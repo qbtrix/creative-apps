@@ -31,11 +31,11 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AC-zoom | Design's and Photo's `setZoom` clamps and Halo's second document-to-screen mapping go; every app clamps through `ZoomMath.clamped`, fits through one fit, and maps through `CanvasLayout`. | AC-z1, AC-z2 | zoomModelTests | editor-kernel:EK-a, adopt-kernel-brush:AB-photo |
-| AC-colour | Design, Photo, Flare and Halo keep their file-format colour types but parse, format and pick through `HexColor` and `ColorWell`; the hex parser gets its tests. | AC-c1, AC-c2 | colourModelTests | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, adopt-suiteui-chrome:AC-zoom |
-| AC-tools | Flare, Design and Photo pick a tool from a key and read modifiers through SuiteUI's `ToolKeys`; the three letter lookups and three `NSEvent.modifierFlags` conversions are deleted. | AC-t1, AC-t2 | toolsModelTests | editor-kernel:EK-chrome, adopt-suiteui-chrome:AC-colour |
-| AC-guides | Flare's rulers and guides toggles do something: guides draw through `CanvasMarks` and the stub view is deleted; the rulers flag is filed on canvas-marks. | AC-g1, AC-g2 | guidesModelTests | editor-kernel:EK-a |
-| AC-export-sheet | Photo's, Library's and Flare's export sheets are SuiteUI's `ExportSheet` over each app's `ExportRun`, and the three app sheets are deleted. | AC-e1, AC-e2 | export sheetModelTests | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, adopt-kernel-export:AX-library, adopt-kernel-export:AX-flare |
+| AC-zoom | Design's and Photo's `setZoom` clamps and Halo's second document-to-screen mapping go; every app clamps through `ZoomMath.clamped`, fits through one fit, and maps through `CanvasLayout`. | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo |
+| AC-colour | Design, Photo, Flare and Halo keep their file-format colour types but parse, format and pick through `HexColor` and `ColorWell`; the hex parser gets its tests. | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, adopt-suiteui-chrome:AC-zoom |
+| AC-tools | Flare, Design and Photo pick a tool from a key and read modifiers through SuiteUI's `ToolKeys`; the three letter lookups and three `NSEvent.modifierFlags` conversions are deleted. | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, adopt-suiteui-chrome:AC-colour |
+| AC-guides | Flare's rulers and guides toggles do something: guides draw through `CanvasMarks` and the stub view is deleted; the rulers flag is filed on canvas-marks. | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a |
+| AC-export-sheet | Photo's, Library's and Flare's export sheets are SuiteUI's `ExportSheet` over each app's `ExportRun`, and the three app sheets are deleted. | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, adopt-kernel-export:AX-library, adopt-kernel-export:AX-flare |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -47,10 +47,14 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AC-zoom`: `DesignWindowZoomTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AC-colour`: `HexColorParserTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AC-tools`: `FlareToolsKeyTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AC-guides`: `FlareStageGuideSnapshots` (existing), green on the Linux job after both tasks merge.
+- `MJ-AC-export-sheet`: `PhotoExportSheetSnapshots` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -59,7 +63,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-a` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 

@@ -29,9 +29,9 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AT-design | Design runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-d1, AT-d2 | DesignModelTests | editor-kernel:EK-box, adopt-kernel-selection:AS-design, adopt-kernel-layers:AL-design |
-| AT-photo | Photo runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-p1, AT-p2 | PhotoModelTests | editor-kernel:EK-box |
-| AT-flare | Flare runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-f1, AT-f2 | FlareModelTests | editor-kernel:EK-box |
+| AT-design | Design runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-d1, AT-d2 | MJ-AT-design | editor-kernel:EK-box, adopt-kernel-selection:AS-design, adopt-kernel-layers:AL-design |
+| AT-photo | Photo runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-p1, AT-p2 | MJ-AT-photo | editor-kernel:EK-box |
+| AT-flare | Flare runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-f1, AT-f2 | MJ-AT-flare | editor-kernel:EK-box |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -43,10 +43,12 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AT-design`: `DesignResizeTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AT-photo`: `PhotoMoveTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AT-flare`: `BoxGestureMathTests` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -55,7 +57,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-box` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 

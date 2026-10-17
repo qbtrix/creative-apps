@@ -48,7 +48,7 @@
         "AE-f2"
       ],
       "journeys": [
-        "FlareModelTests"
+        "MJ-AE-flare"
       ],
       "owned": [
         "Sources/FlareModel/EasingEditing.swift",
@@ -82,7 +82,7 @@
         "AE-h2"
       ],
       "journeys": [
-        "HaloModelTests"
+        "MJ-AE-halo"
       ],
       "owned": [
         "Sources/HaloModel/HaloKeySelection.swift",

@@ -47,7 +47,7 @@
         "AS-f2"
       ],
       "journeys": [
-        "FlareModelTests"
+        "MJ-AS-flare"
       ],
       "owned": [
         "Sources/FlareModel/FlareSelection.swift",
@@ -72,7 +72,7 @@
         "AS-d2"
       ],
       "journeys": [
-        "DesignModelTests"
+        "MJ-AS-design"
       ],
       "owned": [
         "Sources/DesignModel/DesignSelection.swift",
@@ -101,7 +101,7 @@
         "AS-h2"
       ],
       "journeys": [
-        "HaloModelTests"
+        "MJ-AS-halo"
       ],
       "owned": [
         "Sources/HaloModel/HaloKeySelection.swift",
@@ -124,7 +124,7 @@
         "AS-l2"
       ],
       "journeys": [
-        "LibraryModelTests"
+        "MJ-AS-library"
       ],
       "owned": [
         "Sources/LibraryModel/LibraryCatalog.swift",

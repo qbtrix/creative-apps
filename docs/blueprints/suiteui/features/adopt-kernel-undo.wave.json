@@ -58,7 +58,7 @@
         "AU-d2"
       ],
       "journeys": [
-        "DesignModelTests"
+        "MJ-AU-design"
       ],
       "owned": [
         "Sources/DesignModel/DesignHistory.swift",
@@ -84,7 +84,7 @@
         "AU-p2"
       ],
       "journeys": [
-        "PhotoModelTests"
+        "MJ-AU-photo"
       ],
       "owned": [
         "Sources/PhotoModel/PhotoHistory.swift",
@@ -111,7 +111,7 @@
         "AU-l2"
       ],
       "journeys": [
-        "LibraryModelTests"
+        "MJ-AU-library"
       ],
       "owned": [
         "Sources/LibraryModel/CatalogHistory.swift",
@@ -137,7 +137,7 @@
         "AU-h2"
       ],
       "journeys": [
-        "HaloModelTests"
+        "MJ-AU-halo"
       ],
       "owned": [
         "Sources/HaloModel/Live/HaloHistoryRules.swift",
@@ -166,7 +166,7 @@
         "AU-f2"
       ],
       "journeys": [
-        "FlareModelTests"
+        "MJ-AU-flare"
       ],
       "owned": [
         "Sources/FlareModel/FlareWorkspace.swift",

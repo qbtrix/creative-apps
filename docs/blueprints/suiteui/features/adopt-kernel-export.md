@@ -29,9 +29,9 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AX-flare | Flare runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted. | AX-f1, AX-f2 | FlareModelTests | editor-kernel:EK-run |
-| AX-photo | Photo runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted. | AX-p1, AX-p2 | PhotoModelTests | editor-kernel:EK-run, adopt-kernel-layers:AL-photo |
-| AX-library | Library runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted. | AX-l1, AX-l2 | LibraryModelTests | editor-kernel:EK-run, adopt-kernel-selection:AS-library |
+| AX-flare | Flare runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted. | AX-f1, AX-f2 | MJ-AX-flare | editor-kernel:EK-run |
+| AX-photo | Photo runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted. | AX-p1, AX-p2 | MJ-AX-photo | editor-kernel:EK-run, adopt-kernel-layers:AL-photo |
+| AX-library | Library runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted. | AX-l1, AX-l2 | MJ-AX-library | editor-kernel:EK-run, adopt-kernel-selection:AS-library |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -43,10 +43,12 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AX-flare`: `ExportScanTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AX-photo`: `PhotoExportTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AX-library`: `LibraryServicesTests` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -55,7 +57,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-run` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 

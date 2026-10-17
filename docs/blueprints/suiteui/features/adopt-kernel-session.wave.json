@@ -57,7 +57,7 @@
         "AD-f2"
       ],
       "journeys": [
-        "FlareModelTests"
+        "MJ-AD-flare"
       ],
       "owned": [
         "Sources/FlareModel/FlareFiles.swift",
@@ -83,7 +83,7 @@
         "AD-p2"
       ],
       "journeys": [
-        "PhotoModelTests"
+        "MJ-AD-photo"
       ],
       "owned": [
         "Sources/PhotoModel/PhotoRecovery.swift",
@@ -111,7 +111,7 @@
         "AD-h2"
       ],
       "journeys": [
-        "HaloModelTests"
+        "MJ-AD-halo"
       ],
       "owned": [
         "Sources/HaloModel/HaloFiles.swift",
@@ -138,7 +138,7 @@
         "AD-d2"
       ],
       "journeys": [
-        "DesignModelTests"
+        "MJ-AD-design"
       ],
       "owned": [
         "Sources/DesignModel/DesignFile.swift",
@@ -163,7 +163,7 @@
         "AD-l2"
       ],
       "journeys": [
-        "LibraryModelTests"
+        "MJ-AD-library"
       ],
       "owned": [
         "Sources/LibraryModel/LibraryReadouts.swift",

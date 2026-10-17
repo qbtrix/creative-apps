@@ -45,6 +45,8 @@ rename, LL-8a menus, LL-9 expansion): `LayerTreeList` composes `SidebarRow`
 and takes each as it lands. LL-13's `layers` pages show `LayerTreeList`, and
 LL-16's layer-list baseline is `LayerTreeList`'s. The apps' panels migrate in
 `adopt-kernel-layers` (docs/blueprints/suiteui/features/adopt-kernel-layers.md).
+#146 and #73's layer-row half are editor-kernel's: this feature's issue does
+not list them on its `Covers:` line.
 
 **Not this line's:** #589's second acceptance bullet (Design's journey
 hides a group from its row's eye) and #284's Design half (`Section("Pages")`

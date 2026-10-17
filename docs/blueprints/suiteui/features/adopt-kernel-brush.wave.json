@@ -39,7 +39,7 @@
         "AB-p2"
       ],
       "journeys": [
-        "PhotoModelTests"
+        "MJ-AB-photo"
       ],
       "owned": [
         "Sources/PhotoModel/PhotoStroke.swift",

@@ -30,10 +30,10 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AL-design | Design runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-d1, AL-d2, AL-d3 | DesignModelTests | editor-kernel:EK-tree, editor-kernel:EK-u |
-| AL-photo | Photo runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-p1, AL-p2, AL-p3 | PhotoModelTests | editor-kernel:EK-tree, adopt-kernel-undo:AU-photo, editor-kernel:EK-u |
-| AL-halo | Halo runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-h1, AL-h2, AL-h3 | HaloModelTests | editor-kernel:EK-tree, adopt-kernel-easing:AE-halo, editor-kernel:EK-u |
-| AL-flare | Flare runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-f1, AL-f2, AL-f3 | FlareModelTests | editor-kernel:EK-tree, editor-kernel:EK-u |
+| AL-design | Design runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-d1, AL-d2, AL-d3 | MJ-AL-design | editor-kernel:EK-tree, editor-kernel:EK-u |
+| AL-photo | Photo runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-p1, AL-p2, AL-p3 | MJ-AL-photo | editor-kernel:EK-tree, adopt-kernel-undo:AU-photo, editor-kernel:EK-u |
+| AL-halo | Halo runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-h1, AL-h2, AL-h3 | MJ-AL-halo | editor-kernel:EK-tree, adopt-kernel-easing:AE-halo, editor-kernel:EK-u |
+| AL-flare | Flare runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`. | AL-f1, AL-f2, AL-f3 | MJ-AL-flare | editor-kernel:EK-tree, editor-kernel:EK-u |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -45,10 +45,13 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AL-design`: `DesignTreeTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AL-photo`: `PhotoLayersTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AL-halo`: `HaloLayerEditsTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AL-flare`: `FlareLayersTests` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -57,7 +60,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-tree` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 

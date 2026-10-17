@@ -43,7 +43,7 @@
         "AT-d2"
       ],
       "journeys": [
-        "DesignModelTests"
+        "MJ-AT-design"
       ],
       "owned": [
         "Sources/DesignModel/DesignNode.swift",
@@ -78,7 +78,7 @@
         "AT-p2"
       ],
       "journeys": [
-        "PhotoModelTests"
+        "MJ-AT-photo"
       ],
       "owned": [
         "Sources/PhotoModel/PhotoTransform.swift",
@@ -104,7 +104,7 @@
         "AT-f2"
       ],
       "journeys": [
-        "FlareModelTests"
+        "MJ-AT-flare"
       ],
       "owned": [
         "Sources/FlareModel/Live/BoxGestureMath.swift",

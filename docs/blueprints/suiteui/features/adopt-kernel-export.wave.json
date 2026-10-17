@@ -36,7 +36,7 @@
         "AX-f2"
       ],
       "journeys": [
-        "FlareModelTests"
+        "MJ-AX-flare"
       ],
       "owned": [
         "Sources/FlareModel/FlareExport.swift",
@@ -60,7 +60,7 @@
         "AX-p2"
       ],
       "journeys": [
-        "PhotoModelTests"
+        "MJ-AX-photo"
       ],
       "owned": [
         "Sources/PhotoModel/PhotoWorkspace.swift",
@@ -87,7 +87,7 @@
         "AX-l2"
       ],
       "journeys": [
-        "LibraryModelTests"
+        "MJ-AX-library"
       ],
       "owned": [
         "Sources/LibraryModel/LibraryCatalog.swift",

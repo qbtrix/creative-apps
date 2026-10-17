@@ -31,11 +31,11 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AD-flare | Flare runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-f1, AD-f2 | FlareModelTests | editor-kernel:EK-doc |
-| AD-photo | Photo runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-p1, AD-p2 | PhotoModelTests | editor-kernel:EK-doc |
-| AD-halo | Halo runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-h1, AD-h2 | HaloModelTests | editor-kernel:EK-doc |
-| AD-design | Design runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-d1, AD-d2 | DesignModelTests | editor-kernel:EK-doc |
-| AD-library | Library runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-l1, AD-l2 | LibraryModelTests | editor-kernel:EK-doc, adopt-kernel-undo:AU-library |
+| AD-flare | Flare runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-f1, AD-f2 | MJ-AD-flare | editor-kernel:EK-doc |
+| AD-photo | Photo runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-p1, AD-p2 | MJ-AD-photo | editor-kernel:EK-doc |
+| AD-halo | Halo runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-h1, AD-h2 | MJ-AD-halo | editor-kernel:EK-doc |
+| AD-design | Design runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-d1, AD-d2 | MJ-AD-design | editor-kernel:EK-doc |
+| AD-library | Library runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted. | AD-l1, AD-l2 | MJ-AD-library | editor-kernel:EK-doc, adopt-kernel-undo:AU-library |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -47,10 +47,14 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AD-flare`: `FlareFilesTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AD-photo`: `PhotoRecoveryTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AD-halo`: `HaloFileTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AD-design`: `DesignFileTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AD-library`: `LibraryCatalogTests` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -59,7 +63,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-doc` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 

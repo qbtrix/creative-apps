@@ -65,7 +65,7 @@
         "AL-d3"
       ],
       "journeys": [
-        "DesignModelTests"
+        "MJ-AL-design"
       ],
       "owned": [
         "Sources/DesignModel/DesignNode.swift",
@@ -103,7 +103,7 @@
         "AL-p3"
       ],
       "journeys": [
-        "PhotoModelTests"
+        "MJ-AL-photo"
       ],
       "owned": [
         "Sources/PhotoModel/PhotoLayerOps.swift",
@@ -138,7 +138,7 @@
         "AL-h3"
       ],
       "journeys": [
-        "HaloModelTests"
+        "MJ-AL-halo"
       ],
       "owned": [
         "Sources/HaloModel/HaloLayerEdits.swift",
@@ -175,7 +175,7 @@
         "AL-f3"
       ],
       "journeys": [
-        "FlareModelTests"
+        "MJ-AL-flare"
       ],
       "owned": [
         "Sources/FlareModel/FlareLayers.swift",

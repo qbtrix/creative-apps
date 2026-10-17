@@ -31,11 +31,11 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AU-design | Design runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-d1, AU-d2 | DesignModelTests | editor-kernel:EK-undo |
-| AU-photo | Photo runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-p1, AU-p2 | PhotoModelTests | editor-kernel:EK-undo |
-| AU-library | Library runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-l1, AU-l2 | LibraryModelTests | editor-kernel:EK-undo |
-| AU-halo | Halo runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-h1, AU-h2 | HaloModelTests | editor-kernel:EK-undo |
-| AU-flare | Flare runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-f1, AU-f2 | FlareModelTests | editor-kernel:EK-undo |
+| AU-design | Design runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-d1, AU-d2 | MJ-AU-design | editor-kernel:EK-undo |
+| AU-photo | Photo runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-p1, AU-p2 | MJ-AU-photo | editor-kernel:EK-undo |
+| AU-library | Library runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-l1, AU-l2 | MJ-AU-library | editor-kernel:EK-undo |
+| AU-halo | Halo runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-h1, AU-h2 | MJ-AU-halo | editor-kernel:EK-undo |
+| AU-flare | Flare runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted. | AU-f1, AU-f2 | MJ-AU-flare | editor-kernel:EK-undo |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -47,10 +47,14 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AU-design`: `DesignUndoTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AU-photo`: `PhotoHistoryStepsTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AU-library`: `LibraryHistoryTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AU-halo`: `ProjectHistoryContractTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AU-flare`: `SceneUndoSelectionTests` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -59,7 +63,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-undo` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 

@@ -28,8 +28,8 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AE-flare | Flare runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted. | AE-f1, AE-f2 | FlareModelTests | editor-kernel:EK-keys |
-| AE-halo | Halo runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted. | AE-h1, AE-h2 | HaloModelTests | editor-kernel:EK-keys, adopt-kernel-selection:AS-halo |
+| AE-flare | Flare runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted. | AE-f1, AE-f2 | MJ-AE-flare | editor-kernel:EK-keys |
+| AE-halo | Halo runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted. | AE-h1, AE-h2 | MJ-AE-halo | editor-kernel:EK-keys, adopt-kernel-selection:AS-halo |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -41,10 +41,11 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AE-flare`: `EasingEditingContractTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AE-halo`: `KeyEasingContractTests` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -53,7 +54,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-keys` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 

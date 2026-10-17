@@ -61,7 +61,7 @@
         "AC-z2"
       ],
       "journeys": [
-        "zoomModelTests"
+        "MJ-AC-zoom"
       ],
       "owned": [
         "Sources/DesignApp/DesignWindow.swift",
@@ -93,7 +93,7 @@
         "AC-c2"
       ],
       "journeys": [
-        "colourModelTests"
+        "MJ-AC-colour"
       ],
       "owned": [
         "Sources/DesignApp/DesignIntent.swift",
@@ -128,7 +128,7 @@
         "AC-t2"
       ],
       "journeys": [
-        "toolsModelTests"
+        "MJ-AC-tools"
       ],
       "owned": [
         "Sources/FlareApp/FlareStage.swift",
@@ -158,7 +158,7 @@
         "AC-g2"
       ],
       "journeys": [
-        "guidesModelTests"
+        "MJ-AC-guides"
       ],
       "owned": [
         "Sources/FlareApp/FlareStageGuides.swift",
@@ -182,7 +182,7 @@
         "AC-e2"
       ],
       "journeys": [
-        "export sheetModelTests"
+        "MJ-AC-export-sheet"
       ],
       "owned": [
         "Sources/PhotoApp/ExportSheet.swift",

@@ -30,10 +30,10 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AS-flare | Flare runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-f1, AS-f2 | FlareModelTests | editor-kernel:EK-sel |
-| AS-design | Design runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-d1, AS-d2 | DesignModelTests | editor-kernel:EK-sel |
-| AS-halo | Halo runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-h1, AS-h2 | HaloModelTests | editor-kernel:EK-sel |
-| AS-library | Library runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-l1, AS-l2 | LibraryModelTests | editor-kernel:EK-sel, adopt-kernel-undo:AU-library |
+| AS-flare | Flare runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-f1, AS-f2 | MJ-AS-flare | editor-kernel:EK-sel |
+| AS-design | Design runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-d1, AS-d2 | MJ-AS-design | editor-kernel:EK-sel |
+| AS-halo | Halo runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-h1, AS-h2 | MJ-AS-halo | editor-kernel:EK-sel |
+| AS-library | Library runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted. | AS-l1, AS-l2 | MJ-AS-library | editor-kernel:EK-sel, adopt-kernel-undo:AU-library |
 
 There is no new screen (`"ui_slice": "none"`); a slice that touches
 `Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
@@ -45,10 +45,13 @@ construction), plus a mutation plan on each adapter (rule 14).
 
 ## Journey steps
 
-The app's existing journeys, unchanged, on the scoped run after each
-slice's last PR: the app opens a document, edits with the concept
-(undo, select, reorder, ease, resize, export, save), and the journey's
-readouts match what they matched before.
+One Linux walk per slice, each an existing Model test file kept green
+unchanged (rule 13 holds by construction), then the app's existing journeys
+on the scoped run after the slice's last PR:
+- `MJ-AS-flare`: `WorkspaceWiringTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AS-design`: `DesignMultiSelectTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AS-halo`: `HaloKeySelectionTests` (existing), green on the Linux job after both tasks merge.
+- `MJ-AS-library`: `LibraryGridTests` (existing), green on the Linux job after both tasks merge.
 
 ## Screens and states
 
@@ -57,7 +60,7 @@ finisher diffs the app's existing PNGs against the previous dev run.
 
 ## Contract slice
 
-None added: the kernel's contract is editor-kernel's `EK-sel` (its
+None added: the kernel's contract is editor-kernel's `{f['slice']}` (its
 packet, Contract slice). Each adapter is one file in `<App>Model` that
 conforms the app's types to the kernel and keeps the app's signatures.
 
