@@ -3,7 +3,8 @@
 // outline and, unless a lock stops it, its resize handles where DesignRect.handles
 // puts them (a small selection shows only its corners, outside the box). Several
 // layers: SuiteUI's dashed SelectionOutline on each and one around them all, and
-// no handles (a layer's solid edge over the box's dashes read as two outlines).
+// the box's 8 handles (no solid edge over its dashes) while the Model's
+// `transformHelp` is nil; a lock or hidden layer in the selection leaves none.
 // The text node being edited shows its editor's box instead. The box carries the
 // one accessibility element, `design.canvas.selection` ("Selection"): a clear
 // rectangle at the box's frame, an image, never a control. Takes no clicks; the
@@ -26,6 +27,7 @@ struct DesignSelectionMarks: View {
             }
             if let bounds = model.selectionBounds {
                 SelectionOutline(rect: bounds.cgRect, zoom: zoom)
+                DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.transformHelp == nil, edge: false)
                 DesignSelectionElement(rect: bounds, zoom: zoom)
             }
         } else if let selected = painted.first(where: { $0.node.id == model.selectedNodeID })?.node,
@@ -36,13 +38,15 @@ struct DesignSelectionMarks: View {
     }
 }
 
-/// One selected layer: an accent outline around `rect`, and with `handles` its resize handles,
-/// white squares with an accent edge. Shapes, not a Canvas, so marks past the page's edge still
-/// draw: CanvasViewport doesn't clip its overlay. Frames and handles stay one size at any zoom.
+/// One selected layer: an accent outline around `rect` (left out without `edge`, under the
+/// several-layer box's dashes), and with `handles` its resize handles, white squares with an
+/// accent edge. Shapes, not a Canvas, so marks past the page's edge still draw: CanvasViewport
+/// doesn't clip its overlay. Frames and handles stay one size at any zoom.
 struct DesignSelectionBox: View {
     let rect: DesignRect
     let zoom: Double
     var handles = true
+    var edge = true
 
     var body: some View {
         let scale = usable(zoom)
@@ -55,7 +59,7 @@ struct DesignSelectionBox: View {
             }
         }
         ZStack(alignment: .topLeading) {
-            Path(box).stroke(SuiteColor.accent, lineWidth: 1)
+            if edge { Path(box).stroke(SuiteColor.accent, lineWidth: 1) }
             squares.fill(SuiteColor.overlayPaper)
             squares.stroke(SuiteColor.accent, lineWidth: 1)
         }

@@ -3,7 +3,9 @@
 // selected inside a frame, shows the Align row, Align Left off because the
 // rectangle already sits at the left edge; then the canvas after Align Center, the rectangle centered in its
 // frame and still selected. Writes design-align-inspector- and
-// design-align-center-{light,dark}.png. macOS only.
+// design-align-center-{light,dark}.png. Then several layers (#714): A, B and C
+// of `cards` after Align Top, all three at y 100 inside one box with its 8
+// handles. Writes design-align-{light,dark}.png. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -29,6 +31,17 @@ import Testing
         #expect(model.selectedNode?.frame == DesignRect(x: 460, y: 240, width: 200, height: 120))
         #expect(model.undoActionName == "Undo Align Center")
         try shootCanvas(model, "design-align-center")
+    }
+
+    @Test func threeRectanglesAfterAlignTop() throws {
+        var model = DesignFixtures.cards
+        model.selectItem("node-2")
+        for id in ["node-3", "node-4"] { model.toggleSelection(id) }
+        try #require(model.selectedNodeIDs == ["node-2", "node-3", "node-4"])
+        try model.run(.align(.top))
+        #expect(model.selectedNodes.map(\.frame.y) == [100, 100, 100])
+        #expect(model.selectedNodeIDs == ["node-2", "node-3", "node-4"])
+        try shootCanvas(model, "design-align")
     }
 }
 
