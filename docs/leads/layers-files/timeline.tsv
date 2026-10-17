@@ -4,3 +4,4 @@
 2026-10-16T22:32Z	heartbeat	-	#1516	stage 0: #1365 still open (dev 6baabdb4); waiting
 2026-10-16T23:03Z	heartbeat	-	#1516	stage 0: #1365 still open (dev caa3c666); waiting
 2026-10-16T23:35Z	heartbeat	-	#1516	stage 0: #1365 still open; draw-key-save.wave.json now built on dev (dbe98d9e), waves.md still planned; asked supervisor
+2026-10-17T00:06Z	heartbeat	-	#1516	stage 0: waiting on supervisor ruling for #1365; dev 24201bb0
