@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: SS-a critic panel wk80sq2nu; SS-a line on full CI 39072812111 once Linux is green; S-7 once findings <=5; S-5 waits on CB-a
+Next: SS-a fix round 1 (wb9v4rpri: #2442, #2441+#2440, #2439 to gap); then #2443 after #2417, #2438 after #2349; S-7 (J5/J6) once open findings <=5; SS-a slice line after full CI Linux green
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

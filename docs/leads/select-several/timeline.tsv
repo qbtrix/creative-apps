@@ -25,3 +25,6 @@ utc	stage	event	ref	note
 2026-10-17T21:29:59Z	check	#2373 open, no needs-fix or needs-rebase
 2026-10-17T21:55:02Z	merge	#2373 merged c2a70dd8 (S-6)
 2026-10-17T22:18Z	panel	SS-a critic panel started, workflow wk80sq2nu, on scoped 39072517901 (499d955e, has #2373)
+2026-10-17T22:22Z	critic	SS-a panel wk80sq2nu: 9 confirmed / 8 refuted; filed #2437-#2443
+2026-10-17T22:22Z	finding	#2437 closed: J5/J6 are task S-7, held until open findings <=5
+2026-10-17T22:22Z	wave	SS-a fix round 1 launched (wb9v4rpri, base 178e59db): #2442, #2441, #2440, #2439; deferred #2443 (busy #2417), #2438 (busy #2349)
