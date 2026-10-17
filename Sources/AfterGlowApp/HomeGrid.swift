@@ -63,8 +63,7 @@ struct HomeGrid: View {
     /// All, then one chip per app; the ids are "all" and each app's raw value.
     private var chips: [ChipItem<String>] {
         [ChipItem(id: "all", title: "All", isOn: model.filter == nil)] + SuiteApp.apps.map {
-            ChipItem(id: $0.rawValue, title: $0.displayName, systemImage: HomeSidebarRows.symbol($0),
-                     isOn: model.filter == $0)
+            ChipItem(id: $0.rawValue, title: $0.displayName, app: $0, isOn: model.filter == $0)
         }
     }
 

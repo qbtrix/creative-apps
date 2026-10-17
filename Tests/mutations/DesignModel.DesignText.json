@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the editor scale floors at 1 again",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "zoom.isFinite && zoom > 0 ? zoom : 1",
+    "replace": "zoom.isFinite && zoom > 0 ? Swift.max(zoom, 1) : 1",
+    "tests": "DesignTextScaleModelTests.swift"
+  },
+  {
+    "label": "an infinite zoom passes the finite check",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "zoom.isFinite && zoom > 0 ? zoom : 1",
+    "replace": "zoom > 0 ? zoom : 1",
+    "tests": "DesignTextScaleModelTests.swift"
+  }
+]

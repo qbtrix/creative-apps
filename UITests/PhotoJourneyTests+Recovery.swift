@@ -24,7 +24,7 @@ final class PhotoRecoveryJourneyTests: XCTestCase {
 
         // 1. beach.png, New Layer, a stroke: "Edited", then "Edited, autosaved" 5 s on, a .ora in the folder.
         var photo = Journey("Photo", self, arguments: photoArguments(open: file, recoveryDir: recovery))
-        XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 30), "beach.png didn't open")
+        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "beach.png didn't open")
         XCTAssert(photo.element("suite.canvas").waitForExistence(timeout: 5), "no canvas (suite.canvas)")
         photo.shot("recovery-opened")
         choose("New Layer", from: "Layer", photo)
@@ -124,7 +124,7 @@ final class PhotoRecoveryJourneyTests: XCTestCase {
         XCTAssert(waitFor { !photo.app.menus.allElementsBoundByIndex.contains { !$0.frame.isEmpty } }, "the \(menu) menu stayed open")
     }
 
-    /// Waits for the button titled `title`, such as the top bar's "Undo Paint".
+    /// Waits for the button titled `title`, such as the window toolbar's "Undo Paint".
     @MainActor private func expect(_ title: String, _ photo: Journey, _ message: String) {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "\(message) (no \(title) button)")
     }

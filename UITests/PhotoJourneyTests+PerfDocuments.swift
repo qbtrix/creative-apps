@@ -39,7 +39,7 @@ final class PhotoPerfDocumentsJourneyTests: XCTestCase {
 
         // Open the large photo and add two layers.
         var photo = Journey("Photo", self, arguments: photoArguments(open: file, saveTo: saves, recoveryDir: recovery))
-        XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 60), "the 4000 x 3000 beach.png didn't open")
+        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 60), "the 4000 x 3000 beach.png didn't open")
         expectHeader("4000 × 3000 px", photo, timeout: 60, "beach.png isn't 4000 × 3000 px")
         photo.shot("perf-documents-opened")
         for _ in 0..<2 { photo.press(character: "n", [.command, .shift]) }
@@ -58,7 +58,7 @@ final class PhotoPerfDocumentsJourneyTests: XCTestCase {
         let saved = photo.app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier == 'photo.bar.saved' AND label == 'Saved'")).firstMatch
         // Report-only (PB-18): poll for "Saving…" (`photo.file.saving`, shown once a save has run 100 ms)
-        // until the top bar reads Saved, as the reopen loop below polls "Opening…".
+        // until the title bar's subtitle reads Saved, as the reopen loop below polls "Opening…".
         let savingNote = photo.element("photo.file.saving")
         var (savePolls, saveSeen, saveFirstSeen, isSaved) = (0, 0, Double?.none, false)
         while !isSaved, Date().timeIntervalSince(clicked) < 60 {

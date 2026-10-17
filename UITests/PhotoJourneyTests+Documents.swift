@@ -49,7 +49,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
             .firstMatch.exists, "Keep layers? doesn't say it writes beach.ora next to beach.png")
         photo.shot("documents-1-keep-layers")
         keep.buttons["photo.file.keep-layers.document"].firstMatch.click()
-        XCTAssert(photo.app.windows["beach.ora"].waitForExistence(timeout: 30), "the window isn't titled beach.ora")
+        XCTAssert(photo.window(named: "beach.ora").waitForExistence(timeout: 30), "the window isn't titled beach.ora")
         expectStatus("Saved", photo)
         let saved = try Data(contentsOf: folder.appending(path: "beach.ora"))
         XCTAssertEqual(Array(saved.prefix(4)), [0x50, 0x4B, 0x03, 0x04], "beach.ora isn't a zip")
@@ -60,15 +60,15 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
 
         // 4. Command-W closes with no prompt; Open Recent > beach.ora brings both layers back.
         photo.press(character: "w", .command)
-        XCTAssert(photo.app.windows["beach.ora"].waitForNonExistence(timeout: 10), "Command-W didn't close a saved window")
+        XCTAssert(photo.window(named: "beach.ora").waitForNonExistence(timeout: 10), "Command-W didn't close a saved window")
         photo.shot("documents-1-closed", screen: true)
         quit(photo)
         photo = launch(photoArguments(saveTo: folder), window: nil)
         openRecent("beach.ora", photo)
-        XCTAssert(photo.app.windows["beach.ora"].waitForExistence(timeout: 30), "Open Recent didn't reopen beach.ora")
+        XCTAssert(photo.window(named: "beach.ora").waitForExistence(timeout: 30), "Open Recent didn't reopen beach.ora")
         openLayers(photo)
         let header = photo.app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '2 layers'"))
-        XCTAssert(header.firstMatch.waitForExistence(timeout: 10), "the panel header doesn't count 2 layers")
+        XCTAssert(header.firstMatch.waitForExistence(timeout: 10), "the image header doesn't count 2 layers")
         expectRow("Layer 1", meta: "Multiply 50%", photo)
         let share = Self.differingShare(edited, steadyCanvas(photo))
         XCTAssertLessThanOrEqual(share, 0.01, "the reopened canvas differs from the saved one in \(share * 100)% of its pixels")
@@ -113,7 +113,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let maker = launch(photoArguments(open: beach, saveTo: folder), window: "beach.png")
         newLayer(maker)
         maker.press(character: "s", [.command, .shift])
-        XCTAssert(maker.app.windows["beach.ora"].waitForExistence(timeout: 30), "Save As wrote no beach.ora")
+        XCTAssert(maker.window(named: "beach.ora").waitForExistence(timeout: 30), "Save As wrote no beach.ora")
         quit(maker)
         let entries = Self.entries(of: try Data(contentsOf: folder.appending(path: "beach.ora")))
         func edited(_ from: String, _ to: String) -> Data {
@@ -159,20 +159,20 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let cancel = askToClose(photo, "photo.unsaved.cancel")
         cancel.click()
         XCTAssert(cancel.waitForNonExistence(timeout: 5), "Cancel left the unsaved alert up")
-        XCTAssert(photo.app.windows["beach.png"].exists, "Cancel closed the window")
+        XCTAssert(photo.window(named: "beach.png").exists, "Cancel closed the window")
         // The autosave, 5 s after the stroke, has usually run by now: "Edited, autosaved" is still edited.
         expectStatus("Edited", photo, prefix: true)
         photo.shot("documents-2-cancelled")
 
         // 3. Command-W, Don't Save closes; Open Recent's first entry reopens beach.png as it was on disk.
         askToClose(photo, "photo.unsaved.dontSave").click()
-        XCTAssert(photo.app.windows["beach.png"].waitForNonExistence(timeout: 10), "Don't Save didn't close the window")
+        XCTAssert(photo.window(named: "beach.png").waitForNonExistence(timeout: 10), "Don't Save didn't close the window")
         photo.shot("documents-2-closed", screen: true)
         XCTAssertEqual(try Data(contentsOf: beach), original, "Don't Save wrote beach.png")
         quit(photo)
         photo = launch(photoArguments(), window: nil)
         openRecent("beach.png", photo)
-        XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 30), "Open Recent didn't reopen beach.png")
+        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "Open Recent didn't reopen beach.png")
         expectStatus("Saved", photo)
         let undo = photo.app.buttons["photo.bar.undo"]
         XCTAssert(undo.waitForExistence(timeout: 5) && !undo.isEnabled, "the reopened beach.png kept the stroke's undo")
@@ -192,7 +192,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
     /// Launches Photo with `arguments` and waits for a window (titled `window` when given).
     @MainActor private func launch(_ arguments: [String], window: String?) -> Journey {
         let photo = Journey("Photo", self, arguments: arguments)
-        XCTAssert((window.map { photo.app.windows[$0] } ?? photo.app.windows.firstMatch).waitForExistence(timeout: 30), "no \(window ?? "Photo") window opened")
+        XCTAssert((window.map { photo.window(named: $0) } ?? photo.app.windows.firstMatch).waitForExistence(timeout: 30), "no \(window ?? "Photo") window opened")
         return photo
     }
 
@@ -231,7 +231,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         XCTAssert(layers.waitForExistence(timeout: 5), "the sidebar has no layer list (photo.layers)")
     }
 
-    /// Waits for the button titled `title`, such as the top bar's "Undo Paint".
+    /// Waits for the button titled `title`, such as the window toolbar's "Undo Paint".
     @MainActor private func expect(_ title: String, _ photo: Journey) {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "no \(title) button")
     }

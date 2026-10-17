@@ -135,7 +135,7 @@ bundle-apps (macOS):                                                # BU-4
   xcodebuild -scheme Release build
   assemble: launcher -> Contents/MacOS/AfterGlow; each <X>App -> Contents/Helpers/<X>.app (+ its Info.plist from Bundle/Info/<X>.plist)
             frameworks -> Contents/Frameworks; Bundle/Samples/ -> Contents/Resources/Samples (empty until onboarding)
-            Bundle/Icons/<X>.png -> sips/iconutil -> <X>.icns into each Resources
+            Bundle/Icons/<X>.png and <X>-<px>.png (rendered from Bundle/Marks/<X>.svg) -> iconutil -> <X>.icns into each Resources
   for each helper: otool -L | must list the four frameworks, else fail
   sign inside out: frameworks, each helper, outer (ad-hoc "-")
   plutil -lint every Info.plist; codesign --verify --deep --strict

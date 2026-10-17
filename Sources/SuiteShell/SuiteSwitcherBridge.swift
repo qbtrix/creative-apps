@@ -19,7 +19,7 @@ enum SuiteSwitcherBridge {
         let launcher = AppLauncher(bundle: bundle, arguments: arguments)
         let rows = SwitcherEntries.entries(current: app, states: states)
         let items = rows.map { row in
-            AppSwitcherItem(id: id(of: row.app), title: row.title, systemImage: row.systemImage,
+            AppSwitcherItem(id: id(of: row.app), title: row.title, app: row.app == .launcher ? nil : row.app,
                             shortcut: row.shortcut, unavailableHelp: row.reason)
         }
         return AppSwitcherState(items: items, current: id(of: app), onSelect: { selected in

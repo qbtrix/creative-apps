@@ -4,7 +4,8 @@
 // checks the empty window (title, layer list, toolbar items enabled or not,
 // the canvas's Open… empty state, the inspector's no-image state, the app
 // switcher centred with Photo current). J2 opens the 800 × 600 test photo with
-// -PhotoOpenFile and checks the title, subtitle, one layer row, the palette at
+// -PhotoOpenFile and checks the title (the file's name beside the save-state
+// subtitle, which the accessibility title carries too, #1910), one layer row, the palette at
 // the canvas's leading edge and the inspector's header and sections. J3 drags
 // a marquee from the image's left edge, fits it and checks the shell geometry
 // with the palette clear of the rulers and of the image grown by anchorHit / 2.
@@ -111,14 +112,15 @@ final class PhotoShellJourneyTests: XCTestCase {
         let url = folder.appending(path: Self.file)
         try writeTestPhoto(to: url)
         let photo = Journey("Photo", self, arguments: Self.size + extra + photoArguments(open: url))
-        XCTAssert(photo.app.windows[Self.file].waitForExistence(timeout: 30), "\(Self.file) didn't open")
+        XCTAssert(photo.window(named: Self.file).waitForExistence(timeout: 30), "\(Self.file) didn't open")
         return photo
     }
 
     /// The title, an empty or Saved subtitle, one layer, the palette at the
     /// canvas's leading edge and the inspector's header, Tool Options, Layer and adjustments.
     @MainActor private func expectOpen(_ photo: Journey, shot: String) {
-        XCTAssertEqual(photo.app.windows.firstMatch.title, Self.file, "the open image's title")
+        let title = photo.app.windows.firstMatch.title
+        XCTAssert(title.contains(Self.file), "the open image's title reads \(title), not \(Self.file) beside its subtitle")
         for status in ["Edited", "Not saved"] {
             XCTAssertFalse(showsSubtitle(status, photo), "the freshly opened image's subtitle reads \(status)")
         }
