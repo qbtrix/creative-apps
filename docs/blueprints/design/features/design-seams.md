@@ -97,8 +97,10 @@ endDrag(): marquee = nil; endEditRun()               # one step per gesture
 ```
 
 With exactly one layer selected, move and resize drags keep today's
-methods whatever `services` holds. `.live`'s marquee answers `[]`, so on the
-live services a marquee selects nothing until select-several S-1.
+methods whatever `services` holds. `.live`'s marquee is `LiveMarquee`, which
+already picks the visible, unlocked layers the rectangle touches at that
+level, so a marquee selects on the live services too; where `.live`'s
+Duplicate isn't built, an Option-drag stays a plain move.
 
 ## Tasks
 

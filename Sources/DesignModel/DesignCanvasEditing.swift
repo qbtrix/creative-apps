@@ -16,6 +16,17 @@
 //           subtree. A click on an already selected text node edits it. With Shift
 //           a press adds the node under it to the selection or takes it out
 //           (DesignSelection) and moves nothing; on empty canvas it keeps the selection.
+//           A press on the background of a frame that isn't selected, or outside every
+//           layer, starts a marquee at that frame's level (the top level outside): each
+//           step `marquee` holds the rectangle and the selection is what
+//           `services.marquee` picks; it records nothing, and a click without moving
+//           selects the frame (deselects outside). With several layers selected a press
+//           on one moves them all, and on a handle of their box resizes them all, through
+//           `services.transforming`; Option on a selected layer duplicates it and drags
+//           the copies, one "Duplicate" step whose ids are minted once at the press. Each
+//           of these steps rewinds to the gesture's start, history included, so the last
+//           sample alone gives the same document. With one layer selected, move and
+//           resize keep the routes below whatever `services` holds.
 //   frame, rectangle, ellipse, text   DesignDrawing.
 //   pen     nothing.
 //
@@ -34,6 +45,14 @@ struct DesignGesture: Sendable, Equatable {
         case move(String)
         /// Resize the node by the drag from the frame it had at the start.
         case resize(String, DesignHandle, DesignRect)
+        /// Select what `services.marquee` picks among the children of this frame (nil: the top level).
+        case marquee(String?)
+        /// Move these selected layers through `services.transforming`.
+        case moveSeveral([String])
+        /// Resize the box of these selected layers by its handle through `services.transforming`.
+        case resizeSeveral([String], DesignHandle)
+        /// Duplicate these layers with the ids of this mint and drag the copies.
+        case optionCopy([String], DesignIDMint)
         /// Draw a node of this kind (DesignDrawing).
         case draw(DesignNodeKind)
         /// Place a text node and edit it (DesignDrawing).
@@ -49,6 +68,8 @@ struct DesignGesture: Sendable, Equatable {
     var wasSelected: Bool
     /// Whether any call left the start.
     var moved = false
+    /// The undo history at the start; a service step puts it back before it applies.
+    var history = DesignHistory()
 }
 
 extension DesignWorkspace {
@@ -65,7 +86,17 @@ extension DesignWorkspace {
     public func handle(at point: DesignPoint) -> DesignHandle? {
         guard !hasMultipleSelection, let node = selectedNode, !isLockedInTree(node.id), !isHiddenInTree(node.id)
         else { return nil }
-        let frame = node.frame
+        return handle(on: node.frame, at: point)
+    }
+
+    /// With several layers selected, the handle of their box (`selectionBounds`) under `point`, as
+    /// `handle(at:)` finds one on a single layer; nil otherwise.
+    func boxHandle(at point: DesignPoint) -> DesignHandle? {
+        guard hasMultipleSelection, let box = selectionBounds else { return nil }
+        return handle(on: box, at: point)
+    }
+
+    private func handle(on frame: DesignRect, at point: DesignPoint) -> DesignHandle? {
         let inside = point.x > frame.x && point.x < frame.maxX && point.y > frame.y && point.y < frame.maxY
         if inside, frame.isCompact(handleSize: handleTolerance) { return nil }
         let shown = frame.handles(size: handleTolerance)
@@ -127,7 +158,9 @@ extension DesignWorkspace {
     /// One pointer move of the active tool's gesture, from the gesture's start to `end`.
     public mutating func drag(from start: DesignPoint, to end: DesignPoint, modifiers: DesignModifiers = []) {
         guard isOpen, end.isFinite, gesture != nil || start.isFinite else { return }
-        if gesture == nil { gesture = beginGesture(at: start, shift: modifiers.contains(.shift)) }
+        if gesture == nil {
+            gesture = beginGesture(at: start, shift: modifiers.contains(.shift), option: modifiers.contains(.option))
+        }
         guard var current = gesture else { return }
         if end != current.start { current.moved = true }
         let delta = DesignPoint(x: end.x - current.start.x, y: end.y - current.start.y)
@@ -140,6 +173,16 @@ extension DesignWorkspace {
             let frame = original.resized(
                 handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
             _ = pages.update(id) { $0.frame = frame }
+        case .marquee(let parent):
+            guard current.moved, let page = selectedPage else { break }
+            let rect = DesignRect(
+                x: Swift.min(current.start.x, end.x), y: Swift.min(current.start.y, end.y),
+                width: (end.x - current.start.x).magnitude, height: (end.y - current.start.y).magnitude)
+            marquee = rect
+            selectedNodeIDs = services.marquee.layers(touching: rect, in: parent, on: page)
+            for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) }
+        case .moveSeveral, .resizeSeveral, .optionCopy:
+            applyStep(current, delta: delta, modifiers: modifiers)
         case .draw(let kind):
             draw(kind, from: current, to: end, square: modifiers.contains(.shift))
         case .text:
@@ -148,6 +191,40 @@ extension DesignWorkspace {
             break
         }
         gesture = current
+    }
+
+    /// One step of a service route: back to the gesture's start, history included, then the
+    /// edit for `delta` from the start. A refused edit leaves the start as it was.
+    private mutating func applyStep(_ current: DesignGesture, delta: DesignPoint, modifiers: DesignModifiers) {
+        rewind(to: current.before)
+        history = current.history
+        guard current.moved, let page = selectedPage else { return }
+        let transforming = services.transforming
+        do throws(DesignRefusal) {
+            switch current.route {
+            case .moveSeveral(let ids):
+                apply(try transforming.move(ids, by: delta, on: page))
+            case .resizeSeveral(let ids, let handle):
+                apply(try transforming.resize(ids, handle: handle, by: delta, modifiers: modifiers, on: page))
+            case .optionCopy(let ids, let start):
+                var mint = start
+                let copied = try services.duplicating.duplicate(ids, offset: DesignPoint(x: 0, y: 0), on: page, mint: &mint)
+                var copies = page
+                copies.nodes = copied.nodes
+                let nodes: [DesignNode]
+                do throws(DesignRefusal) {
+                    nodes = try transforming.move(copied.selection, by: delta, on: copies).nodes
+                } catch .unchanged {
+                    nodes = copied.nodes
+                }
+                apply(DesignEdit(name: "Duplicate", nodes: nodes, selection: copied.selection,
+                                 coalescingKey: DesignEdit.runKey("option-drag", ids)), mint: mint)
+            default:
+                break
+            }
+        } catch {
+            return
+        }
     }
 
     /// Puts back the gesture's starting pages and their held-id index together, so an edit
@@ -163,6 +240,8 @@ extension DesignWorkspace {
     public mutating func endDrag() {
         guard let done = gesture else { return }
         gesture = nil
+        marquee = nil
+        defer { endEditRun() }
         switch done.route {
         case .move(let id):
             // A click only selects, like a click on nothing deselects: no undo step.
@@ -170,6 +249,11 @@ extension DesignWorkspace {
             if !done.moved, done.wasSelected, findNode(id)?.kind == .text { try? beginTextEdit(id) }
         case .resize:
             record("Resize", before: done.before)
+        case .marquee(let frame):
+            // A click without moving: the frame's background selects it; outside, nothing.
+            if !done.moved, let frame { selectItem(frame) }
+        case .moveSeveral, .resizeSeveral, .optionCopy:
+            break
         case .draw(let kind):
             record("Add \(kind.defaultName)", before: done.before)
             tool = .move
@@ -186,22 +270,35 @@ extension DesignWorkspace {
 
     /// Decides what the gesture starting at `start` does, selecting the node a Move press hits.
     /// With Shift a Move press on a node adds it to the selection or takes it out, and moves nothing.
-    private mutating func beginGesture(at start: DesignPoint, shift: Bool) -> DesignGesture {
+    private mutating func beginGesture(at start: DesignPoint, shift: Bool, option: Bool) -> DesignGesture {
         commitTextEdit()
+        endEditRun()
         var route = DesignGesture.Route.none
         var wasSelected = false
+        let ids = selectedNodeIDs
         switch tool {
         case .move:
+            let hit = hitTest(start)
             if let handle = handle(at: start), let node = selectedNode {
                 route = .resize(node.id, handle, node.frame)
-            } else if let id = hitTest(start), shift {
+            } else if let handle = boxHandle(at: start) {
+                route = .resizeSeveral(ids, handle)
+            } else if let id = hit, shift {
                 toggleSelection(id)
-            } else if let id = hitTest(start) {
+            } else if let id = hit, ids.contains(id), option, let page = selectedPage,
+                services.duplicating.duplicateHelp(ids, on: page) == nil {
+                route = .optionCopy(ids, mint())
+            } else if let id = hit, ids.contains(id), ids.count > 1 {
+                route = .moveSeveral(ids)
+            } else if let id = hit, !ids.contains(id), selectedPage?.nodes.node(id)?.kind == .frame {
+                route = .marquee(id)
+            } else if let id = hit {
                 wasSelected = id == selectedNodeID
                 selectItem(id)
                 route = .move(id)
             } else if !shift {
                 deselect()
+                route = .marquee(nil)
             }
         case .frame, .rectangle, .ellipse:
             if let kind = tool.nodeKind { route = .draw(kind) }
@@ -210,6 +307,6 @@ extension DesignWorkspace {
         case .pen:
             break
         }
-        return DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected)
+        return DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)
     }
 }
