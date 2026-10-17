@@ -1,0 +1,5 @@
+utc	stage	event	ref	note
+2026-10-17T06:08Z	0	stage-start	#1497	line lead over #1325 #1498 #1497; base 0e3c08e (main) = dev b8dfb4f at start; no lead branch existed
+2026-10-17T06:17Z	1	stage-end	#1497	packet read; gap #1988 filed (Auto Layout, p3)
+2026-10-17T06:17Z	2	stage-end	#1497	waves: ST-1+ST-2+ST-3+ST-6b (with layers-panel L-3, L-7); ST-7 / ST-4b ST-5f ST-5 ST-4 after DW-a, DW-b; ST-5t ST-6; ST-8
+2026-10-17T06:20Z	3	stage-start	wave 1	ST-1 ST-2 ST-3 ST-6b base fe0f5f1
