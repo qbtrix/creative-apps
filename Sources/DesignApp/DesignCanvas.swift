@@ -18,6 +18,8 @@
 // selection's marks, the marquee and the feedback are drawn from the window's
 // DesignLiveDrag copy (`live.workspace ?? model`), so a sample redraws the
 // canvas without running the window (D0-8a); keys and text editing read `model`.
+// The canvas lists itself in `suite.controls` as `design.canvas.page`
+// (DesignControlID.canvas) without replacing CanvasViewport's identifier.
 // Content, not chrome: flat, no glass.
 import DesignModel
 import SuiteUI
@@ -66,6 +68,8 @@ struct DesignCanvas: View {
             feedback
         }
         .designPasteboardCommands(model, perform)
+        // Listed under its DesignControlID; CanvasViewport keeps its own `suite.canvas` identifier.
+        .suiteControl(id: DesignControlID.canvas, enabled: true, reason: nil, identifies: false)
     }
 
     /// Arrows nudge the selection (Shift: ten points), Delete removes it, Escape deselects, Return
