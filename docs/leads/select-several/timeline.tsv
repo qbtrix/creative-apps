@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-17T19:40:27Z	check	S-6 waits on DW-b (#2282 building); CB-a no merges
 2026-10-17T20:03Z	check	D0-8a merged; S-6 waits on D0-8b; CB-a still unmerged
 2026-10-17T20:26Z	check	S-6 waits on #2309 merge
+2026-10-17T20:43:47Z	wave	wave 5 launched on 2fc0629d: s-6 (DW-b now on dev)
