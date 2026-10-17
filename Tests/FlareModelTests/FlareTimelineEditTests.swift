@@ -86,6 +86,23 @@ struct FlareTimelineEditTests {
         #expect(ballX(w) == [0, 12, 24, 36, 47] && !w.canUndo)
     }
 
+    /// #2194: the Delete key goes through Edit > Delete, which did nothing; now it removes the selected key.
+    @Test func editDeleteRemovesTheSelectedKeyAsOneEntry() {
+        var w = bounce()
+        #expect(w.deleteHelp != nil)
+        w.deleteSelection()
+        #expect(ballX(w) == [0, 12, 24, 36, 47] && !w.canUndo)
+        w.selectKey(ballKey(24), extending: false)
+        drag(&w, from: 24, steps: 4)
+        w.selectKey(ballKey(12), extending: false)
+        #expect(w.deleteHelp == nil)
+        w.deleteSelection()
+        #expect(ballX(w) == [0, 28, 36, 47] && w.selectedKeys.isEmpty && w.deleteHelp != nil)
+        #expect(w.undoActionName == "Undo Delete Keyframe")
+        w.undo()
+        #expect(ballX(w) == [0, 12, 28, 36, 47])
+    }
+
     @Test func framesAndLabelsFollowThePlayhead() {
         var w = bounce()
         w.selectKey(ballKey(24), extending: false)

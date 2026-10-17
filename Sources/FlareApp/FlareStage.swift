@@ -154,7 +154,7 @@ struct FlareStage: View {
             let intent = FlareIntent.tools(.choose(tool))
             return ToolbarAction(
                 tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool,
-                unavailableHelp: model.toolHelp(tool), shortcut: tool.shortcut, identifier: intent.identifier
+                unavailableHelp: model.toolHelp(tool), shortcut: tool.shortcut, identifier: intent.controlIdentifier
             ) { perform(intent) }
         }
         let finish = FlareIntent.tools(.finishPath)

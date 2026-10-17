@@ -47,6 +47,16 @@ private func run(_ w: inout FlareWorkspace, _ ticker: inout PlaybackTicker, _ ta
     #expect(w.currentFrame == 1)
 }
 
+/// #2241: Animate > Play (Space) sends togglePlay; the driver's ticks then advance the frame, and a second toggle stops them.
+@Test func togglePlayThenTicksAdvanceTheFrame() {
+    var (w, ticker) = (workspace(), PlaybackTicker())
+    w.togglePlay()
+    #expect(w.isPlaying)
+    #expect(run(&w, &ticker, [100, 100.5]) == [0, 12])
+    w.togglePlay()
+    #expect(!w.isPlaying && !w.tick(target: 101, ticker: &ticker) && w.currentFrame == 12)
+}
+
 @Test func playbackFollowsTheTargetTimestampsNotWallTime() {
     var (w, ticker) = (workspace(), PlaybackTicker())
     w.play()

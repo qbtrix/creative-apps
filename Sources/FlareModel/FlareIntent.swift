@@ -99,6 +99,13 @@ public enum FlareIntent: Sendable, Equatable {
     /// "flare.<area>.<case name>": unique per case; payloads don't change it.
     public var identifier: String { "flare.\(area.rawValue).\(caseName)" }
 
+    /// A control's accessibility id: `identifier`, plus the tool's raw value for a palette tool, so each of the five
+    /// palette buttons has its own id ("flare.tools.choose.pen"); a shared one let a sweep click Select five times.
+    public var controlIdentifier: String {
+        if case .tools(.choose(let tool)) = self { return identifier + "." + tool.rawValue }
+        return identifier
+    }
+
     var caseName: String {
         switch self {
         case .file(let intent): intent.name

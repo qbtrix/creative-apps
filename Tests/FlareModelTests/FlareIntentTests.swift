@@ -75,6 +75,13 @@ struct FlareIntentTests {
                                                option: false, stageScale: 2)).identifier == "flare.stage.dragChanged")
     }
 
+    @Test func eachPaletteToolHasItsOwnControlIdentifier() {
+        let ids = FlareTool.allCases.map { FlareIntent.tools(.choose($0)).controlIdentifier }
+        #expect(Set(ids).count == FlareTool.allCases.count)
+        #expect(FlareIntent.tools(.choose(.pen)).controlIdentifier == "flare.tools.choose.pen")
+        #expect(FlareIntent.timeline(.scrub(frame: 3)).controlIdentifier == "flare.timeline.scrub")
+    }
+
     @Test func everyAreaHasACase() {
         let areas = Set(FlareIntent.examples.map(\.area))
         for area in FlareIntent.Area.allCases {
