@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: S-6 starts once design-window DW-a (D0-5a..D0-6) and DW-b (D0-8a, D0-8b) merge; S-5 once design-seams and canvas-basics CB-a merge
+Next: S-6 starts once design-window DW-a (wave 2 building) and DW-b (D0-8a, D0-8b) merge; S-5 waits only on canvas-basics CB-a now (design-seams merged)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

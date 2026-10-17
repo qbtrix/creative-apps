@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-17T16:48Z	heartbeat	heartbeat: nothing startable (S-6 waits DW-a/DW-b; S-5/7/8 wait design-seams); 0 open findings
 2026-10-17T17:03Z	heartbeat	heartbeat: nothing startable; 0 findings
 2026-10-17T17:16Z	heartbeat	heartbeat: nothing startable; 0 findings
+2026-10-17T17:31Z	heartbeat	stage 3 heartbeat: #2166 and #2168 merged; dw wave 2 and cg C-1 launched; design-seams merged; findings 0 open
