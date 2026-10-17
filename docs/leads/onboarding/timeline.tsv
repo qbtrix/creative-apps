@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-17T06:00Z	0	stage-start	–	fresh start: no lead/onboarding on the remote; base origin/dev 4a86f5fc; swift 6.3.3 installed
+2026-10-17T06:15Z	2	stage-end	–	plan: 5 waves, OB-5 split into OB-5 (code) and OB-5g (goldens); journeys in their own classes
+2026-10-17T06:15Z	3	stage-start	OB-1	wave 1: OB-1 builder started
