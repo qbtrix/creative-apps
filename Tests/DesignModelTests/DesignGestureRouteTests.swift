@@ -40,8 +40,7 @@ import Testing
     @Test func withDesktopSelectedTheSamePressMovesIt() {
         var workspace = Self.cards()
         workspace.selectItem("node-1")
-        workspace.drag(from: pt(80, 80), to: pt(120, 80))
-        workspace.endDrag()
+        workspace.gesture(.move, pt(80, 80), pt(120, 80))
         #expect(workspace.frame("node-1") == rc(40, 0, 1440, 1024))
         #expect(workspace.undoActionName == "Undo Move")
         #expect(workspace.marquee == nil)
@@ -72,8 +71,7 @@ import Testing
     @Test func aClickOutsideThePageDeselects() {
         var workspace = Self.cards()
         workspace.selectItem("node-2")
-        workspace.drag(from: pt(1500, 1100), to: pt(1500, 1100))
-        workspace.endDrag()
+        workspace.gesture(.move, pt(1500, 1100), pt(1500, 1100))
         #expect(workspace.selectedNodeIDs.isEmpty)
     }
 
@@ -104,10 +102,8 @@ import Testing
 
     @Test func twoDragsOfTheSameLayersAreTwoSteps() {
         var workspace = Self.aAndB()
-        workspace.drag(from: pt(150, 140), to: pt(190, 140))
-        workspace.endDrag()
-        workspace.drag(from: pt(190, 140), to: pt(230, 140))
-        workspace.endDrag()
+        workspace.gesture(.move, pt(150, 140), pt(190, 140))
+        workspace.gesture(.move, pt(190, 140), pt(230, 140))
         #expect(workspace.history.undo.count == 2)
     }
 
@@ -134,20 +130,17 @@ import Testing
     @Test func testGesturesWalk() {
         var workspace = Self.cards()
         // Marquee inside Desktop: A and B.
-        workspace.drag(from: pt(80, 80), to: pt(520, 240))
-        workspace.endDrag()
+        workspace.gesture(.move, pt(80, 80), pt(520, 240))
         #expect(workspace.selectedNodeIDs == ["node-2", "node-3"])
         #expect(workspace.history.undo.isEmpty)
         // Drag A 40 pt right: one Move for both.
-        workspace.drag(from: pt(150, 140), to: pt(190, 140))
-        workspace.endDrag()
+        workspace.gesture(.move, pt(150, 140), pt(190, 140))
         #expect(workspace.frame("node-2")?.x == 140)
         #expect(workspace.frame("node-3")?.x == 340)
         #expect(workspace.history.undo.count == 1)
         #expect(workspace.undoActionName == "Undo Move")
         // The box (140, 100)–(540, 220): its bottom-right handle out 20 pt is one Resize.
-        workspace.drag(from: pt(540, 220), to: pt(560, 220))
-        workspace.endDrag()
+        workspace.gesture(.move, pt(540, 220), pt(560, 220))
         #expect(workspace.history.undo.count == 2)
         #expect(workspace.undoActionName == "Undo Resize")
         // Option-drag A by (0, 100) in five steps: one Duplicate and two A's.

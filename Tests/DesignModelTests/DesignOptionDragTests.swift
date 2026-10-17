@@ -53,10 +53,8 @@ import Testing
 
     @Test func aSecondOptionDragIsASecondStep() {
         var workspace = Self.cardsWithA()
-        workspace.drag(from: pt(150, 140), to: pt(150, 240), modifiers: .option)
-        workspace.endDrag()
-        workspace.drag(from: pt(150, 240), to: pt(150, 340), modifiers: .option)
-        workspace.endDrag()
+        workspace.gesture(.move, pt(150, 140), pt(150, 240), .option)
+        workspace.gesture(.move, pt(150, 240), pt(150, 340), .option)
         #expect(workspace.history.undo.count == 2)
         #expect(Self.named("A", workspace).count == 3)
         workspace.undo()
@@ -65,8 +63,7 @@ import Testing
 
     @Test func anOptionClickWithoutMovingCopiesNothing() {
         var workspace = Self.cardsWithA()
-        workspace.drag(from: pt(150, 140), to: pt(150, 140), modifiers: .option)
-        workspace.endDrag()
+        workspace.gesture(.move, pt(150, 140), pt(150, 140), .option)
         #expect(workspace.history.undo.isEmpty)
         #expect(Self.named("A", workspace).count == 1)
     }
@@ -74,8 +71,7 @@ import Testing
     @Test func withoutABuiltDuplicateOptionDragStillMoves() {
         var workspace = DesignFixtures.cards
         workspace.selectItem("node-2")
-        workspace.drag(from: pt(150, 140), to: pt(150, 240), modifiers: .option)
-        workspace.endDrag()
+        workspace.gesture(.move, pt(150, 140), pt(150, 240), .option)
         #expect(workspace.frame("node-2") == rc(100, 200, 100, 80))
         #expect(workspace.undoActionName == "Undo Move")
     }
