@@ -17,7 +17,9 @@
 // `model.unavailableHelp(for:)` (the text area's `textHelp`) as help while it
 // can't act. It only reads the model and calls `perform`; it owns the draft
 // and the field's focus. A draft left on another layer neither shows nor
-// commits, and the next keystroke starts a draft for the selected one.
+// commits, and the next keystroke starts a draft for the selected one. A new
+// selection drops the draft, ends editing and rebuilds the field (keyed by
+// `selectedLayerID`), so the old edit buffer never shows on the next layer.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -75,6 +77,8 @@ struct HaloTextInspector: View {
             .help(help ?? "Text")
             .accessibilityLabel("Text")
             .haloControl(id: Self.stringID, enabled: help == nil, help: help)
+            .id(layerID)
+            .onChange(of: model.selectedLayerID) { reset() }
     }
 
     /// The size bar, in composition pixels: drags over `sizeBarRange`, types
@@ -113,5 +117,11 @@ struct HaloTextInspector: View {
         guard let pending = draft else { return }
         draft = nil
         if let command = pending.commit(on: model) { perform(command) }
+    }
+
+    /// On a new selection: drops the old layer's draft unsent, then ends editing.
+    private func reset() {
+        draft = nil
+        editing = false
     }
 }

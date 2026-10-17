@@ -45,6 +45,17 @@ extension FlareWorkspace {
         selectedKeys = []
     }
 
+    /// Why Edit > Delete (the Delete key) can't act now: nil while keyframes are selected; deleting art waits for F18.
+    public var deleteHelp: String? {
+        selectedKeys.isEmpty ? "Select keyframes to delete; deleting art isn't built yet (F18)." : nil
+    }
+
+    /// Edit > Delete: removes the selected keyframes, one undo step; nothing while none are selected.
+    public mutating func deleteSelection() {
+        guard deleteHelp == nil else { return }
+        removeSelectedKeys()
+    }
+
     /// Inserts `count` frames at the playhead on every layer: later keys and labels move `count` later.
     public mutating func insertFrames(_ count: Int) {
         let frame = currentFrame, layerIDs = (ownerLayers ?? []).map(\.id), keyframes = services.keyframes

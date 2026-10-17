@@ -62,10 +62,12 @@ struct FlareStage: View {
     /// The actual-rate pill's tooltip.
     static let actualHelp = "The rate playback is showing now. Under the scene's rate, frames are being dropped."
 
-    /// The IT-9 pills after the size: aspect, rate, the rate shown while playing and the hidden-text warning.
+    /// The IT-9 pills after the size: aspect, rate, the rate shown while playing and the hidden-text warning. Aspect
+    /// and rate are data, in primary text as the zoom pill is: a short "1:1" in the bar's secondary text measured
+    /// under 4.5:1 on the pill fill.
     @ViewBuilder static func statusPills(_ pills: StatusPills) -> some View {
-        Text(pills.aspect).accessibilityIdentifier("flare.status.aspect")
-        Text(pills.fps).accessibilityIdentifier("flare.status.fps")
+        Text(pills.aspect).foregroundStyle(SuiteColor.textPrimary).accessibilityIdentifier("flare.status.aspect")
+        Text(pills.fps).foregroundStyle(SuiteColor.textPrimary).accessibilityIdentifier("flare.status.fps")
         if let actual = pills.actualFPS {
             Text(actual)
                 .accessibilityIdentifier("flare.status.actualFPS")
@@ -154,7 +156,7 @@ struct FlareStage: View {
             let intent = FlareIntent.tools(.choose(tool))
             return ToolbarAction(
                 tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool,
-                unavailableHelp: model.toolHelp(tool), shortcut: tool.shortcut, identifier: intent.identifier
+                unavailableHelp: model.toolHelp(tool), shortcut: tool.shortcut, identifier: intent.controlIdentifier
             ) { perform(intent) }
         }
         let finish = FlareIntent.tools(.finishPath)
