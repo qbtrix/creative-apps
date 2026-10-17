@@ -1,10 +1,10 @@
 # photo-adjustment-layers lead record
 
 Issue: #1501 · Packet: docs/blueprints/photo/features/photo-adjustment-layers.md
-Run: act-1a148875943-9arx (relaunch; first run act-1a145e74c85-r5fi) · Session: claude/shell-parity-adjustment-layers-g6jfld (first claude/photo-adjustment-layers-4nslsw) · Started: 2026-10-16T18:11Z
+Run: act-1a14a193a7a-rmz6 (relaunch 2; before: act-1a148875943-9arx; first run act-1a145e74c85-r5fi) · Session: claude/shell-parity-adjustment-layers-g6jfld (first claude/photo-adjustment-layers-4nslsw) · Started: 2026-10-16T18:11Z
 Stage: done
 Base: 0fb4cca61406da24980a9444d86c16b705ca94da (origin/dev at the relaunch, 2026-10-17T06:40Z)
-Next: nothing for this lead. Belt-Contact-Sheet posted on #1501 (2026-10-17T07:0xZ) from scoped run 38993910840, as the relaunch brief asked (both fix rounds spent). PJ-9's open step (#1910) is fixed by the shell-parity lead's round-2 wave (same session): the next scoped photo run shows it; if PJ-9 then fails past its open step, that is a gap of this feature for the supervisor to file.
+Next: nothing for this lead. Belt-Contact-Sheet refreshed on #1501 (issuecomment-6234651687, 2026-10-17T13:5xZ) with this run's session link from full run 39032323316 (d14e765, green; includes F-1910 #2008). PJ-9 now gets past its open step and fails on typing 0 into Opacity (slider typing, shell-parity's inspector): gap #2019.
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (work started after #1302).
 
