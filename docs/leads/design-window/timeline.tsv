@@ -46,3 +46,5 @@ utc	stage	event	ref	note
 2026-10-17T21:55:02Z	wave	wave 6 fix round 2 started, workflow wn5bcz05k, busy: #2371 #2349 files
 2026-10-17T22:11Z	wave6	DW-a/DW-b round 2: #2418 (#2363, part #2353), #2417 (#2365), #2413 (#2405); #2402 closed (fixed on dev)
 2026-10-17T22:11Z	gaps	round 2 was the last: #2419<-#2399 #2420<-#2404 #2421<-#2362 #2422<-#2401 #2423<-#2353 rest #2424<-#2356 #2425<-#2359 #2426<-#2360; findings closed
+2026-10-17T22:18Z	wave	wave 7 started, workflow wiw2mswtf: CI journey findings from scoped 39072517901 (499d955e), checked against dev 178e59db first
+2026-10-17T22:18Z	ci	scoped design 39072517901 success; full CI 39072812111 still pending (no jobs yet); 10 findings open, so no feature tasks
