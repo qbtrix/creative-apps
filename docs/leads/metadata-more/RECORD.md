@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a147b718b0-qox5 · Session: resumed after worker restart · Started: 2026-10-17T03:07Z
 Stage: 2 plan
 Base: 82ac50553324ea359ca4b75c5d495fc812445cde (origin/dev)
-Next: resolve the base-branch question (brief says main, CLAUDE.md says never branch from main; this lead uses dev), then build the contract slice | MD-a | contract: keywords, title, caption, camera fields, sidecar fake | MD-1..MD-4 | MD-MJ1 | cull MD-4 (built) | no | 0 | planned | - | - |
+Next: supervisor answers base (dev vs main); then plan waves against the current origin/dev and build the contract slice
 | MD-b | Info tab camera details | MD-5..MD-8 | MD-J1 | MD-a; status-and-layout MD-8 | yes | 0 | planned | - | - |
 | MD-c | keyword/title/caption edits with undo | MD-9..MD-13 | MD-J2 | MD-a; cull; persist; MD-b; filters; crop+export (MD-13) | yes | 0 | planned | - | - |
 | MD-d | XMP sidecar writes | MD-14..MD-18 | MD-J3 | MD-a; MD-c; cull; filters | yes | 0 | planned | - | - |
