@@ -1,7 +1,7 @@
 # suite-contracts lead record
 
 Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
-Run: act-1a14bc85382-m8og (line lead for suite-contracts, bundle, home; was act-1a14ad585d6-dlpz, act-1a149c6a2a3-yna2, act-1a14881ad5e-axoa, act-1a1448a5fd9-0he1) · Session: session_01FgHMdTN1ZvtNhGw81uzVWU (claude/feature-lead-suite-contracts-z0ynwa; was session_01WeQwKxFmpontDYTdMSub85) · Started: 2026-10-16T11:49Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z, 2026-10-17T17:08Z, 2026-10-17T21:34Z
+Run: act-1a14c1f550d-8dvt (line lead for suite-contracts, bundle, home; was act-1a14bc85382-m8og, act-1a14ad585d6-dlpz, act-1a149c6a2a3-yna2, act-1a14881ad5e-axoa, act-1a1448a5fd9-0he1) · Session: session_01FgHMdTN1ZvtNhGw81uzVWU (claude/feature-lead-suite-contracts-z0ynwa; was session_01WeQwKxFmpontDYTdMSub85) · Started: 2026-10-16T11:49Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z, 2026-10-17T17:08Z, 2026-10-17T21:34Z, 2026-10-17T23:09Z
 Stage: done
 Base: 68cabe667bf2de7df53327a947705078d3b08f2b
 Next: none. Belt-Contact-Sheet posted on #1332 (full run 38988895145 on 7ac0a317, green; main promoted). Line lead act-1a149c6a2a3-yna2 re-checked on 2026-10-17T12:13Z: no open finding for the feature, nothing left.
@@ -46,6 +46,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 Runs after round 1: scoped: suite 38938043443 on 91f1ba6 (has SC-5c and #1472) green; full run 38938209193 on 7d7256c pending; scoped: suite 38940652547 on 3fbd10f (all round-1 fixes) in progress.
 
 ## Decisions
+- Line lead act-1a14c1f550d-8dvt (2026-10-17T23:10Z): main HEAD 59c435a6 verified. The supervisor parked #1331, #1332 and #1503 with needs-human at 23:07Z ("supervisor un-parks after Mac verification"), so this run builds nothing and leaves the label. The Halo journey regression blamed on #2073 is refuted: scoped: halo run 39045670179 (dd7ec767, which contains #2073's 6fe25c81) is green, and #2077 to #2081 closed as passing. Posted on #1331.
 - Line lead act-1a14bc85382-m8og (2026-10-17T21:34Z): main HEAD c55fad78 verified (= dev's run head). The brief's rebase of lead/<feature> onto origin/main is done as one commit on origin/main carrying docs/leads/<feature>/ from the old branch (the clone is shallow and the old branch shares no base with main; its only own content is this record), pushed with --force-with-lease.
 - No `## Slices` table in the packet: v2 loop. Started after #1302, so the findings queue (rule 10) and the 2-round cap (rule 11) apply; rules 13/14 (v3 only) don't.
 - PRs target `dev`, not `main`: CLAUDE.md forbids targeting `main` and the lane retargets fast-lane PRs to `dev`. The brief's main HEAD 9e3c5f8 was verified; dev (ebc68bf) is one commit ahead.
