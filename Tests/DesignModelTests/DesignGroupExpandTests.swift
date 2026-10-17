@@ -25,7 +25,10 @@ import Testing
         #expect(workspace.isExpanded(group))
         let rows = workspace.layerRows.map(\.id)
         let at = try #require(rows.firstIndex(of: group))
-        #expect(Array(rows.dropFirst(at + 1).prefix(2)) == ["node-2", "node-3"])
+        // Layers lists front to back, so B (node-3) shows above A (node-2), one level deeper.
+        #expect(Array(rows.dropFirst(at + 1).prefix(2)) == ["node-3", "node-2"])
+        let depth = try #require(workspace.layerRows.first { $0.id == group }?.depth)
+        #expect(workspace.layerRows.filter { ["node-2", "node-3"].contains($0.id) }.allSatisfy { $0.depth == depth + 1 })
     }
 
     @Test func ungroupExpandsNoMember() throws {
