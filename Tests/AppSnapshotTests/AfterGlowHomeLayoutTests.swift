@@ -1,6 +1,8 @@
 // AfterGlowHomeLayoutTests.swift: the home's layout spec (blueprint suite.md
-// 7.3, HM-2b) at 880, 1000, 1280 and 1728 pt on `weekOfWork`. A 200 pt
-// sidebar column beside HomeContent; the New row's tiles, the recents
+// 7.3, HM-2b) at 880, 1000, 1280 and 1728 pt on `weekOfWork`. The window's
+// real 200 pt sidebar (SuiteSidebarList over HomeSidebarRows, whose seven
+// rows are read from the accessibility tree, #1761) beside HomeContent;
+// afterglow-home-search-1280 shows the "logo" search with it. The New row's tiles, the recents
 // (whose first row is the RECENT header) and the sidebar report their frames
 // through HomeLayoutAnchors, and the cards, drawn inside SuiteUI's
 // ThumbnailGrid, through the hosted window's accessibility tree, as
@@ -30,11 +32,14 @@ import Testing
         return (model, services)
     }
 
-    /// The window at `width`: the sidebar column, then the home's content.
+    /// The window at `width`: the window's sidebar list, then the home's content.
     private func home(_ model: HomeModel, _ services: SuiteServices, width: CGFloat,
                       height: CGFloat = AfterGlowHomeLayoutTests.height) -> some View {
         HStack(spacing: 0) {
-            SuiteColor.panel.frame(width: CGFloat(HomeLayout.sidebar)).homeLayoutAnchor("sidebar")
+            SuiteSidebarList(sections: HomeSidebarRows.sections,
+                             selection: HomeSidebarRows.selection(showsAssets: false, filter: model.filter),
+                             onSelect: { _ in })
+                .frame(width: CGFloat(HomeLayout.sidebar)).homeLayoutAnchor("sidebar")
             HomeContent(model: model, services: services, images: [:]).homeLayoutAnchor("content")
         }
         .frame(width: width, height: height, alignment: .topLeading)
@@ -43,12 +48,17 @@ import Testing
     @Test(arguments: AfterGlowHomeLayoutTests.widths) func homeFollowsTheLayoutSpec(width: CGFloat) async {
         let (model, services) = await model()
         #expect(model.state.cards.count == 8)
-        let (frames, cards) = measure(home(model, services, width: width), size: CGSize(width: width, height: Self.height))
+        let (frames, cards, sidebarTitles) = measure(home(model, services, width: width),
+                                                     size: CGSize(width: width, height: Self.height))
         guard let sidebar = frames["sidebar"], let content = frames["content"], let tiles = frames["tiles"],
               let recents = frames["recents"] else {
             Issue.record("missing frames at \(width): \(frames.keys.sorted())")
             return
         }
+        // #1761: the window's sidebar, Home, Assets and the five app rows, not a blank column.
+        let rows = ["Home", "Assets"] + SuiteApp.apps.map(\.displayName)
+        #expect(rows.count == 7)
+        #expect(rows.filter(sidebarTitles.contains) == rows, "sidebar read \(sidebarTitles.sorted()) at \(width)")
         let margin = CGFloat(HomeLayout.margin)
         let left = content.minX + margin, right = content.maxX - margin
         #expect(abs(sidebar.width - 200) <= 0.5 && SuiteSize.sidebarWidth.ideal == 200)
@@ -108,7 +118,7 @@ import Testing
           + [CGSize(width: 800, height: 640)])
     func homeFitsTheWindow(size: CGSize) async {
         let (model, services) = await model()
-        let (frames, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
+        let (frames, _, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
         guard let sidebar = frames["sidebar"], let content = frames["content"], let tiles = frames["tiles"],
               let recents = frames["recents"], let running = frames["running"] else {
             Issue.record("missing frames at \(size): \(frames.keys.sorted())")
@@ -129,7 +139,7 @@ import Testing
     @Test func emptyStateFillsTheRecents() async {
         let (model, services) = await model(empty: true)
         let size = CGSize(width: 800, height: 640)
-        let (frames, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
+        let (frames, _, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
         guard let empty = frames["empty"], let recents = frames["recents"] else {
             Issue.record("missing frames: \(frames.keys.sorted())")
             return
@@ -146,10 +156,18 @@ import Testing
                              name: "afterglow-home-\(Int(width))", area: "afterglow", appearance: appearance)
             }
         }
+        // #1761: the search beside the sidebar, the query in the "Matching" line.
+        model.search("logo", now: now)
+        #expect(model.state.cards.count == 2)
+        for appearance in SnapshotAppearance.allCases {
+            assertGolden(home(model, services, width: 1280), size: CGSize(width: 1280, height: Self.height),
+                         name: "afterglow-home-search-1280", area: "afterglow", appearance: appearance)
+        }
     }
 
-    /// The named frames and the cards' frames, in the view's own top-left space.
-    private func measure(_ view: some View, size: CGSize) -> ([String: CGRect], [CGRect]) {
+    /// The named frames, the cards' frames (in the view's own top-left space)
+    /// and every accessibility label, title or text value inside the sidebar column.
+    private func measure(_ view: some View, size: CGSize) -> ([String: CGRect], [CGRect], Set<String>) {
         let seen = MeasuredHome()
         let measured = view
             .environment(\.suiteSnapshotRendering, true)
@@ -175,12 +193,23 @@ import Testing
         host.layoutSubtreeIfNeeded()
         RunLoop.main.run(until: Date().addingTimeInterval(0.3))
         host.layoutSubtreeIfNeeded()
-        let cards = axNodes(in: host).compactMap { node -> CGRect? in
+        let nodes = axNodes(in: host)
+        let cards = nodes.compactMap { node -> CGRect? in
             guard ((node.accessibilityIdentifier?() ?? nil) ?? "").hasPrefix("afterglow.home.card."),
                   let screen = node.accessibilityFrame?() else { return nil }
             return host.convert(window.convertFromScreen(screen), from: nil)
         }
-        return (seen.frames, cards)
+        var sidebarTitles = Set<String>()
+        for node in nodes {
+            guard let screen = node.accessibilityFrame?() else { continue }
+            let frame = host.convert(window.convertFromScreen(screen), from: nil)
+            guard frame.width > 0, frame.maxX <= CGFloat(HomeLayout.sidebar) + 0.5 else { continue }
+            let value: Any?? = node.accessibilityValue?()
+            for text in [node.accessibilityLabel?() ?? nil, node.accessibilityTitle?() ?? nil, (value ?? nil) as? String] {
+                if let text, !text.isEmpty { sidebarTitles.insert(text) }
+            }
+        }
+        return (seen.frames, cards, sidebarTitles)
     }
 }
 

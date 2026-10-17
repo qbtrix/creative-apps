@@ -1,9 +1,10 @@
 // AfterGlowHomeSnapshots.swift: the home (HM-2a) as goldens in Golden/afterglow/:
-// afterglow-home-{week,empty,missing,loading,search}-{light,dark,light-ic,dark-ic};
+// afterglow-home-{week,empty,missing,loading,search,filter,removed}-{light,dark,light-ic,dark-ic};
 // the "Preview data" pill only on the fakes; LauncherServices seeds a fixture,
 // is no preview, and its tiles are disabled while `sending` is pending. The
 // cards' captions and tooltips (#1758), the search line (#1765) and the
-// missing notice's Locate… (#1759) are checked on HomeGrid's mapping. macOS only.
+// missing notice's Locate… (#1759) are checked on HomeGrid's mapping; the
+// empty state's sentence says why Open… waits (#1754). macOS only.
 import AppKit
 import SuiteModel
 import SuiteUI
@@ -56,6 +57,22 @@ import Testing
         #expect(search.state.cards.map(\.item.ref.displayName) == ["Logo.design", "Logo animated.flare"])
         shoot(search, services, name: "search")
 
+        // #1767: SJ1 step 2 (the Design chip after the search) and step 5 (Remove, then Undo).
+        let filter = await model(services)
+        filter.search("logo", now: now)
+        filter.filter(.design, now: now)
+        #expect(filter.state.cards.count == 1)
+        shoot(filter, services, name: "filter")
+
+        let own = SuiteServices.fake(recents: week)  // its own store: the remove doesn't reach the others
+        let removed = await model(own)
+        removed.select(removed.state.cards.first?.item.ref.fileID)
+        await removed.removeSelection(now: now)
+        #expect(removed.state.cards.count == 7)
+        shoot(removed, own, name: "removed")
+        await removed.undoRemove(now: now)
+        #expect(removed.state.cards.count == 8)
+
         let missing = await model(services, missing: ["Cards.design"])
         let cards = missing.state.cards.first { $0.item.ref.displayName == "Cards.design" }
         #expect(cards?.isMissing == true)
@@ -68,7 +85,13 @@ import Testing
         let none = SuiteServices.fake()
         let empty = await model(none)
         #expect(empty.state.emptyMessage == "No recent work yet. Start something new above, or open a file.")
-        #expect(HomeContent.open(none, identifier: "x").isEnabled == false)
+        // #1754: while Open… waits, the sentence drops "or open a file" and says why, in Open…'s own words.
+        let open = HomeContent.open(none, identifier: "x")
+        #expect(open.isEnabled == false)
+        let shown = HomeGrid.emptyMessage(empty, open: open)
+        #expect(!shown.contains("open a file"), "\(shown)")
+        #expect(shown.contains(open.unavailableHelp ?? "-"), "\(shown)")
+        #expect(open.unavailableHelp != SuiteIdentity.notConnected("recents-open-in"))
         shoot(empty, none, name: "empty")
     }
 
