@@ -2,9 +2,9 @@
 
 Issue: #1365 · Packet: docs/blueprints/flare/features/draw-key-save.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier runs act-1a1487603d9-vrd4, act-1a145e74c0e-upy8) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:10Z (resumed 2026-10-17T06:05Z)
-Stage: 4 round 2
+Stage: done
 Base: 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745
-Next: round-2 critic panel running on full dev run 39032323316 (d14e765b, green Linux, promoted main; contains every round-2 fix); then relabel the open findings gap (round cap, rule 11) and post Belt-Contact-Sheet on #1365
+Next: none. Contact sheet posted (https://github.com/qbtrix/creative-apps/issues/1365#issuecomment-6234618001); open findings relabelled gap
 
 Loop: v2 (the packet has no `## Slices` table), started after #1302 merged
 (2026-10-16T04:20Z), so the findings queue and the 2-round cap apply.
@@ -44,7 +44,7 @@ Wave 6: DK-14 (waits DK-9, DK-10). Wave 7: DK-15 (waits all).
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | scoped flare 38988929676 (7ac0a31) | red: 10 of 11 Flare journeys fail (frame readout unreadable, save check, sidebar scene, step back, audit) | over: contrast 4/0, identifier 31/12, unnamed 3/0, offscreen 4/0, overlap 1/0 | clarity, journey, design, mouse: 19 confirmed, 5 refuted | #1792 (fixed by #1799, #1819), #1836-#1841, panel #1844-#1863 (18 issues; 2 blockers #1849 #1862) | #1843 (merged; #1836, #1837), #1864 (#1841, #1840 part), #1875 (#1839) merged; #1876 (#1838) closed on a conflict, #1838 moved to round 2 | no |
-| 2 | scoped flare 39001036689 (e251c5c5) | workflow success; macOS (flare) job red: 11 journeys still fail (frame readout nil after a scrub in 4; identifier, contrast, unnamed audits; Scene 1 keeps Ball selected) | over: contrast 5/0, identifier 18/12 | same panel: clarity, journey, design, mouse (running) | | #1885 (#1846 #1848 #1851), #1886 (#1847 #1853 #1861), #1889 (#1844 #1859), #1890 (#1845), #1892 (#1854 #1857), #1893 (#1862 #1863, #1850 part), #1896 (#1856), #1897 (#1858); #1849 closed (fixed by #1843); not fixed: #1838 (SuiteUI #1867, journey), #1840 (#1852, #1148), #1860 (#1888) | |
+| 2 | scoped flare 39001036689 (e251c5c5) | workflow success; macOS (flare) job red: 11 journeys still fail (frame readout nil after a scrub in 4; identifier, contrast, unnamed audits; Scene 1 keeps Ball selected) | over: contrast 5/0, identifier 18/12 | same panel on full dev run 39032323316 (d14e765b): 9 confirmed, 12 refuted | #2088-#2095 | #1885 (#1846 #1848 #1851), #1886 (#1847 #1853 #1861), #1889 (#1844 #1859), #1890 (#1845), #1892 (#1854 #1857), #1893 (#1862 #1863, #1850 part), #1896 (#1856), #1897 (#1858); #1849 closed (fixed by #1843); not fixed: #1838 (SuiteUI #1867, journey), #1840 (#1852, #1148), #1860 (#1888) | |
 
 ## Decisions
 - Base and PR target are `dev`, not `main` as the launch brief says: CLAUDE.md and lead.md rule 4 say never branch from or target `main`, and the packet exists only on `dev` (main is 74 commits behind).
@@ -79,3 +79,5 @@ Wave 6: DK-14 (waits DK-9, DK-10). Wave 7: DK-15 (waits all).
 - #1675 (needs-ui): ToolbarGroup can't set one button's accessibility value, so the Play button's "Playing" reads as selected in testPlayAndStep until it lands.
 - #1621 (needs-ui, line:suiteui): SuiteWindow ignores ToolbarAction.isSelected, so J0's Auto-key-selected check is a non-strict XCTExpectFailure until it lands.
 - #1589 (needs-ui, line:suiteui): the parity journey clicks Flare's toolbar New Sample Animation, which DK-6b removes.
+
+- Round cap reached after round 2 (rule 11): 23 open findings relabelled gap. Full run 39032323316: Linux green, main promoted; macOS journeys red (all 7 feature journeys fail; flare contrast 5, identifier 18). Contact sheet says so.
