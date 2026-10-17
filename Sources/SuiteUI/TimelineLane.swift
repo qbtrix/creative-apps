@@ -7,7 +7,7 @@
 // shape, fill and edge from their own pick, never the track's selection
 // (#1423). Hover (from TimelineLaneInput, through the environment) turns the
 // bed rowHover and rings the key under the pointer in a 2 pt accent ring
-// 1 pt outside it, fading with SuiteMotion.state. Equatable over its values
+// 1 pt outside it, drawn by TimelineLanes' layer (TL-21). Equatable over its values
 // and holding no closure, so the strip's `.equatable()` skips a lane whose
 // track and mapping didn't change, and a hover change redraws only its own
 // lane. Accessibility is in TimelineLaneAccess; the geometry is
@@ -18,7 +18,6 @@ struct TimelineLane<ID: Hashable & Sendable>: View {
     let track: TimelineTrack<ID>
     let mapping: FrameMapping
     @Environment(\.timelineLaneHover) private var hover
-    @Environment(\.suiteReduceMotion) private var reduceMotion
 
     #if DEBUG
     /// How many times a lane's body ran, over every ID type; the real-window
@@ -33,77 +32,9 @@ struct TimelineLane<ID: Hashable & Sendable>: View {
         #if DEBUG
         Self.bodyRuns += 1
         #endif
-        let track = track
-        let mapping = mapping
-        let ringed = hover?.key
-        return Canvas { context, size in
-            let bedRect = TimelineLaneGeometry.bed(width: size.width, height: size.height)
-            for span in track.spans {
-                let block = TimelineLaneGeometry.block(span, mapping: mapping, bed: bedRect)
-                let shape = Path(roundedRect: block, cornerRadius: TimelineLaneGeometry.radius(of: block))
-                context.fill(shape, with: .color(TimelineLook.clipFill.color()))
-            }
-            drawKeys(of: track, mapping: mapping, ringed: ringed, mid: bedRect.midY, in: &context)
-        }
-        .frame(height: SuiteSize.timelineLane)
-        // A view background, not a color one, so it keeps to the safe area (#1034).
-        .background(alignment: .center) { bedLayer }
-        .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hover)
-        .modifier(TimelineLaneAccess(track: track))
-    }
-
-    /// The bed: rowHover under the pointer, else laneBed, under the selectedTint on a selected track.
-    private var bedLayer: some View {
-        let bed = RoundedRectangle(cornerRadius: SuiteRadius.lane)
-        return bed.fill(hover == nil ? SuiteColor.laneBed : SuiteColor.rowHover)
-            .overlay { if track.isSelected { bed.fill(SuiteColor.selectedTint) } }
-            .padding(.vertical, TimelineLaneGeometry.gap)
-    }
-}
-
-/// The tweens, then the keys over them, then the hover ring.
-private func drawKeys<ID>(
-    of track: TimelineTrack<ID>, mapping: FrameMapping, ringed: Int?, mid: CGFloat, in context: inout GraphicsContext
-) {
-    let keys = track.keys.sorted { $0.frame < $1.frame }
-    let tweenWidth = SuiteSpacing.xxs
-    let glyph = SuiteSpacing.xs
-    var tween = Path()
-    for (a, b) in zip(keys, keys.dropFirst()) {
-        let (ax, bx) = (tickX(mapping, a.frame), tickX(mapping, b.frame))
-        let segment = TimelineLook.segment(from: a, at: Double(ax), to: b, at: Double(bx))
-        switch segment.kind {
-        case .line:
-            tween.move(to: CGPoint(x: ax, y: mid))
-            tween.addLine(to: CGPoint(x: bx, y: mid))
-        case .step:
-            tween.move(to: CGPoint(x: ax, y: mid + glyph))
-            tween.addLine(to: CGPoint(x: bx, y: mid + glyph))
-            tween.addLine(to: CGPoint(x: bx, y: mid))
-        }
-        if let x = segment.curveGlyphX.map({ CGFloat($0) }) {
-            tween.move(to: CGPoint(x: x - glyph, y: mid + glyph))
-            tween.addCurve(
-                to: CGPoint(x: x + glyph, y: mid - glyph),
-                control1: CGPoint(x: x, y: mid + glyph), control2: CGPoint(x: x, y: mid - glyph))
-        }
-    }
-    context.stroke(tween, with: .color(SuiteColor.textTertiary), lineWidth: tweenWidth)
-    let size = SuiteSize.timelineKeyframe
-    for key in keys {
-        let picked = track.pickedFrames.contains(key.frame)
-        let center = CGPoint(x: tickX(mapping, key.frame), y: mid)
-        let look = TimelineLook.keyPath(key.shape)
-        let shape = TimelineLaneGeometry.keyShape(look.glyph, center: center, size: size)
-        let edge = TimelineLook.keyEdge(picked: picked)
-        context.fill(shape, with: .color(TimelineLook.keyFill(picked: picked, atPlayhead: false).color()))
-        context.stroke(shape, with: .color(edge.color.color()), lineWidth: CGFloat(edge.width))
-        if key.frame == ringed {
-            // The ring's centre line sits its half width beyond a 1 pt gap.
-            let out = SuiteSize.focusRingGap + SuiteSize.focusRing / 2
-            let ring = TimelineLaneGeometry.keyShape(look.glyph, center: center, size: size + out * 2)
-            context.stroke(ring, with: .color(SuiteColor.accent), lineWidth: SuiteSize.focusRing)
-        }
+        return TimelineLanes(lanes: [TimelineLaneDrawing(track, mapping: mapping, hover: hover)])
+            .frame(height: SuiteSize.timelineLane)
+            .modifier(TimelineLaneAccess(track: track))
     }
 }
 
