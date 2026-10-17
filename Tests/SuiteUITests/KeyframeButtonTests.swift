@@ -2,7 +2,8 @@
 // and key-here diamond, that the button keeps its width in every state, and
 // that its two buttons read as two 28 pt elements with their own identifiers
 // after the diamond appears (#1282; read from the window's accessibility
-// tree, which SwiftUI builds once the app is asked for it). macOS only.
+// tree, which SwiftUI builds once the app is asked for it), and that a
+// disabled pair's tooltips say why it can't act. macOS only.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -20,6 +21,20 @@ import Testing
     #expect(KeyState.idle.diamond == nil)
     #expect(KeyState.animated.diamond?.symbol == "diamond" && KeyState.animated.diamond?.action == "Add Key")
     #expect(KeyState.keyedHere.diamond?.symbol == "diamond.fill" && KeyState.keyedHere.diamond?.action == "Remove Key")
+}
+
+/// A pair that can act names its action; a disabled one shows the reason on both buttons, so a mouse user hovering
+/// either one learns why it does nothing (no dead controls).
+@Test func aDisabledPairTellsWhyOnBothButtons() {
+    func help(_ state: KeyState, _ unavailable: String? = nil) -> [String?] {
+        let h = KeyframeButton.help("X", state: state, unavailable: unavailable)
+        return [h.stopwatch, h.diamond]
+    }
+    #expect(help(.idle) == ["Animate X", nil])
+    #expect(help(.keyedHere) == ["Stop Animating X", "Remove Key for X"])
+    let why = "Select a layer to animate it."
+    #expect(help(.idle, why) == [why, nil])
+    #expect(help(.animated, why) == [why, why])
 }
 
 /// The diamond slot is reserved even while empty, so the row never changes width.
