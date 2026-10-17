@@ -36,7 +36,9 @@ extension BodyCountSuites {
         }
 
         static func run() async throws -> (scrub: RenderStep, canvas: RenderStep) {
-            var model = FlareWorkspace()
+            // The real services, as the app launches on: `FlareWorkspace()` is `.live`, whose stage and shapes are
+            // NotBuilt, so its stage list is always empty and a Rectangle drag draws nothing (#1792).
+            var model = FlareWorkspace(services: .built)
             model.newSampleAnimation()
             let segment = try #require(model.easingSegments.first, "the sample has no easing segment")
             model.selectEasingSegment(segment)
