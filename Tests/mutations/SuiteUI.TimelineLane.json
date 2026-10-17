@@ -1,4 +1,6 @@
 [
 {"label":"the block ends at upper + 1, so it covers a cell past its last frame","file":"Sources/SuiteUI/TimelineLane.swift","find":"max(tickX(mapping, span.upperBound) - start","replace":"max(tickX(mapping, span.upperBound + 1) - start","tests":"TimelineLaneTests"},
-{"label":"the minimum width is dropped, so a one-frame span draws nothing","file":"Sources/SuiteUI/TimelineLane.swift","find":"tickX(mapping, span.upperBound) - start, SuiteSize.timelineKeyframe)","replace":"tickX(mapping, span.upperBound) - start, 0)","tests":"TimelineLaneTests"}
+{"label":"the minimum width is dropped, so a one-frame span draws nothing","file":"Sources/SuiteUI/TimelineLane.swift","find":"tickX(mapping, span.upperBound) - start, SuiteSize.timelineKeyframe)","replace":"tickX(mapping, span.upperBound) - start, 0)","tests":"TimelineLaneTests"},
+{"label":"host skips the Equatable check, so every update redraws every lane","file":"Sources/SuiteUI/TimelineLanesView.swift","find":"var dirty = TimelineLaneLayers.dirty(old: lanes, new: new)","replace":"var dirty = Set(new.indices)","tests":"TimelineLanesViewTests"},
+{"label":"a layer per key instead of per lane","file":"Sources/SuiteUI/TimelineLanesView.swift","find":"let wanted = new.count","replace":"let wanted = new.reduce(0) { $0 + $1.keys.count }","tests":"TimelineLanesViewTests"}
 ]
