@@ -94,4 +94,28 @@ import Testing
             onScrub: { _ in })
         #expect(playhead != worked)
     }
+
+    /// The pill hides each ruler label it touches whole: in timecode a label
+    /// runs right of its tick past the pill, and half of one read "06" beside
+    /// it (Mac finish). Labels clear of the pill keep their ground.
+    @Test func theKnockOutCoversEveryRulerLabelThePillTouches() {
+        let mapping = FrameMapping(duration: 120, frameWidth: 10)
+        let rules = TimelineRulerLabels(mapping: mapping, unit: .timecode, fps: 24)
+        let pill = TimelinePlayheadGrab.pill(lineX: tickX(mapping, 30), label: rules.text(30), width: 720)
+        let grounds = TimelinePlayheadGrab.grounds(pill: pill, rules: rules, scrollX: 0)
+        let ground = grounds.reduce(CGRect.null) { $0.union($1) }
+        let inset = Double(timelineInset)
+        let labels = rules.placed(rules.frames(visibleX: 0...720))
+        let touched = labels.filter { $0.minX + inset < Double(pill.maxX) && $0.maxX + inset > Double(pill.minX) }
+        #expect(touched.contains { $0.maxX + inset > Double(pill.maxX) })
+        for label in labels {
+            let covered = Double(ground.minX) <= label.minX + inset && Double(ground.maxX) >= label.maxX + inset
+            let clear = Double(ground.maxX) < label.minX + inset || Double(ground.minX) > label.maxX + inset
+            #expect(touched.contains(label) ? covered : clear, "label \(label.text)")
+        }
+        #expect(ground.contains(pill.insetBy(dx: -TimelinePlayheadGrab.knockOut, dy: 0)))
+        #expect(ground.minY >= 0 && ground.maxY <= SuiteSize.timelineRuler)
+        // Beside the pill only the label's text band clears; the ticks under it stay.
+        #expect(grounds.dropFirst().allSatisfy { $0.minY == 0 && $0.maxY <= TimelinePlayheadGrab.labelBand })
+    }
 }
