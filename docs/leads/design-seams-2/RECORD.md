@@ -1,10 +1,10 @@
 # design-seams-2 lead record
 
 Issue: (feature issue not filed yet; packet says filed once S2-a's waits are done) · Packet: docs/blueprints/design/features/design-seams-2.md
-Run: act-1a1465d47db-qxmg · Session: this session · Started: 2026-10-16T20:49Z
-Stage: 0 setup
+Run: act-1a14a8f0634-uwzw (resumes act-1a1465d47db-qxmg) · Session: this session · Started: 2026-10-16T20:49Z
+Stage: parked (out of the beta cut)
 Base: 1d68b2288cfe9c31e6b7cea460f5eb1ada5ddd18 (origin/dev, 1d68b22)
-Next: hold; re-check the waits below each stage until they merge
+Next: nothing until after beta. Supervisor on #1526, 2026-10-17T06:06Z: parked, needs-human stays, the line lead drops this feature from its brief.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
