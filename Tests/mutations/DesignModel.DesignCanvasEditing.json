@@ -1,0 +1,6 @@
+[
+{"label":"a step keeps the history of the samples before it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"        history = current.history\n","replace":"\n","tests":"DesignGestureRouteTests"},
+{"label":"an Option-drag moves the copy on the page without it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"by: delta, on: copies)","replace":"by: delta, on: page)","tests":"DesignOptionDragTests"},
+{"label":"endDrag leaves the marquee up","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"        marquee = nil\n","replace":"\n","tests":"DesignGestureRouteTests"},
+{"label":"a press on an unselected frame's background moves it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"route = .marquee(id)","replace":"selectItem(id); route = .move(id)","tests":"DesignGestureRouteTests"}
+]
