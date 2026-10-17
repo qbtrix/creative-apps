@@ -84,7 +84,7 @@ import Testing
         for zoom in [1.0, 2.0] {
             let path = try #require(artworkPath(for: node, scale: zoom))
             let style = try #require(artworkStroke(for: node, scale: zoom))
-            #expect(style.lineWidth == 4 * zoom)
+            #expect(Double(style.lineWidth) == 4 * zoom)
             let drawn = path.strokedPath(style).boundingRect
             let edge = path.boundingRect
             // Half the width outside the edge on every side, so half lies inside.

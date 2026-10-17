@@ -1,8 +1,8 @@
 // DesignAlignBar.swift: the Align section of Design's inspector: the six align
 // commands for the selected layer as SuiteUI inspector actions in two columns,
 // horizontal on the left (Left, Center, Right) and vertical on the right (Top,
-// Middle, Bottom). With several layers selected a fourth row adds Distribute
-// Horizontally and Vertically, and every button runs its DesignCommand. Each
+// Middle, Bottom). With several layers selected two full-width rows add
+// Distribute Horizontally and Vertically, and every button runs its DesignCommand. Each
 // shows its symbol, its tooltip is its title, one that can't run is disabled
 // with the reason from the Model (alignHelps, help(_:)), and each carries its
 // DesignControlID and lists itself in `suite.controls`. Values in, intents out.
@@ -30,8 +30,9 @@ struct DesignAlignBar: View {
                     }
                 }
                 if let distributeHelp {
-                    GridRow {
-                        ForEach(DesignDistributeAxis.allCases, id: \.self) { distribute($0, distributeHelp[$0]) }
+                    // Full width each: "Distribute Horizontally" wraps in a half-width cell.
+                    ForEach(DesignDistributeAxis.allCases, id: \.self) { axis in
+                        GridRow { distribute(axis, distributeHelp[axis]).gridCellColumns(2) }
                     }
                 }
             }

@@ -32,7 +32,7 @@ extension BodyCountSuites {
             let w = RenderBudgetWindow(DesignWindow(seed: Self.cards(), live: live))
             defer { w.close() }
             try await w.settle(800)
-            let board = try #require(await w.element("suite.canvas"), "no canvas")
+            let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
             let page = CGSize(width: 1440, height: 1024)
             DesignWindow.lastWorkspace = nil
             try await w.drag(from: w.point(CGPoint(x: 150, y: 140), on: page, in: board), release: false) {
