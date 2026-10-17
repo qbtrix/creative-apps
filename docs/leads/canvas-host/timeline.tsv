@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-17T02:51Z	0	stage-start	#1596	checkout claude/canvas-host-lead-quy2t1 at b1ec047 (origin/main)
+2026-10-17T02:51Z	1	stage-end	#1596	packet and wave data read; canvas-marks planned, no slices
+2026-10-17T02:51Z	2	stage-start	#1596	waves planned from the packet build waves
