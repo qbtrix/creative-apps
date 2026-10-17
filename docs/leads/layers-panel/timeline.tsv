@@ -1,0 +1,5 @@
+utc	stage	event	ref	note
+2026-10-17T06:08Z	0	stage-start	#1498	line lead over #1325 #1498 #1497; no lead branch existed
+2026-10-17T06:17Z	1	stage-end	#1498	packet read; gap #1986 filed (rename/reorder/nest/Arrange, p1 in-progress)
+2026-10-17T06:17Z	2	stage-end	#1498	waves: L-3+L-7 now; L-1 L-2 wait on EK-tree #1933; L-4 L-5 on DW-a/DW-b; L-6 on LL-9
+2026-10-17T06:20Z	3	stage-start	wave 1	L-3 L-7 base fe0f5f1
