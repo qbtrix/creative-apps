@@ -289,6 +289,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   path touched (the files above), mergeable, no red or running check on the
   head, and proof the head passed the gate: the `Fast-Check: pass` /
   `Head: <sha>` lines for the current head, or a passing CI check on it.
+  A head with neither and no check at all gets a Linux-only CI run from the
+  lane (`ci.yml` with `linux_only`), once per head, and merges when it
+  passes. A fork's PR doesn't.
 - A PR whose every changed path is under `docs/` (packets, blueprints and
   their `.wave.json` feature data, `docs/c4/parts/`, any `.md` there) takes
   the lane at any size. It needs the same proof, and that proof is
