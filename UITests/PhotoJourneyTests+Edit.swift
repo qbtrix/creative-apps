@@ -164,7 +164,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         photo = Journey("Photo", self, arguments: photoArguments())
         XCTAssert(photo.app.windows["Photo"].waitForExistence(timeout: 30), "the empty Photo window didn't open")
         choose("Paste", photo)
-        XCTAssert(photo.app.windows["Untitled"].waitForExistence(timeout: 15), "Paste with no image opened no Untitled image")
+        XCTAssert(photo.window(named: "Untitled").waitForExistence(timeout: 15), "Paste with no image opened no Untitled image")
         expectHeader("200 × 100 px", photo, "the pasted image isn't 200 × 100 px")
         expectHeader("1 layer", photo, "the pasted image has more than one layer")
         expect("photo.bar.undo", photo, "the window has no Undo button")
@@ -180,7 +180,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         choose("Paste", photo)
         expectStatus("Pasted at 84%.", photo, timeout: 180)
         photo.shot("edit-pasted-scaled")
-        XCTAssert(photo.app.windows["Untitled"].waitForExistence(timeout: 5), "the 24 MP paste opened no Untitled image")
+        XCTAssert(photo.window(named: "Untitled").waitForExistence(timeout: 5), "the 24 MP paste opened no Untitled image")
         expectHeader("5016 × 3344 px", photo, "the 24 MP paste isn't 5016 × 3344 px")
         _ = NSPasteboard.general.clearContents()
     }
@@ -194,7 +194,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         let file = folder.appending(path: "beach.png")
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 30), "beach.png didn't open")
+        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "beach.png didn't open")
         XCTAssert(photo.element("suite.canvas").waitForExistence(timeout: 5), "no canvas (suite.canvas)")
         return photo
     }
@@ -268,7 +268,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         _ = photo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
     }
 
-    /// Waits for the button titled `title`, such as the top bar's "Undo Paste".
+    /// Waits for the button titled `title`, such as the window toolbar's "Undo Paste".
     @MainActor private func expect(_ title: String, _ photo: Journey, _ message: String) {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "\(message) (no \(title) button)")
     }

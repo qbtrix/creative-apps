@@ -58,6 +58,17 @@ func photoArguments(
     return arguments
 }
 
+extension Journey {
+    /// The window titled `name` (an opened file's name). The title bar follows the name with the
+    /// save state as its subtitle ("Saved", "Edited"), so the window's accessibility title is no
+    /// longer the bare name and `windows[name]` misses it (#1910); this matches the name anywhere in it.
+    /// Case-sensitive on purpose: testSaveAsAndActualSize tells "tools.PNG" from "tools.png".
+    func window(named name: String) -> XCUIElement {
+        app.windows.matching(NSPredicate(
+            format: "title CONTAINS %@ OR label CONTAINS %@ OR identifier == %@", name, name, name)).firstMatch
+    }
+}
+
 final class PhotoJourneyKitTests: XCTestCase {
     /// The arguments are spelled right; a written beach.png opens, titled
     /// beach.png, with its canvas and nothing over the window (no restore
@@ -79,7 +90,7 @@ final class PhotoJourneyKitTests: XCTestCase {
 
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 30), "beach.png didn't open")
+        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "beach.png didn't open")
         XCTAssert(photo.element("suite.canvas").waitForExistence(timeout: 5), "no canvas (suite.canvas)")
         XCTAssertFalse(
             photo.app.buttons["photo.recovery.restore"].waitForExistence(timeout: 5),
