@@ -1,8 +1,11 @@
 // FlareEasingInspector.swift: the easing editor in Flare's inspector, under
 // two Studio caps headers. KEYFRAMES lists the selected layer's segments (an
-// amber diamond, the property, "0 → 24", and the selected row's preset);
+// amber diamond, the property, "frames 0 → 24", and the selected row's
+// preset); its header shows only over rows, so a layer with no keys shows
+// EASING and its hint alone (#1861);
 // EASING shapes the selected segment with SuiteUI's CurveEditor, ChoiceChips
-// and four StudioScrubRows (x1, y1, x2, y2). Generic over the EasingEditing
+// and four StudioScrubRows (x1, y1, x2, y2), each with a tooltip naming its
+// handle, axis and range (#1847). Generic over the EasingEditing
 // contract, so it runs on FakeEasingEditing in snapshots and on FlareWorkspace
 // in the window. It only reads the editor and calls the closures; it never
 // mutates the editor. Every drag, nudge or typed value ends in `onEndDrag`,
@@ -30,7 +33,7 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header("Keyframes")
+            if editor.showsKeyframesHeader { header("Keyframes") }
             ForEach(editor.easingSegments) { segmentRow($0) }
             header("Easing")
             easing
@@ -54,7 +57,6 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
 
     private func segmentRow(_ segment: EasingSegment) -> some View {
         let selected = segment == editor.selectedEasingSegment
-        let title = "\(segment.property) \(segment.startFrame) → \(segment.endFrame)"
         return Button { onSelect(segment) } label: {
             HStack(spacing: SuiteSpacing.s) {
                 Image(systemName: "diamond.fill")
@@ -64,7 +66,7 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
                 Text(segment.property)
                     .font(SuiteFont.inspectorLabel)
                     .foregroundStyle(selected ? SuiteColor.accentText : Color.primary)
-                Text("\(segment.startFrame) → \(segment.endFrame)")
+                Text(segment.frameSpan)
                     .font(SuiteFont.inspectorValue)
                     .foregroundStyle(SuiteColor.secondaryText)
                 Spacer(minLength: SuiteSpacing.s)
@@ -83,7 +85,7 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
         }
         .buttonStyle(.plain)
         .onHover { hovered = $0 ? segment : (hovered == segment ? nil : hovered) }
-        .accessibilityLabel(title)
+        .accessibilityLabel(segment.title)
         .accessibilityIdentifier(Self.rowIdentifier(segment))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
@@ -112,10 +114,10 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
                     options: EasingPreset.allCases.map { InspectorOption(id: $0, title: $0.title) },
                     selected: editor.currentEasingPreset, onSelect: onPreset)
                     .padding(.vertical, SuiteSpacing.xs)
-                scrubRow("X1", .first, handles.first, x: true)
-                scrubRow("Y1", .first, handles.first, x: false)
-                scrubRow("X2", .second, handles.second, x: true)
-                scrubRow("Y2", .second, handles.second, x: false)
+                scrubRow(.first, .x, handles.first)
+                scrubRow(.first, .y, handles.first)
+                scrubRow(.second, .x, handles.second)
+                scrubRow(.second, .y, handles.second)
             }
             .disabled(reason != nil)
         } else {
@@ -126,11 +128,13 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
     }
 
     /// One coordinate of one handle: x in 0...1, y in -1...2, step 0.01.
-    private func scrubRow(_ label: String, _ handle: EasingHandle, _ point: Point, x: Bool) -> some View {
-        StudioScrubRow(
-            label: label, value: x ? point.x : point.y, range: x ? 0...1 : -1...2, step: 0.01,
+    private func scrubRow(_ handle: EasingHandle, _ axis: EasingAxis, _ point: Point) -> some View {
+        let x = axis == .x
+        return StudioScrubRow(
+            label: handle.label(axis), value: x ? point.x : point.y, range: axis.range, step: 0.01,
             onChange: { onMoveHandle(handle, x ? Point(x: $0, y: point.y) : Point(x: point.x, y: $0)) },
             onEnd: onEndDrag)
-            .accessibilityIdentifier("flare.easing.row.\(label.lowercased())")
+            .help(handle.help(axis))
+            .accessibilityIdentifier("flare.easing.row.\(handle.label(axis).lowercased())")
     }
 }

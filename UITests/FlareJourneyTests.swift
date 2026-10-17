@@ -6,8 +6,10 @@
 // Keyed Ball (FlareJourneyTests+Menus.swift, with J1) and checks every step by the active preset chip and by where the
 // curve well draws handle 1. On the 1024 x 768 runner the window, its
 // columns, the timeline and the easing rows must fit the screen with the
-// sidebar showing (`expectEasingGeometry`, #1841); the nudge goes to the X1
-// row, which takes the arrow keys once a click has given it focus.
+// sidebar showing (`expectEasingGeometry`, #1841), the inspector is the
+// editor panel's width and every preset chip's title fits its chip (#1853,
+// #1847); the nudge goes to the X1 row, which takes the arrow keys once a
+// click has given it focus.
 import AppKit
 import XCTest
 
@@ -79,10 +81,12 @@ final class FlareJourneyTests: XCTestCase {
     }
 
     @MainActor func testEditEasingOfAKeyframeSegment() {
-        let flare = Journey("Flare", self)
+        let flare = Journey("Flare", self, arguments: ["-SuiteWindowSize", "1024x768"])
         flare.openSample("Keyed Ball")
         flare.shot("easing-sample")
-        let rows = [("x 0 → 24", "x.0-24"), ("x 24 → 48", "x.24-48"), ("y 0 → 24", "y.0-24")]
+        let rows = [
+            ("x frames 0 → 24", "x.0-24"), ("x frames 24 → 48", "x.24-48"), ("y frames 0 → 24", "y.0-24"),
+        ]
         for (row, id) in rows {
             XCTAssert(flare.app.buttons[row].waitForExistence(timeout: 10), "KEYFRAMES doesn't list \(row)")
             XCTAssertEqual(
@@ -90,11 +94,12 @@ final class FlareJourneyTests: XCTestCase {
         }
         XCTAssert(flare.app.staticTexts["Pick a keyframe above."].exists, "no hint to pick a keyframe")
 
-        flare.click("x 0 → 24", in: .window, step: "easing-segment")
-        XCTAssert(flare.app.buttons["x 0 → 24"].isSelected, "x 0 → 24 isn't selected")
+        flare.click("x frames 0 → 24", in: .window, step: "easing-segment")
+        XCTAssert(flare.app.buttons["x frames 0 → 24"].isSelected, "x frames 0 → 24 isn't selected")
         XCTAssertEqual(activePreset(flare), "Linear", "the sample's segment isn't linear")
         expectEasingGeometry(flare)
         scrollInspector(toShow: flare.element("flare.easing"), flare)
+        expectPresetsFit(flare)
 
         flare.click("Ease In", in: .window, step: "easing-preset")
         XCTAssertEqual(activePreset(flare), "Ease In", "Ease In isn't the active preset")
@@ -166,7 +171,7 @@ final class FlareJourneyTests: XCTestCase {
         }
         regions["toolbar"] = rect(flare.app.toolbars.firstMatch.frame)
         let minimums: [String: (width: Double, height: Double)] = [
-            "suite.sidebar": (width: 1, height: 1), "suite.inspector": (width: 200, height: 1),
+            "suite.sidebar": (width: 1, height: 1), "suite.inspector": (width: Self.inspectorWidth, height: 1),
             "flare.timeline": (width: 1, height: 56), "flare.easing": (width: 1, height: 1),
             "toolbar": (width: 1, height: 1),
         ]
@@ -183,6 +188,23 @@ final class FlareJourneyTests: XCTestCase {
             XCTAssert(element.frame.height >= 20, "\(row) is only \(element.frame.height) pt tall")
         }
         flare.shot("easing-geometry")
+    }
+
+    /// FlareWindow.inspectorWidth: SuiteSize.editorPanelWidth (280) plus
+    /// SuiteSpacing.m (12) on each side (#1853).
+    static let inspectorWidth = 304.0
+
+    /// Each preset chip is at least as wide as its title drawn in the chip's
+    /// font (caption, semibold) plus its 4 pt side padding, so no title is
+    /// cut to "Ease…" (#1847, #1853).
+    @MainActor private func expectPresetsFit(_ flare: Journey) {
+        let font = NSFont.systemFont(ofSize: NSFont.preferredFont(forTextStyle: .caption1).pointSize, weight: .semibold)
+        for title in ["Linear", "Ease", "Ease In", "Ease Out", "Ease In-Out", "Hold"] {
+            let chip = flare.app.windows.firstMatch.buttons[title]
+            XCTAssert(chip.waitForExistence(timeout: 5), "no \(title) preset")
+            let needed = (title as NSString).size(withAttributes: [.font: font]).width + 2 * 4
+            XCTAssert(chip.frame.width >= needed, "\(title) is \(chip.frame.width) pt wide, its title needs \(needed)")
+        }
     }
 
     /// Scrolls the inspector until `element` is inside it.
