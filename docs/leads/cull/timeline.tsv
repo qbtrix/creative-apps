@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-17T00:23Z	4	pr-opened	#1803	ci-2 J4 position check + audit (no app bug)
 2026-10-17T00:29Z	4	pr-merged	#1803	ci-2 (0e6f7c9)
 2026-10-17T00:46Z	4	ci-run	38986624933	J4 passes step 1, fails step 2 focus; ci-3 fixer
+2026-10-17T00:52Z	4	pr-opened	#1818	ci-3 J4 loupe focus, menus closed without Escape
