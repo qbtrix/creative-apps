@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a147b718fd-n1ee · Session: unknown · Started: 2026-10-17T02:30Z
 Stage: 3 wave 1 (waiting on supervisor)
 Base: 06371387 (origin/dev at setup; the brief's main 37d99630 is an ancestor, CLAUDE.md says dev)
-Next: wait for the supervisor's answers to Q1 to Q3 under Open; then FC-2 (contract slice) on LibraryCatalog.swift, LibraryOrder.swift and LibraryCollections.swift
+Next: wait for the supervisor's answers to Q1 to Q4 under Open; then FC-2 (contract slice) on LibraryCatalog.swift, LibraryOrder.swift and LibraryCollections.swift
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
