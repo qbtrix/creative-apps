@@ -17,7 +17,9 @@ final class FlareMenuJourneys: XCTestCase {
         ("Edit", ["Undo", "Redo", "Cut", "Copy", "Paste", "Duplicate", "Delete", "Select All", "Deselect"], false),
         ("View", ["Zoom In", "Zoom Out", "Fit", "Actual Size", "Onion Skin", "Motion Path", "Show Rulers",
                   "Show Guides", "Clear Guides"], false),
-        ("Object", ["Convert to Symbol", "Edit Symbol", "Exit Symbol", "Bring Forward", "Send Backward"], true),
+        // Finish Path is Return's item for the mouse (#1893).
+        ("Object", ["Convert to Symbol", "Edit Symbol", "Exit Symbol", "Bring Forward", "Send Backward",
+                    "Finish Path"], true),
         ("Animate", ["Play/Pause", "Loop", "Next Frame", "Previous Frame", "Next Keyframe", "Previous Keyframe",
                      "Go to Start", "Go to End", "Add Keyframe", "Remove Keyframe", "Auto-Key", "Insert Frame",
                      "Remove Frame", "Add Label", "Easing", "Animate with Assist…"], true),

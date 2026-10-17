@@ -101,7 +101,10 @@ final class FlareDrawJourneys: XCTestCase {
         XCTAssertGreaterThanOrEqual(
             palette.frame.minX, rulerMaxX, "the palette \(palette.frame) covers the vertical ruler (ends at \(rulerMaxX))")
         let window = flare.app.windows.firstMatch.frame
-        let zoom = pane.staticTexts.matching(NSPredicate(format: "label MATCHES 'Zoom [0-9]+%'")).firstMatch
+        // "Zoom 51%" as its label, or, as macOS XCUITest drops a Text's label (#1452), "51%" as its value.
+        let zoom = pane.staticTexts.matching(
+            NSPredicate(format: "label MATCHES 'Zoom [0-9]+%' OR value MATCHES '[0-9]+%'")
+        ).firstMatch
         let size = pane.staticTexts["550 × 400 pt"]
         let preview = flare.element("flare.status.preview")
         for (pill, name) in [(zoom, "zoom percent"), (size, "550 × 400 pt"), (preview, "Preview data")] {

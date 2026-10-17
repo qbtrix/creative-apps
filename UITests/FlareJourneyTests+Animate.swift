@@ -73,7 +73,7 @@ final class FlareAnimateJourneys: XCTestCase {
         // 6. At 30 Shadow sits 50 points right too: its old center hits nothing, the new one selects it.
         scrub(to: 30, flare)
         let shadow = flare.element("flare.timeline").buttons.matching(
-            NSPredicate(format: "identifier == 'flare.timeline.track' AND label == 'Shadow'")).firstMatch
+            NSPredicate(format: "label == 'Shadow'")).firstMatch
         XCTAssert(shadow.waitForExistence(timeout: 5), "no Shadow track in the timeline")
         point(270, 352, on: canvas).click()
         XCTAssert(waitFor { !shadow.isSelected }, "a click where Shadow was still hits Shadow at frame 30")
