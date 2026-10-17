@@ -1,0 +1,6 @@
+[
+{"label":"the bed clip dropped: a clip past the lane's end spills past the bed's corner","file":"Sources/SuiteUI/TimelineLanesView.swift","find":"        context.clip()\n","replace":"        context.beginPath()\n","tests":"TimelineLaneBedTests"},
+{"label":"a hold drawn as a solid tween","file":"Sources/SuiteUI/TimelineLanesView.swift","find":"case .step: held.addLines(","replace":"case .step: tween.addLines(","tests":"TimelineLaneBedTests"},
+{"label":"the hold's dash dropped","file":"Sources/SuiteUI/TimelineLanesView.swift","find":"              dash: [SuiteSpacing.xs, SuiteSpacing.xs], in: context)","replace":"              in: context)","tests":"TimelineLaneBedTests"},
+{"label":"the hold drawn below the keys' centre line","file":"Sources/SuiteUI/TimelineLanesView.swift","find":"held.addLines([CGPoint(x: ax, y: mid), CGPoint(x: bx, y: mid)])","replace":"held.addLines([CGPoint(x: ax, y: mid + 4), CGPoint(x: bx, y: mid + 4)])","tests":"TimelineLaneBedTests"}
+]

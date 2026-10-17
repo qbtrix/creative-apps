@@ -456,9 +456,13 @@ struct TimelineNameStyle: ButtonStyle {
         var body: some View {
             let row = TimelineLook.nameRow(selected: selected, hovered: hovering && isEnabled, pressed: configuration.isPressed)
             configuration.label
-                // `ignoresSafeAreaEdges: []`: a color background ignores every safe-area edge by default,
-                // so under a floating sidebar the selected row reached 208 pt left of the strip (#1034).
-                .background(fill(row), ignoresSafeAreaEdges: [])
+                // The lane bed's shape and inset, so a name's row lines up with its lane (#1744). A shape
+                // view background stays inside the safe area, unlike a bare color (#1034).
+                .background(alignment: .center) {
+                    RoundedRectangle(cornerRadius: SuiteRadius.lane)
+                        .fill(fill(row))
+                        .padding(.vertical, TimelineLaneGeometry.gap)
+                }
                 .onHover { hovering = $0 }
         }
 

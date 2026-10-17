@@ -387,7 +387,10 @@ with the symbol in `accentText`.
 A name chip on the left with eye and lock buttons. Key diamonds: idle
 `textSecondary`, selected `accent` with a 1 pt light edge, at the playhead
 `stateKeyed`, suggested a hollow `stateSuggested` diamond. A tween segment is
-a 2 pt line between keys; an eased segment shows a small curve glyph.
+a 2 pt line between keys; an eased segment shows a small curve glyph; a
+segment after a hold key is dashed on the same line. Blocks, tweens and keys
+are clipped to the bed, so content past the lane's end stops on its curve. A
+track name's hover, press and selected fills take the bed's shape and inset.
 Playhead: a 2 pt `accent` line with a time pill (`accentFill`, white `pill`
 text). While recording, a 2 pt `stateRecording` ring frames the timeline.
 Clip lanes (Halo) use the same bed with clip blocks at radius `lane`, slate

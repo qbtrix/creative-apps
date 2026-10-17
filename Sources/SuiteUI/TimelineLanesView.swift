@@ -55,12 +55,20 @@ enum TimelineLanePainter {
         let bedPath = Path(roundedRect: bed, cornerRadius: SuiteRadius.lane).cgPath
         paint(bedPath, fill: palette.color(lane.hovered ? palette.hoverBed : palette.bed), in: context)
         if lane.isSelected { paint(bedPath, fill: palette.color(palette.tint, alpha: palette.tintAlpha), in: context) }
+        // Blocks, tweens and keys stay on the bed, so one running past the lane's end stops on its curve (#1735).
+        context.saveGState()
+        defer { context.restoreGState() }
+        context.addPath(bedPath)
+        context.clip()
         for span in lane.spans {
             let block = TimelineLaneGeometry.block(span, mapping: lane.mapping, bed: bed)
             let shape = Path(roundedRect: block, cornerRadius: TimelineLaneGeometry.radius(of: block))
             paint(shape.cgPath, fill: palette.color(palette.clip), in: context)
         }
-        paint(tweens(of: lane, mid: bed.midY).cgPath, stroke: palette.color(palette.tween), width: SuiteSpacing.xxs, in: context)
+        let (tweens, held) = tweens(of: lane, mid: bed.midY)
+        paint(tweens.cgPath, stroke: palette.color(palette.tween), width: SuiteSpacing.xxs, in: context)
+        paint(held.cgPath, stroke: palette.color(palette.tween), width: SuiteSpacing.xxs,
+              dash: [SuiteSpacing.xs, SuiteSpacing.xs], in: context)
         let size = SuiteSize.timelineKeyframe
         for key in lane.keys {
             let picked = lane.pickedFrames.contains(key.frame)
@@ -78,16 +86,18 @@ enum TimelineLanePainter {
         }
     }
 
-    /// The tweens between consecutive keys: a line, a step after a hold key, a curve glyph on a wide eased gap.
-    private static func tweens(of lane: TimelineLaneDrawing, mid: CGFloat) -> Path {
+    /// The tweens between consecutive keys on the keys' centre line: a solid
+    /// line, with a curve glyph on a wide eased gap; and apart, the holds
+    /// after a hold key, which draw dashed (#1742).
+    private static func tweens(of lane: TimelineLaneDrawing, mid: CGFloat) -> (Path, held: Path) {
         let glyph = SuiteSpacing.xs
-        var tween = Path()
+        var (tween, held) = (Path(), Path())
         for (a, b) in zip(lane.keys, lane.keys.dropFirst()) {
             let (ax, bx) = (tickX(lane.mapping, a.frame), tickX(lane.mapping, b.frame))
             let segment = TimelineLook.segment(from: a, at: Double(ax), to: b, at: Double(bx))
             switch segment.kind {
             case .line: tween.addLines([CGPoint(x: ax, y: mid), CGPoint(x: bx, y: mid)])
-            case .step: tween.addLines([CGPoint(x: ax, y: mid + glyph), CGPoint(x: bx, y: mid + glyph), CGPoint(x: bx, y: mid)])
+            case .step: held.addLines([CGPoint(x: ax, y: mid), CGPoint(x: bx, y: mid)])
             }
             if let x = segment.curveGlyphX.map({ CGFloat($0) }) {
                 tween.move(to: CGPoint(x: x - glyph, y: mid + glyph))
@@ -95,13 +105,18 @@ enum TimelineLanePainter {
                                control1: CGPoint(x: x, y: mid + glyph), control2: CGPoint(x: x, y: mid - glyph))
             }
         }
-        return tween
+        return (tween, held)
     }
 
     private static func paint(_ path: CGPath, fill: CGColor? = nil, stroke: CGColor? = nil, width: CGFloat = 1,
-                              in context: CGContext) {
+                              dash: [CGFloat] = [], in context: CGContext) {
         if let fill { context.addPath(path); context.setFillColor(fill); context.fillPath() }
-        if let stroke { context.addPath(path); context.setStrokeColor(stroke); context.setLineWidth(width); context.strokePath() }
+        guard let stroke else { return }
+        context.addPath(path)
+        context.setStrokeColor(stroke)
+        context.setLineWidth(width)
+        context.setLineDash(phase: 0, lengths: dash)
+        context.strokePath()
     }
 }
 

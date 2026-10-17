@@ -1,8 +1,9 @@
 // TimelineLane.swift: one track's lane in TimelineStrip (timeline packet,
 // TL-6), drawn with TimelineLook's rules. A laneBed bed at radius `lane`
 // with 2 pt above and below, under the selectedTint when the track is
-// selected; clip blocks in clipFill from tick to tick, at least a key wide;
-// a 2 pt textTertiary tween between consecutive keys (a step after a hold
+// selected; clip blocks in clipFill from tick to tick, at least a key wide,
+// and everything after the bed clipped to it;
+// a 2 pt textTertiary tween between consecutive keys (dashed after a hold
 // key, a curve glyph on a wide eased gap); keys over everything in their
 // shape, fill and edge from their own pick, never the track's selection
 // (#1423). Hover (from TimelineLaneInput, through the environment) turns the
