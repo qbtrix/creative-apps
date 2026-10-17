@@ -72,6 +72,7 @@ restates them for the suite.
 | Card in the content layer | `SurfaceCard` (never in an inspector) |
 | Empty pane | `EmptyStateView` (`ContentUnavailableView`) |
 | Icon | SF Symbols by name (`systemImage:`) |
+| An app's mark (switcher, sidebar row, chip, tile, app icon in a window) | `AppMark(app:style:)`, never an SF Symbol (AfterGlow, below) |
 | Color, type, spacing, radius, size | `SuiteColor`, `SuiteFont`, `SuiteSpacing`, `SuiteRadius`, `SuiteSize` |
 
 Gate: the design lint in `scripts/ci` fails on raw colors, custom fonts,
@@ -682,6 +683,51 @@ For every screen, name what is content and what is control before you build.
 - Hit targets at least 28x28 points (20x20 minimum).
 - Buttons say what they do with a verb ("Export", "New Animation"). Title case
   for menu items and buttons. An ellipsis when more input follows ("Export…").
+
+## AfterGlow
+
+The suite's own rules (blueprint `docs/blueprints/suite.md` 6.4).
+
+- **One family, one mark per app.** Each mark has one source,
+  `Bundle/Marks/<App>.svg`, and three forms that `AppMark(app:style:)` draws
+  from it: `.icon` (the dark tile with the coloured glyph), `.glyph` (the
+  coloured glyph alone) and `.line` (a monoline in the foreground style).
+  `app: nil` is the AfterGlow suite mark.
+
+  | App | Mark | Glyph colour |
+  |---|---|---|
+  | AfterGlow | a sun past the horizon, two bands under it | gold to rose |
+  | Flare | one spark and its arc | gold to rose |
+  | Design | a pen nib under its bezier handle | sky to brand blue `#1877F2` |
+  | Photo | framed hills and a sun | mint to green |
+  | Library | a starred card on a stack | lemon to amber |
+  | Halo | a ringed world and one moon | lilac to violet |
+
+- **Where each form goes.** `.line` wherever an app is named in UI: the
+  switcher (at `SuiteSize.switcherIcon`), sidebar rows (`SidebarItem(app:)`),
+  chips (`ChipItem(app:)`) and New tiles (`symbolSized()` lays it out like an
+  SF Symbol in the current font). `.icon` where a window shows the app icon.
+  Tools, rows and empty states that aren't an app keep their own SF Symbols,
+  and never borrow an app's.
+- **Small sizes.** At 32 px and under the icon draws its small-size art: a
+  light rim so the dark tile holds its edge on a dark Dock, and a simpler,
+  lighter glyph, so each app is told apart by silhouette even in grayscale.
+- **Dock icons come from the same SVGs.** `scripts/render-marks` writes
+  `Bundle/Icons/` (every `.icns` size) and `Sources/SuiteUI/AppMarkArt.swift`;
+  never edit either by hand. `scripts/check-app-marks` fails on an app-symbol
+  table, an `AppSwitcherItem` with `systemImage:` or an old app symbol next to
+  an app's name.
+- **The home is a content window.** It follows the system appearance; the
+  editors stay dark (Editor shell). Cards and tiles are flat content, no
+  glass; the sidebar and toolbar are the system's.
+- **Cross-app commands live in the same place in every app**: Window >
+  Switch To, File > Open In, <App> > Settings…, Edit > Paste with the
+  suite's refusal text. Never a toolbar-only route.
+- **Moving work keeps its memory**: a linked item shows the `link` symbol;
+  "Update available" uses `stateWarning` with its triangle; a missing
+  source says "using the last copy" in `textSecondary`.
+- **A hand-off is never silent**: the target app comes forward; if it takes
+  longer than 100 ms the source shows progress.
 
 ## Empty states and messages
 

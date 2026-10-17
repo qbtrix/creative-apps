@@ -4,10 +4,11 @@
 // semibold caption in secondary text; hover takes the field fill and primary
 // text; on is the selected well with a 1 pt accent border and primary text;
 // disabled draws at 40%; state changes fade over 0.14 s (at once under
-// Reduce Motion). ChipRow lays toggle
-// chips in a row, as the timeline's toolbar does; each one reports On or Off.
-// Chips are real Buttons, so Tab reaches them and Space presses them. Owns
-// presentation state only: hover.
+// Reduce Motion). ChipRow lays toggle chips in a row, as the timeline's
+// toolbar does, each with an optional SF Symbol or an app's line mark
+// (AppMark); each one reports On or Off. Chips are real Buttons, so Tab
+// reaches them and Space presses them. Owns presentation state only: hover.
+import SuiteModel
 import SwiftUI
 
 /// One toggle chip in a ChipRow.
@@ -15,12 +16,15 @@ public struct ChipItem<ID: Hashable & Sendable>: Identifiable, Sendable {
     public let id: ID
     public let title: String
     public let systemImage: String?
+    /// The app whose line mark the chip shows (AppMark); it wins over `systemImage`.
+    public let app: SuiteApp?
     public let isOn: Bool
 
-    public init(id: ID, title: String, systemImage: String? = nil, isOn: Bool) {
+    public init(id: ID, title: String, systemImage: String? = nil, app: SuiteApp? = nil, isOn: Bool) {
         self.id = id
         self.title = title
         self.systemImage = systemImage
+        self.app = app
         self.isOn = isOn
     }
 
@@ -42,7 +46,10 @@ public struct ChipRow<ID: Hashable & Sendable>: View {
         HStack(spacing: SuiteSpacing.xs) {
             ForEach(chips) { chip in
                 Button { onToggle(chip.id) } label: {
-                    if let symbol = chip.systemImage {
+                    if let app = chip.app {
+                        Label { Text(chip.title) } icon: { AppMark(app: app, style: .line).symbolSized() }
+                            .imageScale(.small)
+                    } else if let symbol = chip.systemImage {
                         Label(chip.title, systemImage: symbol).imageScale(.small)
                     } else {
                         Text(chip.title)

@@ -115,9 +115,9 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
         region(of: source, from: "private var title: some View", to: "public static func doubleClickRenames"))
     #expect(
         squeezed(title).contains(
-            "Label(item.title,systemImage:item.systemImage).contentShape(Rectangle())"
+            "Label{Text(item.title)}icon:{SidebarRowIcon(item:item)}.contentShape(Rectangle())"
                 + ".simultaneousGesture(TapGesture(count:2).onEnded{beginRename(on:.title)})}"),
-        "the rename gesture must sit right on the plain title Label, with nothing after it")
+        "the rename gesture must sit right on the title Label (its icon a gesture-free leaf), with nothing after it")
     #expect(!title.lowercased().contains("toggle"), "the title must not draw the toggles inside its hit area (#308)")
     #expect(!title.contains("beginRename(on: .toggle)"))
     let names = callNames(in: title)
@@ -126,7 +126,7 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     ]
     let calls: Set = [
         "View", "nil", "else", "focused", "TextField", "Binding", "commitRename", "Label", "Rectangle", "TapGesture",
-        "beginRename",
+        "beginRename", "Text", "SidebarRowIcon",
     ]
     #expect(
         names.modifiers.subtracting(modifiers).isEmpty,
