@@ -47,6 +47,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - Planned wave 1 once unblocked: the adapter task of each slice whose waits are met; wave 2: that app's delete and panel tasks (independent of each other, both wait on the adapter). The last merged panel task carries `feature-done`.
 
 ## Open
+- 2026-10-17T10:44Z heartbeat: editor-kernel is at stage 3 wave 2, stacked on PR #1992 (EK-1, not merged: it edits Package.swift, so the supervisor merges it). EK-tree is still `planned` in its RECORD and dev 453198a has no kernel type. Still blocked.
 - 2026-10-17T06:38Z heartbeat: editor-kernel's lead (run act-1a1483c0771-g24c, `lead/editor-kernel`) started wave 1 on 2026-10-17T06:36Z: PR #1992 (EK-1, slice EK-a). EK-tree waits on EK-a, so it is at least two editor-kernel waves away; still blocked, nothing to start.
 - Blocked on #1933 editor-kernel: EK-tree (every slice) and EK-u (the panel tasks AL-d3, AL-p3, AL-h3, AL-f3).
 - AL-photo also waits on adopt-kernel-undo:AU-photo (this lead's own feature, same block); AL-halo on adopt-kernel-easing:AE-halo (#1937, p3, not started).
