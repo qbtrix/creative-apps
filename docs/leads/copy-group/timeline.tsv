@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-17T15:46Z	0	stage-start	#1496	fresh start, base dd7ec76
+2026-10-17T15:48Z	0	stage-end	#1496	C-1 and C-5 wait on design-seams
+2026-10-17T15:48Z	1	stage-end	#1496	packet read
+2026-10-17T15:48Z	2	stage-end	#1496	plan: W1 C-2
+2026-10-17T15:48Z	3	stage-start	#1496	wave 1
