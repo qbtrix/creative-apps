@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-17T16:12:12Z	pr	D0-5a #2168 and D0-5b #2163 open, contract ok after footer strip; gap #2171 filed (WxH parse to SuiteModel)
 2026-10-17T16:12:53Z	check	#2163 macOS build run 39048246275; #2168 awaiting lane build; wave-2 args ready (D0-5c, D0-5d, D0-6)
 2026-10-17T16:13:27Z	check	findings for my features 0; line:design has 8 CI journey findings without a Feature line (#2074-#2087, #1974); #2085 is J1 testEveryMenuOpens, which D0-6 extends: its builder reads it first
+2026-10-17T16:30:33Z	check	#2163 macOS build green (39048246275), awaits lane sweep; #2168 build 39048879204 running; wave 2 waits #2168 on dev; findings 0
