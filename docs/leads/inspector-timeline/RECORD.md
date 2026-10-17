@@ -4,7 +4,7 @@ Issue: #1515 · Packet: docs/blueprints/flare/features/inspector-timeline.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
 Stage: 3 build (wave 2)
 Base: 8c05d0021d20690ad338e9758c933adf23691e4f (origin/dev, wave 2)
-Next: wave 2 (IT-1..IT-4, workflow whh613drx) PRs through the lane; then wave 3 (IT-5..IT-8)
+Next: wave 2 PRs (#2128, #2130, #2113, #2129) through the lane; when they merge, wave 3 (IT-5..IT-8) on that dev head
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
@@ -14,10 +14,10 @@ No `## Slices` table: v2 packet, v2 loop applies.
 |---|---|---|---|---|---|
 | IT-0 | 1 | FlareInspectorRead, FlarePaint, FlareTimelineEdit (Model, stubs), FlareWorkspace.swift + Tests | rule 18 stubs: every IT-1..IT-3 signature, fake value or NotBuilt; stored state cleared in load | #2100 | merged |
 | IT-9a | 1 | FlareStatusRead + Tests, PlaybackDriver(+Tests), ViewerStatusBar pills in FlareWindow, +Playback | StatusPills, measuredFPS, J10 | #2101 | merged |
-| IT-1 | 2 | FlareInspectorRead + Tests | inspectorSummary for real | | building |
-| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | | building |
-| IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | | building |
-| IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | | building |
+| IT-1 | 2 | FlareInspectorRead + Tests | inspectorSummary for real | #2128 | open, lane |
+| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | #2130 | open, lane |
+| IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | #2113 | open, lane |
+| IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | #2129 | open, lane |
 | IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | | |
 | IT-6 | 3 | FlareInspectorScene, FlareSceneSnapshots, +SceneInspector | | | |
 | IT-7 | 3 | FlareTimelineEdit (App), FlareTimeline, FlareWindow+Timeline, +TimelineEdit | J11 | | |
@@ -38,6 +38,8 @@ None.
 - PR base is dev (CLAUDE.md: never target main), builder branches lead/<feature>-<id>.
 - Stopped at stage 0: `Depends on: draw-key-save`, and #1365 is open (draw-key-save.wave.json status `planned`).
 - Status is pushed to the designated branch claude/feature-lead-flare-line-yzaus7, not lead/inspector-timeline, per the session's branch rule.
+
+- Wave 2 contract check: IT-2 and IT-3 also update Tests/FlareModelTests/FlareStubsTests.swift (the IT-0 stub expectations they replace); accepted as their tests. IT-4 names its TRANSFORM section file FlareInspectorGeometry.swift instead of FlareInspectorTransform.swift because scripts/check-dup-logic flags app files named *Transform*; accepted, wave 3 tasks use the new name. IT-3's key selection lives in FlareTimelineEdit.swift as the thin selectedKeys set this record's rule-20 decision allows; adopt-kernel-selection (#1935) moves it.
 
 ## Open
 - #340 (TransportCapsule) open: IT-9b waits; becomes a gap if still open at wave 4.
