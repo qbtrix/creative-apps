@@ -2,9 +2,9 @@
 
 Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
 Run: act-1a14852c11d-65cg · Session: (cloud) · Started: 2026-10-17T05:59Z
-Stage: 3 wave 1
-Base: 0e3c08ea52648f6654e583a64ddf07ccb5aa328c
-Next: wait for the lane to merge #1987 and #1997 (build-only macOS run per code PR), then run the between-waves check and start wave 2 (DE-1, DE-8)
+Stage: 3 wave 2
+Base: 0d7a3dbd3e1ac4d87363e8318f47deedf90fbde1
+Next: DE-8 builder running on dev 0d7a3db; when #1997 (DE-2) merges, start DE-1; then wave 3 (DE-3, DE-5, DE-9)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,11 +18,11 @@ Next: wait for the lane to merge #1987 and #1997 (build-only macOS run per code 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| DE-0 | DE-a | 1 | UniqueFileNames.name in SuiteModel, its plan, C4 sentence, its test | Sources/SuiteModel/Values/UniqueFileNames.swift, Tests/SuiteModelTests/UniqueFileNamesTests.swift, Tests/mutations/SuiteModel.UniqueFileNames.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | UniqueFileNamesTests (3 mutations) | #1987 | open, Fast-Check pass on d2aa134 (dev merged past #1985) |
+| DE-0 | DE-a | 1 | UniqueFileNames.name in SuiteModel, its plan, C4 sentence, its test | Sources/SuiteModel/Values/UniqueFileNames.swift, Tests/SuiteModelTests/UniqueFileNamesTests.swift, Tests/mutations/SuiteModel.UniqueFileNames.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | UniqueFileNamesTests (3 mutations) | #1987 | merged 0d7a3db |
 | DE-2 | DE-a | 1 | DesignExportScope, DesignExportOptions, LiveExport (fake plan, stub svg), DesignSVG stub, workspace readouts, both slots LiveExport, NotBuilt tests updated, plans, C4 sentence, shape half of DesignExportPlanTests | Sources/DesignModel/DesignExport+Kernel.swift, Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignServices.swift, Sources/DesignModel/DesignWorkspace.swift (one stored field), Tests/DesignModelTests/{DesignLiveStubTests,DesignNotBuiltTests,DesignArrangeFakesTests,DesignExportPlanTests}.swift, Tests/mutations/DesignModel.{DesignServices,DesignExport+Kernel}.json, docs/c4/parts/creative-apps/design-model/design-model-sources.json | DesignExportPlanTests shape half (3 mutations + the repointed DesignServices entry) | #1997 | open, Fast-Check pass on d072516, Mutate 3/3 + 10/10 |
 | DE-2b | DE-a | later | `public typealias DesignExportRun = ExportRun<DesignExportOptions>` once SuiteKernel is linkable from DesignModel | Sources/DesignModel/DesignExport+Kernel.swift | DesignExportPlanTests shape | – | waits on editor-kernel EK-a and a Package.swift dependency (supervisor) |
 | DE-1 | DE-a | 2 | the remaining packet tests, disabled by name: DesignExportPlanTests rules half, DesignSVGTests, DesignExportBudgetTests, DesignExportWalkTests (MJ13), DesignSVGWalkTests (MJ14) | Tests/DesignModelTests/{DesignExportPlanTests,DesignSVGTests,DesignExportBudgetTests,DesignExportWalkTests,DesignSVGWalkTests}.swift | every suite compiles and skips | – | planned |
-| DE-8 | DE-w | 2 | DesignRasterizer.png over DesignArtwork, DesignRasterizerTests, RenderBudgetDesignRasterTests | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/{DesignRasterizerTests,RenderBudgetDesignRasterTests}.swift | DesignRasterizerTests.pixelSize (macOS) | – | planned |
+| DE-8 | DE-w | 2 | DesignRasterizer.png over DesignArtwork, DesignRasterizerTests, RenderBudgetDesignRasterTests | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/{DesignRasterizerTests,RenderBudgetDesignRasterTests}.swift | DesignRasterizerTests.pixelSize (macOS) | – | building |
 | DE-3 | DE-s | 3 | the plan: scopes, hidden dropped, UniqueFileNames against existing, pixel sizes, refusals; turns on the rules half and MJ13 | Sources/DesignModel/DesignExport+Kernel.swift, Tests/mutations/DesignModel.DesignExport+Kernel.json, Tests/DesignModelTests/{DesignExportPlanTests,DesignExportWalkTests}.swift | DesignExportPlanTests, MJ13 (7 mutations) | – | planned |
 | DE-5 | DE-s | 3 | DesignSVG.document per the pseudocode (QD-V8); turns on DesignSVGTests, svgExport budget, MJ14 | Sources/DesignModel/Live/DesignSVG.swift, Tests/mutations/DesignModel.DesignSVG.json, Tests/DesignModelTests/{DesignSVGTests,DesignExportBudgetTests,DesignSVGWalkTests}.swift | DesignSVGTests, MJ14 (7 mutations) | – | planned |
 | DE-9 | DE-w | 3 | DesignRasterizer.pdf, pdfOnePage test | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/DesignRasterizerTests.swift | pdfOnePage (macOS) | – | planned |
@@ -42,7 +42,7 @@ Next: wait for the lane to merge #1987 and #1997 (build-only macOS run per code 
 - Rule 13 vs the packet's wave 1: DE-1's suites can't compile against types no code declares yet, so wave 1 is DE-0 and DE-2 (disjoint files, the contract) and DE-1 (the rest of the disabled suites) follows in wave 2, still ahead of DE-3 and DE-5, the code it checks. DE-2 carries the shape half of DesignExportPlanTests and DE-0 its own test, so each code task merges with its check.
 - DE-2 drops the `DesignExportRun` typealias: SuiteKernel is not on dev (editor-kernel EK-a) and DesignModel can't depend on it without a Package.swift change, which is protected. DE-2b adds the one line later; the App's run (DE-6) waits on it anyway.
 - `exportDefaults` needs one stored field, and an extension can't add one: DE-2 adds `exportOptions` to DesignWorkspace.swift beside `services` (outside the snapshot, so it is never a history step). layers-panel and adopt-kernel-undo also list that file; one added line merges by lines.
-- DE-8 waits on DE-2 rather than all of DE-a: it needs only the export types, and DE-1 is tests alone. It runs in wave 2 beside DE-1.
+- DE-8 waits on neither DE-2 nor DE-1: its signatures use only `DesignExportItem`, which design-contracts put on dev, and its files are new. It started as soon as #1987 merged; DE-1 starts when #1997 merges.
 - editor-kernel EK-1 makes every Model depend on SuiteKernel in Package.swift, so DE-2b needs nothing from the supervisor: it waits on EK-a's Belt-Slice-Done line alone.
 
 ## Open

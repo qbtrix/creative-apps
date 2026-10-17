@@ -10,3 +10,6 @@ utc	stage	event	ref	note
 2026-10-17T06:28Z	3	heartbeat	wave 1	DE-0 #1987 open waiting on #1985; DE-2 builder running the gate
 2026-10-17T06:32Z	3	ci-run	#1987	dev merged past #1985, scripts/ci --changed CI: PASS on d2aa134, Fast-Check moved
 2026-10-17T06:33Z	3	pr-opened	#1997	task DE-2 export contract and stubs, Mutate 3/3 DesignExport+Kernel, 10/10 DesignServices
+2026-10-17T06:51Z	3	pr-merged	#1987	DE-0 merged into dev as 0d7a3db by the lane (macOS build green)
+2026-10-17T06:51Z	3	stage-start	wave 2	DE-8 builder started on 0d7a3db; DE-1 waits on #1997
+2026-10-17T06:51Z	3	heartbeat	wave 2	#1997 in a lane batch (Linux check running)
