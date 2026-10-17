@@ -5,8 +5,8 @@
 // and the window's body doesn't (#1792); its art and marks come from that copy while it lasts. Mouse-up sends the
 // last sample as `.stage(.dragChanged)` (the gesture's start, Shift and Option and the zoom), then `.stage(.endDrag)`,
 // so the window changes once; Escape drops the copy before the window's `toolKey` cancels. A tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
-// glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act. It only reads
-// `model`; every change goes through `perform`.
+// glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
+// Path with `model.finishPathHelp`. It only reads `model`; every change goes through `perform`.
 import AppKit
 import FlareCore
 import FlareModel
@@ -90,15 +90,23 @@ struct FlareStage: View {
         return .handled
     }
 
-    /// The palette: V A R E P, each with its reason when it can't act.
+    /// The palette: V A R E P, each with its reason when it can't act, then Finish Path. Return finishes a pen
+    /// path too, but a mouse-only user needs a control on screen (lead.md rule 8, 9).
     private var palette: [ToolbarAction] {
-        FlareTool.allCases.map { tool in
+        let tools = FlareTool.allCases.map { tool in
             let intent = FlareIntent.tools(.choose(tool))
             return ToolbarAction(
                 tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool,
                 unavailableHelp: model.toolHelp(tool), shortcut: tool.shortcut, identifier: intent.identifier
             ) { perform(intent) }
         }
+        let finish = FlareIntent.tools(.finishPath)
+        return tools + [
+            ToolbarAction(
+                "Finish Path", systemImage: "checkmark.circle", isSelected: false,
+                unavailableHelp: model.finishPathHelp, shortcut: nil, identifier: finish.identifier
+            ) { perform(finish) }
+        ]
     }
 }
 
