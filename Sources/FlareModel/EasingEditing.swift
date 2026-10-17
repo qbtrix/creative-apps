@@ -26,11 +26,39 @@ public struct EasingSegment: Hashable, Sendable, Identifiable {
     }
 
     public var id: Self { self }
+
+    /// The row's span, saying its numbers are frames: "frames 0 → 24".
+    public var frameSpan: String { "frames \(startFrame) → \(endFrame)" }
+    /// The row's whole title, its property then its span: "x frames 0 → 24".
+    public var title: String { "\(property) \(frameSpan)" }
 }
 
 /// The two control points of a cubic Bezier easing.
 public enum EasingHandle: Int, CaseIterable, Sendable {
     case first = 1, second = 2
+
+    /// The scrub row's label for one coordinate: "X1", "Y1", "X2", "Y2".
+    public func label(_ axis: EasingAxis) -> String {
+        "\(axis == .x ? "X" : "Y")\(rawValue)"
+    }
+
+    /// The scrub row's tooltip: which handle, which axis, and its range.
+    public func help(_ axis: EasingAxis) -> String {
+        let handle = self == .first ? "First" : "Second"
+        return switch axis {
+        case .x: "\(handle) handle, horizontal (time, 0 to 1)"
+        case .y: "\(handle) handle, vertical (progress, -1 to 2)"
+        }
+    }
+}
+
+/// One coordinate of a handle: x is time (0...1), y is progress, which may
+/// overshoot (-1...2).
+public enum EasingAxis: CaseIterable, Sendable {
+    case x, y
+
+    /// The range its scrub row covers.
+    public var range: ClosedRange<Double> { self == .x ? 0...1 : -1...2 }
 }
 
 /// The preset chips, in the order the editor shows them.
@@ -93,6 +121,10 @@ extension EasingEditing {
     public var currentEasingPreset: EasingPreset? {
         EasingPreset.allCases.first { $0.easing == currentEasing }
     }
+
+    /// Whether the KEYFRAMES header shows: only over rows, so a layer with no
+    /// keys shows the EASING header and its hint alone (#1861).
+    public var showsKeyframesHeader: Bool { !easingSegments.isEmpty }
 
     /// Where the editor draws the two handles; nil with no selection.
     public var currentEasingHandles: (first: Point, second: Point)? {
