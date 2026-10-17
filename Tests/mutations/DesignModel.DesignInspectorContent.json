@@ -33,5 +33,19 @@
     "find": "nodes.first(where: { isHiddenInTree($0.id) })",
     "replace": "nodes.first(where: { $0.isHidden })",
     "tests": "DesignInspectorSharedValueTests"
+  },
+  {
+    "label": "sharedTextStyle drops the text-kind filter, so a rectangle's default style makes Title + A read Mixed",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "selectedNodes.filter { $0.kind == .text }.map(\\.textStyle)",
+    "replace": "selectedNodes.map(\\.textStyle)",
+    "tests": "DesignInspectorSharedValueTests"
+  },
+  {
+    "label": "sharedTextStyle returns the first text layer's style without comparing the others",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "return styles.allSatisfy { $0 == style } ? style : nil",
+    "replace": "return style",
+    "tests": "DesignInspectorSharedValueTests"
   }
 ]
