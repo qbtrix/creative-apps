@@ -157,8 +157,9 @@ public enum SuiteSize {
     public static let rulerLabelSpacing: CGFloat = 64
     /// One square of the checkerboard behind transparent pixels.
     public static let checkerSquare: CGFloat = 8
-    /// The hex text field beside a color well.
-    public static let hexField: CGFloat = 76
+    /// The hex text field beside a color well: "#FFFFFF" with a little room,
+    /// so a row's label ("Background") still fits at the ideal inspector width.
+    public static let hexField: CGFloat = 56
     /// Studio controls: the letter spacing of a caps header, a filled scrub
     /// row, and the 2 pt tick dots and value marker of a bar slider.
     public static let capsTracking: CGFloat = 0.7
