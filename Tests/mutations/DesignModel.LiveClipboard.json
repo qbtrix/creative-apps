@@ -1,0 +1,44 @@
+[
+  {
+    "label": "a pasted id collides: the copies keep the copied ids",
+    "file": "Sources/DesignModel/Live/LiveClipboard.swift",
+    "find": "var copies = payload.nodes.map { duplicating.copySubtree($0, mint: &mint) }",
+    "replace": "var copies = payload.nodes; _ = duplicating",
+    "tests": "DesignPasteboardTests"
+  },
+  {
+    "label": "the destination rule is wrong: the selected frame loses to the source parent",
+    "file": "Sources/DesignModel/Live/LiveClipboard.swift",
+    "find": "[parentID, payload.parentID].lazy",
+    "replace": "[payload.parentID, parentID].lazy",
+    "tests": "DesignPasteboardTests"
+  },
+  {
+    "label": "the destination rule is wrong: always the top level",
+    "file": "Sources/DesignModel/Live/LiveClipboard.swift",
+    "find": "page.nodes.node(id)?.kind.holdsChildren == true",
+    "replace": "false",
+    "tests": "DesignPasteboardTests"
+  },
+  {
+    "label": "the copies always move by (10, 10)",
+    "file": "Sources/DesignModel/Live/LiveClipboard.swift",
+    "find": "if landsOnOne {",
+    "replace": "if landsOnOne || true {",
+    "tests": "DesignPasteboardTests"
+  },
+  {
+    "label": "bad bytes change anything: a version 2 payload pastes",
+    "file": "Sources/DesignModel/Live/LiveClipboard.swift",
+    "find": "payload.version == 1, !payload.nodes.isEmpty",
+    "replace": "!payload.nodes.isEmpty",
+    "tests": "DesignPasteboardTests"
+  },
+  {
+    "label": "bad bytes change anything: an empty payload pastes",
+    "file": "Sources/DesignModel/Live/LiveClipboard.swift",
+    "find": "payload.version == 1, !payload.nodes.isEmpty",
+    "replace": "payload.version == 1",
+    "tests": "DesignPasteboardTests"
+  }
+]

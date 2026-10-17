@@ -116,8 +116,9 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(live.marquee is LiveMarquee && live.aligning is LiveAligning)
         #expect(try live.duplicating.duplicate([a], offset: pt(10, 10), on: page, mint: &mint).name == "Duplicate")  // live since C-1
         #expect(try live.grouping.group([a, b], on: page, mint: &mint).name == "Group")  // live since copy-group C-2
-        #expect(throws: DesignRefusal.notBuilt("Copy and paste")) { try live.clipboard.encode([pair], on: page) }
-        #expect(throws: DesignRefusal.notBuilt("Copy and paste")) {
+        let livePaste = try live.clipboard.paste(live.clipboard.encode([pair], on: page), into: nil, on: page, mint: &mint)
+        #expect(livePaste.name == "Paste")  // live since copy-group C-3
+        #expect(throws: DesignRefusal.unreadable) {
             try live.clipboard.paste(Data("hello".utf8), into: nil, on: page, mint: &mint)
         }
         #expect(DesignServices.fake != live && fake.export is LiveExport && fake.export.exportHelp([a], on: page) == nil)
