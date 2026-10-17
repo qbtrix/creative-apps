@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-17T16:49:40Z	wave2 builds green
 2026-10-17T17:11Z	heartbeat	lane-check	builds green; waiting on batch merge
 2026-10-17T17:33Z	wave	start	wave 3 started
+2026-10-17T17:59Z	heartbeat	CH-a done; wave 3 PRs #2231 #2210 #2203; findings 0
