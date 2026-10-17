@@ -2,7 +2,7 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 5 Anatomy round 2 running on scoped halo 39062554279 (0c8e4a71, holds #2271), 2026-10-17T20:15Z. Full CI 39064216590 (8f0fa09) holds every fix
+Stage: 5 Fix round 2 (last) building: #2345 (stale note inside artboard), 2026-10-17T20:20Z
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
 Next: fixer PR for #2261 merges, then Anatomy round 2 on a scoped halo run holding it, then the done check on a green full dev run. H-J21 passes every functional step; it is red only on the audit (4 ids from #2261; the rest is #1789 and #2262 scroller on line:suiteui)
 
@@ -25,7 +25,8 @@ Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| – | – | – | – | – | – | – | – |
+| 1 | 39056662077 | red (#1789) | ids +4 (#2261) | 6 | #2261 | #2271 | no |
+| 2 | 39062554279 | red (#1789, #2262) | #2261 gone; rest #1789/#2262 | 6 | #2345 | building | no |
 
 ## Decisions
 - 2026-10-17T13:55Z Between-wave check: the open Halo `CI finding:` issues (#1574, #1696-#1705, #2077-#2081) are all a launch crash, SuiteKernel.framework missing from AfterGlow.app (scripts/bundle-apps, from #1992). Filed #2099 for the supervisor. They are not findings of this feature (no Feature: line, not in its files), so the 5-open pause does not apply.
@@ -53,3 +54,4 @@ Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0
 - 2026-10-17T17:50Z RO-10 #2211: class HaloRenderJourneyTests; the sheet has no identifier on its summary, progress row and outcome text, so the journey finds them by visible text (critic panel: consider identifiers); PNG progress row optional (48 half frames can finish first), movie progress row required; waits up to 15 s for the cancelled .mp4 to go.
 
 - Round 1 (2026-10-17T19:08Z, scoped 39056662077, e17b68f9): #2261 major, the Format/Size segments have no ids (audit Audit.swift:99). Filed on line:suiteui: #2262, the unnamed timeline scroller. Refuted: progress bar lag, temp destination, window title, failed-sheet Close only. Open question (not filed): "Frame 0 of 300" counts frames written. Perf RenderBudgetHaloTests over budget (report-only).
+- Round 2 (2026-10-17T20:20Z, scoped 39062554279, 0c8e4a71): #2261 fixed (no render-sheet violation). H-J21 functional steps all pass; red only on audit from #1789/#2262. New #2345 major: stale note drawn on artboard pixels (1.1:1 dark). Refuted: Frame 0 of 300 (packet text), Half pixel size shown in summary, progress min fill, no dead controls. Fixer spawned for #2345 (last round).
