@@ -61,3 +61,6 @@ utc	stage	event	ref	note
 2026-10-17T23:41Z	pr	#2468 r-b1 head 721e6802: inspector ScrollView .scrollIndicators(.never), unlabeled legacy scroller tripped the unnamed audit; fixes #2455 #2406 #2352 (footer stripped)
 2026-10-17T23:41Z	pr	#2464 r-b2 head 007b2fb7: DS-J4 targets design.layer.node-2; fixes #2075
 2026-10-17T23:41Z	wave	w9 done wj1dcag7a, nothing deferred
+2026-10-17T23:50Z	merge	#2462 merged (fixes #2411)
+2026-10-17T23:50Z	merge	#2464 merged (fixes #2075)
+2026-10-17T23:50Z	ci	full CI 39080371690 on dev a6150139 queued
