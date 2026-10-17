@@ -3,7 +3,11 @@
 // `-HaloSample empty` (Comp 1 with no layers, on live services; the text
 // rasterizer is CoreText's in both modes) it adds Layer > New > Text, types
 // Hello in the TEXT field and presses Return, types 96 into the size bar and
-// presses Return, then clears the field and presses Return, which is refused.
+// presses Return, then clears the field and presses Return, which is refused
+// with one caption, between the field and the size bar (#2175, #2181). Last
+// it adds a second text layer, types into its field without Return and
+// selects the first layer from the list (`halo.layer.row.<id>`), whose field
+// still reads Hello after Return (#2177).
 // The TEXT section is HaloTextInspector.swift: the field is
 // `halo.inspector.text.string` (its value the words), the size bar
 // `halo.inspector.text.size` (a slider whose value is its `sizeText`,
@@ -77,13 +81,52 @@ final class HaloTextJourneyTests: XCTestCase {
         XCTAssert(
             waitFor { caption.label == message || (caption.value as? String) == message },
             "the refusal reads \(caption.label), not \(message)")
+        // One caption: every element carrying the id lies between the field and Size.
+        let captions = halo.app.descendants(matching: .any).matching(identifier: "halo.refusal").allElementsBoundByIndex
+        let stray = captions.filter { $0.frame.minY < field.frame.maxY || $0.frame.maxY > size.frame.minY }
+        XCTAssert(stray.isEmpty, "a blank commit shows a second refusal caption at \(stray.map(\.frame))")
         XCTAssertGreaterThanOrEqual(caption.frame.minY, field.frame.maxY, "the refusal caption isn't under the field")
+        XCTAssertLessThanOrEqual(caption.frame.maxY, size.frame.minY, "the refusal caption isn't right under the field, above Size")
         expectField(reads: "Hello", halo)
         expectSize(reads: "96 px", 96, halo)
         expectSummary(halo)
         expectUndo("Undo Change Text Size", halo)
         scrollInspector(toShow: caption, halo)
         halo.shot("text-4-refused")
+
+        // 5. A second text layer: type into its field without Return, then
+        // select the first layer: the field reads Hello, and Return there
+        // leaves Hello, so no draft crosses layers.
+        choose(["Layer", "New", "Text"], halo)
+        expectField(reads: "Text", halo)
+        scrollInspector(toShow: field, halo)
+        field.click()
+        halo.press(character: "a", .command)
+        field.typeText("Stale")
+        let first = layerRow(at: 1, halo)
+        XCTAssert(first.waitForExistence(timeout: 5), "the layer list shows no second row")
+        first.click()
+        expectField(reads: "Hello", halo)
+        scrollInspector(toShow: field, halo)
+        field.click()
+        halo.press(.return)
+        expectField(reads: "Hello", halo)
+        halo.shot("text-5-other-layer")
+    }
+
+    /// The layer list's row `index`, top first (`halo.layer.row.<id>`).
+    @MainActor private func layerRow(at index: Int, _ halo: Journey) -> XCUIElement {
+        let prefix = "halo.layer.row."
+        var ids: [String] = []
+        _ = waitFor {
+            let rows = halo.app.descendants(matching: .any)
+                .matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix)).allElementsBoundByIndex
+                .map { ($0.identifier, $0.frame.minY) }.sorted { $0.1 < $1.1 }
+            var seen = Set<String>()
+            ids = rows.map(\.0).filter { seen.insert($0).inserted }
+            return ids.count > index
+        }
+        return halo.element(ids.indices.contains(index) ? ids[index] : prefix)
     }
 
     // MARK: - Helpers

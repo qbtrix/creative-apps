@@ -17,8 +17,9 @@
 // (XCUITest reads values empty otherwise, #262); its stopwatch is
 // `halo.inspector.key.<raw>`, labelled "Animate <title>" with the key state
 // as its value, and its diamond `halo.inspector.key.<raw>.diamond`. A
-// refusal naming a row or its stopwatch shows under that row;
-// any other inspector refusal shows under the group. LAYER has two
+// refusal naming a row or its stopwatch shows under that row; one naming a
+// TEXT control shows only in TEXT (HaloTextInspector.owns, #2175); any other
+// inspector refusal shows under the group. LAYER has two
 // InspectorPickerRows: Parent (`halo.inspector.parent`, None then
 // `model.parentChoices`) sends .setParent, and Blend (`halo.inspector.blend`,
 // `model.blendChoices`) sends .setBlendMode; each reads its current title as
@@ -44,7 +45,7 @@ struct HaloLayerInspector: View {
                 }
                 if let refusal = model.refusal, refusal.control.hasPrefix("halo.inspector"),
                     !HaloProperty.allCases.contains(where: { rowRefusal($0) != nil }),
-                    !HaloLayerGroup.owns(refusal)
+                    !HaloLayerGroup.owns(refusal), !HaloTextInspector.owns(refusal)
                 {
                     HaloRefusalCaption(refusal: refusal)
                 }
