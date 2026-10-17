@@ -6,9 +6,10 @@
 // last sample as `.stage(.dragChanged)` (the gesture's start, Shift and Option and the zoom), then `.stage(.endDrag)`,
 // so the window changes once; Escape drops the copy before the window's `toolKey` cancels. A tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
 // glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
-// Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage a ViewerStatusBar shows the
-// zoom percent, the scene size and, on the fakes, a "Preview data" warning pill. It only reads `model`; every change
-// goes through `perform`.
+// Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
+// ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
+// `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
+// while frames drop) and "Text not shown (n)". It only reads `model`; every change goes through `perform`.
 import AppKit
 import FlareCore
 import FlareModel
@@ -24,6 +25,8 @@ struct FlareStage: View {
     let help: @MainActor (FlareIntent) -> String?
     /// A key the stage doesn't take itself; the window passes `toolKey` (Escape, Return).
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
+    /// The rate playback measured, from FlareCanvas's PlaybackDriver; nil while paused.
+    var measuredFPS: Double? = nil
     /// The gesture under way's first point, in scene points; nil between drags.
     @State private var dragStart: CGPoint?
     /// The drag under way, drawn here until mouse-up; nil between drags and after Escape.
@@ -43,6 +46,7 @@ struct FlareStage: View {
                             .help(Self.previewHelp)
                             .accessibilityHint(Self.previewHelp)
                     }
+                    Self.statusPills(model.statusPills(measuredFPS: measuredFPS))
                 }
             }
             .accessibilityElement(children: .contain)
@@ -54,6 +58,25 @@ struct FlareStage: View {
     static let identifier = "flare.stagePane"
     /// What the "Preview data" pill means, as its tooltip and accessibility hint.
     static let previewHelp = "This window shows built-in sample data, not a file on disk."
+
+    /// The actual-rate pill's tooltip.
+    static let actualHelp = "The rate playback is showing now. Under the scene's rate, frames are being dropped."
+
+    /// The IT-9 pills after the size: aspect, rate, the rate shown while playing and the hidden-text warning.
+    @ViewBuilder static func statusPills(_ pills: StatusPills) -> some View {
+        Text(pills.aspect).accessibilityIdentifier("flare.status.aspect")
+        Text(pills.fps).accessibilityIdentifier("flare.status.fps")
+        if let actual = pills.actualFPS {
+            Text(actual)
+                .accessibilityIdentifier("flare.status.actualFPS")
+                .accessibilityLabel("Showing \(actual)")
+                .help(actualHelp)
+                .statusPill(pills.isDropping ? .warning : .plain)
+        }
+        if let warning = pills.textWarning {
+            Text(warning).accessibilityIdentifier("flare.status.text").statusPill(.warning)
+        }
+    }
 
     /// The scene's size for the status bar in whole points ("550 × 400 pt"); a non-finite side reads 0.
     static func sizeText(_ size: CGSize) -> String {

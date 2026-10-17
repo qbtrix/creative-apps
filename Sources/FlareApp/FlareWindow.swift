@@ -133,16 +133,21 @@ struct FlareCanvas: View {
     var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
+    /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
+    /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
+    @State private var driver: PlaybackDriver?
 
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey)
-                FlareTimeline(model: model, zoom: zoom, perform: perform, tick: tick)
+                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS)
+                FlareTimeline(model: model, perform: perform)
             }
             .overlay { FlareRecording(model: model) }
+            .onChange(of: model.isPlaying, initial: true) { _, playing in follow(playing: playing) }
+            .onDisappear { driver?.stop() }
         } else {
             EmptyStateView(
                 "No Animation Open", systemImage: "square.stack.3d.forward.dottedline",
@@ -151,5 +156,17 @@ struct FlareCanvas: View {
                     perform(.file(.new))
                 })
         }
+    }
+
+    /// Runs the display link while playing and stops it otherwise.
+    private func follow(playing: Bool) {
+        guard playing else {
+            driver?.stop()
+            return
+        }
+        let tick = tick
+        let running = driver ?? PlaybackDriver(onTick: { target, ticker in tick(target, &ticker) })
+        driver = running
+        running.start()
     }
 }

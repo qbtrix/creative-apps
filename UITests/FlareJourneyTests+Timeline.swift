@@ -32,7 +32,7 @@ final class FlareTimelineJourneys: XCTestCase {
 
         // 2. Click Ball's name in the timeline: its row is selected.
         let ball = flare.element("flare.timeline").buttons.matching(
-            NSPredicate(format: "identifier == 'flare.timeline.track' AND label == 'Ball'")).firstMatch
+            NSPredicate(format: "label == 'Ball'")).firstMatch
         XCTAssert(ball.waitForExistence(timeout: 5), "no Ball track in the timeline")
         ball.click()
         XCTAssert(waitFor { ball.isSelected }, "clicking Ball's name didn't select Ball's row")

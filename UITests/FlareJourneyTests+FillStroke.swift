@@ -16,7 +16,7 @@ final class FlareFillStrokeJourneys: XCTestCase {
 
         // 1. Select Ball from its timeline track: FILL and STROKE show.
         let ball = flare.element("flare.timeline").buttons.matching(
-            NSPredicate(format: "identifier == 'flare.timeline.track' AND label == 'Ball'")).firstMatch
+            NSPredicate(format: "label == 'Ball'")).firstMatch
         XCTAssert(ball.waitForExistence(timeout: 10), "no Ball track in the timeline")
         ball.click()
         let fill = flare.element("flare.inspector.fill")

@@ -1,12 +1,13 @@
 // FlareTransportSnapshots.swift: Flare's transport above the timeline
 // (draw-key-save DK-11). On `bounce` at frame 30: paused with Loop off (Play
 // shows play, Loop unselected), and playing with Loop on (Play shows pause and
-// reads selected, Loop selected). The playing shot never ticks: its `tick`
-// returns false, so the driver stops at once and the frame stays 30. Writes
+// reads selected, Loop selected). The transport owns no driver, so the frame
+// stays 30. Writes
 // flare-transport-paused.png and flare-transport-playing.png. The flat row
 // (#1858) shows Play on accentFill and the whole Loop toggle; two checks pin
-// the controls' kinds and that the row asks for room for every control.
-// The status pills (inspector-timeline IT-9) under the stage, from
+// the controls' kinds and that the row asks for room for every control, and
+// that the whole readout row fits the narrowest content column (#2101).
+// The status pills (inspector-timeline IT-9) in the stage's status bar, from
 // `statusPills(measuredFPS:)` on `bounce` playing: at a measured 60 the
 // actual-fps pill reads 24 fps plain, at 18 it reads 18 fps in the warning
 // color; on `showcase` the "Text not shown (1)" warning. Writes
@@ -60,11 +61,23 @@ import Testing
         model.setCurrentFrame(30)
         model.setLoops(true)
         model.play()
-        let row = FlareTransport(model: model, zoom: nil, perform: { _ in }, tick: { _, _ in false })
+        let row = FlareTransport(model: model, perform: { _ in })
         let taken = NSHostingController(rootView: row).sizeThatFits(in: CGSize(width: 2000, height: 2000))
         let least = 5 * SuiteSize.transportButton + SuiteSize.playButton
         #expect(taken.width >= least - 0.5, "the transport is \(taken.width) pt wide, under \(least)")
         #expect(taken.height >= SuiteSize.playButton - 0.5, "the transport is \(taken.height) pt tall")
+    }
+
+    /// #2101: the transport and both readouts, playing with Loop on at the last frame, fit inside
+    /// SuiteSize.contentMinimum's width, so the row never overflows the content column under the side columns.
+    @Test func timelineRowFitsTheNarrowestColumn() {
+        var model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "bounce"]))
+        model.setCurrentFrame(model.timelineFrames - 1)
+        model.setLoops(true)
+        model.play()
+        let row = FlareTimeline(model: model, perform: { _ in })
+        let taken = NSHostingController(rootView: row).sizeThatFits(in: CGSize(width: 0, height: 2000))
+        #expect(taken.width <= SuiteSize.contentMinimum.width, "the timeline needs \(taken.width) pt")
     }
 
     @Test func statusPlaying() throws {
@@ -93,13 +106,13 @@ import Testing
     }
 
     private func status(_ pills: StatusPills) -> some View {
-        FlareTransport.StatusBar(zoom: 1, pills: pills)
+        ViewerStatusBar(zoom: 1, size: "550 × 400 pt") { FlareStage.statusPills(pills) }
             .padding(SuiteSpacing.m)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func transport(_ model: FlareWorkspace) -> some View {
-        FlareTransport(model: model, zoom: nil, perform: { _ in }, tick: { _, _ in false })
+        FlareTransport(model: model, perform: { _ in })
             .padding(SuiteSpacing.m)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

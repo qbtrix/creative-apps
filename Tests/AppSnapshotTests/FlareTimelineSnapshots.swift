@@ -45,7 +45,7 @@ import Testing
     }
 
     private func timeline(_ model: FlareWorkspace) -> some View {
-        FlareTimeline(model: model, zoom: nil, perform: { _ in }, tick: { _, _ in false })
+        FlareTimeline(model: model, perform: { _ in })
             .frame(width: SuiteSize.windowLaunch.width)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
