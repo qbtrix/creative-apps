@@ -9,7 +9,8 @@
 // DesignInspectorPage. With several layers selected (D0-5c) it shows "<n> Layers",
 // Align with Distribute, then Frame and Fill: a row whose value every selected
 // layer shares edits it on all of them (`.setStyle`), and one whose values differ
-// reads "Mixed" as plain text (a mixed scrub field is needs-ui #2148). Every
+// reads "Mixed" as plain text (a mixed scrub field is needs-ui #2148), then the
+// Text section when any of them is a text layer. Every
 // control's help comes from the Model, and each carries its DesignControlID and
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
 // refuses what it must.
@@ -30,6 +31,7 @@ struct DesignInspector: View {
                     DesignNodeProperties(
                         node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps, perform: perform
                     ).id(node.id)
+                    if node.kind == .text { DesignInspectorText(model: model, perform: perform).id(node.id) }
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
                 }
@@ -142,7 +144,6 @@ private struct DesignNodeProperties: View {
                         id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                 }
             }
-            if node.kind == .text { DesignInspectorText() }
         }
     }
 }
@@ -189,6 +190,9 @@ private struct DesignSeveralProperties: View {
                         InspectorRow("Fill") { mixed(fillHelp) }
                     }
                 }
+            }
+            if model.selectedNodes.contains(where: { $0.kind == .text }) {
+                DesignInspectorText(model: model, perform: perform)
             }
         }
     }
