@@ -1,7 +1,10 @@
 // FlareWindow+File.swift: the router's file area (FlareWindow+Router.swift).
-// New makes an empty document. Open and Open Recent read the file's bytes off
-// the main actor, show the open's progress (`beginOpen`), decode it off the
-// main actor too and land it through `finishOpen`; a file that can't be read or
+// New presents the New Animation sheet (FlareNewSheet.swift); its Create
+// (`.create`) makes the document from the sheet's NewDocumentSpec and
+// dismisses it; a spec with a problem is refused (Create's help says why).
+// Open and Open Recent read the file's bytes off the main actor, show the
+// open's progress (`beginOpen`), decode it off the main actor too and land it
+// through `finishOpen`; a file that can't be read or
 // decoded keeps the open document and says why in `loadState`. Save writes
 // `saveData()`'s bytes atomically off the main actor to `-FlareSaveTo`'s folder
 // (as "<title>.flare"), else the file the document was opened from or last
@@ -19,7 +22,7 @@ extension FlareWindow {
     /// Acts on a file intent.
     func performFile(_ intent: FlareIntent.File) {
         switch intent {
-        case .new: model.newDocument()
+        case .new: presented = .newAnimation
         case .open: if let url = FlareFileDialogs.chooseFile() { open(url) }
         case .openRecent(let path): open(URL(fileURLWithPath: path))
         case .clearRecent: model.clearRecent()
@@ -27,7 +30,10 @@ extension FlareWindow {
         case .saveAs: Task { await save(asking: true) }
         case .close: Task { await close() }
         case .openSample(let name): openSample(name)
-        case .create: break
+        case .create:
+            guard let spec = NewDocumentSpec(intent) else { return }
+            model.newDocument(spec)
+            if spec.problem == nil { presented = nil }
         }
     }
 
@@ -38,8 +44,14 @@ extension FlareWindow {
         case .clearRecent: model.recent.isEmpty ? "No recent animations." : nil
         case .save, .saveAs: model.document == nil ? "Open or create an animation first." : nil
         case .openSample(let name): FlareFixtures.named(name) == nil ? "No sample called \(name)." : nil
-        case .create: "Not built yet (F17a)."
+        case .create: createHelp(intent)
         }
+    }
+
+    /// Why Create can't make this spec's document; nil when it can.
+    private func createHelp(_ intent: FlareIntent.File) -> String? {
+        guard let spec = NewDocumentSpec(intent) else { return "Pick a valid background color." }
+        return spec.problem
     }
 
     /// Opens the fixture called `name` under its menu title; an unknown name does nothing.

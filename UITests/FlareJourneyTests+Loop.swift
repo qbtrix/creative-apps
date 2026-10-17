@@ -2,7 +2,7 @@
 // docs/blueprints/flare/features/draw-key-save.md), the whole loop on live
 // services: no `-FlareFixture`, so the window runs on `FlareServices.built`,
 // with `-FlareSaveTo <tmp>` so Save writes without a panel. New from the
-// toolbar; the palette's Rectangle and drag a rectangle (Rectangle 1, its one
+// toolbar, then the New Animation sheet's Web 550 × 400 and Create; the palette's Rectangle and drag a rectangle (Rectangle 1, its one
 // key at 0); Auto-key on (the recording ring, `flare.recording`: SuiteWindow
 // drops Auto-key's selected state, #1621); the palette's Select; drag the
 // playhead to 24 on the Frame Ruler and drag the rectangle 200 scene points
@@ -31,10 +31,12 @@ final class FlareLoopJourneys: XCTestCase {
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let toolbar = flare.app.toolbars.firstMatch
 
-        // 1. New from the toolbar: an empty 550 × 400 stage.
+        // 1. New from the toolbar, the sheet's Web 550 × 400 preset and Create: an empty 550 × 400 stage.
         let new = toolbar.buttons["flare.file.new"]
         XCTAssert(new.waitForExistence(timeout: 10), "no New in the toolbar (flare.file.new)")
         new.click()
+        flare.click("Web 550 × 400", in: .sheet)
+        flare.click("Create", in: .sheet)
         let canvas = flare.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "New showed no stage (suite.canvas)")
         // A click with Select on the empty stage only gives it the keyboard.
