@@ -73,6 +73,26 @@ import Testing
         #expect(halo?.item.reason == SuiteError.appMissing(.halo).message)
     }
 
+    /// #1874: a tile with no presets gives the page's sentence in File > New, not a false "isn't available".
+    @Test func emptyPresetNewItemSaysNoPresets() {
+        let tile = NewTile(app: .design, title: "New Design", presets: [])
+        let new = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home, hasWindow: true,
+                                tiles: [tile]).new
+        #expect(new.first?.item.reason == "No presets for New Design.")
+        #expect(HomeMenu.newReason(tile) == "No presets for New Design.")
+        let missing = NewTile(app: .design, title: "New Design", presets: [], disabledReason: "Gone.")
+        #expect(HomeMenu.newReason(missing) == "Gone.")
+        #expect(SuiteCreating().tiles(missing: []).allSatisfy { HomeMenu.newReason($0) == nil })
+    }
+
+    /// #1868: the presets menu names its tile's kind, not a bare "Presets".
+    @Test func presetsTitleNamesTheTile() {
+        let tiles = SuiteCreating().tiles(missing: [])
+        #expect(tiles.first { $0.app == .flare }.map(HomeMenu.presetsTitle) == "Animation Presets")
+        #expect(HomeMenu.presetsTitle(NewTile(app: .library, title: "Import Photos…", presets: [])) == "Import Photos Presets")
+        #expect(tiles.allSatisfy { HomeMenu.presetsTitle($0) != "Presets" })
+    }
+
     @Test func openWaitsForRouting() {
         #expect(menu().open == HomeMenu.Item("Open…", reason: HomeMenu.openWaits))
         #expect(menu(window: false).open == HomeMenu.Item("Open…"))
