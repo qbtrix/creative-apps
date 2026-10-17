@@ -52,8 +52,10 @@ struct FlareIntentTitleTests {
         ("Export…", .export(.showSheet)),
     ]
 
-    /// Every case once, plus the second direction of `step`, which titles two menu items.
-    static let everyValue: [FlareIntent] = FlareIntent.examples + [.timeline(.step(-1))]
+    /// Every case once, plus the second direction of `step`, which titles two menu items, and the two
+    /// export formats the examples don't carry, which title two more chips.
+    static let everyValue: [FlareIntent] = FlareIntent.examples
+        + [.timeline(.step(-1)), .export(.setFormat(.lottie)), .export(.setFormat(.pngSequence))]
 
     @Test func everyMenuItemHasItsSectionThreeFourTitle() {
         #expect(Self.menuBar.count == 48)
@@ -95,8 +97,18 @@ struct FlareIntentTitleTests {
         #expect(Set(titles).count == titles.count)
     }
 
-    @Test func payloadsKeepTheTitleExceptStepDirectionToolAndLayerFlag() {
+    @Test func payloadsKeepTheTitleExceptStepDirectionToolLayerFlagAndExportFormat() {
         #expect(FlareIntent.timeline(.step(5)).title == "Next Frame")
+        #expect(FlareIntent.export(.setFrames(from: 0, to: 9)).title == FlareIntent.export(.setFrames(from: 3, to: 4)).title)
+        #expect(FlareIntent.export(.setStep(1)).title == FlareIntent.export(.setStep(2)).title)
+        #expect(FlareIntent.export(.setScale(1)).title == FlareIntent.export(.setScale(2)).title)
+        #expect(FlareIntent.export(.setTransparent(true)).title == FlareIntent.export(.setTransparent(false)).title)
+        // The format chips are three rows, so the payload names each (flare-export FX-1).
+        #expect(FlareIntent.export(.setFormat(.svgFrame)).title == "SVG frame")
+        #expect(FlareIntent.export(.setFormat(.lottie)).title == "Lottie")
+        #expect(FlareIntent.export(.setFormat(.pngSequence)).title == "PNG sequence")
+        let formats = ExportFormat.allCases.map { FlareIntent.export(.setFormat($0)).title }
+        #expect(Set(formats).count == ExportFormat.allCases.count)
         #expect(FlareIntent.timeline(.step(-5)).title == "Previous Frame")
         #expect(FlareIntent.timeline(.setLoops(false)).title == "Loop")
         #expect(FlareIntent.file(.openSample(name: "button")).title == "Open Sample")

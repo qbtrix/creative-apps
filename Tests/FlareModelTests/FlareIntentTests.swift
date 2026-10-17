@@ -13,16 +13,56 @@ struct FlareIntentTests {
     @Test func identifiersAreUniqueAndWellFormed() throws {
         let ids = FlareIntent.examples.map(\.identifier)
         #expect(Set(ids).count == ids.count)
-        let pattern = try Regex("^flare\\.[a-z]+\\.[a-zA-Z0-9]+$")
+        // A name is one word, or two for the export format chips ("format.lottie").
+        let pattern = try Regex("^flare\\.[a-z]+\\.[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+)?$")
         for id in ids {
             #expect(id.wholeMatch(of: pattern) != nil, "\(id)")
         }
     }
 
     @Test func examplesListEveryCase() {
-        // The contract slice's case count: 9 file, 11 edit, 3 stage, 2 tools, 13 view, 16 inspector,
-        // 18 timeline, 8 layers, 9 library, 1 interactions, 1 export, 1 assist.
-        #expect(FlareIntent.examples.count == 92)
+        // The contract slices' case count: 9 file, 11 edit, 3 stage, 2 tools, 13 view, 16 inspector,
+        // 18 timeline, 8 layers, 9 library, 1 interactions, 11 export (flare-export FX-1), 1 assist.
+        #expect(FlareIntent.examples.count == 102)
+    }
+
+    @Test func exportFormatChipsRegisterApart() {
+        // flare-export FX-1: the three format chips are three controls, "flare.export.format.<rawValue>".
+        let ids = ExportFormat.allCases.map { FlareIntent.export(.setFormat($0)).identifier }
+        #expect(Set(ids).count == ExportFormat.allCases.count)
+        for (format, id) in zip(ExportFormat.allCases, ids) {
+            #expect(id.hasSuffix(".format.\(format.rawValue)"), "\(id)")
+            #expect(id.hasPrefix("flare.export."), "\(id)")
+        }
+        #expect(FlareIntent.export(.setFormat(.lottie)).identifier == "flare.export.format.lottie")
+        #expect(FlareIntent.export(.setFormat(.svgFrame)).identifier == "flare.export.format.svgFrame")
+        #expect(FlareIntent.export(.setFormat(.pngSequence)).identifier == "flare.export.format.pngSequence")
+    }
+
+    static let exportCases: [FlareIntent.Export] = [
+        .showSheet, .setFormat(.svgFrame), .setFrames(from: 0, to: 47), .setStep(1), .setScale(2),
+        .setTransparent(true), .start, .cancel, .dismiss, .tryAgain, .reveal,
+    ]
+
+    @Test func everyExportCaseKeepsItsArea() {
+        #expect(Self.exportCases.count == 11)
+        for intent in Self.exportCases {
+            let whole = FlareIntent.export(intent)
+            #expect(whole.area == .export, "\(whole.identifier)")
+            #expect(whole.identifier.hasPrefix("flare.export."), "\(whole.identifier)")
+        }
+        #expect(FlareIntent.export(.start).identifier == "flare.export.start")
+        #expect(FlareIntent.export(.setFrames(from: 0, to: 9)).identifier == "flare.export.setFrames")
+        #expect(FlareIntent.export(.reveal).identifier == "flare.export.reveal")
+        #expect(FlareIntent.export(.tryAgain).identifier == "flare.export.tryAgain")
+    }
+
+    @Test func everyExportCaseHasATitle() {
+        let titles = Self.exportCases.map { FlareIntent.export($0).title }
+        #expect(!titles.contains(""))
+        #expect(Set(titles).count == titles.count)
+        #expect(FlareIntent.export(.showSheet).title == "Export…")
+        #expect(FlareIntent.export(.start).title == "Export")
     }
 
     @Test func aPayloadDoesNotChangeTheIdentifier() {

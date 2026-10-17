@@ -70,7 +70,12 @@ public enum FlareIntent: Sendable, Equatable {
 
     /// The interactions editor's own controls come later (tier 3).
     public enum Interactions: Sendable, Equatable { case toggleEditor }
-    public enum Export: Sendable, Equatable { case showSheet }
+    /// The Export sheet (flare-export FX-1): its opener, its option rows and its actions. `setFormat` is one
+    /// case whose three payloads are three chips, so its name carries the format.
+    public enum Export: Sendable, Equatable {
+        case showSheet, setFormat(ExportFormat), setFrames(from: Int, to: Int), setStep(Int), setScale(Double),
+             setTransparent(Bool), start, cancel, dismiss, tryAgain, reveal
+    }
     public enum Assist: Sendable, Equatable { case showPopover }
 
     /// The area this intent belongs to.
@@ -106,7 +111,7 @@ public enum FlareIntent: Sendable, Equatable {
         case .layers(let intent): intent.name
         case .library(let intent): intent.name
         case .interactions: "toggleEditor"
-        case .export: "showSheet"
+        case .export(let intent): intent.name
         case .assist: "showPopover"
         }
     }
@@ -147,7 +152,11 @@ public enum FlareIntent: Sendable, Equatable {
         .library(.convertToSymbol(name: "")), .library(.place(id: "")), .library(.edit(id: "")),
         .library(.exitSymbol), .library(.rename(id: "", name: "")), .library(.remove(id: "")),
         .library(.addSwatch), .library(.applySwatch(0)), .library(.removeSwatch(0)),
-        .interactions(.toggleEditor), .export(.showSheet), .assist(.showPopover),
+        .interactions(.toggleEditor),
+        .export(.showSheet), .export(.setFormat(.svgFrame)), .export(.setFrames(from: 0, to: 47)),
+        .export(.setStep(1)), .export(.setScale(1)), .export(.setTransparent(false)), .export(.start),
+        .export(.cancel), .export(.dismiss), .export(.tryAgain), .export(.reveal),
+        .assist(.showPopover),
     ]
 }
 
@@ -283,6 +292,25 @@ extension FlareIntent.Layers {
         case .addScene: "addScene"
         case .remove: "remove"
         case .duplicate: "duplicate"
+        }
+    }
+}
+
+extension FlareIntent.Export {
+    /// The case name, except the format chips: "format.<rawValue>", one identifier per chip.
+    var name: String {
+        switch self {
+        case .showSheet: "showSheet"
+        case .setFormat(let format): "format.\(format.rawValue)"
+        case .setFrames: "setFrames"
+        case .setStep: "setStep"
+        case .setScale: "setScale"
+        case .setTransparent: "setTransparent"
+        case .start: "start"
+        case .cancel: "cancel"
+        case .dismiss: "dismiss"
+        case .tryAgain: "tryAgain"
+        case .reveal: "reveal"
         }
     }
 }
