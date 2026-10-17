@@ -1,15 +1,15 @@
 # snapping lead record
 
-Issue: (feature issue not filed by this lead yet; gap and needs-ui issues not filed) · Packet: docs/blueprints/design/features/snapping.md
-Run: act-1a1465d47db-qxmg · Session: this session · Started: 2026-10-16T20:49Z
-Stage: 1 packet
-Base: 1d68b2288cfe9c31e6b7cea460f5eb1ada5ddd18 (origin/dev, 1d68b22)
-Next: plan wave 1 (SN-1, the contract) once a Swift toolchain is available; file the gap and needs-ui issues after the supervisor confirms
+Issue: #1552 · Gaps: SN-a #2152, SN-e #2154, SN-b #2155, SN-c #2156, SN-f #2157 · needs-ui: #2151 · Packet: docs/blueprints/design/features/snapping.md
+Run: act-1a14a8f0634-uwzw · Session: this session · Started: 2026-10-17T15:40Z (resumes act-1a1465d47db-qxmg)
+Stage: 2 plan (waiting on editor-kernel EK-a)
+Base: a575d0351f2df6c5a0dff97d70eb59e860cc61b9 (origin/dev, a575d03)
+Next: no snapping task starts until editor-kernel EK-a (#1933) merges; then SN-1 and SN-12 (the kernel bridge) as wave 1
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SN-a | guide types, modifier, candidates, engine shape and stubs | SN-1, SN-9 | MJ12 | design-contracts (built) | no | 0 | planned | – | – |
+| SN-a | guide types, modifier, candidates, engine shape and stubs | SN-1, SN-12, SN-9 | MJ12 | design-contracts (built); editor-kernel EK-a | no | 0 | planned | – | – |
 | SN-e | snap engine: edges/centres, gaps and spacing | SN-2, SN-3 | MJ10 | SN-a | no | 0 | planned | – | – |
 | SN-b | move, resize, draw snap before whole points; ⌘ off | SN-4, SN-5 | MJ11 | SN-a, SN-e, design-seams, canvas-basics CB-a, select-several SS-b | no | 0 | waiting | – | – |
 | SN-c | smart guides on canvas; View > Snap to Layers | SN-6, SN-7, SN-8 | testSnapAndSmartGuides | SN-a; design-window DW-d, DW-a; canvas-basics CB-c; files-history FH-b | yes | 0 | waiting | – | – |
@@ -38,10 +38,12 @@ Waves follow the packet's tasks and the `.wave.json` waits; they are not yet che
 | – | – | – | – | – | – |
 
 ## Decisions
-- Base: origin/dev (see design-seams RECORD).
+- Base: origin/dev (CLAUDE.md), confirmed by the supervisor on #1493.
+- Snap engine types live in Sources/SuiteKernel/Snap/ (packet amendment #1898); never in DesignModel (rule 20). SN-1 and SN-12 wait on EK-a (#1933, no lead yet): supervisor decision on #1552, 2026-10-17T06:06Z.
+- Filed gap issues per slice (#2152, #2154, #2155, #2156, #2157) and the needs-ui issue #2151.
+- Base: a575d0351f2df6c5a0dff97d70eb59e860cc61b9 (origin/dev, a575d03)
 - SN-a (SN-1, SN-9) is the only slice with no feature waits; the packet says SN-1 and SN-6 start once design-contracts closes, which it has.
 - SN-4 and SN-5 touch DesignCanvasEditing.swift, which design-seams D0-3c also owns. Keep them in separate waves.
 
 ## Open
-- File the one needs-ui issue (SuiteUI smart-guide marks with distance labels, labels needs-ui and line:suiteui) and one gap issue per slice (labels gap, line:design, p1). Not filed: waiting for supervisor OK, since these are GitHub writes.
-- No Swift toolchain on PATH, so scripts/ci --changed cannot run here.
+- editor-kernel EK-a (#1933) has no lead yet; every snapping slice waits on it.

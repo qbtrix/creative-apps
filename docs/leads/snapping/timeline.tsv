@@ -5,3 +5,6 @@ utc	stage	event	ref	note
 2026-10-16T21:20Z	1	heartbeat		still blocked: no Swift toolchain; supervisor answers pending (base, issue filing)
 2026-10-16T21:50Z	1	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
 2026-10-16T22:29Z	1	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
+2026-10-17T15:40Z	2	resume		run act-1a14a8f0634-uwzw; base origin/dev a575d03
+2026-10-17T15:44Z	2	issues filed		needs-ui #2151; gaps #2152 #2154 #2155 #2156 #2157
+2026-10-17T15:45Z	2	waiting	SN-1,SN-12	waits on editor-kernel EK-a (#1933)
