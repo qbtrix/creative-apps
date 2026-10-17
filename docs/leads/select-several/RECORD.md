@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: S-7 PR #2469 open (J5 skips nudge/delete on gap #2463); wave 11 fix-batch for #2463 running; SS-a line after #2469, #2461, #2463 merge and a full CI run contains them
+Next: #2461 (#2438) merged; S-7 #2469 in lane; #2463 fix (wave 11, fixer hit full disk) finishing by lead: gate running; SS-a line after #2469 + #2463 fix merge and a full CI contains them
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
