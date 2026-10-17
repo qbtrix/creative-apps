@@ -84,6 +84,8 @@ final class DesignJourneyTests: XCTestCase {
         let design = Journey("Design", self, arguments: ["-DesignFixture", "cards"])
         let desktop = design.element("design.layer.node-1")
         XCTAssert(desktop.waitForExistence(timeout: 30), "cards showed no Desktop row (design.layer.node-1)")
+        // A group's row is its disclosure's one checkbox; its identifier must be the row's, not its toggles' (#2410).
+        XCTAssert(desktop.label.hasPrefix("Desktop"), "design.layer.node-1 reads \(desktop.label), not Desktop")
         desktop.click()
         let edit = design.app.menuBars.firstMatch.menuBarItems["Edit"]
         edit.click()

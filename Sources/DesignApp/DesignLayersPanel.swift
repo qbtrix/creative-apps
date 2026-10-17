@@ -20,9 +20,10 @@
 // on a highlighted row), and a child of a hidden or locked group
 // shows the group's state in its toggles. Each row carries the identifier
 // `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
-// group's row, its disclosure's label, reads as one checkbox, so the identifier
-// is what names it. A page row is a container identified `design.page.row.<id>`
-// with its checkmark inside: a page name's words sit in its text's value, not
+// group's row, its disclosure's label, reads as one checkbox. That checkbox takes
+// its identifier from the label's elements (its toggles' ids, joined), so the
+// label combines into one element first and the identifier is the row's (#2410).
+// A page row is a container identified `design.page.row.<id>` with its checkmark inside: a page name's words sit in its text's value, not
 // its label, so journeys count pages by identifier (#1451). The section headers use SuiteColor.textSecondary; the
 // sidebar style's own header gray is under 4.5:1. While the list has focus, Edit >
 // Cut, Copy and Paste send `.cut`, `.copy` and `.paste` (designPasteboardCommands).
@@ -173,7 +174,7 @@ private struct DesignLayerTree: View {
                 ) {
                     DesignLayerTree(nodes: node.children, model: model, perform: perform)
                 } label: {
-                    DesignLayerRow(node: node, model: model, perform: perform).tag(node.id)
+                    DesignLayerRow(node: node, model: model, perform: perform, isDisclosureLabel: true).tag(node.id)
                 }
                 .tag(node.id)
             }
@@ -186,6 +187,8 @@ private struct DesignLayerRow: View {
     let node: DesignNode
     let model: DesignWorkspace
     let perform: DesignPerform
+    /// A group's row: its disclosure flattens the label into one checkbox, so the row combines.
+    var isDisclosureLabel = false
 
     var body: some View {
         let id = node.id
@@ -206,7 +209,7 @@ private struct DesignLayerRow: View {
         .truncationMode(.middle)
         .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.textSecondary : Color.primary)
         .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
-        .accessibilityElement(children: .contain)
+        .accessibilityElement(children: isDisclosureLabel ? .combine : .contain)
         .accessibilityIdentifier("design.layer.\(id)")
     }
 }
