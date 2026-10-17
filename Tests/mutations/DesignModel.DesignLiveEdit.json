@@ -1,0 +1,8 @@
+[
+  {"label": "the drag's end records no step", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "            model.endDrag()\n        case .style", "replace": "        case .style", "tests": "DesignLiveEditTests.swift"},
+  {"label": "a sample is never kept for the end", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        last = .drag(from: start, to: end, modifiers: modifiers)\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
+  {"label": "a sample before begin is replayed at the end", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        guard workspace != nil else { return }\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
+  {"label": "the scrub's step stays open", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "            defer { model.endEditRun() }\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
+  {"label": "the copy outlives the end", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        defer { (workspace, base, last) = (nil, nil, nil) }\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
+  {"label": "a scrub preview shows no change", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        try? shown.setStyle(change)\n", "replace": "", "tests": "DesignLiveEditTests.swift"}
+]
