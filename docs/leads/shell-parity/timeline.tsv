@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-17T13:46Z	done	heartbeat	d2c4fa21	feature done; branch recut onto main at 13:43 kept
 2026-10-17T14:04Z	shell-parity	check	dev@25b220e4	launch-infra CI findings classified, not ours
 2026-10-17T14:20Z	shell-parity	check	dev@8c05d002	blocked on DW-a/EK-tree/LL-9
+2026-10-17T14:36Z	shell-parity	check	dev@8c05d002	blocked on DW-a/EK-tree/LL-9
