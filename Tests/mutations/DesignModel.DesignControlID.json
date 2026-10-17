@@ -1,0 +1,7 @@
+[
+  {"label": "a tool id loses its area", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "public static func tool(_ tool: DesignTool) -> String { \"design.tool.\\(tool.rawValue)\" }", "replace": "public static func tool(_ tool: DesignTool) -> String { \"design.\\(tool.rawValue)\" }", "tests": "DesignControlIDTests"},
+  {"label": "the list drops the Align buttons", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "+ DesignFrameField.allCases.map(frameField) + DesignAlignEdge.allCases.map(align)", "replace": "+ DesignFrameField.allCases.map(frameField)", "tests": "DesignControlIDTests"},
+  {"label": "the canvas id repeats the selection's", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "public static let canvas = \"design.canvas.page\"", "replace": "public static let canvas = \"design.canvas.selection\"", "tests": "DesignControlIDTests"},
+  {"label": "the list drops the canvas", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "        canvas, canvasSelection,", "replace": "        canvasSelection,", "tests": "DesignControlIDTests"},
+  {"label": "the list drops the toolbar", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "] + DesignToolbarItem.allCases.map(\\.identifier) + DesignTool.allCases.map(tool)", "replace": "] + DesignTool.allCases.map(tool)", "tests": "DesignControlIDTests"}
+]
