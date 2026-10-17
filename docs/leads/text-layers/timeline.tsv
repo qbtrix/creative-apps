@@ -22,3 +22,5 @@ utc	stage	event	ref	note
 2026-10-17T14:14Z	3	pr-opened	#2109	TX-6 head 76c003c
 2026-10-17T14:18:46Z	3 wave 2	heartbeat	#2107	TX-5 lane macOS build run 39040027884 dispatched
 2026-10-17T14:18:46Z	3 wave 2	heartbeat	#2109	TX-6 lane macOS build run 39040054237 dispatched
+2026-10-17T14:40:18Z	3 wave 2	mac-build-green	#2107	run 39040027884 success; awaiting lane sweep
+2026-10-17T14:40:18Z	3 wave 2	mac-build-green	#2109	run 39040054237 success; awaiting lane sweep
