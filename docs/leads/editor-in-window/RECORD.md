@@ -56,3 +56,5 @@ Next: none. Belt-Contact-Sheet posted on #1079 (run 39032290190). Round 4 was re
 - Worker restart at ~12:10Z interrupted the builders: EW-8 had opened #1337; ew/EW-6 pushed; EW-5 committed locally. Finishers resume both from their worktrees.
 - Relaunched 2026-10-16 after a stall: wave 1 had merged (#1288, #1289, #1290, #1293, #1294) while RECORD still read wave 1.
 - dev macOS runs 38835566584 and earlier are red (other lines); runs 38841265840 and 38841439320 are in progress.
+
+- 2026-10-17T13:44Z post-finish: finding #2069 (testEditorWindow, no editor-window page) arrived after the finish; relabelled gap p2 and linked to #2057/#2058. #2070 was auto-closed by CI.
