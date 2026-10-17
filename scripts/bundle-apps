@@ -8,8 +8,9 @@
 #   .build/apps/AfterGlow.app/Contents/MacOS/AfterGlow           the launcher
 #   .build/apps/AfterGlow.app/Contents/Helpers/<X>.app            each app, its
 #       Info.plist from Bundle/Info/<X>.plist, executable Contents/MacOS/<X>
-#   .build/apps/AfterGlow.app/Contents/Frameworks/<F>.framework   SuiteUI,
-#       SuiteModel, SuiteShell, CreativeEngines (linked once, shared)
+#   .build/apps/AfterGlow.app/Contents/Frameworks/<F>.framework   every
+#       @rpath framework the apps link, and those frameworks link, read from
+#       the built binaries with otool -L (linked once, shared; no hand list)
 #   .build/apps/AfterGlow.app/Contents/Resources/Samples          Bundle/Samples/, if present
 #   <bundle>/Contents/Resources/<name>.icns                       from Bundle/Icons/<name>.png and
 #       <name>-<px>.png, the renders scripts/render-marks makes of Bundle/Marks/<name>.svg
@@ -22,12 +23,14 @@
 # a tarball because actions/upload-artifact drops file modes. To open after
 # download: tar xzf app-builds.tar.gz && open AfterGlow.app
 #
-# Steps: build (xcodegen, xcodebuild -scheme Release), assemble, verify each
-# helper's links (otool -L lists the four frameworks; otool -l has the helper
-# run path), sign inside out ad hoc (frameworks, helpers, outer), verify
-# (plutil -lint every Info.plist, codesign --verify --deep --strict), register
-# (lsregister -f), then tar. A failure exits 1 naming the step and the path;
-# a helper missing a framework fails with "<X> does not link <framework>".
+# Steps: build (xcodegen, xcodebuild -scheme Release), assemble, verify the
+# links (every @rpath framework the outer app or a helper links is in
+# Contents/Frameworks; otool -l has the helper run path), sign inside out ad
+# hoc (frameworks, helpers, outer), verify (plutil -lint every Info.plist,
+# codesign --verify --deep --strict), register (lsregister -f), then tar. A
+# failure exits 1 naming the step and the path; a linked framework missing
+# from the bundle fails with "<binary> links <F>.framework but the bundle
+# lacks it".
 # xcodegen comes from PATH, else the pinned release ci.yml installs is fetched
 # into .build/tools (sha256 checked), since CI runs this before that step.
 # Release builds only the active arch, as the SwiftPM build before it did, so
@@ -36,7 +39,6 @@ set -Eeuo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
 apps="Flare Design Photo Library Halo"
-frameworks="SuiteUI SuiteModel SuiteShell CreativeEngines"
 out=.build/apps
 bundle="$out/AfterGlow.app"
 derived=.build/xcode-release
@@ -47,6 +49,12 @@ step=build
 at=project.yml
 trap 'echo "bundle-apps: $step failed at $at" >&2' ERR
 die() { echo "bundle-apps: $step: $*" >&2; trap - ERR; exit 1; }
+
+# The @rpath frameworks the given binaries link, one name per line.
+rpath_frameworks() {
+  otool -L "$@" | sed -n 's|^[[:space:]]*@rpath/\([^/]*\)\.framework/.*|\1|p' | sort -u
+}
+
 
 xcodegen_bin() {
   if command -v xcodegen >/dev/null; then echo xcodegen; return; fi
@@ -117,9 +125,22 @@ at="$products/AfterGlow.app"
 ditto "$at" "$bundle"
 dress "$bundle" AfterGlow AfterGlow
 mkdir -p "$bundle/Contents/Helpers" "$bundle/Contents/Frameworks"
+# Every framework the apps link, and the frameworks those link, from the
+# built binaries: a hand list went stale when SuiteKernel became dynamic.
+frameworks="" todo="$products/AfterGlow.app/Contents/MacOS/AfterGlow"
+for x in $apps; do todo="$todo $products/$x.app/Contents/MacOS/$x"; done
+while [[ -n $todo ]]; do
+  next=""
+  for f in $(rpath_frameworks $todo); do
+    case " $frameworks " in *" $f "*) continue ;; esac
+    at="$products/$f.framework"
+    [[ -d "$at" ]] || die "missing $at"
+    frameworks="$frameworks $f" next="$next $at/$f"
+  done
+  todo=$next
+done
 for f in $frameworks; do
   at="$products/$f.framework"
-  [[ -d "$at" ]] || die "missing $at"
   ditto "$at" "$bundle/Contents/Frameworks/$f.framework"
 done
 for x in $apps; do
@@ -133,16 +154,20 @@ if [[ -d Bundle/Samples ]]; then
   ditto Bundle/Samples "$bundle/Contents/Resources/Samples"
 fi
 
-# 3. verify the links: each helper loads the four frameworks from the bundle.
+# 3. verify the links: every @rpath framework the outer app or a helper links
+# is in the bundle (else dyld kills it at launch), and each helper has the
+# run path that finds them.
 step=verify
 for x in $apps; do
   at="$bundle/Contents/Helpers/$x.app/Contents/MacOS/$x"
-  links=$(otool -L "$at")
-  for f in $frameworks; do
-    grep -q "/$f.framework/" <<<"$links" || die "$x does not link $f ($at)"
-  done
   otool -l "$at" | grep -q '@executable_path/../../../../Frameworks' \
     || die "$x has no run path @executable_path/../../../../Frameworks ($at)"
+done
+for at in "$bundle/Contents/MacOS/AfterGlow" $(for x in $apps; do echo "$bundle/Contents/Helpers/$x.app/Contents/MacOS/$x"; done); do
+  for f in $(rpath_frameworks "$at"); do
+    [[ -d "$bundle/Contents/Frameworks/$f.framework" ]] \
+      || die "$(basename "$at") links $f.framework but the bundle lacks it ($at)"
+  done
 done
 
 # 4. sign inside out, ad hoc until a Developer ID exists.

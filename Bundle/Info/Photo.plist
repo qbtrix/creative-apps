@@ -2,11 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>CFBundleExecutable</key><string>Photo</string>
   <key>CFBundleIconFile</key><string>Photo</string>
   <key>CFBundleIdentifier</key><string>org.creativesuite.photo</string>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
   <key>CFBundleName</key><string>Photo</string>
   <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>0.1</string>
+  <key>CFBundleVersion</key><string>1</string>
   <key>LSMinimumSystemVersion</key><string>26.0</string>
   <key>NSPrincipalClass</key><string>NSApplication</string>
   <key>CFBundleDocumentTypes</key>
@@ -48,7 +52,7 @@
       <key>UTTypeIdentifier</key><string>org.creativesuite.photo.openraster</string>
       <key>UTTypeDescription</key><string>Photo Document</string>
       <key>UTTypeConformsTo</key><array><string>public.image</string><string>public.zip-archive</string></array>
-      <key>UTTypeTagSpecification</key><dict><key>public.filename-extension</key><array><string>ora</string></array></dict>
+      <key>UTTypeTagSpecification</key><dict><key>public.filename-extension</key><array><string>ora</string></array><key>public.mime-type</key><array><string>image/openraster</string></array></dict>
     </dict>
   </array>
   <key>UTImportedTypeDeclarations</key>

@@ -45,18 +45,16 @@ private func ballAt12() -> FlareWorkspace {
     }
 }
 
-@Test func timelineSettersChangeNothingAndSetTimelineError() {
-    let key = KeyRef(layerID: "ball", property: nil, frame: 12)
+@Test func keyEditsWithNoKeySelectedChangeNothingAndSetTimelineError() {
     let setters: [(inout FlareWorkspace) -> Void] = [
-        { $0.selectKey(key, extending: false) }, { $0.moveSelectedKeys(by: 2, dragStart: 12) },
-        { $0.removeSelectedKeys() }, { $0.insertFrames(2) }, { $0.removeFrames(1) }, { $0.setLabel("hit") },
+        { $0.moveSelectedKeys(by: 2, dragStart: 12) }, { $0.removeSelectedKeys() },
     ]
     for set in setters {
         var w = ballAt12()
         let before = w.document
         set(&w)
         #expect(w.document == before && !w.canUndo && w.selectedKeys.isEmpty)
-        #expect(w.timelineError == FlareWorkspace.timelineNotBuilt)
+        #expect(w.timelineError == FlareWorkspace.selectKeyFirst)
         #expect(w.paintError == nil)
     }
 }
@@ -77,7 +75,7 @@ private func ballAt12() -> FlareWorkspace {
 @Test func loadClearsPaintErrorSelectedKeysAndTimelineError() {
     var w = ballAt12()
     w.setFill(hex: "FF3B3")
-    w.insertFrames(1)
+    w.removeSelectedKeys()
     w.selectedKeys = [KeyRef(layerID: "ball", property: nil, frame: 12)]
     #expect(w.paintError != nil && w.timelineError != nil && !w.selectedKeys.isEmpty)
     w.load(FlareFixtures.bounce)
