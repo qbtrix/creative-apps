@@ -1,10 +1,10 @@
 # photo-shell-parity lead record
 
 Issue: #1502 · Packet: docs/blueprints/photo/features/shell-parity.md
-Run: act-1a145e74c6c-9utm · Session: claude/photo-shell-parity-p2mo9n · Started: 2026-10-16T18:20Z
-Stage: 4 polling (lead stopped at its 8 h wall clock, 2026-10-17T02:05Z; resume from Next)
-Base: 653b674d (round 1's run)
-Next: (hand-off for a relaunched lead) 1. Poll scoped photo runs (`ci.yml` runs titled `scoped: photo` on dev) until 'Scoped build and tests' passes: it needs SuiteUI #1295 (CanvasViewport checkerboard tile built once; fixes PhotoWindowStrokeTests, finding #1674) (adjustTabEndIsReachable from #1733 passes since run 38990423996; only #1674 gates). 2. When a run reaches the journeys: download its ui-screens and snapshots, read PhotoJourneyTests* and PhotoShellJourneyTests (shell geometry steps are expected red until SuiteUI #1456), and run the critic panel (docs/factory/workflows/critic-panel.js; lenses: clarity, journey, design, layout/geometry, controls, audit) with `issue`=#1502 so findings are filed with `finding` + `line:photo`. This is round 2 of 2 (round 1 = #1674). 3. Fix the findings in one wave, then PS-7: wave.json status built + feature issue, plus the last stale words (+Documents/+Edit/+Recovery/+PerfDocuments messages, PhotoInspectorContent, PhotoIntent comments, the photo-model C4 part), label feature-done. 4. After the full dev run that PS-7 triggers: contact sheet on #1502 (Belt-Contact-Sheet: line). Push every record to lead/photo-shell-parity and mirror it to lead/shell-parity under docs/leads/photo-shell-parity/ (Belt watches lead/shell-parity).
+Run: act-1a148875943-9arx (relaunch; first run act-1a145e74c6c-9utm) · Session: claude/shell-parity-adjustment-layers-g6jfld (first claude/photo-shell-parity-p2mo9n) · Started: 2026-10-16T18:20Z
+Stage: 4 round 2 (fix wave F-1910 and PS-7 building)
+Base: 0fb4cca61406da24980a9444d86c16b705ca94da (origin/dev at the relaunch, 2026-10-17T06:40Z)
+Next: wait for the lane to merge F-1910 (lead/photo-shell-parity-f1910: journeys find the window by its name beside the subtitle) and PS-7 (lead/photo-shell-parity-ps7: wave.json built + feature-done); then the full dev run PS-7 triggers is round 2's review run and the contact sheet run: read its Photo journeys and audit-photo-*.json, run the critic panel on its ui-screens (same panel as round 1: clarity, journey, design, layout/geometry, controls, audit; issue=#1502), relabel any finding still open after that review to gap (round cap), and post Belt-Contact-Sheet on #1502 with that run (parity-* shots beside shell-open/shell-open-dark; SuiteUI #1295, #1456 and the switcher-centring gap listed).
 
 Loop: v2 (no `## Slices` table in the packet or its wave.json). Started after #1302, so the findings queue (rule 10) and 2 fix rounds (rule 11) apply.
 
@@ -19,7 +19,8 @@ Loop: v2 (no `## Slices` table in the packet or its wave.json). Started after #1
 | PS-5 | 3 | Shell journey steps 1-6 with geometry | UITests/PhotoJourneyTests+Shell.swift | PhotoJourneyTests+Shell on the dev run | #1612 | merged |
 | PS-6 | 4 | feature-done: wave.json status built + feature issue | PS-4's 3 dropped leftovers (stale header comments in Sources/PhotoApp, PhotoStroke's "Layers tab" message + its 2 tests, the photo-app C4 part description) | scripts/ci; grep | #1682 | merged |
 | PS-6b | 4 | the rest of the stale shell words (9 PhotoApp, 3 PhotoModel, 6 UITests files incl. failure messages) | listed in #1682's body | scripts/ci | #1706 | merged |
-| PS-7 | 5 | feature-done: wave.json status built + feature issue; plus #1706's last stale words (+Documents, +Edit, +Recovery, +PerfDocuments messages; PhotoInspectorContent, PhotoIntent comments; photo-model C4 part) | docs/blueprints/photo/features/shell-parity.wave.json + those 7 files | scripts/ci renders waves | – | after the rounds |
+| F-1910 | 5 (round 2 fix) | Photo journeys find the opened file's window by its name within the title (the save-state subtitle changed the accessibility title: #1910 and #1902-#1930); testFixtureLaunch measures suite.viewport; +Documents/+Edit/+Recovery/+PerfDocuments stale words | UITests/PhotoJourneyTests+Fixtures.swift (window(named:)), PhotoJourneyTests.swift, +Shell, +Recovery, +Crop, +AdjustmentLayers, +PerfDocuments, +LayerOps, +Edit, +Documents | the Photo journeys on the next dev run | – | building |
+| PS-7 | 5 | feature-done: wave.json status built + feature issue; PhotoInspectorContent, PhotoIntent comments; photo-model C4 part; test-only comments | docs/blueprints/photo/features/shell-parity.wave.json + those files | scripts/ci renders waves | – | building |
 
 Wave 1: PS-1 and PS-2 independent (disjoint files). Wave 2: PS-3 waits on PS-1 (uses PhotoToolbarItem) and PS-2 (uses PhotoLayerList/PhotoLayerSettings, same PhotoJourneyTests.swift). Wave 3: PS-4 and PS-5 independent of each other; both wait on PS-3 (PS-4 deletes what PS-3 stops using; PS-5 drives the new shell).
 
@@ -28,8 +29,13 @@ Wave 1: PS-1 and PS-2 independent (disjoint files). Wave 2: PS-3 waits on PS-1 (
 |---|---|---|---|---|---|---|---|
 | 1 | scoped photo 38969445494 (653b674d; contains PS-1..PS-5) | red: snapshot step (journeys not reached) | not read (journeys not reached) | CI | #1674 PhotoWindowStrokeTests bigDisplays 1 (ours, new since #1583); #1603 curvesLayerTarget (not ours, adjustment-layers); RenderBudgetPhotoTests timing (perf list, report-only) | no Photo fix: cause is SuiteUI CanvasViewport's checkerboard (computed static checkerTile rebuilt per body; one body run, likely from the canvas taking focus on the first drag now that the sidebar list is first key view) -> SuiteUI #1295 (needs-ui) | no |
 | 1b | scoped photo 38971693968 (4347bc74) | red: snapshot step; only gating failure is PhotoWindowStrokeTests (#1674 -> SuiteUI #1295); #1603 passes | not read | CI | – | waits on #1295 | no |
+| 2 | scoped photo 38993910840 (124b118; first run past the snapshot step, after #1716) | journeys ran: 27 Photo journeys red, 25 at the window wait (#1910 + #1902-#1930: the subtitle changes the window's AX title), testFixtureLaunch's viewport measure (#1914), testShell1Empty's switcher centring (#1925, SuiteUI) | photo identifier 14 (baseline 22), no other key | CI (journeys) | #1910 and siblings | F-1910 (this wave) | no |
 
 ## Decisions
+- Relaunch 2026-10-17T06:06Z (supervisor): #1716 fixed the stroke test; #1910 is this feature's and goes in round 2; SuiteUI #1295 and #1456 are not waited on, they go in the contact sheet. The done check reads the Linux job.
+- #1910 root cause: Design's subtitle-less SuiteWindow still matches `windows["journey.design"]` on dev (run 38991865764) and testShell1Empty's `window.title == "Photo"` passes with an empty subtitle, so a non-empty subtitle is what changes the window's accessibility title. The packet wants the subtitle (step 2), so the journeys match the name within the title (UITests only, no app change).
+- PS-7 runs in the same wave as F-1910 (disjoint files: F-1910 takes the four UITests files #1706 left, PS-7 the Sources/Tests/C4 words and wave.json), so the full run PS-7's feature-done label triggers is both round 2's review run and the contact sheet run.
+- The switcher-centring failure (testShell1Empty, J6 expectSwitcher: midX 635 in a 1024 window) is SuiteUI's principal item placement, Design's #1617/#1618 gaps show the same; not fixed in Photo, becomes a gap after round 2.
 - Status branch is lead/photo-shell-parity (the packet's Lead branch): lead/shell-parity holds Design's shell-parity lead (#1325, done 22:33). Belt watches lead/shell-parity for this run, so from 23:25 every RECORD push also goes there, under docs/leads/photo-shell-parity/ (Design's docs/leads/shell-parity/ is left as it is).
 - PRs target dev (CLAUDE.md; main is behind dev and the lane retargets main to dev). Brief base main = 2e0f7df verified; work starts from origin/dev 132d910.
 - PR body uses `Feature: shell-parity` (Belt brief) plus "Part of the Photo shell-parity feature"; findings are told apart from Design's by `line:photo`.
@@ -54,6 +60,7 @@ Wave 1: PS-1 and PS-2 independent (disjoint files). Wave 2: PS-3 waits on PS-1 (
 - Wave 1 has 2 tasks: one worktree subagent each, started together.
 
 ## Open
+- Round 2 wave in flight: F-1910 and PS-7 (two worktree builders, started 2026-10-17T07:05Z).
 - Scoped photo run 38982540952 (96bd5d9e) adds a second gating failure, not this feature's: PhotoProInspectorSnapshots.adjustTabEndIsReachable, a test #1733 (photo-adjustment-layers, #1501) added at 23:2x that fails on its first run (`changed 0`: the panel scrolled to its end draws the same as its top). It renders our tabless PhotoPanel; if its owner finds the cause is the inspector's scroll structure from PS-3/PS-4b, it comes back here as a finding.
 - #1674 (finding) waits on SuiteUI #1295 (the checkerboard tile built once); Photo can't fix it without a look-alike checkerboard.
 - SuiteUI #1456 (shell geometry) open; PS-5's geometry steps may stay red until it lands.
