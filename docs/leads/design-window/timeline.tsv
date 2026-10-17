@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-17T21:07:05Z	check	full runs 39066112359 and 39068392590 cancelled; 39068664974 (abb4e96a, has DW-a and DW-b) pending; dev-red #2303 still open
 2026-10-17T21:08:23Z	pr	wave 5: f1974 #2370 head c3d6cf0c; D0-7a #2374 head ae7f86f0; contract checks ok
 2026-10-17T21:21:12Z	fix	round 1: #2397 (8262cb9a) fixes #2354; #2372 (823c2858) fixes #2355 #2357 #2358 #2361 #2364; deferred #2353 #2356 #2359 #2360 #2362 #2363 #2365; follow-up: DesignEditMenuSnapshots header still says Delete Layer
+2026-10-17T21:29:59Z	check	Belt-Slice-Done + Mac-Finish-Wanted posted for DW-a and DW-b on #1494 (full CI 39069913922, c55fad78, Linux green; main promoted). #2370 merged (fixes #1974). DW-b critic panel wz3d3sx7m launched

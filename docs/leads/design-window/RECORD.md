@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: lane on #2370 #2374 #2397 #2372; round 2: #2353 #2363 after #2374, #2362 #2365 after #2373; #2356 #2359 #2360 wait on SuiteUI #2366-#2368; full CI 39068664974 -> DW-a + DW-b slice lines
+Next: DW-b critic panel wz3d3sx7m (scoped 39068267491); lane on #2372 #2374 #2397; round 2: #2353 #2363 after #2374, #2362 #2365 after #2373; then D0-7b
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
