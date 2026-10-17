@@ -33,11 +33,14 @@ struct FlareWindow: View {
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
     static var bodyRuns = 0
+    /// The model the last body ran on, for the hosted-window tests to read back.
+    static var shownModel: FlareWorkspace?
     #endif
 
     var body: some View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
+        let _ = Self.shownModel = model
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title,

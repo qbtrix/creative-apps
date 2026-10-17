@@ -1,8 +1,10 @@
 // FlareStage.swift: the stage, the top of Flare's content (packet draw-key-save, DK-8). The scene's draw list
 // (`model.stageList`) is drawn in one Canvas under `.drawingGroup()` on CanvasViewport, so the committed art redraws
-// only when the list changes; FlareStageOverlay draws the marks (draft, marquee, selection outline) over it. A drag
-// sends `.stage(.dragChanged)` with the gesture's start, Shift and Option and the zoom, then `.stage(.endDrag)`. A
-// tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
+// only when the list changes; FlareStageOverlay draws the marks (draft, marquee, selection outline) over it. A drag's
+// samples run on a FlareLiveDrag, a copy of the model in this view's own state, so only the stage redraws per sample
+// and the window's body doesn't (#1792); its art and marks come from that copy while it lasts. Mouse-up sends the
+// last sample as `.stage(.dragChanged)` (the gesture's start, Shift and Option and the zoom), then `.stage(.endDrag)`,
+// so the window changes once; Escape drops the copy before the window's `toolKey` cancels. A tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
 // glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act. It only reads
 // `model`; every change goes through `perform`.
 import AppKit
@@ -22,6 +24,8 @@ struct FlareStage: View {
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     /// The gesture under way's first point, in scene points; nil between drags.
     @State private var dragStart: CGPoint?
+    /// The drag under way, drawn here until mouse-up; nil between drags and after Escape.
+    @State private var live: FlareLiveDrag?
     /// The viewport's size, for the fit while `zoom` is nil.
     @State private var viewport: CGSize = .zero
 
@@ -32,11 +36,11 @@ struct FlareStage: View {
             CanvasViewport(
                 documentSize: size, zoom: scale, checkerboard: false, onSize: { viewport = $0 },
                 onDrag: { previous, current in drag(from: previous, to: current, scale: scale) },
-                onDragEnd: { perform(.stage(.endDrag)); dragStart = nil }, onKey: key
+                onDragEnd: endDrag, onKey: key
             ) {
-                if let list = model.stageList { FlareStageArt(list: list, zoom: scale).drawingGroup() }
+                if let list = live?.movePreview ?? model.stageList { FlareStageArt(list: list, zoom: scale).drawingGroup() }
             } overlay: {
-                FlareStageOverlay(marks: model.stageMarks, zoom: scale)
+                FlareStageOverlay(marks: live?.stageMarks ?? model.stageMarks, zoom: scale)
                 FlareStageSelection(model: model, zoom: scale, perform: perform)
                 FlareStageGuides(model: model, zoom: scale, perform: perform)
             }
@@ -47,18 +51,37 @@ struct FlareStage: View {
         }
     }
 
-    /// One pointer move: the gesture keeps the point it started at, so the Model sees one gesture.
+    /// One pointer move, on the live copy (made from the model at the drag's first sample, or the first after
+    /// Escape): the gesture keeps the point it started at, so the Model sees one gesture.
     private func drag(from previous: CGPoint, to current: CGPoint, scale: Double) {
         let start = dragStart ?? previous
         if dragStart == nil { dragStart = start }
         let flags = NSEvent.modifierFlags
-        perform(.stage(.dragChanged(
-            start: Point(x: start.x, y: start.y), end: Point(x: current.x, y: current.y),
-            shift: flags.contains(.shift), option: flags.contains(.option), stageScale: scale)))
+        var modifiers: DragModifiers = []
+        if flags.contains(.shift) { modifiers.insert(.shift) }
+        if flags.contains(.option) { modifiers.insert(.option) }
+        var next = live ?? FlareLiveDrag(on: model)
+        live = nil
+        next.move(StageDragSample(
+            start: Point(x: start.x, y: start.y), end: Point(x: current.x, y: current.y), modifiers: modifiers,
+            stageScale: scale))
+        live = next
+    }
+
+    /// Mouse-up: the window gets the drag's last sample and its end, one change and one undo step.
+    private func endDrag() {
+        if let s = live?.last {
+            perform(.stage(.dragChanged(
+                start: s.start, end: s.end, shift: s.modifiers.contains(.shift), option: s.modifiers.contains(.option),
+                stageScale: s.stageScale)))
+        }
+        perform(.stage(.endDrag))
+        (live, dragStart) = (nil, nil)
     }
 
     /// A tool letter chooses its tool when it can act, as its palette button does; anything else goes to `onKey`.
     private func key(_ press: KeyPress) -> KeyPress.Result {
+        if press.key == .escape { live = nil }
         guard press.modifiers.isEmpty,
             let tool = FlareTool.allCases.first(where: { $0.shortcut.map(String.init) == press.characters.lowercased() })
         else { return onKey(press) }

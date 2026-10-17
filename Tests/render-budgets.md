@@ -41,7 +41,7 @@ has to end up.
 | Library | select, 10 clicks on grid cells | 10 / 10 / 10 | 80 / 120 / 33 ms | none in flight |
 | Library | loupe step | not driven | not driven | the loupe's arrow keys need a key window, which a test process can't have |
 | Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 13.0 / 20 / 8.3 ms | #1471 removed the per-step ticks; not re-measured on a quiet machine yet, so the time budget is unchanged |
-| Flare | drag on the canvas, 120 samples | 0 / 0 / 0 | 0.08 / 1 / 8.3 ms | none: the canvas has no gesture yet, so this row bounds the shell alone |
+| Flare | draw a rectangle on the canvas, 120 samples | not re-measured (122 before #1792) / 3 / 3 | not re-measured (54.1 before #1792) / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
 
 Bodies for Flare's scrub row and Library's selection count one per edit: each
