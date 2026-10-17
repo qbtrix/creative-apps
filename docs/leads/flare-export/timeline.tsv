@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-17T06:05Z	0	stage-start	#1973	line lead act-1a1487603d9-vrd4; base dev 4a86f5f; lead/flare-export created
+2026-10-17T06:20Z	2	stage-end	plan	wave 1 = FX-1 FX-6 FX-7; FX-2 FX-3 FX-4 wait on editor-kernel EK-a/EK-chrome/EK-run; FX-5 on inspector-timeline
+2026-10-17T06:20Z	3	stage-start	wave 1	build-wave FX-1 FX-6 FX-7 alongside draw-key-save round-2 panel
