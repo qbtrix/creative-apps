@@ -49,4 +49,5 @@ Wave 3: FX-5 (waits FX-3 and inspector-timeline #1515). Wave 4: FX-9. Wave 5: FX
 ## Open
 - editor-kernel (#1933) is `planned` with no lead branch: FX-2 (EK-a), FX-4 (EK-run) and FX-3 (EK-chrome) wait on it; checked between waves.
 - inspector-timeline (#1515) is at stage 0 waiting on #1365's dependency confirmation: FX-5 waits on it.
-- needs-ui to file: ExportSheet options slot for app rows and a control-id prefix (EK-30; #1981 asks for scope and scale rows for Design). Kernel issue to file: the shared never-overwrite name rule extracted from Library's LiveExporter. Note to post on #1939 (adopt-kernel-export): AX-flare's move happens in FX-2 and FX-4.
+- Filed #1989 (needs-ui): ExportSheet host options slot and control-id prefix (EK-30; beside #1981). Filed #1990 (needs-ui): SuiteModel's shared never-overwrite name rule from Library's LiveExporter. Commented on #1939: AX-flare's move happens in FX-2 and FX-4.
+- Wave 1 workflow wf_b541828b-076 (build-wave: FX-1, FX-6, FX-7; alongside: draw-key-save round-2 panel).
