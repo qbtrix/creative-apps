@@ -88,7 +88,7 @@ enum BuildGraph {
         try String(contentsOf: root.appendingPathComponent(path), encoding: .utf8)
     }
 
-    static let expected = Set(["SuiteUI", "SuiteModel", "SuiteShell", "AfterGlowApp"])
+    static let expected = Set(["SuiteUI", "SuiteModel", "SuiteKernel", "SuiteShell", "AfterGlowApp"])
         .union(["Flare", "Design", "Photo", "Library", "Halo"].flatMap { ["\($0)Model", "\($0)App"] })
 
     @Test func packageScanFindsTheMacOSTargets() throws {

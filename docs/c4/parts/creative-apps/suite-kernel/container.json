@@ -1,0 +1,18 @@
+{
+  "id": "suite-kernel",
+  "name": "SuiteKernel",
+  "description": "The editor kernel: one Linux-safe library every app Model and SuiteUI link, one module per editor concept the apps used to build five times (history, selection, layer tree, keys and easing, snap, transform, export, session, stroke) over FlareCore's geometry. No app copies a kernel concept. Imports no app Model, no SuiteUI and no SuiteModel.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "tags": [
+    "internal"
+  ],
+  "order": 125,
+  "relationships": [
+    {
+      "source": "suite-kernel",
+      "target": "flarecore",
+      "description": "uses FlareCore's Point, Rect, Matrix, Keyframe and Easing as they are",
+      "style": "sync"
+    }
+  ]
+}
