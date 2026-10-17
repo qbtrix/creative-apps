@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-17T06:23Z	3	slice-done	TL-a TL-b TL-c TL-d TL-e	Belt-Slice-Done on full run 39001215720 (Linux green), Mutate macOS pending, Mac-Finish-Wanted posted; TL-b gaps + #1782 #1784
 2026-10-17T06:23Z	3	fix-round	TL-c TL-d TL-e	wave 10 fix batch: #1781 #1783 #1795 #1796 #1813 (+gaps #1782 #1784)
 2026-10-17T06:23Z	3	review	39001038692	TL-a and TL-e critic panels started (ui: true)
+2026-10-17T10:47Z	3	heartbeat	-	lead resumed after a container restart and a session limit (reset 10:40Z); wave-10 results read
