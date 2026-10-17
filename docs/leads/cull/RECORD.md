@@ -2,9 +2,9 @@
 
 Issue: #1345 · Packet: docs/blueprints/library/features/cull.md
 Run: act-1a145e74beb-obp4 · Session: cse_01BkDrX316MPq32KYU5agHQr · Started: 2026-10-16T18:10Z
-Stage: 4 round 2
+Stage: done
 Base: 7ab292cdb1022222c00314a2b52c44c087811c46
-Next: wait for the scoped library run that contains #1818 (b2f5986): J4 must pass; then the contact sheet
+Next: nothing; contact sheet posted on #1345 (run 38988926432). Follow-ups live in #1662, #1718, #1670, #1671, #1183, #782 (CU-8)
 
 Loop: v2 (no `## Slices` table in the packet), with the findings queue and
 the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
@@ -18,7 +18,7 @@ the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
 | CU-3 | 2 | Auto Advance inside `cull`; undo never moves the loupe; cull budgets | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift, Tests/LibraryModelTests/LibraryCullBudgetTests.swift | LibraryAutoAdvanceTests, LibraryCullBudgetTests | #1588 | merged |
 | CU-4 | 2 | inspector and menu edits go through `cull(_:advance: false)` | Sources/LibraryModel/MetadataEditing.swift, Tests/LibraryModelTests/LibraryMetadataTests.swift | LibraryMetadataTests | #1579 | merged |
 | CU-5 | 3 | cull area: single keys, Metadata menu, Auto Advance checkmark, refused-change notice | Sources/LibraryApp/LibraryWindow+Cull.swift, Sources/LibraryApp/LibraryBrowser.swift (cull notice close button), Tests/AppSnapshotTests/LibraryRatingSnapshots.swift, Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift | snapshots; J4 on macOS | #1598 | merged |
-| CU-7 | 4 | J4 steps 1–8 (F and L); `feature-done`; cull.wave.json `status: built` | UITests/LibraryJourneyTests+Cull.swift, docs/blueprints/library/features/cull.wave.json | J4 | #1604 | merged (a5c680a) |
+| CU-7 | 4 | J4 steps 1–8 (F and L); `feature-done`; cull.wave.json `status: built` | UITests/LibraryJourneyTests+Cull.swift, docs/blueprints/library/features/cull.wave.json | J4 | #1604 | merged (a5c680a); J4 green on 38988926432 |
 | CU-8 | – | P2 `testCullKeyLatency` (report-only) | UITests/LibraryJourneyTests+PerfCull.swift | P2 | | blocked: #782 open |
 
 Wave independence: wave 1 CU-1 and CU-2 independent; wave 2 CU-3 and CU-4
@@ -31,6 +31,7 @@ CU-5's keys and menu.
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38965923292 (full, 1910bff) | macOS job red: SuiteUI TimelineStripLayoutTests (not cull); snapshots and journeys never ran; cullOneWithinBudget 12.97 ms > 10 hidden as known issue (#1587) | not measured | pending (scoped run) | #1587 | #1645 (r1-b1, merged) | no |
+| final | 38988926432 (scoped library, 7ac0a31) | green: 11 Library journeys, J4 fakes and live included | identifier 2 / 12, unnamed 0 / 1 (under) | – | – | – | yes |
 | 2r | 38986624933 (scoped library, 0e6f7c9) | J4 passes step 1, fails step 2 (no library.loupe.photo after the Metadata menu and Escape); other journeys green | – | – | – | #1818 (ci-3, merged) | no |
 | 2r | 38984212662 (scoped library, b4b063d) | every Library journey green except J4: fails at step 1's position check (readout now ends with the cull summary, #1678) | – | – | – | #1803 (ci-2, merged) | no |
 | 2r | 38981648832 (scoped library, b267d00) | snapshot test LibraryGridCellTests.anUnflaggedCellSaysItsStarsAndLabel red: seam between #1732 (label text) and #1687's test; journeys didn't run | not measured | – | – | #1774 (ci-1, merged) | no |
