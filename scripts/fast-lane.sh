@@ -931,7 +931,8 @@ red_sweep() {
 # for a running probe. lo is the longest green prefix (the good commit counts
 # as 0), hi the shortest red one; a red-triage guess on <issue> is probed
 # first (its parent, then itself); hi = lo + 1 names the culprit, which is
-# posted on <issue> (with BISECT_MARK, so a done red is never redone) and on
+# posted on <issue> (with BISECT_MARK, so an issue with a verdict is never
+# bisected again, whichever red sha its range names now) and on
 # the owning feature-lead issue, and the probes are deleted.
 red_bisect() {
   local issue="$1" good="$2" bad="$3" branch="$4" d k i sha v lo hi mid red7 hint=0 waited=0 line probes n p
@@ -943,7 +944,9 @@ red_bisect() {
   good=$(git -C "$d" rev-parse --verify -q "origin/$good^{commit}" 2>/dev/null || git -C "$d" rev-parse --verify -q "$good^{commit}" 2>/dev/null) \
     || { log "bisect: $2 is not a commit at $REMOTE"; return; }
   red7=${bad:0:7}
-  if has_comment "$issue" "$BISECT_MARK $red7 -->"; then log "bisect: $red7 already has its verdict on #$issue"; return; fi
+  # One verdict per issue, whatever the red sha: ci.yml moves the issue's range
+  # to each newer red run, and the culprit found once is the culprit.
+  if has_comment "$issue" "$BISECT_MARK "; then log "bisect: #$issue already has its verdict; not bisecting $red7"; return; fi
   while read -r sha; do chain+=("$sha"); done < <(git -C "$d" rev-list --first-parent --reverse "$good..$bad" 2>/dev/null)
   k=${#chain[@]}
   (( k )) || { log "bisect: $good..$bad holds no first-parent commits"; return; }
