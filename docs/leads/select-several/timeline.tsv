@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-17T22:46Z	wave	wxkvtvg5f done: PR #2454 fixes #2443 (marquee hides handles; Fast-Check pass at 0a2e5792, mutate 5/5; PNGs design-marquee-light/dark)
 2026-10-17T23:03Z	pr	#2445 (2440+2441) #2454 (2443) open fast-lane
 2026-10-17T23:03Z	wave	w9 fix-batch launched: 2438
+2026-10-17T23:13Z	pr	#2461 w9 r-b1 fixes #2438 (Distribute reason caption)
