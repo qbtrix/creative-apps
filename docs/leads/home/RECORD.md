@@ -2,9 +2,9 @@
 
 Issue: #1503 · Packet: docs/blueprints/suite/features/home.md
 Run: act-1a149c6a2a3-yna2 (line lead for suite-contracts, bundle, home; was act-1a14881ad5e-axoa, act-1a145e74c4e-1rah) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T18:11Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z
-Stage: 3 wave 5 (HM-3a, HM-3b journeys)
+Stage: 4 feature-done (HM-3z)
 Base: 042423165693f2f1d65d2ece90eb0d5bcb910554
-Next: HM-3a PR #2056 head 26fc2878 (main-actor fix after build 39033113702 failed); wait for the lane's macOS build and merge; then HM-3z (home.wave.json built, feature-done) and Belt-Contact-Sheet on #1503
+Next: HM-3z PR #2082 (feature-done, docs only) waits on the lane; then the dev CI it triggers must be green; then Belt-Contact-Sheet on #1503 and a gap issue for the #836-skipped assertions
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged).
 Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged), bundle BU-3 #814 and BU-4 #818 (open, supervisor merges; HM-0 waits), #778/#775 (`.suiteControl`, `.suiteProbes` on dev), A-DE-0 #836 (open, Design line; HM-3a waits).
@@ -19,9 +19,9 @@ Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged),
 | HM-2b | 3 | New row, inspector, drop target, layout test (#845) | Sources/AfterGlowApp/{HomeNewRow,HomeInspector,HomeDropTarget}.swift, Tests/AppSnapshotTests/AfterGlowHomeLayoutTests.swift | AfterGlowHomeLayoutTests | #1613 | merged |
 | HM-2c | 3 | Launcher File, Edit, View menus over `HomeMenu` (#846) | Sources/AfterGlowApp/LauncherCommands+Home.swift, Sources/SuiteModel/Home/HomeMenu.swift, Tests/SuiteModelTests/{HomeMenuTests,LauncherMenuStubTests}.swift | HomeMenuTests | #1616 | merged |
 | HM-4 | 4 | Home golden baselines (#870) | Tests/AppSnapshotTests/Golden/afterglow/ | dev run compare | #1953 #1954 #1956 #1959 #1960 | merged |
-| HM-3a | 5 | Journeys SJ0, SJ1 steps 1, 2, 5, 6 (#847); the assertions that need the Design fixture files skip with `XCTSkip("waits on #836")` until `UITests/Fixtures/suite/Cards.design` exists | UITests/AfterGlowJourneyTests.swift, UITests/AfterGlowJourneyTests+Home.swift | SJ0, SJ1 | | building |
+| HM-3a | 5 | Journeys SJ0, SJ1 steps 1, 2, 5, 6 (#847); the assertions that need the Design fixture files skip with `XCTSkip("waits on #836")` until `UITests/Fixtures/suite/Cards.design` exists | UITests/AfterGlowJourneyTests.swift, UITests/AfterGlowJourneyTests+Home.swift | SJ0, SJ1 | #2056 | merged 13:29Z |
 | HM-3b | 5 | testHomeAtEveryWidth, SJ19 (#848) | UITests/AfterGlowJourneyTests+{Layout,EveryControl}.swift | those journeys | #2007 | merged 07:15Z (3a9a784) |
-| HM-3z | 6 | home.wave.json status built + feature issue; `feature-done` | docs/blueprints/suite/features/home.wave.json | scripts/ci | | waits HM-3a, HM-3b |
+| HM-3z | 6 | home.wave.json status built + feature issue; `feature-done` | docs/blueprints/suite/features/home.wave.json | scripts/ci | #2082 | open |
 | HM-3c | – | Perf journeys SP3, SP4 (#849; follow-up, outside done check) | UITests/AfterGlowJourneyTests+{PerfHome,BudgetsHome}.swift, HomeGrid.swift | SP3, SP4 | | waits #782 |
 
 Waves (packet's Build waves, checked against dev at 132d910):
