@@ -4,7 +4,7 @@ Issue: #1503 · Packet: docs/blueprints/suite/features/home.md
 Run: act-1a149c6a2a3-yna2 (line lead for suite-contracts, bundle, home; was act-1a14881ad5e-axoa, act-1a145e74c4e-1rah) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T18:11Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z
 Stage: 3 wave 5 (HM-3a, HM-3b journeys)
 Base: 042423165693f2f1d65d2ece90eb0d5bcb910554
-Next: HM-3a builder running on lead/home-HM-3a from dev 04242316 (SJ0 in AfterGlowJourneyTests.swift, SJ1 in +Home, #836 assertions skip); then HM-3z (home.wave.json built, feature-done) and Belt-Contact-Sheet on #1503
+Next: HM-3a PR #2056 open (head d9c50780), wait for the lane's build-only run and merge; then HM-3z (home.wave.json built, feature-done) and Belt-Contact-Sheet on #1503
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged).
 Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged), bundle BU-3 #814 and BU-4 #818 (open, supervisor merges; HM-0 waits), #778/#775 (`.suiteControl`, `.suiteProbes` on dev), A-DE-0 #836 (open, Design line; HM-3a waits).

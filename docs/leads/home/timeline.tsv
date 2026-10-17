@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-17T12:13Z	3	stage-start	wave 5	line lead act-1a149c6a2a3-yna2 resumed on dev 04242316; HM-3a never opened, rebuilding it
 2026-10-17T12:17Z	3	agent-start	HM-3a	builder on lead/home-HM-3a from 04242316
 2026-10-17T12:21Z	3	heartbeat	HM-3a	container restart lost the first builder before any code; HM-3a builder relaunched
+2026-10-17T13:14Z	3	pr-opened	#2056	HM-3a SJ0+SJ1 journeys (#836 skips)
