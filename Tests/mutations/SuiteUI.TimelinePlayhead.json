@@ -1,0 +1,7 @@
+[
+{"label":"the changed-frame guard is dropped, so a scrub repeats a frame (#1297)","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"guard frame != last else { return }","replace":"_ = last","tests":"TimelinePlayheadTests|SuiteTimelineScrubWindowTests"},
+{"label":"the band is the 2 pt line, so a press beside it misses","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"static let band: CGFloat = SuiteSize.timelineKeyframeHit","replace":"static let band: CGFloat = 2","tests":"TimelinePlayheadTests"},
+{"label":"the upper dim is dropped, so the lanes after the work area stay bright","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"(tickX(mapping, workArea.upperBound), tickX(mapping, mapping.duration)),","replace":"","tests":"TimelinePlayheadTests"},
+{"label":"the first row rounds up, so a row half under the ruler drops out and its key draws idle (#1745)","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"(visibleY.lowerBound / lane).rounded(.down)","replace":"(visibleY.lowerBound / lane).rounded(.up)","tests":"TimelinePlayheadTests"},
+{"label":"the end row rounds down, so a row half off the bottom drops out and its key draws idle (#1745)","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"(visibleY.upperBound / lane).rounded(.up)","replace":"(visibleY.upperBound / lane).rounded(.down)","tests":"TimelinePlayheadTests"}
+]

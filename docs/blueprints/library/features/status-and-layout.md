@@ -73,6 +73,12 @@ can't own.
 | SL-b | The status row under the grid and the loupe shows the count, the selection, the thumbnail size or zoom, the loupe's place and every progress or problem pill, and J12 checks it at every width. | SL-3, SL-4 | J12 | SL-a (SL-4); thumbnails, loupe-viewport; #1184 (SL-4) |
 | SL-c | The inspector's header names the selection with its facts, every Library control carries an identifier, and the wide widths are proven by snapshots. | SL-5, SL-6, SL-7, SL-8 | J12 | SL-a (SL-5, SL-7); SL-b (SL-6, SL-8); the MetadataInspector header gap (SL-6) |
 
+Screen early: SL-b is the UI slice (`"ui": true`). It draws SL-a's
+`statusRow` on the fixtures and waits only on SL-a among this feature's
+slices. SL-c also owns App views (`"ui": true`). It mixes SL-5's header
+facts with SL-6's header view and SL-8's sweep. Any split would leave a
+one-task slice, so it stays whole.
+
 SL-a is the contract: no other feature plugs into status or layout, so it
 publishes values, not protocols or fakes. `LibraryStatusRow`,
 `LibraryStatusPill`, `LibraryInspectorHeader` and `LibraryLayout` are what

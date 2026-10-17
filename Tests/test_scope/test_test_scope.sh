@@ -28,9 +28,9 @@ changed() {
   printf '%s\n' "$@" | python3 "$ts" changed ${flag[@]+"${flag[@]}"} | paste -sd';' -
 }
 
-design_snaps='^AppSnapshotTests\.(Design[A-Za-z]*/|AppSnapshotTests/design\()'
-photo_snaps='^AppSnapshotTests\.(Photo[A-Za-z]*/|AppSnapshotTests/photo\()'
-suiteui_snaps='^AppSnapshotTests\.((Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\()'
+design_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Design[A-Za-z]*/|AppSnapshotTests/design\()'
+photo_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Photo[A-Za-z]*/|AppSnapshotTests/photo\()'
+suiteui_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\()'
 
 # Changed paths to tests.
 check "a Design Model file runs DesignModelTests only" \
@@ -49,6 +49,8 @@ check "AfterGlow and SuiteShell run the suite scope" \
 check "a Model test file runs its target" '^(HaloModelTests)\.;' "$(changed Tests/HaloModelTests/HaloEditTests.swift)"
 check "an app's snapshot file runs that app's snapshot suites" \
   ";$photo_snaps" "$(changed Tests/AppSnapshotTests/PhotoBrushSnapshots.swift)"
+check "an app's render budget file runs that app's snapshot suites" \
+  ";$photo_snaps" "$(changed Tests/AppSnapshotTests/RenderBudgetPhotoTests.swift)"
 check "a shared snapshot file runs every snapshot" \
   ';^AppSnapshotTests\.' "$(changed Tests/AppSnapshotTests/GoldenImage.swift)"
 check "docs, scripts, journeys, CI and the perf list run no tests" ';' \
@@ -69,14 +71,22 @@ check "an unknown app is refused" 1 "$?"
 missing=""
 while read -r app id; do
   case "$app" in ''|'#'*) continue ;; esac
-  target=${id%%.*} rest=${id#*.} suite=${id#*.} test=""
-  [[ "$rest" != */* ]] || { suite=${rest%%/*} test=${rest#*/}; }
-  if [[ -z "$test" ]]; then
-    grep -rqE "(struct|func) $suite[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
-  else
-    file=$(grep -rlE "struct $suite[[:space:]:{]" "$root/Tests/$target" | head -1)
-    [[ -n "$file" ]] && grep -qE "func $test\\(" "$file" || missing="$missing $id"
+  target=${id%%.*} rest=${id#*.}
+  IFS=/ read -ra parts <<<"$rest"
+  n=${#parts[@]} last=${parts[$((${#parts[@]} - 1))]}
+  if [[ $n -eq 1 ]]; then
+    grep -rqE "(struct|func) $last[[:space:](<:]" "$root/Tests/$target" || missing="$missing $id"
+    continue
   fi
+  # Every part before the last is a suite (a nested one has its parent enum first).
+  for p in "${parts[@]:0:n-1}"; do
+    grep -rqE "(struct|enum) $p[[:space:]:{]" "$root/Tests/$target" || missing="$missing $id"
+  done
+  # The last is a nested suite or a test of the suite before it.
+  grep -rqE "struct $last[[:space:]:{]" "$root/Tests/$target" && continue
+  suite=${parts[$((n - 2))]}
+  file=$(grep -rlE "struct $suite[[:space:]:{]" "$root/Tests/$target" | head -1)
+  [[ -n "$file" ]] && grep -qE "func $last\\(" "$file" || missing="$missing $id"
 done <"$root/Tests/perf-suites.txt"
 check "every Tests/perf-suites.txt entry names a test in Tests/" "" "$missing"
 
@@ -92,6 +102,10 @@ check "leaves its suite's other tests in the gate" no \
 check "leaves PhotoStrokePacerTests' order tests in the gate" no \
   "$(takes 'AppSnapshotTests.PhotoStrokePacerTests/aSampleAfterTheSpacingAppliesAtOnce()')"
 check "leaves HaloFilesBudgetTests' size test in the gate" no "$(takes 'HaloModelTests.HaloFilesBudgetTests/hugeFitsTheLimit()')"
+check "takes a nested suite's timing test" yes "$(takes 'AppSnapshotTests.BodyCountSuites/RenderBudgetHaloTests/timing()')"
+check "leaves that nested suite's bodies test in the gate" no "$(takes 'AppSnapshotTests.BodyCountSuites/RenderBudgetHaloTests/bodies()')"
+check "a nested suite is in its app's scope" yes \
+  "$(grep -qE "$photo_snaps" <<<'AppSnapshotTests.BodyCountSuites/PhotoWindowStrokeTests/aBrushStrokeRedrawsOnlyTheCanvas()' && echo yes || echo no)"
 check "takes a listed free test" yes "$(takes 'FlareModelTests.hitWithinBudget()')"
 check "leaves a free test that only shares a prefix" no "$(takes 'FlareModelTests.hitWithinBudgetTwice()')"
 check "leaves a suite that only shares a prefix" no "$(takes 'PhotoModelTests.PhotoBudgetTestsHelpers/x()')"
@@ -99,7 +113,7 @@ check "leaves another target's suite of the same name" no "$(takes 'DesignModelT
 photo=$(python3 "$ts" perf photo)
 check "perf photo takes Photo's" yes "$(grep -qE "$photo" <<<'AppSnapshotTests.PhotoBrushLatencyTests/x()' && echo yes || echo no)"
 check "perf photo leaves Halo's" no "$(grep -qE "$photo" <<<'HaloModelTests.HaloViewerBudgetTests/x()' && echo yes || echo no)"
-check "perf for an app with none is empty, never a match-all regex" "" "$(python3 "$ts" perf design)"
+check "perf for an app with none is empty, never a match-all regex" "" "$(python3 "$ts" perf suite)"
 printf '%s\n' '# nothing yet' >"$tmp/empty.txt"
 check "an empty list gives no regex" "" "$(PERF_SUITES="$tmp/empty.txt" python3 "$ts" perf)"
 printf '%s\n' 'photo PhotoModelTests' >"$tmp/bad.txt"

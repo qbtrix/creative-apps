@@ -11,7 +11,19 @@ public enum SuiteIdentity {
     /// The launcher's (AfterGlow's) bundle id.
     public static let launcherBundleID = prefix + ".afterglow"
 
+    /// Each feature slug (docs/blueprints/suite.md 8.2) to the plain words a
+    /// newcomer reads in a disabled control's help; slugs never reach the UI.
+    public static let featurePhrases: [String: String] = [
+        "switching": "Switching between apps", "recents-open-in": "Opening recent work",
+        "home": "The Home window", "settings": "The Settings window",
+        "clipboard-drag": "Copy and paste between apps", "photo-round-trip": "Editing in Photo and back",
+        "shared-assets": "The shared asset library", "linked-assets": "Linking assets between apps",
+        "onboarding": "The welcome tour", "updater": "Checking for updates",
+    ]
+
     /// The help text of a control whose feature is not built yet, as in
-    /// "Not connected yet (switching)."
-    public static func notConnected(_ feature: String) -> String { "Not connected yet (\(feature))." }
+    /// "Switching between apps isn't available yet."
+    public static func notConnected(_ feature: String) -> String {
+        "\(featurePhrases[feature] ?? "This") isn't available yet."
+    }
 }

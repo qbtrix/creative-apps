@@ -1,6 +1,6 @@
 # Writing a feature packet
 
-A **packet** is the plan one feature lead builds from:
+A **packet** is the plan a lead builds one feature from:
 `docs/blueprints/<app>/features/<feature>.md`. This page is the one
 reference for whoever writes or re-cuts a packet, and for the packet critic
 who checks it. The lead playbook (`lead.md`) says how a lead runs one.
@@ -77,6 +77,32 @@ for them by name.
    the slice that builds it, not on that feature's first slice. A packet
    with this table runs the v3 lead loop (`lead.md`, Which loop); one
    without it runs the v2 loop unchanged.
+   - **UI slices.** A slice whose tasks change `Sources/*App/` or
+     `Sources/SuiteUI/` declares `"ui": true` on its entry in `slices`
+     (`scripts/waves check` fails on a value that isn't `true` or `false`).
+     It also gets a render budget row in Quality tests for each
+     interaction it adds or changes, for example "120-sample drag ≤ 3
+     window bodies; divider drag p95 ≤ 8 ms", with its
+     `Tests/AppSnapshotTests/RenderBudget*` test. Body counts gate; times
+     are checked by the Mac finisher. A UI slice is done only through the
+     feel gate and a Mac finisher pass (`lead.md`, contract rules 15 and
+     17). Its builders read `docs/engineering/swiftui-rules.md`.
+   - **Screen early** (`lead.md`, contract rule 18). Every packet has a
+     UI slice that builds the feature's real screen on the contract
+     slice's fakes, clickable end to end. Its waits name no slice of its own
+     feature but the first (contract) slice, so it runs beside the logic
+     slices (real Model, live services), which never wait on it. Its first
+     task makes the feature reachable from a visible menu or toolbar
+     control. The contract slice declares every Model signature the UI
+     calls, as stubs (a stub returns the fake's value, or `NotBuilt` with a
+     reason the UI shows); the logic slices fill in the bodies and never
+     change the signatures. A packet whose contract slice doesn't (every
+     v2 packet, most v3 ones today) gets a small first UI task that
+     declares the stubs, and the UI and logic tasks wait only on it. A last slice waits on both and swaps the fakes for live, with
+     the journeys on live. A feature with no screen (Model only) puts
+     `"ui_slice": "none"` and its reason in `"ui_slice_reason"` in its
+     `.wave.json` instead. `scripts/waves check` warns when a feature that
+     isn't built has neither (an error once the open packets are re-sliced).
 3. **Journey steps.** The numbered steps a user takes, each naming the task
    and the journey test (`<X>-J<n>`) that proves it.
 4. **Screens and states.** Each screen state the feature adds and the
@@ -119,12 +145,15 @@ for them by name.
      for `<` on the left edge; a locked layer moves), which the builder adds
      to the plan of the file it changes and runs with `scripts/mutate`.
 10. **Quality tests.** `| quality row | budget | test |`: budgets, no dead
-   controls, one gesture one step, keyboard parity, the audit.
+   controls, one gesture one step, keyboard parity, the audit, and a render
+   budget row per UI slice (`render: <interaction>` | `120-sample drag ≤ 3
+   window bodies; p95 ≤ 8 ms` | `RenderBudget<App>Tests.<test>`).
 11. **Done check.** Journeys green on the `feature-done` CI run, audit zero
     new, the contact sheet comment. With Slices, per slice instead: its
     journeys green on a scoped run (`ci.yml` with `app=<app>`) that contains
-    its last merged PR, every app built, no open `finding` issue, then the
-    contact sheet once every slice is done (`lead.md`, contract rule 6).
+    its last merged PR, every app built, no open `finding` issue, for a UI
+    slice the feel gate and its `Mac-Finish:` line, then the contact sheet
+    once every slice is done (`lead.md`, contract rules 6, 15 and 17).
 12. **Review notes folded in** (optional). What a review changed.
 
 ## The three rules
@@ -199,3 +228,25 @@ with the task ids. It refutes; it doesn't rewrite.
 11. **No oracle** (with Slices). A task that adds behaviour with fewer than
     2 mutations in its Acceptance row, or that changes planned source
     without owning that file's plan in `Tests/mutations/`.
+12. **UI slice unmarked** (with Slices). A slice whose tasks own files under
+    `Sources/*App/` or `Sources/SuiteUI/` without `"ui": true`, or a UI
+    slice with no render budget row in Quality tests.
+13. **Screen last.** A UI task that calls a Model signature no contract
+    task or stub task declares (it can't compile until a logic slice
+    lands); every packet, v2 included. With Slices, also: no `"ui": true`
+    slice whose waits, within its own feature, name only the contract
+    slice (never a logic slice), or a UI slice whose first task doesn't
+    reach the feature from a visible menu or toolbar control on the fakes.
+    A feature with no screen instead declares `"ui_slice": "none"` with a
+    `"ui_slice_reason"`; a reason that doesn't hold (the feature adds a
+    control or a screen) is a miss too.
+14. **App-local copy** (a blocker; every packet, v2 included). A task that
+    adds app-local logic, in `Sources/<X>Model/` or `Sources/<X>App/`, for a
+    concept SuiteModel, SuiteUI, creative-core or another app's Model
+    already has, or for a concept with a planned editor-kernel module (undo
+    and history, selection, the layer tree and parenting, transform with
+    marquee and snapping, keyframes and easing, export, crop). The fix uses
+    the shared module, or adds a contract task that extracts the concept
+    into SuiteModel first and both apps use it (`lead.md`, contract rule
+    20). An adapter onto the shared module (`<X>+Kernel.swift`,
+    `<X>Adapter.swift`) isn't a copy.

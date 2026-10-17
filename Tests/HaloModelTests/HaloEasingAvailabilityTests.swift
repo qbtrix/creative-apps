@@ -1,10 +1,13 @@
 // HaloEasingAvailabilityTests.swift: EZ-5 (#428), QB-F1 for the easing
-// area. The Keyframe Easing commands act once a key is picked in the EASING
-// list and say why not before; picking keys needs a layer (a lane click only
+// area. The Keyframe Easing commands and Delete Keyframes act once a key is
+// picked (from the timeline or the EASING list) and say why not before; picking keys needs a layer (a lane click only
 // a composition, since it selects the layer); an easing service that isn't
 // ready says why. Linux and macOS.
 @testable import HaloModel
 import Testing
+
+/// Why an easing edit waits: no key picked, from the timeline or a row.
+private let noPick = "Click a key on the timeline or pick a span in the EASING list first."
 
 /// The commands that change the picked keys' easing.
 private let easingEdits: [HaloCommand] =
@@ -46,7 +49,7 @@ func easingEditsWaitForAPickedKey(services: HaloServices) throws {
     var (project, ball) = try keyedBall(services)
     project.selectLayer(ball)
     for command in easingEdits {
-        #expect(project.unavailableHelp(for: command) == "Pick a key in the EASING list first.", "\(command)")
+        #expect(project.unavailableHelp(for: command) == noPick, "\(command)")
     }
     for command in picks(ball) {
         #expect(project.unavailableHelp(for: command) == nil, "\(command)")
@@ -56,7 +59,7 @@ func easingEditsWaitForAPickedKey(services: HaloServices) throws {
         #expect(project.unavailableHelp(for: command) == nil, "\(command)")
     }
     project.clearKeySelection()
-    #expect(project.unavailableHelp(for: .setEasing(.easeIn)) == "Pick a key in the EASING list first.")
+    #expect(project.unavailableHelp(for: .setEasing(.easeIn)) == noPick)
 }
 
 @Test(arguments: [HaloServices.fake, .live])
@@ -85,6 +88,17 @@ func easingNeedsALayerAndAComposition(services: HaloServices) throws {
     for command in easingEdits + picks(ball) {
         #expect(project.unavailableHelp(for: command) == "Easing is resting.", "\(command)")
     }
+}
+
+/// B1: ⌫'s Delete Keyframes acts once a key is picked, and says how before.
+@Test(arguments: [HaloServices.fake, .live])
+func deleteKeysWaitsForAPickedKey(services: HaloServices) throws {
+    var (project, ball) = try keyedBall(services)
+    #expect(project.unavailableHelp(for: .deleteKeys) == "Select a layer first.")
+    project.selectLayer(ball)
+    #expect(project.unavailableHelp(for: .deleteKeys) == "Click a key on the timeline first.")
+    project.selectLaneKeys(layerID: ball, frame: 24, extending: false)
+    #expect(project.unavailableHelp(for: .deleteKeys) == nil)
 }
 
 extension HaloCommand {

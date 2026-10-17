@@ -295,7 +295,9 @@ used by the fake and the live conformance alike:
   sits at the playhead.
 - Auto-key on and the property not animated: an edit writes a key at the
   playhead and keeps any key at another frame, so an edit at a second frame
-  makes the property animated.
+  makes the property animated. A new shape writes its position as one key at
+  frame 0, inside its one "Add <Shape>" undo step, so the first auto-key drag
+  at another frame animates it.
 - The stopwatch on a not-animated property adds a key at the playhead. If
   that still leaves one key (the playhead was on it), it also keys the
   scene's last frame with the same value, so the person sees two diamonds
@@ -479,7 +481,17 @@ One window (with the Interactions editor as a mode of it), sheets and
 popovers, and the menu bar.
 Components are SuiteUI unless named `Flare*`.
 
-### 3.1 Main window: `FlareEditor` on `EditorShell` (dark, hidden title bar)
+### 3.1 Main window: `FlareWindow` on `SuiteWindow`
+
+Built by draw-key-save (#1365; "The look", captain, 2026-10-15): the window
+is `SuiteWindow`, not `EditorShell`. The top bar's actions are its toolbar
+`actions` in the order below (Animate… and Export… disabled with their
+area's reason); the Layers tab's SCENES and LAYERS are the sidebar; the
+inspector is `SegmentedTabs` with Properties and Library; the content is the
+stage on `CanvasViewport` with the floating glass tool palette
+(`ToolbarGroup(.floating)`, the tool rail below), over the transport and
+readouts, then `TimelineStrip`. The table keeps the regions' contents.
+
 
 | Region | What is in it | Components |
 |---|---|---|
@@ -1430,6 +1442,12 @@ key, timeline, save, then the panels. Engine-direct use cases have no fake,
 so F7a needs LM-7 (playback state) and F17a needs LM-1 (files); both are
 first-wave logic tasks with no engine dependency, so the UI line never waits
 on creative-core.
+
+Status (2026-10-16): F1a, F1b, F2, F3a, F4a, F7a and F17a are built, by
+draw-key-save (#1365) on `SuiteWindow` rather than `EditorShell`, with
+`FlareIntent` in FlareModel; J26 (`FlareLoopJourneys.testDrawKeyAndSave`)
+walks them on live services. F5's recording ring, F3b's move-to-key and
+F7b's transport buttons landed with them; the rest of those rows stays open.
 
 | id | title | supersedes | owns | deps | acceptance (journey) | quality |
 |---|---|---|---|---|---|---|

@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# scripts/ci-findings <ui-test-log>: the macOS job's Findings step. One open
+# `finding` issue per failing journey, titled "CI finding: <Target/Class/test>"
+# (the form UITests/quarantine.json takes), labelled `finding` and `line:<app>`.
+#  - A failed test with an open finding gets that issue's body rewritten, but
+#    the `Feature:`, `Slice:` and `Owner:` lines a triage added are read from
+#    the current body first and appended to the new one, so routing survives
+#    the next red run. If the body can't be read the issue is left alone.
+#  - A test that passed in this log (a "Test Case ... passed" line, so it ran
+#    and was not skipped or left out of a scoped run) and has an open finding
+#    gets "Passes on run <url>" and is closed. A test that also failed in the
+#    log (a retry) stays open. Only a run on `dev` closes: a pass on a fix
+#    branch (a proof run) says nothing about dev, so branch runs still file
+#    and update findings but never close one.
+# Needs gh and jq on PATH and RUN_URL, GITHUB_REF_NAME and GITHUB_SHA in the
+# env; Tests/ci_findings/test_ci_findings.sh runs it against a stub gh.
+set -uo pipefail
+log=${1:?usage: scripts/ci-findings <ui-test-log>}
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# names <failed|passed>: "Module.Class test" -> "Module/Class/test", one per line
+names() {
+  sed -n "s/.*Test Case '-\[\([^]]*\)\]' $1.*/\1/p" "$log" | sort -u | while read -r mc test; do
+    echo "${mc%%.*}/${mc#*.}/$test"
+  done
+}
+failed=$(names failed)
+passed=$(names passed)
+open=$(gh issue list --label finding --state open --limit 500 --json number,title)
+
+while IFS=/ read -r mod cls test; do
+  [[ -n "$mod" ]] || continue
+  name="$mod/$cls/$test" title="CI finding: $mod/$cls/$test"
+  err=$(grep -F -m1 "error: -[$mod.$cls $test] : " "$log" | sed 's/^.*error: -\[[^]]*\] : //' | cut -c1-300 || true)
+  app=$(sed -E 's/JourneyTests$//' <<<"$mod" | tr '[:upper:]' '[:lower:]')
+  [[ "$app" != suite ]] || app=suiteui
+  {
+    echo "The \`$name\` journey failed in CI. The macOS job is report-only until beta, so this issue is how the red reaches its line; nobody's merge waited on it."
+    echo
+    echo "Test: \`$name\`"
+    echo "Error: ${err:-none printed; see the run log}"
+    echo "Run: $RUN_URL"
+    echo "Branch: $GITHUB_REF_NAME"
+    echo "Commit: $GITHUB_SHA"
+  } >"$tmp/finding.md"
+  n=$(jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty' <<<"$open")
+  if [[ -n "$n" ]]; then
+    if old=$(gh issue view "$n" --json body -q .body); then
+      keep=$(grep -E '^[[:space:]]*(Feature|Slice|Owner):' <<<"$old" || true)
+      [[ -z "$keep" ]] || { echo; echo "$keep"; } >>"$tmp/finding.md"
+      gh issue edit "$n" --body-file "$tmp/finding.md" >/dev/null && echo "updated #$n: $name" \
+        || echo "::warning::could not update #$n for $name"
+    else
+      echo "::warning::could not read #$n, left its body alone: $name"
+    fi
+  else
+    labels=finding
+    case "$app" in flare|design|photo|library|halo|suiteui) labels+=",line:$app" ;; esac
+    gh issue create --title "$title" --label "$labels" --body-file "$tmp/finding.md" \
+      || echo "::warning::could not file a finding for $name"
+  fi
+done <<<"$failed"
+
+# Close findings whose test ran and passed in this log, on dev only.
+[[ "$GITHUB_REF_NAME" == dev ]] && jq -r '.[] | select(.title | startswith("CI finding: ")) | "\(.number)\t\(.title[12:])"' <<<"$open" |
+  while IFS=$'\t' read -r n name; do
+    grep -qxF -- "$name" <<<"$passed" && ! grep -qxF -- "$name" <<<"$failed" || continue
+    gh issue comment "$n" --body "Passes on run $RUN_URL" >/dev/null \
+      && gh issue close "$n" >/dev/null && echo "closed #$n: $name" \
+      || echo "::warning::could not close #$n for $name"
+  done
+exit 0

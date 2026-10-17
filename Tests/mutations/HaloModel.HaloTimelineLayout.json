@@ -1,0 +1,5 @@
+[
+{"label":"a click in the name column hits a lane","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"x > labelColumn + divider, y >= ruler","replace":"x >= 0, y >= ruler","tests":"HaloTimelineLayoutTests"},
+{"label":"a click on the ruler hits the first lane","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"x > labelColumn + divider, y >= ruler","replace":"x > labelColumn + divider, y >= 0","tests":"HaloTimelineLayoutTests"},
+{"label":"a click under the last lane hits one","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"y < ruler + lane * Double(max(rows, 0))","replace":"y <= ruler + lane * Double(max(rows, 0))","tests":"HaloTimelineLayoutTests"}
+]

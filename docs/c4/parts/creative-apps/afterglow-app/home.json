@@ -1,7 +1,7 @@
 {
   "id": "home",
   "name": "Home window",
-  "description": "New tiles and presets, recents grid with search and app filter, running apps strip.",
+  "description": "SuiteWindow over a HomeModel: sidebar (Home, Assets, the five apps), Open… and search in the toolbar, the recents grid with app filter chips, the \"Preview data\" pill on the fakes, empty, no-match and missing-file states in place, the running apps strip; the New row (one tile per app, presets as chips or a menu by HomeLayout.tileShowsChips, disabled reasons, a progress hook) and the inspector (Open, Open In disabled until recents-open-in, Show in Finder, Locate…, Remove from Recents); HomeLayoutAnchors publishes frames for the layout test. Publishes the model as the homeModel focused value.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/AfterGlowApp/Home*.swift"

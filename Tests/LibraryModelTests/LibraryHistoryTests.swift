@@ -188,3 +188,47 @@ private func catalogWithLoupe() -> LibraryCatalog {
     #expect(catalog.order == ["F"])
     #expect(catalog.selectedCollection?.count == 1)
 }
+
+/// The collection counts by id.
+private func counts(_ catalog: LibraryCatalog) -> [String: Int] {
+    Dictionary(catalog.collections.map { ($0.id, $0.count) }, uniquingKeysWith: { first, _ in first })
+}
+
+/// The counts a full rescan of `catalog` gives.
+private func rescannedCounts(_ catalog: LibraryCatalog) -> [String: Int] {
+    var rescanned = catalog
+    rescanned.recount()
+    return counts(rescanned)
+}
+
+/// An edit, undo and redo move Favorites by the changed photos alone (#1587)
+/// and leave All Photos and Recently Added as a full rescan has them.
+@Test func editUndoAndRedoKeepEveryCollectionCountWithoutARescan() {
+    var catalog = LibraryCatalog()
+    catalog.load((0..<30).map { index in
+        PhotoItem(
+            name: "P\(index)", captureDate: Date(timeIntervalSince1970: Double(index)), color: Color3(0, 0, 0),
+            isFlagged: index % 5 == 0)
+    })
+    let start = ["all": 30, "favorites": 6, "recent": 20]
+    let picked = ["all": 30, "favorites": 7, "recent": 20]
+    let unflagged = ["all": 30, "favorites": 4, "recent": 20]
+    #expect(counts(catalog) == start)
+
+    catalog.recordEdit("Pick", ids: ["P1"]) { $0.flag = .pick }  // one id: the plain scan
+    #expect(counts(catalog) == picked)
+    catalog.recordEdit("Unflag", ids: ["P0", "P2", "P5", "P10"]) { $0.flag = .none }  // several: the set
+    #expect(counts(catalog) == unflagged)
+    #expect(counts(catalog) == rescannedCounts(catalog))
+
+    catalog.undo()
+    #expect(counts(catalog) == picked)
+    catalog.undo()
+    #expect(counts(catalog) == start)
+    catalog.redo()
+    #expect(counts(catalog) == picked)
+    catalog.redo()
+    #expect(counts(catalog) == unflagged)
+    #expect(counts(catalog) == rescannedCounts(catalog))
+    #expect(catalog.items.filter(\.isFlagged).map(\.id) == ["P1", "P15", "P20", "P25"])
+}

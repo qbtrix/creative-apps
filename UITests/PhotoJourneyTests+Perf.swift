@@ -13,10 +13,10 @@
 // line per series to .build/ui-screens/photo-perf-<journey>.txt, which the
 // contact sheet inlines, and attaches the same lines as "perf-report-<journey>".
 // A series counts the `suite.perf` samples its gesture added (`canvas-drag`,
-// `bar-slider`) once the window publishes the frame probe (#330). Photo's
-// EditorShell window doesn't yet, so until then a series counts event samples:
-// the drag's measured seconds (less the press and hold) at one pointer event
-// per 60 Hz refresh, and its frames late p95 reads n/a.
+// `bar-slider`) from the frame probe Photo's SuiteWindow publishes
+// (`.suiteProbes()`, #330). If a run finds no probe, a series falls back to
+// event samples: the drag's measured seconds (less the press and hold) at one
+// pointer event per 60 Hz refresh, and its frames late p95 reads n/a.
 import AppKit
 import CoreGraphics
 import XCTest
@@ -102,20 +102,20 @@ final class PhotoPerfJourneyTests: XCTestCase {
 
     /// Launches Photo on `large` with the frame probe asked for, and waits for the 4000 x 3000 image.
     @MainActor private func launchLarge() -> Journey {
-        let arguments = photoArguments(fixture: "large", windowWidth: 1800) + ["-SuitePerfProbe"]
+        let arguments = photoArguments(fixture: "large", windowSize: "1800x820") + ["-SuitePerfProbe"]
         let photo = Journey("Photo", self, arguments: arguments)
-        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 60), "no tool rail (suite.tools)")
+        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 60), "no tool palette (suite.tools)")
         let header = photo.app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "4000 × 3000 px")).firstMatch
         XCTAssert(header.waitForExistence(timeout: 60), "-PhotoFixture large didn't open the 4000 × 3000 px image")
         return photo
     }
 
-    /// Waits for the rail to show `tool` picked.
+    /// Waits for the tool palette to show `tool` picked.
     @MainActor private func expectPicked(_ tool: String, _ photo: Journey) {
         let picked = photo.element("suite.tools").buttons
             .matching(NSPredicate(format: "label == %@ AND selected == true", tool)).firstMatch
-        XCTAssert(picked.waitForExistence(timeout: 5), "the rail doesn't show \(tool) picked")
+        XCTAssert(picked.waitForExistence(timeout: 5), "the tool palette doesn't show \(tool) picked")
     }
 
     /// Drags 600 pt (or 80% of the visible canvas, if narrower) left to right
@@ -124,7 +124,7 @@ final class PhotoPerfJourneyTests: XCTestCase {
     @MainActor private func canvasDrag(_ name: String, _ photo: Journey, step: String) -> Series {
         let frame = photo.element("suite.canvas").frame
         var area = frame.intersection(photo.app.windows.firstMatch.frame)
-        // Zoomed in, the canvas runs under the tool rail and the inspector: keep between them.
+        // Zoomed in, the canvas runs under the floating tool palette and the inspector: keep between them.
         let rail = photo.element("suite.tools").frame, inspector = photo.element("suite.inspector").frame
         if rail.maxX > area.minX, rail.maxX < area.maxX {
             area = area.divided(atDistance: rail.maxX - area.minX, from: .minXEdge).remainder
@@ -164,7 +164,7 @@ final class PhotoPerfJourneyTests: XCTestCase {
         let time = String(format: "%.2f", seconds)
         return Series(
             name: name, samples: events, p95: "n/a",
-            source: "event samples: \(time) s of drag at 60 Hz; Photo publishes no suite.perf until FrameProbe #330 is wired")
+            source: "event samples: \(time) s of drag at 60 Hz; the window published no suite.perf")
     }
 
     /// The `suite.perf` summary of `key`; nil when the window doesn't publish the probe.

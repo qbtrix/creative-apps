@@ -20,7 +20,7 @@ func lanesFitTheStripWidth(width: Double) throws {
         var project = HaloProject()
         project.newComposition(CompositionSettings(name: "Comp", framesPerSecond: fps, durationSeconds: 10))
         let comp = try #require(project.selectedComposition)
-        let content = Double(comp.durationFrames) * comp.frameWidth(toFit: lanes) + layout.trailingRoom
+        let content = Double(comp.lastFrame) * comp.frameWidth(toFit: lanes) + layout.trailingRoom
         #expect(content <= width - layout.labelColumn - layout.divider + 1e-9)
     }
 }
@@ -79,4 +79,20 @@ func heightIsCappedAndKeepsTheMinimum(rows: Int) {
     #expect(layout.height(rows: 3, available: -10) == 0)
     #expect(layout.height(rows: 3, available: .nan) == 0)
     #expect(layout.height(rows: 3, available: 200) == 80)
+}
+
+/// B4: a click below the ruler and right of the names lands in a lane; the
+/// ruler, the names column and the space under the last lane are no lane.
+@Test func aClickInTheLanesFindsItsRow() {
+    let lanes = 160.0 + 1 + 0.5
+    #expect(layout.row(atX: lanes, y: 24, rows: 3) == 0)
+    #expect(layout.row(atX: lanes, y: 55.9, rows: 3) == 0)
+    #expect(layout.row(atX: 600, y: 56, rows: 3) == 1)
+    #expect(layout.row(atX: 600, y: 119.9, rows: 3) == 2)
+    #expect(layout.row(atX: 600, y: 120, rows: 3) == nil)
+    #expect(layout.row(atX: 600, y: 23.9, rows: 3) == nil)
+    #expect(layout.row(atX: 161, y: 40, rows: 3) == nil)
+    #expect(layout.row(atX: 600, y: 40, rows: 0) == nil)
+    #expect(layout.row(atX: .nan, y: 40, rows: 3) == nil)
+    #expect(layout.row(atX: 600, y: .nan, rows: 3) == nil)
 }

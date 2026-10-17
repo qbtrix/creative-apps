@@ -3,7 +3,9 @@
 What good code looks like in creative-apps (CLAUDE.md covers picking work and
 shipping it). Read this before you write code; check your diff against
 `docs/review-rubric.md` before you open a PR. Look and behavior rules for views
-are in `docs/design.md`.
+are in `docs/design.md`. Before any SwiftUI work, read
+`docs/engineering/swiftui-rules.md`: what makes a view slow or feel dead, with
+a wrong and a right line for each rule.
 
 Each rule names what enforces it. **Gate** means `scripts/ci` fails when the
 rule is broken. **Compiler** means the build fails. **Test** names the test

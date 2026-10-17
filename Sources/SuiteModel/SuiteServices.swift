@@ -25,7 +25,7 @@ public struct SuiteServices: Sendable {
     /// True only for `.fake(...)` (snapshots, Model tests); `.live` sets false even while
     /// a slot still holds a not-connected fake, whose controls say so themselves.
     public var isPreview: Bool
-    /// Member name to "Not connected yet (<feature>)." for every member not live
+    /// Member name to "<What> isn't available yet." for every member not live
     /// yet; a view disables a control whose member is here and shows the reason.
     public var pending: [String: String]
 
@@ -77,7 +77,8 @@ public struct SuiteServices: Sendable {
         "onboarding": "onboarding", "linking": "linked-assets",
     ]
 
-    /// The not-connected reason of a slotted member, from `slotFeatures`.
+    /// The not-connected reason of a slotted member: its `slotFeatures` slug in
+    /// plain words (`SuiteIdentity.featurePhrases`), never the slug itself.
     public static func notConnected(_ member: String) -> String? {
         slotFeatures[member].map(SuiteIdentity.notConnected)
     }

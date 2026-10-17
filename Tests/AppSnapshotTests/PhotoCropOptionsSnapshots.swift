@@ -43,7 +43,7 @@ import Testing
         let tiles = try photoTiles(model)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1, tab: .adjust),
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1),
                 name: "photo-crop-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
@@ -56,7 +56,7 @@ import Testing
         let tiles = try photoTiles(model)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1, tab: .adjust),
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1),
                 name: "photo-crop-ratio-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }

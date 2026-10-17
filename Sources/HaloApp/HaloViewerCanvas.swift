@@ -1,6 +1,7 @@
 // HaloViewerCanvas.swift: the artboard in Halo's viewer (#37). CanvasSurface
 // sized to the selected composition, with the Model's `viewerDrawList` drawn
-// over the artboard's fitted frame in one SwiftUI Canvas, bottom layer first,
+// over the artboard's fitted frame in one SwiftUI Canvas, bottom layer first
+// (the live drag's project while one lasts, HaloLiveEdit.swift),
 // in linear light as LiveFrameRendering composites (the Canvas's colorMode
 // and its drawing group both .linear): each item at its matrix times the fit,
 // at its opacity and blend mode; a solid fills its box, a shape the ellipse in it, a text layer
@@ -31,14 +32,7 @@ struct HaloViewerCanvas: View {
         CanvasSurface(artboard: artboard)
             // CanvasSurface draws a flat artboard; the layers cover its fitted
             // frame, laid out the same way.
-            .overlay {
-                if let list = model.viewerDrawList {
-                    HaloDrawnLayers(list: list, selectedLayerID: model.selectedLayerID)
-                        .aspectRatio(artboard, contentMode: .fit)
-                        .frame(maxWidth: artboard.width, maxHeight: artboard.height)
-                        .padding(SuiteSize.canvasInset)
-                }
-            }
+            .overlay { HaloLiveLayers(model: model, artboard: artboard) }
             .overlay { HaloRenderedFrameView(model: model, perform: perform) }
             .overlay { HaloViewerGestures(model: model, perform: perform) }
             .overlay {
@@ -51,6 +45,33 @@ struct HaloViewerCanvas: View {
             .accessibilityLabel("Artboard")
             .accessibilityValue(model.viewerSummary)
             .accessibilityIdentifier("halo.viewer")
+    }
+}
+
+/// The drawn layers over the artboard: the live drag's project while one
+/// lasts (HaloLiveEdit), else the window's. Only this view reads the live
+/// project, so a drag sample re-runs it and nothing around it.
+struct HaloLiveLayers: View {
+    let model: HaloProject
+    let artboard: CGSize
+    @Environment(\.haloLiveEdit) private var live
+
+    #if DEBUG
+    /// How many times the drawn layers' body ran; HaloWindowLiveDragTests counts a drag's.
+    static var bodyRuns = 0
+    #endif
+
+    var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
+        let shown = live?.project ?? model
+        if let list = shown.viewerDrawList {
+            HaloDrawnLayers(list: list, selectedLayerID: shown.selectedLayerID)
+                .aspectRatio(artboard, contentMode: .fit)
+                .frame(maxWidth: artboard.width, maxHeight: artboard.height)
+                .padding(SuiteSize.canvasInset)
+        }
     }
 }
 

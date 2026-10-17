@@ -22,11 +22,11 @@
 // `unavailableHelp` (PhotoToolsTests checks this).
 import CoreRaster
 
-/// The tools on Photo's tool rail.
+/// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
     case move, marquee, brush, eraser, clone, heal, crop, eyedropper
 
-    /// Why the rail shows this tool disabled, as its tooltip; nil once the
+    /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
     /// `toolHelp` asks its sampling service instead.
@@ -129,7 +129,7 @@ public struct PhotoWorkspace: Sendable {
         self.services = services
     }
 
-    /// Why the rail shows `tool` disabled, as its tooltip; nil once it works.
+    /// Why the palette shows `tool` disabled, as its tooltip; nil once it works.
     /// The eyedropper asks the sampling service, so `.fake` enables it.
     public func toolHelp(_ tool: PhotoTool) -> String? {
         tool == .eyedropper ? services.sampling.unavailableHelp : tool.unavailableHelp

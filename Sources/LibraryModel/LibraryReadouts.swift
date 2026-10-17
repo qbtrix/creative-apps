@@ -6,7 +6,10 @@
 
 /// What the content's notice slot shows; `source` says whose dismiss closes it.
 public struct LibraryNoticeContent: Hashable, Sendable {
-    public enum Action: Hashable, Sendable { case showCatalogInFinder, showFailures }
+    public enum Action: Hashable, Sendable { case showCatalogInFinder, showFailures, importFolder }
+    /// How a refused cull change on sample data is fixed; a cull notice
+    /// ending with it offers Import Folder….
+    public static let importHint = "Import a folder to rate your own photos."
     public enum Source: Hashable, Sendable { case catalog, `import`, cull }
 
     public var message: String
@@ -30,7 +33,7 @@ public struct LibraryEmptyState: Hashable, Sendable {
 
 extension LibraryCatalog {
     /// A grid cell's value: `unreadable`, `ready W×H` or `loading`, then the
-    /// photo's `cullSummary` ("ready 256×171 3 stars, Picked, Red"). Empty for an unknown id.
+    /// photo's `cullSummary` ("ready 256×171 3 stars, Picked, Red label"). Empty for an unknown id.
     public func cellValue(for id: String) -> String {
         guard let photo = items.first(where: { $0.id == id }) else { return "" }
         let state: String
@@ -69,6 +72,18 @@ extension LibraryCatalog {
         parts.append(Self.zoomText(loupeZoom))
         parts.append(photo.cullSummary)
         return parts.joined(separator: " ")
+    }
+
+    /// The loupe's glass readout: name, place and cull summary, e.g.
+    /// "IMG_0055  ·  1 of 60  ·  3 stars, Picked, Red label". Nil outside the loupe.
+    public var loupeReadout: String? {
+        guard let photo = loupeItem, let position = loupePosition else { return nil }
+        return Self.loupeReadout(for: photo, position: position)
+    }
+
+    /// The readout for `photo` at `position` ("1 of 60"), so a key's change shows in the loupe (#1661).
+    public static func loupeReadout(for photo: PhotoItem, position: String) -> String {
+        "\(photo.name)  ·  \(position)  ·  \(photo.cullSummary)"
     }
 
     /// The loupe render's histogram as `mean 0.4213`; `mean 0.0000` with no render.
@@ -115,7 +130,9 @@ extension LibraryCatalog {
                 action: importNotice.failures.isEmpty ? nil : .showFailures, source: .import)
         }
         if let cullError {
-            return LibraryNoticeContent(message: cullError, isError: true, action: nil, source: .cull)
+            let action: LibraryNoticeContent.Action? =
+                cullError.hasSuffix(LibraryNoticeContent.importHint) ? .importFolder : nil
+            return LibraryNoticeContent(message: cullError, isError: true, action: action, source: .cull)
         }
         return nil
     }

@@ -27,7 +27,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         newLayer(photo)
         paint(photo)
         chooseBlend("Multiply", photo)
-        typeValue("50", into: "Opacity", photo)
+        typeValue("50", into: "photo.layer.opacity", photo)
         expectRow("Layer 1", meta: "Multiply 50%", photo)
         expectStatus("Edited", photo)
         let edited = steadyCanvas(photo)
@@ -225,10 +225,10 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         expect("Undo Paint", photo)
     }
 
+    /// The sidebar's layer list (`photo.layers`) is up.
     @MainActor private func openLayers(_ photo: Journey) {
-        let tab = photo.app.radioButtons["Layers"]
-        XCTAssert(tab.waitForExistence(timeout: 5), "no Layers tab")
-        tab.click()
+        let layers = photo.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
+        XCTAssert(layers.waitForExistence(timeout: 5), "the sidebar has no layer list (photo.layers)")
     }
 
     /// Waits for the button titled `title`, such as the top bar's "Undo Paint".
@@ -243,7 +243,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
                   "no \(name) row reading \(meta)")
     }
 
-    /// Picks `mode` from the Layers tab's Blend Mode menu (`photo.layer.blend`).
+    /// Picks `mode` from the inspector's Blend Mode menu (`photo.layer.blend`).
     @MainActor private func chooseBlend(_ mode: String, _ photo: Journey) {
         let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
         let picker = photo.element("suite.inspector").descendants(matching: .any).matching(NSPredicate(format:
@@ -256,13 +256,16 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         expect("Undo Blend Mode", photo)
     }
 
-    /// Types `value` into the panel number labelled `label`: click it, clear it, type, Return.
+    /// Types `value` into the panel number labelled `label`, or identified by it: click it, clear it, type, Return.
     @MainActor private func typeValue(_ value: String, into label: String, _ photo: Journey) {
         let panel = photo.element("suite.inspector")
-        let matches = panel.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label))
+        let matches = panel.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@ OR identifier == %@", label, label))
         XCTAssert(matches.firstMatch.waitForExistence(timeout: 5), "no \(label) in the panel")
-        matches.element(boundBy: matches.count - 1).click()
-        let field = panel.textFields[label].waitForExistence(timeout: 3) ? panel.textFields[label] : panel.textFields.firstMatch
+        let target = matches.element(boundBy: matches.count - 1)
+        let name = target.label.isEmpty ? label : target.label
+        target.click()
+        let field = panel.textFields[name].waitForExistence(timeout: 3) ? panel.textFields[name] : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(label) opened no field")
         field.click()
         photo.app.typeKey(.rightArrow, modifierFlags: .command)

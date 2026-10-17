@@ -1,0 +1,201 @@
+{
+  "title": "Every app's layer list or tree runs on SuiteKernel's LayerTree; the app tree helpers are deleted",
+  "wave": "XK2",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'layers'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-tree only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it (its UI slices swap an app view for the SuiteUI component the kernel's EK-chrome page already shows)",
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignLocking.swift",
+    "Sources/DesignModel/Live/LiveOrdering.swift",
+    "Sources/DesignModel/Live/LiveGrouping.swift",
+    "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+    "Tests/DesignModelTests/DesignTreeTests.swift",
+    "Tests/DesignModelTests/DesignTreeEdgeTests.swift",
+    "Tests/DesignModelTests/DesignArrangeFakesTests.swift",
+    "Tests/DesignModelTests/DesignLayerTogglesTests.swift",
+    "Tests/mutations/DesignModel.KernelLayersAdapter.json",
+    "Tests/mutations/DesignModel.DesignNode.json",
+    "Tests/mutations/DesignModel.DesignArrangeFakes.json",
+    "Sources/DesignApp/DesignLayersPanel.swift",
+    "Tests/AppSnapshotTests/DesignLayersPanelSnapshots.swift",
+    "Sources/PhotoModel/PhotoLayerOps.swift",
+    "Sources/PhotoModel/PhotoWorkspace.swift",
+    "Tests/PhotoModelTests/PhotoLayersTests.swift",
+    "Tests/PhotoModelTests/PhotoLayersEdgeTests.swift",
+    "Tests/PhotoModelTests/PhotoLayerOpsTests.swift",
+    "Tests/mutations/PhotoModel.KernelLayersAdapter.json",
+    "Tests/mutations/PhotoModel.PhotoLayerOps.json",
+    "Sources/PhotoApp/PhotoLayerList.swift",
+    "Tests/AppSnapshotTests/PhotoLayerListSnapshots.swift",
+    "Sources/HaloModel/HaloLayerEdits.swift",
+    "Sources/HaloModel/Live/HaloKeyRules.swift",
+    "Sources/HaloModel/Live/LiveLayerPlacing.swift",
+    "Tests/HaloModelTests/HaloLayerEditsTests.swift",
+    "Tests/HaloModelTests/HaloLayersTests.swift",
+    "Tests/HaloModelTests/LayerPlacingContractTests.swift",
+    "Tests/HaloModelTests/PropertyKeyingContractTests.swift",
+    "Tests/mutations/HaloModel.KernelLayersAdapter.json",
+    "Tests/mutations/HaloModel.HaloLayerEdits.json",
+    "Sources/HaloApp/HaloLayerList.swift",
+    "Tests/AppSnapshotTests/HaloLayerListSnapshots.swift",
+    "Sources/FlareModel/FlareLayers.swift",
+    "Sources/FlareApp/FlareLayerItems.swift",
+    "Sources/FlareApp/FlareWindow+Layers.swift",
+    "Tests/FlareModelTests/FlareLayersTests.swift",
+    "Tests/FlareModelTests/LiveScenesOrderTests.swift",
+    "Tests/mutations/FlareModel.KernelLayersAdapter.json",
+    "Tests/mutations/FlareModel.FlareLayers.json",
+    "Tests/AppSnapshotTests/FlareLayersPanelSnapshots.swift"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AL-design",
+      "behavior": "Design runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`.",
+      "tasks": [
+        "AL-d1",
+        "AL-d2",
+        "AL-d3"
+      ],
+      "journeys": [
+        "MJ-AL-design"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignLocking.swift",
+        "Sources/DesignModel/Live/LiveOrdering.swift",
+        "Sources/DesignModel/Live/LiveGrouping.swift",
+        "Sources/DesignModel/Live/LiveDuplicating.swift",
+        "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+        "Tests/DesignModelTests/DesignTreeTests.swift",
+        "Tests/DesignModelTests/DesignTreeEdgeTests.swift",
+        "Tests/DesignModelTests/DesignArrangeFakesTests.swift",
+        "Tests/DesignModelTests/DesignLayerTogglesTests.swift",
+        "Tests/mutations/DesignModel.KernelLayersAdapter.json",
+        "Tests/mutations/DesignModel.DesignNode.json",
+        "Tests/mutations/DesignModel.DesignArrangeFakes.json",
+        "Sources/DesignApp/DesignLayersPanel.swift",
+        "Tests/AppSnapshotTests/DesignLayersPanelSnapshots.swift"
+      ],
+      "waits": {
+        "editor-kernel:EK-tree": [
+          "AL-d1"
+        ],
+        "editor-kernel:EK-u": [
+          "AL-d3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AL-photo",
+      "behavior": "Photo runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`.",
+      "tasks": [
+        "AL-p1",
+        "AL-p2",
+        "AL-p3"
+      ],
+      "journeys": [
+        "MJ-AL-photo"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoLayerOps.swift",
+        "Sources/PhotoModel/PhotoWorkspace.swift",
+        "Tests/PhotoModelTests/PhotoLayersTests.swift",
+        "Tests/PhotoModelTests/PhotoLayersEdgeTests.swift",
+        "Tests/PhotoModelTests/PhotoLayerOpsTests.swift",
+        "Tests/mutations/PhotoModel.KernelLayersAdapter.json",
+        "Tests/mutations/PhotoModel.PhotoLayerOps.json",
+        "Sources/PhotoApp/PhotoLayerList.swift",
+        "Tests/AppSnapshotTests/PhotoLayerListSnapshots.swift"
+      ],
+      "waits": {
+        "editor-kernel:EK-tree": [
+          "AL-p1"
+        ],
+        "adopt-kernel-undo:AU-photo": [
+          "AL-p1"
+        ],
+        "editor-kernel:EK-u": [
+          "AL-p3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AL-halo",
+      "behavior": "Halo runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`.",
+      "tasks": [
+        "AL-h1",
+        "AL-h2",
+        "AL-h3"
+      ],
+      "journeys": [
+        "MJ-AL-halo"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloLayerEdits.swift",
+        "Sources/HaloModel/Live/HaloKeyRules.swift",
+        "Sources/HaloModel/Live/LiveLayerPlacing.swift",
+        "Tests/HaloModelTests/HaloLayerEditsTests.swift",
+        "Tests/HaloModelTests/HaloLayersTests.swift",
+        "Tests/HaloModelTests/LayerPlacingContractTests.swift",
+        "Tests/HaloModelTests/PropertyKeyingContractTests.swift",
+        "Tests/mutations/HaloModel.KernelLayersAdapter.json",
+        "Tests/mutations/HaloModel.HaloLayerEdits.json",
+        "Sources/HaloApp/HaloLayerList.swift",
+        "Tests/AppSnapshotTests/HaloLayerListSnapshots.swift"
+      ],
+      "waits": {
+        "editor-kernel:EK-tree": [
+          "AL-h1"
+        ],
+        "adopt-kernel-easing:AE-halo": [
+          "AL-h1"
+        ],
+        "editor-kernel:EK-u": [
+          "AL-h3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AL-flare",
+      "behavior": "Flare runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`.",
+      "tasks": [
+        "AL-f1",
+        "AL-f2",
+        "AL-f3"
+      ],
+      "journeys": [
+        "MJ-AL-flare"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareLayers.swift",
+        "Sources/FlareApp/FlareLayerItems.swift",
+        "Sources/FlareApp/FlareWindow+Layers.swift",
+        "Tests/FlareModelTests/FlareLayersTests.swift",
+        "Tests/FlareModelTests/LiveScenesOrderTests.swift",
+        "Tests/mutations/FlareModel.KernelLayersAdapter.json",
+        "Tests/mutations/FlareModel.FlareLayers.json",
+        "Tests/AppSnapshotTests/FlareLayersPanelSnapshots.swift"
+      ],
+      "waits": {
+        "editor-kernel:EK-tree": [
+          "AL-f1"
+        ],
+        "editor-kernel:EK-u": [
+          "AL-f3"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

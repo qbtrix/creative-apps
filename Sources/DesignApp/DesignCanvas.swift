@@ -1,7 +1,8 @@
 // DesignCanvas.swift: the canvas of Design's editor shell: the selected page on
-// SuiteUI's CanvasViewport (rulers, checkerboard, zoom), with its nodes painted
+// SuiteUI's CanvasViewport (rulers in points, matching the status bar and the
+// inspector; checkerboard; zoom), with its nodes painted
 // by DesignArtwork and the selection's outline and handles over them (with
-// several layers selected, an outline on each, SuiteUI's dashed SelectionOutline
+// several layers selected, SuiteUI's dashed SelectionOutline on each and one
 // around them all, and no handles), or the
 // empty state with a New File button when nothing is open. Pointer drags go to
 // the workspace as `.drag` with the modifier keys held, and the release as
@@ -43,15 +44,16 @@ struct DesignCanvas: View {
         let outlined = painted.map(\.node).filter { selectedIDs.contains($0.id) }
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
-            pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
+            pointer: model.tool.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
             onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
             onKey: model.editingTextID == nil ? { key($0) } : nil
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
             if model.hasMultipleSelection {
-                ForEach(outlined) { node in DesignSelectionMarks(rect: node.frame, zoom: zoom, handles: false) }
-                // The box around them all is SuiteUI's dashed outline, apart from each layer's own.
+                // Each layer and the box around them share SuiteUI's dashed outline: a layer's solid accent
+                // edge drawn over the box's dashes read as two outlines where the two met.
+                ForEach(outlined) { node in SelectionOutline(rect: node.frame.cgRect, zoom: zoom) }
                 if let bounds = model.selectionBounds { SelectionOutline(rect: bounds.cgRect, zoom: zoom) }
             } else if let selected, selected.id != model.editingTextID {
                 // The text being edited shows its editor's box instead of handles.

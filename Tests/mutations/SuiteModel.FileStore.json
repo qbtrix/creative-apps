@@ -1,0 +1,7 @@
+[
+{"label":"a hand-off error falls back to a suite file","file":"Sources/SuiteModel/Store/FileStore.swift","find":"if name.hasPrefix(\"handoffs/\") { HandOffCodec.subject }","replace":"if false { HandOffCodec.subject }","tests":"StoreHardeningTests"},
+{"label":"the shared assets list loses its plain words","file":"Sources/SuiteModel/Store/FileStore.swift","find":"case \"assets/index.json\": \"your shared assets list\"","replace":"","tests":"StoreHardeningTests"},
+{"label":"a negative revision reads as valid","file":"Sources/SuiteModel/Store/FileStore.swift","find":"envelope.revision >= 0, ","replace":"","tests":"StoreHardeningTests"},
+{"label":"a damaged file is never moved aside","file":"Sources/SuiteModel/Store/FileStore.swift","find":"guard rename(target, target + \".damaged-\\(UUID().uuidString)\") == 0 else { throw .ioFailed(Self.subject(name)) }","replace":"throw .ioFailed(Self.subject(name))","tests":"StoreHardeningTests"},
+{"label":"an escaping name shows its raw path","file":"Sources/SuiteModel/Store/FileStore.swift","find":"throw .damaged(Self.subject(name))\n        }","replace":"throw .damaged(name)\n        }","tests":"StoreHardeningTests"}
+]

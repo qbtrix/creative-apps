@@ -48,7 +48,7 @@ private struct MoreShapeAssets: AssetLibrary {
     func update(_ id: String, payload: Data?, color: SuiteColorValue?, at date: Date) async throws(SuiteError) -> SuiteAsset {
         var a = moreAsset; a.revision += 1; a.modifiedAt = date; return a
     }
-    func remove(_ id: String) async throws(SuiteError) { if id.isEmpty { throw .linkMissing } }
+    func remove(_ id: String) async throws(SuiteError) { if id.isEmpty { throw .linkMissing(name: "Logo") } }
     func payload(of asset: SuiteAsset) async throws(SuiteError) -> Data { Data("<svg/>".utf8) }
     func assets(fromFileID fileID: String) async throws(SuiteError) -> [SuiteAsset] { [moreAsset] }
     func changes() async -> AsyncStream<Int> { oneYield() }

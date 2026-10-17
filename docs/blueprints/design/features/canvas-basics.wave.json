@@ -1,0 +1,157 @@
+{
+  "title": "Canvas basics: whole points, text boxes that fit, layers past the page, page size",
+  "wave": 1,
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "UX review 2026-10-16 R6 (top-12 items 5, 9, 10); one gap issue per slice, filed at stage 1",
+  "waits_on": "design-contracts; design-seams for CB-a's Model; style-rows SR-m and SR-t for CB-b; all of design-window for the App tasks of CB-b and CB-c",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "UITests/DesignJourneyTests+WholePoints.swift",
+    "Sources/DesignModel/DesignWholePoints.swift",
+    "Sources/DesignModel/DesignDrawing.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/DesignModelTests/DesignWholePointsTests.swift",
+    "Tests/mutations/DesignModel.DesignWholePoints.json",
+    "Tests/mutations/DesignModel.DesignDrawing.json",
+    "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+    "Sources/DesignModel/Contracts/StyleTypes.swift",
+    "Tests/DesignModelTests/DesignTextBoxDrawTests.swift",
+    "Tests/mutations/DesignModel.StyleTypes.json",
+    "UITests/DesignJourneyTests+TextBox.swift",
+    "Sources/DesignModel/DesignText.swift",
+    "Sources/DesignModel/Live/LiveStyling.swift",
+    "Tests/DesignModelTests/DesignTextFitTests.swift",
+    "Tests/mutations/DesignModel.DesignText.json",
+    "Tests/mutations/DesignModel.LiveStyling.json",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignTextFont.swift",
+    "Sources/DesignApp/DesignTextEditor.swift",
+    "Sources/DesignApp/DesignTextArtwork.swift",
+    "Tests/AppSnapshotTests/DesignTextFitSnapshots.swift",
+    "UITests/DesignJourneyTests+Page.swift",
+    "Sources/DesignModel/DesignPageSize.swift",
+    "Tests/DesignModelTests/DesignPageSizeTests.swift",
+    "Tests/mutations/DesignModel.DesignPageSize.json",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Sources/DesignApp/DesignInspectorPage.swift",
+    "Sources/DesignApp/DesignPastEdge.swift",
+    "Tests/AppSnapshotTests/DesignPageSnapshots.swift"
+  ],
+  "journeys": [
+    "DesignWholePointsJourneyTests.testDrawMoveResizeOnWholePoints",
+    "DesignTextBoxJourneyTests.testTextBoxFitsItsText",
+    "DesignPageJourneyTests.testPageSizeAndPastThePage"
+  ],
+  "slices": [
+    {
+      "id": "CB-a",
+      "behavior": "Drawing, moving and resizing on the canvas land on whole points at any zoom, and a Text click-drag makes a text box as wide as the drag.",
+      "tasks": [
+        "CB-1",
+        "CB-2",
+        "CB-3"
+      ],
+      "journeys": [
+        "testDrawMoveResizeOnWholePoints",
+        "MJ9"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+WholePoints.swift",
+        "Sources/DesignModel/DesignWholePoints.swift",
+        "Sources/DesignModel/DesignDrawing.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Tests/DesignModelTests/DesignWholePointsTests.swift",
+        "Tests/mutations/DesignModel.DesignWholePoints.json",
+        "Tests/mutations/DesignModel.DesignDrawing.json",
+        "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+        "Sources/DesignModel/Contracts/StyleTypes.swift",
+        "Tests/DesignModelTests/DesignTextBoxDrawTests.swift",
+        "Tests/mutations/DesignModel.StyleTypes.json"
+      ],
+      "waits": {
+        "design-seams": [
+          "CB-2",
+          "CB-3"
+        ]
+      }
+    },
+    {
+      "id": "CB-b",
+      "behavior": "A clicked text box grows and shrinks with its text, a dragged one keeps its width, wraps and grows down, and a size change refits the box, so no text is cut off.",
+      "tasks": [
+        "CB-4",
+        "CB-5",
+        "CB-6"
+      ],
+      "journeys": [
+        "testTextBoxFitsItsText"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+TextBox.swift",
+        "Sources/DesignModel/DesignText.swift",
+        "Sources/DesignModel/Live/LiveStyling.swift",
+        "Tests/DesignModelTests/DesignTextFitTests.swift",
+        "Tests/mutations/DesignModel.DesignText.json",
+        "Tests/mutations/DesignModel.LiveStyling.json",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignTextFont.swift",
+        "Sources/DesignApp/DesignTextEditor.swift",
+        "Sources/DesignApp/DesignTextArtwork.swift",
+        "Tests/AppSnapshotTests/DesignTextFitSnapshots.swift"
+      ],
+      "waits": {
+        "CB-a": [
+          "CB-5"
+        ],
+        "style-rows:SR-m": [
+          "CB-5"
+        ],
+        "style-rows:SR-t": [
+          "CB-6"
+        ],
+        "design-window": [
+          "CB-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-c",
+      "behavior": "Layers past the page's edge show dimmed instead of vanishing, and the page's width and height are editable in the inspector, one undo step each.",
+      "tasks": [
+        "CB-7",
+        "CB-8",
+        "CB-9"
+      ],
+      "journeys": [
+        "testPageSizeAndPastThePage"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+Page.swift",
+        "Sources/DesignModel/DesignPageSize.swift",
+        "Tests/DesignModelTests/DesignPageSizeTests.swift",
+        "Tests/mutations/DesignModel.DesignPageSize.json",
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Sources/DesignApp/DesignInspectorPage.swift",
+        "Sources/DesignApp/DesignPastEdge.swift",
+        "Tests/AppSnapshotTests/DesignPageSnapshots.swift"
+      ],
+      "waits": {
+        "design-window": [
+          "CB-9"
+        ],
+        "CB-b": [
+          "CB-9"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

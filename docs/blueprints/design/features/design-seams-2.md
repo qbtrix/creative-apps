@@ -18,7 +18,7 @@ whose files it reopens (it calls no wave-1 code):
 
 | what it waits on | why | tasks |
 |---|---|---|
-| style-rows SR-a | `DesignInspectorContent.swift` (ST-2) | D2-1a |
+| style-rows SR-m | `DesignInspectorContent.swift` (ST-2) | D2-1a |
 | style-rows SR-b | `DesignCanvasMarks.swift` (ST-5) | D2-1a, D2-4a |
 | files-history FH-a | `DesignFile.swift`, `DesignHistory.swift`, `Live/LiveFiling.swift`, `DesignFilingTests.swift` (FH-1, FH-2) | D2-1b |
 | layers-panel LP-b | `DesignWorkspace.swift` (L-3) | D2-1b, D2-3a |
@@ -26,6 +26,9 @@ whose files it reopens (it calls no wave-1 code):
 | select-several SS-b | `DesignCanvasEditing.swift` (S-5) | D2-3b |
 | all of design-window | `DesignCanvas.swift`, `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift`, `DesignObjectMenu.swift`, `DesignWindowOptions.swift`, `UITests/DesignJourneyTests.swift`, the live drag box | D2-4a, D2-4b |
 | files-history FH-b | `DesignCommands.swift` (FH-3) | D2-4b |
+| canvas-basics | `DesignCanvasEditing.swift` (CB-2, CB-3), `DesignCanvas.swift`, `DesignIntent.swift`, `DesignWindow.swift` (CB-6, CB-9) | D2-3b, D2-4a, D2-4b |
+| snapping SN-b | `DesignCanvasEditing.swift` (SN-4, SN-5) | D2-3b |
+| snapping SN-c | `DesignIntent.swift`, `DesignCommands.swift` (SN-8) | D2-4b |
 
 copy-group and select-several's SS-a are not waited on. The feature issue
 is filed once S2-a's waits are done; its body lists the table above.
@@ -41,8 +44,14 @@ Linux gate).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| S2-a | A file with a path, a component and a bound variable saves as version 2 and reopens, version 1 still opens, a newer version is refused, and undo restores the library. | D2-1a, D2-1b, D2-2 | MJ6 | design-contracts (the feature); style-rows SR-a, SR-b (D2-1a); files-history FH-a, layers-panel LP-b (D2-1b) |
-| S2-b | Export, Create Component, Variables and Light or Dark preview sit in the menus, each saying it isn't built yet, while the Model drafts pen paths, components and variables on the fakes. | D2-3a, D2-3b, D2-4a, D2-4b | J1, MJ7 | S2-a (D2-3a, D2-4a); layers-panel LP-b (D2-3a); design-seams, select-several SS-b (D2-3b); design-window (D2-4a, D2-4b); style-rows SR-b (D2-4a); files-history FH-b (D2-4b) |
+| S2-a | A file with a path, a component and a bound variable saves as version 2 and reopens, version 1 still opens, a newer version is refused, and undo restores the library. | D2-1a, D2-1b, D2-2 | MJ6 | design-contracts (the feature); style-rows SR-m, SR-b (D2-1a); files-history FH-a, layers-panel LP-b (D2-1b) |
+| S2-b | Export, Create Component, Variables and Light or Dark preview sit in the menus, each saying it isn't built yet, while the Model drafts pen paths, components and variables on the fakes. | D2-3a, D2-3b, D2-4a, D2-4b | J1, MJ7 | S2-a (D2-3a, D2-4a); layers-panel LP-b (D2-3a); design-seams, select-several SS-b (D2-3b); design-window (D2-4a, D2-4b); style-rows SR-b (D2-4a); files-history FH-b (D2-4b); canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b), SN-c (D2-4b) |
+
+S2-b is the UI slice (`"ui": true` in the `.wave.json`: the feel gate, rule
+15, and the Mac finish, rule 17); S2-a is the contract (schema, tier-2 fakes
+and live stubs). D2-4a and D2-4b call D2-3a's actions and D2-3b's `penDraft`
+in the same slice, so S2-b isn't split; D2-4b, the `feature-done` task, is
+the integrate step.
 
 A pen drag's samples go to design-window's live drag box, and the draft
 overlay reads it, so the editor body doesn't run per sample; D2-4a checks
@@ -174,13 +183,13 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| D2-1a | – | `case path` with every switch over the kind (a placeholder in the artwork); `path` on the node | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignCanvasMarks.swift`; tests `DesignPathKindTests.swift` | style-rows SR-a, SR-b | ~150, 5 |
+| D2-1a | – | `case path` with every switch over the kind (a placeholder in the artwork); `path` on the node | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignCanvasMarks.swift`; tests `DesignPathKindTests.swift` | style-rows SR-m, SR-b | ~150, 5 |
 | D2-1b | – | `componentID`, `fillVariableID`; file `components` and `variables`; version 2 with version 1 still opening; snapshots carry the library; walk MJ6 | `DesignNode.swift`, `DesignFile.swift`, `Live/LiveFiling.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift`, and the existing version-1 byte checks it moves to version 2: `DesignFilingTests.swift`, `DesignFileTests.swift`, `DesignFixturesTests.swift` | D2-1a; files-history FH-a; layers-panel LP-b | ~380, 9 |
 | D2-2 | – | Tier-2 fakes and live stubs; `.fake` and `.live` name them; the law over them | `Fakes/DesignTierTwoFakes.swift`, `Live/LiveExport.swift`, `Live/LivePen.swift`, `Live/LiveComponents.swift`, `Live/LiveVariables.swift`, `DesignServices.swift`; tests `DesignContractLawTierTwoTests.swift` | D2-1b | ~380, 7 |
 | D2-3a | – | Export, component and variable actions, `previewMode`, `displayFill`, `resolvedChildren` | `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `previewMode`); tests `DesignActionsTierTwoTests.swift` | D2-2; layers-panel LP-b | ~360, 3 |
-| D2-3b | – | Pen press, drag, finish and cancel routes; walk MJ7 | `DesignCanvasEditing.swift`, `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `penDraft`); tests `DesignPenRouteTests.swift`, `DesignSeams2JourneyTests.swift` | D2-3a; design-seams; select-several SS-b | ~300, 5 |
-| D2-4a | – | The canvas draws paths, resolved instances and bound fills; the pen draft overlay slot, reading the live drag box; the pen drag check | `DesignCanvasMarks.swift`, `DesignCanvas.swift`; snapshots `DesignTierTwoCanvasSnapshots.swift`; `Tests/AppSnapshotTests/DesignPenDragTests.swift` | D2-3b; design-window; style-rows SR-b | ~320, 4 |
-| D2-4b | #288 (part) | Export…, Create Component, Variables… and Light / Dark in the menus and toolbar, with their ids in `DesignControlID`; the window presents the two placeholder sheets and keeps the visible canvas center for Insert; J1's tier-2 items | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignExportSheet.swift`, `DesignVariablesSheet.swift`, `Sources/DesignModel/DesignWindowOptions.swift`; snapshots `DesignTierTwoMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D2-3a; design-window; files-history FH-b | ~350, 10; `feature-done` |
+| D2-3b | – | Pen press, drag, finish and cancel routes; walk MJ7 | `DesignCanvasEditing.swift`, `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `penDraft`); tests `DesignPenRouteTests.swift`, `DesignSeams2JourneyTests.swift` | D2-3a; design-seams; select-several SS-b; canvas-basics; snapping SN-b | ~300, 5 |
+| D2-4a | – | The canvas draws paths, resolved instances and bound fills; the pen draft overlay slot, reading the live drag box; the pen drag check | `DesignCanvasMarks.swift`, `DesignCanvas.swift`; snapshots `DesignTierTwoCanvasSnapshots.swift`; `Tests/AppSnapshotTests/DesignPenDragTests.swift` | D2-3b; design-window; style-rows SR-b; canvas-basics | ~320, 4 |
+| D2-4b | #288 (part) | Export…, Create Component, Variables… and Light / Dark in the menus and toolbar, with their ids in `DesignControlID`; the window presents the two placeholder sheets and keeps the visible canvas center for Insert; J1's tier-2 items | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignExportSheet.swift`, `DesignVariablesSheet.swift`, `Sources/DesignModel/DesignWindowOptions.swift`; snapshots `DesignTierTwoMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D2-3a; design-window; files-history FH-b; canvas-basics; snapping SN-c | ~350, 10; `feature-done` |
 
 Each link is merged code the task needs. `DesignNode.swift` passes D2-1a →
 D2-1b (both add stored fields and coding keys to `DesignNode`, which an

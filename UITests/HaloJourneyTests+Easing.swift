@@ -1,30 +1,36 @@
 // HaloJourneyTests+Easing.swift: H-J7, ease keys (easing, EZ-8;
 // docs/blueprints/halo/features/easing.md, Journey steps). On
 // `-HaloSample keyed` (Bounce on live services: Ball keyed on x at 0 and 24,
-// 160 to 960 px, and on opacity at 0 and 12, and Floor) it selects Ball,
-// finds Animation > Keyframe Easing off with nothing picked, picks the
+// 160 to 960 px, and on opacity at 0 and 12, and Floor) it selects Ball in
+// the inspector's LAYERS list, scrolls to that list's end so EASING's rows
+// and "Pick a span above to shape its easing." show whole above it, finds
+// Animation > Keyframe Easing off with nothing picked, picks the
 // Position X row in EASING, gives it Ease In and Out from the chips, reads
 // Position X at 12 and 6, bends the curve by dragging `halo.easing.handle1`,
 // gives it Hold from `halo.timeline`'s context menu, then ⌘Z three times.
 // An EASING row is `halo.easing.key.<property>.<frame>`, labelled with its
-// title ("Position X 0 → 24"), its easing's title as value and selected
+// title ("Position X, frames 0–24"), its easing's title as value and selected
 // while picked (HaloEasingInspector.swift); the chips are the inspector's
-// buttons titled by preset, the one on carrying the selected trait. Position
+// buttons titled by preset, the one on carrying the selected trait. They are
+// PresetGrids, lazy grids that make no element until on screen, so
+// `showChips` scrolls them in before every chip query (#1411). Position
 // X is the TRANSFORM row `halo.inspector.row.x`, whose value is its text
 // ("560.0 px") or its number. The playhead moves from the keys: clicking
 // Ball's title in the timeline focuses it, then Home and →, read on the
 // status timecode, as H-J6 does. EASING sits below the inspector's fold at
-// 640 pt, so the inspector is scrolled to each control before it is used.
+// 640 pt, so the inspector is scrolled to each control before it is used,
+// and each shot shows its step's end state whole (#1418).
 // A disabled menu item is checked as disabled only: XCUITest doesn't read
-// SwiftUI .help on menu items reliably, so its reason ("Pick a key in the
-// EASING list first.") is proven by HaloModelTests'
+// SwiftUI .help on menu items reliably, so its reason ("Click a key on the
+// timeline or pick a span in the EASING list first.") is proven by HaloModelTests'
 // HaloEasingAvailabilityTests. The Model half of every step is
 // HaloEasingTests.testEaseKeysJourney. One shot per step, `halo-easing-<step>`.
 import XCTest
 
 final class HaloEasingJourneyTests: XCTestCase {
     /// The `keyed` fixture's Ball, and its Position X row in EASING.
-    private static let ball = "comp-1-layer-2", xRow = "halo.easing.key.x.0", opacityRow = "halo.easing.key.opacity.0"
+    private static let ball = "comp-1-layer-2", floor = "comp-1-layer-1"
+    private static let xRow = "halo.easing.key.x.0", opacityRow = "halo.easing.key.opacity.0"
     private static let presets = ["Linear", "Ease In", "Ease Out", "Ease In and Out", "Hold"]
 
     /// H-J7: pick a key, ease it from the chips, the curve and the timeline, then undo.
@@ -32,19 +38,26 @@ final class HaloEasingJourneyTests: XCTestCase {
         let halo = Journey("Halo", self, arguments: ["-HaloSample", "keyed", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
-        // 1. Select Ball in LAYERS: two rows, none picked, "Pick a key above.".
+        // 1. Select Ball in the inspector's LAYERS list: two rows, none
+        // picked, "Pick a span above to shape its easing.". The shot sits at
+        // LAYERS' end (Floor), so the note shows whole and nothing is cut at
+        // the window's edge.
         let ballRow = halo.element("halo.layer.row.\(Self.ball)")
         XCTAssert(ballRow.waitForExistence(timeout: 10), "no Ball row (halo.layer.row.\(Self.ball))")
+        scrollInspector(toShow: ballRow, halo)
         ballRow.click()
         let xRow = halo.element(Self.xRow), opacityRow = halo.element(Self.opacityRow)
         XCTAssert(xRow.waitForExistence(timeout: 5), "EASING has no Position X row (\(Self.xRow))")
-        scrollInspector(toShow: opacityRow, halo)
-        XCTAssertEqual(xRow.label, "Position X 0 → 24", "the first EASING row's title")
-        XCTAssertEqual(opacityRow.label, "Opacity 0 → 12", "the second EASING row's title")
-        XCTAssertFalse(xRow.isSelected, "Position X 0 → 24 is picked before any click")
-        XCTAssertFalse(opacityRow.isSelected, "Opacity 0 → 12 is picked before any click")
-        XCTAssert(text("Pick a key above.", in: halo.element("suite.inspector")).waitForExistence(timeout: 5),
-                  "EASING doesn't read Pick a key above.")
+        scrollInspector(toShow: halo.element("halo.layer.row.\(Self.floor)"), halo)
+        XCTAssertEqual(xRow.label, "Position X, frames 0–24", "the first EASING row's title")
+        XCTAssertEqual(opacityRow.label, "Opacity, frames 0–12", "the second EASING row's title")
+        XCTAssertFalse(xRow.isSelected, "Position X, frames 0–24 is picked before any click")
+        XCTAssertFalse(opacityRow.isSelected, "Opacity, frames 0–12 is picked before any click")
+        let unpicked = "Pick a span above to shape its easing."
+        let inspector = halo.element("suite.inspector"), note = text(unpicked, in: inspector)
+        XCTAssert(note.waitForExistence(timeout: 5), "EASING doesn't read \(unpicked)")
+        XCTAssert(inspector.frame.contains(note.frame), "\(unpicked) at \(note.frame) is cut by \(inspector.frame)")
+        XCTAssert(inspector.frame.contains(xRow.frame), "the Position X row is cut by the inspector")
         halo.shot("easing-1-select-ball")
 
         // 2. Animation > Keyframe Easing: all five items are off.
@@ -59,19 +72,22 @@ final class HaloEasingJourneyTests: XCTestCase {
 
         // 3. Click the Position X row: picked, with the chips, the curve and X1 to Y2; Linear is on.
         xRow.click()
-        XCTAssert(waitFor { xRow.isSelected }, "clicking Position X 0 → 24 didn't pick it")
+        XCTAssert(waitFor { xRow.isSelected }, "clicking Position X, frames 0–24 didn't pick it")
         let curve = halo.element("halo.easing")
         XCTAssert(curve.waitForExistence(timeout: 5), "no easing curve (halo.easing) with a key picked")
         for row in ["x1", "y1", "x2", "y2"] {
             XCTAssert(halo.element("halo.easing.row.\(row)").exists, "no \(row.uppercased()) row (halo.easing.row.\(row))")
         }
+        showChips(halo)
         expectChipOn("Linear", halo)
         scrollInspector(toShow: halo.element("halo.easing.row.y2"), halo)
         halo.shot("easing-3-pick-row")
 
-        // 4. The Ease In and Out chip: the row reads it, and Edit names the step.
+        // 4. The Ease In and Out chip, a row of its own so its title shows
+        // whole: the row reads it, and Edit names the step.
+        showChips(halo)
         let easeInOut = chip("Ease In and Out", halo)
-        scrollInspector(toShow: easeInOut, halo)
+        XCTAssert(easeInOut.frame.width > chip("Linear", halo).frame.width, "Ease In and Out's chip isn't its own row")
         easeInOut.click()
         expectRow(reads: "Ease In and Out", halo)
         expectChipOn("Ease In and Out", halo)
@@ -93,6 +109,7 @@ final class HaloEasingJourneyTests: XCTestCase {
         let grab = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         grab.press(forDuration: 0.1, thenDragTo: grab.withOffset(CGVector(dx: 40, dy: 0)))
         expectRow(reads: "Custom", halo)
+        showChips(halo)
         for preset in Self.presets {
             XCTAssertFalse(chip(preset, halo).isSelected, "the \(preset) chip is on for a custom curve")
         }
@@ -117,7 +134,7 @@ final class HaloEasingJourneyTests: XCTestCase {
             halo.press(character: "z", .command)
             expectRow(reads: easing, halo)
         }
-        XCTAssert(halo.element(Self.xRow).isSelected, "undo unpicked Position X 0 → 24")
+        XCTAssert(halo.element(Self.xRow).isSelected, "undo unpicked Position X, frames 0–24")
         scrubFromTheKeys(to: 6, halo)
         expectPositionX("360.0 px", halo)
         halo.shot("easing-8-undo")
@@ -136,6 +153,22 @@ final class HaloEasingJourneyTests: XCTestCase {
         halo.element("suite.inspector").buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
     }
 
+    /// Scrolls the inspector until the Linear and Ease In and Out chips lie
+    /// whole inside it. The chips sit just above the curve (`halo.easing`),
+    /// so it scrolls toward the curve's top at the inspector's middle.
+    @MainActor private func showChips(_ halo: Journey) {
+        let inspector = halo.element("suite.inspector"), curve = halo.element("halo.easing")
+        XCTAssert(curve.waitForExistence(timeout: 5), "no easing curve (halo.easing) under the chips")
+        let first = chip("Linear", halo), last = chip("Ease In and Out", halo)
+        let shown = {
+            first.exists && last.exists && inspector.frame.contains(first.frame) && inspector.frame.contains(last.frame)
+        }
+        for _ in 0..<20 where !shown() {
+            inspector.scroll(byDeltaX: 0, deltaY: curve.frame.minY > inspector.frame.midY ? -40 : 40)
+        }
+        XCTAssert(shown(), "the chips didn't show in the inspector (curve at \(curve.frame))")
+    }
+
     /// The chip `title` is the one on, within three seconds.
     @MainActor private func expectChipOn(_ title: String, _ halo: Journey) {
         let on = chip(title, halo)
@@ -149,7 +182,7 @@ final class HaloEasingJourneyTests: XCTestCase {
         let row = halo.element(Self.xRow)
         XCTAssert(
             waitFor { (row.value as? String) == easing || self.text(easing, in: row).exists },
-            "Position X 0 → 24 reads \(String(describing: row.value)), not \(easing)")
+            "Position X, frames 0–24 reads \(String(describing: row.value)), not \(easing)")
     }
 
     /// The TRANSFORM Position X row's text, or its number as text.

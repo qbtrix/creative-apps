@@ -7,9 +7,10 @@
 // then collapsed, which selects the parent (#121). Each has two pages with
 // Page 1 current, so Page 1 keeps its checkmark even while a layer is highlighted,
 // with Add Page and Delete Page in a SidebarActionRow under the pages; a
-// one-page file shows Delete Page disabled, saying why. Writes design-layers-,
-// -group-hidden-, -collapsed-, -chevrons-, -collapsed-selection- and
-// -one-page-{light,dark}.png. macOS only.
+// one-page file shows Delete Page disabled, saying why, and with no file open
+// both are disabled. Writes design-layers-, -group-hidden-, -collapsed-,
+// -chevrons-, -collapsed-selection-, -one-page- and -no-file-{light,dark}.png.
+// macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -93,6 +94,17 @@ import Testing
         try shoot("-one-page", model)
         let allEnabled = DesignLayersPanel.pageCommands(twoPages(), { _ in }).allSatisfy { $0.isEnabled }
         #expect(allEnabled)
+    }
+
+    /// With no file open, Add Page can't add one, so both page commands are off and say why.
+    @Test func noFileDisablesBothPageCommands() throws {
+        let model = DesignWorkspace()
+        let entries = DesignLayersPanel.pageCommands(model, { _ in }).map { $0.controlEntry() }
+        #expect(entries == [
+            ControlEntry(id: "design.page.add", enabled: false, reason: "Create or open a file first."),
+            ControlEntry(id: "design.page.delete", enabled: false, reason: "Create or open a file first."),
+        ])
+        try shoot("-no-file", model)
     }
 }
 

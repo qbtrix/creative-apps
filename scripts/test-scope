@@ -33,16 +33,17 @@ import sys
 APPS = {"flare": "Flare", "design": "Design", "photo": "Photo", "library": "Library", "halo": "Halo"}
 SCOPES = list(APPS) + ["suite", "suiteui"]
 SNAP = "AppSnapshotTests"
-# AppSnapshotTests suites per scope, by name. Flare and SuiteUI add the
+# AppSnapshotTests suites per scope, by name (an app's RenderBudget<App>Tests
+# included). Flare and SuiteUI add the
 # suites and free tests whose names don't say so, and each app has its test
 # in the AppSnapshotTests suite. A snapshot test that fits no app runs in
 # full runs only.
 SNAPSHOTS = {
-    "flare": r"(Flare[A-Za-z]*|AutosaveTests|AutosaveRecoveryTests|PlaybackDriverTests|StagePathTests)/|AppSnapshotTests/flare\(",
-    "design": r"Design[A-Za-z]*/|AppSnapshotTests/design\(",
-    "photo": r"Photo[A-Za-z]*/|AppSnapshotTests/photo\(",
-    "library": r"Library[A-Za-z]*/|AppSnapshotTests/library\(",
-    "halo": r"Halo[A-Za-z]*/|AppSnapshotTests/halo\(",
+    "flare": r"((RenderBudget)?Flare[A-Za-z]*|AutosaveTests|AutosaveRecoveryTests|PlaybackDriverTests|StagePathTests)/|AppSnapshotTests/flare\(",
+    "design": r"(RenderBudget)?Design[A-Za-z]*/|AppSnapshotTests/design\(",
+    "photo": r"(RenderBudget)?Photo[A-Za-z]*/|AppSnapshotTests/photo\(",
+    "library": r"(RenderBudget)?Library[A-Za-z]*/|AppSnapshotTests/library\(",
+    "halo": r"(RenderBudget)?Halo[A-Za-z]*/|AppSnapshotTests/halo\(",
     "suiteui": r"(Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders"
     r"|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\(",
 }
@@ -85,7 +86,8 @@ def path_units(path):
         return ALL  # a target this table doesn't know yet
     if root == "Tests":
         if top == SNAP:
-            app = next((a for a, x in APPS.items() if parts[2].startswith(x)), None)
+            name = parts[2].removeprefix("RenderBudget")
+            app = next((a for a, x in APPS.items() if name.startswith(x)), None)
             return [(SNAP, SNAPSHOTS[app] if app else None)]
         if top.endswith("ModelTests") or top in ("SuiteUITests", "AppAuditTests"):
             return [(top, None)]
@@ -102,7 +104,8 @@ def regexes(units, linux=False):
     if None in snaps:
         second = r"^AppSnapshotTests\."
     elif snaps:
-        second = r"^AppSnapshotTests\.(%s)" % "|".join(dict.fromkeys(snaps))
+        # BodyCountSuites/ is the serialized parent the body-counter suites nest in.
+        second = r"^AppSnapshotTests\.(BodyCountSuites/)?(%s)" % "|".join(dict.fromkeys(snaps))
     else:
         second = ""
     return first + "\n" + second
@@ -116,8 +119,8 @@ def perf_entries():
             fields = line.split("#", 1)[0].split()
             if not fields:
                 continue
-            if len(fields) != 2 or fields[0] not in SCOPES or not re.fullmatch(r"\w+\.\w+(/\w+)?", fields[1]):
-                sys.exit(f"test-scope: {PERF_LIST}:{n}: want '<app> <Target>.<Suite>[/<test>]' or '<app> <Target>.<freeTest>', got {line.strip()!r}")
+            if len(fields) != 2 or fields[0] not in SCOPES or not re.fullmatch(r"\w+\.\w+(/\w+){0,2}", fields[1]):
+                sys.exit(f"test-scope: {PERF_LIST}:{n}: want '<app> <Target>.<Suite>[/<test>]' (a nested suite: <Target>.<Parent>/<Suite>[/<test>]) or '<app> <Target>.<freeTest>', got {line.strip()!r}")
             entries.append((fields[0], fields[1]))
     return entries
 

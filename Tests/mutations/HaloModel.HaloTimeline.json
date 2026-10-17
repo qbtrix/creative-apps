@@ -1,0 +1,6 @@
+[
+{"label":"scrubChanges drops the clamp","file":"Sources/HaloModel/HaloTimeline.swift","find":"return min(max(frame, 0), comp.lastFrame) != comp.playheadFrame","replace":"return frame != comp.playheadFrame","tests":"HaloPlaybackWritesTests"},
+{"label":"scrubChanges says yes with no composition","file":"Sources/HaloModel/HaloTimeline.swift","find":"guard let comp = selectedComposition else { return false }\n        return min","replace":"guard let comp = selectedComposition else { return true }\n        return min","tests":"HaloPlaybackWritesTests"},
+{"label":"the strip fits the frame count, not the last frame","file":"Sources/HaloModel/HaloTimeline.swift","find":"width > 0 ? width / Double(max(1, lastFrame)) : 0","replace":"width > 0 ? width / Double(max(1, durationFrames)) : 0","tests":"HaloTimelineTests"},
+{"label":"a bar runs to its out point","file":"Sources/HaloModel/HaloTimeline.swift","find":"span.lowerBound...max(span.lowerBound, span.upperBound - 1)","replace":"span","tests":"HaloTimelineTests"}
+]

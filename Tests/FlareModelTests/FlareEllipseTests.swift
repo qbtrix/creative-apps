@@ -23,9 +23,9 @@ private func expectBounds(_ shape: FlareShape?, _ expected: Rect) {
     #expect(b.map { abs($0.maxX - expected.maxX) < 1e-6 && abs($0.maxY - expected.maxY) < 1e-6 } == true)
 }
 
-@Test func ellipseToolIsDisabledUntilTheStageSendsDrags() {
-    #expect(!FlareTool.ellipse.isEnabled)
-    #expect(FlareTool.ellipse.unavailableHelp?.isEmpty == false)
+@Test func ellipseToolIsEnabledNowTheStageSendsDrags() {
+    #expect(FlareTool.ellipse.isEnabled)
+    #expect(FlareTool.ellipse.unavailableHelp == nil)
 }
 
 @Test func ellipseDragAddsAnEllipseLayerInOneUndoStep() {

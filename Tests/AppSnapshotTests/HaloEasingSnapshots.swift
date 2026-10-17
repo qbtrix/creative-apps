@@ -1,11 +1,19 @@
 // HaloEasingSnapshots.swift: Halo's EASING group (#428, EZ-6) on the `keyed`
-// fixture. With Ball selected and Position X 0 → 24 picked with Ease In and
-// Out: the two rows (the picked one selected), the chips with Ease In and
-// Out on, the curve and X1 Y1 X2 Y2 (halo-easing-*). Ball with nothing
-// picked: the rows and "Pick a key above." (halo-easing-unpicked-*). Floor,
-// which has no property of two keys: "Key a property to shape its easing."
+// fixture. With Ball selected and Position X, frames 0–24 picked with Ease
+// In and Out: the two rows (the picked one selected), the chips with Ease In
+// and Out on, the curve and X1 Y1 X2 Y2 (halo-easing-*, and at the
+// inspector's minimum width halo-easing-narrow-*). Ball with nothing picked:
+// the rows and "Pick a span above to shape its easing."
+// (halo-easing-unpicked-*). Floor, which has no property of two keys:
+// collapsed (halo-easing-empty-collapsed-*) and opened, the stopwatch hint
 // (halo-easing-empty-*). Light and Dark, at the inspector's ideal width.
-// macOS only.
+// Geometry, measured on the views the row draws: every chip title fits at
+// the minimum width, no segment title or easing title ever truncates (one
+// line beside each other, else the easing under the title), Linear sits
+// beside its title at the ideal width, the rows are filled and the picked
+// one bordered, and the empty group adds no text height while collapsed
+// (#1412, #1414, #1416, #1420, #1421, #1422, #1450, #1453). macOS only.
+import AppKit
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -28,23 +36,113 @@ import Testing
         #expect(project.easingCurve(count: 129).count == 129)
         #expect(project.refusal == nil)
         try snapshots(project, name: "halo-easing")
+        try snapshots(project, name: "halo-easing-narrow", width: SuiteSize.inspectorWidth.min)
     }
 
-    /// Ball's segments with none picked: the rows and "Pick a key above.".
+    /// Ball's segments with none picked: the rows and "Pick a span above to shape its easing.".
     @Test func unpicked() throws {
         let project = try layer("Ball")
-        #expect(project.keySegments.map(\.title) == ["Position X 0 → 24", "Opacity 0 → 12"])
+        #expect(project.keySegments.map(\.title) == ["Position X, frames 0–24", "Opacity, frames 0–12"])
         #expect(project.keySegments.map(\.easingTitle) == ["Linear", "Linear"])
         #expect(project.pickedSegment == nil)
         #expect(project.easingHandles == nil)
         try snapshots(project, name: "halo-easing-unpicked")
     }
 
-    /// Floor has no property of two keys: "Key a property to shape its easing.".
+    /// Floor has no property of two keys: collapsed, and opened the stopwatch hint (#1417).
     @Test func noSegments() throws {
         let project = try layer("Floor")
         #expect(project.keySegments.isEmpty)
-        try snapshots(project, name: "halo-easing-empty")
+        try snapshots(project, name: "halo-easing-empty", expandsWhenEmpty: true)
+        try snapshots(project, name: "halo-easing-empty-collapsed")
+    }
+
+    /// #1412: with no segment the group opens collapsed, so its text adds no
+    /// height under the inspector's fold.
+    @Test func emptyGroupAddsNoTextHeight() throws {
+        let project = try layer("Floor")
+        let collapsed = height(HaloEasingInspector(model: project))
+        let open = height(HaloEasingInspector(model: project, expandsWhenEmpty: true))
+        let note = height(Text(HaloEasingInspector.emptyNote).font(SuiteFont.inspectorMeta))
+        #expect(collapsed > 0)
+        #expect(open - collapsed >= note - 0.5, "collapsed \(collapsed), open \(open), note \(note)")
+    }
+
+    /// #1414: each preset once, and every chip's title fits its cell at the
+    /// inspector's minimum width (three a row cut "Ease In and Out").
+    @Test func chipsFit() {
+        let rows = HaloEasingInspector.chipRows
+        #expect(
+            rows.flatMap { $0 }.map(\.rawValue).sorted() == HaloEasingPreset.allCases.map(\.rawValue).sorted())
+        let content = SuiteSize.inspectorWidth.min - 2 * SuiteSpacing.m
+        for row in rows {
+            let columns = CGFloat(row.count)
+            let cell = (content - (columns - 1) * SuiteSpacing.xs) / columns
+            for preset in row {
+                let needs = width(preset.title, SuiteFont.caption.weight(.semibold)) + 2 * SuiteSpacing.s
+                #expect(needs <= cell, "\(preset.title) needs \(needs) pt in a \(cell) pt chip")
+            }
+        }
+    }
+
+    /// #1420, #1450: at the inspector's minimum width every segment title
+    /// stays on one line with every easing title whole: beside it, or else
+    /// under it. Measured on the label's own two layouts (font, padding,
+    /// gap), at the width the section leaves the row.
+    @Test func segmentTitlesFitOneLine() throws {
+        let project = try layer("Ball")
+        #expect(!project.keySegments.isEmpty)
+        let row = rowWidth(SuiteSize.inspectorWidth.min)
+        for segment in project.keySegments {
+            for value in Self.easingTitles {
+                let label = HaloEasingSegmentLabel(title: segment.title, value: value)
+                let one = fitting(label.oneLine), two = fitting(label.twoLines)
+                #expect(
+                    one <= row || two <= row,
+                    "\(segment.title) with \(value): one line \(one), two lines \(two), row \(row) pt")
+            }
+        }
+    }
+
+    /// #1453: at the ideal width Linear sits whole beside every segment
+    /// title, and every other easing title is whole on one line or the next.
+    @Test func segmentValueFitsAtIdeal() throws {
+        let project = try layer("Ball")
+        let row = rowWidth(SuiteSize.inspectorWidth.ideal)
+        for segment in project.keySegments {
+            let linear = fitting(HaloEasingSegmentLabel(title: segment.title, value: "Linear").oneLine)
+            #expect(linear <= row, "\(segment.title) and Linear need \(linear) pt on one line, row \(row) pt")
+            for value in Self.easingTitles {
+                let label = HaloEasingSegmentLabel(title: segment.title, value: value)
+                #expect(fitting(label.oneLine) <= row || fitting(label.twoLines) <= row, "\(segment.title), \(value)")
+            }
+        }
+    }
+
+    /// #1422: the picked row has an accent border, the others none. #1416:
+    /// the curve says what it does and what its axes are. #1417, #1454: the
+    /// empty and unpicked texts say how to get a span and that rows are spans.
+    @Test func pickIsBorderedAndCurveExplained() {
+        #expect(HaloEasingInspector.rowBorder(picked: true) == SuiteColor.accent)
+        #expect(HaloEasingInspector.rowBorder(picked: false) == nil)
+        #expect(HaloEasingInspector.curveTip.contains("Drag a handle"))
+        #expect(HaloEasingInspector.curveNote.contains("dashed line is Linear"))
+        #expect(HaloEasingInspector.emptyNote.contains("stopwatch"))
+        #expect(HaloEasingInspector.unpickedNote == "Pick a span above to shape its easing.")
+    }
+
+    /// #1421: rows sit on the Studio row's fill, the picked one on the
+    /// selected well. #1415: X1 to Y2 explain themselves.
+    @Test func rowsAreFilledAndHandlesExplained() {
+        #expect(HaloEasingInspector.rowFill(picked: false, hovered: false) == SuiteColor.row)
+        #expect(HaloEasingInspector.rowFill(picked: false, hovered: true) == SuiteColor.rowHover)
+        #expect(HaloEasingInspector.rowFill(picked: true, hovered: true) == SuiteColor.selectedWell)
+        for label in ["X1", "Y1", "X2", "Y2"] {
+            let help = HaloEasingInspector.handleHelp(label)
+            #expect(help != label)
+            #expect(help.contains(label.hasSuffix("1") ? "first" : "second"))
+            #expect(help.contains(label.hasPrefix("X") ? "Time" : "Progress"))
+        }
     }
 
     /// `keyed` on `.fake` with the layer named `name` selected.
@@ -56,12 +154,36 @@ import Testing
         return project
     }
 
+    /// Every title a segment row's value can read: each preset's and Custom.
+    private static let easingTitles = HaloEasingPreset.allCases.map(\.title) + ["Custom"]
+
+    /// The width InspectorSection leaves a row in an inspector `inspector` pt wide.
+    private func rowWidth(_ inspector: CGFloat) -> CGFloat { inspector - 2 * SuiteSpacing.m }
+
+    /// `view`'s ideal width, as ViewThatFits measures a candidate.
+    private func fitting(_ view: some View) -> CGFloat {
+        NSHostingView(rootView: view.fixedSize()).fittingSize.width
+    }
+
+    /// `text`'s one-line width in `font`.
+    private func width(_ text: String, _ font: Font) -> CGFloat {
+        NSHostingView(rootView: Text(text).font(font).lineLimit(1).fixedSize()).fittingSize.width
+    }
+
+    /// `view`'s height at the inspector's ideal width.
+    private func height(_ view: some View) -> CGFloat {
+        NSHostingView(rootView: view.frame(width: SuiteSize.inspectorWidth.ideal)).fittingSize.height
+    }
+
     /// The EASING group in its column on the panel, as `<name>-light.png` and `<name>-dark.png`.
-    private func snapshots(_ model: HaloProject, name: String) throws {
+    private func snapshots(
+        _ model: HaloProject, name: String, width: CGFloat = SuiteSize.inspectorWidth.ideal,
+        expandsWhenEmpty: Bool = false
+    ) throws {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                HaloEasingInspector(model: model)
-                    .frame(width: SuiteSize.inspectorWidth.ideal, height: 520, alignment: .topLeading)
+                HaloEasingInspector(model: model, expandsWhenEmpty: expandsWhenEmpty)
+                    .frame(width: width, height: 560, alignment: .topLeading)
                     .background(SuiteColor.panel)
                     .padding(SuiteSpacing.xxl),
                 name: "\(name)-\(scheme.name)", scheme: scheme)

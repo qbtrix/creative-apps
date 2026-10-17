@@ -1,0 +1,124 @@
+{
+  "title": "Design's, Photo's and Flare's box transform math runs on SuiteKernel's BoxMath; the app copies are deleted",
+  "wave": "XK2",
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'transform'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-box only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it",
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/Live/LiveTransforming.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/DesignModelTests/DesignResizeTests.swift",
+    "Tests/DesignModelTests/DesignSeveralTransformTests.swift",
+    "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
+    "Tests/DesignModelTests/DesignCanvasTests.swift",
+    "Tests/mutations/DesignModel.KernelTransformAdapter.json",
+    "Tests/mutations/DesignModel.LiveTransforming.json",
+    "Tests/mutations/DesignModel.DesignNode.json",
+    "Sources/PhotoModel/PhotoTransform.swift",
+    "Sources/PhotoModel/Live/LiveTransform.swift",
+    "Sources/PhotoModel/Contracts/PhotoContractTypes.swift",
+    "Tests/PhotoModelTests/PhotoMoveTests.swift",
+    "Tests/PhotoModelTests/PhotoDragRoutingTests.swift",
+    "Tests/mutations/PhotoModel.KernelTransformAdapter.json",
+    "Tests/mutations/PhotoModel.PhotoTransform.json",
+    "Sources/FlareModel/Live/BoxGestureMath.swift",
+    "Tests/FlareModelTests/BoxGestureMathTests.swift",
+    "Tests/FlareModelTests/LiveShapesBoxTests.swift",
+    "Tests/mutations/FlareModel.KernelTransformAdapter.json",
+    "Tests/mutations/FlareModel.BoxGestureMath.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AT-design",
+      "behavior": "Design runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AT-d1",
+        "AT-d2"
+      ],
+      "journeys": [
+        "MJ-AT-design"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/Live/LiveTransforming.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Tests/DesignModelTests/DesignResizeTests.swift",
+        "Tests/DesignModelTests/DesignSeveralTransformTests.swift",
+        "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
+        "Tests/DesignModelTests/DesignCanvasTests.swift",
+        "Tests/mutations/DesignModel.KernelTransformAdapter.json",
+        "Tests/mutations/DesignModel.LiveTransforming.json",
+        "Tests/mutations/DesignModel.DesignNode.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-box": [
+          "AT-d1"
+        ],
+        "adopt-kernel-selection:AS-design": [
+          "AT-d1"
+        ],
+        "adopt-kernel-layers:AL-design": [
+          "AT-d1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AT-photo",
+      "behavior": "Photo runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AT-p1",
+        "AT-p2"
+      ],
+      "journeys": [
+        "MJ-AT-photo"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoTransform.swift",
+        "Sources/PhotoModel/Live/LiveTransform.swift",
+        "Sources/PhotoModel/Contracts/PhotoContractTypes.swift",
+        "Tests/PhotoModelTests/PhotoMoveTests.swift",
+        "Tests/PhotoModelTests/PhotoDragRoutingTests.swift",
+        "Tests/mutations/PhotoModel.KernelTransformAdapter.json",
+        "Tests/mutations/PhotoModel.PhotoTransform.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-box": [
+          "AT-p1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AT-flare",
+      "behavior": "Flare runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AT-f1",
+        "AT-f2"
+      ],
+      "journeys": [
+        "MJ-AT-flare"
+      ],
+      "owned": [
+        "Sources/FlareModel/Live/BoxGestureMath.swift",
+        "Tests/FlareModelTests/BoxGestureMathTests.swift",
+        "Tests/FlareModelTests/LiveShapesBoxTests.swift",
+        "Tests/mutations/FlareModel.KernelTransformAdapter.json",
+        "Tests/mutations/FlareModel.BoxGestureMath.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-box": [
+          "AT-f1"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

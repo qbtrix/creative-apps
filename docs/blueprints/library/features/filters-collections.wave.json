@@ -103,7 +103,8 @@
         "Sources/LibraryApp/LibraryWindow.swift",
         "Sources/LibraryApp/LibraryCommands.swift",
         "Sources/LibraryApp/LibraryBrowser.swift"
-      ]
+      ],
+      "ui": true
     },
     {
       "id": "FC-b",
@@ -157,7 +158,8 @@
           "FC-9",
           "FC-10"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "FC-d",
@@ -227,7 +229,8 @@
         "FC-d": [
           "FC-16"
         ]
-      }
+      },
+      "ui": true
     }
   ]
 }

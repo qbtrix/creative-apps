@@ -26,9 +26,9 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     var catalog = LibraryCatalog()
     catalog.load([photo("a"), photo("b", rating: 3, picked: true, label: .red)])
     #expect(catalog.cellValue(for: "a") == "loading No stars")
-    #expect(catalog.cellValue(for: "b") == "loading 3 stars, Picked, Red")
+    #expect(catalog.cellValue(for: "b") == "loading 3 stars, Picked, Red label")
     catalog.thumbnails["b"] = image(256, 171)
-    #expect(catalog.cellValue(for: "b") == "ready 256×171 3 stars, Picked, Red")
+    #expect(catalog.cellValue(for: "b") == "ready 256×171 3 stars, Picked, Red label")
 }
 
 @Test func cellValueAndHelpSayAMissingFileIsUnreadable() {

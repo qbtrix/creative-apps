@@ -61,7 +61,7 @@ public actor StoreRecents: RecentWork {
         let (_, revision) = try store.update(Self.file, empty: RecentsList()) { old in
             var list = old
             change(&list)
-            list.revision += 1
+            list.revision = list.revision < Int.max ? list.revision + 1 : 0
             return list
         }
         seen = revision

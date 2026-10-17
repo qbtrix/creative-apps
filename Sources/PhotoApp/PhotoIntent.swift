@@ -1,5 +1,6 @@
 // PhotoIntent.swift: everything a person can ask Photo's window to do, as one
-// value: every control in the top bar, rail, canvas, panel and menus sends one
+// value: every control in the window toolbar, floating tool palette, canvas,
+// sidebar, inspector and menus sends one
 // of these to PhotoWindow.perform, which calls the matching PhotoWorkspace
 // method or opens a panel or sheet. Each v2 area has one case holding its own
 // enum, declared in its PhotoWindow+<Area>.swift and routed to that file's

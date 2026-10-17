@@ -92,21 +92,36 @@ import Testing
         #expect(RecentEvent(rawValue: "saved") == .saved)
     }
 
-    /// QB-SM1: noting into a full list is <= 0.2 ms release, <= 2 ms debug.
-    @Test func noteIntoFullList() {
-        var full = RecentsList()
+    @Test func mergingKeepsMineOnATie() {
+        var mine = RecentsList()
+        mine.note(RecentItem(ref: ref("Logo.design", .design, .designDocument), lastUsed: now, thumbnail: "thumbnails/a.png"))
+        var theirs = RecentsList()
+        theirs.note(logo(now))
+        let merged = mine.merging(theirs)
+        #expect(merged.items.count == 1)
+        #expect(merged.items.first?.thumbnail == "thumbnails/a.png")
+    }
+
+    /// QB-SM1: noting into a full list is <= 0.2 ms release, <= 2 ms debug,
+    /// as a median. Even rounds re-note a file already listed; odd rounds
+    /// note a new file, which evicts the oldest.
+    @Test func noteIntoFullList() async {
+        var list = RecentsList()
         for i in 0..<RecentsList.cap {
-            full.note(RecentItem(ref: ref("f\(i).flare", .flare, .flareAnimation), lastUsed: now + Double(i)))
+            list.note(RecentItem(ref: ref("f\(i).flare", .flare, .flareAnimation), lastUsed: now + Double(i)))
         }
-        let clock = ContinuousClock()
-        var best = Duration.seconds(1)
-        for round in 0..<20 {
-            var list = full
-            let item = RecentItem(ref: ref("f\(round * 7).flare", .flare, .flareAnimation), lastUsed: now + 1_000)
-            let took = clock.measure { list.note(item) }
-            best = min(best, took)
-            #expect(list.items.count == RecentsList.cap)
+        let runs = 50
+        let items = (0..<runs).map { i in
+            let name = i.isMultiple(of: 2) ? "f\(RecentsList.cap - 1 - i).flare" : "new\(i).flare"
+            return RecentItem(ref: ref(name, .flare, .flareAnimation), lastUsed: now + 1_000 + Double(i))
         }
-        #expect(best <= .milliseconds(2))
+        let budget = suiteBudget(device: 0.2)
+        let costs = await suiteMeasure("recents.note full", runs: runs, budget: budget) { i in
+            list.note(items[i])
+        }
+        #expect(list.items.count == RecentsList.cap)
+        #expect(list.items.first?.ref.displayName == "new49.flare")
+        #expect(list.items.last?.ref.displayName == "f25.flare")
+        #expect(suiteMedian(costs) <= budget)
     }
 }

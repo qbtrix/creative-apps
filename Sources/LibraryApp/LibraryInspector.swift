@@ -1,5 +1,6 @@
 // LibraryInspector.swift: the Library window's inspector: Info and Develop
-// tabs on SegmentedTabs. Info shows the selected photos' MetadataInspector or
+// tabs on SegmentedTabs. Info shows the cull targets' MetadataInspector (the
+// loupe photo in the loupe, else the selected photos) or
 // else an InspectorHeader with the selected collection's name and photo
 // count. Develop shows DevelopInspector. Which tab shows is presentation
 // state kept here; values in, closures out: it reads LibraryCatalog and hands

@@ -72,3 +72,22 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     let changed = shows(tool, changeFrom: before, to: after)
     #expect(changed || before.toolHelp(tool)?.isEmpty == false, "\(tool) is dead on .live with no help saying why")
 }
+
+/// Move refuses an adjustment layer, which has no origin on the canvas, and
+/// says why in the status and in its hint (#1630); an image layer moves.
+@Test func moveRefusesAnAdjustmentLayerAndSaysWhy() throws {
+    var workspace = try PhotoWorkspace.fixture(.layered)
+    workspace.selectTool(.move)
+    let background = try #require(workspace.layers.first { $0.name == "Background" })
+    workspace.selectLayer(background.id)
+    #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
+    let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
+    workspace.selectLayer(curves.id)
+    #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
+    let steps = workspace.historySteps.count
+    stroke(&workspace, from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 150, y: 150))
+    let after = try #require(workspace.layers.first { $0.id == curves.id })
+    #expect([after.offsetX, after.offsetY] == [curves.offsetX, curves.offsetY])
+    #expect(workspace.historySteps.count == steps)
+    #expect(workspace.statusMessage == "Select an image layer in the sidebar to move it.")
+}

@@ -82,7 +82,8 @@ private func ball(_ w: FlareWorkspace) -> Layer? { w.document?.scenes.first?.lay
     #expect(FlareTool.allCases.allSatisfy { FlareWorkspace(services: .fake()).toolHelp($0) == nil })
     var off = FlareServices.fake()
     off.shapes = FakeShapes(unavailable: "")
-    #expect(FlareWorkspace(services: off).toolHelp(.pen) == FlareTool.pen.unavailableHelp)
+    // Every tool's own help is nil now (DK-8), so a service's reason still disables it.
+    #expect(FlareWorkspace(services: off).toolHelp(.pen) != nil)
 }
 
 @Test func aLabelledStepIsOneNamedEntryAndLoadClearsTheRest() {

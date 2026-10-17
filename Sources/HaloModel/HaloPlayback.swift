@@ -5,6 +5,8 @@
 // (a scrub while playing) and on each loop wrap, so turning Loop off mid-play
 // ends the current pass. Never calls `edit`: playback is not an undo step
 // (QB-F3). Writes only `playback` and the playhead, through `scrub(to:)`.
+// `tickChanges(now:)` says whether a tick would change anything, so the
+// window ticks only then and a refresh between frames writes nothing.
 // Linux-safe: no UI imports.
 
 extension HaloProject {
@@ -69,6 +71,16 @@ extension HaloProject {
         if t.ended { state.playing = false }
         playback = state
         return state.playing
+    }
+
+    /// Whether `tick(now:)` at `now` would change anything: the frame, the
+    /// anchor a scrub while playing moves (the frame can stay put), or the
+    /// end of a play-once pass. Ticks on a copy and compares, so a refresh
+    /// between two frames lets the window skip its write (#1296).
+    public func tickChanges(now: Double) -> Bool {
+        var next = self
+        next.tick(now: now)
+        return next != self
     }
 
     /// ← and →: pauses, then moves the playhead `frames` frames, clamped.

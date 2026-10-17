@@ -1,0 +1,5 @@
+[
+{"label":"a merge tie takes the other writer's entry","file":"Sources/SuiteModel/Recents/RecentsList.swift","find":"mine.lastUsed >= item.lastUsed","replace":"mine.lastUsed > item.lastUsed","tests":"ValuesRecentsTests"},
+{"label":"a merge keeps the receiver's revision","file":"Sources/SuiteModel/Recents/RecentsList.swift","find":"revision: max(revision, other.revision)","replace":"revision: revision","tests":"ValuesRecentsTests"},
+{"label":"a full list stops evicting","file":"Sources/SuiteModel/Recents/RecentsList.swift","find":"if items.count > Self.cap { items.removeLast(items.count - Self.cap) }","replace":"","tests":"ValuesRecentsTests"}
+]

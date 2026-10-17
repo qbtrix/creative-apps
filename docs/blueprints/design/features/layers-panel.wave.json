@@ -59,7 +59,8 @@
         "design-window:DW-b": [
           "L-4"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "LP-b",

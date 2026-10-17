@@ -192,6 +192,15 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Whether Delete Page can act: a page is selected and it is not the file's last one.
     public var canDeletePage: Bool { selectedPage != nil && pages.count > 1 }
 
+    /// Why Add Page can't run now, as its tooltip; nil when it can.
+    public var addPageHelp: String? { isOpen ? nil : DesignToolbarItem.noFile }
+
+    /// Why Delete Page can't run now, as its tooltip; nil when it can.
+    public var deletePageHelp: String? {
+        if selectedPage == nil { return DesignToolbarItem.noFile }
+        return canDeletePage ? nil : "A file keeps at least one page."
+    }
+
     /// Deletes a page; the last page is refused. Deleting the selected page selects its neighbor.
     /// Undo brings the page back with its nodes and the selection it had.
     public mutating func deletePage(_ id: String) throws(DesignTreeError) {

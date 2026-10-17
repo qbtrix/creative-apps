@@ -1,4 +1,4 @@
-// PhotoToolOptions.swift: the Tool Options section of the Adjust tab, which
+// PhotoToolOptions.swift: the Tool Options section of the inspector, which
 // shows the active tool's options. The brush, eraser, clone and heal sliders
 // and the marquee's actions live here; the crop's, selection's, transform's
 // and eyedropper's own options each live in their file (CropOptions,
@@ -56,7 +56,7 @@ struct ToolOptionsSection: View {
                 // CropOptions draws the crop's one instruction line itself.
                 CropOptions(model: model, perform: perform)
             case .move:
-                hint("Drag over the image to move the selected layer.")
+                hint(model.moveHint)
                 TransformOptions(model: model, perform: perform)
             case .eyedropper:
                 hint(Self.eyedropperHint)

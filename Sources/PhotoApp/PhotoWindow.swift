@@ -1,6 +1,6 @@
 // PhotoWindow.swift: the root of a Photo window. It holds the one
 // PhotoWorkspace (`model`) and the window's presentation state (zoom, the
-// panel tab, the open file's URL, sheets and alerts, the Straighten draft the
+// open file's URL, sheets and alerts, the Straighten draft the
 // canvas previews, and the v2 presentation flags), turns every PhotoIntent
 // into a workspace method or a panel, and keeps the picture rendered (CanvasRenderer) whenever the
 // workspace's revision moves, and clears the status line's message 4 s after
@@ -43,7 +43,6 @@ struct PhotoWindow: View {
     @State var fitFollowsViewport = false
     /// The zoom the last fit chose; a zoom that differs means the user zoomed.
     @State var fittedZoom: Double?
-    @State var tab = PhotoPanelTab.adjust
     @State var documentURL: URL?
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
@@ -74,7 +73,7 @@ struct PhotoWindow: View {
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
 
-    /// This process's `-PhotoFixture` and `-PhotoWindowWidth`, read once.
+    /// This process's `-PhotoFixture`, read once.
     nonisolated static let launchOptions = PhotoLaunchOptions(arguments: ProcessInfo.processInfo.arguments)
 
     /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(.live)`.
@@ -90,9 +89,8 @@ struct PhotoWindow: View {
     var body: some View {
         PhotoEditor(
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
-            note: renderer.failure ?? note, zoom: zoom, tab: tab,
-            onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform, straighten: straightenDraft)
-            .navigationTitle(model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"))
+            note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
+            straighten: straightenDraft)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onChange(of: model.canvas) {
@@ -262,12 +260,13 @@ struct PhotoWindow: View {
         zoom = min(max(scale.isFinite ? scale : 1, ViewerZoom.stops[0]), ViewerZoom.stops[ViewerZoom.stops.count - 1])
     }
 
-    /// Fits the image in the canvas, once the canvas has been laid out.
+    /// Fits the image in the canvas clear of the floating palette (every tool shows while an image is
+    /// open), once the canvas has been laid out.
     private func fit() {
         guard let canvas = model.canvas, viewport.width > 0, viewport.height > 0 else { return }
         fitPending = false
-        let fitted = ViewerZoom.fitScale(
-            artboard: CGSize(width: canvas.width, height: canvas.height), in: viewport, inset: SuiteSpacing.xxl)
+        let layout = EditorDetailLayout(viewport: viewport, toolCount: PhotoTool.allCases.count)
+        let fitted = layout.fitScale(artboard: CGSize(width: canvas.width, height: canvas.height))
         setZoom(fitted > 0 ? fitted : 1)
         fittedZoom = zoom
     }

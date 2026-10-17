@@ -39,6 +39,12 @@ the Design-scoped macOS run.
 | FH-a | Saving and opening go through the live filing with the same bytes, the document knows when it is unsaved, and opening a bad file says exactly what is wrong. | FH-2, FH-1, FH-6 | J16 | design-contracts (the feature) |
 | FH-b | Undo in a text field undoes the typing, the window says when the file is saved, closing with unsaved changes asks first, and a 2,000-layer file opens within budget. | FH-3, FH-4, FH-5, FH-7 | J13, J14, P4 | FH-a (FH-3, FH-4, FH-7); design-window DW-a (FH-3, FH-4, FH-5, FH-7) |
 
+FH-b is the UI slice (`"ui": true` in the `.wave.json`: the feel gate, rule
+15, and the Mac finish, rule 17); FH-a is Model only. FH-3 and FH-4 call
+FH-2's `undoTarget`, `isDirty`, `saveStateText` and `closePrompt`, which no
+contract declares, so FH-b keeps its wait on FH-a; FH-7, the `feature-done`
+task, is the integrate step on `.live`.
+
 No drag or scrub here.
 
 Blueprint sections: 4 (J3, J13, J14, J16, P4; the bad files), 5.4

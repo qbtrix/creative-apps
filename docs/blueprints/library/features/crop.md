@@ -78,7 +78,10 @@ handle anatomy S-L3 will give both apps.
 
 CR-a is the contract: the catalog methods every view calls and the Auto
 slot (`CropLeveling`), all on the spine's `FakeCrop`. CR-b and CR-c build
-side by side on it. CR-e can close with gaps if core's detector hasn't
+side by side on it. CR-c is the UI slice (`"ui": true`): the screen on the
+fakes, reached from Photo > Crop, waiting only on CR-a; CR-b and CR-e are
+the logic, and CR-d is the integrate slice that runs J6 on the live
+services. CR-e can close with gaps if core's detector hasn't
 shipped when the rest is done (Done check).
 
 ## Journey steps

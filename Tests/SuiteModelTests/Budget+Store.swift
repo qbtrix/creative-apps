@@ -6,10 +6,10 @@
 // another binary) two StoreRecents run on two tasks instead; each update
 // opens its own lock fd, so flock serialises them the same way.
 //
-// recents.json keeps at most RecentsList.cap (200) items, so "1,000 of 1,000"
-// is read as: the file's revision is 1,000 (each update reads the revision
-// under the lock and writes it + 1, so a lost write leaves it short), and the
-// list holds exactly the 200 newest of the 1,000 distinct items noted.
+// The packet's QB-SM6 row: recents.json ends at revision 1,000 and holds the
+// 200 newest of the 1,000 distinct notes (RecentsList.cap is 200). Each update
+// reads the revision under the lock and writes it + 1, so a lost write leaves
+// it short.
 import Foundation
 import SuiteModel
 import Testing

@@ -1,52 +1,46 @@
-# CI: runs scripts/ci on Linux (Model targets only; Package.swift declares the
-# UI targets on macOS only) and on macOS 26 (everything, plus the snapshot
-# PNGs uploaded as the `snapshots` artifact and the five release .app bundles
-# from scripts/bundle-apps as the `app-builds` artifact, a tarball inside so
-# the executables keep their +x bit, then the UI journeys on those bundles with
-# their whole-window PNGs as the `ui-screens` artifact, with contact-sheet.html,
-# the one page to review per run, inside it).
+# CI: the Linux job runs scripts/ci (lints, every Model target built and
+# tested; Package.swift declares the UI targets on macOS only). It is the one
+# gate for dev until a solid beta (captain, 2026-10-16): only compile and Model
+# tests block. The macOS job is report-only: it builds everything on macOS 26,
+# runs the snapshots (`snapshots` artifact), bundles the five release apps
+# (`app-builds`, a tarball so the executables keep their +x bit), runs the UI
+# journeys with the app audit (`ui-screens`, contact-sheet.html inside) and
+# the perf tests, and writes its summary. It has continue-on-error, so a red
+# macOS job never turns the run red, opens `dev-red` or holds `promote`.
+# Instead its `Findings` step files or updates one `finding` issue (labels
+# `finding`, `line:<app>`) per failing journey, audit violations included,
+# keyed by test name, so the owning lead sees it without anyone waiting.
 #
-# Branch model: crew PRs merge into dev through the fast lane with no CI of
-# their own; the worker's local scripts/ci --changed (Models and lint, since
-# SwiftUI can't compile on Linux) is the per-PR check. This workflow runs on dev once a
-# feature is built, not after every merge: on workflow_dispatch (the supervisor
-# or Belt, e.g. after an integrate PR), when the lane merges a PR labelled
-# `feature-done` (it dispatches this once), and daily as a safety net. When
-# both jobs are green, `promote` fast-forwards main to that exact SHA, so main
-# only holds tested dev SHAs and is the last green. When a job is red,
-# `dev-red` opens or updates one "dev is red" issue with the culprit range
-# main..SHA; the next promotion closes it. No push trigger: main only receives
-# tested SHAs, and a push trigger on dev would fire per merge. pull_request
-# runs only for rare hotfix PRs to main. The app audit only fails a count that
-# rose; when the journeys measure counts under the baseline, `audit-lower`
-# pushes one commit to dev that lowers it.
+# Branch model: crew PRs merge into dev through the fast lane on the worker's
+# Linux scripts/ci --changed marker (plus a build-only macOS compile for code
+# PRs). This workflow runs on dev once a feature is built: on
+# workflow_dispatch (the supervisor, Belt, or the lane after a `feature-done`
+# or UI merge) and daily as a safety net. A green Linux job lets `promote`
+# fast-forward main to that exact SHA. A red Linux job makes `dev-red` open
+# or update one "dev is red" issue with the culprit range main..SHA; the next
+# promotion closes it. No push trigger; pull_request runs only for rare
+# hotfix PRs to main. The app audit fails only a count that rose; after a
+# green journey step on dev, `audit-lower` pushes one commit lowering it.
 #
-# Trade-off: SwiftUI breakage, snapshot and UI journey failures sit on dev
-# until the next feature run, so a dev-red culprit range can span several PRs.
-#
-# Perf and timing tests (Tests/perf-suites.txt) are out of the gate: scripts/ci
-# and the scoped step skip them, and the macOS job's Perf step runs them alone
-# on every run, reports their numbers in the job summary and warns on a bound
-# missed by more than 3x. It never fails the job, so it never blocks promote.
+# Perf and timing tests (Tests/perf-suites.txt) run alone in the macOS job's
+# Perf step, which reports and never fails.
 #
 # Scoped run (workflow_dispatch with `app`: flare, design, photo, library,
-# halo, suite or suiteui): the macOS job still builds every target with its
-# tests, the five app bundles and every journey bundle, but runs only that
-# app's Model tests, snapshot tests and UI journeys, so another app's red test
-# can't hide it, then that app's perf tests in the Perf step. The Linux job (lints and every Model's tests) is skipped, and
-# a scoped run never promotes main, opens dev-red or lowers the audit
-# baseline. belt-pilot's verify-dispatch.sh dispatches one on dev after an
-# app's merges.
+# halo, suite or suiteui): the macOS job builds every target, bundle and
+# journey bundle but runs only that app's Model, snapshot and journey tests,
+# then its perf tests. The Linux job is skipped; a scoped run never promotes,
+# opens dev-red or lowers the audit baseline. verify-dispatch.sh starts one
+# per app after its merges.
 #
-# The fast lane also counts a passing check from this workflow ("CI") on a PR
-# head and reads the job names "Linux", "macOS" and "macOS build" and the
-# run title "macOS build", so keep them stable. A scoped run's macOS job is
-# named "macOS (<app>)" so the lane never takes it as a full macOS result.
+# The fast lane reads the job names "Linux" and "macOS build" and the run
+# title "macOS build", and ignores "macOS" and "macOS (<app>)", so keep them
+# stable.
 name: CI
-# A build-only run (the fast lane's compile check for code PRs) and a scoped
-# run ("scoped: <app>", how verify-dispatch.sh finds them) get their own
-# titles; " " keeps the default title.
-run-name: "${{ inputs.build_only && 'macOS build' || inputs.app && format('scoped: {0}', inputs.app) || ' ' }}"
+# A build-only run (the fast lane's compile check for code PRs), a Linux-only
+# run (the lane's check on a head it integrated) and a scoped run ("scoped:
+# <app>", how verify-dispatch.sh finds them) get their own titles; " " keeps
+# the default title.
+run-name: "${{ inputs.build_only && 'macOS build' || inputs.linux_only && 'Linux check' || inputs.app && format('scoped: {0}', inputs.app) || ' ' }}"
 
 on:
   pull_request:
@@ -55,6 +49,10 @@ on:
     inputs:
       build_only:
         description: Only build every target on macOS (the fast lane's compile check for code PRs)
+        type: boolean
+        default: false
+      linux_only:
+        description: Only the Linux job (the fast lane's check on a PR head it integrated itself; no macOS job, so no findings get filed for a branch)
         type: boolean
         default: false
       app:
@@ -73,7 +71,7 @@ permissions:
 # from a branch named dev can't cancel a dev run. Each scoped app gets its own
 # group, so a Design run never displaces a pending Photo or full run.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.app && format('-{0}', inputs.app) || '' }}
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ inputs.app && format('-{0}', inputs.app) || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 jobs:
@@ -120,16 +118,22 @@ jobs:
 
   macos:
     name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
-    if: ${{ !inputs.build_only }}
+    if: ${{ !inputs.build_only && !inputs.linux_only }}
     runs-on: macos-26
     # scripts/ci alone takes about 20 min under load and the five apps' UI
     # journeys about 30 more; 45 cut ui-test off mid-run (dev run 38792928305).
     timeout-minutes: 90
-    # issues: read lets scripts/quarantine check that each quarantined
-    # journey's owner issue is still open (the Linux container has no gh).
+    # Report-only until beta: a failure shows on this job but leaves the run
+    # green. Later jobs read `ui`, the journeys' outcome, never this job's
+    # result.
+    continue-on-error: true
+    outputs:
+      ui: ${{ steps.ui.outcome }}
+    # issues: write lets scripts/quarantine check each quarantined journey's
+    # owner issue (the Linux container has no gh) and Findings file issues.
     permissions:
       contents: read
-      issues: read
+      issues: write
     env:
       APP: ${{ inputs.app }}
     steps:
@@ -273,7 +277,8 @@ jobs:
           if-no-files-found: error
       # The human-like UI tests: scripts/ui-test launches the bundles above,
       # clicks through each app (UITests/) and exports a whole-window PNG per
-      # step, uploaded as `ui-screens`. A failed journey fails this job.
+      # step, uploaded as `ui-screens`. A failed journey fails this job (not
+      # the run), and the log goes to Findings.
       # XcodeGen is a pinned release, checked against its sha256 (Homebrew
       # can't pin a version). automationmodetool lets the test runner drive
       # the UI without a password prompt.
@@ -300,7 +305,23 @@ jobs:
         if: ${{ !inputs.app || steps.scope.outputs.journeys != '' }}
         env:
           JOURNEYS: ${{ steps.scope.outputs.journeys }}
-        run: scripts/ui-test ${JOURNEYS:+"-only-testing:$JOURNEYS"}
+        run: |
+          set -o pipefail
+          scripts/ui-test ${JOURNEYS:+"-only-testing:$JOURNEYS"} 2>&1 | tee "$RUNNER_TEMP/ui-test.log"
+      # One `finding` issue per failing journey (an audit violation fails its
+      # journey too), titled "CI finding: <Target/Class/test>", the form
+      # UITests/quarantine.json takes, labelled `finding` and `line:<app>`.
+      # An open one with that title gets its body updated instead (keeping the
+      # `Feature:`, `Slice:` and `Owner:` lines a triage added), so a test red
+      # across runs keeps one routed issue. A test that ran and passed closes
+      # its finding with "Passes on run <url>". scripts/ci-findings does the
+      # work. Not on hotfix PRs to main.
+      - name: Findings
+        if: always() && (steps.ui.outcome == 'failure' || steps.ui.outcome == 'success') && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: scripts/ci-findings "$RUNNER_TEMP/ui-test.log"
       # The page to review: every journey step with its audit, each app's
       # audit counts against the baseline and the perf reports, written into
       # ui-screens, plus a short table in the job summary. Runs when a journey
@@ -379,12 +400,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # Fast-forward main to this dev SHA once every job above passed. The only
-  # job besides audit-lower (which pushes one baseline commit to dev) that
-  # writes contents.
+  # Fast-forward main to this dev SHA once the Linux job passed; the macOS job
+  # is report-only. The only job besides audit-lower (which pushes one
+  # baseline commit to dev) that writes contents.
   promote:
     name: Promote
-    needs: [linux, macos]
+    needs: [linux]
     if: github.ref == 'refs/heads/dev' && !inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -415,11 +436,12 @@ jobs:
             gh issue close "$n" --comment "dev is green again at $GITHUB_SHA ($RUN_URL), and main now points there."
           done
 
-  # Open, or update, the single "dev is red" issue. main is the last green dev
-  # SHA, so main..SHA holds the culprit.
+  # Open, or update, the single "dev is red" issue when the Linux job fails
+  # (macOS reds go to Findings). main is the last green dev SHA, so main..SHA
+  # holds the culprit.
   dev-red:
     name: Dev red
-    needs: [linux, macos]
+    needs: [linux]
     if: failure() && github.ref == 'refs/heads/dev' && !inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -466,15 +488,16 @@ jobs:
   # UITests/audit-baseline.json with scripts/audit-lower and pushes that one
   # commit straight to dev, the way promote pushes main. scripts/audit-lower
   # refuses any count over its baseline, so this can only tighten the audit.
-  # It runs only after a green macOS job: a failed journey leaves its later
-  # screens unaudited, so its counts are too low to trust. When dev moved
-  # during the run the push is refused; it fetches dev and lowers again on top,
+  # It runs only when the journeys passed (the macOS job's `ui` output; the
+  # job's own result can't say, since it has continue-on-error): a failed
+  # journey leaves its later screens unaudited, so its counts are too low.
+  # When dev moved during the run the push is refused; it fetches dev and lowers again on top,
   # judging only checks still at the number they were measured against (the
   # third argument), up to 3 retries. GITHUB_TOKEN pushes start no workflow.
   audit-lower:
     name: Audit lower
     needs: [macos]
-    if: github.ref == 'refs/heads/dev' && !inputs.app
+    if: github.ref == 'refs/heads/dev' && !inputs.app && needs.macos.outputs.ui == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

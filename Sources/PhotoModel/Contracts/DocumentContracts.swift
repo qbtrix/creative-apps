@@ -31,7 +31,7 @@ public struct PhotoDocumentSnapshot: Sendable, Equatable {
     public var pixels: [PhotoLayer.ID: DecodedImage]
     /// One image per layer that has a mask, the layer's size.
     public var masks: [PhotoLayer.ID: DecodedImage]
-    /// The Adjust tab's whole-image adjustments.
+    /// The inspector's whole-image adjustments.
     public var adjustments: AdjustmentSettings
     public var selectedLayerID: PhotoLayer.ID?
     public init(canvas: CanvasSize, layers: [PhotoLayer], pixels: [PhotoLayer.ID: DecodedImage],

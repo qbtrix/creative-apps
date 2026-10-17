@@ -40,14 +40,30 @@ import Testing
     }
 
     @Test func notAHandOffIsDamaged() {
-        #expect(throws: SuiteError.damaged("not a hand-off")) { try HandOffCodec.decode(Data("[]".utf8)) }
-        #expect(throws: SuiteError.damaged("hand-off fields")) { try HandOffCodec.decode(Data("{\"format\":1}".utf8)) }
+        let plain = SuiteError.damaged("the message from another app")
+        #expect(throws: plain) { try HandOffCodec.decode(Data("[]".utf8)) }
+        #expect(throws: plain) { try HandOffCodec.decode(Data("{\"format\":1}".utf8)) }
     }
 
     @Test(arguments: ["../outside", "a/b", "", "ABC-def", "id with space", "x.y"])
     func anUnsafeIDIsDamaged(id: String) throws {
         let data = try HandOffCodec.encode(sample(id: id))
-        #expect(throws: SuiteError.damaged("hand-off id")) { try HandOffCodec.decode(data) }
+        do {
+            _ = try HandOffCodec.decode(data)
+            Issue.record("an unsafe id decoded")
+        } catch {
+            #expect(error == .damaged("the message from another app"))
+            #expect(!error.message.contains("hand-off"))
+        }
+    }
+
+    /// #1486: a failed encode is a failed write in plain words, not a damaged
+    /// file, and no message the codec builds says "hand-off".
+    @Test func anEncodeFailureIsAFailedWriteInPlainWords() {
+        #expect(HandOffCodec.encodeFailure == .ioFailed("the message from another app"))
+        #expect(HandOffCodec.encodeFailure.message == "Couldn't save: the message from another app.")
+        #expect(!HandOffCodec.encodeFailure.message.lowercased().contains("hand-off"))
+        #expect(!HandOffCodec.encodeFailure.message.contains("damaged"))
     }
 
     @Test func newIDIsALowercaseUUIDAndUnique() throws {

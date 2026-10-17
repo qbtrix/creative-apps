@@ -40,7 +40,12 @@ the Design-scoped macOS run.
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | SS-a | A marquee selects several layers, which then move, resize, nudge, delete, align and distribute as one step each. | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-contracts (S-1 to S-3); design-window DW-a (S-6, S-7) and DW-b (S-6); design-seams (S-7) |
-| SS-b | View > Zoom to Selection frames the selection, an edit pressed mid-drag waits for the drag to end, and canvas drags keep up on 2,000 layers. | S-4, S-5, S-7b, S-8 | J4, P1 | design-contracts (S-4); design-seams (S-5, S-8); design-window DW-a (S-7b, S-8); SS-a (S-7b, S-8) |
+| SS-b | View > Zoom to Selection frames the selection, an edit pressed mid-drag waits for the drag to end, and canvas drags keep up on 2,000 layers. | S-4, S-5, S-7b, S-8 | J4, P1 | design-contracts (S-4); design-seams, canvas-basics CB-a (S-5); design-seams (S-8); design-window DW-a (S-7b, S-8); SS-a (S-7b, S-8) |
+
+SS-a is the UI slice (`"ui": true` in the `.wave.json`: the feel gate, rule
+15, and the Mac finish, rule 17); SS-b has no view task. S-1 to S-3 have
+merged, so SS-a's tasks and waits stay as they are; S-8, the `feature-done`
+task, is the integrate step on `.live`.
 
 Every drag here goes through design-window's live drag box, so the editor
 body doesn't run per sample: S-6 checks it for the marquee and the
@@ -165,7 +170,7 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | S-2 | gap "several layers" (part) | `LiveTransforming`: move, resize in the box, nudge, delete; lock and hidden refusals | `Live/LiveTransforming.swift`; tests `DesignSeveralTransformTests.swift` | – | ~310, 2 |
 | S-3 | #714 (Model part) | `LiveAligning`: align to the union with locked layers fixed; distribute | `Live/LiveAligning.swift`, `DesignAlign.swift` (the one-layer help reused, no behaviour change); tests `DesignDistributeTests.swift` | – | ~260, 3 |
 | S-4 | gap "Zoom to Selection" (part) | `LiveFraming` | `Live/LiveFraming.swift`; tests `DesignFramingTests.swift` | – | ~90, 2 |
-| S-5 | #542, #607 (closes both) | No edit or step while a gesture is live; no nudge of a hidden-in-tree layer | `DesignCanvasEditing.swift`, `DesignActions.swift`, `DesignActions+Edit.swift`; tests `DesignMidDragEditTests.swift`, `DesignHiddenNudgeTests.swift`, `DesignHeldIDsFuzzTests.swift` (existing: gains the `history.undo` check) | design-seams | ~240, 6 |
+| S-5 | #542, #607 (closes both) | No edit or step while a gesture is live; no nudge of a hidden-in-tree layer | `DesignCanvasEditing.swift`, `DesignActions.swift`, `DesignActions+Edit.swift`; tests `DesignMidDragEditTests.swift`, `DesignHiddenNudgeTests.swift`, `DesignHeldIDsFuzzTests.swift` (existing: gains the `history.undo` check) | design-seams; canvas-basics CB-a (the whole-point drag routes in `DesignCanvasEditing.swift`) | ~240, 6 |
 | S-6 | gaps "marquee select", "several layers" (close); #714 (closes); #288 (part) | Views: the several-layer box's handles (the canvas gesture already routes them to `resize`); the Align row's Distribute buttons and their ids; the marquee drawn from the Model; snapshots; the drag check | `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift`; `Tests/AppSnapshotTests/DesignSelectDragTests.swift` | S-1, S-2, S-3; design-window DW-a, DW-b | ~320, 6 |
 | S-7 | – | J5, J6 | `UITests/DesignJourneyTests+Select.swift` | S-6; design-seams | ~240, 1 |
 | S-7b | gap "Zoom to Selection" (closes) | J4, in the same file after S-7 | `UITests/DesignJourneyTests+Select.swift` | S-4, S-7 | ~80, 1 |

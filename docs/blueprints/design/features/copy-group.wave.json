@@ -70,5 +70,7 @@
         ]
       }
     }
-  ]
+  ],
+  "ui_slice": "none",
+  "ui_slice_reason": "No task edits a view: Duplicate, Group, Ungroup, Cut, Copy and Paste are design-window DW-a's controls; this feature fills their live use cases and checks them."
 }

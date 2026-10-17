@@ -105,6 +105,25 @@ import Testing
         #expect(try f.store.read("recents.json", as: RecentsList.self).value?.items.isEmpty == true)
     }
 
+    @Test func reseedingMissingAfterWeekOfWorkRemovesCards() throws {
+        let f = try makeFolders()
+        try FixtureSeeder.seed("weekOfWork", into: f.store, documentsFrom: f.from, documentsTo: f.to, now: now)
+        try FixtureSeeder.seed("missing", into: f.store, documentsFrom: f.from, documentsTo: f.to, now: now)
+        #expect(!documents(in: f.to).contains("Cards.design"))
+        #expect(try f.store.readData("thumbnails/\(thumbnailKey(f, "Cards.design")).png") == nil)
+        #expect(documents(in: f.to).count == 7)
+    }
+
+    @Test func reseedingAfterASourceGoesAbsentRemovesItsStaleCopy() throws {
+        let f = try makeFolders()
+        try FixtureSeeder.seed("weekOfWork", into: f.store, documentsFrom: f.from, documentsTo: f.to, now: now)
+        try FileManager.default.removeItem(atPath: f.from + "/Intro.halo")
+        try FixtureSeeder.seed("weekOfWork", into: f.store, documentsFrom: f.from, documentsTo: f.to, now: now)
+        #expect(!documents(in: f.to).contains("Intro.halo"))
+        #expect(try f.store.readData("thumbnails/\(thumbnailKey(f, "Intro.halo")).png") == nil)
+        #expect(try f.store.readData("Documents/Logo.design") == Data("doc Logo.design".utf8))
+    }
+
     @Test func anUnknownNameThrowsNoFixtureNamed() throws {
         let f = try makeFolders()
         #expect(throws: SuiteError.notAvailable("No fixture named nope.")) {

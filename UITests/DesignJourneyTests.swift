@@ -116,13 +116,13 @@ final class DesignJourneyTests: XCTestCase {
         // The row's Add Page adds a page as one undo step, which turns Delete Page on; Undo takes it back (#1385).
         addPage.click()
         XCTAssert(Self.waitForLabel(design.element("design.bar.undo"), "Undo Add Page"), "the row's Add Page made no undo step")
-        let pageRows = sidebar.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Page "))
         XCTAssert(sidebar.staticTexts["Page 2"].waitForExistence(timeout: 5), "the row's Add Page added no Page 2:\n\(sidebar.debugDescription)")
-        XCTAssertEqual(pageRows.count, 2, "the Pages list doesn't hold two pages")
+        XCTAssert(Self.waitForPageRows(sidebar, 2), "the Pages list holds \(Self.pageRows(sidebar)) pages, not 2")
         XCTAssert(deletePage.isEnabled, "Delete Page is disabled with two pages")
         design.shot("layers-added-page")
         design.element("design.bar.undo").click()
         XCTAssert(Self.waitForGone(sidebar.staticTexts["Page 2"]), "Undo left Page 2 in the Pages list")
+        XCTAssert(Self.waitForPageRows(sidebar, 1), "the Pages list holds \(Self.pageRows(sidebar)) pages after Undo, not 1")
         XCTAssertFalse(deletePage.isEnabled, "Delete Page stayed enabled once Add Page was undone")
         // A row's eye hides that layer as one undo step, and Undo shows it again.
         let eye = sidebar.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Hide Layer")).firstMatch
@@ -195,6 +195,21 @@ final class DesignJourneyTests: XCTestCase {
             if element.exists && element.label == label { return true }
             Thread.sleep(forTimeInterval: 0.2)
         } while Date() < deadline
+        return false
+    }
+
+    /// The distinct `design.page.row.<id>` rows in `sidebar`; a page's name reads empty as a label (#1451).
+    @MainActor private static func pageRows(_ sidebar: XCUIElement) -> Int {
+        let rows = sidebar.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "design.page.row."))
+        return Set(rows.allElementsBoundByIndex.map(\.identifier)).count
+    }
+
+    /// Whether `sidebar` holds exactly `count` page rows within five seconds.
+    @MainActor private static func waitForPageRows(_ sidebar: XCUIElement, _ count: Int) -> Bool {
+        for _ in 0..<25 {
+            if pageRows(sidebar) == count { return true }
+            Thread.sleep(forTimeInterval: 0.2)
+        }
         return false
     }
 

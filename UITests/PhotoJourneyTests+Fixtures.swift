@@ -44,7 +44,7 @@ func writeTestPhoto(to url: URL, width: Int = 800, height: Int = 600) throws {
 /// always passed exactly once and the journey's own folder is the only one.
 func photoArguments(
     open file: URL? = nil, saveTo: URL? = nil, exportTo: URL? = nil,
-    fixture: String? = nil, recoveryDir: URL? = nil, windowWidth: Int? = nil
+    fixture: String? = nil, recoveryDir: URL? = nil, windowSize: String? = nil
 ) -> [String] {
     var arguments = [String]()
     if let file { arguments += ["-PhotoOpenFile", file.path] }
@@ -54,7 +54,7 @@ func photoArguments(
     let recovery = recoveryDir
         ?? FileManager.default.temporaryDirectory.appending(path: "photo-journey-recovery-\(UUID().uuidString)")
     arguments += ["-PhotoRecoveryDir", recovery.path]
-    if let windowWidth { arguments += ["-PhotoWindowWidth", "\(windowWidth)"] }
+    if let windowSize { arguments += ["-SuiteWindowSize", windowSize] }
     return arguments
 }
 

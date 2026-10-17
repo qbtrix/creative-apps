@@ -2,7 +2,8 @@
 // image, an artboard) sits on a checkerboard at `zoom` points per document
 // pixel, centred while it fits and scrollable with a margin once it doesn't,
 // with rulers along the top and left that follow the zoom and the scroll
-// (Ruler). Pointer drags arrive in document pixels: `onDrag(from:to:)` once
+// (Ruler); their corner names the document's unit, "px" unless the app passes
+// `unit` ("pt" for Design). Pointer drags arrive in document pixels: `onDrag(from:to:)` once
 // per move with the previous and current point (a click is a drag that
 // doesn't move), then `onDragEnd`. Pinch zooms through `onZoom`. Key presses
 // reach `onKey` while the canvas has focus, which a drag on it gives it.
@@ -104,6 +105,8 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let zoom: Double
     private let pointer: PointerStyle?
     private let checkerboard: Bool
+    /// The unit the ruler corner names: "px" unless the app's document is in another one.
+    let unit: String
     private let onSize: @MainActor (CGSize) -> Void
     private let onZoom: (@MainActor (Double) -> Void)?
     private let onDrag: (@MainActor (CGPoint, CGPoint) -> Void)?
@@ -128,6 +131,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     /// unless `checkerboard` is false.
     public init(
         documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil, checkerboard: Bool = true,
+        unit: String = "px",
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
         onZoom: (@MainActor (Double) -> Void)? = nil,
         onDrag: (@MainActor (CGPoint, CGPoint) -> Void)? = nil,
@@ -140,6 +144,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         self.zoom = zoom
         self.pointer = pointer
         self.checkerboard = checkerboard
+        self.unit = unit
         self.onSize = onSize
         self.onZoom = onZoom
         self.onDrag = onDrag
@@ -171,9 +176,9 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         }
     }
 
-    /// The ruler corner, naming the unit.
+    /// The ruler corner, naming the document's unit.
     private var corner: some View {
-        Text("px")
+        Text(unit)
             .font(SuiteFont.rulerLabel)
             .foregroundStyle(SuiteColor.secondaryText)
             .frame(width: SuiteSize.ruler, height: SuiteSize.ruler)

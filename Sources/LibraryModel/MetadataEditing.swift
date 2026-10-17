@@ -1,8 +1,10 @@
-// MetadataEditing.swift: the inspector's view of the selected photos and the
-// edits it makes to them: rating, flag and color label. Every edit applies
-// to every selected photo; a field whose values differ reads as mixed. A
-// rating outside 0...5 is refused. Keywords and camera details are #744.
-// Linux-safe.
+// MetadataEditing.swift: the inspector's view of the cull targets and the
+// edits it and the Metadata menu make: rating, flag and color label. Every
+// edit goes through `cull(_:advance: false)`, so it changes the cull targets
+// (the loupe photo in the loupe, else the selection) as the same named undo
+// step a key makes, and never moves the loupe. A field whose values differ
+// reads as mixed. A rating outside 0...5 is silently refused. Keywords and
+// camera details are #744. Linux-safe.
 
 /// A pick, a reject, or neither. The raw value is the menu title.
 public enum PhotoFlag: String, CaseIterable, Sendable, Hashable {
@@ -47,28 +49,35 @@ public struct PhotoMetadata: Sendable, Hashable {
 }
 
 extension LibraryCatalog {
-    /// The selected photos as the inspector shows them; nil with nothing selected.
+    /// The cull targets as the inspector shows them: the loupe photo in the
+    /// loupe, else the selected photos; nil with nothing to cull. One source
+    /// with `cull`, so the inspector shows what a key just changed (#1661).
     public var selectedMetadata: PhotoMetadata? {
-        PhotoMetadata(sortedItems.filter { selection.contains($0.id) })
+        let ids = cullTargets
+        return PhotoMetadata(items.filter { ids.contains($0.id) })
     }
 
-    /// Sets the selected photos' rating; a rating outside 0...5 is refused.
+    /// Sets the cull targets' rating as one "Set Rating" step; a rating
+    /// outside 0...5 is refused without a `cullError`.
     public mutating func setRating(_ stars: Int) {
         guard (0...5).contains(stars) else { return }
-        editSelected { $0.rating = stars }
+        cull(.rating(stars), advance: false)
     }
 
     /// A click on star `stars`: sets that rating, or clears it when every
-    /// selected photo already has it.
+    /// cull target already has it.
     public mutating func clickStar(_ stars: Int) {
-        setRating(selectedMetadata?.rating == .value(stars) ? 0 : stars)
+        let current = selectedMetadata?.rating
+        setRating(current == .value(stars) ? 0 : stars)
     }
 
+    /// Flags the cull targets as one "Pick", "Reject" or "Clear Flag" step.
     public mutating func setFlag(_ flag: PhotoFlag) {
-        editSelected { $0.flag = flag }
+        cull(.flag(flag), advance: false)
     }
 
+    /// Labels the cull targets as one "Set Label" step.
     public mutating func setLabel(_ label: PhotoLabel?) {
-        editSelected { $0.label = label }
+        cull(.label(label), advance: false)
     }
 }

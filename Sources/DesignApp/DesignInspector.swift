@@ -1,4 +1,5 @@
-// DesignInspector.swift: the Properties tab of Design's panel. A selected
+// DesignInspector.swift: Properties in Design's inspector, its rows in a
+// container identified `design.properties` inside the scroll view. A selected
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
@@ -30,8 +31,12 @@ struct DesignInspector: View {
                     DesignPageProperties(page: page).id(page.id)
                 }
             }
+            // The id sits on a container inside the ScrollView, not on the ScrollView: SuiteWindow's
+            // `.accessibilityElement(children: .contain)` modifies the inspector's existing element (this
+            // scroll view) and its `suite.inspector` replaced an id there (#1443).
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("design.properties")
         }
-        .accessibilityIdentifier("design.properties")
     }
 }
 

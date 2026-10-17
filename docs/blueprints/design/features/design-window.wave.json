@@ -1,11 +1,11 @@
 {
-  "title": "The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, J15 and layout",
+  "title": "The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, canvas feedback, J15 and layout",
   "wave": "0b",
   "order": 20,
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#288 (part)",
-  "waits_on": "design-contracts; its first slice DW-a also waits on Design shell-parity, which edits the same window files",
+  "waits_on": "design-contracts; its first slice DW-a also waits on Design shell-parity, which edits the same window files; DW-d's last task waits on canvas-basics CB-a (the Text click-drag route)",
   "depends": [
     "design-contracts"
   ],
@@ -35,9 +35,21 @@
     "Tests/AppSnapshotTests/DesignEditMenuSnapshots.swift",
     "Tests/AppSnapshotTests/DesignPageMenuSnapshots.swift",
     "UITests/DesignJourneyTests.swift",
+    "Sources/DesignApp/DesignTextArtwork.swift",
+    "Sources/DesignApp/DesignCanvasFeedback.swift",
+    "Sources/DesignApp/DesignInspectorText.swift",
+    "Sources/DesignApp/DesignInspectorPage.swift",
     "Sources/DesignApp/DesignLiveDrag.swift",
     "Tests/AppSnapshotTests/DesignLiveDragTests.swift",
     "Tests/AppSnapshotTests/DesignWindowDragTests.swift",
+    "UITests/DesignJourneyTests+Feedback.swift",
+    "Sources/DesignModel/DesignCanvasHints.swift",
+    "Tests/DesignModelTests/DesignCanvasHintsTests.swift",
+    "Tests/mutations/DesignModel.DesignCanvasHints.json",
+    "Tests/AppSnapshotTests/DesignCanvasFeedbackSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignCanvasHoverTests.swift",
+    "Tests/AppSnapshotTests/DesignCanvasBadgeSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignCanvasBadgeTests.swift",
     "Tests/DesignModelTests/DesignControlIDTests.swift",
     "UITests/DesignJourneyTests+EveryControl.swift",
     "UITests/DesignJourneyTests+Layout.swift"
@@ -45,7 +57,8 @@
   "journeys": [
     "DesignJourneyTests.testEveryMenuOpens",
     "DesignEveryControlJourneyTests.testEveryControlActsOrSaysWhy",
-    "DesignLayoutJourneyTests.testLayoutAtWidths"
+    "DesignLayoutJourneyTests.testLayoutAtWidths",
+    "DesignFeedbackJourneyTests.testCanvasFeedback"
   ],
   "slices": [
     {
@@ -86,7 +99,11 @@
         "Sources/DesignApp/DesignObjectMenu.swift",
         "Tests/AppSnapshotTests/DesignEditMenuSnapshots.swift",
         "Tests/AppSnapshotTests/DesignPageMenuSnapshots.swift",
-        "UITests/DesignJourneyTests.swift"
+        "UITests/DesignJourneyTests.swift",
+        "Sources/DesignApp/DesignTextArtwork.swift",
+        "Sources/DesignApp/DesignCanvasFeedback.swift",
+        "Sources/DesignApp/DesignInspectorText.swift",
+        "Sources/DesignApp/DesignInspectorPage.swift"
       ],
       "waits": {
         "shell-parity": [
@@ -94,7 +111,8 @@
           "D0-5d",
           "D0-6"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "DW-b",
@@ -119,7 +137,44 @@
           "D0-8a",
           "D0-8b"
         ]
-      }
+      },
+      "ui": true
+    },
+    {
+      "id": "DW-d",
+      "behavior": "The canvas shows what a click will pick, a W × H badge under the selection (X, Y while moving) that stays live mid-drag, a resize, move or copy pointer over handles and layers, and the Text tool's box before a click, which a click-drag sizes.",
+      "tasks": [
+        "D0-9a",
+        "D0-9b",
+        "D0-9c",
+        "D0-9d"
+      ],
+      "journeys": [
+        "testCanvasFeedback"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+Feedback.swift",
+        "Sources/DesignModel/DesignCanvasHints.swift",
+        "Tests/DesignModelTests/DesignCanvasHintsTests.swift",
+        "Tests/mutations/DesignModel.DesignCanvasHints.json",
+        "Sources/DesignApp/DesignCanvasFeedback.swift",
+        "Tests/AppSnapshotTests/DesignCanvasFeedbackSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignCanvasHoverTests.swift",
+        "Tests/AppSnapshotTests/DesignCanvasBadgeSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignCanvasBadgeTests.swift"
+      ],
+      "waits": {
+        "DW-a": [
+          "D0-9c"
+        ],
+        "DW-b": [
+          "D0-9d"
+        ],
+        "canvas-basics:CB-a": [
+          "D0-9d"
+        ]
+      },
+      "ui": true
     },
     {
       "id": "DW-c",
@@ -147,8 +202,12 @@
         ],
         "DW-a": [
           "D0-7b"
+        ],
+        "DW-d": [
+          "D0-7b"
         ]
-      }
+      },
+      "ui": true
     }
   ]
 }
