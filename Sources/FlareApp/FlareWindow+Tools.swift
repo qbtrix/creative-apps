@@ -1,7 +1,9 @@
 // FlareWindow+Tools.swift: the router's tools area (FlareWindow+Router.swift).
 // Choosing a palette tool selects it, with the Model's `toolHelp` as the
-// reason one can't act yet. Finish Path commits the open pen path
-// (`model.finishPath`), with `finishPathHelp` as its reason. The stage's
+// reason one can't act yet; leaving the Pen that way keeps an open path
+// (`selectTool` finishes it). Finish Path (the palette's last button and
+// Object > Finish Path) commits the open pen path (`model.finishPath`), with
+// `finishPathHelp` as its reason. The stage's
 // keys (`toolKey`): Return finishes the path, Escape cancels the draft or
 // the drag under way; the tool letters are the stage's own (FlareStage).
 import FlareModel

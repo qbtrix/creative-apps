@@ -3,7 +3,8 @@
 // `perform` and is disabled, never hidden, while that window's `help` gives a
 // reason (shown as the item's help). The keys of section 3.4 (Space, the
 // arrows, Home, End, K, ⌥K and the ⌘ keys) live only here; no view binds them
-// again. Return and Escape stay the stage's (toolKey). Undo and Redo are
+// again. Return and Escape stay the stage's (toolKey); Object > Finish Path is
+// Return's item for the mouse, with no key of its own. Undo and Redo are
 // titled by the step, as in "Undo Set Keyframe Easing". File > Open Sample
 // lists Bounce, Character, Button and Keyed Ball, the keyed document the
 // easing journey starts from; Open Recent lists the window's recent files,
@@ -103,6 +104,9 @@ struct FlareCommands: Commands {
             Divider()
             item(.edit(.bringForward), key: KeyboardShortcut("]"))
             item(.edit(.sendBackward), key: KeyboardShortcut("["))
+            Divider()
+            // No key: Return stays the stage's (toolKey), so a text field's Return is never taken.
+            item(.tools(.finishPath))
         }
         CommandMenu("Animate") { animate }
         CommandGroup(before: .windowSize) {
