@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-17T00:15Z	4	ci-run	38984212662	scoped library: all journeys green but J4 (step 1 readout check); ci-2 fixer
 2026-10-17T00:23Z	4	pr-opened	#1803	ci-2 J4 position check + audit (no app bug)
 2026-10-17T00:29Z	4	pr-merged	#1803	ci-2 (0e6f7c9)
+2026-10-17T00:46Z	4	ci-run	38986624933	J4 passes step 1, fails step 2 focus; ci-3 fixer
