@@ -1,6 +1,7 @@
 // FlareJourneyTests+Timeline.swift: J9's slice for draw-key-save DK-10, the
-// timeline under the stage driven with the mouse. On `-FlareFixture bounce`
-// (Ball, Shadow and Background, 48 frames at 24 fps) it drags the playhead on
+// timeline under the stage driven with the mouse. On `-FlareSample bounce`
+// (live services since inspector-timeline IT-10; Ball, Shadow and
+// Background, 48 frames at 24 fps) it drags the playhead on
 // the Frame Ruler to 30, where the readouts read "30 / 48" and "01:06 / 02:00",
 // then clicks Ball's name in the timeline, which selects Ball's row. A frame's
 // x is the ruler's left edge plus the strip's 8 pt inset and the frame's share
@@ -13,7 +14,7 @@ final class FlareTimelineJourneys: XCTestCase {
 
     /// Drag the playhead to 30: the readouts follow; click Ball's name: Ball's row is selected.
     @MainActor func testTimelineScrub() {
-        let flare = Journey("Flare", self, arguments: ["-FlareFixture", "bounce"])
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "bounce"])
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let frame = flare.element("flare.timeline.frame")
         XCTAssert(frame.waitForExistence(timeout: 10), "no frame readout (flare.timeline.frame)")

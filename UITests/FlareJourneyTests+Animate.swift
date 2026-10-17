@@ -1,6 +1,6 @@
 // FlareJourneyTests+Animate.swift: J6's slice for draw-key-save DK-14, drag
-// to key, driven with the mouse. On `-FlareFixture bounce` (Ball keyed at 0,
-// 12, 24, 36 and 47; Shadow a flat ellipse at (275, 352) with no keys) it
+// to key, driven with the mouse. On `-FlareSample bounce` (live services
+// since inspector-timeline IT-10; Ball keyed at 0, 12, 24, 36 and 47; Shadow a flat ellipse at (275, 352) with no keys) it
 // turns Auto-key on from the toolbar and finds the recording ring's dot
 // (`flare.recording`), drags the playhead to 30 on the Frame Ruler (as
 // FlareTimelineJourneys does), chooses Select from the palette and drags Ball
@@ -22,11 +22,11 @@ final class FlareAnimateJourneys: XCTestCase {
 
     /// Auto-key on; at 30 drag Ball: a key at 30, one Undo removes it; Auto-key off; at 0 drag Shadow: no key at 30.
     @MainActor func testMoveAndKeyByDrag() {
-        let flare = Journey("Flare", self, arguments: ["-FlareFixture", "bounce"])
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "bounce"])
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let canvas = flare.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "no stage (suite.canvas)")
-        XCTAssertEqual(keys("Ball", flare), Self.ballKeys, "Ball's lane doesn't read the fixture's keys")
+        XCTAssertEqual(keys("Ball", flare), Self.ballKeys, "Ball's lane doesn't read the sample's keys")
         XCTAssertEqual(keys("Shadow", flare), [], "Shadow's lane has keys before any edit")
         flare.shot("animate-0-open")
 
