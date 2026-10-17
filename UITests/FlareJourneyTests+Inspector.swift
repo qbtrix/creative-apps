@@ -43,8 +43,10 @@ final class FlareInspectorJourneys: XCTestCase {
         // 5. Focus the bar (a click opens its field; Return closes it and keeps the focus), then →, →, Shift-→.
         let bar = flare.element("flare.inspector.rotation")
         bar.click()
-        let field = flare.element("suite.inspector").textFields.firstMatch
-        XCTAssert(field.waitForExistence(timeout: 5), "clicking the Rotation bar opened no field")
+        guard let field = editField("Rotation", of: bar, flare) else {
+            flare.attachTree(as: "j7-rotation-field-tree")
+            return XCTFail("clicking the Rotation bar opened no field")
+        }
         flare.press(.return)
         XCTAssert(waitFor { !field.exists }, "Return didn't close the Rotation field")
         guard let start = number(bar) else { return XCTFail("the Rotation bar reads no number: \(String(describing: bar.value))") }
@@ -72,6 +74,18 @@ final class FlareInspectorJourneys: XCTestCase {
     /// The stopwatch of the TRANSFORM row titled `title`.
     @MainActor private func stopwatch(_ title: String, _ flare: Journey) -> XCUIElement {
         flare.element("suite.inspector").buttons.matching(NSPredicate(format: "label == %@", "Animate \(title)")).firstMatch
+    }
+
+    /// The typing field a click on `bar` opened, within five seconds: the text
+    /// field inside the bar (ScrubField contains it while editing), or the
+    /// inspector's text field labelled `title`; never another row's field, such
+    /// as FILL's hex. Nil when neither shows.
+    @MainActor private func editField(_ title: String, of bar: XCUIElement, _ flare: Journey) -> XCUIElement? {
+        let inside = bar.textFields.firstMatch
+        let labelled = flare.element("suite.inspector").textFields.matching(
+            NSPredicate(format: "label == %@ OR placeholderValue == %@", title, title)).firstMatch
+        guard waitFor({ inside.exists || labelled.exists }) else { return nil }
+        return inside.exists ? inside : labelled
     }
 
     /// `title`'s stopwatch reads `state` within five seconds.
