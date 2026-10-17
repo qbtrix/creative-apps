@@ -6,7 +6,9 @@
 // last sample as `.stage(.dragChanged)` (the gesture's start, Shift and Option and the zoom), then `.stage(.endDrag)`,
 // so the window changes once; Escape drops the copy before the window's `toolKey` cancels. A tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
 // glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
-// Path with `model.finishPathHelp`. It only reads `model`; every change goes through `perform`.
+// Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage a ViewerStatusBar shows the
+// zoom percent, the scene size and, on the fakes, a "Preview data" warning pill. It only reads `model`; every change
+// goes through `perform`.
 import AppKit
 import FlareCore
 import FlareModel
@@ -33,22 +35,54 @@ struct FlareStage: View {
         if let scene = model.selectedScene {
             let size = CGSize(width: scene.width, height: scene.height)
             let scale = zoom ?? ZoomMath.fit(document: size, in: viewport)
-            CanvasViewport(
-                documentSize: size, zoom: scale, checkerboard: false, onSize: { viewport = $0 },
-                onDrag: { previous, current in drag(from: previous, to: current, scale: scale) },
-                onDragEnd: endDrag, onKey: key
-            ) {
-                if let list = live?.movePreview ?? model.stageList { FlareStageArt(list: list, zoom: scale).drawingGroup() }
-            } overlay: {
-                FlareStageOverlay(marks: live?.stageMarks ?? model.stageMarks, zoom: scale)
-                FlareStageSelection(model: model, zoom: scale, perform: perform)
-                FlareStageGuides(model: model, zoom: scale, perform: perform)
+            VStack(spacing: 0) {
+                stage(size: size, scale: scale)
+                ViewerStatusBar(zoom: scale, size: Self.sizeText(size)) {
+                    if model.services.isPreview {
+                        Text("Preview data").accessibilityIdentifier("flare.status.preview").statusPill(.warning)
+                            .help(Self.previewHelp)
+                            .accessibilityHint(Self.previewHelp)
+                    }
+                }
             }
-            .overlay(alignment: .leading) {
-                ToolbarGroup(palette, axis: .vertical, style: .floating).padding(SuiteSpacing.m)
-            }
-            .modifier(FlareStageContextMenu(model: model, zoom: scale, perform: perform))
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(Self.identifier)
         }
+    }
+
+    /// The stage and its status bar; the journeys measure the palette against its leading ruler.
+    static let identifier = "flare.stagePane"
+    /// What the "Preview data" pill means, as its tooltip and accessibility hint.
+    static let previewHelp = "This window shows built-in sample data, not a file on disk."
+
+    /// The scene's size for the status bar in whole points ("550 × 400 pt"); a non-finite side reads 0.
+    static func sizeText(_ size: CGSize) -> String {
+        func side(_ value: CGFloat) -> String {
+            value.isFinite ? Double(value).formatted(.number.grouping(.never).precision(.fractionLength(0))) : "0"
+        }
+        return "\(side(size.width)) × \(side(size.height)) pt"
+    }
+
+    /// The viewport with the art, the marks and the floating palette. The palette starts inside the vertical
+    /// ruler (CanvasViewport always draws one), so it never covers the ruler's numbers.
+    private func stage(size: CGSize, scale: Double) -> some View {
+        CanvasViewport(
+            documentSize: size, zoom: scale, checkerboard: false, onSize: { viewport = $0 },
+            onDrag: { previous, current in drag(from: previous, to: current, scale: scale) },
+            onDragEnd: endDrag, onKey: key
+        ) {
+            if let list = live?.movePreview ?? model.stageList { FlareStageArt(list: list, zoom: scale).drawingGroup() }
+        } overlay: {
+            FlareStageOverlay(marks: live?.stageMarks ?? model.stageMarks, zoom: scale)
+            FlareStageSelection(model: model, zoom: scale, perform: perform)
+            FlareStageGuides(model: model, zoom: scale, perform: perform)
+        }
+        .overlay(alignment: .leading) {
+            ToolbarGroup(palette, axis: .vertical, style: .floating)
+                .padding(SuiteSpacing.m)
+                .padding(.leading, SuiteSize.ruler)
+        }
+        .modifier(FlareStageContextMenu(model: model, zoom: scale, perform: perform))
     }
 
     /// One pointer move, on the live copy (made from the model at the drag's first sample, or the first after
