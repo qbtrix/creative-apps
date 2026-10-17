@@ -1,17 +1,45 @@
 [
   {
-    "label": "a slot names the wrong feature",
+    "label": "the live marquee slot stays NotBuilt",
     "file": "Sources/DesignModel/DesignServices.swift",
-    "find": "framing: NotBuilt(\"Zoom to Selection\")",
-    "replace": "framing: NotBuilt(\"Zoom\")",
-    "tests": "DesignNotBuiltTests"
+    "find": "marquee: LiveMarquee()",
+    "replace": "marquee: NotBuilt(\"Marquee selection\")",
+    "tests": "DesignLiveStubTests"
   },
   {
-    "label": "the filing slot names the wrong feature",
+    "label": "the live aligning slot stays NotBuilt",
     "file": "Sources/DesignModel/DesignServices.swift",
-    "find": "filing: NotBuilt(\"Saving\")",
-    "replace": "filing: NotBuilt(\"Save\")",
-    "tests": "DesignNotBuiltTests"
+    "find": "aligning: LiveAligning()",
+    "replace": "aligning: NotBuilt(\"Aligning several layers\")",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "the live styling slot skips its stub",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "styling: LiveStyling()",
+    "replace": "styling: NotBuilt(\"Style editing\")",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "the live filing slot is the fake codec",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "filing: LiveFiling()",
+    "replace": "filing: FakeFiling()",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "the live filing slot stays NotBuilt",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "filing: LiveFiling()",
+    "replace": "filing: NotBuilt(\"Saving\")",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "a live tier-2 slot names the wrong feature",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "filing: LiveFiling(), export: NotBuilt(\"Export\")",
+    "replace": "filing: LiveFiling(), export: NotBuilt(\"Exporting\")",
+    "tests": "DesignLiveStubTests"
   },
   {
     "label": "services never break equality",
@@ -26,5 +54,19 @@
     "find": "        self.services = services\n",
     "replace": "",
     "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "the fake duplicating slot stays NotBuilt",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "duplicating: FakeDuplicating(),",
+    "replace": "duplicating: NotBuilt(\"Duplicate\"),",
+    "tests": "DesignArrangeFakesTests"
+  },
+  {
+    "label": "the fake set takes the live name",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "name: \"fake\", marquee",
+    "replace": "name: \"live\", marquee",
+    "tests": "DesignArrangeFakesTests"
   }
 ]

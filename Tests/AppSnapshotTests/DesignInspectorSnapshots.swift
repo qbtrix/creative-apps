@@ -1,4 +1,4 @@
-// DesignInspectorSnapshots.swift: Design's panel on the Properties tab at the
+// DesignInspectorSnapshots.swift: Design's inspector (Properties) at the
 // editor's panel width: a page with no layer selected, a rectangle selected
 // (Layer, Frame and Fill), a locked rectangle (Frame and Fill disabled,
 // with the line saying why), and a rectangle inside a locked group (disabled
@@ -47,7 +47,7 @@ import Testing
 private struct PanelSample: View {
     let model: DesignWorkspace
     var body: some View {
-        DesignPanel(model: model, tab: .properties)
+        DesignInspector(model: model, perform: { _ in })
             .frame(width: SuiteSize.editorPanelWidth)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(SuiteSpacing.xxl)

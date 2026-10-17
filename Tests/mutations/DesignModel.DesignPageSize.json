@@ -1,0 +1,44 @@
+[
+  {
+    "label": "the clamp's floor dropped",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "let newWidth = Swift.min(Swift.max(width, range.lowerBound), range.upperBound)",
+    "replace": "let newWidth = Swift.min(width, range.upperBound)",
+    "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "the clamp's ceiling dropped",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "let newWidth = Swift.min(Swift.max(width, range.lowerBound), range.upperBound)",
+    "replace": "let newWidth = Swift.max(width, range.lowerBound)",
+    "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "the unchanged check dropped (a step for no change)",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "guard newWidth != pages[index].frameWidth || newHeight != pages[index].frameHeight else { return }",
+    "replace": "",
+    "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "contentBounds keeps hidden layers",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "for node in nodes where !node.isHidden {",
+    "replace": "for node in nodes {",
+    "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "contentBounds skips a group's children",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "                visit(node.children)\n",
+    "replace": "",
+    "tests": "DesignPageSizeTests.swift"
+  },
+  {
+    "label": "isPastEdge ignores the right edge",
+    "file": "Sources/DesignModel/DesignPageSize.swift",
+    "find": "frame.maxX > frameWidth || ",
+    "replace": "",
+    "tests": "DesignPageSizeTests.swift"
+  }
+]

@@ -73,6 +73,7 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssert(position.waitForExistence(timeout: 5), "no loupe position (library.loupe.position)")
         let start = Self.text(of: position)
         XCTAssert(start.contains(" of "), "the loupe position reads \(start), not \"<name>  ·  n of m\"")
+        XCTAssert(start.contains("star"), "the loupe readout \(start) doesn't show the photo's rating (#1661)")
         library.shot("loupe")
         // The loupe's keys act while it has focus; a menu click may leave focus
         // elsewhere, so click the photo first, as a person would.
@@ -93,6 +94,16 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssert(cell.waitForExistence(timeout: 5), "no grid cell for \(name) after Escape")
         XCTAssert(cell.isSelected, "the grid came back without \(name), the loupe's photo, selected")
         library.shot("loupe-back-to-grid")
+        // Someone who doesn't know Escape clicks the loupe's Grid button instead.
+        view.click()
+        view.menuItems["Loupe"].click()
+        XCTAssert(loupe.waitForExistence(timeout: 10), "View > Loupe didn't reopen the loupe")
+        let gridButton = library.element("library.loupe.grid")
+        XCTAssert(gridButton.waitForExistence(timeout: 5), "the loupe shows no Grid button (library.loupe.grid)")
+        gridButton.click()
+        XCTAssert(loupe.waitForNonExistence(timeout: 5), "the Grid button left it still in the loupe")
+        XCTAssert(gridCell(named: name, in: library).waitForExistence(timeout: 5), "no grid after the Grid button")
+        library.shot("loupe-grid-button")
     }
 
     /// Selecting a photo swaps the collection card for its metadata inspector;
@@ -223,7 +234,7 @@ final class LibraryJourneyTests: XCTestCase {
     }
 
     /// The grid's first sample photo. A cell's label leads with its badges
-    /// ("2 stars, Purple, IMG_0034"), so match the file name anywhere in a
+    /// ("2 stars, Purple label, IMG_0034"), so match the file name anywhere in a
     /// grid button's label.
     @MainActor private func samplePhoto(in library: Journey) -> XCUIElement {
         library.app.splitGroups.descendants(matching: .button)

@@ -5,15 +5,35 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#752, #267, #268, #276, #266, #532",
-  "waits_on": "design-contracts; view tasks: design-window DW-a (DW-b for the scrub check)",
+  "waits_on": "design-contracts; SR-t's view tasks: design-window DW-a only; SR-a's: DW-a (DW-b for the scrub check)",
   "depends": [
     "design-contracts"
   ],
   "owned": [
     "Sources/DesignModel/Live/LiveStyling.swift",
     "Tests/DesignModelTests/DesignStyleTests.swift",
+    "Tests/mutations/DesignModel.LiveStyling.json",
     "Sources/DesignModel/DesignInspectorContent.swift",
     "Tests/DesignModelTests/DesignInspectorSharedValueTests.swift",
+    "Tests/mutations/DesignModel.DesignInspectorContent.json",
+    "Sources/DesignModel/DesignText.swift",
+    "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
+    "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
+    "Tests/mutations/DesignModel.DesignText.json",
+    "UITests/DesignJourneyTests+Text.swift",
+    "Sources/DesignApp/DesignInspectorText.swift",
+    "Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift",
+    "Sources/DesignApp/DesignTextFont.swift",
+    "Sources/DesignApp/DesignTextArtwork.swift",
+    "Sources/DesignApp/DesignTextEditor.swift",
+    "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
+    "Tests/AppSnapshotTests/DesignTextDrawTests.swift",
+    "Sources/DesignApp/DesignFrameLabels.swift",
+    "Sources/DesignModel/DesignFrameLabel.swift",
+    "Tests/DesignModelTests/DesignFrameLabelTests.swift",
+    "Tests/mutations/DesignModel.DesignFrameLabel.json",
+    "Tests/AppSnapshotTests/DesignFrameLabelSnapshots.swift",
     "Sources/DesignApp/DesignInspector.swift",
     "Sources/DesignApp/DesignInspectorStyle.swift",
     "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
@@ -21,30 +41,86 @@
     "Tests/AppSnapshotTests/DesignStyleScrubTests.swift",
     "UITests/DesignJourneyTests+Style.swift",
     "Tests/DesignModelTests/DesignStyleBudgetTests.swift",
-    "Sources/DesignModel/DesignText.swift",
-    "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
-    "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
-    "Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift",
     "Sources/DesignApp/DesignCanvasMarks.swift",
-    "Sources/DesignApp/DesignFrameLabels.swift",
-    "Sources/DesignApp/DesignTextEditor.swift",
-    "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
     "Tests/AppSnapshotTests/DesignArtworkPathTests.swift",
-    "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
     "UITests/DesignJourneyTests+PerfScrub.swift"
   ],
   "journeys": [
     "DesignStyleJourneyTests.testInspectorStyleRows",
-    "DesignStyleJourneyTests.testTextFontAndSize",
+    "DesignTextJourneyTests.testTextFontAndSize",
     "DesignPerfScrubJourneyTests.testScrubLatency"
   ],
   "slices": [
     {
-      "id": "SR-a",
-      "behavior": "Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read \"Mixed\" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget.",
+      "id": "SR-m",
+      "behavior": "On the live services every style setter refuses, skips and clamps as blueprint 5.4 says, the inspector's shared values read \"Mixed\" only when layers differ, and the inline editor's scale follows the zoom.",
       "tasks": [
         "ST-1",
         "ST-2",
+        "ST-3"
+      ],
+      "journeys": [
+        "MJ8"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveStyling.swift",
+        "Tests/DesignModelTests/DesignStyleTests.swift",
+        "Tests/mutations/DesignModel.LiveStyling.json",
+        "Sources/DesignModel/DesignInspectorContent.swift",
+        "Tests/DesignModelTests/DesignInspectorSharedValueTests.swift",
+        "Tests/mutations/DesignModel.DesignInspectorContent.json",
+        "Sources/DesignModel/DesignText.swift",
+        "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
+        "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
+        "Tests/mutations/DesignModel.DesignText.json"
+      ],
+      "waits": {}
+    },
+    {
+      "id": "SR-t",
+      "behavior": "Text family, size, weight and alignment rows set a text layer, the canvas and the inline editor draw its text in that style (size 32 draws twice as tall as 16), committed text doesn't jump at any zoom, and top-level frame names sit above their frames.",
+      "tasks": [
+        "ST-6b",
+        "ST-4b",
+        "ST-5t",
+        "ST-5f"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+Text.swift",
+        "Sources/DesignApp/DesignInspectorText.swift",
+        "Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift",
+        "Sources/DesignApp/DesignTextFont.swift",
+        "Sources/DesignApp/DesignTextArtwork.swift",
+        "Sources/DesignApp/DesignTextEditor.swift",
+        "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
+        "Tests/AppSnapshotTests/DesignTextDrawTests.swift",
+        "Sources/DesignApp/DesignFrameLabels.swift",
+        "Sources/DesignModel/DesignFrameLabel.swift",
+        "Tests/DesignModelTests/DesignFrameLabelTests.swift",
+        "Tests/mutations/DesignModel.DesignFrameLabel.json",
+        "Tests/AppSnapshotTests/DesignFrameLabelSnapshots.swift"
+      ],
+      "waits": {
+        "SR-m": [
+          "ST-4b",
+          "ST-5t"
+        ],
+        "design-window:DW-a": [
+          "ST-4b",
+          "ST-5t",
+          "ST-5f"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SR-a",
+      "behavior": "Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read \"Mixed\" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget.",
+      "tasks": [
         "ST-4",
         "ST-6",
         "ST-7"
@@ -53,10 +129,6 @@
         "J10"
       ],
       "owned": [
-        "Sources/DesignModel/Live/LiveStyling.swift",
-        "Tests/DesignModelTests/DesignStyleTests.swift",
-        "Sources/DesignModel/DesignInspectorContent.swift",
-        "Tests/DesignModelTests/DesignInspectorSharedValueTests.swift",
         "Sources/DesignApp/DesignInspector.swift",
         "Sources/DesignApp/DesignInspectorStyle.swift",
         "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
@@ -66,6 +138,10 @@
         "Tests/DesignModelTests/DesignStyleBudgetTests.swift"
       ],
       "waits": {
+        "SR-m": [
+          "ST-4",
+          "ST-7"
+        ],
         "design-window:DW-a": [
           "ST-4",
           "ST-6"
@@ -73,50 +149,37 @@
         "design-window:DW-b": [
           "ST-4"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "SR-b",
-      "behavior": "Text family, size, weight and alignment rows work, committed text doesn't jump at any zoom, the canvas draws radius, stroke, opacity and frame names above their frames, and scrubs and typing keep up on 2,000 layers.",
+      "behavior": "The canvas draws radius, stroke and opacity as stored, and scrubs and typing keep up on 2,000 layers.",
       "tasks": [
-        "ST-3",
-        "ST-4b",
         "ST-5",
-        "ST-6b",
         "ST-8"
       ],
       "journeys": [
-        "J11",
         "P2"
       ],
       "owned": [
-        "Sources/DesignModel/DesignText.swift",
-        "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
-        "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
-        "Sources/DesignApp/DesignInspectorStyle.swift",
-        "Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift",
         "Sources/DesignApp/DesignCanvasMarks.swift",
-        "Sources/DesignApp/DesignFrameLabels.swift",
-        "Sources/DesignApp/DesignTextEditor.swift",
-        "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
         "Tests/AppSnapshotTests/DesignArtworkPathTests.swift",
-        "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
-        "UITests/DesignJourneyTests+Style.swift",
         "UITests/DesignJourneyTests+PerfScrub.swift"
       ],
       "waits": {
         "design-window:DW-a": [
-          "ST-4b",
           "ST-5",
-          "ST-6b",
           "ST-8"
         ],
         "SR-a": [
-          "ST-4b",
-          "ST-6b",
+          "ST-8"
+        ],
+        "SR-t": [
           "ST-8"
         ]
-      }
+      },
+      "ui": true
     }
   ]
 }

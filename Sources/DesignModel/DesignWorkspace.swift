@@ -14,7 +14,9 @@
 //   refused call (it throws, names an unknown id, hits a locked node, or changes
 //   nothing) records nothing and leaves the workspace as it was.
 // - Selection, expansion, tool and zoom are not edits. Undo restores the
-//   selection an edit had, but not the expanded rows.
+//   selection an edit had, but not the expanded rows. Every selection change
+//   (select, toggle, deselect, page switch) ends the edit run, so a coalescing
+//   run never spans two selections.
 // - Every palette tool acts through `drag(from:to:modifiers:)` and `endDrag()`; a
 //   tool that does nothing there stays disabled with `unavailableHelp`
 //   (DesignToolsTests checks this).
@@ -32,7 +34,11 @@ public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
     public var frameWidth: Double
     public var frameHeight: Double
     /// Top-level nodes, back to front.
-    public var nodes: [DesignNode] = []
+    public var nodes: [DesignNode]
+
+    public init(id: String, name: String, frameWidth: Double, frameHeight: Double, nodes: [DesignNode] = []) {
+        (self.id, self.name, self.frameWidth, self.frameHeight, self.nodes) = (id, name, frameWidth, frameHeight, nodes)
+    }
 
     /// The tree as rows, frontmost first among siblings: each node, then its children when its id
     /// is in `expanded`.
@@ -90,6 +96,8 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// The text node being edited inline, and its live text (DesignText).
     public internal(set) var editingTextID: String?
     public internal(set) var textDraft = ""
+    /// The rectangle a marquee drag covers on the selected page, while one is under way.
+    public internal(set) var marquee: DesignRect?
     /// How far from a selection handle, in document points, still grabs it.
     public private(set) var handleTolerance = 6.0
     /// The file the document was opened from or last saved to; nil for a new, unsaved file.
@@ -184,6 +192,15 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Whether Delete Page can act: a page is selected and it is not the file's last one.
     public var canDeletePage: Bool { selectedPage != nil && pages.count > 1 }
 
+    /// Why Add Page can't run now, as its tooltip; nil when it can.
+    public var addPageHelp: String? { isOpen ? nil : DesignToolbarItem.noFile }
+
+    /// Why Delete Page can't run now, as its tooltip; nil when it can.
+    public var deletePageHelp: String? {
+        if selectedPage == nil { return DesignToolbarItem.noFile }
+        return canDeletePage ? nil : "A file keeps at least one page."
+    }
+
     /// Deletes a page; the last page is refused. Deleting the selected page selects its neighbor.
     /// Undo brings the page back with its nodes and the selection it had.
     public mutating func deletePage(_ id: String) throws(DesignTreeError) {
@@ -201,6 +218,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     public mutating func selectPage(_ id: String) {
         guard pages.contains(where: { $0.id == id }) else { return }
         commitTextEdit()
+        endEditRun()
         (selectedPageID, selectedNodeID) = (id, nil)
     }
 
@@ -210,6 +228,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         if pages.contains(where: { $0.id == id }) { return selectPage(id) }
         guard let page = pages.first(where: { $0.nodes.node(id) != nil }) else { return }
         commitTextEdit()
+        endEditRun()
         selectedPageID = page.id
         selectedNodeID = id
         expandAncestors(of: id, in: page.nodes)
@@ -218,6 +237,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Clears the node selection, every selected layer (Escape, a click on empty canvas); the page stays selected.
     public mutating func deselect() {
         commitTextEdit()
+        endEditRun()
         selectedNodeID = nil
     }
 

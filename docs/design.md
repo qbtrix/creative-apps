@@ -571,9 +571,9 @@ exception to "no rounded cards inside an inspector".
 | Part | Component | Rules |
 |---|---|---|
 | Group header | `Text` in `SuiteFont.sectionCaps`, `.textCase(.uppercase)`, `.tracking(SuiteSize.capsTracking)` | Secondary color; 12 pt above, 4 pt below. |
-| Number row | `StudioScrubRow` | The bar slider (`InspectorSliderRow`) showing two decimals: 28 pt, full width, radius `SuiteRadius.row`. Label inside on the left, value right in tabular figures. The fill runs to the value over five faint ticks; the marker turns accent while dragged. Drag, click to type, arrows step, Home and End. |
+| Number row | `StudioScrubRow` | The bar slider (`InspectorSliderRow`) showing two decimals: 28 pt, full width, radius `SuiteRadius.row`. Label inside on the left, value right in tabular figures. The fill runs to the value; five faint ticks sit in the gap between the label and the value, never on the text, and none show when the gap is too narrow to space them. The marker turns accent while dragged. Drag, click to type, arrows step, Home and End. |
 | Presets | `ChoiceChips`, `PresetGrid`, `ChipRow` | 24 pt filled chips (`ChipRow`'s toggle chips 28 pt), radius `SuiteRadius.row`, secondary text. `ChoiceChips` is `PresetGrid` in three columns. One on at most in a grid: the selected well plus a 1 pt accent border, primary text. |
-| Curve | `CurveEditor` | 180 pt well. Handles are 10 pt with a 28 pt hit target; the focused or dragged one is accent with a ring 2 pt out. Arrow keys nudge 0.01, Shift 0.1; Tab moves between handles; a drag focuses the handle it moved. |
+| Curve | `CurveEditor` | 180 pt well. Handles are 10 pt with a 28 pt hit target; the focused or dragged one is accent with a ring 2 pt out; under the pointer a handle's rim turns accent and the pointer is a grab hand. Arrow keys nudge 0.01, Shift 0.1; Tab moves between handles; a drag focuses the handle it moved. |
 
 Color carries meaning only: accent is selected or active, `SuiteColor.keyframed`
 (amber) is a keyframe. Each drag, nudge or typed value ends in one `onEnd`, so

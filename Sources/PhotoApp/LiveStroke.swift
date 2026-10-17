@@ -1,7 +1,8 @@
 // LiveStroke.swift: the workspace a paint stroke draws on while it lasts.
 // The window keeps its workspace in State, and every write to it re-runs and
-// lays out the whole editor on the main actor (top bar, rail, panels, menus,
-// the checkerboard behind the picture): a SwiftUI pass per pointer sample. A
+// lays out the whole editor on the main actor (toolbar, tool palette, sidebar,
+// inspector, menus, the checkerboard behind the picture): a SwiftUI pass per
+// pointer sample. A
 // brush, eraser, clone or heal drag changes only pixels
 // (PhotoWorkspace.dragPaintsOnly), so its samples go to a copy kept here, out
 // of SwiftUI's sight, and the tile canvas shows each one through

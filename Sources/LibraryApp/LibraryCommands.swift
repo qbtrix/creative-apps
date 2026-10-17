@@ -6,7 +6,8 @@
 // Loupe, Zoom In ⌘+ and Zoom Out ⌘- (Larger and Smaller Thumbnails in the
 // grid), Zoom to Fit ⌘0, Actual Size ⌘1, Sort By. Photo: Copy Settings ⇧⌘C,
 // Paste Settings ⇧⌘V, Reset Develop, Crop, Reset Crop. Metadata: Set Rating,
-// Set Flag, Set Label, Auto Advance. An item whose action is nil is disabled,
+// Set Flag, Set Label, Auto Advance (its help says it moves the loupe to the
+// next photo after a rating or a flag). An item whose action is nil is disabled,
 // never hidden, and its help says why. Single keys (R, G, and 0-5, P, X and U
 // once the cull area routes them) act only while the grid or loupe has focus,
 // so their items take no key equivalent and name the key in their help
@@ -175,6 +176,12 @@ struct LibraryCommands: Commands {
             isOn: Binding(get: { menu.cull.autoAdvance }, set: { _ in menu.cull.toggleAutoAdvance?() })
         )
         .disabled(cull.toggleAutoAdvance == nil)
-        .help(cull.toggleAutoAdvance == nil ? "Auto Advance: \(advance)" : "Auto Advance")
+        .help(Self.autoAdvanceHelp(disabled: cull.toggleAutoAdvance == nil ? advance : nil))
+    }
+
+    /// Auto Advance's help: what it does while enabled (a label never moves
+    /// the loupe), else `disabled`, the reason it is off.
+    static func autoAdvanceHelp(disabled reason: String?) -> String {
+        "Auto Advance: " + (reason ?? "In the loupe, go to the next photo after you set a rating or a flag.")
     }
 }

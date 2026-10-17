@@ -4,7 +4,7 @@
 // folder, import it again, then an unreadable one. Step 6 runs on the fakes
 // (`-LibraryFixture shoot-unimported -LibraryFakeMode slow`) to catch the
 // progress row before the slow importer moves on. The progress row is
-// `library.import.progress` (its value the text), the notice
+// `library.import.progress` (its label the text), the notice
 // `library.import.notice` with its Show and Close buttons.
 import XCTest
 
@@ -14,7 +14,7 @@ extension LibraryJourneyTests {
     /// can't read a folder.
     @MainActor func testImportAFolder() throws {
         // Step 1: 24 JPEGs (4 in day2/), 1 PNG, 1 HEIC, broken.jpg and notes.txt.
-        let folder = try LibraryFiles.freshCatalogDir()
+        let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
         try LibraryFiles.write(20, in: folder)
@@ -23,6 +23,7 @@ extension LibraryJourneyTests {
         let broken = try LibraryFiles.broken(in: folder)
         try Data("not a photo".utf8).write(to: folder.appending(path: "notes.txt"))
         let name = folder.lastPathComponent
+        XCTAssertFalse(name.hasPrefix("library-catalog"), "the imported folder is named like a catalog dir")
         var library = Journey("Library", self, arguments: [
             "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
         ])
@@ -52,10 +53,11 @@ extension LibraryJourneyTests {
         XCTAssertEqual(mentions.count, 0, "the notice mentions notes.txt")
         library.shot("imported")
 
-        // Step 4: without broken.jpg, the same folder again brings nothing new.
+        // Step 4: without broken.jpg, the same folder again brings nothing new
+        // and says its 26 photos are already in the library.
         try FileManager.default.removeItem(at: broken)
         importFromFileMenu(library)
-        expectNotice("No new photos in \(name).", library)
+        expectNotice("No new photos in \(name). All 26 are already in your library.", library)
         library.shot("import-again")
         XCTAssertEqual(gridCells(library).count, 26, "importing again changed the grid's cell count")
         expectAllPhotos(26, library)
@@ -87,7 +89,7 @@ extension LibraryJourneyTests {
         let start = Date()
         var reads = ""
         while Date().timeIntervalSince(start) < 2, reads != "Importing 1 of 24" {
-            reads = progress.exists ? (progress.value as? String) ?? "" : ""
+            reads = progress.exists ? progress.label : ""
         }
         library.shot("import-progress")
         XCTAssertEqual(reads, "Importing 1 of 24", "library.import.progress within 2 s of File > Import Folder…")

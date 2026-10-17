@@ -1,0 +1,220 @@
+// DesignLiveStubTests.swift: the tier-1 live stubs before their features fill
+// them (D0-2b). LiveDuplicating, LiveGrouping, LiveClipboard, LiveOrdering and
+// LiveStyling answer every help and every refusal exactly as NotBuilt with
+// their 5.6 name, on DesignFixtures' `cards` with A selected and with A and B.
+// LiveFiling is today's codec: it saves `cards` to the bytes DesignFile writes,
+// opens them back to the same pages, and refuses what DesignFile refuses with
+// the same reason. `.live` holds the ten Live types, obeys the help law, and
+// MJ3 walks every slot of it on `cards`. Runs on Linux and macOS.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+@testable import DesignModel
+import Testing
+
+@Suite struct DesignLiveStubTests {
+    let workspace = DesignFixtures.cards
+    var page: DesignPage { workspace.selectedPage ?? DesignPage(id: "none", name: "None", frameWidth: 1, frameHeight: 1) }
+    static let selections = [["node-2"], ["node-2", "node-3"]]  // A; A and B
+
+    /// What `body` threw as a refusal; nil when it returned (or threw something else).
+    private func refusal(_ body: () throws -> Void) -> DesignRefusal? {
+        do { try body() } catch { return error as? DesignRefusal }
+        return nil
+    }
+
+    /// Each help and each write of the five forwarding stubs, as the stub answers and as NotBuilt
+    /// with `name` answers, so a pair differs exactly when the stub stops forwarding.
+    private func answers(_ ids: [String]) -> [(stub: String, notBuilt: String, name: String)] {
+        let delta = pt(10, 10)
+        let bytes = Data("{}".utf8)
+        func help(_ name: String, _ stub: String?, _ base: String?) -> (String, String, String) {
+            ("\(stub ?? "nil")", "\(base ?? "nil")", name)
+        }
+        func write(_ name: String, _ stub: () throws -> Void, _ base: () throws -> Void) -> (String, String, String) {
+            ("\(String(describing: refusal(stub)))", "\(String(describing: refusal(base)))", name)
+        }
+        var mint = DesignIDMint(taken: [], after: 10)
+        let (dup, group, clip, order, style) = (LiveDuplicating(), LiveGrouping(), LiveClipboard(), LiveOrdering(), LiveStyling())
+        let (nd, ng, nc, no, ns) = (NotBuilt("Duplicate"), NotBuilt("Group"), NotBuilt("Copy and paste"),
+                                     NotBuilt("Reordering layers"), NotBuilt("Style editing"))
+        var rows = [
+            help("Duplicate", dup.duplicateHelp(ids, on: page), nd.duplicateHelp(ids, on: page)),
+            write("Duplicate", { _ = try dup.duplicate(ids, offset: delta, on: page, mint: &mint) },
+                  { _ = try nd.duplicate(ids, offset: delta, on: page, mint: &mint) }),
+            help("Group", group.groupHelp(ids, on: page), ng.groupHelp(ids, on: page)),
+            help("Group", group.ungroupHelp(ids, on: page), ng.ungroupHelp(ids, on: page)),
+            write("Group", { _ = try group.group(ids, on: page, mint: &mint) }, { _ = try ng.group(ids, on: page, mint: &mint) }),
+            write("Group", { _ = try group.ungroup(ids, on: page) }, { _ = try ng.ungroup(ids, on: page) }),
+            help("Copy and paste", clip.copyHelp(ids, on: page), nc.copyHelp(ids, on: page)),
+            help("Copy and paste", clip.pasteHelp(nil), nc.pasteHelp(nil)),
+            help("Copy and paste", clip.pasteHelp(bytes), nc.pasteHelp(bytes)),
+            help("Copy and paste", clip.pasteboardType, nc.pasteboardType),
+            write("Copy and paste", { _ = try clip.encode(ids, on: page) }, { _ = try nc.encode(ids, on: page) }),
+            write("Copy and paste", { _ = try clip.paste(bytes, into: nil, on: page, mint: &mint) },
+                  { _ = try nc.paste(bytes, into: nil, on: page, mint: &mint) }),
+            write("Style editing", { _ = try style.setFrame(.x, to: 300, ids, on: page) },
+                  { _ = try ns.setFrame(.x, to: 300, ids, on: page) }),
+            write("Style editing", { _ = try style.setFill(DesignColor(1, 2, 3), ids, on: page) },
+                  { _ = try ns.setFill(DesignColor(1, 2, 3), ids, on: page) }),
+            write("Style editing", { _ = try style.setCornerRadius(12, ids, on: page) },
+                  { _ = try ns.setCornerRadius(12, ids, on: page) }),
+            write("Style editing", { _ = try style.setOpacity(0.5, ids, on: page) }, { _ = try ns.setOpacity(0.5, ids, on: page) }),
+            write("Style editing", { _ = try style.setStroke(nil, ids, on: page) }, { _ = try ns.setStroke(nil, ids, on: page) }),
+            write("Style editing", { _ = try style.setTextStyle(.default, ids, on: page) },
+                  { _ = try ns.setTextStyle(.default, ids, on: page) }),
+        ]
+        for id in ids {
+            rows.append(help("Reordering layers", order.moveHelp(id, into: "node-1", at: 0, on: page),
+                             no.moveHelp(id, into: "node-1", at: 0, on: page)))
+            rows.append(write("Reordering layers", { _ = try order.move(id, into: "node-1", at: 0, on: page) },
+                              { _ = try no.move(id, into: "node-1", at: 0, on: page) }))
+        }
+        for step in [DesignArrangeStep.bringToFront, .sendToBack] {
+            rows.append(help("Reordering layers", order.arrangeHelp(step, ids, on: page), no.arrangeHelp(step, ids, on: page)))
+            rows.append(write("Reordering layers", { _ = try order.arrange(step, ids, on: page) },
+                              { _ = try no.arrange(step, ids, on: page) }))
+        }
+        for property in [DesignStyleProperty.fill, .opacity] {
+            rows.append(help("Style editing", style.styleHelp(property, ids, on: page), ns.styleHelp(property, ids, on: page)))
+        }
+        return rows
+    }
+
+    @Test(arguments: selections) func stubsAnswerAsNotBuilt(_ ids: [String]) {
+        #expect(page.nodes.node("node-2")?.name == "A")
+        let rows = answers(ids)
+        #expect(rows.count > 20)
+        for row in rows { #expect(row.stub == row.notBuilt, "\(row.name)") }
+    }
+
+    @Test(arguments: selections) func stubsRefuseWithTheirName(_ ids: [String]) {
+        var mint = DesignIDMint(taken: [], after: 10)
+        let refusals: [(DesignRefusal?, String)] = [
+            (refusal { _ = try LiveDuplicating().duplicate(ids, offset: pt(10, 10), on: page, mint: &mint) }, "Duplicate"),
+            (refusal { _ = try LiveGrouping().group(ids, on: page, mint: &mint) }, "Group"),
+            (refusal { _ = try LiveClipboard().encode(ids, on: page) }, "Copy and paste"),
+            (refusal { _ = try LiveOrdering().arrange(.bringForward, ids, on: page) }, "Reordering layers"),
+            (refusal { _ = try LiveStyling().setFill(DesignColor(1, 2, 3), ids, on: page) }, "Style editing"),
+        ]
+        for (thrown, name) in refusals { #expect(thrown == .notBuilt(name)) }
+        let helps: [(String?, String)] = [
+            (LiveDuplicating().duplicateHelp(ids, on: page), "Duplicate"), (LiveGrouping().ungroupHelp(ids, on: page), "Group"),
+            (LiveClipboard().copyHelp(ids, on: page), "Copy and paste"),
+            (LiveOrdering().arrangeHelp(.sendBackward, ids, on: page), "Reordering layers"),
+            (LiveStyling().styleHelp(.cornerRadius, ids, on: page), "Style editing"),
+        ]
+        for (help, name) in helps { #expect(help == "\(name) isn't built yet.") }
+        #expect(mint.minted.isEmpty)
+    }
+
+    @Test func copySubtreeForwards() {
+        var mint = DesignIDMint(taken: [], after: 10)
+        let node = page.nodes.node("node-6") ?? DesignNode(id: "x", name: "x", kind: .group, frame: rc(0, 0, 1, 1))
+        #expect(LiveDuplicating().copySubtree(node, mint: &mint) == node)
+        #expect(mint.minted.isEmpty)
+    }
+
+    @Test func filingSavesTodaysBytes() throws {
+        let filing = LiveFiling()
+        let today = try workspace.fileData()
+        let saved = try filing.encode(DesignDocument(pages: workspace.pages))
+        #expect(saved == today)
+        let reopened = try filing.decode(saved)
+        #expect(reopened == DesignDocument(pages: workspace.pages))
+        #expect(try filing.encode(reopened) == today)
+    }
+
+    @Test func filingRefusesWithDesignFilesReason() {
+        let bytes = Data("not json".utf8)
+        var today = DesignWorkspace()
+        let expected: DesignFileError?
+        do { try today.open(bytes); expected = nil } catch { expected = error }
+        let thrown: DesignFileError?
+        do { _ = try LiveFiling().decode(bytes); thrown = nil } catch { thrown = error }
+        #expect(expected == .unreadable)
+        #expect(thrown == expected)
+        #expect(thrown?.reason == "It is not a Design file.")
+    }
+
+    @Test func filingRefusesWhatDecodeRefuses() {
+        let a = page.nodes.node("node-2") ?? DesignNode(id: "x", name: "x", kind: .rectangle, frame: rc(0, 0, 1, 1))
+        var twice = page
+        twice.nodes.append(a)
+        let encode: DesignFileError?
+        do { _ = try LiveFiling().encode(DesignDocument(pages: [twice])); encode = nil } catch { encode = error }
+        #expect(encode == .duplicateID("node-2"))
+        let version: DesignFileError?
+        do { _ = try LiveFiling().decode(Data(#"{"pages":[],"version":2}"#.utf8)); version = nil } catch { version = error }
+        #expect(version == .unsupportedVersion(2))
+        let empty: DesignFileError?
+        do { _ = try LiveFiling().decode(Data(#"{"pages":[],"version":1}"#.utf8)); empty = nil } catch { empty = error }
+        #expect(empty == .noPages)
+    }
+
+    @Test func liveSlotsAreTheLiveTypes() {
+        let live = DesignServices.live
+        #expect(live.marquee is LiveMarquee && live.transforming is LiveTransforming)
+        #expect(live.aligning is LiveAligning && live.framing is LiveFraming)
+        #expect(live.duplicating is LiveDuplicating && live.grouping is LiveGrouping)
+        #expect(live.clipboard is LiveClipboard && live.ordering is LiveOrdering)
+        #expect(live.styling is LiveStyling && live.filing is LiveFiling)
+        let tier2: [(Any, String)] = [(live.export, "Export"), (live.pen, "The Pen tool"),
+                                      (live.components, "Components"), (live.variables, "Variables")]
+        for (slot, name) in tier2 { #expect((slot as? NotBuilt)?.feature == name) }
+    }
+
+    @Test func helpLawHoldsOnLive() {
+        let law = DesignContractLaw.check(.live, on: page)
+        #expect(law.checks == 66 * DesignContractLaw.selections.count)
+        #expect(law.violations.isEmpty, "\(law.violations)")
+    }
+
+    /// MJ3: open `cards`; every `.live` slot answers its NotBuilt help and refusal, except the four
+    /// with live paths (their Live types, obeying the law) and filing, which saves and reopens `cards`.
+    @Test func testLiveStubsWalk() throws {
+        var opened = DesignWorkspace()
+        try opened.open(DesignFixtures.cards.fileData())
+        let page = try #require(opened.selectedPage)
+        let live = DesignServices.live
+        let ids = ["node-2", "node-3"]
+        var mint = DesignIDMint(taken: [], after: 10)
+        let helps: [(String?, String)] = [
+            (live.duplicating.duplicateHelp(ids, on: page), "Duplicate"), (live.grouping.groupHelp(ids, on: page), "Group"),
+            (live.clipboard.copyHelp(ids, on: page), "Copy and paste"),
+            (live.ordering.arrangeHelp(.bringToFront, ids, on: page), "Reordering layers"),
+            (live.styling.styleHelp(.fill, ids, on: page), "Style editing"), (live.export.exportHelp(ids, on: page), "Export"),
+            (live.components.createHelp(ids, on: page), "Components"),
+        ]
+        for (help, name) in helps { #expect(help == "\(name) isn't built yet.") }
+        let path = DesignPath(anchors: [DesignAnchor(point: pt(0, 0)), DesignAnchor(point: pt(10, 10))], isClosed: false)
+        let writes: [(DesignRefusal?, String)] = [
+            (refusal { _ = try live.duplicating.duplicate(ids, offset: pt(10, 10), on: page, mint: &mint) }, "Duplicate"),
+            (refusal { _ = try live.grouping.group(ids, on: page, mint: &mint) }, "Group"),
+            (refusal { _ = try live.clipboard.encode(ids, on: page) }, "Copy and paste"),
+            (refusal { _ = try live.ordering.arrange(.sendToBack, ids, on: page) }, "Reordering layers"),
+            (refusal { _ = try live.styling.setOpacity(0.5, ids, on: page) }, "Style editing"),
+            (refusal { _ = try live.export.svg(for: "node-2", on: page) }, "Export"),
+            (refusal { _ = try live.pen.commit(path, into: nil, on: page, mint: &mint) }, "The Pen tool"),
+            (refusal { _ = try live.components.create(from: "node-1", on: page, library: [], mint: &mint) }, "Components"),
+            (refusal { _ = try live.variables.remove("v", from: []) }, "Variables"),
+        ]
+        for (thrown, name) in writes { #expect(thrown == .notBuilt(name)) }
+        #expect(mint.minted.isEmpty)
+        // The four live paths: their own types, acting as their features define, within the law.
+        #expect(live.marquee is LiveMarquee && live.transforming is LiveTransforming)
+        #expect(live.aligning is LiveAligning && live.framing is LiveFraming)
+        #expect(live.transforming.transformHelp(ids, on: page) == nil)
+        #expect(live.framing.rectToShow(ids, on: page) != nil)
+        let law = DesignContractLaw.check(live, on: page)
+        #expect(law.violations.isEmpty, "\(law.violations)")
+        // Filing saves `cards` to today's bytes and reopens it to the same pages.
+        let today = try opened.fileData()
+        let saved = try live.filing.encode(DesignDocument(pages: opened.pages))
+        #expect(saved == today)
+        #expect(try live.filing.decode(saved) == DesignDocument(pages: opened.pages))
+        #expect(throws: DesignFileError.unreadable) { try live.filing.decode(Data("not json".utf8)) }
+    }
+}

@@ -6,7 +6,8 @@
 // column drops the layer count, then the transport, then the timecode, so the
 // content adds no width to SuiteWindow's minimum. Space, ←, →,
 // Home, End, I and O become HaloCommands sent to `perform`, and ⌫ (the
-// delete command, as in the layer list) deletes the selected layer. Views only read HaloProject; state lives in HaloModel.
+// delete command) sends the Model's `deleteCommand`: the picked keys while any
+// are picked, else the selected layer, as in the layer list. Views only read HaloProject; state lives in HaloModel.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -57,7 +58,7 @@ struct HaloViewer: View {
             // ⌫ arrives as the delete command, as in the layer list; a key
             // press for .delete (U+0008) deleted nothing from the focused
             // timeline in run 38823293728.
-            .onDeleteCommand { perform(.deleteLayer) }
+            .onDeleteCommand { perform(model.deleteCommand) }
             .onKeyPress(characters: CharacterSet(charactersIn: "iIoO")) { press in
                 perform(press.characters.lowercased() == "i" ? .setInPoint : .setOutPoint)
                 return .handled

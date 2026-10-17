@@ -5,7 +5,9 @@
 // media clock, `CACurrentMediaTime()`, the clock the display link's target
 // timestamps use, so the first tick lines up with play. Loop flips the
 // Model's loop flag; ← and → step a frame, Home and End jump; the transport's
-// driver sends `.tick(now)` each refresh. Playback is never an undo step.
+// driver sends `.tick(now)` each refresh. A tick or a ruler scrub writes the
+// Model only when the Model says it changes something, so a refresh or drag
+// sample between two frames writes nothing (#1296). Playback is never an undo step.
 // `playbackScene(_:)` adds nothing.
 import HaloModel
 import QuartzCore
@@ -16,14 +18,14 @@ extension HaloWindow {
         switch command {
         case .setInPoint: _ = model.setSelectedLayerInPoint()
         case .setOutPoint: _ = model.setSelectedLayerOutPoint()
-        case .scrub(let frame): model.scrub(to: frame)
+        case .scrub(let frame): if model.scrubChanges(to: frame) { model.scrub(to: frame) }
         case .playPause: model.togglePlay(at: CACurrentMediaTime())
         case .toggleLoop: model.setLoops(!model.playback.loops)
         case .nextFrame: model.stepFrame(by: 1)
         case .previousFrame: model.stepFrame(by: -1)
         case .goToStart: model.goToStart()
         case .goToEnd: model.goToEnd()
-        case .tick(let now): model.tick(now: now)
+        case .tick(let now): if model.tickChanges(now: now) { model.tick(now: now) }
         default: break
         }
     }

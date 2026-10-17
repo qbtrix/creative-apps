@@ -2,18 +2,28 @@
      docs/blueprints/flare/features/*.wave.json. Edit those, never this file. -->
 # Flare features: waves
 
-The open `p1` logic work on `line:flare` (refreshed in section 0 of
-`docs/blueprints/flare.md`, 2026-10-14) grouped into four features, one
-feature-lead session each. A wave starts when everything it waits on has
+The open `p1` work on `line:flare` grouped into features, one feature-lead
+session each. Waves 1 and 2 build the Model on real documents (section 0 of
+`docs/blueprints/flare.md`, 2026-10-14); waves 3 and 4 put it on screen (the
+UI of section 7.3 and the integrate tasks of 7.6, ordered by the usage map
+in section 1, 2026-10-15). A wave starts when everything it waits on has
 merged. Two features in the same wave never own the same file. Each packet
 lists its tasks, owned files and acceptance tests.
 
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
 | 1 | Never lose work, and draw at full quality on the Mac | `mac-platform.md` | #739, #373, #370 | nothing | #793 | built |
-| 2 | Draw and select on real documents | `live-stage.md` | #357, #740 | nothing | #798 | built |
-| 2 | Key, retime and ease on real documents | `live-keys.md` | #13, #358 | creative-core #171, #216, #219 | #799 | built |
-| 2 | Scenes and guides on real documents | `live-scenes.md` | #362 | nothing | #800 | built |
+| 2 | Draw and select on real documents | `live-stage.md` | #357, #740 | creative-core #213–#216, #182, #173 (all on core `main` 98be31a) | #798 | built |
+| 2 | Key, retime and ease on real documents | `live-keys.md` | #13, #358 | creative-core #171, #216, #219 (on core `main` 98be31a) | #799 | built |
+| 2 | Scenes and guides on real documents | `live-scenes.md` | #362 | creative-core #217, #219 (on core `main` 98be31a) | #800 | built |
+| 3 | Draw a rectangle, key it, play it and save it | `draw-key-save.md` | #346, #347, #12, #203, #15, #11, #205; part of #204, #376, #391 | #793 (closed); task DK-3 only on #798, #799, #800 | #1365 | built |
+| 4 | Select, transform, zoom and edit on the stage | `stage-edit.md` | #204, #375, #384; IN-1 #397 (stage half) | `draw-key-save`; tasks SE-1, SE-2 on #273 and #995 | file when ready | planned |
+| 4 | Key in the inspector, ease and edit the timeline | `inspector-timeline.md` | #186, #348, #349 (SCENE), #376, #377, #378; IN-2 #385; IN-1 #397 (inspector half) | `draw-key-save`; tasks IT-7 on #63, IT-9 on #340 | file when ready | planned |
+| 4 | Scenes and layers, new from a preset, files that never fail silently | `layers-files.md` | #350, #351, #392, #393; IN-4 #398 (files half) | `draw-key-save`; tasks LF-1 on #146, LF-2 on #73 | file when ready | planned |
+
+Longest chain per feature: mac-platform 3, live-stage 4, live-keys 4,
+live-scenes 3, draw-key-save 7 (the reason is in its Build waves), stage-edit
+3, inspector-timeline 4 (reason in its Build waves), layers-files 3.
 
 Shipped while these packets were written, so no packet: LM-0c3 fake export
 and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
@@ -21,35 +31,74 @@ and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
 
 ## Why this order
 
-- **mac-platform goes first.** It waits on nothing. It is the only feature
-  that edits `docs/c4/model.json` (two new FlareApp files and the new
-  FlareFiles behavior have to be named in the C4 descriptions).
-- **live-stage, live-keys and live-scenes** wait on creative-core. On
-  creative-core `main` cfad97f none of LC-1 to LC-10 had landed. The lead
-  playbook (`docs/factory/lead.md`, stage 0) stops a lead whose `Depends on:`
-  issue is still open, so each feature issue is filed once the engine issues
-  in its "waits on" cell have merged; the three can then run side by side.
-  Some tasks need no engine change (ST-7; KY-1, KY-5 and SN-1), and if the
-  engine is slow the supervisor can split those into a smaller feature of
-  their own. None of the three edits `docs/c4/model.json`: the
-  `flare-model-sources` description already covers "their live conformances
-  over FlareCore".
+- **mac-platform went first.** It waited on nothing and was the only wave-1
+  or wave-2 feature that edits `docs/c4/model.json`.
+- **live-stage, live-keys and live-scenes** waited on creative-core LC-1 to
+  LC-10. Those landed on creative-core `main` 98be31a, so the three feature
+  issues (#798, #799, #800) were filed with "Depends on: none" and ran side
+  by side; each packet's Status line says it is built on `dev`. None of the
+  three edits `docs/c4/model.json`: the `flare-model-sources` description
+  already covers "their live conformances over FlareCore".
+- **draw-key-save is the first UI feature** because it is the core loop
+  (CLAUDE.md, Journeys first): the window, the router every later control
+  goes through, the stage, the timeline, the transport, the menus and the
+  files. When it lands a person can draw a rectangle, key its position on
+  the timeline, play it and save it, on live services (`FlareServices.built`,
+  DK-3). It needs no SuiteUI issue. Its DK-3 is the one task that waits on
+  #798, #799 and #800, and only DK-15 needs DK-3, so the lead starts the
+  rest at once. It is the only wave-3 or wave-4 feature that edits shared
+  docs (the `flare-app` and `flare-model` C4 parts, `flare.md`), in DK-15.
+  Each lead marks its own status in its `.wave.json`.
+- **Wave 4 is three features side by side,** each the rest of one tier-1
+  area: the stage (select, transform, zoom, edit), the inspector and
+  timeline (key, ease, retime, play), and layers and files. Each owns its
+  own view, area and journey files. The `draw-key-save` and older files they
+  edit are each edited by one task in the whole wave: `FlareStage.swift`
+  (stage-edit SE-2), `FlareDrag.swift` and `FlareSelection.swift` (SE-0),
+  `FlareWorkspace.swift` (inspector-timeline IT-2), `FlareTimeline.swift` and
+  `FlareWindow+Timeline.swift` (IT-7), `FlareTransport.swift` and
+  `PlaybackDriver.swift` (IT-9), `FlareInspector.swift` and
+  `FlareWindow+Inspector.swift` (IT-4), `UITests/FlareJourneyTests.swift`
+  (IT-8), `FlareLayerItems.swift` (layers-files LF-1, then LF-2),
+  `FlareWindow+File.swift` and `UITests/FlareJourneyTests+Loop.swift` (LF-3,
+  then LF-6). `FlareIntent.swift` holds every case from the start, so no
+  wave-4 task edits it. They edit no shared doc: each sets its own
+  `.wave.json` status, and the next packet writer refreshes section 0.
+- **SuiteUI waits are task-level.** A task that needs a SuiteUI issue waits
+  on that issue; the rest of its feature goes ahead. The issues: S12 #273
+  (selection handles, guide marks), #995 (ruler toggle and drag-out guides),
+  S11 #63 (timeline key drag), S7 #340 (`TransportCapsule`, pills), S15
+  #146 (dimmed sidebar row), #73 (sidebar row context menus).
+- **IN-1, IN-2 and IN-4 close with their journeys.** Wave-4 journeys launch
+  with `-FlareSample` (fixture documents on live services), so each one is
+  its integrate check. #397 closes with the later of `stage-edit` and
+  `inspector-timeline`, #398 with the later of `layers-files` and
+  `stage-edit`, #385 with `inspector-timeline`. IN-9 #399 (no-argument
+  launch on `.live`, folding `.built` into it) follows wave 4 as one task.
 - **Files across the waves.** mac-platform owns `FlareFiles.swift`,
-  `Sources/FlareApp/StagePath.swift`, `Sources/FlareApp/FlareAutosave.swift`,
-  their tests and `docs/c4/model.json`. The three live features own only
-  their own files under `Sources/FlareModel/Live/` and their own test files,
-  plus `Fakes/FakeShapes.swift` (live-stage ST-7, which moves its box math
-  into `Live/`). Nothing is shared, within a wave or across them.
+  `StagePath.swift`, `FlareAutosave.swift` and their tests. The live
+  features own only their files under `Sources/FlareModel/Live/` and
+  `Fakes/FakeShapes.swift`. The UI features never touch `Live/`; each
+  packet lists its files.
 
 ## Not in a packet yet (later features)
 
-The Flare UI on fakes (section 7.3) and the integrate tasks (section 7.6)
-make the next features once these land: F1a #346 and F1b #347 (the window on
-`EditorShell`) first, then the stage, inspector, timeline, file and edit
-chains (#375, #391, #348, #349, #376, #377, #378, #350, #351, #392, #393,
-#384 and the older #11, #12, #15, #186, #203, #204, #205). The `p1`
-integrate tasks IN-1 #397, IN-2 #385, IN-4 #398 and IN-9 #399 wire the live
-types from this plan into `FlareServices.live` after gate G2.
+In usage order (section 1's map). Tier 2: export (F15a #354, F15b #355, IN-7
+#374), symbols, instances and swatches (F12a #14, F12b #380, the INSTANCE
+section of #349, IN-5), onion skin and motion path (F10 #379, IN-3), and
+Direct Select's anchor marks (F4b #390). Tier 3: interactions (F13a #352,
+F13b #353, F14 #381, IN-6), Assist (F16a #382, F16b #383, IN-8), and the
+perf journeys (QH-5 #394, QH-6 #395, QH-7 #396). They wait on wave 4.
+
+## File when ready
+
+Feature issues whose dependencies are still open. Each is filed with labels
+`feature-lead`, `line:flare` and `p1` once its "waits on" cell has merged.
+
+- `draw-key-save`: filed once its packet is on `dev` (it waits only on #793,
+  closed).
+- `stage-edit`, `inspector-timeline`, `layers-files`: filed when the
+  `draw-key-save` feature issue closes.
 
 ## The lead contract
 

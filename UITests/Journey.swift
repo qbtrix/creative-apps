@@ -21,6 +21,13 @@
 // Every window shot is also audited (Audit.swift); an audit failure doesn't
 // stop the journey. The class's last test (in run order, which is by name)
 // must launch a Journey: its teardown attaches the app's audit counts.
+//
+// Each launch waits for the display's visible frame to hold still first. A
+// quitting app's Dock tile goes away a moment after it quits, and on the
+// runner's crowded 1024 pt Dock that resizes the Dock, so a window fitted to
+// the visible frame while two tiles were up ran 2 to 5 pt under the Dock once
+// one went (run 38991868071: Library 677 pt tall on a 674 pt visible frame).
+import AppKit
 import XCTest
 
 @MainActor
@@ -40,6 +47,8 @@ struct Journey {
         self.test = test
         test.continueAfterFailure = false
         app.launchArguments = ["-ApplePersistenceIgnoreState", "YES"] + arguments
+        if app.state != .notRunning { app.terminate() }
+        Self.waitForSettledDisplay()
         app.launch()
         app.activate()
         if test.name == type(of: test).defaultTestSuite.tests.last?.name {
@@ -165,6 +174,20 @@ struct Journey {
         target.coordinate(withNormalizedOffset: start)
             .press(forDuration: 0.1, thenDragTo: target.coordinate(withNormalizedOffset: end))
         if let step { shot(step) }
+    }
+
+    /// Waits, up to four seconds, until the main screen's visible frame reads
+    /// the same three times a quarter second apart: the Dock has finished
+    /// resizing after the last app quit. The run loop runs meanwhile, so
+    /// NSScreen sees the change.
+    private static func waitForSettledDisplay() {
+        var last = NSScreen.screens.first?.visibleFrame, same = 0
+        for _ in 0..<16 where same < 3 {
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.25))
+            let now = NSScreen.screens.first?.visibleFrame
+            same = now == last ? same + 1 : 0
+            last = now
+        }
     }
 
     func element(_ identifier: String) -> XCUIElement {

@@ -14,7 +14,8 @@
 // focused value and its project as `haloProject` (the menus read titles and
 // availability from it), opens on HaloLaunch's project and, under
 // `-HaloControlsProbe`, publishes the `halo.controls` JSON
-// (HaloControls.swift). The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
+// (HaloControls.swift). A viewer drag or inspector scrub shows through its
+// `live` HaloLiveEdit and reaches `perform` once, at its end. The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
 // state lives in HaloModel (scripts/ci checks this).
 import HaloModel
 import SuiteUI
@@ -30,8 +31,21 @@ struct HaloWindow: View {
     @State var showsNewComposition = false
     /// The dialog an area's route asked for; its area's hook shows it and sets it back to nil.
     @State var request: HaloWindowRequest?
+    /// The drag in progress, which the viewer draws without re-running this body (HaloLiveEdit.swift).
+    @State var live = HaloLiveEdit()
+
+    #if DEBUG
+    /// How many times a window's body ran; HaloWindowPlaybackTests counts playback's.
+    static var bodyRuns = 0
+    /// The project the last body ran on, for the hosted-window tests to read back.
+    static var shownProject: HaloProject?
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        let _ = Self.shownProject = model
+        #endif
         let newComposition = ToolbarAction("New Composition…", systemImage: "plus", identifier: "halo.composition.new") {
             perform(.newComposition)
         }
@@ -67,6 +81,8 @@ struct HaloWindow: View {
                 problem: { model.renameProblem($0.id, to: $1) },
                 onRename: { perform(.renameComposition($0.id, $1)) },
                 onDismiss: { model.dismissRefusedRename() })))
+        .environment(\.haloLiveEdit, live)
+        .onAppear { live.current = { model } }
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
         .haloControlsProbe(HaloLaunch.current.controlsProbe)

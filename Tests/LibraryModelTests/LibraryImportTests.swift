@@ -89,6 +89,22 @@ private func allCount(_ catalog: LibraryCatalog) -> Int? {
     #expect(library.importNotice?.isError == false)
 }
 
+/// Importing a folder again says its photos are already in the library (#1375),
+/// so it can't be read as "found nothing" or a failed import.
+@Test func importingAgainSaysThePhotosAreAlreadyKnown() {
+    var library = catalog(["/a.jpg"])
+    _ = library.beginImport()
+    library.finishImport(ImportResult(added: [], alreadyKnown: 26, failures: []), folder: "shoot")
+    #expect(library.importNotice?.message == "No new photos in shoot. All 26 are already in your library.")
+    #expect(library.importNotice?.isError == false)
+    _ = library.beginImport()
+    library.finishImport(ImportResult(added: [], alreadyKnown: 1, failures: []), folder: "shoot")
+    #expect(library.importNotice?.message == "No new photos in shoot. 1 is already in your library.")
+    _ = library.beginImport()
+    library.finishImport(ImportResult(added: [], alreadyKnown: 0, failures: []), folder: "shoot")
+    #expect(library.importNotice?.message == "No new photos in shoot.")
+}
+
 @Test func failImportGivesTheErrorNotice() {
     var library = catalog(["/a.jpg"])
     _ = library.beginImport()

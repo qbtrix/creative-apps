@@ -1,0 +1,186 @@
+{
+  "title": "Every app's undo runs on SuiteKernel's History; the four app history engines are deleted",
+  "wave": "XK2",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'undo'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-undo only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it",
+  "owned": [
+    "Sources/DesignModel/DesignHistory.swift",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Tests/DesignModelTests/DesignUndoTests.swift",
+    "Tests/DesignModelTests/DesignUndoSwapEdgeTests.swift",
+    "Tests/DesignModelTests/DesignGestureTests.swift",
+    "Tests/mutations/DesignModel.KernelUndoAdapter.json",
+    "Tests/mutations/DesignModel.DesignHistory.json",
+    "Sources/PhotoModel/PhotoHistory.swift",
+    "Sources/PhotoModel/PhotoWorkspace.swift",
+    "Tests/PhotoModelTests/PhotoHistoryStepsTests.swift",
+    "Tests/PhotoModelTests/PhotoHistoryTests.swift",
+    "Tests/PhotoModelTests/PhotoStepIDTests.swift",
+    "Tests/PhotoModelTests/PhotoSliderGestureUndoTests.swift",
+    "Tests/mutations/PhotoModel.KernelUndoAdapter.json",
+    "Tests/mutations/PhotoModel.PhotoHistory.json",
+    "Sources/LibraryModel/CatalogHistory.swift",
+    "Sources/LibraryModel/LibraryCulling.swift",
+    "Sources/LibraryModel/LibraryReadouts.swift",
+    "Tests/LibraryModelTests/LibraryHistoryTests.swift",
+    "Tests/mutations/LibraryModel.KernelUndoAdapter.json",
+    "Tests/mutations/LibraryModel.LibraryReadouts.json",
+    "Tests/mutations/LibraryModel.CatalogHistory.json",
+    "Sources/HaloModel/Live/HaloHistoryRules.swift",
+    "Sources/HaloModel/Live/LiveProjectHistory.swift",
+    "Sources/HaloModel/Fakes/FakeProjectHistory.swift",
+    "Sources/HaloModel/HaloHistory.swift",
+    "Sources/HaloModel/HaloProject.swift",
+    "Tests/HaloModelTests/ProjectHistoryContractTests.swift",
+    "Tests/HaloModelTests/HaloUndoTests.swift",
+    "Tests/HaloModelTests/HaloHistoryCommandTests.swift",
+    "Tests/mutations/HaloModel.KernelUndoAdapter.json",
+    "Tests/mutations/HaloModel.HaloHistory.json",
+    "Sources/FlareModel/FlareWorkspace.swift",
+    "Tests/FlareModelTests/SceneUndoSelectionTests.swift",
+    "Tests/FlareModelTests/FlareLiveDragTests.swift",
+    "Tests/mutations/FlareModel.KernelUndoAdapter.json",
+    "Tests/mutations/FlareModel.FlareWorkspace.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AU-design",
+      "behavior": "Design runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AU-d1",
+        "AU-d2"
+      ],
+      "journeys": [
+        "MJ-AU-design"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignHistory.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/DesignModelTests/DesignUndoTests.swift",
+        "Tests/DesignModelTests/DesignUndoSwapEdgeTests.swift",
+        "Tests/DesignModelTests/DesignGestureTests.swift",
+        "Tests/mutations/DesignModel.KernelUndoAdapter.json",
+        "Tests/mutations/DesignModel.DesignHistory.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-undo": [
+          "AU-d1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AU-photo",
+      "behavior": "Photo runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AU-p1",
+        "AU-p2"
+      ],
+      "journeys": [
+        "MJ-AU-photo"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoHistory.swift",
+        "Sources/PhotoModel/PhotoWorkspace.swift",
+        "Tests/PhotoModelTests/PhotoHistoryStepsTests.swift",
+        "Tests/PhotoModelTests/PhotoHistoryTests.swift",
+        "Tests/PhotoModelTests/PhotoStepIDTests.swift",
+        "Tests/PhotoModelTests/PhotoSliderGestureUndoTests.swift",
+        "Tests/mutations/PhotoModel.KernelUndoAdapter.json",
+        "Tests/mutations/PhotoModel.PhotoHistory.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-undo": [
+          "AU-p1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AU-library",
+      "behavior": "Library runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AU-l1",
+        "AU-l2"
+      ],
+      "journeys": [
+        "MJ-AU-library"
+      ],
+      "owned": [
+        "Sources/LibraryModel/CatalogHistory.swift",
+        "Sources/LibraryModel/LibraryCulling.swift",
+        "Sources/LibraryModel/LibraryReadouts.swift",
+        "Tests/LibraryModelTests/LibraryHistoryTests.swift",
+        "Tests/mutations/LibraryModel.KernelUndoAdapter.json",
+        "Tests/mutations/LibraryModel.LibraryReadouts.json",
+        "Tests/mutations/LibraryModel.CatalogHistory.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-undo": [
+          "AU-l1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AU-halo",
+      "behavior": "Halo runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AU-h1",
+        "AU-h2"
+      ],
+      "journeys": [
+        "MJ-AU-halo"
+      ],
+      "owned": [
+        "Sources/HaloModel/Live/HaloHistoryRules.swift",
+        "Sources/HaloModel/Live/LiveProjectHistory.swift",
+        "Sources/HaloModel/Fakes/FakeProjectHistory.swift",
+        "Sources/HaloModel/HaloHistory.swift",
+        "Sources/HaloModel/HaloProject.swift",
+        "Tests/HaloModelTests/ProjectHistoryContractTests.swift",
+        "Tests/HaloModelTests/HaloUndoTests.swift",
+        "Tests/HaloModelTests/HaloHistoryCommandTests.swift",
+        "Tests/mutations/HaloModel.KernelUndoAdapter.json",
+        "Tests/mutations/HaloModel.HaloHistory.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-undo": [
+          "AU-h1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AU-flare",
+      "behavior": "Flare runs its undo on `History<Payload>` and `HistoryReading` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AU-f1",
+        "AU-f2"
+      ],
+      "journeys": [
+        "MJ-AU-flare"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareWorkspace.swift",
+        "Tests/FlareModelTests/SceneUndoSelectionTests.swift",
+        "Tests/FlareModelTests/FlareLiveDragTests.swift",
+        "Tests/mutations/FlareModel.KernelUndoAdapter.json",
+        "Tests/mutations/FlareModel.FlareWorkspace.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-undo": [
+          "AU-f1"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

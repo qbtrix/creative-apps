@@ -1,7 +1,11 @@
 // DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
 // small source-list style: the file's pages, with Add Page and Delete Page in
-// a row under them, then the current page's layer tree, frontmost layer at the
-// top (`frontToBack`; the document keeps paint order). Selection runs through
+// a SidebarActionRow under them (`design.page.add`, `design.page.delete`;
+// each disabled with the Model's reason while it can't run),
+// its first glyph on the page rows' symbol column,
+// then the current page's layer tree (a hint when the page is empty or no file
+// is open), frontmost layer at the top
+// (`frontToBack`; the document keeps paint order). Selection runs through
 // the List, so arrow keys and type-select move through pages and layers; the
 // highlighted rows are the selected layers, or the current page when no layer is.
 // Shift-click on a layer row adds it to the selection or takes it out (#413).
@@ -17,7 +21,9 @@
 // shows the group's state in its toggles. Each row carries the identifier
 // `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
 // group's row, its disclosure's label, reads as one checkbox, so the identifier
-// is what names it. The section headers use SuiteColor.textSecondary; the
+// is what names it. A page row is a container identified `design.page.row.<id>`
+// with its checkmark inside: a page name's words sit in its text's value, not
+// its label, so journeys count pages by identifier (#1451). The section headers use SuiteColor.textSecondary; the
 // sidebar style's own header gray is under 4.5:1. Values in, intents out.
 import DesignModel
 import SuiteUI
@@ -34,7 +40,10 @@ struct DesignLayersPanel: View {
                     DesignPageLabel(page: page, isCurrent: page.id == model.selectedPageID).tag(page.id)
                 }
                 // A row, not the section header: a sidebar header hides its buttons from accessibility.
-                pageActions
+                // The accessory-bar button pads its glyph on top of the row's own inset; pulling the row
+                // back by that padding puts the + glyph on the page rows' symbol column (#1386).
+                SidebarActionRow(Self.pageCommands(model, perform))
+                    .padding(.leading, -SuiteInset.barButton.leading)
             } header: {
                 header("Pages")
             }
@@ -42,7 +51,7 @@ struct DesignLayersPanel: View {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
                     DesignLayerTree(nodes: nodes, model: model, perform: perform)
                 } else {
-                    DesignPanelHint("Nothing on this page yet.")
+                    DesignPanelHint(model.isOpen ? "Nothing on this page yet." : "No file open.")
                 }
             } header: {
                 header("Layers")
@@ -83,20 +92,18 @@ struct DesignLayersPanel: View {
             })
     }
 
-    /// Add Page and Delete Page (the checked page); the last page can't be deleted. Untagged, so not selectable.
-    private var pageActions: some View {
-        HStack(spacing: 0) {
-            EditorBarItem(ToolbarAction("Add Page", systemImage: "plus") { perform(.addPage) }, showsTitle: false)
-                .accessibilityIdentifier("design.page.add")
-            EditorBarItem(
-                ToolbarAction(
-                    "Delete Page", systemImage: "trash",
-                    unavailableHelp: model.canDeletePage ? nil : "A file keeps at least one page.") {
-                    perform(.deletePage)
-                }, showsTitle: false)
-            .accessibilityIdentifier("design.page.delete")
-            Spacer(minLength: 0)
-        }
+    /// Add Page and Delete Page (the checked page), each disabled with the Model's reason while it
+    /// can't run: no file open, or the file's last page. Untagged, so not selectable.
+    static func pageCommands(_ model: DesignWorkspace, _ perform: @escaping DesignPerform) -> [ToolbarAction] {
+        [
+            ToolbarAction(
+                "Add Page", systemImage: "plus", unavailableHelp: model.addPageHelp, identifier: "design.page.add"
+            ) { perform(.addPage) },
+            ToolbarAction(
+                "Delete Page", systemImage: "trash", unavailableHelp: model.deletePageHelp,
+                identifier: "design.page.delete"
+            ) { perform(.deletePage) },
+        ]
     }
 }
 
@@ -121,6 +128,8 @@ private struct DesignPageLabel: View {
                     .accessibilityIdentifier("design.current-page")
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("design.page.row.\(page.id)")
     }
 }
 

@@ -1,4 +1,4 @@
-// DesignLayersSnapshots.swift: Design's panel on the Layers tab at the editor's
+// DesignLayersSnapshots.swift: Design's sidebar (DesignLayersPanel) at the editor's
 // panel width: a Desktop frame holding a group of two shapes (one hidden, one
 // locked and selected), each row with its eye and lock toggles (#45), the group
 // collapsed, the group itself hidden and locked (its shapes' rows dim and show
@@ -6,8 +6,11 @@
 // side by side (the chevrons look alike), and a shape selected whose parent is
 // then collapsed, which selects the parent (#121). Each has two pages with
 // Page 1 current, so Page 1 keeps its checkmark even while a layer is highlighted,
-// with Add Page and Delete Page in a row under the pages. Writes design-layers-,
-// -group-hidden-, -collapsed-, -chevrons- and -collapsed-selection-{light,dark}.png. macOS only.
+// with Add Page and Delete Page in a SidebarActionRow under the pages; a
+// one-page file shows Delete Page disabled, saying why, and with no file open
+// both are disabled. Writes design-layers-, -group-hidden-, -collapsed-,
+// -chevrons-, -collapsed-selection-, -one-page- and -no-file-{light,dark}.png.
+// macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -77,12 +80,38 @@ import Testing
         #expect(model.selectedNodeID == group)
         try shoot("-collapsed-selection", model)
     }
+
+    @Test func aOnePageFileCantDeleteItsPage() throws {
+        var model = DesignWorkspace()
+        model.newFile()
+        let entries = DesignLayersPanel.pageCommands(model, { _ in }).map { $0.controlEntry() }
+        #expect(entries == [
+            ControlEntry(id: "design.page.add", enabled: true),
+            ControlEntry(id: "design.page.delete", enabled: false, reason: "A file keeps at least one page."),
+        ])
+        let titles = DesignLayersPanel.pageCommands(model, { _ in }).map { $0.title }
+        #expect(titles == ["Add Page", "Delete Page"])
+        try shoot("-one-page", model)
+        let allEnabled = DesignLayersPanel.pageCommands(twoPages(), { _ in }).allSatisfy { $0.isEnabled }
+        #expect(allEnabled)
+    }
+
+    /// With no file open, Add Page can't add one, so both page commands are off and say why.
+    @Test func noFileDisablesBothPageCommands() throws {
+        let model = DesignWorkspace()
+        let entries = DesignLayersPanel.pageCommands(model, { _ in }).map { $0.controlEntry() }
+        #expect(entries == [
+            ControlEntry(id: "design.page.add", enabled: false, reason: "Create or open a file first."),
+            ControlEntry(id: "design.page.delete", enabled: false, reason: "Create or open a file first."),
+        ])
+        try shoot("-no-file", model)
+    }
 }
 
 private struct PanelSample: View {
     let model: DesignWorkspace
     var body: some View {
-        DesignPanel(model: model, tab: .layers)
+        DesignLayersPanel(model: model, perform: { _ in })
             .frame(width: SuiteSize.editorPanelWidth)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(SuiteSpacing.xxl)

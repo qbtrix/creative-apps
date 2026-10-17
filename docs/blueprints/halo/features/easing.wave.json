@@ -2,8 +2,8 @@
   "title": "Ease keys",
   "wave": "W2",
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1333",
   "covers": "#428",
   "waits_on": "layer-keys, history-files; #333; #771 and #63 not blocking (plain diamonds; keys picked from the EASING rows)",
   "cells": {

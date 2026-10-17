@@ -2,8 +2,8 @@
   "title": "Cull from the keyboard with undo and Auto Advance",
   "wave": 2,
   "order": 30,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1345",
   "covers": "#211, #426, #724 (keys)",
   "waits_on": "spine, #333",
   "issues": [

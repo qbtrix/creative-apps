@@ -8,10 +8,11 @@
 // three layers of gradients and noise, built from shared one-color tiles so it
 // costs a few buffers, not 12 M pixels each. The blueprint's test-only
 // `limit` (about 4 GB) is left out. Each fixture opens with a clean history.
-// PhotoLaunchOptions reads `-PhotoFixture <name>` and `-PhotoWindowWidth <pt>`
-// from the arguments the app passes in; `launch(_:)` builds the window's
-// workspace from them (S-12), and `isPreviewData` tells the status line to
-// show its "Preview data" pill. Linux-safe.
+// PhotoLaunchOptions reads `-PhotoFixture <name>` from the arguments the app
+// passes in (the window's size comes from SuiteUI's `-SuiteWindowSize`);
+// `launch(_:)` builds the window's workspace from them (S-12), and
+// `isPreviewData` tells the status line to show its "Preview data" pill.
+// Linux-safe.
 import CoreRaster
 
 /// A built-in document (blueprint 4.4).
@@ -25,8 +26,6 @@ public struct PhotoLaunchOptions: Equatable, Sendable {
     public var fixture: PhotoFixture?
     /// `-PhotoFixture <name>` when the name isn't one.
     public var unknownFixture: String?
-    /// `-PhotoWindowWidth <pt>`, kept only within 880...4096.
-    public var windowWidth: Double?
 
     /// Reads the flags anywhere in `arguments`; a flag with no value after it is ignored.
     public init(arguments: [String]) {
@@ -37,9 +36,6 @@ public struct PhotoLaunchOptions: Equatable, Sendable {
                 guard let name = rest.popFirst() else { break }
                 fixture = PhotoFixture(rawValue: name)
                 unknownFixture = fixture == nil ? name : nil
-            case "-PhotoWindowWidth":
-                guard let text = rest.popFirst() else { break }
-                windowWidth = Double(text).flatMap { (880...4096).contains($0) ? $0 : nil }
             default: break
             }
         }
@@ -103,6 +99,8 @@ extension PhotoWorkspace {
     /// selected.
     private mutating func addFixtureLayers() throws {
         var curves = AdjustmentSettings()
+        // One kind per layer, as addAdjustmentLayer makes it.
+        for other in AdjustmentKind.allCases where other != .curves { curves.apply(.setEnabled(other, false)) }
         curves.apply(.curvePoints([CurvePoint(x: 0, y: 0), CurvePoint(x: 0.25, y: 0.18),
                                    CurvePoint(x: 0.75, y: 0.82), CurvePoint(x: 1, y: 1)]))
         _ = insertLayer(named: "Curves 1", pixels: nil, kind: .adjustment(curves), at: 0)

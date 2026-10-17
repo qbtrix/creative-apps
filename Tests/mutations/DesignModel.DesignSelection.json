@@ -1,0 +1,23 @@
+[
+  {
+    "label": "Shift-click adding a layer keeps the run",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "        guard canAddToSelection(id), let page = selectedPage else { return }\n        endEditRun()\n",
+    "replace": "        guard canAddToSelection(id), let page = selectedPage else { return }\n",
+    "tests": "DesignSelectionRunTests.swift"
+  },
+  {
+    "label": "Shift-click taking a layer out keeps the run",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "            endEditRun()\n            selectedNodeIDs.remove(at: index)\n",
+    "replace": "            selectedNodeIDs.remove(at: index)\n",
+    "tests": "DesignSelectionRunTests.swift"
+  },
+  {
+    "label": "an ignored Shift-click ends the run",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "        guard canAddToSelection(id), let page = selectedPage else { return }\n        endEditRun()\n",
+    "replace": "        endEditRun()\n        guard canAddToSelection(id), let page = selectedPage else { return }\n",
+    "tests": "DesignSelectionRunTests.swift"
+  }
+]

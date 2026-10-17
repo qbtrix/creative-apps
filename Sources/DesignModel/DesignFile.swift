@@ -10,8 +10,10 @@
 // than 1, has no page, repeats an id (page and node ids share one namespace, as
 // `selectItem` looks them up together), nests children under a node that cannot
 // hold them, or has a page or node whose size is under 1 point or whose numbers
-// are not finite, or a negative corner radius. A node written before corner
-// radius existed opens with square corners (DesignNode's decoder). Saving runs
+// are not finite, a negative corner radius, an opacity outside 0...1, a negative
+// stroke width or a text size under 1 point. A node written before the style
+// fields existed opens with each at its default: square corners, opacity 1, no
+// stroke and the default text style (DesignNode's decoder). Saving runs
 // the same number check, so a file written here
 // always opens again. Opening clears the undo history and the selection, so Open
 // only fills a workspace with nothing open (`takesOpenedFile`).
@@ -115,10 +117,15 @@ extension DesignWorkspace {
         func drawable(_ rect: DesignRect) -> Bool {
             [rect.x, rect.y, rect.width, rect.height].allSatisfy(\.isFinite) && rect.width >= 1 && rect.height >= 1
         }
+        func styled(_ node: DesignNode) -> Bool {
+            let strokeWidth = node.stroke?.width ?? 0
+            return (0...1).contains(node.opacity) && strokeWidth.isFinite && strokeWidth >= 0
+                && node.textStyle.size.isFinite && node.textStyle.size >= 1
+        }
         func checkNodes(_ nodes: [DesignNode]) throws(DesignFileError) {
             for node in nodes {
                 try claim(node.id)
-                guard drawable(node.frame), node.cornerRadius.isFinite, node.cornerRadius >= 0 else {
+                guard drawable(node.frame), node.cornerRadius.isFinite, node.cornerRadius >= 0, styled(node) else {
                     throw .invalidNumber(node.id)
                 }
                 guard node.children.isEmpty || node.kind.holdsChildren else { throw .notAContainer(node.id) }

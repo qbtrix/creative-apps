@@ -38,6 +38,12 @@ the Design-scoped macOS run.
 | LP-a | Rename, reorder and nest layers from the Layers panel, and Object > Arrange, each one step. | L-1, L-2, L-4, L-5 | J12 | design-contracts (L-1, L-2); design-window DW-a (L-4, L-5) and DW-b (L-4) |
 | LP-b | Locking a layer mid text edit keeps the typing, the Layers list scrolls 2,000 expanded rows, and a group row's own eye hides it once SuiteUI's LL-9 lands. | L-3, L-6, L-7 | P3, J12 | design-contracts (L-3); LP-a (L-6); design-window DW-a (L-7); SuiteUI LL-9 (L-6) |
 
+LP-a is the UI slice (`"ui": true` in the `.wave.json`: the feel gate, rule
+15, and the Mac finish, rule 17); LP-b has no view task. L-4 calls L-2's
+`layerDrop`, which no contract declares, so it keeps its wait on L-2; L-5
+(or L-6, when it ships), the `feature-done` task, is the integrate step on
+`.live`.
+
 If LL-9 hasn't merged when L-5 lands, L-6 becomes the follow-up issue
 below and LP-b is L-3 and L-7; the lead drops L-6 from the slice in
 `layers-panel.wave.json` in the same PR. A row drag keeps its insertion

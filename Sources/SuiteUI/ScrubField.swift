@@ -4,7 +4,8 @@
 // own. As the bar slider (InspectorSliderRow) it is the Studio editor's
 // number row, the look of Flare's easing rows: the whole 28 pt rounded row is
 // the control, the label inside on the left, a lighter fill up to the value
-// over five faint ticks, a thin marker at the value and the value on the
+// over five faint ticks (in the gap between the label and the value, none
+// when it is too narrow), a thin marker at the value and the value on the
 // right (docs/design.md, Studio rows and chips). Both share the rules: drag
 // sideways to change the value (one step per point, Shift ten, Option a
 // tenth; a modifier change re-anchors so nothing jumps), click or press
@@ -128,8 +129,8 @@ public struct ScrubField: View {
     }
 
     /// The bar slider, drawn as the Studio editor's number row (Flare's easing
-    /// rows): a 28 pt filled rounded row, a lighter fill up to the value over
-    /// five faint ticks between the label and the value, and a thin marker at
+    /// rows): a 28 pt filled rounded row, a lighter fill up to the value, five
+    /// faint ticks in the gap between the label and the value, and a thin marker at
     /// the value, accent while dragged.
     private func barBody(_ bar: Bar) -> some View {
         let dragging = anchor != nil
@@ -141,23 +142,24 @@ public struct ScrubField: View {
                 if !bar.mixed {
                     Rectangle().fill(dragging ? SuiteColor.studioFillActive : SuiteColor.studioFill).frame(width: x)
                 }
-                // Five ticks across the stretch between the label and the value.
-                let lane = (start: SuiteSpacing.xxl + SuiteSpacing.s, end: geo.size.width - SuiteSpacing.xxl - SuiteSpacing.l)
-                ForEach(0..<5) { tick in
-                    Circle()
-                        .fill(Color.primary.opacity(0.22))
-                        .frame(width: SuiteSize.studioTick, height: SuiteSize.studioTick)
-                        .position(x: lane.start + (lane.end - lane.start) * CGFloat(tick) / 4, y: geo.size.height / 2)
-                }
                 if !bar.mixed {
                     Rectangle()
                         .fill(dragging ? SuiteColor.accent : keyed ? SuiteColor.stateKeyed : Color.primary.opacity(0.55))
                         .frame(width: SuiteSize.studioTick, height: SuiteSize.studioRow - SuiteSpacing.m)
                         .position(x: min(max(x, SuiteSize.studioTick), geo.size.width - SuiteSize.studioTick), y: geo.size.height / 2)
                 }
-                HStack {
-                    Text(label).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.secondaryText)
-                    Spacer(minLength: SuiteSpacing.s)
+                HStack(spacing: SuiteSpacing.s) {
+                    Text(label).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.secondaryText).layoutPriority(1)
+                    // The five ticks fill the gap between the label and the value, never the text.
+                    Canvas { context, size in
+                        let d = SuiteSize.studioTick
+                        for x in Self.tickXs(gap: size.width) {
+                            let dot = CGRect(x: x - d / 2, y: (size.height - d) / 2, width: d, height: d)
+                            context.fill(Path(ellipseIn: dot), with: .color(Color.primary.opacity(0.22)))
+                        }
+                    }
+                    .frame(minWidth: SuiteSpacing.s, maxWidth: .infinity)
+                    .accessibilityHidden(true)
                     valueText(keyed ? SuiteColor.stateKeyed : Color.primary, mixed: bar.mixed).fixedSize()
                 }
                 .padding(.horizontal, SuiteSpacing.m)
@@ -166,6 +168,18 @@ public struct ScrubField: View {
         .frame(height: SuiteSize.studioRow)
         .background(hovering && !dragging && isEnabled ? SuiteColor.field : SuiteColor.panelRaised)
         .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.row))
+    }
+
+    /// Where the bar's five ticks sit across the `gap` points the row leaves
+    /// between its label and its value (already `SuiteSpacing.s` clear of
+    /// each): spread evenly, whole dots inside it; none when the gap can't
+    /// space them `SuiteSpacing.xs` apart (a long label and a wide value on a
+    /// narrow row).
+    nonisolated static func tickXs(gap: CGFloat) -> [CGFloat] {
+        let d = SuiteSize.studioTick
+        let lane = gap - d
+        guard lane >= 4 * SuiteSpacing.xs else { return [] }
+        return (0..<5).map { d / 2 + lane * CGFloat($0) / 4 }
     }
 
     /// The value with its unit, or the typing field on its inset well.
@@ -302,7 +316,9 @@ public struct ScrubField: View {
 
 /// The field is one adjustable element; the bar is a real slider over its
 /// track (so XCUI finds `sliders[label]`), except while typing, when the
-/// text field shows through.
+/// text field shows through. The slider takes no `step:`: a stepped Slider
+/// builds one tick per step on every body pass (200,001 for Halo's X), so it
+/// snaps a set value itself and steps through its adjustable action.
 private struct ScrubAccessibility: ViewModifier {
     let label: String
     let spoken: String
@@ -316,23 +332,27 @@ private struct ScrubAccessibility: ViewModifier {
         if isBar && !editing {
             content.accessibilityRepresentation {
                 Slider(
-                    value: Binding(get: { position }, set: { adjust($0) }), in: track.positions,
-                    step: track.step > 0 && track.step.isFinite ? track.step : 1
+                    value: Binding(get: { position }, set: { adjust(ScrubValue.snapped($0, to: track.step, in: track.positions)) }),
+                    in: track.positions
                 ) {
                     Text(label)
                 }
                 .accessibilityValue(spoken)
+                .accessibilityAdjustableAction(step)
             }
         } else {
             content
                 .accessibilityElement(children: editing ? .contain : .ignore)
                 .accessibilityLabel(label)
                 .accessibilityValue(spoken)
-                .accessibilityAdjustableAction { direction in
-                    let key: ScrubKey = direction == .increment ? .increment : .decrement
-                    guard direction == .increment || direction == .decrement else { return }
-                    adjust(ScrubValue.pressed(key, from: position, step: track.step, in: track.positions))
-                }
+                .accessibilityAdjustableAction(step)
         }
+    }
+
+    /// VoiceOver's increment and decrement: one step along the track.
+    private func step(_ direction: AccessibilityAdjustmentDirection) {
+        guard direction == .increment || direction == .decrement else { return }
+        let key: ScrubKey = direction == .increment ? .increment : .decrement
+        adjust(ScrubValue.pressed(key, from: position, step: track.step, in: track.positions))
     }
 }

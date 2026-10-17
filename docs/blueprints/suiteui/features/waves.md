@@ -16,15 +16,35 @@ cross-app plan whose order and shared files are in
 `docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
 file's waves, not this one's.
 
+Rows whose wave reads `XK1` or `XK2` belong to the kernel track: `SuiteKernel`
+(editor-kernel, XK1), the Linux-safe library every app Model and SuiteUI's
+kernel-facing views import, and the `adopt-kernel-*` migrations (XK2), one
+per concept with one slice per app, each waiting only on its concept's
+kernel slice. The prefix sorts after `SP` so the track may depend on the
+built shell-parity features whose files it edits (`SuiteGallery.swift`).
+Design: `paw-workspace/docs/design/drafts/2026-10-17-editor-kernel.md`.
+
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
 | 1 | The test harness: goldens, gallery, inventory, probe, contracts, tokens | `suite-harness.md` | #773, #774, #283, #330, #775, #776, #333, #331, #332 | nothing | #778 | built |
 | 2 | The editor window's chrome | `editor-chrome.md` | #342, #339, #340, #341 | #778 (suite-harness) | file when ready | planned |
 | 2 | Inspector controls end once and work from the keyboard | `inspector-controls.md` | #718, #591, #88, #622, #285, #262, #343 | #778 (suite-harness) | file when ready | planned |
-| 2 | Sidebar and layer rows | `lists-and-layers.md` | #146, #577, #108, #73, #589, #111, #249, #284, #308, #311, #312 | #778 (suite-harness) | file when ready | planned |
+| 2 | Sidebar and layer rows | `lists-and-layers.md` | #146, #577, #108, #73, #589, #111, #249, #284, #308, #311, #312; LL-5 and LL-8b withdrawn 2026-10-17: the panel is editor-kernel's LayerTreeList | #778 (suite-harness) | file when ready | planned |
 | 2 | Marks over the canvas, zoom and pan, the surface | `canvas-marks.md` | #273, #706, #737, #530, #264 | #778 (suite-harness) | file when ready | planned |
-| SP1 | `SuiteWindow` can hold a canvas editor: sidebar slot, subtitle, document actions, inspector width, `-SuiteWindowSize`, `EditorDetail`, `SidebarActionRow`, the app switcher, the journeys' window and geometry checks, the parity journey | `editor-in-window.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), SuiteUI half | nothing (#933 for the geometric test EW-5b) | #1079 | building |
+| 2 | A modern timeline strip: lane beds, key states, a grabbable playhead, picking, dragging and trimming keys, zoom, units and a work area | `timeline.md` | #62, #63, #1257, #1423 | #778 (suite-harness, closed); no editor-chrome wait (the 2026-10-15 one-shell decision removes #342's slot) | #1480 | built |
+| 3 | An AppKit canvas host (CALayer tiles or a CAMetalLayer) with live input, and the Settings > Rendering choice | `canvas-host.md` | dual-renderer design (2026-10-17) sections 2 and 3; #1458 (SuiteUI half) | canvas-marks (owns CanvasViewport.swift in wave 2; CH-9 adds an extension file, never edits it); no creative-core issue | file when ready | planned |
+| SP1 | `SuiteWindow` can hold a canvas editor: sidebar slot, subtitle, document actions, inspector width, `-SuiteWindowSize`, `EditorDetail`, `SidebarActionRow`, the app switcher, the journeys' window and geometry checks, the parity journey | `editor-in-window.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), SuiteUI half | nothing (#933 for the geometric test EW-5b) | #1079 | built |
 | SP3 | Delete `EditorShell`, `EditorTopBar`, `.rail` and their tokens; rewrite `docs/design.md`'s Editor shell section | `editor-shell-removal.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), the deletion half | Design shell-parity, Photo shell-parity | file when ready | planned |
+| XK1 | SuiteKernel: one Linux-safe library for history, selection, the layer tree with parenting, keys and easing, snap, transform, stroke, export and session, plus its SuiteUI halves (layers panel, handles, guides, export sheet) | `editor-kernel.md` | editor-kernel design (2026-10-17) and its inventory; captain's canonical-first call on #1552; the smart-guide needs-ui from snapping; lists-and-layers LL-5 and LL-8b (the one layers panel) | nothing open: suite-harness (#778) and editor-in-window (#1079) are built and own SuiteGallery.swift and project.yml; EK-26 waits on canvas-host CH-d for suiteui.md; the adopt-kernel-* features and snapping wait on slices here | file when ready | planned |
+| XK2 | Every app's undo runs on SuiteKernel's History; the four app history engines are deleted | `adopt-kernel-undo.md` | editor-kernel design (2026-10-17), inventory row 'undo'; captain's canonical-first call on #1552 | editor-kernel:EK-undo only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | Every app's selection set, marquee rule and nudge run on SuiteKernel's Selection; the app copies are deleted | `adopt-kernel-selection.md` | editor-kernel design (2026-10-17), inventory row 'selection'; captain's canonical-first call on #1552 | editor-kernel:EK-sel only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | Every app's layer list or tree runs on SuiteKernel's LayerTree; the app tree helpers are deleted | `adopt-kernel-layers.md` | editor-kernel design (2026-10-17), inventory row 'layers'; captain's canonical-first call on #1552 | editor-kernel:EK-tree only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | Flare's and Halo's keyframe and easing rules run on SuiteKernel's Keys; the two copies of the handle math and the key rules are deleted | `adopt-kernel-easing.md` | editor-kernel design (2026-10-17), inventory row 'easing'; captain's canonical-first call on #1552 | editor-kernel:EK-keys only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | Design's, Photo's and Flare's box transform math runs on SuiteKernel's BoxMath; the app copies are deleted | `adopt-kernel-transform.md` | editor-kernel design (2026-10-17), inventory row 'transform'; captain's canonical-first call on #1552 | editor-kernel:EK-box only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | Flare's, Photo's and Library's export state runs on SuiteKernel's ExportRun; the two app state machines and Photo's Bool are deleted | `adopt-kernel-export.md` | editor-kernel design (2026-10-17), inventory row 'export'; captain's canonical-first call on #1552 | editor-kernel:EK-run only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | Every app's dirty rule, save status, autosave timing, recovery offer and version probe run on SuiteKernel's DocumentSession; the five copies are deleted | `adopt-kernel-session.md` | editor-kernel design (2026-10-17), inventory row 'session'; captain's canonical-first call on #1552 | editor-kernel:EK-doc only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | Photo's brush runs on SuiteKernel's stroke model and SuiteUI's pacer, pressure capture and cursor mark; Flare's pencil and Design's pen are built on the same module later, never as copies | `adopt-kernel-brush.md` | editor-kernel design (2026-10-17), inventory row 'brush'; captain's canonical-first call on #1552 | editor-kernel:EK-stroke only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
+| XK2 | The apps' zoom clamps, colour types, tool-letter and modifier lookups, guide views and export sheets move onto the SuiteUI component each already has or editor-kernel adds; the app copies are deleted | `adopt-suiteui-chrome.md` | editor-kernel design (2026-10-17), inventory row 'chrome'; captain's canonical-first call on #1552 | editor-kernel:EK-a only (every slice); cross-line hand-offs in the packet's Hand-offs list | file when ready | planned |
 
 ## File when ready
 
@@ -41,9 +61,14 @@ still open, so filing them earlier would only start leads that stop.
 | inspector-controls | Feature: inspector-controls | p1 (#343) | #778 |
 | lists-and-layers | Feature: lists-and-layers | p1 (#146) | #778 |
 | canvas-marks | Feature: canvas-marks | p1 (#273) | #778 |
+| timeline | Feature: timeline | p1 (#62, #63; Halo's timeline and Flare's IT-7 wait on it) | #778 |
 
-All four can run side by side: their owned files are disjoint (checked in
-"Files across the waves" below).
+All five can run side by side: their owned files are disjoint (checked in
+"Files across the waves" below). Timeline joined wave 2 on 2026-10-16: it
+waited on editor-chrome's timeline slot (#342), and the 2026-10-15
+one-shell decision removes that slot (Q4 below). It is a v3 packet with
+slices, so `scripts/waves check` also holds its slices against every other
+feature.
 
 ## Why this order
 
@@ -66,6 +91,7 @@ All four can run side by side: their owned files are disjoint (checked in
 | inspector-controls | Design's one-undo-step edit runs (follow-up of closed #536, on the #749 workaround today); Photo's Gamma from the keyboard (follow-up of closed #584); Flare F6a #186, F6b #348, F6c #349, F9 #378 |
 | lists-and-layers | Flare F11a #350; Halo's inline rename refusal (#139) and composition context menu (follow-up of closed #35); Design's Layers toggles and expansion (follow-ups of closed #50 and PR #549) |
 | canvas-marks | Flare's stage (#12, F3c #375, F4b #390); Design adopting the shared handles; Photo swapping `CloneSourceMark` and `StraightenMarks` (follow-ups of closed #647, #422, #419); Halo's viewer |
+| timeline | Halo's timeline feel (the 2026-10-16 review: its adoption follow-up on `line:halo`); Flare's timeline #11 (DK-10) and key retime #377 (IT-7, which waits on #63) |
 
 An app feature that needs one of these depends on that SuiteUI feature's
 issue (its `Depends on:` line names it, or the open `needs-ui` issue the
@@ -89,8 +115,10 @@ packet covers until the feature issue is filed).
   `EmptyStateView.swift` and `Gallery/GalleryChrome.swift` to editor-chrome;
   `InspectorAction.swift` and `Gallery/GalleryInspector.swift` to
   inspector-controls; `SuiteWindow.swift` and `Gallery/GalleryLists.swift` to
-  lists-and-layers; `Gallery/GalleryCanvas.swift` to canvas-marks. The other
-  harness files stay with no wave-2 feature.
+  lists-and-layers; `Gallery/GalleryCanvas.swift` to canvas-marks;
+  `Gallery/GalleryTimeline.swift` and `UITests/SuiteJourneyTests+Budgets.swift`
+  (QB-S5's series line only) to timeline. The other harness files stay with
+  no wave-2 feature.
 - **Wave 2** features own only their packet's files: their own
   `Contracts/*.swift`, their components, their `Gallery/Gallery<Area>.swift`,
   their `UITests/SuiteJourneyTests+<Area>.swift`, their `Tests/SuiteUITests`
@@ -112,8 +140,9 @@ packet covers until the feature issue is filed).
 | Q3 `suiteui` audit key at 0 | SH-7 | yes (adding an app at 0 does not loosen the audit) |
 | Q9 one publisher of `suite.controls` | Flare F1b #347 | SuiteUI's `ControlInventory`; a note is on #347 |
 | The gallery ships in release builds (review of #765) | every app bundle | keep it: the journeys run release bundles (`scripts/bundle-apps` builds `-c release`), so `#if DEBUG` would hide it from them; the flag is parsed in one function so a later gate is one line |
-| Q4 drop #342 from #62's `Depends on:` | timeline (wave 3) | timeline waits on editor-chrome |
-| Q5 lift `needs-human` on #63 | timeline (wave 3) | asked again when the timeline packet is written |
+| Q4 drop #342 from #62's `Depends on:` | timeline | answered by the 2026-10-15 one-shell decision: `EditorShell` goes, so timeline waits on no editor-chrome task and runs in wave 2 |
+| Q5 lift `needs-human` on #63 | timeline | the captain's brief of 2026-10-16 puts #63 in the timeline packet; the feature issue asks to lift the label |
+| Q10 mutation plans for SuiteUI files | timeline (every slice) | SuiteUI builds only on macOS, so the supervisor runs `scripts/mutate --plan SuiteUI.<File>` on its Mac before each `Belt-Slice-Done:`; approving Q1 would let a Linux builder run them |
 
 ## Cross-line notes (no SuiteUI wave edits these)
 
@@ -169,7 +198,6 @@ covered issue is open (#745 is closed and not covered), no product names.
 
 | wave | feature | covers | waits on |
 |---|---|---|---|
-| 3 | timeline | #62, #219, #63 (`needs-human`, Q5), and the newer #771 (key shape by easing, selected-keys set) and #772 (lane accessibility value) | editor-chrome (#62's `Depends on:` names #342; Q4) |
 | 3 | node-graph | #344 | suite-harness |
 | 4 | suite-record | #345; section 6.2's rows into `docs/design.md` | waves 1–3 |
 

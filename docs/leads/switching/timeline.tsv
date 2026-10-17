@@ -1,0 +1,13 @@
+utc	stage	event	ref	note
+2026-10-16T23:00Z	0	stage-start	#1507	setup: base origin/dev caa3c66, designated branch
+2026-10-16T23:03Z	1	stage-end	#1507	v2 packet, no slices; wave 1 is SW-1, SW-2, SW-5
+2026-10-16T23:05Z	3	stage-start	#1507	wave 1: SW-1 first (one branch, one PR at a time)
+2026-10-17T00:30Z	3	pr-merged	#1747	SW-1 merged as b267d006
+2026-10-17T00:45Z	3	pr-opened	SW-2	StoreHandOffs + HandOffStoreTests + Budget+HandOff; scripts/ci --changed CI: PASS
+2026-10-17T01:00Z	3	pr-opened	#1791	SW-2 PR opened with fast-lane; head c6863082
+2026-10-17T02:00Z	3	pr-merged	#1791	SW-2 merged as c512a7e8
+2026-10-17T02:20Z	3	pr-opened	SW-5	rubric AfterGlow subsection; every QB-S/QB-SM row once, report only; gate CI: PASS
+2026-10-17T03:00Z	3	pr-merged	#1816	SW-5 merged as 7dd54a00; wave 1 done
+2026-10-17T03:40Z	3	pr-opened	SW-3a	AppLauncher, StoreWatcher, live switching and recents slots; macOS-only, Linux gate PASS, build-only lane run decides
+2026-10-17T04:00Z	3	pr-merged	#1833	SW-3a merged as 7d022431
+2026-10-17T04:30Z	3	pr-opened	SW-3b	HandOffTransport, SuiteAppDelegate, live hand-off slot, launcher router; macOS-only, Linux gate PASS

@@ -76,7 +76,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         photo.press(character: "v", .command)
         expect("Undo Paste", photo, "Command-V made no Paste step")
         let pasted = photo.app.staticTexts["Pasted Layer"], background = photo.app.staticTexts["Background"]
-        XCTAssert(pasted.waitForExistence(timeout: 5), "the Layers tab lists no Pasted Layer")
+        XCTAssert(pasted.waitForExistence(timeout: 5), "the layer list lists no Pasted Layer")
         XCTAssert(waitFor { pasted.frame.minY < background.frame.minY }, "Pasted Layer isn't above Background")
         expectHeader("2 layers", photo, "the header doesn't count two layers after the paste")
         expectSelectedRow("Pasted Layer", photo)
@@ -147,7 +147,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         let image = try XCTUnwrap(self.box(of: Self.colored, photo), "beach.png shows no picture on the canvas")
         choose("Paste", photo)
         expect("Undo Paste", photo, "Edit > Paste made no Paste step")
-        XCTAssert(photo.app.staticTexts["Pasted Layer"].waitForExistence(timeout: 5), "the Layers tab lists no Pasted Layer")
+        XCTAssert(photo.app.staticTexts["Pasted Layer"].waitForExistence(timeout: 5), "the layer list lists no Pasted Layer")
         expectHeader("2 layers", photo, "the header doesn't count two layers after the paste")
         var box: CGRect?
         XCTAssert(waitFor { box = self.magentaBox(photo); return box != nil }, "the pasted image isn't on the canvas")
@@ -199,11 +199,11 @@ final class PhotoEditJourneyTests: XCTestCase {
         return photo
     }
 
+    /// The sidebar's layer list (`photo.layers`) is up and lists Background.
     @MainActor private func openLayersTab(_ photo: Journey) {
-        let tab = photo.app.radioButtons["Layers"]
-        XCTAssert(tab.waitForExistence(timeout: 5), "no Layers tab")
-        tab.click()
-        XCTAssert(photo.app.staticTexts["Background"].waitForExistence(timeout: 5), "the Layers tab doesn't list Background")
+        let layers = photo.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
+        XCTAssert(layers.waitForExistence(timeout: 5), "the sidebar has no layer list (photo.layers)")
+        XCTAssert(photo.app.staticTexts["Background"].waitForExistence(timeout: 5), "the layer list doesn't list Background")
     }
 
     /// Clears the general pasteboard and puts `png` on it, as another app would.

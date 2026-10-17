@@ -114,7 +114,7 @@ code generation, and reading or writing any closed file format.
 | Inspector: X, Y, W, H, corner radius, fill, layer opacity, stroke color and width, text family, size, weight and alignment | Gradients, images as fills, shadows and blurs, blend modes, per-corner radius, dashed strokes |
 | Layers: select, rename, reorder and nest by drag, hide, lock; Arrange menu | Auto Layout values and the layout math (#752's last bullet: section 9, Q2) |
 | Duplicate and Option-drag, group and ungroup, cut, copy and paste (also between windows) | Boolean operations, masks, constraints |
-| Align (one layer to its frame, several to each other) and distribute | Smart guides and snapping (first item after v1) |
+| Align (one layer to its frame, several to each other) and distribute; snapping to layers, the frame and the page, with smart guides (snapping in v1, captain, 2026-10-16) | – |
 | Undo and redo named for each step; save, Save As, reopen; unsaved-changes dot and close prompt; open errors named | Version history, autosave and crash recovery (section 9, Q4) |
 
 **Tier 2, after the loop (still v1.x, waves 2 and 3):** export to PNG, SVG and
@@ -133,6 +133,7 @@ links, comments, a shared library across files.
 | Auto Layout section of #752 | Not v1 | Storing direction, gap and padding without the layout math gives controls that change nothing on the canvas, which breaks "no dead controls". Ship it with the math (Q2) |
 | Close prompt for unsaved changes | v1 | Losing work is worse than any missing feature; #275 already names it |
 | Pages | Already built | Tier 2 in priorities, but it shipped with the tree |
+| Smart guides and snapping | snapping in v1 (captain, 2026-10-16) | Reverses "first item after v1": the captain used the app and found "the canvas feels basic, needs better tool feedback". Tier 1, wave 1: `features/snapping.md` |
 | Variables (#20) | Tier 2, wave 3 | Priorities puts shared color variables in tier 2 and light and dark modes in tier 3; #20 is labelled `p2` and holds both, so the mode switch rides along with it rather than splitting the issue |
 
 ---
@@ -251,6 +252,7 @@ Sources (the first two are the ones `docs/priorities.md` used for Design):
 | 21 | Save, Save As, reopen | priorities, *inferred* | built | – |
 | 22 | Unsaved state and close prompt | S4, *inferred* | missing | #270, #275 |
 | 23 | Open errors named | *inferred* | built, no journey | new journey (F5) |
+| 24 | Snap to layers, the frame and the page; smart guides, distances, equal spacing | *inferred*, captain 2026-10-16 | missing | new gaps (`snapping`) |
 
 ### Tier 2: weekly (`p2`)
 
@@ -268,7 +270,6 @@ Sources (the first two are the ones `docs/priorities.md` used for Design):
 |---|---|---|---|
 | Wide-gamut color variables | priorities | missing | #21 |
 | Auto Layout (direction, gap, padding) with the layout math | S1, *inferred* | missing | #752 (last bullet; not v1) |
-| Smart guides and snapping | *inferred* | missing | none (first item after v1) |
 | Boolean operations, masks | *inferred* | missing | none |
 | Prototype links and a player | S3 | missing | none |
 

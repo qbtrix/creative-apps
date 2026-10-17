@@ -1,7 +1,11 @@
 // LibraryLoupe.swift: one photo fitted in SuiteUI's CanvasSurface at the
-// photo's size, with its name and "12 of 60" position in a glass readout.
-// Left and Right step through the sort; Escape or G go back to the grid. The
-// view reads values and calls closures; LibraryCatalog holds the state.
+// photo's size, with its name, "12 of 60" position and cull summary ("3 stars,
+// Picked, Red label") in a glass readout.
+// Left and Right step through the sort; Escape, G or the glass Grid button at
+// the top leading corner (`library.loupe.grid`, so nobody needs the keys) go
+// back to the grid. The button and the readout sit outside the focusable
+// part, so neither takes the keys. The view reads values and calls closures;
+// LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -55,10 +59,22 @@ struct LibraryLoupe: View {
             // After the focus modifiers, so the readout is never the focusable element.
             .overlay(alignment: .bottom) {
                 GlassPanel {
-                    Text("\(photo.name)  ·  \(position)")
+                    Text(LibraryCatalog.loupeReadout(for: photo, position: position))
                         .font(SuiteFont.monospacedDigits)
                         .accessibilityIdentifier("library.loupe.position")
                 }
+                .padding(SuiteSpacing.l)
+            }
+            .overlay(alignment: .topLeading) {
+                Button(action: onGrid) {
+                    GlassPanel { Label("Grid", systemImage: "chevron.left") }
+                        .frame(minHeight: SuiteSize.toolButton)
+                        .contentShape(.rect)
+                }
+                .buttonStyle(HoverButtonStyle())
+                .help("Back to the grid (Esc or G)")
+                .accessibilityLabel("Grid")
+                .libraryControl(id: "library.loupe.grid", enabled: true, help: nil)
                 .padding(SuiteSpacing.l)
             }
             // A focusable view whose only element was the readout turned it into

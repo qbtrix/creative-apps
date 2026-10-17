@@ -58,18 +58,21 @@ Layers tab), 7.1 PB-13, PJ-P2, 7.3 PF-8, PF-12.
 ## Journey steps
 
 1. **PJ-9 `testAdjustmentLayer`** (`+AdjustmentLayers`), as blueprint 4.2
-   writes it: Layers tab; Layer > New Adjustment Layer > Curves gives a row
-   "Curves 1" with `photo.layer.<id>.kind` reading "Adjustment layer" above
-   Background, selected; the Adjust tab shows only Curves under the header
+   writes it, with the layer list in the sidebar and the adjustment sections
+   in the inspector (the window has no tabs): Layer > New Adjustment Layer >
+   Curves gives a row "Curves 1" with `photo.layer.<id>.kind` reading
+   "Adjustment layer" above Background, selected; the inspector shows only
+   Curves under the header
    "Curves 1" with the info line "Adjusts the layers below"; "Undo New
    Adjustment Layer". Drag the midpoint up: the canvas differs, "Undo
    Curves". Hide the eye: the canvas equals step 1. New Layer above, brush:
-   the stroke is unadjusted. Select the adjustment, Send Backward once: it
+   the stroke is unadjusted. Select the adjustment, Opacity 0: the canvas
+   equals the hidden-eye canvas with the stroke (the adjustment weighs
+   nothing); Command-Z restores the adjusted canvas. Send Backward once: it
    is the bottom row, Send Backward disabled, the row's info line "Nothing
-   below to adjust.". Opacity 0: the canvas equals step 1; Command-Z
-   restores it. Select Background: the header reads "Image", "Adjusts the
+   below to adjust.". Select Background: the header reads "Image", "Adjusts the
    whole image". Error: with the adjustment selected, Brush and drag: the
-   status line reads "Select an image layer in the Layers tab to paint on." and nothing changes.
+   status line reads "Select an image layer in the sidebar to paint on." and nothing changes.
 2. **PJ-P2's adjustment series `testAdjustmentLayerScrubLatency`**
    (`+PerfAdjustmentLayers`): on `-PhotoFixture large` add an Exposure
    adjustment layer and drag its bar; at least 60 samples; QB-L2 reported.
@@ -78,10 +81,10 @@ Layers tab), 7.1 PB-13, PJ-P2, 7.3 PF-8, PF-12.
 
 | Screen | Empty | Error | Loading |
 |---|---|---|---|
-| Layers tab row | an adjustment at the bottom: info line "Nothing below to adjust." | – | – |
-| Adjust tab | no image: today's empty state; a pixel layer selected: the whole-image sections under "Image" | – | – |
+| Sidebar layer row | an adjustment at the bottom: info line "Nothing below to adjust." | – | – |
+| Inspector | no image: today's empty state; a pixel layer selected: the whole-image sections under "Image" | – | – |
 | Layer > New Adjustment Layer | no image: the four items disabled "Open an image first." | – | – |
-| Canvas | – | a paint tool on an adjustment layer: "Select an image layer in the Layers tab to paint on." (photo-seams' `paintTarget()`) | none: an adjustment's tile render stays within PB-13 |
+| Canvas | – | a paint tool on an adjustment layer: "Select an image layer in the sidebar to paint on." (photo-seams' `paintTarget()`) | none: an adjustment's tile render stays within PB-13 |
 
 ## Contract slice
 

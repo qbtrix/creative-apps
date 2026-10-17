@@ -1,28 +1,314 @@
 {
-  "title": "Keywords and camera details (not v1)",
+  "title": "Keywords and camera details",
   "wave": 5,
   "order": 20,
   "status": "planned",
-  "feature_issue": "later (packet after wave 2 lands)",
+  "feature_issue": "file when ready",
   "covers": "#744",
-  "waits_on": "import",
+  "waits_on": "import; takes over files from cull, persist, status-and-layout, and the window shell crop and export edit in wave 4; its window and search slices wait on filters-collections (same wave)",
   "issues": [
     744
   ],
   "owned": [
+    "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "Sources/LibraryModel/PhotoItem.swift",
+    "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "Tests/LibraryModelTests/LibraryPhotoDetailsTests.swift",
+    "Tests/mutations/LibraryModel.PhotoDetails.json",
+    "Tests/mutations/LibraryModel.PhotoItem.json",
+    "Sources/LibraryModel/Contracts/SidecarContracts.swift",
+    "Sources/LibraryModel/Fakes/FakeSidecars.swift",
+    "Sources/LibraryModel/LibraryServices.swift",
+    "Sources/LibraryModel/LibraryLaunch.swift",
+    "Tests/LibraryModelTests/LibrarySidecarContractTests.swift",
+    "Tests/mutations/LibraryModel.SidecarContracts.json",
+    "Tests/mutations/LibraryModel.FakeSidecars.json",
+    "Tests/mutations/LibraryModel.LibraryServices.json",
+    "Sources/LibraryModel/LibraryFixtures.swift",
+    "Sources/LibraryModel/Fakes/FakePlatform.swift",
+    "Sources/LibraryModel/Live/LiveImporter.swift",
+    "Tests/LibraryModelTests/LibraryCamerasFixtureTests.swift",
+    "Tests/mutations/LibraryModel.LibraryFixtures.json",
+    "Tests/mutations/LibraryModel.LiveImporter.json",
     "Sources/LibraryModel/LibraryKeywords.swift",
+    "Sources/LibraryModel/MetadataEditing.swift",
+    "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "Tests/LibraryModelTests/LibraryMetadataSlotsTests.swift",
+    "Tests/LibraryModelTests/LibraryCameraRowsTests.swift",
+    "Tests/AppSnapshotTests/LibraryCameraDecodeTests.swift",
+    "Tests/AppSnapshotTests/LibraryCameraSnapshots.swift",
+    "UITests/LibraryJourneyTests+Camera.swift",
+    "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+    "Sources/LibraryApp/LibraryInspector.swift",
     "Tests/LibraryModelTests/LibraryKeywordTests.swift",
+    "Tests/LibraryModelTests/LibraryCaptionTests.swift",
+    "Tests/LibraryModelTests/LibraryMetadataPersistTests.swift",
+    "Tests/LibraryModelTests/LibraryKeywordBudgetTests.swift",
+    "Tests/AppSnapshotTests/LibraryKeywordSnapshots.swift",
+    "UITests/LibraryJourneyTests+Keywords.swift",
+    "Tests/mutations/LibraryModel.LibraryKeywords.json",
+    "Tests/mutations/LibraryModel.MetadataEditing.json",
+    "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "Tests/mutations/LibraryModel.LiveCatalogCoding.json",
     "Sources/LibraryApp/MetadataInspector.swift",
-    "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
+    "Sources/LibraryApp/LibraryWindow.swift",
+    "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift",
+    "Tests/LibraryModelTests/LibraryXMPTests.swift",
+    "Tests/LibraryModelTests/LibrarySidecarPlanTests.swift",
+    "Tests/AppSnapshotTests/LibrarySidecarWriterTests.swift",
+    "Tests/AppSnapshotTests/LibrarySidecarSnapshots.swift",
+    "UITests/LibraryJourneyTests+Sidecars.swift",
+    "Tests/mutations/LibraryModel.XMPSidecar.json",
+    "Sources/LibraryApp/Platform/XMPSidecarWriter.swift",
+    "Sources/LibraryApp/LibraryWindow+Cull.swift",
+    "Tests/LibraryModelTests/LibrarySearchTests.swift",
+    "Tests/LibraryModelTests/LibrarySearchOrderTests.swift",
+    "Tests/LibraryModelTests/LibrarySearchBudgetTests.swift",
+    "UITests/LibraryJourneyTests+Search.swift",
+    "Tests/mutations/LibraryModel.PhotoSearch.json",
+    "Sources/LibraryModel/LibraryCatalog.swift",
+    "Sources/LibraryModel/LibraryOrder.swift",
+    "Tests/mutations/LibraryModel.LibraryCatalog.json",
+    "Tests/mutations/LibraryModel.LibraryOrder.json",
+    "Sources/LibraryApp/LibraryCommands.swift"
   ],
   "core": "none",
-  "suiteui": "none",
+  "suiteui": "S-L9 InspectorTokenRow, S-L10 InspectorTextRow (needs-ui, to file; soft waits with plain SwiftUI placeholders)",
   "depends": [
-    "import"
+    "import",
+    "cull",
+    "persist",
+    "status-and-layout"
   ],
-  "journeys": [],
-  "notes": "Not v1. Camera details come from the Exif the import scan already reads.",
-  "quality": "later",
-  "library_title": "Keywords and camera details (not v1)",
-  "journeys_none": "no packet yet, not v1: the blueprint names no journey"
+  "journeys": [
+    "LibraryCameraJourneyTests.testCameraDetailsInInfo",
+    "LibraryKeywordsJourneyTests.testKeywordsOnASelection",
+    "LibrarySidecarJourneyTests.testKeywordsWriteASidecar",
+    "LibrarySearchJourneyTests.testSearchByKeywordAndCamera"
+  ],
+  "notes": "Not v1. Camera details are read from the Exif and TIFF dictionaries the import scan already opens (MD-7 reads the tags; today the scan keeps only the date and size). Keywords, title, caption, rating and label go to XMP sidecars; originals are never written. Search ANDs with filters-collections' filter.",
+  "quality": "QB-LIB-M1, QB-LIB-M2, QB-LIB-M3, QB-LIB-M4, QB-LIB-4, QB-LIB-V8, QB-LIB-V9, QB-F1, QB-F3, QB-F4, QB-V5",
+  "library_title": "Keywords and camera details",
+  "slices": [
+    {
+      "id": "MD-a",
+      "behavior": "Every photo carries keywords, a title, a caption and camera details, the sidecar contract has a fake and a live default that says it isn't connected, the `cameras` fixture opens with camera details, and every later slot exists.",
+      "tasks": [
+        "MD-1",
+        "MD-2",
+        "MD-3",
+        "MD-4"
+      ],
+      "journeys": [
+        "MD-MJ1"
+      ],
+      "owned": [
+        "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+        "Sources/LibraryModel/PhotoItem.swift",
+        "Sources/LibraryModel/Contracts/LibraryValues.swift",
+        "Tests/LibraryModelTests/LibraryPhotoDetailsTests.swift",
+        "Tests/mutations/LibraryModel.PhotoDetails.json",
+        "Tests/mutations/LibraryModel.PhotoItem.json",
+        "Sources/LibraryModel/Contracts/SidecarContracts.swift",
+        "Sources/LibraryModel/Fakes/FakeSidecars.swift",
+        "Sources/LibraryModel/LibraryServices.swift",
+        "Sources/LibraryModel/LibraryLaunch.swift",
+        "Tests/LibraryModelTests/LibrarySidecarContractTests.swift",
+        "Tests/mutations/LibraryModel.SidecarContracts.json",
+        "Tests/mutations/LibraryModel.FakeSidecars.json",
+        "Tests/mutations/LibraryModel.LibraryServices.json",
+        "Sources/LibraryModel/LibraryFixtures.swift",
+        "Sources/LibraryModel/Fakes/FakePlatform.swift",
+        "Sources/LibraryModel/Live/LiveImporter.swift",
+        "Tests/LibraryModelTests/LibraryCamerasFixtureTests.swift",
+        "Tests/mutations/LibraryModel.LibraryFixtures.json",
+        "Tests/mutations/LibraryModel.LiveImporter.json",
+        "Sources/LibraryModel/LibraryKeywords.swift",
+        "Sources/LibraryModel/MetadataEditing.swift",
+        "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+        "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+        "Tests/LibraryModelTests/LibraryMetadataSlotsTests.swift"
+      ],
+      "waits": {
+        "cull": [
+          "MD-4"
+        ]
+      }
+    },
+    {
+      "id": "MD-b",
+      "behavior": "Selecting a photo shows its camera, lens, aperture, shutter, ISO, focal length and date taken in the Info tab, read from its Exif at import; several photos show ranges and counts.",
+      "tasks": [
+        "MD-5",
+        "MD-6",
+        "MD-7",
+        "MD-8"
+      ],
+      "journeys": [
+        "MD-J1"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryCameraRowsTests.swift",
+        "Tests/AppSnapshotTests/LibraryCameraDecodeTests.swift",
+        "Tests/AppSnapshotTests/LibraryCameraSnapshots.swift",
+        "UITests/LibraryJourneyTests+Camera.swift",
+        "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+        "Tests/mutations/LibraryModel.PhotoDetails.json",
+        "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+        "Sources/LibraryApp/LibraryInspector.swift"
+      ],
+      "waits": {
+        "MD-a": [
+          "MD-5"
+        ],
+        "status-and-layout": [
+          "MD-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "MD-c",
+      "behavior": "Adding or removing keywords on a selection, or setting its title or caption, is one named undo step with suggestions from the catalog's keywords, and the catalog keeps them across relaunch.",
+      "tasks": [
+        "MD-9",
+        "MD-10",
+        "MD-11",
+        "MD-12",
+        "MD-13"
+      ],
+      "journeys": [
+        "MD-J2"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryKeywordTests.swift",
+        "Tests/LibraryModelTests/LibraryCaptionTests.swift",
+        "Tests/LibraryModelTests/LibraryMetadataPersistTests.swift",
+        "Tests/LibraryModelTests/LibraryKeywordBudgetTests.swift",
+        "Tests/AppSnapshotTests/LibraryKeywordSnapshots.swift",
+        "UITests/LibraryJourneyTests+Keywords.swift",
+        "Sources/LibraryModel/LibraryKeywords.swift",
+        "Tests/mutations/LibraryModel.LibraryKeywords.json",
+        "Sources/LibraryModel/MetadataEditing.swift",
+        "Tests/mutations/LibraryModel.MetadataEditing.json",
+        "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+        "Tests/mutations/LibraryModel.LiveCatalogCoding.json",
+        "Sources/LibraryApp/MetadataInspector.swift",
+        "Sources/LibraryApp/LibraryInspector.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
+      ],
+      "waits": {
+        "MD-a": [
+          "MD-9"
+        ],
+        "cull": [
+          "MD-10",
+          "MD-11",
+          "MD-13"
+        ],
+        "persist": [
+          "MD-12"
+        ],
+        "MD-b": [
+          "MD-13"
+        ],
+        "filters-collections": [
+          "MD-13"
+        ],
+        "crop": [
+          "MD-13"
+        ],
+        "export": [
+          "MD-13"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "MD-d",
+      "behavior": "Each keyword, title, caption, rating or label change on a photo with a file is written to an XMP sidecar beside it, the original never changes, and a sidecar another app wrote is left alone with a reason.",
+      "tasks": [
+        "MD-14",
+        "MD-15",
+        "MD-16",
+        "MD-17",
+        "MD-18"
+      ],
+      "journeys": [
+        "MD-J3"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryXMPTests.swift",
+        "Tests/LibraryModelTests/LibrarySidecarPlanTests.swift",
+        "Tests/AppSnapshotTests/LibrarySidecarWriterTests.swift",
+        "Tests/AppSnapshotTests/LibrarySidecarSnapshots.swift",
+        "UITests/LibraryJourneyTests+Sidecars.swift",
+        "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+        "Tests/mutations/LibraryModel.XMPSidecar.json",
+        "Sources/LibraryApp/Platform/XMPSidecarWriter.swift",
+        "Sources/LibraryApp/LibraryWindow+Cull.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Sources/LibraryApp/LibraryInspector.swift",
+        "Sources/LibraryApp/MetadataInspector.swift"
+      ],
+      "waits": {
+        "MD-a": [
+          "MD-14"
+        ],
+        "MD-c": [
+          "MD-18"
+        ],
+        "cull": [
+          "MD-18"
+        ],
+        "filters-collections": [
+          "MD-18"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "MD-e",
+      "behavior": "Typing in the window's search field shows only the photos whose keywords, title, caption or camera details match, `field:value` narrows to one field, and a camera value in the Info tab searches for itself.",
+      "tasks": [
+        "MD-19",
+        "MD-20",
+        "MD-21",
+        "MD-22"
+      ],
+      "journeys": [
+        "MD-J4"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibrarySearchTests.swift",
+        "Tests/LibraryModelTests/LibrarySearchOrderTests.swift",
+        "Tests/LibraryModelTests/LibrarySearchBudgetTests.swift",
+        "UITests/LibraryJourneyTests+Search.swift",
+        "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+        "Tests/mutations/LibraryModel.PhotoSearch.json",
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Sources/LibraryModel/LibraryOrder.swift",
+        "Tests/mutations/LibraryModel.LibraryCatalog.json",
+        "Tests/mutations/LibraryModel.LibraryOrder.json",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Sources/LibraryApp/LibraryInspector.swift"
+      ],
+      "waits": {
+        "MD-a": [
+          "MD-19"
+        ],
+        "filters-collections": [
+          "MD-21",
+          "MD-22"
+        ],
+        "MD-d": [
+          "MD-22"
+        ]
+      },
+      "ui": true
+    }
+  ]
 }

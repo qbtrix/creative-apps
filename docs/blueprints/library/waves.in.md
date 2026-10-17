@@ -6,7 +6,8 @@ one feature-lead session each. A wave starts when everything it waits on has
 merged. Two features in the same wave never own the same file. Each packet
 lists its tasks, owned files, acceptance tests, quality bars and done check.
 Waves 3 to 5 (develop, status-and-layout, crop, export, and the three not-v1
-features) get their packets once wave 2 has landed.
+features) have v3 packets with slices too: contract slice first, acceptance
+tests written before their code, and mutation plans for Model behaviour.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 

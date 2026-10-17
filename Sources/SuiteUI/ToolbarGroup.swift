@@ -3,7 +3,8 @@
 // ToolbarGroup, a tool palette of icon buttons. Two styles: `.floating` sits
 // over a canvas in one glass capsule (one glass shape, no glass on glass);
 // `.rail` is the flat vertical tool rail docked at an EditorShell's leading
-// edge. Either way the selected tool is a flat accent tint. Window toolbar
+// edge. Either way the selected tool is a flat accent tint, and every enabled
+// tool shows hover and press in its well (ToolWell). Window toolbar
 // items use the same ToolbarAction through SuiteWindow and EditorBarItem. An
 // action can only be disabled by saying why: its `unavailableHelp` is the
 // tooltip, so no shown control is silently dead. Apps build their palette
@@ -110,10 +111,8 @@ public struct ToolbarGroup: View {
                         .symbolVariant(isSelected ? .fill : .none)
                         .foregroundStyle(Self.symbolStyle(action))
                         .frame(width: SuiteSize.toolButton, height: SuiteSize.toolButton)
-                        .background(well(isSelected))
-                        .contentShape(.rect)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ToolButtonStyle(isSelected: isSelected, style: style))
                 .disabled(!action.isEnabled)
                 // After .disabled, so the tooltip still shows on a disabled tool.
                 .help(action.help)
@@ -132,21 +131,67 @@ public struct ToolbarGroup: View {
         }
     }
 
-    /// The selected tool's tint: a circle in the capsule, a rounded square on the rail.
-    @ViewBuilder private func well(_ isSelected: Bool) -> some View {
-        if !isSelected {
-            Color.clear
-        } else if style == .rail {
-            RoundedRectangle(cornerRadius: SuiteRadius.small).fill(SuiteColor.selectedWell)
-        } else {
-            Circle().fill(SuiteColor.accent.opacity(0.15))
-        }
-    }
-
     /// Accent when selected, primary when enabled, tertiary (dimmed) when not;
     /// set here because a plain button style does not dim reliably everywhere.
     private static func symbolStyle(_ action: ToolbarAction) -> AnyShapeStyle {
         guard action.isEnabled else { return AnyShapeStyle(HierarchicalShapeStyle.tertiary) }
         return action.isSelected ? AnyShapeStyle(SuiteColor.accent) : AnyShapeStyle(Color.primary)
+    }
+}
+
+/// What a tool button's well shows: the selected tint wins, then pressed, then
+/// hover. A disabled tool shows none, since it can't act.
+enum ToolWell: Equatable {
+    case clear, hovered, pressed, selected
+
+    static func state(isSelected: Bool, isEnabled: Bool, isHovering: Bool, isPressed: Bool) -> ToolWell {
+        guard isEnabled else { return .clear }
+        if isSelected { return .selected }
+        if isPressed { return .pressed }
+        return isHovering ? .hovered : .clear
+    }
+}
+
+/// A tool button: its well (a circle in the capsule, a rounded square on the
+/// rail) shows hover in `rowHover`, a press in `valueFill` and the selected
+/// tool in its tint, fading between them.
+private struct ToolButtonStyle: ButtonStyle {
+    let isSelected: Bool
+    let style: ToolbarGroup.Style
+
+    func makeBody(configuration: Configuration) -> some View {
+        ToolButtonBody(configuration: configuration, isSelected: isSelected, style: style)
+    }
+}
+
+private struct ToolButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    let isSelected: Bool
+    let style: ToolbarGroup.Style
+    @State private var hovering = false
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.suiteReduceMotion) private var reduceMotion
+
+    var body: some View {
+        let well = ToolWell.state(
+            isSelected: isSelected, isEnabled: isEnabled, isHovering: hovering, isPressed: configuration.isPressed)
+        configuration.label
+            .background { shape.fill(fill(well)) }
+            .contentShape(.rect)
+            .onHover { hovering = $0 }
+            .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: well)
+    }
+
+    private var shape: AnyShape {
+        style == .rail ? AnyShape(RoundedRectangle(cornerRadius: SuiteRadius.small)) : AnyShape(Circle())
+    }
+
+    private func fill(_ well: ToolWell) -> Color {
+        switch well {
+        case .clear: .clear
+        case .hovered: SuiteColor.rowHover
+        case .pressed: SuiteColor.valueFill
+        case .selected: style == .rail ? SuiteColor.selectedWell : SuiteColor.accent.opacity(0.15)
+        }
     }
 }

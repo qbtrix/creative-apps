@@ -3,7 +3,9 @@
 // the last one in is the primary selection, which `selectedNodeID` and
 // `selectedNode` read, so single-selection callers keep working. A plain click
 // (selectItem) replaces the list, Shift-click (toggleSelection) adds a layer or
-// takes it out, and deselect (Escape, a click on empty canvas) clears it.
+// takes it out, and deselect (Escape, a click on empty canvas) clears it. Each
+// of them ends the edit run (DesignHistory), so nudging A, then selecting B and
+// nudging it, is two undo steps.
 //
 // A layer that is locked or hidden, itself or through a group around it, is
 // never added (the subtree checks in DesignLocking and DesignLayerToggles); one
@@ -47,11 +49,14 @@ extension DesignWorkspace {
     public mutating func toggleSelection(_ id: String) {
         // Committing first: a blank placed text node goes away with its edit.
         commitTextEdit()
+        // Either change ends the edit run: a run never spans two selections.
         if let index = selectedNodeIDs.firstIndex(of: id) {
+            endEditRun()
             selectedNodeIDs.remove(at: index)
             return
         }
         guard canAddToSelection(id), let page = selectedPage else { return }
+        endEditRun()
         selectedNodeIDs.append(id)
         expandAncestors(of: id, in: page.nodes)
     }

@@ -1,6 +1,7 @@
 // LibraryMetadataTests.swift: the inspector's metadata edits on LibraryCatalog:
-// rating, flag and label on every selected photo, mixed values, and a budget
-// for one edit across all 60 samples. Runs on
+// rating, flag and label on every selected photo, mixed values, the named
+// undo steps they share with the cull keys, the loupe photo as their target
+// in the loupe, and a budget for one edit across all 60 samples. Runs on
 // Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -85,4 +86,67 @@ private func threeSelected() -> LibraryCatalog {
         }
     }.sorted()
     #expect(times.count == 50 && times[47] < .milliseconds(10))
+}
+
+@Test func aStarClickIsOneSetRatingStepThatUndoes() {
+    var catalog = threeSelected()
+    let before = catalog.items
+    catalog.clickStar(4)
+    #expect(catalog.items.map(\.rating) == [4, 4, 4])
+    #expect(catalog.undoTitle == "Undo Set Rating")
+    #expect(catalog.history.undo.count == 1)
+    catalog.undo()
+    #expect(catalog.items == before)
+}
+
+@Test func flagAndLabelEditsAreNamedLikeTheKeys() {
+    var catalog = threeSelected()
+    catalog.setFlag(.reject)
+    #expect(catalog.undoTitle == "Undo Reject")
+    catalog.setFlag(.pick)
+    #expect(catalog.undoTitle == "Undo Pick")
+    catalog.setFlag(.none)
+    #expect(catalog.undoTitle == "Undo Clear Flag")
+    catalog.setLabel(.red)
+    #expect(catalog.undoTitle == "Undo Set Label")
+    #expect(catalog.history.undo.map(\.name) == ["Reject", "Pick", "Clear Flag", "Set Label"])
+}
+
+@Test func anOutOfRangeRatingLeavesNoErrorOrStep() {
+    var catalog = threeSelected()
+    catalog.setRating(6)
+    catalog.setRating(-1)
+    #expect(catalog.cullError == nil && catalog.history.undo.isEmpty)
+}
+
+@Test func inTheLoupeAStarClickRatesTheLoupePhotoAndStays() {
+    var catalog = threeSelected()
+    catalog.open("P2")
+    catalog.setAutoAdvance(true)
+    catalog.clickStar(4)
+    #expect(catalog.items.map(\.rating) == [1, 4, 3])
+    #expect(catalog.mode == .loupe && catalog.loupeItem?.id == "P2")
+    #expect(catalog.undoTitle == "Undo Set Rating")
+    catalog.clickStar(4)
+    #expect(catalog.items.map(\.rating) == [1, 0, 3])
+    #expect(catalog.loupeItem?.id == "P2")
+}
+
+@Test func inTheLoupeTheStarClearsByTheLoupePhotosRating() {
+    var catalog = threeSelected()
+    catalog.select(["P1", "P3"])
+    catalog.open("P2")
+    catalog.clickStar(2)
+    #expect(catalog.items.map(\.rating) == [1, 0, 3])
+}
+
+@Test func aRefusedFlagLeavesThePhotosAndSaysWhy() {
+    var catalog = LibraryCatalog(services: .fake(mode: .fail))
+    catalog.load(threeSelected().items)
+    catalog.select(["P1", "P2"])
+    let before = catalog.items
+    catalog.setFlag(.reject)
+    #expect(catalog.items == before)
+    #expect(catalog.history.undo.isEmpty)
+    #expect(catalog.cullError == "Couldn't set the flag: this window shows built-in sample data, not photos on disk. Import a folder to rate your own photos.")
 }

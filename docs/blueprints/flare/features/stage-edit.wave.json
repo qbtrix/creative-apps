@@ -1,0 +1,46 @@
+{
+  "title": "Select, transform, zoom and edit on the stage",
+  "wave": 4,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#204, #375, #384; IN-1 #397 (stage half)",
+  "waits_on": "`draw-key-save`; tasks SE-1, SE-2 on #273 and #995",
+  "depends": [
+    "draw-key-save"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareBoxDrag.swift",
+    "Sources/FlareModel/FlareDrag.swift",
+    "Sources/FlareModel/FlareSelection.swift",
+    "Tests/FlareModelTests/FlareBoxDragTests.swift",
+    "Sources/FlareModel/FlareSelectionRead.swift",
+    "Tests/FlareModelTests/FlareSelectionReadTests.swift",
+    "Sources/FlareApp/FlareStageSelection.swift",
+    "Tests/AppSnapshotTests/FlareSelectSnapshots.swift",
+    "UITests/FlareJourneyTests+Select.swift",
+    "Sources/FlareModel/FlareViewMath.swift",
+    "Tests/FlareModelTests/FlareViewMathTests.swift",
+    "Sources/FlareApp/FlareStageGuides.swift",
+    "Sources/FlareApp/FlareStage.swift",
+    "Sources/FlareApp/FlareWindow+View.swift",
+    "Tests/AppSnapshotTests/FlareViewSnapshots.swift",
+    "UITests/FlareJourneyTests+View.swift",
+    "Sources/FlareApp/FlareWindow+Edit.swift",
+    "Sources/FlareApp/FlarePasteboard.swift",
+    "Sources/FlareApp/FlareStageContextMenu.swift",
+    "UITests/FlareJourneyTests+Edit.swift",
+    "Sources/FlareModel/FlareEditOrder.swift",
+    "Tests/FlareModelTests/FlareEditOrderTests.swift",
+    "UITests/FlareJourneyTests+Draw.swift",
+    "UITests/FlareJourneyTests+EditOrder.swift",
+    "docs/blueprints/flare/features/stage-edit.md"
+  ],
+  "journeys": [
+    "FlareSelectJourneys.testSelectMarqueeScaleRotate",
+    "FlareViewJourneys.testZoomPanAndGuides",
+    "FlareEditJourneys.testCopyPasteDuplicateDelete",
+    "FlareEditOrderJourneys.testSelectAllOrderAndEscape",
+    "FlareDrawJourneys.testDrawShapesWithEachTool"
+  ]
+}

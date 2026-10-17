@@ -69,6 +69,6 @@ public enum DesignToolbarItem: String, CaseIterable, Sendable {
         }
     }
 
-    private static let noFile = "Create or open a file first."
+    static let noFile = "Create or open a file first."
     private static let finishEditing = "Finish editing the text first."
 }

@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the stub names the wrong feature",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "let base = NotBuilt(\"Style editing\")",
+    "replace": "let base = NotBuilt(\"Styling\")",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "a style help answers nil, so the row looks enabled",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "base.styleHelp(property, ids, on: page)",
+    "replace": "nil",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "setStroke acts instead of refusing",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "try base.setStroke(stroke, ids, on: page)",
+    "replace": "DesignEdit(name: \"Stroke\", nodes: page.nodes, selection: ids)",
+    "tests": "DesignLiveStubTests"
+  }
+]

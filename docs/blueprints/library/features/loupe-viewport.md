@@ -173,6 +173,7 @@ LibraryLoupe(model:menu:) (LV-7; the spine passes both, so LibraryBrowser.swift,
   (CanvasViewport takes focus once onZoom is set and pans on arrow keys unless onKey handles them first,
    CanvasViewport.swift: so onKey keeps Left and Right stepping photos; its own Command-0 arrives through
    onZoom at the fit scale, which zoomTo maps back to .fit)
+  the Grid button overlay (`library.loupe.grid`, top leading) stays and calls menu.view.grid, as Escape does
   readout GlassPanel model.loupeReadout; value model.loupeValue; help photo.availability.help ?? model.loupeError
   the preview-to-full swap has no animation (and none under Reduce Motion)
 ```

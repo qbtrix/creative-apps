@@ -8,7 +8,9 @@
 // out only through `onMove` and `onEnd`, with one `onEnd` after every drag and
 // every nudge, so the host can make each one undo step. Knows no Model. The
 // math (plot range, mapping, preview point, nudges) is static and tested in
-// CurveEditorTests. Owns presentation state only: focus and the drag's range.
+// CurveEditorTests. A handle shows a grab pointer and an accent rim under the
+// pointer, and fills accent with a ring while focused or dragged. Owns
+// presentation state only: focus, the hovered handle and the drag's range.
 import SwiftUI
 
 /// One of the two handles of a cubic Bezier easing.
@@ -25,6 +27,7 @@ public struct CurveEditor: View {
     private let onEnd: @MainActor () -> Void
     @State private var focused: EasingHandleIndex?
     @State private var dragging: (handle: EasingHandleIndex, range: ClosedRange<CGFloat>)?
+    @State private var hovered: EasingHandleIndex?
     @FocusState private var hasFocus: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -113,17 +116,19 @@ public struct CurveEditor: View {
     private func handle(
         _ index: EasingHandleIndex, at point: CGPoint, plot: CGRect, range: ClosedRange<CGFloat>
     ) -> some View {
-        let active = focused == index || dragging?.handle == index
+        let look = Self.handleLook(active: focused == index || dragging?.handle == index, hovered: hovered == index)
         return Circle()
-            .fill(active ? SuiteColor.accent : SuiteColor.panel)
-            .overlay(Circle().strokeBorder(active ? SuiteColor.accent : Color.primary, lineWidth: 1.5))
+            .fill(look.fill)
+            .overlay(Circle().strokeBorder(look.stroke, lineWidth: 1.5))
             .overlay {
-                if active { Circle().strokeBorder(SuiteColor.accent, lineWidth: 2).padding(-SuiteSpacing.xs) }
+                if look.ring { Circle().strokeBorder(SuiteColor.accent, lineWidth: 2).padding(-SuiteSpacing.xs) }
             }
             .frame(width: SuiteSize.curveHandle, height: SuiteSize.curveHandle)
             .frame(width: SuiteSize.curveHandleHit, height: SuiteSize.curveHandleHit)
             .contentShape(Circle())
             .opacity(dimmedHandles ? 0.4 : 1)
+            .onHover { hovered = $0 ? index : (hovered == index ? nil : hovered) }
+            .pointerStyle(dragging?.handle == index ? .grabActive : .grabIdle)
             .position(Self.viewPoint(point, in: plot, range: range))
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -171,6 +176,21 @@ public struct CurveEditor: View {
 }
 
 extension CurveEditor {
+    /// How a handle draws: filled accent and ringed while focused or dragged;
+    /// an accent rim under the pointer, so it reads as grabbable before the
+    /// press; a primary rim on the panel fill at rest.
+    public struct HandleLook: Equatable, Sendable {
+        public let fill: Color
+        public let stroke: Color
+        public let ring: Bool
+    }
+
+    nonisolated public static func handleLook(active: Bool, hovered: Bool) -> HandleLook {
+        active
+            ? HandleLook(fill: SuiteColor.accent, stroke: SuiteColor.accent, ring: true)
+            : HandleLook(fill: SuiteColor.panel, stroke: hovered ? SuiteColor.accent : Color.primary, ring: false)
+    }
+
     /// The y range the well shows: -0.25...1.25, widened to take in every
     /// finite point. Always at least 1.5 tall, so mapping never divides by 0.
     nonisolated public static func plotRange(including points: [CGPoint]) -> ClosedRange<CGFloat> {

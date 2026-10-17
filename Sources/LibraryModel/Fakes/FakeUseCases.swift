@@ -52,7 +52,7 @@ public struct FakeCulling: PhotoCulling {
     let mode: FakeMode
     public init(mode: FakeMode = .ok) { self.mode = mode }
     public func apply(_ change: CullChange, to ids: Set<String>, in items: [PhotoItem]) throws -> [PhotoItem] {
-        if mode == .fail { throw LibraryError.invalid("Rating is unavailable in this preview.") }
+        if mode == .fail { throw LibraryError.invalid(Self.refusal(change)) }
         if case .rating(let stars) = change, !(0...5).contains(stars) {
             throw LibraryError.invalid("A rating is 0 to 5 stars.")
         }
@@ -66,6 +66,20 @@ public struct FakeCulling: PhotoCulling {
             }
             return copy
         }
+    }
+    /// The `.fail` message: what couldn't change, why in plain words, then
+    /// how to fix it ("Couldn't set the flag: this window shows built-in
+    /// sample data, ... Import a folder to rate your own photos.").
+    static func refusal(_ change: CullChange) -> String {
+        let what: String
+        switch change {
+        case .rating: what = "set the rating"
+        case .flag(.none): what = "clear the flag"
+        case .flag: what = "set the flag"
+        case .label: what = "set the label"
+        }
+        return "Couldn't \(what): this window shows built-in sample data, not photos on disk. "
+            + LibraryNoticeContent.importHint
     }
     public func advance(from id: String, before: [String], after: [String]) -> String? {
         guard let index = before.firstIndex(of: id) else { return after.first }

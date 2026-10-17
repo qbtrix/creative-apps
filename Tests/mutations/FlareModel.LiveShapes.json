@@ -1,0 +1,30 @@
+[
+  {
+    "label": "a new shape keys no position",
+    "file": "Sources/FlareModel/Live/LiveShapes.swift",
+    "find": "static let positionKeys = [\"x\", \"y\"]",
+    "replace": "static let positionKeys: [String] = []",
+    "tests": "LiveShapesPositionKeyTests.swift"
+  },
+  {
+    "label": "a new shape keys only x",
+    "file": "Sources/FlareModel/Live/LiveShapes.swift",
+    "find": "static let positionKeys = [\"x\", \"y\"]",
+    "replace": "static let positionKeys = [\"x\"]",
+    "tests": "LiveShapesPositionKeyTests.swift"
+  },
+  {
+    "label": "the position key lands on frame 1",
+    "file": "Sources/FlareModel/Live/LiveShapes.swift",
+    "find": "let key = Keyframe(frame: 0, value: Layer.standardDefaults[property] ?? 0)",
+    "replace": "let key = Keyframe(frame: 1, value: Layer.standardDefaults[property] ?? 0)",
+    "tests": "LiveShapesPositionKeyTests.swift"
+  },
+  {
+    "label": "the position keys are their own undo step",
+    "file": "Sources/FlareModel/Live/LiveShapes.swift",
+    "find": "        }\n        return layer.id\n    }\n\n    /// The pen path",
+    "replace": "        }\n        for property in Self.positionKeys { try engine.perform(SetKeyframe(owner: owner, layerID: layer.id, property: property, keyframe: Keyframe(frame: 0, value: 0))) }\n        return layer.id\n    }\n\n    /// The pen path",
+    "tests": "LiveShapesPositionKeyTests.swift"
+  }
+]

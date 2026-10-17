@@ -1,0 +1,21 @@
+# Tests/canonical-concepts.txt: the concepts that live in SuiteModel (the
+# editor kernel), never app-local (docs/factory/lead.md, contract rule 20).
+# One line per concept, `Concept: Stem Stem ...`. A stem matches a file name
+# or primary type at a CamelCase boundary with an optional plural s (Snap
+# matches SnapGuides, never Snapshot), so inflected forms are listed. The
+# concept name is what an `Allow-Dup: <concept> <reason>` PR line names.
+# Read by scripts/check-dup-logic; the fast lane reads main's copy.
+Undo: Undo
+History: History
+Selection: Selection
+Marquee: Marquee
+Snap: Snap Snapping
+Easing: Easing
+Keyframe: Keyframe
+Layers: Layers LayerTree
+Crop: Crop Cropping Cropper
+Export: Export Exporter Exporting
+Clipboard: Clipboard
+Transform: Transform Transforming
+Parent: Parent Parenting
+Bones: Bone

@@ -1,0 +1,5 @@
+[
+{"label":"the zoom bar's upper bound 1","file":"Sources/SuiteUI/TimelineToolbar.swift","find":"        TimelineZoom.range(frameWidth: frameWidth)\n","replace":"        1...1\n","tests":"TimelineToolbarTests"},
+{"label":"Fit sets 2","file":"Sources/SuiteUI/TimelineToolbar.swift","find":"    static let fitZoom: Double = 1\n","replace":"    static let fitZoom: Double = 2\n","tests":"TimelineToolbarTests"},
+{"label":"the Work Area chip sends the range when turning off","file":"Sources/SuiteUI/TimelineToolbar.swift","find":"        guard current == nil else { return nil }\n","replace":"","tests":"TimelineRulerUnitTests"}
+]

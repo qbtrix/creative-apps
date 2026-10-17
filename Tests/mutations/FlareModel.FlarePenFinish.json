@@ -1,0 +1,23 @@
+[
+  {
+    "label": "one anchor finishes a path",
+    "file": "Sources/FlareModel/FlarePenFinish.swift",
+    "find": "public static let minimumFinishAnchors = 2",
+    "replace": "public static let minimumFinishAnchors = 1",
+    "tests": "FlarePenFinishTests"
+  },
+  {
+    "label": "finishPath registers no Add Path step",
+    "file": "Sources/FlareModel/FlarePenFinish.swift",
+    "find": "        commit(pending)\n",
+    "replace": "",
+    "tests": "FlarePenFinishTests"
+  },
+  {
+    "label": "the draft survives a finished path",
+    "file": "Sources/FlareModel/FlarePenFinish.swift",
+    "find": "        cancelDrag()\n",
+    "replace": "",
+    "tests": "FlarePenFinishTests"
+  }
+]

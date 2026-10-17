@@ -1,0 +1,6 @@
+[
+{"label":"the value drops the span","file":"Sources/SuiteUI/TimelineLaneAccess.swift","find":"return (spans + [keys]).joined(separator: \", \")","replace":"return keys","tests":"TimelineAccessTests"},
+{"label":"the child label reads the index, not the frame","file":"Sources/SuiteUI/TimelineLaneAccess.swift","find":"label: keyLabel(frame: key.frame, shape: key.shape)","replace":"label: keyLabel(frame: track.keys.firstIndex(of: key) ?? 0, shape: key.shape)","tests":"TimelineAccessTests"},
+{"label":"the visible-x filter dropped: every key gets a child","file":"Sources/SuiteUI/TimelineLaneAccess.swift","find":"guard let visibleX, let mapping else { return all }","replace":"guard let visibleX, let mapping, visibleX.isEmpty else { return all }","tests":"TimelineAccessTests"},
+{"label":"the spoken-key cap dropped: the value names every key","file":"Sources/SuiteUI/TimelineLaneAccess.swift","find":"let spoken = frames.prefix(spokenKeys)","replace":"let spoken = frames.prefix(frames.count)","tests":"TimelineAccessTests"}
+]

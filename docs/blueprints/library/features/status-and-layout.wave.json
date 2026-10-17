@@ -3,37 +3,135 @@
   "wave": 3,
   "order": 20,
   "status": "planned",
-  "feature_issue": "later (packet after wave 2 lands)",
+  "feature_issue": "file when ready",
   "covers": "#185, #291",
-  "waits_on": "spine, thumbnails, loupe-viewport",
+  "waits_on": "spine, thumbnails, loupe-viewport; SuiteUI #1184 (S-L7); two gaps filed at stage 1 (the spine's preview-only status bar, MetadataInspector's own header)",
   "issues": [
     185,
     291
   ],
   "owned": [
-    "Sources/LibraryModel/LibraryStatusText.swift",
     "Sources/LibraryModel/LibraryLayout.swift",
-    "Sources/LibraryApp/LibraryStatusBar.swift",
-    "Sources/LibraryApp/LibraryInspector.swift",
-    "Tests/LibraryModelTests/LibraryStatusTextTests.swift",
     "Tests/LibraryModelTests/LibraryLayoutTests.swift",
-    "Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift",
+    "Tests/mutations/LibraryModel.LibraryLayout.json",
+    "Sources/LibraryModel/LibraryStatusText.swift",
+    "Tests/LibraryModelTests/LibraryStatusTextTests.swift",
+    "Tests/mutations/LibraryModel.LibraryStatusText.json",
+    "docs/c4/parts/creative-apps/library-model/library-model-sources.json",
+    "UITests/LibraryJourneyTests+Layout.swift",
+    "Sources/LibraryApp/LibraryStatusBar.swift",
+    "Tests/AppSnapshotTests/LibraryStatusSnapshots.swift",
+    "docs/c4/parts/creative-apps/library-app/library-app-sources.json",
+    "Sources/LibraryApp/LibraryInspector.swift",
     "Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift",
-    "UITests/LibraryJourneyTests+Layout.swift"
+    "Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift"
   ],
   "core": "none",
-  "suiteui": "S-L7 optional zoom and size pills; #330, #333",
+  "suiteui": "#1184 (S-L7, optional zoom pill) for SL-4; #779 (S-L2) sharpens J12's grid step; #7 command palette (not v1, open question 1)",
   "depends": [
     "spine",
     "thumbnails",
     "loupe-viewport"
   ],
-  "journeys": [],
-  "notes": "Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list.",
+  "journeys": [
+    "LibraryLayoutJourneyTests.testLayoutAtWidths"
+  ],
+  "notes": "Identifiers in other features' views are each feature's own job; SL-8 fixes what is left in this feature's views and files the rest (SuiteUI's as needs-ui). The command palette needs LibraryCommands.swift, LibraryWindow.swift and new Sources files, none ownable in wave 3: open question 1.",
   "quality": "layout spec 7.3, audit exit 7.2, QB-V5",
   "library_title": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests",
   "journey_ids": [
     "J12"
   ],
-  "journeys_none": "no packet yet: the blueprint names its journeys by id (J12) but no XCUITest method"
+  "slices": [
+    {
+      "id": "SL-a",
+      "behavior": "On the fixtures the Model says what the status row and the inspector header show, and how many grid columns and what loupe fit every window width gets.",
+      "tasks": [
+        "SL-1",
+        "SL-2"
+      ],
+      "journeys": [
+        "MJ1"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryLayout.swift",
+        "Tests/LibraryModelTests/LibraryLayoutTests.swift",
+        "Tests/mutations/LibraryModel.LibraryLayout.json",
+        "Sources/LibraryModel/LibraryStatusText.swift",
+        "Tests/LibraryModelTests/LibraryStatusTextTests.swift",
+        "Tests/mutations/LibraryModel.LibraryStatusText.json",
+        "docs/c4/parts/creative-apps/library-model/library-model-sources.json"
+      ],
+      "waits": {
+        "spine": [
+          "SL-1",
+          "SL-2"
+        ]
+      }
+    },
+    {
+      "id": "SL-b",
+      "behavior": "The status row under the grid and the loupe shows the count, the selection, the thumbnail size or zoom, the loupe's place and every progress or problem pill, and J12 checks it at every width.",
+      "tasks": [
+        "SL-3",
+        "SL-4"
+      ],
+      "journeys": [
+        "J12"
+      ],
+      "owned": [
+        "UITests/LibraryJourneyTests+Layout.swift",
+        "Sources/LibraryApp/LibraryStatusBar.swift",
+        "Tests/AppSnapshotTests/LibraryStatusSnapshots.swift",
+        "docs/c4/parts/creative-apps/library-app/library-app-sources.json"
+      ],
+      "waits": {
+        "SL-a": [
+          "SL-4"
+        ],
+        "thumbnails": [
+          "SL-4"
+        ],
+        "loupe-viewport": [
+          "SL-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SL-c",
+      "behavior": "The inspector's header names the selection with its facts, every Library control carries an identifier, and the wide widths are proven by snapshots.",
+      "tasks": [
+        "SL-5",
+        "SL-6",
+        "SL-7",
+        "SL-8"
+      ],
+      "journeys": [
+        "J12"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryStatusText.swift",
+        "Tests/LibraryModelTests/LibraryStatusTextTests.swift",
+        "Tests/mutations/LibraryModel.LibraryStatusText.json",
+        "Sources/LibraryApp/LibraryInspector.swift",
+        "Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift",
+        "UITests/LibraryJourneyTests+Layout.swift",
+        "docs/c4/parts/creative-apps/library-app/library-app-sources.json",
+        "Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift",
+        "Sources/LibraryApp/LibraryStatusBar.swift"
+      ],
+      "waits": {
+        "SL-a": [
+          "SL-5",
+          "SL-7"
+        ],
+        "SL-b": [
+          "SL-6",
+          "SL-8"
+        ]
+      },
+      "ui": true
+    }
+  ]
 }

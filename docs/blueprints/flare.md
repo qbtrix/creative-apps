@@ -84,16 +84,35 @@ order): wave 1 `mac-platform` (#370, #373, #739), which waits on nothing;
 wave 2, as their engine issues land, `live-stage` (#357, #740), `live-keys`
 (#13, #358) and `live-scenes` (#362).
 
-**Later features (UI and integrate, not in a packet yet).** The Flare UI on
-fakes: F1a #346, F1b #347, F3c #375, F5 #391, F6b #348, F6c #349, F7b #376,
-F8 #377, F9 #378, F11a #350, F11b #351, F17b #392, F17c #393, F18 #384, and
-the older issues that now carry F tasks (#11, #12, #15, #186, #203, #204,
-#205). The p1 integrate tasks IN-1 #397, IN-2 #385, IN-4 #398 and IN-9 #399
-wait on that UI and on gate G2.
+**Later features (UI and integrate), as packets (2026-10-15).** Wave 3
+`draw-key-save` (#346, #347, #12, #203, #15, #11, #205, part of #204, #376
+and #391): the window on `SuiteWindow`, the router, stage, timeline,
+transport, menus and files, so a person can draw, key, play and save on
+live services. Wave 4, side by side: `stage-edit` (#204, #375, #384, IN-1
+#397), `inspector-timeline` (#186, #348, #349, #376, #377, #378, IN-2 #385)
+and `layers-files` (#350, #351, #392, #393, IN-4 #398). The tier 2 and 3
+screens follow; `flare/features/waves.md` lists them.
 
 ---
 
 ## 1. Scope
+
+### Usage map (2026-10-15)
+
+Which of the v1 features below people use most, from `docs/priorities.md`
+(Flare) and this section's scope, so feature packets go most-used first.
+**Tier 1, nearly every session:** draw rectangles and ellipses, select and
+move on the stage, and the layers list; key position, scale, rotation and
+opacity on the timeline, then retime and delete keys; scrub, play and loop
+with Space; easing presets; fill and stroke; open, save, undo,
+copy/paste/duplicate and zoom/pan. Pen and anchor editing are tier 1 but
+thin (*inferred*). **Tier 2, weekly:** export (SVG, Lottie, PNG sequence),
+symbols and instances with swatches, onion skin and the motion path, and the
+custom easing curve. **Tier 3, occasional:** interactive state machines,
+Assist, guides beyond the basics, and the perf budgets. The UI packets in
+`flare/features/waves.md` follow this order: draw, key, play and save first,
+then stage editing, the inspector and timeline, and layers and files; the
+tier 2 and 3 screens come after.
 
 ### MVP (v1)
 
@@ -276,7 +295,9 @@ used by the fake and the live conformance alike:
   sits at the playhead.
 - Auto-key on and the property not animated: an edit writes a key at the
   playhead and keeps any key at another frame, so an edit at a second frame
-  makes the property animated.
+  makes the property animated. A new shape writes its position as one key at
+  frame 0, inside its one "Add <Shape>" undo step, so the first auto-key drag
+  at another frame animates it.
 - The stopwatch on a not-animated property adds a key at the playhead. If
   that still leaves one key (the playhead was on it), it also keys the
   scene's last frame with the same value, so the person sees two diamonds
@@ -460,7 +481,17 @@ One window (with the Interactions editor as a mode of it), sheets and
 popovers, and the menu bar.
 Components are SuiteUI unless named `Flare*`.
 
-### 3.1 Main window: `FlareEditor` on `EditorShell` (dark, hidden title bar)
+### 3.1 Main window: `FlareWindow` on `SuiteWindow`
+
+Built by draw-key-save (#1365; "The look", captain, 2026-10-15): the window
+is `SuiteWindow`, not `EditorShell`. The top bar's actions are its toolbar
+`actions` in the order below (Animate… and Export… disabled with their
+area's reason); the Layers tab's SCENES and LAYERS are the sidebar; the
+inspector is `SegmentedTabs` with Properties and Library; the content is the
+stage on `CanvasViewport` with the floating glass tool palette
+(`ToolbarGroup(.floating)`, the tool rail below), over the transport and
+readouts, then `TimelineStrip`. The table keeps the regions' contents.
+
 
 | Region | What is in it | Components |
 |---|---|---|
@@ -1411,6 +1442,12 @@ key, timeline, save, then the panels. Engine-direct use cases have no fake,
 so F7a needs LM-7 (playback state) and F17a needs LM-1 (files); both are
 first-wave logic tasks with no engine dependency, so the UI line never waits
 on creative-core.
+
+Status (2026-10-16): F1a, F1b, F2, F3a, F4a, F7a and F17a are built, by
+draw-key-save (#1365) on `SuiteWindow` rather than `EditorShell`, with
+`FlareIntent` in FlareModel; J26 (`FlareLoopJourneys.testDrawKeyAndSave`)
+walks them on live services. F5's recording ring, F3b's move-to-key and
+F7b's transport buttons landed with them; the rest of those rows stays open.
 
 | id | title | supersedes | owns | deps | acceptance (journey) | quality |
 |---|---|---|---|---|---|---|

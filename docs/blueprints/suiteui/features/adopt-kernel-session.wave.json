@@ -1,0 +1,187 @@
+{
+  "title": "Every app's dirty rule, save status, autosave timing, recovery offer and version probe run on SuiteKernel's DocumentSession; the five copies are deleted",
+  "wave": "XK2",
+  "order": 70,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'session'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-doc only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it (its UI slices swap an app view for the SuiteUI component the kernel's EK-chrome page already shows)",
+  "owned": [
+    "Sources/FlareModel/FlareFiles.swift",
+    "Sources/FlareApp/FlareAutosave.swift",
+    "Tests/FlareModelTests/FlareFilesTests.swift",
+    "Tests/FlareModelTests/FlareAutosaveDueTests.swift",
+    "Tests/FlareModelTests/FlareRecoveryRestoreTests.swift",
+    "Tests/mutations/FlareModel.KernelSessionAdapter.json",
+    "Tests/mutations/FlareModel.FlareFiles.json",
+    "Sources/PhotoModel/PhotoRecovery.swift",
+    "Sources/PhotoModel/Live/LiveArchive.swift",
+    "Sources/PhotoModel/PhotoSaveStatusHelp.swift",
+    "Tests/PhotoModelTests/PhotoRecoveryTests.swift",
+    "Tests/PhotoModelTests/LiveRecoveryTests.swift",
+    "Tests/PhotoModelTests/PhotoDocumentFileTests.swift",
+    "Tests/PhotoModelTests/PhotoSaveStatusHelpTests.swift",
+    "Tests/mutations/PhotoModel.KernelSessionAdapter.json",
+    "Tests/mutations/PhotoModel.PhotoRecovery.json",
+    "Sources/HaloModel/HaloFiles.swift",
+    "Sources/HaloModel/Live/HaloFileEnvelope.swift",
+    "Sources/HaloModel/Live/HaloFileValidation.swift",
+    "Tests/HaloModelTests/HaloFileTests.swift",
+    "Tests/HaloModelTests/HaloFileValidationTests.swift",
+    "Tests/HaloModelTests/ProjectFilesContractTests.swift",
+    "Tests/mutations/HaloModel.KernelSessionAdapter.json",
+    "Tests/mutations/HaloModel.HaloFiles.json",
+    "Sources/DesignModel/DesignFile.swift",
+    "Sources/DesignModel/Live/LiveFiling.swift",
+    "Tests/DesignModelTests/DesignFileTests.swift",
+    "Tests/DesignModelTests/DesignDocumentTests.swift",
+    "Tests/mutations/DesignModel.KernelSessionAdapter.json",
+    "Tests/mutations/DesignModel.LiveFiling.json",
+    "Sources/LibraryModel/LibraryReadouts.swift",
+    "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "Tests/LibraryModelTests/LibraryCatalogTests.swift",
+    "Tests/LibraryModelTests/LibraryReadoutsTests.swift",
+    "Tests/mutations/LibraryModel.KernelSessionAdapter.json",
+    "Tests/mutations/LibraryModel.LibraryReadouts.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AD-flare",
+      "behavior": "Flare runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AD-f1",
+        "AD-f2"
+      ],
+      "journeys": [
+        "MJ-AD-flare"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareFiles.swift",
+        "Sources/FlareApp/FlareAutosave.swift",
+        "Tests/FlareModelTests/FlareFilesTests.swift",
+        "Tests/FlareModelTests/FlareAutosaveDueTests.swift",
+        "Tests/FlareModelTests/FlareRecoveryRestoreTests.swift",
+        "Tests/mutations/FlareModel.KernelSessionAdapter.json",
+        "Tests/mutations/FlareModel.FlareFiles.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-doc": [
+          "AD-f1"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AD-photo",
+      "behavior": "Photo runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AD-p1",
+        "AD-p2"
+      ],
+      "journeys": [
+        "MJ-AD-photo"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoRecovery.swift",
+        "Sources/PhotoModel/Live/LiveArchive.swift",
+        "Sources/PhotoModel/PhotoSaveStatusHelp.swift",
+        "Tests/PhotoModelTests/PhotoRecoveryTests.swift",
+        "Tests/PhotoModelTests/LiveRecoveryTests.swift",
+        "Tests/PhotoModelTests/PhotoDocumentFileTests.swift",
+        "Tests/PhotoModelTests/PhotoSaveStatusHelpTests.swift",
+        "Tests/mutations/PhotoModel.KernelSessionAdapter.json",
+        "Tests/mutations/PhotoModel.PhotoRecovery.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-doc": [
+          "AD-p1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AD-halo",
+      "behavior": "Halo runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AD-h1",
+        "AD-h2"
+      ],
+      "journeys": [
+        "MJ-AD-halo"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloFiles.swift",
+        "Sources/HaloModel/Live/HaloFileEnvelope.swift",
+        "Sources/HaloModel/Live/HaloFileValidation.swift",
+        "Tests/HaloModelTests/HaloFileTests.swift",
+        "Tests/HaloModelTests/HaloFileValidationTests.swift",
+        "Tests/HaloModelTests/ProjectFilesContractTests.swift",
+        "Tests/mutations/HaloModel.KernelSessionAdapter.json",
+        "Tests/mutations/HaloModel.HaloFiles.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-doc": [
+          "AD-h1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AD-design",
+      "behavior": "Design runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AD-d1",
+        "AD-d2"
+      ],
+      "journeys": [
+        "MJ-AD-design"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignFile.swift",
+        "Sources/DesignModel/Live/LiveFiling.swift",
+        "Tests/DesignModelTests/DesignFileTests.swift",
+        "Tests/DesignModelTests/DesignDocumentTests.swift",
+        "Tests/mutations/DesignModel.KernelSessionAdapter.json",
+        "Tests/mutations/DesignModel.LiveFiling.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-doc": [
+          "AD-d1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AD-library",
+      "behavior": "Library runs its session on `DocumentSession`, `SaveStatus`, `RecoveryOffer` and `VersionedJSON` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AD-l1",
+        "AD-l2"
+      ],
+      "journeys": [
+        "MJ-AD-library"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryReadouts.swift",
+        "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+        "Tests/LibraryModelTests/LibraryCatalogTests.swift",
+        "Tests/LibraryModelTests/LibraryReadoutsTests.swift",
+        "Tests/mutations/LibraryModel.KernelSessionAdapter.json",
+        "Tests/mutations/LibraryModel.LibraryReadouts.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-doc": [
+          "AD-l1"
+        ],
+        "adopt-kernel-undo:AU-library": [
+          "AD-l1"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

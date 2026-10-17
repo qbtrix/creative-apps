@@ -66,7 +66,7 @@ public struct SuiteGallery: View {
     /// Every area's pages, one dictionary per `Gallery<Area>.swift`.
     @MainActor static let areas: [GalleryPages] = [
         GalleryIndex.pages, GalleryChrome.pages, GalleryInspector.pages, GalleryLists.pages,
-        GalleryCanvas.pages, GalleryTimeline.pages, GalleryGraph.pages,
+        GalleryCanvas.pages, GalleryTimeline.pages, GalleryGraph.pages, GalleryEditorWindow.pages,
     ]
 
     /// All pages by name; `SuiteGalleryTests` checks no two areas declare one name.

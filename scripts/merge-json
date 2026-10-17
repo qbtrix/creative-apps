@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# scripts/merge-json: the git merge driver behind `merge=json` in .gitattributes
+# (scripts/install-merge-drivers wires it in). A three-way merge of JSON by
+# object key, recursively: a key changed on one side only takes that side, the
+# same change on both sides is kept once, a key deleted on one side and left
+# alone on the other goes, and two added objects merge key by key. Arrays and
+# scalars are atomic. Key order is ours', then theirs' new keys; output is jq's
+# 2-space formatting. Any real disagreement (one key changed two ways, a
+# deletion against a change, two array edits) or a side that isn't one JSON
+# value falls back to `git merge-file`, so the file gets ordinary conflict
+# markers and the merge stops as usual. Why not Mergiraf: it would be a new
+# binary in the lane runner and on every agent machine, and the files agents
+# fight over here are Swift, bash, YAML and Markdown, which it doesn't parse
+# either; `brew install mergiraf` plus one config line is the upgrade path.
+#
+# Called by git: merge-json %O %A %B [%L]   (base, ours, theirs, marker size).
+# Writes the result to %A. Exit 0: merged; non-zero: conflict, markers in %A.
+set -uo pipefail
+base=$1 ours=$2 theirs=$3 marker=${4:-7}
+
+merged=$(jq -n --slurpfile o "$base" --slurpfile a "$ours" --slurpfile b "$theirs" '
+  def m(o; a; b):
+    if a == b then a
+    elif o == a then b
+    elif o == b then a
+    elif (o | type) == "object" and (a | type) == "object" and (b | type) == "object" then
+      reduce ((a | keys_unsorted) + ((b | keys_unsorted) - (a | keys_unsorted)))[] as $k ({};
+        if (a | has($k)) and (b | has($k)) then
+          .[$k] = m(if (o | has($k)) then o[$k] else (if (a[$k] | type) == "object" and (b[$k] | type) == "object" then {} else null end) end; a[$k]; b[$k])
+        elif (a | has($k)) then
+          if (o | has($k)) then (if o[$k] == a[$k] then . else error("conflict") end) else .[$k] = a[$k] end
+        else
+          if (o | has($k)) then (if o[$k] == b[$k] then . else error("conflict") end) else .[$k] = b[$k] end
+        end)
+    else error("conflict") end;
+  if ($a | length) != 1 or ($b | length) != 1 or ($o | length) > 1 then error("not one JSON value") else . end
+  | ($o[0] // (if ($o | length) == 0 and ($a[0] | type) == "object" and ($b[0] | type) == "object" then {} else null end)) as $base
+  | m($base; $a[0]; $b[0])' 2>/dev/null) && { printf '%s\n' "$merged" >"$ours"; exit 0; }
+
+git merge-file --marker-size="$marker" -L ours -L base -L theirs "$ours" "$base" "$theirs" >/dev/null 2>&1
+rc=$?
+(( rc == 0 )) && exit 0
+exit 1

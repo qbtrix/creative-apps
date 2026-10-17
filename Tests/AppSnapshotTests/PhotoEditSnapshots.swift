@@ -1,9 +1,8 @@
 // PhotoEditSnapshots.swift: the Photo window after a paste (photo-edit E-8):
 // the sun marqueed, copied and pasted as "Pasted Layer" above Background and
-// selected, on the Layers tab. Writes photo-pasted-layer-light.png and
-// photo-pasted-layer-dark.png (the editor is dark in both on purpose, as in
-// PhotoEditorSnapshots). Also checks the Layer menu's Duplicate Layer
-// (Command-J), Merge Down (Command-E) and Flatten Image (no shortcut), and
+// selected in the sidebar's layer list. Writes photo-pasted-layer-light.png
+// and photo-pasted-layer-dark.png. Also checks the Layer menu's Duplicate
+// Layer (Command-J), Merge Down (Command-E) and Flatten Image (no shortcut), and
 // their reasons with one layer (QB-F4). macOS only.
 import CoreRaster
 import PhotoModel
@@ -49,7 +48,7 @@ import Testing
         let tiles = try photoTiles(model)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1, tab: .layers),
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1),
                 name: "photo-pasted-layer-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }

@@ -3,39 +3,269 @@
   "wave": 4,
   "order": 20,
   "status": "planned",
-  "feature_issue": "later (packet after wave 2 lands)",
-  "covers": "#424",
-  "waits_on": "develop, import",
+  "feature_issue": "file when ready",
+  "covers": "#424 (closes with EX-13); gaps the lead files: other formats, presets and name templates, XMP sidecars",
+  "waits_on": "develop, import; in wave 4, EX-1 after crop's CR-a and EX-6 after crop's CR-c (shared spine files), EX-14 after crop; P8: #782; the progress row: #781 (soft)",
   "issues": [
     424
   ],
   "owned": [
+    "Sources/LibraryModel/Contracts/LibraryContracts.swift",
+    "Sources/LibraryModel/Contracts/ExportFormats.swift",
+    "Sources/LibraryModel/Contracts/ExportNaming.swift",
+    "Sources/LibraryModel/Contracts/ExportPresets.swift",
+    "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "Sources/LibraryModel/Fakes/FakeRendering.swift",
     "Sources/LibraryModel/LibraryExport.swift",
-    "Sources/LibraryModel/Live/LiveExporter.swift",
-    "Sources/LibraryApp/Platform/JPEGWriter.swift",
-    "Sources/LibraryApp/LibraryExportSheet.swift",
-    "Sources/LibraryApp/LibraryWindow+Export.swift",
+    "Tests/LibraryModelTests/LibraryExportContractTests.swift",
     "Tests/LibraryModelTests/LibraryExportPlanTests.swift",
-    "Tests/AppSnapshotTests/LibraryExportSnapshots.swift",
-    "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
+    "Tests/LibraryModelTests/LibraryExportFlowTests.swift",
+    "Tests/mutations/LibraryModel.ExportNaming.json",
+    "Sources/LibraryModel/Live/LiveExporter.swift",
+    "Tests/mutations/LibraryModel.LiveExporter.json",
+    "Tests/mutations/LibraryModel.LibraryExport.json",
     "UITests/LibraryJourneyTests+Export.swift",
-    "UITests/LibraryJourneyTests.swift",
+    "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
+    "Sources/LibraryApp/Platform/JPEGWriter.swift",
+    "Sources/LibraryApp/LibraryWindow+Export.swift",
+    "Sources/LibraryApp/LibraryExportSheet.swift",
+    "Sources/LibraryApp/LibraryWindow.swift",
+    "Tests/AppSnapshotTests/LibraryExportSnapshots.swift",
+    "Tests/LibraryModelTests/LibraryExportFormatTests.swift",
+    "Tests/AppSnapshotTests/LibraryExportFormatFidelityTests.swift",
+    "UITests/LibraryJourneyTests+ExportFormats.swift",
+    "Tests/mutations/LibraryModel.ExportFormats.json",
+    "Tests/LibraryModelTests/LibraryExportNamingTests.swift",
+    "Tests/LibraryModelTests/LibraryExportPresetTests.swift",
+    "UITests/LibraryJourneyTests+ExportPresets.swift",
+    "Tests/mutations/LibraryModel.ExportPresets.json",
+    "Sources/LibraryApp/Platform/ExportPresetStore.swift",
+    "Tests/LibraryModelTests/LibraryExportBatchTests.swift",
     "Tests/LibraryModelTests/LibraryExportBudgetTests.swift",
-    "UITests/LibraryJourneyTests+PerfExport.swift"
+    "UITests/LibraryJourneyTests+ExportBatch.swift",
+    "UITests/LibraryJourneyTests+PerfExport.swift",
+    "Tests/LibraryModelTests/LibraryExportSidecarTests.swift",
+    "UITests/LibraryJourneyTests+ExportSidecars.swift",
+    "Tests/mutations/LibraryModel.ExportSidecar.json",
+    "docs/blueprints/library.md"
   ],
-  "core": "none",
-  "suiteui": "S-L5 ProgressRow; #330, #333",
+  "core": "none: ImageIO encodes JPEG, PNG, TIFF, HEIC; creative-core c608d4b has no raster encoder; no WebP anywhere",
+  "suiteui": "S-L5 ProgressRow #781 (soft, placeholder until it lands); S-L8 #782 for P8",
   "depends": [
     "develop",
     "import"
   ],
-  "journeys": [],
-  "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
-  "quality": "QB-L9, QB-LIB-7, QB-V4, QB-F2",
+  "journeys": [
+    "LibraryExportJourneyTests.testExportJPEGsAtASize",
+    "LibraryExportFormatsJourneyTests.testExportOtherFormats",
+    "LibraryExportPresetsJourneyTests.testExportPresetsAndNames",
+    "LibraryExportBatchJourneyTests.testExportFailsAndCancels",
+    "LibraryExportSidecarsJourneyTests.testExportWithSidecars",
+    "LibraryPerfExportJourneyTests.testExportThroughput"
+  ],
+  "notes": "Contract-first (v3): EX-a publishes the export values, slots and catalog methods; after EX-a and EX-b, slices EX-c to EX-f build side by side. EX-14 (QB-V4 and the plan size on a cropped photo) waits on crop. Spine handovers: EX-1 edits ExportOptions in Contracts/LibraryContracts.swift and FakeExporter in Fakes/FakeRendering.swift; EX-6 edits the .sheet line of LibraryWindow.swift. #333 merged, so LibraryJourneyTests.swift is no longer owned. EX-c, EX-d and EX-f go past blueprint 1.4's v1 line (captain's blueprint rule).",
+  "quality": "QB-L9, QB-LIB-7, QB-V4, QB-F1, QB-F2, QB-F4, QB-V5",
   "library_title": "Export JPEG at a set long edge and quality, never overwriting",
   "journey_ids": [
     "J7",
+    "J7F",
+    "J7N",
+    "J7B",
+    "J7S",
     "P8"
   ],
-  "journeys_none": "no packet yet: the blueprint names its journeys by id (J7, P8) but no XCUITest method"
+  "slices": [
+    {
+      "id": "EX-a",
+      "behavior": "On the fake services, exporting two selected photos plans files at the chosen long edge and quality that never overwrite (IMG_0001 2.jpg the second time), renders each with its develop settings, writes them in order, and the format, preset, name and sidecar options exist as slots the sheet can show.",
+      "tasks": [
+        "EX-1",
+        "EX-2",
+        "EX-3"
+      ],
+      "journeys": [
+        "MX1"
+      ],
+      "owned": [
+        "Sources/LibraryModel/Contracts/LibraryContracts.swift",
+        "Sources/LibraryModel/Contracts/ExportFormats.swift",
+        "Sources/LibraryModel/Contracts/ExportNaming.swift",
+        "Sources/LibraryModel/Contracts/ExportPresets.swift",
+        "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+        "Sources/LibraryModel/Fakes/FakeRendering.swift",
+        "Sources/LibraryModel/LibraryExport.swift",
+        "Tests/LibraryModelTests/LibraryExportContractTests.swift",
+        "Tests/LibraryModelTests/LibraryExportPlanTests.swift",
+        "Tests/LibraryModelTests/LibraryExportFlowTests.swift",
+        "Tests/mutations/LibraryModel.ExportNaming.json",
+        "Sources/LibraryModel/Live/LiveExporter.swift",
+        "Tests/mutations/LibraryModel.LiveExporter.json",
+        "Tests/mutations/LibraryModel.LibraryExport.json"
+      ]
+    },
+    {
+      "id": "EX-b",
+      "behavior": "File > Export… opens the sheet on the selection, and Export writes real sRGB JPEGs at 1024 px and quality 80 into the folder with Show in Finder, a second export adds IMG_0001 2.jpg, and the exported pixels match the loupe.",
+      "tasks": [
+        "EX-4",
+        "EX-5",
+        "EX-6"
+      ],
+      "journeys": [
+        "J7"
+      ],
+      "owned": [
+        "UITests/LibraryJourneyTests+Export.swift",
+        "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift",
+        "Sources/LibraryApp/LibraryWindow+Export.swift",
+        "Sources/LibraryApp/LibraryExportSheet.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Tests/AppSnapshotTests/LibraryExportSnapshots.swift"
+      ],
+      "waits": {
+        "EX-a": [
+          "EX-5",
+          "EX-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EX-c",
+      "behavior": "The Format row writes PNG, TIFF or HEIC with the same pixels, hides quality for lossless formats, and disables a format this Mac can't write with the reason.",
+      "tasks": [
+        "EX-7",
+        "EX-8"
+      ],
+      "journeys": [
+        "J7F"
+      ],
+      "owned": [
+        "Sources/LibraryModel/Contracts/ExportFormats.swift",
+        "Tests/LibraryModelTests/LibraryExportFormatTests.swift",
+        "Tests/AppSnapshotTests/LibraryExportFormatFidelityTests.swift",
+        "UITests/LibraryJourneyTests+ExportFormats.swift",
+        "Tests/mutations/LibraryModel.ExportFormats.json",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift"
+      ],
+      "waits": {
+        "EX-a": [
+          "EX-7"
+        ],
+        "EX-b": [
+          "EX-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EX-d",
+      "behavior": "A name template names the files with a live preview and never an illegal or duplicate name, presets set every option at once, and the last settings come back on the next export and after relaunch.",
+      "tasks": [
+        "EX-9",
+        "EX-10",
+        "EX-11"
+      ],
+      "journeys": [
+        "J7N"
+      ],
+      "owned": [
+        "Sources/LibraryModel/Contracts/ExportNaming.swift",
+        "Tests/LibraryModelTests/LibraryExportNamingTests.swift",
+        "Tests/LibraryModelTests/LibraryExportPresetTests.swift",
+        "UITests/LibraryJourneyTests+ExportPresets.swift",
+        "Tests/mutations/LibraryModel.ExportNaming.json",
+        "Sources/LibraryModel/Contracts/ExportPresets.swift",
+        "Tests/mutations/LibraryModel.ExportPresets.json",
+        "Sources/LibraryApp/Platform/ExportPresetStore.swift",
+        "Sources/LibraryApp/LibraryWindow+Export.swift"
+      ],
+      "waits": {
+        "EX-a": [
+          "EX-9",
+          "EX-10"
+        ],
+        "EX-b": [
+          "EX-11"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EX-e",
+      "behavior": "Exporting many photos shows its progress with Cancel, keeps going past a file that fails, lists each failure with Try Again, stops cleanly on Cancel, and a cropped photo exports exactly as the loupe shows it.",
+      "tasks": [
+        "EX-12",
+        "EX-13",
+        "EX-14"
+      ],
+      "journeys": [
+        "J7B",
+        "P8"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryExportBatchTests.swift",
+        "Tests/LibraryModelTests/LibraryExportBudgetTests.swift",
+        "UITests/LibraryJourneyTests+ExportBatch.swift",
+        "UITests/LibraryJourneyTests+PerfExport.swift",
+        "Sources/LibraryModel/LibraryExport.swift",
+        "Tests/mutations/LibraryModel.LibraryExport.json",
+        "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
+        "Tests/LibraryModelTests/LibraryExportPlanTests.swift",
+        "Tests/mutations/LibraryModel.LiveExporter.json"
+      ],
+      "waits": {
+        "EX-a": [
+          "EX-12",
+          "EX-13",
+          "EX-14"
+        ],
+        "EX-b": [
+          "EX-13",
+          "EX-14"
+        ],
+        "crop:CR-b": [
+          "EX-14"
+        ]
+      }
+    },
+    {
+      "id": "EX-f",
+      "behavior": "With Write Sidecar on, each exported file gets an XMP file beside it with its rating, label, pick and develop settings, named so neither file overwrites anything.",
+      "tasks": [
+        "EX-15",
+        "EX-16",
+        "EX-17"
+      ],
+      "journeys": [
+        "J7S"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryExportSidecarTests.swift",
+        "UITests/LibraryJourneyTests+ExportSidecars.swift",
+        "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+        "Tests/mutations/LibraryModel.ExportSidecar.json",
+        "docs/blueprints/library.md"
+      ],
+      "waits": {
+        "EX-a": [
+          "EX-15",
+          "EX-16"
+        ],
+        "EX-b": [
+          "EX-16"
+        ],
+        "EX-c": [
+          "EX-17"
+        ],
+        "EX-d": [
+          "EX-17"
+        ],
+        "EX-e": [
+          "EX-17"
+        ]
+      }
+    }
+  ]
 }

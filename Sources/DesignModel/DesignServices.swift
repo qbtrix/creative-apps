@@ -1,8 +1,10 @@
 // DesignServices.swift: the use cases a workspace runs on. `.live` is what the
-// shipping app uses: each use case's live type once its feature lands, and
-// NotBuilt before that, so the control is disabled with "<Feature> isn't built
-// yet." and never acts. Two service sets are equal when their names are, so
-// DesignWorkspace stays Equatable. Linux-safe.
+// shipping app uses: each tier-1 use case's Live type (Live/). A Live type whose
+// feature hasn't landed forwards to NotBuilt, as the tier-2 slots are, so the
+// control is disabled with "<Feature> isn't built yet." and never acts. `.fake`
+// is the fixture set the snapshots and the journeys launched with
+// `-DesignServices fake` use. Two service sets are equal when their names are,
+// so DesignWorkspace stays Equatable. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -28,12 +30,21 @@ public struct DesignServices: Sendable, Equatable {
 
     public static func == (a: DesignServices, b: DesignServices) -> Bool { a.name == b.name }
 
-    /// D0-2's `.live`: every slot NotBuilt. D0-2b replaces the tier-1 slots with the Live stubs
-    /// (`LiveFiling` alone wraps today's codec; the others forward to NotBuilt) and D2-2 the tier-2 ones.
+    /// The fixture fakes for every tier-1 slot; export, pen, components and variables stay
+    /// NotBuilt until D2-2 adds their fakes.
+    public static let fake = DesignServices(
+        name: "fake", marquee: FakeMarquee(), transforming: FakeTransforming(), aligning: FakeAligning(),
+        duplicating: FakeDuplicating(), grouping: FakeGrouping(), clipboard: FakeClipboard(), ordering: FakeOrdering(),
+        styling: FakeStyling(), framing: FakeFraming(), filing: FakeFiling(), export: NotBuilt("Export"),
+        pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
+
+    /// The shipping set: every tier-1 slot is its Live type. Marquee, transforming, aligning and
+    /// framing act as their features define; `LiveFiling` wraps today's codec; the other five forward
+    /// to NotBuilt with their feature's name until that feature fills its file. Export, pen,
+    /// components and variables stay NotBuilt until D2-2.
     public static let live = DesignServices(
-        name: "live", marquee: NotBuilt("Marquee selection"), transforming: NotBuilt("Editing several layers"),
-        aligning: NotBuilt("Aligning several layers"), duplicating: NotBuilt("Duplicate"), grouping: NotBuilt("Group"),
-        clipboard: NotBuilt("Copy and paste"), ordering: NotBuilt("Reordering layers"), styling: NotBuilt("Style editing"),
-        framing: NotBuilt("Zoom to Selection"), filing: NotBuilt("Saving"), export: NotBuilt("Export"),
+        name: "live", marquee: LiveMarquee(), transforming: LiveTransforming(), aligning: LiveAligning(),
+        duplicating: LiveDuplicating(), grouping: LiveGrouping(), clipboard: LiveClipboard(), ordering: LiveOrdering(),
+        styling: LiveStyling(), framing: LiveFraming(), filing: LiveFiling(), export: NotBuilt("Export"),
         pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
 }

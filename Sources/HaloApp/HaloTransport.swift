@@ -7,7 +7,8 @@
 // draws its on state (system highlight, accent ink) so a person can see
 // whether looping is on. It owns the HaloPlaybackDriver: running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
-// the screen; each refresh sends `.tick(now)` through `perform`. Each
+// the screen, on the `haloRefreshLink` the environment gives; each refresh
+// sends `.tick(now)` through `perform`. Each
 // control takes at least a SuiteSize.pillHit square (24 pt) to click, not
 // just its 10 pt glyph, the squares edge to edge so the row stays narrow
 // enough for the status bar, until TransportCapsule (#340) replaces it.
@@ -20,6 +21,7 @@ struct HaloTransport: View {
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
 
     @State private var driver: HaloPlaybackDriver?
+    @Environment(\.haloRefreshLink) private var makeLink
 
     /// One transport button: its command, SF Symbol and control id.
     private struct Item: Identifiable, Sendable {
@@ -103,7 +105,7 @@ struct HaloTransport: View {
             return
         }
         let perform = perform
-        let running = driver ?? HaloPlaybackDriver { now in perform(.tick(now)) }
+        let running = driver ?? HaloPlaybackDriver(onTick: { now in perform(.tick(now)) }, makeLink: makeLink)
         driver = running
         running.start()
     }

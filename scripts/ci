@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the
 # app-state rule, the design lint, the C4 ownership check, the duplicate-code
-# check, the CI scripts' fixture tests, the journey quarantine check, the
+# check, the canonical-first check, the CI scripts' fixture tests, the journey quarantine check, the
 # mutation anchors, swift build of every target with its tests, and swift
 # test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
 # from the committed Package.resolved (--force-resolved-versions): a
@@ -60,7 +60,7 @@
 # waves.md without writing it (the generated files are written only on dev),
 # and Tests/generated tests scripts/c4-assemble and scripts/waves on fixtures.
 #
-# The fixture tests: Tests/contact_sheet, audit_lower, test_died, jetsam,
+# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
 # test_scope and bump_core test the scripts of the same names (some need jq).
 #
 # The journey quarantine check runs Tests/quarantine, then scripts/quarantine
@@ -79,6 +79,13 @@
 # and only ever goes down: lower it when you remove a clone, never raise it.
 # Without npx, or when npm can't fetch jscpd, the check prints SKIP and the gate
 # goes on; CI enforces it.
+#
+# The canonical-first check runs Tests/canonical, then scripts/check-dup-logic:
+# a Swift file under Sources/<X>Model or Sources/<X>App (SuiteModel aside)
+# whose name or primary type names a concept in Tests/canonical-concepts.txt
+# (undo, history, selection, layers, easing, export, crop, ...) must be listed
+# in Tests/canonical-baseline.txt, the grandfathered copies, unless it is an
+# adapter (+Kernel or Adapter). The baseline only shrinks (lead.md rule 20).
 #
 # On a Mac with only the Command Line Tools (no Xcode), Swift Testing lives in
 # a framework directory swift does not search by default, so we add it.
@@ -297,12 +304,18 @@ else
     || fail "jscpd: duplicated lines over $JSCPD_THRESHOLD%; move the shared code into SuiteUI or a Model instead of copying it"
 fi
 
+echo "== canonical first (Tests/canonical, Tests/canonical-baseline.txt)"
+bash Tests/canonical/test_check_dup_logic.sh || fail "canonical first: scripts/check-dup-logic broke its tests"
+python3 scripts/check-dup-logic || fail "canonical first: use the SuiteModel module for that concept, not an app copy (docs/factory/lead.md rule 20)"
+
 echo "== contact sheet (Tests/contact_sheet)"
 bash Tests/contact_sheet/test_contact_sheet.sh || fail "contact sheet: scripts/contact-sheet broke its fixture test"
 echo "== audit lower (Tests/audit_lower)"
 bash Tests/audit_lower/test_audit_lower.sh || fail "audit lower: scripts/audit-lower broke its decision tests"
 echo "== test died (Tests/test_died)"
 bash Tests/test_died/test_test_died.sh || fail "test died: scripts/test-died broke its fixture test"
+echo "== ci findings (Tests/ci_findings)"
+bash Tests/ci_findings/test_ci_findings.sh || fail "ci findings: scripts/ci-findings broke its stub-gh tests"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
 echo "== test scope (Tests/test_scope)"
@@ -312,6 +325,8 @@ bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/qu
 scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
 echo "== bump core (Tests/bump_core)"
 bash Tests/bump_core/test_bump_core.sh || fail "bump core: scripts/bump-core broke its tests"
+echo "== merge drivers (Tests/merge_drivers)"
+bash Tests/merge_drivers/test_merge_drivers.sh || fail "merge drivers: scripts/merge-json or scripts/install-merge-drivers broke their tests, or .gitattributes names a driver they don't define"
 echo "== mutation anchors (Tests/mutations)"
 bash Tests/mutate/test_mutate.sh || fail "mutation anchors: scripts/mutate broke its fixture test"
 python3 scripts/mutate --validate || fail "mutation anchors: repoint each find above at the code as it is now (scripts/mutate)"

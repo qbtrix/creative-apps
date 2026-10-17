@@ -4,6 +4,32 @@
 import FlareCore
 
 extension FlareWorkspace {
+    /// The selected scene's size in the stage's unit, "550 × 400 px", matching the ruler corner's "px" (#1846).
+    public var sceneSizeText: String? {
+        selectedScene.map { "\(Self.whole($0.width)) × \(Self.whole($0.height)) px" }
+    }
+    /// The selected scene's frame rate, "24 fps".
+    public var sceneRateText: String? { selectedScene.map { "\($0.fps) fps" } }
+    /// The selected scene's size and rate on one line, "550 × 400 px · 24 fps".
+    public var sceneSummary: String? {
+        guard let size = sceneSizeText, let rate = sceneRateText else { return nil }
+        return "\(size) · \(rate)"
+    }
+
+    /// The Properties tab's empty state as (title, message): with no animation open it says to create or open one,
+    /// since there is no scene to select (#1848); with one open, to select a scene.
+    public var inspectorEmptyText: (title: String, message: String) {
+        document == nil
+            ? ("No Animation", "Create or open an animation to see its properties.")
+            : ("No Selection", "Select a scene to see its properties.")
+    }
+
+    /// A whole-number readout that never traps on a non-finite or out-of-range value.
+    static func whole(_ value: Double) -> String {
+        guard value.isFinite, abs(value) < 1e15 else { return "–" }
+        return String(Int(value.rounded()))
+    }
+
     /// Why scene `id` can't be removed, as the Remove button's tooltip; nil when it can.
     public func sceneRemoveHelp(_ id: String) -> String? {
         guard scenes.contains(where: { $0.id == id }) else { return FlareLayerError.noDocument.message }

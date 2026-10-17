@@ -1,0 +1,16 @@
+[
+  {
+    "label": "old init maps keys to .eased",
+    "file": "Sources/SuiteUI/TimelineTrack.swift",
+    "find": "keys: keyframes.map { TimelineKey(frame: $0, shape: .linear) },",
+    "replace": "keys: keyframes.map { TimelineKey(frame: $0, shape: .eased) },",
+    "tests": "TimelineTrackTests"
+  },
+  {
+    "label": "keyframes reads pickedFrames",
+    "file": "Sources/SuiteUI/TimelineTrack.swift",
+    "find": "public var keyframes: [Int] { keys.map(\\.frame) }",
+    "replace": "public var keyframes: [Int] { pickedFrames.sorted() }",
+    "tests": "TimelineTrackTests"
+  }
+]

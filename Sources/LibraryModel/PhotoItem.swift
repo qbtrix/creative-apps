@@ -114,12 +114,12 @@ public enum PhotoAvailability: Hashable, Sendable {
 
 extension PhotoItem {
     /// The loupe photo's and grid cell's accessibility value, e.g.
-    /// "3 stars, Picked, Red"; "No stars" when unrated. Journeys read it.
+    /// "3 stars, Picked, Red label"; "No stars" when unrated. Journeys read it.
     public var cullSummary: String {
         var parts = [rating == 0 ? "No stars" : rating == 1 ? "1 star" : "\(rating) stars"]
         if flag == .pick { parts.append("Picked") }
         if flag == .reject { parts.append("Rejected") }
-        if let label { parts.append(label.rawValue) }
+        if let label { parts.append("\(label.rawValue) label") }
         return parts.joined(separator: ", ")
     }
 }

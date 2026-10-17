@@ -2,64 +2,72 @@
 # scripts/fast-lane.sh: merge small, checked crew PRs into BASE_BRANCH (dev)
 # without waiting for captain review. The captain batch-reviews merged
 # fast-lane PRs later and reverts anything wrong. Rules for agents: CLAUDE.md,
-# "Fast lane".
+# "Fast lane". Run by .github/workflows/fast-lane.yml with this file from the
+# trusted main branch; it reads PR metadata and file contents through the
+# GitHub API and never checks out or runs PR code.
 #
-# Run by .github/workflows/fast-lane.yml with this file from the trusted main
-# branch. It only reads PR metadata and file contents through the GitHub API.
-# It never checks out or runs PR code.
-#
-# The branch model: workers run scripts/ci on their own machine, the lane merges
-# into dev at once, full CI runs on dev once a feature is built, and the
-# `promote` job in ci.yml fast-forwards main to a dev SHA only when that run is
-# green. A red dev run opens the "dev is red" issue. The lane keeps merging
-# while dev is red, on purpose: promotion is the guard that keeps main green.
+# Until beta only compile and Model tests block (captain, 2026-10-16). The
+# proof a head passed the gate is Linux-side: the worker's `Fast-Check: pass`
+# line followed by `Head: <full head sha>` in the body, or a passing CI
+# `Linux` check on the head. CI's `macOS` and `macOS (<app>)` jobs are
+# report-only, so the lane ignores them (REPORT_ONLY_RE): a red or running
+# one never holds a PR. A PR that changes code (BUILD_RE) also needs a
+# passing build-only CI run on its head (build_gate), which the lane
+# dispatches itself, once per head (workers get 403).
 #
 # Eligibility (all must hold): open, not draft, label `fast-lane`, base
 # BASE_BRANCH, author in FAST_LANE_AUTHORS, size within MAX_LINES/MAX_FILES
-# (unless every path is under DOCS_RE: the docs tier takes any size), no
-# changed or renamed-away path under PROTECTED (CLAUDE.md's "Never edit" list),
-# no looser app audit (audit_loosens), MERGEABLE, no red or running check on the
-# head, and proof the head passed the gate: a passing check from CI_WORKFLOWS on
-# the head, or the worker's marker in the PR body, a line `Fast-Check: pass`
-# followed by the line `Head: <full head sha>` for the current head. A PR that
-# changes or renames a MAC_GATED shared shell file also needs a completed CI
-# run on its head whose macOS job passed or failed only where dev fails
-# (mac_gate): the run a body line
-# `Mac-Check: <run url>` names, or else the latest CI run on the head, which
-# the lane dispatches itself when there is none. Any other PR that changes
-# code (BUILD_RE: Swift under Sources/, Tests/ or UITests/, project.yml,
-# Package.swift) needs a passing build-only CI run on its head (build_gate),
-# also dispatched by the lane. A Belt PR
-# (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
-# `belt/review` commit status at success on its head while REQUIRE_BELT_REVIEW=1.
-# A fast-lane PR based on main is retargeted to BASE_BRANCH. A PR that conflicts
-# with the base gets one comment per head and keeps its label for Belt's fixer.
+# (unless every path is under DOCS_RE), no changed or renamed-away path under
+# PROTECTED (CLAUDE.md's "Never edit" list), no looser app audit
+# (audit_loosens), no added app-local copy of a canonical concept without an
+# `Allow-Dup:` line (dup_logic), MERGEABLE, no red or running check on the head, the proof
+# above, and for a Belt PR (`Belt-Run:` or `Belt-Test:` line) Belt's
+# `belt/review` status while REQUIRE_BELT_REVIEW=1. A PR based on main is
+# retargeted. A PR that is behind the base merges as it is. One that conflicts
+# is integrated by the lane (integrate): a scratch clone merges the base into
+# the PR head with the repo's merge drivers (scripts/install-merge-drivers and
+# scripts/merge-json from this checkout, i.e. main, never the PR's), pushes the
+# merge commit to the PR branch with a lease on the head it read, and the
+# re-sweep, seeing a head whose last commit is that merge (LANE_MERGE_SUBJECT)
+# with no check on it, dispatches a Linux-only CI run (linux-dispatch; ci.yml's
+# `linux_only`) and merges on its pass like any CI-proven head. A conflict the
+# drivers can't resolve gets one comment naming the files and the
+# NEEDS_REBASE_LABEL label for a fixer; the label goes when a later head
+# integrates or merges.
 #
-# Every run sweeps all open fast-lane PRs, oldest first, and merges each
-# eligible one. A lead's PR (a `Feature:` body line) never closes a
-# `feature-lead` issue: before the squash the lane turns the closing keyword
-# before one into `Refs` (lead_refs); its other closing references stay.
-# After its merges the lane dispatches CI on BASE_BRANCH at most once per run
-# (dispatch_reason), when it merged a PR labelled FEATURE_LABEL,
-# merged a PR touching UI_RE (app shells, SuiteUI, snapshot tests, UI journeys),
-# or BASE_BRANCH holds DISPATCH_EVERY merged PRs since the last CI run's head.
-# Leads can't dispatch CI themselves (403), so the lane does it for them.
-# Trade-off: the lane builds each code PR on macOS (build_gate) but runs
-# nothing there, so snapshot and UI journey breakage sits on dev until that
-# run, and the dev-red range can span PRs.
+# Every run sweeps all open fast-lane PRs, oldest first. Eligible PRs don't
+# merge one by one: with one ready PR the lane squash-merges it (land); with two
+# or more it builds a batch (batch_start): BASE_BRANCH plus every ready PR
+# merged in order on a scratch branch `lane/batch-<id>` (BATCH_PREFIX, merge
+# drivers on, one merge commit per PR whose subject names the PR and its head),
+# runs ONE Linux-only CI run on it and, when green, lands every PR in that
+# order (squash, head matched). A red batch is bisected by prefix on the same
+# branch (batch_resume): `lane/batch-<id>-<i>` points at the chain after i PRs
+# and gets its own Linux run, until PR hi is the first that turns the chain
+# red: PRs before it land, PR hi gets NEEDS_FIX_LABEL and one comment naming
+# the run, and the PRs after it wait for the next batch. The branch is the
+# whole state, so a later sweep resumes a batch a run left behind; while one is
+# in flight nothing else merges (one batch at a time, arrivals wait). A PR
+# whose head moved or that conflicts with an earlier PR in the batch waits for
+# the next sweep. A red base (the chain before any PR) means BASE_BRANCH itself
+# is red: the batch lands on the PRs' own proof, as before batches, so a fix
+# can get through.
 #
-# `decide` is the pure decision function (no network). It reads a PR JSON file,
-# a file-list file (one path per line), a check-rollup JSON file and, when the
-# PR touches the app audit, two audit_snapshot directories (merge base, head),
-# and, when it touches MAC_GATED, the `gh run view` JSON of its Mac-Check run
-# and of the latest CI run on its head, and when it touches BUILD_RE, its
-# latest build-only run.
-# It logs each rule to stderr and prints one line to stdout:
+# A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
+# (lead_refs). After its merges the lane dispatches CI on BASE_BRANCH at most
+# once per run (dispatch_reason): a FEATURE_LABEL PR, a UI_RE change, or
+# DISPATCH_EVERY merged PRs since the last CI run. Promotion of main is
+# ci.yml's job.
+#
+# `decide` is the pure decision function (no network): it reads a PR JSON
+# file, a file-list file, a check-rollup JSON file, optional audit_snapshot
+# dirs (merge base, head), the Mac-Check run and the latest build-only run on
+# the head, and the PR's added files, logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
-#   conflict|<head sha>  pending|<why>  mac-dispatch|<gated files>|<head branch>
-#   build-dispatch|<code paths>|<head branch>
-#   mac-gate|<what to do>  eligible|<lines>|<files>|<proof>
-# Tests/fast_lane/test_fast_lane.sh sources this file and feeds `decide` fixtures.
+#   conflict|<head sha>  pending|<why>  build-dispatch|<code paths>|<head branch>
+#   linux-dispatch|<head branch>
+#   build-gate|<what to do>  eligible|<lines>|<files>|<proof>
+# Tests/fast_lane/test_fast_lane.sh sources this file and feeds it fixtures.
 #
 # Usage: scripts/fast-lane.sh [--dry-run] [PR ...]   (no PR: every open fast-lane PR)
 # --dry-run prints the decision and makes no API writes. Needs gh and jq.
@@ -91,7 +99,9 @@ MERGED_LABEL="fast-lane-merged"
 FEATURE_LABEL="feature-done"  # merging one dispatches full CI on BASE_BRANCH
 CI_WORKFLOWS=("CI")
 # CI job names, so CI runs started by workflow_dispatch (no PR association) still count.
-CI_CHECKS=("Linux" "macOS")
+CI_CHECKS=("Linux")
+# CI's report-only jobs (ci.yml): never red, pending or proof here.
+REPORT_ONLY_RE='^macOS( \(.*\))?$'
 CI_FILE="ci.yml"  # the CI workflow file, dispatched on BASE_BRANCH after merges
 SELF_WORKFLOW="Fast Lane"
 # The lane job's own check run on the head. Check runs read off the commit carry
@@ -104,12 +114,13 @@ SELF_CHECK="fast-lane"
 # bullet; Tests/fast_lane checks the two match. A path ending in / is that
 # folder at the root, a path with a / is that file, and a bare name is that
 # file in any folder (docs/AGENTS.md too). A * matches one folder name.
-# Matching ignores case. docs/c4/model.json and each app's waves.md are
+# Matching ignores case. .gitattributes names the merge drivers the lane runs
+# when it integrates a PR, so a PR can't turn one on for itself. docs/c4/model.json and each app's waves.md are
 # generated on dev (.github/workflows/generated.yml), so PRs never edit them.
 # UITests/quarantine.json skips failing journeys (scripts/quarantine), so only
 # the supervisor quarantines; Tests/perf-suites.txt takes tests out of the
 # gate (scripts/test-scope), so only the supervisor lists them.
-PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ CLAUDE.md AGENTS.md LICENSE
+PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ .gitattributes CLAUDE.md AGENTS.md LICENSE
   docs/c4/model.json 'docs/blueprints/*/features/waves.md' UITests/quarantine.json Tests/perf-suites.txt)
 deny_re() {
   local p re=""
@@ -132,25 +143,21 @@ AUDIT_DIRS='(Tests/PhotoModelTests/AppAudit|Tests/AppAuditTests)'
 AUDIT_RE="^(UITests/audit-baseline\\.json\$|$AUDIT_DIRS/)"
 AUDIT_REGISTRY_RE="^$AUDIT_DIRS/AuditCore\\.swift\$"
 AUDIT_REASON="loosens the app audit: needs the captain's review"
+# Canonical first (docs/factory/lead.md rule 20): a PR that adds a Swift file
+# under Sources/<X>Model or Sources/<X>App named for a canonical concept
+# (Tests/canonical-concepts.txt) needs an `Allow-Dup: <concept> <reason>` body
+# line. The lane runs main's scripts/check-dup-logic --paths on the PR's added
+# and renamed-to files: names only, since it never reads PR code; the primary
+# type rule and the grandfathered baseline are scripts/ci's (the head's proof).
+DUP_REASON="adds app-local logic for a canonical concept (use the SuiteModel module, or add \`Allow-Dup: <concept> <reason>\` to the body)"
 
-# Shared shell files every app's window is built from. SwiftUI can't build on
-# Linux, so a change here can pass scripts/ci and still break every app's UI
-# journeys: #962 moved SuiteWindow's inspector, merged on the Linux gate, broke
-# Flare, Library, Halo and Suite on dev (run 38679533707) and was reverted in
-# #975. A PR that changes or renames one merges only with proof from macOS: a
-# completed CI run on its head whose macOS job passed, or failed only tests
-# that also fail in the latest completed dev run (mac_judge). Cloud sessions
-# can't dispatch workflows (403, #1040), so the lane dispatches CI on the PR's
-# head branch itself, once per head, and merges when that run passes. A
-# `Mac-Check: <run url>` line a supervisor adds by hand counts too. Not
-# PROTECTED: agents may edit these, with that proof.
-MAC_GATED=(Sources/SuiteUI/SuiteWindow.swift Sources/SuiteUI/EditorShell.swift
-  Sources/SuiteUI/ToolbarGroup.swift Sources/SuiteUI/Tokens.swift)
+# A supervisor's `Mac-Check: <run url>` line names a CI run whose green
+# macOS job built every app, which also proves a code PR builds (build_gate).
 MAC_CHECK_LINE="Mac-Check:"
 MAC_JOB="macOS"
 # What a compiler reads: Swift under Sources/, Tests/ and UITests/, plus
-# project.yml and Package.swift (protected anyway). A PR changing any of it
-# that isn't MAC_GATED merges only once a build-only CI run (ci.yml's
+# project.yml and Package.swift (protected anyway). A PR changing any of it,
+# shared shell files such as SuiteWindow.swift included, merges only once a build-only CI run (ci.yml's
 # `build_only` input: every SwiftPM target with its tests, then the journey
 # bundles; nothing runs) compiled its head; the lane dispatches it, once per
 # head. Linux scripts/ci never builds the app targets (lesson 114: dev stopped
@@ -162,6 +169,28 @@ MAC_JOB="macOS"
 BUILD_RE='^((Sources|Tests|UITests)/.*\.swift|project\.yml|Package\.swift)$'
 BUILD_JOB="macOS build"    # the build-only job's name in ci.yml
 BUILD_TITLE="macOS build"  # ci.yml's run-name for a build-only run
+LINUX_TITLE="Linux check"  # ci.yml's run-name for a linux_only run (the lane's check on a head it integrated)
+# The lane's own merge commit on a PR head (integrate). Fixed subject, so
+# decide can tell such a head and ask for its Linux check (linux-dispatch).
+LANE_MERGE_SUBJECT="fast lane: merge dev into the PR head"
+NEEDS_REBASE_LABEL="needs-rebase"
+# Batches (the header's second paragraph). The scratch branch and its probes
+# live at REMOTE; each merge commit's subject names the PR and the head merged.
+BATCH_PREFIX="lane/batch-"
+BATCH_SUBJECT_RE='^fast lane batch: PR #([0-9]+) at ([0-9a-f]{40})$'
+MAX_BATCH=8          # PRs per batch; a bisect then needs at most 4 probes
+NEEDS_FIX_LABEL="needs-fix"
+# After starting a Linux run on a batch, wait this long (seconds, polling
+# every BATCH_POLL) for its verdict in the same run before leaving the rest to
+# the next sweep. Tests set it to 0.
+BATCH_WAIT="${FAST_LANE_BATCH_WAIT:-420}"
+BATCH_POLL="${FAST_LANE_BATCH_POLL:-60}"
+READY=()   # eligible PRs this pass, n|head|branch|proof (settle_ready lands or batches them)
+HOLD=0     # a batch is in flight: eligible PRs wait for the next sweep
+SCRATCH="" # the run's scratch clone of REMOTE (scratch)
+# Where integrate fetches and pushes; tests point it at a local bare repo.
+REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.git}"
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # After dispatching, look this many times, 5s apart, for the new run's URL to comment.
 RUN_LOOKUP_RETRIES="${FAST_LANE_RUN_LOOKUP_RETRIES:-6}"
 
@@ -280,140 +309,22 @@ mac_run_id() {
   [[ -z "$id" ]] || echo "$id"
 }
 
-# mac_gated <files.txt>: the MAC_GATED paths among <files.txt>, joined by ", ".
-mac_gated() {
-  grep -Fx -f <(printf '%s\n' "${MAC_GATED[@]}") "$1" | sort -u | paste -sd, - | sed 's/,/, /g' || true
-}
-
-# failed_tests: the failing test identifiers in a job log on stdin, one per
-# line: XCTest's `-[Module.Class testName]` from its "Test Case '...' failed"
-# lines, and Swift Testing's `Test name()` from its "✘ Test name() failed" lines.
-failed_tests() {
-  sed -e 's/^[0-9T:.-]*Z //' -e $'s/\x1b\\[[0-9;]*m//g' \
-    | sed -n -e "s/.*Test Case '\(-\[[^]]*\]\)' failed.*/\1/p" -e 's/.*✘ \(Test .*\) failed after .*/\1/p' \
-    | sort -u || true
-}
-
 # mac_judge <run.json> <head sha>: nothing when the run (`gh run view --json
 # workflowName,status,headSha,jobs`) is a completed CI run on <head sha> whose
-# macOS job passed, or failed only where dev fails too; else what is wrong.
-# Dev has been red for days at a time from other lines, so a failed macOS job
-# passes when the run's `failedTests` (failed_tests on its log) are all in
-# `.base.failedTests`, the latest completed dev run's, its failed steps are
-# all failed there too, and it has at least one failing test to compare (a
-# build or setup failure has none). evaluate adds both (mac_add_failures).
+# macOS job passed; else what is wrong.
 mac_judge() {
   local runjson='{}'
   [[ -z "$1" || ! -s "$1" ]] || runjson=$(cat "$1")
   jq -r --arg wf "${CI_WORKFLOWS[0]}" --arg job "$MAC_JOB" --arg head "$2" '
     def lc: (. // "") | ascii_downcase;
     ([.jobs[]? | select(.name == $job)] | last) as $j
-    | ([$j.steps[]? | select((.conclusion | lc) == "failure") | .name]) as $steps
-    | (.failedTests // []) as $tests
     | if (.workflowName // "") == "" then "its run could not be read"
       elif .workflowName != $wf then "its run is the \(.workflowName) workflow, not \($wf)"
       elif (.status | lc) != "completed" then "its run has not completed"
       elif $j == null then "its run has no \($job) job"
-      elif ($j.conclusion | lc) == "success" then
-        (if (.headSha // "") != $head then "its run is on \(.headSha // "no head"), not the head \($head)" else empty end)
-      elif ($j.conclusion | lc) != "failure" then "its \($job) job is \($j.conclusion // "unfinished")"
-      elif .base == null then "its \($job) job failed, and no completed \($job) run on dev could be read to compare"
-      elif ($tests | length) == 0 then "its \($job) job failed in \($steps | join(", ")) with no failing test to compare with dev"
-      elif ($tests - .base.failedTests | length) > 0 then
-        ($tests - .base.failedTests) as $new
-        | "its \($job) job has \($new | length) failing test(s) that the latest dev run (\(.base.url)) does not: \($new | join(", "))"
-      elif ($steps - .base.failedSteps | length) > 0 then
-        "its \($job) job failed in \($steps - .base.failedSteps | join(", ")), which passed in the latest dev run (\(.base.url))"
+      elif ($j.conclusion | lc) != "success" then "its \($job) job is \($j.conclusion // "unfinished")"
       elif (.headSha // "") != $head then "its run is on \(.headSha // "no head"), not the head \($head)"
       else empty end' <<<"$runjson" 2>/dev/null || echo "its run could not be read"
-}
-
-# mac_dev_note <run.json>: when the run's macOS job failed (and mac_judge
-# passed it), a note naming the dev run with the same failures.
-mac_dev_note() {
-  jq -r --arg job "$MAC_JOB" '
-    if ([.jobs[]? | select(.name == $job) | .conclusion // "" | ascii_downcase] | last) == "failure"
-    then " (its failing tests also fail on dev: \(.base.url))" else "" end' "$1" 2>/dev/null || true
-}
-
-# mac_gate <pr.json> <files.txt> <mac-check run.json> <lane run.json>: nothing
-# when the PR touches no MAC_GATED path, else one line:
-#   ok|<proof>                 a CI run on the head passes mac_judge
-#   dispatch|<files>|<branch>  no CI run on the head yet: the lane starts one
-#   wait|<url>                 the CI run on the head is still going
-#   refuse|<what to do>        the CI run on the head failed on macOS beyond dev
-# The Mac-Check line's run counts first (a supervisor can add one by hand);
-# otherwise the latest CI run on the head (<lane run.json>, {} when none).
-mac_gate() {
-  local pr="$1" files="$2" gated head branch url lane='{}' why
-  gated=$(mac_gated "$files")
-  [[ -n "$gated" ]] || return 0
-  head=$(jq -r '.headRefOid' "$pr")
-  branch=$(jq -r '.headRefName // ""' "$pr")
-  url=$(mac_check_url "$pr")
-  if [[ -n "$url" && -n "$(mac_run_id "$url")" && -z "$(mac_judge "${3:-}" "$head")" ]]; then
-    echo "ok|$MAC_CHECK_LINE $url$(mac_dev_note "$3")"; return
-  fi
-  [[ -z "${4:-}" || ! -s "$4" ]] || lane=$(cat "$4")
-  url=$(jq -r '.url // ""' <<<"$lane" 2>/dev/null || true)
-  # No run on the head (a run on an older head doesn't count): dispatch one.
-  if [[ -z "$url" || "$(jq -r '.headSha // ""' <<<"$lane")" != "$head" ]]; then
-    echo "dispatch|$gated|$branch"; return
-  fi
-  why=$(mac_judge "$4" "$head")
-  if [[ -z "$why" ]]; then echo "ok|macOS run $url$(mac_dev_note "$4")"; return; fi
-  if [[ "$why" == "its run has not completed" ]]; then echo "wait|$url"; return; fi
-  echo "refuse|changes $gated, shared by every app's window, so it needs a macOS run on its head $head that is green or fails only where dev fails, and the CI run the lane found there doesn't: $url ($why). Fix it and push; the lane dispatches CI again on the new head. A supervisor can instead add a line \`$MAC_CHECK_LINE <run url>\` naming a green CI run on this head"
-}
-
-# mac_job_failures <run.json>: the failing tests in the log of the run's
-# failed macOS job, as a JSON array; nothing when it didn't fail or the log
-# can't be read.
-mac_job_failures() {
-  local jid log
-  jid=$(jq -r --arg job "$MAC_JOB" '[.jobs[]? | select(.name == $job and ((.conclusion // "") | ascii_downcase) == "failure")
-    | .databaseId] | last // ""' "$1" 2>/dev/null || true)
-  [[ -n "$jid" ]] || return 0
-  log=$(gh api "repos/$REPO/actions/jobs/$jid/logs" 2>/dev/null) || return 0
-  failed_tests <<<"$log" | jq -R . | jq -sc .
-}
-
-# mac_base_json: the latest completed CI run on BASE_BRANCH whose macOS job
-# passed or failed, as {url, failedTests, failedSteps}; nothing when none can
-# be read. Read once per lane run (MAC_BASE, MAC_BASE_READ).
-MAC_BASE="" MAC_BASE_READ=0
-mac_base_json() {
-  if (( ! MAC_BASE_READ )); then
-    MAC_BASE_READ=1
-    local id ids f tests
-    f=$(mktemp)
-    ids=$(gh run list -R "$REPO" --workflow "$CI_FILE" --branch "$BASE_BRANCH" --status completed --limit 10 \
-      --json databaseId --jq '.[].databaseId' 2>/dev/null || true)
-    for id in $ids; do
-      gh run view "$id" -R "$REPO" --json jobs,url >"$f" 2>/dev/null || continue
-      case "$(jq -r --arg job "$MAC_JOB" '[.jobs[]? | select(.name == $job) | .conclusion // "" | ascii_downcase] | last // ""' "$f")" in
-        success) tests='[]' ;;
-        failure) tests=$(mac_job_failures "$f"); [[ -n "$tests" ]] || continue ;;
-        *) continue ;;
-      esac
-      MAC_BASE=$(jq -c --arg job "$MAC_JOB" --argjson t "$tests" '{url, failedTests: $t,
-        failedSteps: [.jobs[]? | select(.name == $job) | .steps[]? | select(((.conclusion // "") | ascii_downcase) == "failure") | .name]}' "$f")
-      break
-    done
-    rm -f "$f"
-  fi
-  [[ -z "$MAC_BASE" ]] || echo "$MAC_BASE"
-}
-
-# mac_add_failures <run.json>: when the run's macOS job failed, adds its
-# `failedTests` and the dev run to compare with as `base` (mac_judge).
-mac_add_failures() {
-  local tests base
-  tests=$(mac_job_failures "$1")
-  [[ -n "$tests" ]] || return 0
-  base=$(mac_base_json)
-  jq --argjson t "$tests" --argjson b "${base:-null}" '.failedTests = $t | if $b == null then . else .base = $b end' \
-    "$1" >"$1.x" && mv "$1.x" "$1"
 }
 
 # build_paths <files.txt>: the BUILD_RE files among <files.txt> by target
@@ -423,9 +334,10 @@ build_paths() {
 }
 
 # build_gate <pr.json> <files.txt> <mac-check run.json> <build run.json>:
-# nothing when the PR touches no BUILD_RE code, else a line like mac_gate's. A green
-# Mac-Check run on the head (it builds every app) counts; otherwise the latest
-# build-only run on the head ({} when none: dispatch one).
+# nothing when the PR touches no BUILD_RE code, else one line:
+#   ok|<proof>  dispatch|<paths>|<branch>  wait|<url>  refuse|<what to do>
+# A green Mac-Check run on the head (it builds every app) counts; otherwise
+# the latest build-only run on the head ({} when none: dispatch one).
 build_gate() {
   local pr="$1" paths head branch url run='{}' st
   paths=$(build_paths "$2")
@@ -559,9 +471,20 @@ audit_loosens() {
   (( lists <= 1 )) || echo "AppAudit.checks is declared $lists times"
 }
 
+# dup_logic <pr.json> <added.txt>: one line per added concept file the body has
+# no Allow-Dup line for, or `error: <why>` when the check can't run (the PR
+# then waits, like an unreadable audit: never merged unchecked).
+dup_logic() {
+  local out rc=0
+  out=$(python3 "$HERE/check-dup-logic" --paths "$2" --body <(jq -r '.body // ""' "$1") 2>/dev/null) || rc=$?
+  if (( rc > 1 )); then echo "error: scripts/check-dup-logic could not run (exit $rc)"; else printf '%s' "$out"; fi
+}
+
 # decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir>
-#   [<mac-check run.json> <lane run.json> [<build run.json>]]]
-# (pass "" "" for the audit dirs when the PR doesn't touch the audit)
+#   [<mac-check run.json> <unused> [<build run.json> [<added.txt>]]]]
+# (pass "" "" for the audit dirs when the PR doesn't touch the audit; the
+# seventh argument is ignored, a slot kept so callers didn't shift; added.txt
+# lists the PR's added and renamed-to paths, "" or missing skips dup_logic)
 decide() {
   local pr="$1" files="$2" checks="$3"
   local state draft base has_label author adds dels nfiles lines mergeable mstate head
@@ -619,6 +542,16 @@ decide() {
     fi
   fi
 
+  if [[ -n "${9:-}" && -s "${9:-}" ]]; then
+    local dups
+    dups=$(dup_logic "$pr" "$9" | paste -sd, -)
+    case "$dups" in
+      "") log "canonical first: ok" ;;
+      error:*) log "canonical first: ${dups#error: }"; pending="${dups#error: }" ;;
+      *) log "canonical first: FAIL ($dups)"; reasons+=("$DUP_REASON: ${dups//,/, }") ;;
+    esac
+  fi
+
   local conflict=0
   if [[ "$mergeable" == "MERGEABLE" && ! "$mstate" =~ ^(DIRTY|UNKNOWN|BLOCKED|DRAFT)$ ]]; then
     log "mergeable: ok ($mstate)"
@@ -637,28 +570,23 @@ decide() {
     log "belt review: $review"
   fi
 
-  # A gated PR's macOS check is mac_gate's to judge (it may fail only where dev
-  # fails), and a code PR's macOS build check is build_gate's, so each leaves
-  # the red and running lists below. A MAC_GATED PR needs only mac_gate: its
-  # full run builds every app too.
-  local mac macdrop="" gate=mac
-  mac=$(mac_gate "$pr" "$files" "${6:-}" "${7:-}")
-  if [[ -n "$mac" ]]; then
-    macdrop="$MAC_JOB"
-  else
-    gate=build
-    mac=$(build_gate "$pr" "$files" "${6:-}" "${8:-}")
-    [[ -z "$mac" ]] || macdrop="$BUILD_JOB"
-  fi
+  # A code PR's macOS build check is build_gate's to judge, so it leaves the
+  # red and running lists below.
+  local mac macdrop=""
+  mac=$(build_gate "$pr" "$files" "${6:-}" "${8:-}")
+  [[ -z "$mac" ]] || macdrop="$BUILD_JOB"
 
-  # Drop our own check, Belt's review and Copilot review checks, then classify the rest.
+  # Drop our own check, CI's report-only macOS jobs, Belt's review and
+  # Copilot review checks, then classify the rest.
   local ci_json summary
   ci_json=$(printf '%s\n' "${CI_WORKFLOWS[@]}" "${CI_CHECKS[@]}" | jq -R . | jq -s .)
   summary=$(jq -c --arg self "$SELF_WORKFLOW" --arg selfcheck "$SELF_CHECK" \
-      --arg review "$BELT_REVIEW_CONTEXT" --argjson ci "$ci_json" --arg macdrop "$macdrop" '
+      --arg review "$BELT_REVIEW_CONTEXT" --argjson ci "$ci_json" --arg macdrop "$macdrop" \
+      --arg report "$REPORT_ONLY_RE" '
     [ .[]
       | select((.workflowName // "") != $self and (.name // "") != $selfcheck)
       | select($macdrop == "" or (.name // "") != $macdrop)
+      | select((.name // "") | test($report) | not)
       | select((.context // .name // "") != $review)
       | select(((.name // .context // "") + " " + (.workflowName // "")) | test("copilot"; "i") | not)
       | { name: (.name // .context),
@@ -680,9 +608,15 @@ decide() {
   npending=$(jq -r '.pending | length' <<<"$summary")
   nci=$(jq -r '.ci_passed' <<<"$summary")
   if has_marker "$pr" "$head"; then marker=1; fi
+  # The lane's own merge commit as the head (integrate): no marker can name it,
+  # so its proof is a Linux run, which the lane starts when none exists yet.
+  local lane_head=0
+  if [[ "$(jq -r --arg h "$head" '.commits // [] | last // {} | select(.oid == $h) | .messageHeadline // ""' "$pr")" == "$LANE_MERGE_SUBJECT" ]]; then
+    lane_head=1
+  fi
   # ponytail: "CI passed" = at least one *passing* check from CI_WORKFLOWS, so a
   # head where every CI job was skipped still needs the worker's marker.
-  log "checks: green=$ngreen pending=$npending red=[${red}] ci_passed=$nci marker=$marker"
+  log "checks: green=$ngreen pending=$npending red=[${red}] ci_passed=$nci marker=$marker lane_head=$lane_head"
 
   if [[ -n "$skip" ]]; then echo "skip|$skip"; return; fi
   if [[ -n "$retarget" ]]; then echo "retarget|$retarget"; return; fi
@@ -695,22 +629,272 @@ decide() {
   if [[ -n "$pending" ]]; then echo "pending|$pending"; return; fi
   if (( npending )); then echo "pending|$npending checks still running"; return; fi
   if (( nci == 0 && marker == 0 )); then
+    if (( lane_head )); then echo "linux-dispatch|$(jq -r '.headRefName // ""' "$pr")"; return; fi
     echo "pending|no passing CI check and no $MARKER_LINE marker for head $head"; return
   fi
   if (( belt )) && [[ "$review" != "SUCCESS" ]]; then echo "pending|waiting for review"; return; fi
-  log "$gate gate: ${mac:-not gated}"
+  log "build gate: ${mac:-no code}"
   case "$mac" in
-    dispatch\|*) echo "$gate-dispatch|${mac#dispatch|}"; return ;;
-    wait\|*)
-      if [[ "$gate" == mac ]]; then echo "pending|waiting for the macOS CI run ${mac#wait|} on head $head"
-      else echo "pending|waiting for the macOS build ${mac#wait|} on head $head"; fi
-      return ;;
-    refuse\|*) echo "mac-gate|${mac#refuse|}"; return ;;
+    dispatch\|*) echo "build-dispatch|${mac#dispatch|}"; return ;;
+    wait\|*) echo "pending|waiting for the macOS build ${mac#wait|} on head $head"; return ;;
+    refuse\|*) echo "build-gate|${mac#refuse|}"; return ;;
   esac
   local proof="Fast-Check marker"
   (( nci == 0 )) || proof="$ngreen checks green"
   [[ "$mac" != ok\|* ]] || proof+=", ${mac#ok|}"
   echo "eligible|$lines|$nfiles|$proof$tier"
+}
+
+# integrate <head sha> <head branch>: in a scratch clone, merges
+# origin/BASE_BRANCH into the PR head with the repo's merge drivers (installed
+# from this checkout: main's scripts, never the PR's) and pushes the merge
+# commit to the head branch with a lease on <head sha>. Runs git and the
+# drivers only; nothing from the PR's tree is executed. Prints one line:
+#   integrated|<new head sha>   conflict|<unmerged files>   failed|<why>
+integrate() {
+  local head="$1" branch="$2" d files new
+  d=$(mktemp -d)
+  if ! git init -q "$d" || ! git -C "$d" remote add origin "$REMOTE" \
+      || ! { git -C "$d" fetch -q --filter=blob:none origin "$BASE_BRANCH" "$branch" 2>/dev/null \
+             || git -C "$d" fetch -q origin "$BASE_BRANCH" "$branch" 2>/dev/null; }; then
+    echo "failed|could not fetch $BASE_BRANCH and $branch from $REMOTE"; rm -rf "$d"; return
+  fi
+  if [[ "$(git -C "$d" rev-parse "origin/$branch" 2>/dev/null)" != "$head" ]]; then
+    echo "failed|$branch no longer points at $head"; rm -rf "$d"; return
+  fi
+  if ! git -C "$d" checkout -q -b work "origin/$branch" 2>/dev/null || ! bash "$HERE/install-merge-drivers" "$d" >/dev/null 2>&1; then
+    echo "failed|could not check out $branch with the merge drivers"; rm -rf "$d"; return
+  fi
+  if ! git -C "$d" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+      merge -q --no-edit -m "$LANE_MERGE_SUBJECT" "origin/$BASE_BRANCH" >/dev/null 2>&1; then
+    files=$(git -C "$d" diff --name-only --diff-filter=U | sort -u | paste -sd, - | sed 's/,/, /g')
+    git -C "$d" merge --abort >/dev/null 2>&1 || true
+    echo "conflict|${files:-files git could not name}"; rm -rf "$d"; return
+  fi
+  new=$(git -C "$d" rev-parse HEAD)
+  if ! git -C "$d" push -q --force-with-lease="refs/heads/$branch:$head" origin "HEAD:refs/heads/$branch" 2>/dev/null; then
+    echo "failed|push to $branch refused (it moved past $head)"; rm -rf "$d"; return
+  fi
+  rm -rf "$d"
+  echo "integrated|$new"
+}
+
+# scratch <ref>...: fetches <ref>s from REMOTE into the run's one scratch clone
+# (blob:none where the remote allows it) so origin/<ref> is current. Non-zero
+# when the fetch fails.
+scratch() {
+  if [[ -z "$SCRATCH" ]]; then
+    SCRATCH=$(mktemp -d)
+    if ! git init -q "$SCRATCH" || ! git -C "$SCRATCH" remote add origin "$REMOTE"; then rm -rf "$SCRATCH"; SCRATCH=""; return 1; fi
+  fi
+  git -C "$SCRATCH" fetch -q --filter=blob:none origin "$@" 2>/dev/null || git -C "$SCRATCH" fetch -q origin "$@" 2>/dev/null
+}
+
+# batch_branches: every batch branch at REMOTE, `<sha> <name>` per line.
+batch_branches() {
+  git ls-remote --heads "$REMOTE" "refs/heads/${BATCH_PREFIX}*" 2>/dev/null | sed 's:[[:space:]]*refs/heads/: :' | sort -k2
+}
+
+# check_verdict <sha>: the newest Linux check run on <sha>:
+#   none   running   green|<url>   red|<url>
+check_verdict() {
+  local runs
+  runs=$(gh api "repos/$REPO/commits/$1/check-runs?per_page=100" --jq '.check_runs' 2>/dev/null) || { echo none; return; }
+  jq -r --arg name "${CI_CHECKS[0]}" '
+    ([ .[] | select(.name == $name and .conclusion != "action_required") ] | sort_by(.started_at // "") | last) as $r
+    | if $r == null then "none"
+      elif ($r.status | ascii_downcase) != "completed" then "running"
+      elif (($r.conclusion // "") | ascii_downcase) == "success" then "green|\($r.details_url // $r.html_url // "")"
+      else "red|\($r.details_url // $r.html_url // "")" end' <<<"$runs" 2>/dev/null || echo none
+}
+
+# dispatch_linux <branch>: ci.yml's Linux job alone on <branch>, once per
+# batch_resume call (DISPATCHED): a run takes seconds to show up, and a second
+# dispatch on the same ref would cancel the first (ci.yml's concurrency).
+DISPATCHED=""
+dispatch_linux() {
+  case "$DISPATCHED" in *" $1 "*) log "Linux check on $1 just started; waiting for it to show up"; return 0 ;; esac
+  DISPATCHED+=" $1 "
+  write gh workflow run "$CI_FILE" -R "$REPO" -f linux_only=true --ref "$1" || log "could not dispatch the Linux check on $1"
+}
+
+# settle_ready: what the pass found eligible (READY: n|head|branch|proof). One
+# PR lands as before; two or more become a batch; while a batch is in flight
+# they all wait.
+settle_ready() {
+  local items=("${READY[@]+"${READY[@]}"}") n head branch proof
+  READY=()
+  (( ${#items[@]} )) || return 0
+  if (( HOLD )); then log "a batch is in flight: ${#items[@]} ready PR(s) wait for the next sweep"; return 0; fi
+  if (( ${#items[@]} == 1 )); then
+    IFS='|' read -r n head branch proof <<<"${items[0]}"
+    land "$n" "$head" "$proof" || true
+    return 0
+  fi
+  batch_start "${items[@]}"
+}
+
+# batch_start <n|head|branch|proof>...: BASE_BRANCH plus the ready
+# PRs in order on a scratch branch, pushed as lane/batch-<id> with one Linux run
+# started, then batch_resume on it. A PR whose branch can't be fetched or moved
+# past its head, or that conflicts with an earlier PR in the batch, waits for
+# the next sweep. Fewer than two PRs left makes no batch: one lands as before.
+batch_start() {
+  local items=("$@") it n head branch merged=() d id br
+  if (( DRY_RUN )); then log "dry-run, would batch ${#items[@]} PRs: $(printf '#%s ' "${items[@]%%|*}")"; return 0; fi
+  if ! scratch "$BASE_BRANCH"; then log "batch: could not fetch $BASE_BRANCH from $REMOTE; the ready PRs wait for the next sweep"; return 0; fi
+  d="$SCRATCH"
+  if ! git -C "$d" checkout -q -B batch "origin/$BASE_BRANCH" 2>/dev/null || ! bash "$HERE/install-merge-drivers" "$d" >/dev/null 2>&1; then
+    log "batch: could not check out $BASE_BRANCH with the merge drivers; the ready PRs wait"; return 0
+  fi
+  for it in "${items[@]}"; do
+    (( ${#merged[@]} < MAX_BATCH )) || { log "batch: full at $MAX_BATCH PRs; the rest wait"; break; }
+    IFS='|' read -r n head branch _ <<<"$it"
+    if ! scratch "$branch"; then log "batch: #$n: could not fetch $branch; it waits"; continue; fi
+    if [[ "$(git -C "$d" rev-parse "origin/$branch" 2>/dev/null)" != "$head" ]]; then log "batch: #$n: $branch moved past $head; it waits"; continue; fi
+    if git -C "$d" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+        merge -q --no-ff --no-edit -m "fast lane batch: PR #$n at $head" "$head" >/dev/null 2>&1; then
+      merged+=("$it")
+    else
+      git -C "$d" merge --abort >/dev/null 2>&1 || true
+      log "batch: #$n conflicts with an earlier PR in the batch; it waits for the next one"
+    fi
+  done
+  if (( ${#merged[@]} < 2 )); then
+    log "batch: ${#merged[@]} PR(s) could join; no batch"
+    (( ${#merged[@]} == 0 )) || { READY=("${merged[0]}"); settle_ready; }
+    return 0
+  fi
+  id=$(date -u +%Y%m%d%H%M%S); br="${BATCH_PREFIX}$id"
+  if ! git -C "$d" push -q origin "HEAD:refs/heads/$br" 2>/dev/null; then log "batch: could not push $br; the ready PRs wait"; return 0; fi
+  log "batch $br: ${#merged[@]} PRs ($(printf '#%s ' "${merged[@]%%|*}")), one Linux check"
+  batch_resume "$br"
+  [[ "$BATCH_STATE" != waiting ]] || HOLD=1
+}
+
+# batch_resume <branch>: reads the batch chain (BASE_BRANCH, then one merge
+# commit per PR) and the Linux verdicts on its tip and probes, acts, and sets
+# BATCH_STATE to done (the branch is gone) or waiting (a run is still going;
+# nothing else merges meanwhile). Red tip: a prefix bisect with lo = the
+# longest green prefix, hi = the shortest red one; the probe is their midpoint;
+# hi = lo + 1 names the culprit. Probe 0 is the base alone and is only asked
+# for when PR 1 is the suspect: a red base means BASE_BRANCH is red, and the
+# batch lands on the PRs' own proof so a fix can get through.
+BATCH_STATE=""
+batch_resume() {
+  local br="$1" d k i sha v lo hi mid url waited=0 line probes
+  local chain=() verd=()
+  DISPATCHED=""; BATCH_STATE=waiting
+  if ! scratch "$BASE_BRANCH" "$br"; then log "batch $br: could not fetch it; the next sweep tries again"; return; fi
+  d="$SCRATCH"
+  while read -r sha line; do
+    [[ "$line" =~ $BATCH_SUBJECT_RE ]] || continue
+    chain+=("$sha|${BASH_REMATCH[1]}|${BASH_REMATCH[2]}")
+  done < <(git -C "$d" log --first-parent --reverse --format='%H %s' "origin/$BASE_BRANCH..origin/$br" 2>/dev/null)
+  k=${#chain[@]}
+  if (( k == 0 )); then log "batch $br: nothing left to land; dropping it"; batch_drop "$br"; BATCH_STATE=done; return; fi
+  chain=("$(git -C "$d" rev-parse "origin/$br~$k")||" "${chain[@]}")  # [0] = the base
+  while :; do
+    for (( i = 0; i <= k; i++ )); do verd[i]=""; done
+    verd[k]=$(check_verdict "${chain[k]%%|*}")
+    probes=$(batch_branches | grep -E " ${br//./\\.}-[0-9]+\$" || true)
+    while read -r sha line; do
+      [[ -n "$line" ]] || continue
+      i="${line##*-}"
+      (( i >= 0 && i < k )) && [[ "${chain[i]%%|*}" == "$sha" ]] || continue
+      verd[i]=$(check_verdict "$sha")
+    done <<<"$probes"
+    v="${verd[k]}"
+    if (( DRY_RUN )); then log "dry-run: batch $br ($k PRs) tip is $v; probes: $(printf '%s ' "${verd[@]}")"; return; fi
+    case "$v" in
+      none) log "batch $br: no Linux run on its tip; starting one"; dispatch_linux "$br" ;;
+      running) log "batch $br: Linux check running" ;;
+      green*)
+        batch_land "$br" "$k" "batch of $k PRs checked together on Linux: ${v#green|}" "${chain[@]}"
+        BATCH_STATE=done; return ;;
+      red*)
+        lo=-1; hi=$k
+        case "${verd[0]}" in
+          red*)
+            log "batch $br: $BASE_BRANCH itself is red (${verd[0]#red|}); landing on the PRs' own proof"
+            batch_land "$br" "$k" "$BASE_BRANCH was red on its own (${verd[0]#red|}), so this batch landed on each PR's own proof" "${chain[@]}"
+            BATCH_STATE=done; return ;;
+          green*) lo=0 ;;
+        esac
+        for (( i = 1; i < k; i++ )); do
+          case "${verd[i]}" in green*) lo=$i ;; red*) (( i < hi )) && hi=$i ;; esac
+        done
+        if (( lo >= 0 && hi == lo + 1 )); then
+          batch_culprit "$br" "$lo" "$hi" "${verd[hi]#red|}" "${chain[@]}"
+          BATCH_STATE=done; return
+        elif (( lo == -1 && hi == 1 )); then
+          batch_probe "$br" 0 "${chain[0]%%|*}" "${verd[0]}"
+        else
+          mid=$(( ( (lo < 0 ? 0 : lo) + hi ) / 2 ))
+          batch_probe "$br" "$mid" "${chain[mid]%%|*}" "${verd[mid]}"
+        fi ;;
+    esac
+    if (( waited >= BATCH_WAIT )); then return; fi
+    sleep "$BATCH_POLL"; waited=$(( waited + BATCH_POLL ))
+  done
+}
+
+# batch_probe <branch> <i> <sha> <verdict>: makes sure the chain after i PRs
+# has a Linux run: pushes lane/batch-<id>-<i> at <sha> and dispatches when
+# there is none; says so when one is running.
+batch_probe() {
+  local br="$1" i="$2" sha="$3" v="$4"
+  case "$v" in
+    running) log "batch $br: probe $i running" ;;
+    "")
+      if (( $(batch_branches | grep -cE " ${br//./\\.}-[0-9]+\$" || true) >= MAX_BATCH )); then
+        log "batch $br: too many probes; dropping the batch, its PRs wait"; batch_drop "$br"; return
+      fi
+      if git -C "$SCRATCH" push -q origin "$sha:refs/heads/$br-$i" 2>/dev/null; then
+        log "batch $br: probing the chain after $i PR(s)"; dispatch_linux "$br-$i"
+      else log "batch $br: could not push probe $i; the next sweep tries again"; fi ;;
+    *) log "batch $br: probe $i has no run yet"; dispatch_linux "$br-$i" ;;
+  esac
+}
+
+# batch_land <branch> <upto> <proof> <chain...>: lands PRs 1..upto in order,
+# stopping at the first that won't (its head moved: the rest were proven on
+# top of it and wait), then drops the branch.
+batch_land() {
+  local br="$1" upto="$2" proof="$3"; shift 3
+  local chain=("$@") i n head
+  for (( i = 1; i <= upto; i++ )); do
+    IFS='|' read -r _ n head <<<"${chain[i]}"
+    if ! land "$n" "$head" "$proof"; then log "batch $br: #$n did not land; the PRs after it wait for the next batch"; break; fi
+  done
+  batch_drop "$br"
+}
+
+# batch_culprit <branch> <lo> <hi> <run url> <chain...>: PRs 1..lo land, PR hi
+# gets NEEDS_FIX_LABEL and one comment, the rest wait for the next batch.
+batch_culprit() {
+  local br="$1" lo="$2" hi="$3" url="$4"; shift 4
+  local chain=("$@") n head after="" i pn
+  IFS='|' read -r _ n head <<<"${chain[hi]}"
+  for (( i = 1; i <= lo; i++ )); do IFS='|' read -r _ pn _ <<<"${chain[i]}"; after+="${after:+, }#$pn"; done
+  log "batch $br: PR #$n at $head is the culprit ($url)"
+  write gh label create "$NEEDS_FIX_LABEL" -R "$REPO" --color d93f0b --force \
+    --description "The lane's Linux check fails with this PR on dev; push a fix" >/dev/null 2>&1 || true
+  write gh pr edit "$n" -R "$REPO" --add-label "$NEEDS_FIX_LABEL" || log "could not add $NEEDS_FIX_LABEL"
+  comment_once "$n" "Fast lane: head $head fails the Linux check once it lands on $BASE_BRANCH${after:+ after $after}: $url. ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits. Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
+  batch_land "$br" "$lo" "batch of $lo PRs checked together on Linux before #$n broke the chain" "${chain[@]}"
+}
+
+# batch_drop <branch>: deletes the batch branch and its probes at REMOTE.
+batch_drop() {
+  local br="$1" names
+  names=$(batch_branches | awk -v b="$br" '$2 == b || index($2, b "-") == 1 { print $2 }' | paste -sd' ' -)
+  [[ -z "$names" ]] || git -C "$SCRATCH" push -q origin --delete $names 2>/dev/null || log "batch $br: could not delete $names"
+}
+
+# has_comment <pr> <text>: a comment on the PR contains <text>.
+has_comment() {
+  gh api "repos/$REPO/issues/$1/comments" --paginate --jq '.[].body' 2>/dev/null | grep -qF -- "$2"
 }
 
 write() {  # run a mutating command unless --dry-run
@@ -734,7 +918,7 @@ evaluate() {
   tmp=$(mktemp -d)
   local tries=0
   while :; do
-    gh pr view "$n" -R "$REPO" --json number,state,isDraft,baseRefName,labels,author,body,additions,deletions,changedFiles,mergeable,mergeStateStatus,headRefOid,headRefName,statusCheckRollup >"$tmp/pr.json"
+    gh pr view "$n" -R "$REPO" --json number,state,isDraft,baseRefName,labels,author,body,additions,deletions,changedFiles,mergeable,mergeStateStatus,headRefOid,headRefName,statusCheckRollup,commits >"$tmp/pr.json"
     [[ "$(jq -r '.mergeable' "$tmp/pr.json")" == "UNKNOWN" ]] || break
     (( tries++ < UNKNOWN_RETRIES )) || break
     sleep 5
@@ -744,6 +928,14 @@ evaluate() {
   # parks as action_required for bot pushes.
   local head
   head=$(jq -r '.headRefOid' "$tmp/pr.json")
+  # A batch's culprit (NEEDS_FIX_LABEL) waits at the head the lane named; a new
+  # head gets the label dropped and a fresh look.
+  if jq -e --arg l "$NEEDS_FIX_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+    if has_comment "$n" "Fast lane: head $head fails the Linux check"; then
+      log "PR #$n: $NEEDS_FIX_LABEL at head $head; waiting for a fix"; rm -rf "$tmp"; return
+    fi
+    write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_FIX_LABEL" || log "could not remove $NEEDS_FIX_LABEL"
+  fi
   if gh api "repos/$REPO/commits/$head/check-runs?per_page=100" --jq '.check_runs' >"$tmp/runs.json" 2>/dev/null; then
     jq '[ group_by(.name)[] | sort_by(.started_at // "") | last
           | select(.conclusion != "action_required")
@@ -759,7 +951,11 @@ evaluate() {
     jq '.statusCheckRollup // []' "$tmp/pr.json" >"$tmp/checks.json"
   fi
   # A rename counts under both names, so moving a protected file away is caught.
-  gh api "repos/$REPO/pulls/$n/files" --paginate --jq '.[] | .filename, (.previous_filename // empty)' >"$tmp/files.txt"
+  # added.txt: the paths the PR adds, a rename's new name included (dup_logic).
+  gh api "repos/$REPO/pulls/$n/files" --paginate \
+    --jq '.[] | [.status, .filename, (.previous_filename // "")] | @tsv' >"$tmp/files.tsv"
+  cut -f2,3 "$tmp/files.tsv" | tr '\t' '\n' | grep -v '^$' >"$tmp/files.txt" || true
+  awk -F'\t' '$1 == "added" || $1 == "renamed" || $1 == "copied" { print $2 }' "$tmp/files.tsv" >"$tmp/added.txt"
   # The app audit is judged on its files at the merge base and the head (the
   # PR's own diff: a count dev lowered meanwhile isn't this PR's raise). An
   # API failure skips the PR this sweep rather than judging it blind.
@@ -773,29 +969,11 @@ evaluate() {
     fi
     audit=("$tmp/before" "$tmp/after")
   fi
-  # A MAC_GATED change brings the run its Mac-Check line names and the latest
-  # CI run on the head (mac_gate judges them). A failed run list skips the PR
-  # this sweep, so an API hiccup never dispatches a second run for one head.
+  # Code brings the run its Mac-Check line names, if any, and the latest
+  # build-only run on the head. A failed run list skips the PR this sweep, so
+  # an API hiccup never dispatches a second build for one head.
   local mac=() id fields=workflowName,status,conclusion,headSha,jobs,url
-  if [[ -n "$(mac_gated "$tmp/files.txt")" ]]; then
-    echo '{}' >"$tmp/mac.json"; echo '{}' >"$tmp/lane.json"
-    id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
-    if [[ -n "$id" ]]; then
-      gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/mac.json" 2>/dev/null || echo '{}' >"$tmp/mac.json"
-      mac_add_failures "$tmp/mac.json"
-    fi
-    if ! id=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 --json databaseId,displayTitle \
-        --jq "[.[] | select(.displayTitle != \"$BUILD_TITLE\")][0].databaseId // \"\""); then
-      log "PR #$n: could not list CI runs on the head; the next sweep looks again"; rm -rf "$tmp"; return
-    fi
-    if [[ -n "$id" ]]; then
-      gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/lane.json" 2>/dev/null || echo '{}' >"$tmp/lane.json"
-      mac_add_failures "$tmp/lane.json"
-    fi
-    (( ${#audit[@]} )) || audit=("" "")
-    mac=("$tmp/mac.json" "$tmp/lane.json")
-  elif [[ -n "$(build_paths "$tmp/files.txt")" ]]; then
-    # Code: the Mac-Check line's run, if any, and the latest build-only run on the head.
+  if [[ -n "$(build_paths "$tmp/files.txt")" ]]; then
     echo '{}' >"$tmp/mac.json"
     id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
     if [[ -n "$id" ]]; then
@@ -812,7 +990,9 @@ evaluate() {
 
   echo "PR #$n:" >&2
   local decision kind rest
-  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" ${audit[@]+"${audit[@]}"} ${mac[@]+"${mac[@]}"})
+  (( ${#audit[@]} )) || audit=("" "")
+  (( ${#mac[@]} )) || mac=("" "" "")
+  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" "${audit[@]}" "${mac[@]}" "$tmp/added.txt")
   echo "decision: $decision"
   kind="${decision%%|*}"; rest="${decision#*|}"
 
@@ -827,34 +1007,62 @@ evaluate() {
       fi
       ;;
     conflict)
-      # Usually an earlier merge in this sweep. Belt's fixer rebases it; the label stays.
-      comment_once "$n" "Fast lane: not merged, this PR conflicts with $BASE_BRANCH at head $rest. Rebase on origin/$BASE_BRANCH, rerun scripts/ci, and update the Fast-Check marker."
+      # The lane integrates: merge the base into the head with the merge
+      # drivers and push. The re-sweep then sees the lane's merge commit as the
+      # head with no check and starts its Linux run (linux-dispatch). A conflict
+      # the drivers can't resolve goes to a fixer once per head, with the files.
+      local branch out why
+      branch=$(jq -r '.headRefName // ""' "$tmp/pr.json")
+      if has_comment "$n" "could not integrate it at head $rest"; then
+        log "conflict at head $rest already handed to a fixer"
+      elif (( DRY_RUN )); then
+        log "dry-run, would integrate $BASE_BRANCH into $branch at $rest"
+      else
+        gh auth setup-git >/dev/null 2>&1 || true
+        out=$(integrate "$rest" "$branch"); why="${out#*|}"
+        case "${out%%|*}" in
+          integrated)
+            MERGED_ANY=1  # re-sweep: the new head gets its Linux check now, not next run
+            if jq -e --arg l "$NEEDS_REBASE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+              write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_REBASE_LABEL" || log "could not remove $NEEDS_REBASE_LABEL"
+            fi
+            comment_once "$n" "Fast lane: this PR conflicted with $BASE_BRANCH, so the lane merged origin/$BASE_BRANCH into $branch itself ($why) with the repo's merge drivers. Next it starts a Linux check on that head and merges once it passes; nothing to do on your side. If you push again, fetch first."
+            ;;
+          conflict)
+            write gh label create "$NEEDS_REBASE_LABEL" -R "$REPO" --color d93f0b --force \
+              --description "The lane could not merge dev into this PR; a fixer resolves the named files" >/dev/null 2>&1 || true
+            write gh pr edit "$n" -R "$REPO" --add-label "$NEEDS_REBASE_LABEL" || log "could not add $NEEDS_REBASE_LABEL"
+            comment_once "$n" "Fast lane: this PR conflicts with $BASE_BRANCH in $why, and the lane could not integrate it at head $rest (the merge drivers don't resolve these). A fixer takes it: merge origin/$BASE_BRANCH into $branch, resolve those files, rerun scripts/ci --changed, push, and move the Head: line. The lane then drops the $NEEDS_REBASE_LABEL label and merges."
+            ;;
+          *) log "integration failed ($why); the next sweep tries again" ;;
+        esac
+      fi
       ;;
-    mac-dispatch|build-dispatch)
+    build-dispatch|linux-dispatch)
       # Authors can't dispatch (403, #1040), so the lane does, once per head:
       # the next sweep finds this run on the head and waits for it, then merges.
-      local what branch url="" i flags=() sel="!="
-      IFS='|' read -r what branch <<<"$rest"
-      [[ "$kind" == mac-dispatch ]] || { flags=(-f build_only=true); sel="=="; }
-      if ! write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]+"${flags[@]}"}" --ref "$branch"; then
+      local what="" branch url="" i flags=(-f build_only=true) title="$BUILD_TITLE"
+      if [[ "$kind" == linux-dispatch ]]; then branch="$rest"; flags=(-f linux_only=true); title="$LINUX_TITLE"
+      else IFS='|' read -r what branch <<<"$rest"; fi
+      if ! write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]}" --ref "$branch"; then
         log "could not dispatch CI on $branch; the next sweep tries again"; rm -rf "$tmp"; return
       fi
       for (( i = 0; i <= RUN_LOOKUP_RETRIES; i++ )); do
         url=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 --json url,displayTitle \
-          --jq "[.[] | select(.displayTitle $sel \"$BUILD_TITLE\")][0].url // \"\"" 2>/dev/null || true)
+          --jq "[.[] | select(.displayTitle == \"$title\")][0].url // \"\"" 2>/dev/null || true)
         [[ -z "$url" && $i -lt $RUN_LOOKUP_RETRIES ]] || break
         sleep 5
       done
       [[ -n "$url" ]] || url="https://github.com/$REPO/actions/workflows/$CI_FILE?query=branch%3A$branch"
-      if [[ "$kind" == mac-dispatch ]]; then
-        comment_once "$n" "Fast lane: this PR changes $what, shared by every app's window, so it needs a green macOS run on its head $head. The lane dispatched CI on $branch: $url. A later sweep merges this PR once that run's macOS job passes on this head; a new push gets a new run."
+      if [[ "$kind" == linux-dispatch ]]; then
+        comment_once "$n" "Fast lane: the head $head is the lane's merge of $BASE_BRANCH into $branch, so its proof is a Linux check, started now: $url. A later sweep merges this PR once it passes (a code PR gets its macOS build on this head first)."
       else
         comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
       fi
       ;;
-    mac-gate)
-      # The label stays: a push gets a new run on the new head, and a later sweep merges it once green.
-      comment_once "$n" "Fast lane: waiting for macOS proof. This PR $rest."
+    build-gate)
+      # The label stays: a push gets a new build on the new head, and a later sweep merges it once it compiles.
+      comment_once "$n" "Fast lane: waiting for a macOS build. This PR $rest."
       ;;
     not-eligible)
       write gh pr edit "$n" -R "$REPO" --remove-label "$LABEL" || log "could not remove label"
@@ -868,50 +1076,70 @@ evaluate() {
       fi
       ;;
     eligible)
-      local lines files proof
-      IFS='|' read -r lines files proof <<<"$rest"
-      # Squash message = PR title + body, minus any AI attribution lines.
-      local title body
-      title=$(gh pr view "$n" -R "$REPO" --json title --jq .title)
-      body=$(gh pr view "$n" -R "$REPO" --json body --jq .body | strip_attribution)
-      # A lead's closing keyword before a feature-lead issue becomes Refs, in the body and so
-      # in the squash message. An issue whose labels can't be read keeps its keyword.
-      local lead=0
-      if grep -qE "$LEAD_RE" <<<"$body"; then
-        lead=1
-        lead_issues "$body"
-        body=$(lead_refs "$LEAD_FEATURES" <<<"$body")
-        [[ -z "$LEAD_UNREAD" ]] || comment_once "$n" "Fast lane: could not read the labels of $LEAD_UNREAD, so the closing keyword before it stays and the lane closes none of them. A PR must never close a $FEATURE_ISSUE_LABEL issue: if one is, reopen it after the merge."
-      fi
-      # Cloud sessions append a "Generated by Claude Code" footer to the PR body; drop it there too.
-      write gh pr edit "$n" -R "$REPO" --body "$body" || log "could not strip attribution from the PR body"
-      # A failed merge (head moved, or the base changed under it) is left for the next sweep.
-      if ! write gh pr merge "$n" -R "$REPO" --squash --delete-branch=false --match-head-commit "$head" \
-          --subject "$title (#$n)" --body "$body"; then
-        log "merge failed; the next sweep looks again"; rm -rf "$tmp"; return
-      fi
-      MERGED_ANY=1
-      MERGED_RUN=$((MERGED_RUN + 1))
-      # GITHUB_TOKEN merges fire no workflows; a finished feature or a UI change gets a CI run.
-      if jq -e --arg l "$FEATURE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
-        DISPATCH_FEATURE=1
-      fi
-      if grep -qE "$UI_RE" "$tmp/files.txt"; then DISPATCH_UI=1; fi
-      # GitHub does not auto-close linked issues when GITHUB_TOKEN merges, so close them here.
-      # For a lead's PR only issues known not to be feature-lead: GitHub may still list one
-      # whose keyword lead_refs just rewrote, or one linked by hand.
-      local issue
-      for issue in $(gh pr view "$n" -R "$REPO" --json closingIssuesReferences --jq '.closingIssuesReferences[].number'); do
-        if (( lead )) && ! { issue_is_feature "$REPO#$issue" && [[ "$FEATURE" == n ]]; }; then
-          log "not closing #$issue: a $FEATURE_ISSUE_LABEL issue, or its labels can't be read"; continue
-        fi
-        write gh issue close "$issue" -R "$REPO" --reason completed --comment "Done in #$n (fast lane)." || log "could not close #$issue"
-        write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
-      done
-      write gh pr edit "$n" -R "$REPO" --add-label "$MERGED_LABEL" || log "could not add $MERGED_LABEL label"
-      comment_once "$n" "Fast lane: merged into $BASE_BRANCH ($lines lines, $files files, $proof)."
+      # settle_ready lands it, or batches it with the pass's other eligible PRs.
+      READY+=("$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|${rest#*|*|}")
       ;;
   esac
+  rm -rf "$tmp"
+}
+
+# land <n> <head> <proof>: squash-merges PR <n> at <head> into BASE_BRANCH with
+# the bookkeeping: attribution stripped from the squash message, a lead's
+# closing keywords before feature-lead issues turned into Refs, linked issues
+# closed, labels, one comment. Non-zero when it did not merge (the head moved,
+# or the base changed under it): the next sweep looks again.
+land() {
+  local n="$1" head="$2" proof="$3" tmp lines files
+  tmp=$(mktemp -d)
+  if ! gh pr view "$n" -R "$REPO" --json labels,additions,deletions,changedFiles >"$tmp/pr.json" 2>/dev/null \
+      || ! gh api "repos/$REPO/pulls/$n/files" --paginate --jq '.[] | .filename' >"$tmp/files.txt" 2>/dev/null; then
+    log "PR #$n: could not read it before the merge; the next sweep looks again"; rm -rf "$tmp"; return 1
+  fi
+  lines=$(jq -r '(.additions // 0) + (.deletions // 0)' "$tmp/pr.json")
+  files=$(jq -r '.changedFiles // 0' "$tmp/pr.json")
+  # Squash message = PR title + body, minus any AI attribution lines.
+  local title body
+  title=$(gh pr view "$n" -R "$REPO" --json title --jq .title)
+  body=$(gh pr view "$n" -R "$REPO" --json body --jq .body | strip_attribution)
+  # A lead's closing keyword before a feature-lead issue becomes Refs, in the body and so
+  # in the squash message. An issue whose labels can't be read keeps its keyword.
+  local lead=0
+  if grep -qE "$LEAD_RE" <<<"$body"; then
+    lead=1
+    lead_issues "$body"
+    body=$(lead_refs "$LEAD_FEATURES" <<<"$body")
+    [[ -z "$LEAD_UNREAD" ]] || comment_once "$n" "Fast lane: could not read the labels of $LEAD_UNREAD, so the closing keyword before it stays and the lane closes none of them. A PR must never close a $FEATURE_ISSUE_LABEL issue: if one is, reopen it after the merge."
+  fi
+  # Cloud sessions append a "Generated by Claude Code" footer to the PR body; drop it there too.
+  write gh pr edit "$n" -R "$REPO" --body "$body" || log "could not strip attribution from the PR body"
+  # A failed merge (head moved, or the base changed under it) is left for the next sweep.
+  if ! write gh pr merge "$n" -R "$REPO" --squash --delete-branch=false --match-head-commit "$head" \
+      --subject "$title (#$n)" --body "$body"; then
+    log "merge failed; the next sweep looks again"; rm -rf "$tmp"; return 1
+  fi
+  MERGED_ANY=1
+  MERGED_RUN=$((MERGED_RUN + 1))
+  # GITHUB_TOKEN merges fire no workflows; a finished feature or a UI change gets a CI run.
+  if jq -e --arg l "$FEATURE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+    DISPATCH_FEATURE=1
+  fi
+  if grep -qE "$UI_RE" "$tmp/files.txt"; then DISPATCH_UI=1; fi
+  # GitHub does not auto-close linked issues when GITHUB_TOKEN merges, so close them here.
+  # For a lead's PR only issues known not to be feature-lead: GitHub may still list one
+  # whose keyword lead_refs just rewrote, or one linked by hand.
+  local issue
+  for issue in $(gh pr view "$n" -R "$REPO" --json closingIssuesReferences --jq '.closingIssuesReferences[].number'); do
+    if (( lead )) && ! { issue_is_feature "$REPO#$issue" && [[ "$FEATURE" == n ]]; }; then
+      log "not closing #$issue: a $FEATURE_ISSUE_LABEL issue, or its labels can't be read"; continue
+    fi
+    write gh issue close "$issue" -R "$REPO" --reason completed --comment "Done in #$n (fast lane)." || log "could not close #$issue"
+    write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
+  done
+  write gh pr edit "$n" -R "$REPO" --add-label "$MERGED_LABEL" || log "could not add $MERGED_LABEL label"
+  if jq -e --arg l "$NEEDS_REBASE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+    write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_REBASE_LABEL" || true
+  fi
+  comment_once "$n" "Fast lane: merged into $BASE_BRANCH ($lines lines, $files files, $proof)."
   rm -rf "$tmp"
 }
 
@@ -950,18 +1178,32 @@ main() {
     esac
     shift
   done
-  if (( ${#prs[@]} == 0 )); then
+  (( DRY_RUN )) || gh auth setup-git >/dev/null 2>&1 || true
+  # A batch a run left behind comes first: its verdict lands or bisects it, and
+  # while it is still running nothing else merges (settle_ready holds). The
+  # open PRs are listed after it, so what it landed isn't looked at again.
+  local br
+  while read -r _ br; do
+    [[ "$br" =~ ^${BATCH_PREFIX}[0-9]+$ ]] || continue  # probes (<batch>-<i>) belong to their batch
+    batch_resume "$br"
+    [[ "$BATCH_STATE" != waiting ]] || HOLD=1
+  done < <(batch_branches)
+  local explicit=${#prs[@]}
+  if (( explicit == 0 )); then
     while read -r n; do [[ -n "$n" ]] && prs+=("$n"); done < <(open_prs)
   fi
-  (( ${#prs[@]} )) || { echo "fast-lane: no open $LABEL PRs" >&2; return 0; }
+  (( ${#prs[@]} )) || { (( HOLD || MERGED_RUN )) || echo "fast-lane: no open $LABEL PRs" >&2; return 0; }
   local n pass
   for n in "${prs[@]}"; do evaluate "$n"; done
+  settle_ready
   # A merge changes every other PR's mergeable state, and GitHub reports
-  # UNKNOWN until it recomputes. Sweep again after any merge, until a pass
-  # merges nothing, so a PR that settles late still merges in this run.
+  # UNKNOWN until it recomputes. Sweep again after any merge (or a lane
+  # integration, whose new head needs its Linux check), until a pass changes
+  # nothing, so a PR that settles late still merges in this run.
   for (( pass = 0; MERGED_ANY && pass < 5; pass++ )); do
     MERGED_ANY=0
     while read -r n; do [[ -n "$n" ]] && evaluate "$n"; done < <(open_prs)
+    settle_ready
   done
   # At most one dispatch per run, and only after a run that merged something.
   (( MERGED_RUN )) || return 0

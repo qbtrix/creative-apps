@@ -11,7 +11,9 @@
 # its class, an owned generated file, the C4 owner opt-in) and the slice checks (a file handed over
 # across a contract-slice wait, two slices that can run at once owning a file,
 # unknown waits, slice size, a task in two slices, journeys, owned in step,
-# cycles). Also: the real repo's parts assemble, and
+# cycles, a "ui" flag that isn't a boolean), and the UI-slice warning (lead.md rule
+# 18: a clean case, a UI slice waiting on its own logic slice, no UI slice, "ui_slice":
+# "none" without a reason, a built feature exempt). Also: the real repo's parts assemble, and
 # the Generated workflow's guards on a scratch git repo: c4-assemble --absorb keeps
 # a part edit, folds a direct model.json edit into the parts, and refuses a part
 # changed both ways; waves render --guard regenerates after a data edit and leaves
@@ -235,6 +237,39 @@ sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "sli
   {"id": "U-a", "behavior": "One.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"], "waits": {"U-b": ["U-1"]}},
   {"id": "U-b", "behavior": "Two.", "tasks": ["U-3", "U-4"], "journeys": ["J4"], "owned": ["M/Ui.swift"], "waits": {"U-a": ["U-3"]}}]}'
 expect "slices: waits that go round fail" 1 "cycle through ui" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"], "ui": true}]}'
+expect "slices: a UI slice marked \"ui\": true passes" 0 "waves: OK" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"], "ui": "yes"}]}'
+expect "slices: a \"ui\" that isn't a boolean fails" 1 'ui:U-a: "ui" must be true or false' python3 "$waves" --root "$s" check
+# lead.md rule 18 (a warning for now): a sliced feature's "ui": true slice waits on
+# no slice of its own feature but the first, or the feature says "ui_slice": "none".
+sfeature win '{"title": "Window", "wave": "0b", '"$base"', "ui_slice": "none", "ui_slice_reason": "Model only", "owned": ["A/Slot.swift", "A/Win.swift"], "slices": [
+  {"id": "W-a", "behavior": "The slot shows.", "tasks": ["W-1", "W-2"], "journeys": ["J1"], "owned": ["A/Slot.swift", "A/Win.swift"]},
+  {"id": "W-b", "behavior": "The window finishes.", "tasks": ["W-3", "W-4"], "journeys": ["J2"], "owned": ["A/Win.swift"], "waits": {"W-a": ["W-3"]}}]}'
+uiwaits() { sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift", "M/View.swift", "M/Live.swift"], "slices": [
+  {"id": "U-a", "behavior": "The contract.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"]},
+  {"id": "U-b", "behavior": "The screen on fakes.", "tasks": ["U-3", "U-4"], "journeys": ["J4"], "owned": ["M/View.swift"], "ui": true, "waits": '"$1"'},
+  {"id": "U-c", "behavior": "The live Model.", "tasks": ["U-5", "U-6"], "journeys": ["J5"], "owned": ["M/Live.swift"], "waits": {"U-a": ["U-5"]}}]}'; }
+uiwaits '{"U-a": ["U-3"], "win:W-b": ["U-4"]}'
+got=$(python3 "$waves" --root "$s" check 2>&1)
+[[ $? == 0 && "$got" == *"waves: OK"* && "$got" != *"warning:"* ]] \
+  && ok "ui slice: a UI slice waiting only on its contract slice (and other features) passes quietly" || bad "ui slice clean case: $got"
+uiwaits '{"U-a": ["U-3"], "U-c": ["U-4"]}'
+expect "ui slice: a UI slice waiting on its own logic slice warns, exit 0" 0 'warning: app/ui: no "ui": true slice that waits only on its contract slice U-a' python3 "$waves" --root "$s" check
+uiwaits '{"ui:U-c": ["U-4"]}'
+expect "ui slice: the <feature>:<slice> form of that wait warns too" 0 "warning: app/ui: no \"ui\": true slice" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"]}]}'
+expect "ui slice: a sliced feature with no UI slice warns" 0 "warning: app/ui: no \"ui\": true slice" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "ui_slice": "none", "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"]}]}'
+expect "ui slice: \"ui_slice\": \"none\" without a reason warns" 0 'needs its reason in "ui_slice_reason"' python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, "status": "built", "feature_issue": "later", "covers": "-", "waits_on": "-", "journeys": ["AppJourneyTests.testSlot"], "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"]}]}'
+got=$(python3 "$waves" --root "$s" check 2>&1)
+[[ $? == 0 && "$got" != *"warning:"* ]] && ok "ui slice: a built feature is exempt" || bad "ui slice built exemption: $got"
 
 # --- the Generated workflow's guards (git history) ----------------------------
 # A scratch repo with scripts/ copied in; commit <msg> commits everything.
