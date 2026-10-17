@@ -23,3 +23,4 @@
 2026-10-17T15:35:38Z	heartbeat	LF-1 #2110 merged; wave 1 done; LF-1d/LF-2 wait #146/#73
 2026-10-17T15:57:04Z	heartbeat	wave 1 merged; #146 #73 still open (LF-1d/LF-2 wait); LF-6 in wave 4
 2026-10-17T16:19:30Z	heartbeat	#146 #73 open; LF-6 waits for wave 4 (after inspector-timeline wave 3 lands)
+2026-10-17T16:37:12Z	heartbeat	LF-1d -> gap #2186, LF-2 -> gap #2187; wave 4 LF-6 launched on 1a4e5e8

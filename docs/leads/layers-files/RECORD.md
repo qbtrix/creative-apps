@@ -4,7 +4,7 @@ Issue: #1516 · Packet: docs/blueprints/flare/features/layers-files.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
 Stage: 3 build (wave 1)
 Base: d2c4fa212a4b4ea55bc551b783fc1c48520e5fbf (origin/dev)
-Next: wave 1 merged; LF-1d/LF-2 if #146/#73 close, LF-6 feature-done in wave 4
+Next: wave 4 LF-6 (feature-done) building on 1a4e5e8; then Anatomy and the contact sheet
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
@@ -16,8 +16,8 @@ No `## Slices` table: v2 packet, v2 loop applies.
 | LF-3 | 1 | FlareNewDocument + Tests, FlareNewSheet, FlareWindow+File, FlareNewSheetSnapshots, +NewSheet | NewDocumentSpec, newDocument(_:), J2 | #2102 | merged |
 | LF-4 | 1 | FlareLoadProgress + Tests, FlareOpenStatus, FlareOpenStatusSnapshots, +OpenErrors | loadProgressDelay, showsLoadProgress, J27 | #2103 | merged |
 | LF-5 | 1 | FlareSaveStatus + Tests, FlareRecovery, FlareRecoverySnapshots, +Recovery | saveStatus, autosave, recovery offer, J28 | #2106 | merged |
-| LF-1d | 2+ | FlareLayerItems, FlareLayersSnapshots, +Scenes | dimmed locked row; waits #146 | | waiting |
-| LF-2 | 2+ | FlareLayerItems, +SceneMenus | row context menus; waits LF-1 and #73 | | waiting |
+| LF-1d | 2+ | FlareLayerItems, FlareLayersSnapshots, +Scenes | dimmed locked row; waits #146 | | gap #2186 |
+| LF-2 | 2+ | FlareLayerItems, +SceneMenus | row context menus; waits LF-1 and #73 | | gap #2187 |
 | LF-6 | 4 | +Loop, packet, wave.json | feature-done, J26 via the sheet; waits LF-1, 3, 4, 5 | | |
 
 ## Reviews
@@ -37,3 +37,4 @@ None.
 ## Open
 - #146 (dimmed sidebar row) open: LF-1d waits.
 - #73 (sidebar row context menus) open: LF-2 waits.
+- Wave 4: #146 and #73 still open, so LF-1d became gap #2186 and LF-2 gap #2187 (p2); LF-6 ships feature-done without them.
