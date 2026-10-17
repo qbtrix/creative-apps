@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-17T20:26Z	check	S-6 waits on #2309 merge
 2026-10-17T20:43:47Z	wave	wave 5 launched on 2fc0629d: s-6 (DW-b now on dev)
 2026-10-17T21:07:05Z	check	wave 5 s-6 building
+2026-10-17T21:07:18Z	pr	S-6 opened #2373 head b1f4a95c, contract check ok
