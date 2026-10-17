@@ -1,10 +1,10 @@
 # suite-contracts lead record
 
 Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
-Run: act-1a14881ad5e-axoa (line lead for suite-contracts, bundle, home; was act-1a1448a5fd9-0he1) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T11:49Z · Resumed: 2026-10-17T06:17Z
+Run: act-1a149c6a2a3-yna2 (line lead for suite-contracts, bundle, home; was act-1a14881ad5e-axoa, act-1a1448a5fd9-0he1) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T11:49Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z
 Stage: done
 Base: 68cabe667bf2de7df53327a947705078d3b08f2b
-Next: none. Belt-Contact-Sheet posted on #1332 (full run 38988895145 on 7ac0a317, green; main promoted). The line lead act-1a14881ad5e-axoa re-checked it on 2026-10-17T06:17Z: nothing left; lead/suite-contracts rebuilt on main 0e3c08ea (records only) so Belt's distance check passes.
+Next: none. Belt-Contact-Sheet posted on #1332 (full run 38988895145 on 7ac0a317, green; main promoted). Line lead act-1a149c6a2a3-yna2 re-checked on 2026-10-17T12:13Z: no open finding for the feature, nothing left.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
