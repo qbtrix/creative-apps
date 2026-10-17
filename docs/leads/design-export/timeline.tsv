@@ -3,3 +3,5 @@ utc	stage	event	ref	note
 2026-10-17T05:59Z	1	stage-start	#1970	reading the packet
 2026-10-17T06:02Z	2	stage-end	#1970	waves planned: 1 DE-0 DE-2; 2 DE-1 DE-8; 3 DE-3 DE-5 DE-9; then DE-6 DE-7 DE-10 DE-11 on the kernel and window waits
 2026-10-17T06:02Z	3	stage-start	wave 1	DE-0, DE-2 builders started
+2026-10-17T06:07Z	3	finding-filed	#1981 #1982 #1983 #1984	the packet's needs-ui and follow-up issues filed
+2026-10-17T06:07Z	3	heartbeat	wave 1	DE-0 and DE-2 builders running; first Linux build took 4m27s

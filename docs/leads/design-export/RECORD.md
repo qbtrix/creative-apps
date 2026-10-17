@@ -42,9 +42,10 @@ Next: wave 1 (DE-0, DE-2) builders are running; when their PRs merge, run the ch
 - DE-2 drops the `DesignExportRun` typealias: SuiteKernel is not on dev (editor-kernel EK-a) and DesignModel can't depend on it without a Package.swift change, which is protected. DE-2b adds the one line later; the App's run (DE-6) waits on it anyway.
 - `exportDefaults` needs one stored field, and an extension can't add one: DE-2 adds `exportOptions` to DesignWorkspace.swift beside `services` (outside the snapshot, so it is never a history step). layers-panel and adopt-kernel-undo also list that file; one added line merges by lines.
 - DE-8 waits on DE-2 rather than all of DE-a: it needs only the export types, and DE-1 is tests alone. It runs in wave 2 beside DE-1.
-- SuiteKernel's target and DesignModel's dependency on it are Package.swift changes: asked of the supervisor on the editor-kernel issue when EK-a lands (Open).
+- editor-kernel EK-1 makes every Model depend on SuiteKernel in Package.swift, so DE-2b needs nothing from the supervisor: it waits on EK-a's Belt-Slice-Done line alone.
 
 ## Open
+- Follow-ups filed (the packet's list): #1981 SuiteUI ExportSheet scope and scale rows (needs-ui); #1982 SuiteUI one image file writer (needs-ui); #1983 Library LiveExporter uses UniqueFileNames (line:library); #1984 Design Export… in the top bar (line:design, depends on #339).
 - No Swift toolchain was on the machine; scripts/cloud-setup.sh installed 6.3.3 (first build warming while wave 1 starts).
 - editor-kernel (#1933) has no SuiteKernel on dev yet: DE-2 (ExportRun typealias) and DE-6 (ExportSheet) wait on EK-a and EK-chrome.
 - design-window DW-c (DesignWindowOptions.swift), files-history FH-b, snapping SN-c and canvas-basics CB-c are not merged: DE-6 waits.
