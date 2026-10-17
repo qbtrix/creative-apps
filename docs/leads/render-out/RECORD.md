@@ -1,9 +1,9 @@
 # render-out lead record
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
-Run: act-1a1487bf880-qmey (line lead for #1035, #1509, #1505; earlier run act-1a1429c87eb-3ecm planned) · Session: claude/halo-feature-lead-run-j7dyv1 · Started: 2026-10-17T06:05Z
+Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
 Stage: 3 wave 1
-Base: b8dfb4f0ed86c0db148446c4b4e95557c2f440d0 (origin/dev at 2026-10-17T06:15Z)
+Base: 042423165693f2f1d65d2ece90eb0d5bcb910554 (origin/dev at 2026-10-17T11:56Z)
 Next: wave 1 running (RO-1, RO-2, RO-3 beside text-layers' TX-1 to TX-4); when the lane has merged them, run the check and start wave 2 (RO-4, RO-5 beside TX-5, TX-6)
 
 ## Tasks
@@ -28,6 +28,7 @@ Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0
 | – | – | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-17T11:56Z rule 20: HaloModel links SuiteModel (Package.swift gives every <X>Model the SuiteModel dependency), so RO-3's renderOutputName and RO-1's file-name sanitizing call SuiteModel's UniqueFileNames.name(_:extension:among:) (#1987) instead of a Halo copy. The PNG sequence's `_0001` frame suffix stays Halo-local.
 - 2026-10-17T06:05Z: line lead for #1035 (done, supervisor decision 06:06Z), #1509 and #1505 in one run. Waits met: #1035 done, #333 closed (#877 merged). PRs base `dev` (the lane merges into dev and retargets `main`).
 - No Swift on this box at launch; installed swift 6.3.3 under /opt/swift so `scripts/ci` can run the Model tests.
 - Unchained RO-7 from RO-6 (packets.md rule (b)): RO-7's code needs only RO-1 and RO-5; its test compares frame 0 against the same bytes RO-6 writes (`render` → `rgba8`), so both writers build in wave 3 and the chain drops from 6 to 5.
