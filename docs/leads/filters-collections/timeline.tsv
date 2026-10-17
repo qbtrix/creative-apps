@@ -1,0 +1,5 @@
+utc	stage	event	ref	note
+2026-10-17T03:09Z	0	stage-start	-	lead branch created from origin/dev 06371387
+2026-10-17T03:09Z	0	stage-end	-	no lead/filters-collections existed on the remote, so RECORD.md was written from the template
+2026-10-17T03:09Z	2	pr-opened	-	none; FC-1 committed as 711d58b4
+2026-10-17T03:09Z	2	stage-end	-	FC-1 tests pass on dev base; FC-2 next
