@@ -3,8 +3,9 @@
 // the "Preview data" pill only on the fakes; LauncherServices seeds a fixture,
 // is no preview, and its tiles are disabled while `sending` is pending. The
 // cards' captions and tooltips (#1758), the search line (#1765) and the
-// missing notice's Locate… (#1759) are checked on HomeGrid's mapping; the
-// empty state's sentence says why Open… waits (#1754). macOS only.
+// missing notice's Locate… (#1759) are checked on HomeGrid's mapping; "removed"
+// is SJ1 step 5's Remove of the missing Cards.design with its Undo notice (#1870,
+// #1865); the empty state's sentence says why Open… waits (#1754). macOS only.
 import AppKit
 import SuiteModel
 import SuiteUI
@@ -64,14 +65,21 @@ import Testing
         #expect(filter.state.cards.count == 1)
         shoot(filter, services, name: "filter")
 
+        // #1870: as SJ1 step 5 runs it, Return on the missing Cards.design, its notice, then Remove.
         let own = SuiteServices.fake(recents: week)  // its own store: the remove doesn't reach the others
-        let removed = await model(own)
-        removed.select(removed.state.cards.first?.item.ref.fileID)
+        let removed = await model(own, missing: ["Cards.design"])
+        removed.select(removed.state.cards.first { $0.item.ref.displayName == "Cards.design" }?.item.ref.fileID)
+        await removed.openSelection(now: now)
+        #expect(removed.message == .fileMissing(name: "Cards.design"))
         await removed.removeSelection(now: now)
         #expect(removed.state.cards.count == 7)
+        #expect(!removed.state.cards.contains { $0.item.ref.displayName == "Cards.design" })
+        #expect(removed.state.cards.contains { $0.item.ref.displayName == "Logo.design" })
+        // #1865: the notice names the removed file and offers Undo.
+        #expect(removed.message == nil && removed.removedNotice == "Cards.design removed from Recents.")
         shoot(removed, own, name: "removed")
         await removed.undoRemove(now: now)
-        #expect(removed.state.cards.count == 8)
+        #expect(removed.state.cards.count == 8 && removed.removedNotice == nil)
 
         let missing = await model(services, missing: ["Cards.design"])
         let cards = missing.state.cards.first { $0.item.ref.displayName == "Cards.design" }
@@ -108,11 +116,23 @@ import Testing
     @Test func searchShowsTheQueryAndMissingOffersLocate() async {
         let search = await model(SuiteServices.fake(recents: week))
         search.search("logo", now: now)
-        #expect(HomeGrid.matching(query: search.query, count: search.state.cards.count) == "Matching \u{201C}logo\u{201D} · 2")
+        #expect(HomeGrid.matching(query: search.query, count: search.state.cards.count) == "2 items matching \u{201C}logo\u{201D}")
+        #expect(HomeGrid.matching(query: "logo", count: 1) == "1 item matching \u{201C}logo\u{201D}")
         #expect(HomeGrid.matching(query: "", count: 8) == nil)
         #expect(HomeGrid.noticeActions(.fileMissing(name: "Cards.design"), hasSelection: true)
                 == ["afterglow.home.locate", "afterglow.home.remove"])
         #expect(HomeGrid.noticeActions(.fileMissing(name: "Cards.design"), hasSelection: false).isEmpty)
+    }
+
+    /// #1871: the notice is InlineNotice #780's placeholder in Library's shape, not a tinted slab.
+    @Test func noticeIsNoTintedBand() throws {
+        var root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+        while root.path != "/", !FileManager.default.fileExists(atPath: root.appendingPathComponent("Package.swift").path) {
+            root = root.deletingLastPathComponent()
+        }
+        let grid = try String(contentsOf: root.appendingPathComponent("Sources/AfterGlowApp/HomeGrid.swift"), encoding: .utf8)
+        #expect(!grid.contains("Tint, in:"))
+        #expect(grid.contains("Label(text, systemImage: systemImage).font(SuiteFont.caption)"))
     }
 
     @Test func previewPillOnlyOnTheFakesAndAFixtureSeedsTheLiveStore() async throws {

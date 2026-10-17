@@ -1,7 +1,8 @@
 // HomeGrid.swift: the recents (blueprint suite.md 6.1): RECENT with the
 // "Preview data" label on the fakes (a plain placeholder until SuiteUI has a
 // standalone StatusPill, #1790), the app chips, a message in place
-// (InlineNotice #780's placeholder), then the grid, the empty sentence with
+// (InlineNotice #780's placeholder: the missing file, or the removed one with
+// Undo), then the grid, the empty sentence with
 // Open… prominent (while it waits, the sentence says why instead of inviting
 // it, #1754), or the no-match sentence. "Missing" sits in a missing
 // card's caption until ThumbnailBadges has its badge (#804); until then a
@@ -24,7 +25,11 @@ struct HomeGrid: View {
             header
             ChipRow(chips) { model.filter(SuiteApp(rawValue: $0), now: Date()) }
                 .suiteControl(id: "afterglow.home.filter", enabled: true, reason: nil, identifies: false)
-            if let message = model.message { notice(message) }
+            if let message = model.message {
+                notice(message)
+            } else if let removed = model.removedNotice {
+                removedNotice(removed)
+            }
             if !model.state.cards.isEmpty {
                 ThumbnailGrid(
                     model.state.cards.map(item), cellSize: cellSize, selection: Set(model.selection.map { [$0] } ?? []),
@@ -83,10 +88,8 @@ struct HomeGrid: View {
             isUnreadable: card.isMissing)
     }
 
-    /// "Matching “logo” · 2" beside RECENT while a search is on; nil without one.
-    static func matching(query: String, count: Int) -> String? {
-        query.isEmpty ? nil : "Matching \u{201C}\(query)\u{201D} · \(count)"
-    }
+    /// "2 items matching “logo”" beside RECENT while a search is on; nil without one (HomeModel's, #1866).
+    static func matching(query: String, count: Int) -> String? { HomeModel.matching(query: query, count: count) }
 
     /// The empty state's text: the model's sentence, saying why Open… waits while it can't act.
     static func emptyMessage(_ model: HomeModel, open: ToolbarAction) -> String {
@@ -117,11 +120,7 @@ struct HomeGrid: View {
     }
 
     private func notice(_ message: SuiteError) -> some View {
-        HStack(spacing: SuiteSpacing.s) {
-            Label { Text(message.message) } icon: {
-                Image(systemName: "exclamationmark.triangle").foregroundStyle(SuiteColor.stateWarning)
-            }
-            Spacer(minLength: SuiteSpacing.s)
+        noticeRow(message.message, systemImage: "exclamationmark.triangle", color: SuiteColor.stateWarning) {
             if !Self.noticeActions(message, hasSelection: model.selection != nil).isEmpty {
                 if let ref = selectedRef {
                     Button("Locate…") { HomeInspector.locate(ref, model: model) }
@@ -131,7 +130,26 @@ struct HomeGrid: View {
                     .suiteControl(id: "afterglow.home.remove", enabled: true, reason: nil)
             }
         }
-        .padding(SuiteInset.card)
-        .background(SuiteColor.warningTint, in: RoundedRectangle(cornerRadius: SuiteRadius.control))
+    }
+
+    /// After Remove from Recents (#1865): says which file went, with Undo beside it.
+    private func removedNotice(_ text: String) -> some View {
+        noticeRow(text, systemImage: "trash", color: SuiteColor.textSecondary) {
+            Button("Undo") { Task { await model.undoRemove(now: Date()) } }
+                .suiteControl(id: "afterglow.home.undo-remove", enabled: true, reason: nil)
+        }
+    }
+
+    /// InlineNotice #780's placeholder, as Library's notice row draws it (#1871):
+    /// a caption-sized label in the state color and its buttons, no tinted fill.
+    private func noticeRow<Actions: View>(_ text: String, systemImage: String, color: Color,
+                                          @ViewBuilder actions: () -> Actions) -> some View {
+        HStack(spacing: SuiteSpacing.s) {
+            Label(text, systemImage: systemImage).font(SuiteFont.caption).foregroundStyle(color).lineLimit(2)
+            Spacer(minLength: SuiteSpacing.s)
+            actions()
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("afterglow.home.notice")
     }
 }

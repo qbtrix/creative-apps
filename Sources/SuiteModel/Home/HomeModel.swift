@@ -37,6 +37,17 @@ public final class HomeModel {
     /// Whether Edit > Undo can put back the last removed card.
     public var canUndoRemove: Bool { lastRemoved != nil }
 
+    /// "Logo.design removed from Recents." while Undo can put it back (#1865); nil otherwise.
+    public var removedNotice: String? { lastRemoved.map { "\($0.ref.displayName) removed from Recents." } }
+
+    /// The search line beside RECENT: "2 items matching “logo”" while a search is on (#1866).
+    public var matching: String? { Self.matching(query: query, count: state.cards.count) }
+
+    /// "1 item matching “q”" / "N items matching “q”"; nil for an empty query.
+    public static func matching(query: String, count: Int) -> String? {
+        query.isEmpty ? nil : "\(count) \(count == 1 ? "item" : "items") matching \u{201C}\(query)\u{201D}"
+    }
+
     public func reload(now: Date) async {
         do { recents = try await services.recents.list() } catch { message = error }
         order = Self.ordered((try? await services.preferences.load())?.homeOrder ?? SuiteApp.apps)
