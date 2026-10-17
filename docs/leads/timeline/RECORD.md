@@ -1,10 +1,10 @@
 # timeline lead record
 
 Issue: #1480 · Packet: docs/blueprints/suiteui/features/timeline.md
-Run: act-1a1487bf89a-zfq8 (line lead with #1079, #1941; earlier runs act-1a145e74c2e-oyc0) · Session: claude/suiteui-feature-lead-t357v5 · Started: 2026-10-16T18:10Z (this run 2026-10-17T06:10Z)
-Stage: 3 wave 10
+Run: act-1a149babb21-udz7 (line lead with #1079, #1480, #1596; earlier act-1a1487bf89a-zfq8) · Session: claude/suiteui-feature-lead-t357v5 · Started: 2026-10-16T18:10Z (this run 2026-10-17T06:10Z)
+Stage: 3 wave 11
 Base: fe0f5f176a95336c77a1d0cff7162e584db1d24c
-Next: read the wave-10 workflow (TL-20 PR, the 7-finding fix batch, TL-a and TL-e panels); then the check, then wave 11 (TL-21 + fixes)
+Next: wave 11 (fixes only: 9 suiteui findings open, over 5): fix-2002 (#2012 #2014, TL-20 regression) and fix-w11 (#1781 #1783 #1795 #1796 #1813, gaps #1782 #1784); TL-21 waits until open findings are 5 or fewer
 
 TL-a to TL-e are merged-done on full run 39001215720 (bd11faf7, Linux green); their `Belt-Slice-Done:` and `Mac-Finish-Wanted:` lines are on #1480 (2026-10-17T06:3xZ), with `Mutate: macOS pending` per the Q10 decision. TL-f (the 2026-10-17 amendment) is the work left: TL-20 → TL-21 → TL-22 → TL-23 (`feature-done`), one per wave, then the contact sheet.
 
