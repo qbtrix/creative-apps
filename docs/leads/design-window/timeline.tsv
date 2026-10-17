@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-17T16:48Z	heartbeat	heartbeat: #2168 build 39048879204 success, #2163 build success; both awaiting lane merge sweep; wave 2 holds until #2168 on dev; dev head 1a4e5e89
 2026-10-17T17:03Z	heartbeat	heartbeat: #2163/#2168 not merged; lane bisecting batch 20261017163800, #2163 probe run 39051918154 in progress; wave 2 still holds
 2026-10-17T17:16Z	heartbeat	merged: #2163 D0-5b as 53e3127e. #2168 still queued in lane (build green, no needs-fix); wave 2 holds for #2168
+2026-10-17T17:31Z	heartbeat	stage 3 heartbeat: #2166 and #2168 merged; dw wave 2 and cg C-1 launched; design-seams merged; findings 0 open
