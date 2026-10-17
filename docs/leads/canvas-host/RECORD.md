@@ -46,3 +46,5 @@ Next: wave 2 (CH-2, CH-6, CH-8) once suiteui open findings are 5 or fewer (after
 3. **canvas-marks not built.** Its wave.json is `planned` with no slices. CH-a's feature-level wait on it is unmet; CH-1 and CH-2 are not blocked by it at task level. Confirm before CH-a's wave 1 merges.
 4. **No macOS here.** The UI slices (CH-b, CH-c, CH-d) cannot be compiled or snapshotted on this Linux worker. Their journeys and render budgets need the lane's build-only run and the Mac finisher.
 5. **No PRs opened yet.** The session rules say not to open a PR unless asked, so the swarm stops at wave 1 until the supervisor confirms that PRs with the `fast-lane` label are wanted.
+
+- 2026-10-17T13:44Z heartbeat: wave 2 (CH-2, CH-6, CH-8) still held. Open suiteui findings are 7; #2048 closes 6 of them. Next: start wave 2 once #2048 merges.
