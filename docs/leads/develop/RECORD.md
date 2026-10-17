@@ -2,7 +2,7 @@
 
 Issue: #1527 · Packet: docs/blueprints/library/features/develop.md
 Run: act-1a147b7188d-pjro · Session: claude/library-feature-lead-agcik2 · Started: 2026-10-17T02:36Z
-Stage: 0 setup
+Stage: 0 setup (re-checked at dev 82ac5055, 2026-10-17T03:08Z: still blocked)
 Base: 37d996308670a9e50012b28d830fcd8736299b02 (origin/main; origin/dev is bc04c7d4)
 Next: wait for spine (#1044), persist, thumbnails and loupe-viewport to merge DV-a's waits; then re-run stage 0.4
 

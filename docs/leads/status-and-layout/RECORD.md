@@ -2,7 +2,7 @@
 
 Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a147b7188d-pjro · Session: claude/library-feature-lead-agcik2 · Started: 2026-10-17T02:36Z
-Stage: 0 setup
+Stage: 0 setup (re-checked at dev 82ac5055, 2026-10-17T03:08Z: still blocked)
 Base: 37d996308670a9e50012b28d830fcd8736299b02 (origin/main; origin/dev is bc04c7d4)
 Next: wait for spine (#1044, status building) to merge SL-1/SL-2, and for thumbnails and loupe-viewport; then re-run stage 0.4
 

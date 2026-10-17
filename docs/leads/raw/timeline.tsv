@@ -1,3 +1,4 @@
 utc	stage	event	ref	note
 2026-10-17T02:36Z	0	stage-start	#1530	setup; base 37d9963; all dependencies unmerged
 2026-10-17T02:36Z	0	stage-end		blocked, no task started
+2026-10-17T03:08Z	0	heartbeat		resumed; re-checked waits at dev 82ac5055: unmerged
