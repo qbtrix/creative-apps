@@ -1,0 +1,5 @@
+[
+{"label":"an adjustment layer's kind label drops its kind","file":"Sources/PhotoModel/PhotoAdjustmentLayer.swift","find":"return kinds.isEmpty ? \"Adjustment layer\" : \"\\(kinds.joined(separator: \", \")) adjustment layer\"","replace":"return \"Adjustment layer\"","tests":"PhotoLayerRowLabelTests"},
+{"label":"the blend summary's tooltip drops the word opacity","file":"Sources/PhotoModel/PhotoAdjustmentLayer.swift","find":"help: \"Blend mode \\(mode), opacity \\(percent)\")","replace":"help: \"\\(mode) \\(percent)\")","tests":"PhotoLayerRowLabelTests"},
+{"label":"a Normal layer at 100% shows a summary","file":"Sources/PhotoModel/PhotoAdjustmentLayer.swift","find":"layers[at].blendMode != .normal || layers[at].opacity < 1 else { return nil }","replace":"true else { return nil }","tests":"PhotoLayerRowLabelTests"}
+]

@@ -47,9 +47,9 @@ extension PhotoJourneyTests {
         XCTAssert(adjWaitUntil { curves.frame.minY < background.frame.minY }, "Curves 1 isn't above Background")
         let kind = photo.app.descendants(matching: .any).matching(NSPredicate(
             format: "identifier BEGINSWITH %@ AND identifier ENDSWITH %@ AND label == %@",
-            "photo.layer.", ".kind", "Adjustment layer")).firstMatch
-        XCTAssert(kind.waitForExistence(timeout: 5), "no photo.layer.<id>.kind reads Adjustment layer")
-        XCTAssert(abs(kind.frame.midY - curves.frame.midY) < 12, "the Adjustment layer kind isn't on Curves 1's row")
+            "photo.layer.", ".kind", "Curves adjustment layer")).firstMatch
+        XCTAssert(kind.waitForExistence(timeout: 5), "no photo.layer.<id>.kind reads Curves adjustment layer")
+        XCTAssert(abs(kind.frame.midY - curves.frame.midY) < 12, "the Curves adjustment layer kind isn't on Curves 1's row")
         photo.shot("adjlayer-added")
         adjExpectHeader("Curves 1", "Adjusts the layers below", photo)
         XCTAssert(photo.element("photo.curves").waitForExistence(timeout: 5), "the inspector shows no Curves")
