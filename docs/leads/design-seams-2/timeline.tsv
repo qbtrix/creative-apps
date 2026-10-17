@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-16T20:49Z	0	stage-start		setup; branch from origin/dev 1d68b22
+2026-10-16T20:49Z	0	stage-end		lead/design-seams-2 created; held on planned waits
+2026-10-16T21:20Z	0	heartbeat		still blocked: no Swift toolchain; supervisor answers pending (base, issue filing)
+2026-10-16T21:50Z	0	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
+2026-10-16T22:29Z	0	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
