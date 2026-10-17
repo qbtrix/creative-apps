@@ -47,5 +47,19 @@
     "find": "return styles.allSatisfy { $0 == style } ? style : nil",
     "replace": "return style",
     "tests": "DesignInspectorSharedValueTests"
+  },
+  {
+    "label": "a page's header line names its size 'Frame', reading as a frame layer's size (#2354)",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "public var inspectorDetails: [String] { [sizeText] }",
+    "replace": "public var inspectorDetails: [String] { [\"Frame \\(sizeText)\"] }",
+    "tests": "DesignInspectorContentTests.swift"
+  },
+  {
+    "label": "a page's header drops its size line",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "public var inspectorDetails: [String] { [sizeText] }",
+    "replace": "public var inspectorDetails: [String] { [] }",
+    "tests": "DesignInspectorContentTests.swift"
   }
 ]

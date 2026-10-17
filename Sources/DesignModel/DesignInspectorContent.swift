@@ -17,8 +17,9 @@ extension DesignNode {
 }
 
 extension DesignPage {
-    /// The header line under the name: "Frame 1440 × 1024 pt".
-    public var inspectorDetails: [String] { ["Frame \(sizeText)"] }
+    /// The header line under the name: the page size, "1440 × 1024 pt". No "Frame" prefix:
+    /// that word names a layer kind, so it read as the size of a frame layer on the page.
+    public var inspectorDetails: [String] { [sizeText] }
 }
 
 extension DesignNodeKind {
