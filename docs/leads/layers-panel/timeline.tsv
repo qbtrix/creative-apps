@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-17T13:14Z	3	heartbeat	polling	waits on EK-tree #1933, DW-a #1494, LL-9
 2026-10-17T13:30Z	3	heartbeat	cd0282c	EK-tree (#1933) and DW-a (#1494) not merged, LL-9 not merged; 0 open findings
 2026-10-17T13:45Z	3	heartbeat	d2c4fa21	DW-a/DW-b, EK-tree, LL-9: none merged or open; 0 open findings
+2026-10-17T14:04Z	layers-panel	check	dev@25b220e4	launch-infra CI findings classified, not ours

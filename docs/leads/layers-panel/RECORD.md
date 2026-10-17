@@ -42,3 +42,4 @@ Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497
 - editor-kernel EK-tree (#1933) not started: L-1, L-2 and so LP-a wait. If the kernel's tree slice slips past this run, the supervisor decides whether L-1 may build an adapter on today's `DesignWorkspace.moveNode` instead.
 - design-window DW-a / DW-b (#1494) not merged: L-4, L-5 and L-7's P3 wait.
 - SuiteUI lists-and-layers LL-9 not merged: L-6 waits; J12's group-row eye step skips naming #589.
+- 2026-10-17T14:04Z heartbeat: dev 25b220e4; no DW-a/DW-b, EK-tree or LL-9 merge or open PR; nothing unblocked. CI findings #2074 #2075 #2083-#2087 (scoped design run 39037761414 at d2c4fa21) all fail at launch: 'Application org.creativesuite.design does not have a process ID'. App-launch infra (bundle packaging, cf #2099 line:suite, after #2073), not in this feature's files and carry no Feature: line; not counted as this feature's findings, not fixed here.
