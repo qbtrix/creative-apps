@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-17T13:44Z	heartbeat	#2048 re-merged dev d2c4fa2, head 3c7b9713, gate pass	findings 7
 2026-10-17T14:08Z	heartbeat	#2048 macOS build fix, head ff00c03f, gate pass	findings 7
 2026-10-17T14:29Z	heartbeat	#2048 macOS build 39040114342 running	findings 7
+2026-10-17T14:55Z	heartbeat	#2048 green (linux + macOS build), awaiting lane sweep	findings 7

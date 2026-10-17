@@ -86,3 +86,5 @@ Waves 1 to 9 as the earlier record (packet waves checked against dev). Wave 10 (
 - 2026-10-17T14:08Z heartbeat: the lane's macOS build 39038062743 of #2048 (3c7b971) failed: TimelineKeyDragTests.swift:109 called mutating release(atDX:) inside #expect. Fixed by binding a let, merged dev 25b220e, gate CI: PASS, pushed ff00c03f, Head moved. Open suiteui findings: 7 (#2048 closes 6). Next: the lane's macOS build of ff00c03f; TL-21 once #2048 merges.
 
 - 2026-10-17T14:29Z heartbeat: #2048 head ff00c03f is mergeable (clean on dev 25b220e). The lane's Linux check 39039476815 has run, and its macOS build 39040114342 started compiling at 14:29. The needs-rebase label is left over from the old head. TL-21 still held: 7 suiteui findings open.
+
+- 2026-10-17T14:55Z heartbeat: #2048 head ff00c03f is green: the lane's Linux check 39039476815 and its macOS build 39040114342 (14:35) both passed. It still merges cleanly onto the new dev 2c5003b. The needs-rebase label doesn't block it (the lane removes it on merge), so a later sweep merges it; the lane is busy with other PRs. TL-21 still held until it merges.
