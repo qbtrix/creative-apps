@@ -1,3 +1,4 @@
 utc	stage	event	ref	note
 2026-10-17T03:58Z	3	stage-start	-	wave 1 begins from dev c5efa4eb
 2026-10-17T05:50Z	3	base-moved	0e3c08ea	dev moved; no Design or SuiteUI files touched; relaunch wave 1
+2026-10-17T05:54Z	3	pr-opened	#1979	task D0-9a, skipped journey, no Fast-Check on Linux
