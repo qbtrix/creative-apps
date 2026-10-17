@@ -67,7 +67,7 @@ public struct SuiteGallery: View {
     @MainActor static let areas: [GalleryPages] = [
         GalleryIndex.pages, GalleryChrome.pages, GalleryInspector.pages, GalleryLists.pages,
         GalleryCanvas.pages, GalleryTimeline.pages, GalleryGraph.pages, GalleryEditorWindow.pages,
-        GalleryAppMarks.pages,
+        GalleryAppMarks.pages, GalleryCanvasHost.pages, GalleryRenderingPane.pages,
     ]
 
     /// All pages by name; `SuiteGalleryTests` checks no two areas declare one name.
