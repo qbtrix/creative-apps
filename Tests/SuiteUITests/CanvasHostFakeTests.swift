@@ -1,7 +1,8 @@
 // CanvasHostFakeTests.swift: the CH-1 fakes keep the promises the contract
 // makes. The twenty content tiles cover the 4096 x 2160 document with no
-// overlap, and the fake preference round-trips a choice and reports device
+// overlap, and the fake preference round-trips a choice, tells observers and reports device
 // loss under Automatic only. macOS only.
+import Combine
 import CoreGraphics
 import SuiteUI
 import Testing
@@ -32,6 +33,16 @@ import Testing
         #expect(preference.choice == .cpu)
     }
 
+    @Test func observersHearEachChoice() {
+        let preference = FakeRenderingPreference(choice: .automatic)
+        let heard = HeardChoices()
+        let token = preference.observe { heard.choices.append($0) }
+        preference.set(.cpu)
+        preference.set(.gpu)
+        #expect(heard.choices == [.cpu, .gpu])
+        token.cancel()
+    }
+
     @Test func deviceLossNotesAutomaticOnly() {
         let automatic = FakeRenderingPreference(choice: .automatic)
         #expect(automatic.status.note == nil)
@@ -44,4 +55,8 @@ import Testing
         #expect(gpu.status.note == nil)
         #expect(gpu.status.active == "GPU")
     }
+}
+
+@MainActor private final class HeardChoices {
+    var choices: [RenderingChoice] = []
 }

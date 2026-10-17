@@ -25,14 +25,6 @@ public struct CanvasTile: Equatable, Sendable {
     public init(rect: CanvasTileRect, image: CGImage?) {
         self.rect = rect; self.image = image
     }
-    public static func == (lhs: CanvasTile, rhs: CanvasTile) -> Bool {
-        guard lhs.rect == rhs.rect else { return false }
-        switch (lhs.image, rhs.image) {
-        case (nil, nil): return true
-        case let (left?, right?): return CFEqual(left, right)
-        default: return false
-        }
-    }
 }
 
 /// What the host draws. Apps conform; the host never reads their models.
@@ -120,7 +112,15 @@ public final class FakeRenderingPreference: RenderingPreferenceReading {
     public func observe(_ onChange: @escaping @Sendable @MainActor (RenderingChoice) -> Void) -> AnyCancellable {
         let id = UUID()
         observers[id] = onChange
-        return AnyCancellable { [weak self] in self?.observers[id] = nil }
+        // AnyCancellable may run this off the main actor (on deinit), so it hops back rather than assume isolation.
+        return AnyCancellable { @Sendable [weak self] in
+            let owner = self
+            Task { @MainActor in owner?.removeObserver(id) }
+        }
+    }
+
+    private func removeObserver(_ id: UUID) {
+        observers[id] = nil
     }
 
     public func loseDevice() {
