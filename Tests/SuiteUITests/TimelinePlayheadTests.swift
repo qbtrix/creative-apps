@@ -116,6 +116,19 @@ import Testing
         #expect(ground.contains(pill.insetBy(dx: -TimelinePlayheadGrab.knockOut, dy: 0)))
         #expect(ground.minY >= 0 && ground.maxY <= SuiteSize.timelineRuler)
         // Beside the pill only the label's text band clears; the ticks under it stay.
-        #expect(grounds.dropFirst().allSatisfy { $0.minY == 0 && $0.maxY <= TimelinePlayheadGrab.labelBand })
+        #expect(grounds.dropFirst().allSatisfy { $0.minY == 0 && $0.maxY < SuiteSize.timelineRuler })
+    }
+
+    /// A label that ends just before the pill keeps its ground: only labels
+    /// the pill touches are knocked out, not every label near it.
+    @Test func aLabelEndingBeforeThePillKeepsItsGround() {
+        let mapping = FrameMapping(duration: 120, frameWidth: 10)
+        let rules = TimelineRulerLabels(mapping: mapping, unit: .frames, fps: 24)
+        guard let label = rules.placed(rules.frames(visibleX: 0...720)).first(where: { $0.frame == 30 }) else {
+            Issue.record("no label at 30")
+            return
+        }
+        let pill = CGRect(x: label.maxX + Double(timelineInset) + 1, y: 2, width: 30, height: SuiteSize.pill)
+        #expect(TimelinePlayheadGrab.grounds(pill: pill, rules: rules, scrollX: 0).count == 1)
     }
 }
