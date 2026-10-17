@@ -14,7 +14,7 @@ Next: wave 1 builds C-2; C-1 (and C-3 after it) waits on design-seams merging D0
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| C-2 | CG-a | 1 | LiveGrouping: group, ungroup, names, refusals | Sources/DesignModel/Live/LiveGrouping.swift; Tests/DesignModelTests/DesignGroupTests.swift; Tests/mutations/DesignModel.LiveGrouping.json | DesignGroupTests | – | building |
+| C-2 | CG-a | 1 | LiveGrouping: group, ungroup, names, refusals | Sources/DesignModel/Live/LiveGrouping.swift; Tests/DesignModelTests/DesignGroupTests.swift; Tests/mutations/DesignModel.LiveGrouping.json | DesignGroupTests | #2166 | open, contract ok |
 | C-1 | CG-a | 2 | LiveDuplicating: duplicate, Option-drag one step | Sources/DesignModel/Live/LiveDuplicating.swift; Tests/DesignModelTests/DesignDuplicateTests.swift; Tests/mutations/DesignModel.LiveDuplicating.json | DesignDuplicateTests | – | waits design-seams |
 | C-3 | CG-a | 3 | LiveClipboard and LayerPayload v1 | Sources/DesignModel/Live/LiveClipboard.swift; Tests/DesignModelTests/DesignPasteboardTests.swift; Tests/mutations/DesignModel.LiveClipboard.json | DesignPasteboardTests | – | waits C-1 (copySubtree) |
 | C-4 | CG-a | 4 | duplicate, group, paste snapshots; Option-drag check | Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift, DesignGroupSnapshots.swift, DesignPasteboardSnapshots.swift, DesignArrangeDragTests.swift | the snapshots | – | waits C-1..C-3, DW-a, DW-b |
