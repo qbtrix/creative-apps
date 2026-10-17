@@ -4,9 +4,11 @@
 // the 24 JPEGs `LibraryFiles.writeShoot` writes, imported on launch
 // (`-LibraryImportOnLaunch`; those shots end `-live`). Step 8 runs on the
 // fakes only (`-LibraryFakeMode fail`): a refused rating shows the cull
-// notice `library.notice` and changes nothing. A photo's cull state is the
-// loupe photo's value (`library.loupe.photo`, ending in its cull summary,
-// "3 stars, Picked") or a grid cell's label and value, which name its marks.
+// notice `library.notice` and changes nothing. The loupe's readout
+// (`library.loupe.position`) reads "<name>  ·  <n> of 24  ·  <cull summary>"
+// (#1678); a photo's cull state is that summary ("3 stars, Picked"), else
+// the loupe photo's value, which ends in it, or a grid cell's label, which
+// names its badges ("2 stars", "Flagged").
 import XCTest
 
 extension LibraryJourneyTests {
@@ -25,7 +27,7 @@ extension LibraryJourneyTests {
         refused.press(character: "3", step: "cull-refused")
         let text = "Couldn't set the rating: this window shows built-in sample data, not photos on disk. Import a folder to rate your own photos."
         let message = refused.element("library.notice").descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@ OR value == %@", text, text)).firstMatch
+            .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text)).firstMatch
         XCTAssert(message.waitForExistence(timeout: 10), "the cull notice (library.notice) doesn't read \"\(text)\"")
         XCTAssert(refused.element("library.notice.close").exists, "the cull notice has no close (library.notice.close)")
         let after = cullValue(refused)
@@ -140,27 +142,39 @@ extension LibraryJourneyTests {
         photo.click()
     }
 
-    /// The loupe's readout names `name` and `position` within five seconds.
-    @MainActor private func expectPosition(_ name: String, _ position: String, _ library: Journey) {
+    /// The loupe's readout, "<name>  ·  <n> of 24  ·  <cull summary>", and its trimmed parts.
+    @MainActor private func readoutParts(_ library: Journey) -> (text: String, parts: [String]) {
         let readout = library.element("library.loupe.position")
+        let value = (readout.value as? String) ?? ""
+        let text = value.isEmpty ? readout.label : value
+        return (text, text.split(separator: "·").map { $0.trimmingCharacters(in: .whitespaces) })
+    }
+
+    /// Within five seconds the readout names `name` and has a part that is
+    /// exactly `position`, so "1 of 24" never matches "11 of 24".
+    @MainActor private func expectPosition(_ name: String, _ position: String, _ library: Journey) {
         var text = ""
         for _ in 0..<25 {
-            let value = (readout.value as? String) ?? ""
-            text = value.isEmpty ? readout.label : value
-            if text.contains(name), text.hasSuffix(position) { return }
+            let read = readoutParts(library)
+            text = read.text
+            if text.contains(name), read.parts.contains(position) { return }
             Thread.sleep(forTimeInterval: 0.2)
         }
         XCTFail("the loupe reads \"\(text)\", not \(name) at \(position)")
     }
 
-    /// The loupe photo's value: its render state, then its cull summary.
+    /// The loupe photo's cull summary: the readout's last part, else the
+    /// photo's value (its render state, then the summary), which XCUITest
+    /// may read empty (#262).
     @MainActor private func cullValue(_ library: Journey) -> String {
+        let read = readoutParts(library)
+        if read.parts.count >= 3, let summary = read.parts.last, !summary.isEmpty { return summary }
         let photo = library.element("library.loupe.photo")
         XCTAssert(photo.waitForExistence(timeout: 5), "no loupe photo (library.loupe.photo)")
         return (photo.value as? String) ?? ""
     }
 
-    /// The loupe photo's value ends `suffix` within five seconds.
+    /// The loupe photo's cull summary ends `suffix` within five seconds.
     @MainActor private func expectValue(endingWith suffix: String, _ library: Journey) {
         var value = ""
         for _ in 0..<25 {
@@ -168,7 +182,7 @@ extension LibraryJourneyTests {
             if value.hasSuffix(suffix) { return }
             Thread.sleep(forTimeInterval: 0.2)
         }
-        XCTFail("the loupe photo's value is \"\(value)\", not ending \(suffix)")
+        XCTFail("the loupe photo's cull summary is \"\(value)\", not ending \(suffix)")
     }
 
     /// The grid cell naming `name`, and `marked` in its label or value when given.
