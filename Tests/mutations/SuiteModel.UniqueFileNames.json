@@ -1,0 +1,23 @@
+[
+  {
+    "label": "takenGetsSuffix",
+    "file": "Sources/SuiteModel/Values/UniqueFileNames.swift",
+    "find": "let taken = Set(existing.map(Self.key))",
+    "replace": "let taken = Set<String>()",
+    "tests": "UniqueFileNamesTests"
+  },
+  {
+    "label": "firstSuffixIsTwo",
+    "file": "Sources/SuiteModel/Values/UniqueFileNames.swift",
+    "find": "var number = 2",
+    "replace": "var number = 1",
+    "tests": "UniqueFileNamesTests"
+  },
+  {
+    "label": "ignoresCase",
+    "file": "Sources/SuiteModel/Values/UniqueFileNames.swift",
+    "find": "name.lowercased()",
+    "replace": "name",
+    "tests": "UniqueFileNamesTests"
+  }
+]

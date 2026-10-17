@@ -36,7 +36,7 @@ final class PhotoCropJourneyTests: XCTestCase {
         let file = folder.appending(path: "beach.png")
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 30), "beach.png didn't open")
+        XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "beach.png didn't open")
         expectText("800 × 600 px", photo, "the status bar shows no 800 × 600 px image size")
 
         // 1. C picks Crop: the four fields, the caption and the six chips.

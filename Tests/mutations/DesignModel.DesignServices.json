@@ -35,10 +35,10 @@
     "tests": "DesignLiveStubTests"
   },
   {
-    "label": "a live tier-2 slot names the wrong feature",
+    "label": "the live export slot stays NotBuilt",
     "file": "Sources/DesignModel/DesignServices.swift",
-    "find": "filing: LiveFiling(), export: NotBuilt(\"Export\")",
-    "replace": "filing: LiveFiling(), export: NotBuilt(\"Exporting\")",
+    "find": "filing: LiveFiling(), export: LiveExport()",
+    "replace": "filing: LiveFiling(), export: NotBuilt(\"Export\")",
     "tests": "DesignLiveStubTests"
   },
   {

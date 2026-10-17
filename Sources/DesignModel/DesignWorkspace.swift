@@ -114,6 +114,9 @@ public struct DesignWorkspace: Sendable, Equatable {
     var placedText: DesignPlacedText?
     /// The use cases this workspace runs on (DesignServices); equal by name, so equality holds.
     public internal(set) var services: DesignServices = .live
+    /// The last export run's options, which the next Export sheet opens with (DesignExport+Kernel).
+    /// Not in the snapshot: undo never touches it.
+    var exportOptions = DesignExportOptions()
 
     public init() {}
 

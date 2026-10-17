@@ -32,7 +32,7 @@ extension PhotoJourneyTests {
         let file = folder.appending(path: "tools.png")
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
+        XCTAssert(photo.window(named: "tools.png").waitForExistence(timeout: 30), "tools.png didn't open")
         let layers = photo.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
         XCTAssert(layers.waitForExistence(timeout: 5), "the sidebar shows no layer list (photo.layers)")
         let background = photo.app.staticTexts["Background"], curves = photo.app.staticTexts["Curves 1"]

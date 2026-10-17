@@ -1,0 +1,30 @@
+[
+  {
+    "label": "the cancellation check between PNG frames is dropped",
+    "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "find": "                try Task.checkCancellation()\n                let list = stage.drawList",
+    "replace": "                let list = stage.drawList",
+    "tests": "LiveExportTests"
+  },
+  {
+    "label": "text is not removed before the exporters run",
+    "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "find": "        let clean = ExportScan.withoutText(document)\n",
+    "replace": "        let clean = document\n",
+    "tests": "LiveExportTests"
+  },
+  {
+    "label": "an SVG export ignores transparentBackground",
+    "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "find": "            if options.transparentBackground { scene.background.a = 0 }\n",
+    "replace": "",
+    "tests": "LiveExportTests"
+  },
+  {
+    "label": "PNG files are named by their index, not the plan's file name",
+    "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "find": "                files.append(ExportFile(name: frame.fileName, data: try rasterizer.png(",
+    "replace": "                files.append(ExportFile(name: \"frame_\\(i).png\", data: try rasterizer.png(",
+    "tests": "LiveExportTests"
+  }
+]

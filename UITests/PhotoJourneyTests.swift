@@ -73,28 +73,31 @@ final class PhotoJourneyTests: XCTestCase {
         // reports "Not built yet (PV-9)." on .live), since XCUITest doesn't read SwiftUI .help reliably.
     }
 
-    /// The sample opened fitted: the picture (suite.canvas) is no larger than
-    /// the canvas viewport (at 100% the 800 x 600 sample would overflow the
-    /// journey window's viewport) and lies inside it and the window, clear of
-    /// the inspector and above the status bar (the Preview data pill). It
-    /// doesn't read the zoom pill: XCUITest doesn't expose that SwiftUI label
-    /// as a static text (#262).
+    /// The sample opened fitted: the canvas (suite.canvas) is no larger than
+    /// the canvas viewport (EditorDetail's suite.viewport; at 100% the 800 x 600
+    /// sample would overflow the journey window's viewport) and lies inside it
+    /// and the window, clear of the inspector and above the status bar (the
+    /// Preview data pill). `suite.canvas` is the whole scroll content, not the
+    /// artboard (see the header of PhotoJourneyTests+Edit.swift), so this
+    /// proves the canvas sits inside the viewport, not that the picture does.
+    /// It doesn't read the zoom pill: XCUITest doesn't expose that SwiftUI
+    /// label as a static text (#262).
     @MainActor private func expectFitted(_ photo: Journey) {
-        let picture = photo.element("suite.canvas").frame
-        let viewport = photo.app.scrollViews.containing(.any, identifier: "suite.canvas").firstMatch
-        XCTAssert(viewport.exists, "no scroll view holds the canvas (suite.canvas)")
+        let canvas = photo.element("suite.canvas").frame
+        let viewport = photo.element("suite.viewport")
+        XCTAssert(viewport.exists, "no canvas viewport (suite.viewport)")
         let room = viewport.frame
-        XCTAssertLessThanOrEqual(picture.width, room.width + 1, "the picture \(picture) is wider than the viewport \(room): not fitted")
-        XCTAssertLessThanOrEqual(picture.height, room.height + 1, "the picture \(picture) is taller than the viewport \(room): not fitted")
+        XCTAssertLessThanOrEqual(canvas.width, room.width + 1, "the canvas \(canvas) is wider than the viewport (suite.viewport) \(room): not fitted")
+        XCTAssertLessThanOrEqual(canvas.height, room.height + 1, "the canvas \(canvas) is taller than the viewport (suite.viewport) \(room): not fitted")
         let slack = { (frame: CGRect) in frame.insetBy(dx: -1, dy: -1) }
-        XCTAssert(slack(viewport.frame).contains(picture), "the picture \(picture) runs outside the canvas viewport \(viewport.frame)")
+        XCTAssert(slack(viewport.frame).contains(canvas), "the canvas \(canvas) runs outside the viewport (suite.viewport) \(viewport.frame)")
         let window = photo.app.windows.firstMatch.frame
-        XCTAssert(slack(window).contains(picture), "the picture \(picture) runs outside the window \(window)")
+        XCTAssert(slack(window).contains(canvas), "the canvas \(canvas) runs outside the window \(window)")
         let inspector = photo.element("suite.inspector").frame
-        XCTAssertFalse(picture.insetBy(dx: 1, dy: 1).intersects(inspector), "the picture \(picture) runs under the inspector \(inspector)")
+        XCTAssertFalse(canvas.insetBy(dx: 1, dy: 1).intersects(inspector), "the canvas \(canvas) runs under the inspector \(inspector)")
         let bar = photo.element("photo.status.preview").frame
-        XCTAssertFalse(picture.insetBy(dx: 1, dy: 1).intersects(bar), "the picture \(picture) runs under the status bar \(bar)")
-        XCTAssertLessThanOrEqual(picture.maxY, bar.minY + 1, "the picture \(picture) reaches below the status bar's top \(bar)")
+        XCTAssertFalse(canvas.insetBy(dx: 1, dy: 1).intersects(bar), "the canvas \(canvas) runs under the status bar \(bar)")
+        XCTAssertLessThanOrEqual(canvas.maxY, bar.minY + 1, "the canvas \(canvas) reaches below the status bar's top \(bar)")
     }
 
     @MainActor func testNewImageAndEveryTool() {
@@ -115,7 +118,7 @@ final class PhotoJourneyTests: XCTestCase {
         let file = try Self.folder().appending(path: "large.png")
         try writeTestPhoto(to: file, width: 4000, height: 3000)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["large.png"].waitForExistence(timeout: 60), "large.png didn't open")
+        XCTAssert(photo.window(named: "large.png").waitForExistence(timeout: 60), "large.png didn't open")
         photo.element("suite.tools").buttons["Brush"].click()
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "no suite.canvas to paint on")
@@ -135,7 +138,7 @@ final class PhotoJourneyTests: XCTestCase {
         let file = try Self.folder().appending(path: "curves.png")
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["curves.png"].waitForExistence(timeout: 30), "curves.png didn't open")
+        XCTAssert(photo.window(named: "curves.png").waitForExistence(timeout: 30), "curves.png didn't open")
         photo.shot("curves-opened")
         let canvas = photo.element("suite.canvas")
         let before = canvas.screenshot().pngRepresentation
@@ -169,7 +172,7 @@ final class PhotoJourneyTests: XCTestCase {
         let original = try Data(contentsOf: file)
         let arguments = photoArguments(open: file, exportTo: exports)
         let photo = Journey("Photo", self, arguments: arguments)
-        XCTAssert(photo.app.windows["journey.png"].waitForExistence(timeout: 30), "journey.png didn't open")
+        XCTAssert(photo.window(named: "journey.png").waitForExistence(timeout: 30), "journey.png didn't open")
         photo.shot("opened")
 
         photo.element("suite.tools").buttons["Brush"].click()
@@ -234,7 +237,7 @@ final class PhotoJourneyTests: XCTestCase {
         // The saved file reopens, with no history.
         photo.app.terminate()
         let reopened = Journey("Photo", self, arguments: photoArguments(open: file, exportTo: exports))
-        XCTAssert(reopened.app.windows["journey.png"].waitForExistence(timeout: 30), "the saved journey.png didn't reopen")
+        XCTAssert(reopened.window(named: "journey.png").waitForExistence(timeout: 30), "the saved journey.png didn't reopen")
         expectHeader("800 × 600 px", reopened, "the reopened journey.png isn't 800 × 600 px")
         expect("photo.bar.undo", reopened, "the reopened window has no Undo button")
         XCTAssertFalse(reopened.app.buttons["photo.bar.undo"].isEnabled, "the reopened file came with undo history")
@@ -252,14 +255,14 @@ final class PhotoJourneyTests: XCTestCase {
         try writeTestPhoto(to: file)
         let original = try Data(contentsOf: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file, saveTo: saves))
-        XCTAssert(photo.app.windows["tools.PNG"].waitForExistence(timeout: 30), "tools.PNG didn't open")
+        XCTAssert(photo.window(named: "tools.PNG").waitForExistence(timeout: 30), "tools.PNG didn't open")
 
         // Shift-Command-S writes a PNG copy, and the window and the image header now name it.
         photo.app.typeKey("s", modifierFlags: [.command, .shift])
         let copy = saves.appending(path: "tools.png")
         XCTAssert(Self.waitForFile(copy), "Save As wrote no tools.png")
         XCTAssertEqual(try Data(contentsOf: copy).prefix(4), Data([0x89, 0x50, 0x4E, 0x47]), "the Save As copy isn't a PNG")
-        XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 5), "the window isn't titled tools.png")
+        XCTAssert(photo.window(named: "tools.png").waitForExistence(timeout: 5), "the window isn't titled tools.png")
         expectHeader("tools.png, ", photo, "the image header doesn't name tools.png")
         photo.shot("saved-as")
 
@@ -290,7 +293,7 @@ final class PhotoJourneyTests: XCTestCase {
         let file = try Self.folder().appending(path: "tools.png")
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
+        XCTAssert(photo.window(named: "tools.png").waitForExistence(timeout: 30), "tools.png didn't open")
         let tools = photo.element("suite.tools").buttons
 
         // Clone (#647): Option-click the yellow sun to sample it, then paint it onto the sky.
@@ -334,7 +337,7 @@ final class PhotoJourneyTests: XCTestCase {
         let file = try Self.folder().appending(path: "straighten.png")
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["straighten.png"].waitForExistence(timeout: 30), "straighten.png didn't open")
+        XCTAssert(photo.window(named: "straighten.png").waitForExistence(timeout: 30), "straighten.png didn't open")
         XCTAssert(photo.app.staticTexts["800 × 600 px"].waitForExistence(timeout: 5), "the status bar shows no image size")
 
         photo.app.menuBars.menuBarItems["Image"].click()
@@ -598,7 +601,7 @@ final class PhotoJourneyTests: XCTestCase {
         let file = try Self.folder().appending(path: "tools.png")
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
+        XCTAssert(photo.window(named: "tools.png").waitForExistence(timeout: 30), "tools.png didn't open")
         photo.shot(step)
         return photo
     }
