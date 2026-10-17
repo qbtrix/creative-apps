@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-17T15:48Z	1	stage-end	#1496	packet read
 2026-10-17T15:48Z	2	stage-end	#1496	plan: W1 C-2
 2026-10-17T15:48Z	3	stage-start	#1496	wave 1
+2026-10-17T15:50Z	3	wave-start	W1	C-2 (workflow wf_a9a4c50c-d7b)
