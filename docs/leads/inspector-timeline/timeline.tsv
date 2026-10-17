@@ -25,3 +25,4 @@
 2026-10-17T15:54:45Z	wave3-prs	#2130 merged; IT-5 #2136, IT-7 #2150, IT-8 #2149 opened (lane, macOS builds); IT-6 blocked on FlareInspector line 75, rerun wdj56smrx on a575d03
 2026-10-17T15:57:04Z	heartbeat	#2130 merged; #2136 #2149 #2150 in lane (macOS builds); IT-6 rerun and IT-4f building; #146 #73 #340 open
 2026-10-17T16:02:15Z	fix	IT-4f #2160 opened (J7 Rotation field query), body cleaned; lane
+2026-10-17T16:03:21Z	pr	IT-6 #2161 opened (SCENE section, one-line FlareInspector change), body cleaned; lane
