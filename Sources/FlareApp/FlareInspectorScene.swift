@@ -56,6 +56,8 @@ struct FlareInspectorScene: View {
                 }
                 .disabled(sizeHelp != nil)
                 .help(sizeHelp ?? "Canvas size presets")
+                // On the grid, so each preset button reads it (SuiteUI has no per-option id yet, #1148).
+                .accessibilityIdentifier("flare.inspector.scene.preset")
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("flare.inspector.scene")

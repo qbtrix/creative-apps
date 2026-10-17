@@ -33,15 +33,19 @@ struct FlareTimeline: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-            HStack(spacing: SuiteSpacing.m) {
+            // No Spacer: its two gaps made the row 14 pt wider than the narrowest column (#2259). The readouts
+            // take the room left and sit at its trailing edge, `s` from the transport at the least.
+            HStack(spacing: SuiteSpacing.s) {
                 FlareTransport(model: model, perform: perform)
-                Spacer(minLength: 0)
-                readout(
-                    model.timecodeParts, label: model.timecode, help: model.timecodeHelp,
-                    identifier: "flare.timeline.timecode")
-                readout(
-                    model.frameReadoutParts, label: model.frameReadout, help: model.frameReadoutHelp, lead: "Frame ",
-                    identifier: "flare.timeline.frame")
+                HStack(spacing: SuiteSpacing.s) {
+                    readout(
+                        model.timecodeParts, label: model.timecode, help: model.timecodeHelp,
+                        identifier: "flare.timeline.timecode")
+                    readout(
+                        model.frameReadoutParts, label: model.frameReadout, help: model.frameReadoutHelp,
+                        lead: "Frame ", identifier: "flare.timeline.frame")
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
             .padding(.horizontal, Self.inset)
             if let error = model.timelineError {

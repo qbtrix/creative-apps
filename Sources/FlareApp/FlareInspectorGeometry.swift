@@ -57,12 +57,19 @@ struct FlareGeometryRow: View {
                 .accessibilityIdentifier("flare.inspector.\(row.name)")
                 .disabled(rowHelp != nil)
                 .help(rowHelp ?? row.title)
+            // No modifier that wraps the pair (`.help`, an identifier): it would make the stopwatch read 56 pt, over
+            // its own diamond (#1282). Each button carries its tooltip; the reason goes to `suite.controls`.
+            let id = "flare.inspector.\(row.name).key"
+            let state = Self.keyState(row.keyState)
             KeyframeButton(
-                row.title, id: "flare.inspector.\(row.name).key", state: Self.keyState(row.keyState),
+                row.title, id: id, state: state,
                 onToggle: { perform(.inspector(.toggleAnimated(row.name))) },
                 onKey: { perform(.inspector(.toggleKey(row.name))) })
                 .disabled(keyHelp != nil)
-                .help(keyHelp ?? "Animate \(row.title)")
+                .suiteControl(id: id, enabled: keyHelp == nil, reason: keyHelp, identifies: false)
+                .suiteControl(
+                    id: state.diamond == nil ? nil : KeyframeButton.diamondID(id), enabled: keyHelp == nil,
+                    reason: keyHelp, identifies: false)
         }
     }
 

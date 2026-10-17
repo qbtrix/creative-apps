@@ -101,11 +101,9 @@ final class FlareDrawJourneys: XCTestCase {
         XCTAssertGreaterThanOrEqual(
             palette.frame.minX, rulerMaxX, "the palette \(palette.frame) covers the vertical ruler (ends at \(rulerMaxX))")
         let window = flare.app.windows.firstMatch.frame
-        // "Zoom 51%" as its label, or, as macOS XCUITest drops a Text's label (#1452), "51%" as its value.
-        let zoom = pane.staticTexts.matching(
-            NSPredicate(format: "label MATCHES 'Zoom [0-9]+%' OR value MATCHES '[0-9]+%'")
-        ).firstMatch
         let size = pane.staticTexts["550 × 400 pt"]
+        XCTAssert(size.waitForExistence(timeout: 5), "the stage's status bar shows no 550 × 400 pt pill")
+        let zoom = zoomPill(before: size, in: pane)
         let preview = flare.element("flare.status.preview")
         for (pill, name) in [(zoom, "zoom percent"), (size, "550 × 400 pt"), (preview, "Preview data")] {
             XCTAssert(pill.waitForExistence(timeout: 5), "the stage's status bar shows no \(name) pill")
@@ -115,6 +113,26 @@ final class FlareDrawJourneys: XCTestCase {
     }
 
     @MainActor private func stage(_ flare: Journey) -> XCUIElement { flare.element("suite.canvas") }
+
+    /// The zoom pill: the status bar's text just before the size pill. Its "Zoom 51%" label doesn't reach macOS
+    /// XCUITest (#1452) and SuiteUI gives it no identifier (#2260), so it reads unnamed (#2236); when XCUITest
+    /// does read a label or value off it, that names a percent.
+    @MainActor private func zoomPill(before size: XCUIElement, in pane: XCUIElement) -> XCUIElement {
+        let row = pane.staticTexts.allElementsBoundByIndex.filter {
+            abs($0.frame.midY - size.frame.midY) < 2 && $0.frame.maxX <= size.frame.minX + 1
+        }
+        guard let zoom = row.max(by: { $0.frame.maxX < $1.frame.maxX }) else {
+            XCTFail("no pill before the size pill \(size.frame) in the status bar (the zoom percent)")
+            return size
+        }
+        for read in [zoom.label, zoom.value as? String ?? ""] where !read.isEmpty {
+            let percent = read.hasPrefix("Zoom ") ? String(read.dropFirst(5)) : read
+            XCTAssert(
+                percent.hasSuffix("%") && Int(percent.dropLast()).map { $0 > 0 } == true,
+                "the pill before the size pill reads \(read), not a zoom percent")
+        }
+        return zoom
+    }
 
     /// The point at (`x`, `y`), fractions of `element`'s size.
     @MainActor private func point(_ x: Double, _ y: Double, on element: XCUIElement) -> XCUICoordinate {

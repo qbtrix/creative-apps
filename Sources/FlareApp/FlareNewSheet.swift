@@ -30,6 +30,8 @@ struct FlareNewSheet: ViewModifier {
 
 struct FlareNewAnimationSheet: View {
     static let custom = "Custom"
+    /// Every preset button's identifier; a journey picks one by it and its title.
+    static let presetID = "flare.new.preset"
     var onCreate: @MainActor (NewDocumentSpec) -> Void
     var onCancel: @MainActor () -> Void
     @State private var spec: NewDocumentSpec
@@ -56,6 +58,8 @@ struct FlareNewAnimationSheet: View {
                 options: CanvasPreset.all.map { InspectorOption(id: $0.name, title: $0.name) }
                     + [InspectorOption(id: Self.custom, title: Self.custom)],
                 selected: spec.preset?.name ?? Self.custom, columns: 3, onSelect: pick)
+                // On the grid, so each preset button reads it (SuiteUI has no per-option id yet, #1148).
+                .accessibilityIdentifier(Self.presetID)
             Form {
                 TextField("Width", text: Binding(get: { widthText }, set: { setWidth($0) }))
                     .accessibilityLabel("Width")

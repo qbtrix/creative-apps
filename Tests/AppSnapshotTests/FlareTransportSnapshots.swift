@@ -11,7 +11,8 @@
 // `statusPills(measuredFPS:)` on `bounce` playing: at a measured 60 the
 // actual-fps pill reads 24 fps plain, at 18 it reads 18 fps in the warning
 // color; on `showcase` the "Text not shown (1)" warning. Writes
-// flare-status-playing.png, flare-status-dropping.png and flare-status-text.png.
+// flare-status-playing.png, flare-status-dropping.png and flare-status-text.png;
+// paused on `bounce`, flare-status-paused-light.png and flare-status-paused-dark.png.
 // macOS only.
 import AppKit
 import FlareModel
@@ -90,6 +91,16 @@ import Testing
         let pills = playing("bounce").statusPills(measuredFPS: 18)
         #expect(pills.actualFPS == "18 fps" && pills.isDropping)
         try snapshot(status(pills), name: "flare-status-dropping", scheme: .dark)
+    }
+
+    /// The stage's status bar paused, in light and dark: zoom, size, aspect and rate in primary text on the pill fill
+    /// (the audit measured a secondary "1:1" at 3.89:1).
+    @Test func statusPaused() throws {
+        let pills = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "bounce"])).statusPills(measuredFPS: nil)
+        #expect(pills.actualFPS == nil && pills.textWarning == nil)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(status(pills), name: "flare-status-paused-\(scheme.name)", scheme: scheme)
+        }
     }
 
     @Test func statusHiddenText() throws {
