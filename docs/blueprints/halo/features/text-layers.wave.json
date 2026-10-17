@@ -2,8 +2,8 @@
   "title": "Text layers",
   "wave": "W2",
   "order": 30,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1509",
   "covers": "#430",
   "waits_on": "layer-keys, viewer-playback, history-files; #333",
   "cells": {
@@ -17,6 +17,7 @@
   ],
   "owned": [
     "Sources/HaloModel/HaloTextEdits.swift",
+    "Sources/HaloModel/HaloTextEdits+Color.swift",
     "Sources/HaloModel/Availability/HaloAvailability+Text.swift",
     "Sources/HaloApp/HaloTextInspector.swift",
     "Sources/HaloApp/HaloTextRasterizer.swift",

@@ -328,9 +328,10 @@
               {
                 "id": "halo-text",
                 "name": "Text layers",
-                "description": "Set a text layer's string and size, each one named step; an empty string is refused.",
+                "description": "Set a text layer's string and size, and the layer color, each one named step; an empty string is refused.",
                 "paths": [
-                  "Sources/HaloModel/HaloTextEdits.swift"
+                  "Sources/HaloModel/HaloTextEdits.swift",
+                  "Sources/HaloModel/HaloTextEdits+Color.swift"
                 ],
                 "status": "planned",
                 "authored": true,
