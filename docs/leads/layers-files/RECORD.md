@@ -2,23 +2,37 @@
 
 Issue: #1516 · Packet: docs/blueprints/flare/features/layers-files.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
-Stage: 1 orient
-Base: 1d68b2288cfe9c31e6b7cea460f5eb1ada5ddd18 (origin/main; origin/dev is 1910bff6)
-Next: read the packet, docs and code; check task waits; canonical search (rule 20); then the stage-2 wave plan
+Stage: 3 build (wave 1)
+Base: d2c4fa212a4b4ea55bc551b783fc1c48520e5fbf (origin/dev)
+Next: wave 1 (LF-1, LF-3, LF-4, LF-5) building beside inspector-timeline wave 1; then LF-1d/LF-2 if #146/#73 close, LF-6 feature-done in wave 4
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
 
 ## Tasks
-None planned yet. Stage 1 (packet read) and stage 2 (wave plan) wait on the dependency.
+| Task | Wave | Files | What | PR | State |
+|---|---|---|---|---|---|
+| LF-1 | 1 | FlareSidebarHelp + Tests, FlareLayerItems, FlareWindow+Layers, FlareLayersSnapshots, +Scenes | removeSceneHelp, layerRowIsDimmed (Model), J16; no visual dimming | | building |
+| LF-3 | 1 | FlareNewDocument + Tests, FlareNewSheet, FlareWindow+File, FlareNewSheetSnapshots, +NewSheet | NewDocumentSpec, newDocument(_:), J2 | | building |
+| LF-4 | 1 | FlareLoadProgress + Tests, FlareOpenStatus, FlareOpenStatusSnapshots, +OpenErrors | loadProgressDelay, showsLoadProgress, J27 | | building |
+| LF-5 | 1 | FlareSaveStatus + Tests, FlareRecovery, FlareRecoverySnapshots, +Recovery | saveStatus, autosave, recovery offer, J28 | | building |
+| LF-1d | 2+ | FlareLayerItems, FlareLayersSnapshots, +Scenes | dimmed locked row; waits #146 | | waiting |
+| LF-2 | 2+ | FlareLayerItems, +SceneMenus | row context menus; waits LF-1 and #73 | | waiting |
+| LF-6 | 4 | +Loop, packet, wave.json | feature-done, J26 via the sheet; waits LF-1, 3, 4, 5 | | |
 
 ## Reviews
 None.
 
 ## Decisions
+- Waves merged with inspector-timeline into one plan (rule 19): w1 LF-1, LF-3, LF-4, LF-5 | IT-0, IT-9a; w2 LF-1d/LF-2 if unblocked | IT-1..IT-4; w3 IT-5..IT-8; w4 LF-6 | IT-10.
+- No stub task (rule 18): every LF task ships its Model file and its UI together and none depends on another's Model.
+- LF-1 split: LF-1 now (help text, dimmed predicate, J16 steps that don't need the look); LF-1d (the dimmed look, snapshot, J16 step) waits on SuiteUI #146. LF-2 waits on SuiteUI #73. Either still blocked at wave 4 becomes a gap and LF-6 ships anyway.
+- Rule 20: FlareSidebarHelp, FlareNewDocument, FlareLoadProgress and FlareSaveStatus are adapters onto the existing FlareScenes/FlareLayers and creative-core document IO; no layer tree or history logic is added. No name hits Tests/canonical-concepts.txt.
 - Depends on draw-key-save is met: its wave.json says built, feature-done #1738 merged, and this run's lead owns all three features; #1365 stays open only until its contact sheet (lane turns Closes into Refs for feature-lead issues).
 - PR base is dev (CLAUDE.md: never target main), builder branches lead/<feature>-<id>.
 - Stopped at stage 0: `Depends on: draw-key-save`, and #1365 is open (draw-key-save.wave.json status `planned`).
 - Status is pushed to the designated branch claude/feature-lead-flare-line-yzaus7, not lead/layers-files, per the session's branch rule.
 
 ## Open
+- #146 (dimmed sidebar row) open: LF-1d waits.
+- #73 (sidebar row context menus) open: LF-2 waits.
