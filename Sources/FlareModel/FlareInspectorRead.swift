@@ -1,6 +1,6 @@
 // FlareInspectorRead.swift: what the inspector's header and info card show (inspector-timeline IT-1). Read-only.
-// IT-0 declares the signature as a stub (lead.md rule 18) built from what the workspace already knows; IT-1 fills
-// in the kind, size and key count without changing it.
+// Nothing selected reads the scene; one layer reads its name, kind, size at the playhead and the keys on its timeline
+// row; several read "<n> layers" with no key count. Inside an edited symbol the layers are the symbol's.
 import FlareCore
 
 /// The inspector header and info card for the current selection, or for the scene when nothing is selected.
@@ -20,13 +20,41 @@ public struct InspectorSummary: Sendable, Equatable {
 }
 
 extension FlareWorkspace {
-    /// Stub (IT-0): the selected layer's name, or the scene's name with `showsScene` when no layer is selected.
+    /// The inspector header and info card: the scene when no layer is selected, else the inspector's layers
+    /// (`propertyLayerIDs`) at the playhead. Several layers of different kinds read "Mixed".
     public var inspectorSummary: InspectorSummary {
-        guard let id = selectedLayerID, let layer = ownerLayers?.first(where: { $0.id == id }) else {
+        let layers = propertyLayerIDs.compactMap { id in ownerLayers?.first { $0.id == id } }
+        guard let first = layers.first else {
             return InspectorSummary(title: selectedScene?.name ?? "", kind: "Scene", frame: currentFrame,
-                                    size: "", keys: nil, showsScene: true)
+                                    size: sceneSizeText ?? "", keys: nil, showsScene: true)
         }
-        return InspectorSummary(title: layer.name, kind: "Shape", frame: currentFrame, size: "", keys: nil,
+        let kind = Set(layers.map(Self.inspectorKind)).count == 1 ? Self.inspectorKind(first) : "Mixed"
+        let size = inspectorBounds(of: layers.map(\.id)).map {
+            "\(Self.whole($0.maxX - $0.minX)) × \(Self.whole($0.maxY - $0.minY)) px"
+        } ?? "–"
+        guard layers.count == 1 else {
+            return InspectorSummary(title: "\(layers.count) layers", kind: kind, frame: currentFrame, size: size,
+                                    keys: nil, showsScene: false)
+        }
+        let keys = timelineRows.first { $0.layerID == first.id }?.keyFrames.count ?? 0
+        return InspectorSummary(title: first.name, kind: kind, frame: currentFrame, size: size, keys: keys,
                                 showsScene: false)
+    }
+
+    /// "Instance" for a layer holding only symbol placements, "Group" for one mixing placements with drawn content,
+    /// else "Shape".
+    static func inspectorKind(_ layer: Layer) -> String {
+        guard !layer.instances.isEmpty else { return "Shape" }
+        return layer.shapes.isEmpty && layer.texts.isEmpty ? "Instance" : "Group"
+    }
+
+    /// The stage selection's box when there is one, else the box of every item on `layerIDs` at the playhead.
+    func inspectorBounds(of layerIDs: [String]) -> Rect? {
+        if !selection.isEmpty { return selectionBounds }
+        guard let sceneID = selectedSceneID, let document else { return nil }
+        let items = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID)
+            .items.map(\.address).filter { layerIDs.contains($0.layerID) }
+        guard !items.isEmpty else { return nil }
+        return services.hits.bounds(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID, of: items)
     }
 }
