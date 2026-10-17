@@ -27,6 +27,11 @@
 // refusal (nothing selected, nothing of Design's to paste) goes to the status
 // line. DesignClosePrompt sits on the root, letting every close through until
 // files-history asks about unsaved changes.
+//
+// Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
+// then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
+// draws, so the window doesn't run per sample. Mouse-up, or the scrub's end
+// run, replays the last one into the workspace as one step (`live.end(into:)`).
 import AppKit
 import DesignModel
 import SuiteUI
@@ -38,6 +43,10 @@ struct DesignWindow: View {
     var launch: DesignLaunch?
 
     @State private var model = DesignWorkspace()
+    /// The drag or scrub shown on a copy until it ends; the canvas reads it from the environment.
+    @State private var live = DesignLiveDrag()
+    /// A test's starting workspace: the window opens it as it is and skips the launch steps.
+    private let seeded: Bool
     @State private var zoom = 1.0
     @State private var viewport = CGSize.zero
     /// A new page waits to be fitted until the canvas has a size.
@@ -64,7 +73,17 @@ struct DesignWindow: View {
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetDesignTests counts an interaction's.
     static var bodyRuns = 0
+    /// The workspace after the last intent; DesignLiveDragTests reads it.
+    static var lastWorkspace: DesignWorkspace?
     #endif
+
+    /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
+    init(launch: DesignLaunch? = nil, seed: DesignWorkspace? = nil, live: DesignLiveDrag = DesignLiveDrag()) {
+        self.launch = launch
+        seeded = seed != nil
+        _model = State(initialValue: seed ?? DesignWorkspace())
+        _live = State(initialValue: live)
+    }
 
     var body: some View {
         #if DEBUG
@@ -85,9 +104,13 @@ struct DesignWindow: View {
         }
         .task { start() }
         .modifier(DesignClosePrompt(model: model))
+        .environment(\.designLiveDrag, live)
     }
 
     private func perform(_ intent: DesignIntent) {
+        #if DEBUG
+        defer { Self.lastWorkspace = model }
+        #endif
         switch intent {
         case .newFile: model.newFile()
         case .open: chooseFile()
@@ -97,8 +120,14 @@ struct DesignWindow: View {
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
         case .drag(let from, let to, let modifiers):
-            model.drag(from: DesignPoint(from), to: DesignPoint(to), modifiers: modifiers)
-        case .endDrag: model.endDrag()
+            let start = DesignPoint(from)
+            if live.workspace == nil {
+                // The press goes to the workspace, so the selection shows at once.
+                model.drag(from: start, to: start, modifiers: modifiers)
+                live.begin(from: model)
+            }
+            live.sample(from: start, to: DesignPoint(to), modifiers: modifiers)
+        case .endDrag: endLive { model.endDrag() }
         case .nudge(let direction, let shift): model.nudge(direction, shift: shift)
         case .deleteSelection: model.deleteSelection()
         case .deselect: model.deselect()
@@ -112,7 +141,7 @@ struct DesignWindow: View {
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
         case .align(let edge): model.alignLayer(edge)
-        case .endEditRun: model.endEditRun()
+        case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
         case .setLocked(let id, let locked): try? model.setNodeLocked(id, locked)
         case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)
@@ -144,6 +173,12 @@ struct DesignWindow: View {
                 if case .alreadyExists = error { note = DesignRefusal.nameTaken(name).help }
             }
         }
+    }
+
+    /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
+    private func endLive(otherwise: () -> Void) {
+        guard live.workspace != nil else { return otherwise() }
+        if let refusal = live.end(into: &model) { note = refusal.help }
     }
 
     /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.
@@ -201,6 +236,10 @@ struct DesignWindow: View {
     private func start() {
         guard !started else { return }
         started = true
+        if seeded {
+            fitPending = true
+            return fit()
+        }
         let options = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments)
         model.useServices(options.services)
         if let file = launch?.file {

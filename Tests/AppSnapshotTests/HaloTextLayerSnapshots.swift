@@ -3,7 +3,8 @@
 // drawing it beside the TEXT section (the field, the "96 px" size bar, the
 // color row) at the inspector's ideal width (halo-text-layer-*), and the
 // same after a blank commit, with "Enter some text." under the field that
-// still holds "Hello" (halo-text-refused-*), and the whole layer inspector
+// still holds "Hello" (halo-text-refused-*), the words in a filled row like
+// Color's rather than a bordered field, and the whole layer inspector
 // then, with that one caption under the field and none under TRANSFORM
 // (halo-text-refused-inspector-*). Light and Dark. Also: the section draws
 // nothing for a solid layer. macOS only.
@@ -49,6 +50,41 @@ import Testing
                     .background(SuiteColor.panel)
                     .padding(SuiteSpacing.xxl),
                 name: "halo-text-refused-inspector-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
+
+    /// The words sit in a filled Studio row like Color's below them, not a
+    /// bordered system field: down a column just inside the rows' leading
+    /// edge, the first row (the field) has the Color row's fill and height.
+    /// Before the fix it was a short white bordered box.
+    @Test func fieldIsAStudioRow() throws {
+        let model = try hello()
+        for scheme in [ColorScheme.light, .dark] {
+            let image = try #require(render(
+                HaloTextInspector(model: model)
+                    .padding(.vertical, SuiteSpacing.m)
+                    .frame(width: SuiteSize.inspectorWidth.ideal)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .background(SuiteColor.panel),
+                scheme: scheme))
+            let x = 16
+            let background = image.colorAt(x: x, y: image.pixelsHigh - 1)
+            var runs: [Range<Int>] = []
+            var start: Int?
+            for y in 0..<image.pixelsHigh {
+                let filled = image.colorAt(x: x, y: y) != background
+                if filled, start == nil { start = y }
+                if !filled, let s = start { runs.append(s..<y); start = nil }
+            }
+            runs.removeAll { $0.count < 16 }  // the TEXT header's glyphs
+            let field = try #require(runs.first, "no rows drawn (\(scheme.name))")
+            let color = try #require(runs.last, "no rows drawn (\(scheme.name))")
+            #expect(runs.count >= 3, "rows at \(runs) (\(scheme.name))")
+            #expect(field.count == color.count, "field row \(field), color row \(color) (\(scheme.name))")
+            #expect(
+                image.colorAt(x: x, y: (field.lowerBound + field.upperBound) / 2)
+                    == image.colorAt(x: x, y: (color.lowerBound + color.upperBound) / 2),
+                "the field's fill differs from the Color row's (\(scheme.name))")
         }
     }
 

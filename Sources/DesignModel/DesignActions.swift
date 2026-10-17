@@ -121,9 +121,13 @@ extension DesignWorkspace {
     mutating func apply(_ edit: DesignEdit, mint: DesignIDMint? = nil) {
         guard let index = pages.firstIndex(where: { $0.id == selectedPageID }) else { return }
         let before = snapshot
-        held.remove(pages[index].nodes)
+        // A style edit keeps every id where it was, so the held ids stand; only a change to the
+        // tree's ids rebuilds them, which on `crowd` is most of a scrub step (#2303).
+        if !Self.sameIDs(pages[index].nodes, edit.nodes) {
+            held.remove(pages[index].nodes)
+            for id in Self.ids(in: edit.nodes) { held.insert(id) }
+        }
         pages[index].nodes = edit.nodes
-        for id in Self.ids(in: edit.nodes) { held.insert(id) }
         selectedNodeIDs = edit.selection
         for id in edit.selection { expandAncestors(of: id, in: edit.nodes) }
         if let mint { nodeCount = Swift.max(nodeCount, mint.counter) }
@@ -156,6 +160,18 @@ extension DesignWorkspace {
     }
 
     private static let finishEditing = "Finish editing the text first."
+
+    /// Whether `old` and `new` hold the same ids in the same places, so they hold the same id set.
+    static func sameIDs(_ old: [DesignNode], _ new: [DesignNode]) -> Bool {
+        guard old.count == new.count else { return false }
+        // Arrays sharing storage are one subtree: an edit copies only the path down to what it changed.
+        let shared = old.withUnsafeBufferPointer { $0.baseAddress } == new.withUnsafeBufferPointer { $0.baseAddress }
+        if shared { return true }
+        for index in old.indices where old[index].id != new[index].id || !sameIDs(old[index].children, new[index].children) {
+            return false
+        }
+        return true
+    }
 
     private static func ids(in nodes: [DesignNode]) -> [String] {
         nodes.flatMap { [$0.id] + ids(in: $0.children) }

@@ -9,6 +9,7 @@
 // three choices reads the backend picked. SP11 drags 600 pt at 300 pt a
 // second and reports the `canvas-drag` series: the `suite.perf` samples when
 // the host records them, else the samples the delegate counted, report-only.
+// Both read the log through `logText`: macOS gives a Text's string as `value`.
 import AppKit
 import XCTest
 
@@ -24,9 +25,10 @@ extension SuiteJourneyTests {
             step: "canvas-host-dragged")
         let log = gallery.element(CanvasHostIDs.log)
         XCTAssert(log.waitForExistence(timeout: 5), "no \(CanvasHostIDs.log) under the canvas")
-        let ends = endDragSamples(in: log.label)
-        XCTAssertEqual(ends.count, 1, "the drag should end once, the log reads: \(log.label)")
-        XCTAssertGreaterThan(ends.first ?? 0, 0, "the drag never reached the delegate, the log reads: \(log.label)")
+        let text = logText(log)
+        let ends = endDragSamples(in: text)
+        XCTAssertEqual(ends.count, 1, "the drag should end once, the log reads: \(text)")
+        XCTAssertGreaterThan(ends.first ?? 0, 0, "the drag never reached the delegate, the log reads: \(text)")
     }
 
     /// SJ28: each pick in the Rendering pull-down moves its status line to the backend picked.
@@ -59,7 +61,8 @@ extension SuiteJourneyTests {
             on: CanvasHostIDs.canvas, from: CGVector(dx: 0.5 - reach / 2, dy: 0.5),
             to: CGVector(dx: 0.5 + reach / 2, dy: 0.5), velocity: velocity, step: "canvas-host-drag-perf")
         let log = gallery.element(CanvasHostIDs.log)
-        let delegated = endDragSamples(in: log.label).last ?? 0
+        let text = logText(log)
+        let delegated = endDragSamples(in: text).last ?? 0
         let probed = gallery.perf()?.latency["canvas-drag"]
         let line = probed.map { "SP11 canvas-drag: samples=\($0.count) frames-late-p95=\($0.p95FramesLate) report-only (suite.perf)" }
             ?? "SP11 canvas-drag: samples=\(delegated) frames-late-p95=n/a report-only (delegate samples; the host records no suite.perf series)"
@@ -68,7 +71,13 @@ extension SuiteJourneyTests {
         attachment.name = "perf-report-canvas-drag"
         attachment.lifetime = .keepAlways
         add(attachment)
-        XCTAssertGreaterThan(probed?.count ?? delegated, 0, "the canvas-drag series is empty, the log reads: \(log.label)")
+        XCTAssertGreaterThan(probed?.count ?? delegated, 0, "the canvas-drag series is empty, the log reads: \(text)")
+    }
+
+    /// The log's text: a SwiftUI `Text` on macOS exposes its string as the element's
+    /// `value` and leaves `label` empty, so read `label` only when it is set.
+    @MainActor private func logText(_ log: XCUIElement) -> String {
+        log.label.isEmpty ? log.value as? String ?? "" : log.label
     }
 
     /// The sample count of each `endDrag after N samples` line in the page's log, oldest first.

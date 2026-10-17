@@ -31,7 +31,7 @@ struct HaloRenderedFrameView: View {
 }
 
 /// The rendered frame over the artboard's fitted frame, and its note under it.
-private struct HaloRenderedImage: View, Equatable {
+struct HaloRenderedImage: View, Equatable {
     let frame: HaloRenderedFrame
     let artboard: CGSize
     let summary: String
@@ -48,12 +48,14 @@ private struct HaloRenderedImage: View, Equatable {
                 .accessibilityValue(summary)
                 .accessibilityIdentifier("halo.viewer.rendered")
                 .aspectRatio(artboard, contentMode: .fit)
-                // Under the artboard, in the canvas inset: the note's top
-                // sits a small gap below the image's bottom edge.
+                // Under the artboard, in the canvas inset: a zero-height
+                // frame on the image's bottom edge that the note hangs from,
+                // a small gap below it, without moving the image.
                 .overlay(alignment: .bottom) {
                     if let note {
                         HaloRenderedNote(text: note)
-                            .alignmentGuide(.bottom) { $0[.top] - SuiteSpacing.xs }
+                            .padding(.top, SuiteSpacing.xs)
+                            .frame(height: .zero, alignment: .top)
                     }
                 }
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)

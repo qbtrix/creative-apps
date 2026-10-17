@@ -1,7 +1,8 @@
 // HaloTextInspector.swift: the TEXT slot of Halo's layer inspector (#430,
 // TX-6). Shown only while a text layer is selected (`model.selectedText`):
-// the TEXT header; a system TextField (`halo.inspector.text.string`) holding
-// a view-local draft of the words kept with the layer it was typed for
+// the TEXT header; a plain TextField in a filled InspectorRow, lit while
+// typing like InspectorColorRow's hex field (`halo.inspector.text.string`),
+// holding a view-local draft of the words kept with the layer it was typed for
 // (HaloTextDraft), sent as .setText on Return and when focus leaves only
 // while that layer is still selected (#2177; a blank commit is refused by
 // the Model and the field goes back to the stored words); an
@@ -17,7 +18,9 @@
 // `model.unavailableHelp(for:)` (the text area's `textHelp`) as help while it
 // can't act. It only reads the model and calls `perform`; it owns the draft
 // and the field's focus. A draft left on another layer neither shows nor
-// commits, and the next keystroke starts a draft for the selected one.
+// commits, and the next keystroke starts a draft for the selected one. A new
+// selection drops the draft, ends editing and rebuilds the field (keyed by
+// `selectedLayerID`), so the old edit buffer never shows on the next layer.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -65,16 +68,24 @@ struct HaloTextInspector: View {
         let words = Binding(
             get: { model.textFieldWords(draft: draft) ?? text.string },
             set: { typed in draft = layerID.map { HaloTextDraft(layerID: $0, words: typed) } })
-        return TextField("Text", text: words)
-            .textFieldStyle(.roundedBorder)
-            .labelsHidden()
-            .focused($editing)
-            .onSubmit(commit)
-            .onChange(of: editing) { _, isEditing in if !isEditing { commit() } }
-            .disabled(help != nil)
-            .help(help ?? "Text")
-            .accessibilityLabel("Text")
-            .haloControl(id: Self.stringID, enabled: help == nil, help: help)
+        return InspectorRow("") {
+            TextField("Text", text: words)
+                .textFieldStyle(.plain)
+                .labelsHidden()
+                .font(SuiteFont.inspectorValue)
+                .focused($editing)
+                .onSubmit(commit)
+                .onChange(of: editing) { _, isEditing in if !isEditing { commit() } }
+                .background {
+                    if editing { RoundedRectangle(cornerRadius: SuiteRadius.field).fill(SuiteColor.fieldActive).padding(-SuiteSpacing.xs) }
+                }
+                .disabled(help != nil)
+                .help(help ?? "Text")
+                .accessibilityLabel("Text")
+                .haloControl(id: Self.stringID, enabled: help == nil, help: help)
+                .id(layerID)
+                .onChange(of: model.selectedLayerID) { reset() }
+        }
     }
 
     /// The size bar, in composition pixels: drags over `sizeBarRange`, types
@@ -113,5 +124,11 @@ struct HaloTextInspector: View {
         guard let pending = draft else { return }
         draft = nil
         if let command = pending.commit(on: model) { perform(command) }
+    }
+
+    /// On a new selection: drops the old layer's draft unsent, then ends editing.
+    private func reset() {
+        draft = nil
+        editing = false
     }
 }
