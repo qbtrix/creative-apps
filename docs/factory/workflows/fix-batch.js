@@ -59,6 +59,12 @@ const FIXED = {
 
 const refs = ns => ns.map(n => '#' + n).join(', ')
 
+const CANON = `Canonical first (docs/factory/lead.md, contract rule 20): a fix never adds a second copy of an editor concept.
+Before writing logic, search SuiteModel, SuiteUI, creative-core and every other app's Model (Sources/*Model/). If one has the
+concept, fix it there or call it; never copy it. Undo and history, selection, the layer tree and parenting, transform with marquee
+and snapping, keyframes and easing, export and crop are editor-kernel concepts, never app-local. scripts/check-dup-logic fails
+a new app-local concept file.`
+
 function fixerPrompt(b) {
   const head = queue
     ? `You fix batch ${b.id} of feature ${args.feature} (feature issue #${args.issue}): finding issues ${refs(b.issues)}.`
@@ -71,6 +77,7 @@ ${b.findings.map((f, i) => `${i + 1}. (${f.severity}, ${f.lens}) ${f.what}\n   w
   const closes = queue ? `one "Fixes #<n>" line per finding issue it fixes, "Refs #${args.issue}", ` : ''
   const slice = queue && b.slices.length ? `Slice: ${b.slices.join(', ')}\n` : ''
   return `${head}
+${CANON}
 
 Step one, before anything else (your worktree starts on the default branch, not on dev):
   git fetch origin dev && git switch -c lead/${args.feature}/${b.id} origin/dev
