@@ -48,3 +48,5 @@ utc	stage	event	ref	note
 2026-10-17T22:11Z	gaps	round 2 was the last: #2419<-#2399 #2420<-#2404 #2421<-#2362 #2422<-#2401 #2423<-#2353 rest #2424<-#2356 #2425<-#2359 #2426<-#2360; findings closed
 2026-10-17T22:18Z	wave	wave 7 started, workflow wiw2mswtf: CI journey findings from scoped 39072517901 (499d955e), checked against dev 178e59db first
 2026-10-17T22:18Z	ci	scoped design 39072517901 success; full CI 39072812111 still pending (no jobs yet); 10 findings open, so no feature tasks
+2026-10-17T22:25Z	wave	wave 7 (wiw2mswtf) done: PR #2444 fixes #2410 (group Layers row accessibility), Fast-Check pass at 16e2a63b
+2026-10-17T22:25Z	wave	wave 7 deferred #2411, #2406, #2352, #2302, #2075 (files busy with open PRs); next wave

@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: wave 7 wiw2mswtf (CI findings #2411 #2410 #2406 #2352 #2302 #2075); lane on #2418 #2417 #2413; D0-7b once findings <=5
+Next: watch lane for #2444/#2418/#2417/#2413; next fix wave for #2411, #2406+#2352, #2302, #2075 once busy files (#2417/#2349/#2413) free; full CI 39072812111 Linux green -> CG-a/SS-a lines
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
