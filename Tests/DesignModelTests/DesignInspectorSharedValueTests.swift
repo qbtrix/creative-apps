@@ -2,7 +2,7 @@
 // layers: the value they all share, or nil ("Mixed") when they differ; the
 // opacity row's percent text; the Text rows' style over the selected text
 // layers only (sharedTextStyle); and the hint the value column shows when the
-// selection can't be edited (#276). On `cards`. Runs on Linux and macOS.
+// selection can't be edited (#276), a hidden group's included. On `cards`. Runs on Linux and macOS.
 import DesignModel
 import Testing
 
@@ -122,6 +122,19 @@ extension DesignWorkspace {
     try workspace.setNodeLocked("node-6", false)
     try workspace.setNodeHidden("node-6", true)
     #expect(workspace.styleHint(.opacity) == "Show E1 to change it.")
+}
+
+@Test func aLayerInsideAHiddenGroupGetsTheHiddenHintOnRowsWhoseHelpIsSilent() throws {
+    var workspace = DesignFixtures.cards
+    workspace.selectItem("node-7")
+    try workspace.setNodeHidden("node-6", true)
+    #expect(workspace.selectedNode?.isHidden == false)
+    // Frame, Fill and Corner Radius have their own help, which doesn't know the group is hidden.
+    #expect(workspace.styleHelp(.frame) == nil)
+    #expect(workspace.styleHelp(.fill) == nil)
+    for property in DesignStyleProperty.allCases {
+        #expect(workspace.styleHint(property) == "Show E1 to change it.", "\(property)")
+    }
 }
 
 @Test func aLockedLayerAmongSeveralSelectedNamesItAndLockedWinsOverHidden() throws {
