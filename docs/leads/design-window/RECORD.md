@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: wave 6 fix round 2 (last) running, workflow wn5bcz05k on dev 2b08e8fd: #2353 #2363 #2362 #2365 #2399 #2401 #2402 #2404 #2405; then file leftovers (#2356 #2359 #2360 and any deferred) as gap; D0-7b once 5 or fewer findings are open; DW-c slice line after D0-7b
+Next: lane on #2418 #2417 #2413; DW-a/DW-b gap mentions; D0-7b once findings <=5
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
