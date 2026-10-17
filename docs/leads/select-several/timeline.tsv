@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-17T15:46Z	0	stage-start	#1495	fresh start, base dd7ec76; S-1..S-4 merged
+2026-10-17T15:48Z	0	stage-end	#1495	S-6 waits on DW-a, DW-b
+2026-10-17T15:48Z	1	stage-end	#1495	packet read
+2026-10-17T15:48Z	2	stage-end	#1495	plan: no task in W1
+2026-10-17T15:48Z	3	stage-start	#1495	wave 1
