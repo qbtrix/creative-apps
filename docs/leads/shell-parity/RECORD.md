@@ -4,13 +4,13 @@ Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a149c0c306-8ckd (before: act-1a1487bf8e3-hwdj; first run act-1a14478b134-5to5) · Session: claude/design-shell-parity-lead-0l668u · Started: 2026-10-16T12:00Z
 Stage: done
 Base: 0e3c08ea52648f6654e583a64ddf07ccb5aa328c
-Next: nothing. Feature done: DP-a done (38956034097), DP-b done with gaps #1452 #1572 #1573 #1617 #1618 #1877 #1878 (38971702274), Belt-Contact-Sheet posted on #1325. The gaps close when SuiteUI #1456 lands. This branch was recut onto main on 2026-10-17 (Belt: 290 commits behind).
+Next: nothing. Feature done: DP-a done (38956034097), DP-b done with gaps #1452 #1572 #1573 #1617 #1618 #1877 #1878 #1993 #1994 (38971702274), Belt-Contact-Sheet posted on #1325. The gaps close when SuiteUI #1456 lands. This branch was recut onto main on 2026-10-17 (Belt: 290 commits behind).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | no | 2 | done | 38956034097 | – |
-| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | no | 2 | done-with-gaps (#1452 #1572 #1573 #1617 #1618 #1877 #1878) | 38971702274 | – |
+| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | no | 2 | done-with-gaps (#1452 #1572 #1573 #1617 #1618 #1877 #1878 #1993 #1994) | 38971702274 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -30,6 +30,7 @@ Next: nothing. Feature done: DP-a done (38956034097), DP-b done with gaps #1452 
 | DP-b | 38991865764 (CI findings) | 6c4ad16a | journey (CI) | #1877, #1878 (same geometry as #1456) | 2 (cap reached: relabelled gap) |
 
 ## Decisions
+- 2026-10-17T13:30Z: CI findings #1993/#1994 (DesignShellJourneyTests light/dark at 93c2103, run 39033633296) repeat #1877/#1878 (SuiteUI #1456). DP-b is past its 2 rounds, so both relabelled `gap` and added to the gap list. No new Design PR.
 - 2026-10-17 relaunch: CI findings #1877 and #1878 (DesignShellJourneyTests light/dark, `suite.inspector` 280 under 304 and the column overlaps) repeat #1572/#1573 at a newer commit. DP-b has used its 2 fix rounds and the cause is SuiteUI's #1456, so both are relabelled `gap` under rule 11 and added to DP-b's gap list. No new Design PR.
 - Belt asked for lead/shell-parity to be rebased onto main: the branch was recut from main 0e3c08e with the docs/leads records carried over (shell-parity, and photo-shell-parity which an earlier lead kept on this branch); docs/leads/switching keeps main's copy.
 - DP-a done on run 38956034097 (successful under the 18:13 policy: journeys report findings, don't fail the run). CI filed #1572/#1573 for DP-b's shell journeys; both relabelled gap (round cap) with #1452. DP-b closes with gaps on the run that contains DS-5 #1610, per the supervisor's "macOS journeys never hold you". #1337 (switcher) merged on dev at 72c5aeab.
