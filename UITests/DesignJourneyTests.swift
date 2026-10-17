@@ -5,7 +5,8 @@
 // open, so the launch check and the tool journey start with New File. The core journey
 // clicks the top bar's New (`design.bar.new`), draws a frame (crossing the page's top
 // edge, so its handles show past it), a rectangle and an ellipse, moves and
-// resizes the ellipse, checks the palette and the status line's tool are back
+// resizes the ellipse, Shift-clicks the rectangle (2 Layers, with the disabled
+// Distribute rows' reason shown as a caption, #2438), checks the palette and the status line's tool are back
 // on Move after each draw and after the text placement (#278), so the move and
 // the press on the committed text select and move rather than draw again; checks the sidebar still marks the current page while the
 // ellipse is selected, finds Add Page and Delete Page (`design.page.add`,
@@ -165,6 +166,13 @@ final class DesignJourneyTests: XCTestCase {
         }
         let both = design.app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR value == %@", "2 Layers", "2 Layers")).firstMatch
         XCTAssert(both.waitForExistence(timeout: 5), "Shift-click didn't add the rectangle to the selection")
+        // Two layers can't distribute: the inspector says why on screen, not only in a tooltip (#2438).
+        let distributeReason = design.element("suite.inspector").descendants(matching: .any)["design.distribute.reason"]
+        XCTAssert(distributeReason.waitForExistence(timeout: 5), "no visible reason under the disabled Distribute rows")
+        let reasonText = "Select three or more layers to distribute."
+        XCTAssert(distributeReason.label == reasonText || (distributeReason.value as? String) == reasonText,
+                  "the Distribute caption reads \(distributeReason.label), not \(reasonText)")
+        XCTAssertFalse(design.app.windows.firstMatch.buttons["Distribute Horizontally"].isEnabled, "Distribute ran with two layers")
         design.shot("multi-select")
         // With the ellipse holding the selection, the sidebar still checks the current page.
         let sidebar = design.element("suite.sidebar")
