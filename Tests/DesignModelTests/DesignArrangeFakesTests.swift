@@ -117,7 +117,7 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(throws: DesignRefusal.notBuilt("Duplicate")) {
             try live.duplicating.duplicate([a], offset: pt(10, 10), on: page, mint: &mint)
         }
-        #expect(throws: DesignRefusal.notBuilt("Group")) { try live.grouping.group([a, b], on: page, mint: &mint) }
+        #expect(try live.grouping.group([a, b], on: page, mint: &mint).name == "Group")  // live since copy-group C-2
         #expect(throws: DesignRefusal.notBuilt("Copy and paste")) { try live.clipboard.encode([pair], on: page) }
         #expect(throws: DesignRefusal.notBuilt("Copy and paste")) {
             try live.clipboard.paste(Data("hello".utf8), into: nil, on: page, mint: &mint)

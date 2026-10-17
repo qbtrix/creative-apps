@@ -1,0 +1,37 @@
+[
+  {
+    "label": "group moves a leaf",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "made.children = siblings.filter { wanted.contains($0.id) }",
+    "replace": "made.children = siblings.filter { wanted.contains($0.id) }.map { var leaf = $0; leaf.translate(by: DesignPoint(x: 1, y: 0)); return leaf }",
+    "tests": "DesignGroupTests"
+  },
+  {
+    "label": "group goes to the top instead of the topmost member's place",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "siblings.insert(made, at: at)",
+    "replace": "siblings.append(made)",
+    "tests": "DesignGroupTests"
+  },
+  {
+    "label": "ungroup reverses the children's order",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "siblings.replaceSubrange(at...at, with: current.children)",
+    "replace": "siblings.replaceSubrange(at...at, with: current.children.reversed())",
+    "tests": "DesignGroupTests"
+  },
+  {
+    "label": "a cross-parent group is made",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "let parent = try fakeSharedParent(ids.filter { page.nodes.node($0) != nil }, page)",
+    "replace": "let parent = page.nodes.ancestors(of: ids.last ?? \"\")?.last",
+    "tests": "DesignGroupTests"
+  },
+  {
+    "label": "a group name repeats",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "name: \"Group \\(freeGroupNumber(page.nodes))\"",
+    "replace": "name: \"Group 1\"",
+    "tests": "DesignGroupTests"
+  }
+]
