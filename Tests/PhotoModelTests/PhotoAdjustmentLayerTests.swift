@@ -1,6 +1,6 @@
 // PhotoAdjustmentLayerTests.swift: adjustment layers in the workspace (PV-6,
 // AL-3): New Adjustment Layer's name, place, selection and one undo step; the
-// Adjust tab's target, sections, header and info line; one gesture on a layer
+// inspector's adjust target, sections, header and info line; one gesture on a layer
 // is one step and damages the canvas at once; ids never repeat; undo of a
 // layer-list step with an adjustment layer. Builds on `.fake`
 // (FakeAdjustmentLayers). Runs on Linux and macOS.

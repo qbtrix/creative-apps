@@ -4,7 +4,7 @@
 // lines, the Layer section, Tool Options, then the flush, hairline-separated adjustment sections
 // with Gamma as a ScrubField. Light and Dark. Writes
 // photo-inspector-layer-light.png and photo-inspector-layer-dark.png, then
-// the same panel as tall as its whole content, so the Adjust tab is drawn
+// the same panel as tall as its whole content, so the inspector is drawn
 // down to its last section (Blur, with its Radius) without scrolling:
 // photo-inspector-layer-end-light.png and photo-inspector-layer-end-dark.png
 // (2×, through SnapshotHost, framed to the content's fitting size). The
@@ -65,7 +65,7 @@ import Testing
         }
     }
 
-    /// #1714: the whole Adjust tab, down to its last section, drawn unclipped.
+    /// #1714: the whole inspector, down to its last section, drawn unclipped.
     @Test func layerInspectorEnd() throws {
         let model = try Self.workspace()
         let size = Self.fullSize(model)
@@ -97,8 +97,8 @@ import Testing
         }
     }
 
-    /// #1714: the Adjust tab's content has a finite height, taller than the
-    /// panel the canvas gives it, and framed to that height the whole tab is
+    /// #1714: the inspector's content has a finite height, taller than the
+    /// panel the canvas gives it, and framed to that height the whole inspector is
     /// drawn: the last section's checkbox ("Blur Enabled") lies inside the
     /// frame, the band above the panel's bottom edge holds drawn rows (Blur's
     /// Radius) rather than plain fill, and the padding below it is backdrop.
