@@ -49,6 +49,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onUnit: @MainActor (TimeUnit) -> Void
     private let onWorkArea: @MainActor (ClosedRange<Int>?) -> Void
     @Environment(\.suiteSnapshotRendering) private var snapshot
+    /// The host's prefix for the name buttons' identifiers; nil puts none.
+    @Environment(\.timelineIdentifierPrefix) private var idPrefix
     /// The stretch of the lanes the scroll view shows, in mapping x; nil until
     /// it first reports.
     @State private var visibleX: ClosedRange<Double>?
@@ -272,6 +274,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private var names: some View {
         LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(tracks) { track in
+                let nameID = TimelineLaneSpeech.identifier(idPrefix, "name", track.id)
                 Button { onSelectTrack(track.id) } label: {
                     Text(track.name)
                         .font(track.isSelected ? SuiteFont.headline : SuiteFont.body)
@@ -286,6 +289,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 // so under a floating sidebar the selected row reached 208 pt left of the strip (#1034).
                 .background(track.isSelected ? SuiteColor.accent.opacity(0.15) : Color.clear, ignoresSafeAreaEdges: [])
                 .accessibilityAddTraits(track.isSelected ? .isSelected : [])
+                .accessibilityIdentifier(nameID ?? "", isEnabled: nameID != nil)
             }
         }
         .frame(width: SuiteSize.timelineLabelColumn)
@@ -301,6 +305,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             }
         }
         .frame(width: width, alignment: .leading)
+        // Only the lanes' access modifiers read it, so a scroll re-runs those, never a lane's Canvas.
+        .environment(\.timelineVisibleX, snapshot ? nil : visibleX)
         .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
     }
 }
