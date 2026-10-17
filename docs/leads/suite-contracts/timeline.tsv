@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-17T12:13Z	done	heartbeat	lead	line lead act-1a149c6a2a3-yna2 resumed; feature done, no open findings
 2026-10-17T13:14Z	5	heartbeat	#1332	done; contact sheet posted
 2026-10-17T17:10Z	done	heartbeat	lead	line lead act-1a14ad585d6-dlpz resumed; branch on main 2c5003b5; feature done, nothing left
+2026-10-17T21:34Z	done	stage-start	c55fad78	line lead act-1a14bc85382-m8og resumed; branch moved onto main
