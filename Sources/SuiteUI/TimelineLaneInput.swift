@@ -311,13 +311,14 @@ struct TimelineKeyDrag: Equatable, Sendable {
     var frame: Int { grabbed + steps.lastSent }
 
     /// Frames the group moves for a pointer `dx` points from the press:
-    /// snapped(grabbed + frameDelta(dx)) - grabbed, clamped as a group.
+    /// snapped(grabbed + frameDelta(dx)) - grabbed, clamped as a group; the
+    /// pointer snaps too, so a key dropped 6 pt short of the playhead lands on it (#2140).
     func total(dx: Double) -> Int {
         let scale = TimelineScale(lastFrame: mapping.duration, frameWidth: mapping.frameWidth)
         let keys = SuiteKeyEditing()
         let target = SuiteTimelineEditing().snapped(
-            grabbed + keys.frameDelta(points: dx, scale: scale), playhead: playhead,
-            radius: Double(SuiteSize.timelineKeyframeHit / 2), scale: scale)
+            grabbed + keys.frameDelta(points: dx, scale: scale), pointer: Double(grabbed) * scale.frameWidth + dx,
+            playhead: playhead, radius: Double(SuiteSize.timelineKeyframeHit / 2), scale: scale)
         let lane = Set(group.map { LaneKey(track: "", frame: $0) })
         let moved = keys.moved(lane, by: target - grabbed, lastFrame: mapping.duration)
         return moved[LaneKey(track: "", frame: grabbed)].map { $0 - grabbed } ?? 0
