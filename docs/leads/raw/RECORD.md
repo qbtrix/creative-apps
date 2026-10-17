@@ -2,7 +2,7 @@
 
 Issue: #1530 · Packet: docs/blueprints/library/features/raw.md
 Run: act-1a147b7188d-pjro · Session: claude/library-feature-lead-agcik2 · Started: 2026-10-17T02:36Z
-Stage: 0 setup (re-checked at dev 1a8eea2a, 2026-10-17T03:39Z: still blocked)
+Stage: 0 setup (re-checked at dev 0e3c08ea, 2026-10-17T05:50Z: still blocked; needs-human comment posted on the issue)
 Base: 37d996308670a9e50012b28d830fcd8736299b02 (origin/main; origin/dev is bc04c7d4)
 Next: wait for develop:DV-a, crop:CR-a, export:EX-a, metadata-more:MD-a/MD-b/MD-e and thumbnails to merge; then re-run stage 0.4
 
