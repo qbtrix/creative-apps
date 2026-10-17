@@ -8,3 +8,5 @@ utc	stage	event	ref	note
 2026-10-16T22:29Z	2	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
 2026-10-17T15:40Z	3	resume		run act-1a14a8f0634-uwzw; Swift 6.3.3 installed; base origin/dev a575d03
 2026-10-17T15:45Z	3	wave 1 start	D0-3c,D0-4b	builders launched
+2026-10-17T16:15Z	3	pr-opened	#2162	D0-4b budget tests QD-S8/S9/S11
+2026-10-17T16:15Z	3	pr-opened	#2167	D0-3c gesture routes, Mutate 4/4; 403 lines, fixer trims
