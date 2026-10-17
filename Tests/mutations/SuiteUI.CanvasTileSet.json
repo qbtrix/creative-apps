@@ -1,0 +1,4 @@
+[
+{"label":"restart skipped on resize: a stale tile survives a new document size","file":"Sources/SuiteUI/CanvasTileSet.swift","find":"        let restarted = size != documentSize\n","replace":"        let restarted = documentSize == .zero\n","tests":"CanvasTileSetTests"},
+{"label":"handedBytes counts clean tiles","file":"Sources/SuiteUI/CanvasTileSet.swift","find":"            if layers[tile.rect] != nil, given[tile.rect] === tile.image { continue }\n","replace":"            if layers[tile.rect] != nil, given[tile.rect] === tile.image {\n                handedBytes += images[tile.rect].map { $0.bytesPerRow * $0.height } ?? 0\n                continue\n            }\n","tests":"CanvasTileSetTests"}
+]
