@@ -15,3 +15,4 @@
 2026-10-17T13:39Z	stage	-	#1516	dependency met (draw-key-save built, #1738 merged); stage 1 orient; dev d2c4fa2
 2026-10-17T13:43:01Z	stage	2 plan written; wave 1 LF-1, LF-3, LF-4, LF-5
 2026-10-17T14:07:45Z	heartbeat	wave 1 building: #2102 (LF-3) open; LF-1, LF-4, LF-5 building
+2026-10-17T14:13:13Z	wave	1 done: #2102 LF-3, #2103 LF-4, #2106 LF-5 in the lane; LF-1 fixer running
