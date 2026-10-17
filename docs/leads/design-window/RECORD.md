@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: #2282 (D0-8a) macOS build 39062698750 queued; #2280 (D0-9c) fix round 1 pushed (c76da704) after build 39062505918 failed, lane rebuilds. D0-8b after #2282 merges. DW-a slice check: run 39061216116 cancelled; now waits on full CI https://github.com/qbtrix/creative-apps/actions/runs/39062516417 (0c8e4a71, contains b2942150): Linux green -> Belt-Slice-Done + Mac-Finish-Wanted; ui-screens -> critic panel
+Next: D0-8a merged (#2282, 8f0fa099); wave 4 D0-8b building (workflow wf_5f3a4a14-aa9, base 8f0fa099). #2280 (D0-9c) build 39063972956 green on c76da704, lane merges next sweep. DW-a slice check: run 39062516417 Linux red on DesignStyleBudgetTests.scrubStep (ST-7, not ours; dev-red #2303 owned by style-rows), so DW-a waits on the next full run with a green Linux job (39064216590 on 8f0fa099 pending). Finding #1974 (body-count flake, Feature: design-window) goes first in wave 5 with D0-7a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
