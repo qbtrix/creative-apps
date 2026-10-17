@@ -10,7 +10,7 @@ Sources/DesignModel/Fakes/DesignSelectFakes.swift
 Sources/DesignModel/Live/LiveClipboard.swift
 Sources/DesignModel/Live/LiveMarquee.swift
 Sources/DesignModel/Live/LiveTransforming.swift
-Sources/FlareApp/FlareEasingInspector.swift
+Sources/FlareApp/FlareEasingPopover.swift
 Sources/FlareApp/FlareStageSelection.swift
 Sources/FlareApp/FlareWindow+Export.swift
 Sources/FlareApp/FlareWindow+Layers.swift
