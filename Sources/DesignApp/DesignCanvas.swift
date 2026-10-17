@@ -1,14 +1,15 @@
 // DesignCanvas.swift: the canvas of Design's editor shell: the selected page on
 // SuiteUI's CanvasViewport (rulers in points, matching the status bar and the
-// inspector; checkerboard; zoom), with its nodes painted
-// by DesignArtwork and the selection's outline and handles over them (with
-// several layers selected, SuiteUI's dashed SelectionOutline on each and one
-// around them all, and no handles), or the
+// inspector; checkerboard; zoom), with its nodes painted by DesignArtwork, or the
 // empty state with a New File button when nothing is open. Pointer drags go to
 // the workspace as `.drag` with the modifier keys held, and the release as
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
-// overlay (not clipped to the page) is the selection's marks, left out for the
-// text node being edited, then DesignTextOverlay, the inline text editor. Keys reach the
+// pointer and the pointer handler come from DesignCanvasFeedback. The overlay
+// (not clipped to the page) is, bottom to top: the frame names
+// (DesignFrameLabels), the selection's marks (DesignSelectionMarks), the marquee
+// under way (DesignMarqueeMark), DesignTextOverlay, the inline text editor, and
+// DesignCanvasFeedback's marks. `show` is the rect View > Zoom to Selection asks
+// for, kept until CanvasViewport can scroll to a rect. Keys reach the
 // canvas while it has focus. During an inline text edit the canvas passes no key
 // handler, so CanvasViewport stops being focusable: a focusable view around the
 // text field would keep the field from taking the keyboard.
@@ -20,6 +21,8 @@ import SwiftUI
 struct DesignCanvas: View {
     let model: DesignWorkspace
     var zoom = 1.0
+    /// The rect Zoom to Selection asks the canvas to show (page points); stored until CanvasViewport takes it.
+    var show: DesignRect?
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
     var onZoom: @MainActor (Double) -> Void = { _ in }
     var perform: DesignPerform = { _ in }
@@ -38,28 +41,20 @@ struct DesignCanvas: View {
 
     private func canvas(_ page: DesignPage) -> some View {
         let painted = page.painted
-        // A hidden node, or one inside a hidden frame, is not on the canvas, so it has no outline.
-        let selected = painted.first { $0.node.id == model.selectedNodeID }?.node
-        let selectedIDs = Set(model.selectedNodeIDs)
-        let outlined = painted.map(\.node).filter { selectedIDs.contains($0.id) }
+        let feedback = DesignCanvasFeedback(model: model, zoom: zoom)
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
-            pointer: model.tool.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
+            pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
             onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
-            onKey: model.editingTextID == nil ? { key($0) } : nil
+            onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
-            if model.hasMultipleSelection {
-                // Each layer and the box around them share SuiteUI's dashed outline: a layer's solid accent
-                // edge drawn over the box's dashes read as two outlines where the two met.
-                ForEach(outlined) { node in SelectionOutline(rect: node.frame.cgRect, zoom: zoom) }
-                if let bounds = model.selectionBounds { SelectionOutline(rect: bounds.cgRect, zoom: zoom) }
-            } else if let selected, selected.id != model.editingTextID {
-                // The text being edited shows its editor's box instead of handles.
-                DesignSelectionMarks(rect: selected.frame, zoom: zoom, handles: model.lockHelp(selected.id) == nil)
-            }
+            DesignFrameLabels(painted: painted, zoom: zoom)
+            DesignSelectionMarks(model: model, painted: painted, zoom: zoom)
+            if let marquee = model.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
+            feedback
         }
     }
 
