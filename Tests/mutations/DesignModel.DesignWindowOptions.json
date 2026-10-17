@@ -1,0 +1,9 @@
+[
+  {"label": "fake services for any value", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "value(after: \"-DesignServices\") == \"fake\" ? .fake : .live", "replace": "value(after: \"-DesignServices\") != nil ? .fake : .live", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "size accepts zero", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "width > 0, height > 0", "replace": "width >= 0, height >= 0", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "size accepts extra parts", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "guard parts.count == 2,", "replace": "guard parts.count >= 2,", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "fixture keeps the file location", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "        documentURL = nil\n        return true", "replace": "        return true", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "fixture keeps the history", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "        load(fixture.pages)\n", "replace": "        pages = fixture.pages\n", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "one layer reads as plural", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "case 1: \"1 Layer\"", "replace": "case 1: \"1 Layers\"", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "no selection shows a count", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "case 0: nil", "replace": "case 0: \"0 Layers\"", "tests": "DesignWindowOptionsTests.swift"}
+]

@@ -5,7 +5,8 @@
 // the pages and layer tree in the sidebar (DesignLayersPanel), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
 // file is open and the status line under it (zoom, page size, the last
-// message, the active tool), and Properties (DesignInspector) in the
+// message, "2 Layers" with a selection, the save state's slot
+// (DesignSaveStatus), the active tool), and Properties (DesignInspector) in the
 // inspector. Values in, intents out: it reads the workspace and sends every
 // action to `perform`, so the same view draws the live window and the
 // snapshots. A command that can't act now is disabled with a tooltip saying
@@ -34,7 +35,7 @@ struct DesignEditor: View {
         SuiteWindow(
             title: documentName ?? (model.isOpen ? "Untitled" : "Design"),
             // The save state's place; it reads nothing until Design has an unsaved state (#270).
-            subtitle: nil,
+            subtitle: DesignSaveStatus.subtitle(model),
             documentActions: Self.documentItems.map { action($0) },
             actions: Self.trailingItems.map { action($0) },
             inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
@@ -50,8 +51,13 @@ struct DesignEditor: View {
             } status: {
                 ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.selectedPage?.sizeText ?? "No file open") {
                     if let note { Text(note) }
+                    if let count = model.selectionCountText {
+                        Text(count)
+                            .accessibilityIdentifier(DesignControlID.statusSelection)
+                    }
+                    DesignSaveStatus(model: model)
                     Text(model.tool.title)
-                        .accessibilityIdentifier("design.status.tool")
+                        .accessibilityIdentifier(DesignControlID.statusTool)
                 }
             }
         } inspector: {
