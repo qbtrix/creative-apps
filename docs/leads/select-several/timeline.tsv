@@ -38,3 +38,6 @@ utc	stage	event	ref	note
 2026-10-17T23:13Z	pr	#2461 w9 r-b1 fixes #2438 (Distribute reason caption)
 2026-10-17T23:28Z	merge	#2445 and #2454 merged (closed #2440 #2441 #2443)
 2026-10-17T23:28Z	wave	wave 10 launched: S-7 build-wave wft4m7hdr; 1 open finding (#2438)
+2026-10-17T23:43Z	pr	S-7 #2469 opened (J5, J6)
+2026-10-17T23:43Z	finding	#2463 gap filed: several-layer nudge/delete keys do nothing
+2026-10-17T23:43Z	wave	11 fix-batch launched for #2463
