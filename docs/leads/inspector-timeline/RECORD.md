@@ -2,9 +2,9 @@
 
 Issue: #1515 · Packet: docs/blueprints/flare/features/inspector-timeline.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
-Stage: 3 build (wave 1)
-Base: d2c4fa212a4b4ea55bc551b783fc1c48520e5fbf (origin/dev)
-Next: wait for #2100 (IT-0 stubs) to merge, then wave 2 (IT-1..IT-4) on that dev head
+Stage: 3 build (wave 2)
+Base: 8c05d0021d20690ad338e9758c933adf23691e4f (origin/dev, wave 2)
+Next: wave 2 (IT-1..IT-4, workflow whh613drx) PRs through the lane; then wave 3 (IT-5..IT-8)
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
@@ -12,12 +12,12 @@ No `## Slices` table: v2 packet, v2 loop applies.
 ## Tasks
 | Task | Wave | Files | What | PR | State |
 |---|---|---|---|---|---|
-| IT-0 | 1 | FlareInspectorRead, FlarePaint, FlareTimelineEdit (Model, stubs), FlareWorkspace.swift + Tests | rule 18 stubs: every IT-1..IT-3 signature, fake value or NotBuilt; stored state cleared in load | #2100 | open, lane |
-| IT-9a | 1 | FlareStatusRead + Tests, PlaybackDriver(+Tests), ViewerStatusBar pills in FlareWindow, +Playback | StatusPills, measuredFPS, J10 | #2101 | open, lane |
-| IT-1 | 2 | FlareInspectorRead + Tests | inspectorSummary for real | | |
-| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | | |
-| IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | | |
-| IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | | |
+| IT-0 | 1 | FlareInspectorRead, FlarePaint, FlareTimelineEdit (Model, stubs), FlareWorkspace.swift + Tests | rule 18 stubs: every IT-1..IT-3 signature, fake value or NotBuilt; stored state cleared in load | #2100 | merged |
+| IT-9a | 1 | FlareStatusRead + Tests, PlaybackDriver(+Tests), ViewerStatusBar pills in FlareWindow, +Playback | StatusPills, measuredFPS, J10 | #2101 | merged |
+| IT-1 | 2 | FlareInspectorRead + Tests | inspectorSummary for real | | building |
+| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | | building |
+| IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | | building |
+| IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | | building |
 | IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | | |
 | IT-6 | 3 | FlareInspectorScene, FlareSceneSnapshots, +SceneInspector | | | |
 | IT-7 | 3 | FlareTimelineEdit (App), FlareTimeline, FlareWindow+Timeline, +TimelineEdit | J11 | | |
