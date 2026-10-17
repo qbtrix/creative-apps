@@ -1,7 +1,7 @@
 {
   "id": "design-app-sources",
   "name": "DesignApp sources",
-  "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built on SuiteUI's SuiteWindow and EditorDetail: the window and its intents (DesignWindow, DesignIntent), the window toolbar's commands (DesignToolbarItem), the floating tool palette, the canvas with selection handles (drawn above the page clip) and the inline text editor, the sidebar (a List of the pages and the layer tree), the Properties inspector (with its Align row in DesignAlignBar), the File, Edit, Page, Object (Align) and View menus, and the open and save panels.",
+  "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built on SuiteUI's SuiteWindow and EditorDetail: the window and its intents (DesignWindow, DesignIntent), the window toolbar's commands (DesignToolbarItem), the floating tool palette, the canvas (DesignArtwork with its text drawn by DesignTextArtwork, then an overlay above the page clip with the frame names in DesignFrameLabels, the selection marks and handles in DesignSelectionMarks, the marquee mark, and the tool-feedback slot DesignCanvasFeedback) and the inline text editor, the sidebar (a List of the pages and the layer tree), the Properties inspector (with its Align row in DesignAlignBar), the File, Edit, Page, Object (Align) and View menus, and the open and save panels.",
   "technology": "Swift 6, SwiftUI, macOS 26",
   "paths": [
     "Sources/DesignApp/"

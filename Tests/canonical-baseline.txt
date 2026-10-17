@@ -3,6 +3,7 @@
 # --update-baseline, never by hand. It only shrinks: move a concept into
 # SuiteModel, delete the app copy, and drop its line in the same PR.
 Sources/DesignApp/DesignLayersPanel.swift
+Sources/DesignApp/DesignSelectionMarks.swift
 Sources/DesignModel/Contracts/UseCases.swift
 Sources/DesignModel/DesignHistory.swift
 Sources/DesignModel/DesignSelection.swift
