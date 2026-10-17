@@ -2,8 +2,8 @@
 // The transport (FlareTransport, DK-11) and the readouts (`timecode` and
 // `frameReadout`) sit on one row above a TimelineStrip with one lane per row
 // of `timelineRows`: its name and its key frames as diamonds, the playhead on
-// `currentFrame`. Dragging the ruler scrubs through `.timeline(.scrub)`, and a
-// name selects its layer through `.layers(.select)`. The strip's duration is
+// `currentFrame`; FlareTimelineEdit draws it and edits keys and labels (IT-7), and
+// `timelineError` shows under the readouts. The strip's duration is
 // the last frame, and its frames are fitted to the width it is offered less
 // the name column, the divider and the trailing room, so every frame shows and
 // the lanes never scroll sideways. With no rows it shows `timelineEmptyText`.
@@ -41,13 +41,20 @@ struct FlareTimeline: View {
                     identifier: "flare.timeline.frame")
             }
             .padding(.horizontal, Self.inset)
+            if let error = model.timelineError {
+                Label(error, systemImage: "exclamationmark.circle")
+                    .font(SuiteFont.caption)
+                    .foregroundStyle(SuiteColor.stateError)
+                    .padding(.horizontal, Self.inset)
+                    .accessibilityIdentifier("flare.timeline.error")
+            }
             if let text = model.timelineEmptyText {
                 Text(text)
                     .font(SuiteFont.caption)
                     .foregroundStyle(SuiteColor.secondaryText)
                     .frame(maxWidth: .infinity, minHeight: SuiteSize.timelineLane)
             } else {
-                strip.padding(.horizontal, Self.inset)
+                FlareTimelineEdit(model: model, perform: perform).padding(.horizontal, Self.inset)
             }
         }
         .padding(.vertical, SuiteSpacing.s)
@@ -78,24 +85,5 @@ struct FlareTimeline: View {
             .help(help ?? "")
             .accessibilityLabel(label ?? "")
             .accessibilityIdentifier(identifier)
-    }
-
-    private var strip: some View {
-        let rows = model.timelineRows
-        let selected = model.selectedTimelineRowID
-        let tracks = rows.map {
-            TimelineTrack(id: $0.layerID, name: $0.name, keyframes: $0.keyFrames, isSelected: $0.layerID == selected)
-        }
-        let lastFrame = max(model.timelineFrames - 1, 0)
-        return GeometryReader { proxy in
-            let lanes = Self.laneWidth(strip: proxy.size.width)
-            TimelineStrip(
-                tracks: tracks, duration: lastFrame, frameWidth: lanes / CGFloat(max(lastFrame, 1)),
-                playhead: model.currentFrame,
-                onScrub: { perform(.timeline(.scrub(frame: $0))) },
-                onSelectTrack: { perform(.layers(.select(id: $0))) })
-                .accessibilityIdentifier("flare.timeline.track")
-        }
-        .frame(height: SuiteSize.timelineRuler + SuiteSize.timelineLane * CGFloat(rows.count))
     }
 }
