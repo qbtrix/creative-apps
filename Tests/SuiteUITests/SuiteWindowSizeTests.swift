@@ -40,7 +40,7 @@ import Testing
         let frame = CGRect(x: 0, y: 31, width: 1024, height: 768)
         for visible in [
             CGRect.zero, CGRect(x: 0, y: 0, width: 1024, height: 0), CGRect(x: 0, y: 0, width: 0, height: 768),
-            CGRect(x: 0, y: 0, width: .infinity, height: 768), CGRect(x: .nan, y: 0, width: 1024, height: 768),
+            CGRect(x: 0, y: 0, width: CGFloat.infinity, height: 768), CGRect(x: CGFloat.nan, y: 0, width: 1024, height: 768),
         ] {
             #expect(SuiteWindowSize.fitted(frame, in: visible) == frame, "\(visible)")
         }
