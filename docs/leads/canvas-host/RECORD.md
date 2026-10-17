@@ -2,9 +2,9 @@
 
 Issue: #1596 · Packet: docs/blueprints/suiteui/features/canvas-host.md
 Run: act-1a147c4ddc0-fouq · Session: n/a (cloud session on claude/canvas-host-lead-quy2t1) · Started: 2026-10-17T02:51Z
-Stage: 2 plan
+Stage: 3 wave 1 (CH-1 open as #1978; CH-2, CH-6, CH-8 wait on it)
 Base: b1ec04755cc52d9fc0588046dbc5d088a12e8dd7 (origin/main, the brief's SHA); origin/dev is ef3dfdb7f0f772723deaf139bd09f4625a1e9090
-Next: the supervisor decides the integration branch (see Open 1); then start wave 1 (CH-1), the only task with no wait.
+Next: wait for #1978 to merge (lane build-only run), then wave 2 (CH-2, CH-6, CH-8); base is dev, status stays on this branch.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,7 +17,7 @@ Next: the supervisor decides the integration branch (see Open 1); then start wav
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| CH-1 | CH-a | 1 | CanvasHosting contracts, FakeCanvasContent, FakeRenderingPreference | Sources/SuiteUI/Contracts/CanvasHosting.swift, Tests/SuiteUITests/CanvasHostFakeTests.swift | CanvasHostFakeTests | – | ready (no wait) |
+| CH-1 | CH-a | 1 | CanvasHosting contracts, FakeCanvasContent, FakeRenderingPreference | Sources/SuiteUI/Contracts/CanvasHosting.swift, Tests/SuiteUITests/CanvasHostFakeTests.swift | CanvasHostFakeTests | #1978 | open, swift build unverified here |
 | CH-2 | CH-a | 2 | RenderingPreference stub, control ids, placeholder pages, first-check skips | Sources/SuiteUI/RenderingPreference.swift, Tests/SuiteUITests/RenderingPreferenceTests.swift, Tests/mutations/SuiteUI.RenderingPreference.json, Sources/SuiteUI/Gallery/GalleryCanvasHost.swift, Sources/SuiteUI/Gallery/GalleryRenderingPane.swift, UITests/SuiteJourneyTests+CanvasHost.swift, Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift | RenderingPreferenceTests | – | waits CH-1 |
 | CH-6 | CH-c | 2 | CanvasHitMap | Sources/SuiteUI/CanvasHitMap.swift, Tests/SuiteUITests/CanvasHitMapTests.swift, Tests/mutations/SuiteUI.CanvasHitMap.json | CanvasHitMapTests | – | waits CH-1 |
 | CH-8 | CH-c | 2 | CanvasTileSet | Sources/SuiteUI/CanvasTileSet.swift, Tests/SuiteUITests/CanvasTileSetTests.swift, Tests/mutations/SuiteUI.CanvasTileSet.json | CanvasTileSetTests | – | waits CH-1 |
