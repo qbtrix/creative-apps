@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-17T17:16Z	heartbeat	merged: #2163 D0-5b as 53e3127e. #2168 still queued in lane (build green, no needs-fix); wave 2 holds for #2168
 2026-10-17T17:31Z	heartbeat	stage 3 heartbeat: #2166 and #2168 merged; dw wave 2 and cg C-1 launched; design-seams merged; findings 0 open
 2026-10-17T17:48Z	heartbeat	builders still running (no wave-2 or C-1 PR yet); findings 0 open for this lead; canvas-basics CB-a no new merges, S-5 stays blocked
+2026-10-17T17:51Z	wave	wave 2 PRs open: D0-5c #2217 (c1f3bef7), D0-5d #2214 (0b5f4e52), D0-6 #2213 (7156b1da); contract checks ok
