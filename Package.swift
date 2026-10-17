@@ -6,7 +6,8 @@
 //             the creative-core engines. Built and tested on Linux and macOS.
 //   <X>App    the SwiftUI app: a window built only from SuiteUI. macOS only.
 //   SuiteUI   the shared design system (tokens, Liquid Glass primitives,
-//             the window shell). macOS only.
+//             the window shell, the app marks; links SuiteModel for the app
+//             list). macOS only.
 // for X in Flare (2D animation), Design (vector and UI design), Photo (raster
 // editing), Library (photo catalog) and Halo (motion graphics).
 //
@@ -65,10 +66,10 @@ var targets: [Target] =
 #if os(macOS)
 products += (apps + ["AfterGlow"]).map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
 targets += [
-    .target(name: "SuiteUI"),
+    .target(name: "SuiteUI", dependencies: ["SuiteModel"]),
     .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
     .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
-    .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI"]),
+    .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI", "SuiteModel"]),
     .testTarget(
         name: "AppSnapshotTests",
         dependencies: ["SuiteUI", "AfterGlowApp", "SuiteShell", "SuiteModel"]

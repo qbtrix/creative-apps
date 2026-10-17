@@ -1,0 +1,78 @@
+{
+  "about": "Written by scripts/render-marks; never by hand. FNV-1a 64 digests of each Bundle/Marks SVG and the PNGs rendered from it.",
+  "icons": {
+    "AfterGlow": {
+      "png": {
+        "1024": "36bc4df5cf71b7b0",
+        "128": "bafff63762c69d4a",
+        "16": "2af8c2d779258140",
+        "256": "0939befb35af126a",
+        "32": "5d51a2ff3a82d415",
+        "512": "09e6648e1a1fd26d",
+        "64": "498c3c708a8c8835"
+      },
+      "svg": "886e3fbf629f6ea8"
+    },
+    "Design": {
+      "png": {
+        "1024": "83858ed43a0befcf",
+        "128": "b3e50f50d919c6f2",
+        "16": "0d5153f7713607ab",
+        "256": "8497c8fda9ae6c62",
+        "32": "e8c6b3e3728e7acb",
+        "512": "a793b4eaf62db3cc",
+        "64": "b111cc93e60ea107"
+      },
+      "svg": "e5db5d22c9974f26"
+    },
+    "Flare": {
+      "png": {
+        "1024": "a662d1a8b818dfc6",
+        "128": "b052ec4e04bcb988",
+        "16": "c04fcfdf74c773ad",
+        "256": "42ca2ecf84838423",
+        "32": "6d212fb16df45acd",
+        "512": "cd10a203b27101fa",
+        "64": "889aca6e473ed75a"
+      },
+      "svg": "93f4b206d6dce8e3"
+    },
+    "Halo": {
+      "png": {
+        "1024": "cf890f87d09f43c4",
+        "128": "39139348a51ab3a1",
+        "16": "fb5ec5d74b1b209c",
+        "256": "8357c722899f15f1",
+        "32": "4fae51099c462169",
+        "512": "ff39e5829f08d82b",
+        "64": "f7ef7a93740698eb"
+      },
+      "svg": "62ae6b3a0d93219d"
+    },
+    "Library": {
+      "png": {
+        "1024": "293b4362d9185184",
+        "128": "12c80282ce70096a",
+        "16": "b0ff3ced4d9bd0eb",
+        "256": "556e84c501f5b891",
+        "32": "ee52a45dc7f7076c",
+        "512": "76d2e608bf9665ab",
+        "64": "a1ab77645c9daa81"
+      },
+      "svg": "d043361337730120"
+    },
+    "Photo": {
+      "png": {
+        "1024": "cae5151a9a60ccd3",
+        "128": "3aecde8300926ef3",
+        "16": "d19f867a9e0fcbef",
+        "256": "5b7d834862568a2a",
+        "32": "61ac27644bea95c6",
+        "512": "19ccf63c9405b378",
+        "64": "736352aa260eaeb6"
+      },
+      "svg": "1298d6c4978f045f"
+    }
+  },
+  "renderer": "rsvg-convert version 2.62.1\n\nlibraries used:\n  cairo 1.18.4\n  pango 1.57.1\n  harfbuzz 14.3.1\n  fontconfig 2.18.3"
+}
