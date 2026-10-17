@@ -21,3 +21,6 @@ utc	stage	event	ref	note
 2026-10-17T18:37:38Z	merge	#2217 D0-5c and #2214 D0-5d merged
 2026-10-17T18:37:38Z	fix	#2213 needs-rebase: merged origin/dev, resolved C4 part, head 5196d0f6, Head line moved
 2026-10-17T18:56:51Z	check	heartbeat: #2213 head 5196d0f6 macOS build 39059621460 running; findings for this feature: none
+2026-10-17T19:16:03Z	merge	#2213 D0-6 merged b2942150; DW-a all merged
+2026-10-17T19:16:03Z	wave	wave 3 launched: D0-8a (DW-b), D0-9c (DW-d) on 6ad373ab
+2026-10-17T19:16:03Z	check	DW-a check waits on full CI 39061216116
