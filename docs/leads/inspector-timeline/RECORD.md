@@ -18,7 +18,7 @@ No `## Slices` table: v2 packet, v2 loop applies.
 | IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | #2130 | merged |
 | IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | #2113 | merged |
 | IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | #2129 | merged |
-| IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | #2136 | open, lane |
+| IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | #2136 | merged |
 | IT-6 | 3 | FlareInspectorScene, FlareSceneSnapshots, +SceneInspector, one line of FlareInspector | testSceneSection | #2161 | open, lane |
 | IT-7 | 3 | FlareTimelineEdit (App), FlareTimeline, FlareWindow+Timeline, +TimelineEdit | J11 | #2150 | open, lane |
 | IT-8 | 3 | FlareInspectorTiming, FlareEasingPopover, delete FlareEasingInspector, +Easing | J12 | #2149 | open, lane |
