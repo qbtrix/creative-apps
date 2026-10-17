@@ -2,9 +2,9 @@
 
 Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14841719c-kml4 · Session: claude/task-36wu9d · Started: 2026-10-17T06:00Z
-Stage: 3 wave 1
-Base: 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745
-Next: wave 1 (OB-1) building; when its PR merges, run the check and start wave 2 (OB-2, OB-3, OB-11)
+Stage: 3 wave 2
+Base: 453198ac93bd637e13a6aea5f20273bd7ee728f4
+Next: wave 2 (OB-2, OB-3, OB-11) building via build-wave.js; when their PRs merge, run the check (a dev run with a green Linux job containing OB-2 makes OB-a merged-done) and start wave 3 (OB-4, OB-7, OB-8, OB-9, OB-10)
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -13,7 +13,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| OB-a | `Sources/SuiteModel/Onboarding/` with every type and signature the window calls as stubs returning the fake's values; its Linux tests written and disabled | OB-1, OB-2 | MJ-OB0 | – | no | 0 | building | – | – |
+| OB-a | `Sources/SuiteModel/Onboarding/` with every type and signature the window calls as stubs returning the fake's values; its Linux tests written and disabled | OB-1, OB-2 | MJ-OB0 | – | no | 0 | building (OB-1 merged; dev runs 39013069150 and 39018046761 at 453198ac are green and contain it) | – | – |
 | OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 0 | waiting | – | – |
 | OB-m | SuiteOnboarding, OnboardingLaunch, OnboardingModel do the work; StorePreferences over FileStore makes the preferences slot live | OB-7, OB-8, OB-9 | MJ-OB1, MJ-OB2, MJ-OB4 | OB-a | no | 0 | waiting | – | – |
 | OB-s | SampleCatalog names one sample per app, finds it under Resources, copies into Documents without overwriting; Bundle/Samples/ holds the files | OB-10, OB-11 | MJ-OB3 | OB-a; bundle (built: bundle-apps copies Bundle/Samples/) | no | 0 | waiting | – | – |
@@ -22,10 +22,10 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| OB-1 | OB-a | 1 | The Onboarding/ types and stubs (SampleFile, OnboardingStarter, OnboardingLayout, OnboardingControls; SuiteOnboarding, OnboardingLaunch, SampleCatalog, StorePreferences, OnboardingModel) with the packet's signatures, bodies returning the fake's values; C4 part descriptions | Sources/SuiteModel/Onboarding/{OnboardingStarter,SuiteOnboarding,OnboardingLaunch,SampleCatalog,OnboardingModel}.swift, Sources/SuiteModel/Preferences/StorePreferences.swift, Tests/SuiteModelTests/OnboardingStubTests.swift, docs/c4/parts/creative-apps/suite-model/{suite-onboarding,suite-preferences}.json | OnboardingStubTests (MJ-OB0) | – | building |
-| OB-2 | OB-a | 2 | The checks first, each `@Test(.disabled("waits on OB-n"))`: SuiteOnboardingTests, OnboardingLaunchTests, OnboardingModelTests, StorePreferencesTests, SampleCatalogTests | Tests/SuiteModelTests/{SuiteOnboarding,OnboardingLaunch,OnboardingModel,StorePreferences,SampleCatalog}Tests.swift | the five files compile, disabled with their task id | – | waits OB-1 |
-| OB-3 | OB-u | 2 | Reachable and open: Help > Welcome to AfterGlow, the scene's launch behavior, OnboardingWindow page 1 on an OnboardingModel over LauncherServices.shared; OnboardingLauncherTests; the Mac suites as disabled shells | Sources/AfterGlowApp/{AfterGlowApp,LauncherCommands+Onboarding,OnboardingWindow,OnboardingPages}.swift, Tests/SuiteModelTests/OnboardingLauncherTests.swift, Tests/AppSnapshotTests/{AfterGlowOnboardingSnapshots,RenderBudgetAfterGlowOnboardingTests}.swift, docs/c4/parts/creative-apps/afterglow-app/onboarding.json | OnboardingLauncherTests (Linux text scan) | – | waits OB-1 |
-| OB-11 | OB-s | 2 | Bundle/Samples/ and SampleFilesTests (every SampleCatalog sample present, non-empty, extension matches; a row whose export issue #836–#839 is open skips naming it) | Bundle/Samples/, Tests/SuiteModelTests/SampleFilesTests.swift | SampleFilesTests | – | waits OB-1 |
+| OB-1 | OB-a | 1 | The Onboarding/ types and stubs (SampleFile, OnboardingStarter, OnboardingLayout, OnboardingControls; SuiteOnboarding, OnboardingLaunch, SampleCatalog, StorePreferences, OnboardingModel) with the packet's signatures, bodies returning the fake's values; C4 part descriptions | Sources/SuiteModel/Onboarding/{OnboardingStarter,SuiteOnboarding,OnboardingLaunch,SampleCatalog,OnboardingModel}.swift, Sources/SuiteModel/Preferences/StorePreferences.swift, Tests/SuiteModelTests/OnboardingStubTests.swift, docs/c4/parts/creative-apps/suite-model/{suite-onboarding,suite-preferences}.json | OnboardingStubTests (MJ-OB0) | #1998 (merged 0cf5769d) | merged |
+| OB-2 | OB-a | 2 | The checks first, each `@Test(.disabled("waits on OB-n"))`: SuiteOnboardingTests, OnboardingLaunchTests, OnboardingModelTests, StorePreferencesTests, SampleCatalogTests | Tests/SuiteModelTests/{SuiteOnboarding,OnboardingLaunch,OnboardingModel,StorePreferences,SampleCatalog}Tests.swift | the five files compile, disabled with their task id | – | building |
+| OB-3 | OB-u | 2 | Reachable and open: Help > Welcome to AfterGlow, the scene's launch behavior, OnboardingWindow page 1 on an OnboardingModel over LauncherServices.shared; OnboardingLauncherTests; the Mac suites as disabled shells | Sources/AfterGlowApp/{AfterGlowApp,LauncherCommands+Onboarding,OnboardingWindow,OnboardingPages}.swift, Tests/SuiteModelTests/OnboardingLauncherTests.swift, Tests/AppSnapshotTests/{AfterGlowOnboardingSnapshots,RenderBudgetAfterGlowOnboardingTests}.swift, docs/c4/parts/creative-apps/afterglow-app/onboarding.json | OnboardingLauncherTests (Linux text scan) | – | building |
+| OB-11 | OB-s | 2 | Bundle/Samples/ and SampleFilesTests (every SampleCatalog sample present, non-empty, extension matches; a row whose export issue #836–#839 is open skips naming it) | Bundle/Samples/, Tests/SuiteModelTests/SampleFilesTests.swift | SampleFilesTests | – | building |
 | OB-4 | OB-u | 3 | Pages 2 and 3 on the fakes: ChoiceChips of the five focuses, Back; the starter row (OnboardingStartPage), "Start from an empty home"; every control's id; ids-present scan | Sources/AfterGlowApp/{OnboardingPages,OnboardingStartPage}.swift, Tests/SuiteModelTests/OnboardingLauncherTests.swift | OnboardingLauncherTests | – | waits OB-3 |
 | OB-7 | OB-m | 3 | SuiteOnboarding and OnboardingLaunch bodies and plans; turns on their tests | Sources/SuiteModel/Onboarding/{SuiteOnboarding,OnboardingLaunch}.swift, Tests/mutations/SuiteModel.{SuiteOnboarding,OnboardingLaunch}.json, Tests/SuiteModelTests/{SuiteOnboarding,OnboardingLaunch}Tests.swift | SuiteOnboardingTests, OnboardingLaunchTests; Mutate 4/4 | – | waits OB-2 |
 | OB-8 | OB-m | 3 | OnboardingModel body and plan; turns on OnboardingModelTests | Sources/SuiteModel/Onboarding/OnboardingModel.swift, Tests/mutations/SuiteModel.OnboardingModel.json, Tests/SuiteModelTests/OnboardingModelTests.swift | OnboardingModelTests; Mutate 6/6 | – | waits OB-2 |
@@ -59,6 +59,10 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - OB-1 also updates the suite-onboarding and suite-preferences C4 part descriptions; OB-3 the afterglow-app onboarding part (the files exist but their descriptions don't name the new types).
 - #836–#839 (the sample exports) are all open and UITests/Fixtures/suite does not exist: OB-11 ships Bundle/Samples/ with no sample files yet, every SampleFilesTests row skipping by its issue number; OJ3 (open the Flare sample) skips naming #837 until it lands. Recorded under Open.
 - The slice done rule read as lead.md rule 6: a dev run containing the slice's last PR with a green Linux job; a scoped `app=suite` run or a full run both count.
+
+## Decisions (wave 2)
+- The container restarted during wave 1; OB-1's PR #1998 merged at 07:05Z while the lead was down. Resumed at 10:40Z from the remote state: dev at 453198ac, two green full runs containing #1998.
+- HM-3b (#2007) landed home's layout and control-sweep journeys but no shared AfterGlowJourneyTests class; OB-6 keeps its own class.
 
 ## Open
 - Sample files: #836 (Design), #837 (Flare), #838 (Photo), #839 (Halo) open on their lines. Until they land, every tile's "Open sample" reads "The <App> sample isn't in this build." and OJ3 skips.
