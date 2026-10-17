@@ -1,9 +1,10 @@
 // DesignJourneyTests+Style.swift: J10, the inspector's style rows on one layer
 // (packet docs/blueprints/design/features/style-rows.md, Journey steps item 1,
-// SR-a, ST-6). On `cards` at 1024 × 768, live services: click A's row in
-// Layers; click the Corners Radius bar, type 12, Return: it reads 12 and the
-// top bar's Undo reads "Undo Change Corner Radius"; drag the Opacity bar to
-// 50%: "Undo Change Opacity"; click Add Stroke: the Width bar reads 1
+// SR-a, ST-6). On `cards` at 1024 × 768, live services: open Desktop's row
+// in Layers (a file opens with its rows collapsed) and click A's row; click
+// the Corners Radius bar, type 12, Return: it reads 12 and the top bar's Undo
+// reads "Undo Change Corner Radius"; drag the Opacity bar to 50%: "Undo
+// Change Opacity"; click Add Stroke: the Width bar reads 1
 // (DesignStroke.default); give the Width bar the keys and press → three
 // times: it reads 4, and the three presses are one "Undo Change Stroke" step,
 // so one Undo puts the width back to 1 (three steps would leave 3); click
@@ -18,6 +19,8 @@ final class DesignStyleJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
     /// A's and Hidden's rows in Layers (DesignFixtures.cards).
     static let rowA = "design.layer.node-2", hiddenRow = "design.layer.node-10"
+    /// Desktop's row, the frame around A and Hidden; collapsed when the file opens.
+    static let desktopRow = "design.layer.node-1"
     /// The style rows of DesignInspectorStyle, by their DesignControlID.
     static let radius = "design.inspector.corner-radius", opacity = "design.inspector.opacity"
     static let strokeWidth = "design.inspector.stroke-width", addStroke = "design.inspector.stroke-add"
@@ -30,7 +33,8 @@ final class DesignStyleJourneyTests: XCTestCase {
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "the cards fixture showed no page (suite.canvas)")
         let undo = design.element("design.bar.undo")
 
-        // 1. A's row in Layers, then Radius 12 typed with Return: one Change Corner Radius step.
+        // 1. A's row in Layers, inside Desktop's, then Radius 12 typed with Return: one Change Corner Radius step.
+        design.expandDesignLayer(Self.desktopRow)
         clickRow(design, Self.rowA, "A")
         let radius = control(design, Self.radius)
         XCTAssert(radius.waitForExistence(timeout: 5), "no Radius bar in the inspector (\(Self.radius))")

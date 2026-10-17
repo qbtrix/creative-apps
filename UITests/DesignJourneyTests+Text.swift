@@ -1,9 +1,10 @@
 // DesignJourneyTests+Text.swift: J11, a text layer's family, size, weight and
 // alignment (packet docs/blueprints/design/features/style-rows.md, Journey
 // steps item 2, SR-t). On `cards` at 1024 × 768, live services, every step with
-// the mouse on visible controls: click Title's row in Layers; click the Size
-// field, type 32, Return: it reads 32 and the top bar's Undo reads "Undo Change
-// Text Style"; click Bold in the weight chips, Center in the alignment chips and
+// the mouse on visible controls: open Desktop's row in Layers (a file opens
+// with its rows collapsed), click Title's row; click the Size field, type 32,
+// Return: it reads 32 and the top bar's Undo reads "Undo Change Text Style";
+// click Bold in the weight chips, Center in the alignment chips and
 // another family in the Family menu; select A and Title again and each reads
 // back; click A's row: the Text rows are disabled with "A isn't a text layer.";
 // click the top bar's zoom-out until the status line reads 50%; double-click
@@ -27,6 +28,8 @@ final class DesignTextJourneyTests: XCTestCase {
     static let pageWidth = 1440.0
     /// Title's and A's rows in Layers (DesignFixtures.cards).
     static let titleRow = "design.layer.node-5", rowA = "design.layer.node-2"
+    /// Desktop's row, the frame around Title and A; collapsed when the file opens.
+    static let desktopRow = "design.layer.node-1"
     /// The Text rows ST-4b adds, by id, with the label each is found by otherwise.
     static let familyRow = (id: "design.inspector.text-family", label: "Family")
     static let sizeRow = (id: "design.inspector.text-size", label: "Size")
@@ -48,7 +51,8 @@ final class DesignTextJourneyTests: XCTestCase {
         XCTAssert(canvas.waitForExistence(timeout: 10), "the cards fixture showed no page (suite.canvas)")
         let undo = design.element("design.bar.undo")
 
-        // 1. Title's row in Layers, then Size 32 typed with Return: one step, and the field reads 32.
+        // 1. Title's row in Layers, inside Desktop's, then Size 32 typed with Return: one step, and the field reads 32.
+        design.expandDesignLayer(Self.desktopRow)
         clickRow(design, Self.titleRow, "Title")
         let size = row(design, Self.sizeRow)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector (\(Self.sizeRow.id))")
