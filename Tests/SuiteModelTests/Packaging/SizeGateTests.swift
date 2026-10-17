@@ -86,6 +86,17 @@ import Testing
         #expect(findings.map(\.hard) == [true, false])
     }
 
+    @Test func suiteUISymbolLimitOfOneAllowsOneAndFlagsTwo() {
+        var budget = Self.budget75
+        budget.maxSuiteUISymbols = 1
+        let atLimit = SizeReport(commit: "c", entries: [], suiteUISymbols: ["Flare": 1])
+        #expect(SizeGate().evaluate(atLimit, against: budget).isEmpty)
+        let over = SizeReport(commit: "c", entries: [], suiteUISymbols: ["Flare": 2])
+        #expect(SizeGate().evaluate(over, against: budget) == [
+            SizeFinding(name: "Flare SuiteUI symbols", measured: 2, limit: 1, hard: true),
+        ])
+    }
+
     @Test func budgetRoundTripsThroughJSON() throws {
         let budget = SizeBudget(limits: ["SuiteUI.framework": 4], maxSuiteUISymbols: 1, reportOnly: ["Flare"])
         let data = try JSONEncoder().encode(budget)

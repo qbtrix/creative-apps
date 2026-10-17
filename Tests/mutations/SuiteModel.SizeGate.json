@@ -1,0 +1,6 @@
+[
+{"label":"the symbol gate ignores the configured limit","file":"Sources/SuiteModel/Packaging/SizeGate.swift","find":"where count > budget.maxSuiteUISymbols","replace":"where count > 0","tests":"SizeGateTests"},
+{"label":"a symbol finding reports limit 0","file":"Sources/SuiteModel/Packaging/SizeGate.swift","find":"limit: budget.maxSuiteUISymbols","replace":"limit: 0","tests":"SizeGateTests"},
+{"label":"a row exactly at its limit is a finding","file":"Sources/SuiteModel/Packaging/SizeGate.swift","find":"entry.bytes > limit","replace":"entry.bytes >= limit","tests":"SizeGateTests"},
+{"label":"a report-only row is hard","file":"Sources/SuiteModel/Packaging/SizeGate.swift","find":"hard: !budget.reportOnly.contains(entry.name)","replace":"hard: true","tests":"SizeGateTests"}
+]
