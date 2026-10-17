@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-17T06:17Z	0	stage-start	#1505	line lead act-1a1487bf880-qmey resumed; lead/render-out rebuilt on main; swift 6.3.3 installed
 2026-10-17T06:17Z	2	stage-end	#1505	combined plan with text-layers: 10 tasks, 5 waves (RO-7 unchained from RO-6); base b8dfb4f0
 2026-10-17T06:17Z	3	stage-start	#1505	wave 1: RO-1 RO-2 RO-3 beside TX-1 to TX-4
+2026-10-17T11:58Z	3	heartbeat	act-1a149b53ef6-67v7	line lead resumed: wave 1 of the previous run opened no PRs; restarting it on dev 0424231
