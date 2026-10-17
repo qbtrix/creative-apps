@@ -1,0 +1,63 @@
+utc	stage	event	ref	note
+2026-10-16T02:45Z	0	stage-start	#1079	base 9230d80
+2026-10-16T02:50Z	0	stage-end	#1079	#980 merged, #933 closed
+2026-10-16T02:50Z	1	stage-start	packet	read editor-in-window.md
+2026-10-16T02:55Z	1	stage-end	packet	tasks copied
+2026-10-16T02:55Z	2	stage-end	plan	waves as packet
+2026-10-16T02:58Z	3	stage-start	wave1	wf_395a4ad0-1ed EW-1 EW-2 EW-3 EW-4 EW-7
+2026-10-16T12:00Z	3	pr-merged	#1288 #1289 #1290 #1293 #1294	wave 1 merged (recorded on relaunch)
+2026-10-16T12:00Z	3	stage-start	wave2	EW-8 base ebc68bf
+2026-10-16T12:05Z	3	stage-start	wave2+3	EW-8 PR; EW-5, EW-6 branches held for EW-8
+2026-10-16T12:15Z	3	ci-run	38887139934	full dev run green with wave 1; offscreen 0
+2026-10-16T12:17Z	3	pr-opened	#1337	EW-8 switcher slot; lane mac run 38897404951
+2026-10-16T12:17Z	3	heartbeat	-	EW-5, EW-6 finishers running
+2026-10-16T12:23Z	3	heartbeat	-	EW-5 d848e62 and EW-6 5fedecc pass the gate; held for #1337 (mac run in progress)
+2026-10-16T12:38Z	3	heartbeat	#1337	mac run 38897404951 still in progress
+2026-10-16T13:02Z	3	ci-run	38897404951	#1337 mac red: toolbar overflow from the switcher; fixer started
+2026-10-16T13:10Z	3	fix-round	#1337	e634d40 switcher spacing from window width
+2026-10-16T13:30Z	3	heartbeat	#1337	mac run 38905746186 on e634d40 running
+2026-10-16T13:57Z	3	heartbeat	#1337	mac run 38905746186 still running
+2026-10-16T14:18Z	3	ci-run	38905746186	#1337 e634d40: toolbar journeys green; only Library testImportAFolder red, same on dev 38909379074
+2026-10-16T14:39Z	3	heartbeat	#1337	dev full run 38908942026 completed red; waiting on the lane's next sweep
+2026-10-16T14:57Z	3	pr-opened	#1402	EW-6 parity journey
+2026-10-16T14:57Z	3	stopped	#1337	lane cannot read dev base; asked supervisor on #1079
+2026-10-16T15:19Z	3	pr-merged	#1402	EW-6 parity journey
+2026-10-16T15:19Z	3	heartbeat	#1337	still waiting on supervisor or lane fix
+2026-10-16T15:42Z	3	ci-run	38921665864	scoped suiteui red: testAppsSideBySide Flare 677>674; fixer started
+2026-10-16T15:49Z	3	pr-opened	#1427	EW-6 fix; gap #1425 filed for Flare
+2026-10-16T15:51Z	3	fix-round	#1337	rebased to 488ca96 on dev f52ec33
+2026-10-16T16:18Z	3	pr-merged	#1427	EW-6 fix
+2026-10-16T16:18Z	3	heartbeat	#1337	mac run 38927252048 on 488ca96
+2026-10-16T16:19Z	3	fix-round	#1337	rebased to 63e26bb on dev with #1427
+2026-10-16T16:51Z	3	ci-run	38931048372	#1337 stopped on Halo snapshot test that dev fails too (#1429)
+2026-10-16T17:19Z	3	fix-round	#1337	rebased to d30f9fd on dev with Halo #1470
+2026-10-16T17:51Z	3	heartbeat	#1337	mac run 38938835086 on d30f9fd in journeys
+2026-10-16T18:13Z	3	heartbeat	#1337	mac run 38938835086 still in journeys
+2026-10-16T18:31Z	3	ci-run	38938835086	#1337: Design toolbar overflow (ours), Halo testEaseKeys (dev too); fixer started
+2026-10-16T18:42Z	3	fix-round	#1337	4eb5c3c compact step; gap #1561 filed for Design centring check
+2026-10-16T18:45Z	3	heartbeat	EW-5	60208fc ready, held for #1337
+2026-10-16T19:09Z	3	heartbeat	#1337	mac run 38949333875 on 4eb5c3c
+2026-10-16T19:35Z	3	heartbeat	#1337	mac run 38949333875 running since 19:11Z
+2026-10-16T20:02Z	3	heartbeat	#1337	mac run 38949333875 running; lane also dispatched a build-only run
+2026-10-16T20:26Z	3	pr-merged	#1337	EW-8 switcher
+2026-10-16T20:26Z	3	pr-opened	#1611	EW-5 editor-window page and journey
+2026-10-16T20:53Z	3	heartbeat	#1611	lane macOS build 38962453303 running
+2026-10-16T21:19Z	5	pr-merged	#1611	EW-5
+2026-10-16T21:19Z	5	pr-opened	#1642	feature-done
+2026-10-16T21:46Z	5	pr-merged	#1642	feature-done; waiting on full run 38971156288
+2026-10-16T22:18Z	5	ci-run	38971697983	scoped suiteui stops on TimelineStripSafeAreaTests before journeys; waiting
+2026-10-16T22:50Z	5	heartbeat	-	runs until bfb8ce4f stop on TimelineStripSafeAreaTests; fix #1694 now on dev
+2026-10-16T23:22Z	5	heartbeat	-	runs still stop before ui-test on other features' unit tests; noted on #1079
+2026-10-17T00:09Z	4	round-findings	38981651490	first run reaching journeys: editor-window, parity, hit-size, gallery audit red; two fixers
+2026-10-17T00:21Z	4	pr-opened	#1801	round 1 batch A: gallery page size, dark args order, title read
+2026-10-17T00:22Z	4	pr-opened	#1802	round 1 batch B: switcher measures real items, gives way to current-only
+2026-10-17T00:26Z	4	pr-opened	#1809	round 1 batch C: parity opens Flare sample via File menu; Design/Photo frame checks
+2026-10-17T00:52Z	4	pr-merged	#1801 #1802 #1809	round 1 fixes merged; round 2 on 38988169067
+2026-10-17T01:20Z	4	ci-run	38988169067	our AppSwitcherTests float compare (from #1802) stops the macOS job; fixer started
+2026-10-17T01:25Z	4	pr-opened	#1835	AppSwitcherTests: Int-typed expected value in #expect; compare as CGFloat
+2026-10-17T01:57Z	4	pr-merged	#1835	switcher test fix; runs 38991868071, 38991985274 in progress
+2026-10-17T02:30Z	4	round-findings	38991868071	round 2: parity, hit-size pass; editor-window list/geometry reads remain
+2026-10-17T02:49Z	4	pr-opened	#1900	round 2 fix: splitter-based column frames, Dock-settle wait, sidebar list read
+2026-10-17T03:26Z	4	pr-merged	#1900	round 2 fix merged; round 3 on 38997835882
+2026-10-17T03:53Z	4	round-findings	38997835882	round 3: window 677>674, artboard read; fixer started
+2026-10-17T06:23Z	4	stage-start	round 3	lead relaunched as line lead act-1a1487bf89a-zfq8; branch rebuilt on main; round-3 fixer started (fix-batch r3-b1: #1777, #1778) on dev fe0f5f17
