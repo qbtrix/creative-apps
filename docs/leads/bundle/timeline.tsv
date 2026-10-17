@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-17T15:13Z	4	heartbeat	#2111	clean and build-green; queued behind lane batch-20261017145213 bisect (8 ready PRs wait)
 2026-10-17T15:40Z	4	merged	#2111	merged 15:25Z as f50448c4 (batch of 4, Linux); #2104 #2105 closed
 2026-10-17T15:40Z	4	round-closed	#2053 #2054	cap reached; open findings relabelled gap (supervisor-owned, scripts/)
+2026-10-17T15:52Z	heartbeat	full CI 39043153763: Linux green; macOS scripts/ci step failed, ui-test still running; logs readable once job ends
