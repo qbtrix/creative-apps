@@ -1,5 +1,5 @@
 {
-  "title": "An AppKit canvas host (CALayer tiles or a CAMetalLayer) with live input, and the Settings > Rendering choice",
+  "title": "An AppKit canvas host (CALayer tiles or a CAMetalLayer) with live input, and the View > Rendering choice",
   "wave": 3,
   "order": 10,
   "status": "planned",
@@ -24,9 +24,9 @@
     "Sources/SuiteUI/CanvasHost.swift",
     "Tests/SuiteUITests/CanvasHostTests.swift",
     "Tests/AppSnapshotTests/SuiteCanvasHostSnapshots.swift",
-    "Sources/SuiteUI/RenderingSettingsPane.swift",
-    "Tests/SuiteUITests/RenderingSettingsPaneTests.swift",
-    "Tests/AppSnapshotTests/SuiteRenderingPaneSnapshots.swift",
+    "Sources/SuiteUI/RenderingCommands.swift",
+    "Tests/SuiteUITests/RenderingCommandsTests.swift",
+    "Tests/AppSnapshotTests/SuiteRenderingMenuSnapshots.swift",
     "Tests/AppSnapshotTests/Golden/canvas-host/",
     "Sources/SuiteUI/CanvasHitMap.swift",
     "Tests/SuiteUITests/CanvasHitMapTests.swift",
@@ -76,7 +76,7 @@
     },
     {
       "id": "CH-b",
-      "behavior": "The gallery's canvas-host page shows a document on the AppKit host, drags draw on the overlay and reach the fake delegate with 0 window bodies per sample, and the settings-rendering page switches Automatic, GPU and CPU on the fake preference with the status note.",
+      "behavior": "The gallery's canvas-host page shows a document on the AppKit host, drags draw on the overlay and reach the fake delegate with 0 window bodies per sample, and the settings-rendering page's Rendering menu (Automatic, GPU (Metal), CPU, a checkmark on the current one, the status line under them) switches the fake preference and shows the status note.",
       "tasks": [
         "CH-3",
         "CH-4",
@@ -93,10 +93,10 @@
         "Sources/SuiteUI/Gallery/GalleryCanvasHost.swift",
         "Tests/SuiteUITests/CanvasHostTests.swift",
         "Tests/AppSnapshotTests/SuiteCanvasHostSnapshots.swift",
-        "Sources/SuiteUI/RenderingSettingsPane.swift",
+        "Sources/SuiteUI/RenderingCommands.swift",
         "Sources/SuiteUI/Gallery/GalleryRenderingPane.swift",
-        "Tests/SuiteUITests/RenderingSettingsPaneTests.swift",
-        "Tests/AppSnapshotTests/SuiteRenderingPaneSnapshots.swift",
+        "Tests/SuiteUITests/RenderingCommandsTests.swift",
+        "Tests/AppSnapshotTests/SuiteRenderingMenuSnapshots.swift",
         "UITests/SuiteJourneyTests+CanvasHost.swift",
         "Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift",
         "Tests/AppSnapshotTests/Golden/canvas-host/"
@@ -111,7 +111,7 @@
     },
     {
       "id": "CH-c",
-      "behavior": "The hit map, the tile set (premultiplied sRGB tiles, dirty-tile replace) and the live preference store (shared suite defaults, observed across the suite's processes) behave as the fakes promised.",
+      "behavior": "The hit map, the tile set (premultiplied sRGB tiles, dirty-tile replace) and the live preference store (one suite-wide key, kept across relaunch, observed across the suite's processes) behave as the fakes promised.",
       "tasks": [
         "CH-6",
         "CH-7",
@@ -142,7 +142,7 @@
     },
     {
       "id": "CH-d",
-      "behavior": "The pages run on the live store and tiles, CanvasViewport hosts its content on the host, the Metal layer path exists behind the preference, and the journeys pass on live.",
+      "behavior": "The pages run on the live store and tiles, CanvasViewport hosts its content on the host, the Metal layer path exists behind the preference, the menu's choice survives a relaunch, and the journeys pass on live.",
       "tasks": [
         "CH-9",
         "CH-10",
