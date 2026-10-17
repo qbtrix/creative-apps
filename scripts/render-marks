@@ -1,0 +1,464 @@
+#!/usr/bin/env python3
+# scripts/render-marks: the one generator of the suite's app marks. The six
+# SVGs in Bundle/Marks/ are the only hand-edited form; this writes everything
+# else from them:
+#   Bundle/Icons/<App>.png              1024 px, the CFBundleIconFile art
+#   Bundle/Icons/<App>-<px>.png         16, 32, 64, 128, 256 and 512 px; at
+#                                       32 px and under the -small groups draw
+#                                       (a heavier rim, a simpler glyph)
+#   Bundle/Icons/marks.json             FNV-1a 64 digests of each SVG and of
+#                                       every PNG rendered from it
+#   Sources/SuiteUI/AppMarkArt.swift    the same groups as absolute path data
+#                                       on the 1024 grid, drawn by AppMark
+# scripts/bundle-apps packs each app's PNGs into its .icns (iconutil).
+#
+#   scripts/render-marks           regenerate all of it (needs rsvg-convert:
+#                                  brew install librsvg); PNGs are committed
+#   scripts/render-marks --check   no rendering: fail when AppMarkArt.swift is
+#                                  not what the SVGs give, or an SVG or PNG no
+#                                  longer matches its digest in marks.json
+#                                  (scripts/ci runs this, Linux included)
+#
+# Each SVG holds <name>-tile, -tile-small, -glyph, -glyph-small and -line
+# groups (name = the file's stem, lowercased). The SVG subset read here is the
+# one the marks use: rect, circle, ellipse and path (M L H V C Q A Z, absolute
+# and relative), translate/scale/rotate transforms, solid and gradient paint
+# (linear or radial, userSpaceOnUse or objectBoundingBox), opacity, and
+# stroke width, caps and joins. Anything else fails loudly. Arcs, quadratics
+# and shapes become cubics. --root DIR runs on another tree (the tests).
+# Exit 0 ok, 1 drift, 2 bad input. Python 3 stdlib only.
+import argparse
+import json
+import math
+import pathlib
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
+APPS = ["AfterGlow", "Flare", "Design", "Photo", "Library", "Halo"]
+SIZES = [16, 32, 64, 128, 256, 512, 1024]
+SMALL = 32  # this size and under draw the -small groups
+GROUPS = ["tile", "tileSmall", "glyph", "glyphSmall", "line"]
+NS = "{http://www.w3.org/2000/svg}"
+ET.register_namespace("", NS[1:-1])
+
+
+class Bad(Exception):
+    pass
+
+
+def fnv(data):
+    """FNV-1a 64 as 16 hex digits: the digest IconFilesTests recomputes in Swift."""
+    h = 0xCBF29CE484222325
+    for b in data:
+        h = ((h ^ b) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return "%016x" % h
+
+
+def group_id(stem, group):
+    return stem.lower() + "-" + re.sub(r"([A-Z])", lambda m: "-" + m.group(1).lower(), group)
+
+
+# --- geometry -----------------------------------------------------------------
+
+def mul(m, n):
+    a, b, c, d, e, f = m
+    p, q, r, s, t, u = n
+    return (a * p + c * q, b * p + d * q, a * r + c * s, b * r + d * s, a * t + c * u + e, b * t + d * u + f)
+
+
+def apply(m, x, y):
+    return (m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5])
+
+
+def transform(text):
+    m = (1, 0, 0, 1, 0, 0)
+    for name, args in re.findall(r"(\w+)\s*\(([^)]*)\)", text or ""):
+        v = [float(x) for x in re.split(r"[\s,]+", args.strip()) if x]
+        if name == "translate":
+            n = (1, 0, 0, 1, v[0], v[1] if len(v) > 1 else 0)
+        elif name == "scale":
+            n = (v[0], 0, 0, v[1] if len(v) > 1 else v[0], 0, 0)
+        elif name == "rotate":
+            a = math.radians(v[0])
+            cx, cy = (v[1], v[2]) if len(v) == 3 else (0, 0)
+            n = mul(mul((1, 0, 0, 1, cx, cy), (math.cos(a), math.sin(a), -math.sin(a), math.cos(a), 0, 0)),
+                    (1, 0, 0, 1, -cx, -cy))
+        else:
+            raise Bad(f"unsupported transform {name}")
+        m = mul(m, n)
+    return m
+
+
+NUM = re.compile(r"[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?")
+
+
+def arc(x1, y1, rx, ry, phi, large, sweep, x2, y2):
+    """An SVG arc as cubics [(c1x, c1y, c2x, c2y, x, y)] (SVG 1.1 F.6.5 endpoint to center)."""
+    if rx == 0 or ry == 0:
+        return [(x1, y1, x2, y2, x2, y2)]
+    rx, ry, phi = abs(rx), abs(ry), math.radians(phi)
+    cp, sp = math.cos(phi), math.sin(phi)
+    dx, dy = (x1 - x2) / 2, (y1 - y2) / 2
+    x1p, y1p = cp * dx + sp * dy, -sp * dx + cp * dy
+    lam = x1p ** 2 / rx ** 2 + y1p ** 2 / ry ** 2
+    if lam > 1:
+        rx, ry = rx * math.sqrt(lam), ry * math.sqrt(lam)
+    num = rx ** 2 * ry ** 2 - rx ** 2 * y1p ** 2 - ry ** 2 * x1p ** 2
+    k = math.sqrt(max(0, num / (rx ** 2 * y1p ** 2 + ry ** 2 * x1p ** 2)))
+    if large == sweep:
+        k = -k
+    cxp, cyp = k * rx * y1p / ry, -k * ry * x1p / rx
+    cx, cy = cp * cxp - sp * cyp + (x1 + x2) / 2, sp * cxp + cp * cyp + (y1 + y2) / 2
+
+    def angle(ux, uy, vx, vy):
+        return math.atan2(ux * vy - uy * vx, ux * vx + uy * vy)
+    t1 = angle(1, 0, (x1p - cxp) / rx, (y1p - cyp) / ry)
+    dt = angle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry)
+    if not sweep and dt > 0:
+        dt -= 2 * math.pi
+    elif sweep and dt < 0:
+        dt += 2 * math.pi
+    n = max(1, math.ceil(abs(dt) / (math.pi / 2) - 1e-9))
+    step = dt / n
+    alpha = 4 / 3 * math.tan(step / 4)
+
+    def point(t):
+        return (cx + rx * math.cos(t) * cp - ry * math.sin(t) * sp, cy + rx * math.cos(t) * sp + ry * math.sin(t) * cp)
+
+    def deriv(t):
+        return (-rx * math.sin(t) * cp - ry * math.cos(t) * sp, -rx * math.sin(t) * sp + ry * math.cos(t) * cp)
+    out = []
+    for i in range(n):
+        a, b = t1 + i * step, t1 + (i + 1) * step
+        (ax, ay), (bx, by) = point(a), point(b)
+        (dax, day), (dbx, dby) = deriv(a), deriv(b)
+        out.append((ax + alpha * dax, ay + alpha * day, bx - alpha * dbx, by - alpha * dby, bx, by))
+    out[-1] = out[-1][:4] + (x2, y2)
+    return out
+
+
+def path_ops(d):
+    """Path data as [('m', x, y) | ('l', x, y) | ('c', 6 numbers) | ('z',)], absolute."""
+    tokens = re.findall(r"[A-Za-z]|" + NUM.pattern, d)
+    ops, i, cmd = [], 0, None
+    x = y = sx = sy = 0.0
+
+    def nums(k):
+        nonlocal i
+        if i + k > len(tokens) or any(re.fullmatch(r"[A-Za-z]", t) for t in tokens[i:i + k]):
+            raise Bad(f"path data ends early: {d!r}")
+        v = [float(t) for t in tokens[i:i + k]]
+        i += k
+        return v
+    while i < len(tokens):
+        if re.fullmatch(r"[A-Za-z]", tokens[i]):
+            cmd = tokens[i]
+            i += 1
+            if cmd in "Zz":
+                ops.append(("z",))
+                x, y = sx, sy
+                continue
+        elif cmd is None:
+            raise Bad(f"path data has no command: {d!r}")
+        rel = cmd.islower()
+        c = cmd.upper()
+        ox, oy = (x, y) if rel else (0.0, 0.0)
+        if c == "M":
+            px, py = nums(2)
+            x, y = sx, sy = ox + px, oy + py
+            ops.append(("m", x, y))
+            cmd = "l" if rel else "L"
+        elif c == "L":
+            px, py = nums(2)
+            x, y = ox + px, oy + py
+            ops.append(("l", x, y))
+        elif c == "H":
+            x = (x if rel else 0) + nums(1)[0]
+            ops.append(("l", x, y))
+        elif c == "V":
+            y = (y if rel else 0) + nums(1)[0]
+            ops.append(("l", x, y))
+        elif c == "C":
+            v = nums(6)
+            pts = [ox + v[0], oy + v[1], ox + v[2], oy + v[3], ox + v[4], oy + v[5]]
+            ops.append(("c", *pts))
+            x, y = pts[4], pts[5]
+        elif c == "Q":
+            v = nums(4)
+            qx, qy, ex, ey = ox + v[0], oy + v[1], ox + v[2], oy + v[3]
+            ops.append(("c", x + 2 / 3 * (qx - x), y + 2 / 3 * (qy - y), ex + 2 / 3 * (qx - ex), ey + 2 / 3 * (qy - ey), ex, ey))
+            x, y = ex, ey
+        elif c == "A":
+            v = nums(7)
+            ex, ey = ox + v[5], oy + v[6]
+            ops.extend(("c", *seg) for seg in arc(x, y, v[0], v[1], v[2], int(v[3]), int(v[4]), ex, ey))
+            x, y = ex, ey
+        else:
+            raise Bad(f"unsupported path command {cmd}")
+    return ops
+
+
+def shape_ops(el):
+    tag = el.tag.replace(NS, "")
+    g = lambda k, dflt=0.0: float(el.get(k, dflt))
+    if tag == "path":
+        return path_ops(el.get("d", ""))
+    if tag == "rect":
+        x, y, w, h = g("x"), g("y"), g("width"), g("height")
+        rx = g("rx", el.get("ry", 0))
+        ry = g("ry", rx)
+        if not rx:
+            return [("m", x, y), ("l", x + w, y), ("l", x + w, y + h), ("l", x, y + h), ("z",)]
+        d = (f"M{x + rx} {y} H{x + w - rx} A{rx} {ry} 0 0 1 {x + w} {y + ry} V{y + h - ry} "
+             f"A{rx} {ry} 0 0 1 {x + w - rx} {y + h} H{x + rx} A{rx} {ry} 0 0 1 {x} {y + h - ry} "
+             f"V{y + ry} A{rx} {ry} 0 0 1 {x + rx} {y} Z")
+        return path_ops(d)
+    if tag in ("circle", "ellipse"):
+        cx, cy = g("cx"), g("cy")
+        rx = g("r") if tag == "circle" else g("rx")
+        ry = g("r") if tag == "circle" else g("ry")
+        return path_ops(f"M{cx + rx} {cy} A{rx} {ry} 0 0 1 {cx} {cy + ry} A{rx} {ry} 0 0 1 {cx - rx} {cy} "
+                        f"A{rx} {ry} 0 0 1 {cx} {cy - ry} A{rx} {ry} 0 0 1 {cx + rx} {cy} Z")
+    raise Bad(f"unsupported element <{tag}>")
+
+
+# --- paint --------------------------------------------------------------------
+
+def color(text):
+    t = text.strip().lstrip("#")
+    if len(t) == 3:
+        t = "".join(ch * 2 for ch in t)
+    if not re.fullmatch(r"[0-9a-fA-F]{6}", t):
+        raise Bad(f"unsupported colour {text!r}")
+    return int(t, 16)
+
+
+def paint(value, alpha, gradients, m, ops):
+    """('solid', rgb, alpha) | ('linear', stops, x1, y1, x2, y2) | ('radial', stops, cx, cy, r), on the 1024 grid."""
+    if value in (None, "none"):
+        return None
+    ref = re.fullmatch(r"url\(#([^)]+)\)", value.strip())
+    if not ref:
+        return ("solid", color(value), alpha)
+    grad = gradients.get(ref.group(1))
+    if grad is None:
+        raise Bad(f"no gradient {ref.group(1)}")
+    stops = [(float(s.get("offset", 0)), color(s.get("stop-color", "#000")), float(s.get("stop-opacity", 1)) * alpha)
+             for s in grad.findall(NS + "stop")]
+    units = grad.get("gradientUnits", "objectBoundingBox")
+    if units == "objectBoundingBox":
+        xs = [v for op in ops for v in op[1::2]]
+        ys = [v for op in ops for v in op[2::2]]
+        bx, by, bw, bh = min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
+        box = (bw, 0, 0, bh, bx, by)
+    else:
+        box = (1, 0, 0, 1, 0, 0)
+    full = mul(m, box)
+    f = lambda k, dflt: float(grad.get(k, dflt))
+    if grad.tag == NS + "linearGradient":
+        x1, y1 = apply(full, f("x1", 0), f("y1", 0))
+        x2, y2 = apply(full, f("x2", 1), f("y2", 0))
+        return ("linear", stops, x1, y1, x2, y2)
+    if grad.tag == NS + "radialGradient":
+        if grad.get("fx", grad.get("cx")) != grad.get("cx") or grad.get("fy", grad.get("cy")) != grad.get("cy"):
+            raise Bad("a radial gradient's focus must be its center")
+        if abs(abs(full[0]) - abs(full[3])) > 1e-6 and full[1] == 0:
+            raise Bad("a radial gradient needs a square box")
+        cx, cy = apply(full, f("cx", 0.5), f("cy", 0.5))
+        return ("radial", stops, cx, cy, f("r", 0.5) * math.sqrt(abs(full[0] * full[3] - full[1] * full[2])))
+    raise Bad(f"unsupported gradient <{grad.tag}>")
+
+
+INHERITED = ("fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "fill-opacity", "stroke-opacity")
+
+
+def elements(group, gradients):
+    """The group's shapes, each {ops, fill, stroke, width, cap, join, opacity}, on the 1024 grid."""
+    out = []
+
+    def walk(node, m, style):
+        for el in node:
+            tag = el.tag.replace(NS, "")
+            if tag in ("title", "desc"):
+                continue
+            st = dict(style)
+            st.update({k: el.get(k) for k in INHERITED if el.get(k) is not None})
+            em = mul(m, transform(el.get("transform")))
+            if tag == "g":
+                walk(el, em, st)
+                continue
+            local = shape_ops(el)
+            ops = [(op[0],) + tuple(v for p in zip(op[1::2], op[2::2]) for v in apply(em, *p)) for op in local]
+            scale = math.sqrt(abs(em[0] * em[3] - em[1] * em[2]))
+            fill = paint(st.get("fill", "#000"), float(st.get("fill-opacity", 1)), gradients, em, local)
+            stroke = paint(st.get("stroke"), float(st.get("stroke-opacity", 1)), gradients, em, local)
+            out.append({
+                "ops": ops, "fill": fill, "stroke": stroke,
+                "width": float(st.get("stroke-width", 1)) * scale if stroke else 0.0,
+                "cap": st.get("stroke-linecap", "butt") == "round",
+                "join": st.get("stroke-linejoin", "miter") == "round",
+                "opacity": float(el.get("opacity", 1)),
+            })
+    walk(group, transform(group.get("transform")),
+         {k: group.get(k) for k in INHERITED if group.get(k) is not None})
+    return out
+
+
+def read_mark(path):
+    """{group: [element]} for one SVG; raises Bad on a missing group or unsupported SVG."""
+    root = ET.parse(path).getroot()
+    gradients = {g.get("id"): g for g in root.iter() if g.tag in (NS + "linearGradient", NS + "radialGradient")}
+    groups = {g.get("id"): g for g in root.iter(NS + "g")}
+    art = {}
+    for group in GROUPS:
+        gid = group_id(path.stem, group)
+        if gid not in groups:
+            raise Bad(f"{path.name}: no <g id=\"{gid}\">")
+        art[group] = elements(groups[gid], gradients)
+    return art
+
+
+# --- Swift --------------------------------------------------------------------
+
+def n(v):
+    s = ("%.2f" % v).rstrip("0").rstrip(".")
+    return "0" if s in ("-0", "") else s
+
+
+def swift_paint(p):
+    if p is None:
+        return "nil"
+    stops = lambda ss: "[" + ", ".join(f".init({n(o)}, 0x{c:06X}, {n(a)})" for o, c, a in ss) + "]"
+    if p[0] == "solid":
+        return f".solid(0x{p[1]:06X}, {n(p[2])})"
+    if p[0] == "linear":
+        return f".linear({stops(p[1])}, {', '.join(n(v) for v in p[2:])})"
+    return f".radial({stops(p[1])}, {', '.join(n(v) for v in p[2:])})"
+
+
+def swift_element(e):
+    ops = ", ".join(f".{op[0]}" + (f"({', '.join(n(v) for v in op[1:])})" if len(op) > 1 else "") for op in e["ops"])
+    return (f"            .init(ops: [{ops}],\n"
+            f"                  fill: {swift_paint(e['fill'])}, stroke: {swift_paint(e['stroke'])}, "
+            f"width: {n(e['width'])}, roundCap: {str(e['cap']).lower()}, roundJoin: {str(e['join']).lower()}, "
+            f"opacity: {n(e['opacity'])}),")
+
+
+def swift(arts):
+    lines = [
+        "// AppMarkArt.swift: GENERATED by scripts/render-marks from Bundle/Marks/*.svg; never edit by hand.",
+        "// Each mark's groups as absolute path data on the 1024 icon grid (AppMark draws them).",
+        "// scripts/render-marks --check, in scripts/ci, fails when this differs from the SVGs.",
+        "import CoreGraphics",
+        "",
+        "extension AppMarkArt {",
+        "    /// The art for each mark, by `SuiteApp` raw value.",
+        "    static let all: [String: AppMarkArt] = [",
+    ]
+    for app in APPS:
+        key = "launcher" if app == "AfterGlow" else app.lower()
+        lines.append(f"        \"{key}\": AppMarkArt(")
+        for group in GROUPS:
+            lines.append(f"            {group}: [")
+            lines += ["    " + swift_element(e) for e in arts[app][group]]
+            lines.append("            ]" + ("," if group != GROUPS[-1] else ""))
+        lines.append("        ),")
+    lines += ["    ]", "}", ""]
+    return "\n".join(lines)
+
+
+# --- rendering ----------------------------------------------------------------
+
+def variant(path, small):
+    """The SVG text with the -small groups shown and the full glyph hidden when `small`."""
+    tree = ET.parse(path)
+    groups = {g.get("id"): g for g in tree.getroot().iter(NS + "g")}
+    show = {"tileSmall": small, "glyph": not small, "glyphSmall": small, "line": False}
+    for group, on in show.items():
+        g = groups[group_id(path.stem, group)]
+        if on:
+            g.attrib.pop("display", None)
+        else:
+            g.set("display", "none")
+    return ET.tostring(tree.getroot(), encoding="unicode")
+
+
+def render(rsvg, path, size, tmp):
+    src = pathlib.Path(tmp) / f"{path.stem}-{size}.svg"
+    src.write_text(variant(path, size <= SMALL))
+    return subprocess.run([rsvg, "-w", str(size), "-h", str(size), str(src)], check=True, capture_output=True).stdout
+
+
+def png_name(app, size):
+    return f"{app}.png" if size == 1024 else f"{app}-{size}.png"
+
+
+def main():
+    ap = argparse.ArgumentParser(description="render the app marks from Bundle/Marks")
+    ap.add_argument("--root", type=pathlib.Path, default=HERE)
+    ap.add_argument("--check", action="store_true")
+    a = ap.parse_args()
+    marks, icons = a.root / "Bundle/Marks", a.root / "Bundle/Icons"
+    art_file = a.root / "Sources/SuiteUI/AppMarkArt.swift"
+    try:
+        arts = {app: read_mark(marks / f"{app}.svg") for app in APPS}
+    except (Bad, OSError, ET.ParseError, ValueError) as e:
+        print(f"render-marks: {e}", file=sys.stderr)
+        return 2
+    code = swift(arts)
+
+    if a.check:
+        bad = []
+        if not art_file.exists() or art_file.read_text() != code:
+            bad.append(f"{art_file.relative_to(a.root)} is not what Bundle/Marks gives")
+        try:
+            manifest = json.loads((icons / "marks.json").read_text())["icons"]
+        except (OSError, ValueError, KeyError) as e:
+            print(f"render-marks: Bundle/Icons/marks.json: {e}", file=sys.stderr)
+            return 2
+        for app in APPS:
+            entry = manifest.get(app, {})
+            if entry.get("svg") != fnv((marks / f"{app}.svg").read_bytes()):
+                bad.append(f"Bundle/Marks/{app}.svg changed since its PNGs were rendered")
+            for size in SIZES:
+                png = icons / png_name(app, size)
+                if not png.exists() or entry.get("png", {}).get(str(size)) != fnv(png.read_bytes()):
+                    bad.append(f"Bundle/Icons/{png.name} is not the render marks.json records")
+        for line in bad:
+            print(line)
+        if bad:
+            print("Rerun scripts/render-marks (needs rsvg-convert) and commit what it writes.")
+            return 1
+        print(f"ok ({len(APPS)} marks, {len(APPS) * len(SIZES)} PNGs, AppMarkArt.swift current)")
+        return 0
+
+    rsvg = shutil.which("rsvg-convert")
+    if not rsvg:
+        print("render-marks: rsvg-convert not found; brew install librsvg", file=sys.stderr)
+        return 2
+    version = subprocess.run([rsvg, "--version"], capture_output=True, text=True).stdout.strip()
+    manifest = {}
+    with tempfile.TemporaryDirectory() as tmp:
+        for app in APPS:
+            svg = marks / f"{app}.svg"
+            entry = {"svg": fnv(svg.read_bytes()), "png": {}}
+            for size in SIZES:
+                data = render(rsvg, svg, size, tmp)
+                (icons / png_name(app, size)).write_bytes(data)
+                entry["png"][str(size)] = fnv(data)
+            manifest[app] = entry
+    doc = {"about": "Written by scripts/render-marks; never by hand. FNV-1a 64 digests of each Bundle/Marks SVG "
+                    "and the PNGs rendered from it.", "renderer": version, "icons": manifest}
+    (icons / "marks.json").write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n")
+    art_file.write_text(code)
+    print(f"render-marks: wrote {len(APPS) * len(SIZES)} PNGs, Bundle/Icons/marks.json and {art_file.relative_to(a.root)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

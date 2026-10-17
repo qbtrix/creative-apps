@@ -18,7 +18,7 @@ extension FlareIntent {
         case .layers(let intent): intent.title
         case .library(let intent): intent.title
         case .interactions(.toggleEditor): "Interactions"
-        case .export(.showSheet): "Export…"
+        case .export(let intent): intent.title
         case .assist(.showPopover): "Animate with Assist…"
         }
     }
@@ -175,6 +175,31 @@ extension FlareIntent.Layers {
         case .addScene: "Add Scene"
         case .remove: "Delete Layer"
         case .duplicate: "Duplicate Layer"
+        }
+    }
+}
+
+extension FlareIntent.Export {
+    /// Export… opens the sheet (File menu, toolbar); the rest are the sheet's own rows and buttons
+    /// (docs/blueprints/flare/features/flare-export.md), so a format chip's title names its format.
+    var title: String {
+        switch self {
+        case .showSheet: "Export…"
+        case .setFormat(let format):
+            switch format {
+            case .svgFrame: "SVG frame"
+            case .lottie: "Lottie"
+            case .pngSequence: "PNG sequence"
+            }
+        case .setFrames: "Frames"
+        case .setStep: "Step"
+        case .setScale: "Scale"
+        case .setTransparent: "Transparent background"
+        case .start: "Export"
+        case .cancel: "Cancel"
+        case .dismiss: "Done"
+        case .tryAgain: "Try Again"
+        case .reveal: "Reveal in Finder"
         }
     }
 }

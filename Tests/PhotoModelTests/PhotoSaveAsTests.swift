@@ -1,5 +1,5 @@
 // PhotoSaveAsTests.swift: the file name Export and Save As offer, and Save As
-// renaming the document (window title, top bar, panel header) without an undo
+// renaming the document (window title, window toolbar, image header) without an undo
 // step. Runs on Linux and macOS.
 import PhotoModel
 import Testing

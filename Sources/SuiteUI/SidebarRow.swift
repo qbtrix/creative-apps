@@ -1,5 +1,5 @@
-// SidebarRow.swift: SidebarItem (id, title, SF Symbol, optional count, row
-// toggles, children), SidebarToggle, and the row SuiteWindow draws for an
+// SidebarRow.swift: SidebarItem (id, title, SF Symbol or an app's mark,
+// optional count, row toggles, children), SidebarToggle, and the row SuiteWindow draws for an
 // item. Row height follows the system sidebar size setting, so nothing here
 // fixes a height. The row owns only presentation state (the rename draft);
 // toggles and renames go out through closures, and a nil closure turns that
@@ -7,12 +7,16 @@
 // so it is as wide in every state and the toggles form a column (#53). The
 // icon is hidden from accessibility, so each toggle carries its own
 // identifier, `suite.sidebar.<item id>.<toggle id>` (the app audit, #262).
+import SuiteModel
 import SwiftUI
 
 public struct SidebarItem: Identifiable, Hashable, Sendable {
     public let id: String
     public let title: String
     public let systemImage: String
+    /// The app whose mark the row shows in place of `systemImage` (AppMark
+    /// .line; .launcher is the suite mark); nil shows the symbol.
+    public let app: SuiteApp?
     /// A count shown as a trailing badge; nil or 0 shows none.
     public let count: Int?
     /// Small icon toggles after the title (visibility, lock, ...).
@@ -25,14 +29,20 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
 
     public init(
         id: String, title: String, systemImage: String, count: Int? = nil,
-        toggles: [SidebarToggle] = [], children: [SidebarItem] = []
+        toggles: [SidebarToggle] = [], children: [SidebarItem] = [], app: SuiteApp? = nil
     ) {
         self.id = id
         self.title = title
         self.systemImage = systemImage
+        self.app = app
         self.count = count
         self.toggles = toggles
         self.children = children
+    }
+
+    /// A row that shows `app`'s mark instead of a symbol.
+    public init(id: String, title: String, app: SuiteApp, count: Int? = nil) {
+        self.init(id: id, title: title, systemImage: "", count: count, app: app)
     }
 
     /// The rows the sidebar draws under this item at the second level: every
@@ -42,7 +52,7 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
         children.flatMap { child in
             [SidebarItem(
                 id: child.id, title: child.title, systemImage: child.systemImage, count: child.count,
-                toggles: child.toggles)] + child.secondLevelRows
+                toggles: child.toggles, app: child.app)] + child.secondLevelRows
         }
     }
 }
@@ -131,7 +141,7 @@ public struct SidebarRow: View {
                 .onExitCommand { draft = nil }
                 .onChange(of: editing) { _, focused in if !focused { commitRename() } }
         } else {
-            Label(item.title, systemImage: item.systemImage)
+            Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
                 .contentShape(Rectangle())
                 .simultaneousGesture(TapGesture(count: 2).onEnded { beginRename(on: .title) })
         }
@@ -154,6 +164,19 @@ public struct SidebarRow: View {
         guard let name = draft?.trimmingCharacters(in: .whitespaces) else { return }
         draft = nil
         if !name.isEmpty, name != item.title { onRename?(name) }
+    }
+}
+
+/// A row's icon: its app's line mark (AppMark, sized like a symbol), else its SF Symbol.
+private struct SidebarRowIcon: View {
+    let item: SidebarItem
+
+    var body: some View {
+        if let app = item.app {
+            AppMark(app: app, style: .line).symbolSized()
+        } else {
+            Image(systemName: item.systemImage)
+        }
     }
 }
 

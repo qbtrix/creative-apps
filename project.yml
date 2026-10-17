@@ -82,7 +82,7 @@ targets:
       [{ package: creative-core, product: FlareCore }, { package: creative-core, product: CoreRaster },
        { package: creative-core, product: CoreColor }]
   SuiteModel: { type: framework, platform: macOS, sources: [Sources/SuiteModel] }
-  SuiteUI: { type: framework, platform: macOS, sources: [Sources/SuiteUI] }
+  SuiteUI: { type: framework, platform: macOS, sources: [Sources/SuiteUI], dependencies: [{ target: SuiteModel }] }
   SuiteShell:
     type: framework
     platform: macOS

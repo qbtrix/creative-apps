@@ -2,9 +2,11 @@
 // to its main window to take part in switching (blueprint 2.6). It hands the
 // app's document host to the process's SuiteAppDelegate, which then accepts
 // the hand-offs the app receives, settles them through a store over the
-// support folder, and sends the other documents to the host.
+// support folder, sends the other documents to the host, and sets the window's
+// app switcher from the same Switch To items as the menu.
 import Foundation
 import SuiteModel
+import SuiteUI
 import SwiftUI
 
 extension Scene {
@@ -16,6 +18,6 @@ extension Scene {
             delegate.host = host
             delegate.receiver = StoreHandOffs(store: FileStore(folder: support), from: app, deliver: HandOffTransport.deliver)
         }
-        return self
+        return environment(\.suiteSwitcher, SuiteSwitcherBridge.state(current: app))
     }
 }

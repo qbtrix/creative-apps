@@ -1,6 +1,7 @@
-// AppSwitcher.swift: the suite's app switcher, one centered row of monochrome
-// line icons in a SuiteWindow's toolbar (Home, Flare, Design, Photo, Library,
-// Halo), no labels and no bar behind it (docs/blueprints/suiteui.md section 6).
+// AppSwitcher.swift: the suite's app switcher, one centered row of each app's
+// line mark (AppMark .line; Home is the AfterGlow suite mark) in a
+// SuiteWindow's toolbar (Home, Flare, Design, Photo, Library, Halo), no labels
+// and no bar behind it (docs/blueprints/suiteui.md section 6).
 // The current app's item sits in a capsule of SuiteUI glass (`suiteGlass`, the
 // row's one glass shape) with its icon in textPrimary; the others are
 // textSecondary. Item centers sit `spacing` apart, one of `spacingSteps`
@@ -25,6 +26,7 @@
 // switching feature wires it, with every item disabled and the current one
 // picked from the running executable's name. Tested in AppSwitcherTests and
 // SuiteAppSwitcherSnapshots.
+import SuiteModel
 import SwiftUI
 
 public struct AppSwitcherItem: Identifiable, Sendable {
@@ -32,17 +34,17 @@ public struct AppSwitcherItem: Identifiable, Sendable {
     public let id: String
     /// The app's name: the accessibility label and the tooltip's first words.
     public let title: String
-    /// A monochrome line SF Symbol.
-    public let systemImage: String
+    /// Whose mark the item draws (AppMark .line); nil is the suite mark, for Home.
+    public let app: SuiteApp?
     /// The key equivalent shown in the tooltip ("⌃⌘2").
     public let shortcut: String
     /// Why the item can't switch yet; non-nil shows it disabled with this reason.
     public let unavailableHelp: String?
 
-    public init(id: String, title: String, systemImage: String, shortcut: String, unavailableHelp: String? = nil) {
+    public init(id: String, title: String, app: SuiteApp?, shortcut: String, unavailableHelp: String? = nil) {
         self.id = id
         self.title = title
-        self.systemImage = systemImage
+        self.app = app
         self.shortcut = shortcut
         self.unavailableHelp = unavailableHelp
     }
@@ -211,8 +213,8 @@ public struct AppSwitcher: View {
                 Button {
                     onSelect(item.id)
                 } label: {
-                    Image(systemName: item.systemImage)
-                        .font(.system(size: SuiteSize.switcherIcon))
+                    AppMark(app: item.app, style: .line)
+                        .frame(width: SuiteSize.switcherIcon, height: SuiteSize.switcherIcon)
                         .foregroundStyle(isCurrent ? SuiteColor.textPrimary : SuiteColor.textSecondary)
                         .frame(width: spacing, height: Self.capsuleHeight(spacing: spacing))
                         .contentShape(.rect)
@@ -270,22 +272,16 @@ extension AppSwitcherState {
     /// Why the placeholder's items can't switch yet.
     public static let notConnected = "Not connected yet (switching)."
 
-    /// Home plus the five apps, every item disabled "Not connected yet
-    /// (switching)."; the current item is the one whose app runs this process
-    /// (the executable "DesignApp" → "design"; anything else → none).
+    /// Home plus the five apps, in SuiteApp's order with its shortcuts, every
+    /// item disabled "Not connected yet (switching)."; the current item is the
+    /// one whose app runs this process (the executable "DesignApp" → "design";
+    /// anything else → none).
     public static func placeholder(processName: String) -> AppSwitcherState {
-        let apps: [(id: String, title: String, systemImage: String)] = [
-            ("home", "Home", "house"),
-            ("flare", "Flare", "flame"),
-            ("design", "Design", "pencil.and.outline"),
-            ("photo", "Photo", "camera.aperture"),
-            ("library", "Library", "photo.on.rectangle"),
-            ("halo", "Halo", "film"),
-        ]
-        let items = apps.enumerated().map { index, app in
-            AppSwitcherItem(
-                id: app.id, title: app.title, systemImage: app.systemImage, shortcut: "⌃⌘\(index)",
-                unavailableHelp: notConnected)
+        let items = SuiteApp.allCases.map { app in
+            let home = app == .launcher
+            return AppSwitcherItem(
+                id: home ? "home" : app.rawValue, title: home ? "Home" : app.displayName, app: home ? nil : app,
+                shortcut: "⌃⌘\(app.switchDigit)", unavailableHelp: notConnected)
         }
         // Home is not an app with an executable of its own.
         let current = items.first { $0.id != "home" && "\($0.title)App" == processName }?.id

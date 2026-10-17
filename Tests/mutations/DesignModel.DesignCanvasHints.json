@@ -1,0 +1,107 @@
+[
+  {
+    "label": "a handle of the selection shows the move pointer",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "pointer: .resize(handle))",
+    "replace": "pointer: .move)",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "a handle hover names no layer",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "DesignHover(nodeID: node.id, outline: node.frame, pointer: .resize(handle))",
+    "replace": "DesignHover(nodeID: nil, outline: nil, pointer: .resize(handle))",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the Option check dropped, so no copy pointer",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "pointer: modifiers.contains(.option) ? .copy : .move)",
+    "replace": "pointer: .move)",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the live-gesture guard dropped, so the outline shows mid-drag",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "guard let point, point.isFinite, gesture == nil else { return idle }",
+    "replace": "guard let point, point.isFinite else { return idle }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the non-finite guard dropped, so a text box is placed at NaN",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "guard let point, point.isFinite, gesture == nil else { return idle }",
+    "replace": "guard let point, gesture == nil else { return idle }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "drawing tools pick the layer under the point",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "guard tool == .move else { return idle }",
+    "replace": "guard tool != .pen else { return idle }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the Text box swaps width and height",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "let box = DesignRect(x: point.x, y: point.y, width: size.width, height: size.height)",
+    "replace": "let box = DesignRect(x: point.x, y: point.y, width: size.height, height: size.width)",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the resize name drops its dash",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "\"-\" + $0.lowercased()",
+    "replace": "String($0).lowercased()",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the resize name keeps the camel case",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "\"-\" + $0.lowercased()",
+    "replace": "\"-\" + String($0)",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the move badge swaps X and Y",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "return \"X \\(wholePoints(bounds.x)), Y \\(wholePoints(bounds.y))\"",
+    "replace": "return \"X \\(wholePoints(bounds.y)), Y \\(wholePoints(bounds.x))\"",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the size badge reads width for both sides",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "return \"\\(wholePoints(bounds.width)) × \\(wholePoints(bounds.height))\"",
+    "replace": "return \"\\(wholePoints(bounds.width)) × \\(wholePoints(bounds.width))\"",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge reads one layer, not the bounds of several",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "guard let bounds = selectionBounds else { return nil }",
+    "replace": "guard let bounds = selectedNodes.last?.frame else { return nil }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge shows a zero size with nothing selected",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "guard let bounds = selectionBounds else { return nil }",
+    "replace": "guard let bounds = Optional(selectionBounds ?? DesignRect(x: 0, y: 0, width: 0, height: 0)) else { return nil }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge truncates instead of rounding to whole points",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "return Int(Swift.min(Swift.max(value.rounded(), -1e9), 1e9))",
+    "replace": "return Int(Swift.min(Swift.max(value, -1e9), 1e9))",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge shows X and Y for a resize, not a move",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "if case .move? = gesture?.route {",
+    "replace": "if case .resize? = gesture?.route {",
+    "tests": "DesignCanvasHintsTests.swift"
+  }
+]

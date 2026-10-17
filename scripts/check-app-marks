@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+# scripts/check-app-marks: one mark per app (docs/blueprints/suite.md 6.4), in
+# the canonical-first style of scripts/check-dup-logic (lead.md rule 20). An
+# app's mark is drawn only by AppMark (Sources/SuiteUI/AppMark.swift), from the
+# SVGs in Bundle/Marks/. Outside AppMark.swift and its generated
+# AppMarkArt.swift, a Swift file under Sources/ fails on
+#   table      a `[SuiteApp: String]` symbol table: its name says symbol, image
+#              or icon, or its literal holds an SF Symbol-shaped value
+#              ("square.on.circle") or a retired name (a title table passes)
+#   switcher   an `AppSwitcherItem(` call that passes `systemImage:`
+#   retired    a retired app-mark SF Symbol name (RETIRED) on a line that also
+#              names an app: SuiteApp, a case like `.flare`, or an app's id or
+#              name in quotes ("flare", "Flare", "Home", "AfterGlow", ...)
+# Tool and row symbols that only share a name with an old mark (Photo's Brush,
+# Library's All Photos, Flare's scene rows) don't name an app and pass.
+# It also fails when a PNG in Bundle/Icons/ (<App>.png or <App>-<px>.png) has
+# no Bundle/Marks/<App>.svg, or an SVG there has no <App>.png.
+#
+# Tests/app-marks-baseline.txt lists files grandfathered whole until they move
+# to AppMark; it only shrinks.
+#   scripts/check-app-marks                    fail on a hit in an unlisted file, a listed
+#                                              file with no hits (prune it), or a missing twin
+#   scripts/check-app-marks --update-baseline  rewrite it; refuses to add a file
+# --root DIR runs against another tree (the tests). Exit 0 clean, 1 on a hit,
+# 2 on bad input. Python 3 stdlib only.
+import argparse
+import pathlib
+import re
+import sys
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
+EXEMPT = {"Sources/SuiteUI/AppMark.swift", "Sources/SuiteUI/AppMarkArt.swift"}
+RETIRED = ["scribble.variable", "square.on.circle", "paintbrush.pointed", "photo.on.rectangle.angled", "film.stack",
+           "square.grid.3x3.square", "flame", "pencil.and.outline", "camera.aperture", "photo.on.rectangle", "film",
+           "house"]
+APP_IDS = ["launcher", "home", "flare", "design", "photo", "library", "halo"]
+TABLE = re.compile(r"\[\s*SuiteApp\s*\??\s*:\s*String\s*\??\s*\]")
+RETIRED_RE = re.compile(r'"(%s)"' % "|".join(map(re.escape, RETIRED)))
+NAMES_APP = re.compile(r"\bSuiteApp\b|\.(?:%s)\b|\"(?:%s|AfterGlow)\"" % (
+    "|".join(APP_IDS), "|".join(APP_IDS + [a.capitalize() for a in APP_IDS])))
+SYMBOLISH = re.compile(r'"[a-z][a-z0-9]*(?:\.[a-z0-9]+)+"|' + RETIRED_RE.pattern)
+NAMED_SYMBOL = re.compile(r"symbol|image|icon", re.I)
+ICON = re.compile(r"^([A-Za-z]+?)(?:-(\d+))?\.png$")
+HEADER = """# Tests/app-marks-baseline.txt: Swift files that drew app marks before AppMark
+# existed, grandfathered. Written by scripts/check-app-marks --update-baseline,
+# never by hand. It only shrinks: switch the file to AppMark and drop its line.
+"""
+
+
+def code_lines(text):
+    """(line number, line) for each line, // comments blanked so they never hit."""
+    for n, line in enumerate(text.splitlines(), 1):
+        yield n, "" if line.lstrip().startswith("//") else line
+
+
+def calls(text, name):
+    """(line number, call text) for each `name(` call, up to its closing parenthesis."""
+    for m in re.finditer(re.escape(name) + r"\(", text):
+        depth, i = 1, m.end()
+        while i < len(text) and depth:
+            depth += {"(": 1, ")": -1}.get(text[i], 0)
+            i += 1
+        yield text.count("\n", 0, m.start()) + 1, text[m.start():i]
+
+
+def literal_after(code, start):
+    """The `[...]` literal assigned after index `start` on its statement, or "" when there is none."""
+    m = re.compile(r"[^\n=]*=\s*\[").match(code, start)
+    if not m:
+        return ""
+    depth, i = 1, m.end()
+    while i < len(code) and depth:
+        depth += {"[": 1, "]": -1}.get(code[i], 0)
+        i += 1
+    return code[m.end():i]
+
+
+def hits_in(text):
+    """[(line, rule)] for one Swift file's text."""
+    out = []
+    code = "\n".join(line for _, line in code_lines(text))
+    for m in TABLE.finditer(code):
+        line = code[code.rfind("\n", 0, m.start()) + 1:code.find("\n", m.end()) % (len(code) + 1)]
+        if NAMED_SYMBOL.search(line.split("=", 1)[0]) or SYMBOLISH.search(literal_after(code, m.end())):
+            out.append((code.count("\n", 0, m.start()) + 1,
+                        "table: a [SuiteApp: String] symbol table; draw the mark with AppMark(app:)"))
+    for n, line in code_lines(text):
+        m = RETIRED_RE.search(line)
+        if m and NAMES_APP.search(line):
+            out.append((n, f'retired: "{m.group(1)}" is an old app mark; use AppMark(app:)'))
+    for n, call in calls(code, "AppSwitcherItem"):
+        if "systemImage:" in call:
+            out.append((n, "switcher: AppSwitcherItem takes app:, not systemImage:"))
+    return sorted(set(out))
+
+
+def scan(root):
+    """{path: [(line, rule)]} for every Swift file under Sources/ with a hit."""
+    found = {}
+    for f in sorted((root / "Sources").rglob("*.swift")):
+        rel = f.relative_to(root).as_posix()
+        if rel in EXEMPT:
+            continue
+        hits = hits_in(f.read_text(errors="replace"))
+        if hits:
+            found[rel] = hits
+    return found
+
+
+def twins(root):
+    """Lines naming each icon PNG without its SVG and each SVG without its PNG."""
+    out = []
+    icons, marks = root / "Bundle/Icons", root / "Bundle/Marks"
+    svgs = {p.stem for p in marks.glob("*.svg")} if marks.is_dir() else set()
+    pngs = sorted(p.name for p in icons.glob("*.png")) if icons.is_dir() else []
+    for name in pngs:
+        m = ICON.match(name)
+        if not m or m.group(1) not in svgs:
+            out.append(f"Bundle/Icons/{name}: no Bundle/Marks/{m.group(1) if m else name}.svg renders it")
+    for stem in sorted(svgs):
+        if f"{stem}.png" not in pngs:
+            out.append(f"Bundle/Marks/{stem}.svg: no Bundle/Icons/{stem}.png; run scripts/render-marks")
+    return out
+
+
+def read_baseline(path):
+    """The listed files, or None when there is no baseline yet (the first --update-baseline writes it)."""
+    if not path.exists():
+        return None
+    return {l.strip() for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")}
+
+
+def main():
+    ap = argparse.ArgumentParser(description="one mark per app: AppMark only")
+    ap.add_argument("--root", type=pathlib.Path, default=HERE)
+    ap.add_argument("--update-baseline", action="store_true")
+    a = ap.parse_args()
+    if not (a.root / "Sources").is_dir():
+        print(f"check-app-marks: no Sources/ under {a.root}", file=sys.stderr)
+        return 2
+    found = scan(a.root)
+    path = a.root / "Tests/app-marks-baseline.txt"
+    base = read_baseline(path)
+
+    if a.update_baseline:
+        grew = sorted(set(found) - base) if base is not None else []
+        if grew:
+            print("check-app-marks: refusing to grow the baseline (it only shrinks):", file=sys.stderr)
+            for p in grew:
+                print(f"  {p}", file=sys.stderr)
+            return 1
+        path.write_text(HEADER + "".join(p + "\n" for p in sorted(found)))
+        print(f"check-app-marks: baseline written, {len(found)} grandfathered files.")
+        return 0
+
+    base = base or set()
+    new = {p: h for p, h in found.items() if p not in base}
+    gone = sorted(base - set(found))
+    missing = twins(a.root)
+    for p, hits in new.items():
+        for n, rule in hits:
+            print(f"{p}:{n}: {rule}")
+    for p in gone:
+        print(f"{p}: listed in Tests/app-marks-baseline.txt but draws no old mark now")
+    for line in missing:
+        print(line)
+    if new:
+        print("One mark per app (suite.md 6.4): AppMark(app:style:) in Sources/SuiteUI/AppMark.swift draws every\n"
+              "app's mark from Bundle/Marks; .line is the monochrome form for rows, chips and the switcher.")
+    if gone:
+        print("Ratchet down: scripts/check-app-marks --update-baseline")
+    if new or gone or missing:
+        return 1
+    print(f"ok ({len(found)} grandfathered files, no new app-mark symbols, every icon has its SVG)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

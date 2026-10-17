@@ -1,0 +1,23 @@
+[
+  {
+    "label": "frameScopeClimbs: the frame scope returns the selected shape instead of its top-level frame",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "{ return [top] }",
+    "replace": "{ return [selectedNodeID ?? top] }",
+    "tests": "DesignExportPlanTests"
+  },
+  {
+    "label": "hiddenDropped: a hidden selected layer stays in the selection scope",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "return selectedNodeIDs.filter { !isHiddenInTree($0) }",
+    "replace": "return selectedNodeIDs",
+    "tests": "DesignExportPlanTests"
+  },
+  {
+    "label": "defaultsNotAStep: rememberExport records an Export history step",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "        exportOptions = options\n",
+    "replace": "        exportOptions = options\n        history.undo.append(DesignHistory.Step(name: \"Export\", snapshot: snapshot))\n",
+    "tests": "DesignExportPlanTests"
+  }
+]
