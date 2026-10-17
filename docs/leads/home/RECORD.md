@@ -4,7 +4,7 @@ Issue: #1503 · Packet: docs/blueprints/suite/features/home.md
 Run: act-1a149c6a2a3-yna2 (line lead for suite-contracts, bundle, home; was act-1a14881ad5e-axoa, act-1a145e74c4e-1rah) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T18:11Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z
 Stage: 4 feature-done (HM-3z)
 Base: 042423165693f2f1d65d2ece90eb0d5bcb910554
-Next: full CI 39038160863 on 8e868417 (from feature-done #2082) must be green; then Belt-Contact-Sheet on #1503 and a gap issue for the #836-skipped assertions
+Next: full CI 39040191625 on 8c05d002 (contains 8e868417; 39038160863 was cancelled, superseded) must be green; then Belt-Contact-Sheet on #1503 and a gap issue for the #836-skipped assertions
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged).
 Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged), bundle BU-3 #814 and BU-4 #818 (open, supervisor merges; HM-0 waits), #778/#775 (`.suiteControl`, `.suiteProbes` on dev), A-DE-0 #836 (open, Design line; HM-3a waits).
