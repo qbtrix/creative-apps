@@ -2,18 +2,18 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 3 wave 1
-Base: 042423165693f2f1d65d2ece90eb0d5bcb910554 (origin/dev at 2026-10-17T11:56Z)
-Next: wave 1 running (RO-1, RO-2, RO-3 beside text-layers' TX-1 to TX-4); when the lane has merged them, run the check and start wave 2 (RO-4, RO-5 beside TX-5, TX-6)
+Stage: 3 wave 2
+Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
+Next: wave 2 running (RO-4, RO-5 beside TX-5, TX-6); when the lane has merged them, start wave 3 (RO-6, RO-7, RO-9)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| RO-1 | 1 | `HaloRenderRules` (plan: half size even and ≥ 2, movie even at full size, names sanitized; the frame loop with cancel and sink errors); `LiveCompositionRendering` runs it on the live drawing and rendering with `unavailableHelp == nil`; `FakeCompositionRendering` a thin wrapper over the rules; contract suite over [fake, live] | Sources/HaloModel/Live/HaloRenderRules.swift, Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloModel/Fakes/FakeCompositionRendering.swift, Tests/HaloModelTests/CompositionRenderingContractTests.swift, Tests/HaloModelTests/HaloRenderPlanTests.swift | HaloRenderPlanTests, CompositionRenderingContractTests | – | building |
-| RO-2 | 1 | `renderCurrentFrame`, computed `renderedFrameStale`, `shownRenderedFrame`, `renderedFrameNote`, `renderedFrameSummary` | Sources/HaloModel/HaloRenderFrame.swift, Tests/HaloModelTests/HaloRenderFrameTests.swift | HaloRenderFrameTests | – | building |
-| RO-3 | 1 | The render job: `openRenderSheet`, `closeRenderSheet`, `renderSummary`, `renderOutputName`, `startRender`, `renderProgress`, `cancelRender`, `finishRender`, `renderProgressText`, `renderOutcomeText` | Sources/HaloModel/HaloRenderJob.swift, Tests/HaloModelTests/HaloRenderJobTests.swift | HaloRenderJobTests | – | building |
-| RO-4 | 2 | `HaloAvailability+Render.swift` answers state (no composition; a render running) then the service's help, so both commands turn on; HB-12, HB-13 report-only | Sources/HaloModel/Availability/HaloAvailability+Render.swift, Tests/HaloModelTests/HaloRenderAvailabilityTests.swift, Tests/HaloModelTests/HaloRenderBudgetTests.swift | HaloRenderAvailabilityTests | – | planned |
-| RO-5 | 2 | App: `HaloFrameImage` (CGImage from `rgba8(colorSpace:)`); `HaloRenderedFrameView` replaces the stub (`halo.viewer.rendered`, note `halo.viewer.renderedNote`); Render Frame's route calls `renderCurrentFrame()`; snapshots | Sources/HaloApp/HaloFrameImage.swift, Sources/HaloApp/HaloRenderedFrameView.swift, Sources/HaloApp/HaloWindow+Render.swift, Tests/AppSnapshotTests/HaloRenderSnapshots.swift | halo-rendered-frame-*.png, halo-rendered-frame-stale-*.png | – | planned |
+| RO-1 | 1 | `HaloRenderRules` (plan: half size even and ≥ 2, movie even at full size, names sanitized; the frame loop with cancel and sink errors); `LiveCompositionRendering` runs it on the live drawing and rendering with `unavailableHelp == nil`; `FakeCompositionRendering` a thin wrapper over the rules; contract suite over [fake, live] | Sources/HaloModel/Live/HaloRenderRules.swift, Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloModel/Fakes/FakeCompositionRendering.swift, Tests/HaloModelTests/CompositionRenderingContractTests.swift, Tests/HaloModelTests/HaloRenderPlanTests.swift | HaloRenderPlanTests, CompositionRenderingContractTests | #2062 | merged |
+| RO-2 | 1 | `renderCurrentFrame`, computed `renderedFrameStale`, `shownRenderedFrame`, `renderedFrameNote`, `renderedFrameSummary` | Sources/HaloModel/HaloRenderFrame.swift, Tests/HaloModelTests/HaloRenderFrameTests.swift | HaloRenderFrameTests | #2061 | merged |
+| RO-3 | 1 | The render job: `openRenderSheet`, `closeRenderSheet`, `renderSummary`, `renderOutputName`, `startRender`, `renderProgress`, `cancelRender`, `finishRender`, `renderProgressText`, `renderOutcomeText` | Sources/HaloModel/HaloRenderJob.swift, Tests/HaloModelTests/HaloRenderJobTests.swift | HaloRenderJobTests | #2066 | merged |
+| RO-4 | 2 | `HaloAvailability+Render.swift` answers state (no composition; a render running) then the service's help, so both commands turn on; HB-12, HB-13 report-only | Sources/HaloModel/Availability/HaloAvailability+Render.swift, Tests/HaloModelTests/HaloRenderAvailabilityTests.swift, Tests/HaloModelTests/HaloRenderBudgetTests.swift | HaloRenderAvailabilityTests | – | building |
+| RO-5 | 2 | App: `HaloFrameImage` (CGImage from `rgba8(colorSpace:)`); `HaloRenderedFrameView` replaces the stub (`halo.viewer.rendered`, note `halo.viewer.renderedNote`); Render Frame's route calls `renderCurrentFrame()`; snapshots | Sources/HaloApp/HaloFrameImage.swift, Sources/HaloApp/HaloRenderedFrameView.swift, Sources/HaloApp/HaloWindow+Render.swift, Tests/AppSnapshotTests/HaloRenderSnapshots.swift | halo-rendered-frame-*.png, halo-rendered-frame-stale-*.png | – | building |
 | RO-6 | 3 | `HaloPNGWriter` (folder, one PNG per frame via CGImageDestination; HF-7) | Sources/HaloApp/HaloPNGWriter.swift, Tests/AppSnapshotTests/HaloPNGWriterTests.swift | HaloPNGWriterTests (macOS) | – | planned |
 | RO-7 | 3 | `HaloMovieWriter` (H.264 .mp4 at the plan's size and fps; cancel removes the file; HF-8); its frame-0 oracle is `LiveFrameRendering().render` of frame 0 as `rgba8` through `HaloFrameImage`, not RO-6's PNG | Sources/HaloApp/HaloMovieWriter.swift, Tests/AppSnapshotTests/HaloMovieWriterTests.swift | HaloMovieWriterTests (macOS) | – | planned |
 | RO-9 | 3 | Journey H-J20 on `-HaloSample parented`; `Closes #451` | UITests/HaloJourneyTests+RenderFrame.swift | H-J20 on dev CI | – | planned |
@@ -28,6 +28,7 @@ Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0
 | – | – | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-17T13:53Z RO-3 (#2066) plans through services.compositionRendering.plan, not HaloRenderRules, so it stayed independent of RO-1; it adds internal `renderRunning` for RO-4.
 - 2026-10-17T11:56Z rule 20: HaloModel links SuiteModel (Package.swift gives every <X>Model the SuiteModel dependency), so RO-3's renderOutputName and RO-1's file-name sanitizing call SuiteModel's UniqueFileNames.name(_:extension:among:) (#1987) instead of a Halo copy. The PNG sequence's `_0001` frame suffix stays Halo-local.
 - 2026-10-17T06:05Z: line lead for #1035 (done, supervisor decision 06:06Z), #1509 and #1505 in one run. Waits met: #1035 done, #333 closed (#877 merged). PRs base `dev` (the lane merges into dev and retargets `main`).
 - No Swift on this box at launch; installed swift 6.3.3 under /opt/swift so `scripts/ci` can run the Model tests.
