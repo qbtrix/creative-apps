@@ -14,6 +14,20 @@
     "tests": "DesignSelectionRunTests.swift"
   },
   {
+    "label": "a live marquee shows the selection handles",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "        marquee == nil && transformHelp == nil\n",
+    "replace": "        transformHelp == nil\n",
+    "tests": "DesignMarqueeMarksTests.swift"
+  },
+  {
+    "label": "a locked selection shows handles",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "        marquee == nil && transformHelp == nil\n",
+    "replace": "        marquee == nil\n",
+    "tests": "DesignMarqueeMarksTests.swift"
+  },
+  {
     "label": "an ignored Shift-click ends the run",
     "file": "Sources/DesignModel/DesignSelection.swift",
     "find": "        guard canAddToSelection(id), let page = selectedPage else { return }\n        endEditRun()\n",

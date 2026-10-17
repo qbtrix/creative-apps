@@ -11,7 +11,9 @@
 // never added (the subtree checks in DesignLocking and DesignLayerToggles); one
 // already selected can always be taken out. With several layers selected the
 // canvas shows no handles, and nudge, delete and the inspector's fields act on
-// none of them: editing several layers at once is a later issue. Linux-safe.
+// none of them: editing several layers at once is a later issue. While a marquee
+// drag is live, showsSelectionHandles is false: the canvas draws the marquee and
+// an outline on each layer it touches, never the box's handles. Linux-safe.
 
 extension DesignWorkspace {
     /// More than one layer is selected.
@@ -20,6 +22,13 @@ extension DesignWorkspace {
     /// Why single-layer edits (handles, frame, fill, nudge, delete) don't act, or nil with at most one layer selected.
     public var multipleSelectionHelp: String? {
         hasMultipleSelection ? "Editing several layers at once isn't available yet." : nil
+    }
+
+    /// Whether the canvas draws the selection's resize handles: never while a marquee drag is
+    /// live (it shows the marquee and an outline on each layer it touches until the drag ends),
+    /// otherwise when a drag can move the selection (`transformHelp` is nil).
+    public var showsSelectionHandles: Bool {
+        marquee == nil && transformHelp == nil
     }
 
     /// The selected layers in the order they were selected; the primary one is last.
