@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-16T22:52Z	0	stopped	#1344	ninth nudge; dev 3bc75afd; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
 2026-10-16T23:23Z	0	stopped	#1344	tenth nudge; dev 407301e5; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
 2026-10-16T23:55Z	0	stopped	#1344	eleventh nudge; dev 2be6a100; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T00:26Z	0	stopped	#1344	twelfth nudge; dev 7a090878; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
