@@ -4,7 +4,7 @@ Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
 Run: act-1a14852c11d-65cg · Session: (cloud) · Started: 2026-10-17T05:59Z
 Stage: 3 wave 1
 Base: 0e3c08ea52648f6654e583a64ddf07ccb5aa328c
-Next: DE-2 builder finishing its gate and PR; when both wave-1 PRs merge, run the between-waves check and start wave 2 (DE-1, DE-8)
+Next: wait for the lane to merge #1987 and #1997 (build-only macOS run per code PR), then run the between-waves check and start wave 2 (DE-1, DE-8)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,7 +19,7 @@ Next: DE-2 builder finishing its gate and PR; when both wave-1 PRs merge, run th
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | DE-0 | DE-a | 1 | UniqueFileNames.name in SuiteModel, its plan, C4 sentence, its test | Sources/SuiteModel/Values/UniqueFileNames.swift, Tests/SuiteModelTests/UniqueFileNamesTests.swift, Tests/mutations/SuiteModel.UniqueFileNames.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | UniqueFileNamesTests (3 mutations) | #1987 | open, Fast-Check pass on d2aa134 (dev merged past #1985) |
-| DE-2 | DE-a | 1 | DesignExportScope, DesignExportOptions, LiveExport (fake plan, stub svg), DesignSVG stub, workspace readouts, both slots LiveExport, NotBuilt tests updated, plans, C4 sentence, shape half of DesignExportPlanTests | Sources/DesignModel/DesignExport+Kernel.swift, Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignServices.swift, Sources/DesignModel/DesignWorkspace.swift (one stored field), Tests/DesignModelTests/{DesignLiveStubTests,DesignNotBuiltTests,DesignArrangeFakesTests,DesignExportPlanTests}.swift, Tests/mutations/DesignModel.{DesignServices,DesignExport+Kernel}.json, docs/c4/parts/creative-apps/design-model/design-model-sources.json | DesignExportPlanTests shape half (3 mutations + the repointed DesignServices entry) | – | building |
+| DE-2 | DE-a | 1 | DesignExportScope, DesignExportOptions, LiveExport (fake plan, stub svg), DesignSVG stub, workspace readouts, both slots LiveExport, NotBuilt tests updated, plans, C4 sentence, shape half of DesignExportPlanTests | Sources/DesignModel/DesignExport+Kernel.swift, Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignServices.swift, Sources/DesignModel/DesignWorkspace.swift (one stored field), Tests/DesignModelTests/{DesignLiveStubTests,DesignNotBuiltTests,DesignArrangeFakesTests,DesignExportPlanTests}.swift, Tests/mutations/DesignModel.{DesignServices,DesignExport+Kernel}.json, docs/c4/parts/creative-apps/design-model/design-model-sources.json | DesignExportPlanTests shape half (3 mutations + the repointed DesignServices entry) | #1997 | open, Fast-Check pass on d072516, Mutate 3/3 + 10/10 |
 | DE-2b | DE-a | later | `public typealias DesignExportRun = ExportRun<DesignExportOptions>` once SuiteKernel is linkable from DesignModel | Sources/DesignModel/DesignExport+Kernel.swift | DesignExportPlanTests shape | – | waits on editor-kernel EK-a and a Package.swift dependency (supervisor) |
 | DE-1 | DE-a | 2 | the remaining packet tests, disabled by name: DesignExportPlanTests rules half, DesignSVGTests, DesignExportBudgetTests, DesignExportWalkTests (MJ13), DesignSVGWalkTests (MJ14) | Tests/DesignModelTests/{DesignExportPlanTests,DesignSVGTests,DesignExportBudgetTests,DesignExportWalkTests,DesignSVGWalkTests}.swift | every suite compiles and skips | – | planned |
 | DE-8 | DE-w | 2 | DesignRasterizer.png over DesignArtwork, DesignRasterizerTests, RenderBudgetDesignRasterTests | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/{DesignRasterizerTests,RenderBudgetDesignRasterTests}.swift | DesignRasterizerTests.pixelSize (macOS) | – | planned |
@@ -36,6 +36,7 @@ Next: DE-2 builder finishing its gate and PR; when both wave-1 PRs merge, run th
 |---|---|---|---|---|---|
 
 ## Decisions
+- DE-2 as built: `exportPlan` throws `.nothingSelected` itself for an empty selection scope (the slot reads empty ids as every top-level frame); the `defaultsNotAStep` mutation appends to `history.undo` directly because `record` no-ops on an unchanged document; pixel sizes guard non-finite sides (`whole()`), so DE-3 keeps that helper.
 - The brief's base fdaabbfb had moved by the time the lead started; the base is origin/dev at start (0e3c08ea52648f6654e583a64ddf07ccb5aa328c), which main also points at.
 - PRs target dev per CLAUDE.md (the lane retargets a main-based PR to dev anyway); main moves when full CI on dev is green.
 - Rule 13 vs the packet's wave 1: DE-1's suites can't compile against types no code declares yet, so wave 1 is DE-0 and DE-2 (disjoint files, the contract) and DE-1 (the rest of the disabled suites) follows in wave 2, still ahead of DE-3 and DE-5, the code it checks. DE-2 carries the shape half of DesignExportPlanTests and DE-0 its own test, so each code task merges with its check.
