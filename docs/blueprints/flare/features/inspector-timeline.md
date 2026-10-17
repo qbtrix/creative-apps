@@ -7,6 +7,12 @@ TIMING row and the easing popover; retiming, deleting and labelling keys,
 inserting and removing frames; and the transport with the actual-fps pill.
 **Line:** `line:flare` · **Wave:** 4 (`waves.md`) · **Lead branch:** `lead/inspector-timeline`
 
+**Status:** built (2026-10-17), feature issue #1515. IT-1 to IT-10 are on
+`dev`; J9 and J6 now run on `-FlareSample bounce`, so no fixture flag is
+left in this feature's journeys. IT-9's `TransportCapsule` half is deferred
+to gap issue #2185, because SuiteUI #340 is still open; its status pills
+and J10 on live merged.
+
 **Covers:** F6a #186, F6b #348, F6c #349 (its SCENE half; the INSTANCE half
 moves to the later library feature, with J18), F7b #376, F8 #377, F9 #378,
 and IN-2 #385 (J9 to J12 green live). It also makes J6 to J8 green live, the
