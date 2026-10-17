@@ -33,7 +33,7 @@ extension BodyCountSuites {
             let (playback, _, _, _) = try await HaloWindowPlaybackTests.playOneSecond()
             // Targets: a step fits one 120 Hz frame (8.3 ms); selecting may take two 60 Hz frames.
             expectP95(select, atMost: 130, target: 33)  // dev: 108 ms
-            expectP95(divider, atMost: 130, target: 8.3)  // dev: 97 ms
+            expectP95(divider, atMost: 60, target: 8.3)  // dev: 28 ms release (67 to 76 before HaloBarAndKeyLayout)
             expectP95(viewer, atMost: 4, target: 8.3)  // dev: 2.9 ms
             expectP95(playback, atMost: 27, target: 8.3)  // dev: 17.0 ms
         }

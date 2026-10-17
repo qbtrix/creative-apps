@@ -47,7 +47,7 @@ private struct HomeTile: View {
 
     private var id: String { "afterglow.home.new.\(tile.app.rawValue)" }
     private var enabled: Bool { tile.disabledReason == nil && !tile.presets.isEmpty }
-    private var reason: String? { tile.disabledReason ?? (tile.presets.isEmpty ? "No presets for \(tile.title)." : nil) }
+    private var reason: String? { HomeMenu.newReason(tile) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
@@ -94,7 +94,8 @@ private struct HomeTile: View {
             .suiteControl(id: id + ".presets", enabled: enabled, reason: reason, identifies: false)
             .homeLayoutAnchor("chips.\(tile.app.rawValue)")
         } else {
-            Menu("Presets") {
+            // Names its tile's kind ("Animation Presets"), not a bare "Presets" (#1868).
+            Menu(HomeMenu.presetsTitle(tile)) {
                 ForEach(tile.presets, id: \.id) { preset in
                     // A second Text is the menu item's subtitle: the preset's size or formats.
                     Button { create(preset) } label: {

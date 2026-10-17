@@ -1,6 +1,7 @@
 // FlareWindow.swift: Flare's window on SuiteWindow. The model comes from the
 // launch flags (FlareLaunch: -FlareFixture, -FlareSample, -FlareOpenFile).
-// The sidebar holds SCENES and LAYERS; the toolbar is New, Open, Save, Undo,
+// The sidebar is a SuiteSidebarList of SCENES and LAYERS, and the
+// inspector column is `inspectorWidth` wide in every state; the toolbar is New, Open, Save, Undo,
 // Redo, Auto-key, Animate… and Export…, each disabled with its area's reason
 // while it can't act. The content is the stage over the timeline (FlareCanvas)
 // while a document is open, else the empty state with New Animation; the
@@ -37,23 +38,31 @@ struct FlareWindow: View {
     static var shownModel: FlareWorkspace?
     #endif
 
+    /// The inspector column: the editor's panel width plus SuiteWindow's
+    /// gutter on each side, as Design's and Photo's, so it never jumps
+    /// width between states and the easing presets' three columns read in
+    /// full (#1853).
+    static let inspectorWidth = SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
+
     var body: some View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         let _ = Self.shownModel = model
         #endif
         SuiteWindow(
-            title: model.document == nil ? "Flare" : model.title,
-            sections: SidebarSection.flare(model, onAddLayer: { perform(.layers(.addLayer)) }),
-            selection: model.selectedLayerID ?? model.selectedSceneID,
-            onSelect: { perform(.layers(.select(id: $0))) },
-            onToggle: { perform(.layers(.toggle(id: $0, flag: $1))) },
-            onMove: { section, rows, destination in
-                if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
-            },
-            onRename: { perform(.layers(.rename(id: $0, name: $1))) },
-            actions: toolbar
+            title: model.document == nil ? "Flare" : model.title, actions: toolbar,
+            inspectorWidth: Self.inspectorWidth
         ) {
+            SuiteSidebarList(
+                sections: SidebarSection.flare(model, onAddLayer: { perform(.layers(.addLayer)) }),
+                selection: model.selectedLayerID ?? model.selectedSceneID,
+                onSelect: { perform(.layers(.select(id: $0))) },
+                onToggle: { perform(.layers(.toggle(id: $0, flag: $1))) },
+                onMove: { section, rows, destination in
+                    if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
+                },
+                onRename: { perform(.layers(.rename(id: $0, name: $1))) })
+        } content: {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                 help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey)
@@ -110,8 +119,11 @@ struct FlareWindow: View {
 
 /// The window's content: the stage over the timeline while a document is
 /// open, else the empty state whose one action is New Animation (Open is the
-/// toolbar's).
+/// toolbar's). New Animation is `.file(.new)` like the toolbar's New, so it
+/// takes `emptyNewIdentifier` to keep `suite.controls` free of duplicates.
 struct FlareCanvas: View {
+    /// The empty state's New Animation: `.file(.new)`'s identifier, set apart from the toolbar's New.
+    static let emptyNewIdentifier = FlareIntent.file(.new).identifier + ".empty"
     let model: FlareWorkspace
     var zoom: Double? = nil
     var showsRulers = true
@@ -135,7 +147,9 @@ struct FlareCanvas: View {
             EmptyStateView(
                 "No Animation Open", systemImage: "film.stack",
                 message: "Create an animation to start drawing scenes and keyframes.",
-                action: ToolbarAction("New Animation", systemImage: "plus") { perform(.file(.new)) })
+                action: ToolbarAction("New Animation", systemImage: "plus", identifier: Self.emptyNewIdentifier) {
+                    perform(.file(.new))
+                })
         }
     }
 }

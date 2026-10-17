@@ -71,7 +71,7 @@ struct LibraryLoupe: View {
                         .frame(minHeight: SuiteSize.toolButton)
                         .contentShape(.rect)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(HoverButtonStyle())
                 .help("Back to the grid (Esc or G)")
                 .accessibilityLabel("Grid")
                 .libraryControl(id: "library.loupe.grid", enabled: true, help: nil)

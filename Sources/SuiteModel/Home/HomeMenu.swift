@@ -59,8 +59,7 @@ public struct HomeMenu: Equatable, Sendable {
         let blocked = hasWindow ? nil : noWindow
         let tiles = tiles.isEmpty ? SuiteCreating().tiles(missing: []) : tiles
         let new = tiles.map { tile in
-            let reason = tile.disabledReason ?? (tile.presets.isEmpty ? SuiteIdentity.notConnected("home") : nil)
-            return New(app: tile.app, preset: tile.presets.first, item: Item(tile.title, reason: hasWindow ? reason : nil))
+            New(app: tile.app, preset: tile.presets.first, item: Item(tile.title, reason: hasWindow ? newReason(tile) : nil))
         }
         let openReason = openReason(pending: pending)
         let recent = recents.items.prefix(recentCount).map {
@@ -81,6 +80,21 @@ public struct HomeMenu: Equatable, Sendable {
             showInspector: Item("Show Inspector", reason: blocked ?? SuiteIdentity.notConnected("home")),
             larger: Item("Larger Thumbnails", reason: blocked ?? (thumbnailStep >= 3 ? largest : nil)),
             smaller: Item("Smaller Thumbnails", reason: blocked ?? (thumbnailStep <= 0 ? smallest : nil)))
+    }
+
+    /// Why a New tile (home page and File > New) can't act: its own reason, or
+    /// "No presets for <title>." when it has none (#1874); nil: it acts.
+    public static func newReason(_ tile: NewTile) -> String? {
+        tile.disabledReason ?? (tile.presets.isEmpty ? "No presets for \(tile.title)." : nil)
+    }
+
+    /// The tile's presets menu title, naming its kind: "New Animation" gives
+    /// "Animation Presets" (#1868).
+    public static func presetsTitle(_ tile: NewTile) -> String {
+        var kind = Substring(tile.title)
+        if kind.hasPrefix("New ") { kind = kind.dropFirst(4) }
+        while kind.hasSuffix("…") { kind = kind.dropLast() }
+        return "\(kind) Presets"
     }
 
     /// Why Open… (menu, toolbar and empty state) can't act: `openWaits` while

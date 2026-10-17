@@ -2,8 +2,9 @@
 // (FlareWindow+Router.swift). Scrubbing, the transport's start, step, end,
 // play/pause and loop move the playhead through the Model's playback calls
 // while a timeline can play; Auto-key toggles recording while a document is
-// open. Key navigation and the key edits have no Model call yet, so they wait
-// for F7a and say so.
+// open. Start, end and the steps say why while the playhead already stands
+// where they'd put it (FlareTransport.help, #1839). Key navigation and the
+// key edits have no Model call yet, so they wait for F7a and say so.
 import FlareModel
 
 extension FlareWindow {
@@ -26,8 +27,8 @@ extension FlareWindow {
     /// Why a timeline intent can't act now; nil when it can.
     func timelineHelp(_ intent: FlareIntent.Timeline) -> String? {
         switch intent {
-        case .scrub, .goToStart, .goToEnd, .step, .togglePlay, .setLoops:
-            model.canPlay ? nil : "Open an animation to play it."
+        case .scrub, .togglePlay, .setLoops: model.canPlay ? nil : FlareTransport.cannotPlay
+        case .goToStart, .goToEnd, .step: FlareTransport.help(for: intent, in: model)
         case .toggleAutoKey: model.document == nil ? "Open an animation to key it." : nil
         case .nextKeyframe, .previousKeyframe, .selectKey, .moveKeys, .endKeyDrag, .removeKeys, .addKey, .removeKey,
             .insertFrames, .removeFrames, .setLabel:

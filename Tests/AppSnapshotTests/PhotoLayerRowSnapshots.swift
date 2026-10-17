@@ -56,6 +56,12 @@ import Testing
 
     @Test func focusedSelectedRow() throws {
         let (selected, hidden) = try layers()
+        // The light file must draw its panel light. The panel is 280 pt wide and
+        // centred in the 1440x900 render, so x = 720 - 140 + 4 sits in its left
+        // padding, clear of every row, at the vertical middle.
+        let light = try #require(render(LayerRows(selected: selected, hidden: hidden), scheme: .light))
+        let panel = try #require(light.colorAt(x: 584, y: 450)?.usingColorSpace(.sRGB))
+        #expect(panel.redComponent > 0.5, "the light focused-row snapshot is drawn dark")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 LayerRows(selected: selected, hidden: hidden),
@@ -122,6 +128,5 @@ private struct LayerRows: View {
         .padding(SuiteSpacing.m)
         .frame(width: 280, alignment: .leading)
         .background(SuiteColor.panel)
-        .environment(\.colorScheme, .dark)
     }
 }

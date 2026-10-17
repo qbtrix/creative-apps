@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+# scripts/check-dup-logic: the canonical-first ratchet (docs/factory/lead.md,
+# contract rule 20). Undo/history, selection, layers, easing, export, crop,
+# marquee, transform and the rest belong in SuiteModel (the editor kernel),
+# never as one more copy in an app.
+#
+# Scope: Swift files under Sources/<X>Model/ and Sources/<X>App/, SuiteModel
+# excluded (it is the canonical home). A file is a concept file when its name
+# or its primary type (the first struct, class, enum, protocol or actor it
+# declares) holds a stem from Tests/canonical-concepts.txt at a CamelCase
+# boundary: the stem, an optional plural s, then the end, an uppercase letter,
+# a digit, + or _ (Snap matches SnapGuides and Snaps, never Snapshot). An
+# adapter onto the shared module is fine: a file whose name ends in +Kernel
+# or Adapter never counts.
+#
+# Tests/canonical-baseline.txt lists today's concept files (grandfathered).
+#   scripts/check-dup-logic                    fail on a concept file the baseline doesn't list,
+#                                              and on a listed one that is gone (prune it)
+#   scripts/check-dup-logic --update-baseline  rewrite it; refuses to add a file unless
+#                                              --allow-increase (it only shrinks)
+#   scripts/check-dup-logic --paths FILE [--body FILE]
+#                                              the fast lane's check: of the paths in FILE (the
+#                                              PR's added files), the concept files by NAME
+#                                              (the lane has no contents) whose concept has no
+#                                              `Allow-Dup: <concept> <reason>` line in the body
+# --root DIR runs against another tree (the tests). Exit 0 clean, 1 on a hit,
+# 2 on bad input. Python 3 stdlib only.
+import argparse
+import pathlib
+import re
+import sys
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
+SCOPE = re.compile(r"^Sources/(?!SuiteModel/)[A-Za-z0-9_]+(Model|App)/.+\.swift$")
+TYPE = re.compile(r"^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:public|internal|package|fileprivate|private|open|final|indirect)\s+)*"
+                  r"(?:struct|class|enum|protocol|actor)\s+([A-Za-z_]\w*)", re.M)
+ALLOW = re.compile(r"^[ \t]*Allow-Dup:[ \t]*(\S+)[ \t]+\S", re.I | re.M)
+
+
+def concepts(root):
+    """Tests/canonical-concepts.txt -> [(concept, compiled stem regex)]. Line: `Concept: Stem Stem ...`."""
+    out = []
+    for line in (root / "Tests/canonical-concepts.txt").read_text().splitlines():
+        line = line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        name, _, stems = line.partition(":")
+        stems = stems.split() or [name.strip()]
+        out.append((name.strip(), re.compile("(?:%s)s?(?![a-z])" % "|".join(map(re.escape, stems)))))
+    return out
+
+
+def is_adapter(path):
+    stem = path.rsplit("/", 1)[-1][: -len(".swift")]
+    return stem.endswith("+Kernel") or stem.endswith("Adapter")
+
+
+def concept_of(path, table, text=None):
+    """The first concept the file's name, or its primary type in `text`, names; None when neither does."""
+    if not SCOPE.match(path) or is_adapter(path):
+        return None
+    names = [path.rsplit("/", 1)[-1][: -len(".swift")]]
+    if text is not None:
+        code = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("//"))
+        m = TYPE.search(code)
+        if m:
+            names.append(m.group(1))
+    for concept, rx in table:
+        if any(rx.search(n) for n in names):
+            return concept
+    return None
+
+
+def scan(root, table):
+    """{path: concept} for every concept file in the tree."""
+    found = {}
+    for f in sorted((root / "Sources").rglob("*.swift")):
+        rel = f.relative_to(root).as_posix()
+        c = concept_of(rel, table, f.read_text(errors="replace"))
+        if c:
+            found[rel] = c
+    return found
+
+
+def read_baseline(path):
+    if not path.exists():
+        return None
+    return {l.strip() for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")}
+
+
+HEADER = """# Tests/canonical-baseline.txt: concept files that predate contract rule 20
+# (docs/factory/lead.md), grandfathered. Written by scripts/check-dup-logic
+# --update-baseline, never by hand. It only shrinks: move a concept into
+# SuiteModel, delete the app copy, and drop its line in the same PR.
+"""
+
+
+def main():
+    ap = argparse.ArgumentParser(description="canonical-first ratchet (lead.md rule 20)")
+    ap.add_argument("--root", type=pathlib.Path, default=HERE)
+    ap.add_argument("--update-baseline", action="store_true")
+    ap.add_argument("--allow-increase", action="store_true")
+    ap.add_argument("--paths", type=pathlib.Path)
+    ap.add_argument("--body", type=pathlib.Path)
+    a = ap.parse_args()
+    try:
+        table = concepts(a.root)
+    except OSError as e:
+        print(f"check-dup-logic: {e}", file=sys.stderr)
+        return 2
+
+    if a.paths:
+        body = a.body.read_text() if a.body else ""
+        allowed = {m.group(1).lower() for m in ALLOW.finditer(body)}
+        hits = 0
+        for p in a.paths.read_text().splitlines():
+            c = concept_of(p.strip(), table)
+            if c and c.lower() not in allowed:
+                print(f"{p.strip()} ({c})")
+                hits += 1
+        return 1 if hits else 0
+
+    current = scan(a.root, table)
+    path = a.root / "Tests/canonical-baseline.txt"
+    base = read_baseline(path)
+
+    if a.update_baseline:
+        grew = sorted(set(current) - (base or set())) if base is not None else []
+        if grew and not a.allow_increase:
+            print("check-dup-logic: refusing to grow the baseline (it only shrinks):", file=sys.stderr)
+            for p in grew:
+                print(f"  {p} ({current[p]})", file=sys.stderr)
+            print("Use the SuiteModel module instead. A reviewed exception reruns with --allow-increase\n"
+                  "and puts `Allow-Dup: <concept> <reason>` in the PR body.", file=sys.stderr)
+            return 1
+        path.write_text(HEADER + "".join(p + "\n" for p in sorted(current)))
+        print(f"check-dup-logic: baseline written, {len(current)} grandfathered files.")
+        return 0
+
+    if base is None:
+        print("check-dup-logic: Tests/canonical-baseline.txt is missing; run --update-baseline", file=sys.stderr)
+        return 2
+    new = sorted(set(current) - base)
+    gone = sorted(base - set(current))
+    for p in new:
+        print(f"{p}: new app-local {current[p]} logic")
+    for p in gone:
+        print(f"{p}: listed in Tests/canonical-baseline.txt but no longer a concept file")
+    if new:
+        print("Canonical first (docs/factory/lead.md rule 20): use the SuiteModel module for this concept, or\n"
+              "extract the existing app copy into SuiteModel first and use it from both apps. An adapter onto\n"
+              "the shared module is fine: name it <X>+Kernel.swift or <X>Adapter.swift. A reviewed exception:\n"
+              "scripts/check-dup-logic --update-baseline --allow-increase, and `Allow-Dup: <concept> <reason>`\n"
+              "in the PR body.")
+    if gone:
+        print("Ratchet down: scripts/check-dup-logic --update-baseline")
+    if new or gone:
+        return 1
+    print(f"ok ({len(current)} grandfathered concept files, none new)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

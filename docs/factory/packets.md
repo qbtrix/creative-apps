@@ -240,3 +240,13 @@ with the task ids. It refutes; it doesn't rewrite.
     A feature with no screen instead declares `"ui_slice": "none"` with a
     `"ui_slice_reason"`; a reason that doesn't hold (the feature adds a
     control or a screen) is a miss too.
+14. **App-local copy** (a blocker; every packet, v2 included). A task that
+    adds app-local logic, in `Sources/<X>Model/` or `Sources/<X>App/`, for a
+    concept SuiteModel, SuiteUI, creative-core or another app's Model
+    already has, or for a concept with a planned editor-kernel module (undo
+    and history, selection, the layer tree and parenting, transform with
+    marquee and snapping, keyframes and easing, export, crop). The fix uses
+    the shared module, or adds a contract task that extracts the concept
+    into SuiteModel first and both apps use it (`lead.md`, contract rule
+    20). An adapter onto the shared module (`<X>+Kernel.swift`,
+    `<X>Adapter.swift`) isn't a copy.
