@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-17T19:16:03Z	merge	#2213 D0-6 merged b2942150; DW-a all merged
 2026-10-17T19:16:03Z	wave	wave 3 launched: D0-8a (DW-b), D0-9c (DW-d) on 6ad373ab
 2026-10-17T19:16:03Z	check	DW-a check waits on full CI 39061216116
+2026-10-17T19:29:58Z	pr	wave 3 opened: #2282 D0-8a (DesignLiveEdit in Model accepted), #2280 D0-9c
