@@ -5,23 +5,30 @@
 // `LiveCompositionRendering` sends `keyed`'s 48 frames at 1920 × 1080 into a
 // counting sink that times each frame; the device budget is under 5 s for the
 // whole sequence. Each prints p50, p95, max (and HB-13 the total) and fails
-// only on too few samples, never on time. Debug builds (scripts/ci) run
-// CoreRaster about 20 times slower, a frame of `reference` taking seconds,
-// so debug takes 3 previews and the first 8 frames of the sequence; release
-// (`swift test -c release`) takes all 20 and all 48. Runs on Linux and macOS.
+// only on too few samples, never on time. Release (`swift test -c release`)
+// runs exactly that. Debug builds are minimal on purpose: CoreRaster runs
+// about 20 times slower there (one `reference` frame at 480 × 270 took 12 s),
+// and until this suite is listed in Tests/perf-suites.txt the merge gate
+// (scripts/ci) runs it in parallel with every other test, where heavy frames
+// starve wall-clock tests such as Design's. So debug only proves the paths
+// run and the samples are counted: 1 preview of `keyed` (2 layers) instead of
+// `reference`, and 1 frame of `empty`'s sequence at 1920 × 1080 instead of
+// `keyed`'s (a `keyed` frame took 2 s), which ends .cancelled(frames: 1).
+// Runs on Linux and macOS.
 @testable import HaloModel
 import Testing
 
 #if DEBUG
-/// Render Frame calls timed by HB-12, and frames of HB-13's 48 timed.
-private let previews = 3, sequenceFrames = 8
+/// Render Frame calls timed by HB-12 and the fixture they draw; frames of
+/// HB-13's sequence timed and the fixture rendered.
+private let previews = 1, previewFixture = "keyed", sequenceFrames = 1, sequenceFixture = "empty"
 #else
-private let previews = 20, sequenceFrames = 48
+private let previews = 20, previewFixture = "reference", sequenceFrames = 48, sequenceFixture = "keyed"
 #endif
 
 @Suite struct HaloRenderBudgetTests {
     @Test func renderPreview() throws {
-        let doc = try #require(HaloFixtures.project("reference"))
+        let doc = try #require(HaloFixtures.project(previewFixture))
         let comp = try #require(HaloProject(services: .fake, document: doc).selectedComposition)
         let drawing = LiveFrameDrawing(placing: FakeLayerPlacing())
         let rendering = LiveFrameRendering()
@@ -40,7 +47,7 @@ private let previews = 20, sequenceFrames = 48
     }
 
     @Test func renderSequence() throws {
-        let doc = try #require(HaloFixtures.project("keyed"))
+        let doc = try #require(HaloFixtures.project(sequenceFixture))
         let comp = try #require(HaloProject(services: .fake, document: doc).selectedComposition)
         let rendering = LiveCompositionRendering()
         let plan = try rendering.plan(comp, settings: HaloRenderSettings(format: .pngSequence))
