@@ -19,15 +19,17 @@ struct DesignFrameLabels: View {
             ForEach(DesignFrameLabel.labelled(on: topLevel)) { node in
                 let box = node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
                 let bottom = DesignFrameLabel.bottom(frameTop: Double(box.minY), gap: Double(SuiteSpacing.xxs))
-                Text(node.name)
-                    .font(SuiteFont.caption)
-                    .foregroundStyle(SuiteColor.secondaryText)
-                    .lineLimit(1)
-                    .fixedSize()
-                    // A zero-size box whose bottom-leading corner is the name's: the name grows up and
-                    // right from that point without moving the overlay's layout.
-                    .frame(width: 0, height: 0, alignment: .bottomLeading)
-                    .offset(x: box.minX, y: bottom)
+                // One clear layer the artboard's size per name, so the name's guides move only the name.
+                Color.clear.overlay(alignment: .topLeading) {
+                    Text(node.name)
+                        .font(SuiteFont.caption)
+                        .foregroundStyle(SuiteColor.secondaryText)
+                        .lineLimit(1)
+                        .fixedSize()
+                        // The name's bottom edge lands `bottom` down the artboard, its leading edge on the frame's.
+                        .alignmentGuide(.top) { $0[.bottom] - CGFloat(bottom) }
+                        .alignmentGuide(.leading) { _ in -box.minX }
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
