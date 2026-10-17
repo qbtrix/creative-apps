@@ -4,7 +4,7 @@
 // Open and Save beside the title; Undo, Redo and the zoom commands trailing),
 // the pages and layer tree in the sidebar (DesignLayersPanel), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
-// file is open and the status line under it (zoom, page size, the last
+// file is open and the status line under it (zoom, "Page 1440 × 1024 pt", the last
 // message, "2 Layers" with a selection, the save state's slot
 // (DesignSaveStatus), the active tool), and Properties (DesignInspector) in the
 // inspector. Values in, intents out: it reads the workspace and sends every
@@ -62,7 +62,7 @@ struct DesignEditor: View {
                     ToolbarGroup(palette, axis: .vertical, style: .floating)
                 }
             } status: {
-                ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.selectedPage?.sizeText ?? "No file open") {
+                ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.statusSizeText) {
                     if let note {
                         Text(note)
                             .suiteControl(id: DesignControlID.statusNote, enabled: true, reason: nil)
@@ -73,6 +73,7 @@ struct DesignEditor: View {
                     }
                     DesignSaveStatus(model: model)
                     Text(model.tool.title)
+                        .help("\(DesignWorkspace.statusToolHelp): \(model.tool.title)")
                         .suiteControl(id: DesignControlID.statusTool, enabled: true, reason: nil)
                 }
             }

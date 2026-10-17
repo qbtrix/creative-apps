@@ -1,6 +1,6 @@
 // DesignWindowOptionsTests.swift: the window's launch arguments (-DesignServices,
 // -DesignFixture, -DesignWindowSize), opening a named fixture as an unsaved file,
-// the status line's selection count and the control id list. Runs on Linux and macOS.
+// the status line's selection count, page size and tool tooltip, and the control id list. Runs on Linux and macOS.
 import Foundation
 import Testing
 
@@ -25,7 +25,7 @@ import Testing
         let options = DesignWindowOptions(arguments: ["app", "-DesignWindowSize", "880x560", "-DesignFixture", "cards"])
         #expect(options.windowWidth == 880 && options.windowHeight == 560)
         #expect(options.fixture == "cards")
-        for bad in ["880", "0x0", "axb", "880x0", "-5x10", "880x560x2", "x560", "infx560"] {
+        for bad in ["880", "0x0", "axb", "880x0", "-5x10", "880x560x2", "x560", "infx560", "880xinf", "880xx560"] {
             let parsed = DesignWindowOptions(arguments: ["app", "-DesignWindowSize", bad])
             #expect(parsed.windowWidth == nil && parsed.windowHeight == nil, "\(bad)")
         }
@@ -72,6 +72,17 @@ import Testing
         #expect(workspace.selectionCountText == "1 Layer")
         workspace.toggleSelection("node-3")
         #expect(workspace.selectionCountText == "2 Layers")
+    }
+
+    @Test func statusChipsSayWhatTheyShow() {
+        let empty = DesignWorkspace()
+        #expect(empty.statusSizeText == "No file open")
+        var workspace = DesignFixtures.cards
+        #expect(workspace.statusSizeText == "Page \(workspace.selectedPage?.sizeText ?? "-")")
+        #expect(workspace.statusSizeText.contains(" × "))
+        #expect(DesignWorkspace.statusToolHelp == "Active tool")
+        workspace.selectItem("node-2")
+        #expect(workspace.statusSizeText.hasPrefix("Page "), "the size is the page's, not the selection's")
     }
 
     @Test func controlIDsAreUniqueAndCoverTheContract() {

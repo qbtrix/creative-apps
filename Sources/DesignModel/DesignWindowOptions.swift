@@ -4,10 +4,11 @@
 // `-DesignWindowSize WxH` (both above zero, else nil; the app floors it at the
 // suite's minimum window size). The size parse matches SuiteUI's
 // SuiteWindowSize.parse, which is macOS-only, so the Model holds its own copy.
-// Also here: `openFixture(_:)`, the status line's selection count text, and
-// DesignControlID, every tier-1 `design.*` accessibility identifier declared up
-// front so the views and journeys share one list: each is `design.<area>.<name>`,
-// lowercase and dot-separated, and appears once (DesignControlIDTests). The
+// Also here: `openFixture(_:)`, the status line's selection count, page size
+// ("Page 1440 × 1024 pt") and tool tooltip, and DesignControlID, every tier-1
+// `design.*` accessibility identifier declared up front so the views and
+// journeys share one list: each is `design.<area>.<name>`, lowercase and
+// dot-separated, and appears once (DesignControlIDTests). The
 // window registers its own controls under these ids with `.suiteControl`: the
 // toolbar items, each palette tool, the canvas and the status line. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -68,6 +69,15 @@ extension DesignWorkspace {
         case let count: "\(count) Layers"
         }
     }
+
+    /// The status line's size chip: "Page 1440 × 1024 pt" for the selected page, so it never
+    /// reads as the selection's size; "No file open" with no page.
+    public var statusSizeText: String {
+        selectedPage.map { "Page \($0.sizeText)" } ?? "No file open"
+    }
+
+    /// The tool chip's tooltip: its text is the bare tool name, which the journeys read.
+    public static let statusToolHelp = "Active tool"
 }
 
 /// Every tier-1 `design.*` control id, declared up front so the wave-1 views use it without
