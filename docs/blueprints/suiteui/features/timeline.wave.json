@@ -2,8 +2,8 @@
   "title": "A modern timeline strip: lane beds, key states, a grabbable playhead, picking, dragging and trimming keys, zoom, units and a work area",
   "wave": 2,
   "order": 50,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1480",
   "covers": "#62, #63, #1257, #1423",
   "waits_on": "#778 (suite-harness, closed); no editor-chrome wait (the 2026-10-15 one-shell decision removes #342's slot)",
   "depends": [
