@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-17T12:21Z	4	heartbeat	round 1	container restart; round-1 critic panel resumed
 2026-10-17T13:14Z	4	round-findings	#2050-#2054	round 1: 5 minor findings filed
 2026-10-17T13:20Z	4	fix-round	#2050 #2051 #2052	round 1 fixers A and B started from f301f664
+2026-10-17T13:29Z	4	pr-opened	#2072	fix B: SizeGate nonzero symbol limit test, Mutate 4/4 (Fixes #2052)
