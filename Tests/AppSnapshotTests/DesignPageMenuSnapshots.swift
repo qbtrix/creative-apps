@@ -1,6 +1,7 @@
 // DesignPageMenuSnapshots.swift: Design's Page menu items in three columns,
-// since the menu bar does not render here: with no file both are off, with two
-// pages both are on, and with the last page Delete Page is off. Writes
+// since the menu bar does not render here: with no file all three are off, with two
+// pages Add and Delete Page are on, and with the last page Delete Page is off. Rename
+// Page… is off in every column with its reason (no file, or no name field yet). Writes
 // design-page-menu-light.png and design-page-menu-dark.png. macOS only.
 import DesignModel
 import SuiteUI
@@ -20,6 +21,9 @@ import Testing
         #expect(!menus[0].isOpen && !menus[0].canDeletePage)
         #expect(menus[1].isOpen && menus[1].canDeletePage)
         #expect(menus[2].isOpen && !menus[2].canDeletePage)
+        #expect(menus[2].deletePageHelp == "A file keeps at least one page.")
+        #expect(menus[0].renamePageHelp == DesignWorkspace().addPageHelp)
+        #expect(menus[1].renamePageHelp == "Renaming a page from the menu isn't built yet.")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(PageMenuStates(menus: menus), name: "design-page-menu-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }

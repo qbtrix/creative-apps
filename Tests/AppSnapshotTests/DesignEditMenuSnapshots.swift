@@ -4,7 +4,10 @@
 // rectangle ("Undo Add Rectangle", Delete Layer on), after that Undo ("Redo
 // Add Rectangle"), and while a text layer is being typed into (Undo, Redo and
 // Delete Layer off, the model ignores them then). Writes design-edit-menu-light.png and
-// design-edit-menu-dark.png. macOS only.
+// design-edit-menu-dark.png. A second shot shows Duplicate after the system's Cut, Copy,
+// Paste and Select All (drawn here as plain stand-ins, since the system adds them): off
+// with nothing selected, its tooltip "Select a layer first.", and on with a layer selected
+// on the fixture fakes. Writes design-edit-menu-duplicate-light.png and -dark.png. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -36,6 +39,45 @@ import Testing
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(EditMenuStates(menus: menus), name: "design-edit-menu-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
+    }
+}
+
+extension DesignEditMenuSnapshots {
+    @Test func duplicate() throws {
+        var none = DesignWorkspace()
+        none.newFile()
+        var one = DesignWorkspace()
+        one.useServices(.fake)
+        #expect(one.openFixture("cards"))
+        one.selectItem(one.selectedPage?.nodes.last?.id ?? "")
+        let menus = [none, one].map { DesignMenu(model: $0, perform: { _ in }) }
+        #expect(menus[0].help(.duplicate) == "Select a layer first.")
+        #expect(!one.selectedNodeIDs.isEmpty && menus[1].help(.duplicate) == nil)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(DuplicateStates(menus: menus), name: "design-edit-menu-duplicate-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
+}
+
+/// Duplicate under stand-ins for the system's pasteboard group, which the menu bar keeps above it.
+private struct DuplicateStates: View {
+    let menus: [DesignMenu]
+    private let titles = ["Nothing selected", "A layer selected"]
+
+    var body: some View {
+        HStack(alignment: .top, spacing: SuiteSpacing.xxl) {
+            ForEach(menus.indices, id: \.self) { index in
+                VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+                    Text(titles[index]).font(SuiteFont.headline)
+                    ForEach(["Cut", "Copy", "Paste", "Select All"], id: \.self) { Button($0) {}.disabled(true) }
+                    Divider()
+                    DesignEditItems(menu: menus[index])
+                }
+                .labelStyle(.titleAndIcon)
+            }
+        }
+        .padding(SuiteSpacing.xxl)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

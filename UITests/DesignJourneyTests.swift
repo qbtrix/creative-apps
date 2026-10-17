@@ -14,7 +14,11 @@
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
 // relaunches with -DesignOpenFile and checks the saved file reopens. The menu
-// journey checks each menu really opens, and adds a page from the Page menu.
+// journey checks each menu really opens, finds each Design item in it (Edit keeps
+// the system's Cut, Copy, Paste and Select All above Duplicate) on, or off with
+// nothing selected (their tooltips, which XCUITest can't read on a menu item, are
+// proven in DesignEditMenuSnapshots and DesignPageMenuSnapshots), and adds a page
+// from the Page menu.
 // The align journey draws a rectangle, centers it from the inspector's Align
 // row and moves it to the top from Object > Align, one undo step each.
 import XCTest
@@ -38,6 +42,26 @@ final class DesignJourneyTests: XCTestCase {
         let design = Journey("Design", self)
         design.app.typeKey("n", modifierFlags: .command)
         design.openEachMenu(expecting: ["Page": "Add Page"])
+        let items = [
+            "Edit": ["Cut", "Copy", "Paste", "Select All", "Duplicate", "Delete Layer"],
+            "Page": ["Add Page", "Rename Page…", "Delete Page"],
+            "Object": ["Group", "Ungroup", "Arrange", "Align", "Distribute Horizontally", "Distribute Vertically"],
+            "View": ["Zoom to Selection"],
+        ]
+        // With nothing selected these are off; each says why in its tooltip.
+        let off: Set = ["Duplicate", "Delete Layer", "Rename Page…", "Delete Page", "Group", "Ungroup",
+                        "Distribute Horizontally", "Distribute Vertically", "Zoom to Selection"]
+        for (title, names) in items.sorted(by: { $0.key < $1.key }) {
+            let menu = design.app.menuBars.firstMatch.menuBarItems[title]
+            menu.click()
+            for name in names {
+                let item = menu.menuItems[name]
+                XCTAssert(item.waitForExistence(timeout: 3), "the \(title) menu shows no \(name)")
+                if off.contains(name) { XCTAssertFalse(item.isEnabled, "\(title) > \(name) is on with nothing selected") }
+            }
+            design.shot("menu-items-\(title.lowercased())", screen: true)
+            design.app.typeKey(.escape, modifierFlags: [])
+        }
         design.app.menuBars.firstMatch.menuBarItems["Page"].click()
         design.app.menuItems["Add Page"].click()
         XCTAssert(design.app.buttons["Undo Add Page"].waitForExistence(timeout: 5), "Page > Add Page added no page")
