@@ -58,3 +58,4 @@ Next: none. Belt-Contact-Sheet posted on #1079 (run 39032290190). Round 4 was re
 - dev macOS runs 38835566584 and earlier are red (other lines); runs 38841265840 and 38841439320 are in progress.
 
 - 2026-10-17T13:44Z post-finish: finding #2069 (testEditorWindow, no editor-window page) arrived after the finish; relabelled gap p2 and linked to #2057/#2058. #2070 was auto-closed by CI.
+- 16:02 post-finish: scoped suiteui 39044925054 (a81dd8d) filed #2137 (testEditorWindow: suite.sidebar isn't hittable) and #2138 (testEditorWindowDark geometry). The budget is spent, so both are now gap p2, linked to #2057 #2058 #2069.
