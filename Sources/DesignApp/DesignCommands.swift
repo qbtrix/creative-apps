@@ -1,9 +1,10 @@
 // DesignCommands.swift: Design's menu bar. File: New File, Open…, Save, Save As…;
-// Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste
-// and Select All, Duplicate and Delete Layer (DesignEditMenu); Page: Add Page,
+// Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
+// Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
 // Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Zoom to
-// Selection. Every top bar command is here too.
+// Selection. Every top bar command is here too. Every item Design adds carries
+// its SF Symbol, the toolbar's where the toolbar has the same command.
 //
 // The focused window publishes a DesignMenu (what can run now, and where to send
 // it) as a focused scene value. An item that can't run is disabled, never hidden,
@@ -11,8 +12,8 @@
 // With no Design window focused only New File acts: it opens a window that starts
 // with a new file. Edit > Undo and Redo replace the system pair so they run the
 // model's history; that costs the system's own Undo inside a text field. The stock
-// pasteboard group stays, so Select All still works there. Delete Layer has no
-// shortcut: the canvas handles the Delete key.
+// pasteboard group stays, so Select All still works there. Its Delete removes the
+// selected layer while the canvas or the Layers list has focus (`canDeleteLayer`).
 import DesignModel
 import SwiftUI
 
@@ -28,7 +29,7 @@ struct DesignMenu {
     var undoHelp: String? = "Nothing to undo."
     var redoHelp: String? = "Nothing to redo."
     var canDeletePage = false
-    /// A layer is selected and unlocked, the only kind Delete Layer can remove, and no text is being edited.
+    /// A layer is selected and unlocked, the only kind Delete can remove, and no text is being edited.
     var canDeleteLayer = false
     /// Why each Align command can't run, keyed by edge; an edge left out can run.
     var alignHelp = DesignWorkspace().alignHelps
@@ -67,7 +68,7 @@ struct DesignMenu {
         undoHelp = editing ? Self.finishEditing : model.canUndo ? nil : "Nothing to undo."
         redoHelp = editing ? Self.finishEditing : model.canRedo ? nil : "Nothing to redo."
         canDeletePage = model.canDeletePage
-        canDeleteLayer = !editing && !model.hasMultipleSelection && (model.selectedNode.map { model.lockHelp($0.id) == nil } ?? false)
+        canDeleteLayer = Self.deletesLayer(model)
         alignHelp = model.alignHelps
         commandHelp = Self.helps(model)
         zoomToSelectionHelp = model.zoomToSelectionHelp
@@ -80,6 +81,12 @@ struct DesignMenu {
     /// Why `command` can't run now; nil when it can.
     func help(_ command: DesignCommand) -> String? { commandHelp[command] }
 
+    /// Whether Edit > Delete removes a layer now: one unlocked layer selected, no text being edited.
+    static func deletesLayer(_ model: DesignWorkspace) -> Bool {
+        model.editingTextID == nil && !model.hasMultipleSelection
+            && (model.selectedNode.map { model.lockHelp($0.id) == nil } ?? false)
+    }
+
     private static func helps(_ model: DesignWorkspace) -> [DesignCommand: String] {
         Dictionary(uniqueKeysWithValues: menuCommands.compactMap { command in model.help(command).map { (command, $0) } })
     }
@@ -89,7 +96,7 @@ struct DesignMenu {
     }
 
     private static let finishEditing = "Finish editing the text first."
-    private static let oneLayer = "Delete Layer removes one layer at a time."
+    private static let oneLayer = "Delete removes one layer at a time."
 }
 
 /// A plain key rather than `@Entry`, so DesignApp builds without the SwiftUI
@@ -138,16 +145,16 @@ struct DesignFileMenu: View {
     let menu: DesignMenu
 
     var body: some View {
-        Button("New File", systemImage: "plus") { menu.perform(.newFile) }
+        Button("New File", systemImage: DesignToolbarItem.newFile.systemImage) { menu.perform(.newFile) }
             .keyboardShortcut("n")
-        Button("Open…", systemImage: "folder") { menu.perform(.open) }
+        Button("Open…", systemImage: DesignToolbarItem.open.systemImage) { menu.perform(.open) }
             .keyboardShortcut("o")
             .disabled(!menu.hasWindow)
         Divider()
-        Button("Save", systemImage: "square.and.arrow.down") { menu.perform(.save) }
+        Button("Save", systemImage: DesignToolbarItem.save.systemImage) { menu.perform(.save) }
             .keyboardShortcut("s")
             .disabled(!menu.isOpen)
-        Button("Save As…") { menu.perform(.saveAs) }
+        Button("Save As…", systemImage: "square.and.arrow.down.on.square") { menu.perform(.saveAs) }
             .keyboardShortcut("s", modifiers: [.command, .shift])
             .disabled(!menu.isOpen)
     }
@@ -158,23 +165,25 @@ struct DesignHistoryMenu: View {
     let menu: DesignMenu
 
     var body: some View {
-        Button(menu.undoTitle) { menu.perform(.undo) }
+        Button(menu.undoTitle, systemImage: DesignToolbarItem.undo.systemImage) { menu.perform(.undo) }
             .disabled(!menu.canUndo)
             .help(menu.undoHelp ?? "")
             .keyboardShortcut("z", modifiers: .command)
-        Button(menu.redoTitle) { menu.perform(.redo) }
+        Button(menu.redoTitle, systemImage: DesignToolbarItem.redo.systemImage) { menu.perform(.redo) }
             .disabled(!menu.canRedo)
             .help(menu.redoHelp ?? "")
             .keyboardShortcut("z", modifiers: [.shift, .command])
     }
 }
 
-/// Edit: Delete Layer, which removes the selected layer; disabled with none or a locked one.
+/// The system's Edit > Delete as the selection leaves it: on with one unlocked layer selected,
+/// else off with why. The menu bar draws the real item (designPasteboardCommands hooks it);
+/// this one is its stand-in where the menu bar doesn't render (DesignEditMenuSnapshots).
 struct DesignDeleteLayerItem: View {
     let menu: DesignMenu
 
     var body: some View {
-        Button("Delete Layer", systemImage: "trash") { menu.perform(.deleteSelection) }
+        Button("Delete", systemImage: "trash") { menu.perform(.deleteSelection) }
             .disabled(!menu.canDeleteLayer)
             .help(menu.deleteLayerHelp ?? "")
     }
@@ -203,19 +212,19 @@ struct DesignViewMenu: View {
     let menu: DesignMenu
 
     var body: some View {
-        Button("Zoom In") { menu.perform(.zoomIn) }
+        Button("Zoom In", systemImage: DesignToolbarItem.zoomIn.systemImage) { menu.perform(.zoomIn) }
             .keyboardShortcut("=")
             .disabled(!menu.isOpen)
             .help(menu.noFileHelp ?? "")
-        Button("Zoom Out") { menu.perform(.zoomOut) }
+        Button("Zoom Out", systemImage: DesignToolbarItem.zoomOut.systemImage) { menu.perform(.zoomOut) }
             .keyboardShortcut("-")
             .disabled(!menu.isOpen)
             .help(menu.noFileHelp ?? "")
-        Button("Fit Page") { menu.perform(.fit) }
+        Button("Fit Page", systemImage: DesignToolbarItem.fit.systemImage) { menu.perform(.fit) }
             .keyboardShortcut("0")
             .disabled(!menu.isOpen)
             .help(menu.noFileHelp ?? "")
-        Button("Zoom to Selection") { menu.perform(.zoomToSelection) }
+        Button("Zoom to Selection", systemImage: "viewfinder") { menu.perform(.zoomToSelection) }
             .keyboardShortcut("2", modifiers: [.option, .command])
             .disabled(menu.zoomToSelectionHelp != nil)
             .help(menu.zoomToSelectionHelp ?? "")
