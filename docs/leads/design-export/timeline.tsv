@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-17T06:07Z	3	heartbeat	wave 1	DE-0 and DE-2 builders running; first Linux build took 4m27s
 2026-10-17T06:20Z	3	pr-opened	#1987	task DE-0 UniqueFileNames, Mutate 3/3; gate red only on dev's app-marks check
 2026-10-17T06:20Z	3	ci-run	origin/dev	check-app-marks red on dev since #1977; fix #1985 open
+2026-10-17T06:28Z	3	heartbeat	wave 1	DE-0 #1987 open waiting on #1985; DE-2 builder running the gate
