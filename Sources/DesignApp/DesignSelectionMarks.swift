@@ -3,8 +3,9 @@
 // outline and, unless a lock stops it, its resize handles where DesignRect.handles
 // puts them (a small selection shows only its corners, outside the box). Several
 // layers: the same accent outline on each and a solid accent box around them all,
-// with the box's handles while the Model's `transformHelp` is nil; a lock or hidden
-// layer in the selection leaves none. Dashes are the live marquee's alone
+// with the box's handles while the Model's `showsSelectionHandles` holds; a lock or
+// hidden layer in the selection leaves none. While a marquee is live only each hit
+// layer's outline draws: no box, no handles until the drag ends. Dashes are the live marquee's alone
 // (DesignMarqueeMark), so a committed selection never reads as one in progress.
 // The text node being edited shows its editor's box instead. The box carries the
 // one accessibility element, `design.canvas.selection` ("Selection"): a clear
@@ -27,12 +28,15 @@ struct DesignSelectionMarks: View {
                 DesignSelectionBox(rect: node.frame, zoom: zoom, handles: false)
             }
             if let bounds = model.selectionBounds {
-                DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.transformHelp == nil)
+                // A live marquee shows what it will select, not the box it will commit.
+                if model.marquee == nil {
+                    DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.showsSelectionHandles)
+                }
                 DesignSelectionElement(rect: bounds, zoom: zoom)
             }
         } else if let selected = painted.first(where: { $0.node.id == model.selectedNodeID })?.node,
                   selected.id != model.editingTextID {
-            DesignSelectionBox(rect: selected.frame, zoom: zoom, handles: model.lockHelp(selected.id) == nil)
+            DesignSelectionBox(rect: selected.frame, zoom: zoom, handles: model.showsSelectionHandles)
             DesignSelectionElement(rect: selected.frame, zoom: zoom)
         }
     }
