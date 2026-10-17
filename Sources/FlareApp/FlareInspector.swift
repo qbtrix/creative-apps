@@ -1,10 +1,8 @@
 // FlareInspector.swift: Flare's inspector, a SegmentedTabs switch between
-// Properties and Library. Properties shows the selected scene's InspectorHeader
-// (never a SurfaceCard, docs/design.md; its Size and Frame rate come from the
-// Model, in the stage's px) and,
-// while a layer is selected, the easing editor the window hands in as
-// `easing` (FlareEasingInspector, until inspector-timeline retires it); with
-// no scene it says what to do. Library is FlareLibraryPanel. A tab click goes
+// Properties and Library. Properties (IT-4) shows refusals in the error color,
+// the InspectorHeader from `model.inspectorSummary`, then SCENE with nothing
+// selected, else TRANSFORM, FILL and TIMING (holding the `easing` editor);
+// with no scene it says what to do. Library is FlareLibraryPanel. A tab click goes
 // out as `.inspector(.showTab)`; the window keeps which tab shows. It only
 // reads `model`. SuiteWindow doesn't scroll its inspector, so this one
 // scrolls itself (as Halo's does): unscrolled, the easing editor stood taller
@@ -59,20 +57,38 @@ struct FlareInspector<Easing: View>: View {
     }
 
     @ViewBuilder private var properties: some View {
-        if let error = model.layerError {
-            Label(error.message, systemImage: "exclamationmark.triangle")
-                .foregroundStyle(SuiteColor.secondaryText)
+        ForEach(errors, id: \.self) { message in
+            Label(message, systemImage: "exclamationmark.circle")
+                .font(SuiteFont.caption)
+                .foregroundStyle(SuiteColor.stateError)
+                .padding(.horizontal, SuiteSpacing.m)
+                .accessibilityIdentifier("flare.inspector.error")
         }
-        if let scene = model.selectedScene {
-            InspectorHeader(scene.name, facts: [
-                InspectorFact("Size", model.sceneSizeText ?? ""),
-                InspectorFact("Frame rate", model.sceneRateText ?? ""),
+        if model.selectedScene != nil {
+            let summary = model.inspectorSummary
+            InspectorHeader(summary.title, facts: [
+                InspectorFact("Kind", summary.kind), InspectorFact("Frame", "\(summary.frame)"),
+                InspectorFact("Size", summary.size), InspectorFact("Keys", summary.keys.map { "\($0)" } ?? ""),
             ])
             .accessibilityIdentifier("flare.inspector.header")
-            if model.selectedLayerID != nil { easing }
+            if summary.showsScene {
+                FlareInspectorScene(size: model.sceneSizeText ?? "", rate: model.sceneRateText ?? "")
+            } else {
+                FlareInspectorGeometry(
+                    rows: model.animatedProperties,
+                    rowHelp: FlareWindow.inspectorHelp(.scrub(property: "", value: 0, dragStart: 0), in: model),
+                    keyHelp: FlareWindow.inspectorHelp(.toggleKey(""), in: model), perform: perform)
+                if let paint = model.paint { FlareInspectorFill(paint: paint) }
+                FlareInspectorTiming(easing: easing)
+            }
         } else {
             let empty = model.inspectorEmptyText
             EmptyStateView(empty.title, systemImage: "film", message: empty.message)
         }
+    }
+
+    /// The refusals to show above the header: the last layer edit's, then paint's and the timeline's.
+    private var errors: [String] {
+        [model.layerError?.message, model.paintError, model.timelineError].compactMap { $0 }
     }
 }
