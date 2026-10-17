@@ -2,13 +2,15 @@
 // docs/blueprints/flare/features/draw-key-save.md), the whole loop on live
 // services: no `-FlareFixture`, so the window runs on `FlareServices.built`,
 // with `-FlareSaveTo <tmp>` so Save writes without a panel. New from the
-// toolbar; R and drag a rectangle (Rectangle 1, its one key at 0); Auto-key on
-// (the recording ring, `flare.recording`: SuiteWindow drops Auto-key's
-// selected state, #1621); V; drag the playhead to 24 on the Frame Ruler and
-// drag the rectangle 200 scene points right: its lane keys 24 and keeps 0.
-// Space, wait, Space plays and pauses (Animate > Play/Pause's key); ⌘Z takes
-// the key at 24 away and ⇧⌘Z brings it back; ⌘S writes <tmp>/Untitled.flare
-// and the title reads "Untitled", not edited (`flare.file` reads "Saved").
+// toolbar; the palette's Rectangle and drag a rectangle (Rectangle 1, its one
+// key at 0); Auto-key on (the recording ring, `flare.recording`: SuiteWindow
+// drops Auto-key's selected state, #1621); the palette's Select; drag the
+// playhead to 24 on the Frame Ruler and drag the rectangle 200 scene points
+// right: its lane keys 24 and keeps 0. The transport's Play/Pause, wait,
+// Play/Pause plays and pauses; the toolbar's Undo takes the key at 24 away and
+// its Redo brings it back; its Save writes <tmp>/Untitled.flare and the title
+// reads "Untitled", not edited (`flare.file` reads "Saved"). Every step up to
+// here is a click (#1863); the keys are FlareJourneyTests' `testKeys`.
 // End moves the playhead off 0, then File > Open Recent lists Untitled.flare
 // and opening it lands at frame 0 with keys at 0 and 24 on the lane and the
 // title "Untitled", not edited. Lanes, scene points and the ruler are read as
@@ -39,8 +41,8 @@ final class FlareLoopJourneys: XCTestCase {
         point(530, 380, on: canvas).click()
         flare.shot("loop-1-new")
 
-        // 2. R and drag a rectangle from (100, 100) to (200, 180): Rectangle 1, keyed at 0 only.
-        choose("r", "Rectangle", flare)
+        // 2. Rectangle and drag a rectangle from (100, 100) to (200, 180): Rectangle 1, keyed at 0 only.
+        choose("Rectangle", flare)
         point(100, 100, on: canvas).press(forDuration: 0.1, thenDragTo: point(200, 180, on: canvas))
         let sidebar = flare.element("suite.sidebar")
         XCTAssert(sidebar.staticTexts[Self.lane].waitForExistence(timeout: 10), "the drag drew no \(Self.lane)")
@@ -54,37 +56,39 @@ final class FlareLoopJourneys: XCTestCase {
         XCTAssert(flare.element("flare.recording").waitForExistence(timeout: 5), "no recording ring with Auto-key on")
         flare.shot("loop-3-auto-key-on")
 
-        // 4. V, frame 24, drag the rectangle (centre (150, 140)) 200 points right: keys at 0 and 24.
-        choose("v", "Select", flare)
+        // 4. Select, frame 24, drag the rectangle (centre (150, 140)) 200 points right: keys at 0 and 24.
+        choose("Select", flare)
         scrub(to: 24, flare)
         point(150, 140, on: canvas).press(forDuration: 0.1, thenDragTo: point(350, 140, on: canvas))
         XCTAssert(waitFor { keys(Self.lane, flare).contains(24) }, "the drag at 24 left \(keys(Self.lane, flare).sorted())")
         expectKeys([0, 24], flare, "after the drag at 24")
         flare.shot("loop-4-keyed")
 
-        // 5. Space, wait, Space: the playhead moves, then holds.
-        flare.press(.space)
+        // 5. Play/Pause, wait, Play/Pause on the transport: the playhead moves, then holds.
+        let play = flare.element("flare.timeline.togglePlay")
+        XCTAssert(play.waitForExistence(timeout: 5) && play.isEnabled, "no enabled Play (flare.timeline.togglePlay)")
+        play.click()
         Thread.sleep(forTimeInterval: 0.5)
-        flare.press(.space)
+        play.click()
         let paused = frame(flare)
-        XCTAssertNotEqual(paused, 24, "Space didn't play")
+        XCTAssertNotEqual(paused, 24, "Play didn't play")
         Thread.sleep(forTimeInterval: 0.5)
-        XCTAssertEqual(frame(flare), paused, "the second Space didn't pause")
+        XCTAssertEqual(frame(flare), paused, "the second Play/Pause didn't pause")
         flare.shot("loop-5-played")
 
-        // 6. ⌘Z takes away only the key at 24; ⇧⌘Z brings it back.
-        flare.press(character: "z", .command)
-        XCTAssert(waitFor { !keys(Self.lane, flare).contains(24) }, "⌘Z left \(keys(Self.lane, flare).sorted())")
-        expectKeys([0], flare, "after ⌘Z")
+        // 6. The toolbar's Undo takes away only the key at 24; its Redo brings it back.
+        click("flare.edit.undo", in: toolbar)
+        XCTAssert(waitFor { !keys(Self.lane, flare).contains(24) }, "Undo left \(keys(Self.lane, flare).sorted())")
+        expectKeys([0], flare, "after Undo")
         flare.shot("loop-6-undo")
-        flare.press(character: "z", [.command, .shift])
-        XCTAssert(waitFor { keys(Self.lane, flare).contains(24) }, "⇧⌘Z left \(keys(Self.lane, flare).sorted())")
-        expectKeys([0, 24], flare, "after ⇧⌘Z")
+        click("flare.edit.redo", in: toolbar)
+        XCTAssert(waitFor { keys(Self.lane, flare).contains(24) }, "Redo left \(keys(Self.lane, flare).sorted())")
+        expectKeys([0, 24], flare, "after Redo")
         flare.shot("loop-6-redo")
 
-        // 7. ⌘S: written to -FlareSaveTo with no panel, titled Untitled, not edited.
-        flare.press(character: "s", .command)
-        XCTAssert(waitFor { FileManager.default.fileExists(atPath: file.path) }, "⌘S wrote no \(file.path)")
+        // 7. The toolbar's Save: written to -FlareSaveTo with no panel, titled Untitled, not edited.
+        click("flare.file.save", in: toolbar)
+        XCTAssert(waitFor { FileManager.default.fileExists(atPath: file.path) }, "Save wrote no \(file.path)")
         expectSaved(flare)
         flare.shot("loop-7-saved")
 
@@ -119,12 +123,19 @@ final class FlareLoopJourneys: XCTestCase {
         XCTAssert(waitFor { status.label == "Saved" }, "flare.file reads \(status.label), not Saved")
     }
 
-    /// Types `key` on the stage; the palette's `title` button (`suite.tools`) reads selected.
-    @MainActor private func choose(_ key: String, _ title: String, _ flare: Journey) {
-        flare.press(character: key)
+    /// Clicks the palette's `title` button (`suite.tools`); it reads selected.
+    @MainActor private func choose(_ title: String, _ flare: Journey) {
         let button = flare.element("suite.tools").buttons[title]
         XCTAssert(button.waitForExistence(timeout: 5), "no \(title) in the palette (suite.tools)")
-        XCTAssert(waitFor { button.isSelected }, "\(key.uppercased()) didn't select \(title)")
+        button.click()
+        XCTAssert(waitFor { button.isSelected }, "clicking \(title) didn't select it")
+    }
+
+    /// Clicks the toolbar button `identifier` once it is enabled.
+    @MainActor private func click(_ identifier: String, in toolbar: XCUIElement) {
+        let button = toolbar.buttons[identifier]
+        XCTAssert(waitFor { button.exists && button.isEnabled }, "no enabled \(identifier) in the toolbar")
+        button.click()
     }
 
     /// The frames of the keys on the lane named `name`: its key children, else the frames its value lists.

@@ -1,11 +1,15 @@
-// FlareJourneyTests+Draw.swift: J3's slice for draw-key-save DK-9, every drawing tool driven by its key and the
-// mouse. On `-FlareFixture empty` (one 550 × 400 scene, no layers) it presses R and drags a rectangle (Rectangle 1),
-// E and Shift-drags a square box (Ellipse 1), P and clicks three corners then the first (Path 1, closed), clicks two
-// points and presses Return (Path 2, open), then R and presses Escape in the middle of a drag (no layer), and clicks
-// Edit > Undo: Path 2 goes and the menu reads "Redo Add Path". V selects Select again. Each tool letter must select
-// its palette button. Escape mid-drag needs the button held while the key goes down, which XCUITest's drags can't
-// do, so that drag is posted as CGEvents. One shot per step, `flare-draw-<step>`. Before the first shot it checks the
-// stage's chrome: the palette clear of the vertical ruler and the status bar's zoom, size and Preview data pills.
+// FlareJourneyTests+Draw.swift: J3's slice for draw-key-save DK-9, every drawing tool chosen by a click on its
+// palette button (the letters are FlareJourneyTests' `testKeys`; #1863) and driven by the mouse. On `-FlareFixture
+// empty` (one 550 × 400 scene, no layers) it chooses Rectangle and drags a rectangle (Rectangle 1), Ellipse and
+// Shift-drags a square box (Ellipse 1), Pen and clicks three corners then the first (Path 1, closed), clicks two points
+// and the palette's Finish Path (Path 2, open; #1862), then Rectangle and presses Escape in the middle of a drag (no
+// layer), and clicks Edit > Undo: Path 2 goes and the menu reads "Redo Add Path". Clicking Select selects it again.
+// Escape mid-drag needs the button held while the key goes down, which XCUITest's drags can't do, so that drag is
+// posted as CGEvents. Those need the runner's post-event (Accessibility) access, so the step first fails by name
+// without it, then proves the posted drag reaches the stage (a plain posted drag draws Rectangle 2, which the
+// toolbar's Undo takes away) before the Escape one adds nothing (#1850). One shot per step, `flare-draw-<step>`.
+// Before the first shot it checks the stage's chrome: the palette clear of the vertical ruler and the status bar's
+// zoom, size and Preview data pills.
 import CoreGraphics
 import XCTest
 
@@ -21,14 +25,14 @@ final class FlareDrawJourneys: XCTestCase {
         expectStageChrome(flare)
         flare.shot("draw-0-open")
 
-        // 1. R, drag a rectangle.
-        choose("r", "Rectangle", flare)
+        // 1. Rectangle, drag a rectangle.
+        choose("Rectangle", flare)
         point(0.1, 0.1, on: stage).press(forDuration: 0.1, thenDragTo: point(0.3, 0.3, on: stage))
         expectLayers(["Rectangle 1"], flare)
         flare.shot("draw-1-rectangle")
 
-        // 2. E, Shift-drag a square box: a circle.
-        choose("e", "Ellipse", flare)
+        // 2. Ellipse, Shift-drag a square box: a circle.
+        choose("Ellipse", flare)
         let side = stage.frame.height * 0.2
         let start = point(0.5, 0.1, on: stage)
         XCUIElement.perform(withKeyModifiers: .shift) {
@@ -37,21 +41,32 @@ final class FlareDrawJourneys: XCTestCase {
         expectLayers(["Rectangle 1", "Ellipse 1"], flare)
         flare.shot("draw-2-ellipse")
 
-        // 3. P, three corners then the first: a closed path.
-        choose("p", "Pen", flare)
+        // 3. Pen, three corners then the first: a closed path.
+        choose("Pen", flare)
         for (x, y) in [(0.1, 0.6), (0.3, 0.6), (0.2, 0.85), (0.1, 0.6)] { point(x, y, on: stage).click() }
         expectLayers(["Rectangle 1", "Ellipse 1", "Path 1"], flare)
         flare.shot("draw-3-closed-path")
 
-        // 4. Two clicks and Return: an open path.
+        // 4. Two clicks and the palette's Finish Path: an open path, with no key.
         for (x, y) in [(0.5, 0.6), (0.8, 0.8)] { point(x, y, on: stage).click() }
-        flare.press(.return)
+        let finish = flare.element("suite.tools").buttons["Finish Path"]
+        XCTAssert(waitFor { finish.exists && finish.isEnabled }, "Finish Path isn't enabled after two pen clicks")
+        finish.click()
         expectLayers(["Rectangle 1", "Ellipse 1", "Path 1", "Path 2"], flare)
         flare.shot("draw-4-open-path")
 
-        // 5. R, Escape in the middle of a drag: no layer.
-        choose("r", "Rectangle", flare)
-        dragWithEscape(from: point(0.6, 0.2, on: stage), to: point(0.8, 0.4, on: stage), flare)
+        // 5. Rectangle, Escape in the middle of a drag: no layer. First a plain posted drag must draw (Rectangle 2,
+        // undone from the toolbar), so a drag the system blocks can't pass as a cancelled one.
+        choose("Rectangle", flare)
+        XCTAssert(
+            CGPreflightPostEventAccess(), "the UI test runner can't post events (Accessibility): Escape mid-drag unproven")
+        postedDrag(from: point(0.6, 0.2, on: stage), to: point(0.8, 0.4, on: stage), flare, escape: false)
+        expectLayers(["Rectangle 1", "Ellipse 1", "Path 1", "Path 2", "Rectangle 2"], flare)
+        let undoButton = flare.app.toolbars.firstMatch.buttons["flare.edit.undo"]
+        XCTAssert(undoButton.waitForExistence(timeout: 5), "no Undo in the toolbar (flare.edit.undo)")
+        undoButton.click()
+        expectLayers(["Rectangle 1", "Ellipse 1", "Path 1", "Path 2"], flare)
+        postedDrag(from: point(0.6, 0.2, on: stage), to: point(0.8, 0.4, on: stage), flare, escape: true)
         Thread.sleep(forTimeInterval: 0.5)
         expectLayers(["Rectangle 1", "Ellipse 1", "Path 1", "Path 2"], flare)
         flare.shot("draw-5-escape")
@@ -70,9 +85,8 @@ final class FlareDrawJourneys: XCTestCase {
         flare.shot("draw-6-undo", screen: true)
         flare.press(.escape)
 
-        // 7. V: Select again.
-        point(0.95, 0.95, on: stage).click()
-        choose("v", "Select", flare)
+        // 7. Select again from the palette.
+        choose("Select", flare)
         flare.shot("draw-7-select")
     }
 
@@ -104,12 +118,12 @@ final class FlareDrawJourneys: XCTestCase {
         element.coordinate(withNormalizedOffset: CGVector(dx: x, dy: y))
     }
 
-    /// Types `key` on the stage; the palette's `title` button reads selected.
-    @MainActor private func choose(_ key: String, _ title: String, _ flare: Journey) {
-        flare.press(character: key)
+    /// Clicks the palette's `title` button (`suite.tools`); it reads selected.
+    @MainActor private func choose(_ title: String, _ flare: Journey) {
         let button = flare.element("suite.tools").buttons[title]
         XCTAssert(button.waitForExistence(timeout: 5), "no \(title) in the palette (suite.tools)")
-        XCTAssert(waitFor { button.isSelected }, "\(key.uppercased()) didn't select \(title)")
+        button.click()
+        XCTAssert(waitFor { button.isSelected }, "clicking \(title) didn't select it")
     }
 
     /// The sidebar names exactly the layers in `names` among the shapes this journey draws.
@@ -125,8 +139,10 @@ final class FlareDrawJourneys: XCTestCase {
             "the sidebar shows \(drawn.filter(shown)), not \(names)")
     }
 
-    /// Holds the button down from `start`, drags to `end`, presses Escape, then lets go, as CGEvents.
-    @MainActor private func dragWithEscape(from start: XCUICoordinate, to end: XCUICoordinate, _ flare: Journey) {
+    /// Holds the button down from `start`, drags to `end`, presses Escape when `escape`, then lets go, as CGEvents.
+    @MainActor private func postedDrag(
+        from start: XCUICoordinate, to end: XCUICoordinate, _ flare: Journey, escape: Bool
+    ) {
         let a = start.screenPoint, b = end.screenPoint
         func post(_ type: CGEventType, _ at: CGPoint) {
             CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: at, mouseButton: .left)?
@@ -138,7 +154,7 @@ final class FlareDrawJourneys: XCTestCase {
             let t = Double(step) / 10
             post(.leftMouseDragged, CGPoint(x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t))
         }
-        flare.press(.escape, step: "draw-5-escape-mid-drag")
+        if escape { flare.press(.escape, step: "draw-5-escape-mid-drag") }
         post(.leftMouseUp, b)
     }
 

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "choosing a tool drops an open pen path",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "        if finishPathHelp == nil { finishPath() }\n",
+    "replace": "",
+    "tests": "FlareToolSwitchTests"
+  },
+  {
+    "label": "choosing a tool finishes even a one-anchor draft",
+    "file": "Sources/FlareModel/FlareWorkspace.swift",
+    "find": "        if finishPathHelp == nil { finishPath() }\n        self.tool = tool\n        cancelDrag()\n",
+    "replace": "        if finishPathHelp == nil { finishPath() }\n        self.tool = tool\n",
+    "tests": "FlareToolSwitchTests"
+  }
+]
