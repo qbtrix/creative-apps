@@ -1,0 +1,79 @@
+utc	stage	event	ref	note
+2026-10-16T18:10Z	0	stage-start	#1480	setup on dev 132d910
+2026-10-16T18:12Z	2	stage-end	#1480	plan: 8 waves from the packet, unchanged
+2026-10-16T18:12Z	3	stage-start	wave 1	TL-1, TL-2
+2026-10-16T18:42Z	3	pr-merged	#1531	TL-1 contracts
+2026-10-16T18:33Z	3	pr-merged	#1532	TL-2 split
+2026-10-16T19:15Z	3	stage-start	wave 2	TL-3, TL-10, TL-16 on 0e969d8; 0 open findings
+2026-10-16T19:20Z	3	pr-opened	#1569	TL-3 API
+2026-10-16T19:21Z	3	pr-opened	#1571	TL-10 key rules
+2026-10-16T19:24Z	3	pr-opened	#1575	TL-16 zoom and time
+2026-10-16T19:50Z	3	pr-merged	#1569 #1571 #1575	wave 2 merged
+2026-10-16T19:53Z	3	stage-start	wave 3	TL-4, TL-5, TL-7, TL-13 on 98414eb; 0 open findings
+2026-10-16T20:13Z	3	heartbeat	wave 3	builders running TL-4, TL-5, TL-7, TL-13
+2026-10-16T20:15Z	3	pr-opened	#1602 #1605 #1606 #1607	wave 3: TL-4, TL-5, TL-7, TL-13
+2026-10-16T20:33Z	3	heartbeat	wave 3	waiting on lane macOS builds
+2026-10-16T20:40Z	3	pr-merged	#1602 #1606 #1607	TL-4, TL-7, TL-13; TL-a all merged
+2026-10-16T20:45Z	3	stage-start	wave 4	TL-17, TL-4b on ecd7137; TL-6 waits #1605; 0 open findings
+2026-10-16T20:49Z	3	pr-merged	#1605	TL-5 look rules
+2026-10-16T20:51Z	3	stage-start	wave 4	TL-6 joins on ef95656
+2026-10-16T21:00Z	3	pr-opened	#1619 #1620	TL-4b gallery scroll, TL-17 zoom and toolbar
+2026-10-16T21:03Z	3	pr-opened	#1623	TL-6 lanes
+2026-10-16T21:17Z	3	pr-merged	#1619 #1620 #1623	wave 4 merged
+2026-10-16T21:19Z	3	stage-start	wave 5	TL-8, TL-11 on 3b59dc5; 0 open findings
+2026-10-16T21:33Z	3	pr-opened	#1647 #1657	TL-11 picking, TL-8 playhead
+2026-10-16T21:40Z	3	ci-run	38967063787	scoped suiteui at 5c1742f: TimelineStripLayoutTests red, journeys skipped
+2026-10-16T21:41Z	3	finding-filed	#1659	TL-b layout test 120.0 != 120
+2026-10-16T21:42Z	3	fix-round	TL-b	round 1: fixer on #1659
+2026-10-16T21:36Z	3	pr-opened	#1672	fix #1659 layout test literal
+2026-10-16T21:39Z	3	pr-merged	#1647	TL-11 picking
+2026-10-16T21:39Z	3	stage-start	wave 6	TL-12, TL-14 on 1a2f0ef; 1 open finding (#1659, fix #1672)
+2026-10-16T21:47Z	3	pr-merged	#1657 #1672	TL-8 playhead; fix for #1659
+2026-10-16T21:47Z	3	stage-start	wave 6	TL-18 joins on 4347bc7
+2026-10-16T21:51Z	3	pr-opened	#1680 #1681	TL-12 keys and VoiceOver, TL-14 key drag
+2026-10-16T21:59Z	3	pr-opened	#1686	TL-18 units and work area
+2026-10-16T22:09Z	3	ci-run	38971697983	scoped suiteui at 4347bc7: safe-area guard red on TimelinePlayhead pill
+2026-10-16T22:09Z	3	finding-filed	#1693	TL-b pill background
+2026-10-16T22:09Z	3	fix-round	TL-b	round 2: fixer on #1693
+2026-10-16T22:12Z	3	pr-merged	#1680	TL-12 keys and VoiceOver
+2026-10-16T22:12Z	3	ci-run	38972124110 38973010004	macOS builds red for #1681, #1686; fixers sent
+2026-10-16T22:14Z	3	pr-opened	#1694	fix #1693 pill background (closure form)
+2026-10-16T22:19Z	3	pr-opened	#1686	TL-18 compile fix pushed e258b5b
+2026-10-16T22:20Z	3	pr-opened	#1681	TL-14 compile fix pushed 78d29cc (also carries #1694 one-liner)
+2026-10-16T22:43Z	3	pr-merged	#1686 #1694	TL-18 units and work area; fix for #1693
+2026-10-16T22:43Z	3	stage-start	wave 7	TL-8b on 4eff5af; TL-15 waits #1681
+2026-10-16T22:49Z	3	pr-opened	#1707	TL-8b work-area dimming
+2026-10-16T22:49Z	3	heartbeat	ci	waiting on scoped suiteui 38977886661
+2026-10-16T23:07Z	3	pr-merged	#1707	TL-8b work-area dimming
+2026-10-16T23:07Z	3	ci-run	38977886661	scoped suiteui at a7c34b4 reports success; reading jobs
+2026-10-16T23:09Z	3	ci-run	38977886661	scoped suiteui at a7c34b4: SuiteTimelineScrubWindowTests red, journeys skipped; 12 timeline goldens uploaded
+2026-10-16T23:09Z	3	finding-filed	#1728	TL-b scrub window ruler press
+2026-10-16T23:09Z	3	review	TL-b	critic panel on snapshots of 38977886661
+2026-10-16T23:11Z	3	pr-opened	#1681	TL-14 merged dev in, 5bd0a07
+2026-10-16T23:14Z	3	review	TL-b	panel: 14 confirmed, 10 issues; 9 relabelled gap (past round cap), #1745 oracle fixed now
+2026-10-16T23:15Z	3	pr-opened	#1746	fix #1728 scrub window test (activation click)
+2026-10-16T23:15Z	3	stage-start	wave 6	TL-9 goldens building
+2026-10-16T23:20Z	3	pr-merged	#1681	TL-14 key drag
+2026-10-16T23:20Z	3	stage-start	wave 7	TL-15 on 7ea9c39
+2026-10-16T23:23Z	3	pr-opened	#1749	fix #1745 oracle test for playhead rows
+2026-10-16T23:24Z	3	pr-opened	#1756	TL-9 12 timeline goldens
+2026-10-16T23:24Z	3	pr-opened	#1760	key-drag window test allows activation clicks
+2026-10-16T23:28Z	3	pr-opened	#1770	TL-15 trim
+2026-10-16T23:35Z	3	pr-merged	#1746 #1749 #1760	scrub window fix, oracle test, key-drag window fix
+2026-10-16T23:35Z	3	stage-start	wave 8	TL-19a on dbe98d9
+2026-10-16T23:38Z	3	pr-merged	#1770	TL-15 trim; TL-c, TL-d all merged
+2026-10-16T23:43Z	3	pr-opened	#1775	TL-19a toolbar snapshot, SJ19d on
+2026-10-16T23:57Z	3	pr-merged	#1775	TL-19a; every task but TL-19b merged
+2026-10-17T00:17Z	3	ci-run	38983393903	journeys ran: SJ0 identifiers, SJ19a/b/c no lane for Ball, SP3/SP8 timeouts; window budgets + goldens pass
+2026-10-17T00:18Z	3	finding-filed	#1800	TL-c lane/key ids, a11y tree size, journey lookups
+2026-10-17T00:18Z	3	fix-round	TL-c	round 1: fixer on #1800
+2026-10-17T00:27Z	3	pr-opened	#1810	fix #1800 lanes ids, visible-only key children, journeys
+2026-10-17T00:28Z	3	ci-run	38985040768	scoped suiteui c512a7e: build+tests green, toolbar goldens recorded; ui-test running
+2026-10-17T00:38Z	3	pr-merged	#1810	fix #1800 lanes ids, visible keys
+2026-10-17T00:38Z	4	stage-start	finish	TL-19b (feature-done) building on ae6bb95
+2026-10-17T00:44Z	4	pr-opened	#1817	TL-19b toolbar goldens, wave.json built, feature-done
+2026-10-17T00:45Z	4	pr-merged	#1817	feature-done; every task merged
+2026-10-17T01:12Z	4	ci-run	38988895145	full CI 7ac0a31: AppSwitcherTests red (#1802, not ours), journeys skipped; filed #1832
+2026-10-17T01:12Z	4	heartbeat	ci	waiting on #1832 and the next run past it
+2026-10-17T01:31Z	4	heartbeat	ci	#1835 fixed the switcher test; waiting on a run containing fc31b4f
+2026-10-17T01:52Z	4	heartbeat	ci	scoped suiteui 38991868071 in ui-test
