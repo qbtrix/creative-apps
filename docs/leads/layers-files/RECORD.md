@@ -13,7 +13,7 @@ No `## Slices` table: v2 packet, v2 loop applies.
 | Task | Wave | Files | What | PR | State |
 |---|---|---|---|---|---|
 | LF-1 | 1 | FlareSidebarHelp + Tests, FlareLayerItems, FlareWindow+Layers, FlareLayersSnapshots, +Scenes | removeSceneHelp, layerRowIsDimmed (Model), J16; no visual dimming | #2110 | open, lane (fixer finished; CI: PASS on 7cfb492) |
-| LF-3 | 1 | FlareNewDocument + Tests, FlareNewSheet, FlareWindow+File, FlareNewSheetSnapshots, +NewSheet | NewDocumentSpec, newDocument(_:), J2 | #2102 | open, lane |
+| LF-3 | 1 | FlareNewDocument + Tests, FlareNewSheet, FlareWindow+File, FlareNewSheetSnapshots, +NewSheet | NewDocumentSpec, newDocument(_:), J2 | #2102 | merged |
 | LF-4 | 1 | FlareLoadProgress + Tests, FlareOpenStatus, FlareOpenStatusSnapshots, +OpenErrors | loadProgressDelay, showsLoadProgress, J27 | #2103 | open, lane |
 | LF-5 | 1 | FlareSaveStatus + Tests, FlareRecovery, FlareRecoverySnapshots, +Recovery | saveStatus, autosave, recovery offer, J28 | #2106 | open, lane |
 | LF-1d | 2+ | FlareLayerItems, FlareLayersSnapshots, +Scenes | dimmed locked row; waits #146 | | waiting |
