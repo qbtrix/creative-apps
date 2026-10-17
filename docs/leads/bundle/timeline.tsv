@@ -61,3 +61,5 @@ utc	stage	event	ref	note
 2026-10-17T13:29Z	4	pr-opened	#2072	fix B: SizeGate nonzero symbol limit test, Mutate 4/4 (Fixes #2052)
 2026-10-17T13:29Z	4	pr-opened	#2073	fix A: plist type names + CFBundleExecutable (Fixes #2050 #2051)
 2026-10-17T13:42Z	heartbeat	wait	#2072 and #2073 macOS builds green (39036738534, 39036751440); waiting on the lane merge
+2026-10-17T14:04Z	4	pr-merged	#2072 #2073	fix round 1 merged 13:47Z (batch Linux 39037438601)
+2026-10-17T14:04Z	4	agent-start	round 2	critic panel (5 lenses) on dev 8e868417
