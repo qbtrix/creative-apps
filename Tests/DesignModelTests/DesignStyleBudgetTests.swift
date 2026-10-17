@@ -7,9 +7,9 @@
 // ≤ 1 ms under the gate. As in DesignLayersBudgetTests, each gate reads the median of
 // the runs, not one sample, so a single slow run on a busy worker doesn't fail it,
 // and a warm-up step runs first so the timed steps all coalesce into the open run.
-// A scrub step rebuilds the page's id set and compares the tree (about 2 to 3 ms in
-// a Linux debug build), so a worker busy with the other suites can push one batch's
-// median past 5 ms; the scrub gate reads the quietest of three batches' medians.
+// A scrub step keeps the page's held ids, since a style edit changes no id, and walks
+// only the path the edit copied (#2303: rebuilding the id set cost about 2 ms in a
+// Linux debug build); the scrub gate still reads the quietest of three batches' medians.
 // P2 is the screen half of both.
 @testable import DesignModel
 import Testing

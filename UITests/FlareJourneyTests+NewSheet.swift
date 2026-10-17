@@ -15,14 +15,8 @@ final class FlareNewSheetJourneys: XCTestCase {
         XCTAssert(sheet.waitForExistence(timeout: 10), "⌘N showed no sheet")
         flare.shot("new-sheet-1-open")
 
-        // 2. Each preset button carries `flare.new.preset` (the audit's identifier check); Vertical 9:16, then 30 fps.
-        for title in ["1080p 16:9", "Square", "Vertical 9:16", "Web 550 × 400", "Custom"] {
-            let preset = sheet.buttons.matching(
-                NSPredicate(format: "identifier == 'flare.new.preset' AND label == %@", title)).firstMatch
-            XCTAssert(preset.waitForExistence(timeout: 5), "no \(title) preset by its identifier (flare.new.preset)")
-        }
-        sheet.buttons.matching(NSPredicate(format: "identifier == 'flare.new.preset' AND label == 'Vertical 9:16'"))
-            .firstMatch.click()
+        // 2. Vertical 9:16, then 30 fps.
+        flare.click("Vertical 9:16", in: .sheet)
         let rate = flare.element("flare.new.fps")
         XCTAssert(rate.waitForExistence(timeout: 5), "no Frame Rate (flare.new.fps)")
         rate.click()

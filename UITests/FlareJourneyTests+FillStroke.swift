@@ -5,7 +5,8 @@
 // old choice again and Cap stays Round. The hex and Width fields are found
 // inside their rows (`flare.inspector.fill`, `.strokeWidth`); a menu's items
 // are the hittable ones, since AppKit keeps closed menus in the tree. Shots
-// are `flare-j8-<step>`.
+// are `flare-j8-<step>`. A menu is clicked through its button (by id or the
+// label Cap or Join), not the row's first match, which can be its label text.
 import XCTest
 
 final class FlareFillStrokeJourneys: XCTestCase {
@@ -71,12 +72,23 @@ final class FlareFillStrokeJourneys: XCTestCase {
         flare.app.typeText(text)
     }
 
+    /// The Cap or Join menu's button: under the inspector, a menu, pop-up or plain button with the row's id or its
+    /// label ("Cap" for `flare.inspector.cap`). The id alone can match the row's "Cap" text first, and a click on
+    /// that text opens nothing (#2237).
+    @MainActor private func picker(_ id: String, _ flare: Journey) -> XCUIElement {
+        let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
+        let label = (id.split(separator: ".").last.map(String.init) ?? id).capitalized
+        return flare.element("suite.inspector").descendants(matching: .any).matching(
+            NSPredicate(format: "elementType IN %@ AND (identifier == %@ OR label == %@)", types, id, label)
+        ).firstMatch
+    }
+
     /// Opens the menu `id` and clicks its hittable item `title`.
     @MainActor private func choose(_ title: String, in id: String, _ flare: Journey) {
-        let picker = flare.element(id)
-        XCTAssert(picker.waitForExistence(timeout: 5), "no \(id) menu")
-        XCTAssert(picker.isEnabled, "the \(id) menu is disabled")
-        picker.click()
+        let menu = picker(id, flare)
+        XCTAssert(menu.waitForExistence(timeout: 5), "no \(id) menu")
+        XCTAssert(menu.isEnabled, "the \(id) menu is disabled")
+        menu.click()
         let items = flare.app.menuItems.matching(NSPredicate(format: "title == %@", title))
         var item: XCUIElement?
         for _ in 0..<15 where item == nil {
@@ -87,16 +99,20 @@ final class FlareFillStrokeJourneys: XCTestCase {
         item.click()
     }
 
-    /// The menu `id`'s value: the title of its choice.
+    /// The menu `id`'s value: the title of its choice, from the row (its accessibility value) or else its button.
     @MainActor private func value(of id: String, _ flare: Journey) -> String {
-        let picker = flare.element(id)
-        XCTAssert(picker.waitForExistence(timeout: 5), "no \(id) menu")
-        return (picker.value as? String) ?? ""
+        let row = flare.element(id)
+        XCTAssert(row.waitForExistence(timeout: 5), "no \(id) menu")
+        let shown = (row.value as? String) ?? ""
+        return shown.isEmpty ? (picker(id, flare).value as? String) ?? "" : shown
     }
 
-    /// The menu `id` reads `title` within five seconds.
+    /// The menu `id` reads `title` within five seconds: some element with that id carries it as its value.
     @MainActor private func expect(_ id: String, reads title: String, _ flare: Journey) {
-        XCTAssert(waitFor { self.value(of: id, flare) == title }, "\(id) reads \(value(of: id, flare)), not \(title)")
+        let reading = flare.app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == %@ AND value == %@", id, title)).firstMatch
+        XCTAssert(waitFor { reading.exists || self.value(of: id, flare) == title },
+                  "\(id) reads \(value(of: id, flare)), not \(title)")
     }
 
     /// A bar's value: a number, or the first number in its text ("4.0 pt"); nil with neither.

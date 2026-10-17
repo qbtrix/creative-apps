@@ -14,7 +14,10 @@
 // handler, so CanvasViewport stops being focusable: a focusable view around the
 // text field would keep the field from taking the keyboard. While the canvas has
 // focus, Edit > Cut, Copy and Paste send `.cut`, `.copy` and `.paste`
-// (designPasteboardCommands).
+// (designPasteboardCommands). While a drag or scrub is live, the page, the
+// selection's marks, the marquee and the feedback are drawn from the window's
+// DesignLiveDrag copy (`live.workspace ?? model`), so a sample redraws the
+// canvas without running the window (D0-8a); keys and text editing read `model`.
 // Content, not chrome: flat, no glass.
 import DesignModel
 import SuiteUI
@@ -28,10 +31,13 @@ struct DesignCanvas: View {
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
     var onZoom: @MainActor (Double) -> Void = { _ in }
     var perform: DesignPerform = { _ in }
+    /// The window's live drag box; nil when the canvas is hosted alone.
+    @Environment(\.designLiveDrag) private var live
 
     var body: some View {
-        if let page = model.selectedPage {
-            canvas(page)
+        let shown = live?.workspace ?? model
+        if let page = shown.selectedPage {
+            canvas(page, shown: shown)
         } else {
             EmptyStateView(
                 "No File Open", systemImage: "square.on.square.dashed",
@@ -41,9 +47,10 @@ struct DesignCanvas: View {
         }
     }
 
-    private func canvas(_ page: DesignPage) -> some View {
+    /// `page` of `shown`, the live copy while a drag or scrub lasts and `model` otherwise.
+    private func canvas(_ page: DesignPage, shown: DesignWorkspace) -> some View {
         let painted = page.painted
-        let feedback = DesignCanvasFeedback(model: model, zoom: zoom)
+        let feedback = DesignCanvasFeedback(model: shown, zoom: zoom)
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
@@ -53,8 +60,8 @@ struct DesignCanvas: View {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
             DesignFrameLabels(painted: painted, zoom: zoom)
-            DesignSelectionMarks(model: model, painted: painted, zoom: zoom)
-            if let marquee = model.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
+            DesignSelectionMarks(model: shown, painted: painted, zoom: zoom)
+            if let marquee = shown.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
             feedback
         }
