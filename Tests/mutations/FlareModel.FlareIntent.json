@@ -1,0 +1,23 @@
+[
+  {
+    "label": "setFormat's name drops the raw value: two chips read flare.export.setFormat",
+    "file": "Sources/FlareModel/FlareIntent.swift",
+    "find": "        case .setFormat(let format): \"format.\\(format.rawValue)\"\n",
+    "replace": "        case .setFormat: \"setFormat\"\n",
+    "tests": "FlareIntentTests"
+  },
+  {
+    "label": ".export's area reads .file",
+    "file": "Sources/FlareModel/FlareIntent.swift",
+    "find": "        case .export: .export\n",
+    "replace": "        case .export: .file\n",
+    "tests": "FlareIntentTests"
+  },
+  {
+    "label": "the reveal chip shares start's identifier",
+    "file": "Sources/FlareModel/FlareIntent.swift",
+    "find": "        case .reveal: \"reveal\"\n",
+    "replace": "        case .reveal: \"start\"\n",
+    "tests": "FlareIntentTests"
+  }
+]

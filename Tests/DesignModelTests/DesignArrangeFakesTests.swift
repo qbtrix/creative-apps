@@ -122,6 +122,6 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(throws: DesignRefusal.notBuilt("Copy and paste")) {
             try live.clipboard.paste(Data("hello".utf8), into: nil, on: page, mint: &mint)
         }
-        #expect(DesignServices.fake != live && fake.export.exportHelp([a], on: page) == "Export isn't built yet.")
+        #expect(DesignServices.fake != live && fake.export is LiveExport && fake.export.exportHelp([a], on: page) == nil)
     }
 }

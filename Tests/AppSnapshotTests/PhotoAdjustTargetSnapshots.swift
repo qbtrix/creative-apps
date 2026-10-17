@@ -1,7 +1,7 @@
-// PhotoAdjustTargetSnapshots.swift: Photo's Adjust tab editing its target
+// PhotoAdjustTargetSnapshots.swift: Photo's inspector editing its adjust target
 // (AL-7 of photo-adjustment-layers, PV-6): on the `layered` fixture with
 // "Curves 1" selected, the header reads "Curves 1" over "Adjusts the layers
-// below" and the tab shows only that layer's Curves section, with no enable
+// below" and the inspector shows only that layer's Curves section, with no enable
 // switch (the row's eye turns the layer off), under the Layer section with
 // its Blend Mode and Opacity, as the inspector shows it (#1713). With Background selected the
 // target is the whole image, under "Image", with all five sections. Writes
@@ -26,7 +26,7 @@ import Testing
     @Test func curvesLayerTarget() throws {
         let model = try layered(selecting: "Curves 1")
         guard case .layer(let id, let settings) = model.adjustTarget else {
-            Issue.record("Curves 1 is not the Adjust tab's target")
+            Issue.record("Curves 1 is not the inspector's adjust target")
             return
         }
         #expect(id == model.selectedLayerID)
@@ -56,7 +56,7 @@ import Testing
     }
 }
 
-/// The Adjust tab at the inspector's ideal width, in a panel, with the
+/// The adjustments at the inspector's ideal width, in a panel, with the
 /// Layer section above the target's header, as PhotoPanel draws it.
 private struct AdjustTabSample: View {
     let model: PhotoWorkspace

@@ -1,7 +1,7 @@
 // DesignCompactSelectionTests.swift: a small selection stays usable. Under three
 // handles across on either side only the corners show, pushed outside the box,
 // and a press inside the box moves it instead of grabbing a handle. Also the
-// inline editor's minimum scale and the Open guard (one file per window).
+// inline editor's scale and the Open guard (one file per window).
 // Runs on Linux and macOS.
 import DesignModel
 import Testing
@@ -70,8 +70,8 @@ private func smallTextBox() throws -> DesignWorkspace {
     #expect(workspace.undoActionName == "Undo Resize")
 }
 
-@Test func theTextEditorNeverDrawsUnderFullSize() {
-    #expect(DesignWorkspace.textEditScale(zoom: 0.43) == 1)
+@Test func theTextEditorScaleFollowsTheZoom() {
+    #expect(DesignWorkspace.textEditScale(zoom: 0.43) == 0.43)
     #expect(DesignWorkspace.textEditScale(zoom: 1) == 1)
     #expect(DesignWorkspace.textEditScale(zoom: 2.5) == 2.5)
     #expect(DesignWorkspace.textEditScale(zoom: 0) == 1)

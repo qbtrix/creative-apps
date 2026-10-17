@@ -4,8 +4,9 @@
 // exactly as NotBuilt with their 5.6 name, on `cards` with A, and with A and B.
 // LiveFiling is today's codec: it saves `cards` to the bytes DesignFile writes,
 // opens them back to the same pages, and refuses what DesignFile refuses with
-// the same reason. `.live` holds the ten Live types, obeys the help law, and
-// MJ3 walks every slot of it on `cards`. Runs on Linux and macOS.
+// the same reason. `.live` holds the ten Live types plus LiveExport (the export
+// plan and SVG text, DesignExport+Kernel), obeys the help law, and MJ3 walks
+// every slot of it on `cards`. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -145,8 +146,8 @@ import Testing
         #expect(live.duplicating is LiveDuplicating && live.grouping is LiveGrouping)
         #expect(live.clipboard is LiveClipboard && live.ordering is LiveOrdering)
         #expect(live.styling is LiveStyling && live.filing is LiveFiling)
-        let tier2: [(Any, String)] = [(live.export, "Export"), (live.pen, "The Pen tool"),
-                                      (live.components, "Components"), (live.variables, "Variables")]
+        #expect(live.export is LiveExport)
+        let tier2: [(Any, String)] = [(live.pen, "The Pen tool"), (live.components, "Components"), (live.variables, "Variables")]
         for (slot, name) in tier2 { #expect((slot as? NotBuilt)?.feature == name) }
     }
 
@@ -157,7 +158,8 @@ import Testing
     }
 
     /// MJ3: open `cards`; every `.live` slot answers its NotBuilt help and refusal, except the five
-    /// with live paths (their Live types, obeying the law) and filing, which saves and reopens `cards`.
+    /// with live paths (their Live types, obeying the law), filing, which saves and reopens `cards`,
+    /// and export, which plans A and B as PNGs and gives an SVG document.
     @Test func testLiveStubsWalk() throws {
         var opened = DesignWorkspace()
         try opened.open(DesignFixtures.cards.fileData())
@@ -169,7 +171,7 @@ import Testing
             (live.duplicating.duplicateHelp(ids, on: page), "Duplicate"), (live.grouping.groupHelp(ids, on: page), "Group"),
             (live.clipboard.copyHelp(ids, on: page), "Copy and paste"),
             (live.ordering.arrangeHelp(.bringToFront, ids, on: page), "Reordering layers"),
-            (live.export.exportHelp(ids, on: page), "Export"), (live.components.createHelp(ids, on: page), "Components"),
+            (live.components.createHelp(ids, on: page), "Components"),
         ]
         for (help, name) in helps { #expect(help == "\(name) isn't built yet.") }
         let path = DesignPath(anchors: [DesignAnchor(point: pt(0, 0)), DesignAnchor(point: pt(10, 10))], isClosed: false)
@@ -178,7 +180,6 @@ import Testing
             (refusal { _ = try live.grouping.group(ids, on: page, mint: &mint) }, "Group"),
             (refusal { _ = try live.clipboard.encode(ids, on: page) }, "Copy and paste"),
             (refusal { _ = try live.ordering.arrange(.sendToBack, ids, on: page) }, "Reordering layers"),
-            (refusal { _ = try live.export.svg(for: "node-2", on: page) }, "Export"),
             (refusal { _ = try live.pen.commit(path, into: nil, on: page, mint: &mint) }, "The Pen tool"),
             (refusal { _ = try live.components.create(from: "node-1", on: page, library: [], mint: &mint) }, "Components"),
             (refusal { _ = try live.variables.remove("v", from: []) }, "Variables"),
@@ -193,6 +194,11 @@ import Testing
         #expect(live.styling.styleHelp(.opacity, ids, on: page) == nil)
         let law = DesignContractLaw.check(live, on: page)
         #expect(law.violations.isEmpty, "\(law.violations)")
+        // Export plans the named layers and gives an SVG document; its help is nil exactly when the plan succeeds.
+        #expect(live.export is LiveExport && live.export.exportHelp(ids, on: page) == nil)
+        #expect(try live.export.plan(ids, on: page, format: .png, scale: 2, existing: []).map(\.fileName) == ["A.png", "B.png"])
+        #expect(try live.export.svg(for: "node-2", on: page).hasPrefix("<svg"))
+        #expect(live.export.exportHelp(["nope"], on: page) == "Select a layer first.")
         // Filing saves `cards` to today's bytes and reopens it to the same pages.
         let today = try opened.fileData()
         let saved = try live.filing.encode(DesignDocument(pages: opened.pages))
