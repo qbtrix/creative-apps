@@ -36,3 +36,5 @@ utc	stage	event	ref	note
 2026-10-17T23:03Z	pr	#2445 (2440+2441) #2454 (2443) open fast-lane
 2026-10-17T23:03Z	wave	w9 fix-batch launched: 2438
 2026-10-17T23:13Z	pr	#2461 w9 r-b1 fixes #2438 (Distribute reason caption)
+2026-10-17T23:28Z	merge	#2445 and #2454 merged (closed #2440 #2441 #2443)
+2026-10-17T23:28Z	wave	wave 10 launched: S-7 build-wave wft4m7hdr; 1 open finding (#2438)

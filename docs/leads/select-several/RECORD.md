@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: SS-a PRs #2445 #2454 #2461 in lane; S-7 (J5/J6) held while >5 findings open
+Next: S-7 (J5 J6) building in wft4m7hdr; #2461 (#2438) in lane; then SS-b S-4/S-8 (S-5 waits CB-a)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
