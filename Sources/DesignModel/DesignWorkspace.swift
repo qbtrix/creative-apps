@@ -184,8 +184,11 @@ public struct DesignWorkspace: Sendable, Equatable {
         record("Add Page", before: before)
     }
 
+    /// Renames a page to `name` without its surrounding whitespace; a blank name is refused, and
+    /// the same name records no step.
     public mutating func renamePage(_ id: String, to name: String) throws(DesignTreeError) {
-        guard !name.allSatisfy(\.isWhitespace) else { throw .emptyName }
+        let name = Self.trimmedName(name)
+        guard !name.isEmpty else { throw .emptyName }
         guard let index = pages.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
         let before = snapshot
         pages[index].name = name
@@ -320,8 +323,11 @@ public struct DesignWorkspace: Sendable, Equatable {
         record("Move Layer", before: before)
     }
 
+    /// Renames a layer to `name` without its surrounding whitespace; a blank name is refused, and
+    /// the same name records no step.
     public mutating func renameNode(_ id: String, to name: String) throws(DesignTreeError) {
-        guard !name.allSatisfy(\.isWhitespace) else { throw .emptyName }
+        let name = Self.trimmedName(name)
+        guard !name.isEmpty else { throw .emptyName }
         try updateNode(id, named: "Rename Layer") { $0.name = name }
     }
 
@@ -329,7 +335,10 @@ public struct DesignWorkspace: Sendable, Equatable {
         try updateNode(id, named: isHidden ? "Hide Layer" : "Show Layer") { $0.isHidden = isHidden }
     }
 
+    /// Locks or unlocks a layer as one step. An open text edit on the layer or inside it commits
+    /// first, as its own step, so the typing isn't lost to the lock (#613).
     public mutating func setNodeLocked(_ id: String, _ isLocked: Bool) throws(DesignTreeError) {
+        if let editing = editingTextID, anyInTree(editing, { $0.id == id }) { commitTextEdit() }
         try updateNode(id, named: isLocked ? "Lock Layer" : "Unlock Layer") { $0.isLocked = isLocked }
     }
 
@@ -365,6 +374,14 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     // MARK: Editing helpers
+
+    /// `name` without its leading and trailing whitespace; "" when it is all whitespace.
+    static func trimmedName(_ name: String) -> String {
+        guard let first = name.firstIndex(where: { !$0.isWhitespace }),
+            let last = name.lastIndex(where: { !$0.isWhitespace })
+        else { return "" }
+        return String(name[first...last])
+    }
 
     /// The node `id` on any page.
     func findNode(_ id: String) -> DesignNode? {

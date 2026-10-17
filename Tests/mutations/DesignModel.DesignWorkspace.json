@@ -1,0 +1,37 @@
+[
+  {
+    "label": "a lock no longer commits the open text edit first",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "if let editing = editingTextID, anyInTree(editing, { $0.id == id }) { commitTextEdit() }",
+    "replace": "",
+    "tests": "DesignLockTextEditTests.swift"
+  },
+  {
+    "label": "a lock commits only an edit on the locked layer itself, not one inside it",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "if let editing = editingTextID, anyInTree(editing, { $0.id == id }) { commitTextEdit() }",
+    "replace": "if let editing = editingTextID, editing == id { commitTextEdit() }",
+    "tests": "DesignLockTextEditTests.swift"
+  },
+  {
+    "label": "a lock commits any open text edit, even on another layer",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "if let editing = editingTextID, anyInTree(editing, { $0.id == id }) { commitTextEdit() }",
+    "replace": "if editingTextID != nil { commitTextEdit() }",
+    "tests": "DesignLockTextEditTests.swift"
+  },
+  {
+    "label": "a page rename keeps the surrounding whitespace",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "        let name = Self.trimmedName(name)\n        guard !name.isEmpty else { throw .emptyName }\n        guard let index",
+    "replace": "        guard !Self.trimmedName(name).isEmpty else { throw .emptyName }\n        guard let index",
+    "tests": "DesignRenameTests.swift"
+  },
+  {
+    "label": "a trim drops only the leading whitespace",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "return String(name[first...last])",
+    "replace": "return String(name[first...])",
+    "tests": "DesignRenameTests.swift"
+  }
+]

@@ -27,8 +27,8 @@
 // a pinch on the lanes (anchored under the pointer) and the toolbar row
 // (TimelineToolbar). The lanes scroll sideways by wheel and trackpad, and a
 // playhead that leaves the view moves it a page (TimelineZoom.followed).
-// Neither scroll view draws scrollers (the ruler and the zoom bar show where
-// the view is), so none reads as an unnamed control (#1784).
+// Neither scroll view shows indicators (#2012): an always-shown AppKit scroller
+// reads as an unnamed 11 pt button and sits over the lanes' right edge.
 import SwiftUI
 
 public struct TimelineStrip<ID: Hashable & Sendable>: View {
@@ -154,6 +154,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                         ScrollView(.horizontal) {
                             lanes(width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false))
                         }
+                        .scrollIndicators(.never)
                         .onScrollGeometryChange(for: ClosedRange<Double>.self) { geometry in
                             let rect = geometry.visibleRect
                             let low = Double(rect.minX - timelineInset)
@@ -170,8 +171,6 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                         }
                     }
                 }
-                // No legacy scrollers: each read as an unnamed button (#1784; precedent #1368).
-                // The visibility reaches the inner horizontal ScrollView too.
                 .scrollIndicators(.never)
                 .onScrollGeometryChange(for: ClosedRange<Double>.self) { geometry in
                     let rect = geometry.visibleRect

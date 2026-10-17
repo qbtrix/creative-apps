@@ -216,7 +216,9 @@ enum ShellGeometry {
 ```
 
 Accessibility identifiers. These stay: `suite.sidebar`, `suite.inspector`,
-`suite.tools` and `suite.canvas`. These are new: `suite.viewport` (the
+`suite.tools` and `suite.canvas` (the scrollable area the app journeys drag
+on; the artboard's own rectangle is `suite.canvas.artboard`, which step 1
+measures). These are new: `suite.viewport` (the
 canvas region `EditorDetail` lays out, rulers included) and `suite.status`
 (the status line), and `suite.switcher` with `suite.switcher.<id>` for each
 item (EW-7). The sidebar slot is wrapped in a container with

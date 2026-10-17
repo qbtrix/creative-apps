@@ -26,7 +26,12 @@
 // artboard; the overlay (selection outlines and handles, inline editors) is
 // laid out on the artboard but not clipped, so marks on a shape that crosses
 // the document's edge still show. Content, not chrome: flat, no glass. The
-// artboard is the accessibility element `suite.canvas`.
+// artboard's container carries the accessibility element `suite.canvas`;
+// XCUITest reads that container, which has no children of its own, at the
+// scrollable area's frame (the viewport, or the artboard plus its margin), and
+// the app journeys drag on it by normalized offsets of that area (#566). The
+// artboard's own rectangle at the current zoom is the leaf element
+// `suite.canvas.artboard`, for a journey that measures the document.
 import SwiftUI
 
 /// Where the artboard sits in the scrollable canvas, in points.
@@ -190,6 +195,16 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         ScrollView([.horizontal, .vertical]) {
             ZStack(alignment: .topLeading) {
                 Color.clear
+                // The artboard's rectangle as an element of its own, beside the container below
+                // (not inside it, so the container's frame stays the one the app journeys read).
+                Color.clear
+                    .frame(width: layout.artboard.width, height: layout.artboard.height)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Artboard")
+                    .accessibilityIdentifier("suite.canvas.artboard")
+                    .padding(.leading, layout.origin.x)
+                    .padding(.top, layout.origin.y)
+                    .allowsHitTesting(false)
                 ZStack(alignment: .topLeading) {
                     if checkerboard {
                         Rectangle().fill(ImagePaint(image: Self.checkerTile))
