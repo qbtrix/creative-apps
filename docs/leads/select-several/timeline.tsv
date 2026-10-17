@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-17T22:22Z	critic	SS-a panel wk80sq2nu: 9 confirmed / 8 refuted; filed #2437-#2443
 2026-10-17T22:22Z	finding	#2437 closed: J5/J6 are task S-7, held until open findings <=5
 2026-10-17T22:22Z	wave	SS-a fix round 1 launched (wb9v4rpri, base 178e59db): #2442, #2441, #2440, #2439; deferred #2443 (busy #2417), #2438 (busy #2349)
+2026-10-17T22:40Z	wave	SS-a round 1 batch 2 (wxkvtvg5f, base e3c5da79): #2443, file freed by #2417 merge
