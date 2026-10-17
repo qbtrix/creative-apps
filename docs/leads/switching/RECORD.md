@@ -75,3 +75,7 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 - `.suiteApp(_:host:)` reaches the delegate through `SuiteAppRegistry.delegate`, which `SuiteAppDelegate.init` sets; the receiver is a `StoreHandOffs` over the support folder.
 - Not done here: the `SettingsRoute` and `OpenInMenu` stubs. Settings and Open In aren't in this menu yet, and the settings and recents-open-in features own those stubs from wave 3, so creating them now would add unused code.
 - `LauncherMenuStubTests` no longer requires Switch To buttons to be disabled stubs; `SuiteCommandsTests` checks the live wiring instead.
+
+## Decisions (SW-3c fix)
+- The lane's macOS build failed on #1943: `AppLauncher.open` called the static `path(of:bundle:)` without `Self.`, after the static run-state refactor. The Linux gate can't compile SuiteShell, so only the macOS build caught it. Fixed on the same branch; the fix is a fast-forward, not a force-push.
+- Lesson for the rest of wave 3: before a macOS-only edit, check every call site of a helper that changed from instance to static, by grep, since the Linux gate won't.

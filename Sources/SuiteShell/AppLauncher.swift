@@ -65,7 +65,7 @@ public actor AppLauncher: AppSwitching {
         configuration.arguments = LaunchArguments.forward(arguments, to: app)
         configuration.activates = true
         do {
-            _ = try await NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path(of: app, bundle: bundle)), configuration: configuration)
+            _ = try await NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: Self.path(of: app, bundle: bundle)), configuration: configuration)
         } catch {
             throw .notAvailable("\(app.displayName) didn't open. Try again.")
         }
