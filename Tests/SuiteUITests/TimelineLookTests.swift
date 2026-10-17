@@ -94,4 +94,15 @@ import Testing
         let middle = TimelineLook.pillRect(playheadX: 300, labelWidth: 14, height: 20, visible: visible)
         #expect(middle.midX == 300 && middle.width == 30 && middle.height == 20)
     }
+
+    @Test func aTrackNameShowsPressAndSelectionAndHoversOnlyWhenIdle() {
+        #expect(TimelineLook.nameRow(selected: false, hovered: false, pressed: false) == .plain)
+        #expect(TimelineLook.nameRow(selected: false, hovered: true, pressed: false) == .hovered)
+        #expect(TimelineLook.nameRow(selected: true, hovered: false, pressed: false) == .selected)
+        // A selected row keeps its tint under the pointer.
+        #expect(TimelineLook.nameRow(selected: true, hovered: true, pressed: false) == .selected)
+        // A press shows at once, on a selected row too.
+        #expect(TimelineLook.nameRow(selected: false, hovered: true, pressed: true) == .pressed)
+        #expect(TimelineLook.nameRow(selected: true, hovered: false, pressed: true) == .pressed)
+    }
 }

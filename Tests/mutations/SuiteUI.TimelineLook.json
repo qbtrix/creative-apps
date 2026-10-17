@@ -1,5 +1,7 @@
 [
 {"label":"picked reads the track's selection, so every key on a selected track turns accent (#1423)","file":"Sources/SuiteUI/TimelineLook.swift","find":"track.pickedFrames.contains(key.frame)","replace":"track.isSelected","tests":"TimelineLookTests"},
 {"label":"the at-playhead check is dropped, so a key at the playhead isn't keyed","file":"Sources/SuiteUI/TimelineLook.swift","find":"key.frame == playhead","replace":"false","tests":"TimelineLookTests"},
-{"label":"the pill clamp's upper bound is dropped, so the pill leaves the lanes at the last frame","file":"Sources/SuiteUI/TimelineLook.swift","find":"min(playheadX - width / 2, high - width)","replace":"playheadX - width / 2","tests":"TimelineLookTests"}
+{"label":"the pill clamp's upper bound is dropped, so the pill leaves the lanes at the last frame","file":"Sources/SuiteUI/TimelineLook.swift","find":"min(playheadX - width / 2, high - width)","replace":"playheadX - width / 2","tests":"TimelineLookTests"},
+{"label":"a pressed track name reads plain, so a press shows nothing","file":"Sources/SuiteUI/TimelineLook.swift","find":"if pressed { return .pressed }","replace":"if pressed { return .plain }","tests":"TimelineLookTests"},
+{"label":"an idle track name never shows hover","file":"Sources/SuiteUI/TimelineLook.swift","find":"return hovered ? .hovered : .plain","replace":"return .plain","tests":"TimelineLookTests"}
 ]
