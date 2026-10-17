@@ -1,7 +1,7 @@
 {
   "id": "suite-preferences",
   "name": "Preferences",
-  "description": "SuitePreferences (General and a pane per app), defaults, change records.",
+  "description": "StorePreferences, the live PreferencesStoring over FileStore's preferences.json: load with the store's revision, save with the stale check and revision + 1, changes() and externalChange().",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
     "Sources/SuiteModel/Preferences/"
