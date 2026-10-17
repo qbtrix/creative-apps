@@ -4,7 +4,7 @@ Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
 Stage: 3 wave 3
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
-Next: RO-4 #2112 fixed at d34cb7f6 (debug budget suite 37 s -> 1 s), back in lane; RO-6, RO-7 building; start RO-9 (H-J20, Closes #451) when RO-4 merges; then wave 4 RO-8
+Next: RO-4 #2112 (d34cb7f6) Linux check passed, macOS build 39046677063 running; RO-6 #2135 and RO-7 #2143 in lane; start RO-9 (H-J20, Closes #451) when RO-4 merges; wave 4 RO-8 when RO-6 + RO-7 merge
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
