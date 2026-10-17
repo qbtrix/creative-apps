@@ -67,15 +67,24 @@ import Testing
             }
         }
         let presets = apps.compactMap { frames["chips.\($0)"] ?? frames["menu.\($0)"] }
-        #expect(presets.count == 5)
+        // #1753: only a tile with more than one preset has a preset row.
+        #expect(presets.count == model.state.tiles.filter(HomeLayout.showsPresets).count)
         for preset in presets { #expect(abs(preset.minY - (presets.first?.minY ?? 0)) <= 0.5, "presets at \(preset.minY)") }
         // #1768: the Presets menu is a small control, no taller than a chip.
         for menu in apps.compactMap({ frames["menu.\($0)"] }) {
             #expect(menu.height <= SuiteSize.chip + 0.5, "menu \(menu.height) pt tall at \(width)")
         }
-        let chips = width >= 1280
-        #expect(apps.allSatisfy { (frames["chips.\($0)"] != nil) == chips && (frames["menu.\($0)"] != nil) == !chips },
-                "chips expected: \(chips) at \(width)")
+        // #1753: chips only where every title fits one untruncated, inside its tile.
+        for tile in model.state.tiles where HomeLayout.showsPresets(tile) {
+            let app = tile.app.rawValue
+            let chips = HomeLayout.tileShowsChips(windowWidth: Double(width), presets: tile.presets)
+            #expect((frames["chips.\(app)"] != nil) == chips && (frames["menu.\(app)"] != nil) == !chips,
+                    "\(app) chips expected: \(chips) at \(width)")
+            if let row = frames["chips.\(app)"] ?? frames["menu.\(app)"], let box = frames["tile.\(app)"] {
+                #expect(row.maxX <= box.maxX + 0.5, "\(app) presets end at \(row.maxX) past \(box.maxX)")
+            }
+        }
+        #expect(apps.allSatisfy { app in frames["chips.\(app)"] == nil } || width >= 1728, "no chip fits at \(width)")
 
         #expect(cards.count == 8, "cards read: \(cards.count)")
         for card in cards { #expect(card.maxX <= right + 0.5, "a card ends at \(card.maxX) past \(right)") }
