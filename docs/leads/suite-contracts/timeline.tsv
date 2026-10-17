@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-17T17:10Z	done	heartbeat	lead	line lead act-1a14ad585d6-dlpz resumed; branch on main 2c5003b5; feature done, nothing left
 2026-10-17T21:34Z	done	stage-start	c55fad78	line lead act-1a14bc85382-m8og resumed; branch moved onto main
 2026-10-17T23:10Z	done	heartbeat	59c435a6	line lead act-1a14c1f550d-8dvt resumed; feature done, nothing left
+2026-10-17T23:43Z	done	heartbeat	-	parked needs-human; run 39076534514 ui-test running, 39079435388 pending; no open findings
