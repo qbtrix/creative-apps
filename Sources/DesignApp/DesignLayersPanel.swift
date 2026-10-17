@@ -1,8 +1,10 @@
 // DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
 // small source-list style: the file's pages, with Add Page and Delete Page in
-// a SidebarActionRow under them (`design.page.add`, `design.page.delete`),
+// a SidebarActionRow under them (`design.page.add`, `design.page.delete`;
+// each disabled with the Model's reason while it can't run),
 // its first glyph on the page rows' symbol column,
-// then the current page's layer tree, frontmost layer at the top
+// then the current page's layer tree (a hint when the page is empty or no file
+// is open), frontmost layer at the top
 // (`frontToBack`; the document keeps paint order). Selection runs through
 // the List, so arrow keys and type-select move through pages and layers; the
 // highlighted rows are the selected layers, or the current page when no layer is.
@@ -49,7 +51,7 @@ struct DesignLayersPanel: View {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
                     DesignLayerTree(nodes: nodes, model: model, perform: perform)
                 } else {
-                    DesignPanelHint("Nothing on this page yet.")
+                    DesignPanelHint(model.isOpen ? "Nothing on this page yet." : "No file open.")
                 }
             } header: {
                 header("Layers")
@@ -90,13 +92,15 @@ struct DesignLayersPanel: View {
             })
     }
 
-    /// Add Page and Delete Page (the checked page); the last page can't be deleted. Untagged, so not selectable.
+    /// Add Page and Delete Page (the checked page), each disabled with the Model's reason while it
+    /// can't run: no file open, or the file's last page. Untagged, so not selectable.
     static func pageCommands(_ model: DesignWorkspace, _ perform: @escaping DesignPerform) -> [ToolbarAction] {
         [
-            ToolbarAction("Add Page", systemImage: "plus", identifier: "design.page.add") { perform(.addPage) },
             ToolbarAction(
-                "Delete Page", systemImage: "trash",
-                unavailableHelp: model.canDeletePage ? nil : "A file keeps at least one page.",
+                "Add Page", systemImage: "plus", unavailableHelp: model.addPageHelp, identifier: "design.page.add"
+            ) { perform(.addPage) },
+            ToolbarAction(
+                "Delete Page", systemImage: "trash", unavailableHelp: model.deletePageHelp,
                 identifier: "design.page.delete"
             ) { perform(.deletePage) },
         ]
