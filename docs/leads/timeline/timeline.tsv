@@ -77,3 +77,7 @@ utc	stage	event	ref	note
 2026-10-17T01:12Z	4	heartbeat	ci	waiting on #1832 and the next run past it
 2026-10-17T01:31Z	4	heartbeat	ci	#1835 fixed the switcher test; waiting on a run containing fc31b4f
 2026-10-17T01:52Z	4	heartbeat	ci	scoped suiteui 38991868071 in ui-test
+2026-10-17T06:23Z	3	stage-start	wave 10	line lead act-1a1487bf89a-zfq8 resumed; TL-f added; base fe0f5f17
+2026-10-17T06:23Z	3	slice-done	TL-a TL-b TL-c TL-d TL-e	Belt-Slice-Done on full run 39001215720 (Linux green), Mutate macOS pending, Mac-Finish-Wanted posted; TL-b gaps + #1782 #1784
+2026-10-17T06:23Z	3	fix-round	TL-c TL-d TL-e	wave 10 fix batch: #1781 #1783 #1795 #1796 #1813 (+gaps #1782 #1784)
+2026-10-17T06:23Z	3	review	39001038692	TL-a and TL-e critic panels started (ui: true)
