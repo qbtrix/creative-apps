@@ -28,9 +28,10 @@ import Testing
         return model
     }
 
-    /// The panel at the inspector's width, as tall as the canvas less its padding.
-    private static func panel(_ model: PhotoWorkspace) -> some View {
-        PhotoPanel(model: model)
+    /// The panel at the inspector's width, as tall as the canvas less its
+    /// padding, its scroll view started at `anchor` (nil: the top).
+    private static func panel(_ model: PhotoWorkspace, anchor: UnitPoint? = nil) -> some View {
+        PhotoPanel(model: model, scrollAnchor: anchor)
             .frame(
                 width: SuiteSize.inspectorWidth.ideal, height: canvas.height - 2 * SuiteSpacing.xxl,
                 alignment: .topLeading)
@@ -38,9 +39,11 @@ import Testing
             .padding(SuiteSpacing.xxl)
     }
 
-    /// The panel with its scroll view started at the bottom of its content.
+    /// The panel with PhotoAdjustTab's own scroll view started at the bottom
+    /// of its content. An anchor set on an ancestor doesn't reach that scroll
+    /// view: the render matched the unscrolled one.
     private static func panelAtEnd(_ model: PhotoWorkspace) -> some View {
-        panel(model).defaultScrollAnchor(.bottom)
+        panel(model, anchor: .bottom)
     }
 
     @Test func layerInspector() throws {
