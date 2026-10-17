@@ -30,21 +30,21 @@ public struct DesignServices: Sendable, Equatable {
 
     public static func == (a: DesignServices, b: DesignServices) -> Bool { a.name == b.name }
 
-    /// The fixture fakes for every tier-1 slot; export, pen, components and variables stay
-    /// NotBuilt until D2-2 adds their fakes.
+    /// The fixture fakes for every tier-1 slot; export is `LiveExport` (planning is pure, so the
+    /// fakes share it); pen, components and variables stay NotBuilt until D2-2 adds their fakes.
     public static let fake = DesignServices(
         name: "fake", marquee: FakeMarquee(), transforming: FakeTransforming(), aligning: FakeAligning(),
         duplicating: FakeDuplicating(), grouping: FakeGrouping(), clipboard: FakeClipboard(), ordering: FakeOrdering(),
-        styling: FakeStyling(), framing: FakeFraming(), filing: FakeFiling(), export: NotBuilt("Export"),
+        styling: FakeStyling(), framing: FakeFraming(), filing: FakeFiling(), export: LiveExport(),
         pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
 
     /// The shipping set: every tier-1 slot is its Live type. Marquee, transforming, aligning and
     /// framing act as their features define; `LiveFiling` wraps today's codec; the other five forward
-    /// to NotBuilt with their feature's name until that feature fills its file. Export, pen,
-    /// components and variables stay NotBuilt until D2-2.
+    /// to NotBuilt with their feature's name until that feature fills its file. Export is
+    /// `LiveExport` (design-export); pen, components and variables stay NotBuilt until D2-2.
     public static let live = DesignServices(
         name: "live", marquee: LiveMarquee(), transforming: LiveTransforming(), aligning: LiveAligning(),
         duplicating: LiveDuplicating(), grouping: LiveGrouping(), clipboard: LiveClipboard(), ordering: LiveOrdering(),
-        styling: LiveStyling(), framing: LiveFraming(), filing: LiveFiling(), export: NotBuilt("Export"),
+        styling: LiveStyling(), framing: LiveFraming(), filing: LiveFiling(), export: LiveExport(),
         pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
 }
