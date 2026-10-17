@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-17T12:17Z	3	agent-start	HM-3a	builder on lead/home-HM-3a from 04242316
 2026-10-17T12:21Z	3	heartbeat	HM-3a	container restart lost the first builder before any code; HM-3a builder relaunched
 2026-10-17T13:14Z	3	pr-opened	#2056	HM-3a SJ0+SJ1 journeys (#836 skips)
+2026-10-17T13:20Z	3	pr-updated	#2056	macOS build 39033113702 failed (main-actor hasFixture); fixed, head 26fc2878
