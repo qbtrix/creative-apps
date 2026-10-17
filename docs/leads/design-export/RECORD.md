@@ -4,7 +4,7 @@ Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
 Run: act-1a14852c11d-65cg · Session: (cloud) · Started: 2026-10-17T05:59Z
 Stage: 3 wave 1
 Base: 0e3c08ea52648f6654e583a64ddf07ccb5aa328c
-Next: wave 1 (DE-0, DE-2) builders are running; when their PRs merge, run the check and start wave 2 (DE-1, DE-8)
+Next: DE-2 builder running; when #1985 merges, merge dev into de-0/unique-file-names (and DE-2's branch), rerun scripts/ci --changed, set Fast-Check/Head; then wave 2 (DE-1, DE-8)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,7 +18,7 @@ Next: wave 1 (DE-0, DE-2) builders are running; when their PRs merge, run the ch
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| DE-0 | DE-a | 1 | UniqueFileNames.name in SuiteModel, its plan, C4 sentence, its test | Sources/SuiteModel/Values/UniqueFileNames.swift, Tests/SuiteModelTests/UniqueFileNamesTests.swift, Tests/mutations/SuiteModel.UniqueFileNames.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | UniqueFileNamesTests (3 mutations) | – | building |
+| DE-0 | DE-a | 1 | UniqueFileNames.name in SuiteModel, its plan, C4 sentence, its test | Sources/SuiteModel/Values/UniqueFileNames.swift, Tests/SuiteModelTests/UniqueFileNamesTests.swift, Tests/mutations/SuiteModel.UniqueFileNames.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | UniqueFileNamesTests (3 mutations) | #1987 | open, waits on dev green (#1985) |
 | DE-2 | DE-a | 1 | DesignExportScope, DesignExportOptions, LiveExport (fake plan, stub svg), DesignSVG stub, workspace readouts, both slots LiveExport, NotBuilt tests updated, plans, C4 sentence, shape half of DesignExportPlanTests | Sources/DesignModel/DesignExport+Kernel.swift, Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignServices.swift, Sources/DesignModel/DesignWorkspace.swift (one stored field), Tests/DesignModelTests/{DesignLiveStubTests,DesignNotBuiltTests,DesignArrangeFakesTests,DesignExportPlanTests}.swift, Tests/mutations/DesignModel.{DesignServices,DesignExport+Kernel}.json, docs/c4/parts/creative-apps/design-model/design-model-sources.json | DesignExportPlanTests shape half (3 mutations + the repointed DesignServices entry) | – | building |
 | DE-2b | DE-a | later | `public typealias DesignExportRun = ExportRun<DesignExportOptions>` once SuiteKernel is linkable from DesignModel | Sources/DesignModel/DesignExport+Kernel.swift | DesignExportPlanTests shape | – | waits on editor-kernel EK-a and a Package.swift dependency (supervisor) |
 | DE-1 | DE-a | 2 | the remaining packet tests, disabled by name: DesignExportPlanTests rules half, DesignSVGTests, DesignExportBudgetTests, DesignExportWalkTests (MJ13), DesignSVGWalkTests (MJ14) | Tests/DesignModelTests/{DesignExportPlanTests,DesignSVGTests,DesignExportBudgetTests,DesignExportWalkTests,DesignSVGWalkTests}.swift | every suite compiles and skips | – | planned |
@@ -45,6 +45,7 @@ Next: wave 1 (DE-0, DE-2) builders are running; when their PRs merge, run the ch
 - editor-kernel EK-1 makes every Model depend on SuiteKernel in Package.swift, so DE-2b needs nothing from the supervisor: it waits on EK-a's Belt-Slice-Done line alone.
 
 ## Open
+- dev is red on the Linux gate: scripts/check-app-marks fails on origin/dev since #1977 (SwitcherEntries glyph(for:), SuiteSwitcherBridge); fix is #1985, unmerged. Wave-1 PRs pass every other check and wait to carry Fast-Check: pass. Commented on #1970.
 - Follow-ups filed (the packet's list): #1981 SuiteUI ExportSheet scope and scale rows (needs-ui); #1982 SuiteUI one image file writer (needs-ui); #1983 Library LiveExporter uses UniqueFileNames (line:library); #1984 Design Export… in the top bar (line:design, depends on #339).
 - No Swift toolchain was on the machine; scripts/cloud-setup.sh installed 6.3.3 (first build warming while wave 1 starts).
 - editor-kernel (#1933) has no SuiteKernel on dev yet: DE-2 (ExportRun typealias) and DE-6 (ExportSheet) wait on EK-a and EK-chrome.
