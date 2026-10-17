@@ -2,28 +2,28 @@
 
 Issue: #1497 · Packet: docs/blueprints/design/features/style-rows.md
 Run: act-1a149c0c306-8ckd (before: act-1a1487bf8e3-hwdj) · Session: claude/design-shell-parity-lead-678eue · Started: 2026-10-17T06:08Z
-Stage: 3 wave 1
-Base: 042423165693f2f1d65d2ece90eb0d5bcb910554
-Next: wave 1 resumed 12:10Z: a fixer merges dev into #2009 (ST-1, needs-rebase on DesignLiveStubTests), ST-6b is building; when they merge run the check, start ST-7 (waits on ST-1); ST-4b, ST-5f, ST-5, ST-4 still wait on design-window DW-a/DW-b (#1494, not merged)
+Stage: 3 wave 2
+Base: 9ba6658425c543613715ebbf34d677a380ef8cc3
+Next: wave 2 = ST-7 (building, wave/style-rows-ST-7); then poll every 10 min: ST-4b, ST-5f, ST-5, ST-4 start when design-window DW-a (#1494) merges
 
 Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497 style-rows. One wave plan across the three.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SR-m | On the live services every style setter refuses, skips and clamps as blueprint 5.4 says, the inspector's shared values read "Mixed" only when layers differ, and the inline editor's scale follows the zoom. | ST-1, ST-2, ST-3 | MJ8 | design-contracts (built) | no | 0 | building | – | – |
-| SR-t | Text family, size, weight and alignment rows set a text layer, the canvas and the inline editor draw its text in that style, committed text doesn't jump at any zoom, and top-level frame names sit above their frames. | ST-6b, ST-4b, ST-5t, ST-5f | J11 | SR-m (ST-4b, ST-5t); design-window DW-a (ST-4b, ST-5t, ST-5f) | yes | 0 | building (ST-6b) | – | – |
-| SR-a | Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read "Mixed" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget. | ST-4, ST-6, ST-7 | J10 | SR-m (ST-4, ST-7); design-window DW-a (ST-4, ST-6) and DW-b (ST-4) | yes | 0 | planned | – | – |
+| SR-m | On the live services every style setter refuses, skips and clamps as blueprint 5.4 says, the inspector's shared values read "Mixed" only when layers differ, and the inline editor's scale follows the zoom. | ST-1, ST-2, ST-3 | MJ8 | design-contracts (built) | no | 0 | done | 39033633296 | – |
+| SR-t | Text family, size, weight and alignment rows set a text layer, the canvas and the inline editor draw its text in that style, committed text doesn't jump at any zoom, and top-level frame names sit above their frames. | ST-6b, ST-4b, ST-5t, ST-5f | J11 | SR-m (ST-4b, ST-5t); design-window DW-a (ST-4b, ST-5t, ST-5f) | yes | 0 | building (ST-6b merged; rest wait on DW-a) | – | – |
+| SR-a | Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read "Mixed" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget. | ST-4, ST-6, ST-7 | J10 | SR-m (ST-4, ST-7); design-window DW-a (ST-4, ST-6) and DW-b (ST-4) | yes | 0 | building (ST-7) | – | – |
 | SR-b | The canvas draws radius, stroke and opacity as stored, and scrubs and typing keep up on 2,000 layers. | ST-5, ST-8 | P2 | design-window DW-a (ST-5, ST-8); SR-a, SR-t (ST-8) | yes | 0 | planned | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| ST-1 | SR-m | 1 | `LiveStyling`: every setter over ids with the refusals and clamps (reads `DesignCorners` help); walk MJ8; retires the stub's entries in DesignLiveStubTests and the plan | Sources/DesignModel/Live/LiveStyling.swift, Tests/DesignModelTests/DesignStyleTests.swift, Tests/DesignModelTests/DesignLiveStubTests.swift, Tests/mutations/DesignModel.LiveStyling.json | DesignStyleTests + Mutate 4/4 | #2009 | needs-rebase; fixer merging dev |
+| ST-1 | SR-m | 1 | `LiveStyling`: every setter over ids with the refusals and clamps (reads `DesignCorners` help); walk MJ8; retires the stub's entries in DesignLiveStubTests and the plan | Sources/DesignModel/Live/LiveStyling.swift, Tests/DesignModelTests/DesignStyleTests.swift, Tests/DesignModelTests/DesignLiveStubTests.swift, Tests/mutations/DesignModel.LiveStyling.json | DesignStyleTests + Mutate 4/4 | #2009 | merged |
 | ST-2 | SR-m | 1 | `sharedValue`, `opacityPercentText`, the locked hint's text per row | Sources/DesignModel/DesignInspectorContent.swift, Tests/DesignModelTests/DesignInspectorSharedValueTests.swift, Tests/mutations/DesignModel.DesignInspectorContent.json | DesignInspectorSharedValueTests + Mutate 2+/n | #2001 | merged |
 | ST-3 | SR-m | 1 | `textEditScale` follows the zoom (no floor at 1) | Sources/DesignModel/DesignText.swift, Tests/DesignModelTests/DesignTextScaleModelTests.swift, Tests/DesignModelTests/DesignCompactSelectionTests.swift, Tests/mutations/DesignModel.DesignText.json | DesignTextScaleModelTests + Mutate 2+/n | #2005 | merged |
-| ST-6b | SR-t | 1 | J11 written from the packet, `XCTSkip("waits on ST-5t")` | UITests/DesignJourneyTests+Text.swift | compiles on the lane's macOS build; skips by name | – | building (relaunch: the first run opened no PR) |
-| ST-7 | SR-a | 2 | QD-S6, QD-S7 model budgets | Tests/DesignModelTests/DesignStyleBudgetTests.swift | DesignStyleBudgetTests under the Linux gates | – | waits on ST-1 |
+| ST-6b | SR-t | 1 | J11 written from the packet, `XCTSkip("waits on ST-5t")` | UITests/DesignJourneyTests+Text.swift | compiles on the lane's macOS build; skips by name | #2046 | merged |
+| ST-7 | SR-a | 2 | QD-S6, QD-S7 model budgets | Tests/DesignModelTests/DesignStyleBudgetTests.swift | DesignStyleBudgetTests under the Linux gates | – | building |
 | ST-4b | SR-t | 2 | Text rows in DW-a's Text section slot | Sources/DesignApp/DesignInspectorText.swift, Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift | DesignTextStyleSnapshots | – | waits on ST-1, ST-2, DW-a |
 | ST-5f | SR-t | 2 | Top-level frame names above their frames in the unclipped overlay | Sources/DesignApp/DesignFrameLabels.swift, Sources/DesignModel/DesignFrameLabel.swift, Tests/DesignModelTests/DesignFrameLabelTests.swift, Tests/mutations/DesignModel.DesignFrameLabel.json, Tests/AppSnapshotTests/DesignFrameLabelSnapshots.swift | DesignFrameLabelTests + snapshots | – | waits on DW-a |
 | ST-5 | SR-b | 2 | Artwork draws radius, stroke and opacity | Sources/DesignApp/DesignCanvasMarks.swift, Tests/AppSnapshotTests/DesignArtworkPathTests.swift | DesignArtworkPathTests | – | waits on DW-a |
@@ -37,6 +37,7 @@ Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497
 |---|---|---|---|---|---|
 
 ## Decisions
+- 13:10Z wave 1 merged at 12:41 (#2009, #2046 beside layers-panel #2047, #2055). SR-m done on scoped design run 39033633296 (head 93c2103 = #2055's merge, contains #2009); posted Belt-Slice-Done. SR-m is Model-only: no panel. No open findings. Wave 2 = ST-7 alone (every other task waits on DW-a).
 - 2026-10-17 12:10Z relaunch (run act-1a149c0c306-8ckd, brief base 0424231 = dev = main): ST-2 #2001 and ST-3 #2005 merged; ST-1 #2009 needs-rebase (conflict in DesignLiveStubTests), sent to a fixer who also strips the attribution footer from its body; ST-6b had no PR and is rebuilt. No open findings. PRs still target dev (the lane's base).
 - PRs target `dev`: the fast lane's base is `dev` (scripts/fast-lane.sh, CLAUDE.md) and it retargets a PR based on `main`; main is a promoted dev SHA. The brief's "main" is read as the integration branch the lane feeds.
 - Builder branches are `wave/<feature>-<task>`: git can't hold `lead/style-rows/<task>` beside `lead/style-rows`.
