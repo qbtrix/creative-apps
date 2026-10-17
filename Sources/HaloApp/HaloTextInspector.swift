@@ -1,17 +1,23 @@
 // HaloTextInspector.swift: the TEXT slot of Halo's layer inspector (#430,
 // TX-6). Shown only while a text layer is selected (`model.selectedText`):
 // the TEXT header; a system TextField (`halo.inspector.text.string`) holding
-// a view-local draft of the words, sent as .setText on Return and when focus
-// leaves (a blank commit is refused by the Model and the field goes back to
-// the stored words); an InspectorSliderRow for the size
-// (`halo.inspector.text.size`, `sizeText` as its accessibility value) that
+// a view-local draft of the words kept with the layer it was typed for
+// (HaloTextDraft), sent as .setText on Return and when focus leaves only
+// while that layer is still selected (#2177; a blank commit is refused by
+// the Model and the field goes back to the stored words); an
+// InspectorSliderRow for the size (`halo.inspector.text.size`, `sizeText` as
+// its accessibility value) that drags over `sizeBarRange`, so the usual
+// sizes sit clear of its label, and types over `fontSizeRange` (#2180), and
 // sends .setFontSize per sample and .endTextSizeScrub at the end, one step;
 // an InspectorColorRow (`halo.inspector.text.color`, from
-// `selectedLayerColor`) that sends .setLayerColor in 8-bit sRGB; then the refusal's caption when the
-// Model's refusal names one of these controls. Each control is disabled with
+// `selectedLayerColor`) that sends .setLayerColor in 8-bit sRGB. A refusal
+// naming one of these controls shows once, right under that control
+// (`textRefusal(at:)`, #2181); `owns` keeps the layer inspector's catch-all
+// caption off them (#2175). Each control is disabled with
 // `model.unavailableHelp(for:)` (the text area's `textHelp`) as help while it
 // can't act. It only reads the model and calls `perform`; it owns the draft
-// and the field's focus.
+// and the field's focus. A draft left on another layer neither shows nor
+// commits, and the next keystroke starts a draft for the selected one.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -19,33 +25,47 @@ import SwiftUI
 struct HaloTextInspector: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
-    /// The field's words while typing; nil shows the stored words.
-    @State private var draft: String?
+    /// The field's words while typing and their layer; nil shows the stored words.
+    @State private var draft: HaloTextDraft?
     @FocusState private var editing: Bool
 
     static let stringID = "halo.inspector.text.string"
     static let sizeID = "halo.inspector.text.size"
     static let colorID = "halo.inspector.text.color"
 
+    /// Whether `refusal` names a TEXT control, so it shows here and only here.
+    static func owns(_ refusal: HaloRefusal) -> Bool { HaloProject.textOwns(refusal) }
+
     var body: some View {
         if let text = model.selectedText {
-            VStack(alignment: .leading, spacing: 0) {
-                InspectorSection("Text") {
-                    field(text)
-                    size(text)
-                    if let current = model.selectedLayerColor { color(current) }
-                }
-                if let refusal = model.refusal, [Self.stringID, Self.sizeID, Self.colorID].contains(refusal.control) {
-                    HaloRefusalCaption(refusal: refusal)
+            InspectorSection("Text") {
+                field(text)
+                caption(Self.stringID)
+                size(text)
+                caption(Self.sizeID)
+                if let current = model.selectedLayerColor {
+                    color(current)
+                    caption(Self.colorID)
                 }
             }
+        }
+    }
+
+    /// The refusal's caption when it names `control`.
+    @ViewBuilder private func caption(_ control: String) -> some View {
+        if let refusal = model.textRefusal(at: control) {
+            HaloRefusalCaption(refusal: refusal)
         }
     }
 
     /// The words: a draft while typing, committed on Return or focus loss.
     private func field(_ text: HaloTextContent) -> some View {
         let help = model.unavailableHelp(for: .setText(text.string))
-        return TextField("Text", text: Binding(get: { draft ?? text.string }, set: { draft = $0 }))
+        let layerID = model.selectedLayerID
+        let words = Binding(
+            get: { model.textFieldWords(draft: draft) ?? text.string },
+            set: { typed in draft = layerID.map { HaloTextDraft(layerID: $0, words: typed) } })
+        return TextField("Text", text: words)
             .textFieldStyle(.roundedBorder)
             .labelsHidden()
             .focused($editing)
@@ -57,11 +77,16 @@ struct HaloTextInspector: View {
             .haloControl(id: Self.stringID, enabled: help == nil, help: help)
     }
 
-    /// The size bar, in composition pixels.
+    /// The size bar, in composition pixels: drags over `sizeBarRange`, types
+    /// over `fontSizeRange`.
     private func size(_ text: HaloTextContent) -> some View {
         let help = model.unavailableHelp(for: .setFontSize(text.fontSize))
+        let track = ScrubTrack(
+            positions: HaloTextContent.sizeBarRange, step: 1, position: { HaloTextContent.sizeBarPosition($0) },
+            value: { $0 })
         return InspectorSliderRow(
             "Size", value: text.fontSize, in: HaloTextContent.fontSizeRange, step: 1, unit: "px", decimals: 0,
+            track: track,
             onChange: { perform(.setFontSize($0)) },
             onEnd: { perform(.endTextSizeScrub) })
             .disabled(help != nil)
@@ -82,10 +107,11 @@ struct HaloTextInspector: View {
         .haloControl(id: Self.colorID, enabled: help == nil, help: help)
     }
 
-    /// Sends the draft, if any, and shows the stored words again.
+    /// Sends the draft while its layer is still selected, and shows the
+    /// stored words again; a draft for another layer is dropped.
     private func commit() {
-        guard let words = draft else { return }
+        guard let pending = draft else { return }
         draft = nil
-        perform(.setText(words))
+        if let command = pending.commit(on: model) { perform(command) }
     }
 }

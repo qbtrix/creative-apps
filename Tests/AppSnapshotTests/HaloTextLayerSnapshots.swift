@@ -3,8 +3,10 @@
 // drawing it beside the TEXT section (the field, the "96 px" size bar, the
 // color row) at the inspector's ideal width (halo-text-layer-*), and the
 // same after a blank commit, with "Enter some text." under the field that
-// still holds "Hello" (halo-text-refused-*). Light and Dark. Also: the
-// section draws nothing for a solid layer. macOS only.
+// still holds "Hello" (halo-text-refused-*), and the whole layer inspector
+// then, with that one caption under the field and none under TRANSFORM
+// (halo-text-refused-inspector-*). Light and Dark. Also: the section draws
+// nothing for a solid layer. macOS only.
 import AppKit
 import HaloModel
 import SuiteUI
@@ -30,6 +32,24 @@ import Testing
         #expect(project.refusal == HaloRefusal(control: HaloTextInspector.stringID, message: "Enter some text."))
         #expect(project.selectedText?.string == "Hello")
         try snapshots(project, name: "halo-text-refused")
+    }
+
+    /// The whole layer inspector after a blank commit: one caption, under
+    /// the field, none under TRANSFORM (#2175, #2181).
+    @Test func refusedInTheWholeInspector() throws {
+        var project = try hello()
+        project.setText("")
+        let refusal = try #require(project.refusal)
+        #expect(HaloTextInspector.owns(refusal))
+        #expect(project.textRefusal(at: HaloTextInspector.stringID) == refusal)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                HaloLayerInspector(model: project)
+                    .frame(width: SuiteSize.inspectorWidth.ideal, height: 1100, alignment: .topLeading)
+                    .background(SuiteColor.panel)
+                    .padding(SuiteSpacing.xxl),
+                name: "halo-text-refused-inspector-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
     }
 
     @Test func noSectionForASolid() throws {
