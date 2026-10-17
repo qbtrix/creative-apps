@@ -1,7 +1,7 @@
 # shell-parity lead record
 
 Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
-Run: act-1a1487bf8e3-hwdj (first run act-1a14478b134-5to5) · Session: claude/design-shell-parity-lead-0l668u · Started: 2026-10-16T12:00Z
+Run: act-1a149c0c306-8ckd (before: act-1a1487bf8e3-hwdj; first run act-1a14478b134-5to5) · Session: claude/design-shell-parity-lead-0l668u · Started: 2026-10-16T12:00Z
 Stage: done
 Base: 0e3c08ea52648f6654e583a64ddf07ccb5aa328c
 Next: nothing. Feature done: DP-a done (38956034097), DP-b done with gaps #1452 #1572 #1573 #1617 #1618 #1877 #1878 (38971702274), Belt-Contact-Sheet posted on #1325. The gaps close when SuiteUI #1456 lands. This branch was recut onto main on 2026-10-17 (Belt: 290 commits behind).
