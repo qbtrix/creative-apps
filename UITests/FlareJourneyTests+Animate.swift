@@ -49,6 +49,7 @@ final class FlareAnimateJourneys: XCTestCase {
         drag(from: (322.5, 230), by: 100, on: canvas)
         XCTAssert(waitFor { keys("Ball", flare) == Self.ballKeys.union([30]) },
                   "Ball's lane reads \(keys("Ball", flare).sorted()) after the drag, not a key added at 30")
+        expectKeyButtonsApart(flare)
         flare.shot("animate-3-keyed")
 
         // 4. Edit > Undo: only that key goes.
@@ -81,6 +82,22 @@ final class FlareAnimateJourneys: XCTestCase {
         XCTAssert(waitFor { shadow.isSelected }, "a click 50 points right of Shadow's old place misses it at 30")
         XCTAssertFalse(keys("Shadow", flare).contains(30), "a drag with Auto-key off keyed Shadow at 30")
         flare.shot("animate-6-shadow-at-30")
+    }
+
+    /// Ball is keyed on x and y: each of those rows' stopwatch (`flare.inspector.<p>.key`) and its key-here diamond
+    /// (`.key.diamond`) are two 28 pt buttons that don't intersect: nothing wraps the pair to make the stopwatch
+    /// read 56 pt over its diamond (#1282).
+    @MainActor private func expectKeyButtonsApart(_ flare: Journey) {
+        for property in ["x", "y"] {
+            let watch = flare.element("flare.inspector.\(property).key")
+            let diamond = flare.element("flare.inspector.\(property).key.diamond")
+            XCTAssert(watch.waitForExistence(timeout: 5), "no stopwatch for \(property) (flare.inspector.\(property).key)")
+            XCTAssert(diamond.waitForExistence(timeout: 5), "no key diamond for \(property) with Ball animated")
+            XCTAssertLessThanOrEqual(watch.frame.width, 29, "the \(property) stopwatch reads \(watch.frame.width) pt wide")
+            XCTAssertFalse(
+                watch.frame.insetBy(dx: 0.5, dy: 0.5).intersects(diamond.frame),
+                "the \(property) stopwatch \(watch.frame) overlaps its diamond \(diamond.frame)")
+        }
     }
 
     /// The frames of the keys on the lane named `name`: its key children, else the frames its value lists.
