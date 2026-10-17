@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-17T14:55Z	heartbeat	wave 2 held (7)	-
 2026-10-17T15:18:42Z	heartbeat	#2048 eligible, awaiting lane batch
 2026-10-17T15:40:46Z	wave	wave 2 started
+2026-10-17T16:02:55Z	check	wave 2 building
