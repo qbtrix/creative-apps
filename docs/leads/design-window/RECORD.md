@@ -3,7 +3,7 @@
 Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14801a0f5-htqa · Session: 2f69baa5-b59f-5f22-b23e-b03fb33d3e02 · Started: 2026-10-17T03:58Z
 Stage: 3 wave 1
-Base: c5efa4eb0565135ddffa97149c65c114bb7fa93a (origin/dev; main 1a8eea2ac5869aef64c3bc19e87e08c9f5253b36 is its ancestor)
+Base: 0e3c08ea52648f6654e583a64ddf07ccb5aa328c (origin/dev; moved from c5efa4eb by #1965, #1966, #1967, #1968, #1969, #1943, #1932, none touching Design or SuiteUI)
 Next: wave 1 PRs (D0-5a, D0-5b, D0-9a, D0-9b) to merge through the lane, then wave 2
 
 ## Slices
@@ -46,3 +46,4 @@ Next: wave 1 PRs (D0-5a, D0-5b, D0-9a, D0-9b) to merge through the lane, then wa
 - Blocked: D0-9d and everything after it (D0-7b, feature-done) until canvas-basics CB-a merges.
 - The packet's needs-ui issue ("SuiteUI: a mixed state on ScrubField") is not yet filed; file at stage 1 per packet.
 - Nothing on this feature has been built on macOS; all UI tasks are built blind and need the lane's build-only run and the Mac finisher.
+- Base moved to 0e3c08ea (dev). Builders from wave 1 attempt 1 stopped on the base check with no work, so wave 1 is relaunched from 0e3c08ea.
