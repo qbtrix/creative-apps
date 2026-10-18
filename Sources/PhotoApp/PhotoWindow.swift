@@ -4,12 +4,12 @@
 // canvas previews, and the v2 presentation flags), turns every PhotoIntent
 // into a workspace method or a panel, and keeps the picture rendered (CanvasRenderer) whenever the
 // workspace's revision moves (on the app's View > Rendering backend), and clears the status line's message 4 s after
-// it appears. Canvas drags carry the pen's pressure (PointerPressure), the
+// it appears. Canvas drags carry the pen's pressure (SuiteUI's SuitePointerPressure), the
 // keys held (DragModifiers) and the zoom, and, while they last, AppKit's mouse
-// event coalescing is off so every pointer sample arrives; StrokePacer hands
+// event coalescing is off so every pointer sample arrives; StrokePacer (SuiteUI's pacer) hands
 // them to the workspace as they come, at most twice a display frame, and each
 // apply starts the picture's render at once. A brush, eraser, clone or heal
-// stroke draws on LiveStroke's copy and comes back once, at its end or before
+// stroke draws on LiveStroke's LiveCopy and comes back once, at its end or before
 // any other intent, so drawing never re-runs the panels. Its workspace runs on
 // `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
@@ -144,7 +144,7 @@ struct PhotoWindow: View {
                 Text(shown.message)
             }
             .task {
-                PointerPressure.watch()
+                SuitePointerPressure.watch()
                 showLaunchImage()
                 openLaunchFile()
             }
@@ -185,7 +185,7 @@ struct PhotoWindow: View {
             // Every pointer sample while drawing, not AppKit's merged ones; the drag's end turns merging back on.
             NSEvent.isMouseCoalescingEnabled = false
             let move = (
-                Mask.Point(x: from.x, y: from.y), Mask.Point(x: to.x, y: to.y), PointerPressure.current,
+                Mask.Point(x: from.x, y: from.y), Mask.Point(x: to.x, y: to.y), SuitePointerPressure.current,
                 DragModifiers(flags: NSEvent.modifierFlags))
             // The picture starts at once, not after SwiftUI's next pass reaches `.onChange`. A paint
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.

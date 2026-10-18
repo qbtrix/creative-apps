@@ -180,6 +180,18 @@ final class PhotoJourneyTests: XCTestCase {
         photo.click("Undo Paint", in: .window, step: "undone")
         XCTAssert(photo.app.buttons["Redo Paint"].waitForExistence(timeout: 5), "Undo didn't undo the stroke")
 
+        // The Preset menu (AB-p2) sets every brush setting at once: Soft Round is 60 px.
+        let preset = photo.element("photo.tool.preset")
+        XCTAssert(preset.waitForExistence(timeout: 5), "the brush's Tool Options show no Preset menu")
+        preset.click()
+        let soft = photo.app.menuItems["Soft Round"]
+        XCTAssert(soft.waitForExistence(timeout: 5), "the Preset menu doesn't list Soft Round")
+        soft.click()
+        let size = photo.element("photo.tool.size")
+        let sixty = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value CONTAINS '60'"), object: size)
+        XCTAssertEqual(XCTWaiter().wait(for: [sixty], timeout: 5), .completed, "Soft Round didn't set the size to 60 px")
+        photo.shot("preset-soft-round")
+
         typeValue("1.5", into: "Exposure", photo)
         expect("Undo Exposure", photo, "typing 1.5 into Exposure made no Exposure step")
         photo.shot("exposure")

@@ -11,8 +11,8 @@ import Synchronization
 import Testing
 
 @Suite struct PhotoBrushKernelTests {
-    private func sample(_ x: Double, _ y: Double, _ pressure: Double = 1) -> PhotoStroke.Sample {
-        PhotoStroke.Sample(point: Point(x: x, y: y), pressure: pressure)
+    private func sample(_ x: Double, _ y: Double, _ pressure: Double = 1) -> StrokeSample {
+        StrokeSample(point: Point(x: x, y: y), pressure: pressure)
     }
 
     @Test func theFirstSegmentComesWithTheThirdSample() throws {
@@ -110,5 +110,17 @@ import Testing
         workspace.selectTool(.eraser)
         workspace.setToolOption(.preset(faint))
         #expect(workspace.eraserOptions.opacityPercent == 1 && workspace.brushOptions.settings == preset.settings)
+    }
+
+    @Test func thePresetMenuNamesTheMatchingPresetAndNoneOnceASettingDiffers() throws {
+        var options = ToolOptions()
+        #expect(options.preset?.id == "hard-round", "the default settings are Hard Round")
+        options.apply(.hardness(percent: 0))
+        #expect(options.preset == nil, "a soft 20 px brush is no preset")
+        let soft = try #require(ToolOptions.presets.first { $0.id == "soft-round" })
+        options.apply(.preset(soft))
+        #expect(options.preset == soft)
+        options.apply(.color(red: 9, green: 9, blue: 9))
+        #expect(options.preset == soft, "the color is not part of a preset")
     }
 }
