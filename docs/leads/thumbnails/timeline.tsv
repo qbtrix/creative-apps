@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-18T22:19Z	round1	waiting: full CI 39160459432 macOS on scripts/ci 70+ min; asked supervisor for scoped library run
 2026-10-18T22:41Z	round1	full CI 39160459432 void: hung in AfterGlowHomeSidebarTests until timeout, journeys never ran
 2026-10-18T23:03Z	round1	waiting: full CI 39171756438 macOS queued
+2026-10-18T23:25Z	round1	macOS job of 39171756438 started; waiting on journeys
