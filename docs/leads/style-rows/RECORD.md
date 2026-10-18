@@ -113,3 +113,4 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - 2026-10-18T04:35:09Z check: dev CI 39096939772 (21066130) cancelled. Scoped design 39097469910 on d3a4f16e (holds #2561) in progress: it decides SR-b.
 - 2026-10-18T04:39:26Z check: SR-b fix #2561 merged (d3a4f16e7); scoped design run 39097469910 on it in progress; full CI 39093416270 macOS still running; no dev-red
 - 2026-10-18T04:56:58Z check: SR-b: P2 testScrubLatency passed in scoped run 39097469910 on d3a4f16e7 (fix #2561); awaiting Linux job of dev CI 39098181461 for merged-done; full CI 39093416270 macOS failed (pre-fix, failures across design/flare/halo/afterglow); no dev-red
+- 2026-10-18T05:04:03Z check: feature done (contact sheet 6245833712); idle
