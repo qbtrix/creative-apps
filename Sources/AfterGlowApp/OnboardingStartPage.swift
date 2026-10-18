@@ -1,8 +1,8 @@
 // OnboardingStartPage.swift: the welcome window's page 3, the starter row
 // (onboarding packet OB-4). One grid row per starter in the model's focus
-// order: the app's mark and name, its presets as ChoiceChips titled "New ..."
-// (SuiteOnboarding.presetTitle; a chip creates that document at once, as the home's tiles do) and "Open sample", disabled
-// with the model's reason as its help when the sample isn't in this build.
+// order: the app's mark and name, its presets as ChoiceChips (SuiteOnboarding.presetTitle:
+// "New Blank Design", or the preset's own "Import Folder…" when it asks for more) and
+// "Open sample". A disabled control's help is the model's reason (#3018).
 // While a hand-off is in flight its row shows a small progress ring and every
 // control is disabled; a refused hand-off's sentence sits under that row,
 // never an alert. "Start from an empty home" is the window's default button
@@ -35,7 +35,7 @@ struct OnboardingStartPage: View {
     private func row(_ starter: OnboardingStarter) -> some View {
         let app = starter.tile.app
         let busy = model.launching != nil
-        let sampleEnabled = starter.sample != nil && starter.sampleReason == nil && !busy
+        let sampleReason = model.sampleUnavailable(starter)
         return GridRow(alignment: .center) {
             HStack(spacing: SuiteSpacing.s) {
                 AppMark(app: app, style: .line).symbolSized().font(SuiteFont.body)
@@ -54,11 +54,9 @@ struct OnboardingStartPage: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Button("Open sample") { Task { await model.openSample(app, now: Date()) } }
-                .disabled(!sampleEnabled)
-                .help(starter.sampleReason ?? starter.sample.map { "Open \($0.title) in \(app.displayName)." }
-                    ?? "The \(app.displayName) sample isn't in this build.")
-                .suiteControl(id: OnboardingControls.sample(app), enabled: sampleEnabled,
-                              reason: sampleEnabled ? nil : (starter.sampleReason ?? "Another document is opening."))
+                .disabled(sampleReason != nil)
+                .help(model.sampleHelp(starter))
+                .suiteControl(id: OnboardingControls.sample(app), enabled: sampleReason == nil, reason: sampleReason)
         }
     }
 
@@ -72,6 +70,6 @@ struct OnboardingStartPage: View {
             }
         }
         .disabled(tile.disabledReason != nil || busy)
-        .help(tile.disabledReason ?? "Creates a new \(tile.app.displayName) document at once.")
+        .help(model.presetsHelp(tile))
     }
 }

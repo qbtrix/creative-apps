@@ -219,10 +219,10 @@ focus → starter → finished, preferences saved, one hand-off recorded), MJ-OB
 | screen state | what shows | snapshot (`Golden/afterglow-onboarding/`) |
 |---|---|---|
 | Page 1, welcome | title "Five apps, one AfterGlow", the five symbols (`HomeSidebarRows.symbol`) with names in a row, the body, the Rendering line in `SuiteFont.caption` / `textSecondary`, Continue (prominent, default), Skip | `afterglow-onboarding-welcome-{light,dark,light-ic,dark-ic}` |
-| Page 2, focus | "What do you make most?", `ChoiceChips` Animation, Design, Photos, Motion, Everything, none selected; Back, Continue, Skip | `-focus-*`, `-focus-selected-*` (Photos) |
-| Page 3, start | "Start with a sample or a new document", five tiles in focus order, preset chips, "Open sample"; "Start from an empty home"; Back, Skip | `-start-*` (Photos order), `-start-default-*` (no focus) |
+| Page 2, focus | "What do you make most?", `ChoiceChips` naming the apps each puts first (`SuiteOnboarding.focusTitle`: "Animation: Flare, Halo", "Design", "Photos: Library, Photo", "Motion graphics: Halo, Flare", "Everything"), none selected; Back, Continue, Skip | `-focus-*`, `-focus-selected-*` (Photos) |
+| Page 3, start | "Start with a sample or a new document", five tiles in focus order, preset chips ("New Blank Design"; a preset that asks for more keeps its "…", as "Import Folder…"), "Open sample"; "Start from an empty home"; Back, Skip | `-start-*` (Photos order), `-start-default-*` (no focus) |
 | Page 3, a sample missing | that tile's "Open sample" disabled, help "The Halo sample isn't in this build." | `-start-missing-*` |
-| Finishing | after a chip or Open sample: the tile's progress ring (`launching`), controls disabled while the hand-off sends | `-start-launching-*` |
+| Finishing | after a chip or Open sample: the tile's progress ring (`launching`), controls disabled while the hand-off sends, each with help "A document is opening." | `-start-launching-*` |
 | Error in place | a hand-off refused: the sentence under the tile (`SuiteError.message`), nothing modal | `-start-error-*` |
 
 Layout check (blueprint 7.3 item 2): Continue, Back and Skip sit inside the

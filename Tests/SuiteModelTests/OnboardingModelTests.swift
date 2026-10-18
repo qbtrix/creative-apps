@@ -309,6 +309,37 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.pageIndex == 1)
     }
 
+    /// #3018: every control held by a hand-off says why in its help, and says what it does otherwise.
+    @Test func everyHeldControlsHelpSaysADocumentIsOpening() async throws {
+        let gate = GateSending()
+        let (m, _) = await model({ $0.sending = gate }, present: { $0.hasPrefix("/R/Samples/") && !$0.contains("Bounce") })
+        m.continue(); m.continue()
+        let flare = try #require(m.starters.first { $0.tile.app == .flare })
+        let design = try #require(m.starters.first { $0.tile.app == .design })
+        let missing = "The Flare sample isn't in this build."
+        #expect(m.skipHelp == "Close the welcome window. Help > Welcome to AfterGlow opens it again.")
+        #expect(m.backHelp == "Go back to the previous page.")
+        #expect(m.startEmptyHelp == "Close the welcome window and go to the home with nothing open.")
+        #expect(m.presetsHelp(design.tile) == SuiteOnboarding.presetsHelp(design.tile))
+        #expect(m.sampleUnavailable(design) == nil && m.sampleHelp(design) == "Open \(design.sample?.title ?? "") in Design.")
+        #expect(m.sampleUnavailable(flare) == missing && m.sampleHelp(flare) == missing)
+        let bare = OnboardingStarter(tile: design.tile, sample: nil, sampleReason: nil)
+        #expect(m.sampleUnavailable(bare) == "The Design sample isn't in this build.")
+        let blocked = NewTile(app: .halo, title: "New Composition", presets: [], disabledReason: "Halo isn't installed.")
+        #expect(m.presetsHelp(blocked) == "Halo isn't installed.")
+        let preset = try flareHD()
+        let send = Task { await m.startNew(preset, now: now) }
+        while !(await gate.isWaiting) { await Task.yield() }
+        let opening = "A document is opening."
+        #expect([m.skipHelp, m.backHelp, m.startEmptyHelp, m.presetsHelp(design.tile), m.sampleHelp(design)]
+            == Array(repeating: opening, count: 5))
+        #expect(m.sampleUnavailable(design) == opening && m.sampleHelp(flare) == missing)
+        #expect(m.presetsHelp(blocked) == "Halo isn't installed.")
+        await gate.finish(.failure(.timedOut))
+        await send.value
+        #expect(m.skipHelp != opening && m.sampleUnavailable(design) == nil)
+    }
+
     @Test func aRefusedHandOffKeepsItsTile() async throws {
         let refusal = "Switching isn't available yet."
         let (m, _) = await model { $0.sending = FakeHandOffs(unavailable: refusal) }
