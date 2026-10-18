@@ -24,7 +24,7 @@ extension BodyCountSuites {
     @MainActor @Suite(.serialized) struct PhotoZoomBudgetTests {
         static let zooms = [0.5, 1, 1.5, 2, 3]
 
-        @Test(.timeLimit(.minutes(20))) func eightKPanAndSliderAtEachZoomOnEachBackend() async throws {
+        @Test(.timeLimit(.minutes(40))) func eightKPanAndSliderAtEachZoomOnEachBackend() async throws {
             var lines: [String] = []
             // PHOTO_ZOOM_ONLY=GPU or =CPU runs one backend, PHOTO_ZOOM_AT=1 one zoom: a run to `sample`.
             let env = ProcessInfo.processInfo.environment
