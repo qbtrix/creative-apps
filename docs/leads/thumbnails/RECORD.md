@@ -4,7 +4,7 @@ Issue: #1506 · Packet: docs/blueprints/library/features/thumbnails.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: round 1 fixes all merged; #2749 #2766 #2882 closed by the lane. Scoped library 39157077321 (1fcbcd9, has #2878) is running its UI journeys (build, scoped tests, snapshots passed). Full CI 39159685451 cancelled (superseded); newest full CI 39161458093 (0e4e913) pending. Green: contact sheet. Red: round 2 (the last), then gaps
+Next: scoped library 39157077321 (1fcbcd9) is void: build, scoped tests and snapshots passed, but xcodebuild for the journeys was SIGKILLed 3 s after launch (scripts/ui-test line 59, Killed: 9, 0 tests, no xcresult); flare and photo scoped runs on the same commit ran normally, so it's the runner. Supervisor: please re-dispatch scoped library on dev (I can't dispatch). Also waiting on full CI 39162498756 (b1526f3; 39161458093 was cancelled). Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
