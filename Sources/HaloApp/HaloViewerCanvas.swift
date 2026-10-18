@@ -36,9 +36,9 @@ struct HaloViewerCanvas: View {
             .overlay { HaloRenderedFrameView(model: model, perform: perform) }
             .overlay { HaloViewerGestures(model: model, perform: perform) }
             .overlay {
-                HaloSummaryElement(text: model.viewerSummary, identifier: "halo.viewer.summary")
+                ProbeElement("halo.viewer.summary", label: model.viewerSummary)
                 if let list = model.viewerDrawList {
-                    HaloSummaryElement(text: list.drawnSummary, identifier: "halo.viewer.drawn")
+                    ProbeElement("halo.viewer.drawn", label: list.drawnSummary)
                 }
             }
             .accessibilityElement(children: .contain)
@@ -72,21 +72,6 @@ struct HaloLiveLayers: View {
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
                 .padding(SuiteSize.canvasInset)
         }
-    }
-}
-
-/// A hidden, hitless leaf whose label is `text`: what XCUITest can read
-/// where an accessibility value reads empty (#262), as `halo.file` does.
-private struct HaloSummaryElement: View {
-    let text: String
-    let identifier: String
-
-    var body: some View {
-        Color.clear
-            .allowsHitTesting(false)
-            .accessibilityElement()
-            .accessibilityLabel(text)
-            .accessibilityIdentifier(identifier)
     }
 }
 
