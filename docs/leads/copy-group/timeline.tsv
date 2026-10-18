@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-18T04:41Z	check	run 39093416270 macOS ui-test still running (since 03:35Z); no findings
 2026-10-18T04:47:47Z	3	merged	#2569	CG-a r1 on dev 308b58a9; next design run holding it decides CG-a
 2026-10-18T05:03:50Z	3	round	#2615	CG-a round 2 opened, fixes finding #2611; full run 39098845449 pending on 308b58a9
+2026-10-18T05:10Z	sheet	contact sheet on #1496 now has J7-J9 failures (#2579-#2581, #2585) and audit identifier:2; fix rounds belong to lead act-1a14d32dfd7-u3ff (#2569 merged, #2615 open)
