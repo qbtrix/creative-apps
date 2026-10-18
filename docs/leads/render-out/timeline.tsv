@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-17T23:36Z	6	full-ci-check	39076534514	macOS red on Design snapshot tests only, not Halo; Halo render timing p95 74.6ms/60ms report-only
 2026-10-17T23:58Z	6	heartbeat	39076534514	still in progress (ui-test, no journey output yet); next full run 39080371690 on a6150139 pending
 2026-10-18T00:19Z	6	heartbeat	39076534514	still in progress (ui-test); 39080371690 on a6150139 still pending, no jobs
+2026-10-18T00:41Z	6	full-ci-check	39076534514	completed: macOS scripts/ci red (Design only), ui-test cancelled at 00:28Z; 39080371690 pending
