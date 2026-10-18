@@ -1,21 +1,21 @@
 # adopt-kernel-brush lead record
 
 Issue: #1941 · Packet: docs/blueprints/suiteui/features/adopt-kernel-brush.md
-Run: act-1a14d380dff-xcgw (line lead with #1933, #1940; relaunch of act-1a1487bf89a-zfq8) · Session: claude/editor-kernel-lead-si485j · Started: 2026-10-17T06:10Z
-Stage: 0 setup (blocked)
-Base: 2106613068d1e316799297f887e22e123fe240aa
-Next: at every check, re-read #1933 for `Belt-Slice-Done: EK-stroke` (then AB-p1 may start) and `EK-chrome` (AB-p2); nothing can start before
+Run: act-1a14f91ff8b-nq4v (line lead with #1933, #1941, #1940)
+Stage: 3 wave A
+Base: 5a8c6fa745be653c2b82d41047a51de5244a939f
+Next: AB-p1 builds now; AB-p2 (feature-done) once AB-p1 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AB-photo | Photo's brush, eraser, clone and heal sample through StrokeSmoother and DabSpacer, options in BrushSettings, LiveCopy<PhotoWorkspace> through SuiteUI's StrokePacer, PointerPressure and BrushCursorMark; the Photo copies deleted | AB-p1, AB-p2 | MJ-AB-photo (PhotoBrushTests on Linux; Photo's journeys on the scoped run) | editor-kernel:EK-stroke (AB-p1), editor-kernel:EK-chrome (AB-p2); hand-offs photo-seams and photo-edit on PhotoStroke.swift, PhotoRetouch.swift, PhotoWindow.swift | true | 0 | blocked | – | – |
+| AB-photo | Photo's brush, eraser, clone and heal sample through StrokeSmoother and DabSpacer, options in BrushSettings, LiveCopy<PhotoWorkspace> through SuiteUI's StrokePacer, PointerPressure and BrushCursorMark; the Photo copies deleted | AB-p1, AB-p2 | MJ-AB-photo (PhotoBrushTests on Linux; Photo's journeys on the scoped run) | editor-kernel:EK-stroke (AB-p1), editor-kernel:EK-chrome (AB-p2); hand-offs photo-seams and photo-edit on PhotoStroke.swift, PhotoRetouch.swift, PhotoWindow.swift | true | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| AB-p1 | AB-photo | 1 | Photo adapter: PhotoStroke.Sample is StrokeSample, curve and the 4-sample window route to StrokeSmoother, dabCenters to DabSpacer, ToolOptions to BrushSettings (ToolOptionEdit → BrushEdit; BrushPreset list behind the options view), LiveStroke to LiveCopy<PhotoWorkspace>; capsule, falloff and max-coverage blend stay behind `paint`; files the needs-core issue for a CoreRaster stamp op; existing tests unchanged; plan PhotoModel.KernelBrushAdapter | Sources/PhotoModel/PhotoStroke.swift, PhotoRetouch.swift, ToolOptions.swift, Sources/PhotoApp/LiveStroke.swift, StrokePacer.swift, PointerPressure.swift, BrushCursorOverlay.swift, PhotoToolOptions.swift, PhotoWindow.swift, Tests/PhotoModelTests/PhotoBrushTests.swift, PhotoLiveStrokeTests.swift, PhotoDragBatchTests.swift, PhotoBrushArcTests.swift, PhotoRetouchDabTests.swift, Tests/AppSnapshotTests/PhotoStrokePacerTests.swift, PhotoWindowStrokeTests.swift, Tests/mutations/PhotoModel.KernelBrushAdapter.json | the seven existing suites unchanged + `scripts/mutate --plan PhotoModel.KernelBrushAdapter` (drops endRun forward; maps refusal to success) | – | waits editor-kernel:EK-stroke |
-| AB-p2 | AB-photo | 2 | Photo delete: the sampling, curve and dab code and the four app files go; plans repointed; C4 part updated; feature-done | the same Photo files, Tests/mutations/PhotoModel.PhotoStroke.json | the same suites, `scripts/mutate --validate`, `grep -rn <symbol> Sources` empty | – | waits AB-p1, editor-kernel:EK-chrome |
+| AB-p1 | AB-photo | 1 | Photo adapter: PhotoStroke.Sample is StrokeSample, curve and the 4-sample window route to StrokeSmoother, dabCenters to DabSpacer, ToolOptions to BrushSettings (ToolOptionEdit → BrushEdit; BrushPreset list behind the options view), LiveStroke to LiveCopy<PhotoWorkspace>; capsule, falloff and max-coverage blend stay behind `paint`; files the needs-core issue for a CoreRaster stamp op; existing tests unchanged; plan PhotoModel.KernelBrushAdapter | Sources/PhotoModel/PhotoStroke.swift, PhotoRetouch.swift, ToolOptions.swift, Sources/PhotoApp/LiveStroke.swift, StrokePacer.swift, PointerPressure.swift, BrushCursorOverlay.swift, PhotoToolOptions.swift, PhotoWindow.swift, Tests/PhotoModelTests/PhotoBrushTests.swift, PhotoLiveStrokeTests.swift, PhotoDragBatchTests.swift, PhotoBrushArcTests.swift, PhotoRetouchDabTests.swift, Tests/AppSnapshotTests/PhotoStrokePacerTests.swift, PhotoWindowStrokeTests.swift, Tests/mutations/PhotoModel.KernelBrushAdapter.json | the seven existing suites unchanged + `scripts/mutate --plan PhotoModel.KernelBrushAdapter` (drops endRun forward; maps refusal to success) | – | building wave A |
+| AB-p2 | AB-photo | 2 | Photo delete: the sampling, curve and dab code and the four app files go; plans repointed; C4 part updated; feature-done | the same Photo files, Tests/mutations/PhotoModel.PhotoStroke.json | the same suites, `scripts/mutate --validate`, `grep -rn <symbol> Sources` empty | – | waits AB-p1 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -25,7 +25,7 @@ Next: at every check, re-read #1933 for `Belt-Slice-Done: EK-stroke` (then AB-p1
 - Checked 2026-10-17T06:20Z: #1933 (editor-kernel) has no comments, no `lead/editor-kernel` branch exists, and no kernel type (StrokeSmoother, DabSpacer, BrushSettings, BrushPreset, LiveCopy) or SuiteUI StrokePacer/PointerPressure/BrushCursorMark exists on dev. Both waits are unmet; commented on #1941.
 - The packet's AB-p1 owns 17 files (the cap is 15): when it starts, the test files it doesn't edit come off its list (the acceptance says the app's tests pass unchanged), which also keeps the "zero test edits" quality row honest.
 - Base is `dev` for PRs (CLAUDE.md, fast-lane.sh); this status branch sits on main as Belt asked.
+- 2026-10-18 relaunch act-1a14f91ff8b-nq4v: EK-stroke and EK-chrome are done (Belt; StrokePacer, PointerPressure, BrushCursorMark merged in #2744), so both waits are met.
 
 ## Open
-- 2026-10-18 relaunch: same lead now runs editor-kernel (#1933); EK-stroke (EK-29 stubs, EK-23, EK-24) is planned in its waves 2 to 4.
-- Blocked on editor-kernel:EK-stroke and EK-chrome (#1933).
+- AB-p2 waits AB-p1.
