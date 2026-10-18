@@ -98,3 +98,4 @@ utc	stage	event	ref	note
 2026-10-18T04:57Z	done	heartbeat	e01529f4	full CI 39098181461 running; awaiting supervisor on #1503; parked
 2026-10-18T05:28Z	done	heartbeat	e01529f4	full CI 39098181461 running; awaiting supervisor; parked
 2026-10-18T06:04Z	done	heartbeat	39098181461	parked needs-human; no supervisor reply; dev green; no finding
+2026-10-18T06:42Z	done	heartbeat	39098181461	3rd run same 4 AfterGlow journey fails; re-raised #1503; dev-red #2667 Library, not ours
