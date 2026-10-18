@@ -1,7 +1,9 @@
 // LoupeState.swift: what the loupe reads from LibraryCatalog: its photo, the
 // "12 of 60" position in the current sort, whether Left and Right can move,
-// and the artboard size CanvasSurface fits. Read-only; the loupe changes
-// through LibraryCatalog's open, showLoupe, stepLoupe and showGrid. Linux-safe.
+// and the artboard size CanvasSurface fits; and Home and End. The loupe
+// changes through LibraryCatalog's open, showLoupe, stepLoupe, showGrid and
+// the showFirstInLoupe / showLastInLoupe here. The readout with the photo's
+// name is LibraryReadouts' loupeReadout. Linux-safe.
 
 extension LibraryCatalog {
     /// The size the loupe draws a photo at, in pixels: a 4:3 camera frame, the
@@ -24,6 +26,12 @@ extension LibraryCatalog {
     public var canShowNextInLoupe: Bool {
         loupePlace.map { $0.index < $0.items.count - 1 } ?? false
     }
+
+    /// Home: the first photo in the sort. Does nothing in the grid.
+    public mutating func showFirstInLoupe() { stepLoupe(by: Int.min) }
+
+    /// End: the last photo in the sort. Does nothing in the grid.
+    public mutating func showLastInLoupe() { stepLoupe(by: Int.max) }
 
     /// The shown photos in sort order and the loupe photo's index among them.
     private var loupePlace: (items: [PhotoItem], index: Int)? {
