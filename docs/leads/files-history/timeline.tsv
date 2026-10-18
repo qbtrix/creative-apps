@@ -9,3 +9,4 @@ utc	feature	event	ref	note
 2026-10-18T17:37:26Z	files-history	merge	#2870	FH-1 merged (macOS build 39147792299)
 2026-10-18T17:37:26Z	files-history	stage-start	wave 3	FH-6 builder (J16) on dev@bea7db20; FH-5 waits on #2873 and #2866, FH-7 last
 2026-10-18T17:53:56Z	files-history	pr	#2879	FH-6 opened, contract ok
+2026-10-18T17:59:56Z	files-history	heartbeat	#2866	FH-4 merged 17:50Z (batch run 39150527669); #2873 FH-3 macOS build 39148468443 green, waiting on lane sweep; #2879 FH-6 macOS build 39152072157 queued; FH-5 starts once #2873 merges
