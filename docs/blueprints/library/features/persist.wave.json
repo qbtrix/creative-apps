@@ -2,7 +2,7 @@
   "title": "The catalog file",
   "wave": 2,
   "order": 40,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "#212",
   "waits_on": "spine, #333",
