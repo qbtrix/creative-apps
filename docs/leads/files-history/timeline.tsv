@@ -13,3 +13,5 @@ utc	feature	event	ref	note
 2026-10-18T18:18:09Z	files-history	merged	#2873	FH-3 merged 18:03Z
 2026-10-18T18:18:09Z	files-history	merged	#2879	FH-6 merged 18:11Z; FH-a complete on dev c91b1468; full CI 39153086055 pending (Belt-Slice-Done when green)
 2026-10-18T18:18:09Z	files-history	wave	wkf4hdp2e	wave 4 started: FH-5 (J13/J14) and FH-7 (P4, feature-done, held with no-fast-lane until FH-5 merges); base c91b1468
+2026-10-18T18:30:31Z	files-history	pr	#2896	FH-5 J13/J14, head b8412161, closes #275 #270; dot check deferred to #2861
+2026-10-18T18:30:31Z	files-history	pr	#2894	FH-7 P4 + J16 row, head bfcccd0d, feature-done, held with no-fast-lane

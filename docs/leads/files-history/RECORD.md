@@ -62,3 +62,4 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - Slice done lines: none yet.
 
 - 2026-10-18T18:18:09Z: FH-3 #2873 and FH-6 #2879 merged; FH-a is fully on dev. Wave 4 (wkf4hdp2e): FH-5 and FH-7, FH-7 held with `no-fast-lane` so it merges after FH-5.
+- 2026-10-18T18:30:31Z: wave 4 opened FH-5 #2896 (head b8412161) and FH-7 #2894 (head bfcccd0d, held). Both had the attribution footer stripped. Contract checks were otherwise clean.
