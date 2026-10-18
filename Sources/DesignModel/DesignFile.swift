@@ -1,21 +1,13 @@
-// DesignFile.swift: Design's file format and the codec between it and the
-// workspace. A file is JSON, `{"pages":[...],"version":1}` with sorted keys, so
-// the same document always writes the same bytes. `fileData()` writes the open
-// document; `open(_:at:)` replaces it with a file's pages and remembers where it
-// came from (`documentURL`, which `didSave(to:)` moves after a save). Linux-safe.
+// DesignFile.swift: Design's file errors and the workspace's Open and Save.
+// `fileData()` writes the open document and `open(_:at:)` replaces it with a
+// file's pages, both through `services.filing` (on the live services that is
+// LiveFiling, the codec: sorted-key JSON, version 1, and every refusal with its
+// reason). `open` remembers where the file came from (`documentURL`, which
+// `didSave(to:)` moves after a save). Linux-safe.
 //
-// Opening is all or nothing: the whole file is checked first and the workspace
-// is touched only by the final `load`, so a refused file leaves it exactly as it
-// was. A file is refused when it isn't JSON of this shape, names a version other
-// than 1, has no page, repeats an id (page and node ids share one namespace, as
-// `selectItem` looks them up together), nests children under a node that cannot
-// hold them, or has a page or node whose size is under 1 point or whose numbers
-// are not finite, a negative corner radius, an opacity outside 0...1, a negative
-// stroke width or a text size under 1 point. A node written before the style
-// fields existed opens with each at its default: square corners, opacity 1, no
-// stroke and the default text style (DesignNode's decoder). Saving runs
-// the same number check, so a file written here
-// always opens again. Opening clears the undo history and the selection, so Open
+// Opening is all or nothing: the filing checks the whole file first and the
+// workspace is touched only by the final `load`, so a refused file leaves it
+// exactly as it was. Opening clears the undo history and the selection, so Open
 // only fills a workspace with nothing open (`takesOpenedFile`).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -51,54 +43,23 @@ public enum DesignFileError: Error, Equatable, Sendable {
     }
 }
 
-/// The file's JSON.
-private struct DesignFileContent: Codable {
-    var version: Int
-    var pages: [DesignPage]
-}
-
-/// Just the version, read first so a file from a future format reports its version
-/// and not "unreadable".
-private struct DesignFileHeader: Decodable {
-    var version: Int
-}
-
 extension DesignWorkspace {
-    private static let fileVersion = 1
-
     /// Whether Open may put a file in this workspace: only while it holds none. A workspace that
     /// holds a file, saved or not, is never replaced; the window opens the file in a new window.
     public var takesOpenedFile: Bool { !isOpen }
 
-    /// The open document as file bytes. Throws `.noFile` with nothing open.
+    /// The open document as file bytes, written by `services.filing`. Throws `.noFile` with nothing open.
     public func fileData() throws(DesignFileError) -> Data {
         guard isOpen else { throw .noFile }
-        try Self.check(pages)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .sortedKeys
-        do {
-            return try encoder.encode(DesignFileContent(version: Self.fileVersion, pages: pages))
-        } catch {
-            // Every number is finite after `check`, which is all that makes the encoder throw.
-            throw .unreadable
-        }
+        return try services.filing.encode(DesignDocument(pages: pages))
     }
 
-    /// Replaces the document with the file's pages, selects the first page and clears the undo
-    /// history; `url` becomes `documentURL`. A refused file throws and changes nothing.
+    /// Replaces the document with the file's pages, read by `services.filing`, selects the first
+    /// page and clears the undo history; `url` becomes `documentURL`. A refused file throws and
+    /// changes nothing.
     public mutating func open(_ data: Data, at url: URL? = nil) throws(DesignFileError) {
-        let content: DesignFileContent
-        do {
-            let header = try JSONDecoder().decode(DesignFileHeader.self, from: data)
-            guard header.version == Self.fileVersion else { throw DesignFileError.unsupportedVersion(header.version) }
-            content = try JSONDecoder().decode(DesignFileContent.self, from: data)
-        } catch let error as DesignFileError {
-            throw error
-        } catch {
-            throw .unreadable
-        }
-        try Self.check(content.pages)
-        load(content.pages)
+        let document = try services.filing.decode(data)
+        load(document.pages)
         documentURL = url
     }
 
@@ -107,39 +68,5 @@ extension DesignWorkspace {
     public mutating func didSave(to url: URL) {
         documentURL = url
         markSaved()
-    }
-
-    /// Throws the first problem in `pages` that would make the document unusable.
-    private static func check(_ pages: [DesignPage]) throws(DesignFileError) {
-        guard !pages.isEmpty else { throw .noPages }
-        var seen = Set<String>()
-        func claim(_ id: String) throws(DesignFileError) {
-            guard seen.insert(id).inserted else { throw .duplicateID(id) }
-        }
-        func drawable(_ rect: DesignRect) -> Bool {
-            [rect.x, rect.y, rect.width, rect.height].allSatisfy(\.isFinite) && rect.width >= 1 && rect.height >= 1
-        }
-        func styled(_ node: DesignNode) -> Bool {
-            let strokeWidth = node.stroke?.width ?? 0
-            return (0...1).contains(node.opacity) && strokeWidth.isFinite && strokeWidth >= 0
-                && node.textStyle.size.isFinite && node.textStyle.size >= 1
-        }
-        func checkNodes(_ nodes: [DesignNode]) throws(DesignFileError) {
-            for node in nodes {
-                try claim(node.id)
-                guard drawable(node.frame), node.cornerRadius.isFinite, node.cornerRadius >= 0, styled(node) else {
-                    throw .invalidNumber(node.id)
-                }
-                guard node.children.isEmpty || node.kind.holdsChildren else { throw .notAContainer(node.id) }
-                try checkNodes(node.children)
-            }
-        }
-        for page in pages {
-            try claim(page.id)
-            guard drawable(DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)) else {
-                throw .invalidNumber(page.id)
-            }
-            try checkNodes(page.nodes)
-        }
     }
 }
