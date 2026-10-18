@@ -1,5 +1,5 @@
 // SuiteOnboardingTests.swift: the live OnboardingFlowing (onboarding OB-7's
-// acceptance row, written first by OB-2; disabled until OB-7's bodies).
+// acceptance row, written first by OB-2).
 import SuiteModel
 import Testing
 
@@ -7,14 +7,14 @@ import Testing
     let flow = SuiteOnboarding()
     let version = SuiteOnboarding.version
 
-    @Test(.disabled("waits on OB-7")) func showsUntilTheCurrentVersionIsDone() {
+    @Test func showsUntilTheCurrentVersionIsDone() {
         #expect(flow.shouldShow(SuitePreferences(), version: version))
         #expect(flow.shouldShow(SuitePreferences(onboardingDoneVersion: version - 1), version: version))
         #expect(!flow.shouldShow(SuitePreferences(onboardingDoneVersion: version), version: version))
         #expect(flow.shouldShow(SuitePreferences(onboardingDoneVersion: version), version: version + 1))
     }
 
-    @Test(.disabled("waits on OB-7")) func finishingRecordsTheVersionAndPutsTheFocusFirst() {
+    @Test func finishingRecordsTheVersionAndPutsTheFocusFirst() {
         let done = flow.finishing(SuitePreferences(revision: 4, units: .millimeters), focus: .photos, version: version)
         #expect(done.onboardingDoneVersion == version && !flow.shouldShow(done, version: version))
         #expect(Array(done.homeOrder.prefix(2)) == [.library, .photo])
@@ -23,7 +23,7 @@ import Testing
         #expect(none.homeOrder == SuiteApp.apps && none.onboardingDoneVersion == version)
     }
 
-    @Test(.disabled("waits on OB-7")) func everyFocusOrderKeepsAllFiveApps() {
+    @Test func everyFocusOrderKeepsAllFiveApps() {
         #expect(SuiteOnboarding.order(for: nil) == SuiteApp.apps)
         for focus in OnboardingFocus.allCases {
             let order = SuiteOnboarding.order(for: focus)
