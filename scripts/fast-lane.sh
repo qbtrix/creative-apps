@@ -62,7 +62,11 @@
 # Linux-only runs (at most MAX_BISECT per red), testing red-triage's confident
 # guess (a `Likely cause: #N ... (Clef p)` comment, p >= CLEF_MIN) first, and
 # posts the first red commit on the dev-red issue and on the owning
-# feature-lead issue (the PR's `Feature:` line), then deletes its probes.
+# feature-lead issue (the PR's `Feature:` line), then deletes its probes. When
+# every failure in the red tip's log is a measured value against a budget
+# (budget_failure), the test can flip at random, so each probe runs up to 3
+# times and is called on 2 of 3, at most MAX_BISECT_BUDGET runs per red, and a
+# value within BUDGET_NEAR of its budget posts the culprit as "likely".
 # `--bisect <good>..<bad> <issue> [<branch>]` runs one such bisect by hand.
 #
 # A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
@@ -215,6 +219,8 @@ SCRATCH="" # the run's scratch clone of REMOTE (scratch)
 RED_LABEL="dev-red"
 BISECT_PREFIX="ci/bisect-"  # ci/bisect-<red7>-<i>: the i-th first-parent commit past the good one
 MAX_BISECT="${FAST_LANE_MAX_BISECT:-8}"  # Linux runs per red, probes counted
+MAX_BISECT_BUDGET="${FAST_LANE_MAX_BISECT_BUDGET:-12}"  # Linux runs per red in vote mode (a budget test), runs counted
+BUDGET_NEAR="0.15"          # a measured value at most this far past its budget makes the culprit "likely"
 CLEF_MIN="0.80"             # a red-triage culprit guess at or above this is probed first
 BISECT_MARK="<!-- lane-bisect"  # the culprit comment's marker: "<!-- lane-bisect <red7> -->"
 # Where integrate fetches and pushes; tests point it at a local bare repo.
@@ -762,13 +768,16 @@ check_verdict() {
       else "red|\($r.details_url // $r.html_url // "")" end' <<<"$runs" 2>/dev/null || echo none
 }
 
-# dispatch_linux <branch>: ci.yml's Linux job alone on <branch>, once per
-# batch_resume call (DISPATCHED): a run takes seconds to show up, and a second
-# dispatch on the same ref would cancel the first (ci.yml's concurrency).
+# dispatch_linux <branch> [<key>]: ci.yml's Linux job alone on <branch>, once
+# per key (default the branch) per batch_resume or red_bisect call
+# (DISPATCHED): a run takes seconds to show up, and a second dispatch on the
+# same ref would cancel the first (ci.yml's concurrency). A vote probe keys on
+# its run count, so its next run can start once the last one is in.
 DISPATCHED=""
 dispatch_linux() {
-  case "$DISPATCHED" in *" $1 "*) log "Linux check on $1 just started; waiting for it to show up"; return 0 ;; esac
-  DISPATCHED+=" $1 "
+  local key="${2:-$1}"
+  case "$DISPATCHED" in *" $key "*) log "Linux check on $1 just started; waiting for it to show up"; return 0 ;; esac
+  DISPATCHED+=" $key "
   write gh workflow run "$CI_FILE" -R "$REPO" -f linux_only=true --ref "$1" || log "could not dispatch the Linux check on $1"
 }
 
@@ -946,6 +955,61 @@ batch_drop() {
   [[ -z "$names" ]] || git -C "$SCRATCH" push -q origin --delete $names 2>/dev/null || log "batch $br: could not delete $names"
 }
 
+# probe_votes <sha>: the Linux runs on <sha> as one vote-mode verdict and the
+# number of runs, tab-separated: none, running, more (no 2 of 3 yet),
+# green|<url> or red|<url> (2 green or 2 red runs; cancelled runs don't vote).
+probe_votes() {
+  local runs
+  runs=$(gh api "repos/$REPO/commits/$1/check-runs?per_page=100" --jq '.check_runs' 2>/dev/null) || { printf 'none\t0\n'; return; }
+  jq -r --arg name "${CI_CHECKS[0]}" '
+    def lc: (. // "") | ascii_downcase;
+    def url: sort_by(.started_at // "") | last | (.details_url // .html_url // "");
+    [ .[] | select(.name == $name and .conclusion != "action_required") ] as $all
+    | [ $all[] | select((.status | lc) == "completed" and (.conclusion | lc) == "success") ] as $g
+    | [ $all[] | select((.status | lc) == "completed" and ((.conclusion | lc) == "failure" or (.conclusion | lc) == "timed_out")) ] as $r
+    | if ($all | length) == 0 then "none"
+      elif ($r | length) >= 2 then "red|\($r | url)"
+      elif ($g | length) >= 2 then "green|\($g | url)"
+      elif any($all[]; (.status | lc) != "completed") then "running"
+      else "more" end
+    | "\(.)\t\($all | length)"' <<<"$runs" 2>/dev/null || printf 'none\t0\n'
+}
+
+# budget_failure: reads a Linux job's failed-step log on stdin. When every
+# issue a test recorded (swift-testing's "recorded an issue" lines; a known
+# issue doesn't count) is a numeric comparison in a budget test (the line
+# names a budget, median or p95), like
+#   ... recorded an issue at LibraryLoupeBudgetTests.swift:59:5: Expectation failed: (cost.median → 1.046542) <= (1 * scale → 1.0)
+# prints "<measured> <op> <budget>" for the first; else nothing.
+budget_failure() {
+  local line got first="" n=0
+  while IFS= read -r line; do
+    [[ "$line" == *"recorded an issue"* ]] || continue
+    n=$((n + 1))
+    grep -qiE 'budget|median|p9[05]' <<<"$line" || return 0
+    got=$(sed -nE 's/.*Expectation failed: \(.* → (-?[0-9.]+)\) (<=|<|>=|>) (\(.* → )?(-?[0-9.]+)\)?[[:space:]]*$/\1 \2 \4/p' <<<"$line")
+    [[ -n "$got" ]] || return 0
+    [[ -n "$first" ]] || first="$got"
+  done
+  (( n )) && echo "$first"
+  return 0
+}
+
+# budget_near <measured> <op> <budget>: true when the value is past its
+# budget by at most BUDGET_NEAR of it (a ceiling for < and <=, a floor for > and >=).
+budget_near() {
+  awk -v m="$1" -v op="$2" -v b="$3" -v f="$BUDGET_NEAR" 'BEGIN {
+    if (op ~ /^</) exit !(m + 0 > b + 0 && m + 0 <= (b + 0) * (1 + f))
+    exit !(m + 0 < b + 0 && m + 0 >= (b + 0) * (1 - f)) }'
+}
+
+# failure_log <verdict>: the failed steps' log of the job a red|<job url>
+# verdict names; nothing when it has no job id or the log can't be read.
+failure_log() {
+  [[ "$1" =~ /job/([0-9]+) ]] || return 0
+  gh run view --job "${BASH_REMATCH[1]}" --log-failed -R "$REPO" 2>/dev/null || true
+}
+
 # red_sweep: when a dev-red issue for a red Linux job is open, bisects its
 # culprit range. Probes an earlier sweep left pin the red they bisect, since
 # ci.yml rewrites the issue body for every newer red run.
@@ -971,10 +1035,12 @@ red_sweep() {
 # first (its parent, then itself); hi = lo + 1 names the culprit, which is
 # posted on <issue> (with BISECT_MARK, so an issue with a verdict is never
 # bisected again, whichever red sha its range names now) and on
-# the owning feature-lead issue, and the probes are deleted.
+# the owning feature-lead issue, and the probes are deleted. Vote mode (the
+# header's rung 2c paragraph) is chosen once per call from the tip's failed log.
 red_bisect() {
   local issue="$1" good="$2" bad="$3" branch="$4" d k i sha v lo hi mid red7 hint=0 waited=0 line probes n p
-  local chain=() verd=()
+  local budget="" mode="" cap="$MAX_BISECT" used nr runs
+  local chain=() verd=() nruns=()
   DISPATCHED=""
   if ! scratch "$branch" "$good"; then log "bisect: could not fetch $branch and $good from $REMOTE"; return; fi
   d="$SCRATCH"
@@ -1001,16 +1067,31 @@ red_bisect() {
       (( hint )) && log "bisect: red-triage names #$n (Clef $p), commit $hint of $k; probing around it first"
     fi
   fi
+  budget=$(failure_log "$(check_verdict "$bad")" | budget_failure)
+  if [[ -n "$budget" ]]; then
+    cap="$MAX_BISECT_BUDGET" mode="budget $budget"
+    # shellcheck disable=SC2086 # three words: measured, op, budget
+    if budget_near $budget; then mode="likely $budget"; fi
+    log "bisect: $red7 fails only a budget test ($budget); each probe votes 2 of 3, at most $cap runs"
+  fi
   while :; do
-    for (( i = 0; i <= k; i++ )); do verd[i]=""; done
+    for (( i = 0; i <= k; i++ )); do verd[i]=""; nruns[i]=0; done
+    runs=0
     verd[k]=$(check_verdict "$bad")
     probes=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}${red7}-*" 2>/dev/null | sed 's:[[:space:]]*refs/heads/: :' || true)
     while read -r sha line; do
       [[ -n "$line" ]] || continue
       i="${line##*-}"
       (( i >= 1 && i < k )) && [[ "${chain[i]}" == "$sha" ]] || continue
-      verd[i]=$(check_verdict "$sha")
+      if [[ -n "$budget" ]]; then
+        v=$(probe_votes "$sha"); nr="${v##*$'\t'}"
+        verd[i]="${v%%$'\t'*}" nruns[i]="$nr" runs=$((runs + nr))
+      else
+        verd[i]=$(check_verdict "$sha")
+      fi
     done <<<"$probes"
+    used=$(grep -c . <<<"$probes" || true)
+    [[ -z "$budget" ]] || used="$runs"
     case "${verd[k]}" in
       green*) log "bisect: $red7 is green now (${verd[k]#green|}); nothing to find"; bisect_drop "$red7"; return ;;
     esac
@@ -1019,40 +1100,55 @@ red_bisect() {
       case "${verd[i]}" in green*) lo=$i ;; red*) (( i < hi )) && hi=$i ;; esac
     done
     if (( hi == lo + 1 )); then
-      bisect_post "$issue" "$red7" "$lo" "$hi" "$(grep -c . <<<"$probes" || true)" "${verd[lo]}" "${verd[hi]}" "${chain[@]}"
+      bisect_post "$issue" "$red7" "$lo" "$hi" "$used" "${verd[lo]}" "${verd[hi]}" "$mode" "${chain[@]}"
       bisect_drop "$red7"; return
     fi
     if (( DRY_RUN )); then log "dry-run: bisect $red7 on #$issue: $k commits, green prefix $lo, red from $hi"; return; fi
-    if (( $(grep -c . <<<"$probes" || true) >= MAX_BISECT )); then
-      log "bisect: $red7 used $MAX_BISECT runs; stopping between $lo and $hi"
-      write gh issue comment "$issue" -R "$REPO" --body "Bisect on $BASE_BRANCH stopped after $MAX_BISECT Linux runs: the Linux job is green at ${chain[lo]:0:7} and red at ${chain[hi]:0:7}; the culprit is one of the $((hi - lo)) commits between them (git log --first-parent ${chain[lo]:0:7}..${chain[hi]:0:7}). $BISECT_MARK $red7 -->"
+    if (( used >= cap )); then
+      log "bisect: $red7 used $cap runs; stopping between $lo and $hi"
+      write gh issue comment "$issue" -R "$REPO" --body "Bisect on $BASE_BRANCH stopped after $cap Linux runs: the Linux job is green at ${chain[lo]:0:7} and red at ${chain[hi]:0:7}; the culprit is one of the $((hi - lo)) commits between them (git log --first-parent ${chain[lo]:0:7}..${chain[hi]:0:7}). $BISECT_MARK $red7 -->"
       bisect_drop "$red7"; return
     fi
-    if (( hint > lo && hint <= hi )) && (( hint - 1 > lo )) && [[ -z "${verd[hint - 1]}" ]]; then mid=$((hint - 1))
+    # A probe still voting is finished before a new one opens.
+    mid=""
+    for (( i = lo + 1; i < hi; i++ )); do [[ "${verd[i]}" != more ]] || { mid=$i; break; }; done
+    if [[ -n "$mid" ]]; then :
+    elif (( hint > lo && hint <= hi )) && (( hint - 1 > lo )) && [[ -z "${verd[hint - 1]}" ]]; then mid=$((hint - 1))
     elif (( hint > lo && hint < hi )) && [[ -z "${verd[hint]}" ]]; then mid=$hint
     else mid=$(( (lo + hi) / 2 )); fi
+    p="${BISECT_PREFIX}${red7}-$mid"
     case "${verd[mid]}" in
       running) log "bisect: $red7 probe $mid running" ;;
       "")
-        if git -C "$d" push -q origin "${chain[mid]}:refs/heads/${BISECT_PREFIX}${red7}-$mid" 2>/dev/null; then
-          log "bisect: $red7 probing commit $mid of $k (${chain[mid]:0:7})"; dispatch_linux "${BISECT_PREFIX}${red7}-$mid"
+        if git -C "$d" push -q origin "${chain[mid]}:refs/heads/$p" 2>/dev/null; then
+          log "bisect: $red7 probing commit $mid of $k (${chain[mid]:0:7})"; dispatch_linux "$p" "$p#0"
         else log "bisect: could not push probe $mid; the next sweep tries again"; fi ;;
-      *) dispatch_linux "${BISECT_PREFIX}${red7}-$mid" ;;
+      *) dispatch_linux "$p" "$p#${nruns[mid]}" ;;
     esac
     if (( waited >= BATCH_WAIT )); then return; fi
     sleep "$BATCH_POLL"; waited=$(( waited + BATCH_POLL ))
   done
 }
 
-# bisect_post <issue> <red7> <lo> <hi> <runs> <green verdict> <red verdict> <chain...>:
-# the culprit on the dev-red issue and on the owning feature-lead issue.
+# bisect_post <issue> <red7> <lo> <hi> <runs> <green verdict> <red verdict>
+# <mode> <chain...>: the culprit on the dev-red issue and on the owning
+# feature-lead issue. <mode> is empty, "budget <m> <op> <b>" (vote mode) or
+# "likely <m> <op> <b>" (vote mode, the value near its budget: not certain).
 bisect_post() {
-  local issue="$1" red7="$2" lo="$3" hi="$4" runs="$5" gv="$6" rv="$7"; shift 7
-  local chain=("$@") c subj n body fid lead
+  local issue="$1" red7="$2" lo="$3" hi="$4" runs="$5" gv="$6" rv="$7" mode="$8"; shift 8
+  local chain=("$@") c subj n body fid lead head="Bisect:" is="is" note="" m b
   c="${chain[hi]}"; subj=$(git -C "$SCRATCH" log -1 --format=%s "$c")
   n=$(grep -oE '\(#[0-9]+\)$' <<<"$subj" | tr -dc 0-9 || true)
-  log "bisect: culprit ${c:0:7} $subj (green at ${chain[lo]:0:7}, $runs probes)"
-  write gh issue comment "$issue" -R "$REPO" --body "Bisect: ${c:0:7} $subj is the first commit on $BASE_BRANCH whose Linux job fails. Green at ${chain[lo]:0:7} (${gv#green|}), red at ${c:0:7} (${rv#red|}); $runs Linux run(s) on ci/bisect branches, now deleted. $BISECT_MARK $red7 -->"
+  if [[ -n "$mode" ]]; then
+    read -r _ m _ b <<<"$mode"
+    note=" The failing test is a timing budget test (measured $m against $b), so each probe ran up to 3 times and was called on 2 of 3."
+    if [[ "$mode" == likely* ]]; then
+      head="Bisect (likely):" is="is likely"
+      note+=" The value measured $m against $b, within $(awk -v f="$BUDGET_NEAR" 'BEGIN { print f * 100 }')% of it, so the test sits on its line: treat this as likely, not certain."
+    fi
+  fi
+  log "bisect: culprit ${c:0:7} $subj (green at ${chain[lo]:0:7}, $runs runs${mode:+, $mode})"
+  write gh issue comment "$issue" -R "$REPO" --body "$head ${c:0:7} $subj $is the first commit on $BASE_BRANCH whose Linux job fails. Green at ${chain[lo]:0:7} (${gv#green|}), red at ${c:0:7} (${rv#red|}); $runs Linux run(s) on ci/bisect branches, now deleted.$note $BISECT_MARK $red7 -->"
   [[ -n "$n" ]] || return 0
   body=$(gh api "repos/$REPO/pulls/$n" --jq '.body // ""' 2>/dev/null) || return 0
   fid=$(grep -E '^[[:space:]]*\**Feature:' <<<"$body" | head -1 | sed -E 's/^[[:space:]]*\**Feature:\**[[:space:]]*`?#?//; s/`.*//; s/[[:space:]].*//' || true)
@@ -1060,7 +1156,7 @@ bisect_post() {
   lead=$(gh api "search/issues?q=repo:$REPO+label:$FEATURE_ISSUE_LABEL+state:open+in:title+%22Feature:+$fid%22" \
     --jq "[.items[] | select(.title == \"Feature: $fid\" or (.title | endswith(\"($fid)\")))] | first // empty | .number" 2>/dev/null) || return 0
   [[ -n "$lead" ]] || { log "bisect: no open $FEATURE_ISSUE_LABEL issue for $fid"; return 0; }
-  write gh issue comment "$lead" -R "$REPO" --body "Bisect on dev-red #$issue: your PR #$n ($subj) is the first commit that turns $BASE_BRANCH's Linux job red: ${rv#red|}. $BISECT_MARK $red7 -->"
+  write gh issue comment "$lead" -R "$REPO" --body "Bisect on dev-red #$issue: your PR #$n ($subj) $is the first commit that turns $BASE_BRANCH's Linux job red: ${rv#red|}. $BISECT_MARK $red7 -->"
 }
 
 # bisect_drop <red7>: deletes that red's probe branches at REMOTE.
