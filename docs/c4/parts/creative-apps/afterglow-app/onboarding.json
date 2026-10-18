@@ -1,7 +1,7 @@
 {
   "id": "onboarding",
   "name": "Onboarding",
-  "description": "Three first-launch pages.",
+  "description": "The Welcome to AfterGlow window over SuiteModel's OnboardingModel: three first-launch pages (page 1 shows the five apps' marks and names, the body and the Rendering line) with Skip and Continue. The scene presents itself at launch when OnboardingLaunch says so, is never restored, and closing it is Skip. Help > Welcome to AfterGlow (LauncherCommands+Onboarding, in the launcher scene) reopens it.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/AfterGlowApp/Onboarding*.swift"

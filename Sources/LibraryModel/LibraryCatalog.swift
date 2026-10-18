@@ -67,10 +67,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var order: [String] = []  // the shown ids in sort order (LibraryOrder.swift)
     public internal(set) var importState = ImportState.idle
     public internal(set) var importNotice: ImportNotice?
-    public internal(set) var thumbnails: [String: DisplayImage] = [:]
-    public internal(set) var thumbnailLongSide = 512
-    public internal(set) var pendingThumbnails: [String: ThumbnailRequest] = [:]
-    var thumbnailPositions = ThumbnailPositions()  // a lookup cache, left out of ==
+    /// Its own thumbnails; `thumbnails` and the rest forward to it (LibraryThumbnails.swift).
+    public internal(set) var thumbnailCache = LibraryThumbnailCache()
     public internal(set) var autoAdvance = true
     public internal(set) var loupeZoom = LoupeZoom.fit
     public internal(set) var loupeRender: RenderedPhoto?
@@ -106,8 +104,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.history == rhs.history && lhs.order == rhs.order
             && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
-            && lhs.thumbnails == rhs.thumbnails && lhs.thumbnailLongSide == rhs.thumbnailLongSide
-            && lhs.pendingThumbnails == rhs.pendingThumbnails && lhs.autoAdvance == rhs.autoAdvance
+            && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
             && lhs.cullError == rhs.cullError && lhs.exportState == rhs.exportState
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeError == rhs.loupeError

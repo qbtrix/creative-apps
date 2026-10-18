@@ -19,5 +19,12 @@
     "find": "    public mutating func clearKeySelection() {\n        keySelection.clear()\n",
     "replace": "    public mutating func clearKeySelection() {\n",
     "tests": "HaloKeySelectionTests|HaloProjectTests"
+  },
+  {
+    "label": "the live pick keeps stale and other-layer keys: ⌫ deletes keys off the selected layer's tracks",
+    "file": "Sources/HaloModel/HaloKeySelection.swift",
+    "find": "        live.prune { alive.contains($0) }\n",
+    "replace": "",
+    "tests": "HaloKeySelectionTests"
   }
 ]

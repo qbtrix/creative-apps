@@ -1,8 +1,8 @@
 // FlareExportTests.swift: MJ-FX1's run transitions over the kernel's ExportRun
 // (docs/blueprints/flare/features/flare-export.md, FX-2 and FX-4). `shape`: Flare's ExportState is the kernel's
 // ExportRun<ExportOptions>, and with nothing open every transition changes nothing. The rest are MJ-FX1 and the FX-4
-// mutations; the ones that read FX-11's setters, `exportProblem`, `exportSummary` or the refusal sentences wait on
-// FX-11, and the others place the run directly so they hold FX-4's transitions on their own.
+// mutations; the ones that read FX-11's setters, `exportProblem`, `exportSummary` or the refusal sentences go through
+// them, and the others place the run directly so they hold FX-4's transitions on their own.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -42,7 +42,7 @@ struct FlareExportTests {
         #expect(Set(states).count == 4 && !states.contains(.idle))
     }
 
-    @Test(.disabled("waits on FX-11")) func walk() {
+    @Test func walk() {
         var w = showcase()
         let opened = w.openExport()
         #expect(opened)
@@ -60,7 +60,7 @@ struct FlareExportTests {
         #expect(w.exportState == .idle && w.exportingOptions == nil)
     }
 
-    @Test(.disabled("waits on FX-11")) func startRefusesABadRange() {
+    @Test func startRefusesABadRange() {
         var w = editingSevenPNGs()
         w.setExportFrames(0...90)
         let before = w
@@ -83,7 +83,7 @@ struct FlareExportTests {
         #expect(w.exportState == .idle && w.exportingOptions == nil)
     }
 
-    @Test(.disabled("waits on FX-11")) func aFailureCarriesTheSheetsSentence() {
+    @Test func aFailureCarriesTheSheetsSentence() {
         var w = runningSevenPNGs()
         w.endExport(.failure(ExportWriteRefusal.alreadyThere(name: "scene-1.svg", folder: "Exports")))
         #expect(w.exportState == .failed(sevenPNGs, "scene-1.svg is already in Exports. Choose another folder."))

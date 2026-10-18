@@ -18,7 +18,7 @@ tests written before their code, and mutation plans for Model behaviour.
 | 2 | Real grid thumbnails | `thumbnails.md` | #33 | spine, #779 (S-L2), #333 | file when ready | built |
 | 2 | Cull from the keyboard with undo and Auto Advance | `cull.md` | #211, #426, #724 (keys) | spine, #333 | #1345 | built |
 | 2 | The catalog file | `persist.md` | #212 | spine, #333 | file when ready | built |
-| 2 | The loupe on CanvasViewport | `loupe-viewport.md` | #724 (zoom, real size) | spine, #333 | file when ready | planned |
+| 2 | The loupe on CanvasViewport | `loupe-viewport.md` | #724 (zoom, real size) | spine, #333 | file when ready | built |
 | 3 | Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings | `develop.md` | #32, #423 | spine, persist, thumbnails, loupe-viewport; the spine follow-up (inspector pass-through) for DV-9; a creative-core issue (vibrance, saturation) and its bump for DV-12; #782 for P3 | file when ready | planned |
 | 3 | Status pills, inspector header (#185), the remaining identifiers (#291), layout tests | `status-and-layout.md` | #185, #291 | spine, thumbnails, loupe-viewport; SuiteUI #1184 (S-L7); two gaps filed at stage 1 (the spine's preview-only status bar, MetadataInspector's own header) | file when ready | planned |
 | 4 | Crop and straighten in the loupe, applied in render, thumbnail and export | `crop.md` | #425 | develop; slice CR-a first (contract); CR-5 and CR-6 wait on the spine follow-up (LibraryMenu.Photo.crop merged by the window) and develop's inspector follow-up; P5 (CR-8) waits on #782; CR-10 waits on a creative-core issue to file (horizon angle) and its bump | file when ready | planned |

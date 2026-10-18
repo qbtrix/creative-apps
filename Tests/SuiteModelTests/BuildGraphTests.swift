@@ -119,6 +119,17 @@ enum BuildGraph {
             == ["HaloApp missing from Package.swift"])
     }
 
+    /// SuiteUI and SuiteKernel use FlareCore's Rect and Point, and a framework
+    /// doesn't re-export what it links, so each links CreativeEngines itself (#2801).
+    @Test func theFrameworksThatUseEngineGeometryLinkTheEngines() throws {
+        let project = try Self.read("project.yml")
+        for name in ["SuiteUI", "SuiteKernel"] {
+            let block = BuildGraph.block(name, in: project)
+            #expect(block.contains { $0.contains("dependencies") && $0.contains("{ target: CreativeEngines }") },
+                    "\(name) doesn't link CreativeEngines")
+        }
+    }
+
     @Test func afterGlowJourneyBundleCompilesTheSuiteValues() throws {
         let block = BuildGraph.block("AfterGlowJourneyTests", in: try Self.read("project.yml"))
         #expect(block.contains { $0.contains("Journey") && $0.contains("templates") })

@@ -3,7 +3,8 @@
 // and add button, since the sidebar List does not render here. A new
 // document with three layers, one hidden and one locked; `bounce` with Shadow
 // hidden (Background is locked); two scenes; and `empty`, whose LAYERS has no
-// rows and its New Layer button.
+// rows and its New Layer button. `rowsFromTree` checks LAYERS is the
+// kernel's `layerRows` (adopt-kernel-layers AL-f2).
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -44,6 +45,16 @@ import Testing
         let model = fixture("empty")
         #expect(model.layers.isEmpty && model.selectedScene != nil)
         try snapshot(LayersRows(model: model), name: "flare-sidebar-empty", scheme: .light)
+    }
+
+    @Test func rowsFromTree() {
+        var model = fixture("bounce")
+        model.toggleLayerFlag("shadow", .visible)
+        let layers = SidebarSection.flare(model, perform: { _ in }).first { $0.id == "layers" }?.items ?? []
+        #expect(layers.map(\.id) == model.layerRows.map(\.id) && layers.map(\.title) == ["Ball", "Shadow", "Background"])
+        let flags = layers.map { $0.toggles.map(\.isOn) }
+        #expect(flags == model.layerRows.map { [!$0.isHidden, $0.isLocked] })
+        #expect(layers.first { $0.id == "shadow" }?.toggles.first?.title == "Show Layer")
     }
 
     private func fixture(_ name: String) -> FlareWorkspace {

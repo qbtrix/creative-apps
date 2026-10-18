@@ -1,19 +1,17 @@
 // PhotoHistory.swift: Photo's undo and redo, a thin adapter over SuiteKernel's
-// History, where the stack, the step ids and the open run live; the adapter
-// adds the base step's name. Every document edit records one
-// step: a name ("Paint", "Crop") and the change that puts the document back
-// (PhotoEdit). Undoing applies that change and keeps its inverse for Redo,
-// and the reverse. Pixel edits keep only the tiles they changed, as they were
-// (undo swaps them back); layer property and order changes keep the layer list, which
-// holds no pixels; edits that add, remove or resize layers keep the whole
-// stack. A run of edits with the same coalescing key (one slider's drag, one
-// layer's opacity) is one step, until endAdjust closes it at the gesture's end (an undo
-// or redo closes it too). A new edit clears Redo; the history keeps the
-// last `limit` steps. The history list reads both stacks as one row of named
-// steps, from how the image began ("New Image", "Open") to the last redo, and
-// jumping to a step undoes or redoes up to it. Every step has an id from a
-// counter that never repeats; `currentStepID` names the state the image is at
-// and `isDirty` compares it with the step last saved, opened or created.
+// History, which keeps the steps, their ids, the open run, the limit and the
+// jumps. Every document edit records one step: a name ("Paint", "Crop") and
+// the change that puts the document back (PhotoEdit), which `apply` makes and
+// inverts. Pixel edits keep only the tiles they changed, as they were (undo
+// swaps them back); layer property and order changes keep the layer list,
+// which holds no pixels; edits that add, remove or resize layers keep the
+// whole stack. A run of edits with the same coalescing key (one slider's drag,
+// one layer's opacity) is one step until endAdjust closes it at the gesture's
+// end. The adapter keeps only what the kernel can't: the base step's name
+// ("New Image", "Open", or the newest step the 50-step limit dropped), the
+// open run's key it needs to tell a fold from a drop, and the mid-drag guards.
+// `isDirty` compares the kernel's `currentStepID` with the step last saved,
+// opened or created.
 // Linux-safe.
 import CoreRaster
 import SuiteKernel
@@ -62,11 +60,11 @@ struct PhotoHistory: Sendable {
 
 extension PhotoHistory: Equatable {
     /// Equal when they show the same steps at the same place and run (History
-    /// isn't Equatable); the workspace's `revision` tells different edits apart.
+    /// isn't Equatable; the steps and index already settle canUndo and
+    /// canRedo); the workspace's `revision` tells different edits apart.
     static func == (lhs: PhotoHistory, rhs: PhotoHistory) -> Bool {
         lhs.baseName == rhs.baseName && lhs.kernel.steps == rhs.kernel.steps
             && lhs.kernel.index == rhs.kernel.index && lhs.kernel.currentStepID == rhs.kernel.currentStepID
-            && lhs.kernel.canUndo == rhs.kernel.canUndo && lhs.kernel.canRedo == rhs.kernel.canRedo
             && lhs.runKey == rhs.runKey
     }
 }

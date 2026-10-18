@@ -62,7 +62,8 @@ struct LibraryWindow: View {
         ) {
             VStack(spacing: 0) {
                 LibraryBrowser(
-                    model: model, menu: menu, onSelect: { model.select($0) }, onOpen: { model.open($0) },
+                    // The store goes down unread, so a thumbnail pass reruns the grid, not this body.
+                    model: model, menu: menu, thumbnails: areas.thumbnails.store, onSelect: { model.select($0) }, onOpen: { model.open($0) },
                     onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
                     // On the content, so it hears keys only while the grid or the loupe has focus.
                     .onKeyPress(phases: .down) { press in route(press) }
