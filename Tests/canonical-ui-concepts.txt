@@ -1,0 +1,26 @@
+# Tests/canonical-ui-concepts.txt: the UI pieces that live in SuiteUI, never
+# app-local (docs/factory/lead.md rules 16 and 20). One line per concept,
+# `Concept: Stem Stem ...`. A stem matches an app View struct's name (and an
+# added file's name in the fast lane) at a CamelCase boundary with an optional
+# plural s. The first concept that matches, in this order, wins, so put the
+# narrower one first (PhotoMergeNote is BusyNote, not Notice). The concept name
+# is what an `Allow-Dup-View: <concept> <reason>` PR line names.
+# Read by scripts/check-dup-views; the fast lane reads main's copy.
+Sheet: Sheet
+Transport: Transport
+SaveStatus: SaveStatus
+LayerList: LayerList LayerRow LayerTree LayersPanel
+MenuCommand: MenuItem CommandItem
+Probe: Element
+BusyNote: Progress WorkNote MergeNote
+Notice: Notice Caption Hint Note
+StatusBar: StatusBar StatusLine
+Header: Header
+Easing: Easing
+KeyedRow: PropertyRow GeometryRow
+CanvasMark: SelectionBox MarqueeMark HoverMark
+Swatch: Swatch ColorWell
+Ruler: Ruler
+Zoom: ZoomControl ZoomBar
+EmptyState: EmptyState Placeholder
+ToolPalette: ToolPalette ToolRail Palette

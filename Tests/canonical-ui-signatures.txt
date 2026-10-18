@@ -1,0 +1,21 @@
+# Tests/canonical-ui-signatures.txt: body shapes that mean "this is a copy of a
+# SuiteUI piece" (docs/factory/lead.md rules 16 and 20). One line per signature:
+# `id | regex ; regex ; ... | use <SuiteUI component>`. An app View hits when its
+# body (comments removed, string literals kept) matches every regex. An id
+# written `file:<id>` matches the whole file instead of one view. Fields are
+# split on " | " and regexes on " ; ", so a regex may hold a bare |.
+# Read by scripts/check-dup-views; the id is what `Allow-Dup-View:` names.
+sheet-buttons | \.keyboardShortcut\(\.cancelAction\) | use SuiteSheet
+busy-glass | GlassPanel\s*\{ ; ProgressView\( | use BusyNote
+error-label | Label\( ; SuiteColor\.stateError | use NoticeRow / InspectorNote
+caps-header | SuiteFont\.sectionCaps ; \.textCase\(\.uppercase\) | use InspectorSectionHeader
+probe-element | Color\.clear ; \.accessibilityElement\(\) ; \.accessibilityIdentifier\( | use ProbeElement
+keyed-row | InspectorSliderRow\( ; KeyframeButton\( | use KeyframedSliderRow
+easing | CurveEditor\( ; (ChoiceChips|PresetGrid)\( | use EasingEditor
+accent-outline | \.stroke\(SuiteColor\.accent | use SelectionOutline
+selected-fill | SuiteColor\.(selectedTint|selectedWell) | use SidebarRow / ChoiceChips
+preview-pill | \.statusPill\(\.warning\) | use ViewerStatusBar(isPreview:)
+transport | backward\.frame\.fill ; forward\.frame\.fill | use TransportCapsule
+menu-item | \.keyboardShortcut\(shortcut\) ; \.disabled\( | use MenuCommand
+pending-commit | @State private var (pending|draft\w*|scrubbed|start)\b ; onEnd: | use InspectorSliderRow(commit: .onEnd)
+file:app-inventory | PreferenceKey ; \[ControlEntry\] | use .suiteControl
