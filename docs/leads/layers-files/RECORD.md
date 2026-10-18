@@ -53,3 +53,7 @@ Next: green full dev CI (dev-red #2303 is a Design perf test, not ours), then Be
 - Red journeys filed after the review were relabelled gap (rule 11), each pointing to its earlier gap: #2376-#2388 and #2118.
 - Belt-Contact-Sheet: https://github.com/qbtrix/creative-apps/issues/1516#issuecomment-6243313577
 - Lead branch rebuilt on origin/main 59c435a6 with this record only (brief rule 2).
+
+## Contact sheet wait (00:40)
+
+Every full dev run since 21:27 has been cancelled before its macOS job uploaded ui-screens: each new merge to dev starts a full run that cancels the one in flight, and the macOS job needs about 90 minutes. Dev went red at 00:29 (#2509, Linux, range main..d3cd7d9f, design-line PRs), which is not this feature's to fix. The contact sheet posts from the first full run that completes green with ui-screens.
