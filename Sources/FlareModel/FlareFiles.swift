@@ -2,12 +2,12 @@
 // state first (`beginOpen`), decodes off the main thread (`decodeFile` is pure), then lands through `load`
 // (`finishOpen`); a bad file leaves the open document as it was and says why in `loadState`, with section 3.3's
 // text for each FormatError. A save hands the app the file's bytes (`saveData`), and the app reports the write
-// back (`didSave`, `saveFailed`). `isDirty` compares the document with the one last opened or saved, so undoing
-// back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`,
+// back (`didSave`, `saveFailed`). `isDirty` is the kernel session's: dirty while the document differs from the one
+// last opened or saved, so undoing back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`,
 // `clearRecent`). Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
 // (`autosaveDue`), and `recoveryData()` is the dirty document's file bytes; `restoreRecovery` lands a recovered
-// document again as unsaved, untitled work. The app does the file panels and the disk. Dirty and due read through
-// the kernel's session, and a save ends the open run (FlareFiles+Kernel.swift).
+// document again as unsaved, untitled work. The app does the file panels and the disk. Dirty, due and the launch
+// offer are the kernel session's, and a save ends the open run (FlareFiles+Kernel.swift); Flare keeps no copy.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
