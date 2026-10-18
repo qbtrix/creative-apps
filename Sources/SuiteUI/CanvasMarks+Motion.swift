@@ -17,9 +17,9 @@ public struct MotionPathMarks: View {
     private let zoom: Double
 
     /// The marks never take a click: the canvas gesture under them does.
-    public static let takesHits = false
+    public nonisolated static let takesHits = false
     /// The marks are hidden from accessibility; an app adds its own element.
-    public static let hiddenFromAccessibility = true
+    public nonisolated static let hiddenFromAccessibility = true
 
     /// `points` in document pixels, one per frame in frame order; `zoom` in points per pixel.
     public init(points: [CGPoint], zoom: Double) {
@@ -28,18 +28,18 @@ public struct MotionPathMarks: View {
     }
 
     /// `zoom`, or 1 when it isn't a positive finite number.
-    public static func scale(_ zoom: Double) -> Double {
+    public nonisolated static func scale(_ zoom: Double) -> Double {
         zoom.isFinite && zoom > 0 ? zoom : 1
     }
 
     /// The frame points in view points at `zoom`, in order; points that aren't finite are dropped.
-    public static func line(points: [CGPoint], zoom: Double) -> [CGPoint] {
+    public nonisolated static func line(points: [CGPoint], zoom: Double) -> [CGPoint] {
         let factor = Self.scale(zoom)
         return points.filter { $0.x.isFinite && $0.y.isFinite }.map { CGPoint(x: $0.x * factor, y: $0.y * factor) }
     }
 
     /// One `anchor`-sized dot per frame point, centred on it, the same size at every zoom.
-    public static func dots(points: [CGPoint], zoom: Double) -> [CGRect] {
+    public nonisolated static func dots(points: [CGPoint], zoom: Double) -> [CGRect] {
         let side = SuiteSize.anchor
         return line(points: points, zoom: zoom).map {
             CGRect(x: $0.x - side / 2, y: $0.y - side / 2, width: side, height: side)
@@ -73,7 +73,7 @@ public struct GhostLayer<Content: View>: View {
     }
 
     /// `opacity` kept in 0...1; NaN is 0, so a bad value draws nothing.
-    public static func clamped(_ opacity: Double) -> Double {
+    public nonisolated static func clamped(_ opacity: Double) -> Double {
         opacity.isNaN ? 0 : min(max(opacity, 0), 1)
     }
 

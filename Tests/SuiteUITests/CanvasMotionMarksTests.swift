@@ -22,7 +22,7 @@ import Testing
 }
 
 @Test func theMotionPathDropsPointsThatAreNotFiniteAndReadsABadZoomAsOne() {
-    let points = [CGPoint(x: 3, y: 4), CGPoint(x: .nan, y: 1), CGPoint(x: 1, y: .infinity), CGPoint(x: 6, y: 8)]
+    let points = [CGPoint(x: 3, y: 4), CGPoint(x: CGFloat.nan, y: 1), CGPoint(x: 1, y: CGFloat.infinity), CGPoint(x: 6, y: 8)]
     #expect(MotionPathMarks.line(points: points, zoom: 2) == [CGPoint(x: 6, y: 8), CGPoint(x: 12, y: 16)])
     for zoom in [0, -2, Double.nan, .infinity] {
         #expect(MotionPathMarks.scale(zoom) == 1)
@@ -36,7 +36,7 @@ import Testing
     #expect(MotionPathMarks.hiddenFromAccessibility)
 }
 
-@Test func theGhostKeepsItsOpacityInZeroToOne() {
+@MainActor @Test func theGhostKeepsItsOpacityInZeroToOne() {
     #expect(GhostLayer(content: Color.clear, opacity: 0.4).opacity == 0.4)
     #expect(GhostLayer<Color>.clamped(-1) == 0 && GhostLayer<Color>.clamped(2) == 1)
     #expect(GhostLayer<Color>.clamped(.nan) == 0 && GhostLayer<Color>.clamped(.infinity) == 1)
