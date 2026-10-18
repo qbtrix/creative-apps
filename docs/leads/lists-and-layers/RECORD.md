@@ -2,9 +2,9 @@
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: 5 goldens (checks in the lane)
+Stage: 5 goldens (checks on dev)
 Base: 2e27b8db (origin/dev)
-Next: #2917 waits on its macOS build; then sidebar actuals from a scoped suiteui run, baselines PR, LL-17 feature-done
+Next: full CI 39161458093 on dev 0e4e913 (queued) writes golden-new/sidebar actuals; commit them, then LL-17 feature-done
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
