@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-18T15:16Z	3	stage-start	#1941	relaunch act-1a14f91ff8b-nq4v base 5a8c6fa; wave A: AB-p1
 2026-10-18T20:09Z	3	stage-start	#1941	relaunch act-1a1509b245f-653k base b1526f3e; AB-p1 queued for the next builder slot
 2026-10-18T21:13Z	3	stage-start	wave B	AB-p1 builder started
+2026-10-18T21:32Z	3	pr-opened	#3011	AB-p1 Photo brush adapter (Model half)
