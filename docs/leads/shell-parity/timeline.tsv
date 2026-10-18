@@ -173,3 +173,4 @@ utc	stage	event	ref	note
 2026-10-18T20:49:19Z	shell-parity	check	dev@ae6e7c81	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 15 design findings open (none ours)
 2026-10-18T21:06:28Z	shell-parity	check	dev@203e7d91	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 12 design findings open (none ours)
 2026-10-18T21:24:58Z	shell-parity	check	dev@b40c77f6	blocked: #2524 #2263 open; gap #1573 open; new finding #3007 (testShellDark 3pt over visible frame) triaged as SuiteUI #2524; no dev-red; 12 design findings open
+2026-10-18T21:42:16Z	shell-parity	check	dev@2aad2f98	blocked: #2524 #2263 open; gap #1573 open; #3007 tracks testShellDark (=#2524); no dev-red; 12 design findings open

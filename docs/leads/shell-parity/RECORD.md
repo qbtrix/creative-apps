@@ -154,3 +154,4 @@ Next: nothing. Feature done: DP-a done (38956034097), DP-b done with gaps #1452 
 - 2026-10-18T20:49:19Z check: blocked: #2524 #2263 open; gap #1573 open; no dev-red; 15 design findings open (none ours)
 - 2026-10-18T21:06:28Z check: blocked: #2524 #2263 open; gap #1573 open; no dev-red; 12 design findings open (none ours)
 - 2026-10-18T21:24:58Z check: blocked: #2524 #2263 open; gap #1573 open; new finding #3007 (testShellDark 3pt over visible frame) triaged as SuiteUI #2524; no dev-red; 12 design findings open
+- 2026-10-18T21:42:16Z check: blocked: #2524 #2263 open; gap #1573 open; #3007 tracks testShellDark (=#2524); no dev-red; 12 design findings open
