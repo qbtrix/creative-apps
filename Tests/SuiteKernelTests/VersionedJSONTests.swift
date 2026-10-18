@@ -3,7 +3,7 @@
 // document is decoded, says `missing` when the key is absent, `damaged` when
 // the bytes are not a JSON object and `newer` when the file is newer than this
 // app reads; `words` puts a decoding error in words that name the coding path.
-// Written first and disabled until EK-24 (docs/factory/lead.md rule 13).
+// Written first (EK-23) and turned on by EK-24 (docs/factory/lead.md rule 13).
 import Foundation
 import Testing
 import SuiteKernel
@@ -11,13 +11,13 @@ import SuiteKernel
 @Suite struct VersionedJSONTests {
     static func json(_ text: String) -> Data { Data(text.utf8) }
 
-    @Test(.disabled("waits on EK-24")) func probeReadsTheVersion() throws {
+    @Test func probeReadsTheVersion() throws {
         #expect(try VersionedJSON.probe(Self.json(#"{"version": 2, "layers": []}"#)) == 2)
         #expect(try VersionedJSON.probe(Self.json(#"{"layers": [], "version": 5}"#)) == 5)
         #expect(try VersionedJSON.probe(Self.json(#"{"format": 3}"#), key: "format") == 3)
     }
 
-    @Test(.disabled("waits on EK-24")) func probeNamesTheMissingKey() {
+    @Test func probeNamesTheMissingKey() {
         #expect(throws: VersionError.missing("version")) {
             try VersionedJSON.probe(Self.json(#"{"layers": []}"#))
         }
@@ -30,7 +30,7 @@ import SuiteKernel
         }
     }
 
-    @Test(.disabled("waits on EK-24")) func probeRefusesDamaged() {
+    @Test func probeRefusesDamaged() {
         for text in ["", "not json", "[1, 2]", #"{"version": 2"#, "42"] {
             #expect(throws: VersionError.damaged) { try VersionedJSON.probe(Self.json(text)) }
         }
@@ -38,21 +38,23 @@ import SuiteKernel
     }
 
     /// A version that is not an integer is not a version the probe can read.
-    @Test(.disabled("waits on EK-24")) func probeRefusesNonIntegerVersion() {
+    @Test func probeRefusesNonIntegerVersion() {
         #expect(throws: VersionError.self) { try VersionedJSON.probe(Self.json(#"{"version": "two"}"#)) }
         #expect(throws: VersionError.self) { try VersionedJSON.probe(Self.json(#"{"version": 1.5}"#)) }
     }
 
     /// A file newer than the app reads is refused with both versions, so the
-    /// alert can say which app version to update to. `probe(_:supported:)` is
-    /// the signature EK-24 adds; it does not exist on dev yet, so the call is
-    /// kept commented and EK-24 uncomments it.
-    @Test(.disabled("waits on EK-24: probe(_:supported:) not declared yet")) func refusesNewer() {
-        // #expect(throws: VersionError.newer(found: 3, supported: 2)) {
-        //     try VersionedJSON.probe(Self.json(#"{"version": 3}"#), supported: 2)
-        // }
-        // #expect(try VersionedJSON.probe(Self.json(#"{"version": 2}"#), supported: 2) == 2)
-        // #expect(try VersionedJSON.probe(Self.json(#"{"version": 1}"#), supported: 2) == 1)
+    /// alert can say which app version to update to; the same version or an
+    /// older one reads.
+    @Test func refusesNewer() throws {
+        #expect(throws: VersionError.newer(found: 3, supported: 2)) {
+            try VersionedJSON.probe(Self.json(#"{"version": 3}"#), supported: 2)
+        }
+        #expect(try VersionedJSON.probe(Self.json(#"{"version": 2}"#), supported: 2) == 2)
+        #expect(try VersionedJSON.probe(Self.json(#"{"version": 1}"#), supported: 2) == 1)
+        #expect(throws: VersionError.missing("format")) {
+            try VersionedJSON.probe(Self.json(#"{"version": 1}"#), key: "format", supported: 2)
+        }
         #expect(VersionError.newer(found: 3, supported: 2) != .newer(found: 2, supported: 3))
     }
 
@@ -60,7 +62,7 @@ import SuiteKernel
     struct Doc: Decodable { var version: Int; var layers: [Layer] }
 
     /// The words name where in the file the decoding stopped.
-    @Test(.disabled("waits on EK-24")) func wordsNameThePath() {
+    @Test func wordsNameThePath() {
         let text = #"{"version": 1, "layers": [{"name": "Sky", "opacity": 1}, {"name": "Sea"}]}"#
         do {
             _ = try JSONDecoder().decode(Doc.self, from: Self.json(text))
@@ -75,7 +77,7 @@ import SuiteKernel
         }
     }
 
-    @Test(.disabled("waits on EK-24")) func wordsDifferByError() {
+    @Test func wordsDifferByError() {
         let wrongKind = #"{"version": 1, "layers": [{"name": 4, "opacity": 1}]}"#
         let missing = #"{"version": 1}"#
         let texts = [wrongKind, missing].map { text -> String in
