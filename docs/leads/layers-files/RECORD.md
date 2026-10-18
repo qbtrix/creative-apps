@@ -57,3 +57,6 @@ Next: green full dev CI (dev-red #2303 is a Design perf test, not ours), then Be
 ## Contact sheet wait (00:40)
 
 Every full dev run since 21:27 has been cancelled before its macOS job uploaded ui-screens: each new merge to dev starts a full run that cancels the one in flight, and the macOS job needs about 90 minutes. Dev went red at 00:29 (#2509, Linux, range main..d3cd7d9f, design-line PRs), which is not this feature's to fix. The contact sheet posts from the first full run that completes green with ui-screens.
+
+## Reconcile (2026-10-18T01:11Z, run act-1a14c3ffa03-yyt3)
+Stage stays done. The contact sheet above stands: run 39076534514 holds the feature-done PR with Linux green and Promote green (main 59c435a6). Its macOS job was cancelled at 00:28 by a newer run before it uploaded ui-screens; that job is report-only until beta (CI blocks only on compile and Model tests), and the sheet's journey lines come from scoped run 39072522704. The "contact sheet waits" heartbeats at 00:13 and 00:40 came from a second session on this branch and are superseded. Dev-red #2509 (Linux, design-line PRs in main..d3cd7d9f) is not this feature's. Nothing pending.
