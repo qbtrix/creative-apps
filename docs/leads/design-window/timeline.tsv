@@ -110,3 +110,4 @@ utc	stage	event	ref	note
 2026-10-18T16:43Z	heartbeat	no change: CB-3 not opened, #2623 open; full CI 39143942767 in progress, 39145334588 pending; no dev-red; findings 8 (2 ours, blocked on #2623)
 2026-10-18T17:05Z	heartbeat	CB-3 opened as #2871 (head 080dea87, fast-lane, waiting on lane macOS build); S-5 and D0-9d start once it merges; #2623 open; full CI 39143942767 macOS running, 39145334588 cancelled, 39147480679 pending; no dev-red; findings 8
 2026-10-18T17:27Z	heartbeat	CB-3 #2871 open, macOS build 39147869454 queued; full CI 39143942767 macOS still running (Linux green); 39147480679 cancelled; #2623 open; 8 findings, 2 ours; no dev-red
+2026-10-18T17:50Z	heartbeat	CB-3 #2871 macOS build 39147869454 green, awaiting lane merge; full CI 39143942767 macOS still running; scoped design 39149361102 queued; #2623 open; no dev-red
