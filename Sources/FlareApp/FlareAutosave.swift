@@ -5,7 +5,8 @@
 // actor, once per edit when the model says autosave is due (`autosaveDue`), `didSave()` removes the file, and
 // `willQuit(model:)` encodes and writes once more, off the main actor, while dirty. Times come in as arguments, never from a clock, so tests drive it. On launch (MP-6), `launch()` reads and
 // decodes the recovery file in a detached task, off the main thread, and returns a `RecoveryOffer` ("Restore the
-// unsaved animation from <time>?"), or nil when there is no file; a damaged file is removed with no offer.
+// unsaved animation from <time>?", carrying the kernel's `FlareRecoveryOffer`), or nil when there is no file; a
+// damaged file is removed with no offer.
 // `restore(_:into:)` lands the document through `restoreRecovery` and keeps the file, so a second crash before the
 // next edit or save still recovers it; `didSave()` or `discard()` removes it.
 // No SwiftUI: F17c (#393) wires it to the window and shows the offer.
@@ -46,12 +47,15 @@ struct RecoveryOffer: Sendable {
     let document: Document
     let date: Date
     let message: String
+    /// The same offer as the editor kernel's session sees it.
+    let session: FlareRecoveryOffer
 
     /// `time` turns the file's date into the time shown in the message; by default the current locale's date
     /// and time.
     init(document: Document, date: Date, time: (Date) -> String = RecoveryOffer.time) {
         self.document = document
         self.date = date
+        session = FlareWorkspace.recoveryOffer(savedAt: date)
         message = "Restore the unsaved animation from \(time(date))?"
     }
 
