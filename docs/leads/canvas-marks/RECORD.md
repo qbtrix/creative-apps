@@ -4,7 +4,7 @@ Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: 5 baselines (code tasks all merged)
 Base: 2e27b8db (origin/dev)
-Next: #2911 #2912 #2913 (baselines) and #2916 (handle, point mark, grid checks) in the lane; once #2916 is on dev, a scoped suiteui run gives its actuals: commit them, then CM-16 (suiteui.md + feature-done)
+Next: #2911 #2912 #2913 merged at 19:14Z; #2916 (handle, point mark, grid checks) waits on its lane macOS build 39158010316; once on dev, a scoped suiteui run gives its actuals: commit them, then CM-16 (suiteui.md + feature-done)
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
