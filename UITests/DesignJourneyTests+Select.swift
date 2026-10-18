@@ -11,10 +11,8 @@
 // and B: Distribute is disabled in the inspector and the Object menu.
 // Page points map to the screen through the artboard (`suite.canvas.artboard`,
 // the page's rectangle at the current zoom, #2349): its corner plus the point
-// times its width over 1440. Until #2463 routes the canvas keys to the
-// several-layer nudge and delete, ⇧→ and ⌫ change nothing on a multi-selection;
-// J5 then checks the empty marquee and skips naming #2463, and any other wrong
-// step name fails. J4 (S-7b): the zoom pill's fitted percent f; C selected;
+// times its width over 1440. ⇧→ arrives flagged as a numeric-pad key, which the
+// canvas ignores (DesignCanvasKeys, #2706). J4 (S-7b): the zoom pill's fitted percent f; C selected;
 // ⌘= twice steps two ViewerZoom stops up; Space-drag 200 pt left pans
 // `design.canvas.selection` about 200 pt left; ⌘0 reads f again; View > Zoom
 // to Selection zooms past both stops; Escape, then the item is disabled.
@@ -37,7 +35,7 @@ final class DesignSelectJourneyTests: XCTestCase {
     static let distributeTitle = "Distribute Horizontally"
 
     /// J5: a marquee picks A and B, which then move, resize, nudge and delete as one step each.
-    @MainActor func testMarqueeMoveResizeSeveral() throws {
+    @MainActor func testMarqueeMoveResizeSeveral() {
         let design = open()
         let undo = design.element("design.bar.undo")
 
@@ -60,18 +58,12 @@ final class DesignSelectJourneyTests: XCTestCase {
 
         // 4. ⇧→ nudges both 10 right: one Nudge step.
         design.press(.rightArrow, .shift)
-        if !Self.waitForLabel(undo, "Undo Nudge"), undo.label == "Undo Resize" {
-            try skipOnKeys(design, "⇧→ made no step on two layers")
-        }
-        XCTAssertEqual(undo.label, "Undo Nudge", "⇧→ made the wrong step")
+        XCTAssert(Self.waitForLabel(undo, "Undo Nudge"), "⇧→ made no Nudge step on two layers (Undo reads \(undo.label))")
         design.shot("select-nudged")
 
         // 5. ⌫ deletes both: one Delete step, and A's and B's rows go.
         design.press(.delete)
-        if !Self.waitForLabel(undo, "Undo Delete"), undo.label == "Undo Nudge" {
-            try skipOnKeys(design, "⌫ made no step on two layers")
-        }
-        XCTAssertEqual(undo.label, "Undo Delete", "⌫ made the wrong step")
+        XCTAssert(Self.waitForLabel(undo, "Undo Delete"), "⌫ made no Delete step on two layers (Undo reads \(undo.label))")
         XCTAssert(Self.waitUntil { !row(design, Self.rowA).exists && !row(design, Self.rowB).exists },
                   "⌫ left A's or B's row in Layers")
         design.shot("select-deleted")
@@ -232,13 +224,6 @@ final class DesignSelectJourneyTests: XCTestCase {
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element(Self.artboard).waitForExistence(timeout: 10), "cards showed no page (\(Self.artboard))")
         return design
-    }
-
-    /// The trailing empty-marquee check, then a skip naming #2463 (the canvas keys miss several layers).
-    @MainActor private func skipOnKeys(_ design: Journey, _ what: String) throws {
-        design.shot("select-keys-missing")
-        expectEmptyMarquee(design)
-        throw XCTSkip("#2463: \(what); the canvas keys still send the one-layer nudge and delete")
     }
 
     /// Marquee (380, 580)-(720, 720) on Desktop touches only Locked and Hidden: the selection is empty.
