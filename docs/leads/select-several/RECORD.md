@@ -1,16 +1,16 @@
 # select-several lead record
 
 Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
-Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
-Stage: 3 wave 1
-Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: SS-a fix round 1 merged (#2621 as 148ade3e); wait for a full CI run on dev at or after 148ade3e with green J5/J6, then Belt-Slice-Done SS-a + Mac-Finish-Wanted. SS-b S-5/S-8 wait on #1493 and CB-a.
+Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
+Stage: 3 wave 2
+Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
+Next: S-8 builder (lead/select-several-s-8) opens its PR; SS-a re-done on a successful run holding 148ade3e (full 39105383795 pending). S-5 waits on canvas-basics CB-3 (CB-a).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SS-a | marquee, several-layer move/resize/nudge/delete, align and distribute, on screen | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-window DW-a, DW-b (S-6); design-seams (S-7) | yes | 1 | fixing | – | – |
-| SS-b | Zoom to Selection; no edit mid-gesture; budgets | S-4, S-5, S-7b, S-8 | J4, P1 | design-seams, canvas-basics CB-a (S-5); DW-a, SS-a (S-7b, S-8) | no | 0 | building | – | – |
+| SS-a | marquee, several-layer move/resize/nudge/delete, align and distribute, on screen | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-window DW-a, DW-b (S-6); design-seams (S-7) | yes | 1 | merged (done on 39093416270 before fix #2621; re-done waits on a run holding 148ade3e) | 39093416270 | wanted |
+| SS-b | Zoom to Selection; no edit mid-gesture; budgets | S-4, S-5, S-7b, S-8 | J4, P1 | design-seams, canvas-basics CB-a (S-5); DW-a, SS-a (S-7b, S-8) | no | 0 | building (S-8 wave 2; S-5 waits CB-a; #2538 blocked on needs-ui #2623) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -19,21 +19,25 @@ Next: SS-a fix round 1 merged (#2621 as 148ade3e); wait for a full CI run on dev
 | S-2 | SS-a | 0 | LiveTransforming several layers | Sources/DesignModel/Live/LiveTransforming.swift; Tests/DesignModelTests/DesignSeveralTransformTests.swift | DesignSeveralTransformTests | (before this run) | merged |
 | S-3 | SS-a | 0 | LiveAligning distribute | Sources/DesignModel/Live/LiveAligning.swift; Tests/DesignModelTests/DesignDistributeTests.swift | DesignDistributeTests | (before this run) | merged |
 | S-4 | SS-b | 0 | LiveFraming | Sources/DesignModel/Live/LiveFraming.swift; Tests/DesignModelTests/DesignFramingTests.swift | DesignFramingTests | (before this run) | merged |
-| S-5 | SS-b | – | no edit or step while a gesture is live; no nudge of a hidden-in-tree layer | DesignCanvasEditing.swift, DesignActions.swift, DesignActions+Edit.swift; tests | DesignMidDragEditTests, DesignHiddenNudgeTests | – | waits design-seams, CB-a |
-| S-6 | SS-a | – | views: several-layer handles, Distribute buttons, marquee from the Model; snapshots | DesignSelectionMarks.swift, DesignAlignBar.swift; snapshots | DesignMarqueeSnapshots, DesignAlignSnapshots, DesignMultiSelectSnapshots | – | waits DW-b |
-| S-7 | SS-a | – | J5, J6 | UITests/DesignJourneyTests+Select.swift | J5, J6 | – | waits S-6, design-seams |
-| S-7b | SS-b | – | J4 | UITests/DesignJourneyTests+Select.swift | J4 | – | waits S-4, S-7 |
-| S-8 | SS-b | – | QD-S1..S4 budgets, P1; feature-done | Tests/DesignModelTests/DesignSelectBudgetTests.swift; UITests/DesignJourneyTests+PerfCanvas.swift | DesignSelectBudgetTests, P1 | – | waits S-7b, design-seams |
+| S-5 | SS-b | 3 | no edit or step while a gesture is live; no nudge of a hidden-in-tree layer | DesignCanvasEditing.swift, DesignActions.swift, DesignActions+Edit.swift; tests | DesignMidDragEditTests, DesignHiddenNudgeTests | – | waits canvas-basics CB-a (CB-3 also edits DesignCanvasEditing.swift); design-seams met; feature-done |
+| S-6 | SS-a | 1 | views: several-layer handles, Distribute buttons, marquee from the Model; snapshots | DesignSelectionMarks.swift, DesignAlignBar.swift; snapshots | DesignMarqueeSnapshots, DesignAlignSnapshots, DesignMultiSelectSnapshots | – | waits DW-b |
+| S-7 | SS-a | 1 | J5, J6 | UITests/DesignJourneyTests+Select.swift | J5, J6 | – | waits S-6, design-seams |
+| S-7b | SS-b | 1 | J4 | UITests/DesignJourneyTests+Select.swift | J4 | – | waits S-4, S-7 |
+| S-8 | SS-b | 2 | QD-S1..S4 budgets, P1 | Tests/DesignModelTests/DesignSelectBudgetTests.swift; UITests/DesignJourneyTests+PerfCanvas.swift | DesignSelectBudgetTests, P1 | – | building (waits met: S-7b #2526, design-seams SE-a done) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-18 resume (act-1a14ddefb3a-z1bl): brief says base main; dev is 37 ahead of main and CLAUDE.md forbids targeting main, so PRs stay on dev. main verified at e01529f.
+- design-seams' wait is met by SE-a's Belt-Slice-Done (#1493 stays open as a feature-lead issue), so S-8 starts now.
+- feature-done moves from S-8 to S-5, the last SS-b task to merge (S-5 still waits on CB-a).
 - Base is origin/dev, not main (CLAUDE.md). main verified at 2c5003b.
 - S-1 to S-4 merged before this run (their Live files and tests are on dev, tests enabled), as the packet says for S-1 to S-3.
 - No task of this feature can start in wave 1: S-6 waits on design-window DW-a and DW-b, which this lead builds first.
 
 ## Open
-- S-5, S-7, S-8 wait on design-seams (#1493), which has not built wave 1 (D0-3c); S-5 also waits on canvas-basics CB-a.
+- S-5 waits on canvas-basics CB-a (CB-1, CB-2 merged; CB-3 building).
+- #2538 (J4, SS-b) blocked on needs-ui #2623 (CanvasViewport scroller unnamed).
 - Stage-1 issues filed: gaps #2144 (marquee), #2145 (several layers), #2146 (Zoom to Selection); needs-ui #2147 (CanvasViewport scroll to a rect).

@@ -73,3 +73,5 @@ utc	stage	event	ref	note
 2026-10-18T06:39Z	merged	#2621 merged 06:33Z as 148ade3e; closes #2516 #2517
 2026-10-18T06:39Z	triage	findings #2657-#2661 belong to copy-group, style-rows, shell-parity; not mine
 2026-10-18T07:01Z	heartbeat	full CI 39105383795 on 9e0ac922 (contains 148ade3e) pending; it is SS-a's proof run. No new findings; #1493 #2263 #2623 open
+2026-10-18T07:30Z	0	stage-start	act-1a14ddefb3a-z1bl	resume; branch rebased onto main e01529f; base dev cd81c77
+2026-10-18T07:30Z	3	stage-start	wave 2	S-8 builder started (design-seams wait met)
