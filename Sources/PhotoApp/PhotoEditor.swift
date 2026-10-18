@@ -22,6 +22,8 @@ struct PhotoEditor: View {
     let model: PhotoWorkspace
     var tiles: CanvasTiles?
     var renderMilliseconds: Double?
+    /// The backend that drew the picture (CanvasRenderer.backend), for the status line.
+    var renderBackend: String?
     var note: String?
     var zoom = 1.0
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
@@ -73,7 +75,9 @@ struct PhotoEditor: View {
                             saveStatus.editorState, title: saveStatus.title,
                             help: saveStatus.help(fileName: model.documentName), identifier: "photo.bar.saved")
                     }
-                    PhotoStatusLine(model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds)
+                    PhotoStatusLine(
+                        model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds,
+                        renderBackend: renderBackend)
                 }
                 .background(SuiteColor.panel)
             }
@@ -101,7 +105,7 @@ struct PhotoEditor: View {
     }
 }
 
-/// The canvas: the rendered picture (TileCanvas) on the checkerboard with PhotoCanvasOverlay's
+/// The canvas: the rendered picture (CanvasTiles on SuiteUI's EmbeddedCanvasHost) on the checkerboard with PhotoCanvasOverlay's
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
 /// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
@@ -117,6 +121,8 @@ struct PhotoCanvas: View {
     var straighten: StraightenDraft?
     /// The document point under the pointer, for the brush cursor; nil once it leaves.
     @State private var hover: CGPoint?
+    /// The app's View > Rendering; nil (the tile layers) in tests.
+    @Environment(\.photoRendering) private var rendering
 
     var body: some View {
         Group {
@@ -127,7 +133,11 @@ struct PhotoCanvas: View {
                     onDrag: { perform(.drag($0, $1)) }, onDragEnd: { perform(.endDrag) }, onKey: key,
                     onPointer: { hover = $0 }
                 ) {
-                    if let tiles { TileCanvas(tiles: tiles, zoom: zoom, degrees: straighten?.degrees ?? 0) }
+                    if let tiles {
+                        EmbeddedCanvasHost(degrees: straighten?.degrees ?? 0, rendering: rendering?.preference) {
+                            tiles.attach($0)
+                        }
+                    }
                 } overlay: {
                     PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover)
                     if let straighten,

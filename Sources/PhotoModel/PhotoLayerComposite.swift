@@ -148,8 +148,13 @@ public enum PhotoLayerComposite {
     /// opaque, so a layer with any transparency costs about one pixel read.
     static func replaces(_ tile: PixelBuffer, _ piece: PixelBuffer, dx: Int, dy: Int,
                          mode: BlendMode, opacity: Float) throws -> Bool {
-        guard mode == .normal, opacity == 1, dx == 0, dy == 0,
-            tile.width == piece.width, tile.height == piece.height
+        try replaces(tile, width: piece.width, height: piece.height, dx: dx, dy: dy, mode: mode, opacity: opacity)
+    }
+
+    /// `replaces` for a picture piece `width` x `height`, which the dispatcher's render holds as a surface.
+    static func replaces(_ tile: PixelBuffer, width: Int, height: Int, dx: Int, dy: Int,
+                         mode: BlendMode, opacity: Float) throws -> Bool {
+        guard mode == .normal, opacity == 1, dx == 0, dy == 0, tile.width == width, tile.height == height
         else { return false }
         for y in 0..<tile.height {
             for x in 0..<tile.width {

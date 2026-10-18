@@ -1,0 +1,65 @@
+[
+  {
+    "label": "refusalIsSuccess: a refused kernel edit keeps the tree's layers and returns, so a refusal lands as success",
+    "file": "Sources/HaloModel/HaloLayers+Kernel.swift",
+    "find": "        } catch {\n            throw refusal(error)\n        }",
+    "replace": "        } catch {\n            layers = Self.layers(of: tree)\n            return\n        }",
+    "tests": "HaloKernelLayersTests"
+  },
+  {
+    "label": "orderFlipped: the tree's roots are built top first, so the kernel moves and arranges the wrong way",
+    "file": "Sources/HaloModel/HaloLayers+Kernel.swift",
+    "find": "LayerTree(layers.reversed().map {",
+    "replace": "LayerTree(layers.map {",
+    "tests": "HaloKernelLayersTests"
+  },
+  {
+    "label": "followLinkDropped: the tree's nodes follow nothing, so a parent no longer carries its children",
+    "file": "Sources/HaloModel/HaloLayers+Kernel.swift",
+    "find": "followsID: $0.parentID, payload: $0",
+    "replace": "followsID: nil, payload: $0",
+    "tests": "HaloKernelLayersTests"
+  },
+  {
+    "label": "copyKeepsSourceID: a duplicate's payload id wins over the node's, so the copy repeats its source's id",
+    "file": "Sources/HaloModel/HaloLayers+Kernel.swift",
+    "find": "var layer = node.payload.id == node.id ? node.payload : node.payload.withID(node.id)",
+    "replace": "var layer = node.payload",
+    "tests": "HaloKernelLayersTests"
+  },
+  {
+    "label": "moveIndexUnflipped: a top-first move index goes to the kernel as a back-to-front one",
+    "file": "Sources/HaloModel/HaloLayerEdits.swift",
+    "find": "let at = last - min(max(index, 0), last)",
+    "replace": "let at = min(max(index, 0), last)",
+    "tests": "HaloKernelLayersTests"
+  },
+  {
+    "label": "placeNotKept: setFollow's keeping-place matrix is dropped, so a newly parented layer jumps",
+    "file": "Sources/HaloModel/Live/HaloKeyRules.swift",
+    "find": "local = placed.apply(anchor)",
+    "replace": "_ = placed",
+    "tests": "HaloKernelLayersTests"
+  },
+  {
+    "label": "followsReversed: follows asks the kernel the other way round, so the parent choices offer a layer's followers",
+    "file": "Sources/HaloModel/Live/HaloKeyRules.swift",
+    "find": "c.layerTree.follows(id, ancestorID)",
+    "replace": "c.layerTree.follows(ancestorID, id)",
+    "tests": "HaloKernelFollowTests"
+  },
+  {
+    "label": "selfParentOpens: the cycle check drops the layer that is its own parent, so that damaged file opens",
+    "file": "Sources/HaloModel/Live/HaloFileValidation.swift",
+    "find": "if parentID == layer.id || HaloKeyRules.follows(parentID, layer.id, in: comp) {",
+    "replace": "if HaloKeyRules.follows(parentID, layer.id, in: comp) {",
+    "tests": "HaloKernelFollowTests"
+  },
+  {
+    "label": "cycleThroughParentOpens: the cycle check no longer asks the kernel whether the parent follows the layer, so a longer cycle opens",
+    "file": "Sources/HaloModel/Live/HaloFileValidation.swift",
+    "find": "if parentID == layer.id || HaloKeyRules.follows(parentID, layer.id, in: comp) {",
+    "replace": "if parentID == layer.id {",
+    "tests": "HaloKernelFollowTests"
+  }
+]

@@ -17,6 +17,13 @@ public struct SuiteOnboarding: OnboardingFlowing {
     public func finishing(_ p: SuitePreferences, focus: OnboardingFocus?, version: Int) -> SuitePreferences {
         FakeOnboarding().finishing(p, focus: focus, version: version)
     }
+    /// A preset chip's label on the start page. One click creates the document,
+    /// so it says "New" (or "Import") and drops the ellipsis: no dialog follows.
+    public static func presetTitle(_ preset: NewDocumentPreset) -> String {
+        var title = preset.title
+        while title.hasSuffix("…") { title.removeLast() }
+        return title.hasPrefix("New ") || title.hasPrefix("Import ") ? title : "New " + title
+    }
     /// The apps a focus puts first, the order the start page and the home share.
     public static func order(for focus: OnboardingFocus?) -> [SuiteApp] {
         SuiteOnboarding().finishing(SuitePreferences(), focus: focus, version: version).homeOrder

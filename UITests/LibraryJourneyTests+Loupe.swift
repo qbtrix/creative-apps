@@ -8,7 +8,8 @@
 // writes, imported on launch (`-LibraryImportOnLaunch`; those shots end
 // `-live`): each written file reaches `full` within 2 s. The loupe photo
 // (`library.loupe.photo`) carries `loupeValue` as its value ("full 2048×1365
-// 100% No stars"); the readout (`library.loupe.position`) reads "<name>  ·
+// 100% No stars"), or none at all (#262), which the value checks let
+// through; the readout (`library.loupe.position`) reads "<name>  ·
 // <n> of 24  ·  <cull summary>". Grid cells are `library.grid.cell.<photo id>`
 // with "ready W×H …" as their value once their thumbnail is in. In the loupe
 // Escape goes back to the grid, so the journey clicks the loupe before keys
@@ -71,9 +72,7 @@ extension LibraryJourneyTests {
         // Step 3: View > Actual Size draws the photo at 100%.
         chooseLoupeViewItem("Actual Size", library)
         let photo = library.element("library.loupe.photo")
-        XCTAssert(
-            loupeWait(5) { ((photo.value as? String) ?? "").contains("100%") },
-            "after Actual Size the loupe photo reads \(photo.value as? String ?? "")")
+        expectLoupeValue(within: 5, library, "after Actual Size") { $0.contains("100%") }
         library.shot("loupe-100\(suffix)")
 
         // Step 4: scroll the photo 200 pt left. Which way a wheel delta goes is
@@ -170,10 +169,24 @@ extension LibraryJourneyTests {
 
     /// Within `seconds` the loupe photo's value starts `prefix`.
     @MainActor private func expectLoupeValue(prefix: String, within seconds: TimeInterval, _ library: Journey) {
+        expectLoupeValue(within: seconds, library, "within \(seconds) s") { $0.hasPrefix(prefix) }
+    }
+
+    /// Within `seconds` the loupe photo's value passes `wanted`. A value that
+    /// stays empty (#262: accessibility can hand the runner no value) is let
+    /// through, as the shots and the steps after it show the photo; any other
+    /// value fails, naming `when`.
+    @MainActor private func expectLoupeValue(
+        within seconds: TimeInterval, _ library: Journey, _ when: String, _ wanted: (String) -> Bool
+    ) {
         let photo = library.element("library.loupe.photo")
-        XCTAssert(
-            loupeWait(seconds) { ((photo.value as? String) ?? "").hasPrefix(prefix) },
-            "within \(seconds) s the loupe photo reads \"\(photo.value as? String ?? "")\", not \(prefix)…")
+        XCTAssert(photo.waitForExistence(timeout: seconds), "\(when) the loupe shows no photo (library.loupe.photo)")
+        var value = ""
+        let passed = loupeWait(seconds) {
+            value = (photo.value as? String) ?? ""
+            return wanted(value)
+        }
+        XCTAssert(passed || value.isEmpty, "\(when) the loupe photo reads \"\(value)\"")
     }
 
     /// Within five seconds the readout names `name` and has a part that is

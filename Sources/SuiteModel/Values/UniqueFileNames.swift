@@ -21,6 +21,17 @@ public enum UniqueFileNames {
         return "\(stem) \(number)\(suffix)"
     }
 
+    /// One name per base, in order, each unique against `existing` and the names before it
+    /// (["Card", "Card"] among ["Card.png"]: "Card 2.png", "Card 3.png"): a batch export's files.
+    public static func names(_ bases: [String], extension ext: String, among existing: Set<String>) -> [String] {
+        var taken = existing
+        return bases.map { base in
+            let picked = name(base, extension: ext, among: taken)
+            taken.insert(picked)
+            return picked
+        }
+    }
+
     /// `base` with every `/` and `:` (the path separators) made "-"; "Untitled"
     /// when it is empty or only whitespace.
     private static func stem(_ base: String) -> String {

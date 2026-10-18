@@ -1,6 +1,8 @@
 # Generated files: the one writer of docs/c4/model.json (scripts/c4-assemble,
-# from docs/c4/parts/) and docs/blueprints/*/features/waves.md (scripts/waves,
-# from each app's waves.in.md and features/*.wave.json). Writers edit only
+# from docs/c4/parts/), docs/blueprints/*/features/waves.md (scripts/waves,
+# from each app's waves.in.md and features/*.wave.json) and
+# docs/blueprints/*/jobs.md (scripts/jobs, from each app's jobs.json; no guard:
+# a direct jobs.md edit is overwritten). Writers edit only
 # their own part or feature file, so parallel PRs never conflict on a shared
 # file; PRs never edit the generated ones (the lane's PROTECTED list).
 #
@@ -32,6 +34,7 @@ on:
       - docs/blueprints/**
       - scripts/c4-assemble
       - scripts/waves
+      - scripts/jobs
   schedule:
     - cron: '7-59/10 * * * *'  # every 10 minutes; schedule runs on the default branch (dev)
   workflow_dispatch:
@@ -59,7 +62,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          title="chore(generated): assemble docs/c4/model.json and waves.md from their parts"
+          title="chore(generated): assemble docs/c4/model.json, waves.md and jobs.md from their parts"
           run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -75,7 +78,8 @@ jobs:
             status=0; out=$(python3 scripts/waves render --guard) || status=$?
             echo "$out"
             if [[ $status -eq 2 ]]; then report="$report${report:+$'\n'}$out"; elif [[ $status -ne 0 ]]; then exit 1; fi
-            git add docs/c4/model.json docs/c4/parts 'docs/blueprints/*/features/waves.md'
+            python3 scripts/jobs render
+            git add docs/c4/model.json docs/c4/parts 'docs/blueprints/*/features/waves.md' 'docs/blueprints/*/jobs.md'
             if git diff --cached --quiet; then
               echo "Generated: nothing to commit." >>"$GITHUB_STEP_SUMMARY"
               break

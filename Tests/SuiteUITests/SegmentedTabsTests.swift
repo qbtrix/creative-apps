@@ -2,7 +2,10 @@
 // underneath its capsule (EC-7), that its `suite.controls` entry's reason is
 // its tooltip while it can't act, and that a selection change records one
 // `fade-start`/`fade-end` pair on series `tabs` with the Reduce Motion switch
-// off (about 0.14 s apart) and on (at once). macOS only.
+// off (about 0.14 s apart) and on (at once), that ← and → step to the
+// neighbouring tab and stop at either end, and that each segment carries an
+// identifier under the switch's `id` and is listed in `suite.controls`
+// under it. macOS only.
 import AppKit
 @testable import SuiteUI
 import SwiftUI
@@ -14,6 +17,33 @@ private let panelTabs = [InspectorOption(id: 0, title: "Adjust"), InspectorOptio
     let tabs = SegmentedTabs("Panel", tabs: panelTabs, selection: 0) { _ in }
     let name = String(describing: type(of: tabs.picker))
     #expect(name.hasPrefix("Picker<"), "SegmentedTabs draws \(name), not a Picker")
+}
+
+@Test func theArrowsStepToTheNeighbouringTab() {
+    let ids = [0, 1, 2]
+    #expect(SegmentedTabs<Int>.step(ids, from: 1, by: -1) == 0)
+    #expect(SegmentedTabs<Int>.step(ids, from: 1, by: 1) == 2)
+    #expect(SegmentedTabs<Int>.step(ids, from: 0, by: -1) == nil)
+    #expect(SegmentedTabs<Int>.step(ids, from: 2, by: 1) == nil)
+    #expect(SegmentedTabs<Int>.step(ids, from: 7, by: 1) == nil)
+}
+
+@Test func eachSegmentCarriesAnIdentifier() {
+    #expect(SegmentedTabs<Int>.segmentID(panelTabs[1], in: "suite.tabs") == "suite.tabs.1")
+    #expect(SegmentedTabs<Int>.segmentID(panelTabs[1], in: nil) == nil)
+    let own = InspectorOption(id: 0, title: "Adjust", identifier: "photo.tab.adjust")
+    #expect(SegmentedTabs<Int>.segmentID(own, in: "suite.tabs") == "photo.tab.adjust")
+}
+
+@Test func eachIdentifiedSegmentIsListed() {
+    let on = SegmentedTabs<Int>.segmentEntries(panelTabs, in: "suite.tabs", enabled: true, reason: "Panel")
+    #expect(on == [
+        ControlEntry(id: "suite.tabs.0", enabled: true, reason: nil),
+        ControlEntry(id: "suite.tabs.1", enabled: true, reason: nil),
+    ])
+    let off = SegmentedTabs<Int>.segmentEntries(panelTabs, in: "suite.tabs", enabled: false, reason: "Why")
+    #expect(off.map(\.reason) == ["Why", "Why"])
+    #expect(SegmentedTabs<Int>.segmentEntries(panelTabs, in: nil, enabled: true, reason: nil).isEmpty)
 }
 
 @Test func theEntrysReasonEqualsItsHelp() {

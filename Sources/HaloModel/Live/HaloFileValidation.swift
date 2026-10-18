@@ -95,7 +95,8 @@ enum HaloFileValidation {
         guard comp.layers.contains(where: { $0.id == parentID }) else {
             throw damaged("the layer \(name) follows \(parentID), which isn't in \(comp.name)")
         }
-        if FakeLayerPlacing.follows(layer.id, layer.id, in: comp) {
+        // In a cycle the layer is its own parent, or its parent follows it (the kernel's follow link).
+        if parentID == layer.id || HaloKeyRules.follows(parentID, layer.id, in: comp) {
             throw damaged("the layer \(name) follows itself through a parent cycle")
         }
     }

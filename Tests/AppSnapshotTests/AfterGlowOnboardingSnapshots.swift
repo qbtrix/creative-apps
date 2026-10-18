@@ -1,13 +1,15 @@
 // AfterGlowOnboardingSnapshots.swift: the welcome window (onboarding packet
 // OB-5) as goldens in Golden/afterglow-onboarding/:
 // afterglow-onboarding-{welcome,focus,focus-selected,start,start-default,
-// start-missing,start-launching,start-error}-{light,dark,light-ic,dark-ic},
+// start-missing,start-error}-{light,dark,light-ic,dark-ic},
 // each the real OnboardingWindow over an OnboardingModel on the fakes, built
 // fresh for every appearance (closing a window is Skip, which would clear the
 // focus of a shared model). "start" is Photos' order, "start-default" no
 // focus; "start-missing" says Halo's sample isn't in this build, "start-error"
-// is a refused hand-off's sentence in place, "start-launching" holds Flare's
-// ring on a sender that never answers. A state the model can't reach yet
+// is a refused hand-off's sentence in place. "start-launching" (Flare's
+// hand-off in flight on a sender that never answers) is checked on the model
+// and shoots nothing: rendering its indeterminate ring hung the macOS job
+// (#2895), so it records a known issue. A state the model can't reach yet
 // (the reason OB-10 fills, the message OB-8 sets) records a known issue and
 // shoots nothing, so no wrong golden is recorded; a missing golden is a known
 // issue too (assertGolden), until OB-5g commits the macOS run's PNGs. The
@@ -26,10 +28,11 @@ import Testing
 
 @testable import AfterGlowApp
 
-/// A sender that never answers, so a hand-off stays in flight (`launching`) while it is shot.
+/// A sender that never answers until cancelled, so a hand-off stays in flight (`launching`).
 private actor SilentSender: HandOffSending {
     func send(_ handOff: HandOff) async throws(SuiteError) -> SwitchReceipt {
-        try? await Task.sleep(for: .seconds(600))
+        // Cancelling the send ends the wait at once, so no task outlives the test.
+        do { try await Task.sleep(for: .seconds(600)) } catch {}
         throw .notAvailable("The test stopped waiting.")
     }
 }
@@ -105,17 +108,17 @@ extension BodyCountSuites {
                 }
             }
 
-            // Flare's Open sample while its hand-off is in flight: the ring, every control disabled.
+            // Flare's Open sample while its hand-off is in flight: checked on the model, not shot.
             var silent = SuiteServices.fake()
             silent.sending = SilentSender()
-            for appearance in SnapshotAppearance.allCases {
-                let launching = start(await model(silent), focus: .photos)
-                let send = Task { await launching.openSample(.flare, now: now) }
-                for _ in 0..<100 where launching.launching == nil { try? await Task.sleep(for: .milliseconds(10)) }
-                #expect(launching.launching == .flare)
-                assertGolden(OnboardingWindow(model: launching), size: size, name: "afterglow-onboarding-start-launching",
-                             area: "afterglow-onboarding", appearance: appearance)
-                send.cancel()
+            let launching = start(await model(silent), focus: .photos)
+            let send = Task { await launching.openSample(.flare, now: now) }
+            for _ in 0..<100 where launching.launching == nil { try? await Task.sleep(for: .milliseconds(10)) }
+            #expect(launching.launching == .flare)
+            send.cancel()
+            await send.value
+            withKnownIssue("start-launching's indeterminate ring never settles; its shot hung the macOS job (#2895)") {
+                Issue.record("no deterministic render of the launching ring yet")
             }
 
             // A refused hand-off: its sentence in place under the row, nothing modal.

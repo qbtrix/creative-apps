@@ -6,6 +6,8 @@
 // the ids a scope names, the plan, its help, the SVG of one item, and the
 // remembered options. Those options are not document state: remembering them
 // is never a history step and undo never touches them. Linux-safe.
+import SuiteKernel
+import SuiteModel
 
 /// What one export writes: the selected layers, the frame around them, or the page.
 public enum DesignExportScope: String, CaseIterable, Hashable, Sendable { case selection, frame, page }
@@ -21,7 +23,8 @@ public struct DesignExportOptions: Hashable, Sendable {
     }
 }
 
-// DesignExportRun: DE-2b, once SuiteKernel is linked.
+/// Design's export run is the kernel's; the sheet reads it, DesignExport+Kernel (App) drives it.
+public typealias DesignExportRun = ExportRun<DesignExportOptions>
 
 /// The live export slot: the plan and the SVG text. `.fake` uses the same type (planning is pure;
 /// what differs on the fakes is that the App writes nothing).
@@ -33,12 +36,19 @@ public struct LiveExport: ExportPlanning {
         do { _ = try plan(ids, on: page, format: .png, scale: 1, existing: []); return nil } catch { return error.help }
     }
 
+    /// The files for `ids` (every visible top-level frame when empty): hidden layers dropped,
+    /// locked ones kept, names unique against `existing` and each other, pixels at whole points
+    /// times the scale (PNG: 1...3; SVG and PDF: 1). Nothing left: `.nothingToExport` for no
+    /// ids, `.nothingSelected` for named ids that are all hidden or unknown.
     public func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
                      existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
-        // DE-3: names through UniqueFileNames against existing, hidden layers dropped, scale clamped 1...3.
-        let nodes = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : fakeFind(ids, page)
+        let found = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : fakeFind(ids, page)
+        let nodes = found.filter { !page.isHiddenInTree($0.id) }
         guard !nodes.isEmpty else { throw ids.isEmpty ? .nothingToExport : .nothingSelected }
-        return nodes.map { exportItem($0.id, $0.name, $0.frame.width, $0.frame.height, format, scale) }
+        let names = UniqueFileNames.names(nodes.map(\.name), extension: format.rawValue, among: existing)
+        return zip(nodes, names).map { node, name in
+            exportItem(node.id, name, node.frame.width, node.frame.height, format, scale)
+        }
     }
 
     public func svg(for id: String, on page: DesignPage) throws(DesignRefusal) -> String {
@@ -47,13 +57,18 @@ public struct LiveExport: ExportPlanning {
     }
 }
 
-/// One planned file: "<name>.<format>", `width` × `height` points, and the pixels at whole points
-/// times the scale (PNG only; at least 1). A non-finite side counts as 0 pixels rather than crash.
-func exportItem(_ id: String, _ name: String, _ width: Double, _ height: Double,
+/// The pixel factor: the scale clamped to 1...3 for PNG, 1 for SVG and PDF (vector, in points).
+func exportFactor(_ format: DesignExportFormat, _ scale: Int) -> Int {
+    format == .png ? Swift.min(Swift.max(scale, 1), 3) : 1
+}
+
+/// One planned file: `fileName`, `width` × `height` points, and the pixels at whole points times
+/// the factor. A non-finite side counts as 0 pixels rather than crash.
+func exportItem(_ id: String, _ fileName: String, _ width: Double, _ height: Double,
                 _ format: DesignExportFormat, _ scale: Int) -> DesignExportItem {
-    let k = format == .png ? Swift.max(scale, 1) : 1
+    let k = exportFactor(format, scale)
     func whole(_ value: Double) -> Int { value.isFinite ? Int(Swift.max(Swift.min(value, 1e9), -1e9).rounded()) : 0 }
-    return DesignExportItem(nodeID: id, fileName: "\(name).\(format.rawValue)", width: width, height: height,
+    return DesignExportItem(nodeID: id, fileName: fileName, width: width, height: height,
                             pixelWidth: whole(width) * k, pixelHeight: whole(height) * k)
 }
 
@@ -86,7 +101,8 @@ extension DesignWorkspace {
     public func exportPlan(_ options: DesignExportOptions, existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
         guard let page = selectedPage else { throw .nothingToExport }
         if options.scope == .page {
-            return [exportItem(page.id, page.name, page.frameWidth, page.frameHeight, options.format, options.scale)]
+            let name = UniqueFileNames.name(page.name, extension: options.format.rawValue, among: existing)
+            return [exportItem(page.id, name, page.frameWidth, page.frameHeight, options.format, options.scale)]
         }
         let ids = exportTargetIDs(options.scope)
         // An empty selection is its own refusal; the slot reads empty ids as "every top-level frame".

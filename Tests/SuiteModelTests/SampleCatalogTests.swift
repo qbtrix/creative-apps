@@ -43,6 +43,14 @@ import Testing
         }
     }
 
+    @Test func destinationSkipsEveryTakenNameInARow() throws {
+        let s = try #require(SampleCatalog.sample(for: .flare))
+        let taken: Set<String> = ["/D/Samples/Bounce.flare", "/D/Samples/Bounce 2.flare", "/D/Samples/Bounce 3.flare"]
+        let dest = SampleCatalog.destination(for: s, documents: "/D", exists: { taken.contains($0) })
+        #expect(dest == "/D/Samples/Bounce 4.flare")
+        #expect(!taken.contains(dest))
+    }
+
     @Test func refNamesTheCopy() throws {
         let s = try #require(SampleCatalog.sample(for: .flare))
         let path = "/D/Samples/Bounce 2.flare"
@@ -69,5 +77,23 @@ import Testing
         #expect(SampleCatalog.destination(for: s, documents: "/D", exists: { _ in false }) == "/D/Samples/Intro.halo")
         let bare = SampleFile(app: .photo, fileName: "README", type: .png, title: "README")
         #expect(SampleCatalog.destination(for: bare, documents: "/D", exists: { $0 == "/D/Samples/README" }) == "/D/Samples/README 2")
+    }
+
+    @Test func destinationSkipsATakenNameInAnotherCaseAsUniqueFileNamesDoes() throws {
+        // `exists` answers as the file system does: on APFS (case-insensitive) "bounce.flare" takes "Bounce.flare".
+        let s = try #require(SampleCatalog.sample(for: .flare))
+        let onDisk = ["bounce.flare", "BOUNCE 2.flare", "Bounce 4.flare"]
+        let folded = Set(onDisk.map { ("/D/Samples/" + $0).lowercased() })
+        let dest = SampleCatalog.destination(for: s, documents: "/D", exists: { folded.contains($0.lowercased()) })
+        #expect(dest == "/D/Samples/Bounce 3.flare")
+        #expect(dest == "/D/Samples/" + UniqueFileNames.name("Bounce", extension: "flare", among: Set(onDisk)))
+    }
+
+    @Test func destinationKeepsTheSampleNameAsIs() {
+        let dotted = SampleFile(app: .photo, fileName: "my.beach.ora", type: .photoOpenRaster, title: "Beach")
+        #expect(SampleCatalog.destination(for: dotted, documents: "/D", exists: { $0 == "/D/Samples/my.beach.ora" })
+            == "/D/Samples/my.beach 2.ora")
+        let hidden = SampleFile(app: .photo, fileName: ".ora", type: .photoOpenRaster, title: "Beach")
+        #expect(SampleCatalog.destination(for: hidden, documents: "/D", exists: { $0 == "/D/Samples/.ora" }) == "/D/Samples/.ora 2")
     }
 }

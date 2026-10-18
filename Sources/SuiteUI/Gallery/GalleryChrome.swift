@@ -172,6 +172,8 @@ private struct GalleryChromeEditor: View {
     ) -> some View {
         Toggle(title, isOn: Binding(get: { isOn }, set: { onChange($0) }))
             .toggleStyle(.switch)
+            // The switch draws no title beside it, so it names itself for VoiceOver and the app audit.
+            .accessibilityLabel(title)
             .help(title)
             .suiteControl(id: "suite.gallery.editor.\(id)", enabled: true, reason: nil)
     }

@@ -9,6 +9,9 @@
 // the catalog's `cellValue` ("ready 640×480 4 stars, Picked, Red label",
 // "unreadable No stars"). The catalog notice is `library.notice`, its Show in
 // Finder button `library.notice.action`.
+import CoreGraphics
+import ImageIO
+import Vision
 import XCTest
 
 extension LibraryJourneyTests {
@@ -181,19 +184,61 @@ extension LibraryJourneyTests {
     /// The missing photo's help reads "The file is missing." when the runner
     /// shows a help tag; the shell journey notes it may not (#1678's runner),
     /// so a missing tag is recorded, not failed, and LibraryReadoutsTests
-    /// proves the text.
+    /// proves the text. A tag can reach accessibility with no text (dev run
+    /// 38835566584), so each tag shown within three seconds is read from its
+    /// label, title and value, or from its pixels with Vision when all are empty.
     @MainActor private func expectMissingHelp(on cell: XCUIElement, _ library: Journey) {
         let text = "The file is missing."
         cell.hover()
-        let tag = library.app.helpTags.firstMatch
-        guard tag.waitForExistence(timeout: 3) else {
+        let tags = library.app.helpTags
+        guard tags.firstMatch.waitForExistence(timeout: 3) else {
             XCTContext.runActivity(named: "no help tag on hover; \"\(text)\" is unchecked here") { _ in }
             return
         }
-        let match = library.app.helpTags.matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text))
-        let inside = tag.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text))
-        XCTAssert(match.count + inside.count > 0, "the missing photo's help tag doesn't read \"\(text)\"")
+        var read: [String] = []
+        let deadline = Date(timeIntervalSinceNow: 3)
+        repeat {
+            read = tags.allElementsBoundByIndex.map(Self.persistHelpText)
+            if read.contains(where: { Self.persistLetters($0).contains(Self.persistLetters(text)) }) { return }
+            Thread.sleep(forTimeInterval: 0.2)
+        } while Date() < deadline
+        if tags.firstMatch.exists {
+            let attachment = XCTAttachment(screenshot: tags.firstMatch.screenshot())
+            attachment.name = "missing-help-tag"
+            add(attachment)
+        }
+        XCTFail("the missing photo's help tag doesn't read \"\(text)\"; it reads \(read)")
+    }
+
+    /// A help tag's label, title and value, or what Vision reads in a shot of it when all are empty.
+    @MainActor private static func persistHelpText(_ tag: XCUIElement) -> String {
+        guard tag.exists else { return "" }
+        let named = [tag.label, tag.title, (tag.value as? String) ?? ""].filter { !$0.isEmpty }
+        guard named.isEmpty else { return named.joined(separator: " ") }
+        // Drawn three times larger first, as a tag's type is small.
+        let png = tag.screenshot().pngRepresentation
+        guard let source = CGImageSourceCreateWithData(png as CFData, nil),
+            let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+            let space = CGColorSpace(name: CGColorSpace.sRGB), image.width > 0, image.height > 0
+        else { return "" }
+        let large = CGRect(x: 0, y: 0, width: image.width * 3, height: image.height * 3)
+        guard let context = CGContext(
+            data: nil, width: Int(large.width), height: Int(large.height), bitsPerComponent: 8, bytesPerRow: 0,
+            space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return "" }
+        context.interpolationQuality = .high
+        context.draw(image, in: large)
+        guard let scaled = context.makeImage() else { return "" }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = false
+        guard (try? VNImageRequestHandler(cgImage: scaled, options: [:]).perform([request])) != nil else { return "" }
+        return (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: " ")
+    }
+
+    /// `text` lowercased with only its letters and digits, so OCR's spacing and punctuation don't matter.
+    private static func persistLetters(_ text: String) -> String {
+        String(text.lowercased().unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) })
     }
 
     /// Within ten seconds the catalog notice (`library.notice`) reads `text`.

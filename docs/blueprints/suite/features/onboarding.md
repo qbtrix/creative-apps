@@ -37,7 +37,7 @@ home (the harness HM-0 and `AfterGlowJourneyTests.swift` HM-3a, `HomeModel`
 reading `homeOrder`, the `afterglow` audit key), switching (hand-off
 transport to a cold app, Window > Switch To). Cross-line, in the Hand-offs
 list: the fixture exports #836 (Design), #837 (Flare), #838 (Photo), #839
-(Halo), which are the sample files; SuiteUI `needs-ui` for
+(Halo), which are the sample files; SuiteUI `needs-ui` #2867 for
 `SuiteSize.onboardingWindow` (blueprint 6.3) and #803 `AppTile`. **No
 settings wait:** settings is out of the beta (captain, 2026-10-17), so this
 packet makes the preferences slot live itself (OB-9, see What changed).
@@ -73,7 +73,7 @@ slice starts):
 - **`Tests/perf-suites.txt`** gains
   `suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing`:
   supervisor-only, asked for in OB-5's PR body.
-- **`needs-ui`:** `SuiteSize.onboardingWindow` (720 × 520, blueprint 6.3);
+- **`needs-ui`:** #2867 `SuiteSize.onboardingWindow` (720 × 520, blueprint 6.3);
   until it merges the window's size and margins come from `OnboardingLayout`
   in SuiteModel (as `HomeLayout` holds the home's numbers), so the design
   lint sees no literal in app code. `AppTile` #803: the starter tile and the
@@ -251,7 +251,7 @@ public struct OnboardingStarter: Equatable, Sendable {
     public var sample: SampleFile?
     public var sampleReason: String?     // nil when the sample can be opened
 }
-/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui): 720 × 520, 24 pt margins.
+/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui #2867): 720 × 520, 24 pt margins.
 public enum OnboardingLayout { public static let width = 720.0, height = 520.0, margin = 24.0 }
 /// Identifiers (blueprint 4.1): afterglow.onboarding.<name>.
 public enum OnboardingControls {

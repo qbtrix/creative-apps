@@ -21,20 +21,22 @@ public struct SampleCatalog: Sendable {
         return "The \(s.app.displayName) sample isn't in this build."
     }
     /// Where the copy lands: <documents>/Samples/<fileName>, or "<stem> 2.<ext>", "<stem> 3.<ext>" while
-    /// taken. Never an existing path: a copy never overwrites. The first suffix is 2, as in UniqueFileNames.
+    /// taken. Never an existing path: a copy never overwrites. The names come from UniqueFileNames, the one
+    /// suffix rule: each name `exists` reports joins the taken set, compared ignoring case, then the next is asked.
     public static func destination(for s: SampleFile, documents: String, exists: (String) -> Bool) -> String {
         let folder = documents + "/Samples/"
-        let first = folder + s.fileName
-        guard exists(first) else { return first }
-        let (stem, suffix) = split(s.fileName)
-        var number = 2
-        while exists(folder + "\(stem) \(number)\(suffix)") { number += 1 }
-        return folder + "\(stem) \(number)\(suffix)"
+        let (stem, ext) = split(s.fileName)
+        var taken: Set<String> = []
+        while true {
+            let name = UniqueFileNames.name(stem, extension: ext, among: taken)
+            guard exists(folder + name) else { return folder + name }
+            taken.insert(name)
+        }
     }
-    /// "Bounce.flare" → ("Bounce", ".flare"); a name with no dot (or only a leading one) has no suffix.
-    private static func split(_ name: String) -> (stem: String, suffix: String) {
+    /// "Bounce.flare" → ("Bounce", "flare"); a name with no dot (or only a leading one) has no extension.
+    private static func split(_ name: String) -> (stem: String, ext: String) {
         guard let dot = name.lastIndex(of: "."), dot != name.startIndex else { return (name, "") }
-        return (String(name[..<dot]), String(name[dot...]))
+        return (String(name[..<dot]), String(name[name.index(after: dot)...]))
     }
     /// The document ref of a copy at `path`.
     public static func ref(for s: SampleFile, path: String) -> SuiteDocumentRef {

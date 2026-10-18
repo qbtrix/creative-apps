@@ -6,7 +6,9 @@
 // and Level 3 lines up with Level 2: SidebarNode nests `secondLevelRows`, the
 // two-level cap. With the cap reverted (`children` in SidebarSection.swift),
 // Level 2 gets a chevron of its own and Level 3 a third indent, so the PNG
-// changes (LL-10, #249). macOS only.
+// changes (LL-10, #249). `goldens()` checks the same tree against
+// Golden/sidebar/suiteui-sidebar-nesting-<appearance>.png in the four
+// appearances (LL-16). macOS only.
 import SwiftUI
 import Testing
 
@@ -23,6 +25,15 @@ import Testing
         #expect(NestingSample.top.secondLevelRows.allSatisfy { $0.children.isEmpty })
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(NestingSample(), name: "suiteui-sidebar-nesting-\(scheme.name)", scheme: scheme)
+        }
+    }
+
+    @Test func goldens() {
+        let size = CGSize(
+            width: SuiteSize.sidebarWidth.ideal + SuiteSpacing.xxl * 2,
+            height: SuiteSize.windowMinimum.height / 2 + SuiteSpacing.xxl * 2)
+        for appearance in SnapshotAppearance.allCases {
+            assertGolden(NestingSample(), size: size, name: "suiteui-sidebar-nesting", area: "sidebar", appearance: appearance)
         }
     }
 }

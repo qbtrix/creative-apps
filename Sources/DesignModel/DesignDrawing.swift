@@ -9,8 +9,12 @@
 //                              both sides at least 1, both ends on whole points
 //                              (DesignWholePoints). A gesture that never left
 //                              its start is the kind's default size there.
-//   text                       a "Text" node of the default size at the start;
-//                              endDrag starts its inline edit (DesignText).
+//   text                       a click: a "Text" node of the default size at the
+//                              start, auto width. A drag (canvas-basics CB-3): a
+//                              box from the start to the pointer on whole points,
+//                              at least 8 wide and the default height tall, with
+//                              a fixed width. endDrag starts its inline edit
+//                              (DesignText).
 // Linux-safe.
 
 extension DesignWorkspace {
@@ -26,19 +30,32 @@ extension DesignWorkspace {
         place(kind, frame: frame, at: gesture.start)
     }
 
-    /// The Text tool's step: a default-size text node at the gesture's start.
-    mutating func placeText(from gesture: DesignGesture) {
+    /// The Text tool's step: a click places a default-size, auto-width text node at the
+    /// gesture's start; a drag a fixed-width box from the start to `end`.
+    mutating func placeText(from gesture: DesignGesture, to end: DesignPoint) {
         rewind(to: gesture.before)
-        place(.text, frame: defaultFrame(.text, at: gesture.start), at: gesture.start)
+        guard gesture.moved else {
+            place(.text, frame: defaultFrame(.text, at: gesture.start), at: gesture.start)
+            return
+        }
+        var frame = DesignRect(from: gesture.start, to: end).wholePoints
+        frame.width = Swift.max(frame.width, Self.minimumTextWidth)
+        frame.height = Swift.max(frame.height, DesignNodeKind.text.defaultSize.height)
+        guard let id = place(.text, frame: frame, at: gesture.start) else { return }
+        _ = pages.update(id) { $0.textStyle.fixedWidth = true }
     }
+
+    /// The narrowest box a Text drag makes.
+    static let minimumTextWidth = 8.0
 
     private func defaultFrame(_ kind: DesignNodeKind, at point: DesignPoint) -> DesignRect {
         DesignRect(x: point.x, y: point.y, width: kind.defaultSize.width, height: kind.defaultSize.height)
     }
 
-    private mutating func place(_ kind: DesignNodeKind, frame: DesignRect, at point: DesignPoint) {
+    @discardableResult
+    private mutating func place(_ kind: DesignNodeKind, frame: DesignRect, at point: DesignPoint) -> String? {
         let parent = selectedPage?.nodes.deepestFrame(containing: point)
         // The page is selected and the parent was just found on it, so the add cannot be refused.
-        _ = try? insertNode(kind, frame: frame, in: parent)
+        return try? insertNode(kind, frame: frame, in: parent)
     }
 }

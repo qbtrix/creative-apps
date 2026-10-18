@@ -19,5 +19,68 @@
     "find": "        exportOptions = options\n",
     "replace": "        exportOptions = options\n        history.undo.append(DesignHistory.Step(name: \"Export\", snapshot: snapshot))\n",
     "tests": "DesignExportPlanTests"
+  },
+  {
+    "label": "namesUniqueAgainstFolder: the folder's names are ignored",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "nodes.map(\\.name), extension: format.rawValue, among: existing)",
+    "replace": "nodes.map(\\.name), extension: format.rawValue, among: [])",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "namesUniqueWithinPlan: a planned name is not taken for the next layer",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "let names = UniqueFileNames.names(nodes.map(\\.name), extension: format.rawValue, among: existing)",
+    "replace": "let names = nodes.map { UniqueFileNames.name($0.name, extension: format.rawValue, among: existing) }",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "svgIgnoresScale: SVG and PDF are sized by the scale",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "    format == .png ? Swift.min(Swift.max(scale, 1), 3) : 1\n",
+    "replace": "    Swift.min(Swift.max(scale, 1), 3)\n",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "scaleClamps: the PNG scale is not clamped to 1...3",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "    format == .png ? Swift.min(Swift.max(scale, 1), 3) : 1\n",
+    "replace": "    format == .png ? scale : 1\n",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "refusalNamesTheCause: .nothingToExport thrown when ids were given",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "throw ids.isEmpty ? .nothingToExport : .nothingSelected",
+    "replace": "throw .nothingToExport",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "lockedExports: a locked layer is refused",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "found.filter { !page.isHiddenInTree($0.id) }",
+    "replace": "found.filter { !page.isHiddenInTree($0.id) && !$0.isLocked }",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "pageIsThePage: the page item is sized by the content bounds",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "page.frameWidth, page.frameHeight, options.format",
+    "replace": "page.contentBounds?.width ?? 0, page.contentBounds?.height ?? 0, options.format",
+    "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "frameScopeFramesOnly: an empty-ids plan exports top-level shapes too",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "page.nodes.filter { $0.kind == .frame } : fakeFind",
+    "replace": "page.nodes : fakeFind",
+    "tests": "DesignExportPlanTests"
+  },
+  {
+    "label": "hiddenInPlan: the plan keeps layers inside a hidden group",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "found.filter { !page.isHiddenInTree($0.id) }",
+    "replace": "found.filter { !$0.isHidden }",
+    "tests": "DesignExportPlanTests"
   }
 ]

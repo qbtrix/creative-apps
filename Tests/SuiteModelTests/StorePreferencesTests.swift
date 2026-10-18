@@ -66,6 +66,18 @@ import Testing
         #expect(await secondChanges.next() == 2)
     }
 
+    /// A save marks its own revision as seen: externalChange() after it (a watcher firing on this
+    /// instance's own write) yields nothing, so the next value is the following save's.
+    @Test func externalChangeAfterAnOwnSaveYieldsNothing() async throws {
+        let prefs = StorePreferences(store: store)
+        var changes = await prefs.changes().makeAsyncIterator()
+        let one = try await prefs.save(try await prefs.load())
+        #expect(await changes.next() == 1)
+        await prefs.externalChange()           // its own write: already yielded
+        _ = try await prefs.save(one)
+        #expect(await changes.next() == 2)
+    }
+
     @Test func onWriteIsCalledWithTheFileOnEverySave() async throws {
         let calls = Mutex<[String]>([])
         let prefs = StorePreferences(store: store) { name in calls.withLock { $0.append(name) } }

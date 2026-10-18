@@ -2,7 +2,9 @@
 // 25, 100 and 400 %, in Light and Dark, in
 // suiteui-marks-handles-{25,100,400}-{light,dark}.png, plus the hairline
 // check: at scale 2 the box's 1 pt outline is exactly two device pixels per
-// edge and each handle's edge is crisp on the pixel grid. macOS only.
+// edge and each handle's edge is crisp on the pixel grid. `goldens()` checks
+// the 100 % page against Golden/canvas/suiteui-marks-handles-<appearance>.png
+// in the four appearances (CM-14). macOS only.
 import Foundation
 import SwiftUI
 import Testing
@@ -45,6 +47,13 @@ import Testing
             #expect(!SnapshotHostTests.differs(edge.0, paper), "\(zoom) \(appearance.rawValue)")
             #expect(SnapshotHostTests.differs(edge.1, paper) && !SnapshotHostTests.differs(edge.1, edge.2),
                     "\(zoom) \(appearance.rawValue)")
+        }
+    }
+
+    @Test func goldens() {
+        for appearance in SnapshotAppearance.allCases {
+            assertGolden(Self.page(zoom: 1), size: CGSize(width: 360, height: 280),
+                         name: "suiteui-marks-handles", area: "canvas", appearance: appearance)
         }
     }
 }

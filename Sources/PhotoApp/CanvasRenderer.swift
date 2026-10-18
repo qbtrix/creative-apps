@@ -9,8 +9,12 @@
 // exists per event. `revision` says what is shown; the render time reaches the
 // status line at most four times a second, and not from a live stroke's
 // renders (`quietly`), since each readout re-runs the window's views. A failed
-// render keeps the last good picture and its message. Presentation state only:
-// it never changes the workspace.
+// render keeps the last good picture and its message. Renders go through
+// `route` (CoreRender's dispatcher, CPU or Metal); `follow` keeps it on the
+// app's View > Rendering choice, and a switch redraws the whole picture on the
+// new backend at once (a waiting request redraws all of it too). `backend` names the backend that drew the picture shown.
+// Presentation state only: it never changes the workspace.
+import Combine
 import CoreGraphics
 import Foundation
 import Observation
@@ -34,6 +38,33 @@ final class CanvasRenderer {
     private var waiting: PhotoWorkspace?
     /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
     @ObservationIgnored var onPicture: ((Int) -> Void)?
+    /// Where renders run; `use` switches it.
+    @ObservationIgnored private(set) var route = PhotoRenderRoute.cpu
+    /// The backend that drew the picture shown ("cpu", or the GPU's name); nil before the first.
+    private(set) var backend: String?
+    /// The next render redraws every tile: the route changed.
+    @ObservationIgnored private var redrawAll = false
+    @ObservationIgnored private var following: AnyCancellable?
+
+    /// Draws on `route` from now on: the next `show` redraws every tile there.
+    func use(_ route: PhotoRenderRoute) {
+        self.route = route
+        redrawAll = true
+    }
+
+    /// Draws on `rendering`'s route now and after every change of its choice,
+    /// calling `redraw` (the window's `show` of its workspace) each time. The
+    /// renderer keeps no workspace of its own: a held copy would make the next
+    /// brush write copy every tile it lands in.
+    func follow(_ rendering: PhotoRendering, redraw: @escaping @MainActor () -> Void) {
+        use(rendering.route)
+        redraw()
+        following = rendering.preference.observe { [weak self, weak rendering] _ in
+            guard let self, let rendering else { return }
+            use(rendering.route)
+            redraw()
+        }
+    }
 
     /// Draws `workspace` once the render in flight, if any, is done.
     /// `quietly` leaves the status line's render time as it is.
@@ -47,17 +78,20 @@ final class CanvasRenderer {
         let sameSize = canvas.width == tiles.width && canvas.height == tiles.height
         // A drag's revision is shown by the pacer's apply, then asked for again by
         // the window's revision change: the second ask has nothing to draw.
-        if sameSize, workspace.revision == revision, failure == nil { return }
+        if sameSize, workspace.revision == revision, failure == nil, !redrawAll { return }
         guard !isRendering else {
             waiting = workspace
             return
         }
         isRendering = true
-        let since = sameSize ? revision : nil
+        let since = sameSize && !redrawAll ? revision : nil
+        let route = self.route
+        redrawAll = false
         Task {
             do {
-                let update = try await PhotoRenderer.update(workspace, since: since)
+                let update = try await PhotoRenderer.update(workspace, since: since, route: route)
                 tiles.apply(update)
+                if backend != update.backend { backend = update.backend }
                 onPicture?(update.revision)
                 lastMilliseconds = update.milliseconds
                 if !quiet, ContinuousClock.now - timed >= Self.timing {

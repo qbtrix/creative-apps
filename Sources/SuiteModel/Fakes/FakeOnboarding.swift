@@ -7,9 +7,10 @@ public struct FakeOnboarding: OnboardingFlowing {
     public var pages: [OnboardingPage] {
         [OnboardingPage(id: "apps", title: "Five apps, one AfterGlow",
                         body: "Flare animates, Design draws, Photo retouches, Library sorts your photos, Halo composites. Switch with Control-Command 1 to 5."),
-         OnboardingPage(id: "focus", title: "What do you make most?", body: "AfterGlow puts those apps first. You can change this in Settings.",
+         OnboardingPage(id: "focus", title: "What do you make most?", body: "AfterGlow puts those apps first. Change it any time from Help > Welcome to AfterGlow.",
                         choices: OnboardingFocus.allCases),
-         OnboardingPage(id: "start", title: "Start with a sample", body: "Open a sample to see each app at work, or start from an empty home.")]
+         OnboardingPage(id: "start", title: "Start with a sample or a new document",
+                        body: "Open a sample to see an app at work, or click a New chip to start a document at once.")]
     }
     public func shouldShow(_ p: SuitePreferences, version: Int) -> Bool { p.onboardingDoneVersion == nil }
     public func finishing(_ p: SuitePreferences, focus: OnboardingFocus?, version: Int) -> SuitePreferences {

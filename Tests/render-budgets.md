@@ -43,6 +43,7 @@ has to end up.
 | Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 11–13 ms p95 release, 12 ms debug / 20 / 8.3 ms | #1471 removed the per-step ticks; measured on the finisher's Mac (busy, not quiet), over the 8.3 ms target and under the 20 ms report bound |
 | Flare | draw an ellipse on the canvas, 120 samples (Rectangle is not connected yet, IN-1) | 1 / 3 / 3 (debug; 122 before #1792) | p95 2.3–2.5 ms release, 2.3–2.5 debug / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
+| SuiteUI | stroke pad on the editor-kernel chrome panel, 120 samples, `RenderBudgetEditorKernelStrokeTests` | not yet / 1 / 0 | not yet / not gated / 8.3 ms | first measured by the macOS run after EK-31; the pad's samples stay in its own state, paced by `SuiteStrokePacer` |
 | AfterGlow onboarding | click Continue (page 1 to 2) | not yet / 2 / 1 | not yet / 50 / 16 ms | first measured by the macOS run after OB-5 |
 | AfterGlow onboarding | click the Photos focus chip | not yet / 1 / 0 | not yet / 50 / 16 ms | first measured by the macOS run after OB-5 |
 | AfterGlow onboarding | move the pointer across the first starter row, 120 samples | not yet / 0 / 0 | not yet / 16 / 8.3 ms | first measured by the macOS run after OB-5 |
@@ -50,6 +51,30 @@ has to end up.
 Bodies for Flare's scrub row and Library's selection count one per edit: each
 step changes the model once. Their target is that count, not 3. Halo's
 playback bound comes from #1296: at least `fps / 2` and at most `fps + 6`.
+
+## Photo at 8K, CPU against GPU (recorded, no budget yet)
+
+`PhotoRenderBudgetTests` (perf list, report only) draws a 7680 x 4320
+document with three layers (white Background, a full fill at 50 %, a Paint
+layer with one stroke) through `PhotoRenderer.update` on each View > Rendering
+backend. It times the first full picture and a brush frame (one 64 px brush
+segment, its damaged tiles). A pan draws nothing on either backend: the canvas
+moves the tiles it already has. These are records, not budgets; the
+large-image gate (beta-80 row G1) sets those. Measured on an M2 Pro,
+2026-10-18, optimized (`swift build -c release -Xswiftc -enable-testing
+-Xswiftc -DDEBUG`), median of 3 full pictures and 10 brush frames:
+
+| Backend | Full picture | Brush frame (2 tiles) |
+|---|---|---|
+| CPU (CoreRender's CPU backend, tiles in parallel) | 60 ms | 1.1 ms (max 1.1) |
+| GPU (Metal, rows of tiles in parallel) | 325 ms | 4.6 ms (max 11.3) |
+
+A debug build is 20x to 400x slower (CPU 21 s and 55 ms, GPU 125 s and
+247 ms before the rows and identity skips), so read the release row. The GPU
+loses here because every frame uploads the layer tiles it composites (Float32
+to half on the CPU) and reads the display bytes back, which the tile canvas
+then uploads again. Layer surfaces kept resident on the GPU between frames,
+and a display op that writes the drawable, are the G1 and G2 candidates.
 
 ## What the harness can't drive
 

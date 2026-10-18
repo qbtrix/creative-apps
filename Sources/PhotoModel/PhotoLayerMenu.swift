@@ -28,15 +28,17 @@ extension PhotoWorkspace {
     /// Whether Send Backward can run: the selected layer isn't the bottom one.
     public var canSendSelectedLayerBackward: Bool { selectedIndex.map { $0 < layers.count - 1 } ?? false }
 
-    /// Moves the selected layer one place toward the top. Ignored at the top.
+    /// Moves the selected layer one place toward the top. Ignored at the top,
+    /// where LayerTree.arrange leaves it and no step is recorded.
     public mutating func bringSelectedLayerForward() {
-        guard canBringSelectedLayerForward, let id = selectedLayerID else { return }
+        guard let id = selectedLayerID else { return }
         arrangeLayer(id, .bringForward)
     }
 
-    /// Moves the selected layer one place toward the bottom. Ignored at the bottom.
+    /// Moves the selected layer one place toward the bottom. Ignored at the
+    /// bottom, where LayerTree.arrange leaves it and no step is recorded.
     public mutating func sendSelectedLayerBackward() {
-        guard canSendSelectedLayerBackward, let id = selectedLayerID else { return }
+        guard let id = selectedLayerID else { return }
         arrangeLayer(id, .sendBackward)
     }
 

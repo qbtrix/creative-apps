@@ -19,10 +19,20 @@ public struct DesignLayerToggle: Equatable, Sendable {
     public let isOn: Bool
 }
 
-extension DesignWorkspace {
-    /// Whether node `id` or any node enclosing it is hidden; false for an unknown id.
+extension DesignPage {
+    /// Whether node `id` or any node enclosing it on this page is hidden; false for an id not on
+    /// it. The one hidden-in-tree rule: the Layers rows, the selection and export all read it.
     public func isHiddenInTree(_ id: String) -> Bool {
-        anyInTree(id) { $0.isHidden }
+        guard let path = nodes.ancestors(of: id) else { return false }
+        return (path + [id]).contains { nodes.node($0)?.isHidden == true }
+    }
+}
+
+extension DesignWorkspace {
+    /// Whether node `id` or any node enclosing it is hidden (DesignPage's rule, on its page);
+    /// false for an unknown id.
+    public func isHiddenInTree(_ id: String) -> Bool {
+        pages.contains { $0.isHiddenInTree(id) }
     }
 
     /// The eye and lock toggles for node `id`'s row, in that order; empty for an unknown id.
