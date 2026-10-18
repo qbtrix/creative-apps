@@ -28,6 +28,13 @@
 //   AfterGlowApp  the launcher: the home window that opens the five apps.
 //             macOS only.
 //
+//   AfterGlowCLICore, AfterGlowCLI  the `afterglow` command line tool: the
+//             Linux-safe router library (Foundation, SuiteKernel, SuiteModel
+//             and every <X>Model) and its thin executable, product
+//             "afterglow". With AfterGlowCLITests, on Linux and macOS
+//             (docs/blueprints/suite/features/afterglow-cli.md). Headless, so
+//             not part of the Release graph in project.yml.
+//
 //   AppAuditTests  the app audit's pure code (pixel math, engine, checks) and
 //             its tests, Foundation only, on Linux and macOS. project.yml
 //             also compiles its non-test files into every UI journey bundle
@@ -36,7 +43,7 @@
 // The macOS-only targets are appended under `#if os(macOS)`. The manifest is
 // evaluated on the host, so on Linux they do not exist at all: `swift build`
 // and `swift test` there cover exactly the Model targets (SuiteModel and
-// SuiteKernel among them) and their tests.
+// SuiteKernel among them), the afterglow CLI and their tests.
 import PackageDescription
 
 // The engines, pinned to one creative-core commit (`revision:` below; core has
@@ -58,7 +65,7 @@ func model(_ name: String, _ engines: [String]) -> [Target] {
 
 let apps = ["Flare", "Design", "Photo", "Library", "Halo"]
 
-var products: [Product] = []
+var products: [Product] = [.executable(name: "afterglow", targets: ["AfterGlowCLI"])]
 var targets: [Target] =
     model("Flare", ["FlareCore"])
     + model("Design", ["CoreColor"])
@@ -71,6 +78,9 @@ var targets: [Target] =
         .target(name: "SuiteKernel", dependencies: [.product(name: "FlareCore", package: core)]),
         .testTarget(name: "SuiteKernelTests", dependencies: ["SuiteKernel"]),
         .testTarget(name: "AppAuditTests"),
+        .target(name: "AfterGlowCLICore", dependencies: ["SuiteKernel", "SuiteModel"] + apps.map { .target(name: "\($0)Model") }),
+        .executableTarget(name: "AfterGlowCLI", dependencies: ["AfterGlowCLICore"]),
+        .testTarget(name: "AfterGlowCLITests", dependencies: ["AfterGlowCLICore"]),
     ]
 
 #if os(macOS)

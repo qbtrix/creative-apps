@@ -1,0 +1,16 @@
+{
+  "id": "cli-runner",
+  "name": "CLI runner",
+  "description": "The `afterglow` executable (AfterGlowCLI/main.swift: hands the arguments, stdout and stderr to CLI.run and exits with its code) and the router in AfterGlowCLICore: CLI.run, CLI.version and the sysexits codes (CLI.Exit), with the parser, output, file system and app registry files the single-shot forms use. CL-1 makes `--version` live (one JSON object, sorted keys, exit 0); every other form exits 69 naming the slice that builds it until CL-2 and CL-4 fill them.",
+  "technology": "Swift 6, Foundation, Linux and macOS",
+  "paths": [
+    "Sources/AfterGlowCLI/",
+    "Sources/AfterGlowCLICore/CLI.swift",
+    "Sources/AfterGlowCLICore/CLIIO.swift",
+    "Sources/AfterGlowCLICore/LiveIO.swift",
+    "Sources/AfterGlowCLICore/Apps.swift",
+    "Sources/AfterGlowCLICore/Arguments.swift",
+    "Sources/AfterGlowCLICore/Output.swift"
+  ],
+  "order": 10
+}
