@@ -21,6 +21,20 @@
     "tests": "LibraryThumbnailScaleTests.swift"
   },
   {
+    "label": "a pass's images are dropped",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "case .success(let image): setThumbnail(image, for: request)",
+    "replace": "case .success: break",
+    "tests": "LibraryThumbnailResultTests.swift"
+  },
+  {
+    "label": "a pass's failures are dropped",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "case .failure(let error): failThumbnail(request, error)",
+    "replace": "case .failure: break",
+    "tests": "LibraryThumbnailResultTests.swift"
+  },
+  {
     "label": "a cached position is trusted without checking its slot still holds the id",
     "file": "Sources/LibraryModel/LibraryThumbnails.swift",
     "find": "index < ids.endIndex, ids[index] == id { return index }",
