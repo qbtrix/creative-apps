@@ -2,16 +2,16 @@
 
 Issue: #1496 · Packet: docs/blueprints/design/features/copy-group.md
 Run: act-1a14d32dfd7-u3ff (before: act-1a14a88d756-rnok) · Session: claude/layers-panel-style-rows-copy-group-x5zrpm · Started: 2026-10-17T15:46Z
-Stage: 3 polling
+Stage: 4 done
 Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
-Next: a completed design or full run holding b8344824 (#2615) shows DesignArrangeDragTests green; then Belt-Slice-Done CG-a and Belt-Contact-Sheet on #1496
+Next: none; CG-a done with gap #2694 (Belt-Slice-Done 6247090184, Belt-Contact-Sheet 6247090297 on 39101541012)
 
 Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-group.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| CG-a | duplicate and Option-drag copy, group and ungroup, cut copy paste also between files | C-1, C-2, C-3, C-4, C-5, built | J7, J8, J9 | design-seams (C-1, C-5); design-window DW-a (C-4, C-5), DW-b (C-4) | no ("ui_slice": "none") | 2 | fixing (#2611) | 39093367358 (J7 J8 J9 red) | – |
+| CG-a | duplicate and Option-drag copy, group and ungroup, cut copy paste also between files | C-1, C-2, C-3, C-4, C-5, built | J7, J8, J9 | design-seams (C-1, C-5); design-window DW-a (C-4, C-5), DW-b (C-4) | no ("ui_slice": "none") | 2 | done, gaps #2694 | 39101541012 (J7 J8 J9 green; DesignArrangeDragTests red → #2694) | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -39,5 +39,6 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - CG-a is Model and tests only (no UI slice): no critic panel on screens.
 
 ## Open
-- CG-a round 2 (last): #2615 fixes #2611 (DesignArrangeDragTests pressed within the fit zoom's handle reach). Anything still red after it becomes a gap. #2566 (gap, p2): Shift-click on a Layers row adds nothing; outside CG-a.
+- (closed) CG-a round 2 (last): #2615 fixes #2611 (DesignArrangeDragTests pressed within the fit zoom's handle reach). Anything still red after it becomes a gap. #2566 (gap, p2): Shift-click on a Layers row adds nothing; outside CG-a.
 - 2026-10-18T05:37:17Z scoped design run 39099202215 (a0f2ff00, holds #2569): J7 J8 J9 pass; DesignArrangeDragTests still red as expected (no #2615). #2615 merged as b8344824.
+- 2026-10-18T07:22:30Z scoped design run 39101541012 (3a8c658a, holds b8344824): J7 J8 J9 pass; DesignArrangeDragTests now never reaches the editor (bodies 0). Round cap reached: gap #2694 filed; Belt-Slice-Done CG-a with gaps #2694 and Belt-Contact-Sheet posted on #1496.
