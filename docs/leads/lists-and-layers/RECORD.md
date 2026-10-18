@@ -2,9 +2,9 @@
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: fix round 1 in lane
+Stage: fix round 1 blocked on dev
 Base: 2e27b8db (origin/dev)
-Next: #2992 in the lane (macOS build-only next); #2839 decided after the next suiteui run; LL-17 feature-done after #2992 merges
+Next: #2992's macOS build (39166219091) failed only on dev's PhotoZoomSweepTests (TileCanvasView); once #2990 merges, merge dev, regate, push, move Head
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.

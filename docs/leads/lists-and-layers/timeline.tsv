@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-18T20:53:39Z	fix round 1	started	#2837	findings #2837 #2838 #2839 #2864 #2865: list journeys red since 16:35Z
 2026-10-18T21:00Z	fix-1	pr-opened	#2992	list journeys click at element middles; Fixes #2837 #2838 #2864 #2865
 2026-10-18T21:02:05Z	fix	lane-wait	#2992	no lane comment yet; dev CI 39164756292 pending
+2026-10-18T21:24:46Z	fix	blocked	#2992	macOS build red on dev's PhotoZoomSweepTests; fix #2990 open; commented
