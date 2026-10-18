@@ -23,7 +23,7 @@
 // instead of the checkerboard. `onPointer`
 // reports the document point under the pointer, nil once it leaves the artboard.
 // CanvasLayout is the placement and pan math, plain and tested on its own;
-// every pan is clamped to its scrollable area. The content is clipped to the
+// every pan is clamped to its scrollable area, and it draws no scroll bars. The content is clipped to the
 // artboard; the overlay (selection outlines and handles, inline editors) is
 // laid out on the artboard but not clipped, so marks on a shape that crosses
 // the document's edge still show. Content, not chrome: flat, no glass. The
@@ -228,6 +228,8 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .simultaneousGesture(pinch, isEnabled: onZoom != nil)
             .pointerStyle(panStart != nil ? .grabActive : spaceHeld ? .grabIdle : pointer)
         }
+        // No scroll bars: the rulers show where the view is, and an unnamed bar fails the app audit (SJ21).
+        .scrollIndicators(.never)
         .scrollPosition($position)
         .onScrollGeometryChange(for: CGPoint.self) { $0.contentOffset } action: { _, offset in scrolled = offset }
         .background(SuiteColor.canvasSurround)
