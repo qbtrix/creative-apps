@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-18T21:25:08Z	check	heartbeat: full dev run 39166900704 f33b5b88 pending (contains #2903); scoped suite 39167050158 f33b5b88 queued, for OB-u round-2 critics
 2026-10-18T21:51:30Z	check	heartbeat: full dev runs keep cancelling while pending (latest 39169434591 e3859e3f); scoped suite 39167050158 still queued
 2026-10-18T22:17:22Z	check	heartbeat: scoped suite 39167050158 f33b5b88 in progress (OB-u round 2 critics on completion); full dev run 39171061138 85f4a229 pending
+2026-10-18T22:22:23Z	review	OB-u round-2 critic panel started on scoped run 39167050158 (f33b5b88)

@@ -14,7 +14,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OB-a | `Sources/SuiteModel/Onboarding/` with every type and signature the window calls as stubs returning the fake's values; its Linux tests written and disabled | OB-1, OB-2 | MJ-OB0 | – | no | 0 | done (Belt-Slice-Done: run 39132122171 at 4bf67be8, #2791) | – | – |
-| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 1 | fix round 1 (#2884-#2887, #2895); OB-5g merged; fixes #2901, #2903, #2905 open | – | – |
+| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 1 | fix round 1 merged (#2901, #2903, #2905; OB-5g); round-2 review on scoped run 39167050158 (f33b5b88) running | – | – |
 | OB-m | SuiteOnboarding, OnboardingLaunch, OnboardingModel do the work; StorePreferences over FileStore makes the preferences slot live | OB-7, OB-8, OB-9 | MJ-OB1, MJ-OB2, MJ-OB4 | OB-a | no | 0 | done (Belt-Slice-Done: run 39143942767 at bafd1d38, #2825) | – | – |
 | OB-s | SampleCatalog names one sample per app, finds it under Resources, copies into Documents without overwriting; Bundle/Samples/ holds the files | OB-10, OB-11 | MJ-OB3 | OB-a; bundle (built: bundle-apps copies Bundle/Samples/) | no | 1 | done (Belt-Slice-Done: run 39152649677 at 71facd44, after fix round 1) | – | – |
 | OB-z | The slot is live, the window reads the bundle's samples, journeys on live | OB-12, OB-13 | OJ3, OJ4 | OB-u, OB-m, OB-s (OB-12); switching (OB-13: Window > Switch To and the transport are on dev) | no | 0 | waiting | – | – |
@@ -61,6 +61,7 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 | OB-a | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2852 (minor) | clean |
 | OB-s | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2849 (major), #2850, #2851 (minor) | not clean: fix round 1 |
 | OB-u | 39143942767 | bafd1d38 | clarity, journey, design, layout, controls, mouse, taste, oracle | #2884 (major), #2885, #2886, #2887 (minor); #2895 (major, from the run's hang) | not clean: fix round 1 |
+| OB-u (round 2) | 39167050158 | f33b5b88 | clarity, journey, design, layout, controls, mouse, taste, oracle | running | – |
 | OB-m | 39143942767 | bafd1d38 | clarity, journey, design, controls, oracle | #2890, #2891 (major), #2892, #2893 (minor) | not clean: fix round 1 (slice already merged-done; follow-ups) |
 
 ## Decisions
