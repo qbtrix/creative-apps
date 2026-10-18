@@ -5,8 +5,9 @@
 // has focus; the items name those keys in their help rather than take them as
 // key equivalents, so typing in a field never plays or sets a point. Each item
 // is sent through the focused window and disabled with the Model's reason as
-// help (HaloMenuItem).
+// help (SuiteUI's MenuCommand).
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 struct HaloAnimationMenu: Commands {
@@ -17,20 +18,20 @@ struct HaloAnimationMenu: Commands {
 
     var body: some Commands {
         CommandMenu("Animation") {
-            HaloMenuItem(command: .playPause, target: target, systemImage: "playpause", key: "Space")
-            HaloMenuItem(command: .toggleLoop, target: target, systemImage: "repeat")
+            MenuCommand(command: .playPause, target: target, systemImage: "playpause", key: "Space")
+            MenuCommand(command: .toggleLoop, target: target, systemImage: "repeat")
             Divider()
-            HaloMenuItem(command: .nextFrame, target: target, key: "→")
-            HaloMenuItem(command: .previousFrame, target: target, key: "←")
-            HaloMenuItem(command: .goToStart, target: target, key: "Home")
-            HaloMenuItem(command: .goToEnd, target: target, key: "End")
+            MenuCommand(command: .nextFrame, target: target, key: "→")
+            MenuCommand(command: .previousFrame, target: target, key: "←")
+            MenuCommand(command: .goToStart, target: target, key: "Home")
+            MenuCommand(command: .goToEnd, target: target, key: "End")
             Divider()
-            HaloMenuItem(command: .setInPoint, target: target, key: "I")
-            HaloMenuItem(command: .setOutPoint, target: target, key: "O")
+            MenuCommand(command: .setInPoint, target: target, key: "I")
+            MenuCommand(command: .setOutPoint, target: target, key: "O")
             Divider()
             Menu("Keyframe Easing") {
                 ForEach(HaloEasingPreset.allCases, id: \.self) { preset in
-                    HaloMenuItem(command: .setEasing(preset), target: target)
+                    MenuCommand(command: .setEasing(preset), target: target)
                 }
             }
         }

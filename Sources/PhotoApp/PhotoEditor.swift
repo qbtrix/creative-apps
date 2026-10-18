@@ -71,7 +71,9 @@ struct PhotoEditor: View {
             } status: {
                 HStack(spacing: 0) {
                     if let saveStatus {
-                        PhotoSaveStatusLabel(status: saveStatus, fileName: model.documentName)
+                        EditorSaveStatus(
+                            saveStatus.editorState, title: saveStatus.title,
+                            help: saveStatus.help(fileName: model.documentName), identifier: "photo.bar.saved")
                     }
                     // The refusal, then zoom, image size, the note, the tool, the render
                     // time and, on the fakes (`-PhotoFixture`), the "Preview data" pill.
