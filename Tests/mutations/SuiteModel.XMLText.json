@@ -1,0 +1,23 @@
+[
+  {
+    "label": "ampEscaped: & is written raw",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "case \"&\": out += \"&amp;\"",
+    "replace": "case \"&\": out += \"&\"",
+    "tests": "XMLTextTests"
+  },
+  {
+    "label": "aposEscaped: ' is written raw",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "case \"'\": out += \"&apos;\"",
+    "replace": "case \"'\": out += \"'\"",
+    "tests": "XMLTextTests"
+  },
+  {
+    "label": "ltEscaped: < is written raw",
+    "file": "Sources/SuiteModel/Values/XMLText.swift",
+    "find": "case \"<\": out += \"&lt;\"",
+    "replace": "case \"<\": out += \"<\"",
+    "tests": "XMLTextTests"
+  }
+]

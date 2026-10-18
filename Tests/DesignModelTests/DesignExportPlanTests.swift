@@ -212,4 +212,26 @@ import Testing
         let bare = try empty.exportPlan(DesignExportOptions(format: .svg, scope: .page), existing: [])
         #expect(bare.map(\.width) == [1440] && bare.map(\.height) == [1024])
     }
+
+    @Test func framesOnlyWhenNoIDs() throws {
+        let loose = DesignNode(id: "r", name: "Loose", kind: .rectangle, frame: rc(0, 0, 10, 10))
+        let plan = try LiveExport().plan([], on: pageOf([card("c1"), loose]), format: .png, scale: 1, existing: [])
+        #expect(plan.map(\.nodeID) == ["c1"])
+        #expect(refusal { _ = try LiveExport().plan([], on: pageOf([loose]), format: .png, scale: 1, existing: []) } == .nothingToExport)
+    }
+
+    @Test func planAndLayersShareOneHiddenRule() throws {
+        var workspace = cards
+        let group = try workspace.addNode(.frame, frame: rc(10, 10, 80, 80), in: nil)
+        let child = try workspace.addNode(.rectangle, frame: rc(5, 5, 10, 10), in: group)
+        for hidden in [false, true] {
+            try workspace.setNodeHidden(group, hidden)
+            let page = try #require(workspace.selectedPage)
+            #expect(page.isHiddenInTree(child) == hidden)
+            #expect(workspace.isHiddenInTree(child) == page.isHiddenInTree(child))
+            let refused = refusal { _ = try LiveExport().plan([child], on: page, format: .png, scale: 1, existing: []) }
+            #expect((refused == .nothingSelected) == page.isHiddenInTree(child))
+        }
+        #expect(!page.isHiddenInTree("nope"))
+    }
 }
