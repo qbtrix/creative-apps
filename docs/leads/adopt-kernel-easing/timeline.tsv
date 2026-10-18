@@ -17,3 +17,7 @@ utc	stage	event	ref	note
 2026-10-18T12:54Z	3	pr-opened	#2786	AE-f1, Mutate 6/6
 2026-10-18T13:45Z	3	fix	#2786	needs-rebase on FlareModel C4 part; lead merged dev
 2026-10-18T13:55Z	3	fix	#2786	merge of dev pushed (0b1d7808), gate PASS 812 tests, Head moved, footer dropped
+2026-10-18T14:30Z	3	pr-merged	#2786	AE-f1 merged 14:15Z
+2026-10-18T14:30Z	3	wave-end	1	AE-flare wave 1 merged; AS-h2 #2792 met AE-halo's wait
+2026-10-18T14:30Z	3	stage-start	AE-f2	wave 2 builder AE-f2
+2026-10-18T14:30Z	3	stage-start	AE-h1	wave 1 builder AE-h1
