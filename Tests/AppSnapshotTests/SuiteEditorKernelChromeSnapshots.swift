@@ -38,9 +38,10 @@ private struct ExportSheets: View {
 
 private struct StrokePadSheet: View {
     var body: some View {
-        let dots = (0..<40).map { i in
-            GalleryStrokePad.Dot(
-                point: CGPoint(x: 40 + Double(i) * 9, y: 180 + 60 * sin(Double(i) / 6)), pressure: 0.2 + 0.8 * Double(i) / 39, starts: i == 0)
+        let dots: [GalleryStrokePad.Dot] = (0..<40).map { i in
+            let t = Double(i)
+            let point = CGPoint(x: 40 + t * 9, y: 180 + 60 * sin(t / 6))
+            return GalleryStrokePad.Dot(point: point, pressure: 0.2 + 0.8 * t / 39, starts: i == 0)
         }
         GalleryStrokePad(dots: dots, hover: dots.last?.point)
             .padding(SuiteSpacing.xxl).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

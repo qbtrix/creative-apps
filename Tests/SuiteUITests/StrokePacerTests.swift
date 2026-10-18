@@ -26,7 +26,7 @@ import Testing
         #expect(read(true, 1.5) == 1 && read(true, 0.25) == 0.25 && read(true, .nan) == 1 && read(false, 0.1) == 1)
         for (zoom, side) in [(0.25, 16.0), (1, 64), (4, 256)] {
             let ring = BrushCursorMark.frame(point: CGPoint(x: 40, y: 20), diameter: 64, zoom: zoom)
-            #expect(ring?.width == side && ring?.midX == 40 * zoom && ring?.midY == 20 * zoom)
+            #expect(ring?.width == CGFloat(side) && ring?.midX == CGFloat(40 * zoom) && ring?.midY == CGFloat(20 * zoom))
         }
         #expect(BrushCursorMark.frame(point: nil, diameter: 64, zoom: 1) == nil)
     }
