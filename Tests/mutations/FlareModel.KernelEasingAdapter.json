@@ -1,0 +1,8 @@
+[
+  {"label": "refusalIgnored: a track KeyRules refuses is skipped, so a refused move goes ahead", "file": "Sources/FlareModel/KeyframeEditing+Kernel.swift", "find": "catch { return (error, group.property) }", "replace": "catch { continue }", "tests": "FlareKernelEasingTests"},
+  {"label": "rangeAfterCollision: the range pass is dropped, so a collision wins over a key past the range", "file": "Sources/FlareModel/KeyframeEditing+Kernel.swift", "find": "for withStaying in [false, true] {", "replace": "for withStaying in [true] {", "tests": "FlareKernelEasingTests"},
+  {"label": "summaryNamed: the summary key maps to a named empty track instead of .all", "file": "Sources/FlareModel/EasingEditing+Kernel.swift", "find": "track: property.map { .property($0) } ?? .all", "replace": "track: .property(property ?? \"\")", "tests": "FlareKernelEasingTests"},
+  {"label": "handlesSwapped: Flare's first handle moves the kernel's second", "file": "Sources/FlareModel/EasingEditing.swift", "find": "EaseCurve.moving(handle.rawValue - 1,", "replace": "EaseCurve.moving(handle.rawValue % 2,", "tests": "FlareKernelEasingTests"},
+  {"label": "insertAtFrame: the kernel inserts after the frame, so a key at the insert frame stays put", "file": "Sources/FlareModel/KeyframeEditing+Kernel.swift", "find": "let before = frame > Int.min ? frame - 1 : frame", "replace": "let before = frame", "tests": "FlareKernelEasingTests"},
+  {"label": "removeShifted: frames go from the frame after, so the key at the first removed frame stays", "file": "Sources/FlareModel/KeyframeEditing+Kernel.swift", "find": "KeyRules.removeFrames(&scratch, count, at: frame)", "replace": "KeyRules.removeFrames(&scratch, count, at: frame + 1)", "tests": "FlareKernelEasingTests"}
+]

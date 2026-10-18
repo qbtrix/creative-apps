@@ -3,6 +3,7 @@
 // `SetKeyframeEasing`. A summary key (no property) sets every track keyed at its frame. `FakeEasingEditing` stays the
 // window-level `EasingEditing` stand-in; this is not it. With `unavailable` set, reads are empty and writes throw it.
 import FlareCore
+import SuiteKernel
 
 public struct FakeEasing: KeyframeEasing {
     /// Why this member is off; nil when it works.
@@ -12,9 +13,8 @@ public struct FakeEasing: KeyframeEasing {
     public var presets: [EasingPreset] { unavailable == nil ? EasingPreset.allCases : [] }
 
     public func curve(_ easing: Easing, count: Int) -> [Point] {
-        guard unavailable == nil, count > 0 else { return [] }
-        let last = Double(max(count - 1, 1))
-        return (0..<count).map { Point(x: Double($0) / last, y: easing.value(at: Double($0) / last)) }
+        guard unavailable == nil else { return [] }
+        return EaseCurve.samples(of: easing, count: count)
     }
 
     public func setEasing(_ easing: Easing, at key: KeyRef, owner: LayerOwner,
@@ -24,8 +24,7 @@ public struct FakeEasing: KeyframeEasing {
         guard let layer = engine.document.layers(of: owner)?.first(where: { $0.id == key.layerID }) else {
             throw CommandError.layerNotFound(key.layerID)
         }
-        let properties = key.property.map { [$0] }
-            ?? layer.tracks.filter { $0.value.contains { $0.frame == key.frame } }.keys.sorted()
+        let properties = key.easedProperties(in: layer)
         guard !properties.isEmpty else { throw CommandError.keyframeNotFound(property: "", frame: key.frame) }
         func write(_ engine: inout CommandEngine) throws {
             for property in properties {
