@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-18T04:25:13Z	3	merged	#2561	SR-b r1 on dev d3a4f16e; next run holding it closes SR-b
 2026-10-18T04:35:09Z	3	check	39097469910	scoped design on d3a4f16e in progress (SR-b)
 2026-10-18T04:39:26Z	style-rows	check	dev@e01529f4	SR-b fix #2561 merged (d3a4f16e7); scoped design run 39097469910 on it in progress; full CI 39093416270 macOS still running; no dev-red
+2026-10-18T04:56:58Z	style-rows	check	dev@308b58a9	SR-b: P2 testScrubLatency passed in scoped run 39097469910 on d3a4f16e7 (fix #2561); awaiting Linux job of dev CI 39098181461 for merged-done; full CI 39093416270 macOS failed (pre-fix, failures across design/flare/halo/afterglow); no dev-red
