@@ -5,3 +5,5 @@ utc	stage	event	ref	note
 2026-10-18T08:23Z	0	stopped	#1937	still blocked on EK-keys
 2026-10-18T08:54Z	0	recheck	#1937	Belt nudge 2; dev 93b1e91, EK-keys still stubs, editor-kernel waiting on lane batch
 2026-10-18T08:54Z	0	stopped	#1937	still blocked on EK-keys
+2026-10-18T09:25Z	0	recheck	#1937	Belt nudge 3; dev ed52eaa8; EK-14 tests #2655 not yet on dev
+2026-10-18T09:25Z	0	stopped	#1937	still blocked on EK-keys
