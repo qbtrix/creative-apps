@@ -2,7 +2,7 @@
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: waiting on a dev full/suiteui run past #2990 for journey results
+Stage: waiting on full CI 39171756438 / scoped suite 39172233475 on 349578b
 Base: 2e27b8db (origin/dev)
 Next: Belt-Contact-Sheet on #1344 or gap issues; decide #2839
 
