@@ -16,6 +16,9 @@
 // in the `suite.gallery.status` line (`.topLeft`). The second draws
 // `SnapGuideMarks` over `SnapGuides.fake` between two boxes: a line at x 300
 // and gaps labelled 100, the `suite.guides` value its `summary`.
+//
+// A debug-only `bodyRuns` counts the page's bodies, the window bodies EK-6's
+// render budget reads (RenderBudgetEditorKernelTests, as CanvasHostPage's).
 import SuiteKernel
 import SwiftUI
 
@@ -45,7 +48,12 @@ enum GalleryEditorKernel {
     }
 }
 
-private struct GalleryEditorKernelPage: View {
+/// Internal, not private, so RenderBudgetEditorKernelTests hosts it and reads `bodyRuns`.
+struct GalleryEditorKernelPage: View {
+    #if DEBUG
+    // view-static: main-actor
+    static var bodyRuns = 0
+    #endif
     @State private var tree = KernelFixtures.tree200
     @State private var open = GalleryEditorKernel.allOpen(KernelFixtures.tree200)
     @State private var log: [String] = []
@@ -54,6 +62,9 @@ private struct GalleryEditorKernelPage: View {
     private let zoom = 0.5
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         HStack(alignment: .top, spacing: SuiteSpacing.m) {
             VStack(alignment: .leading, spacing: SuiteSpacing.s) {
                 header("Layers")
