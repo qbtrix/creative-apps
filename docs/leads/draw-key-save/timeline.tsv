@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-18T02:14Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; full run 39082226458 ended red (Linux, dev-red #2509, design line; macOS cancelled); 39088586270 (d3cd7d9f) running; nothing pending
 2026-10-18T02:45Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; full run 39088586270 (d3cd7d9f) Linux red again (dev-red #2509, design line), macOS running; 39090620413 (498c5b3c) queued; nothing pending
 2026-10-18T03:18Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; dev-red #2509 closed (main 948bcbf4); full run 39092671040 (10fb92ec) pending, 39090620413 cancelled; nothing pending
+2026-10-18T03:50Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; no dev-red open; main 0965457c; full run 39094858422 (fc009a3b) pending; nothing pending
