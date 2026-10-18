@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-u fix round 1 open: #2905 (#2884, #2885), #2903 (#2886, #2887), #2901 (#2895 hang); OB-5g merged (#2888, #2889). OB-m follow-ups open: #2906 (#2890, #2892), #2902 (#2893); #2891 fixer once #2903 merges (both touch OnboardingModel.send). OB-u slice-done and Mac-Finish-Wanted once its PRs merge and a full dev run's Linux is green. OB-13 once switching and the bundled samples are on dev; OB-z review after it.
+Next: OB-u fix round 1: #2901 and #2905 merged; #2903 (#2886, #2887) macOS build green, waiting on the lane sweep. OB-m follow-ups: #2902 build green, #2906 build running; #2891 fixer once #2903 merges (both touch OnboardingModel.send). OB-u slice-done and Mac-Finish-Wanted once #2903 merges and a full dev run containing it has a green Linux job. OB-13 once switching and the bundled samples are on dev; OB-z review after it.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 

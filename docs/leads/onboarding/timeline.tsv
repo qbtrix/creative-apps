@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-18T19:30:10Z	merged	F-2895	#2901 f8e3cd15
 2026-10-18T19:36:22Z	heartbeat	-	#2902 #2903 #2905 #2906 wait on lane macOS builds; 39152649677 macOS in ui-test (scripts/ci step failed at 18:38, no hang)
 2026-10-18T19:39:33Z	merged	F-2884	#2905 a6a99476
+2026-10-18T20:04:16Z	check	lane builds green for #2902 #2903, #2906 running; waiting on lane sweep
