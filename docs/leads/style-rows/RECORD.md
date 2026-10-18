@@ -1,20 +1,20 @@
 # style-rows lead record
 
 Issue: #1497 · Packet: docs/blueprints/design/features/style-rows.md
-Run: act-1a149c0c306-8ckd (before: act-1a1487bf8e3-hwdj) · Session: claude/design-shell-parity-lead-678eue · Started: 2026-10-17T06:08Z
-Stage: 3 wave 2
-Base: d2c4fa212a4b4ea55bc551b783fc1c48520e5fbf
-Next: poll every 10-15 min: ST-4b, ST-5f, ST-5, ST-4 start when design-window DW-a (#1494) merges (no DW PR open yet); full CI 39036875578 on d2c4fa21 holds ST-7
+Run: act-1a14d32dfd7-u3ff (before: act-1a149c0c306-8ckd, act-1a1487bf8e3-hwdj) · Session: claude/layers-panel-style-rows-copy-group-x5zrpm · Started: 2026-10-17T06:08Z
+Stage: 3 polling
+Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
+Next: wait for the lane to merge #2561 (SR-b fix round 1, Fixes #2552), then a completed, successful design scoped or full run that holds it; post Belt-Slice-Done SR-b, then Belt-Contact-Sheet on #1497
 
-Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497 style-rows. One wave plan across the three.
+Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-group.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SR-m | On the live services every style setter refuses, skips and clamps as blueprint 5.4 says, the inspector's shared values read "Mixed" only when layers differ, and the inline editor's scale follows the zoom. | ST-1, ST-2, ST-3 | MJ8 | design-contracts (built) | no | 0 | done | 39033633296 | – |
-| SR-t | Text family, size, weight and alignment rows set a text layer, the canvas and the inline editor draw its text in that style, committed text doesn't jump at any zoom, and top-level frame names sit above their frames. | ST-6b, ST-4b, ST-5t, ST-5f | J11 | SR-m (ST-4b, ST-5t); design-window DW-a (ST-4b, ST-5t, ST-5f) | yes | 0 | building (ST-6b merged; rest wait on DW-a) | – | – |
-| SR-a | Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read "Mixed" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget. | ST-4, ST-6, ST-7 | J10 | SR-m (ST-4, ST-7); design-window DW-a (ST-4, ST-6) and DW-b (ST-4) | yes | 0 | building (ST-7 merged; ST-4, ST-6 wait on DW-a) | – | – |
-| SR-b | The canvas draws radius, stroke and opacity as stored, and scrubs and typing keep up on 2,000 layers. | ST-5, ST-8 | P2 | design-window DW-a (ST-5, ST-8); SR-a, SR-t (ST-8) | yes | 0 | planned | – | – |
+| SR-t | Text family, size, weight and alignment rows set a text layer, the canvas and the inline editor draw its text in that style, committed text doesn't jump at any zoom, and top-level frame names sit above their frames. | ST-6b, ST-4b, ST-5t, ST-5f | J11 | SR-m (ST-4b, ST-5t); design-window DW-a (ST-4b, ST-5t, ST-5f) | yes | 2 | done (gap #2545) | 39093367358 | wanted |
+| SR-a | Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read "Mixed" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget. | ST-4, ST-6, ST-7 | J10 | SR-m (ST-4, ST-7); design-window DW-a (ST-4, ST-6) and DW-b (ST-4) | yes | 2 | done (gap #2544) | 39093367358 | wanted |
+| SR-b | The canvas draws radius, stroke and opacity as stored, and scrubs and typing keep up on 2,000 layers. | ST-5, ST-8 | P2 | design-window DW-a (ST-5, ST-8); SR-a, SR-t (ST-8) | yes | 1 | merged (fix #2561 open) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -46,6 +46,8 @@ Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497
 - Rule 18: the UI slices can't start before DW-a because their files are DW-a's slots (DesignInspectorText, DesignTextArtwork, DesignFrameLabels, DesignInspectorStyle don't exist on dev yet). The Model signatures the UI calls (`sharedValue`, `opacityPercentText`, `textEditScale`) are SR-m's wave-1 tasks, so nothing further to stub.
 - Rule 20: style setters, shared values and the edit scale are Design-only concepts (no kernel module plans them); no extraction needed.
 - Filed the packet's `p3` gap: #1988 (Auto Layout). ST-6's PR body says #752 closes with that bullet moved there.
+
+- 2026-10-18T04:12Z relaunch (run act-1a14d32dfd7-u3ff, main 0965457c verified): the brief counts a slice done only on a completed, successful ci.yml run. SR-t's line cited 39076534514 (cancelled) and SR-a's 39093416270 (still running), so both are re-posted on scoped design 39093367358 (0965457c, success), which holds SR-t's last PR #2412 and SR-a's #2505. SR-a and SR-t each used 2 fix rounds (#2460, #2505): J10 #2544 is SR-a's gap, J11 #2545 is SR-t's (the 04:04Z line put both on SR-a).
 
 ## Open
 - design-window DW-a (#1494) not merged: SR-t, SR-a and SR-b's view tasks wait on it (their files are its slots). DW-d PRs are at the lane; DW-a's aren't visible yet.
