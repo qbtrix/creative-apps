@@ -1,7 +1,8 @@
 // Live/HaloFileEnvelope.swift: the one copy of the .halo envelope (#209),
 // shared by LiveProjectFiles and FakeProjectFiles. A file is JSON with
 // sorted keys: {"format":"halo","project":{...},"version":1}. Unwrapping
-// checks size before parsing, then format, version and project; the
+// checks size before parsing, then format, version (the kernel's
+// `VersionedJSON.probe`, HaloFiles+Kernel.swift) and project; the
 // project's contents are checked by the live type alone (HF-5). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -38,7 +39,7 @@ enum HaloFileFormat {
         guard let head = try? decoder.decode(Header.self, from: data), head.format == format else {
             throw HaloFileError.notAHaloFile
         }
-        guard head.version <= version else { throw HaloFileError.newerVersion(head.version) }
+        _ = try probeVersion(data)
         let envelope: HaloFileEnvelope
         do {
             envelope = try decoder.decode(HaloFileEnvelope.self, from: data)
@@ -126,9 +127,8 @@ enum HaloFileFormat {
         return "\(number)\(suffix)"
     }
 
-    /// Just enough to tell a Halo file and its version.
+    /// Just enough to tell a Halo file; `probeVersion` reads its version.
     private struct Header: Decodable {
         var format: String
-        var version: Int
     }
 }
