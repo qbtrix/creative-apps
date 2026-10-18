@@ -77,6 +77,9 @@ final class MetalRoute {
 }
 
 extension CanvasHostView {
+    /// The presenter filling the Metal layer; nil on the tile path.
+    public var metalPresenter: (any MetalPresenting)? { presenter }
+
     /// The installed Metal layer; nil on the tile path.
     public var metalLayer: CAMetalLayer? {
         layer?.sublayers?.lazy.compactMap { $0 as? CAMetalLayer }.first
