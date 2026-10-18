@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-17T05:51Z	3	pr-opened	#1976	FC-1 filter rules, fast-lane, head 01ce599b
 2026-10-17T06:28Z	3	pr-merged	#1976	FC-1 filter rules merged to dev by the lane
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
+2026-10-18T06:22Z	4	heartbeat	#2629 #2638	open, waiting on the lane; scoped suiteui read after both merge
