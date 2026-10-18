@@ -34,3 +34,4 @@ utc	feature	event	ref	note
 2026-10-18T21:59:59Z	files-history	push	#2968	head f0653e21 (dev merged, carries #2990), scripts/ci --changed PASS, Head: moved
 2026-10-18T22:18:50Z	files-history	merged	#2968	fixes #2939 merged 76789931 (FH-a round 1 done)
 2026-10-18T22:18:50Z	files-history	fix-batch	wf_be705683-751	round 1 for #2938 (+ J16 row in docs/blueprints/design.md, noted on #2938), base 349578b8
+2026-10-18T22:41:39Z	files-history	heartbeat	39167807664	scoped design (b40c77f6, has 237bc5af) still running; #2938 fixer in progress (ec236735 local, no PR yet)
