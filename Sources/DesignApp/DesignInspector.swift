@@ -14,7 +14,8 @@
 // control's help comes from the Model, and each carries its DesignControlID and
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
 // refuses what it must. Opacity, Corners and Stroke, the hint and the frame
-// fields' live scrub are DesignInspectorStyle.
+// fields' live scrub are DesignInspectorStyle. The scroll view shows no
+// indicators, so no legacy scroller reads as an unlabelled button.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -45,6 +46,9 @@ struct DesignInspector: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("design.properties")
         }
+        // No scroller, as in Flare's and Halo's inspectors: once the rows outgrow the 1024 x 768
+        // runner, a legacy scroller's page area is an unnamed button to the app audit (#2455).
+        .scrollIndicators(.never)
     }
 }
 
