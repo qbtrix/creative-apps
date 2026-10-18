@@ -19,7 +19,6 @@ A Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover Easing
 A Sources/FlareApp/FlareFilePanels.swift::FlareFileElement Probe
 A Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow KeyedRow
 A Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet Sheet
-A Sources/FlareApp/FlareRecovery.swift::FlareSaveStatusLabel SaveStatus
 A Sources/FlareApp/FlareTransport.swift::FlareTransport Transport
 A Sources/HaloApp/HaloControls.swift::HaloControlsElement Probe
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector Easing
@@ -45,7 +44,6 @@ A Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet Sheet
 A Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement Probe
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerRow LayerList
-A Sources/PhotoApp/PhotoSaveStatusLabel.swift::PhotoSaveStatusLabel SaveStatus
 A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
 A Sources/PhotoApp/StraightenSheet.swift::StraightenSheet Sheet
 B Sources/AfterGlowApp/HomeGrid.swift::HomeGrid caps-header
@@ -65,7 +63,6 @@ B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow pending-commit
 B Sources/FlareApp/FlareInspectorScene.swift::FlareSceneNumberRow pending-commit
 B Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet error-label
 B Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet sheet-buttons
-B Sources/FlareApp/FlareRecovery.swift::FlareSaveStatusLabel error-label
 B Sources/FlareApp/FlareStage.swift::FlareStage preview-pill
 B Sources/FlareApp/FlareStageOverlay.swift::FlareStageOverlay accent-outline
 B Sources/FlareApp/FlareTimeline.swift::FlareTimeline error-label
@@ -96,7 +93,6 @@ B Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar preview-pill
 B Sources/PhotoApp/ExportSheet.swift::ExportSheet sheet-buttons
 B Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet sheet-buttons
 B Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement probe-element
-B Sources/PhotoApp/PhotoSaveStatusLabel.swift::PhotoSaveStatusLabel error-label
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine preview-pill
 B Sources/PhotoApp/StraightenSheet.swift::StraightenSheet sheet-buttons
