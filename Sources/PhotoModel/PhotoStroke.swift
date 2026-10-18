@@ -13,7 +13,8 @@
 // and the rest paint or move here.
 //
 //   brush, eraser  a round stroke through the pointer samples on the selected
-//                  layer: a centripetal Catmull-Rom curve, so sparse samples
+//                  layer: a centripetal Catmull-Rom curve (SuiteKernel's
+//                  StrokeSmoother, PhotoBrush+Kernel.swift), so sparse samples
 //                  from a fast hand still paint a curve. A segment is painted
 //                  once the sample after it arrives (the last one on mouse-up),
 //                  cut into pieces flat to a quarter pixel, each a capsule
@@ -55,6 +56,7 @@
 // piece's whole box, so very large brushes on tight curves cost more; a
 // CoreRaster stamp op is the upgrade once brushes get textures. Linux-safe.
 import CoreRaster
+import SuiteKernel
 
 /// Where a paint stroke writes. A mask's coverage is its gray (red
 /// channel), alpha always 1, so the brush paints black to hide and white to
@@ -70,7 +72,7 @@ struct PhotoStroke: Sendable, Equatable {
     var start: Mask.Point
     /// Brush, eraser and clone: the layer; by tile index, each painted tile as it
     /// was before the stroke and its pixels' coverage so far (row-major, the
-    /// tile's size); and the last four pointer samples and their pressures.
+    /// tile's size); and the last four pointer samples, the kernel's window.
     var layerID: PhotoLayer.ID?
     var before: [Int: PixelBuffer] = [:]
     var coverage: [Int: [Float]] = [:]
@@ -81,10 +83,7 @@ struct PhotoStroke: Sendable, Equatable {
     /// Option subtracts, PV-5).
     var modifiers: DragModifiers = []
 
-    struct Sample: Sendable, Equatable {
-        var point: Mask.Point
-        var pressure: Double
-    }
+    typealias Sample = StrokeSample
 }
 
 extension PhotoWorkspace {
@@ -153,8 +152,8 @@ extension PhotoWorkspace {
                 if begun { current.layerID = paintLayerID() }
                 guard let id = current.layerID else { break }
                 // A move after the press starts on the dab the last event laid, so it skips that one.
-                let last = current.samples.last?.point
-                current.samples = [PhotoStroke.Sample(point: end, pressure: 1)]
+                let last = current.samples.last.map { Mask.Point($0.point) }
+                current.samples = [PhotoStroke.Sample(point: end.kernel)]
                 stamp(
                     along: [last ?? start, end], size: brushOptions.size, layer: id, before: &current.before,
                     coverage: &current.coverage, healing: current.tool == .heal, skippingFirst: last != nil)
@@ -228,38 +227,6 @@ extension PhotoWorkspace {
         }
     }
 
-    /// The centripetal Catmull-Rom curve from `p1` to `p2`, with `p0` before
-    /// and `p3` after, as points from `p1` to `p2` whose chords stay within a
-    /// quarter pixel of it.
-    static func curve(_ p0: Mask.Point, _ p1: Mask.Point, _ p2: Mask.Point, _ p3: Mask.Point) -> [Mask.Point] {
-        // Knot spacing is the square root of each chord; tiny chords count as 1e-6.
-        func knot(_ a: Mask.Point, _ b: Mask.Point) -> Double {
-            max(((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)).squareRoot().squareRoot(), 1e-6)
-        }
-        let (t01, t12, t23) = (knot(p0, p1), knot(p1, p2), knot(p2, p3))
-        // The tangents at p1 and p2 over this segment, as Bezier handles.
-        func handle(_ a: Mask.Point, _ b: Mask.Point, _ c: Mask.Point, _ ab: Double, _ bc: Double, _ sign: Double)
-            -> Mask.Point
-        {
-            let m = { (u: Double, v: Double, w: Double) in (v - u) / ab - (w - u) / (ab + bc) + (w - v) / bc }
-            return Mask.Point(x: b.x + sign * t12 * m(a.x, b.x, c.x) / 3, y: b.y + sign * t12 * m(a.y, b.y, c.y) / 3)
-        }
-        let (b1, b2) = (handle(p0, p1, p2, t01, t12, 1), handle(p1, p2, p3, t12, t23, -1))
-        // How far the curve bends from its chord bounds the pieces it needs.
-        func bend(_ a: Mask.Point, _ b: Mask.Point, _ c: Mask.Point) -> Double {
-            let (x, y) = (a.x - 2 * b.x + c.x, a.y - 2 * b.y + c.y)
-            return (x * x + y * y).squareRoot()
-        }
-        let most = max(bend(p1, b1, b2), bend(b1, b2, p2))
-        let n = most.isFinite ? min(max(Int((3 * most).squareRoot().rounded(.up)), 1), 64) : 1
-        return (0...n).map { k in
-            let t = Double(k) / Double(n), u = 1 - t
-            let (w0, w1, w2, w3) = (u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t)
-            return Mask.Point(
-                x: w0 * p1.x + w1 * b1.x + w2 * b2.x + w3 * p2.x, y: w0 * p1.y + w1 * b1.y + w2 * b2.y + w3 * p2.y)
-        }
-    }
-
     /// A drag's rectangle clipped to the canvas; nil for a click or a drag
     /// that stays outside.
     static func dragRect(_ a: Mask.Point, _ b: Mask.Point, in canvas: CanvasSize) -> PixelRect? {
@@ -291,24 +258,14 @@ extension PhotoWorkspace {
     private mutating func paint(_ current: inout PhotoStroke, adding point: Mask.Point?, pressure: Double) {
         if let point {
             guard point.x.isFinite, point.y.isFinite, abs(point.x) < 1e7, abs(point.y) < 1e7,
-                current.samples.last?.point != point
+                current.samples.last?.point != point.kernel
             else { return }
             let clamped = pressure.isNaN ? 1 : min(max(pressure, 0), 1)
-            current.samples = current.samples.suffix(3) + [PhotoStroke.Sample(point: point, pressure: clamped)]
+            current.samples = current.samples.suffix(3) + [PhotoStroke.Sample(point: point.kernel, pressure: clamped)]
+            if current.samples.count == 1 { return lay([point], from: clamped, to: clamped, &current) }
         }
-        let s = current.samples, n = s.count
-        if point != nil, n == 1 { return lay([s[0].point], from: s[0].pressure, to: s[0].pressure, &current) }
-        // The segment ends at sample `last`: the one before the newest, or on the end the newest.
-        let last = point == nil ? n - 1 : n - 2
-        guard last >= 1 else { return }
-        // Past either end the curve runs on straight: sample i's neighbor j, mirrored through it.
-        func mirror(_ i: Int, _ j: Int) -> Mask.Point {
-            Mask.Point(x: 2 * s[i].point.x - s[j].point.x, y: 2 * s[i].point.y - s[j].point.y)
-        }
-        let before = last >= 2 ? s[last - 2].point : mirror(last - 1, last)
-        let after = last + 1 < n ? s[last + 1].point : mirror(last, last - 1)
-        lay(Self.curve(before, s[last - 1].point, s[last].point, after), from: s[last - 1].pressure,
-            to: s[last].pressure, &current)
+        guard let piece = PhotoStroke.smoothed(current.samples, ending: point == nil) else { return }
+        lay(piece.points, from: piece.from, to: piece.to, &current)
     }
 
     /// Paints capsules along `points` (canvas pixels) on the stroke's layer,
