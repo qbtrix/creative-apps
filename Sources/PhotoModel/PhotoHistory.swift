@@ -1,11 +1,14 @@
-// PhotoHistory.swift: Photo's undo and redo. Every document edit records one
+// PhotoHistory.swift: Photo's undo and redo, a thin adapter over SuiteKernel's
+// History, where the stack, the step ids and the open run live; the adapter
+// adds the base step's name. Every document edit records one
 // step: a name ("Paint", "Crop") and the change that puts the document back
 // (PhotoEdit). Undoing applies that change and keeps its inverse for Redo,
 // and the reverse. Pixel edits keep only the tiles they changed, as they were
 // (undo swaps them back); layer property and order changes keep the layer list, which
 // holds no pixels; edits that add, remove or resize layers keep the whole
 // stack. A run of edits with the same coalescing key (one slider's drag, one
-// layer's opacity) is one step, until endAdjust closes it at the gesture's end. A new edit clears Redo; the history keeps the
+// layer's opacity) is one step, until endAdjust closes it at the gesture's end (an undo
+// or redo closes it too). A new edit clears Redo; the history keeps the
 // last `limit` steps. The history list reads both stacks as one row of named
 // steps, from how the image began ("New Image", "Open") to the last redo, and
 // jumping to a step undoes or redoes up to it. Every step has an id from a
@@ -13,6 +16,7 @@
 // and `isDirty` compares it with the step last saved, opened or created.
 // Linux-safe.
 import CoreRaster
+import SuiteKernel
 
 /// The state an edit puts back.
 enum PhotoEdit: Sendable, Equatable {
@@ -43,44 +47,41 @@ struct PhotoStack: Sendable, Equatable {
     var selection: PixelRect?
 }
 
-struct PhotoHistory: Sendable, Equatable {
-    struct Step: Sendable, Equatable {
-        var name: String
-        var edit: PhotoEdit
-        var coalescing: String?
-        /// Names the state this step leads to; undo and redo keep it.
-        var id: Int
-    }
-
+struct PhotoHistory: Sendable {
     static let limit = 50
     /// The first step: how the image began, or the newest step the limit
-    /// dropped, since the oldest state left is the one after it.
+    /// dropped, since the oldest state left is the one after it. The kernel
+    /// keeps no base, so the adapter does.
     var baseName = "New Image"
-    /// The id of the state `baseName` names: 0 at the start, then the id of
-    /// the newest step the limit dropped.
-    var baseStepID = 0
-    /// The next step's id; ids are never reused.
-    var nextID = 1
-    var undo: [Step] = []
-    var redo: [Step] = []
+    /// The steps, their edits and ids, the open run and the limit.
+    var kernel = History<PhotoEdit>(limit: PhotoHistory.limit)
+    /// The open run's key, as the kernel keeps it: a record under it folds
+    /// instead of adding a step, so it drops nothing at the limit.
+    var runKey: String?
+}
 
-    mutating func takeID() -> Int {
-        defer { nextID += 1 }
-        return nextID
+extension PhotoHistory: Equatable {
+    /// Equal when they show the same steps at the same place and run (History
+    /// isn't Equatable); the workspace's `revision` tells different edits apart.
+    static func == (lhs: PhotoHistory, rhs: PhotoHistory) -> Bool {
+        lhs.baseName == rhs.baseName && lhs.kernel.steps == rhs.kernel.steps
+            && lhs.kernel.index == rhs.kernel.index && lhs.kernel.currentStepID == rhs.kernel.currentStepID
+            && lhs.kernel.canUndo == rhs.kernel.canUndo && lhs.kernel.canRedo == rhs.kernel.canRedo
+            && lhs.runKey == rhs.runKey
     }
 }
 
 extension PhotoWorkspace {
-    public var canUndo: Bool { !history.undo.isEmpty }
-    public var canRedo: Bool { !history.redo.isEmpty }
+    public var canUndo: Bool { history.kernel.canUndo }
+    public var canRedo: Bool { history.kernel.canRedo }
     /// "Undo Paint", or plain "Undo" with nothing to undo.
-    public var undoActionName: String { history.undo.last.map { "Undo \($0.name)" } ?? "Undo" }
+    public var undoActionName: String { history.kernel.undoName.map { "Undo \($0)" } ?? "Undo" }
     /// "Redo Paint", or plain "Redo" with nothing to redo.
-    public var redoActionName: String { history.redo.last.map { "Redo \($0.name)" } ?? "Redo" }
+    public var redoActionName: String { history.kernel.redoName.map { "Redo \($0)" } ?? "Redo" }
 
-    /// The id of the step the image is at: the newest undo entry's, or the
+    /// The id of the step the image is at: the newest applied step's, or the
     /// base's with nothing to undo. Never the same for two different states.
-    public var currentStepID: Int { history.undo.last?.id ?? history.baseStepID }
+    public var currentStepID: Int { history.kernel.currentStepID }
 
     /// Whether the open image has changes since it was last saved, opened or
     /// created. False with no image open.
@@ -88,62 +89,66 @@ extension PhotoWorkspace {
 
     /// Puts back the last edit. Ignored with nothing to undo or mid-drag.
     public mutating func undo() {
-        guard stroke == nil, let step = history.undo.popLast() else { return }
-        history.redo.append(Step(name: step.name, edit: apply(step.edit), coalescing: nil, id: step.id))
+        guard stroke == nil else { return }
+        moveHistory { _ = $0.undo($1) }
     }
 
     /// Makes the last undone edit again.
     public mutating func redo() {
-        guard stroke == nil, let step = history.redo.popLast() else { return }
-        history.undo.append(Step(name: step.name, edit: apply(step.edit), coalescing: nil, id: step.id))
+        guard stroke == nil else { return }
+        moveHistory { _ = $0.redo($1) }
     }
 
     /// Every step's name, oldest first: how the image began, each edit that
     /// can be undone, then each that can be redone. Empty with no image.
     public var historySteps: [String] {
         guard canvas != nil else { return [] }
-        return [history.baseName] + history.undo.map(\.name) + history.redo.reversed().map(\.name)
+        return [history.baseName] + history.kernel.steps
     }
 
     /// The index in `historySteps` of the step the image is at now; later
     /// steps are the ones Redo makes again.
-    public var historyIndex: Int { history.undo.count }
+    public var historyIndex: Int { history.kernel.index }
 
     /// Undoes or redoes until the image is at `historySteps[index]`. Ignored
     /// out of range, mid-drag or at the current step.
     public mutating func jumpToHistoryStep(_ index: Int) {
-        guard stroke == nil, historySteps.indices.contains(index) else { return }
-        while historyIndex > index { undo() }
-        while historyIndex < index { redo() }
+        guard stroke == nil, historySteps.indices.contains(index), index != historyIndex else { return }
+        moveHistory { $0.jump(to: index, $1) }
     }
 
     /// Ends the run the last undo step is coalescing (a slider's or a curve's
     /// drag), so the next edit, even to the same section, is a new step. The
     /// inspector calls it when a gesture ends: one gesture, one undo step.
     public mutating func endAdjust() {
-        if let last = history.undo.indices.last { history.undo[last].coalescing = nil }
+        history.kernel.endRun()
+        history.runKey = nil
     }
 
-    private typealias Step = PhotoHistory.Step
+    /// Runs `move` (an undo, a redo or a jump) on the kernel with `apply` as
+    /// its closure. The kernel is taken out while it runs, since `apply`
+    /// changes the workspace; that also spares a copy of the steps. The
+    /// kernel ends the open run on every move.
+    private mutating func moveHistory(_ move: (inout History<PhotoEdit>, (PhotoEdit) -> PhotoEdit) -> Void) {
+        var kernel = history.kernel
+        history.kernel = History(limit: PhotoHistory.limit)
+        move(&kernel) { apply($0) }
+        history.kernel = kernel
+        history.runKey = nil
+    }
 
     /// Records `edit`, the change that undoes what is about to happen. With a
-    /// `coalescing` key equal to the last step's, the last step already puts
+    /// `coalescing` key equal to the open run's, the last step already puts
     /// back the state before this run, so nothing new is kept; it takes a new
-    /// id, since the state it leads to changes.
+    /// id, since the state it leads to changes. A new step at the limit drops
+    /// the oldest, whose name becomes the base.
     mutating func record(_ edit: PhotoEdit, named name: String, coalescing: String? = nil) {
-        history.redo.removeAll()
-        let id = history.takeID()
-        if let coalescing, let last = history.undo.indices.last, history.undo[last].coalescing == coalescing {
-            history.undo[last].id = id
-            return
+        let folds = coalescing != nil && coalescing == history.runKey && history.kernel.canUndo
+        if !folds, history.kernel.index >= PhotoHistory.limit, let oldest = history.kernel.steps.first {
+            history.baseName = oldest
         }
-        history.undo.append(Step(name: name, edit: edit, coalescing: coalescing, id: id))
-        let over = history.undo.count - PhotoHistory.limit
-        if over > 0 {
-            history.baseName = history.undo[over - 1].name
-            history.baseStepID = history.undo[over - 1].id
-            history.undo.removeFirst(over)
-        }
+        history.kernel.record(name, edit, key: coalescing)
+        history.runKey = coalescing
     }
 
     /// Records the layer list as it is, before a property or order change.
