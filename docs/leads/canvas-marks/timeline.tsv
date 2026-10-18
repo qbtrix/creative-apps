@@ -1,0 +1,66 @@
+utc	stage	event	ref	note
+2026-10-16T22:48Z	2	stage-end	#1512	plan waves 1-8 from packet; no PRs opened
+2026-10-17T05:50Z	3	heartbeat	-	blocked: no swift toolchain, no GitHub write access
+2026-10-18T03:44Z	1	stage-start	#1512	line lead act-1a14d197cc1-i61z resumed; swift 6.3.3 installed, GitHub MCP works; re-checking the plan against dev (canvas-host built since)
+2026-10-18T03:53Z	1	stage-start	#1512	run act-1a14d17c86c-d1qr resumed; base f6de1a9; toolchain and GitHub access restored
+2026-10-18T03:54Z	2	wave-start	#1512	wave 1: CM-1, CM-5, CM-6, CM-7, CM-8, CM-9, CM-10 builders launched
+2026-10-18T04:33Z	2	wave-start	#1512	run act-1a14d1f3122-r1yb took over after Belt's stall nudge; prior wave-1 builders left no PR; relaunching wave 1 (CM-1, CM-5, CM-7, CM-8 first)
+2026-10-18T04:36Z	2	wave-start	#1512	run act-1a14d48ae2f-857a took over; rule 20: CM-2, CM-4 wait on editor-kernel EK-box, EK-5; wave 1 batch A (CM-1, CM-5, CM-7, CM-8) on e01529f4
+2026-10-18T04:37Z	2	wave-start	#1512	build-wave wf_0f3831cb-1eb running: CM-1, CM-5, CM-7, CM-8
+2026-10-18T04:59Z	2	check	#1512	CM-1 builder ended with no PR (gate killed by shell timeout; branch name lead/canvas-marks/CM-1 collides with lead/canvas-marks); lead runs the gate on its head 39237b4 and opens it; CM-5, CM-7, CM-8 building
+2026-10-18T05:30Z	2 build	wave 1 batch A in lane	#2610 #2631 #2632 #2633	CM-1 adopted from run r1yb; CM-5/7/8 gated sequentially, PASS
+2026-10-18T05:32Z	2 build	batch B started	CM-6 CM-9 CM-10	one builder, gated sequentially
+2026-10-18T05:43Z	2 build	batch B in lane	#2640 #2641 #2642	CM-6/9/10 gated PASS; CM-9b added for canvas-drag series + registration
+2026-10-18T06:08Z	build	check	#2610,#2631-#2633,#2640-#2642	none merged yet; #2610 macOS build green; lane busy with other PRs. CM-2 waits on EK-box (#2646 open)
+2026-10-18T06:34Z	build	merged	#2610	CM-1 on dev 26f1bd50
+2026-10-18T06:34Z	build	wave2-start	CM-3	builder started; CM-9b waits on #2641; CM-15 waits on a CI run with CM-6, CM-7 and CM-8 actuals; CM-2 waits on EK-box
+2026-10-18T06:41Z	build	merged	#2633	CM-8 CanvasGrid on dev
+2026-10-18T06:41Z	build	gate	CM-3	re-gating on dev 9e0ac922 (the earlier waiter matched its own pgrep and never ran)
+2026-10-18T06:41Z	build	pr-open	#2681	CM-3 gated on dev, head 8b7b2f76, fast-lane
+2026-10-18T06:57Z	build	check	#2641	macOS build run 39102112525 still in progress; CM-9b waits on it; #2631, #2632, #2640, #2642, #2681 in the lane
+2026-10-18T07:30:20Z	2 build	heartbeat	-	dev 5d214f1e; #2641 macOS build green 07:05Z, queued behind lane batch; CM-9b building stacked on CM-9
+2026-10-18T07:31:48Z	2 build	built	CM-9b	a715a5e9, waits on #2641
+2026-10-18T09:53Z	build	fix	#2641	CM-9 needs-fix from batch red on LibraryLoupeBudgetTests (dev red, fixed by #2698); regating on dev for a new head
+2026-10-18T09:56Z	build	gate	#2641	CM-9 PASS on dev 02c20bfb; Head 1156e9df (drops needs-fix); CM-9b rebased to a334926d, opens after CM-9 merges
+2026-10-18T10:07Z	fix	lint	#2642	view-statics lint: CanvasSurface.fitted nonisolated (2b2dd85d); regating
+2026-10-18T10:11Z	fix	gate	#2642	CM-10 PASS, Head 041e4d42
+2026-10-18T11:12Z	2 build	built	CM-2	adapter over BoxMath/HandleHit; packet's width 0 is the kernel's 1 pt clamp (rule 20); gating
+2026-10-18T11:12Z	2 build	rebase	CM-9b	onto dev after #2641, 02b2cf61; gating
+2026-10-18T11:13Z	2 build	pr	#2752	CM-2 PASS 481361b2, fast-lane
+2026-10-18T11:14Z	2 build	pr	#2753	CM-9b PASS 5d0ec681, fast-lane
+2026-10-18T11:46Z	check	heartbeat	-	waiting: #2642 CM-10, #2752 CM-2, #2753 CM-9b on the lane; CM-4 and CM-11 on EK-5 (SelectionHandles not on dev)
+2026-10-18T11:58Z	2 build	fix	#2642	CM-10 macOS build-only red: ambiguous .nan at CanvasSurfaceTests 35/40; CGFloat.nan fix ac39c74b, gating
+2026-10-18T11:58Z	2 build	unblock	#2738	EK-5 SelectionHandles on dev; CM-4 starts over CM-2
+2026-10-18T12:14Z	2 build	merged	#2753	CM-9b on dev
+2026-10-18T12:14Z	fix	needs-rebase	#2752	dev merged (a42b1660), gating
+2026-10-18T12:14Z	2 build	built	CM-4	78eba6a4, PR after #2752 merges
+2026-10-18T12:15Z	fix	push	#2752	CM-2 dev merge a42b1660 PASS, Head moved
+2026-10-18T12:43Z	2 build	merged	#2752	CM-2 on dev
+2026-10-18T12:43Z	2 build	merged	#2642	CM-10 on dev
+2026-10-18T12:43Z	2 build	gate	CM-4	24aedccb on dev, gating
+2026-10-18T12:44Z	2 build	opened	#2780	CM-4 PASS Head 24aedccb
+2026-10-18T12:44Z	2 build	filed	#2778	gap: frameResize pointers
+2026-10-18T12:44Z	2 build	filed	#2781	line:design adopts SelectionHandlesEditor
+2026-10-18T12:57Z	2 build	filed	#2784	gap: suiteProbes records no component series
+2026-10-18T12:57Z	3 build	build	CM-11	gallery pages, stacked on CM-4
+2026-10-18T12:59Z	3 build	build	CM-11	baee545b on CM-4, 319 lines, gating
+2026-10-18T12:59Z	4 build	launch	CM-12, CM-13	journey builders on CM-11 baee545b
+2026-10-18T13:03Z	3 build	gate-pass	CM-11	baee545b pushed, PR after #2780
+2026-10-18T13:07Z	3 build	built	CM-13	3f4c82d2 pushed, PR after CM-11
+2026-10-18T13:13Z	3 build	built	CM-12	b05e98a1 pushed; gap #2794
+2026-10-18T13:27Z	4 ship	merged	#2780	CM-4
+2026-10-18T13:27Z	4 ship	pr	#2795	CM-11 head 7f4983d8
+2026-10-18T13:56Z	4 build	merged	#2795	CM-11 on dev
+2026-10-18T13:56Z	4 build	pr	#2803	CM-12 SJ9 SJ10 SJ26 PASS c650c704
+2026-10-18T13:56Z	4 build	pr	#2804	CM-13 SJ21 SP2 SP5 PASS 3c8fb36c
+2026-10-18T14:19:36Z	CM-12	merged	#2803	Link fix for #2801 open as #2806; CM-13 #2804 open; CM-14..16 wait on a green run with artifacts after #2806.
+2026-10-18T14:35:39Z	CM-13	merged	#2804	CM-14..16 goldens wait on a green run with artifacts after #2806.
+2026-10-18T14:36:12Z	goldens	waiting	#2806	Link fix merged at 624c4291 (#2801 closed); waiting for a CI or scoped suiteui run on dev that includes it, for actuals.
+2026-10-18T14:40:32Z	goldens	waiting	624c4291	No dev run includes the link fix yet (CI 39135416326 and scoped suiteui 39136389298 are at 650d2985); CM-14..16 wait.
+2026-10-18T15:02:15Z	goldens	waiting	39137279211	CI at 80c14eed includes the link fix and is in progress; CM-14..16 start from its artifacts.
+2026-10-18T15:24:08Z	goldens	waiting	39137279211	Release bundles now build (both runs reached scripts/ui-test): #2801 confirmed fixed. CM-14..16 start from the artifacts.
+2026-10-18T15:46:09Z	goldens	waiting	39137893783	Scoped suiteui at its Findings step, full CI still in journeys (snapshots uploaded); goldens start from ui-screens.
+2026-10-18T16:13:31Z	triage	run 39137893783 triaged	04170953	SJ21 scroll bars unnamed; SJ9 cmd-= reads 100 %
+2026-10-18T16:13:31Z	findings	filed	#2847 #2848	scrollers fix gating; #2848 is cross-line (LibraryCommands Zoom In shortcut), no fix, to the supervisor
+2026-10-18T16:15:40Z	CM-13	fix gating	#2847	scrollers fix gating; #2848 with the supervisor; dev CI 39143942767 pending
+2026-10-18T16:20:27Z	fix round 1	PR open	#2856	canvas scroll bars hidden (CM-13); gate PASS
