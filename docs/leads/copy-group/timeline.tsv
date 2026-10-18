@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-18T05:23:07Z	3	check	#2615	macOS build 39099611282 green; waiting for the lane; full run 39098845449 still pending
 2026-10-18T05:37:17Z	3	check	39099202215	J7 J8 J9 green after round 1; #2615 merged b8344824; waiting for a design run holding it
 2026-10-18T05:58:44Z	3	check	-	scoped design run 39101541012 on 3a8c658a (holds b8344824) queued; watching
+2026-10-18T06:20:36Z	3	check	39101541012	still queued (macOS runner backlog)
