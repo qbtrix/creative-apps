@@ -85,6 +85,25 @@ private func occurrences(of needle: String, in text: String) -> Int {
         #expect(close.contains("model.skip()"), "closing the window doesn't skip")
     }
 
+    /// OB-12: the window reads the bundle's Resources/Samples, copies into Documents and passes both on.
+    @Test func windowReadsTheBundlesSamplesAndCopiesThem() throws {
+        let router = try source("Sources/AfterGlowApp/LauncherRouter+Onboarding.swift")
+        #expect(router.contains("static let samplesFolder = SampleCatalog.folder(resources: Bundle.main.resourcePath"),
+                "samplesFolder isn't the bundle's Resources/Samples")
+        #expect(router.contains("support + \"/Documents\""), "documents isn't the support folder's Documents")
+        #expect(router.contains("copyItem(atPath: source, toPath: destination)"), "the copy doesn't copy")
+        #expect(router.contains("withIntermediateDirectories: true"), "the copy doesn't make Documents/Samples")
+        #expect(!router.contains("notAvailable"), "the copy still refuses")
+        let window = try source("Sources/AfterGlowApp/OnboardingWindow.swift")
+        for needle in [
+            "samplesFolder: LauncherServices.samplesFolder", "documents: LauncherServices.documents(support: support)",
+            "LauncherServices.copySample(source, to: destination)",
+        ] {
+            #expect(window.contains(needle), "OnboardingWindow lacks \(needle)")
+        }
+        #expect(!window.contains("notAvailable"), "the window's copy still refuses")
+    }
+
     // OB-4: pages 2 and 3.
     static let windowFiles = [
         "Sources/AfterGlowApp/OnboardingWindow.swift", "Sources/AfterGlowApp/OnboardingPages.swift",

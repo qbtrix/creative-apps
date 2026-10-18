@@ -31,11 +31,11 @@ struct OnboardingWindow: View {
     #endif
 
     init(services: SuiteServices = LauncherServices.shared, support: String = LauncherServices.support) {
-        // The samples folder and the copy are wired by OB-12; until then Open sample can't copy.
+        // The bundle's samples, the support folder's Documents and the copy (LauncherRouter+Onboarding).
         _model = State(initialValue: OnboardingModel(
-            services: services, samplesFolder: SampleCatalog.folder(resources: Bundle.main.resourcePath ?? ""),
-            documents: support + "/Documents", present: { FileManager.default.fileExists(atPath: $0) },
-            copy: { _, _ throws(SuiteError) in throw SuiteError.notAvailable("Samples arrive with the onboarding feature.") }))
+            services: services, samplesFolder: LauncherServices.samplesFolder,
+            documents: LauncherServices.documents(support: support), present: { FileManager.default.fileExists(atPath: $0) },
+            copy: { source, destination throws(SuiteError) in try LauncherServices.copySample(source, to: destination) }))
     }
 
     /// The window over a given model: AfterGlowOnboardingSnapshots shoots a page or state it put the model in.
