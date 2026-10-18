@@ -13,3 +13,5 @@ utc	stage	event	ref	note
 2026-10-18T14:08Z	3	pr-merged	#2791	OB-2 checks first, disabled
 2026-10-18T14:08Z	3	stage-end	wave 2	OB-2, OB-3, OB-11 merged
 2026-10-18T14:08Z	3	stage-start	wave 3	OB-4, OB-7, OB-8, OB-9, OB-10 builders started; base d506e4aa
+2026-10-18T14:11:04Z	slice-done	OB-a	https://github.com/qbtrix/creative-apps/actions/runs/39132122171
+2026-10-18T14:11:04Z	wave-start	wave 3	OB-4 OB-7 OB-8 OB-9 OB-10 builders launched
