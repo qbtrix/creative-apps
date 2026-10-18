@@ -1,10 +1,10 @@
 # lists-and-layers lead record
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
-Run: act-1a14c4f9bb5-swq8 · Session: (this session) · Started: 2026-10-16T22:48Z (resumed 2026-10-18T00:03Z)
-Stage: 3 wave 3
-Base: a6150139a815efa68d34af8723a1b58eea894f9c
-Next: LL-16 baselines wait on the first full dev run after #2817 and #2807 that writes golden-new PNGs; then the critic panel and LL-17
+Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
+Stage: 5 baselines (code tasks all merged)
+Base: 2e27b8db (origin/dev)
+Next: LL-16, LL-17 need golden-new lists PNGs; blocked the same way as canvas-marks (snapshot tests skipped in scoped runs before #2841); waiting on scoped suiteui 39153976103 (c91b1468)
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.

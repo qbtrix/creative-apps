@@ -51,3 +51,5 @@ utc	stage	event	ref	note
 2026-10-18T15:08Z	wave	LL-9 fix opened as #2817 (CI: PASS 156f2e21); #2805 split, SegmentedTabs half to editor-chrome
 2026-10-18T15:25Z	heartbeat	LL-15 #2796 merged 516505f4; #2817 macOS build 39139303570 success
 2026-10-18T15:48Z	heartbeat	LL-9 fix #2817 merged; dev CI 39137279211 (80c14eed, older than both fixes) failed only on the two #2805 tests
+2026-10-18T18:39:28Z	wave	merged	#2734 #2735 #2760 #2777 #2779 #2782 #2796 #2797	LL-7..LL-15 all on dev
+2026-10-18T18:39:28Z	goldens	waiting	39153976103	no lists actuals yet; scoped suiteui at c91b1468 carries #2841
