@@ -23,15 +23,15 @@
   {
     "label": "namesUniqueAgainstFolder: the folder's names are ignored",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "        var taken = existing\n",
-    "replace": "        var taken = Set<String>()\n",
+    "find": "nodes.map(\\.name), extension: format.rawValue, among: existing)",
+    "replace": "nodes.map(\\.name), extension: format.rawValue, among: [])",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
     "label": "namesUniqueWithinPlan: a planned name is not taken for the next layer",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "            taken.insert(name)\n",
-    "replace": "",
+    "find": "let names = UniqueFileNames.names(nodes.map(\\.name), extension: format.rawValue, among: existing)",
+    "replace": "let names = nodes.map { UniqueFileNames.name($0.name, extension: format.rawValue, among: existing) }",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
@@ -58,8 +58,8 @@
   {
     "label": "lockedExports: a locked layer is refused",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
-    "find": "found.filter { !exportHidden($0.id, page) }",
-    "replace": "found.filter { !exportHidden($0.id, page) && !$0.isLocked }",
+    "find": "found.filter { !page.isHiddenInTree($0.id) }",
+    "replace": "found.filter { !page.isHiddenInTree($0.id) && !$0.isLocked }",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
   },
   {
@@ -68,5 +68,19 @@
     "find": "page.frameWidth, page.frameHeight, options.format",
     "replace": "page.contentBounds?.width ?? 0, page.contentBounds?.height ?? 0, options.format",
     "tests": "DesignExportPlanTests|DesignExportWalkTests"
+  },
+  {
+    "label": "frameScopeFramesOnly: an empty-ids plan exports top-level shapes too",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "page.nodes.filter { $0.kind == .frame } : fakeFind",
+    "replace": "page.nodes : fakeFind",
+    "tests": "DesignExportPlanTests"
+  },
+  {
+    "label": "hiddenInPlan: the plan keeps layers inside a hidden group",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "found.filter { !page.isHiddenInTree($0.id) }",
+    "replace": "found.filter { !$0.isHidden }",
+    "tests": "DesignExportPlanTests"
   }
 ]
