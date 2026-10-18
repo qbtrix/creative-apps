@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: SS-a done line once a full run with #2469+#2481 has green Linux (#2504 blocks); open S-7b PR once #2504 clears; S-5/S-8 wait on #1493 and CB-a
+Next: S-7b PR #2526 in the lane; SS-a done line waits on a full CI run on dev at or after 948bcbf4 with a green Linux job; S-5/S-8 wait on #1493 and CB-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
