@@ -86,3 +86,4 @@
 2026-10-18T16:03Z	heartbeat	no open dev-red; 39137279211 (80c14eed) macOS still running (~1h20m); 39141126140 cancelled; 39142469932 (524c3271) pending
 2026-10-18T16:25Z	heartbeat	39137279211 (80c14eed) macOS cancelled at 16:20 during SuiteJourneyTests, no ui-screens; SuiteUI link error gone; Flare journeys ran: 8 pass, 15 fail (new vs map: testCopyPasteDuplicateDelete, testFillAndStroke); 39143942767 (bafd1d38) queued; no open dev-red
 2026-10-18T16:52Z	heartbeat	no open dev-red; 39143942767 (bafd1d38) Linux green, macOS started 16:40, running; 39145334588 (ae72cc6c) pending
+2026-10-18T17:24Z	heartbeat	no open dev-red; 39143942767 (bafd1d38) macOS running (~45m in); 39147480679, 39148230994 cancelled; 39148719518 (196d884e) pending
