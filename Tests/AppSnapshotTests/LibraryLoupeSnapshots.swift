@@ -4,9 +4,11 @@
 // (`library-loupe-fit`), the grid-size preview scaled up
 // (`library-loupe-preview`), the full render at 100% (`library-loupe-100`),
 // and a failed render with no picture yet: the placeholder with the photo's
-// name and size (`library-loupe-placeholder`). The pan is CanvasViewport's
-// own scroll state, which J3 step 4 drives. macOS only.
-import LibraryModel
+// name and size on a card-toned frame (`library-loupe-placeholder`); and,
+// on live data, the fitted photo with the status bar under it showing the
+// zoom and the photo's size (`library-loupe-status`). The pan is
+// CanvasViewport's own scroll state, which J3 step 4 drives. macOS only.
+@testable import LibraryModel
 import SwiftUI
 import Testing
 
@@ -61,6 +63,23 @@ import Testing
         catalog.zoomLoupe(.actual)
         #expect(catalog.loupeValue?.contains("100%") == true)
         try shoot(catalog, "100")
+    }
+
+    /// On live data the status bar shows only in the loupe, with the fit
+    /// scale as its zoom and the photo's pixel size.
+    @Test func statusBar() throws {
+        var catalog = try showing(.full, longSide: 1024, in: try shootOnThird())
+        catalog.services.isPreview = false
+        #expect(catalog.showsStatusBar && catalog.statusSizeText == "4000 × 6000 px")
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                VStack(spacing: 0) {
+                    LibraryBrowser(model: catalog).frame(minHeight: 0, maxHeight: .infinity)
+                    LibraryStatusBar(model: catalog, fitScale: 0.14).fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(width: 1440, height: 900),
+                name: "library-loupe-status-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
     }
 
     @Test func placeholder() throws {
