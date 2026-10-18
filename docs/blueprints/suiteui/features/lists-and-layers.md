@@ -184,7 +184,7 @@ interval series. No task edits `docs/c4/model.json`, `docs/design.md`,
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
 | LL-1 | – | The two list contracts and their Fakes | `Sources/SuiteUI/Contracts/GridSelecting.swift`, `Sources/SuiteUI/Contracts/ListEditing.swift`, `Tests/SuiteUITests/ListFakeTests.swift` | – |
-| LL-2 | – | `SuiteListEditing`: rename outcomes, reorder, drop index (QB-S14) | `Sources/SuiteUI/ListEditing.swift`, `Tests/SuiteUITests/ListEditingTests.swift`, `Tests/SuiteUITests/ListBudgetTests.swift` | LL-1 |
+| LL-2 | – | `SuiteListEditing`: rename outcomes, reorder, drop index (QB-S14) | `Sources/SuiteUI/SuiteListEditing.swift`, `Tests/SuiteUITests/ListEditingTests.swift`, `Tests/SuiteUITests/ListBudgetTests.swift` | LL-1 |
 | LL-3 | – | `SuiteGridSelecting` over `GridSelection`; the 40-sequence reference (QB-S28) and QB-S12 | `Sources/SuiteUI/GridSelection.swift`, `Tests/SuiteUITests/GridSelectionReferenceTests.swift`, `Tests/SuiteUITests/ListBudgetTests.swift` | LL-2 |
 | LL-4 | #146 (part) | `SidebarItem.isDimmed`; `SidebarRow` dims title and symbol | `Sources/SuiteUI/SidebarRow.swift`, `Tests/SuiteUITests/SidebarTests.swift`, `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift` | – |
 | LL-5 | #146 (closes with editor-kernel EK-4) | Withdrawn: the layer panel is `LayerTreeList` (editor-kernel EK-4, EK-5) | – | – |

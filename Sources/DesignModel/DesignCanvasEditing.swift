@@ -26,7 +26,9 @@
 //           the copies, one "Duplicate" step whose ids are minted once at the press. Each
 //           of these steps rewinds to the gesture's start, history included, so the last
 //           sample alone gives the same document. With one layer selected, move and
-//           resize keep the routes below whatever `services` holds.
+//           resize keep the routes below whatever `services` holds. A move (of one layer,
+//           several or their copies) and a one-layer resize land on whole points
+//           (DesignWholePoints); a nudge keeps its fraction.
 //   frame, rectangle, ellipse, text   DesignDrawing.
 //   pen     nothing.
 //
@@ -171,11 +173,12 @@ extension DesignWorkspace {
         switch current.route {
         case .move(let id):
             restorePages(current.before)
-            _ = pages.update(id) { $0.translate(by: delta) }
+            if current.moved { _ = pages.update(id) { $0.translate(by: $0.frame.wholeDelta(delta)) } }
         case .resize(let id, let handle, let original):
             restorePages(current.before)
-            let frame = original.resized(
+            let raw = original.resized(
                 handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
+            let frame = current.moved ? raw.wholePoints : raw
             _ = pages.update(id) { $0.frame = frame }
         case .marquee(let parent):
             guard current.moved, let page = selectedPage else { break }
@@ -204,10 +207,12 @@ extension DesignWorkspace {
         history = current.history
         guard current.moved, let page = selectedPage else { return }
         let transforming = services.transforming
+        // A move lands the selection box's top-left on a whole point (DesignWholePoints).
+        let moveBy = selectionBounds?.wholeDelta(delta) ?? delta
         do throws(DesignRefusal) {
             switch current.route {
             case .moveSeveral(let ids):
-                apply(try transforming.move(ids, by: delta, on: page))
+                apply(try transforming.move(ids, by: moveBy, on: page))
             case .resizeSeveral(let ids, let handle):
                 apply(try transforming.resize(ids, handle: handle, by: delta, modifiers: modifiers, on: page))
             case .optionCopy(let ids, let start):
@@ -217,7 +222,7 @@ extension DesignWorkspace {
                 copies.nodes = copied.nodes
                 let nodes: [DesignNode]
                 do throws(DesignRefusal) {
-                    nodes = try transforming.move(copied.selection, by: delta, on: copies).nodes
+                    nodes = try transforming.move(copied.selection, by: moveBy, on: copies).nodes
                 } catch .unchanged {
                     nodes = copied.nodes
                 }

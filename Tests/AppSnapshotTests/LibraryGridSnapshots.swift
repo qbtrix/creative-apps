@@ -1,4 +1,5 @@
-// LibraryGridSnapshots.swift: Library's browser with the sample photos loaded,
+// LibraryGridSnapshots.swift: Library's browser with the sample photos loaded
+// and their thumbnails held (each sample's gradient, as the fakes draw it),
 // with nothing selected and with three photos selected, in Light and Dark.
 // Writes library-grid-{light,dark}.png and library-grid-selected-{light,dark}.png.
 // macOS only.
@@ -11,8 +12,10 @@ import Testing
 @MainActor
 @Suite struct LibraryGridSnapshots {
     @Test func grid() throws {
-        var loaded = LibraryCatalog()
-        loaded.loadSamples()
+        var samples = LibraryCatalog()
+        samples.loadSamples()
+        let loaded = samples.answeringThumbnails()
+        #expect(loaded.sortedItems.allSatisfy { loaded.thumbnails[$0.id] != nil })
         // Three photos by display position, all within the first two rows, so
         // every selection ring is in the capture.
         let order = loaded.sortedItems.map(\.id)

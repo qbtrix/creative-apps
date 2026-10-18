@@ -102,9 +102,11 @@ extension DesignWorkspace {
         documentURL = url
     }
 
-    /// Records that the document was just written to `url`, so Save writes there next. Not an edit.
+    /// Records that the document was just written to `url`, so Save writes there next. Not an
+    /// edit: it marks the current step as saved and ends the edit run (DesignHistory).
     public mutating func didSave(to url: URL) {
         documentURL = url
+        markSaved()
     }
 
     /// Throws the first problem in `pages` that would make the document unusable.

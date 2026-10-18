@@ -6,8 +6,9 @@
 //
 //   frame, rectangle, ellipse  the rectangle from the start to the pointer
 //                              (Shift: a square growing away from the start),
-//                              both sides at least 1. A gesture that never left
-//                              its start is the kind's default size at the start.
+//                              both sides at least 1, both ends on whole points
+//                              (DesignWholePoints). A gesture that never left
+//                              its start is the kind's default size there.
 //   text                       a "Text" node of the default size at the start;
 //                              endDrag starts its inline edit (DesignText).
 // Linux-safe.
@@ -15,9 +16,10 @@
 extension DesignWorkspace {
     /// The gesture's drawing step: the node of `kind` as of the pointer at `end`.
     mutating func draw(_ kind: DesignNodeKind, from gesture: DesignGesture, to end: DesignPoint, square: Bool) {
-        var frame = defaultFrame(kind, at: gesture.start)
+        let start = gesture.start.wholePoints
+        var frame = defaultFrame(kind, at: start)
         if gesture.moved {
-            frame = DesignRect(from: gesture.start, to: end, square: square)
+            frame = DesignRect(from: start, to: end.wholePoints, square: square)
             (frame.width, frame.height) = (Swift.max(frame.width, 1), Swift.max(frame.height, 1))
         }
         rewind(to: gesture.before)

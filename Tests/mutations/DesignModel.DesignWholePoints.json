@@ -1,0 +1,6 @@
+[
+{"label":"whole points round down instead of to the nearest","file":"Sources/DesignModel/DesignWholePoints.swift","find":"let nearest = value.rounded()","replace":"let nearest = value.rounded(.down)","tests":"DesignWholePointsTests"},
+{"label":"a rectangle rounds its width instead of its far edge","file":"Sources/DesignModel/DesignWholePoints.swift","find":"width: Swift.max(whole(maxX) - left, 1)","replace":"width: Swift.max(whole(width), 1)","tests":"DesignWholePointsTests"},
+{"label":"a negative half rounds away from zero, not up","file":"Sources/DesignModel/DesignWholePoints.swift","find":"value - nearest == 0.5 ? nearest + 1 : nearest","replace":"nearest","tests":"DesignWholePointsTests"},
+{"label":"a rounded rectangle's height can reach 0","file":"Sources/DesignModel/DesignWholePoints.swift","find":"height: Swift.max(whole(maxY) - top, 1)","replace":"height: whole(maxY) - top","tests":"DesignWholePointsTests"}
+]

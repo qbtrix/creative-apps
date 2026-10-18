@@ -12,6 +12,8 @@
 // pasteboard Edit > Paste is off. J9: A and B Shift-selected, ⌘G gives
 // "Undo Group" and a "Group 1" row, ⇧⌘G "Undo Ungroup", the row gone and its
 // two children selected; A plus E1 (inside Pair) leaves Object > Group off.
+// Layers rows are clicked off their names (Journey.clickDesignLayer, #2496),
+// and E1 joins A with a Command-click: a Shift-click on a row adds nothing yet (#2566).
 // Presses on the page go to `suite.canvas.artboard`, the page's rectangle, at
 // page points over the page's 1440 × 1024 size. Menu tooltips (the refusal
 // text) are not readable by XCUI; DesignWindowTests prove those.
@@ -63,7 +65,7 @@ final class DesignArrangeJourneyTests: XCTestCase {
         XCTAssert(Self.waitUntil { self.rows(design, "A") == 3 }, "Redo left \(rows(design, "A")) A rows, not 3")
 
         // 5. Locked selected from Layers, then ⌘D: the copy is unlocked.
-        clickRow(design, Self.lockedRow, "Locked")
+        design.clickDesignLayer(Self.lockedRow)
         design.press(character: "d", .command)
         XCTAssert(Self.waitUntil { self.rows(design, "Locked") == 2 }, "⌘D on Locked left \(rows(design, "Locked")) Locked rows")
         XCTAssertEqual(lockToggles(design, "Locked"), ["Lock Layer", "Unlock Layer"], "the copy of Locked is not unlocked")
@@ -77,7 +79,7 @@ final class DesignArrangeJourneyTests: XCTestCase {
 
         // 1. Pair selected from Layers (a press on A first opens Desktop), ⌘C, ⌘V: a second Pair.
         click(design, x: 150, y: 140)
-        clickRow(design, Self.pairRow, "Pair")
+        design.clickDesignLayer(Self.pairRow)
         design.press(character: "c", .command)
         design.press(character: "v", .command)
         XCTAssert(Self.waitForLabel(undo, "Undo Paste"), "⌘V made no Paste step (Undo reads \(undo.label))")
@@ -98,7 +100,7 @@ final class DesignArrangeJourneyTests: XCTestCase {
         // 4. A new file after a relaunch: Desktop selected, ⌘V pastes B (the pasteboard outlived the app).
         design = launch(["-DesignFixture", "empty", "-SuiteWindowSize", "1024x768"])
         let newUndo = design.element("design.bar.undo")
-        clickRow(design, Self.desktopRow, "Desktop")
+        design.clickDesignLayer(Self.desktopRow)
         design.press(character: "v", .command)
         XCTAssert(Self.waitForLabel(newUndo, "Undo Paste"), "⌘V in the new file made no step (Undo reads \(newUndo.label))")
         XCTAssert(Self.waitUntil { self.rows(design, "B") == 1 }, "the new file holds \(rows(design, "B")) B rows, not 1")
@@ -155,13 +157,11 @@ final class DesignArrangeJourneyTests: XCTestCase {
         XCTAssert(Self.waitForText(status, "2 Layers"), "Ungroup selected \(Self.text(status)), not its 2 layers")
         design.shot("arrange-ungroup")
 
-        // 4. E1 pressed (opens Pair in Layers), A pressed, E1's row Shift-clicked: Group is off.
+        // 4. E1 pressed (opens Pair in Layers), A pressed, E1's row Command-clicked: Group is off.
         click(design, x: 950, y: 450)
         click(design, x: 150, y: 140)
-        let e1 = design.element("suite.sidebar").descendants(matching: .any)[Self.e1Row].firstMatch
-        XCTAssert(e1.waitForExistence(timeout: 5), "no E1 row in Layers (\(Self.e1Row))")
-        XCUIElement.perform(withKeyModifiers: .shift) { e1.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click() }
-        XCTAssert(Self.waitForText(status, "2 Layers"), "Shift-click on E1 selected \(Self.text(status)), not 2 Layers")
+        design.clickDesignLayer(Self.e1Row, modifiers: .command)
+        XCTAssert(Self.waitForText(status, "2 Layers"), "Command-click on E1 selected \(Self.text(status)), not 2 Layers")
         let object = design.app.menuBars.firstMatch.menuBarItems["Object"]
         object.click()
         let group = object.menuItems["Group"]
@@ -197,13 +197,6 @@ final class DesignArrangeJourneyTests: XCTestCase {
     /// A page point as a fraction of the 1440 × 1024 page.
     private static func offset(_ x: Double, _ y: Double) -> CGVector {
         CGVector(dx: x / 1440, dy: y / 1024)
-    }
-
-    /// Clicks the Layers row `identifier`, inside its label.
-    @MainActor private func clickRow(_ design: Journey, _ identifier: String, _ name: String) {
-        let layer = design.element("suite.sidebar").descendants(matching: .any)[identifier].firstMatch
-        XCTAssert(layer.waitForExistence(timeout: 5), "no \(name) row in Layers (\(identifier))")
-        layer.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
     }
 
     /// The Layers rows showing now, every one or only those named `name`.

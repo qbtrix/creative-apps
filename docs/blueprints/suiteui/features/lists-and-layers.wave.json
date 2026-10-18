@@ -10,7 +10,7 @@
     "Sources/SuiteUI/Contracts/GridSelecting.swift",
     "Sources/SuiteUI/Contracts/ListEditing.swift",
     "Tests/SuiteUITests/ListFakeTests.swift",
-    "Sources/SuiteUI/ListEditing.swift",
+    "Sources/SuiteUI/SuiteListEditing.swift",
     "Tests/SuiteUITests/ListEditingTests.swift",
     "Tests/SuiteUITests/ListBudgetTests.swift",
     "Sources/SuiteUI/GridSelection.swift",

@@ -100,11 +100,16 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // `accessibilityIdentifier` and the `identifier(in:)` that builds its
     // string (#938, the app audit's #262) only name a toggle for accessibility:
     // neither attaches a gesture or changes a hit area.
+    // `selectionDisabled` reads `SidebarRowLook` (lists-and-layers LL-4): it
+    // only says whether the row can be selected and attaches no gesture.
     let modifiers: Set = [
         "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel",
-        "accessibilityIdentifier", "identifier", "badge",
+        "accessibilityIdentifier", "identifier", "badge", "selectionDisabled",
     ]
-    let calls: Set = ["View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon"]
+    let calls: Set = [
+        "View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon",
+        "SidebarRowLook",
+    ]
     #expect(names.modifiers.subtracting(modifiers).isEmpty, "new modifier in body: can it rename from a toggle? (#54)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in body: can it rename from a toggle? (#54)")
 }
@@ -115,23 +120,39 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
         region(of: source, from: "private var title: some View", to: "public static func doubleClickRenames"))
     #expect(
         squeezed(title).contains(
-            "Label{Text(item.title)}icon:{SidebarRowIcon(item:item)}.contentShape(Rectangle())"
+            "Label{Text(item.title)}icon:{SidebarRowIcon(item:item)}"
+                + ".modifier(SidebarRowDimming(color:SidebarRowLook(item).title)).contentShape(Rectangle())"
                 + ".simultaneousGesture(TapGesture(count:2).onEnded{beginRename(on:.title)})}"),
-        "the rename gesture must sit right on the title Label (its icon a gesture-free leaf), with nothing after it")
+        "the rename gesture must sit right on the title Label (its icon and dimming gesture-free), with nothing after it")
     #expect(!title.lowercased().contains("toggle"), "the title must not draw the toggles inside its hit area (#308)")
     #expect(!title.contains("beginRename(on: .toggle)"))
     let names = callNames(in: title)
+    // `modifier(SidebarRowDimming(...))` only colors a dimmed row's title
+    // (LL-4); `dimmingOnlyColorsTheTitle` keeps it free of gestures.
     let modifiers: Set = [
         "focused", "onSubmit", "onExitCommand", "onChange", "contentShape", "simultaneousGesture", "onEnded",
+        "modifier",
     ]
     let calls: Set = [
         "View", "nil", "else", "focused", "TextField", "Binding", "commitRename", "Label", "Rectangle", "TapGesture",
-        "beginRename", "Text", "SidebarRowIcon",
+        "beginRename", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook",
     ]
     #expect(
         names.modifiers.subtracting(modifiers).isEmpty,
         "new modifier on the title: does it grow the rename hit area over the toggles or blank space? (#308)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in the title: can it rename elsewhere? (#308)")
+}
+
+/// The title's dimming modifier sets a color and nothing else, so it can't
+/// add a gesture or grow the rename hit area (#308).
+@Test func dimmingOnlyColorsTheTitle() throws {
+    let source = try sidebarRowSource()
+    let dimming = try #require(
+        region(of: source, from: "private struct SidebarRowDimming", to: "private struct SidebarRowIcon"))
+    let names = callNames(in: dimming)
+    #expect(names.modifiers.subtracting(["foregroundStyle"]).isEmpty, "the dimming modifier does more than color")
+    #expect(names.calls.subtracting(["ViewModifier", "body", "View", "color", "else"]).isEmpty, "the dimming modifier calls something new")
+    #expect(!dimming.contains("Gesture") && !dimming.contains("contentShape"))
 }
 
 /// #53: a toggle's icon lays out both its symbols, so flipping a toggle can't

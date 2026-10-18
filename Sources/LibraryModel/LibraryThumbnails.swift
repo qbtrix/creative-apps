@@ -2,7 +2,9 @@
 // TH-1). The cell's size bucket, requests for the visible cells only (never
 // one twice, none for a file that can't be read), the develop token that lets
 // a stale answer be dropped, and eviction that keeps visible ± two screens
-// under 128 MB. Linux-safe; LibraryApp runs the requests and hands back results.
+// under 128 MB. Results (TH-2): stale answers dropped, failures to
+// availability, invalidation. Linux-safe; LibraryApp runs the requests and
+// hands back results.
 
 /// A request's token: FNV-1a 64-bit over the develop settings' fields and the
 /// long side. Deterministic across processes (never `hashValue`), so a result
@@ -97,20 +99,28 @@ extension LibraryCatalog {
         }
     }
 
-    /// Stores `image` while `request` is still the pending one for its photo.
-    /// A minimal form for the UI to build on; TH-2 completes it (stale-token drops).
+    /// Stores `image` while `request` is still the pending one for its photo and
+    /// its token still matches the photo's develop settings. A stale answer is
+    /// dropped: one for a request no longer pending changes nothing; one whose
+    /// settings have since changed also clears the request, so the next pass asks again.
     public mutating func setThumbnail(_ image: DisplayImage, for request: ThumbnailRequest) {
         guard pendingThumbnails[request.id] == request else { return }
         pendingThumbnails[request.id] = nil
+        guard let photo = items.first(where: { $0.id == request.id }),
+              ThumbnailToken.of(photo.develop, longSide: request.longSide) == request.token
+        else { return }
         thumbnails[request.id] = image
     }
 
-    /// Clears the pending request; marks the photo `.missing` or `.unreadable(reason)`.
-    /// A minimal form for the UI to build on; TH-2 completes it and its tests.
+    /// Clears the pending request; marks the photo `.missing` or `.unreadable(reason)`
+    /// and drops any image it held. A failure for a request no longer pending is
+    /// dropped, and `.cancelled` says nothing about the file, so it only clears the request.
     public mutating func failThumbnail(_ request: ThumbnailRequest, _ error: LibraryError) {
         guard pendingThumbnails[request.id] == request else { return }
         pendingThumbnails[request.id] = nil
+        if case .cancelled = error { return }
         guard let index = items.firstIndex(where: { $0.id == request.id }) else { return }
+        thumbnails[request.id] = nil
         if case .missingFile = error {
             items[index].availability = .missing
         } else {
@@ -118,8 +128,8 @@ extension LibraryCatalog {
         }
     }
 
-    /// Drops the held image and any pending request of `id` (after its develop settings change).
-    /// A minimal form for the UI to build on; TH-2 completes it and its tests.
+    /// Drops the held image and any pending request of `id` (after its develop
+    /// settings change), so a late answer is dropped and the next pass asks again.
     public mutating func invalidateThumbnail(_ id: String) {
         thumbnails[id] = nil
         pendingThumbnails[id] = nil
