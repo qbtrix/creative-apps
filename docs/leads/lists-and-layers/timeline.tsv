@@ -53,3 +53,5 @@ utc	stage	event	ref	note
 2026-10-18T15:48Z	heartbeat	LL-9 fix #2817 merged; dev CI 39137279211 (80c14eed, older than both fixes) failed only on the two #2805 tests
 2026-10-18T18:39:28Z	wave	merged	#2734 #2735 #2760 #2777 #2779 #2782 #2796 #2797	LL-7..LL-15 all on dev
 2026-10-18T18:39:28Z	goldens	waiting	39153976103	no lists actuals yet; scoped suiteui at c91b1468 carries #2841
+2026-10-18T18:56:46Z	goldens	actuals	39153976103	lists and sidebar golden-new PNGs downloaded; 2 baseline branches gating
+2026-10-18T18:56:46Z	goldens	checks	suiteui/ll-goldens-rows	assertGolden for plain, refused, nested sidebar rows

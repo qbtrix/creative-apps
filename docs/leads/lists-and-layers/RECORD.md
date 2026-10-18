@@ -4,7 +4,7 @@ Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: 5 baselines (code tasks all merged)
 Base: 2e27b8db (origin/dev)
-Next: LL-16, LL-17 need golden-new lists PNGs; blocked the same way as canvas-marks (snapshot tests skipped in scoped runs before #2841); waiting on scoped suiteui 39153976103 (c91b1468)
+Next: 39153976103 wrote lists and sidebar actuals: baselines for grid, grid-small (LL-17) and suiteui-sidebar-dimmed (LL-16) on their branches, gating; plain, refused and nested sidebar rows had no golden check, added on suiteui/ll-goldens-rows; their baselines come from the next scoped run, then LL-17 feature-done. Layer list goldens sit with the editor kernel's snapshots, not this line
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
