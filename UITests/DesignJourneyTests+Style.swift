@@ -35,7 +35,7 @@ final class DesignStyleJourneyTests: XCTestCase {
 
         // 1. A's row in Layers, inside Desktop's, then Radius 12 typed with Return: one Change Corner Radius step.
         design.expandDesignLayer(Self.desktopRow)
-        clickRow(design, Self.rowA, "A")
+        design.clickDesignLayer(Self.rowA)
         let radius = control(design, Self.radius)
         XCTAssert(radius.waitForExistence(timeout: 5), "no Radius bar in the inspector (\(Self.radius))")
         radius.click()
@@ -80,7 +80,7 @@ final class DesignStyleJourneyTests: XCTestCase {
         design.shot("style-stroke-run-undone")
 
         // 6. Hidden's row in Layers: its style rows are disabled, saying why.
-        clickRow(design, Self.hiddenRow, "Hidden")
+        design.clickDesignLayer(Self.hiddenRow)
         let rows = [control(design, Self.opacity), control(design, Self.radius), control(design, Self.addStroke)]
         XCTAssert(Self.waitUntil { rows.allSatisfy { $0.exists && !$0.isEnabled } },
                   "a style row is enabled on Hidden (\(rows.map { "\($0.identifier): \($0.isEnabled)" }))")
@@ -88,19 +88,6 @@ final class DesignStyleJourneyTests: XCTestCase {
             NSPredicate(format: "label == %@ OR value == %@", Self.hiddenHint, Self.hiddenHint)).firstMatch
         XCTAssert(reason.waitForExistence(timeout: 5), "the disabled style rows don't say \"\(Self.hiddenHint)\"")
         design.shot("style-hidden-refused")
-    }
-
-    /// Clicks the Layers row `identifier` (the layer called `name`) in its blank space, between the
-    /// name and the Hide toggle: a click on the name itself doesn't select the row (#2496).
-    @MainActor private func clickRow(_ design: Journey, _ identifier: String, _ name: String) {
-        let layer = design.element("suite.sidebar").descendants(matching: .any)[identifier].firstMatch
-        XCTAssert(layer.waitForExistence(timeout: 5), "no \(name) row in Layers (\(identifier))")
-        let row = layer.frame, title = layer.staticTexts.firstMatch, toggle = layer.checkBoxes.firstMatch
-        var dx = 0.6
-        if row.width > 0, title.exists, toggle.exists, title.frame.maxX < toggle.frame.minX {
-            dx = Double((title.frame.maxX + toggle.frame.minX) / 2 - row.minX) / Double(row.width)
-        }
-        layer.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: 0.5)).click()
     }
 
     /// The inspector's control with the id `identifier`.

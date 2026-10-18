@@ -32,7 +32,7 @@ final class DesignPerfScrubJourneyTests: XCTestCase {
         let canvas = design.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "crowd showed no page (suite.canvas)")
         design.expandDesignLayer(Self.frameRow)
-        clickRow(design, Self.textRow)
+        design.clickDesignLayer(Self.textRow)
         var numbers: [String: String] = [:]
 
         let opacity = scrub(design, Self.opacity, step: "perf-scrub-opacity")
@@ -103,18 +103,6 @@ final class DesignPerfScrubJourneyTests: XCTestCase {
         let perf = design.element("suite.perf")
         guard perf.exists, let document = try? JSONDecoder().decode(ProbeDocument.self, from: Data(perf.label.utf8)) else { return 0 }
         return document.samples.count
-    }
-
-    /// Clicks the Layers row `identifier` midway between its name and its Hide toggle (#2496).
-    @MainActor private func clickRow(_ design: Journey, _ identifier: String) {
-        let layer = design.element("suite.sidebar").descendants(matching: .any)[identifier].firstMatch
-        XCTAssert(layer.waitForExistence(timeout: 5), "no \(identifier) row in Layers")
-        let row = layer.frame, title = layer.staticTexts.firstMatch, toggle = layer.checkBoxes.firstMatch
-        var dx = 0.6
-        if row.width > 0, title.exists, toggle.exists, title.frame.maxX < toggle.frame.minX {
-            dx = Double((title.frame.maxX + toggle.frame.minX) / 2 - row.minX) / Double(row.width)
-        }
-        layer.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: 0.5)).click()
     }
 
     /// Writes the report-only numbers to .build/ui-screens/perf-design-scrub.json and attaches them.
