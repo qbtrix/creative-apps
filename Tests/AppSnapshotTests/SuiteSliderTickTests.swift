@@ -83,8 +83,8 @@ import Testing
 
     /// The gap between the label and the value, 2 pt clear of each text so its anti-aliased edge doesn't count.
     private static func gap(_ label: String, _ value: Double, _ unit: String, _ decimals: Int, _ width: CGFloat) -> ClosedRange<CGFloat> {
-        let labelWidth = width(Text(label).font(SuiteFont.inspectorLabel))
-        let valueWidth = width(Text(NumericInput.text(value, decimals: decimals, unit: unit)).font(SuiteFont.inspectorValue))
+        let labelWidth = Self.width(Text(label).font(SuiteFont.inspectorLabel))
+        let valueWidth = Self.width(Text(NumericInput.text(value, decimals: decimals, unit: unit)).font(SuiteFont.inspectorValue))
         return (SuiteSpacing.m + labelWidth + 2)...(width - SuiteSpacing.m - valueWidth - 2)
     }
 
