@@ -14,7 +14,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OB-a | `Sources/SuiteModel/Onboarding/` with every type and signature the window calls as stubs returning the fake's values; its Linux tests written and disabled | OB-1, OB-2 | MJ-OB0 | – | no | 0 | done (Belt-Slice-Done: run 39132122171 at 4bf67be8, #2791) | – | – |
-| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 0 | waiting on OB-5g (other tasks merged, Linux green on 39143942767) | – | – |
+| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 1 | fix round 1 (#2884-#2887); OB-5g building | – | – |
 | OB-m | SuiteOnboarding, OnboardingLaunch, OnboardingModel do the work; StorePreferences over FileStore makes the preferences slot live | OB-7, OB-8, OB-9 | MJ-OB1, MJ-OB2, MJ-OB4 | OB-a | no | 0 | done (Belt-Slice-Done: run 39143942767 at bafd1d38, #2825) | – | – |
 | OB-s | SampleCatalog names one sample per app, finds it under Resources, copies into Documents without overwriting; Bundle/Samples/ holds the files | OB-10, OB-11 | MJ-OB3 | OB-a; bundle (built: bundle-apps copies Bundle/Samples/) | no | 1 | fix round 1 (#2857, #2858, #2877 merged; waiting on a Linux-green full dev run containing 13c1cad0) | – | – |
 | OB-z | The slot is live, the window reads the bundle's samples, journeys on live | OB-12, OB-13 | OJ3, OJ4 | OB-u, OB-m, OB-s (OB-12); switching (OB-13: Window > Switch To and the transport are on dev) | no | 0 | waiting | – | – |
@@ -39,6 +39,8 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | F-2851 | OB-s | 5 | fix round 1: Photo sample title "Beach"; titles test; 2 mutations (Mutate 6/6 SuiteModel.SampleCatalog) | Sources/SuiteModel/Onboarding/SampleCatalog.swift, Tests/SuiteModelTests/SampleCatalogTests.swift, Tests/mutations/SuiteModel.SampleCatalog.json | SampleCatalogTests | #2858 | merged |
 | F-2852 | OB-a | 5 | needs-ui #2867 filed for SuiteSize.onboardingWindow; OnboardingStarter comment and packet name it (values already pinned by OnboardingStubTests.controlIdentifiers; no mutation change) | Sources/SuiteModel/Onboarding/OnboardingStarter.swift, docs/blueprints/suite/features/onboarding.md | OnboardingStubTests | #2872 | merged (23aac48f) |
 | F-2850 | OB-s | 5 | destination names copies with UniqueFileNames (canonical first); case test, leading-dot test; plan rewritten for the new code (Mutate 8/8) | Sources/SuiteModel/Onboarding/SampleCatalog.swift, Tests/SuiteModelTests/SampleCatalogTests.swift, Tests/mutations/SuiteModel.SampleCatalog.json | SampleCatalogTests | #2877 | merged (13c1cad0) |
+| F-2884 | OB-u | 6 | #2884 focus copy points to Help > Welcome; #2885 start title, preset chips named as new documents | FakeOnboarding.swift (SuiteModel), start page view | model string tests | – | building |
+| F-2886 | OB-u | 6 | #2886 Skip/Back disabled while a hand-off sends; #2887 refusal shows under its tile | OnboardingModel.swift, start page view | OnboardingModel tests | – | building |
 | OB-5g | OB-u | 5 | The goldens for Golden/afterglow-onboarding/ taken from the first macOS run's `snapshots` artifact that holds OB-5 | Tests/AppSnapshotTests/Golden/afterglow-onboarding/ | the run's compare | – | building (snapshots of 39143942767) |
 | OB-13 | OB-z | 5 | Enables OJ3 and OJ4 on live (OJ3 skips naming #837 while the Flare sample is missing); blueprint prose; status built; feature-done | UITests/AfterGlowJourneyTests+OnboardingStart.swift, docs/blueprints/suite.md, docs/blueprints/suite/features/onboarding.wave.json | OJ3, OJ4 on the dev run | – | waits OB-5, OB-6, OB-11, OB-12 |
 
@@ -54,6 +56,7 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 |---|---|---|---|---|---|
 | OB-a | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2852 (minor) | clean |
 | OB-s | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2849 (major), #2850, #2851 (minor) | not clean: fix round 1 |
+| OB-u | 39143942767 | bafd1d38 | clarity, journey, design, layout, controls, mouse, taste, oracle | #2884 (major), #2885, #2886, #2887 (minor) | not clean: fix round 1 |
 
 ## Decisions
 - Base `dev`, not `main`: CLAUDE.md never targets main, the lead contract says base dev, and the fast lane retargets a main PR to dev. The brief's base SHA fdaabbfb is an ancestor of origin/main (0e3c08ea) and of dev (4a86f5fc).
@@ -86,3 +89,4 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - OB-a window size/margin placeholder (OnboardingLayout 720×520, 24 pt) waits on needs-ui #2867 (SuiteSize.onboardingWindow), filed for finding #2852.
 - F-2850 (#2877): case folding still comes from the exists closure (default APFS folds case); the new case test records parity but does not tell old from new. A taken: closure overload on UniqueFileNames would make it exact; left as is (minor).
 - Full run 39143942767 (bafd1d38): macOS job cancelled after the snapshot step; it uploaded `snapshots` (24 afterglow-onboarding PNGs: welcome, focus, focus-selected, start, start-default, start-missing x 4 appearances; no start-launching or start-error) and no ui-screens. OB-5g and the OB-u critics use those snapshots; OJ1/OJ2 judged from code. Review 2: OB-u and OB-m panels on that run; OB-z waits for OB-13.
+- Review 2, OB-u (39143942767 snapshots, code for OJ1/OJ2): 1 major (#2884), 3 minor; refuted 9 (grey prominent buttons are a render artefact shared with other apps; chip ic border is shared ChoiceChips; taste references absent from the artifact). #2887's fix is in OnboardingModel (OB-m's file), done under OB-u.

@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-18T18:01:52Z	merged	F-2850	#2877 at 13c1cad0 (finding #2850, OB-s); OB-s fix round 1 all merged
 2026-10-18T18:13:07Z	stage	review-2	critic panels OB-u (ui) and OB-m on 39143942767 (bafd1d38); OB-5g builder started from its snapshots
 2026-10-18T18:14:26Z	heartbeat	-	OB-5g builder, OB-u and OB-m critics running; OB-s waits on full run 39152649677 Linux
+2026-10-18T18:18:09Z	review	OB-u	not clean: #2884 (major), #2885 #2886 #2887 (minor); fixers F-2884, F-2886 started (round 1)
