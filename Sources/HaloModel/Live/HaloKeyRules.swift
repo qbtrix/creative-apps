@@ -5,6 +5,9 @@
 // layer's default (opacity's static home is `HaloLayer.opacity`). Key state,
 // the stopwatch and the key diamond decide with SuiteKernel's `KeyRules`
 // (AE-h1); opacity's home and the stopwatch's last-frame rule stay here.
+// A layer's place through its parents and the parent picker run on the
+// kernel's follow link (`LayerTree.worldPlacement`, `follows`, `setFollow`;
+// AL-h1).
 // Internal; Linux-safe.
 import FlareCore
 import SuiteKernel
@@ -28,30 +31,21 @@ enum HaloKeyRules {
             * HaloMatrix.scale(x: v(.scaleX), y: v(.scaleY)) * HaloMatrix.translation(x: -v(.anchorX), y: -v(.anchorY))
     }
 
-    /// Layer space to composition space, parents applied outermost last. The
-    /// walk stops at a parent it has already seen (a cycle) or an unknown
-    /// one. Nil for an unknown id.
+    /// Layer space to composition space, parents applied outermost last,
+    /// through the kernel's `worldPlacement`. The walk stops at a parent it
+    /// has already seen (a cycle) or an unknown one. Nil for an unknown id.
     static func worldMatrix(of id: String, in c: HaloComposition, at f: Int) -> HaloMatrix? {
-        guard let start = layer(id, in: c) else { return nil }
-        var matrix = localMatrix(of: start, in: c, at: f)
-        var seen: Set<String> = [id]
-        var next = start.parentID
-        while let parentID = next, seen.insert(parentID).inserted, let parent = layer(parentID, in: c) {
-            matrix = localMatrix(of: parent, in: c, at: f) * matrix
-            next = parent.parentID
-        }
-        return matrix
+        guard layer(id, in: c) != nil else { return nil }
+        return c.layerTree.worldPlacement(of: id) { localMatrix(of: $0.payload, in: c, at: f) }
     }
 
-    /// Whether `id` follows `ancestorID` through its chain of parents.
+    /// Whether `id` follows `ancestorID` through its chain of parents (the
+    /// kernel's `follows`). A layer follows itself only through a cycle, as a
+    /// damaged file's check asks; the kernel says no for a layer and itself.
     static func follows(_ id: String, _ ancestorID: String, in c: HaloComposition) -> Bool {
-        var seen: Set<String> = []
-        var next = layer(id, in: c)?.parentID
-        while let parentID = next, seen.insert(parentID).inserted {
-            if parentID == ancestorID { return true }
-            next = layer(parentID, in: c)?.parentID
-        }
-        return false
+        let tree = c.layerTree
+        guard id == ancestorID else { return tree.follows(id, ancestorID) }
+        return tree.node(id)?.followsID.map { $0 == id || tree.follows($0, id) } ?? false
     }
 
     /// Section 2's not-animated rule, read side: fewer than two keys is not
@@ -112,27 +106,26 @@ enum HaloKeyRules {
         }
     }
 
-    /// The parent picker: layer `id` follows `pid` (nil clears it) and keeps
-    /// its anchor's place on screen at `f`, its x and y rewritten in the new
-    /// parent's space through `setValue` (keyed when animated). The layer
-    /// itself, or a layer that already follows it, throws
-    /// `.parentCycle(<its name>)`; an unknown id throws `.unknownLayer`. A
-    /// refusal changes nothing. Under a parent that can't be inverted (a
-    /// scale of 0 squashes every point to one) x and y stay as they are.
+    /// The parent picker: layer `id` follows `pid` (nil clears it) through
+    /// the kernel's `setFollow(keepingPlace:)` and keeps its anchor's place on
+    /// screen at `f`, its x and y rewritten in the new parent's space through
+    /// `setValue` (keyed when animated). The layer itself, or a layer that
+    /// already follows it, throws `.parentCycle(<its name>)`; an unknown id
+    /// throws `.unknownLayer`. A refusal changes nothing. Under a parent that
+    /// can't be inverted (a scale of 0 squashes every point to one) x and y
+    /// stay as they are.
     static func setParent(_ pid: String?, of id: String, at f: Int, in c: inout HaloComposition) throws {
-        guard let child = layer(id, in: c), let world = worldMatrix(of: id, in: c, at: f) else {
-            throw HaloEditError.unknownLayer(id)
-        }
-        if let pid {
-            guard layer(pid, in: c) != nil else { throw HaloEditError.unknownLayer(pid) }
-            if pid == id || follows(pid, id, in: c) { throw HaloEditError.parentCycle(child.name) }
-        }
+        guard let child = layer(id, in: c) else { throw HaloEditError.unknownLayer(id) }
+        let before = c
         let anchor = HaloPoint(x: value(.anchorX, of: child, in: c, at: f), y: value(.anchorY, of: child, in: c, at: f))
-        let screen = world.apply(anchor)
+        var local: HaloPoint?
         var copy = c
-        try change(id, in: &copy) { $0.parentID = pid }
-        let parentWorld = pid.flatMap { worldMatrix(of: $0, in: copy, at: f) } ?? .identity
-        if let local = try? parentWorld.inverted().apply(screen) {
+        try copy.editLayerTree { (tree: inout LayerTree<HaloLayer>) throws(TreeRefusal) in
+            try tree.setFollow(id, pid, local: { localMatrix(of: $0.payload, in: before, at: f) }) { _, placed in
+                local = placed.apply(anchor)
+            }
+        }
+        if let local {
             try setValue(local.x, for: .x, of: id, at: f, in: &copy)
             try setValue(local.y, for: .y, of: id, at: f, in: &copy)
         }

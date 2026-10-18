@@ -3,7 +3,9 @@
 // through `edit`. Every edit is refused with `.noComposition` without a
 // composition; a refused or unchanged edit records nothing. Deleting a parent
 // un-parents its children through `PropertyKeying.setParent(nil, …)`, so they
-// keep their place on screen at the playhead. Linux-safe: no UI imports.
+// keep their place on screen at the playhead. Moves, bring/send and duplicate
+// run on SuiteKernel's LayerTree (HaloLayers+Kernel). Linux-safe: no UI imports.
+import SuiteKernel
 
 extension HaloProject {
     /// The layer list's identifier, where list-wide refusals show.
@@ -27,7 +29,7 @@ extension HaloProject {
                 do {
                     try keying.setParent(nil, of: child.id, at: comp.playheadFrame, in: &comp)
                 } catch HaloEditError.notBuilt {
-                    if let k = comp.layers.firstIndex(where: { $0.id == child.id }) { comp.layers[k].parentID = nil }
+                    try comp.editLayerTree { tree in _ = tree.update(child.id) { $0.followsID = nil } }
                 }
             }
             comp.layers.removeAll { $0.id == id }
@@ -52,40 +54,42 @@ extension HaloProject {
         }
     }
 
-    /// Moves layer `id` to `index` (top first), clamped to the list. One
-    /// step, "Move Layer", unless it is already there.
+    /// Moves layer `id` to `index` (top first), clamped to the list, through
+    /// LayerTree.move. One step, "Move Layer", unless it is already there.
     public mutating func moveLayer(_ id: String, to index: Int) {
         edit("Move Layer", control: Self.layerListControl) { doc in
             let c = try doc.selectedCompositionIndex()
-            var layers = doc.compositions[c].layers
-            guard let from = layers.firstIndex(where: { $0.id == id }) else { throw HaloEditError.unknownLayer(id) }
-            let layer = layers.remove(at: from)
-            layers.insert(layer, at: min(max(index, 0), layers.count))
-            doc.compositions[c].layers = layers
+            // Top first among the others becomes back to front once the layer is out.
+            let last = doc.compositions[c].layers.count - 1
+            let at = last - min(max(index, 0), last)
+            try doc.compositions[c].editLayerTree { (tree: inout LayerTree<HaloLayer>) throws(TreeRefusal) in
+                try tree.move(id, into: nil, at: at)
+            }
         }
     }
 
     /// Moves the selected layer one place toward the top; nothing at the top.
     /// One step, "Move Layer".
-    public mutating func bringSelectedLayerForward() { moveSelectedLayer(by: -1) }
+    public mutating func bringSelectedLayerForward() { arrangeSelectedLayer(.bringForward) }
 
     /// Moves the selected layer one place toward the bottom; nothing at the
     /// bottom. One step, "Move Layer".
-    public mutating func sendSelectedLayerBackward() { moveSelectedLayer(by: 1) }
+    public mutating func sendSelectedLayerBackward() { arrangeSelectedLayer(.sendBackward) }
 
     /// Copies the selected layer directly above it as "<name> copy" with a new
     /// id (taken before the step, so an undone copy's id is never given
-    /// again), everything else kept, and selects the copy. One step,
-    /// "Duplicate Layer".
+    /// again), everything else kept, and selects the copy, through
+    /// LayerTree.duplicate. One step, "Duplicate Layer".
     public mutating func duplicateSelectedLayer() {
         let newID = selectedLayer == nil ? nil : selectedComposition.map { takeLayerID(in: $0.id) }
         edit("Duplicate Layer", control: Self.layerListControl) { doc in
             let (c, l) = try doc.selectedLayerIndices()
             guard let newID else { throw HaloEditError.noLayerSelected }
             let original = doc.compositions[c].layers[l]
-            var copy = original.withID(newID)
-            copy.name = "\(original.name) copy"
-            doc.compositions[c].layers.insert(copy, at: l)
+            try doc.compositions[c].editLayerTree { (tree: inout LayerTree<HaloLayer>) throws(TreeRefusal) in
+                guard tree.duplicate([original.id], mint: { newID }) == [newID] else { throw .unknown(original.id) }
+                _ = tree.update(newID) { $0.name = "\(original.name) copy" }
+            }
             doc.selectedLayerID = newID
         }
     }
@@ -99,13 +103,15 @@ extension HaloProject {
         return min(max(target, 0), count - 1)
     }
 
-    /// Swaps the selected layer with its neighbor `step` places down; nothing
-    /// when there is none.
-    private mutating func moveSelectedLayer(by step: Int) {
+    /// Moves the selected layer one place by `step` through LayerTree.arrange;
+    /// nothing when it is already at that end.
+    private mutating func arrangeSelectedLayer(_ step: ArrangeStep) {
         edit("Move Layer", control: Self.layerListControl) { doc in
             let (c, l) = try doc.selectedLayerIndices()
-            guard doc.compositions[c].layers.indices.contains(l + step) else { return }
-            doc.compositions[c].layers.swapAt(l, l + step)
+            let id = doc.compositions[c].layers[l].id
+            try doc.compositions[c].editLayerTree { (tree: inout LayerTree<HaloLayer>) throws(TreeRefusal) in
+                try tree.arrange(step, [id])
+            }
         }
     }
 }
