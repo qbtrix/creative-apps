@@ -4,7 +4,7 @@ Issue: #1937 · Packet: docs/blueprints/suiteui/features/adopt-kernel-easing.md
 Run: act-1a14dfbdefe-il38 · Session: claude/adopt-kernel-features-qyyie4 · Started: 2026-10-18T08:30Z
 Stage: 3 wave 2 (AE-flare) + wave 1 (AE-halo)
 Base: 4bf67be861d056068f683878a580864ac71bed21
-Next: AE-flare Belt-Slice-Done when scoped flare run 39142436739 (dev 524c3271, contains #2819) is green. #2842 (AE-h2, feature-done) and #2828 in the lane; AE-halo Belt-Slice-Done after #2842 merges and a green halo run; then Belt-Contact-Sheet
+Next: (16:32Z) #2842 (AE-h2) merged as ae72cc6c. #2828 closed, superseded by #2841. Waiting on full CI 39145334588 (ae72cc6c, which has #2819 and #2842) and flare run 39142436739: when green, Belt-Slice-Done AE-flare and AE-halo, then Belt-Contact-Sheet.
 
 Line lead for #1938, #1937 and #1936 (contract rule 19); this record is the
 adopt-kernel-easing part. The brief names `main` at
@@ -49,6 +49,8 @@ fast-lane PR opened against `main` to `dev`).
 - 2026-10-18T15:56Z: AE-h2 → PR #2842 (5 files, +24/−31, all HaloModel and its plan; the lead checked the file list; Mutate 10/10 HaloModel.KernelEasingAdapter, HaloKeySelection 6/6 re-run). Deleted: the sample loop in `easingCurve` (now `EaseCurve.samples`), the preset switch and search (now via rawValue), the curve-to-preset lookup (via `EasePreset`), and setEasing's handle clamp (via `EaseCurve.moving`). Kept: the handles/movingHandle/keyState wrappers, which unchanged tests call, and Halo-only key rules (opacity's static home, clamping, `keyed`, last-frame stopwatch, parent math). `HaloModel.HaloKeyRules.json` doesn't exist on dev, so the new mutations went into the adapter plan. It carries feature-done.
 
 - 2026-10-18T16:08Z: #2819 (AE-f2) merged as 1ffa16a0. Scoped flare run 39142436739 on dev 524c3271 contains it (queued); AE-flare's Belt-Slice-Done waits on that run. Scoped halo run 39141680081 (dev 6d589da5, AE-h1 only) is in progress; AE-halo still needs #2842.
+
+- 16:32Z: Closed #2828 as superseded. #2841 (bafd1d38) restored #2807's SegmentedTabs lines and moved fade-end to a run-loop timer.
 
 ## Open
 - 2026-10-18T13:45Z: ninth Belt nudge (after a worker restart); continued from stage 3.
