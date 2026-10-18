@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-18T21:25Z	3	ci-red	#2989	macOS build failed on dev break (TileCanvasView, #2942); fix #2990
 2026-10-18T21:55Z	3	merge-dev	#2989	#2990 on dev; dev merged into SW-4a
 2026-10-18T22:43Z	4	merged	#2989	SW-4a squash-merged as 531550f (feature-done)
+2026-10-18T23:15Z	4	wait-ci	39173775025	full dev CI with 531550f pending, no runner yet
