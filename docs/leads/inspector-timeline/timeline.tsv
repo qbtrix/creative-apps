@@ -59,3 +59,4 @@
 2026-10-18T02:14Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; full run 39082226458 ended red (Linux, dev-red #2509, design line; macOS cancelled); 39088586270 (d3cd7d9f) running; nothing pending
 2026-10-18T02:14Z	heartbeat	dev-red #2509 open; 39082226458 finished failure (macOS cancelled); new full run 39088586270 on same d3cd7d9f: Linux failed again, macOS in progress; no green full run yet
 2026-10-18T02:45Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; full run 39088586270 (d3cd7d9f) Linux red again (dev-red #2509, design line), macOS running; 39090620413 (498c5b3c) queued; nothing pending
+2026-10-18T02:46Z	heartbeat	dev-red #2509 closed 02:23 by Linux-only run 39089489958 (main -> 948bcbf4, no ui-screens); new full run 39090620413 on 498c5b3c pending; waiting on its macOS ui-screens
