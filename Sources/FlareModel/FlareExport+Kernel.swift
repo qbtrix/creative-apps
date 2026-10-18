@@ -1,21 +1,32 @@
 // FlareExport+Kernel.swift: the export sheet's run transitions over the kernel's `ExportRun`
-// (docs/blueprints/flare/features/flare-export.md, Contract slice). FX-2 declares them: the openers report nothing
-// and change nothing, and progress, end and dismiss forward to the run, whose bodies arrive with EK-22. FX-4 fills
-// the bodies without changing a signature.
+// (docs/blueprints/flare/features/flare-export.md, Contract slice and Pseudocode). Every move delegates to the run:
+// it holds the state, clamps progress and keeps a running run open (rule 20); this file only says which move each
+// sheet action is and when the sheet may make it.
 import FlareCore
 import SuiteKernel
 
 extension FlareWorkspace {
-    /// The run's options in every state but idle. Stub (FX-4): nil.
-    public var exportingOptions: ExportOptions? { nil }
+    /// The run's options in every state but idle.
+    public var exportingOptions: ExportOptions? {
+        switch exportState {
+        case .idle: nil
+        case .editing(let o), .running(let o, _, _), .finished(let o, _), .failed(let o, _): o
+        }
+    }
 
-    /// Idle to editing on the SVG frame defaults; false otherwise. Stub (FX-4): false, changing nothing.
+    /// Idle to editing on the SVG frame defaults; false (and no change) with no document or a sheet already open.
     @discardableResult
-    public mutating func openExport() -> Bool { false }
+    public mutating func openExport() -> Bool {
+        guard case .idle = exportState, document != nil, let o = exportOptions(.svgFrame) else { return false }
+        return exportState.begin(o)
+    }
 
-    /// Editing with no problem to running at 0 of `exportFileCount`; false otherwise. Stub (FX-4): false, changing nothing.
+    /// Editing with no problem to running at 0 of `exportFileCount`; false (and no change) otherwise.
     @discardableResult
-    public mutating func startExport() -> Bool { false }
+    public mutating func startExport() -> Bool {
+        guard exportProblem == nil else { return false }
+        return exportState.start(total: exportFileCount)
+    }
 
     /// Moves the running run to `fraction` of its total, rounded down; the run clamps and never goes back.
     /// Ignored unless running.
@@ -33,8 +44,11 @@ extension FlareWorkspace {
         }
     }
 
-    /// Failed back to editing with the same options. Stub (FX-4): changes nothing.
-    public mutating func retryExport() {}
+    /// Failed back to editing with the same options; any other state stays.
+    public mutating func retryExport() {
+        guard case .failed(let o, _) = exportState else { return }
+        _ = exportState.begin(o)
+    }
 
     /// Closes an editing, finished or failed run; a running one stays until it ends.
     public mutating func dismissExport() { exportState.dismiss() }
