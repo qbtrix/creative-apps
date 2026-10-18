@@ -28,3 +28,5 @@ utc	stage	event	ref	note
 2026-10-18T15:23:13Z	merged	OB-10	#2809
 2026-10-18T15:23:24Z	merged	OB-8 OB-9 OB-7	#2810 #2812 #2813; wave 3 complete
 2026-10-18T15:23:38Z	pr-open	OB-5	#2822 5d607b43
+2026-10-18T15:25:13Z	build-start	OB-12	worktree builder
+2026-10-18T15:25:13Z	build-start	OB-8b	worktree builder
