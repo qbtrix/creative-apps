@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-18T16:40:31Z	round1	round 1: fixing #2767 loupe, #2765 persist, #2749 grid (grid fails in Release journeys since before #2790)
 2026-10-18T17:45:28Z	round1	fix PRs #2859 #2860 #2878; resumed after worker restart
 2026-10-18T18:10:35Z	round1	check-in: run 39148564664 red as expected (fixes not in it); #2860 merged; #2878 takes #2766 #2882 too
+2026-10-18T18:32:12Z	round1	check-in: #2878 macOS build green, waits for lane sweep; scoped library 39153204776 queued
