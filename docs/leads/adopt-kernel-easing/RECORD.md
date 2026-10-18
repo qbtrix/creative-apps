@@ -4,7 +4,7 @@ Issue: #1937 · Packet: docs/blueprints/suiteui/features/adopt-kernel-easing.md
 Run: act-1a14dfbdefe-il38 · Session: claude/adopt-kernel-features-qyyie4 · Started: 2026-10-18T08:30Z
 Stage: 3 wave 2 (AE-flare) + wave 1 (AE-halo)
 Base: 4bf67be861d056068f683878a580864ac71bed21
-Next: (16:32Z) #2842 (AE-h2) merged as ae72cc6c. #2828 closed, superseded by #2841. Waiting on full CI 39145334588 (ae72cc6c, which has #2819 and #2842) and flare run 39142436739: when green, Belt-Slice-Done AE-flare and AE-halo, then Belt-Contact-Sheet.
+Next: (17:16Z) AE-flare done: Belt-Slice-Done posted with run 39142436739. AE-halo waits on full CI 39145334588 (ae72cc6c, still pending) or a green halo scoped run that contains #2842. Then the Belt-Contact-Sheet.
 
 Line lead for #1938, #1937 and #1936 (contract rule 19); this record is the
 adopt-kernel-easing part. The brief names `main` at
