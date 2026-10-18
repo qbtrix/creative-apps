@@ -1,7 +1,9 @@
 // AfterGlowApp.swift: AfterGlow, the suite's launcher. Three scenes: the
 // home window, the Settings scene (AfterGlow > Settings…, Command-comma,
-// is its own item and opens it) and the onboarding window, declared here and
-// opened only by the onboarding feature. The menus are SuiteCommands'
+// is its own item and opens it) and the onboarding window, presented over
+// the home at first launch and at OnboardingLayout's fixed size. Both the
+// home and the welcome window present themselves: a presented scene keeps an
+// `.automatic` one closed. The menus are SuiteCommands'
 // Window > Switch To plus one LauncherCommands stub per launcher feature,
 // each holding its blueprint 6.2 items disabled with their reason until that
 // feature wires them. LauncherDelegate (LauncherRouter.swift) is the app
@@ -20,6 +22,8 @@ struct AfterGlowApp: App {
         Window("AfterGlow", id: "home") { HomeWindow() }
             // The launch size SuiteWindow's apps use (#715); HomeWindow sets the minimum.
             .defaultSize(SuiteSize.windowLaunch)
+            // Presents itself: the welcome window presenting would otherwise keep it closed at first launch.
+            .defaultLaunchBehavior(.presented)
             .commands {
                 SuiteCommands(app: .launcher)
                 LauncherCommandsHome()
@@ -29,5 +33,9 @@ struct AfterGlowApp: App {
         Settings { SettingsView() }
             .commands { LauncherCommandsSettings() }
         Window("Welcome to AfterGlow", id: "onboarding") { OnboardingWindow() }
+            .defaultLaunchBehavior(OnboardingWindow.launchBehavior)
+            .restorationBehavior(.disabled)
+            .windowResizability(.contentSize)
+            .commands { LauncherCommandsOnboarding() }
     }
 }

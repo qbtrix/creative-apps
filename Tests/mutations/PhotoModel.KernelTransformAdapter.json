@@ -1,0 +1,37 @@
+[
+  {
+    "label": "shiftDropped: Photo's Shift never reaches EditModifiers, so a corner drag loses its aspect and a turn its snap",
+    "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "find": "if modifiers.contains(.shift) { out.insert(.shift) }",
+    "replace": "if modifiers.contains(.option) { out.insert(.shift) }",
+    "tests": "PhotoKernelTransformTests"
+  },
+  {
+    "label": "optionDropped: Photo's Option never reaches EditModifiers, so a drag no longer mirrors about the centre",
+    "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "find": "if modifiers.contains(.option) { out.insert(.option) }",
+    "replace": "if modifiers.contains(.shift) { out.insert(.option) }",
+    "tests": "PhotoKernelTransformTests"
+  },
+  {
+    "label": "toleranceFixed: the handle hit ignores the caller's tolerance and always uses 6",
+    "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "find": "in: box.rect, tolerance: tolerance)",
+    "replace": "in: box.rect, tolerance: 6)",
+    "tests": "PhotoKernelTransformTests"
+  },
+  {
+    "label": "axesSwapped: a canvas point reaches the kernel with x and y swapped",
+    "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "find": "turned(Point(x: p.x, y: p.y), -1)",
+    "replace": "turned(Point(x: p.y, y: p.x), -1)",
+    "tests": "PhotoKernelTransformTests"
+  },
+  {
+    "label": "snapSkipped: a rotate drag adds the turn without BoxMath.snappedDegrees",
+    "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "find": "BoxMath.snappedDegrees(draft.transform.degrees + turn, modifiers: kernel(modifiers))",
+    "replace": "draft.transform.degrees + turn",
+    "tests": "PhotoKernelTransformTests"
+  }
+]

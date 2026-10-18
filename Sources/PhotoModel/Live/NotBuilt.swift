@@ -79,17 +79,6 @@ struct NotBuiltAdjustmentLayers: AdjustmentLayering {
                   mask: PixelBuffer?) throws -> PixelBuffer { below }
 }
 
-struct NotBuiltTransform: LayerTransforming {
-    let not = NotBuilt(feature: "PV-7")
-    var unavailableHelp: String? { not.help }
-    func handle(at point: Mask.Point, in draft: TransformDraft, tolerance: Double) -> TransformHandle? { nil }
-    func dragged(_ draft: TransformDraft, handle: TransformHandle, from start: Mask.Point, to point: Mask.Point,
-                 modifiers: DragModifiers) -> TransformDraft { draft }
-    func corners(of draft: TransformDraft) -> [Mask.Point] { [] }
-    func applied(_ draft: TransformDraft, to content: PlacedPixels) throws -> PlacedPixels { throw not.refuse() }
-    func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels { throw not.refuse() }
-}
-
 struct NotBuiltExportSizing: ExportSizing {
     let not = NotBuilt(feature: "PV-8")
     var unavailableHelp: String? { not.help }

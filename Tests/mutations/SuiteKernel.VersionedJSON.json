@@ -1,0 +1,16 @@
+[
+  {
+    "label": "acceptsNewer: probe(_:supported:) reads a version newer than the app supports",
+    "file": "Sources/SuiteKernel/Session/VersionedJSON.swift",
+    "find": "guard version <= supported else",
+    "replace": "guard version <= Int.max else",
+    "tests": "VersionedJSONTests"
+  },
+  {
+    "label": "wordsDropPath: words name no coding path",
+    "file": "Sources/SuiteKernel/Session/VersionedJSON.swift",
+    "find": "let names = path.map { key in key.intValue.map { \"[\\($0)]\" } ?? key.stringValue }",
+    "replace": "let names: [String] = []",
+    "tests": "VersionedJSONTests"
+  }
+]

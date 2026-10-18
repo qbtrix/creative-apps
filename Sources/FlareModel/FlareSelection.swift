@@ -41,11 +41,13 @@ extension FlareWorkspace {
         return held ? selection : [hit]
     }
 
-    /// Mouse-up: a click selects what it hits, a drag from an item moves it, a drag from empty stage is a marquee.
+    /// Mouse-up: a click selects what it hits, a drag from a box handle scales or rotates the selection, a drag from
+    /// an item moves it, a drag from empty stage is a marquee.
     mutating func endSelect(_ g: StageGesture) {
         guard let sceneID = selectedSceneID, let document, g.start.isFinite, g.end.isFinite else { return }
         let extending = g.modifiers.contains(.shift)
         if g.isClick { return select(hit(at: g.start, stageScale: g.stageScale), extending: extending) }
+        if let grip = g.grip { return commitBox(grip, g) }
         guard g.moving.isEmpty else { return commitMove(g.moving, dx: g.end.x - g.start.x, dy: g.end.y - g.start.y) }
         guard let rect = Rect(enclosing: [g.start, g.end]) else { return }
         let found = services.hits.marquee(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID, rect: rect)

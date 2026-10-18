@@ -1,6 +1,8 @@
 // Contracts/LayerContracts.swift: adjustment layers (PV-6, #580) and the
-// free transform and flips (PV-7). Linux-safe.
+// free transform and flips (PV-7), whose handle and transform types are
+// SuiteKernel's. Linux-safe.
 import CoreRaster
+import SuiteKernel
 
 /// PV-6: an adjustment in the stack changes the layers under it.
 public protocol AdjustmentLayering: PhotoUseCase {
@@ -16,27 +18,17 @@ public protocol AdjustmentLayering: PhotoUseCase {
                   blendMode: BlendMode, mask: PixelBuffer?) throws -> PixelBuffer
 }
 
-/// A handle of the transform box.
-public enum TransformHandle: Hashable, Sendable, CaseIterable {
-    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
-    /// Inside the box: move.
-    case inside
-    /// Just outside a corner: rotate.
-    case rotate
-}
+/// A handle of the transform box: SuiteKernel's `EditorHandle` (the eight
+/// sides clockwise from the top-left, `inside` to move, `rotate` to turn).
+public typealias TransformHandle = EditorHandle
 
-/// A layer's pending transform: scale about the box's top-left, then turn
-/// clockwise about the box's center, then move.
-public struct LayerTransform: Hashable, Sendable {
-    public var scaleX: Double
-    public var scaleY: Double
-    public var degrees: Double
-    public var dx: Double
-    public var dy: Double
-    public init(scaleX: Double = 1, scaleY: Double = 1, degrees: Double = 0, dx: Double = 0, dy: Double = 0) {
-        self.scaleX = scaleX; self.scaleY = scaleY; self.degrees = degrees; self.dx = dx; self.dy = dy
-    }
-    public static let identity = LayerTransform()
+/// A layer's pending transform: SuiteKernel's `LayerTransform` (scale about
+/// the box's top-left, then turn clockwise about the box's center, then move).
+public typealias LayerTransform = SuiteKernel.LayerTransform
+
+extension SuiteKernel.LayerTransform {
+    /// No scale, turn or move.
+    public static let identity = SuiteKernel.LayerTransform()
 }
 
 /// Edit > Free Transform in progress on one layer.

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "dirtyIsAFlag: isDirty reads an edit flag instead of saved vs current tokens",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "public var isDirty: Bool { currentToken != savedToken }",
+    "replace": "public var isDirty: Bool { lastEdit != nil }",
+    "tests": "DocumentSessionTests"
+  },
+  {
+    "label": "dueFromAutosave: autosaveDue measures the delay from the last autosave, not the last edit",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "return now.timeIntervalSince(edit) >= delay",
+    "replace": "return now.timeIntervalSince(lastAutosave ?? edit) >= delay",
+    "tests": "DocumentSessionTests"
+  }
+]

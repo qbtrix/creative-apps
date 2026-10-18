@@ -4,9 +4,10 @@
 import FlareCore
 
 /// The gesture under way: `base` is the pen draft it carries on from, `moving`
-/// what a selection-tool drag moves (empty for a marquee).
+/// what a selection-tool drag moves (empty for a marquee or a handle), `grip` the box handle a Select drag holds.
 struct StageGesture: Equatable, Sendable {
     var start: Point, end: Point, modifiers: DragModifiers, stageScale: Double, base: ShapeDraft?, moving: [StageAddress]
+    var grip: BoxGrip? = nil
 
     var isClick: Bool {
         let scale = FlareWorkspace.usable(stageScale)
@@ -47,8 +48,11 @@ extension FlareWorkspace {
     /// the stage's fit scale (stage points per scene point), so minimums apply on screen.
     public mutating func dragChanged(from start: Point, to end: Point, modifiers: DragModifiers = [], stageScale: Double = 1) {
         if gesture?.start != start {
+            // A handle of the selection box wins over the art under it (FlareBoxDrag.swift).
+            let grip = grip(at: start, stageScale: stageScale)
             gesture = StageGesture(start: start, end: end, modifiers: modifiers, stageScale: stageScale,
-                                   base: gesture.map(\.base) ?? draft, moving: grabbed(at: start, stageScale: stageScale))
+                                   base: gesture.map(\.base) ?? draft,
+                                   moving: grip == nil ? grabbed(at: start, stageScale: stageScale) : [], grip: grip)
         }
         gesture?.end = end; gesture?.modifiers = modifiers; gesture?.stageScale = stageScale
         guard selectedScene != nil, let g = gesture else { return draft = nil }
@@ -66,6 +70,12 @@ extension FlareWorkspace {
             draft = shapes.draft(tool, from: start, to: end, modifiers: modifiers, previous: base)
         case .select, .directSelect:
             let drags = !g.isClick && start.isFinite && end.isFinite
+            if let grip = g.grip {
+                marquee = nil
+                let asked = Self.boxGesture(grip, from: start, to: end, modifiers: modifiers)
+                dragPreview = drags ? boxPreview(asked, box: grip.box) : nil
+                return
+            }
             marquee = drags && g.moving.isEmpty ? Rect(enclosing: [start, end]) : nil
             dragPreview = drags && !g.moving.isEmpty ? movePreview(g.moving, dx: end.x - start.x, dy: end.y - start.y) : nil
         }
@@ -139,7 +149,7 @@ extension FlareWorkspace {
 
     /// Whether a Select move of `moving` would key a symbol's layers. The box commit keys scene layers only, so it
     /// would key the scene layer that shares their id instead (#674).
-    private func selectKeysSymbol(_ moving: [StageAddress]) -> Bool {
+    func selectKeysSymbol(_ moving: [StageAddress]) -> Bool {
         tool == .select && moving.contains { $0.owner != selectedSceneID.map(LayerOwner.scene) }
     }
 

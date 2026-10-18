@@ -8,8 +8,8 @@
 # targets of AfterGlow.app from the same folders as Package.swift: five
 # frameworks (SuiteUI, SuiteModel, SuiteKernel, SuiteShell, and
 # CreativeEngines, which compiles only Bundle/Engines/CreativeEngines.swift and
-# is the only target linking the creative-core products; SuiteKernel reads
-# FlareCore's geometry through it), each <X>Model as a static library, each
+# is the only target linking the creative-core products; SuiteKernel and
+# SuiteUI read FlareCore's geometry through it), each <X>Model as a static library, each
 # <X>App as an application with the helper run path, and the AfterGlowApp
 # launcher. Frameworks are not embedded here: bundle-apps assembles them into
 # AfterGlow.app/Contents/Frameworks. Every non-test target of Package.swift
@@ -95,7 +95,7 @@ targets:
     type: framework
     platform: macOS
     sources: [Sources/SuiteUI]
-    dependencies: [{ target: SuiteModel }, { target: SuiteKernel }]
+    dependencies: [{ target: SuiteModel }, { target: SuiteKernel }, { target: CreativeEngines }]
   SuiteShell:
     type: framework
     platform: macOS

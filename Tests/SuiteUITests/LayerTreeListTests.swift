@@ -3,7 +3,8 @@
 // it. Each row is keyed by its layer's own id (200 rows, no duplicates); a drop
 // onto an open container lands as its last child, and a drop onto a leaf, a
 // locked group, the row itself or its own descendant is refused; the page is
-// in the gallery index. macOS only.
+// in the gallery index. The list shows no scroller, whose page area the app
+// audit reads as an unnamed button with no identifier (#2742). macOS only.
 @testable import SuiteUI
 import SuiteKernel
 import SwiftUI
@@ -40,5 +41,14 @@ import Testing
             == "move(into: \"header\", at: 3)")
         #expect(SuiteGallery.pageNames.contains(GalleryEditorKernel.name))
         #expect(SuiteGallery.resolve("editor-kernel") == .page("editor-kernel"))
+    }
+
+    /// A legacy scroller's page area is a `button ''` to the app audit, so the
+    /// list hides its scroll indicators (#2742; Design's list did the same, #2561).
+    @Test func listShowsNoScroller() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = try String(contentsOf: root.appending(path: "Sources/SuiteUI/LayerTreeList.swift"), encoding: .utf8)
+        #expect(source.contains(".scrollIndicators(.never)"))
     }
 }

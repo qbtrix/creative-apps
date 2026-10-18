@@ -4,8 +4,43 @@
 // either kind of row by id, New Scene and New Layer. Remove takes a scene or a
 // layer; a scene's Remove is refused with the Model's removeSceneHelp, which
 // is also the remove control's tooltip. Duplicate waits for the row context
-// menus (LF-2) and says so.
+// menus (LF-2) and says so. The LAYERS rows come from the kernel's tree
+// (`layerRows`, adopt-kernel-layers AL-f2): one row per LayerRow, top first,
+// with an eye and a lock toggle whose ids are FlareLayerFlag raw values, so a
+// click routes straight to toggleLayerFlag. The rows are the ones the old
+// item file drew, pixel for pixel: SidebarItem's isDimmed (for
+// layerRowIsDimmed) is left off so the layer snapshots stay unchanged.
 import FlareModel
+import SuiteUI
+
+extension SidebarSection {
+    /// The SCENES and LAYERS sections. New Scene shows while an animation is open, New Layer while a scene is
+    /// selected; each sends its intent through `perform`.
+    static func flare(_ model: FlareWorkspace, perform: @escaping @MainActor (FlareIntent.Layers) -> Void) -> [SidebarSection] {
+        [
+            SidebarSection(
+                id: "scenes", title: "Scenes",
+                items: model.scenes.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "film") },
+                addAction: model.document == nil
+                    ? nil : ToolbarAction("New Scene", systemImage: "plus") { perform(.addScene) }),
+            SidebarSection(
+                id: "layers", title: "Layers", items: model.layerRows.map { row in
+                    SidebarItem(
+                        id: row.id, title: row.name, systemImage: "square.3.layers.3d",
+                        toggles: [
+                            SidebarToggle(
+                                id: FlareLayerFlag.visible.rawValue, title: row.isHidden ? "Show Layer" : "Hide Layer",
+                                onSymbol: "eye", offSymbol: "eye.slash", isOn: !row.isHidden),
+                            SidebarToggle(
+                                id: FlareLayerFlag.locked.rawValue, title: row.isLocked ? "Unlock Layer" : "Lock Layer",
+                                onSymbol: "lock.fill", offSymbol: "lock.open", isOn: row.isLocked),
+                        ])
+                },
+                addAction: model.selectedScene == nil
+                    ? nil : ToolbarAction("New Layer", systemImage: "plus") { perform(.addLayer) }),
+        ]
+    }
+}
 
 extension FlareWindow {
     /// Acts on a layers intent.

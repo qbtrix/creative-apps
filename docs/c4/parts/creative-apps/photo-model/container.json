@@ -1,7 +1,7 @@
 {
   "id": "photo-model",
   "name": "PhotoModel",
-  "description": "Linux-safe state and logic behind Photo's window: the canvas as a CoreRaster PixelBuffer, its layer stack, selected layer and tool, adjustment settings, and inspector and Layer menu state. Foundation only, value types.",
+  "description": "Linux-safe state and logic behind Photo's window: the canvas as a CoreRaster PixelBuffer, its layer stack, selected layer and tool, adjustment settings, and inspector and Layer menu state; the free transform's handle hit and drag math adapt onto SuiteKernel (LiveTransform+Kernel). Foundation only, value types.",
   "technology": "Swift 6, Foundation",
   "tags": [
     "internal"

@@ -1,3 +1,4 @@
-// Live/LiveTransform.swift: the live layer transform. PV-7 replaces this
-// NotBuilt stand-in. Linux-safe.
-enum LiveTransform { static func make() -> any LayerTransforming { NotBuiltTransform() } }
+// Live/LiveTransform.swift: the live layer transform, on SuiteKernel
+// (LiveTransform+Kernel.swift); applying it to pixels is still PV-7's.
+// Linux-safe.
+enum LiveTransform { static func make() -> any LayerTransforming { KernelTransform() } }

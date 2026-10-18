@@ -14,6 +14,7 @@
 // dismissed.
 import CoreRaster
 import FlareCore
+import SuiteKernel
 
 /// A composition: a sized, timed canvas that layers play in. Codable, so a
 /// project file holds it as it is, playhead included.
@@ -70,8 +71,11 @@ public struct HaloProject: Sendable, Equatable {
     public internal(set) var playback = HaloPlaybackState()
     /// A layer being dragged in the viewer; written by `HaloViewerDrag.swift`.
     public internal(set) var viewerDrag: HaloViewerDragState?
-    /// The keys picked for easing; written by `HaloKeySelection.swift`.
-    public internal(set) var selectedKeys: Set<HaloKeyRef> = []
+    /// The keys picked for easing, a SuiteKernel `Selection`; written by
+    /// `HaloKeySelection.swift`.
+    var keySelection = Selection<HaloKeyRef>()
+    /// The picked keys as a set, read from `keySelection`.
+    public var selectedKeys: Set<HaloKeyRef> { keySelection.set }
     /// The project file's name, path and status; written by `HaloFiles.swift`.
     public internal(set) var file = HaloFileState()
     /// The frame Render Frame shows; written by `HaloRenderFrame.swift`.

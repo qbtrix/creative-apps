@@ -324,10 +324,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   merges `dev` plus each PR, in order, onto a scratch `lane/batch-<id>` branch
   (merge drivers on), runs one Linux-only CI run on it, and on green
   squash-merges every PR in that order. On red it bisects the batch by prefix
-  (`lane/batch-<id>-<i>` probes, one Linux run each) until it finds the first
-  PR that turns the chain red: the PRs before it merge, that PR gets one
-  comment naming the run and the `needs-fix` label, and the PRs after it wait
-  for the next batch. Fix it, rerun `scripts/ci --changed`, push, and move the
+  (`lane/batch-<id>-<i>` probes, one Linux run each; when the red tip fails
+  only a timing budget test, each probe runs up to 3 times and is called on 2
+  of 3) until it finds the first PR that turns the chain red: the PRs before it merge, that PR gets one
+  comment naming the run and the `needs-fix` label (the comment says "likely"
+  when the measured value sat within 15% of its budget), and the PRs after it
+  wait for the next batch. Fix it, rerun `scripts/ci --changed`, push, and move the
   `Head:` line; the lane drops the label on the new head. One batch runs at a
   time; a PR that becomes ready while one is in flight waits for the next
   sweep (a few minutes). A PR that is behind
