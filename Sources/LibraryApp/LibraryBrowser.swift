@@ -21,6 +21,8 @@ struct LibraryBrowser: View {
     let model: LibraryCatalog
     /// The window's menu (LibraryMenu.disabled outside one), passed to the grid and the loupe.
     var menu = LibraryMenu()
+    /// The window's held thumbnails, passed to the grid; nil shows the catalog's own.
+    var thumbnails: LibraryThumbnailStore? = nil
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
     var onShowAll: @MainActor () -> Void = {}
@@ -102,7 +104,7 @@ struct LibraryBrowser: View {
             LibraryLoupe(model: model, menu: menu, onStep: onStep, onGrid: onGrid)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
-            LibraryGrid(model: model, menu: menu, onSelect: onSelect, onOpen: onOpen)
+            LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }

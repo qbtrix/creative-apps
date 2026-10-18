@@ -43,10 +43,16 @@ extension LibraryCatalog {
     /// building every cell's value stays O(n) on a 10,000-photo catalog.
     public func cellValue(photo: PhotoItem) -> String {
         let id = photo.id
+        return Self.cellValue(photo: photo, thumbnail: thumbnails[id])
+    }
+
+    /// `cellValue(photo:)` with the cell's held image passed in, for a grid
+    /// whose thumbnails live outside the catalog (LibraryThumbnailCache).
+    public static func cellValue(photo: PhotoItem, thumbnail: DisplayImage?) -> String {
         let state: String
         if photo.availability != .available {
             state = "unreadable"
-        } else if let thumbnail = thumbnails[id] {
+        } else if let thumbnail {
             state = "ready " + Self.sizeText(thumbnail.size)
         } else {
             state = "loading"

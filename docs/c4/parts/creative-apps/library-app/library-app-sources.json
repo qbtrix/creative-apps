@@ -1,7 +1,7 @@
 {
   "id": "library-app-sources",
   "name": "LibraryApp sources",
-  "description": "The Library app (photo catalog): the SwiftUI App scene and views in Sources/LibraryApp, built from SuiteUI: the window with its thumbnail grid, the loupe (one photo on CanvasViewport at its own pixel size, its render or a placeholder, with its position readout, arrow keys and Escape), the metadata inspector for the selected photos (rating, flag, color label), and the File > Load Sample Photos, View > Grid and Loupe, View > Sort By and thumbnail size commands, and the loupe area (View > Zoom In, Zoom Out, Zoom to Fit and Actual Size, Home and End, renders through a latest-wins RenderQueue on the loupe service, and the neighbours prefetched).",
+  "description": "The Library app (photo catalog): the SwiftUI App scene and views in Sources/LibraryApp, built from SuiteUI: the window with its thumbnail grid, the loupe (one photo on CanvasViewport at its own pixel size, its render or a placeholder, with its position readout, arrow keys and Escape), the metadata inspector for the selected photos (rating, flag, color label), and the File > Load Sample Photos, View > Grid and Loupe, View > Sort By and thumbnail size commands, and the loupe area (View > Zoom In, Zoom Out, Zoom to Fit and Actual Size, Home and End, renders through a latest-wins RenderQueue on the loupe service, and the neighbours prefetched), and the thumbnails area, whose LibraryThumbnailStore holds the grid's images apart from the catalog so a thumbnail pass reruns the grid and not the window's body.",
   "technology": "Swift 6, SwiftUI, macOS 26",
   "paths": [
     "Sources/LibraryApp/"

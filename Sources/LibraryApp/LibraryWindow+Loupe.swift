@@ -73,7 +73,7 @@ extension LibraryWindow {
     /// thumbnail as a preview, then the full render and the neighbours.
     func loupeAreaFocusChanged() {
         guard model.mode == .loupe else { return }
-        model.loupeFocusChanged()
+        model.loupeFocusChanged(from: areas.thumbnails.store.cache)
         loupeAreaRender(.full)
         loupeAreaPrefetch()
     }

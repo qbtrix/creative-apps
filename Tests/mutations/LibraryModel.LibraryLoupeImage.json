@@ -12,5 +12,12 @@
     "find": "loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }",
     "replace": "loupeRender = nil",
     "tests": "LibraryLoupeImageTests.swift"
+  },
+  {
+    "label": "the preview ignores the window's thumbnail cache",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "let thumbnails = cache?.thumbnails ?? self.thumbnails",
+    "replace": "let thumbnails = self.thumbnails",
+    "tests": "LibraryThumbnailCacheTests"
   }
 ]

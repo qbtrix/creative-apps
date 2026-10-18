@@ -23,16 +23,37 @@
   {
     "label": "a pass's images are dropped",
     "file": "Sources/LibraryModel/LibraryThumbnails.swift",
-    "find": "case .success(let image): setThumbnail(image, for: request)",
+    "find": "case .success(let image): setThumbnail(image, for: request, in: catalog)",
     "replace": "case .success: break",
     "tests": "LibraryThumbnailResultTests.swift"
   },
   {
     "label": "a pass's failures are dropped",
     "file": "Sources/LibraryModel/LibraryThumbnails.swift",
-    "find": "case .failure(let error): failThumbnail(request, error)",
+    "find": "case .failure(let error): failures[request.id] = failThumbnail(request, error, in: catalog) ?? failures[request.id]",
     "replace": "case .failure: break",
     "tests": "LibraryThumbnailResultTests.swift"
+  },
+  {
+    "label": "a missing file is reported unreadable",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "if case .missingFile = error { return .missing }",
+    "replace": "if case .missingFile = error { return .unreadable(error.message) }",
+    "tests": "LibraryThumbnailCacheTests"
+  },
+  {
+    "label": "a pass's failures never reach the catalog's photos",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "if let availability = failures[items[index].id] { items[index].availability = availability }",
+    "replace": "if let availability = failures[items[index].id] { _ = availability }",
+    "tests": "LibraryThumbnailCacheTests"
+  },
+  {
+    "label": "a catalog forward loses the cache it moved out",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "defer { thumbnailCache = cache }",
+    "replace": "defer { _ = cache }",
+    "tests": "LibraryThumbnailCacheTests"
   },
   {
     "label": "a cached position is trusted without checking its slot still holds the id",

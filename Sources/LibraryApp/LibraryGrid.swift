@@ -22,6 +22,8 @@ struct LibraryGrid: View {
     let model: LibraryCatalog
     /// The window's menu; the cells on screen go to `menu.thumbnails.visibleChanged`.
     var menu = LibraryMenu()
+    /// The window's held thumbnails; nil shows the catalog's own (snapshots).
+    var thumbnails: LibraryThumbnailStore? = nil
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
     @Environment(\.displayScale) private var displayScale
@@ -34,10 +36,13 @@ struct LibraryGrid: View {
         let visibleChanged = menu.thumbnails.visibleChanged
         let cellSizeChanged = menu.thumbnails.cellSizeChanged
         let cell = [model.cellSize, LibraryCatalog.thumbnailScale(forDisplayScale: Double(displayScale))]
+        // Read here, so a thumbnail pass reruns this body and not the window's.
+        let held = thumbnails?.thumbnails ?? model.thumbnails
         ThumbnailGrid(
             model.sortedItems.map {
                 ThumbnailItem<String>(
-                    photo: $0, thumbnail: model.thumbnails[$0.id], value: model.cellValue(photo: $0))
+                    photo: $0, thumbnail: held[$0.id],
+                    value: LibraryCatalog.cellValue(photo: $0, thumbnail: held[$0.id]))
             },
             cellSize: CGSize(width: side, height: side * 3 / 4),
             selection: model.selection, onSelectionChange: onSelect, onOpen: onOpen,
