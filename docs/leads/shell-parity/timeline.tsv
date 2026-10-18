@@ -1,0 +1,113 @@
+utc	stage	event	ref	note
+2026-10-16T12:00Z	0	stage-start	#1325	base 9e3c5f8
+2026-10-16T12:05Z	2	stage-end	#1325	waves: DS-1+DS-2, DS-3, DS-4
+2026-10-16T12:05Z	3	stage-start	wave 1	DS-1, DS-2
+2026-10-16T12:10Z	3	stage-start	wave 1	DS-4 journey-first added to wave 1 (rule 13)
+2026-10-16T11:56Z	3	pr-merged	#1335	DS-1 DesignToolbarItem
+2026-10-16T11:56Z	3	pr-merged	#1330	DS-4 shell journey, skipped
+2026-10-16T13:20Z	3	fix-round	#1329	DS-2 macOS build fix (not a finding round)
+2026-10-16T13:13Z	3	pr-merged	#1329	DS-2 sidebar action row; DP-a merged
+2026-10-16T13:40Z	3	stage-start	wave 2	DS-3 base 7773dc3
+2026-10-16T13:50Z	3	ci-run	38906785154	scoped design green, contains #1329 (DP-a); audit design identifier 16 = baseline
+2026-10-16T13:52Z	3	review	DP-a	critic panel started
+2026-10-16T14:00Z	3	review	DP-a	clarity/journey/design/layout/controls/oracle: 3 confirmed
+2026-10-16T14:00Z	3	finding-filed	#1385 #1386 #1387	DP-a
+2026-10-16T14:16Z	3	pr-merged	#1391	DS-3 suite window move; DP-b merged
+2026-10-16T14:30Z	3	fix-round	DP-a	round 1: #1385 #1386 #1387
+2026-10-16T14:50Z	3	ci-run	38915938965	full run red (dev-red #1393), diagnosing
+2026-10-16T15:13Z	3	pr-merged	#1403	fix #1385
+2026-10-16T15:23Z	3	pr-merged	#1408	fix #1387
+2026-10-16T15:55Z	3	ci-run	38917492060	scoped design red: 3 journeys from #1391
+2026-10-16T15:58Z	3	finding-filed	#1443 #1444	DP-b
+2026-10-16T16:00Z	3	fix-round	DP-b	round 1: #1443 #1444; #1404 build fix
+2026-10-16T16:20Z	3	pr-opened	#1446	fix #1443 design.properties inside suite.inspector
+2026-10-16T16:30Z	3	pr-opened	#1447	fix #1444 switcher checks last
+2026-10-16T16:45Z	3	pr-opened	#1404	new head c8360c7, build fix
+2026-10-16T16:45Z	3	heartbeat	-	polling: lane merges of #1404 #1446 #1447, then scoped run app=design
+2026-10-16T16:24Z	3	pr-merged	#1404	fix #1386
+2026-10-16T16:17Z	3	pr-merged	#1446 #1447	fix #1443 #1444
+2026-10-16T16:45Z	3	ci-run	38931490731	scoped design red: J3 page count, shell status zoom, shell geometry
+2026-10-16T16:50Z	3	finding-filed	#1451 #1452	DP-a, DP-b
+2026-10-16T16:52Z	3	fix-round	DP-a DP-b	round 2 (last): #1451 #1452
+2026-10-16T17:05Z	3	pr-opened	#1467	fix #1451 page rows get design.page.row.<id>
+2026-10-16T17:15Z	3	pr-opened	#1469	Refs #1452: status zoom read; geometry filed as needs-ui #1456
+2026-10-16T17:15Z	3	heartbeat	-	polling: lane merges of #1467 #1469, then scoped run app=design
+2026-10-16T16:56Z	3	pr-merged	#1467 #1469	round 2 fixes
+2026-10-16T17:20Z	3	heartbeat	38936731510	scoped design run in progress, contains round 2
+2026-10-16T17:40Z	3	ci-run	38936731510	DP-a journeys green; DP-b shell journeys red on SuiteUI geometry #1456
+2026-10-16T17:42Z	3	stopped	#1452	round cap: finding -> gap
+2026-10-16T17:43Z	3	heartbeat	#1325	status posted; waiting on #1456 and #1337
+2026-10-16T18:05Z	3	heartbeat	#1325	replied to supervisor: #1337 first, #1456 SuiteUI; no new scoped design run since 38936731510
+2026-10-16T18:33Z	3	heartbeat	-	no scoped design run since 38936731510; #1337 #1456 open; supervisor 18:13: journeys no longer hold CI
+2026-10-16T19:00Z	3	heartbeat	38949684833	scoped design run queued, contains #1467; #1337 #1456 open
+2026-10-16T19:26Z	3	heartbeat	38949684833	scoped design running: build+Model+snapshot tests green, journeys pending
+2026-10-16T19:48Z	3	ci-run	38949684833	same as 38936731510: DesignJourneyTests green, DesignShellJourneyTests red on #1456 geometry; run failed
+2026-10-16T19:49Z	3	heartbeat	-	lead wall clock near 8 h; RECORD Next written for a resume
+2026-10-16T20:20Z	4	ci-run	38956034097	successful scoped design, contains #1467; DP-a green; shell journeys red (#1456)
+2026-10-16T20:21Z	4	slice-done	DP-a	38956034097
+2026-10-16T20:22Z	4	stopped	#1572 #1573	CI findings -> gap (round cap)
+2026-10-16T20:24Z	4	pr-opened	#1610	DS-5 feature-done
+2026-10-16T20:26Z	4	pr-merged	#1610	DS-5 feature-done
+2026-10-16T20:53Z	4	heartbeat	38960992806	scoped design at 58ac7ac9 (has #1337, not #1610): DesignJourneyTests green, shell journeys red only on #1456 geometry; waiting for a successful run containing #1610
+2026-10-16T21:25Z	4	ci-run	38965923292	full run successful, contains #1610, but macOS scripts/ci failed so journeys were skipped; not usable for DP-b
+2026-10-16T21:26Z	4	fix-round	#1561	gap from editor-in-window: switcher check relaxed to title..trailing (fixer started)
+2026-10-16T21:35Z	4	pr-opened	#1655	Fixes gap #1561: switcher between title and trailing buttons
+2026-10-16T22:02Z	4	pr-merged	#1655	Fixes gap #1561
+2026-10-16T22:03Z	4	heartbeat	#1325	no scoped design run with #1610; asked supervisor to dispatch app=design
+2026-10-16T22:35Z	4	ci-run	38971702274	scoped design successful, contains #1610 #1655; DesignJourneyTests green; shell journeys red only on #1456 (5 lines)
+2026-10-16T22:36Z	4	slice-done	DP-b	38971702274 gaps #1452 #1572 #1573 #1617 #1618
+2026-10-16T22:37Z	4	stage-end	#1325	Belt-Contact-Sheet posted
+2026-10-16T22:37Z	done	stopped	#1325	feature done
+2026-10-17T06:17Z	done	stopped	#1877 #1878	CI findings relabelled gap (round cap; SuiteUI #1456); branch recut onto main 0e3c08e for Belt
+2026-10-17T12:15Z	done	heartbeat	#1325	relaunch act-1a149c0c306-8ckd: feature already done (both Belt-Slice-Done lines and the contact sheet on #1325); nothing to build
+2026-10-17T13:14Z	done	heartbeat	#1325	still done; line lead busy on layers-panel and style-rows
+2026-10-17T13:30Z	done	finding-filed	#1993 #1994	relabelled gap (round cap, same cause as #1456)
+2026-10-17T13:46Z	done	heartbeat	d2c4fa21	feature done; branch recut onto main at 13:43 kept
+2026-10-17T14:04Z	shell-parity	check	dev@25b220e4	launch-infra CI findings classified, not ours
+2026-10-17T14:20Z	shell-parity	check	dev@8c05d002	blocked on DW-a/EK-tree/LL-9
+2026-10-17T14:36Z	shell-parity	check	dev@8c05d002	blocked on DW-a/EK-tree/LL-9
+2026-10-17T14:52Z	shell-parity	check	dev@2c5003b5	blocked on DW-a/EK-tree/LL-9
+2026-10-17T15:09Z	shell-parity	check	dev@6dcb79e5	blocked on DW-a/EK-tree/LL-9
+2026-10-17T15:26Z	shell-parity	check	dev@f50448c4	blocked on DW-a/EK-tree/LL-9
+2026-10-17T15:43Z	shell-parity	check	dev@dd7ec767	blocked on DW-a/EK-tree/LL-9
+2026-10-17T16:00Z	shell-parity	check	dev@d6187654	blocked on DW-a/EK-tree/LL-9
+2026-10-17T16:18Z	shell-parity	check	dev@0b50c70f	DW-a PRs #2168 #2163 open; EK-tree, LL-9 none
+2026-10-17T16:32Z	shell-parity	check	dev@4cc9e6f4	DW-a #2168 #2163 waiting on macOS build
+2026-10-17T16:46Z	shell-parity	check	dev@1a4e5e89	DW-a 2/5 tasks in open PRs; EK-tree, LL-9 none
+2026-10-17T17:07Z	shell-parity	check	dev@dd568918	dev dd568918; DW-a 3/5 tasks merged, #2168 #2163 open; no EK-tree/LL-9 PR; no new findings; dev red #2191 (Linux): DesignStyleBudgetTests/scrubStep 5.119ms vs 5ms gate, a style-rows ST-7 timing test under load, perf-suites listing asked of supervisor
+2026-10-17T17:25Z	shell-parity	check	dev@ec0e979b	dev ec0e979b; DW-a: #2168 and #2163 merged, still missing inspector/pasteboard/edit-menu files (DesignSeveralInspectorSnapshots, DesignPasteboardBridge, DesignClosePrompt, DesignEditMenu, DesignInspectorText/Page), no open DW-a PR, so DW-a-gated tasks wait (17:07 record's '3/5 merged' was wrong: 0 of 5 were in then); no EK-tree/LL-9 PR; no new findings; dev-red #2191 open, no supervisor reply; scoped flare/halo green, full CI on 4cc9e6f4 still running
+2026-10-17T17:41Z	shell-parity	check	dev@c3dbf73c	dev c3dbf73c (9 non-Design merges since ec0e979b); DW-a still misses inspector/pasteboard/close-prompt/edit-menu files, no open DW-a PR, so DW-a-gated tasks wait; no EK-tree/LL-9 PR; no new findings; dev-red #2191 open, no supervisor reply; full CI 39049627028 still running, 39050873494 cancelled
+2026-10-17T17:57Z	shell-parity	check	dev@57486e5e	dev 57486e5e (2 Flare merges); DW-a remainder now in open PRs #2217 (several inspector), #2214 (pasteboard, close prompt), #2213 (menu items), not merged, so DW-a-gated tasks still wait; no EK-tree/LL-9 PR; no new findings; dev-red #2191: lane bisect names #2150 (Flare) as first red commit, our timing-miss note stands, no supervisor reply; CI 39055838504/39055200176 queued
+2026-10-17T18:14Z	shell-parity	check	dev@e17b68f9	dev e17b68f9 (1 Halo merge); DW-a remainder PRs #2217 #2214 #2213 still open (fast-lane), DW-a-gated tasks wait; no EK-tree/LL-9 PR; no new findings; dev-red #2191 closed: green at b04e50c7 (run 39055200176), main promoted; DesignStyleBudgetTests not yet in perf-suites (supervisor's call), may flake again
+2026-10-17T18:31Z	shell-parity	check	dev@13911964	dev@13911964; DW-a #2217 and #2214 merged, only #2213 (DesignEditMenu) still open; no EK-tree/LL-9 PRs; no dev-red; no new line:design findings; SR-a/L-4/L-5 still wait on DW-a; next check ~18:50
+2026-10-17T19:03Z	shell-parity	check	dev@b2942150	dev@b2942150: done; no new findings on its slices.
+2026-10-17T19:21Z	shell-parity	check	dev@19206653	dev@19206653: done; nothing new.
+2026-10-17T19:38Z	shell-parity	check	dev@0c8e4a71	dev@0c8e4a71: done; nothing new.
+2026-10-17T19:56Z	shell-parity	check	dev@8f0fa099	dev@8f0fa099: done. New shell-geometry findings #2283 (testShellDark) and #2075 (testShellLight), on 6ad373ab (#2258, SuiteUI); not reopening the feature.
+2026-10-17T20:19Z	shell-parity	check	dev@8f0fa099	dev@8f0fa099: done.
+2026-10-17T20:36Z	shell-parity	check	dev@df60ad73	dev@df60ad73: done.
+2026-10-17T20:52Z	shell-parity	check	dev@056214c4	dev@056214c4: done. #2352 testShellDark (shell geometry) is another CI finding; not reopening.
+2026-10-17T21:13Z	shell-parity	check	dev@32c676c1	dev 32c676c1. Done; shell-geometry findings #2352/#2075 stay with SuiteUI #2258; #2302 waits on SuiteUI #2263 (open).
+2026-10-17T21:33Z	shell-parity	check	dev@c2a70dd8	dev c2a70dd8. Done; #2352/#2075 stay with SuiteUI #2258; #2302 waits on SuiteUI #2263 (open).
+2026-10-17T21:53Z	shell-parity	check	dev@bc252a71	dev bc252a71. Done; #2352/#2075 stay with SuiteUI #2258; #2302 waits on SuiteUI #2263 (open).
+2026-10-17T22:11:21Z	shell-parity	check	dev@2b08e8fd	check: done; #2352 #2075 wait on SuiteUI #2258, #2302 on #2263 (open); new dev findings #2406 #2410 #2411 are not shell-parity's
+2026-10-17T22:28:25Z	shell-parity	check	dev@e3c5da79	check: done; #2302 waits on #2263 (open); new findings #2438-#2443 are select-several's
+2026-10-17T22:45:28Z	shell-parity	check	dev@1265b11a	check: done; #2302 waits on #2263; no new shell findings
+2026-10-17T23:03:16Z	shell-parity	check	dev@59c435a6	check: done; #2302 waits on #2263; no new shell findings
+2026-10-17T23:21:18Z	shell-parity	check	dev@e26c99f8	scoped 39077269207 at 59c435a6: testShellDark (#2352) now also hits a new unnamed 11x204 button at x=998 in the inspector, from #2349 (no lead); testShellLight (#2075) undo; #2263 open. Left to red-triage/owner.
+2026-10-17T23:37:49Z	shell-parity	check	dev@56cd8160	#2352/#2075 still open (unnamed inspector button from #2349, undo); #2263 open. No action from this lead.
+2026-10-17T23:53:56Z	shell-parity	check	dev@a6150139	#2075 testShellLight not in the open findings now; DS-J4 #2464 on dev. #2352 open (unnamed button), #2263 open.
+2026-10-18T00:10:50Z	shell-parity	check	dev@f335fde7	#2468 (81f6e0af) removed the inspector's legacy scroller, the unnamed button that failed testShellDark #2352; the next scoped design run verifies it. #2263 open.
+2026-10-18T00:27:55Z	shell-parity	check	dev@d3cd7d9f	new findings #2508 testShellDark and #2482 testShellLight (red-triage, a6150139); #2352 closed by #2468. Owners outside this lead; #2263 open.
+2026-10-18T00:44:25Z	shell-parity	check	dev@d3cd7d9f	new findings #2506 testAlignALayer and #2507 testEditDelete: an unnamed button at x 986, seen at a6150139, before #2468 (81f6e0af), which removed that scroller. Verify on scoped run 39083023668 (d3cd7d9f, contains #2468). #2508/#2482 are open; #2263 is open.
+2026-10-18T01:00:58Z	shell-parity	check	dev@d3cd7d9f	scoped run 39083023668 passes testShellLight/testShellDark/testAlignALayer/testEditDelete; findings #2482/#2506/#2507/#2508 closed (the bot's 'passes on run'). Nothing open for shell-parity except SuiteUI #2263.
+2026-10-18T01:18:15Z	shell-parity	check	dev@d3cd7d9f	no change; only SuiteUI #2263 open.
+2026-10-18T01:35:29Z	shell-parity	check	dev@d3cd7d9f	no change; only SuiteUI #2263 open.
+2026-10-18T01:53:19Z	shell-parity	check	dev@d3cd7d9f	no change; only SuiteUI #2263 open
+2026-10-18T02:11:32Z	shell-parity	check	dev@d3cd7d9f	findings #2519/#2520 (shell geometry, full run 39082226458): window 2pt over a 677pt visible frame, SuiteUI sizer; filed #2524 needs-ui; passes on scoped run 39083023668
+2026-10-18T02:31:59Z	shell-parity	check	dev@948bcbf4	dev 948bcbf4 green (#2509 closed, quarantine renewed by #2523). #2519/#2520 wait on SuiteUI #2524; #2263 open.
+2026-10-18T02:49:16Z	shell-parity	check	dev@498c5b3c	no change: #2519/#2520 wait on SuiteUI #2524; #2263 open.
+2026-10-18T03:06:26Z	shell-parity	check	dev@10fb92ec	no change: #2519/#2520 wait on SuiteUI #2524; #2263 open.
+2026-10-18T03:23:06Z	shell-parity	check	dev@0965457c	no change: #2519/#2520 wait on SuiteUI #2524; #2263 open.
+2026-10-18T03:41:01Z	shell-parity	check	dev@f6de1a9b	no change; #2263 open, #2519/#2520 wait on SuiteUI #2524
+2026-10-18T04:00:53Z	shell-parity	recut	main@0965457c	run act-1a14d285aef-3epc: branch recut onto main; #2519/#2520 relabelled gap (round cap), wait on SuiteUI #2524
