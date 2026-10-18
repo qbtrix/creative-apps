@@ -1,0 +1,37 @@
+[
+  {
+    "label": "offByOne: Flare's handle h maps to the kernel's handle h + 1",
+    "file": "Sources/FlareModel/Live/BoxGestureMath+Kernel.swift",
+    "find": "let i = ((h % 8) + 8) % 8",
+    "replace": "let i = ((h % 8) + 9) % 8",
+    "tests": "BoxGestureMathKernelTests"
+  },
+  {
+    "label": "noWrap: the mod-8 wrap is dropped, so 8...15 and negative handles fall back to the top-left",
+    "file": "Sources/FlareModel/Live/BoxGestureMath+Kernel.swift",
+    "find": "let i = ((h % 8) + 8) % 8",
+    "replace": "let i = h",
+    "tests": "BoxGestureMathKernelTests"
+  },
+  {
+    "label": "cornerAsEdge: the top-left corner counts as a y-only edge like top and bottom",
+    "file": "Sources/FlareModel/Live/BoxGestureMath+Kernel.swift",
+    "find": "handle == .top || handle == .bottom",
+    "replace": "handle == .topLeft || handle == .bottom",
+    "tests": "BoxGestureMathKernelTests"
+  },
+  {
+    "label": "oppositeIsNeighbour: the fixed handle is two steps round the ring instead of four",
+    "file": "Sources/FlareModel/Live/BoxGestureMath+Kernel.swift",
+    "find": "flareHandle(handle).map { editorHandle($0 + 4) } ?? handle",
+    "replace": "flareHandle(handle).map { editorHandle($0 + 2) } ?? handle",
+    "tests": "BoxGestureMathKernelTests"
+  },
+  {
+    "label": "squareCorner: a handle's spot is its 0-size square's min corner on a size-1 square, half a point off",
+    "file": "Sources/FlareModel/Live/BoxGestureMath+Kernel.swift",
+    "find": "BoxMath.handles(of: box, size: 0)[handle]",
+    "replace": "BoxMath.handles(of: box, size: 1)[handle].map { Rect(minX: $0.minX, minY: $0.minY, maxX: $0.minX, maxY: $0.minY) }",
+    "tests": "BoxGestureMathKernelTests"
+  }
+]
