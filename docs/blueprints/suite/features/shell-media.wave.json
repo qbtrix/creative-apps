@@ -1,0 +1,188 @@
+{
+  "title": "Media I/O for the suite: movies (H.264, HEVC, ProRes 4444), GIF and APNG, stills, image and footage decode",
+  "wave": 5,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta-80 plan row E9 (W1); the guard that Halo's H.264 writer moves into shell-media; Halo map rows 10 and 13 (decode half)",
+  "waits_on": "suite-contracts (built). No creative-core issue. Moves code already on dev: Halo render-out's HaloMovieWriter and Photo's ImageIOCodec (both built)",
+  "depends": [
+    "suite-contracts"
+  ],
+  "longest_chain": "6 (SM-1 → SM-2 → SM-5 → SM-8 → SM-9 → SM-10)",
+  "journeys": [],
+  "journeys_none": "No control of its own: Model walks on Linux (MediaContractTests, MediaRulesTests, FrameClockTests) and macOS live walks in AppSnapshotTests prove it; its screen is SuiteUI's ExportSheet (S11) and each app's import (S20)",
+  "ui_slice": "none",
+  "ui_slice_reason": "A service with no screen: SuiteUI's ExportSheet and the apps' import flows are its screens, in their own W2 and W3 features",
+  "owned": [
+    "Sources/SuiteModel/Values/Media.swift",
+    "Sources/SuiteModel/Contracts/MediaEncoding.swift",
+    "Sources/SuiteModel/Contracts/MediaDecoding.swift",
+    "Sources/SuiteModel/Fakes/FakeMedia.swift",
+    "Sources/SuiteModel/SuiteServices.swift",
+    "Sources/SuiteShell/SuiteServices+Live.swift",
+    "Sources/SuiteShell/Live/MediaSlot.swift",
+    "Tests/SuiteModelTests/MediaContractTests.swift",
+    "Tests/mutations/SuiteModel.MediaFrame.json",
+    "Tests/SuiteModelTests/MediaRulesTests.swift",
+    "Tests/SuiteModelTests/FrameClockTests.swift",
+    "Tests/AppSnapshotTests/ShellMediaWriteTests.swift",
+    "Tests/AppSnapshotTests/ShellMediaReadTests.swift",
+    "Tests/AppSnapshotTests/Fixtures/media/",
+    "Sources/SuiteModel/Values/Media+Rules.swift",
+    "Tests/mutations/SuiteModel.MediaRules.json",
+    "Sources/SuiteModel/Values/FrameClock.swift",
+    "Tests/mutations/SuiteModel.FrameClock.json",
+    "Sources/SuiteShell/Media/MovieWriter.swift",
+    "docs/c4/parts/creative-apps/suite-shell/shell-media.json",
+    "Sources/SuiteShell/Media/AnimatedImageWriter.swift",
+    "Sources/SuiteShell/Media/StillEncoder.swift",
+    "Tests/AppSnapshotTests/ShellMediaImageWriteTests.swift",
+    "Sources/SuiteShell/Media/StillDecoder.swift",
+    "Sources/SuiteShell/Media/FootageReader.swift",
+    "Tests/AppSnapshotTests/ShellMediaFootageTests.swift",
+    "Sources/SuiteShell/Media/LiveMedia.swift",
+    "Tests/AppSnapshotTests/ShellMediaLiveTests.swift",
+    "docs/blueprints/suite/features/shell-media.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "SM-a",
+      "behavior": "Callers can code against MediaEncoding, MediaDecoding, the media values and FakeMedia through SuiteServices.media, with the Linux checks and the macOS live checks written and disabled.",
+      "tasks": [
+        "SM-1",
+        "SM-2"
+      ],
+      "journeys": [
+        "MJ-SM0"
+      ],
+      "waits": {},
+      "ui": false,
+      "owned": [
+        "Sources/SuiteModel/Values/Media.swift",
+        "Sources/SuiteModel/Contracts/MediaEncoding.swift",
+        "Sources/SuiteModel/Contracts/MediaDecoding.swift",
+        "Sources/SuiteModel/Fakes/FakeMedia.swift",
+        "Sources/SuiteModel/SuiteServices.swift",
+        "Sources/SuiteShell/SuiteServices+Live.swift",
+        "Sources/SuiteShell/Live/MediaSlot.swift",
+        "Tests/SuiteModelTests/MediaContractTests.swift",
+        "Tests/mutations/SuiteModel.MediaFrame.json",
+        "Tests/SuiteModelTests/MediaRulesTests.swift",
+        "Tests/SuiteModelTests/FrameClockTests.swift",
+        "Tests/AppSnapshotTests/ShellMediaWriteTests.swift",
+        "Tests/AppSnapshotTests/ShellMediaReadTests.swift",
+        "Tests/AppSnapshotTests/Fixtures/media/"
+      ]
+    },
+    {
+      "id": "SM-m",
+      "behavior": "MovieSettings and AnimatedImageSettings refuse what each codec can't write, and FrameClock gives exact presentation times and GIF delays whose rounding never drifts.",
+      "tasks": [
+        "SM-3",
+        "SM-4"
+      ],
+      "journeys": [
+        "MJ-SM1"
+      ],
+      "waits": {
+        "SM-a": [
+          "SM-3",
+          "SM-4"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteModel/Values/Media+Rules.swift",
+        "Tests/SuiteModelTests/MediaRulesTests.swift",
+        "Tests/mutations/SuiteModel.MediaRules.json",
+        "Sources/SuiteModel/Values/FrameClock.swift",
+        "Tests/SuiteModelTests/FrameClockTests.swift",
+        "Tests/mutations/SuiteModel.FrameClock.json"
+      ]
+    },
+    {
+      "id": "SM-w",
+      "behavior": "On a Mac, a movie writes in each of the four codecs with BT.709 tags and alpha where the codec keeps it, GIF and APNG write with their loop count and delays, stills encode, and cancel deletes the file.",
+      "tasks": [
+        "SM-5",
+        "SM-6"
+      ],
+      "journeys": [
+        "MJ-SM2"
+      ],
+      "waits": {
+        "SM-a": [
+          "SM-5",
+          "SM-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteShell/Media/MovieWriter.swift",
+        "Tests/AppSnapshotTests/ShellMediaWriteTests.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-media.json",
+        "Sources/SuiteShell/Media/AnimatedImageWriter.swift",
+        "Sources/SuiteShell/Media/StillEncoder.swift",
+        "Tests/AppSnapshotTests/ShellMediaImageWriteTests.swift"
+      ]
+    },
+    {
+      "id": "SM-r",
+      "behavior": "On a Mac, any still ImageIO reads decodes upright to 8-bit sRGB, and a movie's info and its frame at a time read back.",
+      "tasks": [
+        "SM-7",
+        "SM-8"
+      ],
+      "journeys": [
+        "MJ-SM3"
+      ],
+      "waits": {
+        "SM-a": [
+          "SM-7"
+        ],
+        "SM-w": [
+          "SM-8"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteShell/Media/StillDecoder.swift",
+        "Tests/AppSnapshotTests/ShellMediaReadTests.swift",
+        "Sources/SuiteShell/Media/FootageReader.swift",
+        "Tests/AppSnapshotTests/ShellMediaFootageTests.swift"
+      ]
+    },
+    {
+      "id": "SM-z",
+      "behavior": "The slot is live, a walk writes and reads back every format on the Mac, the shared prose names the service, and the feature is built.",
+      "tasks": [
+        "SM-9",
+        "SM-10"
+      ],
+      "journeys": [
+        "MJ-SM4"
+      ],
+      "waits": {
+        "SM-m": [
+          "SM-9"
+        ],
+        "SM-w": [
+          "SM-9"
+        ],
+        "SM-r": [
+          "SM-9"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteShell/Media/LiveMedia.swift",
+        "Sources/SuiteShell/Live/MediaSlot.swift",
+        "Tests/AppSnapshotTests/ShellMediaLiveTests.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-media.json",
+        "docs/blueprints/suite/features/shell-media.wave.json"
+      ]
+    }
+  ]
+}
