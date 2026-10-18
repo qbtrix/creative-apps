@@ -70,6 +70,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var thumbnails: [String: DisplayImage] = [:]
     public internal(set) var thumbnailLongSide = 512
     public internal(set) var pendingThumbnails: [String: ThumbnailRequest] = [:]
+    var thumbnailPositions = ThumbnailPositions()  // a lookup cache, left out of ==
     public internal(set) var autoAdvance = true
     public internal(set) var loupeZoom = LoupeZoom.fit
     public internal(set) var loupeRender: RenderedPhoto?

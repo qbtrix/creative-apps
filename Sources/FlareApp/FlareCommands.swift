@@ -9,7 +9,9 @@
 // lists Bounce, Character, Button and Keyed Ball, the keyed document the
 // easing journey starts from; Open Recent lists the window's recent files,
 // then Clear Menu. The focused window publishes a FlareMenu as a focused
-// scene value (FlareWindow.swift); with none focused every item disables.
+// scene value (FlareWindow.swift); with none focused every item disables. The
+// value carries the selection's Edit reasons too, so a new selection is a new
+// value and the items re-read their reasons.
 import FlareModel
 import SwiftUI
 
@@ -21,6 +23,12 @@ struct FlareMenu {
     var redoTitle = "Redo"
     var recent: [String] = []
     var loops = false
+    /// The selection's Edit reasons as values (#2618). `help` is a closure, which never reads as a changed menu,
+    /// so without these a LAYERS pick left Edit > Copy disabled with its launch reason until something else
+    /// (an undo title, the pasteboard) changed.
+    var editHelps: [FlareEditAction: String] = [:]
+    /// The keyframe Delete reason (`deleteHelp`), then Bring Forward's and Send Backward's.
+    var selectionHelps: [String?] = []
 
     /// Open Sample's items: the sample's name for `.openSample(name:)`, and its title.
     static let samples: [(name: String, title: String)] = [

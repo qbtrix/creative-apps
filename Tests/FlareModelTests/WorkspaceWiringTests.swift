@@ -99,12 +99,14 @@ private func ball(_ w: FlareWorkspace) -> Layer? { w.document?.scenes.first?.lay
     #expect(w == workspace(FlareFixtures.bounce, .select))
 }
 
+private let svgFrame = ExportOptions(format: .svgFrame, sceneID: "scene-1", frames: 0...0)
+
 @Test func loadResetsThePerDocumentStateAndKeepsThePreferences() {
     var w = workspace(FlareFixtures.bounce, .select)
     (w.currentFrame, w.isPlaying, w.playClock, w.editingSymbolID) = (12, true, 0.5, "star")
     w.machineID = "button"
     w.machinePreview = MachinePreview(machineID: "button", stateID: "idle", frame: 3, inputs: [:])
-    (w.machineError, w.exportState, w.assist.prompt) = ("No machine.", .running(progress: 0.5), "bounce higher")
+    (w.machineError, w.exportState, w.assist.prompt) = ("No machine.", .running(svgFrame, done: 1, total: 2), "bounce higher")
     (w.fileName, w.savedDocument, w.saveError, w.loadState) = ("bounce.flare", nil, "Disk full.", .failed("Bad file."))
     (w.loops, w.autoKey, w.onion.isOn, w.showsMotionPath, w.recent) = (false, true, true, true, ["a.flare"])
     w.load(FlareFixtures.bounce)
@@ -118,7 +120,7 @@ private func ball(_ w: FlareWorkspace) -> Layer? { w.document?.scenes.first?.lay
     let changes: [(inout FlareWorkspace) -> Void] = [
         { $0.isPlaying = true }, { $0.loops = false }, { $0.playClock = 1 }, { $0.autoKey = true },
         { $0.onion.before = 3 }, { $0.showsMotionPath = true }, { $0.editingSymbolID = "star" },
-        { $0.machineID = "button" }, { $0.machineError = "No machine." }, { $0.exportState = .failed("Disk full.") },
+        { $0.machineID = "button" }, { $0.machineError = "No machine." }, { $0.exportState = .failed(svgFrame, "Disk full.") },
         { $0.machinePreview = MachinePreview(machineID: "m", stateID: "idle", frame: 0, inputs: [:]) },
         { $0.assist.error = .timedOut }, { $0.fileName = "bounce.flare" }, { $0.savedDocument = nil },
         { $0.saveError = "Disk full." }, { $0.loadState = .loading }, { $0.recent = ["a.flare"] },

@@ -1,6 +1,6 @@
-// FlareExport.swift: the export sheet's state (docs/blueprints/flare.md, sections 2 and 3.3): default options and the
-// scan's warnings before Export, then one run: `beginExport`, `exportProgressed`, and `endExport` (a result finishes,
-// a cancel goes back to idle, any other error fails with a sentence). `export` does all three without live progress.
+// FlareExport.swift: the export sheet's options and readouts (docs/blueprints/flare.md, sections 2 and 3.3): default
+// options and the scan's warnings before Export, the option setters, and the sentences a failed run carries. The run
+// itself is the kernel's `ExportRun` (FlareExport+Kernel.swift); the window runs the exporter and reports to it.
 // FX-2a (docs/blueprints/flare/features/flare-export.md, Contract slice) declares the sheet's readouts and option
 // setters as stubs that report nothing and change nothing; FX-11 fills them without changing a signature.
 import FlareCore
@@ -27,47 +27,6 @@ extension FlareWorkspace {
     /// What this export can't write, listed before Export; empty with no document.
     public func exportWarnings(_ options: ExportOptions) -> [String] {
         document.map { services.export.warnings($0, options: options) } ?? []
-    }
-
-    /// Starts a run at 0 progress. False, changing nothing, with no document or while a run is under way.
-    @discardableResult
-    public mutating func beginExport() -> Bool {
-        guard document != nil else { return false }
-        if case .running = exportState { return false }
-        exportState = .running(progress: 0)
-        return true
-    }
-
-    /// Moves the running bar to `fraction`, clamped to 0...1; never backwards, and ignored when nothing runs.
-    public mutating func exportProgressed(_ fraction: Double) {
-        guard case .running(let done) = exportState, !fraction.isNaN else { return }
-        exportState = .running(progress: max(done, min(max(fraction, 0), 1)))
-    }
-
-    /// Ends the run: finished with the result, idle after a cancel, or failed with the reason. Ignored when nothing runs.
-    public mutating func endExport(_ outcome: Result<ExportResult, any Error>) {
-        guard case .running = exportState else { return }
-        switch outcome {
-        case .success(let result): exportState = .finished(result)
-        case .failure(is CancellationError): exportState = .idle
-        case .failure(let error): exportState = .failed(Self.exportMessage(error))
-        }
-    }
-
-    /// Closes a finished or failed run; a running one stays until it ends.
-    public mutating func dismissExport() {
-        if case .running = exportState { return }
-        exportState = .idle
-    }
-
-    /// One whole run through `services.export`, without live progress.
-    public mutating func export(_ options: ExportOptions, rasterizer: any FrameRasterizing) async {
-        guard let document, beginExport() else { return }
-        do {
-            endExport(.success(try await services.export.export(document, options: options, rasterizer: rasterizer) { _ in }))
-        } catch {
-            endExport(.failure(error))
-        }
     }
 
     /// Nil when Export can start; otherwise why not, in the sheet's words. Stub (FX-11): nil.
