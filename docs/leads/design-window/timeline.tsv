@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-18T08:12Z	3	pr	#2701 fixes #2465 (DW-a round 2) be4db89
 2026-10-18T08:18Z	heartbeat	scoped design 39107691328 (cd81c77b, holds 148ade3e) in progress; full 39108958964 pending. #2696 #2701 awaiting lane macOS builds. CB-3 not merged. 10 line:design findings open
 2026-10-18T08:45Z	heartbeat	#2701 (DW-a round 2) awaiting lane macOS build; full 39108958964 pending; CB-3 not merged; select-several SS-a re-done, #2706 round 2
+2026-10-18T08:58Z	heartbeat	#2696 and #2701 macOS builds green, awaiting lane sweep; #2707 macOS build in progress; full 39108958964 in progress; CB-3 not opened; 9 line:design findings open (new feature tasks held); earlier 08:45Z rows were stamped late, real time ~08:37Z
