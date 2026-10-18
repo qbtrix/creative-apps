@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-18T15:10:30Z	merged	OB-4	#2808
 2026-10-18T15:11:21Z	wave-start	wave 4 (early)	OB-5, OB-6 builders launched; OB-4 on dev
 2026-10-18T15:22:14Z	pr-open	OB-6	#2821 8acb4587
+2026-10-18T15:23:13Z	merged	OB-10	#2809
