@@ -65,6 +65,10 @@ extension BodyCountSuites {
                     let clip = scroll.contentView
                     clip.scroll(to: NSPoint(x: clip.bounds.origin.x + (i % 30 < 15 ? 8 : -8), y: clip.bounds.origin.y + 4))
                     scroll.reflectScrolledClipView(clip)
+                    // The Core Animation commit the scroll forces, as the zoom sweep times it.
+                    w.host.layoutSubtreeIfNeeded()
+                    w.window.displayIfNeeded()
+                    CATransaction.flush()
                 }
             }
             var sliderStall = (longest: 0.0, total: 0.0)
