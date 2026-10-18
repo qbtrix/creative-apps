@@ -12,6 +12,8 @@
 // The only view state is the drop target lit while a drag hovers it, written
 // on enter and exit, never per sample. Each row's controls carry
 // `suite.layers.<id>.<part>`; the row itself is `suite.layers.row.<id>`.
+// It shows no scroller (wheel, trackpad and keys still scroll), so the
+// audit finds no unnamed page-area button beside a long tree.
 import SuiteKernel
 import SwiftUI
 
@@ -96,6 +98,9 @@ public struct LayerTreeList: View {
             }
             .padding(.vertical, SuiteSpacing.xs)
         }
+        // No scroller: a legacy scroller's page area is an unnamed button with
+        // no identifier to the app audit (#2742, as in Design's list, #2561).
+        .scrollIndicators(.never)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("suite.layers")
     }
