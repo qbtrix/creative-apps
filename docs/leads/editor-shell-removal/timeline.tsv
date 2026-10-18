@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-17T06:04Z	0	stage-start	#1529	lead start; base origin/dev 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745
 2026-10-17T06:25Z	0	stopped	#1529	parked: captain's beta-cut comment, nothing in flight
 2026-10-18T03:44Z	0	stopped	#1529	line lead act-1a14d197cc1-i61z: still parked, captain's beta cut (2026-10-17 03:08Z) unchanged on #1529
+2026-10-18T03:53Z	0	parked	#1529	run act-1a14d17c86c-d1qr: stays parked (out of beta cut); depends on editor-chrome added in #2554
