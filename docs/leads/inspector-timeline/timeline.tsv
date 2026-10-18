@@ -55,3 +55,4 @@
 2026-10-18T01:11Z	stage	done stands: contact sheet already posted on run 39076534514 (Linux+Promote green); 00:13/00:40 waiting heartbeats superseded; dev-red #2509 not ours
 2026-10-18T01:12Z	heartbeat	dev-red #2509 still open; full run 39082226458 (d3cd7d9f) Linux failed, macOS in progress; no green full run with ui-screens yet
 2026-10-18T01:43Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; full run 39082226458 (d3cd7d9f) Linux red (dev-red #2509, design line), macOS running, report-only; nothing pending
+2026-10-18T01:43Z	heartbeat	dev-red #2509 open; full run 39082226458 (d3cd7d9f) still in progress, Linux red; no newer full run; no green full run with ui-screens yet
