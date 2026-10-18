@@ -2,9 +2,9 @@
 
 Issue: #1513 · Packet: docs/blueprints/library/features/loupe-viewport.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
-Stage: 3 build waves (last slices in the lane)
+Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: all wave PRs merged (#2729 LV-10 feature-done merged 11:54); wait for a green full dev CI containing #2729, then contact sheet, LV-11 gap (#782), Anatomy
+Next: #2859 merged; #2860 and #2878 merge; then a scoped library run on dev. Every macOS job since #2790 failed linking SuiteUI in the Release build, which is not on this line. Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -25,6 +25,7 @@ Next: all wave PRs merged (#2729 LV-10 feature-done merged 11:54); wait for a gr
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 39122753293 (scoped library, e3a4582) | red | not reached | journeys, clarity | #2767 (J3 step 3 reads "" after Actual Size, XCUITest #262) | #2859 merged | no |
 
 ## Decisions
 - 2026-10-18: new run act-1a14cdfa655-jrmy replaces act-1a14698db7e-jmb4; toolchain installed by scripts/cloud-setup.sh (Swift 6.3.3), so the earlier blocker is gone.
