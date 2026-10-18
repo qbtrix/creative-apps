@@ -1,7 +1,7 @@
 # thumbnails lead record
 
 Issue: #1506 · Packet: docs/blueprints/library/features/thumbnails.md
-Run: act-1a14cdfa655-jrmy · Session: see Belt run page · Started: 2026-10-18T02:45Z
+Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 3 build waves (wave 5: TH-8 feature-done PR open)
 Base: origin/dev 21066130 (wave 2)
 Next: full dev CI 39121139544 (a8ba1d69, carries #2708; 39120347568 was cancelled) must go green; then Belt-Contact-Sheet after green dev CI; TH-9 becomes a gap (#782 open)
