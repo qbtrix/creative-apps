@@ -31,6 +31,15 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     #expect(catalog.cellValue(for: "b") == "ready 256×171 3 stars, Picked, Red label")
 }
 
+@Test func cellValueOfAPhotoInHandMatchesTheLookupByID() {
+    var catalog = LibraryCatalog()
+    catalog.load([photo("a"), photo("b", rating: 3, picked: true, label: .red), photo("gone", availability: .missing)])
+    catalog.thumbnails["b"] = image(256, 171)
+    let values = catalog.sortedItems.map { catalog.cellValue(photo: $0) }
+    #expect(values == catalog.sortedItems.map { catalog.cellValue(for: $0.id) })
+    #expect(Set(values) == ["loading No stars", "ready 256×171 3 stars, Picked, Red label", "unreadable No stars"])
+}
+
 @Test func cellValueAndHelpSayAMissingFileIsUnreadable() {
     var catalog = LibraryCatalog()
     catalog.load([photo("gone", availability: .missing), photo("bad", availability: .unreadable("bad header"))])

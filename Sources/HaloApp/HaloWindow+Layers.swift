@@ -12,6 +12,7 @@
 // readout (HaloReadout.swift), since XCUITest reads a menu item's help tag
 // as no text.
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 extension HaloWindow {
@@ -34,7 +35,7 @@ extension HaloWindow {
     func layersScene(_ content: some View) -> some View {
         content
             .background(alignment: .topLeading) {
-                HaloReadoutElement(identifier: "halo.menu.reasons", text: model.layerMenuReasons)
+                ProbeElement("halo.menu.reasons", label: model.layerMenuReasons, size: HaloReadout.size)
             }
             .modifier(RenameLayerPrompt(
                 layerID: renamingLayerID,

@@ -29,7 +29,9 @@ struct FlareRecovery: ViewModifier {
             .navigationSubtitle(model.saveStatus ?? "")
             .overlay(alignment: .bottomTrailing) {
                 if let status = model.saveStatus {
-                    FlareSaveStatusLabel(status: status, reason: model.saveError ?? "")
+                    // Its tooltip is why the save failed.
+                    EditorSaveStatus(.notSaved, title: status, help: model.saveError ?? "", identifier: "flare.saveStatus")
+                        .padding(SuiteSpacing.s)
                 }
             }
             .onChange(of: model.document) { autosave?.noteEdit(at: Self.now) }
@@ -88,22 +90,4 @@ struct FlareRecovery: ViewModifier {
 private struct AutosaveKey: Equatable {
     let document: FlareCore.Document?
     let dirty: Bool
-}
-
-/// "Not saved" with the warning triangle, in the error color; its tooltip is why the save failed.
-private struct FlareSaveStatusLabel: View {
-    let status: String
-    let reason: String
-
-    var body: some View {
-        Label(status, systemImage: "exclamationmark.triangle.fill")
-            .foregroundStyle(SuiteColor.stateError)
-            .padding(SuiteSpacing.m)
-            .fixedSize()
-            .help(reason)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(status)
-            .accessibilityValue(status)
-            .accessibilityIdentifier("flare.saveStatus")
-    }
 }

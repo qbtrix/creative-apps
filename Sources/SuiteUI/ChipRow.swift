@@ -146,7 +146,14 @@ struct ChipProbe: Sendable {
     /// Runs `change` under the state fade (none under Reduce Motion), marking its start and its end.
     @MainActor static func fade(reduceMotion: Bool, probe: ChipProbe?, _ change: () -> Void) {
         probe?.record(ProbeMark(name: "fade-start", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
-        // The completion runs exactly once: after the fade, or at once when nothing animates.
+        // Under Reduce Motion nothing fades, so the pair closes on this turn: a nil animation's completion, run from
+        // onChange, waited for the next transaction (start, start, end on CI's scoped run 39097468065).
+        if reduceMotion {
+            change()
+            probe?.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
+            return
+        }
+        // The completion runs exactly once, after the fade.
         withAnimation(SuiteMotion.state(reduceMotion: reduceMotion), change) {
             probe?.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
         }

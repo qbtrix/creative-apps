@@ -57,7 +57,7 @@ struct HaloTextInspector: View {
     /// The refusal's caption when it names `control`.
     @ViewBuilder private func caption(_ control: String) -> some View {
         if let refusal = model.textRefusal(at: control) {
-            HaloRefusalCaption(refusal: refusal)
+            InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
         }
     }
 

@@ -461,6 +461,16 @@
                 ]
               },
               {
+                "id": "kernel-keys",
+                "name": "Keys and easing",
+                "description": "Keys/Keys.swift: Keyframe and Easing as FlareCore's types under kernel names, Track (one property or all), KeyRef, KeyState (not animated, animated, keyed here), Segment, EasePreset (the one preset list with its easing and title), EaseCurve (Bezier handles, moving a handle, samples capped at 4096) and RemovePolicy. Keys/KeyRules.swift: KeyRules (key state, toggle a key or the animation, move keys all or nothing in a range, remove by policy, insert and remove frames) and KeyRefusal. Stubs from EK-3; bodies EK-15 and EK-16.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Keys/Keys.swift",
+                  "Sources/SuiteKernel/Keys/KeyRules.swift"
+                ]
+              },
+              {
                 "id": "kernel-layers",
                 "name": "Layer tree and fixtures",
                 "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop).",
@@ -477,6 +487,27 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Snap/"
+                ]
+              },
+              {
+                "id": "kernel-transform",
+                "name": "Box transform and handle hit",
+                "description": "Transform/BoxMath.swift: LayerTransform (scale, degrees, move) and BoxMath (resize by an EditorHandle with Shift aspect and Option centre, at least 1 and never flipping; several items scaled as one box; 15 degree rotate snap; the handle rects). Transform/HandleHit.swift: HandleHit (the handle under a point, Chebyshev with corners winning ties; a screen tolerance divided by zoom). Stubs from EK-3; bodies EK-20.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Transform/BoxMath.swift",
+                  "Sources/SuiteKernel/Transform/HandleHit.swift"
+                ]
+              },
+              {
+                "id": "kernel-export-session",
+                "name": "Export run and document session",
+                "description": "Export/ExportRun.swift: ExportRun<Options> (idle, editing, running with done and total, finished with the written files, failed with words; begin, start, progress that never goes back, end, dismiss). Session/DocumentSession.swift: SaveStatus, DocumentSession (dirty from the saved and current tokens, autosave due a delay after the last edit, didSave and didEdit) and RecoveryOffer. Session/VersionedJSON.swift: VersionedJSON (probe a file's version before decoding, a decoding error in words) and VersionError. Stubs from EK-3; bodies EK-22 and EK-24.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Export/ExportRun.swift",
+                  "Sources/SuiteKernel/Session/DocumentSession.swift",
+                  "Sources/SuiteKernel/Session/VersionedJSON.swift"
                 ]
               },
               {
