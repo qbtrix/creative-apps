@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-18T20:41Z	0	stage-start	#1528	resumed as run act-1a150baa34c-jzk9; base dev 507719b3; spine, thumbnails, loupe-viewport built
 2026-10-18T20:41Z	2	stage-end	-	combined plan with develop and export; waves check OK; wave 1 SL-1, SL-2, SL-3
 2026-10-18T20:41Z	3	stage-start	-	wave 1
+2026-10-18T22:36Z	3	heartbeat	-	resumed after restart; wave 1 PRs read, macOS build failures under investigation
