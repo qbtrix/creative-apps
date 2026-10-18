@@ -10,7 +10,8 @@
 // `-SuiteFixture <name>` (the launcher seeds the store before its first
 // frame, LauncherRouter+Services.swift), `-SuiteFixtureDocuments` pointing at
 // UITests/Fixtures/suite (read only for the fixtures with documents),
-// `-SuiteSkipOnboarding YES` and `-ApplePersistenceIgnoreState YES`.
+// `-SuiteSkipOnboarding YES` (unless a journey passes `skipOnboarding: false`)
+// and `-ApplePersistenceIgnoreState YES`.
 // `attach(_:)` drives a running suite process by its bundle id and shoots and
 // audits it under its own key: `afterglow` for the launcher, the app's raw
 // value (`flare`, ...) for an embedded app. Only the `afterglow` counts are
@@ -65,24 +66,25 @@ final class SuiteHarness {
         app == .launcher ? launcherKey : app.rawValue
     }
 
-    /// The suite launch flags for `fixture` over `support` (blueprint 4.1).
-    static func flags(fixture: String, support: URL) -> [String] {
-        [
-            "-ApplePersistenceIgnoreState", "YES", "-SuiteSupportDir", support.path,
-            "-SuiteSkipOnboarding", "YES", "-SuiteFixture", fixture,
-            "-SuiteFixtureDocuments", fixtureDocuments.path,
-        ]
+    /// The suite launch flags for `fixture` over `support` (blueprint 4.1);
+    /// `skipOnboarding: false` leaves out `-SuiteSkipOnboarding YES`, for
+    /// the onboarding journeys on `firstLaunch`.
+    static func flags(fixture: String, support: URL, skipOnboarding: Bool = true) -> [String] {
+        ["-ApplePersistenceIgnoreState", "YES", "-SuiteSupportDir", support.path]
+            + (skipOnboarding ? ["-SuiteSkipOnboarding", "YES"] : [])
+            + ["-SuiteFixture", fixture, "-SuiteFixtureDocuments", fixtureDocuments.path]
     }
 
     /// Launches AfterGlow.app fresh on `fixture` with the suite flags and
     /// `arguments` (`-SuitePerfProbe YES` to read suite.controls), after
     /// ending any suite process left running. Shoots under `afterglow`.
+    /// `skipOnboarding: false` lets the welcome window present itself.
     @discardableResult
-    func launch(fixture: String, arguments: [String] = []) -> Journey {
+    func launch(fixture: String, arguments: [String] = [], skipOnboarding: Bool = true) -> Journey {
         endEverySuiteProcess()
         let journey = Journey(
             bundlePath: Self.bundle.path, bundleID: SuiteApp.launcher.bundleID, auditKey: Self.launcherKey, test)
-        journey.app.launchArguments = Self.flags(fixture: fixture, support: support) + arguments
+        journey.app.launchArguments = Self.flags(fixture: fixture, support: support, skipOnboarding: skipOnboarding) + arguments
         settle()
         journey.app.launch()
         journey.app.activate()
