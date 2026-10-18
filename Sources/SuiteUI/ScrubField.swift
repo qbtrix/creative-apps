@@ -5,8 +5,10 @@
 // number row, the look of Flare's easing rows: the whole 28 pt rounded row is
 // the control, the label inside on the left, a lighter fill up to the value
 // over five faint ticks (in the gap between the label and the value, none
-// when it is too narrow), a thin marker at the value and the value on the
-// right (docs/design.md, Studio rows and chips). Both share the rules: drag
+// when it is too narrow), a thin marker at the value in that same gap, never
+// on the text, and the value on the right (docs/design.md, Studio rows and
+// chips); typing keeps the whole label and puts the field and its unit in
+// the gap, outlined in the error color while its text isn't a number. Both share the rules: drag
 // sideways to change the value (one step per point, Shift ten, Option a
 // tenth; a modifier change re-anchors so nothing jumps), click or press
 // Return to type (Return or a click away commits, Escape cancels; after
@@ -42,7 +44,8 @@ public struct ScrubField: View {
         var preview: Preview?
     }
 
-    enum Preview { case hover, focus, dragging, editing }
+    /// `invalid` is the typing field holding text that isn't a number.
+    enum Preview { case hover, focus, dragging, editing, invalid }
 
     private let label: String
     private let value: Double
@@ -94,6 +97,7 @@ public struct ScrubField: View {
         case .hover: _hovering = State(initialValue: true)
         case .dragging: _anchor = State(initialValue: (value, 0, 1))
         case .editing: _draft = State(initialValue: NumericInput.format(value))
+        case .invalid: _draft = State(initialValue: "abc")
         default: break
         }
     }
@@ -105,6 +109,7 @@ public struct ScrubField: View {
     public var body: some View {
         let editing = draft != nil
         let ring = isFocused || editing || bar?.preview == .focus
+        let invalid = draft.map { !NumericInput.accepts($0) } ?? false
         let radius = bar == nil ? SuiteRadius.field : SuiteRadius.row
         Group {
             if let bar { barBody(bar) } else { valueText(SuiteColor.textPrimary) }
@@ -115,7 +120,7 @@ public struct ScrubField: View {
             if ring {
                 let out = SuiteSize.focusRingGap + SuiteSize.focusRing / 2
                 RoundedRectangle(cornerRadius: radius + out)
-                    .stroke(SuiteColor.accent, lineWidth: SuiteSize.focusRing)
+                    .stroke(invalid ? SuiteColor.stateError : SuiteColor.accent, lineWidth: SuiteSize.focusRing)
                     .padding(-out)
             }
         }
@@ -139,45 +144,69 @@ public struct ScrubField: View {
     }
 
     /// The bar slider, drawn as the Studio editor's number row (Flare's easing
-    /// rows): a 28 pt filled rounded row, a lighter fill up to the value, five
-    /// faint ticks in the gap between the label and the value, and a thin marker at
-    /// the value, accent while dragged.
+    /// rows): a 28 pt filled rounded row, five faint ticks in the gap between
+    /// the label and the value, a thin `marker` at the value inside that gap
+    /// (never on the text, #2963) and a lighter fill up to it. While typing, the
+    /// label keeps its full width and the field with its unit takes the gap,
+    /// with no marker, ticks or fill under it (#2952).
     private func barBody(_ bar: Bar) -> some View {
         let dragging = anchor != nil
         let keyed = bar.keyed && !dragging
+        let editing = draft != nil
         let fraction = ScrubValue.fraction(track.position(value), in: track.positions)
-        return GeometryReader { geo in
-            let x = geo.size.width * fraction
-            ZStack(alignment: .leading) {
-                if !bar.mixed {
-                    Rectangle().fill(dragging ? SuiteColor.studioFillActive : SuiteColor.studioFill).frame(width: x)
-                }
-                if !bar.mixed {
-                    Rectangle()
-                        .fill(dragging ? SuiteColor.accent : keyed ? SuiteColor.stateKeyed : Color.primary.opacity(0.55))
-                        .frame(width: SuiteSize.studioTick, height: SuiteSize.studioRow - SuiteSpacing.m)
-                        .position(x: min(max(x, SuiteSize.studioTick), geo.size.width - SuiteSize.studioTick), y: geo.size.height / 2)
-                }
-                HStack(spacing: SuiteSpacing.s) {
-                    Text(label).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.secondaryText).layoutPriority(1)
-                    // The five ticks fill the gap between the label and the value, never the text.
-                    Canvas { context, size in
-                        let d = SuiteSize.studioTick
-                        for x in Self.tickXs(gap: size.width) {
-                            let dot = CGRect(x: x - d / 2, y: (size.height - d) / 2, width: d, height: d)
-                            context.fill(Path(ellipseIn: dot), with: .color(Color.primary.opacity(0.22)))
-                        }
+        let mixed = bar.mixed
+        let mark = dragging ? SuiteColor.markerDragging : keyed ? SuiteColor.stateKeyed : SuiteColor.marker
+        return HStack(spacing: SuiteSpacing.s) {
+            Text(label).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.secondaryText).layoutPriority(1)
+                .fixedSize(horizontal: editing, vertical: false)
+            if editing {
+                Spacer(minLength: 0)
+                valueText(SuiteColor.textPrimary)
+            } else {
+                // The ticks and the marker fill the gap between the label and the value, never the text.
+                Canvas { context, size in
+                    let d = SuiteSize.studioTick
+                    for x in Self.tickXs(gap: size.width) {
+                        let dot = CGRect(x: x - d / 2, y: (size.height - d) / 2, width: d, height: d)
+                        context.fill(Path(ellipseIn: dot), with: .color(Color.primary.opacity(0.22)))
                     }
-                    .frame(minWidth: SuiteSpacing.s, maxWidth: .infinity)
-                    .accessibilityHidden(true)
-                    valueText(keyed ? SuiteColor.stateKeyed : Color.primary, mixed: bar.mixed).fixedSize()
+                    guard !mixed else { return }
+                    let height = SuiteSize.studioRow - 2 * SuiteSpacing.markerInset
+                    let x = Self.markerX(fraction: fraction, gap: size.width)
+                    context.fill(Path(CGRect(x: x - d / 2, y: (size.height - height) / 2, width: d, height: height)), with: .color(mark))
                 }
-                .padding(.horizontal, SuiteSpacing.m)
+                .frame(minWidth: SuiteSpacing.s, maxWidth: .infinity)
+                .anchorPreference(key: BarLaneKey.self, value: .bounds) { $0 }
+                .accessibilityHidden(true)
+                valueText(keyed ? SuiteColor.stateKeyed : Color.primary, mixed: bar.mixed).fixedSize()
+            }
+        }
+        .padding(.horizontal, SuiteSpacing.m)
+        .frame(maxWidth: .infinity)
+        .backgroundPreferenceValue(BarLaneKey.self) { lane in
+            // The fill ends at the marker: the gap's start plus the marker's place in it.
+            GeometryReader { geo in
+                if let lane, !bar.mixed {
+                    let gap = geo[lane]
+                    Rectangle().fill(dragging ? SuiteColor.studioFillActive : SuiteColor.studioFill)
+                        .frame(width: max(gap.minX + Self.markerX(fraction: fraction, gap: gap.width), 0))
+                }
             }
         }
         .frame(height: SuiteSize.studioRow)
         .background(hovering && !dragging && isEnabled ? SuiteColor.field : SuiteColor.panelRaised)
         .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.row))
+    }
+
+    /// Where the bar's marker sits across the `gap` points between its label
+    /// and its value, for a value `fraction` of the way along the track: a
+    /// whole 2 pt marker inside the gap from its start (0) to its end (1),
+    /// the ticks' lane; the gap's middle when it is narrower than the marker.
+    nonisolated static func markerX(fraction: Double, gap: CGFloat) -> CGFloat {
+        let d = SuiteSize.studioTick
+        guard gap > d else { return max(gap, 0) / 2 }
+        let along = fraction.isNaN ? 0 : min(max(fraction, 0), 1)
+        return d / 2 + (gap - d) * CGFloat(along)
     }
 
     /// Where the bar's five ticks sit across the `gap` points the row leaves
@@ -192,30 +221,40 @@ public struct ScrubField: View {
         return (0..<5).map { d / 2 + lane * CGFloat($0) / 4 }
     }
 
-    /// The value with its unit, or the typing field on its inset well.
+    /// The value with its unit, or the typing field and its unit on one inset
+    /// well: the exact field's 56 pt, the bar's gap up to that (#2952). Text
+    /// that isn't a number reads in the error color, with help naming the range.
     @ViewBuilder
     private func valueText(_ color: Color, mixed: Bool = false) -> some View {
-        if draft != nil {
-            TextField(label, text: Binding(get: { draft ?? "" }, set: {
-                draft = $0
-                edited = true
-            }))
-                .textFieldStyle(.plain)
-                .labelsHidden()
-                .multilineTextAlignment(.trailing)
-                .font(SuiteFont.inspectorValue)
-                .foregroundStyle(SuiteColor.textPrimary)
-                .focused($isTyping)
-                .task { await takeFocus() }
-                .onSubmit { commit(refocus: true) }
-                .onExitCommand {
-                    draft = nil
-                    Task { await takeBackKeys() }
+        if let text = draft {
+            let valid = NumericInput.accepts(text)
+            HStack(spacing: 0) {
+                TextField(label, text: Binding(get: { draft ?? "" }, set: {
+                    draft = $0
+                    edited = true
+                }))
+                    .textFieldStyle(.plain)
+                    .labelsHidden()
+                    .multilineTextAlignment(.trailing)
+                    .focused($isTyping)
+                    .task { await takeFocus() }
+                    .onSubmit { commit(refocus: true) }
+                    .onExitCommand {
+                        draft = nil
+                        Task { await takeBackKeys() }
+                    }
+                    .onChange(of: isTyping) { _, typing in if !typing { commit() } }
+                if !unit.isEmpty {
+                    Text(unit.first?.isLetter == true ? " " + unit : unit).fixedSize()
+                        .accessibilityHidden(true)
                 }
-                .onChange(of: isTyping) { _, typing in if !typing { commit() } }
-                .padding(.horizontal, SuiteSpacing.xs)
-                .frame(width: SuiteSize.inspectorField)
-                .background(SuiteColor.fieldActive, in: .rect(cornerRadius: SuiteRadius.field))
+            }
+            .font(SuiteFont.inspectorValue)
+            .foregroundStyle(valid ? SuiteColor.textPrimary : SuiteColor.stateError)
+            .padding(.horizontal, SuiteSpacing.xs)
+            .frame(minWidth: bar == nil ? SuiteSize.inspectorField : nil, maxWidth: SuiteSize.inspectorField)
+            .background(SuiteColor.fieldActive, in: .rect(cornerRadius: SuiteRadius.field))
+            .help(valid ? label : NumericInput.rangeHelp(range, decimals: decimals, unit: unit))
         } else {
             Text(mixed ? "Mixed" : NumericInput.text(value, decimals: decimals, unit: unit))
                 .font(SuiteFont.inspectorValue)
@@ -364,6 +403,16 @@ struct ScrubEnds: Equatable, Sendable {
     mutating func stepped() -> Bool {
         _ = run.change()
         return run.end()
+    }
+}
+
+/// The bar's gap between its label and its value, where its ticks and marker
+/// sit, so its fill can end at the marker in the same layout pass.
+private struct BarLaneKey: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? { nil }
+
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
     }
 }
 

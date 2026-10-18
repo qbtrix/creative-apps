@@ -110,6 +110,8 @@ private struct InspectorSectionHeader: View {
                 .accessibilityIdentifier(InspectorSection<EmptyView>.headerIdentifier(title) + ".reset")
             }
         }
+        // Always the Reset's height, so the rows never move as it comes and goes (#2964).
+        .frame(minHeight: SuiteSize.iconButtonHit)
         .font(SuiteFont.sectionCaps)
         .foregroundStyle(SuiteColor.secondaryText)
         .padding(.top, SuiteSpacing.m)
@@ -247,12 +249,13 @@ public struct InspectorPickerRow<ID: Hashable & Sendable>: View {
                 .pickerStyle(.inline)
                 .labelsHidden()
             } label: {
-                HStack(spacing: SuiteSpacing.xs) {
-                    Text(options.first { $0.id == selection }?.title ?? "")
-                        .font(SuiteFont.inspectorValue)
-                    Image(systemName: "chevron.up.chevron.down").imageScale(.small).foregroundStyle(SuiteColor.textSecondary)
-                }
-                .contentShape(.rect)
+                // One Text, choice and chevron, so the menu's frame ends where
+                // its chevron does, flush with the other rows' values (#2961).
+                let choice = Text(options.first { $0.id == selection }?.title ?? "").font(SuiteFont.inspectorValue)
+                let chevron = Text(Image(systemName: "chevron.up.chevron.down"))
+                    .font(SuiteFont.inspectorMeta).foregroundStyle(SuiteColor.textSecondary)
+                Text("\(choice) \(chevron)")
+                    .contentShape(.rect)
             }
             .menuStyle(.button)
             .buttonStyle(.plain)

@@ -32,6 +32,22 @@ import Testing
     #expect(ScrubValue.fraction(1, in: 1...1) == 0)
 }
 
+/// #2963: the marker sits whole inside the gap between the label and the
+/// value, the ticks' lane, at any value; never on the text either side.
+@Test func markerStaysInsideTheGap() {
+    let d = SuiteSize.studioTick
+    for gap: CGFloat in [8, 40, 120] {
+        for fraction in [0, 0.05, 0.5, 1, -2, 7, .nan] {
+            let x = ScrubField.markerX(fraction: fraction, gap: gap)
+            #expect(x - d / 2 >= 0 && x + d / 2 <= gap, "fraction \(fraction) in a \(gap) pt gap: \(x)")
+        }
+        #expect(ScrubField.markerX(fraction: 0, gap: gap) == d / 2)
+        #expect(ScrubField.markerX(fraction: 1, gap: gap) == gap - d / 2)
+        #expect(ScrubField.markerX(fraction: 0.5, gap: gap) == gap / 2)
+    }
+    #expect(ScrubField.markerX(fraction: 0.5, gap: 1) == 0.5)
+}
+
 @Test func valueTextShowsTheFieldsPrecisionWithItsUnit() {
     #expect(NumericInput.text(45, decimals: 0, unit: "°") == "45°")
     #expect(NumericInput.text(100, decimals: 0, unit: "%") == "100%")
