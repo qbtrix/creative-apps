@@ -91,20 +91,25 @@ struct LibraryCommands: Commands {
             title: "Loupe", systemImage: "rectangle", action: view.loupe,
             reason: why(nil, "The loupe is already showing, or there are no photos."))
         Divider()
-        // In the grid Zoom In/Out size the thumbnails (disabled at a limit);
-        // in the loupe they wait on loupe zoom, which isn't wired yet.
+        // In the grid Zoom In/Out size the thumbnails; in the loupe they step
+        // the zoom. Either is disabled at its limit; Zoom to Fit and Actual
+        // Size act only in the loupe.
         let inGrid = view.zoomInTitle == "Larger Thumbnails"
-        let loupeZoom = why("loupe", "Zoom in the loupe isn't connected yet.")
+        let zoomWhy: (String) -> String = { inGrid ? why(nil, $0) : why("loupe", $0) }
+        let openFirst = why(nil, "Open a photo in the loupe to zoom.")
         MenuCommand(
             title: view.zoomInTitle, systemImage: "plus.magnifyingglass", action: view.zoomIn,
-            reason: inGrid ? why(nil, "Can't zoom in further.") : loupeZoom, shortcut: KeyboardShortcut("+"))
+            reason: zoomWhy("Can't zoom in further."), shortcut: KeyboardShortcut("+"))
         MenuCommand(
             title: view.zoomOutTitle, systemImage: "minus.magnifyingglass", action: view.zoomOut,
-            reason: inGrid ? why(nil, "Can't zoom out further.") : loupeZoom, shortcut: KeyboardShortcut("-"))
+            reason: zoomWhy("Can't zoom out further."), shortcut: KeyboardShortcut("-"))
         MenuCommand(
-            title: "Zoom to Fit", action: view.zoomToFit, reason: loupeZoom, shortcut: KeyboardShortcut("0"))
+            title: "Zoom to Fit", action: view.zoomToFit,
+            reason: inGrid ? openFirst : zoomWhy("The photo already fits."), shortcut: KeyboardShortcut("0"))
         MenuCommand(
-            title: "Actual Size", action: view.actualSize, reason: loupeZoom, shortcut: KeyboardShortcut("1"))
+            title: "Actual Size", action: view.actualSize,
+            reason: inGrid ? openFirst : zoomWhy("The photo is already at actual size."),
+            shortcut: KeyboardShortcut("1"))
         Divider()
         // A Menu of buttons, not a Picker: a Picker's .disabled didn't reach
         // the menu bar, while each item here is disabled by its nil action.

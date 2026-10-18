@@ -65,13 +65,15 @@ import SuiteKernel
     /// without trapping, and the fixtures have the packet's shape.
     @Test func stubsReturnFakes() throws {
         var history = History<Int>()
-        history.record("Move", 1, key: "drag")
-        history.endRun()
         #expect(!history.undo { $0 } && !history.redo { $0 })
         history.jump(to: 0) { $0 }
         let reading: any HistoryReading = history
         #expect(!reading.isDirty && !reading.canUndo && !reading.canRedo && reading.undoName == nil)
         #expect(history.steps.isEmpty && history.index == 0 && history.currentStepID == history.savedStepID)
+        // EK-8 built the body: a recorded step is now undoable (HistoryTests covers the rest).
+        history.record("Move", 1, key: "drag")
+        history.endRun()
+        #expect(history.steps == ["Move"] && history.canUndo && history.isDirty)
 
         var selection = Selection(["a", "b"])
         #expect(selection.primary == "b" && selection.set == ["a", "b"] && selection.contains("a"))
@@ -95,10 +97,11 @@ import SuiteKernel
         #expect(try tree.group(["hero"], name: "G", payload: KernelFixtures.cards.roots[0].payload) { "g1" } == "g1")
         try tree.ungroup("g1")
         try tree.setFollow("hero", "header", local: { _ in .identity }, keepingPlace: { _, _ in })
-        #expect(tree == KernelFixtures.tree200 && tree.node("hero") == nil && tree.ancestors(of: "hero") == nil)
+        // The tree has its body (EK-12): the edits land and the cascades read ancestors.
+        #expect(tree.node("header")?.children.count == 4 && tree.roots.last?.id == "hero" && tree.ancestors(of: "hero") == [])
         let updated = tree.update("hero") { node in node.name = "X" }
-        #expect(tree.duplicate(["hero"]) { "copy" }.isEmpty && !updated)
-        #expect(tree.frontToBack.isEmpty && !tree.isEffectivelyHidden("archive") && !tree.follows("hero", "header"))
+        #expect(tree.duplicate(["nowhere"]) { "copy" }.isEmpty && updated)
+        #expect(tree.frontToBack.count == 200 && tree.isEffectivelyHidden("archive-1") && !tree.follows("hero", "header"))
         #expect(tree.worldPlacement(of: "hero") { _ in .identity } == .identity)
 
         let desktop = KernelFixtures.cards.rows(expanded: ["desktop"])

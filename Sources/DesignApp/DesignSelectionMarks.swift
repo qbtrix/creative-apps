@@ -16,6 +16,8 @@ import SuiteUI
 import SwiftUI
 
 struct DesignSelectionMarks: View {
+    /// The selection's probe (SuiteUI's ProbeElement): a clear box labelled "Selection", painting nothing.
+    static let selectionID = "design.canvas.selection"
     let model: DesignWorkspace
     let painted: [DesignPainted]
     let zoom: Double
@@ -32,12 +34,13 @@ struct DesignSelectionMarks: View {
                 if model.marquee == nil {
                     DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.showsSelectionHandles)
                 }
-                DesignSelectionElement(rect: bounds, zoom: zoom)
+                ProbeElement(Self.selectionID, label: "Selection", rect: bounds.cgRect, zoom: usable(zoom), traits: .isImage)
             }
         } else if let selected = painted.first(where: { $0.node.id == model.selectedNodeID })?.node,
                   selected.id != model.editingTextID {
             DesignSelectionBox(rect: selected.frame, zoom: zoom, handles: model.showsSelectionHandles)
-            DesignSelectionElement(rect: selected.frame, zoom: zoom)
+            ProbeElement(
+                Self.selectionID, label: "Selection", rect: selected.frame.cgRect, zoom: usable(zoom), traits: .isImage)
         }
     }
 }
@@ -68,27 +71,5 @@ struct DesignSelectionBox: View {
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
-    }
-}
-
-/// The selection's accessibility element: a clear rectangle at `rect` (page points) at `zoom`,
-/// identified `design.canvas.selection` and labelled "Selection". It paints nothing.
-private struct DesignSelectionElement: View {
-    let rect: DesignRect
-    let zoom: Double
-
-    var body: some View {
-        let scale = usable(zoom)
-        let box = rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale)).standardized
-        Color.clear
-            .frame(width: box.width, height: box.height)
-            .accessibilityElement()
-            .accessibilityLabel(Text(verbatim: "Selection"))
-            .accessibilityIdentifier("design.canvas.selection")
-            .accessibilityAddTraits(.isImage)
-            .padding(.leading, box.minX)
-            .padding(.top, box.minY)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .allowsHitTesting(false)
     }
 }
