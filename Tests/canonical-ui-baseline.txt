@@ -15,27 +15,21 @@ A Sources/DesignApp/DesignSaveStatus.swift::DesignSaveStatus SaveStatus
 A Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox CanvasMark
 A Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement Probe
 A Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover Easing
-A Sources/FlareApp/FlareFilePanels.swift::FlareFileElement Probe
 A Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow KeyedRow
 A Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet Sheet
 A Sources/FlareApp/FlareTransport.swift::FlareTransport Transport
-A Sources/HaloApp/HaloControls.swift::HaloControlsElement Probe
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector Easing
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingSegmentLabel Easing
 A Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView KeyedRow
 A Sources/HaloApp/HaloLayerList.swift::HaloLayerList LayerList
 A Sources/HaloApp/HaloLayerList.swift::HaloLayerRow LayerList
-A Sources/HaloApp/HaloReadout.swift::HaloReadoutElement Probe
 A Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet Sheet
 A Sources/HaloApp/HaloRenderedFrameView.swift::HaloRenderedNote Notice
 A Sources/HaloApp/HaloTransport.swift::HaloTransport Transport
 A Sources/HaloApp/HaloViewer.swift::HaloRefusalCaption Notice
-A Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement Probe
-A Sources/HaloApp/HaloWindow+File.swift::HaloFileElement Probe
 A Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet Sheet
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow Notice
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow Notice
-A Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement Probe
 A Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet Sheet
 A Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar StatusBar
 A Sources/PhotoApp/ExportSheet.swift::ExportSheet Sheet
@@ -54,7 +48,6 @@ B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox accent-outlin
 B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement probe-element
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover caps-header
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover easing
-B Sources/FlareApp/FlareFilePanels.swift::FlareFileElement probe-element
 B Sources/FlareApp/FlareInspector.swift::FlareInspector error-label
 B Sources/FlareApp/FlareInspectorFill.swift::FlareInspectorFill pending-commit
 B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow keyed-row
@@ -67,26 +60,21 @@ B Sources/FlareApp/FlareStageOverlay.swift::FlareStageOverlay accent-outline
 B Sources/FlareApp/FlareTimeline.swift::FlareTimeline error-label
 B Sources/FlareApp/FlareTransport.swift::FlareTransport transport
 B Sources/HaloApp/HaloControls.swift::* app-inventory
-B Sources/HaloApp/HaloControls.swift::HaloControlsElement probe-element
 B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector easing
 B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector selected-fill
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView keyed-row
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView pending-commit
 B Sources/HaloApp/HaloLayerList.swift::HaloLayerRow selected-fill
-B Sources/HaloApp/HaloReadout.swift::HaloReadoutElement probe-element
 B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet error-label
 B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet sheet-buttons
 B Sources/HaloApp/HaloTextInspector.swift::HaloTextInspector pending-commit
 B Sources/HaloApp/HaloTransport.swift::HaloTransport transport
 B Sources/HaloApp/HaloViewer.swift::HaloRefusalCaption error-label
-B Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement probe-element
-B Sources/HaloApp/HaloWindow+File.swift::HaloFileElement probe-element
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet error-label
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet sheet-buttons
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow error-label
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow error-label
 B Sources/LibraryApp/LibraryControls.swift::* app-inventory
-B Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement probe-element
 B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
 B Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar preview-pill
 B Sources/PhotoApp/ExportSheet.swift::ExportSheet sheet-buttons
@@ -96,8 +84,3 @@ B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine preview-pill
 B Sources/PhotoApp/StraightenSheet.swift::StraightenSheet sheet-buttons
 C Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement ~ Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement
-C Sources/FlareApp/FlareFilePanels.swift::FlareFileElement ~ Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement
-C Sources/FlareApp/FlareFilePanels.swift::FlareFileElement ~ Sources/HaloApp/HaloWindow+File.swift::HaloFileElement
-C Sources/HaloApp/HaloControls.swift::HaloControlsElement ~ Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement
-C Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement ~ Sources/HaloApp/HaloWindow+File.swift::HaloFileElement
-C Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement ~ Sources/SuiteUI/ControlInventory.swift::SuiteControlsElement
