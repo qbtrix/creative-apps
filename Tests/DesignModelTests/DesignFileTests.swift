@@ -178,6 +178,7 @@ private func file(_ pages: [DesignPage]) throws -> Data {
     let before = workspace
     for (from, to, id) in [
         ("\"width\":10", "\"width\":0", "a"), ("\"height\":10", "\"height\":0.5", "a"), ("\"width\":10", "\"width\":-3", "a"),
+        ("\"width\":10", "\"width\":0.5", "a"),
         ("\"frameWidth\":800", "\"frameWidth\":0", "page-1"), ("\"frameHeight\":600", "\"frameHeight\":-1", "page-1"),
     ] {
         let bad = text(good).replacing(from, with: to)
@@ -186,6 +187,11 @@ private func file(_ pages: [DesignPage]) throws -> Data {
         #expect(throws: DesignFileError.invalidNumber(id), "\(to)") { try other.open(bytes(bad)) }
         #expect(other == before)
     }
+    // Exactly 1 point is the smallest size that opens.
+    let onePoint = try file([page("page-1", [node("a", .rectangle, rc(5, 5, 1, 1))])])
+    var smallest = DesignWorkspace()
+    try smallest.open(onePoint)
+    #expect(smallest.pages[0].nodes.first?.frame == rc(5, 5, 1, 1))
 }
 
 @Test func aDocumentThatCouldNotBeOpenedAgainIsNotWritten() {
