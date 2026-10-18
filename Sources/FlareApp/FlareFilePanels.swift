@@ -7,9 +7,11 @@
 // Model sets it again, and opens `-FlareOpenFile`'s file once, in the first
 // window, the way Open Recent does. FlareFileDialogs are the AppKit panels:
 // open and save for .flare files, the export's folder, and the close prompt's
-// Save, Don't Save and Cancel. The window title is SuiteWindow's (`model.title`).
+// Save, Don't Save and Cancel, in the kernel's shared words (UnsavedPrompt).
+// The window title is SuiteWindow's (`model.title`).
 import AppKit
 import FlareModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -108,16 +110,20 @@ final class FlareEditedView: NSView {
     static func askToSave(_ title: String, in window: NSWindow?) async -> Choice {
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "Do you want to save the changes made to \u{201C}\(title)\u{201D}?"
-        alert.informativeText = "Your changes will be lost if you don't save them."
-        alert.addButton(withTitle: "Save").setAccessibilityIdentifier("flare.close.save")
-        alert.addButton(withTitle: "Don't Save").setAccessibilityIdentifier("flare.close.discard")
-        alert.addButton(withTitle: "Cancel").setAccessibilityIdentifier("flare.close.cancel")
+        alert.messageText = UnsavedPrompt.message(for: title)
+        alert.informativeText = UnsavedPrompt.informativeText
+        let identifiers: [UnsavedPrompt.Answer: String] =
+            [.save: "flare.close.save", .dontSave: "flare.close.discard", .cancel: "flare.close.cancel"]
+        for answer in UnsavedPrompt.answers {
+            alert.addButton(withTitle: UnsavedPrompt.title(of: answer))
+                .setAccessibilityIdentifier(identifiers[answer, default: "flare.close.cancel"])
+        }
         let response = if let window { await alert.beginSheetModal(for: window) } else { alert.runModal() }
-        switch response {
-        case .alertFirstButtonReturn: return .save
-        case .alertSecondButtonReturn: return .discard
-        default: return .cancel
+        let index = response.rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+        switch UnsavedPrompt.answer(forButton: index) {
+        case .save: return .save
+        case .dontSave: return .discard
+        case .cancel: return .cancel
         }
     }
 }
