@@ -1,0 +1,37 @@
+[
+  {
+    "label": "the layer is not moved to the origin",
+    "file": "Sources/DesignModel/DesignRaster.swift",
+    "find": "node.translate(by: origin)",
+    "replace": "_ = origin",
+    "tests": "DesignRasterTests"
+  },
+  {
+    "label": "a layer draws the whole page instead of its subtree",
+    "file": "Sources/DesignModel/DesignRaster.swift",
+    "find": "(origin, drawn) = (DesignPoint(x: -node.frame.x, y: -node.frame.y), [node])",
+    "replace": "(origin, drawn) = (DesignPoint(x: -node.frame.x, y: -node.frame.y), nodes)",
+    "tests": "DesignRasterTests"
+  },
+  {
+    "label": "the max-side limit dropped",
+    "file": "Sources/DesignModel/DesignRaster.swift",
+    "find": "item.pixelWidth <= DesignRaster.maxSide, item.pixelHeight <= DesignRaster.maxSide",
+    "replace": "item.pixelWidth > 0, item.pixelHeight > 0",
+    "tests": "DesignRasterTests"
+  },
+  {
+    "label": "the height's scale is not checked against the width's",
+    "file": "Sources/DesignModel/DesignRaster.swift",
+    "find": "guard scale >= 1, item.pixelHeight / h == scale,",
+    "replace": "guard scale >= 1,",
+    "tests": "DesignRasterTests"
+  },
+  {
+    "label": "the plan's pixel size is not read back",
+    "file": "Sources/DesignModel/DesignRaster.swift",
+    "find": "return DesignRaster(artwork: artwork, pixelWidth: item.pixelWidth, pixelHeight: item.pixelHeight, scale: scale)",
+    "replace": "return DesignRaster(artwork: artwork, pixelWidth: w, pixelHeight: h, scale: scale)",
+    "tests": "DesignRasterTests"
+  }
+]
