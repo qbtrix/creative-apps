@@ -3,7 +3,7 @@
     "label": "the cycle check sees only a direct follow",
     "file": "Sources/SuiteKernel/Layers/LayerFollow.swift",
     "find": "if parent == id || follows(parent, id) { throw .cycle(id) }",
-    "replace": "if parent == id || followNode(parent)?.followsID == id { throw .cycle(id) }",
+    "replace": "if parent == id || node(parent)?.followsID == id { throw .cycle(id) }",
     "tests": "LayerFollowTests"
   },
   {

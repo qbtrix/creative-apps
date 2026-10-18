@@ -16,10 +16,10 @@ extension LayerTree {
     /// for an unknown id, and for a layer and itself.
     public func follows(_ id: String, _ ancestor: String) -> Bool {
         var seen: Set<String> = [id]
-        var next = followNode(id)?.followsID
+        var next = node(id)?.followsID
         while let current = next, seen.insert(current).inserted {
             if current == ancestor { return true }
-            next = followNode(current)?.followsID
+            next = node(current)?.followsID
         }
         return false
     }
@@ -31,7 +31,7 @@ extension LayerTree {
         var chain: [Matrix] = []
         var seen: Set<String> = []
         var next: String? = id
-        while let current = next, seen.insert(current).inserted, let node = followNode(current) {
+        while let current = next, seen.insert(current).inserted, let node = node(current) {
             chain.append(local(node))
             next = node.followsID
         }
@@ -46,41 +46,17 @@ extension LayerTree {
     /// placement can't be inverted, the local placement stays as it is.
     public mutating func setFollow(_ id: String, _ parent: String?, local: (LayerNode<Payload>) -> Matrix,
                                    keepingPlace: (inout LayerNode<Payload>, Matrix) -> Void) throws(TreeRefusal) {
-        guard followNode(id) != nil else { throw .unknown(id) }
+        guard node(id) != nil else { throw .unknown(id) }
         if let parent {
-            guard followNode(parent) != nil else { throw .unknown(parent) }
+            guard node(parent) != nil else { throw .unknown(parent) }
             if parent == id || follows(parent, id) { throw .cycle(id) }
         }
         let world = worldPlacement(of: id, local: local)
         let parentWorld = parent.map { worldPlacement(of: $0, local: local) } ?? .identity
         let placed = (try? parentWorld.inverted()).map { $0 * world }
-        Self.editFollow(&roots, id) { node in
+        _ = update(id) { node in
             node.followsID = parent
             if let placed { keepingPlace(&node, placed) }
         }
-    }
-
-    /// The node with `id` anywhere in the tree, nil when there is none.
-    private func followNode(_ id: String) -> LayerNode<Payload>? {
-        var stack = roots
-        while let node = stack.popLast() {
-            if node.id == id { return node }
-            stack.append(contentsOf: node.children)
-        }
-        return nil
-    }
-
-    /// Runs `body` on the node with `id` among `nodes` or below; true once found.
-    @discardableResult
-    private static func editFollow(_ nodes: inout [LayerNode<Payload>], _ id: String,
-                                   _ body: (inout LayerNode<Payload>) -> Void) -> Bool {
-        for index in nodes.indices {
-            if nodes[index].id == id {
-                body(&nodes[index])
-                return true
-            }
-            if editFollow(&nodes[index].children, id, body) { return true }
-        }
-        return false
     }
 }
