@@ -12,7 +12,12 @@
 // and the shortcut for every tool. The palette is one accessibility
 // container, `suite.tools`, so the UI journeys in UITests/ can click every
 // tool in it without listing them. An action with an `identifier` carries it
-// as its accessibility identifier and lists itself in `suite.controls`.
+// as its accessibility identifier and lists itself in `suite.controls`. The
+// `.floating` palette asks SuiteToolPicking (UC6) for each tool's tooltip and
+// for the tool a key picks while focus is in it; each click or key pick
+// reports a `press` sample, and each tool's selection fade (0.14 s, none
+// under `suiteReduceMotion`) a `fade-start`/`fade-end` pair on series `tool`
+// (ChipProbe, which a probe host sets). `.rail` keeps the action's own help.
 import SwiftUI
 
 public struct ToolbarAction: Identifiable {
@@ -79,6 +84,7 @@ public struct ToolbarGroup: View {
     private let actions: [ToolbarAction]
     private let axis: Axis
     private let style: Style
+    @Environment(\.chipProbe) private var probe
 
     public init(_ actions: [ToolbarAction], axis: Axis = .horizontal, style: Style = .floating) {
         self.actions = actions
@@ -106,7 +112,9 @@ public struct ToolbarGroup: View {
             ForEach(actions) { action in
                 // A disabled tool never shows as the selected one.
                 let isSelected = action.isSelected && action.isEnabled
-                Button(action: action.perform) {
+                Button {
+                    if style == .floating { ChipProbe.press(probe) { action.perform() } } else { action.perform() }
+                } label: {
                     Image(systemName: action.systemImage)
                         .symbolVariant(isSelected ? .fill : .none)
                         .foregroundStyle(Self.symbolStyle(action))
@@ -115,10 +123,10 @@ public struct ToolbarGroup: View {
                 .buttonStyle(ToolButtonStyle(isSelected: isSelected, style: style))
                 .disabled(!action.isEnabled)
                 // After .disabled, so the tooltip still shows on a disabled tool.
-                .help(action.help)
+                .help(Self.tooltip(action, style: style))
                 .accessibilityLabel(action.title)
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
-                .suiteControl(action)
+                .suiteControl(action, style: style)
             }
         }
         .accessibilityElement(children: .contain)
@@ -127,8 +135,52 @@ public struct ToolbarGroup: View {
         if style == .rail {
             palette
         } else {
-            palette.suiteGlass(in: Capsule())
+            palette
+                .onKeyPress(phases: .down) { press in pickTool(press) }
+                .suiteGlass(in: Capsule())
         }
+    }
+
+    /// Runs the tool `press` picks, reporting a `press` sample; other keys go on to the rest of the window.
+    private func pickTool(_ press: KeyPress) -> KeyPress.Result {
+        guard let action = Self.pick(press.characters, modifiers: press.modifiers, in: actions, style: style)
+        else { return .ignored }
+        ChipProbe.press(probe) { action.perform() }
+        return .handled
+    }
+
+    /// The picking rule's view of an action; its title is its id, unique within a group.
+    nonisolated static func face(_ action: ToolbarAction) -> ToolFace {
+        ToolFace(id: action.id, title: action.title, shortcut: action.shortcut, unavailableHelp: action.unavailableHelp)
+    }
+
+    /// The tooltip: `.floating` asks the picking rule, `.rail` keeps the action's own.
+    nonisolated static func tooltip(
+        _ action: ToolbarAction, style: Style, picking: some ToolPicking = SuiteToolPicking()
+    ) -> String {
+        style == .rail ? action.help : picking.help(for: face(action))
+    }
+
+    /// The `suite.controls` entry: while disabled its reason is the tooltip. `.rail` keeps the action's own.
+    nonisolated static func entry(
+        _ action: ToolbarAction, style: Style, picking: some ToolPicking = SuiteToolPicking()
+    ) -> ControlEntry? {
+        guard style == .floating, let id = action.identifier else { return action.controlEntry() }
+        let reason = action.isEnabled ? nil : tooltip(action, style: style, picking: picking)
+        return ControlEntry(id: id, enabled: action.isEnabled, reason: reason)
+    }
+
+    /// The action a key picks on a `.floating` palette: the rule's enabled tool on that one character, with
+    /// Shift or none held; nil on `.rail`, with Command, Control or Option, or for any other key.
+    nonisolated static func pick(
+        _ characters: String, modifiers: EventModifiers, in actions: [ToolbarAction], style: Style,
+        picking: some ToolPicking = SuiteToolPicking()
+    ) -> ToolbarAction? {
+        guard style == .floating, characters.count == 1, let key = characters.first,
+              modifiers.isDisjoint(with: [.command, .control, .option]),
+              let id = picking.tool(forKey: key, in: actions.map { face($0) })
+        else { return nil }
+        return actions.first { $0.id == id }
     }
 
     /// Accent when selected, primary when enabled, tertiary (dimmed) when not;
@@ -169,17 +221,32 @@ private struct ToolButtonBody: View {
     let isSelected: Bool
     let style: ToolbarGroup.Style
     @State private var hovering = false
+    /// The selection a `.floating` well draws; it follows `isSelected` through ToolFade, so the fade reports its marks.
+    @State private var shownSelected: Bool
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.suiteReduceMotion) private var reduceMotion
+    @Environment(\.chipProbe) private var probe
+
+    init(configuration: ButtonStyleConfiguration, isSelected: Bool, style: ToolbarGroup.Style) {
+        self.configuration = configuration
+        self.isSelected = isSelected
+        self.style = style
+        _shownSelected = State(initialValue: isSelected)
+    }
 
     var body: some View {
+        let selected = style == .rail ? isSelected : shownSelected
         let well = ToolWell.state(
-            isSelected: isSelected, isEnabled: isEnabled, isHovering: hovering, isPressed: configuration.isPressed)
+            isSelected: selected, isEnabled: isEnabled, isHovering: hovering, isPressed: configuration.isPressed)
         configuration.label
             .background { shape.fill(fill(well)) }
             .contentShape(.rect)
             .onHover { hovering = $0 }
             .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: well)
+            .onChange(of: isSelected) { _, new in
+                guard style == .floating else { return }
+                ToolFade.fade(reduceMotion: reduceMotion, probe: probe) { shownSelected = new }
+            }
     }
 
     private var shape: AnyShape {
@@ -193,5 +260,28 @@ private struct ToolButtonBody: View {
         case .pressed: SuiteColor.valueFill
         case .selected: style == .rail ? SuiteColor.selectedWell : SuiteColor.accent.opacity(0.15)
         }
+    }
+}
+
+/// A `.floating` tool's selection fade: a `fade-start`/`fade-end` mark pair on
+/// series `tool` through the chip probe (nil records nothing).
+enum ToolFade {
+    static let series = "tool"
+
+    /// Runs `change` under the state fade (none under Reduce Motion), marking its start and its end.
+    @MainActor static func fade(reduceMotion: Bool, probe: ChipProbe?, _ change: () -> Void) {
+        probe?.record(ProbeMark(name: "fade-start", series: series, time: ProcessInfo.processInfo.systemUptime))
+        // The completion runs exactly once: after the fade, or at once when nothing animates.
+        withAnimation(SuiteMotion.state(reduceMotion: reduceMotion), change) {
+            probe?.record(ProbeMark(name: "fade-end", series: series, time: ProcessInfo.processInfo.systemUptime))
+        }
+    }
+}
+
+extension View {
+    /// Registers `action` under its identifier: a `.floating` tool with the picking rule's tooltip as its reason.
+    fileprivate func suiteControl(_ action: ToolbarAction, style: ToolbarGroup.Style) -> some View {
+        let entry = ToolbarGroup.entry(action, style: style)
+        return suiteControl(id: entry?.id, enabled: entry?.enabled ?? action.isEnabled, reason: entry?.reason)
     }
 }
