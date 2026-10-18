@@ -14,7 +14,9 @@
 // tool in it without listing them. An action with an `identifier` carries it
 // as its accessibility identifier and lists itself in `suite.controls`. The
 // `.floating` palette asks SuiteToolPicking (UC6) for each tool's tooltip and
-// for the tool a key picks while focus is in it; each click or key pick
+// for the tool a key picks while focus is in it. A click on a tool puts focus
+// in the palette, so its keys reach it with keyboard navigation off too
+// (buttons take no click focus then); each click or key pick
 // reports a `press` sample, and each tool's selection fade (0.14 s, none
 // under `suiteReduceMotion`) a `fade-start`/`fade-end` pair on series `tool`
 // (ChipProbe, which a probe host sets). `.rail` keeps the action's own help.
@@ -85,6 +87,8 @@ public struct ToolbarGroup: View {
     private let axis: Axis
     private let style: Style
     @Environment(\.chipProbe) private var probe
+    /// Whether focus is in the `.floating` palette, so its keys reach `pickTool`.
+    @FocusState private var focused: Bool
 
     public init(_ actions: [ToolbarAction], axis: Axis = .horizontal, style: Style = .floating) {
         self.actions = actions
@@ -113,7 +117,9 @@ public struct ToolbarGroup: View {
                 // A disabled tool never shows as the selected one.
                 let isSelected = action.isSelected && action.isEnabled
                 Button {
-                    if style == .floating { ChipProbe.press(probe) { action.perform() } } else { action.perform() }
+                    guard style == .floating else { return action.perform() }
+                    focused = true
+                    ChipProbe.press(probe) { action.perform() }
                 } label: {
                     Image(systemName: action.systemImage)
                         .symbolVariant(isSelected ? .fill : .none)
@@ -135,7 +141,11 @@ public struct ToolbarGroup: View {
         if style == .rail {
             palette
         } else {
+            // Focusable on a click, not only under keyboard navigation (focusable(_:interactions:)).
             palette
+                .focusable()
+                .focused($focused)
+                .focusEffectDisabled()
                 .onKeyPress(phases: .down) { press in pickTool(press) }
                 .suiteGlass(in: Capsule())
         }
