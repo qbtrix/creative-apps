@@ -1,0 +1,4 @@
+[
+{"label":"the skip flag is ignored","file":"Sources/SuiteModel/Onboarding/OnboardingLaunch.swift","find":"        if zip(arguments, arguments.dropFirst()).contains(where: { $0 == skipFlag && $1 == \"YES\" }) { return false }\n","replace":"","tests":"OnboardingLaunchTests"},
+{"label":"the YES check is inverted","file":"Sources/SuiteModel/Onboarding/OnboardingLaunch.swift","find":"$1 == \"YES\"","replace":"$1 != \"YES\"","tests":"OnboardingLaunchTests"}
+]

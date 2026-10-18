@@ -1,6 +1,6 @@
 // OnboardingLaunchTests.swift: whether the first launch shows the welcome
-// window (onboarding OB-7's acceptance row, written first by OB-2; disabled
-// until OB-7's bodies). "-SuiteSkipOnboarding YES" always wins.
+// window (onboarding OB-7's acceptance row, written first by OB-2).
+// "-SuiteSkipOnboarding YES" always wins.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -21,13 +21,19 @@ import Testing
         FileStore(folder: FileManager.default.temporaryDirectory.appendingPathComponent("OnboardingLaunchTests-\(UUID().uuidString)").path)
     }
 
-    @Test(.disabled("waits on OB-7")) func skipFlagYesHidesWhateverIsStored() {
+    @Test func skipFlagYesHidesWhateverIsStored() {
         for stored in [nil, SuitePreferences(), done] {
             #expect(!presents(["AfterGlow", "-SuiteSkipOnboarding", "YES"], stored))
         }
     }
 
-    @Test(.disabled("waits on OB-7")) func otherwiseTheFlowAnswersOnWhatIsStored() {
+    @Test func anyFlagFollowedByYesWins() {
+        #expect(!presents(["-SuiteSkipOnboarding", "NO", "-SuiteSkipOnboarding", "YES"], nil))
+        #expect(!presents(["-SuiteSkipOnboarding", "-SuiteSkipOnboarding", "YES"], nil))
+        #expect(presents(["-SuiteSkipOnboarding", "yes"], nil))
+    }
+
+    @Test func otherwiseTheFlowAnswersOnWhatIsStored() {
         for args in [[], ["-SuiteSkipOnboarding", "NO"], ["-SuiteSkipOnboarding"], ["YES", "-SuiteSkipOnboarding"]] {
             #expect(presents(args, nil), "\(args)")
             #expect(presents(args, SuitePreferences(onboardingDoneVersion: SuiteOnboarding.version - 1)), "\(args)")
@@ -36,7 +42,7 @@ import Testing
         #expect(OnboardingLaunch.presents(arguments: [], stored: done, flow: flow, version: SuiteOnboarding.version + 1))
     }
 
-    @Test(.disabled("waits on OB-7")) func storedReadsWhatTheStoreWrote() throws {
+    @Test func storedReadsWhatTheStoreWrote() throws {
         let store = emptyStore()
         #expect(OnboardingLaunch.stored(in: store) == nil)
         let written = SuitePreferences(onboardingDoneVersion: 1, homeOrder: [.library, .photo, .flare, .design, .halo])
@@ -46,7 +52,7 @@ import Testing
         #expect(!presents([], read))
     }
 
-    @Test(.disabled("waits on OB-7")) func storedIsNilWhenUnreadable() throws {
+    @Test func storedIsNilWhenUnreadable() throws {
         let store = emptyStore()
         try store.writeData("preferences.json", Data("not json".utf8))
         #expect(OnboardingLaunch.stored(in: store) == nil)

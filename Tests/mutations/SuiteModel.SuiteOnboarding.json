@@ -1,0 +1,4 @@
+[
+{"label":"the tour shows again after it was done","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"(p.onboardingDoneVersion ?? 0) < version","replace":"(p.onboardingDoneVersion ?? 0) <= version","tests":"SuiteOnboardingTests"},
+{"label":"finishing never records the version","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"FakeOnboarding().finishing(p, focus: focus, version: version)","replace":"p","tests":"SuiteOnboardingTests"}
+]
