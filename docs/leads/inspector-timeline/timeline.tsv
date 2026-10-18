@@ -100,3 +100,4 @@
 2026-10-18T20:57Z	heartbeat	no green full run: 39160459432 (f7e03506) macOS queued since 20:01 (no runner), 39164756292 (ae6e7c81) pending, 4 pending runs superseded; #2971 open, no response, ci.yml unchanged
 2026-10-18T21:29Z	heartbeat	39160459432 (f7e03506) macOS started 21:07 (90-min limit at ~22:37); 39167964719 (b40c77f6) pending; #2971 open, no response, ci.yml unchanged; no dev-red
 2026-10-18T22:01Z	heartbeat	39160459432 (f7e03506) macOS still in scripts/ci after 53 min (started 21:07), journeys not started, 90-min limit ~22:37; 39169434591 (e3859e3f) pending; #2971 open, no response, ci.yml unchanged
+2026-10-18T22:43Z	blocked	39160459432 (f7e03506) macOS cancelled at 90 min inside scripts/ci: hung in AppSnapshotTests AfterGlowHomeSidebarTests from 21:14:35 (not a Flare suite); journeys never ran; added to #2971; 39171756438 (349578b8) queued
