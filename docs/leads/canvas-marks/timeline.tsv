@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-18T21:24:46Z	goldens	waiting	#2990	39164756292 cancelled; dev snapshots blocked on #2990
 2026-10-18T21:48:56Z	goldens	ci running	39169434591	first full run past #2990
 2026-10-18T22:16Z	wait	ci-cancelled	39169434591	full dev run cancelled; next 39171061138 pending on 85f4a22
+2026-10-18T22:38Z	wait	ci-cancelled	39171061138	full run cancelled again; 39171756438 queued
