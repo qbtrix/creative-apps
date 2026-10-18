@@ -1,0 +1,82 @@
+utc	stage	event	ref	note
+2026-10-16T18:11Z	0	stage-start	#1501	setup on base 132d910
+2026-10-16T18:11Z	2	stage-end	#1501	plan: 4 waves from the packet
+2026-10-16T18:11Z	3	stage-start	wave1	AL-1, AL-3
+2026-10-16T18:27Z	3	pr-opened	#1540	AL-1 LiveAdjustmentLayering
+2026-10-16T18:27Z	3	pr-opened	#1537	AL-3 workspace adjustment layers
+2026-10-16T18:35Z	3	heartbeat	wave1	waiting on macOS builds for #1537, #1540
+2026-10-16T18:37Z	3	pr-merged	#1540	AL-1
+2026-10-16T18:37Z	3	stage-start	wave2	AL-2 (AL-5, AL-6 wait on #1537)
+2026-10-16T18:44Z	3	pr-merged	#1537	AL-3
+2026-10-16T18:44Z	3	heartbeat	wave2	AL-5, AL-6 building
+2026-10-16T18:56Z	3	pr-opened	#1564	AL-2 adjustment case of PhotoLayerComposite
+2026-10-16T19:02Z	3	pr-opened	#1566	AL-5 New Adjustment Layer menu
+2026-10-16T19:02Z	3	pr-opened	#1565	AL-6 layer rows (conflict, rebasing)
+2026-10-16T19:07Z	3	fix-round	#1565	AL-6 rebased onto #1546
+2026-10-16T19:08Z	3	pr-merged	#1564	AL-2
+2026-10-16T19:08Z	3	stage-start	wave3	AL-4 (AL-7 waits on #1566)
+2026-10-16T19:09Z	3	pr-merged	#1566	AL-5
+2026-10-16T19:09Z	3	stage-start	wave3	AL-7
+2026-10-16T19:18Z	3	heartbeat	wave3	AL-4, AL-7 building; #1565 in lane
+2026-10-16T19:23Z	3	pr-opened	#1570	AL-7 Adjust tab edits the target
+2026-10-16T19:29Z	3	pr-merged	#1565	AL-6
+2026-10-16T19:32Z	3	pr-opened	#1576	AL-4 PB-13 budget and latency series
+2026-10-16T19:40Z	3	pr-merged	#1570	AL-7
+2026-10-16T19:40Z	3	stage-start	wave4	AL-8 feature-done
+2026-10-16T19:51Z	3	pr-opened	#1595	AL-8 journeys PJ-9, PJ-P2 (feature-done)
+2026-10-16T20:02Z	3	heartbeat	wave4	#1576, #1595 in lane
+2026-10-16T20:15Z	3	pr-merged	#1576	AL-4
+2026-10-16T20:23Z	3	heartbeat	wave4	#1595 built, waiting for lane sweep
+2026-10-16T20:25Z	3	pr-merged	#1595	AL-8 feature-done
+2026-10-16T20:25Z	3	stage-end	wave4	all 8 tasks merged
+2026-10-16T20:25Z	4	stage-start	round1	waiting on dev CI containing 0738181
+2026-10-16T20:44Z	4	heartbeat	round1	waiting on dev CI containing 0738181
+2026-10-16T20:58Z	4	ci-run	38962219854	scoped photo red: #1622 ours, stroke test not ours
+2026-10-16T20:58Z	4	round-findings	#1622	fixture Curves 1 has every kind enabled
+2026-10-16T21:05Z	4	round-findings	round1	8 filed (#1629-#1636) + #1622; 7 to fix, 2 gap
+2026-10-16T21:05Z	4	fix-round	round1	fix batch started
+2026-10-16T21:26Z	4	heartbeat	round1	fix batch running
+2026-10-16T21:33Z	4	pr-opened	#1639 #1640 #1646 #1656 #1660	round 1 fixes
+2026-10-16T21:33Z	4	pr-merged	#1639 #1640	round 1 fixes
+2026-10-16T21:47Z	4	heartbeat	round1	fix PRs in lane, PB-13 fixer running
+2026-10-16T22:02Z	4	pr-opened	#1689	PB-13 perf: release p50 5.61 -> 3.2 ms
+2026-10-16T22:09Z	4	heartbeat	round1	#1689 in lane
+2026-10-16T22:30Z	4	pr-merged	#1646 #1656 #1660 #1689	round 1 fixes all merged
+2026-10-16T22:30Z	4	stage-start	round2	waiting on dev CI containing bfb8ce4
+2026-10-16T22:44Z	4	ci-run	38975895713	scoped photo: ours green, stroke test (shell-parity) red, journeys skipped
+2026-10-16T22:44Z	4	review	round2	panel started
+2026-10-16T22:50Z	4	round-findings	round2	8 filed (#1708-#1715); 7 to fix, #1715 gap
+2026-10-16T22:50Z	4	fix-round	round2	fix batch started (last round)
+2026-10-16T23:11Z	4	heartbeat	round2	fix batch running
+2026-10-16T23:13Z	4	pr-opened	#1723 #1727 #1729 #1733	round 2 fixes
+2026-10-16T23:32Z	4	heartbeat	round2	fix PRs in lane
+2026-10-16T23:59Z	4	fix-round	#1727	macOS build fix (PhotoBlendSummary public init), head 0e48074
+2026-10-17T00:21Z	4	pr-merged	#1727	round 2 fixes all merged
+2026-10-17T00:21Z	4	ci-run	38985043432	scoped photo: 591 model tests green; adjustTabEndIsReachable red (ours, #1733), stroke + RenderBudgetPhoto red (shell-parity)
+2026-10-17T00:21Z	4	review	final	panel started; fixer r-b7 on adjustTabEndIsReachable
+2026-10-17T00:26Z	4	round-clean	final	no blocker/major; 5 minor findings relabelled gap (round cap)
+2026-10-17T00:27Z	4	pr-opened	#1811	adjustTabEndIsReachable fix (anchor on the tab's own ScrollView)
+2026-10-17T00:38Z	4	pr-merged	#1811	adjustTabEndIsReachable fix
+2026-10-17T00:48Z	4	heartbeat	final	waiting on dev CI containing ef79e76
+2026-10-17T00:51Z	4	ci-run	38987398234	ef79e76: adjustTabEndIsReachable still red (offscreen render ignores scroll anchor); fixer r-b8 making it deterministic
+2026-10-17T00:58Z	4	pr-opened	#1822	adjustTabEndIsReachable: geometric check, #1811 plumbing reverted
+2026-10-17T00:59Z	4	heartbeat	final	#1822 macOS build running
+2026-10-17T01:11Z	4	pr-merged	#1822	adjustTabEndIsReachable geometric fix
+2026-10-17T01:25Z	4	heartbeat	final	waiting on dev CI containing 2fe7477
+2026-10-17T01:30Z	4	ci-run	38989795903	full CI on 2fe7477: macOS scripts/ci red on SuiteUI AppSwitcher + Flare/Halo/Library/Photo render budgets (not ours); snapshots not reached
+2026-10-17T01:31Z	4	ci-run	38990423996	scoped photo: all ours green; shell-parity stroke + render budget red (#1716 open)
+2026-10-17T01:31Z	5	stage-start	finish	status on #1501; waiting for a dev run with ui-screens
+2026-10-17T01:51Z	5	heartbeat	finish	waiting on a dev run with ui-screens (#1716)
+2026-10-17T02:18Z	5	heartbeat	finish	waiting on a dev run with ui-screens (#1716)
+2026-10-17T02:18Z	5	ci-run	#1716	shell-parity stroke fix merged (e3448fc); waiting for a dev run with ui-screens
+2026-10-17T02:39Z	5	heartbeat	finish	waiting on a dev run with ui-screens
+2026-10-17T02:54Z	5	ci-run	38993910840	journeys ran: PJ-P2 pass, PJ-9 blocked at open (#1910, 27 Photo journeys)
+2026-10-17T02:54Z	5	stopped	#1501	8 h wall clock; contact sheet waits on #1910
+2026-10-17T06:40Z	5	stage-start	finish	relaunch act-1a148875943-9arx: supervisor asks for the contact sheet from 38993910840
+2026-10-17T07:03Z	5	stage-end	#1501	Belt-Contact-Sheet posted (issuecomment-6230706012); PJ-9 open step -> #1910 gap, fixed on the shell-parity side
+2026-10-17T07:05Z	done	stopped	#1501	lead done; records pushed
+2026-10-17T13:55Z	done	stage-end	#1501	relaunch act-1a14a193a7a-rmz6: Belt-Contact-Sheet refreshed from 39032323316 (issuecomment-6234651687); PJ-9 -> gap #2019
+2026-10-18T04:06Z	done	stage-start	main@0965457c	relaunch act-1a14d2dd531-xb8a: branch recut onto main
+2026-10-18T04:06Z	done	finding-filed	39088586270	CI findings that repeat gaps relabelled gap (round cap)
+2026-10-18T04:06Z	done	stage-end	#1501	Belt-Contact-Sheet refreshed with this run's session link
+2026-10-18T04:06Z	done	stopped	#1501	lead done; records pushed
