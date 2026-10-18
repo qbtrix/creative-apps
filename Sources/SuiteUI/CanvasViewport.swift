@@ -205,7 +205,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                     .allowsHitTesting(false)
                 ZStack(alignment: .topLeading) {
                     if checkerboard {
-                        Rectangle().fill(ImagePaint(image: Self.checkerTile))
+                        CanvasCheckerboard()
                     } else {
                         SuiteColor.artboard
                     }
@@ -336,18 +336,6 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 onZoom?(ZoomMath.clamped(base * value.magnification))
             }
             .onEnded { _ in pinchBase = nil }
-    }
-
-    /// Two squares of each checker tone, tiled behind the document.
-    private static var checkerTile: Image {
-        let square = SuiteSize.checkerSquare
-        return Image(size: CGSize(width: 2 * square, height: 2 * square)) { context in
-            context.fill(
-                Path(CGRect(x: 0, y: 0, width: 2 * square, height: 2 * square)), with: .color(SuiteColor.checkerDark))
-            context.fill(Path(CGRect(x: 0, y: 0, width: square, height: square)), with: .color(SuiteColor.checkerLight))
-            context.fill(
-                Path(CGRect(x: square, y: square, width: square, height: square)), with: .color(SuiteColor.checkerLight))
-        }
     }
 }
 

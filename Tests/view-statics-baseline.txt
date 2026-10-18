@@ -74,7 +74,6 @@ Sources/PhotoApp/PhotoWindow+File.swift::PhotoWindow.reason
 Sources/PhotoApp/PhotoWindow+File.swift::PhotoWindow.saveToFolder
 Sources/SuiteUI/AppMark.swift::AppMark.draw
 Sources/SuiteUI/CanvasMarks+Points.swift::CanvasPointMark.frame
-Sources/SuiteUI/CanvasViewport.swift::CanvasViewport.checkerTile
 Sources/SuiteUI/Gallery/GalleryCanvasHost.swift::CanvasHostPage.bodyRuns
 Sources/SuiteUI/Gallery/GalleryCanvasHost.swift::CanvasHostStatusLine.line
 Sources/SuiteUI/PresetGrid.swift::PresetGrid.arrow
