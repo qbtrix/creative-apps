@@ -1,7 +1,7 @@
 # persist lead record
 
 Issue: #1511 · Packet: docs/blueprints/library/features/persist.md
-Run: act-1a14cdfa655-jrmy · Session: see Belt run page · Started: 2026-10-18T02:45Z
+Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 3 build waves (last slice in the lane)
 Base: origin/dev 21066130 (wave 2)
 Next: #2720 merged 10:44; full dev CI 39121139544 (a8ba1d69, carries it) must go green; then contact sheet and Anatomy; PE-7 becomes a gap (#782)
