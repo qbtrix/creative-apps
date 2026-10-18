@@ -120,3 +120,6 @@ utc	stage	event	ref	note
 2026-10-18T02:33Z	done	closed	#1480	feature complete: TL-a to TL-f Belt-Slice-Done and Belt-Contact-Sheet (run 39078610003) posted; lead now on #1510 and #1508 (lead/lists-and-layers, lead/inspector-controls)
 2026-10-18T03:19Z	5	ci-findings	#2497,#2499-#2503	full run 39082226458 on d3cd7d9 red on timeline/editor-window journeys; scoped suiteui runs 39078610003 and 39080533807 were green; scoped run 39092168295 on 10fb92ec will show if they still fail
 2026-10-18T05:12Z	5	triage	#2497,#2499-#2503	journeys red identically in scoped suiteui 39078610003, 39080533807, 39092168295, 39097468065 (earlier rows wrongly said green): editor window 1024x677 overflows the visible frame 1024x674 by 3 pt, sidebar not hittable, timeline ScrollView no hit point, key-drag/scrub 0 samples. Not LL/IC. Fix round 1 starts.
+2026-10-18T05:30Z	5	fix-round-1	#2629	gallery window fit (page adds nothing to the window minimum, back row xs padding); fixes #2497 (and editor-window dark geometry); head 4746fa19, gate PASS
+2026-10-18T05:30Z	5	gap	#2499,#2500,#2502	0-sample perf series: no probe sink feeds SuiteFrameProbe; feature-sized, relabelled gap p2
+2026-10-18T05:30Z	5	fix-round-2	#2501,#2503	fixer on timeline ScrollView hit point and playhead pill format; last round, then gap
