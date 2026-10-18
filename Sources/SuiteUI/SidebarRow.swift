@@ -7,7 +7,9 @@
 // toggles and renames go out through closures, and a nil closure turns that
 // gesture off. A rename the app refuses (its `onRename` returns a message)
 // keeps the field open with the draft as typed and the message under it in
-// SuiteColor.stateError (SidebarRenameField, LL-6); the Void form still renames. Each toggle icon lays out both of its symbols and draws one,
+// SuiteColor.stateError (SidebarRenameField, LL-6); the Void form still renames.
+// Return on the focused row and the "Rename" accessibility action open the
+// same field as the double-click, and only on a row with `onRename` (LL-7). Each toggle icon lays out both of its symbols and draws one,
 // so it is as wide in every state and the toggles form a column (#53). The
 // icon is hidden from accessibility, so each toggle carries its own
 // identifier, `suite.sidebar.<item id>.<toggle id>` (the app audit, #262).
@@ -228,6 +230,10 @@ public struct SidebarRow: View {
         }
         .badge(item.count ?? 0)
         .selectionDisabled(!SidebarRowLook(item).isSelectable)
+        .onKeyPress(.return) { requestRename() }
+        .accessibilityActions {
+            if onRename != nil { Button(Self.renameActionName) { _ = requestRename() } }
+        }
     }
 
     /// The title label, or the rename field while renaming. The rename
@@ -265,6 +271,16 @@ public struct SidebarRow: View {
         part == .title && renamable && !renaming
     }
 
+    /// Whether Return on the focused row, or the "Rename" accessibility
+    /// action, opens the rename field: only when the row can be renamed and is
+    /// not being renamed (LL-7).
+    nonisolated public static func keyRenames(renamable: Bool, renaming: Bool) -> Bool {
+        renamable && !renaming
+    }
+
+    /// The accessibility action VoiceOver lists on a renamable row.
+    nonisolated public static let renameActionName = "Rename"
+
     private func beginRename(on part: SidebarRowPart) {
         guard Self.doubleClickRenames(part, renamable: onRename != nil, renaming: field.isOpen) else { return }
         field.open(item.title)
@@ -277,6 +293,14 @@ public struct SidebarRow: View {
 
     private func loseFocus() {
         field.loseFocus(original: item.title, rename: onRename)
+    }
+
+    /// Return on the focused row or the "Rename" action: opens the field as a
+    /// double-click on the title does; ignored on a row without `onRename`.
+    private func requestRename() -> KeyPress.Result {
+        guard Self.keyRenames(renamable: onRename != nil, renaming: field.isOpen) else { return .ignored }
+        beginRename(on: .title)
+        return .handled
     }
 }
 
