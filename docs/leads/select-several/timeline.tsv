@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-18T02:02Z	check	dev still d3cd7d9 with 5 expired quarantine entries (#2504 open); new full run 39088586270 started on d3cd7d9, its Linux job is expected to fail the same step
 2026-10-18T02:26Z	pr	S-7b #2526 opened (Fixes #2146), gate clean after #2523 renewed the quarantine
 2026-10-18T02:26Z	check	full run 39088586270 on d3cd7d9: Linux red (expired quarantine), not usable
+2026-10-18T02:47Z	merge	S-7b #2526 merged as 498c5b3 (Fixes #2146)
