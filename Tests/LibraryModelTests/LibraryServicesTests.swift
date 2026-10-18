@@ -120,7 +120,8 @@ private func liveServices() -> LibraryServices {
 @Test func liveStubsSayWhyUntilBuilt() async throws {
     let services = liveServices()
     #expect(services.unavailable["importer"] == nil && services.unavailable["culling"] == nil)
-    #expect(services.unavailable.count == 6)
+    #expect(services.unavailable["coding"] == nil)
+    #expect(services.unavailable.count == 5)
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })
