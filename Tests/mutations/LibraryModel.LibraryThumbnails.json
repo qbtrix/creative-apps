@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the display scale is truncated, not rounded",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "return Int(min(max(scale.rounded(), 1), 8))",
+    "replace": "return Int(min(max(scale, 1), 8))",
+    "tests": "LibraryThumbnailScaleTests.swift"
+  },
+  {
+    "label": "a scale under one is reported as is",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "return Int(min(max(scale.rounded(), 1), 8))",
+    "replace": "return Int(min(scale.rounded(), 8))",
+    "tests": "LibraryThumbnailScaleTests.swift"
+  },
+  {
+    "label": "a non-finite scale is not caught",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "guard scale.isFinite else { return 1 }",
+    "replace": "guard scale.isFinite else { return 8 }",
+    "tests": "LibraryThumbnailScaleTests.swift"
+  }
+]
