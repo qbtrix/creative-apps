@@ -4,7 +4,7 @@ Issue: #1496 · Packet: docs/blueprints/design/features/copy-group.md
 Run: act-1a14d32dfd7-u3ff (before: act-1a14a88d756-rnok) · Session: claude/layers-panel-style-rows-copy-group-x5zrpm · Started: 2026-10-17T15:46Z
 Stage: 3 polling
 Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
-Next: Feature built; add macOS journey and audit results of run 39093416270 to the contact sheet when its ui-test ends
+Next: #2569 (CG-a fix round 1, findings #2513 #2514 #2515) merges; then a completed, successful design run holding it gives Belt-Slice-Done CG-a and Belt-Contact-Sheet on #1496
 
 Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-group.
 
@@ -22,7 +22,7 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 | C-4 | CG-a | 4 | duplicate, group, paste snapshots; Option-drag check | Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift, DesignGroupSnapshots.swift, DesignPasteboardSnapshots.swift, DesignArrangeDragTests.swift | the snapshots | #2389 | merged |
 | C-5 | CG-a | 5 | J7, J8, J9; closes #414 #415 #416 | UITests/DesignJourneyTests+Arrange.swift | J7, J8, J9 | #2470, #2479 | merged |
 | built | CG-a | 6 | copy-group.wave.json status built; feature-done | docs/blueprints/design/features/copy-group.wave.json | scripts/ci | #2558 | merged (6bb1f3f6) |
-| F-1 | CG-a | r1 | J7 J8 J9 click Layers rows off the name (shared Journey.clickDesignLayer); E1 joins A by Command-click | UITests/DesignJourneyTests+Layers.swift, +Arrange, +Style, +Text, +PerfScrub | J7, J8, J9 | – | gate |
+| F-1 | CG-a | r1 | J7 J8 J9 click Layers rows off the name (shared Journey.clickDesignLayer); E1 joins A by Command-click | UITests/DesignJourneyTests+Layers.swift, +Arrange, +Style, +Text, +PerfScrub | J7, J8, J9 | #2569 | in lane (f15b7775) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -37,4 +37,4 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - CG-a is Model and tests only (no UI slice): no critic panel on screens.
 
 ## Open
-- CG-a round 1 in flight. #2566 (gap, p2): Shift-click on a Layers row adds nothing; outside CG-a.
+- CG-a round 1: #2569 in the fast lane. #2566 (gap, p2): Shift-click on a Layers row adds nothing; outside CG-a.
