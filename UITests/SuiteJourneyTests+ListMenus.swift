@@ -28,7 +28,7 @@ extension SuiteJourneyTests {
         XCTAssert(ball.waitForExistence(timeout: 10), "the sidebar has no Ball row")
 
         // 1. Right-click Ball, choose Duplicate.
-        ball.rightClick()
+        ball.listMiddle.rightClick()
         let duplicate = gallery.app.menuItems["Duplicate"]
         XCTAssert(duplicate.waitForExistence(timeout: 5), "Ball's context menu has no Duplicate")
         gallery.shot("window-row-menu")
@@ -37,7 +37,7 @@ extension SuiteJourneyTests {
                   "the log's last line reads \(menusLastLine(log)), not menu duplicate ball")
 
         // 2. Right-click Ball again: Delete is there, disabled, and its help tag says why.
-        ball.rightClick()
+        ball.listMiddle.rightClick()
         let delete = gallery.app.menuItems["Delete"]
         XCTAssert(delete.waitForExistence(timeout: 5), "Ball's context menu has no Delete")
         XCTAssertFalse(delete.isEnabled, "Ball's Delete is enabled")
@@ -67,7 +67,7 @@ extension SuiteJourneyTests {
         XCTAssert(list.waitForExistence(timeout: 30), "layers-300 has no list (suite.layers)")
         // Rows run front to back; which end shows first is read, not assumed.
         let ends = ["group-10", "layer-1-1"].map { layers.element("suite.layers.row.\($0)") }
-        let topFirst = ends[0].exists && ends[0].isHittable
+        let topFirst = ends[0].listShows(in: list)
         menusScroll(list, until: topFirst ? ends[1] : ends[0], by: -300)
         layers.shot("layers-300-end")
         menusScroll(list, until: topFirst ? ends[0] : ends[1], by: 300)
@@ -87,11 +87,11 @@ extension SuiteJourneyTests {
     /// Scrolls the middle of `area` by `delta` pixels until `target` is hittable, at most 300 times.
     @MainActor private func menusScroll(_ area: XCUIElement, until target: XCUIElement, by delta: CGFloat) {
         var scrolls = 0
-        while !(target.exists && target.isHittable), scrolls < 300 {
+        while !target.listShows(in: area), scrolls < 300 {
             area.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).scroll(byDeltaX: 0, deltaY: delta)
             scrolls += 1
         }
-        XCTAssert(target.exists && target.isHittable, "\(scrolls) scrolls didn't reach \(target.identifier)")
+        XCTAssert(target.listShows(in: area), "\(scrolls) scrolls didn't bring the \(delta < 0 ? "far" : "near") end into view")
     }
 
     /// Fails when `series` has fewer than 60 frame intervals in `document`: its numbers mean nothing.

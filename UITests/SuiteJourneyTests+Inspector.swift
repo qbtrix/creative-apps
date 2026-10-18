@@ -12,7 +12,8 @@
 // since XCUITest can't read a tooltip; the hover is still shot. SJ15 reads
 // the Onion chip's `fade-start`/`fade-end` marks from `suite.perf` (QB-S9).
 // SwiftUI values can read "" in XCUITest (#262), so text falls back to the
-// label.
+// label. Rows inside the page's ScrollView are clicked and hovered at their
+// middle (inspectorPoint), and SJ15 scrolls MOTION into view first.
 import XCTest
 
 extension SuiteJourneyTests {
@@ -81,7 +82,7 @@ extension SuiteJourneyTests {
         let entry = gallery.controls()?.controls.first { $0.id == "suite.gallery.inspector.skew" }
         XCTAssertEqual(entry?.enabled, false, "Skew is listed enabled in suite.controls")
         XCTAssertEqual(entry?.reason, Self.inspectorLocked, "Skew's reason in suite.controls")
-        skew.hover()
+        inspectorPoint(skew).hover()
         gallery.shot("inspector-skew-locked")
         let locked = inspectorText(log)
         let skewMiddle = skew.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
@@ -150,10 +151,10 @@ extension SuiteJourneyTests {
         let rotation = inspectorFind("suite.gallery.inspector.rotation", gallery)
 
         // 1. The header collapses the section and expands it again.
-        header.click()
+        inspectorPoint(header).click()
         XCTAssert(inspectorWait { self.inspectorText(header) == "Collapsed" && !rotation.exists }, "TRANSFORM didn't collapse")
         gallery.shot("inspector-transform-collapsed")
-        header.click()
+        inspectorPoint(header).click()
         XCTAssert(inspectorWait { self.inspectorText(header) == "Expanded" && rotation.exists }, "TRANSFORM didn't expand")
 
         // 2. Reset shows only once Rotation differs; its hit frame is ≥ 20 × 20 pt and over no other control.
@@ -170,13 +171,13 @@ extension SuiteJourneyTests {
             XCTAssert(overlap.isNull || overlap.width * overlap.height < 0.5, "Reset overlaps \(id)")
         }
         gallery.shot("inspector-transform-reset")
-        reset.click()
+        inspectorPoint(reset).click()
         expectInspectorLog("reset transform", log)
         XCTAssert(inspectorWait { !reset.exists }, "Reset stayed after resetting TRANSFORM")
 
         // 3. Cap: choose Round; the picker reads it.
         let cap = inspectorFind("suite.gallery.inspector.cap", gallery)
-        cap.click()
+        inspectorPoint(cap).click()
         let round = gallery.app.menuItems["Round"]
         XCTAssert(round.waitForExistence(timeout: 5), "the Cap picker's menu has no Round")
         round.click()
@@ -186,7 +187,7 @@ extension SuiteJourneyTests {
         // 4. The Snap to Pixels checkbox toggles.
         let snap = inspectorFind("suite.gallery.inspector.snap", gallery)
         let was = inspectorText(snap)
-        snap.click()
+        inspectorPoint(snap).click()
         expectInspectorLog("snap on", log)
         XCTAssert(inspectorWait { self.inspectorText(snap) != was }, "the checkbox's value stayed \(was)")
 
@@ -196,7 +197,7 @@ extension SuiteJourneyTests {
         let entry = gallery.controls()?.controls.first { $0.id == "suite.gallery.inspector.action-convert" }
         XCTAssertEqual(entry?.enabled, false, "Convert to Path is listed enabled")
         XCTAssertEqual(entry?.reason, "The gallery has no shape to convert.", "Convert to Path's reason")
-        convert.hover()
+        inspectorPoint(convert).hover()
         gallery.shot("inspector-style")
     }
 
@@ -214,7 +215,7 @@ extension SuiteJourneyTests {
         gallery.shot("inspector-key-idle")
 
         // 1. Click the stopwatch: a key here.
-        stopwatch.click()
+        inspectorPoint(stopwatch).click()
         expectInspectorLog("key add, Keyed at this frame", log)
         XCTAssert(inspectorWait { self.inspectorText(stopwatch) == "Keyed at this frame" }, "the stopwatch reads \(inspectorText(stopwatch))")
         // 2. The page's switches: animated, then keyed here.
@@ -231,7 +232,7 @@ extension SuiteJourneyTests {
         let keyed = row()
         gallery.shot("inspector-key-keyed")
         // 3. Click the diamond: the key goes, the property stays animated.
-        diamond.click()
+        inspectorPoint(diamond).click()
         expectInspectorLog("key remove, Animated", log)
         XCTAssert(inspectorWait { self.inspectorText(stopwatch) == "Animated" }, "the stopwatch reads \(inspectorText(stopwatch))")
         for (name, edges) in [("animated", animated), ("keyed here", keyed)] {
@@ -244,13 +245,15 @@ extension SuiteJourneyTests {
     @MainActor func testPresetsAndChips() throws {
         let gallery = try inspectorOpen()
         let log = gallery.element("suite.gallery.log")
+        // MOTION sits below the fold, and its presets are built only once they scroll in: show it whole first.
+        let onion = inspectorReveal("suite.gallery.inspector.chip-onion", gallery)
         let presets = ["linear", "ease-in", "ease-out", "ease-in-out"].map {
             inspectorFind("suite.gallery.inspector.preset-\($0)", gallery)
         }
         let on = { presets.filter(\.isSelected).count }
 
         // 1. Click Ease Out: it alone is on. → then Space picks its neighbour, Ease In Out.
-        presets[2].click()
+        inspectorPoint(presets[2]).click()
         expectInspectorLog("preset ease-out", log)
         XCTAssert(inspectorWait { presets[2].isSelected && on() == 1 }, "Ease Out isn't the one preset on")
         gallery.press(.rightArrow)
@@ -260,7 +263,6 @@ extension SuiteJourneyTests {
         gallery.shot("inspector-presets")
 
         // 2. Onion twice, with the page's Reduce Motion off, then twice with it on: one pair per click.
-        let onion = inspectorFind("suite.gallery.inspector.chip-onion", gallery)
         let refresh = gallery.perf()?.refreshInterval ?? 1.0 / 60
         for reduced in [false, true] {
             if reduced {
@@ -269,7 +271,7 @@ extension SuiteJourneyTests {
             }
             for turnOn in [true, false] {
                 let before = inspectorFades(gallery).count
-                onion.click()
+                inspectorPoint(onion).click()
                 expectInspectorLog("chip onion \(turnOn ? "on" : "off")", log)
                 XCTAssert(inspectorWait { onion.isSelected == turnOn }, "Onion's isSelected isn't \(turnOn)")
                 Thread.sleep(forTimeInterval: 0.5)
@@ -297,6 +299,29 @@ extension SuiteJourneyTests {
     @MainActor private func inspectorFind(_ id: String, _ gallery: Journey) -> XCUIElement {
         let element = gallery.element(id)
         XCTAssert(element.waitForExistence(timeout: 5), "no \(id) on the inspector page")
+        return element
+    }
+
+    /// `element`'s middle. Clicking or hovering a row in the page's ScrollView itself makes XCUITest look for a hit
+    /// point on the ScrollView, which it can't find (#2957), so the journeys act at this point.
+    @MainActor private func inspectorPoint(_ element: XCUIElement) -> XCUICoordinate {
+        element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+    }
+
+    /// Scrolls the page's ScrollView until `id` shows whole between the page's switches and its log; returns it.
+    @MainActor func inspectorReveal(_ id: String, _ gallery: Journey) -> XCUIElement {
+        let element = gallery.element(id)
+        let top = inspectorFind("suite.gallery.inspector.reduce-motion", gallery)
+        let log = gallery.element("suite.gallery.log")
+        let shown = { element.exists && element.frame.minY >= top.frame.maxY && element.frame.maxY <= log.frame.minY }
+        // A point inside the ScrollView: 120 pt below the switches, which sit above it.
+        let area = top.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 1)).withOffset(CGVector(dx: 0, dy: 120))
+        for _ in 0..<20 where !shown() {
+            // Up while the element sits above the switches; down while it is below the log or not built yet.
+            area.scroll(byDeltaX: 0, deltaY: element.exists && element.frame.maxY < top.frame.maxY ? 40 : -40)
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        XCTAssert(shown(), "\(id) didn't scroll into view on the inspector page")
         return element
     }
 

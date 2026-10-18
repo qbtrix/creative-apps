@@ -3,8 +3,7 @@
 // cases with the four corners marked, and nothing under Sources/SuiteKernel
 // imports an app Model, SuiteUI, SuiteModel or a Darwin-only framework, so the
 // kernel stays Linux-safe and below every app. KJ0, the kernel shape walk,
-// is here disabled by name: EK-2 and EK-3 extend it with each module's stubs
-// and EK-3 turns it on (docs/factory/lead.md rule 13).
+// checks the geometry's shape; KJ9 (KernelWalkTests) walks every module.
 import Foundation
 import Testing
 import SuiteKernel
@@ -110,10 +109,10 @@ import SuiteKernel
         #expect(KernelFixtures.cards.roots.first?.payload.frame.width == 1440)
     }
 
-    /// KJ0, the kernel shape walk: every module's declared shape in one pass.
-    /// EK-1 walks the geometry; EK-2 adds history, selection and the tree,
-    /// EK-3 keys, transform, export and session, and turns it on.
-    @Test(.disabled("waits on EK-3")) func kernelShapeWalk() {
+    /// KJ0, the kernel shape walk: the geometry's shape (handles, modifiers,
+    /// the identity matrix). The modules' walk on one document is KJ9 in
+    /// KernelWalkTests.
+    @Test func kernelShapeWalk() {
         let box = Rect(minX: 10, minY: 20, maxX: 110, maxY: 70)
         let handles = EditorHandle.allCases
         #expect(handles.filter(\.isCorner).count == 4)

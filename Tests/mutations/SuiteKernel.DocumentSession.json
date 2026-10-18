@@ -12,5 +12,26 @@
     "find": "return now.timeIntervalSince(edit) >= delay",
     "replace": "return now.timeIntervalSince(lastAutosave ?? edit) >= delay",
     "tests": "DocumentSessionTests"
+  },
+  {
+    "label": "promptWording: the shared close prompt drops \"the document\"",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "\"Do you want to save the changes made to the document \\u{201C}\\(name)\\u{201D}?\"",
+    "replace": "\"Do you want to save the changes made to \\u{201C}\\(name)\\u{201D}?\"",
+    "tests": "UnsavedPromptTests"
+  },
+  {
+    "label": "stateIgnoresDirty: the save word reads Saved while edited",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "return isDirty ? \"Edited\" : \"Saved\"",
+    "replace": "return \"Saved\"",
+    "tests": "UnsavedPromptTests"
+  },
+  {
+    "label": "buttonPastEnd: an out-of-range button reads Save",
+    "file": "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "find": "answers.indices.contains(index) ? answers[index] : .cancel",
+    "replace": "answers.indices.contains(index) ? answers[index] : .save",
+    "tests": "UnsavedPromptTests"
   }
 ]

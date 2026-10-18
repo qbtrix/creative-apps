@@ -112,15 +112,6 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         }
     }
 
-    /// The pick rule's modifiers from AppKit's.
-    static func modifiers(_ flags: NSEvent.ModifierFlags) -> KeyModifiers {
-        var modifiers: KeyModifiers = []
-        if flags.contains(.shift) { modifiers.insert(.shift) }
-        if flags.contains(.option) { modifiers.insert(.option) }
-        if flags.contains(.command) { modifiers.insert(.command) }
-        return modifiers
-    }
-
     /// Writes `new` only when it differs from what is shown, fading the change.
     private func setHover(_ new: TimelineLaneHover?) {
         guard new != hover else { return }
@@ -227,7 +218,7 @@ struct TimelineLanePointerExtras {
         guard let lane else { return }
         reset()
         extras?.focus?.claim()
-        let held = TimelineLaneInput<ID>.modifiers(flags)
+        let held = KeyModifiers(flags: flags)
         (active, modifiers, liveDelta, liveTrim) = (true, held, 0, nil)
         target = TimelineLanePress.target(atX: point.x, on: lane.track, mapping: lane.mapping)
         drag = TimelineLanePress.begin(

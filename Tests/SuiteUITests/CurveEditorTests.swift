@@ -67,6 +67,22 @@ import Testing
     #expect(CurveEditor.describe(CGPoint(x: 0.42, y: 0)) == "x 0.42, y 0.00")
 }
 
+@Test func aHandleReadsItsValueInItsTooltipAndLabel() {
+    // #2953, #2960: a handle's tooltip and label carry the nudging's spoken value, not only "Handle 1".
+    let spoken = SuiteEasingHandleNudging().describe(PlanePoint(x: 0.42, y: 0.1))
+    let reading = CurveEditor.handleReading(.first, spoken: spoken)
+    #expect(reading == "Handle 1: x 0.42, y 0.10")
+    #expect(CurveEditor.handleReading(.second, spoken: "x 0.58, y 1.00") == "Handle 2: x 0.58, y 1.00")
+    // The journey reads the numbers after the colon back (#262: XCUITest reads SwiftUI values as "").
+    let tail = reading.split(separator: ":").last.map(String.init) ?? ""
+    #expect(tail.split { $0 == "," || $0 == " " }.compactMap { Double($0) } == [0.42, 0.1])
+}
+
+@Test func theEasingAxesAreCaptionedTimeAndProgress() {
+    // #2953: the well says which axis is which.
+    #expect(CurveEditor.axisCaptions == CurveAxisCaptions(x: "Time", y: "Progress"))
+}
+
 @Test func handleShowsHoverPressedAndFocus() {
     let rest = CurveEditor.handleLook(active: false, hovered: false)
     let hover = CurveEditor.handleLook(active: false, hovered: true)

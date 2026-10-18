@@ -40,5 +40,19 @@
     "find": "documentURL?.lastPathComponent ?? \"Untitled\"",
     "replace": "documentURL?.lastPathComponent ?? \"Design\"",
     "tests": "DesignUndoTargetTests"
+  },
+  {
+    "label": "the close prompt builds its own wording instead of the shared one",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "return UnsavedPrompt.message(for: name)",
+    "replace": "return \"Do you want to save the changes you made to \\u{201C}\\(name)\\u{201D}?\"",
+    "tests": "DesignUndoTargetTests"
+  },
+  {
+    "label": "the save state ignores dirty and always reads Saved",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "session.currentToken = isDirty ? 1 : 0",
+    "replace": "session.currentToken = 0",
+    "tests": "DesignUndoTargetTests"
   }
 ]

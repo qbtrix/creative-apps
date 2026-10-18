@@ -242,11 +242,12 @@ something. One that can't act yet is disabled and says why:
   your issue with the failing test name and stop.
 - **Never edit** `Package.swift`, `Package.resolved`, `.github/`, `.claude/`,
   `scripts/`, `.gitattributes`, `CLAUDE.md`, `AGENTS.md` or `LICENSE` unless your issue says to,
-  and never the generated `docs/c4/model.json` or
-  `docs/blueprints/*/features/waves.md` at all: edit your component's part in
-  docs/c4/parts/ or your feature's .wave.json, and the generated workflow
-  rewrites them on dev. Only the supervisor edits the journey quarantine,
-  `UITests/quarantine.json`, and the perf list the gate skips,
+  and never the generated `docs/c4/model.json`,
+  `docs/blueprints/*/features/waves.md` or `docs/blueprints/*/jobs.md` at all:
+  edit your component's part in docs/c4/parts/, your feature's .wave.json or
+  the app's jobs.json, and the generated workflow rewrites them on dev. Only
+  the supervisor edits the journey quarantine, `UITests/quarantine.json`, and
+  the perf list the gate skips,
   `Tests/perf-suites.txt`.
   `scripts/` means all of it, the gate included. Every target already exists.
   If you think one of these must change, say so in an issue. The fast lane
