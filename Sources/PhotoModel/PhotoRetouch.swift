@@ -4,7 +4,8 @@
 // point on the canvas. The first clone stroke after that fixes the offset from
 // where it starts to the source, in whole pixels, and later strokes keep it
 // until the source is sampled again. A stroke lays round dabs of the given
-// size along its points, spaced a quarter of the size apart, on the paint
+// size along its points, spaced the brush's spacing (a quarter of the size
+// unless a preset changed it) apart by SuiteKernel's DabSpacer, on the paint
 // target (`paintTarget()`, PhotoStroke), each pixel taking the source pixel at
 // the offset; the brush's hardness gives the soft edge, its opacity how much
 // shows and the selection's coverage scales both, and each pixel
@@ -83,7 +84,7 @@ extension PhotoWorkspace {
         let layer = layers[at]
         let weight = coverageWeight(offsetX: layer.offsetX, offsetY: layer.offsetY)
         var touched = PixelRect(x: 0, y: 0, width: 0, height: 0)
-        for center in Self.dabCenters(points, spacing: max(diameter / 4, 1)).dropFirst(skippingFirst ? 1 : 0) {
+        for center in Self.dabCenters(points, spacing: max(diameter * (brushOptions.settings.spacing / 100), 1)).dropFirst(skippingFirst ? 1 : 0) {
             let dab = Mask.Point(x: center.x - Double(layer.offsetX), y: center.y - Double(layer.offsetY))
             // Every index is inside the layer and every value finite, so a dab can't throw.
             if let area = try? cloneDab(
@@ -95,22 +96,6 @@ extension PhotoWorkspace {
         }
         pixels[id] = tiled
         if !touched.isEmpty { touch(.region(touched)) }
-    }
-
-    /// `points` with dabs filled in so no two in a row are more than
-    /// `spacing` apart; at most 10,000 between any two.
-    static func dabCenters(_ points: [Mask.Point], spacing: Double) -> [Mask.Point] {
-        guard let first = points.first else { return [] }
-        var centers = [first]
-        for (a, b) in zip(points, points.dropFirst()) {
-            let dx = b.x - a.x, dy = b.y - a.y
-            let n = min(max(Int(((dx * dx + dy * dy).squareRoot() / spacing).rounded(.up)), 1), 10_000)
-            for k in 1...n {
-                let t = Double(k) / Double(n)
-                centers.append(Mask.Point(x: a.x + dx * t, y: a.y + dy * t))
-            }
-        }
-        return centers
     }
 
     /// One round dab at `center` (layer pixels) copying from `offset` away,

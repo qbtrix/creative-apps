@@ -3,7 +3,8 @@
 // file's pages, both through `services.filing` (on the live services that is
 // LiveFiling, the codec: sorted-key JSON, version 1, and every refusal with its
 // reason). `open` remembers where the file came from (`documentURL`, which
-// `didSave(to:)` moves after a save). Linux-safe.
+// `didSave(to:)` moves after a save and records on the kernel's session in
+// DesignSession+Kernel.swift). Linux-safe.
 //
 // Opening is all or nothing: the filing checks the whole file first and the
 // workspace is touched only by the final `load`, so a refused file leaves it
@@ -68,9 +69,10 @@ extension DesignWorkspace {
     }
 
     /// Records that the document was just written to `url`, so Save writes there next. Not an
-    /// edit: it marks the current step as saved and ends the edit run (DesignHistory).
+    /// edit: the session's saved token becomes the current step and the edit run ends
+    /// (DesignSession+Kernel.swift).
     public mutating func didSave(to url: URL) {
         documentURL = url
-        markSaved()
+        sessionDidSave()
     }
 }
