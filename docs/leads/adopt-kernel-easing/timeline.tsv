@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-18T12:25Z	3	stage-start	b0c59a4f	wave 1 builder AE-f1
 2026-10-18T12:54Z	3	pr-opened	#2786	AE-f1, Mutate 6/6
 2026-10-18T13:45Z	3	fix	#2786	needs-rebase on FlareModel C4 part; lead merged dev
+2026-10-18T13:55Z	3	fix	#2786	merge of dev pushed (0b1d7808), gate PASS 812 tests, Head moved, footer dropped
