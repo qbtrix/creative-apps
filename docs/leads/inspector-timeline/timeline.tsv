@@ -80,3 +80,4 @@
 2026-10-18T11:17Z	heartbeat	no open dev-red; 39118417962 (ca6c45b7) Linux green, macOS still running; 39120347568 and 39121139544 cancelled; newest 39122016685 (7bd94d21) pending; no green full run with ui-screens yet
 2026-10-18T11:48Z	heartbeat	no open dev-red; 39118417962 (ca6c45b7) Linux green but macOS cancelled, no ui-screens; 39122016685 cancelled; newest 39122776184 (e3a4582c) queued; full runs keep being cancelled before macOS finishes
 2026-10-18T12:21Z	heartbeat	no open dev-red; 39122776184 (e3a4582c) Linux green, macOS running; 39125829959 cancelled; newest 39126612277 (e2dd717f) pending; no green full run with ui-screens yet
+2026-10-18T12:53Z	heartbeat	no open dev-red; 39122776184 (e3a4582c) Linux green, macOS still running (snapshots uploaded, journeys in progress); 39126612277, 39127288998, 39128125790 cancelled; newest 39129009677 (9bd0da5a) pending
