@@ -32,3 +32,5 @@ utc	feature	event	ref	note
 2026-10-18T21:33:10Z	files-history	heartbeat	39167964719	39164756292 cancelled; FH-b now waits on full 39167964719 / scoped design 39167807664 (dev b40c77f6); #2968 clean, awaiting lane macOS build
 2026-10-18T21:56:05Z	files-history	ci-red	39166101762	#2968 macOS build failed on PhotoZoomSweepTests (TileCanvasView), from dev #2942, fixed on dev by #2990; merging dev into #2968 (f0653e21), gate running; full CI 39167964719 cancelled, now 39169434591 (e3859e3f)
 2026-10-18T21:59:59Z	files-history	push	#2968	head f0653e21 (dev merged, carries #2990), scripts/ci --changed PASS, Head: moved
+2026-10-18T22:18:50Z	files-history	merged	#2968	fixes #2939 merged 76789931 (FH-a round 1 done)
+2026-10-18T22:18:50Z	files-history	fix-batch	wf_be705683-751	round 1 for #2938 (+ J16 row in docs/blueprints/design.md, noted on #2938), base 349578b8
