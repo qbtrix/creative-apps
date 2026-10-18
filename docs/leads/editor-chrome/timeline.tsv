@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-18T20:53:39Z	fix round 2	merged	#2941	dev f836dc7
 2026-10-18T20:53:39Z	fix round 2	waiting	39163553482	full CI cancelled; scoped suiteui run asked of the supervisor
 2026-10-18T21:00Z	4	heartbeat	39164756292	waiting on run
+2026-10-18T21:02:05Z	contact-sheet	waiting	39164756292	still pending
