@@ -8,6 +8,10 @@
 // `contextActions` gives its id, reached through the environment
 // (`sidebarContextActions`): a disabled action shows greyed with its
 // unavailableHelp as help, and a row with no actions gets no menu (LL-8a).
+// A group's expansion can be the app's: with the window's `expanded` and
+// `onExpand` (the environment's `sidebarExpansion`), the disclosure shows the
+// app's set and a click calls onExpand; without onExpand the group keeps its
+// own state (LL-9). A parent row keeps its toggles as their own elements.
 // Selection stays one SidebarItem.ID across every section. A header's
 // title is SuiteColor.textSecondary: the sidebar style's own header gray is
 // about 2.2:1 on the sidebar, under the 4.5:1 the app audit asks for.
@@ -58,17 +62,31 @@ struct SidebarNode: View {
     let onRename: (@MainActor (SidebarItem.ID, String) -> String?)?
     /// The window's `contextActions`; nil gives no row a menu (LL-8a).
     @Environment(\.sidebarContextActions) private var contextActions
+    /// The window's `expanded` and `onExpand`; nil keeps `isOpen` (LL-9).
+    @Environment(\.sidebarExpansion) private var expansion
+    /// The group's own open state, while the app doesn't own it.
+    @State private var isOpen = false
 
     var body: some View {
         if item.children.isEmpty {
             row
         } else {
-            DisclosureGroup {
+            DisclosureGroup(isExpanded: Self.expansion(for: item.id, in: expansion, local: $isOpen)) {
                 ForEach(item.secondLevelRows) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
             } label: {
-                row
+                // The row's toggles stay their own elements beside the disclosure.
+                row.accessibilityElement(children: .contain)
             }
         }
+    }
+
+    /// The disclosure's open state for `id`: the app's set, reported through
+    /// onExpand, when the window gives both; else the group's own `local`.
+    @MainActor static func expansion(
+        for id: SidebarItem.ID, in expansion: SidebarExpansion?, local: Binding<Bool>
+    ) -> Binding<Bool> {
+        guard let expansion, let expanded = expansion.expanded, let onExpand = expansion.onExpand else { return local }
+        return Binding(get: { expanded.contains(id) }, set: { onExpand(id, $0) })
     }
 
     private var row: some View {
@@ -165,4 +183,30 @@ extension EnvironmentValues {
 
 private struct SidebarContextActionsKey: EnvironmentKey {
     static let defaultValue: SidebarContextActions? = nil
+}
+
+/// The window's `expanded` and `onExpand`, boxed for the environment like
+/// SidebarContextActions (LL-9).
+@MainActor final class SidebarExpansion {
+    /// The ids of the groups the app shows open; nil leaves each group its own state.
+    let expanded: Set<SidebarItem.ID>?
+    /// Gets a group's id and whether a click opens it; nil leaves each group its own state.
+    let onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)?
+
+    init(expanded: Set<SidebarItem.ID>?, onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)?) {
+        self.expanded = expanded
+        self.onExpand = onExpand
+    }
+}
+
+extension EnvironmentValues {
+    /// The app's sidebar expansion; nil lets each group keep its own.
+    var sidebarExpansion: SidebarExpansion? {
+        get { self[SidebarExpansionKey.self] }
+        set { self[SidebarExpansionKey.self] = newValue }
+    }
+}
+
+private struct SidebarExpansionKey: EnvironmentKey {
+    static let defaultValue: SidebarExpansion? = nil
 }
