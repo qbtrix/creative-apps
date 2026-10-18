@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-18T18:56:46Z	goldens	checks	suiteui/ll-goldens-rows	assertGolden for plain, refused, nested sidebar rows
 2026-10-18T19:03:56Z	goldens	PRs	#2914 #2915 #2917	baselines LL-17a/16a and golden checks for plain, refused, nested rows; fast-lane
 2026-10-18T19:24:50Z	goldens	merged	#2914 #2915	baselines on dev; #2917 waits on macOS build
+2026-10-18T19:44:52Z	goldens	waiting	#2917	lane macOS build
