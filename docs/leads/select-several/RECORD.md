@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
 Stage: 3 wave 2
 Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
-Next: S-8 builder (lead/select-several-s-8) opens its PR; SS-a re-done on a successful run holding 148ade3e (full 39105383795 pending). S-5 waits on canvas-basics CB-3 (CB-a).
+Next: SS-a fix round 1 merged (#2621 as 148ade3e); wait for a full CI run on dev at or after 148ade3e with green J5/J6, then Belt-Slice-Done SS-a + Mac-Finish-Wanted. SS-b S-5/S-8 wait on #1493 and CB-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
