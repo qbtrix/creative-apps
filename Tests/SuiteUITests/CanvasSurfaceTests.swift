@@ -32,13 +32,13 @@ private func fitted(_ artboard: CGSize, in size: CGSize, inset: CGFloat = 64) ->
 
 @Test func aSideThatIsNotPositiveCountsAsOne() {
     #expect(fitted(.zero, in: CGSize(width: 200, height: 200), inset: 0) == CGRect(x: 99.5, y: 99.5, width: 1, height: 1))
-    #expect(fitted(CGSize(width: -5, height: .nan), in: CGSize(width: 200, height: 200), inset: 0).size
+    #expect(fitted(CGSize(width: -5, height: CGFloat.nan), in: CGSize(width: 200, height: 200), inset: 0).size
         == CGSize(width: 1, height: 1))
 }
 
 @Test(arguments: [
-    CGSize.zero, CGSize(width: -100, height: 50), CGSize(width: 100, height: 100), CGSize(width: .nan, height: 600),
-    CGSize(width: .infinity, height: 600),
+    CGSize.zero, CGSize(width: -100, height: 50), CGSize(width: 100, height: 100), CGSize(width: CGFloat.nan, height: 600),
+    CGSize(width: CGFloat.infinity, height: 600),
 ])
 func noRoomGivesAnEmptyFiniteRect(_ size: CGSize) {
     let rect = fitted(CGSize(width: 400, height: 300), in: size)
