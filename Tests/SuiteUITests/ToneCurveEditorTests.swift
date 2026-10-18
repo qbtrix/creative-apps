@@ -86,7 +86,8 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
 
 @Test func aClickAddsAPointInOrderAndEndsOnce() throws {
     var gesture = ToneCurveGesture()
-    let added = try #require(gesture.pressed(at: view(CGPoint(x: 0.5, y: 0.6)), points: s, in: plot))
+    let pressed = gesture.pressed(at: view(CGPoint(x: 0.5, y: 0.6)), points: s, in: plot)
+    let added = try #require(pressed)
     #expect(added.count == 5 && added.map(\.x) == added.map(\.x).sorted())
     #expect(abs(added[2].x - 0.5) < 1e-9 && abs(added[2].y - 0.6) < 1e-9)
     #expect(gesture.drag?.index == 2)
@@ -105,7 +106,8 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
     var sent: [[CGPoint]] = []
     for dy in [-10.0, -20.0, -30.0] {
         let at = CGPoint(x: view(s[1]).x, y: view(s[1]).y + dy)
-        sent += [try #require(gesture.dragged(to: at, by: CGSize(width: 0, height: dy), in: plot, well: well))]
+        let moved = gesture.dragged(to: at, by: CGSize(width: 0, height: dy), in: plot, well: well)
+        sent += [try #require(moved)]
     }
     #expect(sent.count == 3 && sent.allSatisfy { $0.count == 4 })
     // Each sample moves from where the press began: 30 pt up is 30 / side of the unit square.
@@ -119,10 +121,12 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
     var gesture = ToneCurveGesture()
     _ = gesture.pressed(at: view(s[2]), points: s, in: plot)
     let inMargin = CGPoint(x: well.width + ToneCurveEditor.outOfWellMargin - 1, y: 40)
-    let kept = try #require(gesture.dragged(to: inMargin, by: CGSize(width: 40, height: 0), in: plot, well: well))
+    let keptStep = gesture.dragged(to: inMargin, by: CGSize(width: 40, height: 0), in: plot, well: well)
+    let kept = try #require(keptStep)
     #expect(kept.count == 4)
     let past = CGPoint(x: well.width + ToneCurveEditor.outOfWellMargin + 4, y: 40)
-    let removed = try #require(gesture.dragged(to: past, by: CGSize(width: 60, height: 0), in: plot, well: well))
+    let removedStep = gesture.dragged(to: past, by: CGSize(width: 60, height: 0), in: plot, well: well)
+    let removed = try #require(removedStep)
     #expect(removed == [s[0], s[1], s[3]])
     let ended = gesture.released()
     #expect(ended && gesture.run.ends == 1)
@@ -131,7 +135,8 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
     var end = ToneCurveGesture()
     _ = end.pressed(at: view(s[3]), points: s, in: plot)
     let out = CGPoint(x: well.width + 40, y: -40)
-    let ends = try #require(end.dragged(to: out, by: CGSize(width: 40, height: -40), in: plot, well: well))
+    let endStep = end.dragged(to: out, by: CGSize(width: 40, height: -40), in: plot, well: well)
+    let ends = try #require(endStep)
     #expect(ends.count == 4 && ends[3] == CGPoint(x: 1, y: 1) && ends[0] == s[0])
 }
 
