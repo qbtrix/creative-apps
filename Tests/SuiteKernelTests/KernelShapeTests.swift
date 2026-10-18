@@ -75,11 +75,13 @@ import SuiteKernel
 
         var selection = Selection(["a", "b"])
         #expect(selection.primary == "b" && selection.set == ["a", "b"] && selection.contains("a"))
+        // EK-10 built the body: with no anchor, extend appends (SelectionTests covers the rest).
         let picked = selection.pick("c", .extend, order: ["a", "b", "c"])
-        #expect(!picked)
+        #expect(picked && selection.ordered == ["a", "b", "c"] && selection.primary == "c")
         selection.move(.right, order: ["a", "b", "c"], columns: 3)
-        selection.prune { _ in true }
-        #expect(selection == Selection(["a", "b"]))
+        #expect(selection.ordered == ["c"])
+        selection.prune { $0 != "c" }
+        #expect(selection.ordered.isEmpty && selection.primary == nil)
 
         var tree = KernelFixtures.tree200
         #expect(tree.rows(expanded: []).count == 7)
