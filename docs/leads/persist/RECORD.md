@@ -2,9 +2,9 @@
 
 Issue: #1511 · Packet: docs/blueprints/library/features/persist.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
-Stage: 3 build waves (last slice in the lane)
+Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: #2720 merged 10:44; full dev CI 39121139544 (a8ba1d69, carries it) must go green; then contact sheet and Anatomy; PE-7 becomes a gap (#782)
+Next: #2859 merged; #2860 and #2878 merge; then a scoped library run on dev. Every macOS job since #2790 failed linking SuiteUI in the Release build, which is not on this line. Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -21,6 +21,7 @@ Next: #2720 merged 10:44; full dev CI 39121139544 (a8ba1d69, carries it) must go
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 39122753293 (scoped library, e3a4582) | red | not reached | journeys, clarity | #2765 (J8 help tag reads empty) | #2860 (macOS build green, in the lane) | no |
 
 ## Decisions
 - 2026-10-18: new run act-1a14cdfa655-jrmy replaces act-1a14698db7e-jmb4; toolchain installed by scripts/cloud-setup.sh (Swift 6.3.3), so the earlier blocker is gone.
