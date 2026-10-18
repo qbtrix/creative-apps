@@ -31,12 +31,13 @@ public struct CanvasGrid: View {
     }
 
     /// The lines of a `cells` grid over `rect` at `zoom`: cells - 1 each way,
-    /// none when `cells` is 0 or less or the rect or zoom isn't finite.
+    /// none when `cells` is 0 or less, the rect isn't finite, or the zoom isn't
+    /// a finite positive number.
     /// Pure math, so nonisolated: the View conformance would otherwise make it
     /// main-actor and trap when called off the main thread (a test worker).
     public nonisolated static func lines(rect: CGRect, cells: Int, zoom: Double) -> CanvasGridLines {
         let finite = [rect.minX, rect.minY, rect.width, rect.height, zoom].allSatisfy(\.isFinite)
-        guard cells > 0, finite else { return CanvasGridLines(vertical: [], horizontal: []) }
+        guard cells > 0, finite, zoom > 0 else { return CanvasGridLines(vertical: [], horizontal: []) }
         let shares = (1..<cells).map { Double($0) / Double(cells) }
         return CanvasGridLines(
             vertical: shares.map { (rect.minX + rect.width * $0) * zoom },
