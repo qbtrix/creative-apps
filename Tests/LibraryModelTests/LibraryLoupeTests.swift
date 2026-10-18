@@ -72,11 +72,6 @@ private func loupeOnTwelfth() -> (catalog: LibraryCatalog, order: [String]) {
     #expect(catalog.loupeItem?.id == order[20])
 }
 
-@Test func theLoupeArtboardIsThePhotoSizeInTheGridAspect() {
-    let size = LibraryCatalog.loupeArtboard
-    #expect(size.width == 4032 && size.height == 3024)
-    #expect(size.width * 3 == size.height * 4)
-}
 
 /// The 24-photo shoot fixture sorted by name, IMG_0003 open in the loupe.
 private func shootOnThird() -> LibraryCatalog {
@@ -109,4 +104,45 @@ private func shootOnThird() -> LibraryCatalog {
     let catalog = shootOnThird()
     #expect(catalog.loupeItem?.name == "IMG_0003")
     #expect(catalog.loupeReadout?.hasPrefix("IMG_0003  ·  3 of 24  ·  ") == true)
+}
+
+@Test func theLoupeDrawsThePhotoAtItsOwnSize() {
+    var catalog = shootOnThird()
+    #expect(catalog.loupeItem?.name == "IMG_0003")
+    let portrait = catalog.loupePhotoSize
+    #expect(portrait == PixelSize(width: 4000, height: 6000))
+    #expect((portrait?.height ?? 0) > (portrait?.width ?? 0), "a portrait photo draws taller than wide")
+    #expect(catalog.loupePlaceholder == "IMG_0003  ·  4000 × 6000")
+    catalog.stepLoupe(by: 1)
+    #expect(catalog.loupePhotoSize == PixelSize(width: 6000, height: 4000))
+    catalog.showGrid()
+    #expect(catalog.loupePhotoSize == nil && catalog.loupePlaceholder == nil)
+}
+
+@Test func aPhotoWithoutPixelsStillHasASize() {
+    let shoot = LibraryFixtures.photos(named: "shoot")
+    var catalog = LibraryCatalog()
+    catalog.load(shoot.prefix(1).map {
+        PhotoItem(name: $0.name, captureDate: $0.captureDate, color: $0.color, pixelSize: PixelSize(width: 0, height: -3))
+    })
+    catalog.showLoupe()
+    #expect(catalog.loupePhotoSize == PixelSize(width: 1, height: 1))
+}
+
+@Test func theLoupeHelpSaysWhyThePhotoCantShow() {
+    var catalog = shootOnThird()
+    #expect(catalog.loupeHelp == nil)
+    catalog.failLoupeRender(.renderFailed("no memory"), token: catalog.loupeRenderToken)
+    #expect(catalog.loupeHelp == "Couldn't render this photo: no memory.")
+    catalog.showGrid()
+    #expect(catalog.loupeHelp == nil)
+
+    let shoot = LibraryFixtures.photos(named: "shoot")
+    var missing = LibraryCatalog()
+    missing.load(shoot.prefix(1).map {
+        PhotoItem(name: $0.name, captureDate: $0.captureDate, color: $0.color, availability: .missing)
+    })
+    missing.showLoupe()
+    missing.failLoupeRender(.renderFailed("no file"), token: missing.loupeRenderToken)
+    #expect(missing.loupeHelp == "The file is missing.", "the file's own reason comes first")
 }
