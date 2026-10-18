@@ -13,8 +13,10 @@
 // With `identifies` false it only registers, for a view whose parts carry
 // their own identifiers: an identifier on a view of several elements lands on
 // every one of them (KeyframeButton, #1282). The publishing call also sets
-// `gridProbe`, so grids and layer lists record their scroll frames into the
-// window's `suite.perf` (SP4); only the hidden element watches the recorder,
+// `gridProbe`, `scrubProbe`, `chipProbe` and `curveProbe`, so grids, layer
+// lists, scrub fields, chips and curve editors record their frames, samples
+// and marks into the window's `suite.perf` (SP1, SP4, SP6, SP7, SJ20); only
+// the hidden element watches the recorder,
 // so a frame never runs the window's body. Plain keys rather than `@Entry`,
 // as in Glass.swift.
 import SwiftUI
@@ -135,6 +137,9 @@ private struct SuiteProbesModifier: ViewModifier {
                 .environment(\.suiteProbesHosted, true)
                 .environment(\.suiteControlStore, store)
                 .environment(\.gridProbe, recorder.gridProbe)
+                .environment(\.scrubProbe, recorder.scrubProbe)
+                .environment(\.chipProbe, recorder.chipProbe)
+                .environment(\.curveProbe, recorder.curveProbe)
                 .background(alignment: .topLeading) {
                     SuitePerfHost(recorder: recorder)
                         .preference(key: SuiteProbeElementsKey.self, value: [SuitePerfElement.identifier])
@@ -147,14 +152,28 @@ private struct SuiteProbesModifier: ViewModifier {
     }
 }
 
-/// The window's frame probe behind `.suiteProbes()`. `gridProbe` is built
-/// once, so the environment value stays the same closure across passes.
+/// The window's frame probe behind `.suiteProbes()`. Each control probe is
+/// built once, so its environment value stays the same closure across passes.
 @MainActor final class SuiteProbeRecorder: ObservableObject {
     @Published private(set) var probe = SuiteFrameProbe()
     private(set) var gridProbe = GridProbe { _, _ in }
+    private(set) var scrubProbe = ScrubProbe { _ in }
+    private(set) var chipProbe = ChipProbe(record: { _ in }, sample: { _ in })
+    private(set) var curveProbe = CurveProbe(record: { _ in }, mark: { _ in })
 
     init() {
         gridProbe = GridProbe { [weak self] series, time in self?.probe.drew(series, at: time) }
+        scrubProbe = ScrubProbe { [weak self] sample in self?.probe.record(sample) }
+        chipProbe = ChipProbe(
+            record: { [weak self] mark in self?.mark(mark) },
+            sample: { [weak self] sample in self?.probe.record(sample) })
+        curveProbe = CurveProbe(
+            record: { [weak self] sample in self?.probe.record(sample) },
+            mark: { [weak self] mark in self?.mark(mark) })
+    }
+
+    private func mark(_ mark: ProbeMark) {
+        probe.mark(mark.name, series: mark.series, at: mark.time)
     }
 }
 
