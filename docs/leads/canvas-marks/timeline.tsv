@@ -66,3 +66,5 @@ utc	stage	event	ref	note
 2026-10-18T16:20:27Z	fix round 1	PR open	#2856	canvas scroll bars hidden (CM-13); gate PASS
 2026-10-18T18:39:28Z	goldens	blocked	39143178581	no canvas actuals: snapshot tests skipped after aTabChangeRecordsAFadePair failed (pre-#2841); full run 39143942767 hung on onboarding (#2895)
 2026-10-18T18:39:28Z	goldens	waiting	39153976103	scoped suiteui at c91b1468 carries #2841
+2026-10-18T18:56:46Z	goldens	actuals	39153976103	canvas golden-new PNGs downloaded; 3 baseline branches gating
+2026-10-18T18:56:46Z	goldens	checks	suiteui/cm-goldens-marks	assertGolden for handles, point mark, grid (no checks existed)
