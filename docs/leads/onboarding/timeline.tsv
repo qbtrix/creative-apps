@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-18T16:16:29Z	review	OB-a,OB-s	OB-a clean (#2852 minor); OB-s major #2849, minors #2850 #2851
 2026-10-18T16:16:57Z	fix-start	OB-s	fixers for #2849 (major) and #2851; #2850 (UniqueFileNames reuse) and #2852 (OB-a needs-ui) follow once these merge, same files
 2026-10-18T16:26:34Z	pr-open	F-2849	#2857 head 69d35a3c, 2 files +22, Mutate 6/6
+2026-10-18T16:27:25Z	pr-open	F-2851	#2858 head 74cee90d, 3 files +21/-1, Mutate 6/6; footer stripped
