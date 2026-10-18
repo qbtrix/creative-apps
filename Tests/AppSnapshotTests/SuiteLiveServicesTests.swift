@@ -1,7 +1,8 @@
 // SuiteLiveServicesTests.swift: SuiteServices.live over a temp support
 // folder (suite-contracts SC-5b, SC-5c). It is not a preview; recents is
-// live and writes recents.json there, creating and home are live (HM-2a); each of
-// the other 12 slotted members is pending with its "<What> isn't available yet."
+// live and writes recents.json there, creating and home are live (HM-2a),
+// preferences is live over preferences.json (onboarding OB-9); each other
+// slotted member is pending with its "<What> isn't available yet."
 // sentence, and each throwing one throws notAvailable with that sentence.
 // `animations` and `updates` are the fakes until `with(animations:updates:)`
 // swaps them. macOS only (SuiteShell).
@@ -45,12 +46,23 @@ import Testing
         #expect(s.pending["recents"] == nil)
     }
 
+    @Test func preferencesLoadDefaultsAndSaveThroughTheSupportFolder() async throws {
+        let (s, support) = makeLive()
+        #expect(s.pending["preferences"] == nil)
+        var p = try await s.preferences.load()
+        #expect(p == SuitePreferences())
+        p.onboardingDoneVersion = 1
+        #expect(try await s.preferences.save(p).revision == 1)
+        let onDisk = try FileStore(folder: support).read("preferences.json", as: SuitePreferences.self)
+        #expect(onDisk.value?.onboardingDoneVersion == 1 && onDisk.revision == 1)
+    }
+
     @Test func everyOtherSlottedMemberIsPendingWithItsFeature() {
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
-        for live in ["recents", "creating", "home", "switching", "sending", "receiving"] { expected[live] = nil }
+        for live in ["recents", "creating", "home", "switching", "sending", "receiving", "preferences"] { expected[live] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 9)
+        #expect(pending.count == 8)
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
         #expect(pending["home"] == nil)
         #expect(pending["creating"] == nil)
@@ -59,7 +71,7 @@ import Testing
         #expect(pending["pasteboard"] == "Copy and paste between apps isn't available yet.")
         #expect(pending["assets"] == "The shared asset library isn't available yet.")
         #expect(pending["linking"] == "Linking assets between apps isn't available yet.")
-        #expect(pending["preferences"] == "The Settings window isn't available yet.")
+        #expect(pending["preferences"] == nil)
         #expect(pending["settings"] == "The Settings window isn't available yet.")
     }
 
@@ -69,7 +81,8 @@ import Testing
                                     "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
                                     "onboarding", "thumbnails", "home"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
-        #expect(Set(pending.keys).union(["recents", "creating", "home", "switching", "sending", "receiving"]) == members)
+        let live: Set<String> = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences"]
+        #expect(Set(pending.keys).union(live) == members)
     }
 
     @Test func throwingMembersNotLiveThrowTheirReason() async throws {
@@ -78,7 +91,6 @@ import Testing
         await #expect(throws: reason("thumbnails")) { _ = try await s.thumbnails.publish(png: Data(), for: logo) }
         await #expect(throws: reason("roundTrips")) { try await s.roundTrips.cancel(session: "r1") }
         await #expect(throws: reason("assets")) { _ = try await s.assets.index() }
-        await #expect(throws: reason("preferences")) { _ = try await s.preferences.load() }
         await #expect(throws: reason("settings")) { try await s.settings.open(.general, from: .launcher) }
     }
 
