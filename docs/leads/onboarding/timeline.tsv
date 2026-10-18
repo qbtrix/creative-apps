@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-18T14:43:42Z	pr-open	OB-8	#2810 19822e70 mutate 8/8; 2 tests wait OB-10 (follow-up OB-8b)
 2026-10-18T14:47:05Z	pr-open	OB-9	#2812 b05bd2ac mutate 3/3
 2026-10-18T14:49:24Z	pr-open	OB-7	#2813 0c88dff5 mutate 4/4
+2026-10-18T14:51:26Z	heartbeat	wave 3	all five open; lane macOS build-only runs dispatched; 0 onboarding findings
