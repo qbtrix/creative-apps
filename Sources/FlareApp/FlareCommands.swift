@@ -44,8 +44,13 @@ private struct FlareMenuKey: FocusedValueKey {
 
 struct FlareCommands: Commands {
     @FocusedValue(\.flareMenu) private var focused
+    /// Read so a pasteboard change re-runs the body and Paste's reason (FlarePasteboard.swift).
+    @FocusedValue(\.flarePasteboardChange) private var pasteboardChange
 
-    private var menu: FlareMenu { focused ?? FlareMenu() }
+    private var menu: FlareMenu {
+        _ = pasteboardChange
+        return focused ?? FlareMenu()
+    }
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
