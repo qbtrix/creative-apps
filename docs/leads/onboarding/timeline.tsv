@@ -67,3 +67,9 @@ utc	stage	event	ref	note
 2026-10-18T18:31:40Z	finding	OB-u	#2895 start-launching snapshot hangs macOS; fixer F-2895
 2026-10-18T18:31:40Z	review	OB-m	not clean: #2890-#2893; fixers F-2890, F-2893
 2026-10-18T18:41:07Z	heartbeat	-	fixers F-2884 F-2886 F-2895 F-2890 F-2893 running; #2888 #2889 open
+2026-10-18T19:08:54Z	pr	OB-5g\t#2888 #2889 merged
+2026-10-18T19:08:54Z	pr	F-2895\t#2901 open
+2026-10-18T19:08:54Z	pr	F-2893\t#2902 open
+2026-10-18T19:08:54Z	pr	F-2886\t#2903 open
+2026-10-18T19:08:54Z	pr	F-2884\t#2905 open
+2026-10-18T19:08:54Z	pr	F-2890\t#2906 open
