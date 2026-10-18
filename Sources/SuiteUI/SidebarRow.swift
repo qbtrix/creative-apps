@@ -1,6 +1,8 @@
 // SidebarRow.swift: SidebarItem (id, title, SF Symbol or an app's mark,
-// optional count, row toggles, children), SidebarToggle, and the row SuiteWindow draws for an
-// item. Row height follows the system sidebar size setting, so nothing here
+// optional count, row toggles, children, dimmed), SidebarToggle, and the row SuiteWindow draws for an
+// item. A dimmed item (a hidden or locked layer) draws its title and symbol in
+// SuiteColor.textSecondary (SidebarRowLook) and stays selectable; its toggles
+// draw as on any row. Row height follows the system sidebar size setting, so nothing here
 // fixes a height. The row owns only presentation state (the rename draft);
 // toggles and renames go out through closures, and a nil closure turns that
 // gesture off. Each toggle icon lays out both of its symbols and draws one,
@@ -26,11 +28,16 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
     /// level in, and their own descendants are drawn flat at that same level,
     /// in depth-first order, right after their parent (`secondLevelRows`).
     public let children: [SidebarItem]
+    /// Draws the title and symbol in SuiteColor.textSecondary, for a hidden or
+    /// locked layer. The row stays selectable and its toggles are unchanged.
+    public let isDimmed: Bool
 
     public init(
         id: String, title: String, systemImage: String, count: Int? = nil,
-        toggles: [SidebarToggle] = [], children: [SidebarItem] = [], app: SuiteApp? = nil
+        toggles: [SidebarToggle] = [], children: [SidebarItem] = [], app: SuiteApp? = nil,
+        isDimmed: Bool = false
     ) {
+        self.isDimmed = isDimmed
         self.id = id
         self.title = title
         self.systemImage = systemImage
@@ -52,7 +59,7 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
         children.flatMap { child in
             [SidebarItem(
                 id: child.id, title: child.title, systemImage: child.systemImage, count: child.count,
-                toggles: child.toggles, app: child.app)] + child.secondLevelRows
+                toggles: child.toggles, app: child.app, isDimmed: child.isDimmed)] + child.secondLevelRows
         }
     }
 }
@@ -88,6 +95,19 @@ public struct SidebarToggle: Identifiable, Hashable, Sendable {
 /// the title and the toggles, or one of the toggles.
 public enum SidebarRowPart: Sendable {
     case title, blank, toggle
+}
+
+/// How a row draws its title and symbol: `title` is the foreground (nil keeps
+/// the list's own, which turns white on a selected row), and `isSelectable`
+/// stays true for a dimmed row, so a hidden or locked layer can still be picked.
+public struct SidebarRowLook: Equatable, Sendable {
+    public let title: Color?
+    public let isSelectable: Bool
+
+    public init(_ item: SidebarItem) {
+        title = item.isDimmed ? SuiteColor.textSecondary : nil
+        isSelectable = true
+    }
 }
 
 public struct SidebarRow: View {
@@ -127,6 +147,7 @@ public struct SidebarRow: View {
             }
         }
         .badge(item.count ?? 0)
+        .selectionDisabled(!SidebarRowLook(item).isSelectable)
     }
 
     /// The title label, or the rename field while renaming. The rename
@@ -142,6 +163,7 @@ public struct SidebarRow: View {
                 .onChange(of: editing) { _, focused in if !focused { commitRename() } }
         } else {
             Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
+                .modifier(SidebarRowDimming(color: SidebarRowLook(item).title))
                 .contentShape(Rectangle())
                 .simultaneousGesture(TapGesture(count: 2).onEnded { beginRename(on: .title) })
         }
@@ -164,6 +186,20 @@ public struct SidebarRow: View {
         guard let name = draft?.trimmingCharacters(in: .whitespaces) else { return }
         draft = nil
         if !name.isEmpty, name != item.title { onRename?(name) }
+    }
+}
+
+/// Draws the title label in a dimmed row's color; a nil color leaves the
+/// list's own foreground, so a normal row reads as before.
+private struct SidebarRowDimming: ViewModifier {
+    let color: Color?
+
+    func body(content: Content) -> some View {
+        if let color {
+            content.foregroundStyle(color)
+        } else {
+            content
+        }
     }
 }
 
