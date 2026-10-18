@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-18T02:20Z	done	heartbeat	d3cd7d9f	CI 39082226458 ui-test read; 39088586270 in macOS; parked
 2026-10-18T02:52Z	done	heartbeat	948bcbf4	dev green; 39088586270 in ui-test; 39090620413 queued; parked
 2026-10-18T03:22Z	done	heartbeat	d3cd7d9f	39088586270 in ui-test; 39090620413 cancelled; parked
+2026-10-18T04:24Z	done	heartbeat	b2b19dd	Mac finish #2525 merged; 39088586270 ui-test repeats 4 AfterGlow failures; parked
