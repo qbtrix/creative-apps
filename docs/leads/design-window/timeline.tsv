@@ -122,3 +122,4 @@ utc	stage	event	ref	note
 2026-10-18T20:26Z	heartbeat	D0-9d #2899 needs-rebase again (design-model-sources.json); fixer started
 2026-10-18T20:38Z	fix	D0-9d #2899 re-merged dev, head 4debd0ce, ci PASS
 2026-10-18T20:49Z	heartbeat	#2899 needs-rebase dropped, lane macOS build dispatched on 4debd0ce; scoped design 39160167870 in progress
+2026-10-18T21:11Z	heartbeat	#2899 lane macOS build 39164252078 queued (runner backlog); scoped design 39160167870 still in progress
