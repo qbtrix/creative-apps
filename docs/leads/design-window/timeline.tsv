@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-18T10:51Z	heartbeat	#2701 (DW-a r2, #2465 closed) merged be2260cd and #2707 (SS-a r2, #2706 closed) merged d353fee7 in batch 39118867527; full 39120347568 (5e1844e6) holds both, pending: J1/J5 there decide DW-a/SS-a re-done; scoped design 39118734724 (holds #2696 S-8) running; CB-3 not opened; 7 design findings open (>5)
 2026-10-18T11:12Z	heartbeat	full 39120347568 cancelled (superseded); full 39122016685 (7bd94d21, holds #2701 #2707) pending; scoped design 39118734724 (holds #2696 S-8) still running; CB-3 not opened; 7 design findings open (>5)
 2026-10-18T11:36Z	check	#2750 likely stale (pre-#2701); waiting on e3a4582c runs
+2026-10-18T11:58Z	heartbeat	scoped design 39122750799 in progress, full 39122776184 queued (e3a4582c); findings 9; CB-3 not open
