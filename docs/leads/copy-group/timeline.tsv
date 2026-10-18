@@ -1,0 +1,56 @@
+utc	stage	event	ref	note
+2026-10-17T15:46Z	0	stage-start	#1496	fresh start, base dd7ec76
+2026-10-17T15:48Z	0	stage-end	#1496	C-1 and C-5 wait on design-seams
+2026-10-17T15:48Z	1	stage-end	#1496	packet read
+2026-10-17T15:48Z	2	stage-end	#1496	plan: W1 C-2
+2026-10-17T15:48Z	3	stage-start	#1496	wave 1
+2026-10-17T15:50Z	3	wave-start	W1	C-2 (workflow wf_a9a4c50c-d7b)
+2026-10-17T16:08Z	3	pr	#2166	C-2 open, head 1c39a81, Mutate 5/5; attribution footer stripped from body
+2026-10-17T16:12:53Z	check	C-2 #2166: lane dispatched macOS build run 39048294825; findings 0
+2026-10-17T16:30:33Z	check	C-2 #2166 macOS build 39048294825 still running; findings 0
+2026-10-17T16:48Z	heartbeat	heartbeat: #2166 C-2 macOS build 39048294825 success; awaiting lane merge sweep; 0 open design findings
+2026-10-17T17:03Z	heartbeat	heartbeat: #2166 not merged; lane batch 20261017163800 bisecting (probe -1 #2162 green, probe -2 #2163 running run 39051918154); 0 design findings
+2026-10-17T17:16Z	heartbeat	heartbeat: #2166 still queued in lane (build green, no needs-fix); 0 design findings
+2026-10-17T17:31Z	heartbeat	stage 3 heartbeat: #2166 and #2168 merged; dw wave 2 and cg C-1 launched; design-seams merged; findings 0 open
+2026-10-17T17:48Z	heartbeat	builders still running (no wave-2 or C-1 PR yet); findings 0 open for this lead; canvas-basics CB-a no new merges, S-5 stays blocked
+2026-10-17T17:56Z	wave	wave 2 PR open: C-1 #2230 (2e1d7ca2); contract check ok; C-3 starts once it is on dev
+2026-10-17T18:10Z	heartbeat	#2230 (C-1) waiting on the lane's macOS build
+2026-10-17T18:37:38Z	merge	#2230 C-1 merged
+2026-10-17T18:37:38Z	wave	wave 3: C-3 building from 13911964
+2026-10-17T18:47:13Z	pr	C-3 opened #2255 (head af31b57e), contract ok
+2026-10-17T18:56:51Z	check	heartbeat: #2255 macOS build 39059641801 running
+2026-10-17T19:16:17Z	merge	#2255 C-3 merged 5b8a4f29; CG-a Model part on dev
+2026-10-17T19:16:17Z	check	CG-a Model walk waits on full CI 39061216116
+2026-10-17T19:40:27Z	ci	run 39061216116 cancelled; CG-a Model walk waits on 39062516417
+2026-10-17T20:03Z	check	run 39062516417 Linux red on ST-7 timing test (not ours); walk waits on next full run
+2026-10-17T20:26Z	check	walk waits on 39066112359; C-4 waits on #2309 merge
+2026-10-17T20:43:47Z	wave	wave 5 launched on 2fc0629d: c-4 (DW-b now on dev)
+2026-10-17T21:07:05Z	check	wave 5 c-4 building; waiting on full CI 39068664974
+2026-10-17T21:11:46Z	pr	C-4 opened #2389 head c2745254, contract check ok
+2026-10-17T21:29:59Z	check	full CI 39069913922 Linux green on c55fad78; #2389 not merged yet, so the CG-a walk waits
+2026-10-17T21:55:02Z	merge	#2389 merged 0bf01673 (C-4)
+2026-10-17T22:18Z	ci	full CI 39072812111 (2b08e8fd, has #2389) still pending
+2026-10-17T22:40Z	ci	39072812111 cancelled; waiting on 39074726717
+2026-10-17T23:03Z	ci	full CI 39074726717 cancelled; newest 39076534514 on 59c435a6
+2026-10-17T23:28Z	ci	full CI 39076534514 Linux green on 59c435a6 (contains C-4 #2389)
+2026-10-17T23:28Z	wave	wave 6 launched: C-5 build-wave w2v1tr5jd, 0 open findings
+2026-10-17T23:44Z	pr	C-5 #2470 opened (J7, J8, J9; feature-done)
+2026-10-17T23:44Z	finding	#2471 gap: new group row stays collapsed (D0-3a)
+2026-10-17T23:44Z	wave	3 fix-batch launched for #2471
+2026-10-17T23:54Z	pr	#2479 opened (fixes #2471, mutate 14/14)
+2026-10-18T00:13Z	merge	#2470 merged (C-5, feature-done)
+2026-10-18T00:13Z	merge	#2479 merged (fixes #2471)
+2026-10-18T00:13Z	ci	full CI 39080371690 cancelled; 39081548839 pending on 388ab8a8
+2026-10-18T00:35Z	ci	full run 39082226458 on d3cd7d9 holds CG-a, Linux red on expired quarantine entries (#2504)
+2026-10-18T00:57Z	ci	scoped design run 39083023668 on d3cd7d9 green; full run Linux still red on #2504
+2026-10-18T01:19Z	check	no change; dev still d3cd7d9, #2504 open
+2026-10-18T01:41Z	check	no change; dev still d3cd7d9, 5 expired quarantine entries (#2504), full run 39082226458 still in progress
+2026-10-18T02:02Z	check	dev still d3cd7d9 with 5 expired quarantine entries (#2504 open); new full run 39088586270 started on d3cd7d9, its Linux job is expected to fail the same step
+2026-10-18T02:26Z	check	full run 39088586270 Linux red; waiting for a full run on 948bcbf4+
+2026-10-18T02:47Z	check	full run 39090620413 pending on 498c5b3
+2026-10-18T03:09Z	check	full run 39090620413 still pending (no jobs) at 2026-10-18T03:09Z
+2026-10-18T03:31Z	check	full run 39090620413 cancelled (superseded); full run 39093416270 on 0965457 Linux job in progress
+2026-10-18T03:58Z	done	Belt-Slice-Done CG-a run 39093416270 (Linux green)
+2026-10-18T03:58Z	contact-sheet	Belt-Contact-Sheet posted on #1496
+2026-10-18T03:58Z	pr	#2558 copy-group.wave.json status built
+2026-10-18T04:13Z	3	relaunch	act-1a14d32dfd7-u3ff	branch rebuilt on main 0965457c; CG-a lines to re-post on a completed run holding 6bb1f3f6
