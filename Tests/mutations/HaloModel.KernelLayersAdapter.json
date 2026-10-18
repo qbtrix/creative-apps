@@ -40,5 +40,26 @@
     "find": "local = placed.apply(anchor)",
     "replace": "_ = placed",
     "tests": "HaloKernelLayersTests"
+  },
+  {
+    "label": "followsReversed: follows asks the kernel the other way round, so the parent choices offer a layer's followers",
+    "file": "Sources/HaloModel/Live/HaloKeyRules.swift",
+    "find": "c.layerTree.follows(id, ancestorID)",
+    "replace": "c.layerTree.follows(ancestorID, id)",
+    "tests": "HaloKernelFollowTests"
+  },
+  {
+    "label": "selfParentOpens: the cycle check drops the layer that is its own parent, so that damaged file opens",
+    "file": "Sources/HaloModel/Live/HaloFileValidation.swift",
+    "find": "if parentID == layer.id || HaloKeyRules.follows(parentID, layer.id, in: comp) {",
+    "replace": "if HaloKeyRules.follows(parentID, layer.id, in: comp) {",
+    "tests": "HaloKernelFollowTests"
+  },
+  {
+    "label": "cycleThroughParentOpens: the cycle check no longer asks the kernel whether the parent follows the layer, so a longer cycle opens",
+    "file": "Sources/HaloModel/Live/HaloFileValidation.swift",
+    "find": "if parentID == layer.id || HaloKeyRules.follows(parentID, layer.id, in: comp) {",
+    "replace": "if parentID == layer.id {",
+    "tests": "HaloKernelFollowTests"
   }
 ]
