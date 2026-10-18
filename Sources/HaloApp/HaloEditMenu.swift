@@ -4,6 +4,7 @@
 // reason as help (SuiteUI's MenuCommand). The system's pasteboard items stay, so Cut,
 // Copy, Paste and Select All still work in text fields.
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 struct HaloEditMenu: Commands {

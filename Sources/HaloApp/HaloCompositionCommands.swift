@@ -7,6 +7,7 @@
 // window's route asks HaloProject.compositionDeleteCommand with HaloTextFocus.
 import AppKit
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 /// The key window's text focus, read when a menu command fires.

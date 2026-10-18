@@ -7,6 +7,7 @@
 // Symbol sending DesignIntent.command, disabled while the Model's help for it
 // says why, with that help as its tooltip.
 import DesignModel
+import SuiteUI
 import SwiftUI
 
 /// Edit: Duplicate.

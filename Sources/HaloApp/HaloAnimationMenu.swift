@@ -7,6 +7,7 @@
 // is sent through the focused window and disabled with the Model's reason as
 // help (SuiteUI's MenuCommand).
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 struct HaloAnimationMenu: Commands {

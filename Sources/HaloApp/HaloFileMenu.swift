@@ -6,6 +6,7 @@
 // its HaloCommand through the focused window and is disabled with the Model's
 // reason as help (SuiteUI's MenuCommand).
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 struct HaloFileMenu: Commands {

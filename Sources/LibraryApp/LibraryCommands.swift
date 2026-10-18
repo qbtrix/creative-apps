@@ -13,6 +13,7 @@
 // so their items take no key equivalent and name the key in their help
 // instead ("Pick (P)"); a key with no route yet goes unnamed.
 import LibraryModel
+import SuiteUI
 import SwiftUI
 
 extension MenuCommand {

@@ -9,6 +9,7 @@
 // moves or deletes. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate,
 // Rename…, Delete, Bring Forward, Send Backward.
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 extension FocusedValues {

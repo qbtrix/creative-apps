@@ -8,6 +8,7 @@
 // submenu whose every item is off is off too, with its first item's reason.
 // Every item, submenus included, carries its SF Symbol.
 import DesignModel
+import SuiteUI
 import SwiftUI
 
 /// Object: Group, Ungroup, Arrange, Align and Distribute.
