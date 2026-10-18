@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 22:36Z	check	dev 349578b8; #2973/#2979/#3010/#3011 wait on lane mac builds of their new heads; 0 findings
 22:56Z	check	dev afa91212; #2973 waits on lane mac build; 0 findings
 23:16Z	check	dev e0a627c0; #2973 mac build green, waits lane sweep; no green dev run yet
+23:36Z	check	#2973 EK-6 merged (f115ceff); EK-26 builder started; EK-chrome waits scoped suiteui 39175856233 (e0a627c0) or CI 39176304199; EK-u waits a run containing f115ceff

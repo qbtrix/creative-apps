@@ -100,3 +100,4 @@ Next: wave A PRs #2973 (EK-6), #2972 (EK-31), #2974 (EK-25) wait on the lane's m
 - 22:36Z dev 349578b8; #2973/#2979/#3010/#3011 wait on lane mac builds of their new heads; 0 findings
 - 22:56Z dev afa91212; #2973 waits on lane mac build; 0 findings
 - 23:16Z dev e0a627c0; #2973 mac build green, waits lane sweep; no green dev run yet
+- 23:36Z #2973 EK-6 merged (f115ceff); EK-26 builder started; EK-chrome waits scoped suiteui 39175856233 (e0a627c0) or CI 39176304199; EK-u waits a run containing f115ceff
