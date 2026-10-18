@@ -3,7 +3,7 @@
 // one twice, none for a file that can't be read), the develop token that lets
 // a stale answer be dropped, and eviction that keeps visible ± two screens
 // under 128 MB. Results (TH-2): stale answers dropped, failures to
-// availability, invalidation. The whole display scale the grid reports with
+// availability, invalidation, and a pass's answers applied in one change. The whole display scale the grid reports with
 // its cell size (TH-6f). Linux-safe; LibraryApp runs the requests and hands
 // back results.
 
@@ -134,6 +134,17 @@ extension LibraryCatalog {
             items[index].availability = .missing
         } else {
             items[index].availability = .unreadable(error.message)
+        }
+    }
+
+    /// A request pass's answers in one change, each through setThumbnail or
+    /// failThumbnail, so the window redraws once per pass, not once per image.
+    public mutating func applyThumbnails(_ results: [(request: ThumbnailRequest, result: Result<DisplayImage, LibraryError>)]) {
+        for (request, result) in results {
+            switch result {
+            case .success(let image): setThumbnail(image, for: request)
+            case .failure(let error): failThumbnail(request, error)
+            }
         }
     }
 

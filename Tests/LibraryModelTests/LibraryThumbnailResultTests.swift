@@ -134,3 +134,24 @@ private func setExposure(_ catalog: inout LibraryCatalog, _ id: String, _ value:
     #expect(catalog.cellValue(for: "A").hasPrefix("loading"))
     #expect(Set(catalog.requestThumbnails(visible: ["A", "B"]).map(\.id)) == ["A", "B"])
 }
+
+@Test func onePassOfResultsLandsTogether() throws {
+    var catalog = twoPhotoCatalog()
+    let image = try #require(bucketImage())
+    let requests = catalog.requestThumbnails(visible: ["A", "B"])
+    let a = try #require(requests.first { $0.id == "A" })
+    let b = try #require(requests.first { $0.id == "B" })
+    catalog.applyThumbnails([(a, .success(image)), (b, .failure(.missingFile("/photos/B.jpg")))])
+    #expect(catalog.thumbnails["A"] == image)
+    #expect(catalog.cellValue(for: "B").hasPrefix("unreadable"))
+    #expect(catalog.pendingThumbnails.isEmpty)
+}
+
+@Test func aStaleResultInAPassIsDropped() throws {
+    var catalog = twoPhotoCatalog()
+    let image = try #require(bucketImage())
+    let old = try #require(catalog.requestThumbnails(visible: ["A"]).first)
+    catalog.invalidateThumbnail("A")
+    catalog.applyThumbnails([(old, .success(image))])
+    #expect(catalog.thumbnails["A"] == nil)
+}

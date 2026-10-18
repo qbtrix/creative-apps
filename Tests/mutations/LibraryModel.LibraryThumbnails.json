@@ -19,5 +19,19 @@
     "find": "guard scale.isFinite else { return 1 }",
     "replace": "guard scale.isFinite else { return 8 }",
     "tests": "LibraryThumbnailScaleTests.swift"
+  },
+  {
+    "label": "a pass's images are dropped",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "case .success(let image): setThumbnail(image, for: request)",
+    "replace": "case .success: break",
+    "tests": "LibraryThumbnailResultTests.swift"
+  },
+  {
+    "label": "a pass's failures are dropped",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "case .failure(let error): failThumbnail(request, error)",
+    "replace": "case .failure: break",
+    "tests": "LibraryThumbnailResultTests.swift"
   }
 ]
