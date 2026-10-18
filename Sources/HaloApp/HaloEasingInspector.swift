@@ -84,7 +84,7 @@ struct HaloEasingInspector: View {
                 .onExitCommand { perform(.clearKeySelection) }
             }
             if let refusal = model.refusal, refusal.control == "halo.easing" {
-                HaloRefusalCaption(refusal: refusal)
+                InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
             }
         }
     }

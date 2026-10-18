@@ -47,7 +47,7 @@ struct HaloViewer: View {
                 Divider()
                 HaloTimelineView(model: model, perform: perform)
                 if let refusal = model.refusal, !refusal.control.hasPrefix("halo.inspector") {
-                    HaloRefusalCaption(refusal: refusal)
+                    InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
                 }
             }
             .onKeyPress(keys: [.space, .leftArrow, .rightArrow, .home, .end]) { press in
@@ -106,18 +106,3 @@ struct HaloViewer: View {
     }
 }
 
-/// A refused edit's message under the control that refused it, in the error
-/// state's color and symbol (docs/design.md, States).
-struct HaloRefusalCaption: View {
-    let refusal: HaloRefusal
-
-    var body: some View {
-        Label(refusal.message, systemImage: "exclamationmark.circle")
-            .font(SuiteFont.caption)
-            .foregroundStyle(SuiteColor.stateError)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, SuiteSpacing.m)
-            .padding(.vertical, SuiteSpacing.xs)
-            .accessibilityIdentifier("halo.refusal")
-    }
-}

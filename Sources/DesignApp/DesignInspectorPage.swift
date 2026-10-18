@@ -17,7 +17,7 @@ struct DesignPageProperties: View {
             InspectorSection("Page Size") {
                 InspectorRow("W") { size(page.frameWidth) }
                 InspectorRow("H") { size(page.frameHeight) }
-                DesignPanelHint("Select a layer to edit its properties.")
+                InspectorNote("Select a layer to edit its properties.")
             }
         }
     }

@@ -47,7 +47,7 @@ struct HaloLayerInspector: View {
                     !HaloProperty.allCases.contains(where: { rowRefusal($0) != nil }),
                     !HaloLayerGroup.owns(refusal), !HaloTextInspector.owns(refusal)
                 {
-                    HaloRefusalCaption(refusal: refusal)
+                    InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
                 }
                 if let layer = model.selectedLayer {
                     HaloLayerGroup(layer: layer, model: model, perform: perform)
@@ -116,7 +116,7 @@ struct HaloPropertyRowView: View, Equatable {
                 key
             }
             if let refusal {
-                HaloRefusalCaption(refusal: refusal)
+                InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
             }
         }
     }
@@ -212,7 +212,7 @@ private struct HaloLayerGroup: View {
                 .accessibilityValue(Text(verbatim: parentTitle))
                 .haloControl(id: "halo.inspector.parent", enabled: parentHelp == nil, help: parentHelp)
             if let refusal = refusal(Self.parentIDs) {
-                HaloRefusalCaption(refusal: refusal)
+                InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
             }
             InspectorPickerRow("Blend", options: blends, selection: layer.blendMode) { perform(.setBlendMode($0)) }
                 .disabled(blendHelp != nil)
@@ -220,7 +220,7 @@ private struct HaloLayerGroup: View {
                 .accessibilityValue(Text(verbatim: blendTitle))
                 .haloControl(id: "halo.inspector.blend", enabled: blendHelp == nil, help: blendHelp)
             if let refusal = refusal(Self.blendIDs) {
-                HaloRefusalCaption(refusal: refusal)
+                InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
             }
         }
     }

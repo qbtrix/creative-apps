@@ -8,7 +8,8 @@
 // the drag, key or typed value lands the last one as one step (`.endEditRun`).
 // Hosted without a box, each value goes straight to `.setStyle`. The hint
 // says why the rows are off ("Unlock A to change it.", #276) and starts at the
-// value column: the X field's leading edge, measured in DesignStyleHint.space.
+// value column: the X field's leading edge, measured in
+// DesignNodeProperties.hintSpace (SuiteUI's InspectorNote draws it).
 // Every control's help comes from the Model. Values in, intents out.
 import DesignModel
 import SuiteUI
@@ -152,24 +153,3 @@ struct DesignInspectorStyle: View {
     }
 }
 
-/// Why the selection's rows are off, starting at the value column (`column`, the X field's leading
-/// x in `space`) rather than the gutter, so it reads as the rows' value (#276).
-struct DesignStyleHint: View {
-    /// The coordinate space DesignNodeProperties names, where `column` and this hint are measured.
-    nonisolated static let space = "design.properties.column"
-    let text: String
-    let column: CGFloat
-    @State private var origin: CGFloat = 0
-
-    var body: some View {
-        Text(text)
-            .font(SuiteFont.inspectorMeta)
-            .foregroundStyle(SuiteColor.secondaryText)
-            .accessibilityIdentifier("design.inspector.hint")
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, Swift.max(column - origin, .zero))
-            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.space)).minX } action: { origin = $0 }
-            .padding(.vertical, SuiteSpacing.xs)
-    }
-}
