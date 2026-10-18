@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-18T03:58Z	pr	#2558 copy-group.wave.json status built
 2026-10-18T04:13Z	3	relaunch	act-1a14d32dfd7-u3ff	branch rebuilt on main 0965457c; CG-a lines to re-post on a completed run holding 6bb1f3f6
 2026-10-18T04:19Z	3	finding	#2513 #2514 #2515	J7 J8 J9 red on 39093367358; CG-a round 1 started; gap #2566 filed
+2026-10-18T04:19Z	merged	#2558 copy-group status built

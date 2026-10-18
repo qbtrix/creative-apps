@@ -4,7 +4,7 @@ Issue: #1496 · Packet: docs/blueprints/design/features/copy-group.md
 Run: act-1a14d32dfd7-u3ff (before: act-1a14a88d756-rnok) · Session: claude/layers-panel-style-rows-copy-group-x5zrpm · Started: 2026-10-17T15:46Z
 Stage: 3 polling
 Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
-Next: land CG-a fix round 1 (findings #2513 #2514 #2515, branch lead/copy-group-CG-a-r1); then a completed, successful design run holding it gives Belt-Slice-Done CG-a and Belt-Contact-Sheet on #1496
+Next: Feature built; add macOS journey and audit results of run 39093416270 to the contact sheet when its ui-test ends
 
 Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-group.
 
