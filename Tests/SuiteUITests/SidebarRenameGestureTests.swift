@@ -83,10 +83,10 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     let source = try sidebarRowSource()
     #expect(occurrences(of: "beginRename", in: source) == 2, "beginRename is declared once and used once, by the title label")
     let flat = squeezed(source)
-    #expect(occurrences(of: "draft=item.title", in: flat) == 1)
+    #expect(occurrences(of: "field.open(item.title)", in: flat) == 1)
     #expect(occurrences(of: "editing=true", in: flat) == 1)
     let begin = try #require(region(of: source, from: "private func beginRename", to: "private func commitRename"))
-    #expect(squeezed(begin).contains("draft=item.title"), "only beginRename opens the rename field")
+    #expect(squeezed(begin).contains("field.open(item.title)"), "only beginRename opens the rename field")
 }
 
 @Test func rowBodyAndItsTogglesCarryNoDoubleClickGesture() throws {
@@ -129,13 +129,18 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     let names = callNames(in: title)
     // `modifier(SidebarRowDimming(...))` only colors a dimmed row's title
     // (LL-4); `dimmingOnlyColorsTheTitle` keeps it free of gestures.
+    // The open field's refusal (LL-6) sits under the field in a VStack, not
+    // in the label's chain: `isOpen`, `type`, `cancel` and `message` read or
+    // change the rename field, `font`, `foregroundStyle` and
+    // `accessibilityIdentifier` style and name the field and its message, and
+    // `loseFocus` commits or drops the draft. None can start a rename.
     let modifiers: Set = [
         "focused", "onSubmit", "onExitCommand", "onChange", "contentShape", "simultaneousGesture", "onEnded",
-        "modifier",
+        "modifier", "isOpen", "type", "cancel", "message", "font", "foregroundStyle", "accessibilityIdentifier",
     ]
     let calls: Set = [
         "View", "nil", "else", "focused", "TextField", "Binding", "commitRename", "Label", "Rectangle", "TapGesture",
-        "beginRename", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook",
+        "beginRename", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook", "VStack", "loseFocus",
     ]
     #expect(
         names.modifiers.subtracting(modifiers).isEmpty,

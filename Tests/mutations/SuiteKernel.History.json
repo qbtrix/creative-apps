@@ -1,0 +1,30 @@
+[
+  {
+    "label": "undo leaves the run open, so two edits under one key fold across the undo",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "        openKey = nil\n        guard var step = done.popLast() else { return false }",
+    "replace": "        guard var step = done.popLast() else { return false }",
+    "tests": "SuiteKernelTests.HistoryTests"
+  },
+  {
+    "label": "the limit trim uses <=, so the history keeps one step too many",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "while done.count > limit { done.removeFirst() }",
+    "replace": "while done.count > limit + 1 { done.removeFirst() }",
+    "tests": "SuiteKernelTests.HistoryTests"
+  },
+  {
+    "label": "a fold shows the next id without taking it, so a later step repeats it",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "            let folded = nextID()",
+    "replace": "            let folded = lastIssuedID + 1",
+    "tests": "SuiteKernelTests.HistoryTests"
+  },
+  {
+    "label": "a new step's id is its depth, so the same name at the same depth reads as saved",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "        let after = nextID()",
+    "replace": "        let after = done.count + 1",
+    "tests": "SuiteKernelTests.HistoryTests"
+  }
+]

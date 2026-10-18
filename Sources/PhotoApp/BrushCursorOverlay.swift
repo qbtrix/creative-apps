@@ -15,6 +15,6 @@ struct BrushCursorOverlay: View {
     var mark: PhotoCanvasMark? { nil }
 
     var body: some View {
-        if let mark = mark { PhotoCanvasMarkElement(mark: mark, zoom: zoom) }
+        if let mark = mark { mark.probe(zoom: zoom) }
     }
 }

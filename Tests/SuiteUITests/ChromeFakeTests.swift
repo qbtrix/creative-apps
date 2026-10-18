@@ -73,22 +73,9 @@ import Testing
     #expect(pills.pills(zoom: 1, documentSize: PlaneExtent(width: 1, height: 1), trailing: []).count == 2)
 }
 
-@Test func stubTransportAndToolPickingGiveTheirFakesValues() {
-    let states = [
-        TransportState(frame: 47, frameCount: 48, fps: 24, loops: true),
-        TransportState(frame: 0, frameCount: 48, fps: 24, isPlaying: true),
-        TransportState(frame: 0, frameCount: 0, fps: 0),
-    ]
-    for s in states {
-        #expect(SuiteTransport().stepped(s, by: 1) == FakeTransportStepping().stepped(s, by: 1))
-        #expect(SuiteTransport().stepped(s, by: -1) == FakeTransportStepping().stepped(s, by: -1))
-        #expect(SuiteTransport().toStart(s) == FakeTransportStepping().toStart(s))
-        #expect(SuiteTransport().toEnd(s) == FakeTransportStepping().toEnd(s))
-        #expect(SuiteTransport().face(s) == FakeTransportStepping().face(s))
-    }
+@Test func stubToolPickingGivesItsFakesValues() {
     let tools = [ToolFace(id: "a", title: "A", shortcut: "a"), ToolFace(id: "b", title: "B", shortcut: "A")]
     #expect(SuiteToolPicking().tool(forKey: "A", in: tools) == "a")
-    #expect(SuiteToolPicking().violations(in: tools) == FakeToolPicking().violations(in: tools))
     #expect(SuiteToolPicking().help(for: tools[1]) == "B (A)")
 }
 

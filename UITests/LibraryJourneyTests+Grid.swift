@@ -14,10 +14,16 @@ import XCTest
 extension LibraryJourneyTests {
     /// J2: every visible cell shows its thumbnail, a larger cell size draws a
     /// larger one, Sort By Name reorders, and Shift-click selects a range.
-    @MainActor func testGridShowsThumbnailsAndSorts() {
+    @MainActor func testGridShowsThumbnailsAndSorts() throws {
         gridSteps(Journey("Library", self, arguments: ["-LibraryFixture", "shoot"]), suffix: "")
-        // TH-8: J2 (L), step 1 launched live on `LibraryFiles.writeShoot` with
-        // `-LibraryImportOnLaunch`, then `gridSteps(_, suffix: "-live")`.
+        // Live (TH-8): the same steps on the 24 JPEGs writeShoot writes, imported on launch.
+        let folder = try LibraryFiles.freshPhotoFolder()
+        let catalog = try LibraryFiles.freshCatalogDir()
+        addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
+        try LibraryFiles.writeShoot(in: folder)
+        gridSteps(Journey("Library", self, arguments: [
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path, "-LibraryImportOnLaunch",
+        ]), suffix: "-live")
     }
 
     /// J2 steps 1 to 4 on `library`, each shot's name ending `suffix`.

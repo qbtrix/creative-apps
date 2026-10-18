@@ -1,0 +1,30 @@
+[
+  {
+    "label": "intoItselfDirectOnly: move refuses only a parent that is the node or its direct child",
+    "file": "Sources/SuiteKernel/Layers/LayerTree.swift",
+    "find": "if parent == id || ancestors(of: parent)?.contains(id) == true { throw .intoItself(parent) }",
+    "replace": "if parent == id || ancestors(of: parent)?.last == id { throw .intoItself(parent) }",
+    "tests": "LayerTreeTests"
+  },
+  {
+    "label": "cascadeOwnFlagOnly: isEffectivelyHidden reads the node's own isHidden and ignores its ancestors",
+    "file": "Sources/SuiteKernel/Layers/LayerTree.swift",
+    "find": "chain(id)?.contains { $0.isHidden } ?? false",
+    "replace": "chain(id)?.last?.isHidden ?? false",
+    "tests": "LayerTreeTests"
+  },
+  {
+    "label": "bringForwardAtTopWraps: bringForward on the front layer wraps it to the back instead of staying",
+    "file": "Sources/SuiteKernel/Layers/LayerTree.swift",
+    "find": "let to = min(index + 1, kids.count - 1)",
+    "replace": "let to = (index + 1) % kids.count",
+    "tests": "LayerTreeTests"
+  },
+  {
+    "label": "ungroupDropsOrder: ungroup puts the group's children back in reverse order",
+    "file": "Sources/SuiteKernel/Layers/LayerTree.swift",
+    "find": "kids.replaceSubrange(index...index, with: target.children)",
+    "replace": "kids.replaceSubrange(index...index, with: target.children.reversed())",
+    "tests": "LayerTreeTests"
+  }
+]

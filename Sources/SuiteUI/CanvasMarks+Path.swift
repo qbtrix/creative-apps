@@ -8,7 +8,8 @@
 // pixels at the canvas zoom; mark sizes are fixed on screen (`SuiteSize.anchor`
 // at any zoom). Black and white, or the accent for guides, so they read on any
 // pixels. Marks are hidden from accessibility and never take a click; the
-// canvas gesture does. The geometry is static and plain so tests read it.
+// canvas gesture does. The geometry is static, plain and nonisolated, so
+// tests read it off the main actor without tripping the View isolation check.
 import SwiftUI
 
 /// One anchor of a vector path, in document pixels.
@@ -78,16 +79,16 @@ public struct PathMarks: View {
     }
 
     /// A non-finite or non-positive zoom draws at 1, like `CanvasLayout`.
-    public static func scale(_ zoom: Double) -> Double { zoom.isFinite && zoom > 0 ? zoom : 1 }
+    public nonisolated static func scale(_ zoom: Double) -> Double { zoom.isFinite && zoom > 0 ? zoom : 1 }
 
-    private static func view(_ point: CGPoint, _ zoom: Double) -> CGPoint {
+    private nonisolated static func view(_ point: CGPoint, _ zoom: Double) -> CGPoint {
         let s = scale(zoom)
         return CGPoint(x: point.x * s, y: point.y * s)
     }
 
     /// The anchor's mark in view points: a square for a corner, a circle for a
     /// smooth anchor, `SuiteSize.anchor` across at every zoom, centered on it.
-    public static func anchorShape(_ anchor: PathAnchor, zoom: Double) -> Path {
+    public nonisolated static func anchorShape(_ anchor: PathAnchor, zoom: Double) -> Path {
         let side = SuiteSize.anchor
         let center = view(anchor.point, zoom)
         let box = CGRect(x: center.x - side / 2, y: center.y - side / 2, width: side, height: side)
@@ -98,7 +99,7 @@ public struct PathMarks: View {
     }
 
     /// Every anchor's mark, plus a half-size dot on each smooth anchor's handles.
-    public static func anchorMarks(anchors: [PathAnchor], zoom: Double) -> Path {
+    public nonisolated static func anchorMarks(anchors: [PathAnchor], zoom: Double) -> Path {
         var path = Path()
         let dot = SuiteSize.anchor / 2
         for anchor in anchors {
@@ -113,7 +114,7 @@ public struct PathMarks: View {
     }
 
     /// The lines from each smooth anchor to its handles; corners draw none.
-    public static func handleLines(anchors: [PathAnchor], zoom: Double) -> Path {
+    public nonisolated static func handleLines(anchors: [PathAnchor], zoom: Double) -> Path {
         var path = Path()
         for anchor in anchors where anchor.kind == .smooth {
             for handle in [anchor.handleIn, anchor.handleOut].compactMap({ $0 }) {
@@ -125,7 +126,7 @@ public struct PathMarks: View {
     }
 
     /// The segments in view points; one whose index is out of range draws nothing.
-    public static func outline(anchors: [PathAnchor], segments: [PathSegment], zoom: Double) -> Path {
+    public nonisolated static func outline(anchors: [PathAnchor], segments: [PathSegment], zoom: Double) -> Path {
         var path = Path()
         for segment in segments {
             guard anchors.indices.contains(segment.from), anchors.indices.contains(segment.to) else { continue }
@@ -188,7 +189,7 @@ public struct ViewportGuideMarks: View {
 
     /// Each guide's line from one edge of `viewport` to the other; a guide at a
     /// non-finite position, or an empty or non-finite viewport, draws nothing.
-    public static func lines(guides: [ViewportGuide], zoom: Double, viewport: CGRect) -> [GuideLine] {
+    public nonisolated static func lines(guides: [ViewportGuide], zoom: Double, viewport: CGRect) -> [GuideLine] {
         let v = viewport.standardized
         guard [v.minX, v.minY, v.width, v.height].allSatisfy(\.isFinite), v.width > 0, v.height > 0 else { return [] }
         let s = PathMarks.scale(zoom)

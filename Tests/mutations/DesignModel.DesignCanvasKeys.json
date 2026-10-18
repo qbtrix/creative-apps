@@ -1,0 +1,30 @@
+[
+  {
+    "label": "only Shift may be held, so a numeric-pad arrow is dropped (#2706)",
+    "file": "Sources/DesignModel/DesignCanvasKeys.swift",
+    "find": "public var reachesCanvas: Bool { isDisjoint(with: [.command, .option, .control]) }",
+    "replace": "public var reachesCanvas: Bool { subtracting(.shift).isEmpty }",
+    "tests": "DesignJ5KeysTests.swift"
+  },
+  {
+    "label": "Command no longer leaves the key to the menus",
+    "file": "Sources/DesignModel/DesignCanvasKeys.swift",
+    "find": "public var reachesCanvas: Bool { isDisjoint(with: [.command, .option, .control]) }",
+    "replace": "public var reachesCanvas: Bool { isDisjoint(with: [.option, .control]) }",
+    "tests": "DesignJ5KeysTests.swift"
+  },
+  {
+    "label": "arrows and Delete act only with one layer selected",
+    "file": "Sources/DesignModel/DesignCanvasKeys.swift",
+    "find": "public var hasSelection: Bool { !selectedNodeIDs.isEmpty }",
+    "replace": "public var hasSelection: Bool { selectedNodeIDs.count == 1 }",
+    "tests": "DesignJ5KeysTests.swift"
+  },
+  {
+    "label": "Shift is dropped from the nudge",
+    "file": "Sources/DesignModel/DesignCanvasKeys.swift",
+    "find": ".nudge(direction, shift: modifiers.contains(.shift))",
+    "replace": ".nudge(direction, shift: false)",
+    "tests": "DesignJ5KeysTests.swift"
+  }
+]
