@@ -9,9 +9,8 @@
 //
 // A layer that is locked or hidden, itself or through a group around it, is
 // never added (the subtree checks in DesignLocking and DesignLayerToggles); one
-// already selected can always be taken out. With several layers selected the
-// canvas shows no handles, and nudge, delete and the inspector's fields act on
-// none of them: editing several layers at once is a later issue. While a marquee
+// already selected can always be taken out. With several layers selected, nudge
+// and delete act on all of them through `run` (DesignActions). While a marquee
 // drag is live, showsSelectionHandles is false: the canvas draws the marquee and
 // an outline on each layer it touches, never the box's handles. Linux-safe.
 
