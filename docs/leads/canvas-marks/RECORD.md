@@ -2,9 +2,9 @@
 
 Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: goldens wait
+Stage: waiting on a dev full CI run with snapshots
 Base: 2e27b8db (origin/dev)
-Next: snapshots from dev CI 39169434591 (past #2990), then the canvas baseline PR
+Next: canvas golden PR from golden-new, then CM-16 feature-done
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
