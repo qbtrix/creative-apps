@@ -29,7 +29,8 @@ import Testing
     /// `catalog` with the loupe photo's sample picture at `longSide` shown as `quality`.
     private func showing(_ quality: RenderQuality, longSide: Int, in catalog: LibraryCatalog) throws -> LibraryCatalog {
         var catalog = catalog
-        let request = try #require(catalog.loupeRequest(longSide: longSide, quality: quality))
+        let pending = catalog.loupeRequest(longSide: longSide, quality: quality)
+        let request = try #require(pending)
         let image = try #require(SampleImage.image(for: request.photo, longSide: longSide))
         catalog.showLoupeRender(RenderedPhoto(image: image, histogram: .empty, quality: quality), token: request.token)
         return catalog
