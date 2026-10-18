@@ -4,7 +4,8 @@
 // The window chrome (toolbar, sidebar, inspector) is system Liquid Glass; the
 // content stays flat. Apps pass state in and get selection out through
 // `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
-// gesture off. Toolbar actions with `unavailableHelp` show disabled, with the
+// gesture off. An overload's `onRename` can refuse: it returns the message
+// the row shows under the field it keeps open (LL-6). Toolbar actions with `unavailableHelp` show disabled, with the
 // reason as their tooltip. The shell owns only presentation state (inspector
 // visibility) and tints the content and inspector with the suite's one accent
 // (SuiteColor.accent); the sidebar keeps the system's selection style, which
@@ -78,6 +79,24 @@ extension SuiteWindow where Sidebar == SuiteSidebarList {
         self.init(
             galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
             subtitle: subtitle, sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle,
+            onMove: onMove, onRename: SidebarNode.refusable(onRename), documentActions: documentActions,
+            actions: actions, content: content, inspector: inspector)
+    }
+
+    /// The same window with a rename the app can refuse: `onRename` returns
+    /// nil to accept, or the message the row shows under its open field (LL-6).
+    public init(
+        title: String, subtitle: String? = nil, sections: [SidebarSection], selection: SidebarItem.ID?,
+        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
+        onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
+        onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
+        onRename: @escaping @MainActor (SidebarItem.ID, String) -> String?,
+        documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
+        @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
+    ) {
+        self.init(
+            galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
+            subtitle: subtitle, sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle,
             onMove: onMove, onRename: onRename, documentActions: documentActions, actions: actions,
             content: content, inspector: inspector)
     }
@@ -89,7 +108,7 @@ extension SuiteWindow where Sidebar == SuiteSidebarList {
         selection: SidebarItem.ID?, onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
         onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
         onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
-        onRename: (@MainActor (SidebarItem.ID, String) -> Void)? = nil,
+        onRename: (@MainActor (SidebarItem.ID, String) -> String?)? = nil,
         documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
@@ -98,7 +117,7 @@ extension SuiteWindow where Sidebar == SuiteSidebarList {
             actions: actions, inspectorWidth: nil,
             sidebar: SuiteSidebarList(
                 sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle, onMove: onMove,
-                onRename: onRename),
+                refusableRename: onRename),
             content: content(), inspector: inspector())
     }
 
