@@ -29,7 +29,7 @@ public enum FlareIntent: Sendable, Equatable {
 
     public enum Stage: Sendable, Equatable {
         case dragChanged(start: Point, end: Point, shift: Bool, option: Bool, stageScale: Double),
-             endDrag, cancelDrag
+             endDrag, cancelDrag, contextClick(at: Point, stageScale: Double)
     }
 
     public enum Tools: Sendable, Equatable {
@@ -134,7 +134,7 @@ public enum FlareIntent: Sendable, Equatable {
         .edit(.selectAll), .edit(.deselect), .edit(.bringForward), .edit(.sendBackward),
         .stage(.dragChanged(start: Point(x: 0, y: 0), end: Point(x: 0, y: 0), shift: false, option: false,
                             stageScale: 1)),
-        .stage(.endDrag), .stage(.cancelDrag),
+        .stage(.endDrag), .stage(.cancelDrag), .stage(.contextClick(at: Point(x: 0, y: 0), stageScale: 1)),
         .tools(.choose(.select)), .tools(.finishPath),
         .view(.zoomIn), .view(.zoomOut), .view(.fit), .view(.actualSize), .view(.toggleOnion),
         .view(.toggleMotionPath), .view(.toggleRulers), .view(.toggleGuides), .view(.clearGuides),
@@ -207,6 +207,7 @@ extension FlareIntent.Stage {
         case .dragChanged: "dragChanged"
         case .endDrag: "endDrag"
         case .cancelDrag: "cancelDrag"
+        case .contextClick: "contextClick"
         }
     }
 }

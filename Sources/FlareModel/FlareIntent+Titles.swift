@@ -76,6 +76,7 @@ extension FlareIntent.Stage {
         case .dragChanged: "Drag on Stage"
         case .endDrag: "End Drag"
         case .cancelDrag: "Cancel Drag"
+        case .contextClick: "Right Click on Stage"
         }
     }
 }

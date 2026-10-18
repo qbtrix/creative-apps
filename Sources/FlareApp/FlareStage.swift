@@ -4,7 +4,8 @@
 // samples run on a FlareLiveDrag, a copy of the model in this view's own state, so only the stage redraws per sample
 // and the window's body doesn't (#1792); its art and marks come from that copy while it lasts. Mouse-up sends the
 // last sample as `.stage(.dragChanged)` (the gesture's start, Shift and Option and the zoom), then `.stage(.endDrag)`,
-// so the window changes once; Escape drops the copy before the window's `toolKey` cancels. A tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
+// so the window changes once; Escape drops the copy before the window's `toolKey` cancels. The item under the pointer is kept for
+// FlareStageContextMenu, so a right click acts on what it hits. A tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
 // glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
 // Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
 // ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
@@ -33,6 +34,8 @@ struct FlareStage: View {
     @State private var live: FlareLiveDrag?
     /// The viewport's size, for the fit while `zoom` is nil.
     @State private var viewport: CGSize = .zero
+    /// The item under the pointer, for the context menu; written only when that item changes, not per move.
+    @State private var pointed: FlareStagePointer?
 
     var body: some View {
         if let scene = model.selectedScene {
@@ -94,7 +97,7 @@ struct FlareStage: View {
         CanvasViewport(
             documentSize: size, zoom: scale, checkerboard: false, onSize: { viewport = $0 },
             onDrag: { previous, current in drag(from: previous, to: current, scale: scale) },
-            onDragEnd: endDrag, onKey: key
+            onDragEnd: endDrag, onKey: key, onPointer: { pointer($0, scale: scale) }
         ) {
             if let list = live?.movePreview ?? model.stageList { FlareStageArt(list: list, zoom: scale).drawingGroup() }
         } overlay: {
@@ -107,7 +110,7 @@ struct FlareStage: View {
                 .padding(SuiteSpacing.m)
                 .padding(.leading, SuiteSize.ruler)
         }
-        .modifier(FlareStageContextMenu(model: model, zoom: scale, perform: perform))
+        .modifier(FlareStageContextMenu(model: model, zoom: scale, pointed: pointed, perform: perform))
     }
 
     /// One pointer move, on the live copy (made from the model at the drag's first sample, or the first after
@@ -125,6 +128,15 @@ struct FlareStage: View {
             start: Point(x: start.x, y: start.y), end: Point(x: current.x, y: current.y), modifiers: modifiers,
             stageScale: scale))
         live = next
+    }
+
+    /// The pointer over the artboard (nil off it): keeps the item it hits, so a right click acts on that item.
+    /// ponytail: one hit test per pointer move; cache by item bounds if hover on a big scene gets slow.
+    private func pointer(_ location: CGPoint?, scale: Double) {
+        let point = location.map { Point(x: $0.x, y: $0.y) }
+        let hit = point.flatMap { model.stageHit(at: $0, stageScale: scale) }
+        guard hit != pointed?.hit else { return }
+        pointed = point.flatMap { p in hit.map { FlareStagePointer(point: p, hit: $0) } }
     }
 
     /// Mouse-up: the window gets the drag's last sample and its end, one change and one undo step.

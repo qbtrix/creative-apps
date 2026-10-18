@@ -1,0 +1,23 @@
+[
+  {
+    "label": "a right click never selects the hit",
+    "file": "Sources/FlareModel/FlareContextClick.swift",
+    "find": "        if !held { setSelection([hit]) }\n",
+    "replace": "",
+    "tests": "FlareContextClickTests"
+  },
+  {
+    "label": "a right click replaces a selection that holds the hit",
+    "file": "Sources/FlareModel/FlareContextClick.swift",
+    "find": "if !held { setSelection",
+    "replace": "if held || !held { setSelection",
+    "tests": "FlareContextClickTests"
+  },
+  {
+    "label": "empty stage clears the selection",
+    "file": "Sources/FlareModel/FlareContextClick.swift",
+    "find": "guard let hit = hit(at: point, stageScale: stageScale) else { return }",
+    "replace": "guard let hit = hit(at: point, stageScale: stageScale) else { setSelection([]); return }",
+    "tests": "FlareContextClickTests"
+  }
+]
