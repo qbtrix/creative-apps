@@ -4,7 +4,7 @@ Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: 5 baselines (code tasks all merged)
 Base: 2e27b8db (origin/dev)
-Next: #2914 #2915 (baselines) and #2917 (plain, refused, nested checks) in the lane; once #2917 is on dev, a scoped suiteui run gives its actuals: commit them, then LL-17 feature-done
+Next: #2914 #2915 merged at 19:15Z; #2917 (plain, refused, nested checks) waits on its lane macOS build; once on dev, a scoped suiteui run gives its actuals: commit them, then LL-17 feature-done
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
