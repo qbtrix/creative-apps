@@ -24,3 +24,4 @@ utc	feature	event	ref	note
 2026-10-18T19:50Z	files-history	findings	FH-a	panel wf_48b462ba-016: 5 confirmed (#2938 major; #2936 #2937 #2939 #2940 minor), 0 refuted
 2026-10-18T19:50Z	files-history	fix-round	FH-a	round 1: fix-batch wf_82aa48f8-7c9 on dev f7e03506, findings 2936-2940
 2026-10-18T20:03:36Z	files-history	heartbeat	#2894	FH-7 open, macOS build green, lane run 39161134484 in flight; fix-batch wok9a3u9f round 1 running; 5 open findings (cap)
+2026-10-18T20:24:54Z	files-history	merged	#2894	FH-7 merged 237bc5af; FH-b last PR in; full CI 39162498756 (b1526f3e) pending contains it; fix-batch wok9a3u9f still running
