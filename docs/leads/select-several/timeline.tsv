@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-18T11:12Z	heartbeat	full 39120347568 cancelled (superseded); full 39122016685 (7bd94d21, holds #2701 #2707) pending; scoped design 39118734724 (holds #2696 S-8) still running; CB-3 not opened; 7 design findings open (>5)
 2026-10-18T11:36Z	check	S-8 on 39118734724; #2751 SS-b r1 fixer sent; runs 39122750799/39122776184 (e3a4582c) hold #2701 #2707
 2026-10-18T11:39Z	check	#2751 blocked on needs-ui #2623
+2026-10-18T11:58Z	heartbeat	scoped design 39122750799 in progress, full 39122776184 queued (e3a4582c); findings 9; CB-3 not open
