@@ -15,7 +15,7 @@
 // tab and what is presented (FlarePresentation, in FlareNewSheet.swift).
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
 // `help` for every section 3.4 item, the Undo and Redo step names, the recent
-// files and Loop.
+// files, Loop and the selection's Edit reasons.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -83,7 +83,8 @@ struct FlareWindow: View {
             FlareMenu(
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
-                recent: model.recent, loops: model.loops))
+                recent: model.recent, loops: model.loops, editHelps: model.editHelps,
+                selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)]))
     }
 
     /// The menu bar's door: File > Open Sample > Keyed Ball opens the keyed

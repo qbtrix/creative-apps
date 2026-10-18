@@ -8,7 +8,9 @@
 // IC columns can't render in-process (the four-appearance host is #332). The
 // -contrast files set the environment's contrast (the underscored setter),
 // which shows the component's own IC change, the well outline. Writes
-// suite-tone-curve-light, -dark, -light-contrast and -dark-contrast .png.
+// suite-tone-curve-light, -dark, -light-contrast and -dark-contrast .png,
+// and checks the gallery against Golden/inspector/tone-curve-<appearance>.png
+// in SnapshotHost's four appearances (a missing baseline is a known issue).
 import CoreRaster
 import SuiteUI
 import SwiftUI
@@ -29,6 +31,12 @@ import Testing
             try snapshot(
                 gallery.environment(\._colorSchemeContrast, .increased), name: "suite-tone-curve-\(look)-contrast",
                 scheme: scheme)
+        }
+        // Three 240 pt inspector columns, 32 pt apart and around.
+        for appearance in SnapshotAppearance.allCases {
+            assertGolden(
+                gallery, size: CGSize(width: 848, height: 300), name: "tone-curve", area: "inspector",
+                appearance: appearance)
         }
     }
 
