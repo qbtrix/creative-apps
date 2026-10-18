@@ -23,10 +23,12 @@ public struct LoupeRequest: Sendable, Hashable {
 extension LibraryCatalog {
     /// After the loupe's photo changes: the grid thumbnail as a `.preview` render
     /// (or nil), no error, a new token; the zoom stays (stepping at 100% compares focus).
-    /// Reads the thumbnail by the focused id, never scanning `order` or `items` (QB-LIB-5: 1 ms at 10,000).
-    public mutating func loupeFocusChanged() {
+    /// Reads the thumbnail by the focused id, never scanning `order` or `items` (QB-LIB-5: 1 ms at 10,000),
+    /// from `cache` when the window keeps the thumbnails apart, else from the catalog's own.
+    public mutating func loupeFocusChanged(from cache: LibraryThumbnailCache? = nil) {
         loupeRenderToken &+= 1
         loupeError = nil
+        let thumbnails = cache?.thumbnails ?? self.thumbnails
         let held = mode == .loupe ? focusedItemID.flatMap { thumbnails[$0] } : nil
         loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }
     }
