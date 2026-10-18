@@ -23,3 +23,4 @@ Next: parked: the captain's comment on #1529 (2026-10-17 03:08 UTC) takes this f
 ## Open
 - 2026-10-18 run act-1a14d17c86c-d1qr keeps this parked. Its wave.json now depends on editor-chrome (#2554), since both own ToolbarGroup.swift: EC-8 lands before `.rail` is deleted.
 - Waits on the captain lifting the beta cut.
+- 2026-10-18T04:35Z run act-1a14d1f3122-r1yb: still parked; the captain's beta cut on #1529 stands and nothing is in flight.
