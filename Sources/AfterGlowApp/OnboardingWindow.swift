@@ -7,7 +7,8 @@
 // launch when `launchBehavior` says so (OnboardingLaunch, decided once,
 // before the first frame) and Help > Welcome to AfterGlow reopens it.
 // Closing the window is Skip: `onDisappear` without a finish calls
-// `model.skip()`. The view only reads the model and calls its methods.
+// `model.skip()`. `init(model:)` lets the snapshot and render budget suites
+// show a model they drove. The view only reads the model and calls its methods.
 import Foundation
 import SuiteModel
 import SuiteUI
@@ -35,6 +36,11 @@ struct OnboardingWindow: View {
             services: services, samplesFolder: SampleCatalog.folder(resources: Bundle.main.resourcePath ?? ""),
             documents: support + "/Documents", present: { FileManager.default.fileExists(atPath: $0) },
             copy: { _, _ throws(SuiteError) in throw SuiteError.notAvailable("Samples arrive with the onboarding feature.") }))
+    }
+
+    /// The window over a given model: AfterGlowOnboardingSnapshots shoots a page or state it put the model in.
+    init(model: OnboardingModel) {
+        _model = State(initialValue: model)
     }
 
     var body: some View {
