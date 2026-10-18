@@ -66,7 +66,8 @@ extension LibraryWindow {
             fitMeasured: { fit in areas.loupe.fitScale = fit })
     }
 
-    /// Called when `model.focusedItemID` changes (the loupe's photo): the held
+    /// Called when `model.focusedItemID` or `model.mode` changes (the loupe's
+    /// photo, or the loupe opening on the photo the grid had focused): the held
     /// thumbnail as a preview, then the full render and the neighbours.
     func loupeAreaFocusChanged() {
         guard model.mode == .loupe else { return }
