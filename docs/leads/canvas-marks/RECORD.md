@@ -1,10 +1,10 @@
 # canvas-marks lead record
 
 Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
-Run: act-1a14d48ae2f-857a (line lead with #1344, #1939; took over from act-1a14d1f3122-r1yb) · Session: claude/feature-lead-playbook-147xje · Started: 2026-10-16T22:48Z (resumed 2026-10-18T04:36Z)
-Stage: 2 build (wave 2 CM-3 open)
-Base: 9e0ac922 (origin/dev)
-Next: CM-10 #2642 macOS build failed (ambiguous `.nan` in CanvasSurfaceTests), fix ac39c74b gating; CM-2 #2752 open (PASS, Head 481361b2; over EK-box's merged bodies #2711); CM-9b #2753 open (PASS, Head 5d0ec681); CM-4 unblocked by EK-5 #2738 (stacks on CM-2); CM-15 after CM-6, CM-7 and CM-8 actuals
+Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
+Stage: 5 baselines (code tasks all merged)
+Base: 2e27b8db (origin/dev)
+Next: CM-14, CM-15, CM-16 need golden-new canvas PNGs; scoped suiteui runs 39142434472 and 39143178581 never reached the snapshot tests (SegmentedTabsTests aTabChangeRecordsAFadePair failed in Model tests, before #2841); waiting on 39153976103 (c91b1468, has #2841)
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.

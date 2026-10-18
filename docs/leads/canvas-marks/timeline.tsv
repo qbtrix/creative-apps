@@ -64,3 +64,5 @@ utc	stage	event	ref	note
 2026-10-18T16:13:31Z	findings	filed	#2847 #2848	scrollers fix gating; #2848 is cross-line (LibraryCommands Zoom In shortcut), no fix, to the supervisor
 2026-10-18T16:15:40Z	CM-13	fix gating	#2847	scrollers fix gating; #2848 with the supervisor; dev CI 39143942767 pending
 2026-10-18T16:20:27Z	fix round 1	PR open	#2856	canvas scroll bars hidden (CM-13); gate PASS
+2026-10-18T18:39:28Z	goldens	blocked	39143178581	no canvas actuals: snapshot tests skipped after aTabChangeRecordsAFadePair failed (pre-#2841); full run 39143942767 hung on onboarding (#2895)
+2026-10-18T18:39:28Z	goldens	waiting	39153976103	scoped suiteui at c91b1468 carries #2841
