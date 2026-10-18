@@ -22,6 +22,14 @@ kernel slice. The prefix sorts after `SP` so the track may depend on the
 built shell-parity features whose files it edits (`SuiteGallery.swift`).
 Design: `paw-workspace/docs/design/drafts/2026-10-17-editor-kernel.md`.
 
+The kernel track also carries the command layer (beta-80 W0, `p0`,
+2026-10-19): `command-catalog` (XK1, order 5) adds `SuiteKernel/Commands`,
+the one typed catalog every app's actions register in, and
+`adopt-command-catalog` (XK2) moves each app onto it, one slice per app.
+Its drivers, the `afterglow` CLI and MCP server, are on the suite line
+(`docs/blueprints/suite/features/afterglow-cli.md`, `afterglow-mcp.md`);
+the principle is suite.md 1.5.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 **Wave 4 (beta-80 W1, 2026-10-18).** `font-picker` is SuiteUI's piece of

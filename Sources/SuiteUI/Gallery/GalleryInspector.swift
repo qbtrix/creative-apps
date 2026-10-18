@@ -5,7 +5,8 @@
 // Fill color row with its hex field, the Cap picker, a checkbox row, a
 // disabled action) and MOTION (easing presets, blend chips, the Onion chip).
 // `curves` draws the easing CurveEditor, the ToneCurveEditor and a
-// StudioScrubRow. Each page writes one line per callback to
+// StudioScrubRow (Duration, in seconds). The Onion chip and the Cap picker
+// carry tooltips that say what they are. Each page writes one line per callback to
 // `suite.gallery.log` (`rotation 40°`, `rotation 40° ends 1`, `color #FF3B30`,
 // `reset transform`, `cap round`, `key add, Keyed at this frame`,
 // `preset ease-out`, `chip onion on`, `handle1 x 0.42, y 0.10`,
@@ -25,6 +26,11 @@ enum GalleryInspector {
         "curves": { AnyView(GalleryCurvesPage()) },
         "notes": { AnyView(GalleryNotesPage()) },
     ]
+
+    /// The Onion chip's tooltip: what onion skin does, not its label again.
+    static let onionHelp = "Onion Skin: show the frames before and after the current one"
+    /// The Cap picker's tooltip: what the cap is.
+    static let capHelp = "Line Cap: how stroke ends are drawn"
 }
 
 /// The `inspector` page: every inspector row over the page's own state.
@@ -135,6 +141,7 @@ private struct GalleryInspectorPage: View {
                 cap = new
                 log.write("cap \(new)")
             }
+            .help(GalleryInspector.capHelp)
             .suiteControl(id: "suite.gallery.inspector.cap", enabled: true, reason: nil)
             InspectorRow("") {
                 Toggle("Snap to Pixels", isOn: Binding(get: { snap }, set: { on in
@@ -169,7 +176,9 @@ private struct GalleryInspectorPage: View {
                 log.write("blend \(id)")
             }
             .galleryRegisters(blends.compactMap(\.identifier))
-            GallerySwitch(title: "Onion", id: "suite.gallery.inspector.chip-onion", isOn: onion) {
+            GallerySwitch(
+                title: "Onion", id: "suite.gallery.inspector.chip-onion", isOn: onion, help: GalleryInspector.onionHelp
+            ) {
                 onion.toggle()
                 log.write("chip onion \(onion ? "on" : "off")")
             }
@@ -240,7 +249,7 @@ private struct GalleryCurvesPage: View {
                         },
                         onEnd: { log.end("easing") })
                     StudioScrubRow(
-                        label: "Duration", value: duration, range: 0...10, step: 0.1,
+                        label: "Duration", value: duration, range: 0...10, step: 0.1, unit: "s",
                         onChange: { new in
                             duration = new
                             log.write("duration \(NumericInput.text(new, decimals: 2, unit: "s"))")
@@ -316,16 +325,18 @@ private struct GalleryInspectorLogView: View {
     }
 }
 
-/// One page switch: a ChipRow of one chip, so its identifier lands on that chip alone.
+/// One page switch: a ChipRow of one chip, so its identifier lands on that chip alone; its tooltip is `help`, or the
+/// title when the title says it all.
 private struct GallerySwitch: View {
     let title: String
     let id: String
     let isOn: Bool
+    var help: String?
     let toggle: @MainActor () -> Void
 
     var body: some View {
         ChipRow([ChipItem(id: id, title: title, isOn: isOn)]) { _ in toggle() }
-            .help(title)
+            .help(help ?? title)
             .suiteControl(id: id, enabled: true, reason: nil)
     }
 }

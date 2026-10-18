@@ -105,7 +105,31 @@ actor RacingPreferences: PreferencesStoring {
         await m.skip()
         let p = try await saved(s)
         #expect(p.onboardingDoneVersion == 1 && p.homeOrder == SuiteApp.apps)
-        #expect(m.isFinished && m.focus == nil && m.message == nil)
+        #expect(m.isFinished && m.message == nil)
+    }
+
+    @Test func skipOnAReopenedTourKeepsTheHomeOrder() async throws {
+        let done = FakeOnboarding().finishing(SuitePreferences(), focus: .photos, version: 1)
+        let (m, s) = await model { $0.preferences = FakePreferences(done) }
+        await m.skip()
+        let p = try await saved(s)
+        #expect(p.onboardingDoneVersion == 1 && Array(p.homeOrder.prefix(2)) == [.library, .photo])
+        #expect(m.isFinished && m.message == nil)
+    }
+
+    @Test func aHandOffThatLandsAfterTheWindowClosedKeepsTheFocus() async throws {
+        let done = FakeOnboarding().finishing(SuitePreferences(), focus: .photos, version: 1)
+        let (m, s) = await model { $0.preferences = FakePreferences(done) }
+        await m.skip()
+        await m.openSample(.flare, now: now)
+        #expect(try await sent(s).count == 1)
+        #expect(Array(try await saved(s).homeOrder.prefix(2)) == [.library, .photo])
+    }
+
+    @Test func aMissingSampleSaysItIsNotInThisBuild() async throws {
+        let (m, _) = await model(present: { $0.hasPrefix("/R/Samples/") && !$0.hasSuffix(".flare") })
+        await m.openSample(.flare, now: now)
+        #expect(m.message?.message == "The Flare sample isn't in this build.")
     }
 
     @Test func finishAfterPhotosSavesLibraryAndPhotoFirst() async throws {
@@ -189,10 +213,28 @@ actor RacingPreferences: PreferencesStoring {
         let refusal = "Switching isn't available yet."
         let (m, s) = await model { $0.sending = FakeHandOffs(unavailable: refusal) }
         await m.startNew(try flareHD(), now: now)
-        #expect(m.message == .notAvailable(refusal) && !m.isFinished)
+        #expect(m.message == .notAvailable(refusal) && !m.isFinished && m.launching == nil)
         #expect(try await saved(s).onboardingDoneVersion == nil)
         await m.openSample(.flare, now: now)
-        #expect(m.message == .notAvailable(refusal) && !m.isFinished)
+        #expect(m.message == .notAvailable(refusal) && !m.isFinished && m.launching == nil)
+    }
+
+    @Test func aSendAfterARefusalClearsTheOldSentence() async throws {
+        let gate = GateSending()
+        let (m, _) = await model { $0.sending = gate }
+        let preset = try flareHD()
+        let refused = Task { await m.startNew(preset, now: now) }
+        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.finish(.failure(.timedOut))
+        await refused.value
+        #expect(m.message == .timedOut && m.launching == nil && !m.isFinished)
+        let next = Task { await m.openSample(.design, now: now) }
+        while !(await gate.isWaiting) { await Task.yield() }
+        #expect(m.message == nil && m.failed == nil && m.launching == .design)
+        await gate.finish(.success(SwitchReceipt(app: .design, wasRunning: false, requestedAt: 1)))
+        await next.value
+        #expect(m.message == nil && m.isFinished)
+        #expect(await gate.sent.map(\.to) == [.flare, .design])
     }
 
     @Test func openSampleWhoseFileIsGoneRecordsNothing() async throws {
@@ -200,7 +242,7 @@ actor RacingPreferences: PreferencesStoring {
         await m.openSample(.flare, now: now)
         #expect(log.all.isEmpty)
         #expect(try await sent(s).isEmpty)
-        #expect(m.message == .fileMissing(name: "Bounce.flare") && !m.isFinished && m.launching == nil)
+        #expect(m.message == .notAvailable("The Flare sample isn't in this build.") && !m.isFinished && m.launching == nil)
     }
 
     @Test func openSampleWhoseFileVanishedAfterLoadRecordsNothing() async throws {
@@ -211,7 +253,7 @@ actor RacingPreferences: PreferencesStoring {
         await m.openSample(.flare, now: now)
         #expect(log.all.isEmpty)
         #expect(try await sent(s).isEmpty)
-        #expect(m.message == .fileMissing(name: "Bounce.flare") && !m.isFinished && m.launching == nil)
+        #expect(m.message == .notAvailable("The Flare sample isn't in this build.") && !m.isFinished && m.launching == nil)
     }
 
     @Test func aRefusedCopySendsNothing() async throws {
@@ -280,7 +322,7 @@ actor RacingPreferences: PreferencesStoring {
     @Test func aSampleThatCantOpenKeepsItsTileAndTheNextStartClearsIt() async throws {
         let (m, _) = await model(present: { $0.hasPrefix("/R/Samples/") && !$0.hasSuffix(".flare") })
         await m.openSample(.flare, now: now)
-        #expect(m.message == .fileMissing(name: "Bounce.flare") && m.failed == .flare)
+        #expect(m.message == .notAvailable("The Flare sample isn't in this build.") && m.failed == .flare)
         await m.openSample(.design, now: now)
         #expect(m.message == nil && m.failed == nil && m.isFinished)
     }

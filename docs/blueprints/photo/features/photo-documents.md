@@ -144,7 +144,7 @@ error state per note 3, and one new journey.
    is titled "<file> can't be opened." and reads "It isn't a Photo Document
    or an image Photo can open.", "It was saved by a newer version of Photo.
    Update Photo to open it.", "It is damaged and can't be read." or "It is
-   larger than Photo can open: up to 16 megapixels." (#1266).
+   larger than Photo can open: up to 40 megapixels." (#1266).
 6. **PJ-P3 `testOpenLargeDocument`** (`+PerfDocuments`): write a 4000 × 3000
    photo with `writeTestPhoto(to:width:height:)`, open it, add two layers
    and save as a document (see D-12; `-PhotoFixture large` runs on fakes),
