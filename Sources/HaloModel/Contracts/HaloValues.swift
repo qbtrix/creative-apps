@@ -10,6 +10,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import FlareCore
+import SuiteKernel
 
 public typealias HaloKeyframe = FlareCore.Keyframe
 public typealias HaloEasing = FlareCore.Easing
@@ -146,10 +147,11 @@ public enum HaloEasingPreset: String, CaseIterable, Sendable {
 
     public var easing: HaloEasing { kernel.easing }
 
-    /// The preset `easing` equals; nil for a custom curve.
+    /// The preset `easing` equals; nil for a custom curve or the kernel's
+    /// `ease`, which Halo doesn't show.
     public init?(_ easing: HaloEasing) {
-        guard let match = Self.allCases.first(where: { $0.easing == easing }) else { return nil }
-        self = match
+        guard let match = EasePreset.allCases.first(where: { $0.easing == easing }) else { return nil }
+        self.init(match)
     }
 }
 

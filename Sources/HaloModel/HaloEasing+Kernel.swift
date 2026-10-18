@@ -28,22 +28,12 @@ extension HaloKeySegment {
 }
 
 extension HaloEasingPreset {
-    /// The kernel's preset of the same name.
-    public var kernel: EasePreset {
-        switch self {
-        case .linear: .linear
-        case .easeIn: .easeIn
-        case .easeOut: .easeOut
-        case .easeInOut: .easeInOut
-        case .hold: .hold
-        }
-    }
+    /// The kernel's preset of the same name: the raw values match, so the
+    /// fallback never runs.
+    public var kernel: EasePreset { EasePreset(rawValue: rawValue) ?? .linear }
 
     /// Halo's preset for the kernel's; nil for `ease`, which Halo doesn't show.
-    public init?(_ preset: EasePreset) {
-        guard let match = Self.allCases.first(where: { $0.kernel == preset }) else { return nil }
-        self = match
-    }
+    public init?(_ preset: EasePreset) { self.init(rawValue: preset.rawValue) }
 }
 
 extension HaloKeyState {
