@@ -4,7 +4,7 @@ Issue: #1513 · Packet: docs/blueprints/library/features/loupe-viewport.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: round 1 fixes all merged (#2859, #2860, #2878 at 2e27b8d). Scoped library 39153204776 (c91b146, #2860 only): 12 of 15 pass, J8 relaunch green (#2881 closed); the 3 red (J2 grid, J1 import crash, J3 loupe thumbnail) are what #2878 fixes. Waiting on scoped library 39157077321 (1fcbcd9, has #2878, queued) and full CI 39155751405. Green: contact sheet. Red: round 2 (the last), then gaps
+Next: round 1 fixes all merged; #2749 #2766 #2882 closed by the lane. Full CI 39155751405 was cancelled (superseded). Waiting on scoped library 39157077321 (1fcbcd9, has #2878, still queued: runners backed up) and full CI 39159685451 (0526d31, pending). Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
