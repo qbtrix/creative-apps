@@ -26,5 +26,19 @@
     "find": "\\(s.app.displayName) sample",
     "replace": "\\(s.title) sample",
     "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "photoTitleCapitalised",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "type: .photoOpenRaster, title: \"Beach\")",
+    "replace": "type: .photoOpenRaster, title: \"beach\")",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "titleIsDisplayName",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "type: .flareAnimation, title: \"Bounce\")",
+    "replace": "type: .flareAnimation, title: \"Bounce.flare\")",
+    "tests": "SampleCatalogTests"
   }
 ]
