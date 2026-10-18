@@ -74,7 +74,7 @@ struct OnboardingWindow: View {
                         .help(model.startEmptyHelp)
                         .disabled(model.launching != nil)
                         .suiteControl(id: OnboardingControls.startEmpty, enabled: model.launching == nil,
-                                      reason: model.launching == nil ? nil : "A document is opening.")
+                                      reason: model.sendingReason)
                 } else {
                     Button("Continue") { model.continue() }
                         .buttonStyle(.borderedProminent)

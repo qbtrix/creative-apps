@@ -163,6 +163,7 @@ private func occurrences(of needle: String, in text: String) -> Int {
         for help in [".help(model.skipHelp)", ".help(model.backHelp)", ".help(model.startEmptyHelp)"] {
             #expect(occurrences(of: help, in: window) == 1, "\(help)")
         }
+        #expect(!window.contains("\"A document is opening.\""), "the window spells the hand-off's reason itself")
         let start = try source("Sources/AfterGlowApp/OnboardingStartPage.swift")
         #expect(start.contains(".help(model.presetsHelp(tile))") && start.contains(".help(model.sampleHelp(starter))"))
         #expect(!start.contains("at once"), "a chip's help still says at once")
