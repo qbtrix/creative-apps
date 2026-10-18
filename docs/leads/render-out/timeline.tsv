@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-17T23:16Z	6	heartbeat	act-1a14c24f6d2-lrkw	resumed, rebased on main 59c435a6; 0 open findings; waiting on CI 39076534514
 2026-10-17T23:36Z	6	full-ci-check	39076534514	macOS red on Design snapshot tests only, not Halo; Halo render timing p95 74.6ms/60ms report-only
 2026-10-17T23:58Z	6	heartbeat	39076534514	still in progress (ui-test, no journey output yet); next full run 39080371690 on a6150139 pending
+2026-10-18T00:19Z	6	heartbeat	39076534514	still in progress (ui-test); 39080371690 on a6150139 still pending, no jobs
