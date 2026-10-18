@@ -108,6 +108,18 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(applied.payloads == ["a", "b"])
     }
 
+    @Test func undoEndsRunUnderAnEarlierStep() {
+        var history = History<String>()
+        var applied = Applied()
+        history.record("Move", "a")
+        history.record("Nudge", "b", key: "nudge")
+        #expect(history.undo { applied.flip($0) })
+        // With Move still applied, the next nudge is its own step, never folded into Move.
+        history.record("Nudge", "c", key: "nudge")
+        #expect(history.steps == ["Move", "Nudge"])
+        #expect(history.index == 2)
+    }
+
     @Test func redoEndsRun() {
         var history = History<String>()
         var applied = Applied()
