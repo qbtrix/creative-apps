@@ -207,3 +207,20 @@ private func file(_ pages: [DesignPage]) throws -> Data {
     #expect(Set(reasons).count == errors.count && reasons.allSatisfy { $0.hasSuffix(".") })
     #expect(reasons[2].contains("3") && reasons[4].contains("node-4") && reasons[5].contains("node-5"))
 }
+
+/// #2936: a damaged file says what is wrong in plain words first; the raw id is only a detail.
+@Test func aDamagedFileSaysSoBeforeNamingTheID() {
+    #expect(DesignFileError.duplicateID("node-2").reason == "It is damaged: two of its layers share the id node-2.")
+    #expect(DesignFileError.notAContainer("node-5").reason.hasPrefix("It is damaged: a layer that isn't a frame"))
+    #expect(DesignFileError.invalidNumber("page-2").reason.hasPrefix("One of its layers has a size or position"))
+    for error: DesignFileError in [.duplicateID("node-2"), .notAContainer("node-2"), .invalidNumber("node-2")] {
+        #expect(error.reason.hasSuffix(" node-2.") || error.reason.hasSuffix("(node-2)."), "\(error)")
+    }
+}
+
+/// #2937: a newer file says which version this Design opens and what to do next.
+@Test func aNewerFileSaysWhichVersionOpensAndWhatToDo() {
+    let reason = DesignFileError.unsupportedVersion(99).reason
+    #expect(reason.contains("(file version 99; this version opens up to \(LiveFiling.fileVersion))."))
+    #expect(reason.hasSuffix(" Update Design to open it."))
+}

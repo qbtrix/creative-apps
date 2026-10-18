@@ -29,16 +29,20 @@ public enum DesignFileError: Error, Equatable, Sendable {
     /// The id of a page or node whose size or position cannot be drawn.
     case invalidNumber(String)
 
-    /// What to tell the person, ending in a full stop.
+    /// What to tell the person, ending in a full stop: the problem in plain words first, a raw
+    /// id only as the closing detail, and for a newer file the version this Design opens and
+    /// what to do (#2936, #2937).
     public var reason: String {
         switch self {
         case .noFile: "There is no file open to save."
         case .unreadable: "It is not a Design file."
-        case .unsupportedVersion(let version): "It was made by a newer version of Design (file version \(version))."
+        case .unsupportedVersion(let version):
+            "It was made by a newer version of Design (file version \(version); this version opens up to "
+                + "\(LiveFiling.fileVersion)). Update Design to open it."
         case .noPages: "It has no pages."
-        case .duplicateID(let id): "It uses the id \(id) more than once."
-        case .notAContainer(let id): "The layer \(id) holds other layers but isn't a frame or group."
-        case .invalidNumber(let id): "The size or position of \(id) isn't valid."
+        case .duplicateID(let id): "It is damaged: two of its layers share the id \(id)."
+        case .notAContainer(let id): "It is damaged: a layer that isn't a frame or group holds other layers (\(id))."
+        case .invalidNumber(let id): "One of its layers has a size or position that can't be drawn (\(id))."
         }
     }
 }
