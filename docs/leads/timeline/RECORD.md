@@ -4,7 +4,7 @@ Issue: #1480 · Packet: docs/blueprints/suiteui/features/timeline.md
 Run: act-1a149babb21-udz7 (line lead with #1079, #1480, #1596; earlier act-1a1487bf89a-zfq8) · Session: claude/suiteui-feature-lead-t357v5 · Started: 2026-10-16T18:10Z (this run 2026-10-17T06:10Z)
 Stage: 3 wave 11 (checked)
 Base: 9ba6658425c543613715ebbf34d677a380ef8cc3
-Next: #2048 head f81b5240 (dev merged, gate CI: PASS, body: footer removed, Fixes #2059 added) waits on the lane (macOS build-only run). Scoped suiteui 39034310918 shows whether #2012 cleared. TL-21 starts once open findings are 5 or fewer (now #2014 + #2059 + the 7 #2048 fixes)
+Next: none. timeline is done (Belt-Contact-Sheet run 39078610003 on #1480); the lead's live status is on lead/lists-and-layers and lead/inspector-controls.
 
 TL-a to TL-e are merged-done on full run 39001215720 (bd11faf7, Linux green); their `Belt-Slice-Done:` and `Mac-Finish-Wanted:` lines are on #1480 (2026-10-17T06:3xZ), with `Mutate: macOS pending` per the Q10 decision. TL-f (the 2026-10-17 amendment) is the work left: TL-20 → TL-21 → TL-22 → TL-23 (`feature-done`), one per wave, then the contact sheet.
 
