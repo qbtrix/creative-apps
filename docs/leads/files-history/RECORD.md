@@ -65,3 +65,4 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - 2026-10-18T18:30:31Z: wave 4 opened FH-5 #2896 (head b8412161) and FH-7 #2894 (head bfcccd0d, held). Both had the attribution footer stripped. Contract checks were otherwise clean.
 - 2026-10-18T19:03Z heartbeat: full CI 39153086055 was cancelled. FH-a waits on scoped design run 39155524227 (dev 2e27b8db), queued. #2896 FH-5's macOS build 39154768808 is still running; #2894 FH-7 stays held.
 - 2026-10-18T19:25Z heartbeat: #2896 FH-5's macOS build 39154768808 passed at 19:07Z, so it waits on the lane's merge. #2894 FH-7 stays held. Scoped design run 39155524227 is in progress.
+- 2026-10-18T19:44Z: #2896 FH-5 merged at 19:28Z, so I removed `no-fast-lane` from #2894 FH-7. Scoped design run 39155524227 (dev 2e27b8db) is green and contains #2870 and #2879, so I posted `Belt-Slice-Done: FH-a` on #1499. The FH-a critic panel (wf_48b462ba-016) is running.
