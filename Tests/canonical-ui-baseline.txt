@@ -6,11 +6,9 @@
 A Sources/AfterGlowApp/UpdateSheet.swift::UpdateSheet Sheet
 A Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark CanvasMark
 A Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark CanvasMark
-A Sources/DesignApp/DesignInspectorStyle.swift::DesignStyleHint Notice
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayerRow LayerList
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayerTree LayerList
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayersPanel LayerList
-A Sources/DesignApp/DesignPanel.swift::DesignPanelHint Notice
 A Sources/DesignApp/DesignSaveStatus.swift::DesignSaveStatus SaveStatus
 A Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox CanvasMark
 A Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement Probe
@@ -26,7 +24,6 @@ A Sources/HaloApp/HaloLayerList.swift::HaloLayerRow LayerList
 A Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet Sheet
 A Sources/HaloApp/HaloRenderedFrameView.swift::HaloRenderedNote Notice
 A Sources/HaloApp/HaloTransport.swift::HaloTransport Transport
-A Sources/HaloApp/HaloViewer.swift::HaloRefusalCaption Notice
 A Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet Sheet
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow Notice
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow Notice
@@ -69,7 +66,6 @@ B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet error-label
 B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet sheet-buttons
 B Sources/HaloApp/HaloTextInspector.swift::HaloTextInspector pending-commit
 B Sources/HaloApp/HaloTransport.swift::HaloTransport transport
-B Sources/HaloApp/HaloViewer.swift::HaloRefusalCaption error-label
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet error-label
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet sheet-buttons
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow error-label

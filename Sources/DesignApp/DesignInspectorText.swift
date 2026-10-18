@@ -79,7 +79,7 @@ struct DesignInspectorText: View {
                          id: DesignControlID.inspectorTextAlignment) { alignment in
                     commit { $0.alignment = alignment }
                 }
-                if let help { DesignPanelHint(help) }
+                if let help { InspectorNote(help) }
             }
         }
     }

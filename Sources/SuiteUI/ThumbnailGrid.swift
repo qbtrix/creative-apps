@@ -18,7 +18,7 @@ import SwiftUI
 /// Small symbols over a thumbnail. `rating` is clamped to 0...5 stars. The
 /// color label's `name` is its accessibility label, so color never carries
 /// the meaning alone. `dimmed` (a reject) draws the image at 40% with an
-/// `xmark.circle` badge labelled "Rejected".
+/// `xmark.circle.fill` badge labelled "Rejected", solid like the stars.
 public struct ThumbnailBadges: Sendable {
     public let rating: Int
     public let isFlagged: Bool
@@ -268,7 +268,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(Text(verbatim: marks.rating == 1 ? "1 star" : "\(marks.rating) stars"))
                 }
-                if marks.dimmed { Image(systemName: "xmark.circle").accessibilityLabel("Rejected") }
+                if marks.dimmed { Image(systemName: "xmark.circle.fill").accessibilityLabel("Rejected") }
                 if marks.isFlagged { Image(systemName: "flag.fill").accessibilityLabel("Flagged") }
                 if let label = marks.colorLabel {
                     Image(systemName: "circle.fill").foregroundStyle(label.color).accessibilityLabel(label.name)
