@@ -28,7 +28,7 @@ Next: #2465 fix PR #2701 (DW-a round 2) in the lane; DW-a re-done on a successfu
 | D0-9c | DW-d | 3 | hover outline and pointers in DesignCanvasFeedback | DesignCanvasFeedback.swift; snapshots; DesignCanvasHoverTests | DesignCanvasFeedbackSnapshots | #2280 | merged df60ad7 |
 | D0-8b | DW-b | 4 | editor bodyRuns counter, 120-sample drag check | DesignEditor.swift; DesignWindowDragTests | DesignWindowDragTests | #2309 | merged 0c29554 |
 | D0-7a | DW-c | 5 | suiteProbes and ids on window controls | DesignWindow.swift, DesignEditor.swift, DesignCanvas.swift, DesignControlID.swift; DesignControlIDTests | DesignControlIDTests | #2374 | merged d2249aa |
-| D0-9d | DW-d | 5 | size badge from the live box, text preview; testCanvasFeedback on | DesignCanvasFeedback.swift; snapshots; DesignCanvasBadgeTests; +Feedback journey | DesignCanvasBadgeTests | #2899 | open, head 7144f9a6 (fast-lane; lane macOS build pending) |
+| D0-9d | DW-d | 5 | size badge from the live box, text preview; testCanvasFeedback on | DesignCanvasFeedback.swift; snapshots; DesignCanvasBadgeTests; +Feedback journey | DesignCanvasBadgeTests | #2899 | open, head 7144f9a6; lane needs-rebase 18:43Z (C4 parts conflict), fixer merging dev |
 | D0-7b | DW-c | 6 | J15 sweep and layout journey; feature-done | UITests/DesignJourneyTests+EveryControl.swift, +Layout.swift | J15, testLayoutAtWidths | – | waits D0-6, D0-7a, D0-9d |
 
 Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other's code: the canvas slots read only the existing Model). C-2 (copy-group) runs beside them.
