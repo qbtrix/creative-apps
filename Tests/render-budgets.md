@@ -44,9 +44,9 @@ has to end up.
 | Flare | draw an ellipse on the canvas, 120 samples (Rectangle is not connected yet, IN-1) | 1 / 3 / 3 (debug; 122 before #1792) | p95 2.3–2.5 ms release, 2.3–2.5 debug / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
 | SuiteUI | stroke pad on the editor-kernel chrome panel, 120 samples, `RenderBudgetEditorKernelStrokeTests` | not yet / 1 / 0 | not yet / not gated / 8.3 ms | first measured by the macOS run after EK-31; the pad's samples stay in its own state, paced by `SuiteStrokePacer` |
-| AfterGlow onboarding | click Continue (page 1 to 2) | not yet / 2 / 1 | not yet / 50 / 16 ms | first measured by the macOS run after OB-5 |
-| AfterGlow onboarding | click the Photos focus chip | not yet / 1 / 0 | not yet / 50 / 16 ms | first measured by the macOS run after OB-5 |
-| AfterGlow onboarding | move the pointer across the first starter row, 120 samples | not yet / 0 / 0 | not yet / 16 / 8.3 ms | first measured by the macOS run after OB-5 |
+| AfterGlow onboarding | click Continue (page 1 to 2) | 1 / 1 / 1 | 14 ms debug (31 ms on a cold first run) / 35 / 16 ms | none in flight; at target bodies. Release not measured: `swift test -c release` fails to link SuiteUITests (#2714) |
+| AfterGlow onboarding | click the Photos focus chip | 0 / 0 / 0 | 9.5 ms debug (24 ms cold) / 30 / 16 ms | none in flight. The click focuses the chip, and the system focus ring animates in: ~700–800 layout passes (~55 ms) over the 100 ms after the step, off the step time |
+| AfterGlow onboarding | move the pointer across the first starter row, 120 samples | 0 / 0 / 0 | 0.09 / 1 / 8.3 ms | none in flight; under target |
 
 Bodies for Flare's scrub row and Library's selection count one per edit: each
 step changes the model once. Their target is that count, not 3. Halo's
