@@ -17,3 +17,5 @@ utc	stage	event	ref	note
 2026-10-18T23:00Z	3	heartbeat	-	lane macOS builds queued: #3003 39173727972, #3004 39173846993, #2993 39173694212; feature findings 0 (line CI findings #2908-#2910 open, not this feature's)
 2026-10-18T23:21Z	3	ci-run	39173727972	macOS build-only green on #3003 (SL-1) head 6c31df92; lane merges on next sweep
 2026-10-18T23:21Z	3	heartbeat	-	#3004 39173846993 and #2993 39173694212 still queued; lane sweep 39176056596 pending; feature findings 0
+2026-10-18T23:33Z	3	pr-merged	#3003	SL-1 merged as db15b8a6
+2026-10-18T23:33Z	3	heartbeat	-	#3004 (SL-2) 39173846993 and #2993 (SL-3) 39173694212 macOS builds still queued; SL-4/5/7 wait on #3004; feature findings 0

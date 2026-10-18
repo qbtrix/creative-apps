@@ -16,7 +16,7 @@ Next: lane merges #3003, #3004, #2993 (refreshed onto dev for the macOS build); 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| SL-1 | SL-a | 1 | LibraryLayout: content width, grid columns, loupe fit | Sources/LibraryModel/LibraryLayout.swift, Tests/LibraryModelTests/LibraryLayoutTests.swift, Tests/mutations/LibraryModel.LibraryLayout.json | LibraryLayoutTests | #3003 | pr-open |
+| SL-1 | SL-a | 1 | LibraryLayout: content width, grid columns, loupe fit | Sources/LibraryModel/LibraryLayout.swift, Tests/LibraryModelTests/LibraryLayoutTests.swift, Tests/mutations/LibraryModel.LibraryLayout.json | LibraryLayoutTests | #3003 | merged db15b8a6 |
 | SL-2 | SL-a | 1 | status contract and statusRow; empty inspector header; MJ1; SL-5 tests disabled; model C4 part | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json, docs/c4/parts/creative-apps/library-model/library-model-sources.json | LibraryStatusTextTests | #3004 | pr-open |
 | SL-3 | SL-b | 1 | J12 written whole, skipped "waits on SL-4" | UITests/LibraryJourneyTests+Layout.swift | J12 compiles and skips | #2993 | pr-open |
 | SL-4 | SL-b | 2 | LibraryStatusBar under grid and loupe from statusRow | Sources/LibraryApp/LibraryStatusBar.swift, Tests/AppSnapshotTests/LibraryStatusSnapshots.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | LibraryStatusSnapshots, J12 | - | planned |
