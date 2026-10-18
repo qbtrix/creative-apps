@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-18T16:27:25Z	pr-open	F-2851	#2858 head 74cee90d, 3 files +21/-1, Mutate 6/6; footer stripped
 2026-10-18T16:29:38Z	heartbeat	-	full 39143942767 Linux running; scoped 39143959244 macOS running; #2857 #2858 open; findings #2850 #2852 queued behind them
 2026-10-18T16:30:04Z	slice-done	OB-m	run 39143942767 Linux green at bafd1d38
+2026-10-18T16:34:37Z	check	OB-u	scoped suite 39143959244 green, no screens (suite scope runs none); screens come from full 39143942767 macOS job

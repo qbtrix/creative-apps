@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-m done. OB-s after #2857 and #2858 merge and a dev run holding them is Linux-green; then fixers for #2850, #2852. OB-u after OB-5g (goldens from scoped suite run 39143959244), then Mac-Finish-Wanted OB-u. Critics for OB-u, OB-m, OB-z on that scoped run. OB-13 once switching and bundled samples are on dev.
+Next: OB-m done. OB-s after #2857 and #2858 merge and a dev run holding them is Linux-green; then fixers for #2850, #2852. OB-u after OB-5g (goldens from the snapshots of full run 39143942767 (macOS job)), then Mac-Finish-Wanted OB-u. Critics for OB-u, OB-m, OB-z on that full run's snapshots and ui-screens. OB-13 once switching and bundled samples are on dev.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -80,3 +80,4 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - OB-12 (#2824): 7 files +100/-15; pending count was 8 on dev (packet said 9), now 7; copySample makes Documents/Samples and never overwrites, failures show as ioFailed(<file>); no Model code, so no mutation line. OJ3/OJ4 skip in AfterGlowOnboardingStartJourneys. OB-13 still needs the bundled samples (does bundle-apps copy Bundle/Samples/?) and switching's Window > Switch To.
 - OB-8b (#2825): tests and plan only (3 files +46/-6); Mutate 10/10 SuiteModel.OnboardingModel. Added openSampleWhoseFileVanishedAfterLoadRecordsNothing because OB-8's "openSample sends without the sample file" mutation went uncaught once OB-10's real reason merged; the reason test also covers a file that appears after load. No Model change.
 - Review 1 (OB-a, OB-s): critic panel on scoped run 39140922596 at 15e42166 (green; no ui-screens/snapshots artifacts uploaded, so code lenses only: clarity, journey, design, controls, oracle). OB-u/OB-m/OB-z review waits on a scoped app=suite run that holds #2822, #2824, #2825 and uploads screens.
+- Scoped app=suite runs upload no screens: ci.yml's scope table has `suite) journeys="" ;; # AfterGlow and SuiteModel: no snapshots or journey bundle yet`, and only size-report and app-builds come out (39143959244, green). AfterGlow onboarding snapshots and journeys come only from full runs, so OB-u, OB-m and OB-z critics and the OB-5g goldens use the macOS job of full run 39143942767 (bafd1d38).
