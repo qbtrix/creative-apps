@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-18T05:58:44Z	3	check	-	scoped design run 39101541012 on 3a8c658a (holds b8344824) queued; watching
 2026-10-18T06:20:36Z	3	check	39101541012	still queued (macOS runner backlog)
 2026-10-18T06:40:17Z	3	check	-	39101541012 still queued
+2026-10-18T07:19:27Z	3	check	-	39101541012 macOS (design) in progress
