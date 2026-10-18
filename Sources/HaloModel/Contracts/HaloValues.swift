@@ -136,29 +136,15 @@ public struct HaloKeyRef: Hashable, Sendable, Codable {
 }
 
 /// The easing presets the menu, the chips and the timeline diamonds name.
-/// Each is FlareCore's own `Easing` value; a curve matching none is custom.
+/// Each is SuiteKernel's `EasePreset` of the same name (`kernel`, in
+/// HaloEasing+Kernel.swift); a curve matching none is custom.
 public enum HaloEasingPreset: String, CaseIterable, Sendable {
     case linear, easeIn, easeOut, easeInOut, hold
 
-    public var title: String {
-        switch self {
-        case .linear: "Linear"
-        case .easeIn: "Ease In"
-        case .easeOut: "Ease Out"
-        case .easeInOut: "Ease In and Out"
-        case .hold: "Hold"
-        }
-    }
+    /// The kernel's title, but "Ease In and Out" for Ease In-Out.
+    public var title: String { self == .easeInOut ? "Ease In and Out" : kernel.title }
 
-    public var easing: HaloEasing {
-        switch self {
-        case .linear: .linear
-        case .easeIn: .easeIn
-        case .easeOut: .easeOut
-        case .easeInOut: .easeInOut
-        case .hold: .hold
-        }
-    }
+    public var easing: HaloEasing { kernel.easing }
 
     /// The preset `easing` equals; nil for a custom curve.
     public init?(_ easing: HaloEasing) {

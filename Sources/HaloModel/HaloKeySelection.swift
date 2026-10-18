@@ -226,22 +226,18 @@ extension HaloProject {
 }
 
 extension HaloEasing {
-    /// The curve's two handles; linear and hold read as (0, 0) and (1, 1).
+    /// The curve's two handles (SuiteKernel's `EaseCurve.handles`); linear
+    /// and hold read as (0, 0) and (1, 1).
     var handles: (first: HaloPoint, second: HaloPoint) {
-        switch self {
-        case let .cubicBezier(x1, y1, x2, y2): (HaloPoint(x: x1, y: y1), HaloPoint(x: x2, y: y2))
-        case .linear, .hold: (HaloPoint(x: 0, y: 0), HaloPoint(x: 1, y: 1))
-        }
+        guard let points = EaseCurve.handles(of: self), points.count == 2,
+            let first = points.first, let second = points.last
+        else { return (HaloPoint(x: 0, y: 0), HaloPoint(x: 1, y: 1)) }
+        return (first, second)
     }
 
-    /// This curve with `handle` at `point`: x clamped to 0...1, y kept.
+    /// This curve with `handle` at `point` (SuiteKernel's `EaseCurve.moving`):
+    /// x clamped to 0...1, y kept.
     func movingHandle(_ handle: HaloEasingHandle, to point: HaloPoint) -> HaloEasing {
-        var (first, second) = handles
-        let moved = HaloPoint(x: min(max(point.x, 0), 1), y: point.y)
-        switch handle {
-        case .first: first = moved
-        case .second: second = moved
-        }
-        return .cubicBezier(x1: first.x, y1: first.y, x2: second.x, y2: second.y)
+        EaseCurve.moving(handle == .first ? 0 : 1, to: point, in: self)
     }
 }
