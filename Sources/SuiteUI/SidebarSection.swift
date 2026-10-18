@@ -75,7 +75,7 @@ struct SidebarNode: View {
     }
 
     /// The Void rename form as one that never refuses.
-    static func refusable(
+    nonisolated static func refusable(
         _ onRename: (@MainActor (SidebarItem.ID, String) -> Void)?
     ) -> (@MainActor (SidebarItem.ID, String) -> String?)? {
         guard let onRename else { return nil }

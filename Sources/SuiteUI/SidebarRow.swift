@@ -200,7 +200,7 @@ public struct SidebarRow: View {
     }
 
     /// The Void rename form as one that never refuses.
-    public static func refusable(_ onRename: (@MainActor (String) -> Void)?) -> (@MainActor (String) -> String?)? {
+    public nonisolated static func refusable(_ onRename: (@MainActor (String) -> Void)?) -> (@MainActor (String) -> String?)? {
         guard let onRename else { return nil }
         return { name in
             onRename(name)
