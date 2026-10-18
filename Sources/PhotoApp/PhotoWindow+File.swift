@@ -352,7 +352,12 @@ struct PhotoFileArea: ViewModifier {
             .environment(\.photoSaveStatus, model.saveStatus(
                 autosaved: files.autosave?.autosaved ?? false, saveFailed: files.saveFailed))
             .background { PhotoWindowEdited(model: model, files: files, perform: perform) }
-            .overlay { PhotoFileWorkNote(work: files.working) }
+            .overlay {
+                // A quick save shows nothing: the note waits 100 ms.
+                if let work = files.working {
+                    BusyNote(work.note, identifier: work.identifier, delay: .milliseconds(100))
+                }
+            }
             .focusedSceneValue(\.photoRecentFiles, files.recentFiles)
             // Keep layers? as a sheet on the window; Cancel (or no window) just closes it.
             .task(id: files.keepLayers) {
@@ -386,37 +391,6 @@ struct PhotoFileArea: ViewModifier {
             .task { if let url = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(.openFile(url)) } }
             // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
-    }
-}
-
-/// `photo.file.saving` / `photo.file.opening`: a spinner and the note over the
-/// window once `work` has run 100 ms (a quick save shows nothing); nothing otherwise.
-struct PhotoFileWorkNote: View {
-    let work: PhotoFileWork?
-    @State private var shown: PhotoFileWork?
-
-    var body: some View {
-        Color.clear
-            .allowsHitTesting(false)
-            .overlay {
-                if let shown {
-                    GlassPanel {
-                        HStack(spacing: SuiteSpacing.s) {
-                            ProgressView().controlSize(.small)
-                            Text(shown.note).font(SuiteFont.body)
-                        }
-                    }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(shown.note)
-                    .accessibilityIdentifier(shown.identifier)
-                }
-            }
-            .task(id: work) {
-                shown = nil
-                guard let work else { return }
-                try? await Task.sleep(for: .milliseconds(100))
-                if !Task.isCancelled { shown = work }
-            }
     }
 }
 

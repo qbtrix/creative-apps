@@ -1,0 +1,11 @@
+{
+  "id": "kernel-transform",
+  "name": "Box transform and handle hit",
+  "description": "Transform/BoxMath.swift: LayerTransform (scale, degrees, move) and BoxMath (resize by an EditorHandle with Shift aspect and Option centre, at least 1 and never flipping; several items scaled as one box; 15 degree rotate snap; the handle rects). Transform/HandleHit.swift: HandleHit (the handle under a point, Chebyshev with corners winning ties; a screen tolerance divided by zoom). Stubs from EK-3; bodies EK-20.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Transform/BoxMath.swift",
+    "Sources/SuiteKernel/Transform/HandleHit.swift"
+  ],
+  "order": 60
+}

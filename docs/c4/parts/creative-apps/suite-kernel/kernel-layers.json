@@ -1,0 +1,8 @@
+{
+  "id": "kernel-layers",
+  "name": "Layer tree and fixtures",
+  "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop).",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": ["Sources/SuiteKernel/Layers/", "Sources/SuiteKernel/Fakes/"],
+  "order": 40
+}
