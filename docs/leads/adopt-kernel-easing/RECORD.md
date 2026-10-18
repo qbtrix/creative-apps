@@ -36,6 +36,7 @@ fast-lane PR opened against `main` to `dev`).
 - Both slices are Model only (`"ui": false`); merged-done reads dev's Linux job. The last delete to merge carries `feature-done`.
 
 ## Open
+- 2026-10-18T09:56Z: fourth Belt nudge; rechecked. dev now 02c20bfb; EK-14 tests #2655 now on dev (877567cf), so EK-15/EK-16 bodies are unblocked for editor-kernel; not started; EK-keys bodies still EK-3 stubs; editor-kernel lead still stage 3 wave 2 (heartbeat 09:53Z). lead.md gained the `Belt released this run.` stop rule (#2717), noted. Still blocked; stopped again.
 - 2026-10-18T09:25Z: third Belt nudge; rechecked. dev now ed52eaa8; EK-14 tests #2655 not yet on dev; EK-keys bodies still EK-3 stubs; editor-kernel lead still stage 3 wave 2. Still blocked; stopped again.
 - 2026-10-18T08:54Z: second Belt nudge; rechecked. dev now 93b1e91 (one Library perf merge since 2202c7c); EK-keys bodies still EK-3 stubs; editor-kernel lead at stage 3 wave 2, waiting on lane batch-20261018081953, wave 4 (bodies) not started. Still blocked; stopped again.
 - 2026-10-18T08:23Z: Belt nudge after 30 quiet min; rechecked. dev still 2202c7c (no merges since); EK-keys bodies still EK-3 stubs; editor-kernel lead stopped at stage 3 wave 2 on dev-red #2667, wave 4 (bodies) not started. Still blocked; stopped again.

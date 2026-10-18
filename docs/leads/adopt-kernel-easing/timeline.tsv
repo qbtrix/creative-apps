@@ -7,3 +7,5 @@ utc	stage	event	ref	note
 2026-10-18T08:54Z	0	stopped	#1937	still blocked on EK-keys
 2026-10-18T09:25Z	0	recheck	#1937	Belt nudge 3; dev ed52eaa8; EK-14 tests #2655 not yet on dev
 2026-10-18T09:25Z	0	stopped	#1937	still blocked on EK-keys
+2026-10-18T09:56Z	0	recheck	#1937	Belt nudge 4; dev 02c20bfb; EK-14 tests #2655 now on dev (877567cf), so EK-15/EK-16 bodies are unblocked for editor-kernel; not started
+2026-10-18T09:56Z	0	stopped	#1937	still blocked on EK-keys bodies
