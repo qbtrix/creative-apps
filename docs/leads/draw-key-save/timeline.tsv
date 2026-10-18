@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-17T23:48Z	rebase	lead branch rebuilt on origin/main 59c435a6; stage stays done
 2026-10-18T01:11Z	heartbeat	stage done; nothing pending (Belt nudge answered)
 2026-10-18T01:43Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; full run 39082226458 (d3cd7d9f) Linux red (dev-red #2509, design line), macOS running, report-only; nothing pending
+2026-10-18T02:14Z	heartbeat	stage done; one Belt-Contact-Sheet on the issue; full run 39082226458 ended red (Linux, dev-red #2509, design line; macOS cancelled); 39088586270 (d3cd7d9f) running; nothing pending
