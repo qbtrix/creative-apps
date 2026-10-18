@@ -1,7 +1,7 @@
 // OnboardingModelTests.swift: the welcome window's view-model on `.fake`
 // (onboarding OB-8's acceptance row, written first by OB-2). Saves retry a
-// stale write once; hand-offs finish the window. The two sample checks that
-// need SampleCatalog's reason and "<stem> 2" rule wait on OB-10's body.
+// stale write once; hand-offs finish the window; a sample copy never
+// overwrites, and a starter that shows a reason opens nothing.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -16,6 +16,13 @@ final class SampleCopyLog: Sendable {
     private let pairs = Mutex<[[String]]>([])
     func record(_ from: String, _ to: String) { pairs.withLock { $0.append([from, to]) } }
     var all: [[String]] { pairs.withLock { $0 } }
+}
+
+/// A flag a `present` closure reads, so a sample can turn up or vanish after the starters were built.
+final class SampleFlag: Sendable {
+    private let raised = Mutex(false)
+    func raise() { raised.withLock { $0 = true } }
+    var isRaised: Bool { raised.withLock { $0 } }
 }
 
 /// Preferences another writer beats on the first `races` saves, so each of those is refused as stale.
@@ -155,20 +162,27 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.message == nil)
     }
 
-    @Test(.disabled("waits on OB-10")) func openSampleNeverOverwritesAnEarlierCopy() async throws {
+    @Test func openSampleNeverOverwritesAnEarlierCopy() async throws {
         let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") || $0 == "/D/Samples/Bounce.flare" })
         await m.openSample(.flare, now: now)
         #expect(log.all == [["/R/Samples/Bounce.flare", "/D/Samples/Bounce 2.flare"]])
         #expect(try await sent(s).first?.documents.map(\.path) == ["/D/Samples/Bounce 2.flare"])
     }
 
-    @Test(.disabled("waits on OB-10")) func openSampleWithAReasonRecordsNothing() async throws {
-        let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") && !$0.hasSuffix(".halo") })
+    @Test func openSampleWithAReasonRecordsNothing() async throws {
+        let shipped = SampleFlag()
+        let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") && (!$0.hasSuffix(".halo") || shipped.isRaised) })
         #expect(m.starters.first { $0.tile.app == .halo }?.sampleReason != nil)
         await m.openSample(.halo, now: now)
         #expect(log.all.isEmpty)
         #expect(try await sent(s).isEmpty)
         #expect(m.message != nil && !m.isFinished)
+        // The tile still shows its reason, so the file turning up later opens nothing either.
+        shipped.raise()
+        await m.openSample(.halo, now: now)
+        #expect(log.all.isEmpty)
+        #expect(try await sent(s).isEmpty)
+        #expect(m.message != nil && !m.isFinished && m.launching == nil)
     }
 
     @Test func aRefusedHandOffKeepsTheWindowOpen() async throws {
@@ -183,6 +197,17 @@ actor RacingPreferences: PreferencesStoring {
 
     @Test func openSampleWhoseFileIsGoneRecordsNothing() async throws {
         let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") && !$0.hasSuffix(".flare") })
+        await m.openSample(.flare, now: now)
+        #expect(log.all.isEmpty)
+        #expect(try await sent(s).isEmpty)
+        #expect(m.message == .fileMissing(name: "Bounce.flare") && !m.isFinished && m.launching == nil)
+    }
+
+    @Test func openSampleWhoseFileVanishedAfterLoadRecordsNothing() async throws {
+        let removed = SampleFlag()
+        let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") && !($0.hasSuffix(".flare") && removed.isRaised) })
+        #expect(m.starters.first { $0.tile.app == .flare }?.sampleReason == nil)
+        removed.raise()
         await m.openSample(.flare, now: now)
         #expect(log.all.isEmpty)
         #expect(try await sent(s).isEmpty)
