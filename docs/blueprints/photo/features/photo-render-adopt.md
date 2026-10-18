@@ -5,8 +5,9 @@ dispatcher, on the CPU backend or the Metal backend, and View > Rendering
 (Automatic, GPU (Metal), CPU) picks which, live in every open window. The
 choice is the suite's one `suite.rendering` key, so it survives a relaunch.
 The status line names the backend that drew the picture and how long it
-took. Photo's document, tools and undo don't change; only how the picture
-is drawn does.
+took. The canvas is SuiteUI's CanvasHostView: tile layers on the CPU path,
+its CAMetalLayer on the GPU path. Photo's document, tools and undo don't
+change; only how the picture is drawn does.
 **Line:** `line:photo` · **Row:** R1 of the beta-80 plan
 (`docs/design/drafts/2026-10-18-beta-80-plan.md` in the workspace), Photo
 adopter · **Blueprint:** the dual-renderer note (2026-10-17) and
@@ -90,8 +91,8 @@ CoreRaster directly, which is also the reference the parity tests use.
 | id | what | PR |
 |---|---|---|
 | RA-1 | Bump creative-core to 3094ab1 (CoreRender and CoreRenderMetal reach the apps) | #2820 |
-| RA-2 | The dispatcher route, View > Rendering in Photo, the status line readout, the parity, switching and 8K tests, this packet | this one |
-| RA-3 | SuiteUI's CanvasHostView hosts Photo's canvas: the tile path on the CPU, the CAMetalLayer on the GPU | next |
+| RA-2 | The dispatcher route, View > Rendering in Photo, the status line readout, the parity, switching and 8K tests, this packet | #2840 |
+| RA-3 | SuiteUI's CanvasHostView hosts Photo's canvas (`EmbeddedCanvasHost` in the CanvasViewport): tile layers on the CPU path, the CAMetalLayer with `CanvasTilePresenter` on the GPU path; Automatic draws on Metal; Photo's own `TileCanvasView` is deleted | the next PR |
 
 ## Acceptance
 
@@ -100,6 +101,8 @@ CoreRaster directly, which is also the reference the parity tests use.
 | `PhotoRenderRouteTests` (Linux) | the CPU route, or the one-region GPU path run on a second CPU backend, differs from CoreRaster's render by any byte, for a full picture or a stroke's damaged tiles |
 | `PhotoRenderBackendTests` parity (this Mac's GPU) | Metal against the reference: layers alone outside CoreRender's standard tolerance (2 display levels, 1e-3 linear); with every adjustment on, outside 2 levels or 4e-3 linear (a nine-step half-float chain) |
 | `PhotoRenderBackendTests` switching | changing the choice doesn't redraw the whole picture on the backend it names |
+| `PhotoTileCanvasTests` (this Mac's GPU) | the embedded host's tile layers or the Metal presenter's texture differ from the reference picture |
+| `CanvasHostMetalTests` | Automatic or GPU with a device keeps the tile layers, the presenter misses the tiles shown, or the drawable has more pixels than the document |
 | `PhotoRenderBudgetTests` (perf list, report only) | never; it records the 8K numbers in `Tests/render-budgets.md`, and G1 sets the budgets |
 
 ## Done check

@@ -1,7 +1,7 @@
 // PhotoBrushDisplayTests.swift: what one brush drag event costs on its way to
 // the screen, on a 4000 x 3000 image, through the window's own path: the drag
 // on State's copy (StateBox), CanvasRenderer.show, then the tile images the
-// canvas view's layers get (`renderer.tiles`, attached to a TileCanvasView as
+// canvas view's layers get (`renderer.tiles`, attached to a CanvasHostView as
 // in the window). 120 events of one fast stroke; each that
 // moves the revision is shown before the next, as the window does. Per event
 // it measures wall time until the new picture is on the renderer, the bytes
@@ -32,6 +32,7 @@ import CoreRaster
 import Foundation
 import Observation
 import PhotoModel
+import SuiteUI
 import Synchronization
 import Testing
 
@@ -55,7 +56,7 @@ import Testing
         let state = StateBox(open)
         let split = try await whereTheBytesGo()
         let renderer = CanvasRenderer()
-        let view = TileCanvasView(frame: CGRect(x: 0, y: 0, width: 1000, height: 750))
+        let view = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 1000, height: 750))
         renderer.tiles.attach(view)
         renderer.show(state.value)
         await nextPicture(renderer)
