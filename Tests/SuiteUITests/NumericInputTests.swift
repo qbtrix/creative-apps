@@ -105,3 +105,15 @@ private let degrees = ScrubSpec(range: 0...360, step: 1, decimals: 0, unit: "°"
     #expect(s.fraction(90, spec: degrees) == 0.25)
     #expect(s.fraction(.nan, spec: degrees) == 0)
 }
+
+/// #2952: a typing field marks text that isn't a number, and its help names the range.
+@Test func acceptsOnlyTextParseReads() {
+    #expect(NumericInput.accepts(" 72 "))
+    #expect(NumericInput.accepts("-400"))
+    #expect(!NumericInput.accepts("abc"))
+    #expect(!NumericInput.accepts(""))
+    #expect(!NumericInput.accepts("nan"))
+    #expect(NumericInput.rangeHelp(-180...180, decimals: 0, unit: "°") == "Type a number from -180° to 180°")
+    #expect(NumericInput.rangeHelp(0...10, decimals: 1, unit: "px") == "Type a number from 0 px to 10 px")
+    #expect(NumericInput.rangeHelp(0...1) == "Type a number from 0 to 1")
+}
