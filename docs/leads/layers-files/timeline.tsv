@@ -79,3 +79,4 @@
 2026-10-18T12:53Z	heartbeat	no open dev-red; 39122776184 (e3a4582c) Linux green, macOS still running (snapshots uploaded, journeys in progress); 39126612277, 39127288998, 39128125790 cancelled; newest 39129009677 (9bd0da5a) pending
 2026-10-18T13:15Z	heartbeat	no open dev-red; 39122776184 (e3a4582c) Linux green, macOS still running (snapshots uploaded); 39129009677 cancelled; newest 39129812289 (7ae985e3) pending
 2026-10-18T13:42Z	heartbeat	no open dev-red; 39122776184 (e3a4582c) macOS cancelled before ui-screens; 39129812289, 39131391914 cancelled; newest 39132122171 (4bf67be8) in progress
+2026-10-18T14:14Z	heartbeat	no open dev-red; 39132122171 (4bf67be8) macOS failed (journey bundle BUILD FAILED, SuiteUI linker error), no ui-screens, Dev red job skipped; 39133431238 (3f5ae7f3) in progress; 39135047742 (d506e4aa) pending
