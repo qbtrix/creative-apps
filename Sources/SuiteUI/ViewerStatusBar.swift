@@ -6,7 +6,11 @@
 // `.statusPill(.toggle(isOn: true))` takes the selected tint and accent text,
 // and one marked `.statusPill(.warning)` the warning tint and color with a
 // triangle. Chrome, but flat: no glass and no band. The zoom text comes from
-// ViewerZoom, so every app formats it the same way.
+// ViewerZoom, so every app formats it the same way. `message` is a refusal
+// sentence at the leading edge (caption text in the error color with the
+// exclamation circle, not a pill: nothing changed), and `previewHelp` adds
+// the last pill, a "Preview data" warning whose tooltip and accessibility hint
+// say the window shows built-in sample data.
 import SwiftUI
 
 /// How a pill in a ViewerStatusBar draws.
@@ -37,18 +41,35 @@ extension View {
 public struct ViewerStatusBar<Trailing: View>: View {
     private let zoom: Double
     private let size: String
+    private let message: (text: String, identifier: String)?
+    private let preview: (help: String, identifier: String)?
     private let trailing: Trailing
 
     /// `zoom` is the scale the viewer draws at (1 is 100%; ViewerZoom.fitScale
     /// gives CanvasSurface's), `size` the document size ("1920 × 1080 px").
-    public init(zoom: Double, size: String, @ViewBuilder trailing: () -> Trailing) {
+    /// `message` is a leading refusal, `preview` the "Preview data" pill's help and identifier.
+    public init(
+        zoom: Double, size: String, message: (text: String, identifier: String)? = nil,
+        preview: (help: String, identifier: String)? = nil, @ViewBuilder trailing: () -> Trailing
+    ) {
         self.zoom = zoom
         self.size = size
+        self.message = message
+        self.preview = preview
         self.trailing = trailing()
     }
 
+    /// The leading refusal's type: caption text, not the pill type.
+    static var messageFont: Font { SuiteFont.caption }
+
     public var body: some View {
         HStack(spacing: SuiteSpacing.pillGap) {
+            if let message {
+                Label(message.text, systemImage: "exclamationmark.circle")
+                    .font(Self.messageFont)
+                    .foregroundStyle(SuiteColor.stateError)
+                    .accessibilityIdentifier(message.identifier)
+            }
             Spacer(minLength: SuiteSpacing.s)
             pill(.plain) {
                 Text(ViewerZoom.percentText(zoom))
@@ -58,6 +79,13 @@ public struct ViewerStatusBar<Trailing: View>: View {
             pill(.plain) { Text(size) }
             ForEach(subviews: trailing) { view in
                 pill(view.containerValues.statusPillStyle) { view }
+            }
+            if let preview {
+                pill(.warning) {
+                    Text("Preview data").accessibilityIdentifier(preview.identifier)
+                        .help(preview.help)
+                        .accessibilityHint(preview.help)
+                }
             }
         }
         .lineLimit(1)
@@ -85,7 +113,10 @@ public struct ViewerStatusBar<Trailing: View>: View {
 }
 
 extension ViewerStatusBar where Trailing == EmptyView {
-    public init(zoom: Double, size: String) {
-        self.init(zoom: zoom, size: size) { EmptyView() }
+    public init(
+        zoom: Double, size: String, message: (text: String, identifier: String)? = nil,
+        preview: (help: String, identifier: String)? = nil
+    ) {
+        self.init(zoom: zoom, size: size, message: message, preview: preview) { EmptyView() }
     }
 }

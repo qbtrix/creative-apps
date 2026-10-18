@@ -1,5 +1,5 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
-// collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
+// collections in the sidebar, LibraryBrowser as content (with its status bar
 // under it on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
@@ -32,6 +32,16 @@ final class LibraryAreas {
 }
 
 struct LibraryWindow: View {
+    /// What the "Preview data" pill means, as its tooltip and accessibility hint.
+    static let previewHelp = "This window shows built-in sample data, not photos on disk."
+
+    /// The status bar under the browser: the photo count, then the "Preview data" pill on the fakes.
+    static func statusBar(_ model: LibraryCatalog) -> some View {
+        ViewerStatusBar(
+            zoom: 1, size: LibraryCatalog.photoCountText(model.items.count),
+            preview: model.services.isPreview ? (previewHelp, "library.status.preview") : nil)
+    }
+
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
 
@@ -68,7 +78,7 @@ struct LibraryWindow: View {
                     .onKeyPress(phases: .down) { press in route(press) }
                 if model.services.isPreview {
                     // Keeps its height; the content above shrinks to fit.
-                    LibraryStatusBar(model: model).fixedSize(horizontal: false, vertical: true)
+                    Self.statusBar(model).fixedSize(horizontal: false, vertical: true)
                 }
             }
         } inspector: {

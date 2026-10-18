@@ -47,13 +47,13 @@ import Testing
     @Test func previewDataShowsTheStatusBarInsideTheFrame() throws {
         var samples = LibraryCatalog()
         samples.loadSamples()
-        let barHeight = NSHostingView(rootView: LibraryStatusBar(model: samples)).fittingSize.height
+        let barHeight = NSHostingView(rootView: LibraryWindow.statusBar(samples)).fittingSize.height
         #expect(barHeight > 0 && barHeight < 100, "status bar height \(barHeight)")
         let stacked = try #require(render(previewData(samples), scheme: .light))
         let alone = try #require(render(
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                LibraryStatusBar(model: samples).fixedSize(horizontal: false, vertical: true)
+                LibraryWindow.statusBar(samples).fixedSize(horizontal: false, vertical: true)
             }.frame(width: 1440, height: 900), scheme: .light))
         let row = 900 - max(1, Int(barHeight / 2))
         var differing = 0
@@ -80,7 +80,7 @@ import Testing
             LibraryBrowser(model: model)
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                 .clipped()
-            LibraryStatusBar(model: model).fixedSize(horizontal: false, vertical: true)
+            LibraryWindow.statusBar(model).fixedSize(horizontal: false, vertical: true)
         }
         .frame(width: 1440, height: 900)
     }

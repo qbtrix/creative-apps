@@ -20,7 +20,7 @@ import Testing
         try snapshot(
             PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1),
             name: "photo-preview-pill-dark", scheme: .dark)
-        #expect(PhotoStatusLine.previewHelp == "This window shows built-in sample data, not a file on disk.")
+        #expect(PhotoEditor.previewHelp == "This window shows built-in sample data, not a file on disk.")
     }
 
     /// The enabled Eyedropper's Tool Options section says what it does, as
