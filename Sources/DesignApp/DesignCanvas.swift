@@ -72,29 +72,53 @@ struct DesignCanvas: View {
         .suiteControl(id: DesignControlID.canvas, enabled: true, reason: nil, identifies: false)
     }
 
-    /// Arrows nudge the selection (Shift: ten points), Delete removes it, Escape deselects, Return
-    /// edits a selected text node, and a tool's letter picks that tool. Anything else is left to the system.
+    /// The Model decides the arrows, Delete, Escape and Return (canvasKeyAction: every selected
+    /// layer nudges or deletes); a tool's letter picks that tool. Anything else is left to the system.
     private func key(_ press: KeyPress) -> KeyPress.Result {
-        guard press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
-        let shift = press.modifiers.contains(.shift)
-        let selection = model.selectedNode
-        switch press.key {
-        case .upArrow where selection != nil: perform(.nudge(.up, shift: shift))
-        case .downArrow where selection != nil: perform(.nudge(.down, shift: shift))
-        case .leftArrow where selection != nil: perform(.nudge(.left, shift: shift))
-        case .rightArrow where selection != nil: perform(.nudge(.right, shift: shift))
-        case .delete where selection != nil, .deleteForward where selection != nil: perform(.deleteSelection)
-        case .escape: perform(.deselect)
-        case .return:
-            guard let selection, selection.kind == .text else { return .ignored }
-            perform(.editText(selection.id))
-        default:
-            // The rail shows Pen disabled; its letter must not pick it either.
-            let typed = press.characters.lowercased()
-            guard let tool = DesignTool.allCases.first(where: { $0.isEnabled && $0.shortcut.map(String.init) == typed })
-            else { return .ignored }
-            perform(.tool(tool))
+        let modifiers = DesignKeyModifiers(press.modifiers)
+        guard modifiers.reachesCanvas else { return .ignored }
+        if let key = DesignCanvasKey(press.key) {
+            switch model.canvasKeyAction(key, modifiers: modifiers) {
+            case .nudge(let direction, let shift)?: perform(.nudge(direction, shift: shift))
+            case .deleteSelection?: perform(.deleteSelection)
+            case .deselect?: perform(.deselect)
+            case .editText(let id)?: perform(.editText(id))
+            case nil: return .ignored
+            }
+            return .handled
         }
+        // The rail shows Pen disabled; its letter must not pick it either.
+        let typed = press.characters.lowercased()
+        guard let tool = DesignTool.allCases.first(where: { $0.isEnabled && $0.shortcut.map(String.init) == typed })
+        else { return .ignored }
+        perform(.tool(tool))
         return .handled
+    }
+}
+
+extension DesignCanvasKey {
+    /// The canvas key `key` is, or nil for any other key.
+    init?(_ key: KeyEquivalent) {
+        switch key {
+        case .upArrow: self = .arrow(.up)
+        case .downArrow: self = .arrow(.down)
+        case .leftArrow: self = .arrow(.left)
+        case .rightArrow: self = .arrow(.right)
+        case .delete, .deleteForward: self = .delete
+        case .escape: self = .escape
+        case .return: self = .enter
+        default: return nil
+        }
+    }
+}
+
+extension DesignKeyModifiers {
+    /// Every flag of `modifiers`: an arrow press carries `.numericPad`, which the Model ignores.
+    init(_ modifiers: EventModifiers) {
+        let pairs: [(EventModifiers, DesignKeyModifiers)] = [
+            (.shift, .shift), (.command, .command), (.option, .option), (.control, .control),
+            (.numericPad, .numericPad), (.capsLock, .capsLock),
+        ]
+        self = pairs.reduce(into: []) { held, pair in if modifiers.contains(pair.0) { held.insert(pair.1) } }
     }
 }

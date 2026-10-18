@@ -1,10 +1,10 @@
-// SuiteStatusPills.swift: the status bar's live pill rule (UC14), declared
-// with its final signature so ViewerStatusBar (EC-6a) can take its zoom and
-// size text from it. ViewerStatusBar is live in every app, so this stub
-// already gives today's text: the zoom through ViewerZoom.percentText (the one
-// formatter every app shares), then "W × H" in whole units, then the trailing
-// pills in order. A side that isn't a finite number reads 0, never traps.
-// EC-6b adds the edge cases (rounding each side).
+// SuiteStatusPills.swift: the status bar's live pill rule (UC14), which
+// ViewerStatusBar (EC-6a) takes its zoom and size text from. The zoom reads
+// through ViewerZoom.percentText (the one formatter every app shares, so NaN,
+// infinity and 0 read "–"), then "W × H" with each side rounded to the
+// nearest whole unit (1919.6 reads 1920), then the trailing pills in their
+// order. A side that isn't a finite number, or doesn't fit an Int, reads 0,
+// never traps.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -19,8 +19,8 @@ public struct SuiteStatusPills: StatusPillComposing {
         return [StatusPill(text: ViewerZoom.percentText(zoom)), StatusPill(text: size)] + trailing
     }
 
-    /// A side in whole units, truncated; 0 when it isn't finite or doesn't fit an Int.
+    /// A side in whole units, rounded half away from zero; 0 when it isn't finite or doesn't fit an Int.
     private static func side(_ value: Double) -> Int {
-        Int(exactly: value.rounded(.towardZero)) ?? 0
+        Int(exactly: value.rounded(.toNearestOrAwayFromZero)) ?? 0
     }
 }

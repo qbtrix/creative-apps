@@ -5,7 +5,8 @@
 # trees), whole sweeps against a stub `gh`, and, against a local bare repo, the
 # lane's integration of a conflicting PR (integrate) and its batches (two or
 # more ready PRs get one Linux check together before they land; a red batch is
-# bisected by prefix). No network, needs bash, git and jq.
+# bisected by prefix), and the red-dev bisect, with its 2-of-3 vote mode for
+# a timing budget test. No network, needs bash, git and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
 # workflow's Linux and macOS jobs plus one SKIPPED CI job, a non-CI workflow
@@ -610,6 +611,7 @@ gh() {
     "api "*"/pulls/"*) n="${2##*/}"; jq -r "${!#}" "$sw/pull.$n.json" 2>/dev/null || true ;;  # a PR's body (bisect_post)
     "api repos/"*"/issues?labels=dev-red"*) jq -r "${!#}" "$sw/red.json" 2>/dev/null || true ;;  # the open dev-red issue
     "api search/issues"*) jq -r "${!#}" "$sw/search.json" 2>/dev/null || true ;;
+    "run view --job "*) cat "$sw/joblog.$4" 2>/dev/null || return 1 ;;  # a job's failed-step log (budget_failure)
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
     "run list "*"--commit "*)
       u="${a#*--commit }"; u="${u%% *}"
@@ -1119,5 +1121,72 @@ verdict "$C1" success
 expect "bisect by hand: at the run cap it stops and names the range left" \
   "$(grep -c "^issue comment 500 .*stopped after 1 Linux runs: the Linux job is green at ${C1:0:7} and red at ${C3:0:7}; the culprit is one of the 2 commits between them" "$sw/calls")" 1
 expect "bisect by hand: and drops its probes" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' ')" 0
+
+# A red on a timing budget test (rung 2c's vote mode): when every issue in the
+# tip's failed log is a measured value against a budget, a probe is run up to
+# 3 times and called on 2 of 3, the run cap is MAX_BISECT_BUDGET runs, and a
+# value within BUDGET_NEAR of its budget makes the culprit "likely".
+ISSUE_LINE='✘ Test focusChangeWithinBudget() recorded an issue at LibraryLoupeBudgetTests.swift:59:5: Expectation failed: (cost.median → 1.046542) <= (1 * scale → 1.0)'
+bf() { printf '%s\n' "$@" | budget_failure; }
+expect "budget: a median over its budget is a budget failure" "$(bf "$ISSUE_LINE" '✘ Test focusChangeWithinBudget() failed after 44.392 seconds with 1 issue.')" "1.046542 <= 1.0"
+expect "budget: a literal budget counts" "$(bf '✘ Test keysWithinBudget() recorded an issue at LiveKeysBudgetTests.swift:37:9: Expectation failed: (costs[60] → 0.31) <= 0.25')" "0.31 <= 0.25"
+expect "budget: one other failure means no budget mode" "$(bf "$ISSUE_LINE" '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)')" ""
+expect "budget: a size compare outside a budget test is no budget failure" "$(bf '✘ Test rows() recorded an issue at RowTests.swift:9:5: Expectation failed: (rows.count → 9) <= (8 → 8)')" ""
+expect "budget: a known issue alone is no failure" "$(bf '✘ Test x() recorded a known issue at XTests.swift:1:1: Expectation failed: (median → 2.0) <= (budget → 1.0)')" ""
+near() { if budget_near "$@"; then echo near; else echo far; fi; }
+expect "budget: 4.7% over is near, 50% over is far, under is far" "$(near 1.046542 '<=' 1.0),$(near 1.5 '<=' 1.0),$(near 0.9 '<=' 1.0)" "near,far,far"
+expect "budget: a floor works the other way" "$(near 54 '>=' 60),$(near 40 '>=' 60)" "near,far"
+
+votes() {  # votes <sha> <conclusion>...: completed Linux runs on <sha>, oldest first
+  local sha="$1" i=0 c; shift
+  for c in "$@"; do
+    i=$((i + 1))
+    jq -n --arg c "$c" --arg t "2026-01-01T00:0$i:00Z" --arg u "https://github.com/qbtrix/creative-apps/actions/runs/88$i/job/77$i" \
+      '{name: "Linux", status: "completed", conclusion: $c, started_at: $t, details_url: $u}'
+  done | jq -s . >"$sw/checks.$sha.json"
+}
+red_tip() {  # red_tip <issue line>: the tip's one red Linux run, whose failed log holds that line
+  jq -n '[{name: "Linux", status: "completed", conclusion: "failure", started_at: "2026-01-01T00:00:00Z",
+    details_url: "https://github.com/qbtrix/creative-apps/actions/runs/9100/job/4242"}]' >"$sw/checks.$C3.json"
+  printf '%s\nCI: FAIL (swift test (all) exited 1)\n' "$1" >"$sw/joblog.4242"
+}
+bisect_by_hand() { ( FAST_LANE_RUN_LOOKUP_RETRIES=0 main --bisect "$M..$C3" "$1" dev ) >/dev/null 2>&1 || { echo "FAIL sweep: main --bisect exited non-zero"; fail=1; }; }
+dispatches() { grep -c -- "-f linux_only=true --ref ci/bisect-$R7-$1\$" "$sw/calls" || true; }
+
+# 4.7% over a 1 ms budget: probe 1 needs 3 runs (red, green, red) and the verdict is "likely".
+rm -f "$sw/checks.$C1.json" "$sw/checks.$C2.json"; : >"$sw/calls"; red_tip "$ISSUE_LINE"
+bisect_by_hand 501
+expect "vote: a budget red probes the midpoint once" "$(bprobe 1),$(dispatches 1)" "$C1,1"
+votes "$C1" failure; bisect_by_hand 501
+expect "vote: one red run is not a verdict, the probe runs again" "$(dispatches 1),$(grep -c '^issue comment 501 ' "$sw/calls")" "2,0"
+votes "$C1" failure success; bisect_by_hand 501
+expect "vote: one each, a third run" "$(dispatches 1),$(grep -c '^issue comment 501 ' "$sw/calls")" "3,0"
+votes "$C1" failure success failure; bisect_by_hand 501
+expect "vote: 2 of 3 red names the culprit as likely, counting runs" \
+  "$(grep -c "^issue comment 501 .*Bisect (likely): ${C1:0:7} fix(a): one (#101) is likely the first commit on dev whose Linux job fails.*3 Linux run(s).*measured 1.046542 against 1.0, within 15% of it" "$sw/calls")" 1
+expect "vote: and drops its probes" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' ')" 0
+
+# Twice the budget: 2 green runs settle probe 1, 2 red settle probe 2, and the verdict is certain.
+rm -f "$sw/checks.$C1.json" "$sw/checks.$C2.json"; : >"$sw/calls"
+red_tip "${ISSUE_LINE/1.046542/2.1}"
+bisect_by_hand 502; votes "$C1" success success; bisect_by_hand 502
+expect "vote: 2 green runs settle a probe without a third" "$(dispatches 1),$(bprobe 2)" "1,$C2"
+votes "$C2" failure failure; bisect_by_hand 502
+expect "vote: far past the budget the verdict is certain and says how it was voted" \
+  "$(grep -c "^issue comment 502 .*Bisect: ${C2:0:7} feat(b): two (#102) is the first commit on dev whose Linux job fails.*4 Linux run(s).*2 of 3" "$sw/calls"),$(grep -c 'likely' "$sw/calls")" "1,0"
+
+# The run cap counts runs in vote mode.
+rm -f "$sw/checks.$C1.json" "$sw/checks.$C2.json"; : >"$sw/calls"; red_tip "$ISSUE_LINE"
+bisect_by_hand 503; votes "$C1" failure success
+( MAX_BISECT_BUDGET=2 FAST_LANE_RUN_LOOKUP_RETRIES=0 main --bisect "$M..$C3" 503 dev ) >/dev/null 2>&1 || { echo "FAIL sweep: main --bisect exited non-zero"; fail=1; }
+expect "vote: at the run cap it stops and names the range left" \
+  "$(grep -c "^issue comment 503 .*stopped after 2 Linux runs: the Linux job is green at ${M:0:7} and red at ${C3:0:7}" "$sw/calls")" 1
+
+# A tip log with a non-budget failure keeps one run per probe.
+rm -f "$sw/checks.$C1.json" "$sw/checks.$C2.json"; : >"$sw/calls"
+red_tip '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+bisect_by_hand 504; votes "$C1" failure; bisect_by_hand 504
+expect "vote: a plain red names its culprit on one run" \
+  "$(dispatches 1),$(grep -c "^issue comment 504 .*Bisect: ${C1:0:7} fix(a): one (#101) is the first commit.*; 1 Linux run(s) on ci/bisect branches, now deleted. <!--" "$sw/calls")" "1,1"
 
 exit "$fail"

@@ -73,14 +73,6 @@ Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerRow.kindSymbol
 Sources/PhotoApp/PhotoWindow+File.swift::PhotoWindow.reason
 Sources/PhotoApp/PhotoWindow+File.swift::PhotoWindow.saveToFolder
 Sources/SuiteUI/AppMark.swift::AppMark.draw
-Sources/SuiteUI/CanvasMarks+Grid.swift::CanvasGrid.lines
-Sources/SuiteUI/CanvasMarks+Path.swift::PathMarks.anchorMarks
-Sources/SuiteUI/CanvasMarks+Path.swift::PathMarks.anchorShape
-Sources/SuiteUI/CanvasMarks+Path.swift::PathMarks.handleLines
-Sources/SuiteUI/CanvasMarks+Path.swift::PathMarks.outline
-Sources/SuiteUI/CanvasMarks+Path.swift::PathMarks.scale
-Sources/SuiteUI/CanvasMarks+Path.swift::PathMarks.view
-Sources/SuiteUI/CanvasMarks+Path.swift::ViewportGuideMarks.lines
 Sources/SuiteUI/CanvasMarks+Points.swift::CanvasPointMark.frame
 Sources/SuiteUI/CanvasViewport.swift::CanvasViewport.checkerTile
 Sources/SuiteUI/Gallery/GalleryCanvasHost.swift::CanvasHostPage.bodyRuns

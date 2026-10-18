@@ -2,11 +2,11 @@
 // `KeyRules`, the one set of key rules every timeline shares: the key state,
 // toggling a key and animation, moving keys (clamped, all or nothing),
 // removing keys under both policies, and inserting and removing frames; KJ4,
-// the keys walk, closes the file. Disabled until EK-16 writes the bodies.
+// the keys walk, closes the file. EK-16 wrote the bodies and turned it on.
 import Testing
 import SuiteKernel
 
-@Suite(.disabled("waits on EK-16")) struct KeyRulesTests {
+@Suite struct KeyRulesTests {
     /// Four keys like the packet's `bounceTrack`: 0, 10, 20 and 30.
     let bounce = [Keyframe(frame: 0, value: 0), Keyframe(frame: 10, value: 100, easing: .easeOut),
                   Keyframe(frame: 20, value: 0, easing: .easeIn), Keyframe(frame: 30, value: 50)]
@@ -107,9 +107,22 @@ import SuiteKernel
         #expect(tracks["x"] == bounce)
     }
 
+    @Test func moveRefusedOnOneTrackMovesNoTrack() {
+        let y = [Keyframe(frame: 10, value: 1), Keyframe(frame: 13, value: 2)]
+        var tracks = ["x": bounce, "y": y]
+        #expect(throws: KeyRefusal.collides(frame: 13)) { try KeyRules.moveKeys(&tracks, [10], by: 3, clampedTo: 0...40) }
+        #expect(tracks["x"] == bounce && tracks["y"] == y)
+    }
+
+    @Test func toggleAnimatedNeedsTwoFrames() {
+        var track: [Keyframe] = []
+        #expect(!KeyRules.toggleAnimated(&track, at: 5, lastFrame: 5, value: 1))
+        #expect(track.isEmpty)
+    }
+
     @Test func moveOntoAKeyThatAlsoMovesIsFine() throws {
         var tracks = ["x": bounce]
-        try KeyRules.moveKeys(&tracks, [10, 20], by: 10, clampedTo: 0...40)
+        try KeyRules.moveKeys(&tracks, [10, 20, 30], by: 10, clampedTo: 0...40)
         #expect(tracks["x"].map(frames) == [0, 20, 30, 40])
         #expect(tracks["x"]?.first { $0.frame == 20 }?.value == 100)
     }

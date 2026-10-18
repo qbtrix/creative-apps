@@ -1,7 +1,8 @@
 // LayerTree.swift (EK-2 stub, EK-12 body, EK-13 the follow link): the one
 // layer tree every app keeps: nesting, back-to-front order, hide and lock
-// cascades, a follow link. `rows(expanded:)` already walks, so the gallery
-// draws the fixture's tree; every edit is a stub that changes nothing.
+// cascades, moves into a parent with refusals, arrange, group, ungroup and
+// duplicate. The follow link (`follows`, `worldPlacement`, `setFollow`)
+// stays a stub until EK-13.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -88,10 +89,10 @@ public struct LayerTree<Payload: LayerPayload>: Hashable, Sendable {
     public init(_ roots: [LayerNode<Payload>] = []) {
         self.roots = roots
     }
-    /// The node with `id`, nil when there is none. Stub: nil.
-    public func node(_ id: String) -> LayerNode<Payload>? { nil }
-    /// The ids from the root down to `id`'s parent, nil for an unknown id. Stub: nil.
-    public func ancestors(of id: String) -> [String]? { nil }
+    /// The node with `id`, nil when there is none.
+    public func node(_ id: String) -> LayerNode<Payload>? { chain(id)?.last }
+    /// The ids from the root down to `id`'s parent, nil for an unknown id.
+    public func ancestors(of id: String) -> [String]? { chain(id)?.dropLast().map(\.id) }
     /// The panel's rows, front to back as a panel lists them, descending into
     /// every node whose id is in `expanded`.
     public func rows(expanded: Set<String>) -> [LayerRow] {
@@ -99,29 +100,169 @@ public struct LayerTree<Payload: LayerPayload>: Hashable, Sendable {
         Self.walk(roots, depth: 0, hidden: false, locked: false, expanded: expanded, into: &out)
         return out
     }
-    /// Every id, front to back, descendants after their parent. Stub: none.
-    public var frontToBack: [String] { [] }
-    /// True when the node or an ancestor is hidden. Stub: false.
-    public func isEffectivelyHidden(_ id: String) -> Bool { false }
-    /// True when the node or an ancestor is locked. Stub: false.
-    public func isEffectivelyLocked(_ id: String) -> Bool { false }
-    /// Edits the node with `id` in place; false when there is none. Stub: false.
-    public mutating func update(_ id: String, _ body: (inout LayerNode<Payload>) -> Void) -> Bool { false }
-    /// Moves `id` into `parent` (nil: the roots) at `index`, clamped to the
-    /// count. Stub: moves nothing.
-    public mutating func move(_ id: String, into parent: String?, at index: Int) throws(TreeRefusal) {}
-    /// Arranges `ids` among their siblings by `step`. Stub: nothing.
-    public mutating func arrange(_ step: ArrangeStep, _ ids: [String]) throws(TreeRefusal) {}
-    /// Groups `ids` under a new node named `name` with id `mint()`, returning
-    /// that id. Stub: returns a minted id and changes nothing.
-    public mutating func group(_ ids: [String], name: String, payload: Payload, mint: () -> String) throws(TreeRefusal) -> String {
-        mint()
+    /// Every id, front to back, descendants after their parent.
+    public var frontToBack: [String] {
+        var out: [String] = []
+        Self.collect(roots, into: &out)
+        return out
     }
-    /// Replaces the group `id` with its children. Stub: nothing.
-    public mutating func ungroup(_ id: String) throws(TreeRefusal) {}
-    /// Copies `ids` with fresh ids from `mint`, each in front of its original;
-    /// returns the copies' ids. Stub: none.
-    public mutating func duplicate(_ ids: [String], mint: () -> String) -> [String] { [] }
+    /// True when the node or an ancestor is hidden.
+    public func isEffectivelyHidden(_ id: String) -> Bool { chain(id)?.contains { $0.isHidden } ?? false }
+    /// True when the node or an ancestor is locked.
+    public func isEffectivelyLocked(_ id: String) -> Bool { chain(id)?.contains { $0.isLocked } ?? false }
+    /// Edits the node with `id` in place; false when there is none.
+    public mutating func update(_ id: String, _ body: (inout LayerNode<Payload>) -> Void) -> Bool {
+        guard let path = path(to: id) else { return false }
+        return Self.edit(&roots, path[...], body) != nil
+    }
+    /// Moves `id` into `parent` (nil: the roots) at `index`, clamped to the
+    /// count. Refuses an unknown id or parent, a parent that is `id` or below
+    /// it, one that holds no children, and one that is effectively locked.
+    public mutating func move(_ id: String, into parent: String?, at index: Int) throws(TreeRefusal) {
+        guard node(id) != nil else { throw .unknown(id) }
+        if let parent {
+            guard let destination = node(parent) else { throw .unknown(parent) }
+            if parent == id || ancestors(of: parent)?.contains(id) == true { throw .intoItself(parent) }
+            guard destination.payload.holdsChildren else { throw .notAContainer(parent) }
+            guard !isEffectivelyLocked(parent) else { throw .locked(parent) }
+        }
+        guard let moving = remove(id) else { throw .unknown(id) }
+        _ = editChildren(of: parent) { kids in kids.insert(moving, at: min(max(index, 0), kids.count)) }
+    }
+    /// Arranges `ids` among their siblings by `step`; the ids keep their order
+    /// among themselves, and one already at the end it moves toward stays.
+    public mutating func arrange(_ step: ArrangeStep, _ ids: [String]) throws(TreeRefusal) {
+        var parents: [String?] = []
+        for id in ids {
+            guard let line = ancestors(of: id) else { throw .unknown(id) }
+            if !parents.contains(line.last) { parents.append(line.last) }
+        }
+        let picked = Set(ids)
+        for parent in parents {
+            _ = editChildren(of: parent) { kids in Self.arranged(&kids, step, picked) }
+        }
+    }
+    /// Groups `ids` under a new node named `name` with id `mint()`, in the
+    /// place of the frontmost one, keeping their order; returns that id.
+    public mutating func group(_ ids: [String], name: String, payload: Payload, mint: () -> String) throws(TreeRefusal) -> String {
+        for id in ids where node(id) == nil { throw .unknown(id) }
+        let picked = Set(ids)
+        let order = frontToBack.filter { id in
+            picked.contains(id) && !(ancestors(of: id) ?? []).contains(where: picked.contains)
+        }
+        guard let front = order.first, let line = ancestors(of: front) else { throw .unknown(ids.first ?? "") }
+        let parent = line.last
+        let siblings = parent.map { node($0)?.children ?? [] } ?? roots
+        let at = siblings.prefix { $0.id != front }.filter { !picked.contains($0.id) }.count
+        var members: [LayerNode<Payload>] = []
+        for id in order.reversed() {
+            if let member = remove(id) { members.append(member) }
+        }
+        let made = LayerNode(id: mint(), name: name, children: members, payload: payload)
+        _ = editChildren(of: parent) { kids in kids.insert(made, at: min(at, kids.count)) }
+        return made.id
+    }
+    /// Replaces the group `id` with its children, in their order.
+    public mutating func ungroup(_ id: String) throws(TreeRefusal) {
+        guard let target = node(id), let line = ancestors(of: id) else { throw .unknown(id) }
+        guard target.payload.holdsChildren else { throw .notAContainer(id) }
+        _ = editChildren(of: line.last) { kids in
+            guard let index = kids.firstIndex(where: { $0.id == id }) else { return }
+            kids.replaceSubrange(index...index, with: target.children)
+        }
+    }
+    /// Copies `ids` with fresh ids from `mint` (descendants too), each in
+    /// front of its original; returns the copies' ids. Unknown ids are skipped.
+    public mutating func duplicate(_ ids: [String], mint: () -> String) -> [String] {
+        var out: [String] = []
+        for id in ids {
+            guard let original = node(id), let line = ancestors(of: id) else { continue }
+            let copy = Self.copied(original, mint: mint)
+            let placed = editChildren(of: line.last) { kids -> Bool in
+                guard let index = kids.firstIndex(where: { $0.id == id }) else { return false }
+                kids.insert(copy, at: index + 1)
+                return true
+            }
+            if placed == true { out.append(copy.id) }
+        }
+        return out
+    }
+    /// The nodes from the root down to `id`, nil for an unknown id.
+    private func chain(_ id: String) -> [LayerNode<Payload>]? {
+        guard let path = path(to: id) else { return nil }
+        var out: [LayerNode<Payload>] = []
+        var level = roots
+        for index in path {
+            guard level.indices.contains(index) else { return nil }
+            out.append(level[index])
+            level = level[index].children
+        }
+        return out
+    }
+    /// The child indexes from the roots down to `id`, nil for an unknown id.
+    private func path(to id: String) -> [Int]? { Self.path(to: id, in: roots) }
+    private static func path(to id: String, in nodes: [LayerNode<Payload>]) -> [Int]? {
+        for (index, node) in nodes.enumerated() {
+            if node.id == id { return [index] }
+            if let rest = path(to: id, in: node.children) { return [index] + rest }
+        }
+        return nil
+    }
+    /// Runs `body` on the node at `path`; nil when the path leads nowhere.
+    private static func edit<R>(_ nodes: inout [LayerNode<Payload>], _ path: ArraySlice<Int>,
+                                _ body: (inout LayerNode<Payload>) -> R) -> R? {
+        guard let index = path.first, nodes.indices.contains(index) else { return nil }
+        if path.count == 1 { return body(&nodes[index]) }
+        return edit(&nodes[index].children, path.dropFirst(), body)
+    }
+    /// Runs `body` on the children of `parent` (nil: the roots); nil for an unknown parent.
+    private mutating func editChildren<R>(of parent: String?, _ body: (inout [LayerNode<Payload>]) -> R) -> R? {
+        guard let parent else { return body(&roots) }
+        guard let path = path(to: parent) else { return nil }
+        return Self.edit(&roots, path[...]) { body(&$0.children) }
+    }
+    /// Takes the node with `id` out of the tree and returns it.
+    private mutating func remove(_ id: String) -> LayerNode<Payload>? {
+        guard let line = ancestors(of: id) else { return nil }
+        let taken = editChildren(of: line.last) { kids -> LayerNode<Payload>? in
+            guard let index = kids.firstIndex(where: { $0.id == id }) else { return nil }
+            return kids.remove(at: index)
+        }
+        return taken ?? nil
+    }
+    /// Reorders one sibling list by `step`, moving the `picked` ids.
+    private static func arranged(_ kids: inout [LayerNode<Payload>], _ step: ArrangeStep, _ picked: Set<String>) {
+        switch step {
+        case .bringToFront:
+            kids = kids.filter { !picked.contains($0.id) } + kids.filter { picked.contains($0.id) }
+        case .sendToBack:
+            kids = kids.filter { picked.contains($0.id) } + kids.filter { !picked.contains($0.id) }
+        case .bringForward:
+            for index in kids.indices.reversed() where picked.contains(kids[index].id) {
+                let to = min(index + 1, kids.count - 1)
+                if to != index, !picked.contains(kids[to].id) { kids.swapAt(index, to) }
+            }
+        case .sendBackward:
+            for index in kids.indices where picked.contains(kids[index].id) {
+                let to = max(index - 1, 0)
+                if to != index, !picked.contains(kids[to].id) { kids.swapAt(index, to) }
+            }
+        }
+    }
+    /// A copy of `node` with fresh ids from `mint`, the node's own first.
+    private static func copied(_ node: LayerNode<Payload>, mint: () -> String) -> LayerNode<Payload> {
+        var copy = node
+        copy.id = mint()
+        copy.children = node.children.map { copied($0, mint: mint) }
+        return copy
+    }
+    /// Appends the ids of `nodes` front to back, each before its descendants.
+    private static func collect(_ nodes: [LayerNode<Payload>], into out: inout [String]) {
+        for node in nodes.reversed() {
+            out.append(node.id)
+            collect(node.children, into: &out)
+        }
+    }
     /// Appends `nodes` front to back, then the children of each expanded one.
     private static func walk(_ nodes: [LayerNode<Payload>], depth: Int, hidden: Bool, locked: Bool,
                              expanded: Set<String>, into out: inout [LayerRow]) {

@@ -2,8 +2,9 @@
 // image, an artboard) sits on a checkerboard at `zoom` points per document
 // pixel, centred while it fits and scrollable with a margin once it doesn't,
 // with rulers along the top and left that follow the zoom and the scroll
-// (Ruler); their corner names the document's unit, "px" unless the app passes
-// `unit` ("pt" for Design). Pointer drags arrive in document pixels: `onDrag(from:to:)` once
+// (Ruler); their corner (RulerCorner) names the document's unit, "px" unless
+// the app passes `rulerUnit` ("pt" for Design; the older `unit` label, when
+// given, wins). Pointer drags arrive in document pixels: `onDrag(from:to:)` once
 // per move with the previous and current point (a click is a drag that
 // doesn't move), then `onDragEnd`. Pinch zooms through `onZoom`. Key presses
 // reach `onKey` while the canvas has focus, which a drag on it gives it.
@@ -111,7 +112,9 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let pointer: PointerStyle?
     private let checkerboard: Bool
     /// The unit the ruler corner names: "px" unless the app's document is in another one.
-    let unit: String
+    public let rulerUnit: String
+    /// The ruler corner's unit under its older name.
+    var unit: String { rulerUnit }
     private let onSize: @MainActor (CGSize) -> Void
     private let onZoom: (@MainActor (Double) -> Void)?
     private let onDrag: (@MainActor (CGPoint, CGPoint) -> Void)?
@@ -133,10 +136,11 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     /// `documentSize` in pixels; `content` and `overlay` are laid out at the
     /// artboard's size (the document at `zoom`), overlay on top. Only the
     /// content is clipped to the artboard. The checkerboard shows behind it
-    /// unless `checkerboard` is false.
+    /// unless `checkerboard` is false. The ruler corner names `rulerUnit`, or
+    /// `unit` when an app still passes that label.
     public init(
         documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil, checkerboard: Bool = true,
-        unit: String = "px",
+        rulerUnit: String = "px", unit: String? = nil,
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
         onZoom: (@MainActor (Double) -> Void)? = nil,
         onDrag: (@MainActor (CGPoint, CGPoint) -> Void)? = nil,
@@ -149,7 +153,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         self.zoom = zoom
         self.pointer = pointer
         self.checkerboard = checkerboard
-        self.unit = unit
+        self.rulerUnit = unit ?? rulerUnit
         self.onSize = onSize
         self.onZoom = onZoom
         self.onDrag = onDrag
@@ -168,7 +172,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             let layout = CanvasLayout(document: documentSize, zoom: zoom, viewport: viewport)
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    corner
+                    RulerCorner(unit: rulerUnit)
                     Ruler(axis: .horizontal, origin: layout.origin.x - scrolled.x, scale: layout.scale)
                 }
                 HStack(spacing: 0) {
@@ -179,16 +183,6 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onAppear { onSize(viewport) }
             .onChange(of: viewport) { _, size in onSize(size) }
         }
-    }
-
-    /// The ruler corner, naming the document's unit.
-    private var corner: some View {
-        Text(unit)
-            .font(SuiteFont.rulerLabel)
-            .foregroundStyle(SuiteColor.secondaryText)
-            .frame(width: SuiteSize.ruler, height: SuiteSize.ruler)
-            .background(SuiteColor.panel)
-            .accessibilityHidden(true)
     }
 
     private func scroller(_ layout: CanvasLayout) -> some View {

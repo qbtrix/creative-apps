@@ -14,6 +14,6 @@ struct TransformOverlay: View {
     var mark: PhotoCanvasMark? { model.transformDraft.map { PhotoCanvasMark.transformBox($0.box.cgRect) } }
 
     var body: some View {
-        if let mark = mark { PhotoCanvasMarkElement(mark: mark, zoom: zoom) }
+        if let mark = mark { mark.probe(zoom: zoom) }
     }
 }
