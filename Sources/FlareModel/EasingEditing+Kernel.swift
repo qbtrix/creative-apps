@@ -18,6 +18,24 @@ extension KeyRef {
         }
         return [name]
     }
+
+    /// Sets `easing` on each track this key names in `owner`'s layer: one undo step, or merged into `coalesceKey`'s
+    /// entry. Live and Fake both write through here. A missing layer throws `layerNotFound`, a key on no track
+    /// `keyframeNotFound`.
+    func setEasing(_ easing: Easing, owner: LayerOwner, coalesceKey: String?, in engine: inout CommandEngine) throws {
+        guard let layer = engine.document.layers(of: owner)?.first(where: { $0.id == layerID }) else {
+            throw CommandError.layerNotFound(layerID)
+        }
+        let properties = easedProperties(in: layer)
+        guard !properties.isEmpty else { throw CommandError.keyframeNotFound(property: "", frame: frame) }
+        func write(_ engine: inout CommandEngine) throws {
+            for property in properties {
+                try engine.perform(SetKeyframeEasing(owner: owner, layerID: layerID, property: property,
+                                                     frame: frame, easing: easing), coalesceKey: coalesceKey)
+            }
+        }
+        if coalesceKey == nil, properties.count > 1 { try engine.group("Set Keyframe Easing", write) } else { try write(&engine) }
+    }
 }
 
 extension SuiteKernel.KeyRef where Property == String {

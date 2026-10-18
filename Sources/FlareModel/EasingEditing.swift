@@ -109,8 +109,9 @@ extension EasingEditing {
     }
 }
 
-/// The pure curve math both conformers share, so the Fake and the real model
-/// cannot drift apart.
+/// Flare's names for SuiteKernel's `EaseCurve`, kept for the app and its
+/// tests: thin forwards that hold only Flare's deviations (a non-finite drag
+/// is nil, fewer than 2 samples draw nothing).
 public enum EasingCurve {
     /// The control points of `easing`; linear and hold sit at (0,0) and (1,1).
     public static func handles(of easing: Easing) -> (first: Point, second: Point) {

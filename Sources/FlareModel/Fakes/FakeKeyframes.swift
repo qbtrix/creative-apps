@@ -43,39 +43,20 @@ public struct FakeKeyframes: KeyframeEditing {
                          coalesceKey: String?, in engine: inout CommandEngine) throws {
         try available()
         let sceneID = try Self.scene(owner)
-        let moving = try KernelKeys.trackKeys(keys, owner: owner, in: engine.document)
-        guard delta != 0, !moving.isEmpty else { return }
-        guard moving.allSatisfy({ !$0.frame.addingReportingOverflow(delta).overflow }) else { throw CommandError.invalidFrame(delta) }
-        // A key moved later never lands past the scene's last frame, where its pose would never play (#636).
-        guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
-        let past = (moving.map(\.frame).max() ?? 0) + delta
-        guard let range = KernelKeys.frames(from: Int.min, before: delta > 0 ? scene.durationFrames : Int.max) else {
-            throw CommandError.invalidFrame(past)
+        // A key moved later never lands past the scene's last frame, where its pose would never play (#636). Fake's
+        // only lower bound is FlareCore's own refusal of a negative frame.
+        let end = { (document: Document) throws -> Int in
+            guard let scene = document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
+            return scene.durationFrames
         }
-        switch KernelKeys.moveRefusal(moving, by: delta, in: engine.document.layers(of: owner) ?? [], range: range) {
-        case (.pastRange, _)?: throw CommandError.invalidFrame(past)
-        case (.collides(let frame), let property)?: throw CommandError.frameOccupied(property: property, frame: frame)
-        case nil: break
-        }
-        let ordered = KernelKeys.moves(moving, by: delta, owner: .scene(sceneID))
-        func write(_ engine: inout CommandEngine) throws {
-            for move in ordered { try engine.perform(move, coalesceKey: coalesceKey) }
-        }
-        // On a copy, so a move that fails part way (a key landing on another, say) leaves the engine as it was.
-        var trial = engine
-        if coalesceKey == nil, ordered.count > 1 { try trial.group("Move Keyframe", write) } else { try write(&trial) }
-        engine = trial
+        try KernelKeys.move(keys, by: delta, owner: owner, coalesceKey: coalesceKey, from: Int.min, before: end,
+                            pastRange: { CommandError.invalidFrame(($0.map(\.frame).max() ?? 0) + delta) }, in: &engine)
     }
 
     public func removeKeys(_ keys: Set<KeyRef>, owner: LayerOwner, in engine: inout CommandEngine) throws {
         try available()
-        let sceneID = try Self.scene(owner)
-        let removing = try KernelKeys.trackKeys(keys, owner: owner, in: engine.document)
-        try engine.group("Delete Keyframe") { engine in
-            for removal in KernelKeys.removals(removing, owner: .scene(sceneID), in: engine.document.layers(of: owner) ?? []) {
-                try engine.perform(removal)
-            }
-        }
+        _ = try Self.scene(owner)
+        try KernelKeys.remove(keys, owner: owner, in: &engine)
     }
 
     public func insertFrames(_ count: Int, at frame: Int, layerIDs: [String], owner: LayerOwner,
@@ -83,7 +64,7 @@ public struct FakeKeyframes: KeyframeEditing {
         try available()
         let sceneID = try Self.scene(owner)
         let layers = try Self.frameEdit(count, at: frame, layerIDs: layerIDs, owner: owner, in: engine.document)
-        let shifted = layers.filter { (Self.lastFrame(of: $0) ?? Int.min) >= frame }
+        let shifted = layers.filter { (KernelKeys.lastKey(of: $0) ?? Int.min) >= frame }
             .compactMap { KernelKeys.lastKey(afterInserting: count, at: frame, in: $0) }
         guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
         // The scene grows so a key pushed past its last frame still plays (#596).
@@ -102,7 +83,7 @@ public struct FakeKeyframes: KeyframeEditing {
         }
         try engine.group("Insert Frame") { engine in
             for layer in layers {
-                guard let last = Self.lastFrame(of: layer), last >= frame else { continue }
+                guard let last = KernelKeys.lastKey(of: layer), last >= frame else { continue }
                 try engine.perform(ShiftKeyframes(owner: .scene(sceneID), layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
             }
             if duration != scene.durationFrames {
@@ -121,15 +102,7 @@ public struct FakeKeyframes: KeyframeEditing {
         let labels = Self.ruler(count, at: frame, layerIDs: layerIDs, owner: owner, in: engine.document)
             ? engine.document.scenes.first { $0.id == sceneID }?.labels.filter { $0.value >= frame } ?? [:] : [:]
         try engine.group("Remove Frame") { engine in
-            for layer in layers {
-                for (property, keys) in layer.tracks.sorted(by: { $0.key < $1.key }) {
-                    for key in KernelKeys.dropped(byRemoving: count, at: frame, from: keys) {
-                        try engine.perform(RemoveKeyframe(owner: .scene(sceneID), layerID: layer.id, property: property, frame: key.frame))
-                    }
-                }
-                guard let last = Self.lastFrame(of: layer), last >= end else { continue }
-                try engine.perform(ShiftKeyframes(owner: .scene(sceneID), layerID: layer.id, fromFrame: end, toFrame: last, delta: -count))
-            }
+            for layer in layers { try KernelKeys.removeFrames(count, at: frame, from: layer, owner: owner, in: &engine) }
             for name in labels.filter({ $0.value < end }).keys.sorted() {
                 try engine.perform(RemoveFrameLabel(sceneID: sceneID, name: name))
             }
@@ -161,8 +134,6 @@ public struct FakeKeyframes: KeyframeEditing {
             try engine.perform(SetFrameLabel(sceneID: sceneID, name: name, frame: frame))
         }
     }
-
-    private static func lastFrame(of layer: Layer) -> Int? { layer.tracks.values.flatMap { $0.map(\.frame) }.max() }
 
     private static func scene(_ owner: LayerOwner) throws -> String {
         guard case .scene(let id) = owner else { throw CommandError.invalidDocument(FakeProperties.symbolKeys) }

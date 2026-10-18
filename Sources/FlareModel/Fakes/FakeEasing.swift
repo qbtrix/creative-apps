@@ -21,17 +21,6 @@ public struct FakeEasing: KeyframeEasing {
                           coalesceKey: String?, in engine: inout CommandEngine) throws {
         if let unavailable { throw NotBuilt(reason: unavailable) }
         guard case .scene = owner else { throw CommandError.invalidDocument(FakeProperties.symbolKeys) }
-        guard let layer = engine.document.layers(of: owner)?.first(where: { $0.id == key.layerID }) else {
-            throw CommandError.layerNotFound(key.layerID)
-        }
-        let properties = key.easedProperties(in: layer)
-        guard !properties.isEmpty else { throw CommandError.keyframeNotFound(property: "", frame: key.frame) }
-        func write(_ engine: inout CommandEngine) throws {
-            for property in properties {
-                try engine.perform(SetKeyframeEasing(owner: owner, layerID: key.layerID, property: property,
-                                                     frame: key.frame, easing: easing), coalesceKey: coalesceKey)
-            }
-        }
-        if coalesceKey == nil, properties.count > 1 { try engine.group("Set Keyframe Easing", write) } else { try write(&engine) }
+        try key.setEasing(easing, owner: owner, coalesceKey: coalesceKey, in: &engine)
     }
 }
