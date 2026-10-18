@@ -1,0 +1,3 @@
+utc	stage	event	ref	note
+2026-10-18T23:21Z	0	stage-start	#2998	setup, base e0a627c
+2026-10-18T23:21Z	3	stage-start	wave 1	CL-1; CL-2 blocked on #2996 CC-a
