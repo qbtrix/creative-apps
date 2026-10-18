@@ -77,3 +77,5 @@ utc	stage	event	ref	note
 2026-10-18T19:44:52Z	goldens	merged	#2918 #2919	chrome baselines on dev
 2026-10-18T19:44:52Z	fix round 2	PR open	#2941	tab segments listed in suite.controls (EC-b); gate PASS
 2026-10-18T20:12:18Z	fix round 2	build green	#2941	macOS build 39160448592 success
+2026-10-18T20:53:39Z	fix round 2	merged	#2941	dev f836dc7
+2026-10-18T20:53:39Z	fix round 2	waiting	39163553482	full CI cancelled; scoped suiteui run asked of the supervisor
