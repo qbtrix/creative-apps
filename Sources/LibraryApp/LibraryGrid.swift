@@ -4,7 +4,7 @@
 // grid; the placeholder fill while it loads), file name, and rating, flag
 // and label badges. A reject is dimmed under SuiteUI's "Rejected" badge; a
 // file that can't be read shows SuiteUI's unreadable mark. A cell's value is
-// the catalog's `cellValue(for:)` ("ready 256×171 3 stars"), and its tooltip
+// the catalog's `cellValue(photo:)` ("ready 256×171 3 stars"), and its tooltip
 // names the photo and its cull state ("IMG_0040: 1 star, Picked"), or why its
 // file can't be read, so the flag glyph never stands alone. Each cell is
 // identified `library.grid.cell.<photo id>` on the cell itself, never on the
@@ -31,7 +31,7 @@ struct LibraryGrid: View {
         ThumbnailGrid(
             model.sortedItems.map {
                 ThumbnailItem<String>(
-                    photo: $0, thumbnail: model.thumbnails[$0.id], value: model.cellValue(for: $0.id))
+                    photo: $0, thumbnail: model.thumbnails[$0.id], value: model.cellValue(photo: $0))
             },
             cellSize: CGSize(width: side, height: side * 3 / 4),
             selection: model.selection, onSelectionChange: onSelect, onOpen: onOpen,
