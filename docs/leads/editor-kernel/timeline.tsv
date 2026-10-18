@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-18T21:29Z	3	pr-merged	#2972	EK-31 ToolKeys
 2026-10-18T21:32Z	3	finding-filed	#3012	gap: kernel stroke gaps from AB-p1
 2026-10-18T21:38:11Z	check	check: dev 8640f00f; #2973 EK-6 needs-rebase fixed (merged dev, render-budgets.md both rows, gate PASS, head 30a35145, Head line moved); #2974 waits on lane mac build; 0 findings
+2026-10-18T22:16:45Z	check	check: dev f221b370; #2974 EK-25 merged; #2973 EK-6 merged dev again (old base lacks #2990's PhotoZoomSweepTests fix, which broke #2979's mac build), gate PASS, head fdfd625e; EK-26 waits on #2973
