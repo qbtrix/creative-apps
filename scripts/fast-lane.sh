@@ -15,6 +15,10 @@
 # passing build-only CI run on its head (build_gate), which the lane
 # dispatches itself, once per head (workers get 403).
 #
+# A crew PR into BASE_BRANCH with a `Belt-Lead:` body line and no `fast-lane`
+# label gets the label from the sweep (belt_label) unless it carries an
+# OPT_OUT_LABELS label; it is then evaluated like any labelled PR.
+#
 # Eligibility (all must hold): open, not draft, label `fast-lane`, base
 # BASE_BRANCH, author in FAST_LANE_AUTHORS, size within MAX_LINES/MAX_FILES
 # (unless every path is under DOCS_RE), no changed or renamed-away path under
@@ -116,6 +120,8 @@ REQUIRE_BELT_REVIEW=0
 BELT_REVIEW_CONTEXT="belt/review"
 BASE_BRANCH="${FAST_LANE_BASE:-dev}"
 LABEL="fast-lane"
+# A Belt-Lead PR from the crew gets LABEL added by the sweep unless it carries one of these.
+OPT_OUT_LABELS="no-fast-lane needs-human"
 MERGED_LABEL="fast-lane-merged"
 FEATURE_LABEL="feature-done"  # merging one dispatches full CI on BASE_BRANCH
 CI_WORKFLOWS=("CI")
@@ -1491,10 +1497,39 @@ merges_since_ci() {
     --jq '[.commits[] | select(.commit.message | split("\n")[0] | test("\\(#[0-9]+\\)$"))] | length' || true
 }
 
-# Open fast-lane PRs on any base, oldest first (decide retargets main and skips the rest).
-open_prs() {
-  gh pr list -R "$REPO" --state open --label "$LABEL" --limit 100 --json number --jq '.[].number' | sort -n
+# Every open PR, one call: the sweep's labelled PRs and the Belt leads to label both come from it.
+open_list() {
+  gh pr list -R "$REPO" --state open --limit 100 --json number,labels,author,baseRefName,body
 }
+
+# lane_prs <open_list json>: open fast-lane PRs on any base, oldest first (decide retargets main and skips the rest).
+lane_prs() {
+  jq -r --arg l "$LABEL" '.[] | select(any(.labels[]?; .name == $l)) | .number' <<<"$1" | sort -n
+}
+
+# belt_unlabelled <open_list json>: the crew's PRs into BASE_BRANCH whose body has a
+# `Belt-Lead:` line, with no LABEL and no opt-out label. Belt leads often forget the label.
+belt_unlabelled() {
+  jq -r --arg l "$LABEL" --arg base "$BASE_BRANCH" --arg authors "$FAST_LANE_AUTHORS" --arg out "$OPT_OUT_LABELS" '
+    ([$l] + ($out | split(" "))) as $skip
+    | .[] | select(.baseRefName == $base
+        and (.author.login as $a | ($authors | split(" ")) | index($a) != null)
+        and ((.body // "") | test("(^|\n)Belt-Lead:"))
+        and (all(.labels[]?; .name as $n | ($skip | index($n)) == null)))
+    | .number' <<<"$1" | sort -n
+}
+
+# belt_label <open_list json>: label each belt_unlabelled PR; the sweep then evaluates it as usual.
+belt_label() {
+  local n
+  for n in $(belt_unlabelled "$1"); do
+    log "PR #$n: Belt-Lead and no $LABEL label; labelling"
+    write gh pr edit "$n" -R "$REPO" --add-label "$LABEL" || { log "could not add $LABEL to #$n"; continue; }
+    write gh pr comment "$n" -R "$REPO" --body "Fast lane: labelled because the PR carries Belt-Lead." || true
+  done
+}
+
+open_prs() { lane_prs "$(open_list)"; }
 
 main() {
   local prs=() bisect="" bisect_issue="" bisect_branch="$BASE_BRANCH"
@@ -1525,7 +1560,9 @@ main() {
   done < <(batch_branches)
   local explicit=${#prs[@]}
   if (( explicit == 0 )); then
-    while read -r n; do [[ -n "$n" ]] && prs+=("$n"); done < <(open_prs)
+    local list; list=$(open_list)
+    belt_label "$list"
+    while read -r n; do [[ -n "$n" ]] && prs+=("$n"); done < <({ lane_prs "$list"; belt_unlabelled "$list"; } | sort -un)
   fi
   (( ${#prs[@]} )) || { (( HOLD || MERGED_RUN )) || echo "fast-lane: no open $LABEL PRs" >&2; return 0; }
   local n pass

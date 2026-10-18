@@ -319,6 +319,10 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   (docs, data, packets) takes the lane on the Linux check alone.
 - Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
   the snapshots after the next feature CI and files fixes as new issues.
+- A crew PR into `dev` whose body has a `Belt-Lead:` line but no `fast-lane`
+  label gets the label from the lane's next sweep, with one comment, and is
+  evaluated in that sweep under the same rules. `no-fast-lane` or
+  `needs-human` on the PR stops it (`OPT_OUT_LABELS` in scripts/fast-lane.sh).
 - Each lane run merges every eligible PR, oldest first. One ready PR
   squash-merges at once. Two or more are checked together first: the lane
   merges `dev` plus each PR, in order, onto a scratch `lane/batch-<id>` branch
