@@ -13,7 +13,7 @@ import Testing
     }
 
     @MainActor @Test func quickSamplesWaitTogetherInOrder() {
-        let pacer = StrokePacer<Int>(spacing: .milliseconds(50))
+        let pacer = SuiteStrokePacer<Int>(spacing: .milliseconds(50))
         var calls: [[Int]] = []
         for x in 0..<3 { pacer.add(x) { calls.append($0) } }
         #expect(calls == [[0]])
@@ -22,8 +22,8 @@ import Testing
     }
 
     @Test func pressureAndRing() {
-        #expect(PointerPressure.reading(isPen: true, raw: 1.5) == 1 && PointerPressure.reading(isPen: true, raw: 0.25) == 0.25)
-        #expect(PointerPressure.reading(isPen: true, raw: .nan) == 1 && PointerPressure.reading(isPen: false, raw: 0.1) == 1)
+        let read = SuitePointerPressure.reading
+        #expect(read(true, 1.5) == 1 && read(true, 0.25) == 0.25 && read(true, .nan) == 1 && read(false, 0.1) == 1)
         for (zoom, side) in [(0.25, 16.0), (1, 64), (4, 256)] {
             let ring = BrushCursorMark.frame(point: CGPoint(x: 40, y: 20), diameter: 64, zoom: zoom)
             #expect(ring?.width == side && ring?.midX == 40 * zoom && ring?.midY == 20 * zoom)

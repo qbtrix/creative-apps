@@ -1,7 +1,7 @@
 // GalleryEditorKernelChrome.swift: the editor-kernel page's chrome (EK-30) on
-// the fakes: Export opens ExportSheet and walks a fake run to 10 of 10; the
-// stroke pad paints a StrokePacer-paced drag at PointerPressure under a
-// BrushCursorMark. The pad's samples stay in its own state.
+// the fakes: Export opens SuiteExportSheet and walks a fake run to 10 of 10;
+// the stroke pad paints a SuiteStrokePacer-paced drag at SuitePointerPressure
+// under a BrushCursorMark. The pad's samples stay in its own state.
 import SuiteKernel
 import SwiftUI
 
@@ -49,14 +49,14 @@ struct GalleryEditorKernelChromePanel: View {
 }
 
 struct GalleryStrokePad: View {
-    struct Dot: Hashable { var point: CGPoint, pressure: Double, starts: Bool }
+    struct Dot { var point: CGPoint, pressure: Double, starts: Bool }
 
     @State private var dots: [Dot]
     @State private var hover: CGPoint?
     @State private var drawing = false
-    @State private var pacer = StrokePacer<Dot>()
+    @State private var pacer = SuiteStrokePacer<Dot>()
 
-    init(dots: [Dot] = [], hover: CGPoint? = nil) { (_dots, _hover) = (State(initialValue: dots), State(initialValue: hover)) }
+    init(dots: [Dot] = [], hover: CGPoint? = nil) { _dots = State(initialValue: dots); _hover = State(initialValue: hover) }
 
     var body: some View {
         let shown = dots
@@ -79,12 +79,12 @@ struct GalleryStrokePad: View {
             DragGesture(minimumDistance: 0)
                 .onChanged { value in
                     hover = value.location
-                    let dot = Dot(point: value.location, pressure: PointerPressure.current, starts: !drawing)
+                    let dot = Dot(point: value.location, pressure: SuitePointerPressure.current, starts: !drawing)
                     drawing = true
                     pacer.add(dot) { dots += $0 }
                 }
                 .onEnded { _ in pacer.stop(); drawing = false })
-        .onAppear { PointerPressure.watch() }
+        .onAppear { SuitePointerPressure.watch() }
         .accessibilityElement()
         .accessibilityLabel("Stroke pad")
         .accessibilityValue("\(dots.filter(\.starts).count) strokes")

@@ -1,9 +1,9 @@
-// PointerPressure.swift: pen pressure for a canvas drag (EK-30; Photo's shape).
-// `watch()` monitors left-button events once and keeps the latest reading: a
-// pen's pressure clamped to 0...1, and 1 for a mouse or trackpad.
+// PointerPressure.swift: SuitePointerPressure, pen pressure for a canvas drag
+// (EK-30; Photo's shape). `watch()` monitors left-button events once and keeps
+// the latest reading: a pen's pressure clamped to 0...1, 1 for a mouse.
 import AppKit
 
-@MainActor public enum PointerPressure {
+@MainActor public enum SuitePointerPressure {
     public private(set) static var current = 1.0
     private static var monitor: Any?
 

@@ -1,5 +1,5 @@
-// StrokePacer.swift: hands a canvas drag's samples to the editor at most twice
-// a display frame (EK-30; Photo's pacer is the shape). A sample at least
+// StrokePacer.swift: SuiteStrokePacer hands a canvas drag's samples to the
+// editor at most twice a display frame (EK-30; Photo's pacer is the shape). A sample at least
 // `spacing` after the last apply applies at once; quicker ones wait and apply
 // together, in order, from the main run loop. `stop()` flushes at drag end.
 import AppKit
@@ -8,7 +8,7 @@ public enum StrokePacing {
     public static func spacing(framesPerSecond: Int) -> Duration { .microseconds(500_000 / max(framesPerSecond, 1)) }
 }
 
-@MainActor public final class StrokePacer<Move> {
+@MainActor public final class SuiteStrokePacer<Move> {
     private var waiting: [Move] = [], apply: ([Move]) -> Void = { _ in }
     private var lastApply: ContinuousClock.Instant?, timerSet = false
     public let spacing: Duration
