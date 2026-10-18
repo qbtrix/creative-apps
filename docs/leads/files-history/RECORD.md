@@ -60,3 +60,5 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - FH-3: PR #2873 (head 6f3f7a50, finished by a fixer after the builder stopped before the gate; 3 files, +250/-24).
 - The PR bodies were cleaned of the auto-added attribution footer through the GitHub MCP update. A REST PATCH re-adds it.
 - Slice done lines: none yet.
+
+- 2026-10-18T18:18:09Z: FH-3 #2873 and FH-6 #2879 merged; FH-a is fully on dev. Wave 4 (wkf4hdp2e): FH-5 and FH-7, FH-7 held with `no-fast-lane` so it merges after FH-5.

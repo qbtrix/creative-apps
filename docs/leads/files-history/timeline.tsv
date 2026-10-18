@@ -10,3 +10,6 @@ utc	feature	event	ref	note
 2026-10-18T17:37:26Z	files-history	stage-start	wave 3	FH-6 builder (J16) on dev@bea7db20; FH-5 waits on #2873 and #2866, FH-7 last
 2026-10-18T17:53:56Z	files-history	pr	#2879	FH-6 opened, contract ok
 2026-10-18T17:59:56Z	files-history	heartbeat	#2866	FH-4 merged 17:50Z (batch run 39150527669); #2873 FH-3 macOS build 39148468443 green, waiting on lane sweep; #2879 FH-6 macOS build 39152072157 queued; FH-5 starts once #2873 merges
+2026-10-18T18:18:09Z	files-history	merged	#2873	FH-3 merged 18:03Z
+2026-10-18T18:18:09Z	files-history	merged	#2879	FH-6 merged 18:11Z; FH-a complete on dev c91b1468; full CI 39153086055 pending (Belt-Slice-Done when green)
+2026-10-18T18:18:09Z	files-history	wave	wkf4hdp2e	wave 4 started: FH-5 (J13/J14) and FH-7 (P4, feature-done, held with no-fast-lane until FH-5 merges); base c91b1468
