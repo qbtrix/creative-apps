@@ -111,3 +111,4 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - 2026-10-18T04:22:14Z check: SR-b fix #2561 macOS build green (run 39095809132), awaiting lane merge; full CI 39093416270 macOS job still running; no dev-red
 - 2026-10-18T04:25:13Z check: #2561 merged into dev as d3a4f16e (04:24Z). Dev CI 39096939772 runs on 21066130, before it, so it can't close SR-b; waiting for a design-scoped or full run on d3a4f16e or later.
 - 2026-10-18T04:35:09Z check: dev CI 39096939772 (21066130) cancelled. Scoped design 39097469910 on d3a4f16e (holds #2561) in progress: it decides SR-b.
+- 2026-10-18T04:39:26Z check: SR-b fix #2561 merged (d3a4f16e7); scoped design run 39097469910 on it in progress; full CI 39093416270 macOS still running; no dev-red
