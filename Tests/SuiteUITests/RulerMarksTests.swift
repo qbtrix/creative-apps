@@ -1,7 +1,10 @@
 // RulerMarksTests.swift: the ruler draws only the ticks and labels inside the
 // visible stretch, so their count is bounded by its width, not the duration.
-// No SwiftUI. macOS only.
+// The canvas rulers' corner reads the unit it is given, "px" by default, so
+// Photo's rulers stay in pixels while Design's say points (#264). No
+// rendering. macOS only.
 import SuiteUI
+import SwiftUI
 import Testing
 
 @Test func rulerMarksStayBoundedNearIntMax() {
@@ -45,4 +48,20 @@ import Testing
     let mapping = FrameMapping(duration: 48, frameWidth: 10)
     #expect(mapping.rulerMarks(visibleX: 600...900, tickSpacing: 6, labelSpacing: 48).ticks.isEmpty)
     #expect(mapping.rulerMarks(visibleX: -300 ... -10, tickSpacing: 6, labelSpacing: 48).ticks.isEmpty)
+}
+
+@Test func theRulerCornerReadsItsUnitPixelsByDefault() {
+    #expect(RulerCorner().unit == "px")
+    #expect(RulerCorner(unit: "pt").unit == "pt")
+}
+
+@MainActor
+@Test func theViewportPassesItsRulerUnitToTheCorner() {
+    let size = CGSize(width: 100, height: 100)
+    let pixels = CanvasViewport(documentSize: size, zoom: 1) { Color.clear } overlay: { EmptyView() }
+    let points = CanvasViewport(documentSize: size, zoom: 1, rulerUnit: "pt") { Color.clear } overlay: { EmptyView() }
+    let older = CanvasViewport(documentSize: size, zoom: 1, unit: "pt") { Color.clear } overlay: { EmptyView() }
+    #expect(pixels.rulerUnit == "px")
+    #expect(points.rulerUnit == "pt")
+    #expect(older.rulerUnit == "pt")
 }
