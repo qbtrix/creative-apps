@@ -1,12 +1,14 @@
 // PhotoUnsavedPrompt.swift: the words of the unsaved-changes alert before a
 // dirty window closes or the app quits (photo-documents D-10, PJ-2, PJ-3);
 // the app builds its NSAlert from these. A clean or empty image has no
-// prompt (`unsavedPromptMessage` is nil). Linux-safe.
+// prompt (`unsavedPromptMessage` is nil). The words are the kernel's
+// `UnsavedPrompt`, shared by every app; Photo adds its button identifiers. Linux-safe.
+import SuiteKernel
 
 /// The unsaved-changes alert: its message, informative text and buttons.
 public enum PhotoUnsavedPrompt {
     /// What the person chose.
-    public enum Answer: Sendable, Equatable { case save, dontSave, cancel }
+    public typealias Answer = UnsavedPrompt.Answer
 
     /// One of the alert's buttons, in the order the alert adds them.
     public struct Choice: Sendable, Equatable {
@@ -16,23 +18,17 @@ public enum PhotoUnsavedPrompt {
     }
 
     /// Save (the default, Return), Don't Save, Cancel (Escape).
-    public static let choices: [Choice] = [
-        Choice(title: "Save", identifier: "photo.unsaved.save", answer: .save),
-        Choice(title: "Don't Save", identifier: "photo.unsaved.dontSave", answer: .dontSave),
-        Choice(title: "Cancel", identifier: "photo.unsaved.cancel", answer: .cancel),
-    ]
+    public static let choices: [Choice] = UnsavedPrompt.answers.map {
+        Choice(title: UnsavedPrompt.title(of: $0), identifier: "photo.unsaved.\($0)", answer: $0)
+    }
 
-    public static let informativeText = "Your changes will be lost if you don't save them."
+    public static let informativeText = UnsavedPrompt.informativeText
 
     /// "Do you want to save the changes made to the document “beach.png”?"
-    public static func message(for name: String) -> String {
-        "Do you want to save the changes made to the document \u{201C}\(name)\u{201D}?"
-    }
+    public static func message(for name: String) -> String { UnsavedPrompt.message(for: name) }
 
     /// The answer for the button at `index` (0 is the first); Cancel for any other.
-    public static func answer(forButton index: Int) -> Answer {
-        choices.indices.contains(index) ? choices[index].answer : .cancel
-    }
+    public static func answer(forButton index: Int) -> Answer { UnsavedPrompt.answer(forButton: index) }
 }
 
 extension PhotoWorkspace {
