@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: fix round 1 for OB-s (#2849 major; #2850, #2851 minors) and OB-a minor #2852 (wave 5 takes findings first). Slice-done: OB-u and OB-m on full run 39143942767 (bafd1d38, holds every merged task); OB-s after its fix round on a later run. Then critics on scoped suite run 39143959244, OB-5g goldens from its snapshots, Mac-Finish-Wanted OB-u, OB-13 once switching and bundled samples are on dev.
+Next: OB-m done. OB-s after #2857 and #2858 merge and a dev run holding them is Linux-green; then fixers for #2850, #2852. OB-u after OB-5g (goldens from scoped suite run 39143959244), then Mac-Finish-Wanted OB-u. Critics for OB-u, OB-m, OB-z on that scoped run. OB-13 once switching and bundled samples are on dev.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -14,9 +14,9 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OB-a | `Sources/SuiteModel/Onboarding/` with every type and signature the window calls as stubs returning the fake's values; its Linux tests written and disabled | OB-1, OB-2 | MJ-OB0 | – | no | 0 | done (Belt-Slice-Done: run 39132122171 at 4bf67be8, #2791) | – | – |
-| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 0 | waiting | – | – |
-| OB-m | SuiteOnboarding, OnboardingLaunch, OnboardingModel do the work; StorePreferences over FileStore makes the preferences slot live | OB-7, OB-8, OB-9 | MJ-OB1, MJ-OB2, MJ-OB4 | OB-a | no | 0 | waiting | – | – |
-| OB-s | SampleCatalog names one sample per app, finds it under Resources, copies into Documents without overwriting; Bundle/Samples/ holds the files | OB-10, OB-11 | MJ-OB3 | OB-a; bundle (built: bundle-apps copies Bundle/Samples/) | no | 0 | waiting | – | – |
+| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 0 | waiting on OB-5g (other tasks merged, Linux green on 39143942767) | – | – |
+| OB-m | SuiteOnboarding, OnboardingLaunch, OnboardingModel do the work; StorePreferences over FileStore makes the preferences slot live | OB-7, OB-8, OB-9 | MJ-OB1, MJ-OB2, MJ-OB4 | OB-a | no | 0 | done (Belt-Slice-Done: run 39143942767 at bafd1d38, #2825) | – | – |
+| OB-s | SampleCatalog names one sample per app, finds it under Resources, copies into Documents without overwriting; Bundle/Samples/ holds the files | OB-10, OB-11 | MJ-OB3 | OB-a; bundle (built: bundle-apps copies Bundle/Samples/) | no | 1 | fix round 1 (#2857, #2858; tasks merged, Linux green on 39143942767) | – | – |
 | OB-z | The slot is live, the window reads the bundle's samples, journeys on live | OB-12, OB-13 | OJ3, OJ4 | OB-u, OB-m, OB-s (OB-12); switching (OB-13: Window > Switch To and the transport are on dev) | no | 0 | waiting | – | – |
 
 ## Tasks
