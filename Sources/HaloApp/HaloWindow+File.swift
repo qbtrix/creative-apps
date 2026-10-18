@@ -38,7 +38,7 @@ extension HaloWindow {
     func fileScene(_ content: some View) -> some View {
         content
             .navigationSubtitle(model.windowSubtitle ?? "")
-            .background { HaloFileElement(status: model.saveStatus) }
+            .background { ProbeElement("halo.file", label: model.saveStatus, value: model.saveStatus) }
             .overlay { HaloOpenProgress(model: model) }
             .fileExporter(
                 isPresented: Binding(get: { request == .saveAs }, set: { if !$0, request == .saveAs { request = nil } }),
@@ -210,21 +210,6 @@ struct HaloOpenProgress: View {
             .accessibilityLabel(text)
             .accessibilityIdentifier("halo.file.progress")
         }
-    }
-}
-
-/// The hidden `halo.file` element: no hits, its label and value the save
-/// status. The label is what XCUITest can read (values read empty, #262).
-private struct HaloFileElement: View {
-    let status: String
-
-    var body: some View {
-        Color.clear
-            .allowsHitTesting(false)
-            .accessibilityElement()
-            .accessibilityLabel(status)
-            .accessibilityValue(status)
-            .accessibilityIdentifier("halo.file")
     }
 }
 
