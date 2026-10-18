@@ -1,0 +1,37 @@
+[
+  {
+    "label": "the selection pill shows with nothing selected (0 selected)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let chosen = selection.isEmpty ? [] : [picked]",
+    "replace": "let chosen = [picked]",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the grid's count reads the whole catalog, not the shown collection",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "size: Self.photoCountText(order.count)",
+    "replace": "size: Self.photoCountText(items.count)",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the loupe's place counts from zero (0 of 24)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "text: \"\\(index + 1) of \\(order.count)\"",
+    "replace": "text: \"\\(index) of \\(order.count)\"",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "a full render still shows the Preview pill",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "} else if loupeRender?.quality == .preview {",
+    "replace": "} else if loupeRender != nil {",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "an empty live catalog shows a status row",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "return services.isPreview ? empty : nil",
+    "replace": "return empty",
+    "tests": "LibraryStatusTextTests.swift"
+  }
+]
