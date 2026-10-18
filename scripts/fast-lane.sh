@@ -142,13 +142,13 @@ SELF_CHECK="fast-lane"
 # folder at the root, a path with a / is that file, and a bare name is that
 # file in any folder (docs/AGENTS.md too). A * matches one folder name.
 # Matching ignores case. .gitattributes names the merge drivers the lane runs
-# when it integrates a PR, so a PR can't turn one on for itself. docs/c4/model.json and each app's waves.md are
+# when it integrates a PR, so a PR can't turn one on for itself. docs/c4/model.json, each app's waves.md and jobs.md are
 # generated on dev (.github/workflows/generated.yml), so PRs never edit them.
 # UITests/quarantine.json skips failing journeys (scripts/quarantine), so only
 # the supervisor quarantines; Tests/perf-suites.txt takes tests out of the
 # gate (scripts/test-scope), so only the supervisor lists them.
 PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ .gitattributes CLAUDE.md AGENTS.md LICENSE
-  docs/c4/model.json 'docs/blueprints/*/features/waves.md' UITests/quarantine.json Tests/perf-suites.txt)
+  docs/c4/model.json 'docs/blueprints/*/features/waves.md' 'docs/blueprints/*/jobs.md' UITests/quarantine.json Tests/perf-suites.txt)
 deny_re() {
   local p re=""
   for p in "${PROTECTED[@]}"; do

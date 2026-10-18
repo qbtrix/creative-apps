@@ -1,6 +1,7 @@
 // SuiteEditorKernelChromeSnapshots.swift: EK-30's chrome in Light and Dark:
 // the export sheet editing, at 4 of 10 and finished; the stroke pad with the
-// brush ring. Writes suiteui-editor-kernel-{export,stroke}-{light,dark}.png.
+// brush ring over the status line naming the Brush tool (EK-31). Writes
+// suiteui-editor-kernel-{export,stroke}-{light,dark}.png.
 import Foundation
 import SuiteKernel
 import SwiftUI
@@ -43,7 +44,10 @@ private struct StrokePadSheet: View {
             let point = CGPoint(x: 40 + t * 9, y: 180 + 60 * sin(t / 6))
             return GalleryStrokePad.Dot(point: point, pressure: 0.2 + 0.8 * t / 39, starts: i == 0)
         }
-        GalleryStrokePad(dots: dots, hover: dots.last?.point)
-            .padding(SuiteSpacing.xxl).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+            GalleryStrokePad(dots: dots, hover: dots.last?.point)
+            GalleryToolStatus(tool: .brush)
+        }
+        .padding(SuiteSpacing.xxl).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

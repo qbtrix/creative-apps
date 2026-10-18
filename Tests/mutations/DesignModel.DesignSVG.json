@@ -7,10 +7,10 @@
     "tests": "DesignSVGTests|DesignSVGWalkTests"
   },
   {
-    "label": "textEscaped: & is written raw",
+    "label": "textEscaped: text content is written raw",
     "file": "Sources/DesignModel/Live/DesignSVG.swift",
-    "find": "case \"&\": out += \"&amp;\"",
-    "replace": "case \"&\": out += \"&\"",
+    "find": ">\\(XMLText.escaped(node.text))</text>",
+    "replace": ">\\(node.text)</text>",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
   },
   {

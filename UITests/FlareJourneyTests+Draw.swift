@@ -1,25 +1,36 @@
-// FlareJourneyTests+Draw.swift: J3's slice for draw-key-save DK-9, every drawing tool chosen by a click on its
-// palette button (the letters are FlareJourneyTests' `testKeys`; #1863) and driven by the mouse. On `-FlareFixture
-// empty` (one 550 × 400 scene, no layers) it chooses Rectangle and drags a rectangle (Rectangle 1), Ellipse and
-// Shift-drags a square box (Ellipse 1), Pen and clicks three corners then the first (Path 1, closed), clicks two points
-// and the palette's Finish Path (Path 2, open; #1862), then Rectangle and presses Escape in the middle of a drag (no
-// layer), and clicks Edit > Undo: Path 2 goes and the menu reads "Redo Add Path". Clicking Select selects it again.
+// FlareJourneyTests+Draw.swift: J3 (draw-key-save DK-9, stage-edit SE-5a), every drawing tool chosen by a click on
+// its palette button (the letters are FlareJourneyTests' `testKeys`; #1863) and driven by the mouse. On `-FlareSample
+// empty` (one 550 × 400 scene, no layers, on the live services) the timeline first reads its empty text, then it
+// chooses Rectangle and drags a rectangle (Rectangle 1), Ellipse and Shift-drags a square box (Ellipse 1), Pen and
+// clicks three corners then the first (Path 1, closed), clicks once and press-drags the second point, so it gets
+// handles, and presses Return, Object > Finish Path's key, with the palette's Finish Path enabled (Path 2, open;
+// #1862). Then Rectangle and Escape in the middle of a drag (no layer), and ⌘Z: Path 2 goes and the Edit menu reads
+// "Redo Add Path". Clicking Select selects it again. Path 2's second anchor reading smooth waits on an anchor-kind
+// readout (#390), so the journey ends on that step's XCTSkip.
 // Escape mid-drag needs the button held while the key goes down, which XCUITest's drags can't do, so that drag is
 // posted as CGEvents. Those need the runner's post-event (Accessibility) access, so the step first fails by name
 // without it, then proves the posted drag reaches the stage (a plain posted drag draws Rectangle 2, which the
 // toolbar's Undo takes away) before the Escape one adds nothing (#1850). One shot per step, `flare-draw-<step>`.
 // Before the first shot it checks the stage's chrome: the palette clear of the vertical ruler and the status bar's
-// zoom, size and Preview data pills.
+// zoom, size and Preview data pills. The timeline's track-name buttons carry no identifier (needs-ui #1789), so
+// each drawn layer still counts once under the audit's `identifier` check (#2485).
 import CoreGraphics
 import XCTest
 
 final class FlareDrawJourneys: XCTestCase {
-    /// R, E, P draw a rectangle, an ellipse and two paths; Escape mid-drag adds nothing; Undo removes only Path 2.
-    @MainActor func testDrawShapesWithEachTool() {
-        let flare = Journey("Flare", self, arguments: ["-FlareFixture", "empty"])
+    /// The timeline's text with no layers (FlareTimelineRead's `timelineEmptyMessage`).
+    private static let emptyTimeline = "No layers yet. Draw on the stage to add one."
+
+    /// R, E, P draw a rectangle, an ellipse and two paths; Escape mid-drag adds nothing; ⌘Z removes only Path 2.
+    @MainActor func testDrawShapesWithEachTool() throws {
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "empty"])
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let stage = flare.element("suite.canvas")
         XCTAssert(stage.waitForExistence(timeout: 10), "no stage (suite.canvas)")
+        let timeline = flare.element("flare.timeline")
+        XCTAssert(timeline.waitForExistence(timeout: 10), "no timeline (flare.timeline)")
+        XCTAssert(timeline.staticTexts[Self.emptyTimeline].waitForExistence(timeout: 5),
+                  "the empty scene's timeline doesn't read \(Self.emptyTimeline)")
         // A click with Select on the empty stage only gives it the keyboard.
         point(0.95, 0.95, on: stage).click()
         expectStageChrome(flare)
@@ -47,11 +58,14 @@ final class FlareDrawJourneys: XCTestCase {
         expectLayers(["Rectangle 1", "Ellipse 1", "Path 1"], flare)
         flare.shot("draw-3-closed-path")
 
-        // 4. Two clicks and the palette's Finish Path: an open path, with no key.
-        for (x, y) in [(0.5, 0.6), (0.8, 0.8)] { point(x, y, on: stage).click() }
+        XCTAssertFalse(timeline.staticTexts[Self.emptyTimeline].exists, "the timeline still reads empty with 3 layers")
+
+        // 4. A click, then a press-drag at the second point (its handles), then Return: an open path.
+        point(0.5, 0.6, on: stage).click()
+        point(0.8, 0.8, on: stage).press(forDuration: 0.1, thenDragTo: point(0.9, 0.7, on: stage))
         let finish = flare.element("suite.tools").buttons["Finish Path"]
-        XCTAssert(waitFor { finish.exists && finish.isEnabled }, "Finish Path isn't enabled after two pen clicks")
-        finish.click()
+        XCTAssert(waitFor { finish.exists && finish.isEnabled }, "Finish Path isn't enabled after two pen anchors")
+        flare.press(.return)
         expectLayers(["Rectangle 1", "Ellipse 1", "Path 1", "Path 2"], flare)
         flare.shot("draw-4-open-path")
 
@@ -71,13 +85,14 @@ final class FlareDrawJourneys: XCTestCase {
         expectLayers(["Rectangle 1", "Ellipse 1", "Path 1", "Path 2"], flare)
         flare.shot("draw-5-escape")
 
-        // 6. Edit > Undo: only Path 2 goes, and Redo names it.
+        // 6. ⌘Z, Edit > Undo Add Path's key: only Path 2 goes, and Redo names it.
         let edit = flare.app.menuBars.firstMatch.menuBarItems["Edit"]
         XCTAssert(edit.waitForExistence(timeout: 5), "no Edit menu")
         edit.click()
-        let undo = edit.menus.firstMatch.menuItems["Undo Add Path"]
-        XCTAssert(undo.waitForExistence(timeout: 3), "the Edit menu has no Undo Add Path")
-        undo.click()
+        XCTAssert(edit.menus.firstMatch.menuItems["Undo Add Path"].waitForExistence(timeout: 3),
+                  "the Edit menu has no Undo Add Path")
+        flare.press(.escape)
+        flare.press(character: "z", .command)
         expectLayers(["Rectangle 1", "Ellipse 1", "Path 1"], flare)
         edit.click()
         let redo = edit.menus.firstMatch.menuItems["Redo Add Path"]
@@ -88,6 +103,9 @@ final class FlareDrawJourneys: XCTestCase {
         // 7. Select again from the palette.
         choose("Select", flare)
         flare.shot("draw-7-select")
+
+        // 8. Path 2's second anchor, press-dragged, reads smooth: no view says an anchor's kind yet.
+        throw XCTSkip("waits on #390: no anchor-kind readout for Path 2's smooth anchor")
     }
 
     /// The stage's chrome on the 550 × 400 fixture: the palette starts right of the vertical ruler (#1857), and a
