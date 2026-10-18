@@ -4,7 +4,8 @@
 // Cut takes Shadow away and Paste brings it back as "Shadow copy"; Delete removes "Ball copy 2". With the
 // pasteboard cleared, Edit > Paste is disabled and its help tag shows (`edit-paste-disabled`). A right click
 // on Ball on the stage opens the context menu: Cut, Copy, Duplicate, Delete, Bring Forward and Send Backward
-// (`stage-context-menu`). A scene point is the artboard's top-left corner plus the point at its fit scale.
+// (`stage-context-menu`). A scene point is the artboard's top-left corner plus the point at its fit scale. Rows are
+// picked off their names and read selected before the menu opens (Journey.pickSidebarRow, #2496, #2730).
 import AppKit
 import XCTest
 
@@ -21,7 +22,7 @@ final class FlareEditJourneys: XCTestCase {
 
         // 1. Ball, Edit > Copy: the pasteboard holds Flare layers.
         _ = NSPasteboard.general.clearContents()
-        sidebar.staticTexts["Ball"].click()
+        flare.pickSidebarRow("Ball")
         choose("Copy", flare)
         XCTAssert(waitFor { NSPasteboard.general.data(forType: Self.layersType) != nil },
                   "Copy put no Flare layers on the pasteboard")
@@ -40,7 +41,7 @@ final class FlareEditJourneys: XCTestCase {
         flare.shot("edit-3-duplicated")
 
         // 4. Shadow, Cut: it goes; Paste brings it back renamed.
-        sidebar.staticTexts["Shadow"].click()
+        flare.pickSidebarRow("Shadow")
         choose("Cut", flare)
         XCTAssert(sidebar.staticTexts["Shadow"].waitForNonExistence(timeout: 5), "Cut left Shadow in LAYERS")
         expectUndo("Undo Cut", flare)
@@ -49,7 +50,7 @@ final class FlareEditJourneys: XCTestCase {
         flare.shot("edit-4-cut-pasted")
 
         // 5. "Ball copy 2", Delete: it goes.
-        sidebar.staticTexts["Ball copy 2"].click()
+        flare.pickSidebarRow("Ball copy 2")
         choose("Delete", flare)
         XCTAssert(sidebar.staticTexts["Ball copy 2"].waitForNonExistence(timeout: 5), "Delete left Ball copy 2")
         expectUndo("Undo Delete", flare)
@@ -60,7 +61,7 @@ final class FlareEditJourneys: XCTestCase {
         expectDisabledWithHelp("Paste", flare)
 
         // 7. Right click Ball on the stage (at (80, 100) on frame 0): the stage's context menu.
-        sidebar.staticTexts["Ball"].click()
+        flare.pickSidebarRow("Ball")
         let canvas = flare.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "no stage (suite.canvas)")
         point(80, 100, on: canvas).rightClick()

@@ -81,7 +81,14 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
 
 @Test func renameStartsFromOneCallSiteOnly() throws {
     let source = try sidebarRowSource()
-    #expect(occurrences(of: "beginRename", in: source) == 2, "beginRename is declared once and used once, by the title label")
+    // Besides the title label's double-click, `requestRename` (Return on the
+    // focused row and the "Rename" accessibility action, LL-7) calls it; it
+    // checks `keyRenames` and never reads which part was clicked.
+    #expect(
+        occurrences(of: "beginRename", in: source) == 3,
+        "beginRename is declared once and used by the title label and requestRename only")
+    let request = try #require(region(of: source, from: "private func requestRename", to: "\n}"))
+    #expect(squeezed(request).contains("guardSelf.keyRenames(renamable:onRename!=nil,renaming:field.isOpen)"))
     let flat = squeezed(source)
     #expect(occurrences(of: "field.open(item.title)", in: flat) == 1)
     #expect(occurrences(of: "editing=true", in: flat) == 1)
@@ -102,13 +109,17 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // neither attaches a gesture or changes a hit area.
     // `selectionDisabled` reads `SidebarRowLook` (lists-and-layers LL-4): it
     // only says whether the row can be selected and attaches no gesture.
+    // `onKeyPress` and `accessibilityActions` (LL-7) start a rename from Return
+    // on the focused row or the "Rename" action through `requestRename`, the
+    // `Button` being the action itself and `nil` its `if onRename != nil`: no
+    // pointer, so no toggle or blank space.
     let modifiers: Set = [
         "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel",
-        "accessibilityIdentifier", "identifier", "badge", "selectionDisabled",
+        "accessibilityIdentifier", "identifier", "badge", "selectionDisabled", "onKeyPress", "accessibilityActions",
     ]
     let calls: Set = [
         "View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon",
-        "SidebarRowLook",
+        "SidebarRowLook", "requestRename", "Button", "nil",
     ]
     #expect(names.modifiers.subtracting(modifiers).isEmpty, "new modifier in body: can it rename from a toggle? (#54)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in body: can it rename from a toggle? (#54)")

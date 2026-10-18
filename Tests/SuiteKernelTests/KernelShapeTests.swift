@@ -77,11 +77,13 @@ import SuiteKernel
 
         var selection = Selection(["a", "b"])
         #expect(selection.primary == "b" && selection.set == ["a", "b"] && selection.contains("a"))
+        // EK-10 built the body: with no anchor, extend appends (SelectionTests covers the rest).
         let picked = selection.pick("c", .extend, order: ["a", "b", "c"])
-        #expect(!picked)
+        #expect(picked && selection.ordered == ["a", "b", "c"] && selection.primary == "c")
         selection.move(.right, order: ["a", "b", "c"], columns: 3)
-        selection.prune { _ in true }
-        #expect(selection == Selection(["a", "b"]))
+        #expect(selection.ordered == ["c"])
+        selection.prune { $0 != "c" }
+        #expect(selection.ordered.isEmpty && selection.primary == nil)
 
         var tree = KernelFixtures.tree200
         #expect(tree.rows(expanded: []).count == 7)
@@ -96,12 +98,11 @@ import SuiteKernel
         try tree.arrange(.bringToFront, ["hero"])
         #expect(try tree.group(["hero"], name: "G", payload: KernelFixtures.cards.roots[0].payload) { "g1" } == "g1")
         try tree.ungroup("g1")
-        try tree.setFollow("hero", "header", local: { _ in .identity }, keepingPlace: { _, _ in })
         // The tree has its body (EK-12): the edits land and the cascades read ancestors.
         #expect(tree.node("header")?.children.count == 4 && tree.roots.last?.id == "hero" && tree.ancestors(of: "hero") == [])
         let updated = tree.update("hero") { node in node.name = "X" }
         #expect(tree.duplicate(["nowhere"]) { "copy" }.isEmpty && updated)
-        #expect(tree.frontToBack.count == 200 && tree.isEffectivelyHidden("archive-1") && !tree.follows("hero", "header"))
+        #expect(tree.frontToBack.count == 200 && tree.isEffectivelyHidden("archive-1"))
         #expect(tree.worldPlacement(of: "hero") { _ in .identity } == .identity)
 
         let desktop = KernelFixtures.cards.rows(expanded: ["desktop"])

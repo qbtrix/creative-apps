@@ -1,9 +1,9 @@
 // LibraryWindow+Thumbnails.swift: the thumbnails area (thumbnails TH-6). The
 // grid reports the cells on screen and its cell size at the window's display
 // scale; the catalog turns them into ThumbnailRequests (the size bucket, never
-// a request twice); each request runs on the thumbnails service off the main
-// actor, and its image or error goes back through setThumbnail or
-// failThumbnail, which drop an answer that is no longer wanted.
+// a request twice); a pass's requests run together on the thumbnails service
+// off the main actor, and their images and errors go back in one
+// applyThumbnails change, which drops an answer that is no longer wanted.
 import LibraryModel
 import SwiftUI
 
@@ -37,27 +37,31 @@ extension LibraryWindow {
         runThumbnailRequests(model.requestThumbnails(visible: state.visible))
     }
 
-    /// Each request on the thumbnails service off the main actor; its result back on it.
+    /// A pass's requests on the thumbnails service off the main actor, together;
+    /// their answers land in one catalog change, so the window body runs once
+    /// per pass instead of once per image.
     private func runThumbnailRequests(_ requests: [ThumbnailRequest]) {
         guard !requests.isEmpty else { return }
         let service = model.services.thumbnails
         var photos: [String: PhotoItem] = [:]
         for photo in model.items { photos[photo.id] = photo }
-        for request in requests {
-            guard let photo = photos[request.id] else { continue }
-            Task {
-                let result = await Task.detached(priority: .userInitiated) { () -> Result<DisplayImage, LibraryError> in
-                    do {
-                        return .success(try await service.thumbnail(for: photo, longSide: request.longSide))
-                    } catch {
-                        return .failure(error as? LibraryError ?? .renderFailed("the thumbnail couldn't be drawn"))
+        let jobs = requests.compactMap { request in photos[request.id].map { (request, $0) } }
+        Task {
+            let results = await Task.detached(priority: .userInitiated) {
+                await withTaskGroup(of: (request: ThumbnailRequest, result: Result<DisplayImage, LibraryError>).self) { group in
+                    for (request, photo) in jobs {
+                        group.addTask {
+                            do {
+                                return (request, .success(try await service.thumbnail(for: photo, longSide: request.longSide)))
+                            } catch {
+                                return (request, .failure(error as? LibraryError ?? .renderFailed("the thumbnail couldn't be drawn")))
+                            }
+                        }
                     }
-                }.value
-                switch result {
-                case .success(let image): model.setThumbnail(image, for: request)
-                case .failure(let error): model.failThumbnail(request, error)
+                    return await group.reduce(into: []) { $0.append($1) }
                 }
-            }
+            }.value
+            model.applyThumbnails(results)
         }
     }
 }

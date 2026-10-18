@@ -1,11 +1,11 @@
 // EaseCurveTests.swift (editor-kernel EK-14, slice EK-keys): checks first for
 // `EasePreset`, the one preset list every easing menu offers, and `EaseCurve`,
 // the one handle math for a curve editor: handles, moving a handle (x clamped)
-// and samples along the curve at counts 1 and 5000. Disabled until EK-15.
+// and samples along the curve at counts 1 and 5000. On since EK-15.
 import Testing
 import SuiteKernel
 
-@Suite(.disabled("waits on EK-15")) struct EaseCurveTests {
+@Suite struct EaseCurveTests {
     // MARK: EasePreset
 
     @Test func presetsSetFlareCoreEasings() {
