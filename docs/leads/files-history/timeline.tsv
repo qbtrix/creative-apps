@@ -27,3 +27,4 @@ utc	feature	event	ref	note
 2026-10-18T20:24:54Z	files-history	merged	#2894	FH-7 merged 237bc5af; FH-b last PR in; full CI 39162498756 (b1526f3e) pending contains it; fix-batch wok9a3u9f still running
 2026-10-18T20:30:55Z	files-history	fix-round-1	#2975,#2967,#2968	FH-a round 1 (wf_82aa48f8-7c9): #2975 fixes #2936 #2937; #2967 fixes #2940; #2968 fixes #2939 (shared UnsavedPrompt in SuiteKernel, used by Design, Photo, Flare per rule 20); #2938 deferred (DesignHistory.swift busy in #2968); footers stripped
 2026-10-18T20:48:02Z	files-history	heartbeat	#2968	no green run yet (full CI 39162498756 and 39163553482 cancelled; 39164756292 pending at ae6e7c81 contains #2894); #2968 needs-rebase (FlareFilePanels header comment): lead merged dev, gate running; #2975 #2967 in lane
+2026-10-18T20:54:07Z	files-history	rebase	#2968	merged origin/dev (FlareFilePanels header comment), scripts/ci --changed PASS, pushed dbf56fca, Head: moved
