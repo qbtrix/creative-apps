@@ -142,11 +142,17 @@ final class DesignTextJourneyTests: XCTestCase {
         design.shot("text-style-committed-50")
     }
 
-    /// Clicks the Layers row `identifier` (the layer called `name`).
+    /// Clicks the Layers row `identifier` (the layer called `name`) in its blank space, between the
+    /// name and the Hide toggle: a click on the name itself doesn't select the row (#2496).
     @MainActor private func clickRow(_ design: Journey, _ identifier: String, _ name: String) {
         let layer = design.element("suite.sidebar").descendants(matching: .any)[identifier].firstMatch
         XCTAssert(layer.waitForExistence(timeout: 5), "no \(name) row in Layers (\(identifier))")
-        layer.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        let row = layer.frame, title = layer.staticTexts.firstMatch, toggle = layer.checkBoxes.firstMatch
+        var dx = 0.6
+        if row.width > 0, title.exists, toggle.exists, title.frame.maxX < toggle.frame.minX {
+            dx = Double((title.frame.maxX + toggle.frame.minX) / 2 - row.minX) / Double(row.width)
+        }
+        layer.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: 0.5)).click()
     }
 
     /// A Text row: its id once ST-4b gives it one, else the inspector's control labelled `label`.
@@ -191,12 +197,14 @@ final class DesignTextJourneyTests: XCTestCase {
 
     /// The first number an element reads ("32", "32 pt", "1,440 points"), or nil.
     @MainActor private static func number(_ element: XCUIElement) -> Double? {
+        if let number = element.value as? NSNumber { return number.doubleValue }
         guard let word = text(element).split(separator: " ").first else { return nil }
         return Double(word.filter { character in character.isNumber || character == "." || character == "-" })
     }
 
     /// What an element reads: its value where macOS puts a field's number or a menu's choice, else its label.
     @MainActor private static func text(_ element: XCUIElement) -> String {
+        if let number = element.value as? NSNumber { return number.stringValue }
         let value = element.value as? String ?? ""
         return value.isEmpty ? element.label : value
     }
