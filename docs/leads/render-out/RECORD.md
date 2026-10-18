@@ -2,7 +2,7 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a14c24f6d2-lrkw (line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a149b53ef6-67v7, act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-17T06:05Z
-Stage: 6 Done check: full CI 39080371690 (a6150139) cancelled; 39082226458 (d3cd7d9f) red at scripts/ci on 5 expired quarantine entries (2 Halo: H-J13 owner #1035, H-J5 owner #1283); asked supervisor on #1505 (comment 6244022808). Waiting for a green full run at 2026-10-18T01:04Z
+Stage: 6 stopped: run act-1a14c24f6d2-lrkw posted Belt-Contact-Sheet (39076534514, red) at 2026-10-18T00:36Z with the round budget spent, filed the remaining work as gaps, and stopped the lead. Older run act-1a149b53ef6-67v7 stood down at 2026-10-18T01:26Z. Full dev CI is also red on expired quarantine entries (supervisor asked on #1505, comment 6244022808)
 Base: 59c435a6e190a84496ac81a2358cf13a8bdb5fcf (origin/main at 2026-10-17T23:16Z; dev e26c99f8)
 Next: wait for CI run 39076534514 on main to end, then post Belt-Contact-Sheet on #1505. Round cap used; 0 open findings (#2345 fixed by #2348). Mac-Finish-Wanted for testTextLayer (23:12Z) is the Mac finisher's.
 
