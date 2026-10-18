@@ -69,6 +69,7 @@ public enum UnsavedPrompt {
     /// Return), Don't Save, Cancel (Escape).
     public static let answers: [Answer] = Answer.allCases
 
+    /// The line under the message, the same in every app.
     public static let informativeText = "Your changes will be lost if you don't save them."
 
     /// "Do you want to save the changes made to the document “Poster.design”?"
