@@ -21,7 +21,7 @@ struct CropOverlay: View {
         if let crop = model.pendingCrop, let canvas = model.canvas, let mark = mark {
             ZStack(alignment: .topLeading) {
                 CropShade(rect: crop.cgRect, documentSize: CGSize(width: canvas.width, height: canvas.height), zoom: zoom)
-                PhotoCanvasMarkElement(mark: mark, zoom: zoom)
+                mark.probe(zoom: zoom)
                 if let badge = model.cropAspectBadge {
                     aspectPill(badge, on: crop.cgRect)
                 }
