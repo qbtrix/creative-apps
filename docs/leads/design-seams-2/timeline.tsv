@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-16T21:50Z	0	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
 2026-10-16T22:29Z	0	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
 2026-10-17T15:40Z	0	parked		out of the beta cut (p3); no task in flight
+2026-10-18T02:28Z	0	parked	#1526	run act-1a14cd4adaa-upx1: still out of the beta cut, needs-human; no task started
