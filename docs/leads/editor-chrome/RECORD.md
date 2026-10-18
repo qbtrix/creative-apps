@@ -2,9 +2,9 @@
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: 4 review (fix round 2 open)
+Stage: 4 review (fix round 2 in the lane)
 Base: 2e27b8db (origin/dev)
-Next: #2941 (EC-b round 2, fixes #2831) in the lane; then a scoped suiteui run: if the gallery and chrome journeys pass, Belt-Contact-Sheet on #1344, else the rest become gap issues
+Next: #2941 macOS build 39160448592 green, merges on the next sweep; then a suiteui run on it: gallery and chrome journeys green → Belt-Contact-Sheet on #1344, else leftovers become gap issues
 
 ## Slices
 | slice | tasks | journeys | waits on | state |

@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-18T19:44:52Z	triage	run 39153976103 triaged	c91b1468	chrome journeys (transport, status pills, tabs, palette, empty state) pass; #2832 #2834 #2836 closed; gallery fails on unlisted tab segments (#2831)
 2026-10-18T19:44:52Z	goldens	merged	#2918 #2919	chrome baselines on dev
 2026-10-18T19:44:52Z	fix round 2	PR open	#2941	tab segments listed in suite.controls (EC-b); gate PASS
+2026-10-18T20:12:18Z	fix round 2	build green	#2941	macOS build 39160448592 success
