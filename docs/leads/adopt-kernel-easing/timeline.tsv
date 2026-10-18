@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-18T09:56Z	0	stopped	#1937	still blocked on EK-keys bodies
 2026-10-18T10:27Z	0	recheck	#1937	Belt nudge 5; dev a80ed944; EK-15/EK-16 still planned
 2026-10-18T10:27Z	0	stopped	#1937	still blocked on EK-keys bodies
+2026-10-18T11:01Z	0	recheck	-	recheck 6: still waiting on editor-kernel
