@@ -1,0 +1,55 @@
+utc	stage	event	ref	note
+2026-10-16T21:27Z	2	stage-start		plan written from packet and origin/dev
+2026-10-16T21:27Z	2	stage-end		waiting on Swift toolchain for scripts/ci
+2026-10-16T21:53Z	2	heartbeat		resumed from Belt nudge; no swift toolchain yet, wave 1 blocked
+2026-10-16T22:56Z	2	heartbeat		still no swift toolchain; wave 1 blocked; awaiting supervisor
+2026-10-16T23:26Z	2	heartbeat		no swift toolchain yet; wave 1 blocked; awaiting supervisor
+2026-10-16T23:57Z	2	heartbeat		no swift toolchain yet; wave 1 blocked; awaiting supervisor
+2026-10-18T02:45Z	2	stage-end		plan written for run act-1a14cdfa655-jrmy; base dev 498c5b3c
+2026-10-18T02:45Z	3	stage-start		wave 1 launched
+2026-10-18T04:18Z	3	heartbeat	-	wave 1 workflow done; recording PRs, finishing LV-1 and LV-5
+2026-10-18T04:19Z	3	pr-merged	#2535	LV-3
+2026-10-18T04:19Z	3	pr-merged	#2537	LV-2
+2026-10-18T04:19Z	3	pr-merged	#2539	LV-4
+2026-10-18T04:19Z	3	stage-start	wave 2	base 21066130
+2026-10-18T04:21:20Z	heartbeat	wave 2 building; LV-1/LV-5 gates running
+2026-10-18T04:24:59Z	pr-opened	LV-5 #2570
+2026-10-18T04:25:25Z	pr-opened	LV-1 #2571
+2026-10-18T04:42:36Z	heartbeat	wave 2: TH-2/3/5 PRs open, others building; LV-1 #2571, LV-5 #2570 in lane
+2026-10-18T04:57:12Z	blocked	LV-6 focus change over budget
+2026-10-18T04:57:12Z	task-start	LV-6 with loupePlace fix
+2026-10-18T04:57:12Z	stage-end	wave 2
+2026-10-18T05:01:34Z	pr-open	LV-6 #2612 (loupePlace fix, focus change 0.4 ms)
+2026-10-18T05:04:52Z	merged	LV-1 #2571, LV-5 #2570 (04:58Z)
+2026-10-18T05:04:52Z	task-start	LV-7
+2026-10-18T05:04:52Z	heartbeat	waiting on LV-6 #2612 lane build; LV-7 building
+2026-10-18T05:14:19Z	pr-open	LV-7 #2625 (loupe on CanvasViewport, loupeArtboard removed)
+2026-10-18T05:27:43Z	heartbeat	LV-6 #2612, LV-7 #2625 on lane macOS builds
+2026-10-18T05:49:06Z	heartbeat	LV-6 #2612, LV-7 #2625 on lane macOS build
+2026-10-18T06:11:47Z	merged	LV-6 #2612 (05:48Z)
+2026-10-18T06:11:47Z	fix-start	LV-7 #2625 needs-rebase: LoupeState mutation plan add/add
+2026-10-18T06:16:38Z	fix-done	LV-7 #2625 dev merged in, head 9f548842, CI: PASS
+2026-10-18T06:33Z	heartbeat	heartbeat: LV-7 #2625 head 9f548842 merges cleanly with dev, macOS build dispatched 06:21; waiting on lane
+2026-10-18T07:00Z	heartbeat	lane macOS builds queued since 06:21 (runner backlog); LV-7 #2625 waits on run 39103764091
+2026-10-18T07:27:22Z	build	LV-7 #2625 macOS build of 9f54884 failed (#require on mutating loupeRequest); fix 06cc6ba gated CI: PASS, Head line moved; waiting on the lane build
+2026-10-18T07:58:24Z	fix	full Linux run on LV-7 06cc6ba red: focusChangeWithinBudget 1.02 ms (LV-6 test). LV-6f #2698: focus change reads thumbnail by id (0.0 ms); merged into LV-7, head b068f22, gated CI: PASS
+2026-10-18T08:21:53Z	heartbeat	dev-red #2667 is LV-6's focusChangeWithinBudget flaking at the 1 ms edge; it fails lane batches (bisect blamed #2641, dev bisect blamed #2613). #2698 (LV-6f) macOS build green, waiting on lane batch 20261018081953. #2625 macOS build queued. Commented on #2667 and #2641.
+2026-10-18T08:45:03Z	heartbeat	#2698 (LV-6f): supervisor dispatched Linux run 39112223654 (in progress) and lands it on green to clear dev-red #2667. No lead PR merged yet; #2625, #2637, #2643, #2644 wait on the lane.
+2026-10-18T09:15:41Z	merge	#2698 LV-6f merged 08:48; #2625 LV-7 macOS build green, waiting on lane
+2026-10-18T09:37:42Z	merge	#2625 LV-7 merged 09:20; LV-8 started
+2026-10-18T09:53:54Z	pr	LV-8 #2719 opened (fast-lane), lead fix: render on mode change
+2026-10-18T10:07:53Z	pr	LV-9 #2728 and LV-10 #2729 (feature-done) opened, stacked on #2719
+2026-10-18T10:21:54Z	heartbeat	#2719 LV-8 macOS build 39117790110 green; #2728 LV-9 and #2729 LV-10 builds queued (39118375857, 39118387291)
+2026-10-18T10:43:21Z	heartbeat	LV-9 39118375857 and LV-10 39118387291 macOS builds green; #2719/#2728/#2729 wait on the lane
+2026-10-18T11:08:10Z	merge	#2719 LV-8 merged 10:44, #2728 LV-9 merged 10:56
+2026-10-18T11:08:10Z	fix	#2729 needs-rebase: merged dev, kept LV-10 side of LibraryJourneyTests+Loupe.swift, CI: PASS, Head e2f3f6df
+2026-10-18T11:30:21Z	heartbeat	#2729 macOS build 39122297443 in progress on e2f3f6df; full dev CI 39122776184 pending
+2026-10-18T11:51:53Z	heartbeat	#2729 macOS build 39122297443 success on e2f3f6df; mergeable clean; removed stale needs-rebase so the lane can merge
+2026-10-18T12:15:05Z	heartbeat	#2729 LV-10 merged 11:54 (feature-done); full dev CI 39122776184 (pre-#2729) macOS scripts/ci step red, triaging
+2026-10-18T12:40:34Z	heartbeat	scoped library run 39126826000 (b0c59a4f, has #2729) macOS red: RenderBudgetLibraryTests.bodies scroll 13>0 from thumbnail passes mutating the window's @State catalog (thumbnails, #2709, taken by this lead: builder making a thumbnail store the window body doesn't read); ui-test SuiteUI linker failure is not Library's. Contact sheets wait for a green full run.
+2026-10-18T13:00:19Z	stage	opened #2783 (docs, fast-lane): blueprint Loupe row describes the viewport; #2790 fixes the Library bodies red
+2026-10-18T13:03:07Z	heartbeat	#2790 (thumbnail store, fixes bodies 13>0, Closes #2709) and #2783 (loupe blueprint row) open, clean, waiting on lane. Scoped library 39128250329 (618256bc, pre-#2790): macOS red on bodies, as expected. Full CI 39129009677 pending; contact sheets wait for a green macOS job.
+2026-10-18T13:24:45Z	heartbeat	#2783 (loupe blueprint row) merged 13:04. #2790 (thumbnail store, Closes #2709): lane macOS build 39129784715 green, waiting for the lane to merge it. Full CI runs 39129009677 and 39129812289 were cancelled by newer runs; 39131391914 (ab22e2e2) is pending. Contact sheets wait for a green macOS job.
+2026-10-18T13:49:04Z	heartbeat	#2790 merged 13:24. Scoped library 39131870562 (4bf67be8): build+tests green, bundle-apps fails linking FlareCore in SuiteUI (filed #2801), so no journeys. Full CI 39132122171 macOS scripts/ci red, still running. Contact sheet waits on a green full macOS job.
+2026-10-18T14:12:03Z	heartbeat	Full CI 39132122171 (4bf67be8) macOS red: gate fails only SuiteUI SidebarNestingTests + SegmentedTabsTests (filed #2805), bundle-apps link (#2801, in progress). Not Library. Perf report-only: RenderBudgetLibrary timing p95 14.3/10 and 120.9/120 under load (all apps over). Contact sheet waits.
+2026-10-18T14:40:50Z	heartbeat	#2801 fixed by #2806 (merged 14:34). Full CI 39135047742 (d506e4aa) macOS red on the same SuiteUI tests only (#2805, open, unclaimed); no Library failure. Next full run after #2806 should bundle; contact sheet still needs #2805 fixed.
