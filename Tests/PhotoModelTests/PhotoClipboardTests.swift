@@ -143,18 +143,22 @@ import Testing
         #expect(try one.rgba8() == [200, 200, 200, 200])
     }
 
+    /// The limit these cases were written against (16 MP), so their sizes stay fixed whatever the open cap is.
+    static let limit = 16 * 1024 * 1024
+
     @Test func oversizedPasteIsScaledToFit() throws {
-        // 6000 x 4000 (24 MP) against the 16,777,216 open limit.
-        let size = try #require(PhotoWorkspace.pasteSize(width: 6000, height: 4000))
+        // 24 MP fits the 40 MP open limit; against a 16,777,216 limit it scales.
+        #expect(PhotoWorkspace.pasteSize(width: 6000, height: 4000) == nil)
+        let size = try #require(PhotoWorkspace.pasteSize(width: 6000, height: 4000, limit: Self.limit))
         #expect(size.width == 5016 && size.height == 3344 && size.percent == 84)
-        #expect(size.width * size.height <= PhotoWorkspace.maxOpenPixels)
-        #expect(PhotoWorkspace.pasteSize(width: 4096, height: 4096) == nil)
+        #expect(size.width * size.height <= Self.limit)
+        #expect(PhotoWorkspace.pasteSize(width: 4096, height: 4096, limit: Self.limit) == nil)
 
         // The same ratio through the workspace and a real lanczos3 resize, at a
         // hundredth of the limit, so the debug build stays fast.
         var workspace = try whiteImage(64, 64)
         let bytes = [UInt8](repeating: 255, count: 600 * 400 * 4)
-        PhotoWorkspace.$pasteLimit.withValue(PhotoWorkspace.maxOpenPixels / 100) {
+        PhotoWorkspace.$pasteLimit.withValue(Self.limit / 100) {
             workspace.paste(
                 ClipboardImage(image: DecodedImage(rgba8: bytes, width: 600, height: 400), source: nil),
                 viewCenter: point(32, 32))
@@ -170,7 +174,7 @@ import Testing
 
         // With no image open, the scaled paste opens at the scaled size.
         var empty = PhotoWorkspace()
-        PhotoWorkspace.$pasteLimit.withValue(PhotoWorkspace.maxOpenPixels / 100) {
+        PhotoWorkspace.$pasteLimit.withValue(Self.limit / 100) {
             empty.paste(
                 ClipboardImage(image: DecodedImage(rgba8: bytes, width: 600, height: 400), source: nil),
                 viewCenter: point(0, 0))

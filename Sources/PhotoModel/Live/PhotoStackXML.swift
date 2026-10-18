@@ -3,8 +3,9 @@
 // one <layer> per pixel layer, top first, with its src, name, offset, opacity,
 // visibility and composite-op. Adjustment layers and masks have no OpenRaster
 // word and live only in photo/document.json. Written, never parsed back.
-// Linux-safe.
+// Linux-safe. Names and paths are escaped by SuiteModel's XMLText.
 import CoreRaster
+import SuiteModel
 
 enum PhotoStackXML {
     /// The spec version these elements follow.
@@ -15,7 +16,7 @@ enum PhotoStackXML {
         xml += #"<image version="\#(version)" w="\#(canvas.width)" h="\#(canvas.height)">"# + "\n<stack>\n"
         for layer in layers {
             guard let src = layer.src else { continue }
-            xml += #"<layer name="\#(escaped(layer.name))" src="\#(escaped(src))" x="\#(layer.offset.x)""#
+            xml += #"<layer name="\#(XMLText.escaped(layer.name))" src="\#(XMLText.escaped(src))" x="\#(layer.offset.x)""#
             xml += #" y="\#(layer.offset.y)" opacity="\#(layer.opacity)""#
             xml += #" visibility="\#(layer.visible ? "visible" : "hidden")" composite-op="\#(compositeOp(layer.blend))"/>"#
             xml += "\n"
@@ -31,21 +32,5 @@ enum PhotoStackXML {
             if character.isUppercase { name += "-" + character.lowercased() } else { name.append(character) }
         }
         return name
-    }
-
-    /// `text` safe inside a double-quoted XML attribute.
-    static func escaped(_ text: String) -> String {
-        var out = ""
-        for character in text {
-            switch character {
-            case "&": out += "&amp;"
-            case "<": out += "&lt;"
-            case ">": out += "&gt;"
-            case "\"": out += "&quot;"
-            case "'": out += "&apos;"
-            default: out.append(character)
-            }
-        }
-        return out
     }
 }
