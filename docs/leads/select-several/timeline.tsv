@@ -58,3 +58,5 @@ utc	stage	event	ref	note
 2026-10-18T02:47Z	merge	S-7b #2526 merged as 498c5b3 (Fixes #2146)
 2026-10-18T03:09Z	check	full run 39090620413 still pending (no jobs) at 2026-10-18T03:09Z
 2026-10-18T03:31Z	check	full run 39093416270 Linux in progress; #1493 still open
+2026-10-18T03:58Z	done	Belt-Slice-Done SS-a run 39093416270 (Linux green)
+2026-10-18T03:58Z	mac	Mac-Finish-Wanted SS-a posted on #1495
