@@ -36,5 +36,6 @@ fast-lane PR opened against `main` to `dev`).
 - Both slices are Model only (`"ui": false`); merged-done reads dev's Linux job. The last delete to merge carries `feature-done`.
 
 ## Open
+- 2026-10-18T08:54Z: second Belt nudge; rechecked. dev now 93b1e91 (one Library perf merge since 2202c7c); EK-keys bodies still EK-3 stubs; editor-kernel lead at stage 3 wave 2, waiting on lane batch-20261018081953, wave 4 (bodies) not started. Still blocked; stopped again.
 - 2026-10-18T08:23Z: Belt nudge after 30 quiet min; rechecked. dev still 2202c7c (no merges since); EK-keys bodies still EK-3 stubs; editor-kernel lead stopped at stage 3 wave 2 on dev-red #2667, wave 4 (bodies) not started. Still blocked; stopped again.
 - Blocked on #1933 editor-kernel EK-keys (EK-15, EK-16). AE-halo also on adopt-kernel-selection:AS-halo (#1934's lead, blocked on EK-sel).

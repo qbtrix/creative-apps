@@ -3,3 +3,5 @@ utc	stage	event	ref	note
 2026-10-18T08:37Z	0	stopped	#1937	blocked: EK-keys bodies (EK-15, EK-16) unmerged; Keys and KeyRules on dev are EK-3 stubs
 2026-10-18T08:23Z	0	recheck	#1937	Belt nudge; dev unchanged at 2202c7c, EK-keys unmerged, editor-kernel blocked on dev-red #2667
 2026-10-18T08:23Z	0	stopped	#1937	still blocked on EK-keys
+2026-10-18T08:54Z	0	recheck	#1937	Belt nudge 2; dev 93b1e91, EK-keys still stubs, editor-kernel waiting on lane batch
+2026-10-18T08:54Z	0	stopped	#1937	still blocked on EK-keys
