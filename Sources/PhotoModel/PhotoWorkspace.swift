@@ -266,9 +266,9 @@ public struct PhotoWorkspace: Sendable {
     /// Shows a hidden layer or hides a shown one.
     public mutating func toggleVisibility(_ id: PhotoLayer.ID) {
         guard let at = index(of: id) else { return }
-        recordLayers(named: layers[at].isVisible ? "Hide Layer" : "Show Layer")
-        layers[at].isVisible.toggle()
-        touch(.all)
+        commitKernelLayers(
+            Self.kernelEdited(layers) { tree in _ = tree.update(id) { $0.isHidden.toggle() } },
+            named: layers[at].isVisible ? "Hide Layer" : "Show Layer")
     }
 
     /// Sets opacity from a percentage, clamped to 0...100. NaN is ignored. A
@@ -291,17 +291,13 @@ public struct PhotoWorkspace: Sendable {
 
     /// Moves the layers at `offsets` (top-first positions) to sit before the
     /// layer now at `destination`, as a list drag reports it; `layers.count`
-    /// moves them to the bottom. Out-of-range offsets are ignored.
+    /// moves them to the bottom. Out-of-range offsets are ignored. Runs on
+    /// LayerTree.move (PhotoLayers+Kernel).
     public mutating func moveLayers(fromOffsets offsets: [Int], toOffset destination: Int) {
         let sources = Set(offsets.filter { layers.indices.contains($0) })
         guard !sources.isEmpty, (0...layers.count).contains(destination) else { return }
-        let moving = layers.indices.filter { sources.contains($0) }.map { layers[$0] }
-        var staying = layers.indices.filter { !sources.contains($0) }.map { layers[$0] }
-        staying.insert(contentsOf: moving, at: destination - sources.filter { $0 < destination }.count)
-        guard staying != layers else { return }
-        recordLayers(named: "Reorder Layers")
-        layers = staying
-        touch(.all)
+        commitKernelLayers(
+            Self.kernelMoved(layers, fromOffsets: sources, toOffset: destination), named: "Reorder Layers")
     }
 
     // MARK: Damage
