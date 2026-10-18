@@ -70,3 +70,5 @@ utc	stage	event	ref	note
 2026-10-18T05:32Z	heartbeat	#2621 waits on the lane's macOS build (run 39099852195); #2538 waits on #2623; #1493 open
 2026-10-18T05:54Z	heartbeat	#2621 macOS build 39099852195 green, mergeable clean; waits on a lane sweep
 2026-10-18T06:16Z	heartbeat	#2621 still open, clean, fast-lane only; lane run 39103458645 pending (sweeps queued); no new findings; #1493 #2263 #2623 open
+2026-10-18T06:39Z	merged	#2621 merged 06:33Z as 148ade3e; closes #2516 #2517
+2026-10-18T06:39Z	triage	findings #2657-#2661 belong to copy-group, style-rows, shell-parity; not mine
