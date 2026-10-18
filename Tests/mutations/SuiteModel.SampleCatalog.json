@@ -2,15 +2,15 @@
   {
     "label": "neverOverwrites",
     "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
-    "find": "guard exists(first) else { return first }",
-    "replace": "return first",
+    "find": "guard exists(folder + name) else { return folder + name }",
+    "replace": "return folder + name",
     "tests": "SampleCatalogTests"
   },
   {
-    "label": "firstSuffixIsTwo",
+    "label": "nameFromUniqueFileNames",
     "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
-    "find": "var number = 2",
-    "replace": "var number = 1",
+    "find": "UniqueFileNames.name(stem, extension: ext, among: taken)",
+    "replace": "UniqueFileNames.name(stem + \".\" + ext, extension: \"\", among: taken)",
     "tests": "SampleCatalogTests"
   },
   {
@@ -28,17 +28,17 @@
     "tests": "SampleCatalogTests"
   },
   {
-    "label": "whileBecomesIf",
+    "label": "extensionDropsItsDot",
     "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
-    "find": "while exists(folder + \"\\(stem) \\(number)\\(suffix)\") { number += 1 }",
-    "replace": "if exists(folder + \"\\(stem) \\(number)\\(suffix)\") { number += 1 }",
+    "find": "String(name[name.index(after: dot)...])",
+    "replace": "String(name[dot...])",
     "tests": "SampleCatalogTests"
   },
   {
-    "label": "stepsByOne",
+    "label": "leadingDotIsNotAnExtension",
     "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
-    "find": "{ number += 1 }",
-    "replace": "{ number += 2 }",
+    "find": "guard let dot = name.lastIndex(of: \".\"), dot != name.startIndex else",
+    "replace": "guard let dot = name.lastIndex(of: \".\") else",
     "tests": "SampleCatalogTests"
   },
   {
