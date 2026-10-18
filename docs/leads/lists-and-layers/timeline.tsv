@@ -1,0 +1,53 @@
+utc	stage	event	ref	note
+2026-10-16T22:48Z	2	stage-end	#1510	plan waves 1-8 from packet; no PRs opened
+2026-10-17T05:50Z	3	heartbeat	-	blocked: no swift toolchain, no GitHub write access
+2026-10-18T00:03:56Z	wave	start	wave 1	base a615013
+2026-10-18T00:18:45Z	wave	built	wave 1	gate red on dev: expired quarantine, #2504; branches pushed, PRs held
+2026-10-18T00:27Z	3	heartbeat	#2504	dev d3cd7d9 still has 5 quarantine entries expiring 2026-10-18; wave-1 PRs held
+2026-10-18T00:48Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T01:10Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T01:32Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T01:54Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T02:32Z	3	unblocked	#2523	dev 948bcbf moved quarantine expiry to 10-20/10-23; merging dev into wave-1 branches, gating
+2026-10-18T02:37Z	3	prs-open	#2527 #2528	LL-1 #2527 (4c9d424), LL-4 #2528 (2013d3d) open on fast-lane, gate CI: PASS on dev 948bcbf; LL-2 builds once #2527 merges
+2026-10-18T02:55Z	3	heartbeat	#2527	LL-1 macOS build 39090558473 success, awaiting lane sweep; LL-4 #2528 build pending
+2026-10-18T03:18Z	3	wave-1-merged	#2527-#2530	dev 0965457c; IC-6 #2531 pending; 6 open suiteui findings #2497-#2503 hold the next wave (rule 6)
+2026-10-18T03:19Z	3	wave-2-start	LL-2	base 0965457c; 0 open findings for this feature (the 6 suiteui CI findings are timeline journeys, no Feature: line)
+2026-10-18T05:00Z	3	build-fix	#2547	LL-2 macOS build failed (run 39094627480): Sources/SuiteUI/ListEditing.swift shares a basename with Contracts/ListEditing.swift; renamed to SuiteListEditing.swift, gate running
+2026-10-18T05:12Z	3	pushed	#2547	LL-2 head d1ea92d6 (rename, gate PASS); lane macOS build dispatched
+2026-10-18T05:12Z	3	fix-round-1	#2616	LL-4 #2528 broke SidebarRenameGestureTests (scoped run 39097468065); #2616 widens the guard for SidebarRowDimming/SidebarRowLook, gate PASS, build dispatched
+2026-10-18T05:34Z	3	heartbeat	#2547 #2616	macOS builds 39099501777 and 39099623343 success; awaiting lane sweep
+2026-10-18T05:56Z	3	merged	#2547 #2616	LL-2 and LL fix 1 merged
+2026-10-18T05:56Z	3	wave-3-start	LL-3,LL-6	base e3fccbbb
+2026-10-18T06:12Z	3	wave-3-prs	#2648 #2651	LL-3 and LL-6 opened; footers stripped; waiting on the lane
+2026-10-18T07:16Z	heartbeat	probe batch-20261018063810-4 green; #2627 #2629 #2635 #2638 #2648 #2651 open, builds green, awaiting lane sweep
+2026-10-18T07:30Z	heartbeat	lane run 39107445380 in progress; all six lead PRs open, no needs-fix; scoped suiteui 39106447807 still queued (pre-merge sha, not the timeline proof)
+2026-10-18T07:46Z	heartbeat	#2648 (LL-3) and #2651 (LL-6) in lane batch 20261018073731
+2026-10-18T08:06Z	heartbeat	batch 20261018073731 (#2648 LL-3, #2651 LL-6) red on Library focusChangeWithinBudget (loupe budget flake, not ours); lane bisecting (probe -1 run 39109869829)
+2026-10-18T08:23Z	heartbeat	batch 20261018073731 probes -1/-2 red on the same Library focusChangeWithinBudget flake (median 1.000037 vs 1.0); no needs-fix on #2648/#2651; new batch 20261018081953 run 39111028843 in progress
+2026-10-18T08:42Z	heartbeat	batch 20261018081953 red, lane bisecting (probe -3 green, -5 running); #2648/#2651 still open, no needs-fix
+2026-10-18T09:00Z	heartbeat	batch 20261018081953 bisected: first 5 merged, #2647 (not ours) needs-fix; #2648/#2651 wait for the next batch; #2698 (loupe perf) merged on dev
+2026-10-18T09:27:43Z	heartbeat	#2651 statics fix pushed dbf2150; waiting on #2648 merge for LL-12
+2026-10-18T09:45Z	heartbeat	#2648 merged; LL-12 started
+2026-10-18T09:53Z	wave	LL-12 PR #2718 opened, head 26e189e, footer stripped
+2026-10-18T10:02Z	heartbeat	#2651 macOS build green; #2718 open
+2026-10-18T10:20Z	heartbeat	LL-6 merged; LL-7 and LL-8a builders started; LL-12 macOS green
+2026-10-18T10:33Z	heartbeat	LL-12 merged; LL-7 #2734 and LL-8a #2735 opened
+2026-10-18T10:37Z	heartbeat	LL-7 and LL-8a macOS builds queued
+2026-10-18T10:55Z	heartbeat	LL-7 and LL-8a macOS builds green
+2026-10-18T11:08Z	heartbeat	LL-7/LL-8a builds green; lane sweep in flight
+2026-10-18T11:22Z	wave	LL-7, LL-8a merged; LL-9 wave started
+2026-10-18T11:44Z	heartbeat	LL-9 #2760 opened
+2026-10-18T12:07Z	heartbeat	LL-9 #2760 cleaned up
+2026-10-18T12:29Z	wave	LL-9 merged; LL-10/LL-11/LL-13 wave started
+2026-10-18T12:46Z	heartbeat	LL-10/11/13 PRs cleaned (footer stripped, line:suiteui); #2772 filed for Design
+2026-10-18T13:11Z	heartbeat	lane dispatched macOS builds for LL-10/11/13
+2026-10-18T13:33Z	heartbeat	LL-10 #2777, LL-11 #2779, LL-13 #2782 merged; wave LL-14/LL-15 started
+2026-10-18T13:45Z	heartbeat	LL-14 #2797 and LL-15 #2796 opened; SP4 probes unwired on dev, added LL-15b
+2026-10-18T13:52Z	heartbeat	LL-15b #2802 opened (probe wiring), cleaned
+2026-10-18T13:56Z	heartbeat	LL-14 #2797, LL-15b #2802 on lane; #2796 held; LL-16 blocked by #2801 (SuiteUI release link, filed by Library line)
+2026-10-18T14:20Z	heartbeat	LL-14 merged; #2802 macOS build fix pushed f777339; #2796 held
+2026-10-18T15:02Z	heartbeat	LL-15b merged 6ca77194; LL-15 #2796 back in the lane; #2805 LL-9 test fix started
+2026-10-18T15:08Z	wave	LL-9 fix opened as #2817 (CI: PASS 156f2e21); #2805 split, SegmentedTabs half to editor-chrome
+2026-10-18T15:25Z	heartbeat	LL-15 #2796 merged 516505f4; #2817 macOS build 39139303570 success
+2026-10-18T15:48Z	heartbeat	LL-9 fix #2817 merged; dev CI 39137279211 (80c14eed, older than both fixes) failed only on the two #2805 tests
