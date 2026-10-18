@@ -1,9 +1,13 @@
 [
 {"label":"a step keeps the history of the samples before it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"        history = current.history\n","replace":"\n","tests":"DesignGestureRouteTests"},
-{"label":"an Option-drag moves the copy on the page without it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"by: delta, on: copies)","replace":"by: delta, on: page)","tests":"DesignOptionDragTests"},
+{"label":"an Option-drag moves the copy on the page without it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"by: moveBy, on: copies)","replace":"by: moveBy, on: page)","tests":"DesignOptionDragTests"},
 {"label":"endDrag leaves the marquee up","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"        marquee = nil\n","replace":"\n","tests":"DesignGestureRouteTests"},
 {"label":"a press on an unselected frame's background moves it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"route = .marquee(id)","replace":"selectItem(id); route = .move(id)","tests":"DesignGestureRouteTests"},
 {"label":"the arrow keys do nothing with several layers selected (#2463)","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"try? run(.nudge(direction, large: shift)); return","replace":"return","tests":"theCanvasArrowKeysNudgeSeveral"},
 {"label":"Shift-arrow nudges several layers by one point","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"run(.nudge(direction, large: shift))","replace":"run(.nudge(direction, large: false))","tests":"theCanvasArrowKeysNudgeSeveral"},
-{"label":"Delete does nothing with several layers selected (#2463)","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"try? run(.delete); return","replace":"return","tests":"theCanvasDeleteKeyAndEditDeleteRemoveSeveral"}
+{"label":"Delete does nothing with several layers selected (#2463)","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"try? run(.delete); return","replace":"return","tests":"theCanvasDeleteKeyAndEditDeleteRemoveSeveral"},
+{"label":"a move uses the raw delta, so the layer lands off the grid","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"$0.translate(by: $0.frame.wholeDelta(delta))","replace":"$0.translate(by: delta)","tests":"DesignWholePointsTests"},
+{"label":"a resize rounds the width instead of the far edge","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"let frame = current.moved ? raw.wholePoints : raw","replace":"let frame = DesignRect(x: raw.x.rounded(), y: raw.y.rounded(), width: raw.width.rounded(), height: raw.height.rounded())","tests":"DesignWholePointsTests"},
+{"label":"several layers move by the raw delta","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"let moveBy = selectionBounds?.wholeDelta(delta) ?? delta","replace":"let moveBy = delta","tests":"DesignWholePointsTests"},
+{"label":"a click on a fractional layer rounds it","file":"Sources/DesignModel/DesignCanvasEditing.swift","find":"if current.moved { _ = pages.update(id)","replace":"if true { _ = pages.update(id)","tests":"DesignWholePointsTests"}
 ]
