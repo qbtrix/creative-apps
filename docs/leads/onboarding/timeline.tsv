@@ -1,0 +1,8 @@
+utc	stage	event	ref	note
+2026-10-17T06:00Z	0	stage-start	–	fresh start: no lead/onboarding on the remote; base origin/dev 4a86f5fc; swift 6.3.3 installed
+2026-10-17T06:15Z	2	stage-end	–	plan: 5 waves, OB-5 split into OB-5 (code) and OB-5g (goldens); journeys in their own classes
+2026-10-17T06:15Z	3	stage-start	OB-1	wave 1: OB-1 builder started
+2026-10-17T06:40Z	3	pr-opened	#1998	task OB-1 onboarding contract types and stubs
+2026-10-17T07:05Z	3	pr-merged	#1998	OB-1 merged as 0cf5769d
+2026-10-17T08:37Z	3	ci-run	39018046761	full run on dev 453198ac green, contains #1998
+2026-10-17T10:45Z	3	stage-start	wave 2	OB-2, OB-3, OB-11 builders started (lead resumed after a container restart)
