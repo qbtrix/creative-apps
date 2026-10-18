@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-18T08:45Z	slice-done	SS-a re-done on scoped design 39107691328 (Belt-Slice-Done posted on #1495); #2692 closed; finding #2706 (J5 nudge on two layers) round 2 fixer dispatched
 2026-10-18T08:47Z	pr	round 2 PR #2707 (#2706) opened, head e7afea2: canvas keys ignored arrows on the numeric-pad modifier flag; J5 skips removed
 2026-10-18T08:58Z	heartbeat	#2696 and #2701 macOS builds green, awaiting lane sweep; #2707 macOS build in progress; full 39108958964 in progress; CB-3 not opened; 9 line:design findings open (new feature tasks held); earlier 08:45Z rows were stamped late, real time ~08:37Z
+2026-10-18T09:21Z	heartbeat	#2696 #2701 #2707 macOS builds all green; held behind lane batch-20261018085947 bisect (21 ready PRs wait). Scoped design 39113458871 success (d6271ae4, none of ours). Full 39108958964 still in progress. CB-3 not opened. 9 line:design findings open
