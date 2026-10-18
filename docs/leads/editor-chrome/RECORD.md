@@ -4,7 +4,7 @@ Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: 4 review (fix round 1 merged)
 Base: 2e27b8db (origin/dev)
-Next: 39153976103 passed Model and snapshot tests (aTabChangeRecordsAFadePair fixed by #2841) and wrote chrome actuals; journeys still running: read them for #2844-#2846 and the CI findings, commit the chrome baselines, then Belt-Contact-Sheet on #1344, or round 2
+Next: journeys of 39153976103 still running at 2026-10-18T19:24:50Z: read them for #2844-#2846 and the CI findings, then Belt-Contact-Sheet on #1344 or round 2. Chrome baselines #2918 (EC-12) and #2919 (EC-13 tabs) in the lane; floating palette has no chrome golden
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
