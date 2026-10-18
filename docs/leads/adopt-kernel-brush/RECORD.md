@@ -1,10 +1,10 @@
 # adopt-kernel-brush lead record
 
 Issue: #1941 · Packet: docs/blueprints/suiteui/features/adopt-kernel-brush.md
-Run: act-1a14f91ff8b-nq4v (line lead with #1933, #1941, #1940)
+Run: act-1a1509b245f-653k (line lead with #1933, #1941, #1940)
 Stage: 3 wave A
-Base: 5a8c6fa745be653c2b82d41047a51de5244a939f
-Next: AB-p1 builds now; AB-p2 (feature-done) once AB-p1 merges
+Base: b1526f3e (origin/dev); lead branch rebased on main 71facd44
+Next: AB-p1 at the next free builder slot (no AB PR was ever opened; EK-stroke done, EK-30's SuiteUI parts on dev; no open PR touches the hand-off files); AB-p2 (feature-done) once AB-p1 merges and EK-chrome is done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -26,6 +26,8 @@ Next: AB-p1 builds now; AB-p2 (feature-done) once AB-p1 merges
 - The packet's AB-p1 owns 17 files (the cap is 15): when it starts, the test files it doesn't edit come off its list (the acceptance says the app's tests pass unchanged), which also keeps the "zero test edits" quality row honest.
 - Base is `dev` for PRs (CLAUDE.md, fast-lane.sh); this status branch sits on main as Belt asked.
 - 2026-10-18 relaunch act-1a14f91ff8b-nq4v: EK-stroke and EK-chrome are done (Belt; StrokePacer, PointerPressure, BrushCursorMark merged in #2744), so both waits are met.
+
+- 2026-10-18 relaunch act-1a1509b245f-653k: the previous run's AB-p1 builder never opened a PR. AB-p1 rebuilds from dev b1526f3e. Its 17 packet files exceed the 15-file cap: it edits only the ones the adapter needs (the unchanged test files stay out of the diff).
 
 ## Open
 - AB-p2 waits AB-p1.
