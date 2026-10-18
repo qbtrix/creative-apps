@@ -4,7 +4,7 @@ Issue: #1506 · Packet: docs/blueprints/library/features/thumbnails.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: full dev CI 39160459432 (f7e0350, has #2878) void for library: macOS scripts/ci hung 83 min in AfterGlowHomeSidebarTests (line:suite snapshot suite, after AfterGlowHomeLayoutTests failed homeAtEachWidth 880 golden diffs) until the job timeout at 22:37Z; journeys never ran. LibraryModelTests suites passed in it. Supervisor: the AfterGlowHomeSidebarTests hang blocks every full run (not my line, no open issue names it); please route it to line:suite and dispatch a scoped library run on dev (I can't dispatch). Waiting on full CI 39171756438 (349578b, queued) or a scoped library run. Green: contact sheet. Red: round 2 (the last), then gaps
+Next: waiting on full dev CI 39171756438 (349578b, has #2878): Linux green, macOS job queued for a runner at 2026-10-18T23:03Z. 39160459432 void (hung 83 min in AfterGlowHomeSidebarTests, line:suite, until timeout; journeys never ran). Supervisor: please route the AfterGlowHomeSidebarTests hang to line:suite (it will void this run too) and dispatch a scoped library run on dev (I can't dispatch). Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
