@@ -72,3 +72,4 @@
 2026-10-18T09:09Z	heartbeat	dev-red #2667 closed 08:57 (a Library perf test still flakes on Linux per its last comment; not flare); 39108958964 (2202c7c3) Linux failed, macOS running, cannot be green; newest 39114185843 (d6271ae4) pending; no green full run with ui-screens yet
 2026-10-18T09:41Z	heartbeat	no open dev-red; 39108958964 (2202c7c3) Linux failed, macOS still running; 39114185843 cancelled; newest 39115690758 (ed52eaa8) pending; no green full run with ui-screens yet
 2026-10-18T10:12Z	heartbeat	no open dev-red; 39108958964 (2202c7c3) Linux failed, macOS still running; 39115690758 cancelled; newest 39116548471 (b1b56eba) pending; no green full run with ui-screens yet
+2026-10-18T10:44Z	heartbeat	no open dev-red; 39108958964 failed (Linux red, macOS cancelled); 39118417962 (ca6c45b7) Linux green, macOS running; newest 39120347568 (5e1844e6) pending; no green full run with ui-screens yet
