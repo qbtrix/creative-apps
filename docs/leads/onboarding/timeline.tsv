@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-18T20:30:56Z	check	heartbeat: #2906 #2966 in lane; full dev run 39163553482 f836dc70 pending (contains #2903)
 2026-10-18T20:42:55Z	merge	#2966 merged 28713c70
 2026-10-18T20:45:00Z	merge	#2906 merged ae6e7c81; OB-m follow-ups done
+2026-10-18T20:58:12Z	check	heartbeat: all fix PRs merged; waiting on full dev run 39164756292 ae6e7c81 Linux for OB-u
