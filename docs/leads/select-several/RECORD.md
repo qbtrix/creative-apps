@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
 Stage: 3 wave 2
 Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
-Next: SS-a fix round 1 merged (#2621 as 148ade3e); wait for a full CI run on dev at or after 148ade3e with green J5/J6, then Belt-Slice-Done SS-a + Mac-Finish-Wanted. SS-b S-5/S-8 wait on #1493 and CB-a.
+Next: S-8 #2696 in the lane (macOS build-only check); SS-a re-done on a successful run holding 148ade3e (full 39105383795 pending). S-5 waits on canvas-basics CB-3 (CB-a).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,7 @@ Next: SS-a fix round 1 merged (#2621 as 148ade3e); wait for a full CI run on dev
 | S-6 | SS-a | 1 | views: several-layer handles, Distribute buttons, marquee from the Model; snapshots | DesignSelectionMarks.swift, DesignAlignBar.swift; snapshots | DesignMarqueeSnapshots, DesignAlignSnapshots, DesignMultiSelectSnapshots | – | waits DW-b |
 | S-7 | SS-a | 1 | J5, J6 | UITests/DesignJourneyTests+Select.swift | J5, J6 | – | waits S-6, design-seams |
 | S-7b | SS-b | 1 | J4 | UITests/DesignJourneyTests+Select.swift | J4 | – | waits S-4, S-7 |
-| S-8 | SS-b | 2 | QD-S1..S4 budgets, P1 | Tests/DesignModelTests/DesignSelectBudgetTests.swift; UITests/DesignJourneyTests+PerfCanvas.swift | DesignSelectBudgetTests, P1 | – | building (waits met: S-7b #2526, design-seams SE-a done) |
+| S-8 | SS-b | 2 | QD-S1..S4 budgets, P1 | Tests/DesignModelTests/DesignSelectBudgetTests.swift; UITests/DesignJourneyTests+PerfCanvas.swift | DesignSelectBudgetTests, P1 | – | PR #2696 open, head b1c409b (QD-S4 over gate: gap #2695) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -38,6 +38,8 @@ Next: SS-a fix round 1 merged (#2621 as 148ade3e); wait for a full CI run on dev
 - No task of this feature can start in wave 1: S-6 waits on design-window DW-a and DW-b, which this lead builds first.
 
 ## Open
+- Findings #2691 (J6 contrast, select-distribute-off) and #2692 (J5 no Resize step) are from scoped run 39101541012 on 3a8c658, before fix #2621 (148ade3e); held until the proof run.
+- S-8 #2696: QD-S4 marquee step is over its 10 ms gate (known issue, gap #2695 p2); DesignSelectBudgetTests in Tests/perf-suites.txt is the supervisor's call (asked in the PR body).
 - S-5 waits on canvas-basics CB-a (CB-1, CB-2 merged; CB-3 building).
 - #2538 (J4, SS-b) blocked on needs-ui #2623 (CanvasViewport scroller unnamed).
 - Stage-1 issues filed: gaps #2144 (marquee), #2145 (several layers), #2146 (Zoom to Selection); needs-ui #2147 (CanvasViewport scroll to a rect).

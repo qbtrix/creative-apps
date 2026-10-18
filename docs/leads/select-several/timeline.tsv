@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-18T07:30Z	0	stage-start	act-1a14ddefb3a-z1bl	resume; branch rebased onto main e01529f; base dev cd81c77
 2026-10-18T07:30Z	3	stage-start	wave 2	S-8 builder started (design-seams wait met)
 2026-10-18T07:33Z	heartbeat	full CI 39105383795 still pending. Findings #2691 (J6 contrast on select-distribute-off) and #2692 (J5 no Resize step) come from scoped run 39101541012 on 3a8c658, which is before 148ade3e; #2621 targets both. Holding them until the proof run. #1493 #2263 #2623 open
+2026-10-18T07:40Z	3	pr	S-8 #2696 opened b1c409b; gap #2695 (QD-S4 marquee over gate)
