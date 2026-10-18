@@ -180,3 +180,4 @@ utc	stage	event	ref	note
 2026-10-18T22:52:21Z	shell-parity	check	dev@3bf5bc5b	blocked: #2524 #2263 open; gap #1573 open (testShellLight still red in run 39167807664); testShellDark passed there, #3007 auto-closed; no dev-red; 11 design findings open (new #3020 perf testOpenLargeFile, not ours)
 2026-10-18T23:10:10Z	shell-parity	check	dev@afa91212	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 11 design findings open
 2026-10-18T23:27:07Z	shell-parity	check	dev@db15b8a6	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 11 design findings open
+2026-10-18T23:44:31Z	shell-parity	check	dev@9ece98c5	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 11 design findings open
