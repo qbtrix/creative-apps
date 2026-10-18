@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: wave 4 merged (#2821, #2822, #2824, #2825). Slice-done checks: OB-s and OB-u on a dev run holding #2822 (full run 39142469932), OB-m on one holding #2825 (58e33b30). Then critics on a scoped app=suite run, OB-5g goldens from its snapshots, Mac-Finish-Wanted OB-u, OB-13 once switching and bundled samples are on dev.
+Next: fix round 1 for OB-s (#2849 major; #2850, #2851 minors) and OB-a minor #2852 (wave 5 takes findings first). Slice-done: OB-u and OB-m on full run 39143942767 (bafd1d38, holds every merged task); OB-s after its fix round on a later run. Then critics on scoped suite run 39143959244, OB-5g goldens from its snapshots, Mac-Finish-Wanted OB-u, OB-13 once switching and bundled samples are on dev.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -48,7 +48,8 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
-| – | – | – | – | – | – |
+| OB-a | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2852 (minor) | clean |
+| OB-s | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2849 (major), #2850, #2851 (minor) | not clean: fix round 1 |
 
 ## Decisions
 - Base `dev`, not `main`: CLAUDE.md never targets main, the lead contract says base dev, and the fast lane retargets a main PR to dev. The brief's base SHA fdaabbfb is an ancestor of origin/main (0e3c08ea) and of dev (4a86f5fc).

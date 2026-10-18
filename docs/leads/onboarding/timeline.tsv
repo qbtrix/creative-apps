@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-18T16:08:06Z	review	OB-a,OB-s	critic panel round 1 on run 39140922596
 2026-10-18T16:08:24Z	heartbeat	lead	all PRs merged; OB-s/OB-u wait on run 39142469932 Linux; critic panel OB-a/OB-s running
 2026-10-18T16:14:03Z	check	OB-s,OB-u,OB-m	full run 39143942767 and scoped suite 39143959244 at bafd1d38 hold every merged task
+2026-10-18T16:16:29Z	review	OB-a,OB-s	OB-a clean (#2852 minor); OB-s major #2849, minors #2850 #2851
