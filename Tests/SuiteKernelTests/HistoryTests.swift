@@ -2,9 +2,8 @@
 // EK-undo). Named steps, a run under one key folded into one step, the run
 // ending on undo, redo and `endRun`, step ids that never repeat, dirty read
 // exactly as saved-vs-current, the limit rolling old steps into the base, and
-// `jump(to:)`. KJ1, the history walk, is the last test. Written from the
-// packet ahead of the body, so every test waits on EK-8, which turns them on
-// (docs/factory/lead.md rule 13).
+// `jump(to:)`. KJ1, the history walk, is the last test. EK-8 built the body
+// and turned these on.
 import Testing
 import SuiteKernel
 
@@ -25,7 +24,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
 }
 
 @Suite struct HistoryTests {
-    @Test(.disabled("waits on EK-8")) func recordsNamedSteps() {
+    @Test func recordsNamedSteps() {
         var history = History<String>()
         #expect(!history.canUndo && !history.canRedo && !history.isDirty)
         history.record("Move", "move-back")
@@ -38,7 +37,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.isDirty)
     }
 
-    @Test(.disabled("waits on EK-8")) func undoAndRedoHandPayloadsThrough() {
+    @Test func undoAndRedoHandPayloadsThrough() {
         var history = History<String>()
         var applied = Applied()
         history.record("Move", "move-back")
@@ -52,7 +51,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.undoName == "Move")
     }
 
-    @Test(.disabled("waits on EK-8")) func emptyHistoryRefusesUndoAndRedo() {
+    @Test func emptyHistoryRefusesUndoAndRedo() {
         var history = History<String>()
         var applied = Applied()
         #expect(!history.undo { applied.flip($0) })
@@ -61,7 +60,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.currentStepID == 0)
     }
 
-    @Test(.disabled("waits on EK-8")) func foldKeepsOneStep() {
+    @Test func foldKeepsOneStep() {
         var history = History<String>()
         var applied = Applied()
         for nudge in 0..<120 { history.record("Nudge", "nudge-\(nudge)", key: "nudge") }
@@ -76,7 +75,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.currentStepID == 0)
     }
 
-    @Test(.disabled("waits on EK-8")) func differentKeysAndNoKeyDoNotFold() {
+    @Test func differentKeysAndNoKeyDoNotFold() {
         var history = History<String>()
         history.record("Nudge", "a", key: "nudge")
         history.record("Resize", "b", key: "resize")
@@ -85,7 +84,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.steps == ["Nudge", "Resize", "Fill", "Fill"])
     }
 
-    @Test(.disabled("waits on EK-8")) func endRunEndsRun() {
+    @Test func endRunEndsRun() {
         var history = History<String>()
         history.record("Nudge", "a", key: "nudge")
         history.record("Nudge", "b", key: "nudge")
@@ -95,7 +94,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.index == 2)
     }
 
-    @Test(.disabled("waits on EK-8")) func undoEndsRun() {
+    @Test func undoEndsRun() {
         var history = History<String>()
         var applied = Applied()
         history.record("Nudge", "a", key: "nudge")
@@ -109,7 +108,19 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(applied.payloads == ["a", "b"])
     }
 
-    @Test(.disabled("waits on EK-8")) func redoEndsRun() {
+    @Test func undoEndsRunUnderAnEarlierStep() {
+        var history = History<String>()
+        var applied = Applied()
+        history.record("Move", "a")
+        history.record("Nudge", "b", key: "nudge")
+        #expect(history.undo { applied.flip($0) })
+        // With Move still applied, the next nudge is its own step, never folded into Move.
+        history.record("Nudge", "c", key: "nudge")
+        #expect(history.steps == ["Move", "Nudge"])
+        #expect(history.index == 2)
+    }
+
+    @Test func redoEndsRun() {
         var history = History<String>()
         var applied = Applied()
         history.record("Nudge", "a", key: "nudge")
@@ -120,7 +131,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.index == 2)
     }
 
-    @Test(.disabled("waits on EK-8")) func recordDropsRedo() {
+    @Test func recordDropsRedo() {
         var history = History<String>()
         var applied = Applied()
         history.record("Move", "a")
@@ -132,7 +143,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.redoName == nil)
     }
 
-    @Test(.disabled("waits on EK-8")) func idsNeverRepeat() {
+    @Test func idsNeverRepeat() {
         var history = History<String>()
         var applied = Applied()
         var seen: [Int] = [history.currentStepID]
@@ -151,7 +162,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(!seen.contains(history.currentStepID))
     }
 
-    @Test(.disabled("waits on EK-8")) func redoRestoresTheStepsID() {
+    @Test func redoRestoresTheStepsID() {
         var history = History<String>()
         var applied = Applied()
         history.record("Move", "a")
@@ -161,7 +172,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.currentStepID == afterMove)
     }
 
-    @Test(.disabled("waits on EK-8")) func dirtyExactAfterUndoToSaved() {
+    @Test func dirtyExactAfterUndoToSaved() {
         var history = History<String>()
         var applied = Applied()
         history.record("Move", "a")
@@ -182,7 +193,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.isDirty)
     }
 
-    @Test(.disabled("waits on EK-8")) func foldPastSavedIsDirty() {
+    @Test func foldPastSavedIsDirty() {
         var history = History<String>()
         history.record("Nudge", "a", key: "nudge")
         history.savedStepID = history.currentStepID
@@ -191,7 +202,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.isDirty)
     }
 
-    @Test(.disabled("waits on EK-8")) func limitRollsIntoBase() {
+    @Test func limitRollsIntoBase() {
         var history = History<String>(limit: 3)
         var applied = Applied()
         for step in ["A", "B", "C", "D", "E"] { history.record(step, step.lowercased()) }
@@ -208,7 +219,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(history.isDirty)
     }
 
-    @Test(.disabled("waits on EK-8")) func jumpUndoesAndRedoesInOrder() {
+    @Test func jumpUndoesAndRedoesInOrder() {
         var history = History<String>()
         var applied = Applied()
         history.record("Move", "a")
@@ -232,7 +243,7 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
     }
 
     /// KJ1, the history walk: an edit session read the way a menu and title bar read it.
-    @Test(.disabled("waits on EK-8")) func historyWalk() {
+    @Test func historyWalk() {
         var history = History<String>()
         var applied = Applied()
         #expect(menuState(history) == (false, false, nil, nil, false))
