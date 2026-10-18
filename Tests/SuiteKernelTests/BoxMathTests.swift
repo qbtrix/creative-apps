@@ -1,6 +1,6 @@
 // BoxMathTests.swift (editor-kernel EK-19, slice EK-box, KJ6): the selection
-// box's resize, scale and rotate math. Written against the EK-3 stubs and
-// disabled until EK-20 gives BoxMath its body. Document y grows downwards.
+// box's resize, scale and rotate math. Written against the EK-3 stubs;
+// EK-20 gave BoxMath its body and turned them on. Document y grows downwards.
 import Foundation
 import Testing
 import SuiteKernel
@@ -9,7 +9,7 @@ import SuiteKernel
     let box = Rect(minX: 10, minY: 20, maxX: 110, maxY: 70)
     let wide = Rect(minX: 0, minY: 0, maxX: 100, maxY: 50)
 
-    @Test(.disabled("waits on EK-20")) func eachHandleMovesItsEdges() {
+    @Test func eachHandleMovesItsEdges() {
         let delta = Point(x: 5, y: 7)
         let expected: [(EditorHandle, Rect)] = [
             (.topLeft, Rect(minX: 15, minY: 27, maxX: 110, maxY: 70)),
@@ -26,7 +26,7 @@ import SuiteKernel
         }
     }
 
-    @Test(.disabled("waits on EK-20")) func shiftKeepsAspect() {
+    @Test func shiftKeepsAspect() {
         // The larger change (y) wins and x follows at the 2:1 aspect.
         #expect(BoxMath.resized(wide, .bottomRight, by: Point(x: 10, y: 20), modifiers: .shift)
             == Rect(minX: 0, minY: 0, maxX: 140, maxY: 70))
@@ -41,7 +41,7 @@ import SuiteKernel
             == Rect(minX: 0, minY: 0, maxX: 140, maxY: 55))
     }
 
-    @Test(.disabled("waits on EK-20")) func optionResizesFromCentre() {
+    @Test func optionResizesFromCentre() {
         #expect(BoxMath.resized(wide, .right, by: Point(x: 10, y: 0), modifiers: .option)
             == Rect(minX: -10, minY: 0, maxX: 110, maxY: 50))
         #expect(BoxMath.resized(wide, .bottomRight, by: Point(x: 10, y: 6), modifiers: .option)
@@ -53,7 +53,7 @@ import SuiteKernel
             == Rect(minX: -20, minY: -10, maxX: 120, maxY: 60))
     }
 
-    @Test(.disabled("waits on EK-20")) func minimumOnePoint() {
+    @Test func minimumOnePoint() {
         #expect(BoxMath.resized(wide, .right, by: Point(x: -200, y: 0), modifiers: [])
             == Rect(minX: 0, minY: 0, maxX: 1, maxY: 50))
         #expect(BoxMath.resized(wide, .bottom, by: Point(x: 0, y: -100), modifiers: [])
@@ -62,7 +62,7 @@ import SuiteKernel
             == Rect(minX: 0, minY: 0, maxX: 1, maxY: 1))
     }
 
-    @Test(.disabled("waits on EK-20")) func neverFlipsPastTheFixedEdge() {
+    @Test func neverFlipsPastTheFixedEdge() {
         #expect(BoxMath.resized(wide, .left, by: Point(x: 500, y: 0), modifiers: [])
             == Rect(minX: 99, minY: 0, maxX: 100, maxY: 50))
         #expect(BoxMath.resized(wide, .topLeft, by: Point(x: 300, y: 300), modifiers: [])
@@ -78,7 +78,7 @@ import SuiteKernel
         }
     }
 
-    @Test(.disabled("waits on EK-20")) func worksOnAScaledBox() {
+    @Test func worksOnAScaledBox() {
         // A box already scaled to fractional points keeps its 2:1 aspect with Shift.
         let scaled = Rect(minX: 2.5, minY: 1.25, maxX: 52.5, maxY: 26.25)
         let r = BoxMath.resized(scaled, .bottomRight, by: Point(x: 25, y: 2), modifiers: .shift)
@@ -86,7 +86,7 @@ import SuiteKernel
         #expect(abs(r.width / r.height - 2) < 1e-9)
     }
 
-    @Test(.disabled("waits on EK-20")) func severalScaleAsOneBox() {
+    @Test func severalScaleAsOneBox() {
         let union = Rect(minX: 0, minY: 0, maxX: 200, maxY: 100)
         let a = Rect(minX: 0, minY: 0, maxX: 100, maxY: 50)
         let b = Rect(minX: 100, minY: 50, maxX: 200, maxY: 100)
@@ -98,7 +98,7 @@ import SuiteKernel
         #expect(BoxMath.scaled(union, from: union, to: wider) == wider)
     }
 
-    @Test(.disabled("waits on EK-20")) func shiftSnapsRotationTo15Degrees() {
+    @Test func shiftSnapsRotationTo15Degrees() {
         #expect(BoxMath.snappedDegrees(22, modifiers: .shift) == 15)
         #expect(BoxMath.snappedDegrees(23, modifiers: .shift) == 30)
         #expect(BoxMath.snappedDegrees(-10, modifiers: .shift) == -15)
@@ -107,7 +107,7 @@ import SuiteKernel
         #expect(BoxMath.snappedDegrees(22, modifiers: .option) == 22)
     }
 
-    @Test(.disabled("waits on EK-20")) func handlesSitOnTheBox() {
+    @Test func handlesSitOnTheBox() {
         let handles = BoxMath.handles(of: box, size: 8)
         #expect(handles.count == 9 && handles[.inside] == nil && handles[.rotate] != nil)
         #expect(handles[.topLeft] == Rect(minX: 6, minY: 16, maxX: 14, maxY: 24))

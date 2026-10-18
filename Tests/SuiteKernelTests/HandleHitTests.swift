@@ -1,6 +1,6 @@
 // HandleHitTests.swift (editor-kernel EK-19, slice EK-box, KJ6): which box
-// handle is under the pointer. Written against the EK-3 stubs and disabled
-// until EK-20 gives HandleHit its body. Document y grows downwards.
+// handle is under the pointer. Written against the EK-3 stubs; EK-20
+// gave HandleHit its body and turned them on. Document y grows downwards.
 import Foundation
 import Testing
 import SuiteKernel
@@ -8,7 +8,7 @@ import SuiteKernel
 @Suite struct HandleHitTests {
     let box = Rect(minX: 0, minY: 0, maxX: 100, maxY: 50)
 
-    @Test(.disabled("waits on EK-20")) func picksEachHandle() {
+    @Test func picksEachHandle() {
         let expected: [(Point, EditorHandle)] = [
             (Point(x: 1, y: -1), .topLeft),
             (Point(x: 50, y: 2), .top),
@@ -24,7 +24,7 @@ import SuiteKernel
         }
     }
 
-    @Test(.disabled("waits on EK-20")) func insideOrNone() {
+    @Test func insideOrNone() {
         #expect(HandleHit.handle(at: Point(x: 30, y: 30), in: box, tolerance: 4) == .inside)
         #expect(HandleHit.handle(at: Point(x: 25, y: 1), in: box, tolerance: 4) == .inside)
         #expect(HandleHit.handle(at: Point(x: 200, y: 200), in: box, tolerance: 4) == nil)
@@ -32,7 +32,7 @@ import SuiteKernel
         #expect(HandleHit.handle(at: Point(x: 50, y: -6), in: box, tolerance: 4) == nil)
     }
 
-    @Test(.disabled("waits on EK-20")) func chebyshev() {
+    @Test func chebyshev() {
         // 3 along each axis is 3 in Chebyshev distance but 4.24 in Euclidean.
         #expect(HandleHit.handle(at: Point(x: 3, y: 3), in: box, tolerance: 4) == .topLeft)
         #expect(HandleHit.handle(at: Point(x: -3.5, y: -3.5), in: box, tolerance: 4) == .topLeft)
@@ -40,7 +40,7 @@ import SuiteKernel
         #expect(HandleHit.handle(at: Point(x: -4.5, y: -1), in: box, tolerance: 4) == nil)
     }
 
-    @Test(.disabled("waits on EK-20")) func cornersWinTies() {
+    @Test func cornersWinTies() {
         let small = Rect(minX: 0, minY: 0, maxX: 6, maxY: 6)
         // Each point is 1.5 from a corner and 1.5 from an edge's middle.
         #expect(HandleHit.handle(at: Point(x: 1.5, y: 0), in: small, tolerance: 4) == .topLeft)
@@ -49,7 +49,7 @@ import SuiteKernel
         #expect(HandleHit.handle(at: Point(x: 0, y: 4.5), in: small, tolerance: 4) == .bottomLeft)
     }
 
-    @Test(.disabled("waits on EK-20")) func toleranceDividesByZoom() {
+    @Test func toleranceDividesByZoom() {
         #expect(HandleHit.tolerance(screen: 8, zoom: 2) == 4)
         #expect(HandleHit.tolerance(screen: 8, zoom: 0.5) == 16)
         #expect(HandleHit.tolerance(screen: 8, zoom: 1) == 8)
