@@ -2,7 +2,7 @@
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a150baa312-n5va · Session: claude/switching-feature-lead-kyvcdx · Started: 2026-10-18 (earlier run act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 4 (SW-4a #2989 merged as 531550f; waiting on full dev CI 39173775025, head 46f6ce21, pending since 22:47Z with no runner)
+Stage: 4 (SW-4a #2989 merged as 531550f; waiting on full dev CI 39176304199, head 398ea5d4; 39173775025 was cancelled at 23:23Z when this newer run superseded it)
 Base: origin/dev 2567c02
 Next: green dev macOS run on or after 531550f; review round; Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
 
