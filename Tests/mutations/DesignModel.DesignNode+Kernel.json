@@ -1,0 +1,6 @@
+[
+{"label":"every node holds children","file":"Sources/DesignModel/DesignNode+Kernel.swift","find":"var holdsChildren: Bool { node.kind.holdsChildren }","replace":"var holdsChildren: Bool { true }","tests":"DesignOrderingTests"},
+{"label":"Bring Forward runs as Send Backward","file":"Sources/DesignModel/DesignNode+Kernel.swift","find":"case .bringForward: .bringForward","replace":"case .bringForward: .sendBackward","tests":"DesignOrderingTests"},
+{"label":"Send to Back runs as Bring to Front","file":"Sources/DesignModel/DesignNode+Kernel.swift","find":"case .sendToBack: .sendToBack","replace":"case .sendToBack: .bringToFront","tests":"DesignOrderingTests"},
+{"label":"the round trip drops the lock","file":"Sources/DesignModel/DesignNode+Kernel.swift","find":"isLocked = layer.isLocked","replace":"isLocked = false","tests":"DesignOrderingTests"}
+]
