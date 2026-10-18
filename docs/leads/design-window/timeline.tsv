@@ -118,3 +118,4 @@ utc	stage	event	ref	note
 2026-10-18T19:05Z	fix	#2899 dev merged at 7c6b42ca, ci PASS, DesignCanvasHints 20/20, Head line moved, body footer-free
 2026-10-18T19:19Z	heartbeat	#2898 lane macOS build 39155410272 still queued; #2899 needs-rebase dropped, lane macOS build dispatched 19:16Z; full CI 39152649677 running; #2623 open; no dev-red
 2026-10-18T19:42Z	heartbeat	#2898 lane macOS build 39155410272 in progress; #2899 lane macOS build 39157978420 queued; full CI 39152649677 running; #2623 open; no dev-red
+2026-10-18T20:04Z	heartbeat	#2898 lane macOS build 39155410272 success, awaiting lane merge; #2899 build 39157978420 queued; full CI 39152649677 cancelled; #2623 open; no dev-red
