@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-18T07:32Z	3	heartbeat	-	D0-9d waits CB-a (CB-3); #2302 waits #2263
 2026-10-18T07:55Z	heartbeat	J1 #2465 still red at 3a8c658 (after round-1 #2372): fixer started, DW-a round 2. Shell #2661 #2693 from same run (after SuiteUI #2617), not this feature's tasks yet. CB-3 not merged; D0-9d waits. #2302 waits #2263
 2026-10-18T08:12Z	3	pr	#2701 fixes #2465 (DW-a round 2) be4db89
+2026-10-18T08:18Z	heartbeat	scoped design 39107691328 (cd81c77b, holds 148ade3e) in progress; full 39108958964 pending. #2696 #2701 awaiting lane macOS builds. CB-3 not merged. 10 line:design findings open
