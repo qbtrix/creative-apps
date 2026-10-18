@@ -3,7 +3,6 @@
 # scripts/check-dup-views --update-baseline, never by hand. It only shrinks: move the
 # cluster into SuiteUI, delete the app copies, and drop their lines in the same PR.
 # `A path::Name Concept`, `B path::Name signature`, `C path::Name ~ path::Name`.
-A Sources/AfterGlowApp/LauncherCommands+Home.swift::HomeMenuItem MenuCommand
 A Sources/AfterGlowApp/UpdateSheet.swift::UpdateSheet Sheet
 A Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark CanvasMark
 A Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark CanvasMark
