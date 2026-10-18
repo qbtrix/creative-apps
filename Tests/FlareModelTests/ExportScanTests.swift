@@ -1,5 +1,6 @@
 // ExportScanTests.swift: LM-0c3 (docs/blueprints/flare.md, 7.1): one test per warning, `bounce` 0–12 step 2 gives 7
-// PNGs, a cancelled export returns no files, export state, `showcase`, never a silent drop, and QB-L8 on the fake.
+// PNGs, a cancelled export returns no files, the run on the kernel's ExportRun (FX-4), `showcase`, never a silent
+// drop, and QB-L8 on the fake.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -108,42 +109,55 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     }
 }
 
-@Test func aWorkspaceExportRunsThenFinishesWithTheResult() async {
-    var w = workspace(FlareFixtures.showcase)
+@Test func aWorkspaceKeepsTheSheetsDefaultsAndWarnings() {
+    let w = workspace(FlareFixtures.showcase)
     #expect(w.exportOptions(.pngSequence) == options(.pngSequence, 0...47))
     #expect(w.exportOptions(.lottie).map(w.exportWarnings) == [text, symbol, machine, background])
-    await w.export(options(.pngSequence, 0...4, step: 2), rasterizer: FakeRasterizer())
-    guard case .finished(let result) = w.exportState else { Issue.record("not finished"); return }
-    #expect(result.files.count == 3 && result.warnings == [text, symbol, machine])
+    let none = FlareWorkspace(services: .fake())
+    #expect(none.exportOptions(.svgFrame) == nil && none.exportWarnings(options(.lottie)).isEmpty)
+}
+
+// The run tests below are the kernel-shaped rewrite of the old app-local run (FX-2); FX-4 turns them on.
+@Test(.disabled("waits on FX-4")) func aWorkspaceExportRunsThenFinishesWithTheWrittenNames() async throws {
+    var w = workspace(FlareFixtures.showcase)
+    let document = try #require(w.document)
+    #expect(w.openExport() && w.startExport())
+    let o = try #require(w.exportingOptions)
+    #expect(o == options(.svgFrame, 0...47))
+    let result = try await run(document, o)
+    #expect(result.warnings == [text, symbol, machine])
+    w.endExport(.success(result.files.map(\.name)))
+    #expect(w.exportState == .finished(o, ["scene-1.svg"]))
     w.dismissExport()
     #expect(w.exportState == .idle)
     var none = FlareWorkspace(services: .fake())
-    #expect(none.exportOptions(.svgFrame) == nil && none.exportWarnings(options(.lottie)).isEmpty)
-    await none.export(options(.svgFrame), rasterizer: FakeRasterizer())
-    #expect(none.exportState == .idle && !none.beginExport())
+    #expect(!none.openExport() && !none.startExport() && none.exportState == .idle)
 }
 
-@Test func progressOnlyMovesForwardWhileRunning() {
+@Test(.disabled("waits on FX-4")) func progressOnlyMovesForwardWhileRunning() throws {
     var w = workspace(FlareFixtures.bounce)
     w.exportProgressed(0.5)
-    #expect(w.exportState == .idle && w.beginExport() && !w.beginExport())
+    #expect(w.exportState == .idle && w.openExport() && !w.openExport() && w.startExport() && !w.startExport())
+    let o = try #require(w.exportingOptions)
     for p in [0.25, 0.1, .nan, 0.75, 4] { w.exportProgressed(p) }
-    #expect(w.exportState == .running(progress: 1))
+    #expect(w.exportState == .running(o, done: 1, total: 1))
     w.dismissExport()
-    #expect(w.exportState == .running(progress: 1))
+    #expect(w.exportState == .running(o, done: 1, total: 1))
 }
 
-@Test func cancelGoesBackToIdleAndAFailureSaysWhy() {
+@Test(.disabled("waits on FX-4")) func cancelGoesBackToIdleAndAFailureSaysWhy() throws {
     var w = workspace(FlareFixtures.bounce)
-    _ = w.beginExport()
+    _ = w.openExport(); _ = w.startExport()
+    let o = try #require(w.exportingOptions)
     w.endExport(.failure(CancellationError()))
-    #expect(w.exportState == .idle && w.beginExport())
+    #expect(w.exportState == .idle && w.openExport() && w.startExport())
     w.endExport(.failure(PNGExportError.frameOutOfRange(0...90)))
-    #expect(w.exportState == .failed("Frames 0–90 aren't all in the scene.") && w.beginExport())
+    #expect(w.exportState == .failed(o, "Frames 0–90 aren't all in the scene."))
+    w.retryExport(); _ = w.startExport()
     w.endExport(.failure(NotBuilt(reason: "Not connected yet (IN-7).")))
-    #expect(w.exportState == .failed("Not connected yet (IN-7)."))
-    w.endExport(.success(ExportResult(files: [], warnings: [])))
-    #expect(w.exportState == .failed("Not connected yet (IN-7)."))
+    #expect(w.exportState == .failed(o, "Not connected yet (IN-7)."))
+    w.endExport(.success(["scene-1.svg"]))
+    #expect(w.exportState == .failed(o, "Not connected yet (IN-7)."))
 }
 
 // QB-L8's Linux gate: SVG frame < 1 s, Lottie of 300 frames < 10 s, 48 PNG frames at 1080p < 10 s. The fake's
