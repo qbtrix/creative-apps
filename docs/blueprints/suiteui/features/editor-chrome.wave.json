@@ -4,48 +4,166 @@
   "order": 10,
   "status": "planned",
   "feature_issue": "file when ready",
-  "covers": "#342, #339, #340, #341",
-  "waits_on": "#778 (suite-harness)",
+  "covers": "#340, #341, #339 (empty state only), #342 (moot)",
+  "waits_on": "#778 (suite-harness, merged)",
+  "depends": [
+    "suite-harness"
+  ],
   "owned": [
-    "Sources/SuiteUI/Contracts/ShellLayingOut.swift",
     "Sources/SuiteUI/Contracts/ToolPicking.swift",
     "Sources/SuiteUI/Contracts/TransportStepping.swift",
     "Sources/SuiteUI/Contracts/StatusPillComposing.swift",
+    "Sources/SuiteUI/SuiteTransport.swift",
+    "Sources/SuiteUI/SuiteStatusPills.swift",
+    "Sources/SuiteUI/SuiteToolPicking.swift",
     "Tests/SuiteUITests/ChromeFakeTests.swift",
-    "Sources/SuiteUI/ShellLayout.swift",
-    "Tests/SuiteUITests/ShellLayoutTests.swift",
-    "Sources/SuiteUI/EditorShell.swift",
-    "Tests/SuiteUITests/EditorShellTests.swift",
-    "Tests/AppSnapshotTests/SuiteShellSnapshots.swift",
-    "Sources/SuiteUI/EditorTopBar.swift",
     "Sources/SuiteUI/EmptyStateView.swift",
-    "Tests/AppSnapshotTests/SuiteTopBarSnapshots.swift",
-    "Tests/AppSnapshotTests/SuiteEditorBarDimmingTests.swift",
-    "Sources/SuiteUI/TransportCapsule.swift",
-    "Tests/SuiteUITests/TransportTests.swift",
-    "Tests/AppSnapshotTests/SuiteTransportSnapshots.swift",
-    "Sources/SuiteUI/ViewerStatusBar.swift",
-    "Tests/SuiteUITests/StatusPillTests.swift",
-    "Tests/AppSnapshotTests/SuiteStatusSnapshots.swift",
+    "Tests/AppSnapshotTests/SuiteEmptyStateSnapshots.swift",
     "Sources/SuiteUI/SegmentedTabs.swift",
-    "Sources/SuiteUI/ToolbarGroup.swift",
     "Tests/AppSnapshotTests/SuiteTabsSnapshots.swift",
-    "Tests/SuiteUITests/ToolPickingTests.swift",
+    "Sources/SuiteUI/TransportCapsule.swift",
+    "Tests/AppSnapshotTests/SuiteTransportSnapshots.swift",
     "Sources/SuiteUI/Gallery/GalleryChrome.swift",
-    "UITests/SuiteJourneyTests+Chrome.swift",
+    "Sources/SuiteUI/ViewerStatusBar.swift",
+    "Tests/AppSnapshotTests/SuiteStatusSnapshots.swift",
+    "Tests/SuiteUITests/SuiteGalleryTests.swift",
     "UITests/SuiteJourneyTests+ChromePanels.swift",
+    "Tests/SuiteUITests/TransportTests.swift",
+    "Tests/SuiteUITests/StatusPillTests.swift",
+    "Tests/SuiteUITests/ToolPickingTests.swift",
+    "Sources/SuiteUI/ToolbarGroup.swift",
+    "Tests/SuiteUITests/ToolbarPickingTests.swift",
+    "UITests/SuiteJourneyTests+Chrome.swift",
     "Tests/AppSnapshotTests/Golden/chrome/"
   ],
   "journeys": [
-    "SuiteJourneyTests.testEditorShellFitsAtEveryWidth",
-    "SuiteJourneyTests.testEditorShellTimelineSlot",
     "SuiteJourneyTests.testEmptyStateOffersAction",
     "SuiteJourneyTests.testPressLatency",
     "SuiteJourneyTests.testSegmentedTabsSwitch",
-    "SuiteJourneyTests.testSlotDragLatency",
     "SuiteJourneyTests.testStatusPills",
-    "SuiteJourneyTests.testToolRailSelectsAndExplains",
-    "SuiteJourneyTests.testTopBarCommandsAndSaveStatus",
+    "SuiteJourneyTests.testToolPaletteSelectsAndExplains",
     "SuiteJourneyTests.testTransportPlaysStepsAndLoops"
+  ],
+  "slices": [
+    {
+      "id": "EC-a",
+      "behavior": "The three chrome contracts, their fakes and the three rules as stubs every view compiles against; the empty state's action is the primary button and the tabs draw as a capsule that is still a system Picker.",
+      "tasks": [
+        "EC-1",
+        "EC-4",
+        "EC-7"
+      ],
+      "journeys": [
+        "ChromeFakeTests",
+        "SuiteEmptyStateSnapshots",
+        "SuiteTabsSnapshots"
+      ],
+      "owned": [
+        "Sources/SuiteUI/Contracts/ToolPicking.swift",
+        "Sources/SuiteUI/Contracts/TransportStepping.swift",
+        "Sources/SuiteUI/Contracts/StatusPillComposing.swift",
+        "Sources/SuiteUI/SuiteTransport.swift",
+        "Sources/SuiteUI/SuiteStatusPills.swift",
+        "Sources/SuiteUI/SuiteToolPicking.swift",
+        "Tests/SuiteUITests/ChromeFakeTests.swift",
+        "Sources/SuiteUI/EmptyStateView.swift",
+        "Tests/AppSnapshotTests/SuiteEmptyStateSnapshots.swift",
+        "Sources/SuiteUI/SegmentedTabs.swift",
+        "Tests/AppSnapshotTests/SuiteTabsSnapshots.swift"
+      ],
+      "waits": {}
+    },
+    {
+      "id": "EC-b",
+      "behavior": "The gallery's editor page shows a clickable transport capsule, status pills with toggle and warning, capsule tabs and the floating palette, and the empty page offers its primary action, all on the stubs.",
+      "tasks": [
+        "EC-5a",
+        "EC-6a",
+        "EC-9",
+        "EC-11"
+      ],
+      "journeys": [
+        "SJ5",
+        "SJ6",
+        "SJ7",
+        "SJ8",
+        "SP9"
+      ],
+      "owned": [
+        "Sources/SuiteUI/TransportCapsule.swift",
+        "Tests/AppSnapshotTests/SuiteTransportSnapshots.swift",
+        "Sources/SuiteUI/Gallery/GalleryChrome.swift",
+        "Sources/SuiteUI/ViewerStatusBar.swift",
+        "Tests/AppSnapshotTests/SuiteStatusSnapshots.swift",
+        "Tests/SuiteUITests/SuiteGalleryTests.swift",
+        "UITests/SuiteJourneyTests+ChromePanels.swift"
+      ],
+      "waits": {
+        "EC-a": [
+          "EC-5a",
+          "EC-6a",
+          "EC-9"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EC-c",
+      "behavior": "The live rules: the transport wraps or clamps and reads seconds:frames, the zoom pill reads “–” for a zoom that isn't a number, and a key picks only an enabled tool while a duplicate shortcut is a violation.",
+      "tasks": [
+        "EC-5b",
+        "EC-6b",
+        "EC-8b"
+      ],
+      "journeys": [
+        "TransportTests",
+        "StatusPillTests",
+        "ToolPickingTests"
+      ],
+      "owned": [
+        "Sources/SuiteUI/SuiteTransport.swift",
+        "Tests/SuiteUITests/TransportTests.swift",
+        "Sources/SuiteUI/SuiteStatusPills.swift",
+        "Tests/SuiteUITests/StatusPillTests.swift",
+        "Sources/SuiteUI/SuiteToolPicking.swift",
+        "Tests/SuiteUITests/ToolPickingTests.swift"
+      ],
+      "waits": {
+        "EC-a": [
+          "EC-5b",
+          "EC-6b",
+          "EC-8b"
+        ]
+      }
+    },
+    {
+      "id": "EC-d",
+      "behavior": "The floating palette picks tools by key through the live rule and explains each disabled one, and the chrome's goldens are recorded.",
+      "tasks": [
+        "EC-8",
+        "EC-10",
+        "EC-12",
+        "EC-13"
+      ],
+      "journeys": [
+        "SJ4"
+      ],
+      "owned": [
+        "Sources/SuiteUI/ToolbarGroup.swift",
+        "Tests/SuiteUITests/ToolbarPickingTests.swift",
+        "UITests/SuiteJourneyTests+Chrome.swift",
+        "Tests/AppSnapshotTests/Golden/chrome/"
+      ],
+      "waits": {
+        "EC-b": [
+          "EC-8",
+          "EC-12",
+          "EC-13"
+        ],
+        "EC-c": [
+          "EC-8"
+        ]
+      }
+    }
   ]
 }
