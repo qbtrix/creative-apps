@@ -26,6 +26,7 @@ Sources/FlareModel/FlareEasing.swift
 Sources/FlareModel/FlareExport.swift
 Sources/FlareModel/FlareLayers.swift
 Sources/FlareModel/FlareSelection.swift
+Sources/FlareModel/FlareSelectionRead.swift
 Sources/FlareModel/Live/LiveEasing.swift
 Sources/FlareModel/Live/LiveHits+Marquee.swift
 Sources/FlareModel/Live/LiveKeyframes+Edit.swift
