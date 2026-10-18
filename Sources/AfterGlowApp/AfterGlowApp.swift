@@ -29,5 +29,8 @@ struct AfterGlowApp: App {
         Settings { SettingsView() }
             .commands { LauncherCommandsSettings() }
         Window("Welcome to AfterGlow", id: "onboarding") { OnboardingWindow() }
+            .defaultLaunchBehavior(OnboardingWindow.launchBehavior)
+            .restorationBehavior(.disabled)
+            .commands { LauncherCommandsOnboarding() }
     }
 }
