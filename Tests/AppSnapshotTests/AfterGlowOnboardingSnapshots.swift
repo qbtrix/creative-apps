@@ -142,6 +142,18 @@ extension BodyCountSuites {
 
         // MARK: Layout (blueprint 7.3)
 
+        /// The page element names the page in its label, where a journey can read it (OJ1, OJ2).
+        @Test func pageElementNamesThePage() async throws {
+            let driven = await model()
+            let w = RenderBudgetWindow(OnboardingWindow(model: driven), size: size)
+            defer { w.close() }
+            for id in ["apps", "focus", "start"] {
+                try await w.settle()
+                #expect(w.label(OnboardingControls.page) == id, "the page element reads \(w.label(OnboardingControls.page) ?? "nothing") on \(id)")
+                driven.continue()
+            }
+        }
+
         /// Continue, Back and Skip sit at least OnboardingLayout.margin inside the window on every page.
         @Test func buttonsKeepTheirMargins() async throws {
             let margin = CGFloat(OnboardingLayout.margin)
