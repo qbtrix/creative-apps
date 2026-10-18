@@ -1,0 +1,9 @@
+[
+  {
+    "label": "apply skips the clamp",
+    "file": "Sources/SuiteKernel/Stroke/BrushSettings.swift",
+    "find": "let clamped = Swift.min(range.upperBound, Swift.max(range.lowerBound, value))",
+    "replace": "let clamped = value",
+    "tests": "StrokeTests"
+  }
+]
