@@ -25,6 +25,7 @@ struct HomeNewRow: View {
         HStack(alignment: .top, spacing: CGFloat(HomeLayout.gap)) {
             ForEach(model.state.tiles, id: \.app) { tile in
                 HomeTile(tile: tile, showsChips: HomeLayout.tileShowsChips(windowWidth: windowWidth, presets: tile.presets),
+                         presetsLabel: HomeMenu.presetsLabel(tile, windowWidth: windowWidth),
                          isLaunching: model.launching == tile.app) { preset in
                     Task { await model.newDocument(preset, now: Date()) }
                 }
@@ -42,6 +43,8 @@ struct HomeNewRow: View {
 private struct HomeTile: View {
     let tile: NewTile
     let showsChips: Bool
+    /// The presets menu's visible title, chosen to fit the tile.
+    let presetsLabel: String
     let isLaunching: Bool
     let create: @MainActor (NewDocumentPreset) -> Void
 
@@ -94,8 +97,8 @@ private struct HomeTile: View {
             .suiteControl(id: id + ".presets", enabled: enabled, reason: reason, identifies: false)
             .homeLayoutAnchor("chips.\(tile.app.rawValue)")
         } else {
-            // Names its tile's kind ("Animation Presets"), not a bare "Presets" (#1868).
-            Menu(HomeMenu.presetsTitle(tile)) {
+            // Names its tile's kind ("Animation Presets", #1868) where the tile holds it, never truncated.
+            Menu(presetsLabel) {
                 ForEach(tile.presets, id: \.id) { preset in
                     // A second Text is the menu item's subtitle: the preset's size or formats.
                     Button { create(preset) } label: {
@@ -109,6 +112,7 @@ private struct HomeTile: View {
             .controlSize(.small)
             .disabled(!enabled)
             .help(reason ?? HomeLayout.presetsHelp(tile.presets))
+            .accessibilityLabel(HomeMenu.presetsTitle(tile))
             .suiteControl(id: id + ".presets", enabled: enabled, reason: reason)
             .homeLayoutAnchor("menu.\(tile.app.rawValue)")
         }
