@@ -1,0 +1,37 @@
+[
+  {
+    "label": "dismissExport while running goes idle",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "    public mutating func dismissExport() { exportState.dismiss() }\n",
+    "replace": "    public mutating func dismissExport() { exportState = .idle }\n",
+    "tests": "FlareExportTests"
+  },
+  {
+    "label": "a CancellationError ends the run failed, not idle",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        case .failure(let error as CancellationError): exportState.end(.failure(error))\n",
+    "replace": "        case .failure(is CancellationError): exportState.end(.failure(ExportRefusal(description: \"Cancelled.\")))\n",
+    "tests": "FlareExportTests"
+  },
+  {
+    "label": "exportProgressed maps the fraction with ceil",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "* Double(total)).rounded(.down)))",
+    "replace": "* Double(total)).rounded(.up)))",
+    "tests": "FlareExportTests"
+  },
+  {
+    "label": "retryExport from finished reopens the sheet",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        guard case .failed(let o, _) = exportState else { return }\n",
+    "replace": "        guard let o = exportingOptions else { return }\n",
+    "tests": "FlareExportTests"
+  },
+  {
+    "label": "exportingOptions reads nil while running",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        case .idle: nil\n        case .editing(let o), .running(let o, _, _), .finished(let o, _), .failed(let o, _): o\n",
+    "replace": "        case .idle, .running: nil\n        case .editing(let o), .finished(let o, _), .failed(let o, _): o\n",
+    "tests": "ExportScanTests.swift"
+  }
+]

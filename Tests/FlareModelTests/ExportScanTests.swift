@@ -117,8 +117,9 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     #expect(none.exportOptions(.svgFrame) == nil && none.exportWarnings(options(.lottie)).isEmpty)
 }
 
-// The run tests below are the kernel-shaped rewrite of the old app-local run (FX-2); FX-4 turns them on.
-@Test(.disabled("waits on FX-4")) func aWorkspaceExportRunsThenFinishesWithTheWrittenNames() async throws {
+// The run tests below are the kernel-shaped rewrite of the old app-local run (FX-2), on since FX-4; the progress one
+// reads the run's total, which is `exportFileCount`, so it waits on FX-11.
+@Test func aWorkspaceExportRunsThenFinishesWithTheWrittenNames() async throws {
     var w = workspace(FlareFixtures.showcase)
     let document = try #require(w.document)
     #expect(w.openExport() && w.startExport())
@@ -134,7 +135,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     #expect(!none.openExport() && !none.startExport() && none.exportState == .idle)
 }
 
-@Test(.disabled("waits on FX-4")) func progressOnlyMovesForwardWhileRunning() throws {
+@Test(.disabled("waits on FX-11")) func progressOnlyMovesForwardWhileRunning() throws {
     var w = workspace(FlareFixtures.bounce)
     w.exportProgressed(0.5)
     #expect(w.exportState == .idle && w.openExport() && !w.openExport() && w.startExport() && !w.startExport())
@@ -145,7 +146,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     #expect(w.exportState == .running(o, done: 1, total: 1))
 }
 
-@Test(.disabled("waits on FX-4")) func cancelGoesBackToIdleAndAFailureSaysWhy() throws {
+@Test func cancelGoesBackToIdleAndAFailureSaysWhy() throws {
     var w = workspace(FlareFixtures.bounce)
     _ = w.openExport(); _ = w.startExport()
     let o = try #require(w.exportingOptions)
