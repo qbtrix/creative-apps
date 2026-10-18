@@ -4,7 +4,7 @@ Issue: #1513 · Packet: docs/blueprints/library/features/loupe-viewport.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: scoped library 39157077321 (1fcbcd9) is void: build, scoped tests and snapshots passed, but xcodebuild for the journeys was SIGKILLed 3 s after launch (scripts/ui-test line 59, Killed: 9, 0 tests, no xcresult); flare and photo scoped runs on the same commit ran normally, so it's the runner. Supervisor: please re-dispatch scoped library on dev (I can't dispatch). Also waiting on full CI 39162498756 (b1526f3; 39161458093 was cancelled). Green: contact sheet. Red: round 2 (the last), then gaps
+Next: no valid library journey run since #2878 merged. Scoped library 39157077321 (1fcbcd9) void (journeys xcodebuild SIGKILLed 3 s after launch, 0 tests); no scoped library re-run queued yet. Supervisor: please re-dispatch scoped library on dev (I can't dispatch). Full dev CI keeps being cancelled while pending as newer ones queue (39158639377, 39159685451, 39161458093, 39162498756, 39163553482); still queued: 39160459432 (f7e0350), pending: 39164756292 (ae6e7c8). Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
