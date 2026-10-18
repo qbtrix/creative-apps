@@ -1,9 +1,9 @@
 // SelectionTests.swift: the checks for `Selection<ID>` (editor-kernel EK-9,
 // slice EK-sel), written from the packet before the body: replace, toggle and
 // extend with and without an order, the primary, `canAdd` refusals, prune and
-// the grid move, plus KJ2's selection half. Every test waits on EK-10, which
-// writes the body over the EK-2 stub and turns them on (docs/factory/lead.md
-// rule 13). The mutation table names extendAppendsOnAStage,
+// the grid move, plus KJ2's selection half. EK-10 wrote the body over the
+// EK-2 stub and turned them on (docs/factory/lead.md rule 13). The mutation
+// table names extendAppendsOnAStage,
 // extendRangeIsClosed and toggleRefusesLocked.
 import Testing
 import SuiteKernel
@@ -12,7 +12,7 @@ import SuiteKernel
     /// The order a list or canvas gives: back to front, a to f.
     static let order = ["a", "b", "c", "d", "e", "f"]
 
-    @Test(.disabled("waits on EK-10")) func replaceSetsOneAndTheAnchor() {
+    @Test func replaceSetsOneAndTheAnchor() {
         var sel = Selection(["a", "c"])
         let changed1 = sel.pick("b", .replace)
         #expect(changed1)
@@ -25,14 +25,14 @@ import SuiteKernel
         #expect(sel.ordered == ["b"])
     }
 
-    @Test(.disabled("waits on EK-10")) func replaceRefusedByCanAdd() {
+    @Test func replaceRefusedByCanAdd() {
         var sel = Selection(["a"])
         let changed1 = sel.pick("locked", .replace, canAdd: { $0 != "locked" })
         #expect(!changed1)
         #expect(sel.ordered == ["a"])
     }
 
-    @Test(.disabled("waits on EK-10")) func toggleAppendsAndRemoves() {
+    @Test func toggleAppendsAndRemoves() {
         var sel = Selection<String>()
         let changed1 = sel.pick("a", .toggle)
         #expect(changed1)
@@ -47,7 +47,7 @@ import SuiteKernel
         #expect(!sel.contains("a"))
     }
 
-    @Test(.disabled("waits on EK-10")) func toggleRefusesLocked() {
+    @Test func toggleRefusesLocked() {
         var sel = Selection(["a"])
         let changed1 = sel.pick("locked", .toggle, canAdd: { $0 != "locked" })
         #expect(!changed1)
@@ -55,7 +55,7 @@ import SuiteKernel
         #expect(!sel.contains("locked"))
     }
 
-    @Test(.disabled("waits on EK-10")) func extendAppendsOnAStage() {
+    @Test func extendAppendsOnAStage() {
         // No order (a stage of free shapes): Shift-click adds the item alone.
         var sel = Selection<String>()
         sel.pick("a", .replace)
@@ -68,7 +68,7 @@ import SuiteKernel
         #expect(sel.ordered == ["a", "d"])
     }
 
-    @Test(.disabled("waits on EK-10")) func extendRangeIsClosed() {
+    @Test func extendRangeIsClosed() {
         var sel = Selection<String>()
         sel.pick("b", .replace)
         let changed1 = sel.pick("d", .extend, order: Self.order)
@@ -80,7 +80,7 @@ import SuiteKernel
         #expect(sel.anchor == "b")
     }
 
-    @Test(.disabled("waits on EK-10")) func extendBackwardsCoversTheRange() {
+    @Test func extendBackwardsCoversTheRange() {
         var sel = Selection<String>()
         sel.pick("e", .replace)
         let changed1 = sel.pick("c", .extend, order: Self.order)
@@ -89,7 +89,7 @@ import SuiteKernel
         #expect(sel.anchor == "e")
     }
 
-    @Test(.disabled("waits on EK-10")) func extendAgainReplacesTheAnchorsRun() {
+    @Test func extendAgainReplacesTheAnchorsRun() {
         var sel = Selection<String>()
         sel.pick("f", .replace)
         sel.pick("b", .toggle)
@@ -102,7 +102,7 @@ import SuiteKernel
         #expect(!sel.contains("d") && !sel.contains("e"))
     }
 
-    @Test(.disabled("waits on EK-10")) func extendRangeSkipsWhatCanAddRefuses() {
+    @Test func extendRangeSkipsWhatCanAddRefuses() {
         var sel = Selection<String>()
         sel.pick("a", .replace)
         sel.pick("d", .extend, order: Self.order, canAdd: { $0 != "c" })
@@ -110,7 +110,7 @@ import SuiteKernel
         #expect(!sel.contains("c"))
     }
 
-    @Test(.disabled("waits on EK-10")) func primaryIsTheLastPicked() {
+    @Test func primaryIsTheLastPicked() {
         var sel = Selection<String>()
         #expect(sel.primary == nil)
         sel.pick("c", .toggle)
@@ -120,7 +120,7 @@ import SuiteKernel
         #expect(sel.primary == "c")
     }
 
-    @Test(.disabled("waits on EK-10")) func replaceClearAndSelectAll() {
+    @Test func replaceClearAndSelectAll() {
         var sel = Selection<String>()
         sel.replace(["d", "b"])
         #expect(sel.ordered == ["d", "b"])
@@ -132,7 +132,7 @@ import SuiteKernel
         #expect(sel.set.count == 5)
     }
 
-    @Test(.disabled("waits on EK-10")) func pruneDropsDeadIdsInOrder() {
+    @Test func pruneDropsDeadIdsInOrder() {
         var sel = Selection<String>()
         sel.pick("a", .toggle)
         sel.pick("c", .toggle)
@@ -144,7 +144,7 @@ import SuiteKernel
         #expect(sel.anchor != "e")
     }
 
-    @Test(.disabled("waits on EK-10")) func moveByArrowInAGrid() {
+    @Test func moveByArrowInAGrid() {
         // Twelve cells, four columns: 0 1 2 3 / 4 5 6 7 / 8 9 10 11.
         let grid = Array(0..<12)
         var sel = Selection([5])
@@ -159,7 +159,7 @@ import SuiteKernel
         #expect(sel.primary == 5)
     }
 
-    @Test(.disabled("waits on EK-10")) func moveStopsAtTheGridEdge() {
+    @Test func moveStopsAtTheGridEdge() {
         let grid = Array(0..<12)
         var top = Selection([1])
         top.move(.up, order: grid, columns: 4)
@@ -173,7 +173,7 @@ import SuiteKernel
         #expect(last.ordered == [11])
     }
 
-    @Test(.disabled("waits on EK-10")) func moveStartsFromThePrimary() {
+    @Test func moveStartsFromThePrimary() {
         let grid = Array(0..<12)
         var sel = Selection([2, 5])
         sel.move(.right, order: grid, columns: 4)
@@ -181,7 +181,7 @@ import SuiteKernel
     }
 
     /// KJ2, the selection walk: click, Shift-click, Command-click, prune, arrow.
-    @Test(.disabled("waits on EK-10")) func selectionWalk() {
+    @Test func selectionWalk() {
         let cards = (1...8).map { "card-\($0)" }
         var sel = Selection<String>()
         sel.pick("card-1", .replace)
