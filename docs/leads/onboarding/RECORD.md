@@ -1,10 +1,10 @@
 # onboarding lead record
 
 Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
-Run: act-1a14841719c-kml4 · Session: claude/task-36wu9d · Started: 2026-10-17T06:00Z
+Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 2
-Base: 453198ac93bd637e13a6aea5f20273bd7ee728f4
-Next: wave 2 (OB-2, OB-3, OB-11) building via build-wave.js; when their PRs merge, run the check (a dev run with a green Linux job containing OB-2 makes OB-a merged-done) and start wave 3 (OB-4, OB-7, OB-8, OB-9, OB-10)
+Base: 9bd0da5a3f670bd875125ff42d9eb2a5f618ccfe
+Next: wave 2 (OB-2, OB-3, OB-11) rebuilding (the previous session opened no wave-2 PRs) with one worktree builder per task; when their PRs merge, run the check (a dev run with a green Linux job containing OB-2 makes OB-a merged-done) and start wave 3 (OB-4, OB-7, OB-8, OB-9, OB-10)
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 

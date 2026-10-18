@@ -6,3 +6,5 @@ utc	stage	event	ref	note
 2026-10-17T07:05Z	3	pr-merged	#1998	OB-1 merged as 0cf5769d
 2026-10-17T08:37Z	3	ci-run	39018046761	full run on dev 453198ac green, contains #1998
 2026-10-17T10:45Z	3	stage-start	wave 2	OB-2, OB-3, OB-11 builders started (lead resumed after a container restart)
+2026-10-18T12:41Z	3	resume	run act-1a14f05c119-ejlc	no wave-2 PRs or branches found; base moved to 9bd0da5a
+2026-10-18T12:41Z	3	stage-start	wave 2	OB-2, OB-3, OB-11 builders restarted
