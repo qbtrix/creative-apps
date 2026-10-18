@@ -53,7 +53,25 @@ public enum ScrubValue {
         }
     }
 
-    private static func stepped(
+    /// The track position after pressing `key` on a bar slider over `track`
+    /// (the arrows, VoiceOver's adjustable action and the Slider
+    /// representation all come here): Home and End go to the track's ends,
+    /// and an arrow moves `track.step` times the modifier's multiplier
+    /// through `track.stepped(_:by:)`, so a track that owns its step (#591,
+    /// Photo's gamma detent) decides it. With no `stepped` the result is
+    /// exactly `pressed(_:from:step:shift:option:in:)` on the track.
+    public static func pressed(
+        _ key: ScrubKey, from position: Double, shift: Bool = false, option: Bool = false, on track: ScrubTrack
+    ) -> Double {
+        let unit = track.step * multiplier(shift: shift, option: option)
+        guard key == .increment || key == .decrement, unit.isFinite, unit > 0 else {
+            return pressed(key, from: position, step: track.step, shift: shift, option: option, in: track.positions)
+        }
+        let next = track.stepped(position, by: key == .increment ? unit : -unit)
+        return NumericInput.clamp(next.isFinite ? next : position, to: track.positions)
+    }
+
+    static func stepped(
         _ value: Double, by direction: Double, unit: Double, step: Double, in range: ClosedRange<Double>
     ) -> Double {
         guard unit.isFinite, unit > 0 else { return NumericInput.clamp(value, to: range) }
@@ -88,20 +106,40 @@ public enum ScrubKey: Sendable {
 /// The track a bar slider moves along when it isn't its value's range: drags,
 /// keys and the fill move through `positions` in `step`s, and `value` turns a
 /// position back into the value it sets (which may snap, as a detent does).
+/// `stepped`, when set, owns the discrete step (arrows, VoiceOver, the
+/// Slider representation): it takes a position and a signed delta in
+/// positions (the modifier already folded in) and returns the next position,
+/// so a press can leave a detent a drag would snap back into (#591). Drags
+/// never use it.
 public struct ScrubTrack: Sendable {
     public let positions: ClosedRange<Double>
     public let step: Double
     public let position: @Sendable (Double) -> Double
     public let value: @Sendable (Double) -> Double
+    public let stepped: (@Sendable (Double, Double) -> Double)?
 
     public init(
         positions: ClosedRange<Double>, step: Double, position: @escaping @Sendable (Double) -> Double,
-        value: @escaping @Sendable (Double) -> Double
+        value: @escaping @Sendable (Double) -> Double, stepped: (@Sendable (Double, Double) -> Double)? = nil
     ) {
         self.positions = positions
         self.step = step
         self.position = position
         self.value = value
+        self.stepped = stepped
+    }
+}
+
+extension ScrubTrack: TrackStepping {
+    public func position(of value: Double) -> Double { position(value) }
+
+    public func value(at position: Double) -> Double { value(position) }
+
+    /// The track's own step, or today's: `direction` from `position`,
+    /// snapped to the finer of its size and `step`, clamped to `positions`.
+    public func stepped(_ position: Double, by direction: Double) -> Double {
+        if let own = self.stepped { return own(position, direction) }
+        return ScrubValue.stepped(position, by: direction < 0 ? -1 : 1, unit: abs(direction), step: step, in: positions)
     }
 }
 

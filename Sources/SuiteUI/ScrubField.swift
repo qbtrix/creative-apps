@@ -14,7 +14,8 @@
 // modifiers, and the bar takes Home and End. A click or drag gives it the
 // keys (focus interactions `.edit`), with or without keyboard navigation. Hover shows a dotted underline under the
 // value; focus draws the 2 pt accent ring 1 pt outside; disabled draws at 40%.
-// A ScrubTrack lets the bar move along a non-linear track (Photo's log gamma).
+// A ScrubTrack lets the bar move along a non-linear track (Photo's log gamma);
+// its `stepped`, when set, decides the arrow, VoiceOver and Slider steps.
 // Values go out through `onChange` already clamped and snapped (ScrubValue,
 // NumericInput), then `onEnd` once per gesture through an EditRun (ScrubEnds):
 // once per drag that changed the value, once per key press or VoiceOver step
@@ -266,8 +267,8 @@ public struct ScrubField: View {
         default: return .ignored
         }
         set(position: ScrubValue.pressed(
-            key, from: track.position(value), step: track.step, shift: press.modifiers.contains(.shift),
-            option: press.modifiers.contains(.option), in: track.positions))
+            key, from: track.position(value), shift: press.modifiers.contains(.shift),
+            option: press.modifiers.contains(.option), on: track))
         if ends.stepped() { onEnd() }
         return .handled
     }
@@ -420,10 +421,12 @@ private struct ScrubAccessibility: ViewModifier {
         }
     }
 
-    /// VoiceOver's increment and decrement: one step along the track.
+    /// VoiceOver's increment and decrement, on the field and on the Slider
+    /// representation: one step along the track, the track's own when it
+    /// has one (ScrubTrack.stepped), as an arrow key steps.
     private func step(_ direction: AccessibilityAdjustmentDirection) {
         guard direction == .increment || direction == .decrement else { return }
         let key: ScrubKey = direction == .increment ? .increment : .decrement
-        adjust(ScrubValue.pressed(key, from: position, step: track.step, in: track.positions))
+        adjust(ScrubValue.pressed(key, from: position, on: track))
     }
 }
