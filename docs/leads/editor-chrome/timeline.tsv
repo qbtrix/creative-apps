@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-18T16:20:27Z	fix round 1	PRs open	#2853 #2854 #2855	palette focus (EC-d), tabs keys + segment ids (EC-b), switch labels (EC-b); gate PASS
 2026-10-18T18:39:28Z	EC-c	slice done	#1344	Belt-Slice-Done posted (issuecomment-6253616651)
 2026-10-18T18:39:28Z	fix round 1	merged	#2841 #2853 #2854 #2855 #2856	scoped suiteui 39153976103 (c91b1468) running
+2026-10-18T18:56:46Z	fix round 1	snapshots	39153976103	Model and snapshot tests green; journeys running

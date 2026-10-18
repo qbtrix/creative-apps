@@ -4,7 +4,7 @@ Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: 4 review (fix round 1 merged)
 Base: 2e27b8db (origin/dev)
-Next: all slices done (EC-c Belt-Slice-Done posted); scoped suiteui run 39153976103 at c91b1468 carries fix round 1 (#2841 #2853-#2856): read its journeys for #2844-#2846 and the CI findings, then Belt-Contact-Sheet on #1344, or round 2
+Next: 39153976103 passed Model and snapshot tests (aTabChangeRecordsAFadePair fixed by #2841) and wrote chrome actuals; journeys still running: read them for #2844-#2846 and the CI findings, commit the chrome baselines, then Belt-Contact-Sheet on #1344, or round 2
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
