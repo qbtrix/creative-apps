@@ -1,0 +1,52 @@
+utc	stage	event	ref	note
+2026-10-16T21:27Z	2	stage-start		plan written from packet and origin/dev
+2026-10-16T21:27Z	2	stage-end		waiting on Swift toolchain for scripts/ci
+2026-10-16T21:53Z	2	heartbeat		resumed from Belt nudge; no swift toolchain yet, wave 1 blocked
+2026-10-16T22:56Z	2	heartbeat		still no swift toolchain; wave 1 blocked; awaiting supervisor
+2026-10-16T23:26Z	2	heartbeat		no swift toolchain yet; wave 1 blocked; awaiting supervisor
+2026-10-16T23:57Z	2	heartbeat		no swift toolchain yet; wave 1 blocked; awaiting supervisor
+2026-10-18T02:45Z	2	stage-end		plan written for run act-1a14cdfa655-jrmy; base dev 498c5b3c
+2026-10-18T02:45Z	3	stage-start		wave 1 launched
+2026-10-18T04:18Z	3	heartbeat	-	wave 1 workflow done; recording PRs, finishing LV-1 and LV-5
+2026-10-18T04:19Z	3	pr-merged	#2536	TH-1
+2026-10-18T04:19Z	3	stage-start	wave 2	base 21066130
+2026-10-18T04:21:20Z	heartbeat	wave 2 building; LV-1/LV-5 gates running
+2026-10-18T04:42:36Z	pr-opened	TH-2 #2575
+2026-10-18T04:42:36Z	pr-opened	TH-3 #2573
+2026-10-18T04:42:36Z	pr-opened	TH-5 #2574
+2026-10-18T04:42:36Z	heartbeat	wave 2: TH-2/3/5 PRs open, others building; LV-1 #2571, LV-5 #2570 in lane
+2026-10-18T04:57:12Z	pr-opened	TH-6 #2601
+2026-10-18T04:57:12Z	blocked	TH-4 model over budget; fix after TH-2 merges
+2026-10-18T04:57:12Z	stage-end	wave 2
+2026-10-18T05:04:52Z	blocked	TH-3 #2573 needs-rebase (LibraryServicesTests.swift); fixer started
+2026-10-18T05:04:52Z	heartbeat	TH-2 #2575, TH-5 #2574, TH-6 #2601 waiting on lane builds; TH-4 fix waits on TH-2
+2026-10-18T05:09:42Z	unblocked	TH-3 #2573 dev merged, conflict resolved, gate pass, head cf2617fb
+2026-10-18T05:27:43Z	merged	TH-5 #2574, TH-2 #2575 (05:12Z), TH-6 #2601 (05:25Z)
+2026-10-18T05:27:43Z	task-start	TH-4 fix (id-to-index), TH-7 J2
+2026-10-18T05:27:43Z	heartbeat	TH-3 #2573 on lane macOS build
+2026-10-18T05:38:45Z	pr	TH-7 #2637 opened; held off lane (step 2 needs cellSizeChanged wired)
+2026-10-18T05:38:45Z	task-start	TH-6f grid reports cell size and scale
+2026-10-18T05:44:39Z	pr	TH-4 #2643 opened (budgets pass, fast-lane)
+2026-10-18T05:45:50Z	pr	TH-6f #2644 opened (fast-lane)
+2026-10-18T05:49:06Z	merged	TH-3 #2573 (05:48Z)
+2026-10-18T05:49:06Z	heartbeat	TH-4 #2643, TH-6f #2644 on lane; #2637 held
+2026-10-18T06:11:47Z	heartbeat	TH-4 #2643, TH-6f #2644 on lane macOS build; #2637 held
+2026-10-18T06:33Z	heartbeat	heartbeat: TH-4 #2643, TH-6f #2644 on lane (plan add/add expected on the second; fixer then); TH-7 #2637 fast-lane removed again until #2644 merges
+2026-10-18T07:00Z	decision	fast-lane kept reappearing on TH-7 #2637; merged TH-6f #2644 into its branch instead (clean, gate PASS, head 6ba86061) so it can merge alone; body and Head updated
+2026-10-18T07:27:22Z	heartbeat	no merges since 07:00; waiting on lane macOS builds (#2625, #2637, #2643, #2644)
+2026-10-18T07:58:24Z	heartbeat	no merges; LV-6f #2698 fixes a 1 ms loupe budget test that could redden any full Linux run (watch #2637/#2643/#2644 Linux checks)
+2026-10-18T08:21:53Z	heartbeat	#2643 batch probe failed only on LV-6's focusChangeWithinBudget (not ours); waits for #2698. #2637 and #2644 macOS builds green, waiting on lane.
+2026-10-18T09:15:41Z	merge	#2698 LV-6f merged 08:48 (dev-red #2667 fix); #2637 TH-7 merged 08:55 carrying TH-6f; #2644 closed superseded; #2643 conflict fixed at 3f2c27ff; TH-8 #2708 opened with feature-done
+2026-10-18T10:21:35Z	merge	#2643 TH-4 merged 10:00; #2708 TH-8 macOS build green, clean, waiting on lane
+2026-10-18T10:43:21Z	merge	#2708 TH-8 merged 10:31 (feature-done); full dev CI 39120347568 on 5e1844e6 pending
+2026-10-18T11:08:10Z	heartbeat	dev CI 39120347568 cancelled; next full run 39121139544 on a8ba1d69 pending
+2026-10-18T11:30:21Z	heartbeat	full dev CI 39122776184 pending on e3a4582c (contains #2708, #2720); runs 39120347568, 39121139544 cancelled
+2026-10-18T11:51:53Z	heartbeat	full dev CI 39122776184 still queued on e3a4582c (contains #2708, #2720)
+2026-10-18T12:15:05Z	heartbeat	feature-done merged; full dev CI 39122776184 macOS scripts/ci step red, triaging culprit before contact sheet
+2026-10-18T12:40:34Z	heartbeat	scoped library run 39126826000 (b0c59a4f, has #2729) macOS red: RenderBudgetLibraryTests.bodies scroll 13>0 from thumbnail passes mutating the window's @State catalog (thumbnails, #2709, taken by this lead: builder making a thumbnail store the window body doesn't read); ui-test SuiteUI linker failure is not Library's. Contact sheets wait for a green full run.
+2026-10-18T13:00:19Z	stage	opened #2790 (fast-lane, closes #2709): thumbnails in an @Observable store the window body doesn't read; lane builds it on macOS
+2026-10-18T13:03:07Z	heartbeat	#2790 (thumbnail store, fixes bodies 13>0, Closes #2709) and #2783 (loupe blueprint row) open, clean, waiting on lane. Scoped library 39128250329 (618256bc, pre-#2790): macOS red on bodies, as expected. Full CI 39129009677 pending; contact sheets wait for a green macOS job.
+2026-10-18T13:24:45Z	heartbeat	#2783 (loupe blueprint row) merged 13:04. #2790 (thumbnail store, Closes #2709): lane macOS build 39129784715 green, waiting for the lane to merge it. Full CI runs 39129009677 and 39129812289 were cancelled by newer runs; 39131391914 (ab22e2e2) is pending. Contact sheets wait for a green macOS job.
+2026-10-18T13:49:04Z	heartbeat	#2790 merged 13:24. Scoped library 39131870562 (4bf67be8): build+tests green, bundle-apps fails linking FlareCore in SuiteUI (filed #2801), so no journeys. Full CI 39132122171 macOS scripts/ci red, still running. Contact sheet waits on a green full macOS job.
+2026-10-18T14:12:03Z	heartbeat	Full CI 39132122171 (4bf67be8) macOS red: gate fails only SuiteUI SidebarNestingTests + SegmentedTabsTests (filed #2805), bundle-apps link (#2801, in progress). Not Library. Perf report-only: RenderBudgetLibrary timing p95 14.3/10 and 120.9/120 under load (all apps over). Contact sheet waits.
+2026-10-18T14:40:50Z	heartbeat	#2801 fixed by #2806 (merged 14:34). Full CI 39135047742 (d506e4aa) macOS red on the same SuiteUI tests only (#2805, open, unclaimed); no Library failure. Next full run after #2806 should bundle; contact sheet still needs #2805 fixed.
