@@ -11,7 +11,7 @@ private func texts(zoom: Double, size: PlaneExtent = hd, trailing: [StatusPill] 
     SuiteStatusPills().pills(zoom: zoom, documentSize: size, trailing: trailing).map(\.text)
 }
 
-@Test func zoomReadsAsAWholePercent() {
+@Test func statusZoomReadsAsAWholePercent() {
     #expect(texts(zoom: 2).first == "200%")
     #expect(texts(zoom: 2).first == ViewerZoom.percentText(2))
     #expect(texts(zoom: 0.505).first == "51%")
