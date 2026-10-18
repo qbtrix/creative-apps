@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-18T18:39:28Z	goldens	waiting	39153976103	scoped suiteui at c91b1468 carries #2841
 2026-10-18T18:56:46Z	goldens	actuals	39153976103	canvas golden-new PNGs downloaded; 3 baseline branches gating
 2026-10-18T18:56:46Z	goldens	checks	suiteui/cm-goldens-marks	assertGolden for handles, point mark, grid (no checks existed)
+2026-10-18T19:03:56Z	goldens	PRs	#2911 #2912 #2913 #2916	baselines CM-14/15/16a and golden checks for handles, point mark, grid; fast-lane
