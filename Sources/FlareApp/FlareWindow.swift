@@ -12,7 +12,10 @@
 // (FlareTimeline, FlareRecording and the four modifiers) are filled by later
 // tasks without touching their call sites here. The
 // window owns presentation state only: zoom, rulers, guides, the inspector
-// tab and what is presented (FlarePresentation, in FlareNewSheet.swift).
+// tab and what is presented (FlarePresentation, in FlareNewSheet.swift),
+// plus the export task and the file it last wrote (FlareWindow+Export.swift);
+// the export sheet is FlareExportSheetAdapter's, shown while the Model's run
+// isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
 // `help` for every section 3.4 item, the Undo and Redo step names, the recent
 // files, Loop and the selection's Edit reasons.
@@ -29,6 +32,10 @@ struct FlareWindow: View {
     @State var inspectorTab: FlareInspectorTab = .properties
     /// The new sheet, alerts and the recovery offer.
     @State var presented: FlarePresentation? = nil
+    /// The export under way, so Cancel can stop it.
+    @State var exportTask: Task<Void, Never>? = nil
+    /// The first file the last export wrote, for Reveal in Finder.
+    @State var exportedFile: URL? = nil
     let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
@@ -76,6 +83,7 @@ struct FlareWindow: View {
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
+        .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
         .modifier(FlareRecovery(model: model, restore: { model.restoreRecovery($0) }))
         .focusedSceneValue(
