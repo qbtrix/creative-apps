@@ -276,7 +276,8 @@ private struct GalleryTimelinePage: View {
 
 /// A value a journey reads, as the label of a hidden element: 1 x 1 pt, no
 /// hits, drawing nothing, so the app audit finds no control or text in it.
-private struct GalleryTimelineReadout: View {
+/// The `editor` page (GalleryChrome) shows its timecode's tooltip in one.
+struct GalleryTimelineReadout: View {
     /// Its side: not a design size, since it draws nothing.
     private static let side: CGFloat = 1
     let identifier: String
