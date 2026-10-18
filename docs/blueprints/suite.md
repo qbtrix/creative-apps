@@ -238,9 +238,24 @@ creative-core (FlareCore, CoreRaster, CoreColor) ◀── the Models, linked on
 | `SuiteModelTests` | planned | Model tests, contract conformance suites against fakes and live stores, model budgets, registry-vs-plist checks | `Tests/SuiteModelTests/` | `line:suite` |
 | AfterGlow journeys | planned | XCUITest bundle `AfterGlowJourneyTests` that drives the launcher and, through it, the apps | `UITests/AfterGlowJourneyTests*.swift` | `line:suite` |
 | `SuiteUI` | existing | Design system; gains the home and settings parts listed in section 6.3 through `needs-ui` issues | `Sources/SuiteUI/` | `line:suiteui` |
+| `SuiteKernel` | existing (editor-kernel, #1933) | The kernel tier: one Linux-safe library with one module per editor concept the apps used to build on their own: `History`; `Selection`, `Nudge`, `Marquee`; `LayerTree`, `LayerFollow`; `KeyRules`, `EasePreset`, `EaseCurve`; `BoxMath`, `HandleHit`; `Snapping` (its `SnapLines` and `SnapGaps` engines are stubs until the snapping feature fills them); `ExportRun`; `DocumentSession`, `VersionedJSON`; `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy`. Foundation and FlareCore only; no app Model, SuiteModel or SuiteUI | `Sources/SuiteKernel/` | `line:suiteui` |
+| `SuiteKernelTests` | existing (editor-kernel) | One suite per module plus the Linux walk that runs every module together on `KernelFixtures` (`KernelWalkTests`) | `Tests/SuiteKernelTests/` | `line:suiteui` |
 | `<X>App`, `<X>Model` (×5) | existing | The apps. Each adopts the suite with small tasks on its own line (section 8.4): one modifier in `<X>App.swift`, its document kinds and pasteboard representations in `<X>Model` | `Sources/<X>App/`, `Sources/<X>Model/` | `line:<x>` |
 | `AfterGlowCLI` (+ `AfterGlowCLICore`) | planned | The `afterglow` command line tool and MCP server: every app's command catalog run headless on files, JSON scripts and the real-jobs suites, `afterglow mcp` (section 1.5). Foundation, SuiteKernel and the five Models only; Linux and macOS | `Sources/AfterGlowCLI/`, `Sources/AfterGlowCLICore/` | `line:suite` |
 | creative-core engines | existing (external) | FlareCore, CoreRaster, CoreColor; the suite asset model tasks (creative-core #148–#154, p3 today) | qbtrix/creative-core | `needs-core` |
+
+**No app copies a kernel concept.** Every `<X>Model` and SuiteUI link
+`SuiteKernel` (Package.swift). A Model that needs undo, selection, a layer
+tree, keys and easing, box math, snapping, an export run, a document session
+or a stroke uses the kernel's module and converts its own types in an
+adapter, `<X>+Kernel.swift` (or `<X>Adapter.swift`); it never keeps its own
+copy, and `scripts/check-dup-logic` in `scripts/ci` refuses a new one
+(docs/factory/lead.md rule 20). The `adopt-kernel-*` features (wave XK2:
+undo, selection, layers, easing, transform, export, session, brush) move the
+apps' remaining copies onto the kernel and delete them. SuiteUI draws the
+kernel's values: `LayerTreeList`, `SelectionHandles`, `SnapGuideMarks`,
+`SuiteExportSheet`, `SuiteStrokePacer`, `SuitePointerPressure`,
+`BrushCursorMark` and `ToolKeys` (suiteui.md 2.2).
 
 Each `<X>Model` gains one dependency, `SuiteModel` (Foundation only, so the
 Linux build stays as fast as today). `SuiteModel` never imports an app
@@ -318,6 +333,9 @@ values, so a shared store never needs to load five engines.
 | every process | suite store | JSON files under `~/Library/Application Support/AfterGlow/` |
 | every process | each other | hand-off files opened with the target app; distributed notifications for store changes; the system pasteboard |
 | `<X>Model` | creative-core | unchanged, but linked through one shared engine framework (2.5) |
+| each `<X>Model` | SuiteKernel | adapts onto its modules in `<X>+Kernel.swift` files; keeps no copy of a kernel concept |
+| SuiteUI | SuiteKernel | draws the kernel's values: the layers panel, handles, snap guides, export sheet, stroke pacer, pressure, brush cursor and tool keys |
+| SuiteKernel | creative-core | FlareCore's `Point`, `Rect`, `Matrix`, `Easing` and `Keyframe`, as they are |
 | each `<X>Model` | SuiteKernel commands | registers its actions in the command catalog; its `<X>Headless` document opens, saves and exports with no window (1.5) |
 | AfterGlowCLI | SuiteKernel, each `<X>Model` | runs every catalog on files; the MCP server publishes the catalogs as tools |
 | an MCP client | AfterGlowCLI | tools over stdio (`afterglow mcp`), launched by the person's client |
