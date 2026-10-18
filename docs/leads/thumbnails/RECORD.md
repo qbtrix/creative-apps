@@ -4,7 +4,7 @@ Issue: #1506 · Packet: docs/blueprints/library/features/thumbnails.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: full dev CI 39160459432 (f7e0350, has #2878) is running: Linux green, macOS job started 21:07Z (scripts/ci step). Its library journeys are the first valid check of round 1 (scoped library 39157077321 was void: journeys xcodebuild SIGKILLed at launch). Green: contact sheet. Red: round 2 (the last), then gaps
+Next: full dev CI 39160459432 (f7e0350, has #2878) still running at 2026-10-18T21:41Z: Linux green, macOS job on scripts/ci since 21:07Z, journeys (ui-test) still pending. Newer full CI 39167964719 (b40c77f) pending. No valid library journey run since #2878 (scoped library 39157077321 void: SIGKILL at launch); supervisor: a scoped library re-run on dev would help (I can't dispatch). Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
