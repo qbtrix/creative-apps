@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-18T19:43Z	round1	waiting on scoped library 39157077321 and full CI 39159685451 (queued)
 2026-10-18T20:06Z	round1	scoped library 39157077321 running journeys; full CI 39161458093 pending
 2026-10-18T20:24Z	round1	scoped library 39157077321 void (journeys xcodebuild SIGKILLed at launch, 0 tests); asked supervisor to re-dispatch; full CI 39162498756 pending
+2026-10-18T20:46Z	round1	still no valid library journey run; asked supervisor for scoped library re-run; full CI runs cancelled while pending
