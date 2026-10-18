@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 16:32Z	AE-halo	merged	#2842	ae72cc6c
 16:32Z	AE-halo	closed	#2828	superseded by #2841
 16:32Z	check	waiting	39145334588	full CI on ae72cc6c
+16:53Z	check	heartbeat	-	flare run 39142436739: tests green, journeys running; full CI 39145334588 pending
