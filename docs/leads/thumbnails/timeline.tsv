@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-18T18:54:28Z	round1	check-in: #2878 merged 18:32Z; all round-1 fixes on dev; waiting for a library run with them
 2026-10-18T19:16:36Z	round1	check-in: run 39153204776 J8 green (#2881 closed); 3 red wait on #2878 run 39157077321
 2026-10-18T19:43Z	round1	waiting on scoped library 39157077321 and full CI 39159685451 (queued)
+2026-10-18T20:06Z	round1	scoped library 39157077321 running journeys; full CI 39161458093 pending
