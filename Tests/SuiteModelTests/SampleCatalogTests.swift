@@ -8,11 +8,14 @@ import Testing
     let folder = "/R/Samples"
 
     @Test func fiveSamplesOnePerAppWithTheirTypes() {
+        #expect(SampleCatalog.samples.count == 5)
         #expect(SampleCatalog.samples.map(\.app) == SuiteApp.apps)
         #expect(SampleCatalog.samples.map(\.type) == [.flareAnimation, .designDocument, .photoOpenRaster, .png, .haloProject])
         for app in SuiteApp.apps { #expect(SampleCatalog.sample(for: app)?.app == app) }
         #expect(SampleCatalog.sample(for: .launcher) == nil)
         #expect(SampleCatalog.folder(resources: "/R") == folder)
+        #expect(SampleCatalog.folder(resources: "/Applications/AfterGlow.app/Contents/Resources")
+            == "/Applications/AfterGlow.app/Contents/Resources/Samples")
     }
 
     @Test func reasonOnlyWhenTheFileIsMissing() throws {
@@ -41,6 +44,16 @@ import Testing
         #expect(ref.path == path && ref.app == .flare && ref.type == .flareAnimation)
         #expect(ref.displayName == "Bounce 2.flare")
         #expect(ref.fileID == SuiteDocumentRef.fileID(forPath: path))
+    }
+
+    @Test func eachSamplesRefDiffers() {
+        let refs = SampleCatalog.samples.map { s in
+            SampleCatalog.ref(for: s, path: SampleCatalog.destination(for: s, documents: "/D", exists: { _ in false }))
+        }
+        #expect(Set(refs.map(\.path)).count == SampleCatalog.samples.count)
+        #expect(Set(refs.map(\.fileID)).count == SampleCatalog.samples.count)
+        #expect(Set(refs.map(\.displayName)) == Set(SampleCatalog.samples.map(\.fileName)))
+        #expect(refs.map(\.app) == SuiteApp.apps)
     }
 
     @Test func destinationIsTheFirstFreeNameAndKeepsADotlessName() throws {
