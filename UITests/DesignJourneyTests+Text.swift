@@ -53,7 +53,7 @@ final class DesignTextJourneyTests: XCTestCase {
 
         // 1. Title's row in Layers, inside Desktop's, then Size 32 typed with Return: one step, and the field reads 32.
         design.expandDesignLayer(Self.desktopRow)
-        clickRow(design, Self.titleRow, "Title")
+        design.clickDesignLayer(Self.titleRow)
         let size = row(design, Self.sizeRow)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector (\(Self.sizeRow.id))")
         size.click()
@@ -92,8 +92,8 @@ final class DesignTextJourneyTests: XCTestCase {
         design.shot("text-style-family")
 
         // 4. Select A, then Title again: every row reads back what was set.
-        clickRow(design, Self.rowA, "A")
-        clickRow(design, Self.titleRow, "Title")
+        design.clickDesignLayer(Self.rowA)
+        design.clickDesignLayer(Self.titleRow)
         XCTAssert(Self.waitUntil { Self.number(size) == 32 }, "Size reads \(Self.text(size)) after reselecting Title, not 32")
         XCTAssert(chip(design, Self.weightRow, "Bold").isSelected, "Bold isn't picked after reselecting Title")
         XCTAssert(chip(design, Self.alignmentRow, "Center").isSelected, "Center isn't picked after reselecting Title")
@@ -101,7 +101,7 @@ final class DesignTextJourneyTests: XCTestCase {
         design.shot("text-style-read-back")
 
         // 5. A's row: the Text rows are disabled, saying why.
-        clickRow(design, Self.rowA, "A")
+        design.clickDesignLayer(Self.rowA)
         let rows = [row(design, Self.familyRow), row(design, Self.sizeRow),
                     chip(design, Self.weightRow, "Bold"), chip(design, Self.alignmentRow, "Center")]
         XCTAssert(Self.waitUntil { rows.allSatisfy { $0.exists && !$0.isEnabled } }, "a Text row is enabled on A, a rectangle")
@@ -118,7 +118,7 @@ final class DesignTextJourneyTests: XCTestCase {
         XCTAssert(Self.waitUntil { self.statusReads50(design) }, "the status line never read 50% zooming out")
 
         // 7. Double-click Title, type, Return: the committed box sits where the editor was, one Edit Text step.
-        clickRow(design, Self.titleRow, "Title")
+        design.clickDesignLayer(Self.titleRow)
         canvas.coordinate(withNormalizedOffset: Self.insideTitle).doubleClick()
         let editor = design.element("design.text")
         XCTAssert(editor.waitForExistence(timeout: 5), "double-clicking Title opened no text editor (design.text)")
@@ -140,19 +140,6 @@ final class DesignTextJourneyTests: XCTestCase {
                            "the committed text's \(name) jumped from the editor's at 50% (\(committed) vs \(editing))")
         }
         design.shot("text-style-committed-50")
-    }
-
-    /// Clicks the Layers row `identifier` (the layer called `name`) in its blank space, between the
-    /// name and the Hide toggle: a click on the name itself doesn't select the row (#2496).
-    @MainActor private func clickRow(_ design: Journey, _ identifier: String, _ name: String) {
-        let layer = design.element("suite.sidebar").descendants(matching: .any)[identifier].firstMatch
-        XCTAssert(layer.waitForExistence(timeout: 5), "no \(name) row in Layers (\(identifier))")
-        let row = layer.frame, title = layer.staticTexts.firstMatch, toggle = layer.checkBoxes.firstMatch
-        var dx = 0.6
-        if row.width > 0, title.exists, toggle.exists, title.frame.maxX < toggle.frame.minX {
-            dx = Double((title.frame.maxX + toggle.frame.minX) / 2 - row.minX) / Double(row.width)
-        }
-        layer.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: 0.5)).click()
     }
 
     /// A Text row: its id once ST-4b gives it one, else the inspector's control labelled `label`.

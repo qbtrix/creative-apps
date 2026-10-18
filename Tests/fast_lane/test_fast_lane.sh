@@ -532,6 +532,14 @@ dup_decide "canonical: SuiteModel is the home, so it is eligible" "eligible|150|
 dup_decide "canonical: Snapshot is not Snap" "eligible|150|2|4 checks green" "Closes #1" 'Sources/PhotoApp/PhotoSnapshotGrid.swift'
 HERE="$tmp/no-scripts" dup_decide "canonical: a lane that can't run the check waits" \
   "pending|scripts/check-dup-logic could not run" "Closes #1" 'Sources/PhotoModel/PhotoDocument.swift'
+# SuiteUI first (lead.md rules 16 and 20): an added app file named for a UI
+# concept needs an Allow-Dup-View line for it.
+dup_decide "suiteui: a new app sheet is not eligible" \
+  "not-eligible|$DUP_VIEW_REASON: Sources/HaloApp/HaloRenderSheet.swift (Sheet)" "Closes #1" 'Sources/HaloApp/HaloRenderSheet.swift'
+dup_decide "suiteui: Allow-Dup-View with a reason lets it through" "eligible|150|2|4 checks green" \
+  $'Closes #1\nAllow-Dup-View: Sheet SuiteSheet lands in #2001' 'Sources/HaloApp/HaloRenderSheet.swift'
+dup_decide "suiteui: SuiteUI is the home, and +Suite adapters pass" "eligible|150|2|4 checks green" "Closes #1" \
+  "$(printf '%s\n' Sources/SuiteUI/SuiteSheet.swift Sources/HaloApp/HaloRender+Suite.swift)"
 
 # A whole sweep against a stub `gh` that answers from per-PR fixtures and logs
 # every write: #4 and #7 are eligible, #5 is based on main, #6 conflicts.

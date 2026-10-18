@@ -1,0 +1,10 @@
+{
+  "id": "kernel-stroke",
+  "name": "Stroke",
+  "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Stroke/"
+  ],
+  "order": 90
+}

@@ -1,0 +1,4 @@
+[
+{"label":"a draw keeps its start's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"let start = gesture.start.wholePoints","replace":"let start = gesture.start","tests":"DesignWholePointsTests"},
+{"label":"a draw keeps the pointer's fraction","file":"Sources/DesignModel/DesignDrawing.swift","find":"to: end.wholePoints, square: square","replace":"to: end, square: square","tests":"DesignWholePointsTests"}
+]

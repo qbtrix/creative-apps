@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+# scripts/check-dup-views: the SuiteUI-first ratchet for views (docs/factory/lead.md
+# rules 16 and 20, docs/engineering/swiftui-rules.md). A sheet, notice, busy note,
+# probe, menu item, transport or any other UI piece is built once in Sources/SuiteUI
+# and composed by the apps, never copied into one more app. check-dup-logic is the
+# same rule for Model logic.
+#
+# Scope: every `struct Name(<generics>)?: ... View ...` in Sources/*App/**/*.swift.
+# Its body is the brace-matched block after the declaration, comments removed.
+# A view's key is `path::Name`. Three rules:
+#   A  name stem: the struct name holds a stem from Tests/canonical-ui-concepts.txt
+#      at a CamelCase boundary (first concept in table order wins). A struct named
+#      *Adapter, or in a file named *+Suite.swift / *Adapter.swift, never counts.
+#   B  signature: the body (string literals kept) matches every regex of a line in
+#      Tests/canonical-ui-signatures.txt. A `file:` signature matches a whole file.
+#   C  shape twin: 3-token shingles of the body's shape (.modifier( calls, Capitalised
+#      identifiers before ( { or ., braces; strings and lower-case names dropped).
+#      Two views in different files, both bodies >= 10 lines, hit when Jaccard >= 0.5,
+#      or containment >= 0.8 with >= 15 shingles on the smaller. The far side may be
+#      a SuiteUI view (Gallery pages aside): an app copy of a SuiteUI component.
+#
+# Tests/canonical-ui-baseline.txt lists today's hits (grandfathered):
+#   scripts/check-dup-views                    fail on a hit the baseline doesn't list,
+#                                              and on a listed one that is gone (prune it)
+#   scripts/check-dup-views --update-baseline  rewrite it; refuses to add a line unless
+#                                              --allow-increase (it only shrinks)
+#   scripts/check-dup-views --paths FILE [--body FILE]
+#                                              the fast lane's check: rule A on the file
+#                                              NAMES in FILE (the PR's added files) whose
+#                                              concept has no `Allow-Dup-View: <concept>
+#                                              <reason>` line in the body
+#   scripts/check-dup-views --report           also list bag-of-tokens near-twins (cosine
+#                                              >= 0.8); a listing, never a gate
+# --root DIR runs against another tree (the tests). Exit 0 clean, 1 on a hit,
+# 2 on bad input. Python 3 stdlib only (cloud leads cannot compile Swift).
+import argparse
+import collections
+import math
+import pathlib
+import re
+import sys
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
+APP = re.compile(r"^Sources/[A-Za-z0-9_]+App/.+\.swift$")
+SUITE = re.compile(r"^Sources/SuiteUI/(?!Gallery/).+\.swift$")
+LEX = re.compile(r'"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|//[^\n]*|/\*[\s\S]*?\*/')
+STRUCT = re.compile(r"\bstruct\s+([A-Za-z_]\w*)\s*(?:<[^>{]*>)?\s*:([^{]*)\{")
+SHAPE = re.compile(r"\.([A-Za-z_]\w*)\s*\(|\b([A-Z]\w*)\s*(?=[({.])|([{}])")
+ALLOW = re.compile(r"^[ \t]*Allow-Dup-View:[ \t]*(\S+)[ \t]+\S", re.I | re.M)
+BASELINE = "Tests/canonical-ui-baseline.txt"
+MIN_LINES, JACCARD, CONTAIN, CONTAIN_FLOOR, COSINE = 10, 0.5, 0.8, 15, 0.8
+
+
+def concepts(root):
+    """Tests/canonical-ui-concepts.txt -> [(concept, stem regex)]. Line: `Concept: Stem Stem ...`."""
+    out = []
+    for line in (root / "Tests/canonical-ui-concepts.txt").read_text().splitlines():
+        line = line.split("#", 1)[0].strip()
+        if line:
+            name, _, stems = line.partition(":")
+            stems = stems.split() or [name.strip()]
+            out.append((name.strip(), re.compile("(?:%s)s?(?![a-z])" % "|".join(map(re.escape, stems)))))
+    return out
+
+
+def signatures(root):
+    """Tests/canonical-ui-signatures.txt -> [(id, [regex], use, file_level)].
+    Line: `id | regex ; regex | use <Component>`; an id starting `file:` matches a whole file."""
+    out = []
+    for n, line in enumerate((root / "Tests/canonical-ui-signatures.txt").read_text().splitlines(), 1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        parts = line.split(" | ")
+        if len(parts) < 3:
+            raise ValueError(f"canonical-ui-signatures.txt:{n}: want `id | regex ; regex | use X`")
+        sid, use = parts[0].strip(), parts[-1].strip()
+        rxs = [re.compile(r.strip()) for r in " | ".join(parts[1:-1]).split(" ; ") if r.strip()]
+        file_level = sid.startswith("file:")
+        out.append((sid[5:] if file_level else sid, rxs, use, file_level))
+    return out
+
+
+def lex(text):
+    """(code, blank): comments become spaces; in `blank` string contents do too. Offsets match the input."""
+    code, blank, i = [], [], 0
+    keep = lambda s: re.sub(r"[^\n]", " ", s)
+    for m in LEX.finditer(text):
+        code.append(text[i:m.start()]); blank.append(text[i:m.start()])
+        tok = m.group()
+        if tok.startswith("/"):
+            code.append(keep(tok)); blank.append(keep(tok))
+        else:
+            q = 3 if tok.startswith('"""') else 1
+            code.append(tok); blank.append(tok[:q] + keep(tok[q:-q]) + tok[-q:])
+        i = m.end()
+    code.append(text[i:]); blank.append(text[i:])
+    return "".join(code), "".join(blank)
+
+
+def views(rel, text):
+    """[(name, body with strings, shape body, line count)] for each View struct in a file."""
+    code, blank = lex(text)
+    out = []
+    for m in STRUCT.finditer(blank):
+        if not re.search(r"\bView\b", m.group(2)):
+            continue
+        start, depth = m.end() - 1, 0
+        for j in range(start, len(blank)):
+            depth += {"{": 1, "}": -1}.get(blank[j], 0)
+            if depth == 0:
+                break
+        body = code[start:j + 1]
+        out.append((m.group(1), body, blank[start:j + 1], body.count("\n") + 1))
+    return out
+
+
+def shingles(shape):
+    toks = []
+    for m in SHAPE.finditer(shape):
+        if m.group(1):
+            toks.append("." + m.group(1))
+        elif m.group(2):
+            if m.group(2) != "Self":
+                toks.append(m.group(2))
+        else:
+            toks.append(m.group(3))
+    return {tuple(toks[i:i + 3]) for i in range(len(toks) - 2)}, collections.Counter(toks)
+
+
+def is_adapter(rel, name=""):
+    stem = rel.rsplit("/", 1)[-1][: -len(".swift")]
+    return stem.endswith("+Suite") or stem.endswith("Adapter") or name.endswith("Adapter")
+
+
+def concept_of(name, table):
+    for concept, rx in table:
+        if rx.search(name):
+            return concept
+    return None
+
+
+def scan(root, table, sigs, report=False):
+    """{baseline line: message} for every hit in the tree, plus report lines when asked."""
+    hits, app, suite = {}, [], []
+    for f in sorted((root / "Sources").rglob("*.swift")):
+        rel = f.relative_to(root).as_posix()
+        if not (APP.match(rel) or SUITE.match(rel)):
+            continue
+        text = f.read_text(errors="replace")
+        found = views(rel, text)
+        if SUITE.match(rel):
+            suite += [(rel, n, shape, lines) for n, _, shape, lines in found]
+            continue
+        app += [(rel, n, shape, lines) for n, _, shape, lines in found]
+        code = lex(text)[0]
+        for sid, rxs, use, file_level in sigs:
+            if file_level and all(r.search(code) for r in rxs):
+                hits[f"B {rel}::* {sid}"] = f"{rel}: {sid}, use {use}"
+        for name, body, _, _ in found:
+            c = None if is_adapter(rel, name) else concept_of(name, table)
+            if c:
+                hits[f"A {rel}::{name} {c}"] = f"{rel}::{name}: app-local {c} view"
+            for sid, rxs, use, file_level in sigs:
+                if not file_level and all(r.search(body) for r in rxs):
+                    hits[f"B {rel}::{name} {sid}"] = f"{rel}::{name}: {sid}, use {use}"
+    prints = {(r, n): shingles(s) for r, n, s, l in app + suite if l >= MIN_LINES}
+    report_lines = []
+    for i, a in enumerate(app):
+        for b in app[i + 1:] + suite:
+            if a[0] == b[0] or (a[0], a[1]) not in prints or (b[0], b[1]) not in prints:
+                continue
+            (sa, ca), (sb, cb) = prints[(a[0], a[1])], prints[(b[0], b[1])]
+            if not sa or not sb:
+                continue
+            inter, small = len(sa & sb), min(len(sa), len(sb))
+            j, c = inter / len(sa | sb), inter / small
+            x, y = sorted([f"{a[0]}::{a[1]}", f"{b[0]}::{b[1]}"])
+            if j >= JACCARD or (c >= CONTAIN and small >= CONTAIN_FLOOR):
+                hits[f"C {x} ~ {y}"] = f"{x} ~ {y}: shape twin (J {j:.2f}, C {c:.2f}), use one SuiteUI view"
+            elif report:
+                dot = sum(ca[t] * cb[t] for t in ca)
+                cos = dot / (math.sqrt(sum(v * v for v in ca.values())) * math.sqrt(sum(v * v for v in cb.values())))
+                if cos >= COSINE:
+                    report_lines.append(f"report: {x} ~ {y} (cosine {cos:.2f})")
+    return hits, report_lines
+
+
+def read_baseline(path):
+    if not path.exists():
+        return None
+    return {l.strip() for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")}
+
+
+HEADER = """# Tests/canonical-ui-baseline.txt: app views that copy a SuiteUI component or another
+# app's view, grandfathered (docs/factory/lead.md rules 16 and 20). Written by
+# scripts/check-dup-views --update-baseline, never by hand. It only shrinks: move the
+# cluster into SuiteUI, delete the app copies, and drop their lines in the same PR.
+# `A path::Name Concept`, `B path::Name signature`, `C path::Name ~ path::Name`.
+"""
+
+
+def main():
+    ap = argparse.ArgumentParser(description="SuiteUI-first ratchet for views (lead.md rules 16 and 20)")
+    ap.add_argument("--root", type=pathlib.Path, default=HERE)
+    ap.add_argument("--update-baseline", action="store_true")
+    ap.add_argument("--allow-increase", action="store_true")
+    ap.add_argument("--paths", type=pathlib.Path)
+    ap.add_argument("--body", type=pathlib.Path)
+    ap.add_argument("--report", action="store_true")
+    a = ap.parse_args()
+    try:
+        table = concepts(a.root)
+        sigs = [] if a.paths else signatures(a.root)
+    except (OSError, ValueError, re.error) as e:
+        print(f"check-dup-views: {e}", file=sys.stderr)
+        return 2
+
+    if a.paths:
+        body = a.body.read_text() if a.body else ""
+        allowed = {m.group(1).lower() for m in ALLOW.finditer(body)}
+        hits = 0
+        for p in a.paths.read_text().splitlines():
+            p = p.strip()
+            if not APP.match(p) or is_adapter(p):
+                continue
+            c = concept_of(p.rsplit("/", 1)[-1][: -len(".swift")], table)
+            if c and c.lower() not in allowed:
+                print(f"{p} ({c})")
+                hits += 1
+        return 1 if hits else 0
+
+    current, report = scan(a.root, table, sigs, a.report)
+    path = a.root / BASELINE
+    base = read_baseline(path)
+
+    if a.update_baseline:
+        grew = sorted(set(current) - base) if base is not None else []
+        if grew and not a.allow_increase:
+            print("check-dup-views: refusing to grow the baseline (it only shrinks):", file=sys.stderr)
+            for k in grew:
+                print(f"  {current[k]}", file=sys.stderr)
+            print("Use the SuiteUI component instead. A reviewed exception reruns with --allow-increase\n"
+                  "and puts `Allow-Dup-View: <concept-or-signature> <reason>` in the PR body.", file=sys.stderr)
+            return 1
+        path.write_text(HEADER + "".join(k + "\n" for k in sorted(current)))
+        print(f"check-dup-views: baseline written, {len(current)} grandfathered hits.")
+        return 0
+
+    for line in report:
+        print(line)
+    if base is None:
+        print(f"check-dup-views: {BASELINE} is missing; run --update-baseline", file=sys.stderr)
+        return 2
+    new = sorted(set(current) - base)
+    gone = sorted(base - set(current))
+    for k in new:
+        print(f"{current[k]} (new)")
+    for k in gone:
+        print(f"{k}: listed in {BASELINE} but no longer hits")
+    if new:
+        print("SuiteUI first (docs/factory/lead.md rules 16 and 20): use the SuiteUI component, or move the\n"
+              "app copy into SuiteUI first and use it from every app. An adapter onto a SuiteUI view is fine:\n"
+              "name it <X>Adapter or put it in <X>+Suite.swift. A reviewed exception: scripts/check-dup-views\n"
+              "--update-baseline --allow-increase, and `Allow-Dup-View: <concept-or-signature> <reason>` in the PR body.")
+    if gone:
+        print("Ratchet down: scripts/check-dup-views --update-baseline")
+    if new or gone:
+        return 1
+    print(f"ok ({len(current)} grandfathered view hits, none new)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

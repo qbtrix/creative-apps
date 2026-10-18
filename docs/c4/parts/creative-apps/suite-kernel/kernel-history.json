@@ -1,0 +1,8 @@
+{
+  "id": "kernel-history",
+  "name": "History",
+  "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": ["Sources/SuiteKernel/History/"],
+  "order": 20
+}
