@@ -64,3 +64,4 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - 2026-10-18T18:18:09Z: FH-3 #2873 and FH-6 #2879 merged; FH-a is fully on dev. Wave 4 (wkf4hdp2e): FH-5 and FH-7, FH-7 held with `no-fast-lane` so it merges after FH-5.
 - 2026-10-18T18:30:31Z: wave 4 opened FH-5 #2896 (head b8412161) and FH-7 #2894 (head bfcccd0d, held). Both had the attribution footer stripped. Contract checks were otherwise clean.
 - 2026-10-18T19:03Z heartbeat: full CI 39153086055 was cancelled. FH-a waits on scoped design run 39155524227 (dev 2e27b8db), queued. #2896 FH-5's macOS build 39154768808 is still running; #2894 FH-7 stays held.
+- 2026-10-18T19:25Z heartbeat: #2896 FH-5's macOS build 39154768808 passed at 19:07Z, so it waits on the lane's merge. #2894 FH-7 stays held. Scoped design run 39155524227 is in progress.

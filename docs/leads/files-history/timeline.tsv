@@ -17,3 +17,4 @@ utc	feature	event	ref	note
 2026-10-18T18:30:31Z	files-history	pr	#2894	FH-7 P4 + J16 row, head bfcccd0d, feature-done, held with no-fast-lane
 2026-10-18T18:40:06Z	files-history	heartbeat	#2896	FH-5 macOS build 39154768808 dispatched; FH-7 #2894 held; full CI 39153086055 pending
 2026-10-18T19:03Z	files-history	heartbeat	39155524227	full 39153086055 cancelled; scoped design 39155524227 (dev 2e27b8db, has FH-a) queued; #2896 FH-5 macOS build in progress; #2894 held
+2026-10-18T19:25Z	files-history	heartbeat	#2896	FH-5 macOS build 39154768808 green 19:07Z, awaiting lane merge; scoped design 39155524227 in progress
