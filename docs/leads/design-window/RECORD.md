@@ -38,6 +38,7 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-18T18:12Z: canvas-basics CB-3 merged (#2871, 18:01Z), so CB-a's Design edits are on dev. Findings rule: 8 open line:design findings, but 5 (#2693, #2661, #2630, #2590, #2589) are triaged to SuiteUI #2606 and wait on that line; the line-owned ones are #2538 and #2751 (SS-b, blocked on needs-ui #2623) and #2302 (blocked on needs-ui #2263). 3 is not past 5, so new tasks start: S-5 and D0-9d go to builders now.
 - 2026-10-18 resume (act-1a14ddefb3a-z1bl): brief says base main; dev is 37 ahead and CLAUDE.md forbids targeting main, so PRs stay on dev. main verified at e01529f.
 - Base is origin/dev, not main (CLAUDE.md: never branch from or target main; the lane retargets main to dev). main was verified at 2c5003b as the brief asks.
 - D0-9a (#1979) and D0-9b (#1980) already merged; DW-d continues at D0-9c.
