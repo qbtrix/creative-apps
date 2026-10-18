@@ -593,11 +593,12 @@ REMOTE="$sw/origin.git"
 gh() {
   local a="$*" n u
   case "$a" in
-    "pr list "*)
+    "pr list "*)  # every open PR in the --json shape; the lane picks the labelled ones itself
+      u=()
       for n in "$sw"/[0-9]*.json; do
-        jq -e '[.labels[].name] | index("fast-lane")' "$n" >/dev/null || continue
-        n="${n##*/}"; n="${n%.json}"; [[ -e "$sw/$n.merged" ]] || echo "$n"
-      done ;;
+        [[ -e "${n%.json}.merged" ]] || u+=("$n")
+      done
+      if (( ${#u[@]} )); then jq -s . "${u[@]}"; else echo '[]'; fi ;;
     "pr view "*"--json title "*) echo "title $2" ;;
     "pr view "*"--json body "*) jq -r .body "$sw/$3.json" ;;
     "pr view "*"--json closingIssuesReferences "*) cat "$sw/$3.closes" 2>/dev/null || true ;;
@@ -653,6 +654,8 @@ gh() {
     "pr merge "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
     "pr edit "*"--body "*) echo "pr edit $3 --body" >>"$sw/calls"; printf '%s\n' "${!#}" >"$sw/$3.edited" ;;
     "pr edit "*"--base "*) echo "$a" >>"$sw/calls"; jq '.baseRefName = "dev"' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
+    "pr edit "*"--add-label fast-lane") echo "$a" >>"$sw/calls"
+      jq '.labels += [{"name": "fast-lane"}]' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--remove-label fast-lane"*) echo "$a" >>"$sw/calls"
       jq '.labels |= map(select(.name != "fast-lane"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--add-label needs-fix"*) echo "$a" >>"$sw/calls"
@@ -1268,5 +1271,27 @@ lane_sweep
 verdict "$(probe_sha 1)" success; lane_sweep
 expect "batch vote: a plain red names its culprit on one run per probe" \
   "$(bdispatches 1),$(grep -c '^pr edit 96 .*--add-label needs-fix' "$sw/calls"),$(grep -c '2 of 3' "$sw/calls")" "1,1,0"
+
+# A Belt lead often opens its PR without the label (#2637, #2796, #2814, #2815).
+# The sweep lists every open PR once and labels the crew's Belt-Lead PRs into
+# dev that carry no opt-out, then evaluates them like any labelled PR.
+# #30 is such a PR; #31 has no Belt-Lead line; #32's author is off the
+# allowlist; #33 and #34 carry an opt-out label. Only #30 is labelled and merged.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 30 31 32 33 34; do
+  pr_at "$n" "h$n" "$DOCS"
+  jq '.labels = [] | .body += "\nBelt-Lead: act-20261018-1"' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
+done
+jq '.body = "Closes #1\n\nFast-Check: pass\nHead: h31"' "$sw/31.json" >"$sw/x" && mv "$sw/x" "$sw/31.json"
+jq '.author.login = "someone-else"' "$sw/32.json" >"$sw/x" && mv "$sw/x" "$sw/32.json"
+jq '.labels = [{"name":"no-fast-lane"}]' "$sw/33.json" >"$sw/x" && mv "$sw/x" "$sw/33.json"
+jq '.labels = [{"name":"needs-human"}]' "$sw/34.json" >"$sw/x" && mv "$sw/x" "$sw/34.json"
+lane_sweep
+expect "autolabel: a crew PR with a Belt-Lead line gets the label and one comment" \
+  "$(grep -c '^pr edit 30 .*--add-label fast-lane$' "$sw/calls"),$(grep -c '^pr comment 30 .*Fast lane: labelled because the PR carries Belt-Lead\.' "$sw/calls")" "1,1"
+expect "autolabel: the labelled PR is evaluated in the same sweep" "$(grep -c '^pr merge 30' "$sw/calls")" 1
+expect "autolabel: a PR without a Belt-Lead line is left alone" "$(grep -cE '^pr [a-z]+ 31 ' "$sw/calls")" 0
+expect "autolabel: a non-crew author is left alone" "$(grep -cE '^pr [a-z]+ 32 ' "$sw/calls")" 0
+expect "autolabel: no-fast-lane and needs-human PRs are left alone" "$(grep -cE '^pr [a-z]+ (33|34) ' "$sw/calls")" 0
 
 exit "$fail"
