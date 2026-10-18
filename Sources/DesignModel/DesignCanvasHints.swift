@@ -36,6 +36,10 @@ public struct DesignHover: Sendable, Equatable {
     public var nodeID: String?        // the layer a Move click picks; nil on bare canvas and for drawing tools
     public var outline: DesignRect?   // that layer's frame, or the box a Text click places
     public var pointer: DesignPointerHint
+
+    public init(nodeID: String?, outline: DesignRect?, pointer: DesignPointerHint) {
+        (self.nodeID, self.outline, self.pointer) = (nodeID, outline, pointer)
+    }
 }
 
 extension DesignWorkspace {
@@ -67,6 +71,30 @@ extension DesignWorkspace {
             return "X \(wholePoints(bounds.x)), Y \(wholePoints(bounds.y))"
         }
         return "\(wholePoints(bounds.width)) × \(wholePoints(bounds.height))"
+    }
+}
+
+extension DesignHover {
+    /// The rect the hover mark draws: the layer a click picks, or the box a Text click places; nil otherwise.
+    public var mark: DesignRect? { nodeID != nil || pointer == .text ? outline : nil }
+
+    /// The box a Text click would place at the pointer; nil for any other answer.
+    public var placement: DesignRect? { nodeID == nil && pointer == .text ? outline : nil }
+
+    /// This answer as the canvas's pointer needs it: nil when there is nothing to show, and the Text
+    /// tool's box dropped, so it changes only when the pointer or the layer under it does.
+    public var steady: DesignHover? {
+        if nodeID == nil, outline == nil, pointer == .tool { return nil }
+        guard placement != nil else { return self }
+        return DesignHover(nodeID: nil, outline: nil, pointer: pointer)
+    }
+}
+
+extension DesignWorkspace {
+    /// Where the size badge hangs: the middle of the selection's bottom edge (page points); nil with no badge.
+    public var selectionBadgeAnchor: DesignPoint? {
+        guard selectionBadge != nil, let bounds = selectionBounds else { return nil }
+        return DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)
     }
 }
 

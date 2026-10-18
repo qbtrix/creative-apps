@@ -12,6 +12,18 @@ acceptance tests.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
+**Wave AI1 (beta-80 W0, `p0`, 2026-10-19): AI-accessible first.** Every
+action is a command; the UI, the `afterglow` CLI and MCP drive one command
+catalog, and crews and CI test through it (suite.md 1.5). The catalog
+itself is SuiteKernel work on the SuiteUI line (`suiteui/command-catalog`,
+XK1) and each app adopts it there (`suiteui/adopt-command-catalog`, XK2).
+This line builds the two drivers: `afterglow-cli`, whose CL-a waits on the
+catalog's contract slice CC-a (cross-line, so in prose) and whose CL-1 is a
+supervisor merge (`Package.swift`, `scripts/test-scope`); and
+`afterglow-mcp`, whose slices wait on CL-a. The `AI` prefix is the track's
+own numbering; it sorts after the numbered waves but runs first, beside
+wave 5, because the real-jobs acceptance suites run through the CLI.
+
 **Wave 5 (beta-80 W1, 2026-10-18).** `shell-media` and `shell-text` are the
 suite's half of the captain-approved beta-80 plan's W1 engines (rows E9 and
 E8): macOS-only media and text services in SuiteShell with Linux-safe
