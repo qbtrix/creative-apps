@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-18T00:57Z	ci	scoped design run 39083023668 on d3cd7d9 green (holds SS-a); #2504 still open
 2026-10-18T01:19Z	check	no change; dev still d3cd7d9, #2504 open
 2026-10-18T01:41Z	check	no change; dev still d3cd7d9, 5 expired quarantine entries (#2504), full run 39082226458 still in progress
+2026-10-18T02:02Z	check	dev still d3cd7d9 with 5 expired quarantine entries (#2504 open); new full run 39088586270 started on d3cd7d9, its Linux job is expected to fail the same step
