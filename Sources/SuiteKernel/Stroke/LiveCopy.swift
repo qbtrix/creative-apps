@@ -16,14 +16,24 @@ public struct LiveCopy<Model: Sendable>: Sendable {
     /// No copy yet.
     public init() {}
 
-    /// Starts the copy from `m`. EK-28: a second `begin` before `take` is
-    /// ignored. Stub: does nothing.
-    public mutating func begin(_ m: Model) {}
+    /// Starts the copy from `m`; a second `begin` before `take` is ignored.
+    public mutating func begin(_ m: Model) {
+        if shown == nil { shown = m }
+    }
 
-    /// Edits the copy; true when there was one to edit. Stub: false.
-    public mutating func edit(_ body: (inout Model) -> Void) -> Bool { false }
+    /// Edits the copy; true when there was one to edit.
+    public mutating func edit(_ body: (inout Model) -> Void) -> Bool {
+        guard var copy = shown else { return false }
+        body(&copy)
+        shown = copy
+        return true
+    }
 
-    /// Hands back the copy and ends the drag; nil when nothing began.
-    /// EK-28: a second `take` returns nil. Stub: nil.
-    public mutating func take() -> Model? { nil }
+    /// Hands back the copy and ends the drag; nil when nothing began, so a
+    /// second `take` returns nil.
+    public mutating func take() -> Model? {
+        let copy = shown
+        shown = nil
+        return copy
+    }
 }
