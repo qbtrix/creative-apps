@@ -68,3 +68,4 @@
 2026-10-18T07:02Z	heartbeat	dev-red #2667 open (run 39102696294 e3fccbbb, linux; range main..e3fccbbb has no flare PRs, not ours); 39102696294 queued; newest 39105383795 (9e0ac922) pending; no green full run with ui-screens yet
 2026-10-18T07:34Z	heartbeat	dev-red #2667 open (not flare); 39102696294 (e3fccbbb) in_progress; 39105383795 (9e0ac922) pending; no green full run with ui-screens yet
 2026-10-18T08:05Z	heartbeat	dev-red #2667 open (not flare); 39102696294 (e3fccbbb) Linux failed, macOS still running, cannot be green; 39105383795 cancelled; newest 39108958964 (2202c7c3) pending; no green full run with ui-screens yet
+2026-10-18T08:37Z	heartbeat	dev-red #2667 open (not flare); 39102696294 (e3fccbbb) completed failure; 39108958964 (2202c7c3) queued; no green full run with ui-screens yet
