@@ -1,0 +1,16 @@
+[
+  {
+    "label": "a focus change shows the held thumbnail outside the loupe",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "let held = mode == .loupe ? focusedItemID.flatMap { thumbnails[$0] } : nil",
+    "replace": "let held = focusedItemID.flatMap { thumbnails[$0] }",
+    "tests": "LibraryLoupeImageTests.swift"
+  },
+  {
+    "label": "a focus change drops the held thumbnail",
+    "file": "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "find": "loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }",
+    "replace": "loupeRender = nil",
+    "tests": "LibraryLoupeImageTests.swift"
+  }
+]

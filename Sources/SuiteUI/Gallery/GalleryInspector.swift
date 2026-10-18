@@ -13,6 +13,7 @@
 // pins the panel's width (SJ24), each page's Reduce Motion switch sets
 // `suiteReduceMotion` on its components (SJ15, SJ20), and
 // `-SuiteGalleryFakes` swaps each conformance the page uses for IC-1's Fake.
+// `notes` draws InspectorNote in both kinds, inset like the rows.
 // The easing curve's samples come from the kernel's `EaseCurve`, so the
 // drawn line is empty until EK-15 fills that stub; the handles still drag.
 import enum SuiteKernel.EaseCurve
@@ -22,6 +23,7 @@ enum GalleryInspector {
     @MainActor static let pages: GalleryPages = [
         "inspector": { AnyView(GalleryInspectorPage()) },
         "curves": { AnyView(GalleryCurvesPage()) },
+        "notes": { AnyView(GalleryNotesPage()) },
     ]
 }
 
@@ -325,6 +327,21 @@ private struct GallerySwitch: View {
         ChipRow([ChipItem(id: id, title: title, isOn: isOn)]) { _ in toggle() }
             .help(title)
             .suiteControl(id: id, enabled: true, reason: nil)
+    }
+}
+
+/// The `notes` page: InspectorNote in both kinds under a section.
+private struct GalleryNotesPage: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            InspectorSection("Layer") {
+                InspectorNote("Select a layer to edit its properties.")
+                InspectorNote("Unlock Title to change it.", kind: .error, identifier: "suite.gallery.notes.error")
+            }
+            Spacer()
+        }
+        .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
+        .frame(maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
