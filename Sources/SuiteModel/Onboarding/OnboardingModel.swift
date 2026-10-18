@@ -44,14 +44,21 @@ public final class OnboardingModel {
         pages = services.onboarding.pages
     }
 
-    /// The pages and the starters; OB-8 adds the saved focus from the preferences' homeOrder.
+    /// The pages and the starters; once the tour has run, the focus whose order the saved homeOrder is.
     public func load() async {
         pages = services.onboarding.pages
+        if let p = try? await services.preferences.load(), p.onboardingDoneVersion != nil {
+            focus = Self.focusesThatReorder.first { SuiteOnboarding.order(for: $0) == p.homeOrder }
+        }
         rebuildStarters()
     }
 
     /// Last page: finish(); else the next page.
-    public func `continue`() { if isLastPage { isFinished = true } else { pageIndex += 1 } }
+    public func `continue`() {
+        guard isLastPage else { pageIndex += 1; return }
+        isFinished = true
+        Task { await finish() }
+    }
     public func back() { pageIndex = max(pageIndex - 1, 0) }
 
     /// Toggles the focus (the same one again clears it) and reorders the starters.
@@ -60,14 +67,63 @@ public final class OnboardingModel {
         rebuildStarters()
     }
 
-    /// Finishes with no focus; OB-8 saves the version.
-    public func skip() async { focus = nil; isFinished = true }
-    /// Finishes; OB-8 saves `finishing(focus:)` with one stale retry.
-    public func finish() async { isFinished = true }
-    /// A preset chip; OB-8 sends the `.new` hand-off before finishing.
-    public func startNew(_ preset: NewDocumentPreset, now: Date) async { launching = preset.app; isFinished = true }
-    /// Open sample; OB-8 copies the file and sends the `.open` hand-off before finishing.
-    public func openSample(_ app: SuiteApp, now: Date) async { launching = app; isFinished = true }
+    /// Finishes with no focus: the version is saved with the apps in their usual order.
+    public func skip() async {
+        focus = nil
+        rebuildStarters()
+        await finish()
+    }
+
+    /// Saves `finishing(focus:)`; a stale save reloads and saves once more. The window closes either way.
+    public func finish() async {
+        do throws(SuiteError) {
+            do throws(SuiteError) { try await saveFinishing() } catch .staleRevision { try await saveFinishing() }
+        } catch { message = error }
+        isFinished = true
+    }
+
+    /// A preset chip: sends the `.new` hand-off (as the home's New tile does), then finishes.
+    public func startNew(_ preset: NewDocumentPreset, now: Date) async {
+        guard await send(services.creating.handOff(for: preset, id: makeID(), at: now)) else { return }
+        await finish()
+    }
+
+    /// Open sample: copies the bundle's sample into Documents/Samples (never over an earlier copy),
+    /// sends the `.open` hand-off for that copy, then finishes. A sample that can't open sends nothing.
+    public func openSample(_ app: SuiteApp, now: Date) async {
+        let starter = starters.first { $0.tile.app == app }
+        guard let sample = starter?.sample else { message = .fileMissing(name: app.displayName); return }
+        let source = samplesFolder + "/" + sample.fileName
+        guard starter?.sampleReason == nil, present(source) else { message = .fileMissing(name: sample.fileName); return }
+        let destination = SampleCatalog.destination(for: sample, documents: documents, exists: present)
+        do throws(SuiteError) { try copy(source, destination) } catch { message = error; return }
+        let handOff = HandOff(id: makeID(), from: .launcher, to: app, verb: .open,
+                              documents: [SampleCatalog.ref(for: sample, path: destination)], createdAt: now)
+        guard await send(handOff) else { return }
+        await finish()
+    }
+
+    /// The focuses that move apps forward; `.everything` keeps the usual order, as no focus does.
+    private static let focusesThatReorder: [OnboardingFocus] = OnboardingFocus.allCases.filter {
+        SuiteOnboarding.order(for: $0) != SuiteOnboarding.order(for: nil)
+    }
+
+    private func saveFinishing() async throws(SuiteError) {
+        let stored = (try? await services.preferences.load()) ?? SuitePreferences()
+        let next = services.onboarding.finishing(stored, focus: focus, version: SuiteOnboarding.version)
+        _ = try await services.preferences.save(next)
+    }
+
+    /// Sends one hand-off; true when it went. A refusal leaves its message and the window open.
+    private func send(_ handOff: HandOff) async -> Bool {
+        launching = handOff.to
+        message = nil
+        do throws(SuiteError) { _ = try await services.sending.send(handOff) } catch {
+            message = error; launching = nil
+            return false
+        }
+        return true
+    }
 
     private func rebuildStarters() {
         let tiles = services.creating.tiles(missing: [])

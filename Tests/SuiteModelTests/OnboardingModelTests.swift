@@ -1,6 +1,7 @@
 // OnboardingModelTests.swift: the welcome window's view-model on `.fake`
-// (onboarding OB-8's acceptance row, written first by OB-2; disabled until
-// OB-8's body). Saves retry a stale write once; hand-offs finish the window.
+// (onboarding OB-8's acceptance row, written first by OB-2). Saves retry a
+// stale write once; hand-offs finish the window. The two sample checks that
+// need SampleCatalog's reason and "<stem> 2" rule wait on OB-10's body.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -60,7 +61,7 @@ actor RacingPreferences: PreferencesStoring {
         try #require(SuiteCreating.presets[.flare]?.first { $0.id == "flare.hd" })
     }
 
-    @Test(.disabled("waits on OB-8")) func continueWalksThePagesAndTheThirdCallFinishes() async {
+    @Test func continueWalksThePagesAndTheThirdCallFinishes() async {
         let (m, _) = await model()
         m.continue()
         #expect(m.pageIndex == 1 && m.page.id == "focus" && m.canGoBack && !m.isFinished)
@@ -70,7 +71,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.pageIndex == 2 && m.isFinished)
     }
 
-    @Test(.disabled("waits on OB-8")) func backStopsAtTheFirstPage() async {
+    @Test func backStopsAtTheFirstPage() async {
         let (m, _) = await model()
         m.back()
         #expect(m.pageIndex == 0 && !m.canGoBack)
@@ -80,7 +81,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.pageIndex == 0 && m.page.id == "apps")
     }
 
-    @Test(.disabled("waits on OB-8")) func chooseTogglesAndReordersTheStarters() async {
+    @Test func chooseTogglesAndReordersTheStarters() async {
         let (m, _) = await model()
         #expect(m.starters.map(\.tile.app) == SuiteApp.apps)
         m.choose(.photos)
@@ -91,7 +92,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.focus == .motion && m.starters.map(\.tile.app) == SuiteOnboarding.order(for: .motion))
     }
 
-    @Test(.disabled("waits on OB-8")) func skipSavesTheVersionWithTheAppOrder() async throws {
+    @Test func skipSavesTheVersionWithTheAppOrder() async throws {
         let (m, s) = await model()
         m.choose(.photos)
         await m.skip()
@@ -100,7 +101,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.focus == nil && m.message == nil)
     }
 
-    @Test(.disabled("waits on OB-8")) func finishAfterPhotosSavesLibraryAndPhotoFirst() async throws {
+    @Test func finishAfterPhotosSavesLibraryAndPhotoFirst() async throws {
         let (m, s) = await model()
         m.choose(.photos)
         await m.finish()
@@ -110,7 +111,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.message == nil)
     }
 
-    @Test(.disabled("waits on OB-8")) func aStaleSaveReloadsAndSavesOnceMore() async throws {
+    @Test func aStaleSaveReloadsAndSavesOnceMore() async throws {
         let racing = RacingPreferences(races: 1)
         let (m, _) = await model { $0.preferences = racing }
         m.choose(.photos)
@@ -122,7 +123,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.message == nil)
     }
 
-    @Test(.disabled("waits on OB-8")) func aSecondStaleSaveShowsTheMessageAndStillCloses() async {
+    @Test func aSecondStaleSaveShowsTheMessageAndStillCloses() async {
         let racing = RacingPreferences(races: 2)
         let (m, _) = await model { $0.preferences = racing }
         await m.finish()
@@ -131,7 +132,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.message == .staleRevision && m.isFinished)
     }
 
-    @Test(.disabled("waits on OB-8")) func startNewSendsOneNewHandOffThenFinishes() async throws {
+    @Test func startNewSendsOneNewHandOffThenFinishes() async throws {
         let (m, s) = await model()
         let preset = try flareHD()
         await m.startNew(preset, now: now)
@@ -141,7 +142,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.message == nil)
     }
 
-    @Test(.disabled("waits on OB-8")) func openSampleCopiesThenSendsOneOpenAndFinishes() async throws {
+    @Test func openSampleCopiesThenSendsOneOpenAndFinishes() async throws {
         let (m, s) = await model()
         let sample = try #require(SampleCatalog.sample(for: .flare))
         await m.openSample(.flare, now: now)
@@ -154,14 +155,14 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.message == nil)
     }
 
-    @Test(.disabled("waits on OB-8")) func openSampleNeverOverwritesAnEarlierCopy() async throws {
+    @Test(.disabled("waits on OB-10")) func openSampleNeverOverwritesAnEarlierCopy() async throws {
         let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") || $0 == "/D/Samples/Bounce.flare" })
         await m.openSample(.flare, now: now)
         #expect(log.all == [["/R/Samples/Bounce.flare", "/D/Samples/Bounce 2.flare"]])
         #expect(try await sent(s).first?.documents.map(\.path) == ["/D/Samples/Bounce 2.flare"])
     }
 
-    @Test(.disabled("waits on OB-8")) func openSampleWithAReasonRecordsNothing() async throws {
+    @Test(.disabled("waits on OB-10")) func openSampleWithAReasonRecordsNothing() async throws {
         let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") && !$0.hasSuffix(".halo") })
         #expect(m.starters.first { $0.tile.app == .halo }?.sampleReason != nil)
         await m.openSample(.halo, now: now)
@@ -170,7 +171,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.message != nil && !m.isFinished)
     }
 
-    @Test(.disabled("waits on OB-8")) func aRefusedHandOffKeepsTheWindowOpen() async throws {
+    @Test func aRefusedHandOffKeepsTheWindowOpen() async throws {
         let refusal = "Switching isn't available yet."
         let (m, s) = await model { $0.sending = FakeHandOffs(unavailable: refusal) }
         await m.startNew(try flareHD(), now: now)
@@ -178,5 +179,46 @@ actor RacingPreferences: PreferencesStoring {
         #expect(try await saved(s).onboardingDoneVersion == nil)
         await m.openSample(.flare, now: now)
         #expect(m.message == .notAvailable(refusal) && !m.isFinished)
+    }
+
+    @Test func openSampleWhoseFileIsGoneRecordsNothing() async throws {
+        let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") && !$0.hasSuffix(".flare") })
+        await m.openSample(.flare, now: now)
+        #expect(log.all.isEmpty)
+        #expect(try await sent(s).isEmpty)
+        #expect(m.message == .fileMissing(name: "Bounce.flare") && !m.isFinished && m.launching == nil)
+    }
+
+    @Test func aRefusedCopySendsNothing() async throws {
+        let s = SuiteServices.fake()
+        let m = OnboardingModel(services: s, samplesFolder: "/R/Samples", documents: "/D", present: { $0.hasPrefix("/R/") },
+                                copy: { _, _ throws(SuiteError) in throw .ioFailed("the sample") }, makeID: { "id-1" })
+        await m.load()
+        await m.openSample(.design, now: now)
+        #expect(try await sent(s).isEmpty)
+        #expect(m.message == .ioFailed("the sample") && !m.isFinished)
+    }
+
+    @Test func loadRestoresTheSavedFocus() async throws {
+        let done = FakeOnboarding().finishing(SuitePreferences(), focus: .photos, version: 1)
+        let (m, _) = await model { $0.preferences = FakePreferences(done) }
+        #expect(m.focus == .photos && m.starters.map(\.tile.app) == SuiteOnboarding.order(for: .photos))
+        let skipped = FakeOnboarding().finishing(SuitePreferences(), focus: nil, version: 1)
+        let (n, _) = await model { $0.preferences = FakePreferences(skipped) }
+        #expect(n.focus == nil)
+        var unset = SuitePreferences()
+        unset.homeOrder = SuiteOnboarding.order(for: .design)
+        let (o, _) = await model { $0.preferences = FakePreferences(unset) }
+        #expect(o.focus == nil)
+    }
+
+    @Test func continueOnTheLastPageSavesTheVersion() async throws {
+        let (m, s) = await model()
+        m.choose(.design)
+        m.continue(); m.continue(); m.continue()
+        #expect(m.isFinished)
+        for _ in 0..<100 where try await saved(s).onboardingDoneVersion == nil { await Task.yield() }
+        #expect(try await saved(s).onboardingDoneVersion == 1)
+        #expect(try await saved(s).homeOrder.first == .design)
     }
 }
