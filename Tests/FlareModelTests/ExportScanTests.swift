@@ -118,7 +118,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
 }
 
 // The run tests below are the kernel-shaped rewrite of the old app-local run (FX-2), on since FX-4; the progress one
-// reads the run's total, which is `exportFileCount`, so it waits on FX-11.
+// reads the run's total, which is `exportFileCount`, on since FX-11.
 @Test func aWorkspaceExportRunsThenFinishesWithTheWrittenNames() async throws {
     var w = workspace(FlareFixtures.showcase)
     let document = try #require(w.document)
@@ -135,7 +135,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     #expect(!none.openExport() && !none.startExport() && none.exportState == .idle)
 }
 
-@Test(.disabled("waits on FX-11")) func progressOnlyMovesForwardWhileRunning() throws {
+@Test func progressOnlyMovesForwardWhileRunning() throws {
     var w = workspace(FlareFixtures.bounce)
     w.exportProgressed(0.5)
     #expect(w.exportState == .idle && w.openExport() && !w.openExport() && w.startExport() && !w.startExport())

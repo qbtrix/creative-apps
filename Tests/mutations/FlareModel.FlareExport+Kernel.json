@@ -1,5 +1,12 @@
 [
   {
+    "label": "startExport ignores exportProblem",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        guard exportProblem == nil else { return false }\n",
+    "replace": "",
+    "tests": "FlareExportTests"
+  },
+  {
     "label": "dismissExport while running goes idle",
     "file": "Sources/FlareModel/FlareExport+Kernel.swift",
     "find": "    public mutating func dismissExport() { exportState.dismiss() }\n",
