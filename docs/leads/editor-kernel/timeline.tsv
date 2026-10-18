@@ -1,0 +1,43 @@
+utc	stage	event	ref	note
+2026-10-17T06:04Z	0	stage-start	#1933	lead start; base origin/dev 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745; Belt base fdaabbfb is an ancestor
+2026-10-17T06:10Z	1	stage-end	#1933	packet read; 13 slices, 31 tasks copied
+2026-10-17T06:12Z	2	stage-end	#1933	7 waves planned; wave 2 stacks on EK-1 while the supervisor merges it
+2026-10-17T06:12Z	3	stage-start	EK-1	wave 1: EK-1 builder started
+2026-10-17T06:15Z	3	heartbeat	EK-1	builder running; wave 2 and 3 briefs prepared
+2026-10-17T06:26Z	3	pr-opened	#1992	EK-1 SuiteKernel target, Fast-Check pass on 45c1453, supervisor merge requested on #1933
+2026-10-17T06:36Z	3	stage-start	wave 2	EK-2 EK-3 EK-29 stacked on lead-editor-kernel/EK-1
+2026-10-17T06:37Z	3	heartbeat	wave 2	Workflow wf_2a77d1fc-422 running 3 builders
+2026-10-17T06:52Z	3	stopped	wave 2	builders hit the session limit (resets 10:40Z); nothing pushed
+2026-10-17T10:46Z	3	stage-start	wave 2	relaunched EK-2 EK-3 EK-29 stacked on lead-editor-kernel/EK-1; #1992 still awaiting the supervisor
+2026-10-18T04:18Z	3	stage-start	wave 2	relaunch act-1a14d380dff-xcgw: EK-2 EK-3 EK-29 on dev 2106613
+2026-10-18T04:19Z	3	heartbeat	wave 2	Workflow wf_39c1cf57-208 running builders EK-2 EK-3 EK-29
+2026-10-18T04:40Z	3	heartbeat	wave 2	wf_39c1cf57-208 still building EK-2 EK-3 EK-29
+2026-10-18T05:03Z	3	pr-opened	#2577,#2578	EK-2, EK-29 open fast-lane; EK-3 finishing
+2026-10-18T05:10Z	3	pr-opened	#2620	EK-3 open fast-lane; wave 2 all open
+2026-10-18T05:24Z	3	heartbeat	#2577,#2578,#2620	all three waiting on lane macOS build-only runs; dev e1754e0; wave 3 (EK-19 first) starts once they merge
+2026-10-18T05:42Z	3	slice-done	EK-a	run 39100691082 Linux green; wave 3 started wf_38909e34-1cb
+2026-10-18T06:04Z	3	pr-opened	#2645,#2646,#2647	EK-7, EK-19, EK-9 open; 7 builders still running; 0 open findings
+2026-10-18T06:26Z	3	heartbeat	#2652-#2656	8/10 wave-3 PRs open (EK-4, EK-27 building); macOS build-only runs queued since 06:03Z; 0 findings
+2026-10-18T06:34Z	3	wave-done	3	10/10 PRs open and contract ok: #2645-2647, #2652-2656, #2666, #2668; none merged yet
+2026-10-18T06:49Z	wave-3	check	lane	06:49Z: 0/10 merged; macOS builds: EK-23 green, EK-7/19/9/14 running, EK-11/17/21/27/4 queued; no failures, no findings
+2026-10-18T07:11Z	wave-3	check	lane	07:11Z: 0/10 merged; macOS builds green for 9 (EK-27 running); lane still bisecting batch-20261018063810 (not ours)
+2026-10-18T07:28Z	wave-3	check	lane	07:28Z: all 10 macOS builds green, 0 merged; lane still bisecting batch-20261018063810 (probe -7), one batch at a time
+2026-10-18T07:44Z	wave-3	check	lane	07:44Z: #2645, #2646, #2647 in lane batch-20261018073731 (Linux run in progress); other 7 green, waiting on the next batch
+2026-10-18T07:59Z	wave-3	lane-red	batch-20261018073731	batch red on LibraryLoupeBudgetTests.focusChangeWithinBudget timing (1.012>1.0), not ours; probe -4 red, -2 running; no needs-fix on EK PRs
+2026-10-18T08:13Z	wave-3	blocked	dev-red#2667	dev red on LibraryLoupeBudgetTests.focusChangeWithinBudget, bisected to #2613 (library); every lane batch fails until fixed; EK PRs green, no needs-fix
+2026-10-18T08:35Z	wave-3	waiting	batch-20261018081953	#2667 still open; lane blamed #2641 (needs-fix) for the Library timing flake; new batch red, bisecting; no EK PR labelled
+2026-10-18T08:51Z	wave-3	waiting	batch-20261018081953	library fix #2698 on dev; batch probes -3,-5 green, -6 running; no EK PR labelled
+2026-10-18T09:07Z	wave-4	started	wf_d71bd13a-c9d	#2645 #2646 merged; wave 4 EK-20 + EK-8 building on d6271ae4; #2647 needs-fix from Library timing flake (#2667), dev merged in, gate running
+2026-10-18T09:20Z	wave-3	rehead	#2647@a940878a	merged dev into EK-9, gate CI: PASS, Head moved; flake LibraryLoupeBudgetTests reported on #2667
+2026-10-18T09:26Z	wave-4	prs	#2710,#2711	EK-8 #2710, EK-20 #2711 opened, contract ok
+2026-10-18T09:37Z	wave-4	launch	w38wcon2a	#2652-2656,#2666 merged; launched EK-12,13,15,16,22,24,28 on b1b56eba; #2647 needs-fix dropped; waiting #2647(EK-10), #2668(EK-5,30)
+2026-10-18T09:53Z	wave-4	check	heartbeat	no merges since 09:36; batch 20261018093626 red on view-statics lint (not ours), lane bisecting; 0 findings; noted #2717 Belt release stop rule; w38wcon2a building
+2026-10-18T10:10Z	wave-4	launch	woe5w3466	#2668 merged (a4885b39); launched EK-5, EK-30 on ca6c45b7; w38wcon2a has opened #2727 (EK-12), #2731 (EK-16); 0 findings
+2026-10-18T10:26Z	wave-4	launch	wo0uruy8p	#2647 merged; launched EK-10 on a80ed944; #2710/#2711 macOS build green, awaiting lane sweep; #2732 (EK-15) opened; 0 findings
+2026-10-18T10:39Z	wave-4	finisher	EK-10	builder stopped before tests/commit; finisher agent completing in wf_37e13da0-d81-1
+2026-10-18T10:43Z	wave-4	check	heartbeat	#2710 EK-8, #2711 EK-20 merged 10:31; EK-undo/EK-box await Linux on dev run 39120072797 (5e1844e6); new PRs #2736 EK-28, #2737 EK-13; 0 findings
+2026-10-18T10:45Z	wave4	check	PR#2736,PR#2739	w38wcon2a done: EK-12 #2727, EK-15 #2732, EK-16 #2731, EK-24 #2739 ok; EK-28 #2736 body fixed; EK-13 #2737 off-contract (out-of-scope LayerTree edit, no Fast-Check) fixer sent; EK-22 unpushed, finisher sent; EK-30 finisher sent; EK-undo/EK-box slice-done waits on dev CI 39120347568 Linux
+2026-10-18T10:47Z	wave4	pr	PR#2743	EK-10 #2743 open, head 5492c06d, CI: PASS, mutate 3/3+2/2, footer stripped; touches KernelShapeTests (8 files) like EK-8 did
+2026-10-18T10:55Z	wave4	pr	PR#2744	EK-30 #2744 open, head 8567b353, CI: PASS (lints+build; SuiteUI tests run on macOS), 399 lines/9 files; renamed SuiteStrokePacer/SuitePointerPressure vs PhotoApp internals; gallery placement deferred to EK-31 after #2738
+2026-10-18T10:58Z	wave4	pr	PR#2745	EK-22 #2745 open, head 4d3ac4e1, no Fast-Check: gate red only on budget tests outside SuiteKernel (DesignBudgetTests/hitTest red on clean dev too; LibraryImportBudget, DesignSelectBudget pass alone); lane Linux run decides. Disk 98%->39%: removed 15 merged task worktrees, cleared .build of pushed ones
+2026-10-18T10:59Z	wave4	check	PR#2737	EK-13 #2737 fixed: head 1c4a1096 CI: PASS, merged dev, LayerFollow reuses LayerTree node/update, LayerTree -8 stub removal unavoidable (explained in body). Merged: EK-12 #2727, EK-16 #2731. EK-18 waits on #2737; EK-6 on #2738; EK-31 on #2744
