@@ -35,3 +35,4 @@ Next: #3011 (AB-p1) waits on the lane's macOS build; then AB-p2 (feature-done): 
 - 2026-10-18T21:38:11Z check: dev 8640f00f; #3011 AB-p1 waits on lane; 0 findings
 - 2026-10-18T22:16:45Z check: #3011 AB-p1 merged dev for #2990 fix, gate PASS, head 5095cc93
 - 22:36Z dev 349578b8; #2973/#2979/#3010/#3011 wait on lane mac builds of their new heads; 0 findings
+- 22:56Z #3011 AB-p1 merged; AB-p2 builder started
