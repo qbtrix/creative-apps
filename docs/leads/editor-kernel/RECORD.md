@@ -99,3 +99,4 @@ Next: wave A PRs #2973 (EK-6), #2972 (EK-31), #2974 (EK-25) wait on the lane's m
 - 2026-10-18T22:16:45Z check: dev f221b370; #2974 EK-25 merged; #2973 EK-6 merged dev again (old base lacks #2990's PhotoZoomSweepTests fix, which broke #2979's mac build), gate PASS, head fdfd625e; EK-26 waits on #2973
 - 22:36Z dev 349578b8; #2973/#2979/#3010/#3011 wait on lane mac builds of their new heads; 0 findings
 - 22:56Z dev afa91212; #2973 waits on lane mac build; 0 findings
+- 23:16Z dev e0a627c0; #2973 mac build green, waits lane sweep; no green dev run yet
