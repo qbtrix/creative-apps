@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the extending pick extends instead of toggling: a second Shift-click no longer unpicks",
+    "file": "Sources/HaloModel/HaloKeySelection.swift",
+    "find": "keySelection.pick(key, .toggle)",
+    "replace": "keySelection.pick(key, .extend)",
+    "tests": "HaloKeySelectionTests"
+  },
+  {
+    "label": "a Shift-click on a diamond replaces the pick instead of adding to it",
+    "file": "Sources/HaloModel/HaloKeySelection.swift",
+    "find": "for key in clicked { keySelection.pick(key, .extend) }",
+    "replace": "keySelection.replace(clicked)",
+    "tests": "HaloKeySelectionTests"
+  },
+  {
+    "label": "clearKeySelection keeps the pick",
+    "file": "Sources/HaloModel/HaloKeySelection.swift",
+    "find": "    public mutating func clearKeySelection() {\n        keySelection.clear()\n",
+    "replace": "    public mutating func clearKeySelection() {\n",
+    "tests": "HaloKeySelectionTests|HaloProjectTests"
+  }
+]
