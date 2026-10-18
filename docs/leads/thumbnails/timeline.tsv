@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-18T16:22:51Z	heartbeat	Round 1: full CI 39137279211 (80c14eed) Library journeys red: J2 grid cells stay loading (#2749), J3 (L) loupe never full (#2767), J8 missing-file help (#2765); import (#2766) not ours. Diagnosing for the round 1 fix batch.
 2026-10-18T16:40:34Z	round1	round 1: fixing #2767 loupe, #2765 persist, #2749 grid (grid fails in Release journeys since before #2790)
 2026-10-18T17:45:29Z	round1	fix PRs #2859 #2860 #2878; resumed after worker restart
+2026-10-18T18:10:35Z	round1	check-in: run 39148564664 red as expected (fixes not in it); #2860 merged; #2878 takes #2766 #2882 too
