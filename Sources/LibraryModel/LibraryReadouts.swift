@@ -189,6 +189,19 @@ extension LibraryCatalog {
         count == 1 ? "1 photo" : "\(count) photos"
     }
 
+    /// The status bar shows in the loupe (its zoom and the photo's size) and,
+    /// on preview data, in the grid too (the "Preview data" pill).
+    public var showsStatusBar: Bool {
+        services.isPreview || loupeItem != nil
+    }
+
+    /// The status bar's size pill: the loupe photo's "4000 × 6000 px", else
+    /// the photo count.
+    public var statusSizeText: String {
+        guard let size = loupePhotoSize else { return Self.photoCountText(items.count) }
+        return "\(size.width) × \(size.height) px"
+    }
+
     /// Why the services member `member` ("importer", "loupe", ...) can't act
     /// yet: a disabled control's help. Nil once it is live.
     public func help(for member: String) -> String? {

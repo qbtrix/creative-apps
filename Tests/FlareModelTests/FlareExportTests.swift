@@ -1,7 +1,8 @@
 // FlareExportTests.swift: MJ-FX1's run transitions over the kernel's ExportRun
-// (docs/blueprints/flare/features/flare-export.md, FX-2 and FX-4). `shape` runs now and holds through FX-4: Flare's
-// ExportState is the kernel's ExportRun<ExportOptions>, and with nothing open every transition changes nothing. The
-// rest are written from MJ-FX1 and the FX-4 mutations and wait on FX-4 (contract rule 13).
+// (docs/blueprints/flare/features/flare-export.md, FX-2 and FX-4). `shape`: Flare's ExportState is the kernel's
+// ExportRun<ExportOptions>, and with nothing open every transition changes nothing. The rest are MJ-FX1 and the FX-4
+// mutations; the ones that read FX-11's setters, `exportProblem`, `exportSummary` or the refusal sentences wait on
+// FX-11, and the others place the run directly so they hold FX-4's transitions on their own.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -14,16 +15,14 @@ private func showcase() -> FlareWorkspace {
     var w = FlareWorkspace(services: .fake()); w.load(FlareFixtures.showcase); return w
 }
 
-/// `showcase` editing the PNG sequence 0...12 step 2 (7 files).
+/// `showcase` editing the PNG sequence 0...12 step 2 (7 files), placed on the run (`walk` reaches it by the setters).
 private func editingSevenPNGs() -> FlareWorkspace {
-    var w = showcase(); _ = w.openExport()
-    w.setExportFormat(.pngSequence); w.setExportFrames(0...12); w.setExportStep(2)
-    return w
+    var w = showcase(); w.exportState = .editing(sevenPNGs); return w
 }
 
 /// The same run, started at 0 of 7.
 private func runningSevenPNGs() -> FlareWorkspace {
-    var w = editingSevenPNGs(); _ = w.startExport(); return w
+    var w = showcase(); w.exportState = .running(sevenPNGs, done: 0, total: 7); return w
 }
 
 struct FlareExportTests {
@@ -43,7 +42,7 @@ struct FlareExportTests {
         #expect(Set(states).count == 4 && !states.contains(.idle))
     }
 
-    @Test(.disabled("waits on FX-4")) func walk() {
+    @Test(.disabled("waits on FX-11")) func walk() {
         var w = showcase()
         let opened = w.openExport()
         #expect(opened)
@@ -61,7 +60,7 @@ struct FlareExportTests {
         #expect(w.exportState == .idle && w.exportingOptions == nil)
     }
 
-    @Test(.disabled("waits on FX-4")) func startRefusesABadRange() {
+    @Test(.disabled("waits on FX-11")) func startRefusesABadRange() {
         var w = editingSevenPNGs()
         w.setExportFrames(0...90)
         let before = w
@@ -69,7 +68,7 @@ struct FlareExportTests {
         #expect(w.exportState == .editing(ExportOptions(format: .pngSequence, sceneID: "scene-1", frames: 0...90, step: 2)))
     }
 
-    @Test(.disabled("waits on FX-4")) func dismissKeepsARunningRun() {
+    @Test func dismissKeepsARunningRun() {
         var w = runningSevenPNGs()
         w.dismissExport()
         #expect(w.exportState == .running(sevenPNGs, done: 0, total: 7))
@@ -78,20 +77,20 @@ struct FlareExportTests {
         #expect(editing.exportState == .idle)
     }
 
-    @Test(.disabled("waits on FX-4")) func cancelReturnsToIdle() {
+    @Test func cancelReturnsToIdle() {
         var w = runningSevenPNGs()
         w.endExport(.failure(CancellationError()))
         #expect(w.exportState == .idle && w.exportingOptions == nil)
     }
 
-    @Test(.disabled("waits on FX-4")) func aFailureCarriesTheSheetsSentence() {
+    @Test(.disabled("waits on FX-11")) func aFailureCarriesTheSheetsSentence() {
         var w = runningSevenPNGs()
         w.endExport(.failure(ExportWriteRefusal.alreadyThere(name: "scene-1.svg", folder: "Exports")))
         #expect(w.exportState == .failed(sevenPNGs, "scene-1.svg is already in Exports. Choose another folder."))
         #expect(w.exportingOptions == sevenPNGs && w.exportSummary == nil)
     }
 
-    @Test(.disabled("waits on FX-4")) func progressFloorsTheFraction() {
+    @Test func progressFloorsTheFraction() {
         var w = runningSevenPNGs()
         w.exportProgressed(0.5)
         #expect(w.exportState == .running(sevenPNGs, done: 3, total: 7))
@@ -101,7 +100,7 @@ struct FlareExportTests {
         #expect(w.exportState == .running(sevenPNGs, done: 7, total: 7))
     }
 
-    @Test(.disabled("waits on FX-4")) func progressIsOnePerFrame() {
+    @Test func progressIsOnePerFrame() {
         var w = runningSevenPNGs()
         w.exportProgressed(0.5)
         let atThree = w
@@ -111,7 +110,7 @@ struct FlareExportTests {
         #expect(w != atThree && w.exportState == .running(sevenPNGs, done: 4, total: 7))
     }
 
-    @Test(.disabled("waits on FX-4")) func retryOnlyFromFailed() {
+    @Test func retryOnlyFromFailed() {
         var finished = runningSevenPNGs()
         finished.endExport(.success(names))
         let done = finished

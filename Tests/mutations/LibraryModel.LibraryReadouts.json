@@ -40,5 +40,26 @@
     "find": "isEmpty && catalogState != .loading",
     "replace": "isEmpty && catalogState == .loading",
     "tests": "LibraryLoadingEmptyStateTests.swift"
+  },
+  {
+    "label": "the loupe hides the status bar on live data",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "services.isPreview || loupeItem != nil",
+    "replace": "services.isPreview",
+    "tests": "LibraryStatusTests.swift"
+  },
+  {
+    "label": "the grid shows the status bar on live data",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "services.isPreview || loupeItem != nil",
+    "replace": "true",
+    "tests": "LibraryStatusTests.swift"
+  },
+  {
+    "label": "the loupe size pill shows the photo count",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "return \"\\(size.width) × \\(size.height) px\"",
+    "replace": "_ = size; return Self.photoCountText(items.count)",
+    "tests": "LibraryStatusTests.swift"
   }
 ]

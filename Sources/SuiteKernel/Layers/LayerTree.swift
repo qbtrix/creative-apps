@@ -187,14 +187,6 @@ public struct LayerTree<Payload: LayerPayload>: Hashable, Sendable {
         }
         return out
     }
-    /// True when `id` follows `ancestor`, directly or through others (EK-13). Stub: false.
-    public func follows(_ id: String, _ ancestor: String) -> Bool { false }
-    /// The node's placement composed along its follow chain (EK-13). Stub: identity.
-    public func worldPlacement(of id: String, local: (LayerNode<Payload>) -> Matrix) -> Matrix { .identity }
-    /// Makes `id` follow `parent` (nil: nothing), keeping its world place
-    /// through `keepingPlace` (EK-13). Stub: nothing.
-    public mutating func setFollow(_ id: String, _ parent: String?, local: (LayerNode<Payload>) -> Matrix,
-                                   keepingPlace: (inout LayerNode<Payload>, Matrix) -> Void) throws(TreeRefusal) {}
     /// The nodes from the root down to `id`, nil for an unknown id.
     private func chain(_ id: String) -> [LayerNode<Payload>]? {
         guard let path = path(to: id) else { return nil }

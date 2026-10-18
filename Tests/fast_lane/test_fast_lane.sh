@@ -783,6 +783,25 @@ verdict "$HEAD_SHA" failure
 lane_sweep
 expect "a red check: no Linux check dispatched" "$(grep -c '^workflow run' "$sw/calls")" 0
 
+# A stale needs-rebase (#2672, #2624, #2636 kept it after a fixer's push made
+# them mergeable): #84 is MERGEABLE again, so the sweep drops the label and
+# evaluates it in the same pass (no proof yet: its Linux check starts). #85
+# still conflicts at a head already handed to a fixer, and #86's mergeable is
+# UNKNOWN: both keep the label.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for spec in "84 MERGEABLE CLEAN" "85 CONFLICTING DIRTY" "86 UNKNOWN UNKNOWN"; do
+  read -r n m s <<<"$spec"
+  jq --argjson n "$n" --arg m "$m" --arg s "$s" '.number = $n | .headRefName = "b\($n)" | .mergeable = $m | .mergeStateStatus = $s
+    | .labels += [{name: "needs-rebase"}]' <<<"$BASE_PR" >"$sw/$n.json"
+  printf '%s\n' '[{"filename": "docs/x.md", "status": "modified"}]' >"$sw/files.$n.json"
+done
+printf '%s\n' "Fast lane: this PR conflicts with dev in t.md, and the lane could not integrate it at head $HEAD_SHA (the merge drivers don't resolve these)." >"$sw/85.comments"
+( UNKNOWN_RETRIES=0 FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
+expect "needs-rebase: a mergeable PR loses the label and is evaluated in the same sweep" \
+  "$(grep -c '^pr edit 84 .*--remove-label needs-rebase' "$sw/calls"),$(grep -c -- '-f linux_only=true --ref b84$' "$sw/calls")" "1,1"
+expect "needs-rebase: a PR that still conflicts keeps it" "$(grep -c '^pr edit 85 ' "$sw/calls")" 0
+expect "needs-rebase: an UNKNOWN mergeable state is left alone" "$(grep -cE '^pr edit 86 |--ref b86$' "$sw/calls")" 0
+
 # dispatch_reason: feature-done, then a UI change, then the 10-merge count.
 reason() {  # reason <name> <want> <feature> <ui> <since>
   local got; got=$(dispatch_reason "$3" "$4" "$5")
@@ -1188,5 +1207,66 @@ red_tip '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation 
 bisect_by_hand 504; votes "$C1" failure; bisect_by_hand 504
 expect "vote: a plain red names its culprit on one run" \
   "$(dispatches 1),$(grep -c "^issue comment 504 .*Bisect: ${C1:0:7} fix(a): one (#101) is the first commit.*; 1 Linux run(s) on ci/bisect branches, now deleted. <!--" "$sw/calls")" "1,1"
+
+# Vote mode in a batch bisect (rung 2b, #2641 took needs-fix from one flaky
+# run): when the red tip's failed log holds only budget failures, each probe
+# runs up to 3 times and is called on 2 of 3. #90 good, #91 bad, #92 good, the
+# value twice its budget: probe 1's first run is red, then green, green, so
+# #91 is the culprit, not #90.
+DOCS='[{"filename": "docs/blueprints/photo/features/a.md", "status": "modified"}]'
+tip_red() {  # tip_red <sha> <job id> <failed-log line>: one red Linux run on <sha> whose failed log holds that line
+  jq -n --arg u "https://github.com/qbtrix/creative-apps/actions/runs/9200/job/$2" '[{name: "Linux", status: "completed",
+    conclusion: "failure", started_at: "2026-01-01T00:00:00Z", details_url: $u}]' >"$sw/checks.$1.json"
+  printf '%s\nCI: FAIL (swift test (all) exited 1)\n' "$3" >"$sw/joblog.$2"
+}
+batch_br() { git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' --format='%(refname:short)' | grep -E '^lane/batch-[0-9]+$'; }
+bdispatches() { grep -c -- "-f linux_only=true --ref $BR-$1\$" "$sw/calls" || true; }
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 90 91 92; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+H91=$(jq -r .headRefOid "$sw/91.json")
+lane_sweep
+TIP=$(batch_tip); BR=$(batch_br)
+tip_red "$TIP" 4300 "${ISSUE_LINE/1.046542/2.1}"
+lane_sweep
+expect "batch vote: a budget red probes the chain after 1 PR once" "$(probe_sha 1),$(bdispatches 1)" "$(git -C "$sw/origin.git" rev-parse "$TIP~2"),1"
+votes "$(probe_sha 1)" failure; lane_sweep
+expect "batch vote: one red run is no verdict, the probe runs again (no move to the base)" \
+  "$(bdispatches 1),$(grep -c -- '--add-label needs-fix' "$sw/calls"),$(probe_sha 0)" "2,0,"
+votes "$(probe_sha 1)" failure success; lane_sweep
+expect "batch vote: one each, a third run" "$(bdispatches 1),$(grep -c -- '--add-label needs-fix' "$sw/calls")" "3,0"
+votes "$(probe_sha 1)" failure success success; lane_sweep
+expect "batch vote: 2 of 3 green moves on to the chain after 2 PRs" "$(probe_sha 2)" "$(git -C "$sw/origin.git" rev-parse "$TIP~1")"
+votes "$(probe_sha 2)" failure failure; lane_sweep
+expect "batch vote: 2 of 3 red names the right PR" \
+  "$(grep -c '^pr edit 91 .*--add-label needs-fix' "$sw/calls"),$(grep -c '^pr edit 90 .*--add-label needs-fix' "$sw/calls")" "1,0"
+expect "batch vote: the PRs around it land" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 90,pr merge 92"
+expect "batch vote: the comment says how it was voted, and far from the budget it is not likely" \
+  "$(grep -c "^pr comment 91 .*head $H91 fails the Linux check once it lands on dev after #90: .*measured 2.1 against 1.0.*2 of 3" "$sw/calls"),$(grep -c 'likely' "$sw/calls")" "1,0"
+
+# 4.7% over its budget: the needs-fix comment says likely, and the culprit
+# still waits at its head on the next sweep.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 93 94; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+H94=$(jq -r .headRefOid "$sw/94.json")
+lane_sweep
+TIP=$(batch_tip); BR=$(batch_br)
+tip_red "$TIP" 4301 "$ISSUE_LINE"
+lane_sweep
+votes "$(probe_sha 1)" success success; lane_sweep
+expect "batch vote: near its budget the needs-fix comment says likely" \
+  "$(grep -c '^pr edit 94 .*--add-label needs-fix' "$sw/calls"),$(grep -c "^pr comment 94 .*head $H94 fails the Linux check once it lands on dev after #93: .*measured 1.046542 against 1.0, within 15% of it.*treat this as likely, not certain" "$sw/calls")" "1,1"
+lane_sweep
+expect "batch vote: a likely culprit still waits at its head, no writes" "$(grep -c '^pr [a-z]* 94 ' "$sw/calls")" 2
+
+# A plain red with a readable log keeps one run per probe: #95 good, #96 bad.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 95 96; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep
+TIP=$(batch_tip); BR=$(batch_br)
+tip_red "$TIP" 4302 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+lane_sweep
+verdict "$(probe_sha 1)" success; lane_sweep
+expect "batch vote: a plain red names its culprit on one run per probe" \
+  "$(bdispatches 1),$(grep -c '^pr edit 96 .*--add-label needs-fix' "$sw/calls"),$(grep -c '2 of 3' "$sw/calls")" "1,1,0"
 
 exit "$fail"

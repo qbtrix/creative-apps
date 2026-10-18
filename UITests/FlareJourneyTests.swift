@@ -47,14 +47,14 @@ final class FlareJourneyTests: XCTestCase {
         }
 
         // The sidebar goes through `.layers` intents: Scene 1 drops the layer
-        // selection (TIMING's Span picker hides), and Ball brings it back.
+        // selection (TIMING's Span picker hides), and Ball brings it back. Rows are
+        // picked off their names (Journey.pickSidebarRow, #2496).
         flare.openSample("Keyed Ball")
         let hint = flare.element("flare.inspector.span")
         XCTAssert(hint.waitForExistence(timeout: 10), "the sample didn't open with Ball selected")
-        let sidebar = flare.element("suite.sidebar")
-        sidebar.staticTexts["Scene 1"].click()
+        flare.pickSidebarRow("Scene 1")
         XCTAssert(hint.waitForNonExistence(timeout: 5), "selecting Scene 1 kept Ball selected")
-        sidebar.staticTexts["Ball"].click()
+        flare.pickSidebarRow("Ball")
         XCTAssert(hint.waitForExistence(timeout: 5), "selecting Ball in the sidebar didn't select it")
         flare.shot("sidebar-ball")
 

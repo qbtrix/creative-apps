@@ -1,5 +1,6 @@
 // Keys.swift (EK-3 stub, EK-15 body): the key and easing words every timeline shares, over
-// FlareCore's `Keyframe` and `Easing`. Stubs return fakes and never trap.
+// FlareCore's `Keyframe` and `Easing`: the six easing presets and the one handle and
+// sample math of a curve editor. Every function is total and never traps.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -47,27 +48,68 @@ public struct Segment<Property: Hashable & Codable & Sendable>: Hashable, Sendab
 public enum EasePreset: String, CaseIterable, Sendable {
     case linear, ease, easeIn, easeOut, easeInOut, hold
 
-    /// The FlareCore easing the preset sets. Stub: `.linear` until EK-15.
-    public var easing: Easing { .linear }
+    /// The FlareCore easing the preset sets.
+    public var easing: Easing {
+        switch self {
+        case .linear: .linear
+        case .ease: .ease
+        case .easeIn: .easeIn
+        case .easeOut: .easeOut
+        case .easeInOut: .easeInOut
+        case .hold: .hold
+        }
+    }
 
-    /// The preset's menu title. Stub: the raw value until EK-15.
-    public var title: String { rawValue }
+    /// The preset's menu title, in words.
+    public var title: String {
+        switch self {
+        case .linear: "Linear"
+        case .ease: "Ease"
+        case .easeIn: "Ease In"
+        case .easeOut: "Ease Out"
+        case .easeInOut: "Ease In-Out"
+        case .hold: "Hold"
+        }
+    }
 }
 
 /// The one handle math for an easing curve editor: the two Bézier handles in
 /// the unit square, a handle dragged to a point, and points along the curve.
 public enum EaseCurve {
+    /// The most points `samples(of:count:)` returns.
+    public static let maxSamples = 4096
+
     /// The two control points of a cubic Bézier easing; nil for linear and
-    /// hold, which have no handles. Stub: nil until EK-15.
-    public static func handles(of e: Easing) -> [Point]? { nil }
+    /// hold, which have no handles.
+    public static func handles(of e: Easing) -> [Point]? {
+        guard case let .cubicBezier(x1, y1, x2, y2) = e else { return nil }
+        return [Point(x: x1, y: y1), Point(x: x2, y: y2)]
+    }
 
-    /// `e` with handle `handle` (0 or 1) moved to `p`, x clamped to 0...1.
-    /// Stub: `e` unchanged until EK-15.
-    public static func moving(_ handle: Int, to p: Point, in e: Easing) -> Easing { e }
+    /// `e` with handle `handle` (0 or 1) moved to `p`, x clamped to 0...1 and
+    /// y left free (overshoot). Linear and hold become a cubic Bézier whose
+    /// handles start at (0, 0) and (1, 1). Any other handle or a non-finite
+    /// point leaves `e` unchanged.
+    public static func moving(_ handle: Int, to p: Point, in e: Easing) -> Easing {
+        guard p.x.isFinite, p.y.isFinite else { return e }
+        var points = handles(of: e) ?? [Point(x: 0, y: 0), Point(x: 1, y: 1)]
+        guard points.count == 2, points.indices.contains(handle) else { return e }
+        points[handle] = Point(x: min(max(p.x, 0), 1), y: p.y)
+        let first = points[0], second = points[1]
+        return .cubicBezier(x1: first.x, y1: first.y, x2: second.x, y2: second.y)
+    }
 
-    /// `count` points along the curve from (0, 0) to (1, 1); a count of 1
-    /// gives one point and counts are capped at 4096. Stub: none until EK-15.
-    public static func samples(of e: Easing, count: Int) -> [Point] { [] }
+    /// `count` points (x, eased y) evenly spaced from (0, 0) to (1, 1); a count
+    /// of 1 gives (0, 0) alone, below 1 none, and counts are capped at 4096.
+    public static func samples(of e: Easing, count: Int) -> [Point] {
+        let n = min(count, maxSamples)
+        guard n > 1 else { return n == 1 ? [Point(x: 0, y: e.value(at: 0))] : [] }
+        let last = Double(n - 1)
+        return (0..<n).map { i in
+            let x = Double(i) / last
+            return Point(x: x, y: e.value(at: x))
+        }
+    }
 }
 
 /// What removing keys leaves: a single remaining key stays as the one value

@@ -1,6 +1,6 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
 // collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
-// under it on preview data), LibraryInspector in the inspector, and
+// under it in the loupe and on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
 // publishes the `library.controls` JSON (LibraryControls.swift).
@@ -66,9 +66,10 @@ struct LibraryWindow: View {
                     onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
                     // On the content, so it hears keys only while the grid or the loupe has focus.
                     .onKeyPress(phases: .down) { press in route(press) }
-                if model.services.isPreview {
+                if model.showsStatusBar {
                     // Keeps its height; the content above shrinks to fit.
-                    LibraryStatusBar(model: model).fixedSize(horizontal: false, vertical: true)
+                    LibraryStatusBar(model: model, fitScale: areas.loupe.fitScale)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         } inspector: {
