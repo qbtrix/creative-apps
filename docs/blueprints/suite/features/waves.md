@@ -20,6 +20,16 @@ acceptance tests.
 | 2 | The AfterGlow home | `home.md` | #841–#848, #870; app lines #836–#840 (follow-up #849) | suite-contracts, bundle, #778; #782 for the follow-up | #1503 | built |
 | 2 | Switch between apps, hand-offs | `switching.md` | #852–#857, #860; app lines #861–#865 (follow-ups #858, #859) | suite-contracts, bundle, #778; #845 (home HM-2b) for SW-4a; #782 for SW-4c | file when ready | planned |
 | 4 | First-launch onboarding: three pages once, starters and samples, reopened from Help | `onboarding.md` | F10 (OB-1, OB-2), UC-13, SJ18, UC-11's live store; the beta cut's "onboarding (three pages, once)" | targets, suite-contracts, bundle (BU-4 copies Bundle/Samples/: OB-11), home (the harness and the class: OB-6), switching (OB-13); cross-line #836–#839 (the sample files), needs-ui SuiteSize.onboardingWindow and #803 AppTile; no settings wait (settings is out of the beta, OB-9 makes the preferences slot live); no editor-kernel wait (nothing here exports) | file when ready | planned |
+| 5 | Media I/O for the suite: movies (H.264, HEVC, ProRes 4444), GIF and APNG, stills, image and footage decode | `shell-media.md` | beta-80 plan row E9 (W1); the guard that Halo's H.264 writer moves into shell-media; Halo map rows 10 and 13 (decode half) | suite-contracts (built). No creative-core issue. Moves code already on dev: Halo render-out's HaloMovieWriter and Photo's ImageIOCodec (both built) | file when ready | planned |
+| 5 | Text for the suite: measure spans, list fonts and draw placed glyphs on Core Text | `shell-text.md` | beta-80 plan row E8, the macOS half (suite-shell shell-text, contract in suite-model); Halo's Core Text rasterizer as the code to move | suite-contracts (built); the shell-media slice SM-a first, for the two SuiteServices files (soft, a slice wait); creative-core text-engine's layout feeds on these metrics (soft: nothing here imports FlareCore) | file when ready | planned |
+
+**Wave 5 (beta-80 W1, 2026-10-18).** `shell-media` and `shell-text` are the
+suite's half of the captain-approved beta-80 plan's W1 engines (rows E9 and
+E8): macOS-only media and text services in SuiteShell with Linux-safe
+contracts in SuiteModel. They run side by side; `shell-text`'s first task
+waits on `shell-media`'s SM-1 for the two `SuiteServices` files. Neither
+edits `suite.md`: the blueprint line lands with the W3 adoption packets. Their engine siblings are
+creative-core's wave 5 and 6 packets (`docs/blueprints/core/features/waves.md`).
 
 #763 (dev is red) is lane-wide, not a dependency: the lane keeps merging
 while it is open, and no feature names it on its `Depends on:` line.

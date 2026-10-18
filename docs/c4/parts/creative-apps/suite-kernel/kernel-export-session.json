@@ -1,0 +1,12 @@
+{
+  "id": "kernel-export-session",
+  "name": "Export run and document session",
+  "description": "Export/ExportRun.swift: ExportRun<Options> (idle, editing, running with done and total, finished with the written files, failed with words; begin, start, progress that never goes back, end, dismiss). Session/DocumentSession.swift: SaveStatus, DocumentSession (dirty from the saved and current tokens, autosave due a delay after the last edit, didSave and didEdit) and RecoveryOffer. Session/VersionedJSON.swift: VersionedJSON (probe a file's version before decoding, a decoding error in words) and VersionError. Stubs from EK-3; bodies EK-22 and EK-24.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Export/ExportRun.swift",
+    "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "Sources/SuiteKernel/Session/VersionedJSON.swift"
+  ],
+  "order": 70
+}

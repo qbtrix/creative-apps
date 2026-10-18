@@ -24,6 +24,11 @@ Design: `paw-workspace/docs/design/drafts/2026-10-17-editor-kernel.md`.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
+**Wave 4 (beta-80 W1, 2026-10-18).** `font-picker` is SuiteUI's piece of
+the beta-80 plan's text row (E8): one picker over `shell-text`'s font
+families. Its first task waits on editor-kernel's EK-u for
+`SuiteGallery.swift` and on the suite's `shell-text` ST-a for the values.
+
 ## File when ready
 
 Each wave-2 feature issue is filed once #778 is closed (its `feature-done`

@@ -1,4 +1,4 @@
-// HaloEditMenuSnapshots.swift: Halo's Edit menu items (HaloMenuItem for
+// HaloEditMenuSnapshots.swift: Halo's Edit menu items (SuiteUI's MenuCommand for
 // .undo and .redo, as HaloEditMenu builds them) drawn as buttons, since the
 // menu bar does not render here, on the empty fixture with live services
 // after New Layer: "Undo New Layer" enabled, "Redo" disabled with "Nothing to
@@ -31,8 +31,8 @@ private struct EditMenuItems: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("After New Layer").font(SuiteFont.headline)
-            HaloMenuItem(command: .undo, target: target, shortcut: KeyboardShortcut("z"))
-            HaloMenuItem(command: .redo, target: target, shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
+            MenuCommand(command: .undo, target: target, shortcut: KeyboardShortcut("z"))
+            MenuCommand(command: .redo, target: target, shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
         }
         .padding(SuiteSpacing.xxl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

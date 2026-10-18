@@ -24,6 +24,11 @@ public struct SuiteControlInventory: ControlInventorying {
 
     public init() {}
 
+    /// An inventory of `entries`, each its own view's; `document()` keeps the last placed per id.
+    public init(entries: [ControlEntry]) {
+        for entry in entries { register(entry) }
+    }
+
     /// Registers `entry` as a new view's control.
     public mutating func register(_ entry: ControlEntry) { register(entry, owner: UUID()) }
 

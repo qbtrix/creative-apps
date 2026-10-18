@@ -83,3 +83,25 @@ import Testing
         #expect(NumericInput.committed(text, in: 0...100, keeping: 60.39, edited: true) == 60.39)
     }
 }
+
+// SuiteValueScrubbing (UC1) types and reads values through the rules above.
+private let degrees = ScrubSpec(range: 0...360, step: 1, decimals: 0, unit: "°")
+
+@Test func theContractCommitsTypedTextAndKeepsTheRest() {
+    let s = SuiteValueScrubbing()
+    #expect(s.committed("72", opening: "45", old: 45, spec: degrees) == 72)
+    #expect(s.committed("abc", opening: "72", old: 72, spec: degrees) == 72)
+    #expect(s.committed("400", opening: "72", old: 72, spec: degrees) == 360)
+    #expect(s.committed("nan", opening: "72", old: 72, spec: degrees) == 72)
+    #expect(s.committed("1.23", opening: "1.23", old: 1.2345, spec: ScrubSpec(range: 0.1...9.99, step: 0.01)) == 1.2345)
+}
+
+@Test func theContractShowsAndSpeaksTheFieldsPrecision() {
+    let s = SuiteValueScrubbing()
+    #expect(s.text(45, spec: degrees) == "45°")
+    #expect(s.spoken(45, spec: degrees) == "45 degrees")
+    #expect(s.text(0, spec: ScrubSpec(range: 0...100, step: 0.1, decimals: 1, unit: "pt")) == "0.0 pt")
+    #expect(s.spoken(1, spec: ScrubSpec(range: 0...100, step: 1, decimals: 0, unit: "px")) == "1 pixel")
+    #expect(s.fraction(90, spec: degrees) == 0.25)
+    #expect(s.fraction(.nan, spec: degrees) == 0)
+}
