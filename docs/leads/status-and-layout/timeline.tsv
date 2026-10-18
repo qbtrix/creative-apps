@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-18T22:37Z	3	pr-opened	#3004	SL-2 status row values
 2026-10-18T22:37Z	3	pr-opened	#2993	SL-3 J12 skipped
 2026-10-18T22:37Z	3	ci-run	39166877081	macOS build-only red on dev PhotoZoomSweepTests (#2990 fix); branches refreshed
+2026-10-18T22:50Z	3	heartbeat	-	wave 1 refreshed onto dev: #3003 6c31df92, #3004 ff176056, #2993 b074982e; lane macOS builds pending
