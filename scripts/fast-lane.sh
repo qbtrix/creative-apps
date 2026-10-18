@@ -35,8 +35,9 @@
 # unproven head with no check at all gets the same run, once per head (its
 # comment is the record), unless the PR comes from a fork. A conflict the
 # drivers can't resolve gets one comment naming the files and the
-# NEEDS_REBASE_LABEL label for a fixer; the label goes when a later head
-# integrates or merges.
+# NEEDS_REBASE_LABEL label for a fixer; the label goes once the PR is
+# MERGEABLE again (checked each sweep, before the PR is evaluated), integrates
+# or merges.
 #
 # Every run sweeps all open fast-lane PRs, oldest first. Eligible PRs don't
 # merge one by one: with one ready PR the lane squash-merges it (land); with two
@@ -1197,6 +1198,13 @@ evaluate() {
     (( tries++ < UNKNOWN_RETRIES )) || break
     sleep 5
   done
+  # A needs-rebase PR that GitHub reports mergeable again (a fixer's push, or dev
+  # moving) loses the label here and is evaluated below; CONFLICTING keeps it,
+  # UNKNOWN is left for a later sweep.
+  if [[ "$(jq -r --arg l "$NEEDS_REBASE_LABEL" '([.labels[]?.name] | index($l) != null) and .mergeable == "MERGEABLE" and .mergeStateStatus != "DIRTY"' "$tmp/pr.json")" == true ]]; then
+    log "PR #$n: mergeable again; dropping $NEEDS_REBASE_LABEL"
+    write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_REBASE_LABEL" || log "could not remove $NEEDS_REBASE_LABEL"
+  fi
   # Attribution never blocks (land strips it); the author is asked once.
   if [[ "$(jq -r '.body // ""' "$tmp/pr.json")" != "$(jq -r '.body // ""' "$tmp/pr.json" | strip_attribution)" ]]; then
     comment_once "$n" "$ATTRIBUTION_ASK" || log "PR #$n: could not ask about its attribution lines"

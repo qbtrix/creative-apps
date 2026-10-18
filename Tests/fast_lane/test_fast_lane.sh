@@ -783,6 +783,25 @@ verdict "$HEAD_SHA" failure
 lane_sweep
 expect "a red check: no Linux check dispatched" "$(grep -c '^workflow run' "$sw/calls")" 0
 
+# A stale needs-rebase (#2672, #2624, #2636 kept it after a fixer's push made
+# them mergeable): #84 is MERGEABLE again, so the sweep drops the label and
+# evaluates it in the same pass (no proof yet: its Linux check starts). #85
+# still conflicts at a head already handed to a fixer, and #86's mergeable is
+# UNKNOWN: both keep the label.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for spec in "84 MERGEABLE CLEAN" "85 CONFLICTING DIRTY" "86 UNKNOWN UNKNOWN"; do
+  read -r n m s <<<"$spec"
+  jq --argjson n "$n" --arg m "$m" --arg s "$s" '.number = $n | .headRefName = "b\($n)" | .mergeable = $m | .mergeStateStatus = $s
+    | .labels += [{name: "needs-rebase"}]' <<<"$BASE_PR" >"$sw/$n.json"
+  printf '%s\n' '[{"filename": "docs/x.md", "status": "modified"}]' >"$sw/files.$n.json"
+done
+printf '%s\n' "Fast lane: this PR conflicts with dev in t.md, and the lane could not integrate it at head $HEAD_SHA (the merge drivers don't resolve these)." >"$sw/85.comments"
+( UNKNOWN_RETRIES=0 FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
+expect "needs-rebase: a mergeable PR loses the label and is evaluated in the same sweep" \
+  "$(grep -c '^pr edit 84 .*--remove-label needs-rebase' "$sw/calls"),$(grep -c -- '-f linux_only=true --ref b84$' "$sw/calls")" "1,1"
+expect "needs-rebase: a PR that still conflicts keeps it" "$(grep -c '^pr edit 85 ' "$sw/calls")" 0
+expect "needs-rebase: an UNKNOWN mergeable state is left alone" "$(grep -cE '^pr edit 86 |--ref b86$' "$sw/calls")" 0
+
 # dispatch_reason: feature-done, then a UI change, then the 10-merge count.
 reason() {  # reason <name> <want> <feature> <ui> <since>
   local got; got=$(dispatch_reason "$3" "$4" "$5")
