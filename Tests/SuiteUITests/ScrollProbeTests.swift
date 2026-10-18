@@ -14,8 +14,10 @@ import Testing
         for i in 0..<3 { recorder.gridProbe.drew(GridProbe.scrollSeries, Double(i) / 60) }
         recorder.gridProbe.drew(GridProbe.layersScrollSeries, 1)
         recorder.gridProbe.drew(GridProbe.layersScrollSeries, .nan)
-        #expect(recorder.probe.drawn[GridProbe.scrollSeries] == [0, 1.0 / 60, 2.0 / 60])
-        #expect(recorder.probe.drawn["layers-scroll"] == [1])
+        let grid: [Double] = [0, 1.0 / 60, 2.0 / 60]
+        let layers: [Double] = [1]
+        #expect(recorder.probe.drawn[GridProbe.scrollSeries] == grid)
+        #expect(recorder.probe.drawn["layers-scroll"] == layers)
         #expect(recorder.probe.intervals(of: "grid-scroll", refreshInterval: 1.0 / 60).count == 2)
     }
 
