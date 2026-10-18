@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-18T21:32Z	3	pr-opened	#3011	AB-p1 Photo brush adapter (Model half)
 2026-10-18T21:38:11Z	check	check: dev 8640f00f; #3011 AB-p1 waits on lane; 0 findings
 2026-10-18T22:16:45Z	check	check: #3011 AB-p1 merged dev for #2990 fix, gate PASS, head 5095cc93
+22:36Z	check	dev 349578b8; #2973/#2979/#3010/#3011 wait on lane mac builds of their new heads; 0 findings
