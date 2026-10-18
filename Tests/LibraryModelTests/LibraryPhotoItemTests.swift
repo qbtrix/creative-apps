@@ -23,8 +23,8 @@ private let epoch = Date(timeIntervalSince1970: 0)
     #expect(DevelopSettings.neutral.setting(.exposure, to: 9).value(.exposure) == 5)
     #expect(DevelopSettings.neutral.setting(.contrast, to: 500).value(.contrast) == 100)
     #expect(DevelopSettings.neutral.setting(.tint, to: -500).value(.tint) == -100)
-    #expect(DevelopGroup.tone.sliders == [.exposure, .contrast, .highlights, .shadows])
-    #expect(DevelopGroup.color.sliders == [.temperature, .tint])
+    #expect(DevelopGroup.tone.sliders == [.exposure, .contrast, .highlights, .shadows, .whites, .blacks])
+    #expect(DevelopGroup.color.sliders == [.temperature, .tint, .vibrance, .saturation])
 }
 
 @Test func pastingAdjustmentsKeepsTheCrop() {
