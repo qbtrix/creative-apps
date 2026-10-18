@@ -65,13 +65,15 @@ import SuiteKernel
     /// without trapping, and the fixtures have the packet's shape.
     @Test func stubsReturnFakes() throws {
         var history = History<Int>()
-        history.record("Move", 1, key: "drag")
-        history.endRun()
         #expect(!history.undo { $0 } && !history.redo { $0 })
         history.jump(to: 0) { $0 }
         let reading: any HistoryReading = history
         #expect(!reading.isDirty && !reading.canUndo && !reading.canRedo && reading.undoName == nil)
         #expect(history.steps.isEmpty && history.index == 0 && history.currentStepID == history.savedStepID)
+        // EK-8 built the body: a recorded step is now undoable (HistoryTests covers the rest).
+        history.record("Move", 1, key: "drag")
+        history.endRun()
+        #expect(history.steps == ["Move"] && history.canUndo && history.isDirty)
 
         var selection = Selection(["a", "b"])
         #expect(selection.primary == "b" && selection.set == ["a", "b"] && selection.contains("a"))
