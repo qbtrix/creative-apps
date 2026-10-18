@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-18T14:30:54Z	heartbeat	wave 3	OB-7 OB-9 OB-10 in mutation runs; OB-4 OB-8 building
 2026-10-18T14:37:00Z	pr-open	OB-4	#2808 350f156a
 2026-10-18T14:43:19Z	pr-open	OB-10	#2809 a755cf09 mutate 4/4
+2026-10-18T14:43:42Z	pr-open	OB-8	#2810 19822e70 mutate 8/8; 2 tests wait OB-10 (follow-up OB-8b)
