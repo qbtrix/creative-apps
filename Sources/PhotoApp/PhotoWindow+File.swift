@@ -202,7 +202,7 @@ extension PhotoWindow {
             try model.openImage(data, name: url.lastPathComponent, codec: ImageIOCodec(), longestSide: side)
             documentURL = url
             files.noteRecent(url)
-            note = side.map { "Opened at \($0) px on the longest side" }
+            note = side.map { "Opened at \($0) px on the longest side (Photo opens up to \(PhotoWorkspace.maxOpenPixels / (1024 * 1024)) MP)" }
         } catch {
             problem = PhotoProblem("\(url.lastPathComponent) can't be opened.", Self.reason(error))
         }
