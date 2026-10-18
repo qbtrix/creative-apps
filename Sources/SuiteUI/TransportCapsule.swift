@@ -73,7 +73,7 @@ public struct TransportCapsule: View {
     }
 
     /// The timecode split at " / " into the current value and the rest ("" when there is no separator).
-    static func timecodeParts(_ timecode: String) -> (current: String, total: String) {
+    nonisolated static func timecodeParts(_ timecode: String) -> (current: String, total: String) {
         guard let cut = timecode.range(of: " / ") else { return (timecode, "") }
         return (String(timecode[..<cut.lowerBound]), String(timecode[cut.lowerBound...]))
     }
