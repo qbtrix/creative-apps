@@ -70,7 +70,8 @@ private struct InspectorDisclosureStyle: DisclosureGroupStyle {
 }
 
 /// The caps title and chevron (shown on hover or while collapsed) toggle the
-/// section; the Reset icon sits after them.
+/// section; the Reset icon sits after them in the same HStack, never over the
+/// header button, with a hit area of at least `iconButtonHit` square (#285, #622).
 private struct InspectorSectionHeader: View {
     let title: String
     @Binding var isExpanded: Bool
@@ -98,7 +99,10 @@ private struct InspectorSectionHeader: View {
             .accessibilityIdentifier(InspectorSection<EmptyView>.headerIdentifier(title))
             if let onReset {
                 Button(action: onReset) {
-                    Image(systemName: "arrow.counterclockwise").imageScale(.small).contentShape(.rect)
+                    Image(systemName: "arrow.counterclockwise")
+                        .imageScale(.small)
+                        .frame(minWidth: SuiteSize.iconButtonHit, minHeight: SuiteSize.iconButtonHit)
+                        .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
                 .help("Reset \(title)")
@@ -123,7 +127,7 @@ public struct InspectorRow<Value: View>: View {
     private let value: Value
     @State private var hovering = false
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.suiteReduceMotion) private var reduceMotion
 
     public init(_ label: String, @ViewBuilder value: () -> Value) {
         self.label = label

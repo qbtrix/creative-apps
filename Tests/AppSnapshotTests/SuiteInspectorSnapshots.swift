@@ -2,7 +2,9 @@
 // kind (plus a checkbox row, a section with its Reset icon and a collapsed
 // one), at the inspector's ideal width, in Light and Dark. Writes
 // suiteui-inspector-light.png and suiteui-inspector-dark.png, with the system
-// controls drawn for real (the snapshot helper renders through AppKit).
+// controls drawn for real (the snapshot helper renders through AppKit). The
+// section header with Reset is also checked against
+// Golden/inspector/section-header-<appearance>.png in the four appearances.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -12,6 +14,28 @@ import Testing
     @Test func inspector() throws {
         try snapshot(InspectorSample(), name: "suiteui-inspector-light", scheme: .light)
         try snapshot(InspectorSample(), name: "suiteui-inspector-dark", scheme: .dark)
+    }
+
+    /// The section header with its Reset beside it (#285, #622), at the
+    /// inspector's ideal width, as Golden/inspector/section-header-<appearance>.png
+    /// in the four appearances (IC-16 commits the baselines).
+    @Test func sectionHeaderGolden() {
+        let size = CGSize(width: SuiteSize.inspectorWidth.ideal, height: 72)
+        for appearance in SnapshotAppearance.allCases {
+            assertGolden(SectionHeaderSample(), size: size, name: "section-header", area: "inspector",
+                         appearance: appearance)
+        }
+    }
+}
+
+/// One section with Reset over one row, on the panel.
+private struct SectionHeaderSample: View {
+    var body: some View {
+        InspectorSection("Layer", onReset: {}) {
+            InspectorSliderRow("Opacity", value: 80, in: 0...100, unit: "%", decimals: 0) { _ in }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(SuiteColor.panel)
     }
 }
 
