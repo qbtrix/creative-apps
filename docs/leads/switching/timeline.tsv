@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-18T00:30Z	3	pr-opened	SW-4a	switch journeys with adoption skips; feature-done
 2026-10-18T21:25Z	3	ci-red	#2989	macOS build failed on dev break (TileCanvasView, #2942); fix #2990
 2026-10-18T21:55Z	3	merge-dev	#2989	#2990 on dev; dev merged into SW-4a
+2026-10-18T22:43Z	4	merged	#2989	SW-4a squash-merged as 531550f (feature-done)
