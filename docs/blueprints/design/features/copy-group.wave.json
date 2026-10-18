@@ -2,7 +2,7 @@
   "title": "Duplicate, group, cut, copy and paste",
   "wave": 1,
   "order": 20,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "#414, #416, #415",
   "waits_on": "design-contracts; design-seams for C-1, C-5; view tasks: design-window DW-a (DW-b for the drag check)",
