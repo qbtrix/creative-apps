@@ -94,3 +94,4 @@
 2026-10-18T17:56Z	heartbeat	no open dev-red; 39143942767 (bafd1d38) macOS running (~1h15m in); 39148719518 cancelled; 39149544175 (acb73b0c) pending
 2026-10-18T18:22Z	heartbeat	no open dev-red; 39143942767 (bafd1d38) macOS cancelled 18:10 before journeys (no ui-screens); 39152649677 (71facd44) queued, 39153086055 (c91b1468) pending
 2026-10-18T18:54Z	heartbeat	no open dev-red; 39152649677 (71facd44) Linux green, macOS running since 18:31; 39155751405 (2056379a) pending; 39153086055, 39155433572 cancelled
+2026-10-18T19:26Z	heartbeat	no open dev-red; 39152649677 (71facd44) macOS running since 18:31 (~55m in); 39158639377 (7d942bad) pending; 39155751405 cancelled
