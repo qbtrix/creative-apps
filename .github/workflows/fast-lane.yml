@@ -68,13 +68,15 @@ jobs:
           persist-credentials: false
           # The lane's own code, the merge drivers it installs in the scratch
           # clone that integrates a conflicting PR, and the canonical-first
-          # check with its concept list: all from main, never the PR.
+          # and SuiteUI-first checks with their concept lists: all from main, never the PR.
           sparse-checkout: |
             scripts/fast-lane.sh
             scripts/install-merge-drivers
             scripts/merge-json
             scripts/check-dup-logic
             Tests/canonical-concepts.txt
+            scripts/check-dup-views
+            Tests/canonical-ui-concepts.txt
           sparse-checkout-cone-mode: false
       - name: Sweep
         env:

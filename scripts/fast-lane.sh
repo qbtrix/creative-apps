@@ -20,7 +20,8 @@
 # (unless every path is under DOCS_RE), no changed or renamed-away path under
 # PROTECTED (CLAUDE.md's "Never edit" list), no looser app audit
 # (audit_loosens), no added app-local copy of a canonical concept without an
-# `Allow-Dup:` line (dup_logic), MERGEABLE, no red or running check on the head, the proof
+# `Allow-Dup:` line (dup_logic), no added app copy of a SuiteUI piece without an
+# `Allow-Dup-View:` line (dup_views), MERGEABLE, no red or running check on the head, the proof
 # above, and for a Belt PR (`Belt-Run:` or `Belt-Test:` line) Belt's
 # `belt/review` status while REQUIRE_BELT_REVIEW=1. A PR based on main is
 # retargeted. A PR that is behind the base merges as it is. One that conflicts
@@ -162,6 +163,12 @@ AUDIT_REASON="loosens the app audit: needs the captain's review"
 # and renamed-to files: names only, since it never reads PR code; the primary
 # type rule and the grandfathered baseline are scripts/ci's (the head's proof).
 DUP_REASON="adds app-local logic for a canonical concept (use the SuiteModel module, or add \`Allow-Dup: <concept> <reason>\` to the body)"
+# SuiteUI first (lead.md rules 16 and 20), the same way for views: an added
+# file under Sources/<X>App named for a UI concept (Tests/canonical-ui-concepts.txt:
+# Sheet, Notice, Transport, ...) needs an `Allow-Dup-View: <concept> <reason>`
+# line. main's scripts/check-dup-views --paths, names only; its signature and
+# shape rules and baseline are scripts/ci's.
+DUP_VIEW_REASON="adds an app copy of a SuiteUI piece (use the SuiteUI component, or add \`Allow-Dup-View: <concept> <reason>\` to the body)"
 
 # A supervisor's `Mac-Check: <run url>` line names a CI run whose green
 # macOS job built every app, which also proves a code PR builds (build_gate).
@@ -498,11 +505,19 @@ dup_logic() {
   if (( rc > 1 )); then echo "error: scripts/check-dup-logic could not run (exit $rc)"; else printf '%s' "$out"; fi
 }
 
+# dup_views <pr.json> <added.txt>: dup_logic for views (scripts/check-dup-views,
+# Allow-Dup-View lines), with the same `error: <why>` when it can't run.
+dup_views() {
+  local out rc=0
+  out=$(python3 "$HERE/check-dup-views" --paths "$2" --body <(jq -r '.body // ""' "$1") 2>/dev/null) || rc=$?
+  if (( rc > 1 )); then echo "error: scripts/check-dup-views could not run (exit $rc)"; else printf '%s' "$out"; fi
+}
+
 # decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir>
 #   [<mac-check run.json> <unused> [<build run.json> [<added.txt>]]]]
 # (pass "" "" for the audit dirs when the PR doesn't touch the audit; the
 # seventh argument is ignored, a slot kept so callers didn't shift; added.txt
-# lists the PR's added and renamed-to paths, "" or missing skips dup_logic)
+# lists the PR's added and renamed-to paths, "" or missing skips dup_logic and dup_views)
 decide() {
   local pr="$1" files="$2" checks="$3"
   local state draft base has_label author adds dels nfiles lines mergeable mstate head
@@ -567,6 +582,12 @@ decide() {
       "") log "canonical first: ok" ;;
       error:*) log "canonical first: ${dups#error: }"; pending="${dups#error: }" ;;
       *) log "canonical first: FAIL ($dups)"; reasons+=("$DUP_REASON: ${dups//,/, }") ;;
+    esac
+    dups=$(dup_views "$pr" "$9" | paste -sd, -)
+    case "$dups" in
+      "") log "suiteui first: ok" ;;
+      error:*) log "suiteui first: ${dups#error: }"; pending="${pending:-${dups#error: }}" ;;
+      *) log "suiteui first: FAIL ($dups)"; reasons+=("$DUP_VIEW_REASON: ${dups//,/, }") ;;
     esac
   fi
 
