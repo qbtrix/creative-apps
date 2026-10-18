@@ -159,7 +159,15 @@ private func occurrences(of needle: String, in text: String) -> Int {
             #expect(window.contains(call), "\(name) isn't held while a hand-off sends")
         }
         #expect(occurrences(of: ".disabled(model.sendingReason != nil)", in: window) == 2)
+        // #3018: a held control's help is the model's, which says "A document is opening." while held.
+        for help in [".help(model.skipHelp)", ".help(model.backHelp)", ".help(model.startEmptyHelp)"] {
+            #expect(occurrences(of: help, in: window) == 1, "\(help)")
+        }
         let start = try source("Sources/AfterGlowApp/OnboardingStartPage.swift")
+        #expect(start.contains(".help(model.presetsHelp(tile))") && start.contains(".help(model.sampleHelp(starter))"))
+        #expect(!start.contains("at once"), "a chip's help still says at once")
+        let pages = try source("Sources/AfterGlowApp/OnboardingPages.swift")
+        #expect(pages.contains("title: SuiteOnboarding.focusTitle($0)"), "a focus chip doesn't name its apps")
         #expect(start.contains("if model.failed == app, let message = model.message"), "a refusal isn't under its tile")
         #expect(start.contains("if model.failed == nil, let message = model.message"))
     }

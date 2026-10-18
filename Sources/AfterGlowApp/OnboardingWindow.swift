@@ -56,12 +56,13 @@ struct OnboardingWindow: View {
             HStack(spacing: SuiteSpacing.m) {
                 Button("Skip") { Task { await model.skip() } }
                     .keyboardShortcut(.cancelAction)
-                    .help("Close the welcome window. Help > Welcome to AfterGlow opens it again.")
+                    .help(model.skipHelp)
                     .disabled(model.sendingReason != nil)
                     .suiteControl(id: OnboardingControls.skip, enabled: model.sendingReason == nil, reason: model.sendingReason)
                 Spacer()
                 if model.canGoBack {
                     Button("Back") { model.back() }
+                        .help(model.backHelp)
                         .disabled(model.sendingReason != nil)
                         .suiteControl(id: OnboardingControls.back, enabled: model.sendingReason == nil, reason: model.sendingReason)
                 }
@@ -70,6 +71,7 @@ struct OnboardingWindow: View {
                     Button("Start from an empty home") { Task { await model.finish() } }
                         .buttonStyle(.borderedProminent)
                         .keyboardShortcut(.defaultAction)
+                        .help(model.startEmptyHelp)
                         .disabled(model.launching != nil)
                         .suiteControl(id: OnboardingControls.startEmpty, enabled: model.launching == nil,
                                       reason: model.launching == nil ? nil : "A document is opening.")

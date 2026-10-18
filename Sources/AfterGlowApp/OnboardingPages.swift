@@ -57,7 +57,7 @@ private struct OnboardingFocusChips: View {
 
     var body: some View {
         let options = choices.map {
-            InspectorOption(id: $0, title: $0.rawValue.capitalized, identifier: OnboardingControls.focus($0))
+            InspectorOption(id: $0, title: SuiteOnboarding.focusTitle($0), identifier: OnboardingControls.focus($0))
         }
         ChoiceChips(options: options, selected: model.focus) { model.choose($0) }
             .help("Puts the apps you use most first, here and on the home.")

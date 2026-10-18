@@ -17,12 +17,29 @@ public struct SuiteOnboarding: OnboardingFlowing {
     public func finishing(_ p: SuitePreferences, focus: OnboardingFocus?, version: Int) -> SuitePreferences {
         FakeOnboarding().finishing(p, focus: focus, version: version)
     }
-    /// A preset chip's label on the start page. One click creates the document,
-    /// so it says "New" (or "Import") and drops the ellipsis: no dialog follows.
+    /// True when the preset asks for more (a size, a folder) before it acts: its title ends in "…".
+    public static func asksForMore(_ preset: NewDocumentPreset) -> Bool { preset.title.hasSuffix("…") }
+    /// A preset chip's label on the start page. A preset that asks for more keeps its own title,
+    /// ellipsis and all ("Import Folder…", HIG); a one-step one names the document it makes ("New Blank Design").
     public static func presetTitle(_ preset: NewDocumentPreset) -> String {
-        var title = preset.title
-        while title.hasSuffix("…") { title.removeLast() }
-        return title.hasPrefix("New ") || title.hasPrefix("Import ") ? title : "New " + title
+        if asksForMore(preset) || preset.title.hasPrefix("New ") || preset.title.hasPrefix("Import ") { return preset.title }
+        let tileTitle = SuiteCreating.titles[preset.app] ?? ""
+        let noun = tileTitle.hasPrefix("New ") ? String(tileTitle.dropFirst(4)) : "Document"
+        return "New " + preset.title + " " + noun
+    }
+    /// A tile's chips' help: what a click does, saying so when a chip asks for more first.
+    public static func presetsHelp(_ tile: NewTile) -> String {
+        let shown = tile.presets.prefix(3), name = tile.app.displayName
+        if !shown.isEmpty, shown.allSatisfy(asksForMore) { return "Opens \(name), which asks for the details before it starts." }
+        if shown.contains(where: asksForMore) { return "Creates a new \(name) document; a chip ending in … asks for details first." }
+        return "Creates a new \(name) document and closes this window."
+    }
+    /// A focus chip's label: the focus and the apps it puts first, in order ("Animation: Flare, Halo");
+    /// just the focus when it names its one app ("Design") or moves none ("Everything").
+    public static func focusTitle(_ focus: OnboardingFocus) -> String {
+        let name = focus == .motion ? "Motion graphics" : focus.rawValue.capitalized
+        let apps = FakeOnboarding.firstApps(for: focus).map(\.displayName)
+        return apps.isEmpty || apps == [name] ? name : name + ": " + apps.joined(separator: ", ")
     }
     /// The apps a focus puts first, the order the start page and the home share.
     public static func order(for focus: OnboardingFocus?) -> [SuiteApp] {
