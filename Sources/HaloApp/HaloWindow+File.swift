@@ -210,12 +210,7 @@ private struct HaloFileAlert: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .alert(
-                shown ?? "",
-                isPresented: Binding(get: { shown != nil }, set: { if !$0 { shown = nil } })
-            ) {
-                Button("OK", role: .cancel) {}
-            }
+            .suiteProblemAlert($shown)
             .onChange(of: message) { _, new in if let new { shown = new } }
     }
 }

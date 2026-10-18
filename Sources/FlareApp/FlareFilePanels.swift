@@ -31,9 +31,7 @@ struct FlareFilePanels: ViewModifier {
                 FlareEditedDot(edited: edited)
                 ProbeElement("flare.file", label: edited ? "Edited" : "Saved", value: edited ? "Edited" : "Saved")
             }
-            .alert(shown ?? "", isPresented: Binding(get: { shown != nil }, set: { if !$0 { shown = nil } })) {
-                Button("OK", role: .cancel) {}
-            }
+            .suiteProblemAlert($shown)
             .onChange(of: model.saveError) { _, new in if let new { shown = new } }
             .onChange(of: openFailure) { _, new in if let new { shown = new } }
             .task {

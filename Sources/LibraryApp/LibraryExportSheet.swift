@@ -8,20 +8,11 @@ struct LibraryExportSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Export").font(SuiteFont.headline)
+        SuiteSheet("Export", cancelIdentifier: "library.export.cancel", onCancel: { dismiss() }) {
             Form {
                 Text("Export isn't connected yet.")
                     .foregroundStyle(SuiteColor.secondaryText)
             }
-            HStack {
-                Spacer()
-                Button("Cancel") { dismiss() }
-                    .keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("library.export.cancel")
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
     }
 }

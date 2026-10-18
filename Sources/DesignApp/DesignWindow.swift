@@ -104,9 +104,7 @@ struct DesignWindow: View {
             fit()
         }
         .onChange(of: model.pages) { note = nil }
-        .alert(problem ?? "", isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
-            Button("OK", role: .cancel) {}
-        }
+        .suiteProblemAlert($problem)
         .task { start() }
         .modifier(DesignClosePrompt(model: model))
         .environment(\.designLiveDrag, live)
