@@ -1,4 +1,4 @@
-// DesignCommands.swift: Design's menu bar. File: New File, Open…, Save, Save As…;
+// DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…;
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
@@ -10,10 +10,15 @@
 // it) as a focused scene value. An item that can't run is disabled, never hidden,
 // and its tooltip is the Model's help for it.
 // With no Design window focused only New File acts: it opens a window that starts
-// with a new file. Edit > Undo and Redo replace the system pair so they run the
-// model's history; that costs the system's own Undo inside a text field. The stock
-// pasteboard group stays, so Select All still works there. Its Delete removes the
+// with a new file. Edit > Undo and Redo replace the system pair. They go where the
+// Model's `undoTarget(textFieldFocused:)` says: while a text field has keyboard focus,
+// to the field's own undo (undo: and redo: down the responder chain, titled "Undo
+// Typing" from its undo manager; DesignFieldUndo watches the key window's focus),
+// else to the model's history (#275). Close (Command-W) replaces the system's in
+// `.saveItem`; it sends performClose: to the key window, so an edited window asks
+// first (DesignClosePrompt). The stock pasteboard group stays, so Select All still works there. Its Delete removes the
 // selected layers while the canvas or the Layers list has focus (`canDeleteLayer`).
+import AppKit
 import DesignModel
 import SwiftUI
 
@@ -45,6 +50,8 @@ struct DesignMenu {
     /// Rename Page… has no name field of its own yet: the page row's rename is the Layers panel's.
     var renamePageHelp = Self.renamePageHelp(DesignWorkspace())
     var deleteLayerHelp: String? = DesignRefusal.nothingSelected.help
+    /// Where Edit > Undo and Redo go, given whether a text field has keyboard focus: the Model's answer.
+    var undoTarget: (Bool) -> DesignUndoTarget = { DesignWorkspace().undoTarget(textFieldFocused: $0) }
 
     /// The selection commands the Edit and Object menus show beside Align.
     static let menuCommands: [DesignCommand] = [.duplicate, .group, .ungroup]
@@ -81,6 +88,7 @@ struct DesignMenu {
         deletePageHelp = model.deletePageHelp
         renamePageHelp = Self.renamePageHelp(model)
         deleteLayerHelp = model.help(.delete)
+        undoTarget = { [model] in model.undoTarget(textFieldFocused: $0) }
     }
 
     /// Why `command` can't run now; nil when it can.
@@ -129,7 +137,9 @@ struct DesignCommands: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) { DesignFileMenu(menu: menu) }
-        CommandGroup(replacing: .undoRedo) { DesignHistoryMenu(menu: menu) }
+        // `.saveItem` holds the system's Close, which DesignFileMenu's own Close replaces.
+        CommandGroup(replacing: .saveItem) {}
+        CommandGroup(replacing: .undoRedo) { DesignHistoryMenu(menu: menu, field: DesignFieldUndo.shared.state) }
         CommandGroup(after: .pasteboard) {
             Divider()
             DesignEditItems(menu: menu)
@@ -143,7 +153,7 @@ struct DesignCommands: Commands {
     }
 }
 
-/// File: New File and Open…, then Save and Save As…. The menu bar keeps its own Close below.
+/// File: New File and Open…, then Close, Save and Save As….
 struct DesignFileMenu: View {
     let menu: DesignMenu
 
@@ -154,6 +164,8 @@ struct DesignFileMenu: View {
             .keyboardShortcut("o")
             .disabled(!menu.hasWindow)
         Divider()
+        Button("Close", systemImage: "xmark") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
+            .keyboardShortcut("w")
         Button("Save", systemImage: DesignToolbarItem.save.systemImage) { menu.perform(.save) }
             .keyboardShortcut("s")
             .disabled(!menu.isOpen)
@@ -163,19 +175,66 @@ struct DesignFileMenu: View {
     }
 }
 
-/// Edit: Undo and Redo, titled for the edit they act on ("Undo Add Rectangle").
+/// Edit: Undo and Redo, titled for the edit they act on ("Undo Add Rectangle"), or for the
+/// focused text field's typing ("Undo Typing") when `menu.undoTarget` sends them there.
 struct DesignHistoryMenu: View {
     let menu: DesignMenu
+    var field = DesignFieldUndo.State()
+
+    private var inField: Bool { menu.undoTarget(field.focused) == .field }
 
     var body: some View {
-        Button(menu.undoTitle, systemImage: DesignToolbarItem.undo.systemImage) { menu.perform(.undo) }
-            .disabled(!menu.canUndo)
-            .help(menu.undoHelp ?? "")
-            .keyboardShortcut("z", modifiers: .command)
-        Button(menu.redoTitle, systemImage: DesignToolbarItem.redo.systemImage) { menu.perform(.redo) }
-            .disabled(!menu.canRedo)
-            .help(menu.redoHelp ?? "")
-            .keyboardShortcut("z", modifiers: [.shift, .command])
+        Button(inField ? field.undoTitle : menu.undoTitle, systemImage: DesignToolbarItem.undo.systemImage) {
+            if inField { DesignFieldUndo.send("undo:") } else { menu.perform(.undo) }
+        }
+        .disabled(inField ? !field.canUndo : !menu.canUndo)
+        .help((inField ? field.undoHelp : menu.undoHelp) ?? "")
+        .keyboardShortcut("z", modifiers: .command)
+        Button(inField ? field.redoTitle : menu.redoTitle, systemImage: DesignToolbarItem.redo.systemImage) {
+            if inField { DesignFieldUndo.send("redo:") } else { menu.perform(.redo) }
+        }
+        .disabled(inField ? !field.canRedo : !menu.canRedo)
+        .help((inField ? field.redoHelp : menu.redoHelp) ?? "")
+        .keyboardShortcut("z", modifiers: [.shift, .command])
+    }
+}
+
+/// The key window's focused text field and its own undo, for Edit > Undo and Redo (#275).
+/// It rereads the key window's first responder after each window update and writes
+/// `state` only when that changed, so the menu bar rebuilds on a focus or undo change only.
+@MainActor @Observable final class DesignFieldUndo {
+    struct State: Equatable {
+        var focused = false
+        var undoTitle = "Undo", redoTitle = "Redo"
+        var canUndo = false, canRedo = false
+
+        var undoHelp: String? { canUndo ? nil : "Nothing to undo." }
+        var redoHelp: String? { canRedo ? nil : "Nothing to redo." }
+    }
+
+    static let shared = DesignFieldUndo()
+    private(set) var state = State()
+
+    private init() {
+        _ = NotificationCenter.default.addObserver(forName: NSWindow.didUpdateNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { DesignFieldUndo.shared.refresh() }
+        }
+    }
+
+    /// Sends `action` (undo: or redo:) down the key window's responder chain, to the focused field.
+    static func send(_ action: String) {
+        NSApp.sendAction(Selector(action), to: nil, from: nil)
+    }
+
+    private func refresh() {
+        var next = State()
+        if let text = NSApp.keyWindow?.firstResponder as? NSTextView, text.isEditable {
+            let undo = text.undoManager
+            next = State(
+                focused: true, undoTitle: undo?.undoMenuItemTitle ?? "Undo", redoTitle: undo?.redoMenuItemTitle ?? "Redo",
+                canUndo: undo?.canUndo ?? false, canRedo: undo?.canRedo ?? false)
+        }
+        if next != state { state = next }
     }
 }
 
