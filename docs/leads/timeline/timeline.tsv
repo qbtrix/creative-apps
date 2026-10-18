@@ -134,3 +134,4 @@ utc	stage	event	ref	note
 2026-10-18T08:42Z	heartbeat	scoped suiteui 39111510770 on 2202c7c3 (includes #2629 #2638) in progress: this is the proof run; read it next
 2026-10-18T09:00Z	heartbeat	scoped suiteui 39111510770 on 2202c7c3: macOS (suiteui) still running
 2026-10-18T09:27:43Z	heartbeat	proof run 39111510770 red; 5 timeline findings relabelled gap (#2662 #2663 #2690 #2703 #2704); no round 3
+2026-10-18T09:45Z	heartbeat	Mac-Finish-Wanted posted on #1480
