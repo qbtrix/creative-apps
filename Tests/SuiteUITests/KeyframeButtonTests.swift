@@ -2,8 +2,11 @@
 // and key-here diamond, that the button keeps its width in every state, and
 // that its two buttons read as two 28 pt elements with their own identifiers
 // after the diamond appears (#1282; read from the window's accessibility
-// tree, which SwiftUI builds once the app is asked for it), and that a
-// disabled pair's tooltips say why it can't act. macOS only.
+// tree, which SwiftUI builds once the app is asked for it), that a
+// disabled pair's tooltips say why it can't act, that SuiteKeyframeFacing
+// gives each presence's stopwatch, diamond, action and spoken text (equal to
+// the contract's Fake), and that each `suite.controls` entry's reason is its
+// tooltip. macOS only.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -23,6 +26,38 @@ import Testing
     #expect(KeyState.keyedHere.diamond?.symbol == "diamond.fill" && KeyState.keyedHere.diamond?.action == "Remove Key")
 }
 
+@Test func faceForEachPresenceGivesItsStopwatchDiamondActionAndSpokenText() {
+    let facing = SuiteKeyframeFacing()
+    #expect(facing.face(for: .idle) == KeyframeFace(
+        symbol: "stopwatch", diamondSymbol: nil, diamondAction: nil, spoken: "Not animated"))
+    #expect(facing.face(for: .animated) == KeyframeFace(
+        symbol: "stopwatch.fill", diamondSymbol: "diamond", diamondAction: .add, spoken: "Animated"))
+    #expect(facing.face(for: .keyedHere) == KeyframeFace(
+        symbol: "stopwatch.fill", diamondSymbol: "diamond.fill", diamondAction: .remove, spoken: "Keyed at this frame"))
+    for presence in KeyPresence.allCases {
+        #expect(facing.face(for: presence) == FakeKeyframeFacing().face(for: presence))
+    }
+    #expect(KeyState.allCases.map(\.presence) == KeyPresence.allCases)
+    #expect(KeyAction.add.title == "Add Key" && KeyAction.remove.title == "Remove Key")
+}
+
+/// Each entry the pair lists in `suite.controls` takes its button's tooltip as
+/// the reason while it can't act, and none while it can.
+@Test func eachEntrysReasonEqualsItsHelp() {
+    let why = "Select a layer to animate it."
+    for state in KeyState.allCases {
+        let help = KeyframeButton.help("X", state: state, unavailable: why)
+        let off = KeyframeButton.entries("X", id: "k", state: state, enabled: false, unavailable: why)
+        #expect(off.stopwatch == ControlEntry(id: "k", enabled: false, reason: help.stopwatch))
+        #expect(off.diamond?.reason == help.diamond)
+        #expect(off.diamond?.id == (state.diamond == nil ? nil : KeyframeButton.diamondID("k")))
+        let on = KeyframeButton.entries("X", id: "k", state: state, enabled: true)
+        #expect(on.stopwatch == ControlEntry(id: "k", enabled: true) && on.diamond?.reason == nil)
+    }
+    let bare = KeyframeButton.entries("X", id: "k", state: .animated, enabled: false)
+    #expect(bare.stopwatch.reason == "Stop Animating X" && bare.diamond?.reason == "Add Key for X")
+}
+
 /// A pair that can act names its action; a disabled one shows the reason on both buttons, so a mouse user hovering
 /// either one learns why it does nothing (no dead controls).
 @Test func aDisabledPairTellsWhyOnBothButtons() {
@@ -39,9 +74,15 @@ import Testing
 
 /// The diamond slot is reserved even while empty, so the row never changes width.
 @MainActor @Test func everyStateTakesTheSameRoom() {
-    let sizes = KeyState.allCases.map { state in
-        NSHostingView(rootView: KeyframeButton("Rotation", state: state, onToggle: {}, onKey: {})).fittingSize
+    let sizes = KeyState.allCases.flatMap { state in
+        [
+            NSHostingView(rootView: KeyframeButton("Rotation", state: state, onToggle: {}, onKey: {})).fittingSize,
+            NSHostingView(rootView: KeyframeButton(
+                "Rotation", id: "k", state: state, facing: FakeKeyframeFacing(), registers: true,
+                onToggle: {}, onKey: {}).environment(\.suiteReduceMotion, true)).fittingSize,
+        ]
     }
+    #expect(sizes.count == 6)
     #expect(sizes.allSatisfy { $0 == CGSize(width: 2 * SuiteSize.keyframeButton, height: SuiteSize.keyframeButton) })
 }
 

@@ -97,6 +97,14 @@ public struct HomeMenu: Equatable, Sendable {
         return "\(kind) Presets"
     }
 
+    /// The menu's visible label: `presetsTitle` where it fits the tile at this
+    /// window width (HomeLayout's label estimate), else "Presets", which sits
+    /// under its own tile; the menu's accessibility label keeps the full title.
+    public static func presetsLabel(_ tile: NewTile, windowWidth: Double) -> String {
+        let title = presetsTitle(tile)
+        return HomeLayout.chipLabelWidth(title) <= HomeLayout.tileWidth(windowWidth: windowWidth) ? title : "Presets"
+    }
+
     /// Why Open… (menu, toolbar and empty state) can't act: `openWaits` while
     /// routing or sending is pending, and until recents-open-in gives Open… a
     /// file to route (#1763) while the routing slot is still a fake.

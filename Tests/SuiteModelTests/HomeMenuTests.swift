@@ -93,6 +93,17 @@ import Testing
         #expect(tiles.allSatisfy { HomeMenu.presetsTitle($0) != "Presets" })
     }
 
+    /// The menu's label: the kind's title where the tile holds it (1000 pt and up), a plain
+    /// "Presets" in an 880 pt window's 112 pt tile, where the full title truncated to "Animation Pre…".
+    @Test func presetsLabelFitsTheTile() throws {
+        let flare = try #require(SuiteCreating().tiles(missing: []).first { $0.app == .flare })
+        #expect(HomeMenu.presetsLabel(flare, windowWidth: 880) == "Presets")
+        #expect(HomeMenu.presetsLabel(flare, windowWidth: 800) == "Presets")
+        for width in [1000.0, 1280, 1728] {
+            #expect(HomeMenu.presetsLabel(flare, windowWidth: width) == "Animation Presets", "at \(width)")
+        }
+    }
+
     @Test func openWaitsForRouting() {
         #expect(menu().open == HomeMenu.Item("Open…", reason: HomeMenu.openWaits))
         #expect(menu(window: false).open == HomeMenu.Item("Open…"))

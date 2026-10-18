@@ -63,16 +63,16 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    let members = ["thumbnails", "coding", "develop", "crop", "exporter"]
+    let members = ["thumbnails", "develop", "crop", "exporter"]
     #expect(Set(services.unavailable.keys) == Set(members))
     #expect(services.unavailable.values.allSatisfy { !$0.isEmpty })
     let reasons: [String?] = [
-        LiveThumbnails.unavailable, LiveCatalogCoding.unavailable,
-        LiveDevelop.unavailable, LiveCrop.unavailable, LiveExporter.unavailable,
+        LiveThumbnails.unavailable, LiveDevelop.unavailable, LiveCrop.unavailable, LiveExporter.unavailable,
     ]
     #expect(reasons.allSatisfy { ($0?.isEmpty ?? true) == false })
     #expect(LiveImporter.unavailable == nil)
     #expect(LiveCulling.unavailable == nil)
+    #expect(LiveCatalogCoding.unavailable == nil)
     #expect(LiveLoupeImaging.unavailable == nil)
 }
 
@@ -120,7 +120,8 @@ private func liveServices() -> LibraryServices {
 @Test func liveStubsSayWhyUntilBuilt() async throws {
     let services = liveServices()
     #expect(services.unavailable["importer"] == nil && services.unavailable["culling"] == nil)
-    #expect(services.unavailable.count == 5)
+    #expect(services.unavailable["coding"] == nil && services.unavailable["loupe"] == nil)
+    #expect(services.unavailable.count == 4)
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })

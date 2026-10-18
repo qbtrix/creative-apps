@@ -2,7 +2,9 @@
 // facts (labels left, values right in tabular figures), with the older detail
 // lines, with a long name truncated in the middle and with no facts, above a
 // section, on the editor panel, in Light and Dark. Writes
-// suiteui-header-light.png and suiteui-header-dark.png.
+// suiteui-header-light.png and suiteui-header-dark.png, and checks the title
+// and info card against Golden/inspector/header-<appearance>.png in the four
+// appearances.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -12,6 +14,30 @@ import Testing
     @Test func header() throws {
         try snapshot(HeaderSheet(), name: "suiteui-header-light", scheme: .light)
         try snapshot(HeaderSheet(), name: "suiteui-header-dark", scheme: .dark)
+    }
+
+    /// The inspector title and info card on the editor panel, as
+    /// Golden/inspector/header-<appearance>.png in the four appearances
+    /// (IC-18 commits the baselines).
+    @Test func headerGolden() {
+        let size = CGSize(width: SuiteSize.editorPanelWidth, height: 160)
+        for appearance in SnapshotAppearance.allCases {
+            assertGolden(HeaderCard(), size: size, name: "header", area: "inspector", appearance: appearance)
+        }
+    }
+}
+
+/// The title with its info card of facts, filling the panel.
+private struct HeaderCard: View {
+    var body: some View {
+        InspectorHeader(
+            "Hero Banner.png",
+            facts: [
+                InspectorFact("Size", "1920 × 1080 px"), InspectorFact("Color", "sRGB · 8 bits"),
+                InspectorFact("Layers", "3"),
+            ])
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(SuiteColor.panel)
     }
 }
 

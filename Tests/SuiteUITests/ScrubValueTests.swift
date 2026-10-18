@@ -55,6 +55,60 @@ import Testing
     #expect(ScrubValue.defaultStep(for: -Double.greatestFiniteMagnitude...Double.greatestFiniteMagnitude) == 1)
 }
 
+/// #591: a log10 track over 0.1...10 whose value snaps a band of four steps
+/// either side of the middle to exactly 1, and whose `stepped` jumps out of
+/// that band, so one arrow from 1 leaves it and one back lands on exactly 1.
+@Test func aTracksSteppedLeavesTheDetentAndComesBackToOne() {
+    let detent = 0.04
+    let track = ScrubTrack(
+        positions: -1...1, step: 0.01, position: { log10($0) }, value: { abs($0) <= detent ? 1 : pow(10, $0) },
+        stepped: { position, delta in
+            position == 0 && abs(delta) <= detent ? (delta > 0 ? detent : -detent) + delta : position + delta
+        })
+    let up = ScrubValue.pressed(.increment, from: track.position(1), on: track)
+    #expect(track.value(up) != 1)
+    #expect(abs(up - 0.05) < 1e-12)
+    #expect(track.value(ScrubValue.pressed(.decrement, from: up, on: track)) == 1)
+    let down = ScrubValue.pressed(.decrement, from: track.position(1), on: track)
+    #expect(track.value(down) < 1)
+    #expect(ScrubValue.pressed(.home, from: up, on: track) == -1)
+    #expect(ScrubValue.pressed(.end, from: up, on: track) == 1)
+    // Shift folds ten steps into the delta the track receives; the result stays on the track.
+    #expect(abs(ScrubValue.pressed(.increment, from: 0, shift: true, on: track) - 0.1) < 1e-12)
+    #expect(ScrubValue.pressed(.increment, from: 0.99, shift: true, on: track) == 1)
+}
+
+/// The track's TrackStepping face is its closures; with no `stepped` it steps
+/// as ScrubValue.pressed does.
+@Test func aTrackConformsToTrackStepping() {
+    let track: any TrackStepping = ScrubTrack(
+        positions: -1...1, step: 0.01, position: { log10($0) }, value: { pow(10, $0) })
+    #expect(track.position(of: 10) == 1)
+    #expect(track.value(at: -1) == 0.1)
+    #expect(track.stepped(0.5, by: 0.1) == 0.6)
+    let custom: any TrackStepping = ScrubTrack(
+        positions: 0...1, step: 0.1, position: { $0 }, value: { $0 }, stepped: { _, _ in 0.25 })
+    #expect(custom.stepped(0.5, by: 0.1) == 0.25)
+}
+
+/// `stepped: nil` keeps today's result for every key, modifier and start.
+@Test func aTrackWithNoSteppedStepsAsToday() {
+    let keys: [ScrubKey] = [.increment, .decrement, .home, .end]
+    for (step, positions) in [(0.01, -1.0...1.0), (1, -180...180), (0.1, -5...5), (0, 0...10), (.nan, 0...10)] {
+        let track = ScrubTrack(positions: positions, step: step, position: { $0 }, value: { $0 })
+        for key in keys {
+            for (shift, option) in [(false, false), (true, false), (false, true), (true, true)] {
+                for start in [positions.lowerBound, 0.37, 0, 4.5, positions.upperBound, .nan, 1e9] {
+                    let today = ScrubValue.pressed(
+                        key, from: start, step: step, shift: shift, option: option, in: positions)
+                    let now = ScrubValue.pressed(key, from: start, shift: shift, option: option, on: track)
+                    #expect(now == today, "\(key) from \(start) step \(step) shift \(shift) option \(option)")
+                }
+            }
+        }
+    }
+}
+
 @Test func zoomReadsAsAWholePercent() {
     #expect(ViewerZoom.percentText(1) == "100%")
     #expect(ViewerZoom.percentText(0.514) == "51%")

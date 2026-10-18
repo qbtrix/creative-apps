@@ -1,5 +1,6 @@
 // SidebarTests.swift: SidebarItem, SidebarToggle and SidebarSection values.
 // macOS only.
+import SuiteModel
 import SuiteUI
 import Testing
 
@@ -55,4 +56,29 @@ import Testing
     #expect(!SidebarRow.doubleClickRenames(.blank, renamable: true, renaming: false))
     #expect(!SidebarRow.doubleClickRenames(.blank, renamable: false, renaming: false))
     #expect(!SidebarRow.doubleClickRenames(.blank, renamable: true, renaming: true))
+}
+
+@Test func sidebarItemBuiltTheOldWayIsNotDimmed() {
+    let item = SidebarItem(id: "a", title: "All", systemImage: "photo", count: 3)
+    #expect(!item.isDimmed)
+    #expect(!SidebarItem(id: "l", title: "Flare", app: .flare).isDimmed)
+    let look = SidebarRowLook(item)
+    #expect(look.title == nil)
+    #expect(look.isSelectable)
+}
+
+@Test func dimmedRowDrawsItsTitleInTextSecondaryAndStaysSelectable() {
+    let eye = SidebarToggle(id: "v", title: "Visible", onSymbol: "eye", offSymbol: "eye.slash", isOn: false)
+    let item = SidebarItem(id: "hidden", title: "Hidden Layer", systemImage: "square", toggles: [eye], isDimmed: true)
+    let look = SidebarRowLook(item)
+    #expect(look.title == SuiteColor.textSecondary)
+    #expect(look.isSelectable)
+    #expect(item.toggles == [eye])
+}
+
+@Test func dimmedDescendantStaysDimmedAtTheSecondLevel() {
+    let grandchild = SidebarItem(id: "g", title: "Locked", systemImage: "square", isDimmed: true)
+    let child = SidebarItem(id: "c", title: "Group", systemImage: "folder", children: [grandchild])
+    let parent = SidebarItem(id: "p", title: "Root", systemImage: "folder", children: [child])
+    #expect(parent.secondLevelRows.map(\.isDimmed) == [false, true])
 }
