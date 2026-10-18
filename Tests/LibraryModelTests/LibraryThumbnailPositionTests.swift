@@ -99,3 +99,16 @@ private func show(_ visible: [String], in catalog: inout LibraryCatalog, image: 
     show(top, in: &catalog, image: image)
     #expect(Set(catalog.thumbnails.keys) == Set(top))
 }
+
+@Test func scrollingFarDropsTheImagesBehind() {
+    guard let image = image() else { Issue.record("no image"); return }
+    var catalog = LibraryCatalog()
+    catalog.load(photos(100))
+    show(Array(catalog.order.prefix(5)), in: &catalog, image: image)
+    let near = Array(catalog.order[8..<13])  // 4 to 8 cells past the top screen: within two screens (10)
+    show(near, in: &catalog, image: image)
+    #expect(catalog.thumbnails.count == 10)
+    let far = Array(catalog.order[60..<65])
+    show(far, in: &catalog, image: image)
+    #expect(Set(catalog.thumbnails.keys) == Set(far))
+}
