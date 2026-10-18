@@ -5,3 +5,4 @@ utc	feature	event	ref	note
 2026-10-18T16:53:05Z	files-history	heartbeat	wave	builders running, no PRs yet
 2026-10-18T17:05:20Z	files-history	heartbeat	wave 2	PRs #2870 (FH-1), #2866 (FH-4); FH-3 fixer running
 2026-10-18T17:10:00Z	files-history	pr	#2873	FH-3 opened, wave 2 has all three PRs
+2026-10-18T17:15:07Z	files-history	heartbeat	wave 2	#2870 #2866 #2873 open, waiting on lane macOS builds
