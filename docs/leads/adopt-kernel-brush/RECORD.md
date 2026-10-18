@@ -2,9 +2,9 @@
 
 Issue: #1941 · Packet: docs/blueprints/suiteui/features/adopt-kernel-brush.md
 Run: act-1a1509b245f-653k (line lead with #1933, #1941, #1940)
-Stage: 3 wave A
+Stage: 3 wave B
 Base: b1526f3e (origin/dev); lead branch rebased on main 71facd44
-Next: AB-p1 at the next free builder slot (no AB PR was ever opened; EK-stroke done, EK-30's SuiteUI parts on dev; no open PR touches the hand-off files); AB-p2 (feature-done) once AB-p1 merges and EK-chrome is done
+Next: AB-p1 building (wave B, from dev f33b5b88); AB-p2 (feature-done) once AB-p1 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
