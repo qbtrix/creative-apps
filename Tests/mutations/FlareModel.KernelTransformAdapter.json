@@ -28,10 +28,10 @@
     "tests": "BoxGestureMathKernelTests"
   },
   {
-    "label": "squareCorner: a handle's spot is its 0-size square's min corner on a size-1 square, half a point off",
+    "label": "spotMixesAxes: a handle's y is read from its square's x edge, so the spot leaves the box's y",
     "file": "Sources/FlareModel/Live/BoxGestureMath+Kernel.swift",
-    "find": "BoxMath.handles(of: box, size: 0)[handle]",
-    "replace": "BoxMath.handles(of: box, size: 1)[handle].map { Rect(minX: $0.minX, minY: $0.minY, maxX: $0.minX, maxY: $0.minY) }",
+    "find": "y: (square.minY + square.maxY) / 2",
+    "replace": "y: (square.minX + square.maxY) / 2",
     "tests": "BoxGestureMathKernelTests"
   }
 ]
