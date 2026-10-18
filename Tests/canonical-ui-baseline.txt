@@ -20,7 +20,6 @@ A Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover Easing
 A Sources/FlareApp/FlareFilePanels.swift::FlareFileElement Probe
 A Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow KeyedRow
 A Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet Sheet
-A Sources/FlareApp/FlareOpenStatus.swift::FlareOpenProgressRow BusyNote
 A Sources/FlareApp/FlareTransport.swift::FlareTransport Transport
 A Sources/HaloApp/HaloCommands.swift::HaloMenuItem MenuCommand
 A Sources/HaloApp/HaloControls.swift::HaloControlsElement Probe
@@ -36,10 +35,8 @@ A Sources/HaloApp/HaloTransport.swift::HaloTransport Transport
 A Sources/HaloApp/HaloViewer.swift::HaloRefusalCaption Notice
 A Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement Probe
 A Sources/HaloApp/HaloWindow+File.swift::HaloFileElement Probe
-A Sources/HaloApp/HaloWindow+File.swift::HaloOpenProgress BusyNote
 A Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet Sheet
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow Notice
-A Sources/LibraryApp/LibraryBrowser.swift::LibraryImportProgressRow BusyNote
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow Notice
 A Sources/LibraryApp/LibraryCommands.swift::LibraryMenuItem MenuCommand
 A Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement Probe
@@ -51,8 +48,6 @@ A Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement Probe
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerRow LayerList
 A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
-A Sources/PhotoApp/PhotoWindow+Edit.swift::PhotoMergeNote BusyNote
-A Sources/PhotoApp/PhotoWindow+File.swift::PhotoFileWorkNote BusyNote
 A Sources/PhotoApp/StraightenSheet.swift::StraightenSheet Sheet
 B Sources/AfterGlowApp/HomeGrid.swift::HomeGrid caps-header
 B Sources/AfterGlowApp/HomeRunningStrip.swift::HomeRunningStrip caps-header
@@ -72,7 +67,6 @@ B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow pending-commit
 B Sources/FlareApp/FlareInspectorScene.swift::FlareSceneNumberRow pending-commit
 B Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet error-label
 B Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet sheet-buttons
-B Sources/FlareApp/FlareOpenStatus.swift::FlareOpenProgressRow busy-glass
 B Sources/FlareApp/FlareStage.swift::FlareStage preview-pill
 B Sources/FlareApp/FlareStageOverlay.swift::FlareStageOverlay accent-outline
 B Sources/FlareApp/FlareTimeline.swift::FlareTimeline error-label
@@ -93,7 +87,6 @@ B Sources/HaloApp/HaloTransport.swift::HaloTransport transport
 B Sources/HaloApp/HaloViewer.swift::HaloRefusalCaption error-label
 B Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement probe-element
 B Sources/HaloApp/HaloWindow+File.swift::HaloFileElement probe-element
-B Sources/HaloApp/HaloWindow+File.swift::HaloOpenProgress busy-glass
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet error-label
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet sheet-buttons
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow error-label
@@ -108,16 +101,10 @@ B Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet sheet-buttons
 B Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement probe-element
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine preview-pill
-B Sources/PhotoApp/PhotoWindow+Edit.swift::PhotoMergeNote busy-glass
-B Sources/PhotoApp/PhotoWindow+File.swift::PhotoFileWorkNote busy-glass
 B Sources/PhotoApp/StraightenSheet.swift::StraightenSheet sheet-buttons
 C Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement ~ Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement
 C Sources/FlareApp/FlareFilePanels.swift::FlareFileElement ~ Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement
 C Sources/FlareApp/FlareFilePanels.swift::FlareFileElement ~ Sources/HaloApp/HaloWindow+File.swift::HaloFileElement
-C Sources/FlareApp/FlareOpenStatus.swift::FlareOpenProgressRow ~ Sources/HaloApp/HaloWindow+File.swift::HaloOpenProgress
-C Sources/FlareApp/FlareOpenStatus.swift::FlareOpenProgressRow ~ Sources/PhotoApp/PhotoWindow+File.swift::PhotoFileWorkNote
 C Sources/HaloApp/HaloControls.swift::HaloControlsElement ~ Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement
 C Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement ~ Sources/HaloApp/HaloWindow+File.swift::HaloFileElement
 C Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement ~ Sources/SuiteUI/ControlInventory.swift::SuiteControlsElement
-C Sources/HaloApp/HaloWindow+File.swift::HaloOpenProgress ~ Sources/PhotoApp/PhotoWindow+File.swift::PhotoFileWorkNote
-C Sources/PhotoApp/PhotoWindow+Edit.swift::PhotoMergeNote ~ Sources/PhotoApp/PhotoWindow+File.swift::PhotoFileWorkNote

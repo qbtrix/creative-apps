@@ -1,8 +1,9 @@
 // EmptyStateView.swift: what a pane shows when it has nothing to show. Built
 // on the system ContentUnavailableView. Says what to do next and, when there
-// is one, offers the button that does it (the one prominent action, listed in
-// `suite.controls` with role "primary" when it has an identifier; disabled,
-// saying why, while it can't run).
+// is one, offers the button that does it: the one primary button, the system
+// bordered prominent style filled with `accentFill` (white text at 5.05:1),
+// listed in `suite.controls` with role "primary" when it has an identifier;
+// disabled, saying why, while it can't run. With no action there is no button.
 import SwiftUI
 
 public struct EmptyStateView: View {
@@ -18,6 +19,12 @@ public struct EmptyStateView: View {
         self.action = action
     }
 
+    /// The role the button registers with in `suite.controls`.
+    static let primaryRole = "primary"
+
+    /// The action the primary button runs; nil when the view draws no button.
+    var primaryAction: ToolbarAction? { action }
+
     public var body: some View {
         ContentUnavailableView {
             Label(title, systemImage: systemImage)
@@ -28,10 +35,11 @@ public struct EmptyStateView: View {
             if let action {
                 Button(action.title, action: action.perform)
                     .buttonStyle(.borderedProminent)
+                    .tint(SuiteColor.accentFill)
                     .controlSize(.large)
                     .disabled(!action.isEnabled)
                     .help(action.help)
-                    .suiteControl(action, role: "primary")
+                    .suiteControl(action, role: Self.primaryRole)
             }
         }
     }

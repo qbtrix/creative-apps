@@ -61,6 +61,51 @@ import SuiteKernel
         }
     }
 
+    /// EK-2: history, selection and the tree are declared, their stubs answer
+    /// without trapping, and the fixtures have the packet's shape.
+    @Test func stubsReturnFakes() throws {
+        var history = History<Int>()
+        history.record("Move", 1, key: "drag")
+        history.endRun()
+        #expect(!history.undo { $0 } && !history.redo { $0 })
+        history.jump(to: 0) { $0 }
+        let reading: any HistoryReading = history
+        #expect(!reading.isDirty && !reading.canUndo && !reading.canRedo && reading.undoName == nil)
+        #expect(history.steps.isEmpty && history.index == 0 && history.currentStepID == history.savedStepID)
+
+        var selection = Selection(["a", "b"])
+        #expect(selection.primary == "b" && selection.set == ["a", "b"] && selection.contains("a"))
+        let picked = selection.pick("c", .extend, order: ["a", "b", "c"])
+        #expect(!picked)
+        selection.move(.right, order: ["a", "b", "c"], columns: 3)
+        selection.prune { _ in true }
+        #expect(selection == Selection(["a", "b"]))
+
+        var tree = KernelFixtures.tree200
+        #expect(tree.rows(expanded: []).count == 7)
+        let groups = ["header", "hero", "cards", "gallery", "archive", "footer"]
+            + (1...4).flatMap { r in ["row-\(r)"] + (1...3).map { "row-\(r)-col-\($0)" } }
+        let all = tree.rows(expanded: Set(groups))
+        #expect(all.count == 200 && all.map(\.depth).max() == 3)
+        #expect(all.first?.id == "background" && all.contains { $0.id == "card-7" && $0.name == "Card 7" })
+        #expect(all.filter(\.isHidden).map(\.id) == ["archive"] && all.filter(\.isLocked).map(\.id) == ["footer"])
+        #expect(all.first { $0.id == "archive-1" }?.inheritsHidden == true)
+        try tree.move("card-7", into: "header", at: 3)
+        try tree.arrange(.bringToFront, ["hero"])
+        #expect(try tree.group(["hero"], name: "G", payload: KernelFixtures.cards.roots[0].payload) { "g1" } == "g1")
+        try tree.ungroup("g1")
+        try tree.setFollow("hero", "header", local: { _ in .identity }, keepingPlace: { _, _ in })
+        #expect(tree == KernelFixtures.tree200 && tree.node("hero") == nil && tree.ancestors(of: "hero") == nil)
+        let updated = tree.update("hero") { node in node.name = "X" }
+        #expect(tree.duplicate(["hero"]) { "copy" }.isEmpty && !updated)
+        #expect(tree.frontToBack.isEmpty && !tree.isEffectivelyHidden("archive") && !tree.follows("hero", "header"))
+        #expect(tree.worldPlacement(of: "hero") { _ in .identity } == .identity)
+
+        let desktop = KernelFixtures.cards.rows(expanded: ["desktop"])
+        #expect(desktop.map(\.name) == ["Desktop", "Hidden", "Locked", "Pair", "Title", "C", "B", "A"])
+        #expect(KernelFixtures.cards.roots.first?.payload.frame.width == 1440)
+    }
+
     /// KJ0, the kernel shape walk: every module's declared shape in one pass.
     /// EK-1 walks the geometry; EK-2 adds history, selection and the tree,
     /// EK-3 keys, transform, export and session, and turns it on.

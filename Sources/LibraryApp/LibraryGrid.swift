@@ -1,19 +1,23 @@
 // LibraryGrid.swift: the photo grid, SuiteUI's ThumbnailGrid of the sorted
-// photos at the catalog's cell size, and the ThumbnailItem a photo becomes
-// (its flat color, file name, and rating, flag and label badges; a reject is
-// dimmed under SuiteUI's "Rejected" badge). A cell's tooltip names the photo
-// and its cull state ("IMG_0040: 1 star, Picked"), or why its file can't be
-// read, so the flag glyph never stands alone. Each cell is
+// photos at the catalog's cell size, and the ThumbnailItem a photo becomes:
+// its held thumbnail (drawn through `Image(display:)`, aspect-fit by the
+// grid; the placeholder fill while it loads), file name, and rating, flag
+// and label badges. A reject is dimmed under SuiteUI's "Rejected" badge; a
+// file that can't be read shows SuiteUI's unreadable mark. A cell's value is
+// the catalog's `cellValue(for:)` ("ready 256×171 3 stars"), and its tooltip
+// names the photo and its cull state ("IMG_0040: 1 star, Picked"), or why its
+// file can't be read, so the flag glyph never stands alone. Each cell is
 // identified `library.grid.cell.<photo id>` on the cell itself, never on the
-// grid, so journeys and the app audit can find it. Values in,
-// closures out; LibraryCatalog holds the state.
+// grid, so journeys and the app audit can find it. The cells on screen go to
+// `menu.thumbnails.visibleChanged`, which requests their thumbnails. Values
+// in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
 
 struct LibraryGrid: View {
     let model: LibraryCatalog
-    /// The window's menu; the thumbnails feature calls `menu.thumbnails` from here.
+    /// The window's menu; the cells on screen go to `menu.thumbnails.visibleChanged`.
     var menu = LibraryMenu()
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
@@ -23,32 +27,42 @@ struct LibraryGrid: View {
 
     var body: some View {
         let side = CGFloat(model.cellSize)
+        let visibleChanged = menu.thumbnails.visibleChanged
         ThumbnailGrid(
-            model.sortedItems.map { ThumbnailItem<String>(photo: $0) }, cellSize: CGSize(width: side, height: side * 3 / 4),
+            model.sortedItems.map {
+                ThumbnailItem<String>(
+                    photo: $0, thumbnail: model.thumbnails[$0.id], value: model.cellValue(for: $0.id))
+            },
+            cellSize: CGSize(width: side, height: side * 3 / 4),
             selection: model.selection, onSelectionChange: onSelect, onOpen: onOpen,
-            cellIdentifierPrefix: Self.cellIdentifierPrefix)
+            cellIdentifierPrefix: Self.cellIdentifierPrefix,
+            onVisibleChange: { visibleChanged?($0) })
     }
 }
 
 extension ThumbnailItem where ID == String {
-    /// A grid cell for a photo: its flat color, file name, and rating, flag and
-    /// label badges, dimmed for a reject, with the photo's cull state as its help.
-    init(photo: PhotoItem) {
+    /// A grid cell for a photo: its thumbnail (nil draws the placeholder fill),
+    /// file name, and rating, flag and label badges, dimmed for a reject and
+    /// marked when its file can't be read, with `value` as its accessibility
+    /// value and the photo's cull state as its help.
+    init(photo: PhotoItem, thumbnail: DisplayImage? = nil, value: String? = nil) {
         self.init(
-            id: photo.id, image: Self.image(rgba: photo.pixel), caption: photo.name,
+            id: photo.id, image: thumbnail.map(Image.init(display:)), caption: photo.name,
             badges: ThumbnailBadges(
                 rating: photo.rating, isFlagged: photo.isFlagged,
                 colorLabel: photo.label.map { (name: $0.rawValue, color: $0.color) },
                 dimmed: photo.flag == .reject),
-            help: Self.help(photo: photo))
+            accessibilityValue: value, help: Self.help(photo: photo),
+            isUnreadable: photo.availability != .available)
     }
 
-    /// "IMG_0040: 1 star, Picked"; why the file can't be read when it can't.
+    /// "IMG_0040: 1 star, Picked"; why the file can't be read when it can't
+    /// (the catalog's `cellHelp(for:)`, from the same `availability.help`).
     static func help(photo: PhotoItem) -> String {
         photo.availability.help ?? "\(photo.name): \(photo.cullSummary)"
     }
 
-    /// A one-pixel sRGB image from RGBA8 bytes; the cell and the loupe stretch it to fill.
+    /// A one-pixel sRGB image from RGBA8 bytes; the loupe stretches it to fill.
     static func image(rgba: [UInt8]) -> Image? {
         guard rgba.count == 4, let space = CGColorSpace(name: CGColorSpace.sRGB),
               let provider = CGDataProvider(data: Data(rgba) as CFData),
