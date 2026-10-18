@@ -1,6 +1,6 @@
 // StorePreferencesTests.swift: the live PreferencesStoring over FileStore's
-// preferences.json (onboarding OB-9's acceptance row, written first by OB-2;
-// disabled until OB-9's body). A fresh temp folder per test.
+// preferences.json (onboarding OB-9's acceptance row and its store cost
+// row, which is reported, not gated). A fresh temp folder per test.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -19,7 +19,7 @@ import Testing
         try store.read("preferences.json", as: SuitePreferences.self)
     }
 
-    @Test(.disabled("waits on OB-9")) func emptyLoadsDefaultsAndSaveWritesRevisionOne() async throws {
+    @Test func emptyLoadsDefaultsAndSaveWritesRevisionOne() async throws {
         let prefs = StorePreferences(store: store)
         var p = try await prefs.load()
         #expect(p == SuitePreferences() && p.revision == 0)
@@ -30,7 +30,7 @@ import Testing
         #expect(try onDisk().revision == 1 && onDisk().value?.homeOrder == p.homeOrder)
     }
 
-    @Test(.disabled("waits on OB-9")) func aStaleSaveThrowsAndChangesNothing() async throws {
+    @Test func aStaleSaveThrowsAndChangesNothing() async throws {
         let prefs = StorePreferences(store: store)
         let first = try await prefs.save(SuitePreferences(units: .inches))
         await #expect(throws: SuiteError.staleRevision) { try await prefs.save(SuitePreferences(units: .pixels)) }
@@ -39,9 +39,11 @@ import Testing
         try store.write("preferences.json", SuitePreferences(units: .centimeters), expecting: 1)
         await #expect(throws: SuiteError.staleRevision) { try await prefs.save(first) }
         #expect(try onDisk().value?.units == .centimeters)
+        let reloaded = try await prefs.load()
+        #expect(reloaded.units == .centimeters && reloaded.revision == 2)
     }
 
-    @Test(.disabled("waits on OB-9")) func changesYieldEachNewRevisionOnce() async throws {
+    @Test func changesYieldEachNewRevisionOnce() async throws {
         let prefs = StorePreferences(store: store)
         var changes = await prefs.changes().makeAsyncIterator()
         let one = try await prefs.save(try await prefs.load())
@@ -50,7 +52,7 @@ import Testing
         #expect(await changes.next() == 2)
     }
 
-    @Test(.disabled("waits on OB-9")) func aSecondInstanceSeesTheWriteAfterExternalChange() async throws {
+    @Test func aSecondInstanceSeesTheWriteAfterExternalChange() async throws {
         let first = StorePreferences(store: store)
         let second = StorePreferences(store: FileStore(folder: store.folder))
         var secondChanges = await second.changes().makeAsyncIterator()
@@ -64,11 +66,24 @@ import Testing
         #expect(await secondChanges.next() == 2)
     }
 
-    @Test(.disabled("waits on OB-9")) func onWriteIsCalledWithTheFileOnEverySave() async throws {
+    @Test func onWriteIsCalledWithTheFileOnEverySave() async throws {
         let calls = Mutex<[String]>([])
         let prefs = StorePreferences(store: store) { name in calls.withLock { $0.append(name) } }
         _ = try await prefs.save(try await prefs.save(SuitePreferences()))
         await #expect(throws: SuiteError.staleRevision) { try await prefs.save(SuitePreferences()) }
         #expect(calls.withLock { $0 } == ["preferences.json", "preferences.json"])
+    }
+
+    /// The store cost row: `save` on a ~1 KB file, ≤ 2 ms on a device (as Budget+Store). Timing is
+    /// printed, not asserted; the test only checks that every save landed.
+    @Test func saveWithinBudget() async throws {
+        let prefs = StorePreferences(store: store)
+        let keys = Dictionary(uniqueKeysWithValues: (0..<32).map { ("key\($0)", "value-\($0)") })
+        var p = SuitePreferences(perApp: ["photo": keys])
+        _ = try await suiteMeasure("preferences.save", runs: 50, budget: suiteBudget(device: 2)) { _ in
+            p = try await prefs.save(p)
+        }
+        #expect(p.revision == 50)
+        #expect(try onDisk().revision == 50 && onDisk().value?.perApp == ["photo": keys])
     }
 }
