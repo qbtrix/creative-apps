@@ -4,5 +4,5 @@
 {"label":"any picked end key marks its segment, not just a track's last","file":"Sources/HaloModel/HaloKeySelection.swift","find":"let picked = selectedKeys.contains(ref) || (next.frame == sorted.last?.frame && selectedKeys.contains(end))","replace":"let picked = selectedKeys.contains(ref) || selectedKeys.contains(end)","tests":"HaloKeySelectionTests"},
 {"label":"⌫ always deletes the layer","file":"Sources/HaloModel/HaloKeySelection.swift","find":"pickedKeyframes.isEmpty ? .deleteLayer : .deleteKeys","replace":".deleteLayer","tests":"HaloKeySelectionTests"},
 {"label":"a track's keys are deleted first frame first","file":"Sources/HaloModel/HaloKeySelection.swift","find":"$0.property == $1.property ? $0.frame > $1.frame","replace":"$0.property == $1.property ? $0.frame < $1.frame","tests":"HaloKeySelectionTests"},
-{"label":"the pick survives a key delete","file":"Sources/HaloModel/HaloKeySelection.swift","find":"        if deleted { selectedKeys = [] }\n","replace":"","tests":"HaloKeySelectionTests"}
+{"label":"the pick survives a key delete","file":"Sources/HaloModel/HaloKeySelection.swift","find":"        if deleted { keySelection.clear() }\n","replace":"","tests":"HaloKeySelectionTests"}
 ]
