@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-18T20:45:00Z	merge	#2906 merged ae6e7c81; OB-m follow-ups done
 2026-10-18T20:58:12Z	check	heartbeat: all fix PRs merged; waiting on full dev run 39164756292 ae6e7c81 Linux for OB-u
 2026-10-18T21:25:08Z	check	heartbeat: full dev run 39166900704 f33b5b88 pending (contains #2903); scoped suite 39167050158 f33b5b88 queued, for OB-u round-2 critics
+2026-10-18T21:51:30Z	check	heartbeat: full dev runs keep cancelling while pending (latest 39169434591 e3859e3f); scoped suite 39167050158 still queued
