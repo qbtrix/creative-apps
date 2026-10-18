@@ -122,14 +122,6 @@ public struct LayerTree<Payload: LayerPayload>: Hashable, Sendable {
     /// Copies `ids` with fresh ids from `mint`, each in front of its original;
     /// returns the copies' ids. Stub: none.
     public mutating func duplicate(_ ids: [String], mint: () -> String) -> [String] { [] }
-    /// True when `id` follows `ancestor`, directly or through others (EK-13). Stub: false.
-    public func follows(_ id: String, _ ancestor: String) -> Bool { false }
-    /// The node's placement composed along its follow chain (EK-13). Stub: identity.
-    public func worldPlacement(of id: String, local: (LayerNode<Payload>) -> Matrix) -> Matrix { .identity }
-    /// Makes `id` follow `parent` (nil: nothing), keeping its world place
-    /// through `keepingPlace` (EK-13). Stub: nothing.
-    public mutating func setFollow(_ id: String, _ parent: String?, local: (LayerNode<Payload>) -> Matrix,
-                                   keepingPlace: (inout LayerNode<Payload>, Matrix) -> Void) throws(TreeRefusal) {}
     /// Appends `nodes` front to back, then the children of each expanded one.
     private static func walk(_ nodes: [LayerNode<Payload>], depth: Int, hidden: Bool, locked: Bool,
                              expanded: Set<String>, into out: inout [LayerRow]) {

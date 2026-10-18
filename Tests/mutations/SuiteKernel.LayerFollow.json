@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the cycle check sees only a direct follow",
+    "file": "Sources/SuiteKernel/Layers/LayerFollow.swift",
+    "find": "if parent == id || follows(parent, id) { throw .cycle(id) }",
+    "replace": "if parent == id || followNode(parent)?.followsID == id { throw .cycle(id) }",
+    "tests": "LayerFollowTests"
+  },
+  {
+    "label": "world placement composes the layer before its parent",
+    "file": "Sources/SuiteKernel/Layers/LayerFollow.swift",
+    "find": "{ world, placement in placement * world }",
+    "replace": "{ world, placement in world * placement }",
+    "tests": "LayerFollowTests"
+  },
+  {
+    "label": "setFollow skips keepingPlace",
+    "file": "Sources/SuiteKernel/Layers/LayerFollow.swift",
+    "find": "if let placed { keepingPlace(&node, placed) }",
+    "replace": "_ = placed",
+    "tests": "LayerFollowTests"
+  }
+]
