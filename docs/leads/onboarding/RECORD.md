@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-u fix round 1 merged (#2901, #2903, #2905); slice-done and Mac-Finish-Wanted once a full dev run containing b1526f3e has a green Linux job, then re-review (round 2). OB-m follow-ups: #2902, #2906 open; #2891 fixer running. OB-13 once switching and the bundled samples are on dev; OB-z review after it.
+Next: OB-u fix round 1 merged (#2901, #2903, #2905); slice-done and Mac-Finish-Wanted once a full dev run containing b1526f3e has a green Linux job, then re-review (round 2). OB-m follow-ups: #2902, #2906 open; #2966 (#2891) open. OB-13 once switching and the bundled samples are on dev; OB-z review after it.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -45,7 +45,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | F-2895 | OB-u | 6 | #2895 start-launching shot finite (no endless ring on a silent sender) | Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift | AppSnapshotTests on the Mac (known issue, no golden) | #2901 | merged (f8e3cd15) |
 | F-2890 | OB-m | 6 | #2890 Skip keeps the stored home order; #2892 missing-sample message per packet | OnboardingModel.swift | OnboardingModelTests; Mutate 15/15 | #2906 | needs-rebase (conflict with #2903); fixer merging dev |
 | F-2893 | OB-m | 6 | #2893 StorePreferences own-save mutation caught | StorePreferencesTests, plan | StorePreferencesTests; Mutate 5/5 | #2902 | open |
-| F-2891 | OB-m | 6 | #2891 refused hand-off resets launching and message (tests, plan) | OnboardingModelTests.swift, SuiteModel.OnboardingModel.json | Mutate | – | fixer running |
+| F-2891 | OB-m | 6 | #2891 refused hand-off resets launching and message (tests, plan) | OnboardingModelTests.swift, SuiteModel.OnboardingModel.json | Mutate 16/16 | #2966 | open (head e6273c71) |
 | OB-13 | OB-z | 5 | Enables OJ3 and OJ4 on live (OJ3 skips naming #837 while the Flare sample is missing); blueprint prose; status built; feature-done | UITests/AfterGlowJourneyTests+OnboardingStart.swift, docs/blueprints/suite.md, docs/blueprints/suite/features/onboarding.wave.json | OJ3, OJ4 on the dev run | – | waits OB-5, OB-6, OB-11, OB-12 |
 
 Waves (packet's Build waves, checked against dev at 4a86f5fc):
