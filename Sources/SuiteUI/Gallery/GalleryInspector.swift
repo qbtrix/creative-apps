@@ -13,8 +13,9 @@
 // pins the panel's width (SJ24), each page's Reduce Motion switch sets
 // `suiteReduceMotion` on its components (SJ15, SJ20), and
 // `-SuiteGalleryFakes` swaps each conformance the page uses for IC-1's Fake.
-// The easing curve's samples are a plain cubic Bézier through the handles:
-// the kernel's EaseCurve is a stub until EK-15.
+// The easing curve's samples come from the kernel's `EaseCurve`, so the
+// drawn line is empty until EK-15 fills that stub; the handles still drag.
+import enum SuiteKernel.EaseCurve
 import SwiftUI
 
 enum GalleryInspector {
@@ -263,14 +264,13 @@ private struct GalleryCurvesPage: View {
         .background(SuiteColor.panel)
     }
 
-    /// 64 points along the cubic Bézier from (0, 0) through both handles to (1, 1).
+    /// 64 points along the kernel's curve for the two handles.
     private static func samples(_ handles: (CGPoint, CGPoint)) -> [CGPoint] {
-        let count = 64
-        return (0..<count).map { i in
-            let t = CGFloat(i) / CGFloat(count - 1), u = 1 - t
-            let a = 3 * u * u * t, b = 3 * u * t * t, c = t * t * t
-            return CGPoint(x: a * handles.0.x + b * handles.1.x + c, y: a * handles.0.y + b * handles.1.y + c)
-        }
+        EaseCurve.samples(
+            of: .cubicBezier(
+                x1: Double(handles.0.x), y1: Double(handles.0.y), x2: Double(handles.1.x), y2: Double(handles.1.y)),
+            count: 64
+        ).map { CGPoint(x: $0.x, y: $0.y) }
     }
 }
 
