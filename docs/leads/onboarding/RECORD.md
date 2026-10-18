@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-u fix round 1: #2901 and #2905 merged; #2903 (#2886, #2887) macOS build green, waiting on the lane sweep. OB-m follow-ups: #2902 build green, #2906 build running; #2891 fixer once #2903 merges (both touch OnboardingModel.send). OB-u slice-done and Mac-Finish-Wanted once #2903 merges and a full dev run containing it has a green Linux job. OB-13 once switching and the bundled samples are on dev; OB-z review after it.
+Next: OB-u fix round 1 merged (#2901, #2903, #2905); slice-done and Mac-Finish-Wanted once a full dev run containing b1526f3e has a green Linux job, then re-review (round 2). OB-m follow-ups: #2902, #2906 open; #2891 fixer running. OB-13 once switching and the bundled samples are on dev; OB-z review after it.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -40,11 +40,12 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | F-2852 | OB-a | 5 | needs-ui #2867 filed for SuiteSize.onboardingWindow; OnboardingStarter comment and packet name it (values already pinned by OnboardingStubTests.controlIdentifiers; no mutation change) | Sources/SuiteModel/Onboarding/OnboardingStarter.swift, docs/blueprints/suite/features/onboarding.md | OnboardingStubTests | #2872 | merged (23aac48f) |
 | F-2850 | OB-s | 5 | destination names copies with UniqueFileNames (canonical first); case test, leading-dot test; plan rewritten for the new code (Mutate 8/8) | Sources/SuiteModel/Onboarding/SampleCatalog.swift, Tests/SuiteModelTests/SampleCatalogTests.swift, Tests/mutations/SuiteModel.SampleCatalog.json | SampleCatalogTests | #2877 | merged (13c1cad0) |
 | F-2884 | OB-u | 6 | #2884 focus copy points to Help > Welcome; #2885 start title, preset chips named as new documents | FakeOnboarding.swift (SuiteModel), start page view | OnboardingCopyTests; Mutate | #2905 | merged (a6a99476) |
-| F-2886 | OB-u | 6 | #2886 Skip/Back disabled while a hand-off sends; #2887 refusal shows under its tile | OnboardingModel.swift, start page view | OnboardingModelTests; Mutate 14/14 | #2903 | open |
+| F-2886 | OB-u | 6 | #2886 Skip/Back disabled while a hand-off sends; #2887 refusal shows under its tile | OnboardingModel.swift, start page view | OnboardingModelTests; Mutate 14/14 | #2903 | merged (b1526f3e) |
 | OB-5g | OB-u | 5 | The goldens for Golden/afterglow-onboarding/ taken from the first macOS run's `snapshots` artifact that holds OB-5 | Tests/AppSnapshotTests/Golden/afterglow-onboarding/ | the run's compare | #2888 (light, light-ic), #2889 (dark, dark-ic); no start-launching or start-error golden | merged (5920fb94, 2562912e) |
 | F-2895 | OB-u | 6 | #2895 start-launching shot finite (no endless ring on a silent sender) | Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift | AppSnapshotTests on the Mac (known issue, no golden) | #2901 | merged (f8e3cd15) |
 | F-2890 | OB-m | 6 | #2890 Skip keeps the stored home order; #2892 missing-sample message per packet | OnboardingModel.swift | OnboardingModelTests; Mutate 15/15 | #2906 | open |
 | F-2893 | OB-m | 6 | #2893 StorePreferences own-save mutation caught | StorePreferencesTests, plan | StorePreferencesTests; Mutate 5/5 | #2902 | open |
+| F-2891 | OB-m | 6 | #2891 refused hand-off resets launching and message (tests, plan) | OnboardingModelTests.swift, SuiteModel.OnboardingModel.json | Mutate | – | fixer running |
 | OB-13 | OB-z | 5 | Enables OJ3 and OJ4 on live (OJ3 skips naming #837 while the Flare sample is missing); blueprint prose; status built; feature-done | UITests/AfterGlowJourneyTests+OnboardingStart.swift, docs/blueprints/suite.md, docs/blueprints/suite/features/onboarding.wave.json | OJ3, OJ4 on the dev run | – | waits OB-5, OB-6, OB-11, OB-12 |
 
 Waves (packet's Build waves, checked against dev at 4a86f5fc):
