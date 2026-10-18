@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-18T20:12:18Z	goldens	merged	#2917	golden checks on dev 0e4e913; full CI 39161458093 queued
 2026-10-18T20:53:39Z	goldens	waiting	39161458093	cancelled; waiting on 39164756292 or a scoped suiteui run
 2026-10-18T20:53:39Z	fix round 1	started	#2837	findings #2837 #2838 #2839 #2864 #2865: list journeys red since 16:35Z
+2026-10-18T21:00Z	fix-1	pr-opened	#2992	list journeys click at element middles; Fixes #2837 #2838 #2864 #2865
