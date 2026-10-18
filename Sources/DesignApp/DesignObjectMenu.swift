@@ -5,7 +5,8 @@
 // Horizontally and Vertically at the top level. A command that can't run (no
 // layer, a locked layer or group, a hidden group, already there, not built
 // yet) is disabled and its tooltip says why, from DesignMenu's Model help. A
-// submenu whose every item is off is off too, with its first item's reason.
+// submenu whose every item is off is drawn as one off item instead, with its
+// first item's reason: AppKit keeps a submenu's own item enabled (#2465).
 // Every item, submenus included, carries its SF Symbol.
 import DesignModel
 import SuiteUI
@@ -24,28 +25,30 @@ struct DesignObjectMenu: View {
             shortcut: KeyboardShortcut("g", modifiers: [.shift, .command])
         )
         Divider()
-        let arrangeHelp = DesignArrangeStep.allCases.map { menu.help(.arrange($0)) }
-        let arrangeOff = arrangeHelp.allSatisfy { $0 != nil }
-        Menu("Arrange", systemImage: "square.3.layers.3d") {
-            ForEach(DesignArrangeStep.allCases, id: \.self) { step in
-                MenuCommand(
-                    menu: menu, title: step.title, systemImage: step.systemImage, command: .arrange(step),
-                    shortcut: step.shortcut)
+        // AppKit keeps a submenu's own item on whatever `.disabled` says, so an all-off one is a plain off item (#2465).
+        if let arrangeOff = menu.arrangeMenuHelp {
+            MenuCommand("Arrange", systemImage: "square.3.layers.3d", help: arrangeOff, isEnabled: false) {}
+        } else {
+            Menu("Arrange", systemImage: "square.3.layers.3d") {
+                ForEach(DesignArrangeStep.allCases, id: \.self) { step in
+                    MenuCommand(
+                        menu: menu, title: step.title, systemImage: step.systemImage, command: .arrange(step),
+                        shortcut: step.shortcut)
+                }
             }
         }
-        .disabled(arrangeOff)
-        .help(arrangeOff ? arrangeHelp.compactMap { $0 }.first ?? "" : "")
-        let alignOff = DesignAlignEdge.allCases.allSatisfy { menu.alignHelp[$0] != nil }
-        Menu("Align", systemImage: "align.horizontal.center") {
-            ForEach(DesignAlignEdge.allCases, id: \.self) { edge in
-                if edge == .top { Divider() }
-                Button(edge.title, systemImage: edge.systemImage) { menu.perform(.align(edge)) }
-                    .disabled(menu.alignHelp[edge] != nil)
-                    .help(menu.alignHelp[edge] ?? edge.title)
+        if let alignOff = menu.alignMenuHelp {
+            MenuCommand("Align", systemImage: "align.horizontal.center", help: alignOff, isEnabled: false) {}
+        } else {
+            Menu("Align", systemImage: "align.horizontal.center") {
+                ForEach(DesignAlignEdge.allCases, id: \.self) { edge in
+                    if edge == .top { Divider() }
+                    Button(edge.title, systemImage: edge.systemImage) { menu.perform(.align(edge)) }
+                        .disabled(menu.alignHelp[edge] != nil)
+                        .help(menu.alignHelp[edge] ?? edge.title)
+                }
             }
         }
-        .disabled(alignOff)
-        .help(alignOff ? DesignAlignEdge.allCases.compactMap { menu.alignHelp[$0] }.first ?? "" : "")
         ForEach(DesignDistributeAxis.allCases, id: \.self) { axis in
             MenuCommand(menu: menu, title: axis.title, systemImage: axis.systemImage, command: .distribute(axis))
         }

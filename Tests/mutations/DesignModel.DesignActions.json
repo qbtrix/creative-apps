@@ -12,5 +12,9 @@
 {"label":"sameIDs skips the top-level ids","file":"Sources/DesignModel/DesignActions.swift","find":"where old[index].id != new[index].id ||","replace":"where","tests":"DesignApplyHeldIDsTests"},
 {"label":"group leaves the new group collapsed","file":"Sources/DesignModel/DesignActions.swift","find":"if case .group = command { expandedNodeIDs.formUnion(edit.selection) }","replace":"","tests":"DesignGroupExpandTests"},
 {"label":"ungroup expands its members instead of group","file":"Sources/DesignModel/DesignActions.swift","find":"if case .group = command {","replace":"if case .ungroup = command {","tests":"DesignGroupExpandTests"},
+{"label":"a submenu is off when only some items are","file":"Sources/DesignModel/DesignActions.swift","find":"helps.contains { $0 == nil } ? nil :","replace":"helps.allSatisfy { $0 == nil } ? nil :","tests":"DesignSubmenuHelpTests"},
+{"label":"a submenu never says why it is off","file":"Sources/DesignModel/DesignActions.swift","find":"helps.lazy.compactMap { $0 }.first","replace":"nil as String?","tests":"DesignSubmenuHelpTests"},
+{"label":"Arrange asks only its first step","file":"Sources/DesignModel/DesignActions.swift","find":"Self.submenuHelp(DesignArrangeStep.allCases.map { help(.arrange($0)) })","replace":"Self.submenuHelp([help(.arrange(.bringToFront)), nil])","tests":"DesignSubmenuHelpTests"},
+{"label":"Align reads no edge's help","file":"Sources/DesignModel/DesignActions.swift","find":"return Self.submenuHelp(DesignAlignEdge.allCases.map { helps[$0] })","replace":"return Self.submenuHelp(DesignAlignEdge.allCases.map { _ in helps.isEmpty ? nil : nil })","tests":"DesignSubmenuHelpTests"},
 {"label":"group expands nothing it selects","file":"Sources/DesignModel/DesignActions.swift","find":"expandedNodeIDs.formUnion(edit.selection) }","replace":"expandedNodeIDs.formUnion([]) }","tests":"DesignGroupExpandTests"}
 ]

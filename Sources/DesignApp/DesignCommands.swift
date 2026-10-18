@@ -33,6 +33,9 @@ struct DesignMenu {
     var canDeleteLayer = false
     /// Why each Align command can't run, keyed by edge; an edge left out can run.
     var alignHelp = DesignWorkspace().alignHelps
+    /// Why the whole Arrange or Align submenu is off; nil when one of its items can run.
+    var arrangeMenuHelp = DesignWorkspace().arrangeMenuHelp
+    var alignMenuHelp = DesignWorkspace().alignMenuHelp
     /// Why each selection command in `menuCommands` can't run; one left out can run.
     var commandHelp = Self.helps(DesignWorkspace())
     var zoomToSelectionHelp = DesignWorkspace().zoomToSelectionHelp
@@ -70,6 +73,8 @@ struct DesignMenu {
         canDeletePage = model.canDeletePage
         canDeleteLayer = Self.deletesLayer(model)
         alignHelp = model.alignHelps
+        arrangeMenuHelp = model.arrangeMenuHelp
+        alignMenuHelp = model.alignMenuHelp
         commandHelp = Self.helps(model)
         zoomToSelectionHelp = model.zoomToSelectionHelp
         noFileHelp = model.addPageHelp
