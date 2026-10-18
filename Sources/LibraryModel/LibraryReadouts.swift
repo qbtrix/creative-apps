@@ -137,6 +137,13 @@ extension LibraryCatalog {
         return nil
     }
 
+    /// Whether the content shows `emptyState`: the catalog has no photos and
+    /// the launch read has finished. While it runs the content stays blank,
+    /// so a saved catalog never flashes "No Photos" before it appears.
+    public var showsEmptyState: Bool {
+        isEmpty && catalogState != .loading
+    }
+
     /// What the empty catalog's content says, agreeing with the catalog
     /// notice above it. `importReason` is why Import Folder… can't act (nil
     /// when it can); the message then says so and points to File > Load
