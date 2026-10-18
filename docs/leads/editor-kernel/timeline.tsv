@@ -43,3 +43,6 @@ utc	stage	event	ref	note
 2026-10-18T10:59Z	wave4	check	PR#2737	EK-13 #2737 fixed: head 1c4a1096 CI: PASS, merged dev, LayerFollow reuses LayerTree node/update, LayerTree -8 stub removal unavoidable (explained in body). Merged: EK-12 #2727, EK-16 #2731. EK-18 waits on #2737; EK-6 on #2738; EK-31 on #2744
 2026-10-18T15:16Z	3	stage-start	#1933	relaunch act-1a14f91ff8b-nq4v base 5a8c6fa; wave A: EK-18
 2026-10-18T20:08Z	3	stage-start	#1933	relaunch act-1a1509b245f-653k base b1526f3e; Belt-Slice-Done posted for 8 merged slices (run 39153976103); wave A: EK-31, EK-6
+2026-10-18T21:13Z	3	pr-opened	#2972	EK-31 ToolKeys
+2026-10-18T21:13Z	3	pr-opened	#2973	EK-6 render budget + journey on
+2026-10-18T21:13Z	3	pr-opened	#2974	EK-25 KJ9 walk
