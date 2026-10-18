@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-18T04:19Z	3	finding	#2513 #2514 #2515	J7 J8 J9 red on 39093367358; CG-a round 1 started; gap #2566 filed
 2026-10-18T04:19Z	merged	#2558 copy-group status built
 2026-10-18T04:23:57Z	fix	pr-opened	#2569	CG-a r1 (J7 J8 J9 row clicks off the name), scripts/ci --changed PASS on f15b7775
+2026-10-18T04:35:09Z	3	check	#2569	macOS build 39097047689 green; waiting for lane merge
