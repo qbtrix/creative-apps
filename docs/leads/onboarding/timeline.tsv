@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-18T15:36:01Z	pr-open	OB-12	#2824 48a729ef
 2026-10-18T15:38:19Z	pr-open	OB-8b	#2825 f119efbf
 2026-10-18T15:46:34Z	heartbeat	lead	4 PRs in lane (#2821 #2822 #2824 #2825); OB-s waits on dev run 39141126140
+2026-10-18T15:50:09Z	merged	OB-6	#2821
