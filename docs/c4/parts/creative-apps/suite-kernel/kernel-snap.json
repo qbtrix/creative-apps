@@ -1,0 +1,10 @@
+{
+  "id": "kernel-snap",
+  "name": "Snap",
+  "description": "Snap/: SnapLine, SnapGap, SnapGuides (the lines and gaps a drag shows, their summary, the empty and fake guides), SnapCandidate, Snapping (the offset order lines, then gaps, then whole points; candidates over the layer tree arrive with EK-18), and SnapLines and SnapGaps, the alignment and spacing engines whose stubs the snapping feature's SN-2 and SN-3 fill.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Snap/"
+  ],
+  "order": 50
+}

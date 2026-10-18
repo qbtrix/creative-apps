@@ -28,7 +28,7 @@
               {
                 "id": "suiteui-sources",
                 "name": "SuiteUI sources",
-                "description": "The shared design system (Sources/SuiteUI, linking SuiteModel for SuiteApp): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit, and CanvasMarks, SegmentedTabs and the ColorWell hex row); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); AppMark, the one view that draws an app's mark (icon, glyph or line style) from AppMarkArt, path data scripts/render-marks generates from Bundle/Marks; ThumbnailGrid with its selection math; and TimelineStrip with its frame mapping, shared by Flare and Halo, with TimelineLaneLayers, the rules of its AppKit lanes renderer (which lanes redraw from an Equatable diff, a layer frame per lane, a press routed to the lane classification).",
+                "description": "The shared design system (Sources/SuiteUI, linking SuiteModel for SuiteApp): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar, BusyNote for open, save and import progress); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit, and CanvasMarks, SegmentedTabs and the ColorWell hex row); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); AppMark, the one view that draws an app's mark (icon, glyph or line style) from AppMarkArt, path data scripts/render-marks generates from Bundle/Marks; ThumbnailGrid with its selection math; and TimelineStrip with its frame mapping, shared by Flare and Halo, with TimelineLaneLayers, the rules of its AppKit lanes renderer (which lanes redraw from an Equatable diff, a layer frame per lane, a press routed to the lane classification).",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/"
@@ -49,7 +49,7 @@
               {
                 "id": "flare-app-sources",
                 "name": "FlareApp sources",
-                "description": "The Flare app (2D animation): the SwiftUI App scene, its menu bar (FlareCommands) and views in Sources/FlareApp, including the inspector's TIMING row (FlareInspectorTiming: the selected span's easing preset name) and the easing popover it opens (FlareEasingPopover: presets, the four bezier numbers and the curve) on the live FlareWorkspace, built from SuiteUI, and PlaybackDriver, which feeds NSScreen display-link target timestamps into the workspace's play clock, and StagePath, which turns FlareCore paths and colors into CGPath (one addCurve per cubic) and sRGB CGColor for the stage, and StageRasterizer, the PNG export rasterizer (LA-1): FrameRasterizing on a CoreGraphics RGBA8 sRGB bitmap that draws a StageDrawList at 1x or 2x exactly as the stage does, the background unless transparent, and encodes it through ImageIO, and FlareAutosave, which writes the dirty document's RecoveryFile atomically off the main actor once autosave is due and removes it after a save, and on launch reads and decodes it off the main thread into a RecoveryOffer to restore or discard, and FlareWindow, the SuiteWindow with the toolbar, sidebar and inspector that routes every control through one FlareIntent, and FlareToolItems (each FlareTool's palette title, symbol and one-key shortcut), the router (FlareWindow+Router and one FlareWindow+<area> file per FlareIntent area, each acting or giving the reason it can't), and the window's area views: FlareStage (the artboard drawn in a Canvas on CanvasViewport, its overlay of draft, marquee and selection outline drawn from the drag's FlareLiveDrag while one lasts, so the window's body runs once per drag, and the floating tool palette), FlareTimeline (one TimelineStrip lane per layer, ruler scrub and the timecode and frame readouts), FlareTransport (start, step, play/pause, end and loop; FlareCanvas runs PlaybackDriver while playing and the stage status bar shows the rate pills), FlareRecording (the auto-key recording ring), FlareFilePanels (the open and save panels, the title's dirty dot, and the save and open alerts), FlareInspector (Properties and Library tabs) and the stubs later tasks fill (FlareLibraryPanel and the new sheet, open status and recovery modifiers).",
+                "description": "The Flare app (2D animation): the SwiftUI App scene, its menu bar (FlareCommands) and views in Sources/FlareApp, including the inspector's TIMING row (FlareInspectorTiming: the selected span's easing preset name) and the easing popover it opens (FlareEasingPopover: presets, the four bezier numbers and the curve) on the live FlareWorkspace, built from SuiteUI, and PlaybackDriver, which feeds NSScreen display-link target timestamps into the workspace's play clock, and StagePath, which turns FlareCore paths and colors into CGPath (one addCurve per cubic) and sRGB CGColor for the stage, and StageRasterizer, the PNG export rasterizer (LA-1): FrameRasterizing on a CoreGraphics RGBA8 sRGB bitmap that draws a StageDrawList at 1x or 2x exactly as the stage does, the background unless transparent, and encodes it through ImageIO, and FlareAutosave, which writes the dirty document's RecoveryFile atomically off the main actor once autosave is due and removes it after a save, and on launch reads and decodes it off the main thread into a RecoveryOffer to restore or discard, and FlareWindow, the SuiteWindow with the toolbar, sidebar and inspector that routes every control through one FlareIntent, and FlareToolItems (each FlareTool's palette title, symbol and one-key shortcut), the router (FlareWindow+Router and one FlareWindow+<area> file per FlareIntent area, each acting or giving the reason it can't), and the window's area views: FlareStage (the artboard drawn in a Canvas on CanvasViewport, its overlay of draft, marquee and selection outline drawn from the drag's FlareLiveDrag while one lasts, so the window's body runs once per drag, and the floating tool palette), FlareTimeline (one TimelineStrip lane per layer, ruler scrub and the timecode and frame readouts), FlareTransport (start, step, play/pause, end and loop; FlareCanvas runs PlaybackDriver while playing and the stage status bar shows the rate pills), FlareRecording (the auto-key recording ring), FlareFilePanels (the open and save panels, the title's dirty dot, and the save and open alerts), FlareInspector (Properties and Library tabs), FlarePasteboard (Cut, Copy and Paste carry the Model's layer bytes on NSPasteboard.general under the suite's SuiteTypeID.flareLayers, and a change-count watch keeps Edit > Paste current), FlareStageContextMenu (the stage's Cut, Copy, Duplicate, Delete, Bring Forward and Send Backward, each disabled with its reason) and the stubs later tasks fill (FlareLibraryPanel and the new sheet, open status and recovery modifiers).",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/FlareApp/"
@@ -440,6 +440,52 @@
                 "paths": [
                   "Sources/SuiteKernel/Geometry.swift",
                   "Sources/SuiteKernel/SuiteKernel.swift"
+                ]
+              },
+              {
+                "id": "kernel-history",
+                "name": "History",
+                "description": "History<Payload>, the one undo history: named steps, a run under one key folded into one step, endRun, undo and redo through an apply closure, jump to a step, step ids that never repeat and dirty read as savedStepID against currentStepID; HistoryReading, what menus and title bars read. EK-2 declares it as a stub that answers like an empty history; EK-8 fills the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/History/"
+                ]
+              },
+              {
+                "id": "kernel-selection",
+                "name": "Selection",
+                "description": "Selection<ID>, the one ordered selection: the picked ids in picking order, the primary (the last picked), the anchor, one pick rule (replace, toggle, extend over an order) with canAdd, replace, clear, selectAll, prune and an arrow move in a grid. EK-2 declares it as a stub that keeps its ids; EK-10 fills the bodies and adds Nudge and Marquee here.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Selection/"
+                ]
+              },
+              {
+                "id": "kernel-layers",
+                "name": "Layer tree and fixtures",
+                "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop).",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Layers/",
+                  "Sources/SuiteKernel/Fakes/"
+                ]
+              },
+              {
+                "id": "kernel-snap",
+                "name": "Snap",
+                "description": "Snap/: SnapLine, SnapGap, SnapGuides (the lines and gaps a drag shows, their summary, the empty and fake guides), SnapCandidate, Snapping (the offset order lines, then gaps, then whole points; candidates over the layer tree arrive with EK-18), and SnapLines and SnapGaps, the alignment and spacing engines whose stubs the snapping feature's SN-2 and SN-3 fill.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Snap/"
+                ]
+              },
+              {
+                "id": "kernel-stroke",
+                "name": "Stroke",
+                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Stroke/"
                 ]
               }
             ]
