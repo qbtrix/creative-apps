@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-18T04:13Z	3	slice-done	#1497	SR-a, SR-t re-posted on 39093367358 (gaps #2544, #2545); Mac-Finish-Wanted SR-a, SR-t; SR-b waits on #2561
 2026-10-18T04:22:14Z	style-rows	check	dev@21066130	SR-b fix #2561 macOS build green (run 39095809132), awaiting lane merge; full CI 39093416270 macOS job still running; no dev-red
 2026-10-18T04:25:13Z	3	merged	#2561	SR-b r1 on dev d3a4f16e; next run holding it closes SR-b
+2026-10-18T04:35:09Z	3	check	39097469910	scoped design on d3a4f16e in progress (SR-b)

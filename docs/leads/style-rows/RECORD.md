@@ -110,3 +110,4 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - 2026-10-18T04:04:19Z check: scoped 39093367358 done: J10 fails step 2 (slider orientation), J11 fails Size read-back -> #2544/#2545 moved to gap (SR-a cap); P2 perf ok, audit unnamed scroller -> finding #2552, fix PR #2561 (SR-b round 1). Belt-Slice-Done posted for SR-a (gaps #2544 #2545) and SR-t
 - 2026-10-18T04:22:14Z check: SR-b fix #2561 macOS build green (run 39095809132), awaiting lane merge; full CI 39093416270 macOS job still running; no dev-red
 - 2026-10-18T04:25:13Z check: #2561 merged into dev as d3a4f16e (04:24Z). Dev CI 39096939772 runs on 21066130, before it, so it can't close SR-b; waiting for a design-scoped or full run on d3a4f16e or later.
+- 2026-10-18T04:35:09Z check: dev CI 39096939772 (21066130) cancelled. Scoped design 39097469910 on d3a4f16e (holds #2561) in progress: it decides SR-b.
