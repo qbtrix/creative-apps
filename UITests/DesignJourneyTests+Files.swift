@@ -109,7 +109,7 @@ final class DesignFilesJourneyTests: XCTestCase {
         design.press(character: "w", .command)
         var alert = closeAlert(design)
         XCTAssert(alert.exists, "⌘W on an edited window showed no alert")
-        let message = "Do you want to save the changes you made to “Untitled”?"
+        let message = "Do you want to save the changes made to the document “Untitled”?"
         let title = alert.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", message, message)).firstMatch
         XCTAssert(title.waitForExistence(timeout: 5), "the close alert doesn't read \(message)")
         design.shot("files-close-prompt")

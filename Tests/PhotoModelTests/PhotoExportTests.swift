@@ -90,9 +90,11 @@ import Testing
 
     @Test func bigPhotosDecodeSmaller() {
         #expect(PhotoWorkspace.decodeLongestSide(width: 4000, height: 3000) == nil)
-        // 48 MP at 4:3 keeps 16 MP: 4729 x 3547.
+        // An 8K frame (33 MP) opens at full size.
+        #expect(PhotoWorkspace.decodeLongestSide(width: 7680, height: 4320) == nil)
+        // 48 MP at 4:3 keeps 40 MP: 7478 x 5608.
         let side = PhotoWorkspace.decodeLongestSide(width: 8000, height: 6000)
-        #expect(side == 4729)
+        #expect(side == 7478)
         #expect(PhotoWorkspace.decodeLongestSide(width: 0, height: 10) == nil)
     }
 }

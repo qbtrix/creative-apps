@@ -33,7 +33,7 @@ private struct HeaderCard: View {
         InspectorHeader(
             "Hero Banner.png",
             facts: [
-                InspectorFact("Size", "1920 × 1080 px"), InspectorFact("Color", "sRGB · 8 bits"),
+                InspectorFact("Size", "1920 × 1080 px"), InspectorFact("Color", "sRGB · 8 bits/channel"),
                 InspectorFact("Layers", "3"),
             ])
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -48,7 +48,7 @@ private struct HeaderSheet: View {
                 InspectorHeader(
                     "Hero Banner.png",
                     facts: [
-                        InspectorFact("Size", "1920 × 1080 px"), InspectorFact("Color", "sRGB · 8 bits"),
+                        InspectorFact("Size", "1920 × 1080 px"), InspectorFact("Color", "sRGB · 8 bits/channel"),
                         InspectorFact("Layers", "3"), InspectorFact("Empty", ""),
                     ])
                 InspectorSection("Layer") {

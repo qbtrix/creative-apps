@@ -1,0 +1,601 @@
+{
+  "$comment": "Real jobs: tasks a person does with this app, each with an outcome a check can observe. Keyed by job id so scripts/merge-json merges two PRs that add different jobs. scripts/jobs check validates every field; jobs.md beside this file is generated from it on dev (scripts/jobs render), never edited. The fields and the done rule: docs/factory/packets.md, Jobs.",
+  "RJ-H01": {
+    "id": "RJ-H01",
+    "app": "halo",
+    "weight": "high",
+    "job": "Make a lower third: a bar slides in, the name is revealed through a mask, holds 4 s, slides out.",
+    "outcome": "Render ProRes 4444 with alpha that keys over video in an editor.",
+    "needs": [
+      "S4",
+      "E9"
+    ],
+    "needs_note": "S4 masks + E9 ProRes 4444",
+    "closes_with": "S4",
+    "trap": "Background comes out black (the movie writer fills black at alpha 1)",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.adobe.com/learn/after-effects/web/animate-lower-third",
+      "https://discussions.apple.com/thread/254185159",
+      "https://larryjordan.com/articles/motion-export-for-premiere-pro-cc-video/"
+    ]
+  },
+  "RJ-H02": {
+    "id": "RJ-H02",
+    "app": "halo",
+    "weight": "high",
+    "job": "Make a logo reveal: the logo scales up with an overshoot ease and fades in over 5 s; render H.264 1080p.",
+    "outcome": "The logo layer scales with an overshoot and fades in over 5 s, in a 1080p H.264 movie.",
+    "needs": [
+      "S20",
+      "E11"
+    ],
+    "needs_note": "built keys/easing; S20 image or E11 SVG layer",
+    "closes_with": "S20",
+    "trap": "No image or SVG layer, so the logo can't come in",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.udemy.com/course/after-effects-for-beginners-4-projects-to-get-you-started/"
+    ]
+  },
+  "RJ-H03": {
+    "id": "RJ-H03",
+    "app": "halo",
+    "weight": "med",
+    "job": "Make kinetic type: five words pop in on the beat with a stagger.",
+    "outcome": "The five words appear one after another on the beat from one text layer, with an even stagger.",
+    "needs": [
+      "halo/text-layers",
+      "S21"
+    ],
+    "needs_note": "text-layers (built), S21 text animators",
+    "closes_with": "S21",
+    "trap": "One layer per word by hand; no stagger",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.udemy.com/course/adobe-after-effects-for-entrepreneurs/",
+      "https://www.adobe.com/products/aftereffects/text-animation"
+    ]
+  },
+  "RJ-H04": {
+    "id": "RJ-H04",
+    "app": "halo",
+    "weight": "med",
+    "job": "Set a title card with a chosen font, weight, tracking and two lines.",
+    "outcome": "The title shows two lines in the chosen font, weight and tracking, in the viewer and the render.",
+    "needs": [
+      "E8"
+    ],
+    "needs_note": "E8 text engine",
+    "closes_with": "E8",
+    "trap": "One line, no font choice",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.adobe.com/products/aftereffects/text-animation"
+    ]
+  },
+  "RJ-H05": {
+    "id": "RJ-H05",
+    "app": "halo",
+    "weight": "high",
+    "job": "Render a 1080×1080, 15 s social clip under 15 MB.",
+    "outcome": "Size and duration exact, plays in QuickTime.",
+    "needs": [
+      "halo/render-out"
+    ],
+    "needs_note": "halo/render-out (built)",
+    "closes_with": "halo/render-out",
+    "trap": "No bitrate or size readout; 1081 px rounds to 1080 silently",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/after-effects-beta-discussions/feature-focus-exporting-h-264-from-the-after-effects-render-queue-now-available-in-ae-2023/m-p/13885413/highlight/true"
+    ]
+  },
+  "RJ-H06": {
+    "id": "RJ-H06",
+    "app": "halo",
+    "weight": "high",
+    "job": "Render a 1080×1920 vertical story.",
+    "outcome": "The movie is exactly 1080 wide by 1920 high.",
+    "needs": [
+      "halo/render-out"
+    ],
+    "needs_note": "halo/render-out (built)",
+    "closes_with": "halo/render-out",
+    "trap": "Width and height swapped by the preset",
+    "run": "Cm",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/after-effects-beta-discussions/feature-focus-exporting-h-264-from-the-after-effects-render-queue-now-available-in-ae-2023/m-p/13885413/highlight/true"
+    ]
+  },
+  "RJ-H07": {
+    "id": "RJ-H07",
+    "app": "halo",
+    "weight": "med",
+    "job": "Export a GIF of the comp for a chat app.",
+    "outcome": "A GIF file of the comp at its size and length, looping.",
+    "needs": [
+      "E9"
+    ],
+    "needs_note": "E9 media I/O",
+    "closes_with": "E9",
+    "trap": "No GIF writer",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://superrendersfarm.com/article/cavalry-motion-design-review-2026"
+    ]
+  },
+  "RJ-H08": {
+    "id": "RJ-H08",
+    "app": "halo",
+    "weight": "high",
+    "job": "Precompose three layers and reuse the precomp three times; edit once, all update.",
+    "outcome": "One edit inside the precomp shows in all three uses, in the viewer and the render.",
+    "needs": [
+      "A3"
+    ],
+    "needs_note": "A3 precomps",
+    "closes_with": "A3",
+    "trap": "Edits don't propagate",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/hu/after-effects/using/precomposing-nesting-pre-rendering.html"
+    ]
+  },
+  "RJ-H09": {
+    "id": "RJ-H09",
+    "app": "halo",
+    "weight": "high",
+    "job": "Fill text with a moving gradient through a track matte.",
+    "outcome": "The text is filled with the moving gradient and nothing outside the text shows, in the render.",
+    "needs": [
+      "S4"
+    ],
+    "needs_note": "S4 track mattes",
+    "closes_with": "S4",
+    "trap": "Matte inverted or ignored in render",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://helpx.adobe.com/dk/after-effects/using/track-mattes-and-traveling-mattes.html"
+    ]
+  },
+  "RJ-H10": {
+    "id": "RJ-H10",
+    "app": "halo",
+    "weight": "med",
+    "job": "Parent five layers to a null and move the group.",
+    "outcome": "The five layers keep their positions when parented and move together with the null.",
+    "needs": [
+      "halo/layer-keys"
+    ],
+    "needs_note": "layer-keys (built)",
+    "closes_with": "halo/layer-keys",
+    "trap": "Children jump when parented",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H11": {
+    "id": "RJ-H11",
+    "app": "halo",
+    "weight": "high",
+    "job": "Apply ease-in-out presets to position keys.",
+    "outcome": "The motion slows at both ends.",
+    "needs": [
+      "halo/easing"
+    ],
+    "needs_note": "halo/easing (built)",
+    "closes_with": "halo/easing",
+    "trap": "Render ignores easing",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.canva.com/design-school/resources/how-to-create-your-first-scene-in-cavalry"
+    ]
+  },
+  "RJ-H12": {
+    "id": "RJ-H12",
+    "app": "halo",
+    "weight": "med",
+    "job": "Shape a speed curve in the graph editor.",
+    "outcome": "The speed curve shaped in the graph editor is the motion the render shows.",
+    "needs": [
+      "S16"
+    ],
+    "needs_note": "S16 graph editor",
+    "closes_with": "S16",
+    "trap": "Per-segment curve editor only",
+    "run": "J",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H13": {
+    "id": "RJ-H13",
+    "app": "halo",
+    "weight": "med",
+    "job": "Select several keys across layers and drag them later in time.",
+    "outcome": "Every selected key moves by the same time offset, hidden layers' keys included.",
+    "needs": [
+      "S16",
+      "suiteui/timeline"
+    ],
+    "needs_note": "S16 (SuiteUI timeline built, Halo half unfiled)",
+    "closes_with": "S16",
+    "trap": "Keys of hidden layers stay behind",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H14": {
+    "id": "RJ-H14",
+    "app": "halo",
+    "weight": "med",
+    "job": "Set a work area of 2 to 5 s and render only that.",
+    "outcome": "The render is exactly 3 s long and starts at the 2 s frame.",
+    "needs": [
+      "S16"
+    ],
+    "needs_note": "S16 work area",
+    "closes_with": "S16",
+    "trap": "Render covers the whole comp",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/after-effects-beta-discussions/feature-focus-exporting-h-264-from-the-after-effects-render-queue-now-available-in-ae-2023/m-p/13885413/highlight/true"
+    ]
+  },
+  "RJ-H15": {
+    "id": "RJ-H15",
+    "app": "halo",
+    "weight": "med",
+    "job": "Drop in a music track, see its waveform, key to the beat, render with audio.",
+    "outcome": "The render has an audio track in sync with the keyed beats.",
+    "needs": [
+      "S23"
+    ],
+    "needs_note": "S23 audio lane",
+    "closes_with": "S23",
+    "trap": "Render drops audio; sync drifts",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://superrendersfarm.com/article/cavalry-motion-design-review-2026"
+    ]
+  },
+  "RJ-H16": {
+    "id": "RJ-H16",
+    "app": "halo",
+    "weight": "med",
+    "job": "Import a video clip and an image as layers and scale them to fit.",
+    "outcome": "The clip and the image are layers scaled to fit the comp, and both show in the render.",
+    "needs": [
+      "S20",
+      "E9"
+    ],
+    "needs_note": "S20 placed footage, E9 decode",
+    "closes_with": "S20",
+    "trap": "No footage or image layers",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H17": {
+    "id": "RJ-H17",
+    "app": "halo",
+    "weight": "med",
+    "job": "Add blur and glow to a title and change them later.",
+    "outcome": "The blur and glow stay editable, and the render shows their current settings.",
+    "needs": [
+      "S2"
+    ],
+    "needs_note": "S2 effects stack",
+    "closes_with": "S2",
+    "trap": "Effects baked or missing in render",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://superrendersfarm.com/article/cavalry-motion-design-review-2026"
+    ]
+  },
+  "RJ-H18": {
+    "id": "RJ-H18",
+    "app": "halo",
+    "weight": "med",
+    "job": "Colour-correct footage with a Curves adjustment layer.",
+    "outcome": "A Curves adjustment layer changes the footage below it in the viewer and the render, and stays editable.",
+    "needs": [
+      "S3"
+    ],
+    "needs_note": "S3 adjustment layers",
+    "closes_with": "S3",
+    "trap": "No adjustment layers",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H19": {
+    "id": "RJ-H19",
+    "app": "halo",
+    "weight": "med",
+    "job": "Add a wiggle to a layer's position without keying each frame.",
+    "outcome": "The position wiggles without keys, and the preview and the render show the same motion.",
+    "needs": [],
+    "needs_note": "none: behaviours are only a buffer in the beta-80 plan",
+    "closes_with": null,
+    "trap": "Random differs between preview and render",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.canva.com/design-school/resources/how-to-create-your-first-scene-in-cavalry",
+      "https://photography.tutsplus.com/tutorials/cavalry-app--cms-109179"
+    ]
+  },
+  "RJ-H20": {
+    "id": "RJ-H20",
+    "app": "halo",
+    "weight": "med",
+    "job": "Centre layers in the comp and check title-safe guides.",
+    "outcome": "The layers sit on the comp centre and inside the title-safe guides.",
+    "needs": [
+      "S9",
+      "S10"
+    ],
+    "needs_note": "S9 align, S10 safe areas",
+    "closes_with": "S9",
+    "trap": "No guides",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H21": {
+    "id": "RJ-H21",
+    "app": "halo",
+    "weight": "med",
+    "job": "Rotate and scale a layer with handles in the viewer.",
+    "outcome": "Dragging the handles rotates and scales the layer, not only moves it.",
+    "needs": [
+      "S7"
+    ],
+    "needs_note": "S7 transform handles",
+    "closes_with": "S7",
+    "trap": "Drag moves position only",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H22": {
+    "id": "RJ-H22",
+    "app": "halo",
+    "weight": "high",
+    "job": "Save, reopen and render twice.",
+    "outcome": "Both renders are frame-for-frame identical.",
+    "needs": [
+      "halo/history-files",
+      "halo/render-out"
+    ],
+    "needs_note": "history-files + render-out (built)",
+    "closes_with": "halo/history-files",
+    "trap": "Random seeds or float drift change frames",
+    "run": "Cm",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/questions-529/after-effects-crashed-corrupting-file-hoping-to-salvage-38628"
+    ]
+  },
+  "RJ-H23": {
+    "id": "RJ-H23",
+    "app": "halo",
+    "weight": "low",
+    "job": "Force-quit after 30 minutes of work, relaunch.",
+    "outcome": "Halo restores it.",
+    "needs": [
+      "S12"
+    ],
+    "needs_note": "S12 autosave and recovery",
+    "closes_with": "S12",
+    "trap": "Work lost since the last save",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/after-effects-discussions/recover-unsaved-after-effects-project/m-p/8492557",
+      "https://community.adobe.com/questions-529/after-effects-crashed-corrupting-file-hoping-to-salvage-38628"
+    ]
+  },
+  "RJ-H24": {
+    "id": "RJ-H24",
+    "app": "halo",
+    "weight": "med",
+    "job": "Scrub a 10-minute comp with 200 layers and render it.",
+    "outcome": "Scrubbing stays smooth; memory doesn't grow over the render.",
+    "needs": [
+      "G1"
+    ],
+    "needs_note": "G1 gate (Halo adopter)",
+    "closes_with": "G1",
+    "trap": "Untested at this length",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/questions-529/after-effects-crashed-corrupting-file-hoping-to-salvage-38628"
+    ]
+  },
+  "RJ-H25": {
+    "id": "RJ-H25",
+    "app": "halo",
+    "weight": "med",
+    "job": "Cancel a render halfway.",
+    "outcome": "No partial movie or stray frames are left behind.",
+    "needs": [
+      "halo/render-out"
+    ],
+    "needs_note": "render-out Cancel (built)",
+    "closes_with": "halo/render-out",
+    "trap": "Half-written .mov left in the folder: unverified",
+    "run": "Cm",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://community.adobe.com/t5/after-effects-beta-discussions/feature-focus-exporting-h-264-from-the-after-effects-render-queue-now-available-in-ae-2023/m-p/13885413/highlight/true"
+    ]
+  },
+  "RJ-H26": {
+    "id": "RJ-H26",
+    "app": "halo",
+    "weight": "med",
+    "job": "Render a PNG sequence with alpha.",
+    "outcome": "Edges are clean over any background.",
+    "needs": [
+      "halo/render-out"
+    ],
+    "needs_note": "render-out (built)",
+    "closes_with": "halo/render-out",
+    "trap": "Premultiplied edges darken",
+    "run": "Cm",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://discussions.apple.com/thread/254185159"
+    ]
+  },
+  "RJ-H27": {
+    "id": "RJ-H27",
+    "app": "halo",
+    "weight": "med",
+    "job": "Export a simple shape animation as Lottie.",
+    "outcome": "Plays the same in a standard player.",
+    "needs": [
+      "A4"
+    ],
+    "needs_note": "A4 Lottie export (LottieExporter)",
+    "closes_with": "A4",
+    "trap": "Text and effects dropped silently",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://docs.lottiefiles.com/en/integrations/after-effects/09_lottie-compatibility"
+    ]
+  },
+  "RJ-H28": {
+    "id": "RJ-H28",
+    "app": "halo",
+    "weight": "high",
+    "job": "Make 50 key edits including scrubs, then undo all.",
+    "outcome": "Scrubs coalesce into single steps.",
+    "needs": [
+      "halo/history-files"
+    ],
+    "needs_note": "history-files (built)",
+    "closes_with": "halo/history-files",
+    "trap": "Each scrub frame becomes a step",
+    "run": "C",
+    "baseline": "pass",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H29": {
+    "id": "RJ-H29",
+    "app": "halo",
+    "weight": "med",
+    "job": "Hide, lock and solo layers while working.",
+    "outcome": "Hidden layers don't draw, locked layers don't move, and solo changes only the viewer, never the render.",
+    "needs": [
+      "S8"
+    ],
+    "needs_note": "S8 layer tree",
+    "closes_with": "S8",
+    "trap": "Solo affects the render",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://support.apple.com/guide/motion/welcome/mac"
+    ]
+  },
+  "RJ-H30": {
+    "id": "RJ-H30",
+    "app": "halo",
+    "weight": "med",
+    "job": "Draw a star shape with a gradient fill and a stroke.",
+    "outcome": "A star shape with a gradient fill and a stroke, in the viewer and the render.",
+    "needs": [
+      "S19",
+      "S17"
+    ],
+    "needs_note": "S19 shapes, S17 strokes and gradients",
+    "closes_with": "S19",
+    "trap": "Rectangles and ellipses only, layer colour only",
+    "run": "C",
+    "baseline": "partial",
+    "since": "2026-10-19",
+    "sources": [
+      "https://www.canva.com/design-school/resources/how-to-create-your-first-scene-in-cavalry"
+    ]
+  },
+  "RJ-H31": {
+    "id": "RJ-H31",
+    "app": "halo",
+    "weight": "low",
+    "job": "Animate a bar chart from a CSV of five values.",
+    "outcome": "Five bars whose heights match the CSV's values, animated in.",
+    "needs": [],
+    "needs_note": "none (data-driven animation not planned)",
+    "closes_with": null,
+    "trap": "Values typed by hand",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "https://lesterbanks.com/?p=68217"
+    ]
+  }
+}

@@ -1,0 +1,125 @@
+// AfterGlowJourneyTests+Switch.swift: switching's journeys (packet
+// switching.md Journey steps, SW-4a): SJ3 `testSwitchKeepsEachAppAsLeft`,
+// `testOpenRecentBringsAppForward` and `testCrashIsolation`, on the HM-0
+// harness (`SuiteHarness`), so every shot goes under `afterglow`.
+//
+// The bundle compiles only SuiteModel's Values, so SwitchMenu's titles and
+// sentences are literals here. What the launcher does alone runs now: its
+// Window > Switch To items and their Control-Command digits, and a switch
+// launching an app as its own process while the home keeps running. The
+// steps that need Flare or Design to host suite documents and add the
+// shared switcher wait on their adoptions (A-FL-1 #861, A-DE-1 #862) and
+// fixtures (A-FL-0 #837, A-DE-0 #836); they run last and throw XCTSkip
+// while those are absent.
+import AppKit
+import XCTest
+
+extension AfterGlowJourneyTests {
+    /// Why a step that needs Flare and Design adopted is skipped.
+    static let waitsOnAdoption = "waits on #861 (A-FL-1), #862 (A-DE-1), #837 (A-FL-0), #836 (A-DE-0)"
+    /// SwitchMenu's titles on the home, in order: its own item, then the apps.
+    static let homeSwitchItems = ["Show AfterGlow Window", "Flare", "Design", "Photo", "Library", "Halo"]
+
+    /// SJ3: each app keeps its state across switches.
+    @MainActor func testSwitchKeepsEachAppAsLeft() throws {
+        let suite = SuiteHarness(self)
+        let home = suite.launch(fixture: "weekOfWork", arguments: ["-SuitePerfProbe", "YES"])
+        XCTAssert(home.app.windows.firstMatch.waitForExistence(timeout: 30), "AfterGlow opened no window")
+
+        // Window > Switch To on the home: its own item disabled, the five apps after it.
+        let window = home.app.menuBars.firstMatch.menuBarItems["Window"]
+        XCTAssert(window.waitForExistence(timeout: 5), "the home has no Window menu")
+        window.click()
+        let switchTo = window.menuItems["Switch To"]
+        XCTAssert(switchTo.waitForExistence(timeout: 3), "Window has no Switch To")
+        switchTo.hover()
+        for title in Self.homeSwitchItems {
+            XCTAssert(switchTo.menuItems[title].waitForExistence(timeout: 3), "Switch To has no \(title)")
+        }
+        XCTAssertFalse(switchTo.menuItems["Show AfterGlow Window"].isEnabled, "the home's own item is enabled")
+        XCTAssert(switchTo.menuItems["Design"].isEnabled, "Switch To > Design is disabled on the home")
+        home.shot("switch-sj3-menu")
+        home.press(.escape)
+        home.press(.escape)
+
+        // ⌃⌘2 opens Design as its own process; the home keeps running.
+        home.press(character: "2", [.control, .command])
+        let design = XCUIApplication(bundleIdentifier: SuiteApp.design.bundleID)
+        XCTAssert(design.wait(for: .runningForeground, timeout: 30), "⌃⌘2 didn't bring Design forward")
+        XCTAssertNotEqual(home.app.state, .notRunning, "the home quit when Design opened")
+
+        // ⌃⌘0 from the home's side: the home comes forward, Design keeps running.
+        home.app.activate()
+        XCTAssert(home.app.wait(for: .runningForeground, timeout: 10), "the home didn't come forward")
+        XCTAssertNotEqual(design.state, .notRunning, "Design quit when the home came forward")
+        home.shot("switch-sj3-home")
+
+        // 1-5: Bounce.flare at frame 12, the switcher, ⌃⌘1 / ⌃⌘0 keeping state, ⌘W and Show Flare Window.
+        throw XCTSkip(Self.waitsOnAdoption)
+    }
+
+    /// A recent card opens in its app, which comes forward; the home stays running.
+    @MainActor func testOpenRecentBringsAppForward() throws {
+        let suite = SuiteHarness(self)
+        let home = suite.launch(fixture: "weekOfWork", arguments: ["-SuitePerfProbe", "YES"])
+        XCTAssert(home.app.windows.firstMatch.waitForExistence(timeout: 30), "AfterGlow opened no window")
+        XCTAssert(Self.waitForCards(home, Self.weekOfWork), "RECENT reads \(Self.cardNames(home)), not \(Self.weekOfWork)")
+
+        let search = home.app.searchFields.firstMatch
+        XCTAssert(search.waitForExistence(timeout: 10), "the home has no search field")
+        search.click()
+        search.typeText("logo")
+        let chip = Self.designChip(home)
+        XCTAssert(chip.exists, "no Design chip beside the recents")
+        chip.click()
+        XCTAssert(Self.waitForCards(home, ["Logo.design"]), "the Design chip shows \(Self.cardNames(home))")
+        home.shot("switch-open-recent-filter")
+
+        // Return on Logo.design: Design forward with its window titled Logo.design.
+        guard Self.hasFixture("Logo.design") else { throw XCTSkip(Self.waitsOnAdoption) }
+        Self.card(home, "Logo.design").click()
+        home.press(.return)
+        let design = suite.attach(.design)
+        XCTAssert(design.app.wait(for: .runningForeground, timeout: 30), "Design didn't come forward")
+        XCTAssert(design.app.windows["Logo.design"].waitForExistence(timeout: 10), "Design's window isn't Logo.design")
+        XCTAssertNotEqual(home.app.state, .notRunning, "the home quit when Design opened Logo.design")
+        // ⌃⌘0 in Design needs its Switch To menu.
+        throw XCTSkip(Self.waitsOnAdoption)
+    }
+
+    /// One app's crash leaves the others and the home as they were.
+    @MainActor func testCrashIsolation() throws {
+        let suite = SuiteHarness(self)
+        let home = suite.launch(fixture: "weekOfWork", arguments: ["-SuitePerfProbe", "YES"])
+        XCTAssert(home.app.windows.firstMatch.waitForExistence(timeout: 30), "AfterGlow opened no window")
+
+        // Flare and Design each run as their own process.
+        home.press(character: "1", [.control, .command])
+        let flare = XCUIApplication(bundleIdentifier: SuiteApp.flare.bundleID)
+        XCTAssert(flare.wait(for: .runningForeground, timeout: 30), "⌃⌘1 didn't open Flare")
+        home.app.activate()
+        _ = home.app.wait(for: .runningForeground, timeout: 10)
+        home.press(character: "2", [.control, .command])
+        let design = XCUIApplication(bundleIdentifier: SuiteApp.design.bundleID)
+        XCTAssert(design.wait(for: .runningForeground, timeout: 30), "⌃⌘2 didn't open Design")
+
+        // SIGKILL Flare: Design and the home keep running.
+        guard let process = NSRunningApplication.runningApplications(withBundleIdentifier: SuiteApp.flare.bundleID)
+            .first(where: { !$0.isTerminated }), process.forceTerminate() else {
+            throw XCTSkip("This runner can't signal another process; run testCrashIsolation locally.")
+        }
+        XCTAssert(flare.wait(for: .notRunning, timeout: 10), "Flare survived SIGKILL")
+        XCTAssertNotEqual(design.state, .notRunning, "Design quit when Flare was killed")
+        XCTAssertNotEqual(home.app.state, .notRunning, "the home quit when Flare was killed")
+
+        // ⌃⌘1 from the home launches Flare cold.
+        home.app.activate()
+        XCTAssert(home.app.wait(for: .runningForeground, timeout: 10), "the home didn't come forward")
+        home.shot("switch-crash-home")
+        home.press(character: "1", [.control, .command])
+        XCTAssert(flare.wait(for: .runningForeground, timeout: 30), "⌃⌘1 didn't launch Flare again")
+
+        // Design's dirty document and the strip dropping Flare within 1 s.
+        throw XCTSkip(Self.waitsOnAdoption)
+    }
+}
