@@ -4,7 +4,7 @@ Issue: #1506 · Packet: docs/blueprints/library/features/thumbnails.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: #2859 and #2860 merged; #2878 (also fixes #2766 J1 crash in TaskGroup::offer, #2882 J3 loupe thumbnail) passed its lane macOS build 39151487702 and merges on the next sweep. Scoped library run 39153204776 (c91b146, has #2860, not #2878) is queued; the run after #2878 decides round 1. Green: contact sheet. Red: round 2 (the last), then gaps
+Next: round 1 fixes all merged (#2859, #2860 17:50Z, #2878 18:32Z at 2e27b8d; #2878 also fixes #2766 J1 crash and #2882 J3 thumbnail). Waiting on scoped library 39153204776 (c91b146, has #2860, running) and the first library-covering run with #2878 (full CI 39155751405 at 2056379 pending). Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,7 +23,7 @@ Next: #2859 and #2860 merged; #2878 (also fixes #2766 J1 crash in TaskGroup::off
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 39122753293 (scoped library, e3a4582) | red | not reached | journeys, clarity | #2749 (J2: every cell stays loading; #2715 batching) | #2878 (in the lane) | no |
+| 1 | 39122753293 (scoped library, e3a4582) | red | not reached | journeys, clarity | #2749 (J2: every cell stays loading; #2715 batching) | #2878 merged (also #2766, #2882) | no |
 
 ## Decisions
 - 2026-10-18: new run act-1a14cdfa655-jrmy replaces act-1a14698db7e-jmb4; toolchain installed by scripts/cloud-setup.sh (Swift 6.3.3), so the earlier blocker is gone.
