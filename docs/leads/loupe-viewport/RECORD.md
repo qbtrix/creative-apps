@@ -4,7 +4,7 @@ Issue: #1513 · Packet: docs/blueprints/library/features/loupe-viewport.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: full dev CI 39160459432 (f7e0350, has #2878) still running at 2026-10-18T21:57Z: macOS job on scripts/ci since 21:07Z, journeys pending. Newer full CI 39169434591 (e3859e3) pending; 39167964719 and 39168944967 cancelled while pending. No valid library journey run since #2878 (scoped library 39157077321 void: SIGKILL at launch); supervisor: a scoped library re-run on dev would help (I can't dispatch). Green: contact sheet. Red: round 2 (the last), then gaps
+Next: full dev CI 39160459432 (f7e0350, has #2878) macOS job still on scripts/ci at 2026-10-18T22:19Z (started 21:07:20Z, 70+ min; may be hung). Newer full CI 39171061138 (85f4a22) pending; 39169434591 cancelled while pending. No valid library journey run since #2878 (scoped library 39157077321 void: SIGKILL at launch). Supervisor: please check 39160459432's runner and dispatch a scoped library run on dev (I can't dispatch). Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
