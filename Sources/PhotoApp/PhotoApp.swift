@@ -4,7 +4,8 @@
 // tool options, layer settings and adjustments in the inspector, the commands
 // in the window toolbar). The window keeps its title bar and follows the
 // system appearance, and View > Hide Sidebar (SidebarCommands) makes room on a
-// small screen. PhotoWindow holds the state; the menus in PhotoCommands reach
+// small screen, and View > Rendering (RenderingCommands over PhotoRendering)
+// picks the canvas's backend, live in every window. PhotoWindow holds the state; the menus in PhotoCommands reach
 // it through a focused scene value. A window opens 1000 x 700, or at
 // `-SuiteWindowSize WxH` when given (SuiteWindow reads it).
 //
@@ -14,19 +15,25 @@
 // too (PhotoUnsavedFlow.close, from PhotoWindowEditedView's close guard).
 import AppKit
 import PhotoModel
+import SuiteUI
 import SwiftUI
 
 @main
 struct PhotoApp: App {
     @NSApplicationDelegateAdaptor private var delegate: PhotoAppDelegate
+    /// View > Rendering's checkmark and status line, over the app's live preference.
+    @State private var rendering = RenderingMenuModel(preference: PhotoRendering.shared.preference)
 
     var body: some Scene {
-        WindowGroup(id: PhotoOpenQueue.windowID) { PhotoWindow() }
-            .defaultSize(width: 1000, height: 700)
-            .commands {
-                SidebarCommands()
-                PhotoCommands()
-            }
+        WindowGroup(id: PhotoOpenQueue.windowID) {
+            PhotoWindow().environment(\.photoRendering, PhotoRendering.shared)
+        }
+        .defaultSize(width: 1000, height: 700)
+        .commands {
+            SidebarCommands()
+            PhotoCommands()
+            RenderingCommands(model: rendering)
+        }
     }
 }
 

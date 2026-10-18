@@ -81,7 +81,8 @@ targets:
     sources: [Bundle/Engines]
     dependencies:
       [{ package: creative-core, product: FlareCore }, { package: creative-core, product: CoreRaster },
-       { package: creative-core, product: CoreColor }]
+       { package: creative-core, product: CoreColor }, { package: creative-core, product: CoreRender },
+       { package: creative-core, product: CoreRenderMetal }]
   SuiteModel: { type: framework, platform: macOS, sources: [Sources/SuiteModel] }
   # The editor kernel (docs/blueprints/suiteui/features/editor-kernel.md):
   # Linux-safe, Foundation and FlareCore only, so it reaches the engines
