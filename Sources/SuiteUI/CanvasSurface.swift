@@ -58,7 +58,7 @@ extension CanvasSurface {
     /// clear of each edge, scaled by min(room.w / a.w, room.h / a.h, 1). A side
     /// of `artboard` that isn't a positive finite number counts as 1; with no
     /// room (or a size that isn't finite) the rect is empty at the centre.
-    public static func fitted(_ artboard: CGSize, in size: CGSize, inset: CGFloat) -> CGRect {
+    public nonisolated static func fitted(_ artboard: CGSize, in size: CGSize, inset: CGFloat) -> CGRect {
         let side = { (value: CGFloat) in value.isFinite && value > 0 ? value : 1 }
         let board = CGSize(width: side(artboard.width), height: side(artboard.height))
         let scale = CGFloat(ViewerZoom.fitScale(artboard: board, in: size, inset: inset.isFinite ? inset : 0))
