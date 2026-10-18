@@ -12,6 +12,14 @@ acceptance tests.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
+**Wave 5 (beta-80 W1, 2026-10-18).** `shell-media` and `shell-text` are the
+suite's half of the captain-approved beta-80 plan's W1 engines (rows E9 and
+E8): macOS-only media and text services in SuiteShell with Linux-safe
+contracts in SuiteModel. They run side by side; `shell-text`'s first task
+waits on `shell-media`'s SM-1 for the two `SuiteServices` files, and both
+final tasks wait on `onboarding` for `suite.md`. Their engine siblings are
+creative-core's wave 5 and 6 packets (`docs/blueprints/core/features/waves.md`).
+
 #763 (dev is red) is lane-wide, not a dependency: the lane keeps merging
 while it is open, and no feature names it on its `Depends on:` line.
 
