@@ -1,9 +1,11 @@
 // DesignDirtyTests.swift: the document knows when it is unsaved (#270, files-history
-// FH-2). Every history step carries a serial that only increases, and the save
-// marks the current one; the document is dirty when the current serial is not the
-// saved one, so undoing back to the save reads clean, while a new edit after an
-// undo, the 100-step cap and a coalescing run never do. Runs on Linux and macOS.
+// FH-2, #2938). The steps live in SuiteKernel's History, whose step ids never
+// repeat, and the save marks the current one; the document is dirty when the
+// kernel DocumentSession built from those ids is, so undoing back to the save reads
+// clean, while a new edit after an undo, the 100-step cap and a coalescing run
+// never do. Runs on Linux and macOS.
 import DesignModel
+import SuiteKernel
 import Testing
 
 #if canImport(FoundationEssentials)
@@ -112,4 +114,37 @@ private func savedWithRectangle() throws -> (DesignWorkspace, String) {
     // Undo New File brings back the edited, never-saved document.
     workspace.undo()
     #expect(workspace.isDirty)
+}
+
+/// The workspace's dirty state and save word are its kernel session's, and that session is `dirty`.
+private func expectKernelDirty(_ workspace: DesignWorkspace, _ dirty: Bool) {
+    let session: DocumentSession = workspace.documentSession
+    #expect(workspace.isDirty == session.isDirty)
+    #expect(session.isDirty == dirty)
+    #expect(workspace.saveStateText == session.stateText)
+}
+
+/// The dirty state is the editor kernel's (#2938): edit, save, undo, redo and a coalescing run
+/// keep the workspace's isDirty equal to its SuiteKernel DocumentSession's.
+@Test func dirtyComesFromTheKernelSession() throws {
+    var (workspace, _) = try savedWithRectangle()
+    expectKernelDirty(workspace, false)
+    workspace.addPage()
+    expectKernelDirty(workspace, true)
+    workspace.nudge(.right, shift: false)
+    workspace.nudge(.right, shift: false)
+    expectKernelDirty(workspace, true)
+    workspace.didSave(to: savedURL)
+    expectKernelDirty(workspace, false)
+    workspace.undo()
+    expectKernelDirty(workspace, true)
+    workspace.redo()
+    expectKernelDirty(workspace, false)
+    workspace.undo()
+    workspace.undo()
+    expectKernelDirty(workspace, true)
+}
+
+@Test func nothingOpenHasNoSaveWord() {
+    #expect(DesignWorkspace().saveStateText == nil)
 }

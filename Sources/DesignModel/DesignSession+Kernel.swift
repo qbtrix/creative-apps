@@ -1,7 +1,8 @@
 // DesignSession+Kernel.swift (AD-d1): Design's file state on the editor kernel's
 // session. `documentSession` is the open document as a `DocumentSession` whose
-// tokens are the history's step serials (DesignHistory), so the session is dirty
-// exactly when the workspace is and undoing back to the save reads clean. A save
+// tokens are the kernel History's saved and current step ids (DesignHistory,
+// #2938), so the session is dirty exactly when the workspace is and undoing back
+// to the save reads clean. A save
 // (`didSave(to:)`) records the current step as the session's saved token and
 // ends the open edit run, as the kernel's `History.endRun` does after a save, so
 // the next nudge is a step of its own. The file's version is read with
@@ -14,18 +15,14 @@ import Foundation
 import SuiteKernel
 
 extension DesignWorkspace {
-    /// The saved token of a document that has no saved step: serials start at 0
-    /// and only increase, so no step has it.
-    static let neverSavedToken = Int.min
-
     /// The open document's session: saved at the step last saved or opened, current
     /// at the step on screen now; `saved` once it has a location, else `unsaved`.
     /// Clean with nothing open.
-    var documentSession: DocumentSession {
+    public var documentSession: DocumentSession {
         var session = DocumentSession(
-            token: history.savedSerial ?? Self.neverSavedToken, status: documentURL == nil ? .unsaved : .saved)
+            token: history.kernel.savedStepID, status: documentURL == nil ? .unsaved : .saved)
         guard isOpen else { return session }
-        session.currentToken = history.currentSerial
+        session.currentToken = history.kernel.currentStepID
         return session
     }
 
@@ -33,8 +30,8 @@ extension DesignWorkspace {
     /// and the open edit run ends, so the saved step stays the saved one.
     mutating func sessionDidSave() {
         var session = documentSession
-        session.didSave(token: history.currentSerial)
-        history.savedSerial = session.savedToken
+        session.didSave(token: history.kernel.currentStepID)
+        history.kernel.savedStepID = session.savedToken
         endEditRun()
     }
 }
