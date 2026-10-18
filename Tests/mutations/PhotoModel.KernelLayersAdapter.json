@@ -33,5 +33,19 @@
     "find": "guard let next, next != layers else { return }",
     "replace": "guard let next else { return }",
     "tests": "PhotoKernelLayersTests"
+  },
+  {
+    "label": "bringForwardSendsBack: Bring Forward hands the kernel the wrong arrange step, now that the kernel alone decides the edge",
+    "file": "Sources/PhotoModel/PhotoLayerMenu.swift",
+    "find": "arrangeLayer(id, .bringForward)",
+    "replace": "arrangeLayer(id, .sendBackward)",
+    "tests": "PhotoLayerMenuTests"
+  },
+  {
+    "label": "destinationUnchecked: a list drag to an out-of-range destination reaches the kernel, which drops the layer at the bottom",
+    "file": "Sources/PhotoModel/PhotoWorkspace.swift",
+    "find": "guard (0...layers.count).contains(destination) else { return }",
+    "replace": "",
+    "tests": "PhotoLayersEdgeTests"
   }
 ]
