@@ -9,35 +9,35 @@
     "test": "HaloJourneyTests/HaloJourneyTests/testDragLayerToKeyPosition",
     "owner": "#1283",
     "reason": "H-J5: a 100 px drag on Ball in the viewer leaves Position X at 560, not 660 (HaloJourneyTests+Drag.swift:49, scoped run 38857364213 on the tree dev holds now). The press doesn't reach HaloViewerGestures under XCUITest; #1283 is open on it.",
-    "expires": "2026-10-18",
+    "expires": "2026-10-20",
     "scope": "full"
   },
   {
     "test": "HaloJourneyTests/HaloJourneyTests/testEveryControlActsOrSaysWhy",
     "owner": "#1035",
     "reason": "H-J13: halo.transport.play is enabled but clicking it changes nothing (HaloJourneyTests.swift:205), the viewer-playback lead's transport. Scoped run 38857364213 showed it; its overlap failure (#1282) is fixed by #1322 (scoped run 38874911359).",
-    "expires": "2026-10-18",
+    "expires": "2026-10-20",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoEditJourneyTests/testCopyPasteAsNewLayer",
     "owner": "#1520",
     "reason": "PJ-5: Edit > Paste's reason read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since (the brush test stops them), so it is unproven; the scoped photo run decides.",
-    "expires": "2026-10-18",
+    "expires": "2026-10-20",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoEditJourneyTests/testPasteFromAnotherApp",
     "owner": "#1520",
     "reason": "PJ-6: the pasted 200 x 100 layer's place read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides.",
-    "expires": "2026-10-18",
+    "expires": "2026-10-20",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoLayerOpsJourneyTests/testDuplicateMergeAndFlatten",
     "owner": "#1520",
     "reason": "PJ-7: Layer > Merge Down's reason read failed in full run 38841439320, the last that reached the journeys. #1284 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides.",
-    "expires": "2026-10-18",
+    "expires": "2026-10-20",
     "scope": "full"
   }
 ]
