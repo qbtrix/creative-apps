@@ -3,8 +3,8 @@
 // panel rows front to back, cascades hide and lock to descendants, moves a
 // layer into a parent at a clamped index with refusals (unknown, into itself
 // or a descendant, not a container, locked), arranges among siblings, groups,
-// ungroups keeping order and duplicates with fresh ids. Every check waits on
-// EK-12, which writes the body and turns them on (docs/factory/lead.md rule 13).
+// ungroups keeping order and duplicates with fresh ids. EK-12 wrote the body
+// and turned them on (docs/factory/lead.md rule 13).
 import Testing
 import SuiteKernel
 
@@ -49,7 +49,7 @@ private struct Mint {
 
     private static func rootIDs(_ tree: LayerTree<TreeItem>) -> [String] { tree.roots.map(\.id) }
 
-    @Test(.disabled("waits on EK-12")) func nestsAndFindsNodes() {
+    @Test func nestsAndFindsNodes() {
         let tree = KernelFixtures.tree200
         #expect(tree.node("card-7")?.name == "Card 7")
         #expect(tree.node("row-2-col-3")?.children.count == 9)
@@ -61,7 +61,7 @@ private struct Mint {
         #expect(Set(tree.frontToBack).count == 200)
     }
 
-    @Test(.disabled("waits on EK-12")) func rowsAndOrderFrontToBack() {
+    @Test func rowsAndOrderFrontToBack() {
         let tree = KernelFixtures.tree200
         #expect(tree.rows(expanded: []).map(\.id)
             == ["background", "footer", "archive", "gallery", "cards", "hero", "header"])
@@ -72,7 +72,7 @@ private struct Mint {
         #expect(nested.frontToBack == ["d", "g", "y", "x", "a"])
     }
 
-    @Test(.disabled("waits on EK-12")) func hiddenCascades() {
+    @Test func hiddenCascades() {
         var tree = KernelFixtures.tree200
         #expect(tree.isEffectivelyHidden("archive"))
         #expect(tree.isEffectivelyHidden("archive-3"))
@@ -85,7 +85,7 @@ private struct Mint {
         #expect(row?.inheritsHidden == true && row?.isHidden == false)
     }
 
-    @Test(.disabled("waits on EK-12")) func lockedCascades() {
+    @Test func lockedCascades() {
         var tree = KernelFixtures.tree200
         #expect(tree.isEffectivelyLocked("footer-4"))
         #expect(!tree.isEffectivelyLocked("hero-1"))
@@ -94,7 +94,7 @@ private struct Mint {
         #expect(!tree.isEffectivelyLocked("item-2-2-5"))
     }
 
-    @Test(.disabled("waits on EK-12")) func updateEditsInPlace() {
+    @Test func updateEditsInPlace() {
         var tree = KernelFixtures.tree200
         #expect(tree.update("card-3") { $0.name = "Promo" })
         #expect(tree.node("card-3")?.name == "Promo")
@@ -102,7 +102,7 @@ private struct Mint {
         #expect(tree.node("nowhere") == nil)
     }
 
-    @Test(.disabled("waits on EK-12")) func movesIntoParentAtIndex() {
+    @Test func movesIntoParentAtIndex() {
         var tree = KernelFixtures.tree200
         #expect(refusal { try tree.move("card-7", into: "header", at: 3) } == nil)
         #expect(tree.node("header")?.children.map(\.id) == ["header-1", "header-2", "header-3", "card-7"])
@@ -116,7 +116,7 @@ private struct Mint {
         #expect(tree.frontToBack.count == 200)
     }
 
-    @Test(.disabled("waits on EK-12")) func moveRefusals() {
+    @Test func moveRefusals() {
         var tree = KernelFixtures.tree200
         #expect(refusal { try tree.move("nowhere", into: "header", at: 0) } == .unknown("nowhere"))
         #expect(refusal { try tree.move("card-1", into: "nowhere", at: 0) } == .unknown("nowhere"))
@@ -126,7 +126,7 @@ private struct Mint {
         #expect(tree == KernelFixtures.tree200)
     }
 
-    @Test(.disabled("waits on EK-12")) func refusesIntoOwnDescendant() {
+    @Test func refusesIntoOwnDescendant() {
         var tree = KernelFixtures.tree200
         // Two levels down, not only a direct child.
         #expect(refusal { try tree.move("gallery", into: "row-2-col-3", at: 0) } == .intoItself("row-2-col-3"))
@@ -134,7 +134,7 @@ private struct Mint {
         #expect(tree == KernelFixtures.tree200)
     }
 
-    @Test(.disabled("waits on EK-12")) func arrangesAmongSiblings() {
+    @Test func arrangesAmongSiblings() {
         var tree = Self.flat
         #expect(refusal { try tree.arrange(.bringToFront, ["a"]) } == nil)
         #expect(Self.rootIDs(tree) == ["b", "c", "d", "a"])
@@ -154,7 +154,7 @@ private struct Mint {
         #expect(refusal { try tree.arrange(.bringForward, ["nowhere"]) } == .unknown("nowhere"))
     }
 
-    @Test(.disabled("waits on EK-12")) func bringForwardAtTopStays() {
+    @Test func bringForwardAtTopStays() {
         var tree = Self.flat
         #expect(refusal { try tree.arrange(.bringForward, ["d"]) } == nil)
         #expect(tree == Self.flat)
@@ -162,7 +162,7 @@ private struct Mint {
         #expect(tree == Self.flat)
     }
 
-    @Test(.disabled("waits on EK-12")) func groupsUnderANewNode() throws {
+    @Test func groupsUnderANewNode() throws {
         var tree = Self.flat
         let id = try tree.group(["b", "c"], name: "Pair", payload: TreeItem(holdsChildren: true)) { "pair" }
         #expect(id == "pair")
@@ -177,7 +177,7 @@ private struct Mint {
         #expect(other == Self.flat)
     }
 
-    @Test(.disabled("waits on EK-12")) func ungroupKeepsOrder() {
+    @Test func ungroupKeepsOrder() {
         var tree = LayerTree([leaf("a"), group("g", [leaf("x"), leaf("y"), leaf("z")]), leaf("d")])
         #expect(refusal { try tree.ungroup("g") } == nil)
         #expect(Self.rootIDs(tree) == ["a", "x", "y", "z", "d"])
@@ -186,7 +186,7 @@ private struct Mint {
         #expect(refusal { try tree.ungroup("nowhere") } == .unknown("nowhere"))
     }
 
-    @Test(.disabled("waits on EK-12")) func duplicatesInFrontWithFreshIDs() {
+    @Test func duplicatesInFrontWithFreshIDs() {
         var tree = LayerTree([leaf("a"), group("g", [leaf("x")]), leaf("c")])
         var mint = Mint()
         let copies = tree.duplicate(["a"]) { mint.next() }
