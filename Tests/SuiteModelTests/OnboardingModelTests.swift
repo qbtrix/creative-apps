@@ -256,6 +256,15 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.message == .notAvailable("The Flare sample isn't in this build.") && !m.isFinished && m.launching == nil)
     }
 
+    @Test func openSampleWithNoFreeNameRefusesUnderItsTile() async throws {
+        let (m, s) = await model(present: { _ in true })
+        await m.openSample(.flare, now: now)
+        #expect(log.all.isEmpty)
+        #expect(try await sent(s).isEmpty)
+        #expect(m.message == .ioFailed("Documents/Samples has no free name for Bounce.flare."))
+        #expect(m.failed == .flare && !m.isFinished && m.launching == nil)
+    }
+
     @Test func aRefusedCopySendsNothing() async throws {
         let s = SuiteServices.fake()
         let m = OnboardingModel(services: s, samplesFolder: "/R/Samples", documents: "/D", present: { $0.hasPrefix("/R/") },

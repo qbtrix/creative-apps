@@ -44,8 +44,9 @@ extension BodyCountSuites {
         let photosOrder: [SuiteApp] = [.library, .photo, .flare, .design, .halo]
 
         /// A loaded model on the fakes whose samples are all present but those `present` refuses.
+        /// Documents starts empty, so an Open sample's copy has a free name and reaches the send.
         private func model(_ services: SuiteServices = .fake(),
-                           present: @escaping @Sendable (String) -> Bool = { _ in true }) async -> OnboardingModel {
+                           present: @escaping @Sendable (String) -> Bool = { $0.hasPrefix("/fixture/Samples/") }) async -> OnboardingModel {
             let model = OnboardingModel(services: services, samplesFolder: "/fixture/Samples",
                                         documents: "/fixture/Documents", present: present,
                                         copy: { _, _ throws(SuiteError) in }, makeID: { "ob1" })
@@ -96,7 +97,7 @@ extension BodyCountSuites {
 
         @Test func startPageStates() async {
             // Halo's sample missing: its Open sample disabled with the model's reason as its help.
-            let noHalo: @Sendable (String) -> Bool = { !$0.hasSuffix("/Intro.halo") }
+            let noHalo: @Sendable (String) -> Bool = { $0.hasPrefix("/fixture/Samples/") && !$0.hasSuffix("/Intro.halo") }
             let missing = start(await model(present: noHalo), focus: nil)
             if let reason = missing.starters.first(where: { $0.tile.app == .halo })?.sampleReason {
                 #expect(reason == "The Halo sample isn't in this build.")

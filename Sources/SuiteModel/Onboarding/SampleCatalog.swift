@@ -23,16 +23,20 @@ public struct SampleCatalog: Sendable {
     /// Where the copy lands: <documents>/Samples/<fileName>, or "<stem> 2.<ext>", "<stem> 3.<ext>" while
     /// taken. Never an existing path: a copy never overwrites. The names come from UniqueFileNames, the one
     /// suffix rule: each name `exists` reports joins the taken set, compared ignoring case, then the next is asked.
-    public static func destination(for s: SampleFile, documents: String, exists: (String) -> Bool) -> String {
+    /// Nil once `maxTries` names are all taken, so a folder that answers yes to every name can't hang the caller.
+    public static func destination(for s: SampleFile, documents: String, exists: (String) -> Bool) -> String? {
         let folder = documents + "/Samples/"
         let (stem, ext) = split(s.fileName)
         var taken: Set<String> = []
-        while true {
+        for _ in 0..<maxTries {
             let name = UniqueFileNames.name(stem, extension: ext, among: taken)
             guard exists(folder + name) else { return folder + name }
             taken.insert(name)
         }
+        return nil
     }
+    /// How many names `destination` asks about before it gives up.
+    public static let maxTries = 1000
     /// "Bounce.flare" → ("Bounce", "flare"); a name with no dot (or only a leading one) has no extension.
     private static func split(_ name: String) -> (stem: String, ext: String) {
         guard let dot = name.lastIndex(of: "."), dot != name.startIndex else { return (name, "") }

@@ -37,7 +37,8 @@ import Testing
         let s = try #require(SampleCatalog.sample(for: .flare))
         var taken: Set<String> = []
         for expected in ["Bounce.flare", "Bounce 2.flare", "Bounce 3.flare"] {
-            let dest = SampleCatalog.destination(for: s, documents: "/D", exists: { [taken] in taken.contains($0) })
+            let found = SampleCatalog.destination(for: s, documents: "/D", exists: { [taken] in taken.contains($0) })
+            let dest = try #require(found)
             #expect(dest == "/D/Samples/" + expected)
             taken.insert(dest)
         }
@@ -46,7 +47,8 @@ import Testing
     @Test func destinationSkipsEveryTakenNameInARow() throws {
         let s = try #require(SampleCatalog.sample(for: .flare))
         let taken: Set<String> = ["/D/Samples/Bounce.flare", "/D/Samples/Bounce 2.flare", "/D/Samples/Bounce 3.flare"]
-        let dest = SampleCatalog.destination(for: s, documents: "/D", exists: { taken.contains($0) })
+        let found = SampleCatalog.destination(for: s, documents: "/D", exists: { taken.contains($0) })
+        let dest = try #require(found)
         #expect(dest == "/D/Samples/Bounce 4.flare")
         #expect(!taken.contains(dest))
     }
@@ -62,7 +64,7 @@ import Testing
 
     @Test func eachSamplesRefDiffers() {
         let refs = SampleCatalog.samples.map { s in
-            SampleCatalog.ref(for: s, path: SampleCatalog.destination(for: s, documents: "/D", exists: { _ in false }))
+            SampleCatalog.ref(for: s, path: SampleCatalog.destination(for: s, documents: "/D", exists: { _ in false }) ?? "")
         }
         #expect(Set(refs.map(\.path)).count == SampleCatalog.samples.count)
         #expect(Set(refs.map(\.fileID)).count == SampleCatalog.samples.count)
@@ -95,5 +97,15 @@ import Testing
             == "/D/Samples/my.beach 2.ora")
         let hidden = SampleFile(app: .photo, fileName: ".ora", type: .photoOpenRaster, title: "Beach")
         #expect(SampleCatalog.destination(for: hidden, documents: "/D", exists: { $0 == "/D/Samples/.ora" }) == "/D/Samples/.ora 2")
+    }
+
+    @Test func destinationGivesUpWhenEveryNameIsTaken() throws {
+        let s = try #require(SampleCatalog.sample(for: .flare))
+        let asked = SampleCopyLog()
+        #expect(SampleCatalog.destination(for: s, documents: "/D", exists: { asked.record($0, ""); return true }) == nil)
+        #expect(asked.all.count == SampleCatalog.maxTries)
+        #expect(SampleCatalog.maxTries == 1000)
+        let last = "/D/Samples/Bounce \(SampleCatalog.maxTries).flare"
+        #expect(SampleCatalog.destination(for: s, documents: "/D", exists: { $0 != last }) == last)
     }
 }
