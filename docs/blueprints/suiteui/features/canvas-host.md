@@ -7,7 +7,10 @@ hit-tests marks and draws a live drag on an overlay layer without a SwiftUI
 body per sample; plus the suite's **View > Rendering** submenu (Automatic,
 GPU (Metal), CPU, a checkmark on the current one) as SuiteUI's
 `RenderingCommands`, and the one suite-wide preference every app process reads
-live and keeps across relaunch. For the beta, Automatic draws on CPU. The
+live and keeps across relaunch. Automatic draws on Metal when there is a
+device (it drew on the CPU until Photo's render adoption, R1, gave the host a
+live presenter, `CanvasTilePresenter`, and `EmbeddedCanvasHost` put it inside
+a CanvasViewport). The
 Settings > Rendering pane is not in the beta (captain, 2026-10-17; see Not in
 this packet).
 **Line:** `line:suiteui` · **Wave:** 3 (`waves.md`) · **Lead branch:** `lead/canvas-host`

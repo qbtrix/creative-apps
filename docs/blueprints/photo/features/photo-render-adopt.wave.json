@@ -2,7 +2,7 @@
   "title": "Photo's canvas draws through CoreRender, with View > Rendering",
   "wave": "R1",
   "order": 10,
-  "status": "building",
+  "status": "built",
   "feature_issue": "–",
   "covers": "beta-80 row R1, Photo adopter (pulled forward by the captain, 2026-10-18)",
   "waits_on": "creative-core 3094ab1 (CoreRender, CoreRenderMetal); SuiteUI canvas-host",
@@ -20,7 +20,10 @@
     "Sources/PhotoApp/PhotoStatusLine.swift",
     "Tests/PhotoModelTests/PhotoRenderRouteTests.swift",
     "Tests/AppSnapshotTests/PhotoRenderBackendTests.swift",
-    "Tests/AppSnapshotTests/PhotoRenderBudgetTests.swift"
+    "Tests/AppSnapshotTests/PhotoRenderBudgetTests.swift",
+    "Sources/PhotoApp/TileCanvas.swift",
+    "Sources/PhotoApp/PhotoEditor.swift",
+    "Tests/AppSnapshotTests/PhotoTileCanvasTests.swift"
   ],
   "journeys": [],
   "journeys_none": "View > Rendering is a menu: an XCUITest journey would have to take the mouse to open it, so the switch is checked in code (PhotoRenderBackendTests) and by hand on the Mac (the packet's done check)."

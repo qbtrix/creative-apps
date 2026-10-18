@@ -1,7 +1,14 @@
 // CanvasHostView.swift: the canvas host's AppKit view (canvas-host CH-3): tile
 // layers, and a live overlay SwiftUI never sees, cleared at once on mouse-up
-// (no fade). `draw(_:)` paints the same picture for `cacheDisplay`. macOS only.
+// (no fade). `draw(_:)` paints the same picture for `cacheDisplay`. Embedded
+// (`isEmbedded`, inside a CanvasViewport's content, as Photo's canvas) it
+// fills its bounds, draws no surround or artboard so the viewport's
+// checkerboard shows through, and takes no pointer input: the viewport's
+// gestures do. `rotationDegrees` turns the picture about its centre (a
+// straighten preview). Tile layers magnify nearest from 2 px per pixel up and
+// minify trilinear. macOS only.
 import AppKit
+import Combine
 import SwiftUI
 
 /// The AppKit canvas surface: tile layers, the live overlay, mouse, scroll, pinch and hover.
@@ -10,6 +17,24 @@ public final class CanvasHostView: NSView {
     public private(set) var documentSize = CGSize.zero
     public private(set) var zoom: CGFloat = 1
     public private(set) var pan = CGSize.zero
+    /// Inside a CanvasViewport: fills the bounds, no surround or artboard fill, no pointer input.
+    public var isEmbedded = false {
+        didSet {
+            // The viewport's container is the `suite.canvas` element; a second one would make it ambiguous.
+            setAccessibilityElement(!isEmbedded)
+            (needsLayout, needsDisplay) = (true, true)
+        }
+    }
+    /// The filters the tile layers were last given, so a layout that keeps the scale's side of 2 touches none.
+    private var tileFilter: CALayerContentsFilter?
+    /// The picture turned clockwise on screen about its centre, in degrees.
+    public var rotationDegrees = 0.0 {
+        didSet { if rotationDegrees != oldValue { needsLayout = true } }
+    }
+    /// The Metal path's presenter while `metalLayer` is installed; it is handed every tile shown.
+    var presenter: (any MetalPresenting)?
+    /// The followed rendering preference (`followRendering`), held for the view's life.
+    var renderingWatch: AnyCancellable?
     /// The current drag's samples in view points, the overlay's path; empty between drags.
     private(set) var live: [CGPoint] = []
     private var anchor: CGPoint?
@@ -52,11 +77,17 @@ public final class CanvasHostView: NSView {
             container.bounds = CGRect(origin: .zero, size: documentSize)
             setAccessibilityValue("\(Int(documentSize.width)) × \(Int(documentSize.height)) px")
         }
-        for tile in content.tiles(dirtyOnly: !restart) {
+        let tiles = content.tiles(dirtyOnly: !restart)
+        // Layout redraws the hairlines of tiles with no pixels and presents on Metal; a new tile layer needs it too.
+        var relayout = restart || metalLayer != nil
+        for tile in tiles {
+            relayout = relayout || tileLayers[tile.rect] == nil || (images[tile.rect] ?? nil == nil) != (tile.image == nil)
             let layer = tileLayers[tile.rect] ?? CALayer()
             if tileLayers[tile.rect] == nil {
                 layer.frame = frame(of: tile.rect)
                 layer.edgeAntialiasingMask = []
+                layer.magnificationFilter = tileFilter ?? .linear
+                layer.minificationFilter = .trilinear
                 container.addSublayer(layer)
                 tileLayers[tile.rect] = layer
             }
@@ -64,8 +95,11 @@ public final class CanvasHostView: NSView {
             images[tile.rect] = tile.image
         }
         CATransaction.commit()
-        (needsLayout, needsDisplay) = (true, true)
+        if metalLayer != nil { presenter?.show(tiles, documentSize: documentSize) }
+        (needsLayout, needsDisplay) = (needsLayout || relayout, true)
     }
+    /// Every tile shown, with its image.
+    func shown() -> [CanvasTile] { images.map { CanvasTile(rect: $0.key, image: $0.value) } }
     /// A tile's frame in the unflipped container: document row y sits at height - maxY.
     private func frame(of rect: CanvasTileRect) -> CGRect {
         CGRect(x: CGFloat(rect.x), y: documentSize.height - CGFloat(rect.y + rect.height),
@@ -73,6 +107,7 @@ public final class CanvasHostView: NSView {
     }
     /// The document fitted inside the canvas inset, times the zoom, moved by the pan, in view points.
     public var artboard: CGRect {
+        if isEmbedded { return documentSize.width > 0 && documentSize.height > 0 ? bounds : .zero }
         let room = bounds.insetBy(dx: SuiteSize.canvasInset, dy: SuiteSize.canvasInset)
         guard documentSize.width > 0, documentSize.height > 0, room.width > 0, room.height > 0 else { return .zero }
         let scale = min(room.width / documentSize.width, room.height / documentSize.height) * zoom
@@ -89,6 +124,7 @@ public final class CanvasHostView: NSView {
     }
     /// The host on the artboard, nil on the surround so clicks there pass through.
     override public func hitTest(_ point: NSPoint) -> NSView? {
+        if isEmbedded { return nil }
         let local = superview.map { convert(point, from: $0) } ?? point
         return artboard.contains(local) ? self : nil
     }
@@ -100,16 +136,32 @@ public final class CanvasHostView: NSView {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         container.position = board.origin
-        container.setAffineTransform(CGAffineTransform(scaleX: scale, y: scale))
+        container.setAffineTransform(
+            CGAffineTransform(scaleX: scale, y: scale).concatenating(Self.turn(rotationDegrees, in: board.size)))
         overlay.frame = bounds
+        let magnify: CALayerContentsFilter = scale >= 2 ? .nearest : .linear
+        if magnify != tileFilter {
+            tileFilter = magnify
+            for layer in tileLayers.values { layer.magnificationFilter = magnify }
+        }
         // A tile with no pixels yet shows its edge, a hairline at any zoom.
         for (rect, layer) in tileLayers { layer.borderWidth = images[rect, default: nil] == nil && scale > 0 ? 1 / scale : 0 }
         CATransaction.commit()
+        if let presenter { presentMetal(with: presenter) }
+    }
+
+    /// A clockwise turn on screen by `degrees` about the centre of a `size` box with its origin at
+    /// the box's corner (unflipped y goes up, so the angle is negated).
+    nonisolated static func turn(_ degrees: Double, in size: CGSize) -> CGAffineTransform {
+        guard degrees != 0 else { return .identity }
+        return CGAffineTransform(translationX: -size.width / 2, y: -size.height / 2)
+            .concatenating(CGAffineTransform(rotationAngle: -degrees * .pi / 180))
+            .concatenating(CGAffineTransform(translationX: size.width / 2, y: size.height / 2))
     }
 
     override public func updateLayer() {
-        layer?.backgroundColor = color(SuitePalette.canvasSurround)
-        container.backgroundColor = artboardColor
+        layer?.backgroundColor = isEmbedded ? nil : color(SuitePalette.canvasSurround)
+        container.backgroundColor = isEmbedded ? nil : artboardColor
         overlay.strokeColor = color(SuitePalette.accent)
         for layer in tileLayers.values { layer.borderColor = color(SuitePalette.hairline) }
     }
@@ -123,7 +175,7 @@ public final class CanvasHostView: NSView {
     override public func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         let board = artboard
-        for (fill, rect) in [(color(SuitePalette.canvasSurround), bounds), (artboardColor, board)] {
+        for (fill, rect) in [(color(SuitePalette.canvasSurround), bounds), (artboardColor, board)] where !isEmbedded {
             context.setFillColor(fill)
             context.fill(rect)
         }
@@ -131,7 +183,9 @@ public final class CanvasHostView: NSView {
             let scale = board.width / documentSize.width
             context.saveGState()
             context.translateBy(x: board.minX, y: board.minY)
+            context.concatenate(Self.turn(rotationDegrees, in: board.size))
             context.scaleBy(x: scale, y: scale)
+            context.interpolationQuality = scale >= 2 ? .none : .high
             context.setStrokeColor(color(SuitePalette.hairline))
             context.setLineWidth(1 / scale)
             for (rect, image) in images {
