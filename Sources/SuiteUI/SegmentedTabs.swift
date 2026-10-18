@@ -7,7 +7,8 @@
 // the system draws the segments, Tab reaches it and VoiceOver reads it as one.
 // A click on a segment also puts focus in it, so ← and → then step to the
 // previous or next tab (`step`) with keyboard navigation off too, and each
-// segment carries its option's identifier, or `<id>.<option id>`.
+// segment carries its option's identifier, or `<id>.<option id>`, and is
+// listed in `suite.controls` under it (`segmentEntries`).
 // A selection change fades over 0.14 s (at once under `suiteReduceMotion`)
 // and reports a `fade-start`/`fade-end` pair on series `tabs` (QB-S9;
 // TabsProbe, which a probe host sets). Given an `id` it lists itself in
@@ -74,6 +75,15 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
         option.identifier ?? id.map { "\($0).\(String(describing: option.id))" }
     }
 
+    /// The `suite.controls` entries of the identified segments, which share the switch's state and reason.
+    nonisolated static func segmentEntries(
+        _ tabs: [InspectorOption<ID>], in id: String?, enabled: Bool, reason: String?
+    ) -> [ControlEntry] {
+        tabs.compactMap { option in
+            segmentID(option, in: id).map { ControlEntry(id: $0, enabled: enabled, reason: enabled ? nil : reason) }
+        }
+    }
+
     /// The system control underneath: a segmented Picker over the drawn selection.
     var picker: some View {
         Picker(label, selection: Binding(get: { shown }, set: { focused = true; onChange($0) })) {
@@ -116,6 +126,13 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
                 .onHover { hovering = $0 }
                 .help(help)
                 .suiteControl(id: id, enabled: enabled, reason: enabled ? nil : help)
+                .background {
+                    // The segments keep the identifiers the picker set; these only list them.
+                    ForEach(Self.segmentEntries(tabs, in: id, enabled: enabled, reason: help), id: \.id) { entry in
+                        Color.clear.suiteControl(
+                            id: entry.id, enabled: entry.enabled, reason: entry.reason, identifies: false)
+                    }
+                }
                 .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: lit)
                 .padding(SuiteSpacing.s)
             Divider()

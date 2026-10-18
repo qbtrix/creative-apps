@@ -1,7 +1,11 @@
-// CanvasHostMetalTests.swift: the canvas host's Metal path (canvas-host CH-10):
-// `.gpu` with a device installs a `CAMetalLayer` with a colour space, `.cpu`,
-// `.automatic` or a nil device keep the tile layers, and switching keeps the
-// overlay on top. macOS only; the GPU cases need a Metal device.
+// CanvasHostMetalTests.swift: the canvas host's Metal path (canvas-host CH-10,
+// live since render adoption R1): `.gpu` or `.automatic` with a device
+// installs a `CAMetalLayer` with a colour space, `.cpu` or a nil device keep
+// the tile layers, and switching keeps the overlay on top. The presenter is
+// handed every tile on the switch and the changed ones after; the live
+// CanvasTilePresenter writes them into its document texture and fills
+// drawables. The drawable never has more pixels than the document. macOS
+// only; the GPU cases need a Metal device.
 import AppKit
 import Metal
 import QuartzCore
@@ -18,6 +22,7 @@ import Testing
         let metal = try #require(canvas.metalLayer)
         #expect(metal.colorspace != nil)
         #expect(metal.device != nil)
+        #expect(!metal.isOpaque, "a clear pixel would draw black over the checkerboard")
         #expect(canvas.container.isHidden)
         #expect(overlayOnTop(canvas))
     }
@@ -31,15 +36,71 @@ import Testing
         #expect(overlayOnTop(canvas))
     }
 
-    @Test func cpuAndAutomaticKeepTheTileLayers() {
+    @Test func cpuKeepsTheTileLayers() {
         let canvas = loadedHost()
-        let device = MTLCreateSystemDefaultDevice()
-        for choice in [RenderingChoice.cpu, .automatic] {
-            canvas.useRendering(choice, device: device, presenter: ClearingMetalPresenter())
-            #expect(canvas.metalLayer == nil, "\(choice) installed a Metal layer")
-            #expect(!canvas.container.isHidden)
-            #expect(canvas.container.sublayers?.count == 20)
-        }
+        canvas.useRendering(.cpu, device: MTLCreateSystemDefaultDevice(), presenter: ClearingMetalPresenter())
+        #expect(canvas.metalLayer == nil)
+        #expect(!canvas.container.isHidden)
+        #expect(canvas.container.sublayers?.count == 20)
+    }
+
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
+    func automaticWithADeviceDrawsOnMetal() throws {
+        let canvas = loadedHost()
+        canvas.useRendering(.automatic, device: MTLCreateSystemDefaultDevice(), presenter: ClearingMetalPresenter())
+        #expect(canvas.metalLayer != nil)
+        #expect(canvas.container.isHidden)
+    }
+
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
+    func thePresenterGetsEveryTileOnTheSwitchThenTheChangedOnes() throws {
+        let canvas = loadedHost()
+        let presenter = RecordingPresenter()
+        canvas.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        #expect(presenter.shown == [20])
+        canvas.show(OneTile())
+        #expect(presenter.shown == [20, 1])
+        canvas.useRendering(.cpu, device: nil, presenter: presenter)
+        canvas.show(OneTile())
+        #expect(presenter.shown == [20, 1], "a tile on the tile path reached the presenter")
+    }
+
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
+    func theTilePresenterWritesTheTilesAndFillsADrawable() throws {
+        guard drawablesWork() else { return }
+        let canvas = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 960, height: 600))
+        canvas.show(GalleryCanvasDocument.make())
+        canvas.layoutSubtreeIfNeeded()
+        let presenter = CanvasTilePresenter()
+        canvas.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        #expect(presenter.presented >= 1)
+        let texture = try #require(presenter.texture)
+        #expect(texture.width == 4096 && texture.height == 2160)
+        // The first tile is the accent swatch, opaque: its texel is that colour.
+        var texel = [UInt8](repeating: 0, count: 4)
+        texture.getBytes(&texel, bytesPerRow: 4, from: MTLRegionMake2D(10, 10, 1, 1), mipmapLevel: 0)
+        let hex = SuitePalette.accent.light
+        #expect(texel == [UInt8(hex >> 16 & 0xFF), UInt8(hex >> 8 & 0xFF), UInt8(hex & 0xFF), 255])
+    }
+
+    @Test func theDrawableNeverHasMorePixelsThanTheDocument() {
+        let document = CGSize(width: 4096, height: 2160)
+        #expect(CanvasHostView.drawableSize(board: CGSize(width: 800, height: 422), scale: 2, document: document)
+            == CGSize(width: 1600, height: 844))
+        #expect(CanvasHostView.drawableSize(board: CGSize(width: 16384, height: 8640), scale: 2, document: document)
+            == document)
+        #expect(CanvasHostView.drawableSize(board: .zero, scale: 2, document: .zero) == CGSize(width: 1, height: 1))
+    }
+
+    @Test func anEmbeddedHostFillsItsBoundsAndTakesNoClick() {
+        let canvas = loadedHost()
+        canvas.isEmbedded = true
+        #expect(canvas.artboard == canvas.bounds)
+        #expect(canvas.hitTest(CGPoint(x: 480, y: 300)) == nil)
+        // The viewport's container is the one `suite.canvas` element.
+        #expect(!canvas.isAccessibilityElement())
+        canvas.updateLayer()
+        #expect(canvas.layer?.backgroundColor == nil && canvas.container.backgroundColor == nil)
     }
 
     @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
@@ -63,6 +124,28 @@ import Testing
         let metalLayers = canvas.layer?.sublayers?.filter { $0 is CAMetalLayer }.count
         #expect(metalLayers == 0)
     }
+}
+
+/// Whether this machine's Metal layers hand out drawables off screen (a CI VM's may not); the
+/// presenter tests that need one return early when not.
+@MainActor func drawablesWork() -> Bool {
+    let probe = CAMetalLayer()
+    probe.device = MTLCreateSystemDefaultDevice()
+    probe.drawableSize = CGSize(width: 8, height: 8)
+    return probe.device != nil && probe.nextDrawable() != nil
+}
+
+/// Counts the tiles each `show` hands it.
+@MainActor private final class RecordingPresenter: MetalPresenting {
+    var shown: [Int] = []
+    func present(_ drawable: any CAMetalDrawable, on layer: CAMetalLayer) {}
+    func show(_ tiles: [CanvasTile], documentSize: CGSize) { shown.append(tiles.count) }
+}
+
+/// The fake document's first tile again, as a brush event's one dirty tile.
+private struct OneTile: CanvasContentProviding {
+    let documentSize = FakeCanvasContent().documentSize
+    func tiles(dirtyOnly: Bool) -> [CanvasTile] { Array(FakeCanvasContent().tiles(dirtyOnly: true).prefix(1)) }
 }
 
 /// A 960 x 600 host showing the fake document's 20 tiles, laid out.

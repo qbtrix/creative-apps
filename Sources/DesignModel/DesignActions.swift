@@ -12,6 +12,8 @@
 //   the same coalescing key); a refusal records nothing and leaves the workspace as it was.
 // - With nothing selected every help is "Select a layer first."; while text is being edited it is
 //   "Finish editing the text first.", and `run` refuses.
+// - While a canvas gesture is live `run` refuses with `.unchanged` and records nothing (#542); the
+//   gesture's own steps go through `apply`, which stays open to them.
 // - `apply` keeps the held-id index exact for the edited page and takes the mint's counter, so a
 //   minted id is never handed out again, undo included.
 // Linux-safe.
@@ -77,7 +79,7 @@ extension DesignWorkspace {
     public mutating func run(_ command: DesignCommand) throws(DesignRefusal) {
         let ids = selectedNodeIDs
         guard let page = selectedPage, !ids.isEmpty else { throw .nothingSelected }
-        guard editingTextID == nil else { throw .unchanged }
+        guard editingTextID == nil, gesture == nil else { throw .unchanged }
         if ids.count == 1, command.hasOneLayerMethod { return try runOneLayer(command) }
         var mint = mint()
         let edit: DesignEdit
@@ -155,10 +157,14 @@ extension DesignWorkspace {
 
     // MARK: One layer
 
-    /// Today's help for delete, nudge or align on the one selected layer.
+    /// Today's help for delete, nudge or align on the one selected layer. A layer hidden in the
+    /// tree doesn't nudge (#607).
     private func oneLayerHelp(_ command: DesignCommand) -> String? {
-        guard case .align(let edge) = command else { return selectedNodeID.flatMap(lockHelp) }
-        return alignHelp(edge)
+        if case .align(let edge) = command { return alignHelp(edge) }
+        guard let node = selectedNode else { return nil }
+        if let help = lockHelp(node.id) { return help }
+        if case .nudge = command, isHiddenInTree(node.id) { return DesignRefusal.hidden(node.name).help }
+        return nil
     }
 
     /// Delete, nudge or align on the one selected layer through today's methods, which record their

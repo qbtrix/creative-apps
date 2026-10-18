@@ -1,4 +1,6 @@
 [
 {"label":"the tour shows again after it was done","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"(p.onboardingDoneVersion ?? 0) < version","replace":"(p.onboardingDoneVersion ?? 0) <= version","tests":"SuiteOnboardingTests"},
-{"label":"finishing never records the version","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"FakeOnboarding().finishing(p, focus: focus, version: version)","replace":"p","tests":"SuiteOnboardingTests"}
+{"label":"finishing never records the version","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"FakeOnboarding().finishing(p, focus: focus, version: version)","replace":"p","tests":"SuiteOnboardingTests"},
+{"label":"a preset chip keeps its ellipsis","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"while title.hasSuffix(\"…\") { title.removeLast() }","replace":"","tests":"OnboardingCopyTests"},
+{"label":"a preset chip loses its New cue","file":"Sources/SuiteModel/Onboarding/SuiteOnboarding.swift","find":"? title : \"New \" + title","replace":"? title : title","tests":"OnboardingCopyTests"}
 ]
