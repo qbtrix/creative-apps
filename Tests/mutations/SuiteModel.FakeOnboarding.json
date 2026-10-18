@@ -1,0 +1,4 @@
+[
+{"label":"the focus page sends users to Settings again","file":"Sources/SuiteModel/Fakes/FakeOnboarding.swift","find":"Change it any time from Help > Welcome to AfterGlow.","replace":"You can change this in Settings.","tests":"OnboardingCopyTests"},
+{"label":"the start page loses the packet's title","file":"Sources/SuiteModel/Fakes/FakeOnboarding.swift","find":"title: \"Start with a sample or a new document\"","replace":"title: \"Start with a sample\"","tests":"OnboardingCopyTests"}
+]

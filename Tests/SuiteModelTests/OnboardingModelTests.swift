@@ -270,4 +270,42 @@ actor RacingPreferences: PreferencesStoring {
         #expect(try await saved(s).onboardingDoneVersion == 1)
         #expect(try await saved(s).homeOrder.first == .design)
     }
+
+    @Test func skipBackAndContinueHoldWhileAHandOffSends() async throws {
+        let gate = GateSending()
+        let (m, s) = await model { $0.sending = gate }
+        m.continue(); m.continue()
+        #expect(m.isLastPage && m.sendingReason == nil)
+        let preset = try flareHD()
+        let send = Task { await m.startNew(preset, now: now) }
+        while !(await gate.isWaiting) { await Task.yield() }
+        #expect(m.launching == .flare && m.sendingReason == "A document is opening.")
+        m.back(); m.continue()
+        await m.skip()
+        #expect(m.pageIndex == 2 && !m.isFinished)
+        #expect(try await saved(s).onboardingDoneVersion == nil)
+        await gate.finish(.failure(.timedOut))
+        await send.value
+        #expect(m.sendingReason == nil && !m.isFinished)
+        m.back()
+        #expect(m.pageIndex == 1)
+    }
+
+    @Test func aRefusedHandOffKeepsItsTile() async throws {
+        let refusal = "Switching isn't available yet."
+        let (m, _) = await model { $0.sending = FakeHandOffs(unavailable: refusal) }
+        #expect(m.failed == nil)
+        await m.openSample(.design, now: now)
+        #expect(m.message == .notAvailable(refusal) && m.failed == .design && m.launching == nil)
+        await m.startNew(try flareHD(), now: now)
+        #expect(m.message == .notAvailable(refusal) && m.failed == .flare)
+    }
+
+    @Test func aSampleThatCantOpenKeepsItsTileAndTheNextStartClearsIt() async throws {
+        let (m, _) = await model(present: { $0.hasPrefix("/R/Samples/") && !$0.hasSuffix(".flare") })
+        await m.openSample(.flare, now: now)
+        #expect(m.message == .notAvailable("The Flare sample isn't in this build.") && m.failed == .flare)
+        await m.openSample(.design, now: now)
+        #expect(m.message == nil && m.failed == nil && m.isFinished)
+    }
 }

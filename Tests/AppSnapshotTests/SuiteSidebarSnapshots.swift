@@ -6,7 +6,10 @@
 // pair against Golden/sidebar/suiteui-sidebar-dimmed-<appearance>.png in the
 // four appearances; its baselines come from the next CI artifact. A rename
 // the app refused (LL-6) keeps its field open with the typed name and the
-// message under it in stateError, in Light and Dark. macOS only.
+// message under it in stateError, in Light and Dark. `goldens()` also checks
+// the plain rows and the refused rename against
+// Golden/sidebar/suiteui-sidebar{,-refused}-<appearance>.png (LL-16).
+// macOS only.
 import SwiftUI
 import Testing
 @testable import SuiteUI
@@ -30,6 +33,10 @@ import Testing
         for appearance in SnapshotAppearance.allCases {
             assertGolden(DimmedSample(), size: CGSize(width: 320, height: 120),
                          name: "suiteui-sidebar-dimmed", area: "sidebar", appearance: appearance)
+            assertGolden(SidebarSample(), size: CGSize(width: 320, height: 280),
+                         name: "suiteui-sidebar", area: "sidebar", appearance: appearance)
+            assertGolden(RefusedSample(), size: CGSize(width: 320, height: 160),
+                         name: "suiteui-sidebar-refused", area: "sidebar", appearance: appearance)
         }
     }
 }

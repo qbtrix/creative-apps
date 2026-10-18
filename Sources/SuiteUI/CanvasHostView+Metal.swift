@@ -1,9 +1,12 @@
 // CanvasHostView+Metal.swift: the canvas host's GPU path (canvas-host CH-10).
-// Under `.gpu` with a Metal device the tile container hides and a
-// `CAMetalLayer` (sRGB colour space) takes its place under the overlay; its
-// drawable goes to a `MetalPresenting` value (core's display op later, the
-// clearing fake now). `.cpu`, `.automatic` (CPU for the beta) or a nil device
-// keep the tile layers. The overlay stays on top on both paths. macOS only.
+// Under `.gpu` or `.automatic` with a Metal device the tile container hides
+// and a `CAMetalLayer` (sRGB colour space) takes its place under the overlay;
+// the presenter is handed every tile shown and fills each drawable
+// (CanvasTilePresenter live, the clearing fake in tests). `.cpu` or a nil
+// device keep the tile layers. The drawable is the artboard at the backing
+// scale but never more pixels than the document has (Core Animation magnifies
+// it, nearest from 2 px per pixel, as the tile path does), and it turns with
+// `rotationDegrees`. The overlay stays on top on both paths. macOS only.
 import AppKit
 import Combine
 import Metal
@@ -14,6 +17,12 @@ import SwiftUI
 @MainActor
 public protocol MetalPresenting: AnyObject, Sendable {
     func present(_ drawable: any CAMetalDrawable, on layer: CAMetalLayer)
+    /// The tiles the host shows, all of them on a new size or path: what later drawables draw.
+    func show(_ tiles: [CanvasTile], documentSize: CGSize)
+}
+
+extension MetalPresenting {
+    public func show(_ tiles: [CanvasTile], documentSize: CGSize) {}
 }
 
 /// The fake presenter: clears each drawable to the artboard colour and counts the frames.
@@ -68,10 +77,9 @@ extension CanvasHostView {
         layer?.sublayers?.lazy.compactMap { $0 as? CAMetalLayer }.first
     }
 
-    /// Whether `choice` draws on Metal here: only `.gpu` with a device. Automatic draws on CPU for the beta.
+    /// Whether `choice` draws on Metal here: `.gpu` or `.automatic`, with a device.
     static func drawsOnMetal(_ choice: RenderingChoice, device: (any MTLDevice)?) -> Bool {
-        guard choice == .gpu, device != nil else { return false }
-        return true
+        choice != .cpu && device != nil
     }
 
     /// Switches the host to `choice`'s path: a `CAMetalLayer` under the overlay, or the tile layers.
@@ -81,7 +89,7 @@ extension CanvasHostView {
         defer { CATransaction.commit() }
         guard Self.drawsOnMetal(choice, device: device) else {
             metalLayer?.removeFromSuperlayer()
-            container.isHidden = false
+            (self.presenter, container.isHidden) = (nil, false)
             return
         }
         let metal = metalLayer ?? CAMetalLayer()
@@ -89,8 +97,14 @@ extension CanvasHostView {
         metal.pixelFormat = .bgra8Unorm
         metal.colorspace = CGColorSpace(name: CGColorSpace.sRGB)
         metal.name = RenderingControlID.canvas + ".metal"
+        // The presenter scales into the drawable with a compute kernel, which writes the texture.
+        metal.framebufferOnly = false
+        // Not opaque (its default): a clear pixel shows the viewport's checkerboard, as a tile layer's does.
+        metal.isOpaque = false
         if metal.superlayer == nil { layer?.insertSublayer(metal, below: overlay) }
         container.isHidden = true
+        self.presenter = presenter
+        presenter.show(shown(), documentSize: documentSize)
         presentMetal(with: presenter)
     }
 
@@ -99,11 +113,30 @@ extension CanvasHostView {
         guard let metal = metalLayer else { return }
         let board = artboard
         let scale = window?.backingScaleFactor ?? metal.contentsScale
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        metal.setAffineTransform(.identity)
         metal.frame = board
+        metal.setAffineTransform(CGAffineTransform(rotationAngle: -rotationDegrees * .pi / 180))
         metal.contentsScale = scale
-        metal.drawableSize = CGSize(width: max(board.width * scale, 1), height: max(board.height * scale, 1))
+        metal.magnificationFilter = documentSize.width > 0 && board.width / documentSize.width >= 2 ? .nearest : .linear
+        CATransaction.commit()
+        metal.drawableSize = Self.drawableSize(board: board.size, scale: scale, document: documentSize)
         guard let drawable = metal.nextDrawable() else { return }
         presenter.present(drawable, on: metal)
+    }
+
+    /// The artboard in pixels at `scale`, never more than the document's pixels on either side
+    /// (with no document, the artboard alone), and at least 1 x 1.
+    nonisolated static func drawableSize(board: CGSize, scale: CGFloat, document: CGSize) -> CGSize {
+        let cap = { (side: CGFloat, limit: CGFloat) in max(limit > 0 ? min(side, limit) : side, 1) }
+        return CGSize(width: cap(board.width * scale, document.width), height: cap(board.height * scale, document.height))
+    }
+
+    /// Follows `preference` onto Metal (a CanvasTilePresenter on the system GPU) or the tile layers
+    /// for the view's life.
+    public func followRendering(_ preference: any RenderingPreferenceReading) {
+        renderingWatch = follow(preference, device: MTLCreateSystemDefaultDevice(), presenter: CanvasTilePresenter())
     }
 
     /// Applies `preference`'s choice now and on every change until the result is cancelled.

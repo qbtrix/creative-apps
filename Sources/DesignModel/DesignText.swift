@@ -11,7 +11,18 @@
 // do nudge and delete; anything that moves the selection or the tool commits the
 // edit first. The editor draws at `textEditScale`, the canvas zoom with no
 // floor, so it draws at the committed size and the text doesn't jump on commit
-// (#268). Linux-safe.
+// (#268). A commit with the app's measured extent fits the box in the same
+// step (canvas-basics CB-5): an auto-width box takes both sides, a fixed-width
+// one only the height, each rounded up to a whole point, at least 1. Linux-safe.
+
+/// A text's measured size in points, as the app lays it out.
+public struct DesignTextExtent: Sendable, Hashable {
+    public var width, height: Double
+
+    public init(width: Double, height: Double) {
+        (self.width, self.height) = (width, height)
+    }
+}
 
 /// A text node placed by a Text click and the document before that click.
 struct DesignPlacedText: Sendable, Equatable {
@@ -36,20 +47,43 @@ extension DesignWorkspace {
     }
 
     /// Ends the edit and keeps its draft (see the file header for what is recorded).
-    public mutating func commitTextEdit() {
+    public mutating func commitTextEdit() { commitTextEdit(extent: nil) }
+
+    /// Ends the edit as `commitTextEdit()`; with `extent`, the box fits it in the same step. A nil
+    /// or non-finite extent keeps the frame. An existing node records "Edit Text" when its text or
+    /// its fitted frame changed.
+    public mutating func commitTextEdit(extent: DesignTextExtent?) {
         guard let id = editingTextID else { return }
         let (draft, placed) = (textDraft, placedText)
         (editingTextID, textDraft, placedText) = (nil, "", nil)
         let isBlank = draft.allSatisfy(\.isWhitespace)
+        let edit: (inout DesignNode) -> Void = { node in
+            node.text = draft
+            node.frame = Self.fitted(node.frame, node.textStyle, extent)
+        }
         if let placed {
             guard !isBlank else { return rewind(to: placed.before) }
-            _ = pages.update(id) { $0.text = draft }
+            _ = pages.update(id, edit)
             record("Add Text", before: placed.before)
-        } else if !isBlank, !isLockedInTree(id), let node = findNode(id), node.text != draft {
+        } else if !isBlank, !isLockedInTree(id), var node = findNode(id) {
+            let original = node
+            edit(&node)
+            guard node != original else { return }
             let before = snapshot
-            _ = pages.update(id) { $0.text = draft }
+            _ = pages.update(id, edit)
             record("Edit Text", before: before)
         }
+    }
+
+    /// `frame` fitted to `extent`: both sides for an auto-width box, the height for a fixed-width
+    /// one, each rounded up to a whole point and at least 1. Unchanged for a nil or non-finite extent.
+    static func fitted(_ frame: DesignRect, _ style: DesignTextStyle, _ extent: DesignTextExtent?) -> DesignRect {
+        guard let extent, extent.width.isFinite, extent.height.isFinite else { return frame }
+        var fit = frame
+        let fixed = style.fixedWidth == true
+        fit.width = fixed ? frame.width : Swift.max(1, extent.width.rounded(.up))
+        fit.height = Swift.max(1, extent.height.rounded(.up))
+        return fit
     }
 
     /// Ends the edit and drops its draft; a node placed by the click is removed.

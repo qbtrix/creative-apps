@@ -11,7 +11,10 @@
 // (nil removes it), radius 0...half the shorter side, width and height at least
 // 1, text size 1...1000, weight 100...900; a non-finite value changes nothing.
 // Help law: nil exactly when the write succeeds or only reports `.unchanged`;
-// it depends on the selection, never on the value. Linux-safe.
+// it depends on the selection, never on the value. A text style keeps each
+// layer's own `fixedWidth` and refits its box by the size's ratio in the same
+// step (canvas-basics CB-5): auto width both sides, fixed width the height,
+// rounded up, at least 1. Linux-safe.
 
 public struct LiveStyling: StyleEditing {
     public init() {}
@@ -72,8 +75,19 @@ public struct LiveStyling: StyleEditing {
             var clamped = style
             clamped.size = Swift.max(1, Swift.min(style.size, 1000))
             clamped.weight = Swift.min(Swift.max(style.weight, 100), 900)
+            clamped.fixedWidth = node.textStyle.fixedWidth
+            let old = node.textStyle.size
             node.textStyle = clamped
+            guard old.isFinite, old > 0, clamped.size != old else { return }
+            let ratio = clamped.size / old
+            if clamped.fixedWidth != true { node.frame.width = Self.scaled(node.frame.width, ratio) }
+            node.frame.height = Self.scaled(node.frame.height, ratio)
         }
+    }
+
+    /// `side` × `ratio`, rounded up to a whole point, at least 1.
+    private static func scaled(_ side: Double, _ ratio: Double) -> Double {
+        Swift.max(1, (side * ratio).rounded(.up))
     }
 
     /// Which layers a property reaches: every kind, or only those with corners or with text.

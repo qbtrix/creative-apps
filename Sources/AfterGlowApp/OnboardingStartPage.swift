@@ -1,7 +1,7 @@
 // OnboardingStartPage.swift: the welcome window's page 3, the starter row
 // (onboarding packet OB-4). One grid row per starter in the model's focus
-// order: the app's mark and name, its presets as ChoiceChips (a chip creates
-// that document at once, as the home's tiles do) and "Open sample", disabled
+// order: the app's mark and name, its presets as ChoiceChips titled "New ..."
+// (SuiteOnboarding.presetTitle; a chip creates that document at once, as the home's tiles do) and "Open sample", disabled
 // with the model's reason as its help when the sample isn't in this build.
 // While a hand-off is in flight its row shows a small progress ring and every
 // control is disabled; a refused hand-off's sentence sits under that row,
@@ -24,7 +24,7 @@ struct OnboardingStartPage: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if model.launching == nil, let message = model.message {
+            if model.failed == nil, let message = model.message {
                 Text(message.message).font(SuiteFont.caption).foregroundStyle(SuiteColor.stateWarning)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -47,7 +47,7 @@ struct OnboardingStartPage: View {
             .accessibilityElement(children: .combine)
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                 presets(starter.tile, busy: busy)
-                if model.launching == app, let message = model.message {
+                if model.failed == app, let message = model.message {
                     Text(message.message).font(SuiteFont.caption).foregroundStyle(SuiteColor.stateWarning)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -65,7 +65,7 @@ struct OnboardingStartPage: View {
     /// The tile's first three presets as chips, each identified; a click creates that document.
     private func presets(_ tile: NewTile, busy: Bool) -> some View {
         let shown = Array(tile.presets.prefix(3))
-        let options = shown.map { InspectorOption(id: $0.id, title: $0.title, identifier: OnboardingControls.preset($0)) }
+        let options = shown.map { InspectorOption(id: $0.id, title: SuiteOnboarding.presetTitle($0), identifier: OnboardingControls.preset($0)) }
         return ChoiceChips(options: options, selected: nil) { picked in
             if let preset = shown.first(where: { $0.id == picked }) {
                 Task { await model.startNew(preset, now: Date()) }

@@ -39,13 +39,10 @@ enum HaloKeyRules {
         return c.layerTree.worldPlacement(of: id) { localMatrix(of: $0.payload, in: c, at: f) }
     }
 
-    /// Whether `id` follows `ancestorID` through its chain of parents (the
-    /// kernel's `follows`). A layer follows itself only through a cycle, as a
-    /// damaged file's check asks; the kernel says no for a layer and itself.
+    /// Whether `id` follows `ancestorID` through its chain of parents: the
+    /// kernel's `follows`, so never for a layer and itself.
     static func follows(_ id: String, _ ancestorID: String, in c: HaloComposition) -> Bool {
-        let tree = c.layerTree
-        guard id == ancestorID else { return tree.follows(id, ancestorID) }
-        return tree.node(id)?.followsID.map { $0 == id || tree.follows($0, id) } ?? false
+        c.layerTree.follows(id, ancestorID)
     }
 
     /// Section 2's not-animated rule, read side: fewer than two keys is not
