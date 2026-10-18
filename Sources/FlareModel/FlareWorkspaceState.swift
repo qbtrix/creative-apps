@@ -1,14 +1,12 @@
 // FlareWorkspaceState.swift: the value types FlareWorkspace stores for export, assist and file loading
 // (docs/blueprints/flare.md, section 2). Each area's extension file (FlareExport, FlareAssist, FlareFiles) drives them.
 import FlareCore
+import SuiteKernel
 
-/// The export sheet's run: none yet, under way at a fraction done, finished, or failed with a message.
-public enum ExportState: Equatable, Sendable {
-    case idle
-    case running(progress: Double)
-    case finished(ExportResult)
-    case failed(String)
-}
+/// The export sheet's run on the kernel (docs/blueprints/flare/features/flare-export.md, FX-2): idle,
+/// editing(options), running(options, done:, total:), finished(options, written file names) or
+/// failed(options, sentence). One run for every app (rule 20); FlareExport+Kernel.swift drives it.
+public typealias ExportState = ExportRun<ExportOptions>
 
 /// The Assist popover: the prompt typed, the proposal made, the stage it would give, and why the last ask failed.
 public struct AssistState: Equatable, Sendable {
