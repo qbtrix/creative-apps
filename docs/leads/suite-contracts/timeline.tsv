@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-17T23:43Z	done	heartbeat	-	parked needs-human; run 39076534514 ui-test running, 39079435388 pending; no open findings
 2026-10-18T00:14Z	done	heartbeat	-	parked needs-human; run 39076534514 ui-test running, 39081548839 pending; no open findings
 2026-10-18T00:46Z	done	heartbeat	#2509	parked needs-human; dev red on quarantine expiry (supervisor #2504), not ours; no open findings
+2026-10-18T01:16Z	done	heartbeat	#2509	parked needs-human; dev red on quarantine expiry (captain call, #2504), not ours; no open findings
