@@ -1,7 +1,7 @@
 // LibraryServicesTests.swift: `LibraryServices.fake` answers through every
 // member, and `.live` names a reason for each spine stub (not the importer,
-// live since IM-2, nor thumbnails, live since TH-3) while the stubs still draw
-// samples and apply the plain culling rules.
+// live since IM-2, nor thumbnails and the loupe, live since TH-3 and the live
+// loupe) while the stubs still draw samples and apply the plain culling rules.
 import CoreColor
 import CoreRaster
 import Foundation
@@ -63,17 +63,18 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    let members = ["loupe", "develop", "crop", "exporter"]
+    let members = ["develop", "crop", "exporter"]
     #expect(Set(services.unavailable.keys) == Set(members))
     #expect(services.unavailable.values.allSatisfy { !$0.isEmpty })
     let reasons: [String?] = [
-        LiveLoupeImaging.unavailable, LiveDevelop.unavailable, LiveCrop.unavailable, LiveExporter.unavailable,
+        LiveDevelop.unavailable, LiveCrop.unavailable, LiveExporter.unavailable,
     ]
     #expect(reasons.allSatisfy { ($0?.isEmpty ?? true) == false })
     #expect(LiveImporter.unavailable == nil)
     #expect(LiveThumbnails.unavailable == nil)
     #expect(LiveCulling.unavailable == nil)
     #expect(LiveCatalogCoding.unavailable == nil)
+    #expect(LiveLoupeImaging.unavailable == nil)
 }
 
 @Test func liveStubsDrawSamplesAndRefuseFiles() async throws {
@@ -86,8 +87,8 @@ private func liveServices() -> LibraryServices {
     let file = try #require(twentyFourPhotos().first)
     // Thumbnails are live: the fake decoder's empty folder has no such file.
     await #expect(throws: LibraryError.missingFile(file.path ?? "")) { try await live.thumbnails.thumbnail(for: file, longSide: 20) }
-    let loupeReason = LibraryError.invalid(LiveLoupeImaging.unavailable ?? "")
-    await #expect(throws: loupeReason) {
+    // The loupe is live: a file goes to the decoder, which has no such photo.
+    await #expect(throws: LibraryError.missingFile(file.path ?? "")) {
         try await live.loupe.render(file, settings: .neutral, longSide: 40, quality: .full)
     }
 }
@@ -120,9 +121,9 @@ private func liveServices() -> LibraryServices {
 @Test func liveStubsSayWhyUntilBuilt() async throws {
     let services = liveServices()
     #expect(services.unavailable["importer"] == nil && services.unavailable["culling"] == nil)
-    #expect(services.unavailable["coding"] == nil)
+    #expect(services.unavailable["coding"] == nil && services.unavailable["loupe"] == nil)
     #expect(services.unavailable["thumbnails"] == nil)
-    #expect(services.unavailable.count == 4)
+    #expect(services.unavailable.count == 3)
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })

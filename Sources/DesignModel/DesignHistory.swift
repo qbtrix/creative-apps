@@ -18,6 +18,15 @@
 // inspector sends when a scrub drag or field entry ends (#536). A new edit clears Redo. The history keeps
 // the last 100 steps. An edit that changed nothing records nothing; New File
 // over a file with a location changes that location, so it always records (#492).
+//
+// Saved state (#270, files-history FH-2): every step carries a serial from a
+// counter that only increases, and a merge into the top step re-stamps it, so a
+// state is never mistaken for another. The current state's serial is the top
+// undo step's (or, once the cap dropped steps, the last dropped one's; 0 for a
+// fresh history). didSave marks it as saved and ends the edit run; a New File
+// swap marks its own step, as an untouched new file is clean. isDirty compares
+// the two. The marker is a plain Int so the editor kernel's history can take
+// it over. undoTarget routes Edit > Undo to a focused text field's own undo.
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
 // the nodes they didn't touch); switch to per-node diffs if files get large.
 // Linux-safe.
@@ -48,11 +57,36 @@ struct DesignHistory: Sendable, Equatable {
         var swapsDocument = false
         /// The file the snapshot's document was at; a swap step restores it.
         var documentURL: URL?
+        /// The state this step leads to; unique, from `nextSerial`.
+        var serial = 0
     }
 
     static let limit = 100
     var undo: [Step] = []
     var redo: [Step] = []
+    /// The last serial handed out; only ever increases.
+    var nextSerial = 0
+    /// The serial of the state under the bottom undo step: 0, or the last step the cap dropped.
+    var baseSerial = 0
+    /// The serial of the state last saved or opened (a fresh history is 0, clean).
+    var savedSerial: Int? = 0
+
+    /// The serial of the document as it is now.
+    var currentSerial: Int { undo.last?.serial ?? baseSerial }
+
+    /// A serial no step has had before.
+    mutating func newSerial() -> Int {
+        nextSerial += 1
+        return nextSerial
+    }
+}
+
+/// Where Edit > Undo and Redo go.
+public enum DesignUndoTarget: Sendable, Equatable {
+    /// The focused text field's own undo (its typing).
+    case field
+    /// The document's history (`undo()`, `redo()`).
+    case document
 }
 
 extension DesignWorkspace {
@@ -78,7 +112,8 @@ extension DesignWorkspace {
     public mutating func undo() {
         guard historyIsLive, let step = history.undo.popLast() else { return }
         history.redo.append(DesignHistory.Step(
-            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL))
+            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL,
+            serial: step.serial))
         restore(step)
         endRun()
     }
@@ -87,7 +122,8 @@ extension DesignWorkspace {
     public mutating func redo() {
         guard historyIsLive, let step = history.redo.popLast() else { return }
         history.undo.append(DesignHistory.Step(
-            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL))
+            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL,
+            serial: step.serial))
         restore(step)
         endRun()
     }
@@ -110,13 +146,45 @@ extension DesignWorkspace {
             || (swapsDocument && documentURL != nil)
         else { return }
         history.redo.removeAll()
-        if let coalescing, history.undo.last?.coalescing == coalescing { return }
+        if let coalescing, let top = history.undo.indices.last, history.undo[top].coalescing == coalescing {
+            history.undo[top].serial = history.newSerial()
+            return
+        }
+        let serial = history.newSerial()
         history.undo.append(DesignHistory.Step(
             name: name, snapshot: before, coalescing: coalescing, swapsDocument: swapsDocument,
-            documentURL: documentURL))
-        if history.undo.count > DesignHistory.limit {
-            history.undo.removeFirst(history.undo.count - DesignHistory.limit)
+            documentURL: documentURL, serial: serial))
+        if swapsDocument { history.savedSerial = serial }
+        let dropped = history.undo.count - DesignHistory.limit
+        if dropped > 0 {
+            history.baseSerial = history.undo[dropped - 1].serial
+            history.undo.removeFirst(dropped)
         }
+    }
+
+    /// True when the document differs from the last save or open (undoing back to it clears it).
+    public var isDirty: Bool { isOpen && history.currentSerial != history.savedSerial }
+
+    /// "Saved" after a save, "Edited" with unsaved changes, nil with no file open.
+    public var saveStateText: String? { isOpen ? (isDirty ? "Edited" : "Saved") : nil }
+
+    /// The close prompt's message, or nil when the window may close at once.
+    public var closePrompt: String? {
+        guard isDirty else { return nil }
+        let name = documentURL?.lastPathComponent ?? "Untitled"
+        return "Do you want to save the changes you made to “\(name)”?"
+    }
+
+    /// Where Edit > Undo and Redo go: the focused text field's own undo, or the document's.
+    public func undoTarget(textFieldFocused: Bool) -> DesignUndoTarget {
+        textFieldFocused ? .field : .document
+    }
+
+    /// Marks the document as it is now as saved and ends the edit run, so the next nudge
+    /// starts a new step (`didSave(to:)` calls it).
+    mutating func markSaved() {
+        history.savedSerial = history.currentSerial
+        endRun()
     }
 
     /// Undo and redo: the document goes back to the step's snapshot, the counters never go back.

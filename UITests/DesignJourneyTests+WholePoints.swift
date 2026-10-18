@@ -8,8 +8,7 @@
 // "Undo Move") and its bottom-right handle by another (W and H whole, "Undo Resize").
 // Every step uses the mouse on visible controls, never a shortcut. Written before
 // its code (lead.md, contract rule 13): CB-1 wrote it skipped by name, and CB-2
-// turns it on. `-DesignFixture cards` arrives with design-window (D0-5a); the
-// skip covers that too. Desktop fills the 1440 × 1024 page, and its children
+// turned it on. Desktop fills the 1440 × 1024 page, and its children
 // leave (800, 620)-(1100, 850) blank, so the draw starts there.
 // The Frame rows are ScrubFields: XCUI reads each by its label ("X position") with
 // the spoken value ("212 points") as its value; they carry no id of their own yet.
@@ -20,7 +19,6 @@ final class DesignWholePointsJourneyTests: XCTestCase {
 
     /// CB-a: draw, move and resize at a zoom out, each ending on whole points.
     @MainActor func testDrawMoveResizeOnWholePoints() throws {
-        throw XCTSkip("waits on CB-2")
         drawMoveResize()
     }
 

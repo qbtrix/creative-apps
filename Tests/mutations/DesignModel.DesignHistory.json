@@ -1,0 +1,44 @@
+[
+  {
+    "label": "isDirty reads the saved marker backwards",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "isOpen && history.currentSerial != history.savedSerial",
+    "replace": "isOpen && history.currentSerial == history.savedSerial",
+    "tests": "DesignDirtyTests"
+  },
+  {
+    "label": "undo gives the redo step a fresh serial, so redo back to the save reads dirty",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "guard historyIsLive, let step = history.undo.popLast() else { return }",
+    "replace": "guard historyIsLive, var step = history.undo.popLast() else { return }\n        step.serial = history.newSerial()",
+    "tests": "DesignDirtyTests"
+  },
+  {
+    "label": "a New File swap leaves the saved marker on the old document",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "if swapsDocument { history.savedSerial = serial }",
+    "replace": "_ = serial",
+    "tests": "DesignDirtyTests"
+  },
+  {
+    "label": "the cap forgets the dropped step, so undoing to the bottom reads as the save",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "history.baseSerial = history.undo[dropped - 1].serial",
+    "replace": "_ = dropped",
+    "tests": "DesignDirtyTests"
+  },
+  {
+    "label": "a save does not end the edit run, so the next nudge merges into the saved step",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "history.savedSerial = history.currentSerial\n        endRun()",
+    "replace": "history.savedSerial = history.currentSerial",
+    "tests": "DesignDirtyTests"
+  },
+  {
+    "label": "the close prompt names the wrong file for an unsaved document",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "documentURL?.lastPathComponent ?? \"Untitled\"",
+    "replace": "documentURL?.lastPathComponent ?? \"Design\"",
+    "tests": "DesignUndoTargetTests"
+  }
+]
