@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-18T20:20:32Z	fix	#2906 dev merged in (a5c9a4ff), Mutate 19/19, CI: PASS
 2026-10-18T20:30:56Z	check	heartbeat: #2906 #2966 in lane; full dev run 39163553482 f836dc70 pending (contains #2903)
 2026-10-18T20:42:55Z	merge	#2966 merged 28713c70
+2026-10-18T20:45:00Z	merge	#2906 merged ae6e7c81; OB-m follow-ups done
