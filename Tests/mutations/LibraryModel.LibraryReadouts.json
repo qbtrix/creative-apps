@@ -12,5 +12,33 @@
     "find": "cullError.hasSuffix(LibraryNoticeContent.importHint) ? .importFolder : nil",
     "replace": ".importFolder",
     "tests": "LibraryRatingTests.swift"
+  },
+  {
+    "label": "the id lookup stops delegating to the photo-in-hand value",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "return cellValue(photo: photo)",
+    "replace": "return \"\"",
+    "tests": "LibraryReadoutsTests.swift"
+  },
+  {
+    "label": "the photo-in-hand value looks up the wrong thumbnail",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "let id = photo.id",
+    "replace": "let id = \"\"",
+    "tests": "LibraryReadoutsTests.swift"
+  },
+  {
+    "label": "No Photos flashes while the launch read runs",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "isEmpty && catalogState != .loading",
+    "replace": "isEmpty",
+    "tests": "LibraryLoadingEmptyStateTests.swift"
+  },
+  {
+    "label": "a restored empty catalog never shows its empty state",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "isEmpty && catalogState != .loading",
+    "replace": "isEmpty && catalogState == .loading",
+    "tests": "LibraryLoadingEmptyStateTests.swift"
   }
 ]

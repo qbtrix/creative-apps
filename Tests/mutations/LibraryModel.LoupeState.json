@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the loupe position counts every photo, not the shown ones",
+    "file": "Sources/LibraryModel/LoupeState.swift",
+    "find": "\"\\($0.index + 1) of \\(order.count)\"",
+    "replace": "\"\\($0.index + 1) of \\(items.count)\"",
+    "tests": "LibraryLoupePlaceTests.swift"
+  },
+  {
+    "label": "a focused id with no photo still places the loupe",
+    "file": "Sources/LibraryModel/LoupeState.swift",
+    "find": "let item = items.first(where: { $0.id == id }) else { return nil }\n        return (item, index)",
+    "replace": "let item = items.first(where: { $0.id == id }) ?? items.first else { return nil }\n        return (item, index)",
+    "tests": "LibraryLoupePlaceTests.swift"
+  },
+  {
+    "label": "next stays enabled on the last shown photo",
+    "file": "Sources/LibraryModel/LoupeState.swift",
+    "find": "loupePlace.map { $0.index < order.count - 1 } ?? false",
+    "replace": "loupePlace.map { $0.index < order.count } ?? false",
+    "tests": "LibraryLoupePlaceTests.swift"
+  }
+]

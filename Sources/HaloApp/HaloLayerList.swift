@@ -33,7 +33,7 @@
 // names the kind ("Solid layer") and its tooltip adds how to rename and
 // reorder it (HaloLayerKind.rowHelp, from HaloModel). A refused
 // rename shows its message under the row `refusal.control` names, in W0's
-// HaloRefusalCaption (`halo.layer.refusal`). A composition with no layers
+// InspectorNote (`halo.layer.refusal`). A composition with no layers
 // shows "No layers yet. Add one from Layer > New." (`halo.layer.empty`), its
 // icon on the rows' SuiteSpacing.m inset.
 // The list is `halo.layer.list`. Values in, commands out.
@@ -122,7 +122,7 @@ private struct HaloLayerRow: View {
             .haloControl(id: "halo.layer.row.\(layer.id)", enabled: true, help: nil)
             .tag(layer.id)
             if let refusal {
-                HaloRefusalCaption(refusal: refusal)
+                InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("halo.layer.refusal")
             }

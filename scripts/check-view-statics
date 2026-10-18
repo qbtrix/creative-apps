@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+# scripts/check-view-statics: no unmarked `static func` / `static var` on a View
+# (docs/engineering/swiftui-rules.md, "Statics on Views"). A type that conforms to
+# View is @MainActor through the protocol, and so is every static member declared
+# in it. A swift-testing @Test that calls one from a worker thread traps with signal 5
+# (dispatch_assert_queue) and aborts the whole macOS test run, while Linux CI stays
+# green because Linux never builds the code (#2633, #2631, #2640; fixed in #2700).
+# A pure helper is marked `nonisolated`.
+#
+# Scope: Sources/SuiteUI/**/*.swift and Sources/*App/**/*.swift. A static is flagged
+# when its innermost enclosing type is a View: `struct|class|enum|actor X ...: View`
+# (View in the inheritance list, not a `where` clause), or `extension X` where X is
+# a View declared anywhere in scope. A static is fine when
+#   - `nonisolated` (or `nonisolated(unsafe)`) is among its modifiers or attributes, or
+#   - it carries `@MainActor` on purpose, or
+#   - the line before it (attribute lines skipped) is `// view-static: main-actor`.
+# `static let` is not scanned (a constant is read, never called off-actor by a helper).
+#
+# Tests/view-statics-baseline.txt lists today's hits (grandfathered):
+#   scripts/check-view-statics                    fail on a hit the baseline doesn't list,
+#                                                 and on a listed one that is gone (prune it)
+#   scripts/check-view-statics --update-baseline  rewrite it; refuses to add a line unless
+#                                                 --allow-increase (it only shrinks)
+# Baseline line: `path::Type.member`. --root DIR runs against another tree (the tests).
+# Exit 0 clean, 1 on a hit, 2 on bad input. Python 3 stdlib only.
+import argparse
+import pathlib
+import re
+import sys
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
+SCOPE = re.compile(r"^Sources/(SuiteUI|[A-Za-z0-9_]+App)/.+\.swift$")
+LEX = re.compile(r'"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|//[^\n]*|/\*[\s\S]*?\*/')
+TYPE = re.compile(r"\b(struct|class|enum|actor|extension)\s+([A-Za-z_][\w.]*)\s*(?:<[^>{]*>)?\s*([^{;]*)\{")
+STATIC = re.compile(r"\bstatic\s+(?:func|var)\s+([A-Za-z_]\w*|[^\s\w(<]+)")
+OPT_OUT = "// view-static: main-actor"
+BASELINE = "Tests/view-statics-baseline.txt"
+HEADER = """# Tests/view-statics-baseline.txt: unmarked `static func` / `static var` on a View,
+# grandfathered (docs/engineering/swiftui-rules.md, "Statics on Views"). Written by
+# scripts/check-view-statics --update-baseline, never by hand. It only shrinks: mark the
+# helper `nonisolated` (or `// view-static: main-actor` if it needs the main actor) and
+# drop its line in the same PR. Line: `path::Type.member`.
+"""
+
+
+def blank(text):
+    """Comments and string contents become spaces; offsets and newlines are kept."""
+    keep = lambda s: re.sub(r"[^\n]", " ", s)
+    def sub(m):
+        t = m.group()
+        if t.startswith("/"):
+            return keep(t)
+        q = 3 if t.startswith('"""') else 1
+        return t[:q] + keep(t[q:-q]) + t[-q:]
+    return LEX.sub(sub, text)
+
+
+def view_names(files):
+    """Names of the types declared `: ... View` anywhere in scope."""
+    names = set()
+    for text in files.values():
+        for m in TYPE.finditer(blank(text)):
+            if m.group(1) != "extension" and conforms(m.group(3)):
+                names.add(m.group(2).rsplit(".", 1)[-1])
+    return names
+
+
+def conforms(tail):
+    """`: A, View where X: Foo` -> True. Only the inheritance list counts, never a where clause."""
+    inh = re.split(r"\bwhere\b", tail, maxsplit=1)[0]
+    return inh.strip().startswith(":") and re.search(r"\bView\b", inh) is not None
+
+
+def marked(lines, i, text_before):
+    """True when the static on lines[i] is nonisolated, @MainActor, or opted out above it."""
+    if re.search(r"\bnonisolated\b|@MainActor", text_before):
+        return True
+    j = i - 1
+    while j >= 0 and lines[j].strip().startswith(("@", "nonisolated")):
+        if re.search(r"@MainActor|^\s*nonisolated", lines[j]):
+            return True
+        j -= 1
+    return j >= 0 and lines[j].strip() == OPT_OUT
+
+
+def hits_in(rel, text, views):
+    """[baseline line] for each unmarked static whose innermost enclosing type is a View."""
+    code, raw, out = blank(text), text.splitlines(), []
+    opens = {m.end() - 1: m for m in TYPE.finditer(code)}
+    stack = []  # (type name or None, is a View) per open brace
+    pos_static = {m.start(): m for m in STATIC.finditer(code)}
+    for i, ch in enumerate(code):
+        if ch == "{":
+            m = opens.get(i)
+            if m:
+                name = m.group(2).rsplit(".", 1)[-1]
+                view = name in views if m.group(1) == "extension" else conforms(m.group(3))
+                stack.append((name, view))
+            else:
+                stack.append((None, False))
+        elif ch == "}":
+            if stack:
+                stack.pop()
+        elif i in pos_static and stack and stack[-1][1]:
+            line_no = code.count("\n", 0, i)
+            line_start = code.rfind("\n", 0, i) + 1
+            if not marked(raw, line_no, code[line_start:i]):
+                out.append(f"{rel}::{stack[-1][0]}.{pos_static[i].group(1)}")
+    return out
+
+
+def scan(root):
+    files = {}
+    for f in sorted((root / "Sources").rglob("*.swift")):
+        rel = f.relative_to(root).as_posix()
+        if SCOPE.match(rel):
+            files[rel] = f.read_text(errors="replace")
+    views = view_names(files)
+    return {h for rel, text in files.items() for h in hits_in(rel, text, views)}
+
+
+def read_baseline(path):
+    if not path.exists():
+        return None
+    return {l.strip() for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")}
+
+
+def main():
+    ap = argparse.ArgumentParser(description="no unmarked static func/var on a View (swiftui-rules.md)")
+    ap.add_argument("--root", type=pathlib.Path, default=HERE)
+    ap.add_argument("--update-baseline", action="store_true")
+    ap.add_argument("--allow-increase", action="store_true")
+    a = ap.parse_args()
+    current = scan(a.root)
+    path = a.root / BASELINE
+    base = read_baseline(path)
+
+    if a.update_baseline:
+        grew = sorted(current - base) if base is not None else []
+        if grew and not a.allow_increase:
+            print("check-view-statics: refusing to grow the baseline (it only shrinks):", file=sys.stderr)
+            for k in grew:
+                print(f"  {k}", file=sys.stderr)
+            print("Mark each helper `nonisolated`. One that needs the main actor gets `// view-static: main-actor`\n"
+                  "on the line before. A reviewed exception reruns with --allow-increase.", file=sys.stderr)
+            return 1
+        path.write_text(HEADER + "".join(k + "\n" for k in sorted(current)))
+        print(f"check-view-statics: baseline written, {len(current)} grandfathered hits.")
+        return 0
+
+    if base is None:
+        print(f"check-view-statics: {BASELINE} is missing; run --update-baseline", file=sys.stderr)
+        return 2
+    new, gone = sorted(current - base), sorted(base - current)
+    for k in new:
+        print(f"{k}: static on a View is @MainActor, a worker-thread @Test traps (new)")
+    for k in gone:
+        print(f"{k}: listed in {BASELINE} but no longer hits")
+    if new:
+        print("Statics on Views (docs/engineering/swiftui-rules.md): mark a pure helper `nonisolated`. One that\n"
+              "truly needs the main actor gets `// view-static: main-actor` on the line before it.")
+    if gone:
+        print("Ratchet down: scripts/check-view-statics --update-baseline")
+    if new or gone:
+        return 1
+    print(f"ok ({len(current)} grandfathered view statics, none new)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -5,6 +5,7 @@
 // under 128 MB. Results (TH-2): stale answers dropped, failures to
 // availability, invalidation. Each pass costs O(visible + held), not
 // O(catalog) (TH-4): ThumbnailPositions finds an id in `items` and `order`.
+// The whole display scale the grid reports with its cell size (TH-6f).
 // Linux-safe; LibraryApp runs the requests and hands back results.
 
 /// A request's token: FNV-1a 64-bit over the develop settings' fields and the
@@ -81,6 +82,14 @@ extension LibraryCatalog {
 
     /// The most bytes of display images `thumbnails` holds after a request pass (128 MB).
     public static let heldThumbnailBytes = 128 * 1024 * 1024
+
+    /// The whole display scale a cell's bucket is chosen at: the window's
+    /// display scale rounded, clamped to 1...8 (0, a negative, NaN or
+    /// infinite scale is 1), so the grid never reports a scale it can't use.
+    public static func thumbnailScale(forDisplayScale scale: Double) -> Int {
+        guard scale.isFinite else { return 1 }
+        return Int(min(max(scale.rounded(), 1), 8))
+    }
 
     /// ThumbnailBucket for the cell; also sets `thumbnailLongSide`.
     public mutating func thumbnailLongSide(forCell cellWidth: Int, scale: Int) -> Int {

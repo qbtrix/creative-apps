@@ -170,7 +170,7 @@
                   "Sources/SuiteUI/SidebarRow.swift",
                   "Sources/SuiteUI/SidebarSection.swift",
                   "Sources/SuiteUI/LayerList.swift",
-                  "Sources/SuiteUI/ListEditing.swift"
+                  "Sources/SuiteUI/SuiteListEditing.swift"
                 ]
               },
               {

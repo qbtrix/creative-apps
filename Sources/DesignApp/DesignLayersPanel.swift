@@ -59,10 +59,10 @@ struct DesignLayersPanel: View {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
                     DesignLayerTree(nodes: nodes, model: model, perform: perform)
                 } else {
-                    DesignPanelHint(model.isOpen ? "Nothing on this page yet." : "No file open.")
+                    InspectorNote(model.isOpen ? "Nothing on this page yet." : "No file open.")
                 }
                 if let refusal = rename.refusal {
-                    DesignPanelHint(refusal).accessibilityIdentifier(DesignRenameState.refusalID)
+                    InspectorNote(refusal, identifier: DesignRenameState.refusalID)
                 }
             } header: {
                 header("Layers")

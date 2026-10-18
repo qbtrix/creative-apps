@@ -88,39 +88,10 @@ import Testing
         }
     }
 
-    /// The progress row is `library.import.progress`, its label and value the
-    /// progress text (journeys read the label).
-    @Test func progressRowIsIdentifiedWithItsText() {
-        let row = LibraryImportProgressRow(progress: ImportProgress(done: 2, total: 27))
-        #expect(LibraryImportProgressRow.identifier == "library.import.progress")
-        #expect(row.value == "Importing 3 of 27")
-        #expect(row.label == "Importing 3 of 27")
-        #expect(row.fraction.value == 2 && row.fraction.total == 27)
-        let empty = LibraryImportProgressRow(progress: ImportProgress(done: 0, total: 0))
-        #expect(empty.fraction.value == 0 && empty.fraction.total == 1)
-    }
-
-    /// With a delay above zero the row starts hidden and shows once the delay
-    /// passes (#1379: the delay's task hung on an empty Group never ran). The
-    /// window is ordered on screen (off to the side) so the row's `.task`
-    /// starts, and the test awaits on the main actor while it sleeps.
-    @MainActor @Test func progressRowShowsAfterItsDelay() async throws {
-        let row = LibraryImportProgressRow(progress: ImportProgress(done: 0, total: 24), delay: .milliseconds(10))
-        let host = NSHostingView(rootView: row.frame(width: 600))
-        host.frame = CGRect(x: 0, y: 0, width: 600, height: 200)
-        let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false
-        window.contentView = host
-        host.layoutSubtreeIfNeeded()
-        #expect(host.fittingSize.height < 1, "the row showed before its delay")
-        window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
-        window.orderFrontRegardless()
-        defer { window.close() }
-        for _ in 0..<100 where host.fittingSize.height <= 0 {
-            try await Task.sleep(for: .milliseconds(20))
-            host.layoutSubtreeIfNeeded()
-        }
-        #expect(host.fittingSize.height > 0, "the row never showed after its 10 ms delay")
+    /// The progress row is SuiteUI's BusyNote with the import's text and fraction
+    /// (BusyNoteTests covers its delay and accessibility).
+    @Test func progressRowText() {
+        #expect(ImportProgress(done: 2, total: 27).text == "Importing 3 of 27")
     }
 
     /// A clean import's notice is success green with the checkmark; a

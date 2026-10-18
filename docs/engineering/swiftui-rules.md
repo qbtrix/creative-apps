@@ -3,7 +3,7 @@
 <!-- The SwiftUI field guide: what every lead, builder and Mac finisher reads
      before touching Sources/*App/ or Sources/SuiteUI/. Each rule comes from a
      real defect in these apps (the lesson or PR is named) and carries one
-     wrong and one right line. Keep it under 200 lines; detail goes in
+     wrong and one right line. Keep it under 220 lines; detail goes in
      docs/engineering.md or docs/design.md. -->
 
 The apps passed their journeys and still felt slow and dated in the
@@ -183,6 +183,23 @@ SDK.
 ✓ Unverified API: `.navigationSplitViewColumnWidth(min:ideal:max:)` on `.inspector`, HaloWindow.swift
 ```
 
+## Statics on Views
+
+**13. Mark a pure `static` on a View `nonisolated`.** `View` is `@MainActor`,
+and every `static func` and `static var` declared in a type that conforms to
+it inherits that. A swift-testing `@Test` that calls one from a worker thread
+traps with signal 5 (`dispatch_assert_queue`) and aborts the whole macOS test
+run. Linux CI stays green because it never builds that code. It hit three
+times in one day (#2633, #2631, #2640); #2700 and #2640 carry the fixes. A helper that truly needs the main actor says so on the line before
+it: `// view-static: main-actor`. `scripts/check-view-statics` (run by
+`scripts/ci`) fails on a new unmarked one; `Tests/view-statics-baseline.txt`
+holds the old ones and only shrinks.
+
+```swift
+✗ static func lines(guides: [ViewportGuide], zoom: Double) -> [GuideLine]
+✓ nonisolated static func lines(guides: [ViewportGuide], zoom: Double) -> [GuideLine]
+```
+
 ## Before you open a UI PR
 
 - [ ] No `@State` or Model write per drag, scroll or playback sample (1)
@@ -196,3 +213,4 @@ SDK.
 - [ ] Hover, pressed and selected on every new control (10)
 - [ ] SuiteUI searched; shared parts went there (11)
 - [ ] New APIs checked in Xcode docs, or listed as `Unverified API:` (12)
+- [ ] Pure statics on a View are `nonisolated` (13)

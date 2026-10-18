@@ -11,20 +11,17 @@ extension LibraryCatalog {
     public static let loupeArtboard = (width: 4032, height: 3024)
 
     /// The photo the loupe shows; nil in the grid or when it isn't shown.
-    public var loupeItem: PhotoItem? {
-        guard let place = loupePlace else { return nil }
-        return place.items[place.index]
-    }
+    public var loupeItem: PhotoItem? { loupePlace?.item }
 
     /// The loupe photo's place in the sort, e.g. "12 of 60"; nil in the grid.
     public var loupePosition: String? {
-        loupePlace.map { "\($0.index + 1) of \($0.items.count)" }
+        loupePlace.map { "\($0.index + 1) of \(order.count)" }
     }
 
     public var canShowPreviousInLoupe: Bool { (loupePlace?.index ?? 0) > 0 }
 
     public var canShowNextInLoupe: Bool {
-        loupePlace.map { $0.index < $0.items.count - 1 } ?? false
+        loupePlace.map { $0.index < order.count - 1 } ?? false
     }
 
     /// Home: the first photo in the sort. Does nothing in the grid.
@@ -33,10 +30,12 @@ extension LibraryCatalog {
     /// End: the last photo in the sort. Does nothing in the grid.
     public mutating func showLastInLoupe() { stepLoupe(by: Int.max) }
 
-    /// The shown photos in sort order and the loupe photo's index among them.
-    private var loupePlace: (items: [PhotoItem], index: Int)? {
-        guard mode == .loupe, let id = focusedItemID else { return nil }
-        let items = sortedItems
-        return items.firstIndex { $0.id == id }.map { (items, $0) }
+    /// The loupe's photo and its index in `order`: one scan of each list, no
+    /// sorted copy. `order` is rebuilt from `items` on every change to them, so
+    /// each of its ids has a photo and `order.count` is the shown count.
+    private var loupePlace: (item: PhotoItem, index: Int)? {
+        guard mode == .loupe, let id = focusedItemID, let index = order.firstIndex(of: id),
+              let item = items.first(where: { $0.id == id }) else { return nil }
+        return (item, index)
     }
 }

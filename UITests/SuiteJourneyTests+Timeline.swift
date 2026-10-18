@@ -40,8 +40,12 @@ extension SuiteJourneyTests {
         // At the key's centre: through the element, XCUITest finds no hit point for the synthetic child (#1782).
         ball12.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).hover()
         gallery.shot("timeline-hover")
-        // 2. Click Shadow's name: the track is selected.
-        gallery.element("suite.timeline.name.shadow").click()
+        // 2. Click Shadow's name: the track is selected. At the name's centre, as a
+        // person clicks it: through the element, XCUITest finds no hit point inside
+        // the strip's scroll view and tries to scroll it first (#1782, #2501).
+        let shadow = gallery.element("suite.timeline.name.shadow")
+        XCTAssert(shadow.waitForExistence(timeout: 5), "no name suite.timeline.name.shadow")
+        shadow.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
         expectLookLog("track shadow", log)
         // 3. Press on the playhead line inside Badge's lane (frame 30, 10 pt a frame) and drag 120 pt left.
         let badge = lookLane("badge", gallery)
@@ -50,7 +54,9 @@ extension SuiteJourneyTests {
             .withOffset(CGVector(dx: lineX - badge.frame.minX, dy: badge.frame.height / 2))
         onLine.press(forDuration: 0.1, thenDragTo: onLine.withOffset(CGVector(dx: -120, dy: 0)))
         expectLookLog("scrub 18", log)
-        XCTAssert(gallery.app.staticTexts["18"].firstMatch.waitForExistence(timeout: 3), "the pill doesn't read 18")
+        // A macOS text reads in its value, its label empty (#2503).
+        let pill18 = gallery.app.staticTexts.matching(NSPredicate(format: "label == '18' OR value == '18'")).firstMatch
+        XCTAssert(pill18.waitForExistence(timeout: 3), "the pill doesn't read 18")
         // 4. Drag on the ruler back to frame 30.
         let rulerAt18 = ruler.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.5))
             .withOffset(CGVector(dx: lineX - 120 - ruler.frame.minX, dy: 0))
