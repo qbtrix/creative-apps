@@ -1,0 +1,30 @@
+[
+  {
+    "label": "neverOverwrites",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "guard exists(first) else { return first }",
+    "replace": "return first",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "firstSuffixIsTwo",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "var number = 2",
+    "replace": "var number = 1",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "reasonWhenMissing",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "if present(folder + \"/\" + s.fileName) { return nil }",
+    "replace": "if true { return nil }",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "reasonNamesTheApp",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "\\(s.app.displayName) sample",
+    "replace": "\\(s.title) sample",
+    "tests": "SampleCatalogTests"
+  }
+]

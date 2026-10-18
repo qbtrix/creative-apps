@@ -16,10 +16,25 @@ public struct SampleCatalog: Sendable {
     /// The folder the bundle copies Bundle/Samples/ to: <resources>/Samples.
     public static func folder(resources: String) -> String { resources + "/Samples" }
     /// "The <App> sample isn't in this build." when `present` says the file isn't there; nil otherwise (OB-10).
-    public static func reason(for s: SampleFile, folder: String, present: (String) -> Bool) -> String? { nil }
-    /// Where the copy lands: <documents>/Samples/<fileName>; OB-10 adds "<stem> 2.<ext>" while taken.
+    public static func reason(for s: SampleFile, folder: String, present: (String) -> Bool) -> String? {
+        if present(folder + "/" + s.fileName) { return nil }
+        return "The \(s.app.displayName) sample isn't in this build."
+    }
+    /// Where the copy lands: <documents>/Samples/<fileName>, or "<stem> 2.<ext>", "<stem> 3.<ext>" while
+    /// taken. Never an existing path: a copy never overwrites. The first suffix is 2, as in UniqueFileNames.
     public static func destination(for s: SampleFile, documents: String, exists: (String) -> Bool) -> String {
-        documents + "/Samples/" + s.fileName
+        let folder = documents + "/Samples/"
+        let first = folder + s.fileName
+        guard exists(first) else { return first }
+        let (stem, suffix) = split(s.fileName)
+        var number = 2
+        while exists(folder + "\(stem) \(number)\(suffix)") { number += 1 }
+        return folder + "\(stem) \(number)\(suffix)"
+    }
+    /// "Bounce.flare" → ("Bounce", ".flare"); a name with no dot (or only a leading one) has no suffix.
+    private static func split(_ name: String) -> (stem: String, suffix: String) {
+        guard let dot = name.lastIndex(of: "."), dot != name.startIndex else { return (name, "") }
+        return (String(name[..<dot]), String(name[dot...]))
     }
     /// The document ref of a copy at `path`.
     public static func ref(for s: SampleFile, path: String) -> SuiteDocumentRef {
