@@ -47,6 +47,14 @@ extension FlareWorkspace {
         }
     }
 
+    /// `editHelp` for every act but Paste (its reason reads the pasteboard), as one value; an act that can run is
+    /// left out. The menu bar holds it so its Edit items re-read their reasons when the selection changes (#2618).
+    public var editHelps: [FlareEditAction: String] {
+        var helps: [FlareEditAction: String] = [:]
+        for action in FlareEditAction.allCases where action != .paste { helps[action] = editHelp(action) }
+        return helps
+    }
+
     /// Copies the edited layers; returns the pasteboard data, or nil with the reason in `layerError`.
     public mutating func copy() -> Data? {
         if let reason = editHelp(.copy) { refuse(.refused(reason)); return nil }
