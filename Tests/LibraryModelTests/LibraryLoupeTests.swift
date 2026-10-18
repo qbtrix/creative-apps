@@ -77,3 +77,36 @@ private func loupeOnTwelfth() -> (catalog: LibraryCatalog, order: [String]) {
     #expect(size.width == 4032 && size.height == 3024)
     #expect(size.width * 3 == size.height * 4)
 }
+
+/// The 24-photo shoot fixture sorted by name, IMG_0003 open in the loupe.
+private func shootOnThird() -> LibraryCatalog {
+    var catalog = LibraryCatalog()
+    catalog.load(LibraryFixtures.photos(named: "shoot"))
+    catalog.setSort(.name)
+    catalog.open(catalog.sortedItems.map(\.id)[2])
+    return catalog
+}
+
+@Test func endShowsTheLastPhotoAndHomeTheFirst() {
+    var catalog = shootOnThird()
+    let order = catalog.sortedItems.map(\.id)
+    catalog.showLastInLoupe()
+    #expect(catalog.loupeItem?.id == order[23] && catalog.loupePosition == "24 of 24")
+    catalog.showFirstInLoupe()
+    #expect(catalog.loupeItem?.id == order[0] && catalog.loupePosition == "1 of 24")
+}
+
+@Test func homeAndEndDoNothingInTheGrid() {
+    var catalog = shootOnThird()
+    catalog.showGrid()
+    let selection = catalog.selection
+    catalog.showLastInLoupe()
+    catalog.showFirstInLoupe()
+    #expect(catalog.mode == .grid && catalog.loupeItem == nil && catalog.selection == selection)
+}
+
+@Test func theReadoutNamesThePhotoThenItsPosition() {
+    let catalog = shootOnThird()
+    #expect(catalog.loupeItem?.name == "IMG_0003")
+    #expect(catalog.loupeReadout?.hasPrefix("IMG_0003  ·  3 of 24  ·  ") == true)
+}
