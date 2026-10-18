@@ -37,6 +37,14 @@ import Testing
         }
     }
 
+    @Test func destinationSkipsEveryTakenNameInARow() throws {
+        let s = try #require(SampleCatalog.sample(for: .flare))
+        let taken: Set<String> = ["/D/Samples/Bounce.flare", "/D/Samples/Bounce 2.flare", "/D/Samples/Bounce 3.flare"]
+        let dest = SampleCatalog.destination(for: s, documents: "/D", exists: { taken.contains($0) })
+        #expect(dest == "/D/Samples/Bounce 4.flare")
+        #expect(!taken.contains(dest))
+    }
+
     @Test func refNamesTheCopy() throws {
         let s = try #require(SampleCatalog.sample(for: .flare))
         let path = "/D/Samples/Bounce 2.flare"
