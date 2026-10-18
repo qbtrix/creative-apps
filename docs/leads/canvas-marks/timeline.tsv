@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-18T19:44:52Z	goldens	build green	#2916	macOS build 39158010316 success; waits for a lane sweep
 2026-10-18T20:12:18Z	goldens	merged	#2916	golden checks on dev 9acc1b3; full CI 39161458093 queued
 2026-10-18T20:53:39Z	goldens	waiting	39161458093	cancelled; waiting on 39164756292 or a scoped suiteui run
+2026-10-18T21:00Z	5	heartbeat	39164756292	waiting on run for goldens

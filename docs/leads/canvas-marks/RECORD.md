@@ -2,9 +2,9 @@
 
 Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: 5 goldens (checks on dev)
+Stage: 5 goldens
 Base: 2e27b8db (origin/dev)
-Next: a macOS run on dev at 0e4e913 or later (39161458093, 39163553482 cancelled; 39164756292 at ae6e7c8 pending) writes golden-new/canvas actuals; commit them, then CM-16 feature-done
+Next: waits on a suiteui run at or after f836dc7 (39164756292 pending at ae6e7c8) for golden-new; then CM-16 feature-done
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
