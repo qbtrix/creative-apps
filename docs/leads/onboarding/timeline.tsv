@@ -8,3 +8,8 @@ utc	stage	event	ref	note
 2026-10-17T10:45Z	3	stage-start	wave 2	OB-2, OB-3, OB-11 builders started (lead resumed after a container restart)
 2026-10-18T12:41Z	3	resume	run act-1a14f05c119-ejlc	no wave-2 PRs or branches found; base moved to 9bd0da5a
 2026-10-18T12:41Z	3	stage-start	wave 2	OB-2, OB-3, OB-11 builders restarted
+2026-10-18T14:08Z	3	pr-merged	#2785	OB-11 samples folder and SampleFilesTests
+2026-10-18T14:08Z	3	pr-merged	#2787	OB-3 Help > Welcome to AfterGlow, page 1
+2026-10-18T14:08Z	3	pr-merged	#2791	OB-2 checks first, disabled
+2026-10-18T14:08Z	3	stage-end	wave 2	OB-2, OB-3, OB-11 merged
+2026-10-18T14:08Z	3	stage-start	wave 3	OB-4, OB-7, OB-8, OB-9, OB-10 builders started; base d506e4aa
