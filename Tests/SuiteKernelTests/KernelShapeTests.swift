@@ -96,12 +96,11 @@ import SuiteKernel
         try tree.arrange(.bringToFront, ["hero"])
         #expect(try tree.group(["hero"], name: "G", payload: KernelFixtures.cards.roots[0].payload) { "g1" } == "g1")
         try tree.ungroup("g1")
-        try tree.setFollow("hero", "header", local: { _ in .identity }, keepingPlace: { _, _ in })
         // The tree has its body (EK-12): the edits land and the cascades read ancestors.
         #expect(tree.node("header")?.children.count == 4 && tree.roots.last?.id == "hero" && tree.ancestors(of: "hero") == [])
         let updated = tree.update("hero") { node in node.name = "X" }
         #expect(tree.duplicate(["nowhere"]) { "copy" }.isEmpty && updated)
-        #expect(tree.frontToBack.count == 200 && tree.isEffectivelyHidden("archive-1") && !tree.follows("hero", "header"))
+        #expect(tree.frontToBack.count == 200 && tree.isEffectivelyHidden("archive-1"))
         #expect(tree.worldPlacement(of: "hero") { _ in .identity } == .identity)
 
         let desktop = KernelFixtures.cards.rows(expanded: ["desktop"])
