@@ -1,4 +1,4 @@
-// ListEditing.swift: SuiteListEditing, the live UC10 rule the list rows call
+// SuiteListEditing.swift: SuiteListEditing, the live UC10 rule the list rows call
 // (lists-and-layers LL-2). A rename trims the draft, treats an empty or
 // unchanged name as no change, and runs the app's validate; a refusal keeps
 // the draft exactly as typed so the field can stay open with the message.
