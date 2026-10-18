@@ -94,3 +94,4 @@ Next: wave A PRs #2973 (EK-6), #2972 (EK-31), #2974 (EK-25) wait on the lane's m
 ## Open
 - EK-25 builds when a builder slot frees; EK-26 waits EK-6, EK-25, EK-31.
 - 2026-10-18 wave A: #2972 EK-31, #2973 EK-6, #2974 EK-25 opened and checked against the contract (body lines, Head = PR head, no footer, under caps). EK-31 note: journey step 7 and placing the chrome panel on the gallery page are left; EK-26 or a fix takes them if a critic files it. EK-6 note: export step 6 omitted (chrome panel not placed).
+- 2026-10-18 #3012 gap (EK-stroke kernel gaps found by AB-p1): LiveCopy COW copy, smoother first segment, pressure range, DabSpacer end.
