@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-18T02:27Z	6	heartbeat	act-1a14c24f6d2-lrkw	resumed on stall nudge; lead stopped, nothing to build; gaps #2512,#1789; waiting on the supervisor (#1505 6244022808) and SuiteUI (#1789)
 2026-10-18T02:59Z	6	heartbeat	act-1a14c24f6d2-lrkw	stall nudge; lead stopped, nothing to build. dev green again at 948bcbf4 (dev-red #2509 closed); #1505 and #1035 carry needs-human; open: #1789, gaps #2510 #2512
 2026-10-18T03:30Z	6	heartbeat	act-1a14c24f6d2-lrkw	stall nudge; lead stopped, nothing to build. No full dev CI green since 39076534514 (39092671040 cancelled, 39093416270 running); open: #1789, gaps #2510 #2512
+2026-10-18T04:01Z	6	heartbeat	act-1a14c24f6d2-lrkw	stall nudge; lead stopped, nothing to build. Full CI 39093416270 (0965457c): Linux and Promote green, macOS (report-only) running; open: #1789, gaps #2510 #2512
