@@ -91,16 +91,22 @@ final class SuiteListJourneys: XCTestCase {
         expectLog("move shadow 0", log)
         gallery.shot("lists-layers-reordered")
 
-        // 5. Open Group; its child's eye is its own element (#589).
+        // 5. Open Group; its own eye and lock and its child's eye are each one element (#589, #111, LL-9).
         let group = row("group", gallery)
         let disclosure = group.disclosureTriangles.firstMatch
         XCTAssert(disclosure.waitForExistence(timeout: 5), "Group's row has no disclosure")
         disclosure.click()
         expectLog("open group", log)
+        for id in ["suite.sidebar.group.eye", "suite.sidebar.group.lock"] {
+            let count = gallery.app.descendants(matching: .any).matching(identifier: id).count
+            XCTAssertEqual(count, 1, "\(id) is \(count) elements in the open group, not its own one")
+        }
         let childEye = gallery.element("suite.sidebar.child.eye")
         XCTAssert(childEye.waitForExistence(timeout: 5), "Child's eye isn't its own element")
         childEye.click()
         expectLog("toggle eye child", log)
+        gallery.element("suite.sidebar.group.lock").click()
+        expectLog("toggle lock group locked", log)
         gallery.shot("lists-layers-child")
 
         // 6. The rename guard (#308, #311, #312): a double-click on Ball's eye flips it twice and opens no field.

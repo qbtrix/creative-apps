@@ -3,9 +3,9 @@
 // their own. App-owned expansion (lists-and-layers LL-9, #589, #111): with the
 // window's `expanded` and `onExpand`, a group's disclosure follows the app's
 // set and a click calls onExpand instead of local state; without onExpand the
-// group keeps its own state. A parent row's toggles stay their own
-// accessibility elements (read from a hosted view's tree). macOS only.
-import AppKit
+// group keeps its own state. That a parent row's toggles stay their own
+// accessibility elements is SJ17's step 5 (UITests/SuiteJourneyTests+Lists),
+// since an in-process host exposes no List rows to accessibility. macOS only.
 import SwiftUI
 import Testing
 @testable import SuiteUI
@@ -95,53 +95,4 @@ import Testing
         title: "Doc", sections: sections, selection: nil, onSelect: { _ in },
         onRename: { (_: String, _: String) -> String? in nil }, contextActions: { _ in [] }, expanded: [],
         onExpand: { _, _ in }, content: { Text(verbatim: "Content") }, inspector: { Text(verbatim: "Inspector") })
-}
-
-/// Every accessibility identifier a hosted sidebar list draws with the app's
-/// expansion `expanded`, in tree order. The top row has an eye and a lock; its
-/// child and grandchild have an eye each.
-@MainActor private func hostedSidebarIdentifiers(expanded: Set<SidebarItem.ID>) -> [String] {
-    let app = NSApplication.shared
-    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
-        app.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
-    }
-    let eye = SidebarToggle(id: "visible", title: "Visible", onSymbol: "eye", offSymbol: "eye.slash", isOn: true)
-    let lock = SidebarToggle(id: "lock", title: "Lock", onSymbol: "lock", offSymbol: "lock.open", isOn: false)
-    let leaf = SidebarItem(id: "c", title: "Leaf", systemImage: "square", toggles: [eye])
-    let mid = SidebarItem(id: "b", title: "Mid", systemImage: "folder", toggles: [eye], children: [leaf])
-    let top = SidebarItem(id: "a", title: "Top", systemImage: "folder", toggles: [eye, lock], children: [mid])
-    let list = SuiteSidebarList(
-        sections: [SidebarSection(id: "layers", title: "Layers", items: [top])], selection: nil,
-        onSelect: { _ in }, onToggle: { _, _ in }
-    )
-    .environment(\.sidebarExpansion, SidebarExpansion(expanded: expanded, onExpand: { _, _ in }))
-    .frame(width: 300, height: 300)
-    let window = NSWindow(
-        contentRect: CGRect(x: 0, y: 0, width: 300, height: 300), styleMask: [.titled], backing: .buffered, defer: false)
-    window.contentView = NSHostingView(rootView: list)
-    window.orderFrontRegardless()
-    defer { window.orderOut(nil) }
-    RunLoop.main.run(until: Date().addingTimeInterval(0.5))
-    return sidebarIdentifiers(in: window)
-}
-
-@MainActor private func sidebarIdentifiers(in element: Any) -> [String] {
-    let node = element as AnyObject
-    var found = [String]()
-    if let id = node.accessibilityIdentifier?() ?? nil, !id.isEmpty { found.append(id) }
-    for child in (node.accessibilityChildren?() ?? nil) ?? [] { found += sidebarIdentifiers(in: child) }
-    return found
-}
-
-/// The parent row's eye and lock read as two elements, each once with its own
-/// id, not merged into the disclosure row; the app's set opens the group, and
-/// the grandchild draws at the second level.
-@MainActor @Test func aParentRowsTogglesAreTheirOwnElementsInAnAppOwnedGroup() {
-    let open = hostedSidebarIdentifiers(expanded: ["a"])
-    #expect(open.filter { $0 == "suite.sidebar.a.visible" }.count == 1)
-    #expect(open.filter { $0 == "suite.sidebar.a.lock" }.count == 1)
-    #expect(open.contains("suite.sidebar.b.visible") && open.contains("suite.sidebar.c.visible"))
-    let closed = hostedSidebarIdentifiers(expanded: [])
-    #expect(closed.filter { $0 == "suite.sidebar.a.lock" }.count == 1)
-    #expect(!closed.contains("suite.sidebar.b.visible"))
 }
