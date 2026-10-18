@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-17T13:39Z	heartbeat	39032323316	#1365	new lead session; round-2 panel started on full run 39032323316 (d14e765b) instead of scoped 39013292801: newer, green Linux, promoted main
 2026-10-17T13:45:46Z	stage	done: round 2 not clean (8 filed), cap reached, findings to gap, contact sheet posted
 2026-10-17T23:48Z	rebase	lead branch rebuilt on origin/main 59c435a6; stage stays done
+2026-10-18T01:11Z	heartbeat	stage done; nothing pending (Belt nudge answered)
