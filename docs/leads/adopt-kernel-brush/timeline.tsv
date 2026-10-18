@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-18T21:13Z	3	stage-start	wave B	AB-p1 builder started
 2026-10-18T21:32Z	3	pr-opened	#3011	AB-p1 Photo brush adapter (Model half)
 2026-10-18T21:38:11Z	check	check: dev 8640f00f; #3011 AB-p1 waits on lane; 0 findings
+2026-10-18T22:16:45Z	check	check: #3011 AB-p1 merged dev for #2990 fix, gate PASS, head 5095cc93

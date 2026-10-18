@@ -33,3 +33,4 @@ Next: #3011 (AB-p1) waits on the lane's macOS build; then AB-p2 (feature-done): 
 - AB-p2 waits AB-p1.
 - 2026-10-18 AB-p1 #3011 is the Model half (7 files, +251/-93, Mutate 7/7): Sample = StrokeSample, smoother, DabSpacer, BrushSettings, presets. App routing moves to AB-p2. Kernel gaps filed as #3012 (gap, line:suiteui). needs-core CoreRaster stamp op not filed (creative-core 403); draft in #3011's body.
 - 2026-10-18T21:38:11Z check: dev 8640f00f; #3011 AB-p1 waits on lane; 0 findings
+- 2026-10-18T22:16:45Z check: #3011 AB-p1 merged dev for #2990 fix, gate PASS, head 5095cc93
