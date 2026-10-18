@@ -9,3 +9,7 @@ utc	stage	event	ref	note
 2026-10-18T20:41Z	2	stage-end	-	combined plan with develop and export; waves check OK; wave 1 SL-1, SL-2, SL-3
 2026-10-18T20:41Z	3	stage-start	-	wave 1
 2026-10-18T22:36Z	3	heartbeat	-	resumed after restart; wave 1 PRs read, macOS build failures under investigation
+2026-10-18T22:37Z	3	pr-opened	#3003	SL-1 LibraryLayout
+2026-10-18T22:37Z	3	pr-opened	#3004	SL-2 status row values
+2026-10-18T22:37Z	3	pr-opened	#2993	SL-3 J12 skipped
+2026-10-18T22:37Z	3	ci-run	39166877081	macOS build-only red on dev PhotoZoomSweepTests (#2990 fix); branches refreshed
