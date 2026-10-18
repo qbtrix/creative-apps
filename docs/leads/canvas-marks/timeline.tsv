@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-18T20:12:18Z	goldens	merged	#2916	golden checks on dev 9acc1b3; full CI 39161458093 queued
 2026-10-18T20:53:39Z	goldens	waiting	39161458093	cancelled; waiting on 39164756292 or a scoped suiteui run
 2026-10-18T21:00Z	5	heartbeat	39164756292	waiting on run for goldens
+2026-10-18T21:02:05Z	goldens	waiting	39164756292	still pending
