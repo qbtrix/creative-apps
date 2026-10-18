@@ -1,7 +1,8 @@
 // SuiteGalleryTests.swift: the -SuiteGallery parser, the page list the area
 // files declare (unique, the blueprint's 18 names, each resolving to one page
 // view and an unknown name to the empty state), the stub wording, and the
-// SuiteWindow hook with the internal init that skips it. macOS only.
+// SuiteWindow hook with the internal init that skips it, and a page's zero
+// share of the window's minimum height. macOS only.
 @testable import SuiteUI
 import SwiftUI
 import Testing
@@ -65,5 +66,14 @@ import Testing
             title: "App", sections: [], selection: nil, onSelect: { _ in }, content: { Text(verbatim: "Content") },
             inspector: { Text(verbatim: "Inspector") })
         #expect(plain.galleryRequest == nil)
+    }
+
+    /// The editor-window page is a whole SuiteWindow; under the back row it
+    /// must not raise the gallery's minimum height over the window's own, or
+    /// SwiftUI grows a `-SuiteWindowSize` window past the visible frame (#2497).
+    @Test func aPageAddsNothingToTheWindowMinimumHeight() {
+        let host = NSHostingController(rootView: SuiteGallery(GalleryRequest(page: GalleryEditorWindow.name)))
+        let minimum = host.sizeThatFits(in: CGSize(width: SuiteSize.windowLaunch.width, height: .zero))
+        #expect(minimum.height <= SuiteSize.windowMinimum.height)
     }
 }
