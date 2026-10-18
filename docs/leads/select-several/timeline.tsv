@@ -47,3 +47,5 @@ utc	stage	event	ref	note
 2026-10-18T00:13Z	merge	#2469 merged (S-7, J5/J6)
 2026-10-18T00:13Z	wave	12 build-wave launched: S-7b (J4) on f335fde7
 2026-10-18T00:20Z	wave	12 S-7b built (331114e8), PR held: dev gate red on expired quarantine (#2504)
+2026-10-18T00:35Z	merge	#2481 merged 00:17Z (SS-a)
+2026-10-18T00:35Z	ci	full run 39082226458 on d3cd7d9 holds SS-a, Linux red on #2504

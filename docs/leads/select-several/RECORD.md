@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: #2481 (fixes #2463) in lane; S-7b J4 pushed on lead/select-several-s-7b (331114e8), no PR: gate red on dev from expired quarantine entries (#2504, needs-human, supervisor's file); once #2504 clears, rerun scripts/ci --changed there and open the PR (Fixes #2146, Refs #1495, Slice SS-b); SS-a line once #2469+#2481 are in a full CI with green Linux
+Next: SS-a done line once a full run with #2469+#2481 has green Linux (#2504 blocks); open S-7b PR once #2504 clears; S-5/S-8 wait on #1493 and CB-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
