@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-18T21:02:05Z	contact-sheet	waiting	39164756292	still pending
 2026-10-18T21:24:46Z	contact-sheet	waiting	#2990	39164756292 cancelled; #2941 merged
 2026-10-18T21:48:56Z	contact	ci running	39169434591	first full run past #2990
+2026-10-18T22:16Z	wait	ci-cancelled	39169434591	full dev run cancelled; next 39171061138 pending

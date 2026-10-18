@@ -2,9 +2,9 @@
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: contact sheet wait
+Stage: waiting on a dev full/suiteui run past #2990 for journey results
 Base: 2e27b8db (origin/dev)
-Next: evaluate dev CI 39169434591 (past #2941 and #2990): contact sheet or gap issues
+Next: Belt-Contact-Sheet on #1344 or gap issues; decide #2839
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
