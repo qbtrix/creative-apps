@@ -1,10 +1,13 @@
 // GalleryDialogs.swift: the gallery's dialog pages. `sheet` draws SuiteSheet
 // as a page (not presented): the standard settings sheet with a note and a
 // confirm, and the wide New sheet with a problem that disables its confirm.
+// `alert` has one button that raises a problem alert (suiteProblemAlert).
 import SwiftUI
 
 enum GalleryDialogs {
-    @MainActor static let pages: GalleryPages = ["sheet": { AnyView(GallerySheetPage()) }]
+    @MainActor static let pages: GalleryPages = [
+        "sheet": { AnyView(GallerySheetPage()) }, "alert": { AnyView(GalleryAlertPage()) },
+    ]
 }
 
 private struct GallerySheetPage: View {
@@ -31,5 +34,18 @@ private struct GallerySheetPage: View {
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+private struct GalleryAlertPage: View {
+    @State private var problem: String?
+
+    var body: some View {
+        Button("Show Problem") { problem = "The file couldn’t be opened." }
+            .help("Show a problem alert")
+            .suiteControl(id: "suite.gallery.alert.show", enabled: true, reason: nil)
+            .suiteProblemAlert($problem)
+            .padding(SuiteSpacing.m)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

@@ -10,6 +10,7 @@
 // and Cancel. The window title is SuiteWindow's (`model.title`).
 import AppKit
 import FlareModel
+import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -30,9 +31,7 @@ struct FlareFilePanels: ViewModifier {
                 FlareEditedDot(edited: edited)
                 FlareFileElement(status: edited ? "Edited" : "Saved")
             }
-            .alert(shown ?? "", isPresented: Binding(get: { shown != nil }, set: { if !$0 { shown = nil } })) {
-                Button("OK", role: .cancel) {}
-            }
+            .suiteProblemAlert($shown)
             .onChange(of: model.saveError) { _, new in if let new { shown = new } }
             .onChange(of: openFailure) { _, new in if let new { shown = new } }
             .task {
