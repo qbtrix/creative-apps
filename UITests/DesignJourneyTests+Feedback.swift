@@ -10,9 +10,8 @@
 // The one zoom-dependent check reads its scale from A's selection frame, so it
 // holds at any zoom. Holding Option while hovering has no XCUI API, so that
 // step posts CGEvents, as FlareJourneyTests+Draw does for its drags.
-// Written before its code (lead.md, contract rule 13): D0-9a writes the walk
-// skipped by name, and D0-9d deletes the skip line once the hover, badge and
-// text-preview views exist.
+// Written before its code (lead.md, contract rule 13): D0-9a wrote the walk
+// skipped by name, and D0-9d turned it on with the badge and text preview.
 import XCTest
 
 final class DesignFeedbackJourneyTests: XCTestCase {
@@ -24,12 +23,11 @@ final class DesignFeedbackJourneyTests: XCTestCase {
 
     /// The five feedback steps: the hover outline, the move and resize pointers,
     /// the copy pointer, the size badge, and the Text tool's preview and click-drag.
-    @MainActor func testCanvasFeedback() throws {
-        throw XCTSkip("waits on D0-9d")
+    @MainActor func testCanvasFeedback() {
         walkCanvasFeedback()
     }
 
-    /// The journey itself, which D0-9d runs once it drops the skip above.
+    /// The journey itself.
     @MainActor private func walkCanvasFeedback() {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")

@@ -1,9 +1,11 @@
 // PhotoZoomSweepTests.swift: what panning an 8K Photo document costs at each
 // zoom, on each render backend, through the real display path (report only,
 // no budget yet). The document is PhotoRenderBudgetTests' 7680 x 4320 one with
-// three layers. Per backend (CoreRender's CPU backend, and Metal on this Mac's
-// GPU when there is one) a CanvasRenderer on that route draws the picture
-// into PhotoEditor's tile canvas, hosted in RenderBudgetWindow's off-screen
+// three layers. Per View > Rendering choice (CPU, and GPU when this Mac has
+// one) the window's PhotoRendering is a fake preference on that choice: a
+// CanvasRenderer follows it to draw the picture, and PhotoEditor's embedded
+// CanvasHostView follows it to show the tiles (tile layers on the CPU,
+// CAMetalLayer on the GPU), hosted in RenderBudgetWindow's off-screen
 // 1280 x 820 window. At 25, 50, 75, 100, 150, 200, 300 and 400 % it times:
 //   - first draw: from setting the zoom until the tile view is laid out at the
 //     new size, plus the layout, display and Core Animation commit that forced;
@@ -35,27 +37,28 @@ import Testing
     static let step = 12.0
 
     @Test(.timeLimit(.minutes(15))) func panAndFirstDrawAtEachZoomOnEachBackend() async throws {
-        var routes: [(String, PhotoRenderRoute)] = [("CPU", .cpu)]
-        if let device = MetalBackend.defaultDevice {
-            routes.append(("GPU", PhotoRenderRoute(preferred: try MetalBackend(device: device, cacheURL: nil))))
-        }
+        var choices: [(String, RenderingChoice)] = [("CPU", .cpu)]
+        let metal = try MetalBackend.defaultDevice.map { try MetalBackend(device: $0, cacheURL: nil) }
+        if metal != nil { choices.append(("GPU", .gpu)) }
         let workspace = try PhotoRenderBudgetTests.document()
         let width = Double(try #require(workspace.canvas).width)
         var lines: [String] = []
-        for (label, route) in routes {
+        for (label, choice) in choices {
+            let rendering = PhotoRendering(preference: FakeRenderingPreference(choice: choice), makeGPU: { metal })
             let renderer = CanvasRenderer()
-            renderer.use(route)
-            renderer.show(workspace)
+            renderer.follow(rendering) { renderer.show(workspace) }
             let zoom = SweepZoom()
-            let w = RenderBudgetWindow(ZoomSweepEditor(model: workspace, tiles: renderer.tiles, zoom: zoom))
+            let w = RenderBudgetWindow(
+                ZoomSweepEditor(model: workspace, tiles: renderer.tiles, zoom: zoom, rendering: rendering))
             defer { w.close() }
             let deadline = ContinuousClock.now + .seconds(600)
             while renderer.revision != workspace.revision, ContinuousClock.now < deadline {
                 try await Task.sleep(for: .milliseconds(50))
             }
             try #require(renderer.revision == workspace.revision, "\(label): the first picture never landed")
-            let canvas = try #require(await w.first(TileCanvasView.self), "\(label): no tile canvas")
-            let scroll = try #require(canvas.enclosingScrollView ?? w.scrollView(at: CGPoint(x: 640, y: 410)))
+            #expect((renderer.backend == "cpu") == (choice == .cpu), "\(label) drew on \(renderer.backend ?? "nothing")")
+            let canvas = try #require(await w.first(CanvasHostView.self), "\(label): no canvas host")
+            let scroll = try #require(canvas.enclosingScrollView ?? w.scrollView(at: CGPoint(x: 640, y: 410)), "\(label): no scroll view")
             try await w.settle(500)
 
             for z in Self.zooms {
@@ -146,14 +149,15 @@ import Testing
     var value = 1.0
 }
 
-/// The Photo editor at the sweep's zoom, showing the renderer's tiles.
+/// The Photo editor at the sweep's zoom, showing the renderer's tiles on `rendering`'s choice.
 struct ZoomSweepEditor: View {
     let model: PhotoWorkspace
     let tiles: CanvasTiles
     let zoom: SweepZoom
+    let rendering: PhotoRendering
 
     var body: some View {
-        PhotoEditor(model: model, tiles: tiles, zoom: zoom.value)
+        PhotoEditor(model: model, tiles: tiles, zoom: zoom.value).environment(\.photoRendering, rendering)
     }
 }
 #endif
