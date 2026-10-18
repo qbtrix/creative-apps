@@ -1,26 +1,26 @@
 # editor-kernel lead record
 
 Issue: #1933 · Packet: docs/blueprints/suiteui/features/editor-kernel.md
-Run: act-1a14f91ff8b-nq4v (line lead with #1933, #1941, #1940)
+Run: act-1a1509b245f-653k (line lead with #1933, #1941, #1940)
 Stage: 3 wave A
-Base: 5a8c6fa745be653c2b82d41047a51de5244a939f
-Next: EK-18 builds now; EK-25 once EK-18 merges; EK-26 (feature-done) after EK-25
+Base: b1526f3e (origin/dev); lead branch rebased on main 71facd44
+Next: wave A builds EK-31, EK-6 (then EK-25); EK-26 (feature-done) after EK-6, EK-25, EK-31
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | EK-a | `SuiteKernel` target builds on Linux and macOS; every public type and signature declared as a documented stub, fakes and fixtures | EK-1, EK-2, EK-3, EK-29 | KJ0 | – | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39100691082 | – |
-| EK-u | gallery `editor-kernel` page: 200-row layer tree with drag into a parent, selection handles, smart guide with distance label, within the render budget | EK-4, EK-5, EK-6 | testEditorKernelGallery | EK-a | yes | 0 | done | – | – |
-| EK-undo | `History<Payload>`: named steps, folded runs, run ends on undo/redo/endRun, ids never repeat, exact dirty, jump | EK-7, EK-8 | KJ1 | EK-a | no | 0 | done | – | – |
-| EK-sel | `Selection<ID>` replace/toggle/extend, primary, canAdd, prune, grid move; `Nudge`, `Marquee` | EK-9, EK-10 | KJ2 | EK-a | no | 0 | done | – | – |
-| EK-tree | `LayerTree<Payload>` nests, cascades, moves, arranges, groups, ungroups, duplicates; `followsID` without cycles keeping place | EK-11, EK-12, EK-13 | KJ3 | EK-a | no | 0 | done | – | – |
-| EK-keys | `KeyRules` toggle/move/remove/shift keys, key state; `EasePreset`, `EaseCurve` | EK-14, EK-15, EK-16 | KJ4 | EK-a | no | 0 | done | – | – |
-| EK-snap | `Snapping.candidates` and `offset` order; engines stay stubs for snapping SN-2/SN-3 | EK-17, EK-18 | KJ5 | EK-a; EK-tree (EK-18) | no | 0 | building | – | – |
-| EK-box | `BoxMath` resize with Shift/Option, never flips, scaled; `HandleHit` | EK-19, EK-20 | KJ6 | EK-a | no | 0 | done | – | – |
-| EK-run | `ExportRun<Options>` state machine, progress never back, cancel to idle | EK-21, EK-22 | KJ7 | EK-a | no | 0 | done | – | – |
-| EK-doc | `DocumentSession` dirty/status/autosave/recovery; `VersionedJSON.probe` | EK-23, EK-24 | KJ8 | EK-a | no | 0 | done | – | – |
-| EK-stroke | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` | EK-27, EK-28 | KJ10 | EK-a | no | 0 | done | – | – |
-| EK-chrome | `ExportSheet`, `StrokePacer`, `PointerPressure`, `BrushCursorMark`, `ToolKeys` on the gallery page, on the fakes | EK-30, EK-31 | testEditorKernelGallery | EK-a (EK-30 edits EK-4's page, so after EK-4) | yes | 0 | done | – | – |
+| EK-u | gallery `editor-kernel` page: 200-row layer tree with drag into a parent, selection handles, smart guide with distance label, within the render budget | EK-4, EK-5, EK-6 | testEditorKernelGallery | EK-a | yes | 0 | building (EK-6) | – | – |
+| EK-undo | `History<Payload>`: named steps, folded runs, run ends on undo/redo/endRun, ids never repeat, exact dirty, jump | EK-7, EK-8 | KJ1 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-sel | `Selection<ID>` replace/toggle/extend, primary, canAdd, prune, grid move; `Nudge`, `Marquee` | EK-9, EK-10 | KJ2 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-tree | `LayerTree<Payload>` nests, cascades, moves, arranges, groups, ungroups, duplicates; `followsID` without cycles keeping place | EK-11, EK-12, EK-13 | KJ3 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-keys | `KeyRules` toggle/move/remove/shift keys, key state; `EasePreset`, `EaseCurve` | EK-14, EK-15, EK-16 | KJ4 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-snap | `Snapping.candidates` and `offset` order; engines stay stubs for snapping SN-2/SN-3 | EK-17, EK-18 | KJ5 | EK-a; EK-tree (EK-18) | no | 0 | done | (Belt lists it done) | – |
+| EK-box | `BoxMath` resize with Shift/Option, never flips, scaled; `HandleHit` | EK-19, EK-20 | KJ6 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-run | `ExportRun<Options>` state machine, progress never back, cancel to idle | EK-21, EK-22 | KJ7 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-doc | `DocumentSession` dirty/status/autosave/recovery; `VersionedJSON.probe` | EK-23, EK-24 | KJ8 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-stroke | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` | EK-27, EK-28 | KJ10 | EK-a | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39153976103 | – |
+| EK-chrome | `ExportSheet`, `StrokePacer`, `PointerPressure`, `BrushCursorMark`, `ToolKeys` on the gallery page, on the fakes | EK-30, EK-31 | testEditorKernelGallery | EK-a (EK-30 edits EK-4's page, so after EK-4) | yes | 0 | building (EK-31) | – | – |
 | EK-z | KJ9 full walk; blueprints and docs/engineering.md name the kernel tier; `status: built` | EK-25, EK-26 | KJ9 | every slice above; canvas-host:CH-d (EK-26) | no | 0 | planned | – | – |
 
 ## Tasks
@@ -86,5 +86,10 @@ Next: EK-18 builds now; EK-25 once EK-18 merges; EK-26 (feature-done) after EK-2
 - EK-30 waits on EK-4 (it adds to EK-4's page), so EK-chrome's first task runs in wave 4, not wave 2; the packet's waves already say so.
 - 2026-10-18 relaunch act-1a14f91ff8b-nq4v: Belt lists EK-a, EK-u, EK-undo, EK-sel, EK-tree, EK-keys, EK-box, EK-run, EK-doc, EK-stroke and EK-chrome as done; only EK-snap (EK-18) and EK-z (EK-25, EK-26) remain. canvas-host is `built`, so CH-d is met.
 
+- 2026-10-18 relaunch act-1a1509b245f-653k: lead branches rebased on main 71facd44 (force-with-lease). Merged-done slices contained in green `scoped: suiteui` run 39153976103 (sha c91b1468) got their Belt-Slice-Done lines on #1933: EK-box, EK-undo, EK-sel, EK-tree, EK-keys, EK-run, EK-doc, EK-stroke. EK-u and EK-chrome are NOT done: EK-6 (render budget, journey still XCTSkip) and EK-31 (ToolKeys) never merged, so both build in wave A. EK-25 deps all merged (EK-18 #2835), so it builds next.
+- PRs still base `dev` (the brief's integration branch `main` only takes green dev SHAs).
+- Builders run as worktree subagents, at most 3 at once (4 CPUs, ~30 GB disk shared); no separate check agents: the lead reads each PR against the contract.
+- Findings: no open `finding` issue names editor-kernel, adopt-kernel-brush or adopt-kernel-session (the line's CI findings are gallery/journey-wide, not this feature's).
+
 ## Open
-- EK-25 waits EK-18; EK-26 waits EK-25.
+- EK-25 builds when a builder slot frees; EK-26 waits EK-6, EK-25, EK-31.

@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-18T10:58Z	wave4	pr	PR#2745	EK-22 #2745 open, head 4d3ac4e1, no Fast-Check: gate red only on budget tests outside SuiteKernel (DesignBudgetTests/hitTest red on clean dev too; LibraryImportBudget, DesignSelectBudget pass alone); lane Linux run decides. Disk 98%->39%: removed 15 merged task worktrees, cleared .build of pushed ones
 2026-10-18T10:59Z	wave4	check	PR#2737	EK-13 #2737 fixed: head 1c4a1096 CI: PASS, merged dev, LayerFollow reuses LayerTree node/update, LayerTree -8 stub removal unavoidable (explained in body). Merged: EK-12 #2727, EK-16 #2731. EK-18 waits on #2737; EK-6 on #2738; EK-31 on #2744
 2026-10-18T15:16Z	3	stage-start	#1933	relaunch act-1a14f91ff8b-nq4v base 5a8c6fa; wave A: EK-18
+2026-10-18T20:08Z	3	stage-start	#1933	relaunch act-1a1509b245f-653k base b1526f3e; Belt-Slice-Done posted for 8 merged slices (run 39153976103); wave A: EK-31, EK-6
