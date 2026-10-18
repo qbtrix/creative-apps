@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-18T04:19Z	check	#2263 still open; #2302 waits, D0-7b held
 2026-10-18T04:41Z	check	#2263 still open; #2302 waits, D0-7b held
 2026-10-18T05:10Z	check	#2263 still open; #2302 waits, D0-7b held
+2026-10-18T05:32Z	heartbeat	#2263 still open; #2302 waits on it, D0-7b held; new #2630 is canvas-basics, not this feature
