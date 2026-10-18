@@ -7,7 +7,8 @@
 // focus. Curves come from FlareCore through the easing contract, so they are
 // the real ones. Writes suite-curve-editor-light.png and -dark.png. The golden
 // (QB-V5) is the three curve wells alone, with Reduce Motion on so the preview
-// dot is stopped and the image holds still, in the four appearances:
+// dot is stopped and the image holds still, with the Time / Progress caption
+// row under each well (#2953), in the four appearances:
 // Golden/inspector/suite-easing-curve-{light,dark,light-ic,dark-ic}.png.
 import FlareCore
 import FlareModel
@@ -25,7 +26,7 @@ import Testing
 
     @Test func curveEditorGolden() {
         let well = SuiteSize.inspectorWidth.ideal - 2 * SuiteSpacing.m
-        let size = CGSize(width: 3 * well + 4 * SuiteSpacing.xxl, height: SuiteSize.curveEditor + 2 * SuiteSpacing.xxl)
+        let size = CGSize(width: 3 * well + 4 * SuiteSpacing.xxl, height: SuiteSize.curveEditor + SuiteSpacing.l + 2 * SuiteSpacing.xxl)
         let wells = HStack(alignment: .top, spacing: SuiteSpacing.xxl) {
             CurveEditorGallery.well(.easeIn, focus: .first)
             CurveEditorGallery.well(CurveEditorGallery.overshoot, focus: .second)

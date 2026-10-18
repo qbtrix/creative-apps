@@ -103,5 +103,40 @@
     "find": "if case .move? = gesture?.route {",
     "replace": "if case .resize? = gesture?.route {",
     "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the hover mark never draws the Text tool's box",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "public var mark: DesignRect? { nodeID != nil || pointer == .text ? outline : nil }",
+    "replace": "public var mark: DesignRect? { nodeID != nil ? outline : nil }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "any outline without a layer counts as the Text box",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "public var placement: DesignRect? { nodeID == nil && pointer == .text ? outline : nil }",
+    "replace": "public var placement: DesignRect? { nodeID == nil ? outline : nil }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the steady answer keeps the Text box, so it changes per sample",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "guard placement != nil else { return self }",
+    "replace": "guard placement == nil else { return self }",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge hangs under the left edge, not the middle",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "return DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)",
+    "replace": "return DesignPoint(x: bounds.x, y: bounds.maxY)",
+    "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the badge hangs from the top edge",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)",
+    "replace": "DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.y)",
+    "tests": "DesignCanvasHintsTests.swift"
   }
 ]
