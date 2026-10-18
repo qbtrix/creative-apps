@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-18T05:10Z	finding	#2516 J6: distribute-off shot taken with the Object menu open; menu covered toolbar text
 2026-10-18T05:10Z	pr	#2621 SS-a fix round 1 (rounds 0->1): Fixes #2517 #2516, DesignJ5GeometryTests
 2026-10-18T05:10Z	blocked	#2538 J4 unnamed = CanvasViewport scroller; filed #2623 needs-ui
+2026-10-18T05:32Z	heartbeat	#2621 waits on the lane's macOS build (run 39099852195); #2538 waits on #2623; #1493 open
