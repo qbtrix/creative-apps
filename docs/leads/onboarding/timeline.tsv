@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-18T17:30:06Z	merged	F-2849	#2857 merge cab9e7d87d13ddd7158ccac7522c7d19407bbae2; fixer for #2850 starts
 2026-10-18T17:38:16Z	pr-open	F-2850	#2877 head b94e685e, 3 files +41/-21, Mutate 8/8
 2026-10-18T17:48:22Z	heartbeat	-	full 39143942767 macOS still running (no artifacts yet); next full CI 39149544175 pending at acb73b0c; #2872 #2877 open
+2026-10-18T18:01:41Z	merged	F-2852	#2872 at 23aac48f (finding #2852, OB-a)
