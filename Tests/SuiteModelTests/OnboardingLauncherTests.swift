@@ -51,6 +51,19 @@ private func occurrences(of needle: String, in text: String) -> Int {
         }
     }
 
+    /// A presented scene stops an `.automatic` one from presenting (Scene.defaultLaunchBehavior), so the
+    /// home presents itself too, or Skip at first launch leaves no window. The welcome window is exactly
+    /// OnboardingLayout's size: a `Window`'s automatic resizability is contentMinSize, which opened it
+    /// 900 pt wide around the 720 pt content.
+    @Test func homePresentsBesideTheWelcomeWindowAtItsOwnSize() throws {
+        let app = try source("Sources/AfterGlowApp/AfterGlowApp.swift")
+        let parts = app.components(separatedBy: "Window(\"Welcome to AfterGlow\", id: \"onboarding\")")
+        let home = try #require(parts.first?.components(separatedBy: "Settings {").first)
+        let scene = try #require(parts.last)
+        #expect(home.contains(".defaultLaunchBehavior(.presented)"), "the home doesn't present at launch")
+        #expect(scene.contains(".windowResizability(.contentSize)"), "the welcome window resizes past its content")
+    }
+
     @Test func helpWelcomeIsLiveAndOpensTheWindow() throws {
         let text = try source("Sources/AfterGlowApp/LauncherCommands+Onboarding.swift")
         #expect(occurrences(of: "Button(\"Welcome to AfterGlow\")", in: text) == 1)
