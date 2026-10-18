@@ -7,7 +7,6 @@ A Sources/AfterGlowApp/LauncherCommands+Home.swift::HomeMenuItem MenuCommand
 A Sources/AfterGlowApp/UpdateSheet.swift::UpdateSheet Sheet
 A Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark CanvasMark
 A Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark CanvasMark
-A Sources/DesignApp/DesignEditMenu.swift::DesignCommandItem MenuCommand
 A Sources/DesignApp/DesignInspectorStyle.swift::DesignStyleHint Notice
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayerRow LayerList
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayerTree LayerList
@@ -22,7 +21,6 @@ A Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow KeyedRow
 A Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet Sheet
 A Sources/FlareApp/FlareRecovery.swift::FlareSaveStatusLabel SaveStatus
 A Sources/FlareApp/FlareTransport.swift::FlareTransport Transport
-A Sources/HaloApp/HaloCommands.swift::HaloMenuItem MenuCommand
 A Sources/HaloApp/HaloControls.swift::HaloControlsElement Probe
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector Easing
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingSegmentLabel Easing
@@ -39,7 +37,6 @@ A Sources/HaloApp/HaloWindow+File.swift::HaloFileElement Probe
 A Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet Sheet
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow Notice
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow Notice
-A Sources/LibraryApp/LibraryCommands.swift::LibraryMenuItem MenuCommand
 A Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement Probe
 A Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet Sheet
 A Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar StatusBar
@@ -56,7 +53,6 @@ B Sources/AfterGlowApp/HomeRunningStrip.swift::HomeRunningStrip caps-header
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark accent-outline
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark probe-element
 B Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark accent-outline
-B Sources/DesignApp/DesignEditMenu.swift::DesignCommandItem menu-item
 B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox accent-outline
 B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement probe-element
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover caps-header
@@ -74,7 +70,6 @@ B Sources/FlareApp/FlareStage.swift::FlareStage preview-pill
 B Sources/FlareApp/FlareStageOverlay.swift::FlareStageOverlay accent-outline
 B Sources/FlareApp/FlareTimeline.swift::FlareTimeline error-label
 B Sources/FlareApp/FlareTransport.swift::FlareTransport transport
-B Sources/HaloApp/HaloCommands.swift::HaloMenuItem menu-item
 B Sources/HaloApp/HaloControls.swift::* app-inventory
 B Sources/HaloApp/HaloControls.swift::HaloControlsElement probe-element
 B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector easing
@@ -94,7 +89,6 @@ B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet error-label
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet sheet-buttons
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow error-label
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow error-label
-B Sources/LibraryApp/LibraryCommands.swift::LibraryMenuItem menu-item
 B Sources/LibraryApp/LibraryControls.swift::* app-inventory
 B Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement probe-element
 B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
