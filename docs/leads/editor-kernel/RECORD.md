@@ -1,26 +1,26 @@
 # editor-kernel lead record
 
 Issue: #1933 · Packet: docs/blueprints/suiteui/features/editor-kernel.md
-Run: act-1a14d380dff-xcgw (line lead with #1941, #1940; relaunch of act-1a1483c0771-g24c) · Session: claude/editor-kernel-lead-si485j · Started: 2026-10-17T06:04Z
-Stage: 3 wave 2
-Base: 2106613068d1e316799297f887e22e123fe240aa
-Next: wave 3 built (wf_38909e34-1cb: 10/10 PRs meet the contract), waiting on lane macOS build-only runs; wave 4 starts with EK-20 as soon as EK-19 #2646 merges, then each body task once its tests PR is on dev
+Run: act-1a14f91ff8b-nq4v (line lead with #1933, #1941, #1940)
+Stage: 3 wave A
+Base: 5a8c6fa745be653c2b82d41047a51de5244a939f
+Next: EK-18 builds now; EK-25 once EK-18 merges; EK-26 (feature-done) after EK-25
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | EK-a | `SuiteKernel` target builds on Linux and macOS; every public type and signature declared as a documented stub, fakes and fixtures | EK-1, EK-2, EK-3, EK-29 | KJ0 | – | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39100691082 | – |
-| EK-u | gallery `editor-kernel` page: 200-row layer tree with drag into a parent, selection handles, smart guide with distance label, within the render budget | EK-4, EK-5, EK-6 | testEditorKernelGallery | EK-a | yes | 0 | planned | – | – |
-| EK-undo | `History<Payload>`: named steps, folded runs, run ends on undo/redo/endRun, ids never repeat, exact dirty, jump | EK-7, EK-8 | KJ1 | EK-a | no | 0 | planned | – | – |
-| EK-sel | `Selection<ID>` replace/toggle/extend, primary, canAdd, prune, grid move; `Nudge`, `Marquee` | EK-9, EK-10 | KJ2 | EK-a | no | 0 | planned | – | – |
-| EK-tree | `LayerTree<Payload>` nests, cascades, moves, arranges, groups, ungroups, duplicates; `followsID` without cycles keeping place | EK-11, EK-12, EK-13 | KJ3 | EK-a | no | 0 | planned | – | – |
-| EK-keys | `KeyRules` toggle/move/remove/shift keys, key state; `EasePreset`, `EaseCurve` | EK-14, EK-15, EK-16 | KJ4 | EK-a | no | 0 | planned | – | – |
-| EK-snap | `Snapping.candidates` and `offset` order; engines stay stubs for snapping SN-2/SN-3 | EK-17, EK-18 | KJ5 | EK-a; EK-tree (EK-18) | no | 0 | planned | – | – |
-| EK-box | `BoxMath` resize with Shift/Option, never flips, scaled; `HandleHit` | EK-19, EK-20 | KJ6 | EK-a | no | 0 | planned | – | – |
-| EK-run | `ExportRun<Options>` state machine, progress never back, cancel to idle | EK-21, EK-22 | KJ7 | EK-a | no | 0 | planned | – | – |
-| EK-doc | `DocumentSession` dirty/status/autosave/recovery; `VersionedJSON.probe` | EK-23, EK-24 | KJ8 | EK-a | no | 0 | planned | – | – |
-| EK-stroke | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` | EK-27, EK-28 | KJ10 | EK-a | no | 0 | planned | – | – |
-| EK-chrome | `ExportSheet`, `StrokePacer`, `PointerPressure`, `BrushCursorMark`, `ToolKeys` on the gallery page, on the fakes | EK-30, EK-31 | testEditorKernelGallery | EK-a (EK-30 edits EK-4's page, so after EK-4) | yes | 0 | planned | – | – |
+| EK-u | gallery `editor-kernel` page: 200-row layer tree with drag into a parent, selection handles, smart guide with distance label, within the render budget | EK-4, EK-5, EK-6 | testEditorKernelGallery | EK-a | yes | 0 | done | – | – |
+| EK-undo | `History<Payload>`: named steps, folded runs, run ends on undo/redo/endRun, ids never repeat, exact dirty, jump | EK-7, EK-8 | KJ1 | EK-a | no | 0 | done | – | – |
+| EK-sel | `Selection<ID>` replace/toggle/extend, primary, canAdd, prune, grid move; `Nudge`, `Marquee` | EK-9, EK-10 | KJ2 | EK-a | no | 0 | done | – | – |
+| EK-tree | `LayerTree<Payload>` nests, cascades, moves, arranges, groups, ungroups, duplicates; `followsID` without cycles keeping place | EK-11, EK-12, EK-13 | KJ3 | EK-a | no | 0 | done | – | – |
+| EK-keys | `KeyRules` toggle/move/remove/shift keys, key state; `EasePreset`, `EaseCurve` | EK-14, EK-15, EK-16 | KJ4 | EK-a | no | 0 | done | – | – |
+| EK-snap | `Snapping.candidates` and `offset` order; engines stay stubs for snapping SN-2/SN-3 | EK-17, EK-18 | KJ5 | EK-a; EK-tree (EK-18) | no | 0 | building | – | – |
+| EK-box | `BoxMath` resize with Shift/Option, never flips, scaled; `HandleHit` | EK-19, EK-20 | KJ6 | EK-a | no | 0 | done | – | – |
+| EK-run | `ExportRun<Options>` state machine, progress never back, cancel to idle | EK-21, EK-22 | KJ7 | EK-a | no | 0 | done | – | – |
+| EK-doc | `DocumentSession` dirty/status/autosave/recovery; `VersionedJSON.probe` | EK-23, EK-24 | KJ8 | EK-a | no | 0 | done | – | – |
+| EK-stroke | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` | EK-27, EK-28 | KJ10 | EK-a | no | 0 | done | – | – |
+| EK-chrome | `ExportSheet`, `StrokePacer`, `PointerPressure`, `BrushCursorMark`, `ToolKeys` on the gallery page, on the fakes | EK-30, EK-31 | testEditorKernelGallery | EK-a (EK-30 edits EK-4's page, so after EK-4) | yes | 0 | done | – | – |
 | EK-z | KJ9 full walk; blueprints and docs/engineering.md name the kernel tier; `status: built` | EK-25, EK-26 | KJ9 | every slice above; canvas-host:CH-d (EK-26) | no | 0 | planned | – | – |
 
 ## Tasks
@@ -53,7 +53,7 @@ Next: wave 3 built (wf_38909e34-1cb: 10/10 PRs meet the contract), waiting on la
 | EK-28 | EK-stroke | 4 | StrokeSmoother, DabSpacer, BrushSettings, BrushPreset, LiveCopy bodies + plans | Sources/SuiteKernel/Stroke/Stroke.swift, BrushSettings.swift, LiveCopy.swift, Tests/mutations/SuiteKernel.Stroke.json, SuiteKernel.BrushSettings.json, Tests/SuiteKernelTests/StrokeTests.swift | StrokeTests, KJ10; Mutate 7/7 | – | planned |
 | EK-30 | EK-chrome | 4 | ExportSheet, StrokePacer, PointerPressure, BrushCursorMark; page's Export button and stroke pad; snapshots | Sources/SuiteUI/ExportSheet.swift, StrokePacer.swift, PointerPressure.swift, BrushCursorMark.swift, Gallery/GalleryEditorKernelChrome.swift, Tests/SuiteUITests/ExportSheetTests.swift, StrokePacerTests.swift, Tests/AppSnapshotTests/SuiteEditorKernelChromeSnapshots.swift | ExportSheetTests.rowsFollowTheRun, StrokePacerTests.spacingIsHalfAFrame | – | planned |
 | EK-6 | EK-u | 5 | render budget test (120-sample tree drag ≤ 3 bodies); journey on | Tests/AppSnapshotTests/RenderBudgetEditorKernelTests.swift, UITests/SuiteJourneyTests+EditorKernel.swift | RenderBudgetEditorKernelTests.testTreeDragBodies | – | planned |
-| EK-18 | EK-snap | 5 | Snapping body (candidates, offset, .fake, summary) + plan | Sources/SuiteKernel/Snap/Snapping.swift, Tests/mutations/SuiteKernel.Snapping.json, Tests/SuiteKernelTests/SnapCandidateTests.swift | SnapCandidateTests, KJ5; Mutate 4/4 | – | planned |
+| EK-18 | EK-snap | 5 | Snapping body (candidates, offset, .fake, summary) + plan | Sources/SuiteKernel/Snap/Snapping.swift, Tests/mutations/SuiteKernel.Snapping.json, Tests/SuiteKernelTests/SnapCandidateTests.swift | SnapCandidateTests, KJ5; Mutate 4/4 | – | building wave A |
 | EK-31 | EK-chrome | 5 | ToolKeys; page status line names the tool; stroke pad render budget | Sources/SuiteUI/ToolKeys.swift, Tests/SuiteUITests/ToolKeysTests.swift, Sources/SuiteUI/Gallery/GalleryEditorKernelChrome.swift, Tests/AppSnapshotTests/RenderBudgetEditorKernelStrokeTests.swift | ToolKeysTests.letterPicksTool, .modifiersFromFlags | – | planned |
 | EK-25 | EK-z | 6 | KJ9 full walk | Tests/SuiteKernelTests/KernelWalkTests.swift | KernelWalkTests.walk | – | planned |
 | EK-26 | EK-z | 7 | shared prose; `status: built`; `feature-done` | docs/blueprints/suite.md, docs/blueprints/suiteui.md, docs/engineering.md, docs/blueprints/suiteui/features/editor-kernel.wave.json | scripts/waves render --dry-run | – | planned (waits on canvas-host CH-d for suiteui.md) |
@@ -84,14 +84,7 @@ Next: wave 3 built (wf_38909e34-1cb: 10/10 PRs meet the contract), waiting on la
 - Wave 2 stacks on the unmerged EK-1 branch (base `lead/editor-kernel/EK-1`, no `fast-lane` label until retargeted) so the supervisor's merge latency on EK-1 costs one wave, not two. The lead retargets and labels them when EK-1 is on dev.
 - Canonical first (rule 20): the kernel is the canonical home itself; its concepts were inventoried against every app Model in the editor-kernel design, and `Tests/canonical-concepts.txt` names them. No extraction task is needed before any kernel task.
 - EK-30 waits on EK-4 (it adds to EK-4's page), so EK-chrome's first task runs in wave 4, not wave 2; the packet's waves already say so.
+- 2026-10-18 relaunch act-1a14f91ff8b-nq4v: Belt lists EK-a, EK-u, EK-undo, EK-sel, EK-tree, EK-keys, EK-box, EK-run, EK-doc, EK-stroke and EK-chrome as done; only EK-snap (EK-18) and EK-z (EK-25, EK-26) remain. canvas-host is `built`, so CH-d is met.
 
 ## Open
-- Packet gap (EK-3 builder): `VersionedJSON.probe` has no supported-version parameter, yet EK-24 expects `refusesNewer`; EK-24 adds the parameter (contract change noted in its PR). EK-3 chose KeyRefusal {pastRange, collides} and VersionError {damaged, missing, newer}.
-- Outage: the first wave-2 run (wf_2a77d1fc-422) lost all three builders at ~06:52Z to "session limit, resets 10:40 UTC"; nothing was pushed. Relaunched at 10:46Z. #1992 waited unmerged through the outage (no supervisor comment yet).
-- Task branches are `lead-editor-kernel/<task>`: git cannot nest `lead/editor-kernel/<task>` under the record branch `lead/editor-kernel` (EK-1's builder hit "cannot lock ref").
-- `gh pr create` appends a "Generated by Claude Code" footer to PR bodies in this environment; EK-1's builder removed it with the GitHub MCP update tool. Later builders open PRs through `gh api` REST and read the body back; the lead strips any footer that survives.
-- dev was red at the base 4a86f5f (`scripts/check-app-marks` on #1977's files), fixed by #1985 at 0fb4cca; EK-1 rebased onto it. No `dev-red` issue was open because the scoped runs skip the Linux job.
-- EK-1 must be merged by the supervisor (protected paths); the lead cannot dispatch CI.
-- EK-26 waits on canvas-host CH-d (owner of `docs/blueprints/suiteui.md`); canvas-host's CH-1 PR (#1978) is open, CH-d is waves away. If CH-d is not on dev when EK-25 merges, the lead asks the supervisor on #1933 whether EK-26 may edit suiteui.md ahead of it.
-- #1832: `AppSwitcherTests.theRoomModelMatchesTheMeasuredToolbars` fails on macOS since #1802, so no suiteui or full run reaches the journeys. The UI slices' journey screens may not appear until that is fixed; it never holds a `Belt-Slice-Done:` line.
-- Open `CI finding:` issues on line:suiteui (#1813, #1796, #1795, #1784, #1783, #1782, #1781, #1778, #1777) are timeline and editor-window journeys, not this feature's files.
+- EK-25 waits EK-18; EK-26 waits EK-25.
