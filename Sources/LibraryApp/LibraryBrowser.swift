@@ -98,8 +98,8 @@ struct LibraryBrowser: View {
                 action: collection.emptyActionTitle.map {
                     ToolbarAction($0, systemImage: "photo.on.rectangle.angled", perform: onShowAll)
                 })
-        } else if let photo = model.loupeItem, let position = model.loupePosition {
-            LibraryLoupe(photo: photo, position: position, menu: menu, value: model.loupeValue, cropDraft: model.cropDraft, onStep: onStep, onGrid: onGrid)
+        } else if model.loupeItem != nil {
+            LibraryLoupe(model: model, menu: menu, onStep: onStep, onGrid: onGrid)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
             LibraryGrid(model: model, menu: menu, onSelect: onSelect, onOpen: onOpen)

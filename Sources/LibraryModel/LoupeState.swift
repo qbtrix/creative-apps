@@ -1,14 +1,31 @@
 // LoupeState.swift: what the loupe reads from LibraryCatalog: its photo, the
 // "12 of 60" position in the current sort, whether Left and Right can move,
-// and the artboard size CanvasSurface fits; and Home and End. The loupe
+// the photo's own size (the document CanvasViewport draws, LV-7), its help
+// and its placeholder caption; and Home and End. The loupe
 // changes through LibraryCatalog's open, showLoupe, stepLoupe, showGrid and
 // the showFirstInLoupe / showLastInLoupe here. The readout with the photo's
 // name is LibraryReadouts' loupeReadout. Linux-safe.
 
 extension LibraryCatalog {
-    /// The size the loupe draws a photo at, in pixels: a 4:3 camera frame, the
-    /// grid cell's aspect, until import reads each file's real size (L2).
-    public static let loupeArtboard = (width: 4032, height: 3024)
+    /// The loupe photo's own size in pixels, each side at least 1: the document
+    /// the loupe draws, so a portrait photo stands taller than wide. Nil in the grid.
+    public var loupePhotoSize: PixelSize? {
+        loupeItem.map { PixelSize(width: max($0.pixelSize.width, 1), height: max($0.pixelSize.height, 1)) }
+    }
+
+    /// The loupe photo's help: why its file can't be read, else why its last
+    /// render failed ("Couldn't render this photo: …"); nil when neither or in the grid.
+    public var loupeHelp: String? {
+        guard let photo = loupeItem else { return nil }
+        return photo.availability.help ?? loupeError
+    }
+
+    /// What the loupe shows with no picture yet: the photo's name and size,
+    /// e.g. "IMG_0003  ·  4000 × 6000". Nil in the grid.
+    public var loupePlaceholder: String? {
+        guard let photo = loupeItem, let size = loupePhotoSize else { return nil }
+        return "\(photo.name)  ·  \(size.width) × \(size.height)"
+    }
 
     /// The photo the loupe shows; nil in the grid or when it isn't shown.
     public var loupeItem: PhotoItem? { loupePlace?.item }
