@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 2026-10-18T18:34Z	pr	S-5 #2898 opened (75305bac); 2 pre-existing mutation escapes in DesignActions+Edit plan to resolve before SS-b done
 2026-10-18T18:35Z	heartbeat	#2898 (S-5) and #2899 (D0-9d) open, no lane comment yet; scoped design 39149361102 macOS running; full CI 39152649677 running; #2623 open; no dev-red
 2026-10-18T18:58Z	check	scoped design 39149361102 (31dc204a) done: J1 J5 J6 pass, J4 skipped (blocked #2623), P1 fail 3 samples (#2751); new #2900 P2 is style-rows' (SR-b), not ours; #2898 waits lane macOS build 39155410272; #2899 needs-rebase (C4 parts), fixer sent; #2623 still open; no dev-red
+2026-10-18T19:19Z	heartbeat	#2898 lane macOS build 39155410272 still queued; #2899 needs-rebase dropped, lane macOS build dispatched 19:16Z; full CI 39152649677 running; #2623 open; no dev-red
