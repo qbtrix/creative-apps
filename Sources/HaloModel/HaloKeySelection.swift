@@ -4,7 +4,8 @@
 // a timeline diamond picks every key of that lane at its frame, so every
 // diamond picks something: a picked key marks the segment it starts, and a
 // track's last key the segment it ends. The picked keys are a SuiteKernel
-// `Selection` (`keySelection`, AS-h1) used as a set; only this file writes it.
+// `Selection` (`keySelection`, AS-h1) used as a set; only this file writes it,
+// and its `prune(alive:)` drops stale keys, not set algebra here (AS-h2).
 // A pick is never an edit: no history step, no dirty file. ⌫ from the viewer
 // or timeline deletes the picked keys as one "Delete Keyframes" step while
 // any are picked (`deleteCommand`), else the layer.
@@ -109,11 +110,9 @@ extension HaloProject {
             selectLayer(layerID)
             extending = false
         }
-        let keys = segmentKeyList
-        let clicked = keys.filter { $0.frame == frame }
+        let clicked = segmentKeyList.filter { $0.frame == frame }
         guard extending else { return keySelection.replace(clicked) }
-        let alive = Set(keys)
-        keySelection.prune { alive.contains($0) }
+        keySelection = liveKeySelection
         for key in clicked { keySelection.pick(key, .extend) }
     }
 
@@ -125,13 +124,17 @@ extension HaloProject {
         }
     }
 
-    /// `segmentKeyList` as a set.
-    private var segmentKeys: Set<HaloKeyRef> { Set(segmentKeyList) }
+    /// The pick pruned to the selected layer's segment keys: stale and
+    /// other-layer keys drop out.
+    private var liveKeySelection: Selection<HaloKeyRef> {
+        let alive = Set(segmentKeyList)
+        var live = keySelection
+        live.prune { alive.contains($0) }
+        return live
+    }
 
     /// The picked keys still on the selected layer's animated tracks: what ⌫ deletes.
-    public var pickedKeyframes: Set<HaloKeyRef> {
-        selectedKeys.intersection(segmentKeys)
-    }
+    public var pickedKeyframes: Set<HaloKeyRef> { liveKeySelection.set }
 
     /// What ⌫ sends from the viewer and timeline: Delete Keyframes while any
     /// key is picked, else Delete (the selected layer).
