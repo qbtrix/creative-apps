@@ -26,5 +26,19 @@
     "find": "let id = photo.id",
     "replace": "let id = \"\"",
     "tests": "LibraryReadoutsTests.swift"
+  },
+  {
+    "label": "No Photos flashes while the launch read runs",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "isEmpty && catalogState != .loading",
+    "replace": "isEmpty",
+    "tests": "LibraryLoadingEmptyStateTests.swift"
+  },
+  {
+    "label": "a restored empty catalog never shows its empty state",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "isEmpty && catalogState != .loading",
+    "replace": "isEmpty && catalogState == .loading",
+    "tests": "LibraryLoadingEmptyStateTests.swift"
   }
 ]

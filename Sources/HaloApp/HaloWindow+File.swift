@@ -38,8 +38,8 @@ extension HaloWindow {
     func fileScene(_ content: some View) -> some View {
         content
             .navigationSubtitle(model.windowSubtitle ?? "")
-            .background { HaloFileElement(status: model.saveStatus) }
-            .overlay { HaloOpenProgress(model: model) }
+            .background { ProbeElement("halo.file", label: model.saveStatus, value: model.saveStatus) }
+            .overlay { if let note = model.openingNote { BusyNote(note, identifier: "halo.file.progress") } }
             .fileExporter(
                 isPresented: Binding(get: { request == .saveAs }, set: { if !$0, request == .saveAs { request = nil } }),
                 document: request == .saveAs ? HaloProjectDocument(project: model) : nil,
@@ -191,40 +191,12 @@ private enum HaloOpenDecoder {
     static var opened = false
 }
 
-/// `halo.file.progress`: a spinner and "Opening <name>…" over the window from
-/// `beginOpen` until `finishOpen`; nothing otherwise. The pending file rides
-/// at the head of `file.recent` while it opens.
-struct HaloOpenProgress: View {
-    let model: HaloProject
-
-    var body: some View {
-        if model.file.opening {
-            let text = "Opening \(model.file.recent.first?.name ?? "project")…"
-            GlassPanel {
-                HStack(spacing: SuiteSpacing.s) {
-                    ProgressView().controlSize(.small)
-                    Text(text).font(SuiteFont.body)
-                }
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(text)
-            .accessibilityIdentifier("halo.file.progress")
-        }
-    }
-}
-
-/// The hidden `halo.file` element: no hits, its label and value the save
-/// status. The label is what XCUITest can read (values read empty, #262).
-private struct HaloFileElement: View {
-    let status: String
-
-    var body: some View {
-        Color.clear
-            .allowsHitTesting(false)
-            .accessibilityElement()
-            .accessibilityLabel(status)
-            .accessibilityValue(status)
-            .accessibilityIdentifier("halo.file")
+extension HaloProject {
+    /// `halo.file.progress`'s BusyNote text, "Opening <name>…", from `beginOpen`
+    /// until `finishOpen`; nil otherwise. The pending file rides at the head of
+    /// `file.recent` while it opens.
+    var openingNote: String? {
+        file.opening ? "Opening \(file.recent.first?.name ?? "project")…" : nil
     }
 }
 

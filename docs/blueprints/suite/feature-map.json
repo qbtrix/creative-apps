@@ -1,0 +1,1555 @@
+{
+  "$comment": "The AfterGlow suite feature map: every feature, the shared layer it is built in, and the apps that adopt it. Belt's GET /belt/blueprints/suite-map joins it to live status. A row's status comes only from its packet: 'packet' is <app>/<feature>, the id of docs/blueprints/<app>/features/<feature>.wave.json, and the row shows that feature's Belt status once the wave.json is on dev; a packet id with no wave.json on dev yet shows 'writing'; a row with no packet is 'new'. Each adopter has the same rule with its own packet (the packet that wires the feature into that app). See docs/factory/packets.md, 'The suite feature map'.",
+  "version": 1,
+  "layers": [
+    {
+      "id": "core",
+      "name": "creative-core engines"
+    },
+    {
+      "id": "kernel",
+      "name": "SuiteKernel"
+    },
+    {
+      "id": "model",
+      "name": "SuiteModel and suite-shell"
+    },
+    {
+      "id": "ui",
+      "name": "SuiteUI"
+    },
+    {
+      "id": "render",
+      "name": "Render and gate"
+    }
+  ],
+  "apps": [
+    {
+      "id": "photo",
+      "name": "Photo"
+    },
+    {
+      "id": "design",
+      "name": "Design"
+    },
+    {
+      "id": "flare",
+      "name": "Flare"
+    },
+    {
+      "id": "halo",
+      "name": "Halo"
+    },
+    {
+      "id": "library",
+      "name": "Library"
+    }
+  ],
+  "features": [
+    {
+      "id": "E1",
+      "name": "Path geometry: edit math, booleans, dash and trim outlines (unfiled core issue)",
+      "layer": "core",
+      "c4": [
+        "flarecore/geometry ⚠"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "E2",
+      "name": "Mask and matte engine: feather, outlines, masked composite, luma, vector clip",
+      "layer": "core",
+      "c4": [
+        "coreraster/image-ops + compositing",
+        "flarecore/geometry render list ⚠"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "E3",
+      "name": "Tone and colour ops: vibrance, auto, HSL, B&W, mixers, LUT, Hue/Sat into core",
+      "layer": "core",
+      "c4": [
+        "coreraster/image-ops",
+        "corerender/contract `ToneAdjustment`",
+        "corerendermetal"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "E4",
+      "name": "Effects and filters engine: blur family, denoise, clarity, glow, shadows, stroke (re-cut: Halo #39)",
+      "layer": "core",
+      "c4": [
+        "coreraster/image-ops",
+        "corerender/contract new `effect` family",
+        "corerendermetal"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "E5",
+      "name": "Affine composite, flip, canvas pad (CR-1, CR-2, H6)",
+      "layer": "core",
+      "c4": [
+        "coreraster/compositing + image-ops",
+        "corerender `transform` family"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "E6",
+      "name": "Fill tools: flood fill, raster gradient, colour range",
+      "layer": "core",
+      "c4": [
+        "coreraster/image-ops"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "E7",
+      "name": "Retouch: true heal, spot heal, patch, dodge/burn and smudge dabs",
+      "layer": "core",
+      "c4": [
+        "coreraster/image-ops (Retouch)",
+        "corerender `retouch`",
+        "suite-kernel Stroke"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "E8",
+      "name": "Text engine: styles, line height, tracking, paragraphs, type on a path",
+      "layer": "core",
+      "c4": [
+        "flarecore/document-commands (TextShape)",
+        "suite-shell ✚`shell-text` (CoreText)",
+        "suiteui font picker"
+      ],
+      "adopters": [
+        {
+          "app": "halo"
+        },
+        {
+          "app": "design"
+        },
+        {
+          "app": "photo"
+        },
+        {
+          "app": "flare"
+        }
+      ]
+    },
+    {
+      "id": "E9",
+      "name": "Media I/O: H.264, HEVC, ProRes 4444, GIF, APNG, image and footage decode",
+      "layer": "model",
+      "c4": [
+        "suite-model/suite-contracts (contract)",
+        "suite-shell ✚`shell-media` (AVFoundation, ImageIO) ⚠"
+      ],
+      "adopters": [
+        {
+          "app": "halo"
+        },
+        {
+          "app": "flare"
+        }
+      ]
+    },
+    {
+      "id": "E10",
+      "name": "PSD codec: read layers, masks, blend, groups; then write",
+      "layer": "core",
+      "c4": [
+        "coreraster ✚`codecs` (PSD",
+        "ORA moves in) ⚠"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "E11",
+      "name": "SVG and Lottie readers; vector paste between apps",
+      "layer": "core",
+      "c4": [
+        "flarecore ✚`import`",
+        "suite-model/suite-pasteboard"
+      ],
+      "adopters": [
+        {
+          "app": "flare"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "E12",
+      "name": "Preview cache, offline drives, duplicate hash",
+      "layer": "core",
+      "c4": [
+        "coreasset ✚`thumbnail-store`",
+        "coreraster/image-ops (hash)",
+        "corecatalog/catalog-store ⚠"
+      ],
+      "adopters": [
+        {
+          "app": "library"
+        }
+      ]
+    },
+    {
+      "id": "E13",
+      "name": "Colour profiles (assign, convert, embed) and 16-bit layers",
+      "layer": "core",
+      "c4": [
+        "corecolor ✚`icc-profiles`",
+        "coreraster `codecs`"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "E14",
+      "name": "Animate more properties: colour, fill, stroke keys; shape morph",
+      "layer": "core",
+      "c4": [
+        "flarecore/timeline + document-commands + export"
+      ],
+      "adopters": [
+        {
+          "app": "flare"
+        }
+      ]
+    },
+    {
+      "id": "S1",
+      "name": "Tone and colour adjustments as inspector rows and adjustment kinds",
+      "layer": "ui",
+      "c4": [
+        "suiteui/suiteui-sources InspectorRows",
+        "app Models"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "library"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "Effects stack and layer styles, editable later",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel ✚`Effects`",
+        "suiteui effects panel"
+      ],
+      "adopters": [
+        {
+          "app": "halo"
+        },
+        {
+          "app": "photo"
+        },
+        {
+          "app": "library"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "name": "Adjustment layers as a kernel layer kind",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `LayerTree` ⚠ (moves PhotoModel's)"
+      ],
+      "adopters": [
+        {
+          "app": "halo"
+        },
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "Masks and track mattes on layers (re-cut: PV-5 masks)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `LayerTree`",
+        "suiteui CanvasMarks"
+      ],
+      "adopters": [
+        {
+          "app": "halo"
+        },
+        {
+          "app": "flare"
+        },
+        {
+          "app": "photo"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "S5",
+      "name": "Selection tools: ellipse, lasso, add/subtract/intersect, feather, deep select (re-cut: PV-5)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `Selection`",
+        "coreraster Mask"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "S6",
+      "name": "Select Subject and Remove Background (on-device Vision)",
+      "layer": "model",
+      "c4": [
+        "suite-model contract",
+        "suite-shell ✚`shell-vision` ⚠"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "S7",
+      "name": "Transform handles: rotate, scale, flip, canvas size (re-cut: PV-7)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `Transform`/`Box`, kernel-geometry `EditorHandle`",
+        "suiteui CanvasMarks"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "design"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S8",
+      "name": "Layer tree: groups, clipping, lock, solo, labels, parenting, pivot",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `LayerTree`",
+        "suiteui LayerTreeList",
+        "flarecore document-commands (parent, anchor)"
+      ],
+      "adopters": [
+        {
+          "app": "flare"
+        },
+        {
+          "app": "photo"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S9",
+      "name": "Align and distribute",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `Box` ⚠ (moves DesignModel's)"
+      ],
+      "adopters": [
+        {
+          "app": "flare"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "S10",
+      "name": "Guides, grids, safe areas, snapping, hover-measure, frame presets",
+      "layer": "ui",
+      "c4": [
+        "suiteui Ruler + CanvasMarks",
+        "suite-kernel `Snap`",
+        "flarecore ruler guides ⚠",
+        "suite-model/suite-home presets ⚠"
+      ],
+      "adopters": [
+        {
+          "app": "design"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "flare"
+        },
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "S11",
+      "name": "Export pack: formats, at a size, presets, name templates, per-layer, render queue (re-cut: PV-8, EX-c/d)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `Export` (ExportRun)",
+        "suiteui ExportSheet",
+        "`shell-media` writers"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "design"
+        },
+        {
+          "app": "library"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S12",
+      "name": "Autosave, crash recovery, History panel (re-cut: PV-4 History)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel `Session` + `History`",
+        "suite-model/suite-store"
+      ],
+      "adopters": [
+        {
+          "app": "design"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "photo"
+        }
+      ]
+    },
+    {
+      "id": "S13",
+      "name": "Eyedropper (re-cut: PV-9)",
+      "layer": "ui",
+      "c4": [
+        "suiteui ColorWell",
+        "corerender readback"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "S14",
+      "name": "Command palette",
+      "layer": "ui",
+      "c4": [
+        "suiteui-sources",
+        "suite-shell/shell-adoption menus"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "S15",
+      "name": "Preset store: looks, brush, effect, animation, export presets",
+      "layer": "model",
+      "c4": [
+        "suite-model ✚`suite-presets` over suite-store FileStore"
+      ],
+      "adopters": [
+        {
+          "app": "library"
+        },
+        {
+          "app": "photo"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S16",
+      "name": "Timeline pro: graph editor, copy keys, zoom, work area, motion path (re-cut: Halo timeline, Flare F10)",
+      "layer": "ui",
+      "c4": [
+        "suiteui TimelineStrip + CurveEditor",
+        "suite-kernel `Keys`",
+        "flarecore/timeline"
+      ],
+      "adopters": [
+        {
+          "app": "flare"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S17",
+      "name": "Strokes, dashes, trim paths and gradient editor",
+      "layer": "core",
+      "c4": [
+        "flarecore/geometry + document-commands (Fill, Stroke) + export",
+        "suiteui gradient rows ⚠"
+      ],
+      "adopters": [
+        {
+          "app": "design"
+        },
+        {
+          "app": "flare"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S18",
+      "name": "Point editing and booleans (re-cut: Flare Direct Select F4b)",
+      "layer": "kernel",
+      "c4": [
+        "flarecore/geometry",
+        "kernel-geometry `EditorHandle`",
+        "suiteui CanvasMarks"
+      ],
+      "adopters": [
+        {
+          "app": "design"
+        },
+        {
+          "app": "flare"
+        }
+      ]
+    },
+    {
+      "id": "S19",
+      "name": "Shape tools: polygon, star, rounded rect, line, arrow",
+      "layer": "core",
+      "c4": [
+        "flarecore/geometry PathBuilders ⚠",
+        "suiteui tool rail"
+      ],
+      "adopters": [
+        {
+          "app": "flare"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "S20",
+      "name": "Placed images and footage, image fills, crop in frame",
+      "layer": "model",
+      "c4": [
+        "suite-model/suite-assets + suite-links + suite-pasteboard ⚠",
+        "`shell-media` decode"
+      ],
+      "adopters": [
+        {
+          "app": "design"
+        },
+        {
+          "app": "flare"
+        },
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S21",
+      "name": "Text animators: type-on, per-character fade and offset",
+      "layer": "core",
+      "c4": [
+        "flarecore document-commands/timeline",
+        "suite-kernel `Keys`"
+      ],
+      "adopters": [
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S22",
+      "name": "Compare, survey and filmstrip viewer",
+      "layer": "ui",
+      "c4": [
+        "suiteui CanvasSurface + ThumbnailGrid"
+      ],
+      "adopters": [
+        {
+          "app": "library"
+        }
+      ]
+    },
+    {
+      "id": "S23",
+      "name": "Audio lane: waveform, sync play, mux",
+      "layer": "ui",
+      "c4": [
+        "suiteui TimelineStrip lane",
+        "`shell-media`"
+      ],
+      "adopters": [
+        {
+          "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "A1",
+      "name": "Copy as SVG or CSS",
+      "layer": "app",
+      "app": "design",
+      "c4": [
+        "design-model",
+        "flarecore/export SVGExporter ⚠"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "A2",
+      "name": "Lottie round trip: open Lottie, write dotLottie",
+      "layer": "app",
+      "app": "flare",
+      "c4": [
+        "flare-model",
+        "flarecore `import` + export"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "A3",
+      "name": "Precomps",
+      "layer": "app",
+      "app": "halo",
+      "c4": [
+        "halo-model",
+        "suite-kernel `LayerTree`"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "A4",
+      "name": "Lottie export",
+      "layer": "app",
+      "app": "halo",
+      "c4": [
+        "halo-model → flarecore/export LottieExporter ⚠"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "A5",
+      "name": "Finish the cull: Delete Rejects, label keys, full screen",
+      "layer": "app",
+      "app": "library",
+      "c4": [
+        "library-model",
+        "suite-kernel `History`"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "A6",
+      "name": "Browse by date and folder, collection sets",
+      "layer": "app",
+      "app": "library",
+      "c4": [
+        "library-model",
+        "corecatalog/catalog-store",
+        "suiteui LayerTreeList"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "A7",
+      "name": "Card ingest: copy, rename, metadata templates, watched folder",
+      "layer": "app",
+      "app": "library",
+      "c4": [
+        "library-model",
+        "suite-kernel `Export` run pattern"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "A8",
+      "name": "Stacks and virtual copies",
+      "layer": "app",
+      "app": "library",
+      "c4": [
+        "library-model",
+        "corecatalog/catalog-store"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "R1",
+      "name": "Render-backend adoption: CoreRender dispatcher + View > Rendering toggle per app",
+      "layer": "render",
+      "c4": [
+        "corerender/dispatcher",
+        "suiteui canvas-host",
+        "each *-model → corerender (new edge)"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "flare"
+        },
+        {
+          "app": "design"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "name": "Metal kernels for the W1 op families (masked composite, affine, effect, tone extras)",
+      "layer": "render",
+      "c4": [
+        "corerendermetal/metal-backend",
+        "corerender/parity goldens"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "G1",
+      "name": "Large-image gate: 8K, 100 MP, deep-layer PSD; Metal vs CPU frame budgets",
+      "layer": "render",
+      "c4": [
+        "afterglow-journeys",
+        "FrameProbe budgets"
+      ],
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "design"
+        },
+        {
+          "app": "flare"
+        }
+      ]
+    },
+    {
+      "id": "G2",
+      "name": "Over-budget fixes, likely case (2 × S; risky adds 2 × L)",
+      "layer": "render",
+      "c4": [
+        "where the profile points"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "flare/mac-platform",
+      "name": "Never lose work, and draw at full quality on the Mac",
+      "packet": "flare/mac-platform",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/live-stage",
+      "name": "Draw and select on real documents",
+      "packet": "flare/live-stage",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/live-keys",
+      "name": "Key, retime and ease on real documents",
+      "packet": "flare/live-keys",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/live-scenes",
+      "name": "Scenes and guides on real documents",
+      "packet": "flare/live-scenes",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/draw-key-save",
+      "name": "Draw a rectangle, key it, play it and save it",
+      "packet": "flare/draw-key-save",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/stage-edit",
+      "name": "Select, transform, zoom and edit on the stage",
+      "packet": "flare/stage-edit",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/inspector-timeline",
+      "name": "Key in the inspector, ease and edit the timeline",
+      "packet": "flare/inspector-timeline",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/layers-files",
+      "name": "Scenes and layers, new from a preset, files that never fail silently",
+      "packet": "flare/layers-files",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/flare-export",
+      "name": "Export an SVG frame, a Lottie or a PNG sequence on the kernel's export run, never overwriting, with an exact round trip",
+      "packet": "flare/flare-export",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/design-contracts",
+      "name": "The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures",
+      "packet": "design/design-contracts",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/shell-parity",
+      "name": "Design opens in `SuiteWindow` with the floating tool box",
+      "packet": "design/shell-parity",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/design-seams",
+      "name": "The gesture routes: the marquee rule, several-layer drags, Option-drag as one step; the shared Model budgets",
+      "packet": "design/design-seams",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/design-window",
+      "name": "The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, canvas feedback, J15 and layout",
+      "packet": "design/design-window",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/select-several",
+      "name": "Select and edit several layers",
+      "packet": "design/select-several",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/copy-group",
+      "name": "Duplicate, group, cut, copy and paste",
+      "packet": "design/copy-group",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/style-rows",
+      "name": "Style rows and drawing them",
+      "packet": "design/style-rows",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/layers-panel",
+      "name": "The Layers panel",
+      "packet": "design/layers-panel",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/files-history",
+      "name": "Files and history",
+      "packet": "design/files-history",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/canvas-basics",
+      "name": "Canvas basics: whole points, text boxes that fit, layers past the page, page size",
+      "packet": "design/canvas-basics",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/snapping",
+      "name": "Snapping: edges and centres to layers, the frame and the page, smart guides with distances, equal spacing, ⌘ to drag free, View > Snap to Layers",
+      "packet": "design/snapping",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/design-export",
+      "name": "Export: PNG at 1x, 2x, 3x, SVG and PDF of the selection, the frame or the page, from File > Export… on SuiteUI's ExportSheet over SuiteKernel's ExportRun, never writing over a file",
+      "packet": "design/design-export",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/photo-seams",
+      "name": "The seams: contracts, fakes, services, state, routing, file splits",
+      "packet": "photo/photo-seams",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/photo-journey-kit",
+      "name": "Shared journey helpers",
+      "packet": "photo/photo-journey-kit",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/photo-documents",
+      "name": "Save and reopen with layers, Open Recent, unsaved state, recovery",
+      "packet": "photo/photo-documents",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/photo-edit",
+      "name": "Cut, Copy, Paste, Duplicate, Merge Down, Flatten",
+      "packet": "photo/photo-edit",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/photo-crop",
+      "name": "Typed crop size and aspect lock; the perf journeys",
+      "packet": "photo/photo-crop",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/photo-adjustment-layers",
+      "name": "Adjustment layers",
+      "packet": "photo/photo-adjustment-layers",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/shell-parity",
+      "name": "Photo opens in `SuiteWindow` with the floating tool box",
+      "packet": "photo/shell-parity",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/spine",
+      "name": "Contracts, fakes, catalog state, undo, launch arguments, the app split",
+      "packet": "library/spine",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/import",
+      "name": "Import a folder",
+      "packet": "library/import",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/cull",
+      "name": "Cull from the keyboard with undo and Auto Advance",
+      "packet": "library/cull",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/thumbnails",
+      "name": "Real grid thumbnails",
+      "packet": "library/thumbnails",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/loupe-viewport",
+      "name": "The loupe on CanvasViewport",
+      "packet": "library/loupe-viewport",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/persist",
+      "name": "The catalog file",
+      "packet": "library/persist",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/status-and-layout",
+      "name": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests",
+      "packet": "library/status-and-layout",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/develop",
+      "name": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings",
+      "packet": "library/develop",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/crop",
+      "name": "Crop and straighten in the loupe, applied in render, thumbnail and export",
+      "packet": "library/crop",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/export",
+      "name": "Export JPEG at a set long edge and quality, never overwriting",
+      "packet": "library/export",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/foundation",
+      "name": "Foundation: contracts, fakes, state and the window's seams",
+      "packet": "halo/foundation",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/history-files",
+      "name": "Undo, redo, save and open",
+      "packet": "halo/history-files",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/layer-keys",
+      "name": "Key layers: inspector, drag and parent",
+      "packet": "halo/layer-keys",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/layer-panel",
+      "name": "Layer housekeeping",
+      "packet": "halo/layer-panel",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/easing",
+      "name": "Ease keys",
+      "packet": "halo/easing",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/viewer-playback",
+      "name": "See and play the composition",
+      "packet": "halo/viewer-playback",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/render-out",
+      "name": "Render a frame and render to files",
+      "packet": "halo/render-out",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/text-layers",
+      "name": "Text layers",
+      "packet": "halo/text-layers",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/core-loop",
+      "name": "The core loop, live, measured: comp, layers, keys, ease, play, text, render to files, save and reopen",
+      "packet": "halo/core-loop",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suite/targets",
+      "name": "The suite's targets exist, today's size is measured",
+      "packet": "suite/targets",
+      "layer": "model",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suite/suite-contracts",
+      "name": "Shared values, contracts, fakes, store and live slots",
+      "packet": "suite/suite-contracts",
+      "layer": "model",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suite/bundle",
+      "name": "One AfterGlow.app with shared frameworks and document types",
+      "packet": "suite/bundle",
+      "layer": "model",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suite/home",
+      "name": "The AfterGlow home",
+      "packet": "suite/home",
+      "layer": "model",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suite/switching",
+      "name": "Switch between apps, hand-offs",
+      "packet": "suite/switching",
+      "layer": "model",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suite/onboarding",
+      "name": "First-launch onboarding: three pages once, starters and samples, reopened from Help",
+      "packet": "suite/onboarding",
+      "layer": "model",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/suite-harness",
+      "name": "The test harness: goldens, gallery, inventory, probe, contracts, tokens",
+      "packet": "suiteui/suite-harness",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/editor-in-window",
+      "name": "`SuiteWindow` can hold a canvas editor: sidebar slot, subtitle, document actions, inspector width, `-SuiteWindowSize`, `EditorDetail`, `SidebarActionRow`, the app switcher, the journeys' window and geometry checks, the parity journey",
+      "packet": "suiteui/editor-in-window",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/timeline",
+      "name": "A modern timeline strip: lane beds, key states, a grabbable playhead, picking, dragging and trimming keys, zoom, units and a work area",
+      "packet": "suiteui/timeline",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/editor-chrome",
+      "name": "The editor window's chrome",
+      "packet": "suiteui/editor-chrome",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/inspector-controls",
+      "name": "Inspector controls end once and work from the keyboard",
+      "packet": "suiteui/inspector-controls",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/lists-and-layers",
+      "name": "Sidebar and layer rows",
+      "packet": "suiteui/lists-and-layers",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/canvas-marks",
+      "name": "Marks over the canvas, zoom and pan, the surface",
+      "packet": "suiteui/canvas-marks",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/canvas-host",
+      "name": "An AppKit canvas host (CALayer tiles or a CAMetalLayer) with live input, and the View > Rendering choice",
+      "packet": "suiteui/canvas-host",
+      "layer": "ui",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/editor-kernel",
+      "name": "SuiteKernel: one Linux-safe library for history, selection, the layer tree with parenting, keys and easing, snap, transform, stroke, export and session, plus its SuiteUI halves (layers panel, handles, guides, export sheet)",
+      "packet": "suiteui/editor-kernel",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/adopt-kernel-undo",
+      "name": "Every app's undo runs on SuiteKernel's History; the four app history engines are deleted",
+      "packet": "suiteui/adopt-kernel-undo",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-kernel-undo"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-undo"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-kernel-undo"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-undo"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-undo"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-selection",
+      "name": "Every app's selection set, marquee rule and nudge run on SuiteKernel's Selection; the app copies are deleted",
+      "packet": "suiteui/adopt-kernel-selection",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-kernel-selection"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-selection"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-kernel-selection"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-selection"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-layers",
+      "name": "Every app's layer list or tree runs on SuiteKernel's LayerTree; the app tree helpers are deleted",
+      "packet": "suiteui/adopt-kernel-layers",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-kernel-layers"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-layers"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-kernel-layers"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-layers"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-brush",
+      "name": "Photo's brush runs on SuiteKernel's stroke model and SuiteUI's pacer, pressure capture and cursor mark; Flare's pencil and Design's pen are built on the same module later, never as copies",
+      "packet": "suiteui/adopt-kernel-brush",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-brush"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-easing",
+      "name": "Flare's and Halo's keyframe and easing rules run on SuiteKernel's Keys; the two copies of the handle math and the key rules are deleted",
+      "packet": "suiteui/adopt-kernel-easing",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-easing"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-kernel-easing"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-export",
+      "name": "Flare's, Photo's and Library's export state runs on SuiteKernel's ExportRun; the two app state machines and Photo's Bool are deleted",
+      "packet": "suiteui/adopt-kernel-export",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-export"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-export"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-export"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-session",
+      "name": "Every app's dirty rule, save status, autosave timing, recovery offer and version probe run on SuiteKernel's DocumentSession; the five copies are deleted",
+      "packet": "suiteui/adopt-kernel-session",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-kernel-session"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-session"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-kernel-session"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-session"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-session"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-transform",
+      "name": "Design's, Photo's and Flare's box transform math runs on SuiteKernel's BoxMath; the app copies are deleted",
+      "packet": "suiteui/adopt-kernel-transform",
+      "layer": "kernel",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-kernel-transform"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-transform"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-transform"
+        }
+      ]
+    }
+  ]
+}

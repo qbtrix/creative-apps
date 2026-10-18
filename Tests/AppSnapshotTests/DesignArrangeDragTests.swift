@@ -20,11 +20,11 @@ extension BodyCountSuites {
     @MainActor @Suite struct DesignArrangeDragTests {
         typealias Drags = BodyCountSuites.DesignWindowDragTests
 
-        /// `cards` with A (node-2) selected and moved to (-20, -20, 100 × 80): the `move` press at
-        /// (20, 20) is inside it, 40 points from every handle.
+        /// `cards` with A (node-2) selected and moved to (-180, -180, 400 × 400): the `move` press at
+        /// (20, 20) is inside it, 200 points from every handle, past the fit zoom's handle reach.
         static func seed() throws -> DesignWorkspace {
             var workspace = DesignFixtures.cards
-            try workspace.setNodeFrame("node-2", x: -20, y: -20, width: 100, height: 80)
+            try workspace.setNodeFrame("node-2", x: -180, y: -180, width: 400, height: 400)
             workspace.selectItem("node-2")
             return workspace
         }
@@ -42,9 +42,9 @@ extension BodyCountSuites {
             var after = try #require(host.recorder.workspace, "the drag never reached the editor")
             let copy = try #require(after.selectedNode)
             #expect(copy.id != "node-2" && copy.name == "A")
-            #expect(copy.frame.x > -20 && copy.frame.y > -20)
+            #expect(copy.frame.x > -180 && copy.frame.y > -180)
             let a = after.selectedPage?.nodes.first?.children.first { $0.id == "node-2" }
-            #expect(a?.frame == DesignRect(x: -20, y: -20, width: 100, height: 80))
+            #expect(a?.frame == DesignRect(x: -180, y: -180, width: 400, height: 400))
             #expect(after.undoActionName == "Undo Duplicate")
             // Exactly one step: one Undo puts back the document as it was before the press.
             after.undo()

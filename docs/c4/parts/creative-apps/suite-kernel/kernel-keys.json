@@ -1,0 +1,11 @@
+{
+  "id": "kernel-keys",
+  "name": "Keys and easing",
+  "description": "Keys/Keys.swift: Keyframe and Easing as FlareCore's types under kernel names, Track (one property or all), KeyRef, KeyState (not animated, animated, keyed here), Segment, EasePreset (the one preset list with its easing and title), EaseCurve (Bezier handles, moving a handle, samples capped at 4096) and RemovePolicy. Keys/KeyRules.swift: KeyRules (key state, toggle a key or the animation, move keys all or nothing in a range, remove by policy, insert and remove frames) and KeyRefusal. Stubs from EK-3; bodies EK-15 and EK-16.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Keys/Keys.swift",
+    "Sources/SuiteKernel/Keys/KeyRules.swift"
+  ],
+  "order": 40
+}
