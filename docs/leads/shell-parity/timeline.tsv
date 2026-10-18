@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 2026-10-18T12:19:07Z	shell-parity	check	dev@b0c59a4f	blocked: #2524 #2263 open (gaps #1572/#1573 open); no dev-red; 8 design findings open
 2026-10-18T12:36:17Z	shell-parity	check	dev@618256bc	blocked: #2524 #2263 open (gaps #1572/#1573 open); no dev-red; 8 design findings open
 2026-10-18T12:52:52Z	shell-parity	check	dev@7ae985e3	blocked: #2524 #2263 open (gaps #1572/#1573 open); no dev-red; 8 design findings open
+2026-10-18T13:10:27Z	shell-parity	check	dev@563d9fad	blocked: #2524 #2263 open (gaps #1572/#1573 open); no dev-red; 8 design findings open
