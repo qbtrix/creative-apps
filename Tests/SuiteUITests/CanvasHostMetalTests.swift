@@ -4,8 +4,10 @@
 // the tile layers, and switching keeps the overlay on top. The presenter is
 // handed every tile on the switch and the changed ones after; the live
 // CanvasTilePresenter writes them into its document texture and fills
-// drawables. The drawable never has more pixels than the document. macOS
-// only; the GPU cases need a Metal device.
+// drawables. The drawable never has more pixels than the document. On the
+// Metal path the tile layers stay empty until the tile path returns, and a
+// layout presents only a new picture or a new drawable size. macOS only; the
+// GPU cases need a Metal device.
 import AppKit
 import Metal
 import QuartzCore
@@ -81,6 +83,37 @@ import Testing
         texture.getBytes(&texel, bytesPerRow: 4, from: MTLRegionMake2D(10, 10, 1, 1), mipmapLevel: 0)
         let hex = SuitePalette.accent.light
         #expect(texel == [UInt8(hex >> 16 & 0xFF), UInt8(hex >> 8 & 0xFF), UInt8(hex & 0xFF), 255])
+    }
+
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
+    func theMetalPathLeavesTheTileLayersEmptyUntilTheTilePathReturns() throws {
+        let canvas = loadedHost()
+        let tileContents = { (canvas.container.sublayers ?? []).compactMap(\.contents).count }
+        canvas.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: ClearingMetalPresenter())
+        let before = tileContents()
+        canvas.show(GalleryCanvasDocument.make())
+        #expect(tileContents() == before, "a tile layer got an image on the Metal path")
+        canvas.useRendering(.cpu, device: nil, presenter: ClearingMetalPresenter())
+        #expect(tileContents() == canvas.shown().filter { $0.image != nil }.count)
+    }
+
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
+    func aLayoutPresentsOnlyANewPictureOrANewDrawableSize() throws {
+        guard drawablesWork() else { return }
+        let canvas = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 960, height: 600))
+        canvas.show(GalleryCanvasDocument.make())
+        canvas.layoutSubtreeIfNeeded()
+        let presenter = ClearingMetalPresenter()
+        canvas.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        let first = presenter.presented
+        for _ in 0..<5 { canvas.needsLayout = true; canvas.layoutSubtreeIfNeeded() }
+        #expect(presenter.presented == first, "a layout with nothing new presented a drawable")
+        canvas.show(OneTile())
+        canvas.layoutSubtreeIfNeeded()
+        #expect(presenter.presented == first + 1)
+        canvas.setFrameSize(CGSize(width: 480, height: 300))
+        canvas.layoutSubtreeIfNeeded()
+        #expect(presenter.presented == first + 2)
     }
 
     @Test func theDrawableNeverHasMorePixelsThanTheDocument() {

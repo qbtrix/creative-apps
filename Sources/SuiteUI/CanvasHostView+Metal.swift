@@ -3,10 +3,15 @@
 // and a `CAMetalLayer` (sRGB colour space) takes its place under the overlay;
 // the presenter is handed every tile shown and fills each drawable
 // (CanvasTilePresenter live, the clearing fake in tests). `.cpu` or a nil
-// device keep the tile layers. The drawable is the artboard at the backing
-// scale but never more pixels than the document has (Core Animation magnifies
-// it, nearest from 2 px per pixel, as the tile path does), and it turns with
-// `rotationDegrees`. The overlay stays on top on both paths. macOS only.
+// device keep the tile layers. On the Metal path the tile layers get no
+// contents (a commit would colour-convert every image on the main thread);
+// they get them back from the shown images when the path returns to `.cpu`.
+// The drawable is the artboard at the backing scale but never more pixels
+// than the document has (Core Animation magnifies it, nearest from 2 px per
+// pixel, as the tile path does), and it turns with `rotationDegrees`. A layout
+// presents a new drawable only for a new picture or a new drawable size, so a
+// pan or a rotation moves the one shown. The overlay stays on top on both
+// paths. macOS only.
 import AppKit
 import Combine
 import Metal
@@ -90,6 +95,7 @@ extension CanvasHostView {
         guard Self.drawsOnMetal(choice, device: device) else {
             metalLayer?.removeFromSuperlayer()
             (self.presenter, container.isHidden) = (nil, false)
+            place(shown())  // the Metal path left the tile layers without contents
             return
         }
         let metal = metalLayer ?? CAMetalLayer()
@@ -105,6 +111,7 @@ extension CanvasHostView {
         container.isHidden = true
         self.presenter = presenter
         presenter.show(shown(), documentSize: documentSize)
+        pictureChanged = true
         presentMetal(with: presenter)
     }
 
@@ -121,8 +128,13 @@ extension CanvasHostView {
         metal.contentsScale = scale
         metal.magnificationFilter = documentSize.width > 0 && board.width / documentSize.width >= 2 ? .nearest : .linear
         CATransaction.commit()
-        metal.drawableSize = Self.drawableSize(board: board.size, scale: scale, document: documentSize)
+        let size = Self.drawableSize(board: board.size, scale: scale, document: documentSize)
+        // A pan, a rotation or a layout that keeps the picture and the drawable's size needs no new drawable:
+        // Core Animation moves and scales the one shown.
+        guard pictureChanged || presentedSize != size else { return }
+        metal.drawableSize = size
         guard let drawable = metal.nextDrawable() else { return }
+        (pictureChanged, presentedSize) = (false, size)
         presenter.present(drawable, on: metal)
     }
 
