@@ -129,3 +129,4 @@ utc	stage	event	ref	note
 2026-10-18T07:16Z	heartbeat	probe batch-20261018063810-4 green; #2627 #2629 #2635 #2638 #2648 #2651 open, builds green, awaiting lane sweep
 2026-10-18T07:30Z	heartbeat	lane run 39107445380 in progress; all six lead PRs open, no needs-fix; scoped suiteui 39106447807 still queued (pre-merge sha, not the timeline proof)
 2026-10-18T07:46Z	fix	#2629 (round 1) and #2638 (round 2) merged 07:32Z; waiting for a post-merge scoped suiteui run
+2026-10-18T08:06Z	heartbeat	no scoped suiteui run on a post-07:32Z dev sha yet; full CI 39108958964 on 2202c7c3 (includes #2629 #2638) pending
