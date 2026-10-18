@@ -10,7 +10,8 @@
 // file joins them. Every page root carries `suite.gallery.<page>`; an unknown
 // name shows an EmptyStateView naming it. The index page lists every page and
 // opens one through `openGalleryPage`; every other page has a back button to
-// the index. The gallery root applies `.suiteProbes()`.
+// the index. The gallery root applies `.suiteProbes()`. A page adds nothing
+// to the window's minimum height, so the gallery fits `-SuiteWindowSize`.
 import SwiftUI
 
 /// What `-SuiteGallery` asked for: the page, whether to run on the Fakes, and
@@ -116,11 +117,18 @@ public struct SuiteGallery: View {
                 }
                 .help("Gallery Index")
                 .suiteControl(id: "suite.gallery.back", enabled: true, reason: nil)
-                .padding(SuiteSpacing.s)
+                .padding(.horizontal, SuiteSpacing.s)
+                .padding(.vertical, SuiteSpacing.xs)
             }
+            // A zero minimum height: a page's own minimum (the editor-window
+            // page is a whole SuiteWindow) must not stack on the back row and
+            // grow the window past the size `-SuiteWindowSize` fitted to the
+            // visible frame; setFrame ignores the content minimum, SwiftUI
+            // doesn't (677 on a 674 frame, #2497). Top-aligned, so a page
+            // taller than its room loses its bottom, never the back row.
             GalleryPageView(name: name)
                 .id(name)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, minHeight: .zero, maxHeight: .infinity, alignment: .top)
         }
         .environment(\.galleryRequest, request)
         .environment(\.openGalleryPage, { page in opened = page })
