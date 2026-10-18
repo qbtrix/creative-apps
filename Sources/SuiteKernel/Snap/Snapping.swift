@@ -6,7 +6,9 @@
 // the words its accessibility value reads.
 //
 // `Snapping.candidates(in:moving:drawingInto:page:frame:)` walks EK-2's
-// `LayerTree`, which is not on dev yet, so EK-18 declares it with its body.
+// `LayerTree`: the siblings of each moving id (or the children of the frame
+// drawn into), their parent frames and the page; hidden layers and the
+// moving subtree skipped, locked ones kept.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -99,10 +101,48 @@ public struct SnapCandidate: Hashable, Sendable {
 
 /// The snap rules every app shares.
 public enum Snapping {
+    /// The frames a drag of `moving` in `tree` can snap to: the siblings of
+    /// each moving id and the frame they sit in, or, for a layer being drawn
+    /// into `parent`, that frame's children and the frame itself; then the
+    /// page (id nil) once, last. Effectively hidden layers and the moving
+    /// layers with everything below them are skipped; locked ones are kept.
+    /// `frame` gives each layer's frame in document space. Unknown ids name
+    /// nothing; each layer is listed once, in the order first met.
+    public static func candidates<P: LayerPayload>(in tree: LayerTree<P>, moving: [String], drawingInto parent: String?,
+                                                   page: Rect, frame: (LayerNode<P>) -> Rect) -> [SnapCandidate] {
+        let movingIDs = Set(moving)
+        var scopes: [String?] = []
+        for id in moving {
+            guard let line = tree.ancestors(of: id), !scopes.contains(line.last) else { continue }
+            scopes.append(line.last)
+        }
+        if let parent, tree.node(parent) != nil, !scopes.contains(parent) { scopes.append(parent) }
+        var seen: Set<String> = []
+        var out: [SnapCandidate] = []
+        func consider(_ node: LayerNode<P>) {
+            guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id) else { return }
+            guard !movingIDs.contains(node.id),
+                  !(tree.ancestors(of: node.id) ?? []).contains(where: movingIDs.contains) else { return }
+            seen.insert(node.id)
+            out.append(SnapCandidate(id: node.id, frame: frame(node)))
+        }
+        for scope in scopes {
+            guard let scope else {
+                tree.roots.forEach(consider)
+                continue
+            }
+            guard let container = tree.node(scope) else { continue }
+            container.children.forEach(consider)
+            consider(container)
+        }
+        out.append(SnapCandidate(id: nil, frame: page))
+        return out
+    }
+
     /// The offset a drag moves by: the lines' offset when there is one, else
-    /// the gaps', else the whole-point rounding (EK-18). Stub: `wholePoints`.
+    /// the gaps', else the whole-point rounding.
     public static func offset(lines: Double?, gaps: Double?, wholePoints: Double) -> Double {
-        wholePoints
+        lines ?? gaps ?? wholePoints
     }
 
     /// `value` rounded to whole points; 0 when it is not finite or too large
