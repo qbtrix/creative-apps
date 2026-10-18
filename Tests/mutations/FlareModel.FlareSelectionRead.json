@@ -1,0 +1,23 @@
+[
+  {
+    "label": "layers that differ read the first one's value",
+    "file": "Sources/FlareModel/FlareSelectionRead.swift",
+    "find": "guard let first = values.first, values.allSatisfy({ abs($0 - first) <= 1e-9 }) else { return nil }",
+    "replace": "guard let first = values.first else { return nil }",
+    "tests": "FlareSelectionReadTests"
+  },
+  {
+    "label": "a handle drag's preview leaves the scale and rotation as committed",
+    "file": "Sources/FlareModel/FlareSelectionRead.swift",
+    "find": ".merging(changes[id] ?? [:]) { $1 }",
+    "replace": "",
+    "tests": "FlareSelectionReadTests"
+  },
+  {
+    "label": "a scale preview keeps the box it started on",
+    "file": "Sources/FlareModel/FlareSelectionRead.swift",
+    "find": "? grip.box : BoxMath.resized(grip.box, grip.handle.editorHandle, by: delta, modifiers: keys)",
+    "replace": "? grip.box : grip.box",
+    "tests": "FlareSelectionReadTests"
+  }
+]
