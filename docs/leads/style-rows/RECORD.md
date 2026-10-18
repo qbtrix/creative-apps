@@ -108,3 +108,4 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - 2026-10-18T03:23:12Z check: #2505 merged (f0072d09) and #2511 merged (095c4dd7), batch Linux run 39092249899 green; #2466/#2467 closed. Scoped design run 39093367358 on 0965457c (holds both) in progress: verifies J10/J11 and P2.
 - 2026-10-18T03:41:06Z check: full CI 39093416270 on 0965457c (has 095c4dd7): Linux green, SR-a/SR-t/SR-b merged-done; macOS in progress. scoped design 39093367358 in progress (J10/J11/P2 pending)
 - 2026-10-18T04:04:19Z check: scoped 39093367358 done: J10 fails step 2 (slider orientation), J11 fails Size read-back -> #2544/#2545 moved to gap (SR-a cap); P2 perf ok, audit unnamed scroller -> finding #2552, fix PR #2561 (SR-b round 1). Belt-Slice-Done posted for SR-a (gaps #2544 #2545) and SR-t
+- 2026-10-18T04:22:14Z check: SR-b fix #2561 macOS build green (run 39095809132), awaiting lane merge; full CI 39093416270 macOS job still running; no dev-red
