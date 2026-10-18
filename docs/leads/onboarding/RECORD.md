@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-5g builder running on the snapshots artifact of full run 39143942767 (macOS job cancelled after uploading snapshots; no ui-screens). Critic panels running: OB-u (ui lenses: mouse, taste) on those snapshots, OB-m on the code at bafd1d38. OB-a, OB-m, OB-s done. OB-u fix round 1 (F-2884, F-2886) building. OB-z review after OB-13. OB-13 once switching and the bundled samples are on dev.
+Next: OB-u fix round 1 building: F-2884 (#2884, #2885), F-2886 (#2886, #2887), F-2895 (#2895 start-launching snapshot hangs the macOS job). OB-5g open as #2888, #2889. OB-m (done) follow-ups after its review: F-2890 (#2890, #2892), F-2893 (#2893); #2891 waits F-2886 (both touch OnboardingModel.send). OB-u slice-done and Mac-Finish-Wanted once all its PRs merge and a full dev run's Linux is green. OB-13 once switching and the bundled samples are on dev; OB-z review after it.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -14,7 +14,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OB-a | `Sources/SuiteModel/Onboarding/` with every type and signature the window calls as stubs returning the fake's values; its Linux tests written and disabled | OB-1, OB-2 | MJ-OB0 | – | no | 0 | done (Belt-Slice-Done: run 39132122171 at 4bf67be8, #2791) | – | – |
-| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 1 | fix round 1 (#2884-#2887); OB-5g building | – | – |
+| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 1 | fix round 1 (#2884-#2887, #2895); OB-5g #2888, #2889 | – | – |
 | OB-m | SuiteOnboarding, OnboardingLaunch, OnboardingModel do the work; StorePreferences over FileStore makes the preferences slot live | OB-7, OB-8, OB-9 | MJ-OB1, MJ-OB2, MJ-OB4 | OB-a | no | 0 | done (Belt-Slice-Done: run 39143942767 at bafd1d38, #2825) | – | – |
 | OB-s | SampleCatalog names one sample per app, finds it under Resources, copies into Documents without overwriting; Bundle/Samples/ holds the files | OB-10, OB-11 | MJ-OB3 | OB-a; bundle (built: bundle-apps copies Bundle/Samples/) | no | 1 | done (Belt-Slice-Done: run 39152649677 at 71facd44, after fix round 1) | – | – |
 | OB-z | The slot is live, the window reads the bundle's samples, journeys on live | OB-12, OB-13 | OJ3, OJ4 | OB-u, OB-m, OB-s (OB-12); switching (OB-13: Window > Switch To and the transport are on dev) | no | 0 | waiting | – | – |
@@ -41,7 +41,10 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | F-2850 | OB-s | 5 | destination names copies with UniqueFileNames (canonical first); case test, leading-dot test; plan rewritten for the new code (Mutate 8/8) | Sources/SuiteModel/Onboarding/SampleCatalog.swift, Tests/SuiteModelTests/SampleCatalogTests.swift, Tests/mutations/SuiteModel.SampleCatalog.json | SampleCatalogTests | #2877 | merged (13c1cad0) |
 | F-2884 | OB-u | 6 | #2884 focus copy points to Help > Welcome; #2885 start title, preset chips named as new documents | FakeOnboarding.swift (SuiteModel), start page view | model string tests | – | building |
 | F-2886 | OB-u | 6 | #2886 Skip/Back disabled while a hand-off sends; #2887 refusal shows under its tile | OnboardingModel.swift, start page view | OnboardingModel tests | – | building |
-| OB-5g | OB-u | 5 | The goldens for Golden/afterglow-onboarding/ taken from the first macOS run's `snapshots` artifact that holds OB-5 | Tests/AppSnapshotTests/Golden/afterglow-onboarding/ | the run's compare | – | building (snapshots of 39143942767) |
+| OB-5g | OB-u | 5 | The goldens for Golden/afterglow-onboarding/ taken from the first macOS run's `snapshots` artifact that holds OB-5 | Tests/AppSnapshotTests/Golden/afterglow-onboarding/ | the run's compare | #2888 (light, light-ic), #2889 (dark, dark-ic); no start-launching or start-error golden | open |
+| F-2895 | OB-u | 6 | #2895 start-launching shot finite (no endless ring on a silent sender) | Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift | AppSnapshotTests on the Mac | – | building |
+| F-2890 | OB-m | 6 | #2890 Skip keeps the stored home order; #2892 missing-sample message per packet | OnboardingModel.swift | OnboardingModelTests; Mutate | – | building |
+| F-2893 | OB-m | 6 | #2893 StorePreferences own-save mutation caught | StorePreferencesTests, plan | StorePreferencesTests; Mutate | – | building |
 | OB-13 | OB-z | 5 | Enables OJ3 and OJ4 on live (OJ3 skips naming #837 while the Flare sample is missing); blueprint prose; status built; feature-done | UITests/AfterGlowJourneyTests+OnboardingStart.swift, docs/blueprints/suite.md, docs/blueprints/suite/features/onboarding.wave.json | OJ3, OJ4 on the dev run | – | waits OB-5, OB-6, OB-11, OB-12 |
 
 Waves (packet's Build waves, checked against dev at 4a86f5fc):
@@ -56,7 +59,8 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 |---|---|---|---|---|---|
 | OB-a | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2852 (minor) | clean |
 | OB-s | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2849 (major), #2850, #2851 (minor) | not clean: fix round 1 |
-| OB-u | 39143942767 | bafd1d38 | clarity, journey, design, layout, controls, mouse, taste, oracle | #2884 (major), #2885, #2886, #2887 (minor) | not clean: fix round 1 |
+| OB-u | 39143942767 | bafd1d38 | clarity, journey, design, layout, controls, mouse, taste, oracle | #2884 (major), #2885, #2886, #2887 (minor); #2895 (major, from the run's hang) | not clean: fix round 1 |
+| OB-m | 39143942767 | bafd1d38 | clarity, journey, design, controls, oracle | #2890, #2891 (major), #2892, #2893 (minor) | not clean: fix round 1 (slice already merged-done; follow-ups) |
 
 ## Decisions
 - Base `dev`, not `main`: CLAUDE.md never targets main, the lead contract says base dev, and the fast lane retargets a main PR to dev. The brief's base SHA fdaabbfb is an ancestor of origin/main (0e3c08ea) and of dev (4a86f5fc).

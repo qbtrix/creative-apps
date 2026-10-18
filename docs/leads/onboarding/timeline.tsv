@@ -63,3 +63,6 @@ utc	stage	event	ref	note
 2026-10-18T18:14:26Z	heartbeat	-	OB-5g builder, OB-u and OB-m critics running; OB-s waits on full run 39152649677 Linux
 2026-10-18T18:18:09Z	review	OB-u	not clean: #2884 (major), #2885 #2886 #2887 (minor); fixers F-2884, F-2886 started (round 1)
 2026-10-18T18:21:13Z	slice-done	OB-s	Belt-Slice-Done: run 39152649677 (71facd44, Linux green, holds #2877)
+2026-10-18T18:31:40Z	pr	OB-5g	#2888 #2889 open
+2026-10-18T18:31:40Z	finding	OB-u	#2895 start-launching snapshot hangs macOS; fixer F-2895
+2026-10-18T18:31:40Z	review	OB-m	not clean: #2890-#2893; fixers F-2890, F-2893
