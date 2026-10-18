@@ -4,7 +4,7 @@
 // are none). After the system's Close: Save ⌘S, Save As…
 // ⇧⌘S, then Render… ⇧⌘R (Halo's export) and Render Frame ⌘R. Each item sends
 // its HaloCommand through the focused window and is disabled with the Model's
-// reason as help (HaloMenuItem).
+// reason as help (SuiteUI's MenuCommand).
 import HaloModel
 import SwiftUI
 
@@ -16,19 +16,19 @@ struct HaloFileMenu: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
-            HaloMenuItem(command: .newComposition, target: target, systemImage: "plus")
-            HaloMenuItem(command: .open, target: target, systemImage: "folder", shortcut: KeyboardShortcut("o"))
+            MenuCommand(command: .newComposition, target: target, systemImage: "plus")
+            MenuCommand(command: .open, target: target, systemImage: "folder", shortcut: KeyboardShortcut("o"))
             HaloOpenRecentMenu(target: target)
         }
         CommandGroup(after: .saveItem) {
-            HaloMenuItem(
+            MenuCommand(
                 command: .save, target: target, systemImage: "square.and.arrow.down", shortcut: KeyboardShortcut("s"))
-            HaloMenuItem(command: .saveAs, target: target, shortcut: KeyboardShortcut("s", modifiers: [.command, .shift]))
+            MenuCommand(command: .saveAs, target: target, shortcut: KeyboardShortcut("s", modifiers: [.command, .shift]))
             Divider()
-            HaloMenuItem(
+            MenuCommand(
                 command: .openRenderSheet, target: target, systemImage: "film",
                 shortcut: KeyboardShortcut("r", modifiers: [.command, .shift]))
-            HaloMenuItem(command: .renderFrame, target: target, systemImage: "photo", shortcut: KeyboardShortcut("r"))
+            MenuCommand(command: .renderFrame, target: target, systemImage: "photo", shortcut: KeyboardShortcut("r"))
         }
     }
 }
@@ -49,7 +49,7 @@ struct HaloOpenRecentMenu: View {
         } else {
             Menu("Open Recent") {
                 ForEach(recent, id: \.path) { file in
-                    HaloMenuItem(command: .openRecent(file.path), target: target, title: file.name)
+                    MenuCommand(command: .openRecent(file.path), target: target, title: file.name)
                 }
             }
         }
