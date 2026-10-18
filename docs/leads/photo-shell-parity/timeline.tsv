@@ -1,0 +1,54 @@
+utc	stage	event	ref	note
+2026-10-16T18:20Z	0	stage-start	#1502	base 132d910 (dev); main 2e0f7df verified
+2026-10-16T18:30Z	2	stage-end	-	waves: PS-1 PS-2 | PS-3 | PS-4 PS-5
+2026-10-16T18:30Z	3	stage-start	wave 1	PS-1 PS-2
+2026-10-16T18:45Z	3	heartbeat	-	wave 1 builders running (PS-1, PS-2); swift 6.2 installed for scripts/ci
+2026-10-16T19:00Z	3	pr-merged	#1546	PS-2 layer list split
+2026-10-16T19:13Z	3	pr-merged	#1550	PS-1 PhotoToolbarItem
+2026-10-16T19:30Z	3	stage-start	wave 2	PS-3 on ef9dfc2
+2026-10-16T19:45Z	3	pr-opened	#1583	PS-3 Photo on SuiteWindow
+2026-10-16T19:58Z	3	heartbeat	#1583	macOS build-only run 38956887787 queued
+2026-10-16T20:14Z	3	pr-merged	#1583	PS-3 Photo on SuiteWindow
+2026-10-16T20:22Z	3	stage-start	wave 3	PS-4 PS-5 on 1d68b22
+2026-10-16T20:35Z	3	pr-opened	#1612	PS-5 shell journey
+2026-10-16T20:40Z	3	pr-opened	#1614	PS-4 subtract
+2026-10-16T20:44Z	3	pr-merged	#1612	PS-5 shell journey
+2026-10-16T20:48Z	3	heartbeat	#1614	PS-4 macOS build pending
+2026-10-16T21:10Z	3	ci-run	38963169109	PS-4 macOS build failed: +PerfAdjustmentLayers windowWidth
+2026-10-16T21:25Z	3	pr-opened	#1614	PS-4 new head d9eb551 (14 files)
+2026-10-16T21:25Z	3	pr-opened	#1643	PS-4b inspector order, adjustment-layer journey
+2026-10-16T21:21Z	3	pr-merged	#1614	PS-4
+2026-10-16T21:28Z	3	pr-merged	#1643	PS-4b
+2026-10-16T21:50Z	4	ci-run	38969445494	scoped photo red in snapshots: PhotoWindowStrokeTests (ours), #1603 (not ours)
+2026-10-16T21:52Z	4	round-findings	#1674	round 1: stroke draws a 616x462 shape layer on the CPU
+2026-10-16T21:58Z	4	fix-round	#1674	cause in SuiteUI CanvasViewport checkerboard -> #1295 needs-ui; no Photo PR
+2026-10-16T22:05Z	4	pr-opened	#1682	PS-6 refusal text, comments, C4 part
+2026-10-16T22:15Z	4	ci-run	38971693968	only #1674 gates the photo snapshot step; journeys blocked on SuiteUI #1295
+2026-10-16T22:19Z	4	pr-merged	#1682	PS-6
+2026-10-16T22:38Z	4	ci-run	38973834389	scoped photo: still only #1674 gating (SuiteUI #1295 open)
+2026-10-16T22:50Z	4	pr-opened	#1706	PS-6b stale words
+2026-10-16T22:52Z	4	pr-merged	#1706	PS-6b
+2026-10-16T23:05Z	4	heartbeat	38975895713	still only #1674 gating; SuiteUI #1295 open, no PR
+2026-10-16T23:25Z	4	heartbeat	38978837408	Belt nudge on lead/shell-parity (Design lead done there); Photo record mirrored to lead/shell-parity under docs/leads/photo-shell-parity/. Still only #1674 gating; SuiteUI #1295 open, no PR
+2026-10-16T23:31Z	4	heartbeat	38980735562	still only #1674 gating; SuiteUI #1295 open, no PR
+2026-10-16T23:53Z	4	heartbeat	38982540952	polling SuiteUI #1295 (open, no PR)
+2026-10-16T23:56Z	4	ci-run	38982540952	gating: #1674 (ours, waits SuiteUI #1295) + adjustTabEndIsReachable (#1733, adjustment-layers)
+2026-10-17T00:14Z	4	heartbeat	38985043432	polling SuiteUI #1295 (open, no PR); scoped photo run in progress
+2026-10-17T00:36Z	4	heartbeat	38985043432	same gating: #1674 (waits SuiteUI #1295, open, no PR) + adjustTabEndIsReachable (#1733, adjustment-layers)
+2026-10-17T00:57Z	4	heartbeat	38987398234	polling SuiteUI #1295 (open, no PR)
+2026-10-17T01:18Z	4	heartbeat	38987398234	hand-off written to RECORD Next (8 h wall clock ends ~02:15Z); still blocked on SuiteUI #1295 + #1733 test
+2026-10-17T01:42Z	4	heartbeat	38990423996	still blocked on SuiteUI #1295 (+ #1733 test); hand-off in Next
+2026-10-17T01:44Z	4	ci-run	38990423996	adjustTabEndIsReachable passes; only #1674 (SuiteUI #1295) gates the photo journeys
+2026-10-17T02:05Z	4	stopped	#1502	8 h wall clock; built, blocked on SuiteUI #1295 (#1674 gates the photo journeys); hand-off in RECORD Next and on #1502
+2026-10-17T06:40Z	4	stage-start	round 2	relaunch act-1a148875943-9arx: #1716 merged, #1910 (window title with subtitle) is ours
+2026-10-17T06:55Z	4	ci-run	38993910840	journeys ran: 25 window-wait failures (#1910 siblings), testFixtureLaunch viewport measure, testShell1Empty switcher centring
+2026-10-17T07:05Z	4	fix-round	2	F-1910 (journey window lookup, viewport measure) and PS-7 (feature-done) started as worktree builders
+2026-10-17T13:50Z	4	stage-start	round 3	relaunch act-1a14a193a7a-rmz6: PS-7 #2006 + F-1910 #2008 merged, main = dev = d2c4fa2
+2026-10-17T13:50Z	4	ci-run	39032323316	Linux green; 10 Photo journeys red (was 27): inspector below the fold, opacity typing, 1 pt window height, switcher (SuiteUI)
+2026-10-17T14:00Z	4	critic	round 3	panel on 39032323316 screens: new gaps #2096 #2097 #2098; 14 findings relabelled gap
+2026-10-17T14:02Z	done	stage-end	#1502	Belt-Contact-Sheet posted (issuecomment-6234662304)
+2026-10-17T14:02Z	done	stopped	#1502	lead done; records pushed
+2026-10-18T04:06Z	done	stage-start	main@0965457c	relaunch act-1a14d2dd531-xb8a: branch recut onto main
+2026-10-18T04:06Z	done	finding-filed	39088586270	CI findings that repeat gaps relabelled gap (round cap)
+2026-10-18T04:06Z	done	stage-end	#1502	Belt-Contact-Sheet refreshed with this run's session link
+2026-10-18T04:06Z	done	stopped	#1502	lead done; records pushed
