@@ -93,6 +93,12 @@
 # signature (Tests/canonical-ui-signatures.txt) or by shape, must be listed in
 # Tests/canonical-ui-baseline.txt. That baseline only shrinks (lead.md rules 16, 20).
 #
+# The view-statics check runs Tests/canonical/test_check_view_statics.sh, then
+# scripts/check-view-statics: a `static func` or `static var` on a View type is
+# @MainActor, so a worker-thread @Test that calls it traps on macOS while Linux
+# stays green. It must be `nonisolated` (or opt out with `// view-static:
+# main-actor`) unless Tests/view-statics-baseline.txt lists it; that only shrinks.
+#
 # The app-marks check runs Tests/app_marks, then scripts/check-app-marks (an
 # app's mark is drawn only by SuiteUI's AppMark: no [SuiteApp: String] symbol
 # table, no AppSwitcherItem systemImage:, no retired app-mark symbol beside an
@@ -325,6 +331,10 @@ python3 scripts/check-dup-logic || fail "canonical first: use the SuiteModel mod
 echo "== SuiteUI first (Tests/canonical, Tests/canonical-ui-baseline.txt)"
 bash Tests/canonical/test_check_dup_views.sh || fail "SuiteUI first: scripts/check-dup-views broke its tests"
 python3 scripts/check-dup-views || fail "SuiteUI first: use the SuiteUI component, or move the app copy into SuiteUI first (docs/factory/lead.md rules 16 and 20)"
+
+echo "== statics on Views (Tests/view-statics-baseline.txt)"
+bash Tests/canonical/test_check_view_statics.sh || fail "statics on Views: scripts/check-view-statics broke its tests"
+python3 scripts/check-view-statics || fail "statics on Views: mark the pure helper nonisolated (docs/engineering/swiftui-rules.md rule 13)"
 
 echo "== app marks (Tests/app_marks, Bundle/Marks)"
 bash Tests/app_marks/test_app_marks.sh || fail "app marks: scripts/check-app-marks or scripts/render-marks broke their tests"

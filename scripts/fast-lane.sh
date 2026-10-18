@@ -169,6 +169,10 @@ DUP_REASON="adds app-local logic for a canonical concept (use the SuiteModel mod
 # line. main's scripts/check-dup-views --paths, names only; its signature and
 # shape rules and baseline are scripts/ci's.
 DUP_VIEW_REASON="adds an app copy of a SuiteUI piece (use the SuiteUI component, or add \`Allow-Dup-View: <concept> <reason>\` to the body)"
+# Statics on Views (swiftui-rules.md rule 13) has no names-only form: it reads
+# the code, which the lane never does. scripts/check-view-statics runs in the
+# worker's scripts/ci on the head, the Head: proof above, so a fast-lane PR that
+# adds an unmarked static on a View fails there, not here.
 
 # A supervisor's `Mac-Check: <run url>` line names a CI run whose green
 # macOS job built every app, which also proves a code PR builds (build_gate).
