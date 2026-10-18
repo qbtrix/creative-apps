@@ -69,3 +69,5 @@ utc	stage	event	ref	note
 2026-10-18T16:13:31Z	findings	filed	#2844 #2845 #2846	palette focus (EC-d), tabs keys + segment ids (EC-b), switch labels (EC-b); fixes gating
 2026-10-18T16:15:40Z	EC-a	merged	#2841	tabs fade pair on a Timer; fixes #2844-#2846 gating; dev runs 39143942767 (CI) and 39143178581 (scoped suiteui) pending
 2026-10-18T16:20:27Z	fix round 1	PRs open	#2853 #2854 #2855	palette focus (EC-d), tabs keys + segment ids (EC-b), switch labels (EC-b); gate PASS
+2026-10-18T18:39:28Z	EC-c	slice done	#1344	Belt-Slice-Done posted (issuecomment-6253616651)
+2026-10-18T18:39:28Z	fix round 1	merged	#2841 #2853 #2854 #2855 #2856	scoped suiteui 39153976103 (c91b1468) running

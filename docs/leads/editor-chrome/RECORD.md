@@ -1,10 +1,10 @@
 # editor-chrome lead record
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
-Run: act-1a14d48ae2f-857a (line lead with #1512, #1939; took over from act-1a14d1f3122-r1yb) · Session: claude/feature-lead-playbook-147xje · Started: 2026-10-16T18:10Z (resumed 2026-10-18T04:36Z)
-Stage: 2 build (wave 2 PRs open)
-Base: 9e0ac922 (origin/dev)
-Next: #2672 (EC-5a) needs-rebase resolved (merge bda1546c, C4 part), PASS, Head moved; EC-9 restacked on it (e2f96351, EC-6a dropped: merged #2673), EC-11 (06544a7f) and EC-8 (7dc240fc, EC-8b dropped: merged #2676) on EC-9, gating; EC-9 opens once #2672 merges, then EC-11 and EC-8; EC-a critics wait on a scoped suiteui run
+Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
+Stage: 4 review (fix round 1 merged)
+Base: 2e27b8db (origin/dev)
+Next: all slices done (EC-c Belt-Slice-Done posted); scoped suiteui run 39153976103 at c91b1468 carries fix round 1 (#2841 #2853-#2856): read its journeys for #2844-#2846 and the CI findings, then Belt-Contact-Sheet on #1344, or round 2
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
