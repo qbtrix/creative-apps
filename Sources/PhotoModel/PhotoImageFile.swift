@@ -59,8 +59,9 @@ public protocol PhotoImageCodec: Sendable {
 }
 
 extension PhotoWorkspace {
-    /// The most pixels an opened image keeps: 16 megapixels.
-    public static let maxOpenPixels = 16 * 1024 * 1024
+    /// The most pixels an opened image keeps: 40 megapixels, so an 8K frame (7680 x 4320, 33 MP) opens at
+    /// full size. A layer is 16 bytes a pixel in memory (Float32 RGBA), so 40 MP is about 670 MB a layer.
+    public static let maxOpenPixels = 40 * 1024 * 1024
 
     /// The longest side to decode a `width` x `height` file at so it keeps at
     /// most `maxOpenPixels`, or nil when it already fits.

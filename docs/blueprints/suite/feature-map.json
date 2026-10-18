@@ -47,6 +47,115 @@
   ],
   "features": [
     {
+      "id": "AI1",
+      "name": "Command catalog: every action is a typed command (name, JSON-schema params, result, kind with one undo step per edit, description, why-not); menus, CLI and MCP drive it (W0, p0)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-commands ✚",
+        "suiteui MenuCommand"
+      ],
+      "packet": "suiteui/command-catalog",
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-command-catalog"
+        }
+      ]
+    },
+    {
+      "id": "AI2",
+      "name": "afterglow CLI: headless open, run, export and JSON scripts on Linux and macOS; the real-jobs suites (W0, p0)",
+      "layer": "model",
+      "c4": [
+        "afterglow-cli ✚ (cli-runner, cli-batch, cli-jobs)"
+      ],
+      "packet": "suite/afterglow-cli",
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-command-catalog"
+        }
+      ]
+    },
+    {
+      "id": "AI3",
+      "name": "afterglow MCP server: the catalog as tools, headless first; a running app's live document later (macOS, local, approved per client) (W0, p0; live W2)",
+      "layer": "model",
+      "c4": [
+        "afterglow-cli/cli-mcp ✚",
+        "suite-shell/shell-live-commands ✚",
+        "suite-model/suite-ai-access ✚"
+      ],
+      "packet": "suite/afterglow-mcp",
+      "adopters": [
+        {
+          "app": "photo"
+        },
+        {
+          "app": "design"
+        },
+        {
+          "app": "flare"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "library"
+        }
+      ]
+    },
+    {
+      "id": "AI4",
+      "name": "PNG and JPEG on Foundation alone (pure-Swift inflate and deflate) so Photo and Library run headless on Linux (creative-core image-codecs, W0, p0)",
+      "layer": "core",
+      "c4": [
+        "coreraster/codecs"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-command-catalog"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-command-catalog"
+        }
+      ]
+    },
+    {
       "id": "E1",
       "name": "Path geometry: edit math, booleans, dash and trim outlines (unfiled core issue)",
       "layer": "core",
@@ -503,11 +612,12 @@
     },
     {
       "id": "S14",
-      "name": "Command palette",
+      "name": "Command palette (lists the command catalog's entries)",
       "layer": "ui",
       "c4": [
         "suiteui-sources",
-        "suite-shell/shell-adoption menus"
+        "suite-shell/shell-adoption menus",
+        "suite-kernel/kernel-commands (lists catalog entries)"
       ],
       "adopters": [
         {

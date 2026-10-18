@@ -3,6 +3,7 @@
 // Open is clean, a refused edit records nothing, the close prompt names the file,
 // and the save state text (files-history FH-2). Runs on Linux and macOS.
 import DesignModel
+import SuiteKernel
 import Testing
 
 #if canImport(FoundationEssentials)
@@ -44,14 +45,15 @@ import Foundation
 @Test func theClosePromptNamesUntitledForAFixture() throws {
     var workspace = try #require(DesignFixtures.named("cards"))
     workspace.addPage()
-    #expect(workspace.closePrompt == "Do you want to save the changes you made to “Untitled”?")
+    #expect(workspace.closePrompt == UnsavedPrompt.message(for: "Untitled"))
 }
 
 @Test func theClosePromptNamesTheSavedFile() {
     var workspace = openDesign()
     workspace.didSave(to: URL(fileURLWithPath: "/tmp/Poster.design"))
     workspace.addPage()
-    #expect(workspace.closePrompt == "Do you want to save the changes you made to “Poster.design”?")
+    #expect(workspace.closePrompt == UnsavedPrompt.message(for: "Poster.design"))
+    #expect(workspace.closePrompt == "Do you want to save the changes made to the document “Poster.design”?")
 }
 
 @Test func theSaveStateReadsSavedEditedOrNothing() {

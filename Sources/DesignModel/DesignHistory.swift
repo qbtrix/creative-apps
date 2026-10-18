@@ -26,7 +26,9 @@
 // fresh history). didSave marks it as saved and ends the edit run; a New File
 // swap marks its own step, as an untouched new file is clean. isDirty compares
 // the two. The marker is a plain Int so the editor kernel's history can take
-// it over. undoTarget routes Edit > Undo to a focused text field's own undo.
+// it over. The save state's word and the close prompt are the kernel's
+// (DocumentSession.stateText, UnsavedPrompt), shared with the other apps.
+// undoTarget routes Edit > Undo to a focused text field's own undo.
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
 // the nodes they didn't touch); switch to per-node diffs if files get large.
 // Linux-safe.
@@ -35,6 +37,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 /// The document as an undo step restores it.
 struct DesignSnapshot: Sendable, Equatable {
@@ -166,13 +169,18 @@ extension DesignWorkspace {
     public var isDirty: Bool { isOpen && history.currentSerial != history.savedSerial }
 
     /// "Saved" after a save, "Edited" with unsaved changes, nil with no file open.
-    public var saveStateText: String? { isOpen ? (isDirty ? "Edited" : "Saved") : nil }
+    public var saveStateText: String? {
+        guard isOpen else { return nil }
+        var session = DocumentSession(token: 0, status: .saved)
+        session.currentToken = isDirty ? 1 : 0
+        return session.stateText
+    }
 
     /// The close prompt's message, or nil when the window may close at once.
     public var closePrompt: String? {
         guard isDirty else { return nil }
         let name = documentURL?.lastPathComponent ?? "Untitled"
-        return "Do you want to save the changes you made to “\(name)”?"
+        return UnsavedPrompt.message(for: name)
     }
 
     /// Where Edit > Undo and Redo go: the focused text field's own undo, or the document's.

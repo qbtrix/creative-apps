@@ -16,7 +16,7 @@ final class FlareJourneyTests: XCTestCase {
         ("flare.edit.redo", "Redo", "Nothing to redo."),
         ("flare.timeline.toggleAutoKey", "Auto-key", "Open an animation to key it."),
         ("flare.assist.showPopover", "Animate…", "Not built yet (F16a)."),
-        ("flare.export.showSheet", "Export…", "Not built yet (F15a)."),
+        ("flare.export.showSheet", "Export…", "Open or create an animation first."),
     ]
 
     /// J0: the window is SuiteWindow with the empty state's New Animation and

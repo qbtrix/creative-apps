@@ -9,8 +9,10 @@
 // order (a node, then its children); a hidden node drops its whole subtree.
 // Coordinates are page points minus the box's origin. An attribute whose value
 // is the SVG default (opacity 1, no stroke, stroke-width 1, rx 0, font-weight
-// 400, text-anchor start) is left out. Text and attribute values are escaped.
+// 400, text-anchor start) is left out. Text and attribute values are escaped
+// by SuiteModel's XMLText, the suite's one XML escaper.
 // Each element sits on its own line, indented two spaces per depth.
+import SuiteModel
 
 /// The SVG text of nodes inside a box. One element per visible layer in paint order; the box is
 /// the viewBox and coordinates are relative to its origin.
@@ -52,7 +54,7 @@ enum DesignSVG {
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         case .frame:
-            let id = escaped("clip-" + node.id)
+            let id = XMLText.escaped("clip-" + node.id)
             lines.append(pad + "<clipPath id=\"\(id)\"><rect \(box)\(corner(node))/></clipPath>")
             lines.append(pad + "<g clip-path=\"url(#\(id))\"\(alpha(node))>")
             lines.append(pad + "  <rect \(box)\(corner(node)) fill=\"\(hex(node.fill))\"\(paint(node))/>")
@@ -71,10 +73,10 @@ enum DesignSVG {
         }
         let family = style.family == "System" ? "system-ui" : style.family
         var out = "<text x=\"\(number(anchorX))\" y=\"\(number(y + style.size))\" font-size=\"\(number(style.size))\""
-        out += " font-family=\"\(escaped(family))\""
+        out += " font-family=\"\(XMLText.escaped(family))\""
         if style.weight != 400 { out += " font-weight=\"\(style.weight)\"" }
         if let anchor { out += " text-anchor=\"\(anchor)\"" }
-        out += " fill=\"\(hex(node.fill))\"\(alpha(node))>\(escaped(node.text))</text>"
+        out += " fill=\"\(hex(node.fill))\"\(alpha(node))>\(XMLText.escaped(node.text))</text>"
         return out
     }
 
@@ -109,21 +111,5 @@ enum DesignSVG {
         guard value.isFinite else { return "0" }
         if value == value.rounded(), value.magnitude < 1e15 { return String(Int(value)) }
         return "\(value)"
-    }
-
-    /// `text` safe inside an element or a double-quoted attribute: & < > " as entities.
-    static func escaped(_ text: String) -> String {
-        var out = ""
-        out.reserveCapacity(text.utf8.count)
-        for character in text {
-            switch character {
-            case "&": out += "&amp;"
-            case "<": out += "&lt;"
-            case ">": out += "&gt;"
-            case "\"": out += "&quot;"
-            default: out.append(character)
-            }
-        }
-        return out
     }
 }

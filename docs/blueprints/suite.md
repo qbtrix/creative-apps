@@ -136,7 +136,8 @@ typed data and links instead of loose files.
 - Merging the five apps into one window or one menu bar. Each app keeps its
   own windows, menu bar, Dock icon and file types.
 - Cloud sync, accounts, collaboration, or sharing to web services.
-- A plugin API, scripting, or automation actions.
+- A plugin API (third-party code running inside an app). Scripting and
+  automation are not a non-goal: they come with the command layer (1.5).
 - Opening or writing closed file formats of other vendors.
 - An iPad or iPhone build.
 - A store-distributed sandboxed build in v1 (section 9, Q3).
@@ -157,6 +158,7 @@ typed data and links instead of loose files.
 | Flare in Halo | **Conditional:** in v1 only if Halo's "Flare scene as a layer" (H10, Later in #767) and the engine issues of 8.5 land in time; otherwise v1.1. Open In ▸ Halo on a `.flare` makes a composition the scene's size, rate and length with one animation layer linked to the file | Several scenes, nested Halo comps from Flare symbols, time remapping |
 | Settings | One Settings window in the launcher (⌘, from any app opens it at that app's pane): General (units, autosave interval, check for updates), one pane per app | Per-document defaults, keyboard shortcut editor |
 | Onboarding | First launch of AfterGlow: three pages (the five apps, what you do most, open a sample), skippable, never again unless reset from Settings | Interactive tutorials inside the apps |
+| Commands and automation | Every app action is a catalog command (1.5); menus built from the catalog; the `afterglow` CLI and its JSON scripts on Linux and macOS; `afterglow mcp` over stdio on the headless engine | The live-app MCP channel (macOS, approved per client) lands after the headless server; a bundled CLI installer in the app |
 | Updater | One updater in the launcher: check (daily and on demand), show what's new, download, verify the signature, ask the running apps to quit (each runs its unsaved-changes flow), replace `AfterGlow.app`, relaunch | Background silent install, beta channel |
 
 **The line in one sentence:** a person installs one app, opens it, finds
@@ -170,6 +172,34 @@ Checklist:
       updater, settings, onboarding, size) has an "In v1" row.
 - [x] Every non-goal names a behavior, not another company's product.
 - [x] Every "out" item names where it goes (later).
+
+### 1.5 Principle: AI-accessible first (captain, 2026-10-10; written here 2026-10-19)
+
+**Every action is a command.** The UI, the `afterglow` CLI and MCP drive
+one command catalog; crews and CI test through it.
+
+- One catalog: `SuiteKernel`'s command catalog
+  (`docs/blueprints/suiteui/features/command-catalog.md`). Each command
+  has a stable name, typed parameters with a JSON schema, a typed result, a
+  kind (query, view, edit, file; an edit is exactly one undo step), a
+  description for people and models, and an availability rule that says
+  why not.
+- Every app registers the actions it has as commands, and its menus and
+  toolbar are built from them (`adopt-command-catalog`), so there is one
+  path, and a Linux test refuses a menu item built any other way.
+- Every app's document also runs headless (`HeadlessDocument`): the
+  `afterglow` CLI (`suite/features/afterglow-cli.md`) opens, edits, saves
+  and exports files with no window, on Linux, and runs JSON scripts over
+  many files. Those scripts with expected outputs are the **real-jobs
+  suites**, the acceptance tests crews and CI run per app.
+- `afterglow mcp` (`suite/features/afterglow-mcp.md`) publishes the same
+  catalog as MCP tools: headless first; a running app's live document later,
+  macOS-only, over a local same-user socket, approved by the person per
+  client, revocable, with a visible "Controlled by" mark. It is the
+  connection point for the AI module.
+- Any plan built from this blueprint carries it: a new feature's actions are
+  commands in the catalog before they are buttons. This line is here because
+  the beta-80 plan, built from the blueprints, missed the decision.
 
 ---
 
@@ -209,6 +239,7 @@ creative-core (FlareCore, CoreRaster, CoreColor) ◀── the Models, linked on
 | AfterGlow journeys | planned | XCUITest bundle `AfterGlowJourneyTests` that drives the launcher and, through it, the apps | `UITests/AfterGlowJourneyTests*.swift` | `line:suite` |
 | `SuiteUI` | existing | Design system; gains the home and settings parts listed in section 6.3 through `needs-ui` issues | `Sources/SuiteUI/` | `line:suiteui` |
 | `<X>App`, `<X>Model` (×5) | existing | The apps. Each adopts the suite with small tasks on its own line (section 8.4): one modifier in `<X>App.swift`, its document kinds and pasteboard representations in `<X>Model` | `Sources/<X>App/`, `Sources/<X>Model/` | `line:<x>` |
+| `AfterGlowCLI` (+ `AfterGlowCLICore`) | planned | The `afterglow` command line tool and MCP server: every app's command catalog run headless on files, JSON scripts and the real-jobs suites, `afterglow mcp` (section 1.5). Foundation, SuiteKernel and the five Models only; Linux and macOS | `Sources/AfterGlowCLI/`, `Sources/AfterGlowCLICore/` | `line:suite` |
 | creative-core engines | existing (external) | FlareCore, CoreRaster, CoreColor; the suite asset model tasks (creative-core #148–#154, p3 today) | qbtrix/creative-core | `needs-core` |
 
 Each `<X>Model` gains one dependency, `SuiteModel` (Foundation only, so the
@@ -240,6 +271,7 @@ values, so a shared store never needs to load five engines.
 | suite-preferences | `SuitePreferences` (General plus a pane per app), defaults, change records, `SettingsModel` | `Preferences/` | store; Settings scene; every app |
 | suite-onboarding | Pages, choices, when to show, `OnboardingModel` | `Onboarding/` | AfterGlowApp |
 | suite-update | Update feed parsing, version compare, offer, install plan, `UpdateModel` | `Update/` | AfterGlowApp updater |
+| suite-ai-access | `AIAccessGrants`: which MCP client may drive which app's live document (ask, allow once, always, deny; a file command always asks), stored with the preferences | `AIAccess/` | preferences store; SuiteShell's live command channel; the AI Access sheet |
 | suite-packaging | `BundleLayout` (where each executable and framework sits, the rpaths), `SizeReport` and `SizeBudget` with their evaluation | `Packaging/` | `scripts/size-report` output; CI |
 
 **SuiteShell** (`Sources/SuiteShell/`, macOS, all planned)
@@ -252,6 +284,7 @@ values, so a shared store never needs to load five engines.
 | shell-store-watch | Post and observe `DistributedNotificationCenter` changes for recents, assets and preferences | `StoreWatcher.swift` |
 | shell-pasteboard | Map `SuiteClipItem` to `NSPasteboard` items and drag providers, and back | `PasteboardBridge.swift`, `DragBridge.swift` |
 | shell-documents | Record opens and saves into recents, write thumbnails, the Open In submenu | `SuiteDocumentsBridge.swift`, `ThumbnailWriter.swift`, `OpenInMenu.swift` |
+| shell-live-commands | `LiveCommandChannel` (planned, afterglow-mcp's live slices): a running app's command channel on a same-user Unix socket under Application Support, a grant before any command, commands through the app's catalog on the main actor, an audit line per command | `LiveCommandChannel.swift`, `AIAccessCommands.swift` |
 | shell-adoption | `.suiteApp(_:host:)`: the modifier an app adds to its scene (the commands, the store watcher, the settings route), and `SuiteAppDelegate`, an open class the app's `@NSApplicationDelegateAdaptor` uses (or subclasses, as Photo's PV-1 delegate will): its `application(_:open:)` receives hand-off files even with no window open and passes each to the app's `SuiteDocumentHost` | `SuiteAppModifier.swift`, `SuiteAppDelegate.swift`, `SettingsRoute.swift` |
 
 **AfterGlowApp** (`Sources/AfterGlowApp/`, macOS, all planned)
@@ -265,6 +298,15 @@ values, so a shared store never needs to load five engines.
 | onboarding | The three first-launch pages | `Onboarding*.swift` |
 | updater | Check, offer sheet, progress, install | `Update*.swift` |
 
+**AfterGlowCLI** (`Sources/AfterGlowCLI/`, `Sources/AfterGlowCLICore/`, Linux and macOS, all planned)
+
+| Component | Responsibility | Paths |
+|---|---|---|
+| cli-runner | `afterglow` parsing (strict), the router (list-apps, list-commands, describe, open, new, a command, export), one JSON object out, sysexits codes, never overwriting without `--force` | `main.swift`, `CLI.swift`, `Arguments.swift`, `Output.swift`, `CLIIO.swift`, `LiveIO.swift`, `Apps.swift` |
+| cli-batch | `afterglow run <script.jobs.json>`: inputs, steps, atomic per input, name templates, the report | `Script.swift`, `ScriptRunner.swift` |
+| cli-jobs | The real-jobs harness: every `Tests/RealJobs/<app>/<job>/` against its expectations | `RealJobs.swift` |
+| cli-mcp | `afterglow mcp`: JSON-RPC over stdio, both protocol eras, tools from the catalogs, documents by handle under allowed roots; `--live` bridges a running app's channel (macOS) | `MCP/` |
+
 ### 2.4 Relationships
 
 | From | To | What |
@@ -276,6 +318,10 @@ values, so a shared store never needs to load five engines.
 | every process | suite store | JSON files under `~/Library/Application Support/AfterGlow/` |
 | every process | each other | hand-off files opened with the target app; distributed notifications for store changes; the system pasteboard |
 | `<X>Model` | creative-core | unchanged, but linked through one shared engine framework (2.5) |
+| each `<X>Model` | SuiteKernel commands | registers its actions in the command catalog; its `<X>Headless` document opens, saves and exports with no window (1.5) |
+| AfterGlowCLI | SuiteKernel, each `<X>Model` | runs every catalog on files; the MCP server publishes the catalogs as tools |
+| an MCP client | AfterGlowCLI | tools over stdio (`afterglow mcp`), launched by the person's client |
+| AfterGlowCLI | a running `<X>App` (macOS) | live commands over a same-user local socket, only after the person approves the client |
 
 ### 2.5 Packaging: one process or six
 
@@ -2883,7 +2929,7 @@ Commands).
 - **File**: New ▸ (New Animation, New Design, New Image, Import Photos…, New Composition), Open… ⌘O (routes by type), Open Recent ▸ (all apps, 20 newest, Clear Menu), Close ⌘W.
 - **Edit**: Undo/Redo (Remove from Recents is undoable), Cut, Copy (a selected asset), Paste (into Assets: Add from Clipboard), Delete (Remove from Recents / Remove Asset), Select All.
 - **View**: Show Sidebar, Show Inspector ⌥⌘I, Larger Thumbnails ⌘+, Smaller Thumbnails ⌘−.
-- **Window**: Switch To ▸ (Home ⌃⌘0, Flare ⌃⌘1, Design ⌃⌘2, Photo ⌃⌘3, Library ⌃⌘4, Halo ⌃⌘5), Assets ⌥⌘A, then the system items.
+- **Window**: Switch To ▸ (Home ⌃⌘0, Flare ⌃⌘1, Design ⌃⌘2, Photo ⌃⌘3, Library ⌃⌘4, Halo ⌃⌘5), Assets ⌥⌘A, AI Access… (planned, afterglow-mcp: the clients allowed to drive a live document, each revocable), then the system items.
 - **Help**: AfterGlow Help (system).
 - **In each app, added by `SuiteCommands`**: Window > Switch To ▸ (the same six; the current app's item reads "Show Flare Window", enabled when the app has no window, else disabled "You're in Flare."); File > Open In ▸ (the readers of the front document, else disabled with `openInRefusal`'s text); <App> > Settings… ⌘, (opens AfterGlow Settings at that app's tab). Each app's own adoption issues add: Library Photo > Edit in Photo (⌘E); Design Object > Add to Assets and Object > Update Asset (enabled when `assets(fromFileID:)` lists one for the front document); Flare and Halo Object > Update Linked Asset; every app with a colour row Edit > Copy Color and Edit > Paste Color; Photo File > New from Clipboard (PV-2). Each app's menu journey (Flare's J1 counts items) is updated by its A-x-1.
 
