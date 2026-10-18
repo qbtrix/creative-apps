@@ -9,8 +9,13 @@
 // with Option, the I-beam for the Text tool, else the tool's own. The hover outline is
 // a 1 pt accent frame round the layer a click would pick, identified
 // `design.canvas.hover` with the pointer's name as its value; it is asked again of the
-// Model when drawn, so it follows the layer and never shows while a gesture runs. The
-// size badge comes later (D0-9d). It reads the model and never writes it.
+// Model when drawn, so it follows the layer and never shows while a gesture runs. With
+// the Text tool the same mark is dashed and is the box a click would place at the
+// pointer (`placement`, observed by this body alone, so the canvas body never re-runs
+// as it follows the pointer). The size badge (`design.canvas.badge`) is the Model's
+// `selectionBadge` in a caption pill hung under the middle of the selection, one size
+// at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs. It
+// reads the model and never writes it.
 import AppKit
 import DesignModel
 import SuiteUI
@@ -40,14 +45,19 @@ struct DesignCanvasFeedback: View {
         // The observed answer says whether to draw; the same question asked again of today's Model
         // says what: no outline mid-gesture, and the layer's frame as it is now.
         let now = model.hover(at: store.point, modifiers: store.modifiers)
-        if store.hint(for: model) != nil, now.nodeID != nil, let rect = now.outline {
-            DesignHoverMark(rect: rect, zoom: zoom, name: now.pointer.name)
+        if store.shows(model), let rect = now.mark {
+            DesignHoverMark(rect: rect, zoom: zoom, name: now.pointer.name, dashed: now.placement != nil)
+        }
+        if let badge = model.selectionBadge, let anchor = model.selectionBadgeAnchor {
+            DesignSizeBadge(text: badge, anchor: anchor, zoom: zoom)
         }
     }
 }
 
-/// The last hover answer of the canvas the pointer is over. Only `answer` and `key` are observed;
-/// the point and modifiers it came from are kept for the outline to ask again.
+/// The last hover answer of the canvas the pointer is over. Only `answer`, `placement` and `key` are
+/// observed; the point and modifiers it came from are kept for the outline to ask again. `answer`
+/// drops the Text tool's box (`steady`), which moves with the pointer: only the feedback body reads
+/// `placement`, so the canvas body doesn't re-run per sample.
 @MainActor @Observable final class DesignCanvasHover {
     /// The app's one store: one pointer is over at most one canvas.
     static let shared = DesignCanvasHover()
@@ -56,6 +66,8 @@ struct DesignCanvasFeedback: View {
     static var current: DesignCanvasHover { bound ?? shared }
 
     private(set) var answer: DesignHover?
+    /// The box a Text click would place at the pointer; nil for any other answer.
+    private(set) var placement: DesignRect?
     /// The document and page the answer is for.
     private(set) var key: Key?
     @ObservationIgnored private(set) var point: DesignPoint?
@@ -75,13 +87,19 @@ struct DesignCanvasFeedback: View {
     func record(_ point: DesignPoint?, modifiers: DesignModifiers, on model: DesignWorkspace) {
         (self.point, self.modifiers) = (point, modifiers)
         let asked = model.hover(at: point, modifiers: modifiers)
-        let next = asked.nodeID == nil && asked.outline == nil && asked.pointer == .tool ? nil : asked
         let place = Key(model)
         if key != place { key = place }
-        if answer != next { answer = next }
+        if placement != asked.placement { placement = asked.placement }
+        if answer != asked.steady { answer = asked.steady }
     }
 
     func belongs(to model: DesignWorkspace) -> Bool { key == Key(model) }
+
+    /// Whether the hover mark draws on `model`'s canvas; reads `placement` so its reader follows the Text box.
+    func shows(_ model: DesignWorkspace) -> Bool {
+        let box = placement
+        return belongs(to: model) && (box != nil || answer != nil)
+    }
 
     /// The answer for `model`'s page; nil for another canvas or when there is nothing to show.
     func hint(for model: DesignWorkspace) -> DesignHover? { belongs(to: model) ? answer : nil }
@@ -140,17 +158,19 @@ extension DesignHandle {
 }
 
 /// The hover outline: a 1 pt accent frame round `rect` (page points) at `zoom`, one size at any
-/// zoom, identified `design.canvas.hover` with the pointer's name as its value. Takes no clicks.
+/// zoom, dashed for the Text tool's box, identified `design.canvas.hover` with the pointer's name as
+/// its value. Takes no clicks.
 private struct DesignHoverMark: View {
     let rect: DesignRect
     let zoom: Double
     let name: String
+    let dashed: Bool
 
     var body: some View {
         let scale = usable(zoom)
         let box = rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale)).standardized
         ZStack(alignment: .topLeading) {
-            Path(box).stroke(SuiteColor.accent, lineWidth: 1)
+            Path(box).stroke(SuiteColor.accent, style: StrokeStyle(lineWidth: 1, dash: dashed ? [SuiteSpacing.xs] : []))
             Color.clear
                 .frame(width: box.width, height: box.height)
                 .accessibilityElement()
@@ -163,5 +183,29 @@ private struct DesignHoverMark: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .allowsHitTesting(false)
+    }
+}
+
+/// The size badge: `text` in a caption pill, its top `SuiteSpacing.xs` under `anchor` (page points)
+/// at `zoom`, one size at any zoom, identified `design.canvas.badge` with `text` as its label.
+private struct DesignSizeBadge: View {
+    let text: String
+    let anchor: DesignPoint
+    let zoom: Double
+
+    var body: some View {
+        let scale = usable(zoom)
+        Text(verbatim: text)
+            .font(SuiteFont.caption.monospacedDigit())
+            .foregroundStyle(SuiteColor.overlayPaper)
+            .padding(SuiteInset.pill)
+            .frame(height: SuiteSize.pill)
+            .background(Capsule().fill(SuiteColor.accentFill))
+            .fixedSize()
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: text))
+            .accessibilityIdentifier(DesignControlID.canvasBadge)
+            .position(x: CGFloat(anchor.x * scale), y: CGFloat(anchor.y * scale) + SuiteSpacing.xs + SuiteSize.pill / 2)
+            .allowsHitTesting(false)
     }
 }

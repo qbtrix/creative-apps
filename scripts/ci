@@ -2,7 +2,7 @@
 # scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the
 # app-state rule, the design lint, the C4 ownership check, the duplicate-code
 # check, the canonical-first check, the SuiteUI-first view check, the app-marks check, the CI scripts' fixture tests, the journey quarantine check, the
-# mutation anchors, swift build of every target with its tests, and swift
+# real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
 # test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
 # from the committed Package.resolved (--force-resolved-versions): a
 # Package.swift whose creative-core revision doesn't match it fails here
@@ -59,6 +59,11 @@
 # (docs/blueprints/*/features/*.wave.json) passes its checks and prints its
 # waves.md without writing it (the generated files are written only on dev),
 # and Tests/generated tests scripts/c4-assemble and scripts/waves on fixtures.
+#
+# The jobs check runs Tests/jobs, then scripts/jobs: every app's real jobs
+# (docs/blueprints/*/jobs.json) have every field, each needs id is a row in
+# docs/blueprints/suite/feature-map.json, and each jobs.md renders without
+# being written (the Generated workflow writes them on dev).
 #
 # The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
 # test_scope and bump_core test the scripts of the same names (some need jq).
@@ -310,6 +315,9 @@ echo "== waves (docs/blueprints/*/features/*.wave.json)"
 python3 scripts/waves render --dry-run || fail "waves: fix the feature data above (scripts/waves)"
 echo "== generated files (Tests/generated)"
 bash Tests/generated/test_generated.sh || fail "generated files: scripts/c4-assemble or scripts/waves broke their tests"
+echo "== real jobs (docs/blueprints/*/jobs.json)"
+bash Tests/jobs/test_jobs.sh || fail "real jobs: scripts/jobs broke its fixture tests"
+python3 scripts/jobs render --dry-run || fail "real jobs: fix the job data above (scripts/jobs; docs/factory/packets.md, Jobs)"
 
 echo "== duplicate code (jscpd, Sources/)"
 JSCPD_VERSION=5.3.2

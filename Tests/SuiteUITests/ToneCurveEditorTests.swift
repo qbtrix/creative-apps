@@ -192,3 +192,25 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
     #expect(ToneCurveEditor.histogramPoints([]).isEmpty)
     #expect(ToneCurveEditor.histogramPoints([0, 0, .infinity]).isEmpty)
 }
+
+/// The numbers after the reading's last colon, as the journeys parse a point's label (#262: XCUITest
+/// reads SwiftUI values as "", so the label carries them).
+private func readBack(_ reading: String) -> [Double] {
+    let tail = reading.split(separator: ":").last.map(String.init) ?? reading
+    return tail.split { $0 == "," || $0 == " " }.compactMap { Double($0) }
+}
+
+@Test func aPointReadsItsValueInItsTooltipAndLabel() {
+    // #2953, #2959: point 2's tooltip and label carry describe's value, not only "Point 2".
+    let point = CGPoint(x: 0.25, y: 0.75)
+    let reading = ToneCurveEditor.pointReading(1, point)
+    #expect(reading == "Point 2: \(CurveEditor.describe(point))")
+    #expect(reading == "Point 2: x 0.25, y 0.75")
+    #expect(readBack(reading) == [0.25, 0.75])
+    #expect(ToneCurveEditor.pointReading(0, .zero) == "Point 1: x 0.00, y 0.00")
+}
+
+@Test func theToneAxesAreCaptionedInputAndOutput() {
+    // #2953: the well says which axis is which.
+    #expect(ToneCurveEditor.axisCaptions == CurveAxisCaptions(x: "Input", y: "Output"))
+}

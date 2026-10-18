@@ -33,5 +33,19 @@
     "find": "let document = try services.filing.decode(data)",
     "replace": "let document = (try? services.filing.decode(data)) ?? DesignDocument(pages: [])",
     "tests": "DesignFilingTests"
+  },
+  {
+    "label": "a node or page under 1 point wide opens",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "rect.width >= 1 && rect.height >= 1",
+    "replace": "rect.width > 0 && rect.height >= 1",
+    "tests": "DesignFileTests"
+  },
+  {
+    "label": "a node exactly 1 point wide is refused",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "rect.width >= 1 && rect.height >= 1",
+    "replace": "rect.width > 1 && rect.height >= 1",
+    "tests": "DesignFileTests"
   }
 ]
