@@ -7,8 +7,8 @@
 // menus (LF-2) and says so. The LAYERS rows come from the kernel's tree
 // (`layerRows`, adopt-kernel-layers AL-f2): one row per LayerRow, top first,
 // with an eye and a lock toggle whose ids are FlareLayerFlag raw values, so a
-// click routes straight to toggleLayerFlag. The rows are the ones the deleted
-// FlareLayerItems drew, pixel for pixel: SidebarItem's isDimmed (for
+// click routes straight to toggleLayerFlag. The rows are the ones the old
+// item file drew, pixel for pixel: SidebarItem's isDimmed (for
 // layerRowIsDimmed) is left off so the layer snapshots stay unchanged.
 import FlareModel
 import SuiteUI
