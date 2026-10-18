@@ -13,7 +13,7 @@
 // with a new file. Edit > Undo and Redo replace the system pair so they run the
 // model's history; that costs the system's own Undo inside a text field. The stock
 // pasteboard group stays, so Select All still works there. Its Delete removes the
-// selected layer while the canvas or the Layers list has focus (`canDeleteLayer`).
+// selected layers while the canvas or the Layers list has focus (`canDeleteLayer`).
 import DesignModel
 import SwiftUI
 
@@ -75,16 +75,15 @@ struct DesignMenu {
         noFileHelp = model.addPageHelp
         deletePageHelp = model.deletePageHelp
         renamePageHelp = Self.renamePageHelp(model)
-        deleteLayerHelp = canDeleteLayer ? nil : model.help(.delete) ?? Self.oneLayer
+        deleteLayerHelp = model.help(.delete)
     }
 
     /// Why `command` can't run now; nil when it can.
     func help(_ command: DesignCommand) -> String? { commandHelp[command] }
 
-    /// Whether Edit > Delete removes a layer now: one unlocked layer selected, no text being edited.
+    /// Whether Edit > Delete removes the selection now: `.delete`'s help is nil, for one layer or several (#2463).
     static func deletesLayer(_ model: DesignWorkspace) -> Bool {
-        model.editingTextID == nil && !model.hasMultipleSelection
-            && (model.selectedNode.map { model.lockHelp($0.id) == nil } ?? false)
+        model.help(.delete) == nil
     }
 
     private static func helps(_ model: DesignWorkspace) -> [DesignCommand: String] {
@@ -96,7 +95,6 @@ struct DesignMenu {
     }
 
     private static let finishEditing = "Finish editing the text first."
-    private static let oneLayer = "Delete removes one layer at a time."
 }
 
 /// A plain key rather than `@Entry`, so DesignApp builds without the SwiftUI
@@ -176,8 +174,8 @@ struct DesignHistoryMenu: View {
     }
 }
 
-/// The system's Edit > Delete as the selection leaves it: on with one unlocked layer selected,
-/// else off with why. The menu bar draws the real item (designPasteboardCommands hooks it);
+/// The system's Edit > Delete as the selection leaves it: on when `.delete` can run (one
+/// unlocked layer or several), else off with why. The menu bar draws the real item (designPasteboardCommands hooks it);
 /// this one is its stand-in where the menu bar doesn't render (DesignEditMenuSnapshots).
 struct DesignDeleteLayerItem: View {
     let menu: DesignMenu
