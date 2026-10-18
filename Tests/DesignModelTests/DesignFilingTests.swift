@@ -36,11 +36,12 @@ import Foundation
     static let badFiles: [(name: String, data: Data, error: DesignFileError, reason: String)] = [
         ("not json", Data("This is not JSON.".utf8), .unreadable, "It is not a Design file."),
         ("version 99", Data(#"{"pages":[],"version":99}"#.utf8), .unsupportedVersion(99),
-         "It was made by a newer version of Design (file version 99)."),
+         "It was made by a newer version of Design (file version 99; this version opens up to 1)."
+            + " Update Design to open it."),
         ("no pages", Data(#"{"pages":[],"version":1}"#.utf8), .noPages, "It has no pages."),
         ("node-2 twice", Data((#"{"pages":[{"frameHeight":100,"frameWidth":100,"id":"page-1","name":"Page 1","nodes":["#
             + node("node-2") + "," + node("node-2") + #"]}],"version":1}"#).utf8),
-         .duplicateID("node-2"), "It uses the id node-2 more than once."),
+         .duplicateID("node-2"), "It is damaged: two of its layers share the id node-2."),
     ]
 
     static func fnv1a(_ data: Data) -> UInt64 {

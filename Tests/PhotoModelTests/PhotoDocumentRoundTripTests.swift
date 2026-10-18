@@ -139,10 +139,10 @@ import Testing
         }
     }
 
-    @Test func twentyMegapixelLayerIsTooLarge() throws {
+    @Test func aLayerOverFortyMegapixelsIsTooLarge() throws {
         var package = try archive.encode(snapshot(), codec: RawCodec())
         package.files["data/layer-1.png"] = try RawCodec().encode(
-            DecodedImage(rgba8: [UInt8](repeating: 0, count: 5000 * 4000 * 4), width: 5000, height: 4000),
+            DecodedImage(rgba8: [UInt8](repeating: 0, count: 6600 * 6400 * 4), width: 6600, height: 6400),
             as: .png, quality: 1)
         #expect(throws: ArchiveError.tooLarge) { try archive.decode(package, codec: RawCodec()) }
     }
@@ -150,7 +150,7 @@ import Testing
     @Test func oversizedCanvasIsTooLarge() throws {
         let package = try editingJSON(
             try archive.encode(snapshot(), codec: RawCodec()), #""canvas":{"height":4,"width":6}"#,
-            #""canvas":{"height":4000,"width":5000}"#)
+            #""canvas":{"height":6400,"width":6600}"#)
         #expect(throws: ArchiveError.tooLarge) { try archive.decode(package, codec: RawCodec()) }
     }
 

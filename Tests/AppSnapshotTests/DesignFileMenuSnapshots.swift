@@ -37,7 +37,7 @@ import Testing
         edited.drag(from: DesignPoint(x: 100, y: 100), to: DesignPoint(x: 300, y: 240))
         edited.endDrag()
         let prompt = try #require(edited.closePrompt)
-        #expect(prompt == "Do you want to save the changes you made to “Untitled”?")
+        #expect(prompt == "Do you want to save the changes made to the document “Untitled”?")
         let menu = DesignMenu(model: edited, perform: { _ in })
         #expect(menu.undoTarget(true) == .field && menu.undoTarget(false) == .document)
         #expect(DesignMenu().undoTarget(true) == .field)
