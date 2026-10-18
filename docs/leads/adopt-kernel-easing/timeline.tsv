@@ -1,3 +1,5 @@
 utc	stage	event	ref	note
 2026-10-18T08:37Z	0	stage-start	#1937	line lead for #1938 #1937 #1936 (act-1a14dfbdefe-il38); base dev 2202c7c; brief main e01529f verified
 2026-10-18T08:37Z	0	stopped	#1937	blocked: EK-keys bodies (EK-15, EK-16) unmerged; Keys and KeyRules on dev are EK-3 stubs
+2026-10-18T08:23Z	0	recheck	#1937	Belt nudge; dev unchanged at 2202c7c, EK-keys unmerged, editor-kernel blocked on dev-red #2667
+2026-10-18T08:23Z	0	stopped	#1937	still blocked on EK-keys
