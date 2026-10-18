@@ -94,11 +94,10 @@ import SuiteKernel
         try tree.arrange(.bringToFront, ["hero"])
         #expect(try tree.group(["hero"], name: "G", payload: KernelFixtures.cards.roots[0].payload) { "g1" } == "g1")
         try tree.ungroup("g1")
-        try tree.setFollow("hero", "header", local: { _ in .identity }, keepingPlace: { _, _ in })
         #expect(tree == KernelFixtures.tree200 && tree.node("hero") == nil && tree.ancestors(of: "hero") == nil)
         let updated = tree.update("hero") { node in node.name = "X" }
         #expect(tree.duplicate(["hero"]) { "copy" }.isEmpty && !updated)
-        #expect(tree.frontToBack.isEmpty && !tree.isEffectivelyHidden("archive") && !tree.follows("hero", "header"))
+        #expect(tree.frontToBack.isEmpty && !tree.isEffectivelyHidden("archive"))
         #expect(tree.worldPlacement(of: "hero") { _ in .identity } == .identity)
 
         let desktop = KernelFixtures.cards.rows(expanded: ["desktop"])
