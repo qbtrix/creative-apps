@@ -87,3 +87,4 @@
 2026-10-18T14:46Z	heartbeat	no open dev-red; 39133431238, 39135047742, 39135416326 macOS failed (SuiteUI link: FlareCore symbols, #2801), no ui-screens; fix #2806 (624c4291) is on dev after them; 39137279211 (80c14eed, contains the fix) queued
 2026-10-18T15:18Z	heartbeat	no open dev-red; 39137279211 (80c14eed, has link fix) Linux green, macOS running, snapshots uploaded; 39137685526 (04170953) pending
 2026-10-18T15:40Z	heartbeat	no open dev-red; 39137279211 (80c14eed) macOS still running (past the journey build stage that failed before); 39137685526, 39139914832, 39140935376 cancelled; 39141126140 (6d589da5) pending
+2026-10-18T16:03Z	heartbeat	no open dev-red; 39137279211 (80c14eed) macOS still running (~1h20m); 39141126140 cancelled; 39142469932 (524c3271) pending
