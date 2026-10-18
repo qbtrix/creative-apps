@@ -1,6 +1,7 @@
 // SidebarEdgeTests.swift: edge cases for the sidebar values and the two
-// SuiteWindow initializers apps call. macOS only.
-import SuiteUI
+// SuiteWindow initializers apps call, and the section header's colour
+// (LL-11). macOS only.
+@testable import SuiteUI
 import SwiftUI
 import Testing
 
@@ -54,4 +55,10 @@ private func visible(_ isOn: Bool) -> SidebarToggle {
     } inspector: {
         EmptyView()
     }
+}
+
+@Test func sectionHeaderTitleKeepsTheSuiteSecondaryText() {
+    // The sidebar style's own header gray is about 2.2:1 on the sidebar (#284).
+    #expect(SidebarSectionHeader.titleColor == SuiteColor.textSecondary)
+    #expect(SidebarSectionHeader.titleColor != Color.secondary)
 }

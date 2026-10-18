@@ -35,10 +35,13 @@ public struct SidebarSection: Identifiable {
 /// The header SuiteWindow draws for a section: its title and add button.
 struct SidebarSectionHeader: View {
     let section: SidebarSection
+    /// The title's colour: the suite's secondary text, never the sidebar
+    /// style's own header gray (#284, LL-11).
+    static let titleColor: Color = SuiteColor.textSecondary
 
     var body: some View {
         HStack {
-            Text(section.title).foregroundStyle(SuiteColor.textSecondary)
+            Text(section.title).foregroundStyle(Self.titleColor)
             Spacer(minLength: SuiteSpacing.s)
             if let add = section.addAction {
                 Button(action: add.perform) {
