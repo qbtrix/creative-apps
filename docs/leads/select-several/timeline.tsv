@@ -62,3 +62,8 @@ utc	stage	event	ref	note
 2026-10-18T03:58Z	mac	Mac-Finish-Wanted SS-a posted on #1495
 2026-10-18T04:19Z	check	#1493 still open; S-5/S-8 wait
 2026-10-18T04:41Z	check	no findings; S-5/S-8 still wait on #1493 (open)
+2026-10-18T05:10Z	correct	the 04:41 'no findings' was wrong: a semantic search missed label-only CI findings #2516 (J6), #2517 (J5), #2538 (J4); list by labels from now on
+2026-10-18T05:10Z	finding	#2517 J5: journey pressed B's bottom edge (500,220); box corner is (540,220) after the move
+2026-10-18T05:10Z	finding	#2516 J6: distribute-off shot taken with the Object menu open; menu covered toolbar text
+2026-10-18T05:10Z	pr	#2621 SS-a fix round 1 (rounds 0->1): Fixes #2517 #2516, DesignJ5GeometryTests
+2026-10-18T05:10Z	blocked	#2538 J4 unnamed = CanvasViewport scroller; filed #2623 needs-ui
