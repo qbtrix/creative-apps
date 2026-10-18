@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-s slice-done once a full dev run containing 13c1cad0 (#2877) has a green Linux job. OB-u after OB-5g (goldens from the snapshots of full run 39143942767, macOS job), then Mac-Finish-Wanted OB-u. Critics for OB-u, OB-m and OB-z on that run's snapshots and ui-screens. OB-13 once switching and the bundled samples are on dev.
+Next: OB-5g builder running on the snapshots artifact of full run 39143942767 (macOS job cancelled after uploading snapshots; no ui-screens). Critic panels running: OB-u (ui lenses: mouse, taste) on those snapshots, OB-m on the code at bafd1d38. OB-s slice-done once a full dev run containing 13c1cad0 (#2877) has a green Linux job (first candidate 39152649677 at 71facd44). OB-z review after OB-13. OB-13 once switching and the bundled samples are on dev.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -39,7 +39,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | F-2851 | OB-s | 5 | fix round 1: Photo sample title "Beach"; titles test; 2 mutations (Mutate 6/6 SuiteModel.SampleCatalog) | Sources/SuiteModel/Onboarding/SampleCatalog.swift, Tests/SuiteModelTests/SampleCatalogTests.swift, Tests/mutations/SuiteModel.SampleCatalog.json | SampleCatalogTests | #2858 | merged |
 | F-2852 | OB-a | 5 | needs-ui #2867 filed for SuiteSize.onboardingWindow; OnboardingStarter comment and packet name it (values already pinned by OnboardingStubTests.controlIdentifiers; no mutation change) | Sources/SuiteModel/Onboarding/OnboardingStarter.swift, docs/blueprints/suite/features/onboarding.md | OnboardingStubTests | #2872 | merged (23aac48f) |
 | F-2850 | OB-s | 5 | destination names copies with UniqueFileNames (canonical first); case test, leading-dot test; plan rewritten for the new code (Mutate 8/8) | Sources/SuiteModel/Onboarding/SampleCatalog.swift, Tests/SuiteModelTests/SampleCatalogTests.swift, Tests/mutations/SuiteModel.SampleCatalog.json | SampleCatalogTests | #2877 | merged (13c1cad0) |
-| OB-5g | OB-u | 5 | The goldens for Golden/afterglow-onboarding/ taken from the first macOS run's `snapshots` artifact that holds OB-5 | Tests/AppSnapshotTests/Golden/afterglow-onboarding/ | the run's compare | – | waits OB-5 and a macOS run |
+| OB-5g | OB-u | 5 | The goldens for Golden/afterglow-onboarding/ taken from the first macOS run's `snapshots` artifact that holds OB-5 | Tests/AppSnapshotTests/Golden/afterglow-onboarding/ | the run's compare | – | building (snapshots of 39143942767) |
 | OB-13 | OB-z | 5 | Enables OJ3 and OJ4 on live (OJ3 skips naming #837 while the Flare sample is missing); blueprint prose; status built; feature-done | UITests/AfterGlowJourneyTests+OnboardingStart.swift, docs/blueprints/suite.md, docs/blueprints/suite/features/onboarding.wave.json | OJ3, OJ4 on the dev run | – | waits OB-5, OB-6, OB-11, OB-12 |
 
 Waves (packet's Build waves, checked against dev at 4a86f5fc):
@@ -85,3 +85,4 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - Scoped app=suite runs upload no screens: ci.yml's scope table has `suite) journeys="" ;; # AfterGlow and SuiteModel: no snapshots or journey bundle yet`, and only size-report and app-builds come out (39143959244, green). AfterGlow onboarding snapshots and journeys come only from full runs, so OB-u, OB-m and OB-z critics and the OB-5g goldens use the macOS job of full run 39143942767 (bafd1d38).
 - OB-a window size/margin placeholder (OnboardingLayout 720×520, 24 pt) waits on needs-ui #2867 (SuiteSize.onboardingWindow), filed for finding #2852.
 - F-2850 (#2877): case folding still comes from the exists closure (default APFS folds case); the new case test records parity but does not tell old from new. A taken: closure overload on UniqueFileNames would make it exact; left as is (minor).
+- Full run 39143942767 (bafd1d38): macOS job cancelled after the snapshot step; it uploaded `snapshots` (24 afterglow-onboarding PNGs: welcome, focus, focus-selected, start, start-default, start-missing x 4 appearances; no start-launching or start-error) and no ui-screens. OB-5g and the OB-u critics use those snapshots; OJ1/OJ2 judged from code. Review 2: OB-u and OB-m panels on that run; OB-z waits for OB-13.
