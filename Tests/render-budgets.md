@@ -51,6 +51,30 @@ Bodies for Flare's scrub row and Library's selection count one per edit: each
 step changes the model once. Their target is that count, not 3. Halo's
 playback bound comes from #1296: at least `fps / 2` and at most `fps + 6`.
 
+## Photo at 8K, CPU against GPU (recorded, no budget yet)
+
+`PhotoRenderBudgetTests` (perf list, report only) draws a 7680 x 4320
+document with three layers (white Background, a full fill at 50 %, a Paint
+layer with one stroke) through `PhotoRenderer.update` on each View > Rendering
+backend. It times the first full picture and a brush frame (one 64 px brush
+segment, its damaged tiles). A pan draws nothing on either backend: the canvas
+moves the tiles it already has. These are records, not budgets; the
+large-image gate (beta-80 row G1) sets those. Measured on an M2 Pro,
+2026-10-18, optimized (`swift build -c release -Xswiftc -enable-testing
+-Xswiftc -DDEBUG`), median of 3 full pictures and 10 brush frames:
+
+| Backend | Full picture | Brush frame (2 tiles) |
+|---|---|---|
+| CPU (CoreRender's CPU backend, tiles in parallel) | 60 ms | 1.1 ms (max 1.1) |
+| GPU (Metal, rows of tiles in parallel) | 325 ms | 4.6 ms (max 11.3) |
+
+A debug build is 20x to 400x slower (CPU 21 s and 55 ms, GPU 125 s and
+247 ms before the rows and identity skips), so read the release row. The GPU
+loses here because every frame uploads the layer tiles it composites (Float32
+to half on the CPU) and reads the display bytes back, which the tile canvas
+then uploads again. Layer surfaces kept resident on the GPU between frames,
+and a display op that writes the drawable, are the G1 and G2 candidates.
+
 ## What the harness can't drive
 
 The test process is never the active app. Every press it sends is a

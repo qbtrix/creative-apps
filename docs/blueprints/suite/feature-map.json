@@ -773,7 +773,8 @@
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/photo-render-adopt"
         },
         {
           "app": "halo"
