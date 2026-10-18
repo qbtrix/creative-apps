@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 16:32Z	check	waiting	39145334588	full CI on ae72cc6c
 16:53Z	check	heartbeat	-	flare run 39142436739: tests green, journeys running; full CI 39145334588 pending
 17:16Z	AE-flare	slice-done	39142436739	Belt-Slice-Done posted on #1937
+2026-10-18T17:39Z	check	AE-halo run	39145500339	full CI 39145334588 cancelled; halo scoped on e3c46ea8 in progress
