@@ -12,8 +12,11 @@
 // SuiteControlInventory while it is on screen; a nil id registers nothing.
 // With `identifies` false it only registers, for a view whose parts carry
 // their own identifiers: an identifier on a view of several elements lands on
-// every one of them (KeyframeButton, #1282). Plain keys rather than
-// `@Entry`, as in Glass.swift.
+// every one of them (KeyframeButton, #1282). The publishing call also sets
+// `gridProbe`, so grids and layer lists record their scroll frames into the
+// window's `suite.perf` (SP4); only the hidden element watches the recorder,
+// so a frame never runs the window's body. Plain keys rather than `@Entry`,
+// as in Glass.swift.
 import SwiftUI
 
 extension EnvironmentValues {
@@ -124,15 +127,16 @@ private struct SuiteProbesModifier: ViewModifier {
     let requested: Bool
     @Environment(\.suiteProbesHosted) private var hosted
     @StateObject private var store = SuiteControlStore()
-    @State private var probe = SuiteFrameProbe()
+    @StateObject private var recorder = SuiteProbeRecorder()
 
     func body(content: Content) -> some View {
         if requested && !hosted {
             content
                 .environment(\.suiteProbesHosted, true)
                 .environment(\.suiteControlStore, store)
+                .environment(\.gridProbe, recorder.gridProbe)
                 .background(alignment: .topLeading) {
-                    SuitePerfElement(probe: probe, refreshInterval: SuiteFrameProbe.fallbackRefreshInterval)
+                    SuitePerfHost(recorder: recorder)
                         .preference(key: SuiteProbeElementsKey.self, value: [SuitePerfElement.identifier])
                     SuiteControlsElement(store: store)
                         .preference(key: SuiteProbeElementsKey.self, value: [SuiteControlsElement.identifier])
@@ -140,5 +144,25 @@ private struct SuiteProbesModifier: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+/// The window's frame probe behind `.suiteProbes()`. `gridProbe` is built
+/// once, so the environment value stays the same closure across passes.
+@MainActor final class SuiteProbeRecorder: ObservableObject {
+    @Published private(set) var probe = SuiteFrameProbe()
+    private(set) var gridProbe = GridProbe { _, _ in }
+
+    init() {
+        gridProbe = GridProbe { [weak self] series, time in self?.probe.drew(series, at: time) }
+    }
+}
+
+/// `suite.perf` from the recorder: the only view that runs when a frame lands.
+private struct SuitePerfHost: View {
+    @ObservedObject var recorder: SuiteProbeRecorder
+
+    var body: some View {
+        SuitePerfElement(probe: recorder.probe, refreshInterval: SuiteFrameProbe.fallbackRefreshInterval)
     }
 }
