@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 2026-10-18T03:41:01Z	shell-parity	check	dev@f6de1a9b	no change; #2263 open, #2519/#2520 wait on SuiteUI #2524
 2026-10-18T04:00:53Z	shell-parity	recut	main@0965457c	run act-1a14d285aef-3epc: branch recut onto main; #2519/#2520 relabelled gap (round cap), wait on SuiteUI #2524
 2026-10-18T04:04:13Z	shell-parity	check	dev@6bb1f3f6	no change; #2263, #2519/#2520 open, wait on SuiteUI #2524
+2026-10-18T04:22:08Z	shell-parity	check	dev@21066130	waiting on SuiteUI #2524 (findings #2519 #2520) and #2263; all open
