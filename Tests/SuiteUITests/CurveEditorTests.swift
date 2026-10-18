@@ -2,9 +2,13 @@
 // one vector path, the plot range widens for overshoot, the preview dot never
 // leaves the samples, arrow-key nudges step by 0.01 (0.1 with Shift), and a
 // handle looks different at rest, under the pointer and pressed or focused.
+// IC-8: a handle's x clamps to 0...1, SuiteEasingHandleNudging (UC15b) nudges
+// ↑ 0.01 and ⇧↑ 0.1 and speaks the handle, one end per drag or nudge
+// (CurveEnds), the drag series and the Reduce Motion preview mark.
+// Mutating calls go into a local first: #expect can't call a mutating member.
 // No rendering here. macOS only.
 import CoreGraphics
-import SuiteUI
+@testable import SuiteUI
 import SwiftUI
 import Testing
 
@@ -74,4 +78,43 @@ import Testing
     #expect(active.fill == SuiteColor.accent && active.ring)
     #expect(CurveEditor.handleLook(active: true, hovered: true) == active)
     #expect(!rest.ring && !hover.ring)
+}
+
+@Test func handleXClampsToTheUnitRange() {
+    #expect(CurveEditor.handlePoint(CGPoint(x: -0.3, y: 1.4)) == CGPoint(x: 0, y: 1.4))
+    #expect(CurveEditor.handlePoint(CGPoint(x: 1.7, y: -0.6)) == CGPoint(x: 1, y: -0.6))
+    #expect(CurveEditor.handlePoint(CGPoint(x: CGFloat.nan, y: CGFloat.infinity)) == .zero)
+    // A nudge on a handle already outside 0...1 lands it inside, even up or down.
+    #expect(CurveEditor.nudged(CGPoint(x: 1.2, y: 0.5), dx: 0, dy: 1, coarse: false) == CGPoint(x: 1, y: 0.51))
+    #expect(CurveEditor.nudged(CGPoint(x: 0.005, y: 0), dx: -1, dy: 0, coarse: true).x == 0)
+}
+
+@Test func suiteNudgingStepsAndSpeaks() {
+    let n = SuiteEasingHandleNudging()
+    let h = PlanePoint(x: 0.42, y: 1)
+    #expect(n.nudged(h, dx: 0, dy: 1, coarse: false) == PlanePoint(x: 0.42, y: 1.01))
+    #expect(n.nudged(h, dx: 0, dy: 1, coarse: true) == PlanePoint(x: 0.42, y: 1.1))
+    #expect(n.nudged(PlanePoint(x: 0.98, y: 0), dx: 1, dy: 0, coarse: true).x == 1)
+    #expect(n.describe(PlanePoint(x: 0.42, y: 1.1)) == "x 0.42, y 1.10")
+    // The Fake leaves x unclamped; the suite's conformance doesn't.
+    #expect(FakeEasingHandleNudging().nudged(PlanePoint(x: 0.98, y: 0), dx: 1, dy: 0, coarse: true).x > 1)
+}
+
+@Test func oneEndPerDragOrNudge() {
+    var ends = CurveEnds()
+    var opened = 0, fired = 0
+    for _ in 0..<5 where ends.dragged() { opened += 1 }
+    if ends.released() { fired += 1 }
+    if ends.released() { fired += 1 }   // a second release ends nothing
+    if ends.nudged() { fired += 1 }     // ↑
+    if ends.nudged() { fired += 1 }     // ⇧↑
+    let total = ends.ends
+    #expect(opened == 1 && fired == 3 && total == 3 && !ends.isOpen)
+}
+
+@Test func probeSeriesAndPreviewMark() {
+    #expect(CurveProbe.sample(eventTime: 1, shownAt: 2) == ProbeSample(series: "curve-drag", eventTime: 1, shownAt: 2))
+    #expect(CurveEditor.previewMark(reduceMotion: true, hasSamples: true) == "preview-stopped")
+    #expect(CurveEditor.previewMark(reduceMotion: false, hasSamples: true) == "preview-playing")
+    #expect(CurveEditor.previewMark(reduceMotion: true, hasSamples: false) == nil)
 }

@@ -2,15 +2,21 @@
 // plots one easing curve in unit coordinates (x 0...1 is time, y is progress):
 // a quarter grid, the dashed linear reference, the two Bezier handles on their
 // arms, the curve as one vector path, and a preview dot riding it (hidden
-// under Reduce Motion). Drag a handle, or focus the well and nudge the focused
-// handle with the arrow keys (Shift for ten times as far); Tab and Shift-Tab
-// move between the handles, and a drag focuses the handle it moved. Values go
-// out only through `onMove` and `onEnd`, with one `onEnd` after every drag and
-// every nudge, so the host can make each one undo step. Knows no Model. The
-// math (plot range, mapping, preview point, nudges) is static and tested in
-// CurveEditorTests. A handle shows a grab pointer and an accent rim under the
-// pointer, and fills accent with a ring while focused or dragged. Owns
-// presentation state only: focus, the hovered handle and the drag's range.
+// under `suiteReduceMotion`, which a probe host sees as the `preview-stopped`
+// mark of series `curve-preview`). Drag a handle, or focus the well and nudge
+// the focused handle with the arrow keys (Shift for ten times as far); Tab and
+// Shift-Tab move between the handles, and a drag focuses the handle it moved.
+// A handle's x stays in 0...1 (dragged or nudged); y may overshoot. Nudges and
+// the handles' spoken values go through an EasingHandleNudging (UC15b),
+// SuiteEasingHandleNudging unless a gallery swaps in the Fake. Values go out
+// only through `onMove` and `onEnd`, with one `onEnd` per drag and per nudge
+// through an EditRun (CurveEnds), so the host makes each one undo step. Under
+// a probe host each drag sample reports series `curve-drag` (CurveProbe, SP7).
+// Knows no Model. The math (plot range, mapping, preview point, nudges, the
+// clamp) is static and tested in CurveEditorTests. A handle shows a grab
+// pointer and an accent rim under the pointer, and fills accent with a ring
+// while focused or dragged. Owns presentation state only: focus, the hovered
+// handle, the drag's range and the gesture's run.
 import SwiftUI
 
 /// One of the two handles of a cubic Bezier easing.
@@ -23,27 +29,33 @@ public struct CurveEditor: View {
     private let handles: (CGPoint, CGPoint)?
     private let dimmedHandles: Bool
     private let id: String
+    private let nudging: any EasingHandleNudging
     private let onMove: @MainActor (EasingHandleIndex, CGPoint) -> Void
     private let onEnd: @MainActor () -> Void
     @State private var focused: EasingHandleIndex?
     @State private var dragging: (handle: EasingHandleIndex, range: ClosedRange<CGFloat>)?
     @State private var hovered: EasingHandleIndex?
+    @State private var ends = CurveEnds()
     @FocusState private var hasFocus: Bool
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.suiteReduceMotion) private var reduceMotion
+    @Environment(\.curveProbe) private var probe
 
     /// `samples` and `handles` are in unit coordinates. `dimmedHandles` draws
     /// the handles at 40% (a hold segment). `focusedHandle` starts with that
     /// handle ringed, as after a click. `id` prefixes the accessibility
-    /// identifiers: `<id>`, `<id>.handle1`, `<id>.handle2`.
+    /// identifiers: `<id>`, `<id>.handle1`, `<id>.handle2`. `nudging` decides
+    /// the arrow nudges and the handles' spoken values.
     public init(
         samples: [CGPoint], handles: (CGPoint, CGPoint)?, dimmedHandles: Bool = false,
         focusedHandle: EasingHandleIndex? = nil, id: String = "suite.curve",
+        nudging: any EasingHandleNudging = SuiteEasingHandleNudging(),
         onMove: @escaping @MainActor (EasingHandleIndex, CGPoint) -> Void, onEnd: @escaping @MainActor () -> Void
     ) {
         self.samples = samples
         self.handles = handles
         self.dimmedHandles = dimmedHandles
         self.id = id
+        self.nudging = nudging
         self.onMove = onMove
         self.onEnd = onEnd
         _focused = State(initialValue: focusedHandle)
@@ -84,6 +96,10 @@ public struct CurveEditor: View {
                 ? step(to: .first, from: .second) : step(to: .second, from: .first)
         }
         .onKeyPress(keys: [.leftArrow, .rightArrow, .upArrow, .downArrow]) { press in nudge(press) }
+        .onChange(of: reduceMotion, initial: true) { _, reduced in
+            guard let probe, let name = Self.previewMark(reduceMotion: reduced, hasSamples: !samples.isEmpty) else { return }
+            probe.mark(ProbeMark(name: name, series: CurveProbe.previewSeries, time: ProcessInfo.processInfo.systemUptime))
+        }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Easing Curve")
         .accessibilityIdentifier(id)
@@ -137,18 +153,30 @@ public struct CurveEditor: View {
                         dragging = (index, frozen)
                         focused = index
                         hasFocus = true
-                        onMove(index, Self.unitPoint(drag.location, in: plot, range: frozen))
+                        if !ends.isOpen { _ = ends.dragged() }
+                        let eventTime = ProcessInfo.processInfo.systemUptime
+                        onMove(index, Self.handlePoint(Self.unitPoint(drag.location, in: plot, range: frozen)))
+                        report(eventTime)
                     }
                     .onEnded { _ in
                         dragging = nil
-                        onEnd()
+                        if ends.released() { onEnd() }
                     }
             )
             .help("Handle \(index.rawValue)")
             .accessibilityElement()
             .accessibilityLabel("Handle \(index.rawValue)")
-            .accessibilityValue(Self.describe(point))
-            .accessibilityIdentifier("\(id).handle\(index.rawValue)")
+            .accessibilityValue(nudging.describe(PlanePoint(x: Double(point.x), y: Double(point.y))))
+            .suiteControl(id: "\(id).handle\(index.rawValue)", enabled: true, reason: nil)
+    }
+
+    /// A drag sample, shown by the next main-actor turn after the move (the
+    /// host's update has run by then).
+    private func report(_ eventTime: Double) {
+        guard let probe else { return }
+        Task { @MainActor in
+            probe.record(CurveProbe.sample(eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
+        }
     }
 
     /// Tab moves focus from handle 1 to 2 and Shift-Tab back; past either end
@@ -169,8 +197,10 @@ public struct CurveEditor: View {
             default: (0, -1)
             }
         let point = index == .first ? handles.0 : handles.1
-        onMove(index, Self.nudged(point, dx: dx, dy: dy, coarse: press.modifiers.contains(.shift)))
-        onEnd()
+        let moved = nudging.nudged(
+            PlanePoint(x: Double(point.x), y: Double(point.y)), dx: dx, dy: dy, coarse: press.modifiers.contains(.shift))
+        onMove(index, CGPoint(x: moved.x, y: moved.y))
+        if ends.nudged() { onEnd() }
         return .handled
     }
 }
@@ -242,12 +272,27 @@ extension CurveEditor {
         return min(max(t, 0) / 1.2, 1)
     }
 
+    /// A handle's point: x clamped to 0...1 (a non-finite x is 0), y as given
+    /// (a non-finite y is 0), so a drag past the well's edge stops at it.
+    nonisolated public static func handlePoint(_ point: CGPoint) -> CGPoint {
+        let x = point.x.isFinite ? min(max(point.x, 0), 1) : 0
+        return CGPoint(x: x, y: point.y.isFinite ? point.y : 0)
+    }
+
+    /// Whether the preview dot is stopped: `preview-stopped` under Reduce
+    /// Motion, `preview-playing` otherwise; nil with no curve to ride.
+    nonisolated static func previewMark(reduceMotion: Bool, hasSamples: Bool) -> String? {
+        guard hasSamples else { return nil }
+        return reduceMotion ? "preview-stopped" : "preview-playing"
+    }
+
     /// `point` nudged `dx` and `dy` steps of 0.01 (0.1 when `coarse`), the
-    /// moved axis snapped to that step; x stays in 0...1.
+    /// moved axis snapped to that step; x stays in 0...1 either way.
     nonisolated public static func nudged(_ point: CGPoint, dx: Int, dy: Int, coarse: Bool) -> CGPoint {
         let step = coarse ? 0.1 : 0.01
-        var x = Double(point.x)
-        var y = Double(point.y)
+        let clamped = handlePoint(point)
+        var x = Double(clamped.x)
+        var y = Double(clamped.y)
         if dx != 0 { x = ScrubValue.snapped(x + Double(dx) * step, to: step, in: 0...1) }
         if dy != 0 { y = ScrubValue.snapped(y + Double(dy) * step, to: step, in: -.greatestFiniteMagnitude...(.greatestFiniteMagnitude)) }
         return CGPoint(x: x, y: y)
@@ -258,4 +303,65 @@ extension CurveEditor {
         let two = FloatingPointFormatStyle<Double>.number.precision(.fractionLength(2))
         return "x \(Double(point.x).formatted(two)), y \(Double(point.y).formatted(two))"
     }
+}
+
+/// The easing handles' nudges and spoken values (UC15b) over CurveEditor's
+/// static math: x clamps to 0...1, y is free.
+public struct SuiteEasingHandleNudging: EasingHandleNudging {
+    public init() {}
+
+    public func nudged(_ handle: PlanePoint, dx: Int, dy: Int, coarse: Bool) -> PlanePoint {
+        let p = CurveEditor.nudged(CGPoint(x: handle.x, y: handle.y), dx: dx, dy: dy, coarse: coarse)
+        return PlanePoint(x: Double(p.x), y: Double(p.y))
+    }
+
+    public func describe(_ handle: PlanePoint) -> String { CurveEditor.describe(CGPoint(x: handle.x, y: handle.y)) }
+}
+
+/// One gesture, one end, for CurveEditor, over the suite's EditRun: a drag's
+/// samples open one run and its release closes it; a nudge is a change and
+/// an end in one call. CurveEditorTests drive it.
+struct CurveEnds: Equatable, Sendable {
+    private(set) var run = EditRun()
+
+    var isOpen: Bool { run.isOpen }
+    var ends: Int { run.ends }
+
+    /// A drag sample; true when it opened the run.
+    mutating func dragged() -> Bool { run.change() }
+
+    /// The drag's release: true exactly once per drag.
+    mutating func released() -> Bool { run.end() }
+
+    /// An arrow nudge: true, once.
+    mutating func nudged() -> Bool {
+        _ = run.change()
+        return run.end()
+    }
+}
+
+/// Where a CurveEditor reports its drag samples (series `curve-drag`, SP7)
+/// and its preview's marks (series `curve-preview`, SJ20); a probe host sets
+/// it, and nil records nothing.
+struct CurveProbe: Sendable {
+    static let dragSeries = "curve-drag"
+    static let previewSeries = "curve-preview"
+    let record: @MainActor @Sendable (ProbeSample) -> Void
+    let mark: @MainActor @Sendable (ProbeMark) -> Void
+
+    static func sample(eventTime: Double, shownAt: Double) -> ProbeSample {
+        ProbeSample(series: dragSeries, eventTime: eventTime, shownAt: shownAt)
+    }
+}
+
+extension EnvironmentValues {
+    /// Where a CurveEditor reports its probe samples and marks; nil records nothing.
+    var curveProbe: CurveProbe? {
+        get { self[CurveProbeKey.self] }
+        set { self[CurveProbeKey.self] = newValue }
+    }
+}
+
+private struct CurveProbeKey: EnvironmentKey {
+    static let defaultValue: CurveProbe? = nil
 }
