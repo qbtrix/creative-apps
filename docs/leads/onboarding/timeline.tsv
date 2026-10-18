@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-18T15:23:38Z	pr-open	OB-5	#2822 5d607b43
 2026-10-18T15:25:13Z	build-start	OB-12	worktree builder
 2026-10-18T15:25:13Z	build-start	OB-8b	worktree builder
+2026-10-18T15:33:50Z	check	wave3	dev CI 39140935376 and scoped suite 39140922596 at 15e42166 hold #2809-#2813; OB-s slice-done waits on its Linux job
