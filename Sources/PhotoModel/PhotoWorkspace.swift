@@ -292,10 +292,11 @@ public struct PhotoWorkspace: Sendable {
     /// Moves the layers at `offsets` (top-first positions) to sit before the
     /// layer now at `destination`, as a list drag reports it; `layers.count`
     /// moves them to the bottom. Out-of-range offsets are ignored. Runs on
-    /// LayerTree.move (PhotoLayers+Kernel).
+    /// LayerTree.move (PhotoLayers+Kernel), and a move that changes nothing
+    /// records no step there.
     public mutating func moveLayers(fromOffsets offsets: [Int], toOffset destination: Int) {
+        guard (0...layers.count).contains(destination) else { return }
         let sources = Set(offsets.filter { layers.indices.contains($0) })
-        guard !sources.isEmpty, (0...layers.count).contains(destination) else { return }
         commitKernelLayers(
             Self.kernelMoved(layers, fromOffsets: sources, toOffset: destination), named: "Reorder Layers")
     }
