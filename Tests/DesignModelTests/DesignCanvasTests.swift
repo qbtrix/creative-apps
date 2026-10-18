@@ -188,3 +188,39 @@ private func grouped() throws -> DesignWorkspace {
     workspace.deleteSelection()
     #expect(workspace == locked)
 }
+
+/// `cards` with A (node-2) and B (node-3) marqueed, on the live services the app ships with.
+private func marqueedAAndB() -> DesignWorkspace {
+    var workspace = DesignFixtures.cards
+    workspace.drag(from: pt(80, 80), to: pt(520, 240))
+    workspace.endDrag()
+    return workspace
+}
+
+// #2463: the canvas keys call nudge and deleteSelection; with several layers selected they act.
+@Test func theCanvasArrowKeysNudgeSeveralSelectedLayersAsOneNudgeStep() throws {
+    var workspace = marqueedAAndB()
+    #expect(workspace.selectedNodeIDs == ["node-2", "node-3"])
+    let a = try #require(workspace.frame("node-2")), b = try #require(workspace.frame("node-3"))
+    let previous = workspace.undoActionName
+    workspace.nudge(.right, shift: true)
+    workspace.nudge(.down, shift: false)
+    #expect(workspace.frame("node-2") == rc(a.x + 10, a.y + 1, a.width, a.height))
+    #expect(workspace.frame("node-3") == rc(b.x + 10, b.y + 1, b.width, b.height))
+    #expect(workspace.undoActionName == "Undo Nudge")
+    workspace.undo()
+    #expect(workspace.frame("node-2") == a && workspace.frame("node-3") == b)
+    #expect(workspace.undoActionName == previous)
+}
+
+@Test func theCanvasDeleteKeyAndEditDeleteRemoveSeveralSelectedLayersAsOneDeleteStep() {
+    var workspace = marqueedAAndB()
+    #expect(workspace.help(.delete) == nil)
+    workspace.deleteSelection()
+    #expect(workspace.treeNode("node-2") == nil && workspace.treeNode("node-3") == nil)
+    #expect(workspace.selectedNodeIDs.isEmpty)
+    #expect(workspace.undoActionName == "Undo Delete")
+    workspace.undo()
+    #expect(workspace.treeNode("node-2") != nil && workspace.treeNode("node-3") != nil)
+    #expect(workspace.selectedNodeIDs == ["node-2", "node-3"])
+}
