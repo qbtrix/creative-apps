@@ -14,36 +14,14 @@ extension LiveKeyframes {
     public func moveKeys(_ keys: Set<KeyRef>, by delta: Int, owner: LayerOwner,
                          coalesceKey: String?, in engine: inout CommandEngine) throws {
         let length = try Self.length(of: owner, in: engine.document)
-        let moving = try KernelKeys.trackKeys(keys, owner: owner, in: engine.document)
-        guard delta != 0, !moving.isEmpty else { return }
-        guard moving.allSatisfy({ !$0.frame.addingReportingOverflow(delta).overflow }) else { throw CommandError.invalidFrame(delta) }
         // A key past the owner's last frame would never play (#636).
         let pastEnd: CommandError = if case .symbol = owner { .invalidDocument(Self.pastSymbolEnd) } else { .invalidDocument(Self.pastSceneEnd) }
-        guard let range = KernelKeys.frames(from: 0, before: delta > 0 ? length : Int.max) else { throw pastEnd }
-        switch KernelKeys.moveRefusal(moving, by: delta, in: engine.document.layers(of: owner) ?? [], range: range) {
-        case (.pastRange, _)?: throw delta < 0 ? CommandError.invalidDocument(Self.beforeFrameZero) : pastEnd
-        case (.collides(let frame), let property)?: throw CommandError.frameOccupied(property: property, frame: frame)
-        case nil: break
-        }
-        let commands = KernelKeys.moves(moving, by: delta, owner: owner)
-        var trial = engine
-        if coalesceKey == nil, commands.count > 1 {
-            try trial.group("Move Keyframe") { engine in
-                for command in commands { try engine.perform(command) }
-            }
-        } else {
-            for command in commands { try trial.perform(command, coalesceKey: coalesceKey) }
-        }
-        engine = trial
+        try KernelKeys.move(keys, by: delta, owner: owner, coalesceKey: coalesceKey, from: 0, before: { _ in length },
+                            pastRange: { _ in delta < 0 ? CommandError.invalidDocument(Self.beforeFrameZero) : pastEnd }, in: &engine)
     }
 
     public func removeKeys(_ keys: Set<KeyRef>, owner: LayerOwner, in engine: inout CommandEngine) throws {
-        let removing = try KernelKeys.trackKeys(keys, owner: owner, in: engine.document)
-        try engine.group("Delete Keyframe") { engine in
-            for removal in KernelKeys.removals(removing, owner: owner, in: engine.document.layers(of: owner) ?? []) {
-                try engine.perform(removal)
-            }
-        }
+        try KernelKeys.remove(keys, owner: owner, in: &engine)
     }
 
     static let beforeFrameZero = "A key can't move before frame 0."

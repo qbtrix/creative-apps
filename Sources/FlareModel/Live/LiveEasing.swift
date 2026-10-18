@@ -1,5 +1,5 @@
 // LiveEasing.swift: the live `KeyframeEasing` (docs/blueprints/flare.md, 6.2, task LM-6). Presets are the editor's
-// six `EasingPreset`s; the curve is `EasingCurve.samples`, FlareCore's `Easing.value(at:)` as FlareWorkspace's editor
+// six `EasingPreset`s; the curve is `EaseCurve.samples`, FlareCore's `Easing.value(at:)` as FlareWorkspace's editor
 // draws it; a change is FlareCore's `SetKeyframeEasing`, one undo step, or one step per drag under `coalesceKey`.
 // A summary key (no property) sets every track keyed at its frame together. Agrees with `FakeEasing` on the fixtures.
 // The owner is a scene or a symbol (KY-8): a symbol's layers ease through the same `SetKeyframeEasing(owner:)`, and a
@@ -21,20 +21,6 @@ public struct LiveEasing: KeyframeEasing {
 
     public func setEasing(_ easing: Easing, at key: KeyRef, owner: LayerOwner,
                           coalesceKey: String?, in engine: inout CommandEngine) throws {
-        guard let layer = engine.document.layers(of: owner)?.first(where: { $0.id == key.layerID }) else {
-            throw CommandError.layerNotFound(key.layerID)
-        }
-        let properties = key.easedProperties(in: layer)
-        guard !properties.isEmpty else { throw CommandError.keyframeNotFound(property: "", frame: key.frame) }
-        let commands = properties.map {
-            SetKeyframeEasing(owner: owner, layerID: key.layerID, property: $0, frame: key.frame, easing: easing)
-        }
-        guard coalesceKey == nil, commands.count > 1 else {
-            for command in commands { try engine.perform(command, coalesceKey: coalesceKey) }
-            return
-        }
-        try engine.group("Set Keyframe Easing") { engine in
-            for command in commands { try engine.perform(command) }
-        }
+        try key.setEasing(easing, owner: owner, coalesceKey: coalesceKey, in: &engine)
     }
 }
