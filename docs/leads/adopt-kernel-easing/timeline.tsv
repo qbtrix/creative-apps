@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-18T15:15Z	3	pr-opened	#2819	AE-f2, Mutate 8/8
 2026-10-18T15:45Z	3	heartbeat	-	#2818 merged; stray SuiteUI revert fixed by #2828; AE-h2 building
 2026-10-18T15:56Z	3	pr-open	#2842	AE-h2 Halo delete, feature-done
+2026-10-18T16:08Z	3	merged	#2819	AE-f2; flare run 39142436739 queued
