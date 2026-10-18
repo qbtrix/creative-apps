@@ -1,7 +1,7 @@
 // ExportRunTests.swift (editor-kernel EK-21, slice EK-run): checks first for
 // the one export run. Every transition, progress that never goes back and
-// never passes the total, cancel back to idle, and dismiss. Disabled until
-// EK-22 writes ExportRun's body; KJ7 is this module's walk.
+// never passes the total, cancel back to idle, and dismiss. On since EK-22
+// wrote ExportRun's body; KJ7 is this module's walk.
 import Foundation
 import Testing
 import SuiteKernel
@@ -32,7 +32,7 @@ private struct DiskFull: Error, CustomStringConvertible {
         return nil
     }
 
-    @Test(.disabled("waits on EK-22")) func beginOpensTheSheet() {
+    @Test func beginOpensTheSheet() {
         var run = ExportRun<String>.idle
         let opened = run.begin("png")
         #expect(opened && run == .editing("png"))
@@ -41,7 +41,7 @@ private struct DiskFull: Error, CustomStringConvertible {
         #expect(run == .editing("svg"))
     }
 
-    @Test(.disabled("waits on EK-22")) func startRunsFromEditingOnly() {
+    @Test func startRunsFromEditingOnly() {
         var idle = ExportRun<String>.idle
         let fromIdle = idle.start(total: 5)
         #expect(!fromIdle)
@@ -55,14 +55,14 @@ private struct DiskFull: Error, CustomStringConvertible {
         #expect(run == .running("png", done: 0, total: 5))
     }
 
-    @Test(.disabled("waits on EK-22")) func beginRefusedWhileRunning() {
+    @Test func beginRefusedWhileRunning() {
         var run = running()
         let opened = run.begin("svg")
         #expect(!opened)
         #expect(run == .running("png", done: 0, total: ExportRunSteps.total))
     }
 
-    @Test(.disabled("waits on EK-22")) func progressNeverBack() {
+    @Test func progressNeverBack() {
         var run = running()
         var seen: [Int] = []
         for report in ExportRunSteps.reports {
@@ -73,7 +73,7 @@ private struct DiskFull: Error, CustomStringConvertible {
         #expect(zip(seen, seen.dropFirst()).allSatisfy { $0 <= $1 })
     }
 
-    @Test(.disabled("waits on EK-22")) func clampsToTotal() {
+    @Test func clampsToTotal() {
         var run = running(4)
         run.progressed(done: 99)
         #expect(run == .running("png", done: 4, total: 4))
@@ -81,7 +81,7 @@ private struct DiskFull: Error, CustomStringConvertible {
         #expect(run == .running("png", done: 4, total: 4))
     }
 
-    @Test(.disabled("waits on EK-22")) func progressIgnoredOutsideARun() {
+    @Test func progressIgnoredOutsideARun() {
         for start: ExportRun<String> in [.idle, .editing("png"), .finished("png", ["a.png"]), .failed("png", "no")] {
             var run = start
             run.progressed(done: 3)
@@ -89,14 +89,14 @@ private struct DiskFull: Error, CustomStringConvertible {
         }
     }
 
-    @Test(.disabled("waits on EK-22")) func successFinishesWithTheFiles() {
+    @Test func successFinishesWithTheFiles() {
         var run = running()
         run.progressed(done: 10)
         run.end(.success(["a.png", "b.png"]))
         #expect(run == .finished("png", ["a.png", "b.png"]))
     }
 
-    @Test(.disabled("waits on EK-22")) func errorFailsInWords() {
+    @Test func errorFailsInWords() {
         var run = running()
         run.end(.failure(DiskFull()))
         guard case .failed(let options, let words) = run else {
@@ -106,20 +106,20 @@ private struct DiskFull: Error, CustomStringConvertible {
         #expect(options == "png" && !words.isEmpty)
     }
 
-    @Test(.disabled("waits on EK-22")) func cancelReturnsToIdle() {
+    @Test func cancelReturnsToIdle() {
         var run = running()
         run.progressed(done: 3)
         run.end(.failure(CancellationError()))
         #expect(run == .idle)
     }
 
-    @Test(.disabled("waits on EK-22")) func endIgnoredOutsideARun() {
+    @Test func endIgnoredOutsideARun() {
         var run = ExportRun<String>.editing("png")
         run.end(.success(["a.png"]))
         #expect(run == .editing("png"))
     }
 
-    @Test(.disabled("waits on EK-22")) func dismissClosesTheSheet() {
+    @Test func dismissClosesTheSheet() {
         for start: ExportRun<String> in [.editing("png"), .finished("png", ["a.png"]), .failed("png", "no")] {
             var run = start
             run.dismiss()
@@ -130,7 +130,7 @@ private struct DiskFull: Error, CustomStringConvertible {
         #expect(run == .running("png", done: 0, total: ExportRunSteps.total))
     }
 
-    @Test(.disabled("waits on EK-22")) func reopensAfterFinishing() {
+    @Test func reopensAfterFinishing() {
         var run = ExportRun<String>.finished("png", ["a.png"])
         let opened = run.begin("svg")
         #expect(opened)
@@ -139,7 +139,7 @@ private struct DiskFull: Error, CustomStringConvertible {
 
     /// KJ7, the export run walk: open, write ten steps with reports out of
     /// order, finish, dismiss; then a second run cancelled midway.
-    @Test(.disabled("waits on EK-22")) func exportRunWalk() {
+    @Test func exportRunWalk() {
         var run = ExportRun<String>.idle
         let first = run.begin("png") && run.start(total: ExportRunSteps.total)
         #expect(first)
