@@ -67,8 +67,8 @@ struct LiveArchive: DocumentArchiving {
     func decode(_ package: PhotoPackage, codec: any PhotoImageCodec) throws -> PhotoDocumentSnapshot {
         guard let json = package.files[Self.documentPath] else { throw ArchiveError.damaged("\(Self.documentPath) is missing") }
         let unreadable = ArchiveError.damaged("\(Self.documentPath) is unreadable")
-        guard let version = try? JSONDecoder().decode(VersionEntry.self, from: json) else { throw unreadable }
-        guard version.format <= formatVersion else { throw ArchiveError.newerVersion(version.format) }
+        // VersionedJSON.probe (PhotoRecovery+Kernel.swift): newer is newerVersion, anything else unreadable.
+        _ = try Self.probeFormat(json, supported: formatVersion, unreadable: unreadable)
         guard let document = try? JSONDecoder().decode(DocumentEntry.self, from: json) else { throw unreadable }
         let canvas = CanvasSize(width: document.canvas.width, height: document.canvas.height)
         try Self.checkSize(canvas.width, canvas.height, what: "the canvas")

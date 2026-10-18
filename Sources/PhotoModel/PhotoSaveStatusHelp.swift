@@ -8,12 +8,14 @@ extension PhotoSaveStatus {
     /// when nil or empty).
     public func help(fileName: String?) -> String {
         let file = fileName.flatMap { $0.isEmpty ? nil : $0 } ?? "this image"
-        switch self {
+        // Through the kernel's SaveStatus (PhotoRecovery+Kernel.swift); only
+        // an autosave, which the kernel doesn't track, is told apart here.
+        switch kernelStatus {
         case .saved: return "All changes are saved in \(file)."
-        case .edited: return "Changes since \(file) was last saved."
-        case .editedAutosaved:
+        case .failed(let words): return words
+        case .unsaved, .saving, .readOnly:
+            guard self == .editedAutosaved else { return "Changes since \(file) was last saved." }
             return "A recovery copy keeps these changes in case Photo quits. Save to write them to \(file)."
-        case .notSaved: return "The last save didn't finish. Try File > Save As… to choose another folder."
         }
     }
 }
