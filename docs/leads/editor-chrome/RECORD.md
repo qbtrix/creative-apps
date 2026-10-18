@@ -4,7 +4,7 @@ Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: 4 review (fix round 2 merged)
 Base: 2e27b8db (origin/dev)
-Next: a suiteui run on dev at f836dc7 or later (asked of the supervisor, #1344 comment 6255000495; full runs 39162498756 and 39163553482 cancelled): gallery and chrome journeys green → Belt-Contact-Sheet on #1344, else leftovers become gap issues
+Next: waits on a suiteui run at or after f836dc7; then Belt-Contact-Sheet or gap issues
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
