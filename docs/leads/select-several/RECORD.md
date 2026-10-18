@@ -30,6 +30,7 @@ Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-18T18:12Z: canvas-basics CB-3 merged (#2871, 18:01Z), so CB-a's Design edits are on dev. Findings rule: 8 open line:design findings, but 5 (#2693, #2661, #2630, #2590, #2589) are triaged to SuiteUI #2606 and wait on that line; the line-owned ones are #2538 and #2751 (SS-b, blocked on needs-ui #2623) and #2302 (blocked on needs-ui #2263). 3 is not past 5, so new tasks start: S-5 and D0-9d go to builders now.
 - 2026-10-18 resume (act-1a14ddefb3a-z1bl): brief says base main; dev is 37 ahead of main and CLAUDE.md forbids targeting main, so PRs stay on dev. main verified at e01529f.
 - design-seams' wait is met by SE-a's Belt-Slice-Done (#1493 stays open as a feature-lead issue), so S-8 starts now.
 - feature-done moves from S-8 to S-5, the last SS-b task to merge (S-5 still waits on CB-a).
