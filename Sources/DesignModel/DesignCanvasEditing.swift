@@ -193,7 +193,7 @@ extension DesignWorkspace {
         case .draw(let kind):
             draw(kind, from: current, to: end, square: modifiers.contains(.shift))
         case .text:
-            placeText(from: current)
+            placeText(from: current, to: end)
         case .none:
             break
         }

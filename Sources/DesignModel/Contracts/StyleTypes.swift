@@ -27,9 +27,29 @@ public struct DesignTextStyle: Sendable, Hashable, Codable {
     /// 100...900 in steps of 100, as CSS and OpenType name weights.
     public var weight: Int
     public var alignment: DesignTextAlignment
+    /// nil or false: the box fits its text (a Text click); true: it keeps its width and the
+    /// text wraps (a Text drag, canvas-basics CB-3). Left out of the file when nil, so a file
+    /// written before it opens as auto width and keeps its bytes.
+    public var fixedWidth: Bool?
 
-    public init(family: String, size: Double, weight: Int, alignment: DesignTextAlignment) {
+    public init(
+        family: String, size: Double, weight: Int, alignment: DesignTextAlignment, fixedWidth: Bool? = nil
+    ) {
         (self.family, self.size, self.weight, self.alignment) = (family, size, weight, alignment)
+        self.fixedWidth = fixedWidth
+    }
+
+    private enum CodingKeys: String, CodingKey { case family, size, weight, alignment, fixedWidth }
+
+    /// Decodes a style; a file without `fixedWidth` is auto width (nil). The synthesized
+    /// encoder leaves a nil `fixedWidth` out.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            family: container.decode(String.self, forKey: .family), size: container.decode(Double.self, forKey: .size),
+            weight: container.decode(Int.self, forKey: .weight),
+            alignment: container.decode(DesignTextAlignment.self, forKey: .alignment),
+            fixedWidth: container.decodeIfPresent(Bool.self, forKey: .fixedWidth))
     }
 
     public static let `default` = DesignTextStyle(family: "System", size: 16, weight: 400, alignment: .leading)
