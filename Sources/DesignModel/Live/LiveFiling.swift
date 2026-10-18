@@ -26,9 +26,10 @@ private struct DesignFileContent: Codable {
     var pages: [DesignPage]
 }
 
-/// Just the version, read first so a file from a future format reports its version
+/// Just the version, read first through the kernel's probe (`probeVersion`,
+/// DesignSession+Kernel.swift) so a file from a future format reports its version
 /// and not "unreadable".
-private struct DesignFileHeader: Decodable {
+private struct DesignFileHeader {
     var version: Int
 }
 
@@ -52,7 +53,7 @@ public struct LiveFiling: DocumentFiling {
     public func decode(_ data: Data) throws(DesignFileError) -> DesignDocument {
         let content: DesignFileContent
         do {
-            let header = try JSONDecoder().decode(DesignFileHeader.self, from: data)
+            let header = DesignFileHeader(version: try Self.probeVersion(data))
             guard header.version == Self.fileVersion else { throw DesignFileError.unsupportedVersion(header.version) }
             content = try JSONDecoder().decode(DesignFileContent.self, from: data)
         } catch let error as DesignFileError {
