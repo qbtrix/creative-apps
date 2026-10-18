@@ -87,7 +87,7 @@ struct NewCompositionSheet: View {
         if !lines.isEmpty {
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                 ForEach(lines, id: \.self) { problem in
-                    // An error, not a warning: stateError with the circle, like InspectorNote(kind: .error).
+                    // An error, not a warning: stateError with the circle, like HaloRefusalCaption.
                     Label(problem, systemImage: "exclamationmark.circle")
                         .font(SuiteFont.caption)
                         .foregroundStyle(SuiteColor.stateError)
