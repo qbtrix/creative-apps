@@ -54,3 +54,4 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 - needs-ui #2148: SuiteUI ScrubField mixed state; D0-5c uses plain "Mixed" text meanwhile.
 - #2282 (D0-8a) adds Sources/DesignModel/DesignLiveEdit.swift, its Linux tests and a 6-mutation plan beyond the packet's four files. Accepted: the lead's brief told the builder to put the replay logic in DesignModel with a test and a plan (CLAUDE.md: logic in the Model); DesignLiveDrag in DesignApp only wraps it. The contract check's file-scope flag is answered by this note.
 - #2280 (D0-9c) leaves the DesignEditor body-count assertion as TODO(D0-8b): the counter arrives with D0-8b. It asserts DesignWindow body runs 0 and canvas reads at most 1 now. D0-8b's builder turns the TODO into an assertion.
+- #2750 (J1 testEveryMenuOpens, scoped 39118734724 at a80ed944) predates #2701 (be2260cd); to be confirmed on 39122750799 / 39122776184 (e3a4582c), which hold it.
