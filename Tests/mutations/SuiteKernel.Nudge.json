@@ -1,0 +1,16 @@
+[
+  {
+    "label": "largeIsTen: a Shift nudge moves 5 instead of 10",
+    "file": "Sources/SuiteKernel/Selection/Nudge.swift",
+    "find": "largeStep: Double = 10",
+    "replace": "largeStep: Double = 5",
+    "tests": "NudgeMarqueeTests"
+  },
+  {
+    "label": "unionDedupes: Marquee.union keeps duplicate ids",
+    "file": "Sources/SuiteKernel/Selection/Marquee.swift",
+    "find": "found where seen.insert(id).inserted {",
+    "replace": "found {",
+    "tests": "NudgeMarqueeTests"
+  }
+]

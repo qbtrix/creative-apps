@@ -3,7 +3,9 @@
 // keys on a track, named after the first. A row picks its segment's first key;
 // a timeline diamond picks every key of that lane at its frame, so every
 // diamond picks something: a picked key marks the segment it starts, and a
-// track's last key the segment it ends. Only this file writes `selectedKeys`.
+// track's last key the segment it ends. The picked keys are a SuiteKernel
+// `Selection` (`keySelection`, AS-h1) used as a set; only this file writes it,
+// and its `prune(alive:)` drops stale keys, not set algebra here (AS-h2).
 // A pick is never an edit: no history step, no dirty file. ⌫ from the viewer
 // or timeline deletes the picked keys as one "Delete Keyframes" step while
 // any are picked (`deleteCommand`), else the layer.
@@ -11,6 +13,7 @@
 // handle drag is one step until `endCoalescing()` (coalesced per layer); the
 // curve and handles the inspector draws come from the first picked segment.
 // Linux-safe: no UI imports.
+import SuiteKernel
 
 /// One row of the EASING list: a key and the next key on its track.
 public struct HaloKeySegment: Identifiable, Sendable, Hashable {
@@ -82,7 +85,20 @@ extension HaloProject {
     /// segment (a track's last key, another layer's) changes nothing.
     public mutating func selectKey(_ key: HaloKeyRef, extending: Bool) {
         guard keySegments.contains(where: { $0.key == key }) else { return }
-        selectedKeys = extending ? pickedKeys.symmetricDifference([key]) : [key]
+        guard extending else { return keySelection.replace([key]) }
+        narrowToPickedKeys()
+        keySelection.pick(key, .toggle)
+    }
+
+    /// Narrows the pick to `pickedKeys` before a toggle: stale and
+    /// other-layer keys drop out, and a picked last key of a track gives way
+    /// to the first key of the segment it ends.
+    private mutating func narrowToPickedKeys() {
+        let alive = pickedKeys
+        keySelection.prune { alive.contains($0) }
+        for segment in keySegments where segment.isPicked && !keySelection.contains(segment.key) {
+            keySelection.pick(segment.key, .extend)
+        }
     }
 
     /// Picks every key of `layerID`'s animated tracks at `frame`, as a
@@ -94,21 +110,31 @@ extension HaloProject {
             selectLayer(layerID)
             extending = false
         }
-        let clicked = segmentKeys.filter { $0.frame == frame }
-        selectedKeys = extending ? pickedKeyframes.union(clicked) : clicked
+        let clicked = segmentKeyList.filter { $0.frame == frame }
+        guard extending else { return keySelection.replace(clicked) }
+        keySelection = liveKeySelection
+        for key in clicked { keySelection.pick(key, .extend) }
     }
 
-    /// Every key of the selected layer's segments, first and last alike.
-    private var segmentKeys: Set<HaloKeyRef> {
-        Set(keySegments.flatMap { segment in
+    /// Every key of the selected layer's segments, first and last alike, in
+    /// segment order.
+    private var segmentKeyList: [HaloKeyRef] {
+        keySegments.flatMap { segment in
             [segment.key, HaloKeyRef(layerID: segment.key.layerID, property: segment.key.property, frame: segment.endFrame)]
-        })
+        }
+    }
+
+    /// The pick pruned to the selected layer's segment keys: stale and
+    /// other-layer keys drop out.
+    private var liveKeySelection: Selection<HaloKeyRef> {
+        let alive = Set(segmentKeyList)
+        var live = keySelection
+        live.prune { alive.contains($0) }
+        return live
     }
 
     /// The picked keys still on the selected layer's animated tracks: what ⌫ deletes.
-    public var pickedKeyframes: Set<HaloKeyRef> {
-        selectedKeys.intersection(segmentKeys)
-    }
+    public var pickedKeyframes: Set<HaloKeyRef> { liveKeySelection.set }
 
     /// What ⌫ sends from the viewer and timeline: Delete Keyframes while any
     /// key is picked, else Delete (the selected layer).
@@ -138,12 +164,12 @@ extension HaloProject {
                 try keying.toggleKey(key.property, of: key.layerID, at: key.frame, in: &doc.compositions[c])
             }
         }
-        if deleted { selectedKeys = [] }
+        if deleted { keySelection.clear() }
     }
 
     /// Picks nothing.
     public mutating func clearKeySelection() {
-        selectedKeys = []
+        keySelection.clear()
     }
 
     // MARK: Easing the picked keys (EZ-3)

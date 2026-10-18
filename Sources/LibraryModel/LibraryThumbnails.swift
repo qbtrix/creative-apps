@@ -7,7 +7,7 @@
 // pass costs O(visible + held), not O(catalog) (TH-4): ThumbnailPositions finds
 // an id in `items` and `order`. The whole display scale the grid reports with
 // its cell size (TH-6f). Linux-safe; LibraryApp runs the requests and hands
-// back results.
+// back results into a LibraryThumbnailCache it keeps apart from the catalog (#2709).
 
 /// A request's token: FNV-1a 64-bit over the develop settings' fields and the
 /// long side. Deterministic across processes (never `hashValue`), so a result
@@ -69,18 +69,6 @@ struct IDPositions: Sendable {
 }
 
 extension LibraryCatalog {
-    /// The index of `id` in `items` (see ThumbnailPositions).
-    mutating func itemIndex(of id: String, rebuilt: inout Bool) -> Int? {
-        let ids = items.lazy.map(\.id)
-        return thumbnailPositions.items.index(of: id, in: ids, rebuilt: &rebuilt)
-    }
-
-    /// The index of `id` in `order` (see ThumbnailPositions).
-    mutating func orderIndex(of id: String, rebuilt: inout Bool) -> Int? {
-        let ids = order
-        return thumbnailPositions.order.index(of: id, in: ids, rebuilt: &rebuilt)
-    }
-
     /// The most bytes of display images `thumbnails` holds after a request pass (128 MB).
     public static let heldThumbnailBytes = 128 * 1024 * 1024
 
@@ -90,6 +78,36 @@ extension LibraryCatalog {
     public static func thumbnailScale(forDisplayScale scale: Double) -> Int {
         guard scale.isFinite else { return 1 }
         return Int(min(max(scale.rounded(), 1), 8))
+    }
+}
+
+/// The grid's thumbnail state: the held images, the pending requests and the
+/// bucket's long side, plus the position cache (left out of ==). Each method
+/// reads the catalog it is handed and never changes it; a failure comes back
+/// as the photo's new availability for `LibraryCatalog.applyThumbnailFailures`.
+public struct LibraryThumbnailCache: Sendable, Equatable {
+    public internal(set) var thumbnails: [String: DisplayImage] = [:]
+    public internal(set) var thumbnailLongSide = 512
+    public internal(set) var pendingThumbnails: [String: ThumbnailRequest] = [:]
+    var positions = ThumbnailPositions()  // a lookup cache, left out of ==
+
+    public init() {}
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.thumbnails == rhs.thumbnails && lhs.thumbnailLongSide == rhs.thumbnailLongSide
+            && lhs.pendingThumbnails == rhs.pendingThumbnails
+    }
+
+    /// The index of `id` in the catalog's `items` (see ThumbnailPositions).
+    mutating func itemIndex(of id: String, in catalog: LibraryCatalog, rebuilt: inout Bool) -> Int? {
+        let ids = catalog.items.lazy.map(\.id)
+        return positions.items.index(of: id, in: ids, rebuilt: &rebuilt)
+    }
+
+    /// The index of `id` in the catalog's `order` (see ThumbnailPositions).
+    mutating func orderIndex(of id: String, in catalog: LibraryCatalog, rebuilt: inout Bool) -> Int? {
+        let ids = catalog.order
+        return positions.order.index(of: id, in: ids, rebuilt: &rebuilt)
     }
 
     /// ThumbnailBucket for the cell; also sets `thumbnailLongSide`.
@@ -102,14 +120,14 @@ extension LibraryCatalog {
     /// request; evicts held images outside visible ± two screens of `order`
     /// (never a visible one; an empty `visible`, as when the loupe opens, evicts nothing),
     /// farthest first, until `thumbnails` holds ≤ heldThumbnailBytes.
-    public mutating func requestThumbnails(visible: [String]) -> [ThumbnailRequest] {
+    public mutating func requestThumbnails(visible: [String], in catalog: LibraryCatalog) -> [ThumbnailRequest] {
         let side = thumbnailLongSide
         var out: [ThumbnailRequest] = []
         var asked = Set<String>()
         var rebuilt = false
         for id in visible where asked.insert(id).inserted {
-            guard let index = itemIndex(of: id, rebuilt: &rebuilt) else { continue }
-            let photo = items[index]
+            guard let index = itemIndex(of: id, in: catalog, rebuilt: &rebuilt) else { continue }
+            let photo = catalog.items[index]
             guard photo.availability == .available else { continue }
             if let held = thumbnails[id], held.size.longSide == photo.pixelSize.fitting(longSide: side).longSide {
                 continue  // a develop change drops the held image first (invalidateThumbnail)
@@ -120,31 +138,31 @@ extension LibraryCatalog {
             pendingThumbnails[id] = request
             out.append(request)
         }
-        if !visible.isEmpty { evictThumbnails(around: asked) }
+        if !visible.isEmpty { evictThumbnails(around: asked, in: catalog) }
         return out
     }
 
     /// Drops held images outside `visible`'s span in `order` ± two screens,
     /// then the farthest from that span until the cap holds. A visible image stays.
-    private mutating func evictThumbnails(around visible: Set<String>) {
+    private mutating func evictThumbnails(around visible: Set<String>, in catalog: LibraryCatalog) {
         var low = Int.max, high = Int.min
         var rebuilt = false
         for id in visible {
-            guard let index = orderIndex(of: id, rebuilt: &rebuilt) else { continue }
+            guard let index = orderIndex(of: id, in: catalog, rebuilt: &rebuilt) else { continue }
             low = min(low, index); high = max(high, index)
         }
         guard low <= high else { return }
         let margin = 2 * visible.count
         var candidates: [(id: String, distance: Int)] = []
         for id in thumbnails.keys where !visible.contains(id) {
-            guard let index = orderIndex(of: id, rebuilt: &rebuilt) else { thumbnails[id] = nil; continue }  // not shown now
+            guard let index = orderIndex(of: id, in: catalog, rebuilt: &rebuilt) else { thumbnails[id] = nil; continue }  // not shown now
             let distance = index < low ? low - index : index > high ? index - high : 0
             if distance > margin { thumbnails[id] = nil } else { candidates.append((id, distance)) }
         }
         var bytes = thumbnails.values.reduce(0) { $0 + $1.rgba8.count }
-        guard bytes > Self.heldThumbnailBytes else { return }
+        guard bytes > LibraryCatalog.heldThumbnailBytes else { return }
         for candidate in candidates.sorted(by: { $0.distance > $1.distance }) {
-            guard bytes > Self.heldThumbnailBytes else { return }
+            guard bytes > LibraryCatalog.heldThumbnailBytes else { return }
             bytes -= thumbnails.removeValue(forKey: candidate.id)?.rgba8.count ?? 0
         }
     }
@@ -153,42 +171,44 @@ extension LibraryCatalog {
     /// its token still matches the photo's develop settings. A stale answer is
     /// dropped: one for a request no longer pending changes nothing; one whose
     /// settings have since changed also clears the request, so the next pass asks again.
-    public mutating func setThumbnail(_ image: DisplayImage, for request: ThumbnailRequest) {
+    public mutating func setThumbnail(_ image: DisplayImage, for request: ThumbnailRequest, in catalog: LibraryCatalog) {
         guard pendingThumbnails[request.id] == request else { return }
         pendingThumbnails[request.id] = nil
         var rebuilt = false
-        guard let index = itemIndex(of: request.id, rebuilt: &rebuilt),
-              ThumbnailToken.of(items[index].develop, longSide: request.longSide) == request.token
+        guard let index = itemIndex(of: request.id, in: catalog, rebuilt: &rebuilt),
+              ThumbnailToken.of(catalog.items[index].develop, longSide: request.longSide) == request.token
         else { return }
         thumbnails[request.id] = image
     }
 
-    /// Clears the pending request; marks the photo `.missing` or `.unreadable(reason)`
-    /// and drops any image it held. A failure for a request no longer pending is
+    /// Clears the pending request; returns the photo's new availability, `.missing`
+    /// or `.unreadable(reason)`, and drops any image it held. A failure for a request no longer pending is
     /// dropped, and `.cancelled` says nothing about the file, so it only clears the request.
-    public mutating func failThumbnail(_ request: ThumbnailRequest, _ error: LibraryError) {
-        guard pendingThumbnails[request.id] == request else { return }
+    public mutating func failThumbnail(_ request: ThumbnailRequest, _ error: LibraryError, in catalog: LibraryCatalog) -> PhotoAvailability? {
+        guard pendingThumbnails[request.id] == request else { return nil }
         pendingThumbnails[request.id] = nil
-        if case .cancelled = error { return }
+        if case .cancelled = error { return nil }
         var rebuilt = false
-        guard let index = itemIndex(of: request.id, rebuilt: &rebuilt) else { return }
+        guard itemIndex(of: request.id, in: catalog, rebuilt: &rebuilt) != nil else { return nil }
         thumbnails[request.id] = nil
-        if case .missingFile = error {
-            items[index].availability = .missing
-        } else {
-            items[index].availability = .unreadable(error.message)
-        }
+        if case .missingFile = error { return .missing }
+        return .unreadable(error.message)
     }
 
     /// A request pass's answers in one change, each through setThumbnail or
-    /// failThumbnail, so the window redraws once per pass, not once per image.
-    public mutating func applyThumbnails(_ results: [(request: ThumbnailRequest, result: Result<DisplayImage, LibraryError>)]) {
+    /// failThumbnail; returns the failed photos' new availability by id.
+    public mutating func applyThumbnails(
+        _ results: [(request: ThumbnailRequest, result: Result<DisplayImage, LibraryError>)],
+        in catalog: LibraryCatalog
+    ) -> [String: PhotoAvailability] {
+        var failures: [String: PhotoAvailability] = [:]
         for (request, result) in results {
             switch result {
-            case .success(let image): setThumbnail(image, for: request)
-            case .failure(let error): failThumbnail(request, error)
+            case .success(let image): setThumbnail(image, for: request, in: catalog)
+            case .failure(let error): failures[request.id] = failThumbnail(request, error, in: catalog) ?? failures[request.id]
             }
         }
+        return failures
     }
 
     /// Drops the held image and any pending request of `id` (after its develop
@@ -196,5 +216,61 @@ extension LibraryCatalog {
     public mutating func invalidateThumbnail(_ id: String) {
         thumbnails[id] = nil
         pendingThumbnails[id] = nil
+    }
+}
+
+extension LibraryCatalog {
+    // The catalog's own cache (tests and snapshots hold thumbnails here): each
+    // forwards to LibraryThumbnailCache, failures then set on `items`.
+    public internal(set) var thumbnails: [String: DisplayImage] {
+        get { thumbnailCache.thumbnails } set { thumbnailCache.thumbnails = newValue }
+    }
+    public internal(set) var thumbnailLongSide: Int {
+        get { thumbnailCache.thumbnailLongSide } set { thumbnailCache.thumbnailLongSide = newValue }
+    }
+    public internal(set) var pendingThumbnails: [String: ThumbnailRequest] {
+        get { thumbnailCache.pendingThumbnails } set { thumbnailCache.pendingThumbnails = newValue }
+    }
+
+    /// Runs `body` on the cache moved out of the catalog, so it reads the
+    /// catalog without an exclusivity clash and the held images aren't copied.
+    private mutating func withThumbnailCache<Value>(_ body: (inout LibraryThumbnailCache, LibraryCatalog) -> Value) -> Value {
+        var cache = thumbnailCache
+        thumbnailCache = LibraryThumbnailCache()
+        defer { thumbnailCache = cache }
+        return body(&cache, self)
+    }
+
+    mutating func itemIndex(of id: String, rebuilt: inout Bool) -> Int? {
+        withThumbnailCache { $0.itemIndex(of: id, in: $1, rebuilt: &rebuilt) }
+    }
+    mutating func orderIndex(of id: String, rebuilt: inout Bool) -> Int? {
+        withThumbnailCache { $0.orderIndex(of: id, in: $1, rebuilt: &rebuilt) }
+    }
+    public mutating func thumbnailLongSide(forCell cellWidth: Int, scale: Int) -> Int {
+        thumbnailCache.thumbnailLongSide(forCell: cellWidth, scale: scale)
+    }
+    public mutating func requestThumbnails(visible: [String]) -> [ThumbnailRequest] {
+        withThumbnailCache { $0.requestThumbnails(visible: visible, in: $1) }
+    }
+    public mutating func setThumbnail(_ image: DisplayImage, for request: ThumbnailRequest) {
+        withThumbnailCache { $0.setThumbnail(image, for: request, in: $1) }
+    }
+    public mutating func failThumbnail(_ request: ThumbnailRequest, _ error: LibraryError) {
+        guard let availability = withThumbnailCache({ $0.failThumbnail(request, error, in: $1) }) else { return }
+        applyThumbnailFailures([request.id: availability])
+    }
+    public mutating func applyThumbnails(_ results: [(request: ThumbnailRequest, result: Result<DisplayImage, LibraryError>)]) {
+        applyThumbnailFailures(withThumbnailCache { $0.applyThumbnails(results, in: $1) })
+    }
+    public mutating func invalidateThumbnail(_ id: String) { thumbnailCache.invalidateThumbnail(id) }
+
+    /// Marks each failed photo `.missing` or `.unreadable(reason)`, as a
+    /// thumbnail pass reported; an unknown id is skipped, and no failures change nothing.
+    public mutating func applyThumbnailFailures(_ failures: [String: PhotoAvailability]) {
+        guard !failures.isEmpty else { return }
+        for index in items.indices {
+            if let availability = failures[items[index].id] { items[index].availability = availability }
+        }
     }
 }

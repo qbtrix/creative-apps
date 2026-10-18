@@ -15,9 +15,6 @@ public struct FakeKeyframes: KeyframeEditing {
     public var unavailable: String?
     public init(unavailable: String? = nil) { self.unavailable = unavailable }
 
-    /// One key on one track.
-    private struct TrackKey: Hashable { var layerID: String, property: String, frame: Int }
-
     private func available() throws { if let unavailable { throw NotBuilt(reason: unavailable) } }
 
     public func rows(_ document: Document, owner: LayerOwner) -> [TimelineRow] {
@@ -46,21 +43,23 @@ public struct FakeKeyframes: KeyframeEditing {
                          coalesceKey: String?, in engine: inout CommandEngine) throws {
         try available()
         let sceneID = try Self.scene(owner)
-        let moving = try Self.expand(keys, owner: owner, in: engine.document)
+        let moving = try KernelKeys.trackKeys(keys, owner: owner, in: engine.document)
         guard delta != 0, !moving.isEmpty else { return }
         guard moving.allSatisfy({ !$0.frame.addingReportingOverflow(delta).overflow }) else { throw CommandError.invalidFrame(delta) }
         // A key moved later never lands past the scene's last frame, where its pose would never play (#636).
         guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
-        if delta > 0, let past = moving.map({ $0.frame + delta }).filter({ $0 >= scene.durationFrames }).max() {
+        let past = (moving.map(\.frame).max() ?? 0) + delta
+        guard let range = KernelKeys.frames(from: Int.min, before: delta > 0 ? scene.durationFrames : Int.max) else {
             throw CommandError.invalidFrame(past)
         }
-        // Keys at the leading edge move first, so no key passes over one that has not moved yet.
-        let ordered = moving.sorted { delta > 0 ? $0.frame > $1.frame : $0.frame < $1.frame }
+        switch KernelKeys.moveRefusal(moving, by: delta, in: engine.document.layers(of: owner) ?? [], range: range) {
+        case (.pastRange, _)?: throw CommandError.invalidFrame(past)
+        case (.collides(let frame), let property)?: throw CommandError.frameOccupied(property: property, frame: frame)
+        case nil: break
+        }
+        let ordered = KernelKeys.moves(moving, by: delta, owner: .scene(sceneID))
         func write(_ engine: inout CommandEngine) throws {
-            for key in ordered {
-                try engine.perform(MoveKeyframe(owner: .scene(sceneID), layerID: key.layerID, property: key.property,
-                                                from: key.frame, to: key.frame + delta), coalesceKey: coalesceKey)
-            }
+            for move in ordered { try engine.perform(move, coalesceKey: coalesceKey) }
         }
         // On a copy, so a move that fails part way (a key landing on another, say) leaves the engine as it was.
         var trial = engine
@@ -71,10 +70,10 @@ public struct FakeKeyframes: KeyframeEditing {
     public func removeKeys(_ keys: Set<KeyRef>, owner: LayerOwner, in engine: inout CommandEngine) throws {
         try available()
         let sceneID = try Self.scene(owner)
-        let removing = try Self.expand(keys, owner: owner, in: engine.document)
+        let removing = try KernelKeys.trackKeys(keys, owner: owner, in: engine.document)
         try engine.group("Delete Keyframe") { engine in
-            for key in removing.sorted(by: { ($0.layerID, $0.property, $0.frame) < ($1.layerID, $1.property, $1.frame) }) {
-                try engine.perform(RemoveKeyframe(owner: .scene(sceneID), layerID: key.layerID, property: key.property, frame: key.frame))
+            for removal in KernelKeys.removals(removing, owner: .scene(sceneID), in: engine.document.layers(of: owner) ?? []) {
+                try engine.perform(removal)
             }
         }
     }
@@ -84,13 +83,13 @@ public struct FakeKeyframes: KeyframeEditing {
         try available()
         let sceneID = try Self.scene(owner)
         let layers = try Self.frameEdit(count, at: frame, layerIDs: layerIDs, owner: owner, in: engine.document)
-        let shifted = layers.compactMap(Self.lastFrame).filter { $0 >= frame }
+        let shifted = layers.filter { (Self.lastFrame(of: $0) ?? Int.min) >= frame }
+            .compactMap { KernelKeys.lastKey(afterInserting: count, at: frame, in: $0) }
         guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
         // The scene grows so a key pushed past its last frame still plays (#596).
         var duration = scene.durationFrames
-        if let last = shifted.max() {
-            let (end, overflow) = last.addingReportingOverflow(count)
-            guard !overflow, end < Int.max else { throw CommandError.invalidFrame(count) }
+        if let end = shifted.max() {
+            guard end < Int.max else { throw CommandError.invalidFrame(count) }
             duration = max(duration, end + 1)
         }
         // A label sits on a frame in 0...durationFrames, so the scene grows to hold one pushed past its end too.
@@ -124,7 +123,7 @@ public struct FakeKeyframes: KeyframeEditing {
         try engine.group("Remove Frame") { engine in
             for layer in layers {
                 for (property, keys) in layer.tracks.sorted(by: { $0.key < $1.key }) {
-                    for key in keys where key.frame >= frame && key.frame < end {
+                    for key in KernelKeys.dropped(byRemoving: count, at: frame, from: keys) {
                         try engine.perform(RemoveKeyframe(owner: .scene(sceneID), layerID: layer.id, property: property, frame: key.frame))
                     }
                 }
@@ -148,24 +147,6 @@ public struct FakeKeyframes: KeyframeEditing {
             for old in here { try engine.perform(RemoveFrameLabel(sceneID: sceneID, name: old)) }
             if let name { try engine.perform(SetFrameLabel(sceneID: sceneID, name: name, frame: frame)) }
         }
-    }
-
-    /// Each `KeyRef` as the track keys it names; a summary key names every track keyed at its frame.
-    private static func expand(_ keys: Set<KeyRef>, owner: LayerOwner, in document: Document) throws -> Set<TrackKey> {
-        let layers = document.layers(of: owner) ?? []
-        var out = Set<TrackKey>()
-        for key in keys {
-            guard let layer = layers.first(where: { $0.id == key.layerID }) else { throw CommandError.layerNotFound(key.layerID) }
-            let properties = key.property.map { [$0] } ?? Array(layer.tracks.keys)
-            for property in properties {
-                guard layer.tracks[property]?.contains(where: { $0.frame == key.frame }) == true else {
-                    if key.property == nil { continue }
-                    throw CommandError.keyframeNotFound(property: property, frame: key.frame)
-                }
-                out.insert(TrackKey(layerID: layer.id, property: property, frame: key.frame))
-            }
-        }
-        return out
     }
 
     /// Whether a frame edit moves the scene ruler, and so its labels: a count of 1 or more on every layer of a scene.

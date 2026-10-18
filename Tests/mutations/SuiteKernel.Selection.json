@@ -1,0 +1,23 @@
+[
+  {
+    "label": "extendAppendsOnAStage: Shift-click without an order replaces the selection",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "                append(id)\n                if anchor == nil",
+    "replace": "                ordered = [id]\n                if anchor == nil",
+    "tests": "SelectionTests"
+  },
+  {
+    "label": "extendRangeIsClosed: the range runs anchor..<id and drops the clicked end",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "Array(order[a...b])",
+    "replace": "Array(order[a..<b])",
+    "tests": "SelectionTests"
+  },
+  {
+    "label": "toggleRefusesLocked: toggle adds without asking canAdd",
+    "file": "Sources/SuiteKernel/Selection/Selection.swift",
+    "find": "} else if canAdd(id) {",
+    "replace": "} else if true {",
+    "tests": "SelectionTests"
+  }
+]

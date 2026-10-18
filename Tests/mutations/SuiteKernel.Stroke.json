@@ -1,0 +1,44 @@
+[
+  {
+    "label": "segment emitted on the 3rd sample, not the 4th",
+    "file": "Sources/SuiteKernel/Stroke/Stroke.swift",
+    "find": "guard recent.count == 4, let before",
+    "replace": "guard recent.count >= 3, let before",
+    "tests": "StrokeTests"
+  },
+  {
+    "label": "repeated point kept",
+    "file": "Sources/SuiteKernel/Stroke/Stroke.swift",
+    "find": "        if recent.last?.point == s.point { return nil }\n",
+    "replace": "",
+    "tests": "StrokeTests"
+  },
+  {
+    "label": "flatten cap 65",
+    "file": "Sources/SuiteKernel/Stroke/Stroke.swift",
+    "find": "Int(Swift.min(64, Swift.max(1, raw)))",
+    "replace": "Int(Swift.min(65, Swift.max(1, raw)))",
+    "tests": "StrokeTests"
+  },
+  {
+    "label": "NaN pressure reads as 0",
+    "file": "Sources/SuiteKernel/Stroke/Stroke.swift",
+    "find": "pressure.isNaN ? 1 :",
+    "replace": "pressure.isNaN ? 0 :",
+    "tests": "StrokeTests"
+  },
+  {
+    "label": "dab spacing floor 0",
+    "file": "Sources/SuiteKernel/Stroke/Stroke.swift",
+    "find": "let step = spacing >= 1 ? spacing : 1",
+    "replace": "let step = spacing >= 0 ? spacing : 0",
+    "tests": "StrokeTests"
+  },
+  {
+    "label": "LiveCopy.take twice returns the copy twice",
+    "file": "Sources/SuiteKernel/Stroke/LiveCopy.swift",
+    "find": "        let copy = shown\n        shown = nil\n",
+    "replace": "        let copy = shown\n",
+    "tests": "StrokeTests"
+  }
+]

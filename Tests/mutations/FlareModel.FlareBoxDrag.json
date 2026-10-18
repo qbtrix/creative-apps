@@ -1,0 +1,37 @@
+[
+  {
+    "label": "a corner scales from the opposite corner's number",
+    "file": "Sources/FlareModel/FlareBoxDrag.swift",
+    "find": "        case .corner(let i): 2 * i\n",
+    "replace": "        case .corner(let i): 2 * i + 4\n",
+    "tests": "FlareBoxDragTests"
+  },
+  {
+    "label": "the rotate drag turns the wrong way",
+    "file": "Sources/FlareModel/FlareBoxDrag.swift",
+    "find": "(atan2(end.y - c.y, end.x - c.x) - atan2(start.y - c.y, start.x - c.x))",
+    "replace": "(atan2(start.y - c.y, start.x - c.x) - atan2(end.y - c.y, end.x - c.x))",
+    "tests": "FlareBoxDragTests"
+  },
+  {
+    "label": "the rotate zone grabs from three times the slop",
+    "file": "Sources/FlareModel/FlareBoxDrag.swift",
+    "find": "max(abs($0.point.x - point.x), abs($0.point.y - point.y)) <= tolerance }",
+    "replace": "max(abs($0.point.x - point.x), abs($0.point.y - point.y)) <= 3 * tolerance }",
+    "tests": "FlareBoxDragTests"
+  },
+  {
+    "label": "the preview leaves the art where it was",
+    "file": "Sources/FlareModel/FlareBoxDrag.swift",
+    "find": "                list.items[i].transform = delta * item.transform\n",
+    "replace": "",
+    "tests": "FlareBoxDragTests"
+  },
+  {
+    "label": "a drag on a handle never holds it",
+    "file": "Sources/FlareModel/FlareBoxDrag.swift",
+    "find": "        return BoxGrip(handle: handle, box: box)\n",
+    "replace": "        return nil\n",
+    "tests": "FlareBoxDragTests"
+  }
+]

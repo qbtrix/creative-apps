@@ -36,6 +36,7 @@ A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
 A Sources/PhotoApp/StraightenSheet.swift::StraightenSheet Sheet
 B Sources/AfterGlowApp/HomeGrid.swift::HomeGrid caps-header
 B Sources/AfterGlowApp/HomeRunningStrip.swift::HomeRunningStrip caps-header
+B Sources/AfterGlowApp/OnboardingWindow.swift::OnboardingWindow sheet-buttons
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark accent-outline
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark probe-element
 B Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark accent-outline

@@ -32,7 +32,10 @@
 // scrollable area's frame (the viewport, or the artboard plus its margin), and
 // the app journeys drag on it by normalized offsets of that area (#566). The
 // artboard's own rectangle at the current zoom is the leaf element
-// `suite.canvas.artboard`, for a journey that measures the document.
+// `suite.canvas.artboard`, for a journey that measures the document. The
+// container registers as the enabled control `suite.canvas` (`.suiteControl`),
+// and under a probe host each tool-drag or Space-pan move reports a sample of
+// series `canvas-drag` (CanvasProbe, SP2).
 import SwiftUI
 
 /// Where the artboard sits in the scrollable canvas, in points.
@@ -132,6 +135,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     @State private var panStart: CGPoint?
     @FocusState private var isFocused: Bool
     @Environment(\.canvasFitScale) private var fitScale
+    @Environment(\.canvasProbe) private var probe
 
     /// `documentSize` in pixels; `content` and `overlay` are laid out at the
     /// artboard's size (the document at `zoom`), overlay on top. Only the
@@ -212,7 +216,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 // Above the clip, so a selection's handles past the document's edge still show.
                 .overlay(alignment: .topLeading) { overlay }
                 .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("suite.canvas")
+                .suiteControl(id: "suite.canvas", enabled: true, reason: nil)
                 .padding(.leading, layout.origin.x)
                 .padding(.top, layout.origin.y)
             }
@@ -287,7 +291,9 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onChanged { value in
                 guard let start = panStart ?? (spaceHeld && last == nil ? scrolled : nil) else { return }
                 panStart = start
+                let eventTime = ProcessInfo.processInfo.systemUptime
                 position.scrollTo(point: layout.panned(from: start, by: value.translation))
+                report(eventTime)
             }
             .onEnded { _ in panStart = nil }
     }
@@ -298,15 +304,26 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 // A drag that starts with Space held is a pan; a tool drag under way keeps going.
                 guard panStart == nil, last != nil || !spaceHeld else { return }
                 if takesKeys { isFocused = true }
+                let eventTime = ProcessInfo.processInfo.systemUptime
                 let point = layout.documentPoint(value.location)
                 onDrag?(last ?? layout.documentPoint(value.startLocation), point)
                 last = point
+                report(eventTime)
             }
             .onEnded { _ in
                 guard last != nil else { return }
                 last = nil
                 onDragEnd?()
             }
+    }
+
+    /// A drag sample, shown by the next main-actor turn after the move (the
+    /// host's update has run by then).
+    private func report(_ eventTime: Double) {
+        guard let probe else { return }
+        Task { @MainActor in
+            probe.record(CanvasProbe.sample(eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
+        }
     }
 
     private var pinch: some Gesture {
@@ -330,4 +347,27 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 Path(CGRect(x: square, y: square, width: square, height: square)), with: .color(SuiteColor.checkerLight))
         }
     }
+}
+
+/// Where a CanvasViewport reports its drag samples (series `canvas-drag`,
+/// SP2); a probe host sets it, and nil records nothing.
+struct CanvasProbe: Sendable {
+    static let dragSeries = "canvas-drag"
+    let record: @MainActor @Sendable (ProbeSample) -> Void
+
+    static func sample(eventTime: Double, shownAt: Double) -> ProbeSample {
+        ProbeSample(series: dragSeries, eventTime: eventTime, shownAt: shownAt)
+    }
+}
+
+extension EnvironmentValues {
+    /// Where a CanvasViewport reports its drag samples; nil records nothing.
+    var canvasProbe: CanvasProbe? {
+        get { self[CanvasProbeKey.self] }
+        set { self[CanvasProbeKey.self] = newValue }
+    }
+}
+
+private struct CanvasProbeKey: EnvironmentKey {
+    static let defaultValue: CanvasProbe? = nil
 }

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "progress goes back",
+    "file": "Sources/SuiteKernel/Export/ExportRun.swift",
+    "find": "let forward = max(done, old)",
+    "replace": "let forward = done",
+    "tests": "ExportRunTests"
+  },
+  {
+    "label": "done past the total kept",
+    "file": "Sources/SuiteKernel/Export/ExportRun.swift",
+    "find": "done: min(forward, total)",
+    "replace": "done: forward",
+    "tests": "ExportRunTests"
+  },
+  {
+    "label": "cancel fails instead of going idle",
+    "file": "Sources/SuiteKernel/Export/ExportRun.swift",
+    "find": "where error is CancellationError: self = .idle",
+    "replace": "where error is CancellationError: self = .failed(o, \"cancelled\")",
+    "tests": "ExportRunTests"
+  },
+  {
+    "label": "begin accepted while running",
+    "file": "Sources/SuiteKernel/Export/ExportRun.swift",
+    "find": "if case .running = self { return false }",
+    "replace": "_ = 0",
+    "tests": "ExportRunTests"
+  }
+]

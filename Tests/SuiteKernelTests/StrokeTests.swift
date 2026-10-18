@@ -4,8 +4,7 @@
 // segment into 1...64 pieces; `DabSpacer` spaces dabs with a floor of 1 and a
 // cap; `BrushSettings` clamps every value and ignores NaN; `BrushPreset`
 // round-trips through JSON; `LiveCopy` hands its copy back once. KJ10 walks
-// them together on the `strokeSamples` fixture. Checks first (docs/factory/
-// lead.md rule 13): every test is disabled until EK-28 fills the bodies.
+// them together on the `strokeSamples` fixture.
 import Foundation
 import Testing
 import SuiteKernel
@@ -30,7 +29,7 @@ import SuiteKernel
 
     // MARK: StrokeSmoother
 
-    @Test(.disabled("waits on EK-28")) func oneSegmentLate() {
+    @Test func oneSegmentLate() {
         var smoother = StrokeSmoother()
         let samples = Self.line(5)
         let firstThree = samples.prefix(3).map { smoother.add($0) }
@@ -40,7 +39,7 @@ import SuiteKernel
         #expect(fifth != nil)
     }
 
-    @Test(.disabled("waits on EK-28")) func segmentsChainThroughTheSamples() throws {
+    @Test func segmentsChainThroughTheSamples() throws {
         let samples = StrokeSample.strokeSamples
         let segs = Self.segments(samples)
         #expect(!segs.isEmpty)
@@ -51,7 +50,7 @@ import SuiteKernel
         #expect(last.p1 == samples.last?.point)
     }
 
-    @Test(.disabled("waits on EK-28")) func dropsRepeatedPoint() {
+    @Test func dropsRepeatedPoint() {
         let clean = Self.line(6)
         var repeated: [StrokeSample] = []
         for s in clean { repeated.append(s); repeated.append(StrokeSample(point: s.point, pressure: s.pressure, time: s.time + 0.001)) }
@@ -64,7 +63,7 @@ import SuiteKernel
         #expect(Self.segments(repeated) == Self.segments(clean))
     }
 
-    @Test(.disabled("waits on EK-28")) func pressureClamps() {
+    @Test func pressureClamps() {
         let samples = Self.line(6).enumerated().map { i, s in
             StrokeSample(point: s.point, pressure: i.isMultiple(of: 2) ? 1.7 : -0.4, time: s.time)
         }
@@ -74,13 +73,13 @@ import SuiteKernel
         #expect(segs.allSatisfy { $0.pressure == 0...1 })
     }
 
-    @Test(.disabled("waits on EK-28")) func nanPressureIsOne() {
+    @Test func nanPressureIsOne() {
         let segs = Self.segments(Self.line(6, pressure: .nan))
         #expect(!segs.isEmpty)
         #expect(segs.allSatisfy { $0.pressure == 1...1 })
     }
 
-    @Test(.disabled("waits on EK-28")) func pressureRangeSpansTheEnds() {
+    @Test func pressureRangeSpansTheEnds() {
         let samples = StrokeSample.strokeSamples
         let byPoint = Dictionary(samples.map { ($0.point, $0.pressure) }, uniquingKeysWith: { a, _ in a })
         for seg in Self.segments(samples) {
@@ -89,7 +88,7 @@ import SuiteKernel
         }
     }
 
-    @Test(.disabled("waits on EK-28")) func mirroredEnds() throws {
+    @Test func mirroredEnds() throws {
         let samples = Self.line(6)
         let segs = Self.segments(samples)
         let first = try #require(segs.first), last = try #require(segs.last)
@@ -102,7 +101,7 @@ import SuiteKernel
         #expect(last.c2.x > last.p0.x && last.c2.x < last.p1.x)
     }
 
-    @Test(.disabled("waits on EK-28")) func finishOnEmptyIsNil() {
+    @Test func finishOnEmptyIsNil() {
         var smoother = StrokeSmoother()
         let finished = smoother.finish()
         let added = smoother.add(StrokeSample(point: Point(x: 0, y: 0)))
@@ -110,21 +109,21 @@ import SuiteKernel
         #expect(added == nil)
     }
 
-    @Test(.disabled("waits on EK-28")) func flattenStraightIsOnePiece() {
+    @Test func flattenStraightIsOnePiece() {
         let seg = StrokeSegment(p0: Point(x: 0, y: 0), c1: Point(x: 10, y: 0), c2: Point(x: 20, y: 0), p1: Point(x: 30, y: 0), pressure: 1...1)
         let points = StrokeSmoother.flattened(seg, tolerance: 0.25)
         #expect(points.count == 2)
         #expect(points.first == seg.p0 && points.last == seg.p1)
     }
 
-    @Test(.disabled("waits on EK-28")) func flattenCap64() {
+    @Test func flattenCap64() {
         let seg = StrokeSegment(p0: Point(x: 0, y: 0), c1: Point(x: 0, y: 1_000_000), c2: Point(x: 1_000_000, y: -1_000_000), p1: Point(x: 10, y: 0), pressure: 1...1)
         let points = StrokeSmoother.flattened(seg, tolerance: 0.01)
         #expect(points.count == 65)
         #expect(points.first == seg.p0 && points.last == seg.p1)
     }
 
-    @Test(.disabled("waits on EK-28")) func flattenCountInRange() {
+    @Test func flattenCountInRange() {
         for seg in Self.segments(StrokeSample.strokeSamples) {
             let points = StrokeSmoother.flattened(seg, tolerance: 0.25)
             #expect((2...65).contains(points.count))
@@ -134,7 +133,7 @@ import SuiteKernel
 
     // MARK: DabSpacer
 
-    @Test(.disabled("waits on EK-28")) func dabSpacing() throws {
+    @Test func dabSpacing() throws {
         let a = Point(x: 0, y: 0), b = Point(x: 100, y: 0)
         let dabs = DabSpacer.centers(a, b, spacing: 10)
         #expect(dabs.first == a)
@@ -143,7 +142,7 @@ import SuiteKernel
         #expect(dabs.allSatisfy { $0.y == 0 && $0.x >= 0 && $0.x <= 100 })
     }
 
-    @Test(.disabled("waits on EK-28")) func spacingFloorOne() {
+    @Test func spacingFloorOne() {
         let a = Point(x: 0, y: 0), b = Point(x: 10, y: 0)
         for spacing in [0, -5, 0.25] {
             let dabs = DabSpacer.centers(a, b, spacing: spacing)
@@ -152,7 +151,7 @@ import SuiteKernel
         }
     }
 
-    @Test(.disabled("waits on EK-28")) func dabCap() {
+    @Test func dabCap() {
         let dabs = DabSpacer.centers(Point(x: 0, y: 0), Point(x: 1_000, y: 0), spacing: 1, cap: 5)
         #expect(dabs.count == 5)
         #expect(DabSpacer.centers(Point(x: 0, y: 0), Point(x: 1_000_000, y: 0), spacing: 1).count == 10_000)
@@ -160,7 +159,7 @@ import SuiteKernel
 
     // MARK: BrushSettings and BrushPreset
 
-    @Test(.disabled("waits on EK-28")) func clampsSize() {
+    @Test func clampsSize() {
         var s = BrushSettings()
         let big = s.apply(.size(1_000)), bigSize = s.size
         let zero = s.apply(.size(0)), zeroSize = s.size
@@ -172,7 +171,7 @@ import SuiteKernel
         #expect(!again)
     }
 
-    @Test(.disabled("waits on EK-28")) func clampsPercentages() {
+    @Test func clampsPercentages() {
         var s = BrushSettings(size: 20, hardness: 50, opacity: 50, flow: 50, spacing: 50)
         let changed = [s.apply(.hardness(150)), s.apply(.opacity(-5)), s.apply(.flow(250)), s.apply(.spacing(-1))]
         let again = s.apply(.hardness(100))
@@ -181,7 +180,7 @@ import SuiteKernel
         #expect(!again)
     }
 
-    @Test(.disabled("waits on EK-28")) func ignoresNaN() {
+    @Test func ignoresNaN() {
         var s = BrushSettings()
         let before = s
         let changed = [BrushEdit.size(.nan), .hardness(.nan), .opacity(.nan), .flow(.nan), .spacing(.nan)].map { s.apply($0) }
@@ -189,7 +188,7 @@ import SuiteKernel
         #expect(s == before)
     }
 
-    @Test(.disabled("waits on EK-28")) func presetRoundTrip() throws {
+    @Test func presetRoundTrip() throws {
         var settings = BrushSettings()
         _ = settings.apply(.size(64))
         _ = settings.apply(.hardness(30))
@@ -203,7 +202,7 @@ import SuiteKernel
 
     // MARK: LiveCopy
 
-    @Test(.disabled("waits on EK-28")) func takeOnce() {
+    @Test func takeOnce() {
         var live = LiveCopy<Int>()
         live.begin(1)
         let edited = live.edit { $0 += 1 }
@@ -216,7 +215,7 @@ import SuiteKernel
         #expect(live.shown == nil)
     }
 
-    @Test(.disabled("waits on EK-28")) func nothingBegunIsNil() {
+    @Test func nothingBegunIsNil() {
         var live = LiveCopy<Int>()
         let edited = live.edit { $0 += 1 }
         let taken = live.take()
@@ -224,7 +223,7 @@ import SuiteKernel
         #expect(taken == nil)
     }
 
-    @Test(.disabled("waits on EK-28")) func secondBeginIgnored() {
+    @Test func secondBeginIgnored() {
         var live = LiveCopy<Int>()
         live.begin(1)
         live.begin(5)
@@ -237,7 +236,7 @@ import SuiteKernel
 
     /// KJ10, the stroke walk: the fixture through the smoother, each segment
     /// flattened and dabbed at the brush's spacing into a live copy, taken once.
-    @Test(.disabled("waits on EK-28")) func strokeWalk() throws {
+    @Test func strokeWalk() throws {
         let samples = StrokeSample.strokeSamples
         var brush = BrushSettings()
         let sized = brush.apply(.size(12))

@@ -3,7 +3,10 @@
 // docs/blueprints/library/features/loupe-viewport.md, Journey steps). Steps 1
 // to 5 run on the `shoot` fixture's fakes; then step 1's loading sub-step
 // relaunches with `-LibraryFakeMode slow`, where the grid thumbnail shows at
-// once as a `preview` and the `full` render lands 2 s later. The loupe photo
+// once as a `preview` and the `full` render lands 2 s later. LV-10 runs
+// steps 1 to 5 again live, on the 24 JPEGs `LibraryFiles.writeShoot`
+// writes, imported on launch (`-LibraryImportOnLaunch`; those shots end
+// `-live`): each written file reaches `full` within 2 s. The loupe photo
 // (`library.loupe.photo`) carries `loupeValue` as its value ("full 2048×1365
 // 100% No stars"); the readout (`library.loupe.position`) reads "<name>  ·
 // <n> of 24  ·  <cull summary>". Grid cells are `library.grid.cell.<photo id>`
@@ -18,7 +21,7 @@ import XCTest
 extension LibraryJourneyTests {
     /// J3: open a photo in the loupe at its real size, step, zoom to 100%,
     /// pan, Zoom to Fit, End and Home, and return to the grid on the photo.
-    @MainActor func testLoupeStepsZoomsAndReturns() {
+    @MainActor func testLoupeStepsZoomsAndReturns() throws {
         loupeSteps(Journey("Library", self, arguments: ["-LibraryFixture", "shoot"]), suffix: "")
 
         // Step 1 (F), loading: the held thumbnail shows at once as `preview`,
@@ -35,6 +38,15 @@ extension LibraryJourneyTests {
         slow.shot("loupe-preview")
         expectLoupeValue(prefix: "full", within: 6, slow)
         slow.app.terminate()
+
+        // Live (LV-10): the same steps on real files imported on launch.
+        let folder = try LibraryFiles.freshPhotoFolder()
+        let catalog = try LibraryFiles.freshCatalogDir()
+        addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
+        try LibraryFiles.writeShoot(in: folder)
+        loupeSteps(Journey("Library", self, arguments: [
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path, "-LibraryImportOnLaunch",
+        ]), suffix: "-live")
     }
 
     /// J3 steps 1 to 5 on `library`, each shot's name ending `suffix`.
@@ -120,10 +132,12 @@ extension LibraryJourneyTests {
             format: "identifier BEGINSWITH %@ AND identifier CONTAINS %@", "library.grid.cell.", name)).firstMatch
     }
 
-    /// Waits for the window and a grid cell (a live import's may take a while), then View > Sort By > Name.
+    /// Waits for the window and IMG_0024's cell, then View > Sort By > Name.
+    /// IMG_0024 leads in capture order; a live import scans every file before
+    /// it adds the first, so the rest follow it within a batch or two.
     @MainActor private func loupeSortByName(_ library: Journey) {
         XCTAssert(library.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
-        XCTAssert(loupeCell("IMG_", library).waitForExistence(timeout: 60), "no grid cell (library.grid.cell.<id>)")
+        XCTAssert(loupeCell("IMG_0024", library).waitForExistence(timeout: 60), "no grid cell for IMG_0024")
         let view = library.app.menuBars.firstMatch.menuBarItems["View"]
         view.click()
         let sort = view.menuItems["Sort By"]

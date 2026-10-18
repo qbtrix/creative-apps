@@ -1,5 +1,6 @@
 // DocumentSession.swift (EK-3 stub, EK-24 body): the one document session. Dirty is read
-// from tokens (history step ids), never a flag. Stubs return fakes and never trap.
+// from tokens (history step ids), never a flag, so undoing back to the saved step reads
+// clean. Autosave is due a delay after the last edit that no autosave has covered.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -24,18 +25,29 @@ public struct DocumentSession: Hashable, Sendable {
         savedToken = token; currentToken = token; lastEdit = nil; lastAutosave = nil; self.status = status
     }
 
-    /// True when the current token is not the saved one. Stub: false until EK-24.
-    public var isDirty: Bool { false }
+    /// True when the current token is not the saved one.
+    public var isDirty: Bool { currentToken != savedToken }
 
     /// True when dirty and `delay` has passed since the last edit with no
-    /// autosave after it. Stub: false until EK-24.
-    public func autosaveDue(now: Date, delay: TimeInterval) -> Bool { false }
+    /// autosave at or after it. False for a delay that is negative, NaN or infinite.
+    public func autosaveDue(now: Date, delay: TimeInterval) -> Bool {
+        guard delay.isFinite, delay >= 0, isDirty, let edit = lastEdit else { return false }
+        if let autosave = lastAutosave, autosave >= edit { return false }
+        return now.timeIntervalSince(edit) >= delay
+    }
 
-    /// Records a save at `token`. Stub: ignored until EK-24.
-    public mutating func didSave(token: Int) {}
+    /// Records a save at `token`: that step is the saved one and the status reads saved.
+    public mutating func didSave(token: Int) {
+        savedToken = token
+        status = .saved
+    }
 
-    /// Records an edit that moved the history to `token` at `at`. Stub: ignored until EK-24.
-    public mutating func didEdit(token: Int, at: Date) {}
+    /// Records an edit that moved the history to `token` at `at`; an undo or
+    /// redo counts, so moving back to the saved token reads clean.
+    public mutating func didEdit(token: Int, at: Date) {
+        currentToken = token
+        lastEdit = at
+    }
 }
 
 /// An autosaved copy found at launch, offered back to the person.
@@ -46,6 +58,6 @@ public struct RecoveryOffer: Hashable, Sendable {
     /// An offer for `name` autosaved at `savedAt`.
     public init(name: String, savedAt: Date) { self.name = name; self.savedAt = savedAt }
 
-    /// The question the recovery alert asks. Stub: the name until EK-24.
-    public var prompt: String { name }
+    /// The question the recovery alert asks, naming the document.
+    public var prompt: String { "Restore the autosaved changes to \u{201C}\(name)\u{201D}?" }
 }

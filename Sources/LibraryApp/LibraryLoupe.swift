@@ -2,9 +2,9 @@
 // photo's own pixel size (a portrait photo stands taller than wide), drawn
 // at `loupeZoom` against the fit the viewport measured. It shows the latest
 // render (the grid thumbnail as a preview, then the full render, swapped
-// with no animation), or a placeholder with the photo's name and size until
-// one arrives. Its help says why the file can't be read or the render
-// failed. The name, "12 of 60" position and cull summary sit in a glass
+// with no animation), or a placeholder until one arrives: the photo's frame
+// in a card tone with its name and size. Its help says why the file can't be
+// read or the render failed. The name, "12 of 60" position and cull summary sit in a glass
 // readout. Left and Right step through the sort; Escape, G or the glass
 // Grid button at the top leading corner (`library.loupe.grid`) go back to
 // the grid. The canvas pans on the other arrows, scroll and Space-drag, and
@@ -68,15 +68,16 @@ struct LibraryLoupe: View {
     }
 
     /// The latest render filling the artboard, or the placeholder: the photo's
-    /// name and size on the surround color. One element either way, carrying
-    /// `loupeValue` (`preview`, `full`, `loading`, …) and the help.
+    /// name and size on a card-toned frame of the photo's shape. One element
+    /// either way, carrying `loupeValue` (`preview`, `full`, `loading`, …) and the help.
     private var picture: some View {
         Group {
             if let render = model.loupeRender {
                 Image(display: render.image).resizable()
             } else {
                 ZStack {
-                    SuiteColor.canvasSurround
+                    // A card tone, not the surround, so the photo's frame shows before its pixels do.
+                    SuiteColor.card
                     Text(model.loupePlaceholder ?? "")
                         .font(SuiteFont.monospacedDigits)
                         .foregroundStyle(SuiteColor.secondaryText)
