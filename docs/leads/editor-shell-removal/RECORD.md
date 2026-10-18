@@ -1,7 +1,7 @@
 # editor-shell-removal lead record
 
 Issue: #1529 · Packet: docs/blueprints/suiteui/features/editor-shell-removal.md
-Run: act-1a1483c0771-g24c · Session: claude/task-52830u · Started: 2026-10-17T06:04Z
+Run: act-1a14d197cc1-i61z · Session: claude/feature-lead-suiteui-editor-zic5j2 · Started: 2026-10-17T06:04Z
 Stage: 0 setup
 Base: 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745
 Next: parked: the captain's comment on #1529 (2026-10-17 03:08 UTC) takes this feature out of the beta cut ("resumes after beta; finish the slice in flight, then stop") and nothing is in flight; a lead resumes at stage 1 when the supervisor says so
