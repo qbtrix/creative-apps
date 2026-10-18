@@ -9,6 +9,8 @@
 // -SuiteGalleryFakes. Each change writes one line to the `suite.gallery.log`
 // element the journeys read: `play on`, `frame 13`, `loop on`, `toggle onion`,
 // `tab layers`, `tool b`, `frames 0`, `reduce motion on`, `warning off`.
+// The timecode's tooltip, which XCUITest can't read, is also the label of the
+// hidden `suite.gallery.editor.timecode-help` readout (SJ5).
 // `empty` shows EmptyStateView with its primary action (log `action new`)
 // and the variant with no action. `save-status` draws EditorSaveStatus in
 // its three states.
@@ -122,6 +124,10 @@ private struct GalleryChromeEditor: View {
                 onStart: { page.move(to: stepping.toStart(transport)) },
                 onEnd: { page.move(to: stepping.toEnd(transport)) },
                 onLoop: { page.setLoops($0) })
+                .background(alignment: .topLeading) {
+                    GalleryTimelineReadout(
+                        identifier: "suite.gallery.editor.timecode-help", text: stepping.face(transport).timecodeHelp ?? "")
+                }
             SegmentedTabs(
                 "Panel", tabs: GalleryEditorPage.tabs, selection: page.tab, id: "suite.gallery.editor.tabs"
             ) { page.select(tab: $0) }
