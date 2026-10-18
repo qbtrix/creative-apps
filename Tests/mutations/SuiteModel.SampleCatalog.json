@@ -28,6 +28,20 @@
     "tests": "SampleCatalogTests"
   },
   {
+    "label": "whileBecomesIf",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "while exists(folder + \"\\(stem) \\(number)\\(suffix)\") { number += 1 }",
+    "replace": "if exists(folder + \"\\(stem) \\(number)\\(suffix)\") { number += 1 }",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "stepsByOne",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "{ number += 1 }",
+    "replace": "{ number += 2 }",
+    "tests": "SampleCatalogTests"
+  },
+  {
     "label": "photoTitleCapitalised",
     "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
     "find": "type: .photoOpenRaster, title: \"Beach\")",
