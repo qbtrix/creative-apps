@@ -53,6 +53,14 @@ private func loupeOnThird() -> (catalog: LibraryCatalog, order: [String]) {
     #expect(catalog.loupeValue?.hasPrefix("loading") == true)
 }
 
+@Test func focusChangeInTheGridShowsNoPicture() throws {
+    var (catalog, order) = loupeOnThird()
+    catalog.thumbnails[order[2]] = try #require(pixels(7))
+    catalog.showGrid()
+    catalog.loupeFocusChanged()
+    #expect(catalog.loupeRender == nil)
+}
+
 @Test func requestCarriesThePhotoItsSettingsAndANewToken() throws {
     var (catalog, order) = loupeOnThird()
     let before = catalog.loupeRenderToken

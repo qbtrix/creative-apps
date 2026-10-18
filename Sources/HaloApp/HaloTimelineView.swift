@@ -107,7 +107,7 @@ struct HaloTimelineView: View {
             }
             .frame(height: height)
             .background(alignment: .topLeading) {
-                ForEach(rows) { HaloReadoutElement(identifier: "halo.timeline.keys", text: $0.keysReadout) }
+                ForEach(rows) { ProbeElement("halo.timeline.keys", label: $0.keysReadout, size: HaloReadout.size) }
             }
             if rows.isEmpty {
                 Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")

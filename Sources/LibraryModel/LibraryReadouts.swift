@@ -36,6 +36,13 @@ extension LibraryCatalog {
     /// photo's `cullSummary` ("ready 256×171 3 stars, Picked, Red label"). Empty for an unknown id.
     public func cellValue(for id: String) -> String {
         guard let photo = items.first(where: { $0.id == id }) else { return "" }
+        return cellValue(photo: photo)
+    }
+
+    /// `cellValue(for:)` for a photo already in hand, in O(1), so the grid
+    /// building every cell's value stays O(n) on a 10,000-photo catalog.
+    public func cellValue(photo: PhotoItem) -> String {
+        let id = photo.id
         let state: String
         if photo.availability != .available {
             state = "unreadable"
@@ -135,6 +142,13 @@ extension LibraryCatalog {
             return LibraryNoticeContent(message: cullError, isError: true, action: action, source: .cull)
         }
         return nil
+    }
+
+    /// Whether the content shows `emptyState`: the catalog has no photos and
+    /// the launch read has finished. While it runs the content stays blank,
+    /// so a saved catalog never flashes "No Photos" before it appears.
+    public var showsEmptyState: Bool {
+        isEmpty && catalogState != .loading
     }
 
     /// What the empty catalog's content says, agreeing with the catalog

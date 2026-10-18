@@ -92,6 +92,8 @@ private struct FrameRow: Identifiable {
 
 /// The selected layer's header and sections.
 private struct DesignNodeProperties: View {
+    /// The coordinate space where the X field's leading x (`valueColumn`) and the style hint are measured.
+    nonisolated static let hintSpace = "design.properties.column"
     let model: DesignWorkspace
     let node: DesignNode
     /// Why the layer can't be edited (it or a group around it is locked), or nil.
@@ -118,7 +120,9 @@ private struct DesignNodeProperties: View {
                         .toggleStyle(.checkbox)
                 }
                 DesignOpacityRow(model: model, perform: perform)
-                if let hint { DesignStyleHint(text: hint, column: valueColumn) }
+                if let hint {
+                    InspectorNote(hint, identifier: "design.inspector.hint", column: (valueColumn, Self.hintSpace))
+                }
             }
             InspectorSection("Frame") {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
@@ -126,7 +130,7 @@ private struct DesignNodeProperties: View {
                         InspectorRow(row.label) {
                             row.scrubField(model, help: lockHelp, perform: perform)
                                 .onGeometryChange(for: CGFloat.self) {
-                                    $0.frame(in: .named(DesignStyleHint.space)).minX
+                                    $0.frame(in: .named(Self.hintSpace)).minX
                                 } action: { if row.field == .x { valueColumn = $0 } }
                         }
                     }
@@ -146,7 +150,7 @@ private struct DesignNodeProperties: View {
                 }
             }
         }
-        .coordinateSpace(.named(DesignStyleHint.space))
+        .coordinateSpace(.named(Self.hintSpace))
     }
 }
 

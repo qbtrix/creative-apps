@@ -69,7 +69,9 @@ struct PhotoEditor: View {
             } status: {
                 HStack(spacing: 0) {
                     if let saveStatus {
-                        PhotoSaveStatusLabel(status: saveStatus, fileName: model.documentName)
+                        EditorSaveStatus(
+                            saveStatus.editorState, title: saveStatus.title,
+                            help: saveStatus.help(fileName: model.documentName), identifier: "photo.bar.saved")
                     }
                     PhotoStatusLine(model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds)
                 }

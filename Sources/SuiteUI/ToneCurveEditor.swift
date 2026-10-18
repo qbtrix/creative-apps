@@ -7,10 +7,14 @@
 // press Delete to remove it; arrows nudge the focused point (Shift ten times
 // as far), Tab and Shift-Tab step between points. Values go out through
 // `onChange` during a gesture and one `onEnd` after it (and after each nudge
-// or delete), so each is one undo step. Knows no Model. The point math is
-// static and tested in ToneCurveEditorTests; mapping, the curve path and
-// nudge steps are CurveEditor's statics. Under Increase Contrast the well
-// gets an outline. Owns presentation state only: focus and the gesture.
+// or delete), so each is one undo step: ToneCurveGesture keeps the suite's
+// EditRun, so a press that changed nothing ends nothing. A drag's changes
+// report probe series `curve-drag` (SP7) to the window's probe sink. Knows no
+// Model. The point math is static and tested in ToneCurveEditorTests, and
+// SuiteCurvePointEditing is its CurvePointEditing conformance (UC15); mapping,
+// the curve path and nudge steps are CurveEditor's statics. Under Increase
+// Contrast the well gets an outline. Every point is listed in `suite.controls`.
+// Owns presentation state only: focus and the gesture.
 import SwiftUI
 
 public struct ToneCurveEditor: View {
@@ -21,10 +25,10 @@ public struct ToneCurveEditor: View {
     private let onChange: @MainActor ([CGPoint]) -> Void
     private let onEnd: @MainActor () -> Void
     @State private var focused: Int?
-    /// The point moved (nil: the click added none), the points and its view position at the start.
-    @State private var drag: (index: Int?, start: [CGPoint], anchor: CGPoint, changed: Bool)?
+    @State private var gesture = ToneCurveGesture()
     @FocusState private var hasFocus: Bool
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.scrubProbe) private var probe
 
     /// `points`: unit control points sorted by x, the ends at x 0 and 1. `samples`: the engine's curve
     /// through them. `histogram`: bin heights at any scale, drawn normalised to the tallest; empty draws
@@ -56,8 +60,7 @@ public struct ToneCurveEditor: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { dragged($0, plot: plot, size: geo.size) }
                     .onEnded { _ in
-                        if drag?.changed == true { onEnd() }
-                        drag = nil
+                        if gesture.released() { onEnd() }
                     }
             )
         }
@@ -80,7 +83,7 @@ public struct ToneCurveEditor: View {
         .onKeyPress(keys: [.delete, .deleteForward]) { _ in delete() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tone Curve")
-        .accessibilityIdentifier(id)
+        .suiteControl(id: id, enabled: true, reason: nil)
     }
 
     private func draw(in context: GraphicsContext, plot: CGRect) {
@@ -101,6 +104,7 @@ public struct ToneCurveEditor: View {
 
     private func point(_ index: Int, plot: CGRect) -> some View {
         // While dragged the moved point is the active one, unless it is out of the well (removed).
+        let drag = gesture.drag
         let active = drag?.index.map { $0 == index && drag?.start.count == points.count } ?? (focused == index)
         let unit = points[index]
         return Circle()
@@ -115,30 +119,30 @@ public struct ToneCurveEditor: View {
             .accessibilityElement()
             .accessibilityLabel("Point \(index + 1)")
             .accessibilityValue(CurveEditor.describe(unit))
-            .accessibilityIdentifier("\(id).point\(index + 1)")
+            .suiteControl(id: Self.pointID(id, index), enabled: true, reason: nil)
     }
 
     /// The first event picks the point (a hit) or adds one (a miss); later ones move it from where it
     /// began, or remove it while the pointer is out of the well.
     private func dragged(_ value: DragGesture.Value, plot: CGRect, size: CGSize) {
-        if drag == nil {
-            if let hit = Self.hitIndex(at: value.startLocation, of: points, in: plot) {
-                drag = (hit, points, CurveEditor.viewPoint(points[hit], in: plot, range: 0...1), false)
-            } else if let added = Self.added(CurveEditor.unitPoint(value.startLocation, in: plot, range: 0...1), to: points) {
-                drag = (added.index, added.points, value.startLocation, true)
-                onChange(added.points)
-            } else {
-                drag = (nil, points, .zero, false)
-            }
-            focused = drag?.index ?? focused
+        if gesture.drag == nil {
+            if let added = gesture.pressed(at: value.startLocation, points: points, in: plot) { onChange(added) }
+            focused = gesture.drag?.index ?? focused
             hasFocus = true
         }
-        guard let start = drag?.start, let index = drag?.index, let anchor = drag?.anchor, value.translation != .zero
-        else { return }
-        let at = CGPoint(x: anchor.x + value.translation.width, y: anchor.y + value.translation.height)
-        let removed = Self.isOutOfWell(value.location, size: size) ? Self.removed(index, from: start) : nil
-        drag?.changed = true
-        onChange(removed ?? Self.moved(index, to: CurveEditor.unitPoint(at, in: plot, range: 0...1), in: start))
+        guard let next = gesture.dragged(to: value.location, by: value.translation, in: plot, well: size) else { return }
+        // The event's time on the uptime clock the probe compares against.
+        let eventTime = ProcessInfo.processInfo.systemUptime - Date().timeIntervalSince(value.time)
+        onChange(next)
+        report(eventTime)
+    }
+
+    /// The drag sample, shown by the next main-actor turn after the change (the host's update has run by then).
+    private func report(_ eventTime: Double) {
+        guard let probe else { return }
+        Task { @MainActor in
+            probe.record(Self.sample(eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
+        }
     }
 
     /// Tab moves to the next point and Shift-Tab back; past either end focus leaves the well.
@@ -152,6 +156,7 @@ public struct ToneCurveEditor: View {
         guard let index = focused, points.indices.contains(index) else { return .ignored }
         let dx = press.key == .rightArrow ? 1 : press.key == .leftArrow ? -1 : 0
         let dy = press.key == .upArrow ? 1 : press.key == .downArrow ? -1 : 0
+        guard gesture.keyed() else { return .ignored }
         onChange(Self.nudged(index, dx: dx, dy: dy, coarse: press.modifiers.contains(.shift), in: points))
         onEnd()
         return .handled
@@ -159,7 +164,7 @@ public struct ToneCurveEditor: View {
 
     /// Removes the focused middle point; focus stays at its index, now the next point.
     private func delete() -> KeyPress.Result {
-        guard let index = focused, let next = Self.removed(index, from: points) else { return .ignored }
+        guard let index = focused, let next = Self.removed(index, from: points), gesture.keyed() else { return .ignored }
         onChange(next)
         onEnd()
         return .handled
@@ -169,6 +174,18 @@ public struct ToneCurveEditor: View {
 extension ToneCurveEditor {
     /// The closest two neighbouring points may sit in x.
     nonisolated public static let minimumGap: CGFloat = 0.01
+    /// How far past the well's edge a drag must go to remove a middle point, so a drag that only
+    /// overshoots the edge keeps it.
+    nonisolated public static let outOfWellMargin: CGFloat = SuiteSpacing.s
+    /// The probe series a point drag reports (SP7, QB-S6).
+    nonisolated static let dragSeries = "curve-drag"
+
+    /// The `suite.controls` and accessibility identifier of point `index`: `<id>.point1`, ...
+    nonisolated public static func pointID(_ id: String, _ index: Int) -> String { "\(id).point\(index + 1)" }
+
+    nonisolated static func sample(eventTime: Double, shownAt: Double) -> ProbeSample {
+        ProbeSample(series: dragSeries, eventTime: eventTime, shownAt: shownAt)
+    }
 
     /// The square the curve is drawn in: the largest inside the well's inset, centred.
     nonisolated public static func plot(in size: CGSize) -> CGRect {
@@ -221,9 +238,11 @@ extension ToneCurveEditor {
         return points.indices.filter { distance($0) <= SuiteSize.curveHandleHit / 2 }.min { distance($0) < distance($1) }
     }
 
-    /// Whether `location` has left a well of `size`: a middle point dragged there is removed.
+    /// Whether `location` is more than `outOfWellMargin` past a well of `size`: a middle point
+    /// dragged there is removed.
     nonisolated public static func isOutOfWell(_ location: CGPoint, size: CGSize) -> Bool {
-        !CGRect(origin: .zero, size: size).contains(location)
+        let m = outOfWellMargin
+        return location.x < -m || location.y < -m || location.x > size.width + m || location.y > size.height + m
     }
 
     /// The histogram's outline in unit coordinates: each bin's top over its centre, the tallest at y 1,
@@ -234,4 +253,93 @@ extension ToneCurveEditor {
         let count = Double(heights.count)
         return heights.enumerated().map { CGPoint(x: (Double($0.offset) + 0.5) / count, y: $0.element / top) }
     }
+}
+
+/// One pointer gesture on a ToneCurveEditor and its key edits, with no view,
+/// over the suite's EditRun: a press adds a point in x order (the first
+/// change) or picks the one under it, its drag moves that point from where it
+/// began or removes a middle one past the well's margin, and the release ends
+/// the run once when anything changed. A nudge or a Delete is a change and an
+/// end in one call; keys wait while a drag is held. ToneCurveEditorTests drive it.
+struct ToneCurveGesture: Equatable, Sendable {
+    /// The point moved (nil: the press hit none and added none), the points and its view position at the press.
+    struct Drag: Equatable, Sendable {
+        let index: Int?
+        let start: [CGPoint]
+        let anchor: CGPoint
+    }
+
+    private(set) var drag: Drag?
+    private(set) var run = EditRun()
+
+    /// The press at `location`: picks the point there, or adds one and returns the points with it.
+    mutating func pressed(at location: CGPoint, points: [CGPoint], in plot: CGRect) -> [CGPoint]? {
+        if let hit = ToneCurveEditor.hitIndex(at: location, of: points, in: plot) {
+            drag = Drag(index: hit, start: points, anchor: CurveEditor.viewPoint(points[hit], in: plot, range: 0...1))
+            return nil
+        }
+        guard let added = ToneCurveEditor.added(CurveEditor.unitPoint(location, in: plot, range: 0...1), to: points)
+        else {
+            drag = Drag(index: nil, start: points, anchor: .zero)
+            return nil
+        }
+        drag = Drag(index: added.index, start: added.points, anchor: location)
+        _ = run.change()
+        return added.points
+    }
+
+    /// The pointer at `location`, `translation` from the press: the points to send, or nil when the
+    /// press picked no point or the pointer hasn't moved.
+    mutating func dragged(to location: CGPoint, by translation: CGSize, in plot: CGRect, well size: CGSize) -> [CGPoint]? {
+        guard let drag, let index = drag.index, translation != .zero else { return nil }
+        let at = CGPoint(x: drag.anchor.x + translation.width, y: drag.anchor.y + translation.height)
+        let out = ToneCurveEditor.isOutOfWell(location, size: size)
+        let removed = out ? ToneCurveEditor.removed(index, from: drag.start) : nil
+        _ = run.change()
+        return removed ?? ToneCurveEditor.moved(index, to: CurveEditor.unitPoint(at, in: plot, range: 0...1), in: drag.start)
+    }
+
+    /// The release: true exactly once for a gesture that changed the points.
+    mutating func released() -> Bool {
+        drag = nil
+        return run.end()
+    }
+
+    /// A nudge or a Delete: true, once, unless a drag is held.
+    mutating func keyed() -> Bool {
+        guard drag == nil else { return false }
+        _ = run.change()
+        return run.end()
+    }
+}
+
+/// ToneCurveEditor's point rules as UC15's CurvePointEditing, in unit points
+/// and, for `isOutOfWell`, view points: sorted adds, x held between
+/// neighbours, the ends kept, nudges of 0.01 (Shift 0.1) and the well's margin.
+public struct SuiteCurvePointEditing: CurvePointEditing {
+    public init() {}
+
+    public func added(_ point: PlanePoint, to points: [PlanePoint]) -> (points: [PlanePoint], index: Int)? {
+        guard let added = ToneCurveEditor.added(Self.cg(point), to: points.map(Self.cg)) else { return nil }
+        return (added.points.map(Self.plane), added.index)
+    }
+
+    public func moved(_ index: Int, to point: PlanePoint, in points: [PlanePoint]) -> [PlanePoint] {
+        ToneCurveEditor.moved(index, to: Self.cg(point), in: points.map(Self.cg)).map(Self.plane)
+    }
+
+    public func removed(_ index: Int, from points: [PlanePoint]) -> [PlanePoint]? {
+        ToneCurveEditor.removed(index, from: points.map(Self.cg))?.map(Self.plane)
+    }
+
+    public func nudged(_ index: Int, dx: Int, dy: Int, coarse: Bool, in points: [PlanePoint]) -> [PlanePoint] {
+        ToneCurveEditor.nudged(index, dx: dx, dy: dy, coarse: coarse, in: points.map(Self.cg)).map(Self.plane)
+    }
+
+    public func isOutOfWell(_ location: PlanePoint, extent: PlaneExtent) -> Bool {
+        ToneCurveEditor.isOutOfWell(Self.cg(location), size: CGSize(width: extent.width, height: extent.height))
+    }
+
+    private static func cg(_ p: PlanePoint) -> CGPoint { CGPoint(x: p.x, y: p.y) }
+    private static func plane(_ p: CGPoint) -> PlanePoint { PlanePoint(x: Double(p.x), y: Double(p.y)) }
 }

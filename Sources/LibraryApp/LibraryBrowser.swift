@@ -81,7 +81,7 @@ struct LibraryBrowser: View {
     }
 
     @ViewBuilder private var content: some View {
-        if model.isEmpty {
+        if model.showsEmptyState {
             let empty = model.emptyState(importReason: importAction.unavailableHelp)
             if empty.offersImport {
                 EmptyStateView(empty.title, systemImage: "photo.stack", message: empty.message, action: importAction)
@@ -89,6 +89,9 @@ struct LibraryBrowser: View {
             } else {
                 EmptyStateView(empty.title, systemImage: "photo.stack", message: empty.message)
             }
+        } else if model.isEmpty {
+            // The launch read is running: blank until the catalog appears, no "No Photos" flash.
+            Color.clear
         } else if model.isSelectedCollectionEmpty, let collection = model.selectedCollection {
             EmptyStateView(
                 "No Photos in \(collection.name)", systemImage: "photo.stack", message: collection.emptyMessage,
