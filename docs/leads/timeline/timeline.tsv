@@ -133,3 +133,4 @@ utc	stage	event	ref	note
 2026-10-18T08:23Z	heartbeat	full CI 39108958964 on 2202c7c3 still pending; scoped suiteui 39106447807 green but on pre-merge dd142a80, not the proof
 2026-10-18T08:42Z	heartbeat	scoped suiteui 39111510770 on 2202c7c3 (includes #2629 #2638) in progress: this is the proof run; read it next
 2026-10-18T09:00Z	heartbeat	scoped suiteui 39111510770 on 2202c7c3: macOS (suiteui) still running
+2026-10-18T09:27:43Z	heartbeat	proof run 39111510770 red; 5 timeline findings relabelled gap (#2662 #2663 #2690 #2703 #2704); no round 3
