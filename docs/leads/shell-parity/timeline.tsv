@@ -166,3 +166,4 @@ utc	stage	event	ref	note
 2026-10-18T18:51:38Z	shell-parity	check	dev@1fcbcd90	blocked: #2524 #2263 open (gaps #1572/#1573 open); no dev-red; 9 design findings open (new #2900 perf scrub journey, not this feature)
 2026-10-18T19:08:29Z	shell-parity	check	dev@1fcbcd90	blocked: #2524 #2263 open (gaps #1572/#1573 open); no dev-red; 9 design findings open
 2026-10-18T19:25:12Z	shell-parity	check	dev@7d942bad	blocked: #2524 #2263 open (gaps #1572/#1573 open); no dev-red; 9 design findings open
+2026-10-18T19:42:39Z	shell-parity	check	dev@f7e03506	blocked: #2524 #2263 open; gap #1572 closed 19:38, #1573 open; no dev-red; 9 design findings open
