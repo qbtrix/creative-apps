@@ -28,7 +28,7 @@ Next: #2465 fix PR #2701 (DW-a round 2) in the lane; DW-a re-done on a successfu
 | D0-9c | DW-d | 3 | hover outline and pointers in DesignCanvasFeedback | DesignCanvasFeedback.swift; snapshots; DesignCanvasHoverTests | DesignCanvasFeedbackSnapshots | #2280 | merged df60ad7 |
 | D0-8b | DW-b | 4 | editor bodyRuns counter, 120-sample drag check | DesignEditor.swift; DesignWindowDragTests | DesignWindowDragTests | #2309 | merged 0c29554 |
 | D0-7a | DW-c | 5 | suiteProbes and ids on window controls | DesignWindow.swift, DesignEditor.swift, DesignCanvas.swift, DesignControlID.swift; DesignControlIDTests | DesignControlIDTests | #2374 | merged d2249aa |
-| D0-9d | DW-d | 5 | size badge from the live box, text preview; testCanvasFeedback on | DesignCanvasFeedback.swift; snapshots; DesignCanvasBadgeTests; +Feedback journey | DesignCanvasBadgeTests | – | waits D0-8b, D0-9c, canvas-basics CB-a |
+| D0-9d | DW-d | 5 | size badge from the live box, text preview; testCanvasFeedback on | DesignCanvasFeedback.swift; snapshots; DesignCanvasBadgeTests; +Feedback journey | DesignCanvasBadgeTests | #2899 | open, head 7144f9a6 (fast-lane; lane macOS build pending) |
 | D0-7b | DW-c | 6 | J15 sweep and layout journey; feature-done | UITests/DesignJourneyTests+EveryControl.swift, +Layout.swift | J15, testLayoutAtWidths | – | waits D0-6, D0-7a, D0-9d |
 
 Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other's code: the canvas slots read only the existing Model). C-2 (copy-group) runs beside them.
@@ -49,6 +49,7 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 - The PR tool appends an attribution footer. The lead stripped it from #2166, #2168 and #2163, and build-wave builders now strip it themselves.
 
 ## Open
+- 2026-10-18T18:35Z: D0-9d PR #2899 (9 files, +287/-18; gate and full scripts/ci pass; DesignCanvasHints plan 20/20). Badge shows in every Design snapshot with a selection (~15 suites beyond the 6 listed PNGs): the DW-d critic panel reviews those on the scoped run. D0-7b starts when #2899 merges.
 - #2465 J1 red again at 3a8c658 after round 1 (#2372): DW-a round 2 fixer, PR #2701 head be4db89 (an all-off Arrange or Align drawn as one disabled MenuCommand; submenu .disabled never reaches the menu bar). A third red makes it a gap.
 - D0-9d (so DW-d, and D0-7b, so DW-c) waits on canvas-basics CB-a: CB-1, CB-2 (#2568) merged, CB-3 building in the canvas-basics lead.
 - Finding #2302 (testDrawShapesAddTextAndSave) blocked on needs-ui #2263.
