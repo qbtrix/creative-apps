@@ -16,5 +16,7 @@
 {"label":"a submenu never says why it is off","file":"Sources/DesignModel/DesignActions.swift","find":"helps.lazy.compactMap { $0 }.first","replace":"nil as String?","tests":"DesignSubmenuHelpTests"},
 {"label":"Arrange asks only its first step","file":"Sources/DesignModel/DesignActions.swift","find":"Self.submenuHelp(DesignArrangeStep.allCases.map { help(.arrange($0)) })","replace":"Self.submenuHelp([help(.arrange(.bringToFront)), nil])","tests":"DesignSubmenuHelpTests"},
 {"label":"Align reads no edge's help","file":"Sources/DesignModel/DesignActions.swift","find":"return Self.submenuHelp(DesignAlignEdge.allCases.map { helps[$0] })","replace":"return Self.submenuHelp(DesignAlignEdge.allCases.map { _ in helps.isEmpty ? nil : nil })","tests":"DesignSubmenuHelpTests"},
-{"label":"group expands nothing it selects","file":"Sources/DesignModel/DesignActions.swift","find":"expandedNodeIDs.formUnion(edit.selection) }","replace":"expandedNodeIDs.formUnion([]) }","tests":"DesignGroupExpandTests"}
+{"label":"group expands nothing it selects","file":"Sources/DesignModel/DesignActions.swift","find":"expandedNodeIDs.formUnion(edit.selection) }","replace":"expandedNodeIDs.formUnion([]) }","tests":"DesignGroupExpandTests"},
+{"label":"run edits mid-gesture (#542)","file":"Sources/DesignModel/DesignActions.swift","find":"guard editingTextID == nil, gesture == nil else { throw .unchanged }","replace":"guard editingTextID == nil else { throw .unchanged }","tests":"DesignMidDragEditTests"},
+{"label":"the nudge command on a hidden layer has no help (#607)","file":"Sources/DesignModel/DesignActions.swift","find":"if case .nudge = command, isHiddenInTree(node.id) {","replace":"if case .nudge = command, node.isHidden && false {","tests":"theNudgeCommandOnAHidden"}
 ]

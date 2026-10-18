@@ -38,7 +38,11 @@
 // Locked nodes never move, resize, change or delete, and neither hidden nor
 // locked nodes are hit. A lock covers the node's whole subtree (DesignLocking),
 // so a layer inside a locked group is locked too (#450), and a layer inside a
-// hidden group shows no handles to press (#449). Linux-safe.
+// hidden group shows no handles to press (#449), nor moves with the arrow keys (#607).
+//
+// While a gesture is live (`gesture != nil`) the canvas edits do nothing, as Undo and Redo
+// don't: each pointer move rewinds to the gesture's start, so an edit landing between two moves
+// would be thrown away while its undo step stayed (#542). Linux-safe.
 
 /// A pointer gesture in progress, from its first `drag` to `endDrag`.
 struct DesignGesture: Sendable, Equatable {
@@ -121,10 +125,12 @@ extension DesignWorkspace {
 
     /// Moves the selected node by 1 point (10 with Shift). A run of nudges to one node is one
     /// step. Several selected layers move together through `run(.nudge)` (#2463). Does nothing
-    /// without an unlocked selection or while editing text.
+    /// without an unlocked selection, for a layer hidden in the tree (#607), while editing text
+    /// or mid-gesture (#542).
     public mutating func nudge(_ direction: DesignDirection, shift: Bool) {
+        guard gesture == nil else { return }
         if hasMultipleSelection { try? run(.nudge(direction, large: shift)); return }
-        guard editingTextID == nil, let id = selectedNodeID else { return }
+        guard editingTextID == nil, let id = selectedNodeID, !isHiddenInTree(id) else { return }
         let step = shift ? 10.0 : 1.0
         let delta = switch direction {
         case .up: DesignPoint(x: 0, y: -step)
@@ -148,8 +154,9 @@ extension DesignWorkspace {
 
     /// Deletes the selected node and its subtree and deselects. Several selected layers go
     /// together through `run(.delete)` (#2463). Does nothing without a selection outside any
-    /// lock or while editing text.
+    /// lock, while editing text or mid-gesture (#542).
     public mutating func deleteSelection() {
+        guard gesture == nil else { return }
         if hasMultipleSelection { try? run(.delete); return }
         guard editingTextID == nil, let node = selectedNode, !isLockedInTree(node.id),
             let page = pages.firstIndex(where: { $0.id == selectedPageID })
