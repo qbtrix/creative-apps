@@ -14,10 +14,8 @@ import Testing
         #expect(row.fraction?.value == 2 && row.fraction?.total == 27)
         let empty = BusyNote("x", identifier: "x", fraction: (0, 0))
         #expect(empty.fraction?.value == 0 && empty.fraction?.total == 1)
-        let over = BusyNote("x", identifier: "x", fraction: (40, 27))
-        #expect(over.fraction?.value == 27)
-        let under = BusyNote("x", identifier: "x", fraction: (-3, 27))
-        #expect(under.fraction?.value == 0)
+        #expect(BusyNote("x", identifier: "x", fraction: (40, 27)).fraction?.value == 27)
+        #expect(BusyNote("x", identifier: "x", fraction: (-3, 27)).fraction?.value == 0)
     }
 
     @Test func aZeroDelayShowsAtOnce() {
