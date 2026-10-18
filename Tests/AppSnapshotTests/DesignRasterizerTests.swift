@@ -3,7 +3,8 @@
 // at 2x and 4320 × 3072 at 3x, and the `twoPages` Mobile page is 390 × 844; a layer's PNG is its
 // own box, its fill at the middle; on a page with one shape, the corner where nothing is drawn
 // has alpha 0 and the shape is opaque; and QD-V9, the 2x Desktop PNG against the canvas's own
-// artwork drawn by the golden host, is report-only until #331 and #332. macOS only.
+// artwork drawn by the golden host, is report-only until #331 and #332. DE-9: the Desktop PDF
+// opens with CGPDFDocument as one page whose media box is 1440 × 1024 pt at any scale. macOS only.
 #if canImport(AppKit)
 import AppKit
 import ImageIO
@@ -84,6 +85,20 @@ import Testing
             #expect(pixel(image, x: x, y: y).last == 0, "(\(x), \(y)) is \(pixel(image, x: x, y: y))")
         }
         #expect(near(pixel(image, x: 100, y: 50), [217, 217, 217, 255]), "the shape: \(pixel(image, x: 100, y: 50))")
+    }
+
+    /// DE-9: the Desktop frame's PDF is one page, its media box the frame in points, never scaled.
+    @Test func pdfOnePage() throws {
+        let cards = DesignFixtures.cards
+        let desktop = try item(cards, DesignExportOptions(format: .pdf, scale: 2, scope: .frame))
+        #expect(desktop.nodeID == "node-1")
+        let pdf = try DesignRasterizer.pdf(try cards.exportRaster(desktop))
+        let provider = try #require(CGDataProvider(data: pdf as CFData))
+        let document = try #require(CGPDFDocument(provider))
+        #expect(document.numberOfPages == 1)
+        let page = try #require(document.page(at: 1))
+        let box = page.getBoxRect(.mediaBox)
+        #expect(box.origin == .zero && box.width == 1440 && box.height == 1024, "media box \(box)")
     }
 
     /// QD-V9: the 2x Desktop PNG is the canvas's artwork of that frame. Report-only until #331 and #332.
