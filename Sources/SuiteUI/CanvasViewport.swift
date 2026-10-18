@@ -32,6 +32,11 @@
 // the app journeys drag on it by normalized offsets of that area (#566). The
 // artboard's own rectangle at the current zoom is the leaf element
 // `suite.canvas.artboard`, for a journey that measures the document.
+// The container is also listed in the window's `suite.controls` (CM-9):
+// enabled while the canvas takes drags or keys, else disabled with a reason.
+// Each tool drag's move reports one `canvas-drag` sample (CanvasDragProbe) to
+// the probe host that sets `canvasDragProbe`; without one it records nothing.
+import AppKit
 import SwiftUI
 
 /// Where the artboard sits in the scrollable canvas, in points.
@@ -129,6 +134,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     @State private var panStart: CGPoint?
     @FocusState private var isFocused: Bool
     @Environment(\.canvasFitScale) private var fitScale
+    @Environment(\.canvasDragProbe) private var probe
 
     /// `documentSize` in pixels; `content` and `overlay` are laid out at the
     /// artboard's size (the document at `zoom`), overlay on top. Only the
@@ -168,7 +174,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             let layout = CanvasLayout(document: documentSize, zoom: zoom, viewport: viewport)
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    corner
+                    RulerCorner(unit: unit)
                     Ruler(axis: .horizontal, origin: layout.origin.x - scrolled.x, scale: layout.scale)
                 }
                 HStack(spacing: 0) {
@@ -179,16 +185,6 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onAppear { onSize(viewport) }
             .onChange(of: viewport) { _, size in onSize(size) }
         }
-    }
-
-    /// The ruler corner, naming the document's unit.
-    private var corner: some View {
-        Text(unit)
-            .font(SuiteFont.rulerLabel)
-            .foregroundStyle(SuiteColor.secondaryText)
-            .frame(width: SuiteSize.ruler, height: SuiteSize.ruler)
-            .background(SuiteColor.panel)
-            .accessibilityHidden(true)
     }
 
     private func scroller(_ layout: CanvasLayout) -> some View {
@@ -218,7 +214,11 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 // Above the clip, so a selection's handles past the document's edge still show.
                 .overlay(alignment: .topLeading) { overlay }
                 .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("suite.canvas")
+                .accessibilityIdentifier(RenderingControlID.canvas)
+                // Lists the container in `suite.controls`; its identifier stays the one set above.
+                .suiteControl(
+                    id: controlEntry.id, enabled: controlEntry.enabled, reason: controlEntry.reason,
+                    identifies: false)
                 .padding(.leading, layout.origin.x)
                 .padding(.top, layout.origin.y)
             }
@@ -259,6 +259,13 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         else { return .ignored }
         position.scrollTo(point: offset)
         return .handled
+    }
+
+    /// The viewport's `suite.controls` entry: enabled while it takes drags or keys.
+    var controlEntry: ControlEntry {
+        let live = onDrag != nil || takesKeys
+        return ControlEntry(
+            id: RenderingControlID.canvas, enabled: live, reason: live ? nil : CanvasDragProbe.inertReason)
     }
 
     /// The canvas takes focus and keys when the host handles keys or zoom.
@@ -304,15 +311,25 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 // A drag that starts with Space held is a pan; a tool drag under way keeps going.
                 guard panStart == nil, last != nil || !spaceHeld else { return }
                 if takesKeys { isFocused = true }
+                let eventTime = NSApp.currentEvent?.timestamp ?? ProcessInfo.processInfo.systemUptime
                 let point = layout.documentPoint(value.location)
                 onDrag?(last ?? layout.documentPoint(value.startLocation), point)
                 last = point
+                report(eventTime)
             }
             .onEnded { _ in
                 guard last != nil else { return }
                 last = nil
                 onDragEnd?()
             }
+    }
+
+    /// The drag sample, shown by the next main-actor turn after the move (the host's update has run by then).
+    private func report(_ eventTime: Double) {
+        guard let probe else { return }
+        Task { @MainActor in
+            probe.record(CanvasDragProbe.sample(eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
+        }
     }
 
     private var pinch: some Gesture {
@@ -336,4 +353,29 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 Path(CGRect(x: square, y: square, width: square, height: square)), with: .color(SuiteColor.checkerLight))
         }
     }
+}
+
+/// Where CanvasViewport reports its tool drags (series `canvas-drag`, SP2,
+/// QB-S3); a probe host sets it, and nil records nothing.
+struct CanvasDragProbe: Sendable {
+    static let series = "canvas-drag"
+    /// Why a viewport with no drag, key or zoom handler is listed disabled.
+    static let inertReason = "This canvas only shows the document."
+    let record: @MainActor @Sendable (ProbeSample) -> Void
+
+    static func sample(eventTime: Double, shownAt: Double) -> ProbeSample {
+        ProbeSample(series: series, eventTime: eventTime, shownAt: shownAt)
+    }
+}
+
+extension EnvironmentValues {
+    /// Where a CanvasViewport reports its drag samples; nil records nothing.
+    var canvasDragProbe: CanvasDragProbe? {
+        get { self[CanvasDragProbeKey.self] }
+        set { self[CanvasDragProbeKey.self] = newValue }
+    }
+}
+
+private struct CanvasDragProbeKey: EnvironmentKey {
+    static let defaultValue: CanvasDragProbe? = nil
 }

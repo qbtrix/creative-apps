@@ -6,9 +6,30 @@
 // SuiteSize.rulerLabelSpacing, and minor ticks split it while they stay at
 // least 5 points apart. Ruler draws them on a flat panel band with a hairline
 // on its inner edge, labels in 10 pt monospaced digits; one view serves both
-// axes. Invariants: every tick lies within the length, and there are never
-// more than `maximumMarks` labelled ticks, whatever the scale.
+// axes. RulerCorner fills the square where the two rulers meet and names the
+// document's unit, "px" unless the app passes another ("pt" for Design).
+// Invariants: every tick lies within the length, and there are never more
+// than `maximumMarks` labelled ticks, whatever the scale.
 import SwiftUI
+
+/// The square where the top and left rulers meet, naming the document's unit.
+public struct RulerCorner: View {
+    /// The unit it names: "px" unless the document is in another one.
+    let unit: String
+
+    public init(unit: String = "px") {
+        self.unit = unit
+    }
+
+    public var body: some View {
+        Text(unit)
+            .font(SuiteFont.rulerLabel)
+            .foregroundStyle(SuiteColor.secondaryText)
+            .frame(width: SuiteSize.ruler, height: SuiteSize.ruler)
+            .background(SuiteColor.panel)
+            .accessibilityHidden(true)
+    }
+}
 
 public struct RulerTicks: Equatable, Sendable {
     /// One labelled tick: its position along the ruler and its text.
