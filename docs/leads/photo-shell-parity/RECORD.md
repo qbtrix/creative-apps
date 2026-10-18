@@ -1,10 +1,10 @@
 # photo-shell-parity lead record
 
 Issue: #1502 · Packet: docs/blueprints/photo/features/shell-parity.md
-Run: act-1a14a193a7a-rmz6 (relaunch 2; before: act-1a148875943-9arx, act-1a145e74c6c-9utm) · Session: claude/shell-parity-adjustment-layers-g6jfld (first claude/photo-shell-parity-p2mo9n) · Started: 2026-10-16T18:20Z
+Run: act-1a14d2dd531-xb8a (relaunch 3; before: act-1a14a193a7a-rmz6, act-1a148875943-9arx, act-1a145e74c6c-9utm) · Session: session_01NH1fVtotumVjzHmEJ2V8fv (before: claude/shell-parity-adjustment-layers-g6jfld; first claude/photo-shell-parity-p2mo9n) · Started: 2026-10-16T18:20Z
 Stage: done
-Base: d2c4fa212a4b4ea55bc551b783fc1c48520e5fbf (origin/main = origin/dev at relaunch 2, 2026-10-17T13:0xZ)
-Next: nothing for this lead. Belt-Contact-Sheet posted on #1502 (issuecomment-6234662304) from full run 39032323316 (d14e765, success; PS-7 #2006 and F-1910 #2008 in it) with this run's session link. All open line:photo findings are now gaps.
+Base: 0965457c4e64d447aa510c8132d7b1ca069a6c3c (origin/main at relaunch 3, 2026-10-18T04:0xZ; dev 6bb1f3f6)
+Next: nothing for this lead. Belt-Contact-Sheet refreshed on #1502 (issuecomment-6245483648) from full run 39032323316 with this run's session link. Every open line:photo CI finding on this feature's journeys is a gap.
 
 Loop: v2 (no `## Slices` table in the packet or its wave.json). Started after #1302, so the findings queue (rule 10) and 2 fix rounds (rule 11) apply.
 
@@ -34,6 +34,7 @@ Wave 1: PS-1 and PS-2 independent (disjoint files). Wave 2: PS-3 waits on PS-1 (
 | 3 | full 39032323316 (d14e765; first full runs with PS-7 #2006 + F-1910 #2008: 39013069150 at 453198a, green overall) | Linux green; macOS report-only red: 10 Photo journeys (was 27) | photo identifier 17 (baseline 22) | CI (journeys), screens | #2015 #2016 #2019 #2021 #2023 #2024 #2025 #2076 (inspector below the fold / slider typing), #1927 #1930 (window 1 pt past the visible frame), #1925 (switcher, SuiteUI) | none: fix rounds spent -> gap; critic panel (clarity, journey, design, layout, controls, audit) filed gaps #2096 #2097 #2098 and added notes to #2021 and #1930 | no |
 
 ## Decisions
+- Relaunch 3 (act-1a14d2dd531-xb8a, 2026-10-18T04:06Z): main 0965457c verified. Both fix rounds spent, so the CI findings full dev run 39088586270 (d3cd7d9f) filed on Photo journeys were relabelled gap beside the gaps they repeat: #2225->#1925, #2226->#1927, #2227->#1930, #2218->#2015, #2219->#2016, #2221->#2021, #2222->#2076, #2223->#2023, #2224->#2024, #2521->#2017, #2522->#2025 (#2220->#2019 on adjustment-layers). lead/photo-shell-parity recut from main with this record (it carried 1082 old dev commits) and pushed with --force-with-lease; the mirror on lead/shell-parity (Design's lead's branch) gets a plain fast-forward commit touching only docs/leads/photo-shell-parity/.
 - Relaunch 2 (act-1a14a193a7a-rmz6, 2026-10-17T13:0xZ): main = dev = d2c4fa2 verified; lead branches rebased onto origin/main. PS-7 #2006 and F-1910 #2008 merged 07:15Z; full CI 39013069150 on 453198a is green (Linux), the macOS job is report-only. Fix rounds: round 2 (F-1910) was this feature's last, as the first relaunch brief said ("take #1910 into your remaining round"), so round 3 is review only and every open finding becomes a gap. Screens of 39032323316 show why the rest are red: the tabless inspector puts Curves/Hue below the 680 pt window (photo-curves-dragged.png), and typing into the opacity slider leaves 38% (photo-layer-opacity.png), which also fails PJ-9's "Normal 0%".
 - Relaunch 2026-10-17T06:06Z (supervisor): #1716 fixed the stroke test; #1910 is this feature's and goes in round 2; SuiteUI #1295 and #1456 are not waited on, they go in the contact sheet. The done check reads the Linux job.
 - #1910 root cause: Design's subtitle-less SuiteWindow still matches `windows["journey.design"]` on dev (run 38991865764) and testShell1Empty's `window.title == "Photo"` passes with an empty subtitle, so a non-empty subtitle is what changes the window's accessibility title. The packet wants the subtitle (step 2), so the journeys match the name within the title (UITests only, no app change).
@@ -63,6 +64,8 @@ Wave 1: PS-1 and PS-2 independent (disjoint files). Wave 2: PS-3 waits on PS-1 (
 - Wave 1 has 2 tasks: one worktree subagent each, started together.
 
 ## Open
+- #2546 (testUnsavedPromptAndOpenRecent, photo.bar.saved reads "Edited, autosaved") is new and in the Documents journey / save-status wording, not this feature's shell: left as a finding for its owner.
+- Shell geometry gaps wait on SuiteUI #1456 and #2524; the switcher gap #1925 on SuiteUI's principal item placement.
 - Round 2 wave in flight: F-1910 and PS-7 (two worktree builders, started 2026-10-17T07:05Z).
 - Scoped photo run 38982540952 (96bd5d9e) adds a second gating failure, not this feature's: PhotoProInspectorSnapshots.adjustTabEndIsReachable, a test #1733 (photo-adjustment-layers, #1501) added at 23:2x that fails on its first run (`changed 0`: the panel scrolled to its end draws the same as its top). It renders our tabless PhotoPanel; if its owner finds the cause is the inspector's scroll structure from PS-3/PS-4b, it comes back here as a finding.
 - #1674 (finding) waits on SuiteUI #1295 (the checkerboard tile built once); Photo can't fix it without a look-alike checkerboard.
