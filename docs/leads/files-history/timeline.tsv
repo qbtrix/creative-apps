@@ -30,3 +30,4 @@ utc	feature	event	ref	note
 2026-10-18T20:54:07Z	files-history	rebase	#2968	merged origin/dev (FlareFilePanels header comment), scripts/ci --changed PASS, pushed dbf56fca, Head: moved
 2026-10-18T21:11:23Z	files-history	heartbeat	39164756292	full CI pending; #2975 merged 203e7d91, #2967 merged 8e7d78cd; #2968 needs-rebase dropped, waiting on lane macOS build at dbf56fca; #2938 fix-batch waits on #2968
 2026-10-18T21:33:10Z	files-history	heartbeat	39167964719	39164756292 cancelled; FH-b now waits on full 39167964719 / scoped design 39167807664 (dev b40c77f6); #2968 clean, awaiting lane macOS build
+2026-10-18T21:56:05Z	files-history	ci-red	39166101762	#2968 macOS build failed on PhotoZoomSweepTests (TileCanvasView), from dev #2942, fixed on dev by #2990; merging dev into #2968 (f0653e21), gate running; full CI 39167964719 cancelled, now 39169434591 (e3859e3f)
