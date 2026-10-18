@@ -1,12 +1,13 @@
 // HaloCompositionCommands.swift: Halo's Composition menu in the menu bar: New
 // ⌥⌘N (opens the New Composition sheet), Duplicate ⌘D and Delete ⌘⌫ for the
 // focused window's selected composition, each sent through `haloPerform` and
-// disabled with the Model's reason as help (HaloMenuItem). Command-Delete
+// disabled with the Model's reason as help (SuiteUI's MenuCommand). Command-Delete
 // while a text field has focus (renaming a composition in the sidebar) edits
 // the text, as it does in any field, and never deletes the composition: the
 // window's route asks HaloProject.compositionDeleteCommand with HaloTextFocus.
 import AppKit
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 /// The key window's text focus, read when a menu command fires.
@@ -31,13 +32,13 @@ struct HaloCompositionCommands: Commands {
 
     var body: some Commands {
         CommandMenu("Composition") {
-            HaloMenuItem(
+            MenuCommand(
                 command: .newComposition, target: target, title: "New", systemImage: "plus",
                 shortcut: KeyboardShortcut("n", modifiers: [.command, .option]))
-            HaloMenuItem(
+            MenuCommand(
                 command: .duplicateComposition, target: target, systemImage: "plus.square.on.square",
                 shortcut: KeyboardShortcut("d"))
-            HaloMenuItem(
+            MenuCommand(
                 command: .deleteComposition, target: target, systemImage: "trash", shortcut: KeyboardShortcut(.delete))
         }
     }
