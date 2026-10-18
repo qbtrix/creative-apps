@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-18T22:22:23Z	review	OB-u round-2 critic panel started on scoped run 39167050158 (f33b5b88)
 2026-10-18T22:28:19Z	review	OB-u round 2: 3 minor findings #3016-#3018; fix round 2 launched
 2026-10-18T22:43:46Z	heartbeat	fix round 2 resumed after container restart (215bcf64 local); monitor re-armed
+2026-10-18T22:47:51Z	pr	OB-u fix round 2: #3021 open (baa32595, Mutate 41/41)
