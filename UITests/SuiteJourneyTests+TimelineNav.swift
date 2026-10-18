@@ -73,7 +73,10 @@ extension SuiteJourneyTests {
         gallery.app.descendants(matching: .any)["Timecode"].firstMatch.click()
         XCTAssert(navWait { self.navText(log).contains("unit timecode") }, "Timecode logged \(navText(log))")
         XCTAssert(navWait { self.navPixels(ruler) != inFrames }, "Timecode left the ruler's labels as they were")
-        let pill = gallery.app.staticTexts.matching(NSPredicate(format: "label MATCHES %@", #"\d\d:\d\d:\d\d"#)).firstMatch
+        // A macOS text reads in its value and leaves its label empty, so both are asked.
+        let timecode = #"\d\d:\d\d:\d\d"#
+        let pill = gallery.app.staticTexts.matching(
+            NSPredicate(format: "label MATCHES %@ OR value MATCHES %@", timecode, timecode)).firstMatch
         XCTAssert(pill.waitForExistence(timeout: 5), "the playhead's pill doesn't read 00:05:00 style")
         gallery.shot("timeline-nav-timecode")
         gallery.app.descendants(matching: .any)["Frames"].firstMatch.click()
