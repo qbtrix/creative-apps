@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-17T23:56Z	pr	#2481 opened (fixes #2463, mutate 7/7)
 2026-10-18T00:13Z	merge	#2469 merged (S-7, J5/J6)
 2026-10-18T00:13Z	wave	12 build-wave launched: S-7b (J4) on f335fde7
+2026-10-18T00:20Z	wave	12 S-7b built (331114e8), PR held: dev gate red on expired quarantine (#2504)
