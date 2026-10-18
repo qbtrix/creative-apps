@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 2026-10-18T05:30Z	5	fix-round-2	#2501,#2503	fixer on timeline ScrollView hit point and playhead pill format; last round, then gap
 2026-10-18T05:34Z	5	heartbeat	#2629	round 1 PR in the lane (build-only run pending); round 2 fixer running
 2026-10-18T05:38Z	5	fix-round-2	#2638	journeys click the track name at its centre (#2501, as #2048 did for keys) and read the pill label or value (#2503; macOS Text puts its string in value); head ea1b4c43, gate PASS. Rounds done: #2629, #2638 prove on the next scoped suiteui run
+2026-10-18T05:56Z	5	heartbeat	#2629 #2638	#2629 macOS build success, awaiting sweep; #2638 build queued
