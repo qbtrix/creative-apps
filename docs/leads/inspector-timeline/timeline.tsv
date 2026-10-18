@@ -96,3 +96,4 @@
 2026-10-18T18:54Z	heartbeat	no open dev-red; 39152649677 (71facd44) Linux green, macOS running since 18:31; 39155751405 (2056379a) pending; 39153086055, 39155433572 cancelled
 2026-10-18T19:26Z	heartbeat	no open dev-red; 39152649677 (71facd44) macOS running since 18:31 (~55m in); 39158639377 (7d942bad) pending; 39155751405 cancelled
 2026-10-18T19:58Z	heartbeat	no open dev-red; 39152649677 (71facd44) macOS ~1h27m in, snapshots uploaded, journeys running; 39160459432 (f7e03506) pending; 39158639377, 39159685451 cancelled
+2026-10-18T20:27Z	blocked	39152649677 (71facd44) macOS hit 90-min job timeout in ui-test (as did 39143942767, 39137279211); Flare journeys same 8 pass / 15 fail as before; filed #2971 for supervisor; still waiting on a completed green full run
