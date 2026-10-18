@@ -37,3 +37,4 @@ utc	feature	event	ref	note
 2026-10-18T22:41:39Z	files-history	heartbeat	39167807664	scoped design (b40c77f6, has 237bc5af) still running; #2938 fixer in progress (ec236735 local, no PR yet)
 2026-10-18T23:06:55Z	files-history	pr	#3022	fixes #2938 (FH-a round 1); lead added J16 doc row, head 3760d5cd, CI: PASS
 2026-10-18T23:07:59Z	files-history	heartbeat	39173700610	scoped design 39167807664 macOS(design) job failed (TileCanvasView compile, pre-#2990) -> not slice-done; next 39173700610 (46f6ce21) queued; #3022 awaits lane macOS build
+2026-10-18T23:29:58Z	files-history	heartbeat	39173700610	scoped design in progress (46f6ce21); full 39173775025 cancelled, 39176304199 pending; #3022 macOS build 39175654043 in progress
