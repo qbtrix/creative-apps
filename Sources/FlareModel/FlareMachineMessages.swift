@@ -53,7 +53,7 @@ extension FlareWorkspace {
         case .inputTypeChange: "An input keeps the type of its default value."
         case .invalidMachine: "That change would break the state machine."
         case .invalidDocument, .notExecuted, .nothingToUndo, .nothingToRedo, .groupInProgress, .unknownCommand,
-             .malformedCommand:
+             .malformedCommand, .notBuilt:
             nil
         }
     }
