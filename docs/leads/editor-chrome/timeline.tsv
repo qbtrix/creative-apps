@@ -1,0 +1,71 @@
+utc	stage	event	ref	note
+2026-10-16T18:10Z	0	stage-start	#1344	base 132d910484b48c7d79bc92a43c2de55cc12c1dc1
+2026-10-16T18:10Z	0	stopped	#1344	packet superseded by 2026-10-15 one-shell decision; needs rescope after editor-shell-removal
+2026-10-16T18:44Z	0	heartbeat	#1344	resumed on stall nudge; packet still superseded; waiting for re-sliced wave.json
+2026-10-16T19:15Z	0	heartbeat	#1344	second stall nudge; #1536 re-sliced timeline only; editor-chrome still unrescoped
+2026-10-16T19:46Z	0	stopped	#1344	third stall nudge; no rescope on dev; needs-human per contract rule 7
+2026-10-16T20:17Z	0	stopped	#1344	fourth nudge after the rule-7 stop; dev 1d68b228 (#1585 canvas-host and timeline only); editor-chrome still unrescoped, no reply on #1344
+2026-10-16T20:48Z	0	stopped	#1344	fifth nudge; dev 7acb6e81; editor-chrome packet, shell-parity-waves and editor-shell-removal unchanged; no reply on #1344
+2026-10-16T21:19Z	0	stopped	#1344	sixth nudge; dev fb6f9837; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T21:50Z	0	stopped	#1344	seventh nudge; dev 1cbf2d7b; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T22:21Z	0	stopped	#1344	eighth nudge; dev bfb8ce4f; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T22:52Z	0	stopped	#1344	ninth nudge; dev 3bc75afd; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T23:23Z	0	stopped	#1344	tenth nudge; dev 407301e5; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T23:55Z	0	stopped	#1344	eleventh nudge; dev 2be6a100; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T00:26Z	0	stopped	#1344	twelfth nudge; dev 7a090878; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T00:57Z	0	stopped	#1344	thirteenth nudge; dev db0495c4; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T01:29Z	0	stopped	#1344	fourteenth nudge; dev 7d022431; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T02:00Z	0	stopped	#1344	fifteenth nudge; dev 1e42526b; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-18T03:44Z	1	stage-start	#1344	line lead act-1a14d197cc1-i61z resumed; supervisor decision 2026-10-17 06:06Z: rescope in one docs PR, slice per rule 18, EC-5 first
+2026-10-18T03:53Z	1	pr-open	#2554	run act-1a14d17c86c-d1qr; rescope PR, waves OK, scripts/ci PASS at 651c90d
+2026-10-18T03:54Z	2	wave-start	#1344	wave 1: EC-1, EC-4, EC-7 builders launched
+2026-10-18T04:33Z	2	wave-start	#1344	run act-1a14d1f3122-r1yb took over after Belt's stall nudge; prior wave-1 builders left no PR; relaunching EC-1, EC-4, EC-7 on d3a4f16e
+2026-10-18T04:36Z	2	wave-start	#1344	run act-1a14d48ae2f-857a took over; no prior wave-1 PR; wave 1 (EC-1, EC-4, EC-7) on e01529f4
+2026-10-18T04:37Z	2	wave-start	#1344	build-wave wf_16d8fa8c-c3a running: EC-1, EC-4, EC-7
+2026-10-18T04:59Z	2	check	#1344	builders EC-1, EC-4, EC-7 still building (gate running); no PR yet
+2026-10-18T05:30Z	2 build	wave 1 in lane	#2609 #2610	EC-4 #2607, EC-7 #2608 merged; EC-1 #2609 open (adopted from run r1yb)
+2026-10-18T05:44Z	2 build	wave 2 started	EC-5a EC-6a EC-5b EC-6b EC-8b	EC-1 #2609 macOS build green (run 39099562824), lane merge pending; one builder, gated after #2609 is on dev
+2026-10-18T06:08Z	build	wave2-built	EC-5a,EC-5b,EC-6a,EC-6b,EC-8b	built on EC-1; rebase and gate once #2609 merges, then 5 PRs
+2026-10-18T06:08Z	build	check	#2609	macOS build green; waiting on a lane sweep
+2026-10-18T06:34Z	build	merged	#2609	EC-1 on dev 9ebfd460; slice EC-a code complete (EC-1, EC-4, EC-7), awaiting a scoped suiteui run for its critics
+2026-10-18T06:34Z	build	rebased	EC-5a,EC-5b,EC-6a,EC-6b,EC-8b	onto dev; EC-5a conflict in GalleryChrome.swift resolved by keeping both the transport and save-status pages; gating in turn
+2026-10-18T06:40Z	build	prs-open	#2672,#2673,#2674,#2675,#2676	EC-5a,EC-6a,EC-5b,EC-6b,EC-8b gated on dev and opened fast-lane; lane dispatches each macOS build
+2026-10-18T06:42Z	build	wave3-start	EC-9	builder started, stacked on EC-5a #2672 and EC-6a #2673; gated and opened once they merge
+2026-10-18T06:49Z	build	built	EC-9	f48fa2ad on lead/editor-chrome-EC-9 (stacked on EC-6a + EC-5a); rebase, gate and open once #2672 and #2673 merge
+2026-10-18T06:57Z	build	check	#2672-#2676	dev 9e0ac922 unchanged; wave 2 PRs await the lane's macOS builds; EC-9 waits on #2672 and #2673
+2026-10-18T07:30:20Z	2 build	heartbeat	-	dev 5d214f1e; wave 2 #2672-#2676 built queued behind lane batch-20261018063810 (bisecting); EC-9 waits on #2672 #2673
+2026-10-18T09:53Z	build	fix	#2675	EC-6b macOS build failed (duplicate @Test name zoomReadsAsAWholePercent with ScrubValueTests); renamed in 5191426b, regating on dev
+2026-10-18T09:56Z	build	gate	#2675	EC-6b PASS on dev 02c20bfb; Head 7fe5e55a
+2026-10-18T09:58Z	4 build	start	EC-11 EC-8	wave 4 building ahead: EC-11 stacked on EC-9, EC-8 on EC-9 + EC-8b; open once their bases merge
+2026-10-18T10:03Z	4 build	built	EC-8	b0c8facd on lead/editor-chrome-EC-8 (+178/-6, 3 files; MAC_GATED); gating; open after #2672 #2673 #2676 merge. Risk: onKeyPress needs focus in the palette, so SJ4 (EC-10) may need the page to focus or forward keys
+2026-10-18T10:06Z	4 build	built	EC-11	fc940185 then d19883a6 (+210/-1, 3 files); SJ5 waits on EC-5b; SP9 needs the press probe in .suiteProbes()
+2026-10-18T10:06Z	4 build	restack	EC-9 EC-8 EC-11	EC-9 conflict with dev resolved (be2d0bfc); EC-8 bb619d32, EC-11 d19883a6; gating
+2026-10-18T10:07Z	fix	needs-fix	#2672	view-statics lint: timecodeParts unmarked static on a View; nonisolated fix e34d8d3b; EC-9/EC-8/EC-11 carry it; regating
+2026-10-18T10:11Z	fix	gate	#2672	EC-5a PASS, Head 7956bfe0; EC-9 8a36fd24, EC-8 4ea49a32, EC-11 14cc5187 PASS (open after bases merge)
+2026-10-18T11:12Z	fix	needs-rebase	#2672	C4 part conflict merged (bda1546c), CI: PASS, Head moved
+2026-10-18T11:12Z	4 build	restack	EC-9 EC-11 EC-8	onto EC-5a bda1546c, merged EC-6a/EC-8b commits dropped; gating
+2026-10-18T11:25Z	2 build	gate	EC-9	PASS e2f96351 on EC-5a bda1546c, pushed; PR after #2672 merges
+2026-10-18T11:25Z	2 build	gate	EC-11	PASS 06544a7f on EC-5a bda1546c, pushed; PR after #2672 merges
+2026-10-18T11:25Z	2 build	gate	EC-8	PASS 7dc240fc on EC-5a bda1546c, pushed; PR after #2672 merges
+2026-10-18T12:14Z	2 build	merged	#2672	EC-5a on dev
+2026-10-18T12:14Z	4 build	rebuild	EC-9	one commit on dev fd7211ef, gating
+2026-10-18T12:15Z	4 build	pr	#2769	EC-9 PASS b290bce7, fast-lane, slice EC-b
+2026-10-18T12:57Z	4 build	merged	#2769	EC-9 on dev
+2026-10-18T12:57Z	4 build	pr	#2788	EC-11 PASS d12ac10c, slice EC-b
+2026-10-18T12:57Z	4 build	pr	#2789	EC-8 PASS 6869034c, slice EC-d, MAC_GATED
+2026-10-18T13:45Z	4 build	merged	#2789	EC-8 on dev
+2026-10-18T13:45Z	4 build	pr	#2798	EC-10 SJ4 PASS c373cabe, slice EC-d
+2026-10-18T13:48Z	4 build	merged	#2788	EC-11 on dev
+2026-10-18T14:04Z	4 build	merged	#2798	EC-10 on dev
+2026-10-18T14:19:36Z	EC-a	fix-open	#2807	Tabs fade pair closes itself (#2805 SegmentedTabs half); EC-12/EC-13 wait on a green run with artifacts after #2806.
+2026-10-18T14:36:12Z	goldens	waiting	#2806	Link fix merged at 624c4291 (#2801 closed); waiting for a CI or scoped suiteui run on dev that includes it, for actuals.
+2026-10-18T14:40:32Z	EC-a	fix-building	#2807	Lane dispatched the macOS build for #2807; EC-12/EC-13 wait on a dev run including 624c4291.
+2026-10-18T14:47:47Z	EC-a	fix-merged	#2807	Tabs fade pair fix merged; proof is the next scoped suiteui run. EC-12/EC-13 wait on a dev run including 624c4291.
+2026-10-18T15:02:15Z	goldens	waiting	39137893783	CI 39137279211 (80c14eed) and scoped suiteui 39137893783 (04170953, has #2807) queued/running; EC-12 starts from their artifacts.
+2026-10-18T15:24:08Z	goldens	waiting	39137893783	Scoped suiteui and full CI both in the journeys step past bundle-apps; EC-12 starts from the artifacts.
+2026-10-18T15:46:09Z	goldens	waiting	39137893783	Scoped suiteui at its Findings step, full CI still in journeys (snapshots uploaded); goldens start from ui-screens.
+2026-10-18T16:13:31Z	EC-a	round 2 open	#2841	fade-end on a run-loop Timer; restores #2807, which #2818 (a Halo PR) reverted
+2026-10-18T16:13:31Z	triage	run 39137893783 triaged	04170953	SJ4, SJ7, gallery audit are mine; SP9 empty because the chip probe merged after (#2816), recheck next run
+2026-10-18T16:13:31Z	findings	filed	#2844 #2845 #2846	palette focus (EC-d), tabs keys + segment ids (EC-b), switch labels (EC-b); fixes gating
+2026-10-18T16:15:40Z	EC-a	merged	#2841	tabs fade pair on a Timer; fixes #2844-#2846 gating; dev runs 39143942767 (CI) and 39143178581 (scoped suiteui) pending
+2026-10-18T16:20:27Z	fix round 1	PRs open	#2853 #2854 #2855	palette focus (EC-d), tabs keys + segment ids (EC-b), switch labels (EC-b); gate PASS
