@@ -52,8 +52,9 @@ final class DesignSelectJourneyTests: XCTestCase {
         expectCount(design, "2 Layers", after: "the move")
         design.shot("select-moved")
 
-        // 3. The box is now (140, 100)-(500, 220): its bottom-right handle out 20 resizes both.
-        drag(design, from: (500, 220), to: (520, 220))
+        // 3. The box is now (140, 100)-(540, 220) (B ends at x 540): its bottom-right handle out
+        // 20 resizes both. (500, 220) is B's bottom edge, a Move (#2517, DesignJ5GeometryTests).
+        drag(design, from: (540, 220), to: (560, 220))
         XCTAssert(Self.waitForLabel(undo, "Undo Resize"), "the box's handle made no Resize step (Undo reads \(undo.label))")
         design.shot("select-resized")
 
@@ -120,8 +121,9 @@ final class DesignSelectJourneyTests: XCTestCase {
         let menuItem = objectItem(design, Self.distributeTitle)
         XCTAssert(menuItem.waitForExistence(timeout: 5), "no Object > \(Self.distributeTitle)")
         XCTAssertFalse(menuItem.isEnabled, "Object > \(Self.distributeTitle) is enabled with two layers")
-        design.shot("select-distribute-off")
+        // Close the menu first: an open menu covers the toolbar in the shot and fails contrast (#2516).
         design.press(.escape)
+        design.shot("select-distribute-off")
     }
 
     /// The percents of ViewerZoom.stops, the stops ⌘= steps through (UITests can't import SuiteUI).
