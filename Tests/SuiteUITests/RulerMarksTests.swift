@@ -1,9 +1,10 @@
 // RulerMarksTests.swift: the ruler draws only the ticks and labels inside the
 // visible stretch, so their count is bounded by its width, not the duration.
 // The canvas rulers' corner reads the unit it is given, "px" by default, so
-// Photo's rulers stay in pixels while Design's say points (#264). No
-// rendering. macOS only.
-import SuiteUI
+// Photo's rulers stay in pixels while Design's say points (#264). The
+// viewport's drag samples carry series `canvas-drag` (SP2). No rendering.
+// macOS only.
+@testable import SuiteUI
 import SwiftUI
 import Testing
 
@@ -64,4 +65,14 @@ import Testing
     #expect(pixels.rulerUnit == "px")
     #expect(points.rulerUnit == "pt")
     #expect(older.rulerUnit == "pt")
+}
+
+@Test func theCanvasDragSeriesIsCanvasDrag() {
+    #expect(CanvasProbe.dragSeries == "canvas-drag")
+}
+
+@Test func aCanvasDragSampleCarriesItsSeriesAndTimes() {
+    #expect(CanvasProbe.sample(eventTime: 1, shownAt: 2) == ProbeSample(series: "canvas-drag", eventTime: 1, shownAt: 2))
+    #expect(CanvasProbe.sample(eventTime: 3.5, shownAt: 3.25).eventTime == 3.5)
+    #expect(CanvasProbe.sample(eventTime: 3.5, shownAt: 3.25).shownAt == 3.25)
 }

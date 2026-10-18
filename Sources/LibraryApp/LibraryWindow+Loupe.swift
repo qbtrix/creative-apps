@@ -20,16 +20,18 @@ struct LoupeRenderResult: Sendable {
     let result: Result<RenderedPhoto, LibraryError>
 }
 
-final class LoupeAreaState {
+/// Observable for `fitScale` alone, so the zoom pill and the menu's zoom
+/// items follow a new fit (a resize, a new photo) the moment it is measured.
+@Observable final class LoupeAreaState {
     /// Runs the renders one at a time; a newer one replaces an older waiting one.
-    let queue = RenderQueue()
+    @ObservationIgnored let queue = RenderQueue()
     /// The fit scale the loupe view last measured; Zoom In and Out step from it.
     var fitScale = 1.0
     /// Finished renders, handed to the catalog on the main actor.
-    let results: AsyncStream<LoupeRenderResult>
-    let deliver: AsyncStream<LoupeRenderResult>.Continuation
+    @ObservationIgnored let results: AsyncStream<LoupeRenderResult>
+    @ObservationIgnored let deliver: AsyncStream<LoupeRenderResult>.Continuation
     /// True once the main-actor task reading `results` runs.
-    var listening = false
+    @ObservationIgnored var listening = false
 
     init() {
         let made = AsyncStream.makeStream(of: LoupeRenderResult.self)
@@ -63,7 +65,7 @@ extension LibraryWindow {
             last: enabled(inLoupe && model.canShowNextInLoupe) { model.showLastInLoupe() },
             zoomInTitle: model.zoomInTitle, zoomOutTitle: model.zoomOutTitle,
             zoomTo: enabled(inLoupe) { (scale: Double) in loupeAreaZoom(to: scale) },
-            fitMeasured: { fit in areas.loupe.fitScale = fit })
+            fitMeasured: { fit in if areas.loupe.fitScale != fit { areas.loupe.fitScale = fit } })
     }
 
     /// Called when `model.focusedItemID` or `model.mode` changes (the loupe's

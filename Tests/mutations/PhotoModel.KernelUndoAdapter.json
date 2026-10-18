@@ -1,0 +1,23 @@
+[
+  {
+    "label": "endRunDropped: endAdjust no longer ends the kernel's run, so one run spans two gestures",
+    "file": "Sources/PhotoModel/PhotoHistory.swift",
+    "find": "        history.kernel.endRun()\n        history.runKey = nil\n",
+    "replace": "        history.runKey = nil\n",
+    "tests": "PhotoSliderGestureUndoTests"
+  },
+  {
+    "label": "clampAsSuccess: an out-of-range jump runs, and the kernel's clamp lands it on an end instead of refusing",
+    "file": "Sources/PhotoModel/PhotoHistory.swift",
+    "find": "guard stroke == nil, historySteps.indices.contains(index), index != historyIndex else { return }",
+    "replace": "guard stroke == nil, index != historyIndex else { return }",
+    "tests": "PhotoHistoryStepsTests"
+  },
+  {
+    "label": "baseNotRolled: a step the limit drops leaves the base's name as it was",
+    "file": "Sources/PhotoModel/PhotoHistory.swift",
+    "find": "            history.baseName = oldest\n",
+    "replace": "            _ = oldest\n",
+    "tests": "PhotoHistoryStepsTests"
+  }
+]

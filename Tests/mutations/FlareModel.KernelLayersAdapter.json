@@ -1,0 +1,30 @@
+[
+  {
+    "label": "refusalIsSuccess: a move the kernel refuses still gives a reorder index, so a command is issued anyway",
+    "file": "Sources/FlareModel/FlareLayers+Kernel.swift",
+    "find": "return nil",
+    "replace": "return count - 1 - row",
+    "tests": "FlareKernelLayersTests"
+  },
+  {
+    "label": "reversedProjection: the tree's roots are built top first, so frontToBack and rows come out bottom first",
+    "file": "Sources/FlareModel/FlareLayers+Kernel.swift",
+    "find": "LayerTree(backToFront.map {",
+    "replace": "LayerTree(backToFront.reversed().map {",
+    "tests": "FlareKernelLayersTests"
+  },
+  {
+    "label": "offByOneMove: the panel row maps to one bottom-first index too high",
+    "file": "Sources/FlareModel/FlareLayers+Kernel.swift",
+    "find": "try tree.move(id, into: nil, at: count - 1 - row)",
+    "replace": "try tree.move(id, into: nil, at: count - row)",
+    "tests": "FlareKernelLayersTests"
+  },
+  {
+    "label": "flagsSwapped: a row's hidden flag is read from the layer's lock",
+    "file": "Sources/FlareModel/FlareLayers+Kernel.swift",
+    "find": "isHidden: !$0.isVisible,",
+    "replace": "isHidden: $0.isLocked,",
+    "tests": "FlareKernelLayersTests"
+  }
+]
