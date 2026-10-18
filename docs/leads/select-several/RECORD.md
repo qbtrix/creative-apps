@@ -19,7 +19,7 @@ Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692
 | S-2 | SS-a | 0 | LiveTransforming several layers | Sources/DesignModel/Live/LiveTransforming.swift; Tests/DesignModelTests/DesignSeveralTransformTests.swift | DesignSeveralTransformTests | (before this run) | merged |
 | S-3 | SS-a | 0 | LiveAligning distribute | Sources/DesignModel/Live/LiveAligning.swift; Tests/DesignModelTests/DesignDistributeTests.swift | DesignDistributeTests | (before this run) | merged |
 | S-4 | SS-b | 0 | LiveFraming | Sources/DesignModel/Live/LiveFraming.swift; Tests/DesignModelTests/DesignFramingTests.swift | DesignFramingTests | (before this run) | merged |
-| S-5 | SS-b | 3 | no edit or step while a gesture is live; no nudge of a hidden-in-tree layer | DesignCanvasEditing.swift, DesignActions.swift, DesignActions+Edit.swift; tests | DesignMidDragEditTests, DesignHiddenNudgeTests | – | waits canvas-basics CB-a (CB-3 also edits DesignCanvasEditing.swift); design-seams met; feature-done |
+| S-5 | SS-b | 3 | no edit or step while a gesture is live; no nudge of a hidden-in-tree layer | DesignCanvasEditing.swift, DesignActions.swift, DesignActions+Edit.swift; tests | DesignMidDragEditTests, DesignHiddenNudgeTests | #2898 | open, head 75305bac (fast-lane, feature-done; closes #542 #607) |
 | S-6 | SS-a | 1 | views: several-layer handles, Distribute buttons, marquee from the Model; snapshots | DesignSelectionMarks.swift, DesignAlignBar.swift; snapshots | DesignMarqueeSnapshots, DesignAlignSnapshots, DesignMultiSelectSnapshots | – | waits DW-b |
 | S-7 | SS-a | 1 | J5, J6 | UITests/DesignJourneyTests+Select.swift | J5, J6 | – | waits S-6, design-seams |
 | S-7b | SS-b | 1 | J4 | UITests/DesignJourneyTests+Select.swift | J4 | – | waits S-4, S-7 |
@@ -39,6 +39,7 @@ Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692
 - No task of this feature can start in wave 1: S-6 waits on design-window DW-a and DW-b, which this lead builds first.
 
 ## Open
+- 2026-10-18T18:34Z: S-5 PR #2898 (9 files, +183/-18; gate and full scripts/ci pass; 8 new mutations caught). Plan DesignModel.DesignActions+Edit scores 6/8: the two escapes (setStyle and styleHelp drop the one-layer fast path) predate S-5 and its lines are unchanged. Accepted for S-5's PR; SS-b is not marked done until a fixer either kills them with a test or drops them as equivalent (rule 14).
 - #2691 closed (J6 green on 39107691328); #2692 closed as fixed by #2621 (J5 past Resize). J5 now skips at the nudge: finding #2706 (round 2; a third miss makes it a gap).
 - S-8 #2696: QD-S4 marquee step is over its 10 ms gate (known issue, gap #2695 p2); DesignSelectBudgetTests in Tests/perf-suites.txt is the supervisor's call (asked in the PR body).
 - S-5 waits on canvas-basics CB-a (CB-1, CB-2 merged; CB-3 building).
