@@ -4,7 +4,7 @@ Issue: #1506 · Packet: docs/blueprints/library/features/thumbnails.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: #2859 and #2860 merged; #2878 (also fixes #2766 J1 crash in TaskGroup::offer, #2882 J3 loupe thumbnail) waits on its lane macOS build 39151487702 (queued). Then a scoped library run on dev. Scoped run 39148564664 (196d884, before #2860/#2878): 8 of 12 library journeys pass, Release build fixed, audit identifier 2 / unnamed 0. Green: contact sheet. Red: round 2 (the last), then gaps
+Next: #2859 and #2860 merged; #2878 (also fixes #2766 J1 crash in TaskGroup::offer, #2882 J3 loupe thumbnail) passed its lane macOS build 39151487702 and merges on the next sweep. Scoped library run 39153204776 (c91b146, has #2860, not #2878) is queued; the run after #2878 decides round 1. Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
