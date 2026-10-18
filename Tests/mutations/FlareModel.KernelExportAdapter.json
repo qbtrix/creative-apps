@@ -1,0 +1,30 @@
+[
+  {
+    "label": "dropsEnd: endExport never forwards a success to the kernel's end, so the run started by one gesture never finishes",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        case .success(let names): exportState.end(.success(names))\n",
+    "replace": "        case .success: break\n",
+    "tests": "ExportScanTests.swift"
+  },
+  {
+    "label": "refusalIsSuccess: startExport reports true when the kernel's start refuses (already running)",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        return exportState.start(total: exportFileCount)\n",
+    "replace": "        _ = exportState.start(total: exportFileCount)\n        return true\n",
+    "tests": "ExportScanTests.swift"
+  },
+  {
+    "label": "openRefusalIsSuccess: openExport skips the idle check, so a second open over an open sheet reports true",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        guard case .idle = exportState, document != nil,",
+    "replace": "        guard document != nil,",
+    "tests": "ExportScanTests.swift"
+  },
+  {
+    "label": "failureIsSuccess: endExport forwards a write failure to the kernel's end as success with no files",
+    "file": "Sources/FlareModel/FlareExport+Kernel.swift",
+    "find": "        case .failure(let error): exportState.end(.failure(ExportRefusal(description: Self.exportMessage(error))))\n",
+    "replace": "        case .failure: exportState.end(.success([]))\n",
+    "tests": "ExportScanTests.swift"
+  }
+]
