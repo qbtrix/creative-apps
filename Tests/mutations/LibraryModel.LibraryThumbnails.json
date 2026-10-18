@@ -19,5 +19,33 @@
     "find": "guard scale.isFinite else { return 1 }",
     "replace": "guard scale.isFinite else { return 8 }",
     "tests": "LibraryThumbnailScaleTests.swift"
+  },
+  {
+    "label": "a cached position is trusted without checking its slot still holds the id",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "index < ids.endIndex, ids[index] == id { return index }",
+    "replace": "index < ids.endIndex { return index }",
+    "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "a miss never rebuilds the position map",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "        guard !rebuilt else { return nil }\n",
+    "replace": "        guard rebuilt else { return nil }\n",
+    "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "the visible span ignores the visible ids' positions",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "low = min(low, index); high = max(high, index)",
+    "replace": "low = min(low, 0); high = max(high, 0)",
+    "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "a held image whose photo left the order is kept",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "else { thumbnails[id] = nil; continue }",
+    "replace": "else { continue }",
+    "tests": "LibraryThumbnailPositionTests"
   }
 ]
