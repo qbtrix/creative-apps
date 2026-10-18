@@ -309,7 +309,7 @@ extension SuiteJourneyTests {
     }
 
     /// Scrolls the page's ScrollView until `id` shows whole between the page's switches and its log; returns it.
-    @MainActor private func inspectorReveal(_ id: String, _ gallery: Journey) -> XCUIElement {
+    @MainActor func inspectorReveal(_ id: String, _ gallery: Journey) -> XCUIElement {
         let element = gallery.element(id)
         let top = inspectorFind("suite.gallery.inspector.reduce-motion", gallery)
         let log = gallery.element("suite.gallery.log")

@@ -93,7 +93,8 @@ extension SuiteJourneyTests {
     /// The chip press: 70 clicks on the Onion switch report `press` (report-only).
     @MainActor func testChipPressLatency() throws {
         let gallery = curvesGallery("inspector", probe: true)
-        let chip = curvesControl("suite.gallery.inspector.chip-onion", gallery)
+        // The Onion chip sits below the fold, where clicks land on nothing (#2962): scroll it into view first.
+        let chip = inspectorReveal("suite.gallery.inspector.chip-onion", gallery)
         for _ in 0..<70 { chip.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click() }
         gallery.shot("inspector-chip-press-perf")
         guard let document = gallery.perf() else { return }
