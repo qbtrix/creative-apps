@@ -56,6 +56,23 @@ extension DesignWorkspace {
         }
     }
 
+    /// Why Object > Arrange is off as a whole: the first step's reason when no step can run; nil when one can.
+    /// The menu bar draws a plain disabled item then, since AppKit keeps a submenu's own item on (#2465).
+    public var arrangeMenuHelp: String? {
+        Self.submenuHelp(DesignArrangeStep.allCases.map { help(.arrange($0)) })
+    }
+
+    /// Why Object > Align is off as a whole: the first edge's reason when no edge can run; nil when one can.
+    public var alignMenuHelp: String? {
+        let helps = alignHelps
+        return Self.submenuHelp(DesignAlignEdge.allCases.map { helps[$0] })
+    }
+
+    /// A submenu's reason: its first item's when every item is off; nil when any item can run (or it has none).
+    static func submenuHelp(_ helps: [String?]) -> String? {
+        helps.contains { $0 == nil } ? nil : helps.lazy.compactMap { $0 }.first
+    }
+
     /// Runs `command` on the selection as one named undo step, or throws and records nothing.
     public mutating func run(_ command: DesignCommand) throws(DesignRefusal) {
         let ids = selectedNodeIDs
