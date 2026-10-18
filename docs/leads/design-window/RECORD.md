@@ -29,7 +29,7 @@ Next: #2465 fix PR #2701 (DW-a round 2) in the lane; DW-a re-done on a successfu
 | D0-8b | DW-b | 4 | editor bodyRuns counter, 120-sample drag check | DesignEditor.swift; DesignWindowDragTests | DesignWindowDragTests | #2309 | merged 0c29554 |
 | D0-7a | DW-c | 5 | suiteProbes and ids on window controls | DesignWindow.swift, DesignEditor.swift, DesignCanvas.swift, DesignControlID.swift; DesignControlIDTests | DesignControlIDTests | #2374 | merged d2249aa |
 | D0-9d | DW-d | 5 | size badge from the live box, text preview; testCanvasFeedback on | DesignCanvasFeedback.swift; snapshots; DesignCanvasBadgeTests; +Feedback journey | DesignCanvasBadgeTests | #2899 | merged 21:45Z (e3859e3f) |
-| D0-7b | DW-c | 6 | J15 sweep and layout journey; feature-done | UITests/DesignJourneyTests+EveryControl.swift, +Layout.swift | J15, testLayoutAtWidths | – | builder started 21:58Z (wave 6) |
+| D0-7b | DW-c | 6 | J15 sweep and layout journey; feature-done | UITests/DesignJourneyTests+EveryControl.swift, +Layout.swift | J15, testLayoutAtWidths | #3014 | open, head 28779c0c (ci PASS full + changed); fast-lane, feature-done; waits lane macOS build |
 
 Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other's code: the canvas slots read only the existing Model). C-2 (copy-group) runs beside them.
 
@@ -60,3 +60,4 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 - DW-a re-done on scoped design https://github.com/qbtrix/creative-apps/actions/runs/39122750799 (e3a4582c, holds #2701 be2260cd): J1 testEveryMenuOpens green, #2750 closed by CI; Belt-Slice-Done posted on #1494.
 
 - 2026-10-18T21:58Z: D0-9d #2899 merged 21:45Z (e3859e3f). design-window has 0 open findings by Feature line (line CI findings are pre-existing or SuiteUI-owned; #3007 twins #2693), so wave 6 starts: D0-7b builder. Run 39169434591 on e3859e3f pending; DW-d critic panel once a run holding it completes.
+- 2026-10-18T22:14Z: D0-7b PR #3014 open (2 files, +270). Builder flags a spec risk: Design window minimum is 944 pt (200 + 440 + 304), so the 880 x 560 layout step may not be reachable and the canvas may fall under 440 pt at 944; asserts kept as specified. If the macOS run fails there, the DW-c review files it as a finding against the packet sizes.
