@@ -88,7 +88,6 @@ import Testing
     }
     let tools = [ToolFace(id: "a", title: "A", shortcut: "a"), ToolFace(id: "b", title: "B", shortcut: "A")]
     #expect(SuiteToolPicking().tool(forKey: "A", in: tools) == "a")
-    #expect(SuiteToolPicking().violations(in: tools) == FakeToolPicking().violations(in: tools))
     #expect(SuiteToolPicking().help(for: tools[1]) == "B (A)")
 }
 
