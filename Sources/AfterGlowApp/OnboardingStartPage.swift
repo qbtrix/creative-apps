@@ -24,7 +24,7 @@ struct OnboardingStartPage: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if model.launching == nil, let message = model.message {
+            if model.failed == nil, let message = model.message {
                 Text(message.message).font(SuiteFont.caption).foregroundStyle(SuiteColor.stateWarning)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -47,7 +47,7 @@ struct OnboardingStartPage: View {
             .accessibilityElement(children: .combine)
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                 presets(starter.tile, busy: busy)
-                if model.launching == app, let message = model.message {
+                if model.failed == app, let message = model.message {
                     Text(message.message).font(SuiteFont.caption).foregroundStyle(SuiteColor.stateWarning)
                         .fixedSize(horizontal: false, vertical: true)
                 }

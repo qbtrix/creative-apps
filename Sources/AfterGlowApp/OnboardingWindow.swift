@@ -1,7 +1,7 @@
 // OnboardingWindow.swift: the "Welcome to AfterGlow" window (onboarding
 // packet OB-3): an OnboardingModel on LauncherServices.shared, the page it
 // shows (OnboardingPages.swift) and Skip, Back (after page 1) and Continue
-// at the bottom; on the last page "Start from an empty home" (OB-4) takes
+// at the bottom, held with the model's reason while a hand-off sends; on the last page "Start from an empty home" (OB-4) takes
 // Continue's place as the default button. All of it sits on
 // OnboardingLayout's size and 24 pt margin. The scene presents itself at
 // launch when `launchBehavior` says so (OnboardingLaunch, decided once,
@@ -57,11 +57,13 @@ struct OnboardingWindow: View {
                 Button("Skip") { Task { await model.skip() } }
                     .keyboardShortcut(.cancelAction)
                     .help("Close the welcome window. Help > Welcome to AfterGlow opens it again.")
-                    .suiteControl(id: OnboardingControls.skip, enabled: true, reason: nil)
+                    .disabled(model.sendingReason != nil)
+                    .suiteControl(id: OnboardingControls.skip, enabled: model.sendingReason == nil, reason: model.sendingReason)
                 Spacer()
                 if model.canGoBack {
                     Button("Back") { model.back() }
-                        .suiteControl(id: OnboardingControls.back, enabled: true, reason: nil)
+                        .disabled(model.sendingReason != nil)
+                        .suiteControl(id: OnboardingControls.back, enabled: model.sendingReason == nil, reason: model.sendingReason)
                 }
                 if model.isLastPage {
                     // The start page's way out with nothing opened: finishes with the chosen focus.

@@ -152,6 +152,18 @@ private func occurrences(of needle: String, in text: String) -> Int {
         #expect(window.contains("Button(\"Back\") { model.back() }"))
     }
 
+    @Test func skipAndBackHoldAndARefusalSitsUnderItsTile() throws {
+        let window = try source("Sources/AfterGlowApp/OnboardingWindow.swift")
+        for name in ["skip", "back"] {
+            let call = ".suiteControl(id: OnboardingControls.\(name), enabled: model.sendingReason == nil, reason: model.sendingReason)"
+            #expect(window.contains(call), "\(name) isn't held while a hand-off sends")
+        }
+        #expect(occurrences(of: ".disabled(model.sendingReason != nil)", in: window) == 2)
+        let start = try source("Sources/AfterGlowApp/OnboardingStartPage.swift")
+        #expect(start.contains("if model.failed == app, let message = model.message"), "a refusal isn't under its tile")
+        #expect(start.contains("if model.failed == nil, let message = model.message"))
+    }
+
     @Test func pagesUseNoLiteralSizes() throws {
         for path in Self.windowFiles {
             let text = try source(path)

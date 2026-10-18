@@ -18,6 +18,7 @@ public final class OnboardingModel {
     public private(set) var starters: [OnboardingStarter] = []  // tiles in SuiteOnboarding.order(for: focus)
     public private(set) var launching: SuiteApp?            // a hand-off in flight
     public private(set) var message: SuiteError?            // shown under the tile, never an alert
+    public private(set) var failed: SuiteApp?               // the tile `message` belongs to; nil for a message with no tile
     public private(set) var isFinished = false              // the window closes when true
 
     @ObservationIgnored let services: SuiteServices
@@ -32,6 +33,8 @@ public final class OnboardingModel {
     public var canGoBack: Bool { pageIndex > 0 }
     public var isLastPage: Bool { pageIndex + 1 >= pages.count }
     public var renderingNote: String { SuiteOnboarding.renderingNote }
+    /// Why Skip, Back and Continue are held: a hand-off is sending. Nil when they act.
+    public var sendingReason: String? { launching == nil ? nil : "A document is opening." }
 
     /// `present` is FileManager.default.fileExists in the app; `samplesFolder` the bundle's Resources/Samples;
     /// `documents` the support folder's Documents; `copy` moves bytes (tests pass a recorder).
@@ -55,11 +58,15 @@ public final class OnboardingModel {
 
     /// Last page: finish(); else the next page.
     public func `continue`() {
+        guard sendingReason == nil else { return }
         guard isLastPage else { pageIndex += 1; return }
         isFinished = true
         Task { await finish() }
     }
-    public func back() { pageIndex = max(pageIndex - 1, 0) }
+    public func back() {
+        guard sendingReason == nil else { return }
+        pageIndex = max(pageIndex - 1, 0)
+    }
 
     /// Toggles the focus (the same one again clears it) and reorders the starters.
     public func choose(_ focus: OnboardingFocus?) {
@@ -69,6 +76,7 @@ public final class OnboardingModel {
 
     /// Finishes with no focus: the version is saved with the apps in their usual order.
     public func skip() async {
+        guard sendingReason == nil else { return }
         focus = nil
         rebuildStarters()
         await finish()
@@ -78,7 +86,7 @@ public final class OnboardingModel {
     public func finish() async {
         do throws(SuiteError) {
             do throws(SuiteError) { try await saveFinishing() } catch .staleRevision { try await saveFinishing() }
-        } catch { message = error }
+        } catch { message = error; failed = nil }
         isFinished = true
     }
 
@@ -92,11 +100,11 @@ public final class OnboardingModel {
     /// sends the `.open` hand-off for that copy, then finishes. A sample that can't open sends nothing.
     public func openSample(_ app: SuiteApp, now: Date) async {
         let starter = starters.first { $0.tile.app == app }
-        guard let sample = starter?.sample else { message = .fileMissing(name: app.displayName); return }
+        guard let sample = starter?.sample else { refuse(.fileMissing(name: app.displayName), for: app); return }
         let source = samplesFolder + "/" + sample.fileName
-        guard starter?.sampleReason == nil, present(source) else { message = .fileMissing(name: sample.fileName); return }
+        guard starter?.sampleReason == nil, present(source) else { refuse(.fileMissing(name: sample.fileName), for: app); return }
         let destination = SampleCatalog.destination(for: sample, documents: documents, exists: present)
-        do throws(SuiteError) { try copy(source, destination) } catch { message = error; return }
+        do throws(SuiteError) { try copy(source, destination) } catch { refuse(error, for: app); return }
         let handOff = HandOff(id: makeID(), from: .launcher, to: app, verb: .open,
                               documents: [SampleCatalog.ref(for: sample, path: destination)], createdAt: now)
         guard await send(handOff) else { return }
@@ -117,12 +125,17 @@ public final class OnboardingModel {
     /// Sends one hand-off; true when it went. A refusal leaves its message and the window open.
     private func send(_ handOff: HandOff) async -> Bool {
         launching = handOff.to
-        message = nil
+        message = nil; failed = nil
         do throws(SuiteError) { _ = try await services.sending.send(handOff) } catch {
-            message = error; launching = nil
+            launching = nil; refuse(error, for: handOff.to)
             return false
         }
         return true
+    }
+
+    /// A start that didn't go: its sentence, kept with the tile it belongs to.
+    private func refuse(_ error: SuiteError, for app: SuiteApp) {
+        message = error; failed = app
     }
 
     private func rebuildStarters() {
