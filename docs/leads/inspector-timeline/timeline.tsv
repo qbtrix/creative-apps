@@ -52,3 +52,4 @@
 2026-10-17T23:48Z	stage	done: contact sheet posted https://github.com/qbtrix/creative-apps/issues/1515#issuecomment-6243314672; findings relabelled gap; branch rebuilt on main 59c435a6
 2026-10-18T00:13Z	heartbeat	full CI 39076534514 (59c435a6) macOS still running; later full runs cancelled, 39081548839 (388ab8a8) queued; contact sheet waits
 2026-10-18T00:40Z	heartbeat	full CI 39076534514 macOS cancelled at 00:28 by newer run 39082226458 (no ui-screens); that run is red on Linux, dev-red #2509 (range main..d3cd7d9f, design-line PRs); not ours to fix; contact sheet waits for next green full run
+2026-10-18T01:11Z	stage	done stands: contact sheet already posted on run 39076534514 (Linux+Promote green); 00:13/00:40 waiting heartbeats superseded; dev-red #2509 not ours
