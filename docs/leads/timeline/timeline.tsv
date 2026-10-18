@@ -136,3 +136,4 @@ utc	stage	event	ref	note
 2026-10-18T09:27:43Z	heartbeat	proof run 39111510770 red; 5 timeline findings relabelled gap (#2662 #2663 #2690 #2703 #2704); no round 3
 2026-10-18T09:45Z	heartbeat	Mac-Finish-Wanted posted on #1480
 2026-10-18T10:02Z	heartbeat	no change; waits on the Mac finisher
+2026-10-18T10:20Z	heartbeat	timeline waiting on Mac finisher
