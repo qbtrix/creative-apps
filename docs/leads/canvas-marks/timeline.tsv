@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-18T21:48:56Z	goldens	ci running	39169434591	first full run past #2990
 2026-10-18T22:16Z	wait	ci-cancelled	39169434591	full dev run cancelled; next 39171061138 pending on 85f4a22
 2026-10-18T22:38Z	wait	ci-cancelled	39171061138	full run cancelled again; 39171756438 queued
+2026-10-18T23:10:17Z	wait	runs-queued	39171756438	full + scoped suite on 349578b still queued
