@@ -55,7 +55,7 @@ extension BodyCountSuites {
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
             let send = try #require(edited.send)
             let box = canvas.convert(canvas.bounds, to: nil)
-            let scroll = try #require(w.scrollView(at: CGPoint(x: 640, y: 410)))
+            let scroll = try #require(canvas.enclosingScrollView ?? w.scrollView(at: CGPoint(x: 640, y: 410)))
 
             let presents = { (canvas.presenter as? CanvasTilePresenter)?.presented ?? 0 }
             let presentsBefore = presents()
