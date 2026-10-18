@@ -29,7 +29,7 @@ Next: #2465 fix PR #2701 (DW-a round 2) in the lane; DW-a re-done on a successfu
 | D0-8b | DW-b | 4 | editor bodyRuns counter, 120-sample drag check | DesignEditor.swift; DesignWindowDragTests | DesignWindowDragTests | #2309 | merged 0c29554 |
 | D0-7a | DW-c | 5 | suiteProbes and ids on window controls | DesignWindow.swift, DesignEditor.swift, DesignCanvas.swift, DesignControlID.swift; DesignControlIDTests | DesignControlIDTests | #2374 | merged d2249aa |
 | D0-9d | DW-d | 5 | size badge from the live box, text preview; testCanvasFeedback on | DesignCanvasFeedback.swift; snapshots; DesignCanvasBadgeTests; +Feedback journey | DesignCanvasBadgeTests | #2899 | merged 21:45Z (e3859e3f) |
-| D0-7b | DW-c | 6 | J15 sweep and layout journey; feature-done | UITests/DesignJourneyTests+EveryControl.swift, +Layout.swift | J15, testLayoutAtWidths | #3014 | open, head 28779c0c (ci PASS full + changed); fast-lane, feature-done; waits lane macOS build |
+| D0-7b | DW-c | 6 | J15 sweep and layout journey; feature-done | UITests/DesignJourneyTests+EveryControl.swift, +Layout.swift | J15, testLayoutAtWidths | #3014 | open, head 28779c0c (ci PASS full + changed); lane macOS build 39171232895 success 22:3xZ; waits lane sweep |
 
 Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other's code: the canvas slots read only the existing Model). C-2 (copy-group) runs beside them.
 
