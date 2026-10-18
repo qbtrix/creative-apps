@@ -4,12 +4,12 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
 Stage: 3 wave 2
 Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
-Next: SS-a fix round 1 merged (#2621 as 148ade3e). Proof: scoped design 39107691328 on cd81c77b (J5/J6) and full CI 39108958964 on 2202c7c3 (Linux job), both contain 148ade3e. Green: Belt-Slice-Done SS-a + Mac-Finish-Wanted, close #2691/#2692. J5/J6 red: fix round 2. SS-b S-5/S-8 wait on #1493 and CB-a.
+Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692 closed). J5 still skips at the ⇧→ nudge on two layers: finding #2706, round 2 fixer in flight (canvas key guard `selection != nil`). Re-done again on a run holding that fix. S-8 #2696 in the lane; S-5 waits on CB-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SS-a | marquee, several-layer move/resize/nudge/delete, align and distribute, on screen | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-window DW-a, DW-b (S-6); design-seams (S-7) | yes | 1 | merged (done on 39093416270 before fix #2621; re-done waits on a run holding 148ade3e) | 39093416270 | wanted |
+| SS-a | marquee, several-layer move/resize/nudge/delete, align and distribute, on screen | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-window DW-a, DW-b (S-6); design-seams (S-7) | yes | 2 | merged (re-done on 39107691328; round 2 #2706 in flight) | 39107691328 | wanted |
 | SS-b | Zoom to Selection; no edit mid-gesture; budgets | S-4, S-5, S-7b, S-8 | J4, P1 | design-seams, canvas-basics CB-a (S-5); DW-a, SS-a (S-7b, S-8) | no | 0 | building (S-8 wave 2; S-5 waits CB-a; #2538 blocked on needs-ui #2623) | – | – |
 
 ## Tasks
@@ -38,7 +38,7 @@ Next: SS-a fix round 1 merged (#2621 as 148ade3e). Proof: scoped design 39107691
 - No task of this feature can start in wave 1: S-6 waits on design-window DW-a and DW-b, which this lead builds first.
 
 ## Open
-- Findings #2691 (J6 contrast, select-distribute-off) and #2692 (J5 no Resize step) are from scoped run 39101541012 on 3a8c658, before fix #2621 (148ade3e); held until the proof run.
+- #2691 closed (J6 green on 39107691328); #2692 closed as fixed by #2621 (J5 past Resize). J5 now skips at the nudge: finding #2706 (round 2; a third miss makes it a gap).
 - S-8 #2696: QD-S4 marquee step is over its 10 ms gate (known issue, gap #2695 p2); DesignSelectBudgetTests in Tests/perf-suites.txt is the supervisor's call (asked in the PR body).
 - S-5 waits on canvas-basics CB-a (CB-1, CB-2 merged; CB-3 building).
 - #2538 (J4, SS-b) blocked on needs-ui #2623 (CanvasViewport scroller unnamed).

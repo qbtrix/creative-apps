@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-18T07:55Z	heartbeat	full 39105383795 cancelled; SS-a proof now full 39108958964 (2202c7c3) or scoped design 39107691328 (cd81c77b), both hold 148ade3e, queued. S-8 #2696 in lane (mac build). CB-3 not merged. line:design findings 10 open (>5: no new feature task); #2691 #2692 held for proof run
 2026-10-18T08:05Z	heartbeat	full CI 39105383795 was cancelled; proof moves to scoped design 39107691328 (in progress) and full CI 39108958964 (pending). No new findings since 07:30Z; #1493 #2263 #2623 open
 2026-10-18T08:18Z	heartbeat	scoped design 39107691328 (cd81c77b, holds 148ade3e) in progress; full 39108958964 pending. #2696 #2701 awaiting lane macOS builds. CB-3 not merged. 10 line:design findings open
+2026-10-18T08:45Z	slice-done	SS-a re-done on scoped design 39107691328 (Belt-Slice-Done posted on #1495); #2692 closed; finding #2706 (J5 nudge on two layers) round 2 fixer dispatched
