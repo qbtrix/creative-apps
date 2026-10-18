@@ -4,7 +4,7 @@ Issue: #1513 · Packet: docs/blueprints/library/features/loupe-viewport.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: full dev CI 39160459432 (f7e0350, has #2878) macOS job still on scripts/ci at 2026-10-18T22:19Z (started 21:07:20Z, 70+ min; may be hung). Newer full CI 39171061138 (85f4a22) pending; 39169434591 cancelled while pending. No valid library journey run since #2878 (scoped library 39157077321 void: SIGKILL at launch). Supervisor: please check 39160459432's runner and dispatch a scoped library run on dev (I can't dispatch). Green: contact sheet. Red: round 2 (the last), then gaps
+Next: full dev CI 39160459432 (f7e0350, has #2878) void for library: macOS scripts/ci hung 83 min in AfterGlowHomeSidebarTests (line:suite snapshot suite, after AfterGlowHomeLayoutTests failed homeAtEachWidth 880 golden diffs) until the job timeout at 22:37Z; journeys never ran. LibraryModelTests suites passed in it. Supervisor: the AfterGlowHomeSidebarTests hang blocks every full run (not my line, no open issue names it); please route it to line:suite and dispatch a scoped library run on dev (I can't dispatch). Waiting on full CI 39171756438 (349578b, queued) or a scoped library run. Green: contact sheet. Red: round 2 (the last), then gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
