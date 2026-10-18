@@ -41,7 +41,9 @@ import Testing
         #expect(project.file.recent.first?.name == "Spot")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                HaloViewer(model: project).overlay { HaloOpenProgress(model: project) },
+                HaloViewer(model: project).overlay {
+                    if let note = project.openingNote { BusyNote(note, identifier: "halo.file.progress") }
+                },
                 name: "halo-file-opening-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
