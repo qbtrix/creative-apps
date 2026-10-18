@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 2026-10-18T05:30Z	5	fix-round-1	#2629	gallery window fit (page adds nothing to the window minimum, back row xs padding); fixes #2497 (and editor-window dark geometry); head 4746fa19, gate PASS
 2026-10-18T05:30Z	5	gap	#2499,#2500,#2502	0-sample perf series: no probe sink feeds SuiteFrameProbe; feature-sized, relabelled gap p2
 2026-10-18T05:30Z	5	fix-round-2	#2501,#2503	fixer on timeline ScrollView hit point and playhead pill format; last round, then gap
+2026-10-18T05:34Z	5	heartbeat	#2629	round 1 PR in the lane (build-only run pending); round 2 fixer running
