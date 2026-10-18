@@ -22,9 +22,11 @@
 // (even one at the range's end that changes nothing) and once per typed
 // value, so a host makes each one undo step; closing the typing field without
 // typing changes nothing, and a typed number commits even when it matches the
-// opening text (NumericInput.committed). Under a probe host the exact field's
-// drag reports series `exact-field` (ScrubProbe). The bar is a real slider to
-// VoiceOver and XCUI (an accessibility representation), spoken with its unit.
+// opening text (NumericInput.committed). Under a probe host a drag reports
+// series `exact-field` on the field and `bar-slider` on the bar, and a bar's
+// key step `slider-key` (ScrubProbe). The bar is a real slider to VoiceOver
+// and XCUI (an accessibility representation) whose value is the row's text,
+// spoken with its unit, and its increment and decrement step as the arrows do.
 // Owns presentation state only: the typed draft and whether it was edited,
 // the drag anchor, the gesture's run, hover.
 import AppKit
@@ -245,7 +247,7 @@ public struct ScrubField: View {
                 let changed = set(position: ScrubValue.dragged(
                     from: anchor.position, by: Double(drag.translation.width - anchor.x), step: track.step,
                     multiplier: multiplier, in: track.positions))
-                if changed { report(eventTime) }
+                if changed { report(eventTime, series: ScrubProbe.dragSeries(isBar: bar != nil)) }
             }
             .onEnded { _ in
                 if anchor == nil { beginTyping() } else if ends.released() { onEnd() }
@@ -266,9 +268,11 @@ public struct ScrubField: View {
             return .handled
         default: return .ignored
         }
-        set(position: ScrubValue.pressed(
+        let eventTime = NSApp.currentEvent?.timestamp ?? ProcessInfo.processInfo.systemUptime
+        let changed = set(position: ScrubValue.pressed(
             key, from: track.position(value), shift: press.modifiers.contains(.shift),
             option: press.modifiers.contains(.option), on: track))
+        if changed && bar != nil { report(eventTime, series: ScrubProbe.keySeries) }
         if ends.stepped() { onEnd() }
         return .handled
     }
@@ -290,12 +294,12 @@ public struct ScrubField: View {
         return true
     }
 
-    /// The exact field's drag sample, shown by the next main-actor turn after
-    /// the change (the host's update has run by then); the bar's series is IC-7's.
-    private func report(_ eventTime: Double) {
-        guard let probe, bar == nil else { return }
+    /// A drag or key sample on `series`, shown by the next main-actor turn
+    /// after the change (the host's update has run by then).
+    private func report(_ eventTime: Double, series: String) {
+        guard let probe else { return }
         Task { @MainActor in
-            probe.record(ScrubProbe.sample(eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
+            probe.record(ScrubProbe.sample(series, eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
         }
     }
 
@@ -363,14 +367,20 @@ struct ScrubEnds: Equatable, Sendable {
     }
 }
 
-/// Where the exact field reports its drag samples (series `exact-field`,
-/// SP1); a probe host sets it, and nil records nothing.
+/// Where a ScrubField reports its samples: the exact field's drag on series
+/// `exact-field` and the bar's on `bar-slider` (SP1), and a bar's arrow-key
+/// step on `slider-key` (SP6); a probe host sets it, and nil records nothing.
 struct ScrubProbe: Sendable {
     static let fieldSeries = "exact-field"
+    static let barSeries = "bar-slider"
+    static let keySeries = "slider-key"
     let record: @MainActor @Sendable (ProbeSample) -> Void
 
-    static func sample(eventTime: Double, shownAt: Double) -> ProbeSample {
-        ProbeSample(series: fieldSeries, eventTime: eventTime, shownAt: shownAt)
+    /// The series a drag reports on: the bar's or the exact field's.
+    static func dragSeries(isBar: Bool) -> String { isBar ? barSeries : fieldSeries }
+
+    static func sample(_ series: String = fieldSeries, eventTime: Double, shownAt: Double) -> ProbeSample {
+        ProbeSample(series: series, eventTime: eventTime, shownAt: shownAt)
     }
 }
 
@@ -391,7 +401,7 @@ private struct ScrubProbeKey: EnvironmentKey {
 /// text field shows through. The slider takes no `step:`: a stepped Slider
 /// builds one tick per step on every body pass (200,001 for Halo's X), so it
 /// snaps a set value itself and steps through its adjustable action.
-private struct ScrubAccessibility: ViewModifier {
+struct ScrubAccessibility: ViewModifier {
     let label: String
     let spoken: String
     let isBar: Bool
@@ -425,8 +435,20 @@ private struct ScrubAccessibility: ViewModifier {
     /// representation: one step along the track, the track's own when it
     /// has one (ScrubTrack.stepped), as an arrow key steps.
     private func step(_ direction: AccessibilityAdjustmentDirection) {
-        guard direction == .increment || direction == .decrement else { return }
-        let key: ScrubKey = direction == .increment ? .increment : .decrement
-        adjust(ScrubValue.pressed(key, from: position, on: track))
+        guard let next = Self.stepped(direction, from: position, on: track) else { return }
+        adjust(next)
+    }
+
+    /// The track position after one VoiceOver step from `position`: exactly
+    /// what the unmodified arrow key gives (ScrubValue.pressed on the track);
+    /// nil for a direction that isn't increment or decrement.
+    static func stepped(
+        _ direction: AccessibilityAdjustmentDirection, from position: Double, on track: ScrubTrack
+    ) -> Double? {
+        switch direction {
+        case .increment: ScrubValue.pressed(.increment, from: position, on: track)
+        case .decrement: ScrubValue.pressed(.decrement, from: position, on: track)
+        default: nil
+        }
     }
 }
