@@ -44,3 +44,5 @@ utc	stage	event	ref	note
 2026-10-17T23:50Z	merge	#2461 merged (fixes #2438)
 2026-10-17T23:50Z	wave	11 fixer stopped on full disk; lead cleared build caches and runs the gate on 860e93a6
 2026-10-17T23:56Z	pr	#2481 opened (fixes #2463, mutate 7/7)
+2026-10-18T00:13Z	merge	#2469 merged (S-7, J5/J6)
+2026-10-18T00:13Z	wave	12 build-wave launched: S-7b (J4) on f335fde7
