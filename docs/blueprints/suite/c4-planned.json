@@ -199,6 +199,54 @@
         "style": "test",
         "status": "planned",
         "authored": true
+      },
+      {
+        "source": "afterglow-cli",
+        "target": "flare-model",
+        "description": "opens, runs commands on, saves and exports its headless document",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "afterglow-cli",
+        "target": "design-model",
+        "description": "opens, runs commands on, saves and exports its headless document",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "afterglow-cli",
+        "target": "photo-model",
+        "description": "opens, runs commands on, saves and exports its headless document",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "afterglow-cli",
+        "target": "library-model",
+        "description": "opens, runs commands on, saves and exports its headless document",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "afterglow-cli",
+        "target": "halo-model",
+        "description": "opens, runs commands on, saves and exports its headless document",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "afterglow-cli",
+        "target": "suite-shell",
+        "description": "live commands over a same-user local socket, after the person approves the client (macOS)",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
       }
     ],
     "systems": [
@@ -428,6 +476,17 @@
                 ],
                 "status": "planned",
                 "authored": true
+              },
+              {
+                "id": "suite-ai-access",
+                "name": "AI access grants",
+                "description": "AIAccessGrants: which MCP client may drive which app's live document (ask, allow once, always, deny; a file command always asks), stored with the preferences.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/AIAccess/"
+                ],
+                "status": "planned",
+                "authored": true
               }
             ]
           },
@@ -523,6 +582,18 @@
                   "Sources/SuiteShell/SuiteAppModifier.swift",
                   "Sources/SuiteShell/SuiteAppDelegate.swift",
                   "Sources/SuiteShell/SettingsRoute.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "shell-live-commands",
+                "name": "Live command channel",
+                "description": "LiveCommandChannel: a running app's command channel on a same-user Unix socket, a grant before any command, commands through the catalog on the main actor, an audit line per command; the AI Access menu.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/LiveCommandChannel.swift",
+                  "Sources/SuiteShell/AIAccessCommands.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -656,6 +727,70 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Tests/SuiteModelTests/"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "afterglow-cli",
+            "name": "AfterGlowCLI",
+            "description": "The afterglow command line tool and MCP server (suite.md 1.5): every app's command catalog run headless on files, JSON scripts and the real-jobs suites, and `afterglow mcp`. Links SuiteKernel, SuiteModel and the five Models; no UI.",
+            "technology": "Swift 6, Foundation, Linux and macOS",
+            "tags": [
+              "internal"
+            ],
+            "status": "planned",
+            "authored": true,
+            "components": [
+              {
+                "id": "cli-runner",
+                "name": "Runner",
+                "description": "Strict parsing, the router (list-apps, list-commands, describe, open, new, a command, export), one JSON object out, sysexits codes, never overwriting without --force.",
+                "technology": "Swift 6, Foundation, Linux and macOS",
+                "paths": [
+                  "Sources/AfterGlowCLI/",
+                  "Sources/AfterGlowCLICore/CLI.swift",
+                  "Sources/AfterGlowCLICore/Arguments.swift",
+                  "Sources/AfterGlowCLICore/Output.swift",
+                  "Sources/AfterGlowCLICore/CLIIO.swift",
+                  "Sources/AfterGlowCLICore/LiveIO.swift",
+                  "Sources/AfterGlowCLICore/Apps.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "cli-batch",
+                "name": "Scripts",
+                "description": "afterglow run <script.jobs.json>: inputs, steps, atomic per input, name templates, the report.",
+                "technology": "Swift 6, Foundation, Linux and macOS",
+                "paths": [
+                  "Sources/AfterGlowCLICore/Script.swift",
+                  "Sources/AfterGlowCLICore/ScriptRunner.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "cli-jobs",
+                "name": "Real jobs",
+                "description": "The real-jobs harness: every Tests/RealJobs/<app>/<job>/ against its sha256, JSON or pixel expectations.",
+                "technology": "Swift 6, Foundation, Linux and macOS",
+                "paths": [
+                  "Sources/AfterGlowCLICore/RealJobs.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "cli-mcp",
+                "name": "MCP server",
+                "description": "JSON-RPC over stdio in both protocol eras, tools generated from the catalogs, documents by handle under allowed roots; --live bridges a running app's command channel (macOS).",
+                "technology": "Swift 6, Foundation, Linux and macOS",
+                "paths": [
+                  "Sources/AfterGlowCLICore/MCP/"
                 ],
                 "status": "planned",
                 "authored": true
