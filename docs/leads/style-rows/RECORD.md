@@ -4,7 +4,7 @@ Issue: #1497 · Packet: docs/blueprints/design/features/style-rows.md
 Run: act-1a14d32dfd7-u3ff (before: act-1a149c0c306-8ckd, act-1a1487bf8e3-hwdj) · Session: claude/layers-panel-style-rows-copy-group-x5zrpm · Started: 2026-10-17T06:08Z
 Stage: 3 polling
 Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
-Next: wait for the lane to merge #2561 (SR-b fix round 1, Fixes #2552), then a completed, successful design scoped or full run that holds it; post Belt-Slice-Done SR-b, then Belt-Contact-Sheet on #1497
+Next: #2561 merged as d3a4f16e (SR-b fix round 1, Fixes #2552); wait for a completed, successful design scoped or full run that holds it; post Belt-Slice-Done SR-b, then Belt-Contact-Sheet on #1497
 
 Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-group.
 
@@ -14,7 +14,7 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 | SR-m | On the live services every style setter refuses, skips and clamps as blueprint 5.4 says, the inspector's shared values read "Mixed" only when layers differ, and the inline editor's scale follows the zoom. | ST-1, ST-2, ST-3 | MJ8 | design-contracts (built) | no | 0 | done | 39033633296 | – |
 | SR-t | Text family, size, weight and alignment rows set a text layer, the canvas and the inline editor draw its text in that style, committed text doesn't jump at any zoom, and top-level frame names sit above their frames. | ST-6b, ST-4b, ST-5t, ST-5f | J11 | SR-m (ST-4b, ST-5t); design-window DW-a (ST-4b, ST-5t, ST-5f) | yes | 2 | done (gap #2545) | 39093367358 | wanted |
 | SR-a | Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read "Mixed" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget. | ST-4, ST-6, ST-7 | J10 | SR-m (ST-4, ST-7); design-window DW-a (ST-4, ST-6) and DW-b (ST-4) | yes | 2 | done (gap #2544) | 39093367358 | wanted |
-| SR-b | The canvas draws radius, stroke and opacity as stored, and scrubs and typing keep up on 2,000 layers. | ST-5, ST-8 | P2 | design-window DW-a (ST-5, ST-8); SR-a, SR-t (ST-8) | yes | 1 | merged (fix #2561 open) | – | – |
+| SR-b | The canvas draws radius, stroke and opacity as stored, and scrubs and typing keep up on 2,000 layers. | ST-5, ST-8 | P2 | design-window DW-a (ST-5, ST-8); SR-a, SR-t (ST-8) | yes | 1 | merged (fix #2561 merged d3a4f16e) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -109,3 +109,4 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - 2026-10-18T03:41:06Z check: full CI 39093416270 on 0965457c (has 095c4dd7): Linux green, SR-a/SR-t/SR-b merged-done; macOS in progress. scoped design 39093367358 in progress (J10/J11/P2 pending)
 - 2026-10-18T04:04:19Z check: scoped 39093367358 done: J10 fails step 2 (slider orientation), J11 fails Size read-back -> #2544/#2545 moved to gap (SR-a cap); P2 perf ok, audit unnamed scroller -> finding #2552, fix PR #2561 (SR-b round 1). Belt-Slice-Done posted for SR-a (gaps #2544 #2545) and SR-t
 - 2026-10-18T04:22:14Z check: SR-b fix #2561 macOS build green (run 39095809132), awaiting lane merge; full CI 39093416270 macOS job still running; no dev-red
+- 2026-10-18T04:25:13Z check: #2561 merged into dev as d3a4f16e (04:24Z). Dev CI 39096939772 runs on 21066130, before it, so it can't close SR-b; waiting for a design-scoped or full run on d3a4f16e or later.

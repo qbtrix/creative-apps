@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-18T04:04:19Z	style-rows	check	dev@6bb1f3f6	scoped 39093367358 done: J10 fails step 2 (slider orientation), J11 fails Size read-back -> #2544/#2545 moved to gap (SR-a cap); P2 perf ok, audit unnamed scroller -> finding #2552, fix PR #2561 (SR-b round 1). Belt-Slice-Done posted for SR-a (gaps #2544 #2545) and SR-t
 2026-10-18T04:13Z	3	slice-done	#1497	SR-a, SR-t re-posted on 39093367358 (gaps #2544, #2545); Mac-Finish-Wanted SR-a, SR-t; SR-b waits on #2561
 2026-10-18T04:22:14Z	style-rows	check	dev@21066130	SR-b fix #2561 macOS build green (run 39095809132), awaiting lane merge; full CI 39093416270 macOS job still running; no dev-red
+2026-10-18T04:25:13Z	3	merged	#2561	SR-b r1 on dev d3a4f16e; next run holding it closes SR-b
