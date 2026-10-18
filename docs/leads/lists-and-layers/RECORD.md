@@ -2,9 +2,9 @@
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: 5 goldens (checks on dev)
+Stage: 5 goldens + fix round 1 (journey findings)
 Base: 2e27b8db (origin/dev)
-Next: full CI 39161458093 on dev 0e4e913 (queued) writes golden-new/sidebar actuals; commit them, then LL-17 feature-done
+Next: fix round 1 on #2837 #2838 #2839 #2864 #2865 (ScrollView hit point on gallery pages, 4 pt shell overflow at 880); golden-new/sidebar actuals from the next macOS run on dev at 0e4e913 or later; then LL-17 feature-done
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
