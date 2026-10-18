@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-18T16:55:25Z	merged	F-2851	#2858 merge aee9df9da3ddc4ce802e016259fb487a3ab2eb0f
 2026-10-18T16:55:51Z	heartbeat	-	#2858 merged, #2857 waiting macOS build; full 39143942767 macOS running; fixer started for #2852 (OB-a); #2850 after #2857
 2026-10-18T16:57:07Z	needs-rebase	F-2849	#2857 conflicts with #2858 in Tests/mutations/SuiteModel.SampleCatalog.json; fixer merging origin/dev
+2026-10-18T17:05:31Z	pr-open	F-2852	#2872 head 21f58320, 2 files +4/-4; needs-ui #2867 filed
