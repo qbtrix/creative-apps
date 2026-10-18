@@ -44,3 +44,14 @@ Waves (packet's Build waves, checked against dev 6bb1f3f6):
 
 ## Open
 - None yet.
+
+## Run act-1a14fd6514a-4hke (resumed 2026-10-18)
+
+Resume point: Stage 3, wave 2 on dev@ae72cc6c.
+
+- FH-2 merged as #2567 (slice FH-a).
+- design-window DW-a has merged (#2163, #2168, #2213, #2214, #2217 and fixes), which unblocks FH-3 and FH-4.
+- No open `finding` issue names files-history.
+- Wave 2 builders: FH-1 (LiveFiling codec, same bytes), FH-3 (Undo routing and close prompt), FH-4 (save state in DesignSaveStatus).
+- Wave 3, next: FH-5 (J13 and J14) once FH-3 and FH-4 merge; FH-6 (J16) and FH-7 (P4, feature-done) once FH-1 merges.
+- Slice done lines: none yet.
