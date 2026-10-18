@@ -98,14 +98,28 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
 /// records nothing): a `fade-start`/`fade-end` mark pair on series `tabs`.
 struct TabsProbe: Sendable {
     static let fadeSeries = "tabs"
+    /// How long `SuiteMotion.state` runs: 0.14 s.
+    static let fadeLength: TimeInterval = 0.14
     let record: @MainActor @Sendable (ProbeMark) -> Void
 
     /// Runs `change` under the state fade (none under Reduce Motion), marking its start and its end.
     @MainActor static func fade(reduceMotion: Bool, probe: TabsProbe?, _ change: () -> Void) {
         probe?.record(ProbeMark(name: "fade-start", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
-        // The completion runs exactly once: after the fade, or at once when nothing animates.
-        withAnimation(SuiteMotion.state(reduceMotion: reduceMotion), change) {
-            probe?.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
+        withAnimation(SuiteMotion.state(reduceMotion: reduceMotion), change)
+        // The drawn selection is a system segmented control, so the change creates no SwiftUI animation, and a
+        // completion run from onChange waited for the next transaction (start, start, end on scoped run
+        // 39133362138, #2805). The pair closes on its own instead: at once under Reduce Motion, else after the
+        // fade, on a main-run-loop timer. A main-actor Task never ran while the caller spun the run loop holding
+        // the main actor (start, start on scoped run 39137893783).
+        guard let probe else { return }
+        if reduceMotion {
+            probe.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
+            return
+        }
+        Timer.scheduledTimer(withTimeInterval: fadeLength, repeats: false) { _ in
+            MainActor.assumeIsolated {
+                probe.record(ProbeMark(name: "fade-end", series: fadeSeries, time: ProcessInfo.processInfo.systemUptime))
+            }
         }
     }
 }
