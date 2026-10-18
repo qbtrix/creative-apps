@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
 Stage: 3 polling
 Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
-Next: D0-9d starts once canvas-basics CB-a has merged (CB-3, the Text click-drag box); then D0-7b (feature-done). Finding #2302 waits on SuiteUI #2263.
+Next: fixer on #2465 (J1 Arrange on with nothing selected, DW-a round 2); D0-9d starts once canvas-basics CB-a has merged (CB-3); then D0-7b (feature-done). Finding #2302 waits on SuiteUI #2263.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -48,6 +48,7 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 - The PR tool appends an attribution footer. The lead stripped it from #2166, #2168 and #2163, and build-wave builders now strip it themselves.
 
 ## Open
+- #2465 J1 red again at 3a8c658 after round 1 (#2372): DW-a round 2 fixer, branch fix/design-2465-arrange-off. A third red makes it a gap.
 - D0-9d (so DW-d, and D0-7b, so DW-c) waits on canvas-basics CB-a: CB-1, CB-2 (#2568) merged, CB-3 building in the canvas-basics lead.
 - Finding #2302 (testDrawShapesAddTextAndSave) blocked on needs-ui #2263.
 - needs-ui #2148: SuiteUI ScrubField mixed state; D0-5c uses plain "Mixed" text meanwhile.
