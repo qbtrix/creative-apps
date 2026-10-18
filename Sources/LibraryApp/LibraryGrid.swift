@@ -9,8 +9,11 @@
 // file can't be read, so the flag glyph never stands alone. Each cell is
 // identified `library.grid.cell.<photo id>` on the cell itself, never on the
 // grid, so journeys and the app audit can find it. The cells on screen go to
-// `menu.thumbnails.visibleChanged`, which requests their thumbnails. Values
-// in, closures out; LibraryCatalog holds the state.
+// `menu.thumbnails.visibleChanged`, which requests their thumbnails. On
+// appear and whenever the cell size or the display scale changes, the grid
+// reports both to `menu.thumbnails.cellSizeChanged` (the scale a whole number
+// ≥ 1, `LibraryCatalog.thumbnailScale`), which picks the thumbnail bucket.
+// Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -21,6 +24,7 @@ struct LibraryGrid: View {
     var menu = LibraryMenu()
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
+    @Environment(\.displayScale) private var displayScale
 
     /// Each cell's identifier is this plus the photo's id.
     static let cellIdentifierPrefix = "library.grid.cell."
@@ -28,6 +32,8 @@ struct LibraryGrid: View {
     var body: some View {
         let side = CGFloat(model.cellSize)
         let visibleChanged = menu.thumbnails.visibleChanged
+        let cellSizeChanged = menu.thumbnails.cellSizeChanged
+        let cell = [model.cellSize, LibraryCatalog.thumbnailScale(forDisplayScale: Double(displayScale))]
         ThumbnailGrid(
             model.sortedItems.map {
                 ThumbnailItem<String>(
@@ -36,7 +42,12 @@ struct LibraryGrid: View {
             cellSize: CGSize(width: side, height: side * 3 / 4),
             selection: model.selection, onSelectionChange: onSelect, onOpen: onOpen,
             cellIdentifierPrefix: Self.cellIdentifierPrefix,
-            onVisibleChange: { visibleChanged?($0) })
+            onVisibleChange: { visibleChanged?($0) }
+        )
+        .onChange(of: cell, initial: true) { _, cell in
+            guard cell.count == 2 else { return }
+            cellSizeChanged?(cell[0], cell[1])
+        }
     }
 }
 

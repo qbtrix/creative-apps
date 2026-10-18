@@ -7,7 +7,7 @@
 // alert. Duplicate Layer goes straight to the workspace; Merge Down and
 // Flatten Image work their pixels out off the main actor and commit on return,
 // showing the workspace's "Merging…" over the canvas once they run 100 ms
-// (PhotoMergeNote). The workspace refuses with its reason in the status line
+// (SuiteUI's BusyNote). The workspace refuses with its reason in the status line
 // (the Layer menu disables them with that reason first). PhotoEditArea
 // watches the general pasteboard's change count and publishes what it holds
 // (`photoPasteboard`) for the Edit menu.
@@ -79,34 +79,6 @@ extension PhotoWindow {
     }
 }
 
-/// `photo.edit.merging`: the workspace's "Merging…" with a spinner over the
-/// canvas once a merge has run 100 ms (a quick one shows nothing).
-private struct PhotoMergeNote: View {
-    let progress: String?
-    @State private var shown: String?
-
-    var body: some View {
-        Color.clear
-            .allowsHitTesting(false)
-            .overlay {
-                if let shown {
-                    GlassPanel {
-                        Label { Text(shown).font(SuiteFont.body) } icon: { ProgressView().controlSize(.small) }
-                    }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(shown)
-                    .accessibilityIdentifier("photo.edit.merging")
-                }
-            }
-            .task(id: progress) {
-                shown = nil
-                guard let progress else { return }
-                try? await Task.sleep(for: .milliseconds(100))
-                if !Task.isCancelled { shown = progress }
-            }
-    }
-}
-
 /// What the general pasteboard holds, as the Edit menu's Paste needs it.
 struct PhotoPasteboardState: Equatable {
     var hasImage = false
@@ -138,7 +110,12 @@ struct PhotoEditArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .overlay { PhotoMergeNote(progress: model.progress) }
+            .overlay {
+                // `photo.edit.merging`, once a merge has run 100 ms (a quick one shows nothing).
+                if let progress = model.progress {
+                    BusyNote(progress, identifier: "photo.edit.merging", delay: .milliseconds(100))
+                }
+            }
             .focusedSceneValue(\.photoPasteboard, pasteboard)
             // Another app can change the pasteboard at any time and says
             // nothing, so its change count is checked four times a second.
