@@ -1,0 +1,158 @@
+{
+  "title": "Text for the suite: measure spans, list fonts and draw placed glyphs on Core Text",
+  "wave": 5,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta-80 plan row E8, the macOS half (suite-shell shell-text, contract in suite-model); Halo's Core Text rasterizer as the code to move",
+  "waits_on": "suite-contracts (built); the shell-media slice SM-a first, for the two SuiteServices files (soft, a slice wait); creative-core text-engine's layout feeds on these metrics (soft: nothing here imports FlareCore)",
+  "depends": [
+    "suite-contracts"
+  ],
+  "longest_chain": "6 (ST-1 → ST-2 → ST-4 → ST-7 → ST-8 → ST-9)",
+  "journeys": [],
+  "journeys_none": "No control of its own: Linux Model walks (TextContractTests, TextRulesTests, FakeTextTests) and macOS live walks in AppSnapshotTests prove it; its screen is SuiteUI's font-picker and each app's text tool",
+  "ui_slice": "none",
+  "ui_slice_reason": "A service with no screen: the font picker is the suiteui font-picker feature, and text tools are each app's W3 adoption",
+  "owned": [
+    "Sources/SuiteModel/Values/Text.swift",
+    "Sources/SuiteModel/Contracts/TextMeasuring.swift",
+    "Sources/SuiteModel/Fakes/FakeText.swift",
+    "Sources/SuiteModel/SuiteServices.swift",
+    "Sources/SuiteShell/SuiteServices+Live.swift",
+    "Sources/SuiteShell/Live/TextSlot.swift",
+    "Tests/SuiteModelTests/TextContractTests.swift",
+    "Tests/mutations/SuiteModel.TextValues.json",
+    "Tests/SuiteModelTests/TextRulesTests.swift",
+    "Tests/SuiteModelTests/FakeTextTests.swift",
+    "Tests/AppSnapshotTests/ShellTextMeasureTests.swift",
+    "Tests/AppSnapshotTests/ShellFontListTests.swift",
+    "Tests/AppSnapshotTests/ShellTextDrawTests.swift",
+    "Sources/SuiteModel/Values/Text+Rules.swift",
+    "Tests/mutations/SuiteModel.TextRules.json",
+    "Tests/mutations/SuiteModel.FakeText.json",
+    "Sources/SuiteShell/Text/CoreTextMeasurer.swift",
+    "docs/c4/parts/creative-apps/suite-shell/shell-text.json",
+    "Sources/SuiteShell/Text/FontCatalog.swift",
+    "Sources/SuiteShell/Text/GlyphRasterizer.swift",
+    "Sources/SuiteShell/Text/LiveText.swift",
+    "Tests/AppSnapshotTests/ShellTextLiveTests.swift",
+    "docs/blueprints/suite/features/shell-text.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "ST-a",
+      "behavior": "Callers can code against TextMeasuring, FontListing, GlyphRasterizing, the text values and FakeText through SuiteServices.text, with the Linux and macOS checks written and disabled.",
+      "tasks": [
+        "ST-1",
+        "ST-2"
+      ],
+      "journeys": [
+        "MJ-ST0"
+      ],
+      "waits": {
+        "shell-media:SM-a": [
+          "ST-1"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteModel/Values/Text.swift",
+        "Sources/SuiteModel/Contracts/TextMeasuring.swift",
+        "Sources/SuiteModel/Fakes/FakeText.swift",
+        "Sources/SuiteModel/SuiteServices.swift",
+        "Sources/SuiteShell/SuiteServices+Live.swift",
+        "Sources/SuiteShell/Live/TextSlot.swift",
+        "Tests/SuiteModelTests/TextContractTests.swift",
+        "Tests/mutations/SuiteModel.TextValues.json",
+        "Tests/SuiteModelTests/TextRulesTests.swift",
+        "Tests/SuiteModelTests/FakeTextTests.swift",
+        "Tests/AppSnapshotTests/ShellTextMeasureTests.swift",
+        "Tests/AppSnapshotTests/ShellFontListTests.swift",
+        "Tests/AppSnapshotTests/ShellTextDrawTests.swift"
+      ]
+    },
+    {
+      "id": "ST-m",
+      "behavior": "TextSpan and PlacedSpan refuse what can't be drawn, unknown fonts fall back by rule, and the fake measures by fixed advances so Linux layouts match creative-core's.",
+      "tasks": [
+        "ST-3",
+        "ST-6"
+      ],
+      "journeys": [
+        "MJ-ST1"
+      ],
+      "waits": {
+        "ST-a": [
+          "ST-3",
+          "ST-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteModel/Values/Text+Rules.swift",
+        "Tests/SuiteModelTests/TextRulesTests.swift",
+        "Tests/mutations/SuiteModel.TextRules.json",
+        "Sources/SuiteModel/Fakes/FakeText.swift",
+        "Tests/SuiteModelTests/FakeTextTests.swift",
+        "Tests/mutations/SuiteModel.FakeText.json"
+      ]
+    },
+    {
+      "id": "ST-live",
+      "behavior": "On a Mac, spans measure through Core Text with one advance per grapheme, the font list names every family with its faces, and placed glyphs draw into a frame at their positions and angles.",
+      "tasks": [
+        "ST-4",
+        "ST-5",
+        "ST-7"
+      ],
+      "journeys": [
+        "MJ-ST2",
+        "MJ-ST3"
+      ],
+      "waits": {
+        "ST-a": [
+          "ST-4"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteShell/Text/CoreTextMeasurer.swift",
+        "Tests/AppSnapshotTests/ShellTextMeasureTests.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-text.json",
+        "Sources/SuiteShell/Text/FontCatalog.swift",
+        "Tests/AppSnapshotTests/ShellFontListTests.swift",
+        "Sources/SuiteShell/Text/GlyphRasterizer.swift",
+        "Tests/AppSnapshotTests/ShellTextDrawTests.swift"
+      ]
+    },
+    {
+      "id": "ST-z",
+      "behavior": "The slot is live, a walk measures and draws a two-style line on the Mac, the shared prose names the service, and the feature is built.",
+      "tasks": [
+        "ST-8",
+        "ST-9"
+      ],
+      "journeys": [
+        "MJ-ST4"
+      ],
+      "waits": {
+        "ST-m": [
+          "ST-8"
+        ],
+        "ST-live": [
+          "ST-8"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteShell/Text/LiveText.swift",
+        "Sources/SuiteShell/Live/TextSlot.swift",
+        "Tests/AppSnapshotTests/ShellTextLiveTests.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-text.json",
+        "docs/blueprints/suite/features/shell-text.wave.json"
+      ]
+    }
+  ]
+}

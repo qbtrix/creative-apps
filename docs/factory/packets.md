@@ -156,6 +156,30 @@ for them by name.
     once every slice is done (`lead.md`, contract rules 6, 15 and 17).
 12. **Review notes folded in** (optional). What a review changed.
 
+## The suite feature map
+
+`docs/blueprints/suite/feature-map.json` lists every AfterGlow feature once:
+its id (`E1`, `S7`, `A3`, or the packet id for older features), name, layer
+(`core`, `kernel`, `model`, `ui`, `render`, or `app` with its `app`), C4
+homes, and `adopters`, the apps that use it. Belt's Suite map view reads it
+and gives each row the live status of its packet. Status comes only from the
+`packet` field, the packet id `<app>/<feature>` (the
+`docs/blueprints/<app>/features/<feature>.wave.json` it names):
+
+- no `packet`: **new**;
+- a `packet` whose `.wave.json` isn't on `dev` yet: **writing**;
+- a `packet` on `dev`: that feature's Belt status (planned, filed,
+  building, waiting, stuck, built, done).
+
+Each adopter row has its own optional `packet` (the packet that wires the
+feature into that app) and the same rule.
+
+**When you write a packet for a feature on the map**, set the row's
+`packet` to your packet id in the same PR as the `.wave.json`, and set it on
+each adopter your packet wires in. A feature that isn't on the map yet gets
+a new row (a fresh id, its layer, C4 homes and adopters). A row is never
+deleted; a re-cut points the row at the new packet.
+
 ## The three rules
 
 **(a) Shared prose goes in ONE final task; fragments go with their code.**

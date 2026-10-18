@@ -107,16 +107,15 @@ private func occurrences(of needle: String, in text: String) -> Int {
         #expect(text.contains("@FocusedValue(\\.homeModel)") && text.contains("HomeMenu.make("))
         #expect(!text.contains("notConnected(") && !text.contains(".disabled(true)"))
         // Each item renders once, with its 6.2 shortcut.
-        let statements = text.components(separatedBy: "HomeMenuItem(item: menu.").dropFirst()
+        let statements = text.components(separatedBy: "MenuCommand(item: menu.").dropFirst()
         for (field, shortcut) in homeFields {
             let found = statements.filter { $0.hasPrefix(field + ")") }
             #expect(found.count == 1, "menu.\(field) renders \(found.count) times")
             if let shortcut { #expect(found.first?.contains(shortcut) == true, "menu.\(field) lacks \(shortcut)") }
         }
         #expect(text.contains("ForEach(menu.new,") && text.contains("ForEach(menu.recents,"))
-        // The one Button: disabled, with its reason as help, whenever it can't act.
-        let button = try #require(buttons(text).first)
-        #expect(buttons(text).count == 1 && button.contains(".disabled(!item.isEnabled).help(item.reason"))
+        // No Button of its own: each item is SuiteUI's MenuCommand, disabled with its reason as help.
+        #expect(buttons(text).isEmpty && text.contains("help: item.reason ?? \"\", isEnabled: item.isEnabled"))
         let menu = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home, hasWindow: true)
         let titles = menu.new.map(\.item.title) + [menu.open, menu.clearMenu, menu.delete, menu.showSidebar,
                                                   menu.showInspector, menu.larger, menu.smaller].map(\.title)
