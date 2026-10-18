@@ -1,0 +1,16 @@
+[
+  {
+    "label": "presetsLabelAlwaysFull",
+    "file": "Sources/SuiteModel/Home/HomeMenu.swift",
+    "find": "HomeLayout.tileWidth(windowWidth: windowWidth) ? title : \"Presets\"",
+    "replace": "HomeLayout.tileWidth(windowWidth: windowWidth) ? title : title",
+    "tests": "HomeMenuTests"
+  },
+  {
+    "label": "presetsLabelFitsInverted",
+    "file": "Sources/SuiteModel/Home/HomeMenu.swift",
+    "find": "HomeLayout.chipLabelWidth(title) <= HomeLayout.tileWidth",
+    "replace": "HomeLayout.chipLabelWidth(title) > HomeLayout.tileWidth",
+    "tests": "HomeMenuTests"
+  }
+]
