@@ -15,9 +15,9 @@ tests written before their code, and mutation plans for Model behaviour.
 |---|---|---|---|---|---|---|
 | 1 | Contracts, fakes, catalog state, undo, launch arguments, the app split | `spine.md` | #235 (and the fix for #156, see below) | nothing | #1044 | building |
 | 2 | Import a folder | `import.md` | #210 | spine | #1334 | built |
-| 2 | Real grid thumbnails | `thumbnails.md` | #33 | spine, #779 (S-L2), #333 | file when ready | planned |
+| 2 | Real grid thumbnails | `thumbnails.md` | #33 | spine, #779 (S-L2), #333 | file when ready | built |
 | 2 | Cull from the keyboard with undo and Auto Advance | `cull.md` | #211, #426, #724 (keys) | spine, #333 | #1345 | built |
-| 2 | The catalog file | `persist.md` | #212 | spine, #333 | file when ready | planned |
+| 2 | The catalog file | `persist.md` | #212 | spine, #333 | file when ready | built |
 | 2 | The loupe on CanvasViewport | `loupe-viewport.md` | #724 (zoom, real size) | spine, #333 | file when ready | planned |
 | 3 | Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings | `develop.md` | #32, #423 | spine, persist, thumbnails, loupe-viewport; the spine follow-up (inspector pass-through) for DV-9; a creative-core issue (vibrance, saturation) and its bump for DV-12; #782 for P3 | file when ready | planned |
 | 3 | Status pills, inspector header (#185), the remaining identifiers (#291), layout tests | `status-and-layout.md` | #185, #291 | spine, thumbnails, loupe-viewport; SuiteUI #1184 (S-L7); two gaps filed at stage 1 (the spine's preview-only status bar, MetadataInspector's own header) | file when ready | planned |
