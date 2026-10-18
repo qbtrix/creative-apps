@@ -43,3 +43,4 @@ Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692
 - S-5 waits on canvas-basics CB-a (CB-1, CB-2 merged; CB-3 building).
 - #2538 (J4, SS-b) blocked on needs-ui #2623 (CanvasViewport scroller unnamed).
 - Stage-1 issues filed: gaps #2144 (marquee), #2145 (several layers), #2146 (Zoom to Selection); needs-ui #2147 (CanvasViewport scroll to a rect).
+- S-8 #2696 (f7d57daf) shown on scoped design https://github.com/qbtrix/creative-apps/actions/runs/39118734724 (a80ed944, success). Finding #2751 (P1 testCanvasDragLatency: unnamed 427x11 button on design-perf-canvas-zoomed-in) is SS-b round 1; fixer sent, likely the same SuiteUI scroller as needs-ui #2623.
