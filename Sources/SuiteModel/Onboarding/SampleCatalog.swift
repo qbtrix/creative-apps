@@ -8,7 +8,7 @@ public struct SampleCatalog: Sendable {
     public static let samples: [SampleFile] = [
         SampleFile(app: .flare, fileName: "Bounce.flare", type: .flareAnimation, title: "Bounce"),
         SampleFile(app: .design, fileName: "Cards.design", type: .designDocument, title: "Cards"),
-        SampleFile(app: .photo, fileName: "beach.ora", type: .photoOpenRaster, title: "beach"),
+        SampleFile(app: .photo, fileName: "beach.ora", type: .photoOpenRaster, title: "Beach"),
         SampleFile(app: .library, fileName: "Sunset.png", type: .png, title: "Sunset"),
         SampleFile(app: .halo, fileName: "Intro.halo", type: .haloProject, title: "Intro"),
     ]

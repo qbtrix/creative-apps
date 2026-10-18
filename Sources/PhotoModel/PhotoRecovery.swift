@@ -36,14 +36,14 @@ extension PhotoWorkspace {
 
     /// Whether to autosave now: the image is dirty, at least `delay` seconds
     /// have passed since `lastEdit`, and the last autosave came before that
-    /// edit. False when any time is NaN or infinite.
+    /// edit. False when any time is NaN or infinite, or `delay` is negative.
     public func autosaveDue(
         lastEdit: Double, lastAutosave: Double?, now: Double, delay: Double = PhotoWorkspace.autosaveDelay
     ) -> Bool {
-        guard isDirty, lastEdit.isFinite, now.isFinite, delay.isFinite, lastAutosave?.isFinite ?? true else {
-            return false
-        }
-        return now - lastEdit >= delay && (lastAutosave ?? -.infinity) < lastEdit
+        guard lastEdit.isFinite, now.isFinite, lastAutosave?.isFinite ?? true else { return false }
+        // The kernel's rule (PhotoRecovery+Kernel.swift): dirty, delay passed, edit not autosaved.
+        return autosaveSession(lastEdit: lastEdit, lastAutosave: lastAutosave)
+            .autosaveDue(now: Date(timeIntervalSinceReferenceDate: now), delay: delay)
     }
 
     /// What an autosave at `now` writes: the document package of the open

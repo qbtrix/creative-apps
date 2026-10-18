@@ -18,6 +18,12 @@ import Testing
             == "/Applications/AfterGlow.app/Contents/Resources/Samples")
     }
 
+    @Test func sampleTitlesAreCapitalisedDisplayNames() {
+        // The start page's help reads "Open <title> in <App>.", so each title is a capitalised name (#2851).
+        #expect(SampleCatalog.samples.map(\.title) == ["Bounce", "Cards", "Beach", "Sunset", "Intro"])
+        for s in SampleCatalog.samples { #expect(s.title.first?.isUppercase == true) }
+    }
+
     @Test func reasonOnlyWhenTheFileIsMissing() throws {
         let halo = try #require(SampleCatalog.sample(for: .halo))
         let path = folder + "/" + halo.fileName

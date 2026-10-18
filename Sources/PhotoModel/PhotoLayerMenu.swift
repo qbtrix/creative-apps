@@ -30,15 +30,14 @@ extension PhotoWorkspace {
 
     /// Moves the selected layer one place toward the top. Ignored at the top.
     public mutating func bringSelectedLayerForward() {
-        guard canBringSelectedLayerForward, let at = selectedIndex else { return }
-        moveLayers(fromOffsets: [at], toOffset: at - 1)
+        guard canBringSelectedLayerForward, let id = selectedLayerID else { return }
+        arrangeLayer(id, .bringForward)
     }
 
     /// Moves the selected layer one place toward the bottom. Ignored at the bottom.
     public mutating func sendSelectedLayerBackward() {
-        guard canSendSelectedLayerBackward, let at = selectedIndex else { return }
-        // A list drag's destination: before the layer two below, once this one is out.
-        moveLayers(fromOffsets: [at], toOffset: at + 2)
+        guard canSendSelectedLayerBackward, let id = selectedLayerID else { return }
+        arrangeLayer(id, .sendBackward)
     }
 
     /// Selects the layer above the selected one. Ignored at the top.

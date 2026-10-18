@@ -4,7 +4,8 @@
 // save leaves, the recent list (newest first, 10 at most, no repeated path),
 // the window title, subtitle and save status, and where Save writes (`saveTarget`,
 // HF-9). The only writer of `file`, besides
-// `edit` marking it unsaved.
+// `edit` marking it unsaved. The status reads through the kernel's session
+// (HaloFiles+Kernel.swift).
 // W0's `HaloFileState.opening` is a Bool, so the file being opened rides at
 // the head of `file.recent` until `finishOpen`; `recent` hides it.
 // Linux-safe: no UI imports.
@@ -65,6 +66,7 @@ extension HaloProject {
         file.path = path
         file.unsaved = false
         file.error = nil
+        sessionDidSave()
         pushRecent(HaloRecentFile(name: name, path: path))
     }
 
@@ -96,14 +98,13 @@ extension HaloProject {
 
     /// "Untitled", "Saved", "Edited", or "Not saved" after a failed save.
     public var saveStatus: String {
-        if file.unsaved { return file.error != nil ? "Not saved" : "Edited" }
-        return file.path == nil ? "Untitled" : "Saved"
+        Self.words(for: session)
     }
 
     /// The title bar's subtitle: "Edited" or "Not saved" while the work
     /// isn't on disk; nil when there is nothing to warn about.
     public var windowSubtitle: String? {
-        file.unsaved ? saveStatus : nil
+        session.isDirty ? saveStatus : nil
     }
 
     /// A launch path (`-HaloSaveTo`) always wins; Save As… asks; Save writes

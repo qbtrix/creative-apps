@@ -180,15 +180,10 @@ extension HaloProject {
         pickedSegment?.easing.handles
     }
 
-    /// `count` points along the picked segment's curve, x from 0 to 1, y from
-    /// FlareCore's `Easing.value(at:)`. Empty with nothing picked.
+    /// `count` points along the picked segment's curve, x from 0 to 1
+    /// (SuiteKernel's `EaseCurve.samples`, at most 4096). Empty with nothing picked.
     public func easingCurve(count: Int) -> [HaloPoint] {
-        guard let easing = pickedSegment?.easing, count > 0 else { return [] }
-        let last = Double(max(count - 1, 1))
-        return (0..<count).map { i in
-            let x = Double(i) / last
-            return HaloPoint(x: x, y: easing.value(at: x))
-        }
+        pickedSegment.map { EaseCurve.samples(of: $0.easing, count: count) } ?? []
     }
 
     /// Gives every picked key `preset`, as one "Keyframe Easing" step. The
