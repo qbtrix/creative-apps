@@ -12,5 +12,7 @@
 {"label":"skip() goes while a hand-off sends","file":"Sources/SuiteModel/Onboarding/OnboardingModel.swift","find":"        guard sendingReason == nil else { return }\n        focus = nil","replace":"        focus = nil","tests":"OnboardingModelTests"},
 {"label":"back() moves while a hand-off sends","file":"Sources/SuiteModel/Onboarding/OnboardingModel.swift","find":"        guard sendingReason == nil else { return }\n        pageIndex = max(pageIndex - 1, 0)","replace":"        pageIndex = max(pageIndex - 1, 0)","tests":"OnboardingModelTests"},
 {"label":"a refusal forgets its tile","file":"Sources/SuiteModel/Onboarding/OnboardingModel.swift","find":"message = error; failed = app","replace":"message = error","tests":"OnboardingModelTests"},
-{"label":"the next send keeps the old tile","file":"Sources/SuiteModel/Onboarding/OnboardingModel.swift","find":"message = nil; failed = nil","replace":"message = nil","tests":"OnboardingModelTests"}
+{"label":"the next send keeps the old tile","file":"Sources/SuiteModel/Onboarding/OnboardingModel.swift","find":"message = nil; failed = nil","replace":"message = nil","tests":"OnboardingModelTests"},
+{"label":"a refused send keeps launching set","file":"Sources/SuiteModel/Onboarding/OnboardingModel.swift","find":"launching = nil; refuse(error, for: handOff.to)","replace":"refuse(error, for: handOff.to)","tests":"OnboardingModelTests"},
+{"label":"the next send keeps the old sentence","file":"Sources/SuiteModel/Onboarding/OnboardingModel.swift","find":"launching = handOff.to\n        message = nil; failed = nil","replace":"launching = handOff.to\n        failed = nil","tests":"OnboardingModelTests"}
 ]
