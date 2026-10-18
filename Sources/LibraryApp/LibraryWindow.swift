@@ -88,6 +88,7 @@ struct LibraryWindow: View {
         }
         .onChange(of: model.saveRevision) { _, _ in persistAreaChanged() }
         .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged() }
+        .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged() }
         .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
