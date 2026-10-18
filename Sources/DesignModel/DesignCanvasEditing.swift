@@ -118,9 +118,11 @@ extension DesignWorkspace {
     }
 
     /// Moves the selected node by 1 point (10 with Shift). A run of nudges to one node is one
-    /// step. Does nothing without an unlocked selection, with several layers selected, or while editing text.
+    /// step. Several selected layers move together through `run(.nudge)` (#2463). Does nothing
+    /// without an unlocked selection or while editing text.
     public mutating func nudge(_ direction: DesignDirection, shift: Bool) {
-        guard editingTextID == nil, !hasMultipleSelection, let id = selectedNodeID else { return }
+        if hasMultipleSelection { try? run(.nudge(direction, large: shift)); return }
+        guard editingTextID == nil, let id = selectedNodeID else { return }
         let step = shift ? 10.0 : 1.0
         let delta = switch direction {
         case .up: DesignPoint(x: 0, y: -step)
@@ -142,10 +144,12 @@ extension DesignWorkspace {
         }
     }
 
-    /// Deletes the selected node and its subtree and deselects. Does nothing without a
-    /// selection outside any lock, with several layers selected, or while editing text.
+    /// Deletes the selected node and its subtree and deselects. Several selected layers go
+    /// together through `run(.delete)` (#2463). Does nothing without a selection outside any
+    /// lock or while editing text.
     public mutating func deleteSelection() {
-        guard editingTextID == nil, !hasMultipleSelection, let node = selectedNode, !isLockedInTree(node.id),
+        if hasMultipleSelection { try? run(.delete); return }
+        guard editingTextID == nil, let node = selectedNode, !isLockedInTree(node.id),
             let page = pages.firstIndex(where: { $0.id == selectedPageID })
         else { return }
         let before = snapshot

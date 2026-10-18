@@ -75,6 +75,8 @@ extension DesignWorkspace {
         case .arrange(let step): edit = try services.ordering.arrange(step, ids, on: page)
         }
         apply(edit, mint: mint)
+        // The new group's own Layers row opens too, so its members stay in view (D0-3a, #2471).
+        if case .group = command { expandedNodeIDs.formUnion(edit.selection) }
     }
 
     /// Why the selection can't be moved or resized by a drag; nil when it can. One layer keeps
