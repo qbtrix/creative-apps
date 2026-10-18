@@ -58,8 +58,8 @@ extension FlareWorkspace {
     /// scene's; nil with neither.
     var ownerLayers: [Layer]? { propertyOwner.flatMap { document?.layers(of: $0) } }
 
-    /// The edited owner's layers, top first.
-    public var layers: [Layer] { ownerLayers?.reversed() ?? [] }
+    /// The edited owner's layers, top first: the kernel tree's front-to-back order (FlareLayers+Kernel).
+    public var layers: [Layer] { Self.frontToBack(ownerLayers ?? []) }
 
     /// The ids and names of every scene and symbol layer, which a new layer's id and name skip.
     var takenLayerNames: Set<String> {
@@ -112,15 +112,20 @@ extension FlareWorkspace {
 
     /// Moves the layer at panel row `source` so it sits before row
     /// `destination` (a list drag's offsets, rows counted top first, so
-    /// `destination` may equal the row count to mean the bottom).
+    /// `destination` may equal the row count to mean the bottom). The move runs through the kernel's
+    /// LayerTree.move first; one it refuses issues no command.
     public mutating func moveLayer(from source: Int, to destination: Int) {
         guard let owner = propertyOwner, let ownerLayers else { return refuse(.noDocument) }
-        let rows = Array(ownerLayers.reversed())
+        let rows = Self.frontToBack(ownerLayers)
         guard rows.indices.contains(source), (0...rows.count).contains(destination) else {
             return refuse(.command(.invalidIndex(rows.indices.contains(source) ? destination : source)))
         }
         let row = destination > source ? destination - 1 : destination
         guard row != source else { return }
-        apply(ReorderLayer(owner: owner, layerID: rows[source].id, toIndex: rows.count - 1 - row))
+        let id = rows[source].id
+        guard let toIndex = Self.kernelReorderIndex(id, toRow: row, in: ownerLayers) else {
+            return refuse(.command(.layerNotFound(id)))
+        }
+        apply(ReorderLayer(owner: owner, layerID: id, toIndex: toIndex))
     }
 }
