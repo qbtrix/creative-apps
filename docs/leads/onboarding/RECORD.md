@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
 Stage: 3 wave 3
 Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-u fix round 1 merged (#2901, #2903, #2905); slice-done and Mac-Finish-Wanted once a full dev run containing b1526f3e has a green Linux job, then re-review (round 2). OB-m follow-ups all merged (#2902, #2906, #2966). OB-13 once switching and the bundled samples are on dev; OB-z review after it.
+Next: OB-u fix round 2 (#3016-#3018) running; after it merges, the round cap closes OB-u (leftovers become gaps); slice-done and Mac-Finish-Wanted once a full dev run containing its merge has a green Linux job. OB-m follow-ups all merged (#2902, #2906, #2966). OB-13 once switching and the bundled samples are on dev; OB-z review after it.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -14,7 +14,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OB-a | `Sources/SuiteModel/Onboarding/` with every type and signature the window calls as stubs returning the fake's values; its Linux tests written and disabled | OB-1, OB-2 | MJ-OB0 | – | no | 0 | done (Belt-Slice-Done: run 39132122171 at 4bf67be8, #2791) | – | – |
-| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 1 | fix round 1 merged (#2901, #2903, #2905; OB-5g); round-2 review on scoped run 39167050158 (f33b5b88) running | – | – |
+| OB-u | Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, starter row, every control identified, render budget met | OB-3, OB-4, OB-5, OB-5g, OB-6 | OJ1, OJ2 | OB-a (OB-3); home HM-0 (merged, #1967) | yes | 1 | fix round 1 merged (#2901, #2903, #2905; OB-5g); round 2: #3016-#3018 (minor), fix round 2 running | – | – |
 | OB-m | SuiteOnboarding, OnboardingLaunch, OnboardingModel do the work; StorePreferences over FileStore makes the preferences slot live | OB-7, OB-8, OB-9 | MJ-OB1, MJ-OB2, MJ-OB4 | OB-a | no | 0 | done (Belt-Slice-Done: run 39143942767 at bafd1d38, #2825) | – | – |
 | OB-s | SampleCatalog names one sample per app, finds it under Resources, copies into Documents without overwriting; Bundle/Samples/ holds the files | OB-10, OB-11 | MJ-OB3 | OB-a; bundle (built: bundle-apps copies Bundle/Samples/) | no | 1 | done (Belt-Slice-Done: run 39152649677 at 71facd44, after fix round 1) | – | – |
 | OB-z | The slot is live, the window reads the bundle's samples, journeys on live | OB-12, OB-13 | OJ3, OJ4 | OB-u, OB-m, OB-s (OB-12); switching (OB-13: Window > Switch To and the transport are on dev) | no | 0 | waiting | – | – |
@@ -43,6 +43,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | F-2886 | OB-u | 6 | #2886 Skip/Back disabled while a hand-off sends; #2887 refusal shows under its tile | OnboardingModel.swift, start page view | OnboardingModelTests; Mutate 14/14 | #2903 | merged (b1526f3e) |
 | OB-5g | OB-u | 5 | The goldens for Golden/afterglow-onboarding/ taken from the first macOS run's `snapshots` artifact that holds OB-5 | Tests/AppSnapshotTests/Golden/afterglow-onboarding/ | the run's compare | #2888 (light, light-ic), #2889 (dark, dark-ic); no start-launching or start-error golden | merged (5920fb94, 2562912e) |
 | F-2895 | OB-u | 6 | #2895 start-launching shot finite (no endless ring on a silent sender) | Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift | AppSnapshotTests on the Mac (known issue, no golden) | #2901 | merged (f8e3cd15) |
+| F-3016 | OB-u | 7 | #3016 ellipsis on presets that ask for input; #3017 focus chips name their apps; #3018 disabled controls' help says a document is opening | SuiteModel onboarding copy/model, start and focus page views | OnboardingCopyTests, OnboardingModelTests; Mutate | – | running |
 | F-2890 | OB-m | 6 | #2890 Skip keeps the stored home order; #2892 missing-sample message per packet | OnboardingModel.swift | OnboardingModelTests; Mutate 15/15 | #2906 | merged (ae6e7c81) |
 | F-2893 | OB-m | 6 | #2893 StorePreferences own-save mutation caught | StorePreferencesTests, plan | StorePreferencesTests; Mutate 5/5 | #2902 | merged (1c7bc061) |
 | F-2891 | OB-m | 6 | #2891 refused hand-off resets launching and message (tests, plan) | OnboardingModelTests.swift, SuiteModel.OnboardingModel.json | Mutate 16/16 | #2966 | merged (28713c70) |
@@ -61,7 +62,7 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 | OB-a | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2852 (minor) | clean |
 | OB-s | 39140922596 | 15e42166 | clarity, journey, design, controls, oracle | #2849 (major), #2850, #2851 (minor) | not clean: fix round 1 |
 | OB-u | 39143942767 | bafd1d38 | clarity, journey, design, layout, controls, mouse, taste, oracle | #2884 (major), #2885, #2886, #2887 (minor); #2895 (major, from the run's hang) | not clean: fix round 1 |
-| OB-u (round 2) | 39167050158 | f33b5b88 | clarity, journey, design, layout, controls, mouse, taste, oracle | running | – |
+| OB-u (round 2) | 39167050158 | f33b5b88 | clarity, journey, design, layout, controls, mouse, taste, oracle | #3016, #3017, #3018 (minor); round-1 #2884-#2887 fixed, #2895 resolved | not clean: fix round 2 (last) |
 | OB-m | 39143942767 | bafd1d38 | clarity, journey, design, controls, oracle | #2890, #2891 (major), #2892, #2893 (minor) | not clean: fix round 1 (slice already merged-done; follow-ups) |
 
 ## Decisions
@@ -96,3 +97,4 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - F-2850 (#2877): case folding still comes from the exists closure (default APFS folds case); the new case test records parity but does not tell old from new. A taken: closure overload on UniqueFileNames would make it exact; left as is (minor).
 - Full run 39143942767 (bafd1d38): macOS job cancelled after the snapshot step; it uploaded `snapshots` (24 afterglow-onboarding PNGs: welcome, focus, focus-selected, start, start-default, start-missing x 4 appearances; no start-launching or start-error) and no ui-screens. OB-5g and the OB-u critics use those snapshots; OJ1/OJ2 judged from code. Review 2: OB-u and OB-m panels on that run; OB-z waits for OB-13.
 - Review 2, OB-u (39143942767 snapshots, code for OJ1/OJ2): 1 major (#2884), 3 minor; refuted 9 (grey prominent buttons are a render artefact shared with other apps; chip ic border is shared ChoiceChips; taste references absent from the artifact). #2887's fix is in OnboardingModel (OB-m's file), done under OB-u.
+- Review 3, OB-u round 2 (scoped run 39167050158, f33b5b88): no screens (the scoped build failed on PhotoZoomSweepTests, #3005; the macOS job is continue-on-error), judged from code and open mac-finish PR #3009's goldens. 3 minor (#3016-#3018); all round-1 findings fixed. Fix round 2 is the last.
