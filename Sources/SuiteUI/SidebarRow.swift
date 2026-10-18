@@ -3,9 +3,11 @@
 // item. A dimmed item (a hidden or locked layer) draws its title and symbol in
 // SuiteColor.textSecondary (SidebarRowLook) and stays selectable; its toggles
 // draw as on any row. Row height follows the system sidebar size setting, so nothing here
-// fixes a height. The row owns only presentation state (the rename draft);
+// fixes a height. The row owns only presentation state (the rename field);
 // toggles and renames go out through closures, and a nil closure turns that
-// gesture off. Each toggle icon lays out both of its symbols and draws one,
+// gesture off. A rename the app refuses (its `onRename` returns a message)
+// keeps the field open with the draft as typed and the message under it in
+// SuiteColor.stateError (SidebarRenameField, LL-6); the Void form still renames. Each toggle icon lays out both of its symbols and draws one,
 // so it is as wide in every state and the toggles form a column (#53). The
 // icon is hidden from accessibility, so each toggle carries its own
 // identifier, `suite.sidebar.<item id>.<toggle id>` (the app audit, #262).
@@ -110,11 +112,61 @@ public struct SidebarRowLook: Equatable, Sendable {
     }
 }
 
+/// A row's rename field (lists-and-layers LL-6): the draft as typed and the
+/// app's refusal shown under it. A commit runs SuiteListEditing with the app's
+/// rename as its validate, so a refusal keeps the draft and the field stays
+/// open; typing clears the message; Escape, or focus lost while refused, closes it.
+public struct SidebarRenameField: Equatable, Sendable {
+    /// The text in the field; nil while the title shows as a label.
+    public private(set) var draft: String?
+    /// Why the app refused the last commit; nil when it didn't.
+    public private(set) var message: String?
+
+    public init() {}
+
+    public var isOpen: Bool { draft != nil }
+
+    public mutating func open(_ title: String) {
+        draft = title
+        message = nil
+    }
+
+    public mutating func type(_ text: String) {
+        draft = text
+        message = nil
+    }
+
+    public mutating func cancel() {
+        draft = nil
+        message = nil
+    }
+
+    /// Commits the draft: `rename` gets the trimmed new name and returns nil
+    /// to accept it or a message to refuse it. Accepted, empty or unchanged
+    /// closes the field; refused keeps it open with the draft and the message.
+    @MainActor public mutating func commit(original: String, rename: (@MainActor (String) -> String?)?) {
+        guard let draft else { return }
+        switch SuiteListEditing().commitRename(draft, original: original, validate: { rename?($0) }) {
+        case let .refused(message, kept):
+            self.draft = kept
+            self.message = message
+        case .renamed, .unchanged, .cancelled:
+            cancel()
+        }
+    }
+
+    /// Focus left the field: a refused draft is dropped (no refusal loop),
+    /// any other draft is committed.
+    @MainActor public mutating func loseFocus(original: String, rename: (@MainActor (String) -> String?)?) {
+        if message != nil { cancel() } else { commit(original: original, rename: rename) }
+    }
+}
+
 public struct SidebarRow: View {
     private let item: SidebarItem
     private let onToggle: (@MainActor (SidebarToggle.ID) -> Void)?
-    private let onRename: (@MainActor (String) -> Void)?
-    @State private var draft: String?
+    private let onRename: (@MainActor (String) -> String?)?
+    @State private var field = SidebarRenameField()
     @FocusState private var editing: Bool
 
     /// `onToggle` gets a toggle's id when it is clicked; `onRename` gets the
@@ -123,9 +175,37 @@ public struct SidebarRow: View {
         _ item: SidebarItem, onToggle: (@MainActor (SidebarToggle.ID) -> Void)? = nil,
         onRename: (@MainActor (String) -> Void)? = nil
     ) {
+        self.init(item, onToggle: onToggle, refusableRename: Self.refusable(onRename))
+    }
+
+    /// A rename the app can refuse: `onRename` returns nil to accept the new
+    /// title, or the message the row shows under the field it keeps open.
+    public init(
+        _ item: SidebarItem, onToggle: (@MainActor (SidebarToggle.ID) -> Void)? = nil,
+        onRename: @escaping @MainActor (String) -> String?
+    ) {
+        self.init(item, onToggle: onToggle, refusableRename: onRename)
+    }
+
+    /// `field` is the rename state the row starts in: closed, unless a
+    /// snapshot shows a refused rename.
+    init(
+        _ item: SidebarItem, onToggle: (@MainActor (SidebarToggle.ID) -> Void)?,
+        refusableRename: (@MainActor (String) -> String?)?, field: SidebarRenameField = SidebarRenameField()
+    ) {
         self.item = item
         self.onToggle = onToggle
-        self.onRename = onRename
+        self.onRename = refusableRename
+        _field = State(initialValue: field)
+    }
+
+    /// The Void rename form as one that never refuses.
+    public static func refusable(_ onRename: (@MainActor (String) -> Void)?) -> (@MainActor (String) -> String?)? {
+        guard let onRename else { return nil }
+        return { name in
+            onRename(name)
+            return nil
+        }
     }
 
     public var body: some View {
@@ -155,12 +235,21 @@ public struct SidebarRow: View {
     /// space after it, so a double-click on a toggle is two plain clicks that
     /// flip it twice, and one on blank space selects the row and nothing more.
     @ViewBuilder private var title: some View {
-        if draft != nil {
-            TextField(item.title, text: Binding(get: { draft ?? item.title }, set: { draft = $0 }))
-                .focused($editing)
-                .onSubmit(commitRename)
-                .onExitCommand { draft = nil }
-                .onChange(of: editing) { _, focused in if !focused { commitRename() } }
+        if field.isOpen {
+            VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
+                TextField(item.title, text: Binding(get: { field.draft ?? item.title }, set: { field.type($0) }))
+                    .focused($editing)
+                    .onSubmit(commitRename)
+                    .onExitCommand { field.cancel() }
+                    .onChange(of: editing) { _, focused in if !focused { loseFocus() } }
+                    .accessibilityIdentifier("suite.sidebar.\(item.id).rename")
+                if let message = field.message {
+                    Label(message, systemImage: "exclamationmark.triangle.fill")
+                        .font(SuiteFont.caption)
+                        .foregroundStyle(SuiteColor.stateError)
+                        .accessibilityIdentifier("suite.sidebar.\(item.id).renameMessage")
+                }
+            }
         } else {
             Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
                 .modifier(SidebarRowDimming(color: SidebarRowLook(item).title))
@@ -177,15 +266,17 @@ public struct SidebarRow: View {
     }
 
     private func beginRename(on part: SidebarRowPart) {
-        guard Self.doubleClickRenames(part, renamable: onRename != nil, renaming: draft != nil) else { return }
-        draft = item.title
+        guard Self.doubleClickRenames(part, renamable: onRename != nil, renaming: field.isOpen) else { return }
+        field.open(item.title)
         editing = true
     }
 
     private func commitRename() {
-        guard let name = draft?.trimmingCharacters(in: .whitespaces) else { return }
-        draft = nil
-        if !name.isEmpty, name != item.title { onRename?(name) }
+        field.commit(original: item.title, rename: onRename)
+    }
+
+    private func loseFocus() {
+        field.loseFocus(original: item.title, rename: onRename)
     }
 }
 

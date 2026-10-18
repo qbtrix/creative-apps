@@ -4,16 +4,25 @@
 // group nests it, so the shot shows the rows themselves. A hidden layer's
 // dimmed row sits beside a normal one (LL-4). `goldens()` checks the dimmed
 // pair against Golden/sidebar/suiteui-sidebar-dimmed-<appearance>.png in the
-// four appearances; its baselines come from the next CI artifact. macOS only.
-import SuiteUI
+// four appearances; its baselines come from the next CI artifact. A rename
+// the app refused (LL-6) keeps its field open with the typed name and the
+// message under it in stateError, in Light and Dark. macOS only.
 import SwiftUI
 import Testing
+@testable import SuiteUI
 
 @MainActor
 @Suite struct SuiteSidebarSnapshots {
     @Test func sidebar() throws {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(SidebarSample(), name: "suiteui-sidebar-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
+
+    @Test func refusedRename() throws {
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                RefusedSample(), name: "suiteui-sidebar-refused-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
 
@@ -45,6 +54,34 @@ private struct DimmedSample: View {
                     id: "hidden", title: "Hidden Layer", systemImage: "square", toggles: Self.toggles(visible: false),
                     isDimmed: true),
                 onToggle: { _ in })
+        }
+        .padding(SuiteSpacing.m)
+        .frame(width: SuiteSize.sidebarWidth.ideal + SuiteSpacing.xxl)
+        .background(SuiteColor.surface, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
+        .padding(SuiteSpacing.m)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+/// A row whose rename to "Sky" the app refused: the field stays open with
+/// the typed name and the reason under it, above a row that renamed as usual.
+private struct RefusedSample: View {
+    private static let refusal = "A layer named “Sky” already exists."
+
+    private var refused: SidebarRenameField {
+        var field = SidebarRenameField()
+        field.open("Layer 2")
+        field.type("Sky")
+        field.commit(original: "Layer 2", rename: { _ in Self.refusal })
+        return field
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+            SidebarRow(SidebarItem(id: "sky", title: "Sky", systemImage: "square"), onRename: { (_: String) in })
+            SidebarRow(
+                SidebarItem(id: "layer-2", title: "Layer 2", systemImage: "square"), onToggle: nil,
+                refusableRename: { _ in Self.refusal }, field: refused)
         }
         .padding(SuiteSpacing.m)
         .frame(width: SuiteSize.sidebarWidth.ideal + SuiteSpacing.xxl)
