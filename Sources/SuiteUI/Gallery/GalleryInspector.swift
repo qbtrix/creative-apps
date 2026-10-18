@@ -178,7 +178,7 @@ private struct GalleryInspectorPage: View {
     }
 
     /// "ease-out" as "Ease Out".
-    private static func title(_ id: String) -> String {
+    private nonisolated static func title(_ id: String) -> String {
         id.split(separator: "-").map { $0.capitalized }.joined(separator: " ")
     }
 
@@ -267,7 +267,7 @@ private struct GalleryCurvesPage: View {
     }
 
     /// 64 points along the kernel's curve for the two handles.
-    private static func samples(_ handles: (CGPoint, CGPoint)) -> [CGPoint] {
+    private nonisolated static func samples(_ handles: (CGPoint, CGPoint)) -> [CGPoint] {
         EaseCurve.samples(
             of: .cubicBezier(
                 x1: Double(handles.0.x), y1: Double(handles.0.y), x2: Double(handles.1.x), y2: Double(handles.1.y)),
