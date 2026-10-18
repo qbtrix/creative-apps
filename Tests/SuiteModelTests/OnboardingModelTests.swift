@@ -189,10 +189,28 @@ actor RacingPreferences: PreferencesStoring {
         let refusal = "Switching isn't available yet."
         let (m, s) = await model { $0.sending = FakeHandOffs(unavailable: refusal) }
         await m.startNew(try flareHD(), now: now)
-        #expect(m.message == .notAvailable(refusal) && !m.isFinished)
+        #expect(m.message == .notAvailable(refusal) && !m.isFinished && m.launching == nil)
         #expect(try await saved(s).onboardingDoneVersion == nil)
         await m.openSample(.flare, now: now)
-        #expect(m.message == .notAvailable(refusal) && !m.isFinished)
+        #expect(m.message == .notAvailable(refusal) && !m.isFinished && m.launching == nil)
+    }
+
+    @Test func aSendAfterARefusalClearsTheOldSentence() async throws {
+        let gate = GateSending()
+        let (m, _) = await model { $0.sending = gate }
+        let preset = try flareHD()
+        let refused = Task { await m.startNew(preset, now: now) }
+        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.finish(.failure(.timedOut))
+        await refused.value
+        #expect(m.message == .timedOut && m.launching == nil && !m.isFinished)
+        let next = Task { await m.openSample(.design, now: now) }
+        while !(await gate.isWaiting) { await Task.yield() }
+        #expect(m.message == nil && m.failed == nil && m.launching == .design)
+        await gate.finish(.success(SwitchReceipt(app: .design, wasRunning: false, requestedAt: 1)))
+        await next.value
+        #expect(m.message == nil && m.isFinished)
+        #expect(await gate.sent.map(\.to) == [.flare, .design])
     }
 
     @Test func openSampleWhoseFileIsGoneRecordsNothing() async throws {
