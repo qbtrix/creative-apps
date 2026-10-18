@@ -56,6 +56,6 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - Wave 3, next: FH-5 (J13 and J14) once FH-3 and FH-4 merge; FH-6 (J16) and FH-7 (P4, feature-done) once FH-1 merges.
 - FH-1: PR #2870 (head e72b3ae0, Mutate 5/5 DesignModel.LiveFiling).
 - FH-4: PR #2866 (head 07210d46). It filed #2861 (`needs-ui`, `line:suiteui`) for the window's edited dot.
-- FH-3: its builder stopped before the gate. A fixer is finishing it on lead/files-history-FH-3.
+- FH-3: PR #2873 (head 6f3f7a50, finished by a fixer after the builder stopped before the gate; 3 files, +250/-24).
 - The PR bodies were cleaned of the auto-added attribution footer through the GitHub MCP update. A REST PATCH re-adds it.
 - Slice done lines: none yet.
