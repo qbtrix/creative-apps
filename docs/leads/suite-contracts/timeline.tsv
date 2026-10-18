@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-18T01:47Z	done	heartbeat	#2509	parked needs-human; 39082226458 macOS ui-test running; no open findings
 2026-10-18T02:20Z	done	heartbeat	d3cd7d9f	CI 39082226458 ui-test read; 39088586270 in macOS; parked
 2026-10-18T02:52Z	done	heartbeat	948bcbf4	dev green; 39088586270 in ui-test; 39090620413 queued; parked
+2026-10-18T03:22Z	done	heartbeat	d3cd7d9f	39088586270 in ui-test; 39090620413 cancelled; parked
