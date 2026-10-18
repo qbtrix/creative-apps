@@ -4,7 +4,8 @@
 // `fade-start`/`fade-end` pair on series `tabs` with the Reduce Motion switch
 // off (about 0.14 s apart) and on (at once), that ← and → step to the
 // neighbouring tab and stop at either end, and that each segment carries an
-// identifier under the switch's `id`. macOS only.
+// identifier under the switch's `id` and is listed in `suite.controls`
+// under it. macOS only.
 import AppKit
 @testable import SuiteUI
 import SwiftUI
@@ -32,6 +33,17 @@ private let panelTabs = [InspectorOption(id: 0, title: "Adjust"), InspectorOptio
     #expect(SegmentedTabs<Int>.segmentID(panelTabs[1], in: nil) == nil)
     let own = InspectorOption(id: 0, title: "Adjust", identifier: "photo.tab.adjust")
     #expect(SegmentedTabs<Int>.segmentID(own, in: "suite.tabs") == "photo.tab.adjust")
+}
+
+@Test func eachIdentifiedSegmentIsListed() {
+    let on = SegmentedTabs<Int>.segmentEntries(panelTabs, in: "suite.tabs", enabled: true, reason: "Panel")
+    #expect(on == [
+        ControlEntry(id: "suite.tabs.0", enabled: true, reason: nil),
+        ControlEntry(id: "suite.tabs.1", enabled: true, reason: nil),
+    ])
+    let off = SegmentedTabs<Int>.segmentEntries(panelTabs, in: "suite.tabs", enabled: false, reason: "Why")
+    #expect(off.map(\.reason) == ["Why", "Why"])
+    #expect(SegmentedTabs<Int>.segmentEntries(panelTabs, in: nil, enabled: true, reason: nil).isEmpty)
 }
 
 @Test func theEntrysReasonEqualsItsHelp() {

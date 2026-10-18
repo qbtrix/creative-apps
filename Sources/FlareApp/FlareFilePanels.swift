@@ -6,9 +6,9 @@
 // or a failed open's `loadState` message in a system alert each time the
 // Model sets it again, and opens `-FlareOpenFile`'s file once, in the first
 // window, the way Open Recent does. FlareFileDialogs are the AppKit panels:
-// open and save for .flare files, and the close prompt's Save, Don't Save
-// and Cancel, in the kernel's shared words (UnsavedPrompt). The window title
-// is SuiteWindow's (`model.title`).
+// open and save for .flare files, the export's folder, and the close prompt's
+// Save, Don't Save and Cancel, in the kernel's shared words (UnsavedPrompt).
+// The window title is SuiteWindow's (`model.title`).
 import AppKit
 import FlareModel
 import SuiteKernel
@@ -91,6 +91,17 @@ final class FlareEditedView: NSView {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [fileType]
         panel.nameFieldStringValue = name
+        return panel.runModal() == .OK ? panel.url : nil
+    }
+
+    /// The folder panel for an export; nil when cancelled.
+    static func chooseFolder() -> URL? {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+        panel.prompt = "Export"
         return panel.runModal() == .OK ? panel.url : nil
     }
 

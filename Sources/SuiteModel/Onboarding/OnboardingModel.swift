@@ -74,20 +74,20 @@ public final class OnboardingModel {
         rebuildStarters()
     }
 
-    /// Finishes with no focus: the version is saved with the apps in their usual order.
+    /// Skip, Escape or closing the window: records the version and leaves the stored home order
+    /// (and the focus, so a hand-off still in flight finishes with it) as they are.
     public func skip() async {
         guard sendingReason == nil else { return }
-        focus = nil
-        rebuildStarters()
-        await finish()
+        await save { stored in
+            var next = stored
+            next.onboardingDoneVersion = SuiteOnboarding.version
+            return next
+        }
     }
 
-    /// Saves `finishing(focus:)`; a stale save reloads and saves once more. The window closes either way.
+    /// Saves `finishing(focus:)`. The window closes either way.
     public func finish() async {
-        do throws(SuiteError) {
-            do throws(SuiteError) { try await saveFinishing() } catch .staleRevision { try await saveFinishing() }
-        } catch { message = error; failed = nil }
-        isFinished = true
+        await save { services.onboarding.finishing($0, focus: focus, version: SuiteOnboarding.version) }
     }
 
     /// A preset chip: sends the `.new` hand-off (as the home's New tile does), then finishes.
@@ -100,9 +100,9 @@ public final class OnboardingModel {
     /// sends the `.open` hand-off for that copy, then finishes. A sample that can't open sends nothing.
     public func openSample(_ app: SuiteApp, now: Date) async {
         let starter = starters.first { $0.tile.app == app }
-        guard let sample = starter?.sample else { refuse(.fileMissing(name: app.displayName), for: app); return }
+        guard let sample = starter?.sample else { refuse(Self.sampleMissing(app), for: app); return }
         let source = samplesFolder + "/" + sample.fileName
-        guard starter?.sampleReason == nil, present(source) else { refuse(.fileMissing(name: sample.fileName), for: app); return }
+        guard starter?.sampleReason == nil, present(source) else { refuse(Self.sampleMissing(app), for: app); return }
         let destination = SampleCatalog.destination(for: sample, documents: documents, exists: present)
         do throws(SuiteError) { try copy(source, destination) } catch { refuse(error, for: app); return }
         let handOff = HandOff(id: makeID(), from: .launcher, to: app, verb: .open,
@@ -116,10 +116,22 @@ public final class OnboardingModel {
         SuiteOnboarding.order(for: $0) != SuiteOnboarding.order(for: nil)
     }
 
-    private func saveFinishing() async throws(SuiteError) {
+    /// The start page's sentence for a sample that can't open, the one its tile's help shows.
+    private static func sampleMissing(_ app: SuiteApp) -> SuiteError {
+        .notAvailable("The \(app.displayName) sample isn't in this build.")
+    }
+
+    /// Saves `change` of the stored preferences; a stale save reloads and saves once more. Closes the window.
+    private func save(_ change: (SuitePreferences) -> SuitePreferences) async {
+        do throws(SuiteError) {
+            do throws(SuiteError) { try await saveOnce(change) } catch .staleRevision { try await saveOnce(change) }
+        } catch { message = error; failed = nil }
+        isFinished = true
+    }
+
+    private func saveOnce(_ change: (SuitePreferences) -> SuitePreferences) async throws(SuiteError) {
         let stored = (try? await services.preferences.load()) ?? SuitePreferences()
-        let next = services.onboarding.finishing(stored, focus: focus, version: SuiteOnboarding.version)
-        _ = try await services.preferences.save(next)
+        _ = try await services.preferences.save(change(stored))
     }
 
     /// Sends one hand-off; true when it went. A refusal leaves its message and the window open.
