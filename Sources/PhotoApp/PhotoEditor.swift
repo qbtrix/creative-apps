@@ -22,6 +22,8 @@ struct PhotoEditor: View {
     let model: PhotoWorkspace
     var tiles: CanvasTiles?
     var renderMilliseconds: Double?
+    /// The backend that drew the picture (CanvasRenderer.backend), for the status line.
+    var renderBackend: String?
     var note: String?
     var zoom = 1.0
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
@@ -73,7 +75,9 @@ struct PhotoEditor: View {
                             saveStatus.editorState, title: saveStatus.title,
                             help: saveStatus.help(fileName: model.documentName), identifier: "photo.bar.saved")
                     }
-                    PhotoStatusLine(model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds)
+                    PhotoStatusLine(
+                        model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds,
+                        renderBackend: renderBackend)
                 }
                 .background(SuiteColor.panel)
             }

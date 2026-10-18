@@ -24,6 +24,7 @@ photo AppSnapshotTests.PhotoBrushInkLatencyTests
 photo AppSnapshotTests.PhotoBrushLatencyTests
 photo AppSnapshotTests.PhotoStrokePacerTests/theFirstSampleAppliesAtOnceAndQuickOnesWaitTogetherInOrder
 photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoTests
+photo AppSnapshotTests.PhotoRenderBudgetTests
 
 halo HaloModelTests.HaloFilesBudgetTests/openCrowd
 halo HaloModelTests.HaloFilesBudgetTests/saveCrowd

@@ -3,7 +3,7 @@
 // open file's URL, sheets and alerts, the Straighten draft the
 // canvas previews, and the v2 presentation flags), turns every PhotoIntent
 // into a workspace method or a panel, and keeps the picture rendered (CanvasRenderer) whenever the
-// workspace's revision moves, and clears the status line's message 4 s after
+// workspace's revision moves (on the app's View > Rendering backend), and clears the status line's message 4 s after
 // it appears. Canvas drags carry the pen's pressure (PointerPressure), the
 // keys held (DragModifiers) and the zoom, and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer hands
@@ -66,6 +66,8 @@ struct PhotoWindow: View {
     @State var isTransforming = false
     /// The Export sheet's choices while it is open (PhotoWindow+Export.swift, PV-8).
     @State var exportDraft: ExportOptions?
+    /// The app's View > Rendering; nil in tests, which draw on the CPU.
+    @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
     var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
@@ -89,10 +91,11 @@ struct PhotoWindow: View {
     var body: some View {
         PhotoEditor(
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
-            note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
+            renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
             straighten: straightenDraft)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
+            .onAppear { if let rendering { renderer.follow(rendering) { renderer.show(model) } } }
             .onChange(of: model.canvas) {
                 fitFollowsViewport = false
                 fitPending = true

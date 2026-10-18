@@ -62,7 +62,7 @@ var products: [Product] = []
 var targets: [Target] =
     model("Flare", ["FlareCore"])
     + model("Design", ["CoreColor"])
-    + model("Photo", ["CoreRaster", "CoreColor"])
+    + model("Photo", ["CoreRaster", "CoreColor", "CoreRender"])
     + model("Library", ["CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])
     + [
@@ -82,12 +82,15 @@ targets += [
     .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI", "SuiteModel"]),
     .testTarget(
         name: "AppSnapshotTests",
-        dependencies: ["SuiteUI", "AfterGlowApp", "SuiteShell", "SuiteModel"]
+        dependencies: ["SuiteUI", "AfterGlowApp", "SuiteShell", "SuiteModel", .product(name: "CoreRenderMetal", package: core)]
             + apps.flatMap { [.target(name: "\($0)App"), .target(name: "\($0)Model")] }
     ),
 ]
+// Photo draws its canvas through CoreRender's dispatcher, on the Metal backend when the View > Rendering choice allows.
+let appEngines: [String: [Target.Dependency]] = ["Photo": [.product(name: "CoreRenderMetal", package: core)]]
 targets += apps.map {
-    .executableTarget(name: "\($0)App", dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")])
+    .executableTarget(name: "\($0)App",
+                      dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")] + appEngines[$0, default: []])
 }
 #endif
 
