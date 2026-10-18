@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-18T04:35:09Z	3	check	#2569	macOS build 39097047689 green; waiting for lane merge
 2026-10-18T04:41Z	check	run 39093416270 macOS ui-test still running (since 03:35Z); no findings
 2026-10-18T04:47:47Z	3	merged	#2569	CG-a r1 on dev 308b58a9; next design run holding it decides CG-a
+2026-10-18T05:03:50Z	3	round	#2615	CG-a round 2 opened, fixes finding #2611; full run 39098845449 pending on 308b58a9
