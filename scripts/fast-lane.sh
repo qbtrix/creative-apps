@@ -49,7 +49,10 @@
 # branch (batch_resume): `lane/batch-<id>-<i>` points at the chain after i PRs
 # and gets its own Linux run, until PR hi is the first that turns the chain
 # red: PRs before it land, PR hi gets NEEDS_FIX_LABEL and one comment naming
-# the run, and the PRs after it wait for the next batch. The branch is the
+# the run, and the PRs after it wait for the next batch. When the red tip's
+# failed log holds only budget failures (vote_mode), each probe runs up to 3
+# times and is called on 2 of 3, under the same MAX_BATCH probe cap, and a
+# value within BUDGET_NEAR of its budget makes that comment say "likely". The branch is the
 # whole state, so a later sweep resumes a batch a run left behind; while one is
 # in flight nothing else merges (one batch at a time, arrivals wait). A PR
 # whose head moved or that conflicts with an earlier PR in the batch waits for
@@ -846,8 +849,8 @@ batch_start() {
 # batch lands on the PRs' own proof so a fix can get through.
 BATCH_STATE=""
 batch_resume() {
-  local br="$1" d k i sha v lo hi mid url waited=0 line probes
-  local chain=() verd=()
+  local br="$1" d k i sha v lo hi mid url waited=0 line probes mode="" moded=0
+  local chain=() verd=() nruns=()
   DISPATCHED=""; BATCH_STATE=waiting
   if ! scratch "$BASE_BRANCH" "$br"; then log "batch $br: could not fetch it; the next sweep tries again"; return; fi
   d="$SCRATCH"
@@ -859,14 +862,23 @@ batch_resume() {
   if (( k == 0 )); then log "batch $br: nothing left to land; dropping it"; batch_drop "$br"; BATCH_STATE=done; return; fi
   chain=("$(git -C "$d" rev-parse "origin/$br~$k")||" "${chain[@]}")  # [0] = the base
   while :; do
-    for (( i = 0; i <= k; i++ )); do verd[i]=""; done
+    for (( i = 0; i <= k; i++ )); do verd[i]=""; nruns[i]=0; done
     verd[k]=$(check_verdict "${chain[k]%%|*}")
+    # Vote mode is read once per call, from the red tip's failed log.
+    if (( ! moded )) && [[ "${verd[k]}" == red* ]]; then
+      moded=1; mode=$(vote_mode "${verd[k]}")
+      [[ -z "$mode" ]] || log "batch $br: the tip fails only a budget test (${mode#* }); each probe votes 2 of 3"
+    fi
     probes=$(batch_branches | grep -E " ${br//./\\.}-[0-9]+\$" || true)
     while read -r sha line; do
       [[ -n "$line" ]] || continue
       i="${line##*-}"
       (( i >= 0 && i < k )) && [[ "${chain[i]%%|*}" == "$sha" ]] || continue
-      verd[i]=$(check_verdict "$sha")
+      if [[ -n "$mode" ]]; then
+        v=$(probe_votes "$sha"); verd[i]="${v%%$'\t'*}" nruns[i]="${v##*$'\t'}"
+      else
+        verd[i]=$(check_verdict "$sha")
+      fi
     done <<<"$probes"
     v="${verd[k]}"
     if (( DRY_RUN )); then log "dry-run: batch $br ($k PRs) tip is $v; probes: $(printf '%s ' "${verd[@]}")"; return; fi
@@ -889,13 +901,13 @@ batch_resume() {
           case "${verd[i]}" in green*) lo=$i ;; red*) (( i < hi )) && hi=$i ;; esac
         done
         if (( lo >= 0 && hi == lo + 1 )); then
-          batch_culprit "$br" "$lo" "$hi" "${verd[hi]#red|}" "${chain[@]}"
+          batch_culprit "$br" "$lo" "$hi" "${verd[hi]#red|}" "$mode" "${chain[@]}"
           BATCH_STATE=done; return
         elif (( lo == -1 && hi == 1 )); then
-          batch_probe "$br" 0 "${chain[0]%%|*}" "${verd[0]}"
+          batch_probe "$br" 0 "${chain[0]%%|*}" "${verd[0]}" "${nruns[0]}"
         else
           mid=$(( ( (lo < 0 ? 0 : lo) + hi ) / 2 ))
-          batch_probe "$br" "$mid" "${chain[mid]%%|*}" "${verd[mid]}"
+          batch_probe "$br" "$mid" "${chain[mid]%%|*}" "${verd[mid]}" "${nruns[mid]}"
         fi ;;
     esac
     if (( waited >= BATCH_WAIT )); then return; fi
@@ -903,11 +915,13 @@ batch_resume() {
   done
 }
 
-# batch_probe <branch> <i> <sha> <verdict>: makes sure the chain after i PRs
-# has a Linux run: pushes lane/batch-<id>-<i> at <sha> and dispatches when
-# there is none; says so when one is running.
+# batch_probe <branch> <i> <sha> <verdict> [<runs>]: makes sure the chain after
+# i PRs has a Linux run: pushes lane/batch-<id>-<i> at <sha> and dispatches when
+# there is none, or when a vote (verdict `more`) needs another; says so when one
+# is running. The dispatch key carries the run count, so a vote's next run can
+# start in the same call once the last one is in.
 batch_probe() {
-  local br="$1" i="$2" sha="$3" v="$4"
+  local br="$1" i="$2" sha="$3" v="$4" key="$1-$2#${5:-0}"
   case "$v" in
     running) log "batch $br: probe $i running" ;;
     "")
@@ -915,9 +929,9 @@ batch_probe() {
         log "batch $br: too many probes; dropping the batch, its PRs wait"; batch_drop "$br"; return
       fi
       if git -C "$SCRATCH" push -q origin "$sha:refs/heads/$br-$i" 2>/dev/null; then
-        log "batch $br: probing the chain after $i PR(s)"; dispatch_linux "$br-$i"
+        log "batch $br: probing the chain after $i PR(s)"; dispatch_linux "$br-$i" "$key"
       else log "batch $br: could not push probe $i; the next sweep tries again"; fi ;;
-    *) log "batch $br: probe $i has no run yet"; dispatch_linux "$br-$i" ;;
+    *) log "batch $br: probe $i needs a run (${5:-0} so far)"; dispatch_linux "$br-$i" "$key" ;;
   esac
 }
 
@@ -934,18 +948,20 @@ batch_land() {
   batch_drop "$br"
 }
 
-# batch_culprit <branch> <lo> <hi> <run url> <chain...>: PRs 1..lo land, PR hi
-# gets NEEDS_FIX_LABEL and one comment, the rest wait for the next batch.
+# batch_culprit <branch> <lo> <hi> <run url> <mode> <chain...>: PRs 1..lo land,
+# PR hi gets NEEDS_FIX_LABEL and one comment (with vote_note's sentences for a
+# vote_mode <mode>), the rest wait for the next batch. The comment's first
+# words are what evaluate looks for to hold the label at that head.
 batch_culprit() {
-  local br="$1" lo="$2" hi="$3" url="$4"; shift 4
+  local br="$1" lo="$2" hi="$3" url="$4" mode="$5"; shift 5
   local chain=("$@") n head after="" i pn
   IFS='|' read -r _ n head <<<"${chain[hi]}"
   for (( i = 1; i <= lo; i++ )); do IFS='|' read -r _ pn _ <<<"${chain[i]}"; after+="${after:+, }#$pn"; done
-  log "batch $br: PR #$n at $head is the culprit ($url)"
+  log "batch $br: PR #$n at $head is the culprit ($url${mode:+, $mode})"
   write gh label create "$NEEDS_FIX_LABEL" -R "$REPO" --color d93f0b --force \
     --description "The lane's Linux check fails with this PR on dev; push a fix" >/dev/null 2>&1 || true
   write gh pr edit "$n" -R "$REPO" --add-label "$NEEDS_FIX_LABEL" || log "could not add $NEEDS_FIX_LABEL"
-  comment_once "$n" "Fast lane: head $head fails the Linux check once it lands on $BASE_BRANCH${after:+ after $after}: $url. ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits. Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
+  comment_once "$n" "Fast lane: head $head fails the Linux check once it lands on $BASE_BRANCH${after:+ after $after}: $url.$(vote_note "$mode") ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits. Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
   batch_land "$br" "$lo" "batch of $lo PRs checked together on Linux before #$n broke the chain" "${chain[@]}"
 }
 
@@ -1004,6 +1020,29 @@ budget_near() {
     exit !(m + 0 < b + 0 && m + 0 >= (b + 0) * (1 - f)) }'
 }
 
+# vote_mode <red verdict>: how a bisect reads its probes, from that red run's
+# failed log: nothing (a plain red: one run each), "budget <m> <op> <b>" (only
+# budget failures: 2 of 3 runs) or "likely <m> <op> <b>" (the same, with the
+# value within BUDGET_NEAR of its budget).
+vote_mode() {
+  local b
+  b=$(failure_log "$1" | budget_failure)
+  [[ -n "$b" ]] || return 0
+  # shellcheck disable=SC2086 # three words: measured, op, budget
+  if budget_near $b; then echo "likely $b"; else echo "budget $b"; fi
+}
+
+# vote_note <mode>: what a verdict found in vote mode says about it, with a
+# leading space; nothing for a plain red.
+vote_note() {
+  local m b
+  [[ -n "$1" ]] || return 0
+  read -r _ m _ b <<<"$1"
+  printf ' The failing test is a timing budget test (measured %s against %s), so each probe ran up to 3 times and was called on 2 of 3.' "$m" "$b"
+  [[ "$1" != likely* ]] || printf ' The value measured %s against %s, within %s%% of it, so the test sits on its line: treat this as likely, not certain.' \
+    "$m" "$b" "$(awk -v f="$BUDGET_NEAR" 'BEGIN { print f * 100 }')"
+}
+
 # failure_log <verdict>: the failed steps' log of the job a red|<job url>
 # verdict names; nothing when it has no job id or the log can't be read.
 failure_log() {
@@ -1040,7 +1079,7 @@ red_sweep() {
 # header's rung 2c paragraph) is chosen once per call from the tip's failed log.
 red_bisect() {
   local issue="$1" good="$2" bad="$3" branch="$4" d k i sha v lo hi mid red7 hint=0 waited=0 line probes n p
-  local budget="" mode="" cap="$MAX_BISECT" used nr runs
+  local mode="" cap="$MAX_BISECT" used nr runs
   local chain=() verd=() nruns=()
   DISPATCHED=""
   if ! scratch "$branch" "$good"; then log "bisect: could not fetch $branch and $good from $REMOTE"; return; fi
@@ -1068,12 +1107,10 @@ red_bisect() {
       (( hint )) && log "bisect: red-triage names #$n (Clef $p), commit $hint of $k; probing around it first"
     fi
   fi
-  budget=$(failure_log "$(check_verdict "$bad")" | budget_failure)
-  if [[ -n "$budget" ]]; then
-    cap="$MAX_BISECT_BUDGET" mode="budget $budget"
-    # shellcheck disable=SC2086 # three words: measured, op, budget
-    if budget_near $budget; then mode="likely $budget"; fi
-    log "bisect: $red7 fails only a budget test ($budget); each probe votes 2 of 3, at most $cap runs"
+  mode=$(vote_mode "$(check_verdict "$bad")")
+  if [[ -n "$mode" ]]; then
+    cap="$MAX_BISECT_BUDGET"
+    log "bisect: $red7 fails only a budget test (${mode#* }); each probe votes 2 of 3, at most $cap runs"
   fi
   while :; do
     for (( i = 0; i <= k; i++ )); do verd[i]=""; nruns[i]=0; done
@@ -1084,7 +1121,7 @@ red_bisect() {
       [[ -n "$line" ]] || continue
       i="${line##*-}"
       (( i >= 1 && i < k )) && [[ "${chain[i]}" == "$sha" ]] || continue
-      if [[ -n "$budget" ]]; then
+      if [[ -n "$mode" ]]; then
         v=$(probe_votes "$sha"); nr="${v##*$'\t'}"
         verd[i]="${v%%$'\t'*}" nruns[i]="$nr" runs=$((runs + nr))
       else
@@ -1092,7 +1129,7 @@ red_bisect() {
       fi
     done <<<"$probes"
     used=$(grep -c . <<<"$probes" || true)
-    [[ -z "$budget" ]] || used="$runs"
+    [[ -z "$mode" ]] || used="$runs"
     case "${verd[k]}" in
       green*) log "bisect: $red7 is green now (${verd[k]#green|}); nothing to find"; bisect_drop "$red7"; return ;;
     esac
@@ -1137,17 +1174,11 @@ red_bisect() {
 # "likely <m> <op> <b>" (vote mode, the value near its budget: not certain).
 bisect_post() {
   local issue="$1" red7="$2" lo="$3" hi="$4" runs="$5" gv="$6" rv="$7" mode="$8"; shift 8
-  local chain=("$@") c subj n body fid lead head="Bisect:" is="is" note="" m b
+  local chain=("$@") c subj n body fid lead head="Bisect:" is="is" note
   c="${chain[hi]}"; subj=$(git -C "$SCRATCH" log -1 --format=%s "$c")
   n=$(grep -oE '\(#[0-9]+\)$' <<<"$subj" | tr -dc 0-9 || true)
-  if [[ -n "$mode" ]]; then
-    read -r _ m _ b <<<"$mode"
-    note=" The failing test is a timing budget test (measured $m against $b), so each probe ran up to 3 times and was called on 2 of 3."
-    if [[ "$mode" == likely* ]]; then
-      head="Bisect (likely):" is="is likely"
-      note+=" The value measured $m against $b, within $(awk -v f="$BUDGET_NEAR" 'BEGIN { print f * 100 }')% of it, so the test sits on its line: treat this as likely, not certain."
-    fi
-  fi
+  note=$(vote_note "$mode")
+  if [[ "$mode" == likely* ]]; then head="Bisect (likely):" is="is likely"; fi
   log "bisect: culprit ${c:0:7} $subj (green at ${chain[lo]:0:7}, $runs runs${mode:+, $mode})"
   write gh issue comment "$issue" -R "$REPO" --body "$head ${c:0:7} $subj $is the first commit on $BASE_BRANCH whose Linux job fails. Green at ${chain[lo]:0:7} (${gv#green|}), red at ${c:0:7} (${rv#red|}); $runs Linux run(s) on ci/bisect branches, now deleted.$note $BISECT_MARK $red7 -->"
   [[ -n "$n" ]] || return 0
