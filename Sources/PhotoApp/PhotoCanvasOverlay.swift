@@ -3,7 +3,7 @@
 // (SelectionOverlay.swift), a pending crop (CropOverlay.swift), Free
 // Transform's box (TransformOverlay.swift) and the brush cursor at `hover`
 // (BrushCursorOverlay.swift), in that order. SuiteUI's marks are hidden from
-// accessibility, so each visible mark also gets one PhotoCanvasMarkElement: a
+// accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
 // clear rectangle at the mark's frame that the journeys find by identifier,
 // an image and never a control, that never takes a click. `marks` lists the
 // elements shown, for tests. Values in, nothing out.
@@ -58,25 +58,11 @@ struct PhotoCanvasMark: Equatable {
     }
 }
 
-/// `mark` as a clear rectangle at its frame at `zoom`: one identified,
-/// labelled image element that takes no clicks. The SuiteUI mark it covers
-/// stays hidden.
-struct PhotoCanvasMarkElement: View {
-    let mark: PhotoCanvasMark
-    let zoom: Double
-
-    var body: some View {
-        let box = mark.rect.applying(CGAffineTransform(scaleX: zoom, y: zoom)).standardized
-        Color.clear
-            .frame(width: box.width, height: box.height)
-            .allowsHitTesting(false)
-            .accessibilityElement()
-            .accessibilityLabel(Text(verbatim: mark.label))
-            .accessibilityIdentifier(mark.identifier)
-            .accessibilityAddTraits(PhotoCanvasMark.traits)
-            .padding(.leading, box.minX)
-            .padding(.top, box.minY)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .allowsHitTesting(false)
+extension PhotoCanvasMark {
+    /// This mark as a clear rectangle at its frame at `zoom` (SuiteUI's
+    /// ProbeElement): one identified, labelled image element that takes no
+    /// clicks. The SuiteUI mark it covers stays hidden.
+    func probe(zoom: Double) -> ProbeElement {
+        ProbeElement(identifier, label: label, rect: rect, zoom: zoom, traits: Self.traits)
     }
 }

@@ -13,7 +13,6 @@ A Sources/DesignApp/DesignLayersPanel.swift::DesignLayersPanel LayerList
 A Sources/DesignApp/DesignPanel.swift::DesignPanelHint Notice
 A Sources/DesignApp/DesignSaveStatus.swift::DesignSaveStatus SaveStatus
 A Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox CanvasMark
-A Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement Probe
 A Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover Easing
 A Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow KeyedRow
 A Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet Sheet
@@ -34,7 +33,6 @@ A Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet Sheet
 A Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar StatusBar
 A Sources/PhotoApp/ExportSheet.swift::ExportSheet Sheet
 A Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet Sheet
-A Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement Probe
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerRow LayerList
 A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
@@ -45,7 +43,6 @@ B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark accent-outline
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark probe-element
 B Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark accent-outline
 B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox accent-outline
-B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement probe-element
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover caps-header
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover easing
 B Sources/FlareApp/FlareInspector.swift::FlareInspector error-label
@@ -79,8 +76,6 @@ B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
 B Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar preview-pill
 B Sources/PhotoApp/ExportSheet.swift::ExportSheet sheet-buttons
 B Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet sheet-buttons
-B Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement probe-element
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine preview-pill
 B Sources/PhotoApp/StraightenSheet.swift::StraightenSheet sheet-buttons
-C Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement ~ Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement
