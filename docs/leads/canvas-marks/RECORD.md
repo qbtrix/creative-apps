@@ -4,7 +4,7 @@ Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: goldens wait
 Base: 2e27b8db (origin/dev)
-Next: CM-14..16 goldens wait on a dev run after #2990 (dev CI 39164756292 cancelled; AppSnapshotTests doesn't compile on dev)
+Next: snapshots from dev CI 39169434591 (past #2990), then the canvas baseline PR
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.

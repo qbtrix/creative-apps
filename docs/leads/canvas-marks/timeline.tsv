@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-18T21:00Z	5	heartbeat	39164756292	waiting on run for goldens
 2026-10-18T21:02:05Z	goldens	waiting	39164756292	still pending
 2026-10-18T21:24:46Z	goldens	waiting	#2990	39164756292 cancelled; dev snapshots blocked on #2990
+2026-10-18T21:48:56Z	goldens	ci running	39169434591	first full run past #2990
