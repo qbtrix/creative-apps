@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-18T20:46Z	round1	still no valid library journey run; asked supervisor for scoped library re-run; full CI runs cancelled while pending
 2026-10-18T21:09Z	round1	full CI 39160459432 (f7e0350, has #2878) macOS job running
 2026-10-18T21:41Z	round1	waiting: full CI 39160459432 macOS on scripts/ci, journeys pending
+2026-10-18T21:57Z	round1	waiting: full CI 39160459432 macOS still on scripts/ci, journeys pending
