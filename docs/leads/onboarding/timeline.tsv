@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-18T15:46:34Z	heartbeat	lead	4 PRs in lane (#2821 #2822 #2824 #2825); OB-s waits on dev run 39141126140
 2026-10-18T15:50:09Z	merged	OB-6	#2821
 2026-10-18T15:51:50Z	merged	OB-5	#2822; OB-5g waits on the first macOS snapshots holding it
+2026-10-18T15:55:30Z	merged	OB-8b	#2825; OB-m waits on a dev run holding it
