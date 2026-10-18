@@ -28,7 +28,9 @@
 // sidebar style's own header gray is under 4.5:1. While the list has focus, Edit >
 // Cut, Copy and Paste send `.cut`, `.copy` and `.paste` (designPasteboardCommands).
 // The rename state (DesignRenameState: the row in rename, the draft, the refusal
-// shown as `design.layers.rename-refusal`) is the panel's own. Values in, intents out.
+// shown as `design.layers.rename-refusal`) is the panel's own. The list shows no
+// scroll indicators, as the inspector doesn't, so on a long layer tree no legacy
+// scroller reads as an unlabelled button (#2552). Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -70,6 +72,9 @@ struct DesignLayersPanel: View {
         .listStyle(.sidebar)
         .environment(\.sidebarRowSize, .small)
         .scrollContentBackground(.hidden)
+        // No scroller: on `crowd`'s 2,000 layers a legacy scroller's page area is an unnamed button
+        // to the app audit (#2552), as it was in the inspector (#2455).
+        .scrollIndicators(.never)
         .font(SuiteFont.inspectorLabel)
         .accessibilityIdentifier("design.layers")
         .designPasteboardCommands(model, perform)
