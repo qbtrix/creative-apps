@@ -1,0 +1,3 @@
+utc	stage	event	ref	note
+2026-10-17T06:04Z	0	stage-start	#1529	lead start; base origin/dev 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745
+2026-10-17T06:25Z	0	stopped	#1529	parked: captain's beta-cut comment, nothing in flight
