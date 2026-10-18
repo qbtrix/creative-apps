@@ -8,6 +8,7 @@
 // submenu whose every item is off is off too, with its first item's reason.
 // Every item, submenus included, carries its SF Symbol.
 import DesignModel
+import SuiteUI
 import SwiftUI
 
 /// Object: Group, Ungroup, Arrange, Align and Distribute.
@@ -15,10 +16,10 @@ struct DesignObjectMenu: View {
     let menu: DesignMenu
 
     var body: some View {
-        DesignCommandItem(
+        MenuCommand(
             menu: menu, title: "Group", systemImage: "rectangle.3.group", command: .group,
             shortcut: KeyboardShortcut("g"))
-        DesignCommandItem(
+        MenuCommand(
             menu: menu, title: "Ungroup", systemImage: "rectangle.dashed", command: .ungroup,
             shortcut: KeyboardShortcut("g", modifiers: [.shift, .command])
         )
@@ -27,7 +28,7 @@ struct DesignObjectMenu: View {
         let arrangeOff = arrangeHelp.allSatisfy { $0 != nil }
         Menu("Arrange", systemImage: "square.3.layers.3d") {
             ForEach(DesignArrangeStep.allCases, id: \.self) { step in
-                DesignCommandItem(
+                MenuCommand(
                     menu: menu, title: step.title, systemImage: step.systemImage, command: .arrange(step),
                     shortcut: step.shortcut)
             }
@@ -46,7 +47,7 @@ struct DesignObjectMenu: View {
         .disabled(alignOff)
         .help(alignOff ? DesignAlignEdge.allCases.compactMap { menu.alignHelp[$0] }.first ?? "" : "")
         ForEach(DesignDistributeAxis.allCases, id: \.self) { axis in
-            DesignCommandItem(menu: menu, title: axis.title, systemImage: axis.systemImage, command: .distribute(axis))
+            MenuCommand(menu: menu, title: axis.title, systemImage: axis.systemImage, command: .distribute(axis))
         }
     }
 }

@@ -9,6 +9,7 @@
 // moves or deletes. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate,
 // Rename…, Delete, Bring Forward, Send Backward.
 import HaloModel
+import SuiteUI
 import SwiftUI
 
 extension FocusedValues {
@@ -30,27 +31,19 @@ struct HaloMenuTarget {
     func title(for command: HaloCommand) -> String { model?.title(for: command) ?? command.title }
 }
 
-/// One menu item for one command: titled by the Model, disabled with its
-/// reason as help. `key` names the focus-scoped plain key that also does it.
-struct HaloMenuItem: View {
-    let command: HaloCommand
-    let target: HaloMenuTarget
-    var title: String?
-    var systemImage: String?
-    var shortcut: KeyboardShortcut?
-    var key: String?
-
-    var body: some View {
+extension MenuCommand {
+    /// One menu item for one command: titled by the Model, disabled with its
+    /// reason as help. `key` names the focus-scoped plain key that also does it.
+    init(
+        command: HaloCommand, target: HaloMenuTarget, title: String? = nil, systemImage: String? = nil,
+        shortcut: KeyboardShortcut? = nil, key: String? = nil
+    ) {
         let reason = target.help(for: command)
         let text = title ?? target.title(for: command)
-        Button {
-            target.perform?(command)
-        } label: {
-            if let systemImage { Label(text, systemImage: systemImage) } else { Text(text) }
-        }
-        .keyboardShortcut(shortcut)
-        .disabled(reason != nil)
-        .help(reason ?? key.map { "Press \($0) while the viewer or timeline has focus." } ?? text)
+        self.init(
+            text, systemImage: systemImage, shortcut: shortcut,
+            help: reason ?? key.map { "Press \($0) while the viewer or timeline has focus." } ?? text,
+            isEnabled: reason == nil) { target.perform?(command) }
     }
 }
 
@@ -66,17 +59,17 @@ struct HaloCommands: Commands {
         CommandMenu("Layer") {
             Menu("New") {
                 ForEach(HaloLayerKind.allCases, id: \.self) { kind in
-                    HaloMenuItem(command: .newLayer(kind), target: target, systemImage: kind.systemImage)
+                    MenuCommand(command: .newLayer(kind), target: target, systemImage: kind.systemImage)
                 }
             }
-            HaloMenuItem(
+            MenuCommand(
                 command: .duplicateLayer, target: target, systemImage: "plus.square.on.square",
                 shortcut: KeyboardShortcut("d", modifiers: [.command, .shift]))
-            HaloMenuItem(command: .beginRenameLayer, target: target)
-            HaloMenuItem(command: .deleteLayer, target: target, systemImage: "trash", key: "Delete")
+            MenuCommand(command: .beginRenameLayer, target: target)
+            MenuCommand(command: .deleteLayer, target: target, systemImage: "trash", key: "Delete")
             Divider()
-            HaloMenuItem(command: .bringLayerForward, target: target, shortcut: KeyboardShortcut("]"))
-            HaloMenuItem(command: .sendLayerBackward, target: target, shortcut: KeyboardShortcut("["))
+            MenuCommand(command: .bringLayerForward, target: target, shortcut: KeyboardShortcut("]"))
+            MenuCommand(command: .sendLayerBackward, target: target, shortcut: KeyboardShortcut("["))
         }
     }
 }
