@@ -13,7 +13,9 @@
 // on enter and exit, never per sample. Each row's controls carry
 // `suite.layers.<id>.<part>`; the row itself is `suite.layers.row.<id>`.
 // It shows no scroller (wheel, trackpad and keys still scroll), so the
-// audit finds no unnamed page-area button beside a long tree.
+// audit finds no unnamed page-area button beside a long tree. While it
+// scrolls it reports a drawn frame on series `layers-scroll` (SP4) to the
+// environment's GridProbe, as ThumbnailGrid does.
 import SuiteKernel
 import SwiftUI
 
@@ -45,6 +47,7 @@ public struct LayerTreeList: View {
     private let childCount: @MainActor (String) -> Int
     private let onAction: @MainActor (LayerTreeAction) -> Void
     @State private var target: String?
+    @Environment(\.gridProbe) private var probe
 
     /// `rows` from `LayerTree.rows(expanded:)`; `childCount` names how many
     /// children a closed container holds, so a drop lands after the last one.
@@ -101,6 +104,9 @@ public struct LayerTreeList: View {
         // No scroller: a legacy scroller's page area is an unnamed button with
         // no identifier to the app audit (#2742, as in Design's list, #2561).
         .scrollIndicators(.never)
+        .onScrollGeometryChange(for: Double.self) { Double($0.contentOffset.y) } action: { _, _ in
+            probe?.drew(GridProbe.layersScrollSeries, ProcessInfo.processInfo.systemUptime)
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("suite.layers")
     }

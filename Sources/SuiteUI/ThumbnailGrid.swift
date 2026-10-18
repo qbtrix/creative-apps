@@ -205,16 +205,18 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
     }
 }
 
-/// Where the grid reports its scroll frames (a probe host sets it; nil
-/// records nothing): one drawn frame on series `grid-scroll` per scroll
-/// offset change, for SP4's frame-interval p95 (QB-S7).
+/// Where scrolling lists report their frames (`.suiteProbes()` sets it; nil
+/// records nothing): one drawn frame per scroll offset change, on series
+/// `grid-scroll` from ThumbnailGrid and `layers-scroll` from LayerTreeList,
+/// for SP4's frame-interval p95 (QB-S7).
 struct GridProbe: Sendable {
     static let scrollSeries = "grid-scroll"
+    static let layersScrollSeries = "layers-scroll"
     let drew: @MainActor @Sendable (String, Double) -> Void
 }
 
 extension EnvironmentValues {
-    /// Where thumbnail grids report their scroll frames; nil records nothing.
+    /// Where thumbnail grids and layer lists report their scroll frames; nil records nothing.
     var gridProbe: GridProbe? {
         get { self[GridProbeKey.self] }
         set { self[GridProbeKey.self] = newValue }
