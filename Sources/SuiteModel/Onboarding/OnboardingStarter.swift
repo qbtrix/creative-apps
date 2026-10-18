@@ -24,7 +24,7 @@ public struct OnboardingStarter: Equatable, Sendable {
     }
 }
 
-/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui): 720 × 520, 24 pt margins.
+/// The window's numbers until SuiteSize.onboardingWindow lands (needs-ui #2867): 720 × 520, 24 pt margins.
 public enum OnboardingLayout { public static let width = 720.0, height = 520.0, margin = 24.0 }
 
 /// Identifiers (blueprint 4.1): afterglow.onboarding.<name>.
