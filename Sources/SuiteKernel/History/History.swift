@@ -26,11 +26,11 @@ public protocol HistoryReading: Sendable {
 public struct History<Payload: Sendable>: Sendable, HistoryReading {
     /// One recorded step: its name, the payload that undoes (or, on the redo
     /// stack, redoes) it, and the step ids before and after it.
-    private struct Step: Sendable {
-        var name: String
-        var payload: Payload
-        var idBefore: Int
-        var idAfter: Int
+    public struct Step: Sendable {
+        public internal(set) var name: String
+        public internal(set) var payload: Payload
+        public internal(set) var idBefore: Int
+        public internal(set) var idAfter: Int
     }
 
     /// The most steps kept; older ones roll into the base and can't be undone.
@@ -63,6 +63,10 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
     public var undoName: String? { done.last?.name }
     /// The name of the step redo would reapply, nil when there is none.
     public var redoName: String? { undone.last?.name }
+    /// The steps undo can revert, oldest first (the next one to undo last).
+    public var undoSteps: [Step] { done }
+    /// The steps redo can reapply, the next one to redo last.
+    public var redoSteps: [Step] { undone }
     /// Every step's name, oldest first, undone ones included.
     public var steps: [String] { done.map(\.name) + undone.reversed().map(\.name) }
     /// How many of `steps` are applied: the place `jump(to:)` moves.
@@ -127,4 +131,13 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
         while done.count > target, undo(apply) {}
         while done.count < target, redo(apply) {}
     }
+
+    /// Marks the step the document is at now as the saved one.
+    public mutating func markSaved() {
+        savedStepID = currentStepID
+    }
 }
+
+/// Two histories are equal when their steps, run, ids and limit are.
+extension History: Equatable where Payload: Equatable {}
+extension History.Step: Equatable where Payload: Equatable {}
