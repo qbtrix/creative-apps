@@ -38,3 +38,4 @@ Next: #3011 (AB-p1) waits on the lane's macOS build; then AB-p2 (feature-done): 
 - 22:56Z #3011 AB-p1 merged; AB-p2 builder started
 - 23:12Z AB-p2 #3030 opened (head 82da78bf, Mutate 9/9 KernelBrushAdapter, feature-done): app copies of StrokePacer/PointerPressure/BrushCursorOverlay deleted for SuiteUI's; preset picker; LiveStroke kept as thin holder of LiveCopy<PhotoWorkspace> (#3012); waits on lane mac build
 - 23:16Z #3030 AB-p2 mac build queued
+- 23:36Z #3030 AB-p2 mac build queued
