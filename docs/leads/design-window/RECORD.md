@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: #2468 (#2455 #2406 #2352) in lane; #2302 blocked on SuiteUI #2263; findings now 4 (<=5); D0-9d then D0-7b wait on canvas-basics CB-a; full CI 39080371690 pending
+Next: findings #2455 #2406 #2352 closed by #2468; only #2302 open (blocked on SuiteUI #2263); D0-7b held on D0-9d / canvas-basics CB-a, not on findings
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
