@@ -2,8 +2,8 @@
   {
     "label": "a newer file version opens as if it were version 1",
     "file": "Sources/DesignModel/Live/LiveFiling.swift",
-    "find": "guard header.version == Self.fileVersion else",
-    "replace": "guard header.version >= 0 else",
+    "find": "guard version == Self.fileVersion else",
+    "replace": "guard version >= 0 else",
     "tests": "DesignFilingTests"
   },
   {

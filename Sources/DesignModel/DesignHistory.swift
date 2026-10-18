@@ -188,13 +188,6 @@ extension DesignWorkspace {
         textFieldFocused ? .field : .document
     }
 
-    /// Marks the document as it is now as saved and ends the edit run, so the next nudge
-    /// starts a new step (`didSave(to:)` calls it).
-    mutating func markSaved() {
-        history.savedSerial = history.currentSerial
-        endRun()
-    }
-
     /// Undo and redo: the document goes back to the step's snapshot, the counters never go back.
     /// A swap step also puts back the file location that document had.
     private mutating func restore(_ step: DesignHistory.Step) {
