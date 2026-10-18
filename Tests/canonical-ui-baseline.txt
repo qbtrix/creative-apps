@@ -67,8 +67,6 @@ B Sources/FlareApp/FlareInspectorFill.swift::FlareInspectorFill pending-commit
 B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow keyed-row
 B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow pending-commit
 B Sources/FlareApp/FlareInspectorScene.swift::FlareSceneNumberRow pending-commit
-B Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet error-label
-B Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet sheet-buttons
 B Sources/FlareApp/FlareRecovery.swift::FlareSaveStatusLabel error-label
 B Sources/FlareApp/FlareStage.swift::FlareStage preview-pill
 B Sources/FlareApp/FlareStageOverlay.swift::FlareStageOverlay accent-outline
@@ -97,15 +95,11 @@ B Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow error-label
 B Sources/LibraryApp/LibraryCommands.swift::LibraryMenuItem menu-item
 B Sources/LibraryApp/LibraryControls.swift::* app-inventory
 B Sources/LibraryApp/LibraryControls.swift::LibraryControlsElement probe-element
-B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
 B Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar preview-pill
-B Sources/PhotoApp/ExportSheet.swift::ExportSheet sheet-buttons
-B Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet sheet-buttons
 B Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement probe-element
 B Sources/PhotoApp/PhotoSaveStatusLabel.swift::PhotoSaveStatusLabel error-label
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine preview-pill
-B Sources/PhotoApp/StraightenSheet.swift::StraightenSheet sheet-buttons
 C Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionElement ~ Sources/PhotoApp/PhotoCanvasOverlay.swift::PhotoCanvasMarkElement
 C Sources/FlareApp/FlareFilePanels.swift::FlareFileElement ~ Sources/HaloApp/HaloViewerCanvas.swift::HaloSummaryElement
 C Sources/FlareApp/FlareFilePanels.swift::FlareFileElement ~ Sources/HaloApp/HaloWindow+File.swift::HaloFileElement

@@ -30,8 +30,15 @@ struct StraightenSheet: View {
     @State private var typed: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Straighten").font(SuiteFont.headline)
+        let tooFar = "The image is too large to turn that far."
+        SuiteSheet(
+            "Straighten", note: frame.map { "New size \($0.size.width) × \($0.size.height) px" } ?? tooFar,
+            cancelIdentifier: "photo.straighten.cancel",
+            confirm: .init(
+                "Apply", identifier: "photo.straighten.apply", help: frame == nil ? tooFar : "Apply",
+                isEnabled: frame != nil, perform: onApply),
+            onCancel: onCancel
+        ) {
             Form {
                 LabeledContent("Angle") {
                     HStack(spacing: SuiteSpacing.s) {
@@ -58,19 +65,7 @@ struct StraightenSheet: View {
                     .toggleStyle(.checkbox)
                     .accessibilityIdentifier("photo.straighten.crop")
             }
-            Text(frame.map { "New size \($0.size.width) × \($0.size.height) px" } ?? "The image is too large to turn that far.")
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.secondaryText)
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("photo.straighten.cancel")
-                Button("Apply", action: onApply).keyboardShortcut(.defaultAction).disabled(frame == nil)
-                    .accessibilityIdentifier("photo.straighten.apply")
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
     }
 
     private func setCropToFit(_ on: Bool) {

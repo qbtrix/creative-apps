@@ -16,8 +16,13 @@ struct ExportSheet: View {
     var onCancel: @MainActor () -> Void = {}
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Export").font(SuiteFont.headline)
+        SuiteSheet(
+            "Export",
+            note: format == .png ? "PNG keeps transparent pixels." : "JPEG has no transparency: transparent pixels export white.",
+            cancelIdentifier: "photo.export.cancel",
+            confirm: .init("Export", identifier: "photo.export.confirm", help: "Export", perform: onExport),
+            onCancel: onCancel
+        ) {
             Form {
                 Picker("Format", selection: Binding(get: { format }, set: { onFormat($0) })) {
                     ForEach(ImageFormat.allCases, id: \.self) { Text($0.title).tag($0) }
@@ -35,18 +40,6 @@ struct ExportSheet: View {
                     }
                 }
             }
-            Text(format == .png ? "PNG keeps transparent pixels." : "JPEG has no transparency: transparent pixels export white.")
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.secondaryText)
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("photo.export.cancel")
-                Button("Export", action: onExport).keyboardShortcut(.defaultAction)
-                    .accessibilityIdentifier("photo.export.confirm")
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
     }
 }

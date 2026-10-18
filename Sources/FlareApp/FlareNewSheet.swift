@@ -50,8 +50,13 @@ struct FlareNewAnimationSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            Text("New Animation").font(SuiteFont.title)
+        SuiteSheet(
+            "New Animation", width: .wide, problem: spec.problem, cancelIdentifier: "flare.new.cancel",
+            confirm: .init(
+                "Create", identifier: "flare.new.create", help: spec.problem ?? "Create the animation",
+                isEnabled: spec.problem == nil) { if spec.problem == nil { onCreate(spec) } },
+            onCancel: onCancel
+        ) {
             PresetGrid(
                 options: (CanvasPreset.all.map(\.name) + [Self.custom]).map {
                     InspectorOption(id: $0, title: $0, identifier: "flare.new.preset.\($0)")
@@ -75,25 +80,7 @@ struct FlareNewAnimationSheet: View {
             }
             .formStyle(.columns)
             InspectorColorWellRow("Background", color: background) { setBackground($0) }
-            if let problem = spec.problem {
-                Label(problem, systemImage: "exclamationmark.circle")
-                    .font(SuiteFont.caption)
-                    .foregroundStyle(SuiteColor.stateError)
-            }
-            HStack {
-                Spacer()
-                Button("Cancel", role: .cancel) { onCancel() }
-                    .keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("flare.new.cancel")
-                Button("Create") { if spec.problem == nil { onCreate(spec) } }
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(spec.problem != nil)
-                    .help(spec.problem ?? "Create the animation")
-                    .accessibilityIdentifier("flare.new.create")
-            }
         }
-        .padding(SuiteSpacing.xl)
-        .frame(width: SuiteSize.contentMinimum.width)
     }
 
     private var background: HexColor {

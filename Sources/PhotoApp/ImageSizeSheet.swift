@@ -32,8 +32,14 @@ struct ImageSizeSheet: View {
 
     var body: some View {
         let typed = Self.side(width) != nil && Self.side(height) != nil
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Image Size").font(SuiteFont.headline)
+        SuiteSheet(
+            "Image Size", note: "Now \(size.width) × \(size.height) px. Each side can be 1 to \(PhotoWorkspace.maxSide) px.",
+            cancelIdentifier: "photo.size.cancel",
+            confirm: .init(
+                "Resize", identifier: "photo.size.resize",
+                help: typed ? "Resize" : "Type each side as a whole number of pixels.", isEnabled: typed, perform: resize),
+            onCancel: onCancel
+        ) {
             Form {
                 TextField("Width", text: Binding(get: { width }, set: { setWidth($0) }))
                     .accessibilityLabel("Width")
@@ -45,22 +51,7 @@ struct ImageSizeSheet: View {
                     .toggleStyle(.checkbox)
                     .accessibilityIdentifier("photo.size.keep-proportions")
             }
-            Text("Now \(size.width) × \(size.height) px. Each side can be 1 to \(PhotoWorkspace.maxSide) px.")
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.secondaryText)
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("photo.size.cancel")
-                Button("Resize", action: resize)
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(!typed)
-                    .help(typed ? "Resize" : "Type each side as a whole number of pixels.")
-                    .accessibilityIdentifier("photo.size.resize")
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
     }
 
     /// A typed side as a whole number, or nil.
