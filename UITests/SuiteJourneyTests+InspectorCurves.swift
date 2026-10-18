@@ -93,7 +93,8 @@ extension SuiteJourneyTests {
     /// The chip press: 70 clicks on the Onion switch report `press` (report-only).
     @MainActor func testChipPressLatency() throws {
         let gallery = curvesGallery("inspector", probe: true)
-        let chip = curvesControl("suite.gallery.inspector.chip-onion", gallery)
+        // The Onion chip sits below the fold, where clicks land on nothing (#2962): scroll it into view first.
+        let chip = inspectorReveal("suite.gallery.inspector.chip-onion", gallery)
         for _ in 0..<70 { chip.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click() }
         gallery.shot("inspector-chip-press-perf")
         guard let document = gallery.perf() else { return }
@@ -271,10 +272,14 @@ extension SuiteJourneyTests {
         return easing.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: y))
     }
 
-    /// A point's or handle's accessibility value, "x 0.42, y 0.10", as numbers.
+    /// A point's or handle's reading, "Point 2: x 0.25, y 0.75" or "Handle 1: x 0.42, y 0.10", as
+    /// numbers: its label, since XCUITest reads SwiftUI values as "" (#262), or its value if it has one.
     @MainActor private func curvesPoint(_ element: XCUIElement) -> CGPoint? {
-        guard element.waitForExistence(timeout: 5), let value = element.value as? String else { return nil }
-        let numbers = value.split { $0 == "," || $0 == " " }.compactMap { Double($0) }
+        guard element.waitForExistence(timeout: 5) else { return nil }
+        let value = element.value as? String ?? ""
+        let reading = value.isEmpty ? element.label : value
+        let tail = reading.split(separator: ":").last.map(String.init) ?? reading
+        let numbers = tail.split { $0 == "," || $0 == " " }.compactMap { Double($0) }
         guard numbers.count == 2 else { return nil }
         return CGPoint(x: numbers[0], y: numbers[1])
     }

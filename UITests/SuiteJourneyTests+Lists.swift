@@ -46,10 +46,10 @@ final class SuiteListJourneys: XCTestCase {
         let sidebar = gallery.element("suite.sidebar")
 
         // 1. Ball's eye, then Shadow's lock (its row dims; the toggle now offers to unlock).
-        gallery.element("suite.sidebar.ball.eye").click()
+        gallery.element("suite.sidebar.ball.eye").listMiddle.click()
         expectLog("toggle eye ball", log)
         let lock = gallery.element("suite.sidebar.shadow.lock")
-        lock.click()
+        lock.listMiddle.click()
         expectLog("toggle lock shadow locked", log)
         XCTAssert(waitFor { lock.label == "Unlock Shadow" }, "Shadow's lock reads \(lock.label), not Unlock Shadow")
         gallery.shot("lists-layers-toggled")
@@ -57,11 +57,11 @@ final class SuiteListJourneys: XCTestCase {
         // 2. Double-click Ball's title, Hero, Return.
         let ballName = row("ball", gallery).staticTexts["Ball"].firstMatch
         XCTAssert(ballName.waitForExistence(timeout: 5), "no Ball title in its row")
-        ballName.doubleClick()
+        ballName.listMiddle.doubleClick()
         let ballField = gallery.element("suite.sidebar.ball.rename")
         XCTAssert(ballField.waitForExistence(timeout: 5), "double-clicking Ball's title opened no rename field")
         gallery.press(character: "a", .command)
-        ballField.typeText("Hero")
+        gallery.app.typeText("Hero")
         gallery.press(.return)
         expectLog("rename ball Hero", log)
         XCTAssert(ballField.waitForNonExistence(timeout: 5), "the rename field stayed open after Hero")
@@ -72,7 +72,7 @@ final class SuiteListJourneys: XCTestCase {
         let shadowField = gallery.element("suite.sidebar.shadow.rename")
         XCTAssert(shadowField.waitForExistence(timeout: 5), "Return on Shadow opened no rename field")
         gallery.press(character: "a", .command)
-        shadowField.typeText("Taken")
+        gallery.app.typeText("Taken")
         gallery.press(.return)
         let message = gallery.element("suite.sidebar.shadow.renameMessage")
         XCTAssert(message.waitForExistence(timeout: 5), "Taken wasn't refused under the row")
@@ -95,7 +95,7 @@ final class SuiteListJourneys: XCTestCase {
         let group = row("group", gallery)
         let disclosure = group.disclosureTriangles.firstMatch
         XCTAssert(disclosure.waitForExistence(timeout: 5), "Group's row has no disclosure")
-        disclosure.click()
+        disclosure.listMiddle.click()
         expectLog("open group", log)
         for id in ["suite.sidebar.group.eye", "suite.sidebar.group.lock"] {
             let count = gallery.app.descendants(matching: .any).matching(identifier: id).count
@@ -103,16 +103,16 @@ final class SuiteListJourneys: XCTestCase {
         }
         let childEye = gallery.element("suite.sidebar.child.eye")
         XCTAssert(childEye.waitForExistence(timeout: 5), "Child's eye isn't its own element")
-        childEye.click()
+        childEye.listMiddle.click()
         expectLog("toggle eye child", log)
-        gallery.element("suite.sidebar.group.lock").click()
+        gallery.element("suite.sidebar.group.lock").listMiddle.click()
         expectLog("toggle lock group locked", log)
         gallery.shot("lists-layers-child")
 
         // 6. The rename guard (#308, #311, #312): a double-click on Ball's eye flips it twice and opens no field.
         let eye = gallery.element("suite.sidebar.ball.eye")
         let before = (label: eye.label, count: lines(log).filter { $0 == "toggle eye ball" }.count)
-        eye.doubleClick()
+        eye.listMiddle.doubleClick()
         XCTAssert(waitFor { lines(log).filter { $0 == "toggle eye ball" }.count == before.count + 2 }, "a double-click on the eye didn't flip it twice")
         XCTAssertEqual(eye.label, before.label, "the eye didn't end where it started")
         expectNoField(sidebar, after: "a double-click on Ball's eye")
@@ -136,11 +136,11 @@ final class SuiteListJourneys: XCTestCase {
         let cell = { (id: Int) in gallery.element("suite.grid.\(id)") }
         XCTAssert(cell(3).waitForExistence(timeout: 10), "no grid cell suite.grid.3")
 
-        cell(3).click()
+        cell(3).listMiddle.click()
         expectLog("3", log)
-        XCUIElement.perform(withKeyModifiers: .shift) { cell(6).click() }
+        XCUIElement.perform(withKeyModifiers: .shift) { cell(6).listMiddle.click() }
         expectLog("3,4,5,6", log)
-        XCUIElement.perform(withKeyModifiers: .command) { cell(4).click() }
+        XCUIElement.perform(withKeyModifiers: .command) { cell(4).listMiddle.click() }
         expectLog("3,5,6", log)
         gallery.shot("lists-grid-picked")
         // 4 left the selection, so the anchor is the first selected cell, 3; Right lands on 4 alone.
