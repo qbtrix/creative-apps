@@ -7,6 +7,7 @@
 // before the system's Enter Full Screen. With no window, New and Open… open
 // it. No SidebarCommands, so Show Sidebar appears once.
 import SuiteModel
+import SuiteUI
 import SwiftUI
 
 struct LauncherCommandsHome: Commands {
@@ -26,47 +27,44 @@ struct LauncherCommandsHome: Commands {
         CommandGroup(replacing: .newItem) {
             Menu("New") {
                 ForEach(menu.new, id: \.app) { entry in
-                    HomeMenuItem(item: entry.item) {
+                    MenuCommand(item: entry.item) {
                         guard let model, let preset = entry.preset else { return openWindow(id: "home") }
                         Task { await model.newDocument(preset, now: Date()) }
                     }
                 }
             }
-            HomeMenuItem(item: menu.open) { openWindow(id: "home") }.keyboardShortcut("o")
+            MenuCommand(item: menu.open) { openWindow(id: "home") }.keyboardShortcut("o")
             Menu("Open Recent") {
                 ForEach(menu.recents, id: \.fileID) { entry in
-                    HomeMenuItem(item: entry.item) {
+                    MenuCommand(item: entry.item) {
                         guard let model else { return }
                         model.select(entry.fileID)
                         Task { await model.openSelection(now: Date()) }
                     }
                 }
                 Divider()
-                HomeMenuItem(item: menu.clearMenu) {}
+                MenuCommand(item: menu.clearMenu) {}
             }
         }
         CommandGroup(after: .undoRedo) {
-            HomeMenuItem(item: menu.undo) { if let model { Task { await model.undoRemove(now: Date()) } } }
+            MenuCommand(item: menu.undo) { if let model { Task { await model.undoRemove(now: Date()) } } }
         }
         CommandGroup(after: .pasteboard) {
-            HomeMenuItem(item: menu.delete) { if let model { Task { await model.removeSelection(now: Date()) } } }
+            MenuCommand(item: menu.delete) { if let model { Task { await model.removeSelection(now: Date()) } } }
         }
         CommandGroup(before: .sidebar) {
-            HomeMenuItem(item: menu.showSidebar) {}
-            HomeMenuItem(item: menu.showInspector) {}.keyboardShortcut("i", modifiers: [.option, .command])
+            MenuCommand(item: menu.showSidebar) {}
+            MenuCommand(item: menu.showInspector) {}.keyboardShortcut("i", modifiers: [.option, .command])
             Divider()
-            HomeMenuItem(item: menu.larger) { model?.larger() }.keyboardShortcut("+")
-            HomeMenuItem(item: menu.smaller) { model?.smaller() }.keyboardShortcut("-")
+            MenuCommand(item: menu.larger) { model?.larger() }.keyboardShortcut("+")
+            MenuCommand(item: menu.smaller) { model?.smaller() }.keyboardShortcut("-")
         }
     }
 }
 
-/// One HomeMenu item: disabled with its reason as help when it can't act.
-private struct HomeMenuItem: View {
-    let item: HomeMenu.Item
-    let action: @MainActor () -> Void
-
-    var body: some View {
-        Button(item.title, action: action).disabled(!item.isEnabled).help(item.reason ?? "")
+extension MenuCommand {
+    /// One HomeMenu item: disabled with its reason as help when it can't act.
+    init(item: HomeMenu.Item, action: @escaping @MainActor () -> Void) {
+        self.init(item.title, help: item.reason ?? "", isEnabled: item.isEnabled, perform: action)
     }
 }

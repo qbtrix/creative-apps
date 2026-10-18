@@ -2,7 +2,8 @@
 // (drag sideways to change a value, step it from the keyboard, how far the
 // fill reaches) and ViewerStatusBar and the editor's zoom commands (the zoom
 // readout, fit, and the zoom in and out stops), plus ScrubTrack, the
-// non-linear track a bar slider can move along. No SwiftUI, like
+// non-linear track a bar slider can move along, and SuiteValueScrubbing, the
+// live UC1 contract over these rules and NumericInput's. No SwiftUI, like
 // NumericInput, so the rules are unit-tested on their own. Invariants: every
 // result is inside its range and never NaN, whatever the drag distance, step
 // or modifier; a step that is zero, negative or not finite means "no
@@ -140,6 +141,73 @@ extension ScrubTrack: TrackStepping {
     public func stepped(_ position: Double, by direction: Double) -> Double {
         if let own = self.stepped { return own(position, direction) }
         return ScrubValue.stepped(position, by: direction < 0 ? -1 : 1, unit: abs(direction), step: step, in: positions)
+    }
+}
+
+/// The live `ValueScrubbing` (UC1): the house number rules every inspector
+/// row shares, built from `ScrubValue` (drag, keys, fill) and `NumericInput`
+/// (typing, text, VoiceOver). A spec whose step is zero, negative or not
+/// finite names no step, so it takes `ScrubValue.defaultStep(for:)` as
+/// docs/design.md says. Option wins over Shift. Every result is inside the
+/// spec's range and never NaN. QB-S27's reference table is its test.
+public struct SuiteValueScrubbing: ValueScrubbing {
+    public init() {}
+
+    /// The spec's step, or the default step of its range when it names none.
+    public static func step(of spec: ScrubSpec) -> Double {
+        spec.step.isFinite && spec.step > 0 ? spec.step : ScrubValue.defaultStep(for: spec.range)
+    }
+
+    public func dragged(from start: Double, by points: Double, modifiers: KeyModifiers, spec: ScrubSpec) -> Double {
+        let multiplier = ScrubValue.multiplier(shift: modifiers.contains(.shift), option: modifiers.contains(.option))
+        return ScrubValue.dragged(from: start, by: points, step: Self.step(of: spec), multiplier: multiplier, in: spec.range)
+    }
+
+    /// With no track, `ScrubValue.pressed` on the spec. On a `ScrubTrack`,
+    /// the track-aware `ScrubValue.pressed` (its own `stepped` decides,
+    /// #591); on any other track, one spec step times the modifier through
+    /// its `stepped`, and Home and End go to the range's ends.
+    public func pressed(
+        _ key: ScrubKey, from value: Double, modifiers: KeyModifiers, spec: ScrubSpec, track: (any TrackStepping)?
+    ) -> Double {
+        let shift = modifiers.contains(.shift), option = modifiers.contains(.option)
+        let step = Self.step(of: spec)
+        guard let track else {
+            return ScrubValue.pressed(key, from: value, step: step, shift: shift, option: option, in: spec.range)
+        }
+        let next: Double
+        if let scrubTrack = track as? ScrubTrack {
+            let position = ScrubValue.pressed(
+                key, from: scrubTrack.position(of: value), shift: shift, option: option, on: scrubTrack)
+            next = scrubTrack.value(at: position)
+        } else {
+            switch key {
+            case .home: next = spec.range.lowerBound
+            case .end: next = spec.range.upperBound
+            case .increment, .decrement:
+                let delta = (key == .increment ? 1 : -1) * step * ScrubValue.multiplier(shift: shift, option: option)
+                next = track.value(at: track.stepped(track.position(of: value), by: delta))
+            }
+        }
+        return NumericInput.clamp(next.isFinite ? next : value, to: spec.range)
+    }
+
+    /// Text the user never changed from `opening` keeps `old`; any other
+    /// text commits the number it names, clamped, or keeps `old`.
+    public func committed(_ text: String, opening: String, old: Double, spec: ScrubSpec) -> Double {
+        NumericInput.committed(text, in: spec.range, keeping: old, edited: text != opening)
+    }
+
+    public func fraction(_ value: Double, spec: ScrubSpec) -> Double {
+        ScrubValue.fraction(value, in: spec.range)
+    }
+
+    public func text(_ value: Double, spec: ScrubSpec) -> String {
+        NumericInput.text(value, decimals: spec.decimals, unit: spec.unit)
+    }
+
+    public func spoken(_ value: Double, spec: ScrubSpec) -> String {
+        NumericInput.spoken(value, decimals: spec.decimals, unit: spec.unit)
     }
 }
 

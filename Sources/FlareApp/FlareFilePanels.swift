@@ -29,7 +29,7 @@ struct FlareFilePanels: ViewModifier {
         content
             .background {
                 FlareEditedDot(edited: edited)
-                FlareFileElement(status: edited ? "Edited" : "Saved")
+                ProbeElement("flare.file", label: edited ? "Edited" : "Saved", value: edited ? "Edited" : "Saved")
             }
             .suiteProblemAlert($shown)
             .onChange(of: model.saveError) { _, new in if let new { shown = new } }
@@ -64,20 +64,6 @@ final class FlareEditedView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         window?.isDocumentEdited = edited
-    }
-}
-
-/// The hidden `flare.file` element: no hits, its label the edited state.
-private struct FlareFileElement: View {
-    let status: String
-
-    var body: some View {
-        Color.clear
-            .allowsHitTesting(false)
-            .accessibilityElement()
-            .accessibilityLabel(status)
-            .accessibilityValue(status)
-            .accessibilityIdentifier("flare.file")
     }
 }
 

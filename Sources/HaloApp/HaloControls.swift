@@ -46,35 +46,10 @@ private struct HaloControlsProbe: ViewModifier {
     func body(content: Content) -> some View {
         if requested {
             content.backgroundPreferenceValue(HaloControlsKey.self, alignment: .topLeading) { entries in
-                HaloControlsElement(entries: entries)
+                ProbeElement("halo.controls", label: SuiteControlInventory(entries: entries).json())
             }
         } else {
             content
         }
-    }
-}
-
-/// The hidden `halo.controls` element: no hits, its label the controls' JSON.
-private struct HaloControlsElement: View {
-    static let identifier = "halo.controls"
-    let entries: [ControlEntry]
-
-    var body: some View {
-        Color.clear
-            .allowsHitTesting(false)
-            .accessibilityElement()
-            .accessibilityLabel(Text(verbatim: json))
-            .accessibilityIdentifier(Self.identifier)
-    }
-
-    /// One entry per id, the last placed, sorted by id; `{}` if it can't encode.
-    private var json: String {
-        var latest: [String: ControlEntry] = [:]
-        for entry in entries { latest[entry.id] = entry }
-        let document = ControlDocument(controls: latest.values.sorted { $0.id < $1.id })
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        guard let data = try? encoder.encode(document) else { return "{}" }
-        return String(decoding: data, as: UTF8.self)
     }
 }
