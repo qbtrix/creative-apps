@@ -11,6 +11,7 @@
 //   until `endEasingHandleDrag()`; every other edit is its own undo step
 // - `easingCurveSamples` are FlareCore's `Easing.value(at:)`, never a copy of it
 import FlareCore
+import SuiteKernel
 
 /// One animated stretch of a property track: from the keyframe at
 /// `startFrame` to the next keyframe on the same track at `endFrame`.
@@ -62,31 +63,7 @@ public enum EasingAxis: CaseIterable, Sendable {
 }
 
 /// The preset chips, in the order the editor shows them.
-public enum EasingPreset: String, CaseIterable, Sendable {
-    case linear, ease, easeIn, easeOut, easeInOut, hold
-
-    public var title: String {
-        switch self {
-        case .linear: "Linear"
-        case .ease: "Ease"
-        case .easeIn: "Ease In"
-        case .easeOut: "Ease Out"
-        case .easeInOut: "Ease In-Out"
-        case .hold: "Hold"
-        }
-    }
-
-    public var easing: Easing {
-        switch self {
-        case .linear: .linear
-        case .ease: .ease
-        case .easeIn: .easeIn
-        case .easeOut: .easeOut
-        case .easeInOut: .easeInOut
-        case .hold: .hold
-        }
-    }
-}
+public typealias EasingPreset = EasePreset
 
 public protocol EasingEditing: Sendable {
     /// The selected layer's segments, sorted by property, then start frame.
@@ -137,33 +114,22 @@ extension EasingEditing {
 public enum EasingCurve {
     /// The control points of `easing`; linear and hold sit at (0,0) and (1,1).
     public static func handles(of easing: Easing) -> (first: Point, second: Point) {
-        guard case let .cubicBezier(x1, y1, x2, y2) = easing else {
+        guard let points = EaseCurve.handles(of: easing), points.count == 2 else {
             return (Point(x: 0, y: 0), Point(x: 1, y: 1))
         }
-        return (Point(x: x1, y: y1), Point(x: x2, y: y2))
+        return (points[0], points[1])
     }
 
     /// `easing` with one handle moved to `point`, x clamped to 0...1; nil
     /// when the point is not finite.
     public static func moving(_ easing: Easing, _ handle: EasingHandle, to point: Point) -> Easing? {
         guard point.x.isFinite, point.y.isFinite else { return nil }
-        var (first, second) = handles(of: easing)
-        let moved = Point(x: min(max(point.x, 0), 1), y: point.y)
-        switch handle {
-        case .first: first = moved
-        case .second: second = moved
-        }
-        return .cubicBezier(x1: first.x, y1: first.y, x2: second.x, y2: second.y)
+        return EaseCurve.moving(handle.rawValue - 1, to: point, in: easing)
     }
 
     /// `count` points of `easing` evenly spaced over 0...1, or none when
     /// `count` is below 2.
     public static func samples(of easing: Easing, count: Int) -> [Point] {
-        guard count >= 2 else { return [] }
-        let last = Double(count - 1)
-        return (0..<count).map { i in
-            let x = Double(i) / last
-            return Point(x: x, y: easing.value(at: x))
-        }
+        count >= 2 ? EaseCurve.samples(of: easing, count: count) : []
     }
 }

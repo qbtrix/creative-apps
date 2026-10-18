@@ -19,9 +19,9 @@ extension LiveKeyframes {
         var shifts: [ShiftKeyframes] = []
         var length = 0  // the scene length the shifted keys and labels need
         for layer in edit.layers {
-            guard let last = Self.lastKey(of: layer), last >= frame else { continue }
-            let (to, overflow) = last.addingReportingOverflow(count)
-            guard !overflow, to < Int.max else { throw CommandError.invalidFrame(count) }
+            guard let last = Self.lastKey(of: layer), last >= frame,
+                  let to = KernelKeys.lastKey(afterInserting: count, at: frame, in: layer) else { continue }
+            guard to < Int.max else { throw CommandError.invalidFrame(count) }
             // FlareCore has no command that grows a symbol, so a key pushed past its last frame refuses.
             if edit.scene == nil, to >= edit.length { throw CommandError.invalidDocument(Self.insertPastSymbolEnd) }
             shifts.append(ShiftKeyframes(owner: owner, layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
@@ -53,7 +53,7 @@ extension LiveKeyframes {
         try engine.group("Remove Frame") { engine in
             for layer in edit.layers {
                 for property in layer.tracks.keys.sorted() {
-                    for key in layer.tracks[property] ?? [] where run.contains(key.frame) {
+                    for key in KernelKeys.dropped(byRemoving: count, at: frame, from: layer.tracks[property] ?? []) {
                         try engine.perform(RemoveKeyframe(owner: owner, layerID: layer.id, property: property, frame: key.frame))
                     }
                 }

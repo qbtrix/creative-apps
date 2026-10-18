@@ -5,18 +5,18 @@
 // The owner is a scene or a symbol (KY-8): a symbol's layers ease through the same `SetKeyframeEasing(owner:)`, and a
 // layer missing from the owner, or an owner that doesn't exist, throws `layerNotFound`.
 import FlareCore
+import SuiteKernel
 
 public struct LiveEasing: KeyframeEasing {
     /// Most points `curve` returns, so a runaway `count` can't exhaust memory.
-    public static let maxCurvePoints = 4096
+    public static let maxCurvePoints = EaseCurve.maxSamples
 
     public init() {}
 
     public var presets: [EasingPreset] { EasingPreset.allCases }
 
     public func curve(_ easing: Easing, count: Int) -> [Point] {
-        if count == 1 { return [Point(x: 0, y: easing.value(at: 0))] }
-        return EasingCurve.samples(of: easing, count: min(count, Self.maxCurvePoints))
+        EaseCurve.samples(of: easing, count: count)
     }
 
     public func setEasing(_ easing: Easing, at key: KeyRef, owner: LayerOwner,
@@ -24,8 +24,7 @@ public struct LiveEasing: KeyframeEasing {
         guard let layer = engine.document.layers(of: owner)?.first(where: { $0.id == key.layerID }) else {
             throw CommandError.layerNotFound(key.layerID)
         }
-        let properties = key.property.map { [$0] }
-            ?? layer.tracks.filter { $0.value.contains { $0.frame == key.frame } }.keys.sorted()
+        let properties = key.easedProperties(in: layer)
         guard !properties.isEmpty else { throw CommandError.keyframeNotFound(property: "", frame: key.frame) }
         let commands = properties.map {
             SetKeyframeEasing(owner: owner, layerID: key.layerID, property: $0, frame: key.frame, easing: easing)
