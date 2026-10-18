@@ -1,8 +1,9 @@
 // ZoomMathTests.swift: the zoom CanvasViewport applies itself (ZoomMath) and
 // the view-to-document point math under it (CanvasLayout): the 10% to 3200%
 // clamp, the steps, the fit for a wide and a tall artboard, a viewport with no
-// room, and the document point under the pointer at 50% and 200%. No SwiftUI
-// rendering. macOS only.
+// room, and the document point under the pointer at 50% and 200%; and
+// SuiteCanvasNavigating, the live CanvasNavigating over ZoomMath, which walks
+// the stops where the Fake doubles. No SwiftUI rendering. macOS only.
 import CoreGraphics
 import SuiteUI
 import Testing
@@ -57,4 +58,43 @@ import Testing
     #expect(half.artboardPoint(CGPoint(x: 149, y: 60)) == nil)
     #expect(half.artboardPoint(CGPoint(x: 650, y: 60)) == nil)
     #expect(half.artboardPoint(CGPoint(x: 300, y: 49)) == nil)
+}
+
+@Test func suiteCanvasZoomInWalksZoomMathsStops() {
+    let n = SuiteCanvasNavigating()
+    // ViewerZoom.stops: 1 -> 1.5 -> 2, where FakeCanvasNavigating gives 2 then 4.
+    #expect(n.zoomedIn(from: 1) == 1.5)
+    #expect(n.zoomedIn(from: n.zoomedIn(from: 1)) == 2)
+    #expect(n.zoomedIn(from: 1) == ZoomMath.zoomedIn(from: 1))
+    #expect(n.zoomedOut(from: 1) == 2.0 / 3)
+    #expect(n.zoomedIn(from: 32) == 32)
+    #expect(n.zoomedOut(from: 0.1) == 0.1)
+}
+
+@Test func suiteCanvasClampsAndTreatsNaNAsOne() {
+    let n = SuiteCanvasNavigating()
+    #expect(n.clamped(.nan) == 1)
+    #expect(n.clamped(0) == 0.1)
+    #expect(n.clamped(100) == 32)
+    #expect(n.clamped(3) == 3)
+}
+
+@Test func suiteCanvasFitsAnEmptyDocumentAtOneAndNoRoomAtTheMinimum() {
+    let n = SuiteCanvasNavigating()
+    let viewport = PlaneExtent(width: 800, height: 600)
+    #expect(n.fit(document: PlaneExtent(width: 0, height: 0), in: viewport, margin: 32) == 1)
+    #expect(n.fit(document: PlaneExtent(width: -5, height: 0), in: viewport, margin: 32) == 1)
+    #expect(n.fit(document: PlaneExtent(width: 1472, height: 100), in: viewport, margin: 32) == 0.5)
+    #expect(n.fit(document: PlaneExtent(width: 400, height: 300), in: PlaneExtent(width: 60, height: 600), margin: 32) == 0.1)
+    #expect(n.fit(document: PlaneExtent(width: 400, height: 300), in: PlaneExtent(width: 0, height: 0), margin: 0) == 0.1)
+    #expect(n.fit(document: PlaneExtent(width: 0, height: 0), in: PlaneExtent(width: .nan, height: 600), margin: 0) == 0.1)
+}
+
+@Test func suiteCanvasMapsViewPointsToDocumentPixelsWithoutDividingByZero() {
+    let n = SuiteCanvasNavigating()
+    let origin = PlanePoint(x: 20, y: 10)
+    #expect(n.documentPoint(PlanePoint(x: 220, y: 110), artboardOrigin: origin, zoom: 2) == PlanePoint(x: 100, y: 50))
+    #expect(n.documentPoint(PlanePoint(x: 120, y: 10), artboardOrigin: origin, zoom: .nan) == PlanePoint(x: 100, y: 0))
+    // A zoom of 0 clamps to 0.1, so the point stays finite.
+    #expect(n.documentPoint(PlanePoint(x: 21, y: 11), artboardOrigin: origin, zoom: 0) == PlanePoint(x: 10, y: 10))
 }
