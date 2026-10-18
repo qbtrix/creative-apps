@@ -4,7 +4,7 @@ Issue: #1496 · Packet: docs/blueprints/design/features/copy-group.md
 Run: act-1a14d32dfd7-u3ff (before: act-1a14a88d756-rnok) · Session: claude/layers-panel-style-rows-copy-group-x5zrpm · Started: 2026-10-17T15:46Z
 Stage: 3 polling
 Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
-Next: Feature built; add macOS journey and audit results of run 39093416270 to the contact sheet when its ui-test ends
+Next: a completed design or full run holding b8344824 (#2615) shows DesignArrangeDragTests green; then Belt-Slice-Done CG-a and Belt-Contact-Sheet on #1496
 
 Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-group.
 
@@ -23,7 +23,7 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 | C-5 | CG-a | 5 | J7, J8, J9; closes #414 #415 #416 | UITests/DesignJourneyTests+Arrange.swift | J7, J8, J9 | #2470, #2479 | merged |
 | built | CG-a | 6 | copy-group.wave.json status built; feature-done | docs/blueprints/design/features/copy-group.wave.json | scripts/ci | #2558 | merged (6bb1f3f6) |
 | F-1 | CG-a | r1 | J7 J8 J9 click Layers rows off the name (shared Journey.clickDesignLayer); E1 joins A by Command-click | UITests/DesignJourneyTests+Layers.swift, +Arrange, +Style, +Text, +PerfScrub | J7, J8, J9 | #2569 | merged (308b58a9) |
-| F-2 | CG-a | r2 | Option-drag check seeds A 200 points from every handle (#2611) | Tests/AppSnapshotTests/DesignArrangeDragTests.swift | DesignArrangeDragTests | #2615 | open |
+| F-2 | CG-a | r2 | Option-drag check seeds A 200 points from every handle (#2611) | Tests/AppSnapshotTests/DesignArrangeDragTests.swift | DesignArrangeDragTests | #2615 | merged (b8344824) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -40,3 +40,4 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 
 ## Open
 - CG-a round 2 (last): #2615 fixes #2611 (DesignArrangeDragTests pressed within the fit zoom's handle reach). Anything still red after it becomes a gap. #2566 (gap, p2): Shift-click on a Layers row adds nothing; outside CG-a.
+- 2026-10-18T05:37:17Z scoped design run 39099202215 (a0f2ff00, holds #2569): J7 J8 J9 pass; DesignArrangeDragTests still red as expected (no #2615). #2615 merged as b8344824.
