@@ -4,12 +4,12 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
 Stage: 3 wave 2
 Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
-Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692 closed). J5 still skips at the ⇧→ nudge on two layers: finding #2706, round 2 fixer in flight (canvas key guard `selection != nil`). Re-done again on a run holding that fix. S-8 #2696 in the lane; S-5 waits on CB-a.
+Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692 closed). J5 still skips at the ⇧→ nudge on two layers: finding #2706, round 2 PR #2707 head e7afea2 in the lane (root cause: arrow presses carry the numeric-pad flag, so the canvas key guard dropped every arrow). Re-done again on a run holding that fix. S-8 #2696 in the lane; S-5 waits on CB-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SS-a | marquee, several-layer move/resize/nudge/delete, align and distribute, on screen | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-window DW-a, DW-b (S-6); design-seams (S-7) | yes | 2 | merged (re-done on 39107691328; round 2 #2706 in flight) | 39107691328 | wanted |
+| SS-a | marquee, several-layer move/resize/nudge/delete, align and distribute, on screen | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-window DW-a, DW-b (S-6); design-seams (S-7) | yes | 2 | merged (re-done on 39107691328; round 2 PR #2707 for #2706 in the lane) | 39107691328 | wanted |
 | SS-b | Zoom to Selection; no edit mid-gesture; budgets | S-4, S-5, S-7b, S-8 | J4, P1 | design-seams, canvas-basics CB-a (S-5); DW-a, SS-a (S-7b, S-8) | no | 0 | building (S-8 wave 2; S-5 waits CB-a; #2538 blocked on needs-ui #2623) | – | – |
 
 ## Tasks

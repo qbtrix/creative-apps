@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-18T08:05Z	heartbeat	full CI 39105383795 was cancelled; proof moves to scoped design 39107691328 (in progress) and full CI 39108958964 (pending). No new findings since 07:30Z; #1493 #2263 #2623 open
 2026-10-18T08:18Z	heartbeat	scoped design 39107691328 (cd81c77b, holds 148ade3e) in progress; full 39108958964 pending. #2696 #2701 awaiting lane macOS builds. CB-3 not merged. 10 line:design findings open
 2026-10-18T08:45Z	slice-done	SS-a re-done on scoped design 39107691328 (Belt-Slice-Done posted on #1495); #2692 closed; finding #2706 (J5 nudge on two layers) round 2 fixer dispatched
+2026-10-18T08:47Z	pr	round 2 PR #2707 (#2706) opened, head e7afea2: canvas keys ignored arrows on the numeric-pad modifier flag; J5 skips removed
