@@ -14,7 +14,15 @@
 // times its width over 1440. Until #2463 routes the canvas keys to the
 // several-layer nudge and delete, ⇧→ and ⌫ change nothing on a multi-selection;
 // J5 then checks the empty marquee and skips naming #2463, and any other wrong
-// step name fails.
+// step name fails. J4 (S-7b): the zoom pill's fitted percent f; C selected;
+// ⌘= twice steps two ViewerZoom stops up; Space-drag 200 pt left pans
+// `design.canvas.selection` about 200 pt left; ⌘0 reads f again; View > Zoom
+// to Selection zooms past both stops; Escape, then the item is disabled.
+// XCUITest can't hold a key that isn't a modifier, so Space goes down and up
+// as CGEvents, and a runner without post-event access skips that step by name.
+// C's center within 2 pt of the canvas center skips naming #2147 (CanvasViewport
+// can't scroll to a rect yet). Every other step still asserts first.
+import CoreGraphics
 import XCTest
 
 final class DesignSelectJourneyTests: XCTestCase {
@@ -114,6 +122,106 @@ final class DesignSelectJourneyTests: XCTestCase {
         XCTAssertFalse(menuItem.isEnabled, "Object > \(Self.distributeTitle) is enabled with two layers")
         design.shot("select-distribute-off")
         design.press(.escape)
+    }
+
+    /// The percents of ViewerZoom.stops, the stops ⌘= steps through (UITests can't import SuiteUI).
+    static let stopPercents = [5, 10, 25, 33, 50, 67, 100, 150, 200, 300, 400, 600, 800, 1200, 1600, 3200]
+    static let zoomToSelection = "Zoom to Selection"
+
+    /// J4: zoom in, pan with Space, fit with ⌘0, then View > Zoom to Selection, which Escape disables.
+    @MainActor func testZoomPanFitAndZoomToSelection() throws {
+        let design = open()
+        var skips: [String] = []
+
+        // 1. The pill's fitted percent f; then press C (700, 100, 100, 120) on the page to select it.
+        let fitted = try XCTUnwrap(zoomPercent(design), "the status line shows no zoom")
+        drag(design, from: (750, 160), to: (750, 160))
+        let selection = design.element("design.canvas.selection")
+        XCTAssert(selection.waitForExistence(timeout: 5), "pressing C selected nothing (design.canvas.selection)")
+        design.shot("select-zoom-fit")
+
+        // 2. ⌘= twice: the pill reads a stop at or just above f, then the stop after it.
+        design.press(character: "=", .command)
+        let first = waitForZoom(design) { $0 != fitted } ?? fitted
+        let candidates = Self.stopPercents.filter { $0 >= fitted }.prefix(2)
+        XCTAssert(candidates.contains(first), "⌘= from \(fitted)% read \(first)%, not the next stop")
+        design.press(character: "=", .command)
+        let next = Self.stopPercents.firstIndex(of: first).flatMap { Self.stopPercents.dropFirst($0 + 1).first }
+        let second = waitForZoom(design) { $0 == next } ?? first
+        XCTAssertEqual(second, next, "the second ⌘= read \(second)%, not the stop after \(first)%")
+        design.shot("select-zoom-in")
+
+        // 3. Space-drag 200 pt left from the canvas's middle: the selection moves about 200 pt left.
+        if CGPreflightPostEventAccess() {
+            let before = selection.frame.midX
+            let viewport = design.element("suite.viewport")
+            let start = viewport.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5))
+            holdingSpace { start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: -200, dy: 0))) }
+            XCTAssert(Self.waitUntil { abs(selection.frame.midX - (before - 200)) <= 30 },
+                      "Space-drag moved the selection from x \(before) to \(selection.frame.midX), not about 200 pt left")
+            XCTAssertEqual(zoomPercent(design), second, "Space-drag changed the zoom")
+            design.shot("select-zoom-panned")
+        } else {
+            skips.append("the runner can't post a held Space (CGPreflightPostEventAccess is false)")
+        }
+
+        // 4. ⌘0 fits the page again: the pill reads f.
+        design.press(character: "0", .command)
+        XCTAssertEqual(waitForZoom(design) { $0 == fitted }, fitted, "⌘0 didn't return to the fitted \(fitted)%")
+        design.shot("select-zoom-refit")
+
+        // 5. View > Zoom to Selection (⌥⌘2) fits C, zooming in past both ⌘= stops.
+        let item = viewItem(design, Self.zoomToSelection)
+        XCTAssert(item.waitForExistence(timeout: 5), "no View > \(Self.zoomToSelection)")
+        XCTAssert(item.isEnabled, "View > \(Self.zoomToSelection) is disabled with C selected")
+        item.click()
+        let framed = waitForZoom(design) { $0 > second } ?? fitted
+        XCTAssertGreaterThan(framed, second, "Zoom to Selection read \(framed)%, not a zoom that fits C")
+        design.shot("select-zoom-selection")
+        let canvas = design.element("suite.viewport").frame
+        let center = CGPoint(x: canvas.minX + (canvas.width + 20) / 2, y: canvas.minY + (canvas.height + 20) / 2)
+        let offset = hypot(selection.frame.midX - center.x, selection.frame.midY - center.y)
+        if offset > 2 { skips.append("#2147: C's center is \(Int(offset)) pt from the canvas center") }
+
+        // 6. Escape deselects: View > Zoom to Selection is disabled ("Select a layer first.").
+        design.press(.escape)
+        XCTAssert(Self.waitUntil { !selection.exists }, "Escape left C selected")
+        let off = viewItem(design, Self.zoomToSelection)
+        XCTAssert(off.waitForExistence(timeout: 5), "no View > \(Self.zoomToSelection)")
+        XCTAssertFalse(off.isEnabled, "View > \(Self.zoomToSelection) is enabled with nothing selected")
+        design.shot("select-zoom-none", screen: true)
+        design.press(.escape)
+        if !skips.isEmpty { throw XCTSkip(skips.joined(separator: "; ")) }
+    }
+
+    /// The zoom pill's percent once `condition` holds on it within 5 seconds, else nil.
+    @MainActor private func waitForZoom(_ design: Journey, _ condition: (Int) -> Bool) -> Int? {
+        Self.waitUntil { zoomPercent(design).map(condition) == true } ? zoomPercent(design) : nil
+    }
+
+    /// The zoom pill's percent: "Zoom 25%" as its label, or "25%" as a plain Text's words (#1452).
+    @MainActor private func zoomPercent(_ design: Journey) -> Int? {
+        let texts = design.element("suite.status").staticTexts.allElementsBoundByIndex
+            .flatMap { [$0.label, $0.value as? String ?? ""] }
+        return texts.lazy.compactMap { text -> Int? in
+            let percent = text.hasPrefix("Zoom ") ? String(text.dropFirst(5)) : text
+            return percent.hasSuffix("%") ? Int(percent.dropLast()) : nil
+        }.first
+    }
+
+    /// Runs `body` with Space held down, posted as CGEvents (virtual key 49).
+    @MainActor private func holdingSpace(_ body: () -> Void) {
+        CGEvent(keyboardEventSource: nil, virtualKey: 49, keyDown: true)?.post(tap: .cghidEventTap)
+        Thread.sleep(forTimeInterval: 0.2)
+        body()
+        CGEvent(keyboardEventSource: nil, virtualKey: 49, keyDown: false)?.post(tap: .cghidEventTap)
+        Thread.sleep(forTimeInterval: 0.2)
+    }
+
+    /// Opens the View menu and returns its item `title`.
+    @MainActor private func viewItem(_ design: Journey, _ title: String) -> XCUIElement {
+        design.app.menuBars.firstMatch.menuBarItems["View"].click()
+        return design.app.menuBars.firstMatch.menuItems[title].firstMatch
     }
 
     /// Launches `cards` and waits for its artboard.
