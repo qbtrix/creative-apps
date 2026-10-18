@@ -1,7 +1,7 @@
 # loupe-viewport lead record
 
 Issue: #1513 · Packet: docs/blueprints/library/features/loupe-viewport.md
-Run: act-1a14cdfa655-jrmy · Session: see Belt run page · Started: 2026-10-18T02:45Z
+Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 3 build waves (last slices in the lane)
 Base: origin/dev 21066130 (wave 2)
 Next: all wave PRs merged (#2729 LV-10 feature-done merged 11:54); wait for a green full dev CI containing #2729, then contact sheet, LV-11 gap (#782), Anatomy
