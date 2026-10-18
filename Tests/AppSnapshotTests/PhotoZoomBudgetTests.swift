@@ -7,9 +7,9 @@
 // changes sent as the slider sends them. Each step is timed as the harness
 // times it (the event plus the layout and display it forced); `main stall` is
 // how late the main thread was to its 120 Hz ticks during the
-// interaction (longest single stall, and the total), which is what a slider
-// or a pan feels: renders that land on the main thread show up there, not in
-// the step. Report-only
+// interaction (longest single stall, and the total) as a main-queue
+// heartbeat sees it: renders that land on the main thread show up there, not
+// in the step. Report-only
 // (Tests/perf-suites.txt): one PHOTO-ZOOM-8K line per backend, zoom and
 // interaction in .build/snapshots/photo-zoom-budget.txt. macOS only.
 import AppKit
@@ -26,8 +26,14 @@ extension BodyCountSuites {
 
         @Test(.timeLimit(.minutes(20))) func eightKPanAndSliderAtEachZoomOnEachBackend() async throws {
             var lines: [String] = []
-            for (label, choice) in [("CPU", RenderingChoice.cpu), ("GPU", .gpu)] {
-                for zoom in Self.zooms {
+            // PHOTO_ZOOM_ONLY=GPU or =CPU runs one backend, PHOTO_ZOOM_AT=1 one zoom: a run to `sample`.
+            let env = ProcessInfo.processInfo.environment
+            let backends = [("CPU", RenderingChoice.cpu), ("GPU", .gpu)].filter { backend in
+                env["PHOTO_ZOOM_ONLY"].map { $0 == backend.0 } ?? true
+            }
+            let zooms = env["PHOTO_ZOOM_AT"].flatMap(Double.init).map { [$0] } ?? Self.zooms
+            for (label, choice) in backends {
+                for zoom in zooms {
                     lines += try await Self.measure(label, choice, zoom: zoom)
                 }
             }
@@ -79,24 +85,22 @@ extension BodyCountSuites {
                    kind, label, zoom * 100, PhotoRenderBudgetTests.config, step.p50, step.p95, stall.longest, stall.total)
         }
 
-        /// `count` timed steps at 120 Hz, then 60 idle ticks for the renders they asked for to land. Each tick
-        /// sleeps one 120 Hz period after the last one ended; whatever it oversleeps is time the main thread was
-        /// busy elsewhere (a render landing, a commit). Returns the longest such stall and their total, in ms.
+        /// `count` timed steps at 120 Hz, then 60 idle ticks for the renders they asked for to land, while a
+        /// main-queue heartbeat (a Dispatch timer every 2 ms, outside Swift concurrency, so a busy cooperative
+        /// pool can't delay it) records how long the main thread was busy past each beat. Returns the longest
+        /// such stall and their total, in ms: what a slider or a pan feels when renders land on the main thread.
         static func stalls(_ w: RenderBudgetWindow<some View>, _ count: Int, _ step: (Int) -> Void) async throws
             -> (longest: Double, total: Double)
         {
+            let beat = MainHeartbeat()
+            defer { beat.stop() }
             let clock = ContinuousClock()
-            let period = Duration.microseconds(8_333)
-            var (longest, total) = (Duration.zero, Duration.zero)
+            let began = clock.now
             for i in 1...(count + 60) {
-                let asleep = clock.now
-                try await Task.sleep(until: asleep + period, clock: clock)
-                let late = max(clock.now - asleep - period, .zero)
-                (longest, total) = (max(longest, late), total + late)
+                try await Task.sleep(until: began + .microseconds(8_333 * i), clock: clock)
                 if i <= count { w.timed { step(i) } }
             }
-            let ms = { (d: Duration) in Double(d / .microseconds(1)) / 1000 }
-            return (ms(longest), ms(total))
+            return (beat.longest * 1000, beat.total * 1000)
         }
 
         /// The canvas shows a picture: its tile layers have images (on the GPU path too, under the Metal layer).
@@ -104,4 +108,26 @@ extension BodyCountSuites {
             !(canvas.layer?.sublayers?.first?.sublayers ?? []).compactMap(\.contents).isEmpty
         }
     }
+}
+
+/// A main-queue Dispatch timer every 2 ms; each fire that comes more than a beat late adds the lateness.
+@MainActor private final class MainHeartbeat {
+    private let timer = DispatchSource.makeTimerSource(queue: .main)
+    private var last = ProcessInfo.processInfo.systemUptime
+    private(set) var longest = 0.0, total = 0.0
+    private static let interval = 0.002
+
+    init() {
+        timer.schedule(deadline: .now(), repeating: .milliseconds(2), leeway: .microseconds(200))
+        timer.setEventHandler { [weak self] in MainActor.assumeIsolated { self?.fire() } }
+        timer.resume()
+    }
+
+    private func fire() {
+        let now = ProcessInfo.processInfo.systemUptime
+        let late = max(now - last - Self.interval, 0)
+        (longest, total, last) = (max(longest, late), total + late, now)
+    }
+
+    func stop() { timer.cancel() }
 }

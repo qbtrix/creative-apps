@@ -1,5 +1,6 @@
 // CanvasHostView.swift: the canvas host's AppKit view (canvas-host CH-3): tile
-// layers, and a live overlay SwiftUI never sees, cleared at once on mouse-up
+// layers (each showing its tile's IOSurface when it came with one, else its
+// image), and a live overlay SwiftUI never sees, cleared at once on mouse-up
 // (no fade). `draw(_:)` paints the same picture for `cacheDisplay`. Embedded
 // (`isEmbedded`, inside a CanvasViewport's content, as Photo's canvas) it
 // fills its bounds, draws no surround or artboard so the viewport's
@@ -9,6 +10,7 @@
 // minify trilinear. macOS only.
 import AppKit
 import Combine
+import IOSurface
 import SwiftUI
 
 /// The AppKit canvas surface: tile layers, the live overlay, mouse, scroll, pinch and hover.
@@ -43,6 +45,8 @@ public final class CanvasHostView: NSView {
     private(set) var live: [CGPoint] = []
     private var anchor: CGPoint?
     private var images: [CanvasTileRect: CGImage?] = [:]
+    /// The tiles' IOSurfaces, where they came with one: what the tile layers show in place of the image.
+    private var surfaces: [CanvasTileRect: IOSurface] = [:]
     private var tileLayers: [CanvasTileRect: CALayer] = [:]
     private var tracking: NSTrackingArea?
     let container = CALayer()
@@ -77,7 +81,7 @@ public final class CanvasHostView: NSView {
         CATransaction.setDisableActions(true)
         if restart {
             for layer in tileLayers.values { layer.removeFromSuperlayer() }
-            (tileLayers, images, documentSize) = ([:], [:], content.documentSize)
+            (tileLayers, images, surfaces, documentSize) = ([:], [:], [:], content.documentSize)
             container.bounds = CGRect(origin: .zero, size: documentSize)
             setAccessibilityValue("\(Int(documentSize.width)) × \(Int(documentSize.height)) px")
         }
@@ -85,7 +89,7 @@ public final class CanvasHostView: NSView {
         guard metalLayer == nil else {
             // The Metal path draws through the presenter: the hidden tile layers get no contents, since
             // Core Animation converts every image a commit hands it on the main thread, colour space and all.
-            for tile in tiles { images[tile.rect] = tile.image }
+            for tile in tiles { (images[tile.rect], surfaces[tile.rect]) = (tile.image, tile.surface) }
             CATransaction.commit()
             pictureChanged = true
             presenter?.show(tiles, documentSize: documentSize)
@@ -113,13 +117,13 @@ public final class CanvasHostView: NSView {
                 container.addSublayer(layer)
                 tileLayers[tile.rect] = layer
             }
-            layer.contents = tile.image
-            images[tile.rect] = tile.image
+            layer.contents = tile.surface ?? tile.image
+            (images[tile.rect], surfaces[tile.rect]) = (tile.image, tile.surface)
         }
         return relayout
     }
     /// Every tile shown, with its image.
-    func shown() -> [CanvasTile] { images.map { CanvasTile(rect: $0.key, image: $0.value) } }
+    func shown() -> [CanvasTile] { images.map { CanvasTile(rect: $0.key, image: $0.value, surface: surfaces[$0.key]) } }
     /// A tile's frame in the unflipped container: document row y sits at height - maxY.
     private func frame(of rect: CanvasTileRect) -> CGRect {
         CGRect(x: CGFloat(rect.x), y: documentSize.height - CGFloat(rect.y + rect.height),
