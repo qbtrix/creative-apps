@@ -1,0 +1,5 @@
+[
+{"label":"each side truncates instead of rounding","file":"Sources/SuiteUI/SuiteStatusPills.swift","find":"value.rounded(.toNearestOrAwayFromZero)","replace":"value.rounded(.towardZero)","tests":"StatusPillTests"},
+{"label":"the zoom prints raw instead of through percentText","file":"Sources/SuiteUI/SuiteStatusPills.swift","find":"StatusPill(text: ViewerZoom.percentText(zoom))","replace":"StatusPill(text: \"\\(Int(zoom * 100))%\")","tests":"StatusPillTests"},
+{"label":"the trailing pills come before the size","file":"Sources/SuiteUI/SuiteStatusPills.swift","find":"[StatusPill(text: ViewerZoom.percentText(zoom)), StatusPill(text: size)] + trailing","replace":"[StatusPill(text: ViewerZoom.percentText(zoom))] + trailing + [StatusPill(text: size)]","tests":"StatusPillTests"}
+]
