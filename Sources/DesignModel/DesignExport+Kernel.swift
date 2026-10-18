@@ -43,13 +43,11 @@ public struct LiveExport: ExportPlanning {
     public func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
                      existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
         let found = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : fakeFind(ids, page)
-        let nodes = found.filter { !exportHidden($0.id, page) }
+        let nodes = found.filter { !page.isHiddenInTree($0.id) }
         guard !nodes.isEmpty else { throw ids.isEmpty ? .nothingToExport : .nothingSelected }
-        var taken = existing
-        return nodes.map { node in
-            let name = UniqueFileNames.name(node.name, extension: format.rawValue, among: taken)
-            taken.insert(name)
-            return exportItem(node.id, name, node.frame.width, node.frame.height, format, scale)
+        let names = UniqueFileNames.names(nodes.map(\.name), extension: format.rawValue, among: existing)
+        return zip(nodes, names).map { node, name in
+            exportItem(node.id, name, node.frame.width, node.frame.height, format, scale)
         }
     }
 
@@ -57,11 +55,6 @@ public struct LiveExport: ExportPlanning {
         guard let node = page.nodes.node(id) else { throw .unknownID(id) }
         return DesignSVG.document([node], box: node.frame, clip: node.kind == .frame)
     }
-}
-
-/// Whether node `id` or any node enclosing it on `page` is hidden.
-func exportHidden(_ id: String, _ page: DesignPage) -> Bool {
-    ((page.nodes.ancestors(of: id) ?? []) + [id]).contains { page.nodes.node($0)?.isHidden == true }
 }
 
 /// The pixel factor: the scale clamped to 1...3 for PNG, 1 for SVG and PDF (vector, in points).
