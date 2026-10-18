@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-18T21:33Z	heartbeat	#2899 build 39164252078 still queued; scoped 39160167870: J1 pass, failures pre-existing
 2026-10-18T21:56Z	heartbeat	D0-9d merged; D0-7b builder running; run 39169434591 pending
 2026-10-18T22:18Z	heartbeat	#3014 D0-7b lane macOS build 39171232895 queued; run 39169434591 cancelled; full run 39171061138 (holds #2899) pending
+2026-10-18T22:41Z	heartbeat	#3014 build green, waits lane sweep; full run 39171756438 (holds #2899) queued
