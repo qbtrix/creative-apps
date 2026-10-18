@@ -1,25 +1,34 @@
 // OnboardingPages.swift: the welcome window's pages (onboarding packet).
-// OB-3 draws page 1, "apps": the title, the five apps' marks (AppMark's
-// line form, as the home's sidebar rows and New tiles draw them) with their
-// names, the page's body and the one Rendering line. The other pages show
-// their title and body until OB-4 adds the focus chips and the starter row.
+// Page 1, "apps" (OB-3): the title, the five apps' marks (AppMark's line
+// form, as the home's sidebar rows and New tiles draw them) with their
+// names, the page's body and the one Rendering line. Page 2, "focus" (OB-4):
+// the page's focuses as ChoiceChips, none selected until a click, a second
+// click on the same chip clears it. Page 3, "start" (OB-4): the starter row
+// (OnboardingStartPage.swift). The pages read the model and call its methods.
 import SuiteModel
 import SuiteUI
 import SwiftUI
 
 struct OnboardingPageView: View {
-    let page: OnboardingPage
-    let renderingNote: String
+    let model: OnboardingModel
 
     var body: some View {
+        let page = model.page
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
             Text(page.title).font(SuiteFont.title).foregroundStyle(SuiteColor.textPrimary)
             if page.id == "apps" { OnboardingAppsRow() }
             Text(page.body).font(SuiteFont.body).foregroundStyle(SuiteColor.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
-            if page.id == "apps" {
-                Text(renderingNote).font(SuiteFont.caption).foregroundStyle(SuiteColor.textSecondary)
+            switch page.id {
+            case "apps":
+                Text(model.renderingNote).font(SuiteFont.caption).foregroundStyle(SuiteColor.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
+            case "focus":
+                OnboardingFocusChips(model: model, choices: page.choices)
+            case "start":
+                OnboardingStartPage(model: model)
+            default:
+                EmptyView()
             }
         }
     }
@@ -38,5 +47,19 @@ private struct OnboardingAppsRow: View {
                 .accessibilityElement(children: .combine)
             }
         }
+    }
+}
+
+/// "What do you make most?": one chip per focus, each with its own identifier; optional, so Continue stays on.
+private struct OnboardingFocusChips: View {
+    let model: OnboardingModel
+    let choices: [OnboardingFocus]
+
+    var body: some View {
+        let options = choices.map {
+            InspectorOption(id: $0, title: $0.rawValue.capitalized, identifier: OnboardingControls.focus($0))
+        }
+        ChoiceChips(options: options, selected: model.focus) { model.choose($0) }
+            .help("Puts the apps you use most first, here and on the home.")
     }
 }

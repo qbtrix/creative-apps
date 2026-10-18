@@ -1,6 +1,8 @@
 // OnboardingWindow.swift: the "Welcome to AfterGlow" window (onboarding
 // packet OB-3): an OnboardingModel on LauncherServices.shared, the page it
-// shows (OnboardingPages.swift) and Skip and Continue at the bottom, on
+// shows (OnboardingPages.swift) and Skip, Back (after page 1) and Continue
+// at the bottom; on the last page "Start from an empty home" (OB-4) takes
+// Continue's place as the default button. All of it sits on
 // OnboardingLayout's size and 24 pt margin. The scene presents itself at
 // launch when `launchBehavior` says so (OnboardingLaunch, decided once,
 // before the first frame) and Help > Welcome to AfterGlow reopens it.
@@ -40,7 +42,7 @@ struct OnboardingWindow: View {
         let _ = Self.bodyRuns += 1
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            OnboardingPageView(page: model.page, renderingNote: model.renderingNote)
+            OnboardingPageView(model: model)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .accessibilityElement(children: .contain)
                 .accessibilityValue(model.page.id)
@@ -51,10 +53,24 @@ struct OnboardingWindow: View {
                     .help("Close the welcome window. Help > Welcome to AfterGlow opens it again.")
                     .suiteControl(id: OnboardingControls.skip, enabled: true, reason: nil)
                 Spacer()
-                Button("Continue") { model.continue() }
-                    .buttonStyle(.borderedProminent)
-                    .keyboardShortcut(.defaultAction)
-                    .suiteControl(id: OnboardingControls.continue, enabled: true, reason: nil)
+                if model.canGoBack {
+                    Button("Back") { model.back() }
+                        .suiteControl(id: OnboardingControls.back, enabled: true, reason: nil)
+                }
+                if model.isLastPage {
+                    // The start page's way out with nothing opened: finishes with the chosen focus.
+                    Button("Start from an empty home") { Task { await model.finish() } }
+                        .buttonStyle(.borderedProminent)
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(model.launching != nil)
+                        .suiteControl(id: OnboardingControls.startEmpty, enabled: model.launching == nil,
+                                      reason: model.launching == nil ? nil : "A document is opening.")
+                } else {
+                    Button("Continue") { model.continue() }
+                        .buttonStyle(.borderedProminent)
+                        .keyboardShortcut(.defaultAction)
+                        .suiteControl(id: OnboardingControls.continue, enabled: true, reason: nil)
+                }
             }
         }
         .padding(CGFloat(OnboardingLayout.margin))

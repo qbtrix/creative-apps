@@ -84,4 +84,67 @@ private func occurrences(of needle: String, in text: String) -> Int {
         let close = try #require(text.components(separatedBy: ".onDisappear").last)
         #expect(close.contains("model.skip()"), "closing the window doesn't skip")
     }
+
+    // OB-4: pages 2 and 3.
+    static let windowFiles = [
+        "Sources/AfterGlowApp/OnboardingWindow.swift", "Sources/AfterGlowApp/OnboardingPages.swift",
+        "Sources/AfterGlowApp/OnboardingStartPage.swift", "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
+    ]
+
+    /// Every name OnboardingControls declares (`static let x` or `static func x(`), the prefix aside.
+    private func declaredControls() throws -> [String] {
+        let text = try source("Sources/SuiteModel/Onboarding/OnboardingStarter.swift")
+        let body = try #require(text.components(separatedBy: "public enum OnboardingControls").last)
+        return body.split(separator: "\n").compactMap { line -> String? in
+            let words = line.split(whereSeparator: { " (:=`".contains($0) }).map(String.init)
+            guard let at = words.firstIndex(where: { $0 == "let" || $0 == "func" }), words.contains("public"),
+                  words.indices.contains(at + 1) else { return nil }
+            return words[at + 1]
+        }
+    }
+
+    @Test func everyOnboardingControlIsIdentified() throws {
+        let names = try declaredControls()
+        #expect(Set(names) == ["page", "continue", "back", "skip", "startEmpty", "help", "focus", "preset", "sample"])
+        let text = try Self.windowFiles.map(source).joined(separator: "\n")
+        for name in names {
+            let ref = "OnboardingControls.\(name)"
+            #expect(text.contains(ref) || text.contains("OnboardingControls.`\(name)`"), "no control uses \(ref)")
+        }
+        // The buttons publish to suite.controls; the chips carry theirs on each option (PresetGrid).
+        for name in ["page", "continue", "back", "skip", "startEmpty", "sample("] {
+            #expect(text.contains(".suiteControl(id: OnboardingControls.\(name)"), "\(name) isn't a suiteControl")
+        }
+        for name in ["focus($0)", "preset($0)"] {
+            #expect(text.contains("identifier: OnboardingControls.\(name)"), "\(name) chips are unidentified")
+        }
+    }
+
+    @Test func focusAndStartPagesUseChipsAndTitles() throws {
+        let pages = try source("Sources/AfterGlowApp/OnboardingPages.swift")
+        let start = try source("Sources/AfterGlowApp/OnboardingStartPage.swift")
+        let window = try source("Sources/AfterGlowApp/OnboardingWindow.swift")
+        #expect(pages.contains("ChoiceChips(") && start.contains("ChoiceChips("), "a page hand-rolls its chips")
+        #expect(pages.contains("OnboardingStartPage(model:"), "page 3 isn't drawn")
+        #expect(pages.contains("model.choose("), "a focus chip doesn't choose")
+        #expect(start.contains("Button(\"Open sample\")") && start.contains("model.openSample("))
+        #expect(start.contains("model.startNew("), "a preset chip doesn't create")
+        #expect(window.contains("Button(\"Start from an empty home\")") && window.contains("model.finish()"))
+        #expect(window.contains("Button(\"Back\") { model.back() }"))
+    }
+
+    @Test func pagesUseNoLiteralSizes() throws {
+        for path in Self.windowFiles {
+            let text = try source(path)
+            for modifier in ["frame(", "padding(", "spacing: ", "Spacing: "] {
+                for part in text.components(separatedBy: modifier).dropFirst() {
+                    let next = part.drop(while: { $0 == " " || $0 == "." }).first
+                    #expect(!(next?.isNumber ?? false), "\(path): a literal after \(modifier)")
+                    let inner = part.prefix(while: { $0 != ")" })
+                    #expect(!inner.contains(where: \.isNumber) || inner.contains("Spacing") || inner.contains("Size")
+                        || inner.contains("Layout"), "\(path): \(modifier)\(inner)")
+                }
+            }
+        }
+    }
 }
