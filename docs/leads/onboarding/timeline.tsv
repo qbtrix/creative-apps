@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-18T15:55:30Z	merged	OB-8b	#2825; OB-m waits on a dev run holding it
 2026-10-18T16:07:13Z	merged	OB-12	#2824
 2026-10-18T16:08:06Z	review	OB-a,OB-s	critic panel round 1 on run 39140922596
+2026-10-18T16:08:24Z	heartbeat	lead	all PRs merged; OB-s/OB-u wait on run 39142469932 Linux; critic panel OB-a/OB-s running
