@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-18T03:31Z	check	full run 39093416270 Linux in progress; #1493 still open
 2026-10-18T03:58Z	done	Belt-Slice-Done SS-a run 39093416270 (Linux green)
 2026-10-18T03:58Z	mac	Mac-Finish-Wanted SS-a posted on #1495
+2026-10-18T04:19Z	check	#1493 still open; S-5/S-8 wait
