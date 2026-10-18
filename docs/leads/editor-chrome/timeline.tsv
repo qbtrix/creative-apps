@@ -73,3 +73,6 @@ utc	stage	event	ref	note
 2026-10-18T18:39:28Z	fix round 1	merged	#2841 #2853 #2854 #2855 #2856	scoped suiteui 39153976103 (c91b1468) running
 2026-10-18T18:56:46Z	fix round 1	snapshots	39153976103	Model and snapshot tests green; journeys running
 2026-10-18T19:24:50Z	goldens	PRs	#2918 #2919	chrome baselines (transport, status, empty state; tabs) from 39153976103; fast-lane
+2026-10-18T19:44:52Z	triage	run 39153976103 triaged	c91b1468	chrome journeys (transport, status pills, tabs, palette, empty state) pass; #2832 #2834 #2836 closed; gallery fails on unlisted tab segments (#2831)
+2026-10-18T19:44:52Z	goldens	merged	#2918 #2919	chrome baselines on dev
+2026-10-18T19:44:52Z	fix round 2	PR open	#2941	tab segments listed in suite.controls (EC-b); gate PASS

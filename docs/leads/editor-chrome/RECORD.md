@@ -2,9 +2,9 @@
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: 4 review (fix round 1 merged)
+Stage: 4 review (fix round 2 open)
 Base: 2e27b8db (origin/dev)
-Next: journeys of 39153976103 still running at 2026-10-18T19:24:50Z: read them for #2844-#2846 and the CI findings, then Belt-Contact-Sheet on #1344 or round 2. Chrome baselines #2918 (EC-12) and #2919 (EC-13 tabs) in the lane; floating palette has no chrome golden
+Next: #2941 (EC-b round 2, fixes #2831) in the lane; then a scoped suiteui run: if the gallery and chrome journeys pass, Belt-Contact-Sheet on #1344, else the rest become gap issues
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
