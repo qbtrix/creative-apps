@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta-80 plan row E8, its SuiteUI piece (the suiteui font picker); the guard that no app grows its own font menu",
-  "waits_on": "the editor-kernel slice EK-u first, for SuiteGallery.swift (a slice wait); the suite shell-text slice ST-a declares FontFamily and FontFace in SuiteModel (cross-line, soft)",
+  "waits_on": "editor-kernel (EK-u owns SuiteGallery.swift); suite:shell-text (FontFamily and FontFace in SuiteModel)",
   "longest_chain": "5 (FP-1 → FP-3 → FP-4 → FP-6 → FP-7)",
   "journeys": [
     "SuiteJourneyTests.testGalleryOpensEveryPage",
@@ -28,7 +28,6 @@
     "Tests/mutations/SuiteUI.FontPickerRules.json",
     "Tests/mutations/SuiteUI.FontPickerNearest.json",
     "Tests/SuiteUITests/FontPickerLiveTests.swift",
-    "docs/blueprints/suiteui.md",
     "docs/c4/parts/creative-apps/suiteui/suiteui-sources.json",
     "docs/blueprints/suiteui/features/font-picker.wave.json"
   ],
@@ -127,19 +126,12 @@
         ],
         "FP-m": [
           "FP-6"
-        ],
-        "editor-kernel": [
-          "FP-7"
-        ],
-        "canvas-marks": [
-          "FP-7"
         ]
       },
       "ui": true,
       "owned": [
         "Sources/SuiteUI/Gallery/GalleryFontPicker.swift",
         "Tests/SuiteUITests/FontPickerLiveTests.swift",
-        "docs/blueprints/suiteui.md",
         "docs/c4/parts/creative-apps/suiteui/suiteui-sources.json",
         "docs/blueprints/suiteui/features/font-picker.wave.json"
       ]

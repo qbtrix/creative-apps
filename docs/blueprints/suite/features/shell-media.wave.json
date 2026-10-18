@@ -44,7 +44,6 @@
     "Tests/AppSnapshotTests/ShellMediaFootageTests.swift",
     "Sources/SuiteShell/Media/LiveMedia.swift",
     "Tests/AppSnapshotTests/ShellMediaLiveTests.swift",
-    "docs/blueprints/suite.md",
     "docs/blueprints/suite/features/shell-media.wave.json"
   ],
   "slices": [
@@ -174,9 +173,6 @@
         ],
         "SM-r": [
           "SM-9"
-        ],
-        "onboarding": [
-          "SM-10"
         ]
       },
       "ui": false,
@@ -184,7 +180,6 @@
         "Sources/SuiteShell/Media/LiveMedia.swift",
         "Sources/SuiteShell/Live/MediaSlot.swift",
         "Tests/AppSnapshotTests/ShellMediaLiveTests.swift",
-        "docs/blueprints/suite.md",
         "docs/c4/parts/creative-apps/suite-shell/shell-media.json",
         "docs/blueprints/suite/features/shell-media.wave.json"
       ]

@@ -47,7 +47,7 @@ documentation; no task reads another product's code.
 | ST-a | Callers can code against `TextMeasuring`, `FontListing`, `GlyphRasterizing`, the text values and `FakeText` through `SuiteServices.text`, with the Linux and macOS checks written and disabled. | ST-1, ST-2 | MJ-ST0 | shell-media:SM-a (ST-1) |
 | ST-m | `TextSpan` and `PlacedSpan` refuse what can't be drawn (empty or unknown fonts fall back by rule, sizes out of range, positions that don't match the graphemes), and the fake measures by fixed advances so Linux layouts match creative-core's. | ST-3, ST-6 | MJ-ST1 | ST-a |
 | ST-live | On a Mac, spans measure through Core Text with one advance per grapheme (ligatures and emoji included), the font list names every family with its faces, and placed glyphs draw into a frame at their positions and angles. | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a |
-| ST-z | The slot is live, a walk measures, lays out (on the fake layout rule) and draws a two-style line on the Mac, the shared prose names the service, and the feature is built. | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live; shell-media (ST-9: suite.md) |
+| ST-z | The slot is live, a walk measures, lays out (on the fake layout rule) and draws a two-style line on the Mac, and the feature is built. | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live |
 
 `ui_slice: none`: the service has no screen. Its screens are SuiteUI's
 `font-picker` and each app's text tool.
@@ -142,11 +142,10 @@ Double }` to `Values/Text.swift`.
 | ST-6 | – | `FakeText`'s fixed advances and its parity with creative-core's numbers; turns on `FakeTextTests` | `Sources/SuiteModel/Fakes/FakeText.swift`, `Tests/SuiteModelTests/FakeTextTests.swift`, `Tests/mutations/SuiteModel.FakeText.json` | ST-2 | ~120, 3 |
 | ST-7 | – | `GlyphRasterizer` (moved from `HaloTextRasterizer`); turns on `ShellTextDrawTests` | `Sources/SuiteShell/Text/GlyphRasterizer.swift`, `Tests/AppSnapshotTests/ShellTextDrawTests.swift` | ST-4 | ~240, 2 |
 | ST-8 | – | `LiveText` joins the three; the slot goes live; MJ-ST4 | `Sources/SuiteShell/Text/LiveText.swift`, `Sources/SuiteShell/Live/TextSlot.swift`, `Tests/AppSnapshotTests/ShellTextLiveTests.swift` | ST-3, ST-5, ST-6, ST-7 | ~100, 3 |
-| ST-9 | – | Shared prose: suite.md names the text service and the measure-here, lay-out-in-core split; the part's final words; `status: built`; `feature-done` | `docs/blueprints/suite.md`, `docs/c4/parts/creative-apps/suite-shell/shell-text.json`, `docs/blueprints/suite/features/shell-text.wave.json` | ST-8, shell-media | ~50, 3 |
+| ST-9 | – | The part's final words (measure here, lay out in core); `status: built`; `feature-done`. The `suite.md` line lands with the W3 adoption packets | `docs/c4/parts/creative-apps/suite-shell/shell-text.json`, `docs/blueprints/suite/features/shell-text.wave.json` | ST-8 | ~30, 2 |
 
 ST-5 and ST-7 wait on ST-4 because it adds the `shell-text` part that owns
-their folder; they share no file with each other. ST-9 waits on
-`shell-media` because both final tasks edit `suite.md`.
+their folder; they share no file with each other.
 
 ## Build waves
 
@@ -173,7 +172,7 @@ ST-4's part owns, the live service joins them, ST-9 is the prose task.
 | ST-6 | `FakeTextTests`: advances, ascent and descent equal creative-core `FixedAdvances`' (0.5, 0.8, 0.2 em) for three sizes and with tracking | Linux layouts diverge from core's | `SuiteModel.FakeText`: tracking added once per span → `FakeTextTests.trackingPerGrapheme`; ascent 0.75 em → `.matchesCoreNumbers` |
 | ST-7 | `ShellTextDrawTests` (MJ-ST3) | a glyph lands at the wrong place or angle | none: live |
 | ST-8 | `ShellTextLiveTests` (MJ-ST4) | the slot stays fake | none: integrate |
-| ST-9 | `scripts/waves render --dry-run`; suite.md names the service | status not built | – |
+| ST-9 | `scripts/waves render --dry-run`; the part names the split | status not built | – |
 
 ## Quality tests
 

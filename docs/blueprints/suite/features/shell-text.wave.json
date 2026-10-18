@@ -38,7 +38,6 @@
     "Sources/SuiteShell/Text/GlyphRasterizer.swift",
     "Sources/SuiteShell/Text/LiveText.swift",
     "Tests/AppSnapshotTests/ShellTextLiveTests.swift",
-    "docs/blueprints/suite.md",
     "docs/blueprints/suite/features/shell-text.wave.json"
   ],
   "slices": [
@@ -144,9 +143,6 @@
         ],
         "ST-live": [
           "ST-8"
-        ],
-        "shell-media": [
-          "ST-9"
         ]
       },
       "ui": false,
@@ -154,7 +150,6 @@
         "Sources/SuiteShell/Text/LiveText.swift",
         "Sources/SuiteShell/Live/TextSlot.swift",
         "Tests/AppSnapshotTests/ShellTextLiveTests.swift",
-        "docs/blueprints/suite.md",
         "docs/c4/parts/creative-apps/suite-shell/shell-text.json",
         "docs/blueprints/suite/features/shell-text.wave.json"
       ]

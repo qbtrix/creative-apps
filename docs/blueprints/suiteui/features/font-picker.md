@@ -38,7 +38,7 @@ Blueprint sections: suiteui.md 2.2 (components), 7.1 (budgets), 7.5 (feel).
 | FP-a | `FontPicker`'s inputs and outputs and `FontPickerRules` are declared as stubs returning the input order, the gallery's `font-picker` page is in the index on `FakeText`'s families, and the checks are written, disabled. | FP-1, FP-2 | SJ0 | editor-kernel:EK-u (FP-1) |
 | FP-u | On the gallery page, typing filters the list per keystroke, each family shows in its own face, the face menu and size row pick, every control is identified, within the render budget. | FP-3, FP-4 | `testFontPickerPicksAFace` | FP-a |
 | FP-m | Search matches prefix first then substring, ignoring case and diacritics; faces order by weight then italic; switching family keeps the nearest weight and italic. | FP-5, FP-8 | FJ-m | FP-a |
-| FP-z | The page runs on the live families when the gallery is launched with live services, the journey passes on live, and the feature is built. | FP-6, FP-7 | `testFontPickerPicksAFace` | FP-u, FP-m; editor-kernel and canvas-marks (FP-7: they own suiteui.md first) |
+| FP-z | The page runs on the live families when the gallery is launched with live services, the journey passes on live, and the feature is built. | FP-6, FP-7 | `testFontPickerPicksAFace` | FP-u, FP-m |
 
 FP-u waits only on FP-a (rule 18); FP-m never waits on FP-u. FJ-m is the
 rules' unit walk in `SuiteUITests` (macOS only, so FP-m takes a Mac pass).
@@ -100,7 +100,7 @@ public struct FontPicker: View { public init(families: [FontFamily], pick: FontP
 | FP-5 | – | `filtered` and `orderedFaces` bodies; turns on `FontPickerRulesTests` | `Sources/SuiteUI/FontPickerRules.swift`, `Tests/SuiteUITests/FontPickerRulesTests.swift`, `Tests/mutations/SuiteUI.FontPickerRules.json` | FP-2 | ~140, 3 |
 | FP-8 | – | `nearestFace` body; turns on `FontPickerNearestTests` | `Sources/SuiteUI/FontPickerRules+Nearest.swift`, `Tests/SuiteUITests/FontPickerNearestTests.swift`, `Tests/mutations/SuiteUI.FontPickerNearest.json` | FP-2 | ~80, 3 |
 | FP-6 | – | The page reads live families when the gallery has live services; the journey on live | `Sources/SuiteUI/Gallery/GalleryFontPicker.swift`, `Tests/SuiteUITests/FontPickerLiveTests.swift` | FP-4, FP-5, FP-8 | ~80, 2 |
-| FP-7 | – | Shared prose: suiteui.md names the picker; the component's description; `status: built`; `feature-done` | `docs/blueprints/suiteui.md`, `docs/c4/parts/creative-apps/suiteui/suiteui-sources.json`, `docs/blueprints/suiteui/features/font-picker.wave.json` | FP-6 | ~40, 3 |
+| FP-7 | – | The component's description names the picker; `status: built`; `feature-done` (the `suiteui.md` line lands with the W3 adoption packets, so no wait on another feature's blueprint edit) | `docs/c4/parts/creative-apps/suiteui/suiteui-sources.json`, `docs/blueprints/suiteui/features/font-picker.wave.json` | FP-6 | ~20, 2 |
 
 FP-1 declares every rule in the two rules files so FP-5 and FP-8 each fill
 one file and share none.

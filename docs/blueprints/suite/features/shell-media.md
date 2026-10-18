@@ -54,7 +54,7 @@ Blueprint sections: suite.md 2 (targets), 2.3 (components), 5 (contracts).
 | SM-m | `MovieSettings` and `AnimatedImageSettings` refuse what each codec can't write (odd sizes for 4:2:0, alpha without an alpha codec, sizes and rates out of range), and `FrameClock` gives exact presentation times and GIF delays whose rounding never drifts. | SM-3, SM-4 | MJ-SM1 | SM-a |
 | SM-w | On a Mac, a movie writes in each of the four codecs at its size and rate with BT.709 tags and alpha where the codec keeps it, GIF and APNG write with their loop count and delays, and stills encode as PNG, JPEG, HEIC and TIFF; cancel deletes the file. | SM-5, SM-6 | MJ-SM2 | SM-a |
 | SM-r | On a Mac, any still ImageIO reads decodes upright to 8-bit sRGB (optionally shrunk), and a movie's info and its frame at a time read back. | SM-7, SM-8 | MJ-SM3 | SM-a; SM-w (SM-8) |
-| SM-z | The slot is live, a walk writes and reads back every format on the Mac, the shared prose names the service, and the feature is built. | SM-9, SM-10 | MJ-SM4 | SM-m, SM-w, SM-r; onboarding (SM-10: it owns suite.md first) |
+| SM-z | The slot is live, a walk writes and reads back every format on the Mac, and the feature is built. | SM-9, SM-10 | MJ-SM4 | SM-m, SM-w, SM-r |
 
 `ui_slice: none`: no screen of its own. Its screen is SuiteUI's
 `ExportSheet` (S11's export pack and render queue) and each app's import of
@@ -166,7 +166,7 @@ public typealias MediaCoding = MediaEncoding & MediaDecoding
 | SM-7 | – | `StillDecoder` (moved from Photo's `ImageIOCodec` decode); turns on the still cases of `ShellMediaReadTests` | `Sources/SuiteShell/Media/StillDecoder.swift`, `Tests/AppSnapshotTests/ShellMediaReadTests.swift` | SM-2 | ~220, 2 |
 | SM-8 | – | `FootageReader` (`info`, `frame`); its read cases in a second suite file, reading SM-5's H.264 | `Sources/SuiteShell/Media/FootageReader.swift`, `Tests/AppSnapshotTests/ShellMediaFootageTests.swift` | SM-5 | ~220, 2 |
 | SM-9 | – | `LiveMedia` joins the four into one `MediaCoding`; the slot goes live (`mediaIsLive = true`); MJ-SM4 | `Sources/SuiteShell/Media/LiveMedia.swift`, `Sources/SuiteShell/Live/MediaSlot.swift`, `Tests/AppSnapshotTests/ShellMediaLiveTests.swift` | SM-3, SM-4, SM-6, SM-7, SM-8 | ~120, 3 |
-| SM-10 | – | Shared prose: suite.md names the media service and the rule that no app writes its own; the `shell-media` part's final words; `status: built`; `feature-done` | `docs/blueprints/suite.md`, `docs/c4/parts/creative-apps/suite-shell/shell-media.json`, `docs/blueprints/suite/features/shell-media.wave.json` | SM-9 | ~60, 3 |
+| SM-10 | – | The `shell-media` part's final words (the rule that no app writes its own media); `status: built`; `feature-done`. The `suite.md` line lands with the W3 adoption packets, so this task waits on no other feature's blueprint edit | `docs/c4/parts/creative-apps/suite-shell/shell-media.json`, `docs/blueprints/suite/features/shell-media.wave.json` | SM-9 | ~30, 2 |
 
 SM-1 is the one task that edits shared suite files (`SuiteServices.swift`,
 `SuiteServices+Live.swift`); `shell-text`'s ST-1 waits on it for the same
@@ -204,7 +204,7 @@ its tests run on the `macOS` job and the Mac finisher (rule 17), not under
 | SM-7 | `ShellMediaReadTests`: the rotated JPEG decodes upright (its top-left pixel red); HEIC decodes; shrink to 512 keeps aspect | a still decodes sideways | none: live |
 | SM-8 | `ShellMediaFootageTests`: SM-5's H.264 reports 1280 × 720, 24 fps, 48 frames, no alpha, no audio; frame at 1.0 s matches source frame 24 (mean error ≤ 6/255) and not 23 or 25 (theirs differ by > 20/255 by construction) | the wrong frame comes back | none: live |
 | SM-9 | `ShellMediaLiveTests` (MJ-SM4): `SuiteServices.live.media` round-trips every format; `pending` has no `media` | the slot stays fake | none: integrate |
-| SM-10 | `scripts/waves render --dry-run`; suite.md names the service | status not built | – |
+| SM-10 | `scripts/waves render --dry-run`; the part names the service | status not built | – |
 
 ## Quality tests
 
