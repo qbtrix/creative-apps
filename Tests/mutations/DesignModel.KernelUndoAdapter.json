@@ -11,7 +11,7 @@
     "file": "Sources/DesignModel/DesignHistory.swift",
     "find": "historyIsLive && history.kernel.canUndo",
     "replace": "historyIsLive",
-    "tests": "DesignUndoTests|DesignUndoSwapEdgeTests|DesignGestureTests"
+    "tests": "DesignGestureTests|DesignFileTests|DesignTextTests"
   },
   {
     "label": "refusalIsSuccess: canRedo ignores the kernel, so Redo reads enabled with nothing to redo",
