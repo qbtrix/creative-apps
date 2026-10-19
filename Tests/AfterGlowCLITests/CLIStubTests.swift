@@ -31,7 +31,7 @@ struct CLIStubTests {
     }
 
     @Test func everyAppStubRefusesToOpenNamingItsSlice() {
-        for app in Apps.all {
+        for app in Apps.all where app.describeAll().isEmpty { // an app whose slice filled its catalog opens for real
             #expect(throws: CatalogError.notBuilt(id: "open", feature: "adopt-command-catalog AC-\(app.name)")) {
                 try app.session(open: Data(), name: "x")
             }
