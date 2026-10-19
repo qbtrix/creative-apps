@@ -19,7 +19,6 @@ A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector Easing
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingSegmentLabel Easing
 A Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView KeyedRow
 A Sources/HaloApp/HaloLayerList.swift::HaloLayerList LayerList
-A Sources/HaloApp/HaloLayerList.swift::HaloLayerRow LayerList
 A Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet Sheet
 A Sources/HaloApp/HaloRenderedFrameView.swift::HaloRenderedNote Notice
 A Sources/HaloApp/HaloTransport.swift::HaloTransport Transport
@@ -59,7 +58,6 @@ B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector easing
 B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector selected-fill
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView keyed-row
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView pending-commit
-B Sources/HaloApp/HaloLayerList.swift::HaloLayerRow selected-fill
 B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet error-label
 B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet sheet-buttons
 B Sources/HaloApp/HaloTextInspector.swift::HaloTextInspector pending-commit
