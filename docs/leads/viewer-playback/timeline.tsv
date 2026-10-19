@@ -162,3 +162,4 @@ utc	stage	event	ref	note
 2026-10-19T20:50Z	heartbeat	PR #3319 (fix #1705) still waits on lane macOS build run 39307484113, queued since 19:01Z (16 queued repo-wide); no failure to act on
 2026-10-19T21:12Z	heartbeat	PR #3319 (fix #1705) still waits on lane macOS build run 39307484113, queued since 19:01Z (15 queued repo-wide, draining); no failure to act on
 2026-10-19T21:34Z	heartbeat	PR #3319 lane macOS build 39307484113 in_progress (17 queued repo-wide); #1705 open
+2026-10-19T21:55Z	heartbeat	PR #3319 merged 21:38Z, #1705 closed by lane; verifying testLayersDrawAtThePlayhead in scoped halo run 39329203917 (queued)
