@@ -118,7 +118,9 @@ struct MCPCallTests {
 
     @Test(.disabled("waits on MC-8"), arguments: ["/etc/passwd", "/tmp/mcp/../etc/passwd", "/tmp/mcp-evil/a.fake", "/tmp", "relative/../../x.fake"])
     func pathsOutsideTheRootsAreRefused(path: String) {
-        var sessions = MCPSessions(Self.options(), io: FakeIO(files: [path: Self.locked, "/tmp/mcp-evil/a.fake": Self.locked]))
+        var files = ["/tmp/mcp-evil/a.fake": Self.locked]
+        files[path] = Self.locked
+        var sessions = MCPSessions(Self.options(), io: FakeIO(files: files))
         let result = sessions.call(.open(app: "fake"), Self.path(path), now: 0)
         #expect(result.isError && result.text.contains("outside the allowed roots"))
     }
