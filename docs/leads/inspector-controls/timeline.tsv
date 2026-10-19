@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-19T19:54Z	check	suiteui 39292745070 still queued (~2h40m); full 39311818078 pending; no supervisor reply on #1508 yet
 2026-10-19T20:17Z	check	no change: suiteui 39292745070 queued, full 39311818078 pending; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
 2026-10-19T20:38Z	check	no change: suiteui 39292745070 queued, full 39311818078 pending; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T21:01Z	check	scoped suiteui 39292745070 still queued since 17:16; full 39311818078 still pending; no new completed dev run; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
