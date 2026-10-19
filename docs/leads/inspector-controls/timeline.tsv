@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-19T17:01Z	check	39278490377 macOS scripts/ci failed (likely #1625, not ours); not usable for contact sheet; wait for next green run with 452534d
 2026-10-19T17:22Z	check	39278490377 still in_progress; scoped suiteui 39292745070 (8f40531) queued as candidate contact-sheet run
 2026-10-19T17:44Z	check	39292745070 still queued; 39278490377 still in_progress (macOS red); no contact sheet yet
+2026-10-19T18:06Z	check	scoped suiteui 39292745070 still queued; full 39278490377 in progress (macOS red); contact sheet waits
