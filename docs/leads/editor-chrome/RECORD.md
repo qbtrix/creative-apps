@@ -2,9 +2,9 @@
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: waiting on scoped suiteui 39175856233 (dev e0a627c, carries #2992; in progress). Scoped suite 39172233475 ran no journeys or snapshots; full 39173775025 cancelled; full 39176304199 pending
+Stage: waiting on 39175856233 journeys
 Base: 2e27b8db (origin/dev)
-Next: on suiteui artifacts: golden PRs (canvas, sidebar), editor-chrome contact sheet or gaps, #2839 call, list journeys check
+Next: read ui-test results; contact sheet or gap issues; decide #2839
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
