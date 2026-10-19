@@ -168,18 +168,37 @@ public enum CullChange: Hashable, Sendable {
     }
 }
 
-public struct ExportOptions: Hashable, Sendable {
+/// Codable for `ExportPresetFile.last`: decoding clamps, and a missing field takes its default.
+public struct ExportOptions: Hashable, Sendable, Codable {
     public static let defaultLongEdge = 2048
     public static let longEdgeRange = 16...16384
     /// Nil: original size.
     public var longEdge: Int?
     public var quality: Int
     public var folder: String
+    public var format: ExportFormat = .jpeg
+    public var naming: ExportNaming = .original
+    /// Writes an XMP file beside each export (EX-16).
+    public var sidecar: Bool = false
     /// `longEdge` and `quality` clamped to their ranges.
-    public init(longEdge: Int? = defaultLongEdge, quality: Int = 85, folder: String) {
+    public init(longEdge: Int? = defaultLongEdge, quality: Int = 85, folder: String,
+                format: ExportFormat = .jpeg, naming: ExportNaming = .original, sidecar: Bool = false) {
         self.longEdge = longEdge.map { min(max($0, Self.longEdgeRange.lowerBound), Self.longEdgeRange.upperBound) }
         self.quality = min(max(quality, 0), 100)
         self.folder = folder
+        self.format = format; self.naming = naming; self.sidecar = sidecar
+    }
+
+    private enum CodingKeys: String, CodingKey { case longEdge, quality, folder, format, naming, sidecar }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(longEdge: try c.decodeIfPresent(Int.self, forKey: .longEdge),
+                  quality: try c.decodeIfPresent(Int.self, forKey: .quality) ?? 85,
+                  folder: try c.decode(String.self, forKey: .folder),
+                  format: try c.decodeIfPresent(ExportFormat.self, forKey: .format) ?? .jpeg,
+                  naming: try c.decodeIfPresent(ExportNaming.self, forKey: .naming) ?? .original,
+                  sidecar: try c.decodeIfPresent(Bool.self, forKey: .sidecar) ?? false)
     }
 }
 

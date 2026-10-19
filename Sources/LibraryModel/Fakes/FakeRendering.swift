@@ -1,8 +1,8 @@
 // Fakes/FakeRendering.swift: fakes of the loupe, develop, crop and export
 // contracts. The loupe is the photo's gradient lifted one byte level per
 // slider step, curve point off the diagonal and levels field off neutral;
-// develop changes nothing, crop centers the aspect, and export plans by the
-// same naming rule in a few lines. The loupe and exporter obey
+// develop changes nothing, crop centers the aspect, and export plans on the
+// shared naming rule (`ExportNames.unique`). The loupe and exporter obey
 // `-LibraryFakeMode`, so the UI track can show every state.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -118,11 +118,10 @@ public struct FakeExporter: PhotoExporting {
     let mode: FakeMode
     public init(mode: FakeMode = .ok) { self.mode = mode }
     public func plan(_ photos: [PhotoItem], options: ExportOptions, existingNames: Set<String>) -> ExportPlan {
-        var taken = existingNames
-        let items = photos.map { photo -> ExportPlan.Item in
-            var name = photo.name + ".jpg", n = 2
-            while taken.contains(name) { name = photo.name + " \(n).jpg"; n += 1 }
-            taken.insert(name)
+        let stems = photos.enumerated().map { options.naming.stem(for: $1, index: $0, count: photos.count) }
+        let names = ExportNames.unique(stems: stems, format: options.format, sidecar: options.sidecar,
+                                       existing: existingNames)
+        let items = zip(photos, names).map { photo, name -> ExportPlan.Item in
             let size = options.longEdge.map { photo.pixelSize.fitting(longSide: $0) } ?? photo.pixelSize
             return ExportPlan.Item(photoID: photo.id, fileName: name, size: size)
         }
