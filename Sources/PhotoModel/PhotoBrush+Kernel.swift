@@ -29,7 +29,7 @@ extension PhotoStroke {
     /// `ending` the last one, as points no more than a quarter pixel off it,
     /// with the pressure at its start and end. Nil while the window has too
     /// few samples.
-    static func smoothed(_ window: [Sample], ending: Bool) -> (points: [Mask.Point], from: Double, to: Double)? {
+    static func smoothed(_ window: [StrokeSample], ending: Bool) -> (points: [Mask.Point], from: Double, to: Double)? {
         let n = window.count
         let (a, b) = ending ? (n - 2, n - 1) : (n - 3, n - 2)
         guard a >= 0, b < n else { return nil }
@@ -37,7 +37,7 @@ extension PhotoStroke {
         if !ending, n == 3 {
             // The first segment: its start runs on straight, the second sample mirrored through the first.
             let (first, second) = (window[0].point, window[1].point)
-            feed.insert(Sample(point: Point(x: 2 * first.x - second.x, y: 2 * first.y - second.y)), at: 0)
+            feed.insert(StrokeSample(point: Point(x: 2 * first.x - second.x, y: 2 * first.y - second.y)), at: 0)
         }
         var smoother = StrokeSmoother()
         var segment: StrokeSegment?
@@ -76,6 +76,10 @@ extension ToolOptions {
         BrushPreset(id: "fine-detail", name: "Fine Detail", settings: BrushSettings(size: 4, hardness: 80, spacing: 10)),
         BrushPreset(id: "airbrush", name: "Airbrush", settings: BrushSettings(size: 120, hardness: 0, opacity: 30)),
     ]
+
+    /// The preset these settings are, for the Tool options' Preset menu; nil
+    /// once any setting differs from every preset's.
+    public var preset: BrushPreset? { Self.presets.first { $0.settings == settings } }
 
     /// `edit` as the kernel's settings edits, opacity floored at Photo's 1%
     /// (a NaN stays NaN, so the kernel ignores it); none for a color.

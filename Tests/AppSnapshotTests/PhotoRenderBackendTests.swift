@@ -6,11 +6,14 @@
 // tolerance, and with every workspace adjustment on too within the bounds
 // `cases` gives and says why. Switching: a window's renderer
 // following View > Rendering redraws the whole picture on the backend the new
-// choice names, and back. The route a choice gives is plain logic, so it is
-// checked without a GPU too. macOS only.
+// choice names, and back. The resident path (layer tiles kept on the GPU,
+// the picture written into a texture) draws the reference within the
+// standard tolerance and uploads no tile for an adjustment. The route a
+// choice gives is plain logic, so it is checked without a GPU too. macOS only.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal
+import Metal
 import PhotoModel
 import SuiteUI
 import Testing
@@ -80,6 +83,63 @@ import Testing
         print("PHOTO-PARITY \(canvas.width)x\(canvas.height) layered\(adjusted ? " + adjustments" : ""): \(parity); canvas bytes worst \(worst)")
     }
 
+    @Test(.enabled(if: device != nil)) func theResidentPathDrawsTheReferenceIntoATextureAndUploadsOnlyChanges() async throws {
+        var workspace = try Self.document()
+        for layer in workspace.layers { if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) } }
+        let canvas = try #require(workspace.canvas)
+        let metal = try Self.metal()
+        let resident = ResidentSurfaces(backend: metal)
+        let route = PhotoRenderRoute(preferred: metal, resident: resident)
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rgba8Unorm, width: canvas.width, height: canvas.height, mipmapped: false)
+        descriptor.usage = [.shaderRead, .shaderWrite]
+        let texture = try #require(metal.device.makeTexture(descriptor: descriptor))
+        let held = UncheckedTexture(texture: texture)
+        let target = PhotoDisplayTarget { surface, rect in
+            try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
+        }
+        let first = try await PhotoRenderer.update(workspace, since: nil, route: route, target: target)
+        #expect(first.wroteTarget && first.tiles.isEmpty)
+        let uploads = resident.uploads
+        #expect(uploads > 0)
+        var bytes = [UInt8](repeating: 0, count: canvas.width * canvas.height * 4)
+        texture.getBytes(&bytes, bytesPerRow: canvas.width * 4, from: MTLRegionMake2D(0, 0, canvas.width, canvas.height), mipmapLevel: 0)
+        let reference = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+        let worst = zip(bytes, reference).map { abs(Int($0) - Int($1)) }.max() ?? 0
+        #expect(worst <= Int(ParityTolerance.standard.bytes), "texture bytes differ from the reference by up to \(worst)")
+        workspace.adjust(.exposure(0.6))
+        _ = try await PhotoRenderer.update(workspace, since: first.revision, route: route, target: target)
+        #expect(resident.uploads == uploads, "an adjustment uploaded layer tiles")
+        print("PHOTO-RESIDENT-PARITY \(canvas.width)x\(canvas.height): texture bytes worst \(worst), \(uploads) tiles uploaded once")
+    }
+
+    @MainActor @Test(.enabled(if: device != nil)) func theLiveHostShowsTheResidentPictureInThePresentersTexture() async throws {
+        var workspace = try Self.document()
+        for layer in workspace.layers { if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) } }
+        let canvas = try #require(workspace.canvas)
+        // As the app wires it: the host on the system device, the backend on MetalBackend.defaultDevice.
+        let host = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 400, height: 300))
+        let presenter = CanvasTilePresenter()
+        host.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        let renderer = CanvasRenderer()
+        renderer.tiles.attach(host)
+        renderer.use(PhotoRenderRoute(preferred: try Self.metal()))
+        renderer.show(workspace)
+        for _ in 0..<600 where renderer.revision != workspace.revision { try await Task.sleep(for: .milliseconds(20)) }
+        #expect(renderer.revision == workspace.revision, "\(renderer.failure ?? "the picture never landed")")
+        host.layoutSubtreeIfNeeded()
+        // The resident path drew it: layer tiles went up once, and no tile bytes came back to the canvas.
+        #expect((renderer.route.residentTiles?.uploads ?? 0) > 0)
+        #expect(renderer.tiles.images.isEmpty, "tile bytes came back on the resident path")
+        let texture = try #require(presenter.texture)
+        #expect(texture.width == canvas.width && texture.height == canvas.height)
+        var bytes = [UInt8](repeating: 0, count: canvas.width * canvas.height * 4)
+        texture.getBytes(&bytes, bytesPerRow: canvas.width * 4, from: MTLRegionMake2D(0, 0, canvas.width, canvas.height), mipmapLevel: 0)
+        let reference = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+        let worst = zip(bytes, reference).map { abs(Int($0) - Int($1)) }.max() ?? 0
+        #expect(worst <= Int(ParityTolerance.standard.bytes), "the presenter's texture differs from the reference by up to \(worst)")
+    }
+
     @MainActor @Test(.enabled(if: device != nil)) func switchingTheChoiceRedrawsOnTheNewBackend() async throws {
         let preference = FakeRenderingPreference(choice: .cpu)
         let metal = try Self.metal()
@@ -119,4 +179,9 @@ import Testing
         for _ in 0..<2000 where renderer.backend != backend { try await Task.sleep(for: .milliseconds(5)) }
         #expect(renderer.backend == backend && renderer.failure == nil, "\(renderer.failure ?? "")")
     }
+}
+
+/// A texture the display target's closure carries across tasks; Metal textures are thread-safe.
+private struct UncheckedTexture: @unchecked Sendable {
+    let texture: any MTLTexture
 }

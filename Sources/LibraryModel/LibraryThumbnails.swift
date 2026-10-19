@@ -9,22 +9,13 @@
 // its cell size (TH-6f). Linux-safe; LibraryApp runs the requests and hands
 // back results into a LibraryThumbnailCache it keeps apart from the catalog (#2709).
 
-/// A request's token: FNV-1a 64-bit over the develop settings' fields and the
-/// long side. Deterministic across processes (never `hashValue`), so a result
+/// A request's token: FNV-1a 64-bit over the develop settings' `fingerprint`
+/// (every field) and the long side. Deterministic across processes (never `hashValue`), so a result
 /// rendered for settings that have since changed is recognised and dropped.
 public enum ThumbnailToken {
     public static func of(_ develop: DevelopSettings, longSide: Int) -> Int {
         var hash = FNV1a()
-        for slider in DevelopSlider.allCases { hash.add(word: develop.value(slider).bitPattern) }
-        if let crop = develop.crop {
-            hash.add(word: 1)
-            for value in [crop.angle, crop.rect.x, crop.rect.y, crop.rect.width, crop.rect.height] {
-                hash.add(word: value.bitPattern)
-            }
-            for byte in crop.aspect.rawValue.utf8 { hash.add(byte) }
-        } else {
-            hash.add(word: 0)
-        }
+        hash.add(word: develop.fingerprint)  // every field: sliders, curve, levels and crop
         hash.add(word: UInt64(bitPattern: Int64(longSide)))
         return Int(truncatingIfNeeded: hash.value)
     }

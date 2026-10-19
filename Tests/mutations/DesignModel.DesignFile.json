@@ -19,5 +19,19 @@
     "find": "+ \"\\(LiveFiling.fileVersion)). Update",
     "replace": "+ \"\\(LiveFiling.fileVersion + 1)). Update",
     "tests": "DesignModelTests.a(Damaged|Newer)"
+  },
+  {
+    "label": "the open alert folds the reason back into its title",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "DesignFileProblem(title: \"\\(file) can't be opened.\", message: reason)",
+    "replace": "DesignFileProblem(title: \"\\(file) can't be opened. \\(reason)\", message: \"\")",
+    "tests": "DesignModelTests.aFileProblem"
+  },
+  {
+    "label": "the save alert's title says opened",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "DesignFileProblem(title: \"\\(file) can't be saved.\", message: reason)",
+    "replace": "DesignFileProblem(title: \"\\(file) can't be opened.\", message: reason)",
+    "tests": "DesignModelTests.aFileProblem"
   }
 ]

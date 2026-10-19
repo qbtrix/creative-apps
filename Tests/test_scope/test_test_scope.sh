@@ -33,25 +33,29 @@ photo_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Photo[A-Za-z]
 suiteui_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\()'
 
 # Changed paths to tests.
-check "a Design Model file runs DesignModelTests only" \
-  '^(DesignModelTests)\.;' "$(changed Sources/DesignModel/DesignNode.swift)"
+check "a Design Model file runs DesignModelTests and the CLI's tests" \
+  '^(AfterGlowCLITests|DesignModelTests)\.;' "$(changed Sources/DesignModel/DesignNode.swift)"
 check "a Design App file runs Design's snapshot suites only" \
   ";$design_snaps" "$(changed Sources/DesignApp/DesignWindow.swift)"
 check "a Model file, another app's view and a doc" \
-  "^(DesignModelTests)\\.;$photo_snaps" "$(changed Sources/DesignModel/A.swift Sources/PhotoApp/B.swift docs/engineering.md)"
+  "^(AfterGlowCLITests|DesignModelTests)\\.;$photo_snaps" "$(changed Sources/DesignModel/A.swift Sources/PhotoApp/B.swift docs/engineering.md)"
 check "SuiteModel runs every Model's tests" \
   '^(DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteModelTests)\.;' \
   "$(changed Sources/SuiteModel/Values/SuiteApp.swift)"
 check "SuiteKernel runs SuiteKernelTests and every Model's tests" \
-  '^(DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
+  '^(AfterGlowCLITests|DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
   "$(changed Sources/SuiteKernel/Geometry.swift)"
 check "a kernel module file runs the same" \
-  '^(DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
+  '^(AfterGlowCLITests|DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
   "$(changed Sources/SuiteKernel/History/History.swift)"
 check "SuiteUI runs SuiteUITests and its snapshot suites" \
   "^(SuiteUITests)\\.;$suiteui_snaps" "$(changed Sources/SuiteUI/Tokens.swift)"
 check "AfterGlow and SuiteShell run the suite scope" \
-  '^(SuiteKernelTests|SuiteModelTests)\.;' "$(changed Sources/AfterGlowApp/HomeWindow.swift Sources/SuiteShell/SuiteCommands.swift)"
+  '^(AfterGlowCLITests|SuiteKernelTests|SuiteModelTests)\.;' "$(changed Sources/AfterGlowApp/HomeWindow.swift Sources/SuiteShell/SuiteCommands.swift)"
+check "the CLI and its entry run AfterGlowCLITests only" '^(AfterGlowCLITests)\.;' \
+  "$(changed Sources/AfterGlowCLI/main.swift Sources/AfterGlowCLICore/CLI.swift)"
+check "a CLI test file or a real job runs AfterGlowCLITests only" '^(AfterGlowCLITests)\.;' \
+  "$(changed Tests/AfterGlowCLITests/CLIShapeTests.swift Tests/RealJobs/fake/grow/grow.jobs.json)"
 check "a Model test file runs its target" '^(HaloModelTests)\.;' "$(changed Tests/HaloModelTests/HaloEditTests.swift)"
 check "a kernel test file runs SuiteKernelTests only" '^(SuiteKernelTests)\.;' \
   "$(changed Tests/SuiteKernelTests/KernelShapeTests.swift)"
@@ -68,11 +72,11 @@ check "docs, scripts, journeys, CI and the perf list run no tests" ';' \
 check "Package.swift runs everything" all "$(changed Sources/DesignModel/A.swift Package.swift)"
 check "a Sources folder the table doesn't know runs everything" all "$(changed Sources/NewModel/A.swift)"
 check "--linux drops what Linux doesn't build" \
-  '^(DesignModelTests)\.;' "$(changed --linux Sources/DesignModel/A.swift Sources/DesignApp/B.swift Sources/SuiteUI/C.swift)"
+  '^(AfterGlowCLITests|DesignModelTests)\.;' "$(changed --linux Sources/DesignModel/A.swift Sources/DesignApp/B.swift Sources/SuiteUI/C.swift)"
 
 # Apps to tests, as CI's scoped runs use them.
 check "app photo" "^(PhotoModelTests)\\.;$photo_snaps" "$(python3 "$ts" app photo | paste -sd';' -)"
-check "app suite" '^(SuiteKernelTests|SuiteModelTests)\.;' "$(python3 "$ts" app suite | paste -sd';' -)"
+check "app suite" '^(AfterGlowCLITests|SuiteKernelTests|SuiteModelTests)\.;' "$(python3 "$ts" app suite | paste -sd';' -)"
 check "app suiteui" "^(AppAuditTests|SuiteKernelTests|SuiteUITests)\\.;$suiteui_snaps" "$(python3 "$ts" app suiteui | paste -sd';' -)"
 python3 "$ts" app nope >/dev/null 2>&1
 check "an unknown app is refused" 1 "$?"

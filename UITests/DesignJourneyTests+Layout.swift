@@ -1,7 +1,8 @@
 // DesignJourneyTests+Layout.swift: Design's window at every width (design-window
 // DW-c, D0-7b; blueprint design.md 7.3). `testLayoutAtWidths` launches on
 // `-DesignFixture cards` with `-DesignWindowSize <w>x<h>` (the content size,
-// which the window floors at its own minimum), selects A from Layers, shoots
+// which the window floors at its own minimum), opens the Desktop frame's row
+// (a document opens with its rows collapsed, #3044), selects A from Layers, shoots
 // "layout-<w>x<h>" and asserts 7.3's six rules from element frames, to 0.5 pt:
 // 1. sidebar, canvas and panel meet with no gap or overlap (a split view
 //    divider between two columns is where they meet), the panel is 280 pt
@@ -37,6 +38,8 @@ final class DesignLayoutJourneyTests: XCTestCase {
                       "design.bar.redo", "design.bar.zoom-out", "design.bar.fit", "design.bar.zoom-in"]
     static let fields = ["design.inspector.y", "design.inspector.width", "design.inspector.height"]
     static let chips = ["design.status.selection", "design.status.save", "design.status.tool"]
+    /// The `cards` fixture's Desktop frame, the parent of every layer the rules click.
+    static let desktopRow = "design.layer.node-1"
 
     @MainActor func testLayoutAtWidths() throws {
         var widths: [String: Double] = [:]
@@ -74,11 +77,11 @@ final class DesignLayoutJourneyTests: XCTestCase {
         XCTAssertEqual(hint.frame.minX, column, accuracy: Self.tolerance, "the locked hint at \(label) isn't in the value column")
     }
 
-    /// Clicks the Layers row of `node`, as a person picks a layer.
+    /// Clicks the Layers row of `node`, as a person picks a layer: Desktop's row opened first, as
+    /// `cards` opens with every row collapsed and A and Locked sit inside it (#3044).
     @MainActor private func select(_ node: String, in design: Journey) {
-        let row = design.element("suite.sidebar").descendants(matching: .any)["design.layer.\(node)"]
-        XCTAssert(row.waitForExistence(timeout: 5), "no Layers row design.layer.\(node)")
-        row.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        design.expandDesignLayer(Self.desktopRow)
+        design.clickDesignLayer("design.layer.\(node)")
         XCTAssert(design.element("design.inspector.x").waitForExistence(timeout: 5), "selecting \(node) showed no Frame fields")
     }
 
