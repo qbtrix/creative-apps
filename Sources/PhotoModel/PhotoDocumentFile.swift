@@ -141,9 +141,8 @@ extension PhotoWorkspace {
     /// workspace is unchanged.
     public mutating func openDocument(_ document: PhotoDocumentSnapshot, name: String) throws {
         let stack = try Self.stack(of: document)
-        let base = try stack.pixels.values.first
-            ?? Self.tiles(width: document.canvas.width, height: document.canvas.height, what: "the canvas")
-        start(with: base, name: name)
+        // The canvas is the document's, not the size of whichever layer a dictionary yields first.
+        start(with: try Self.tiles(width: document.canvas.width, height: document.canvas.height, what: "the canvas"), name: name)
         layers = stack.layers
         pixels = stack.pixels
         masks = stack.masks

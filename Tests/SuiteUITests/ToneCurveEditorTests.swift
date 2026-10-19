@@ -117,6 +117,26 @@ private func view(_ p: CGPoint) -> CGPoint { CurveEditor.viewPoint(p, in: plot, 
     #expect(ended && gesture.run.ends == 1)
 }
 
+/// A drag cancelled outside the window has no `onEnded`; the view's reset releases it, and that
+/// release and the late `onEnded` together end the run once, so the next click picks afresh (#2930).
+@Test func aCancelledDragEndsOnceAndTheNextPressPicksAgain() throws {
+    var gesture = ToneCurveGesture()
+    _ = gesture.pressed(at: view(s[2]), points: s, in: plot)
+    let outStep = gesture.dragged(
+        to: CGPoint(x: view(s[2]).x, y: well.height + 200), by: CGSize(width: 0, height: 200), in: plot, well: well)
+    let out = try #require(outStep)
+    #expect(out.count == 3)
+    let reset = gesture.released()
+    let late = gesture.released()
+    #expect(reset && !late && gesture.run.ends == 1)
+    let picked = gesture.pressed(at: view(out[1]), points: out, in: plot)
+    #expect(picked == nil && gesture.drag?.index == 1)
+    let clickReleased = gesture.released()
+    #expect(!clickReleased)
+    let keyed = gesture.keyed()
+    #expect(keyed && ToneCurveEditor.removed(1, from: out)?.count == 2)
+}
+
 @Test func aDragPastTheMarginRemovesAMiddlePointButNeverAnEnd() throws {
     var gesture = ToneCurveGesture()
     _ = gesture.pressed(at: view(s[2]), points: s, in: plot)

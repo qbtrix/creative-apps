@@ -4,10 +4,9 @@
 // visible controls: a clicked text box hugs "A longer line of text" (W over
 // 120, H at least 16); Title at size 48 refits (H at least 48, W grown); a
 // box dragged 150 pt wide keeps its width and wraps two sentences onto more
-// than one line. Written before its code (lead.md, contract rule 13): CB-4
-// writes it skipped, and CB-6 turns it on once the window commits an open edit
-// with its measured extent. `-DesignFixture` arrives with design-window; the
-// skip covers that too. Frame fields are SuiteUI ScrubFields, read by their
+// than one line. Written before its code (lead.md, contract rule 13) by CB-4;
+// CB-6 turned it on: the window commits an open edit with its measured extent
+// before the click acts. Frame fields are SuiteUI ScrubFields, read by their
 // names ("Width", "Height") and their spoken values ("150 points").
 import XCTest
 
@@ -26,7 +25,6 @@ final class DesignTextBoxJourneyTests: XCTestCase {
 
     /// CB-b: a clicked box grows with its text, a size change refits it, a dragged box wraps.
     @MainActor func testTextBoxFitsItsText() throws {
-        throw XCTSkip("waits on CB-6")
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let canvas = design.element("suite.canvas")
