@@ -7,7 +7,7 @@
 // Again, leaving the first file's bytes alone; Try Again goes back to editing
 // with SVG still chosen and Cancel closes the sheet. A read-only folder named
 // Locked fails with "Flare can't write to Locked." and stays empty. Cancel
-// during a PNG sequence run closes the sheet and leaves no PNG. One shot per
+// during a 2x PNG sequence run closes the sheet and leaves no PNG. One shot per
 // step, `flare-export-errors-<step>`.
 import XCTest
 
@@ -50,13 +50,17 @@ final class FlareExportErrorJourneys: XCTestCase {
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: locked.path), [], "Locked isn't empty")
         flare.shot("export-errors-3-locked")
 
-        // 4. A fresh folder; PNG sequence; Export; Cancel within the run: the sheet goes and no PNG is left.
+        // 4. A fresh folder; PNG sequence; 2x; Export; Cancel within the run: the sheet goes and no PNG is left.
         let fresh = try folder("Fresh")
         flare = launch(on: fresh)
         let export = openSheet(flare)
         let chip = flare.element("flare.export.format.pngSequence")
         XCTAssert(chip.waitForExistence(timeout: 5), "the sheet has no PNG sequence chip")
         chip.click()
+        let double = flare.element("flare.export.scale.2x")
+        XCTAssert(double.waitForExistence(timeout: 5), "the sheet has no 2x chip (flare.export.scale.2x)")
+        double.click()
+        XCTAssert(Self.waitFor { double.isSelected }, "2x didn't take")
         export.click()
         let cancel = flare.element("flare.export.cancel")
         XCTAssert(flare.element("flare.export.progress").waitForExistence(timeout: 5), "the run showed no progress")
