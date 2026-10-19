@@ -67,3 +67,4 @@ utc	feature	event	ref	note
 2026-10-19T09:35:48Z	FH-b	heartbeat	#3199 open, lane macOS build 39226438306 still queued (macOS runners backed up)
 2026-10-19T09:54:49Z	FH-b	heartbeat	#3199 open, lane macOS build 39226438306 queued ~1h (dev CI runs queue and cancel too)
 2026-10-19T10:14:07Z	FH-b	heartbeat	#3199 open, lane macOS build 39226438306 still queued (~77 min)
+2026-10-19T10:35:51Z	heartbeat	#3199 macOS build 39226438306 still queued; DE-u parked (#1552, #1500 open, no supervisor reply)
