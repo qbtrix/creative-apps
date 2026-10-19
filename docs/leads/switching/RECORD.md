@@ -111,3 +111,11 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 - Run 39292755765 (dev 8f405311) finished at 21:09Z: `macOS (suite)` green, `macOS journeys (suite)` red (report-only). Switching's journeys: SJ3 `testSwitchKeepsEachAppAsLeft` ran its launcher steps (switch-sj3-menu, switch-sj3-home) and skipped the adoption steps; `testOpenRecentBringsAppForward` skipped at its fixture guard; `testCrashIsolation` failed at Switch.swift:98: `XCUIApplication(bundleIdentifier:)` raised "The app representing org.creativesuite.flare could not be found" right after ⌃⌘1, though Flare had started (teardown terminated it). Launch Services hadn't registered the id of an app the launcher had just started by path. The run has no `snapshots` artifact, only ui-screens, xcresult, app-builds and size-report. Audit (afterglow): contrast 0, disabled-dim 0, identifier 10, offscreen 0, overlap 0, unnamed 0. The 10 identifier hits are on the home's filter chips and search field (home's feature, not switching's).
 - Fix: the switch journeys wait for the started process and attach by its running bundle's URL (`switched(to:)`), the same `XCUIApplication(url:)` init the harness uses for the launcher. It ships as a fix PR from this branch. Critic round 1 runs on the next scoped `suite` run that contains it.
 - Critic round 1 (workflow wf_0001f667-4c1) started at 21:18Z on run 39292755765's screens, lenses clarity, journey, design, layout and controls.
+- Round 1 verdict: not clean. 11 confirmed findings, 2 refuted, filed as #3352 to #3358.
+- Round 1 fix PR, from this branch:
+  - #3352: the home sets its switcher through a new `.suiteSwitcher(current:)` view modifier in SuiteShell, applied in HomeWindow. AfterGlowApp.swift is frozen.
+  - #3354: SJ3 sends ⌃⌘0 to Design, and skips on adoption while Design has no Switch To menu.
+  - #3355: testCrashIsolation checks Design's window and the strip drop between the SIGKILL and the relaunch.
+  - The attach-by-URL fix for line 98.
+- #3353 is declined. Packet switching.md line 130 specifies the current app's item as "Show <App> Window", the launcher included, so the finding conflicts with the packet.
+- #3356 and #3357 change SuiteWindow and AppSwitcher (SuiteUI, MAC_GATED). #3358 is the home's New row, not switching. They are next, in fix round 2.
