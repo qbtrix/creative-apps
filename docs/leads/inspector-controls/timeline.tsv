@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-19T18:28Z	check	full 39278490377 cancelled 18:10; full 39294573974 (8f40531) cancelled; scoped suiteui 39292745070 still queued; contact sheet waits
 2026-10-19T18:50Z	check	scoped suiteui 39292745070 still queued; halo 39292739235 failed (not ours), photo/design green; no green suiteui/full run yet
 2026-10-19T19:11Z	check	scoped suiteui 39292745070 still queued (since 17:16); no green suiteui/full run on dev
+2026-10-19T19:33Z	check	suiteui 39292745070 still queued (2h15m); full runs cancelled; flagged supervisor on #1508 (comment 6275579596)
