@@ -63,13 +63,8 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    let members = ["crop"]
-    #expect(Set(services.unavailable.keys) == Set(members))
-    #expect(services.unavailable.values.allSatisfy { !$0.isEmpty })
-    let reasons: [String?] = [
-        LiveCrop.unavailable,
-    ]
-    #expect(reasons.allSatisfy { ($0?.isEmpty ?? true) == false })
+    #expect(services.unavailable.isEmpty)
+    #expect(LiveCrop.unavailable == nil)
     #expect(LiveImporter.unavailable == nil)
     #expect(LiveThumbnails.unavailable == nil)
     #expect(LiveCulling.unavailable == nil)
@@ -126,7 +121,7 @@ private func liveServices() -> LibraryServices {
     #expect(services.unavailable["coding"] == nil && services.unavailable["loupe"] == nil)
     #expect(services.unavailable["thumbnails"] == nil)
     #expect(services.unavailable["develop"] == nil && services.unavailable["exporter"] == nil)
-    #expect(services.unavailable.count == 1)
+    #expect(services.unavailable.isEmpty)
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })

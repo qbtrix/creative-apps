@@ -1,0 +1,10 @@
+{
+  "id": "shell-ai-access",
+  "name": "AI access window and approval",
+  "description": "Window > AI Access… and AIAccessCenter, which runs the approval flow on AppKit: the -AIAccessDemoRequest launch hook, the approval sheet begun on the main window (NSWindow.beginSheet), the Controlled by chip as a titlebar accessory, and the window listing and revoking grants. It runs on FakeAIAccess until afterglow-mcp MC-10's live channel replaces it; MC-12 built it and MC-13 holds its render budget.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/AIAccessCommands.swift"
+  ],
+  "order": 80
+}

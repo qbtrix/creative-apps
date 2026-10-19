@@ -1,6 +1,7 @@
 // ProjectHistoryContractTests.swift: what every ProjectHistory promises
 // (#208, HF-1), run over the fake and the live type in `projectHistories`.
-// Both call HaloHistoryRules, so they must agree. Runs on Linux and macOS.
+// Both call the HaloHistory adapter on the kernel History, so they must
+// agree. Runs on Linux and macOS.
 import HaloModel
 import Testing
 

@@ -1,0 +1,5 @@
+[
+  {"label": "pasteHelpReadsPasteboard: Paste's availability reads editHelp without the pasteboard", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "$0.editHelp(.paste, pasteboard: anyPasteboard)", "replace": "$0.editHelp(.paste)", "tests": "FlareCommandCatalogTests"},
+  {"label": "availabilityMatchesHelp: Go to Start takes Go to End's transport help", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "{ $0.transportHelp(back: true, step: false) }", "replace": "{ $0.transportHelp(back: false, step: false) }", "tests": "FlareCommandCatalogTests"},
+  {"label": "conformance: Duplicate is declared a view command", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "\"Duplicates the selected layers.\", .edit,", "replace": "\"Duplicates the selected layers.\", .view,", "tests": "FlareCommandCatalogTests"}
+]

@@ -4,7 +4,7 @@
 // with `-FlareExportTo` on this test's own temp folder, so Export writes with
 // no panel. The toolbar's Export… opens SuiteUI's export sheet, Export writes
 // scene-1.svg (an `<svg>` root 550 by 400), Done closes it; File > Export…
-// opens it again, the Format menu picks Lottie and Export writes scene-1.json
+// opens it again, the Lottie chip picks Lottie and Export writes scene-1.json
 // (`fr` 24, `w` 550, `h` 400, `op` 48). The sheet's suite.export.* ids carry
 // these steps. The warnings, the flare.export.* ids, the From, To and Step
 // rows and the 7-file PNG run wait on the sheet's options slot (#1989), so the
@@ -41,18 +41,15 @@ final class FlareExportJourneys: XCTestCase {
         XCTAssertEqual(root.attributes["height"], "400")
         flare.shot("export-2-svg")
 
-        // 3. Done; File > Export…; the Format menu's Lottie.
+        // 3. Done; File > Export…; the Lottie chip.
         close(flare)
         flare.app.menuBars.firstMatch.menuBarItems["File"].click()
         let item = flare.app.menuBars.firstMatch.menuItems["Export…"]
         XCTAssert(item.waitForExistence(timeout: 5) && item.isEnabled, "File > Export… is missing or disabled")
         item.click()
         let again = expectSheet(flare)
-        let format = flare.app.sheets.firstMatch.menuButtons.firstMatch
-        XCTAssert(format.waitForExistence(timeout: 5), "the sheet has no Format menu")
-        format.click()
-        let lottie = flare.app.menuItems["Lottie"].firstMatch
-        XCTAssert(lottie.waitForExistence(timeout: 5), "the Format menu offers no Lottie")
+        let lottie = flare.element("suite.export.format.lottie")
+        XCTAssert(lottie.waitForExistence(timeout: 5), "the sheet has no Lottie chip (suite.export.format.lottie)")
         lottie.click()
         flare.shot("export-3-lottie")
 
@@ -85,8 +82,8 @@ final class FlareExportJourneys: XCTestCase {
 
     /// Done once the run finished; the sheet goes.
     @MainActor private func close(_ flare: Journey) {
-        let done = flare.element("suite.export.close")
-        XCTAssert(Self.waitFor { done.exists && done.label == "Done" }, "the run never finished (no Done)")
+        let done = flare.element("suite.export.dismiss")
+        XCTAssert(Self.waitFor { done.exists }, "the run never finished (no Done)")
         done.click()
         XCTAssert(flare.app.sheets.firstMatch.waitForNonExistence(timeout: 5), "Done left the sheet open")
     }

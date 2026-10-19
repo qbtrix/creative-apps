@@ -21,9 +21,9 @@ You never start it yourself for routine work. So:
   that already builds. A UI mistake shows up in the next feature CI as a
   "dev is red" issue whose culprit range names your PR.
 - The `macOS` job uploads the `snapshots` artifact (PNGs written by
-  `Tests/AppSnapshotTests`) and clicks through every app
-  (`UITests/<X>JourneyTests.swift`), uploading whole-window screenshots as
-  `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`,
+  `Tests/AppSnapshotTests`), and the report-only `macOS journeys` job clicks
+  through every app (`UITests/<X>JourneyTests.swift`), uploading
+  whole-window screenshots as `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`,
   then `gh run download <id> -n snapshots` or `-n ui-screens`. A user-facing
   feature adds or extends its app's journey test (docs/engineering.md,
   Human-like UI tests).
@@ -93,8 +93,8 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
    `SuiteModel` every Model's tests, and `Package.swift` all of them
    (`scripts/test-scope` holds the table). Plain `scripts/ci` is the full
    gate CI runs. Neither runs the perf and timing tests in
-   `Tests/perf-suites.txt`: the `macOS` job's Perf step reports those and
-   never fails. On Linux it covers the Model targets and the lints; the
+   `Tests/perf-suites.txt`: they run nightly on the captain's Mac
+   (perf-nightly), never in CI. On Linux it covers the Model targets and the lints; the
    macOS job on `dev` catches the rest.
    It is your whole check: no CI runs on your PR, and you never start CI
    yourself for routine work (no `gh workflow run`).
@@ -314,9 +314,15 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   macOS. Linux `scripts/ci` never builds the apps, and it misses macOS-only
   breaks in the targets it does build (#1210: an `ObjCBool` error in
   PhotoModel). The lane dispatches a build-only CI run (`ci.yml` with
-  `build_only`: every target with its tests, then the journey bundles;
-  nothing runs) once per head, comments its URL, and merges when it
-  succeeds. A failed build waits for your next push. A PR with no code
+  `build_only`; nothing runs) once per head, comments its URL, and merges
+  when it succeeds. It is scoped to the apps your code touches
+  (`scripts/test-scope build-apps`, passed as `app`): a Photo-only PR builds
+  PhotoModelTests, the PhotoApp product, AppSnapshotTests and the Photo
+  journey bundle. Shared code (SuiteUI, SuiteKernel, SuiteModel, the shell,
+  the CLI, shared snapshot or journey files, `Package.swift`, `project.yml`)
+  or anything it can't place builds every target and journey bundle, as does
+  a branch whose `ci.yml` predates the `app` input. A newer head's build
+  cancels the older one's. A failed build waits for your next push. A PR with no code
   (docs, data, packets) takes the lane on the Linux check alone.
 - Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
   the snapshots after the next feature CI and files fixes as new issues.
@@ -367,11 +373,14 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - A PR that breaks a hard rule (author, size outside the docs tier, protected
   path, a looser app audit) loses the label with a comment saying why and
   waits for review.
-- Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`
+- Full CI (`Linux`; `macOS`, scripts/ci with the snapshots; and the
+  report-only `macOS journeys`) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
   dispatches it, when the lane merges a PR labelled `feature-done` or one
   touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, after
-  every 10 merged PRs (at most once per lane run), and once a day. Green: `main` fast-forwards to that exact SHA. Red: one issue titled
+  every 10 merged PRs (at most once per lane run), and once a day. Green
+  (`Linux` and `macOS`): `main` fast-forwards to that exact SHA. A red journey
+  files a `finding` issue and holds nothing. Red: one issue titled
   "dev is red" (label `dev-red`) names the failing jobs and the culprit range
   `main..<sha>`. SwiftUI breakage can sit on `dev` until that run, so the range
   can span several PRs. The lane keeps merging while the issue is open; the
@@ -383,8 +392,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - A scoped run proves one app: `gh workflow run ci.yml --ref dev -f
   app=<flare|design|photo|library|halo|suite|suiteui>`. It still builds every
   target, app bundle and journey bundle, then runs only that app's Model
-  tests, snapshot tests and journeys (titled `scoped: <app>`, job `macOS
-  (<app>)`; about 10 min for Design, longer for apps with more journeys). It skips the Linux job and never promotes `main`,
+  tests, snapshot tests and journeys (titled `scoped: <app>`, jobs `macOS
+  (<app>)` and `macOS journeys (<app>)`; about 10 min for Design, longer for
+  apps with more journeys). It skips the Linux job and never promotes `main`,
   opens `dev-red` or lowers the audit baseline. The supervisor's
   verify-dispatch.sh starts one per app after that app's merges.
 - A journey that keeps failing on `dev` for a known reason can be quarantined,

@@ -9,9 +9,11 @@
 // so it is tested without a window. The list mutates nothing: every gesture
 // goes out through one `onAction` closure. Rows are lazy, keyed by the
 // layer's id, and `.equatable()` on their plain values (swiftui-rules 2, 5).
-// The only view state is the drop target lit while a drag hovers it, written
-// on enter and exit, never per sample. Each row's controls carry
-// `suite.layers.<id>.<part>`; the row itself is `suite.layers.row.<id>`.
+// The only view state is the drop target lit while a drag hovers it and the
+// row under the pointer (fill plus outline), each written on enter and exit,
+// never per sample. A flat list (`nests: false`) drops the disclosure column.
+// Each row's controls carry `suite.layers.<id>.<part>`; the row itself is
+// `suite.layers.row.<id>`.
 // To stand in for a sidebar layers panel (#2811) it can take a selected id
 // and `onSelect` (a click on the row; the row draws the selected tint and
 // reads selected), `onRename` (SidebarRow's double-click, Return and
@@ -266,7 +268,17 @@ struct LayerTreeRow: View, Equatable {
     let onSelect: (@MainActor (String) -> Void)?
     let onRename: (@MainActor (String) -> String?)?
     @State var field: SidebarRenameField
+    @State private var hovering = false
     @FocusState var editing: Bool
+    @Environment(\.suiteReduceMotion) private var reduceMotion
+
+    private var look: LayerRowLook { .resolve(selected: selected, lit: lit, hovering: hovering) }
+
+    /// The selected tint wins over hover; a drop target over a selected row keeps the tint.
+    private var fill: Color {
+        if selected { return SuiteColor.selectedTint }
+        return look == .rest ? Color.clear : SuiteColor.rowHover
+    }
 
     init(
         row: LayerRow, lit: Bool, selected: Bool, naming: LayerTreeNaming, options: LayerTreeOptions,
@@ -298,8 +310,10 @@ struct LayerTreeRow: View, Equatable {
 
     private var content: some View {
         HStack(spacing: SuiteSpacing.xs) {
-            Color.clear.frame(width: CGFloat(row.depth) * SuiteSpacing.l, height: SuiteSpacing.xxs)
-            disclosure
+            if options.nests {
+                Color.clear.frame(width: CGFloat(row.depth) * SuiteSpacing.l, height: SuiteSpacing.xxs)
+                disclosure
+            }
             leading
             title
             Spacer(minLength: SuiteSpacing.s)
@@ -310,17 +324,28 @@ struct LayerTreeRow: View, Equatable {
                 toggle(naming.lock(row)) { onAction(.toggleLocked(row.id)) }
             }
         }
+        // One pointer-sized height, so a caption under the name doesn't make its row jump.
+        .frame(minHeight: SuiteSize.studioRow)
         .padding(.horizontal, SuiteSpacing.s)
-        .background(selected ? SuiteColor.selectedTint : lit ? SuiteColor.rowHover : Color.clear,
-                    in: RoundedRectangle(cornerRadius: SuiteRadius.row))
+        .background(fill, in: RoundedRectangle(cornerRadius: SuiteRadius.row))
         .overlay {
-            if lit {
+            switch look {
+            case .dropTarget:
                 RoundedRectangle(cornerRadius: SuiteRadius.row)
                     .strokeBorder(SuiteColor.accent, lineWidth: SuiteSize.focusRing)
                     .allowsHitTesting(false)
+            case .hover:
+                RoundedRectangle(cornerRadius: SuiteRadius.row)
+                    .strokeBorder(SuiteColor.outline, lineWidth: 1)
+                    .allowsHitTesting(false)
+            case .rest, .selected:
+                EmptyView()
             }
         }
         .contentShape(.rect)
+        // Written on enter and exit only, never per pointer sample (swiftui-rules 1).
+        .onHover { hovering = $0 }
+        .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: look)
         .onTapGesture { onSelect?(row.id) }
         .focusable(onRename != nil)
         .onKeyPress(.return) { requestRename() }

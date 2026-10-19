@@ -1,11 +1,11 @@
 # Tests/perf-suites.txt: the perf and timing tests, kept out of the merge gate.
 # A test belongs here when it asserts a wall-clock or allocation budget, so a
 # busy machine can fail it while the code is fine. scripts/ci (Linux and
-# macOS, full and --changed) and CI's scoped runs skip exactly these; the
-# macOS job's Perf step runs exactly these, one at a time, on every full run
-# (a scoped run: its app's), and reports what they measured. That step never
-# fails the run: a test that missed a bound by more than 3x gets a warning
-# (FLAG in scripts/test-scope).
+# macOS, full and --changed) and CI's scoped runs skip exactly these; they
+# run nightly on the captain's Mac (perf-nightly), one at a time
+# (`scripts/test-scope perf [APP]` gives the filter), and never in CI.
+# `scripts/test-scope perf-report` turns that run's log into a report and
+# warns on a bound missed by more than 3x (FLAG in scripts/test-scope).
 #
 # One test per line: <app> <id>. app is the scope that measures it (flare,
 # design, photo, library, halo, suite, suiteui). id is Target.Suite (every
@@ -52,9 +52,16 @@ flare AppSnapshotTests.BodyCountSuites/RenderBudgetFlareTests/timing
 
 library LibraryModelTests.oneEditOnSixtyPhotosStaysInBudget
 library LibraryModelTests.orderRebuildWithinBudget
+library LibraryModelTests.LibraryDevelopBudgetTests
+library LibraryModelTests.beginImportWithinBudget
+library LibraryModelTests.finishImportWithinBudget
+library LibraryModelTests.planAgainstKnownWithinBudget
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
+
+suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
+suite SuiteModelTests.StoreBudgetTests
 
 suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget
