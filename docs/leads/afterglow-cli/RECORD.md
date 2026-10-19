@@ -98,3 +98,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 ## 07:44Z heartbeat
 - #3154 still open, clean, macOS build queued (run 39213749046). No dev merges of ours.
 - Not waiting: CL-10 builder dispatched stacked on lead/afterglow-cli-CL-7; it pushes lead/afterglow-cli-CL-10 and holds its PR until #3154 merges.
+
+## 08:05Z heartbeat
+- #3154 still open, clean; its lane macOS build has been queued since 07:05Z (no macOS runner). For the supervisor: our slices are blocked only on macOS runner capacity, not on code.
