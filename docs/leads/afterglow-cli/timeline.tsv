@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-19T18:00Z	heartbeat	dev runs 39296061014 pending, 39292755765 queued (runners congested)
 2026-10-19T18:45Z	heartbeat	dev runs 39296061014 and 39292755765 still queued (macOS runners busy)
 2026-10-19T18:59Z	check	MC-6 #3284 macOS build 39296255618 in progress; full 39296061014 and scoped 39292755765 still queued
+2026-10-19T19:25Z	check	MC-8 #3320 macOS build 39308275016 queued (tool footer re-added to PR body on every write; lane strips it); full 39296061014 and scoped 39292755765 still queued
