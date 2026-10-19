@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-18T23:33Z	3	pr-merged	#3003	SL-1 merged as db15b8a6
 2026-10-18T23:33Z	3	heartbeat	-	#3004 (SL-2) 39173846993 and #2993 (SL-3) 39173694212 macOS builds still queued; SL-4/5/7 wait on #3004; feature findings 0
 2026-10-18T23:50Z	3	heartbeat	-	#3004 (SL-2) and #2993 (SL-3) macOS builds still queued (~60 min): macOS runners busy with 5 scoped runs and dev CI 39171756438; both near the queue's head; feature findings 0
+2026-10-19T00:13Z	3	heartbeat	-	macOS queue FIFO: 22:43 build started 00:09; #2993 (SL-3, 22:46) and #3004 (SL-2, 22:48) are next; feature findings 0
