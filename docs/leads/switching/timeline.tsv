@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-19T04:20Z	4	wait-ci	39192572958	macOS job started 04:12Z; no supervisor reply on #1507
 2026-10-19T04:48Z	4	wait-ci	39192572958	macOS scripts/ci failed at 04:23Z (no hang this time); Perf step running, later steps pending; reading the log once the job ends
 2026-10-19T05:15Z	4	wait-ci	39192572958	30 SuiteModel 60s time-limit failures (not switching; noted on #2971); ui-test running since 04:53Z
+2026-10-19T05:40Z	4	wait-ci	39192572958	ui-test still running at 05:40Z (log frozen at 05:02Z); 90-min job limit ~05:42Z
