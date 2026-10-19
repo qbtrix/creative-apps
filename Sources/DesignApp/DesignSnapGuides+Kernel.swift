@@ -2,9 +2,10 @@
 // DesignCanvasFeedback's slot. While a drag runs, the guides of the live copy the canvas shows
 // (`model.snapGuides`, never the window's Model mid-drag) are drawn by SuiteUI's SnapGuideMarks:
 // accent lines, gap lines with end ticks (spacing dashed) and each gap's length in a pill, all one
-// size at any zoom. XCUITest can't see marks drawn in a canvas, so a leaf element,
-// `design.canvas.guides`, reads them in words: the running drag's summary, else the last drag's
-// (kept after mouse-up), else "none"; a new press clears the kept one. The kept summary is
+// size at any zoom. XCUITest can't see marks drawn in a canvas, so a 1 pt ProbeElement,
+// `design.canvas.guides`, reads them in words (as its label and its value): the running drag's
+// summary, else the last drag's (kept after mouse-up), else "none"; a new press clears the kept
+// one. The kept summary is
 // written at most twice per gesture (the release and the next press), never per sample.
 // DesignGuidePin lets the snapshots pin a fixed guide set for one render.
 import DesignModel
@@ -29,13 +30,8 @@ struct DesignGuideOverlay: View {
             if let guides {
                 SnapGuideMarks(guides: guides, zoom: zoom).accessibilityHidden(true)
             }
-            Color.clear
-                .frame(width: SuiteSize.pill, height: SuiteSize.pill)
-                .accessibilityElement()
-                .accessibilityLabel(Text(verbatim: "Smart guides"))
-                .accessibilityValue(Text(verbatim: Self.value(guides, last: last)))
-                .accessibilityIdentifier(DesignControlID.canvasGuides)
-                .accessibilityAddTraits(.isImage)
+            let words = Self.value(guides, last: last)
+            ProbeElement(DesignControlID.canvasGuides, label: words, value: words, size: CGSize(width: 1, height: 1))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .allowsHitTesting(false)
