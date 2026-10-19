@@ -30,6 +30,7 @@ private func bounce() -> FlareWorkspace {
     for y in [120.0, 260.2, 299.6] { drag.move(to: y) }
     #expect(drag.shown(over: w.guides) == [Guide(axis: .horizontal, position: 300)])
     #expect(w.guides.isEmpty, "the drag changed the document before its release")
+    #expect(drag.readout == "y 300" && FlareGuideDrag(axis: .vertical, at: 7).readout == "x 7")
     apply(drag.end(overRuler: false), to: &w)
     #expect(w.guides == [Guide(axis: .horizontal, position: 300)] && w.guideReadout(at: 0) == "y 300")
     w.undo()

@@ -38,6 +38,9 @@ public struct FlareGuideDrag: Equatable, Sendable {
         self.position = position.rounded()
     }
 
+    /// The dragged guide's readout, as its mark will read once placed ("y 300").
+    public var readout: String { "\(axis == .horizontal ? "y" : "x") \(FlareWorkspace.whole(position))" }
+
     /// The guides to draw during the drag: `guides` with the dragged one where the drag is, or the new one added.
     public func shown(over guides: [Guide]) -> [Guide] {
         var shown = guides

@@ -33,5 +33,12 @@
     "find": "        if shown.indices.contains(index) { shown[index] = guide }\n",
     "replace": "",
     "tests": "FlareGuideDragTests"
+  },
+  {
+    "label": "a dragged guide's readout names the other axis",
+    "file": "Sources/FlareModel/FlareGuideDrag.swift",
+    "find": "axis == .horizontal ? \"y\" : \"x\") \\(FlareWorkspace.whole(position))",
+    "replace": "axis == .horizontal ? \"x\" : \"y\") \\(FlareWorkspace.whole(position))",
+    "tests": "FlareGuideDragTests"
   }
 ]

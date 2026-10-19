@@ -9,7 +9,9 @@
 // Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
 // ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
 // `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
-// while frames drop) and "Text not shown (n)". It only reads `model`; every change goes through `perform`.
+// while frames drop) and "Text not shown (n)". The rulers show while `showsRulers`; a drag out of one pulls a guide
+// (FlareStageGuides draws and moves them, stage-edit SE-2), and the hidden `flare.stage.zoom` reads the zoom ("Fit",
+// "200%") for journeys. It reports the fit through `onFit`. It only reads `model`; every change goes through `perform`.
 import AppKit
 import FlareCore
 import FlareModel
@@ -27,6 +29,12 @@ struct FlareStage: View {
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     /// The rate playback measured, from FlareCanvas's PlaybackDriver; nil while paused.
     var measuredFPS: Double? = nil
+    /// A guide drag to draw, for the snapshots; a drag out of a ruler on screen uses `liveGuide`.
+    var guideDrag: FlareGuideDrag? = nil
+    /// The fit's zoom, reported as the viewport changes, so Zoom In from the fit steps from it.
+    var onFit: @MainActor (Double) -> Void = { _ in }
+    /// A guide coming out of a ruler, drawn until mouse-up; nil between drags.
+    @State private var liveGuide: FlareGuideDrag?
     /// The gesture under way's first point, in scene points; nil between drags.
     @State private var dragStart: CGPoint?
     /// The drag under way, drawn here until mouse-up; nil between drags and after Escape.
@@ -37,7 +45,8 @@ struct FlareStage: View {
     var body: some View {
         if let scene = model.selectedScene {
             let size = CGSize(width: scene.width, height: scene.height)
-            let scale = zoom ?? ZoomMath.fit(document: size, in: viewport)
+            let fit = ZoomMath.fit(document: size, in: viewport)
+            let scale = zoom ?? fit
             VStack(spacing: 0) {
                 stage(size: size, scale: scale)
                 ViewerStatusBar(zoom: scale, size: Self.sizeText(size)) {
@@ -49,6 +58,10 @@ struct FlareStage: View {
                     Self.statusPills(model.statusPills(measuredFPS: measuredFPS))
                 }
             }
+            .overlay(alignment: .topLeading) {
+                ProbeElement(Self.zoomIdentifier, label: FlareZoom.readout(zoom), size: CGSize(width: 1, height: 1))
+            }
+            .onChange(of: fit, initial: true) { _, fit in onFit(fit) }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier(Self.identifier)
         }
@@ -56,6 +69,8 @@ struct FlareStage: View {
 
     /// The stage and its status bar; the journeys measure the palette against its leading ruler.
     static let identifier = "flare.stagePane"
+    /// The zoom readout journeys read ("Fit", "200%"): the status bar's pill text doesn't reach XCUITest (#1452).
+    static let zoomIdentifier = "flare.stage.zoom"
     /// What the "Preview data" pill means, as its tooltip and accessibility hint.
     static let previewHelp = "This window shows built-in sample data, not a file on disk."
 
@@ -89,19 +104,22 @@ struct FlareStage: View {
     }
 
     /// The viewport with the art, the marks and the floating palette. The palette starts inside the vertical
-    /// ruler (CanvasViewport always draws one), so it never covers the ruler's numbers.
+    /// ruler, so it never covers the ruler's numbers.
     private func stage(size: CGSize, scale: Double) -> some View {
         CanvasViewport(
-            documentSize: size, zoom: scale, checkerboard: false, onSize: { viewport = $0 },
+            documentSize: size, zoom: scale, checkerboard: false, showsRulers: showsRulers, onSize: { viewport = $0 },
             onDrag: { previous, current in drag(from: previous, to: current, scale: scale) },
-            onDragEnd: endDrag, onKey: key
+            onDragEnd: endDrag, onKey: key, onRulerDrag: { rulerDrag($0) }
         ) {
             if let list = live?.movePreview ?? model.stageList { FlareStageArt(list: list, zoom: scale).drawingGroup() }
         } overlay: {
             FlareStageOverlay(marks: live?.stageMarks ?? model.stageMarks, zoom: scale)
             FlareStageSelection(model: model, zoom: scale, perform: perform)
-            FlareStageGuides(model: model, zoom: scale, perform: perform)
+            FlareStageGuides(
+                model: model, zoom: scale, showsGuides: showsGuides, showsRulers: showsRulers,
+                drag: liveGuide ?? guideDrag, perform: perform)
         }
+        .coordinateSpace(.named(FlareStageGuides.space))
         .overlay(alignment: .leading) {
             ToolbarGroup(palette, axis: .vertical, style: .floating)
                 .padding(SuiteSpacing.m)
@@ -125,6 +143,20 @@ struct FlareStage: View {
             start: Point(x: start.x, y: start.y), end: Point(x: current.x, y: current.y), modifiers: modifiers,
             stageScale: scale))
         live = next
+    }
+
+    /// A guide pulled out of a ruler (the top ruler's are horizontal) while guides show: drawn as it moves, and on
+    /// release added, or dropped when it ends back over its ruler, one "Add Guide" step.
+    private func rulerDrag(_ drag: RulerDrag) {
+        guard showsGuides else { return }
+        var next = liveGuide ?? FlareGuideDrag(axis: drag.axis == .horizontal ? .horizontal : .vertical, at: drag.position)
+        next.move(to: drag.position)
+        guard drag.phase == .ended else {
+            liveGuide = next
+            return
+        }
+        liveGuide = nil
+        next.end(overRuler: drag.isOverRuler).forEach { perform($0) }
     }
 
     /// Mouse-up: the window gets the drag's last sample and its end, one change and one undo step.
