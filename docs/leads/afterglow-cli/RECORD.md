@@ -133,3 +133,20 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
   - The symlink fix from #3193 merged cleanly with CL-10's createDirectory.
 - Four RealJobsTests skip on CL-10's branch until CL-9 is on dev.
 - Next: CL-11 (docs/cli.md, wave.json status, feature-done), built on both branches merged, PR held until both merge.
+
+## 2026-10-19T09:49Z: CL-11 pushed, PR held until #3209 and #3211 merge
+- Branch: lead/afterglow-cli-CL-11 @3a291b22722b32f3b462ce4552ef0f41d64bc6eb. It is dev with CL-9 and CL-10 merged in, plus one docs commit.
+- Changes:
+  - docs/cli.md, +263;
+  - afterglow-cli.wave.json status set to built.
+- Gate passed. The builder ran every example in the guide through the built binary.
+- PR plan: title "docs(suite): afterglow CLI guide (CL-11)", labels fast-lane and feature-done, Refs #2998, Slice: CL-z. Open it after a fresh merge of dev once #3209 and #3211 are in.
+- Where the packet and the code disagree (the doc follows the code); these are inputs for the critics:
+  - fake is registered in the shipped binary;
+  - fake list-commands lists 8 ids, not 6 (edit.undo and edit.redo);
+  - new accepts --force;
+  - atomic defaults to true;
+  - a job whose script run fails exits with the run's code, not 70;
+  - pixel tolerance and reference aren't checked yet;
+  - every <X>Headless is still a stub (empty catalogs);
+  - mcp still exits 69 until MC-15.
