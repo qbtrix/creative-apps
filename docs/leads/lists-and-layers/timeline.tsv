@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-19T01:32Z	run 39183169319 cancelled (superseded); waiting on 39185202220
 2026-10-19T01:58Z	full run 39185202220 cancelled (superseded by later merges); now waiting on 39186699154 / scoped suiteui 39187049656
 2026-10-19T02:42Z	5	heartbeat	-	waiting on 39187049656 / 39188162085
+2026-10-19T02:49Z	heartbeat	waiting on scoped suiteui 39187049656 (in progress) / full CI 39188162085 (pending)
