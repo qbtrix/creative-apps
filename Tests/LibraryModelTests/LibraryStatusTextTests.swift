@@ -1,7 +1,7 @@
 // LibraryStatusTextTests.swift: what the status row and the inspector header
 // say (status-and-layout SL-2), MJ1 (`testStatusWalk`) on the `shoot`
-// fixture, and the row's cost on `large`. The header facts tests are SL-5's,
-// written here and disabled until it lands. Runs on Linux and macOS.
+// fixture, the row's cost on `large`, and the header's facts (SL-5): dates,
+// kinds and the capture span. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -166,9 +166,9 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     #expect(loupe.median <= 1 * scale)
 }
 
-// SL-5: the header's facts. Enabled by SL-5.
+// SL-5: the header's facts.
 
-@Test(.disabled("waits on SL-5")) func headerForOnePhoto() {
+@Test func headerForOnePhoto() {
     var catalog = shoot()
     catalog.select([path(1)])
     #expect(catalog.inspectorHeader(utcOffset: 0) == LibraryInspectorHeader(title: "IMG_0001", facts: [
@@ -178,7 +178,7 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     #expect(catalog.inspectorHeader(utcOffset: 19_800).facts.first?.value == "2026-06-01 15:37")
 }
 
-@Test(.disabled("waits on SL-5"), arguments: [
+@Test(arguments: [
     (0.0, "1970-01-01 00:00"), (-60.0, "1969-12-31 23:59"), (1_709_251_140.0, "2024-02-29 23:59"),
 ])
 func headerDates(seconds: Double, text: String) {
@@ -188,7 +188,7 @@ func headerDates(seconds: Double, text: String) {
     #expect(catalog.inspectorHeader(utcOffset: 0).facts.first == .init(label: "Captured", value: text))
 }
 
-@Test(.disabled("waits on SL-5"), arguments: [
+@Test(arguments: [
     (nil, "Sample"), ("/a.png", "PNG"), ("/a.heif", "HEIC"), ("/a.tiff", "TIFF"), ("/a", "File"),
 ] as [(String?, String)])
 func headerKinds(path: String?, kind: String) {
@@ -198,7 +198,7 @@ func headerKinds(path: String?, kind: String) {
     #expect(catalog.inspectorHeader(utcOffset: 0).facts.last == .init(label: "Kind", value: kind))
 }
 
-@Test(.disabled("waits on SL-5")) func headerForSeveralPhotos() {
+@Test func headerForSeveralPhotos() {
     var catalog = shoot()
     catalog.select(Set((1...5).map(path)))
     #expect(catalog.inspectorHeader(utcOffset: 0) == LibraryInspectorHeader(
