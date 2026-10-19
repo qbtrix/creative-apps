@@ -7,8 +7,9 @@
 // child; `drop(_:onto:in:childCount:)` is the pure rule (refusing a
 // non-container, a locked target, the row itself and its own descendants),
 // so it is tested without a window. The list mutates nothing: every gesture
-// goes out through one `onAction` closure. Rows are lazy, keyed by the
-// layer's id, and `.equatable()` on their plain values (swiftui-rules 2, 5).
+// goes out through one `onAction` closure. Rows are keyed by the layer's id,
+// lazy in the list's own scroll view and eager when `embedded` in a host's,
+// and `.equatable()` on their plain values (swiftui-rules 2, 5).
 // The only view state is the drop target lit while a drag hovers it and the
 // row under the pointer, each written on enter and exit, never per sample.
 // A row is the Studio row's 28 pt, takes the hover fill under the pointer, and
@@ -196,35 +197,38 @@ public struct LayerTreeList: View {
 
     @ViewBuilder private var list: some View {
         if options.embedded {
-            stack
+            // Eager: in a host's scroll view a lazy stack never builds the rows
+            // below its fold, so they had no accessibility node to press.
+            VStack(alignment: .leading, spacing: 0) { rowViews }
+                .padding(.vertical, SuiteSpacing.xs)
         } else {
             scrolling
         }
     }
 
-    private var stack: some View {
+    private var rowViews: some View {
         let nests = Self.nests(rows)
-        return LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(rows, id: \.id) { row in
-                LayerTreeRow(
-                    row: row, lit: target == row.id, selected: isSelected(row.id), nests: nests, naming: naming,
-                    options: options, decoration: decorations[row.id],
-                    field: renaming?.id == row.id ? renaming?.field : nil,
-                    onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
-                    .equatable()
-                    .draggable(row.id)
-                    .dropDestination(for: String.self) { items, _ in
-                        accept(items, onto: row.id)
-                    } isTargeted: { over in
-                        light(row.id, over)
-                    }
-            }
+        return ForEach(rows, id: \.id) { row in
+            LayerTreeRow(
+                row: row, lit: target == row.id, selected: isSelected(row.id), nests: nests, naming: naming,
+                options: options, decoration: decorations[row.id],
+                field: renaming?.id == row.id ? renaming?.field : nil,
+                onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
+                .equatable()
+                .draggable(row.id)
+                .dropDestination(for: String.self) { items, _ in
+                    accept(items, onto: row.id)
+                } isTargeted: { over in
+                    light(row.id, over)
+                }
         }
-        .padding(.vertical, SuiteSpacing.xs)
     }
 
     private var scrolling: some View {
-        ScrollView { stack }
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) { rowViews }
+                .padding(.vertical, SuiteSpacing.xs)
+        }
         // No scroller: a legacy scroller's page area is an unnamed button with
         // no identifier to the app audit (#2742, as in Design's list, #2561).
         .scrollIndicators(.never)
@@ -344,6 +348,8 @@ struct LayerTreeRow: View, Equatable {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(row.name)
         .accessibilityAddTraits(selected ? .isSelected : [])
+        // A press selects, as the click does: the tap gesture gives a `.contain` row no default action.
+        .accessibilityAction { onSelect?(row.id) }
         .accessibilityActions {
             if onRename != nil { Button(SidebarRow.renameActionName) { _ = requestRename() } }
         }
