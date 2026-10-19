@@ -1,17 +1,9 @@
-// LiveCommandChannel.swift (afterglow-mcp MC-10): a running app's end of
-// LiveWire, the wire `afterglow mcp --live` speaks (AfterGlowCLICore's
-// LiveBridge.swift): one JSON-RPC 2.0 message per line over a Unix socket at
-// ~/Library/Application Support/AfterGlow/live/<app>-<pid>.sock (folder 0700,
-// socket 0600, this app's dead sockets removed at start). Only a peer with
-// this process's user id is served. `live/describe {client}` answers `{app,
-// title, commands}` from the catalog with no grant (it reads nothing of the
-// document); `live/run {client, id, params}` needs a grant first
-// (AIAccessGrants' verdict; `ask` shows the approval sheet while the bridge
-// waits up to 120 s), then runs the command through the catalog on the main
-// actor and answers `{result, undoStep}`; no grant is error -32010. Each run
-// leaves one line in ~/Library/Logs/AfterGlow/ai-access.log (AIAccessAuditLine:
-// client, app, id, time, outcome; never the params). Darwin sockets: socket,
-// bind, listen, poll, accept, getpeereid, recv, send.
+// LiveCommandChannel.swift (afterglow-mcp MC-10): a running app's end of LiveWire (AfterGlowCLICore's
+// LiveBridge.swift): newline-delimited JSON-RPC 2.0 over ~/Library/Application Support/AfterGlow/live/<app>-<pid>.sock
+// (folder 0700, socket 0600, dead sockets removed at start), served to peers of this user only. `live/describe`
+// answers `{app, title, commands}`; `live/run {client, id, params}` needs a grant (else -32010; `ask` shows the sheet
+// while the bridge waits up to 120 s), runs the command through the catalog on the main actor and answers
+// `{result, undoStep}`. Each run leaves one AIAccessAuditLine in ~/Library/Logs/AfterGlow/ai-access.log.
 import Darwin
 import Foundation
 import Observation
@@ -28,10 +20,8 @@ public final class LiveCommandChannel {
     /// The client that ran the last granted command on a connection still open; what the chip shows.
     public private(set) var connectedClient: String?
 
-    /// The app's name on the wire ("photo") and in the sheet ("Photo").
-    let app: String, title: String
-    let catalog: @MainActor () -> [CommandDescription]
-    let kind: @MainActor (String) -> CommandKind?
+    /// The app's name on the wire ("photo") and in the sheet ("Photo"), and its catalog.
+    let app: String, title: String, commands: [CommandDescription]
     /// Runs a command on the window's document and hands the new one to the app; nil with no document open.
     let perform: @MainActor (String, JSONValue) -> Result<CommandOutcome, CatalogError>?
     let ask: @MainActor (AIAccessRequest) async -> AIAccessDecision
@@ -46,18 +36,11 @@ public final class LiveCommandChannel {
     /// command changed it, and `ask` shows the approval sheet and returns the user's answer.
     public init<D: HeadlessDocument>(app: String, document: @escaping @MainActor () -> D?, apply: @escaping @MainActor (D) -> Void,
                                      ask: @escaping @MainActor (AIAccessRequest) async -> AIAccessDecision) {
-        (self.app, title, self.ask) = (D.app, app, ask)
-        catalog = { D.catalog.describeAll() }
-        kind = { D.catalog.spec($0)?.kind }
+        (self.app, title, commands, self.ask) = (D.app, app, D.catalog.describeAll(), ask)
         perform = { id, params in
             guard var doc = document() else { return nil }
-            do throws(CatalogError) {
-                let outcome = try D.catalog.run(id, params: params, on: &doc)
-                apply(doc)
-                return .success(outcome)
-            } catch {
-                return .failure(error)
-            }
+            do throws(CatalogError) { let outcome = try D.catalog.run(id, params: params, on: &doc); apply(doc); return .success(outcome) }
+            catch { return .failure(error) }
         }
         let support = SuiteLocations.supportFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory())
         grants = StorePreferences(store: FileStore(folder: support))
@@ -70,12 +53,9 @@ public final class LiveCommandChannel {
         try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         guard chmod(dir, 0o700) == 0 else { throw LiveChannelError(description: "can't make \(dir) private: errno \(errno)") }
         Self.removeStale(app: app, in: dir)
-        let path = dir + "/\(app)-\(getpid()).sock"
-        let wire = Wire(listener: try Self.listen(at: path))
+        let path = dir + "/\(app)-\(getpid()).sock", wire = try Wire(listener: Self.listen(at: path))
         (self.wire, self.path) = (wire, path)
-        Thread.detachNewThread { [self] in
-            while let fd = wire.next() { Self.admit(fd, wire: wire, channel: self) }
-        }
+        Thread.detachNewThread { [self] in while let fd = wire.next() { Self.admit(fd, wire: wire, channel: self) } }
     }
 
     /// Stops listening, closes every connection and removes the socket.
@@ -97,10 +77,10 @@ public final class LiveCommandChannel {
         let client: String = if case .string(let name)? = params["client"], !name.isEmpty { String(name.prefix(128)) } else { "MCP client" }
         switch method {
         case "live/describe":
-            let commands = (try? JSONValue(encoding: catalog())) ?? .array([])
-            return Self.success(id, .object(["app": .string(app), "title": .string(title), "commands": commands]))
+            let list = (try? JSONValue(encoding: commands)) ?? .array([])
+            return Self.success(id, .object(["app": .string(app), "title": .string(title), "commands": list]))
         case "live/run":
-            guard case .string(let command)? = params["id"], let kind = kind(command) else {
+            guard case .string(let command)? = params["id"], let kind = commands.first(where: { $0.id == command })?.kind else {
                 return Self.failure(id, -32602, "\(title) has no such command")
             }
             return await run(command, kind, params["params"] ?? .object([:]), client: client, connection: connection, id: id)
@@ -131,19 +111,14 @@ public final class LiveCommandChannel {
                 return Self.failure(id, -32010, "\(title) has no answer for \(client) yet")
             }
         }
-        drivers[connection] = client
-        connectedClient = client
-        switch perform(command, params) {
-        case .success(let outcome)?:
-            audit("ran")
-            return Self.success(id, .object(["result": outcome.result, "undoStep": outcome.undoStep.map(JSONValue.string) ?? .null]))
-        case .failure(let error)?:
-            audit("failed")
-            return Self.failure(id, -32000, error.description)
-        case nil:
-            audit("failed")
-            return Self.failure(id, -32000, "\(title) has no document open; open one, then call again")
+        (drivers[connection], connectedClient) = (client, client)
+        let (outcome, reply): (String, [UInt8]) = switch perform(command, params) {
+        case .success(let done)?: ("ran", Self.success(id, .object(["result": done.result, "undoStep": done.undoStep.map(JSONValue.string) ?? .null])))
+        case .failure(let error)?: ("failed", Self.failure(id, -32000, error.description))
+        case nil: ("failed", Self.failure(id, -32000, "\(title) has no document open; open one, then call again"))
         }
+        audit(outcome)
+        return reply
     }
 
     /// A connection closed: its allow once ends and the chip shows the client of another open one, if any.
@@ -152,12 +127,12 @@ public final class LiveCommandChannel {
         connectedClient = drivers.max { $0.key < $1.key }?.value
     }
 
-    nonisolated static func success(_ id: JSONValue, _ result: JSONValue) -> [UInt8] { encode(id, "result", result) }
+    nonisolated static func success(_ id: JSONValue, _ result: JSONValue) -> [UInt8] { encode(["id": id, "result": result]) }
     nonisolated static func failure(_ id: JSONValue, _ code: Int, _ message: String) -> [UInt8] {
-        encode(id, "error", .object(["code": .number(Double(code)), "message": .string(message)]))
+        encode(["id": id, "error": .object(["code": .number(Double(code)), "message": .string(message)])])
     }
-    nonisolated static func encode(_ id: JSONValue, _ key: String, _ body: JSONValue) -> [UInt8] {
-        Array((try? JSONValue.object(["jsonrpc": .string("2.0"), "id": id, key: body]).json()) ?? Data("{}".utf8))
+    nonisolated static func encode(_ body: [String: JSONValue]) -> [UInt8] {
+        Array((try? JSONValue.object(body.merging(["jsonrpc": .string("2.0")]) { $1 }).json()) ?? Data("{}".utf8))
     }
 
     /// Appends one line to the AI access log (folder 0700, file 0600); a failed write loses only that line.
@@ -168,8 +143,7 @@ public final class LiveCommandChannel {
         let fd = open(path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0o600)
         guard fd >= 0 else { return }
         defer { close(fd) }
-        let bytes = Array(line.text.utf8)
-        _ = bytes.withUnsafeBytes { write(fd, $0.baseAddress, $0.count) }
+        _ = Array(line.text.utf8).withUnsafeBytes { write(fd, $0.baseAddress, $0.count) }
     }
 
     /// Removes `<app>-<pid>.sock` files in `dir` whose process is gone, and this process's own.
@@ -205,9 +179,8 @@ public final class LiveCommandChannel {
 
     /// Serves `fd` on its own thread when its peer runs as this user; otherwise closes it.
     nonisolated static func admit(_ fd: Int32, wire: Wire, channel: LiveCommandChannel) {
-        var uid: uid_t = 0, gid: gid_t = 0
+        var uid: uid_t = 0, gid: gid_t = 0, one: Int32 = 1
         guard getpeereid(fd, &uid, &gid) == 0, uid == geteuid(), let connection = wire.adopt(fd) else { Darwin.close(fd); return }
-        var one: Int32 = 1
         _ = setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &one, socklen_t(MemoryLayout<Int32>.size))
         Thread.detachNewThread {
             var buffer: [UInt8] = []
@@ -224,17 +197,15 @@ public final class LiveCommandChannel {
     /// The next line on `fd`, without its newline; nil when the peer closed, the read failed, or a line passed 16 MiB.
     nonisolated static func line(_ fd: Int32, _ buffer: inout [UInt8]) -> [UInt8]? {
         var chunk = [UInt8](repeating: 0, count: 64 << 10)
-        while true {
+        while buffer.count <= 16 << 20 {
             if let end = buffer.firstIndex(of: UInt8(ascii: "\n")) {
                 defer { buffer.removeSubrange(...end) }
                 return Array(buffer[..<end])
             }
-            guard buffer.count <= 16 << 20 else { return nil }
             let count = chunk.withUnsafeMutableBytes { recv(fd, $0.baseAddress, $0.count, 0) }
-            if count < 0, errno == EINTR { continue }
-            guard count > 0 else { return nil }
-            buffer += chunk[..<count]
+            if count > 0 { buffer += chunk[..<count] } else if count == 0 || errno != EINTR { return nil }
         }
+        return nil
     }
 
     /// Writes all of `bytes` to `fd`; false when the peer is gone.
@@ -242,9 +213,7 @@ public final class LiveCommandChannel {
         var sent = 0
         while sent < bytes.count {
             let count = bytes.withUnsafeBytes { send(fd, $0.baseAddress.map { $0 + sent }, bytes.count - sent, 0) }
-            if count < 0, errno == EINTR { continue }
-            guard count > 0 else { return false }
-            sent += count
+            if count > 0 { sent += count } else if count == 0 || errno != EINTR { return false }
         }
         return true
     }
@@ -253,8 +222,7 @@ public final class LiveCommandChannel {
 /// The listening socket and the open connections, shared by the accept thread, the connection threads and `stop`.
 final class Wire: Sendable {
     struct State { var listener: Int32; var open: [Int: Int32] = [:]; var last = 0 }
-    let state: Mutex<State>
-    let stopped = Atomic<Bool>(false)
+    let state: Mutex<State>, stopped = Atomic<Bool>(false)
     init(listener: Int32) { state = Mutex(State(listener: listener)) }
 
     /// The next accepted connection; nil once stopped, after closing the listener.
@@ -264,8 +232,7 @@ final class Wire: Sendable {
             var ready = pollfd(fd: listener, events: Int16(POLLIN), revents: 0)
             guard poll(&ready, 1, 500) > 0 else { continue }
             let fd = accept(listener, nil, nil)
-            if fd >= 0 { return fd }
-            if errno == EBADF { break }
+            if fd >= 0 { return fd } else if errno == EBADF { break }
         }
         close(listener)
         return nil
@@ -281,10 +248,7 @@ final class Wire: Sendable {
         }
     }
 
-    func drop(_ connection: Int) {
-        let fd = state.withLock { $0.open.removeValue(forKey: connection) }
-        if let fd { close(fd) }
-    }
+    func drop(_ connection: Int) { if let fd = state.withLock({ $0.open.removeValue(forKey: connection) }) { close(fd) } }
 
     /// Ends the accept loop and wakes every connection's read, so each thread closes its socket.
     func stop() {
@@ -295,8 +259,7 @@ final class Wire: Sendable {
 
 /// One reply handed from the main actor to a connection's thread.
 final class Reply: Sendable {
-    let done = DispatchSemaphore(value: 0)
-    let value = Mutex<[UInt8]>([])
+    let done = DispatchSemaphore(value: 0), value = Mutex<[UInt8]>([])
     func set(_ bytes: [UInt8]) { value.withLock { $0 = bytes }; done.signal() }
     func wait() -> [UInt8] { done.wait(); return value.withLock { $0 } }
 }

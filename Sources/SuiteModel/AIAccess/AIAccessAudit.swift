@@ -1,8 +1,5 @@
-// AIAccessAudit.swift (afterglow-mcp MC-10): the Linux-safe half of a running
-// app's live command channel (SuiteShell's LiveCommandChannel): whether a
-// client's command runs, asks or is refused, and the line each command
-// leaves in ~/Library/Logs/AfterGlow/ai-access.log (client, app, id, time and
-// outcome; never the params).
+// AIAccessAudit.swift (afterglow-mcp MC-10): the Linux-safe half of SuiteShell's LiveCommandChannel: whether a
+// command runs, asks or is refused, and its line in ~/Library/Logs/AfterGlow/ai-access.log (never the params).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
