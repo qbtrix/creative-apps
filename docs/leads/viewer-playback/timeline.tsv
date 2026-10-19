@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 2026-10-19T16:42Z	heartbeat	#3245 still open, clean, fast-lane label, no needs-fix/needs-rebase; waiting on the lane; no dev CI run contains it yet
 2026-10-19T17:05Z	heartbeat	#3245 merged 16:58Z; waiting for a dev CI run that contains it
 2026-10-19T17:27Z	heartbeat	scoped halo run 39292739235 (dev 8f405311, has #3245) queued
+2026-10-19T17:57Z	heartbeat	scoped halo 39292739235: macOS (halo) failed in Scoped build and tests; journeys job queued; reading logs
