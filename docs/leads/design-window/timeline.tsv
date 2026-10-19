@@ -130,3 +130,4 @@ utc	stage	event	ref	note
 2026-10-18T23:04Z	heartbeat	all slices merged (D0-7b 46f6ce21); waits scoped:design 39173700610 / full 39173775025
 2026-10-19T00:00Z	heartbeat	run act-1a1517272b2-vq6l: DW-c/DW-d not done on 39173700610 (findings #3042 #3043 #3044 #3045); fix round 2 starting
 2026-10-19T01:06Z	heartbeat	round 2 fix PRs #3064, #3067; r-b2 gating
+2026-10-19T01:11Z	heartbeat	r-b2 shipped: PR #3068 fixes #3042, #3044 (DW-c)
