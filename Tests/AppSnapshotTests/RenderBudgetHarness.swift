@@ -21,11 +21,10 @@
 // is a window-activation click, which a SwiftUI gesture ignores unless it opts
 // in (`allowsWindowActivationEvents`); SwiftUI's own canvases and AppKit
 // controls take them, inspector scrub rows and Halo's viewer don't yet. Keys
-// need a key window, which it can't have either. A drag over a `.draggable`
-// view begins a real AppKit drag session that waits for a window-server
-// mouse-up; DragSessions counts them and `close()` ends them, so every test
-// must close its window (a `defer`) or the next run-loop turn hangs (#2971).
-// macOS only.
+// need a key window, which it can't have either. Nor can it run a system
+// drag: a real session waits for a window-server mouse-up forever (#2971), so
+// once a harness window opens, DragSessions hands every `.draggable` drag an
+// idle session that never starts. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -61,7 +60,7 @@ struct RenderStep: CustomStringConvertible {
     private var stepTimes: [Double] = []
 
     init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820)) {
-        _ = DragSessions.watched
+        _ = DragSessions.faked
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
         // turned on before the window exists so every run builds it the same way.
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
@@ -77,24 +76,7 @@ struct RenderStep: CustomStringConvertible {
         window.orderFrontRegardless()
     }
 
-    /// Ends the drag session a step began, if one did, then closes the window. A drag over a `.draggable` view
-    /// begins an AppKit drag session that starts on the next run-loop turn and blocks the main thread until a
-    /// mouse-up reaches the app's event queue, which only the window server fills: left open, it froze the next
-    /// test that turned the run loop, past every time limit (#2971). So a mouse-up goes in the queue and one turn
-    /// lets the session take it and end. Only then: an event posted with no session to take it stopped the main
-    /// run loop later, which ends a test process early with no summary.
-    func close() {
-        if DragSessions.begun > 0 {
-            DragSessions.begun = 0
-            if let up = NSEvent.mouseEvent(
-                with: .leftMouseUp, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
-                windowNumber: 0, context: nil, eventNumber: 0, clickCount: 1, pressure: 0) {
-                NSApplication.shared.postEvent(up, atStart: false)
-            }
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-        }
-        window.close()
-    }
+    func close() { window.close() }
 
     /// Lets SwiftUI settle: `milliseconds` of run-loop turns.
     func settle(_ milliseconds: Int = 300) async throws { try await Task.sleep(for: .milliseconds(milliseconds)) }
@@ -351,29 +333,35 @@ final class CountingHostingView<Content: View>: NSHostingView<Content> {
     }
 }
 
-/// The AppKit drag sessions views begin while a harness window is open: `NSView.beginDraggingSession` counts
-/// each one on its way through, so `RenderBudgetWindow.close()` ends exactly the sessions that began.
+/// The harness never starts a system drag. A drag over a `.draggable` view makes SwiftUI call
+/// `NSView.beginDraggingSession`, whose real session starts on the next run-loop turn and then blocks the main
+/// thread until a mouse-up comes from the window server, which a test process never gets: it froze the next test
+/// that turned the run loop, past every time limit (#2971). And ending one with a posted mouse-up left the test
+/// process's main run loop to return, so it exited 0 mid-run. So, once the first harness window opens, the method
+/// is swapped for one that counts the call in `begun` and hands back an idle session that never starts. A step's
+/// cost is measured up to the drag's start; whether a drop lands is a journey's to prove.
 @MainActor enum DragSessions {
     static var begun = 0
-    static let watched: Void = {
+    static let faked: Void = {
         let begin = #selector(NSView.beginDraggingSession(with:event:source:))
-        let counted = #selector(NSView.harnessBeginDraggingSession(with:event:source:))
+        let fake = #selector(NSView.harnessBeginDraggingSession(with:event:source:))
         guard let original = class_getInstanceMethod(NSView.self, begin),
-            let counting = class_getInstanceMethod(NSView.self, counted)
+            let replacement = class_getInstanceMethod(NSView.self, fake)
         else {
-            Issue.record("NSView has no beginDraggingSession to watch")
+            Issue.record("NSView has no beginDraggingSession to replace")
             return
         }
-        method_exchangeImplementations(original, counting)
+        method_exchangeImplementations(original, replacement)
     }()
 }
 
 extension NSView {
-    /// Swapped in for `beginDraggingSession(with:event:source:)` by `DragSessions.watched`: counts, then begins.
+    /// Swapped in for `beginDraggingSession(with:event:source:)` by `DragSessions.faked`: counts the call and
+    /// returns a session that was never begun.
     @objc fileprivate func harnessBeginDraggingSession(
         with items: [NSDraggingItem], event: NSEvent, source: any NSDraggingSource
     ) -> NSDraggingSession {
         DragSessions.begun += 1
-        return harnessBeginDraggingSession(with: items, event: event, source: source)
+        return NSDraggingSession()
     }
 }
