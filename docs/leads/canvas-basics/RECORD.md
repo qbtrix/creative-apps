@@ -5,7 +5,7 @@ Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, a
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
 Next: lane merges #3224 after its macOS build; then poll for a design-scoped or full ci.yml run containing c6ad68f (CB-b) and #3224 (CB-c); Belt-Slice-Done for each, Mac-Finish-Wanted, critic panel on the screens.
-Last check: 2026-10-19T13:49Z #3224 head ea150fa: macOS build 39258144713 green, mergeable clean, lane sweep 39261774538 in progress. Dev ci.yml 39252895176 (6e70826, contains c6ad68f) in progress, 39262177225 (2b02948) pending; 0 open findings
+Last check: 2026-10-19T14:16Z #3224 head ea150fa green and clean; lane sweep 39264841725 passed its checks (author ok) but a batch (lane/batch-20261019133046) is being bisected, so 22 ready PRs incl. #3224 wait for the next sweep. Dev ci.yml 39252895176 (6e70826, contains c6ad68f) still in progress since 12:32Z; 0 open findings
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |

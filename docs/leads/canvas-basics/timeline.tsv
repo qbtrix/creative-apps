@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-19T13:02Z	3	fix	#3224	macOS build 39245781059 failed (actor isolation in paintArtwork); pushed ea150fa, Head moved
 2026-10-19T13:27Z	3	heartbeat	#3224	macOS build 39258144713 success on ea150fa; awaiting lane merge
 2026-10-19T13:49Z	3	heartbeat	#3224	clean and green; lane sweep in progress; dev CI 39252895176 running
+2026-10-19T14:16Z	3	heartbeat	#3224	queued behind lane batch bisect (22 ready PRs); dev CI 39252895176 still running
