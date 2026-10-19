@@ -1,11 +1,11 @@
 # canvas-basics lead record
 
 Issue: #1500 · Packet: docs/blueprints/design/features/canvas-basics.md
-Run: act-1a14fde5d4b-ss3f (before: act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
-Stage: 4 wave 4
-Base: e3c46ea8e11e0ad32ee3c236edde57198f4567a2
-Next: CB-a merged-done (Belt-Slice-Done posted, run 39152649677). CB-5 PR #2897 merged 20:05Z (94d162c, lane batch run 39160874078). CB-6 and CB-9 wait on style-rows SR-t (itself waiting on design-window DW-a, #2480 open) and design-window DW-a (#2899 D0-9d merged as e3859e3f). No open findings, no dev-red (checked 08:34Z: #2480 stalled, head Linux red since 10-18 00:19Z; supervisor asked on #1500 comment 6257753581).
-Last check: 2026-10-18T16:45Z
+Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
+Stage: 3 wave 5
+Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
+Next: CB-6 (wave 5, slice CB-b) building on lead/canvas-basics-CB-6; CB-9 (wave 6, CB-c, feature-done) stacks on it as soon as CB-6's PR opens (rule 22). Unblocked: design-window is done (contact sheet 39187798386), style-rows is done (#1497 closed; SR-t's ST-5t view code is on dev, its open journey red is #2545), CB-5 merged.
+Last check: 2026-10-19 (dev 25f6d33, main 6f9a2b8 verified); 0 open findings
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -26,7 +26,7 @@ Gap issues (one per slice, filed at stage 1): CB-a #1521 (CB-2 closes), CB-b #15
 | CB-2 | CB-a | 2 | whole points for draw, move, resize; MJ9; journey on | DesignWholePoints.swift, DesignDrawing.swift, DesignCanvasEditing.swift, DesignWholePointsTests.swift, 3 plans, +WholePoints journey | DesignWholePointsTests | #2568 | merged 7c20424 |
 | CB-3 | CB-a | 3 | Text click-drag fixed-width box; fixedWidth flag | StyleTypes.swift, DesignDrawing.swift, DesignCanvasEditing.swift, DesignTextBoxDrawTests.swift, 3 plans | DesignTextBoxDrawTests | #2871 (080dea8) | merged 18:01Z (4a3e5a0) |
 | CB-5 | CB-b | 4 | commitTextEdit(extent:), setTextStyle refit | DesignText.swift, Live/LiveStyling.swift, DesignTextFitTests.swift, 2 plans | DesignTextFitTests | #2897 (4269cd4) | merged 20:05Z (94d162c) |
-| CB-6 | CB-b | 5 | window commits with measured extent; editor grows/wraps; journey on | DesignWindow.swift, DesignTextFont.swift, DesignTextEditor.swift, DesignTextArtwork.swift, DesignTextFitSnapshots.swift, +TextBox journey | design-text-fit snapshots, journey | | waits CB-4, CB-5, SR-t, design-window |
+| CB-6 | CB-b | 5 | window commits with measured extent; editor grows/wraps; journey on | DesignWindow.swift, DesignTextFont.swift, DesignTextEditor.swift, DesignTextArtwork.swift, DesignTextFitSnapshots.swift, +TextBox journey | design-text-fit snapshots, journey | | building |
 | CB-9 | CB-c | 6 | page rows, past-edge overlay; journey on; feature-done | DesignIntent.swift, DesignWindow.swift, DesignCanvas.swift, DesignInspectorPage.swift, DesignPastEdge.swift, DesignPageSnapshots.swift, +Page journey | design-inspector-page, design-canvas-past-edge, journey | | waits CB-6, CB-7, CB-8, design-window |
 
 Waves (packet's Build waves, checked against dev b01e722):
@@ -42,6 +42,8 @@ Waves (packet's Build waves, checked against dev b01e722):
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-19 (run act-1a153722cda-w61s): resumed. Waits met: design-window done (all of DW-a..DW-d), style-rows done (SR-t closed with gap #2545, a journey red, not missing code: DesignTextFont/Editor/Artwork carry ST-5t). The supervisor's 10-19 08:40Z note (CB-6 waits on #2480) predates reading style-rows' contact sheet; #2480 is a mac-finish PR on Align/Distribute and touches none of CB-6's files, so CB-6 doesn't wait on it. PRs still target dev (main 6f9a2b8 is behind dev; the lane's base is dev).
+- CB-9 is stacked on CB-6's branch (rule 22) since both edit DesignWindow.swift's perform switch.
 - 2026-10-18T04:02Z (run act-1a14d285aef-3epc): resumed as line lead. design-seams is done (D0-3c #2167 merged), so CB-2 starts, alongside files-history FH-2 (disjoint files). style-rows SR-m is done (CB-5 can go after CB-3); SR-t and design-window DW-b/DW-c/DW-d are still building, so CB-6 and CB-9 wait. This branch is 15 commits behind dev; it holds only docs/leads/canvas-basics, so it is left as is.
 - v3 loop: the packet has a Slices table and this run started after #1302 merged.
 - PRs target dev (CLAUDE.md, lead contract rule 4); the brief's "main" at 2e0f7df was verified, but the packet exists only on dev, and the lane retargets main to dev anyway.
