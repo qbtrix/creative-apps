@@ -100,3 +100,4 @@ utc	stage	event	ref	note
 2026-10-19T00:31:34Z	heartbeat	39171756438 still running; pending full run 39180214762 (ef6f201f)
 2026-10-19T00:57:53Z	heartbeat	full run 39180214762 (ef6f201f, contains e0a627c0) Linux running
 2026-10-19T01:04:50Z	slice	OB-u done: Belt-Slice-Done + Mac-Finish-Wanted on #1972 (run 39180214762, Linux green)
+2026-10-19T01:23:20Z	heartbeat	OB-13 still blocked: Bundle/Samples on dev has only README.md; #836-#839 open. Sample monitor re-armed after container restart.
