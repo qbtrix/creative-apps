@@ -66,7 +66,8 @@ import Testing
         let photos = LibraryFixtures.photos(named: "shoot")
         catalog.load(photos)
         catalog.select([photos[0].id])
-        let reason = try #require(LiveExporter.unavailable)
+        // EX-2 connects the exporter (nil reason); the catalog stubs refuse until EX-3.
+        let reason = LiveExporter.unavailable
         #expect(catalog.exportHelp == reason && catalog.exportPreview == reason && catalog.exportTargets.isEmpty)
         let before = catalog
         #expect(catalog.beginExport(folder: "/out") == false)
@@ -84,7 +85,7 @@ import Testing
         let summary = await ExportRunner.run(plan, photos: [:], exporter: FakeExporter(), writer: writer,
                                              writeSidecar: { _, _, _ in }, progress: { _ in })
         #expect(summary.written.isEmpty && summary.failedIDs == plan.items.map(\.photoID))
-        #expect(summary.failures.map(\.reason) == [reason, reason])
+        #expect(summary.failures.map(\.reason) == [reason ?? "", reason ?? ""])
         #expect(await writer.files.isEmpty)
     }
 }
