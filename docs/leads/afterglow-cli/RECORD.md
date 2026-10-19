@@ -2,9 +2,9 @@
 
 Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
-Stage: 3 polling
+Stage: 4 build wave 2
 Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: wait for command-catalog CC-2 #3074 (fake canvas document, five <X>Headless stubs) to merge, then start CL-2 (wave 2)
+Next: CL-2 builder running (branch lead/afterglow-cli-CL-2); on its PR, track the lane merge, then wave 3 (CL-3, CL-6, CL-8)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
