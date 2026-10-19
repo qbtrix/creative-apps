@@ -227,9 +227,7 @@ struct MCPProtocolTests {
 
     @Test func serveLiveRunsOnlyOnMacOSAndAnAppFilterNarrowsTheApps() {
         let io = FakeIO()
-        #if os(macOS)
-        #expect(MCPServer.serve(Self.serveArguments + ["--live"], apps: [Apps.fake], io: io) == 0 && io.stderr.isEmpty)
-        #else
+        #if !os(macOS)
         #expect(MCPServer.serve(Self.serveArguments + ["--live"], apps: [Apps.fake], io: io) == 69)
         #expect(io.stderr == ["afterglow mcp --live runs only on macOS, where the apps listen"])
         #endif

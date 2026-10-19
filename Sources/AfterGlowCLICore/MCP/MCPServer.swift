@@ -6,9 +6,8 @@
 // `server/discover`, `initialize`, `ping`, `tools/list` and `tools/call` (rate
 // limited, run by MCPSessions). A notification is never answered, and
 // `handle` never prints. `serve` parses `[--app <name>]… --root <dir>…
-// [--live]` strictly, then answers stdin line by line until it ends. With
-// `--live` (MC-11, macOS) the running apps' `live.<app>.<id>` tools join the
-// list and their calls go to LiveBridge, named by `initialize`'s clientInfo.
+// [--live]` strictly, then answers stdin line by line until it ends; `--live`
+// (MC-11, macOS) adds the running apps' tools through LiveBridge.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -40,7 +39,6 @@ public final class MCPServer: Sendable {
 
     /// The running apps `--live` bridges; nil without `--live`.
     let live: LiveBridge?
-
     /// The handshake era's negotiated version and client name, the open documents, and the recent calls' times.
     private struct State: Sendable {
         var sessionVersion: String?; var client = LiveBridge.unnamedClient; var sessions: MCPSessions; var calls = RateWindow()
@@ -80,12 +78,8 @@ public final class MCPServer: Sendable {
         case "server/discover":
             return .success(.object(["supportedVersions": Self.supported, "capabilities": Self.capabilities, "serverInfo": Self.info]))
         case "initialize":
-            var client: String?
-            if case .object(let info)? = params["clientInfo"], case .string(let name)? = info["name"], !name.isEmpty { client = name }
-            state.withLock { state in
-                state.sessionVersion = version
-                state.client = client ?? LiveBridge.unnamedClient
-            }
+            let client: String? = if case .object(let info)? = params["clientInfo"], case .string(let name)? = info["name"] { name } else { nil }
+            state.withLock { ($0.sessionVersion, $0.client) = (version, client.flatMap { $0.isEmpty ? nil : $0 } ?? LiveBridge.unnamedClient) }
             return .success(.object(["protocolVersion": .string(version), "capabilities": Self.capabilities, "serverInfo": Self.info]))
         case "ping": return .success(.object([:]))
         case "tools/list":
@@ -140,7 +134,6 @@ public final class MCPServer: Sendable {
     static func invalidParams(_ message: String) -> RPCError { RPCError(code: RPCError.invalidParams, message: message) }
     static let supported = JSONValue.array(MCPVersions.supported.map(JSONValue.string))
     static let capabilities = JSONValue.object(["tools": .object(["listChanged": .bool(false)])])
-    /// Why `--live` refuses off macOS.
     static let liveOffMac = "afterglow mcp --live runs only on macOS, where the apps listen"
     static let info = JSONValue.object(["name": .string(name), "version": .string(CLI.version)])
 
@@ -150,9 +143,7 @@ public final class MCPServer: Sendable {
         let options: MCPOptions
         do { options = try parse(arguments, apps: apps) } catch { return CLI.refuse(error, io: io) }
         let live = options.live ? LiveBridge.local() : nil
-        if options.live, live == nil {
-            return CLI.refuse(Refusal(code: CLI.Exit.unavailable, kind: "unavailable", message: liveOffMac), io: io)
-        }
+        if options.live, live == nil { return CLI.refuse(Refusal(code: CLI.Exit.unavailable, kind: "unavailable", message: liveOffMac), io: io) }
         let start = ContinuousClock.now
         let server = MCPServer(options, io: io, live: live) {
             let elapsed = start.duration(to: .now).components
