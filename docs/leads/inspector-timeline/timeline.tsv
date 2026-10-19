@@ -109,3 +109,4 @@
 2026-10-19T02:05Z	heartbeat	39180214762 (ef6f201f) macOS started 01:41, in scripts/ci 23 min (hang expected at AfterGlowHomeSidebarTests; diagnose when it ends); 39185202220, 39186312924, 39186699154 cancelled (superseded); 39188162085 (17dc84c7) pending; no reply on #2971, ci.yml unchanged, no dev-red
 2026-10-19T02:37Z	heartbeat	39180214762 (ef6f201f) macOS 55 min in scripts/ci (90-min limit at ~03:11); 39188162085 (17dc84c7) pending; no reply on #2971, ci.yml unchanged, no dev-red, no hang fix on dev
 2026-10-19T03:17Z	blocked	39180214762 (ef6f201f) macOS cancelled at 90 min: third run with the same hang at AppSnapshotTests AfterGlowHomeSidebarTests from 01:48:27 (after the homeAtEachWidth failure), journeys never ran; noted on #2971; 39192572958 (cc14022e) queued
+2026-10-19T03:49Z	heartbeat	39192572958 (cc14022e) macOS queued since 03:11, no runner; 39195661324 (918abfc6) pending; no reply on #2971, ci.yml unchanged, no dev-red, no hang fix on dev
