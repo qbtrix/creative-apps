@@ -77,7 +77,11 @@ public struct HaloProject: Sendable, Equatable {
     /// The picked keys as a set, read from `keySelection`.
     public var selectedKeys: Set<HaloKeyRef> { keySelection.set }
     /// The project file's name, path and status; written by `HaloFiles.swift`.
-    public internal(set) var file = HaloFileState()
+    /// A clean file (saved or opened) marks the history's current step saved,
+    /// so the kernel's `isDirty` is true exactly while the work isn't on disk.
+    public internal(set) var file = HaloFileState() {
+        didSet { if !file.unsaved { history.markSaved() } }
+    }
     /// The frame Render Frame shows; written by `HaloRenderFrame.swift`.
     public internal(set) var renderedFrame: HaloShownFrame?
     /// A running or finished render; written by `HaloRenderJob.swift`.
@@ -342,7 +346,7 @@ public struct HaloProject: Sendable, Equatable {
         let before = document
         document = copy
         services.history.record(name, before: before, coalesceKey: coalesceKey, in: &history)
-        file.unsaved = true
+        file.unsaved = history.isDirty
         return true
     }
 
