@@ -146,3 +146,4 @@ utc	stage	event	ref	note
 2026-10-19T14:51Z	3	heartbeat	#3245	still open, eligible; lane sweeps running (4817 in progress)
 2026-10-19T15:14Z	heartbeat	#3245 still open, clean, macOS build green; lane sweep 39275409811 running (merging other PRs); no dev CI run contains #3245 yet
 2026-10-19T15:37Z	heartbeat	#3245 eligible in lane sweep 39271541023 (195 lines, 15 files, macOS build ok); a batch is in flight, 25 ready PRs wait for the next sweep; nothing to fix
+2026-10-19T15:58Z	heartbeat	#3245 still open, clean, fast-lane label, no needs-fix/needs-rebase; lane runs queued behind other PRs; no dev CI run contains it yet
