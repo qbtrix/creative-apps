@@ -111,3 +111,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ## 08:27Z heartbeat
 - #3154 CL-7 still in lane (macOS build queued since 07:05Z). CL-9 and CL-10 held on it.
+
+## 2026-10-19T08:48Z: heartbeat
+- #3154 CL-7 is still waiting for its macOS build: run 39213749046 has been queued since 07:05Z. CL-9 (35ee7e6) and CL-10 (d69d134) ship once it merges. We are blocked only on macOS runner capacity.
