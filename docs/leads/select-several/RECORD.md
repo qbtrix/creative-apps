@@ -2,9 +2,9 @@
 
 Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a1517272b2-vq6l (resumes earlier runs) · Session: claude/feature-lead-playbook-2k2x84 · Started: 2026-10-19T00:00Z
-Stage: fix round 1 in lane
+Stage: fix round 1 merged
 Base: d50e891e (origin/dev); main verified at 349578b8
-Next: Belt-Slice-Done SS-b once #3062 is in a green scoped design run
+Next: Belt-Slice-Done SS-b once full CI 39186699154 on ed0fed9e shows a green Linux job
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -53,3 +53,4 @@ Next: Belt-Slice-Done SS-b once #3062 is in a green scoped design run
 - Fix round 1 (wf_042b23ed-f4a): #2751 -> PR #3062 (SS-b).
 2026-10-19T01:06Z	heartbeat	round 1 fix PR #3062 for #2751
 2026-10-19T01:30Z	heartbeat	#3062 macOS build 39182577452 in progress
+2026-10-19T01:51Z	heartbeat	#3062 merged 081aaebd
