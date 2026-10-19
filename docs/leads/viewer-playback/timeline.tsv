@@ -165,3 +165,4 @@ utc	stage	event	ref	note
 2026-10-19T21:55Z	heartbeat	PR #3319 merged 21:38Z, #1705 closed by lane; verifying testLayersDrawAtThePlayhead in scoped halo run 39329203917 (queued)
 2026-10-19T22:17Z	heartbeat	scoped halo run 39329203917 (e50f30b3, has #3319) still queued; 21 runs queued repo-wide
 2026-10-19T22:38Z	heartbeat	scoped halo run 39329203917 (e50f30b3, has #3319) still queued; 23 runs queued repo-wide
+2026-10-19T23:01Z	heartbeat	scoped halo run 39329203917 (e50f30b3, has #3319) still queued; 21 runs queued repo-wide
