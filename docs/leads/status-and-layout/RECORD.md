@@ -4,7 +4,7 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 2
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: lane merges #3075 (SL-5) and #3069 (SL-7); SL-4 building (wf_02e9365c-cbf); then wave 3: SL-6 once SL-4 and SL-5 merge
+Next: lane merges #3087 (SL-4, macOS build pending); then wave 3: SL-6 (SL-4 and SL-5 merged; MetadataInspector header gap); SL-a merged-done waits on a green Linux dev run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,8 +20,8 @@ Next: lane merges #3075 (SL-5) and #3069 (SL-7); SL-4 building (wf_02e9365c-cbf)
 | SL-2 | SL-a | 1 | status contract and statusRow; empty inspector header; MJ1; SL-5 tests disabled; model C4 part | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json, docs/c4/parts/creative-apps/library-model/library-model-sources.json | LibraryStatusTextTests | #3004 | merged d6b996d1 |
 | SL-3 | SL-b | 1 | J12 written whole, skipped "waits on SL-4" | UITests/LibraryJourneyTests+Layout.swift | J12 compiles and skips | #2993 | merged 562f2125 |
 | SL-4 | SL-b | 2 | LibraryStatusBar under grid and loupe from statusRow | Sources/LibraryApp/LibraryStatusBar.swift, Tests/AppSnapshotTests/LibraryStatusSnapshots.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | LibraryStatusSnapshots, J12 | #3087 | pr-open |
-| SL-5 | SL-c | 2 | inspector header facts and dateText | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json | LibraryStatusTextTests (SL-5 half) | #3075 | pr-open |
-| SL-7 | SL-c | 2 | layout snapshots at each width | Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift | LibraryLayoutSnapshots | #3069 | pr-open |
+| SL-5 | SL-c | 2 | inspector header facts and dateText | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json | LibraryStatusTextTests (SL-5 half) | #3075 | merged a01d82b7 |
+| SL-7 | SL-c | 2 | layout snapshots at each width | Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift | LibraryLayoutSnapshots | #3069 | merged e0b0ac66 |
 | SL-6 | SL-c | 3 | LibraryInspector header library.inspector.header | Sources/LibraryApp/LibraryInspector.swift, Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift | LibraryInspectorSnapshots | - | planned |
 | SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | - | planned |
 

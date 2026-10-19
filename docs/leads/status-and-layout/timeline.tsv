@@ -33,3 +33,6 @@ utc	stage	event	ref	note
 02:33Z	3 wave 2	pr-open	#3087	SL-4 opened (contract check pending in wf_02e9365c-cbf); gap #3088 filed for #1184
 02:33Z	-	check	SL-a	CI 39188162085 on 17dc84c7 pending; not merged-done yet
 02:34Z	3 wave 2	check	#3087	SL-4 contract check ok, head ff42ef50; waits on lane macOS build
+02:56Z	3 wave 2	merged	#3075	SL-5 merged a01d82b7
+02:56Z	3 wave 2	merged	#3069	SL-7 merged e0b0ac66
+02:56Z	-	check	SL-a	CI 39188162085 still pending; no dev Linux run yet
