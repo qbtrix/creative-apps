@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-19T02:28:31Z	watch	39183953361 (124fe38c, #3054 only): scroll window bodies 0/1 (was 0 and drifting), selection 10; J2 still red (no #3053), audit identifier 2 unnamed 0, no crashes. Scoped library 39189402196 on 17dc84c (has #3053+#3054) still queued
 2026-10-19T02:50:34Z	watch	02:50 scoped library 39189402196 (17dc84c) still queued 31 min: macOS runners busy with dev CI 39180214762 (since 00:18, likely hung) and scoped suiteui/flare/design/photo ahead of it
 2026-10-19T03:12:27Z	watch	03:12 scoped library 39189402196 (17dc84c) still queued (53 min); dev CI 39180214762 has cleared, scoped photo and 4 macOS builds hold the runners
+2026-10-19T03:33:55Z	watch	03:33 scoped library 39189402196 (17dc84c) macOS (library) job 117858667692 started 03:14, running
