@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "Opens a 12-frame animation whose ball moves x 0 to 110, selects everything (a script runs one step or more) and exports frame 6 as SVG, the ball drawn at x 60; a script writes one file per input, so one frame.",
+  "inputs": ["input/*.flare"],
+  "steps": [
+    {"id": "edit.select-all", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-frame-6", "format": "svg", "options": {"frames": [6]}},
+  "expect": {
+    "out/ball-frame-6.svg": {"sha256": "341fac91392bafbd4817302cff20f3f13a5f4a129b63cad9358a7ac07ad2544b"}
+  },
+  "platforms": ["linux", "macos"]
+}
