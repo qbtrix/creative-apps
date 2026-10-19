@@ -9,7 +9,7 @@
 // the main actor; its result goes back through showLoupeRender or
 // failLoupeRender, which keep only the current token's (latest wins). The
 // neighbours are decoded ahead so stepping is quick. Every state change is a
-// LibraryCatalog method.
+// LibraryCatalog method; each menu item runs a `LibraryAction`.
 import AppKit
 import LibraryModel
 import SwiftUI
@@ -44,27 +44,23 @@ struct LoupeRenderResult: Sendable {
 
 extension LibraryWindow {
     var viewMenu: LibraryMenu.Viewing {
-        let inGrid = model.mode == .grid
-        let inLoupe = model.mode == .loupe && model.loupeItem != nil
-        let scale = model.loupeZoom.scale(fit: areas.loupe.fitScale)
-        let canZoomIn = LoupeZoom.steps.contains { $0 > scale * 1.0001 }
-        let canZoomOut = LoupeZoom.steps.contains { $0 < scale / 1.0001 }
+        let fit = areas.loupe.fitScale
         return LibraryMenu.Viewing(
-            grid: enabled(model.mode == .loupe) { model.showGrid() },
-            loupe: enabled(inGrid && !model.isSelectedCollectionEmpty) { model.showLoupe() },
-            zoomIn: inGrid
-                ? enabled(model.canShowLargerThumbnails) { model.stepCellSize(by: 1) }
-                : enabled(inLoupe && canZoomIn) { model.stepZoom(by: 1, fitScale: areas.loupe.fitScale) },
-            zoomOut: inGrid
-                ? enabled(model.canShowSmallerThumbnails) { model.stepCellSize(by: -1) }
-                : enabled(inLoupe && canZoomOut) { model.stepZoom(by: -1, fitScale: areas.loupe.fitScale) },
-            zoomToFit: enabled(inLoupe && model.loupeZoom != .fit) { model.zoomLoupe(.fit) },
-            actualSize: enabled(inLoupe && model.loupeZoom != .actual) { model.zoomLoupe(.actual) },
-            setSort: enabled(!model.order.isEmpty) { (sort: LibrarySort) in model.setSort(sort) }, sort: model.sort,
-            first: enabled(inLoupe && model.canShowPreviousInLoupe) { model.showFirstInLoupe() },
-            last: enabled(inLoupe && model.canShowNextInLoupe) { model.showLastInLoupe() },
+            grid: act(.showGrid),
+            loupe: act(.showLoupe),
+            zoomIn: act(.zoomIn(fitScale: fit)),
+            zoomOut: act(.zoomOut(fitScale: fit)),
+            zoomToFit: act(.zoomToFit),
+            actualSize: act(.actualSize),
+            setSort: enabled(model.help(.setSort(model.sort)) == nil) { (sort: LibrarySort) in
+                try? model.run(.setSort(sort))
+            }, sort: model.sort,
+            first: act(.showFirst),
+            last: act(.showLast),
             zoomInTitle: model.zoomInTitle, zoomOutTitle: model.zoomOutTitle,
-            zoomTo: enabled(inLoupe) { (scale: Double) in loupeAreaZoom(to: scale) },
+            zoomTo: enabled(model.help(.zoomTo(1, fitScale: fit)) == nil) { (scale: Double) in
+                try? model.run(.zoomTo(scale, fitScale: areas.loupe.fitScale))
+            },
             fitMeasured: { fit in if areas.loupe.fitScale != fit { areas.loupe.fitScale = fit } })
     }
 
@@ -76,11 +72,6 @@ extension LibraryWindow {
         model.loupeFocusChanged(from: areas.thumbnails.store.cache)
         loupeAreaRender(.full)
         loupeAreaPrefetch()
-    }
-
-    /// The canvas's pinch and its own zoom keys: its fit scale is Zoom to Fit.
-    private func loupeAreaZoom(to scale: Double) {
-        model.zoomLoupe(abs(scale - areas.loupe.fitScale) < 0.0001 ? .fit : .scale(scale))
     }
 
     /// The screen's long side in pixels: the size the loupe renders at.
