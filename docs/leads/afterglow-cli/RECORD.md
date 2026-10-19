@@ -69,3 +69,9 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - CLIFileSafetyTests gated `.enabled(if: routed)` (routed = CLI.run(["list-apps"]) != 69): they turn on by themselves when CL-4 lands.
 - For CL-10: Sources/AfterGlowCLI/main.swift still calls CLI.run(args, out:err:); must become CLI.run(args, io: LiveIO()) or the binary never touches disk. Router: every write error except CLIIOError.exists → 74.
 - Public HeadlessApp.session(reading:io:) lives in LiveIO.swift. #3149 edits cli-runner.json `description` (possible key conflict with CL-4).
+
+## CL-4 handoff notes (PR #3151, head 701ca29)
+- Router CLI.run(_:apps:io:) over CLI.registry = Apps.all + [Apps.fake]; files only via CLIIO. Order: exists check (73) → availability (69) → run → write. Write errors except CLIIOError.exists → 74. Mutate 5/5 AfterGlowCLICore.Arguments.
+- main.swift unchanged: still CLI.run(args, out:err:) which now runs over a fresh FakeIO → CL-10 must switch it to CLI.run(args, io: LiveIO()).
+- run and mcp still route to ScriptRunner / MCPServer stubs (69).
+- Branched before CC-7 #3120 merged: command runs exit 69 "notBuilt" on its base. Four CLIArgsTests disabled "waits on CC-7" (everyCommandFormAnswersWithOneObject, catalogExitCodes, goldenRunOK, lj1FakeSession). With CC-7 now on dev, a follow-up (folded into CL-10 or a small fixer once #3149 and #3151 merge) turns these on and checks the CC-7-dependent CLIFileSafetyTests cases (forceReplacesWhole, inPlaceIsExplicit success, atomicWrite rect.add, directoryIs74 rect.add), which #3149's `routed` gate enables automatically.
