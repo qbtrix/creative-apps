@@ -81,3 +81,5 @@ Next: SL-8 #3230 merged cd7d4120; once a dev run containing it has a green Linux
 - 2026-10-19T16:35Z check: dev still b3011ab9. Feature-done #3292 waiting on lane sweep.
 
 - 2026-10-19T16:57Z heartbeat: dev at ed4d55fd; none of this lead's PRs merged yet; waiting on the lane sweep.
+
+- 2026-10-19T17:27Z: #3292 waiting on lane sweep; footer stripped
