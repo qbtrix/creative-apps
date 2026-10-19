@@ -9,7 +9,8 @@
 // `halo.layer.row.<layer id>`, its parts `halo.layer.<layer id>.<part>`.
 // Each row's decoration carries its kind's SF Symbol, its tooltip
 // (HaloLayerKind.rowHelp: how to rename and reorder it) and its VoiceOver
-// value naming the kind ("Solid layer"). A click selects (`selectLayer`); a
+// value naming the kind ("Solid layer"); names draw at the inspector's label
+// size, like the rows above the list. A click selects (`selectLayer`); a
 // double-click on the name, Return on the focused row or the Rename action
 // opens the row's rename field, which sends `renameLayer(id, name)` and closes
 // (the Model refuses a blank name). A drop goes out as LayerTreeList's
@@ -54,6 +55,8 @@ struct HaloLayerList: View {
                         return nil
                     },
                     onAction: act)
+                // Names at the inspector's label size, as the Parent and Blend rows above.
+                .font(SuiteFont.inspectorLabel)
             }
             if let refusal = rowRefusal(in: layers) {
                 InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
