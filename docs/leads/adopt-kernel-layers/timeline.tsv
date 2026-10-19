@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-19T15:54:33Z	heartbeat	check	-	#3287 open in lane; no supervisor answer yet on #1934-#1936; hand-offs unchanged
 2026-10-19T16:17:18Z	heartbeat	check	-	#3287 open in lane (lane backlog: batch -6 queued); no supervisor answer on #1934-#1936; hand-off owners unchanged
 2026-10-19T16:39:19Z	heartbeat	check	-	#3287 still open in lane; main at 955f02d; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T17:00:47Z	heartbeat	check	#3287	lane sweep 39285705464 rates #3287 eligible (Fast-Check marker), waiting on a batch; main at b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
