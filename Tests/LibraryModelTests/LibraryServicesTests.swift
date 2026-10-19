@@ -125,8 +125,8 @@ private func liveServices() -> LibraryServices {
     #expect(services.unavailable["importer"] == nil && services.unavailable["culling"] == nil)
     #expect(services.unavailable["coding"] == nil && services.unavailable["loupe"] == nil)
     #expect(services.unavailable["thumbnails"] == nil)
-    #expect(services.unavailable["develop"] == nil)
-    #expect(services.unavailable.count == 2)
+    #expect(services.unavailable["develop"] == nil && services.unavailable["exporter"] == nil)
+    #expect(services.unavailable.count == 1)
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })
