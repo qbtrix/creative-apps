@@ -13,9 +13,9 @@ import Testing
         var doc = try FlareHeadless.new(.object(["width": .number(200), "height": .number(100), "durationFrames": .number(12)]))
         let square = [(0.0, 0.0), (20, 0), (20, 20), (0, 20)].map { FlareCore.Point(x: $0.0, y: $0.1) }
         let steps: [any FlareCore.Command] = [
-            AddLayer(owner: .scene("scene-1"), layer: Layer(id: "ball", name: "Ball", shapes: [FlareShape(points: square)])),
-            SetKeyframe(owner: .scene("scene-1"), layerID: "ball", property: "x", keyframe: FlareCore.Keyframe(frame: 0, value: 0)),
-            SetKeyframe(owner: .scene("scene-1"), layerID: "ball", property: "x", keyframe: FlareCore.Keyframe(frame: 11, value: 110)),
+            AddLayer(owner: .scene("scene-1"), layer: Layer(id: "layer-1", name: "Ball", shapes: [FlareShape(points: square)])),
+            SetKeyframe(owner: .scene("scene-1"), layerID: "layer-1", property: "x", keyframe: FlareCore.Keyframe(frame: 0, value: 0)),
+            SetKeyframe(owner: .scene("scene-1"), layerID: "layer-1", property: "x", keyframe: FlareCore.Keyframe(frame: 11, value: 110)),
         ]
         for step in steps {
             _ = try FlareHeadless.catalog.run(FlareWorkspace.catalogID(type(of: step).id), params: JSONValue(encoding: step), on: &doc)
