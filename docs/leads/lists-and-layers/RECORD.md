@@ -2,9 +2,9 @@
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: goldens from 39175856233 -> golden PR
+Stage: golden PR #3047 open (LL-16 baselines)
 Base: 2e27b8db (origin/dev)
-Next: open sidebar golden PR, read list journeys
+Next: read 39175856233 journeys: #3026-#3029 were filed from 203e7d9, before #2992; close those that pass, then LL-17
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
