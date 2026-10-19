@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 4 build wave 3
 Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: wave 3 builders running (CL-3 CL-args, CL-6 CL-batch, CL-8 CL-jobs; checks-first, disabled). CL-2 #3100 merged 04:13Z (CL-a contract on dev). After wave 3: CL-4, CL-7, CL-9 bodies.
+Next: wave 3 PRs in lane (#3118 CL-3, #3123 CL-8, #3124 CL-6). After each merges: CL-4 (after #3118), CL-5, CL-7 (after #3124), CL-9 (after #3123).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -57,3 +57,9 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - Assumed report: RealJobs.check prints one JSON object: "ok": true on pass; "ok": false + non-zero exit on failure; "skipped": "<reason>" + exit 0 on skip ("macOS-only: <why>" or "waits on image-codecs").
 - Fixtures export with "format": "json"; output extension comes from the format. Broken fixture fake/wrong-sha differs in the last hex digit (catches .fullDigest).
 - The pixel-expectation test needs updating once image-codecs is bumped in.
+
+## CL-6 handoff notes (PR #3124, head 458e9ec)
+- BatchTests (16) disabled "waits on CL-7"; also need CC-7 runBatch. Fixtures in Tests/AfterGlowCLITests/Fixtures/Batch/, loaded via #filePath into FakeIO.
+- Fixed choices for CL-7: any refused input in a run exits 70 and the report still prints; output.format equal to the app's native extension ("fake") saves natively; report paths are CLIIO.read-style (batch/out/beach-small.fake).
+- Exit codes: version != 1 → 65; unknown app/step → 64 naming it, nothing written; missing script 74, malformed 65; empty pattern 65; collisions 73 unless force.
+- hundredInputsWithinBudget only prints; ask supervisor if it should join Tests/perf-suites.txt.
