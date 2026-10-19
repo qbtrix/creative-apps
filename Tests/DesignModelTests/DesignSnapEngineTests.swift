@@ -2,8 +2,8 @@
 // `cards` fixture. Design's candidates feed the kernel's snap engines: A's box
 // near B's left edge and C's top snaps by (2.6, -0.4) from the lines; C's box at
 // x 603 snaps -3 to an equal gap; B's box near the middle centres between A and
-// C; and the gaps and spacing hints at each snapped place. SN-1 writes it,
-// disabled until SN-3 fills the engines. Runs on Linux and macOS.
+// C; and the gaps and spacing hints at each snapped place. SN-1 wrote it
+// disabled; SN-3 turned it on. Runs on Linux and macOS.
 import DesignModel
 import SuiteKernel
 import Testing
@@ -21,7 +21,7 @@ import Testing
         axis == .x ? [box.minX, (box.minX + box.maxX) / 2, box.maxX] : [box.minY, (box.minY + box.maxY) / 2, box.maxY]
     }
 
-    @Test(.disabled("waits on SN-3")) func walkEngine() {
+    @Test func walkEngine() {
         let cards = DesignFixtures.cards
 
         // A, dragged to (297.4, 100.4): its left edge lines up with B's at x 300, its top with C's at y 100.
