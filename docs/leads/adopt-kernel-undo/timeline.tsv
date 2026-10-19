@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-19T19:34:31Z	heartbeat	check	-	no supervisor answer; hand-offs still open; full runs 39296061014 queued, 39311818078 (dev dda01faa, contains 90e7a0c) pending; main b3011ab
 2026-10-19T19:56:06Z	heartbeat	check	-	no change: no supervisor answer; hand-offs open; runs 39296061014 queued, 39311818078 pending; main b3011ab
 2026-10-19T20:18:04Z	heartbeat	check	-	no change: no supervisor answer; hand-offs open; runs 39296061014 queued, 39311818078 pending; main b3011ab
+2026-10-19T20:40:13Z	heartbeat	check	-	runs 39311818078/39296061014 still queued; main b3011ab9; no supervisor answer; hand-off owners not done
