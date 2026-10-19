@@ -47,7 +47,7 @@ private final class ThreadProbe: Sendable {
         let launched = await FlareAutosave(recovery: file).launch()
         let offer = try #require(launched)
         #expect(offer.document == FlareFixtures.bounce)
-        #expect(offer.date == date)
+        #expect(offer.session.savedAt == date)
         let time = date.formatted(date: .abbreviated, time: .shortened)
         #expect(offer.message == "Restore the unsaved animation from \(time)?")
         #expect(exists(file), "the file stays until Restore or Discard")

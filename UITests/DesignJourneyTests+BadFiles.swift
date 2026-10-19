@@ -3,9 +3,9 @@
 // fixture: the test writes four files into its own temp folder (not JSON, a
 // version 99 file, a file with no pages, and one that uses the id node-2
 // twice) and launches Design once per file with `-DesignOpenFile <path>`.
-// Each open ends in one system alert whose title is DesignWindow's
-// "<file> can't be opened. <reason>", the reason word for word from
-// DesignFileError; after OK the window stays empty (the New File empty
+// Each open ends in one system alert (DesignFileProblem) titled
+// "<file> can't be opened." whose message is the reason word for word from
+// DesignFileError, so no empty text field trips the contrast audit (#3052); after OK the window stays empty (the New File empty
 // state, no canvas). Live services only: FakeFiling has no version check, so
 // a fake-mode run skips. One shot per file with its alert up,
 // `design-bad-files-<n>`, and one after OK, `design-bad-files-<n>-ok`.
@@ -55,11 +55,13 @@ final class DesignBadFilesJourneyTests: XCTestCase {
             let sheet = design.app.sheets.firstMatch
             let alert = sheet.waitForExistence(timeout: 30) ? sheet : design.app.dialogs.firstMatch
             XCTAssert(alert.waitForExistence(timeout: 5), "opening \(item.file) showed no alert")
-            let message = "\(item.file) can't be opened. \(item.reason)"
             let title = alert.staticTexts.matching(
                 NSPredicate(format: "label BEGINSWITH %@ OR value BEGINSWITH %@", item.file, item.file)).firstMatch
             XCTAssert(title.waitForExistence(timeout: 5), "the \(item.file) alert doesn't name the file")
-            XCTAssertEqual(text(of: title), message, "the \(item.file) alert's words")
+            XCTAssertEqual(text(of: title), "\(item.file) can't be opened.", "the \(item.file) alert's title")
+            let message = alert.staticTexts.matching(
+                NSPredicate(format: "label == %@ OR value == %@", item.reason, item.reason)).firstMatch
+            XCTAssert(message.waitForExistence(timeout: 5), "the \(item.file) alert's message isn't the reason")
             design.shot(step)
 
             alert.buttons["OK"].click()
