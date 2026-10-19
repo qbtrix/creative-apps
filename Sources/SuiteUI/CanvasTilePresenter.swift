@@ -57,7 +57,7 @@ public final class CanvasTilePresenter: MetalPresenting {
     /// and a later `show` of tiles writes over them as before. Nil when Metal won't make it.
     public func residentTexture(on device: any MTLDevice, width: Int, height: Int) -> (any MTLTexture)? {
         let wanted = CGSize(width: width, height: height)
-        if let texture, texture.device === device, size == wanted, texture.usage.contains(.shaderWrite) {
+        if let texture, texture.device.registryID == device.registryID, size == wanted, texture.usage.contains(.shaderWrite) {
             (images, dirty) = ([:], [])
             return texture
         }
@@ -71,7 +71,8 @@ public final class CanvasTilePresenter: MetalPresenting {
 
     /// The document texture with every dirty tile written; nil when Metal won't make it.
     private func upload(on device: any MTLDevice) -> (any MTLTexture)? {
-        if texture == nil || texture?.device !== device {
+        // The same GPU by registry id: two MTLDevice objects for one GPU must not drop a texture a producer wrote.
+        if texture == nil || texture?.device.registryID != device.registryID {
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: .rgba8Unorm, width: Int(size.width), height: Int(size.height), mipmapped: false)
             descriptor.usage = [.shaderRead, .shaderWrite]

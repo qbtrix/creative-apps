@@ -113,6 +113,33 @@ import Testing
         print("PHOTO-RESIDENT-PARITY \(canvas.width)x\(canvas.height): texture bytes worst \(worst), \(uploads) tiles uploaded once")
     }
 
+    @MainActor @Test(.enabled(if: device != nil)) func theLiveHostShowsTheResidentPictureInThePresentersTexture() async throws {
+        var workspace = try Self.document()
+        for layer in workspace.layers { if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) } }
+        let canvas = try #require(workspace.canvas)
+        // As the app wires it: the host on the system device, the backend on MetalBackend.defaultDevice.
+        let host = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 400, height: 300))
+        let presenter = CanvasTilePresenter()
+        host.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        let renderer = CanvasRenderer()
+        renderer.tiles.attach(host)
+        renderer.use(PhotoRenderRoute(preferred: try Self.metal()))
+        renderer.show(workspace)
+        for _ in 0..<600 where renderer.revision != workspace.revision { try await Task.sleep(for: .milliseconds(20)) }
+        #expect(renderer.revision == workspace.revision, "\(renderer.failure ?? "the picture never landed")")
+        host.layoutSubtreeIfNeeded()
+        // The resident path drew it: layer tiles went up once, and no tile bytes came back to the canvas.
+        #expect((renderer.route.residentTiles?.uploads ?? 0) > 0)
+        #expect(renderer.tiles.images.isEmpty, "tile bytes came back on the resident path")
+        let texture = try #require(presenter.texture)
+        #expect(texture.width == canvas.width && texture.height == canvas.height)
+        var bytes = [UInt8](repeating: 0, count: canvas.width * canvas.height * 4)
+        texture.getBytes(&bytes, bytesPerRow: canvas.width * 4, from: MTLRegionMake2D(0, 0, canvas.width, canvas.height), mipmapLevel: 0)
+        let reference = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+        let worst = zip(bytes, reference).map { abs(Int($0) - Int($1)) }.max() ?? 0
+        #expect(worst <= Int(ParityTolerance.standard.bytes), "the presenter's texture differs from the reference by up to \(worst)")
+    }
+
     @MainActor @Test(.enabled(if: device != nil)) func switchingTheChoiceRedrawsOnTheNewBackend() async throws {
         let preference = FakeRenderingPreference(choice: .cpu)
         let metal = try Self.metal()
