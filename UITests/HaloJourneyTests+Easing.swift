@@ -214,8 +214,7 @@ final class HaloEasingJourneyTests: XCTestCase {
     /// focuses the timeline), then Home and → `frame` times; the status
     /// timecode reads the frame.
     @MainActor private func scrubFromTheKeys(to frame: Int, _ halo: Journey) {
-        let title = halo.app.buttons.matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
+        let title = halo.trackName("Ball")
         XCTAssert(title.waitForExistence(timeout: 5), "no Ball track title in the timeline")
         title.click()
         halo.press(.home)

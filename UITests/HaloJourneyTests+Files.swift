@@ -8,7 +8,7 @@
 // 12) with Edit > Undo disabled. XCUITest reads most SwiftUI accessibility
 // values as empty (#262), so `halo.file` carries the save status as its
 // label; the lane's key count is read as H-J6's expectLane reads it, the
-// value of the `halo.timeline.track` labelled Ball. Undo's "Nothing to
+// `halo.timeline.keys` readout labelled Ball (#262). Undo's "Nothing to
 // undo." help is proven by HaloHistoryCommandTests (help tags on menu items
 // don't read reliably).
 // An edit reads "Edited", in `halo.file` and the title bar's subtitle;
@@ -59,9 +59,8 @@ final class HaloFilesJourneyTests: XCTestCase {
         // Ball and Floor.
         expectLayerRows(["comp-2-layer-2", "comp-2-layer-1"], halo)
         expectRowCount(2, halo)
-        let lane = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
-        XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane in Outro's timeline")
+        let lane = halo.trackLane("Ball")
+        XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane (halo.timeline.lane.*) in Outro's timeline")
         expectLane("Ball", keys: 3, halo)
         expectUndoDisabled(halo)
         halo.element("halo.layer.row.comp-2-layer-2").click()
