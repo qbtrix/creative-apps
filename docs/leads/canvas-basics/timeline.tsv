@@ -105,3 +105,4 @@ utc	stage	event	ref	note
 2026-10-19T18:15Z	3	check	-	39278490377 cancelled; waiting 39296061014 / design 39297097650; 0 findings
 2026-10-19T18:37Z	3	check	-	39296061014 Linux green, macOS pending; 0 findings
 2026-10-19T18:58Z	3	check	-	39296061014 macOS pending; 39300369891 cancelled; 39306309509 pending; 0 findings
+2026-10-19T19:19Z	3	check	-	waiting on 39296061014/39297097650; 39306309509 cancelled; 39308088122 pending
