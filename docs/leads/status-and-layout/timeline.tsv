@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-19T12:59Z	check	SL-c all merged; awaiting dev Linux run
 2026-10-19T14:23Z	SL-c done	feature-done PR in gate
 2026-10-19T15:59Z	heartbeat	feature-done gate rerun
+2026-10-19T16:07Z	heartbeat	-	feature-done PR gating
