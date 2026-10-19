@@ -13,7 +13,7 @@ import SuiteKernel
     /// Add, then a select of a rect that isn't there (refused), then a move.
     static let refusedSecond = [add, missing, move]
 
-    @Test(.disabled("waits on CC-7")) func atomicBatchRollsBackOnARefusal() throws {
+    @Test func atomicBatchRollsBackOnARefusal() throws {
         var doc = FakeCanvasDocument.fixture
         let before = try FakeState(doc)
         let report = catalog.runBatch(Self.refusedSecond, on: &doc, atomic: true)
@@ -23,7 +23,7 @@ import SuiteKernel
         #expect(report.steps.last?.error?.contains("There is no rect 9.") == true)
     }
 
-    @Test(.disabled("waits on CC-7")) func atomicBatchRollsBackAnUnavailableStep() throws {
+    @Test func atomicBatchRollsBackAnUnavailableStep() throws {
         var doc = FakeCanvasDocument.fixture
         let before = try FakeState(doc)
         let report = catalog.runBatch([CommandEnvelope(id: "rect.select", params: .object(["id": .number(2)])), Self.move, Self.add],
@@ -32,21 +32,21 @@ import SuiteKernel
         #expect(report.stoppedAt == 1 && report.rolledBack && report.steps.last?.error?.contains("Unlock Rect 2 first.") == true)
     }
 
-    @Test(.disabled("waits on CC-7")) func nonAtomicBatchStopsAndKeepsWhatRan() throws {
+    @Test func nonAtomicBatchStopsAndKeepsWhatRan() throws {
         var doc = FakeCanvasDocument.fixture
         let report = catalog.runBatch(Self.refusedSecond, on: &doc, atomic: false)
         #expect(doc.rects.count == 3 && doc.history.steps == ["Add Rectangle"] && doc.rects.last?.x == 1)
         #expect(report.stoppedAt == 1 && !report.rolledBack && report.steps.count == 2, "the move after the refusal ran")
     }
 
-    @Test(.disabled("waits on CC-7")) func unknownStepStopsTheBatch() throws {
+    @Test func unknownStepStopsTheBatch() throws {
         var doc = FakeCanvasDocument.fixture
         let report = catalog.runBatch([Self.add, CommandEnvelope(id: "rect.nope", params: .object([:])), Self.move], on: &doc, atomic: false)
         #expect(report.stoppedAt == 1 && report.steps.last?.ok == false && report.steps.last?.error?.contains("rect.nope") == true)
         #expect(doc.rects.count == 3 && doc.rects.last?.x == 1)
     }
 
-    @Test(.disabled("waits on CC-7")) func reportNamesEveryStepWhenAllRun() throws {
+    @Test func reportNamesEveryStepWhenAllRun() throws {
         var doc = FakeCanvasDocument.fixture
         let steps = [Self.add, Self.move, CommandEnvelope(id: "rect.select", params: .object(["id": .number(1)])),
                      CommandEnvelope(id: "rect.list", params: .object([:]))]
@@ -60,7 +60,7 @@ import SuiteKernel
         #expect(try JSONValue(encoding: report).decode(BatchReport.self) == report)
     }
 
-    @Test(.disabled("waits on CC-7")) func emptyBatchDoesNothing() throws {
+    @Test func emptyBatchDoesNothing() throws {
         var doc = FakeCanvasDocument.fixture
         let before = try FakeState(doc)
         #expect(catalog.runBatch([], on: &doc, atomic: true) == BatchReport(steps: [], stoppedAt: nil, rolledBack: false))
