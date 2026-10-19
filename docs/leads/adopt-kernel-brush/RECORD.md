@@ -42,3 +42,4 @@ Next: #3011 (AB-p1) waits on the lane's macOS build; then AB-p2 (feature-done): 
 - 2026-10-18T23:56Z #3030 AB-p2 clean, lane macOS build 39175685843 queued (runner backlog).
 - 2026-10-19T00:16Z #3030 clean; lane macOS build 39175685843 still queued.
 - 2026-10-19T00:36Z #3030 AB-p2 lane macOS build 39175685843 in progress.
+- 2026-10-19T00:56Z #3030 AB-p2 mac build 39175685843 succeeded; waiting for the lane's next sweep to merge.
