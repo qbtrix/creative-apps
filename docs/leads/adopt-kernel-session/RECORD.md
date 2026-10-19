@@ -4,7 +4,7 @@ Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
 Run: act-1a1540ed5f3-c3x9 (slices AD-photo, AD-halo, AD-library; AD-flare, AD-design done in act-1a1509b245f-653k)
 Stage: 3 wave B
 Base: 6e70826b (origin/dev); lead branch on main 6f9a2b88
-Next: AD-p2 #3253 (8e5d40de) and AD-h2 #3252 (354e39a8) on dev; candidate runs: full 39311818078 (dda01faa, pending), full 39296061014 (1b33afbb, queued), scoped suiteui 39292745070 (8f405311, queued); full 39308088122, 39306309509, 39300369891 and 39294573974 were cancelled by newer dispatches. Green → Belt-Slice-Done AD-photo, AD-halo. AD-l1 blocked on adopt-kernel-undo:AU-library (no PR yet, checked 2026-10-19T19:35Z). Open findings: 0
+Next: AD-p2 #3253 (8e5d40de) and AD-h2 #3252 (354e39a8) on dev; candidate runs: full 39311818078 (dda01faa, pending), full 39296061014 (1b33afbb, queued), scoped suiteui 39292745070 (8f405311, queued); full 39308088122, 39306309509, 39300369891 and 39294573974 were cancelled by newer dispatches. Green → Belt-Slice-Done AD-photo, AD-halo. AD-l1 blocked on adopt-kernel-undo:AU-library (no PR yet, checked 2026-10-19T19:55Z). Open findings: 0
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
