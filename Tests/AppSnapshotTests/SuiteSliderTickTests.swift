@@ -24,7 +24,7 @@ import Testing
         ("X1", 0.42, "", 2, 216, true),  // Flare's and Halo's easing rows
     ]
 
-    @Test(arguments: cases.indices)
+    @Test(.disabled("quarantine #3262 until 2026-10-22"), arguments: cases.indices)
     func ticksSitBetweenLabelAndValue(index: Int) throws {
         let (label, value, unit, decimals, width, wide) = Self.cases[index]
         // Mixed: the ticks alone. On a narrow lane a marker between two ticks

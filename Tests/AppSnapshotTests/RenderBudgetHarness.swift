@@ -21,7 +21,10 @@
 // is a window-activation click, which a SwiftUI gesture ignores unless it opts
 // in (`allowsWindowActivationEvents`); SwiftUI's own canvases and AppKit
 // controls take them, inspector scrub rows and Halo's viewer don't yet. Keys
-// need a key window, which it can't have either. macOS only.
+// need a key window, which it can't have either. Nor can it run a system
+// drag: a real session waits for a window-server mouse-up forever (#2971), so
+// once a harness window opens, DragSessions hands every `.draggable` drag an
+// idle session that never starts. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -57,6 +60,7 @@ struct RenderStep: CustomStringConvertible {
     private var stepTimes: [Double] = []
 
     init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820)) {
+        _ = DragSessions.faked
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
         // turned on before the window exists so every run builds it the same way.
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
@@ -326,5 +330,38 @@ final class CountingHostingView<Content: View>: NSHostingView<Content> {
         let began = clock.now
         super.layout()
         layoutTime += Double((clock.now - began) / .microseconds(1)) / 1000
+    }
+}
+
+/// The harness never starts a system drag. A drag over a `.draggable` view makes SwiftUI call
+/// `NSView.beginDraggingSession`, whose real session starts on the next run-loop turn and then blocks the main
+/// thread until a mouse-up comes from the window server, which a test process never gets: it froze the next test
+/// that turned the run loop, past every time limit (#2971). And ending one with a posted mouse-up left the test
+/// process's main run loop to return, so it exited 0 mid-run. So, once the first harness window opens, the method
+/// is swapped for one that counts the call in `begun` and hands back an idle session that never starts. A step's
+/// cost is measured up to the drag's start; whether a drop lands is a journey's to prove.
+@MainActor enum DragSessions {
+    static var begun = 0
+    static let faked: Void = {
+        let begin = #selector(NSView.beginDraggingSession(with:event:source:))
+        let fake = #selector(NSView.harnessBeginDraggingSession(with:event:source:))
+        guard let original = class_getInstanceMethod(NSView.self, begin),
+            let replacement = class_getInstanceMethod(NSView.self, fake)
+        else {
+            Issue.record("NSView has no beginDraggingSession to replace")
+            return
+        }
+        method_exchangeImplementations(original, replacement)
+    }()
+}
+
+extension NSView {
+    /// Swapped in for `beginDraggingSession(with:event:source:)` by `DragSessions.faked`: counts the call and
+    /// returns a session that was never begun.
+    @objc fileprivate func harnessBeginDraggingSession(
+        with items: [NSDraggingItem], event: NSEvent, source: any NSDraggingSource
+    ) -> NSDraggingSession {
+        DragSessions.begun += 1
+        return NSDraggingSession()
     }
 }
