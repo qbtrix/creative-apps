@@ -118,3 +118,4 @@ utc	stage	event	ref	note
 2026-10-19T14:38Z	5	stage-start	6e70826b	relaunch act-1a1549772b1-qkhs; 39252895176 ui-test running since 14:20Z
 2026-10-19T14:56Z	5	heartbeat	6e70826b	39252895176 macOS ui-test still running (since 14:20Z)
 2026-10-19T15:22Z	5	done	6e70826b	contact sheet on #1503 from 39098181461; gaps #2041 #2042 #2215 #2216 #3258
+2026-10-19T16:47Z	done	stopped	955f02d0	relaunch act-1a1550f3704-6pib; #1503 closed as done; rebased onto main, nothing to build
