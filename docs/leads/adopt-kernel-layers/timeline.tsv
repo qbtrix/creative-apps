@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-19T11:44:04Z	heartbeat	merged	#3216	AL-f3 merged fa8c815; #3217 #3218 waiting on macOS build
 2026-10-19T15:09Z	lead	resume	act-1a154b13dec-71tm	base 6e70826; hand-offs checked
 2026-10-19T15:54:33Z	heartbeat	check	-	#3287 open in lane; no supervisor answer yet on #1934-#1936; hand-offs unchanged
+2026-10-19T16:17:18Z	heartbeat	check	-	#3287 open in lane (lane backlog: batch -6 queued); no supervisor answer on #1934-#1936; hand-off owners unchanged
