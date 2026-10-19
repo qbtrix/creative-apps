@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-19T05:23:10Z	build	merged	#3124	CL-6 merged 05:09:59Z
 2026-10-19T05:23:10Z	build	wave 4 started	-	CL-4 and CL-5 builders started; CL-7 waits on CC-7 #3120; CL-9 waits on #3123
 2026-10-19T05:37:40Z	build	PR opened	#3149	CL-5 CL-args head e45a0da, ci --changed PASS, mutate 6/6, 227+/4 files
+2026-10-19T05:45:57Z	build	builder started	-	CL-7 (CC-7 #3120 merged); #3123 macOS build green, merges next sweep
