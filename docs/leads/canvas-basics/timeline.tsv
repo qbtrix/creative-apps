@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-19T21:16Z	3	critics	-	CB-b #3334-#3339, CB-c #3340-#3345; fix round 1 wf_2c06ed4c-eff
 2026-10-19T21:34Z	3	check	-	fix round 1 running
 2026-10-19T21:43Z	3	fix	3360	round 1: #3334 closed on dev, #3360 opened, 3 deferred
+2026-10-19T21:49Z	3	fix	3365	round 1 done; r-b3 gate rerun
