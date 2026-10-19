@@ -5,12 +5,15 @@
 // 1440 × 900 and 1920 × 1080 with `-SuiteWindowSize <w>x<h>`, as Halo's
 // testLayoutAtWidths does, and checks only what lies on the runner's display.
 // Each size: the status row (`library.status`, its pills `library.status.*`)
-// reads "24 photos" and "160 pt" on one top edge; the
+// reads "24 photos" and "Thumbnails 160 pt" (#3130), its pills centred on
+// one line (midY: the ids name each pill's text until #3197) without
+// overlapping; the
 // grid's visible cells (`library.grid.cell.<id>`, else buttons whose label
 // holds `IMG_`) line up in rows and columns with equal gaps; Sort By Name,
 // then a click and a Shift-click select five; the inspector's Rating, Flag
 // and Label rows line up; the loupe shows one zoom pill and "1 of 24" once
-// (in its HUD) with the photo centered, and Command-1 shows "Zoom 100%";
+// (in its HUD) with the photo centered and no "Zoom 100%" at Fit (#3135),
+// and Command-1 shows "Zoom 100%";
 // the inspector's one header (`library.inspector.header`) reads "5 Photos"
 // with "Captured" for five photos, and "IMG_0001" with "6000 × 4000" and
 // "JPEG" for one; every control listed in
@@ -46,7 +49,9 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             let window = library.app.windows.firstMatch
             XCTAssert(window.waitForExistence(timeout: 30), "no window opened at \(width)")
 
-            // 1. The status row: "24 photos" and "160 pt", every pill on one top edge, inside the window and the row.
+            // 1. The status row: "24 photos" and "Thumbnails 160 pt", every pill on one centre line (#3131: the
+            //    ids name the pill's text, whose top edge moves with a warning triangle, until #3197), inside
+            //    the window and the row, no two overlapping.
             let status = library.element("library.status")
             XCTAssert(status.waitForExistence(timeout: 10), "no status row (library.status) at \(width)")
             library.shot("layout-\(width)")
@@ -55,15 +60,19 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             }
             let count = Self.text("24 photos", in: status)
             XCTAssert(count.waitForExistence(timeout: 5), "the status row doesn't read 24 photos at \(width)")
-            XCTAssertEqual(Self.text(of: library.element("library.status.cellSize")), "160 pt", "library.status.cellSize at \(width)")
+            XCTAssertEqual(Self.text(of: library.element("library.status.cellSize")), "Thumbnails 160 pt", "library.status.cellSize at \(width)")
             let pills = status.descendants(matching: .any)
                 .matching(NSPredicate(format: "identifier BEGINSWITH 'library.status.'")).allElementsBoundByIndex + [count]
-            let top = count.frame.minY
+            let middle = count.frame.midY
             for pill in pills {
                 let name = pill.identifier.isEmpty ? "the size text" : pill.identifier
-                XCTAssertEqual(pill.frame.minY, top, accuracy: Self.tight, "\(name) is off the row's top edge at \(width)")
+                XCTAssertEqual(pill.frame.midY, middle, accuracy: Self.tight, "\(name) is off the row's centre line at \(width)")
                 XCTAssert(window.frame.insetBy(dx: -1, dy: -1).contains(pill.frame), "\(name) \(pill.frame) is outside the window at \(width)")
                 XCTAssert(status.frame.insetBy(dx: -1, dy: -1).contains(pill.frame), "\(name) \(pill.frame) is outside the row at \(width)")
+            }
+            let lefts = pills.map(\.frame).sorted { $0.minX < $1.minX }
+            for (left, right) in zip(lefts, lefts.dropFirst()) {
+                XCTAssertLessThanOrEqual(left.maxX, right.minX + Self.tight, "status pills \(left) and \(right) overlap at \(width)")
             }
 
             // 2. The visible cells line up in rows and columns with equal gaps; at least 2 columns at 880.
@@ -184,6 +193,8 @@ final class LibraryLayoutJourneyTests: XCTestCase {
         XCTAssert(wait(5) { Self.zoomPills(in: status) == 1 }, "the loupe at Fit shows \(Self.zoomPills(in: status)) zoom pills at \(width)")
         XCTAssertFalse(library.element("library.status.zoom").exists, "the loupe at Fit still shows a Fit pill at \(width)")
         XCTAssertFalse(library.element("library.status.position").exists, "the status row repeats the loupe's place at \(width)")
+        XCTAssert(wait(5) { !Self.text("Zoom 100%", in: status).exists },
+                  "the loupe at Fit reads Zoom 100%, not its fit scale, at \(width) (#3135)")
         let place = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "1 of 24", "1 of 24")
         let places = library.app.windows.firstMatch.staticTexts.matching(place).count
         XCTAssertEqual(places, 1, "\"1 of 24\" shows \(places) times in the loupe at \(width)")

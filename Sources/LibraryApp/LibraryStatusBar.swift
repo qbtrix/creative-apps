@@ -7,6 +7,8 @@
 // tooltip and accessibility hint. The loupe's place is its HUD's. A
 // `.selected` entry draws as an on toggle and a warning or error entry in
 // warning colors. With no row (an empty live catalog) it draws nothing.
+// The identifier and help come last on each trailing view, so they name the
+// pill once ViewerStatusBar makes the capsule one element (#3197).
 // A row without a zoom (the grid) draws no zoom pill; at Fit the loupe's
 // measured fit scale is the one zoom pill.
 import LibraryModel
@@ -23,10 +25,10 @@ struct LibraryStatusBar: View {
             ViewerStatusBar(zoom: row.shownZoom(fitScale: fitScale), size: row.size) {
                 ForEach(row.pills) { pill in
                     Text(pill.text)
+                        .statusPill(Self.style(pill))
                         .help(pill.help)
                         .accessibilityHint(pill.help)
                         .accessibilityIdentifier(Self.identifier(pill))
-                        .statusPill(Self.style(pill))
                 }
             }
             .accessibilityElement(children: .contain)

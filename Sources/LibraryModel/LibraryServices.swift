@@ -15,6 +15,8 @@ public struct LibraryServices: Sendable {
     public var crop: any CropGeometry
     public var exporter: any PhotoExporting
     public var writer: any JPEGWriting
+    /// Crop's Auto (Contracts/CropLeveling.swift); nil until one can level.
+    public var leveler: (any CropLeveling)?
     /// Why a member can't act yet, by member name; empty once all are live.
     public var unavailable: [String: String]
     /// True for `.fake` (fixture data on screen); drives the "Preview data" pill.
@@ -23,11 +25,12 @@ public struct LibraryServices: Sendable {
     public init(decoder: any PhotoDecoding, importer: any PhotoImporting, thumbnails: any ThumbnailProviding,
                 culling: any PhotoCulling, coding: any CatalogCoding, store: any CatalogStoring,
                 loupe: any LoupeImaging, develop: any DevelopRendering, crop: any CropGeometry,
-                exporter: any PhotoExporting, writer: any JPEGWriting,
+                exporter: any PhotoExporting, writer: any JPEGWriting, leveler: (any CropLeveling)? = nil,
                 unavailable: [String: String] = [:], isPreview: Bool) {
         self.decoder = decoder; self.importer = importer; self.thumbnails = thumbnails
         self.culling = culling; self.coding = coding; self.store = store; self.loupe = loupe
         self.develop = develop; self.crop = crop; self.exporter = exporter; self.writer = writer
+        self.leveler = leveler
         self.unavailable = unavailable; self.isPreview = isPreview
     }
 
@@ -39,7 +42,7 @@ public struct LibraryServices: Sendable {
             thumbnails: FakeThumbnails(mode: mode), culling: FakeCulling(mode: mode),
             coding: FakeCatalogCoding(mode: mode), store: FakeCatalogStore(mode: mode),
             loupe: FakeLoupe(mode: mode), develop: FakeDevelop(mode: mode), crop: FakeCrop(),
-            exporter: FakeExporter(mode: mode), writer: FakeJPEGWriter(mode: mode), isPreview: true)
+            exporter: FakeExporter(mode: mode), writer: FakeJPEGWriter(mode: mode), leveler: FakeCrop(), isPreview: true)
     }
 
     /// The live services over LibraryApp's platform adapters. Every member is

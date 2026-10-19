@@ -1,20 +1,19 @@
 // DesignJourneyTests+PerfLayers.swift: layers-panel's perf journey P3
 // (docs/blueprints/design/features/layers-panel.md, Journey steps item 2;
-// blueprint design section 4, P3, and 7.1, QD-S10). On `crowd` (40 frames of
-// 49 layers each, 2,000 layers) at 1024 × 768 it expands every frame's row in
-// Layers, then scrolls the list end to end: down until Frame 1's last row
-// (Rectangle 1, `design.layer.node-2`) shows, and back up until Frame 40's row
-// (`design.layer.node-1951`) does. Frames are expanded bottom up from the
-// keyboard: select Frame 1's row, Right Arrow opens it, Up Arrow moves to the
-// frame above, which opening a lower row never shifts.
+// blueprint design section 4, P3, and 7.1, QD-S10). It opens the `crowd`
+// fixture (`-DesignFixture crowd`: 40 frames of 49 layers each, 2,000 layers)
+// at 1024 × 768, expands every frame's row in Layers, then scrolls the list
+// end to end: down until Frame 1's last row (Rectangle 1, `design.layer.node-2`)
+// shows, and back up until Frame 40's row (`design.layer.node-1951`) does.
+// Frames are expanded bottom up from the keyboard: click Frame 1's row in its
+// blank space (clickDesignLayer, #2496), Right Arrow opens it, Up Arrow moves
+// to the frame above, which opening a lower row never shifts.
 // Report-only (QB-L10; docs/review-rubric.md, How gates are set): the scroll
 // times each scroll call's round trip, which needs the app's main thread to
-// answer, as a coarse sign of a stall, and adds `suite.perf`'s frame intervals
-// when Design's window publishes them (SuiteUI's FrameProbe, #330 and #333).
+// answer, as a coarse sign of a stall, and adds the frame intervals `suite.perf`
+// lists under `-SuitePerfProbe` (SuiteUI's FrameProbe), when it lists any.
 // The numbers go to .build/ui-screens/perf-design-layers.json and attach as
 // "perf-design-layers"; the test asserts only that every row was reached.
-// Written before its fixture (lead.md, contract rule 13): `-DesignFixture
-// crowd` arrives with design-window (D0-5a), so it is skipped by name until then.
 // Frame N's id is node-(50N - 49) and its Text is node-(50N) (DesignFixtures.crowd).
 import XCTest
 
@@ -29,8 +28,7 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
     static let stallMilliseconds = 100.0
 
     /// P3: every frame expanded, scroll Layers to the end and back; report the scroll's timing.
-    @MainActor func testLayerListScroll() throws {
-        throw XCTSkip("waits on design-window D0-5a")
+    @MainActor func testLayerListScroll() {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "crowd showed no page (suite.canvas)")
@@ -52,7 +50,7 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
     @MainActor private func expandEveryFrame(_ design: Journey, _ layers: XCUIElement) {
         let first = row(design, Self.frames[0])
         _ = scroll(layers, until: first, by: -120)
-        first.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        design.clickDesignLayer(Self.frames[0])
         for (index, frame) in Self.frames.enumerated() {
             if index > 0 { design.press(.upArrow) }
             design.press(.rightArrow)
@@ -88,7 +86,7 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
                 numbers["QB-L10 \(series)"] = "p95 \(intervals.p95Refreshes) refreshes (gate 1.5, report-only)"
             }
         } else {
-            numbers["QB-L10"] = "no suite.perf frame intervals: Design's window doesn't publish FrameProbe yet (#330, #333)"
+            numbers["QB-L10"] = "suite.perf listed no frame intervals for this run"
         }
         for (key, value) in numbers.sorted(by: { $0.key < $1.key }) { print("\(key): \(value)") }
         let encoder = JSONEncoder()

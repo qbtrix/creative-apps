@@ -37,6 +37,12 @@ import SwiftUI
         return failures
     }
 
+    /// Drops the held images and requests of `ids` (their develop settings changed).
+    func invalidate(_ ids: Set<String>) {
+        for id in ids { cache.invalidateThumbnail(id) }
+        publish()
+    }
+
     /// Drops every image and request (the catalog was replaced).
     func clear() {
         cache = LibraryThumbnailCache()
@@ -68,6 +74,16 @@ extension LibraryWindow {
     private func thumbnailsVisibleChanged(_ ids: [String]) {
         areas.thumbnails.visible = ids
         runThumbnailRequests(areas.thumbnails.store.request(visible: ids, in: model))
+    }
+
+    /// After a develop edit ends (develop DV-8): drops the held images of
+    /// `ids`, then asks again for the cells last reported on screen, so the
+    /// grid redraws them without waiting for a scroll or a resize.
+    func refreshThumbnails(invalidating ids: Set<String>) {
+        let state = areas.thumbnails
+        state.store.invalidate(ids)
+        guard !state.visible.isEmpty else { return }
+        runThumbnailRequests(state.store.request(visible: state.visible, in: model))
     }
 
     /// A new cell size or display scale: the bucket, then the visible cells again.

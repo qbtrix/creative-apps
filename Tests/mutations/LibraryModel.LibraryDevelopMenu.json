@@ -1,0 +1,23 @@
+[
+  {
+    "label": "a help no longer blocks editing",
+    "file": "Sources/LibraryModel/LibraryDevelop+Menu.swift",
+    "find": "let canEdit = help == nil && targetCount > 0",
+    "replace": "let canEdit = help == nil || targetCount > 0",
+    "tests": "LibraryDevelopMenuTests"
+  },
+  {
+    "label": "Copy Settings runs with several targets",
+    "file": "Sources/LibraryModel/LibraryDevelop+Menu.swift",
+    "find": "canCopySettings: targetCount == 1)",
+    "replace": "canCopySettings: targetCount >= 1)",
+    "tests": "LibraryDevelopMenuTests"
+  },
+  {
+    "label": "Show Original runs in the grid",
+    "file": "Sources/LibraryModel/LibraryDevelop+Menu.swift",
+    "find": "canShowOriginal: canEdit && loupeShowsPhoto,",
+    "replace": "canShowOriginal: canEdit,",
+    "tests": "LibraryDevelopMenuTests"
+  }
+]

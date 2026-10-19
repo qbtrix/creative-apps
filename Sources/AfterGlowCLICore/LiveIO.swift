@@ -35,12 +35,10 @@ public struct LiveIO: CLIIO {
     public init(readLimit: Int64 = LiveIO.defaultReadLimit) { self.readLimit = readLimit }
 
     public func read(_ path: String) throws -> Data {
-        let real = URL(fileURLWithPath: path).resolvingSymlinksInPath().path
-        guard let attributes = try? FileManager.default.attributesOfItem(atPath: real) else { throw CLIIOError.missing(path) }
-        guard attributes[.type] as? FileAttributeType == .typeRegular else { throw LiveIOError.notAFile(path) }
-        let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        guard let (type, size) = Self.follow(path) else { throw CLIIOError.missing(path) }
+        guard type == .typeRegular else { throw LiveIOError.notAFile(path) }
         if size > readLimit { throw LiveIOError.tooLarge(path, size) }
-        let data = try Data(contentsOf: URL(fileURLWithPath: real))
+        let data = try Data(contentsOf: URL(fileURLWithPath: path))
         if Int64(data.count) > readLimit { throw LiveIOError.tooLarge(path, Int64(data.count)) }
         return data
     }
@@ -110,10 +108,19 @@ public struct LiveIO: CLIIO {
     /// The path FileManager takes for a glob path: "" is the current or root folder.
     static func resolve(_ path: String, absolute: Bool) -> String { path.isEmpty ? (absolute ? "/" : ".") : path }
 
-    static func type(_ path: String) -> FileAttributeType? {
-        let real = URL(fileURLWithPath: path).resolvingSymlinksInPath().path
-        return (try? FileManager.default.attributesOfItem(atPath: real))?[.type] as? FileAttributeType
+    /// The type and size of what `path` names, following every symlink on the way (stat, not lstat),
+    /// or nil when nothing is there. Resolving the path first is not enough on macOS:
+    /// `resolvingSymlinksInPath` maps `/var` back to `/var`, which lstat calls a link.
+    static func follow(_ path: String) -> (type: FileAttributeType, size: Int64)? {
+        var info = stat()
+        guard stat(path, &info) == 0 else { return nil }
+        switch info.st_mode & S_IFMT {
+        case S_IFDIR: return (.typeDirectory, Int64(info.st_size))
+        case S_IFREG: return (.typeRegular, Int64(info.st_size))
+        default: return (.typeUnknown, Int64(info.st_size))
+        }
     }
+    static func type(_ path: String) -> FileAttributeType? { follow(path)?.type }
     static func isDirectory(_ path: String) -> Bool { type(path) == .typeDirectory }
     static func isRegular(_ path: String) -> Bool { type(path) == .typeRegular }
 }

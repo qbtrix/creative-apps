@@ -19,5 +19,26 @@
     "find": "let suffixes = sidecar ? [image, \".xmp\"] : [image]",
     "replace": "let suffixes = [image]",
     "tests": "LibraryExportContractTests"
+  },
+  {
+    "label": "{seq} is 0-based",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "padded(index + 1,",
+    "replace": "padded(index,",
+    "tests": "LibraryExportNamingTests"
+  },
+  {
+    "label": "a / in the template is kept",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "String(UniqueFileNames.name(filled, extension: \"\", among: []).drop",
+    "replace": "String(filled.drop",
+    "tests": "LibraryExportNamingTests"
+  },
+  {
+    "label": "{seq} padding ignores the count",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "to: String(max(count, 1)).count)",
+    "replace": "to: 1)",
+    "tests": "LibraryExportNamingTests"
   }
 ]

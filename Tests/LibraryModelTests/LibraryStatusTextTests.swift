@@ -40,9 +40,9 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     var row = try #require(catalog.statusRow)
     #expect(row.size == "24 photos")
     #expect(row.zoom == nil)
-    #expect(texts(row) == ["160 pt", "Preview data"])
+    #expect(texts(row) == ["Thumbnails 160 pt", "Preview data"])
     catalog.select(Set((1...5).map(path)))
-    #expect(texts(catalog.statusRow) == ["5 selected", "160 pt", "Preview data"])
+    #expect(texts(catalog.statusRow) == ["5 selected", "Thumbnails 160 pt", "Preview data"])
     catalog.open(path(1))
     row = try #require(catalog.statusRow)
     #expect(row.size == "6000 × 4000 px")
@@ -75,12 +75,33 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
 @Test func selectionPillOnlyWithASelection() {
     var catalog = shoot(live: true)
     #expect(pill("selection", catalog.statusRow) == nil)
-    #expect(texts(catalog.statusRow) == ["160 pt"])
+    #expect(texts(catalog.statusRow) == ["Thumbnails 160 pt"])
     #expect(catalog.statusRow?.preview == nil)
     catalog.select([path(2)])
     #expect(pill("selection", catalog.statusRow)?.text == "1 selected")
     #expect(pill("selection", catalog.statusRow)?.style == .selected)
     #expect(pill("cellSize", catalog.statusRow)?.style == .plain)
+}
+
+/// #3130: the cell-size pill names the thumbnails and its help says how to change them.
+@Test func cellSizePillNamesTheThumbnails() throws {
+    let cell = try #require(pill("cellSize", shoot(live: true).statusRow))
+    #expect(cell.text.lowercased().contains("thumbnail"))
+    #expect(cell.text.contains("160 pt"))
+    #expect(cell.help.contains("View > Larger Thumbnails"))
+    #expect(cell.help.contains("Smaller Thumbnails"))
+}
+
+/// #3135: at Fit the loupe's zoom pill reads the measured fit scale, never
+/// 100%; the grid shows none; Actual Size reads 100% whatever the fit scale.
+@Test func shownZoomUsesTheFitScaleAtFit() throws {
+    var catalog = shoot(live: true)
+    #expect(catalog.statusRow?.shownZoom(fitScale: 0.14) == nil)
+    catalog.open(path(1))
+    #expect(catalog.statusRow?.shownZoom(fitScale: 0.14) == 0.14)
+    #expect(catalog.statusRow?.shownZoom(fitScale: 0.5) == 0.5)
+    catalog.loupeZoom = .actual
+    #expect(catalog.statusRow?.shownZoom(fitScale: 0.14) == 1)
 }
 
 /// #3129: the grid has no zoom, so the row shows no zoom pill at any fit scale.
