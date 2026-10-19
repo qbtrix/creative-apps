@@ -64,3 +64,4 @@ Next: #3166 (r-b1, head 783c6907, SuiteUI part removed, Mutate 13/13) back in th
 - 08:22Z check: #3166 merged 0ae8bada (closes #3133 #3137); 7 SL findings open; fix-batch round 1 started on #3130 #3131 #3135 (wf_6511ef74-211); SL-8 held until <=5
 - 08:35Z fix round 1 (r-b1, wf_6511ef74-211): PR #3201 (head 43cd44f8, CI: PASS, Mutate 16/16 LibraryModel.LibraryStatusText) fixes #3130 #3135 and #3131's Library side; SuiteUI remainder filed as #3197 (needs-ui, line:suiteui). On merge SL findings drop to 4 (#3129 #3132 #3134 #3136, all waiting on SuiteUI #1184 #3167 #3168); then SL-8 may start.
 - 08:45Z check: 7 SL findings open; fix round 1 #3201 waiting on macOS build 39223926415; SL-8 after merge
+- 09:09Z check: 7 SL findings open; #3201 macOS build 39223926415 queued
