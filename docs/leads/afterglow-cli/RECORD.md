@@ -1,10 +1,10 @@
 # afterglow-cli lead record
 
 Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
-Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
-Stage: 4 build wave 4
-Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: #3154 CL-7 in lane (head a53cfee, macOS build queued since 07:05Z). CL-10 builder dispatched 07:44Z stacked on CL-7 (branch lead/afterglow-cli-CL-10, PR held until #3154 merges). After #3154 merges: re-dispatch CL-9 (lead/afterglow-cli-CL-9 @35ee7e6), open CL-10 PR on dev. Then CL-11 docs, critics.
+Run: act-1a1543c761a-p4tj (resumed from act-1a1514ffe22-lvmw) · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
+Stage: 3 shipping CL-z (resumed run)
+Base: 6e70826be59e092e59269605cfdfbce93c4a2bbe (origin/dev)
+Next: CL-10 #3211 in lane (mac build green, clean). On merge: merge dev into CL-11 (@3a291b22), gate, open its feature-done PR. Only CL-z remains.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
