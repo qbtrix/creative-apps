@@ -118,7 +118,9 @@ public final class OnboardingModel {
         guard let sample = starter?.sample else { refuse(Self.sampleMissing(app), for: app); return }
         let source = samplesFolder + "/" + sample.fileName
         guard starter?.sampleReason == nil, present(source) else { refuse(Self.sampleMissing(app), for: app); return }
-        let destination = SampleCatalog.destination(for: sample, documents: documents, exists: present)
+        guard let destination = SampleCatalog.destination(for: sample, documents: documents, exists: present) else {
+            refuse(.ioFailed("Documents/Samples has no free name for \(sample.fileName)."), for: app); return
+        }
         do throws(SuiteError) { try copy(source, destination) } catch { refuse(error, for: app); return }
         let handOff = HandOff(id: makeID(), from: .launcher, to: app, verb: .open,
                               documents: [SampleCatalog.ref(for: sample, path: destination)], createdAt: now)

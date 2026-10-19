@@ -19,19 +19,19 @@ extension BodyCountSuites {
         @Test(.timeLimit(.minutes(2))) func bodies() async throws {
             let (next, chip, hover) = try await Self.run()
             // A page change is one model change: the window's body once, twice with the button's own update.
-            expectBodies(next, atMost: 2, target: 1)  // dev: not yet measured
+            expectBodies(next, atMost: 1, target: 1)  // dev: 1
             // A focus chip changes the focus and the starters; the page reads them, the window at most once.
-            expectBodies(chip, atMost: 1, target: 0)  // dev: not yet measured
+            expectBodies(chip, atMost: 0, target: 0)  // dev: 0
             // Hovering is presentation only. Target: 0.
-            expectBodies(hover, atMost: 0, target: 0)  // dev: not yet measured
+            expectBodies(hover, atMost: 0, target: 0)  // dev: 0
         }
 
         @Test(.timeLimit(.minutes(2))) func timing() async throws {
             let (next, chip, hover) = try await Self.run()
             // Targets: a click fits one 60 Hz frame; a pointer move one 120 Hz frame.
-            expectP95(next, atMost: 50, target: 16)  // dev: not yet measured
-            expectP95(chip, atMost: 50, target: 16)  // dev: not yet measured
-            expectP95(hover, atMost: 16, target: 8.3)  // dev: not yet measured
+            expectP95(next, atMost: 35, target: 16)  // dev: 14 ms (31 ms cold)
+            expectP95(chip, atMost: 30, target: 16)  // dev: 9.5 ms (24 ms cold)
+            expectP95(hover, atMost: 1, target: 8.3)  // dev: 0.09 ms
         }
 
         static func run() async throws -> (next: RenderStep, chip: RenderStep, hover: RenderStep) {

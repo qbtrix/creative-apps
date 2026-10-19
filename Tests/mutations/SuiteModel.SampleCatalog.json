@@ -54,5 +54,19 @@
     "find": "type: .flareAnimation, title: \"Bounce\")",
     "replace": "type: .flareAnimation, title: \"Bounce.flare\")",
     "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "destinationAsksOnce",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "for _ in 0..<maxTries {",
+    "replace": "for _ in 0..<1 {",
+    "tests": "SampleCatalogTests"
+  },
+  {
+    "label": "destinationOverwritesWhenFull",
+    "file": "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "find": "        return nil\n    }\n    /// How many names",
+    "replace": "        return folder + s.fileName\n    }\n    /// How many names",
+    "tests": "SampleCatalogTests"
   }
 ]

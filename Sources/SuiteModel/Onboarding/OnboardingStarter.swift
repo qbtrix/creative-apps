@@ -30,7 +30,7 @@ public enum OnboardingLayout { public static let width = 720.0, height = 520.0, 
 /// Identifiers (blueprint 4.1): afterglow.onboarding.<name>.
 public enum OnboardingControls {
     static let prefix = "afterglow.onboarding."
-    public static let page = prefix + "page"          // value: the page id
+    public static let page = prefix + "page"          // label and value: the page id
     public static let `continue` = prefix + "continue"
     public static let back = prefix + "back"
     public static let skip = prefix + "skip"

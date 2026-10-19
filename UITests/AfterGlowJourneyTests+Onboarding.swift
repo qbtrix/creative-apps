@@ -10,7 +10,7 @@
 // AfterGlowJourneyTests. The bundle compiles only SuiteModel's Values, so
 // OnboardingControls' ids (`afterglow.onboarding.<name>`) are literals here;
 // OnboardingFocus and SuiteApp come from Values. The page element's value is
-// the page id: `apps`, `focus`, `start`.
+// the page id: `apps`, `focus`, `start`, read from its label (#262).
 import XCTest
 
 final class AfterGlowOnboardingJourneys: XCTestCase {
@@ -141,7 +141,7 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
 
     /// The page id, the page element's value.
     @MainActor static func page(_ launcher: Journey) -> String {
-        (welcome(launcher).descendants(matching: .any)[prefix + "page"].value as? String) ?? "none"
+        (welcome(launcher).descendants(matching: .any)[prefix + "page"].label as String?) ?? "none"
     }
 
     @MainActor static func waitForPage(_ launcher: Journey, _ id: String) -> Bool {

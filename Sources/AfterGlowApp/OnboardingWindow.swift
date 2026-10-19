@@ -8,7 +8,8 @@
 // before the first frame) and Help > Welcome to AfterGlow reopens it.
 // Closing the window is Skip: `onDisappear` without a finish calls
 // `model.skip()`. `init(model:)` lets the snapshot and render budget suites
-// show a model they drove. The view only reads the model and calls its methods.
+// show a model they drove. The page id rides a ProbeElement's label, which
+// XCUITest can read (#262). The view only reads the model and calls its methods.
 import Foundation
 import SuiteModel
 import SuiteUI
@@ -51,8 +52,9 @@ struct OnboardingWindow: View {
             OnboardingPageView(model: model)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .accessibilityElement(children: .contain)
-                .accessibilityValue(model.page.id)
-                .suiteControl(id: OnboardingControls.page, enabled: true, reason: nil, role: "page")
+                // XCUITest reads SwiftUI values as empty (#262): the page id travels as the probe's label.
+                .background { ProbeElement(OnboardingControls.page, label: model.page.id, value: model.page.id) }
+                .suiteControl(id: OnboardingControls.page, enabled: true, reason: nil, role: "page", identifies: false)
             HStack(spacing: SuiteSpacing.m) {
                 Button("Skip") { Task { await model.skip() } }
                     .keyboardShortcut(.cancelAction)

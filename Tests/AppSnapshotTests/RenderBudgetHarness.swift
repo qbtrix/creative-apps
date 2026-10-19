@@ -215,6 +215,12 @@ struct RenderStep: CustomStringConvertible {
         return nil
     }
 
+    /// The accessibility label of the element called `identifier`, the field a journey reads a probe by
+    /// (XCUITest reads SwiftUI values as empty, #262); nil when there is no such element.
+    func label(_ identifier: String) -> String? {
+        Self.node(identifier, in: host)?.accessibilityLabel?() ?? nil
+    }
+
     /// The window point of `point` on an artboard `size` big drawn in `box` (window coordinates, so y up),
     /// `point` measured from the artboard's top left in its own units.
     func point(_ point: CGPoint, on size: CGSize, in box: CGRect) -> CGPoint {
