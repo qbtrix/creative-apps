@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-19T16:57Z	heartbeat	dev ed4d55fd; waiting on lane sweep (#3221, #3251, #3292); #3292 footer stripped
 2026-10-19T17:27Z	fix	#3221 needs-rebase: merged dev (CR-6 conflict in DevelopInspector), gate PASS, head 510c7bf5
 2026-10-19T17:52Z	heartbeat	dev 1b33afbb; #3221 DV-9 head 510c7bf5 clean, waiting on lane macOS build; drafts #3250, #3295 wait on it
+2026-10-19T18:19Z	heartbeat	check-in: #3221 DV-9 pending, the lane is waiting on macOS build 39294392519 for head 510c7bf5; #3250 and #3295 drafts wait on it
