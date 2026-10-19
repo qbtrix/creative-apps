@@ -114,9 +114,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
         var loupe = states["loupe"] ?? LibraryCatalog()
         #expect(try Self.catalog.run("photo.paste-settings", params: .object([:]), on: &loupe).undoStep == "Paste Settings")
         #expect(loupe.items.first { $0.id == "IMG_0003" }?.develop.value(.exposure) == 1)
-        #expect(throws: CatalogError.unavailable(id: "metadata.set-rating", why: LibraryCatalog.ratingRangeReason)) {
-            try Self.catalog.run("metadata.set-rating", params: .object(["stars": .number(6)]), on: &c)
-        }
+        let rated = c
+        #expect(throws: CatalogError.self) { try Self.catalog.run("metadata.set-rating", params: .object(["stars": .number(6)]), on: &c) }
+        #expect(c == rated)
     }
 
     /// Every spec keeps the catalog's laws on each state where it can run. As today, an edit that would change
