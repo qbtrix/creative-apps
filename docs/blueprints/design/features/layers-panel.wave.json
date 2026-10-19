@@ -2,8 +2,8 @@
   "title": "The Layers panel",
   "wave": 1,
   "order": 40,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1498",
   "covers": "#613, #589 (Design half); gap: rename, reorder, nest, Arrange",
   "waits_on": "design-contracts; view tasks: design-window DW-a (DW-b for the drag check); L-6 waits on SuiteUI lists-and-layers LL-9",
   "depends": [
