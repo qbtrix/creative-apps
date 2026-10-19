@@ -7,3 +7,6 @@ utc	stage	event	ref	note
 2026-10-17T05:51Z	3	pr-opened	#1976	FC-1 filter rules, fast-lane, head 01ce599b
 2026-10-17T06:28Z	3	pr-merged	#1976	FC-1 filter rules merged to dev by the lane
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
+2026-10-18T06:22Z	3	heartbeat	#2551 #2627 #2628 #2635	batch probe -1 (#2551) red on LibraryLoupeBudgetTests timing flake from #2612; commented on #2551; IC-12 waits on IC-9/5/7 merge
+2026-10-18T06:43Z	3	merged	#2551 #2628	IC-9 and IC-5 merged 06:32Z; #2627 and #2635 in lane batch 20261018063810; IC-12 starts after IC-7. dev-red #2667 is the Library loupe timing flake, not ours
+2026-10-18T06:59Z	3	heartbeat	#2627 #2635	batch 20261018063810 red only on the Library loupe flake (#2667); lane probe -4 running; IC-12 waits on IC-7

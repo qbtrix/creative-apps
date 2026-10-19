@@ -1,0 +1,99 @@
+utc	stage	event	ref	note
+2026-10-16T22:48Z	2	stage-end	#1508	plan waves 1-8 from packet; no PRs opened
+2026-10-17T05:50Z	3	heartbeat	-	blocked: no swift toolchain, no GitHub write access
+2026-10-18T00:03:58Z	wave	start	wave 1	base a615013
+2026-10-18T00:18:45Z	wave	built	wave 1	gate red on dev: expired quarantine, #2504; branches pushed, PRs held
+2026-10-18T00:27Z	3	heartbeat	#2504	dev d3cd7d9 still has 5 quarantine entries expiring 2026-10-18; wave-1 PRs held
+2026-10-18T00:48Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T01:10Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T01:32Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T01:54Z	3	heartbeat	#2504	dev d3cd7d9 unchanged; 5 quarantine entries still expire 2026-10-18; wave-1 PRs held
+2026-10-18T02:32Z	3	unblocked	#2523	dev 948bcbf moved quarantine expiry to 10-20/10-23; merging dev into wave-1 branches, gating
+2026-10-18T02:37Z	3	prs-open	#2529 #2530 #2531	IC-1 #2529 (c57fe7e), IC-2 #2530 (038bb3f), IC-6 #2531 (fd749c5) open on fast-lane, gate CI: PASS on dev 948bcbf; W1b IC-9/10/11 and IC-3/IC-8 build once #2529 merges
+2026-10-18T02:55Z	3	heartbeat	#2531	IC-6 macOS build 39091662370 dispatched; IC-1 #2529, IC-2 #2530 builds pending
+2026-10-18T03:18Z	3	wave-1-merged	#2527-#2530	dev 0965457c; IC-6 #2531 pending; 6 open suiteui findings #2497-#2503 hold the next wave (rule 6)
+2026-10-18T03:19Z	3	wave-2-start	IC-3,IC-4,IC-8,IC-9,IC-10,IC-11	base 0965457c; 0 open findings for this feature; IC-6 #2531 still in the lane
+2026-10-18T05:00Z	3	merged	#2531 #2548 #2549 #2553 #2550 #2555	IC-6, IC-4, IC-3, IC-10, IC-8, IC-11 merged
+2026-10-18T05:00Z	3	build-fix	#2551	IC-9 macOS build failed (run 39094828604): #require wrapped mutating ToneCurveGesture calls; fixed, gate running
+2026-10-18T05:12Z	3	pushed	#2551	IC-9 head 8a2c6c43 (gate PASS); lane macOS build dispatched
+2026-10-18T05:12Z	3	wave-3-start	IC-5,IC-7	base a0f2ff00
+2026-10-18T05:24Z	3	wave-3-opened	#2628 #2627	IC-5 #2628 (2fc90063), IC-7 #2627 (aa3f9464), gate PASS; footers stripped; lane macOS builds next
+2026-10-18T05:30Z	3	fix-round-1	IC-11 #2555	PresetGridTests.aChipRecordsAFadePairPerChange(reduceMotion:true) red in scoped run 39097468065 (fades start,start,end); fixer started
+2026-10-18T05:34Z	3	heartbeat	#2551 #2627 #2628	macOS builds 39099511880 running, 39100663386 and 39100674344 queued; IC-11 fixer running
+2026-10-18T05:36Z	3	fix-pr	#2635	IC-11 fix: under Reduce Motion ChipProbe.fade records fade-end on the same turn (withAnimation(nil) completion fired late); head c9316f69, gate PASS. Same pattern in TabsProbe.fade (SegmentedTabs, #2608, not this feature): noted, not fixed here
+2026-10-18T05:56Z	3	heartbeat	#2551 #2627 #2628 #2635	macOS builds all success; awaiting lane sweep
+2026-10-18T07:16Z	heartbeat	probe batch-20261018063810-4 green; #2627 #2629 #2635 #2638 #2648 #2651 open, builds green, awaiting lane sweep
+2026-10-18T07:30Z	heartbeat	lane run 39107445380 in progress; all six lead PRs open, no needs-fix; scoped suiteui 39106447807 still queued (pre-merge sha, not the timeline proof)
+2026-10-18T07:46Z	wave 4	IC-7 #2627 and IC-11 fix #2635 merged 07:32Z; IC-12 builder launched on dev 2202c7c3
+2026-10-18T08:04Z	check	IC-12 #2699 opened; contract check: local Bezier replaced with kernel EaseCurve (rule 20), footer stripped, head d3f09c8, CI --changed PASS
+2026-10-18T08:23Z	heartbeat	#2699 macOS build for head d3f09c8 is run 39110605046 (queued); IC-13/IC-14 wait for its merge
+2026-10-18T08:42Z	heartbeat	#2699 macOS build 39110605046 green on d3f09c8; waits for a lane sweep, then IC-13/IC-14
+2026-10-18T09:00Z	heartbeat	#2699 built on macOS, waiting for the next lane batch; IC-13/IC-14 after it merges
+2026-10-18T09:27:43Z	heartbeat	#2699 rebased onto dev, head 5118b21, back in the lane
+2026-10-18T09:45Z	heartbeat	#2699 macOS build 39115064326 running
+2026-10-18T10:02Z	heartbeat	#2699 macOS build green
+2026-10-18T10:20Z	heartbeat	IC-12 integrated by lane, re-check pending
+2026-10-18T10:37Z	heartbeat	IC-12 macOS build running
+2026-10-18T10:55Z	heartbeat	IC-12 macOS build green
+2026-10-18T11:08Z	heartbeat	IC-12 build green; lane sweep in flight
+2026-10-18T11:22Z	wave	IC-12 merged; IC-13/IC-14 wave started
+2026-10-18T11:44Z	heartbeat	IC-13/IC-14 building
+2026-10-18T12:07Z	heartbeat	IC-13/IC-14 building
+2026-10-18T12:29Z	wave	IC-13/IC-14 building
+2026-10-18T12:46Z	heartbeat	IC-13/IC-14 wave still running
+2026-10-18T13:11Z	heartbeat	IC-13/IC-14 wave still running
+2026-10-18T13:33Z	heartbeat	IC-13/IC-14 wave still running
+2026-10-18T13:56Z	heartbeat	IC-13/IC-14 wave building; baselines blocked by #2801
+2026-10-18T14:20Z	heartbeat	IC wave still building
+2026-10-18T15:02Z	heartbeat	IC-14b opened as #2816 (CI: PASS bf50af3f)
+2026-10-18T15:25Z	heartbeat	#2816 macOS build 39139291555 success
+2026-10-18T15:48Z	heartbeat	IC-14b #2816 merged; #2814 and #2815 back on fast-lane
+2026-10-18T20:08Z	stage	resume	#1508	run act-1a150947ee2-hc6b; baselines from run 39153976103
+2026-10-18T20:08Z	pr	IC-15	#2943	baseline suiteui-slider-log, CI: PASS ca3819a7
+2026-10-18T20:14Z	review	round 1	#1508	14 findings #2951-#2964, not clean; baselines held; fix batch launched
+2026-10-18T20:31Z	check	heartbeat	#1508	fix batch running (#2970 open); baselines #2943 #2946 #2947 held with no-fast-lane (the lane had re-added fast-lane)
+2026-10-18T20:37Z	fix	round 1	#1508	PRs #2977 #2978 #2976 #2970 fix 13 of 14; #2962 waits on #2976
+2026-10-18T20:55Z	check	heartbeat	#1508	baselines merged early; IC-19/IC-20 delete the stale ones; fix PRs wait on macOS builds
+2026-10-18T21:05Z	build	IC-19/IC-20	#1508	#2997 and #3001 opened (CI: PASS), stale baselines deleted
+2026-10-18T21:17Z	check	heartbeat	#1508	#2970 merged (957ce9b2); #2976 #2977 #2978 wait on macOS builds; #2997 #3001 in lane (dev keyframe golden stale until #2997 lands)
+2026-10-18T21:39:31Z	check	#2977 #2997 #3001 merged; #2976 #2978 await macOS build; watching dev CI 39167964719 (b40c77f6) for re-record
+2026-10-18T22:04:08Z	fix	#2976 merged; opened #3013 (SP9 Onion reveal, Fixes #2962); #2978 awaits macOS build
+2026-10-18T22:26:01Z	check	#2978 and #3013 await macOS builds
+2026-10-18T22:55:00Z	heartbeat	#3013 merged (2567c021). #2978 macOS build failed (a width param shadowed a helper; stale PhotoZoomSweep). Fixed, merged dev, pushed 7e4864d7, Head moved
+2026-10-18T23:17:45Z	heartbeat	#2978 head 7e4864d7 waiting on its lane macOS build (runs/39174307340)
+2026-10-18T23:39:11Z	heartbeat	#2978 merged as 93dec2a8, so every fix PR is on dev. Waiting for a green dev CI run (full, or scoped suiteui) at 93dec2a8 or later, then re-record goldens and open IC-18
+2026-10-19T00:01:37Z	heartbeat	No green dev run contains 93dec2a8 yet: full CI 39177967096 had it but was cancelled, 39178441058 is pending
+2026-10-19T00:23:55Z	heartbeat	waiting on scoped suiteui 39180136006 (contains 93dec2a8) before goldens + IC-18
+2026-10-19T00:46:17Z	heartbeat	scoped suiteui 39180136006 still queued for a macOS runner
+2026-10-19T01:08:24Z	heartbeat	scoped suiteui 39180136006 in progress (contains 93dec2a8)
+2026-10-19T01:28:47Z	heartbeat	scoped suiteui 39180136006: build-and-tests step failed, journeys still running; reading failures when the job ends
+2026-10-19T02:00:02Z	heartbeat	r-b5 #3083 fixes tick test and timeline toolbar goldens; #3084 goldens part 1; ic-22 feature-done held for #3083
+2026-10-19T02:20:11Z	heartbeat	#3084 merged (inspector goldens 1); #3083 macOS build 39187556097 queued; ic-22 feature-done waits on it
+2026-10-19T02:40:17Z	heartbeat	#3083 macOS build green (39187556097), awaiting lane merge; ic-22 feature-done next
+2026-10-19T02:58:23Z	heartbeat	#3083 merged; feature-done PR #3094 (ic-22, head b634a4e6) opened; Anatomy round 2 on its CI screens
+2026-10-19T03:14:58Z	heartbeat	feature-done #3094 merged (cc14022e); its full CI 39192572958 queued; contact sheet after it is green
+2026-10-19T03:36:57Z	heartbeat	full CI 39192572958 on cc14022e: Linux green, macOS queued; contact sheet after it is green
+2026-10-19T03:57:06Z	heartbeat	full CI 39192572958 macOS still queued; contact sheet after it is green
+2026-10-19T04:18:54Z	heartbeat	full CI 39192572958 macOS job running; contact sheet waits on it
+2026-10-19T04:49:10Z	heartbeat	full-CI-39192572958-red-on-tick-test;fix-gating;triaging-inspector-journeys
+2026-10-19T04:53:59Z	pr	#3127 tick-test cores (full CI red fix); #3128 no scroller on gallery inspector pages (audit unnamed button)
+2026-10-19T05:12:29Z	heartbeat	#3127,#3128-awaiting-lane-macOS-build;full-CI-39192572958-macOS-running
+2026-10-19T05:15:50Z	heartbeat	PR #3141 tone point hit size; #3127 #3128 in lane; full CI 39192572958 macOS running
+2026-10-19T05:35:04Z	heartbeat	PR #3147 easing nudge test; #3127 #3128 #3141 #3143 wait on lane macOS builds; full CI 39192572958 macOS still running
+2026-10-19T06:00:25Z	heartbeat	#3155 tone cancelled-drag fix for #2930; #3127 #3128 #3143 builds green, #3141 #3147 builds queued; full CI 39192572958 cancelled
+2026-10-19T06:07:20Z	heartbeat	#2927 fix PR #3164; #3127 merged; 3128/3141/3143/3147 await lane macOS builds; suiteui 39200664567 running
+2026-10-19T06:28:10Z	heartbeat	#3175 opened (#2923 easing ⇧-nudge); suiteui 39200664567 macOS red on pre-fix head; 9 PRs waiting on lane macOS builds
+2026-10-19T06:53:31Z	heartbeat	#3155 lane build fixed (macro mutating call), head e24bedb0; #3141/#3147/#3157 builds green awaiting lane; suiteui 39211725961 queued
+2026-10-19T07:22:01Z	heartbeat	#3141 #3147 #3157 #3161 merged; #3155 #3165 #3175 lane builds queued; no green suiteui/full run yet (CI 39215489121 pending on 57d85dfd)
+2026-10-19T07:44:23Z	heartbeat	lane builds for #3155 #3165 #3175 still queued; CI 39215489121 pending, suiteui 39211725961 queued; runners backed up
+2026-10-19T08:06:10Z	heartbeat	no change: lane builds #3155 #3165 #3175 queued; CI 39215489121 pending, suiteui 39211725961 queued (macOS runners saturated)
+2026-10-19T08:28:21Z	heartbeat	waiting: lane builds 3155/3165/3175 queued; dev CI cancelled/pending, suiteui 39211725961 queued
+2026-10-19T08:50:08Z	heartbeat	#3165 merged; lane builds 3155/3175 queued; CI 39225019255 pending, suiteui 39211725961 queued
+2026-10-19T09:12:14Z	heartbeat	waiting: lane builds 3155/3175 queued; CI 39226253814 pending, suiteui 39211725961 queued
+2026-10-19T09:33:59Z	heartbeat	#3175 merged; lane build 3155 queued; CI 39230710902 pending, suiteui 39211725961 queued
+2026-10-19T09:56:13Z	heartbeat	lane build 3155 queued; suiteui 39211725961 in progress (977df193, predates #3161); CI 39232536792 pending
+2026-10-19T10:18:46Z	heartbeat	#3155 lane build 39212535565 queued; suiteui 39211725961 in progress; dev CI 39234246603 pending
+2026-10-19T10:40:15Z	heartbeat	#3155 lane build 39212535565 green, awaiting lane merge; suiteui 39211725961 in progress; dev CI 39236881849 pending
+2026-10-19T11:08:27Z	heartbeat	#3155 merged (2ceab7d4); suiteui 39211725961 done: no new failing tests, one new step failure (Onion fade 0.208s) filed #3235, fix PR #3236; queued suiteui 39239970582 at 895fb2d0 has the fixes but not #3155
+2026-10-19T11:30:34Z	heartbeat	#3236 lane build 39243165907 queued; dev CI 39244857355 (c6ad68f7, has cc14022e + fixes) pending
+2026-10-19T11:53:49Z	heartbeat	#3236 lane build 39243165907 still queued; dev runs 39239970582/39244857355/39246909805 all cancelled, waiting for a completed suiteui/full run
