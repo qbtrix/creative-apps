@@ -33,5 +33,33 @@
     "find": "return services.isPreview ? empty : nil",
     "replace": "return empty",
     "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the header ignores the local offset (Captured stays in UTC)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let local = Int(seconds) + utcOffset",
+    "replace": "let local = Int(seconds)",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the civil conversion's month is one short",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let month = mp < 10 ? mp + 3 : mp - 9",
+    "replace": "let month = mp < 10 ? mp + 2 : mp - 9",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "truncating division puts a pre-1970 time on the wrong day",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let days = floorDiv(local, 86_400)",
+    "replace": "let days = local / 86_400",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the capture span runs from the latest day to the earliest",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "let (low, high) = (dates.min() ?? first.captureDate, dates.max() ?? first.captureDate)",
+    "replace": "let (low, high) = (dates.max() ?? first.captureDate, dates.min() ?? first.captureDate)",
+    "tests": "LibraryStatusTextTests.swift"
   }
 ]
