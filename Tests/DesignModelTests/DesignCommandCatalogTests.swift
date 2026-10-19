@@ -3,12 +3,8 @@
 // Fails when a reason changes, an edit records no step, or an id is missing. Linux-safe.
 @testable import DesignModel
 import SuiteKernel
-import Testing
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
 import Foundation
-#endif
+import Testing
 
 /// The workspace as a headless document, so CatalogConformance can walk Design's catalog on any state:
 /// each spec runs through `DesignWorkspace.catalog`, and save() is the file's bytes.
@@ -174,9 +170,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         "object.group | Group | on", "object.ungroup | Ungroup | A isn't a group.",
         "object.bring-to-front | Bring to Front | on", "object.bring-forward | Bring Forward | on",
         "object.send-backward | Send Backward | Nothing would change.", "object.send-to-back | Send to Back | Nothing would change.",
-        "object.align-left | Align Left | on", "object.align-center | Align Center | on",
-        "object.align-right | Align Right | on", "object.align-top | Align Top | on",
-        "object.align-middle | Align Middle | on", "object.align-bottom | Align Bottom | on",
+        "object.align-left | Align Left | on", "object.align-center | Align Center | on", "object.align-right | Align Right | on",
+        "object.align-top | Align Top | on", "object.align-middle | Align Middle | on", "object.align-bottom | Align Bottom | on",
         "object.distribute-horizontally | Distribute Horizontally | Select three or more layers to distribute.",
         "object.distribute-vertically | Distribute Vertically | Select three or more layers to distribute.",
         "object.nudge | Nudge | on",

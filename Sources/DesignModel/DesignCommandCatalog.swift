@@ -2,8 +2,7 @@
 // DesignWorkspace, so a menu, the afterglow CLI and an agent run one path. Each spec's availability is the help the
 // window shows today and its run is today's method: every DesignCommand through `help(_:)` and `run(_:)`, the palette
 // tools through `unavailableHelp` and `selectTool`, the pages through `addPageHelp`/`deletePageHelp`, and the file
-// actions through the toolbar's help. Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them.
-// Linux-safe.
+// actions through the toolbar's help. Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
