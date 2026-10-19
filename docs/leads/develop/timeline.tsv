@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-19T14:11Z	3	heartbeat	-	resumed after container restart; checking #3221 #3250
 2026-10-19T14:23Z	check	#3221 waiting on lane
 2026-10-19T15:35Z	3	heartbeat	#3221	resumed after restart; waiting on lane
+2026-10-19T15:37Z	wave start	DV-13 stacked on #3250; DV-14 gap #3286
