@@ -225,10 +225,14 @@ struct MCPProtocolTests {
         #expect(io.stderr.count == 1 && io.readLine() != nil, "a refused run reads no request")
     }
 
-    @Test func serveLiveIsNotBuiltYetAndAnAppFilterNarrowsTheApps() {
+    @Test func serveLiveRunsOnlyOnMacOSAndAnAppFilterNarrowsTheApps() {
         let io = FakeIO()
+        #if os(macOS)
+        #expect(MCPServer.serve(Self.serveArguments + ["--live"], apps: [Apps.fake], io: io) == 0 && io.stderr.isEmpty)
+        #else
         #expect(MCPServer.serve(Self.serveArguments + ["--live"], apps: [Apps.fake], io: io) == 69)
-        #expect(io.stderr == ["afterglow mcp --live is not built yet (afterglow-mcp MC-11)"])
+        #expect(io.stderr == ["afterglow mcp --live runs only on macOS, where the apps listen"])
+        #endif
         #expect(CLI.run(["mcp", "--root", Self.root], io: FakeIO()) == 0)
         #expect(CLI.run(["mcp", "--app", "fake", "--root", Self.root], io: FakeIO()) == 0)
     }

@@ -6,7 +6,9 @@
 // `server/discover`, `initialize`, `ping`, `tools/list` and `tools/call` (rate
 // limited, run by MCPSessions). A notification is never answered, and
 // `handle` never prints. `serve` parses `[--app <name>]… --root <dir>…
-// [--live]` strictly, then answers stdin line by line until it ends.
+// [--live]` strictly, then answers stdin line by line until it ends. With
+// `--live` (MC-11, macOS) the running apps' `live.<app>.<id>` tools join the
+// list and their calls go to LiveBridge, named by `initialize`'s clientInfo.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -36,12 +38,17 @@ public final class MCPServer: Sendable {
     let io: any CLIIO
     let clock: @Sendable () -> Double
 
-    /// The handshake era's negotiated version, the open documents, and the recent calls' times.
-    private struct State: Sendable { var sessionVersion: String?; var sessions: MCPSessions; var calls = RateWindow() }
+    /// The running apps `--live` bridges; nil without `--live`.
+    let live: LiveBridge?
+
+    /// The handshake era's negotiated version and client name, the open documents, and the recent calls' times.
+    private struct State: Sendable {
+        var sessionVersion: String?; var client = LiveBridge.unnamedClient; var sessions: MCPSessions; var calls = RateWindow()
+    }
     private let state: Mutex<State>
 
-    public init(_ options: MCPOptions, io: any CLIIO, clock: @escaping @Sendable () -> Double) {
-        (self.options, self.io, self.clock) = (options, io, clock)
+    public init(_ options: MCPOptions, io: any CLIIO, live: LiveBridge? = nil, clock: @escaping @Sendable () -> Double) {
+        (self.options, self.io, self.live, self.clock) = (options, io, live, clock)
         state = Mutex(State(sessions: MCPSessions(options, io: io)))
     }
 
@@ -73,11 +80,17 @@ public final class MCPServer: Sendable {
         case "server/discover":
             return .success(.object(["supportedVersions": Self.supported, "capabilities": Self.capabilities, "serverInfo": Self.info]))
         case "initialize":
-            state.withLock { $0.sessionVersion = version }
+            var client: String?
+            if case .object(let info)? = params["clientInfo"], case .string(let name)? = info["name"], !name.isEmpty { client = name }
+            state.withLock { state in
+                state.sessionVersion = version
+                state.client = client ?? LiveBridge.unnamedClient
+            }
             return .success(.object(["protocolVersion": .string(version), "capabilities": Self.capabilities, "serverInfo": Self.info]))
         case "ping": return .success(.object([:]))
         case "tools/list":
-            return .success(.object(["tools": .array(MCPTools.list(options.apps).compactMap { try? JSONValue(encoding: $0) })]))
+            let running = live?.tools(client: state.withLock { $0.client }) ?? []
+            return .success(.object(["tools": .array((MCPTools.list(options.apps) + running).compactMap { try? JSONValue(encoding: $0) })]))
         case "tools/call": return call(params).map(Self.encode)
         default: return .failure(RPCError(code: RPCError.methodNotFound, message: "Method not found: \(request.method)"))
         }
@@ -88,8 +101,14 @@ public final class MCPServer: Sendable {
         guard case .string(let name)? = params["name"] else { return .failure(Self.invalidParams("tools/call needs a tool name")) }
         let arguments = params["arguments"] ?? .object([:])
         guard case .object = arguments else { return .failure(Self.invalidParams("the arguments of \(name) must be an object")) }
-        guard let route = MCPTools.route(name, in: options.apps) else { return .failure(Self.invalidParams("Unknown tool: \(name)")) }
         let now = clock()
+        if let live, name.hasPrefix(LiveWire.prefix + ".") {
+            let (admitted, client) = state.withLock { ($0.calls.admit(at: now, limit: options.maxCallsPerSecond), $0.client) }
+            guard admitted else { return .success(.error("slow down: at most \(options.maxCallsPerSecond) calls a second")) }
+            guard let result = live.call(name, arguments, client: client) else { return .failure(Self.invalidParams("Unknown tool: \(name)")) }
+            return .success(result)
+        }
+        guard let route = MCPTools.route(name, in: options.apps) else { return .failure(Self.invalidParams("Unknown tool: \(name)")) }
         return .success(state.withLock { state in
             guard state.calls.admit(at: now, limit: options.maxCallsPerSecond) else {
                 return .error("slow down: at most \(options.maxCallsPerSecond) calls a second")
@@ -121,16 +140,21 @@ public final class MCPServer: Sendable {
     static func invalidParams(_ message: String) -> RPCError { RPCError(code: RPCError.invalidParams, message: message) }
     static let supported = JSONValue.array(MCPVersions.supported.map(JSONValue.string))
     static let capabilities = JSONValue.object(["tools": .object(["listChanged": .bool(false)])])
+    /// Why `--live` refuses off macOS.
+    static let liveOffMac = "afterglow mcp --live runs only on macOS, where the apps listen"
     static let info = JSONValue.object(["name": .string(name), "version": .string(CLI.version)])
 
     /// Serves `apps` over MCP with `arguments` (what follows `afterglow mcp`): one reply line on stdout per request
-    /// line on stdin, until stdin ends (0). Bad arguments are usage (64); `--live` is not built yet (69, MC-11).
+    /// line on stdin, until stdin ends (0). Bad arguments are usage (64); `--live` off macOS is unavailable (69).
     public static func serve(_ arguments: [String], apps: [HeadlessApp], io: any CLIIO) -> Int32 {
         let options: MCPOptions
         do { options = try parse(arguments, apps: apps) } catch { return CLI.refuse(error, io: io) }
-        if options.live { return CLI.notBuilt("afterglow mcp --live is not built yet (\(slice) MC-11)", io: io) }
+        let live = options.live ? LiveBridge.local() : nil
+        if options.live, live == nil {
+            return CLI.refuse(Refusal(code: CLI.Exit.unavailable, kind: "unavailable", message: liveOffMac), io: io)
+        }
         let start = ContinuousClock.now
-        let server = MCPServer(options, io: io) {
+        let server = MCPServer(options, io: io, live: live) {
             let elapsed = start.duration(to: .now).components
             return Double(elapsed.seconds) + Double(elapsed.attoseconds) / 1e18
         }
