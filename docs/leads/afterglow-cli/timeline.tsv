@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-19T05:58:36Z	build	PR opened	#3154	CL-7 CL-batch head b01b9a1, ci --changed PASS, mutate 7/7, +267/-31 6 files
 2026-10-19T06:10:35Z	build	merged	#3123	CL-8 on dev 1a49ea97
 2026-10-19T06:10:35Z	build	builder started	CL-9	CL-jobs RealJobs body + plan + cli-jobs part
+2026-10-19T06:24:47Z	build	builder holding	CL-9	gate needs CL-7 #3154 on dev; with it CI PASS, mutate 6/6
