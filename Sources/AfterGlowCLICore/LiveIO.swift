@@ -1,6 +1,6 @@
 // LiveIO.swift (afterglow-cli CL-5): CLIIO on the real file system. Reads
 // refuse anything that is not a regular file and stop at a 2 GiB cap. Writes
-// go to a temp file beside the target, then land by rename (replace) or by
+// make missing folders, then go to a temp file beside the target, then land by rename (replace) or by
 // hard link (no replace, which the kernel refuses when the target exists), so
 // the target is absent, as it was, or whole. Globs walk the folders with
 // FileManager and FakeIO's segment matcher; no shell ever sees a pattern.
@@ -47,6 +47,8 @@ public struct LiveIO: CLIIO {
         let target = URL(fileURLWithPath: path)
         if Self.isDirectory(path) { throw LiveIOError.notAFile(path) }
         if !replace, exists(path) { throw CLIIOError.exists(path) }
+        // A batch's output folder may not exist yet; a file standing where a folder goes still refuses.
+        try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
         let temp = target.deletingLastPathComponent()
             .appendingPathComponent(".\(target.lastPathComponent).afterglow-\(UUID().uuidString)").path
         // The temp is gone once renamed; after a link or a failed write this removes it. Its result is moot.
