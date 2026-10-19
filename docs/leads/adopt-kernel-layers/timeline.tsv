@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-19T17:22:38Z	heartbeat	check	#3287	lane batch 20261019172050 Linux check 39293333091 in progress; #3287 open, no needs-fix; main at b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
 2026-10-19T17:44:08Z	heartbeat	check	-	#3287 merged 90e7a0c; full CI 39296061014 pending on dev 1b33afbb; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
 2026-10-19T18:06:17Z	heartbeat	check	-	full CI 39296061014 (dev 1b33afbb, holds AU-design 90e7a0c) still pending, macOS runners backlogged; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T18:28:58Z	heartbeat	check	-	full CI 39296061014 (dev 1b33afbb, holds AU-design 90e7a0c) still queued, newer full CI 39300369891 on c5ec57aa pending; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
