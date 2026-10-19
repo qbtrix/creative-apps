@@ -83,3 +83,4 @@ utc	stage	event	ref	note
 2026-10-19T19:56:06Z	heartbeat	check	-	no change: no supervisor answer; hand-offs open; runs 39296061014 queued, 39311818078 pending; main b3011ab
 2026-10-19T20:18:04Z	heartbeat	check	-	no change: no supervisor answer; hand-offs open; runs 39296061014 queued, 39311818078 pending; main b3011ab
 2026-10-19T20:40:13Z	heartbeat	check	-	runs 39311818078/39296061014 still queued; main b3011ab9; no supervisor answer; hand-off owners not done
+2026-10-19T21:02:05Z	heartbeat	check	-	runs 39311818078/39296061014 still queued (new scoped library 39323823976 queued); main b3011ab9; no supervisor answer; hand-off owners not done
