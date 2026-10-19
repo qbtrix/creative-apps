@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 2026-10-19T13:27Z	3	pr-merged	#2622	prefix public + set on Halo (render-out)
 2026-10-19T13:40Z	3	heartbeat	#3245	waiting on lane, then a scoped halo run
 2026-10-19T14:29Z	3	heartbeat	#3245	macOS build 39259494605 green, mergeable clean; waiting on lane sweep
+2026-10-19T14:51Z	3	heartbeat	#3245	still open, eligible; lane sweeps running (4817 in progress)
