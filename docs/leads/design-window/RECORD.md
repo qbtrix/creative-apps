@@ -1,10 +1,10 @@
 # design-window lead record
 
 Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
-Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
-Stage: 3 polling
-Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
-Next: #2465 fix PR #2701 (DW-a round 2) in the lane; DW-a re-done on a successful run holding it; D0-9d starts once canvas-basics CB-a has merged (CB-3); then D0-7b (feature-done). Finding #2302 waits on SuiteUI #2263.
+Run: act-1a1517272b2-vq6l (resumes earlier runs) · Session: claude/feature-lead-playbook-2k2x84 · Started: 2026-10-19T00:00Z
+Stage: 3 fix round 2 (DW-c, DW-d)
+Base: d50e891e (origin/dev); main verified at 349578b8
+Next: scoped:design 39173700610 (46f6ce21) failed DW-d testCanvasFeedback #3043 and DW-c testEveryControl #3042, testLayoutAtWidths #3044, DesignWindowControlsTests #3045: fix batch (round 2, last) runs beside snapping wave 1; then DW-c/DW-d done on a run holding the fixes, or done with gaps
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -60,4 +60,4 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 - DW-a re-done on scoped design https://github.com/qbtrix/creative-apps/actions/runs/39122750799 (e3a4582c, holds #2701 be2260cd): J1 testEveryMenuOpens green, #2750 closed by CI; Belt-Slice-Done posted on #1494.
 
 - 2026-10-18T21:58Z: D0-9d #2899 merged 21:45Z (e3859e3f). design-window has 0 open findings by Feature line (line CI findings are pre-existing or SuiteUI-owned; #3007 twins #2693), so wave 6 starts: D0-7b builder. Run 39169434591 on e3859e3f pending; DW-d critic panel once a run holding it completes.
-- 2026-10-18T22:14Z: D0-7b PR #3014 open (2 files, +270). Builder flags a spec risk: Design window minimum is 944 pt (200 + 440 + 304), so the 880 x 560 layout step may not be reachable and the canvas may fall under 440 pt at 944; asserts kept as specified. If the macOS run fails there, the DW-c review files it as a finding against the packet sizes.
+- 2026-10-18T22:14Z: D0-7b PR #3014 open (2 files, +270). Builder flags a spec risk: Design window minimum is 944 pt (200 + 440 + 304), so the 880 x 560 layout step may not be reachable and the canvas may fall under 440 pt at 944; asserts kept as specified. If the macOS run fails there, the DW-c review files it as a finding against the packet sizes.2026-10-19T00:00Z	heartbeat	run act-1a1517272b2-vq6l: DW-c/DW-d not done on 39173700610 (findings #3042 #3043 #3044 #3045); fix round 2 starting
