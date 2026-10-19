@@ -4,7 +4,7 @@ Issue: #1934 · Packet: docs/blueprints/suiteui/features/adopt-kernel-undo.md
 Run: act-1a152763cf6-04ka (resume; earlier runs act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/line-lead-playbook-ce1x23 · Resumed: 2026-10-19
 Stage: 3 wave 2
 Base: bede834 (origin/dev, 2026-10-19); brief main cc14022edd80d783a8488e464b15f5766d8dda60 verified
-Next: #3184 (AU-h2, AU-halo's last PR) is in the lane. When it merges, wait for a successful ci.yml run on main holding it, then post Belt-Slice-Done: AU-halo. AU-d1, AU-l1, AU-f1 wait on hand-offs.
+Next: #3184 (AU-h2) merged to dev as 11a5605 at 10:48Z; main does not hold it yet. Full CI 39243183625 on dev d80a1b2 is pending: when a successful ci.yml run promotes main past 11a5605, post Belt-Slice-Done: AU-halo <run url> on #1934. AU-d1, AU-l1, AU-f1 still wait on hand-offs.
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-undo half. The brief's integration branch is `main` at
@@ -77,6 +77,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-19T05:43Z: #3139 opened for AU-h1 (10 files, +216/-51, CI: PASS, head b2a5de65): Halo ProjectHistory over History<HaloDocumentState>, History: Hashable where Payload: Hashable.
 - 2026-10-19T07:09:14Z: #3139 (AU-h1) merged into dev at 07:03Z (6fc1187). Launched AU-h2 (Halo delete) on base 34b8df2.
 - 2026-10-19T07:17:32Z: AU-h2 opened as #3184 (+14 -40, 5 files, head e1e7e13, gate pass). The check flagged the proxy footer (the lane strips it at squash) and no new test; the packet's proof for this deletion is the existing tests plus mutate --validate, so neither needs a fix.
+- #3184 merged in a 3-PR lane batch at 10:48Z.
 
 ## Open
 - 2026-10-18T13:01Z wave 2 started on dev 7ae985e: AU-p1 merged (#2754, 3df88b1, 12:17Z, lane batch of 2). AU-p2 building. #2747 still open, so AU-h1 stays blocked.

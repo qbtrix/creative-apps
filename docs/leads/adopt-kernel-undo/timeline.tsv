@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-19T10:03:13Z	heartbeat	check	-	#3184 macOS build 39215372795 still queued
 2026-10-19T10:24:31Z	heartbeat	check	-	#3184 macOS build still queued
 2026-10-19T10:47:31Z	heartbeat	check	-	#3184 macOS build queued since 07:20 (25 runs queued repo-wide)
+2026-10-19T11:16:12Z	AU-halo	merged	#3184	11a5605 on dev; waiting on main CI
