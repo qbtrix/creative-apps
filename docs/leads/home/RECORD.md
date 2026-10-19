@@ -1,10 +1,10 @@
 # home lead record
 
 Issue: #1503 · Packet: docs/blueprints/suite/features/home.md
-Run: act-1a14c1f550d-8dvt (line lead for suite-contracts, bundle, home; was act-1a14bc85382-m8og, act-1a14ad585d6-dlpz, act-1a149c6a2a3-yna2, act-1a14881ad5e-axoa, act-1a145e74c4e-1rah) · Session: session_01FgHMdTN1ZvtNhGw81uzVWU (claude/feature-lead-suite-contracts-z0ynwa; was session_01WeQwKxFmpontDYTdMSub85) · Started: 2026-10-16T18:11Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z, 2026-10-17T17:08Z, 2026-10-17T21:34Z, 2026-10-17T23:09Z
-Stage: 4 feature-done (HM-3z)
+Run: act-1a1543fa021-d44p (line lead for bundle, home; was act-1a14c1f550d-8dvt, act-1a14bc85382-m8og, act-1a14ad585d6-dlpz, act-1a149c6a2a3-yna2, act-1a14881ad5e-axoa, act-1a145e74c4e-1rah) · Session: session_014LLXKPmyp9YQyheMZE5Cnt (claude/feature-lead-playbook-m29ri0; was session_01FgHMdTN1ZvtNhGw81uzVWU, session_01WeQwKxFmpontDYTdMSub85) · Started: 2026-10-16T18:11Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z, 2026-10-17T17:08Z, 2026-10-17T21:34Z, 2026-10-17T23:09Z, 2026-10-19T13:01Z
+Stage: 5 finish
 Base: 042423165693f2f1d65d2ece90eb0d5bcb910554
-Next: parked (needs-human) until the supervisor un-parks. At 2026-10-18T06:42Z: No supervisor reply on #1331/#1332/#1503. Full CI 39098181461 (e01529f4, now main) finished: Linux green, macOS failed the same 4 AfterGlow journeys (3rd run); re-raised on #1503 (issuecomment-6246651967). dev-red #2667 is Library's LibraryLoupeBudgetTests.focusChangeWithinBudget, not this line. No open finding. After the supervisor's call on #1503: file the 4 as finding (Feature: home), fix wave, then Belt-Contact-Sheet from the next full run's ui-test.
+Next: wait for full run 39221576463 (6f9a2b88, main) macOS ui-test; read the AfterGlow journey results. The 2-round cap is spent (rounds 1-3 above), so per v2 stage 5 each AfterGlow journey still red becomes a `gap` issue (line:suite, Feature: home), then Belt-Contact-Sheet on #1503 with one line per journey and the audit counts.
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged).
 Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged), bundle BU-3 #814 and BU-4 #818 (open, supervisor merges; HM-0 waits), #778/#775 (`.suiteControl`, `.suiteProbes` on dev), A-DE-0 #836 (open, Design line; HM-3a waits).
@@ -42,6 +42,7 @@ Waves (packet's Build waves, checked against dev at 132d910):
 | – | 38967787160 (8e0a5261) | macOS red again on #1659 (SuiteUI); scoped suite run 38968259383 green but uploads no snapshots | – | – | – | – | no review |
 
 ## Decisions
+- Line lead act-1a1543fa021-d44p (2026-10-19T13:01Z): main HEAD 6f9a2b88 verified. The supervisor removed needs-human from #1503 at 12:59Z with no comment. No fix wave for the 4 red journeys: v2 stage 5 sends a red done run back to stage 4 only if the budget allows, and fix rounds 1 and 2 are spent, so the red journeys become gaps. Full run 39135416326 never ran the journeys (its release build failed to link FlareCore in SuiteUI), so the newest results come from 39221576463.
 - Line lead act-1a14c1f550d-8dvt (2026-10-17T23:10Z): main HEAD 59c435a6 verified. The supervisor parked #1331, #1332 and #1503 with needs-human at 23:07Z ("supervisor un-parks after Mac verification"), so this run builds nothing and leaves the label. The Halo journey regression blamed on #2073 is refuted: scoped: halo run 39045670179 (dd7ec767, which contains #2073's 6fe25c81) is green, and #2077 to #2081 closed as passing. Posted on #1331.
 - Line lead act-1a14bc85382-m8og (2026-10-17T21:34Z): main HEAD c55fad78 verified (= dev's run head). The brief's rebase of lead/<feature> onto origin/main is done as one commit on origin/main carrying docs/leads/<feature>/ from the old branch (the clone is shallow and the old branch shares no base with main; its only own content is this record), pushed with --force-with-lease.
 - Wave 5 (line lead, 2026-10-17): HM-3a and HM-3b run together; their files are disjoint and neither needs the other's code. HM-3b's `feature-done` is unchained into HM-3z (a docs-only PR after both merge), since HM-3b's own journeys need only the harness, the views and the goldens, all merged.

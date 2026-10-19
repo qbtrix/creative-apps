@@ -109,3 +109,5 @@ utc	stage	event	ref	note
 2026-10-18T05:28Z	4 feature-done (HM-3z)	heartbeat	e01529f4	full CI 39098181461 running; awaiting supervisor; parked
 2026-10-18T06:04Z	4 feature-done (HM-3z)	heartbeat	39098181461	parked needs-human; no supervisor reply; dev green; no finding
 2026-10-18T06:42Z	4 feature-done (HM-3z)	heartbeat	39098181461	3rd run same 4 AfterGlow journey fails; re-raised #1503; dev-red #2667 Library, not ours
+2026-10-19T13:01Z	5	stage-start	6f9a2b88	relaunch act-1a1543fa021-d44p; needs-human removed 12:59Z
+2026-10-19T13:15Z	5	heartbeat	39221576463	waiting on full run ui-test for AfterGlow journeys; cap spent, red ones become gaps
