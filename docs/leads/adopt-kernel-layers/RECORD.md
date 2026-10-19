@@ -1,10 +1,10 @@
 # adopt-kernel-layers lead record
 
 Issue: #1936 · Packet: docs/blueprints/suiteui/features/adopt-kernel-layers.md
-Run: act-1a14dfbdefe-il38 (relaunch; first run act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-features-qyyie4 · Started: 2026-10-17T06:04Z
+Run: act-1a152763cf6-04ka (resume; earlier runs act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/line-lead-playbook-ce1x23 · Resumed: 2026-10-19
 Stage: 3 wave 2 (AL-flare panel blocked) + wave 1 (AL-photo)
-Base: 4bf67be861d056068f683878a580864ac71bed21
-Next: (17:16Z) #2862 (AL-p2) merged as e55c8d3c. #2863 (AL-h1) is in the lane; when it merges, launch AL-h2. AL-p3 and the other panel tasks wait on #2811. AL-d* wait on design-seams-2.
+Base: bede834 (origin/dev, 2026-10-19); brief main cc14022edd80d783a8488e464b15f5766d8dda60 verified
+Next: (2026-10-19T04:44Z) AL-h1 #2863 merged. Wave 3: AL-h2 (Halo delete) and #2811 (LayerTreeList selection, rename, sidebar ids, header action; same line) are building. AL-p3, AL-h3 and AL-f3 start when #2811 merges. AL-d* wait on design-seams-2 (planned).
 
 Line lead for #1938, #1937 and #1936 (contract rule 19, run act-1a14dfbdefe-il38);
 this record is the adopt-kernel-layers part. The first run led it with #1935 and #1934. This run's brief names `main` at
@@ -58,6 +58,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-18T15:45Z: heartbeat. #2823's file list is checked: PhotoModel, its tests, plan and C4 part only. AL-h1 now waits only on AE-h2 (AE-h1 merged).
 
 - 16:50Z: AL-h1 (#2863) keeps `layers` as a stored `[HaloLayer]` and projects to the tree on each edit, as Photo and Flare do. The packet's endRun mutation doesn't apply because Halo's layer edits never coalesce. The `follows` cycle case is kept for the damaged-file check.
+- 2026-10-19T04:44Z: resume under run act-1a152763cf6-04ka on dev bede834. #2863 (AL-h1) merged 2026-10-18T18:00Z. #2880 (another line) moved Design ordering onto the kernel tree (DesignNode+Kernel.swift, LiveOrdering.swift): part of AL-d1 is done; AL-d stays parked on design-seams-2, still planned. #2811 is line:suiteui, this lead's own line, and has had no taker for a day, so the lead builds it as the unblock task for every panel task (AL-f3, AL-p3, AL-h3, AL-d3).
 
 ## Open
 - 2026-10-18T13:45Z: ninth Belt nudge (after a worker restart); continued from stage 3.
