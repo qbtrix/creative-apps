@@ -21,35 +21,57 @@ import SwiftUI
 extension LibraryWindow {
     var developMenu: LibraryMenu.Photo {
         let canEdit = model.canEditDevelop
-        let develop = LibraryMenu.Develop(
-            set: canEdit
-                ? { (slider: DevelopSlider, value: Double) in
-                    model.setDevelop(slider, to: value, coalesceKey: "develop-\(slider.rawValue)")
-                    developPreview()
-                } : nil,
-            setCurve: enabled(canEdit) { (points: [DevelopCurvePoint]) in
-                model.setCurve(points, coalesceKey: "develop-curve")
+        // Each action in its own typed local: one long initializer mixing
+        // these closures was more than the type checker could finish.
+        let set: (@MainActor (DevelopSlider, Double) -> Void)? =
+            canEdit
+            ? { (slider: DevelopSlider, value: Double) -> Void in
+                model.setDevelop(slider, to: value, coalesceKey: "develop-\(slider.rawValue)")
                 developPreview()
-            },
-            setLevels: canEdit
-                ? { (field: DevelopLevels.Field, value: Double) in
-                    model.setLevels(field, to: value, coalesceKey: "develop-levels")
-                    developPreview()
-                } : nil,
-            endEdit: enabled(canEdit) { developFinish(model.endDevelopDrag()) },
-            reset: enabled(canEdit) { (group: DevelopGroup?) in developFinish(model.resetDevelop(group)) },
-            resetSlider: enabled(canEdit) { (slider: DevelopSlider) in developFinish(model.resetDevelop(slider)) },
-            resetCurve: enabled(canEdit) { developFinish(model.resetCurve()) },
-            resetLevels: enabled(canEdit) { developFinish(model.resetLevels()) },
-            sync: enabled(model.syncSource != nil) { developFinish(model.syncSettings()) },
-            syncTitle: model.syncTitle,
-            toggleOriginal: enabled(model.canShowOriginal) { developToggleOriginal() },
-            showsOriginal: developShowsOriginal)
+            } : nil
+        let setCurve: (@MainActor ([DevelopCurvePoint]) -> Void)? = enabled(canEdit) {
+            (points: [DevelopCurvePoint]) -> Void in
+            model.setCurve(points, coalesceKey: "develop-curve")
+            developPreview()
+        }
+        let setLevels: (@MainActor (DevelopLevels.Field, Double) -> Void)? =
+            canEdit
+            ? { (field: DevelopLevels.Field, value: Double) -> Void in
+                model.setLevels(field, to: value, coalesceKey: "develop-levels")
+                developPreview()
+            } : nil
+        let endEdit: LibraryMenu.Action? = enabled(canEdit) { () -> Void in
+            developFinish(model.endDevelopDrag())
+        }
+        let reset: (@MainActor (DevelopGroup?) -> Void)? = enabled(canEdit) { (group: DevelopGroup?) -> Void in
+            developFinish(model.resetDevelop(group))
+        }
+        let resetSlider: (@MainActor (DevelopSlider) -> Void)? = enabled(canEdit) { (slider: DevelopSlider) -> Void in
+            developFinish(model.resetDevelop(slider))
+        }
+        let resetCurve: LibraryMenu.Action? = enabled(canEdit) { () -> Void in developFinish(model.resetCurve()) }
+        let resetLevels: LibraryMenu.Action? = enabled(canEdit) { () -> Void in developFinish(model.resetLevels()) }
+        let sync: LibraryMenu.Action? = enabled(model.syncSource != nil) { () -> Void in
+            developFinish(model.syncSettings())
+        }
+        let toggleOriginal: LibraryMenu.Action? = enabled(model.canShowOriginal) { () -> Void in
+            developToggleOriginal()
+        }
+        let syncTitle: String? = model.syncTitle
+        let showsOriginal: Bool = developShowsOriginal
+        let develop = LibraryMenu.Develop(
+            set: set, setCurve: setCurve, setLevels: setLevels, endEdit: endEdit, reset: reset,
+            resetSlider: resetSlider, resetCurve: resetCurve, resetLevels: resetLevels, sync: sync,
+            syncTitle: syncTitle, toggleOriginal: toggleOriginal, showsOriginal: showsOriginal)
+        let copySettings: LibraryMenu.Action? = enabled(model.canCopySettings) { () -> Void in model.copySettings() }
+        let pasteSettings: LibraryMenu.Action? = enabled(model.canPasteSettings) { () -> Void in
+            developFinish(model.pasteSettings())
+        }
+        let resetDevelop: LibraryMenu.Action? = enabled(canEdit) { () -> Void in
+            developFinish(model.resetDevelop(nil as DevelopGroup?))
+        }
         return LibraryMenu.Photo(
-            copySettings: enabled(model.canCopySettings) { model.copySettings() },
-            pasteSettings: enabled(model.canPasteSettings) { developFinish(model.pasteSettings()) },
-            resetDevelop: enabled(canEdit) { developFinish(model.resetDevelop(nil)) },
-            develop: develop)
+            copySettings: copySettings, pasteSettings: pasteSettings, resetDevelop: resetDevelop, develop: develop)
     }
 
     /// True while the loupe's photo shows without its adjustments; stepping
