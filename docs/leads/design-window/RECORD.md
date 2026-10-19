@@ -2,9 +2,9 @@
 
 Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a1517272b2-vq6l (resumes earlier runs) · Session: claude/feature-lead-playbook-2k2x84 · Started: 2026-10-19T00:00Z
-Stage: fix round 2 in lane
+Stage: fix round 2 merged
 Base: d50e891e (origin/dev); main verified at 349578b8
-Next: Belt-Slice-Done DW-c/DW-d once #3064 #3067 #3068 are in a green scoped design run
+Next: Belt-Slice-Done DW-c (8632744b,236400ab) and DW-d (ed0fed9e) once full CI 39186699154 on ed0fed9e shows a green Linux job
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -66,3 +66,4 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 2026-10-19T01:06Z	heartbeat	round 2 fix PRs #3064, #3067; r-b2 gating
 2026-10-19T01:11Z	heartbeat	r-b2 shipped: PR #3068 fixes #3042, #3044 (DW-c)
 2026-10-19T01:30Z	heartbeat	#3068 macOS build green; #3064 #3067 builds queued
+2026-10-19T01:50Z	heartbeat	#3064 8632744b, #3068 236400ab, #3067 ed0fed9e merged
