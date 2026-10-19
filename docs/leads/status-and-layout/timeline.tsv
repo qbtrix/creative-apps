@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-19T06:13:51Z	SL-b	ruling	#3166	SuiteUI part stripped by fixer; needs-ui #3167; no-fast-lane until pushed
 2026-10-19T06:26:31Z	SL-b	check	#3166	reworked 783c6907, no SuiteUI; no-fast-lane removed
 06:51Z	check	heartbeat	-	lane waiting on builds
+07:15Z	check	heartbeat	-	macOS builds queued
