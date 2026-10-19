@@ -26,3 +26,7 @@ utc	stage	event	ref	note
 00:57Z	-	heartbeat	-	heartbeat: #3004 SL-2 and #2993 SL-3 builds green, lane merge pending; feature findings 0
 01:02Z	3 wave 1	pr-merged	#3004	SL-2 merged d6b996d1
 01:02Z	3 wave 2	start	SL-5,SL-7	wf_889db5f9-d41 on d6b996d1; SL-4 waits on #2993
+02:11Z	3 wave 2	pr-open	#3075	SL-5 contract check ok
+02:11Z	3 wave 2	pr-open	#3069	SL-7 contract check ok
+02:11Z	3 wave 1	pr-merged	#2993	SL-3 merged 562f2125
+02:11Z	3 wave 2	start	SL-4	wf_02e9365c-cbf on 17dc84c7
