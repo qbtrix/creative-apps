@@ -99,3 +99,4 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 2026-10-19T20:48Z: #3221 DV-9 still open (build green); no scheduled lane sweep since 19:40Z, 16 runs queued repo-wide
 - 2026-10-19T21:28Z: #3221 DV-9 merged. #3250 DV-10 merged with dev (conflicts resolved, crop CR-6 kept), gate pass, 113 lines, head c8132980, ready. #3295 DV-13 merged with DV-10, gate pass, head bbd009af, stays draft until #3250 merges
 - 2026-10-19T22:17Z: #3250 (DV-10) merged 21:49Z as 23e682ad. #3295 (DV-13, slice DV-f) merged dev, gate PASS, ready at d0a3fbf6 (137+/23-). DV-d done waits on green dev CI 39333170092 (a7e93ca4).
+- 2026-10-19T22:45Z: DV-d tasks all on dev (cf120143); done comments wait for green dev CI 39336158094 (pending). #3295 DV-13 open, clean.
