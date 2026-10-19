@@ -4,7 +4,7 @@
 // stored (style-rows ST-5): corner radius, a stroke centered on the edge, and its
 // opacity times every enclosing layer's, so a frame fades its contents. The shape
 // and stroke geometry are small functions (artworkPath, artworkStroke) the tests
-// read. DesignMarqueeMark
+// read; paintArtwork draws a list of them, for DesignArtwork and DesignPastEdge. DesignMarqueeMark
 // is the rectangle a marquee drag covers, from the Model's `marquee`, drawn as a
 // shape in the overlay. Frame names (DesignFrameLabels) and the selection
 // (DesignSelectionMarks) have their own files. None takes clicks: the canvas
@@ -90,27 +90,33 @@ struct DesignArtwork: View {
         let painted = painted
         let scale = usable(zoom)
         let editing = editingTextID
-        Canvas { context, _ in
-            for item in painted {
-                let node = item.node
-                var faded = context
-                faded.opacity = item.opacity
-                if let shape = artworkPath(for: node, scale: scale) {
-                    faded.fill(shape, with: .color(node.fill.color))
-                    if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) {
-                        faded.stroke(shape, with: .color(stroke.color.color), style: style)
-                    } else if node.kind == .frame {
-                        faded.stroke(shape, with: .color(SuiteColor.overlayInk.opacity(0.15)), lineWidth: 1)
-                    }
-                } else if node.kind == .text, node.id != editing {
-                    // Text scales with the artwork; the context carries the zoom for it.
-                    faded.scaleBy(x: scale, y: scale)
-                    DesignTextArtwork.draw(node, in: faded)
-                }
+        Canvas { context, _ in paintArtwork(painted, in: context, scale: scale, editing: editing) }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+}
+
+/// Paints `painted` into `context` at `scale`, each node at its opacity times `fade`; the text
+/// node `editing` is left out. DesignArtwork and DesignPastEdge both draw through it.
+func paintArtwork(
+    _ painted: [DesignPainted], in context: GraphicsContext, scale: Double, editing: String?, fade: Double = 1
+) {
+    for item in painted {
+        let node = item.node
+        var faded = context
+        faded.opacity = item.opacity * fade
+        if let shape = artworkPath(for: node, scale: scale) {
+            faded.fill(shape, with: .color(node.fill.color))
+            if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) {
+                faded.stroke(shape, with: .color(stroke.color.color), style: style)
+            } else if node.kind == .frame {
+                faded.stroke(shape, with: .color(SuiteColor.overlayInk.opacity(0.15)), lineWidth: 1)
             }
+        } else if node.kind == .text, node.id != editing {
+            // Text scales with the artwork; the context carries the zoom for it.
+            faded.scaleBy(x: scale, y: scale)
+            DesignTextArtwork.draw(node, in: faded)
         }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 }
 

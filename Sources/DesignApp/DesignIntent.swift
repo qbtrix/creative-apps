@@ -45,6 +45,8 @@ enum DesignIntent {
     case renamePage(String, String)
     /// A Layers row's rename: the layer and its new name, one "Rename Layer" step.
     case renameLayer(String, String)
+    /// The inspector's Width or Height committed: the selected page's size, one "Change Page Size" step.
+    case setPageSize(width: Double, height: Double)
 }
 
 /// Where a view sends its intents.
