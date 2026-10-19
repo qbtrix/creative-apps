@@ -96,9 +96,8 @@ final class HaloJourneyTests: XCTestCase {
     /// selectedLayerHeader), so it reads "Frames 20–50", and at 60 the
     /// artboard (W0's viewerSummary) no longer names Badge.
     @MainActor private func setBadgeSpanFromTheKeys(_ halo: Journey) {
-        let lane = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Badge'")).firstMatch
-        XCTAssert(lane.waitForExistence(timeout: 5), "no Badge lane in the timeline")
+        let lane = halo.trackName("Badge")
+        XCTAssert(lane.waitForExistence(timeout: 5), "no Badge track (halo.timeline.name.*) in the timeline")
         lane.click()
         XCTAssert(header("Badge", halo).waitForExistence(timeout: 5), "clicking Badge's lane didn't select Badge")
         halo.press(.home)
@@ -231,9 +230,8 @@ final class HaloJourneyTests: XCTestCase {
             // window is wider than the runner's 1024 pt display and the
             // inspector is off it, where nothing can be clicked (run
             // 38848092018: no hit point for suite.inspector at x 1064).
-            let lane = halo.app.descendants(matching: .any).matching(
-                NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
-            XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane in the timeline at \(width)")
+            let lane = halo.trackName("Ball")
+            XCTAssert(lane.waitForExistence(timeout: 5), "no Ball track (halo.timeline.name.*) in the timeline at \(width)")
             lane.click()
             let ball = halo.app.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
@@ -248,7 +246,8 @@ final class HaloJourneyTests: XCTestCase {
             viewerWidths[width] = halo.element("halo.viewer").frame.width
             let timeline = halo.element("halo.timeline").frame
             XCTAssertLessThanOrEqual(timeline.maxY, window.frame.maxY, "the timeline runs off the window at \(width)")
-            let tracks = halo.app.windows.firstMatch.buttons.matching(identifier: "halo.timeline.track").allElementsBoundByIndex
+            let tracks = halo.app.windows.firstMatch.buttons.matching(
+                NSPredicate(format: "identifier BEGINSWITH 'halo.timeline.name.'")).allElementsBoundByIndex
             for track in tracks {
                 XCTAssertGreaterThanOrEqual(track.frame.minX, timeline.minX - 1,
                     "a timeline track \(track.frame) starts left of the timeline \(timeline) at \(width): it runs under the sidebar")
@@ -423,16 +422,20 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// The `halo.*` identifiers of the window's buttons, pop-ups, fields and
-    /// rows, but the timeline's track names (SuiteUI's buttons, which take
-    /// `halo.timeline.track` from their strip and act through the timeline).
+    /// rows, but the timeline strip's own parts (SuiteUI's, which act through
+    /// the timeline): what takes `halo.timeline.track` from the strip, and
+    /// its track names, lanes and keys.
     @MainActor private func onScreenControlIDs(_ halo: Journey) -> Set<String> {
         let window = halo.app.windows.firstMatch
         let types: [XCUIElement.ElementType] = [.button, .popUpButton, .textField, .checkBox, .slider, .cell]
+        // Generated per track and key from the strip's `halo.timeline` prefix, not controls.
+        let generated = ["halo.timeline.name.", "halo.timeline.lane.", "halo.timeline.key."]
         var ids = Set<String>()
         for type in types {
             let query = window.descendants(matching: type).matching(NSPredicate(format: "identifier BEGINSWITH 'halo.'"))
             for element in query.allElementsBoundByIndex where element.identifier != "halo.timeline.track" {
-                ids.insert(element.identifier)
+                let id = element.identifier
+                if !generated.contains(where: { id.hasPrefix($0) }) { ids.insert(id) }
             }
         }
         return ids
@@ -507,5 +510,23 @@ private struct ShotPixels {
     func gray(_ x: Int, _ y: Int) -> Double {
         let i = (y * width + x) * 4
         return (Double(rgba[i]) + Double(rgba[i + 1]) + Double(rgba[i + 2])) / 3
+    }
+}
+
+/// A timeline track's parts by their SuiteUI identifiers under Halo's
+/// `halo.timeline` prefix (TimelineStrip, TimelineLaneAccess): the name
+/// button `halo.timeline.name.<id>` and the lane `halo.timeline.lane.<id>`,
+/// each labelled with the track's name.
+extension Journey {
+    /// The name button of the track `name`; a click selects its layer and focuses the timeline.
+    func trackName(_ name: String) -> XCUIElement {
+        app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH 'halo.timeline.name.' AND label == %@", name)).firstMatch
+    }
+
+    /// The lane of the track `name`.
+    func trackLane(_ name: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH 'halo.timeline.lane.' AND label == %@", name)).firstMatch
     }
 }
