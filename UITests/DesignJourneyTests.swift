@@ -244,7 +244,9 @@ final class DesignJourneyTests: XCTestCase {
         design.app.terminate()
 
         let reopened = Journey("Design", self, arguments: ["-DesignOpenFile", file.path])
-        XCTAssert(reopened.app.windows["journey.design"].waitForExistence(timeout: 30), "journey.design didn't reopen")
+        // The title carries the save state ("journey.design – Saved", files-history FH-4), so match its start.
+        let window = reopened.app.windows.matching(NSPredicate(format: "title BEGINSWITH 'journey.design'")).firstMatch
+        XCTAssert(window.waitForExistence(timeout: 30), "journey.design didn't reopen")
         reopened.shot("reopened")
     }
 
