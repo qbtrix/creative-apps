@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-19T17:49Z	4	heartbeat	39292755765	stall ping answered on #1507; run still queued
 2026-10-19T17:59Z	4	heartbeat	39292755765	scoped suite run waiting
 2026-10-19T18:19Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T18:20Z	4	heartbeat	39292755765	second stall ping; run still queued
