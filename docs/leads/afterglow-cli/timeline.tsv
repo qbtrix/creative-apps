@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-19T13:01:07Z	lead	stage-start	-	run act-1a1543c761a-p4tj resumed; lead branch rebased on main 6f9a2b88
 2026-10-19T13:01:07Z	lead	heartbeat	-	polling lane for #3237 #3238 #3211 #3203
 2026-10-19T13:31:47Z	lead	heartbeat	-	lane congested (24/30 recent sweeps cancelled, sweep 39259516700 in progress since 13:21Z); #3237 #3238 #3211 #3203 clean with green mac builds, awaiting merge
+2026-10-19T13:50:18Z	lead	heartbeat	-	lane batch lane/batch-20261019133046 bisecting (probe -2 Linux check running); #3237 #3238 #3211 #3203 still open, clean
