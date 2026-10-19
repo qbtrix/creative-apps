@@ -117,8 +117,9 @@ public struct LiveTransforming: SelectionTransforming {
 }
 
 extension DesignRect {
-    /// The smallest rectangle holding every frame; nil for none. The one selection-bounds union.
-    static func union(_ frames: [DesignRect]) -> DesignRect? {
+    /// The smallest rectangle holding every frame; nil for none. The one selection-bounds union,
+    /// and the page's content bounds (DesignPage.contentBounds).
+    public static func union(_ frames: [DesignRect]) -> DesignRect? {
         guard let minX = frames.map(\.x).min(), let minY = frames.map(\.y).min(),
             let maxX = frames.map(\.maxX).max(), let maxY = frames.map(\.maxY).max()
         else { return nil }
