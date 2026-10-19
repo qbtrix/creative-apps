@@ -40,3 +40,4 @@ utc	feature	event	ref	note
 2026-10-18T23:29:58Z	files-history	heartbeat	39173700610	scoped design in progress (46f6ce21); full 39173775025 cancelled, 39176304199 pending; #3022 macOS build 39175654043 in progress
 2026-10-18T23:53:06Z	files-history	merged	#3022	fixes #2938 merged b3283d3b; FH-a round 1 complete, 0 open findings; FH-b waits on scoped design 39173700610
 2026-10-19T00:17:39Z	files-history	heartbeat	39173700610	scoped design macOS job red (RenderBudget, WindowControls stroke-add, TextScale, TextDraw, ArrangeDrag, 9 journeys: other design work); J16 red on contrast audit (empty alert message label) -> finding #3052, FH-a fix round 2 (wf_cfa1c00a-481); FH-b not slice-done; next 39178639545 / 39178441058
+2026-10-19T00:28:21Z	files-history	fix-pr	#3057	FH-a round 2: alert split into title+message for #3052; head 8d2fc81c, Fast-Check pass, fast-lane; macOS build pending
