@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-19T11:24Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
 2026-10-19T11:44Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
 2026-10-19T13:15Z	3	stage-start	wave B	relaunch act-1a1540ed5f3-c3x9: AD-p2, AD-h2 builders
+2026-10-19T13:20Z	3	builders	wave B	AD-p2, AD-h2 builders launched (branches lead-adopt-kernel-session/AD-p2, AD-h2)
