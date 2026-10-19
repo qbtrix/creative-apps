@@ -5,11 +5,12 @@
 // uses. On the GPU that is Metal with resident layer tiles writing into a canvas-sized texture (the presenter's);
 // on the CPU, CoreRender's CPU backend returning tile bytes. Cases: Hue/Saturation's Saturation, Levels' Gamma,
 // Curves' midpoint, a Levels and a Hue/Saturation adjustment layer at the top of the stack, and the Move tool
-// dragging the top layer 3 px a step (also a whole-canvas redraw that changes no tile's pixels). Each case warms
+// dragging the top layer 3 px a step (also a whole-canvas redraw that changes no tile's pixels), alone and under
+// a Levels adjustment layer. Each case warms
 // with a full picture and one untimed step, then times `events` steps. The target is p95 <= 16 ms per step at
-// 8K on the GPU route (one display frame); a step over it is a known issue until the GPU tone pass lands.
-// `breakdown` splits one GPU step into its phases (the composite of the layers, each adjustment, the write into
-// the texture), band by band one after another, to show where a step's time goes. Report-only
+// 8K on the GPU route (one display frame): a step over it is a known issue; one over `budget` fails a release run.
+// `breakdown` shows where one GPU step's time goes on the live route: the plan (tone programs), the composites
+// it made again, and the step. Report-only
 // (Tests/perf-suites.txt): ADJUST-SLIDER-8K and ADJUST-BREAKDOWN-8K lines in
 // .build/snapshots/photo-adjust-slider-latency.txt. Read release numbers: a debug build is 20x slower.
 // macOS only.
@@ -27,6 +28,10 @@ import Testing
     static let events = config == "release" ? 30 : 3
     /// One display frame at 60 Hz: the GPU route's target per step.
     static let target = 16.0
+    /// The GPU route's p95 budget per step in release, a little above what it measures (render-budgets.md):
+    /// an adjustment step re-encodes the cached composite (12 to 24 ms measured), a Move step composites every
+    /// layer again (33 ms p50, up to 69 ms p95 on a busy machine).
+    static func budget(_ name: String) -> Double { name.hasPrefix("move") ? 80 : 30 }
 
     /// A case: its name, how it sets the document up (returns the adjustment layer's id, if any), and step `i`
     /// (an adjustment edit, or a Move tool drag sample).
@@ -65,6 +70,15 @@ import Testing
         }, step: { workspace, _, i in
             workspace.drag(from: Mask.Point(x: 2000, y: 2000), to: Mask.Point(x: 2000 + Double(i * 3), y: 2000 + Double(i)))
         }),
+        // The same Move with a Levels adjustment layer above the moved layer.
+        Case(name: "move under levels layer", setUp: { workspace in
+            _ = try layer(.levels, in: &workspace)
+            workspace.selectLayer(workspace.layers[1].id)
+            workspace.selectTool(.move)
+            return nil
+        }, step: { workspace, _, i in
+            workspace.drag(from: Mask.Point(x: 2000, y: 2000), to: Mask.Point(x: 2000 + Double(i * 3), y: 2000 + Double(i)))
+        }),
     ]
 
     /// An adjustment layer of `kind` added above the selected (top) layer.
@@ -92,7 +106,7 @@ import Testing
             routes.insert(("GPU-resident", { let (_, route, target) = try #require(try Self.gpu()); return (route, target) }), at: 0)
         }
         var lines: [String] = []
-        var misses: [String] = []
+        var misses: [String] = [], over: [String] = []
         for (label, make) in routes {
             for slider in Self.cases {
                 let (route, target) = try make()
@@ -115,6 +129,7 @@ import Testing
                 print(line)
                 lines.append(line)
                 if label == "GPU-resident", p95 > Self.target { misses.append(line) }
+                if label == "GPU-resident", p95 > Self.budget(slider.name) { over.append(line) }
             }
         }
         lines += try await Self.breakdown()
@@ -122,69 +137,38 @@ import Testing
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try (lines.joined(separator: "\n") + "\n").write(
             to: folder.appendingPathComponent("photo-adjust-slider-latency.txt"), atomically: true, encoding: .utf8)
-        withKnownIssue("an 8K step recomposites every layer and runs the adjustments as separate passes (hue/sat on the CPU)", isIntermittent: true) {
+        #expect(over.isEmpty || Self.config != "release", "over budget: \(over)")
+        withKnownIssue("Levels and Curves build their tables on the CPU each step, and a Move composites every layer", isIntermittent: true) {
             #expect(misses.isEmpty || Self.config != "release", "over \(Self.target) ms p95: \(misses)")
         }
     }
 
-    /// One GPU step's phases, each band (a row of tiles) one after another: the layers' composite from
-    /// resident tiles, each enabled adjustment section, and the display write into the texture. Hue/Saturation
-    /// splits into its readback, its CPU pass and its upload.
+    /// Where a GPU step's time goes on the live route, for each case: building its plan (`liveStack`, whose
+    /// tone programs probe the CPU for their tables), the composites it had to make again (the cache's
+    /// misses: 0 for a slider, every band for a Move), and the step itself; or that it took the dispatcher
+    /// route.
     static func breakdown() async throws -> [String] {
-        guard let (_, route, target) = try gpu() else { return [] }
+        guard try gpu() != nil else { return [] }
         var lines: [String] = []
-        for slider in [cases[0], cases[1], cases[3], cases[5]] {
+        for slider in cases {
+            // A route of its own: resident tiles keyed by another document's layer ids would compare pixels.
+            guard let (_, route, target) = try gpu() else { return [] }
             var workspace = try PhotoRenderBudgetTests.document()
             let layer = try slider.setUp(&workspace)
             slider.step(&workspace, layer, 0)
-            _ = try await PhotoRenderer.update(workspace, since: nil, route: route, target: target)
-            let canvas = try #require(workspace.canvas)
-            let rects = PhotoRenderer.tiles(of: canvas, in: .all)
-            let bands = Dictionary(grouping: rects, by: \.y).values.map { band in
-                PixelRect(x: band.map(\.x).min()!, y: band[0].y, width: band.map(\.maxX).max()! - band.map(\.x).min()!,
-                          height: band[0].height)
-            }
-            var phase: [String: Double] = [:]
-            func timed<T>(_ name: String, _ body: () throws -> T) rethrows -> T {
-                let clock = ContinuousClock(), t0 = clock.now
-                defer { phase[name, default: 0] += milliseconds(clock.now - t0) }
-                return try body()
-            }
-            let settings = workspace.adjustments
-            let clock = ContinuousClock(), t0 = clock.now
-            for area in bands {
-                let dispatcher = route.dispatcher()
-                var picture = try timed("composite") {
-                    if let resident = try workspace.residentComposited(area, on: dispatcher, resident: try #require(route.residentTiles)) {
-                        return resident
-                    }
-                    return try workspace.composited(area, on: dispatcher)
-                }
-                func step(_ name: String, _ next: () throws -> RenderSurface) throws {
-                    let made = try timed(name, next)
-                    dispatcher.release(picture)
-                    picture = made
-                }
-                if settings.isEnabled(.levels), [settings.blackPoint, settings.whitePoint, settings.gamma] != [0, 1, 1] {
-                    try step("levels") {
-                        try dispatcher.adjusted(picture, .levels(inBlack: settings.blackPoint, inWhite: settings.whitePoint,
-                                                                 gamma: settings.gamma, outBlack: 0, outWhite: 1, encoding: .sRGB))
-                    }
-                }
-                if settings.isEnabled(.hueSaturation), settings.saturation != 0 || settings.hue != 0 || settings.lightness != 0 {
-                    let read = try timed("hue-sat readback") { try dispatcher.read(picture) }
-                    let shifted = try timed("hue-sat CPU") {
-                        try read.hueSaturation(hue: Float(settings.hue), saturation: Float(settings.saturation),
-                                               lightness: Float(settings.lightness))
-                    }
-                    try step("hue-sat upload") { try dispatcher.surface(shifted) }
-                }
-                try timed("display write") { try target.write(picture, area) }
-                dispatcher.release(picture)
-            }
-            let total = milliseconds(clock.now - t0)
-            let parts = phase.sorted { $0.value > $1.value }.map { "\($0.key) \(format($0.value))" }.joined(separator: ", ")
-            let line = "ADJUST-BREAKDOWN-8K GPU-resident \(config) \(slider.name): \(bands.count) bands one after another, \(format(total)) ms: \(parts) ms"
+            var shown = try await PhotoRenderer.update(workspace, since: nil, route: route, target: target).revision
+            slider.step(&workspace, layer, 1)
+            let clock = ContinuousClock()
+            let t0 = clock.now
+            let plan = workspace.liveStack()
+            let planned = milliseconds(clock.now - t0)
+            let made = route.composites.made
+            let t1 = clock.now
+            shown = try await PhotoRenderer.update(workspace, since: shown, route: route, target: target).revision
+            let stepped = milliseconds(clock.now - t1)
+            let line = plan == nil
+                ? "ADJUST-BREAKDOWN-8K GPU-resident \(config) \(slider.name): dispatcher route (no live plan), step \(format(stepped)) ms"
+                : "ADJUST-BREAKDOWN-8K GPU-resident \(config) \(slider.name): plan \(format(planned)) ms, \(route.composites.made - made) composites made again, step \(format(stepped)) ms"
             print(line)
             lines.append(line)
         }

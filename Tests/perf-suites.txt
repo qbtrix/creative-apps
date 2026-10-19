@@ -26,6 +26,7 @@ photo AppSnapshotTests.PhotoStrokePacerTests/theFirstSampleAppliesAtOnceAndQuick
 photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoTests
 photo AppSnapshotTests.PhotoRenderBudgetTests
 photo AppSnapshotTests.PhotoAdjustSliderLatencyTests
+photo AppSnapshotTests.BodyCountSuites/PhotoWindowLiveEditTests
 photo AppSnapshotTests.PhotoZoomSweepTests
 photo AppSnapshotTests.BodyCountSuites/PhotoZoomBudgetTests
 
