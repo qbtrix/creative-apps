@@ -183,3 +183,19 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     #expect(flat.contains("Image(systemName:toggle.onSymbol)") && flat.contains("Image(systemName:toggle.offSymbol)"))
     #expect(!flat.contains(".frame("), "no hand-sized frame: both symbols set the width")
 }
+
+/// A toggle whose symbols change with more than its own state lays out every
+/// symbol it reserves, so its width, and the x of the toggles before it, never moves.
+@Test func toggleIconLaysOutItsReservedSymbols() throws {
+    let source = try sidebarRowSource()
+    let icon = try #require(region(of: source, from: "private struct SidebarToggleIcon", to: ".accessibilityHidden"))
+    #expect(squeezed(icon).contains("ForEach(toggle.reserved"), "the reserved symbols take no part in layout")
+}
+
+@Test func renameFieldKeepsTheRowIconInFrontOfIt() throws {
+    let source = try sidebarRowSource()
+    let open = try #require(region(of: source, from: "if field.isOpen {", to: "} else {"))
+    let field = squeezed(open)
+    #expect(field.contains("Label{"), "the open field drops the title's Label, so the name jumps left")
+    #expect(field.contains("icon:{SidebarRowIcon(item:item)}"), "the open field drops the row icon")
+}
