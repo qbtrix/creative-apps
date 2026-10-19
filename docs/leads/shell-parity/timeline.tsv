@@ -183,3 +183,4 @@ utc	stage	event	ref	note
 2026-10-18T23:44:31Z	shell-parity	check	dev@9ece98c5	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 11 design findings open
 2026-10-19T00:02:03Z	shell-parity	check	dev@d50e891e	blocked: #2524 #2263 open; gap #1573 open (testShellLight still red, testShellDark green in scoped run 39173700610); no dev-red; 14 design findings open (new #3042-#3045 not ours)
 2026-10-19T00:19:49Z	shell-parity	check	dev@ef6f201f	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 15 design findings open (new #3052 J16 bad-file alert, not ours)
+2026-10-19T00:37:31Z	shell-parity	check	dev@7ccb643d	blocked: #2524 #2263 open; gap #1573 open; no dev-red; 15 design findings open
