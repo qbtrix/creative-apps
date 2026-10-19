@@ -5,8 +5,8 @@
 // row entry: the selection and cell size in the grid, and the import, render,
 // save and Preview data pills, each `library.status.<id>` with its help as
 // tooltip and accessibility hint. The loupe's place is its HUD's. A
-// `.selected` entry draws as an on toggle and a warning or error entry in
-// warning colors. With no row (an empty live catalog) it draws nothing.
+// `.selected` entry draws as an on toggle, a warning entry in warning colors
+// and an error entry (a failed save or render) in error colors. With no row (an empty live catalog) it draws nothing.
 // The identifier and help come last on each trailing view, so they name the
 // pill once ViewerStatusBar makes the capsule one element (#3197).
 // A row without a zoom (the grid) draws no zoom pill; at Fit the loupe's
@@ -47,7 +47,7 @@ struct LibraryStatusBar: View {
         case .plain: .plain
         case .selected: .toggle(isOn: true)
         case .warning: .warning
-        case .error: .warning  // until SuiteUI #3167 adds .statusPill(.error)
+        case .error: .error
         }
     }
 }

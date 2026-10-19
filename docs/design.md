@@ -369,7 +369,9 @@ in `stateError` with a triangle.
 `pill` tall capsules on `row`, inset `SuiteInset.pill`, `pill` type in
 `textSecondary`, right-aligned on the row under the stage, `pillGap` apart.
 Toggle pills take the `stateSelected` tint with `accentText` when on;
-warning pills take the warning tint, color and triangle. Transport: a `row`
+warning pills take the warning tint, color and triangle; error pills (a
+failed save or render) the `stateError` tint and color with an exclamation
+circle. Transport: a `row`
 capsule of round icon buttons (`textSecondary`, hover `rowHover`) and a
 larger round play button in `accentFill` with a white glyph. Timecode in
 `timecode`: the current value `textPrimary`, the total `textSecondary`.
