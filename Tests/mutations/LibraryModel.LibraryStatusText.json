@@ -21,6 +21,27 @@
     "tests": "LibraryStatusTextTests.swift"
   },
   {
+    "label": "the loupe at Fit reads 100% (#3135)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "zoom ?? (fits ? fitScale : nil)",
+    "replace": "zoom ?? (fits ? 1 : nil)",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the cell-size pill reads a bare \"160 pt\" (#3130)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "text: \"Thumbnails \\(cellSize) pt\"",
+    "replace": "text: \"\\(cellSize) pt\"",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the cell-size help doesn't say where to change it (#3130)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "\"Thumbnail width; change it with View > Larger Thumbnails or View > Smaller Thumbnails.\"",
+    "replace": "\"The thumbnails' width.\"",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
     "label": "the loupe at Fit shows no zoom (#3133)",
     "file": "Sources/LibraryModel/LibraryStatusText.swift",
     "find": "fits: zoom == nil, size: size",
