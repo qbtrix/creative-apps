@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the long edge is ignored: every photo plans at its full size",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let size = options.longEdge.map { full.fitting(longSide: $0) } ?? full",
+    "replace": "let size = full",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "a photo smaller than the long edge is enlarged to it (fitting becomes a fixed size)",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let size = options.longEdge.map { full.fitting(longSide: $0) } ?? full",
+    "replace": "let size = options.longEdge.map { PixelSize(width: $0 * full.width / max(full.longSide, 1), height: $0 * full.height / max(full.longSide, 1)) } ?? full",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "develop is skipped: render returns the decoded buffer",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "            buffer = try develop.render(buffer, settings: photo.develop)\n",
+    "replace": "",
+    "tests": "LibraryExportPlanTests"
+  }
+]

@@ -63,11 +63,11 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    let members = ["crop", "exporter"]
+    let members = ["crop"]
     #expect(Set(services.unavailable.keys) == Set(members))
     #expect(services.unavailable.values.allSatisfy { !$0.isEmpty })
     let reasons: [String?] = [
-        LiveCrop.unavailable, LiveExporter.unavailable,
+        LiveCrop.unavailable,
     ]
     #expect(reasons.allSatisfy { ($0?.isEmpty ?? true) == false })
     #expect(LiveImporter.unavailable == nil)
@@ -76,6 +76,7 @@ private func liveServices() -> LibraryServices {
     #expect(LiveCatalogCoding.unavailable == nil)
     #expect(LiveLoupeImaging.unavailable == nil)
     #expect(LiveDevelop.unavailable == nil)
+    #expect(LiveExporter.unavailable == nil)
 }
 
 @Test func liveStubsDrawSamplesAndRefuseFiles() async throws {
