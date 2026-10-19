@@ -1,10 +1,10 @@
 # onboarding lead record
 
 Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
-Run: act-1a14f05c119-ejlc · Session: claude/onboarding-feature-lead-aetplh · Started: 2026-10-18 (resumes act-1a14841719c-kml4)
-Stage: 3 wave 3
-Base: d506e4aa78c78ca0c07133749f2616c17a4f6b32
-Next: OB-u done (run 39180214762, Linux green); Mac finish wanted. OB-13 once the bundled samples (#836-#839) are on dev; OB-z review after it; then Belt-Contact-Sheet.
+Run: act-1a152b291d5-uiwb · Session: claude/feature-lead-playbook-00p2kd · Started: 2026-10-18 (resumes act-1a14f05c119-ejlc)
+Stage: 3 wave 8
+Base: 9b33f116f297e6bb31ee5651314d6565c6613c0d
+Next: OB-13 builder (wave 8): OJ4 live, OJ3 live with a runtime XCTSkip naming #837 while Bundle/Samples/Bounce.flare is missing; then OB-z done on a green Linux run and Belt-Contact-Sheet.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -75,6 +75,11 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - OB-1 also updates the suite-onboarding and suite-preferences C4 part descriptions; OB-3 the afterglow-app onboarding part (the files exist but their descriptions don't name the new types).
 - #836–#839 (the sample exports) are all open and UITests/Fixtures/suite does not exist: OB-11 ships Bundle/Samples/ with no sample files yet, every SampleFilesTests row skipping by its issue number; OJ3 (open the Flare sample) skips naming #837 until it lands. Recorded under Open.
 - The slice done rule read as lead.md rule 6: a dev run containing the slice's last PR with a green Linux job; a scoped `app=suite` run or a full run both count.
+
+## Decisions (wave 8)
+- Resumed 2026-10-19 under run act-1a152b291d5-uiwb. Brief's main HEAD cc14022e verified; dev 9b33f116 contains it. PRs stay on base `dev` (earlier decision; the lane retargets main PRs to dev).
+- OB-13 no longer waits on #836-#839: its own task row and the packet's Hand-offs say a missing sample skips with its issue number. OJ4 needs no sample; OJ3 skips at run time naming #837 while the bundle lacks Bounce.flare and runs once it lands. switching, bundle and home are built. Polling for the samples had no end date.
+- No open `finding` issues for onboarding at the start of wave 8.
 
 ## Decisions (wave 2)
 - The container restarted during wave 1; OB-1's PR #1998 merged at 07:05Z while the lead was down. Resumed at 10:40Z from the remote state: dev at 453198ac, two green full runs containing #1998.
