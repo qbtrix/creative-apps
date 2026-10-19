@@ -39,3 +39,5 @@ utc	stage	event	ref	note
 2026-10-19T04:44Z	AL-halo	merged	#2863	AL-h1 (2026-10-18T18:00Z)
 2026-10-19T04:44Z	AL-halo	launch	-	AL-h2
 2026-10-19T04:44Z	AL-flare	launch	#2811	LayerTreeList unblock task
+2026-10-19T05:43Z	AL-halo	pr-merged	#2883	AL-h2 (2026-10-18T18:44Z, found on resume)
+2026-10-19T05:43Z	3	pr-opened	#3138	#2811 LayerTreeList features
