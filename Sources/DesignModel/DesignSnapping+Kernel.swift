@@ -6,8 +6,9 @@
 // or the children of the frame a draw goes into and that frame, then the page.
 // Hidden layers and the moving subtrees are skipped, locked layers kept.
 // `DesignModifiers.noSnap` turns layer snapping off for a step (⌘ held, or View >
-// Snap to Layers off); whole points still apply. `snapGuides` is a stub until the
-// gesture routes (SN-4) fill it. Linux-safe.
+// Snap to Layers off); whole points still apply. `snapGuides` is a stub (SN-9): the
+// kernel's fixed `.fake` set while a gesture runs, nil otherwise, until the gesture
+// routes (SN-4) fill it. Linux-safe.
 import SuiteKernel
 
 /// A line the moving box sits on after a snapped step, in document points.
@@ -39,8 +40,12 @@ public enum DesignSnapSettings {
 
 extension DesignWorkspace {
     /// The guides of the drag under way: nil when no gesture runs, empty when one runs and
-    /// nothing lined up. A stub until the routes land (SN-9 adds the fake, SN-4 the live set).
-    public var snapGuides: DesignSnapGuides? { nil }
+    /// nothing lined up. A stub until the routes land: the kernel's `.fake` while a gesture runs
+    /// (SN-9), so the screen has a set to draw; SN-4 replaces it with the live set.
+    public var snapGuides: DesignSnapGuides? {
+        guard gesture != nil else { return nil }
+        return .fake
+    }
 
     /// The boxes a drag of `moving` on the selected page can line up with: the siblings of each
     /// moving layer and the frame they sit in (a draw into `parent`: that frame's children and the
