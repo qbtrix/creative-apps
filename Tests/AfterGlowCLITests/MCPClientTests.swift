@@ -1,7 +1,7 @@
 // MCPClientTests.swift: MJ0's client checks (afterglow-mcp MC-2). The test
 // client frames each era right, gets exactly one reply per request (two or
-// none fail), checks the envelope echoes the id, and reaches the MC-1 stub
-// in process. The checks that need the real server wait on MC-4, disabled.
+// none fail), checks the envelope echoes the id, and reaches the real
+// server in process (MC-4).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -13,9 +13,7 @@ import Testing
 struct MCPClientTests {
     typealias Client = MCPTestClient
     static let eras: [Client.Era] = [.sessionless(MCPVersions.current), .handshake("2025-06-18")]
-    static let stubMessage = "MCPServer.handle is not built yet (afterglow-mcp MC-4)"
-
-    static func stub() -> MCPServer { MCPServer(MCPOptions(apps: [Apps.fake], roots: ["/tmp/mcp"]), io: FakeIO(), clock: { 0 }) }
+    static func server() -> MCPServer { MCPServer(MCPOptions(apps: [Apps.fake], roots: ["/tmp/mcp"]), io: FakeIO(), clock: { 0 }) }
 
     /// A well-behaved server: echoes each request's id with `{method}`, and stays silent on notifications.
     static func echo(_ line: Data) -> Data? {
@@ -34,18 +32,20 @@ struct MCPClientTests {
         if case .object(let body)? = request, case .object(let params)? = body["params"] { params } else { [:] }
     }
 
-    @Test func discoverReachesTheStubAndGetsTheSupportedVersions() throws {
-        var client = Client(Self.stub(), era: .sessionless(MCPVersions.current))
+    @Test func discoverReachesTheServerAndGetsTheSupportedVersions() throws {
+        var client = Client(Self.server(), era: .sessionless(MCPVersions.current))
         let reply = try client.discover()
-        #expect(reply.id == .null && reply.result == nil && reply.errorCode == -32603)
-        #expect(reply.errorMessage == Self.stubMessage)
-        #expect(reply.error?["data"] == .object(["supportedVersions": .array(MCPVersions.supported.map(JSONValue.string))]))
+        #expect(reply.id == .number(1) && reply.error == nil)
+        guard case .object(let result)? = reply.result else { Issue.record("no result: \(reply)"); return }
+        #expect(result["supportedVersions"] == .array(MCPVersions.supported.map(JSONValue.string)))
     }
 
-    @Test func handshakeAgainstTheStubStopsAfterTheRefusedInitialize() throws {
-        var client = Client(Self.stub(), era: .handshake("2025-11-25"))
+    @Test func handshakeWithAnUnsupportedVersionStopsAfterTheRefusedInitialize() throws {
+        var client = Client(Self.server(), era: .handshake("2024-11-05"))
         let reply = try client.initialize()
-        #expect(reply.errorMessage == Self.stubMessage && !client.initialized && client.sent.count == 1)
+        #expect(reply.errorCode == -32602 && !client.initialized && client.sent.count == 1)
+        #expect(reply.error?["data"] == .object(["supportedVersions": .array(MCPVersions.supported.map(JSONValue.string)),
+                                                 "requested": .string("2024-11-05")]))
         #expect(throws: Client.Failure.notInitialized("tools/list")) { try client.request("tools/list") }
     }
 
@@ -117,9 +117,9 @@ struct MCPClientTests {
         #expect(throws: Client.Failure.repliedToNotification("notifications/cancelled")) { try client.notify("notifications/cancelled") }
     }
 
-    @Test(.disabled("needs MCPServer.handle's dispatch, afterglow-mcp MC-4"), arguments: eras)
+    @Test(arguments: eras)
     func theRealServerAnswersEachEraOnceWithItsID(era: Client.Era) throws {
-        var client = Client(Self.stub(), era: era)
+        var client = Client(Self.server(), era: era)
         let reply = try Self.first(&client)
         #expect(reply.id == .number(1) && reply.error == nil)
         #expect(try client.request("tools/list").id == .number(2))
