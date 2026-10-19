@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "Exports every top-level frame of a two-page file as SVG, one file per frame named after it, and checks their bytes.",
+  "inputs": ["input/*.design"],
+  "steps": [],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "svg", "options": {}},
+  "expect": {
+    "out/two-frames/Cover.svg": {"sha256": "246ae844f9ec8e071cbd8044d2936f3f5926c3a44d924dd9bdf61c8ef509d578"},
+    "out/two-frames/Back.svg": {"sha256": "628a97aa54cfbc1eabc920d8396d4319c844fb2ac676f8afee9aa30578841902"}
+  },
+  "platforms": ["linux", "macos"]
+}
