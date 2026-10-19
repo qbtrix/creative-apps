@@ -22,7 +22,7 @@ Next: wait for the lane to merge #3245 (VP-13), then a scoped halo run on dev th
 | VP-9 | 4 | HF-1 canvas equals render | HaloViewerFidelityTests | HaloViewerFidelityTests | #1125 | merged |
 | VP-11 | 4 | H-J3 extended | UITests/HaloJourneyTests.swift | H-J3 on dev CI | #1102 | merged |
 | VP-12 | 5 | H-J2, H-J4; feature-done | UITests/HaloJourneyTests+Viewer.swift, +Playback.swift | H-J2, H-J4 on dev CI | #1124 | merged |
-| VP-13 | 6 | gap #2512: every Halo journey finds track names and lanes by the halo.timeline.name./.lane. prefixes; onScreenControlIDs leaves them out (findings #1699, #1701, #1703, #1705) | UITests/HaloJourneyTests*.swift | scoped halo run: H-J2, H-J3, H-J4, layout | #3245 | in lane (head 0d6fb734) |
+| VP-13 | 6 | gap #2512: every Halo journey finds track names and lanes by the halo.timeline.name./.lane. prefixes; onScreenControlIDs leaves them out (findings #1699, #1701, #1703, #1705) | UITests/HaloJourneyTests*.swift | scoped halo run: H-J2, H-J3, H-J4, layout | #3245 | in lane, macOS build green (head 0d6fb734) |
 
 Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all independent); W2 VP-3, VP-4b, VP-7, VP-8 (all independent); W3 VP-5, VP-6, VP-10 (all independent); W4 VP-9, VP-11 (both independent); W5 VP-12 alone.
 
