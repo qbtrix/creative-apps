@@ -4,7 +4,7 @@ Issue: #1511 · Packet: docs/blueprints/library/features/persist.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: round 2 (the last). Scoped library 39176576523 (db15b8a, has #2878) red: J2 testGridShowsThumbnailsAndSorts hit the 128-char XCUI identifier limit in step 4 live (thumbnails now load); RenderBudgetLibraryTests.bodies scroll 1 > 0 (a launch change landing in the measure). 14/15 journeys pass, audit library identifier 2 unnamed 0, no crashes. Fixes gating: lead-r2-grid-query, lead-r2-budget-quiet. Supervisor: please start a scoped library run once both merge
+Next: round 2 (the last) PRs open: #3053 (J2 cell query, Fixes #3050) and #3054 (budget settle, Fixes #3051), both Fast-Check pass. Supervisor: please start a scoped library run once both merge. Green: contact sheets on #1513 #1511 #1506. Red: gaps
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
