@@ -2,9 +2,10 @@
 # Tests/test_scope/test_test_scope.sh: tests for scripts/test-scope, the one
 # table of which swift tests run where. Changed paths map to the right test
 # filters (a Design Model file runs DesignModelTests only), apps map to the
-# filters CI's scoped runs use, every entry of Tests/perf-suites.txt names a
-# test that exists, the perf regex takes exactly the listed tests (a suite,
-# one test of a suite, a free test) and nothing beside them, and perf-report
+# filters CI's scoped runs use, every entry of Tests/perf-suites.txt and
+# Tests/heavy-suites.txt names a test that exists, the perf and heavy regexes
+# take exactly the listed tests (a suite, one test of a suite, a free test)
+# and nothing beside them, and perf-report
 # flags only a bound missed by more than its multiple. No swift; needs
 # python3. bash 3.2 compatible.
 #
@@ -81,7 +82,22 @@ check "app suiteui" "^(AppAuditTests|SuiteKernelTests|SuiteUITests)\\.;$suiteui_
 python3 "$ts" app nope >/dev/null 2>&1
 check "an unknown app is refused" 1 "$?"
 
-# Every perf list entry names a test that exists.
+# Code paths to the apps the lane's macOS build-only run compiles (build-apps).
+apps() { printf '%s\n' "$@" | python3 "$ts" build-apps; }
+check "build-apps: one app's Model, tests, app, snapshots and journeys" photo \
+  "$(apps Sources/PhotoModel/A.swift Tests/PhotoModelTests/B.swift Sources/PhotoApp/C.swift \
+    Tests/AppSnapshotTests/PhotoBrushSnapshots.swift Tests/AppSnapshotTests/RenderBudgetPhotoTests.swift UITests/PhotoJourneyTests+Layers.swift)"
+check "build-apps: two apps give both" design,photo "$(apps Sources/PhotoApp/C.swift Sources/DesignModel/X.swift)"
+for p in Sources/SuiteUI/Tokens.swift Sources/SuiteKernel/Geometry.swift Sources/SuiteModel/Values/SuiteApp.swift \
+    Sources/SuiteShell/SuiteCommands.swift Sources/AfterGlowApp/HomeWindow.swift Sources/AfterGlowCLI/main.swift \
+    Tests/AfterGlowCLITests/CLIShapeTests.swift Tests/SuiteUITests/TokensTests.swift Tests/AppAuditTests/Checks/Overlap.swift \
+    Tests/AppSnapshotTests/GoldenImage.swift UITests/Journey.swift UITests/Audit.swift UITests/SuiteJourneyTests.swift \
+    Package.swift project.yml Sources/NewModel/A.swift; do
+  check "build-apps: shared $p builds all" all "$(apps Sources/PhotoApp/C.swift "$p")"
+done
+check "build-apps: no paths builds all" all "$(printf '' | python3 "$ts" build-apps)"
+
+# Every perf and heavy list entry names a test that exists.
 missing=""
 while read -r app id; do
   case "$app" in ''|'#'*) continue ;; esac
@@ -101,8 +117,8 @@ while read -r app id; do
   suite=${parts[$((n - 2))]}
   file=$(grep -rlE "struct $suite[[:space:]:{]" "$root/Tests/$target" | head -1)
   [[ -n "$file" ]] && grep -qE "func $last\\(" "$file" || missing="$missing $id"
-done <"$root/Tests/perf-suites.txt"
-check "every Tests/perf-suites.txt entry names a test in Tests/" "" "$missing"
+done < <(cat "$root/Tests/perf-suites.txt" "$root/Tests/heavy-suites.txt")
+check "every Tests/perf-suites.txt and Tests/heavy-suites.txt entry names a test in Tests/" "" "$missing"
 
 # The perf regex: exactly the listed tests, by suite, one test or free test.
 perf=$(python3 "$ts" perf)
@@ -127,7 +143,8 @@ check "leaves another target's suite of the same name" no "$(takes 'DesignModelT
 photo=$(python3 "$ts" perf photo)
 check "perf photo takes Photo's" yes "$(grep -qE "$photo" <<<'AppSnapshotTests.PhotoBrushLatencyTests/x()' && echo yes || echo no)"
 check "perf photo leaves Halo's" no "$(grep -qE "$photo" <<<'HaloModelTests.HaloViewerBudgetTests/x()' && echo yes || echo no)"
-check "perf for an app with none is empty, never a match-all regex" "" "$(python3 "$ts" perf suite)"
+printf '%s\n' 'photo PhotoModelTests.PhotoBudgetTests' >"$tmp/photo-only.txt"
+check "perf for an app with none is empty, never a match-all regex" "" "$(PERF_SUITES="$tmp/photo-only.txt" python3 "$ts" perf halo)"
 printf '%s\n' '# nothing yet' >"$tmp/empty.txt"
 check "an empty list gives no regex" "" "$(PERF_SUITES="$tmp/empty.txt" python3 "$ts" perf)"
 printf '%s\n' 'photo PhotoModelTests' >"$tmp/bad.txt"
@@ -136,6 +153,19 @@ check "a malformed entry is refused" 1 "$?"
 printf '%s\n' 'paint PhotoModelTests.PhotoBudgetTests' >"$tmp/bad.txt"
 PERF_SUITES="$tmp/bad.txt" python3 "$ts" perf >/dev/null 2>&1
 check "an unknown app in the list is refused" 1 "$?"
+
+# The heavy regex: the listed tests, all or those a --changed filter takes.
+printf '%s\n' '# heavy' 'photo PhotoModelTests.PhotoRenderRouteTests' 'library LibraryModelTests.matchesFullPipeline' >"$tmp/heavy.txt"
+heavy=$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy)
+takes_heavy() { grep -qE "$heavy" <<<"$1" && echo yes || echo no; }
+check "heavy takes a listed suite's test" yes "$(takes_heavy 'PhotoModelTests.PhotoRenderRouteTests/aRegionsSurfaceIsTheRenderedRegion()')"
+check "heavy takes a listed free test" yes "$(takes_heavy 'LibraryModelTests.matchesFullPipeline()')"
+check "heavy leaves the rest of the target" no "$(takes_heavy 'PhotoModelTests.PhotoRendererTests/aFrameIsTheCompositeInDisplayBytes()')"
+check "heavy within a changed filter keeps that target's" '^(PhotoModelTests\.PhotoRenderRouteTests)(/|\()' \
+  "$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy '^(DesignModelTests|PhotoModelTests)\.')"
+check "heavy within a filter that takes none is empty, never a match-all regex" "" \
+  "$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy '^(SuiteModelTests)\.')"
+check "an empty heavy list gives no regex" "" "$(HEAVY_SUITES="$tmp/empty.txt" python3 "$ts" heavy)"
 
 # perf-report: what Swift Testing prints for a missed bound, both ways it
 # shows the values, and a test that only says "failed".

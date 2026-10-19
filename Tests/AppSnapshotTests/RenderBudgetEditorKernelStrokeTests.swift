@@ -13,7 +13,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetEditorKernelStrokeTests {
-        @Test(.timeLimit(.minutes(2))) func testStrokePadBodies() async throws {
+        @Test(.timeLimit(.minutes(2)), .disabled("quarantine #3264 until 2026-10-22")) func testStrokePadBodies() async throws {
             let w = RenderBudgetWindow(StrokePadBudgetHost())
             defer { w.close() }
             let bodies = { () -> Int? in

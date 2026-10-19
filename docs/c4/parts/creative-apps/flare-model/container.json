@@ -1,7 +1,7 @@
 {
   "id": "flare-model",
   "name": "FlareModel",
-  "description": "Linux-safe state and logic behind Flare's window. FlareWorkspace: the open FlareCore document, selected scene and drawing tool. Foundation only, value types.",
+  "description": "Linux-safe state and logic behind Flare's window. FlareWorkspace: the open FlareCore document, selected scene and drawing tool. FlareHeadless: the same document with no window for the CLI (open, save, SVG and Lottie export). Foundation only, value types.",
   "technology": "Swift 6, Foundation",
   "tags": [
     "internal"

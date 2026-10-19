@@ -1,0 +1,23 @@
+[
+  {
+    "label": "flagSets: a flag command toggles its flag off instead of setting it",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "{ _, _ in .setFlag(flag) }",
+    "replace": "{ c, _ in .setFlag(c.selectedMetadata?.flag == .value(flag) ? .none : flag) }",
+    "tests": "LibraryCommandCatalogTests"
+  },
+  {
+    "label": "availabilityMatchesHelp: Paste Settings takes Copy Settings' enablement",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "on: { $0.canPasteSettings }",
+    "replace": "on: { $0.canCopySettings }",
+    "tests": "LibraryCommandCatalogTests"
+  },
+  {
+    "label": "runsWhatTheMenuRuns: Set Rating ignores its stars",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "{ .setRating($1.stars) }",
+    "replace": "{ _, _ in .setRating(3) }",
+    "tests": "LibraryCommandCatalogTests"
+  }
+]

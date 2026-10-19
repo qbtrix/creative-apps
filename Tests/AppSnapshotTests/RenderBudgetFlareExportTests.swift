@@ -3,14 +3,13 @@
 // tests) on the real window through the harness (RenderBudgetHarness.swift).
 // On `showcase` with the fakes it presses the toolbar's Export…, picks the PNG
 // sequence chip, steps the To row (`flare.export.to`) 60 times the way
-// VoiceOver and XCUI adjust it, then presses Cancel (`flare.export.cancel`).
+// VoiceOver and XCUI adjust it (down and up in turn, so each step stays in the
+// scene's 48 frames and is an edit), then presses Cancel (`flare.export.cancel`).
 // The sheet is its own window attached to the hosted one, so its controls are
 // found from `attachedSheet`'s accessibility tree, not the host's. `bodies`
 // gates the window-body counts; `timing` (report-only, for
-// Tests/perf-suites.txt) judges the To steps. Both wait on the sheet's options
-// slot and Flare's ids in it (#1989): until then the sheet has no To row and
-// its controls carry suite.export.* ids. Nested in BodyCountSuites, as every
-// suite that reads a body counter is. macOS only.
+// Tests/perf-suites.txt) judges the To steps. Nested in BodyCountSuites, as
+// every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import FlareModel
@@ -21,8 +20,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetFlareExportTests {
-        @Test(.disabled("waits on #1989: the sheet's options slot (the To row) and flare.export.* ids"),
-              .timeLimit(.minutes(2)))
+        @Test(.timeLimit(.minutes(2)))
         func bodies() async throws {
             let (open, to, close) = try await Self.run()
             // The sheet opening is the press and the run's begin: two bodies at most. Target: 2.
@@ -33,8 +31,7 @@ extension BodyCountSuites {
             expectBodies(close, atMost: 2, target: 2)
         }
 
-        @Test(.disabled("waits on #1989: the sheet's options slot (the To row) and flare.export.* ids"),
-              .timeLimit(.minutes(2)))
+        @Test(.timeLimit(.minutes(2)))
         func timing() async throws {
             let (_, to, _) = try await Self.run()
             // Target: a step fits one 120 Hz frame.
@@ -63,7 +60,9 @@ extension BodyCountSuites {
             try await w.settle(untilStable: bodies)
             let row = try #require(Self.node("flare.export.to", in: sheet), "no To row (flare.export.to)")
             let to = try await w.measure("flare export To row, 60 steps", bodies: bodies) {
-                try await w.ticks(60) { _ in _ = row.accessibilityPerformIncrement?() }
+                try await w.ticks(60) { i in
+                    _ = i.isMultiple(of: 2) ? row.accessibilityPerformIncrement?() : row.accessibilityPerformDecrement?()
+                }
             }
             #expect((to.bodies ?? 1) >= 1, "the To row didn't step: \(to)")
             let close = try await w.measure("flare export sheet closes", bodies: bodies) {

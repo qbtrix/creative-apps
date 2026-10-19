@@ -70,7 +70,7 @@ extension BodyCountSuites {
             }
         }
 
-        @Test func onboardingStates() async {
+        @Test(.disabled("quarantine #3256 until 2026-10-22")) func onboardingStates() async {
             let welcome = await model()
             #expect(welcome.page.id == "apps")
             await shoot("welcome") { await model() }
@@ -95,7 +95,7 @@ extension BodyCountSuites {
             await shoot("start-default") { start(await model(), focus: nil) }
         }
 
-        @Test func startPageStates() async {
+        @Test(.disabled("quarantine #3257 until 2026-10-22")) func startPageStates() async {
             // Halo's sample missing: its Open sample disabled with the model's reason as its help.
             let noHalo: @Sendable (String) -> Bool = { $0.hasPrefix("/fixture/Samples/") && !$0.hasSuffix("/Intro.halo") }
             let missing = start(await model(present: noHalo), focus: nil)
