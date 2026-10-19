@@ -24,3 +24,5 @@ utc	stage	event	ref	note
 2026-10-19T00:37Z	3	heartbeat	-	#3004 (SL-2) macOS build 39173846993 now running; #2993 (SL-3) next; new line findings #3050, #3051 are thumbnails' (#1506), not this feature's; feature findings 0
 00:45Z	3 wave 2	check	#3004	macOS build 39173846993 green on ff176056; lane merges next sweep
 00:57Z	-	heartbeat	-	heartbeat: #3004 SL-2 and #2993 SL-3 builds green, lane merge pending; feature findings 0
+01:02Z	3 wave 1	pr-merged	#3004	SL-2 merged d6b996d1
+01:02Z	3 wave 2	start	SL-5,SL-7	wf_889db5f9-d41 on d6b996d1; SL-4 waits on #2993
