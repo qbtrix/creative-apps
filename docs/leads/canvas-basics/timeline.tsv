@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-19T10:22Z	3	pr-opened	#3224	CB-9 slice CB-c page size rows + past-edge, feature-done; stacked on #3208
 2026-10-19T10:26Z	3	heartbeat	#3208	lane macOS build 39230865936 still queued; 0 findings
 2026-10-19T10:47Z	3	heartbeat	#3208	macOS build 39230865936 still queued (27 queued); 0 findings
+2026-10-19T11:09Z	3	heartbeat	#3208	macOS build 39230865936 success; awaiting lane sweep merge

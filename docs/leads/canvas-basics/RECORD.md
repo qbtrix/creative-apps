@@ -5,7 +5,7 @@ Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, a
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
 Next: when #3208 (CB-6) merges: merge origin/dev into lead/canvas-basics-CB-9, rerun scripts/ci --changed, push, retarget #3224 to dev and move its Head: line. Then poll for a design-scoped or full ci.yml run containing #3208 (CB-b) and #3224 (CB-c).
-Last check: 2026-10-19T10:47Z #3208 waits on lane macOS build 39230865936 (queued; 27 runs queued repo-wide); #3224 stacked; 0 open findings
+Last check: 2026-10-19T11:09Z #3208 macOS build 39230865936 green, awaiting lane merge; #3224 stacked; 0 open findings
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
