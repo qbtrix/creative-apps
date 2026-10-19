@@ -85,3 +85,5 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 2026-10-19T16:35Z check: dev still b3011ab9. DV-9 #3221 macOS build 39283815084 green on 3b9b5ac0, needs-fix dropped; lane merges next sweep. #3250 and #3295 drafts wait on it.
 
 - 2026-10-19T16:57Z heartbeat: dev at ed4d55fd; none of this lead's PRs merged yet; waiting on the lane sweep.
+
+- 2026-10-19T17:27Z: #3221 needs-rebase: merged dev (CR-6 conflict in DevelopInspector), gate PASS, head 510c7bf5

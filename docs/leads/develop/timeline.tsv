@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-19T16:14Z	pr	#3295	DV-13 draft stacked on #3250
 2026-10-19T16:35Z	heartbeat	-	dev still b3011ab9. DV-9 #3221 macOS build 39283815084 green on 3b9b5ac0, needs-fix dropped; lane merges next sweep. #3250 and #3295 drafts wait on it.
 2026-10-19T16:57Z	heartbeat	dev ed4d55fd; waiting on lane sweep (#3221, #3251, #3292); #3292 footer stripped
+2026-10-19T17:27Z	fix	#3221 needs-rebase: merged dev (CR-6 conflict in DevelopInspector), gate PASS, head 510c7bf5
