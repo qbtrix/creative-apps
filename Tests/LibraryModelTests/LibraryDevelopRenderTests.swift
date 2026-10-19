@@ -4,8 +4,8 @@
 // call, every control set runs the packet's pass order and equals the
 // CoreRaster calls run by hand bit for bit (QB-LIB-V2), the histogram is of
 // the rendered buffer (QB-LIB-V3), and MJ3 walks all of it. `HandPass` is the
-// packet's pass list (DV-6 pseudocode) written out here; DV-6 adds a check
-// that `LiveDevelop.passes(for:)` names the same passes in the same order.
+// packet's pass list (DV-6 pseudocode) written out here, and
+// `LiveDevelop.passes(for:)` must name the same passes in the same order.
 // Runs on Linux and macOS.
 @testable import LibraryModel
 import CoreRaster
@@ -84,6 +84,25 @@ enum HandPass: CaseIterable {
     }
 }
 
+extension LiveDevelop.Pass {
+    /// The hand list's name for this pass; nil for `.color` (DV-12).
+    var hand: HandPass? {
+        switch self {
+        case .whiteBalance: .whiteBalance
+        case .exposure: .exposure
+        case .contrast: .contrast
+        case .highlightsShadows: .highlightsShadows
+        case .whitesBlacks: .whitesBlacks
+        case .color: nil
+        case .curve: .curve
+        case .levels: .levels
+        }
+    }
+}
+
+/// `LiveDevelop.passes(for:)` by the hand list's names.
+func livePasses(_ s: DevelopSettings) -> [HandPass?] { LiveDevelop.passes(for: s).map(\.hand) }
+
 /// The panel's histogram of `buffer`, straight from CoreRaster.
 func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
     let h = try Histogram(of: buffer, bins: 256, encoding: .sRGB)
@@ -94,14 +113,16 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
 @Suite struct LibraryDevelopRenderTests {
     let live = LiveDevelop()
 
-    @Test(.disabled("waits on DV-6")) func neutralRunsNoPassAndReturnsTheInput() throws {
+    @Test func neutralRunsNoPassAndReturnsTheInput() throws {
         let gradient = try developGradient()
         #expect(HandPass.passes(for: .neutral).isEmpty)
+        #expect(LiveDevelop.passes(for: .neutral).isEmpty)
+        #expect(LiveDevelop.passes(for: DevelopSettings.neutral.setting(crop: CropSettings(angle: 0, rect: .full, aspect: .original))).isEmpty)
         #expect(try live.render(gradient, settings: .neutral) == gradient)
         #expect(LiveDevelop.unavailable == nil)
     }
 
-    @Test(.disabled("waits on DV-6")) func eachControlAloneIsItsOnePass() throws {
+    @Test func eachControlAloneIsItsOnePass() throws {
         let gradient = try developGradient()
         let curve = ToneCurve(points: [DevelopCurvePoint(x: 0, y: 0), DevelopCurvePoint(x: 0.5, y: 0.7),
                                        DevelopCurvePoint(x: 1, y: 1)]) ?? .identity
@@ -119,30 +140,32 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         ]
         for (settings, pass) in cases {
             #expect(HandPass.passes(for: settings) == [pass])
+            #expect(livePasses(settings) == [pass])
             let rendered = try live.render(gradient, settings: settings)
             #expect(rendered == (try pass.run(gradient, settings)))
             #expect(rendered != gradient)
         }
     }
 
-    @Test(.disabled("waits on DV-6")) func everyControlRunsInOrderAndMatchesCoreRasterBitForBit() throws {
+    @Test func everyControlRunsInOrderAndMatchesCoreRasterBitForBit() throws {
         let gradient = try developGradient()
         let settings = everyControlButColor()
         let order = HandPass.passes(for: settings)
         #expect(order == [.whiteBalance, .exposure, .contrast, .highlightsShadows, .whitesBlacks, .curve, .levels])
+        #expect(livePasses(settings) == order)
         let rendered = try live.render(gradient, settings: settings)
         #expect(rendered == (try HandPass.runByHand(gradient, settings, order: order)))
         let swapped: [HandPass] = [.whiteBalance, .contrast, .exposure, .highlightsShadows, .whitesBlacks, .curve, .levels]
         #expect(rendered != (try HandPass.runByHand(gradient, settings, order: swapped)))
     }
 
-    @Test(.disabled("waits on DV-6")) func exposurePlusOneDoublesLinearGrey() throws {
+    @Test func exposurePlusOneDoublesLinearGrey() throws {
         let grey = try PixelBuffer(width: 4, height: 4, fill: RGBA(r: 0.18, g: 0.18, b: 0.18, a: 1))
         let pixel = try live.render(grey, settings: DevelopSettings.neutral.setting(.exposure, to: 1)).pixel(x: 1, y: 1)
         #expect(abs(pixel.r - 0.36) < 1e-4 && abs(pixel.g - 0.36) < 1e-4 && abs(pixel.b - 0.36) < 1e-4)
     }
 
-    @Test(.disabled("waits on DV-6")) func temperatureWarmsGreyAndKeepsItsLuminance() throws {
+    @Test func temperatureWarmsGreyAndKeepsItsLuminance() throws {
         let grey = try PixelBuffer(width: 4, height: 4, fill: RGBA(r: 0.18, g: 0.18, b: 0.18, a: 1))
         let p = try live.render(grey, settings: DevelopSettings.neutral.setting(.temperature, to: 50)).pixel(x: 0, y: 0)
         let w = Histogram.luminanceWeights
@@ -150,7 +173,7 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         #expect(abs(w.r * p.r + w.g * p.g + w.b * p.b - 0.18) < 1e-3)
     }
 
-    @Test(.disabled("waits on DV-6")) func whitesBrightenAndBlacksDarken() throws {
+    @Test func whitesBrightenAndBlacksDarken() throws {
         let light = try PixelBuffer(rgba8: [230, 230, 230, 255], width: 1, height: 1)   // 0.9 sRGB
         let dark = try PixelBuffer(rgba8: [26, 26, 26, 255], width: 1, height: 1)       // 0.1 sRGB
         let whiter = try live.render(light, settings: DevelopSettings.neutral.setting(.whites, to: 50))
@@ -160,7 +183,7 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
     }
 
     /// DV-6 compares the message with `LiveDevelop.waiting[slider]`; DV-12 turns this into "every control set".
-    @Test(.disabled("waits on DV-6")) func vibranceAndSaturationThrowTheirWaitingReason() throws {
+    @Test func vibranceAndSaturationThrowTheirWaitingReason() throws {
         let gradient = try developGradient()
         for slider in [DevelopSlider.vibrance, .saturation] {
             let error = #expect(throws: LibraryError.self) {
@@ -171,10 +194,11 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
                 continue
             }
             #expect(why.contains("creative-core"))
+            #expect(why == LiveDevelop.waiting[slider])
         }
     }
 
-    @Test(.disabled("waits on DV-6")) func histogramIsCoreRasterOfTheRenderedBuffer() throws {
+    @Test func histogramIsCoreRasterOfTheRenderedBuffer() throws {
         let gradient = try developGradient()
         let rendered = try live.render(gradient, settings: everyControlButColor())
         let bins = try live.histogram(of: rendered)
@@ -187,7 +211,7 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
     }
 
     /// MJ3: the render walk on a 64 × 48 gradient.
-    @Test(.disabled("waits on DV-6")) func testRenderWalk() throws {
+    @Test func testRenderWalk() throws {
         let gradient = try developGradient()
         #expect(HandPass.passes(for: .neutral).isEmpty)
         #expect(try live.render(gradient, settings: .neutral) == gradient)
