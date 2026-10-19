@@ -8,7 +8,9 @@
 # Package.swift whose creative-core revision doesn't match it fails here
 # instead of re-resolving (scripts/bump-core moves both). A swift test that
 # dies without its "Test run with" summary prints TEST PROCESS DIED and the
-# tests it left unfinished (scripts/test-died). CI runs plain scripts/ci on
+# tests it left unfinished (scripts/test-died); one that prints nothing for
+# CI_TEST_STALL seconds (default 600) is stuck, so it is sampled (macOS),
+# killed and named the same way. CI runs plain scripts/ci on
 # Linux and macOS. On Linux, Package.swift declares only the Model targets, so
 # build and test cover those; on macOS they cover everything.
 #
@@ -387,22 +389,67 @@ swift build --build-tests --force-resolved-versions ${flags[@]+"${flags[@]}"} \
 
 # run_tests LABEL ARGS...: one `swift test` run on the build above, its wall
 # time, and on a failure its cause: a dead test process (no "Test run with"
-# summary) names the tests it left running (scripts/test-died).
+# summary, even at exit 0) names the tests it left running (scripts/test-died).
+# On macOS the run gets a pty (script -q), so each line reaches the log when printed:
+# through a pipe the output was block-buffered, and a hung run's log ended
+# suites before the stuck test. A watchdog stops a run that prints nothing
+# for $stall seconds: a test waiting at 0% CPU (#2971, a leaked drag session)
+# outlives every .timeLimit, so without it the job's 90-minute cap cancelled
+# the step with no name. It prints the stuck process's call graph (macOS
+# `sample`), kills the run it started, and test-died names the test.
 logs=()
 trap 'rm -f ${logs[@]+"${logs[@]}"}' EXIT
+stall=${CI_TEST_STALL:-600}
+
+# descendants PID: every process under PID, children before their own.
+descendants() { local c; for c in $(pgrep -P "$1"); do echo "$c"; descendants "$c"; done; }
+
 run_tests() {
-  local label=$1 log start status
+  local label=$1 log start status pid tailer size last=-1 idle=0 stuck=0 p
   shift
   log="$(mktemp)"
   logs+=("$log")
   echo "== swift test: $label"
   start=$SECONDS
-  swift test ${flags[@]+"${flags[@]}"} --skip-build "$@" 2>&1 | tee "$log"
-  status=${PIPESTATUS[0]}
+  local cmd=(swift test ${flags[@]+"${flags[@]}"} --skip-build "$@")
+  [[ "$(uname)" != Darwin ]] || cmd=(script -q /dev/null "${cmd[@]}")
+  NO_COLOR=1 "${cmd[@]}" </dev/null >"$log" 2>&1 &
+  pid=$!
+  tail -n +1 -f "$log" &
+  tailer=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 5
+    size=$(wc -c <"$log")
+    if (( size != last )); then last=$size idle=0; else idle=$((idle + 5)); fi
+    (( idle < stall )) || { stuck=1; break; }
+  done
+  if (( stuck )); then
+    sleep 1
+    echo "== swift test: $label printed nothing for $stall s; stopping it"
+    for p in $(descendants "$pid"); do
+      [[ "$(uname)" == Darwin && "$(ps -o comm= -p "$p")" == *testing-helper* ]] || continue
+      echo "== where the test process waits (sample $p):"
+      sample "$p" 3 -file /dev/stdout 2>/dev/null | sed -n '/^Call graph:/,/^Total number in stack/p' | head -150
+    done
+    kill $(descendants "$pid") "$pid" 2>/dev/null
+  fi
+  wait "$pid"
+  status=$?
+  sleep 1
+  kill "$tailer" 2>/dev/null
+  wait "$tailer" 2>/dev/null
   echo "== swift test: $label took $((SECONDS - start)) s"
+  if (( stuck )); then
+    python3 scripts/test-died "$log"
+    fail "swift test ($label) hung: no output for $stall s; the unfinished test above is stuck"
+  fi
   if (( status != 0 )); then
     python3 scripts/test-died "$log" || fail "swift test ($label) process died (exit $status) with the tests above unfinished"
     fail "swift test ($label) exited $status"
+  fi
+  # A test process whose main run loop is stopped exits 0 mid-run, with no summary.
+  if grep -q "Test run started" "$log"; then
+    python3 scripts/test-died "$log" || fail "swift test ($label) ended early (exit 0) with the tests above unfinished"
   fi
 }
 
