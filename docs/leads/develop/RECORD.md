@@ -77,3 +77,4 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 11:26Z check: DV-9 #3221 head 2e67c5df, macOS build 39243123840 dispatched
 - 11:50Z check: DV-9 #3221 head 2e67c5df, macOS build 39243123840 queued
 - 12:55Z run act-1a1543fe40d-7l1y: lead/develop rebuilt on main 6f9a2b88 (record only). Belt marks DV-e done; remaining DV-d, DV-f. DV-9 #3221 macOS build 39243123840 success; lane merges next. Dev CI runs since 08:16Z all cancelled while queued (39252895176 at 6e70826b pending).
+- 2026-10-19T14:23Z check: DV-9 #3221 mergeable clean, build green, waiting on lane sweep. DV-10 draft #3250 (e29bc8d2) stacked on it; marked ready once #3221 merges.
