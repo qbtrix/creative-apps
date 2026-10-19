@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-19T02:16Z	check	waiting: scoped suiteui 39187049656 at ed0fed9e in progress (contains AB-photo)
 2026-10-19T02:35Z	check	waiting: scoped suiteui 39187049656 at ed0fed9e still in progress (contains AB-photo); full CI 39188162085 pending
 2026-10-19T02:55Z	check	waiting: scoped suiteui 39187049656 at ed0fed9e still in progress (contains AB-photo); full CI 39188162085 pending
+2026-10-19T03:17Z	check	AB-photo done via scoped suiteui 39187049656 (ed0fed9e); contact sheet posted
