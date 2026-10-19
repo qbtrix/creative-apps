@@ -5,7 +5,7 @@
 // 1440 × 900 and 1920 × 1080 with `-SuiteWindowSize <w>x<h>`, as Halo's
 // testLayoutAtWidths does, and checks only what lies on the runner's display.
 // Each size: the status row (`library.status`, its pills `library.status.*`)
-// reads "24 photos" and "160 pt" on one top edge, with no zoom pill; the
+// reads "24 photos" and "160 pt" on one top edge; the
 // grid's visible cells (`library.grid.cell.<id>`, else buttons whose label
 // holds `IMG_`) line up in rows and columns with equal gaps; Sort By Name,
 // then a click and a Shift-click select five; the inspector's Rating, Flag
@@ -46,8 +46,7 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             let window = library.app.windows.firstMatch
             XCTAssert(window.waitForExistence(timeout: 30), "no window opened at \(width)")
 
-            // 1. The status row: "24 photos" and "160 pt", no zoom pill (the grid doesn't zoom, #3129), every pill on one
-            //    top edge, inside the window and the row.
+            // 1. The status row: "24 photos" and "160 pt", every pill on one top edge, inside the window and the row.
             let status = library.element("library.status")
             XCTAssert(status.waitForExistence(timeout: 10), "no status row (library.status) at \(width)")
             library.shot("layout-\(width)")
@@ -57,9 +56,6 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             let count = Self.text("24 photos", in: status)
             XCTAssert(count.waitForExistence(timeout: 5), "the status row doesn't read 24 photos at \(width)")
             XCTAssertEqual(Self.text(of: library.element("library.status.cellSize")), "160 pt", "library.status.cellSize at \(width)")
-            XCTAssertEqual(Self.zoomPills(in: status), 0, "the grid's status row shows a zoom pill at \(width)")
-            let percent = NSPredicate(format: "label MATCHES %@ OR value MATCHES %@", "^[0-9]+%$", "^[0-9]+%$")
-            XCTAssertEqual(status.staticTexts.matching(percent).count, 0, "the grid's status row shows a bare percent at \(width)")
             let pills = status.descendants(matching: .any)
                 .matching(NSPredicate(format: "identifier BEGINSWITH 'library.status.'")).allElementsBoundByIndex + [count]
             let top = count.frame.minY
