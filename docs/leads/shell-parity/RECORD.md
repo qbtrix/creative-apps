@@ -173,3 +173,4 @@ Next: nothing. Feature done: DP-a done (38956034097), DP-b done with gaps #1452 
 - 2026-10-19T02:20:46Z check: blocked: #2524 #2263 open; gap #1573 open; no dev-red; 13 design findings open, unchanged
 - 2026-10-19T02:37:53Z check: blocked: #2524 #2263 open; gap #1573 open; no dev-red; 13 design findings open, unchanged
 - 2026-10-19T02:55:49Z check: blocked: #2524 #2263 open; gap #1573 open; no dev-red; 13 design findings open, unchanged
+- 2026-10-19T03:13:52Z check: blocked: #2524 #2263 open; gap #1573 open; new finding #3097 (testShellDark) = #2524 3 pt overshoot, commented as dup; no dev-red; 12 design findings open
