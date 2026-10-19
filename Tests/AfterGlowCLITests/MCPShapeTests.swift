@@ -1,9 +1,8 @@
 // MCPShapeTests.swift: MJ0's shape checks (afterglow-mcp MC-1). Every
 // contract type exists; the versions are pinned newest first and
-// `negotiate` refuses an unknown one; every stub answers or errors naming
-// the task that builds it (MC-4 built the server, MCPProtocolTests covers
-// it; MC-6 built the tools, MCPToolsTests covers them); the fake approval
-// flow.
+// `negotiate` refuses an unknown one; the built parts answer (MC-4 built
+// the server, MCPProtocolTests covers it; MC-6 the tools, MCPToolsTests;
+// MC-8 the calls, MCPCallTests); the fake approval flow.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -50,14 +49,14 @@ struct MCPShapeTests {
         #expect(!server.options.live && server.options.roots == ["/tmp/mcp"])
     }
 
-    @Test func toolsRouteBackAndSessionsAreAStubNamingMC8() {
+    @Test func toolsRouteBackAndSessionsCall() {
         #expect(MCPTools.name(app: "photo", command: "layer.add") == "photo.layer.add")
         #expect(!MCPTools.list([Apps.fake]).isEmpty)
         #expect(MCPTools.route("fake.rect.add", in: [Apps.fake]) == .command(app: "fake", id: "rect.add"))
         #expect(Set<MCPRoute>([.open(app: "f"), .new(app: "f"), .save, .export, .close, .command(app: "f", id: "a")]).count == 6)
         #expect(MCPTool(name: "fake.rect.list", title: "List", description: "d", inputSchema: .null).annotations == .object([:]))
         var sessions = MCPSessions(Self.options, io: FakeIO())
-        let text = "tools/call is not built yet (afterglow-mcp MC-8)"
+        let text = "there is no file at /tmp/mcp/a.fake"
         #expect(sessions.call(.open(app: "fake"), .object(["path": .string("a.fake")]), now: 0)
                     == MCPToolResult(structured: .object(["error": .string(text)]), text: text, isError: true))
     }
