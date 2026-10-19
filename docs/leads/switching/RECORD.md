@@ -2,9 +2,9 @@
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a152d6e775-atvh · Session: claude/switching-feature-lead-2qhod5 · Started: 2026-10-18 (earlier runs act-1a150baa312-n5va on claude/switching-feature-lead-kyvcdx, act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 4 round 1 (SW-4a #2989 merged as 531550f; full dev runs never reached AfterGlow (#2971); supervisor ruled on #1507 that a green scoped `suite` run on dev containing 531550f counts; tracking scoped run 39209833935 on d481419, macOS (suite) queued since 06:25Z)
+Stage: 4 round 1, blocked on CI #3176 (scoped `suite` runs skip AfterGlowJourneyTests+Switch until it merges, #2971; SW-4a #2989 merged as 531550f)
 Base: origin/dev d481419
-Next: wait for CI: scoped suite run 39209833935 to finish; then download ui-screens, snapshots and audit-suite json, run Anatomy round 1 (critic panel, clarity lens included), then Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
+Next: wait for #3176 (ci/scope-macos-per-app) to merge into dev, then for the next scoped `suite` run on dev that contains it; download ui-screens, snapshots and audit-suite json, run Anatomy round 1 (critic panel, clarity lens), then Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
@@ -90,6 +90,8 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 
 ## Decisions (stage 4, run act-1a152d6e775-atvh)
 - Supervisor (#1507, 06:25Z): a green scoped `suite` run on dev that contains 531550f is valid evidence for Anatomy round 1 and the contact sheet. Run 39209833935 (d481419) is that run.
+- Supervisor correction (#1507, 06:43Z): scoped `suite` runs skip AfterGlowJourneyTests+Switch (#2971), so 39209833935 carries no switching journeys. Evidence is the first scoped `suite` run on dev after #3176 merges.
+- Belt's 07:1xZ stall ping named `lead/switching`; this session may push only `claude/switching-feature-lead-2qhod5`, so RECORD.md and timeline.tsv stay there, as every earlier run of this lead did. Told the supervisor on #1507.
 - Status channel is this run's designated branch `claude/switching-feature-lead-2qhod5`, reset to origin/dev d481419 (a fast-forward from main b7e17ed) with this record copied from `claude/switching-feature-lead-kyvcdx`. Brief's base check: HEAD b7e17ed matched `origin/main`; work stays on dev.
 
 ## Decisions (wave 5, run act-1a150baa312-n5va)
