@@ -32,7 +32,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         try CommandCatalog(app: "fake", ids.map(spec), history: { $0.history })
     }
 
-    @Test(.disabled("waits on CC-7")) func badOrDuplicateIdsAreRefused() throws {
+    @Test func badOrDuplicateIdsAreRefused() throws {
         for bad in ["", "Rect.Add", "rect add", "rect_add", String(repeating: "a", count: 65)] {
             #expect(throws: (any Error).self, "\(bad) was accepted") { try Self.catalog([bad]) }
         }
@@ -40,7 +40,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         #expect(try Self.catalog(["doc.export-json", "rect.add", String(repeating: "a", count: 64)]).ids.count == 3)
     }
 
-    @Test(.disabled("waits on CC-7")) func unknownIdChangesNothing() throws {
+    @Test func unknownIdChangesNothing() throws {
         var doc = FakeCanvasDocument.fixture
         let before = try FakeState(doc)
         #expect(refusal("rect.nope", .object([:]), on: &doc) == .unknownCommand("rect.nope"))
@@ -48,7 +48,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         #expect(try FakeState(doc) == before)
     }
 
-    @Test(.disabled("waits on CC-7")) func malformedParamsNameThePathAndRunNothing() throws {
+    @Test func malformedParamsNameThePathAndRunNothing() throws {
         var doc = FakeCanvasDocument.fixture
         let before = try FakeState(doc)
         var wrong = ["x": JSONValue.string("1"), "y": .number(20), "w": .number(30), "h": .number(40)]
@@ -65,7 +65,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         #expect(try FakeState(doc) == before)
     }
 
-    @Test(.disabled("waits on CC-7")) func unavailableCarriesTheWhyAndChangesNothing() throws {
+    @Test func unavailableCarriesTheWhyAndChangesNothing() throws {
         var doc = FakeCanvasDocument.fixture
         try doc.select(2)
         let before = try FakeState(doc)
@@ -73,12 +73,19 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
                 == .unavailable(id: "rect.move", why: "Unlock Rect 2 first."))
         #expect(refusal("rect.remove", .object([:]), on: &doc) == .unavailable(id: "rect.remove", why: "Unlock Rect 2 first."))
         #expect(refusal("edit.undo", .object([:]), on: &doc) == .unavailable(id: "edit.undo", why: "There is nothing to undo."))
+        // A run that would make itself available: checked on the target before it runs, it never runs.
+        let gated = CommandSpec<FakeCanvasDocument>.typed(
+            "rect.add-after-edit", title: "Add After Edit", summary: "Adds a rectangle once there is an edit.", kind: .edit,
+            params: FakeCanvasDocument.AddRect.self, example: Self.addParams,
+            availability: { $0.history.canUndo ? .available : .unavailable("Edit first.") }) { doc, p in doc.add(p) }
+        let gatedCatalog = try CommandCatalog(app: "fake", [gated], history: { $0.history })
+        #expect(refusal("rect.add-after-edit", Self.addParams, on: &doc, catalog: gatedCatalog) == .unavailable(id: "rect.add-after-edit", why: "Edit first."))
         #expect(try FakeState(doc) == before)
     }
 
     enum Boom: Error { case midway }
 
-    @Test(.disabled("waits on CC-7")) func failedRunRollsBack() throws {
+    @Test func failedRunRollsBack() throws {
         var doc = FakeCanvasDocument.fixture
         let before = try FakeState(doc)
         #expect(refusal("rect.select", .object(["id": .number(9)]), on: &doc) == .failed(id: "rect.select", message: "There is no rect 9."))
@@ -92,7 +99,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         #expect(try FakeState(doc) == before)
     }
 
-    @Test(.disabled("waits on CC-7")) func editRecordsExactlyOneNamedStep() throws {
+    @Test func editRecordsExactlyOneNamedStep() throws {
         var doc = FakeCanvasDocument.fixture
         let added = try catalog.run("rect.add", params: Self.addParams, on: &doc)
         #expect(added.undoStep == "Add Rectangle" && doc.history.steps == ["Add Rectangle"] && doc.history.undoName == "Add Rectangle")
@@ -110,7 +117,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         #expect(doc.rects.first?.x == 10 && doc.history.undoName == "Add Rectangle")
     }
 
-    @Test(.disabled("waits on CC-7")) func envelopeRunsLikeIdAndParams() throws {
+    @Test func envelopeRunsLikeIdAndParams() throws {
         let line = Data(#"{"id":"rect.add","params":{"x":10,"y":20,"w":30,"h":40}}"#.utf8)
         let step = try JSONDecoder().decode(CommandEnvelope.self, from: line)
         var a = FakeCanvasDocument.fixture, b = FakeCanvasDocument.fixture
@@ -118,7 +125,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
         #expect(try FakeState(a) == FakeState(b))
     }
 
-    @Test(.disabled("waits on CC-7")) func describeRoundTripsThroughJSON() throws {
+    @Test func describeRoundTripsThroughJSON() throws {
         #expect(catalog.describe("rect.nope") == nil && catalog.describeAll().map(\.id) == catalog.ids)
         let add = try #require(catalog.describe("rect.add"))
         #expect(add.app == "fake" && add.kind == .edit && add.undoable && add.params == FakeCanvasDocument.AddRect.paramSchema.json)
@@ -129,7 +136,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
     }
 
     /// 1,000 seeded mutations of each example (types swapped, keys dropped and added, huge strings) refuse or run.
-    @Test(.disabled("waits on CC-7")) func fuzzedParamsNeverCrash() throws {
+    @Test func fuzzedParamsNeverCrash() throws {
         var seed: UInt64 = 0x5eed
         func next(_ n: Int) -> Int { seed = seed &* 6364136223846793005 &+ 1442695040888963407; return Int((seed >> 33) % UInt64(n)) }
         let swaps: [JSONValue] = [.null, .bool(true), .number(-1e300), .number(1.5), .string(String(repeating: "x", count: 10_000)),
@@ -158,7 +165,7 @@ func refusal(_ id: String, _ params: JSONValue, on doc: inout FakeCanvasDocument
 
     /// CJ2: add with the example names its step; a move on a locked Rect 1 refuses with the why; an atomic
     /// three-step batch whose second step is refused leaves the document as it was.
-    @Test(.disabled("waits on CC-7")) func cj2CatalogRunsRefusesAndRollsBack() throws {
+    @Test func cj2CatalogRunsRefusesAndRollsBack() throws {
         var doc = FakeCanvasDocument.fixture
         let example = try #require(catalog.spec("rect.add")?.example)
         _ = try catalog.run("rect.add", params: example, on: &doc)

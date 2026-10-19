@@ -3,6 +3,11 @@
 // step through ViewerZoom's stops; Fit is ViewerZoom's fit scale inside the
 // viewport's margin. A zoom that isn't a number is 100%, and a viewport with
 // no room fits at the smallest zoom, never a division by zero.
+// `anchoredOrigin` is the one place a pointer gesture's zoom is anchored: the
+// artboard origin that keeps the document point under the pointer there.
+// CanvasHostView's pinch turns it into its pan and CanvasLayout into the
+// viewport's scroll offset; keys, menus and sliders still zoom about the
+// view centre.
 // SuiteCanvasNavigating is the live CanvasNavigating (UC7) over it: the same
 // stops, clamp and fit through PlaneExtent, the view-to-document point and the
 // arrow-key pan step. Plain math, no SwiftUI, tested on its own (ZoomMathTests,
@@ -32,6 +37,15 @@ public enum ZoomMath {
     /// side, never above 100%, within `range`.
     public static func fit(document: CGSize, in viewport: CGSize, margin: CGFloat = SuiteSpacing.xxl) -> Double {
         clamped(ViewerZoom.fitScale(artboard: document, in: viewport, inset: margin))
+    }
+
+    /// The artboard origin that keeps the document point under `pointer` under it when the zoom
+    /// goes from `old` to `new`, all in view points. Both zooms are clamped first, so a zoom held at
+    /// a range end leaves the origin where it was. Only their ratio counts, so a fit-relative zoom
+    /// works as well as an absolute one. TimelineZoom.anchoredOffset is the timeline's one-axis kin.
+    public static func anchoredOrigin(pointer: CGPoint, origin: CGPoint, from old: Double, to new: Double) -> CGPoint {
+        let ratio = CGFloat(clamped(new) / clamped(old))
+        return CGPoint(x: pointer.x - (pointer.x - origin.x) * ratio, y: pointer.y - (pointer.y - origin.y) * ratio)
     }
 }
 

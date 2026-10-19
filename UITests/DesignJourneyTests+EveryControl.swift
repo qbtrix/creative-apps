@@ -6,7 +6,10 @@
 // selection, or the control list; asserting the click happened is never
 // enough. After each it presses Escape and ⌘Z. A control is judged as the list
 // gives it now, since earlier clicks move state Undo doesn't restore. New goes
-// last, as it replaces the document. The status line's chips (`design.status.*`)
+// last, as it replaces the document. A click that brings up a sheet or dialog
+// (Open's panel) is shot as the whole screen, which skips the audit: the panel
+// covers the window's controls, which its tree still lists, so a disabled
+// button under it measured the panel's ink (#3042). The status line's chips (`design.status.*`)
 // are readouts, registered so the audit sees their ids: each must read some
 // text instead of acting. Ids registered with `identifies: false` are found by
 // the element that carries them on screen (`aliases`). A sweep, not feature
@@ -42,11 +45,16 @@ final class DesignEveryControlJourneyTests: XCTestCase {
             control.click()
             Thread.sleep(forTimeInterval: 0.5)
             let changed = before != Self.state(of: control, design)
-            design.shot("control-\(design.slug(id))")
+            design.shot("control-\(design.slug(id))", screen: Self.panelIsUp(design))
             XCTAssert(changed, "\(id) is enabled but clicking it changed nothing")
             design.press(.escape)
             design.press(character: "z", .command)
         }
+    }
+
+    /// Whether a sheet or dialog (Open's panel, an alert) covers the window now.
+    @MainActor private static func panelIsUp(_ design: Journey) -> Bool {
+        design.app.sheets.firstMatch.exists || design.app.dialogs.firstMatch.exists
     }
 
     /// The `design.*` entries of `suite.controls` as listed now.

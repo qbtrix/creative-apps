@@ -1,0 +1,10 @@
+{
+  "id": "cli-mcp",
+  "name": "MCP server",
+  "description": "`afterglow mcp`: MCPServer, which serves every app's command catalog as MCP tools over stdio. CL-2 stubs MCPServer.serve (exits 69, \"afterglow-mcp is not built yet\"); the afterglow-mcp packet fills it.",
+  "technology": "Swift 6, Foundation, Linux and macOS",
+  "paths": [
+    "Sources/AfterGlowCLICore/MCP/"
+  ],
+  "order": 40
+}

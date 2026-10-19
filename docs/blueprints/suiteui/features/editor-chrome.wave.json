@@ -2,8 +2,8 @@
   "title": "The editor window's chrome",
   "wave": 2,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1344",
   "covers": "#340, #341, #339 (empty state only), #342 (moot)",
   "waits_on": "#778 (suite-harness, merged)",
   "depends": [

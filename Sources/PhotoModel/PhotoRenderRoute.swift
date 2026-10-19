@@ -13,9 +13,12 @@
 // picture back, run on CoreRaster and upload it again; a section at its
 // identity is skipped, as CoreRaster returns the buffer itself there. The CPU
 // route renders each damaged tile on its own task; the GPU route renders each
-// row of damaged tiles as one region, the rows on their own tasks. Export and `composite()` stay on `rendered(_:)` (CoreRaster
-// directly), the reference both routes are held to. Linux-safe: the Metal
-// backend is the app's to make.
+// row of damaged tiles as one region, the rows on their own tasks. With
+// resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
+// composites from them in one batch, so a frame uploads only the tiles that
+// changed, those across the cores. Export and `composite()` stay on
+// `rendered(_:)` (CoreRaster directly), the reference both routes are held
+// to. Linux-safe: the Metal backend is the app's to make.
 import CoreColor
 import CoreRaster
 import CoreRender
@@ -24,9 +27,24 @@ import CoreRender
 public struct PhotoRenderRoute: Sendable {
     /// The GPU backend; nil draws everything on the CPU.
     public let preferred: (any RenderBackend)?
+    /// Layer tiles kept on `preferred` between renders; nil uploads every tile a render composites.
+    public let resident: ResidentSurfaces?
 
-    public init(preferred: (any RenderBackend)? = nil) {
+    public init(preferred: (any RenderBackend)? = nil, resident: ResidentSurfaces? = nil) {
         self.preferred = preferred
+        self.resident = resident
+    }
+
+    /// The families the resident path composites with: every blend mode, so a batch never falls back.
+    static let residentFamilies: Set<RenderOp> = [.composite, .blendSeparable, .blendNonSeparable]
+
+    /// `resident` while it lives on `preferred`, `preferred` is healthy and runs every blend family;
+    /// else nil, and renders upload their tiles (a backend still compiling, or one without in-place blends).
+    public var residentTiles: ResidentSurfaces? {
+        guard let resident, let preferred, preferred.isHealthy, resident.backend.name == preferred.name,
+            Self.residentFamilies.isSubset(of: preferred.supports)
+        else { return nil }
+        return resident
     }
 
     /// Every op on the CPU backend.
@@ -38,14 +56,16 @@ public struct PhotoRenderRoute: Sendable {
     }
 
     /// Whether a render goes to the GPU, one region per frame rather than one task per tile.
-    var isGPU: Bool { preferred?.isHealthy == true }
+    public var isGPU: Bool { preferred?.isHealthy == true }
 }
 
 extension PhotoWorkspace {
     /// `rect` of the canvas through `dispatcher` as display bytes (sRGB,
     /// straight alpha, row-major) and the name of the backend that encoded them.
-    func displayed(_ rect: PixelRect, on dispatcher: RenderDispatcher) throws -> (bytes: [UInt8], backend: String) {
-        let picture = try renderedSurface(rect, on: dispatcher)
+    func displayed(
+        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil
+    ) throws -> (bytes: [UInt8], backend: String) {
+        let picture = try renderedSurface(rect, on: dispatcher, resident: resident)
         defer { dispatcher.release(picture) }
         let backend = dispatcher.backend(for: .display).name
         return (try dispatcher.display(picture, colorSpace: .sRGB), backend)
@@ -53,15 +73,61 @@ extension PhotoWorkspace {
 
     /// `rect` of the canvas composited and adjusted through `dispatcher`, as
     /// `rendered(_:)` makes it on CoreRaster. The caller releases the surface.
-    public func renderedSurface(_ rect: PixelRect, on dispatcher: RenderDispatcher) throws -> RenderSurface {
+    /// With `resident`, the layers' tiles come from it and composite in one batch (`residentComposited`).
+    public func renderedSurface(
+        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil
+    ) throws -> RenderSurface {
         guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
             let inner = rect.intersection(canvas.rect)
         else { throw RasterError.invalid("region \(rect) is outside the image") }
-        let adjusted = try adjustments.applied(to: composited(outer, on: dispatcher), on: dispatcher)
+        let picture = try resident.flatMap { try residentComposited(outer, on: dispatcher, resident: $0) }
+        let adjusted = try adjustments.applied(to: picture ?? composited(outer, on: dispatcher), on: dispatcher)
         guard outer != inner else { return adjusted }
         defer { dispatcher.release(adjusted) }
         return try dispatcher.cropped(
             adjusted, x: inner.x - outer.x, y: inner.y - outer.y, width: inner.width, height: inner.height)
+    }
+
+    /// The visible layers over transparency in `rect`, bottom first, from `resident`: each pixel layer's
+    /// tiles under `rect` synced there (an unchanged tile is not uploaded again, a clear one is skipped),
+    /// then one batched composite onto a blank surface, whole tiles, no CPU scan of their pixels. Nil when
+    /// a visible layer needs the other path: an adjustment layer, or an opacity CoreRaster rejects.
+    func residentComposited(_ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces) throws
+        -> RenderSurface?
+    {
+        let shown = layers.reversed().filter { $0.isVisible && $0.opacity > 0 }
+        guard
+            shown.allSatisfy({ layer in
+                if case .adjustment = layer.kind { return false }
+                return (0...1).contains(Float(layer.opacity))
+            })
+        else { return nil }
+        var tiles: [(key: ResidentKey, pixels: PixelBuffer, at: PixelRect, layer: PhotoLayer)] = []
+        for layer in shown {
+            guard let tiled = pixels[layer.id] else { continue }
+            let region = PixelRect(x: rect.x - layer.offsetX, y: rect.y - layer.offsetY, width: rect.width, height: rect.height)
+            for i in tiled.tileIndices(in: region) where tiled.tiles.indices.contains(i) {
+                let at = tiled.tileRect(i).offsetBy(layer.offsetX - rect.x, layer.offsetY - rect.y)
+                tiles.append((ResidentKey(layer: layer.id, tile: i), tiled.tiles[i], at, layer))
+            }
+        }
+        // The changed tiles upload across the cores, as the CPU route renders its tiles; steps stay in order.
+        let surfaces = try PhotoLayerComposite.inParallel(tiles.count) { [tiles] i in
+            try resident.surface(tiles[i].key, pixels: tiles[i].pixels)
+        }
+        let steps = zip(tiles, surfaces).compactMap { tile, surface in
+            surface.map {
+                CompositeStep($0, x: tile.at.x, y: tile.at.y, mode: tile.layer.blendMode, opacity: Float(tile.layer.opacity))
+            }
+        }
+        var picture = try dispatcher.blank(width: rect.width, height: rect.height)
+        do {
+            try dispatcher.composite(steps, onto: &picture)
+        } catch {
+            dispatcher.release(picture)
+            throw error
+        }
+        return picture
     }
 
     /// The visible layers over transparency in `rect`, bottom first.

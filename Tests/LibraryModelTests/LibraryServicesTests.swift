@@ -63,11 +63,11 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    let members = ["develop", "crop", "exporter"]
+    let members = ["crop", "exporter"]
     #expect(Set(services.unavailable.keys) == Set(members))
     #expect(services.unavailable.values.allSatisfy { !$0.isEmpty })
     let reasons: [String?] = [
-        LiveDevelop.unavailable, LiveCrop.unavailable, LiveExporter.unavailable,
+        LiveCrop.unavailable, LiveExporter.unavailable,
     ]
     #expect(reasons.allSatisfy { ($0?.isEmpty ?? true) == false })
     #expect(LiveImporter.unavailable == nil)
@@ -75,6 +75,7 @@ private func liveServices() -> LibraryServices {
     #expect(LiveCulling.unavailable == nil)
     #expect(LiveCatalogCoding.unavailable == nil)
     #expect(LiveLoupeImaging.unavailable == nil)
+    #expect(LiveDevelop.unavailable == nil)
 }
 
 @Test func liveStubsDrawSamplesAndRefuseFiles() async throws {
@@ -123,10 +124,12 @@ private func liveServices() -> LibraryServices {
     #expect(services.unavailable["importer"] == nil && services.unavailable["culling"] == nil)
     #expect(services.unavailable["coding"] == nil && services.unavailable["loupe"] == nil)
     #expect(services.unavailable["thumbnails"] == nil)
-    #expect(services.unavailable.count == 3)
+    #expect(services.unavailable["develop"] == nil)
+    #expect(services.unavailable.count == 2)
     // The importer is live: the fake decoder's empty folder has no photos.
     await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })
     }
-    #expect(try services.develop.histogram(of: PixelBuffer(rgba8: [0, 0, 0, 255], width: 1, height: 1)) == .empty)
+    // Develop is live: one black pixel is one shadow-clipped count in bin 0.
+    #expect(try services.develop.histogram(of: PixelBuffer(rgba8: [0, 0, 0, 255], width: 1, height: 1)).red.first == 1)
 }

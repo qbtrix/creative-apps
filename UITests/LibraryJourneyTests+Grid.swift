@@ -79,8 +79,8 @@ extension LibraryJourneyTests {
         XCTAssertGreaterThanOrEqual(shown.count, 5, "fewer than five grid cells on screen: \(shown.map(\.name))")
         let range = Array(shown.prefix(5))
         guard let anchor = range.first, let end = range.last else { return }
-        library.element(anchor.id).click()
-        XCUIElement.perform(withKeyModifiers: .shift) { library.element(end.id).click() }
+        gridCell(anchor.id, library).click()
+        XCUIElement.perform(withKeyModifiers: .shift) { gridCell(end.id, library).click() }
         var selected: [String] = []
         for _ in 0..<25 {
             selected = gridCells(library).filter(\.isSelected).map(\.name)
@@ -118,6 +118,15 @@ extension LibraryJourneyTests {
         }
 
         var longSide: Int? { size.map { max($0.width, $0.height) } }
+    }
+
+    /// The cell whose identifier is `id`, found by its prefix and the id's last
+    /// 64 characters: in the live pass the id is a file path, and XCUI refuses
+    /// an identifier lookup longer than 128 characters.
+    @MainActor private func gridCell(_ id: String, _ library: Journey) -> XCUIElement {
+        library.app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", Self.cellPrefix))
+            .matching(NSPredicate(format: "identifier ENDSWITH %@", String(id.suffix(64)))).firstMatch
     }
 
     /// The cells at least half inside the grid's scroll view, in layout order

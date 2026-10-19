@@ -1,0 +1,7 @@
+[
+{"label":"layerDrop forgets the dragged layer's removal in the same parent","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"draggedIndex < index { index -= 1 }","replace":"draggedIndex < index { index -= 0 }","tests":"DesignLayerDropTests"},
+{"label":"layerDrop swaps above and below","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"index = position == .above ? rowIndex + 1 : rowIndex","replace":"index = position == .above ? rowIndex : rowIndex + 1","tests":"DesignLayerDropTests"},
+{"label":"layerDrop drops into a row that is not a frame or group","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"            guard row.kind.holdsChildren else { return nil }\n","replace":"","tests":"DesignLayerDropTests"},
+{"label":"layerDrop takes a drop onto the dragged row itself","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"guard draggedID != rowID, nodes.node(draggedID) != nil","replace":"guard nodes.node(draggedID) != nil","tests":"DesignLayerDropTests"},
+{"label":"layerDrop adjusts for a dragged layer already at the target index","file":"Sources/DesignModel/DesignLayerToggles.swift","find":"draggedIndex < index {","replace":"draggedIndex <= index {","tests":"DesignLayerDropTests"}
+]

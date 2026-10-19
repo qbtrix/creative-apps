@@ -1,0 +1,10 @@
+{
+  "id": "cli-jobs",
+  "name": "Real-jobs harness",
+  "description": "RealJobs: runs a `Tests/RealJobs/<app>/<job>/` script through the batch runner and compares each output with its expectation (sha256, JSON equal, or pixels within a tolerance), skipping a job not meant for this platform with its why. CL-2 stubs RealJobs.check (exits 69 naming CL-jobs); CL-9 fills it.",
+  "technology": "Swift 6, Foundation, Linux and macOS",
+  "paths": [
+    "Sources/AfterGlowCLICore/RealJobs.swift"
+  ],
+  "order": 30
+}
