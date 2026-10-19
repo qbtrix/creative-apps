@@ -115,3 +115,4 @@ utc	stage	event	ref	note
 2026-10-19T13:57Z	5	heartbeat	39252895176	macOS job started 13:38Z, Linux green, main promoted to 6e70826b; ui-test pending
 2026-10-19T14:17Z	5	heartbeat	39252895176	macOS at Perf step; ui-test pending
 2026-10-19T14:38Z	5	heartbeat	39252895176	ui-test running since 14:20Z
+2026-10-19T14:38Z	5	stage-start	6e70826b	relaunch act-1a1549772b1-qkhs; 39252895176 ui-test running since 14:20Z
