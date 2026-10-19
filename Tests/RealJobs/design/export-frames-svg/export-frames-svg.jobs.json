@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "Selects the first page of a two-page file, whose only layer is a loose rectangle, then exports SVG: the one frame, on the second page, is written all the same, named after the input, and its bytes are checked.",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "page.select", "params": {"page": "page-1"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "svg", "options": {}},
+  "expect": {
+    "out/loose-front.svg": {"sha256": "628a97aa54cfbc1eabc920d8396d4319c844fb2ac676f8afee9aa30578841902"}
+  },
+  "platforms": ["linux", "macos"]
+}

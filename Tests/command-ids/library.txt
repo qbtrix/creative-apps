@@ -1,0 +1,25 @@
+# Library's command ids (adopt-command-catalog AC-l2). Never reuse one; mark a removed id "retired <id>".
+edit.deselect
+edit.redo
+edit.select
+edit.select-all
+edit.undo
+file.load-samples
+metadata.auto-advance
+metadata.clear-flag
+metadata.pick
+metadata.reject
+metadata.set-label
+metadata.set-rating
+photo.copy-settings
+photo.crop
+photo.paste-settings
+photo.reset-crop
+photo.reset-develop
+view.actual-size
+view.grid
+view.loupe
+view.sort
+view.zoom-in
+view.zoom-out
+view.zoom-to-fit

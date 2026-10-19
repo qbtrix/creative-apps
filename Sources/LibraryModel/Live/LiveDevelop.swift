@@ -5,7 +5,9 @@
 // pass, so neutral settings return the input untouched. The histogram is
 // CoreRaster's, 256 bins over the sRGB values of the buffer it is given (the
 // rendered one). Vibrance and Saturation wait on creative-core (`waiting`):
-// a render that needs either throws `.renderFailed` with that reason.
+// a render that needs either throws `.renderFailed` with that reason. After
+// the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
+// `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -65,7 +67,14 @@ public struct LiveDevelop: DevelopRendering {
                 throw LibraryError.renderFailed("\(error)")
             }
         }
-        return b
+        guard let crop = settings.crop else { return b }
+        do {
+            let turned = crop.angle == 0 ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)
+            let f = try LiveCrop().frame(crop, photo: PixelSize(width: buffer.width, height: buffer.height))
+            return try turned.cropped(x: f.x, y: f.y, width: f.width, height: f.height)
+        } catch let error as RasterError {
+            throw LibraryError.renderFailed("\(error)")
+        }
     }
 
     public func histogram(of buffer: PixelBuffer) throws -> HistogramBins {
