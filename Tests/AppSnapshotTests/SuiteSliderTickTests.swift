@@ -31,11 +31,13 @@ import Testing
         // touches both, so counting around it merged them (3 at 156 pt).
         let row = InspectorSliderRow(label, value: value, in: value...(value + 1000), unit: unit, decimals: decimals, mixed: true) { _ in }
         let image = try Self.render(row, width: width)
-        let blobs = Self.blobs(in: image, across: Self.gap(label, "Mixed", width))
+        let gap = Self.gap(label, "Mixed", width)
+        let blobs = Self.blobs(in: image, across: gap)
+        let seen = "\(blobs.count) ticks at \(blobs) in \(gap)"
         if wide {
-            #expect(blobs == 5, "\(label) at \(width) pt: \(blobs) ticks, want 5")
+            #expect(blobs.count == 5, "\(label) at \(width) pt: \(seen), want 5")
         } else {
-            #expect(blobs == 0 || blobs == 5, "\(label) at \(width) pt: \(blobs) ticks, want 0 or 5")
+            #expect(blobs.count == 0 || blobs.count == 5, "\(label) at \(width) pt: \(seen), want 0 or 5")
         }
     }
 
@@ -113,19 +115,27 @@ import Testing
         return (corner..<(image.width - corner)).filter { inked(image, $0, y) }
     }
 
-    /// Runs of ink along the row's middle line within `gap` (points), each
-    /// column against its own background.
-    private static func blobs(in image: RGBAImage, across gap: ClosedRange<CGFloat>) -> Int {
+    /// The cores of the ink runs along the row's middle line within `gap`
+    /// (points), each column against its own background, as point ranges.
+    /// A core is a run at 60% or more of the darkest column's ink, so the
+    /// faint anti-aliased edges of two close ticks don't join them into one.
+    private static func blobs(in image: RGBAImage, across gap: ClosedRange<CGFloat>) -> [ClosedRange<CGFloat>] {
         let scale = SnapshotHost.scale
         let middle = Int(SuiteSize.studioRow / 2 * scale)
         let from = Int((gap.lowerBound * scale).rounded(.up)), to = Int((gap.upperBound * scale).rounded(.down))
-        guard from < to else { return 0 }
-        var runs = 0
-        var inRun = false
-        for x in from...to {
-            let ink = inked(image, x, middle)
-            if ink && !inRun { runs += 1 }
-            inRun = ink
+        guard from < to else { return [] }
+        let ground = Int(SuiteSpacing.xxs * scale)
+        let ink = (from...to).map { x in zip(pixel(image, x, middle), pixel(image, x, ground)).map { abs($0 - $1) }.max() ?? 0 }
+        let core = max(21, (ink.max() ?? 0) * 6 / 10)
+        var runs: [ClosedRange<CGFloat>] = []
+        var start: Int?
+        for i in 0...ink.count {
+            let value = i < ink.count ? ink[i] : 0
+            if value >= core, start == nil { start = i }
+            if value < core, let first = start {
+                runs.append(CGFloat(from + first) / scale...CGFloat(from + i - 1) / scale)
+                start = nil
+            }
         }
         return runs
     }

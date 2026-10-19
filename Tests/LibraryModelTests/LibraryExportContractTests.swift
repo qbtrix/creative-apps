@@ -1,5 +1,6 @@
 // LibraryExportContractTests.swift: EX-1, the export contract: options, the
-// final unique-name rule, the fake on it, and stubs refusing until EX-3.
+// final unique-name rule, the fake on it, and the live exporter (EX-2)
+// and the catalog's states (EX-3); cancel and retry refuse until EX-13.
 import Foundation
 import Testing
 
@@ -61,20 +62,18 @@ import Testing
         }
     }
 
-    @Test func liveStubsRefuseWithTheExportersReason() async throws {
+    @Test func liveExporterIsConnectedAndOnlyCancelAndRetryRefuse() async throws {
         var catalog = LibraryCatalog(services: .live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore()))
         let photos = LibraryFixtures.photos(named: "shoot")
         catalog.load(photos)
         catalog.select([photos[0].id])
-        let reason = try #require(LiveExporter.unavailable)
-        #expect(catalog.exportHelp == reason && catalog.exportPreview == reason)
+        // EX-2 connects the exporter (nil reason); EX-3 fills the catalog's export states.
+        #expect(LiveExporter.unavailable == nil)
+        #expect(catalog.exportHelp == nil && catalog.exportTargets.map(\.id) == [photos[0].id])
+        #expect(catalog.beginExport(folder: "/out") == true)
+        #expect(catalog.exportPreview?.hasPrefix("\(photos[0].name).jpg · ") == true)
+        // Cancel and retry stay stubs until EX-13.
         let before = catalog
-        #expect(catalog.beginExport(folder: "/out") == false)
-        catalog.setExportOptions(ExportOptions(folder: "/out"))
-        catalog.showExportProgress(done: 1, total: 2)
-        catalog.finishExport(ExportSummary(total: 1, written: ["a.jpg"]))
-        catalog.closeExport()
-        #expect(catalog.exportPlan(existingNames: []) == nil)
         #expect(catalog.cancelExport() == false)
         #expect(catalog.retryExport(options: ExportOptions(folder: "/out"), existingNames: []) == nil)
         #expect(catalog == before)

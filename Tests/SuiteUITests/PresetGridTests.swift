@@ -1,6 +1,7 @@
 // PresetGridTests.swift: how arrow keys move focus in a PresetGrid (its
 // SuitePresetNavigating rule stops at the edges, where FakePresetNavigating
-// wraps), that a toggle chip reports On and Off, that each option's
+// wraps), that an arrow moves on from the focused preset and passes on when
+// none has focus (#2927), that a toggle chip reports On and Off, that each option's
 // identifier lands on its own button (#1148), and that a chip's state change
 // records one `fade-start`/`fade-end` pair on series `chip` with the Reduce
 // Motion switch off (about 0.14 s apart) and on (at once). macOS only.
@@ -31,6 +32,20 @@ import Testing
     #expect(move(3, .down) == 6 && move(6, .right) == nil && move(6, .up) == 3)
     // The Fake wraps where the live rule stops, so a page built on it shows the difference.
     #expect(FakePresetNavigating().neighbor(of: 2, .right, count: 7, columns: 3) == 3)
+}
+
+/// An arrow moves from the focused preset (a click focuses the one it presses, #2927); with no preset focused, or
+/// at the grid's edge, the key passes on to the control that has focus.
+@Test func anArrowMovesOnFromTheFocusedPreset() {
+    let options = ["linear", "ease-in", "ease-out", "ease-in-out"].map { InspectorOption(id: $0, title: $0) }
+    func target(_ arrow: GridArrow, from focused: String?) -> String? {
+        PresetGrid<String>.target(of: arrow, from: focused, in: options, columns: 2, navigation: SuitePresetNavigating())
+    }
+    #expect(target(.right, from: "ease-out") == "ease-in-out")
+    #expect(target(.up, from: "ease-in-out") == "ease-in")
+    #expect(target(.right, from: nil) == nil)
+    #expect(target(.right, from: "ease-in-out") == nil)
+    #expect(target(.left, from: "bounce") == nil)
 }
 
 @Test func arrowKeysMapToGridArrows() {
