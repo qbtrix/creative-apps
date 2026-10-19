@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-19T18:51Z	4	heartbeat	39292755765	third stall ping; run still queued
 2026-10-19T19:00Z	4	heartbeat	39292755765	scoped suite run waiting
 2026-10-19T19:20Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T19:21:34Z	heartbeat	stage 4: evidence run 39292755765 queued on macos-26 backlog; reported on #1507
