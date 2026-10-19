@@ -4,8 +4,8 @@ Issue: #1500 · Packet: docs/blueprints/design/features/canvas-basics.md
 Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
-Next: round 2 (fix-batch) on #3339/#3342/#3343 once #3365 and #3366 merge; then critic re-review; leftovers to gap; Belt-Contact-Sheet.
-Last check: 2026-10-19T22:06Z: #3360/#3365/#3366 open, fast-lane, mergeable, macOS builds queued; 11 findings open (round 1 fixes pending merge).
+Next: push #3365 build fix after gate; then round 2 on #3339/#3342/#3343 once #3365 and #3366 merge; critic re-review; gaps; Belt-Contact-Sheet.
+Last check: 2026-10-19T22:28Z: #3365 macOS build red (mutating openFixture inside #expect in DesignTextWidthSnapshots); fix committed, gate running. #3360 build green, #3366 build queued.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
