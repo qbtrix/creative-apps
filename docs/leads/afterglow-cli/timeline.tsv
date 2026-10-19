@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-19T04:37:56Z	build	PR opened	#3123	CL-8 CL-jobs head 788e8b8, ci --changed PASS, 224+/8 files
 2026-10-19T04:38:56Z	build	PR opened	#3124	CL-6 CL-batch head 458e9ec, ci --changed PASS, 371+/10 files
 2026-10-19T04:39:32Z	build	heartbeat	-	#3118 macOS build dispatched 04:34Z; #3123 #3124 in lane
+2026-10-19T05:01:02Z	build	heartbeat	-	#3118 #3123 #3124 open in lane, none merged yet; no needs-fix
