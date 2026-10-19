@@ -70,3 +70,4 @@ Next: SL-8 #3230 (4fb9096f, feature-done) in the lane (macOS build next); on mer
 - 2026-10-19T10:17Z check: #3201 macOS build 39223926415 green, waiting on lane sweep; SL-8 starts once it merges (findings then 4)
 - 2026-10-19T10:40Z check: #3201 merged 895fb2d0 (closes #3130 #3131 #3135); CI finding #3186 closed as dup of #3131; 4 SL findings open (#3129 #3132 #3134 #3136, waiting on SuiteUI); SL-8 wave 4 started (wf_00a7b134-d61, base 895fb2d0, audit from scoped run 39207561728)
 - 2026-10-19T10:49Z SL-8 PR #3230 (head 4fb9096f, CI: PASS, Part of #291): inspector tab segments get library.inspector.info/develop and the switch library.inspector.tabs; audit run 39207561728 showed identifier 2 unnamed 0, both in LibraryInspector; no gap or needs-ui filed. Footer stripped from PR body.
+- 11:04Z check: SL-8 #3230 macOS build 39241507186 queued; #3232 closed dup of #3131
