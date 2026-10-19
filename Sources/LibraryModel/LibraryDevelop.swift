@@ -5,7 +5,8 @@
 // sync and the histogram helpers. Every edit goes through `recordEdit`, the
 // catalog's undo history; a drag's samples share one coalesce key, and the
 // grid's thumbnails of the changed photos drop once, when the drag ends.
-// Linux-safe.
+// Paste and sync are each one step over every photo they change, and never
+// touch a crop. Linux-safe.
 
 extension LibraryCatalog {
     /// The loupe photo in the loupe, else the selection.
@@ -22,13 +23,11 @@ extension LibraryCatalog {
         services.develop is LiveDevelop ? LiveDevelop.waiting[slider] : nil
     }
     /// The targets' value, "Mixed" when they differ; nil with no targets.
-    public func developValue(_ slider: DevelopSlider) -> MetadataValue<Double>? {
-        MetadataValue.of(developTargetSettings.map { $0.value(slider) })
-    }
+    public func developValue(_ slider: DevelopSlider) -> MetadataValue<Double>? { developShared { $0.value(slider) } }
     /// The targets' curve, mixed when they differ; nil with no targets.
-    public var developCurve: MetadataValue<ToneCurve>? { MetadataValue.of(developTargetSettings.map(\.curve)) }
+    public var developCurve: MetadataValue<ToneCurve>? { developShared(\.curve) }
     /// The targets' levels, mixed when they differ; nil with no targets.
-    public var developLevels: MetadataValue<DevelopLevels>? { MetadataValue.of(developTargetSettings.map(\.levels)) }
+    public var developLevels: MetadataValue<DevelopLevels>? { developShared(\.levels) }
 
     /// Every target to `value` (clamped). Edits sharing an open `coalesceKey`
     /// (one drag, "develop-exposure") are one step named after the slider.
@@ -86,43 +85,93 @@ extension LibraryCatalog {
         return ids.isEmpty ? [] : items.filter { ids.contains($0.id) }.map(\.develop)
     }
 
+    /// One field across the targets (the spine's helper): shared, mixed, or nil with none.
+    private func developShared<V: Hashable & Sendable>(_ field: (DevelopSettings) -> V) -> MetadataValue<V>? {
+        let values = developTargetSettings.map(field)
+        guard !values.isEmpty else { return nil }
+        return MetadataValue.of(values)
+    }
+
     /// The ids of the photos whose develop settings `step` changed.
     private static func developChanged(_ step: CatalogHistory.Step) -> Set<String> {
         Set(zip(step.before, step.after).filter { $0.develop != $1.develop }.map(\.1.id))
     }
 
-    /// `change` on every target as a step `name` of its own, closed at once
-    /// (an open drag ends first); drops the changed photos' thumbnails and
-    /// returns their ids, none when nothing changed.
-    private mutating func developStep(_ name: String, _ change: (DevelopSettings) -> DevelopSettings) -> Set<String> {
+    /// `change` on `ids` (every target by default) as ONE step `name` of its
+    /// own, closed at once (an open drag ends first); drops the changed photos'
+    /// thumbnails and returns their ids, none when nothing changed.
+    private mutating func developStep(
+        _ name: String, ids: Set<String>? = nil, _ change: (DevelopSettings) -> DevelopSettings
+    ) -> Set<String> {
         endDevelopDrag()
         let steps = history.undo.count
-        recordEdit(name, ids: developTargets) { $0.develop = change($0.develop) }
+        recordEdit(name, ids: ids ?? developTargets) { $0.develop = change($0.develop) }
         return history.undo.count > steps ? endDevelopDrag() : []
     }
 
     /// The loupe photo's settings, else the single selected photo's; nothing with 0 or several.
-    public mutating func copySettings() {}
+    /// Not an edit: no undo step and no save.
+    public mutating func copySettings() {
+        let ids = developTargets
+        guard ids.count == 1, let source = items.first(where: { ids.contains($0.id) }) else { return }
+        copiedSettings = source.develop
+    }
     /// Copied settings and at least one target.
-    public var canPasteSettings: Bool { false }
+    public var canPasteSettings: Bool { copiedSettings != nil && !developTargets.isEmpty }
     /// "Exposure +1.00, Contrast 13, Curve": the copied settings off neutral, in panel order.
-    public var copiedSummary: String? { nil }
+    public var copiedSummary: String? {
+        guard let copied = copiedSettings else { return nil }
+        var parts = DevelopSlider.allCases.filter { copied.value($0) != 0 }
+            .map { "\($0.rawValue) " + Self.developText(copied.value($0), $0) }
+        if !copied.curve.isIdentity { parts.append("Curve") }
+        if copied.levels != .neutral { parts.append("Levels") }
+        return parts.isEmpty ? "No adjustments" : parts.joined(separator: ", ")
+    }
 
     /// The copied adjustments onto every target, keeping each one's crop: one step "Paste Settings".
-    @discardableResult public mutating func pasteSettings() -> Set<String> { [] }
+    @discardableResult public mutating func pasteSettings() -> Set<String> {
+        let ids = developTargets
+        guard let copied = copiedSettings, !ids.isEmpty else { return [] }
+        return developStep("Paste Settings", ids: ids) { $0.pastingAdjustments(from: copied) }
+    }
 
     /// In the grid with 2 or more selected: the first selected photo in the shown order.
-    public var syncSource: PhotoItem? { nil }
+    public var syncSource: PhotoItem? {
+        guard mode == .grid, selection.count >= 2, let id = order.first(where: selection.contains) else { return nil }
+        return items.first { $0.id == id }
+    }
     /// "Sync from IMG_0001".
-    public var syncTitle: String? { nil }
+    public var syncTitle: String? { syncSource.map { "Sync from " + $0.name } }
 
     /// The source's adjustments onto the rest of the selection, crops kept: one step "Sync Settings".
-    @discardableResult public mutating func syncSettings() -> Set<String> { [] }
+    @discardableResult public mutating func syncSettings() -> Set<String> {
+        guard let source = syncSource else { return [] }
+        return developStep("Sync Settings", ids: selection.subtracting([source.id])) {
+            $0.pastingAdjustments(from: source.develop)
+        }
+    }
 
     /// The loupe's render error, shown in the panel.
-    public var developError: String? { nil }
+    public var developError: String? { loupeError }
     /// "Shadows clipped", "Highlights clipped" while any pixel clips.
-    public var histogramClips: [String] { [] }
+    public var histogramClips: [String] {
+        let bins = loupeRender?.histogram ?? .empty
+        return (bins.shadowClipped > 0 ? ["Shadows clipped"] : []) + (bins.highlightClipped > 0 ? ["Highlights clipped"] : [])
+    }
     /// The loupe histogram's three channels summed per bin, scaled 0...1, for the curve's backdrop.
-    public var curveHistogram: [Double] { [] }
+    public var curveHistogram: [Double] {
+        let bins = loupeRender?.histogram ?? .empty
+        let sums = zip(zip(bins.red, bins.green), bins.blue).map { $0.0 + $0.1 + $1 }
+        let tallest = Double(sums.max() ?? 0)
+        return sums.map { tallest > 0 ? Double($0) / tallest : 0 }
+    }
+
+    /// Exposure as "+1.00" (signed, two places); the rest as whole numbers.
+    private static func developText(_ value: Double, _ slider: DevelopSlider) -> String {
+        guard slider == .exposure else { return String(Int(value.rounded())) }
+        let hundredths = Int((abs(value) * 100).rounded())
+        let fraction = String(hundredths % 100)
+        let sign = value > 0 ? "+" : value < 0 ? "-" : ""
+        return sign + "\(hundredths / 100)." + String(repeating: "0", count: 2 - fraction.count) + fraction
+    }
 }
