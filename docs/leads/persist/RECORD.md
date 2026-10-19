@@ -4,7 +4,7 @@ Issue: #1511 · Packet: docs/blueprints/library/features/persist.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: round 2 (last) fully merged. Supervisor: please start a scoped library run on dev at or after 870d885 (current dev 17dc84c works); 39183953361 on 124fe38c lacks #3053. Green: contact sheets on #1513 #1511 #1506. Red: gaps.
+Next: round 2 (last) merged; waiting on scoped library 39189402196 (17dc84c). Green: contact sheets on #1513 #1511 #1506. Red: gaps.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
