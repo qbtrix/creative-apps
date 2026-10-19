@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-19T17:16Z	merged	CL-11 #3281 8f405311
 2026-10-19T17:40Z	heartbeat	full run 39294573974 (contains 8f405311) still running
 2026-10-19T17:45Z	check	full run 39294573974 cancelled; waiting on 39296061014 (1b33afbb) or scoped suite 39292755765 (8f405311)
+2026-10-19T18:00Z	heartbeat	dev runs 39296061014 pending, 39292755765 queued (runners congested)
