@@ -38,8 +38,9 @@
 // The toolbar's centered (`.principal`) slot holds the app switcher
 // (AppSwitcher.swift) with no shared toolbar glass behind it: the environment's
 // `suiteSwitcher`, or AppSwitcherState.placeholder for this process's name.
-// The window measures its width (onGeometryChange) and gives the row
-// AppSwitcher.toolbarFit for it and its actions' titles (drawn icon only), so
+// The window measures its width and its sidebar and inspector columns
+// (onGeometryChange) and gives the row AppSwitcher.toolbarFit for them and its
+// actions' titles (drawn icon only), so no item sits over a shown inspector and
 // the row leaves the sidebar toggle, document actions, title, actions and
 // inspector toggle their room and none of them goes into the toolbar's
 // overflow; in a crowded toolbar the row narrows to its compact step, and
@@ -69,6 +70,9 @@ public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     @State private var columns: NavigationSplitViewVisibility = .all
     /// The window's width, for the switcher's spacing; 0 until measured.
     @State private var windowWidth: CGFloat = 0
+    /// The sidebar and inspector columns' measured widths, for the switcher; 0 until measured.
+    @State private var sidebarWidth: CGFloat = 0
+    @State private var inspectorWidthMeasured: CGFloat = 0
     /// The app switcher to show; nil shows the placeholder.
     @Environment(\.suiteSwitcher) private var switcher
 }
@@ -226,6 +230,18 @@ extension SuiteWindow {
         return (width, width, max(width, SuiteSize.inspectorWidth.max))
     }
 
+    /// The sidebar the switcher's row starts after: 0 when hidden, nil (its ideal) until measured.
+    private var switcherSidebarWidth: CGFloat? {
+        if columns == .detailOnly { return 0 }
+        return sidebarWidth > 0 ? sidebarWidth : nil
+    }
+
+    /// The inspector the switcher's row ends before: 0 when hidden, and never
+    /// under the column's ideal, so a narrow inspector content isn't counted short.
+    private var switcherInspectorWidth: CGFloat {
+        showsInspector ? max(inspectorWidthMeasured, inspectorColumn.ideal) : 0
+    }
+
     private var splitView: some View {
         NavigationSplitView(columnVisibility: $columns) {
             sidebar
@@ -233,6 +249,7 @@ extension SuiteWindow {
                 .environment(\.sidebarExpansion, sidebarExpansion)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("suite.sidebar")
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { sidebarWidth = $0 }
                 // The system's sidebar toggle has no accessibility identifier and can't be given one
                 // (the app audit, #262); the toolbar's own `suite.sidebarToggle` replaces it.
                 .toolbar(removing: .sidebarToggle)
@@ -256,6 +273,7 @@ extension SuiteWindow {
                         .frame(maxHeight: .infinity, alignment: .top)
                         .accessibilityElement(children: .contain)
                         .accessibilityIdentifier("suite.inspector")
+                        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { inspectorWidthMeasured = $0 }
                         .tint(SuiteColor.accent)
                         .inspectorColumnWidth(
                             min: inspectorColumn.min, ideal: inspectorColumn.ideal, max: inspectorColumn.max)
@@ -282,10 +300,11 @@ extension SuiteWindow {
                 let state = switcher ?? AppSwitcherState.placeholder(processName: ProcessInfo.processInfo.processName)
                 // The model adds the window's own sidebar and inspector toggles. Below every
                 // step the row takes AppSwitcher.compactSpacing, and when even that crowds
-                // the actions, the current app's item alone.
+                // the actions or reaches the shown inspector, the current app's item alone (#3134).
                 let fit = AppSwitcher.toolbarFit(
                     windowWidth: windowWidth, itemCount: state.items.count,
-                    documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) })
+                    documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) },
+                    sidebarWidth: switcherSidebarWidth, inspectorWidth: switcherInspectorWidth)
                 AppSwitcher(
                     items: state.shownItems(everyItem: fit.showsEveryItem), current: state.current,
                     spacing: fit.spacing, onSelect: state.onSelect)

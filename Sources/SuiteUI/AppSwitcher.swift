@@ -146,10 +146,13 @@ public struct AppSwitcher: View {
     }
 
     /// Where the row's leading edge can be at the earliest: the sidebar column
-    /// (or the window's controls, if wider), the window's sidebar toggle,
+    /// (`sidebarWidth` as measured, 0 when hidden, nil for its ideal width; or
+    /// the window's controls, if wider), the window's sidebar toggle,
     /// `documentActions` and the title's slot.
-    nonisolated public static func toolbarLeading(documentActions: [SwitcherToolbarItem]) -> CGFloat {
-        max(SuiteSize.sidebarWidth.ideal, windowControlsRoom) + toolbarButtonRoom
+    nonisolated public static func toolbarLeading(
+        documentActions: [SwitcherToolbarItem], sidebarWidth: CGFloat? = nil
+    ) -> CGFloat {
+        max(sidebarWidth ?? SuiteSize.sidebarWidth.ideal, windowControlsRoom) + toolbarButtonRoom
             + documentActions.reduce(0) { $0 + toolbarRoom($1) } + titleRoom
     }
 
@@ -157,6 +160,18 @@ public struct AppSwitcher: View {
     /// toggle, their clearance and the safety margin.
     nonisolated public static func toolbarTrailing(actions: [SwitcherToolbarItem]) -> CGFloat {
         actions.reduce(0) { $0 + toolbarRoom($1) } + toolbarButtonRoom + trailingClearance + safetyMargin
+    }
+
+    /// Where the row must end at the latest: before the trailing room and,
+    /// with the inspector shown (`inspectorWidth` > 0), the trailing clearance
+    /// and safety margin before the inspector column's edge, so no item sits
+    /// over the inspector (Library at 880 pt, #3134).
+    nonisolated public static func toolbarLimit(
+        windowWidth: CGFloat, actions: [SwitcherToolbarItem], inspectorWidth: CGFloat = 0
+    ) -> CGFloat {
+        let trailing = windowWidth - toolbarTrailing(actions: actions)
+        guard inspectorWidth > 0 else { return trailing }
+        return min(trailing, windowWidth - inspectorWidth - trailingClearance - safetyMargin)
     }
 
     /// Where the row of `itemCount` items at `spacing` ends in a window
@@ -171,17 +186,19 @@ public struct AppSwitcher: View {
     }
 
     /// How the row fits a toolbar: the widest of `spacingSteps` whose row of
-    /// `itemCount` items ends before the trailing room (`rowEnd` ≤ windowWidth
-    /// − `toolbarTrailing`); else `compactSpacing` with every item if that
+    /// `itemCount` items ends in time (`rowEnd` ≤ `toolbarLimit`, which counts
+    /// a shown inspector, from a leading end that counts the measured
+    /// sidebar); else `compactSpacing` with every item if that
     /// fits; else the current item alone at `compactSpacing`, so the switcher
     /// gives way and no toolbar action goes into the overflow (the editor
     /// gallery at 900 pt, run 38981651490). Before the window is measured
     /// (width 0) nothing fits, so it is the current item alone too.
     nonisolated public static func toolbarFit(
-        windowWidth: CGFloat, itemCount: Int, documentActions: [SwitcherToolbarItem], actions: [SwitcherToolbarItem]
+        windowWidth: CGFloat, itemCount: Int, documentActions: [SwitcherToolbarItem], actions: [SwitcherToolbarItem],
+        sidebarWidth: CGFloat? = nil, inspectorWidth: CGFloat = 0
     ) -> SwitcherToolbarFit {
-        let leading = toolbarLeading(documentActions: documentActions)
-        let limit = windowWidth - toolbarTrailing(actions: actions)
+        let leading = toolbarLeading(documentActions: documentActions, sidebarWidth: sidebarWidth)
+        let limit = toolbarLimit(windowWidth: windowWidth, actions: actions, inspectorWidth: inspectorWidth)
         let fits = { (spacing: CGFloat) in
             rowEnd(windowWidth: windowWidth, spacing: spacing, itemCount: itemCount, leading: leading) <= limit
         }

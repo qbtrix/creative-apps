@@ -1,0 +1,5 @@
+[
+{"label":"a shown inspector no longer limits the row","file":"Sources/SuiteUI/AppSwitcher.swift","find":"guard inspectorWidth > 0 else { return trailing }","replace":"guard inspectorWidth < 0 else { return trailing }","tests":"AppSwitcherTests"},
+{"label":"the row's end ignores the clearance before the inspector","file":"Sources/SuiteUI/AppSwitcher.swift","find":"windowWidth - inspectorWidth - trailingClearance - safetyMargin)","replace":"windowWidth - inspectorWidth)","tests":"AppSwitcherTests"},
+{"label":"the leading end ignores the measured sidebar","file":"Sources/SuiteUI/AppSwitcher.swift","find":"max(sidebarWidth ?? SuiteSize.sidebarWidth.ideal, windowControlsRoom)","replace":"max(SuiteSize.sidebarWidth.ideal, windowControlsRoom)","tests":"AppSwitcherTests"}
+]

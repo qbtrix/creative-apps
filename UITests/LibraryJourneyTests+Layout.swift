@@ -5,7 +5,8 @@
 // 1440 × 900 and 1920 × 1080 with `-SuiteWindowSize <w>x<h>`, as Halo's
 // testLayoutAtWidths does, and checks only what lies on the runner's display.
 // Each size: the status row (`library.status`, its pills `library.status.*`)
-// reads "24 photos" and "160 pt" on one top edge; the grid's visible cells
+// reads "24 photos" and "160 pt" on one top edge, and each switcher item
+// (`suite.switcher.*`) sits between the sidebar and the inspector; the grid's visible cells
 // (`library.grid.cell.<id>`, else buttons whose label holds `IMG_`) line up
 // in rows and columns with equal gaps; Sort By Name, then a click and a
 // Shift-click select five; the inspector's Rating, Flag and Label rows line
@@ -65,6 +66,8 @@ final class LibraryLayoutJourneyTests: XCTestCase {
                 XCTAssert(status.frame.insetBy(dx: -1, dy: -1).contains(pill.frame), "\(name) \(pill.frame) is outside the row at \(width)")
             }
 
+            expectSwitcherClear(library, in: window, width: width)
+
             // 2. The visible cells line up in rows and columns with equal gaps; at least 2 columns at 880.
             let cells = cellFrames(library)
             XCTAssertFalse(cells.isEmpty, "no grid cell on screen at \(width)")
@@ -117,6 +120,25 @@ final class LibraryLayoutJourneyTests: XCTestCase {
     }
 
     // MARK: - Steps
+
+    /// #3134: each hittable `suite.switcher.*` item lies inside the window, ends
+    /// before the inspector's leading edge and starts after the sidebar's trailing edge.
+    @MainActor private func expectSwitcherClear(_ library: Journey, in window: XCUIElement, width: Int) {
+        let items = library.app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH 'suite.switcher.'")).allElementsBoundByIndex
+        XCTAssertFalse(items.isEmpty, "no suite.switcher item at \(width)")
+        let inspector = library.element("suite.inspector"), sidebar = library.element("suite.sidebar")
+        for item in items where item.isHittable {
+            let frame = item.frame
+            XCTAssert(window.frame.insetBy(dx: -1, dy: -1).contains(frame), "\(item.identifier) \(frame) is outside the window at \(width)")
+            if inspector.exists, !inspector.frame.isEmpty {
+                XCTAssertLessThanOrEqual(frame.maxX, inspector.frame.minX, "\(item.identifier) \(frame) runs into the inspector at \(width)")
+            }
+            if sidebar.exists, !sidebar.frame.isEmpty {
+                XCTAssertGreaterThanOrEqual(frame.minX, sidebar.frame.maxX, "\(item.identifier) \(frame) runs into the sidebar at \(width)")
+            }
+        }
+    }
 
     /// Rows share a top edge, columns a left edge, and adjacent columns' gaps are equal.
     @MainActor private func expectGrid(_ cells: [CGRect], width: Int) {

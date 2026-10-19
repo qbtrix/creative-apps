@@ -151,6 +151,40 @@ import Testing
         #expect(fit("design", 1600) == every(80))
     }
 
+    @Test func aShownInspectorTakesTheRowsRoom() {
+        // #3134: Library at 880 x 560, sidebar 205 and inspector 237 as measured: the six-item row at 48 ran
+        // under the inspector (library cut at its edge, halo over its header). The current item alone fits.
+        let library = { (width: CGFloat, sidebar: CGFloat?, inspector: CGFloat) in
+            AppSwitcher.toolbarFit(
+                windowWidth: width, itemCount: 6, documentActions: [], actions: [], sidebarWidth: sidebar,
+                inspectorWidth: inspector)
+        }
+        #expect(library(880, 205, 237) == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
+        // Hiding the inspector gives the room back; hiding the sidebar too.
+        #expect(library(880, 205, 0).showsEveryItem)
+        #expect(library(880, 0, 0) == SwitcherToolbarFit(spacing: 64, showsEveryItem: true))
+        // Wider windows keep the row with the inspector shown.
+        #expect(library(1024, nil, 240) == SwitcherToolbarFit(spacing: 48, showsEveryItem: true))
+        #expect(library(1920, nil, 240) == SwitcherToolbarFit(spacing: 80, showsEveryItem: true))
+        // At every width from the minimum to 1920 pt, with each toolbar and the inspector shown, the row's
+        // trailing end stays clear of the inspector column and starts after the sidebar.
+        for name in Self.toolbars.keys.sorted() {
+            let toolbar = Self.toolbars[name] ?? (docs: [], actions: [])
+            for width in stride(from: SuiteSize.windowMinimum.width, through: 1920, by: SuiteSpacing.s) {
+                let chosen = AppSwitcher.toolbarFit(
+                    windowWidth: width, itemCount: 6, documentActions: toolbar.docs.map { SwitcherToolbarItem($0) },
+                    actions: toolbar.actions.map { SwitcherToolbarItem($0) }, sidebarWidth: 205, inspectorWidth: 240)
+                let leading = AppSwitcher.toolbarLeading(
+                    documentActions: toolbar.docs.map { SwitcherToolbarItem($0) }, sidebarWidth: 205)
+                let end = AppSwitcher.rowEnd(
+                    windowWidth: width, spacing: chosen.spacing, itemCount: chosen.showsEveryItem ? 6 : 1,
+                    leading: leading)
+                #expect(leading >= 205, "\(name) at \(width) pt")
+                if chosen.showsEveryItem { #expect(end <= width - 240, "\(name) at \(width) pt: row ends at \(end)") }
+            }
+        }
+    }
+
     @Test func beforeTheWindowIsMeasuredOnlyTheCurrentItemShows() {
         #expect(fit("library", 0) == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
         #expect(
