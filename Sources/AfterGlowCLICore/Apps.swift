@@ -21,12 +21,14 @@ public struct HeadlessApp: Sendable {
     public let name: String; public let openExtensions: [String]; public let exportFormats: [String]
     private let describe: @Sendable () -> [CommandDescription]
     private let open: @Sendable (Data, String) throws -> HeadlessSession
+    private let make: @Sendable (JSONValue) throws -> HeadlessSession
 
     /// The app whose document is `type`.
     public init<D: HeadlessDocument>(_ type: D.Type) {
         (name, openExtensions, exportFormats) = (D.app, D.openExtensions, D.exportFormats)
         describe = { D.catalog.describeAll() }
         open = { data, name in HeadlessSession(app: D.app, box: TypedSession(document: try D.open(data, name: name))) }
+        make = { options in HeadlessSession(app: D.app, box: TypedSession(document: try D.new(options))) }
     }
 
     /// Every command the app runs, by id.
@@ -34,6 +36,8 @@ public struct HeadlessApp: Sendable {
 
     /// Opens a file's bytes as this app's document; `name` is its file name. Throws what the app's `open` throws.
     public func session(open data: Data, name: String) throws -> HeadlessSession { try open(data, name) }
+    /// A new document of this app from `options`. Throws what the app's `new` throws.
+    public func session(new options: JSONValue) throws -> HeadlessSession { try make(options) }
 }
 
 /// One open document of any app: run commands on it, then save or export it.
@@ -44,6 +48,8 @@ public struct HeadlessSession: Sendable {
 
     init(app: String, box: any SessionBox) { (self.app, self.box) = (app, box) }
 
+    /// Whether the command `id` can run on the document now, and if not the app's why-not.
+    public func availability(_ id: String) -> Availability { box.availability(id) }
     /// Runs one step on the document through the app's catalog.
     public mutating func run(_ step: CommandEnvelope) throws(CatalogError) -> CommandOutcome { try box.run(step) }
     /// Runs `steps` in order, stopping at the first refusal; `atomic` puts the document back when one stops it.
@@ -58,6 +64,7 @@ public struct HeadlessSession: Sendable {
 
 /// The session's document behind its type.
 protocol SessionBox: Sendable {
+    func availability(_ id: String) -> Availability
     mutating func run(_ step: CommandEnvelope) throws(CatalogError) -> CommandOutcome
     mutating func runBatch(_ steps: [CommandEnvelope], atomic: Bool) -> BatchReport
     func save() throws -> Data
@@ -68,6 +75,7 @@ protocol SessionBox: Sendable {
 /// A session's document of a known type, run through that type's catalog.
 struct TypedSession<D: HeadlessDocument>: SessionBox {
     var document: D
+    func availability(_ id: String) -> Availability { D.catalog.availability(id, on: document) }
     mutating func run(_ step: CommandEnvelope) throws(CatalogError) -> CommandOutcome { try D.catalog.run(step, on: &document) }
     mutating func runBatch(_ steps: [CommandEnvelope], atomic: Bool) -> BatchReport { D.catalog.runBatch(steps, on: &document, atomic: atomic) }
     func save() throws -> Data { try document.save() }
