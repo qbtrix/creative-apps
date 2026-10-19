@@ -1,10 +1,10 @@
 # adopt-kernel-layers lead record
 
 Issue: #1936 · Packet: docs/blueprints/suiteui/features/adopt-kernel-layers.md
-Run: act-1a152763cf6-04ka (resume; earlier runs act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/line-lead-playbook-ce1x23 · Resumed: 2026-10-19
-Stage: 3 wave 2 (AL-flare panel blocked) + wave 1 (AL-photo)
-Base: bede834 (origin/dev, 2026-10-19); brief main cc14022edd80d783a8488e464b15f5766d8dda60 verified
-Next: #3216 (AL-f3) merged as fa8c815 at 11:33Z; scoped flare run 39246056734 queued on it: once green and main holds fa8c815, run critic panel on its screens, then Belt-Slice-Done: AL-flare. #3217 (AL-h3), #3218 (AL-p3) still wait on lane macOS builds.
+Run: act-1a154b13dec-71tm (resume; earlier runs act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-suiteui-lead-gvq11j · Resumed: 2026-10-19
+Stage: 0 (blocked on hand-offs)
+Base: 6e70826 (brief main 6e70826be59e092e59269605cfdfbce93c4a2bbe verified; PRs target dev)
+Next: AL-design: AL-d1/AL-d2 edit DesignNode.swift, owned by design-seams-2 (parked out of beta); AL-d3 waits on layers-panel (LP-b merged, awaiting its run) and shell-parity. #2880 already moved Design ordering onto LayerTree. Supervisor asked on #1936.
 
 Line lead for #1938, #1937 and #1936 (contract rule 19, run act-1a14dfbdefe-il38);
 this record is the adopt-kernel-layers part. The first run led it with #1935 and #1934. This run's brief names `main` at
@@ -66,6 +66,8 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - #3198 merged as fa1fb1d6 at 09:32Z (macOS run 39223178335 success); launched wave 5 with the wider file lists and the .app naming / options / decorations.
 - Wave 5 contract check: the proxy's footer was flagged again (a false positive; the lane strips it). The baseline edits in #3217/#3218 only lower ratchets (canonical-ui, view-statics) after a deleted view, and #3218's journey edits test the swap itself, so both are accepted. Sizes: 206/353/398 lines, 6/7/11 files.
 - 11:43Z: #3216 merged in a 5-PR lane batch.
+
+- 2026-10-19T15:09Z (act-1a154b13dec-71tm) AL-design: design-seams-2 (#1526) is parked out of the beta cut, so the DesignNode.swift hand-off can't clear before beta; supervisor asked on #1936.
 
 ## Open
 - 2026-10-18T13:45Z: ninth Belt nudge (after a worker restart); continued from stage 3.

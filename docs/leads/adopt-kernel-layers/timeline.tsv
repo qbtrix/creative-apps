@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-19T10:47:31Z	heartbeat	check	-	#3216 #3217 #3218 wait on lane macOS builds (repo has 25 queued runs)
 2026-10-19T11:16:12Z	heartbeat	check	-	#3216 #3217 #3218 still wait on lane macOS builds (29 queued)
 2026-10-19T11:44:04Z	heartbeat	merged	#3216	AL-f3 merged fa8c815; #3217 #3218 waiting on macOS build
+2026-10-19T15:09Z	lead	resume	act-1a154b13dec-71tm	base 6e70826; hand-offs checked
