@@ -83,3 +83,5 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 2026-10-19T16:07Z DV-9 #3221 lane fix: needs-fix from Linux run 39268784025 (CommandPathTests, unbaselined row Reset menu). Merged origin/dev, baselined the site (needs-ui #3290 for a slider-row reset), scripts/ci --changed PASS, head 3b9b5ac0, Head line moved and Belt-Lead set to this run. DV-13 relaunched as wf_2a0949c2-75d on base 6e70826b.
 - 2026-10-19T16:14Z DV-13 draft #3295 (1e2be5b7) stacked on #3250. Footer stripped. Contract check flags (size 502, DV-9/DV-10 files) are the stack and clear as #3221 and #3250 merge. Order: #3221 -> mark #3250 ready -> after it merges, merge dev into DV-13, move Head, mark ready.
 - 2026-10-19T16:35Z check: dev still b3011ab9. DV-9 #3221 macOS build 39283815084 green on 3b9b5ac0, needs-fix dropped; lane merges next sweep. #3250 and #3295 drafts wait on it.
+
+- 2026-10-19T16:57Z heartbeat: dev at ed4d55fd; none of this lead's PRs merged yet; waiting on the lane sweep.
