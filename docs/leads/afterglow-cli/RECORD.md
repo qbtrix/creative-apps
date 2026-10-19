@@ -44,3 +44,10 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ## Open
 - command-catalog #2996 CC-a: CC-1 merged (#3056); CC-2 open as #3074. CL-2 needs CC-2's five <X>Headless types and the fake for `Apps.all`, so it holds CL-2, every slice after CL-a, and all of afterglow-mcp.
+
+## CL-3 handoff notes (PR #3118, head 8f1f4af)
+- CLIArgsTests disabled "waits on CL-4"; CLIFileSafetyTests disabled "waits on CL-5" (needs a liveIO() helper filled by CL-5).
+- Output shapes fixed by tests: error kinds usage/data/unavailable/failed/exists/io; reply keys commands, command, summary, output, outputs, undoStep; unavailable message is the app's own text.
+- CL-4 must route over Apps.all + [Apps.fake] (tests call CLI.run(_:io:)); command-editing tests also need CC-7 (catalog run body).
+- CL-4 enabling breaks CLIShapeTests.everyOtherFormIsAStubThatNamesItsSlice (list-apps, --help, --version --json no longer stubs): CL-4 must update that test.
+- Fake catalog has 8 commands (incl. edit.undo/edit.redo), not 6.
