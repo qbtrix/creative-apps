@@ -133,3 +133,4 @@ utc	stage	event	ref	note
 2026-10-19T01:11Z	heartbeat	r-b2 shipped: PR #3068 fixes #3042, #3044 (DW-c)
 2026-10-19T01:30Z	heartbeat	#3068 macOS build green; #3064 #3067 builds queued
 2026-10-19T01:50Z	heartbeat	#3064 8632744b, #3068 236400ab, #3067 ed0fed9e merged
+2026-10-19T02:11Z	heartbeat	full CI on ed0fed9e was cancelled for a newer one
