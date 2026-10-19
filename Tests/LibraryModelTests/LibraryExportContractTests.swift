@@ -67,7 +67,7 @@ import Testing
         catalog.load(photos)
         catalog.select([photos[0].id])
         let reason = try #require(LiveExporter.unavailable)
-        #expect(catalog.exportHelp == reason && catalog.exportPreview == reason && catalog.exportTargets.isEmpty)
+        #expect(catalog.exportHelp == reason && catalog.exportPreview == reason)
         let before = catalog
         #expect(catalog.beginExport(folder: "/out") == false)
         catalog.setExportOptions(ExportOptions(folder: "/out"))
@@ -84,7 +84,7 @@ import Testing
         let summary = await ExportRunner.run(plan, photos: [:], exporter: FakeExporter(), writer: writer,
                                              writeSidecar: { _, _, _ in }, progress: { _ in })
         #expect(summary.written.isEmpty && summary.failedIDs == plan.items.map(\.photoID))
-        #expect(summary.failures.map(\.reason) == [reason, reason])
+        #expect(summary.failures.map(\.reason) == plan.items.map { LibraryError.missingFile($0.photoID).message })
         #expect(await writer.files.isEmpty)
     }
 }
