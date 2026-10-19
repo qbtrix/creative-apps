@@ -173,6 +173,50 @@ import Testing
         #expect(kind.caption == "Pixel · 100%" && kind.thumbnail == nil && kind.help == nil)
     }
 
+    /// A flat leaf row of `tree200`, named Sky.
+    private func flatRow() -> LayerRow {
+        var row = KernelFixtures.tree200.rows(expanded: [])[0]
+        row.id = "7"
+        row.name = "Sky"
+        row.depth = 0
+        row.holdsChildren = false
+        return row
+    }
+
+    /// `row` drawn alone with `options` and `decoration`, at its own size.
+    private func size(_ row: LayerRow, options: LayerTreeOptions = .init(),
+                      decoration: LayerRowDecoration? = nil) -> CGSize {
+        NSHostingView(rootView: LayerTreeRow(
+            row: row, lit: false, selected: false, naming: .layers, options: options, decoration: decoration,
+            field: nil, onAction: { _ in }, onSelect: nil, onRename: nil)).fittingSize
+    }
+
+    /// Every row is one pointer-sized height: a caption under the name doesn't
+    /// make its row jump taller than its neighbours (Photo's blend line).
+    @Test func rowsShareOneHeight() {
+        let plain = size(flatRow()).height
+        let captioned = size(flatRow(), decoration: LayerRowDecoration(symbol: "photo", caption: "Multiply 60%")).height
+        #expect(plain >= SuiteSize.studioRow, "plain row is \(plain) pt")
+        #expect(abs(captioned - plain) <= 4, "caption row \(captioned) pt against plain \(plain) pt")
+    }
+
+    /// A list that never nests (Photo) leaves out the empty disclosure column.
+    @Test func flatListHasNoDisclosureColumn() {
+        #expect(LayerTreeOptions().nests)
+        let nested = size(flatRow()).width
+        let flat = size(flatRow(), options: LayerTreeOptions(nests: false)).width
+        #expect(nested - flat >= SuiteSize.iconButtonHit, "flat \(flat) pt against nested \(nested) pt")
+    }
+
+    /// A row under the pointer shows it with fill and outline (fill alone is
+    /// too faint in Dark); selection and a drop target win over hover.
+    @Test func hoverLook() {
+        #expect(LayerRowLook.resolve(selected: false, lit: false, hovering: false) == .rest)
+        #expect(LayerRowLook.resolve(selected: false, lit: false, hovering: true) == .hover)
+        #expect(LayerRowLook.resolve(selected: true, lit: false, hovering: true) == .selected)
+        #expect(LayerRowLook.resolve(selected: true, lit: true, hovering: true) == .dropTarget)
+    }
+
     /// A legacy scroller's page area is a `button ''` to the app audit, so the
     /// list hides its scroll indicators (#2742; Design's list did the same, #2561).
     @Test func listShowsNoScroller() throws {

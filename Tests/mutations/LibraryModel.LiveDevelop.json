@@ -26,5 +26,19 @@
     "find": "let inWhite = s.whites > 0 ? 1 - 0.25 * s.whites / 100 : 1",
     "replace": "let inWhite = s.whites > 0 ? 1 + 0.25 * s.whites / 100 : 1",
     "tests": "LibraryDevelopRenderTests"
+  },
+  {
+    "label": "the turn is skipped: a straightened crop cuts the upright pixels",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "let turned = crop.angle == 0 ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)",
+    "replace": "let turned = true ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)",
+    "tests": "LibraryCropRenderTests"
+  },
+  {
+    "label": "the frame is taken from the buffer's sides swapped",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "photo: PixelSize(width: buffer.width, height: buffer.height))",
+    "replace": "photo: PixelSize(width: buffer.height, height: buffer.width))",
+    "tests": "LibraryCropRenderTests"
   }
 ]

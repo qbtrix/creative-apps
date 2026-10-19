@@ -1,7 +1,7 @@
 // CLIShapeTests.swift: LJ0's first half (afterglow-cli CL-1). `afterglow
 // --version` prints exactly one JSON object with sorted keys and exits 0;
 // since CL-4 the other single-shot forms answer (CLIArgsTests), since CL-7
-// `run` does too (BatchTests), and `mcp` serves since afterglow-mcp MC-4
+// `run` does too (BatchTests), and since afterglow-mcp MC-4 `mcp` serves
 // (MCPProtocolTests). Runs
 // through CLI.run, the same entry main.swift calls, so both targets build
 // on Linux and macOS.
@@ -35,7 +35,6 @@ struct CLIShapeTests {
         #expect(Self.object(run.out.first ?? "")?["version"] == .string(CLI.version))
         #expect(!CLI.version.isEmpty)
     }
-
 }
 
 /// The scalar JSON this suite reads back (CL-2 brings SuiteKernel's JSONValue).

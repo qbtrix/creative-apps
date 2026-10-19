@@ -1,6 +1,6 @@
 // CLIStubTests.swift: LJ0's second half (afterglow-cli CL-2). The app
 // registry names the five apps in order and adds the fake only when asked;
-// every entry point is built now (CL-7 run, CL-9 jobs, MC-3 mcp), so no stub test is left;
+// every entry point is real (CL-7 ScriptRunner, CL-9 RealJobs, MC-4 MCPServer);
 // FakeIO round trips a file and never overwrites unless told to.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -31,7 +31,7 @@ struct CLIStubTests {
     }
 
     @Test func everyAppStubRefusesToOpenNamingItsSlice() {
-        for app in Apps.all {
+        for app in Apps.all where app.describeAll().isEmpty { // an app whose slice filled its catalog opens for real
             #expect(throws: CatalogError.notBuilt(id: "open", feature: "adopt-command-catalog AC-\(app.name)")) {
                 try app.session(open: Data(), name: "x")
             }

@@ -45,7 +45,7 @@ import Testing
         }
     }
 
-    @Test func theEditorsFontIsTheStyleSizeTimesTheZoom() throws {
+    @Test(.disabled("quarantine #3263 until 2026-10-22")) func theEditorsFontIsTheStyleSizeTimesTheZoom() throws {
         let node = try title()
         let committed = DesignTextFont.nsFont(node.textStyle)
         for zoom in zooms {

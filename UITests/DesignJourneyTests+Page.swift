@@ -8,9 +8,8 @@
 // It shoots the canvas, where Desktop's part past 800 still shows, dimmed (the
 // shot is attached; the pixels are CB-9's snapshot), then clicks Undo and
 // finds Width back at 1440. Every step uses the mouse on visible controls but
-// the typed number. Written before its code (lead.md, contract rule 13): the
-// fixture argument arrives with design-window and the fields with CB-9, which
-// turns it on. A ScrubField reads its number as its value, spoken with its
+// the typed number. Written before its code (lead.md, contract rule 13); the
+// fields arrived with CB-9. A ScrubField reads its number as its value, spoken with its
 // unit, and a plain Text its words as its value, so both are read by label or value.
 import XCTest
 
@@ -19,11 +18,10 @@ final class DesignPageJourneyTests: XCTestCase {
 
     /// CB-c: Width and Height in the inspector, one undo step, Desktop dimmed past the page.
     @MainActor func testPageSizeAndPastThePage() throws {
-        throw XCTSkip("waits on CB-9")
         try walkPageSize()
     }
 
-    /// The journey itself, which CB-9 runs once it drops the skip above.
+    /// The journey itself.
     @MainActor private func walkPageSize() throws {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
