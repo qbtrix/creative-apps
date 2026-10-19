@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 2026-10-19T12:55Z	run act-1a1543fe40d-7l1y start	DV-9 #3221 build green; DV-d, DV-f remain
 2026-10-19T14:11Z	3	heartbeat	-	resumed after container restart; checking #3221 #3250
 2026-10-19T14:23Z	check	#3221 waiting on lane
+2026-10-19T15:35Z	3	heartbeat	#3221	resumed after restart; waiting on lane
