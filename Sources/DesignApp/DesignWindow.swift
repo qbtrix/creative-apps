@@ -58,7 +58,7 @@ struct DesignWindow: View {
     @State private var fitting = false
     /// The status line's message ("Saved sample.design"); it goes at the next edit.
     @State private var note: String?
-    @State private var problem: String?
+    @State private var problem: DesignFileProblem?
     @State private var started = false
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
@@ -104,8 +104,14 @@ struct DesignWindow: View {
             fit()
         }
         .onChange(of: model.pages) { note = nil }
-        .alert(problem ?? "", isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
+        .alert(
+            problem?.title ?? "",
+            isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } }),
+            presenting: problem
+        ) { _ in
             Button("OK", role: .cancel) {}
+        } message: { shown in
+            Text(shown.message)
         }
         .task { start() }
         .modifier(DesignClosePrompt(model: model))
@@ -315,7 +321,7 @@ struct DesignWindow: View {
             fitting = true
             fit()
         } catch {
-            problem = "\(url.lastPathComponent) can't be opened. \(Self.reason(error))"
+            problem = .opening(url.lastPathComponent, Self.reason(error))
         }
     }
 
@@ -344,7 +350,7 @@ struct DesignWindow: View {
             model.didSave(to: url)
             note = "Saved \(url.lastPathComponent)"
         } catch {
-            problem = "\(url.lastPathComponent) can't be saved. \(Self.reason(error))"
+            problem = .saving(url.lastPathComponent, Self.reason(error))
         }
     }
 
