@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-19T01:43:54Z	merged	round 2 merged: #3053 (870d885) and #3054 (ff4f14a), both on dev (head ed0fed9). Queued scoped library 39183953361 is on 124fe38c, before #3053
 2026-10-19T02:06:25Z	watch	no scoped library run on a SHA with #3053 yet; 39183953361 (124fe38c, has #3054 only) in progress
 2026-10-19T02:28:28Z	watch	39183953361 (124fe38c, #3054 only): scroll window bodies 0/1 (was 0 and drifting), selection 10; J2 still red (no #3053), audit identifier 2 unnamed 0, no crashes. Scoped library 39189402196 on 17dc84c (has #3053+#3054) still queued
+2026-10-19T02:50:31Z	watch	02:50 scoped library 39189402196 (17dc84c) still queued 31 min: macOS runners busy with dev CI 39180214762 (since 00:18, likely hung) and scoped suiteui/flare/design/photo ahead of it
