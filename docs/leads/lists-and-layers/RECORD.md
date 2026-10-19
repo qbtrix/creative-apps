@@ -4,7 +4,7 @@ Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a151f5e8ac-m3tp (resumed from act-1a1504abd7d-2wty; line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: waiting on dev CI
 Base: ef6f201f (origin/main)
-Next: wait for scoped suiteui run 39187049656 or full CI 39188162085 on dev (both contain b1383770 #3060 and f191be21 #3061). Post Belt-Contact-Sheet on the first green one.
+Next: wait for scoped suiteui run 39187049656 or full CI 39192266668 on dev (both contain b1383770 #3060 and f191be21 #3061). Post Belt-Contact-Sheet on the first green one.
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
