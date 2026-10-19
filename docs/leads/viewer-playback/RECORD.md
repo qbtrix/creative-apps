@@ -1,10 +1,10 @@
 # viewer-playback lead record
 
 Issue: #1035 · Packet: docs/blueprints/halo/features/viewer-playback.md
-Run: act-1a14c24f6d2-lrkw (line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a1429c87eb-3ecm, resumed 2026-10-16T02:50Z; first run act-1a13ed44a75-delk) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-15T09:05Z
-Stage: done
-Base: 59c435a6e190a84496ac81a2358cf13a8bdb5fcf (origin/main at 2026-10-17T23:16Z; dev e26c99f8)
-Next: nothing. Done: #1685 merged, dev CI runs green (journeys report-only), Belt-Contact-Sheet posted (issuecomment-6226965853). The supervisor drops the H-J13 quarantine entry; SuiteUI fixes #1789.
+Run: act-1a1543fa006-c4p9 (resumed 2026-10-19T13:02Z; earlier act-1a14c24f6d2-lrkw, line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a1429c87eb-3ecm, resumed 2026-10-16T02:50Z; first run act-1a13ed44a75-delk) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-15T09:05Z
+Stage: 3 wave 6 (post-done findings: #1699, #1701, #1703, #1705)
+Base: 6e70826be59e092e59269605cfdfbce93c4a2bbe (origin/dev at 2026-10-19T13:02Z; main 6f9a2b88)
+Next: VP-13 (gap #2512: journeys look tracks up by halo.timeline.name./lane. prefixes) stacked on #2622, which makes timelineIdentifierPrefix public and sets it in HaloTimelineView; then wait for the lane to merge both and a scoped halo run to show H-J2, H-J3, H-J4 and layout passing.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,6 +22,7 @@ Next: nothing. Done: #1685 merged, dev CI runs green (journeys report-only), Bel
 | VP-9 | 4 | HF-1 canvas equals render | HaloViewerFidelityTests | HaloViewerFidelityTests | #1125 | merged |
 | VP-11 | 4 | H-J3 extended | UITests/HaloJourneyTests.swift | H-J3 on dev CI | #1102 | merged |
 | VP-12 | 5 | H-J2, H-J4; feature-done | UITests/HaloJourneyTests+Viewer.swift, +Playback.swift | H-J2, H-J4 on dev CI | #1124 | merged |
+| VP-13 | 6 | gap #2512: every Halo journey finds track names and lanes by the halo.timeline.name./.lane. prefixes; onScreenControlIDs leaves them out (findings #1699, #1701, #1703, #1705) | UITests/HaloJourneyTests*.swift | scoped halo run: H-J2, H-J3, H-J4, layout | – | building |
 
 Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all independent); W2 VP-3, VP-4b, VP-7, VP-8 (all independent); W3 VP-5, VP-6, VP-10 (all independent); W4 VP-9, VP-11 (both independent); W5 VP-12 alone.
 
@@ -42,6 +43,8 @@ Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all indepen
 | 0 | 38731305776 (7f61259) | red: AppSnapshotTests compile error, no journeys ran | n/a | – | build break | #1136 | no (not counted) |
 
 ## Decisions
+- 2026-10-19 relaunch (act-1a1543fa006-c4p9): done stands; the only open work is the 4 CI findings filed after done, all caused by #1789. #2622 (mac finish, Feature: render-out) makes the prefix public and sets it in HaloTimelineView and is in the lane awaiting its macOS build (run 39234951466). Gap #2512 (journey lookups) has no owner since render-out and text-layers stopped, so VP-13 builds it, stacked on #2622 (rule 22). Not a v2 fix round: the 4-round budget is spent; this closes the gap the findings point at.
+- Findings get Refs, not Fixes, in VP-13: a Linux session can't run the journeys, so the lead closes them after a scoped halo run shows them green.
 - The lane refused #1590's first head (UITests/quarantine.json is protected). Its quarantine edit was reverted (head 04ba091) and the supervisor was asked on #1035 to drop the entry.
 - 2026-10-16 restart: the session container restarted and lost about 15 h. #1280 (inspector scroller unnamed) merged at 03:34Z. Run 38841265840 was red on Linux on #851 only (Photo).
 - Supervisor (15:57Z): the done check uses a `scoped: halo` run, not full dev CI; #1296 is out of scope (it's closed anyway, fixed by #1458). Supervisor (18:13Z): CI blocks only on compile and Model tests; journeys report.
