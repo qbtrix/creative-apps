@@ -4,7 +4,10 @@
 // zoom keys itself through CanvasNavigating, so ⌘= walks the live stops and,
 // under -SuiteGalleryFakes, the fake's doubling. A tool drag logs once on its
 // end in document pixels (`drag (0,0)→(100,0) ends 1`); a Space-drag pans and
-// logs nothing. `canvas-pt`'s ruler corner reads "pt" (SJ9). `marks` draws
+// logs nothing. A drag out of a ruler logs its guide on release (`guide
+// horizontal 120`, or `guide horizontal removed` back over the ruler).
+// `canvas-pt`'s ruler corner reads "pt" (SJ9); `canvas-no-rulers` hides the
+// rulers (#995). `marks` draws
 // every canvas mark over one document at 100 % or 400 %: SelectionHandlesEditor
 // (`handle bottomRight`, `keepAspect` with ⇧, the box on end, `rotate 90`),
 // each hit frame's smallest side, the point mark's on-screen size, the
@@ -22,6 +25,7 @@ enum GalleryCanvas {
     @MainActor static let pages: GalleryPages = [
         "canvas": { AnyView(GalleryViewportPage(unit: "px")) },
         "canvas-pt": { AnyView(GalleryViewportPage(unit: "pt")) },
+        "canvas-no-rulers": { AnyView(GalleryViewportPage(unit: "px", showsRulers: false)) },
         "marks": { AnyView(GalleryMarksPage()) },
         "surface": { AnyView(GallerySurfacePage(artboard: CGSize(width: 400, height: 300))) },
         "surface-empty": { AnyView(GallerySurfacePage(artboard: .zero)) },
@@ -86,6 +90,7 @@ private struct GalleryCanvasLogLine: View {
 /// `canvas` and `canvas-pt`: the viewport, its zoom pill and the drag log.
 private struct GalleryViewportPage: View {
     let unit: String
+    var showsRulers = true
     @Environment(\.galleryRequest) private var request
     @State private var zoom = 1.0
     @State private var viewport = CGSize.zero
@@ -105,14 +110,19 @@ private struct GalleryViewportPage: View {
                 .accessibilityLabel(GalleryCanvas.percent(zoom))
                 .accessibilityIdentifier("suite.gallery.canvas.zoom")
             CanvasViewport(
-                documentSize: GalleryCanvas.document, zoom: zoom, rulerUnit: unit,
+                documentSize: GalleryCanvas.document, zoom: zoom, showsRulers: showsRulers, rulerUnit: unit,
                 onSize: { viewport = $0 },
                 onDrag: { from, to in
                     if dragStart == nil { dragStart = from }
                     dragEnd = to
                 },
                 onDragEnd: endDrag,
-                onKey: key
+                onKey: key,
+                onRulerDrag: { drag in
+                    guard drag.phase == .ended else { return }
+                    let at = drag.isOverRuler ? "removed" : "\(Int(drag.position.rounded()))"
+                    log.add("guide \(drag.axis == .horizontal ? "horizontal" : "vertical") \(at)")
+                }
             ) {
                 SuiteColor.artboard
             } overlay: {
