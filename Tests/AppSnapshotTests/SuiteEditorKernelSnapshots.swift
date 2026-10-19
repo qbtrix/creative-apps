@@ -9,6 +9,9 @@
 // LayerTreeList as a sidebar layers panel (#2811): the New Layer header, the
 // Hero row selected and the Cards row in a refused rename, its draft kept with
 // the refusal under it. Writes suiteui-layer-tree-panel-{light,dark}.png.
+// As an app panel (#3194): a flat list with app ids, no eye or lock, each row
+// decorated with a thumbnail or kind symbol and a caption, C selected.
+// Writes suiteui-layer-tree-flat-{light,dark}.png.
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
@@ -65,6 +68,46 @@ import Testing
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(LayerPanelSample(), name: "suiteui-layer-tree-panel-\(scheme.name)", scheme: scheme)
         }
+    }
+
+    @Test func flatDecoratedList() throws {
+        #expect(FlatListSample.rows.map(\.id) == ["hidden", "locked", "title", "c", "b", "a"])
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(FlatListSample(), name: "suiteui-layer-tree-flat-\(scheme.name)", scheme: scheme)
+        }
+    }
+}
+
+/// The snapping page's leaf layers as one flat app list: Photo-style ids, no
+/// toggles, reordering on, a thumbnail or kind symbol and a caption per row.
+private struct FlatListSample: View {
+    static var rows: [LayerRow] {
+        KernelFixtures.cards.rows(expanded: ["desktop"]).filter { $0.depth == 1 && !$0.holdsChildren }.map {
+            var row = $0
+            row.depth = 0
+            return row
+        }
+    }
+
+    static let decorations: [String: LayerRowDecoration] = [
+        "hidden": LayerRowDecoration(symbol: "slider.horizontal.3", symbolLabel: "Adjustment", caption: "Normal · 50%"),
+        "locked": LayerRowDecoration(symbol: "photo", symbolLabel: "Pixel", caption: "Locked", help: "Locked layer"),
+        "title": LayerRowDecoration(symbol: "textformat", symbolLabel: "Text", caption: "200 × 32"),
+        "c": LayerRowDecoration(thumbnail: Image(systemName: "photo.fill"), caption: "100 × 120", value: "Pixel layer"),
+        "b": LayerRowDecoration(thumbnail: Image(systemName: "photo.fill"), caption: "200 × 80"),
+        "a": LayerRowDecoration(thumbnail: Image(systemName: "photo.fill"), caption: "Multiply · 80%"),
+    ]
+
+    var body: some View {
+        LayerTreeList(
+            rows: Self.rows, childCount: { _ in 0 }, selection: "c",
+            naming: .app(LayerTreeIDs(container: "photo.layers", row: "photo.layer.row.", control: "photo.layer.")),
+            options: LayerTreeOptions(showsEye: false, showsLock: false, reorders: true),
+            decorations: Self.decorations, onAction: { _ in })
+        .frame(width: SuiteSize.sidebarWidth.ideal + SuiteSpacing.xxl, height: 300)
+        .background(SuiteColor.surface, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
+        .padding(SuiteSpacing.m)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
