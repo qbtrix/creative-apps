@@ -98,3 +98,4 @@ utc	stage	event	ref	note
 2026-10-19T15:43Z	3	heartbeat	-	dev CI 39268739545 macOS running (CB-b); 39278490377 pending (CB-b+CB-c)
 2026-10-19T16:05Z	3	heartbeat	-	dev CI 39268739545 macOS running; 39278490377 pending
 2026-10-19T16:28Z	3	check	-	39268739545 macOS running; 39278490377 pending; 0 findings
+2026-10-19T16:49Z	3	check	-	39268739545 cancelled; 39278490377 Linux ok, macOS running; 0 findings
