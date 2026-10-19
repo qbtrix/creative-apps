@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 4 build wave 4
 Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: CL-4 and CL-7 builders running; #3149 CL-5 and #3123 CL-8 (build green) in lane → then CL-9. Then CL-10 (after CL-4, CL-5, CL-7; must wire main.swift to LiveIO).
+Next: #3123 CL-8, #3149 CL-5, #3151 CL-4, #3154 CL-7 in lane → CL-9 after #3123; CL-10 after #3149+#3151+#3154 (route run, LiveIO in main.swift, enable waits-on-CC-7 tests). Then critics on scoped app=suite run.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -75,3 +75,11 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - main.swift unchanged: still CLI.run(args, out:err:) which now runs over a fresh FakeIO → CL-10 must switch it to CLI.run(args, io: LiveIO()).
 - run and mcp still route to ScriptRunner / MCPServer stubs (69).
 - Branched before CC-7 #3120 merged: command runs exit 69 "notBuilt" on its base. Four CLIArgsTests disabled "waits on CC-7" (everyCommandFormAnswersWithOneObject, catalogExitCodes, goldenRunOK, lj1FakeSession). With CC-7 now on dev, a follow-up (folded into CL-10 or a small fixer once #3149 and #3151 merge) turns these on and checks the CC-7-dependent CLIFileSafetyTests cases (forceReplacesWhole, inPlaceIsExplicit success, atomicWrite rect.add, directoryIs74 rect.add), which #3149's `routed` gate enables automatically.
+
+## CL-7 handoff notes (PR #3154, head b01b9a1)
+- ScriptRunner.run(_:apps:dryRun:force:io:) keeps CL-2's signature; Script.swift new (format, checks 64/65, name template). 16 BatchTests on, fuzz 1000 → 64/65 only. Mutate 7/7 AfterGlowCLICore.ScriptRunner. 6 files +267/-31.
+- Choices: atomic defaults true; input open failure = refused → 70; non-native format must export exactly one file; dry run prints {"ok":true,"dryRun":true,"inputs":[...]} and still refuses collisions 73.
+- Paths resolve against the script's folder as given; report prints paths as CLIIO.read takes them.
+- Touched CLIStubTests (removed `run` row from everyStubExits69NamingItsSlice) — possible overlap with #3151; lane merge drivers / needs-rebase will tell.
+- CL-10 must: route `run <script> [--dry-run] [--force]` to ScriptRunner.run in CL-4's router (CLIShapeTests still expects "CL-batch" until then); main.swift → CLI.run(args, io: LiveIO()); enable the "waits on CC-7" CLIArgsTests.
+- hundredInputsWithinBudget is print-only (0.13s/103 inputs vs 2s); ask supervisor whether it joins Tests/perf-suites.txt.
