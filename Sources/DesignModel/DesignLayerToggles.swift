@@ -25,6 +25,19 @@ public struct DesignLayerToggle: Equatable, Sendable {
 /// Where a Layers drop lands relative to the row under it: in front of it, behind it, or inside it last.
 public enum DesignDropPosition: Sendable {
     case above, below, into
+
+    /// The position a pointer `y` points down from the top of a row `height` tall picks: the top
+    /// quarter is above, the bottom quarter below, and the middle half into a row that
+    /// `holdsChildren`; on any other row the nearer half decides. nil off the row, or for a row
+    /// with no height.
+    public init?(y: Double, height: Double, holdsChildren: Bool) {
+        guard height > 0, y.isFinite, y >= 0, y <= height else { return nil }
+        if holdsChildren, y >= height / 4, y <= height * 3 / 4 {
+            self = .into
+        } else {
+            self = y < height / 2 ? .above : .below
+        }
+    }
 }
 
 extension DesignPage {
@@ -71,6 +84,17 @@ extension DesignWorkspace {
     /// The move target for a Layers drop on the selected page (DesignPage's `layerDrop`); nil without one.
     public func layerDrop(_ draggedID: String, onto rowID: String, _ position: DesignDropPosition) -> (parentID: String?, index: Int)? {
         selectedPage?.layerDrop(draggedID, onto: rowID, position)
+    }
+
+    /// Where the insertion line goes while layer `draggedID` is dragged `y` points down a row
+    /// `height` tall showing `rowID`: its position (DesignDropPosition's rule), or nil when the
+    /// drop is refused (onto itself, into its own subtree, a lock, a row that is off the page).
+    public func layerDropLine(_ draggedID: String, over rowID: String, y: Double, height: Double) -> DesignDropPosition? {
+        guard let row = findNode(rowID),
+              let position = DesignDropPosition(y: y, height: height, holdsChildren: row.kind.holdsChildren),
+              let target = layerDrop(draggedID, onto: rowID, position),
+              moveLayerHelp(draggedID, into: target.parentID, at: target.index) == nil else { return nil }
+        return position
     }
 
     /// The eye and lock toggles for node `id`'s row, in that order; empty for an unknown id.

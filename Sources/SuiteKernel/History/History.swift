@@ -141,3 +141,17 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
 /// Two histories are equal when their steps, run, ids and limit are.
 extension History: Equatable where Payload: Equatable {}
 extension History.Step: Equatable where Payload: Equatable {}
+extension History.Step: Hashable where Payload: Hashable {}
+
+/// Hashes everything `==` compares, so an app's Hashable state can hold a history.
+extension History: Hashable where Payload: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(limit)
+        hasher.combine(done)
+        hasher.combine(undone)
+        hasher.combine(openKey)
+        hasher.combine(lastIssuedID)
+        hasher.combine(currentStepID)
+        hasher.combine(savedStepID)
+    }
+}

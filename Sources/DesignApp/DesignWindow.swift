@@ -188,6 +188,9 @@ struct DesignWindow: View {
                 if error == .emptyName { note = DesignRefusal.emptyName.help }
                 if case .alreadyExists = error { note = DesignRefusal.nameTaken(name).help }
             }
+        case .renameLayer(let id, let name):
+            // The row ids come from the model's own rows; only the name can be refused.
+            do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
         }
     }
 

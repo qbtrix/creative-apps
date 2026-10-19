@@ -1,7 +1,8 @@
 // Contracts/HaloDocumentValues.swift: the document values every Halo contract
 // speaks: what a frame draws, the document undo restores and a file holds,
-// the undo stacks, a playback tick and the render settings, plan and outcome.
-// The key values and the refusal types sit in HaloValues.swift. Linux-safe.
+// an undo entry, a playback tick and the render settings, plan and outcome.
+// The key values and the refusal types sit in HaloValues.swift; the undo
+// stacks, on the kernel's History, in HaloHistory+Kernel.swift. Linux-safe.
 import CoreRaster
 import FlareCore
 
@@ -82,19 +83,6 @@ public struct HaloHistoryEntry: Sendable, Hashable {
     public init(name: String, before: HaloDocumentState, coalesceKey: String? = nil) {
         self.name = name; self.before = before; self.coalesceKey = coalesceKey
     }
-}
-
-/// Undo and redo stacks, newest last. Only a `ProjectHistory` changes them.
-public struct HaloHistory: Sendable, Hashable {
-    public var undo: [HaloHistoryEntry]
-    public var redo: [HaloHistoryEntry]
-    public init(undo: [HaloHistoryEntry] = [], redo: [HaloHistoryEntry] = []) {
-        self.undo = undo; self.redo = redo
-    }
-    /// "Undo New Layer"; nil when there is nothing to undo.
-    public var undoTitle: String? { undo.last.map { "Undo \($0.name)" } }
-    /// "Redo New Layer"; nil when there is nothing to redo.
-    public var redoTitle: String? { redo.last.map { "Redo \($0.name)" } }
 }
 
 /// Where playback is after a tick.

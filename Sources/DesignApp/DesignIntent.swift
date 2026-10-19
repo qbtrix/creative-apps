@@ -43,6 +43,8 @@ enum DesignIntent {
     /// One inspector row on every selected layer.
     case setStyle(DesignStyleChange)
     case renamePage(String, String)
+    /// A Layers row's rename: the layer and its new name, one "Rename Layer" step.
+    case renameLayer(String, String)
 }
 
 /// Where a view sends its intents.

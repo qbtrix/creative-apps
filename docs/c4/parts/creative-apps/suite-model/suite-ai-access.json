@@ -1,0 +1,10 @@
+{
+  "id": "suite-ai-access",
+  "name": "AI access",
+  "description": "Which MCP clients may drive a running app's live document: AIAccessGrants (ask, allow once, always for a client per app, deny, revoke; a file command always asks), AIAccessRequest and AIAccessEntry, and FakeAIAccess, the approval flow the sheet, the chip and Window > AI Access… run on. afterglow-mcp MC-1 declares them as stubs; MC-9 fills the grants.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/AIAccess/"
+  ],
+  "order": 190
+}

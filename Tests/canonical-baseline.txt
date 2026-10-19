@@ -52,9 +52,12 @@ Sources/LibraryApp/LibraryExportSheet.swift
 Sources/LibraryApp/LibraryWindow+Crop.swift
 Sources/LibraryApp/LibraryWindow+Export.swift
 Sources/LibraryModel/CatalogHistory.swift
+Sources/LibraryModel/Contracts/CropLeveling.swift
 Sources/LibraryModel/Contracts/ExportFormats.swift
 Sources/LibraryModel/Contracts/ExportPresets.swift
 Sources/LibraryModel/Contracts/ExportSidecar.swift
+Sources/LibraryModel/Fakes/FakeCropLeveling.swift
+Sources/LibraryModel/LibraryCrop.swift
 Sources/LibraryModel/LibraryExport.swift
 Sources/LibraryModel/Live/LiveCrop.swift
 Sources/LibraryModel/Live/LiveExporter.swift

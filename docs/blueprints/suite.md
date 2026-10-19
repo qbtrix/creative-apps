@@ -157,7 +157,7 @@ typed data and links instead of loose files.
 | Linked placement | Placing a Design asset in Flare or Halo keeps a link: an "Update available" mark when the asset changes; Update replaces it in one undo step; a missing source keeps the last copy | Live (unprompted) updates, editing the source in place from Flare |
 | Flare in Halo | **Conditional:** in v1 only if Halo's "Flare scene as a layer" (H10, Later in #767) and the engine issues of 8.5 land in time; otherwise v1.1. Open In ▸ Halo on a `.flare` makes a composition the scene's size, rate and length with one animation layer linked to the file | Several scenes, nested Halo comps from Flare symbols, time remapping |
 | Settings | One Settings window in the launcher (⌘, from any app opens it at that app's pane): General (units, autosave interval, check for updates), one pane per app | Per-document defaults, keyboard shortcut editor |
-| Onboarding | First launch of AfterGlow: three pages (the five apps, what you do most, open a sample), skippable, never again unless reset from Settings | Interactive tutorials inside the apps |
+| Onboarding | Built (F10): at first launch the "Welcome to AfterGlow" window over the home, three pages (the five apps; what you make most, which orders the starters and the home's New row; a starter per app with its presets and Open sample), skippable (Skip, Escape, the close button), shown once per onboarding version; Help > Welcome to AfterGlow reopens it | Interactive tutorials inside the apps; Settings > Show Welcome Again (with settings, after the beta) |
 | Commands and automation | Every app action is a catalog command (1.5); menus built from the catalog; the `afterglow` CLI and its JSON scripts on Linux and macOS; `afterglow mcp` over stdio on the headless engine | The live-app MCP channel (macOS, approved per client) lands after the headless server; a bundled CLI installer in the app |
 | Updater | One updater in the launcher: check (daily and on demand), show what's new, download, verify the signature, ask the running apps to quit (each runs its unsaved-changes flow), replace `AfterGlow.app`, relaunch | Background silent install, beta channel |
 
@@ -284,7 +284,7 @@ values, so a shared store never needs to load five engines.
 | suite-links | `AssetLink` and its status (current, update available, missing) | `Links/` | assets; Flare and Halo adoption |
 | suite-animation | `AnimationSummary` of a `.flare` for Halo's import | `Animation/` | Halo adoption |
 | suite-preferences | `SuitePreferences` (General plus a pane per app), defaults, change records, `SettingsModel` | `Preferences/` | store; Settings scene; every app |
-| suite-onboarding | Pages, choices, when to show, `OnboardingModel` | `Onboarding/` | AfterGlowApp |
+| suite-onboarding | Built: `SuiteOnboarding` (the pages, `shouldShow` once per `version`, `finishing(focus:)` into the home order, `order(for:)`, preset and focus titles), `OnboardingLaunch` (the `-SuiteSkipOnboarding YES` flag and the stored preferences read once at launch), `OnboardingModel` (page flow, focus, starters, skip, finish with one stale-revision retry, `startNew` and `openSample` as hand-offs, a refusal shown in place), `SampleCatalog` (one sample per app under the bundle's `Resources/Samples`, copied into `Documents/Samples` without overwriting), `OnboardingStarter`, `OnboardingLayout`, `OnboardingControls` | `Onboarding/` | preferences store (`StorePreferences`, UC-11's live store); hand-offs; AfterGlowApp onboarding |
 | suite-update | Update feed parsing, version compare, offer, install plan, `UpdateModel` | `Update/` | AfterGlowApp updater |
 | suite-ai-access | `AIAccessGrants`: which MCP client may drive which app's live document (ask, allow once, always, deny; a file command always asks), stored with the preferences | `AIAccess/` | preferences store; SuiteShell's live command channel; the AI Access sheet |
 | suite-packaging | `BundleLayout` (where each executable and framework sits, the rpaths), `SizeReport` and `SizeBudget` with their evaluation | `Packaging/` | `scripts/size-report` output; CI |
@@ -310,7 +310,7 @@ values, so a shared store never needs to load five engines.
 | home | The home window: New tiles, recents grid, search, app filter, running apps strip | `Home*.swift` |
 | assets-page | The Assets page of the home sidebar | `Assets*.swift` |
 | settings | General and per-app panes | `Settings*.swift` |
-| onboarding | The three first-launch pages | `Onboarding*.swift` |
+| onboarding | Built: `OnboardingWindow` (`Window` id `onboarding`, presented at launch or suppressed, decided once; Skip, Back, Continue, and on the last page Start from an empty home; closing it unfinished skips), `OnboardingPages` (the apps and focus pages), `OnboardingStartPage` (the starter grid: preset chips, Open sample with its reason as help, progress while a hand-off sends, the message in place), `LauncherRouter+Onboarding` (the bundle's samples folder, the copy into Documents), `LauncherCommands+Onboarding` (Help > Welcome to AfterGlow) | `Onboarding*.swift`, `LauncherRouter+Onboarding.swift`, `LauncherCommands+Onboarding.swift` |
 | updater | Check, offer sheet, progress, install | `Update*.swift` |
 
 **AfterGlowCLI** (`Sources/AfterGlowCLI/`, `Sources/AfterGlowCLICore/`, Linux and macOS, all planned)
@@ -909,7 +909,9 @@ the period.
   lands the suite's first journeys live in `UITests/AfterGlowJourneyTests.swift`.
 - **Launch.** `Journey` launches `.build/apps/AfterGlow.app` by path with
   `-ApplePersistenceIgnoreState YES`, `-SuiteSupportDir <tmp>` (a fresh store
-  per test), `-SuiteSkipOnboarding YES` (except SJ18), `-SuiteFixture <name>`
+  per test), `-SuiteSkipOnboarding YES` (implemented: `OnboardingLaunch`
+  reads it and the welcome window doesn't present; the onboarding journeys
+  OJ1 to OJ4, SJ18's split, leave it out), `-SuiteFixture <name>`
   and, for perf, `-SuitePerfProbe YES`. The launcher forwards
   `-SuiteSupportDir`, `-SuitePerfProbe` and every argument named for an app
   to that app when it launches it cold (`NSWorkspace.OpenConfiguration.arguments`;
@@ -1310,7 +1312,11 @@ public protocol AnimationSourceReading: Sendable {
     func summary(of ref: SuiteDocumentRef) async throws(SuiteError) -> AnimationSummary
 }
 
-/// UC-11 Shared preferences (tier 2). Live: `FileStore` over `preferences.json`.
+/// UC-11 Shared preferences (tier 2). Live: `StorePreferences`, an actor over
+/// `FileStore`'s `preferences.json`, made live by onboarding (OB-9) since the
+/// tour saves its version and home order there. `load()` returns the stored
+/// value (or defaults) at the store's revision and does not mark it seen
+/// (a lead decision): only `save` and `externalChange()` move what was seen.
 public protocol PreferencesStoring: Sendable {
     func load() async throws(SuiteError) -> SuitePreferences
     /// Writes `revision + 1`; `.staleRevision` when another writer won (the caller reloads).
@@ -2932,7 +2938,7 @@ Component names are SuiteUI unless marked **new** (a `needs-ui` issue on
 | Assets page | the home window's content when Assets is selected | Kind picker, grid, colours | `Picker(.segmented)` (All, Colours, Vector, Images, Animations); `ThumbnailGrid`; **new** `SwatchChip` grid for colours (swatch, hex, P3 badge) |
 | | | Inspector (selected asset) | `InspectorHeader` (kind, revision, "From Cards.design"), `InspectorColorRow` for a colour, `InspectorAction` (Place In ▸, Copy, Remove) |
 | Settings | `Settings` scene, `TabView` with General and one tab per app, width `SuiteSize.settingsWidth` (**new** token, 560 pt) | Each tab is a `Form` | `Picker` (units; autosave 10 s, 30 s, 1 min, 5 min), `Toggle` (check for updates), `Button` (Check Now, Show Welcome Again); per-app tabs: the app's default New preset (`Picker`) and "At launch: reopen last documents / start empty" (`Picker(.radioGroup)`) |
-| Onboarding | `Window` sized by `SuiteSize.onboardingWindow` (**new** token, 720 × 520), opened once | Three pages | system `VStack` with `SuiteFont`; page 1: the five app symbols and names; page 2: `ChoiceChips` (Animation, Design, Photos, Motion, Everything); page 3: three sample `Button`s; Continue (prominent), Skip |
+| Onboarding | `Window("Welcome to AfterGlow", id: "onboarding")`, 720 × 520 with 24 pt margins (`OnboardingLayout` until the **new** `SuiteSize.onboardingWindow`, #2867), presented at first launch once per version, reopened from Help | Three pages | system `VStack` with `SuiteFont`; page 1: the five app marks and names and the Rendering line; page 2: `ChoiceChips` (Animation, Design, Photos, Motion, Everything); page 3: a `Grid` of starters, one per app in the focus order, each with up to three preset `ChoiceChips` and an Open sample `Button` (disabled with its reason while the sample isn't in the build), a `ProgressView` while a hand-off sends and the refusal in place; Skip (cancel), Back, Continue (default), and on page 3 Start from an empty home (default) |
 | Update | sheet on the home window | Offer, progress, error | `Text` (version, notes in a `ScrollView`), `ProgressView`, Install and Relaunch (prominent), Later; error with `stateError` and its symbol |
 | Inside each app | the app's own menu bar | Window > Switch To ▸, File > Open In ▸, AppName > Settings… | system `Menu`/`Button` in `SuiteCommands` |
 | | colour popovers (Flare FILL, Design fill, Photo foreground) | SUITE COLOURS section | **new** `SwatchChip` row; "Add to Suite Colours" `InspectorAction` |
@@ -3336,12 +3342,16 @@ Engine: none for v1 (the index lives in SuiteModel). creative-core's
 `CoreAsset` module (the suite asset model, #148–#154, a stub today) can
 replace it later; that is a later decision, not a dependency.
 
-**F10 `onboarding`** (wave 4) · tier 3 · waits on F3, F5
+**F10 `onboarding`** (wave 4) · tier 3 · built (#1972, packet
+`suite/features/onboarding.md`, tasks OB-1 to OB-13 in slices OB-a, OB-u,
+OB-m, OB-s, OB-z)
 
 | Task | Behavior | Owned files | Proof |
 |---|---|---|---|
-| OB-1 | Onboarding flow live, `OnboardingModel`; three pages; samples | `Bundle/Samples/`, `Sources/SuiteModel/Onboarding/`, `Sources/AfterGlowApp/Onboarding*.swift` (includes `OnboardingWindow.swift`), `Sources/SuiteShell/Live/OnboardingSlot.swift`, `Tests/SuiteModelTests/Onboarding*.swift`, `Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift` | goldens per page |
-| OB-2 | Journey SJ18 | `UITests/AfterGlowJourneyTests+Onboarding.swift` | SJ18 |
+| OB-1 to OB-5 | The welcome window on the fakes: Help > Welcome to AfterGlow and the first launch open it; three pages, Continue, Back, Skip, focus chips, the starter grid, every control identified | `Sources/AfterGlowApp/Onboarding*.swift`, `LauncherCommands+Onboarding.swift`, `Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift` | goldens per page, the render budget |
+| OB-7 to OB-10 | `SuiteOnboarding`, `OnboardingLaunch`, `OnboardingModel`, `StorePreferences` (the preferences slot live), `SampleCatalog` | `Sources/SuiteModel/Onboarding/`, `Sources/SuiteModel/Preferences/StorePreferences.swift`, `Tests/SuiteModelTests/` | their Model tests and mutation plans |
+| OB-11, OB-12 | `Bundle/Samples/` (each sample lands with its app's fixture export, #836 to #839); the onboarding slot live, the window reading the bundle's samples | `Bundle/Samples/`, `Sources/SuiteShell/Live/OnboardingSlot.swift`, `LauncherRouter+Onboarding.swift` | `SampleFilesTests`, `SuiteLiveServicesTests` |
+| OB-6, OB-13 | SJ18 as journeys OJ1 and OJ2 (`+Onboarding`: shown, skipped, reopened; the focus orders the starters), OJ3 and OJ4 on live (`+OnboardingStart`: Open sample opens Bounce.flare in Flare and the home takes the Photos order; Design's Blank opens an untitled design; a relaunch shows no welcome). OJ3 skips naming #837 until Bounce.flare ships; the steps inside Flare and Design skip naming #861 and #862 until those apps adopt the suite | `UITests/AfterGlowJourneyTests+Onboarding*.swift` | OJ1 to OJ4 |
 
 **F11 `updater`** (wave 4) · tier 2 · waits on F5; the captain's choice of feed host and signing key (Q2)
 

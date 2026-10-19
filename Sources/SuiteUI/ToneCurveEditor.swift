@@ -123,6 +123,8 @@ public struct ToneCurveEditor: View {
             .padding(SuiteSpacing.xs)
             .overlay { if active { Circle().strokeBorder(SuiteColor.accent, lineWidth: 2) } }
             .frame(width: SuiteSize.curveHandleHit, height: SuiteSize.curveHandleHit)
+            // The hit, not the drawn dot, is the point's frame to accessibility, as in CurveEditor.
+            .contentShape(Circle())
             .position(CurveEditor.viewPoint(unit, in: plot, range: 0...1))
             .help(Self.pointReading(index, unit))
             .accessibilityElement()

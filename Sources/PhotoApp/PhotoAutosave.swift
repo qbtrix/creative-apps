@@ -3,11 +3,13 @@
 // Model's `RecoveryStoring` (one `<window>.ora` per window); this holds only
 // the timing and the off-main calls. When `model.autosaveDue` says so, `tick`
 // builds `recoveryEntry` and writes it in one detached task, once per edit
-// (the main actor only copies the workspace value). A write that lands after
-// a save or a discard is removed again. `launch` reads `leftBehind()` off the
-// main actor (a damaged file is already dropped) and offers the newest;
-// Restore decodes the offer off the main actor (`decode`), then installs it,
-// and Restore and Discard remove what the crash left. Times come in as arguments.
+// (the main actor only copies the workspace value); a write that fails waits
+// for the next edit, so an unchanged document is never encoded twice. A write
+// that lands after a save or a discard is removed again. `launch` reads
+// `leftBehind()` off the main actor (a damaged file is already dropped) and
+// offers the newest; Restore decodes the offer off the main actor (`decode`),
+// then installs it, and Restore and Discard remove what the crash left. Times
+// come in as arguments.
 import Foundation
 import Observation
 import PhotoModel
@@ -46,12 +48,12 @@ final class PhotoAutosave {
         writtenEdit = edit
         let reset = resets
         let wrote = await write(model, now: now, codec: codec)
+        // A failed write keeps `writtenEdit`: the next edit tries again, not the next tick, which would
+        // encode the same document every second for as long as the write fails.
         if resets != reset {
             if wrote { try? store.discard(window: window) }
         } else if wrote {
             autosaved = lastEdit == edit
-        } else if writtenEdit == edit {
-            writtenEdit = nil
         }
     }
 

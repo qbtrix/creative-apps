@@ -4,7 +4,8 @@
 // a write is atomic, so a failed or replaced write leaves the target absent,
 // as it was, or whole, and no temp file behind; a missing input or a
 // directory is 74. Each check runs on FakeIO and on LiveIO, the real file
-// system, in a temp directory.
+// system, in a temp directory. The router checks run once CL-4's router
+// answers (`routed`); the LiveIO checks after them run now.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -18,8 +19,12 @@ struct CLIFileSafetyTests {
     static let original = (try? FakeCanvasDocument.fixture.save()) ?? Data()
     static let addRect = #"{"x":5,"y":6,"w":7,"h":8}"#
 
-    /// The real file system. CL-5 returns its `LiveIO` here; until then the live checks fail, never pass.
-    static func liveIO() -> (any CLIIO)? { nil }
+    /// The real file system.
+    static func liveIO() -> (any CLIIO)? { LiveIO() }
+
+    /// Whether CL-4's router answers. Until it does, every form is a stub that exits 69, so the
+    /// router checks are skipped by name rather than run against a stub.
+    static let routed = CLI.run(["list-apps"], io: FakeIO()) != CLI.Exit.unavailable
 
     /// Where a check runs: the in-memory FakeIO, or LiveIO on a fresh temp directory.
     enum World: String, CaseIterable, Sendable { case fake, live }
@@ -41,7 +46,7 @@ struct CLIFileSafetyTests {
             let io = FakeIO(files: files)
             return Disk(io: io, path: { $0 }, bytes: { io.files[$0] }, names: { io.files.keys.sorted() })
         case .live:
-            let io = try #require(liveIO(), "LiveIO waits on CL-5")
+            let io = try #require(liveIO(), "LiveIO")
             let root = FileManager.default.temporaryDirectory.appendingPathComponent("afterglow-\(UUID().uuidString)").path
             try FileManager.default.createDirectory(atPath: root, withIntermediateDirectories: true)
             for (name, data) in files { _ = FileManager.default.createFile(atPath: root + "/" + name, contents: data) }
@@ -58,7 +63,7 @@ struct CLIFileSafetyTests {
                 ["fake", "export", input, "--format", "json", "--out", out]]
     }
 
-    @Test(.disabled("waits on CL-5"), arguments: World.allCases)
+    @Test(.enabled(if: routed, "waits on CL-4's router"), arguments: World.allCases)
     func neverOverwrites(world: World) throws {
         let kept = Data("keep me".utf8)
         let disk = try Self.disk(world, ["a.fake": Self.original, "b.fake": kept])
@@ -72,7 +77,7 @@ struct CLIFileSafetyTests {
         #expect(disk.bytes("b.fake") == kept)
     }
 
-    @Test(.disabled("waits on CL-5"), arguments: World.allCases)
+    @Test(.enabled(if: routed, "waits on CL-4's router"), arguments: World.allCases)
     func forceReplacesWhole(world: World) throws {
         let disk = try Self.disk(world, ["a.fake": Self.original, "b.fake": Data("old".utf8)])
         for form in Self.writers(disk, to: "b.fake") {
@@ -84,7 +89,7 @@ struct CLIFileSafetyTests {
         #expect(disk.names() == ["a.fake", "b.fake"], "a temp file was left behind")
     }
 
-    @Test(.disabled("waits on CL-5"), arguments: World.allCases)
+    @Test(.enabled(if: routed, "waits on CL-4's router"), arguments: World.allCases)
     func inPlaceIsExplicit(world: World) throws {
         let disk = try Self.disk(world)
         let input = disk.path("a.fake")
@@ -110,7 +115,7 @@ struct CLIFileSafetyTests {
         func err(_ line: String) { base.err(line) }
     }
 
-    @Test(.disabled("waits on CL-5"))
+    @Test(.enabled(if: routed, "waits on CL-4's router"))
     func atomicWrite() throws {
         // A write that fails is 74, prints one failure and leaves the target absent or as it was.
         let base = FakeIO(files: ["a.fake": Self.original, "b.fake": Data("old".utf8)])
@@ -136,7 +141,7 @@ struct CLIFileSafetyTests {
         #expect(disk.bytes("a.fake") == Self.original)
     }
 
-    @Test(.disabled("waits on CL-5"), arguments: World.allCases)
+    @Test(.enabled(if: routed, "waits on CL-4's router"), arguments: World.allCases)
     func missingInputIs74(world: World) throws {
         let disk = try Self.disk(world)
         let missing = disk.path("missing.fake")
@@ -147,7 +152,7 @@ struct CLIFileSafetyTests {
         #expect(disk.names() == ["a.fake"])
     }
 
-    @Test(.disabled("waits on CL-5"))
+    @Test(.enabled(if: routed, "waits on CL-4's router"))
     func directoryIs74() throws {
         let disk = try Self.disk(.live)
         let folder = disk.path("folder.fake")
@@ -159,5 +164,81 @@ struct CLIFileSafetyTests {
         #expect(disk.afterglow(["fake", "new", "--out", folder, "--force"]) == 74)
         #expect((try? FileManager.default.contentsOfDirectory(atPath: folder)) != nil, "the folder is gone")
         #expect(disk.names() == ["a.fake", "folder.fake"])
+    }
+}
+
+/// LiveIO itself, below the router: the same promises on the real file system.
+extension CLIFileSafetyTests {
+    /// LiveIO and a fresh temp directory holding `files`, with that directory's path.
+    static func live(_ files: [String: Data]) throws -> (io: LiveIO, disk: Disk, root: String) {
+        let disk = try disk(.live, files)
+        return (LiveIO(), disk, String(disk.path("x").dropLast(2)))
+    }
+
+    @Test func liveNeverOverwrites() throws {
+        let kept = Data("keep me".utf8)
+        let (io, disk, _) = try Self.live(["b.fake": kept])
+        #expect(throws: CLIIOError.exists(disk.path("b.fake"))) {
+            try io.write(Data("new".utf8), to: disk.path("b.fake"), replace: false)
+        }
+        #expect(disk.bytes("b.fake") == kept)
+        try io.write(Data("new".utf8), to: disk.path("c.fake"), replace: false)
+        #expect(disk.bytes("c.fake") == Data("new".utf8))
+        #expect(disk.names() == ["b.fake", "c.fake"], "a temp file was left behind")
+    }
+
+    @Test func liveAtomicWrite() throws {
+        let (io, disk, _) = try Self.live(["b.fake": Data("old".utf8)])
+        try FileManager.default.linkItem(atPath: disk.path("b.fake"), toPath: disk.path("twin.fake"))
+        try io.write(Data("new".utf8), to: disk.path("b.fake"), replace: true)
+        #expect(disk.bytes("b.fake") == Data("new".utf8))
+        #expect(disk.bytes("twin.fake") == Data("old".utf8), "the write went straight into the target")
+        #expect(disk.names() == ["b.fake", "twin.fake"], "a temp file was left behind")
+        // A folder that is a file, and a directory as the target, refuse and change nothing.
+        #expect(throws: (any Error).self) { try io.write(Data("x".utf8), to: disk.path("b.fake") + "/c.fake", replace: true) }
+        try FileManager.default.createDirectory(atPath: disk.path("folder"), withIntermediateDirectories: false)
+        #expect(throws: LiveIOError.notAFile(disk.path("folder"))) {
+            try io.write(Data("x".utf8), to: disk.path("folder"), replace: true)
+        }
+        #expect(io.exists(disk.path("folder")))
+        #expect(disk.names() == ["b.fake", "folder", "twin.fake"])
+        #expect(disk.bytes("b.fake") == Data("new".utf8))
+    }
+
+    @Test func liveReadRefuses() throws {
+        let (io, disk, _) = try Self.live(["a.fake": Self.original, "big.fake": Data(count: 9)])
+        #expect(try io.read(disk.path("a.fake")) == Self.original)
+        #expect(throws: CLIIOError.missing(disk.path("missing.fake"))) { try io.read(disk.path("missing.fake")) }
+        try FileManager.default.createDirectory(atPath: disk.path("folder"), withIntermediateDirectories: false)
+        #expect(throws: LiveIOError.notAFile(disk.path("folder"))) { try io.read(disk.path("folder")) }
+        #expect(LiveIO.defaultReadLimit == 2 * 1024 * 1024 * 1024)
+        #expect(throws: LiveIOError.tooLarge(disk.path("big.fake"), 9)) { try LiveIO(readLimit: 8).read(disk.path("big.fake")) }
+        #expect(try LiveIO(readLimit: 9).read(disk.path("big.fake")).count == 9)
+    }
+
+    @Test func liveGlobWithoutAShell() throws {
+        let none = Data()
+        let (io, disk, root) = try Self.live(["b.fake": none, "a.fake": none, "c.txt": none, ".hidden.fake": none,
+                                              "$(touch x).fake": none])
+        try FileManager.default.createDirectory(atPath: disk.path("sub"), withIntermediateDirectories: false)
+        try FileManager.default.createDirectory(atPath: disk.path("dir.fake"), withIntermediateDirectories: false)
+        _ = FileManager.default.createFile(atPath: disk.path("sub/d.fake"), contents: none)
+        #expect(try io.glob("*.fake", relativeTo: root) == ["$(touch x).fake", "a.fake", "b.fake"].map(disk.path))
+        #expect(try io.glob("*.fake", relativeTo: root + "/") == ["$(touch x).fake", "a.fake", "b.fake"].map(disk.path))
+        #expect(try io.glob("?.txt", relativeTo: root) == [disk.path("c.txt")])
+        #expect(try io.glob("*/d.fake", relativeTo: root) == [disk.path("sub/d.fake")])
+        #expect(try io.glob(disk.path("sub/*"), relativeTo: "/elsewhere") == [disk.path("sub/d.fake")])
+        #expect(try io.glob(".*.fake", relativeTo: root) == [disk.path(".hidden.fake")])
+        #expect(try io.glob("missing/*.fake", relativeTo: root).isEmpty)
+        #expect(!io.exists(disk.path("x")), "a pattern reached a shell")
+    }
+
+    @Test func sessionsReadThroughIO() throws {
+        let (io, disk, _) = try Self.live(["a.fake": Self.original])
+        let session = try Apps.fake.session(reading: disk.path("a.fake"), io: io)
+        #expect(session.app == "fake")
+        #expect(throws: CLIIOError.missing(disk.path("none.fake"))) {
+            try Apps.fake.session(reading: disk.path("none.fake"), io: io)
+        }
     }
 }

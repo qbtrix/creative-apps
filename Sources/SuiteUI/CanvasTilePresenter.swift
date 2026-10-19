@@ -3,7 +3,10 @@
 // document as one rgba8 texture, writing only the tiles that changed since
 // the last frame (all of them when the size changes or the texture is new),
 // and each `present` scales that texture into the drawable with MPS's
-// Lanczos filter (premultiplied sRGB in, the layer's sRGB out). The tiles'
+// Lanczos filter (premultiplied sRGB in, the layer's sRGB out), or bilinear
+// when Lanczos's own temporary texture would pass the device's size limit
+// (a tiny drawable, or a document near the limit): Metal aborts on that
+// allocation instead of failing it. The tiles'
 // pixels are the app's already: on a GPU route they came back from the GPU
 // as display bytes, so a frame uploads them again. A tile whose image
 // isn't 8-bit premultiplied RGBA at its tile's size is redrawn into that form
@@ -26,7 +29,8 @@ public final class CanvasTilePresenter: MetalPresenting {
     /// The document texture; nil until the first present.
     public private(set) var texture: (any MTLTexture)?
     private var queue: (any MTLCommandQueue)?
-    private var scaler: MPSImageLanczosScale?
+    private var lanczos: MPSImageLanczosScale?
+    private var bilinear: MPSImageBilinearScale?
 
     public init() {}
 
@@ -44,11 +48,35 @@ public final class CanvasTilePresenter: MetalPresenting {
         guard let device = layer.device, size.width >= 1, size.height >= 1 else { return }
         if queue == nil { queue = device.makeCommandQueue() }
         guard let source = upload(on: device), let buffer = queue?.makeCommandBuffer() else { return }
-        if scaler?.device !== device { scaler = MPSImageLanczosScale(device: device) }
-        scaler?.encode(commandBuffer: buffer, sourceTexture: source, destinationTexture: drawable.texture)
+        let target = drawable.texture
+        let scaler: MPSImageScale?
+        if Self.lanczosFits(source: (source.width, source.height), destination: (target.width, target.height),
+                            limit: Self.maxTextureSide(device)) {
+            if lanczos?.device !== device { lanczos = MPSImageLanczosScale(device: device) }
+            scaler = lanczos
+        } else {
+            if bilinear?.device !== device { bilinear = MPSImageBilinearScale(device: device) }
+            scaler = bilinear
+        }
+        scaler?.encode(commandBuffer: buffer, sourceTexture: source, destinationTexture: target)
         buffer.present(drawable)
         buffer.commit()
         presented += 1
+    }
+
+    /// Whether MPS's Lanczos scale of `source` into `destination` keeps its temporary texture within
+    /// `limit` on both sides. That texture is the source side plus three filter widths each way, about
+    /// 6 x source / destination (measured: 7680 x 4320 into 1 x 1 asks for 30238 high).
+    /// ponytail: measured, not documented; bilinear past it aliases, halve-then-Lanczos if that shows.
+    nonisolated static func lanczosFits(source: (Int, Int), destination: (Int, Int), limit: Int) -> Bool {
+        let fits = { (from: Int, to: Int) in from + 6 * ((from + max(to, 1) - 1) / max(to, 1)) + 2 <= limit }
+        return fits(source.0, destination.0) && fits(source.1, destination.1)
+    }
+
+    /// The largest 2D texture side `device` makes: 16384 on Apple-family 3+ and Mac-family GPUs,
+    /// 8192 before (Metal feature set tables; no device property reports it).
+    nonisolated static func maxTextureSide(_ device: any MTLDevice) -> Int {
+        device.supportsFamily(.apple3) || device.supportsFamily(.mac2) ? 16384 : 8192
     }
 
     /// The document texture for a GPU producer to write straight into (resident rendering): `width` x

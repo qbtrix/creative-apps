@@ -14,18 +14,28 @@ public enum ExportFormat: String, CaseIterable, Sendable, Codable {
         }
     }
 
-    /// Whether the Quality row applies. Slot: true; EX-7 makes it JPEG and HEIC only.
-    public var usesQuality: Bool { true }
-
-    /// The format a written name ends in. Slot: jpg and jpeg only, any case.
-    public static func forFileName(_ name: String) -> ExportFormat? {
-        guard let dot = name.lastIndex(of: ".") else { return nil }
-        let ext = name[name.index(after: dot)...].lowercased()
-        return ext == "jpg" || ext == "jpeg" ? .jpeg : nil
+    /// Whether the Quality row applies: only the lossy formats, JPEG and HEIC.
+    public var usesQuality: Bool {
+        switch self {
+        case .jpeg, .heic: true
+        case .png, .tiff: false
+        }
     }
 
-    /// Why `self` can't be chosen, nil when it can. Slot: only JPEG can.
+    /// The format a written name ends in: jpg, jpeg, png, tif, tiff or heic, any case.
+    public static func forFileName(_ name: String) -> ExportFormat? {
+        guard let dot = name.lastIndex(of: "."), dot != name.startIndex else { return nil }
+        switch name[name.index(after: dot)...].lowercased() {
+        case "jpg", "jpeg": return .jpeg
+        case "png": return .png
+        case "tif", "tiff": return .tiff
+        case "heic": return .heic
+        default: return nil
+        }
+    }
+
+    /// Why `self` can't be chosen, nil when this Mac can write it.
     public func help(writable: Set<ExportFormat>) -> String? {
-        self == .jpeg ? nil : "Other formats aren't built yet (export formats)."
+        writable.contains(self) ? nil : "This Mac can't write \(rawValue) files."
     }
 }

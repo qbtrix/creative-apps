@@ -326,10 +326,13 @@ extension SuiteJourneyTests {
     }
 
     /// Clicks `element`'s middle (a field opens typing), selects what it shows and types `text`; no Return.
+    /// It selects with ⌘→ then ⇧⌘←, the text system's own keys: the host app's menu takes ⌘A for its
+    /// own Select All (Library selects photos), so ⌘A never reached the field (#2924).
     @MainActor private func inspectorType(_ text: String, into element: XCUIElement, _ gallery: Journey) {
         element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
         Thread.sleep(forTimeInterval: 0.4)
-        gallery.press(character: "a", .command)
+        gallery.press(.rightArrow, .command)
+        gallery.press(.leftArrow, [.command, .shift])
         gallery.app.typeText(text)
     }
 

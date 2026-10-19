@@ -37,22 +37,36 @@
   {
     "label": "the bridge frames a layer by its origin and size, not its far corner",
     "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
-    "find": "Rect(minX: box.x, minY: box.y, maxX: box.maxX, maxY: box.maxY)",
-    "replace": "Rect(minX: box.x, minY: box.y, maxX: box.width, maxY: box.height)",
+    "find": "Rect(minX: x, minY: y, maxX: maxX, maxY: maxY)",
+    "replace": "Rect(minX: x, minY: y, maxX: width, maxY: height)",
     "tests": "DesignSnapCandidateTests"
   },
   {
-    "label": "snapGuides: the no-gesture nil check dropped, so the fake shows with no drag",
+    "label": "snapGuides keeps the last guides after endDrag (SN-4)",
     "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
-    "find": "guard gesture != nil else { return nil }",
-    "replace": "guard true else { return nil }",
-    "tests": "DesignSnapCandidateTests"
+    "find": "        gesture?.guides\n",
+    "replace": "        gesture?.guides ?? .empty\n",
+    "tests": "DesignSnapMoveTests"
   },
   {
-    "label": "snapGuides: the stub returns .empty instead of .fake",
+    "label": "a step snaps to lines only, never to an equal gap (SN-4)",
     "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
-    "find": "        return .fake\n",
-    "replace": "        return .empty\n",
-    "tests": "DesignSnapCandidateTests"
+    "find": "gaps: gaps.spacingOffset(axis, for: rect, tolerance: tolerance)",
+    "replace": "gaps: nil",
+    "tests": "DesignSnapMoveTests"
+  },
+  {
+    "label": "a step snaps only a box's top edge, not its centre or bottom (SN-4)",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "let dy = offset(.y, [rect.minY, (rect.minY + rect.maxY) / 2, rect.maxY])",
+    "replace": "let dy = offset(.y, [rect.minY])",
+    "tests": "DesignSnapMoveTests"
+  },
+  {
+    "label": "the guides leave out the gaps (SN-4)",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "gaps: gaps.gaps(around: box.snapRect)",
+    "replace": "gaps: []",
+    "tests": "DesignSnapMoveTests"
   }
 ]

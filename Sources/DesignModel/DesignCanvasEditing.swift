@@ -28,7 +28,8 @@
 //           sample alone gives the same document. With one layer selected, move and
 //           resize keep the routes below whatever `services` holds. A move (of one layer,
 //           several or their copies) and a one-layer resize land on whole points
-//           (DesignWholePoints); a nudge keeps its fraction.
+//           (DesignWholePoints); a nudge keeps its fraction. A move first snaps its box with
+//           the engine the press built (DesignSnapIndex, SN-4); `.noSnap` snaps nothing.
 //   frame, rectangle, ellipse, text   DesignDrawing.
 //   pen     nothing.
 //
@@ -76,6 +77,8 @@ struct DesignGesture: Sendable, Equatable {
     var moved = false
     /// The undo history at the start; a service step puts it back before it applies.
     var history = DesignHistory()
+    /// The snap engine the press built (nil: no snapping), its build count, and the last step's guides.
+    var snap: DesignSnapIndex?, snapBuilds = 0, guides = DesignSnapGuides.empty
 }
 
 extension DesignWorkspace {
@@ -180,7 +183,12 @@ extension DesignWorkspace {
         switch current.route {
         case .move(let id):
             restorePages(current.before)
-            if current.moved { _ = pages.update(id) { $0.translate(by: $0.frame.wholeDelta(delta)) } }
+            current.guides = .empty
+            guard current.moved, let frame = selectedPage?.nodes.node(id)?.frame else { break }
+            // Snap first, whole points second (DesignWholePoints).
+            let moveBy = frame.wholeDelta(snapMove(delta, box: frame, modifiers: modifiers, current))
+            _ = pages.update(id) { $0.translate(by: moveBy) }
+            current.guides = landedGuides(frame, by: moveBy, modifiers: modifiers, current)
         case .resize(let id, let handle, let original):
             restorePages(current.before)
             let raw = original.resized(
@@ -196,7 +204,7 @@ extension DesignWorkspace {
             selectedNodeIDs = services.marquee.layers(touching: rect, in: parent, on: page)
             for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) }
         case .moveSeveral, .resizeSeveral, .optionCopy:
-            applyStep(current, delta: delta, modifiers: modifiers)
+            applyStep(&current, delta: delta, modifiers: modifiers)
         case .draw(let kind):
             draw(kind, from: current, to: end, square: modifiers.contains(.shift))
         case .text:
@@ -209,13 +217,16 @@ extension DesignWorkspace {
 
     /// One step of a service route: back to the gesture's start, history included, then the
     /// edit for `delta` from the start. A refused edit leaves the start as it was.
-    private mutating func applyStep(_ current: DesignGesture, delta: DesignPoint, modifiers: DesignModifiers) {
+    private mutating func applyStep(_ current: inout DesignGesture, delta: DesignPoint, modifiers: DesignModifiers) {
         rewind(to: current.before)
         history = current.history
+        current.guides = .empty
         guard current.moved, let page = selectedPage else { return }
         let transforming = services.transforming
-        // A move lands the selection box's top-left on a whole point (DesignWholePoints).
-        let moveBy = selectionBounds?.wholeDelta(delta) ?? delta
+        // A move snaps the selection box, then lands its top-left on a whole point (DesignWholePoints).
+        let bounds = selectionBounds
+        let moveBy = bounds?.wholeDelta(snapMove(delta, box: bounds, modifiers: modifiers, current)) ?? delta
+        if let bounds { current.guides = landedGuides(bounds, by: moveBy, modifiers: modifiers, current) }
         do throws(DesignRefusal) {
             switch current.route {
             case .moveSeveral(let ids):
@@ -241,6 +252,30 @@ extension DesignWorkspace {
         } catch {
             return
         }
+    }
+
+    /// `delta` snapped so `box` moved by it lines up; as is under `.noSnap` or without an engine.
+    private func snapMove(_ delta: DesignPoint, box: DesignRect?, modifiers: DesignModifiers, _ current: DesignGesture) -> DesignPoint {
+        guard !modifiers.contains(.noSnap), current.moved, let box, let snap = current.snap else { return delta }
+        return snap.snapped(delta, box: box, tolerance: handleTolerance)
+    }
+
+    /// The guides `box` moved by `moveBy` landed on; none under `.noSnap` or without an engine.
+    private func landedGuides(_ box: DesignRect, by moveBy: DesignPoint, modifiers: DesignModifiers, _ current: DesignGesture) -> DesignSnapGuides {
+        guard !modifiers.contains(.noSnap), let snap = current.snap else { return .empty }
+        return snap.guides(on: DesignRect(x: box.x + moveBy.x, y: box.y + moveBy.y, width: box.width, height: box.height))
+    }
+
+    /// Builds the snap engine once, at the press, for a move of one layer, several or their copies.
+    private func buildSnap(_ current: inout DesignGesture) {
+        let moving: [String]
+        switch current.route {
+        case .move(let id): moving = [id]
+        case .moveSeveral(let ids), .optionCopy(let ids, _): moving = ids
+        default: return
+        }
+        current.snap = DesignSnapIndex(snapCandidates(moving: moving, drawingInto: nil))
+        current.snapBuilds += 1
     }
 
     /// Puts back the gesture's starting pages and their held-id index together, so an edit
@@ -323,6 +358,8 @@ extension DesignWorkspace {
         case .pen:
             break
         }
-        return DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)
+        var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)
+        buildSnap(&gesture)
+        return gesture
     }
 }

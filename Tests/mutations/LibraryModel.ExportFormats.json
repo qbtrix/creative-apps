@@ -1,0 +1,23 @@
+[
+  {
+    "label": "PNG uses quality",
+    "file": "Sources/LibraryModel/Contracts/ExportFormats.swift",
+    "find": "case .png, .tiff: false",
+    "replace": "case .png, .tiff: self == .png",
+    "tests": "LibraryExportFormatTests"
+  },
+  {
+    "label": ".tif is not recognized",
+    "file": "Sources/LibraryModel/Contracts/ExportFormats.swift",
+    "find": "case \"tif\", \"tiff\": return .tiff",
+    "replace": "case \"tiff\": return .tiff",
+    "tests": "LibraryExportFormatTests"
+  },
+  {
+    "label": "help is nil for an unwritable format",
+    "file": "Sources/LibraryModel/Contracts/ExportFormats.swift",
+    "find": "writable.contains(self) ? nil :",
+    "replace": "!writable.isEmpty ? nil :",
+    "tests": "LibraryExportFormatTests"
+  }
+]
