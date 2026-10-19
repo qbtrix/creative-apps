@@ -2,10 +2,10 @@
 
 Issue: #1499 · Packet: docs/blueprints/design/features/files-history.md
 Run: act-1a14d285aef-3epc (line lead for design: shell-parity #1325, canvas-basics #1500, files-history #1499) · Session: claude/design-shell-parity-wlqm8c · Started: 2026-10-18T04:02Z
-Stage: 2 building
+Stage: 5 contact sheet (FH-a, FH-b done; Belt-Slice-Done posted). FH-b fix round 2: #2693 (shell journey title after FH-4 subtitle)
 Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
-Next: wave 1 FH-2 (builder branch lead/files-history-FH-2). Then wave 2 FH-1, FH-3, FH-4 (DW-a is merged on dev).
-Last check: 2026-10-18T04:02Z
+Next: merge the #2693 fix; post Belt-Contact-Sheet on #1499 once a green run contains #3119 and that fix (scoped design 39211721703 has #3119)
+Last check: 2026-10-19T08:27Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
