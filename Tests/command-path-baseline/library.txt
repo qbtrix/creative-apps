@@ -1,4 +1,5 @@
 # LibraryApp's menu items and buttons built without a command spec (command-catalog CC-11).
+Sources/LibraryApp/DevelopInspector.swift: Button("Reset \(slider.rawValue)") { resetSlider?(slider) }
 Sources/LibraryApp/LibraryBrowser.swift: Button(action.title, action: action.perform)
 Sources/LibraryApp/LibraryBrowser.swift: Button("Close", systemImage: "xmark") { onClose() }
 Sources/LibraryApp/LibraryBrowser.swift: Button(expanded ? "Hide" : "Show") { expanded.toggle() }
