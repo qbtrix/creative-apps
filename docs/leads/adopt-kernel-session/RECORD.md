@@ -1,17 +1,17 @@
 # adopt-kernel-session lead record
 
 Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
-Run: act-1a1509b245f-653k (line lead with #1933, #1941, #1940)
-Stage: 3 wave A
-Base: b1526f3e (origin/dev); lead branch rebased on main 71facd44
-Next: #2979 (AD-f1) and #3010 (AD-d1) wait on the lane's macOS build; AD-f2 after #2979 merges, AD-d2 after #3010; AD-l1 blocked on adopt-kernel-undo:AU-library
+Run: act-1a1540ed5f3-c3x9 (slices AD-photo, AD-halo, AD-library; AD-flare, AD-design done in act-1a1509b245f-653k)
+Stage: 3 wave B
+Base: 6e70826b (origin/dev); lead branch on main 6f9a2b88
+Next: AD-p2 and AD-h2 builders running (one PR each, base dev); AD-l1 blocked on adopt-kernel-undo:AU-library
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AD-flare | Flare runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-f1, AD-f2 | MJ-AD-flare | editor-kernel:EK-doc | no | 0 | building | – | – |
-| AD-photo | Photo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-p1, AD-p2 | MJ-AD-photo | editor-kernel:EK-doc | no | 0 | merged-done (#2826, AD-p1); AD-p2 not in this run | – | – |
-| AD-halo | Halo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-h1, AD-h2 | MJ-AD-halo | editor-kernel:EK-doc | no | 0 | merged-done (#2827, AD-h1); AD-h2 not in this run | – | – |
+| AD-photo | Photo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-p1, AD-p2 | MJ-AD-photo | editor-kernel:EK-doc | no | 0 | building (AD-p1 #2826 merged; AD-p2 in wave B) | – | – |
+| AD-halo | Halo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-h1, AD-h2 | MJ-AD-halo | editor-kernel:EK-doc | no | 0 | building (AD-h1 #2827 merged; AD-h2 in wave B) | – | – |
 | AD-design | Design runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-d1, AD-d2 | MJ-AD-design | editor-kernel:EK-doc | no | 0 | ready (FH-1, FH-2 merged) | – | – |
 | AD-library | Library runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-l1, AD-l2 | MJ-AD-library | editor-kernel:EK-doc, adopt-kernel-undo:AU-library | no | 0 | blocked | – | – |
 
@@ -21,9 +21,9 @@ Next: #2979 (AD-f1) and #3010 (AD-d1) wait on the lane's macOS build; AD-f2 afte
 | AD-f1 | AD-flare | 1 | Flare adapter | `Sources/FlareModel/FlareFiles.swift`, `Sources/FlareApp/FlareAutosave.swift`, `Tests/FlareModelTests/FlareFilesTests.swift`, `Tests/FlareModelTests/FlareAutosaveDueTests.swift`, `Tests/FlareModelTests/FlareRecoveryRestoreTests.swift`, `Tests/mutations/FlareModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | #2979 | open (lane mac build) |
 | AD-f2 | AD-flare | 2 | Flare delete | `Sources/FlareModel/FlareFiles.swift`, `Sources/FlareApp/FlareAutosave.swift`, `Tests/mutations/FlareModel.FlareFiles.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits AD-f1 |
 | AD-p1 | AD-photo | 1 | Photo adapter | `Sources/PhotoModel/PhotoRecovery.swift`, `Sources/PhotoModel/Live/LiveArchive.swift`, `Sources/PhotoModel/PhotoSaveStatusHelp.swift`, `Tests/PhotoModelTests/PhotoRecoveryTests.swift`, `Tests/PhotoModelTests/LiveRecoveryTests.swift`, `Tests/PhotoModelTests/PhotoDocumentFileTests.swift`, `Tests/PhotoModelTests/PhotoSaveStatusHelpTests.swift`, `Tests/mutations/PhotoModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | #2826 | merged |
-| AD-p2 | AD-photo | 2 | Photo delete | `Sources/PhotoModel/PhotoRecovery.swift`, `Sources/PhotoModel/Live/LiveArchive.swift`, `Sources/PhotoModel/PhotoSaveStatusHelp.swift`, `Tests/mutations/PhotoModel.PhotoRecovery.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits AD-p1 |
+| AD-p2 | AD-photo | 2 | Photo delete | `Sources/PhotoModel/PhotoRecovery.swift`, `Sources/PhotoModel/Live/LiveArchive.swift`, `Sources/PhotoModel/PhotoSaveStatusHelp.swift`, `Tests/mutations/PhotoModel.PhotoRecovery.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | building (wave B) |
 | AD-h1 | AD-halo | 1 | Halo adapter | `Sources/HaloModel/HaloFiles.swift`, `Sources/HaloModel/Live/HaloFileEnvelope.swift`, `Sources/HaloModel/Live/HaloFileValidation.swift`, `Tests/HaloModelTests/HaloFileTests.swift`, `Tests/HaloModelTests/HaloFileValidationTests.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift`, `Tests/mutations/HaloModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | #2827 | merged |
-| AD-h2 | AD-halo | 2 | Halo delete | `Sources/HaloModel/HaloFiles.swift`, `Sources/HaloModel/Live/HaloFileEnvelope.swift`, `Sources/HaloModel/Live/HaloFileValidation.swift`, `Tests/mutations/HaloModel.HaloFiles.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits AD-h1 |
+| AD-h2 | AD-halo | 2 | Halo delete | `Sources/HaloModel/HaloFiles.swift`, `Sources/HaloModel/Live/HaloFileEnvelope.swift`, `Sources/HaloModel/Live/HaloFileValidation.swift`, `Tests/mutations/HaloModel.HaloFiles.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | building (wave B) |
 | AD-d1 | AD-design | 1 | Design adapter | `Sources/DesignModel/DesignFile.swift`, `Sources/DesignModel/Live/LiveFiling.swift`, `Tests/DesignModelTests/DesignFileTests.swift`, `Tests/DesignModelTests/DesignDocumentTests.swift`, `Tests/mutations/DesignModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | #3010 | open (lane mac build) |
 | AD-d2 | AD-design | 2 | Design delete | `Sources/DesignModel/DesignFile.swift`, `Sources/DesignModel/Live/LiveFiling.swift`, `Tests/mutations/DesignModel.LiveFiling.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits AD-d1 |
 | AD-l1 | AD-library | 1 | Library adapter | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift`, `Tests/LibraryModelTests/LibraryReadoutsTests.swift`, `Tests/mutations/LibraryModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits adopt-kernel-undo:AU-library |
@@ -44,6 +44,7 @@ Next: #2979 (AD-f1) and #3010 (AD-d1) wait on the lane's macOS build; AD-f2 afte
 - AD-d1 builders read finding #2938 (design line: DesignHistory reimplements kernel saved-state tracking): the adapter's DocumentSession is where that dirty tracking belongs.
 
 ## Open
+- 2026-10-19T13:15Z relaunch act-1a1540ed5f3-c3x9: brief adds AD-photo and AD-halo; AD-p2 and AD-h2 start (AD-p1/AD-h1 merged, no other PR on their files). PRs base dev (lane BASE_BRANCH is dev; brief says main).
 - AD-design waits design:files-history FH-1/FH-2 on DesignFile.swift and LiveFiling.swift.
 - AD-library waits adopt-kernel-undo:AU-library (blocked on filters-collections).
 - 2026-10-18 AD-f1 #2979: tokens from saved-document compare (FlareCore has no undo step number; needs-core issue could not be filed, creative-core 403); save now ends an in-progress scrub (tested).

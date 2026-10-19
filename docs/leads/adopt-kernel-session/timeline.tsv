@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-19T11:04Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; Halo #3184 merged)
 2026-10-19T11:24Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
 2026-10-19T11:44Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
+2026-10-19T13:15Z	3	stage-start	wave B	relaunch act-1a1540ed5f3-c3x9: AD-p2, AD-h2 builders
