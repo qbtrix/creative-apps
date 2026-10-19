@@ -20,6 +20,23 @@ extension AfterGlowJourneyTests {
     /// SwitchMenu's titles on the home, in order: its own item, then the apps.
     static let homeSwitchItems = ["Show AfterGlow Window", "Flare", "Design", "Photo", "Library", "Halo"]
 
+    /// The process `app` runs as once a switch has started it, by the URL of
+    /// its running bundle: `XCUIApplication(bundleIdentifier:)` raises when
+    /// Launch Services hasn't registered the id yet, as it can for an app the
+    /// launcher just started by path. Fails and returns nil when no such
+    /// process appears within `timeout` seconds.
+    func switched(to app: SuiteApp, timeout: TimeInterval = 30) -> XCUIApplication? {
+        let deadline = Date(timeIntervalSinceNow: timeout)
+        repeat {
+            let process = NSRunningApplication.runningApplications(withBundleIdentifier: app.bundleID)
+                .first(where: { !$0.isTerminated && $0.bundleURL != nil })
+            if let url = process?.bundleURL { return XCUIApplication(url: url) }
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.25))
+        } while Date() < deadline
+        XCTFail("\(app.displayName) (\(app.bundleID)) didn't start within \(Int(timeout)) s")
+        return nil
+    }
+
     /// SJ3: each app keeps its state across switches.
     @MainActor func testSwitchKeepsEachAppAsLeft() throws {
         let suite = SuiteHarness(self)
@@ -44,7 +61,7 @@ extension AfterGlowJourneyTests {
 
         // ⌃⌘2 opens Design as its own process; the home keeps running.
         home.press(character: "2", [.control, .command])
-        let design = XCUIApplication(bundleIdentifier: SuiteApp.design.bundleID)
+        guard let design = switched(to: .design) else { return }
         XCTAssert(design.wait(for: .runningForeground, timeout: 30), "⌃⌘2 didn't bring Design forward")
         XCTAssertNotEqual(home.app.state, .notRunning, "the home quit when Design opened")
 
@@ -95,12 +112,12 @@ extension AfterGlowJourneyTests {
 
         // Flare and Design each run as their own process.
         home.press(character: "1", [.control, .command])
-        let flare = XCUIApplication(bundleIdentifier: SuiteApp.flare.bundleID)
+        guard let flare = switched(to: .flare) else { return }
         XCTAssert(flare.wait(for: .runningForeground, timeout: 30), "⌃⌘1 didn't open Flare")
         home.app.activate()
         _ = home.app.wait(for: .runningForeground, timeout: 10)
         home.press(character: "2", [.control, .command])
-        let design = XCUIApplication(bundleIdentifier: SuiteApp.design.bundleID)
+        guard let design = switched(to: .design) else { return }
         XCTAssert(design.wait(for: .runningForeground, timeout: 30), "⌃⌘2 didn't open Design")
 
         // SIGKILL Flare: Design and the home keep running.
