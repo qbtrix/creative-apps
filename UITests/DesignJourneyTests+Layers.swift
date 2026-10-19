@@ -7,7 +7,9 @@
 // no selection. A row is clicked in its blank space, between the name and the
 // Hide toggle: a click on the name itself doesn't select the row (#2496).
 // DesignLayersJourneyTests holds the Layers panel's own journeys: a group
-// row's eye is its own element and hides the group (L-6, #2758).
+// row's eye hides the group (L-6, #2758). A group's row reads as one checkbox
+// (#2410), so its eye is clicked at the toggle column a child row's own eye
+// shows: a toggle sits at the same x in every row (#53).
 import XCTest
 
 extension Journey {
@@ -49,7 +51,7 @@ final class DesignLayersJourneyTests: XCTestCase {
     static let desktopRow = "design.layer.node-1", pairRow = "design.layer.node-6"
     static let childRows = ["design.layer.node-7", "design.layer.node-8"]
 
-    /// L-6 (#2758, #589): an open group's row has its own eye. A click hides the group as one
+    /// L-6 (#2758, #589): an open group's row has an eye. A click hides the group as one
     /// "Hide Layer" step; its children read hidden by it and stay listed; ⌘Z shows it again.
     @MainActor func testGroupRowEyeHidesGroup() {
         let design = Journey("Design", self, arguments: ["-DesignFixture", "cards"])
@@ -59,15 +61,14 @@ final class DesignLayersJourneyTests: XCTestCase {
         for child in Self.childRows {
             XCTAssert(design.element(child).waitForExistence(timeout: 5), "opening Pair showed no \(child) row")
         }
-        // The eye is its own element inside Pair's row, not merged into the disclosure's checkbox.
-        let pair = design.element("suite.sidebar").descendants(matching: .any)[Self.pairRow].firstMatch
-        let eye = design.designLayerToggle(pair, "Hide Layer")
-        XCTAssert(eye.waitForExistence(timeout: 5), "Pair's row has no eye of its own:\n\(pair.debugDescription)")
+        // Pair's row is one checkbox (#2410): its eye is at the x of E1's own eye, on Pair's row.
+        let pair = design.element(Self.pairRow), e1 = design.element(Self.childRows[0])
+        let childEye = design.designLayerToggle(e1, "Hide Layer")
+        XCTAssert(childEye.waitForExistence(timeout: 5), "E1's row has no Hide Layer eye")
         design.shot("layers-group-open")
-        eye.click()
+        let eyeOffset = CGVector(dx: childEye.frame.midX - pair.frame.minX, dy: pair.frame.height / 2)
+        pair.coordinate(withNormalizedOffset: .zero).withOffset(eyeOffset).click()
         XCTAssert(design.app.buttons["Undo Hide Layer"].waitForExistence(timeout: 5), "Pair's eye made no undo step")
-        XCTAssert(design.designLayerToggle(pair, "Show Layer").waitForExistence(timeout: 5),
-                  "Pair's eye doesn't read Show Layer once Pair is hidden")
         for child in Self.childRows {
             let row = design.element(child)
             XCTAssert(row.exists, "hiding Pair collapsed it: no \(child) row")
@@ -76,8 +77,9 @@ final class DesignLayersJourneyTests: XCTestCase {
         }
         design.shot("layers-group-hidden")
         design.press(character: "z", .command)
-        XCTAssert(design.designLayerToggle(pair, "Hide Layer").waitForExistence(timeout: 5), "⌘Z left Pair hidden")
-        XCTAssert(design.element(Self.childRows[0]).exists, "⌘Z collapsed Pair")
+        XCTAssert(e1.exists, "⌘Z collapsed Pair")
+        XCTAssert(design.designLayerToggle(e1, "Hide Layer").waitForExistence(timeout: 5),
+                  "⌘Z left Pair hidden: E1 still reads its group hidden")
         design.shot("layers-group-shown")
     }
 }

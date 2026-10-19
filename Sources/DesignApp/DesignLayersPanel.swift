@@ -19,11 +19,12 @@
 // a group around it reads dimmed (SuiteColor.textSecondary, which keeps 4.5:1
 // on a highlighted row), and a child of a hidden or locked group
 // shows the group's state in its toggles. Each row carries the identifier
-// `design.layer.<id>`, a container with its toggles inside. A group's row, its
-// disclosure's label, is that container too, SuiteUI's shape for a parent row
-// (SidebarNode, LL-9): its eye and lock stay their own elements beside the
-// disclosure, so the group's eye hides the group on its own (#589, #2758). It
-// used to combine into one checkbox (#2410), which merged its toggles away.
+// `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
+// group's row, its disclosure's label, reads as one checkbox. That checkbox takes
+// its identifier from the label's elements (its toggles' ids, joined), so the
+// label combines into one element first and the identifier is the row's (#2410).
+// A `.contain` label loses that identifier (#3195's journeys, #3300 to #3304), so the
+// group's eye stays a plain click at the toggle column, which every row shares (#53).
 // A page row is a container identified `design.page.row.<id>` with its checkmark inside: a page name's words sit in its text's value, not
 // its label, so journeys count pages by identifier (#1451). The section headers use SuiteColor.textSecondary; the
 // sidebar style's own header gray is under 4.5:1. While the list has focus, Edit >
@@ -244,8 +245,8 @@ private struct DesignLayerTree: View {
                 ) {
                     DesignLayerTree(nodes: node.children, model: model, perform: perform, drag: drag)
                 } label: {
-                    // The row's toggles stay their own elements beside the disclosure (LL-9).
-                    DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
+                    DesignLayerRow(node: node, model: model, perform: perform, drag: drag, isDisclosureLabel: true)
+                        .tag(node.id)
                 }
                 .tag(node.id)
             }
@@ -260,6 +261,8 @@ private struct DesignLayerRow: View {
     let model: DesignWorkspace
     let perform: DesignPerform
     let drag: DesignLayerDrag
+    /// A group's row: its disclosure flattens the label into one checkbox, so the row combines.
+    var isDisclosureLabel = false
 
     var body: some View {
         let id = node.id
@@ -294,7 +297,7 @@ private struct DesignLayerRow: View {
             DragGesture(minimumDistance: SuiteSpacing.xs, coordinateSpace: .global)
                 .onChanged { drag.changed(id, $0.location) }
                 .onEnded { _ in drag.ended(id) })
-        .accessibilityElement(children: .contain)
+        .accessibilityElement(children: isDisclosureLabel ? .combine : .contain)
         .accessibilityIdentifier("design.layer.\(id)")
     }
 }
