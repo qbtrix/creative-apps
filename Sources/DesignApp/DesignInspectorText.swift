@@ -1,7 +1,9 @@
 // DesignInspectorText.swift: the Text section of Design's inspector, shown
 // after Fill for every selected layer (style-rows, SR-t). Family is a
 // picker over the system's font families, Size a scrub field (1...1000 pt),
-// Weight and Alignment chips. Every row reads the style the selected text
+// Weight, Alignment and Width chips (Width switches the box between auto
+// width and fixed width, #3337; switching to auto keeps the width until the
+// next edit measures the text). Every row reads the style the selected text
 // layers share (`sharedTextStyle`), or "Mixed" when they differ, and each
 // change is one `.setStyle(.textStyle(...))`, one "Change Text Style" step
 // that sets only the text layers. Size commits on Return, on focus loss, on
@@ -21,7 +23,7 @@ import SwiftUI
     var pending: Double?
 }
 
-/// The selected layers' Text section: Family, Size, Weight and Alignment.
+/// The selected layers' Text section: Family, Size, Weight, Alignment and Width.
 struct DesignInspectorText: View {
     let model: DesignWorkspace
     let perform: DesignPerform
@@ -36,6 +38,14 @@ struct DesignInspectorText: View {
         InspectorOption(id: .leading, title: "Left"), InspectorOption(id: .center, title: "Center"),
         InspectorOption(id: .trailing, title: "Right"),
     ]
+
+    /// The width modes: an auto-width box grows with its text, a fixed-width one wraps (#3337).
+    static let widthModes: [InspectorOption<Bool>] = [
+        InspectorOption(id: false, title: "Auto width"), InspectorOption(id: true, title: "Fixed width"),
+    ]
+
+    /// The Width row's id.
+    static let widthID = "design.inspector.text-width"
 
     /// "System" first, then the families installed on this Mac.
     private static let families: [String] = ["System"] + NSFontManager.shared.availableFontFamilies
@@ -78,6 +88,10 @@ struct DesignInspectorText: View {
                 chipsRow("Alignment", options: Self.alignments, selected: style?.alignment, help: help,
                          id: DesignControlID.inspectorTextAlignment) { alignment in
                     commit { $0.alignment = alignment }
+                }
+                chipsRow("Width", options: Self.widthModes, selected: style.map { $0.fixedWidth == true }, help: help,
+                         id: Self.widthID) { fixed in
+                    commit { $0.fixedWidth = fixed }
                 }
                 if let help { InspectorNote(help) }
             }
