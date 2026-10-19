@@ -97,7 +97,9 @@ struct DesignArtwork: View {
 }
 
 /// Paints `painted` into `context` at `scale`, each node at its opacity times `fade`; the text
-/// node `editing` is left out. DesignArtwork and DesignPastEdge both draw through it.
+/// node `editing` is left out. DesignArtwork and DesignPastEdge both draw through it. Main actor,
+/// as DesignTextArtwork is; both callers draw from a Canvas in their `body`.
+@MainActor
 func paintArtwork(
     _ painted: [DesignPainted], in context: GraphicsContext, scale: Double, editing: String?, fade: Double = 1
 ) {
