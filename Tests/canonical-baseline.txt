@@ -43,7 +43,6 @@ Sources/HaloModel/Fakes/FakeProjectHistory.swift
 Sources/HaloModel/HaloHistory.swift
 Sources/HaloModel/HaloKeySelection.swift
 Sources/HaloModel/Live/HaloEasingRules.swift
-Sources/HaloModel/Live/HaloHistoryRules.swift
 Sources/HaloModel/Live/LiveKeyEasing.swift
 Sources/HaloModel/Live/LiveProjectHistory.swift
 Sources/LibraryApp/CropInspector.swift
