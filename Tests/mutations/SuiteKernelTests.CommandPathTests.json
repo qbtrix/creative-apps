@@ -12,5 +12,12 @@
     "find": "static func key(file: String, text: String) -> String { file + \": \" + text }",
     "replace": "static func key(file: String, text: String) -> String { file }",
     "tests": "CommandPathTests"
+  },
+  {
+    "label": "staleBaselineFails: a baseline line whose site is gone is ignored, so the baseline can grow stale",
+    "file": "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "find": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }",
+    "replace": "let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }.prefix(0)",
+    "tests": "CommandPathTests"
   }
 ]

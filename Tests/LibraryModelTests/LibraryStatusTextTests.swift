@@ -46,12 +46,13 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     catalog.open(path(1))
     row = try #require(catalog.statusRow)
     #expect(row.size == "6000 × 4000 px")
-    #expect(row.zoom == nil)
-    #expect(texts(row) == ["Fit", "1 of 24", "Loading", "Preview data"])
+    #expect(row.zoom == nil && row.fits)
+    #expect(row.shownZoom(fitScale: 0.14) == 0.14)
+    #expect(texts(row) == ["Loading", "Preview data"])
     catalog.loupeZoom = .actual
     row = try #require(catalog.statusRow)
-    #expect(row.zoom == 1)
-    #expect(!texts(row).contains("Fit"))
+    #expect(row.zoom == 1 && !row.fits)
+    #expect(row.shownZoom(fitScale: 0.14) == 1)
     catalog.selectCollection("favorites")
     #expect(catalog.statusRow?.size == "0 photos")
     let header = catalog.inspectorHeader(utcOffset: 0)
@@ -78,6 +79,28 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     #expect(catalog.statusRow?.preview == nil)
     catalog.select([path(2)])
     #expect(pill("selection", catalog.statusRow)?.text == "1 selected")
+    #expect(pill("selection", catalog.statusRow)?.style == .selected)
+    #expect(pill("cellSize", catalog.statusRow)?.style == .plain)
+}
+
+/// #3129: the grid has no zoom, so the row shows no zoom pill at any fit scale.
+@Test func gridShowsNoZoom() throws {
+    let row = try #require(shoot(live: true).statusRow)
+    #expect(row.zoom == nil && !row.fits)
+    #expect(row.shownZoom(fitScale: 0.14) == nil)
+    #expect(row.shownZoom(fitScale: 1) == nil)
+}
+
+/// #3133 and #3137: the loupe shows its zoom once (no "Fit" pill) and leaves
+/// its place to the HUD.
+@Test func loupeRowRepeatsNothing() throws {
+    var catalog = shoot(live: true)
+    catalog.open(path(1))
+    let row = try #require(catalog.statusRow)
+    let place = try #require(catalog.loupePosition)
+    #expect(pill("zoom", row) == nil)
+    #expect(pill("position", row) == nil)
+    #expect(!texts(row).contains(place))
 }
 
 @Test func favoritesCountsTheShownPhotos() {
@@ -94,10 +117,11 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     catalog.open(path(1))
     catalog.loupeZoom = .scale(2.5)
     #expect(catalog.statusRow?.zoom == 2.5)
-    #expect(pill("zoom", catalog.statusRow) == nil)
+    #expect(catalog.statusRow?.shownZoom(fitScale: 0.14) == 2.5)
     catalog.loupeZoom = .scale(.nan)
     #expect(catalog.statusRow?.zoom == nil)
-    #expect(pill("zoom", catalog.statusRow)?.text == "Fit")
+    #expect(catalog.statusRow?.shownZoom(fitScale: 0.14) == 0.14)
+    #expect(pill("zoom", catalog.statusRow) == nil)
     catalog.loupeZoom = .scale(0)
     #expect(catalog.statusRow?.zoom == nil)
 }
@@ -108,9 +132,9 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     catalog.load(LibraryFixtures.photos(named: "shoot"))
     // By capture date IMG_0024 is first; by name it is last.
     catalog.open(path(24))
-    #expect(pill("position", catalog.statusRow)?.text == "1 of 24")
+    #expect(catalog.loupePosition == "1 of 24")
     catalog.setSort(.name)
-    #expect(pill("position", catalog.statusRow)?.text == "24 of 24")
+    #expect(catalog.loupePosition == "24 of 24")
     #expect(catalog.statusRow?.size == "4000 × 6000 px")
 }
 
@@ -131,7 +155,7 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     catalog.loupeError = "Couldn't render this photo: bad data."
     let failed = try #require(pill("render", catalog.statusRow))
     #expect(failed.text == "Render failed")
-    #expect(failed.style == .warning)
+    #expect(failed.style == .error)
     #expect(failed.help == "Couldn't render this photo: bad data.")
     catalog.showGrid()
     #expect(pill("render", catalog.statusRow) == nil)
@@ -147,7 +171,7 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     catalog.saveError = "The disk is full."
     let failed = try #require(pill("save", catalog.statusRow))
     #expect(failed.text == "Not saved")
-    #expect(failed.style == .warning)
+    #expect(failed.style == .error)
     #expect(failed.help == "The disk is full.")
 }
 
@@ -162,7 +186,7 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     let middle = try #require(catalog.order.dropFirst(5_000).first)
     catalog.open(middle)
     let loupe = Budget.measure("status row-loupe-10000") { row = catalog.statusRow }
-    #expect(pill("position", row)?.text == "5001 of 10000")
+    #expect(row?.fits == true)
     #expect(loupe.median <= 1 * scale)
 }
 

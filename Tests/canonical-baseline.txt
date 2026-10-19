@@ -55,6 +55,7 @@ Sources/LibraryModel/CatalogHistory.swift
 Sources/LibraryModel/Contracts/ExportFormats.swift
 Sources/LibraryModel/Contracts/ExportPresets.swift
 Sources/LibraryModel/Contracts/ExportSidecar.swift
+Sources/LibraryModel/LibraryCrop.swift
 Sources/LibraryModel/LibraryExport.swift
 Sources/LibraryModel/Live/LiveCrop.swift
 Sources/LibraryModel/Live/LiveExporter.swift

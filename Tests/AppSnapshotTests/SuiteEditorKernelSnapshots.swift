@@ -6,8 +6,11 @@
 // suiteui-editor-kernel-guides-{light,dark}.png. Where each handle sits is the
 // kernel's `BoxMath.handles`; until EK-20 lands its body (a stub returning no
 // handles), the test uses `fixtureHandles`, test data in the same shape.
+// LayerTreeList as a sidebar layers panel (#2811): the New Layer header, the
+// Hero row selected and the Cards row in a refused rename, its draft kept with
+// the refusal under it. Writes suiteui-layer-tree-panel-{light,dark}.png.
 import SuiteKernel
-import SuiteUI
+@testable import SuiteUI
 import SwiftUI
 import Testing
 
@@ -55,6 +58,39 @@ import Testing
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(GuidesSample(), name: "suiteui-editor-kernel-guides-\(scheme.name)", scheme: scheme)
         }
+    }
+
+    @Test func layerPanel() throws {
+        #expect(LayerPanelSample.refused.isOpen && LayerPanelSample.refused.message == LayerPanelSample.refusal)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(LayerPanelSample(), name: "suiteui-layer-tree-panel-\(scheme.name)", scheme: scheme)
+        }
+    }
+}
+
+/// The fixture's top-level layers as a sidebar panel: New Layer header, Hero
+/// selected, Cards renamed to the taken "Header" and refused.
+private struct LayerPanelSample: View {
+    static let refusal = "A layer named “Header” already exists."
+
+    static var refused: SidebarRenameField {
+        var field = SidebarRenameField()
+        field.open("Cards")
+        field.type("Header")
+        field.commit(original: "Cards", rename: { _ in refusal })
+        return field
+    }
+
+    var body: some View {
+        LayerTreeList(
+            rows: KernelFixtures.tree200.rows(expanded: []), childCount: { _ in 0 }, selection: "hero",
+            naming: .sidebar, header: LayerTreeHeader(title: "Layers", action: ToolbarAction("New Layer", systemImage: "plus") {}),
+            onSelect: { _ in }, onRename: { _, _ in Self.refusal }, renaming: (id: "cards", field: Self.refused),
+            onAction: { _ in })
+        .frame(width: SuiteSize.sidebarWidth.ideal + SuiteSpacing.xxl, height: 360)
+        .background(SuiteColor.surface, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
+        .padding(SuiteSpacing.m)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

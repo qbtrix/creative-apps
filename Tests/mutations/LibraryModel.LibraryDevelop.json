@@ -47,5 +47,33 @@
     "find": "return history.undo.count > steps ? endDevelopDrag() : []",
     "replace": "return history.undo.count > steps ? Set(history.top?.after.map(\\.id) ?? []) : []",
     "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "paste records one step per photo instead of one for the set",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "return developStep(\"Paste Settings\", ids: ids) { $0.pastingAdjustments(from: copied) }",
+    "replace": "return ids.reduce(into: Set<String>()) { all, id in all.formUnion(developStep(\"Paste Settings\", ids: [id]) { $0.pastingAdjustments(from: copied) }) }",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "paste assigns the copied settings whole, so the source's crop is pasted",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "{ $0.pastingAdjustments(from: copied) }",
+    "replace": "{ _ in copied }",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "sync takes the last selected photo in the shown order as its source",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "let id = order.first(where: selection.contains)",
+    "replace": "let id = order.last(where: selection.contains)",
+    "tests": "LibraryDevelopTests"
+  },
+  {
+    "label": "a mixed develop value reads only the first photo",
+    "file": "Sources/LibraryModel/LibraryDevelop.swift",
+    "find": "return MetadataValue.of(values)",
+    "replace": "return .value(values[0])",
+    "tests": "LibraryDevelopTests"
   }
 ]

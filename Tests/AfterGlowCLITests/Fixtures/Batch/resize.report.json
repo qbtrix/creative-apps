@@ -1,0 +1,34 @@
+{
+  "inputs": [
+    {
+      "input": "batch/input/beach.fake",
+      "outputs": ["batch/out/beach-small.fake"],
+      "steps": [
+        {"id": "rect.select", "ok": true},
+        {"id": "rect.move", "ok": true, "undoStep": "Move Rectangle"},
+        {"id": "rect.add", "ok": true, "undoStep": "Add Rectangle"}
+      ]
+    },
+    {
+      "input": "batch/input/city.fake",
+      "outputs": ["batch/out/city-small.fake"],
+      "steps": [
+        {"id": "rect.select", "ok": true},
+        {"id": "rect.move", "ok": true, "undoStep": "Move Rectangle"},
+        {"id": "rect.add", "ok": true, "undoStep": "Add Rectangle"}
+      ]
+    },
+    {
+      "input": "batch/input/dune.fake",
+      "outputs": ["batch/out/dune-small.fake"],
+      "steps": [
+        {"id": "rect.select", "ok": true},
+        {"id": "rect.move", "ok": true, "undoStep": "Move Rectangle"},
+        {"id": "rect.add", "ok": true, "undoStep": "Add Rectangle"}
+      ]
+    }
+  ],
+  "ok": true,
+  "refused": 0,
+  "written": 3
+}

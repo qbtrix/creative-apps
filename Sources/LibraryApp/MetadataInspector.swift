@@ -1,7 +1,7 @@
 // MetadataInspector.swift: the inspector for the selected photos, in the
-// suite's inspector pattern (docs/design.md, Pro density): an InspectorHeader
-// with the selection's name, then Metadata: rating stars, flag and color
-// label dots. A field the photos differ in shows "Mixed". Values in, closures
+// suite's inspector pattern (docs/design.md, Pro density): Metadata: rating
+// stars, flag and color label dots. Its title is LibraryInspector's one
+// header above the tabs (#2982). A field the photos differ in shows "Mixed". Values in, closures
 // out; LibraryCatalog applies each edit to every selected photo. Each control
 // carries its MetadataInspectorID. Each star and dot gets a 20 pt square hit
 // frame (SuiteSize.iconButtonHit, docs/design.md's floor), edge to edge, and
@@ -21,7 +21,6 @@ struct MetadataInspector: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            InspectorHeader(metadata.title)
             InspectorSection("Metadata") {
                 InspectorRow("Rating") { stars }
                 InspectorPickerRow("Flag", options: flagOptions, selection: metadata.flag.shared) {

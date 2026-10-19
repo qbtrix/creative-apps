@@ -79,6 +79,9 @@ private struct GalleryInspectorPage: View {
                 }
                 .padding(.vertical, SuiteSpacing.m)
             }
+            // No scroller: a legacy scroller's page area is an unnamed button
+            // with no identifier to the app audit, as in LayerTreeList.
+            .scrollIndicators(.never)
             .frame(width: GalleryInspectorLog.panelWidth(request))
             .environment(\.suiteReduceMotion, reduceMotion)
             GalleryInspectorLogView(log: log)
@@ -266,6 +269,9 @@ private struct GalleryCurvesPage: View {
                 }
                 .padding(SuiteSpacing.m)
             }
+            // No scroller: a legacy scroller's page area is an unnamed button
+            // with no identifier to the app audit, as in LayerTreeList.
+            .scrollIndicators(.never)
             .frame(width: GalleryInspectorLog.panelWidth(request))
             .environment(\.suiteReduceMotion, reduceMotion)
             GalleryInspectorLogView(log: log)

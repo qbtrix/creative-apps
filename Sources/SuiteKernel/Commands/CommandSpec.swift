@@ -31,16 +31,30 @@ public struct CommandSpec<Target>: Sendable {
     /// Runs on a target with JSON params, returning the JSON result.
     let run: @Sendable (inout Target, JSONValue) throws -> JSONValue
     /// A spec whose params decode as `P` and whose result encodes `R`; `schema` overrides the probe of `P`.
-    /// CC-1 stub: the run throws `CatalogError.notBuilt` until command-catalog CC-7.
+    /// Params that validate but don't decode as `P` throw `malformedParams` before `run` is called.
     public static func typed<P: Decodable & Sendable, R: Encodable>(
         _ id: String, title: String, summary: String, kind: CommandKind,
         params: P.Type, schema: ParamSchema? = nil, result: ParamSchema = .none, example: JSONValue,
         availability: @escaping @Sendable (Target) -> Availability = { _ in .available },
         run: @escaping @Sendable (inout Target, P) throws -> R) -> CommandSpec {
         CommandSpec(id: id, title: title, summary: summary, kind: kind, params: schema ?? SchemaProbe.schema(of: P.self),
-                    result: result, example: example, availability: availability) { _, _ in
-            throw CatalogError.notBuilt(id: id, feature: "command-catalog CC-7")
+                    result: result, example: example, availability: availability) { target, json in
+            let decoded: P
+            do { decoded = try json.decode(P.self) } catch { throw CatalogError.malformedParams(id: id, [issue(error)]) }
+            return try JSONValue(encoding: try run(&target, decoded))
         }
+    }
+    /// A decoding error as one schema issue: the JSON pointer it names and what it says.
+    static func issue(_ error: any Error) -> SchemaIssue {
+        let context: DecodingError.Context?, last: (any CodingKey)?
+        switch error as? DecodingError {
+        case .typeMismatch(_, let c)?, .valueNotFound(_, let c)?, .dataCorrupted(let c)?: (context, last) = (c, nil)
+        case .keyNotFound(let key, let c)?: (context, last) = (c, key)
+        default: (context, last) = (nil, nil)
+        }
+        let keys = (context?.codingPath ?? []) + (last.map { [$0] } ?? [])
+        let path = keys.map { "/" + ($0.intValue.map(String.init) ?? $0.stringValue) }.joined()
+        return SchemaIssue(path: path, message: context?.debugDescription ?? String(describing: error))
     }
 }
 
