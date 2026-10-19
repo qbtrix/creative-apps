@@ -42,7 +42,7 @@ settings:
 packages:
   creative-core:
     url: https://github.com/qbtrix/creative-core
-    revision: bf5426ee38b4aebb2c9132b29ab9307ecc980ac4
+    revision: 0de5687d2f5dbce3fa012605f1a6f97c2cd94055
 targetTemplates:
   # Release graph: <X>Model compiles Sources/<X>Model and links SuiteModel,
   # SuiteKernel and the engines through CreativeEngines.

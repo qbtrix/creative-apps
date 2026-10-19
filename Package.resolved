@@ -1,12 +1,12 @@
 {
-  "originHash" : "a366dd57aacbe1b2fa87dd2a4e8d6503caf327895d4809f35a2b33da2e083546",
+  "originHash" : "51af2cc84de167c0ad4a1fb6141bab73fe59d0e0f4750864a446b7d54af51bdb",
   "pins" : [
     {
       "identity" : "creative-core",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/qbtrix/creative-core",
       "state" : {
-        "revision" : "bf5426ee38b4aebb2c9132b29ab9307ecc980ac4"
+        "revision" : "0de5687d2f5dbce3fa012605f1a6f97c2cd94055"
       }
     },
     {
