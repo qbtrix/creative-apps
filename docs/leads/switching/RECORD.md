@@ -2,7 +2,7 @@
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a150baa312-n5va · Session: claude/switching-feature-lead-kyvcdx · Started: 2026-10-18 (earlier run act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 4 (SW-4a #2989 merged as 531550f; waiting on a full dev CI run that completes; 39173775025, 39176304199 and 39177282982 were each cancelled by the next dispatch before getting a runner; now tracking 39177967096 on 9ece98c5. Scoped suite runs (39176573924 green on db15b8a6) skip the AfterGlow journeys)
+Stage: 4 (SW-4a #2989 merged as 531550f; waiting on a full dev CI run that completes; 39173775025, 39176304199 and 39177282982 were each cancelled by the next dispatch before getting a runner; 39177967096 was cancelled too; now tracking 39178441058 on 22046535. Scoped suite runs (39176573924 green on db15b8a6) skip the AfterGlow journeys)
 Base: origin/dev 2567c02
 Next: green dev macOS run on or after 531550f; review round; Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
 

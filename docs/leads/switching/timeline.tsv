@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-18T23:15Z	4	wait-ci	39173775025	full dev CI with 531550f pending, no runner yet
 2026-10-18T23:27Z	4	wait-ci	39176304199	39173775025 cancelled when superseded; new full dev CI on 398ea5d4 (contains 531550f) pending
 2026-10-18T23:50Z	4	wait-ci	39177967096	39176304199 and 39177282982 cancelled by newer dispatches; scoped suite 39176573924 green but runs no AfterGlow journeys
+2026-10-19T00:16Z	4	wait-ci	39178441058	39177967096 cancelled by the next dispatch; 39178441058 on 22046535 pending since 23:54Z
