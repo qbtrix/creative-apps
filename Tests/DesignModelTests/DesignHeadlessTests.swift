@@ -17,10 +17,10 @@ import Testing
     }
 
     @Test func opensSavesAndReopensWithEveryLayer() throws {
-        let data = try Self.input("export-frames-svg", "two-frames.design")
-        let doc = try DesignHeadless.open(data, name: "two-frames.design")
+        let data = try Self.input("export-frames-svg", "loose-front.design")
+        let doc = try DesignHeadless.open(data, name: "loose-front.design")
         #expect(try doc.save() == data)
-        #expect(Self.layers(doc) == [.number(2), .number(2)])
+        #expect(Self.layers(doc) == [.number(1), .number(2)])
         let again = try DesignHeadless.open(doc.save(), name: "copy.design")
         #expect(Self.layers(again) == Self.layers(doc))
         #expect(again.workspace.pages == doc.workspace.pages)
@@ -60,7 +60,13 @@ import Testing
     }
 
     @Test func exportsEveryFrameOfEveryPageAsSVGAndRefusesOtherFormats() throws {
-        let doc = try DesignHeadless.open(Self.input("export-frames-svg", "two-frames.design"), name: "two-frames.design")
+        var doc = try DesignHeadless.open(Self.input("export-frames-svg", "loose-front.design"), name: "loose-front.design")
+        #expect(try doc.export("svg", options: .object([:])).map(\.suggestedName) == ["Back.svg"])
+        var framed = doc.workspace
+        framed.pages[0].nodes = [DesignNode(id: "node-1", name: "Cover", kind: .frame, frame: DesignRect(x: 0, y: 0, width: 320, height: 200),
+                                            children: framed.pages[0].nodes, fill: DesignColor(255, 255, 255))]
+        doc = DesignHeadless(framed, name: "two-frames.design")
+        _ = try DesignHeadless.catalog.run("page.select", params: .object(["page": .string("page-2")]), on: &doc)
         let files = try doc.export("svg", options: .object([:]))
         #expect(files.map(\.suggestedName) == ["Cover.svg", "Back.svg"] && files.allSatisfy { $0.format == "svg" })
         #expect(throws: CatalogError.notBuilt(id: "export.png", feature: "a Linux PNG writer for Design's raster path")) {
