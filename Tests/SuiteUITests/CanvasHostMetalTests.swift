@@ -125,6 +125,21 @@ import Testing
         #expect(CanvasHostView.drawableSize(board: .zero, scale: 2, document: .zero) == CGSize(width: 1, height: 1))
     }
 
+    /// Before its first real frame a window lays the host out at zero size: no artboard, so no
+    /// drawable. Presenting one (1 x 1) made MPS's Lanczos scale an 8K document into a single pixel,
+    /// which asks Metal for a 30238 px temporary texture and aborts the app.
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
+    func aHostWithNoArtboardPresentsNothing() throws {
+        guard drawablesWork() else { return }
+        let canvas = CanvasHostView(frame: .zero)
+        canvas.show(EightK())
+        let presenter = ClearingMetalPresenter()
+        canvas.useRendering(.gpu, device: MTLCreateSystemDefaultDevice(), presenter: presenter)
+        canvas.layoutSubtreeIfNeeded()
+        #expect(canvas.artboard.isEmpty)
+        #expect(presenter.presented == 0, "a host with no artboard presented a drawable")
+    }
+
     @Test func anEmbeddedHostFillsItsBoundsAndTakesNoClick() {
         let canvas = loadedHost()
         canvas.isEmbedded = true
@@ -179,6 +194,12 @@ import Testing
 private struct OneTile: CanvasContentProviding {
     let documentSize = FakeCanvasContent().documentSize
     func tiles(dirtyOnly: Bool) -> [CanvasTile] { Array(FakeCanvasContent().tiles(dirtyOnly: true).prefix(1)) }
+}
+
+/// An 8K (7680 x 4320) document with no tiles yet, as Photo's is when it opens.
+private struct EightK: CanvasContentProviding {
+    let documentSize = CGSize(width: 7680, height: 4320)
+    func tiles(dirtyOnly: Bool) -> [CanvasTile] { [] }
 }
 
 /// A 960 x 600 host showing the fake document's 20 tiles, laid out.
