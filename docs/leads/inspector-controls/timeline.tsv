@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-19T11:08:27Z	heartbeat	#3155 merged (2ceab7d4); suiteui 39211725961 done: no new failing tests, one new step failure (Onion fade 0.208s) filed #3235, fix PR #3236; queued suiteui 39239970582 at 895fb2d0 has the fixes but not #3155
 2026-10-19T11:30:34Z	heartbeat	#3236 lane build 39243165907 queued; dev CI 39244857355 (c6ad68f7, has cc14022e + fixes) pending
 2026-10-19T11:53:49Z	heartbeat	#3236 lane build 39243165907 still queued; dev runs 39239970582/39244857355/39246909805 all cancelled, waiting for a completed suiteui/full run
+2026-10-19T12:04:00Z	heartbeat	relaunch act-1a15409e144-cyb5; #3236 lane build 39243165907 queued; full dev run 39249031049 (cd7d4120, has cc14022e) pending

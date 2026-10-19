@@ -1,10 +1,10 @@
 # inspector-controls lead record
 
 Issue: #1508 · Packet: docs/blueprints/suiteui/features/inspector-controls.md
-Run: act-1a150947ee2-hc6b (was act-1a14c4f9bb5-swq8) · Session: (this session) · Started: 2026-10-16T22:48Z (resumed 2026-10-18T00:03Z)
-Stage: 4 Anatomy round 1 (fix batch)
-Base: 0e4e913b5046a2d8557e0e48edb7176025e9854a
-Next: fix PRs #2977 #2978 #2976 #2970 merge through the lane; then #2962 (SP9 clicks the Onion chip below the fold in UITests/SuiteJourneyTests+InspectorCurves.swift) once #2976, which edits that file, has merged; then re-record IC-15 to IC-18 from the first dev run containing the fixes, then round 2.
+Run: act-1a15409e144-cyb5 (was act-1a150947ee2-hc6b, act-1a14c4f9bb5-swq8) · Session: claude/inspector-controls-adopt-kernel-export-ct4yeg · Started: 2026-10-16T22:48Z (resumed 2026-10-19T12:04Z)
+Stage: 6 feature-done merged (#3094, cc14022e); waiting on a completed green suiteui/full dev run
+Base: cd7d4120 (origin/dev)
+Next: #3236 (Onion fade window, closes #3235) merges once lane build 39243165907 passes; then the first completed green suiteui-scoped or full ci.yml run on dev containing cc14022e and the round fixes (full run 39249031049 at cd7d4120 is pending) -> Belt-Contact-Sheet on #1508. Triage any red journey in that run first.
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
@@ -55,3 +55,4 @@ Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
 - 2026-10-18T20:14Z: round 1 not clean. The journey blockers SJ11, SJ13, SJ14, SJ15, SJ16 and SJ20 fail in run 39153976103, whose conclusion still reads success. Fix batch launched against base b1526f3e.
 - 2026-10-18T20:37Z: fix batch done. r-b1 #2977 (#2951 #2955 #2957 #2958), r-b2 #2978 (#2952 #2961 #2963 #2964), r-b3 #2976 (#2953 #2959 #2960), r-b4 #2970 (#2954 #2956), each CI: PASS on Linux. #2962 still open. Removed the attribution footers that the REST writes added to the bodies of #2970, #2977 and #2978. Baselines #2943, #2946 and #2947 held with no-fast-lane.
 - 2026-10-18T20:55Z: the lane merged #2943, #2946 and #2947 in a batch it started before the hold labels landed. These baselines are now stale against the round-1 fixes. IC-19 #2997 (slider-log, section-header, keyframe) and IC-20 #3001 (easing, tone curve) delete them. A missing baseline is only a known issue, so dev stays green; the deleted baselines get re-recorded from the first dev run containing the fixes. Chips and presets are not touched by any fix and stay.
+- 2026-10-19T12:04Z: resumed under run act-1a15409e144-cyb5. All IC tasks and fix rounds merged (#2970 #2976 #2977 #2978 #3013 #3083 #3084 #3127 #3128 #3141 #3147 #3155 #3157 #3161 #3164 #3165 #3175); feature-done #3094 merged as cc14022e. Every dev ci.yml run since 11:14Z was cancelled (superseded); full run 39249031049 at cd7d4120 pending. #3236 open, clean, lane build 39243165907 queued.
