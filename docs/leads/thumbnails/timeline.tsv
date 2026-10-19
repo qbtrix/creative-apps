@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-18T23:48Z	round1	scoped library run 39176576523 in progress; full run likely hung in suite tests
 2026-10-19T00:15:16Z	round2	scoped 39176576523 read; round 2 fixes gating
 2026-10-19T00:20:26Z	round2-prs	#3053 #3054 opened
+2026-10-19T00:38:31Z	watch	round 2: lane macOS builds queued for #3053 (39180396349) and #3054 (39180413140); PR bodies get a tool footer re-added server-side on edit, lane strips it from the squash

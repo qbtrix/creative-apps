@@ -4,7 +4,7 @@ Issue: #1506 · Packet: docs/blueprints/library/features/thumbnails.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: round 2 (the last) PRs open: #3053 (J2 cell query, Fixes #3050) and #3054 (budget settle, Fixes #3051), both Fast-Check pass. Supervisor: please start a scoped library run once both merge. Green: contact sheets on #1513 #1511 #1506. Red: gaps
+Next: waiting on lane macOS builds for #3053 and #3054 (round 2, last), then merge. Supervisor: please start a scoped library run once both merge. Green: contact sheets on #1513 #1511 #1506. Red: gaps. Note: the PR-body attribution footer is re-appended by the tooling on every edit; I can't remove it.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
