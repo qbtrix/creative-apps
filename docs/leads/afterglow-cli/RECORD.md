@@ -174,3 +174,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - CL-10 #3211 merged about 15:00Z.
 - Merged dev into CL-11 with no conflicts. The diff is docs only, +264/−1. scripts/ci --changed printed CI: PASS. Pushed c3447624.
 - Opened #3281 with the labels fast-lane and feature-done (Slice: CL-z, Refs #2998).
+
+### 15:49Z: heartbeat
+- CL-11 #3281 is clean and docs only, waiting on the lane's Linux check.
