@@ -1,6 +1,6 @@
 // CLIStubTests.swift: LJ0's second half (afterglow-cli CL-2). The app
 // registry names the five apps in order and adds the fake only when asked;
-// every stub entry point (CL-7 filled ScriptRunner, CL-9 RealJobs) exits 69 with one notBuilt object naming its slice;
+// every entry point is real (CL-7 ScriptRunner, CL-9 RealJobs, MC-4 MCPServer);
 // FakeIO round trips a file and never overwrites unless told to.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -36,24 +36,6 @@ struct CLIStubTests {
                 try app.session(open: Data(), name: "x")
             }
         }
-    }
-
-    @Test(arguments: [
-        ("mcp", "afterglow-mcp is not built yet"),
-    ])
-    func everyStubExits69NamingItsSlice(entry: String, names: String) {
-        let io = FakeIO()
-        let apps = Apps.all + [Apps.fake]
-        let code: Int32 = switch entry {
-        default: MCPServer.serve([], apps: apps, io: io)
-        }
-        #expect(code == 69)
-        #expect(io.stdout.count == 1)
-        let line = io.stdout.first ?? ""
-        #expect(line.hasPrefix(#"{"error":{"kind":"notBuilt","message":"#))
-        #expect(line.hasSuffix(#""ok":false}"#))
-        #expect(io.stderr.count == 1)
-        #expect(io.stderr.first?.contains(names) == true)
     }
 
     @Test func fakeIORoundTripsAFile() throws {

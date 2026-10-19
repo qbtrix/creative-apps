@@ -2,7 +2,7 @@
   "title": "Snapping: edges and centres to layers, the frame and the page, smart guides with distances, equal spacing, ⌘ to drag free, View > Snap to Layers",
   "wave": 1,
   "order": 70,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "captain call 2026-10-16, snapping in v1; UX review 2026-10-16 item 11 and R7; one gap issue per slice, filed at stage 1; kernel amendment 2026-10-17: engines built in SuiteKernel/Snap",
   "waits_on": "editor-kernel EK-a (SuiteKernel snap stubs; SN-1, SN-12); design-contracts; design-seams, canvas-basics CB-a and select-several SS-b for SN-b's routes; design-window DW-d for the overlay; design-window DW-a, canvas-basics CB-c and files-history FH-b for the menu and modifiers",

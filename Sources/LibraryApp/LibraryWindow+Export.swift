@@ -43,8 +43,7 @@ extension LibraryWindow {
 
     /// The sheet for the current export state, every control wired to the catalog.
     var exportSheet: LibraryExportSheet {
-        let state = model.exportState
-        let options: ExportOptions? = LibraryExportSheet.options(state)
+        let options: ExportOptions? = LibraryExportSheet.options(model.exportState)
         let editing = options != nil
         var actions = LibraryExportSheet.Actions()
         actions.setOptions = enabled(editing) { (next: ExportOptions) -> Void in model.setExportOptions(next) }
@@ -66,7 +65,7 @@ extension LibraryWindow {
         }
         let help: String? = model.services.unavailable["exporter"] ?? options?.naming.help
         return LibraryExportSheet(
-            state: state, count: model.exportTargets.count, preview: model.exportPreview,
+            state: model.exportState, count: model.exportTargets.count, preview: model.exportPreview,
             writable: JPEGWriter.writableFormats(), exportHelp: help, presets: areas.export.presets, actions: actions)
     }
 
@@ -93,9 +92,7 @@ extension LibraryWindow {
     /// Try Again: the failed photos only, under the last options.
     private func retryExport() {
         guard let options = areas.export.last else { return }
-        planExport(options) { (names: Set<String>) -> ExportPlan? in
-            model.retryExport(options: options, existingNames: names)
-        }
+        planExport(options) { (names: Set<String>) -> ExportPlan? in model.retryExport(options: options, existingNames: names) }
     }
 
     /// Lists the folder, then plans and runs. An unreadable folder plans with no
@@ -118,9 +115,7 @@ extension LibraryWindow {
         let run = Task.detached(priority: .userInitiated) { () -> ExportSummary in
             let summary = await ExportRunner.run(
                 plan, photos: photos, exporter: exporter, writer: writer,
-                writeSidecar: { (data: Data, folder: String, name: String) async throws -> Void in
-                    try await sidecars.writeSidecar(data, folder: folder, fileName: name)
-                },
+                writeSidecar: { try await sidecars.writeSidecar($0, folder: $1, fileName: $2) },
                 progress: { (done: Int) -> Void in sink.yield(done) })
             sink.finish()
             return summary
@@ -149,10 +144,7 @@ extension LibraryWindow {
         state.store.write(ExportPresetFile(presets: state.presets, last: state.last))
     }
 
-    private func cancelExport() {
-        guard model.cancelExport() else { return }
-        areas.export.run?.cancel()
-    }
+    private func cancelExport() { if model.cancelExport() { areas.export.run?.cancel() } }
 
     /// Choose…: the open panel, folders only; the editing options take its folder.
     private func exportChooseFolder() {
@@ -175,8 +167,5 @@ extension LibraryWindow {
 }
 
 private extension ExportState {
-    var isRunning: Bool {
-        if case .running = self { return true }
-        return false
-    }
+    var isRunning: Bool { if case .running = self { return true }; return false }
 }

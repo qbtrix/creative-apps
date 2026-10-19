@@ -79,6 +79,8 @@ struct LibraryWindow: View {
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        // The crop frame and the CROP section read these (crop CR-6).
+        .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }

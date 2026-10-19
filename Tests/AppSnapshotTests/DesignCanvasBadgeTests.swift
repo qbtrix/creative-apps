@@ -8,6 +8,7 @@
 #if canImport(AppKit)
 import AppKit
 import DesignModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -26,6 +27,7 @@ extension BodyCountSuites {
         static let page = CGSize(width: 1440, height: 1024)
 
         @Test(.timeLimit(.minutes(2))) func theBadgeReadsTheLiveBoxMidDrag() async throws {
+            #if DEBUG
             let live = DesignLiveDrag()
             let w = RenderBudgetWindow(DesignWindow(seed: Self.seed(), live: live))
             defer { w.close() }
@@ -51,6 +53,7 @@ extension BodyCountSuites {
             #expect(live.workspace == nil)
             #expect(Self.label(DesignControlID.canvasBadge, in: w.host) == after.selectionBadge)
             #expect(after.selectionBadge != "100 × 80")
+            #endif
         }
 
         @Test(.timeLimit(.minutes(2))) func aDragWithTheBadgeRunsTheEditorAtMostThreeTimes() async throws {
@@ -62,6 +65,19 @@ extension BodyCountSuites {
             #expect((step.bodies ?? 0) >= 1, "the drag never reached the window: \(step)")
             expectBodies(step, atMost: 3, target: 3)
             #endif
+        }
+
+        /// The badge hangs clear of the bottom-middle handle, so the pill never sits on the grab square.
+        @Test(.timeLimit(.minutes(2))) func theBadgeClearsTheBottomHandles() async throws {
+            let w = RenderBudgetWindow(DesignWindow(seed: Self.seed()))
+            defer { w.close() }
+            try await w.settle(800)
+            let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
+            let badge = try #require(await w.element(DesignControlID.canvasBadge), "no badge")
+            // A's bottom edge is y 180 on the page; window coordinates run y up.
+            let edge = w.point(CGPoint(x: 150, y: 180), on: Self.page, in: board).y
+            let handleBottom = edge - SuiteSize.selectionHandle / 2
+            #expect(badge.maxY <= handleBottom - SuiteSpacing.xxs, "badge top \(badge.maxY), handle bottom \(handleBottom)")
         }
 
         /// The accessibility label of the first element called `identifier` under `element`, in tree order.
