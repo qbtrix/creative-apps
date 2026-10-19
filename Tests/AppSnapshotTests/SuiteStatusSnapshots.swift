@@ -39,6 +39,12 @@ import Testing
         #expect(named.sizeText == "No file open")
     }
 
+    /// A viewer with no zoom (Library's grid) hides the zoom pill (#1184).
+    @Test func aNilZoomDrawsNoZoomPill() {
+        #expect(ViewerStatusBar(zoom: nil, size: "24 photos").zoomText == nil)
+        #expect(ViewerStatusBar(zoom: 1, size: "800 × 600 px").zoomText == ViewerZoom.percentText(1))
+    }
+
     @Test func everyPillStyleMaps() {
         #expect(StatusPillStyle(PillStyle.plain) == .plain)
         #expect(StatusPillStyle(PillStyle.toggle(isOn: true)) == .toggle(isOn: true))

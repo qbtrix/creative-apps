@@ -19,7 +19,6 @@ A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector Easing
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingSegmentLabel Easing
 A Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView KeyedRow
 A Sources/HaloApp/HaloLayerList.swift::HaloLayerList LayerList
-A Sources/HaloApp/HaloLayerList.swift::HaloLayerRow LayerList
 A Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet Sheet
 A Sources/HaloApp/HaloRenderedFrameView.swift::HaloRenderedNote Notice
 A Sources/HaloApp/HaloTransport.swift::HaloTransport Transport
@@ -31,7 +30,6 @@ A Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar StatusBar
 A Sources/PhotoApp/ExportSheet.swift::ExportSheet Sheet
 A Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet Sheet
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
-A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerRow LayerList
 A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
 A Sources/PhotoApp/StraightenSheet.swift::StraightenSheet Sheet
 B Sources/AfterGlowApp/HomeGrid.swift::HomeGrid caps-header
@@ -40,6 +38,7 @@ B Sources/AfterGlowApp/OnboardingWindow.swift::OnboardingWindow sheet-buttons
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark accent-outline
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark probe-element
 B Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark accent-outline
+B Sources/DesignApp/DesignInspectorPage.swift::DesignPageSide pending-commit
 B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox accent-outline
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover caps-header
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover easing
@@ -59,7 +58,6 @@ B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector easing
 B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector selected-fill
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView keyed-row
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView pending-commit
-B Sources/HaloApp/HaloLayerList.swift::HaloLayerRow selected-fill
 B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet error-label
 B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet sheet-buttons
 B Sources/HaloApp/HaloTextInspector.swift::HaloTextInspector pending-commit
