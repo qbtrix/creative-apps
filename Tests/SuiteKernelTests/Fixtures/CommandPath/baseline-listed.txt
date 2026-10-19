@@ -1,0 +1,3 @@
+# The fixture app's baseline: both bare sites listed, by file and line text.
+Sources/FixtureApp/Menus/BareMenu.swift.txt: MenuCommand("X", help: "", perform: {})
+Sources/FixtureApp/Toolbar.swift.txt: Button("Zoom In", systemImage: "plus.magnifyingglass") { zoom(on: 2) }
