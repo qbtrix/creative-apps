@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1543c761a-p4tj (resumed from act-1a1514ffe22-lvmw) · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 3 shipping CL-z (resumed run)
 Base: 6e70826be59e092e59269605cfdfbce93c4a2bbe (origin/dev)
-Next: CL-11 #3281 (head c3447624) in lane; on merge wait for a scoped suite/full run containing it, then Belt-Slice-Done: CL-z and Belt-Contact-Sheet on #2998.
+Next: CL-11 #3281 MERGED 17:16Z (8f405311). Wait for a ci.yml run on dev (full or app=suite) containing 8f405311 to succeed, then Belt-Slice-Done: CL-z <run> and Belt-Contact-Sheet: <run> on #2998.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -189,3 +189,7 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ### 17:02Z: heartbeat
 - Lane batch lane/batch-20261019170158 has been in its Linux check since 17:02Z. Our four PRs are clean and ready. No dev-red issue is open.
+
+## 17:16Z: CL-11 merged, CL-z built
+- #3281 squash-merged as 8f405311 at 17:16Z. It carried feature-done, so the lane should dispatch a full CI run on dev.
+- Waiting for a successful ci.yml run that contains 8f405311, then the Slice-Done and Contact-Sheet comments.
