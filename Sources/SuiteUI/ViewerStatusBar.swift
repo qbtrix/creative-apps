@@ -1,11 +1,12 @@
 // ViewerStatusBar.swift: the row under a canvas or viewer, its facts drawn as
-// status pills, right-aligned and 4 pt apart: the zoom percent, the document
-// size, then each view of the trailing slot (a tool name, a render time, a
+// status pills, right-aligned and 4 pt apart: the zoom percent (none when
+// `zoom` is nil, as in a photo grid), the document size, then each view of the trailing slot (a tool name, a render time, a
 // View menu) in its own pill. A pill is a 20 pt capsule on the row fill (24
 // to hit) in the 10 pt pill type and secondary text. A trailing view marked
 // `.statusPill(.toggle(isOn: true))` takes the selected tint and accent text,
-// and one marked `.statusPill(.warning)` the warning tint and color with a
-// triangle. Chrome, but flat: no glass and no band. The zoom text comes from
+// one marked `.statusPill(.warning)` the warning tint and color with a
+// triangle, and one marked `.statusPill(.error)` (a failed save or render)
+// the error tint and color with an exclamation circle. Chrome, but flat: no glass and no band. The zoom text comes from
 // ViewerZoom, so every app formats it the same way.
 import SwiftUI
 
@@ -14,6 +15,37 @@ public enum StatusPillStyle: Hashable, Sendable {
     case plain
     case toggle(isOn: Bool)
     case warning
+    case error
+
+    /// The symbol before the pill's text: a triangle for a warning, an
+    /// exclamation circle for an error (design.md State colors).
+    var symbol: String? {
+        switch self {
+        case .warning: "exclamationmark.triangle.fill"
+        case .error: "exclamationmark.circle.fill"
+        case .plain, .toggle: nil
+        }
+    }
+
+    /// The pill's text and symbol color.
+    var foreground: Color {
+        switch self {
+        case .warning: SuiteColor.stateWarning
+        case .error: SuiteColor.stateError
+        case .toggle(isOn: true): SuiteColor.accentText
+        case .plain, .toggle: SuiteColor.textSecondary
+        }
+    }
+
+    /// The capsule's fill.
+    var fill: Color {
+        switch self {
+        case .warning: SuiteColor.warningTint
+        case .error: SuiteColor.errorTint
+        case .toggle(isOn: true): SuiteColor.selectedTint
+        case .plain, .toggle: SuiteColor.row
+        }
+    }
 }
 
 private struct StatusPillStyleKey: ContainerValueKey {
@@ -28,14 +60,14 @@ extension ContainerValues {
 }
 
 extension View {
-    /// Marks a view in ViewerStatusBar's trailing slot as a toggle or warning pill.
+    /// Marks a view in ViewerStatusBar's trailing slot as a toggle, warning or error pill.
     public func statusPill(_ style: StatusPillStyle) -> some View {
         containerValue(\.statusPillStyle, style)
     }
 }
 
 public struct ViewerStatusBar<Trailing: View>: View {
-    private let zoom: Double
+    private let zoom: Double?
     private let size: String
     private let trailing: Trailing
     private var composing: any StatusPillComposing = SuiteStatusPills()
@@ -43,8 +75,9 @@ public struct ViewerStatusBar<Trailing: View>: View {
     @Environment(\.chipProbe) private var probe
 
     /// `zoom` is the scale the viewer draws at (1 is 100%; ViewerZoom.fitScale
-    /// gives CanvasSurface's), `size` the document size ("1920 × 1080 px").
-    public init(zoom: Double, size: String, @ViewBuilder trailing: () -> Trailing) {
+    /// gives CanvasSurface's; nil hides the zoom pill), `size` the document
+    /// size ("1920 × 1080 px").
+    public init(zoom: Double?, size: String, @ViewBuilder trailing: () -> Trailing) {
         self.zoom = zoom
         self.size = size
         self.trailing = trailing()
@@ -53,10 +86,13 @@ public struct ViewerStatusBar<Trailing: View>: View {
     public var body: some View {
         HStack(spacing: SuiteSpacing.pillGap) {
             Spacer(minLength: SuiteSpacing.s)
-            pill(.plain) {
-                Text(zoomText)
-                    .foregroundStyle(SuiteColor.textPrimary)
-                    .accessibilityLabel("Zoom \(zoomText)")
+            if let zoomText {
+                pill(.plain) {
+                    Text(zoomText)
+                        .foregroundStyle(SuiteColor.textPrimary)
+                        .accessibilityLabel("Zoom \(zoomText)")
+                }
+                .help("Zoom")
             }
             pill(.plain) { Text(sizeText) }
             ForEach(subviews: trailing) { view in
@@ -71,24 +107,22 @@ public struct ViewerStatusBar<Trailing: View>: View {
     }
 
     private func pill(_ style: StatusPillStyle, @ViewBuilder _ content: () -> some View) -> some View {
-        let on = style == .toggle(isOn: true)
-        return HStack(spacing: SuiteSpacing.xxs) {
-            if style == .warning { Image(systemName: "exclamationmark.triangle.fill").imageScale(.small) }
+        HStack(spacing: SuiteSpacing.xxs) {
+            if let symbol = style.symbol { Image(systemName: symbol).imageScale(.small) }
             content()
         }
         .font(SuiteFont.pill)
-        .foregroundStyle(style == .warning ? SuiteColor.stateWarning : on ? SuiteColor.accentText : SuiteColor.textSecondary)
+        .foregroundStyle(style.foreground)
         .padding(SuiteInset.pill)
         .frame(height: SuiteSize.pill)
-        .background(
-            style == .warning ? SuiteColor.warningTint : on ? SuiteColor.selectedTint : SuiteColor.row, in: Capsule())
+        .background(style.fill, in: Capsule())
         .frame(height: SuiteSize.pillHit)
-        .accessibilityAddTraits(on ? .isSelected : [])
+        .accessibilityAddTraits(style == .toggle(isOn: true) ? .isSelected : [])
     }
 }
 
 extension ViewerStatusBar where Trailing == EmptyView {
-    public init(zoom: Double, size: String) {
+    public init(zoom: Double?, size: String) {
         self.init(zoom: zoom, size: size) { EmptyView() }
     }
 }
@@ -153,9 +187,10 @@ extension ViewerStatusBar {
         self.composing = composing
     }
 
-    /// The zoom pill's text: the composer's first pill.
-    var zoomText: String {
-        faces.first?.text ?? ViewerZoom.percentText(zoom)
+    /// The zoom pill's text: the composer's first pill; nil without a zoom.
+    var zoomText: String? {
+        guard let zoom else { return nil }
+        return faces.first?.text ?? ViewerZoom.percentText(zoom)
     }
 
     /// The size pill's text: the composer's second pill for a document size,
@@ -165,7 +200,7 @@ extension ViewerStatusBar {
     }
 
     private var faces: [StatusPill] {
-        composing.pills(zoom: zoom, documentSize: documentSize ?? PlaneExtent(width: 0, height: 0), trailing: [])
+        composing.pills(zoom: zoom ?? 1, documentSize: documentSize ?? PlaneExtent(width: 0, height: 0), trailing: [])
     }
 
     @ViewBuilder fileprivate func trailingPill(_ view: Subview) -> some View {

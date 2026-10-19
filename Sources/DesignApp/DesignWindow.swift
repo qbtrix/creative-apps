@@ -198,6 +198,7 @@ struct DesignWindow: View {
         case .renameLayer(let id, let name):
             // The row ids come from the model's own rows; only the name can be refused.
             do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
+        case .setPageSize(let width, let height): model.setPageSize(width: width, height: height)
         }
     }
 

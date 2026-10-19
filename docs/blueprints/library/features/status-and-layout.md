@@ -54,7 +54,7 @@ nothing copied. Most-used first.
 |---|---|
 | "Is it still importing? Did my changes save?" Progress lives in one spot that scrolls away or hides behind the loupe | Import progress and save problems are pills in the status row, under the grid and the loupe alike |
 | "How many did I select?" | "5 selected" next to the photo count |
-| "Am I looking at the sharp picture or a quick preview?" (culling is judging focus) | A "Preview" pill until the full render lands; "Render failed" in warning colors with the reason |
+| "Am I looking at the sharp picture or a quick preview?" (culling is judging focus) | A "Preview" pill until the full render lands; "Render failed" in error colors with the reason |
 | "What zoom am I at?" | The zoom pill in the loupe (Fit, 100%, 250%), none in the grid |
 | "Basic file facts need digging" | The inspector header: capture date, pixel size, file kind; for several photos, their count and capture span |
 | Panels clip or the grid leaves a ragged gap at some window sizes | Layout tests at 880, 1024, 1280, 1440 and 1920 |
@@ -237,7 +237,7 @@ statusRow:                                              # SL-2
 
 progressPills:                                          # SL-2
   case .running(let p) = importState  → import p.text ("Importing 3 of 27")
-  in the loupe on an available photo: loupeError → render "Render failed" (warning, help the error)
+  in the loupe on an available photo: loupeError → render "Render failed" (error, help the error)
      else loupeRender nil → render "Loading"; quality .preview → render "Preview"
   saveError → save "Not saved" (warning, help the error); else catalogState .newer → save "Read only" (warning, its message)
   services.isPreview → preview "Preview data" (warning, previewDataHelp)
