@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-19T09:18:48Z	heartbeat	check	-	no change: main 6f9a2b8; #3184 and #3198 open, waiting on their macOS builds; hand-offs open
 2026-10-19T09:41:22Z	wave5	launch	wf_e7c9f05a-613	AL-p3 AL-h3 AL-f3 from b749dd9
 2026-10-19T10:03:13Z	heartbeat	check	-	wave5 PRs #3217 (AL-h3) #3216 (AL-f3) open; AL-p3 building
+2026-10-19T10:05:30Z	wave5	done	#3216 #3217 #3218	three PRs in lane
