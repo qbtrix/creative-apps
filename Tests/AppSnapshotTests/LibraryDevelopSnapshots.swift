@@ -30,12 +30,32 @@ import Testing
 
     /// A window's menu where every Develop action can run (each does nothing here).
     private func menu(for catalog: LibraryCatalog) -> LibraryMenu {
+        // Each action in its own typed local, as LibraryWindow+Develop builds
+        // them: one long initializer of untyped closures was more than the
+        // type checker could finish.
+        let none: LibraryMenu.Action = { () -> Void in }
+        let set: @MainActor (DevelopSlider, Double) -> Void = { (_: DevelopSlider, _: Double) -> Void in }
+        let setCurve: @MainActor ([DevelopCurvePoint]) -> Void = { (_: [DevelopCurvePoint]) -> Void in }
+        let setLevels: @MainActor (DevelopLevels.Field, Double) -> Void = {
+            (_: DevelopLevels.Field, _: Double) -> Void in
+        }
+        let reset: @MainActor (DevelopGroup?) -> Void = { (_: DevelopGroup?) -> Void in }
+        let resetSlider: @MainActor (DevelopSlider) -> Void = { (_: DevelopSlider) -> Void in }
+        var develop = LibraryMenu.Develop()
+        develop.set = set
+        develop.setCurve = setCurve
+        develop.setLevels = setLevels
+        develop.endEdit = none
+        develop.reset = reset
+        develop.resetSlider = resetSlider
+        develop.resetCurve = none
+        develop.resetLevels = none
+        if catalog.syncSource != nil { develop.sync = none }
+        develop.syncTitle = catalog.syncTitle
+        if catalog.canShowOriginal { develop.toggleOriginal = none }
         var menu = LibraryMenu()
-        menu.photo.pasteSettings = catalog.canPasteSettings ? {} : nil
-        menu.photo.develop = LibraryMenu.Develop(
-            set: { _, _ in }, setCurve: { _ in }, setLevels: { _, _ in }, endEdit: {}, reset: { _ in },
-            resetSlider: { _ in }, resetCurve: {}, resetLevels: {}, sync: catalog.syncSource == nil ? nil : {},
-            syncTitle: catalog.syncTitle, toggleOriginal: catalog.canShowOriginal ? {} : nil)
+        if catalog.canPasteSettings { menu.photo.pasteSettings = none }
+        menu.photo.develop = develop
         return menu
     }
 
