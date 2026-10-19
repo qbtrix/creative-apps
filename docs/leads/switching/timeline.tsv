@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-19T19:51:59Z	ping	Belt stall ping answered on #1507; run still queued
 2026-10-19T20:05:22Z	heartbeat	stage 4: run 39292755765 still queued (macos-26 backlog)
 2026-10-19T20:22:42Z	ping	Belt stall ping answered; run still queued
+2026-10-19T20:26:51Z	heartbeat	stage 4: run 39292755765 still queued
