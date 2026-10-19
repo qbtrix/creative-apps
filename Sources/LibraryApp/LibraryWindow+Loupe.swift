@@ -92,7 +92,7 @@ extension LibraryWindow {
 
     /// Asks the catalog for the render it needs and runs it through the queue
     /// off the main actor; the result lands under its token.
-    private func loupeAreaRender(_ quality: RenderQuality) {
+    func loupeAreaRender(_ quality: RenderQuality) {
         guard let request = model.loupeRequest(longSide: loupeLongSide, quality: quality) else { return }
         let state = areas.loupe
         loupeAreaListen(state)
