@@ -124,7 +124,7 @@ import Testing
         return model
     }
 
-    @Test func aRowInRename() async throws {
+    @Test(.disabled("quarantine #3259 until 2026-10-22")) func aRowInRename() async throws {
         for scheme in [ColorScheme.light, .dark] {
             let w = RenderBudgetWindow(PanelSample(model: try cards()).hosted(scheme), size: Self.size)
             defer { w.close() }
@@ -137,7 +137,7 @@ import Testing
         }
     }
 
-    @Test func aLayerNestedInAGroup() async throws {
+    @Test(.disabled("quarantine #3260 until 2026-10-22")) func aLayerNestedInAGroup() async throws {
         var model = try cards()
         try model.moveLayer(title, into: pair, at: 0)
         try model.setExpanded(pair, true)

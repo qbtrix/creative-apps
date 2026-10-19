@@ -20,7 +20,7 @@ has to end up.
   there too, and its `perf-suites.txt` line reads
   `AppSnapshotTests.BodyCountSuites/<Suite>`.
 - **Step p95** is wall time, so `RenderBudget<App>Tests/timing` is listed in
-  `Tests/perf-suites.txt`. It runs in the report-only Perf step, one test at a
+  `Tests/perf-suites.txt`. It runs nightly on the captain's Mac (perf-nightly), one test at a
   time. The numbers below come from a debug build on an M2 Pro (max of
   3 runs). A release build is faster. Halo's were re-measured on `dev` with
   #1471 (no scrub ticks) and #1517 (live drag) in, at machine load 20 (a run at
