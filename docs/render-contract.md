@@ -76,7 +76,7 @@ count. A hit's key is `path::Scope.rule`, so moving lines doesn't move it.
 | Rule | Fails on | Where | Escape (same line) |
 |---|---|---|---|
 | offscreen | `.drawingGroup(`, `.compositingGroup(`, `ImagePaint(`, `Canvas {` / `Canvas(` | canvas and overlay views: files under `Sources/{Photo,Design,Flare,Halo,Library}App` or `Sources/SuiteUI` named with Canvas, Stage, Viewer, Overlay, Viewport, Artboard, Artwork, Loupe, SelectionMarks, SelectionHandles or SnapGuide, plus any file with a `// render-contract: canvas-view` line | `// render-contract: allow <reason>` (the reason is required) |
-| gpu-nil | `return nil` in a func returning `RenderSurface?` | `Sources/*Model` files named with Render (the GPU composite route) | `// render-contract: cpu-op <id>`, `<id>` in `Tests/render-cpu-ops.txt` |
+| gpu-nil | `return nil` in a GPU-route func: one returning `RenderSurface?`, or with `// render-contract: gpu-route` on the line above it | all of `Sources/` | `// render-contract: cpu-op <id>`, `<id>` in `Tests/render-cpu-ops.txt` |
 | readback | `<x>dispatcher.read(` | all of `Sources/` | `cpu-op <id>`, or `allow <reason>` for export and the eyedropper |
 
 Hits that predate the lint are listed in
@@ -86,8 +86,9 @@ does a listed one that is gone, until you rerun
 takes `--allow-increase` and a reviewer who agrees.
 
 A new canvas view whose file name doesn't say so: add the
-`// render-contract: canvas-view` line to its header. A new GPU route that
-returns something other than `RenderSurface?`: widen the lint in the same PR.
+`// render-contract: canvas-view` line to its header. A new GPU-route func that
+returns something other than `RenderSurface?` (a plan, a stack, a Bool): put
+`// render-contract: gpu-route` on the line above it, so its bail-outs count.
 
 Not mechanical, so on review: shadow, blur and mask on canvas-sized views
 (the lint can't tell a handle from an artboard), full-layer uploads and CPU

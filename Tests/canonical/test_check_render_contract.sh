@@ -2,9 +2,9 @@
 # Tests/canonical/test_check_render_contract.sh: scripts/check-render-contract, the
 # render contract's lint (docs/render-contract.md), on scratch trees: each offscreen
 # pattern is caught in a canvas or overlay view and only there, the allow escape needs a
-# reason, comments and strings never count, a GPU-route `return nil` and a dispatcher
-# readback are caught unless marked with a registered cpu-op, and the baseline allows
-# existing hits but only shrinks.
+# reason, comments and strings never count, a GPU-route `return nil` (by return type or
+# the gpu-route marker) and a dispatcher readback are caught unless marked with a
+# registered cpu-op, and the baseline allows existing hits but only shrinks.
 # Run: bash Tests/canonical/test_check_render_contract.sh   (exit 0 = all pass)
 # bash 3.2 compatible, needs python3.
 set -uo pipefail
@@ -50,8 +50,9 @@ expect "the canvas-view marker opts a file in; SuiteUI Canvas* and Loupe files a
 tree
 add Sources/PhotoModel/PhotoRenderRoute.swift $'protocol P {\n  func need() -> RenderSurface?\n}\nextension W {\n  func gpu(_ r: Rect) throws\n    -> RenderSurface?\n  {\n    guard ok else { return nil }\n    let xs = items.compactMap { x -> Int? in return nil }\n    guard blur else { return nil } // render-contract: cpu-op blur-x\n    guard mask else { return nil } // render-contract: cpu-op mask-z\n    return s\n  }\n  func other() -> Int? { return nil }\n  var tiles: ResidentSurfaces? { return nil }\n}'
 add Sources/PhotoModel/PhotoLayers.swift $'func gpu() -> RenderSurface? { return nil }'
-expect "a GPU-route return nil is caught (closures too), a registered cpu-op passes, an unknown one fails; other funcs and files are not scanned" \
-  "Sources/PhotoModel/PhotoRenderRoute.swift::gpu.gpu-nil,Sources/PhotoModel/PhotoRenderRoute.swift::gpu.gpu-nil,Sources/PhotoModel/PhotoRenderRoute.swift::gpu.gpu-nil" "$(hits)"
+add Sources/PhotoModel/PhotoLiveTone.swift $'// render-contract: gpu-route\n@inline(__always)\nfunc plan() -> Plan? {\n  guard ok else { return nil }\n  return p\n}\n// render-contract: gpu-route\nvar x = 1\nfunc after() -> Plan? { return nil }'
+expect "a GPU-route return nil is caught in any file (closures too), the gpu-route marker opts a func in, a registered cpu-op passes, an unknown one fails, other funcs are not scanned" \
+  "Sources/PhotoModel/PhotoLayers.swift::gpu.gpu-nil,Sources/PhotoModel/PhotoLiveTone.swift::plan.gpu-nil,Sources/PhotoModel/PhotoRenderRoute.swift::gpu.gpu-nil,Sources/PhotoModel/PhotoRenderRoute.swift::gpu.gpu-nil,Sources/PhotoModel/PhotoRenderRoute.swift::gpu.gpu-nil" "$(hits)"
 expect "the unknown cpu-op says so" \
   "Sources/PhotoModel/PhotoRenderRoute.swift:11: gpu.gpu-nil: cpu-op \`mask-z\` is not in Tests/render-cpu-ops.txt (new)" \
   "$(rm -f "$tmp/r/Tests/render-contract-baseline.txt"; run --update-baseline >/dev/null; printf '' >"$tmp/r/Tests/render-contract-baseline.txt"; run | grep mask-z)"
