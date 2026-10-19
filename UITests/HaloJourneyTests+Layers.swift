@@ -104,9 +104,8 @@ final class HaloLayersJourneyTests: XCTestCase {
         halo.shot("layers-7")
 
         // 8. Click Rig's lane (selects Rig, focuses the timeline), ⌫ four times.
-        let lane = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Rig'")).firstMatch
-        XCTAssert(lane.waitForExistence(timeout: 5), "no Rig lane in the timeline")
+        let lane = halo.trackName("Rig")
+        XCTAssert(lane.waitForExistence(timeout: 5), "no Rig track (halo.timeline.name.*) in the timeline")
         lane.click()
         let remaining = [[Self.titleLayer, Self.badge, Self.background], [Self.titleLayer, Self.badge], [Self.titleLayer], []]
         for rows in remaining {

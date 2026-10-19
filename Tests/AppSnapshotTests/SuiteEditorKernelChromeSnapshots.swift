@@ -1,5 +1,6 @@
 // SuiteEditorKernelChromeSnapshots.swift: EK-30's chrome in Light and Dark:
-// the export sheet editing, at 4 of 10 and finished; the stroke pad with the
+// the export sheet editing, at 4 of 10 and finished, and a host's sheet
+// (#1989) failed with its own options row and Try Again; the stroke pad with the
 // brush ring over the status line naming the Brush tool (EK-31). Writes
 // suiteui-editor-kernel-{export,stroke}-{light,dark}.png.
 import Foundation
@@ -25,13 +26,23 @@ private struct ExportSheets: View {
         let runs: [ExportRun<ExportPick>] = [
             .editing(ExportPick(format: "jpeg", scale: 2, quality: 0.8)), .running(png, done: 4, total: 10), .finished(png, ["editor-kernel.png"]),
         ]
-        HStack(alignment: .top, spacing: SuiteSpacing.l) {
-            ForEach(runs, id: \.self) { run in
-                SuiteExportSheet(
-                    ExportSheetRows(run, formats: formats) { $0 }, formats: formats,
-                    onFormat: { _ in }, onScale: { _ in }, onQuality: { _ in }, onExport: {}, onClose: {}
-                ).background(SuiteColor.panel)
+        VStack(alignment: .leading, spacing: SuiteSpacing.l) {
+            HStack(alignment: .top, spacing: SuiteSpacing.l) {
+                ForEach(runs, id: \.self) { run in
+                    SuiteExportSheet(
+                        ExportSheetRows(run, formats: formats) { $0 }, formats: formats,
+                        onFormat: { _ in }, onScale: { _ in }, onQuality: { _ in }, onExport: {}, onClose: {}
+                    ).background(SuiteColor.panel)
+                }
             }
+            SuiteExportSheet(
+                ExportSheetRows(.failed(png, "editor-kernel.png is already in Exports."), formats: formats) { $0 },
+                formats: formats, idPrefix: "gallery.export", onFormat: { _ in }, onScale: { _ in }, onQuality: { _ in },
+                onExport: {}, onClose: {}, onTryAgain: {}
+            ) {
+                StudioScrubRow(label: "Frame", value: 12, range: 0...47, step: 1, onChange: { _ in })
+            }
+            .background(SuiteColor.panel)
         }
         .padding(SuiteSpacing.xxl).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }

@@ -205,6 +205,15 @@ extension CLIFileSafetyTests {
         #expect(disk.bytes("b.fake") == Data("new".utf8))
     }
 
+    /// A write into folders that don't exist yet makes them (a batch's `out/`), and only them.
+    @Test func liveWriteMakesFolders() throws {
+        let (io, disk, _) = try Self.live([:])
+        try io.write(Data("new".utf8), to: disk.path("out/deep/c.fake"), replace: false)
+        #expect(disk.bytes("out/deep/c.fake") == Data("new".utf8))
+        #expect(disk.names() == ["out"])
+        #expect((try? FileManager.default.contentsOfDirectory(atPath: disk.path("out/deep"))) == ["c.fake"])
+    }
+
     @Test func liveReadRefuses() throws {
         let (io, disk, _) = try Self.live(["a.fake": Self.original, "big.fake": Data(count: 9)])
         #expect(try io.read(disk.path("a.fake")) == Self.original)

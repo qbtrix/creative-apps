@@ -7,9 +7,10 @@
 // `library.crop.aspect.<title>` ("library.crop.aspect.1:1"), Straighten
 // `library.crop.straighten`, and `library.crop.auto`, `.apply`, `.cancel`.
 //
-// Written before its views (lead.md, contract rule 13): CR-5 writes it
-// skipped, CR-6 drops the skip for the (F) run, CR-7 adds the (L) run and
-// step 10. Each step takes the window and a shot suffix so the (L) run can
+// Written before its views (lead.md, contract rule 13): CR-5 wrote it
+// skipped, CR-6 dropped the skip for the (F) run, CR-7 adds the (L) run and
+// step 10. The frame's handles are `library.crop.handle.<name>`
+// (`library.crop.handle.topLeft`). Each step takes the window and a shot suffix so the (L) run can
 // walk the same steps on real files.
 import XCTest
 
@@ -21,7 +22,6 @@ extension LibraryJourneyTests {
     /// angle and Return store one "Crop" step; a drag and Escape record
     /// nothing; the arrows nudge the frame; Auto levels; Reset Crop clears it.
     @MainActor func testCropAndStraighten() throws {
-        throw XCTSkip("waits on CR-6")
         let library = cropOpen(Self.cropFake, suffix: "")
         cropSquare(library)
         cropStraighten(library, suffix: "", width: nil)

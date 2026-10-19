@@ -5,7 +5,8 @@
 // suiteui-status-dark.png, and checks the same sheet against
 // Golden/chrome/status-<appearance>.png in the four appearances (EC-12
 // commits the baselines). The bar's zoom and size text come from its
-// StatusPillComposing, PillStyle maps onto StatusPillStyle, and a pill that
+// StatusPillComposing, PillStyle maps onto StatusPillStyle, each style has its
+// color and symbol (an error is stateError, not a warning), and a pill that
 // acts registers the reason its tooltip shows. macOS only.
 import SwiftUI
 import Testing
@@ -39,11 +40,30 @@ import Testing
         #expect(named.sizeText == "No file open")
     }
 
+    /// A viewer with no zoom (Library's grid) hides the zoom pill (#1184).
+    @Test func aNilZoomDrawsNoZoomPill() {
+        #expect(ViewerStatusBar(zoom: nil, size: "24 photos").zoomText == nil)
+        #expect(ViewerStatusBar(zoom: 1, size: "800 × 600 px").zoomText == ViewerZoom.percentText(1))
+    }
+
     @Test func everyPillStyleMaps() {
         #expect(StatusPillStyle(PillStyle.plain) == .plain)
         #expect(StatusPillStyle(PillStyle.toggle(isOn: true)) == .toggle(isOn: true))
         #expect(StatusPillStyle(PillStyle.toggle(isOn: false)) == .toggle(isOn: false))
         #expect(StatusPillStyle(PillStyle.warning) == .warning)
+    }
+
+    /// A failed save or render is an error, not a warning: stateError with an
+    /// exclamation circle (design.md State colors, #3167).
+    @Test func anErrorPillDrawsInTheErrorColor() {
+        #expect(StatusPillStyle.error.symbol == "exclamationmark.circle.fill")
+        #expect(StatusPillStyle.error.foreground == SuiteColor.stateError)
+        #expect(StatusPillStyle.error.fill == SuiteColor.errorTint)
+        #expect(StatusPillStyle.warning.symbol == "exclamationmark.triangle.fill")
+        #expect(StatusPillStyle.warning.foreground == SuiteColor.stateWarning)
+        #expect(StatusPillStyle.plain.symbol == nil)
+        #expect(StatusPillStyle.plain.foreground == SuiteColor.textSecondary)
+        #expect(StatusPillStyle.toggle(isOn: true).foreground == SuiteColor.accentText)
     }
 
     @Test func aTogglePillRegistersTheReasonItsTooltipShows() throws {
