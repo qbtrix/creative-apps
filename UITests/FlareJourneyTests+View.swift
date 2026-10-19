@@ -1,8 +1,6 @@
 // FlareJourneyTests+View.swift: J14 (stage-edit SE-2) on `-FlareSample bounce`. The zoom reads off the hidden
-// `flare.stage.zoom` ("Fit", "200%"; the pill's words don't reach XCUITest, #1452); each guide is
-// `flare.stage.guide.<i>` with its readout ("y 300") as the label. Ruler numbers are drawn, not elements, so the pan
-// is read off the artboard (`suite.canvas`) moving under the rulers. Positions land within a point of the target:
-// a drag is placed in screen points at the fit's scale and guides snap to whole scene points.
+// `flare.stage.zoom` (#1452); guide i is `flare.stage.guide.<i>`, labelled "y 300". Ruler numbers aren't elements, so
+// the pan is read off the artboard (`suite.canvas`). Guides land within a point: drags are placed in screen points.
 import XCTest
 
 final class FlareViewJourneys: XCTestCase {
@@ -40,8 +38,7 @@ final class FlareViewJourneys: XCTestCase {
         at(canvas.frame.midX, corner.frame.midY, flare)
             .press(forDuration: 0.1, thenDragTo: at(canvas.frame.midX, canvas.frame.minY + 300 * scale, flare))
         XCTAssert(guide.waitForExistence(timeout: 5), "the drag out of the top ruler placed no guide")
-        let first = position(guide)
-        XCTAssert(first.map { abs($0 - 300) <= 1 } == true, "the guide reads \(guide.label), not y 300")
+        XCTAssert(position(guide).map { abs($0 - 300) <= 1 } == true, "the guide reads \(guide.label), not y 300")
         flare.shot("view-4-guide")
 
         // 5. Drag the guide 20 scene points down: "y 320", one Move Guide step.
@@ -64,9 +61,7 @@ final class FlareViewJourneys: XCTestCase {
 
     /// "y 300" as 300; nil for any other label.
     @MainActor private func position(_ guide: XCUIElement) -> Double? {
-        guard guide.exists else { return nil }
-        let parts = guide.label.split(separator: " ")
-        return parts.count == 2 && (parts[0] == "y" || parts[0] == "x") ? Double(parts[1]) : nil
+        guide.exists && guide.label.hasPrefix("y ") ? Double(guide.label.dropFirst(2)) : nil
     }
 
     /// The screen point (x, y) as a coordinate in the window.

@@ -1,6 +1,5 @@
-// FlareGuideDragTests.swift: stage-edit SE-2 (J14, QB-F3). A guide drag shows its guide moving and sends its view
-// intents on release, one undo step: a drag out of a ruler adds a guide, a drag of a guide moves it, and either
-// released over its ruler leaves no guide. Positions snap to whole scene points.
+// FlareGuideDragTests.swift: stage-edit SE-2 (J14, QB-F3). A guide drag sends its view intents on release, one undo
+// step: out of a ruler adds a guide, a guide drag moves it, either released over its ruler leaves none. Whole points.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -18,15 +17,15 @@ private func apply(_ intents: [FlareIntent], to w: inout FlareWorkspace) {
     }
 }
 
-private func bounce() -> FlareWorkspace {
+private func bounce(guides: [(Guide.Axis, Double)] = []) -> FlareWorkspace {
     var w = FlareWorkspace(services: .fake())
     w.load(FlareFixtures.bounce)
+    for (axis, at) in guides { w.addGuide(axis, at: at) }
     return w
 }
 
 @Test func aDragOutOfTheTopRulerAddsOneGuideOnRelease() {
-    var w = bounce()
-    var drag = FlareGuideDrag(axis: .horizontal, at: 12.4)
+    var w = bounce(), drag = FlareGuideDrag(axis: .horizontal, at: 12.4)
     for y in [120.0, 260.2, 299.6] { drag.move(to: y) }
     #expect(drag.shown(over: w.guides) == [Guide(axis: .horizontal, position: 300)])
     #expect(w.guides.isEmpty, "the drag changed the document before its release")
@@ -37,9 +36,7 @@ private func bounce() -> FlareWorkspace {
 }
 
 @Test func aGuideDragIsOneMoveGuideStep() throws {
-    var w = bounce()
-    w.addGuide(.vertical, at: 40)
-    w.addGuide(.horizontal, at: 300)
+    var w = bounce(guides: [(.vertical, 40), (.horizontal, 300)])
     let added = w.document
     var drag = try #require(FlareGuideDrag(guide: 1, of: w.guides))
     for y in [305.0, 312, 320.3] { drag.move(to: y) }
@@ -52,8 +49,7 @@ private func bounce() -> FlareWorkspace {
 }
 
 @Test func aGuideDroppedOnItsRulerIsGone() throws {
-    var w = bounce()
-    w.addGuide(.horizontal, at: 300)
+    var w = bounce(guides: [(.horizontal, 300)])
     var drag = try #require(FlareGuideDrag(guide: 0, of: w.guides))
     drag.move(to: -4)
     apply(drag.end(overRuler: true), to: &w)
@@ -64,11 +60,9 @@ private func bounce() -> FlareWorkspace {
 }
 
 @Test func aGuideDragThatGoesNowhereOrNowhereRealSendsNothing() throws {
-    var w = bounce()
-    w.addGuide(.horizontal, at: 300)
+    let w = bounce(guides: [(.horizontal, 300)])
     #expect(FlareGuideDrag(guide: 1, of: w.guides) == nil)
     var drag = try #require(FlareGuideDrag(guide: 0, of: w.guides))
     drag.move(to: .nan)
-    #expect(drag.position == 300)
-    #expect(drag.end(overRuler: false).isEmpty, "a drag back to where it began made a step")
+    #expect(drag.position == 300 && drag.end(overRuler: false).isEmpty, "a drag back to where it began made a step")
 }
