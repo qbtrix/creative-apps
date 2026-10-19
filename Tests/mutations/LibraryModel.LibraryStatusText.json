@@ -14,10 +14,38 @@
     "tests": "LibraryStatusTextTests.swift"
   },
   {
-    "label": "the loupe's place counts from zero (0 of 24)",
+    "label": "the grid shows the fit scale as a zoom pill (#3129)",
     "file": "Sources/LibraryModel/LibraryStatusText.swift",
-    "find": "text: \"\\(index + 1) of \\(order.count)\"",
-    "replace": "text: \"\\(index) of \\(order.count)\"",
+    "find": "zoom ?? (fits ? fitScale : nil)",
+    "replace": "zoom ?? fitScale",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the loupe at Fit shows no zoom (#3133)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "fits: zoom == nil, size: size",
+    "replace": "fits: false, size: size",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "a failed save draws as a warning, not an error (#3132)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "text: \"Not saved\", help: saveError, style: .error",
+    "replace": "text: \"Not saved\", help: saveError, style: .warning",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "a failed render draws as a warning, not an error (#3132)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "text: \"Render failed\", help: loupeError, style: .error",
+    "replace": "text: \"Render failed\", help: loupeError, style: .warning",
+    "tests": "LibraryStatusTextTests.swift"
+  },
+  {
+    "label": "the selection pill draws flat (#3136)",
+    "file": "Sources/LibraryModel/LibraryStatusText.swift",
+    "find": "help: \"Photos selected in the grid.\", style: .selected",
+    "replace": "help: \"Photos selected in the grid.\", style: .plain",
     "tests": "LibraryStatusTextTests.swift"
   },
   {

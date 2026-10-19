@@ -5,14 +5,15 @@
 // 1440 × 900 and 1920 × 1080 with `-SuiteWindowSize <w>x<h>`, as Halo's
 // testLayoutAtWidths does, and checks only what lies on the runner's display.
 // Each size: the status row (`library.status`, its pills `library.status.*`)
-// reads "24 photos" and "160 pt" on one top edge; the grid's visible cells
-// (`library.grid.cell.<id>`, else buttons whose label holds `IMG_`) line up
-// in rows and columns with equal gaps; Sort By Name, then a click and a
-// Shift-click select five; the inspector's Rating, Flag and Label rows line
-// up; the loupe shows "Fit" and "1 of 24" with the photo centered, and
-// Command-1 swaps the Fit pill for "Zoom 100%"; the inspector's one header
-// (`library.inspector.header`) reads "5 Photos" with "Captured" for five
-// photos, and "IMG_0001" with "6000 × 4000" and "JPEG" for one; every control listed in
+// reads "24 photos" and "160 pt" on one top edge, with no zoom pill; the
+// grid's visible cells (`library.grid.cell.<id>`, else buttons whose label
+// holds `IMG_`) line up in rows and columns with equal gaps; Sort By Name,
+// then a click and a Shift-click select five; the inspector's Rating, Flag
+// and Label rows line up; the loupe shows one zoom pill and "1 of 24" once
+// (in its HUD) with the photo centered, and Command-1 shows "Zoom 100%";
+// the inspector's one header (`library.inspector.header`) reads "5 Photos"
+// with "Captured" for five photos, and "IMG_0001" with "6000 × 4000" and
+// "JPEG" for one; every control listed in
 // `library.controls` lies inside the window. After the loop the grid has
 // fewer columns at 880 than at 1024. Written before its code (lead.md,
 // contract rule 13); SL-4 draws the status row and runs it.
@@ -45,7 +46,8 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             let window = library.app.windows.firstMatch
             XCTAssert(window.waitForExistence(timeout: 30), "no window opened at \(width)")
 
-            // 1. The status row: "24 photos" and "160 pt", every pill on one top edge, inside the window and the row.
+            // 1. The status row: "24 photos" and "160 pt", no zoom pill (the grid doesn't zoom, #3129), every pill on one
+            //    top edge, inside the window and the row.
             let status = library.element("library.status")
             XCTAssert(status.waitForExistence(timeout: 10), "no status row (library.status) at \(width)")
             library.shot("layout-\(width)")
@@ -55,6 +57,9 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             let count = Self.text("24 photos", in: status)
             XCTAssert(count.waitForExistence(timeout: 5), "the status row doesn't read 24 photos at \(width)")
             XCTAssertEqual(Self.text(of: library.element("library.status.cellSize")), "160 pt", "library.status.cellSize at \(width)")
+            XCTAssertEqual(Self.zoomPills(in: status), 0, "the grid's status row shows a zoom pill at \(width)")
+            let percent = NSPredicate(format: "label MATCHES %@ OR value MATCHES %@", "^[0-9]+%$", "^[0-9]+%$")
+            XCTAssertEqual(status.staticTexts.matching(percent).count, 0, "the grid's status row shows a bare percent at \(width)")
             let pills = status.descendants(matching: .any)
                 .matching(NSPredicate(format: "identifier BEGINSWITH 'library.status.'")).allElementsBoundByIndex + [count]
             let top = count.frame.minY
@@ -88,7 +93,8 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             let inspector = library.element("suite.inspector")
             if inspector.exists, inspector.frame.maxX <= screen.width { expectMetadataRows(in: inspector, width: width) }
 
-            // 5. The loupe: "Fit", "1 of 24", the photo centered; Command-1 shows "Zoom 100%"; Escape.
+            // 5. The loupe: one zoom pill and no Fit pill, "1 of 24" once (the HUD's), the photo centered;
+            //    Command-1 shows "Zoom 100%"; Escape.
             expectLoupe(library, width: width)
 
             // 6. Five selected again, then IMG_0001 alone: the inspector's one header reads the selection's facts.
@@ -166,8 +172,9 @@ final class LibraryLayoutJourneyTests: XCTestCase {
         }
     }
 
-    /// Double-click IMG_0001: "Fit" and "1 of 24", the photo centered in the
-    /// loupe within 1 pt; Command-1: "Zoom 100%" and no Fit pill; Escape.
+    /// Double-click IMG_0001: one zoom pill (the fit percent) and no Fit pill
+    /// (#3133), "1 of 24" once in the window, in the HUD (#3137), the photo
+    /// centered in the loupe within 1 pt; Command-1: "Zoom 100%"; Escape.
     @MainActor private func expectLoupe(_ library: Journey, width: Int) {
         let cell = library.app.descendants(matching: .any).matching(NSPredicate(
             format: "identifier BEGINSWITH %@ AND identifier CONTAINS %@", Self.cellPrefix, "IMG_0001")).firstMatch
@@ -177,23 +184,31 @@ final class LibraryLayoutJourneyTests: XCTestCase {
         target.doubleClick()
         let loupe = library.element("library.loupe")
         XCTAssert(loupe.waitForExistence(timeout: 10), "double-clicking IMG_0001 didn't open the loupe at \(width)")
-        let zoom = library.element("library.status.zoom")
-        XCTAssert(wait(5) { Self.text(of: zoom) == "Fit" }, "library.status.zoom reads \(Self.text(of: zoom)), not Fit, at \(width)")
-        let position = library.element("library.status.position")
-        XCTAssertEqual(Self.text(of: position), "1 of 24", "library.status.position at \(width)")
+        let status = library.element("library.status")
+        XCTAssert(wait(5) { Self.zoomPills(in: status) == 1 }, "the loupe at Fit shows \(Self.zoomPills(in: status)) zoom pills at \(width)")
+        XCTAssertFalse(library.element("library.status.zoom").exists, "the loupe at Fit still shows a Fit pill at \(width)")
+        XCTAssertFalse(library.element("library.status.position").exists, "the status row repeats the loupe's place at \(width)")
+        let place = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "1 of 24", "1 of 24")
+        let places = library.app.windows.firstMatch.staticTexts.matching(place).count
+        XCTAssertEqual(places, 1, "\"1 of 24\" shows \(places) times in the loupe at \(width)")
         library.shot("layout-\(width)-loupe")
         let photo = library.element("library.loupe.photo").frame, column = loupe.frame
         XCTAssertEqual(photo.minX - column.minX, column.maxX - photo.maxX, accuracy: 1, "the loupe photo isn't centered across at \(width)")
         XCTAssertEqual(photo.minY - column.minY, column.maxY - photo.maxY, accuracy: 1, "the loupe photo isn't centered down at \(width)")
         library.press(character: "1", .command)
-        let actual = Self.text("Zoom 100%", in: library.element("library.status"))
+        let actual = Self.text("Zoom 100%", in: status)
         XCTAssert(actual.waitForExistence(timeout: 5), "Command-1 didn't show Zoom 100% in the status row at \(width)")
-        XCTAssert(zoom.waitForNonExistence(timeout: 5), "the Fit pill stayed after Command-1 at \(width)")
+        XCTAssertEqual(Self.zoomPills(in: status), 1, "Command-1 left more than one zoom pill at \(width)")
         library.press(.escape)
         XCTAssert(loupe.waitForNonExistence(timeout: 5), "Escape left it in the loupe at \(width)")
     }
 
     // MARK: - Helpers
+
+    /// The elements in the status row labelled "Zoom …": ViewerStatusBar's zoom pill.
+    @MainActor private static func zoomPills(in status: XCUIElement) -> Int {
+        status.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "Zoom ")).count
+    }
 
     /// The frames of the cells at least half inside the grid's scroll view, in
     /// layout order; cells by identifier, else buttons whose label holds `IMG_`.
