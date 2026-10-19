@@ -4,7 +4,7 @@ Issue: #1972 · Packet: docs/blueprints/suite/features/onboarding.md
 Run: act-1a152b291d5-uiwb · Session: claude/feature-lead-playbook-00p2kd · Started: 2026-10-18 (resumes act-1a14f05c119-ejlc)
 Stage: 3 wave 8
 Base: 9b33f116f297e6bb31ee5651314d6565c6613c0d
-Next: OB-13 builder (wave 8): OJ4 live, OJ3 live with a runtime XCTSkip naming #837 while Bundle/Samples/Bounce.flare is missing; then OB-z done on a green Linux run and Belt-Contact-Sheet.
+Next: wait for the lane to merge #3158 (feature-done), then a CI run on dev whose Linux job contains it; post Belt-Slice-Done: OB-z, then Belt-Contact-Sheet.
 
 Loop: v3 (the packet has a `## Slices` table). Findings queue and the 2-round cap apply.
 
@@ -47,7 +47,7 @@ Brief deviations (see Decisions): PRs base `dev`, not `main`; builder branches a
 | F-2890 | OB-m | 6 | #2890 Skip keeps the stored home order; #2892 missing-sample message per packet | OnboardingModel.swift | OnboardingModelTests; Mutate 15/15 | #2906 | merged (ae6e7c81) |
 | F-2893 | OB-m | 6 | #2893 StorePreferences own-save mutation caught | StorePreferencesTests, plan | StorePreferencesTests; Mutate 5/5 | #2902 | merged (1c7bc061) |
 | F-2891 | OB-m | 6 | #2891 refused hand-off resets launching and message (tests, plan) | OnboardingModelTests.swift, SuiteModel.OnboardingModel.json | Mutate 16/16 | #2966 | merged (28713c70) |
-| OB-13 | OB-z | 8 | Enables OJ3 and OJ4 on live (OJ3 skips naming #837 while the Flare sample is missing); blueprint prose; status built; feature-done | UITests/AfterGlowJourneyTests+OnboardingStart.swift, docs/blueprints/suite.md, docs/blueprints/suite/features/onboarding.wave.json | OJ3, OJ4 on the dev run | – | building (wave 8, lead/onboarding-ob13) |
+| OB-13 | OB-z | 8 | Enables OJ3 and OJ4 on live (OJ3 skips naming #837 while the Flare sample is missing); blueprint prose; status built; feature-done | UITests/AfterGlowJourneyTests+OnboardingStart.swift, docs/blueprints/suite.md, docs/blueprints/suite/features/onboarding.wave.json | OJ3, OJ4 on the dev run | #3158 | open; macOS build 39208251721 green; waiting on lane |
 
 Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - Wave 1: OB-1 alone (every other task names its types).
@@ -80,6 +80,7 @@ Waves (packet's Build waves, checked against dev at 4a86f5fc):
 - Resumed 2026-10-19 under run act-1a152b291d5-uiwb. Brief's main HEAD cc14022e verified; dev 9b33f116 contains it. PRs stay on base `dev` (earlier decision; the lane retargets main PRs to dev).
 - OB-13 no longer waits on #836-#839: its own task row and the packet's Hand-offs say a missing sample skips with its issue number. OJ4 needs no sample; OJ3 skips at run time naming #837 while the bundle lacks Bounce.flare and runs once it lands. switching, bundle and home are built. Polling for the samples had no end date.
 - No open `finding` issues for onboarding at the start of wave 8.
+- OB-13 (#3158, 3 files +175/-23): OJ4 live; OJ3 skips naming #837 while Bounce.flare is missing. Steps that need an app with suite adoption (Bounce/Untitled window titles, Flare's Window > Switch To > Home, the Bounce.flare recent) run only once that app's Window menu has Switch To, else skip at the end naming #861 (A-FL-1) or #862 (A-DE-1). Relaunch drops -SuiteFixture so the seeder doesn't reset firstLaunch prefs.
 
 ## Decisions (wave 2)
 - The container restarted during wave 1; OB-1's PR #1998 merged at 07:05Z while the lead was down. Resumed at 10:40Z from the remote state: dev at 453198ac, two green full runs containing #1998.
