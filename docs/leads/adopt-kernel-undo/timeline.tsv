@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-19T07:54:13Z	heartbeat	lane-check	-	#3184 macOS build 39215372795 still queued; main b7e17ed lacks AU-h1; full CI 39215489121 on dev 57d85df pending
 2026-10-19T08:13:32Z	heartbeat	lane-check	-	#3184 macOS build 39215372795 queued; main b7e17ed lacks AU-h1; full CI 39215489121 on dev cancelled
 2026-10-19T08:34:55Z	heartbeat	check	-	#3184 open (macOS 39215372795 queued); #3198 open (lane macOS build pending); main b7e17ed; hand-offs #1526 #1499 #1494 #1514 #1563 open
+2026-10-19T08:57:29Z	heartbeat	check	-	main 6f9a2b8 (holds AU-h1); #3184 open (macOS 39215372795 queued); #3198 open (lane macOS build pending); hand-offs #1526 #1499 #1494 #1514 #1563 open
