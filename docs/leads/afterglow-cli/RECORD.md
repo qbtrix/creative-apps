@@ -186,3 +186,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ### 16:44Z: heartbeat
 - The macOS builds for MC-13 0b414652, MC-4 b8bc58ec and MC-6 c0cf1cfb succeeded. CL-11 is docs only. All four are ready and wait for the lane sweep running on dev since 16:28Z.
+
+### 17:02Z: heartbeat
+- Lane batch lane/batch-20261019170158 has been in its Linux check since 17:02Z. Our four PRs are clean and ready. No dev-red issue is open.
