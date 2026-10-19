@@ -62,3 +62,4 @@ utc	feature	event	ref	note
 2026-10-19T07:18Z	files-history	heartbeat	-	no design macOS result: scoped design 39211721703 (977df193, has a046f9da) queued, CI 39203617095 macOS in progress, 39211832383 cancelled; P4 verify pending; no supervisor reply
 2026-10-19T07:46Z	files-history	heartbeat	-	no design macOS result: scoped design 39211721703 still queued, CI 39203617095 macOS in progress; 39214719821 cancelled; P4 verify pending; no supervisor reply
 2026-10-19T08:27Z	files-history	fix	FH-b	round 2: #2693 testShellLight title reads 'Untitled – Saved' since FH-4; journey reads the name as the title's start; #3177 P4 fixed by #3119, verify on 39211721703
+2026-10-19T08:56:05Z	FH-b	round2-push	#3199 head 7fe83c5 also closes #3177 (reopen windows match title prefix)
