@@ -31,7 +31,6 @@ A Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar StatusBar
 A Sources/PhotoApp/ExportSheet.swift::ExportSheet Sheet
 A Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet Sheet
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
-A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerRow LayerList
 A Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine StatusBar
 A Sources/PhotoApp/StraightenSheet.swift::StraightenSheet Sheet
 B Sources/AfterGlowApp/HomeGrid.swift::HomeGrid caps-header
