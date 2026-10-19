@@ -114,3 +114,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ## 2026-10-19T08:48Z: heartbeat
 - #3154 CL-7 is still waiting for its macOS build: run 39213749046 has been queued since 07:05Z. CL-9 (35ee7e6) and CL-10 (d69d134) ship once it merges. We are blocked only on macOS runner capacity.
+
+## 2026-10-19T09:11Z: heartbeat
+- #3154 is clean but its macOS build (run 39213749046) is still queued, with 27 CI runs waiting. Another branch, fix/cli-liveio-symlink-type, is building on macOS; it may touch LiveIO, which CL-10 also changes, so check for a conflict when shipping CL-10.
