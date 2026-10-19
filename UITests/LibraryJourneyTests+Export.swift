@@ -10,9 +10,8 @@
 // the progress row `library.export.progress` and the summary
 // `library.export.summary`; its buttons are found by title.
 //
-// Written before its code (lead.md, contract rule 13, EX-4): the walk starts
-// with `throw XCTSkip("waits on EX-6")`, and EX-6, which builds the sheet,
-// drops it.
+// Written before its code (lead.md, contract rule 13, EX-4); EX-6, which
+// builds the sheet, enabled it.
 import AppKit
 import CoreGraphics
 import Foundation
@@ -23,7 +22,6 @@ final class LibraryExportJourneyTests: XCTestCase {
     /// J7: File > Export… writes the selected photos as JPEGs at a long edge
     /// into a folder, never over an earlier file, and is off with no selection.
     @MainActor func testExportJPEGsAtASize() throws {
-        throw XCTSkip("waits on EX-6")
         // (F) steps 1 and 5 on the fakes.
         let fakeOut = try LibraryFiles.freshPhotoFolder()
         let fakeCatalog = try LibraryFiles.freshCatalogDir()
