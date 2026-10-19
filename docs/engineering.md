@@ -218,9 +218,9 @@ every step.
 - **Timing is reported, not gated.** A test that asserts a wall-clock or
   allocation budget can fail on a busy machine while the code is fine, so it
   goes in `Tests/perf-suites.txt` (the supervisor edits it). The gate and
-  scoped runs skip it; the `macOS` job's Perf step runs it alone, reports its
-  numbers in the job summary and warns when a bound is missed by more than
-  3x. Gate: none, by design; read the warnings on `dev` runs.
+  scoped runs skip it; it runs alone nightly on the captain's Mac (perf-nightly),
+  which reports its numbers and warns when a bound is missed by more than 3x.
+  Gate: none, by design.
 
 ## Reading cost
 

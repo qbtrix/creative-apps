@@ -4,8 +4,8 @@
 # tests block. The macOS job is report-only: it builds everything on macOS 26,
 # runs the snapshots (`snapshots` artifact), bundles the five release apps
 # (`app-builds`, a tarball so the executables keep their +x bit), runs the UI
-# journeys with the app audit (`ui-screens`, contact-sheet.html inside) and
-# the perf tests, and writes its summary. It has continue-on-error, so a red
+# journeys with the app audit (`ui-screens`, contact-sheet.html inside), and
+# writes its summary. It has continue-on-error, so a red
 # macOS job never turns the run red, opens `dev-red` or holds `promote`. A red
 # scripts/ci (a macOS-only test the Linux gate can't see) skips the bundles
 # and the size report but not the journeys: they still run and report.
@@ -15,7 +15,8 @@
 #
 # Branch model: crew PRs merge into dev through the fast lane on the worker's
 # Linux scripts/ci --changed marker (plus a build-only macOS compile for code
-# PRs, scoped to the PR's apps when the lane passes `app`). This workflow runs on dev once a feature is built: on
+# PRs, scoped to the PR's apps when the lane passes `app`). This workflow
+# runs on dev once a feature is built: on
 # workflow_dispatch (the supervisor, Belt, or the lane after a `feature-done`
 # or UI merge) and daily as a safety net. A green Linux job lets `promote`
 # fast-forward main to that exact SHA. A red Linux job makes `dev-red` open
@@ -24,13 +25,15 @@
 # hotfix PRs to main. The app audit fails only a count that rose; after a
 # green journey step on dev, `audit-lower` pushes one commit lowering it.
 #
-# Perf and timing tests (Tests/perf-suites.txt) run alone in the macOS job's
-# Perf step, which reports and never fails.
+# Perf and timing tests (Tests/perf-suites.txt) never run here: scripts/ci
+# and scoped runs skip them, and they run nightly on the captain's Mac
+# (perf-nightly), which leaves the macOS job's 90 minutes to the journeys.
 #
 # Scoped run (workflow_dispatch with `app`: flare, design, photo, library,
 # halo, suite or suiteui): the macOS job builds every target, bundle and
-# journey bundle but runs only that app's Model, snapshot and journey tests,
-# then its perf tests. The Linux job is skipped; a scoped run never promotes,
+# journey bundle but runs only that app's Model, snapshot and journey tests
+# (suite: SuiteModel, SuiteKernel and the CLI's tests and the AfterGlow
+# journeys). The Linux job is skipped; a scoped run never promotes,
 # opens dev-red or lowers the audit baseline. verify-dispatch.sh starts one
 # per app after its merges.
 #
@@ -218,8 +221,8 @@ jobs:
       # APP's Model tests and its snapshot tests (one at a time, as scripts/ci
       # does). The filters come from scripts/test-scope, the table scripts/ci
       # --changed maps changed files with; a snapshot test whose name fits no
-      # app runs in full runs only. Perf tests are skipped here and run in the
-      # Perf step. A filter that matches no test fails the step. The job
+      # app runs in full runs only. Perf tests are skipped (perf-nightly runs
+      # them). A filter that matches no test fails the step. The job
       # summary lists what ran.
       - name: Scoped build and tests
         if: inputs.app
@@ -231,7 +234,7 @@ jobs:
             photo)   journeys=PhotoJourneyTests ;;
             library) journeys=LibraryJourneyTests ;;
             halo)    journeys=HaloJourneyTests ;;
-            suite)   journeys="" ;;  # AfterGlow and SuiteModel: no snapshots or journey bundle yet
+            suite)   journeys=AfterGlowJourneyTests ;;  # the launcher's journeys (switching among them); no snapshots yet
             suiteui) journeys=SuiteJourneyTests ;;
             *) echo "::error::app '$APP' is not one of flare, design, photo, library, halo, suite, suiteui"; exit 1 ;;
           esac
@@ -247,7 +250,7 @@ jobs:
             echo "- Model tests: \`swift test --filter '$model'\`"
             if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
             if [[ -n "$journeys" ]]; then echo "- UI journeys: \`scripts/ui-test -only-testing:$journeys\` (quarantine entries of scope all still skipped; scope full ones run)"; else echo "- UI journeys: none"; fi
-            echo "- Perf and timing tests: skipped above; the Perf step runs $APP's (Tests/perf-suites.txt)"
+            echo "- Perf and timing tests: skipped (Tests/perf-suites.txt; they run nightly on the captain's Mac)"
             echo
             echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote, Dev red and Audit lower (a scoped run never moves main or the audit baseline)."
             echo
@@ -269,28 +272,6 @@ jobs:
           }
           run "Model tests" --filter "$model"
           [[ -z "$snap" ]] || run "Snapshot tests" --filter "$snap" --no-parallel
-      # The perf and timing tests (Tests/perf-suites.txt; a scoped run: APP's),
-      # alone and one at a time, so other tests' load doesn't skew them. Runs
-      # whether the tests above passed or not, and before Upload snapshots so
-      # the reports they write to .build/snapshots reach the artifact and the
-      # contact sheet. Report only: continue-on-error, and the script never
-      # fails on a number. The job summary gets each test's result and the
-      # numbers it printed; a bound missed by more than 3x (FLAG in
-      # scripts/test-scope) also gets a warning.
-      - name: Perf (report only)
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        timeout-minutes: 30
-        run: |
-          filter=$(scripts/test-scope perf ${APP:+"$APP"})
-          if [[ -z "$filter" ]]; then
-            echo "### Perf: no perf or timing tests for ${APP:-this run}" >>"$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          log="$RUNNER_TEMP/perf.log"
-          swift test --filter "$filter" --no-parallel 2>&1 | tee "$log" || true
-          python3 scripts/test-died "$log" || true
-          scripts/test-scope perf-report "$log" 2>&1 >>"$GITHUB_STEP_SUMMARY"
       - name: Upload snapshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -385,7 +366,8 @@ jobs:
         run: |
           if [[ -z "$APP" ]]; then scripts/contact-sheet; exit; fi
           base="$RUNNER_TEMP/audit-baseline.json"
-          jq --arg a "$APP" 'with_entries(select(.key == $a))' UITests/audit-baseline.json >"$base"
+          key=$APP; [[ "$APP" != suite ]] || key=afterglow  # the AfterGlow journeys' audit counts
+          jq --arg a "$key" 'with_entries(select(.key == $a))' UITests/audit-baseline.json >"$base"
           GITHUB_REF_NAME="$GITHUB_REF_NAME (scoped: $APP)" scripts/contact-sheet .build/ui-screens "$base"
       - name: Upload UI screens
         if: always() && steps.ui.outcome != 'skipped'

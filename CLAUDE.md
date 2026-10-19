@@ -93,8 +93,8 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
    `SuiteModel` every Model's tests, and `Package.swift` all of them
    (`scripts/test-scope` holds the table). Plain `scripts/ci` is the full
    gate CI runs. Neither runs the perf and timing tests in
-   `Tests/perf-suites.txt`: the `macOS` job's Perf step reports those and
-   never fails. On Linux it covers the Model targets and the lints; the
+   `Tests/perf-suites.txt`: they run nightly on the captain's Mac
+   (perf-nightly), never in CI. On Linux it covers the Model targets and the lints; the
    macOS job on `dev` catches the rest.
    It is your whole check: no CI runs on your PR, and you never start CI
    yourself for routine work (no `gh workflow run`).

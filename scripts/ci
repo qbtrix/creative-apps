@@ -16,7 +16,7 @@
 # then only the tests of the targets the branch touched since its merge base
 # with BASE (default origin/dev), uncommitted and untracked files included
 # (scripts/test-scope changed maps paths to tests). Neither mode runs the
-# perf and timing tests in Tests/perf-suites.txt; CI's Perf step does.
+# perf and timing tests in Tests/perf-suites.txt; perf-nightly does.
 #
 # The no-crash lint fails on crash-prone constructs in Sources/ (tests exempt):
 #   try!  as!  fatalError(  preconditionFailure(  precondition(  unowned  .first!  .last!
@@ -406,7 +406,7 @@ run_tests() {
   fi
 }
 
-# The perf and timing tests run in CI's Perf step, never here. An empty
+# The perf and timing tests run nightly (perf-nightly), never here. An empty
 # regex would skip every test, so the flag goes in only when there is one.
 perf=$(python3 scripts/test-scope perf) || fail "Tests/perf-suites.txt: fix the line above"
 skip_perf=()
