@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-19T03:26Z	4	wait-ci	39180214762	macOS hit 1h30m job timeout in scripts/ci (#2971); next full run 39192572958 queued on cc14022e
 2026-10-19T03:54Z	4	wait-ci	39192572958	Linux green; macOS queued for a runner since 03:11Z; dev full runs hang in AfterGlowHomeSidebarTests (#2971, range 71facd44..f7e03506, before 531550f)
 2026-10-19T04:20Z	4	wait-ci	39192572958	macOS job started 04:12Z; no supervisor reply on #1507
+2026-10-19T04:48Z	4	wait-ci	39192572958	macOS scripts/ci failed at 04:23Z (no hang this time); Perf step running, later steps pending; reading the log once the job ends
