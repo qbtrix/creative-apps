@@ -36,12 +36,12 @@ private func bounce() -> FlareWorkspace {
     #expect(w.guides.isEmpty)
 }
 
-@Test func aGuideDragIsOneMoveGuideStep() {
+@Test func aGuideDragIsOneMoveGuideStep() throws {
     var w = bounce()
     w.addGuide(.vertical, at: 40)
     w.addGuide(.horizontal, at: 300)
     let added = w.document
-    guard var drag = FlareGuideDrag(guide: 1, of: w.guides) else { return Issue.record("no guide 1") }
+    var drag = try #require(FlareGuideDrag(guide: 1, of: w.guides))
     for y in [305.0, 312, 320.3] { drag.move(to: y) }
     #expect(drag.shown(over: w.guides) == [Guide(axis: .vertical, position: 40), Guide(axis: .horizontal, position: 320)])
     apply(drag.end(overRuler: false), to: &w)
@@ -50,10 +50,10 @@ private func bounce() -> FlareWorkspace {
     #expect(w.document == added && w.undoActionName == "Undo Add Guide")
 }
 
-@Test func aGuideDroppedOnItsRulerIsGone() {
+@Test func aGuideDroppedOnItsRulerIsGone() throws {
     var w = bounce()
     w.addGuide(.horizontal, at: 300)
-    guard var drag = FlareGuideDrag(guide: 0, of: w.guides) else { return Issue.record("no guide 0") }
+    var drag = try #require(FlareGuideDrag(guide: 0, of: w.guides))
     drag.move(to: -4)
     apply(drag.end(overRuler: true), to: &w)
     #expect(w.guides.isEmpty && w.undoActionName == "Undo Remove Guide")
@@ -62,11 +62,11 @@ private func bounce() -> FlareWorkspace {
     #expect(fresh.end(overRuler: true).isEmpty, "a new guide dropped back on its ruler was placed")
 }
 
-@Test func aGuideDragThatGoesNowhereOrNowhereRealSendsNothing() {
+@Test func aGuideDragThatGoesNowhereOrNowhereRealSendsNothing() throws {
     var w = bounce()
     w.addGuide(.horizontal, at: 300)
     #expect(FlareGuideDrag(guide: 1, of: w.guides) == nil)
-    guard var drag = FlareGuideDrag(guide: 0, of: w.guides) else { return Issue.record("no guide 0") }
+    var drag = try #require(FlareGuideDrag(guide: 0, of: w.guides))
     drag.move(to: .nan)
     #expect(drag.position == 300)
     #expect(drag.end(overRuler: false).isEmpty, "a drag back to where it began made a step")
