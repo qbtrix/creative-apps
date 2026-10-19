@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".built keeps .live's NotBuilt export",
+    "file": "Sources/FlareModel/FlareServicesBuilt.swift",
+    "find": "        services.export = LiveExportAdapter(stage: LiveStage())\n",
+    "replace": "",
+    "tests": "FlareServicesBuiltTests"
+  },
+  {
+    "label": ".built exports through the fakes",
+    "file": "Sources/FlareModel/FlareServicesBuilt.swift",
+    "find": "services.export = LiveExportAdapter(stage: LiveStage())",
+    "replace": "services.export = FakeExport()",
+    "tests": "FlareServicesBuiltTests"
+  }
+]

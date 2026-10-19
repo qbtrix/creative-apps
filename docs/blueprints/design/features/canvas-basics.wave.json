@@ -2,8 +2,8 @@
   "title": "Canvas basics: whole points, text boxes that fit, layers past the page, page size",
   "wave": 1,
   "order": 60,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1500",
   "covers": "UX review 2026-10-16 R6 (top-12 items 5, 9, 10); one gap issue per slice, filed at stage 1",
   "waits_on": "design-contracts; design-seams for CB-a's Model; style-rows SR-m and SR-t for CB-b; all of design-window for the App tasks of CB-b and CB-c",
   "depends": [

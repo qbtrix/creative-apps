@@ -9,8 +9,8 @@
 // leaves the first file's bytes alone. The real `ImageIODecoder` and
 // `JPEGWriter` read and write the files; the bytes and pixels are the oracle.
 //
-// Written before its code (lead.md, contract rule 13): every test is disabled
-// "waits on EX-5", which enables them; EX-14 adds the cropped photo. macOS only.
+// Written before its code (lead.md, contract rule 13) by EX-4 and enabled by
+// EX-5, which builds `JPEGWriter`; EX-14 adds the cropped photo. macOS only.
 #if os(macOS)
 import CoreGraphics
 import CoreRaster
@@ -109,7 +109,7 @@ import UniformTypeIdentifiers
     }
 
     /// (a) The exporter's render is the hand-made pipeline, bit for bit.
-    @Test(.disabled("waits on EX-5")) func renderEqualsTheHandMadePipeline() async throws {
+    @Test func renderEqualsTheHandMadePipeline() async throws {
         let photo = try writePhoto(in: try folder())
         let exporter = LiveExporter(decoder: decoder, develop: develop)
         let rendered = try await exporter.render(item, photo: photo)
@@ -120,7 +120,7 @@ import UniformTypeIdentifiers
     }
 
     /// (b) The export at 1024 looks like the loupe's `.full` render at 1024.
-    @Test(.disabled("waits on EX-5")) func renderMatchesTheLoupe() async throws {
+    @Test func renderMatchesTheLoupe() async throws {
         let photo = try writePhoto(in: try folder())
         let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
         let loupe = try await LiveLoupeImaging(decoder: decoder, develop: develop)
@@ -131,7 +131,7 @@ import UniformTypeIdentifiers
     }
 
     /// (c) Written at quality 95: an sRGB JPEG within 40 dB of (a), never overwritten.
-    @Test(.disabled("waits on EX-5")) func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
+    @Test func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
         let root = try folder()
         let photo = try writePhoto(in: root)
         let out = root.appending(path: "out")

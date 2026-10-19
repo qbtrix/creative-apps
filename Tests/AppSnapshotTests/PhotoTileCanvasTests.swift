@@ -76,7 +76,14 @@ import Testing
         let view = try view(try workspace(), zoom: 1)
         let layer = try #require(view.layer)
         let shown = try pixels(view.bounds.size) { layer.render(in: $0) }
-        let rep = try #require(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        // One pixel per point, as the snapshots size their rep: bitmapImageRepForCachingDisplay
+        // follows the screen's scale, so on a Retina Mac it drew at 2x and resampling the
+        // stroke's edges down to the layers' size failed the check (#1625).
+        let rep = try #require(NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: Int(view.bounds.width), pixelsHigh: Int(view.bounds.height),
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
+            bytesPerRow: 0, bitsPerPixel: 0))
+        rep.size = view.bounds.size
         view.cacheDisplay(in: view.bounds, to: rep)
         let cached = try #require(rep.cgImage)
         let drawn = try pixels(view.bounds.size) { $0.draw(cached, in: CGRect(origin: .zero, size: view.bounds.size)) }

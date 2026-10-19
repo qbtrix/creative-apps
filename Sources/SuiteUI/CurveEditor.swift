@@ -297,14 +297,15 @@ extension CurveEditor {
     }
 
     /// `point` nudged `dx` and `dy` steps of 0.01 (0.1 when `coarse`), the
-    /// moved axis snapped to that step; x stays in 0...1 either way.
+    /// moved axis snapped to 0.01 so ⇧↑ from 1.01 reads 1.11, not 1.1 (SJ20,
+    /// #2923); x stays in 0...1 either way.
     nonisolated public static func nudged(_ point: CGPoint, dx: Int, dy: Int, coarse: Bool) -> CGPoint {
         let step = coarse ? 0.1 : 0.01
         let clamped = handlePoint(point)
         var x = Double(clamped.x)
         var y = Double(clamped.y)
-        if dx != 0 { x = ScrubValue.snapped(x + Double(dx) * step, to: step, in: 0...1) }
-        if dy != 0 { y = ScrubValue.snapped(y + Double(dy) * step, to: step, in: -.greatestFiniteMagnitude...(.greatestFiniteMagnitude)) }
+        if dx != 0 { x = ScrubValue.snapped(x + Double(dx) * step, to: 0.01, in: 0...1) }
+        if dy != 0 { y = ScrubValue.snapped(y + Double(dy) * step, to: 0.01, in: -.greatestFiniteMagnitude...(.greatestFiniteMagnitude)) }
         return CGPoint(x: x, y: y)
     }
 

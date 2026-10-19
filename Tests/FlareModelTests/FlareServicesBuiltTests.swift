@@ -1,6 +1,6 @@
 // FlareServicesBuiltTests.swift: draw-key-save DK-3. `FlareServices.built` holds the live type for each member whose
-// live conformance has merged and `.live`'s `NotBuilt` for the rest; a launch that isn't `-FlareFixture` runs on it,
-// so a new document draws through `LiveShapes`. Runs on Linux and macOS.
+// live conformance has merged (export too, flare-export FX-9) and `.live`'s `NotBuilt` for the rest; a launch that
+// isn't `-FlareFixture` runs on it, so a new document draws through `LiveShapes`. Runs on Linux and macOS.
 import FlareCore
 import FlareModel
 import Testing
@@ -16,12 +16,13 @@ private func reason(_ member: Any) -> String? { (member as? NotBuilt)?.reason }
     #expect(type(of: built.keyframes) == LiveKeyframes.self)
     #expect(type(of: built.easing) == LiveEasing.self)
     #expect(type(of: built.scenes) == LiveScenes.self)
+    #expect(type(of: built.export) == LiveExportAdapter.self)
 }
 
 @Test func builtKeepsLiveReasonsForTheRest() {
     let built = FlareServices.built, live = FlareServices.live
     let pairs: [(Any, Any)] = [(built.onion, live.onion), (built.library, live.library), (built.machines, live.machines),
-                               (built.preview, live.preview), (built.export, live.export), (built.assist, live.assist)]
+                               (built.preview, live.preview), (built.assist, live.assist)]
     for (builtMember, liveMember) in pairs {
         #expect(reason(builtMember) != nil && reason(builtMember) == reason(liveMember))
     }

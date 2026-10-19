@@ -1,4 +1,5 @@
-// FlareJourneyTests+Sidebar.swift: how Flare's journeys pick a SCENES or LAYERS row. A row is clicked in its blank
+// FlareJourneyTests+Sidebar.swift: how Flare's journeys pick a SCENES or LAYERS row (a LAYERS row by its
+// `suite.sidebar.row.<id>` identifier, since the shared LayerTreeList draws no outline rows). A row is clicked in its blank
 // space, midway between its name and its first toggle (Hide), or at 60% of its width when it has none (a scene row):
 // a click on the name itself doesn't select the row, because SuiteUI's rename double-click on the title takes the
 // List's single click (#2496), so the workspace never hears the pick and Edit > Copy stays "Select a layer first."
@@ -7,9 +8,16 @@
 import XCTest
 
 extension Journey {
-    /// The sidebar's outline row whose name is exactly `title`.
+    /// The sidebar row whose name is exactly `title`: a LAYERS row of the shared list by its id
+    /// (`suite.sidebar.row.<id>`, AL-f3), else a SCENES outline row. Waits up to five seconds for either.
     func sidebarRow(_ title: String) -> XCUIElement {
-        element("suite.sidebar").outlineRows.containing(Self.named(title)).firstMatch
+        let sidebar = element("suite.sidebar")
+        let layer = sidebar.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label == %@", "suite.sidebar.row.", title))
+            .firstMatch
+        let scene = sidebar.outlineRows.containing(Self.named(title)).firstMatch
+        for _ in 0..<25 where !layer.exists && !scene.exists { Thread.sleep(forTimeInterval: 0.2) }
+        return layer.exists ? layer : scene
     }
 
     /// Clicks the sidebar row named `title` off its name (#2496) and waits until it reads selected.

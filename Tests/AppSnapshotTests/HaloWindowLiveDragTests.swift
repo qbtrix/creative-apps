@@ -198,6 +198,38 @@ extension BodyCountSuites {
         return (runs, after)
     }
 
+    /// Presses the accessibility node `identifier`, as VoiceOver does; false when there's none.
+    func press(_ identifier: String) async throws -> Bool {
+        guard let node = Self.nodes(in: host).first(where: { ($0.accessibilityIdentifier?() ?? nil) == identifier })
+        else { return false }
+        let pressed = node.accessibilityPerformPress?() ?? false
+        try await Task.sleep(for: .milliseconds(200))
+        return pressed
+    }
+
+    /// Starts editing the text field `identifier`, as a click into it does,
+    /// and returns its field editor.
+    func edit(_ identifier: String) async throws -> NSTextView? {
+        func fields(in view: NSView) -> [NSTextField] {
+            (view as? NSTextField).map { [$0] } ?? view.subviews.flatMap(fields)
+        }
+        // SwiftUI puts the identifier on the field's wrapper, so find the field under it.
+        guard let frame = frame(of: identifier),
+            let field = fields(in: host).first(where: {
+                $0.convert($0.bounds, to: nil).contains(CGPoint(x: frame.midX, y: frame.midY))
+            })
+        else { return nil }
+        window.makeFirstResponder(field)
+        try await Task.sleep(for: .milliseconds(200))
+        return window.firstResponder as? NSTextView
+    }
+
+    /// The accessibility value of the node `identifier`, as text.
+    func value(of identifier: String) -> String? {
+        let node = Self.nodes(in: host).first { ($0.accessibilityIdentifier?() ?? nil) == identifier }
+        return (node?.accessibilityValue?() ?? nil).map { "\($0)" }
+    }
+
     private func send(_ kind: NSEvent.EventType, at point: CGPoint) {
         guard let event = NSEvent.mouseEvent(
             with: kind, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
