@@ -1,0 +1,16 @@
+[
+  {
+    "label": "oneLayerHelpKept",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "{ reason($0.help(command)) }, { w in try w.run(command) }",
+    "replace": "{ reason($0.selectedNodeIDs.count == 1 ? nil : $0.help(command)) }, { w in try w.run(command) }",
+    "tests": "DesignCommandCatalogTests"
+  },
+  {
+    "label": "nudgeLarge",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "large: params.large ?? false",
+    "replace": "large: false",
+    "tests": "DesignCommandCatalogTests"
+  }
+]
