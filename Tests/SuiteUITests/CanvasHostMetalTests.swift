@@ -6,7 +6,9 @@
 // CanvasTilePresenter writes them into its document texture and fills
 // drawables. The drawable never has more pixels than the document. On the
 // Metal path the tile layers stay empty until the tile path returns, and a
-// layout presents only a new picture or a new drawable size. macOS only; the
+// layout presents only a new picture or a new drawable size, and none with no
+// artboard. The presenter scales any document into any drawable without
+// asking Metal for a texture past its limit. macOS only; the
 // GPU cases need a Metal device.
 import AppKit
 import Metal
@@ -138,6 +140,43 @@ import Testing
         canvas.layoutSubtreeIfNeeded()
         #expect(canvas.artboard.isEmpty)
         #expect(presenter.presented == 0, "a host with no artboard presented a drawable")
+    }
+
+    /// Lanczos's temporary texture is the source side plus about 6 x source / destination; past the
+    /// 16384 limit Metal aborts. These pairs are the measured ones (MPS's own failure messages).
+    @Test func lanczosOnlyScalesWhereItsTemporaryTextureFits() {
+        let fits = { (s: (Int, Int), d: (Int, Int)) in CanvasTilePresenter.lanczosFits(source: s, destination: d, limit: 16384) }
+        #expect(!fits((7680, 4320), (1, 1)), "MPS asks for 30238 high")
+        #expect(!fits((7680, 4320), (3, 2)), "MPS asks for 23038 wide")
+        #expect(!fits((7680, 4320), (5, 3)), "MPS asks for 16894 wide")
+        #expect(!fits((16384, 9000), (1600, 900)), "MPS asks for 16445 wide")
+        #expect(!fits((16384, 16384), (8192, 8192)), "MPS asks for 16395 high")
+        #expect(fits((7680, 4320), (8, 5)))
+        #expect(fits((7680, 4320), (1600, 900)))
+        #expect(fits((16000, 9000), (400, 225)))
+    }
+
+    /// The live presenter fills a drawable far smaller than an 8K document, and one from a document
+    /// at the width limit, without asking Metal for a texture past it (which aborts the process).
+    @Test(.enabled(if: MTLCreateSystemDefaultDevice() != nil))
+    func theTilePresenterScalesAnyDocumentIntoAnyDrawable() throws {
+        guard drawablesWork() else { return }
+        let layer = CAMetalLayer()
+        layer.device = MTLCreateSystemDefaultDevice()
+        layer.pixelFormat = .bgra8Unorm
+        layer.framebufferOnly = false
+        let presenter = CanvasTilePresenter()
+        let cases = [(CGSize(width: 7680, height: 4320), CGSize(width: 1, height: 1)),
+                     (CGSize(width: 7680, height: 4320), CGSize(width: 3, height: 2)),
+                     (CGSize(width: 7680, height: 4320), CGSize(width: 1600, height: 900)),
+                     (CGSize(width: 16384, height: 1000), CGSize(width: 1600, height: 98))]
+        for (document, drawable) in cases {
+            presenter.show([], documentSize: document)
+            layer.drawableSize = drawable
+            let next = try #require(layer.nextDrawable())
+            presenter.present(next, on: layer)
+        }
+        #expect(presenter.presented == cases.count)
     }
 
     @Test func anEmbeddedHostFillsItsBoundsAndTakesNoClick() {
