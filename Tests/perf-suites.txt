@@ -56,5 +56,7 @@ library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
 
+suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
+
 suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget

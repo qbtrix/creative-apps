@@ -143,7 +143,8 @@ check "leaves another target's suite of the same name" no "$(takes 'DesignModelT
 photo=$(python3 "$ts" perf photo)
 check "perf photo takes Photo's" yes "$(grep -qE "$photo" <<<'AppSnapshotTests.PhotoBrushLatencyTests/x()' && echo yes || echo no)"
 check "perf photo leaves Halo's" no "$(grep -qE "$photo" <<<'HaloModelTests.HaloViewerBudgetTests/x()' && echo yes || echo no)"
-check "perf for an app with none is empty, never a match-all regex" "" "$(python3 "$ts" perf suite)"
+printf '%s\n' 'photo PhotoModelTests.PhotoBudgetTests' >"$tmp/photo-only.txt"
+check "perf for an app with none is empty, never a match-all regex" "" "$(PERF_SUITES="$tmp/photo-only.txt" python3 "$ts" perf halo)"
 printf '%s\n' '# nothing yet' >"$tmp/empty.txt"
 check "an empty list gives no regex" "" "$(PERF_SUITES="$tmp/empty.txt" python3 "$ts" perf)"
 printf '%s\n' 'photo PhotoModelTests' >"$tmp/bad.txt"
