@@ -72,9 +72,10 @@ struct DesignLayersPanel: View {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
                     DesignLayerTree(nodes: nodes, model: model, perform: perform, drag: layerDrag)
                 } else {
-                    InspectorNote(
-                        model.isOpen ? "No layers on this page. Draw a frame with the Frame tool (F)." : "No file open.",
-                        identifier: "design.layers.empty")
+                    let notes = Self.emptyNotes(isOpen: model.isOpen)
+                    ForEach(notes.indices, id: \.self) { line in
+                        InspectorNote(notes[line], identifier: line == 0 ? "design.layers.empty" : "design.layers.empty.\(line)")
+                    }
                 }
                 if let refusal = rename.refusal {
                     InspectorNote(refusal, identifier: DesignRenameState.refusalID)
@@ -137,6 +138,12 @@ struct DesignLayersPanel: View {
                     for id in ids.symmetricDifference(highlighted) { perform(.toggleSelect(id)) }
                 }
             })
+    }
+
+    /// The Layers section's lines when the page has no layers, one note each: a list row doesn't
+    /// grow to wrap a note, so each line is short enough to fit the panel on its own.
+    nonisolated static func emptyNotes(isOpen: Bool) -> [String] {
+        isOpen ? ["No layers on this page.", "Draw a frame with the Frame tool (F)."] : ["No file open."]
     }
 
     /// Add Page and Delete Page (the checked page), each disabled with the Model's reason while it
@@ -271,7 +278,7 @@ private struct DesignLayerRow: View {
                 toggles: toggles.map {
                     SidebarToggle(
                         id: $0.flag.rawValue, title: $0.title, onSymbol: $0.onSymbol, offSymbol: $0.offSymbol,
-                        isOn: $0.isOn)
+                        isOn: $0.isOn, reserving: $0.symbols)
                 }),
             onToggle: { flag in
                 if let flag = DesignLayerFlag(rawValue: flag) { perform(.toggleFlag(id, flag)) }
