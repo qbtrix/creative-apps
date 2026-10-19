@@ -68,7 +68,6 @@ scene.timing
 scenes.add
 scenes.remove
 scenes.rename
-scenes.select
 shape-key.remove
 shape-key.set
 shape.add
