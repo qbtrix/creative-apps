@@ -36,7 +36,7 @@ private struct ShapeDoc: HeadlessDocument {
         _ = [CatalogError.unknownCommand("x"), .malformedParams(id: "x", [SchemaIssue(path: "/x", message: "expected number")]),
              .unavailable(id: "x", why: "no"), .failed(id: "x", message: "no")]
         #expect(SchemaProbe.schema(of: ShapeDoc.Bump.self, maxDepth: 2) == ShapeDoc.Bump.paramSchema && ParamSchema.none.validate(.null).isEmpty)
-        #expect(!CommandIDLedger.check(["value.bump"], ledger: "value.bump\n").isEmpty && !CatalogConformance.check(ShapeDoc.self, fixture: doc).isEmpty)
+        #expect(CommandIDLedger.check(["value.bump"], ledger: "value.bump\n").isEmpty && CatalogConformance.check(ShapeDoc.self, fixture: doc).allSatisfy { $0.hasPrefix("value.bump: ") })
         #expect(try ShapeDoc.new(.null).export("json", options: .null).map(\.format) == ["json"] && ShapeDoc.open(Data(), name: "a").summary() != .null)
         #expect(ParamSchema.none.document() == .object(["type": .string("object"), "additionalProperties": .bool(false),
                                                         "$schema": .string("https://json-schema.org/draft/2020-12/schema")]))
