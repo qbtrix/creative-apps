@@ -78,3 +78,4 @@ Next: SL-8 #3230 merged cd7d4120; once a dev run containing it has a green Linux
 - 2026-10-19T15:59Z feature-done PR prep (lead/status-and-layout-done, status: built): the full local scripts/ci shows 42 HomeModel/Onboarding 60 s time-limit hits under 4-core contention (green on CI's Linux job) and no other failure; rerunning the gate with --changed before opening the PR. Findings #3129 #3132 #3134 #3136 open (SuiteUI).
 - 2026-10-19T16:07Z heartbeat: all slices merged-done (SL-a 39192572958, SL-b 39203617095, SL-c 39252895176). Feature-done PR (wave.json status built) gating on lead/status-and-layout-done.
 - 2026-10-19T16:08Z feature-done PR #3292 (wave.json status built, head bade25b6, labels fast-lane + feature-done). Next: once it merges and a dev Linux run containing it is green, post Belt-Contact-Sheet on #1528.
+- 2026-10-19T16:35Z check: dev still b3011ab9. Feature-done #3292 waiting on lane sweep.
