@@ -1,6 +1,6 @@
 // SchemaProbeTests.swift (command-catalog CC-3, CJ1): SchemaProbe reads a params schema from a `Decodable`
 // type's init: structs, optionals, arrays, nested types, the depth cap, a throwing enum init kept partial,
-// and the `CommandSchemaProviding` override. Every check waits on CC-5, which enables them.
+// and the `CommandSchemaProviding` override. CC-5 turned them on.
 import Testing
 import SuiteKernel
 
@@ -55,28 +55,28 @@ private struct Zoom: Decodable, CommandSchemaProviding {
     static let size = ParamSchema.object(["w": .number(), "h": .number()], required: ["w", "h"])
 
     /// CJ1: the probe of `AddRectParams` equals the hand-written schema (mutation `.nestedObject`).
-    @Test(.disabled("waits on CC-5")) func addRectParamsEqualsHandWritten() {
+    @Test func addRectParamsEqualsHandWritten() {
         Self.expectProbe(AddRectParams.self, equals: .object([
             "x": .number(), "y": .number(), "name": .optional(.string()), "size": Self.size,
         ], required: ["x", "y", "name", "size"]))
     }
 
     /// Each scalar maps to its JSON type: Bool boolean, Int integer, String string, Double number.
-    @Test(.disabled("waits on CC-5")) func structScalarsMapToTheirTypes() {
+    @Test func structScalarsMapToTheirTypes() {
         Self.expectProbe(Flags.self, equals: .object([
             "on": .boolean, "count": .integer(), "label": .string(), "scale": .number(),
         ], required: ["on", "count", "label", "scale"]))
     }
 
     /// A key read with `decodeIfPresent` is left out of `required`, nested types included (mutation `.optionalNotRequired`).
-    @Test(.disabled("waits on CC-5")) func optionalsAreNotRequired() {
+    @Test func optionalsAreNotRequired() {
         Self.expectProbe(Loose.self, equals: .object([
             "count": .optional(.integer()), "on": .optional(.boolean), "size": .optional(Self.size), "scale": .number(),
         ], required: ["scale"]))
     }
 
     /// An array is an array of its element's schema, an object element included.
-    @Test(.disabled("waits on CC-5")) func arraysCarryTheirItemSchema() {
+    @Test func arraysCarryTheirItemSchema() {
         Self.expectProbe(Polyline.self, equals: .object([
             "points": .array(of: .object(["x": .number(), "y": .number()], required: ["x", "y"])),
             "tags": .array(of: .string()), "widths": .optional(.array(of: .integer())),
@@ -85,7 +85,7 @@ private struct Zoom: Decodable, CommandSchemaProviding {
     }
 
     /// A type that holds itself stops: `maxDepth` typed object levels, then an open `{}` (mutation `.depthCap`).
-    @Test(.disabled("waits on CC-5")) func depthCap() {
+    @Test func depthCap() {
         for maxDepth in [2, 8] {
             var json = SchemaProbe.schema(of: Link.self, maxDepth: maxDepth).json, levels = 0
             while case .object(let fields) = json, fields["type"] == .string("object"), levels <= maxDepth {
@@ -102,13 +102,13 @@ private struct Zoom: Decodable, CommandSchemaProviding {
 
     /// An init that throws on a placeholder keeps the keys read before it and marks the throwing key
     /// a string with no cases: the known limit.
-    @Test(.disabled("waits on CC-5")) func throwingEnumInitKeptPartial() {
+    @Test func throwingEnumInitKeptPartial() {
         Self.expectProbe(Fill.self, equals: .object(["opacity": .number(), "blend": .string()], required: ["opacity", "blend"]))
         Self.expectProbe(Blend.self, equals: .string())
     }
 
     /// `CommandSchemaProviding` wins, for a nested key (so the keys after it are read) and for the whole type.
-    @Test(.disabled("waits on CC-5")) func overrideWins() {
+    @Test func overrideWins() {
         Self.expectProbe(TextLabel.self, equals: .object([
             "text": .string(), "align": Align.paramSchema, "size": .number(),
         ], required: ["text", "align", "size"]))

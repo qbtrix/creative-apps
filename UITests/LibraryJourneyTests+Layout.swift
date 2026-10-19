@@ -13,7 +13,7 @@
 // Command-1 swaps the Fit pill for "Zoom 100%"; every control listed in
 // `library.controls` lies inside the window. After the loop the grid has
 // fewer columns at 880 than at 1024. Written before its code (lead.md,
-// contract rule 13): SL-4 draws the status row and drops the skip below.
+// contract rule 13); SL-4 draws the status row and runs it.
 // Every shot is audited under `library`. A plain Text reads its words as its
 // value and a label as its label, so text is read from either.
 import AppKit
@@ -28,11 +28,10 @@ final class LibraryLayoutJourneyTests: XCTestCase {
 
     /// J12: the status row, grid, inspector and loupe line up at every width.
     @MainActor func testLayoutAtWidths() throws {
-        throw XCTSkip("waits on SL-4")
         try walkLayout()
     }
 
-    /// The journey itself, which SL-4 runs once it drops the skip above.
+    /// The journey itself.
     @MainActor private func walkLayout() throws {
         let screen = NSScreen.screens.first?.frame.size ?? .zero
         var columns: [Int: Int] = [:]
