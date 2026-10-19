@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-19T13:27Z	3	heartbeat	#3224	macOS build 39258144713 success on ea150fa; awaiting lane merge
 2026-10-19T13:49Z	3	heartbeat	#3224	clean and green; lane sweep in progress; dev CI 39252895176 running
 2026-10-19T14:16Z	3	heartbeat	#3224	queued behind lane batch bisect (22 ready PRs); dev CI 39252895176 still running
+2026-10-19T14:37Z	3	heartbeat	#3224	still queued in lane; dev CI 39252895176 macOS job running
