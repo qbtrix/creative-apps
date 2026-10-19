@@ -2,7 +2,7 @@
 
 Issue: #1934 · Packet: docs/blueprints/suiteui/features/adopt-kernel-undo.md
 Run: act-1a154b13dec-71tm (resume; earlier runs act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-suiteui-lead-gvq11j · Resumed: 2026-10-19
-Stage: 1 (AU-design plan building)
+Stage: 3 wave 1 (AU-design PR #3287)
 Base: 6e70826 (brief main 6e70826be59e092e59269605cfdfbce93c4a2bbe verified; PRs target dev)
 Next: AU-design: Design undo already runs on kernel History (#3022, in main 6e70826), so AU-d1/AU-d2 reduce to the adapter plan DesignModel.KernelUndoAdapter (no hand-off file edited); PR next. AU-library waits on filters-collections (parked out of beta, FC-3 CatalogHistory unbuilt): supervisor asked on #1934. AU-flare waits on stage-edit (building, waiting on #995).
 
