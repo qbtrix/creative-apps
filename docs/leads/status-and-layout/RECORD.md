@@ -43,7 +43,7 @@ Next: lane merges #3087 (SL-4, macOS build pending); then wave 3: SL-6 (SL-4 and
 
 ## Open
 - #3088 (gap): pass `row.zoom` straight to ViewerStatusBar once #1184 lands. SL-4 (#3087) falls back to the loupe fit, or 100% in the grid.
-- SL-a merged-done waits on a dev CI run with a green Linux job that contains #3003 and #3004. CI 39188162085 on 17dc84c7 is pending; the two runs before it were cancelled before any job started.
+- SL-a merged-done waits on a dev CI run with a green Linux job that contains #3003 and #3004. CI 39192572958 (39188162085 cancelled) on 17dc84c7 is pending; the two runs before it were cancelled before any job started.
 - PR #2624 (open, SuiteUI line) deletes Sources/LibraryApp/LibraryStatusBar.swift and moves Library's status line into ViewerStatusBar (`message:`, `preview:`). SL-4 owns that file. If #2624 merges first, SL-4 builds on ViewerStatusBar and its LibraryWindow `statusBar(_:)`, with no Library copy (rule 20).
 - Stage 1 gaps filed: #2981 status row only on preview data in the grid (owner filters-collections), #2982 MetadataInspector draws its own InspectorHeader (owner metadata-more). #291 audit: nothing for SuiteUI; the unnamed Info/Develop tabs need `id:` on SegmentedTabs in LibraryInspector.swift, which goes in SL-8.
 - Line CI findings #2908, #2909, #2910 (LibraryJourneyTests: thumbnails stuck at "loading", lost app connection) are open on line:library with no feature. They count toward no feature's 5-finding cap. SL-3's journey reads the grid, so if thumbnail loading still stalls when SL-3's scoped run happens, take #2908 into the next wave.

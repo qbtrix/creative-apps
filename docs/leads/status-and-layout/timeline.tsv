@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 02:56Z	3 wave 2	merged	#3075	SL-5 merged a01d82b7
 02:56Z	3 wave 2	merged	#3069	SL-7 merged e0b0ac66
 02:56Z	-	check	SL-a	CI 39188162085 still pending; no dev Linux run yet
+03:18Z	check	check-in	dev CI	no lane merges yet (macOS build queue backlogged); dev CI 39188162085 cancelled before any job; merged-done now waits on 39192572958 at cc14022e (contains every merged task; Linux in progress); scoped library 39189402196 in progress
