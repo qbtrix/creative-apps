@@ -1,0 +1,111 @@
+utc	stage	event	ref	note
+2026-10-16T12:43Z	0	stage-start	#1331	lead set up on dev b102413
+2026-10-16T12:43Z	2	stage-end	#1331	planned 4 waves from the packet
+2026-10-16T12:43Z	3	stage-start	wave 1	BU-2 BU-3 BU-5a BU-5b
+2026-10-16T13:56Z	3	pr-merged	#1357	BU-2
+2026-10-16T13:56Z	3	pr-merged	#1360	BU-5a
+2026-10-16T13:56Z	3	pr-merged	#1361	BU-5b
+2026-10-16T13:56Z	3	pr-opened	#1358	BU-3 supervisor merges
+2026-10-16T13:56Z	3	stage-start	wave 2	BU-5c on dev e464eca
+2026-10-16T14:04Z	3	pr-opened	#1392	BU-5c placeholder icons, no feature-done
+2026-10-16T14:19Z	3	heartbeat	#1392	BU-5c waits on lane macOS build run 38912960821; BU-3 #1358 waits on supervisor
+2026-10-16T14:41Z	3	pr-merged	#1392	BU-5c
+2026-10-16T14:41Z	3	stage-start	wave 3	BU-4 waits on supervisor merge of BU-3 #1358
+2026-10-16T15:03Z	3	heartbeat	#1358	BU-3 still waits on the supervisor; BU-4 not started
+2026-10-16T15:25Z	3	heartbeat	#1358	BU-3 still waits on the supervisor; BU-4 not started
+2026-10-16T15:48Z	3	stage-start	wave 3	BU-4 on dev f52ec33, merges after #1358
+2026-10-16T15:57Z	3	pr-opened	#1445	BU-4 bundle-apps and size-report, supervisor merges after #1358
+2026-10-16T16:11Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T16:19Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T16:41Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T17:03Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T17:25Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T17:47Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T18:09Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T18:31Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T18:52Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T19:15Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T19:37Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T19:58Z	3	stopped	#1358	8 h wall clock: BU-3 #1358 and BU-4 #1445 still wait on the supervisor; RECORD Next: holds the resume brief
+2026-10-16T20:29Z	3	heartbeat	#1358	resumed on Belt nudge; #1358 and #1445 open, both merge clean onto dev; still wait on the supervisor
+2026-10-16T20:51Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T21:12Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T21:34Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T21:55Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T22:17Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T22:39Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T23:01Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T23:22Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T23:44Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T00:06Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T00:28Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T00:50Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T01:11Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T01:32Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T01:55Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T02:16Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T02:39Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T03:00Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T03:21Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T03:21Z	3	pr-merged	#1358	BU-3 merged by the supervisor as e3a6807; BU-4 #1445 merges clean on it
+2026-10-17T03:51Z	3	pr-merged	#1445	BU-4 merged by the supervisor
+2026-10-17T03:51Z	5	stage-start	finish	all six tasks merged
+2026-10-17T03:51Z	5	pr-opened	#1966	feature-done: bundle.wave.json built; scripts/ci PASS on 0db5a2d
+2026-10-17T03:58Z	5	pr-merged	#1966	feature-done merged as e251c5c5; full run 39000814995 Linux green, main promoted
+2026-10-17T06:17Z	4	stage-start	round 1	line lead act-1a14881ad5e-axoa resumed; bundle proof read from scoped run 39008864548 (4a86f5fc)
+2026-10-17T12:13Z	4	heartbeat	round 1	line lead act-1a149c6a2a3-yna2 resumed on main/dev 04242316; round-1 panel not yet run, starting it
+2026-10-17T12:17Z	4	agent-start	round 1	critic panel (5 lenses) on 4a86f5fc
+2026-10-17T12:21Z	4	heartbeat	round 1	container restart; round-1 critic panel resumed
+2026-10-17T13:14Z	4	round-findings	#2050-#2054	round 1: 5 minor findings filed
+2026-10-17T13:20Z	4	fix-round	#2050 #2051 #2052	round 1 fixers A and B started from f301f664
+2026-10-17T13:29Z	4	pr-opened	#2072	fix B: SizeGate nonzero symbol limit test, Mutate 4/4 (Fixes #2052)
+2026-10-17T13:29Z	4	pr-opened	#2073	fix A: plist type names + CFBundleExecutable (Fixes #2050 #2051)
+2026-10-17T13:42Z	heartbeat	wait	#2072 and #2073 macOS builds green (39036738534, 39036751440); waiting on the lane merge
+2026-10-17T14:04Z	4	pr-merged	#2072 #2073	fix round 1 merged 13:47Z (batch Linux 39037438601)
+2026-10-17T14:04Z	4	agent-start	round 2	critic panel (5 lenses) on dev 8e868417
+2026-10-17T14:16Z	4	round-findings	#2104 #2105	round 2: round-1 fixes hold; 2 minor findings filed
+2026-10-17T14:16Z	4	pr-opened	#2111	fix round 2 (last): helper plist version keys + Photo OpenRaster MIME tag (Fixes #2104 #2105), head 5f6c61dc
+2026-10-17T14:27Z	4	heartbeat	#2111	lane macOS build 39040181491 in progress
+2026-10-17T14:50Z	4	heartbeat	#2111	lane macOS build 39040181491 green; waiting on the lane sweep to merge
+2026-10-17T15:13Z	4	heartbeat	#2111	clean and build-green; queued behind lane batch-20261017145213 bisect (8 ready PRs wait)
+2026-10-17T15:40Z	4	merged	#2111	merged 15:25Z as f50448c4 (batch of 4, Linux); #2104 #2105 closed
+2026-10-17T15:40Z	4	round-closed	#2053 #2054	cap reached; open findings relabelled gap (supervisor-owned, scripts/)
+2026-10-17T15:52Z	heartbeat	full CI 39043153763: Linux green; macOS scripts/ci step failed, ui-test still running; logs readable once job ends
+2026-10-17T16:06Z	heartbeat	full CI 39043153763 macOS ui-test still running (since 15:15Z); scripts/ci step red, logs pending; 39045632781 cancelled, 39047162437 (d6187654) queued next
+2026-10-17T16:23Z	heartbeat	full CI 39043153763 macOS still in ui-test (67 min); snapshots artifact holds only perf .txt reports, no PNGs, so scripts/ci failed before AppSnapshotTests wrote; logs pending
+2026-10-17T16:40Z	5	ci-run	39043153763	macOS cancelled at 16:36Z: scripts/ci FAIL at Tests/ci_findings (filed #2190, supervisor); 68 journeys "no process ID" = #2099 (bundle lacked SuiteKernel.framework; fixed by #2131 at 15:06Z, after 2c5003b5); no AfterGlow snapshot ran, #1931 unproven; following 39049627028 (4cc9e6f4)
+2026-10-17T17:05Z	5	ci-run	39049627028	39049627028 (4cc9e6f4): Linux red only on DesignStyleBudgetTests/scrubStep timing (5.12ms > 5ms gate, Design line; dev-red #2191); macOS scripts/ci FAIL in 13s again (#2190), so no AfterGlow snapshot, #1931 unproven; ui-test running since 16:48Z; next full run 39050873494 (1a4e5e89) pending
+2026-10-17T17:10Z	5	heartbeat	lead	line lead act-1a14ad585d6-dlpz resumed (session_01FgHMdTN1ZvtNhGw81uzVWU); branch on main 2c5003b5; following full CI 39050873494
+2026-10-17T17:19Z	5	pr-opened	#2198	fix for #2190 (ci_findings case fails on macOS temp paths, stops every full run before AppSnapshotTests); full CI 39050873494 still pending
+2026-10-17T17:39Z	5	heartbeat	#2198	merged into dev c3dbf73c; full CI 39054585645 queued on it
+2026-10-17T17:39Z	5	ci-run	39054585645	full CI on dev c3dbf73c (holds #1966, #2082, #2198)
+2026-10-17T17:59Z	5	heartbeat	39055838504	39054585645 cancelled (superseded); newest full CI 39055838504 on dev 57486e5e pending
+2026-10-17T18:19:37Z	5	heartbeat	39056193379	full CI on dev e17b68f9 pending; 39055838504 (57486e5e) cancelled by newer dev runs
+2026-10-17T18:38:57Z	5	heartbeat	39058107366	full CI on dev 13911964 pending; 39056193379 (e17b68f9) and 39057994682 (9f205637) cancelled by newer dev runs
+2026-10-17T18:58:50Z	5	heartbeat	39058107366	full CI on dev 13911964 still pending (queued behind scoped runs)
+2026-10-17T19:18:29Z	5	heartbeat	39061216116	full CI on dev 6ad373ab pending; 39058107366, 39060443632, 39060502566 cancelled by newer dev runs
+2026-10-17T19:38:05Z	5	heartbeat	39062516417	full CI on dev 0c8e4a71 pending; 39061216116 superseded by newer dev run
+2026-10-17T19:57:33Z	5	heartbeat	39062516417	full CI on dev 0c8e4a71 in progress
+2026-10-17T20:19:39Z	5	heartbeat	39062516417	full CI on dev 0c8e4a71 red outside bundle (home finding #2344, Design #2191); waiting on the next full run after the home fix
+2026-10-17T20:47:25Z	5	heartbeat	39067841526	#2350 waits on its lane macOS build 39067841526; #2351 queued in the lane; full CI on dev df60ad73 (39066112359) predates both
+2026-10-17T21:07:32Z	5	heartbeat	39068664974	home fix #2350 and #2351 merged; full CI 39068664974 on dev abb4e96a holds both, pending
+2026-10-17T21:26:40Z	5	heartbeat	39069913922	full CI 39068664974 cancelled by newer dev run; 39069913922 on dev c55fad78 holds the home fix, queued
+2026-10-17T21:34Z	5	stage-start	c55fad78	line lead act-1a14bc85382-m8og resumed; branch moved onto main
+2026-10-17T21:57Z	bundle	heartbeat	c55fad78	macOS scripts/ci: only DesignArtworkPathTests red (not ours); waiting on ui-test
+2026-10-17T22:19Z	bundle	heartbeat	c55fad78	full CI 39069913922 macOS ui-test still running (since 21:54Z)
+2026-10-17T22:40Z	bundle	heartbeat	c55fad78	full CI 39069913922 macOS ui-test still running (since 21:54Z)
+2026-10-17T23:03Z	bundle	heartbeat	c55fad78	full CI 39069913922 ui-test cancelled (timeout), no ui-screens; waiting on full CI 39076534514
+2026-10-17T23:10Z	bundle	heartbeat	59c435a6	line lead act-1a14c1f550d-8dvt resumed; parked needs-human; #2073 Halo regression refuted (39045670179 green); waiting on Mac verification
+2026-10-17T23:43Z	5 contact sheet	heartbeat	-	parked needs-human; run 39076534514 ui-test running, 39079435388 pending; no open findings
+2026-10-18T00:14Z	5 contact sheet	heartbeat	-	parked needs-human; run 39076534514 ui-test running, 39081548839 pending; no open findings
+2026-10-18T00:46Z	5 contact sheet	heartbeat	#2509	parked needs-human; dev red on quarantine expiry (supervisor #2504), not ours; no open findings
+2026-10-18T01:16Z	5 contact sheet	heartbeat	#2509	parked needs-human; dev red on quarantine expiry (captain call, #2504), not ours; no open findings
+2026-10-18T01:47Z	5 contact sheet	heartbeat	#2509	parked needs-human; 39082226458 macOS ui-test running; no open findings
+2026-10-18T02:20Z	5 contact sheet	heartbeat	d3cd7d9f	CI 39082226458 ui-test read; 39088586270 in macOS; parked
+2026-10-18T02:52Z	5 contact sheet	heartbeat	948bcbf4	dev green; 39088586270 in ui-test; 39090620413 queued; parked
+2026-10-18T03:22Z	5 contact sheet	heartbeat	d3cd7d9f	39088586270 in ui-test; 39090620413 cancelled; parked
+2026-10-18T04:24Z	5 contact sheet	heartbeat	b2b19dd	Mac finish #2525 merged; 39088586270 ui-test repeats 4 AfterGlow failures; parked
+2026-10-18T04:57Z	5 contact sheet	heartbeat	e01529f4	full CI 39098181461 running; awaiting supervisor on #1503; parked
+2026-10-18T05:28Z	5 contact sheet	heartbeat	e01529f4	full CI 39098181461 running; awaiting supervisor; parked
+2026-10-18T06:04Z	5 contact sheet	heartbeat	39098181461	parked needs-human; no supervisor reply; dev green; no finding
+2026-10-18T06:42Z	5 contact sheet	heartbeat	39098181461	3rd run same 4 AfterGlow journey fails; re-raised #1503; dev-red #2667 Library, not ours
