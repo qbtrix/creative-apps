@@ -20,7 +20,7 @@ has to end up.
   there too, and its `perf-suites.txt` line reads
   `AppSnapshotTests.BodyCountSuites/<Suite>`.
 - **Step p95** is wall time, so `RenderBudget<App>Tests/timing` is listed in
-  `Tests/perf-suites.txt`. It runs in the report-only Perf step, one test at a
+  `Tests/perf-suites.txt`. It runs nightly on the captain's Mac (perf-nightly), one test at a
   time. The numbers below come from a debug build on an M2 Pro (max of
   3 runs). A release build is faster. Halo's were re-measured on `dev` with
   #1471 (no scrub ticks) and #1517 (live drag) in, at machine load 20 (a run at
@@ -45,6 +45,8 @@ has to end up.
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
 | SuiteUI | stroke pad on the editor-kernel chrome panel, 120 samples, `RenderBudgetEditorKernelStrokeTests` | not yet / 1 / 0 | not yet / not gated / 8.3 ms | first measured by the macOS run after EK-31; the pad's samples stay in its own state, paced by `SuiteStrokePacer` |
 | SuiteUI gallery `editor-kernel` | drag Card 7 onto Header in the 200-row layer tree, 120 samples (`RenderBudgetEditorKernelTests`) | not yet / 3 / 1 | not timed | first measured by the macOS run after EK-6; the drop's log line and move should be the one body |
+| AI access (afterglow-mcp) | a demo request's approval sheet appears on Flare's window, then Allow Once (`RenderBudgetAIAccessTests/sheet`) | not yet / 2 / 0 | not timed (packet: p95 ≤ 8 ms, report-only once the supervisor lists a `timing` test) | first measured by the macOS run after MC-13; the sheet is its own window, so the app window should not run |
+| AI access (afterglow-mcp) | Flare's ellipse drag, 120 samples, with the "Controlled by" chip in the title bar (`RenderBudgetAIAccessTests/chip`) | not yet / no more than the same drag without the chip, and 3 / 3 | not timed | first measured by the macOS run after MC-13; the chip is its own hosting view and adds 0 bodies |
 | AfterGlow onboarding | click Continue (page 1 to 2) | 1 / 1 / 1 | 14 ms debug (31 ms on a cold first run) / 35 / 16 ms | none in flight; at target bodies. Release not measured: `swift test -c release` fails to link SuiteUITests (#2714) |
 | AfterGlow onboarding | click the Photos focus chip | 0 / 0 / 0 | 9.5 ms debug (24 ms cold) / 30 / 16 ms | none in flight. The click focuses the chip, and the system focus ring animates in: ~700–800 layout passes (~55 ms) over the 100 ms after the step, off the step time |
 | AfterGlow onboarding | move the pointer across the first starter row, 120 samples | 0 / 0 / 0 | 0.09 / 1 / 8.3 ms | none in flight; under target |

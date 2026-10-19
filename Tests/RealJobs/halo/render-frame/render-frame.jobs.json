@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "Moves the playhead of a shapes-only composition to frame 12 and exports that frame as a full-size PNG.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "timeline.scrub", "params": {"frame": 12}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-12", "format": "png", "options": {}},
+  "expect": {
+    "out/shapes-12.png": {"pixels": {"tolerance": 2, "reference": "expected/shapes-12.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}
