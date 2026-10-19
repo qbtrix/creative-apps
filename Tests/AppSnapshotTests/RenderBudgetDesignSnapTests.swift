@@ -2,9 +2,11 @@
 // `cards`, A (node-2, 100 100 100 × 80) dragged by its middle until its right edge sits on B's
 // left (x 300): mid-drag `design.canvas.guides` reads the live copy's guides ("x 300 ...") while
 // the window's A hasn't moved; after the release it keeps the last summary, and a new press clears
-// it to "none". `snappedDrag` gates the bound: a 120-sample move on `crowd` with the guide overlay
-// drawn runs DesignEditor's body 3 times or fewer. Nested in BodyCountSuites, as every suite that
-// reads a body counter or DesignWindow.lastWorkspace is. macOS only.
+// it to "none". `snappedDrag` gates the bound on the live guides (SN-11): on `crowd`, a 120-sample
+// move, resize and draw each run DesignEditor's body 3 times or fewer, and after 60 samples of each
+// `design.canvas.guides` reads the live copy's summary while the window's page is unmoved. Nested
+// in BodyCountSuites, as every suite that reads a body counter or DesignWindow.lastWorkspace is.
+// macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -52,14 +54,46 @@ extension BodyCountSuites {
             w.send(.leftMouseUp, at: at(60))
         }
 
-        @Test(.timeLimit(.minutes(2))) func snappedDrag() async throws {
+        @Test(.timeLimit(.minutes(3))) func snappedDrag() async throws {
             #if DEBUG
-            let w = RenderBudgetWindow(DesignWindow(seed: DesignWindowDragTests.Gesture.move.seed))
-            defer { w.close() }
-            let step = try await DesignWindowDragTests.dragSamples(.move, in: w)
-            #expect((step.bodies ?? 0) >= 1, "the drag never reached the window: \(step)")
-            expectBodies(step, atMost: 3, target: 3)
+            for gesture in [DesignWindowDragTests.Gesture.move, .resize, .draw] {
+                let live = DesignLiveDrag()
+                let w = RenderBudgetWindow(DesignWindow(seed: gesture.seed, live: live))
+                defer { w.close() }
+                let step = try await Self.snappedSamples(gesture, in: w, live: live)
+                #expect((step.bodies ?? 0) >= 1, "the snapped \(gesture) never reached the window: \(step)")
+                expectBodies(step, atMost: 3, target: 3)
+            }
             #endif
+        }
+
+        /// DesignWindowDragTests' 120-sample `gesture` on the window `w` hosts, paused after 60 samples
+        /// to check that the guides read the live copy's summary while the window's page hasn't moved.
+        static func snappedSamples<V: View>(
+            _ gesture: DesignWindowDragTests.Gesture, in w: RenderBudgetWindow<V>, live: DesignLiveDrag
+        ) async throws -> RenderStep {
+            try await w.settle(800)
+            let board = try #require(await w.element("suite.canvas"), "no canvas")
+            let start = w.point(gesture.from, on: page, in: board)
+            let end = w.point(
+                CGPoint(x: gesture.from.x + gesture.by.dx, y: gesture.from.y + gesture.by.dy), on: page, in: board)
+            let at = { (i: Int) in
+                CGPoint(x: start.x + (end.x - start.x) * Double(i) / 120, y: start.y + (end.y - start.y) * Double(i) / 120)
+            }
+            DesignWindow.lastWorkspace = nil
+            let name = "design snapped \(gesture.rawValue), 120 samples"
+            return try await w.measure(name, bodies: DesignWindowDragTests.editorBodies) {
+                try await w.drag(from: start, samples: 60, release: false, path: at)
+                try await w.settle(100)
+                let copy = try #require(live.workspace, "nothing is live during the \(gesture)")
+                let guides = try #require(copy.snapGuides, "the live \(gesture) runs no snapping gesture")
+                #expect(Self.value(in: w.host) == DesignGuideOverlay.value(guides, last: nil),
+                        "mid-\(gesture) the guides don't read the live copy's \(guides.summary)")
+                let window = try #require(DesignWindow.lastWorkspace, "the \(gesture) never reached the window")
+                #expect(window.selectedPage == gesture.seed.selectedPage, "the window's page changed mid-\(gesture)")
+                try await w.ticks(60) { w.send(.leftMouseDragged, at: at(60 + $0)) }
+                w.timed { w.send(.leftMouseUp, at: at(120)) }
+            }
         }
 
         /// The accessibility value of the guides element under `element`, searched depth first.
