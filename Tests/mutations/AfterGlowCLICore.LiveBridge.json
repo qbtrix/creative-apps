@@ -1,0 +1,6 @@
+[
+  {"label": "refusedGrantIsError: a grant refusal forwarded as success", "file": "Sources/AfterGlowCLICore/MCP/LiveBridge.swift", "find": "return .error(\"\\(peer.title) asked you to approve this client; answer it in \\(peer.title), then call again\")", "replace": "return .ok([\"approved\": .bool(false)])", "tests": "LiveBridgeTests"},
+  {"label": "a dead app breaks the list", "file": "Sources/AfterGlowCLICore/MCP/LiveBridge.swift", "find": "let commands = try? body[\"commands\"]?.decode([CommandDescription].self) else { continue }", "replace": "let commands = try? body[\"commands\"]?.decode([CommandDescription].self) else { break }", "tests": "LiveBridgeTests"},
+  {"label": "a name without the live prefix is routed to an app", "file": "Sources/AfterGlowCLICore/MCP/LiveBridge.swift", "find": "guard name.hasPrefix(head) else { return nil }", "replace": "", "tests": "LiveBridgeTests"},
+  {"label": "a second reply line in the buffer is dropped", "file": "Sources/AfterGlowCLICore/MCP/LiveBridge.swift", "find": "defer { buffer.removeSubrange(...end) }", "replace": "defer { buffer.removeAll() }", "tests": "LiveBridgeTests"}
+]
