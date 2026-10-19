@@ -63,3 +63,9 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - Fixed choices for CL-7: any refused input in a run exits 70 and the report still prints; output.format equal to the app's native extension ("fake") saves natively; report paths are CLIIO.read-style (batch/out/beach-small.fake).
 - Exit codes: version != 1 → 65; unknown app/step → 64 naming it, nothing written; missing script 74, malformed 65; empty pattern 65; collisions 73 unless force.
 - hundredInputsWithinBudget only prints; ask supervisor if it should join Tests/perf-suites.txt.
+
+## CL-5 handoff notes (PR #3149, head e45a0da)
+- LiveIO: regular-file reads through symlinks, 2 GiB cap (LiveIO(readLimit:)); writes via hidden temp + rename(2), no-replace via link(2); globs per segment, files only, sorted, dot-files only when the segment starts with '.'. Mutate 6/6 AfterGlowCLICore.LiveIO.
+- CLIFileSafetyTests gated `.enabled(if: routed)` (routed = CLI.run(["list-apps"]) != 69): they turn on by themselves when CL-4 lands.
+- For CL-10: Sources/AfterGlowCLI/main.swift still calls CLI.run(args, out:err:); must become CLI.run(args, io: LiveIO()) or the binary never touches disk. Router: every write error except CLIIOError.exists → 74.
+- Public HeadlessApp.session(reading:io:) lives in LiveIO.swift. #3149 edits cli-runner.json `description` (possible key conflict with CL-4).
