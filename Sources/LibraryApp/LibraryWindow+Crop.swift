@@ -56,35 +56,44 @@ extension LibraryWindow {
 
     /// The overlay's and the CROP section's values and closures; each closure nil without a draft.
     var cropControls: LibraryMenu.Crop {
+        // Typed locals: one initializer holding every closure is too much for the type checker.
         let cropping = model.cropDraft != nil
+        let artboard: PixelSize? = model.loupeItem.map { model.croppedSize($0) }
+        let setAspect: (@MainActor (CropAspect) -> Void)? = enabled(cropping) { (aspect: CropAspect) in
+            model.setCropAspect(aspect)
+        }
+        var drag: (@MainActor (CropHandle, Double, Double) -> Void)?
+        if cropping {
+            drag = { (handle: CropHandle, dx: Double, dy: Double) in
+                model.dragCrop(handle, dx: dx, dy: dy)
+            }
+        }
+        let setAngle: (@MainActor (Double) -> Void)? = enabled(cropping) { (degrees: Double) in
+            model.setCropAngle(degrees)
+            cropAreaRender(preview: true)
+        }
+        let level: LibraryMenu.Action? = enabled(cropping && model.levelHelp == nil) { () in
+            cropAreaLevel()
+        }
+        let apply: LibraryMenu.Action? = enabled(cropping) { () in
+            model.applyCrop()
+            cropAreaRender()
+        }
+        let cancel: LibraryMenu.Action? = enabled(cropping) { () in
+            model.cancelCrop()
+            cropAreaRender()
+        }
+        let reset: LibraryMenu.Action? = enabled(cropping) { () in
+            model.resetCrop()
+            cropAreaRender(preview: true)
+        }
         return LibraryMenu.Crop(
             draft: model.cropDraft,
             frame: model.cropFrame, canvas: model.cropCanvas, frameValue: model.cropFrameValue,
-            artboard: model.loupeItem.map { model.croppedSize($0) },
+            artboard: artboard,
             resetHelp: model.resetCropHelp, levelHelp: model.levelHelp,
-            setAspect: enabled(cropping) { (aspect: CropAspect) in
-                model.setCropAspect(aspect)
-            },
-            drag: cropping ? { (handle: CropHandle, dx: Double, dy: Double) in
-                model.dragCrop(handle, dx: dx, dy: dy)
-            } : nil,
-            setAngle: enabled(cropping) { (degrees: Double) in
-                model.setCropAngle(degrees)
-                cropAreaRender(preview: true)
-            },
-            level: enabled(cropping && model.levelHelp == nil) { cropAreaLevel() },
-            apply: enabled(cropping) {
-                model.applyCrop()
-                cropAreaRender()
-            },
-            cancel: enabled(cropping) {
-                model.cancelCrop()
-                cropAreaRender()
-            },
-            reset: enabled(cropping) {
-                model.resetCrop()
-                cropAreaRender(preview: true)
-            })
+            setAspect: setAspect, drag: drag, setAngle: setAngle,
+            level: level, apply: apply, cancel: cancel, reset: reset)
     }
 
     /// The loupe's picture again for the catalog's current settings (the
