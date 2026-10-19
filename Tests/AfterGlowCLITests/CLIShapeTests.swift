@@ -1,6 +1,7 @@
 // CLIShapeTests.swift: LJ0's first half (afterglow-cli CL-1). `afterglow
 // --version` prints exactly one JSON object with sorted keys and exits 0;
-// every other form is still a stub that exits 69 naming its slice. Runs
+// since CL-4 the other single-shot forms answer (CLIArgsTests), and `run`
+// and `mcp` are stubs that exit 69 naming their slice. Runs
 // through CLI.run, the same entry main.swift calls, so both targets build
 // on Linux and macOS.
 #if canImport(FoundationEssentials)
@@ -28,17 +29,13 @@ struct CLIShapeTests {
     @Test func versionPrintsOneJSONObjectAndExitsZero() {
         let run = Self.run(["--version"])
         #expect(run.code == 0)
-        #expect(run.out == [#"{"version":"\#(CLI.version)"}"#])
+        #expect(run.out == [#"{"ok":true,"version":"\#(CLI.version)"}"#])
         #expect(run.err.isEmpty)
         #expect(Self.object(run.out.first ?? "")?["version"] == .string(CLI.version))
         #expect(!CLI.version.isEmpty)
     }
 
-    @Test(arguments: [
-        (["list-apps"], "CL-args"), (["--help"], "CL-args"), ([], "CL-args"),
-        (["photo", "list-commands"], "CL-args"), (["--version", "--json"], "CL-args"),
-        (["run", "resize.jobs.json"], "CL-batch"), (["mcp"], "afterglow-mcp"),
-    ])
+    @Test(arguments: [(["run", "resize.jobs.json"], "slice CL-batch"), (["mcp"], "afterglow-mcp is not built yet")])
     func everyOtherFormIsAStubThatNamesItsSlice(arguments: [String], slice: String) {
         let run = Self.run(arguments)
         #expect(run.code == 69)
@@ -48,7 +45,7 @@ struct CLIShapeTests {
         #expect(line.hasSuffix(#""ok":false}"#))
         #expect(Self.object(line)?["ok"] == .bool(false))
         #expect(run.err.count == 1)
-        #expect(run.err.first?.contains("slice \(slice)") == true)
+        #expect(run.err.first?.contains(slice) == true, "\(run.err)")
     }
 }
 
