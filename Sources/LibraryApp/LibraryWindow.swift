@@ -75,7 +75,7 @@ struct LibraryWindow: View {
             }
         } inspector: {
             LibraryInspector(
-                model: model, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
+                model: model, menu: menu, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
