@@ -68,7 +68,7 @@ struct HaloLayerList: View {
     }
 
     /// Each row's kind symbol, tooltip and VoiceOver value, by layer id.
-    static func decorations(_ layers: [HaloLayer]) -> [String: LayerRowDecoration] {
+    nonisolated static func decorations(_ layers: [HaloLayer]) -> [String: LayerRowDecoration] {
         Dictionary(layers.map { layer in
             (layer.id, LayerRowDecoration(
                 symbol: layer.kind.systemImage, symbolLabel: layer.kind.layerTitle,
