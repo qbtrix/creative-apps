@@ -107,7 +107,8 @@ private func cardsWithFractionalFrame() throws -> (DesignWorkspace, frame: Strin
     @Test func theBottomRightHandleResizesOntoWholePoints() {
         var workspace = DesignFixtures.cards
         workspace.selectItem(a)
-        workspace.gesture(.move, pt(200, 180), pt(205.5, 180.4))
+        // `.noSnap`: 205.5 is within reach of Title's centre at x 200 (snapping SN-5).
+        workspace.gesture(.move, pt(200, 180), pt(205.5, 180.4), .noSnap)
         #expect(workspace.frame(a) == rc(100, 100, 106, 80))
         #expect(workspace.undoActionName == "Undo Resize")
     }
@@ -115,7 +116,7 @@ private func cardsWithFractionalFrame() throws -> (DesignWorkspace, frame: Strin
     @Test func optionResizesFromTheCentreWithEveryEdgeWhole() {
         var workspace = DesignFixtures.cards
         workspace.selectItem(a)
-        workspace.gesture(.move, pt(200, 180), pt(205.5, 180.4), [.option])
+        workspace.gesture(.move, pt(200, 180), pt(205.5, 180.4), [.option, .noSnap])
         #expect(onWholePoints(workspace.frame(a)))
         #expect(workspace.frame(a) == rc(95, 100, 111, 80))
     }
@@ -158,7 +159,7 @@ private func cardsWithFractionalFrame() throws -> (DesignWorkspace, frame: Strin
         #expect(onWholePoints(workspace.frame(id)))
         #expect(workspace.undoActionName == "Undo Resize")
 
-        workspace.gesture(.rectangle, pt(600.3, 700.7), pt(660.2, 730.1), [.shift])
+        workspace.gesture(.rectangle, pt(600.3, 700.7), pt(660.2, 730.1), [.shift, .noSnap])
         let square = workspace.frame(workspace.selectedNodeID ?? "")
         #expect(square == rc(600, 701, 60, 60))
         #expect(onWholePoints(square))

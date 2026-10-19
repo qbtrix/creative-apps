@@ -6,7 +6,10 @@
 // in the gallery index. The list shows no scroller, whose page area the app
 // audit reads as an unnamed button with no identifier (#2742). As a sidebar
 // layers panel (#2811) it selects, renames (a refusal keeps the draft), names
-// its toggles as SidebarRow does and runs its header action. macOS only.
+// its toggles as SidebarRow does and runs its header action. For the app
+// panel swaps (#3194) it takes app ids, and a drop beside a flat row reorders
+// it among its siblings (before, after, first, last; refused on a locked
+// target or an unknown id), the root as parent at depth 0. macOS only.
 @testable import SuiteUI
 import SuiteKernel
 import SwiftUI
@@ -104,6 +107,70 @@ import Testing
         #expect(header.section.addAction?.title == "New Layer")
         header.action?.perform()
         #expect(calls.added == 1)
+    }
+
+    /// The flat reorder rule (#3194): a drop beside a row moves the dragged
+    /// row next to it in the row's own parent, as the kernel's move applies it.
+    @Test func flatReorder() throws {
+        let open: Set<String> = ["desktop"]
+        func moved(_ id: String, beside target: String, below: Bool) throws -> [String] {
+            var tree = KernelFixtures.cards
+            let move = try #require(LayerTreeList.reorder(id, beside: target, below: below, in: tree.rows(expanded: open)))
+            try tree.move(move.id, into: move.parentID, at: move.index)
+            return tree.rows(expanded: open).map(\.id)
+        }
+        #expect(KernelFixtures.cards.rows(expanded: open).map(\.id)
+            == ["desktop", "hidden", "locked", "pair", "title", "c", "b", "a"])
+        #expect(LayerTreeList.reorder("a", beside: "c", below: false, in: KernelFixtures.cards.rows(expanded: open))
+            == LayerDrop(id: "a", parent: "desktop", index: 2))
+        #expect(try moved("a", beside: "c", below: false) == ["desktop", "hidden", "locked", "pair", "title", "a", "c", "b"])
+        #expect(try moved("title", beside: "b", below: true) == ["desktop", "hidden", "locked", "pair", "c", "b", "title", "a"])
+        #expect(try moved("b", beside: "hidden", below: false) == ["desktop", "b", "hidden", "locked", "pair", "title", "c", "a"])
+        #expect(try moved("hidden", beside: "a", below: true) == ["desktop", "locked", "pair", "title", "c", "b", "a", "hidden"])
+
+        // Refused: a locked target, an unknown id, the row itself, its own descendant.
+        let rows = KernelFixtures.cards.rows(expanded: ["desktop", "pair"])
+        #expect(LayerTreeList.reorder("a", beside: "locked", below: false, in: rows) == nil)
+        #expect(LayerTreeList.reorder("nosuch", beside: "a", below: false, in: rows) == nil)
+        #expect(LayerTreeList.reorder("a", beside: "nosuch", below: true, in: rows) == nil)
+        #expect(LayerTreeList.reorder("a", beside: "a", below: true, in: rows) == nil)
+        #expect(LayerTreeList.reorder("pair", beside: "e1", below: true, in: rows) == nil)
+        let all = KernelFixtures.tree200.rows(expanded: ["footer"])
+        #expect(LayerTreeList.reorder("background", beside: "footer-1", below: false, in: all) == nil)
+
+        // At depth 0 the parent is the root.
+        let roots = KernelFixtures.tree200.rows(expanded: [])
+        let top = try #require(LayerTreeList.reorder("background", beside: "header", below: false, in: roots))
+        #expect(top == LayerDrop(id: "background", parent: LayerDrop.root, index: 1) && top.parentID == nil)
+        var tree = KernelFixtures.tree200
+        try tree.move(top.id, into: top.parentID, at: top.index)
+        #expect(tree.rows(expanded: []).suffix(2).map(\.id) == ["background", "header"])
+    }
+
+    /// App naming (#3194): the container, row and control ids Photo and Halo
+    /// journeys use; every new option defaults off.
+    @Test func appNaming() {
+        let photo = LayerTreeNaming.app(LayerTreeIDs(container: "photo.layers", row: "photo.layer.row.", control: "photo.layer."))
+        var row = KernelFixtures.tree200.rows(expanded: [])[0]
+        row.id = "7"
+        row.name = "Sky"
+        row.isHidden = false
+        #expect(photo.container == "photo.layers")
+        #expect(photo.identifier(of: photo.visibility(row), in: "7") == "photo.layer.7.eye")
+        #expect(photo.control("7", "kind") == "photo.layer.7.kind")
+        #expect(photo.visibility(row).title == "Hide Sky")
+        let halo = LayerTreeNaming.app(LayerTreeIDs(container: "halo.layers", row: "halo.layer.row.", control: "halo.layer."))
+        #expect(halo.row("l1") == "halo.layer.row.l1")
+        // The built-in namings keep their ids.
+        #expect(LayerTreeNaming.layers.disclosure("hero") == "suite.layers.hero.disclose")
+        #expect(LayerTreeNaming.sidebar.renameMessage("hero") == "suite.sidebar.hero.renameMessage")
+
+        let options = LayerTreeOptions()
+        #expect(options.showsEye && options.showsLock && !options.reorders && !options.embedded)
+        let flat = LayerTreeOptions(showsEye: false, showsLock: false, reorders: true, embedded: true)
+        #expect(!flat.showsEye && !flat.showsLock && flat.reorders && flat.embedded)
+        let kind = LayerRowDecoration(symbol: "photo", symbolID: "photo.layer.7.kind", caption: "Pixel · 100%")
+        #expect(kind.caption == "Pixel · 100%" && kind.thumbnail == nil && kind.help == nil)
     }
 
     /// A legacy scroller's page area is a `button ''` to the app audit, so the

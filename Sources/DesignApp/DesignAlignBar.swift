@@ -1,12 +1,12 @@
 // DesignAlignBar.swift: the Align section of Design's inspector: the six align
-// commands for the selected layer as SuiteUI inspector actions in two columns,
-// horizontal on the left (Left, Center, Right) and vertical on the right (Top,
-// Middle, Bottom). With several layers selected two full-width rows add
-// Distribute Horizontally and Vertically, and every button runs its DesignCommand. Each
-// shows its symbol, its tooltip is its title, one that can't run is disabled
-// with the reason from the Model (alignHelps, help(_:)), and each carries its
-// DesignControlID and lists itself in `suite.controls`. A disabled Distribute
-// row also shows its reason as a secondary caption below it
+// commands for the selected layer as icon-only SuiteUI inspector actions in two
+// rows, horizontal (Left, Center, Right) then vertical (Top, Middle, Bottom).
+// With several layers selected a third row adds Distribute Horizontally and
+// Vertically, and every button runs its DesignCommand. Each shows its symbol
+// and its title as the tooltip; one that can't run is disabled and its tooltip
+// names it and gives the reason from the Model (alignHelps, help(_:)). Each
+// carries its DesignControlID and lists itself in `suite.controls`. A disabled
+// Distribute button also shows its reason as a secondary caption under the row
 // (`design.distribute.reason`), so it reads without hovering (#2438). Values in,
 // intents out.
 import DesignModel
@@ -21,33 +21,27 @@ struct DesignAlignBar: View {
     var distributeHelp: [DesignDistributeAxis: String]? = nil
     let perform: DesignPerform
 
-    /// Each grid row: a horizontal command, then its vertical partner.
-    private static let rows: [[DesignAlignEdge]] = [[.left, .top], [.center, .middle], [.right, .bottom]]
+    /// The horizontal commands, then the vertical ones: one row each.
+    private static let rows: [[DesignAlignEdge]] = [[.left, .center, .right], [.top, .middle, .bottom]]
 
     var body: some View {
         InspectorSection("Align") {
-            Grid(horizontalSpacing: SuiteSpacing.xs, verticalSpacing: SuiteSpacing.xs) {
-                ForEach(Self.rows, id: \.self) { row in
-                    GridRow {
-                        ForEach(row, id: \.self) { action($0) }
-                    }
+            ForEach(Self.rows, id: \.self) { row in
+                HStack(spacing: SuiteSpacing.xs) {
+                    ForEach(row, id: \.self) { action($0) }
                 }
-                if let distributeHelp {
-                    // Full width each: "Distribute Horizontally" wraps in a half-width cell.
-                    ForEach(DesignDistributeAxis.allCases, id: \.self) { axis in
-                        GridRow { distribute(axis, distributeHelp[axis]).gridCellColumns(2) }
-                    }
-                    if let caption = Self.distributeCaption(distributeHelp) {
-                        GridRow {
-                            Text(caption)
-                                .font(SuiteFont.caption)
-                                .foregroundStyle(SuiteColor.secondaryText)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .accessibilityIdentifier("design.distribute.reason")
-                                .gridCellColumns(2)
-                        }
-                    }
+            }
+            if let distributeHelp {
+                HStack(spacing: SuiteSpacing.xs) {
+                    ForEach(DesignDistributeAxis.allCases, id: \.self) { distribute($0, distributeHelp[$0]) }
+                }
+                if let caption = Self.distributeCaption(distributeHelp) {
+                    Text(caption)
+                        .font(SuiteFont.caption)
+                        .foregroundStyle(SuiteColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("design.distribute.reason")
                 }
             }
         }
@@ -63,20 +57,22 @@ struct DesignAlignBar: View {
     }
 
     private func action(_ edge: DesignAlignEdge) -> some View {
-        InspectorAction(ToolbarAction(
-            edge.title, systemImage: edge.systemImage, unavailableHelp: help[edge],
-            identifier: DesignControlID.align(edge)
-        ) {
-            perform(distributeHelp == nil ? .align(edge) : .command(.align(edge)))
-        })
+        InspectorAction(
+            ToolbarAction(
+                edge.title, systemImage: edge.systemImage, unavailableHelp: help[edge],
+                identifier: DesignControlID.align(edge)
+            ) {
+                perform(distributeHelp == nil ? .align(edge) : .command(.align(edge)))
+            }, iconOnly: true)
     }
 
     private func distribute(_ axis: DesignDistributeAxis, _ help: String?) -> some View {
-        InspectorAction(ToolbarAction(
-            axis.title, systemImage: axis == .horizontal ? "distribute.horizontal.center" : "distribute.vertical.center",
-            unavailableHelp: help, identifier: DesignControlID.distribute(axis)
-        ) {
-            perform(.command(.distribute(axis)))
-        })
+        InspectorAction(
+            ToolbarAction(
+                axis.title, systemImage: axis == .horizontal ? "distribute.horizontal.center" : "distribute.vertical.center",
+                unavailableHelp: help, identifier: DesignControlID.distribute(axis)
+            ) {
+                perform(.command(.distribute(axis)))
+            }, iconOnly: true)
     }
 }

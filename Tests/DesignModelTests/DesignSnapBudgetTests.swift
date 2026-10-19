@@ -1,5 +1,5 @@
-// DesignSnapBudgetTests.swift: QD-S13 engine build (≤ 2 ms device) and QD-S14 snapped move step
-// (≤ 0.2 ms) on `crowd` and 2,000 rectangles; rows over their gate are known issues (gap #3180).
+// DesignSnapBudgetTests.swift: QD-S13 engine build (≤ 2 ms device) and QD-S14 snapped move, resize
+// and draw steps (≤ 0.2 ms) on `crowd` and 2,000 rectangles; rows over their gate are known issues (gap #3180).
 @testable import DesignModel
 import Testing
 
@@ -34,11 +34,13 @@ import Testing
         #expect(crowd == 40 && flat == 2000)
     }
 
-    /// Times 200 move steps of node-1 from `start`, alternating between `ends`, after the untimed
-    /// press; checks they all ran on a move whose engine was built once.
-    func timeSteps(_ name: String, _ workspace: inout DesignWorkspace, from start: DesignPoint,
+    /// Times 200 steps of `tool` with node-1 selected from `start`, alternating between `ends`, after
+    /// the untimed press; checks they all ran on `route` (a move of node-1) whose engine was built once.
+    func timeSteps(_ name: String, _ workspace: inout DesignWorkspace, tool: DesignTool = .move,
+                   route: DesignGesture.Route = .move("node-1"), from start: DesignPoint,
                    ends: [DesignPoint], sourceLocation: SourceLocation = #_sourceLocation) {
         workspace.selectItem("node-1")
+        workspace.selectTool(tool)
         workspace.drag(from: start, to: ends[0])
         var step = 0
         let gate = DesignBudget.linuxDebugGate(device: .microseconds(200))
@@ -46,7 +48,7 @@ import Testing
             workspace.drag(from: start, to: ends[step % 2])
             step += 1
         }
-        #expect(step == 200 && workspace.gesture?.route == .move("node-1"), sourceLocation: sourceLocation)
+        #expect(step == 200 && workspace.gesture?.route == route, sourceLocation: sourceLocation)
         #expect(workspace.gesture?.snapBuilds == 1, sourceLocation: sourceLocation)
     }
 
@@ -64,5 +66,29 @@ import Testing
         var crowd = DesignFixtures.crowd
         timeSteps("QD-S14 snapped move step on crowd", &crowd, from: pt(30, 30), ends: [pt(202.4, 30.4), pt(207.6, 30.4)])
         #expect(crowd.frame("node-1") == rc(185, 10, 160, 150) && (crowd.snapGuides?.summary ?? "").contains("x 185"))
+    }
+
+    @Test func snapResizeAndDrawSteps() {
+        // node-1's bottom-right handle (30, 28) to (37.4, 28.4) and (65.6, 28.4): its right edge onto
+        // the next columns' left edges at 38 and 66, its bottom on its row's at 28.
+        var resize = Self.flat
+        withKnownIssue("the kernel's gap engine scans every candidate per step (gap #3180)", isIntermittent: true) {
+            timeSteps("QD-S14 snapped resize step on a flat page of 2,000", &resize,
+                      route: .resize("node-1", .bottomRight, rc(10, 10, 20, 18)),
+                      from: pt(30, 28), ends: [pt(37.4, 28.4), pt(65.6, 28.4)])
+        }
+        // Outside the known issue: the 200th step ran on one engine and landed snapped.
+        #expect(resize.frame("node-1") == rc(10, 10, 56, 18) && resize.gesture?.snapBuilds == 1)
+        #expect(resize.snapGuides?.lines.isEmpty == false)
+
+        // A rectangle from (37.4, 34.6) to (65.6, 52.6) and (93.6, 52.6): the start onto (38, 35),
+        // the ends onto x 66 and 94 and the second row's bottom at 53.
+        var draw = Self.flat
+        withKnownIssue("the kernel's gap engine scans every candidate per step (gap #3180)", isIntermittent: true) {
+            timeSteps("QD-S14 snapped draw step on a flat page of 2,000", &draw, tool: .rectangle,
+                      route: .draw(.rectangle), from: pt(37.4, 34.6), ends: [pt(65.6, 52.6), pt(93.6, 52.6)])
+        }
+        #expect(draw.selectedNode?.frame == rc(38, 35, 56, 18) && draw.gesture?.snapBuilds == 1)
+        #expect(draw.snapGuides?.lines.isEmpty == false)
     }
 }

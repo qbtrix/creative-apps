@@ -23,20 +23,70 @@ public struct AIAccessEntry: Codable, Hashable, Sendable {
     public init(client: String, app: String, decision: AIAccessDecision) { (self.client, self.app, self.decision) = (client, app, decision) }
 }
 
-/// The remembered grants, stored through the suite preferences store (MC-9).
+/// The remembered grants: an always or a deny per client per app (allow once
+/// is never remembered), stored in `preferences.json` under each app's
+/// `perApp` keys as `aiAccess.<client>` = the decision's raw value.
 public struct AIAccessGrants: Codable, Hashable, Sendable {
+    /// The `CommandKind.rawValue` that always asks, whatever the grant: a file command reads or writes the disk.
+    public static let fileKind = "file"
+    /// The `perApp` key prefix a grant is stored under.
+    public static let keyPrefix = "aiAccess."
+
     /// Every remembered decision, by client then app.
     public private(set) var entries: [AIAccessEntry] = []
 
     public init() {}
 
-    /// Whether `client` may run a command of `kind` (`CommandKind.rawValue`) in `app`: nil means ask.
-    /// A "file" command always asks. Stub: always nil (ask) until MC-9.
-    public func allows(client: String, app: String, kind: String) -> Bool? { nil }
+    /// The grants stored in `preferences`' per-app keys; a key with an unknown decision is skipped.
+    public init(preferences: SuitePreferences) {
+        for (app, keys) in preferences.perApp {
+            for (key, value) in keys where key.hasPrefix(Self.keyPrefix) {
+                guard let decision = AIAccessDecision(rawValue: value) else { continue }
+                record(decision, client: String(key.dropFirst(Self.keyPrefix.count)), app: app)
+            }
+        }
+    }
 
-    /// Remembers `decision` for `client` in `app`. Stub: remembers nothing until MC-9.
-    public mutating func record(_ decision: AIAccessDecision, client: String, app: String) {}
+    /// Whether `client` may run a command of `kind` (`CommandKind.rawValue`) in `app`: true for an
+    /// always, false for a deny, nil (ask) for no grant. A "file" command always asks.
+    public func allows(client: String, app: String, kind: String) -> Bool? {
+        guard kind != Self.fileKind else { return nil }
+        switch entries.first(where: { $0.client == client && $0.app == app })?.decision {
+        case .alwaysForClient: return true
+        case .deny: return false
+        case .allowOnce, nil: return nil
+        }
+    }
 
-    /// Forgets `client`'s grants in `app`, or in every app when `app` is nil. Stub: nothing to forget until MC-9.
-    public mutating func revoke(client: String, app: String?) {}
+    /// Remembers `decision` for `client` in `app`, replacing the one before. Allow once remembers nothing.
+    public mutating func record(_ decision: AIAccessDecision, client: String, app: String) {
+        guard decision != .allowOnce else { return }
+        entries.removeAll { $0.client == client && $0.app == app }
+        entries.append(AIAccessEntry(client: client, app: app, decision: decision))
+        entries.sort { ($0.client, $0.app) < ($1.client, $1.app) }
+    }
+
+    /// Forgets `client`'s grants in `app`, or in every app when `app` is nil.
+    public mutating func revoke(client: String, app: String?) {
+        entries.removeAll { $0.client == client && (app == nil || $0.app == app) }
+    }
+
+    /// `preferences` with its stored grants replaced by these; every other key is kept and an app left with none is dropped.
+    public func stored(in preferences: SuitePreferences) -> SuitePreferences {
+        var p = preferences
+        p.perApp = p.perApp.mapValues { $0.filter { !$0.key.hasPrefix(Self.keyPrefix) } }
+        for entry in entries { p.perApp[entry.app, default: [:]][Self.keyPrefix + entry.client] = entry.decision.rawValue }
+        p.perApp = p.perApp.filter { !$0.value.isEmpty }
+        return p
+    }
+
+    /// The grants in the suite preferences store.
+    public static func load(from store: any PreferencesStoring) async throws(SuiteError) -> AIAccessGrants {
+        AIAccessGrants(preferences: try await store.load())
+    }
+
+    /// Writes these grants into the store over its current value; `.staleRevision` when another writer won (reload and retry).
+    public func save(to store: any PreferencesStoring) async throws(SuiteError) {
+        _ = try await store.save(stored(in: try await store.load()))
+    }
 }

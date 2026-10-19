@@ -28,6 +28,9 @@ public struct ToneCurveEditor: View {
     private let onEnd: @MainActor () -> Void
     @State private var focused: Int?
     @State private var gesture = ToneCurveGesture()
+    /// True while the pointer gesture is live. SwiftUI resets it when the gesture ends or is
+    /// cancelled (a release outside the window gives no `onEnded`), and the reset ends the run.
+    @GestureState private var pressing = false
     @FocusState private var hasFocus: Bool
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.scrubProbe) private var probe
@@ -67,11 +70,11 @@ public struct ToneCurveEditor: View {
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
+                    .updating($pressing) { _, live, _ in live = true }
                     .onChanged { dragged($0, plot: plot, size: geo.size) }
-                    .onEnded { _ in
-                        if gesture.released() { onEnd() }
-                    }
+                    .onEnded { _ in release() }
             )
+            .onChange(of: pressing) { _, live in if !live { release() } }
         }
         .frame(height: SuiteSize.curveEditor)
         .background(SuiteColor.field)
@@ -153,6 +156,11 @@ public struct ToneCurveEditor: View {
         Task { @MainActor in
             probe.record(Self.sample(eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
         }
+    }
+
+    /// Ends the gesture, from `onEnded` or a cancel's reset of `pressing`; the run ends once.
+    private func release() {
+        if gesture.released() { onEnd() }
     }
 
     /// Tab moves to the next point and Shift-Tab back; past either end focus leaves the well.
