@@ -1,10 +1,10 @@
 # editor-chrome lead record
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
-Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: contact sheet posted on #1344 (run 39175856233); gap #2833
-Base: 2e27b8db (origin/dev)
-Next: done
+Run: act-1a151f5e8ac-m3tp (resumed from act-1a1504abd7d-2wty; line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
+Stage: done
+Base: ef6f201f (origin/main)
+Next: done. The beta-hardening lane verifies EC-a, EC-b, EC-c and EC-d.
 
 ## Slices
 | slice | tasks | journeys | waits on | state |
@@ -87,3 +87,8 @@ Next: done
 - 2026-10-18T16:13:31Z findings: filed (#2844 #2845 #2846) palette focus (EC-d), tabs keys + segment ids (EC-b), switch labels (EC-b); fixes gating
 - 2026-10-18T16:15:40Z EC-a merged #2841 tabs fade pair on a Timer; fixes #2844-#2846 gating; dev runs 39143942767 (CI) and 39143178581 (scoped suiteui) pending
 - 2026-10-18T16:20:27Z fix round 1 PRs open #2853 #2854 #2855 palette focus (EC-d), tabs keys + segment ids (EC-b), switch labels (EC-b); gate PASS
+
+## 2026-10-19T02:40Z done (run act-1a151f5e8ac-m3tp)
+- Lead branches rebased onto origin/main ef6f201f.
+- Belt-Slice-Done: EC-a on #1344 with scoped suiteui run 39180136006 (ef6f201f, green, contains EC-a's last PR #2841). EC-b, EC-c and EC-d were done before this run.
+- Belt-Contact-Sheet on #1344 with run 39180136006. SJ4 to SJ8 pass; gap #2833 (SP9). No open editor-chrome findings.
