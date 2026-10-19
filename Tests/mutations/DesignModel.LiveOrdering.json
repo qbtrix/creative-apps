@@ -1,0 +1,13 @@
+[
+{"label":"move lets a layer inside a locked group leave it","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"guard let layer = tree.node(id) else { throw .unknownID(id) }\n        if let locked = lockedName(id, in: tree) { throw .locked(locked) }","replace":"guard let layer = tree.node(id) else { throw .unknownID(id) }","tests":"DesignOrderingTests"},
+{"label":"a lock counts only on the layer itself, not through an ancestor","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"((tree.ancestors(of: id) ?? []) + [id]).lazy","replace":"[id].lazy","tests":"DesignOrderingTests"},
+{"label":"a move into its own subtree reads as not a container","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"case .intoItself, .cycle: .intoItself(name)","replace":"case .intoItself, .cycle: .notAContainer(name)","tests":"DesignOrderingTests"},
+{"label":"not a container names the parent's id, not its name","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":".notAContainer(named(id))","replace":".notAContainer(id)","tests":"DesignOrderingTests"},
+{"label":"a move that changes nothing is an edit","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"guard nodes != page.nodes else { throw .unchanged }\n        return DesignEdit(name: \"Move Layer\"","replace":"return DesignEdit(name: \"Move Layer\"","tests":"DesignOrderingTests"},
+{"label":"Move Layer selects nothing","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"selection: [id])","replace":"selection: [])","tests":"DesignOrderingTests"},
+{"label":"arrange moves a locked layer","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"            if let locked = lockedName(id, in: tree) { throw .locked(locked) }","replace":"","tests":"DesignOrderingTests"},
+{"label":"arrange keeps only the first selected layer","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"selection: ids)","replace":"selection: Array(ids.prefix(1)))","tests":"DesignOrderingTests"},
+{"label":"arrange's step has a generic name","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"DesignEdit(name: step.title","replace":"DesignEdit(name: \"Arrange\"","tests":"DesignOrderingTests"},
+{"label":"an arrange that changes nothing is an edit","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"guard nodes != page.nodes else { throw .unchanged }\n        return DesignEdit(name: step.title","replace":"return DesignEdit(name: step.title","tests":"DesignOrderingTests"},
+{"label":"an empty arrange is unchanged, not nothing selected","file":"Sources/DesignModel/Live/LiveOrdering.swift","find":"guard !ids.isEmpty else { throw .nothingSelected }","replace":"guard !ids.isEmpty else { throw .unchanged }","tests":"DesignOrderingTests"}
+]

@@ -5,6 +5,7 @@
 import Combine
 import CoreGraphics
 import Foundation
+import IOSurface
 import SwiftUI
 
 /// A whole-pixel rect in document space. Named apart from PhotoModel's `PixelRect`, which apps import too.
@@ -19,11 +20,42 @@ public struct CanvasTileRect: Equatable, Hashable, Sendable {
 }
 
 /// One tile of document pixels. `image` is premultiplied sRGB; nil means the tile has no pixels yet.
-public struct CanvasTile: Equatable, Sendable {
+/// `surface`, when given, holds the same pixels for the tile layer (`CanvasTile.surface(premultipliedRGBA:...)`):
+/// Core Animation shows an IOSurface as it is, where it colour-converts a CGImage on the main thread at every
+/// commit (510 tiles of an 8K picture: about 170 ms). `image` stays the picture for drawing and the Metal path.
+public struct CanvasTile: Equatable, @unchecked Sendable {
     public let rect: CanvasTileRect
     public let image: CGImage?
-    public init(rect: CanvasTileRect, image: CGImage?) {
-        self.rect = rect; self.image = image
+    public let surface: IOSurface?
+    public init(rect: CanvasTileRect, image: CGImage?, surface: IOSurface? = nil) {
+        self.rect = rect; self.image = image; self.surface = surface
+    }
+
+    /// `width` x `height` premultiplied sRGB RGBA bytes (row-major, `width * 4` a row) as a new BGRA IOSurface
+    /// tagged sRGB, for a tile layer's contents; nil when the bytes are short or the surface won't allocate.
+    /// Safe off the main thread: build tiles' surfaces where their bytes are made.
+    public static func surface(premultipliedRGBA bytes: [UInt8], width: Int, height: Int) -> IOSurface? {
+        guard width > 0, height > 0, bytes.count >= width * height * 4,
+            let surface = IOSurface(properties: [
+                .width: width, .height: height, .bytesPerElement: 4, .pixelFormat: 0x4247_5241,  // 'BGRA'
+            ]),
+            let space = CGColorSpace(name: CGColorSpace.sRGB)?.copyPropertyList()
+        else { return nil }
+        surface.lock(options: [], seed: nil)
+        let rowBytes = surface.bytesPerRow, base = surface.baseAddress
+        bytes.withUnsafeBufferPointer { source in
+            for y in 0..<height {
+                let row = base.advanced(by: y * rowBytes).assumingMemoryBound(to: UInt8.self)
+                for x in 0..<width {
+                    let from = (y * width + x) * 4
+                    (row[x * 4], row[x * 4 + 1], row[x * 4 + 2], row[x * 4 + 3]) =
+                        (source[from + 2], source[from + 1], source[from], source[from + 3])
+                }
+            }
+        }
+        surface.unlock(options: [], seed: nil)
+        IOSurfaceSetValue(surface, kIOSurfaceColorSpace, space)
+        return surface
     }
 }
 

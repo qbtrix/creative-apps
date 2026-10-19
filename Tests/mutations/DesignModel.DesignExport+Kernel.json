@@ -17,7 +17,7 @@
     "label": "defaultsNotAStep: rememberExport records an Export history step",
     "file": "Sources/DesignModel/DesignExport+Kernel.swift",
     "find": "        exportOptions = options\n",
-    "replace": "        exportOptions = options\n        history.undo.append(DesignHistory.Step(name: \"Export\", snapshot: snapshot))\n",
+    "replace": "        exportOptions = options\n        history.kernel.record(\"Export\", DesignHistory.Revert(snapshot: snapshot))\n",
     "tests": "DesignExportPlanTests"
   },
   {

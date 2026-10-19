@@ -41,6 +41,17 @@ import Testing
     #expect(!ids.contains(id + ".reset"))
 }
 
+/// #2964: Reset appearing never moves the rows: the section, so its header,
+/// measures the same height with and without it.
+@MainActor @Test func resetAppearingKeepsTheHeadersHeight() {
+    func height(onReset: (@MainActor () -> Void)?) -> CGFloat {
+        let section = InspectorSection("Layer", onReset: onReset) { Text("Opacity") }.frame(width: 240)
+        return NSHostingView(rootView: section).fittingSize.height
+    }
+    let plain = height(onReset: nil), resettable = height(onReset: {})
+    #expect(abs(plain - resettable) <= 0.5, "without Reset \(plain) pt, with it \(resettable) pt")
+}
+
 /// The buttons of a "Layer" section hosted in a 240 pt wide window.
 @MainActor private func sectionButtons(onReset: (@MainActor () -> Void)?) -> [(id: String, frame: CGRect)] {
     let app = NSApplication.shared

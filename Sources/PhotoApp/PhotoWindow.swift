@@ -83,9 +83,10 @@ struct PhotoWindow: View {
         PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(.live))
     }
 
-    /// A window on `model`: the launch workspace in the app, a test's own in tests.
-    init(model: PhotoWorkspace = PhotoWindow.launchWorkspace()) {
+    /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.
+    init(model: PhotoWorkspace = PhotoWindow.launchWorkspace(), zoom: Double = 1) {
         _model = State(initialValue: model)
+        _zoom = State(initialValue: zoom)
     }
 
     var body: some View {

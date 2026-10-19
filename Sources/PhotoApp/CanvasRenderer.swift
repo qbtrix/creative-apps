@@ -4,7 +4,9 @@
 // a new image or a new size asks for all of them; asking again for the
 // revision shown does nothing. While a render runs, newer
 // requests wait and only the latest is drawn, so a fast brush stroke never
-// queues up stale frames. The tiles go straight to the tile layers
+// queues up stale frames: a slider drag draws at most one picture at a time,
+// always the newest. The render and the tiles' images and surfaces are made
+// off the main thread, which only hands them to the view. The tiles go straight to the tile layers
 // (CanvasTiles), not through SwiftUI, so no whole-canvas buffer or picture
 // exists per event. `revision` says what is shown; the render time reaches the
 // status line at most four times a second, and not from a live stroke's
@@ -90,7 +92,7 @@ final class CanvasRenderer {
         Task {
             do {
                 let update = try await PhotoRenderer.update(workspace, since: since, route: route)
-                tiles.apply(update)
+                tiles.apply(update, prepared: await Self.prepared(update))
                 if backend != update.backend { backend = update.backend }
                 onPicture?(update.revision)
                 lastMilliseconds = update.milliseconds
@@ -108,6 +110,12 @@ final class CanvasRenderer {
                 show(latest, quietly: quiet)
             }
         }
+    }
+
+    /// `update`'s tile images and surfaces, made off the main thread (a nonisolated async function runs on
+    /// the global executor), so the main thread only hands them to the view.
+    nonisolated static func prepared(_ update: PhotoTileUpdate) async -> [PixelRect: CanvasTiles.Prepared] {
+        CanvasTiles.prepare(update)
     }
 
     /// 8-bit sRGB bytes as an image. `alpha` is `.last` for straight alpha,

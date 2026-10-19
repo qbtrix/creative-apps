@@ -2,8 +2,8 @@
   "title": "SuiteKernel: one Linux-safe library for history, selection, the layer tree with parenting, keys and easing, snap, transform, stroke, export and session, plus its SuiteUI halves (layers panel, handles, guides, export sheet)",
   "wave": "XK1",
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1933",
   "covers": "editor-kernel design (2026-10-17) and its inventory; captain's canonical-first call on #1552; the smart-guide needs-ui from snapping; lists-and-layers LL-5 and LL-8b (the one layers panel)",
   "waits_on": "nothing open: suite-harness (#778) and editor-in-window (#1079) are built and own SuiteGallery.swift and project.yml; EK-26 waits on canvas-host CH-d for suiteui.md; the adopt-kernel-* features and snapping wait on slices here",
   "depends": [

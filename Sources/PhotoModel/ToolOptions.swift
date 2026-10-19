@@ -1,9 +1,12 @@
 // ToolOptions.swift: the brush's or the eraser's settings in the inspector's
-// Tool options (PhotoWorkspace keeps one set per tool): size in pixels, hardness and opacity as percentages, and the paint
-// color as 8-bit sRGB. Every change arrives as one ToolOptionEdit and clamps
-// to its range; NaN is ignored. Choosing options is not a document edit, so
-// it is not undoable. Linux-safe.
+// Tool options (PhotoWorkspace keeps one set per tool, two kernel
+// `BrushSettings` values): size in pixels, hardness and opacity as
+// percentages, and the paint color as 8-bit sRGB. Every change arrives as one
+// ToolOptionEdit, goes to the settings as `BrushEdit`s (PhotoBrush+Kernel.swift)
+// and clamps to its range; NaN is ignored. Choosing options is not a document
+// edit, so it is not undoable. Linux-safe.
 import CoreColor
+import SuiteKernel
 
 /// One change the Tool options section can ask for.
 public enum ToolOptionEdit: Sendable, Equatable {
@@ -11,19 +14,24 @@ public enum ToolOptionEdit: Sendable, Equatable {
     case hardness(percent: Double)
     case opacity(percent: Double)
     case color(red: UInt8, green: UInt8, blue: UInt8)
+    /// One of `ToolOptions.presets`: all its settings at once; the color stays.
+    case preset(BrushPreset)
 }
 
 public struct ToolOptions: Sendable, Equatable {
-    public static let sizeRange: ClosedRange<Double> = 1...500
+    public static let sizeRange: ClosedRange<Double> = BrushSettings.ranges.size
     /// Hardness and opacity, as the panel shows them.
-    public static let hardnessRange: ClosedRange<Double> = 0...100
+    public static let hardnessRange: ClosedRange<Double> = BrushSettings.ranges.percent
     public static let opacityRange: ClosedRange<Double> = 1...100
 
+    /// The kernel's settings: size, hardness, opacity, flow and spacing (the
+    /// clone stamp's dab gap, of the size).
+    public private(set) var settings = BrushSettings()
     /// The brush's diameter in pixels.
-    public private(set) var size: Double = 20
+    public var size: Double { settings.size }
     /// 100: a hard edge one pixel wide; 0: soft from the center out.
-    public private(set) var hardnessPercent: Double = 100
-    public private(set) var opacityPercent: Double = 100
+    public var hardnessPercent: Double { settings.hardness }
+    public var opacityPercent: Double { settings.opacity }
     public private(set) var red: UInt8 = 0
     public private(set) var green: UInt8 = 0
     public private(set) var blue: UInt8 = 0
@@ -31,12 +39,8 @@ public struct ToolOptions: Sendable, Equatable {
     public init() {}
 
     public mutating func apply(_ edit: ToolOptionEdit) {
-        switch edit {
-        case .size(let value): size = Self.clamp(value, to: Self.sizeRange) ?? size
-        case .hardness(let value): hardnessPercent = Self.clamp(value, to: Self.hardnessRange) ?? hardnessPercent
-        case .opacity(let value): opacityPercent = Self.clamp(value, to: Self.opacityRange) ?? opacityPercent
-        case .color(let r, let g, let b): (red, green, blue) = (r, g, b)
-        }
+        if case .color(let r, let g, let b) = edit { (red, green, blue) = (r, g, b) }
+        for brushEdit in Self.brushEdits(edit) { _ = settings.apply(brushEdit) }
     }
 
     /// The paint color in linear light, as PixelBuffer stores color.
@@ -45,9 +49,5 @@ public struct ToolOptions: Sendable, Equatable {
         // Bytes over 255 are impossible, so the conversion's finiteness check can't fail.
         let linear = (try? srgb.converted(from: .sRGB, to: .linearSRGB)) ?? srgb
         return (Float(linear.c0), Float(linear.c1), Float(linear.c2))
-    }
-
-    private static func clamp(_ value: Double, to range: ClosedRange<Double>) -> Double? {
-        value.isNaN ? nil : min(max(value, range.lowerBound), range.upperBound)
     }
 }

@@ -1,7 +1,8 @@
 // DesignSubmenuHelpTests.swift: the reason Object > Arrange and Object > Align
 // are off as a whole (#2465). With nothing selected both ask for a layer;
-// with a layer that can move one way the submenu is on; on `.live` Arrange
-// is off with its not-built reason. Runs on Linux and macOS.
+// with a layer that can move one way the submenu is on, on `.live` too
+// (LiveOrdering, layers-panel L-1); a locked layer turns it off with its
+// unlock reason. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -28,9 +29,9 @@ private func cards(_ services: DesignServices, _ ids: [String]) -> DesignWorkspa
         #expect(cards(.fake, ["node-3"]).arrangeMenuHelp == nil)
     }
 
-    @Test func liveArrangeIsOffWithItsNotBuiltReason() {
-        let help = cards(.live, ["node-3"]).arrangeMenuHelp
-        #expect(help == NotBuilt("Reordering layers").help)
+    @Test func liveArrangeIsOnForAMovableLayerAndOffForALockedOne() {
+        #expect(cards(.live, ["node-3"]).arrangeMenuHelp == nil)
+        #expect(cards(.live, ["node-9"]).arrangeMenuHelp == "Unlock Locked to change it.")
     }
 
     @Test func aLayerThatCanAlignTurnsAlignOn() {

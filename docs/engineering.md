@@ -33,7 +33,30 @@ Each app has three layers. Each depends only on the ones below it.
 3. **`<X>App`**: SwiftUI views and the `App` scene, built from **SuiteUI**.
    Views read the Model and call its methods. Nothing else.
 
-SuiteUI sits beside the apps: it knows nothing about any Model or engine.
+Every Model also links the **kernel tier**, `SuiteKernel`
+(`Sources/SuiteKernel/`, packet
+`docs/blueprints/suiteui/features/editor-kernel.md`): one Linux-safe library
+with one module per editor concept the apps used to build on their own.
+It imports Foundation and FlareCore only, never an app Model, SuiteModel or
+SuiteUI, and `SuiteKernelTests` covers it on Linux.
+
+| Folder | What it holds |
+|---|---|
+| `History/` | `History<Payload>`: named undo steps, coalescing runs, a drag as one step, step ids that never repeat, dirty as saved-vs-current |
+| `Selection/` | `Selection<ID>` with a primary and an anchor, one `Pick`; the `Nudge` and `Marquee` rules |
+| `Layers/` | `LayerTree<Payload>`: nesting, order, hide and lock cascades, moves into a parent; `LayerFollow`'s follow link (parenting) |
+| `Keys/` | `KeyRules` on sorted key tracks of FlareCore's `Keyframe`; `EasePreset` and `EaseCurve` |
+| `Transform/` | `BoxMath` (resize by a handle, several boxes as one) and `HandleHit` |
+| `Snap/` | `Snapping`: the candidates and the order of offsets. The `SnapLines` and `SnapGaps` engines are stubs that the snapping feature fills |
+| `Export/` | `ExportRun<Options>`: idle, editing, running, finished or failed |
+| `Session/` | `DocumentSession` (dirty, save status, autosave, recovery) and `VersionedJSON` |
+| `Stroke/` | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` |
+
+SuiteUI sits beside the apps. It knows nothing about any app Model, and it
+links SuiteKernel only to draw the kernel's values: `LayerTreeList` (the one
+layers panel), `SelectionHandles`, `SnapGuideMarks`, `SuiteExportSheet`,
+`SuiteStrokePacer`, `SuitePointerPressure`, `BrushCursorMark` and `ToolKeys`,
+all shown on the gallery's `editor-kernel` page.
 
 - **State lives in the Model; views are dumb.** A view holds its Model in one
   `@State private var model` at the window root and passes values and closures
@@ -52,6 +75,18 @@ SuiteUI sits beside the apps: it knows nothing about any Model or engine.
   the merged core feature arrives with the next bump PR.
   Document edits go through the engine's commands (FlareCore's `Command` and
   `CommandEngine`), so undo works. Review-only.
+- **Models adapt onto the kernel; they don't copy it.** A Model that needs
+  undo, selection, a layer tree, keys and easing, box math, snapping, an
+  export run, a document session or a stroke uses SuiteKernel's module and
+  converts its own types in an adapter file named `<X>+Kernel.swift` (or
+  `<X>Adapter.swift`), such as `FlareLayers+Kernel.swift` or
+  `DesignSession+Kernel.swift`. It never keeps its own copy. A missing kernel
+  behaviour is a `gap` issue on `line:suiteui`. The `adopt-kernel-*` features
+  (undo, selection, layers, easing, transform, export, session, brush) move
+  the apps' remaining copies onto the kernel and delete them. Gate:
+  `scripts/check-dup-logic` in `scripts/ci` fails on a new app file whose
+  name or first type names a kernel concept, unless it is an adapter
+  (docs/factory/lead.md rule 20).
 - **Models are Linux-safe.** Foundation only, through the FoundationEssentials
   import pattern; value types, `Sendable`, Swift 6 mode. Gate: the Linux CI
   job builds every Model.

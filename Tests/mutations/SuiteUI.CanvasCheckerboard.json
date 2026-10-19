@@ -1,0 +1,4 @@
+[
+{"label": "the viewport draws the checkerboard as a fill again", "file": "Sources/SuiteUI/CanvasViewport.swift", "find": "                        CanvasCheckerboard()", "replace": "                        Rectangle().fill(SuiteColor.checkerDark)", "tests": "CanvasCheckerboardTests"},
+{"label": "the checkerboard takes the viewport's clicks", "file": "Sources/SuiteUI/CanvasCheckerboard.swift", "find": "override func hitTest(_ point: NSPoint) -> NSView? { nil }", "replace": "override func hitTest(_ point: NSPoint) -> NSView? { super.hitTest(point) }", "tests": "CanvasCheckerboardTests"}
+]

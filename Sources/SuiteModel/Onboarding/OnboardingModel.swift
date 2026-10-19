@@ -35,6 +35,21 @@ public final class OnboardingModel {
     public var renderingNote: String { SuiteOnboarding.renderingNote }
     /// Why Skip, Back and Continue are held: a hand-off is sending. Nil when they act.
     public var sendingReason: String? { launching == nil ? nil : "A document is opening." }
+    /// Each control's help (#3018): `sendingReason` while a hand-off holds it, else what it does.
+    public var skipHelp: String { sendingReason ?? "Close the welcome window. Help > Welcome to AfterGlow opens it again." }
+    public var backHelp: String { sendingReason ?? "Go back to the previous page." }
+    public var startEmptyHelp: String { sendingReason ?? "Close the welcome window and go to the home with nothing open." }
+    /// A tile's preset chips' help: the tile's own reason, then the hand-off's, then what a click does.
+    public func presetsHelp(_ tile: NewTile) -> String { tile.disabledReason ?? sendingReason ?? SuiteOnboarding.presetsHelp(tile) }
+    /// Why a starter's Open sample can't act (no sample, a missing file, a hand-off sending); nil when it can.
+    public func sampleUnavailable(_ starter: OnboardingStarter) -> String? {
+        guard starter.sample != nil else { return Self.sampleMissing(starter.tile.app).message }
+        return starter.sampleReason ?? sendingReason
+    }
+    /// Open sample's help: why it can't act, else what it opens.
+    public func sampleHelp(_ starter: OnboardingStarter) -> String {
+        sampleUnavailable(starter) ?? "Open \(starter.sample?.title ?? "") in \(starter.tile.app.displayName)."
+    }
 
     /// `present` is FileManager.default.fileExists in the app; `samplesFolder` the bundle's Resources/Samples;
     /// `documents` the support folder's Documents; `copy` moves bytes (tests pass a recorder).

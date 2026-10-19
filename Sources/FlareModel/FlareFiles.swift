@@ -6,7 +6,8 @@
 // back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`,
 // `clearRecent`). Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
 // (`autosaveDue`), and `recoveryData()` is the dirty document's file bytes; `restoreRecovery` lands a recovered
-// document again as unsaved, untitled work. The app does the file panels and the disk.
+// document again as unsaved, untitled work. The app does the file panels and the disk. Dirty and due read through
+// the kernel's session, and a save ends the open run (FlareFiles+Kernel.swift).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -35,7 +36,7 @@ public struct FlareSave: Sendable, Equatable {
 
 extension FlareWorkspace {
     /// Unsaved changes: the document differs from the one last opened or saved.
-    public var isDirty: Bool { document != savedDocument }
+    public var isDirty: Bool { documentSession.isDirty }
 
     /// The window title: the file's name without `.flare`, or "Untitled" before the first save.
     public var title: String {
@@ -102,6 +103,7 @@ extension FlareWorkspace {
         savedDocument = save.document
         fileName = name
         saveError = nil
+        sessionDidSave()
     }
 
     /// The write failed for `reason`; the document and its changes stay.
@@ -129,8 +131,8 @@ extension FlareWorkspace {
     /// The app keeps the time of the last edit; due only while the document is dirty, once `autosaveDelay`
     /// seconds have passed. Never due for a missing or non-finite time.
     public func autosaveDue(lastEdit: Double?, now: Double) -> Bool {
-        guard isDirty, let lastEdit, now.isFinite, lastEdit.isFinite else { return false }
-        return now - lastEdit >= Self.autosaveDelay
+        guard let lastEdit, now.isFinite, lastEdit.isFinite else { return false }
+        return kernelAutosaveDue(lastEdit: lastEdit, now: now)
     }
 
     /// The encoded document while dirty, with the save path's encoder; nil when clean, when there is no

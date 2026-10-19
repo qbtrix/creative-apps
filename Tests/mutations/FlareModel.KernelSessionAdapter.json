@@ -1,0 +1,30 @@
+[
+  {
+    "label": "the adapter drops its forward to endRun: a scrub keeps coalescing across a save, so undo skips past the saved document",
+    "file": "Sources/FlareModel/FlareFiles+Kernel.swift",
+    "find": "    mutating func sessionDidSave() {\n        endCoalescing()\n",
+    "replace": "    mutating func sessionDidSave() {\n",
+    "tests": "FlareFilesKernelTests"
+  },
+  {
+    "label": "the adapter maps the kernel's not-due refusal to success: a clean document comes due for autosave",
+    "file": "Sources/FlareModel/FlareFiles+Kernel.swift",
+    "find": "        autosaveSession(lastEdit: lastEdit)\n            .autosaveDue(now: Date(timeIntervalSinceReferenceDate: now), delay: Self.autosaveDelay)\n",
+    "replace": "        _ = autosaveSession(lastEdit: lastEdit)\n            .autosaveDue(now: Date(timeIntervalSinceReferenceDate: now), delay: Self.autosaveDelay)\n        return true\n",
+    "tests": "FlareAutosaveDueTests|FlareFilesKernelTests"
+  },
+  {
+    "label": "the session drops its forward of the current document: an edit never reads dirty",
+    "file": "Sources/FlareModel/FlareFiles+Kernel.swift",
+    "find": "        session.currentToken = document == savedDocument ? session.savedToken : session.savedToken + 1\n",
+    "replace": "",
+    "tests": "FlareFilesTests|FlareRecoveryRestoreTests|FlareFilesKernelTests"
+  },
+  {
+    "label": "the adapter forwards no delay: an edit is due at once",
+    "file": "Sources/FlareModel/FlareFiles+Kernel.swift",
+    "find": "delay: Self.autosaveDelay)\n    }",
+    "replace": "delay: 0)\n    }",
+    "tests": "FlareAutosaveDueTests|FlareFilesKernelTests"
+  }
+]
