@@ -82,5 +82,19 @@
     "find": "else { thumbnails[id] = nil; continue }",
     "replace": "else { continue }",
     "tests": "LibraryThumbnailPositionTests"
+  },
+  {
+    "label": "the token goes back to field by field and misses levels",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "hash.add(word: develop.fingerprint)",
+    "replace": "for slider in DevelopSlider.allCases { hash.add(word: develop.value(slider).bitPattern) }; for p in develop.curve.points { hash.add(word: p.x.bitPattern); hash.add(word: p.y.bitPattern) }",
+    "tests": "LibraryDevelopValuesTests"
+  },
+  {
+    "label": "the token hashes only the sliders and misses the curve and levels",
+    "file": "Sources/LibraryModel/LibraryThumbnails.swift",
+    "find": "hash.add(word: develop.fingerprint)",
+    "replace": "for slider in DevelopSlider.allCases { hash.add(word: develop.value(slider).bitPattern) }",
+    "tests": "LibraryDevelopValuesTests"
   }
 ]

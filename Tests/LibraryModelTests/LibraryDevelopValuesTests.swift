@@ -1,7 +1,8 @@
 // LibraryDevelopValuesTests.swift: develop DV-1. The new sliders and their
 // groups, ToneCurve, DevelopLevels, the back-compatible coding and the
-// fingerprint; MJ1, the old-catalog-and-new-fields walk (its token and fake
-// checks wait on DV-2). Runs on Linux and macOS.
+// fingerprint; MJ1, the old-catalog-and-new-fields walk, whose token and
+// fake checks DV-2 enabled with the token over `fingerprint` and the fake
+// loupe's curve and levels lifts. Runs on Linux and macOS.
 import CoreColor
 import Foundation
 @testable import LibraryModel
@@ -106,7 +107,7 @@ struct LibraryDevelopValuesTests {
         #expect(base.setting(.blacks, to: 3).fingerprint != base.fingerprint)
     }
 
-    @Test func testOldCatalogAndNewFieldsWalk() throws {
+    @Test func testOldCatalogAndNewFieldsWalk() async throws {
         let coding = LiveCatalogCoding()
         let golden = Data(LibraryPersistGolden.catalogV1.utf8)
         let photos = try coding.decode(golden)
@@ -116,15 +117,35 @@ struct LibraryDevelopValuesTests {
         var edited = photos
         edited[0] = try developed(photos[0])
         #expect(try coding.decode(try coding.encode(edited)) == edited)
-    }
-
-    @Test(.disabled("waits on DV-2")) func testOldCatalogAndNewFieldsWalkTokenAndFake() async throws {
-        let photo = LibraryPersistGolden.photos[1]
-        let edited = try developed(photo)
-        #expect(ThumbnailToken.of(edited.develop, longSide: 256) != ThumbnailToken.of(photo.develop, longSide: 256))
+        let photo = try #require(photos.last), changed = try developed(photo)
+        #expect(ThumbnailToken.of(changed.develop, longSide: 256) != ThumbnailToken.of(photo.develop, longSide: 256))
         let loupe = FakeLoupe()
         let neutral = try await loupe.render(photo, settings: photo.develop, longSide: 64, quality: .full)
-        let developedRender = try await loupe.render(edited, settings: edited.develop, longSide: 64, quality: .full)
-        #expect(neutral.image != developedRender.image)
+        let developedRender = try await loupe.render(changed, settings: changed.develop, longSide: 64, quality: .full)
+        #expect(neutral.image.checksum != developedRender.image.checksum)
+    }
+
+    @Test func tokenSeesACurveOnlyAndALevelsOnlyChange() throws {
+        let curve = try #require(ToneCurve(points: [point(0, 0), point(0.5, 0.6), point(1, 1)]))
+        let base = DevelopSettings.neutral.setting(.exposure, to: 1)
+        let token = ThumbnailToken.of(base, longSide: 256)
+        #expect(ThumbnailToken.of(base.setting(curve: curve), longSide: 256) != token)
+        #expect(ThumbnailToken.of(base.setting(levels: DevelopLevels.neutral.setting(.gamma, to: 1.2)),
+                                  longSide: 256) != token)
+    }
+
+    @Test func fakeLoupeMovesForACurveOnlyAndALevelsOnlyChange() async throws {
+        let photo = PhotoItem(name: "IMG_0001", captureDate: Date(timeIntervalSince1970: 0),
+                              color: Color3(0.5, 0.5, 0.5), pixelSize: PixelSize(width: 64, height: 48))
+        let curve = try #require(ToneCurve(points: [point(0, 0), point(0.5, 0.6), point(1, 1)]))
+        let loupe = FakeLoupe()
+        func checksum(_ settings: DevelopSettings) async throws -> String {
+            try await loupe.render(photo, settings: settings, longSide: 64, quality: .full).image.checksum
+        }
+        let neutral = try await checksum(.neutral)
+        let curved = try await checksum(DevelopSettings.neutral.setting(curve: curve))
+        let levels = DevelopLevels.neutral.setting(.outBlack, to: 0.1)
+        let leveled = try await checksum(DevelopSettings.neutral.setting(levels: levels))
+        #expect(curved != neutral && leveled != neutral)
     }
 }
