@@ -43,7 +43,6 @@ Sources/HaloModel/Fakes/FakeProjectHistory.swift
 Sources/HaloModel/HaloHistory.swift
 Sources/HaloModel/HaloKeySelection.swift
 Sources/HaloModel/Live/HaloEasingRules.swift
-Sources/HaloModel/Live/HaloHistoryRules.swift
 Sources/HaloModel/Live/LiveKeyEasing.swift
 Sources/HaloModel/Live/LiveProjectHistory.swift
 Sources/LibraryApp/CropInspector.swift
@@ -52,9 +51,11 @@ Sources/LibraryApp/LibraryExportSheet.swift
 Sources/LibraryApp/LibraryWindow+Crop.swift
 Sources/LibraryApp/LibraryWindow+Export.swift
 Sources/LibraryModel/CatalogHistory.swift
+Sources/LibraryModel/Contracts/CropLeveling.swift
 Sources/LibraryModel/Contracts/ExportFormats.swift
 Sources/LibraryModel/Contracts/ExportPresets.swift
 Sources/LibraryModel/Contracts/ExportSidecar.swift
+Sources/LibraryModel/Fakes/FakeCropLeveling.swift
 Sources/LibraryModel/LibraryCrop.swift
 Sources/LibraryModel/LibraryExport.swift
 Sources/LibraryModel/Live/LiveCrop.swift

@@ -8,7 +8,9 @@
 // The field sits over the node's frame at the canvas zoom (`box`), in the node's own font
 // (DesignTextFont, the one the canvas artwork draws with) at its size x
 // DesignWorkspace.textEditScale, which is the zoom itself, and with its alignment, so the
-// text being typed is the text that commits and nothing jumps on Return (#268). Sized, not a
+// text being typed is the text that commits and nothing jumps on Return (#268). In an
+// auto-width box the field's width follows the measured draft; a fixed-width box keeps
+// its width and the field wraps there, growing down (`field`, canvas-basics CB-6). Sized, not a
 // scaled view: AppKit's text field and its field editor do not hit-test or edit correctly
 // under a scale transform. The draft goes out as `.textDraft`; Return and
 // losing focus send `.commitText`, Escape sends `.cancelText`. It asks for keyboard focus as
@@ -50,6 +52,21 @@ struct DesignTextOverlay: View {
         return node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
     }
 
+    /// The field's size over `node` at `zoom` while it holds `draft` (canvas-basics CB-6): in an
+    /// auto-width box it follows the measured draft, an em wider so the next letter and the caret
+    /// fit before it measures again; in a fixed-width box it keeps the frame's width and the draft
+    /// wraps there. Either way it is at least the frame's height and grows down with the lines.
+    /// It measures with DesignTextFont, which is main-actor (AppKit fonts).
+    // view-static: main-actor
+    static func field(for node: DesignNode, draft: String, zoom: Double) -> CGSize {
+        let scale = DesignWorkspace.textEditScale(zoom: zoom)
+        let box = box(for: node, zoom: zoom)
+        let measured = DesignTextFont.measure(draft, in: node)
+        let width = node.textStyle.fixedWidth == true
+            ? Double(box.width) : measured.width * scale + fontSize(for: node, zoom: zoom)
+        return CGSize(width: width, height: max(Double(box.height), measured.height * scale))
+    }
+
     /// The editor's point size for `node` at `zoom`: the style's size times the zoom.
     static func fontSize(for node: DesignNode, zoom: Double) -> Double {
         DesignTextFont.pointSize(node.textStyle, scale: DesignWorkspace.textEditScale(zoom: zoom))
@@ -67,7 +84,10 @@ private struct DesignTextField: View {
     var body: some View {
         let style = node.textStyle
         let box = DesignTextOverlay.box(for: node, zoom: zoom)
-        TextField("Text", text: Binding(get: { draft }, set: { perform(.textDraft($0)) }))
+        let field = DesignTextOverlay.field(for: node, draft: draft, zoom: zoom)
+        TextField(
+            "Text", text: Binding(get: { draft }, set: { perform(.textDraft($0)) }),
+            axis: style.fixedWidth == true ? .vertical : .horizontal)
             .textFieldStyle(.plain)
             .labelsHidden()
             .font(DesignTextFont.font(style, scale: DesignWorkspace.textEditScale(zoom: zoom)))
@@ -78,7 +98,7 @@ private struct DesignTextField: View {
             .onSubmit { perform(.commitText) }
             .onExitCommand { perform(.cancelText) }
             .onChange(of: focused) { _, isFocused in if !isFocused { perform(.commitText) } }
-            .frame(width: box.width, height: box.height, alignment: DesignTextFont.frameAlignment(style))
+            .frame(width: field.width, height: field.height, alignment: DesignTextFont.frameAlignment(style))
             .border(SuiteColor.accent)
             // A press on the box beside the text must not reach the canvas drag beneath, which
             // would place another text node. The field itself takes its own clicks.

@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the loupe is ignored in exportTargets",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "let ids = mode == .loupe ? loupe : order.filter(selection.contains)",
+    "replace": "let ids = order.filter(selection.contains)",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "a failure stops the run",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "} catch { fail(item, error); continue }",
+    "replace": "} catch { fail(item, error); break }",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "beginExport is allowed while running",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "if case .running = exportState { return \"An export is already running.\" }",
+    "replace": "_ = exportState",
+    "tests": "LibraryExportFlowTests"
+  }
+]
