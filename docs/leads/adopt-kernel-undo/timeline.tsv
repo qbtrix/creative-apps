@@ -1,0 +1,48 @@
+utc	stage	event	ref	note
+2026-10-17T06:04Z	0	stage-start	#1934	setup: line lead for #1936 #1935 #1934; base origin/dev 4a86f5f; brief main fdaabbf verified as ancestor
+2026-10-17T06:10Z	0	stopped	#1934	blocked: every slice waits on editor-kernel:EK-undo (#1933 not started, no kernel types on dev)
+2026-10-17T06:38Z	0	heartbeat	#1934	still blocked: editor-kernel lead started wave 1 (EK-a, PR #1992); EK-undo waits on EK-a
+2026-10-17T10:44Z	0	heartbeat	#1934	still blocked: #1992 (EK-1) unmerged, editor-kernel wave 2 stacked on it; EK-undo still planned
+2026-10-18T07:56Z	0	heartbeat	#1934	relaunch act-1a14e01679a-5ey4: still blocked on editor-kernel:EK-undo (EK-7 #2645 open, EK-8 (History body) planned)
+2026-10-18T08:26Z	0 setup	heartbeat	Belt nudge; still blocked on EK-undo (EK-7 #2645 open, EK-8 planned)
+2026-10-18T08:57Z	0 setup	heartbeat	dev d6271ae; EK-7 #2645 merged (ccaaa7c, HistoryTests disabled); EK-8 (History body) still planned, History still a stub
+2026-10-18T09:28Z	0 setup	heartbeat	dev ed52eaa; EK-8 (History body) still planned, History a stub
+2026-10-18T09:59Z	0 setup	heartbeat	dev 02c20bf; EK-8 (History body) still planned, History a stub
+2026-10-18T10:30Z	0 setup	heartbeat	dev 68eaee6; EK-8 (History body) still planned, History a stub (HistoryTests on dev since ccaaa7c)
+2026-10-18T11:05Z	1 packet	done	EK-8 merged (0533837); packet read
+2026-10-18T11:05Z	2 plan	done	plan unchanged; AU-h1 blocked on #2747
+2026-10-18T11:05Z	3 wave 1	start	base 7bd94d2; AU-p1 building
+2026-10-18T11:55Z	3 wave 1	pr	AU-p1 #2754 open, Mutate 3/3, mac build dispatched by lane
+2026-10-18T12:02Z	3 wave 1	build	AU-p1 #2754 macOS build green; waiting for the lane sweep
+2026-10-18T13:01Z	3 wave 1	merged	AU-p1 #2754 -> 3df88b1
+2026-10-18T13:01Z	3 wave 2	start	base 7ae985e; AU-p2 building
+2026-10-18T13:11Z	3 wave 2	pr	AU-p2 #2793 open, Mutate 3/3
+2026-10-18T13:38Z	3 wave 2	build	AU-p2 #2793 macOS build green; waiting for the lane sweep
+2026-10-18T14:10Z	3 wave 2	merged	AU-p2 #2793 -> b156968
+2026-10-18T14:10Z	3 wave 2	slice-done	AU-photo, run 39133431238
+2026-10-18T14:42Z	3 wave 2	check	dev 80c14ee; all remaining slices blocked on hand-offs; asked supervisor about #2747
+2026-10-18T14:57Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T15:19Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T15:41Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T16:03Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T16:25Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T16:47Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T17:09Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T17:30Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T17:52Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T18:13Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T18:34Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T18:56Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T19:18Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T19:40Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T20:02Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T20:23Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T20:45Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T21:07Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T21:29Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T21:51Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T22:13Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T22:35Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T22:57Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T23:18Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T23:40Z	check-in	blocked; #2747 open, packets unchanged
