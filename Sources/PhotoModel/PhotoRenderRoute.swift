@@ -16,9 +16,9 @@
 // row of damaged tiles as one region, the rows on their own tasks. With
 // resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
 // composites from them in one batch, so a frame uploads only the tiles that
-// changed. Export and `composite()` stay on `rendered(_:)` (CoreRaster
-// directly), the reference both routes are held to. Linux-safe: the Metal
-// backend is the app's to make.
+// changed, those across the cores. Export and `composite()` stay on
+// `rendered(_:)` (CoreRaster directly), the reference both routes are held
+// to. Linux-safe: the Metal backend is the app's to make.
 import CoreColor
 import CoreRaster
 import CoreRender
@@ -102,15 +102,22 @@ extension PhotoWorkspace {
                 return (0...1).contains(Float(layer.opacity))
             })
         else { return nil }
-        var steps: [CompositeStep] = []
+        var tiles: [(key: ResidentKey, pixels: PixelBuffer, at: PixelRect, layer: PhotoLayer)] = []
         for layer in shown {
             guard let tiled = pixels[layer.id] else { continue }
             let region = PixelRect(x: rect.x - layer.offsetX, y: rect.y - layer.offsetY, width: rect.width, height: rect.height)
             for i in tiled.tileIndices(in: region) where tiled.tiles.indices.contains(i) {
-                guard let surface = try resident.surface(ResidentKey(layer: layer.id, tile: i), pixels: tiled.tiles[i])
-                else { continue }
                 let at = tiled.tileRect(i).offsetBy(layer.offsetX - rect.x, layer.offsetY - rect.y)
-                steps.append(CompositeStep(surface, x: at.x, y: at.y, mode: layer.blendMode, opacity: Float(layer.opacity)))
+                tiles.append((ResidentKey(layer: layer.id, tile: i), tiled.tiles[i], at, layer))
+            }
+        }
+        // The changed tiles upload across the cores, as the CPU route renders its tiles; steps stay in order.
+        let surfaces = try PhotoLayerComposite.inParallel(tiles.count) { [tiles] i in
+            try resident.surface(tiles[i].key, pixels: tiles[i].pixels)
+        }
+        let steps = zip(tiles, surfaces).compactMap { tile, surface in
+            surface.map {
+                CompositeStep($0, x: tile.at.x, y: tile.at.y, mode: tile.layer.blendMode, opacity: Float(tile.layer.opacity))
             }
         }
         var picture = try dispatcher.blank(width: rect.width, height: rect.height)
