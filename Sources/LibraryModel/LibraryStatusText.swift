@@ -80,6 +80,10 @@ extension LibraryCatalog {
     /// What the "Preview data" pill means, as its tooltip and accessibility hint.
     public static let previewDataHelp = "This window shows built-in sample data, not photos on disk."
 
+    /// The cell-size pill's tooltip: what it measures and where to change it (#3130).
+    public static let cellSizeHelp =
+        "Thumbnail width; change it with View > Larger Thumbnails or View > Smaller Thumbnails."
+
     /// The row under the content; nil when there is nothing to say (an empty live catalog).
     public var statusRow: LibraryStatusRow? {
         if isEmpty {
@@ -98,7 +102,7 @@ extension LibraryCatalog {
         let picked = LibraryStatusPill(
             id: "selection", text: "\(selection.count) selected", help: "Photos selected in the grid.", style: .selected)
         let chosen = selection.isEmpty ? [] : [picked]
-        let cell = LibraryStatusPill(id: "cellSize", text: "\(cellSize) pt", help: "The thumbnails' width.")
+        let cell = LibraryStatusPill(id: "cellSize", text: "Thumbnails \(cellSize) pt", help: Self.cellSizeHelp)
         let pills = chosen + [cell] + progressPills(photo: nil)
         return LibraryStatusRow(zoom: nil, size: Self.photoCountText(order.count), pills: pills)
     }
