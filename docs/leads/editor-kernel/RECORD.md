@@ -106,3 +106,4 @@ Next: wave A PRs #2973 (EK-6), #2972 (EK-31), #2974 (EK-25) wait on the lane's m
 - 2026-10-19T00:16Z Belt-Slice-Done EK-chrome posted (scoped suiteui 39175856233 green, head e0a627c0 contains #2972). EK-u, EK-z wait on full CI 39178441058 at 22046535 (pending).
 - 2026-10-19T00:36Z Full CI 39178441058 cancelled (superseded). EK-u, EK-z now wait on scoped suiteui 39180136006 / full CI 39180214762 at ef6f201f (queued; contain #2973, #3040).
 - 2026-10-19T00:56Z Scoped suiteui 39180136006 at ef6f201f in progress; full CI 39180214762 queued. Both contain #2973 EK-u, #3040 EK-z.
+- 2026-10-19T01:16Z Scoped suiteui 39180136006 (ef6f201f) still in progress; full CI 39180214762 queued; both contain EK-u, EK-z.
