@@ -129,3 +129,4 @@ utc	stage	event	ref	note
 2026-10-19T01:30Z	heartbeat	#3062 macOS build 39182577452 in progress
 2026-10-19T01:51Z	heartbeat	#3062 merged 081aaebd
 2026-10-19T02:11Z	heartbeat	full CI on ed0fed9e was cancelled for a newer one
+2026-10-19T02:31Z	heartbeat	full CI still pending (runners busy)
