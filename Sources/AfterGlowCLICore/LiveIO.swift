@@ -51,6 +51,7 @@ public struct LiveIO: CLIIO {
         if !replace, exists(path) { throw CLIIOError.exists(path) }
         let temp = target.deletingLastPathComponent()
             .appendingPathComponent(".\(target.lastPathComponent).afterglow-\(UUID().uuidString)").path
+        // The temp is gone once renamed; after a link or a failed write this removes it. Its result is moot.
         defer { _ = unlink(temp) }
         try data.write(to: URL(fileURLWithPath: temp))
         try Self.land(temp, at: path, replace: replace)
