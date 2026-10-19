@@ -4,7 +4,7 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: SL-b fix round 1 (wf_6545bdf4-43b, base bede8342) on #3129-#3137; 9 open findings > 5, so SL-8 is blocked until fixes land; SL-b merged-done waits on dev CI 39199491251 (aed78668) Linux green
+Next: SL-b fix round 1 (wf_6545bdf4-43b) on #3129-#3137 (#3121 closed as dup of #3131); 9 open findings > 5 so SL-8 blocked though SL-6 merged b7e17ed6; SL-b done waits on dev CI 39203617095 (b7e17ed6) Linux green (39199491251 cancelled)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
