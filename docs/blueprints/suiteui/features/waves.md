@@ -36,7 +36,7 @@ the principle is suite.md 1.5.
 |---|---|---|---|---|---|---|
 | 1 | The test harness: goldens, gallery, inventory, probe, contracts, tokens | `suite-harness.md` | #773, #774, #283, #330, #775, #776, #333, #331, #332 | nothing | #778 | built |
 | 2 | The editor window's chrome | `editor-chrome.md` | #340, #341, #339 (empty state only), #342 (moot) | #778 (suite-harness, merged) | file when ready | planned |
-| 2 | Inspector controls end once and work from the keyboard | `inspector-controls.md` | #718, #591, #88, #622, #285, #262, #343 | #778 (suite-harness) | file when ready | planned |
+| 2 | Inspector controls end once and work from the keyboard | `inspector-controls.md` | #718, #591, #88, #622, #285, #262, #343 | #778 (suite-harness) | #1508 | built |
 | 2 | Sidebar and layer rows | `lists-and-layers.md` | #146, #577, #108, #73, #589, #111, #249, #284, #308, #311, #312; LL-5 and LL-8b withdrawn 2026-10-17: the panel is editor-kernel's LayerTreeList | #778 (suite-harness) | #1510 | built |
 | 2 | Marks over the canvas, zoom and pan, the surface | `canvas-marks.md` | #273, #706, #737, #530, #264 | #778 (suite-harness) | #1512 | built |
 | 2 | A modern timeline strip: lane beds, key states, a grabbable playhead, picking, dragging and trimming keys, zoom, units and a work area | `timeline.md` | #62, #63, #1257, #1423 | #778 (suite-harness, closed); no editor-chrome wait (the 2026-10-15 one-shell decision removes #342's slot) | #1480 | built |
