@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-19T06:28Z	4	stage-start	act-1a152d6e775-atvh	relaunched; supervisor: scoped suite run counts; tracking 39209833935 (d481419, macOS queued)
 2026-10-19T06:56Z	4	heartbeat	39209833935	macOS (suite): queued -
 2026-10-19T07:17Z	4	blocked	#3176	supervisor 06:43Z: suite scope skips switching journeys until #3176 merges; 39209833935 dropped as evidence
+2026-10-19T07:36Z	4	heartbeat	#3176	#3176 merged (), no scoped suite run on dev yet
