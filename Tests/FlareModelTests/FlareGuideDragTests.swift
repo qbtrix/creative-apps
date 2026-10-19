@@ -46,6 +46,12 @@ private func bounce() -> FlareWorkspace {
     #expect(drag.shown(over: w.guides) == [Guide(axis: .vertical, position: 40), Guide(axis: .horizontal, position: 320)])
     apply(drag.end(overRuler: false), to: &w)
     #expect(w.guideReadout(at: 1) == "y 320" && w.undoActionName == "Undo Move Guide")
+    let moved = w.document
+    var again = try #require(FlareGuideDrag(guide: 1, of: w.guides))
+    again.move(to: 340)
+    apply(again.end(overRuler: false), to: &w)
+    w.undo()
+    #expect(w.document == moved, "a second guide drag joined the first one's step")
     w.undo()
     #expect(w.document == added && w.undoActionName == "Undo Add Guide")
 }
