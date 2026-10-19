@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "Exports three PNGs of different shapes, with see-through areas, at a 1080 px long side (export's longSide runs image.resize) and checks their pixels.",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "select.all", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-1080", "format": "png", "options": {"longSide": 1080}},
+  "expect": {
+    "out/square-1080.png": {"pixels": {"tolerance": 2, "reference": "expected/square-1080.png"}},
+    "out/tall-1080.png": {"pixels": {"tolerance": 2, "reference": "expected/tall-1080.png"}},
+    "out/wide-1080.png": {"pixels": {"tolerance": 2, "reference": "expected/wide-1080.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}

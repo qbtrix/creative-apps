@@ -29,8 +29,12 @@
 //           resize keep the routes below whatever `services` holds. A move (of one layer,
 //           several or their copies) and a one-layer resize land on whole points
 //           (DesignWholePoints); a nudge keeps its fraction. A move first snaps its box with
-//           the engine the press built (DesignSnapIndex, SN-4); `.noSnap` snaps nothing.
-//   frame, rectangle, ellipse, text   DesignDrawing.
+//           the engine the press built (DesignSnapIndex, SN-4); a resize (one or several)
+//           snaps only the edges its handle drags (Shift: the nearer line sets the scale;
+//           Option: the far edge mirrors). `.noSnap` snaps nothing.
+//   frame, rectangle, ellipse, text   DesignDrawing; once the pointer has moved, the start and
+//           the end each snap to the lines of the frame drawn into (Shift: the end's nearer
+//           axis only), before whole points (SN-5). A click places the default box unsnapped.
 //   pen     nothing.
 //
 // A drawing tool is good for one shape: once its gesture adds a node (a Text
@@ -191,10 +195,12 @@ extension DesignWorkspace {
             current.guides = landedGuides(frame, by: moveBy, modifiers: modifiers, current)
         case .resize(let id, let handle, let original):
             restorePages(current.before)
+            let snapped = snapResize(delta, box: original, handle: handle, modifiers: modifiers, current)
             let raw = original.resized(
-                handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
+                handle, by: snapped, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
             let frame = current.moved ? raw.wholePoints : raw
             _ = pages.update(id) { $0.frame = frame }
+            current.guides = landedGuides(on: frame, modifiers: modifiers, current)
         case .marquee(let parent):
             guard current.moved, let page = selectedPage else { break }
             let rect = DesignRect(
@@ -206,9 +212,13 @@ extension DesignWorkspace {
         case .moveSeveral, .resizeSeveral, .optionCopy:
             applyStep(&current, delta: delta, modifiers: modifiers)
         case .draw(let kind):
-            draw(kind, from: current, to: end, square: modifiers.contains(.shift))
+            let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
+            draw(kind, from: from, to: to, square: modifiers.contains(.shift))
+            current.guides = landedGuides(on: selectedNode?.frame, modifiers: modifiers, current)
         case .text:
-            placeText(from: current, to: end)
+            let (from, to) = snapDraw(current, to: end, modifiers: modifiers)
+            placeText(from: from, to: to)
+            current.guides = landedGuides(on: selectedNode?.frame, modifiers: modifiers, current)
         case .none:
             break
         }
@@ -226,13 +236,13 @@ extension DesignWorkspace {
         // A move snaps the selection box, then lands its top-left on a whole point (DesignWholePoints).
         let bounds = selectionBounds
         let moveBy = bounds?.wholeDelta(snapMove(delta, box: bounds, modifiers: modifiers, current)) ?? delta
-        if let bounds { current.guides = landedGuides(bounds, by: moveBy, modifiers: modifiers, current) }
         do throws(DesignRefusal) {
             switch current.route {
             case .moveSeveral(let ids):
                 apply(try transforming.move(ids, by: moveBy, on: page))
             case .resizeSeveral(let ids, let handle):
-                apply(try transforming.resize(ids, handle: handle, by: delta, modifiers: modifiers, on: page))
+                let snapped = snapResize(delta, box: bounds, handle: handle, modifiers: modifiers, current)
+                apply(try transforming.resize(ids, handle: handle, by: snapped, modifiers: modifiers, on: page))
             case .optionCopy(let ids, let start):
                 var mint = start
                 let copied = try services.duplicating.duplicate(ids, offset: DesignPoint(x: 0, y: 0), on: page, mint: &mint)
@@ -252,6 +262,7 @@ extension DesignWorkspace {
         } catch {
             return
         }
+        current.guides = landedGuides(on: selectionBounds, modifiers: modifiers, current)
     }
 
     /// `delta` snapped so `box` moved by it lines up; as is under `.noSnap` or without an engine.
@@ -262,19 +273,79 @@ extension DesignWorkspace {
 
     /// The guides `box` moved by `moveBy` landed on; none under `.noSnap` or without an engine.
     private func landedGuides(_ box: DesignRect, by moveBy: DesignPoint, modifiers: DesignModifiers, _ current: DesignGesture) -> DesignSnapGuides {
-        guard !modifiers.contains(.noSnap), let snap = current.snap else { return .empty }
-        return snap.guides(on: DesignRect(x: box.x + moveBy.x, y: box.y + moveBy.y, width: box.width, height: box.height))
+        landedGuides(on: DesignRect(x: box.x + moveBy.x, y: box.y + moveBy.y, width: box.width, height: box.height),
+                     modifiers: modifiers, current)
     }
 
-    /// Builds the snap engine once, at the press, for a move of one layer, several or their copies.
+    /// The guides a step's landed `box` sits on; none under `.noSnap`, before a move or without an engine.
+    private func landedGuides(on box: DesignRect?, modifiers: DesignModifiers, _ current: DesignGesture) -> DesignSnapGuides {
+        guard current.moved, !modifiers.contains(.noSnap), let box, let snap = current.snap else { return .empty }
+        return snap.guides(on: box)
+    }
+
+    /// `delta` snapped so the edges `handle` drags of `box` line up, and no other edge. Shift: the
+    /// nearer of the two lines sets the scale and the other side follows the aspect; Option keeps the
+    /// far edge mirrored. As is under `.noSnap` or without an engine.
+    private func snapResize(_ delta: DesignPoint, box: DesignRect?, handle: DesignHandle,
+                            modifiers: DesignModifiers, _ current: DesignGesture) -> DesignPoint {
+        guard current.moved, !modifiers.contains(.noSnap), let box, let snap = current.snap else { return delta }
+        let (shift, grow) = (modifiers.contains(.shift), modifiers.contains(.option) ? 2.0 : 1.0)
+        let raw = box.resized(handle, by: delta, keepAspect: shift, fromCenter: grow > 1)
+        let (h, v) = handle.direction
+        func offset(_ axis: DesignSnapLine.Axis, _ side: Int, _ low: Double, _ high: Double) -> Double? {
+            side == 0 ? nil : snap.lines.offset(axis, for: [side > 0 ? high : low], tolerance: handleTolerance)
+        }
+        let (dx, dy) = (offset(.x, h, raw.x, raw.maxX), offset(.y, v, raw.y, raw.maxY))
+        guard shift, handle.isCorner, box.width > 0, box.height > 0 else {
+            return DesignPoint(x: delta.x + (dx ?? 0), y: delta.y + (dy ?? 0))
+        }
+        let scale: Double
+        if let dx, dy.map({ abs(dx) <= abs($0) }) ?? true {
+            scale = (raw.width + Double(h) * dx * grow) / box.width
+        } else if let dy {
+            scale = (raw.height + Double(v) * dy * grow) / box.height
+        } else {
+            return delta
+        }
+        return DesignPoint(x: box.width * (scale - 1) / (Double(h) * grow), y: box.height * (scale - 1) / (Double(v) * grow))
+    }
+
+    /// A draw's gesture with its start snapped, and its end snapped, each on both axes once the
+    /// pointer has moved (Shift: only the end's nearer axis, then the square). As is under `.noSnap`.
+    private func snapDraw(_ current: DesignGesture, to end: DesignPoint, modifiers: DesignModifiers) -> (DesignGesture, DesignPoint) {
+        guard current.moved, !modifiers.contains(.noSnap), let snap = current.snap else { return (current, end) }
+        func offsets(_ p: DesignPoint) -> (x: Double?, y: Double?) {
+            (snap.lines.offset(.x, for: [p.x], tolerance: handleTolerance),
+             snap.lines.offset(.y, for: [p.y], tolerance: handleTolerance))
+        }
+        var drawing = current
+        let start = offsets(current.start)
+        drawing.start = DesignPoint(x: current.start.x + (start.x ?? 0), y: current.start.y + (start.y ?? 0))
+        var (ex, ey) = offsets(end)
+        if modifiers.contains(.shift), let x = ex, let y = ey {
+            if abs(x) <= abs(y) { ey = nil } else { ex = nil }
+        }
+        return (drawing, DesignPoint(x: end.x + (ex ?? 0), y: end.y + (ey ?? 0)))
+    }
+
+    /// Builds the snap engine once, at the press, for a move, a resize (one layer or several, or
+    /// their copies) and a draw, whose candidates are those of the frame it draws into.
     private func buildSnap(_ current: inout DesignGesture) {
-        let moving: [String]
+        var (moving, parent) = ([String](), String?.none)
         switch current.route {
-        case .move(let id): moving = [id]
-        case .moveSeveral(let ids), .optionCopy(let ids, _): moving = ids
+        case .move(let id), .resize(let id, _, _): moving = [id]
+        case .moveSeveral(let ids), .optionCopy(let ids, _), .resizeSeveral(let ids, _): moving = ids
+        case .draw, .text: parent = selectedPage?.nodes.deepestFrame(containing: current.start)
         default: return
         }
-        current.snap = DesignSnapIndex(snapCandidates(moving: moving, drawingInto: nil))
+        var candidates = snapCandidates(moving: moving, drawingInto: parent)
+        // A draw outside every frame lines up with the page's top level, which the kernel's
+        // candidates give only for a moving layer there.
+        if moving.isEmpty, parent == nil, let page = selectedPage {
+            let roots = page.nodes.filter { !$0.isHidden }.map { DesignSnapCandidate(id: $0.id, frame: $0.frame.snapRect) }
+            candidates.insert(contentsOf: roots, at: 0)
+        }
+        current.snap = DesignSnapIndex(candidates)
         current.snapBuilds += 1
     }
 

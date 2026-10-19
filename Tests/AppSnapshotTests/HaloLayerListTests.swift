@@ -1,8 +1,9 @@
 // HaloLayerListTests.swift: pixel checks on the inspector's LAYERS rows
-// (HaloLayerList) drawn alone in a 240 pt column on the panel, Light and
-// Dark. The selected row spans the column edge to edge (no List inset), in
-// the stateSelected tint with an accent outline, not the system's grey; the
-// icons start SuiteSpacing.m in; layer names clear 4.5:1 on the panel; and a
+// (HaloLayerList, SuiteUI's LayerTreeList since AL-h3) drawn alone in a
+// 240 pt column on the panel, Light and Dark. The selected row spans the
+// column edge to edge (no List inset), in the stateSelected tint, not the
+// system's grey; the kind icons start after the row's empty disclosure
+// column; layer names clear 4.5:1 on the panel; and a
 // composition with no layers draws its hint. macOS only.
 import HaloModel
 import SuiteUI
@@ -35,8 +36,9 @@ import Testing
     func selectedRowSpansTheColumnInTheSelectedTint(scheme: ColorScheme) throws {
         let image = try image(try threeLayers(), scheme)
         let panel = try #require(rgb(image, 700, 450))
-        let edge = Int(SuiteSize.studioRow / 2)
-        // Both outline edges sit on the column's edges, so no List inset.
+        // LayerTreeList's first row starts SuiteSpacing.xs down; sample its middle.
+        let edge = Int(SuiteSpacing.xs + SuiteSize.iconButtonHit / 2)
+        // The selected fill reaches both of the column's edges, so no List inset.
         for x in [0, Self.width - 1] {
             let px = try #require(rgb(image, x, edge))
             #expect(distance(px, panel) > 0.05, "nothing drawn at x \(x) of the selected row (\(scheme))")
@@ -53,14 +55,16 @@ import Testing
         let image = try image(try threeLayers(), scheme)
         let panel = try #require(rgb(image, 700, 450))
         // The second row (Badge), below the selected one.
-        let top = Int(SuiteSize.studioRow + SuiteSpacing.xs)
-        let band = top..<(top + Int(SuiteSize.studioRow))
+        let top = Int(SuiteSpacing.xs + SuiteSize.iconButtonHit)
+        let band = top..<(top + Int(SuiteSize.iconButtonHit))
         let inked = (0..<Self.width).first { x in
             band.contains { y in rgb(image, x, y).map { distance($0, panel) > 0.2 } ?? false }
         }
         let first = try #require(inked, "the second row drew nothing (\(scheme))")
-        #expect((Int(SuiteSpacing.m)...Int(SuiteSpacing.m) + 6).contains(first),
-                "the row's icon starts \(first) pt in, not on the SuiteSpacing.m inset (\(scheme))")
+        // LayerTreeList's row: the SuiteSpacing.s inset, then the empty disclosure column, then the kind icon.
+        let icon = Int(SuiteSpacing.s + SuiteSize.iconButtonHit + SuiteSpacing.xs)
+        #expect((icon...icon + Int(SuiteSize.iconButtonHit)).contains(first),
+                "the row's icon starts \(first) pt in, not after the disclosure column at \(icon) (\(scheme))")
         // The name, right of the icon: its darkest (or brightest) ink against the panel.
         var best = 1.0
         for y in band {
