@@ -1,6 +1,6 @@
 // ParamSchemaTests.swift (command-catalog CC-3, CJ1): each ParamSchema builder writes the JSON Schema 2020-12
 // keywords the packet names, and `validate` gives one issue per fault at its JSON pointer. The builder and
-// `document()` checks run now (CC-1 made them real); the validate checks wait on CC-4, which enables them.
+// `document()` checks run since CC-1 made them real; the validate checks since CC-4 filled `validate`.
 import Testing
 import SuiteKernel
 
@@ -77,7 +77,7 @@ import SuiteKernel
 
     /// A value with every required key, inclusive bounds at their edges and every optional key passes
     /// (mutation `.minimumInclusive`).
-    @Test(.disabled("waits on CC-4")) func validValuePasses() {
+    @Test func validValuePasses() {
         #expect(rectIssues { _ in }.isEmpty)
         #expect(rectIssues { $0["name"] = .string("Rect 1"); $0["blend"] = .string("multiply"); $0["opacity"] = .number(0) }.isEmpty)
         #expect(rectIssues { $0["opacity"] = .number(1); $0["size"] = .object(["w": .number(0), "h": .number(0)]) }.isEmpty)
@@ -86,7 +86,7 @@ import SuiteKernel
     }
 
     /// CJ1: a string where a number goes names `/x` and "expected number"; each other type says what it expected.
-    @Test(.disabled("waits on CC-4")) func wrongTypeNamesPathAndExpectedType() {
+    @Test func wrongTypeNamesPathAndExpectedType() {
         #expect(ParamSchema.object(["x": .number()], required: ["x"]).validate(.object(["x": .string("1")]))
                 == [SchemaIssue(path: "/x", message: "expected number")])
         #expect(rectIssues { $0["y"] = .null } == [SchemaIssue(path: "/y", message: "expected number")])
@@ -100,7 +100,7 @@ import SuiteKernel
     }
 
     /// A missing required key gives one issue at that key's pointer; a missing optional key gives none.
-    @Test(.disabled("waits on CC-4")) func missingRequiredKeyNamesIt() {
+    @Test func missingRequiredKeyNamesIt() {
         #expect(paths(rectIssues { $0["x"] = nil }) == ["/x"])
         #expect(paths(rectIssues { $0["size"] = nil }) == ["/size"])
         #expect(paths(rectIssues { $0["size"] = .object(["w": .number(1)]) }) == ["/size/h"])
@@ -108,7 +108,7 @@ import SuiteKernel
     }
 
     /// A string outside `oneOf` or over `maxLength` gives one issue at its pointer.
-    @Test(.disabled("waits on CC-4")) func enumAndLengthAreChecked() {
+    @Test func enumAndLengthAreChecked() {
         #expect(paths(rectIssues { $0["blend"] = .string("screen") }) == ["/blend"])
         #expect(paths(rectIssues { $0["blend"] = .string("") }) == ["/blend"])
         #expect(paths(rectIssues { $0["name"] = .string("Rectangle 1") }) == ["/name"])
@@ -116,7 +116,7 @@ import SuiteKernel
     }
 
     /// A number below `minimum` or above `maximum` gives one issue at its pointer (mutation `.minimumInclusive`).
-    @Test(.disabled("waits on CC-4")) func boundsAreInclusive() {
+    @Test func boundsAreInclusive() {
         #expect(paths(rectIssues { $0["opacity"] = .number(1.5) }) == ["/opacity"])
         #expect(paths(rectIssues { $0["opacity"] = .number(-0.01) }) == ["/opacity"])
         #expect(paths(rectIssues { $0["size"] = .object(["w": .number(-1), "h": .number(0)]) }) == ["/size/w"])
@@ -125,17 +125,17 @@ import SuiteKernel
     }
 
     /// An extra key gives one issue at its pointer, at the root, nested, and on `.none` (mutation `.closedObject`).
-    @Test(.disabled("waits on CC-4")) func extraKeysAreRefused() {
+    @Test func extraKeysAreRefused() {
         #expect(paths(rectIssues { $0["z"] = .number(0) }) == ["/z"])
         #expect(paths(rectIssues { $0["size"] = .object(["w": .number(1), "h": .number(1), "d": .number(1)]) }) == ["/size/d"])
         #expect(paths(ParamSchema.none.validate(.object(["a": .number(1)]))) == ["/a"])
     }
 
     /// Each array item is checked at its index, and the item count against `minItems`/`maxItems`.
-    @Test(.disabled("waits on CC-4")) func arrayItemsAndCountsAreChecked() {
+    @Test func arrayItemsAndCountsAreChecked() {
         let point = { (x: JSONValue) in JSONValue.object(["x": x]) }
         #expect(Self.path.validate(.object(["points": .array([point(.number(1)), point(.string("2"))])]))
-                == [SchemaIssue(path: "/points/1/x", message: "expected number")])
+                == [SchemaIssue(path: "/points/1/x", message: "expected integer")])
         #expect(paths(Self.path.validate(.object(["points": .array([point(.number(1)), point(.number(101))])]))) == ["/points/1/x"])
         #expect(paths(Self.path.validate(.object(["points": .array([point(.number(1)), .object([:])])]))) == ["/points/1/x"])
         #expect(paths(Self.path.validate(.object(["points": .array(Array(repeating: point(.number(1)), count: 4))]))) == ["/points"])
@@ -143,7 +143,7 @@ import SuiteKernel
     }
 
     /// Nested issues keep every parent in their pointer, and each fault is its own issue (mutation `.nestedPath`).
-    @Test(.disabled("waits on CC-4")) func nestedPathsKeepTheirParents() {
+    @Test func nestedPathsKeepTheirParents() {
         #expect(rectIssues { $0["size"] = .object(["w": .string("1"), "h": .number(1)]) }
                 == [SchemaIssue(path: "/size/w", message: "expected number")])
         #expect(paths(rectIssues { $0["size"] = .object(["w": .string("1")]) }) == ["/size/h", "/size/w"])
