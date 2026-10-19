@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-19T05:43Z	AL-halo	pr-merged	#2883	AL-h2 (2026-10-18T18:44Z, found on resume)
 2026-10-19T05:43Z	3	pr-opened	#3138	#2811 LayerTreeList features
 2026-10-19T06:01:13Z	heartbeat	check	#3138 #3139	both PRs wait on lane macOS build-only runs 39202285107/39203315397 (queued); hand-offs unchanged (design-seams-2, files-history, design-window, stage-edit, filters-collections open)
+2026-10-19T06:26:48Z	heartbeat	check	#3138 #3139	lane macOS build-only runs still queued (25 runs queued repo-wide, macOS runners busy); hand-offs unchanged
