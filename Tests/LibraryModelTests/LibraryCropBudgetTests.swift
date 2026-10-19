@@ -1,6 +1,6 @@
 // LibraryCropBudgetTests.swift: crop CR-3, the crop's Model budgets (slice
 // CR-b; Quality tests QB-L1 Model half and the cropped render), written
-// first and disabled until CR-4 builds `LiveCrop`. On the live services with
+// first; CR-4 builds `LiveCrop` and enables them. On the live services with
 // `IMG_0001` (6000 × 4000) at 1:1: one `dragCrop` within 2 ms debug (0.2 ms
 // release) and one `setCropAngle` within 2 ms (0.2 ms release), neither
 // recording a step. The 2048 px render at 1:1 and 5° through `LiveDevelop`
@@ -20,7 +20,7 @@ private let scale = 0.1
 private let judgesRenders = true
 #endif
 
-@Suite(.disabled("waits on CR-4"))
+@Suite
 struct LibraryCropBudgetTests {
     /// The live loupe on `IMG_0001` with a 1:1 draft.
     private func squareDraft() -> LibraryCatalog {
