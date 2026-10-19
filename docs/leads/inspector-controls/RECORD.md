@@ -4,7 +4,7 @@ Issue: #1508 · Packet: docs/blueprints/suiteui/features/inspector-controls.md
 Run: act-1a15409e144-cyb5 (was act-1a150947ee2-hc6b, act-1a14c4f9bb5-swq8) · Session: claude/inspector-controls-adopt-kernel-export-ct4yeg · Started: 2026-10-16T22:48Z (resumed 2026-10-19T12:04Z)
 Stage: 6 feature-done merged (#3094, cc14022e); waiting on a completed green suiteui/full dev run
 Base: cd7d4120 (origin/dev)
-Next: #3236 merged 15:18 as 452534d. Full run 39278490377 (b3011ab, contains 452534d) dispatched 15:30, pending; when it completes green post Belt-Contact-Sheet on #1508. 39276059443 cancelled; 39268739545 (955f02d) predates. Triage red journeys first.
+Next: #3236 merged 15:18 as 452534d; full run 39278490377 (b3011ab) macOS scripts/ci step failed 16:54 (log still partial; head commit notes known #1625 PhotoTileCanvasTests, not this feature); red run cannot be the contact-sheet run; post Belt-Contact-Sheet on #1508 at the next green ci.yml run containing 452534d.
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
