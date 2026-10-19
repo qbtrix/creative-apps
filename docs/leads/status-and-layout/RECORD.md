@@ -4,7 +4,7 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: SL-6 builds (wave 3, base 918abfc6); SL-b merged-done waits on dev CI 39195661324 (918abfc6, contains SL-4) Linux green; then Mac-Finish-Wanted SL-b; SL-8 after SL-6
+Next: lane merges SL-6 #3107; SL-b merged-done waits on dev CI 39196649963 (7acc00bf, contains SL-4) Linux green (39195661324 cancelled); then Mac-Finish-Wanted SL-b; SL-8 after SL-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -50,3 +50,4 @@ Next: SL-6 builds (wave 3, base 918abfc6); SL-b merged-done waits on dev CI 3919
 - 03:42Z check: SL-4 merged 0c9e58c3. CI 39192572958 (cc14022e) Linux green, so SL-a is merged-done; Belt-Slice-Done SL-a posted. Wave 3 starts SL-6 on 918abfc6. No panel this wave: no UI slice has all its tasks merged in a run with screens.
 - 03:42Z: the packet has SL-6 wait on the MetadataInspector header gap #2982. It is open with nobody on it, and it is one line, so SL-6's PR removes it too (Fixes #2982). One PR adds the single header and drops the duplicate, so the inspector never shows two titles; this replaces waiting on metadata-more's wave 5.
 - 03:51Z: SL-6 PR #3107 is open (head 0e390bcd, 5 files, +124/-15, Fixes #2982, Closes #185). J12 step 6 checks that the header contains the title rather than starts with it; the label of a multi-line header could not be confirmed on Linux. Besides the new library-inspector shots, the snapshots library-inspector-none, library-rated, library-metadata* and auto-advance change too.
+- 04:06Z check: dev at b48cf6c4. SL-6 #3107 is in the lane. CI 39195661324 was cancelled; SL-b waits on 39196649963.

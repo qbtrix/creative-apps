@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 03:42Z	3	check	39192572958	SL-a done; SL-4 merged 0c9e58c3
 03:42Z	3	wave	wave3	SL-6 starts on 918abfc6
 03:51Z	3	pr	#3107	SL-6 open
+04:06Z	3	check	39196649963	SL-b waits on Linux
