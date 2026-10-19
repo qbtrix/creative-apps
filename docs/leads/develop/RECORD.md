@@ -4,7 +4,7 @@ Issue: #1527 · Packet: docs/blueprints/library/features/develop.md
 Run: act-1a1543fe40d-7l1y · Session: claude/library-feature-lead-zn216c · Started: 2026-10-19T12:20Z (earlier: act-1a150baa34c-jzk9)
 Stage: 3 wave 4 (DV-11; DV-3 and DV-8 from wave 3 still open)
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: DV-9 #3221 (2e67c5df) macOS build green, lane merges next; then DV-10 after DV-9; DV-12 waits on the core issue and bump
+Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250 (stacked, ready after #3221 merges), EX-6 #3251 body fix
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
