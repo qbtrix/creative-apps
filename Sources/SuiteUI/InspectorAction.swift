@@ -29,7 +29,7 @@ public struct InspectorAction: View {
 
     /// The tooltip: the action's own help, except that an icon-only action that can't run names
     /// itself before the reason, since no title is on screen.
-    public static func help(_ action: ToolbarAction, iconOnly: Bool) -> String {
+    public nonisolated static func help(_ action: ToolbarAction, iconOnly: Bool) -> String {
         guard iconOnly, let reason = action.unavailableHelp else { return action.help }
         return "\(action.title): \(reason)"
     }
