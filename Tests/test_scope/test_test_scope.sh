@@ -81,6 +81,21 @@ check "app suiteui" "^(AppAuditTests|SuiteKernelTests|SuiteUITests)\\.;$suiteui_
 python3 "$ts" app nope >/dev/null 2>&1
 check "an unknown app is refused" 1 "$?"
 
+# Code paths to the apps the lane's macOS build-only run compiles (build-apps).
+apps() { printf '%s\n' "$@" | python3 "$ts" build-apps; }
+check "build-apps: one app's Model, tests, app, snapshots and journeys" photo \
+  "$(apps Sources/PhotoModel/A.swift Tests/PhotoModelTests/B.swift Sources/PhotoApp/C.swift \
+    Tests/AppSnapshotTests/PhotoBrushSnapshots.swift Tests/AppSnapshotTests/RenderBudgetPhotoTests.swift UITests/PhotoJourneyTests+Layers.swift)"
+check "build-apps: two apps give both" design,photo "$(apps Sources/PhotoApp/C.swift Sources/DesignModel/X.swift)"
+for p in Sources/SuiteUI/Tokens.swift Sources/SuiteKernel/Geometry.swift Sources/SuiteModel/Values/SuiteApp.swift \
+    Sources/SuiteShell/SuiteCommands.swift Sources/AfterGlowApp/HomeWindow.swift Sources/AfterGlowCLI/main.swift \
+    Tests/AfterGlowCLITests/CLIShapeTests.swift Tests/SuiteUITests/TokensTests.swift Tests/AppAuditTests/Checks/Overlap.swift \
+    Tests/AppSnapshotTests/GoldenImage.swift UITests/Journey.swift UITests/Audit.swift UITests/SuiteJourneyTests.swift \
+    Package.swift project.yml Sources/NewModel/A.swift; do
+  check "build-apps: shared $p builds all" all "$(apps Sources/PhotoApp/C.swift "$p")"
+done
+check "build-apps: no paths builds all" all "$(printf '' | python3 "$ts" build-apps)"
+
 # Every perf list entry names a test that exists.
 missing=""
 while read -r app id; do

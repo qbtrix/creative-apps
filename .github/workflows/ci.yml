@@ -15,7 +15,7 @@
 #
 # Branch model: crew PRs merge into dev through the fast lane on the worker's
 # Linux scripts/ci --changed marker (plus a build-only macOS compile for code
-# PRs). This workflow runs on dev once a feature is built: on
+# PRs, scoped to the PR's apps when the lane passes `app`). This workflow runs on dev once a feature is built: on
 # workflow_dispatch (the supervisor, Belt, or the lane after a `feature-done`
 # or UI merge) and daily as a safety net. A green Linux job lets `promote`
 # fast-forward main to that exact SHA. A red Linux job makes `dev-red` open
@@ -58,7 +58,7 @@ on:
         type: boolean
         default: false
       app:
-        description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run)'
+        description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run). With build_only: a comma list of flare, design, photo, library, halo'
         type: string
         default: ''
   schedule:
@@ -67,13 +67,19 @@ on:
 permissions:
   contents: read
 
-# Runs on dev and main never cancel: GitHub keeps the running one plus the
-# newest pending one, so dispatches that pile up collapse into one run (macOS
-# runners are a small shared pool). PR runs group by PR number, so a hotfix PR
-# from a branch named dev can't cancel a dev run. Each scoped app gets its own
-# group, so a Design run never displaces a pending Photo or full run.
+# Runs on dev and main never cancel a running run: GitHub keeps the running
+# one plus the newest pending one and cancels a superseded pending one, so
+# dispatches that pile up collapse into one run (macOS runners are a small
+# shared pool). A running full run is not cancelled because dev is dispatched
+# every 15 to 45 minutes and its macOS job takes 50 to 90: cancelling would
+# starve promote, Findings and Audit lower. PR runs group by PR number, so a
+# hotfix PR from a branch named dev can't cancel a dev run. Each scoped app
+# gets its own group, so a Design run never displaces a pending Photo or full
+# run. A branch's build-only runs share one group whatever their `app`, so a
+# new head's build cancels the old head's (the lane reads the build by head,
+# and an old head's build is no longer the one it waits on).
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ inputs.app && format('-{0}', inputs.app) || '' }}
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ !inputs.build_only && inputs.app && format('-{0}', inputs.app) || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 jobs:
@@ -97,9 +103,17 @@ jobs:
 
   # The fast lane's compile check for a PR that changes code (BUILD_RE in
   # scripts/fast-lane.sh: Swift under Sources/, Tests/ and UITests/,
-  # project.yml, Package.swift). It compiles everything and runs nothing:
-  # every SwiftPM target with its tests, then the journey bundles from
-  # project.yml. Only on workflow_dispatch with build_only.
+  # project.yml, Package.swift). It compiles and runs nothing. Only on
+  # workflow_dispatch with build_only. With no `app` it builds every SwiftPM
+  # target with its tests, then every journey bundle from project.yml. With
+  # `app` (a comma list of flare, design, photo, library, halo: what
+  # `scripts/test-scope build-apps` gave the lane for the PR's code), it builds
+  # per app <X>ModelTests and the <X>App product, plus AppSnapshotTests (every
+  # app's snapshot tests, so it links every app and SuiteUI), then only those
+  # apps' journey bundles. It skips the other Model tests, SuiteUITests,
+  # SuiteModelTests, SuiteKernelTests, AppAuditTests and the CLI: Linux
+  # scripts/ci builds all but SuiteUITests, which a one-app change can't
+  # break. Any other `app` value builds everything (fail closed).
   mac-build:
     name: macOS build
     if: ${{ inputs.build_only }}
@@ -108,7 +122,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo xcode-select -s /Applications/Xcode_26.6.app
-      - run: swift build --build-tests
+      # NAMES: the apps' target prefixes (Photo Design), empty for a full build.
+      - name: Pick the apps
+        env:
+          APP: ${{ inputs.app }}
+        run: |
+          one='(flare|design|photo|library|halo)'
+          names=""
+          if [[ "$APP" =~ ^$one(,$one)*$ ]]; then
+            for a in ${APP//,/ }; do names="$names $(tr a-z A-Z <<<"${a:0:1}")${a:1}"; done
+          elif [[ -n "$APP" ]]; then
+            echo "::warning::app '$APP' is not a comma list of flare, design, photo, library and halo: building everything"
+          fi
+          echo "NAMES=${names# }" >>"$GITHUB_ENV"
+          echo "### macOS build: ${names:-every target with its tests and every journey bundle}" >>"$GITHUB_STEP_SUMMARY"
+      - name: swift build
+        run: |
+          if [[ -z "$NAMES" ]]; then swift build --build-tests; exit; fi
+          swift build --target AppSnapshotTests
+          for x in $NAMES; do
+            swift build --target "${x}ModelTests"
+            swift build --product "${x}App"
+          done
       - name: Install XcodeGen 2.46.0
         run: |
           curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
@@ -116,7 +151,17 @@ jobs:
           unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
       - run: xcodegen generate --quiet
-      - run: xcodebuild build-for-testing -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS
+      # build-for-testing ignores -only-testing (it still compiles every
+      # bundle), so a scoped build names the bundle targets instead.
+      - name: Journey bundles
+        run: |
+          if [[ -z "$NAMES" ]]; then
+            xcodebuild build-for-testing -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS
+            exit
+          fi
+          targets=()
+          for x in $NAMES; do targets+=(-target "${x}JourneyTests"); done
+          xcodebuild build -project CreativeApps.xcodeproj "${targets[@]}" -arch "$(uname -m)"
 
   macos:
     name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
