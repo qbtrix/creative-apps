@@ -45,6 +45,8 @@ enum DesignIntent {
     case renamePage(String, String)
     /// A Layers row's rename: the layer and its new name, one "Rename Layer" step.
     case renameLayer(String, String)
+    /// The inspector's Width or Height committed: the selected page's size, one "Change Page Size" step.
+    case setPageSize(width: Double, height: Double)
 }
 
 /// Where a view sends its intents.
@@ -116,13 +118,21 @@ extension DesignColor {
 }
 
 extension DesignModifiers {
-    /// The modifier keys held right now, for the drag the pointer is making.
+    /// The modifier keys held right now and View > Snap to Layers, for the drag the pointer is making.
     static var current: DesignModifiers {
-        let flags = NSEvent.modifierFlags
-        var held: DesignModifiers = []
-        if flags.contains(.shift) { held.insert(.shift) }
-        if flags.contains(.option) { held.insert(.option) }
-        return held
+        make(flags: NSEvent.modifierFlags, defaults: .standard)
+    }
+
+    /// Shift and Option as held; `.noSnap` when ⌘ is held or Snap to Layers is off in `defaults` (snapping SN-8).
+    static func make(flags: NSEvent.ModifierFlags, defaults: UserDefaults) -> DesignModifiers {
+        DesignModifiers(
+            shift: flags.contains(.shift), option: flags.contains(.option),
+            command: flags.contains(.command), snapToLayers: snapsToLayers(in: defaults))
+    }
+
+    /// View > Snap to Layers as `defaults` holds it; a missing value reads as on.
+    static func snapsToLayers(in defaults: UserDefaults) -> Bool {
+        defaults.object(forKey: DesignSnapSettings.defaultsKey) as? Bool ?? true
     }
 }
 

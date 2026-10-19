@@ -66,9 +66,10 @@ import Testing
     }
 
     @Test func blurredTilesMatchTheWholeImage() async throws {
-        var workspace = try whiteImage(520, 300)
+        // Just wider than one 256 px tile and short: a debug-build blur over a big canvas costs seconds.
+        var workspace = try whiteImage(300, 40)
         workspace.addLayer()
-        stroke(&workspace, .marquee, from: point(250, 0), to: point(262, 300))
+        stroke(&workspace, .marquee, from: point(250, 0), to: point(262, 40))
         workspace.fillSelection()
         workspace.adjust(.blurSigma(4))
         let frame = try await PhotoRenderer.render(workspace)

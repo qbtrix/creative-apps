@@ -1,5 +1,5 @@
 // LibraryLiveCropTests.swift: crop CR-3, the live crop geometry's checks
-// (slice CR-b), written first and disabled until CR-4 builds `LiveCrop` over
+// (slice CR-b), written first and enabled by CR-4, which builds `LiveCrop` over
 // CoreRaster's `straightenCrop`. They reach the geometry only through
 // `LibraryServices.live(...).crop` and the `CropGeometry` protocol, so CR-4
 // keeps that seam: `.live` sets `crop: LiveCrop()` and, once built, no
@@ -40,7 +40,7 @@ func cropLies(_ frame: PixelRect, inside outer: PixelRect) -> Bool {
 
 private let landscape = PixelSize(width: 6000, height: 4000)
 
-@Suite(.disabled("waits on CR-4"))
+@Suite
 struct LibraryLiveCropTests {
     let crop = cropLiveGeometry()
 

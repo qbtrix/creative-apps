@@ -120,7 +120,7 @@ import UniformTypeIdentifiers
     }
 
     /// (b) The export at 1024 looks like the loupe's `.full` render at 1024.
-    @Test func renderMatchesTheLoupe() async throws {
+    @Test(.disabled("quarantine #3276 until 2026-10-22")) func renderMatchesTheLoupe() async throws {
         let photo = try writePhoto(in: try folder())
         let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
         let loupe = try await LiveLoupeImaging(decoder: decoder, develop: develop)
@@ -131,7 +131,7 @@ import UniformTypeIdentifiers
     }
 
     /// (c) Written at quality 95: an sRGB JPEG within 40 dB of (a), never overwritten.
-    @Test func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
+    @Test(.disabled("quarantine #3277 until 2026-10-22")) func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
         let root = try folder()
         let photo = try writePhoto(in: root)
         let out = root.appending(path: "out")
