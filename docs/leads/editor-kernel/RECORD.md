@@ -104,3 +104,4 @@ Next: wave A PRs #2973 (EK-6), #2972 (EK-31), #2974 (EK-25) wait on the lane's m
 - 23:45Z EK-26 #3040 opened (head 1eedab72, docs, feature-done): kernel tier named in engineering.md, suite.md, suiteui.md; wave.json status built
 - 2026-10-18T23:56Z EK-26 #3040 merged (22046535). Full CI 39178441058 at 22046535 pending: contains #2972 EK-chrome, #2973 EK-u, #3040 EK-z. scoped suiteui 39175856233 still in progress. 0 open findings.
 - 2026-10-19T00:16Z Belt-Slice-Done EK-chrome posted (scoped suiteui 39175856233 green, head e0a627c0 contains #2972). EK-u, EK-z wait on full CI 39178441058 at 22046535 (pending).
+- 2026-10-19T00:36Z Full CI 39178441058 cancelled (superseded). EK-u, EK-z now wait on scoped suiteui 39180136006 / full CI 39180214762 at ef6f201f (queued; contain #2973, #3040).
