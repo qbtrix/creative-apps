@@ -39,14 +39,13 @@ struct CLIStubTests {
     }
 
     @Test(arguments: [
-        ("run", "slice CL-batch"), ("jobs", "slice CL-jobs"), ("mcp", "afterglow-mcp is not built yet"), ("cli", "slice CL-args"),
+        ("run", "slice CL-batch"), ("mcp", "afterglow-mcp is not built yet"), ("cli", "slice CL-args"),
     ])
     func everyStubExits69NamingItsSlice(entry: String, names: String) {
         let io = FakeIO()
         let apps = Apps.all + [Apps.fake]
         let code: Int32 = switch entry {
         case "run": ScriptRunner.run("resize.jobs.json", apps: apps, dryRun: false, force: false, io: io)
-        case "jobs": RealJobs.check("Tests/RealJobs/fake/resize", apps: apps, io: io)
         case "mcp": MCPServer.serve([], apps: apps, io: io)
         default: CLI.run(["fake", "list-commands"], io: io)
         }
