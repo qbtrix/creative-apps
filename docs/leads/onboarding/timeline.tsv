@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 2026-10-19T06:40Z	3	pr-opened	#3158	OB-13 OJ3/OJ4 live, blueprint prose, built; macOS build green
 2026-10-19T06:52Z	3	pr-merged	#3158	d99751bcb04942408b4eba02454434d76110aa71
 2026-10-19T07:11Z	3	ci-run	39213562657	full CI on d99751bc pending
+2026-10-19T07:42Z	3	ci-run	39215489121	full CI on 57d85dfd (contains d99751bc) pending; 39213562657 and 39214719821 cancelled before any job
