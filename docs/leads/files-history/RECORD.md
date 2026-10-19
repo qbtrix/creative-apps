@@ -101,3 +101,4 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - 2026-10-19T06:25Z merge: #3119 merged as a046f9da (FH-b fix round 1); P4 check waits on CI 39208339251 (6dd055f6, contains it); scoped design 39204091833 (047303c1) in progress, CI 39203617095 queued; no supervisor reply.
 - 2026-10-19T06:49Z heartbeat: scoped design 39204091833 (047303c1) macOS red on non-FH tests; J13 J14 J16 pass; P4 fails there but run predates a046f9da; #3020 closed by #3119 merge; P4 verify waits on scoped design 39211721703 (977df193); 39208339251 cancelled; no supervisor reply.
 - 2026-10-19T07:18Z heartbeat: no design macOS result: scoped design 39211721703 (977df193, has a046f9da) queued, CI 39203617095 macOS in progress, 39211832383 cancelled; P4 verify pending; no supervisor reply.
+- 2026-10-19T07:46Z heartbeat: no design macOS result: scoped design 39211721703 still queued, CI 39203617095 macOS in progress; 39214719821 cancelled; P4 verify pending; no supervisor reply.
