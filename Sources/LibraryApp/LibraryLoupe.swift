@@ -10,8 +10,13 @@
 // the grid. The canvas pans on the other arrows, scroll and Space-drag, and
 // a click on it gives it the keys. Pinch and its zoom keys go through
 // `menu.view.zoomTo`, the measured fit through `menu.view.fitMeasured`
-// (the loupe area fills both). Values in, closures out; LibraryCatalog
-// holds the state.
+// (the loupe area fills both). While a crop draft is open (crop CR-6) the
+// artboard is the straightened photo (`crop.canvas`) under the crop frame
+// overlay, a canvas drag moves the handle under its press (or the whole
+// frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
+// otherwise the artboard is the photo at its stored crop (`crop.artboard`).
+// The crop controls come from the window through `\.libraryCrop`. Values
+// in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -24,20 +29,25 @@ struct LibraryLoupe: View {
     var onGrid: @MainActor () -> Void = {}
     /// The viewport's size in points, which the fit is measured against.
     @State private var viewport: CGSize = .zero
+    /// The crop handle the drag under way holds; nil between drags.
+    @State private var grabbed: CropHandle?
+    @Environment(\.libraryCrop) private var crop
 
     var body: some View {
-        let size = model.loupePhotoSize ?? PixelSize(width: 1, height: 1)
+        let size = (crop.draft == nil ? nil : crop.canvas) ?? crop.artboard ?? model.loupePhotoSize
+            ?? PixelSize(width: 1, height: 1)
         let document = CGSize(width: size.width, height: size.height)
         let fit = ZoomMath.fit(document: document, in: viewport)
+        let zoom = model.loupeZoom.scale(fit: fit)
         CanvasViewport(
-            documentSize: document, zoom: model.loupeZoom.scale(fit: fit), checkerboard: false,
+            documentSize: document, zoom: zoom, checkerboard: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
-            // No tool draws here: a drag only gives the canvas focus, so its keys reach it.
-            onDrag: { _, _ in }, onKey: key
+            // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
+            onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
         ) {
             picture
         } overlay: {
-            if let cropDraft = model.cropDraft { LibraryCropOverlay(cropDraft: cropDraft) }
+            if crop.draft != nil { LibraryCropOverlay(crop: crop, zoom: zoom) }
         }
         .onChange(of: fit, initial: true) { _, measured in menu.view.fitMeasured?(measured) }
         .overlay(alignment: .bottom) {
@@ -94,10 +104,35 @@ struct LibraryLoupe: View {
         .accessibilityIdentifier("library.loupe.photo")
     }
 
-    /// Left and Right step photos (before the canvas pans on them); Escape and
-    /// G go to the grid. Anything else, or with a command key, passes on.
+    /// A drag sample while cropping: the handle under the press (held until
+    /// the drag ends) moves by the sample's step, in photo pixels.
+    private func cropDrag(from: CGPoint, to: CGPoint, zoom: Double) {
+        guard let drag = crop.drag, let frame = crop.frame else { return }
+        let handle = grabbed ?? LibraryCropOverlay.handle(
+            at: from, frame: CGRect(x: frame.x, y: frame.y, width: frame.width, height: frame.height),
+            radius: Double(SuiteSize.selectionHandleHit) / 2 / max(zoom, 0.001))
+        if grabbed == nil { grabbed = handle }
+        if to != from { drag(handle, to.x - from.x, to.y - from.y) }
+    }
+
+    /// While cropping, Escape cancels and the arrows nudge the frame 1 px
+    /// (Shift 10). Otherwise Left and Right step photos (before the canvas
+    /// pans on them); Escape and G go to the grid. Anything else, or with a
+    /// command key, passes on.
     private func key(_ press: KeyPress) -> KeyPress.Result {
         guard press.modifiers.isDisjoint(with: [.command, .control, .option]) else { return .ignored }
+        if let drag = crop.drag {
+            let step = press.modifiers.contains(.shift) ? 10.0 : 1.0
+            switch press.key {
+            case .escape: crop.cancel?()
+            case .leftArrow: drag(.inside, -step, 0)
+            case .rightArrow: drag(.inside, step, 0)
+            case .upArrow: drag(.inside, 0, -step)
+            case .downArrow: drag(.inside, 0, step)
+            default: return .ignored
+            }
+            return .handled
+        }
         switch press.key {
         case .leftArrow: onStep(-1)
         case .rightArrow: onStep(1)
