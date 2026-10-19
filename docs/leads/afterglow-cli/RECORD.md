@@ -120,3 +120,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ## 2026-10-19T09:26Z: CL-7 #3154 merged (09:22Z)
 - Dispatching a shipper for CL-9 (rebuilt on dev from 35ee7e6, jobs stub row dropped, Slice: CL-jobs) and then CL-10 (d69d134, Slice: CL-z).
+
+## 2026-10-19T09:34Z: heartbeat
+- Shipper is running: CL-9 (merge dev in, drop the jobs row, PR with Slice: CL-jobs), then CL-10 (merge dev in, PR with Slice: CL-z).
