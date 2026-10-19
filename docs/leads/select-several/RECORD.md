@@ -1,10 +1,10 @@
 # select-several lead record
 
 Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
-Run: act-1a14ddefb3a-z1bl (resumes act-1a14a88d756-rnok) · Session: claude/feature-lead-playbook-k74hfj · Started: 2026-10-17T15:46Z
-Stage: 3 wave 2
-Base: cd81c77b0fa1d56822a09bb1208df52ee4548568
-Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692 closed). J5 still skips at the ⇧→ nudge on two layers: finding #2706, round 2 PR #2707 head e7afea2 in the lane (root cause: arrow presses carry the numeric-pad flag, so the canvas key guard dropped every arrow). Re-done again on a run holding that fix. S-8 #2696 in the lane; S-5 waits on CB-a.
+Run: act-1a1517272b2-vq6l (resumes earlier runs) · Session: claude/feature-lead-playbook-2k2x84 · Started: 2026-10-19T00:00Z
+Stage: 3 polling (SS-b)
+Base: d50e891e (origin/dev); main verified at 349578b8
+Next: all SS-b tasks merged (S-8 #2696 10:16Z, S-5 #2898); on 39173700610 J4 skips (runner can't post held Space) and P1 #2751 fails (P1 draw has 3 samples, under 60): fix round for #2751; #2538 stays on needs-ui #2623
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -48,3 +48,4 @@ Next: SS-a re-done on scoped design 39107691328 (holds 148ade3e; J6 green, #2692
 - S-8 #2696 (f7d57daf) shown on scoped design https://github.com/qbtrix/creative-apps/actions/runs/39118734724 (a80ed944, success). Finding #2751 (P1 testCanvasDragLatency: unnamed 427x11 button on design-perf-canvas-zoomed-in) is SS-b round 1; fixer sent, likely the same SuiteUI scroller as needs-ui #2623.
 - #2751 has the same cause as needs-ui #2623 (CanvasViewport's system horizontal scroller in SuiteUI); blocked, no Design PR. If #2623 is still open when SS-b's rounds end, #2751 joins the gaps.
 - SS-a done on scoped design https://github.com/qbtrix/creative-apps/actions/runs/39122750799 (e3a4582c, holds #2707 d353fee7): J5 testMarqueeMoveResizeSeveral and J6 testAlignAndDistributeSeveral green; Belt-Slice-Done posted on #1495. J4 (#2538) and P1 (#2751) still red on the CanvasViewport scroller, needs-ui #2623.
+2026-10-19T00:00Z	heartbeat	run act-1a1517272b2-vq6l: SS-b waits on #2751 (P1 3 samples) and #2538 (needs-ui #2623)

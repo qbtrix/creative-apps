@@ -124,3 +124,4 @@ utc	stage	event	ref	note
 2026-10-18T22:18Z	heartbeat	SS-b: full run 39171061138 (85f4a229, holds #2980) pending; #2538/#2751 wait needs-ui #2623
 2026-10-18T22:41Z	heartbeat	SS-b: full run 39171756438 (349578b8, holds #2980) queued; 39171061138 cancelled; #2538/#2751 wait needs-ui #2623
 2026-10-18T23:04Z	heartbeat	SS-b waits run on 46f6ce21 (scoped:design 39173700610 queued) + #2538/#2751 (needs-ui #2623 open)
+2026-10-19T00:00Z	heartbeat	run act-1a1517272b2-vq6l: SS-b waits on #2751 (P1 3 samples) and #2538 (needs-ui #2623)
