@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-19T00:36Z	check	Full CI 39178441058 cancelled (superseded). EK-u, EK-z now wait on scoped suiteui 39180136006 / full CI 39180214762 at ef6f201f (queued; contain #2973, #3040).
 2026-10-19T00:56Z	check	Scoped suiteui 39180136006 at ef6f201f in progress; full CI 39180214762 queued. Both contain #2973 EK-u, #3040 EK-z.
 2026-10-19T01:16Z	check	Scoped suiteui 39180136006 (ef6f201f) still in progress; full CI 39180214762 queued; both contain EK-u, EK-z.
+2026-10-19T01:36Z	check	waiting: suiteui 39180136006 in progress, full CI 39180214762 queued (EK-u, EK-z)
