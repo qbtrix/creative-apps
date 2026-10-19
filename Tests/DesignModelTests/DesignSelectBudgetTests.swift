@@ -62,10 +62,11 @@ import Testing
         #expect(steps == 200, "the timed moves ran \(steps) steps, not 200")
         #expect(workspace.gesture?.route == .move("node-1"))
         let moved = try #require(workspace.treeNode("node-1"))
-        #expect(moved.frame == rc(13, 17, 160, 150))
+        // The last step, (3, 7), snaps x back onto the frames' left edge at 10 (snapping SN-4).
+        #expect(moved.frame == rc(10, 17, 160, 150))
         #expect(moved.children.count == 50)
         for (old, new) in zip(before.children, moved.children) {
-            #expect(new.frame.x == old.frame.x + 3 && new.frame.y == old.frame.y + 7, "\(new.id) didn't move")
+            #expect(new.frame.x == old.frame.x && new.frame.y == old.frame.y + 7, "\(new.id) didn't move")
         }
         workspace.endDrag()
         #expect(workspace.undoActionName == "Undo Move")
