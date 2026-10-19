@@ -4,8 +4,8 @@
 // one JSON object on stdout (keys sorted) and one human line on stderr only
 // when `ok` is false, each error maps to its sysexits code, and the golden
 // outputs in Golden/ match. Runs in process on FakeIO over the fake app.
-// The runs that edit a document also need the catalog's run (command-catalog
-// CC-7); those stay disabled until it lands.
+// The runs that edit a document go through the catalog's run (command-catalog
+// CC-7).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -77,7 +77,7 @@ struct CLIArgsTests {
         #expect(run.io.stderr.isEmpty)
     }
 
-    @Test(.disabled("waits on CC-7"), arguments: forms.filter { runsCommand($0.0) })
+    @Test(arguments: forms.filter { runsCommand($0.0) })
     func everyCommandFormAnswersWithOneObject(arguments: [String], key: String) {
         everyFormAnswersWithOneObject(arguments: arguments, key: key)
     }
@@ -112,7 +112,7 @@ struct CLIArgsTests {
         Self.expectFailure(run, code, kind, naming: naming)
     }
 
-    @Test(.disabled("waits on CC-7"), arguments: table.filter { fromCatalog($0.3) })
+    @Test(arguments: table.filter { fromCatalog($0.3) })
     func catalogExitCodes(arguments: [String], code: Int32, kind: String, naming: String) {
         exitCodeTable(arguments: arguments, code: code, kind: kind, naming: naming)
     }
@@ -175,7 +175,7 @@ struct CLIArgsTests {
         ("run-refused", ["fake", "rect.move", "--in", "a.fake", "--out", "b.fake", "--json", move]),
     ]
 
-    @Test(.disabled("waits on CC-7"))
+    @Test
     func goldenRunOK() throws {
         try goldenOutputs(name: "run-ok", arguments: ["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--json", Self.rect])
     }
@@ -191,7 +191,7 @@ struct CLIArgsTests {
     }
 
     /// LJ1: list the fake's commands, describe one, add a rect to a copy, refuse an unknown flag and an overwrite.
-    @Test(.disabled("waits on CC-7"))
+    @Test
     func lj1FakeSession() throws {
         let list = Self.afterglow(["fake", "list-commands"])
         guard case .array(let commands)? = list.reply?["commands"] else { Issue.record("no commands: \(list.io.stdout)"); return }
