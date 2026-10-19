@@ -2,10 +2,10 @@
 
 Issue: #1500 · Packet: docs/blueprints/design/features/canvas-basics.md
 Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
-Stage: 3 wave 5
+Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
-Next: CB-6 (wave 5, slice CB-b) building on lead/canvas-basics-CB-6; CB-9 (wave 6, CB-c, feature-done) stacks on it as soon as CB-6's PR opens (rule 22). Unblocked: design-window is done (contact sheet 39187798386), style-rows is done (#1497 closed; SR-t's ST-5t view code is on dev, its open journey red is #2545), CB-5 merged.
-Last check: 2026-10-19 (dev 25f6d33, main 6f9a2b8 verified); 0 open findings
+Next: CB-9 (wave 6, slice CB-c, feature-done) building on lead/canvas-basics-CB-9, stacked on CB-6's branch; CB-6 PR #3208 waits on the lane's macOS build (run 39230865936). Then poll for a design-scoped or full ci.yml run containing #3208 (CB-b) and CB-9's PR (CB-c).
+Last check: 2026-10-19 (dev 25f6d33); 0 open findings; #3208 head 1f78389 mergeable clean
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -26,8 +26,8 @@ Gap issues (one per slice, filed at stage 1): CB-a #1521 (CB-2 closes), CB-b #15
 | CB-2 | CB-a | 2 | whole points for draw, move, resize; MJ9; journey on | DesignWholePoints.swift, DesignDrawing.swift, DesignCanvasEditing.swift, DesignWholePointsTests.swift, 3 plans, +WholePoints journey | DesignWholePointsTests | #2568 | merged 7c20424 |
 | CB-3 | CB-a | 3 | Text click-drag fixed-width box; fixedWidth flag | StyleTypes.swift, DesignDrawing.swift, DesignCanvasEditing.swift, DesignTextBoxDrawTests.swift, 3 plans | DesignTextBoxDrawTests | #2871 (080dea8) | merged 18:01Z (4a3e5a0) |
 | CB-5 | CB-b | 4 | commitTextEdit(extent:), setTextStyle refit | DesignText.swift, Live/LiveStyling.swift, DesignTextFitTests.swift, 2 plans | DesignTextFitTests | #2897 (4269cd4) | merged 20:05Z (94d162c) |
-| CB-6 | CB-b | 5 | window commits with measured extent; editor grows/wraps; journey on | DesignWindow.swift, DesignTextFont.swift, DesignTextEditor.swift, DesignTextArtwork.swift, DesignTextFitSnapshots.swift, +TextBox journey | design-text-fit snapshots, journey | | building |
-| CB-9 | CB-c | 6 | page rows, past-edge overlay; journey on; feature-done | DesignIntent.swift, DesignWindow.swift, DesignCanvas.swift, DesignInspectorPage.swift, DesignPastEdge.swift, DesignPageSnapshots.swift, +Page journey | design-inspector-page, design-canvas-past-edge, journey | | waits CB-6, CB-7, CB-8, design-window |
+| CB-6 | CB-b | 5 | window commits with measured extent; editor grows/wraps; journey on | DesignWindow.swift, DesignTextFont.swift, DesignTextEditor.swift, DesignTextArtwork.swift, DesignTextFitSnapshots.swift, +TextBox journey | design-text-fit snapshots, journey | #3208 | pr-open (head 1f78389, lane macOS build 39230865936) |
+| CB-9 | CB-c | 6 | page rows, past-edge overlay; journey on; feature-done | DesignIntent.swift, DesignWindow.swift, DesignCanvas.swift, DesignInspectorPage.swift, DesignPastEdge.swift, DesignPageSnapshots.swift, +Page journey | design-inspector-page, design-canvas-past-edge, journey | | building |
 
 Waves (packet's Build waves, checked against dev b01e722):
 - Wave 1: CB-1, CB-4, CB-7, CB-8. All independent (disjoint new files; design-contracts is built).

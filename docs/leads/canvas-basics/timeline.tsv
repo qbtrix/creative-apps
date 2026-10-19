@@ -80,3 +80,5 @@ utc	stage	event	ref	note
 08:15	heartbeat	still blocked: #2480 stalled (head Linux red), no supervisor reply yet; SR-t not on dev; no findings, no dev-red
 08:34	heartbeat	still blocked: #2480 stalled (head Linux red), no supervisor reply yet; SR-t not on dev; no findings, no dev-red
 2026-10-19T09:17Z	3	stage-start	wave 5	resumed run act-1a153722cda-w61s; waits met (design-window, style-rows done); CB-6 building
+2026-10-19T10:03Z	3	pr-opened	#3208	CB-6 slice CB-b text boxes fit their text (190+/24-, 6 files)
+2026-10-19T10:03Z	3	stage-start	wave 6	CB-9 slice CB-c stacked on CB-6
