@@ -28,7 +28,7 @@ extension LibraryWindow {
         LibraryMenu.File(
             importFolder: enabled(model.importHelp == nil) { startImport() },
             importHelp: model.importHelp,
-            dismissImportNotice: enabled(model.importNotice != nil) { model.dismissImportNotice() })
+            dismissImportNotice: act(.dismissImportNotice))
     }
 
     /// Called once from the window's `.task`.

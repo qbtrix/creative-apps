@@ -1,0 +1,5 @@
+[
+{"label":"a flag value starting with a dash counts as a client","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"client.allSatisfy(\\.isWhitespace) || client.hasPrefix(\"-\") ? nil : client","replace":"client.allSatisfy(\\.isWhitespace) ? nil : client","tests":"AIAccessPromptTests"},
+{"label":"the sheet drops the command the client sent","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"return base + \" It asked to run “\\(command)”.\"","replace":"return base","tests":"AIAccessPromptTests"},
+{"label":"a deny reads as allowed","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"case .deny: \"Denied\"","replace":"case .deny: \"Always allowed\"","tests":"AIAccessPromptTests"}
+]

@@ -5,6 +5,7 @@
 // update on it, and projects the result back. `PhotoLayer` is the payload; a
 // node's own id, name and hidden flag win over its payload's, so a duplicate
 // keeps the id the kernel gave it. A refusal from the kernel changes nothing.
+// The Layers panel (AL-p3) reads `layerRows`, `layerCaption`, `layerListMove`.
 // Linux-safe.
 import SuiteKernel
 
@@ -79,6 +80,28 @@ extension PhotoWorkspace {
                 anchor = id
             }
         }
+    }
+
+    /// The Layers panel's rows (AL-p3): the tree's rows, top first, flat.
+    public var layerRows: [LayerRow] { layerTree.rows(expanded: []) }
+
+    /// The line under layer `id`'s name: `layerInfo`, then the blend summary,
+    /// joined by " · "; nil when it has neither.
+    public func layerCaption(_ id: PhotoLayer.ID) -> String? {
+        let parts = [layerInfo(id), layerBlendSummary(id)?.text].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// The `moveLayers` offset and destination for the panel's drop of `id`
+    /// into `parent` (only nil, the roots) at `index` from the bottom among
+    /// the others; nil for an unknown id, a parent, a bad index or no move.
+    public func layerListMove(_ id: PhotoLayer.ID, parent: String?, index: Int) -> (offset: Int, destination: Int)? {
+        guard parent == nil, let from = layers.firstIndex(where: { $0.id == id }),
+              (0..<layers.count).contains(index) else { return nil }
+        // Top first, once the others close up around it.
+        let to = layers.count - 1 - index
+        guard to != from else { return nil }
+        return (from, to < from ? to : to + 1)
     }
 
     /// Applies kernel-edited `next` as one undo step named `name`; nothing

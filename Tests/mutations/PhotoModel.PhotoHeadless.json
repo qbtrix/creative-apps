@@ -1,0 +1,23 @@
+[
+  {
+    "label": "pngRoundTripExact: the PNG writer stores premultiplied colour as straight",
+    "file": "Sources/PhotoModel/CoreRasterImageCodec.swift",
+    "find": "let rgba = try buffer.rgba8(), stride = buffer.width * 4",
+    "replace": "let straight = try buffer.rgba8(); let rgba = straight.indices.map { $0 % 4 == 3 ? straight[$0] : UInt8(Int(straight[$0]) * Int(straight[$0 | 3]) / 255) }; let stride = buffer.width * 4",
+    "tests": "PhotoHeadlessTests"
+  },
+  {
+    "label": "realJobPasses(batch-resize): export ignores the longSide option",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "_ = try PhotoWorkspace.catalog.run(\"image.resize\", params: size, on: &copy)",
+    "replace": "_ = size",
+    "tests": "PhotoHeadlessTests"
+  },
+  {
+    "label": "openSaveReopenIsTheSameDocument: a reopened document takes a layer's size as the canvas",
+    "file": "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "find": "start(with: try Self.tiles(width: document.canvas.width, height: document.canvas.height, what: \"the canvas\"), name: name)",
+    "replace": "start(with: try stack.pixels.values.min { $0.width < $1.width } ?? Self.tiles(width: document.canvas.width, height: document.canvas.height, what: \"the canvas\"), name: name)",
+    "tests": "PhotoHeadlessTests"
+  }
+]

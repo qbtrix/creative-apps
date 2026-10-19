@@ -2,7 +2,8 @@
 // (adopt-kernel-layers AL-f1). FlareCore keeps layers bottom first, which is the tree's back-to-front root order,
 // so the tree's frontToBack and rows are the panel's top-first order. A panel move runs through LayerTree.move;
 // the index the kernel leaves the layer at is the one FlareCore's ReorderLayer is given. Edits stay FlareCore
-// commands: the tree is a read, rebuilt from the document each time.
+// commands: the tree is a read, rebuilt from the document each time. A LayerTreeList reorder drop (AL-f3) names the
+// layer and its kernel index among the roots; `layerMove` turns that into moveLayer's top-first row offsets.
 import FlareCore
 import SuiteKernel
 
@@ -19,6 +20,18 @@ extension FlareWorkspace {
 
     /// The layers panel's rows, top first: one root row per layer with its name and own hide and lock flags.
     public var layerRows: [LayerRow] { layerTree.rows(expanded: []) }
+
+    /// moveLayer's `from` and `to` (top-first row offsets) for a panel drop of layer `id` into `parent` at `index`,
+    /// counted from the back among the roots once `id` leaves them, as LayerTreeList.reorder proposes it. Nil for a
+    /// drop into a layer (Flare's layers are flat), an unknown layer or an index past the roots.
+    public func layerMove(_ id: String, parent: String?, index: Int) -> (from: Int, to: Int)? {
+        let rows = layerRows
+        let source = parent == nil && rows.indices.contains(index) ? rows.firstIndex { $0.id == id } : nil
+        return source.map { from in
+            let row = rows.count - 1 - index
+            return (from, row > from ? row + 1 : row)
+        }
+    }
 
     /// The tree of `backToFront`, FlareCore's bottom-first layer list.
     static func layerTree(_ backToFront: [Layer]) -> LayerTree<FlareLayerPayload> {

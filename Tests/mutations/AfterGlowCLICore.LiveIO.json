@@ -4,5 +4,6 @@
 {"label":"the read cap refuses a file of exactly the cap","file":"Sources/AfterGlowCLICore/LiveIO.swift","find":"if size > readLimit {","replace":"if size >= readLimit {","tests":"CLIFileSafetyTests"},
 {"label":"a directory is read as a file","file":"Sources/AfterGlowCLICore/LiveIO.swift","find":"guard type == .typeRegular else","replace":"guard true else","tests":"CLIFileSafetyTests"},
 {"label":"a glob matches directories","file":"Sources/AfterGlowCLICore/LiveIO.swift","find":"            .filter { Self.isRegular(Self.resolve($0, absolute: absolute)) }\n","replace":"","tests":"CLIFileSafetyTests"},
-{"label":"* matches hidden files","file":"Sources/AfterGlowCLICore/LiveIO.swift","find":"(!name.hasPrefix(\".\") || segment.hasPrefix(\".\")) && ","replace":"","tests":"CLIFileSafetyTests"}
+{"label":"* matches hidden files","file":"Sources/AfterGlowCLICore/LiveIO.swift","find":"(!name.hasPrefix(\".\") || segment.hasPrefix(\".\")) && ","replace":"","tests":"CLIFileSafetyTests"},
+{"label":"a write into a missing folder refuses (liveWriteMakesFolders, LJ4)","file":"Sources/AfterGlowCLICore/LiveIO.swift","find":"        try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)\n","replace":"","tests":"CLIFileSafetyTests|CLIBinaryTests"}
 ]
