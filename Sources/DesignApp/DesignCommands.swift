@@ -2,8 +2,8 @@
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
-// Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Zoom to
-// Selection. Every top bar command is here too. Every item Design adds carries
+// Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Snap to
+// Layers (a checked preference in user defaults, DesignSnapToLayersItem), Zoom to Selection. Every top bar command is here too. Every item Design adds carries
 // its SF Symbol, the toolbar's where the toolbar has the same command.
 //
 // The focused window publishes a DesignMenu (what can run now, and where to send
@@ -269,9 +269,11 @@ struct DesignPageMenu: View {
     }
 }
 
-/// View: Zoom In, Zoom Out, Fit Page and Zoom to Selection.
+/// View: Zoom In, Zoom Out, Fit Page, Snap to Layers and Zoom to Selection.
 struct DesignViewMenu: View {
     let menu: DesignMenu
+    /// Where Snap to Layers is stored; a test passes its own suite.
+    var snapStore: UserDefaults = .standard
 
     var body: some View {
         Button("Zoom In", systemImage: DesignToolbarItem.zoomIn.systemImage) { menu.perform(.zoomIn) }
@@ -286,9 +288,29 @@ struct DesignViewMenu: View {
             .keyboardShortcut("0")
             .disabled(!menu.isOpen)
             .help(menu.noFileHelp ?? "")
+        DesignSnapToLayersItem(store: snapStore)
         Button("Zoom to Selection", systemImage: "viewfinder") { menu.perform(.zoomToSelection) }
             .keyboardShortcut("2", modifiers: [.option, .command])
             .disabled(menu.zoomToSelectionHelp != nil)
             .help(menu.zoomToSelectionHelp ?? "")
     }
+}
+
+/// View > Snap to Layers (snapping SN-8): a checked item, on by default, with no key equivalent,
+/// stored under `DesignSnapSettings.defaultsKey` so it holds across relaunches. A preference, so it
+/// acts with no file open; `DesignModifiers.current` reads it on every canvas step.
+struct DesignSnapToLayersItem: View {
+    @AppStorage private var snapsToLayers: Bool
+
+    init(store: UserDefaults = .standard) {
+        _snapsToLayers = AppStorage(wrappedValue: true, DesignSnapSettings.defaultsKey, store: store)
+    }
+
+    var body: some View {
+        Toggle("Snap to Layers", systemImage: "align.horizontal.left", isOn: $snapsToLayers)
+            .help("Line up a drag with the layers and the page. Hold Command to drag without snapping.")
+    }
+
+    /// Turns Snap to Layers on or off, as a click on the item does.
+    func set(_ on: Bool) { snapsToLayers = on }
 }
