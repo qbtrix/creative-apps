@@ -45,3 +45,5 @@ utc	stage	event	ref	note
 2026-10-19T09:11Z	heartbeat	check	-	#3154 is clean but its macOS build (run 39213749046) is still queued, with 27 CI
 2026-10-19T09:26Z	merge	merged	#3154	CL-7
 2026-10-19T09:34Z	heartbeat	check	-	Shipper is running: CL-9 (merge dev in, drop the jobs row, PR with Slice: CL-job
+2026-10-19T09:40Z	wave	pr-open	#3209	CL-9 c8c1f23
+2026-10-19T09:40Z	wave	pr-open	#3211	CL-10 b1b309c

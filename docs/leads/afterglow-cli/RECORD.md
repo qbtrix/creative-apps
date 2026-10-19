@@ -123,3 +123,13 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ## 2026-10-19T09:34Z: heartbeat
 - Shipper is running: CL-9 (merge dev in, drop the jobs row, PR with Slice: CL-jobs), then CL-10 (merge dev in, PR with Slice: CL-z).
+
+## 2026-10-19T09:40Z: CL-9 and CL-10 PRs open
+- CL-9: #3209, head c8c1f238bbc34de54adcf4504f4c530e6b83764e, Slice: CL-jobs.
+  - 5 files, +215/−19. Gate passed, mutate 6/6.
+  - The jobs stub row is gone; only the mcp row is left.
+- CL-10: #3211, head b1b309c9326b44d5f793f2e9ffb6a108ceaa220e, Slice: CL-z.
+  - 8 files, +174/−17. Gate passed, mutate 3/3 and 7/7.
+  - The symlink fix from #3193 merged cleanly with CL-10's createDirectory.
+- Four RealJobsTests skip on CL-10's branch until CL-9 is on dev.
+- Next: CL-11 (docs/cli.md, wave.json status, feature-done), built on both branches merged, PR held until both merge.
