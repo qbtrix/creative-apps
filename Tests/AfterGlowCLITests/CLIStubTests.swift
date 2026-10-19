@@ -39,7 +39,7 @@ struct CLIStubTests {
     }
 
     @Test(arguments: [
-        ("run", "slice CL-batch"), ("jobs", "slice CL-jobs"), ("mcp", "afterglow-mcp is not built yet"), ("cli", "slice CL-batch"),
+        ("run", "slice CL-batch"), ("jobs", "slice CL-jobs"), ("cli", "slice CL-batch"),
     ])
     func everyStubExits69NamingItsSlice(entry: String, names: String) {
         let io = FakeIO()
@@ -47,7 +47,6 @@ struct CLIStubTests {
         let code: Int32 = switch entry {
         case "run": ScriptRunner.run("resize.jobs.json", apps: apps, dryRun: false, force: false, io: io)
         case "jobs": RealJobs.check("Tests/RealJobs/fake/resize", apps: apps, io: io)
-        case "mcp": MCPServer.serve([], apps: apps, io: io)
         default: CLI.run(["run", "resize.jobs.json"], io: io) // the router hands `run` to ScriptRunner's stub
         }
         #expect(code == 69)

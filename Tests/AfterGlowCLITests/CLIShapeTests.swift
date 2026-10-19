@@ -1,7 +1,8 @@
 // CLIShapeTests.swift: LJ0's first half (afterglow-cli CL-1). `afterglow
 // --version` prints exactly one JSON object with sorted keys and exits 0;
 // since CL-4 the other single-shot forms answer (CLIArgsTests), and `run`
-// and `mcp` are stubs that exit 69 naming their slice. Runs
+// is a stub that exits 69 naming its slice (`mcp` serves since afterglow-mcp
+// MC-4; MCPProtocolTests). Runs
 // through CLI.run, the same entry main.swift calls, so both targets build
 // on Linux and macOS.
 #if canImport(FoundationEssentials)
@@ -35,7 +36,7 @@ struct CLIShapeTests {
         #expect(!CLI.version.isEmpty)
     }
 
-    @Test(arguments: [(["run", "resize.jobs.json"], "slice CL-batch"), (["mcp"], "afterglow-mcp is not built yet")])
+    @Test(arguments: [(["run", "resize.jobs.json"], "slice CL-batch")])
     func everyOtherFormIsAStubThatNamesItsSlice(arguments: [String], slice: String) {
         let run = Self.run(arguments)
         #expect(run.code == 69)
