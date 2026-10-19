@@ -2,14 +2,14 @@
 
 Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
-Stage: 3 wave 1
-Base: e0a627c0634a8586785adf4400d401667f5d7215 (origin/dev; brief's main head 349578b86d92793e52559b67e16a57bdfe202577 verified)
-Next: get CL-1's PR opened (supervisor merges it: Package.swift, scripts/test-scope); CL-2 waits on command-catalog CC-a (#2996), not started
+Stage: 3 polling
+Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
+Next: wait for command-catalog CC-2 #3074 (fake canvas document, five <X>Headless stubs) to merge, then start CL-2 (wave 2)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| CL-a | targets, executable, stubs, FakeIO, app registry | CL-1, CL-2 | LJ0 | – (CL-2: command-catalog CC-a, cross-line) | false | 0 | building | – | – |
+| CL-a | targets, executable, stubs, FakeIO, app registry | CL-1, CL-2 | LJ0 | – (CL-2: command-catalog CC-a, cross-line) | false | 0 | building (CL-1 merged) | – | – |
 | CL-args | strict single-shot forms, one JSON object, sysexits, no overwrite | CL-3, CL-4, CL-5 | LJ1 | CL-a | false | 0 | waiting | – | – |
 | CL-batch | `afterglow run` scripts | CL-6, CL-7 | LJ2 | CL-a | false | 0 | waiting | – | – |
 | CL-jobs | real-jobs harness on Linux CI | CL-8, CL-9 | LJ3 | CL-a | false | 0 | waiting | – | – |
@@ -18,8 +18,8 @@ Next: get CL-1's PR opened (supervisor merges it: Package.swift, scripts/test-sc
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| CL-1 | CL-a | 1 | targets, main.swift, CLI router stub, `--version` live, C4 container + cli-runner | Package.swift, scripts/test-scope, Sources/AfterGlowCLI/main.swift, Sources/AfterGlowCLICore/CLI.swift, Tests/AfterGlowCLITests/CLIShapeTests.swift, docs/c4/parts/creative-apps/afterglow-cli/container.json, docs/c4/parts/creative-apps/afterglow-cli/cli-runner.json | CLIShapeTests (LJ0) | – | building |
-| CL-2 | CL-a | 2 | CLIIO/FakeIO, HeadlessApp/Session, Apps, ScriptRunner/RealJobs/MCPServer stubs | Sources/AfterGlowCLICore/{CLIIO,Apps,ScriptRunner,RealJobs}.swift, Sources/AfterGlowCLICore/MCP/MCPServer.swift, Tests/AfterGlowCLITests/CLIStubTests.swift | CLIStubTests | – | blocked on CC-a |
+| CL-1 | CL-a | 1 | targets, main.swift, CLI router stub, `--version` live, C4 container + cli-runner | Package.swift, scripts/test-scope, Sources/AfterGlowCLI/main.swift, Sources/AfterGlowCLICore/CLI.swift, Tests/AfterGlowCLITests/CLIShapeTests.swift, docs/c4/parts/creative-apps/afterglow-cli/container.json, docs/c4/parts/creative-apps/afterglow-cli/cli-runner.json | CLIShapeTests (LJ0) | #3037 | merged 0487e28 |
+| CL-2 | CL-a | 2 | CLIIO/FakeIO, HeadlessApp/Session, Apps, ScriptRunner/RealJobs/MCPServer stubs | Sources/AfterGlowCLICore/{CLIIO,Apps,ScriptRunner,RealJobs}.swift, Sources/AfterGlowCLICore/MCP/MCPServer.swift, Tests/AfterGlowCLITests/CLIStubTests.swift | CLIStubTests | – | waits on CC-2 #3074 |
 | CL-3 | CL-args | 3 | CLIArgsTests + CLIFileSafetyTests, disabled | Tests/AfterGlowCLITests/CLIArgsTests.swift, CLIFileSafetyTests.swift, Golden/ | exists, disabled | – | waiting |
 | CL-6 | CL-batch | 3 | BatchTests + fixtures, disabled | Tests/AfterGlowCLITests/BatchTests.swift, Fixtures/Batch/ | exists, disabled | – | waiting |
 | CL-8 | CL-jobs | 3 | RealJobsTests + fake jobs + broken fixture, disabled | Tests/AfterGlowCLITests/RealJobsTests.swift, Tests/RealJobs/fake/, Fixtures/RealJobsBroken/ | exists, disabled | – | waiting |
@@ -43,4 +43,4 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - No slice is UI (`ui_slice: none`), so no critic panel needs screens; reviews of Linux-only slices run as code reviews only when findings are plausible.
 
 ## Open
-- command-catalog #2996 CC-a not started (no PR, no lead branch at 2026-10-18T23:21Z): holds CL-2 and every slice after CL-a, and all of afterglow-mcp.
+- command-catalog #2996 CC-a: CC-1 merged (#3056); CC-2 open as #3074. CL-2 needs CC-2's five <X>Headless types and the fake for `Apps.all`, so it holds CL-2, every slice after CL-a, and all of afterglow-mcp.
