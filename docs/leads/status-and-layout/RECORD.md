@@ -4,13 +4,13 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: SL-b fix round 1 (wf_6545bdf4-43b) on #3129-#3137 (#3121 closed as dup of #3131); 9 open findings > 5 so SL-8 blocked though SL-6 merged b7e17ed6; SL-b done waits on dev CI 39203617095 (b7e17ed6) Linux green (39199491251 cancelled)
+Next: SL-b done (39203617095; Belt-Slice-Done + Mac-Finish-Wanted posted); SL-b fix round 1 (wf_6545bdf4-43b) on #3129-#3137 (#3121, #3153 closed as dups of #3131); 9 open findings > 5 so SL-8 blocked; then SL-c (SL-8, identifier sweep)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SL-a | status row and inspector header values, grid columns and loupe fit per width | SL-1, SL-2 | MJ1 | spine (built) | no | 0 | done | 39192572958 | - |
-| SL-b | status row under grid and loupe, J12 at every width | SL-3, SL-4 | J12 | SL-a (SL-4); thumbnails, loupe-viewport (built); SuiteUI #1184 (SL-4, soft) | yes | 0 | building | - | - |
+| SL-b | status row under grid and loupe, J12 at every width | SL-3, SL-4 | J12 | SL-a (SL-4); thumbnails, loupe-viewport (built); SuiteUI #1184 (SL-4, soft) | yes | 0 | done | 39203617095 | - |
 | SL-c | inspector header facts, Library control identifiers, wide-width snapshots | SL-5, SL-6, SL-7, SL-8 | J12 | SL-a (SL-5, SL-7); SL-b (SL-6, SL-8) | yes | 0 | building | - | - |
 
 ## Tasks
@@ -54,3 +54,4 @@ Next: SL-b fix round 1 (wf_6545bdf4-43b) on #3129-#3137 (#3121 closed as dup of 
 - 04:29Z check: CI 39196649963 was cancelled too; SL-b now waits on 39199491251 (aed78668). Scoped library run 39195761651 (918abfc6, contains SL-3 and SL-4) is in progress; SL-b critics run once its screens upload. SL-6 #3107 is in the lane.
 | SL-b | 39195761651 (scoped library) | 918abfc6 | clarity, journey, design, layout, controls, oracle, mouse, taste | filed #3129-#3137 (13 confirmed, 2 refuted) | 1 |
 - 04:53Z scoped library run 39195761651 (918abfc6, has SL-3 and SL-4) failed J12 testLayoutAtWidths: library.status.preview sits 653.5 against the row top 650.0 at 880, so J12 stopped after its first screen. The RenderBudgetLibraryTests p95 miss is perf-only. Critic panel wf_82a7861c-60c started for SL-b (ui) with that failure in its context.
+- 06:02Z check: CI 39203617095 (b7e17ed6) Linux green, so SL-b is merged-done; Belt-Slice-Done and Mac-Finish-Wanted SL-b posted. #3153 closed as a duplicate of #3131. 9 open findings; SL-8 waits.
