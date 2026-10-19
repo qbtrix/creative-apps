@@ -1,10 +1,10 @@
 # adopt-kernel-undo lead record
 
 Issue: #1934 · Packet: docs/blueprints/suiteui/features/adopt-kernel-undo.md
-Run: act-1a152763cf6-04ka (resume; earlier runs act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/line-lead-playbook-ce1x23 · Resumed: 2026-10-19
-Stage: 3 wave 2
-Base: bede834 (origin/dev, 2026-10-19); brief main cc14022edd80d783a8488e464b15f5766d8dda60 verified
-Next: #3184 (AU-h2) merged to dev as 11a5605 at 10:48Z; main does not hold it yet. Full CI 39243183625 on dev d80a1b2 is pending: when a successful ci.yml run promotes main past 11a5605, post Belt-Slice-Done: AU-halo <run url> on #1934. AU-d1, AU-l1, AU-f1 still wait on hand-offs.
+Run: act-1a154b13dec-71tm (resume; earlier runs act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-suiteui-lead-gvq11j · Resumed: 2026-10-19
+Stage: 1 (AU-design plan building)
+Base: 6e70826 (brief main 6e70826be59e092e59269605cfdfbce93c4a2bbe verified; PRs target dev)
+Next: AU-design: Design undo already runs on kernel History (#3022, in main 6e70826), so AU-d1/AU-d2 reduce to the adapter plan DesignModel.KernelUndoAdapter (no hand-off file edited); PR next. AU-library waits on filters-collections (parked out of beta, FC-3 CatalogHistory unbuilt): supervisor asked on #1934. AU-flare waits on stage-edit (building, waiting on #995).
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-undo half. The brief's integration branch is `main` at
@@ -78,6 +78,9 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-19T07:09:14Z: #3139 (AU-h1) merged into dev at 07:03Z (6fc1187). Launched AU-h2 (Halo delete) on base 34b8df2.
 - 2026-10-19T07:17:32Z: AU-h2 opened as #3184 (+14 -40, 5 files, head e1e7e13, gate pass). The check flagged the proxy footer (the lane strips it at squash) and no new test; the packet's proof for this deletion is the existing tests plus mutate --validate, so neither needs a fix.
 - #3184 merged in a 3-PR lane batch at 10:48Z.
+
+- 2026-10-19T15:09Z (act-1a154b13dec-71tm) AU-design: #3022 (files-history) already moved DesignHistory onto History<Revert>; the remaining deliverable is the adapter's mutation plan, which touches no hand-off file, so it starts now. AU-d2's stack/run/limit code no longer exists.
+- 2026-10-19T15:09Z (act-1a154b13dec-71tm) AU-library: filters-collections (#1563) is parked out of the beta cut (captain, 10-17) with FC-3 (CatalogHistory) unbuilt; its hand-off can't clear before beta, so the supervisor decides on #1934.
 
 ## Open
 - 2026-10-18T13:01Z wave 2 started on dev 7ae985e: AU-p1 merged (#2754, 3df88b1, 12:17Z, lane batch of 2). AU-p2 building. #2747 still open, so AU-h1 stays blocked.
