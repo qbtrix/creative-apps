@@ -1,7 +1,6 @@
 // FlareStageGuides.swift: the stage's ruler guides (stage-edit SE-2, J14), in the stage's overlay at the artboard's
 // size. While `showsGuides` it draws the selected scene's guides as SuiteUI's ViewportGuideMarks across the artboard,
-// with the drag under way (`drag`, a guide coming out of a ruler, or this view's own line drag) drawn where it is and
-// its readout beside it. Each guide is a hidden `flare.stage.guide.<i>` probe whose label is its readout ("y 300")
+// with the drag under way (`drag`, a guide coming out of a ruler, or this view's own line drag) where it is. Each guide is a hidden `flare.stage.guide.<i>` probe whose label is its readout ("y 300")
 // and a thin hit strip: dragging it moves the guide, and releasing it over its ruler (in the stage's `space`) removes
 // it. The document changes once, on release, through the FlareGuideDrag's intents. It only reads `model`.
 import FlareCore
@@ -34,7 +33,6 @@ struct FlareStageGuides: View {
                         rect: Self.strip(guide, scene: scene, thickness: 2 / zoom), zoom: zoom)
                     hitStrip(index, guide: guide, scene: scene)
                 }
-                if let current { readout(current, board: board) }
             }
             .frame(width: board.width, height: board.height, alignment: .topLeading)
         }
@@ -77,18 +75,5 @@ struct FlareStageGuides: View {
             )
             .accessibilityHidden(true)
             .offset(x: box.minX, y: box.minY)
-    }
-
-    /// The dragged guide's readout, a pill just past the line's start.
-    private func readout(_ current: FlareGuideDrag, board: CGRect) -> some View {
-        let line = current.position * zoom
-        return Text(current.readout)
-            .statusPill(.plain)
-            .fixedSize()
-            .offset(
-                x: current.axis == .horizontal ? SuiteSpacing.s : line + SuiteSpacing.s,
-                y: current.axis == .horizontal ? line + SuiteSpacing.s : SuiteSpacing.s)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
     }
 }

@@ -1,6 +1,6 @@
 // FlareViewSnapshots.swift: stage-edit SE-2, the stage's rulers and guides on `bounce`: at 200% with the rulers on,
-// a vertical guide at x 150 and a horizontal one dragged from y 60 to y 110 (drawn where the drag is, with its
-// readout), and at the fit with the rulers hidden (their band stays empty). Goldens flare-view-*-light.png.
+// a vertical guide at x 150 and a horizontal one dragged from y 60 to y 110 (drawn where the drag is), and at the fit
+// with the rulers hidden (their band stays empty). Goldens flare-view-*-light.png.
 import FlareCore
 import FlareModel
 import SuiteUI
