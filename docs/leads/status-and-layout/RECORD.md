@@ -68,3 +68,4 @@ Next: #3166 (r-b1, head 783c6907, SuiteUI part removed, Mutate 13/13) back in th
 - 09:31Z check: 7 SL findings open; #3201 macOS build 39223926415 queued
 - 09:54Z check: #3201 macOS build 39223926415 still queued; 7 SL findings open, SL-8 waits on #3201
 - 2026-10-19T10:17Z check: #3201 macOS build 39223926415 green, waiting on lane sweep; SL-8 starts once it merges (findings then 4)
+- 2026-10-19T10:40Z check: #3201 merged 895fb2d0 (closes #3130 #3131 #3135); CI finding #3186 closed as dup of #3131; 4 SL findings open (#3129 #3132 #3134 #3136, waiting on SuiteUI); SL-8 wave 4 started (wf_00a7b134-d61, base 895fb2d0, audit from scoped run 39207561728)
