@@ -12,9 +12,12 @@ public enum AIAccessDecision: String, Codable, Sendable { case allowOnce, always
 
 /// One client asking to drive one app: what the approval sheet shows.
 public struct AIAccessRequest: Codable, Hashable, Sendable {
-    /// The client's name as it introduced itself, the app it wants, and the command it would run first, if known.
-    public var client: String; public var app: String; public var command: String?
-    public init(client: String, app: String, command: String? = nil) { (self.client, self.app, self.command) = (client, app, command) }
+    /// The client's name as it introduced itself, the app it wants, the command it would run first, if known,
+    /// and the document the window has open, nil on a window without one.
+    public var client: String; public var app: String; public var command: String?; public var document: String?
+    public init(client: String, app: String, command: String? = nil, document: String? = nil) {
+        (self.client, self.app, self.command, self.document) = (client, app, command, document)
+    }
 }
 
 /// One remembered decision: what Window > AI Access… lists.
