@@ -5,7 +5,7 @@ Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, a
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
 Next: lane merges #3224 after its macOS build; then poll for a design-scoped or full ci.yml run containing c6ad68f (CB-b) and #3224 (CB-c); Belt-Slice-Done for each, Mac-Finish-Wanted, critic panel on the screens.
-Last check: 2026-10-19T17:31Z: dev 39278490377 (b3011ab, has CB-b+CB-c) macOS still running; newer full run 39294573974 (8f40531) pending as fallback; 0 open findings.
+Last check: 2026-10-19T17:54Z: dev 39278490377 (b3011ab, has CB-b+CB-c) macOS still running; 39294573974 cancelled; next full run 39296061014 (1b33afb) pending as fallback; 0 open findings.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
