@@ -4,7 +4,7 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: SL-b fix round 1: #3166 (r-b1) reworked to drop its SuiteUI edit (no-fast-lane until pushed); #3159 (r-b2, SuiteUI only) closed and handed to SuiteUI as #3168; needs-ui #3167 (error pill, size text) and #1184 (optional zoom); deferred #3130 #3131 #3135 run once #3166 merges (same files); SL-8 waits for ≤5 open findings
+Next: #3166 (r-b1, head 783c6907, SuiteUI part removed, Mutate 13/13) back in the lane; once it merges, fix batch on deferred #3130 #3131 #3135 (round 1 for them); #3129 #3132 #3134 #3136 wait on SuiteUI (#1184 #3167 #3168); SL-8 waits for ≤5 open findings (9 open)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -56,3 +56,4 @@ Next: SL-b fix round 1: #3166 (r-b1) reworked to drop its SuiteUI edit (no-fast-
 - 04:53Z scoped library run 39195761651 (918abfc6, has SL-3 and SL-4) failed J12 testLayoutAtWidths: library.status.preview sits 653.5 against the row top 650.0 at 880, so J12 stopped after its first screen. The RenderBudgetLibraryTests p95 miss is perf-only. Critic panel wf_82a7861c-60c started for SL-b (ui) with that failure in its context.
 - 06:02Z check: CI 39203617095 (b7e17ed6) Linux green, so SL-b is merged-done; Belt-Slice-Done and Mac-Finish-Wanted SL-b posted. #3153 closed as a duplicate of #3131. 9 open findings; SL-8 waits.
 - 06:30Z fix round 1 (wf_6545bdf4-43b) reported: r-b1 #3166 (#3129 #3132 #3133 #3136 #3137, gate failed only on timing budgets under load) and r-b2 #3159 (#3134). Both edited SuiteUI, which the Library line must not do. Ruling: #3159 closed, its patch handed to the SuiteUI line as needs-ui #3168. #3166 keeps only the Library side; its SuiteUI part goes to needs-ui #3167 (error pill style, size pill primary text) and existing #1184 (optional zoom). #3129, #3132 (view half), #3134 and #3136 (size half) wait on SuiteUI. Deferred to the next batch because they share #3166's files: #3130, #3131, #3135.
+- 06:26Z check: #3166 reworked to head 783c6907: only Library files (7, +158/-73); the Model keeps .error, and the view maps it to .warning until #3167 lands. The gate passed (one rerun for a timing flake), mutate 13/13, body clean. Removed no-fast-lane. 9 open SL findings; no new Library CI findings.

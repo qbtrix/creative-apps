@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-19T06:13:51Z	SL-b	fix	wf_6545bdf4-43b	PRs #3166, #3159; deferred #3130 #3131 #3135
 2026-10-19T06:13:51Z	SL-b	ruling	#3159	closed: SuiteUI-only, handed to needs-ui #3168
 2026-10-19T06:13:51Z	SL-b	ruling	#3166	SuiteUI part stripped by fixer; needs-ui #3167; no-fast-lane until pushed
+2026-10-19T06:26:31Z	SL-b	check	#3166	reworked 783c6907, no SuiteUI; no-fast-lane removed
