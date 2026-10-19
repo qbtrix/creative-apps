@@ -173,6 +173,21 @@ import Testing
         #expect(kind.caption == "Pixel · 100%" && kind.thumbnail == nil && kind.help == nil)
     }
 
+    /// A flat list (no container, nothing indented) draws no empty disclosure
+    /// column, so its icons sit on the row's inset; a tree keeps the column.
+    /// A row under the pointer takes the hover fill; selected wins over both.
+    @Test func flatListAndRowFill() {
+        let tree = KernelFixtures.tree200.rows(expanded: [])
+        let flat = tree.filter { !$0.holdsChildren && $0.depth == 0 }
+        #expect(!flat.isEmpty)
+        #expect(LayerTreeList.nests(tree))
+        #expect(!LayerTreeList.nests(flat))
+        #expect(LayerTreeRow.fill(selected: false, lit: false, hovering: true) == SuiteColor.rowHover)
+        #expect(LayerTreeRow.fill(selected: false, lit: true, hovering: false) == SuiteColor.rowHover)
+        #expect(LayerTreeRow.fill(selected: true, lit: false, hovering: true) == SuiteColor.selectedTint)
+        #expect(LayerTreeRow.fill(selected: false, lit: false, hovering: false) == Color.clear)
+    }
+
     /// A legacy scroller's page area is a `button ''` to the app audit, so the
     /// list hides its scroll indicators (#2742; Design's list did the same, #2561).
     @Test func listShowsNoScroller() throws {

@@ -9,8 +9,10 @@
 // so it is tested without a window. The list mutates nothing: every gesture
 // goes out through one `onAction` closure. Rows are lazy, keyed by the
 // layer's id, and `.equatable()` on their plain values (swiftui-rules 2, 5).
-// The only view state is the drop target lit while a drag hovers it, written
-// on enter and exit, never per sample. Each row's controls carry
+// The only view state is the drop target lit while a drag hovers it and the
+// row under the pointer, each written on enter and exit, never per sample.
+// A row is the Studio row's 28 pt, takes the hover fill under the pointer, and
+// a flat list (no container, no indent) draws no empty disclosure column. Each row's controls carry
 // `suite.layers.<id>.<part>`; the row itself is `suite.layers.row.<id>`.
 // To stand in for a sidebar layers panel (#2811) it can take a selected id
 // and `onSelect` (a click on the row; the row draws the selected tint and
@@ -174,6 +176,11 @@ public struct LayerTreeList: View {
     /// a row keeps its identity when the rows around it change.
     nonisolated public static func rowIDs(_ rows: [LayerRow]) -> [String] { rows.map(\.id) }
 
+    /// Whether any row is a container or indented; a flat list draws no disclosure column.
+    nonisolated static func nests(_ rows: [LayerRow]) -> Bool {
+        rows.contains { $0.holdsChildren || $0.depth > 0 }
+    }
+
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let header {
@@ -196,10 +203,11 @@ public struct LayerTreeList: View {
     }
 
     private var stack: some View {
-        LazyVStack(alignment: .leading, spacing: 0) {
+        let nests = Self.nests(rows)
+        return LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(rows, id: \.id) { row in
                 LayerTreeRow(
-                    row: row, lit: target == row.id, selected: isSelected(row.id), naming: naming,
+                    row: row, lit: target == row.id, selected: isSelected(row.id), nests: nests, naming: naming,
                     options: options, decoration: decorations[row.id],
                     field: renaming?.id == row.id ? renaming?.field : nil,
                     onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
@@ -259,6 +267,8 @@ struct LayerTreeRow: View, Equatable {
     let row: LayerRow
     let lit: Bool
     let selected: Bool
+    /// Whether the list has a container or an indent: only then the disclosure column shows.
+    let nests: Bool
     let naming: LayerTreeNaming
     let options: LayerTreeOptions
     let decoration: LayerRowDecoration?
@@ -267,9 +277,11 @@ struct LayerTreeRow: View, Equatable {
     let onRename: (@MainActor (String) -> String?)?
     @State var field: SidebarRenameField
     @FocusState var editing: Bool
+    @State private var hovering = false
+    @Environment(\.suiteReduceMotion) private var reduceMotion
 
     init(
-        row: LayerRow, lit: Bool, selected: Bool, naming: LayerTreeNaming, options: LayerTreeOptions,
+        row: LayerRow, lit: Bool, selected: Bool, nests: Bool = true, naming: LayerTreeNaming, options: LayerTreeOptions,
         decoration: LayerRowDecoration?, field: SidebarRenameField?,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void, onSelect: (@MainActor (String) -> Void)?,
         onRename: (@MainActor (String) -> String?)?
@@ -277,6 +289,7 @@ struct LayerTreeRow: View, Equatable {
         self.row = row
         self.lit = lit
         self.selected = selected
+        self.nests = nests
         self.naming = naming
         self.options = options
         self.decoration = decoration
@@ -287,7 +300,8 @@ struct LayerTreeRow: View, Equatable {
     }
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.row == rhs.row && lhs.lit == rhs.lit && lhs.selected == rhs.selected && lhs.naming == rhs.naming
+        lhs.row == rhs.row && lhs.lit == rhs.lit && lhs.selected == rhs.selected && lhs.nests == rhs.nests
+            && lhs.naming == rhs.naming
             && lhs.options == rhs.options && lhs.decoration == rhs.decoration
             && (lhs.onRename == nil) == (rhs.onRename == nil) && (lhs.onSelect == nil) == (rhs.onSelect == nil)
     }
@@ -311,8 +325,11 @@ struct LayerTreeRow: View, Equatable {
             }
         }
         .padding(.horizontal, SuiteSpacing.s)
-        .background(selected ? SuiteColor.selectedTint : lit ? SuiteColor.rowHover : Color.clear,
+        .frame(minHeight: SuiteSize.studioRow)
+        .background(Self.fill(selected: selected, lit: lit, hovering: hovering),
                     in: RoundedRectangle(cornerRadius: SuiteRadius.row))
+        .onHover { hovering = $0 }
+        .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hovering)
         .overlay {
             if lit {
                 RoundedRectangle(cornerRadius: SuiteRadius.row)
@@ -333,6 +350,11 @@ struct LayerTreeRow: View, Equatable {
         .accessibilityIdentifier(naming.row(row.id))
     }
 
+    /// The row's fill: the selected tint, else the hover fill under the pointer or a drag.
+    nonisolated static func fill(selected: Bool, lit: Bool, hovering: Bool) -> Color {
+        selected ? SuiteColor.selectedTint : lit || hovering ? SuiteColor.rowHover : Color.clear
+    }
+
     private func toggle(_ toggle: SidebarToggle, action: @escaping @MainActor () -> Void) -> some View {
         icon(toggle.systemImage, toggle.title, identifier: naming.identifier(of: toggle, in: row.id), action: action)
     }
@@ -343,7 +365,7 @@ struct LayerTreeRow: View, Equatable {
                  identifier: naming.disclosure(row.id), turned: row.isExpanded) {
                 onAction(.disclose(row.id))
             }
-        } else {
+        } else if nests {
             Color.clear.frame(width: SuiteSize.iconButtonHit, height: SuiteSize.iconButtonHit)
         }
     }
