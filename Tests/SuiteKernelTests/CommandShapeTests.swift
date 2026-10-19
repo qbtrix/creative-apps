@@ -1,0 +1,76 @@
+// CommandShapeTests.swift (command-catalog CC-1, CJ0): every public type and method in Commands/
+// exists and its type is documented, the object builder is closed, and JSONValue round trips.
+import Foundation
+import Testing
+import SuiteKernel
+/// A minimal headless document: one number and a history, enough to use every signature.
+private struct ShapeDoc: HeadlessDocument {
+    struct Bump: Codable, Sendable, CommandSchemaProviding { var by: Double; static let paramSchema = ParamSchema.object(["by": .number()], required: ["by"]) }
+    var value = 0.0, history = History<Double>()
+    static let app = "shape", openExtensions = ["shape"], exportFormats = ["json"]
+    // The init's id checks arrive with CC-7; a test may trap where Sources/ may not.
+    static let catalog = try! CommandCatalog<ShapeDoc>(app: app, [
+        .typed("value.bump", title: "Bump Value", summary: "Adds to the value.", kind: .edit, params: Bump.self, example: .object(["by": .number(1)]),
+               availability: { $0.value < 10 ? .available : .unavailable("The value is full.") }) { doc, p in doc.value += p.by; return doc.value },
+    ], history: { $0.history })
+    static func open(_ data: Data, name: String) throws -> ShapeDoc { ShapeDoc() }
+    static func new(_ options: JSONValue) throws -> ShapeDoc { ShapeDoc() }
+    func save() throws -> Data { try JSONValue.number(value).json() }
+    func export(_ format: String, options: JSONValue) throws -> [ExportedFile] { [ExportedFile(suggestedName: "a.json", format: format, data: try save())] }
+    func summary() -> JSONValue { .object(["value": .number(value)]) }
+}
+@Suite struct CommandShapeTests {
+    /// CJ0: every public type and method exists, and the stubs answer without trapping.
+    @Test func everySignatureExists() throws {
+        let catalog = ShapeDoc.catalog, spec = try #require(catalog.spec("value.bump")), described = try #require(catalog.describe("value.bump"))
+        #expect(catalog.app == "shape" && catalog.ids == ["value.bump"] && spec.undoable && spec.params == ShapeDoc.Bump.paramSchema)
+        #expect(catalog.availability("value.bump", on: ShapeDoc(value: 10)).why == "The value is full." && Availability.available.why == nil)
+        #expect(try catalog.describeAll() == [described] && JSONValue(encoding: described).decode(CommandDescription.self) == described)
+        var doc = ShapeDoc()
+        let step = CommandEnvelope(id: "value.bump", params: spec.example)
+        #expect(throws: CatalogError.notBuilt(id: "value.bump", feature: "command-catalog CC-7")) { try catalog.run(step, on: &doc) }
+        #expect(throws: CatalogError.self) { try catalog.run("value.bump", params: spec.example, on: &doc) }
+        #expect(catalog.runBatch([step, step], on: &doc, atomic: true).stoppedAt == 0 && doc.value == 0)
+        #expect(catalog.runBatch([], on: &doc, atomic: false) == BatchReport(steps: [], stoppedAt: nil, rolledBack: false))
+        _ = (CommandOutcome(result: .null, undoStep: nil), BatchReport.Step(id: "a", ok: true, undoStep: nil, error: nil), CommandKind.query)
+        _ = [CatalogError.unknownCommand("x"), .malformedParams(id: "x", [SchemaIssue(path: "/x", message: "expected number")]),
+             .unavailable(id: "x", why: "no"), .failed(id: "x", message: "no")]
+        #expect(SchemaProbe.schema(of: ShapeDoc.Bump.self, maxDepth: 2) == ShapeDoc.Bump.paramSchema && ParamSchema.none.validate(.null).isEmpty)
+        #expect(!CommandIDLedger.check(["value.bump"], ledger: "value.bump\n").isEmpty && !CatalogConformance.check(ShapeDoc.self, fixture: doc).isEmpty)
+        #expect(try ShapeDoc.new(.null).export("json", options: .null).map(\.format) == ["json"] && ShapeDoc.open(Data(), name: "a").summary() != .null)
+        #expect(ParamSchema.none.document() == .object(["type": .string("object"), "additionalProperties": .bool(false),
+                                                        "$schema": .string("https://json-schema.org/draft/2020-12/schema")]))
+    }
+
+    /// `object` writes `additionalProperties: false` and its `required` list (mutation `.objectIsClosed`), and
+    /// `.optional` keeps its key out of `required` (mutation `.optionalDropsRequired`).
+    @Test func objectIsClosedAndOptionalDropsRequired() {
+        let schema = ParamSchema.object(["x": .number(), "name": .optional(.string())], required: ["x", "name"], description: "A point.")
+        #expect(schema.json == .object(["type": .string("object"), "description": .string("A point."), "additionalProperties": .bool(false),
+                                        "required": .array([.string("x")]),
+                                        "properties": .object(["x": .object(["type": .string("number")]), "name": .object(["type": .string("string")])])]))
+    }
+
+    /// Every case survives JSON text and back, sorted or not, and `init(encoding:)` / `decode` agree with Codable.
+    @Test func jsonValueRoundTripsEveryCase() throws {
+        let cases: [JSONValue] = [.null, .bool(true), .bool(false), .number(-2.5), .number(3), .string("a \"b\""), .array([.number(0), .array([])]), .object([:])]
+        for value in cases + [.object(Dictionary(uniqueKeysWithValues: cases.enumerated().map { ("k\($0.offset)", $0.element) }))] {
+            #expect(try JSONValue(json: value.json()) == value && JSONValue(json: value.json(sorted: false)) == value)
+        }
+        #expect(try String(decoding: JSONValue.object(["b": .null, "a": .null]).json(), as: UTF8.self) == #"{"a":null,"b":null}"#)
+        #expect(try JSONValue(encoding: ShapeDoc.Bump(by: 2)) == .object(["by": .number(2)]) && JSONValue.number(2).decode(Double.self) == 2)
+    }
+
+    /// Every public type in Commands/ has a `///` line above it.
+    @Test func publicTypesDocumented() throws {
+        let root = KernelShapeTests.kernelSources, files = try KernelShapeTests.swiftFiles(under: root).filter { $0.hasPrefix("Commands/") }
+        let typeLine = try Regex(#"^\s*public (struct|enum|protocol) "#)
+        #expect(files.count == 8)
+        for file in files {
+            let lines = try String(contentsOf: root.appendingPathComponent(file), encoding: .utf8).split(separator: "\n", omittingEmptySubsequences: false)
+            for (i, line) in lines.enumerated() where line.contains(typeLine) && !(i > 0 && lines[i - 1].contains("///")) {
+                Issue.record("Sources/SuiteKernel/\(file):\(i + 1) has no doc line: \(line)")
+            }
+        }
+    }
+}
