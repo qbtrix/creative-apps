@@ -51,3 +51,9 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - CL-4 must route over Apps.all + [Apps.fake] (tests call CLI.run(_:io:)); command-editing tests also need CC-7 (catalog run body).
 - CL-4 enabling breaks CLIShapeTests.everyOtherFormIsAStubThatNamesItsSlice (list-apps, --help, --version --json no longer stubs): CL-4 must update that test.
 - Fake catalog has 8 commands (incl. edit.undo/edit.redo), not 6.
+
+## CL-8 handoff notes (PR #3123, head 788e8b8)
+- RealJobsTests (LJ3) disabled "waits on CL-9"; RealJobsLayoutTests (2, file-only) enabled.
+- Assumed report: RealJobs.check prints one JSON object: "ok": true on pass; "ok": false + non-zero exit on failure; "skipped": "<reason>" + exit 0 on skip ("macOS-only: <why>" or "waits on image-codecs").
+- Fixtures export with "format": "json"; output extension comes from the format. Broken fixture fake/wrong-sha differs in the last hex digit (catches .fullDigest).
+- The pixel-expectation test needs updating once image-codecs is bumped in.
