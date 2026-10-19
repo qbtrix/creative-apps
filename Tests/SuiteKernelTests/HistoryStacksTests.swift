@@ -42,3 +42,34 @@ import SuiteKernel
         #expect(a != b)
     }
 }
+
+/// A history is Hashable when its payload is (#2747: Halo's undo state is
+/// Hashable): equal histories hash alike, and the saved mark and the redo
+/// stack each change the hash.
+@Suite struct HistoryHashTests {
+    @Test func equalHistoriesHashAlike() {
+        var a = History<String>(), b = History<String>()
+        a.record("Move", "a", key: "drag")
+        b.record("Move", "a", key: "drag")
+        #expect(a == b && a.hashValue == b.hashValue)
+        #expect(Set([a, b]).count == 1)
+        #expect(a.undoSteps.last?.hashValue == b.undoSteps.last?.hashValue)
+    }
+
+    @Test func theSavedMarkChangesTheHash() {
+        var a = History<String>()
+        a.record("Move", "a")
+        var b = a
+        b.markSaved()
+        #expect(a.hashValue != b.hashValue)
+    }
+
+    @Test func theRedoStackChangesTheHash() {
+        var a = History<String>(), b = History<String>()
+        a.record("Move", "a")
+        b.record("Move", "a")
+        _ = a.undo { $0 }
+        _ = b.undo { _ in "other" }
+        #expect(a != b && a.hashValue != b.hashValue)
+    }
+}

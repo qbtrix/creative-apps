@@ -1,8 +1,11 @@
 // LibraryStatusText.swift: what the row under Library's content and the
 // inspector's header say, as values the views draw (status-and-layout SL-2).
-// `statusRow` gives the size text, the zoom (nil hides ViewerStatusBar's zoom
-// pill) and the pills after them: the selection, the cell size or the loupe's
-// Fit and place, then import, render, save and Preview data. The "Preview
+// `statusRow` gives the size text, the zoom and the pills after them: the
+// selection (styled `.selected`), the cell size, then import, render, save
+// and Preview data. The grid has no zoom; the loupe's is its scale, or the
+// fit scale the view measured while it fits (`shownZoom(fitScale:)`), so the
+// row never shows zoom twice. The loupe's place is left to its HUD. A failed
+// render or save is an `.error` pill. The "Preview
 // data" pill is last and carries `previewDataHelp`, so a consumer that draws
 // it through ViewerStatusBar's `preview:` takes `row.preview` and the rest
 // from `row.trailing`. Reads `order`, never a sorted copy, so a frame never
@@ -19,8 +22,9 @@ import Foundation
 
 /// One pill in the status row; `id` names it in `library.status.<id>`.
 public struct LibraryStatusPill: Hashable, Sendable, Identifiable {
-    public enum Style: Hashable, Sendable { case plain, warning }
-    /// selection, cellSize, zoom, position, import, render, save or preview.
+    /// `.selected` draws as an on toggle; `.error` is a failed render or save.
+    public enum Style: Hashable, Sendable { case plain, selected, warning, error }
+    /// selection, cellSize, import, render, save or preview.
     public let id: String
     public let text: String
     /// The tooltip and accessibility hint.
@@ -32,14 +36,23 @@ public struct LibraryStatusPill: Hashable, Sendable, Identifiable {
     }
 }
 
-/// What ViewerStatusBar draws: `zoom` nil hides its zoom pill (#1184).
+/// What ViewerStatusBar draws: `zoom` is the loupe's scale; nil with `fits`
+/// means the loupe fits the window, nil without it the grid (no zoom pill).
 public struct LibraryStatusRow: Hashable, Sendable {
     public let zoom: Double?
+    /// The loupe fits the window, so its zoom is the scale the view measured.
+    public let fits: Bool
     public let size: String
     public let pills: [LibraryStatusPill]
 
-    public init(zoom: Double?, size: String, pills: [LibraryStatusPill]) {
-        self.zoom = zoom; self.size = size; self.pills = pills
+    public init(zoom: Double?, fits: Bool = false, size: String, pills: [LibraryStatusPill]) {
+        self.zoom = zoom; self.fits = fits; self.size = size; self.pills = pills
+    }
+
+    /// The zoom pill's scale: `zoom`, else `fitScale` while the loupe fits,
+    /// else nil (the grid, no zoom pill).
+    public func shownZoom(fitScale: Double) -> Double? {
+        zoom ?? (fits ? fitScale : nil)
     }
 
     /// The "Preview data" pill, for ViewerStatusBar's `preview:`; nil on live data.
@@ -79,13 +92,11 @@ extension LibraryCatalog {
            let photo = items.indices.contains(index) && items[index].id == id
                ? items[index] : items.first(where: { $0.id == id }) {
             let zoom = Self.statusZoom(loupeZoom)
-            let fit = zoom == nil ? [LibraryStatusPill(id: "zoom", text: "Fit", help: "The photo fits the window.")] : []
-            let place = LibraryStatusPill(
-                id: "position", text: "\(index + 1) of \(order.count)", help: "This photo's place in the sort.")
             let size = "\(photo.pixelSize.width) × \(photo.pixelSize.height) px"
-            return LibraryStatusRow(zoom: zoom, size: size, pills: fit + [place] + progressPills(photo: photo))
+            return LibraryStatusRow(zoom: zoom, fits: zoom == nil, size: size, pills: progressPills(photo: photo))
         }
-        let picked = LibraryStatusPill(id: "selection", text: "\(selection.count) selected", help: "Photos selected in the grid.")
+        let picked = LibraryStatusPill(
+            id: "selection", text: "\(selection.count) selected", help: "Photos selected in the grid.", style: .selected)
         let chosen = selection.isEmpty ? [] : [picked]
         let cell = LibraryStatusPill(id: "cellSize", text: "\(cellSize) pt", help: "The thumbnails' width.")
         let pills = chosen + [cell] + progressPills(photo: nil)
@@ -178,7 +189,7 @@ extension LibraryCatalog {
     }
 
     /// The zoom ViewerStatusBar shows: 100% for `.actual`, a finite positive
-    /// scale as it is, nil (a "Fit" pill) for fit or a scale that isn't one.
+    /// scale as it is, nil (the measured fit scale) for fit or a scale that isn't one.
     static func statusZoom(_ zoom: LoupeZoom) -> Double? {
         switch zoom {
         case .fit: nil
@@ -196,7 +207,7 @@ extension LibraryCatalog {
         }
         if let photo, photo.availability == .available {
             if let loupeError {
-                pills.append(LibraryStatusPill(id: "render", text: "Render failed", help: loupeError, style: .warning))
+                pills.append(LibraryStatusPill(id: "render", text: "Render failed", help: loupeError, style: .error))
             } else if loupeRender == nil {
                 pills.append(LibraryStatusPill(id: "render", text: "Loading", help: "The photo is being drawn."))
             } else if loupeRender?.quality == .preview {
@@ -205,7 +216,7 @@ extension LibraryCatalog {
             }
         }
         if let saveError {
-            pills.append(LibraryStatusPill(id: "save", text: "Not saved", help: saveError, style: .warning))
+            pills.append(LibraryStatusPill(id: "save", text: "Not saved", help: saveError, style: .error))
         } else if case .newer = catalogState, let message = catalogState.message {
             pills.append(LibraryStatusPill(id: "save", text: "Read only", help: message, style: .warning))
         }

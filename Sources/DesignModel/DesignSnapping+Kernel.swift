@@ -6,9 +6,8 @@
 // or the children of the frame a draw goes into and that frame, then the page.
 // Hidden layers and the moving subtrees are skipped, locked layers kept.
 // `DesignModifiers.noSnap` turns layer snapping off for a step (⌘ held, or View >
-// Snap to Layers off); whole points still apply. `snapGuides` is a stub (SN-9): the
-// kernel's fixed `.fake` set while a gesture runs, nil otherwise, until the gesture
-// routes (SN-4) fill it. Linux-safe.
+// Snap to Layers off); whole points still apply. A press builds a `DesignSnapIndex`
+// (SN-4); `snapGuides` reads the live step's guides. Linux-safe.
 import SuiteKernel
 
 /// A line the moving box sits on after a snapped step, in document points.
@@ -40,11 +39,9 @@ public enum DesignSnapSettings {
 
 extension DesignWorkspace {
     /// The guides of the drag under way: nil when no gesture runs, empty when one runs and
-    /// nothing lined up. A stub until the routes land: the kernel's `.fake` while a gesture runs
-    /// (SN-9), so the screen has a set to draw; SN-4 replaces it with the live set.
+    /// nothing lined up (or `.noSnap` holds); the lines and gaps of its last step otherwise (SN-4).
     public var snapGuides: DesignSnapGuides? {
-        guard gesture != nil else { return nil }
-        return .fake
+        gesture?.guides
     }
 
     /// The boxes a drag of `moving` on the selected page can line up with: the siblings of each
@@ -55,8 +52,44 @@ extension DesignWorkspace {
         guard let page = selectedPage else { return [] }
         let bounds = Rect(minX: 0, minY: 0, maxX: page.frameWidth, maxY: page.frameHeight)
         return Snapping.candidates(in: page.nodes.layerTree, moving: moving, drawingInto: parent, page: bounds) {
-            let box = $0.payload.node.frame
-            return Rect(minX: box.x, minY: box.y, maxX: box.maxX, maxY: box.maxY)
+            $0.payload.node.frame.snapRect
         }
+    }
+}
+
+extension DesignRect {
+    /// This rectangle as the kernel's `Rect`, by its corners.
+    var snapRect: Rect { Rect(minX: x, minY: y, maxX: maxX, maxY: maxY) }
+}
+
+/// The snap engine a gesture builds at its press, over its candidates. Equal by its candidates.
+struct DesignSnapIndex: Sendable, Equatable {
+    let candidates: [DesignSnapCandidate]
+    let lines: SnapLines
+    let gaps: SnapGaps
+
+    init(_ candidates: [DesignSnapCandidate]) {
+        (self.candidates, lines, gaps) = (candidates, SnapLines(candidates), SnapGaps(candidates))
+    }
+
+    static func == (lhs: DesignSnapIndex, rhs: DesignSnapIndex) -> Bool { lhs.candidates == rhs.candidates }
+
+    /// `delta` plus, per axis, the offset within `tolerance` putting `box` + `delta` on a line, else a gap.
+    func snapped(_ delta: DesignPoint, box: DesignRect, tolerance: Double) -> DesignPoint {
+        let rect = DesignRect(x: box.x + delta.x, y: box.y + delta.y, width: box.width, height: box.height).snapRect
+        func offset(_ axis: SnapLine.Axis, _ values: [Double]) -> Double {
+            let d = Snapping.offset(
+                lines: lines.offset(axis, for: values, tolerance: tolerance),
+                gaps: gaps.spacingOffset(axis, for: rect, tolerance: tolerance), wholePoints: 0)
+            return d.isFinite ? d : 0
+        }
+        let dx = offset(.x, [rect.minX, (rect.minX + rect.maxX) / 2, rect.maxX])
+        let dy = offset(.y, [rect.minY, (rect.minY + rect.maxY) / 2, rect.maxY])
+        return DesignPoint(x: delta.x + dx, y: delta.y + dy)
+    }
+
+    /// The lines `box` sits on and the gaps around it, to draw once a step has landed.
+    func guides(on box: DesignRect) -> DesignSnapGuides {
+        DesignSnapGuides(lines: lines.lines(on: box.snapRect), gaps: gaps.gaps(around: box.snapRect))
     }
 }

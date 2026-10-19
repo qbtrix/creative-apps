@@ -178,7 +178,8 @@ extension SuiteJourneyTests {
         XCTAssertGreaterThan(curvesPoint(first)?.y ?? 0, (before?.y ?? 1) + 0.05, "handle 1 didn't rise")
         XCTAssert(curvesLines(log).contains { $0.hasPrefix("handle1 ") }, "the drag logged no handle1 move")
 
-        // 2. Tab moves to handle 2 (0.58, 1); ↑ nudges it 0.01 and ⇧↑ 0.1, one end each.
+        // 2. Tab moves to handle 2 (0.58, 1); ↑ nudges it 0.01 and ⇧↑ to the next 0.1
+        // (a nudge snaps to its step, so 1.01 goes to 1.1), one end each.
         let start = curvesPoint(second)?.y ?? 0
         gallery.press(.tab)
         gallery.press(.upArrow)
@@ -186,7 +187,7 @@ extension SuiteJourneyTests {
         XCTAssertEqual((curvesPoint(second)?.y ?? 0) - start, 0.01, accuracy: 0.001, "↑ didn't nudge handle 2 by 0.01")
         gallery.press(.upArrow, .shift)
         curvesExpect(["easing ends 3"], log)
-        XCTAssertEqual((curvesPoint(second)?.y ?? 0) - start, 0.11, accuracy: 0.001, "⇧↑ didn't nudge handle 2 by 0.1")
+        XCTAssertEqual((curvesPoint(second)?.y ?? 0) - start, 0.1, accuracy: 0.001, "⇧↑ didn't nudge handle 2 to the next 0.1")
         gallery.shot("curves-easing-nudged")
 
         // 3. Reduce Motion on: the preview dot stops (`preview-stopped`, series `curve-preview`).
@@ -212,7 +213,8 @@ extension SuiteJourneyTests {
         XCTAssertEqual(x.maxX, cap.maxX, accuracy: 0.5, "\(width) pt: the X and Cap values end apart")
         let root = gallery.element("suite.gallery.inspector")
         for (label, value) in [("X", x), ("Cap", cap)] {
-            let text = root.staticTexts.matching(NSPredicate(format: "label == %@", label)).firstMatch
+            // A macOS static text may carry its string as its value, not its label.
+            let text = root.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", label, label)).firstMatch
             XCTAssert(text.waitForExistence(timeout: 5), "\(width) pt: no \(label) label")
             for (what, frame) in [("label", text.frame), ("value", value)] {
                 XCTAssert(

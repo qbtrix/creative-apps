@@ -1,0 +1,30 @@
+[
+  {
+    "label": "noOverlap: the overlap check on the other axis dropped, so a frame beside A's corner counts as its neighbour",
+    "file": "Sources/SuiteKernel/Snap/SnapGaps.swift",
+    "find": "guard o0 < side1, o1 > side0 else { continue }",
+    "replace": "guard o0 < side1 || o1 > side0 || true else { continue }",
+    "tests": "SnapGapTests/aFrameBesideButNotAcrossIsNoNeighbour"
+  },
+  {
+    "label": "ownGapTwice: the equal-gap compare uses the box's own gap twice, so every gap with one beyond is a spacing hint",
+    "file": "Sources/SuiteKernel/Snap/SnapGaps.swift",
+    "find": "let matches = beyond.map { abs($0.gap - side.gap) <= Self.equalGap } ?? false",
+    "replace": "let matches = beyond.map { _ in abs(side.gap - side.gap) <= Self.equalGap } ?? false",
+    "tests": "SnapGapTests/aAtHomeHasAGapToBAndToTitleOnly"
+  },
+  {
+    "label": "noCentre: spacingOffset drops the centred case",
+    "file": "Sources/SuiteKernel/Snap/SnapGaps.swift",
+    "find": "if let b = before, let a = after { options.append((a.gap - b.gap) / 2) }",
+    "replace": "",
+    "tests": "SnapGapTests/bAt348_6CentresBetweenAAndC"
+  },
+  {
+    "label": "noReach: a neighbour past 2,048 pt still counts",
+    "file": "Sources/SuiteKernel/Snap/SnapGaps.swift",
+    "find": "guard gap > 0, gap <= Self.reach else { continue }",
+    "replace": "guard gap > 0 else { continue }",
+    "tests": "SnapGapTests/aNeighbourPast2048IsNone"
+  }
+]

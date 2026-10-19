@@ -6,7 +6,10 @@
 // the app passes `rulerUnit` ("pt" for Design; the older `unit` label, when
 // given, wins). Pointer drags arrive in document pixels: `onDrag(from:to:)` once
 // per move with the previous and current point (a click is a drag that
-// doesn't move), then `onDragEnd`. Pinch zooms through `onZoom`. Key presses
+// doesn't move), then `onDragEnd`. Pinch zooms through `onZoom` about the
+// pointer: the viewport scrolls so the document point under it stays put
+// (CanvasLayout's anchoredOffset over ZoomMath.anchoredOrigin), once the
+// content has taken its new size. Key presses
 // reach `onKey` while the canvas has focus, which a drag on it gives it.
 // While it has focus the canvas also pans without a scroll wheel: a drag that
 // starts with Space held scrolls it with the pointer (the grab pointer) and
@@ -93,6 +96,15 @@ public struct CanvasLayout: Equatable, Sendable {
         clamped(CGPoint(x: start.x - translation.width, y: start.y - translation.height))
     }
 
+    /// The scroll offset, clamped to `next`'s scrollable area, that keeps the document point under
+    /// `pointer` (in viewport points) under it when this layout, scrolled to `scrolled`, zooms to `next`.
+    public func anchoredOffset(to next: CanvasLayout, pointer: CGPoint, scrolled: CGPoint) -> CGPoint {
+        let origin = ZoomMath.anchoredOrigin(
+            pointer: pointer, origin: CGPoint(x: self.origin.x - scrolled.x, y: self.origin.y - scrolled.y),
+            from: scale, to: next.scale)
+        return next.clamped(CGPoint(x: next.origin.x - origin.x, y: next.origin.y - origin.y))
+    }
+
     /// The scroll offset after `key`: an arrow scrolls a tenth of the viewport its way,
     /// a whole viewport with `page` (Shift). Nil for any other key.
     public func panned(from offset: CGPoint, key: KeyEquivalent, page: Bool) -> CGPoint? {
@@ -128,7 +140,10 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let overlay: Overlay
     @State private var scrolled: CGPoint = .zero
     @State private var last: CGPoint?
-    @State private var pinchBase: Double?
+    /// Where the pinch under way began: the zoom, layout and scroll then, and the pointer in the viewport.
+    @State private var pinchStart: (zoom: Double, layout: CanvasLayout, scrolled: CGPoint, pointer: CGPoint)?
+    /// The offset a pinch scrolls to once the content takes its new size.
+    @State private var pendingScroll: CGPoint?
     @State private var position = ScrollPosition()
     @State private var spaceHeld = false
     /// The scroll offset where the pan under way began; nil while no pan is.
@@ -225,13 +240,19 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onContinuousHover { phase in hover(phase, layout) }
             .gesture(drag(layout), isEnabled: onDrag != nil)
             .simultaneousGesture(pan(layout), isEnabled: takesKeys)
-            .simultaneousGesture(pinch, isEnabled: onZoom != nil)
+            .simultaneousGesture(pinch(layout), isEnabled: onZoom != nil)
             .pointerStyle(panStart != nil ? .grabActive : spaceHeld ? .grabIdle : pointer)
         }
         // No scroll bars: the rulers show where the view is, and an unnamed bar fails the app audit (SJ21).
         .scrollIndicators(.never)
         .scrollPosition($position)
         .onScrollGeometryChange(for: CGPoint.self) { $0.contentOffset } action: { _, offset in scrolled = offset }
+        // A pinch's scroll waits for the content's new size, or it would be clamped to the old one.
+        .onScrollGeometryChange(for: CGSize.self) { $0.contentSize } action: { _, _ in
+            guard let point = pendingScroll else { return }
+            pendingScroll = nil
+            position.scrollTo(point: point)
+        }
         .background(SuiteColor.canvasSurround)
         .focusable(takesKeys)
         .focused($isFocused)
@@ -328,14 +349,28 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         }
     }
 
-    private var pinch: some Gesture {
+    /// A pinch zooms about the pointer where it began, each step worked out from that start.
+    private func pinch(_ layout: CanvasLayout) -> some Gesture {
         MagnifyGesture()
             .onChanged { value in
-                let base = pinchBase ?? zoom
-                pinchBase = base
-                onZoom?(ZoomMath.clamped(base * value.magnification))
+                let offset = pendingScroll ?? scrolled
+                let start = pinchStart ?? (zoom, layout, offset,
+                    CGPoint(x: value.startLocation.x - offset.x, y: value.startLocation.y - offset.y))
+                pinchStart = start
+                let next = ZoomMath.clamped(start.zoom * value.magnification)
+                // Held at the clamp: no zoom, so no scroll either.
+                guard next != zoom else { return }
+                onZoom?(next)
+                let target = CanvasLayout(document: documentSize, zoom: next, viewport: start.layout.viewport)
+                let point = start.layout.anchoredOffset(to: target, pointer: start.pointer, scrolled: start.scrolled)
+                if target.content == layout.content {
+                    pendingScroll = nil
+                    position.scrollTo(point: point)
+                } else {
+                    pendingScroll = point
+                }
             }
-            .onEnded { _ in pinchBase = nil }
+            .onEnded { _ in pinchStart = nil }
     }
 }
 

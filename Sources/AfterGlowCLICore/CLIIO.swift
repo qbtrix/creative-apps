@@ -1,7 +1,7 @@
 // CLIIO.swift (afterglow-cli CL-2): everything the CLI touches outside
 // itself, behind one protocol, so every route runs in process on FakeIO in
 // the tests. CL-5 adds LiveIO, the real file system, in its own file; this
-// file keeps the protocol, the in-memory FakeIO and `CLI.run(_:io:)`.
+// file keeps the protocol, the in-memory FakeIO and the stubs' `CLI.notBuilt`.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -94,12 +94,6 @@ public final class FakeIO: CLIIO {
 }
 
 extension CLI {
-    /// Runs one invocation over `io`: `arguments` without the program name. Returns the exit code.
-    /// CL-4 routes every form here; until then it forwards to `run(_:out:err:)`.
-    public static func run(_ arguments: [String], io: any CLIIO) -> Int32 {
-        run(arguments, out: { io.out($0) }, err: { io.err($0) })
-    }
-
     /// Prints the `notBuilt` failure for a stub entry point and returns 69.
     static func notBuilt(_ message: String, io: any CLIIO) -> Int32 {
         io.out(encode(Failure(error: .init(kind: "notBuilt", message: message))))

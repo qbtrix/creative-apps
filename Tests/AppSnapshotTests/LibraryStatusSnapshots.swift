@@ -1,10 +1,12 @@
 // LibraryStatusSnapshots.swift: the status row under Library's grid and loupe
 // (status-and-layout SL-4) on the shoot fixture, live data, Light and Dark:
-// the grid with five photos selected (`library-grid-status`), the loupe at
-// 100% (`library-status-loupe`; `library-loupe-status` is
-// LibraryLoupeSnapshots' fitted shot), and the progress and problem pills:
-// an import running, a preview render and a save error
-// (`library-status-progress`). Each state is set under `@testable`, as
+// the grid with five photos selected (`library-grid-status`: the selection
+// as an on toggle), the loupe at 100% (`library-status-loupe`;
+// `library-loupe-status` is LibraryLoupeSnapshots' fitted shot), and the
+// progress and problem pills at Fit: one zoom pill (the measured 14%), an
+// import running, a preview render and a save error in warning colors until
+// SuiteUI has an error pill (#3167) (`library-status-progress`). The loupe's
+// place is its HUD's, never a pill. Each state is set under `@testable`, as
 // LibraryShellSnapshots does. Every pill carries a `library.status.<id>`
 // identifier and help, and an empty live catalog draws no row. macOS only.
 import AppKit
@@ -17,7 +19,7 @@ import Testing
 
 @MainActor
 @Suite struct LibraryStatusSnapshots {
-    static let ids: Set<String> = ["selection", "cellSize", "zoom", "position", "import", "render", "save", "preview"]
+    static let ids: Set<String> = ["selection", "cellSize", "import", "render", "save", "preview"]
 
     /// The shoot sorted by name, on live data.
     private func shoot() throws -> LibraryCatalog {
@@ -58,15 +60,17 @@ import Testing
         #expect(try pills(catalog) == ["selection", "cellSize"])
         #expect(catalog.statusRow?.size == "24 photos")
         #expect(catalog.statusRow?.pills.first?.text == "5 selected")
+        let row = try #require(catalog.statusRow)
+        #expect(row.pills.map(LibraryStatusBar.style) == [.toggle(isOn: true), .plain])
         try shoot(catalog, "library-grid-status")
     }
 
     @Test func loupeAtActualSize() throws {
         var catalog = try loupe(.full)
         catalog.zoomLoupe(.actual)
-        #expect(try pills(catalog) == ["position"])
+        #expect(try pills(catalog) == [])
         #expect(catalog.statusRow?.zoom == 1)
-        #expect(catalog.statusRow?.pills.first?.text == "1 of 24")
+        #expect(catalog.statusRow?.shownZoom(fitScale: 0.14) == 1)
         try shoot(catalog, "library-status-loupe")
     }
 
@@ -74,10 +78,12 @@ import Testing
         var catalog = try loupe(.preview)
         catalog.importState = .running(ImportProgress(done: 2, total: 27))
         catalog.saveError = "The disk is full."
-        #expect(try pills(catalog) == ["zoom", "position", "import", "render", "save"])
+        #expect(try pills(catalog) == ["import", "render", "save"])
         let row = try #require(catalog.statusRow)
-        #expect(row.pills.map(\.text) == ["Fit", "1 of 24", "Importing 3 of 27", "Preview", "Not saved"])
-        #expect(row.pills.last?.style == .warning && row.pills.last?.help == "The disk is full.")
+        #expect(row.pills.map(\.text) == ["Importing 3 of 27", "Preview", "Not saved"])
+        #expect(row.shownZoom(fitScale: 0.14) == 0.14)
+        #expect(row.pills.last?.style == .error && row.pills.last?.help == "The disk is full.")
+        #expect(row.pills.last.map(LibraryStatusBar.style) == .warning)
         try shoot(catalog, "library-status-progress")
     }
 

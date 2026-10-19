@@ -2,10 +2,10 @@
 // SN-12, journey MJ12 `walkSnapContract`) on the `cards` fixture. The guide types
 // are the kernel's; `snapCandidates` names what a drag can line up with through
 // `Snapping.candidates` over the page's layer tree; `.noSnap` comes from ⌘ or
-// Snap to Layers off; `snapGuides` is the kernel's fixed `.fake` set while a drag
-// runs and nil otherwise until the routes land (SN-9); the kernel's line engine
-// snaps to A's candidates (SN-2) and its gap engine is still a stub that finds
-// nothing. Runs on Linux and macOS.
+// Snap to Layers off; `snapGuides` is the live set of the drag under way and nil
+// otherwise (SN-9, live since SN-4); the kernel's line engine
+// snaps to A's candidates (SN-2) and its gap engine names A's gaps (SN-3).
+// Runs on Linux and macOS.
 import DesignModel
 import SuiteKernel
 import Testing
@@ -93,13 +93,15 @@ import Testing
         #expect(full.summary == "x 300, gap x 100, spacing x 100")
     }
 
-    @Test func snapGuidesIsTheFakeOnlyWhileADragRuns() {
+    @Test func snapGuidesAreTheLiveSetOnlyWhileADragRuns() {
         var workspace = DesignFixtures.cards
         #expect(workspace.snapGuides == nil)
         workspace.selectItem(Self.a)
+        // A at (110, 100): its top, centre and bottom on C's and B's lines, 90 to B, 28 below Title.
         workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: [])
-        #expect(workspace.snapGuides == DesignSnapGuides.fake)
-        #expect(workspace.snapGuides?.summary == "x 300, gap x 100, spacing x 100")
+        #expect(workspace.snapGuides?.summary == "y 100, y 140, y 180, gap x 90, gap y 28")
+        workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: .noSnap)
+        #expect(workspace.snapGuides == DesignSnapGuides.empty)
         workspace.endDrag()
         #expect(workspace.snapGuides == nil)
     }
@@ -111,21 +113,22 @@ import Testing
         #expect(DesignSnapGuides.fake != DesignSnapGuides.empty)
     }
 
-    @Test func theLineEngineSnapsAndTheGapEngineIsAStub() {
+    @Test func theLineAndGapEnginesWorkOnACandidates() {
         let found = candidates([Self.a])
         let box = Rect(minX: 297.4, minY: 100.4, maxX: 397.4, maxY: 180.4)
         let offset = SnapLines(found).offset(.x, for: [297.4, 347.4, 397.4], tolerance: 4)
         #expect(offset.map { abs($0 - 2.6) < 1e-9 } == true)
         #expect(SnapLines(found).lines(on: box).isEmpty)
+        // B overlaps the box, so C is its right neighbour (302.6) and Title sits 28.4 above; no equal gap is near.
         #expect(SnapGaps(found).spacingOffset(.x, for: box, tolerance: 4) == nil)
-        #expect(SnapGaps(found).gaps(around: box).isEmpty)
+        #expect(DesignSnapGuides(gaps: SnapGaps(found).gaps(around: box)).summary == "gap x 303, gap y 28")
     }
 
     // MARK: MJ12
 
     /// MJ12 as far as SN-1 and SN-9 cover it: A's candidates, the modifier mapping, the empty and
-    /// full summaries, the fake guides only while a drag runs, a line engine that finds A already
-    /// aligned, and a gap engine that finds nothing.
+    /// full summaries, the live guides only while a drag runs, a line engine that finds A already
+    /// aligned, and a gap engine that finds A's gaps to B and Title and no equal spacing.
     @Test func walkSnapContract() {
         var workspace = DesignFixtures.cards
         let found = workspace.snapCandidates(moving: [Self.a], drawingInto: nil)
@@ -143,13 +146,13 @@ import Testing
         #expect(workspace.snapGuides == nil)
         workspace.selectItem(Self.a)
         workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: [])
-        #expect(workspace.snapGuides == DesignSnapGuides.fake)
+        #expect(workspace.snapGuides?.summary == "y 100, y 140, y 180, gap x 90, gap y 28")
         workspace.endDrag()
         #expect(workspace.snapGuides == nil)
 
         let box = Rect(minX: 100, minY: 100, maxX: 200, maxY: 180)
         #expect(SnapLines(found).offset(.y, for: [100, 140, 180], tolerance: 4) == 0)
-        #expect(SnapGaps(found).gaps(around: box).isEmpty)
+        #expect(DesignSnapGuides(gaps: SnapGaps(found).gaps(around: box)).summary == "gap x 100, gap y 28")
         #expect(SnapGaps(found).spacingOffset(.y, for: box, tolerance: 4) == nil)
     }
 }
