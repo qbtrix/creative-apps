@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "Adds one rectangle to a one-rect canvas and checks the saved rects as JSON.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.add", "params": {"x": 1, "y": 2, "w": 3, "h": 4}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-added", "format": "json", "options": {}},
+  "expect": {
+    "out/one-added.json": {"json": [
+      {"h": 60, "id": 1, "locked": false, "name": "Rect 1", "w": 100, "x": 10, "y": 10},
+      {"h": 4, "id": 2, "locked": false, "name": "Rect 2", "w": 3, "x": 1, "y": 2}
+    ]}
+  },
+  "platforms": ["linux", "macos"]
+}

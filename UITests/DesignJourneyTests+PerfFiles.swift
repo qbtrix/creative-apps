@@ -14,10 +14,16 @@
 // Design publishes them, add their p95 against QB-L12's 2 refreshes. The
 // numbers go to .build/ui-screens/perf-design-files.json and attach as
 // "perf-design-files"; the test asserts only that the saved file reopened.
+// Every flag carries a value (`-SuitePerfProbe YES`, as AfterGlow's journeys
+// pass it): the launch arguments become UserDefaults' argument domain in
+// "-key value" pairs, so a bare `-SuitePerfProbe` followed by `-DesignSaveTo
+// <tmp>` took `-DesignSaveTo` as its value and left the path on its own, which
+// AppKit opens as a file at launch instead of the first window (#3020: the
+// launch showed a menu bar and no window). FrameProbe only looks for the flag.
 import XCTest
 
 final class DesignPerfFilesJourneyTests: XCTestCase {
-    static let arguments = ["-DesignFixture", "crowd", "-SuiteWindowSize", "1024x768", "-SuitePerfProbe"]
+    static let arguments = ["-DesignFixture", "crowd", "-SuiteWindowSize", "1024x768", "-SuitePerfProbe", "YES"]
     /// A poll round trip over this many milliseconds counts as a stall (QB-L12: 2 refreshes at 60 Hz).
     static let stallMilliseconds = 2 * 1000.0 / 60
     static let fileName = "crowd.design"
@@ -30,7 +36,12 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
         let file = folder.appending(path: Self.fileName)
 
         // Save: ⌘S writes exactly -DesignSaveTo's path, no panel.
-        let design = Journey("Design", self, arguments: Self.arguments + ["-DesignSaveTo", file.path])
+        let saving = Self.arguments + ["-DesignSaveTo", file.path]
+        let reopening = Self.arguments + ["-DesignOpenFile", file.path]
+        for arguments in [saving, reopening] {
+            XCTAssertEqual(Self.unpaired(arguments), [], "a launch argument without its flag opens as a file, not a window")
+        }
+        let design = Journey("Design", self, arguments: saving)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "crowd showed no page (suite.canvas)")
         design.press(character: "s", .command, step: "perf-files-saved")
@@ -39,7 +50,7 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
 
         // Reopen: poll from the relaunch until the window is named after the file and shows its canvas.
         let launched = ProcessInfo.processInfo.systemUptime
-        let reopened = Journey("Design", self, arguments: Self.arguments + ["-DesignOpenFile", file.path])
+        let reopened = Journey("Design", self, arguments: reopening)
         let window = reopened.app.windows[Self.fileName]
         let canvas = reopened.element("suite.canvas")
         var (polls, longest, stalls, shownMs, done) = (0, 0.0, 0, Double?.none, false)
@@ -60,6 +71,17 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
     }
 
     // MARK: - Steps
+
+    /// The arguments that don't sit in a "-flag value" pair, read two at a time from the start as
+    /// UserDefaults' argument domain reads them: a flag with no value, or a value with no flag.
+    static func unpaired(_ arguments: [String]) -> [String] {
+        stride(from: 0, to: arguments.count, by: 2).flatMap { index -> [String] in
+            let flag = arguments[index]
+            guard index + 1 < arguments.count else { return [flag] }
+            let value = arguments[index + 1]
+            return flag.hasPrefix("-") && !value.hasPrefix("-") ? [] : [flag, value]
+        }
+    }
 
     /// Waits up to ten seconds for `file` to exist on disk.
     @MainActor private func waitForFile(_ file: URL) -> Bool {

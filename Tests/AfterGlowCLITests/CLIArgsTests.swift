@@ -5,7 +5,7 @@
 // when `ok` is false, each error maps to its sysexits code, and the golden
 // outputs in Golden/ match. Runs in process on FakeIO over the fake app.
 // The runs that edit a document also need the catalog's run (command-catalog
-// CC-7) to land before CL-4 can turn them on.
+// CC-7); those stay disabled until it lands.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -41,7 +41,7 @@ struct CLIArgsTests {
     /// CL-4 routes this over `apps` (the router takes the registry, so the fake is known only here).
     static func afterglow(_ arguments: [String], files: [String: Data] = ["a.fake": fixture]) -> Run {
         let io = FakeIO(files: files)
-        let code = CLI.run(arguments, io: io)
+        let code = CLI.run(arguments, apps: apps, io: io)
         return Run(code: code, io: io)
     }
 
@@ -66,13 +66,20 @@ struct CLIArgsTests {
         (["fake", "export", "a.fake", "--format", "json", "--out", "a.json"], "outputs"),
     ]
 
-    @Test(.disabled("waits on CL-4"), arguments: forms)
+    static func runsCommand(_ arguments: [String]) -> Bool { arguments.count > 1 && arguments[1] == "rect.add" }
+
+    @Test(arguments: forms.filter { !runsCommand($0.0) })
     func everyFormAnswersWithOneObject(arguments: [String], key: String) {
         let run = Self.afterglow(arguments)
         #expect(run.code == 0, "\(arguments): \(run.io.stdout)")
         #expect(run.ok == true)
         #expect(run.reply?[key] != nil, "\(arguments) has no \(key)")
         #expect(run.io.stderr.isEmpty)
+    }
+
+    @Test(.disabled("waits on CC-7"), arguments: forms.filter { runsCommand($0.0) })
+    func everyCommandFormAnswersWithOneObject(arguments: [String], key: String) {
+        everyFormAnswersWithOneObject(arguments: arguments, key: key)
     }
 
     /// The exit-code table: (arguments, code, error kind, what the message names).
@@ -97,34 +104,40 @@ struct CLIArgsTests {
         (["fake", "open", "missing.fake"], 74, "io", "missing.fake"),
         (["fake", "rect.add", "--in", "missing.fake", "--out", "b.fake", "--json", rect], 74, "io", "missing.fake"),
     ]
+    static func fromCatalog(_ naming: String) -> Bool { ["rect.add", "There is no rect 99."].contains(naming) }
 
-    @Test(.disabled("waits on CL-4"), arguments: table)
+    @Test(arguments: table.filter { !fromCatalog($0.3) })
     func exitCodeTable(arguments: [String], code: Int32, kind: String, naming: String) {
         let run = Self.afterglow(arguments, files: ["a.fake": Self.fixture, "bad.fake": Data("not a canvas".utf8)])
         Self.expectFailure(run, code, kind, naming: naming)
     }
 
-    @Test(.disabled("waits on CL-4"), arguments: forms.map(\.0) + [["fake", "rect.add", "--in", "a.fake", "--out", "b.fake"]])
+    @Test(.disabled("waits on CC-7"), arguments: table.filter { fromCatalog($0.3) })
+    func catalogExitCodes(arguments: [String], code: Int32, kind: String, naming: String) {
+        exitCodeTable(arguments: arguments, code: code, kind: kind, naming: naming)
+    }
+
+    @Test(arguments: forms.map(\.0) + [["fake", "rect.add", "--in", "a.fake", "--out", "b.fake"]])
     func unknownFlagIs64(arguments: [String]) {
         let run = Self.afterglow(arguments + ["--colour", "red"])
         Self.expectFailure(run, 64, "usage", naming: "unknown flag --colour")
         #expect(run.io.files == ["a.fake": Self.fixture], "a refused parse wrote a file")
     }
 
-    @Test(.disabled("waits on CL-4"), arguments: [["--version", "--json"], ["list-apps", "--force"], ["run", "s.jobs.json", "--fast"]])
+    @Test(arguments: [["--version", "--json"], ["list-apps", "--force"], ["run", "s.jobs.json", "--fast"]])
     func aFlagFromAnotherFormIs64(arguments: [String]) {
         let flag = arguments.last ?? ""
         Self.expectFailure(Self.afterglow(arguments), 64, "usage", naming: "unknown flag \(flag)")
     }
 
-    @Test(.disabled("waits on CL-4"), arguments: ["list-commands", "open", "new", "describe", "rect.add"])
+    @Test(arguments: ["list-commands", "open", "new", "describe", "rect.add"])
     func unknownAppIs64(form: String) {
         Self.expectFailure(Self.afterglow(["paint", form]), 64, "usage", naming: "unknown app paint")
         // A real app's name is never unknown, even before it adopts the catalog.
         #expect(Self.afterglow(["photo", "list-commands"]).code != 64)
     }
 
-    @Test(.disabled("waits on CL-4"))
+    @Test
     func unavailableIs69() {
         let run = Self.afterglow(["fake", "rect.move", "--in", "a.fake", "--out", "b.fake", "--json", Self.move])
         Self.expectFailure(run, 69, "unavailable", naming: "Select a rectangle first.")
@@ -132,7 +145,7 @@ struct CLIArgsTests {
     }
 
     /// A run that parses but refuses (65, 69, 70) writes nothing: neither the `--out` file nor `--in-place`.
-    @Test(.disabled("waits on CL-4"), arguments: [
+    @Test(arguments: [
         ("rect.add", #"{"x":1}"#), ("rect.add", "{x:1"), ("rect.move", move), ("rect.select", #"{"id":99}"#),
     ])
     func refusedWritesNothing(command: String, json: String) {
@@ -145,7 +158,7 @@ struct CLIArgsTests {
     }
 
     /// Every run, ok or not, prints exactly one JSON object with sorted keys; stderr has a line only when it failed.
-    @Test(.disabled("waits on CL-4"), arguments: forms.map(\.0) + table.map(\.0))
+    @Test(arguments: forms.map(\.0) + table.map(\.0))
     func oneJSONObjectPerRun(arguments: [String]) throws {
         let run = Self.afterglow(arguments, files: ["a.fake": Self.fixture, "bad.fake": Data("not a canvas".utf8)])
         let line = try #require(run.io.stdout.count == 1 ? run.io.stdout.first : nil, "stdout: \(run.io.stdout)")
@@ -159,11 +172,15 @@ struct CLIArgsTests {
     static let golden: [(String, [String])] = [
         ("list-commands", ["fake", "list-commands"]),
         ("describe", ["fake", "describe", "rect.add"]),
-        ("run-ok", ["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--json", rect]),
         ("run-refused", ["fake", "rect.move", "--in", "a.fake", "--out", "b.fake", "--json", move]),
     ]
 
-    @Test(.disabled("waits on CL-4"), arguments: golden)
+    @Test(.disabled("waits on CC-7"))
+    func goldenRunOK() throws {
+        try goldenOutputs(name: "run-ok", arguments: ["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--json", Self.rect])
+    }
+
+    @Test(arguments: golden)
     func goldenOutputs(name: String, arguments: [String]) throws {
         let file = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
             .appendingPathComponent("Golden").appendingPathComponent("\(name).json")
@@ -174,7 +191,7 @@ struct CLIArgsTests {
     }
 
     /// LJ1: list the fake's commands, describe one, add a rect to a copy, refuse an unknown flag and an overwrite.
-    @Test(.disabled("waits on CL-4"))
+    @Test(.disabled("waits on CC-7"))
     func lj1FakeSession() throws {
         let list = Self.afterglow(["fake", "list-commands"])
         guard case .array(let commands)? = list.reply?["commands"] else { Issue.record("no commands: \(list.io.stdout)"); return }

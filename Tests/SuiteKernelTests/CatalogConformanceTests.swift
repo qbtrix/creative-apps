@@ -1,6 +1,6 @@
 // CatalogConformanceTests.swift (command-catalog CC-6): the fake canvas keeps every catalog law, and a document
-// whose catalog breaks one law fails with a problem naming the command. Written first, disabled by name;
-// CC-8 builds `CatalogConformance.check` and enables them.
+// whose catalog breaks one law fails with a problem naming the command. Written first by CC-6; CC-8 builds
+// `CatalogConformance.check` on CC-7's `CommandCatalog.run` and CC-4's `validate`.
 import Foundation
 import Testing
 import SuiteKernel
@@ -93,15 +93,15 @@ enum BadExample: BrokenLaw {
         #expect(problems.allSatisfy { $0.contains(id) && !$0.contains("item.add") }, "\(problems)", sourceLocation: sourceLocation)
     }
 
-    @Test(.disabled("waits on CC-8")) func theFakeConforms() {
+    @Test func theFakeConforms() {
         #expect(CatalogConformance.check(FakeCanvasDocument.self, fixture: .fixture) == [])
     }
 
-    @Test(.disabled("waits on CC-8")) func anEditThatRecordsNoStepFails() { expectFails(NoStep.self, naming: "item.append") }
-    @Test(.disabled("waits on CC-8")) func anEditThatRecordsTwoStepsFails() { expectFails(TwoSteps.self, naming: "item.twice") }
-    @Test(.disabled("waits on CC-8")) func aStepNotNamedItsTitleFails() { expectFails(Misnamed.self, naming: "item.misname") }
-    @Test(.disabled("waits on CC-8")) func undoThatLeavesOtherBytesFails() { expectFails(UndoKeepsChange.self, naming: "item.stamp") }
-    @Test(.disabled("waits on CC-8")) func aQueryThatChangesBytesFails() { expectFails(QueryWrites.self, naming: "item.peek") }
-    @Test(.disabled("waits on CC-8")) func aViewThatChangesBytesFails() { expectFails(ViewWrites.self, naming: "item.zoom") }
-    @Test(.disabled("waits on CC-8")) func anExampleThatFailsValidationFails() { expectFails(BadExample.self, naming: "item.rename") }
+    @Test func anEditThatRecordsNoStepFails() { expectFails(NoStep.self, naming: "item.append") }
+    @Test func anEditThatRecordsTwoStepsFails() { expectFails(TwoSteps.self, naming: "item.twice") }
+    @Test func aStepNotNamedItsTitleFails() { expectFails(Misnamed.self, naming: "item.misname") }
+    @Test func undoThatLeavesOtherBytesFails() { expectFails(UndoKeepsChange.self, naming: "item.stamp") }
+    @Test func aQueryThatChangesBytesFails() { expectFails(QueryWrites.self, naming: "item.peek") }
+    @Test func aViewThatChangesBytesFails() { expectFails(ViewWrites.self, naming: "item.zoom") }
+    @Test func anExampleThatFailsValidationFails() { expectFails(BadExample.self, naming: "item.rename") }
 }
