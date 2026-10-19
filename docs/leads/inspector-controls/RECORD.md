@@ -4,7 +4,7 @@ Issue: #1508 · Packet: docs/blueprints/suiteui/features/inspector-controls.md
 Run: act-1a15409e144-cyb5 (was act-1a150947ee2-hc6b, act-1a14c4f9bb5-swq8) · Session: claude/inspector-controls-adopt-kernel-export-ct4yeg · Started: 2026-10-16T22:48Z (resumed 2026-10-19T12:04Z)
 Stage: 6 feature-done merged (#3094, cc14022e); waiting on a completed green suiteui/full dev run
 Base: cd7d4120 (origin/dev)
-Next: #3236 merges once its lane build passes; then the first completed green suiteui or full ci.yml run on dev containing cc14022e (and #3236) triggers Belt-Contact-Sheet on #1508. Full runs 39249031049 and 39250826720 were cancelled (superseded); 39252895176 at 6e70826: Linux green, macOS scripts/ci step failed 13:50 (run still in Perf; triage when complete); 39262177225 at 2b02948 pending. Triage red journeys first.
+Next: #3236 merges once its lane build passes; then the first completed green suiteui or full ci.yml run on dev containing cc14022e (and #3236) triggers Belt-Contact-Sheet on #1508. 39252895176 at 6e70826: Linux green, macOS scripts/ci step failed 13:50, run still in Perf at 14:38 (triage when complete; no dev-red issue open yet). 39262177225 cancelled (superseded); 39268739545 at 955f02d pending. Triage red journeys first.
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
