@@ -3,8 +3,9 @@
 // are the kernel's; `snapCandidates` names what a drag can line up with through
 // `Snapping.candidates` over the page's layer tree; `.noSnap` comes from ⌘ or
 // Snap to Layers off; `snapGuides` is the kernel's fixed `.fake` set while a drag
-// runs and nil otherwise until the routes land (SN-9); the kernel engines are
-// still stubs that find nothing. Runs on Linux and macOS.
+// runs and nil otherwise until the routes land (SN-9); the kernel's line engine
+// snaps to A's candidates (SN-2) and its gap engine is still a stub that finds
+// nothing. Runs on Linux and macOS.
 import DesignModel
 import SuiteKernel
 import Testing
@@ -110,10 +111,11 @@ import Testing
         #expect(DesignSnapGuides.fake != DesignSnapGuides.empty)
     }
 
-    @Test func theKernelEnginesAreStubs() {
+    @Test func theLineEngineSnapsAndTheGapEngineIsAStub() {
         let found = candidates([Self.a])
         let box = Rect(minX: 297.4, minY: 100.4, maxX: 397.4, maxY: 180.4)
-        #expect(SnapLines(found).offset(.x, for: [297.4, 347.4, 397.4], tolerance: 4) == nil)
+        let offset = SnapLines(found).offset(.x, for: [297.4, 347.4, 397.4], tolerance: 4)
+        #expect(offset.map { abs($0 - 2.6) < 1e-9 } == true)
         #expect(SnapLines(found).lines(on: box).isEmpty)
         #expect(SnapGaps(found).spacingOffset(.x, for: box, tolerance: 4) == nil)
         #expect(SnapGaps(found).gaps(around: box).isEmpty)
@@ -122,7 +124,8 @@ import Testing
     // MARK: MJ12
 
     /// MJ12 as far as SN-1 and SN-9 cover it: A's candidates, the modifier mapping, the empty and
-    /// full summaries, the fake guides only while a drag runs, and engines that find nothing.
+    /// full summaries, the fake guides only while a drag runs, a line engine that finds A already
+    /// aligned, and a gap engine that finds nothing.
     @Test func walkSnapContract() {
         var workspace = DesignFixtures.cards
         let found = workspace.snapCandidates(moving: [Self.a], drawingInto: nil)
@@ -145,7 +148,7 @@ import Testing
         #expect(workspace.snapGuides == nil)
 
         let box = Rect(minX: 100, minY: 100, maxX: 200, maxY: 180)
-        #expect(SnapLines(found).offset(.y, for: [100, 140, 180], tolerance: 4) == nil)
+        #expect(SnapLines(found).offset(.y, for: [100, 140, 180], tolerance: 4) == 0)
         #expect(SnapGaps(found).gaps(around: box).isEmpty)
         #expect(SnapGaps(found).spacingOffset(.y, for: box, tolerance: 4) == nil)
     }
