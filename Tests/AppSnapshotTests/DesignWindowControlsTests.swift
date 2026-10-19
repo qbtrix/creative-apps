@@ -37,6 +37,7 @@ import Testing
         #expect(ids.contains(DesignControlID.canvas))
         #expect(ids.contains(DesignControlID.statusTool))
         #expect(ids.contains(DesignControlID.statusSelection))
+        #expect(ids.contains(DesignControlID.inspectorStrokeAdd), "A has no stroke, so Add Stroke shows")
         let known = Set(DesignControlID.all)
         for id in ids where id.hasPrefix("design.") {
             #expect(known.contains(id), "\(id) is not in DesignControlID.all")
