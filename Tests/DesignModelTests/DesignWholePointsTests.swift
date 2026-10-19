@@ -77,7 +77,8 @@ private func cardsWithFractionalFrame() throws -> (DesignWorkspace, frame: Strin
 
     @Test func aFrameMovesOntoWholePointsAndItsChildrenKeepTheirOffsets() throws {
         var (workspace, frame, child) = try cardsWithFractionalFrame()
-        workspace.gesture(.move, pt(850, 520), pt(890, 520))
+        // ⌘ held, so y 451 isn't snapped onto Pair's centre line at 450 (snapping SN-4); whole points still apply.
+        workspace.gesture(.move, pt(850, 520), pt(890, 520), .noSnap)
         #expect(workspace.frame(frame) == rc(860, 451, 200, 100))
         let moved = try #require(workspace.frame(child))
         #expect(near(moved.x, 830.3 + 39.7))

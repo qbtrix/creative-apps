@@ -270,16 +270,18 @@ public struct ScrubField: View {
         }
     }
 
-    /// A press that moves 2 points sideways starts a scrub from there; one
-    /// that doesn't is a click and opens the typing field.
+    /// A press that moves 2 points sideways starts a scrub counted from those
+    /// 2 points (ScrubValue.dragOrigin); one that doesn't is a click and opens
+    /// the typing field.
     private var scrub: some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { drag in
-                guard anchor != nil || abs(drag.translation.width) >= 2 else { return }
                 let flags = NSEvent.modifierFlags
                 let multiplier = ScrubValue.multiplier(shift: flags.contains(.shift), option: flags.contains(.option))
                 if anchor?.multiplier != multiplier {
-                    anchor = (track.position(value), drag.translation.width, multiplier)
+                    let width = Double(drag.translation.width)
+                    guard let origin = ScrubValue.dragOrigin(width, restarting: anchor != nil) else { return }
+                    anchor = (track.position(value), CGFloat(origin), multiplier)
                 }
                 guard let anchor else { return }
                 let eventTime = NSApp.currentEvent?.timestamp ?? ProcessInfo.processInfo.systemUptime

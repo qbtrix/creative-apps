@@ -2,8 +2,8 @@
 // SN-12, journey MJ12 `walkSnapContract`) on the `cards` fixture. The guide types
 // are the kernel's; `snapCandidates` names what a drag can line up with through
 // `Snapping.candidates` over the page's layer tree; `.noSnap` comes from ⌘ or
-// Snap to Layers off; `snapGuides` is the kernel's fixed `.fake` set while a drag
-// runs and nil otherwise until the routes land (SN-9); the kernel's line engine
+// Snap to Layers off; `snapGuides` is the live set of the drag under way and nil
+// otherwise (SN-9, live since SN-4); the kernel's line engine
 // snaps to A's candidates (SN-2) and its gap engine names A's gaps (SN-3).
 // Runs on Linux and macOS.
 import DesignModel
@@ -93,13 +93,15 @@ import Testing
         #expect(full.summary == "x 300, gap x 100, spacing x 100")
     }
 
-    @Test func snapGuidesIsTheFakeOnlyWhileADragRuns() {
+    @Test func snapGuidesAreTheLiveSetOnlyWhileADragRuns() {
         var workspace = DesignFixtures.cards
         #expect(workspace.snapGuides == nil)
         workspace.selectItem(Self.a)
+        // A at (110, 100): its top, centre and bottom on C's and B's lines, 90 to B, 28 below Title.
         workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: [])
-        #expect(workspace.snapGuides == DesignSnapGuides.fake)
-        #expect(workspace.snapGuides?.summary == "x 300, gap x 100, spacing x 100")
+        #expect(workspace.snapGuides?.summary == "y 100, y 140, y 180, gap x 90, gap y 28")
+        workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: .noSnap)
+        #expect(workspace.snapGuides == DesignSnapGuides.empty)
         workspace.endDrag()
         #expect(workspace.snapGuides == nil)
     }
@@ -125,7 +127,7 @@ import Testing
     // MARK: MJ12
 
     /// MJ12 as far as SN-1 and SN-9 cover it: A's candidates, the modifier mapping, the empty and
-    /// full summaries, the fake guides only while a drag runs, a line engine that finds A already
+    /// full summaries, the live guides only while a drag runs, a line engine that finds A already
     /// aligned, and a gap engine that finds A's gaps to B and Title and no equal spacing.
     @Test func walkSnapContract() {
         var workspace = DesignFixtures.cards
@@ -144,7 +146,7 @@ import Testing
         #expect(workspace.snapGuides == nil)
         workspace.selectItem(Self.a)
         workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: [])
-        #expect(workspace.snapGuides == DesignSnapGuides.fake)
+        #expect(workspace.snapGuides?.summary == "y 100, y 140, y 180, gap x 90, gap y 28")
         workspace.endDrag()
         #expect(workspace.snapGuides == nil)
 

@@ -32,6 +32,19 @@ public enum ScrubValue {
         return NumericInput.clamp(snapped.isFinite ? snapped : value, to: range)
     }
 
+    /// How far a press moves sideways before it is a scrub, not a click.
+    public static let dragSlack = 2.0
+
+    /// Where a scrub's points count from, given the press's sideways `translation` now: nil
+    /// within the slack; a new scrub counts from the slack's edge, so the points past it move
+    /// the value however coarse the pointer's events (a 4 pt drag moves 2, #2921); a scrub whose
+    /// speed keys changed counts from here.
+    public static func dragOrigin(_ translation: Double, restarting: Bool) -> Double? {
+        if restarting { return translation }
+        guard abs(translation) >= dragSlack else { return nil }
+        return translation < 0 ? -dragSlack : dragSlack
+    }
+
     /// Drag speed for the held keys: Option is fine (a tenth of a step per
     /// point) and wins over Shift, which is coarse (ten steps per point).
     public static func multiplier(shift: Bool, option: Bool) -> Double {
