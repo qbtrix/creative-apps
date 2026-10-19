@@ -1,5 +1,6 @@
-// Contracts/ExportSidecar+Kernel.swift (EX-1 slot, filled by EX-16): the XMP file beside an
-// export. Its name is final, so ExportNames (on SuiteModel's rule) keeps it free.
+// Contracts/ExportSidecar.swift (EX-1 slot, filled by EX-16): the XMP file beside an export.
+// Library-local: no shared module holds the sidecar yet. Its name is final, so ExportNames
+// (ExportNaming+Kernel, on SuiteModel's unique-name rule) keeps it free.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

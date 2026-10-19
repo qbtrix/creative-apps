@@ -1,5 +1,5 @@
-// Contracts/ExportFormats+Kernel.swift (EX-1 slot, filled by EX-7): what an export
-// writes, beside the shared unique-name rule (ExportNaming+Kernel). Extension final.
+// Contracts/ExportFormats.swift (EX-1 slot, filled by EX-7): the raster formats an export
+// writes. Library-local: no shared module holds export formats yet. Extension final.
 
 /// A file format an export writes; the raw value is the sheet's label.
 public enum ExportFormat: String, CaseIterable, Sendable, Codable {

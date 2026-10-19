@@ -1,6 +1,6 @@
-// LibraryExport+Kernel.swift (EX-1 stubs, filled by EX-3 and EX-13): the catalog's
-// export methods and the runner, beside the shared pieces (ExportNames on SuiteModel's
-// unique-name rule). Until EX-3 each refuses with the exporter's reason, changing nothing.
+// LibraryExport.swift (EX-1 stubs, filled by EX-3 and EX-13): the catalog's export methods
+// and the runner. Library-local; names come from ExportNames (ExportNaming+Kernel, on
+// SuiteModel's unique-name rule). Until EX-3 each refuses with the exporter's reason.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
