@@ -93,8 +93,8 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
    `SuiteModel` every Model's tests, and `Package.swift` all of them
    (`scripts/test-scope` holds the table). Plain `scripts/ci` is the full
    gate CI runs. Neither runs the perf and timing tests in
-   `Tests/perf-suites.txt`: the `macOS` job's Perf step reports those and
-   never fails. On Linux it covers the Model targets and the lints; the
+   `Tests/perf-suites.txt`: they run nightly on the captain's Mac
+   (perf-nightly), never in CI. On Linux it covers the Model targets and the lints; the
    macOS job on `dev` catches the rest.
    It is your whole check: no CI runs on your PR, and you never start CI
    yourself for routine work (no `gh workflow run`).
@@ -314,9 +314,15 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   macOS. Linux `scripts/ci` never builds the apps, and it misses macOS-only
   breaks in the targets it does build (#1210: an `ObjCBool` error in
   PhotoModel). The lane dispatches a build-only CI run (`ci.yml` with
-  `build_only`: every target with its tests, then the journey bundles;
-  nothing runs) once per head, comments its URL, and merges when it
-  succeeds. A failed build waits for your next push. A PR with no code
+  `build_only`; nothing runs) once per head, comments its URL, and merges
+  when it succeeds. It is scoped to the apps your code touches
+  (`scripts/test-scope build-apps`, passed as `app`): a Photo-only PR builds
+  PhotoModelTests, the PhotoApp product, AppSnapshotTests and the Photo
+  journey bundle. Shared code (SuiteUI, SuiteKernel, SuiteModel, the shell,
+  the CLI, shared snapshot or journey files, `Package.swift`, `project.yml`)
+  or anything it can't place builds every target and journey bundle, as does
+  a branch whose `ci.yml` predates the `app` input. A newer head's build
+  cancels the older one's. A failed build waits for your next push. A PR with no code
   (docs, data, packets) takes the lane on the Linux check alone.
 - Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
   the snapshots after the next feature CI and files fixes as new issues.

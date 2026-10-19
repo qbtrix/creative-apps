@@ -307,6 +307,17 @@ printf '%s\n' Package.swift project.yml UITests/A.swift Sources/X.swift >"$tmp/f
 got=$(build_paths "$tmp/files.txt")
 if [[ "$got" == "Package.swift, Sources/X.swift, UITests, project.yml" ]]; then echo "ok   build: build_paths names the manifests and folders"
 else echo "FAIL build: build_paths: got '$got'"; fail=1; fi
+# The build is scoped to the apps the code touches (build_apps, main's
+# scripts/test-scope build-apps); a shared path, or a failure to tell, builds all.
+build "one app's code: the build names that app" "build-dispatch|Sources/LibraryApp, Sources/LibraryModel|feat/x|library" "$MARKED" "$APP" -
+build "a shared path: the build covers every app" "build-dispatch|Sources/PhotoApp, Sources/SuiteUI|feat/x|all" "$MARKED" \
+  $'Sources/PhotoApp/A.swift\nSources/SuiteUI/B.swift' -
+build "two apps' code: the build covers both" "build-dispatch|Sources/FlareApp, Sources/LibraryApp|feat/x|flare,library" "$MARKED" \
+  $'Sources/LibraryApp/A.swift\nSources/FlareApp/B.swift' -
+build "project.yml: the build covers every app" "build-dispatch|project.yml|feat/x|all" "$MARKED" 'project.yml' -
+HERE_WAS=$HERE; HERE="$tmp/no-scripts"
+build "no scripts/test-scope to ask: the build covers every app" "build-dispatch|Sources/PhotoApp|feat/x|all" "$MARKED" 'Sources/PhotoApp/PhotoApp.swift' -
+HERE=$HERE_WAS
 build "the build gate does not outrank the proof: a Linux check first" "linux-dispatch|feat/x" ".body = \"x\"" "$APP" .
 build "a supervisor's green Mac-Check run covers the build" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$APP" - '[]' .
 # Every source the manifests compile falls under BUILD_RE: each Package.swift
@@ -621,6 +632,8 @@ gh() {
     "workflow run "*)
       # A dispatch on a PR's head branch starts an in-progress CI run on its head.
       echo "$a" >>"$sw/calls"
+      # $sw/noapp: the branch's ci.yml predates the `app` input, so GitHub refuses it.
+      [[ ! -e "$sw/noapp" || "$a" != *"-f app="* ]] || return 1
       # With -f build_only=true it is a build-only run (title "macOS build"),
       # listed ahead of the head's other runs.
       for n in "$sw"/[0-9]*.json; do
@@ -906,9 +919,9 @@ printf '%s\n' '[{"filename": "Sources/SuiteUI/SuiteWindow.swift", "status": "mod
 echo '[{"databaseId": "32", "displayTitle": "macOS build", "status": "completed", "conclusion": "failure", "url": "https://github.com/qbtrix/creative-apps/actions/runs/32", "headSha": "h32"}]' >"$sw/runs.h32.json"
 lane_sweep
 expect "build: dispatches one build-only run on the app PR's branch, re-sweep included" \
-  "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps -f build_only=true --ref b30$' "$sw/calls")" 1
+  "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps -f build_only=true -f app=library --ref b30$' "$sw/calls")" 1
 expect "build: comments the build's URL once" \
-  "$(grep -c '^pr comment 30 .*The lane dispatched a macOS build on b30: https://github.com/qbtrix/creative-apps/actions/runs/830\.' "$sw/calls")" 1
+  "$(grep -c '^pr comment 30 .*The lane dispatched a macOS build on b30 (apps: library): https://github.com/qbtrix/creative-apps/actions/runs/830\.' "$sw/calls")" 1
 expect "build: doesn't merge before it compiles" "$(grep -c '^pr merge 30' "$sw/calls")" 0
 expect "build: a failed build is refused by URL" \
   "$(grep -c "^pr comment 32 .*doesn't build on macOS: https://github.com/qbtrix/creative-apps/actions/runs/32 (failure)\. Fix it and push" "$sw/calls")" 1
@@ -931,7 +944,7 @@ pr_at 36 h36 '[{"filename": "Tests/AppSnapshotTests/HaloPlaybackDriverTests.swif
 jq '.headRefName = "b36"' "$sw/36.json" >"$sw/x" && mv "$sw/x" "$sw/36.json"
 lane_sweep
 expect "build: a PR touching only a snapshot test gets one build, not a merge" \
-  "$(grep -c -- '-f build_only=true --ref b36$' "$sw/calls"),$(grep -c '^pr merge 36' "$sw/calls")" "1,0"
+  "$(grep -c -- '-f build_only=true -f app=halo --ref b36$' "$sw/calls"),$(grep -c '^pr merge 36' "$sw/calls")" "1,0"
 expect "build: its comment names the folder" \
   "$(grep -c '^pr comment 36 .*changes code (Tests/AppSnapshotTests)' "$sw/calls")" 1
 # #38 changes only PhotoModel (#1210's shape): it gets one build, not a merge.
@@ -942,9 +955,19 @@ pr_at 39 h39 '[{"filename": "docs/blueprints/photo/features/recovery.md", "statu
 for n in 38 39; do jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"; done
 lane_sweep
 expect "build: a Model-only PR gets one build, not a merge" \
-  "$(grep -c -- '-f build_only=true --ref b38$' "$sw/calls"),$(grep -c '^pr merge 38' "$sw/calls")" "1,0"
+  "$(grep -c -- '-f build_only=true -f app=photo --ref b38$' "$sw/calls"),$(grep -c '^pr merge 38' "$sw/calls")" "1,0"
 expect "build: a docs-only PR merges with no build" \
   "$(grep -c -- '--ref b39' "$sw/calls"),$(grep -c '^pr merge 39' "$sw/calls")" "0,1"
+# #40 is a Photo PR on a branch whose ci.yml has no `app` input: the scoped
+# dispatch is refused, so the lane dispatches a full build instead, once.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"; touch "$sw/noapp"
+pr_at 40 h40 '[{"filename": "Sources/PhotoApp/PhotoWindow.swift", "status": "modified"}]'
+jq '.headRefName = "b40"' "$sw/40.json" >"$sw/x" && mv "$sw/x" "$sw/40.json"
+lane_sweep
+expect "build: a refused scoped dispatch falls back to one full build" \
+  "$(grep -c -- '-f build_only=true -f app=photo --ref b40$' "$sw/calls"),$(grep -c -- '-f build_only=true --ref b40$' "$sw/calls")" "1,1"
+expect "build: the fallback's comment says every app" \
+  "$(grep -c '^pr comment 40 .*macOS build on b40 (every app)' "$sw/calls")" 1
 
 # AI attribution in a PR body never reaches history, and its author hears
 # about it once. #45 lands alone: its squash message has no attribution line.
