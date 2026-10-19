@@ -11,7 +11,7 @@ Next: lane merges #2993 (SL-3, build green); SL-5 and SL-7 building (wf_889db5f9
 |---|---|---|---|---|---|---|---|---|---|
 | SL-a | status row and inspector header values, grid columns and loupe fit per width | SL-1, SL-2 | MJ1 | spine (built) | no | 0 | building | - | - |
 | SL-b | status row under grid and loupe, J12 at every width | SL-3, SL-4 | J12 | SL-a (SL-4); thumbnails, loupe-viewport (built); SuiteUI #1184 (SL-4, soft) | yes | 0 | building | - | - |
-| SL-c | inspector header facts, Library control identifiers, wide-width snapshots | SL-5, SL-6, SL-7, SL-8 | J12 | SL-a (SL-5, SL-7); SL-b (SL-6, SL-8) | yes | 0 | planned | - | - |
+| SL-c | inspector header facts, Library control identifiers, wide-width snapshots | SL-5, SL-6, SL-7, SL-8 | J12 | SL-a (SL-5, SL-7); SL-b (SL-6, SL-8) | yes | 0 | building | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
