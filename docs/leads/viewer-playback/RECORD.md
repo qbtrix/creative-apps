@@ -2,9 +2,9 @@
 
 Issue: #1035 · Packet: docs/blueprints/halo/features/viewer-playback.md
 Run: act-1a1543fa006-c4p9 (resumed 2026-10-19T13:02Z; earlier act-1a14c24f6d2-lrkw, line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a1429c87eb-3ecm, resumed 2026-10-16T02:50Z; first run act-1a13ed44a75-delk) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-15T09:05Z
-Stage: 3 wave 6 (post-done findings: #1699, #1701, #1703, #1705)
-Base: 6e70826be59e092e59269605cfdfbce93c4a2bbe (origin/dev at 2026-10-19T13:02Z; main 6f9a2b88)
-Next: VP-13 (gap #2512: journeys look tracks up by halo.timeline.name./lane. prefixes) stacked on #2622, which makes timelineIdentifierPrefix public and sets it in HaloTimelineView; then wait for the lane to merge both and a scoped halo run to show H-J2, H-J3, H-J4 and layout passing.
+Stage: 3 polling (wave 6 opened)
+Base: 2b02948043fe554dde877f184894b7010998117e (origin/dev at 2026-10-19T13:40Z, has #2622)
+Next: wait for the lane to merge #3245 (VP-13), then a scoped halo run on dev that contains it: close #1699 #1701 #1703 #1705 if their journeys pass, else take them into a fix wave.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,7 +22,7 @@ Next: VP-13 (gap #2512: journeys look tracks up by halo.timeline.name./lane. pre
 | VP-9 | 4 | HF-1 canvas equals render | HaloViewerFidelityTests | HaloViewerFidelityTests | #1125 | merged |
 | VP-11 | 4 | H-J3 extended | UITests/HaloJourneyTests.swift | H-J3 on dev CI | #1102 | merged |
 | VP-12 | 5 | H-J2, H-J4; feature-done | UITests/HaloJourneyTests+Viewer.swift, +Playback.swift | H-J2, H-J4 on dev CI | #1124 | merged |
-| VP-13 | 6 | gap #2512: every Halo journey finds track names and lanes by the halo.timeline.name./.lane. prefixes; onScreenControlIDs leaves them out (findings #1699, #1701, #1703, #1705) | UITests/HaloJourneyTests*.swift | scoped halo run: H-J2, H-J3, H-J4, layout | – | building |
+| VP-13 | 6 | gap #2512: every Halo journey finds track names and lanes by the halo.timeline.name./.lane. prefixes; onScreenControlIDs leaves them out (findings #1699, #1701, #1703, #1705) | UITests/HaloJourneyTests*.swift | scoped halo run: H-J2, H-J3, H-J4, layout | #3245 | in lane (head 0d6fb734) |
 
 Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all independent); W2 VP-3, VP-4b, VP-7, VP-8 (all independent); W3 VP-5, VP-6, VP-10 (all independent); W4 VP-9, VP-11 (both independent); W5 VP-12 alone.
 
@@ -80,6 +80,8 @@ Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all indepen
 - Round 1 critic panel deferred: every viewer-playback journey stops at its first read, so the screens show only step 1; journeys and audit were the findings this round.
 
 ## Open
+- #3245 (VP-13, Fixes #2512) in the lane; #2622 merged 13:27Z. Findings #1699 #1701 #1703 #1705 wait on a scoped halo run containing #3245.
+- H-J13 quarantine (owner #1035) expires 2026-10-20; asked the supervisor on #1035.
 - #1789 (needs-ui, line:suiteui, p1): the SuiteUI timeline rework dropped `halo.timeline.track` from track names and lanes; Halo journeys find no lane in scoped run 38972763400 (findings #1696–#1705).
 - H-J13 quarantine entry (owner #1035, expires 2026-10-18) is the supervisor's to drop: UITests/quarantine.json is protected.
 - none
