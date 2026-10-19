@@ -103,11 +103,11 @@ jobs:
   mac-build:
     name: macOS build
     if: ${{ inputs.build_only }}
-    runs-on: macos-26
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - run: xcodebuild -version
       - run: swift build --build-tests
       - name: Install XcodeGen 2.46.0
         run: |
@@ -121,7 +121,7 @@ jobs:
   macos:
     name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
     if: ${{ !inputs.build_only && !inputs.linux_only }}
-    runs-on: macos-26
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
     # scripts/ci alone takes about 20 min under load and the five apps' UI
     # journeys about 30 more; 45 cut ui-test off mid-run (dev run 38792928305).
     timeout-minutes: 90
@@ -141,7 +141,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
-      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - run: xcodebuild -version
       - run: swift --version
       # scripts/ci with a memory sample every 20 s into memory.log: the time,
       # vm_stat's page counts, the system-wide free percentage and the five
