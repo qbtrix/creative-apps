@@ -13,7 +13,9 @@
 // ten times each. Page points map to the screen through the artboard
 // (`suite.canvas.artboard`), as DesignSelectJourneyTests does.
 // Report-only (docs/review-rubric.md, How gates are set): a drag series counts
-// the `suite.perf` samples it added, or, when the window records none, event
+// the drag `suite.perf` samples it added (series `canvas-drag` and
+// `handle-drag`; the tool box's `press` samples from picking Rectangle aren't
+// drag samples, #2751), or, when the window records none, event
 // samples (the drag's seconds at one pointer event per 60 Hz refresh, as
 // DesignPerfScrubJourneyTests does); the zoom series times each key's round
 // trip (20 keys, so it isn't held to 60). The numbers go to
@@ -30,6 +32,8 @@ final class DesignPerfCanvasJourneyTests: XCTestCase {
     /// The page's width in `crowd` (DesignFixtures.crowd), which sets the artboard's scale.
     static let pageWidth = 1440.0
     static let artboard = "suite.canvas.artboard"
+    /// The `suite.perf` series a canvas drag records (CanvasProbe, HandleDragProbe); others, like `press`, aren't drags.
+    static let dragSeries: Set<String> = ["canvas-drag", "handle-drag"]
     static let span: CGFloat = 600, speed: CGFloat = 300, eventRate = 60.0, legPause = 0.1
     /// Rectangle 1 of Frame 1 (12, 12, 16, 16): its middle, then two points on the empty band y 160-210.
     static let moveStart = (20.0, 20.0), moveBand = [(1380.0, 185.0), (20.0, 185.0)]
@@ -194,11 +198,11 @@ final class DesignPerfCanvasJourneyTests: XCTestCase {
             .withOffset(CGVector(dx: page.0 * scale, dy: page.1 * scale))
     }
 
-    /// How many samples `suite.perf` holds; 0 when the window publishes none.
+    /// How many drag samples (`dragSeries`) `suite.perf` holds; 0 when the window publishes none.
     @MainActor private func sampleCount(_ design: Journey) -> Int {
         let perf = design.element("suite.perf")
         guard perf.exists, let document = try? JSONDecoder().decode(ProbeDocument.self, from: Data(perf.label.utf8)) else { return 0 }
-        return document.samples.count
+        return document.samples.reduce(0) { $0 + (Self.dragSeries.contains($1.series) ? 1 : 0) }
     }
 
     /// Writes the report-only numbers to .build/ui-screens/perf-design-canvas.json and attaches them.

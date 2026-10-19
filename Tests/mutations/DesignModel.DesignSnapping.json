@@ -1,0 +1,58 @@
+[
+  {
+    "label": "snapCandidates: the hidden check dropped, so Hidden is a candidate",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id) else { return }",
+    "replace": "guard !seen.contains(node.id) else { return }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "snapCandidates: the moving subtree kept (only the moving ids skipped)",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "!(tree.ancestors(of: node.id) ?? []).contains(where: movingIDs.contains) else { return }",
+    "replace": "true else { return }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "snapCandidates: a locked layer is dropped",
+    "file": "Sources/SuiteKernel/Snap/Snapping.swift",
+    "find": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id) else { return }",
+    "replace": "guard !seen.contains(node.id), !tree.isEffectivelyHidden(node.id), !tree.isEffectivelyLocked(node.id) else { return }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "init(shift:option:command:snapToLayers:): || becomes &&",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "if command || !snapToLayers { insert(.noSnap) }",
+    "replace": "if command && !snapToLayers { insert(.noSnap) }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "the bridge ignores the frame a draw goes into",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "moving: moving, drawingInto: parent, page: bounds",
+    "replace": "moving: moving, drawingInto: nil, page: bounds",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "the bridge frames a layer by its origin and size, not its far corner",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "Rect(minX: box.x, minY: box.y, maxX: box.maxX, maxY: box.maxY)",
+    "replace": "Rect(minX: box.x, minY: box.y, maxX: box.width, maxY: box.height)",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "snapGuides: the no-gesture nil check dropped, so the fake shows with no drag",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "guard gesture != nil else { return nil }",
+    "replace": "guard true else { return nil }",
+    "tests": "DesignSnapCandidateTests"
+  },
+  {
+    "label": "snapGuides: the stub returns .empty instead of .fake",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "        return .fake\n",
+    "replace": "        return .empty\n",
+    "tests": "DesignSnapCandidateTests"
+  }
+]

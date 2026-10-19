@@ -5,10 +5,12 @@
 // and each `present` scales that texture into the drawable with MPS's
 // Lanczos filter (premultiplied sRGB in, the layer's sRGB out). The tiles'
 // pixels are the app's already: on a GPU route they came back from the GPU
-// as display bytes, so a frame uploads them again (a G1 item: present a
-// render surface directly once core can hand one out). A tile whose image
+// as display bytes, so a frame uploads them again. A tile whose image
 // isn't 8-bit premultiplied RGBA at its tile's size is redrawn into that form
-// once. macOS only.
+// once. A GPU producer can instead write the document texture itself
+// (`residentTexture`, render adoption G1): Photo's resident GPU path draws
+// its composite straight into it, so nothing is uploaded or read back. macOS
+// only.
 import CoreGraphics
 import Metal
 import MetalPerformanceShaders
@@ -49,12 +51,31 @@ public final class CanvasTilePresenter: MetalPresenting {
         presented += 1
     }
 
+    /// The document texture for a GPU producer to write straight into (resident rendering): `width` x
+    /// `height`, rgba8 premultiplied sRGB, shader-writable, on `device`. Made (or remade, for a new size or
+    /// device) here, so the tiles shown before are dropped: the producer's writes are the picture from now on,
+    /// and a later `show` of tiles writes over them as before. Nil when Metal won't make it.
+    public func residentTexture(on device: any MTLDevice, width: Int, height: Int) -> (any MTLTexture)? {
+        let wanted = CGSize(width: width, height: height)
+        if let texture, texture.device.registryID == device.registryID, size == wanted, texture.usage.contains(.shaderWrite) {
+            (images, dirty) = ([:], [])
+            return texture
+        }
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rgba8Unorm, width: max(width, 1), height: max(height, 1), mipmapped: false)
+        descriptor.usage = [.shaderRead, .shaderWrite]
+        descriptor.storageMode = device.hasUnifiedMemory ? .shared : .managed
+        (size, images, dirty, texture) = (wanted, [:], [], device.makeTexture(descriptor: descriptor))
+        return texture
+    }
+
     /// The document texture with every dirty tile written; nil when Metal won't make it.
     private func upload(on device: any MTLDevice) -> (any MTLTexture)? {
-        if texture == nil || texture?.device !== device {
+        // The same GPU by registry id: two MTLDevice objects for one GPU must not drop a texture a producer wrote.
+        if texture == nil || texture?.device.registryID != device.registryID {
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: .rgba8Unorm, width: Int(size.width), height: Int(size.height), mipmapped: false)
-            descriptor.usage = .shaderRead
+            descriptor.usage = [.shaderRead, .shaderWrite]
             descriptor.storageMode = device.hasUnifiedMemory ? .shared : .managed
             texture = device.makeTexture(descriptor: descriptor)
             dirty = Set(images.keys)
