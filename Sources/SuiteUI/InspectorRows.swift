@@ -90,6 +90,9 @@ private struct InspectorSectionHeader: View {
                         .imageScale(.small)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                         .opacity(hovering || !isExpanded ? 1 : 0)
+                        // The header button says Expanded or Collapsed; a shown chevron was a second, unnamed
+                        // button to accessibility (#2928).
+                        .accessibilityHidden(true)
                 }
                 .contentShape(.rect)
             }

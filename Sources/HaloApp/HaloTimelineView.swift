@@ -11,8 +11,9 @@
 // each disabled with the Model's unavailableHelp as its help while it can't
 // act. Plain diamonds until key shapes land (#771). The tooltip is the
 // Model's timelineHelp. No layers: how to add one, in the lane under the ruler.
-// The strip's track buttons come from SuiteUI with no identifier of their
-// own, so the strip passes `halo.timeline.track` down to each of them (#290).
+// The strip is `halo.timeline.track`; its timelineIdentifierPrefix
+// `halo.timeline` gives each name button `halo.timeline.name.<id>`, each lane
+// `halo.timeline.lane.<id>` and each key `halo.timeline.key.<id>.<frame>`.
 // A lane speaks its key count as its value, which XCUITest reads empty
 // (#262), so each row's `keysReadout` ("Ball: 3 keyframes") is also the label
 // of a hidden `halo.timeline.keys` element (HaloReadout.swift).
@@ -96,6 +97,7 @@ struct HaloTimelineView: View {
                         perform(.selectLayer(id))
                     })
                     .accessibilityIdentifier("halo.timeline.track")
+                    .environment(\.timelineIdentifierPrefix, "halo.timeline")
                     .simultaneousGesture(SpatialTapGesture().onEnded { tap in
                         let hit = Self.layout.row(atX: Double(tap.location.x), y: Double(tap.location.y), rows: rows.count)
                         guard let hit, rows.indices.contains(hit) else { return }

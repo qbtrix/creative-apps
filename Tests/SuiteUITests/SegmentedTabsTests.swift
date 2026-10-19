@@ -13,10 +13,18 @@ import Testing
 
 private let panelTabs = [InspectorOption(id: 0, title: "Adjust"), InspectorOption(id: 1, title: "Layers")]
 
+/// Looks for the AppKit control a segmented Picker hosts, not at `picker`'s type: naming that
+/// type makes a release test build reference SwiftUI's `tag(_:includeOptional:)` opaque type,
+/// which the macOS 26 runtime doesn't export (#2714).
 @MainActor @Test func theTabsStillBuildASystemPicker() {
-    let tabs = SegmentedTabs("Panel", tabs: panelTabs, selection: 0) { _ in }
-    let name = String(describing: type(of: tabs.picker))
-    #expect(name.hasPrefix("Picker<"), "SegmentedTabs draws \(name), not a Picker")
+    let host = NSHostingView(rootView: SegmentedTabs("Panel", tabs: panelTabs, selection: 0) { _ in })
+    host.frame = CGRect(x: 0, y: 0, width: 280, height: 60)
+    host.layoutSubtreeIfNeeded()
+    func segmented(in view: NSView) -> [NSSegmentedControl] {
+        (view as? NSSegmentedControl).map { [$0] } ?? view.subviews.flatMap(segmented)
+    }
+    let controls = segmented(in: host)
+    #expect(controls.map(\.segmentCount) == [panelTabs.count], "SegmentedTabs hosts no system segmented control")
 }
 
 @Test func theArrowsStepToTheNeighbouringTab() {

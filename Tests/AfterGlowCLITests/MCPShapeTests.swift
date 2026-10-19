@@ -61,7 +61,7 @@ struct MCPShapeTests {
                     == MCPToolResult(structured: .object(["error": .string(text)]), text: text, isError: true))
     }
 
-    @Test func grantsAlwaysAskAndTheFakeFlowConnectsAllowOnceUntilStop() {
+    @Test func aFileCommandAsksAndTheFakeFlowConnectsAllowOnceUntilStop() {
         var grants = AIAccessGrants()
         grants.record(.alwaysForClient, client: "c", app: "photo")
         #expect(grants.allows(client: "c", app: "photo", kind: CommandKind.file.rawValue) == nil)
@@ -76,6 +76,7 @@ struct MCPShapeTests {
         access.request(client: FakeAIAccess.demoClient)
         #expect(access.connectedClient == nil && access.pending?.client == "Test Client")
         access.decide(.deny)
-        #expect(access.pending == nil && access.connectedClient == nil && access.grants.entries.isEmpty)
+        #expect(access.pending == nil && access.connectedClient == nil)
+        #expect(access.grants.entries == [AIAccessEntry(client: "Test Client", app: "photo", decision: .deny)])
     }
 }
