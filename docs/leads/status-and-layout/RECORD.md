@@ -4,7 +4,7 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: SL-8 (wave 4, wf_00a7b134-d61) building; on merge with green Linux dev run, Belt-Slice-Done + Mac-Finish-Wanted SL-c, then contact sheet; 4 findings (#3129 #3132 #3134 #3136) wait on SuiteUI
+Next: SL-8 #3230 (4fb9096f, feature-done) in the lane (macOS build next); on merge with green Linux dev run, Belt-Slice-Done + Mac-Finish-Wanted SL-c, then contact sheet; 4 findings (#3129 #3132 #3134 #3136) wait on SuiteUI
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,7 @@ Next: SL-8 (wave 4, wf_00a7b134-d61) building; on merge with green Linux dev run
 | SL-5 | SL-c | 2 | inspector header facts and dateText | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json | LibraryStatusTextTests (SL-5 half) | #3075 | merged a01d82b7 |
 | SL-7 | SL-c | 2 | layout snapshots at each width | Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift | LibraryLayoutSnapshots | #3069 | merged e0b0ac66 |
 | SL-6 | SL-c | 3 | LibraryInspector header library.inspector.header | Sources/LibraryApp/LibraryInspector.swift, Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift | LibraryInspectorSnapshots | #3107 | merged b7e17ed6 |
-| SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | - | building |
+| SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | #3230 | in lane 4fb9096f |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -69,3 +69,4 @@ Next: SL-8 (wave 4, wf_00a7b134-d61) building; on merge with green Linux dev run
 - 09:54Z check: #3201 macOS build 39223926415 still queued; 7 SL findings open, SL-8 waits on #3201
 - 2026-10-19T10:17Z check: #3201 macOS build 39223926415 green, waiting on lane sweep; SL-8 starts once it merges (findings then 4)
 - 2026-10-19T10:40Z check: #3201 merged 895fb2d0 (closes #3130 #3131 #3135); CI finding #3186 closed as dup of #3131; 4 SL findings open (#3129 #3132 #3134 #3136, waiting on SuiteUI); SL-8 wave 4 started (wf_00a7b134-d61, base 895fb2d0, audit from scoped run 39207561728)
+- 2026-10-19T10:49Z SL-8 PR #3230 (head 4fb9096f, CI: PASS, Part of #291): inspector tab segments get library.inspector.info/develop and the switch library.inspector.tabs; audit run 39207561728 showed identifier 2 unnamed 0, both in LibraryInspector; no gap or needs-ui filed. Footer stripped from PR body.
