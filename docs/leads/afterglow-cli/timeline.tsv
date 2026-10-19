@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-19T02:38Z	3	heartbeat	#3074	lane batch-20261019021433 red (run 39189040322); bisecting, probe-1 (to #3066) red, probe-0 (dev) running 39190259772; CC-2 is last in batch
 2026-10-19T02:52Z	3	heartbeat	#3074	CC-2 still open, no needs-fix; dev now 036f8d0 (bisect resolved earlier PRs); awaiting next lane batch
 2026-10-19T03:06Z	4	builder-start	#3074	CC-2 merged 02:53Z; CL-2 builder started
+2026-10-19T03:17Z	4	pr-open	#3100	CL-2 PR opened, head 01b5b24, scripts/ci PASS (3868 tests)

@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 4 build wave 2
 Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: CL-2 builder running (branch lead/afterglow-cli-CL-2); on its PR, track the lane merge, then wave 3 (CL-3, CL-6, CL-8)
+Next: CL-2 PR #3100 (head 01b5b24, scripts/ci PASS) awaiting lane macOS build + merge; then wave 3 (CL-3, CL-6, CL-8). Note: cli-batch, cli-jobs, cli-mcp C4 parts already created in CL-2
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
