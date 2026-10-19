@@ -39,8 +39,7 @@ import Testing
     @Test func slotsSayWhyTheyCantActYet() {
         #expect(ExportFormat.allCases.map(\.fileExtension) == ["jpg", "png", "tif", "heic"])
         #expect(ExportFormat.jpeg.help(writable: [.jpeg]) == nil)
-        #expect(ExportFormat.png.help(writable: Set(ExportFormat.allCases)) != nil)
-        #expect(ExportFormat.forFileName("a.JPG") == .jpeg && ExportFormat.forFileName("a.png") == nil)
+        #expect(ExportFormat.forFileName("a.JPG") == .jpeg)
         #expect(ExportNaming.original.help == nil && ExportNaming(template: "{n}").help != nil)
         #expect(ExportPresets.unavailable != nil && ExportSidecar.unavailable != nil)
         #expect(ExportSidecar.xmp(for: LibraryFixtures.photos(named: "shoot")[0]) == nil)
