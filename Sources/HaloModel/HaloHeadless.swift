@@ -59,7 +59,7 @@ public struct HaloHeadless: HeadlessDocument {
         }
         let rendered = try renderFrame(options)
         let name = "\(workspace.selectedComposition?.name ?? "frame")-\(rendered.frame).png"
-        return [ExportedFile(suggestedName: name, format: format, data: try PNG.write(rendered.pixels))]
+        return [ExportedFile(suggestedName: name, format: format, data: try HaloFramePNG.data(rendered.pixels))]
     }
 
     /// The selected composition at `frame` (the playhead when absent) at 1/`scale` size (1 when absent), drawn as

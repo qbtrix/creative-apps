@@ -64,6 +64,27 @@ import Testing
         #expect(throws: CatalogError.self) { try doc.export("mov", options: .object([:])) }
     }
 
+    @Test func exportWritesTheRenderedFrameAsAPNGOnEveryPlatform() throws {
+        var doc = try HaloHeadless.open(Self.input("render-frame", "shapes.halo"), name: "shapes.halo")
+        _ = try HaloHeadless.catalog.run("timeline.scrub", params: .object(["frame": .number(12)]), on: &doc)
+        let file = try #require(try doc.export("png", options: .object([:])).first)
+        #expect(file.suggestedName == "Shapes-12.png")
+        let frame = try doc.renderFrame(.object([:])).pixels, png = try HaloJob.decodePNG(file.data)
+        #expect([png.width, png.height] == [frame.width, frame.height] as [Int])
+        #expect(png.rgba == (try frame.rgba8()))
+        let bytes = [UInt8](file.data)
+        var at = 8, types: [String] = []
+        while at + 12 <= bytes.count {
+            let length = bytes[at..<(at + 4)].reduce(0) { $0 << 8 | Int($1) }
+            let tagged = [UInt8](bytes[(at + 4)..<(at + 8 + length)]), stored = bytes[(at + 8 + length)..<(at + 12 + length)]
+            #expect(HaloFramePNG.word(Int(HaloFramePNG.checksum(tagged))) == Array(stored), "a bad CRC")
+            types.append(String(decoding: tagged.prefix(4), as: UTF8.self))
+            at += 12 + length
+        }
+        #expect(types == ["IHDR", "IDAT", "IEND"])
+        #expect(HaloFramePNG.checksum(Array("IEND".utf8)) == 0xAE42_6082)
+    }
+
     @Test(arguments: ["retitle-and-save", "render-frame"])
     func realJobPasses(job: String) throws {
         let problems = try HaloJob.check(job)
@@ -110,14 +131,9 @@ enum HaloJob {
         }
     }
 
-    /// The PNG `export` writes, decoded; until CoreRaster's PNG writer lands (IC-5) the frame `export` renders.
+    /// The PNG `export` writes, decoded.
     static func produced(_ doc: HaloHeadless, _ options: JSONValue) throws -> (width: Int, height: Int, rgba: [UInt8]) {
-        do {
-            return try decodePNG(try #require(doc.export("png", options: options).first).data)
-        } catch is CodecError {
-            let frame = try doc.renderFrame(options).pixels
-            return (frame.width, frame.height, try frame.rgba8())
-        }
+        try decodePNG(try #require(doc.export("png", options: options).first).data)
     }
 
     /// An 8-bit RGBA, non-interlaced PNG's pixels (W3C PNG, chunks, zlib and the five filters); enough for references.
