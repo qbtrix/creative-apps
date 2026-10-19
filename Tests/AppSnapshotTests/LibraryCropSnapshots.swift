@@ -36,13 +36,24 @@ import Testing
 
     /// What `cropControls` hands the views, with closures that change nothing.
     private func controls(_ catalog: LibraryCatalog) -> LibraryMenu.Crop {
-        LibraryMenu.Crop(
-            draft: catalog.cropDraft,
-            frame: catalog.cropFrame, canvas: catalog.cropCanvas, frameValue: catalog.cropFrameValue,
-            artboard: catalog.loupeItem.map { catalog.croppedSize($0) },
-            resetHelp: catalog.resetCropHelp, levelHelp: catalog.levelHelp,
-            setAspect: { _ in }, drag: { _, _, _ in }, setAngle: { _ in },
-            level: catalog.levelHelp == nil ? {} : nil, apply: {}, cancel: {}, reset: {})
+        // Field by field: one initializer holding every closure is too much for the type checker.
+        var crop = LibraryMenu.Crop()
+        crop.draft = catalog.cropDraft
+        crop.frame = catalog.cropFrame
+        crop.canvas = catalog.cropCanvas
+        crop.frameValue = catalog.cropFrameValue
+        crop.artboard = catalog.loupeItem.map { catalog.croppedSize($0) }
+        crop.resetHelp = catalog.resetCropHelp
+        crop.levelHelp = catalog.levelHelp
+        let none: LibraryMenu.Action = {}
+        crop.setAspect = { (_: CropAspect) in }
+        crop.drag = { (_: CropHandle, _: Double, _: Double) in }
+        crop.setAngle = { (_: Double) in }
+        if catalog.levelHelp == nil { crop.level = none }
+        crop.apply = none
+        crop.cancel = none
+        crop.reset = none
+        return crop
     }
 
     private func shoot(_ catalog: LibraryCatalog, _ name: String) throws {
