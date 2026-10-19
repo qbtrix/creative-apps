@@ -1,0 +1,19 @@
+// A fixture app source for CommandPathTests (CC-11): every menu item here is
+// built from a command spec, so the scan finds none. Not compiled: the .txt
+// suffix keeps SwiftPM from building it.
+// MenuCommand("In a comment", help: "", perform: {}) is not a call.
+struct FixtureMenus: Commands {
+    let document: FakeCanvasDocument
+    var body: some Commands {
+        CommandMenu("Rect") {
+            MenuCommand(FakeCanvasDocument.catalog.spec("rect.add"), on: document) { run("rect.add") }
+            MenuCommand(
+                removeSpec,
+                on: document,
+                shortcut: KeyboardShortcut("r")
+            ) { run("rect.remove") }
+            KeyframeButton(time: 0)
+            let unrelated = alert.addButton(withTitle: "OK")
+        }
+    }
+}
