@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-19T10:47Z	4	heartbeat	#3176	#3176 open
 2026-10-19T11:08Z	4	heartbeat	#3176	#3176 open
 2026-10-19T11:28Z	4	heartbeat	#3176	#3176 open
+2026-10-19T11:48Z	4	blocked	#3176	still open; new scoped suite run 39241180774 (e8d4898) still has suite) journeys="" in ci.yml, so no switching journeys; watcher hit its 2 h limit, not restarted
