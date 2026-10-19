@@ -12,7 +12,8 @@ lists its tasks, owned files and acceptance tests.
 
 Longest chain per feature: mac-platform 3, live-stage 4, live-keys 4,
 live-scenes 3, draw-key-save 7 (the reason is in its Build waves), stage-edit
-3, inspector-timeline 4 (reason in its Build waves), layers-files 3.
+3, inspector-timeline 4 (reason in its Build waves), layers-files 3,
+flare-export 5 (FX-2 → FX-3 → FX-5 → FX-9 → FX-10).
 
 Shipped while these packets were written, so no packet: LM-0c3 fake export
 and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
@@ -72,8 +73,7 @@ and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
 
 ## Not in a packet yet (later features)
 
-In usage order (section 1's map). Tier 2: export (F15a #354, F15b #355, IN-7
-#374), symbols, instances and swatches (F12a #14, F12b #380, the INSTANCE
+In usage order (section 1's map). Tier 2: symbols, instances and swatches (F12a #14, F12b #380, the INSTANCE
 section of #349, IN-5), onion skin and motion path (F10 #379, IN-3), and
 Direct Select's anchor marks (F4b #390). Tier 3: interactions (F13a #352,
 F13b #353, F14 #381, IN-6), Assist (F16a #382, F16b #383, IN-8), and the
