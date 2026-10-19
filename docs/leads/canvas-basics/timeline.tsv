@@ -116,3 +116,4 @@ utc	stage	event	ref	note
 2026-10-19T21:43Z	3	fix	3360	round 1: #3334 closed on dev, #3360 opened, 3 deferred
 2026-10-19T21:49Z	3	fix	3365	round 1 done; r-b3 gate rerun
 2026-10-19T21:51Z	3	fix	3366	opened r-b3 PR
+2026-10-19T22:06Z	3	wait-macos-build	3360,3365,3366	builds queued

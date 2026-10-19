@@ -4,8 +4,8 @@ Issue: #1500 · Packet: docs/blueprints/design/features/canvas-basics.md
 Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
-Next: round 2 on #3339/#3342/#3343 once #3365 and #3366 merge (shared files); then review on a green design run; leftovers become gaps; Belt-Contact-Sheet.
-Last check: 2026-10-19T21:51Z: round 1 PRs open: #3360 (#3344/#3345), #3365 (#3335-#3338), #3366 (#3340/#3341, lead's gate rerun CI: PASS). All bodies footer-free, read back.
+Next: round 2 (fix-batch) on #3339/#3342/#3343 once #3365 and #3366 merge; then critic re-review; leftovers to gap; Belt-Contact-Sheet.
+Last check: 2026-10-19T22:06Z: #3360/#3365/#3366 open, fast-lane, mergeable, macOS builds queued; 11 findings open (round 1 fixes pending merge).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
