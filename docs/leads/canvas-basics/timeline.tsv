@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-19T20:25Z	3	check	-	no change; waiting on 39296061014 / 39297097650 / 39311818078; 0 findings
 2026-10-19T20:47Z	3	check	-	no change; journeys ui-test 2h+ on 39296061014; 0 findings
 2026-10-19T21:11Z	3	slice-done	CB-b,CB-c	Belt-Slice-Done on run 39292729592; critic panels next
+2026-10-19T21:16Z	3	critics	-	CB-b #3334-#3339, CB-c #3340-#3345; fix round 1 wf_2c06ed4c-eff

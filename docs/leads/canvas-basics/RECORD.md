@@ -4,8 +4,8 @@ Issue: #1500 · Packet: docs/blueprints/design/features/canvas-basics.md
 Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
-Next: critic panels for CB-b and CB-c on scoped design run 39292729592 (8f40531, ui-screens + snapshots downloaded); file findings; fix rounds (max 2); then Belt-Contact-Sheet.
-Last check: 2026-10-19T21:11Z: scoped design 39292729592 (8f40531, contains c6ad68f and a0de43b) is green (journeys report-only); Belt-Slice-Done CB-b and CB-c and Mac-Finish-Wanted CB-b and CB-c posted on #1500. Full 39296061014 journeys failed suite-wide (every app; empty values, missing layer rows); both slice journeys red there and in 39292729592. 0 open findings.
+Next: fix round 1 (wf_2c06ed4c-eff) on findings #3334-#3345; review again after its PRs merge; round 2 max; leftovers become gaps; then Belt-Contact-Sheet.
+Last check: 2026-10-19T21:16Z: critic panels done. CB-b filed #3334-#3339 (9 confirmed, 4 refuted), CB-c filed #3340-#3345 (9 confirmed, 1 refuted). 12 open findings; fix round 1 started on dev cd44f3e.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
