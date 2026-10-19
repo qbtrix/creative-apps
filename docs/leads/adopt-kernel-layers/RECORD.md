@@ -4,7 +4,7 @@ Issue: #1936 · Packet: docs/blueprints/suiteui/features/adopt-kernel-layers.md
 Run: act-1a152763cf6-04ka (resume; earlier runs act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/line-lead-playbook-ce1x23 · Resumed: 2026-10-19
 Stage: 3 wave 2 (AL-flare panel blocked) + wave 1 (AL-photo)
 Base: bede834 (origin/dev, 2026-10-19); brief main cc14022edd80d783a8488e464b15f5766d8dda60 verified
-Next: Wave 5 PRs in the lane: #3218 AL-p3 (AL-photo), #3217 AL-h3 (AL-halo), #3216 AL-f3 (AL-flare). After each merges and a scoped app or full ci.yml run on main holding it succeeds, run the critic panel on its screens, then post Belt-Slice-Done for the slice.
+Next: #3216 (AL-f3) merged as fa8c815 at 11:33Z; scoped flare run 39246056734 queued on it: once green and main holds fa8c815, run critic panel on its screens, then Belt-Slice-Done: AL-flare. #3217 (AL-h3), #3218 (AL-p3) still wait on lane macOS builds.
 
 Line lead for #1938, #1937 and #1936 (contract rule 19, run act-1a14dfbdefe-il38);
 this record is the adopt-kernel-layers part. The first run led it with #1935 and #1934. This run's brief names `main` at
@@ -65,6 +65,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-19T08:28:59Z #3198 opened by wf_3b6e6f51-0c2. The contract check flagged only the proxy-appended footer, which was accepted earlier because the lane strips it at squash. The swaps are not stacked on #3198: a PR to dev would then carry its 393 lines and break the 400-line cap. They start from dev once it merges.
 - #3198 merged as fa1fb1d6 at 09:32Z (macOS run 39223178335 success); launched wave 5 with the wider file lists and the .app naming / options / decorations.
 - Wave 5 contract check: the proxy's footer was flagged again (a false positive; the lane strips it). The baseline edits in #3217/#3218 only lower ratchets (canonical-ui, view-statics) after a deleted view, and #3218's journey edits test the swap itself, so both are accepted. Sizes: 206/353/398 lines, 6/7/11 files.
+- 11:43Z: #3216 merged in a 5-PR lane batch.
 
 ## Open
 - 2026-10-18T13:45Z: ninth Belt nudge (after a worker restart); continued from stage 3.
