@@ -2,9 +2,9 @@
 
 Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: waiting on scoped suiteui 39175856233 (dev e0a627c, carries #2992; in progress). Scoped suite 39172233475 ran no journeys or snapshots; full 39173775025 cancelled; full 39176304199 pending
+Stage: goldens from 39175856233 -> golden PR
 Base: 2e27b8db (origin/dev)
-Next: on suiteui artifacts: golden PRs (canvas, sidebar), editor-chrome contact sheet or gaps, #2839 call, list journeys check
+Next: open canvas golden PR, then CM-16 feature-done
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
