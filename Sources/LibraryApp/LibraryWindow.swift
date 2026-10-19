@@ -155,6 +155,13 @@ struct LibraryWindow: View {
         allowed ? perform : nil
     }
 
+    /// A two-argument menu action, nil (so the item disables) when it can't run.
+    func enabled<First, Second>(
+        _ allowed: Bool, _ perform: @escaping @MainActor (First, Second) -> Void
+    ) -> (@MainActor (First, Second) -> Void)? {
+        allowed ? perform : nil
+    }
+
     static func symbol(for collectionID: String) -> String {
         switch collectionID {
         case "favorites": "heart"

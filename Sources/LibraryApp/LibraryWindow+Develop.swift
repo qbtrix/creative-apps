@@ -23,23 +23,22 @@ extension LibraryWindow {
         let canEdit = model.canEditDevelop
         // Each action in its own typed local: one long initializer mixing
         // these closures was more than the type checker could finish.
-        let set: (@MainActor (DevelopSlider, Double) -> Void)? =
-            canEdit
-            ? { (slider: DevelopSlider, value: Double) -> Void in
-                model.setDevelop(slider, to: value, coalesceKey: "develop-\(slider.rawValue)")
-                developPreview()
-            } : nil
+        let set: (@MainActor (DevelopSlider, Double) -> Void)? = enabled(canEdit) {
+            (slider: DevelopSlider, value: Double) -> Void in
+            let key: String = "develop-" + slider.rawValue
+            model.setDevelop(slider, to: value, coalesceKey: key)
+            developPreview()
+        }
         let setCurve: (@MainActor ([DevelopCurvePoint]) -> Void)? = enabled(canEdit) {
             (points: [DevelopCurvePoint]) -> Void in
             model.setCurve(points, coalesceKey: "develop-curve")
             developPreview()
         }
-        let setLevels: (@MainActor (DevelopLevels.Field, Double) -> Void)? =
-            canEdit
-            ? { (field: DevelopLevels.Field, value: Double) -> Void in
-                model.setLevels(field, to: value, coalesceKey: "develop-levels")
-                developPreview()
-            } : nil
+        let setLevels: (@MainActor (DevelopLevels.Field, Double) -> Void)? = enabled(canEdit) {
+            (field: DevelopLevels.Field, value: Double) -> Void in
+            model.setLevels(field, to: value, coalesceKey: "develop-levels")
+            developPreview()
+        }
         let endEdit: LibraryMenu.Action? = enabled(canEdit) { () -> Void in
             developFinish(model.endDevelopDrag())
         }
