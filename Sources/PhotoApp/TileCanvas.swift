@@ -8,17 +8,24 @@
 // showing them, without going through SwiftUI. That view (EmbeddedCanvasHost,
 // inside the CanvasViewport) draws them as tile layers on the CPU path or
 // through its CAMetalLayer on the GPU path, as View > Rendering says, turned
-// by the Straighten preview's angle. Mouse input stays with CanvasViewport,
+// by the Straighten preview's angle. On the resident GPU path
+// (`residentTarget`) the renderer writes the picture into the view's Metal
+// presenter's texture instead, and an update brings no tiles, only the
+// present. Mouse input stays with CanvasViewport,
 // which owns focus and Space-pan: the embedded view never takes a click.
 // Presentation state only.
 import AppKit
+import CoreRenderMetal
 import IOSurface
+import Metal
 import PhotoModel
 import SuiteUI
 import SwiftUI
 
 @MainActor final class CanvasTiles {
     private(set) var width = 0, height = 0
+    /// The presenter texture the last resident target wrote into; a different one starts empty.
+    private var targetTexture: ObjectIdentifier?
     private(set) var images: [PixelRect: CGImage] = [:]
     /// The tiles' IOSurfaces, which the view's tile layers show.
     private var surfaces: [PixelRect: IOSurface] = [:]
@@ -69,6 +76,22 @@ import SwiftUI
         return out
     }
 
+    /// Where a resident GPU render writes a `width` x `height` picture: the attached view's Metal presenter's
+    /// document texture, through `metal`'s display encode (premultiplied sRGB, no readback). `isNew` when the
+    /// texture holds none of the picture yet, so the render must draw every tile. Nil off the Metal path.
+    func residentTarget(width: Int, height: Int, on metal: MetalBackend) -> (target: PhotoDisplayTarget, isNew: Bool)? {
+        guard let presenter = view?.metalPresenter as? CanvasTilePresenter,
+            let texture = presenter.residentTexture(on: metal.device, width: width, height: height)
+        else { return nil }
+        let id = ObjectIdentifier(texture)
+        defer { targetTexture = id }
+        let held = TextureBox(texture: texture)
+        let target = PhotoDisplayTarget { surface, rect in
+            try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
+        }
+        return (target, targetTexture != id)
+    }
+
     /// Clears the picture (no image open).
     func clear() {
         (width, height, images, surfaces, handedBytes) = (0, 0, [:], [:], 0)
@@ -109,4 +132,9 @@ import SwiftUI
         tiles.apply(try PhotoRenderer.completeUpdate(workspace))
         return tiles
     }
+}
+
+/// A texture handed to the render task: Metal textures are safe to use from any thread, the type just isn't Sendable.
+private struct TextureBox: @unchecked Sendable {
+    let texture: any MTLTexture
 }
