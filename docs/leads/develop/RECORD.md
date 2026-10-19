@@ -1,10 +1,10 @@
 # develop lead record
 
 Issue: #1527 · Packet: docs/blueprints/library/features/develop.md
-Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
+Run: act-1a1543fe40d-7l1y · Session: claude/library-feature-lead-zn216c · Started: 2026-10-19T12:20Z (earlier: act-1a150baa34c-jzk9)
 Stage: 3 wave 4 (DV-11; DV-3 and DV-8 from wave 3 still open)
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: DV-9 #3221 (21757afc) in the lane (macOS build next); then DV-10 after DV-9; DV-12 waits on the core issue and bump
+Next: DV-9 #3221 (2e67c5df) macOS build green, lane merges next; then DV-10 after DV-9; DV-12 waits on the core issue and bump
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,7 +13,7 @@ Next: DV-9 #3221 (21757afc) in the lane (macOS build next); then DV-10 after DV-
 | DV-b | slider, curve, levels, reset, copy, paste, sync as undo steps | DV-3, DV-4 | MJ2 | DV-a (DV-3) | no | 0 | done (Belt-Slice-Done, dev CI 39221576463 Linux green) | - | - |
 | DV-c | live renderer passes, fixed order, histogram | DV-5, DV-6 | MJ3 | DV-a | no | 0 | done | 39192572958 | - |
 | DV-d | Develop tab on the fakes, reachable from the inspector | DV-7, DV-8, DV-9, DV-10 | J5 | DV-a (DV-8, DV-9); spine follow-up (DV-9) | yes | 0 | building | - | - |
-| DV-e | vibrance and saturation through CoreRaster | DV-11, DV-12 | MJ4 | DV-c; creative-core issue and its bump (DV-12) | no | 0 | building | - | - |
+| DV-e | vibrance and saturation through CoreRaster | DV-11, DV-12 | MJ4 | DV-c; creative-core issue and its bump (DV-12) | no | 0 | done (per Belt) | - | - |
 | DV-f | integrate: live services, relaunch survival, frame budget | DV-13, DV-14, DV-15 | J5, P3 | DV-d, DV-c, DV-b, DV-e | no | 0 | planned | - | - |
 
 ## Tasks
@@ -25,7 +25,7 @@ Next: DV-9 #3221 (21757afc) in the lane (macOS build next); then DV-10 after DV-
 | DV-5 | DV-c | 2 | render and budget checks, disabled until DV-6 (packet row; tests only) | Tests/LibraryModelTests/LibraryDevelopRenderTests.swift, Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift | both compile, disabled "waits on DV-6" | #3038 | merged 91d02681 |
 | DV-6 | DV-c | 3 | LiveDevelop: pass list, CoreRaster calls, neutral untouched, histogram, waiting; enables DV-5's tests | Sources/LibraryModel/Live/LiveDevelop.swift, Tests/LibraryModelTests/LibraryDevelopRenderTests.swift, Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift, Tests/mutations/LibraryModel.LiveDevelop.json | LibraryDevelopRenderTests, LibraryDevelopBudgetTests | #3065 | merged 4747a796 |
 | DV-3 | DV-b | 3 | slider, curve, levels edits, coalescing, resets, helps | Sources/LibraryModel/LibraryDevelop.swift, Tests/LibraryModelTests/LibraryDevelopTests.swift, Tests/mutations/LibraryModel.LibraryDevelop.json | LibraryDevelopTests | #3095 | merged 7acc00bf |
-| DV-8 | DV-d | 3 | develop area and menu closures | Sources/LibraryApp/LibraryMenus.swift, Sources/LibraryApp/LibraryWindow+Develop.swift, Sources/LibraryApp/LibraryWindow+Thumbnails.swift | macOS build; LibraryDevelopMenuTests (fix 1) | #3086 | pr-open (fix 1 pushed f38e5472) |
+| DV-8 | DV-d | 3 | develop area and menu closures | Sources/LibraryApp/LibraryMenus.swift, Sources/LibraryApp/LibraryWindow+Develop.swift, Sources/LibraryApp/LibraryWindow+Thumbnails.swift | macOS build; LibraryDevelopMenuTests (fix 1) | #3086 | merged b749dd94 |
 | DV-11 | DV-e | 4 | color checks and MJ4, disabled "waits on DV-12" | Tests/LibraryModelTests/LibraryDevelopColorTests.swift | compiles, disabled | #3098 | merged b48cf6c4 |
 | DV-4, DV-9 | DV-b, DV-d | 4 | see packet (DV-4 after DV-3, DV-9 after DV-8) | see develop.wave.json | see packet | - | planned |
 | DV-10, DV-12, DV-14 | - | 5 | see packet | see develop.wave.json | see packet | - | planned |
@@ -76,3 +76,4 @@ Next: DV-9 #3221 (21757afc) in the lane (macOS build next); then DV-10 after DV-
 - 11:10Z fix: DV-9 #3221 fixer pushed 2e67c5df (typed closures in snapshot menu); footer 0; awaiting lane macOS build
 - 11:26Z check: DV-9 #3221 head 2e67c5df, macOS build 39243123840 dispatched
 - 11:50Z check: DV-9 #3221 head 2e67c5df, macOS build 39243123840 queued
+- 12:55Z run act-1a1543fe40d-7l1y: lead/develop rebuilt on main 6f9a2b88 (record only). Belt marks DV-e done; remaining DV-d, DV-f. DV-9 #3221 macOS build 39243123840 success; lane merges next. Dev CI runs since 08:16Z all cancelled while queued (39252895176 at 6e70826b pending).
