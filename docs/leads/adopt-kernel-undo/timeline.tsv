@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-19T18:06:17Z	heartbeat	check	-	full CI 39296061014 (dev 1b33afbb, holds AU-design 90e7a0c) still pending, macOS runners backlogged; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
 2026-10-19T18:28:58Z	heartbeat	check	-	full CI 39296061014 (dev 1b33afbb, holds AU-design 90e7a0c) still queued, newer full CI 39300369891 on c5ec57aa pending; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
 2026-10-19T18:50:32Z	heartbeat	check	-	full CI 39296061014 (1b33afbb, holds AU-design 90e7a0c) still queued, 39300369891 (c5ec57aa) pending; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T19:12:49Z	heartbeat	check	-	full CI 39296061014 (1b33afbb, holds AU-design 90e7a0c) still queued; 39300369891 and 39306309509 cancelled; 39308088122 (1f4500f1) pending; main b3011ab; no supervisor answer; hand-off owners unchanged
