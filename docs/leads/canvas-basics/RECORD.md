@@ -5,7 +5,7 @@ Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, a
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
 Next: lane merges #3224 after its macOS build; then poll for a design-scoped or full ci.yml run containing c6ad68f (CB-b) and #3224 (CB-c); Belt-Slice-Done for each, Mac-Finish-Wanted, critic panel on the screens.
-Last check: 2026-10-19T11:54Z #3224 waits on lane macOS build 39245781059; dev ci.yml runs since c6ad68f all cancelled (superseded), none green yet; 0 open findings
+Last check: 2026-10-19T13:02Z lane macOS build 39245781059 on fdb7975 failed (paintArtwork nonisolated calling main-actor DesignTextArtwork.draw); fixed in ea150fa (@MainActor), CI: PASS, Head moved; waits on the new lane build. Dev ci.yml runs since c6ad68f all cancelled (39252895176 on 6e70826 pending); 0 open findings
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -27,7 +27,7 @@ Gap issues (one per slice, filed at stage 1): CB-a #1521 (CB-2 closes), CB-b #15
 | CB-3 | CB-a | 3 | Text click-drag fixed-width box; fixedWidth flag | StyleTypes.swift, DesignDrawing.swift, DesignCanvasEditing.swift, DesignTextBoxDrawTests.swift, 3 plans | DesignTextBoxDrawTests | #2871 (080dea8) | merged 18:01Z (4a3e5a0) |
 | CB-5 | CB-b | 4 | commitTextEdit(extent:), setTextStyle refit | DesignText.swift, Live/LiveStyling.swift, DesignTextFitTests.swift, 2 plans | DesignTextFitTests | #2897 (4269cd4) | merged 20:05Z (94d162c) |
 | CB-6 | CB-b | 5 | window commits with measured extent; editor grows/wraps; journey on | DesignWindow.swift, DesignTextFont.swift, DesignTextEditor.swift, DesignTextArtwork.swift, DesignTextFitSnapshots.swift, +TextBox journey | design-text-fit snapshots, journey | #3208 | merged c6ad68f (#3208, 11:15Z) |
-| CB-9 | CB-c | 6 | page rows, past-edge overlay; journey on; feature-done | DesignIntent.swift, DesignWindow.swift, DesignCanvas.swift, DesignInspectorPage.swift, DesignPastEdge.swift, DesignPageSnapshots.swift, +Page journey | design-inspector-page, design-canvas-past-edge, journey | #3224 | pr-open on dev, head fdb7975 (dev merged in after #3208) |
+| CB-9 | CB-c | 6 | page rows, past-edge overlay; journey on; feature-done | DesignIntent.swift, DesignWindow.swift, DesignCanvas.swift, DesignInspectorPage.swift, DesignPastEdge.swift, DesignPageSnapshots.swift, +Page journey | design-inspector-page, design-canvas-past-edge, journey | #3224 | pr-open on dev, head ea150fa (fix round 1: macOS build error, @MainActor paintArtwork) |
 
 Waves (packet's Build waves, checked against dev b01e722):
 - Wave 1: CB-1, CB-4, CB-7, CB-8. All independent (disjoint new files; design-contracts is built).
