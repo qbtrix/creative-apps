@@ -1,10 +1,10 @@
 # canvas-marks lead record
 
 Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
-Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
+Run: act-1a151f5e8ac-m3tp (resumed from act-1a1504abd7d-2wty; line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: waiting on dev CI
-Base: 2e27b8db (origin/dev)
-Next: Belt-Contact-Sheet on the first green of full run 39186699154 or scoped suiteui run 39187049656 (dev ed0fed9e, contains f191be21)
+Base: ef6f201f (origin/main)
+Next: wait for scoped suiteui run 39187049656 or full CI 39188162085 on dev (both contain b1383770 #3060 and f191be21 #3061). Post Belt-Contact-Sheet on the first green one.
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
@@ -85,3 +85,6 @@ Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
 - 2026-10-18T16:13:31Z findings: filed (#2847 #2848) scrollers fix gating; #2848 is cross-line (LibraryCommands Zoom In shortcut), no fix, to the supervisor
 - 2026-10-18T16:15:40Z CM-13 fix gating #2847 scrollers fix gating; #2848 with the supervisor; dev CI 39143942767 pending
 - 2026-10-18T16:20:27Z fix round 1 PR open #2856 canvas scroll bars hidden (CM-13); gate PASS
+
+## 2026-10-19T02:42Z resumed (run act-1a151f5e8ac-m3tp)
+- Rebased onto origin/main ef6f201f. The full CI 39183169319 that the feature-done merge triggered was cancelled, and so were the full runs after it. Waiting on 39187049656 (scoped suiteui, ed0fed9e) and 39188162085 (CI, 17dc84c7).
