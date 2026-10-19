@@ -32,7 +32,7 @@ final class AfterGlowJourneyTests: XCTestCase {
         "File": ["New", "Open…", "Open Recent"],
         "Edit": ["Undo Remove from Recents", "Remove from Recents", "Cut", "Copy", "Add from Clipboard", "Select All"],
         "View": ["Show Sidebar", "Show Inspector", "Larger Thumbnails", "Smaller Thumbnails"],
-        "Window": ["Switch To", "Assets"],
+        "Window": ["Switch To", "AI Access…", "Assets"],
     ]
     /// The app menu's own item (LauncherCommandsUpdate).
     static let appMenuItems = ["Check for Updates…"]

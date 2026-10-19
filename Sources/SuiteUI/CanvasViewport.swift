@@ -22,7 +22,13 @@
 // ZoomMath to 10% to 3200%: pinch, and Command-plus, Command-minus and
 // Command-0 (fit) while it has focus; Command-0 asks for the environment's
 // `canvasFitScale` (EditorDetail's palette-clear fit) when one is set.
-// `checkerboard: false` puts the document on the plain artboard color
+// `showsRulers: false` drops the rulers and their corner; the canvas keeps
+// an empty band where they were (CanvasLayout's `inset`), so the artboard
+// doesn't jump. A drag that starts on a ruler goes to `onRulerDrag`, never
+// `onDrag`: a RulerDrag per move and one on release, carrying the ruler's axis
+// (.horizontal for the top one), the document coordinate across it and, on
+// release, whether the pointer is back over the ruler (the host removes the
+// guide then). `checkerboard: false` puts the document on the plain artboard color
 // instead of the checkerboard. `onPointer`
 // reports the document point under the pointer, nil once it leaves the artboard.
 // CanvasLayout is the placement and pan math, plain and tested on its own;
@@ -54,20 +60,36 @@ public struct CanvasLayout: Equatable, Sendable {
     public let origin: CGPoint
     /// The visible part of the scrollable area.
     public let viewport: CGSize
+    /// The empty band along the leading and top edges where hidden rulers were; 0 with them shown.
+    public let inset: CGFloat
 
-    /// Non-positive document sides count as one pixel, as CanvasSurface does.
-    public init(document: CGSize, zoom: Double, viewport: CGSize, margin: CGFloat = SuiteSpacing.xxl) {
+    /// Non-positive document sides count as one pixel, as CanvasSurface does. With an `inset`, the artboard
+    /// is placed as in a viewport that much smaller, then moved past the band, so it keeps its place on screen.
+    public init(document: CGSize, zoom: Double, viewport: CGSize, margin: CGFloat = SuiteSpacing.xxl, inset: CGFloat = 0) {
         let scale = zoom.isFinite && zoom > 0 ? zoom : 1
+        let inset = max(inset, 0)
         let artboard = CGSize(
             width: max(document.width, 1) * scale, height: max(document.height, 1) * scale)
         let content = CGSize(
-            width: max(viewport.width, artboard.width + 2 * margin),
-            height: max(viewport.height, artboard.height + 2 * margin))
+            width: max(viewport.width - inset, artboard.width + 2 * margin),
+            height: max(viewport.height - inset, artboard.height + 2 * margin))
         self.scale = scale
         self.artboard = artboard
-        self.content = content
+        self.content = CGSize(width: content.width + inset, height: content.height + inset)
         self.viewport = viewport
-        origin = CGPoint(x: (content.width - artboard.width) / 2, y: (content.height - artboard.height) / 2)
+        self.inset = inset
+        origin = CGPoint(x: (content.width - artboard.width) / 2 + inset, y: (content.height - artboard.height) / 2 + inset)
+    }
+
+    /// The drag out of the `axis` ruler at `point`, in viewport points (the top ruler lies above y 0, the left
+    /// one left of x 0) with the canvas scrolled to `scrolled`: the document coordinate across the ruler (y for
+    /// the top one), and whether the pointer is over that ruler again.
+    public func rulerDrag(_ axis: Axis, _ phase: RulerDrag.Phase, at point: CGPoint, scrolled: CGPoint) -> RulerDrag {
+        let document = documentPoint(CGPoint(x: point.x + scrolled.x, y: point.y + scrolled.y))
+        let horizontal = axis == .horizontal
+        return RulerDrag(
+            axis: axis, phase: phase, position: horizontal ? document.y : document.x,
+            isOverRuler: horizontal ? point.y < 0 : point.x < 0)
     }
 
     /// The document point under `point` in the scrollable area.
@@ -121,11 +143,22 @@ public struct CanvasLayout: Equatable, Sendable {
     }
 }
 
+/// A guide dragged out of a ruler: which ruler, the drag's phase, the document coordinate across the
+/// ruler, and whether the pointer is back over the ruler.
+public struct RulerDrag: Equatable, Sendable {
+    public enum Phase: Equatable, Sendable { case changed, ended }
+    public let axis: Axis, phase: Phase, position: Double, isOverRuler: Bool
+    public init(axis: Axis, phase: Phase, position: Double, isOverRuler: Bool) {
+        (self.axis, self.phase, self.position, self.isOverRuler) = (axis, phase, position, isOverRuler)
+    }
+}
+
 public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let documentSize: CGSize
     private let zoom: Double
     private let pointer: PointerStyle?
     private let checkerboard: Bool
+    private let showsRulers: Bool
     /// The unit the ruler corner names: "px" unless the app's document is in another one.
     public let rulerUnit: String
     /// The ruler corner's unit under its older name.
@@ -136,6 +169,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let onDragEnd: (@MainActor () -> Void)?
     private let onKey: (@MainActor (KeyPress) -> KeyPress.Result)?
     private let onPointer: (@MainActor (CGPoint?) -> Void)?
+    private let onRulerDrag: (@MainActor (RulerDrag) -> Void)?
     private let content: Content
     private let overlay: Overlay
     @State private var scrolled: CGPoint = .zero
@@ -156,22 +190,24 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     /// artboard's size (the document at `zoom`), overlay on top. Only the
     /// content is clipped to the artboard. The checkerboard shows behind it
     /// unless `checkerboard` is false. The ruler corner names `rulerUnit`, or
-    /// `unit` when an app still passes that label.
+    /// `unit` when an app still passes that label; `showsRulers: false` hides them.
     public init(
         documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil, checkerboard: Bool = true,
-        rulerUnit: String = "px", unit: String? = nil,
+        showsRulers: Bool = true, rulerUnit: String = "px", unit: String? = nil,
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
         onZoom: (@MainActor (Double) -> Void)? = nil,
         onDrag: (@MainActor (CGPoint, CGPoint) -> Void)? = nil,
         onDragEnd: (@MainActor () -> Void)? = nil,
         onKey: (@MainActor (KeyPress) -> KeyPress.Result)? = nil,
         onPointer: (@MainActor (CGPoint?) -> Void)? = nil,
+        onRulerDrag: (@MainActor (RulerDrag) -> Void)? = nil,
         @ViewBuilder content: () -> Content, @ViewBuilder overlay: () -> Overlay
     ) {
         self.documentSize = documentSize
         self.zoom = zoom
         self.pointer = pointer
         self.checkerboard = checkerboard
+        self.showsRulers = showsRulers
         self.rulerUnit = unit ?? rulerUnit
         self.onSize = onSize
         self.onZoom = onZoom
@@ -179,29 +215,59 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         self.onDragEnd = onDragEnd
         self.onKey = onKey
         self.onPointer = onPointer
+        self.onRulerDrag = onRulerDrag
         self.content = content()
         self.overlay = overlay()
     }
 
     public var body: some View {
         GeometryReader { geometry in
+            // Hidden rulers leave their band to the canvas, so the size the host fits to stays the same.
+            let band = showsRulers ? SuiteSize.ruler : 0
             let viewport = CGSize(
                 width: max(geometry.size.width - SuiteSize.ruler, 0),
                 height: max(geometry.size.height - SuiteSize.ruler, 0))
-            let layout = CanvasLayout(document: documentSize, zoom: zoom, viewport: viewport)
+            let layout = CanvasLayout(
+                document: documentSize, zoom: zoom,
+                viewport: CGSize(width: viewport.width + SuiteSize.ruler - band, height: viewport.height + SuiteSize.ruler - band),
+                inset: SuiteSize.ruler - band)
             VStack(spacing: 0) {
-                HStack(spacing: 0) {
-                    RulerCorner(unit: rulerUnit)
-                    Ruler(axis: .horizontal, origin: layout.origin.x - scrolled.x, scale: layout.scale)
+                if showsRulers {
+                    HStack(spacing: 0) {
+                        RulerCorner(unit: rulerUnit)
+                        ruler(.horizontal, layout)
+                    }
                 }
                 HStack(spacing: 0) {
-                    Ruler(axis: .vertical, origin: layout.origin.y - scrolled.y, scale: layout.scale)
+                    if showsRulers { ruler(.vertical, layout) }
                     scroller(layout)
                 }
             }
+            .coordinateSpace(.named(Self.space))
             .onAppear { onSize(viewport) }
             .onChange(of: viewport) { _, size in onSize(size) }
         }
+    }
+
+    /// The viewport's frame, the corner at its origin, in which a ruler drag reads the pointer.
+    nonisolated private static var space: String { "suite.canvas.frame" }
+
+    /// A ruler, taking guide drags when the host does.
+    private func ruler(_ axis: Axis, _ layout: CanvasLayout) -> some View {
+        let origin = axis == .horizontal ? layout.origin.x - scrolled.x : layout.origin.y - scrolled.y
+        return Ruler(axis: axis, origin: origin, scale: layout.scale)
+            .gesture(rulerDrag(axis, layout), isEnabled: onRulerDrag != nil)
+    }
+
+    /// A drag from a ruler: each move and the release, in the viewport's points (the rulers' band is negative).
+    private func rulerDrag(_ axis: Axis, _ layout: CanvasLayout) -> some Gesture {
+        let report = { (phase: RulerDrag.Phase, location: CGPoint) in
+            let point = CGPoint(x: location.x - SuiteSize.ruler, y: location.y - SuiteSize.ruler)
+            onRulerDrag?(layout.rulerDrag(axis, phase, at: point, scrolled: scrolled))
+        }
+        return DragGesture(minimumDistance: 1, coordinateSpace: .named(Self.space))
+            .onChanged { report(.changed, $0.location) }
+            .onEnded { report(.ended, $0.location) }
     }
 
     private func scroller(_ layout: CanvasLayout) -> some View {
@@ -294,7 +360,9 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         switch press.key {
         case "=", "+": return ZoomMath.zoomedIn(from: zoom)
         case "-": return ZoomMath.zoomedOut(from: zoom)
-        case "0": return ZoomMath.fit(document: documentSize, in: layout.viewport, using: fitScale)
+        case "0":
+            let area = CGSize(width: layout.viewport.width - layout.inset, height: layout.viewport.height - layout.inset)
+            return ZoomMath.fit(document: documentSize, in: area, using: fitScale)
         default: return nil
         }
     }
@@ -361,7 +429,8 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 // Held at the clamp: no zoom, so no scroll either.
                 guard next != zoom else { return }
                 onZoom?(next)
-                let target = CanvasLayout(document: documentSize, zoom: next, viewport: start.layout.viewport)
+                let target = CanvasLayout(
+                    document: documentSize, zoom: next, viewport: start.layout.viewport, inset: start.layout.inset)
                 let point = start.layout.anchoredOffset(to: target, pointer: start.pointer, scrolled: start.scrolled)
                 if target.content == layout.content {
                     pendingScroll = nil

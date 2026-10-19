@@ -87,6 +87,18 @@ import Testing
         try shoot("several-live", model)
     }
 
+    /// Align is two rows of three icon buttons, and several layers add one row of two Distribute
+    /// buttons: no title wraps or widens a row (#2421).
+    @Test func alignIsCompactIconRows() {
+        func height(_ view: some View) -> CGFloat {
+            NSHostingView(rootView: view.frame(width: SuiteSize.editorPanelWidth)).fittingSize.height
+        }
+        let header = height(InspectorSection("Align") { Color.clear.frame(height: SuiteSize.actionButton) })
+        let row = SuiteSize.actionButton + SuiteSpacing.xs
+        #expect(height(DesignAlignBar(help: [:], perform: { _ in })) == header + row)
+        #expect(height(DesignAlignBar(help: [:], distributeHelp: [:], perform: { _ in })) == header + 2 * row)
+    }
+
     @Test func titleShowsItsTextSection() throws {
         var model = DesignWorkspace()
         model.useServices(.fake)

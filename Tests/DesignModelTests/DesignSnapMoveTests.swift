@@ -95,9 +95,9 @@ import Testing
         var once = cards(Self.a)
         once.drag(from: pt(150, 140), to: last, modifiers: [])
         #expect(workspace.pages == once.pages && workspace.snapGuides == once.snapGuides)
-        var draw = cards()  // A draw builds no engine (SN-5's).
+        var draw = cards()  // A draw builds its engine once at the press too (SN-5).
         draw.selectTool(.rectangle)
         draw.drag(from: pt(497.5, 137.6), to: pt(697.2, 222.3), modifiers: [])
-        #expect(draw.gesture?.snapBuilds == 0 && draw.snapGuides == DesignSnapGuides.empty)
+        #expect(draw.gesture?.snapBuilds == 1 && draw.snapGuides?.lines.isEmpty == false)
     }
 }

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "levelHelp shows when a leveler is set",
+    "file": "Sources/LibraryModel/Contracts/CropLeveling.swift",
+    "find": "leveler == nil ? \"Auto-straighten isn't connected yet (crop).\" : nil",
+    "replace": "leveler != nil ? \"Auto-straighten isn't connected yet (crop).\" : nil",
+    "tests": "LibraryCropLevelingTests"
+  },
+  {
+    "label": "the fake levels by the wrong angle",
+    "file": "Sources/LibraryModel/Fakes/FakeCropLeveling.swift",
+    "find": "return 2.5",
+    "replace": "return 2.0",
+    "tests": "LibraryCropLevelingTests"
+  },
+  {
+    "label": "the fake never looks at the last pixel",
+    "file": "Sources/LibraryModel/Fakes/FakeCropLeveling.swift",
+    "find": "to: bytes.count - 3, by: 4",
+    "replace": "to: bytes.count - 4, by: 4",
+    "tests": "LibraryCropLevelingTests"
+  },
+  {
+    "label": "the fake services have no leveler",
+    "file": "Sources/LibraryModel/LibraryServices.swift",
+    "find": "leveler: FakeCrop(), isPreview: true",
+    "replace": "isPreview: true",
+    "tests": "LibraryCropLevelingTests"
+  }
+]

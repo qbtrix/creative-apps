@@ -58,6 +58,19 @@ import Testing
         #expect(LibraryInspector.headerID == "library.inspector.header")
     }
 
+    /// #291: the tab switch and each of its segments carry a library.* identifier (scoped run 39207561728
+    /// found the Info and Develop radio buttons without one), and J11's id order clicks develop before info.
+    @Test func tabIdentifiers() {
+        #expect(LibraryInspector.tabsID == "library.inspector.tabs")
+        #expect(LibraryInspector.tabs.map(\.id) == [.info, .develop])
+        #expect(LibraryInspector.tabs.map(\.title) == ["Info", "Develop"])
+        let ids = LibraryInspector.tabs.compactMap(\.identifier)
+        #expect(ids == ["library.inspector.info", "library.inspector.develop"])
+        #expect(Set(ids + [LibraryInspector.tabsID]).count == 3)
+        #expect(ids.sorted() == ["library.inspector.develop", "library.inspector.info"])
+        #expect(ids.allSatisfy { $0 < LibraryInspector.tabsID })
+    }
+
     /// The inspector at its ideal width on the panel, as LibraryShellSnapshots draws it.
     private func shoot(_ catalog: LibraryCatalog, _ name: String) throws {
         for scheme in [ColorScheme.light, .dark] {

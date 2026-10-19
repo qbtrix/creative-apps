@@ -51,7 +51,8 @@ final class DesignShellJourneyTests: XCTestCase {
 
         // DS-J2: New File.
         openFile(design, shot: "shell-open")
-        XCTAssertEqual(window.title, "Untitled", "the open file's title")
+        // The runner reads the subtitle into the title ("Untitled – Saved", files-history FH-4), so the name is its start.
+        XCTAssert(window.title.hasPrefix("Untitled"), "the open file's title reads \(window.title)")
         let status = design.element("suite.status")
         // The zoom pill's "Zoom 25%" label doesn't reach XCUITest on macOS (#1452): its Text reads "25%" as its value.
         let texts = status.staticTexts.allElementsBoundByIndex.flatMap { [$0.label, $0.value as? String ?? ""] }
