@@ -2,9 +2,9 @@
 
 Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a1517272b2-vq6l (resumes earlier runs) · Session: claude/feature-lead-playbook-2k2x84 · Started: 2026-10-19T00:00Z
-Stage: waiting on full CI
+Stage: DW-c done gaps #3080; DW-d done gaps #3079 (run 39187798386)
 Base: d50e891e (origin/dev); main verified at 349578b8
-Next: Belt-Slice-Done once full CI 39188162085 (17dc84c7) shows a green Linux job
+Next: Belt-Contact-Sheet once all DW slices done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -70,3 +70,4 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 2026-10-19T02:11Z	heartbeat	full CI on ed0fed9e was cancelled for a newer one
 2026-10-19T02:31Z	heartbeat	full CI still pending (runners busy)
 2026-10-19T03:02Z	heartbeat	full CI still pending
+2026-10-19T03:24Z	heartbeat	DW-c/DW-d done with gaps after 2 fix rounds
