@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 11:26Z	check	heartbeat	-	SL-8 #3230 macOS build 39241507186 in progress
 11:50Z	check	heartbeat	-	SL-8 #3230 macOS build 39241507186 green; awaiting lane merge
 2026-10-19T12:59Z	check	SL-c all merged; awaiting dev Linux run
+2026-10-19T14:23Z	SL-c done	feature-done PR in gate
