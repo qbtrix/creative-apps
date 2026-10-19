@@ -22,16 +22,24 @@ public enum AIAccessPrompt {
         return client.allSatisfy(\.isWhitespace) || client.hasPrefix("-") ? nil : client
     }
 
-    /// The sheet's question, naming the client and the app.
+    /// The sheet's question, naming the client as an AI assistant and the app.
     public static func title(_ request: AIAccessRequest) -> String {
-        "Allow “\(request.client)” to control \(request.app)?"
+        "Allow the AI assistant “\(request.client)” to work in \(request.app)?"
     }
 
-    /// The sheet's explanation, with the command the client sent when there is one.
+    /// The sheet's explanation: what the client may touch (the named document, or the app's documents when the
+    /// window has none), how to stop it, and the command it sent when there is one.
     public static func message(_ request: AIAccessRequest) -> String {
-        let base = "It can read and edit the open document until you stop it."
+        let document = request.document.flatMap { $0.isEmpty ? nil : $0 }
+        let scope = document.map { "read and edit “\($0)”" } ?? "open, read and edit your documents in \(request.app)"
+        let base = "It can \(scope) until you click \(stop) in the title bar. Change this later in Window > \(windowTitle)."
         guard let command = request.command, !command.isEmpty else { return base }
         return base + " It asked to run “\(command)”."
+    }
+
+    /// The line under the sheet's message telling the two allows apart.
+    public static func choiceHelp(_ request: AIAccessRequest) -> String {
+        "\(allowOnce) lasts until “\(request.client)” disconnects. \(alwaysAllow) remembers “\(request.client)” for \(request.app)."
     }
 
     /// The chip's label while `client` drives the window.

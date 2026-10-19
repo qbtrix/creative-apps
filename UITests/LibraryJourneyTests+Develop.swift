@@ -11,8 +11,8 @@
 //
 // Written before its code (lead.md, contract rule 13, DV-7): each step starts
 // with `throw XCTSkip("waits on DV-n")`, and the task named there drops it.
-// DV-10 enables (F) steps 1 and 11, DV-13 (F) steps 2 to 10 and the (L)
-// pass. A skipped step is noted and the walk goes on, so steps 1 and 11 can
+// DV-10 enabled (F) steps 1 and 11; DV-13 enables (F) steps 2 to 10 and the
+// (L) pass. A skipped step is noted and the walk goes on, so steps 1 and 11 can
 // run while 2 to 10 still wait; the test then skips with every step's reason.
 import XCTest
 
@@ -52,7 +52,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 1: by name, IMG_0001 in the loupe, the Develop tab: every row at 0, the curve, the levels.
     @MainActor private func openDevelop(_ arguments: [String], suffix: String) throws {
-        throw XCTSkip("waits on DV-10")
         let library = Journey("Library", self, arguments: arguments)
         self.library = library
         sortByName(library)
@@ -75,6 +74,8 @@ final class LibraryDevelopJourneyTests: XCTestCase {
             XCTAssertEqual(Self.number(row), 0, "\(slider) isn't 0 on a new photo")
         }
         XCTAssert(library.element("library.develop.curve").exists, "no curve (library.develop.curve)")
+        XCTAssert(library.element("library.develop.curve.point2").exists, "the curve hasn't two points")
+        XCTAssertFalse(library.element("library.develop.curve.point3").exists, "a new photo's curve has a third point")
         for field in ["Black Point", "Midtones", "White Point", "Output Black", "Output White"] {
             XCTAssert(inspectorItem(field, library).exists, "no LEVELS row \(field)")
         }
@@ -235,7 +236,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 11 (F): a failed render says so under the histogram.
     @MainActor private func errorState() throws {
-        throw XCTSkip("waits on DV-10")
         let library = Journey("Library", self, arguments: Self.fake + ["-LibraryFakeMode", "fail"])
         sortByName(library)
         cell("IMG_0001", library).doubleClick()
