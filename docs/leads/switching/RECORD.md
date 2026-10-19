@@ -125,3 +125,5 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
   - #3357: an open search field (`isSearching`) reserves `searchFieldRoom` past the buttons, so the row narrows to fit instead of pushing the sidebar toggle into the overflow menu.
   - Tests: AppSwitcherTests `theRowStaysOutOfTheInspectorsColumn` and `anOpenSearchFieldNarrowsTheRow`. The journeys check the row's maxX against the inspector at 880 and 1000 pt, and check that the sidebar toggle stays hittable with search open.
 - Next: critic round 2 on the next scoped `suite` run that contains round 2.
+- Fix round 2 PR #3367 merged at 23:59Z (dev 1299651e), after macOS build 39333570669 passed. It waited about 100 min in the runner queue.
+- Critic round 2 waits on a scoped `suite` run on a dev head that contains 1299651e. Scoped run 39331727327 (bd10d93a, still queued) has #3359 but not #3367, so it can't serve round 2. I asked the supervisor on #1507 to dispatch `ci.yml app=suite` on dev.
