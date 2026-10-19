@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-19T17:10Z	3	check	-	39278490377 macOS running; 0 findings
 2026-10-19T17:31Z	3	check	-	39278490377 macOS running; 39294573974 pending; 0 findings
 2026-10-19T17:54Z	3	check	-	39278490377 macOS running; 39294573974 cancelled; fallback 39296061014 pending; 0 findings
+2026-10-19T18:15Z	3	check	-	39278490377 cancelled; waiting 39296061014 / design 39297097650; 0 findings
