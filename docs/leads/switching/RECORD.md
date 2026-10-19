@@ -1,10 +1,10 @@
 # switching lead record
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
-Run: act-1a150baa312-n5va · Session: claude/switching-feature-lead-kyvcdx · Started: 2026-10-18 (earlier run act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 3 wave 5 (SW-4a #2989, feature-done, waiting on its macOS build)
-Base: origin/dev 507719b
-Next: SW-4a PR merges; green dev macOS run; review round; Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
+Run: act-1a146f2912a-581f · Session: claude/switching-feature-lead-jm0d5f · Started: 2026-10-16T23:00Z
+Stage: 3 wave 3 (SW-3d in review)
+Base: origin/dev 0e3c08ea (after #1943 merged as 98e5d50f)
+Next: #2811 (LayerTreeList) still open; AL-p3, AL-f3 rest, AL-h3, AL-d3 wait on it. AL-d* also waits on design-seams-2.
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
@@ -20,8 +20,8 @@ This packet has no `## Slices` table: the v2 loop applies. The feature is one un
 | SW-3a | feature | 2 | AppLauncher, StoreWatcher, live switching slot, recents watcher | Sources/SuiteShell/{AppLauncher,StoreWatcher}.swift; Live/{SwitchingSlot,RecentsSlot}.swift | SuiteShellSwitchingTests (macOS) | #1833 (merged 7d022431) | merged |
 | SW-3b | feature | 2 | HandOffTransport, SuiteAppDelegate, live hand-off slot, the launcher router | Sources/SuiteShell/{HandOffTransport,SuiteAppDelegate}.swift; Live/HandOffSlot.swift; Sources/AfterGlowApp/LauncherRouter.swift | SuiteShellHandOffTests (macOS) | #1883 (merged 7d068e10) | merged |
 | SW-3c | feature | 3 | SuiteCommands Switch To from SwitchMenu, .suiteApp(_:host:) | Sources/SuiteShell/{SuiteCommands,SuiteAppModifier}.swift; SuiteAppDelegate.swift (registry); AppLauncher.swift (static run state) | SuiteCommandsTests (Linux), LauncherMenuStubTests | #1943 (merged 98e5d50f) | merged |
-| SW-3d | feature | 4 | SwitcherEntries (model), SuiteSwitcherBridge (the switcher a window shows) | Sources/SuiteModel/Switching/SwitcherEntries.swift; Sources/SuiteShell/SuiteSwitcherBridge.swift; SuiteAppModifier.swift | SwitcherEntriesTests (Linux) | #1977 (merged) | merged |
-| SW-4a | feature | 5 | Journeys SJ3, testOpenRecentBringsAppForward, testCrashIsolation (feature-done) | UITests/AfterGlowJourneyTests+Switch.swift | dev macOS run | this PR | in review; adoption steps skip until #861, #862, #836, #837 |
+| SW-3d | feature | 4 | SwitcherEntries (model), SuiteSwitcherBridge (the switcher a window shows) | Sources/SuiteModel/Switching/SwitcherEntries.swift; Sources/SuiteShell/SuiteSwitcherBridge.swift; SuiteAppModifier.swift | SwitcherEntriesTests (Linux) | this PR | in review |
+| SW-4a | feature | 5 | Journeys SJ3, testOpenRecentBringsAppForward, testCrashIsolation (feature-done) | UITests/AfterGlowJourneyTests+Switch.swift | dev macOS run | – | waits on SW-3c, SW-3d, home HM-2b #845 and the adoptions |
 | SW-4b | feature | 5 | Journey SJ2 (follow-up #858) | UITests/AfterGlowJourneyTests+New.swift | dev macOS run | – | follow-up, outside the done check |
 | SW-4c | feature | 5 | SP1, SP2 and budget constants (follow-up #859) | UITests/AfterGlowJourneyTests+PerfSwitch.swift, +BudgetsSwitch.swift | perf JSON | – | follow-up, waits on #782 |
 | A-FL-1 | #861 | line:flare | FlareModel SuiteDocumentHost, FlareApp adoption | Sources/FlareModel/FlareDocumentHost.swift and FlareApp | FlareDocumentHostTests | – | owned by flare line |
@@ -47,12 +47,13 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 - `bundle` (wave 1) is still planned. Its BU-1a (`SuiteCommands`) and BU-1b (`LauncherRouter`) stubs are not on dev, so SW-3b and SW-3c stay blocked until bundle merges.
 - The swift toolchain was not on this machine; it is installed with `scripts/cloud-setup.sh` (pinned 6.3.3) so `scripts/ci --changed` can run here.
 
+- 2026-10-18T18:11Z AL-h2: AL-h1 had already moved HaloLayerEdits' order code onto the kernel, so AL-h2 removed only the remaining parent walks (HaloKeyRules.follows, FakeLayerPlacing.follows); HaloLayerEdits.swift unchanged and no HaloLayerEdits plan exists.
+
 ## Open
 - The fast lane needs `Fast-Check: pass` on the head: produced by `scripts/ci --changed` here after the toolchain installs.
 - Bundle (wave 1) not built: SW-3b and SW-3c wait on it.
 - Editor-in-window's AppSwitcherState is needed for SW-3d.
-- Home's HM-2b (#845) closed; it no longer gates SW-4a.
-- SW-4a's adoption-dependent steps throw XCTSkip naming #861, #862, #837, #836 until those lines land; their journeys then run in full with no change here.
+- Home's HM-2b (#845) gates SW-4a.
 - The adoption issues A-FL-1 through A-HA-1 belong to their app lines, not to this lead.
 
 ## Decisions (wave 2)
@@ -87,10 +88,3 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 - The bridge's rows use the switcher's ids (`home` for the launcher), and a click switches through AppLauncher.
 - C4: the bridge is added to the shell-apps component.
 - Belt-Slice-Done lines don't apply: this packet is v2 (no slices table), so there's no slice to mark.
-
-## Decisions (wave 5, run act-1a150baa312-n5va)
-- The brief's base check (HEAD f7e0350) matched `origin/main`; the work is based on `origin/dev` 507719b, as the earlier run decided.
-- SW-4a ships now as the feature-done PR. The launcher-side steps run today: the home's Switch To items and its disabled own item, ⌃⌘1/⌃⌘2 launching Flare and Design as separate processes while the home keeps running, SIGKILL of Flare leaving Design and the home running, and ⌃⌘1 relaunching Flare cold. Steps that need Flare or Design to host suite documents (state kept across switches, the shared switcher, window titles, dirty dot, the strip listing apps) skip naming the adoption and fixture issues, following the home journeys' XCTSkip pattern. The macOS journeys never hold a lane PR (supervisor note), so the dev run is their proof.
-- Checked with the apple-docs MCP: `XCUIElement.hover()`, `NSRunningApplication.forceTerminate()`.
-- SW-4a is #2989. Its first macOS build (run 39164953207) failed on a dev break that isn't this PR's: #2942's zoom-sweep test still used `TileCanvasView`, which #2907 had removed. #2990 fixed it on dev at 21:35Z. The fix wasn't ported, because CLAUDE.md says not to fix another line's dev break in a PR. dev was merged into the branch once #2990 landed.
-- The GitHub proxy re-appends a "Generated by" footer to every PR body this session writes, even on a REST PATCH, so it can't be removed from here. The lane strips attribution from the squash commit.

@@ -15,8 +15,22 @@ utc	stage	event	ref	note
 2026-10-17T05:40Z	3	pr-opened	SW-3c	SuiteCommands Switch To live, .suiteApp modifier, clash scan; Linux gate PASS
 2026-10-17T06:30Z	3	pr-merged	#1943	SW-3c merged as 98e5d50f
 2026-10-17T07:00Z	3	pr-opened	SW-3d	SwitcherEntries (Linux, tests) and SuiteSwitcherBridge (macOS); Linux gate PASS
-2026-10-17T08:00Z	3	pr-merged	#1977	SW-3d merged
-2026-10-18T00:00Z	3	run-start	act-1a150baa312-n5va	new lead run; #845 closed; adoptions #861 #862 still open
-2026-10-18T00:30Z	3	pr-opened	SW-4a	switch journeys with adoption skips; feature-done
-2026-10-18T21:25Z	3	ci-red	#2989	macOS build failed on dev break (TileCanvasView, #2942); fix #2990
-2026-10-18T21:55Z	3	merge-dev	#2989	#2990 on dev; dev merged into SW-4a
+2026-10-18T17:39Z	check	AL-h1 lane	#2863	macOS build 39147301972 in progress
+2026-10-18T18:01Z	merge	AL-h1	#2863	merged by fast lane after macOS build 39147301972 green
+2026-10-18T18:01Z	launch	AL-h2	-	builder launched for Halo delete
+2026-10-18T18:11Z	pr	AL-h2	#2883	opened, scope and footer verified, Mutate 9/9
+2026-10-18T18:22Z	check	AL-h2 lane	#2883	macOS build 39153072512 running; #2811 open
+2026-10-18T18:45Z	AL-h2	merged	#2883	afc0bda8; #2811 still open
+2026-10-18T19:06Z	heartbeat	check	#2811	still open
+2026-10-18T19:27Z	heartbeat	check	#2811	still open
+2026-10-18T19:49Z	heartbeat	check	#2811	still open
+2026-10-18T20:11Z	heartbeat	check	#2811	still open
+2026-10-18T20:32Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T20:54Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T21:17Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T21:38Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T21:59Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T22:22Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T22:45Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T23:06Z	heartbeat	check	#2811	still open; no launch
+2026-10-18T23:29Z	heartbeat	check	#2811	still open; no launch

@@ -1,0 +1,37 @@
+utc	stage	event	ref	note
+2026-10-17T06:04Z	0	stage-start	#1936	setup: line lead for #1936 #1935 #1934; base origin/dev 4a86f5f; brief main fdaabbf verified as ancestor
+2026-10-17T06:10Z	0	stopped	#1936	blocked: every slice waits on editor-kernel:EK-tree (#1933 not started, no kernel types on dev)
+2026-10-17T06:38Z	0	heartbeat	#1936	still blocked: editor-kernel lead started wave 1 (EK-a, PR #1992); EK-tree waits on EK-a
+2026-10-17T10:44Z	0	heartbeat	#1936	still blocked: #1992 (EK-1) unmerged, editor-kernel wave 2 stacked on it; EK-tree still planned
+2026-10-18T08:30Z	0	stage-start	#1936	relaunch act-1a14dfbdefe-il38: line lead for #1938 #1937 #1936; base dev 2202c7c; brief main e01529f verified
+2026-10-18T08:32Z	0	stopped	#1936	blocked: EK-tree bodies (EK-12, EK-13) unmerged; LayerTree on dev is the EK-2 stub
+2026-10-18T08:23Z	0	recheck	#1936	Belt nudge; dev unchanged at 2202c7c, EK-tree unmerged, editor-kernel blocked on dev-red #2667
+2026-10-18T08:23Z	0	stopped	#1936	still blocked on EK-tree
+2026-10-18T08:54Z	0	recheck	#1936	Belt nudge 2; dev 93b1e91, EK-tree still stubs, editor-kernel waiting on lane batch
+2026-10-18T08:54Z	0	stopped	#1936	still blocked on EK-tree
+2026-10-18T09:25Z	0	recheck	#1936	Belt nudge 3; dev ed52eaa8; EK-11 tests #2652 not yet on dev
+2026-10-18T09:25Z	0	stopped	#1936	still blocked on EK-tree
+2026-10-18T09:56Z	0	recheck	#1936	Belt nudge 4; dev 02c20bfb; EK-11 tests #2652 now on dev (f6562c86), so EK-12/EK-13 bodies are unblocked for editor-kernel; not started
+2026-10-18T09:56Z	0	stopped	#1936	still blocked on EK-tree bodies
+2026-10-18T10:27Z	0	recheck	#1936	Belt nudge 5; dev a80ed944; EK-12/EK-13 still planned; EK-u LayerTreeList #2668 merged (a4885b39), so the panel tasks' EK-u wait is met
+2026-10-18T10:27Z	0	stopped	#1936	still blocked on EK-tree bodies
+2026-10-18T11:01Z	0	recheck	-	recheck 6: still waiting on editor-kernel
+2026-10-18T12:25Z	0	stage-end	#2727	EK-12/EK-13 merged; AL-flare unblocked
+2026-10-18T12:25Z	3	stage-start	b0c59a4f	wave 1 builder AL-f1
+2026-10-18T13:10Z	3	pr-merged	#2776	AL-f1, Mutate 4/4
+2026-10-18T13:45Z	3	wave-end	1	AL-flare wave 1 merged; AL-f2 folded into AL-f3
+2026-10-18T13:45Z	3	stage-start	4bf67be8	wave 2 builder AL-f3
+2026-10-18T14:30Z	3	pr-merged	#2800	AL-f2 + AL-f3 delete half
+2026-10-18T14:30Z	3	blocked	#2811	AL-f3 panel swap needs LayerTreeList APIs; filed needs-ui
+2026-10-18T14:30Z	3	stage-start	AL-p1	wave 1 builder AL-p1 (AU-p2 #2793 merged)
+2026-10-18T15:12Z	3	check	-	AL-p1 building; #2811 open, unassigned; AL-h1 waits on AE-halo (#2818 in lane)
+2026-10-18T15:25Z	3	pr-opened	#2823	AL-p1, Mutate 5/5
+2026-10-18T15:45Z	3	heartbeat	-	#2823 in lane; AL-h1 waits on AE-h2
+2026-10-18T16:08Z	3	heartbeat	-	#2823 still in lane; AL-h1 waits on #2842
+16:32Z	AL-photo	merged	#2823	00d78f21
+16:32Z	AL-halo	launched	AL-h1	builder
+16:32Z	AL-photo	launched	AL-p2	builder
+16:46Z	AL-photo	pr	#2862	AL-p2 a2f75fa5, 4 files PhotoModel, Mutate 7/7
+16:50Z	AL-halo	pr	#2863	AL-h1 fe9fe9ec, 6 files HaloModel, Mutate 6/6
+16:53Z	check	heartbeat	-	#2862 and #2863 open in the lane
+17:16Z	AL-photo	merged	#2862	e55c8d3c
