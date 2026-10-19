@@ -20,8 +20,7 @@ import SwiftUI
 
 extension LibraryWindow {
     var developMenu: LibraryMenu.Photo {
-        let canEdit = model.developHelp == nil && !model.developTargets.isEmpty
-        let inLoupe = model.mode == .loupe && model.loupeItem != nil
+        let canEdit = model.canEditDevelop
         let develop = LibraryMenu.Develop(
             set: canEdit
                 ? { (slider: DevelopSlider, value: Double) in
@@ -44,10 +43,10 @@ extension LibraryWindow {
             resetLevels: enabled(canEdit) { developFinish(model.resetLevels()) },
             sync: enabled(model.syncSource != nil) { developFinish(model.syncSettings()) },
             syncTitle: model.syncTitle,
-            toggleOriginal: enabled(canEdit && inLoupe) { developToggleOriginal() },
+            toggleOriginal: enabled(model.canShowOriginal) { developToggleOriginal() },
             showsOriginal: developShowsOriginal)
         return LibraryMenu.Photo(
-            copySettings: enabled(model.developTargets.count == 1) { model.copySettings() },
+            copySettings: enabled(model.canCopySettings) { model.copySettings() },
             pasteSettings: enabled(model.canPasteSettings) { developFinish(model.pasteSettings()) },
             resetDevelop: enabled(canEdit) { developFinish(model.resetDevelop(nil)) },
             develop: develop)
