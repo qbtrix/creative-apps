@@ -158,3 +158,4 @@ utc	stage	event	ref	note
 2026-10-19T19:23Z	heartbeat	PR #3319 open; lane macOS build 39307484113 queued
 2026-10-19T19:45Z	heartbeat	PR #3319 open; lane macOS build 39307484113 still queued (runner backlog)
 2026-10-19T20:07Z	heartbeat	PR #3319 open; lane macOS build 39307484113 still queued (20 runs queued repo-wide)
+2026-10-19T20:29Z	heartbeat	PR #3319 (fix #1705) waits on lane macOS build run 39307484113, still queued (18 queued repo-wide); no failure to act on
