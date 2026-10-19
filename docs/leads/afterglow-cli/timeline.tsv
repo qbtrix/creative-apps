@@ -27,3 +27,5 @@ utc	stage	event	ref	note
 2026-10-19T05:45:57Z	build	builder started	-	CL-7 (CC-7 #3120 merged); #3123 macOS build green, merges next sweep
 2026-10-19T05:46:50Z	build	PR opened	#3151	CL-4 CL-args head 701ca29, ci --changed PASS, mutate 5/5, 396 lines/9 files
 2026-10-19T05:58:36Z	build	PR opened	#3154	CL-7 CL-batch head b01b9a1, ci --changed PASS, mutate 7/7, +267/-31 6 files
+2026-10-19T06:10:35Z	build	merged	#3123	CL-8 on dev 1a49ea97
+2026-10-19T06:10:35Z	build	builder started	CL-9	CL-jobs RealJobs body + plan + cli-jobs part

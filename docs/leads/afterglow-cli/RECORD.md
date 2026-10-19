@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 4 build wave 4
 Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: #3123 CL-8, #3149 CL-5, #3151 CL-4, #3154 CL-7 in lane → CL-9 after #3123; CL-10 after #3149+#3151+#3154 (route run, LiveIO in main.swift, enable waits-on-CC-7 tests). Then critics on scoped app=suite run.
+Next: CL-9 builder running (#3123 CL-8 merged 1a49ea97). #3149 CL-5, #3151 CL-4, #3154 CL-7 in lane → CL-10 after all three (route run, LiveIO in main.swift, enable waits-on-CC-7 tests). Then CL-11 docs, critics on scoped app=suite run.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
