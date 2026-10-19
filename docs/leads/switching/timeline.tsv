@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-19T01:37Z	4	wait-ci	39180214762	Linux job green; macOS job queued for a runner since 00:54Z; later full runs 39183169319 and 39184285016 were the ones cancelled
 2026-10-19T02:05Z	4	wait-ci	39180214762	macOS job got a runner at 01:41Z; in scripts/ci
 2026-10-19T02:31Z	4	wait-ci	39180214762	macOS job still in scripts/ci (50 min in)
+2026-10-19T02:57Z	4	wait-ci	39180214762	macOS job still in scripts/ci (75 min in); journeys not started
