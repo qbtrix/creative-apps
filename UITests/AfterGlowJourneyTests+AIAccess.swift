@@ -22,7 +22,7 @@ extension AfterGlowJourneyTests {
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "the sheet stayed after Allow Once")
         let chip = home.element("suite.aiaccess.chip")
         XCTAssert(chip.waitForExistence(timeout: 5), "no Controlled by chip after Allow Once")
-        // XCUITest can read a SwiftUI label as empty (#262), so the value stands in.
+        // Falls back to the value the way Home's journey does (#262).
         XCTAssertEqual(chip.label.isEmpty ? (chip.value as? String) ?? "" : chip.label, "Controlled by Test Client")
         home.shot("ai-access-chip")
 

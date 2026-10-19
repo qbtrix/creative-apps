@@ -15,9 +15,12 @@ public struct AIAccessChip: View {
 
     public var body: some View {
         HStack(spacing: SuiteSpacing.s) {
+            // One element labelled with the chip's text: the bare Label read "" in the journey (#3327).
             Label(AIAccessPrompt.chip(client: client), systemImage: "sparkles")
                 .font(SuiteFont.pill)
                 .foregroundStyle(SuiteColor.textPrimary)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(AIAccessPrompt.chip(client: client))
                 .accessibilityIdentifier("suite.aiaccess.chip")
             Button(AIAccessPrompt.stop, systemImage: "stop.fill") { onStop() }
                 .controlSize(SuiteSize.compactControl)
