@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-19T08:13:32Z	wave-4	launch	wf_3bddc912-d1c	AL-p3(+AL-p2) AL-h3 AL-f3 on dev 9cb4a95 after #3138 merged
 2026-10-19T08:16:41Z	wave4	blocked	wf_3bddc912-d1c	AL-p3/AL-h3/AL-f3 blocked on LayerTreeList gaps
 2026-10-19T08:16:41Z	contract	filed	#3194	LayerTreeList contract; builder wf_3b6e6f51-0c2
+2026-10-19T08:28:59Z	contract	pr	#3198	LayerTreeList contract, head 884f9dc
