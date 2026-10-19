@@ -5,7 +5,7 @@ Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, a
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
 Next: fix round 1 (wf_2c06ed4c-eff) on findings #3334-#3345; review again after its PRs merge; round 2 max; leftovers become gaps; then Belt-Contact-Sheet.
-Last check: 2026-10-19T21:16Z: critic panels done. CB-b filed #3334-#3339 (9 confirmed, 4 refuted), CB-c filed #3340-#3345 (9 confirmed, 1 refuted). 12 open findings; fix round 1 started on dev cd44f3e.
+Last check: 2026-10-19T21:34Z: fix round 1 (wf_2c06ed4c-eff) running on #3334-#3345; 12 open findings.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
