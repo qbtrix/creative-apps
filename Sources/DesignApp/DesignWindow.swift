@@ -3,7 +3,9 @@
 // viewport, the status note and the alert; the open file's URL lives in the
 // workspace), turns every DesignIntent into a workspace method or a file panel, and
 // publishes a DesignMenu to the menu bar. Only this file calls the workspace's
-// methods. The zoom keeps the handle tolerance a constant size on screen, and
+// methods. An open text edit is committed, its box fitted to the measured draft,
+// before any intent but a draft or a cancel acts (canvas-basics CB-6). The zoom
+// keeps the handle tolerance a constant size on screen, and
 // the page is fitted whenever the selected page changes or a file opens, and
 // refitted as the canvas resizes until the user zooms, through
 // EditorDetailLayout so the fitted page and its handles stay clear of the
@@ -125,6 +127,11 @@ struct DesignWindow: View {
         #if DEBUG
         defer { Self.lastWorkspace = model }
         #endif
+        // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
+        switch intent {
+        case .textDraft, .cancelText: break
+        default: commitText()
+        }
         switch intent {
         case .newFile: model.newFile()
         case .open: chooseFile()
@@ -161,7 +168,7 @@ struct DesignWindow: View {
         case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)
         case .editText(let id): try? model.beginTextEdit(id)
         case .textDraft(let text): model.setTextDraft(text)
-        case .commitText: model.commitTextEdit()
+        case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
         case .zoomIn: userZoom(ViewerZoom.zoomedIn(from: zoom))
         case .zoomOut: userZoom(ViewerZoom.zoomedOut(from: zoom))
@@ -192,6 +199,17 @@ struct DesignWindow: View {
             // The row ids come from the model's own rows; only the name can be refused.
             do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
         }
+    }
+
+    /// Ends an open text edit with the draft's measured extent, so the box fits its text in the
+    /// commit's step: an auto-width box takes both sides, a fixed-width one wraps at its width and
+    /// takes the height. The edited node is always the selected one (DesignTextOverlay).
+    private func commitText() {
+        guard let id = model.editingTextID else { return }
+        let extent = model.selectedNode.flatMap { node in
+            node.id == id ? DesignTextFont.measure(model.textDraft, in: node) : nil
+        }
+        model.commitTextEdit(extent: extent)
     }
 
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
@@ -347,7 +365,7 @@ struct DesignWindow: View {
 
     /// ponytail: written on the main thread; a design file is small JSON. Move it off if files grow large.
     private func write(to url: URL) {
-        model.commitTextEdit()
+        commitText()
         do {
             try model.fileData().write(to: url, options: .atomic)
             model.didSave(to: url)
