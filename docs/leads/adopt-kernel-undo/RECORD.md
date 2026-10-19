@@ -4,7 +4,7 @@ Issue: #1934 · Packet: docs/blueprints/suiteui/features/adopt-kernel-undo.md
 Run: act-1a152763cf6-04ka (resume; earlier runs act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/line-lead-playbook-ce1x23 · Resumed: 2026-10-19
 Stage: 3 wave 2
 Base: bede834 (origin/dev, 2026-10-19); brief main cc14022edd80d783a8488e464b15f5766d8dda60 verified
-Next: (2026-10-19T04:44Z) Wave 3: AU-h1 (Halo adapter, plus History: Hashable where Payload: Hashable, which closes #2747) is building. AU-d1, AU-l1 and AU-f1 wait on their hand-offs (design-seams-2, files-history, design-window, filters-collections, stage-edit planned; spine building).
+Next: (2026-10-19T05:43Z) #3139 (AU-h1, closes #2747) is in the lane. When it merges, launch AU-h2 (delete HaloHistoryRules.swift and the stack code). AU-d1, AU-l1, AU-f1 wait on hand-offs.
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-undo half. The brief's integration branch is `main` at
@@ -74,6 +74,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - AU-p1 approach: `PhotoHistory` keeps `baseName` (the kernel has none) and updates it when the 50-step limit drops a step. It gets a hand-written `==` over what it shows, because `History` is not Equatable and `PhotoWorkspace` compares history.
 - AU-h1 packet conflict: the "tests unchanged" rule can't hold against the merged kernel API (see Open). Filed #2747 rather than keeping a mirror stack in Halo.
 - 2026-10-19T04:44Z: resume under run act-1a152763cf6-04ka on dev bede834. #3022 (files-history FH-a) moved Design undo and the saved marker onto History and added public undoSteps/redoSteps with Step.payload reads and Equatable where Payload: Equatable. That is most of #2747; only Hashable is missing (HaloHistory is Hashable), so AU-h1 adds that one conformance in SuiteKernel (same line) and starts now. AU-d1 shrinks to what #3022 did not cover; recheck when design-seams-2 lands.
+- 2026-10-19T05:43Z: #3139 opened for AU-h1 (10 files, +216/-51, CI: PASS, head b2a5de65): Halo ProjectHistory over History<HaloDocumentState>, History: Hashable where Payload: Hashable.
 
 ## Open
 - 2026-10-18T13:01Z wave 2 started on dev 7ae985e: AU-p1 merged (#2754, 3df88b1, 12:17Z, lane batch of 2). AU-p2 building. #2747 still open, so AU-h1 stays blocked.
