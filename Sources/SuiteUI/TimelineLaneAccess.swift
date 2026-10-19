@@ -11,7 +11,8 @@
 // get a child, and the value speaks the first 10 keys, so a 20,000 pt lane of
 // 400 keys doesn't flood the tree (#1800). Identifiers are opt-in: with a
 // timelineIdentifierPrefix P the lane is `P.lane.<id>` and each key child
-// `P.key.<id>.<frame>`; with none (Halo, Flare) nothing inside gets one.
+// `P.key.<id>.<frame>`; with none (Flare) nothing inside gets one. Halo sets
+// `halo.timeline`.
 import SwiftUI
 
 struct TimelineLaneAccess<ID: Hashable & Sendable>: ViewModifier {
@@ -158,7 +159,7 @@ extension EnvironmentValues {
     }
 
     /// The prefix a host sets for the strip's inner identifiers; nil puts none.
-    var timelineIdentifierPrefix: String? {
+    public var timelineIdentifierPrefix: String? {
         get { self[TimelineIdentifierPrefixKey.self] }
         set { self[TimelineIdentifierPrefixKey.self] = newValue }
     }

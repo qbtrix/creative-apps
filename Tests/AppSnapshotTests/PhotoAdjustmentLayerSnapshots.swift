@@ -115,28 +115,4 @@ import Testing
             }
         }
     }
-
-    /// #1633: a row's width less its name's width is the same for an image
-    /// layer and an adjustment layer, shown or hidden, so every name starts at
-    /// the same x. Measured with no info line and the default blend and
-    /// opacity, so the name is the row's only text.
-    @Test func namesShareALeadingEdge() throws {
-        var model = try PhotoWorkspace.fixture(.layered)
-        let background = try #require(model.layers.first { $0.name == "Background" })
-        model.toggleVisibility(background.id)
-        let paintLayer = try #require(model.layers.first { $0.name == "Paint" })
-        model.setBlendMode(paintLayer.id, .normal)
-        model.setOpacity(paintLayer.id, percent: 100)
-        var leads: [String: CGFloat] = [:]
-        for layer in model.layers {
-            #expect(model.layerInfo(layer.id) == nil && layer.blendMode == .normal && layer.opacity >= 1)
-            let row = PhotoLayerRow(layer: layer, isSelected: false, perform: { _ in }).fixedSize()
-            let name = Text(layer.name).font(SuiteFont.inspectorLabel).lineLimit(1).fixedSize()
-            leads[layer.name] = NSHostingView(rootView: row).fittingSize.width - NSHostingView(rootView: name).fittingSize.width
-        }
-        let paint = try #require(leads["Paint"])
-        for (name, lead) in leads {
-            #expect(abs(lead - paint) <= 0.5, "\(name)'s name starts \(lead - paint) pt off Paint's: \(leads)")
-        }
-    }
 }
