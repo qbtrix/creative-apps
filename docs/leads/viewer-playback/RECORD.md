@@ -2,9 +2,9 @@
 
 Issue: #1035 · Packet: docs/blueprints/halo/features/viewer-playback.md
 Run: act-1a1543fa006-c4p9 (resumed 2026-10-19T13:02Z; earlier act-1a14c24f6d2-lrkw, line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a1429c87eb-3ecm, resumed 2026-10-16T02:50Z; first run act-1a13ed44a75-delk) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-15T09:05Z
-Stage: 3 polling (wave 6 opened)
+Stage: 3 polling (wave 6 merged)
 Base: 2b02948043fe554dde877f184894b7010998117e (origin/dev at 2026-10-19T13:40Z, has #2622)
-Next: wait for the lane to merge #3245 (VP-13), then a scoped halo run on dev that contains it: close #1699 #1701 #1703 #1705 if their journeys pass, else take them into a fix wave.
+Next: #3245 merged 16:58Z; wait for a scoped halo run on dev that contains it: close #1699 #1701 #1703 #1705 if their journeys pass, else take them into a fix wave.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,7 +22,7 @@ Next: wait for the lane to merge #3245 (VP-13), then a scoped halo run on dev th
 | VP-9 | 4 | HF-1 canvas equals render | HaloViewerFidelityTests | HaloViewerFidelityTests | #1125 | merged |
 | VP-11 | 4 | H-J3 extended | UITests/HaloJourneyTests.swift | H-J3 on dev CI | #1102 | merged |
 | VP-12 | 5 | H-J2, H-J4; feature-done | UITests/HaloJourneyTests+Viewer.swift, +Playback.swift | H-J2, H-J4 on dev CI | #1124 | merged |
-| VP-13 | 6 | gap #2512: every Halo journey finds track names and lanes by the halo.timeline.name./.lane. prefixes; onScreenControlIDs leaves them out (findings #1699, #1701, #1703, #1705) | UITests/HaloJourneyTests*.swift | scoped halo run: H-J2, H-J3, H-J4, layout | #3245 | in lane, macOS build green (head 0d6fb734) |
+| VP-13 | 6 | gap #2512: every Halo journey finds track names and lanes by the halo.timeline.name./.lane. prefixes; onScreenControlIDs leaves them out (findings #1699, #1701, #1703, #1705) | UITests/HaloJourneyTests*.swift | scoped halo run: H-J2, H-J3, H-J4, layout | #3245 | merged 2026-10-19T16:58Z |
 
 Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all independent); W2 VP-3, VP-4b, VP-7, VP-8 (all independent); W3 VP-5, VP-6, VP-10 (all independent); W4 VP-9, VP-11 (both independent); W5 VP-12 alone.
 
@@ -86,3 +86,4 @@ Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all indepen
 - H-J13 quarantine entry (owner #1035, expires 2026-10-18) is the supervisor's to drop: UITests/quarantine.json is protected.
 - none
 - VP-10 started ahead of wave 3: its deps VP-3 (#1087) and VP-7 (#1085) merged; it needs nothing from VP-1.
+- #3245 merged 16:58Z (fast lane). No dev ci.yml run contains it yet (newest, 39278490377, started 15:30Z on b3011ab9).

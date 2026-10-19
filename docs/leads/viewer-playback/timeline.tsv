@@ -149,3 +149,4 @@ utc	stage	event	ref	note
 2026-10-19T15:58Z	heartbeat	#3245 still open, clean, fast-lane label, no needs-fix/needs-rebase; lane runs queued behind other PRs; no dev CI run contains it yet
 2026-10-19T16:20Z	heartbeat	#3245 still open, clean, fast-lane label, no needs-fix/needs-rebase; queued behind the lane batch; no dev CI run contains it yet
 2026-10-19T16:42Z	heartbeat	#3245 still open, clean, fast-lane label, no needs-fix/needs-rebase; waiting on the lane; no dev CI run contains it yet
+2026-10-19T17:05Z	heartbeat	#3245 merged 16:58Z; waiting for a dev CI run that contains it
