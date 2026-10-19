@@ -2,8 +2,9 @@
 // SN-12, journey MJ12 `walkSnapContract`) on the `cards` fixture. The guide types
 // are the kernel's; `snapCandidates` names what a drag can line up with through
 // `Snapping.candidates` over the page's layer tree; `.noSnap` comes from ⌘ or
-// Snap to Layers off; `snapGuides` is nil until the routes land; the kernel
-// engines are still stubs that find nothing. Runs on Linux and macOS.
+// Snap to Layers off; `snapGuides` is the kernel's fixed `.fake` set while a drag
+// runs and nil otherwise until the routes land (SN-9); the kernel engines are
+// still stubs that find nothing. Runs on Linux and macOS.
 import DesignModel
 import SuiteKernel
 import Testing
@@ -91,12 +92,22 @@ import Testing
         #expect(full.summary == "x 300, gap x 100, spacing x 100")
     }
 
-    @Test func snapGuidesIsNil() {
+    @Test func snapGuidesIsTheFakeOnlyWhileADragRuns() {
         var workspace = DesignFixtures.cards
         #expect(workspace.snapGuides == nil)
         workspace.selectItem(Self.a)
         workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: [])
+        #expect(workspace.snapGuides == DesignSnapGuides.fake)
+        #expect(workspace.snapGuides?.summary == "x 300, gap x 100, spacing x 100")
+        workspace.endDrag()
         #expect(workspace.snapGuides == nil)
+    }
+
+    @Test func emptyAndTheInitDefaultHaveNoLinesAndNoGaps() {
+        #expect(DesignSnapGuides.empty.lines.isEmpty && DesignSnapGuides.empty.gaps.isEmpty)
+        #expect(DesignSnapGuides() == DesignSnapGuides.empty)
+        #expect(DesignSnapGuides.empty.summary == "")
+        #expect(DesignSnapGuides.fake != DesignSnapGuides.empty)
     }
 
     @Test func theKernelEnginesAreStubs() {
@@ -110,8 +121,8 @@ import Testing
 
     // MARK: MJ12
 
-    /// MJ12 as far as SN-1 covers it: A's candidates, the modifier mapping, the empty and full
-    /// summaries, no guides, and engines that find no line, no gap and no offset.
+    /// MJ12 as far as SN-1 and SN-9 cover it: A's candidates, the modifier mapping, the empty and
+    /// full summaries, the fake guides only while a drag runs, and engines that find nothing.
     @Test func walkSnapContract() {
         var workspace = DesignFixtures.cards
         let found = workspace.snapCandidates(moving: [Self.a], drawingInto: nil)
@@ -123,12 +134,13 @@ import Testing
         #expect(held.contains(.noSnap) && off.contains(.noSnap))
 
         #expect(DesignSnapGuides.empty.summary == "")
+        #expect(DesignSnapGuides.empty.lines.isEmpty && DesignSnapGuides.empty.gaps.isEmpty)
         #expect(DesignSnapGuides.fake.summary == "x 300, gap x 100, spacing x 100")
 
         #expect(workspace.snapGuides == nil)
         workspace.selectItem(Self.a)
         workspace.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 160, y: 140), modifiers: [])
-        #expect(workspace.snapGuides == nil)
+        #expect(workspace.snapGuides == DesignSnapGuides.fake)
         workspace.endDrag()
         #expect(workspace.snapGuides == nil)
 
