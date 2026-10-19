@@ -9,9 +9,9 @@
 # Until beta only compile and Model tests block (captain, 2026-10-16). The
 # proof a head passed the gate is Linux-side: the worker's `Fast-Check: pass`
 # line followed by `Head: <full head sha>` in the body, or a passing CI
-# `Linux` check on the head. CI's `macOS` and `macOS (<app>)` jobs are
-# report-only, so the lane ignores them (REPORT_ONLY_RE): a red or running
-# one never holds a PR. A PR that changes code (BUILD_RE) also needs a
+# `Linux` check on the head. CI's `macOS` and `macOS journeys` jobs (each
+# also as `... (<app>)`) prove nothing for a PR, so the lane ignores them
+# (REPORT_ONLY_RE): a red or running one never holds a PR. A PR that changes code (BUILD_RE) also needs a
 # passing build-only CI run on its head (build_gate), which the lane
 # dispatches itself, once per head (workers get 403), scoped to the apps its
 # code touches (build_apps: main's scripts/test-scope build-apps; anything
@@ -130,7 +130,7 @@ CI_WORKFLOWS=("CI")
 # CI job names, so CI runs started by workflow_dispatch (no PR association) still count.
 CI_CHECKS=("Linux")
 # CI's report-only jobs (ci.yml): never red, pending or proof here.
-REPORT_ONLY_RE='^macOS( \(.*\))?$'
+REPORT_ONLY_RE='^macOS( journeys)?( \(.*\))?$'
 CI_FILE="ci.yml"  # the CI workflow file, dispatched on BASE_BRANCH after merges
 SELF_WORKFLOW="Fast Lane"
 # The lane job's own check run on the head. Check runs read off the commit carry

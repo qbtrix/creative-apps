@@ -206,6 +206,10 @@ check "a running macOS check doesn't block" "eligible|150|2|4 checks green" . "$
   'map(if .name == "macOS" then .status = "IN_PROGRESS" | .conclusion = null else . end)'
 check "a red scoped macOS check doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS (halo)","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+check "a red journeys check doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"macOS journeys","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+check "a red scoped journeys check doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"macOS journeys (photo)","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
 check "a green macOS check alone is no proof (a Linux check)" "linux-dispatch|feat/x" . "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
 check "a green Linux check alone is proof" "eligible|150|2|1 checks green" . "$BASE_FILES" \
