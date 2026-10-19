@@ -80,7 +80,8 @@ import Testing
         #expect(steps == 200, "the timed draws ran \(steps) steps, not 200")
         #expect(workspace.gesture?.route == .draw(.rectangle))
         #expect(workspace.selectedNode?.kind == .rectangle)
-        #expect(workspace.selectedNode?.frame == rc(30, 30, 110, 90))
+        // The start snaps onto the lines of Frame 1's rectangles at 28 (snapping SN-5).
+        #expect(workspace.selectedNode?.frame == rc(28, 28, 112, 92))
         // Each step rewinds before it adds, so Frame 1 holds one new rectangle, not 201.
         #expect(workspace.treeNode("node-1")?.children.count == 50)
         workspace.endDrag()
@@ -101,7 +102,8 @@ import Testing
             ends: [pt(190, 170), pt(180, 165)])
         #expect(steps == 200, "the timed resizes ran \(steps) steps, not 200")
         #expect(workspace.gesture?.route == .resize("node-1", .bottomRight, rc(10, 10, 160, 150)))
-        #expect(workspace.frame("node-1") == rc(10, 10, 170, 155))
+        // The dragged edges snap onto Frame 2's left edge at 185 and the frames' bottoms at 160 (SN-5).
+        #expect(workspace.frame("node-1") == rc(10, 10, 175, 150))
         workspace.endDrag()
         #expect(workspace.undoActionName == "Undo Resize")
     }
