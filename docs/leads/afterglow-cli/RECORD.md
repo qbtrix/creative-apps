@@ -89,3 +89,8 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - 5 files, 232 lines; pure-Swift SHA-256 in RealJobs.swift (none in repo/core). Also touches CLIStubTests.swift (drops "jobs" case) — same lines as CL-4/CL-7 edits → expect needs-rebase; resolution: drop both "run" and "jobs" cases.
 - Report shapes: pass {"ok":true,"job","checked"}; fail {"ok":false,"job","failures":[{path,why}]} exit 70; skip {"job","skipped"} exit 0 (no ok key). Pixel expectations skipped "waits on image-codecs (creative-core#562)". force:true on runs.
 - CL-11 docs/cli.md: describe real-jobs format (layout, expect per path: sha256/json/pixels{tolerance,reference}, platforms, why), the three report shapes + exit codes, pixel skip until image-codecs bump.
+
+## #3154 rebase fix (head a53cfee)
+- Merged dev into CL-7 (merge commit, no force). CL-4's router already routes `run` → ScriptRunner.run, so `run` is real once #3154 merges. Removed `run`+CL-4 `cli` rows from CLIStubTests.everyStubExits69NamingItsSlice and the `run` row from CLIShapeTests. Full ci PASS (4012), mutate 7/7, 7 files +271/-36.
+- Remaining stub rows: `jobs` (RealJobs.check — CL-9 removes it) and `mcp` (MC slices). When mcp is real, delete CLIShapeTests.everyOtherFormIsAStubThatNamesItsSlice.
+- CL-10 no longer needs to route `run`: only main.swift → LiveIO and the waits-on-CC-7 tests.
