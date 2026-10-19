@@ -11,7 +11,8 @@
 // live drawing rather than the layer list: 2, 3, then 4 layers drawn (the
 // null draws nothing). A new layer goes on top, so the list's first row is
 // the new solid. HaloProject.newLayer names it by kind and that kind's count
-// plus one, and Background is already a solid, so it is Solid 2. One shot
+// plus one, and Background is already a solid, so it is Solid 2 (read from
+// the row's Text, since XCUITest reads the row group's label empty). One shot
 // per step, `halo-viewer-<step>`.
 import XCTest
 
@@ -80,12 +81,18 @@ final class HaloViewerJourneyTests: XCTestCase {
             "\(what) reads \(halo.element(identifier).label), not \(label)")
     }
 
-    /// The label (or value) of the layer list's top row; empty with no rows.
+    /// What the layer list's top row reads: its label, or else its texts'
+    /// labels and values. Since LayerTreeList (#3217) the row is a SwiftUI
+    /// group whose label XCUITest reads empty (#262), so the name comes from
+    /// its Text. "no rows" when the list has none.
     @MainActor private func firstRowLabel(_ halo: Journey) -> String {
         let rows = halo.element("halo.layer.list").descendants(matching: .any)
             .matching(NSPredicate(format: "identifier BEGINSWITH %@", "halo.layer.row.")).allElementsBoundByIndex
-        guard let top = rows.min(by: { $0.frame.minY < $1.frame.minY }) else { return "" }
-        return top.label.isEmpty ? (top.value as? String ?? "") : top.label
+        guard let top = rows.min(by: { $0.frame.minY < $1.frame.minY }) else { return "no rows" }
+        if !top.label.isEmpty { return top.label }
+        let texts = top.staticTexts.allElementsBoundByIndex
+            .map { $0.label.isEmpty ? ($0.value as? String ?? "") : $0.label }
+        return "\(top.identifier): " + texts.joined(separator: " ")
     }
 
     /// Opens the menu bar item `path[0]`, hovers each submenu on the way and
