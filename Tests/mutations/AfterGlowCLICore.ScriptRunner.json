@@ -1,0 +1,9 @@
+[
+  {"label": "collisions checked per input, not up front", "file": "Sources/AfterGlowCLICore/ScriptRunner.swift", "find": "            try refuseCollisions(plan.items, force: force, io: io)\n", "replace": "", "tests": "BatchTests"},
+  {"label": "atomic ignored", "file": "Sources/AfterGlowCLICore/ScriptRunner.swift", "find": "let atomic = plan.script.atomic ?? true", "replace": "let atomic = false", "tests": "BatchTests"},
+  {"label": "globs unsorted", "file": "Sources/AfterGlowCLICore/ScriptRunner.swift", "find": "let inputs = Array(Set(found)).sorted()", "replace": "let inputs = found.reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }", "tests": "BatchTests"},
+  {"label": "a pattern matching nothing is an empty run", "file": "Sources/AfterGlowCLICore/ScriptRunner.swift", "find": "guard !matches.isEmpty else { throw .data(\"input \\(pattern) matches no file\") }", "replace": "", "tests": "BatchTests"},
+  {"label": "step ids not checked before the run", "file": "Sources/AfterGlowCLICore/Script.swift", "find": "if let bad = steps.first(where: { !ids.contains($0.id) }) { throw .usage(\"unknown command \\(bad.id) in \\(app)\") }", "replace": "_ = ids", "tests": "BatchTests"},
+  {"label": "any version runs", "file": "Sources/AfterGlowCLICore/Script.swift", "find": "guard fields[\"version\"] == .number(1) else {", "replace": "guard fields[\"version\"] != nil else {", "tests": "BatchTests"},
+  {"label": "{index} not zero-padded", "file": "Sources/AfterGlowCLICore/Script.swift", "find": "let padded = String(repeating: \"0\", count: max(0, width - number.count)) + number", "replace": "let padded = number; _ = width", "tests": "BatchTests"}
+]
