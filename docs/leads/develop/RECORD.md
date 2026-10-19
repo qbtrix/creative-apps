@@ -95,3 +95,4 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 2026-10-19T19:25Z: #3221 DV-9 open/clean at 510c7bf5; macOS build 39294392519 still queued (no macOS job running repo-wide)
 - 2026-10-19T19:48Z: #3221 DV-9 open/clean at 510c7bf5; macOS build 39294392519 still queued, no workflow running repo-wide
 - 2026-10-19T20:11Z: #3221 DV-9 lane macOS build 39294392519 succeeded; waiting for the next lane sweep to merge
+- 2026-10-19T20:25Z: #3221 DV-9 build 39294392519 green; waiting on the next lane sweep (none since 19:40Z)
