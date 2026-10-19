@@ -169,7 +169,7 @@ private func occurrences(of needle: String, in text: String) -> Int {
         #expect(!start.contains("at once"), "a chip's help still says at once")
         let pages = try source("Sources/AfterGlowApp/OnboardingPages.swift")
         #expect(pages.contains("title: SuiteOnboarding.focusTitle($0)"), "a focus chip doesn't name its apps")
-        #expect(start.contains("if model.failed == app, let message = model.message"), "a refusal isn't under its tile")
+        #expect(start.contains("if model.failed == starter.tile.app, let message = model.message"), "a refusal isn't under its tile")
         #expect(start.contains("if model.failed == nil, let message = model.message"))
     }
 
