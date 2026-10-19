@@ -1,6 +1,6 @@
 // CLIStubTests.swift: LJ0's second half (afterglow-cli CL-2). The app
 // registry names the five apps in order and adds the fake only when asked;
-// every stub entry point exits 69 with one notBuilt object naming its slice;
+// every entry point is real (CL-7 ScriptRunner, CL-9 RealJobs, MC-4 MCPServer);
 // FakeIO round trips a file and never overwrites unless told to.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -31,31 +31,11 @@ struct CLIStubTests {
     }
 
     @Test func everyAppStubRefusesToOpenNamingItsSlice() {
-        for app in Apps.all {
+        for app in Apps.all where app.describeAll().isEmpty { // an app whose slice filled its catalog opens for real
             #expect(throws: CatalogError.notBuilt(id: "open", feature: "adopt-command-catalog AC-\(app.name)")) {
                 try app.session(open: Data(), name: "x")
             }
         }
-    }
-
-    @Test(arguments: [
-        ("run", "slice CL-batch"), ("jobs", "slice CL-jobs"), ("cli", "slice CL-batch"),
-    ])
-    func everyStubExits69NamingItsSlice(entry: String, names: String) {
-        let io = FakeIO()
-        let apps = Apps.all + [Apps.fake]
-        let code: Int32 = switch entry {
-        case "run": ScriptRunner.run("resize.jobs.json", apps: apps, dryRun: false, force: false, io: io)
-        case "jobs": RealJobs.check("Tests/RealJobs/fake/resize", apps: apps, io: io)
-        default: CLI.run(["run", "resize.jobs.json"], io: io) // the router hands `run` to ScriptRunner's stub
-        }
-        #expect(code == 69)
-        #expect(io.stdout.count == 1)
-        let line = io.stdout.first ?? ""
-        #expect(line.hasPrefix(#"{"error":{"kind":"notBuilt","message":"#))
-        #expect(line.hasSuffix(#""ok":false}"#))
-        #expect(io.stderr.count == 1)
-        #expect(io.stderr.first?.contains(names) == true)
     }
 
     @Test func fakeIORoundTripsAFile() throws {

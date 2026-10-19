@@ -1,5 +1,5 @@
 // DesignSnapWalkTests.swift: journey MJ11 `walkSnapping` on `cards`: each gesture snapped and
-// under `.noSnap`, one undo step each. Disabled until SN-5 snaps resize and draw. Linux and macOS.
+// under `.noSnap`, one undo step each (SN-4 moves, SN-5 resizes and draws). Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -18,12 +18,13 @@ import Testing
         workspace.selectTool(tool)
         workspace.drag(from: start, to: end, modifiers: modifiers)
         workspace.endDrag()
+        if tool == .text { workspace.commitTextEdit() }  // A Text box's step lands when its edit ends.
         #expect(workspace.history.undo.count == steps + 1 && workspace.undoActionName == "Undo \(step)", sourceLocation: at)
         #expect(workspace.snapGuides == nil, sourceLocation: at)
         return workspace
     }
 
-    @Test(.disabled("waits on SN-5")) func walkSnapping() throws {
+    @Test func walkSnapping() throws {
         let (a, ab, press, right, down) = (Self.a, [Self.a, Self.b], pt(150, 140), pt(347.4, 140.4), pt(150, 417.6))
         // A move onto B's left edge (297 under ⌘); several and a copy onto Pair's bottom at y 500.
         #expect(walk(.move, [a], press, right).frame(a) == rc(300, 100, 100, 80))

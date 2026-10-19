@@ -9,15 +9,18 @@
 // so it is tested without a window. The list mutates nothing: every gesture
 // goes out through one `onAction` closure. Rows are lazy, keyed by the
 // layer's id, and `.equatable()` on their plain values (swiftui-rules 2, 5).
-// The only view state is the drop target lit while a drag hovers it, written
-// on enter and exit, never per sample. Each row's controls carry
-// `suite.layers.<id>.<part>`; the row itself is `suite.layers.row.<id>`.
+// The only view state is the drop target lit while a drag hovers it and the
+// row under the pointer (fill plus outline), each written on enter and exit,
+// never per sample. A flat list (`nests: false`) drops the disclosure column.
+// Each row's controls carry `suite.layers.<id>.<part>`; the row itself is
+// `suite.layers.row.<id>`.
 // To stand in for a sidebar layers panel (#2811) it can take a selected id
 // and `onSelect` (a click on the row; the row draws the selected tint and
 // reads selected), `onRename` (SidebarRow's double-click, Return and
 // "Rename" routes; a non-nil result refuses and keeps the draft), SidebarRow's
 // identifiers and labels (`naming: .sidebar`) and a header with an action
 // (LayerTreeList+Rows.swift). Each defaults to off, so older callers are unchanged.
+// App panels (#3194) add ids, options and decorations; `reorder` is the flat drop's pure rule.
 // It shows no scroller (wheel, trackpad and keys still scroll), so the
 // audit finds no unnamed page-area button beside a long tree. While it
 // scrolls it reports a drawn frame on series `layers-scroll` (SP4) to the
@@ -36,6 +39,12 @@ public struct LayerDrop: Equatable, Sendable {
         self.parent = parent
         self.index = index
     }
+
+    /// The `parent` of a move among the roots.
+    public static let root = ""
+
+    /// The parent as the kernel's `move(_:into:at:)` takes it: nil for the roots.
+    public var parentID: String? { parent == Self.root ? nil : parent }
 }
 
 /// What a person did in the list.
@@ -55,6 +64,8 @@ public struct LayerTreeList: View {
     private let selection: String?
     let naming: LayerTreeNaming
     let header: LayerTreeHeader?
+    let options: LayerTreeOptions
+    private let decorations: [String: LayerRowDecoration]
     private let onSelect: (@MainActor (String) -> Void)?
     private let onRename: (@MainActor (String, String) -> String?)?
     /// The row that starts with its rename field in this state: a snapshot's refused rename.
@@ -67,20 +78,24 @@ public struct LayerTreeList: View {
     /// `selection` draws that row selected and a click on a row calls
     /// `onSelect`; `onRename` gets a row's id and new name and returns nil to
     /// accept it or the refusal shown under the field it keeps open. Nil
-    /// turns that gesture off; `naming` and `header` are described on their types.
+    /// turns that gesture off; `naming`, `header` and `options` are described
+    /// on their types, and `decorations` holds each decorated row's by its id.
     public init(
         rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selection: String? = nil,
-        naming: LayerTreeNaming = .layers, header: LayerTreeHeader? = nil,
+        naming: LayerTreeNaming = .layers, header: LayerTreeHeader? = nil, options: LayerTreeOptions = .init(),
+        decorations: [String: LayerRowDecoration] = [:],
         onSelect: (@MainActor (String) -> Void)? = nil, onRename: (@MainActor (String, String) -> String?)? = nil,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
         self.init(rows: rows, childCount: childCount, selection: selection, naming: naming, header: header,
+                  options: options, decorations: decorations,
                   onSelect: onSelect, onRename: onRename, renaming: nil, onAction: onAction)
     }
 
     init(
         rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selection: String?,
-        naming: LayerTreeNaming, header: LayerTreeHeader?, onSelect: (@MainActor (String) -> Void)?,
+        naming: LayerTreeNaming, header: LayerTreeHeader?, options: LayerTreeOptions = .init(),
+        decorations: [String: LayerRowDecoration] = [:], onSelect: (@MainActor (String) -> Void)?,
         onRename: (@MainActor (String, String) -> String?)?, renaming: (id: String, field: SidebarRenameField)?,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
@@ -90,6 +105,8 @@ public struct LayerTreeList: View {
         self.selection = selection
         self.naming = naming
         self.header = header
+        self.options = options
+        self.decorations = decorations
         self.onSelect = onSelect
         self.onRename = onRename
         self.renaming = renaming
@@ -128,6 +145,33 @@ public struct LayerTreeList: View {
         return LayerDrop(id: id, parent: target, index: max(count, 0))
     }
 
+    /// The move a drop of `id` beside the row `target` makes: into the
+    /// target's own parent (`LayerDrop.root` at depth 0), just above it in the
+    /// list or, when `below`, just under it. Nil for an unknown row, the row
+    /// itself or one of its descendants, and a target locked by itself or an
+    /// ancestor. The index counts from the back, as the kernel's children do,
+    /// among the siblings left once the moving row leaves.
+    nonisolated public static func reorder(_ id: String, beside target: String, below: Bool,
+                                           in rows: [LayerRow]) -> LayerDrop? {
+        guard id != target,
+              let from = rows.firstIndex(where: { $0.id == id }),
+              let to = rows.firstIndex(where: { $0.id == target }) else { return nil }
+        let destination = rows[to]
+        guard !destination.isLocked, !destination.inheritsLocked else { return nil }
+        let depth = rows[from].depth
+        guard !rows[(from + 1)...].prefix(while: { $0.depth > depth }).contains(where: { $0.id == target }) else {
+            return nil
+        }
+        // The parent is the nearest row above one level up; none at depth 0.
+        let parent = rows[..<to].lastIndex { $0.depth < destination.depth }
+        let siblings = rows[(parent.map { $0 + 1 } ?? 0)...].prefix { $0.depth >= destination.depth }
+            .filter { $0.depth == destination.depth && $0.id != id }
+        guard let place = siblings.firstIndex(where: { $0.id == target }) else { return nil }
+        let fromFront = place + (below ? 1 : 0)
+        return LayerDrop(id: id, parent: parent.map { rows[$0].id } ?? LayerDrop.root,
+                         index: siblings.count - fromFront)
+    }
+
     /// Every id the list keys a row by, in order; ids are the layers' own, so
     /// a row keeps its identity when the rows around it change.
     nonisolated public static func rowIDs(_ rows: [LayerRow]) -> [String] { rows.map(\.id) }
@@ -145,25 +189,36 @@ public struct LayerTreeList: View {
         .accessibilityIdentifier(naming.container)
     }
 
-    private var list: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(rows, id: \.id) { row in
-                    LayerTreeRow(
-                        row: row, lit: target == row.id, selected: isSelected(row.id), naming: naming,
-                        field: renaming?.id == row.id ? renaming?.field : nil,
-                        onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
-                        .equatable()
-                        .draggable(row.id)
-                        .dropDestination(for: String.self) { items, _ in
-                            accept(items, onto: row.id)
-                        } isTargeted: { over in
-                            light(row.id, over)
-                        }
-                }
-            }
-            .padding(.vertical, SuiteSpacing.xs)
+    @ViewBuilder private var list: some View {
+        if options.embedded {
+            stack
+        } else {
+            scrolling
         }
+    }
+
+    private var stack: some View {
+        LazyVStack(alignment: .leading, spacing: 0) {
+            ForEach(rows, id: \.id) { row in
+                LayerTreeRow(
+                    row: row, lit: target == row.id, selected: isSelected(row.id), naming: naming,
+                    options: options, decoration: decorations[row.id],
+                    field: renaming?.id == row.id ? renaming?.field : nil,
+                    onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
+                    .equatable()
+                    .draggable(row.id)
+                    .dropDestination(for: String.self) { items, _ in
+                        accept(items, onto: row.id)
+                    } isTargeted: { over in
+                        light(row.id, over)
+                    }
+            }
+        }
+        .padding(.vertical, SuiteSpacing.xs)
+    }
+
+    private var scrolling: some View {
+        ScrollView { stack }
         // No scroller: a legacy scroller's page area is an unnamed button with
         // no identifier to the app audit (#2742, as in Design's list, #2561).
         .scrollIndicators(.never)
@@ -174,15 +229,24 @@ public struct LayerTreeList: View {
 
     private func accept(_ items: [String], onto parent: String) -> Bool {
         target = nil
-        guard let id = items.first,
-              let move = Self.drop(id, onto: parent, in: rows, childCount: childCount(parent)) else { return false }
+        guard let id = items.first, let move = proposal(id, onto: parent) else { return false }
         onAction(.move(move))
         return true
     }
 
+    /// A drop of `id` on `target`: into a container, or with `reorders` into
+    /// a flat row's place (below it when the row comes from above).
+    private func proposal(_ id: String, onto target: String) -> LayerDrop? {
+        guard options.reorders, let to = rows.firstIndex(where: { $0.id == target }), !rows[to].holdsChildren else {
+            return Self.drop(id, onto: target, in: rows, childCount: childCount(target))
+        }
+        let from = rows.firstIndex { $0.id == id } ?? to
+        return Self.reorder(id, beside: target, below: from < to, in: rows)
+    }
+
     private func light(_ id: String, _ over: Bool) {
         let row = rows.first { $0.id == id }
-        let accepts = row.map { $0.holdsChildren && !$0.isLocked && !$0.inheritsLocked } ?? false
+        let accepts = row.map { ($0.holdsChildren || options.reorders) && !$0.isLocked && !$0.inheritsLocked } ?? false
         if over, accepts {
             target = id
         } else if target == id {
@@ -198,14 +262,27 @@ struct LayerTreeRow: View, Equatable {
     let lit: Bool
     let selected: Bool
     let naming: LayerTreeNaming
+    let options: LayerTreeOptions
+    let decoration: LayerRowDecoration?
     let onAction: @MainActor (LayerTreeAction) -> Void
     let onSelect: (@MainActor (String) -> Void)?
     let onRename: (@MainActor (String) -> String?)?
     @State var field: SidebarRenameField
+    @State private var hovering = false
     @FocusState var editing: Bool
+    @Environment(\.suiteReduceMotion) private var reduceMotion
+
+    private var look: LayerRowLook { .resolve(selected: selected, lit: lit, hovering: hovering) }
+
+    /// The selected tint wins over hover; a drop target over a selected row keeps the tint.
+    private var fill: Color {
+        if selected { return SuiteColor.selectedTint }
+        return look == .rest ? Color.clear : SuiteColor.rowHover
+    }
 
     init(
-        row: LayerRow, lit: Bool, selected: Bool, naming: LayerTreeNaming, field: SidebarRenameField?,
+        row: LayerRow, lit: Bool, selected: Bool, naming: LayerTreeNaming, options: LayerTreeOptions,
+        decoration: LayerRowDecoration?, field: SidebarRenameField?,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void, onSelect: (@MainActor (String) -> Void)?,
         onRename: (@MainActor (String) -> String?)?
     ) {
@@ -213,6 +290,8 @@ struct LayerTreeRow: View, Equatable {
         self.lit = lit
         self.selected = selected
         self.naming = naming
+        self.options = options
+        self.decoration = decoration
         self.onAction = onAction
         self.onSelect = onSelect
         self.onRename = onRename
@@ -221,29 +300,52 @@ struct LayerTreeRow: View, Equatable {
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.row == rhs.row && lhs.lit == rhs.lit && lhs.selected == rhs.selected && lhs.naming == rhs.naming
+            && lhs.options == rhs.options && lhs.decoration == rhs.decoration
             && (lhs.onRename == nil) == (rhs.onRename == nil) && (lhs.onSelect == nil) == (rhs.onSelect == nil)
     }
 
     var body: some View {
+        decorated(content)
+    }
+
+    private var content: some View {
         HStack(spacing: SuiteSpacing.xs) {
-            Color.clear.frame(width: CGFloat(row.depth) * SuiteSpacing.l, height: SuiteSpacing.xxs)
-            disclosure
+            if options.nests {
+                Color.clear.frame(width: CGFloat(row.depth) * SuiteSpacing.l, height: SuiteSpacing.xxs)
+                disclosure
+            }
+            leading
             title
             Spacer(minLength: SuiteSpacing.s)
-            toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
-            toggle(naming.lock(row)) { onAction(.toggleLocked(row.id)) }
+            if options.showsEye {
+                toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
+            }
+            if options.showsLock {
+                toggle(naming.lock(row)) { onAction(.toggleLocked(row.id)) }
+            }
         }
+        // One pointer-sized height, so a caption under the name doesn't make its row jump.
+        .frame(minHeight: SuiteSize.studioRow)
         .padding(.horizontal, SuiteSpacing.s)
-        .background(selected ? SuiteColor.selectedTint : lit ? SuiteColor.rowHover : Color.clear,
-                    in: RoundedRectangle(cornerRadius: SuiteRadius.row))
+        .background(fill, in: RoundedRectangle(cornerRadius: SuiteRadius.row))
         .overlay {
-            if lit {
+            switch look {
+            case .dropTarget:
                 RoundedRectangle(cornerRadius: SuiteRadius.row)
                     .strokeBorder(SuiteColor.accent, lineWidth: SuiteSize.focusRing)
                     .allowsHitTesting(false)
+            case .hover:
+                RoundedRectangle(cornerRadius: SuiteRadius.row)
+                    .strokeBorder(SuiteColor.outline, lineWidth: 1)
+                    .allowsHitTesting(false)
+            case .rest, .selected:
+                EmptyView()
             }
         }
         .contentShape(.rect)
+        // Written on enter and exit only, never per pointer sample (swiftui-rules 1).
+        .onHover { hovering = $0 }
+        .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: look)
         .onTapGesture { onSelect?(row.id) }
         .focusable(onRename != nil)
         .onKeyPress(.return) { requestRename() }

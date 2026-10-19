@@ -57,6 +57,7 @@ import SuiteKernel
             .appendingPathComponent("\(app)Model").appendingPathComponent("\(app)Headless.swift")
         let text = try String(contentsOf: file, encoding: .utf8)
         #expect(text.contains("public struct \(app)Headless: HeadlessDocument {"))
+        guard text.contains("command-catalog CC-2 stub") else { return } // its adopting slice has filled it
         #expect(text.contains("public static let adoptingSlice = \"adopt-command-catalog AC-\(app.lowercased())\""))
         #expect(text.contains("public static let app = \"\(app.lowercased())\""))
         #expect(text.contains("static func open(_ data: Data, name: String) throws -> \(app)Headless { throw notBuilt(\"open\") }"))

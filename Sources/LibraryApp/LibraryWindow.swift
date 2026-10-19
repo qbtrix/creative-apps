@@ -79,6 +79,8 @@ struct LibraryWindow: View {
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        // The crop frame and the CROP section read these (crop CR-6).
+        .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
         // The export area moves `exportState` off `.idle`; nothing does in wave 1.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) {
@@ -152,6 +154,13 @@ struct LibraryWindow: View {
 
     /// A one-argument menu action, nil (so the item disables) when it can't run.
     func enabled<Value>(_ allowed: Bool, _ perform: @escaping @MainActor (Value) -> Void) -> (@MainActor (Value) -> Void)? {
+        allowed ? perform : nil
+    }
+
+    /// A two-argument menu action, nil (so the item disables) when it can't run.
+    func enabled<First, Second>(
+        _ allowed: Bool, _ perform: @escaping @MainActor (First, Second) -> Void
+    ) -> (@MainActor (First, Second) -> Void)? {
         allowed ? perform : nil
     }
 

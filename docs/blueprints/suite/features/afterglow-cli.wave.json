@@ -2,7 +2,7 @@
   "title": "afterglow: a headless CLI over every app's command catalog (single commands, open, export, describe, and JSON scripts), on Linux, and the real-jobs suites that run through it",
   "wave": "AI1",
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "#2998",
   "covers": "captain's AI-accessible-first call (CLI half); beta-80 plan W0 (p0); suite.md 1.5; defines the real-jobs suite format",
   "waits_on": "suiteui command-catalog CC-a (cross-line: the Commands stubs, the fake document, the five <X>Headless stubs); targets (#873, built). Pixel expectations wait on creative-core image-codecs IC-png and its bump. CL-1 is a supervisor merge (Package.swift, scripts/test-scope)",

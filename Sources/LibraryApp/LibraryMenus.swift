@@ -70,11 +70,29 @@ struct LibraryMenu {
         var fitMeasured: (@MainActor (Double) -> Void)?  // the fit scale the loupe view measured
     }
 
+    /// The Develop tab's actions (develop): no menu items of their own; the
+    /// tab's rows, curve, levels, resets, Sync and Show Original call them.
+    struct Develop {
+        var set: (@MainActor (DevelopSlider, Double) -> Void)?
+        var setCurve: (@MainActor ([DevelopCurvePoint]) -> Void)?
+        var setLevels: (@MainActor (DevelopLevels.Field, Double) -> Void)?
+        var endEdit: Action?  // a row's or the curve's onEnd
+        var reset: (@MainActor (DevelopGroup?) -> Void)?
+        var resetSlider: (@MainActor (DevelopSlider) -> Void)?
+        var resetCurve: Action?
+        var resetLevels: Action?
+        var sync: Action?
+        var syncTitle: String?
+        var toggleOriginal: Action?
+        var showsOriginal = false
+    }
+
     /// Photo: the develop half (develop) and the crop half (crop).
     struct Photo {
         var copySettings: Action?
         var pasteSettings: Action?
         var resetDevelop: Action?
+        var develop = Develop()
         var toggleCrop: Action?
         var cropTitle: String = "Crop"
         var applyCrop: Action?

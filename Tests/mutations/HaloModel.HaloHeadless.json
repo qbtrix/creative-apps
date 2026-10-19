@@ -1,0 +1,6 @@
+[
+  {"label": "realJobPasses(render-frame): render ignores the frame number", "file": "Sources/HaloModel/HaloHeadless.swift", "find": "comp.renderFrame(at: frame,", "replace": "comp.renderFrame(at: 0,", "tests": "HaloHeadlessTests"},
+  {"label": "opensAndSavesTheSameBytes: open drops the file's project", "file": "Sources/HaloModel/HaloHeadless.swift", "find": "project.finishOpen(.success(state))", "replace": "project.finishOpen(.success(HaloDocumentState()))", "tests": "HaloHeadlessTests"},
+  {"label": "theCatalogIsHaloProjects...: file commands run headless", "file": "Sources/HaloModel/HaloHeadless.swift", "find": "windowOnly ? .unavailable(fileCommandHelp) : ", "replace": "", "tests": "HaloHeadlessTests"},
+  {"label": "renderFrameDrawsTheAskedFrame...: render defaults to a quarter scale", "file": "Sources/HaloModel/HaloHeadless.swift", "find": "o.scale ?? 1", "replace": "o.scale ?? 4", "tests": "HaloHeadlessTests"}
+]
