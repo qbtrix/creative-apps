@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-19T20:11Z	heartbeat	#3221 DV-9 lane macOS build 39294392519 succeeded; waiting for the next lane sweep to merge
 2026-10-19T20:25Z	heartbeat	#3221 DV-9 build 39294392519 green; waiting on the next lane sweep (none since 19:40Z)
 2026-10-19T20:48Z	heartbeat	#3221 DV-9 still open (build green); no scheduled lane sweep since 19:40Z, 16 runs queued repo-wide
+2026-10-19T21:28Z	heartbeat	#3221 DV-9 merged. #3250 DV-10 merged with dev (conflicts resolved, crop CR-6 kept), gate pass, 113 lines, head c8132980, ready. #3295 DV-13 merged with DV-10, gate pass, head bbd009af, stays draft until #3250 merges
