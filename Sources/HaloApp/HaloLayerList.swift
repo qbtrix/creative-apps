@@ -33,7 +33,7 @@ struct HaloLayerList: View {
     /// Halo's ids for the shared list, kept from the hand-rolled rows so the journeys still find them.
     static let naming = LayerTreeNaming.app(
         LayerTreeIDs(container: "halo.layer.list", row: "halo.layer.row.", control: "halo.layer."))
-    static let options = LayerTreeOptions(showsEye: false, showsLock: false, reorders: true, embedded: true)
+    static let options = LayerTreeOptions(showsEye: false, showsLock: false, reorders: true, embedded: true, nests: false)
 
     var body: some View {
         let layers = model.selectedComposition?.layers ?? []

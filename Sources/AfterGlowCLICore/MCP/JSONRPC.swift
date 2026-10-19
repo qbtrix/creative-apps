@@ -1,7 +1,9 @@
 // JSONRPC.swift (afterglow-mcp MC-1 contract, MC-4 body): JSON-RPC 2.0
-// framing, one message per line. The ids, requests and errors are real;
-// `parse` is a stub that refuses every line naming MC-4, and `reply` writes
-// the envelope so the stubs can answer.
+// framing, one message per line (https://www.jsonrpc.org/specification).
+// `parse` reads a line as one request or notification: bad JSON is -32700,
+// JSON that isn't a request object (a batch, a wrong `jsonrpc`, an id that is
+// neither an integer nor a string, params that aren't an object, a line over
+// the cap) is -32600. `reply` writes the envelope.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -51,10 +53,31 @@ public enum JSONRPC {
     public static let maxLineBytes = 16 << 20
 
     /// Reads one line as a request: -32700 for bad JSON, -32600 for JSON that isn't a request.
-    /// Stub: refuses every line with `RPCError.notBuilt` naming MC-4.
     public static func parse(_ line: Data) -> Result<RPCRequest, RPCError> {
-        .failure(.notBuilt("JSONRPC.parse", task: "MC-4"))
+        guard line.count <= maxLineBytes else { return .failure(invalid("the line is over \(maxLineBytes) bytes")) }
+        guard let value = try? JSONValue(json: line) else {
+            return .failure(RPCError(code: RPCError.parseError, message: "Parse error: the line is not one JSON value"))
+        }
+        guard case .object(let body) = value else { return .failure(invalid("a message is one JSON object (batches are not read)")) }
+        guard body["jsonrpc"] == .string("2.0") else { return .failure(invalid("jsonrpc must be \"2.0\"")) }
+        guard case .string(let method)? = body["method"] else { return .failure(invalid("method must be a string")) }
+        var id: RPCID?
+        switch body["id"] {
+        case nil: id = nil
+        case .string(let text)?: id = .string(text)
+        case .number(let number)?:
+            guard let whole = Int(exactly: number) else { return .failure(invalid("id must be an integer or a string")) }
+            id = .number(whole)
+        default: return .failure(invalid("id must be an integer or a string"))
+        }
+        switch body["params"] {
+        case nil, .object?: return .success(RPCRequest(id: id, method: method, params: body["params"]))
+        default: return .failure(invalid("params must be an object"))
+        }
     }
+
+    /// The -32600 error saying why a message isn't a request.
+    static func invalid(_ why: String) -> RPCError { RPCError(code: RPCError.invalidRequest, message: "Invalid Request: \(why)") }
 
     /// The success reply to `id`, one line without its newline.
     public static func reply(_ id: RPCID, result: JSONValue) -> Data {

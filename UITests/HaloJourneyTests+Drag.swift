@@ -134,9 +134,8 @@ extension HaloJourneyTests {
     /// Clicks layer `name`'s timeline lane: selects it and focuses the
     /// timeline, so Home and → reach the playhead.
     func focusLane(_ name: String) {
-        let lane = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == %@", name)).firstMatch
-        XCTAssert(lane.waitForExistence(timeout: 5), "no \(name) lane in the timeline")
+        let lane = halo.trackName(name)
+        XCTAssert(lane.waitForExistence(timeout: 5), "no \(name) track (halo.timeline.name.*) in the timeline")
         lane.click()
         expectSelected(name)
     }

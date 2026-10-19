@@ -9,8 +9,9 @@
 // after a click on each layer's row, so each drag stops 2 screen points short
 // of its target, inside the window's snap reach of 8 screen points.
 // Written before its code (lead.md, contract rule 13): SN-6 writes it skipped
-// by name, SN-7 turns on the stub steps (the View checkmark, the relaunch,
-// the toggle), and SN-10 sets `snapIsLive` for the drags and guide reads.
+// by name; SN-7 draws the guides but every step left on runs View > Snap to
+// Layers, so SN-8 turns them on (the View checkmark, the relaunch, the
+// toggle), and SN-10 sets `snapIsLive` for the drags and guide reads.
 import XCTest
 
 final class DesignSnapJourneyTests: XCTestCase {
@@ -29,7 +30,7 @@ final class DesignSnapJourneyTests: XCTestCase {
 
     /// SN-c: moves, resizes, several moves, equal spacing and draws snap; the setting turns it off and is remembered.
     @MainActor func testSnapAndSmartGuides() throws {
-        throw XCTSkip("waits on SN-7")
+        throw XCTSkip("waits on SN-8: every step left on clicks View > Snap to Layers")
         walkSnapAndSmartGuides()
     }
 

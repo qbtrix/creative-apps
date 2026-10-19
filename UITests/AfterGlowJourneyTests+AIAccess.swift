@@ -1,15 +1,11 @@
 // AfterGlowJourneyTests+AIAccess.swift (afterglow-mcp MC-12): the approval journey
-// (sheet, Allow Once, chip, Stop, an empty Window > AI Access…), skipped until MC-13.
+// (sheet, Allow Once, chip, Stop, an empty Window > AI Access…) on the fake request;
+// turned on by MC-13. MC-10 swaps the fake for the live channel behind the same views.
 // The bundle compiles only SuiteModel's Values, so AIAccessPrompt's copy is literal.
 import XCTest
 
 extension AfterGlowJourneyTests {
-    /// Why the journey is skipped, and while it is.
-    static let aiAccessWaits = "waits on MC-13 (afterglow-mcp): the approval journey runs once the live bridge lands"
-    static let aiAccessSkipped = true
-
     @MainActor func testAIAccessApproval() throws {
-        if Self.aiAccessSkipped { throw XCTSkip(Self.aiAccessWaits) }
         let suite = SuiteHarness(self)
         let home = suite.launch(fixture: "weekOfWork", arguments: ["-AIAccessDemoRequest", "Test Client"])
         XCTAssert(home.app.windows.firstMatch.waitForExistence(timeout: 30), "AfterGlow opened no window")

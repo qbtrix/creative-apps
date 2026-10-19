@@ -61,11 +61,11 @@ struct PhotoLayerList: View {
 }
 
 /// A Layers row's ids (`photo.layers`, `photo.layer.row.<id>`,
-/// `photo.layer.<id>.<part>`), eye, no lock, reordering, and kind symbol.
+/// `photo.layer.<id>.<part>`), eye, no lock, reordering, no nesting, and kind symbol.
 enum PhotoLayerRow {
     static let naming = LayerTreeNaming.app(
         LayerTreeIDs(container: "photo.layers", row: "photo.layer.row.", control: "photo.layer."))
-    static let options = LayerTreeOptions(showsEye: true, showsLock: false, reorders: true)
+    static let options = LayerTreeOptions(showsEye: true, showsLock: false, reorders: true, nests: false)
 
     static func kindSymbol(_ kind: PhotoLayerKind) -> String {
         if case .adjustment = kind { return "slider.horizontal.3" }

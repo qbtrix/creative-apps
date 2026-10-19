@@ -1,7 +1,8 @@
 // PhotoLayerListSnapshots.swift: Photo's Layers panel on SuiteUI's
 // LayerTreeList (AL-p3), `layered` with Background hidden: the journeys' ids,
 // each row's kind symbol (no thumbnail, so names share a leading edge, #1633)
-// and caption. Writes photo-layer-list-kernel-light/-dark.png. macOS only.
+// and caption, with no disclosure column (the layers never nest). Writes
+// photo-layer-list-kernel-light/-dark.png. macOS only.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -35,6 +36,8 @@ import Testing
         let curves = try #require(model.layers.first { $0.name == "Curves 1" })
         #expect(decorations[curves.id]?.symbolLabel == "Curves adjustment layer")
         #expect(PhotoLayerRow.options.showsEye && !PhotoLayerRow.options.showsLock)
+        // Photo's layers never nest, so the list leaves out the empty disclosure column.
+        #expect(!PhotoLayerRow.options.nests)
         let paint = try #require(model.layers.first { $0.name == "Paint" })
         #expect(decorations[paint.id]?.caption == "Multiply 60%")
         #expect(decorations[paint.id]?.help == "Blend mode Multiply, opacity 60%")

@@ -10,6 +10,7 @@
 // SidebarRow.doubleClickRenames / keyRenames / renameActionName gate the
 // double-click on the title, Return on the focused row and the "Rename"
 // accessibility action. App panels (#3194): `.app` naming, LayerTreeOptions, LayerRowDecoration.
+// LayerRowLook picks a row's state fill: drop target, selected, hover, rest.
 import SuiteKernel
 import SwiftUI
 
@@ -93,12 +94,28 @@ public struct LayerTreeOptions: Equatable, Sendable {
     public var reorders: Bool
     /// Whether the rows sit in the host's own scroll view, without the list's ScrollView.
     public var embedded: Bool
+    /// Whether rows can hold children; a flat list (Photo) leaves out the
+    /// indent and the empty disclosure column, so names start near the edge.
+    public var nests: Bool
 
-    public init(showsEye: Bool = true, showsLock: Bool = true, reorders: Bool = false, embedded: Bool = false) {
+    public init(showsEye: Bool = true, showsLock: Bool = true, reorders: Bool = false, embedded: Bool = false,
+                nests: Bool = true) {
         self.showsEye = showsEye
         self.showsLock = showsLock
         self.reorders = reorders
         self.embedded = embedded
+        self.nests = nests
+    }
+}
+
+/// How a row draws its state. A drop target wins, then the selection, then
+/// the pointer: hover is a `rowHover` fill with an `outline` edge, never fill
+/// alone (docs/design.md, Surfaces).
+enum LayerRowLook: Equatable {
+    case rest, hover, selected, dropTarget
+
+    static func resolve(selected: Bool, lit: Bool, hovering: Bool) -> Self {
+        lit ? .dropTarget : selected ? .selected : hovering ? .hover : .rest
     }
 }
 
