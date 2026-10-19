@@ -87,3 +87,5 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 2026-10-19T16:57Z heartbeat: dev at ed4d55fd; none of this lead's PRs merged yet; waiting on the lane sweep.
 
 - 2026-10-19T17:27Z: #3221 needs-rebase: merged dev (CR-6 conflict in DevelopInspector), gate PASS, head 510c7bf5
+
+- 2026-10-19T17:52Z: dev 1b33afbb; #3221 DV-9 head 510c7bf5 clean, waiting on lane macOS build; drafts #3250, #3295 wait on it
