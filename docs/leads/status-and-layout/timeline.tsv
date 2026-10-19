@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 09:09Z	check	heartbeat	-	7 SL findings open; #3201 macOS build 39223926415 queued
 09:31Z	check	heartbeat	-	7 SL findings open; #3201 macOS build 39223926415 queued
 09:54Z	check	heartbeat	-	#3201 macOS build 39223926415 still queued; 7 SL findings open, SL-8 waits on #3201
+2026-10-19T10:17Z	check	heartbeat	-	#3201 macOS build 39223926415 green, waiting on lane sweep; SL-8 starts once it merges (findings then 4)
