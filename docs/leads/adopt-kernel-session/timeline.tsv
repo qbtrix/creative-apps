@@ -1,0 +1,52 @@
+utc	stage	event	ref	note
+2026-10-18T04:18Z	0	stage-start	#1940	line lead act-1a14d380dff-xcgw; waits on editor-kernel:EK-doc
+2026-10-18T04:18Z	0	stage-end	#1940	waits on editor-kernel:EK-doc
+2026-10-18T15:16Z	3	stage-start	#1940	relaunch act-1a14f91ff8b-nq4v base 5a8c6fa; wave A: AD-f1, AD-p1, AD-h1; AD-d1, AD-l1 held
+2026-10-18T20:08Z	3	stage-start	#1940	relaunch act-1a1509b245f-653k base b1526f3e; wave A: AD-f1 (AD-d1 next slot); AD-l1 blocked on AU-library
+2026-10-18T21:13Z	3	pr-opened	#2979	AD-f1 Flare session adapter
+2026-10-18T21:13Z	3	stage-start	wave B	AD-d1, AB-p1
+2026-10-18T21:29Z	3	pr-opened	#3010	AD-d1 Design session adapter
+2026-10-18T21:38:11Z	check	check: dev 8640f00f; #2979 AD-f1 and #3010 AD-d1 wait on lane mac build; 0 findings
+2026-10-18T22:16:45Z	check	check: #2979 AD-f1 mac build failed in PhotoZoomSweepTests (not ours, fixed on dev by #2990): merged dev, gate PASS, head 9e35dd3d; #3010 AD-d1 needs-rebase on design-model-sources C4 part: merged dev, kept both descriptions, gate PASS, head 7a9e3a2c
+22:36Z	check	dev 349578b8; #2973/#2979/#3010/#3011 wait on lane mac builds of their new heads; 0 findings
+22:56Z	check	#3010 AD-d1 merged; AD-d2 builder started; #2979 mac build in progress
+23:04Z	wave	AD-d2 #3024 opened (head 8ac2053e, Mutate 4/4 KernelSessionAdapter; LiveFiling 7/7): DesignFileHeader and markSaved deleted; waits on lane mac build
+23:16Z	check	#2979 AD-f1 merged (626404ce); AD-f2 builder started; #3024 AD-d2 mac build queued
+23:24Z	wave	AD-f2 #3034 opened (head 51c324dc, Mutate 4/4 KernelSessionAdapter): app RecoveryOffer.date dropped for the kernel offer's savedAt; AD-f1 had already replaced dirty/due in place; waits on lane mac build
+23:36Z	check	#3034 AD-f2 and #3024 AD-d2 wait on lane mac builds
+2026-10-18T23:56Z	check	#3024 AD-d2 and #3034 AD-f2 clean, lane macOS builds 39175673182 / 39176703183 queued (runner backlog). AD-library still blocked on AU-library.
+2026-10-19T00:16Z	check	#3024, #3034 clean; lane macOS builds 39175673182 / 39176703183 still queued. AD-library blocked on AU-library.
+2026-10-19T00:36Z	check	AD-d2 #3024 merged (f6418684): AD-design's last PR. #3034 AD-f2 mac build 39176703183 still queued. AD-library blocked on AU-library.
+2026-10-19T00:56Z	check	#3034 AD-f2 mac build 39176703183 in progress. AD-design (#3024 f6418684) waits on a suiteui/full run past 7ccb643d. AD-library blocked on AU-library.
+2026-10-19T01:16Z	check	AD-f2 #3034 merged (b15dd305), AD-flare's last PR. AD-design f6418684 is in full CI 39184285016 (124fe38c, pending); AD-flare needs a later run. AD-library blocked on AU-library.
+2026-10-19T01:36Z	check	waiting: full CI 39185202220 at 036f8d0a contains AD-design, AD-flare; AD-library blocked on AU-library
+2026-10-19T01:56Z	check	waiting: full CI 39185202220 cancelled; need a green suiteui/full run containing f6418684 (AD-design), b15dd305 (AD-flare); suiteui 39187049656 / CI 39186699154 at ed0fed9e queued; AD-library blocked on AU-library
+2026-10-19T02:16Z	check	waiting: scoped suiteui 39187049656 at ed0fed9e in progress (contains AD-design, AD-flare); full CI 39186699154 cancelled; AD-library blocked on AU-library
+2026-10-19T02:35Z	check	waiting: scoped suiteui 39187049656 at ed0fed9e still in progress (contains AD-design, AD-flare); full CI 39188162085 at 17dc84c7 pending; AD-library blocked on AU-library
+2026-10-19T02:55Z	check	waiting: scoped suiteui 39187049656 at ed0fed9e still in progress (contains AD-design, AD-flare); full CI 39188162085 pending; AD-library blocked on AU-library
+2026-10-19T03:17Z	check	AD-design, AD-flare done via scoped suiteui 39187049656 (ed0fed9e); AD-library blocked on adopt-kernel-undo:AU-library
+2026-10-19T03:36Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
+2026-10-19T03:55Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
+2026-10-19T04:15Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
+2026-10-19T04:36Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
+2026-10-19T04:55Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
+2026-10-19T05:15Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev; only AU-halo #3139 open)
+2026-10-19T05:34Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev; only AU-halo #3139 open)
+2026-10-19T05:54Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev; only AU-halo #3139 open)
+2026-10-19T06:22Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev; only AU-halo #3139 open)
+2026-10-19T06:42Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev; only AU-halo #3139 open)
+2026-10-19T07:03Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev; only AU-halo #3139 open)
+2026-10-19T07:25Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (AU-halo #3139 merged; #3184 Halo open; no AU-library)
+2026-10-19T07:45Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T08:05Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T08:24Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T08:44Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T09:04Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T09:24Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T09:43Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T10:04Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T10:23Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T10:42Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; #3184 Halo open)
+2026-10-19T11:04Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open; Halo #3184 merged)
+2026-10-19T11:24Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
+2026-10-19T11:44Z	check	AD-library still blocked on adopt-kernel-undo:AU-library (none on dev or open)
