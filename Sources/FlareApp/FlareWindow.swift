@@ -1,6 +1,7 @@
 // FlareWindow.swift: Flare's window on SuiteWindow. The model comes from the
 // launch flags (FlareLaunch: -FlareFixture, -FlareSample, -FlareOpenFile).
-// The sidebar is a SuiteSidebarList of SCENES and LAYERS, and the
+// The sidebar is a SuiteSidebarList of SCENES over the shared LayerTreeList
+// of LAYERS (FlareLayersList, FlareWindow+Layers.swift), and the
 // inspector column is `inspectorWidth` wide in every state; the toolbar is New, Open, Save, Undo,
 // Redo, Auto-key, Animate… and Export…, each disabled with its area's reason
 // while it can't act. The content is the stage over the timeline (FlareCanvas)
@@ -60,15 +61,17 @@ struct FlareWindow: View {
             title: model.document == nil ? "Flare" : model.title, actions: toolbar,
             inspectorWidth: Self.inspectorWidth
         ) {
-            SuiteSidebarList(
-                sections: SidebarSection.flare(model, perform: { perform(.layers($0)) }),
-                selection: model.selectedLayerID ?? model.selectedSceneID,
-                onSelect: { perform(.layers(.select(id: $0))) },
-                onToggle: { perform(.layers(.toggle(id: $0, flag: $1))) },
-                onMove: { section, rows, destination in
-                    if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
-                },
-                onRename: { perform(.layers(.rename(id: $0, name: $1))) })
+            VStack(spacing: 0) {
+                SuiteSidebarList(
+                    sections: [SidebarSection.flareScenes(model, perform: { perform(.layers($0)) })],
+                    selection: model.selectedLayerID == nil ? model.selectedSceneID : nil,
+                    onSelect: { perform(.layers(.select(id: $0))) },
+                    onMove: { section, rows, destination in
+                        if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
+                    },
+                    onRename: { perform(.layers(.rename(id: $0, name: $1))) })
+                FlareLayersList(model: model, perform: { perform(.layers($0)) })
+            }
         } content: {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,

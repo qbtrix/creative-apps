@@ -88,8 +88,9 @@ final class DesignJourneyTests: XCTestCase {
         let design = Journey("Design", self, arguments: ["-DesignFixture", "cards"])
         let desktop = design.element("design.layer.node-1")
         XCTAssert(desktop.waitForExistence(timeout: 30), "cards showed no Desktop row (design.layer.node-1)")
-        // A group's row is its disclosure's one checkbox; its identifier must be the row's, not its toggles' (#2410).
-        XCTAssert(desktop.label.hasPrefix("Desktop"), "design.layer.node-1 reads \(desktop.label), not Desktop")
+        // A group's row keeps its own identifier, not its toggles' (#2410); it holds the name, or reads it.
+        let name = desktop.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", "Desktop", "Desktop"))
+        XCTAssert(desktop.label.hasPrefix("Desktop") || name.count > 0, "design.layer.node-1 doesn't name Desktop")
         desktop.click()
         let edit = design.app.menuBars.firstMatch.menuBarItems["Edit"]
         edit.click()
@@ -244,7 +245,9 @@ final class DesignJourneyTests: XCTestCase {
         design.app.terminate()
 
         let reopened = Journey("Design", self, arguments: ["-DesignOpenFile", file.path])
-        XCTAssert(reopened.app.windows["journey.design"].waitForExistence(timeout: 30), "journey.design didn't reopen")
+        // The title carries the save state ("journey.design – Saved", files-history FH-4), so match its start.
+        let window = reopened.app.windows.matching(NSPredicate(format: "title BEGINSWITH 'journey.design'")).firstMatch
+        XCTAssert(window.waitForExistence(timeout: 30), "journey.design didn't reopen")
         reopened.shot("reopened")
     }
 

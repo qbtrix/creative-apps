@@ -1,6 +1,6 @@
 // ViewerStatusBar.swift: the row under a canvas or viewer, its facts drawn as
-// status pills, right-aligned and 4 pt apart: the zoom percent, the document
-// size, then each view of the trailing slot (a tool name, a render time, a
+// status pills, right-aligned and 4 pt apart: the zoom percent (none when
+// `zoom` is nil, as in a photo grid), the document size, then each view of the trailing slot (a tool name, a render time, a
 // View menu) in its own pill. A pill is a 20 pt capsule on the row fill (24
 // to hit) in the 10 pt pill type and secondary text. A trailing view marked
 // `.statusPill(.toggle(isOn: true))` takes the selected tint and accent text,
@@ -35,7 +35,7 @@ extension View {
 }
 
 public struct ViewerStatusBar<Trailing: View>: View {
-    private let zoom: Double
+    private let zoom: Double?
     private let size: String
     private let trailing: Trailing
     private var composing: any StatusPillComposing = SuiteStatusPills()
@@ -43,8 +43,9 @@ public struct ViewerStatusBar<Trailing: View>: View {
     @Environment(\.chipProbe) private var probe
 
     /// `zoom` is the scale the viewer draws at (1 is 100%; ViewerZoom.fitScale
-    /// gives CanvasSurface's), `size` the document size ("1920 × 1080 px").
-    public init(zoom: Double, size: String, @ViewBuilder trailing: () -> Trailing) {
+    /// gives CanvasSurface's; nil hides the zoom pill), `size` the document
+    /// size ("1920 × 1080 px").
+    public init(zoom: Double?, size: String, @ViewBuilder trailing: () -> Trailing) {
         self.zoom = zoom
         self.size = size
         self.trailing = trailing()
@@ -53,10 +54,13 @@ public struct ViewerStatusBar<Trailing: View>: View {
     public var body: some View {
         HStack(spacing: SuiteSpacing.pillGap) {
             Spacer(minLength: SuiteSpacing.s)
-            pill(.plain) {
-                Text(zoomText)
-                    .foregroundStyle(SuiteColor.textPrimary)
-                    .accessibilityLabel("Zoom \(zoomText)")
+            if let zoomText {
+                pill(.plain) {
+                    Text(zoomText)
+                        .foregroundStyle(SuiteColor.textPrimary)
+                        .accessibilityLabel("Zoom \(zoomText)")
+                }
+                .help("Zoom")
             }
             pill(.plain) { Text(sizeText) }
             ForEach(subviews: trailing) { view in
@@ -88,7 +92,7 @@ public struct ViewerStatusBar<Trailing: View>: View {
 }
 
 extension ViewerStatusBar where Trailing == EmptyView {
-    public init(zoom: Double, size: String) {
+    public init(zoom: Double?, size: String) {
         self.init(zoom: zoom, size: size) { EmptyView() }
     }
 }
@@ -153,9 +157,10 @@ extension ViewerStatusBar {
         self.composing = composing
     }
 
-    /// The zoom pill's text: the composer's first pill.
-    var zoomText: String {
-        faces.first?.text ?? ViewerZoom.percentText(zoom)
+    /// The zoom pill's text: the composer's first pill; nil without a zoom.
+    var zoomText: String? {
+        guard let zoom else { return nil }
+        return faces.first?.text ?? ViewerZoom.percentText(zoom)
     }
 
     /// The size pill's text: the composer's second pill for a document size,
@@ -165,7 +170,7 @@ extension ViewerStatusBar {
     }
 
     private var faces: [StatusPill] {
-        composing.pills(zoom: zoom, documentSize: documentSize ?? PlaneExtent(width: 0, height: 0), trailing: [])
+        composing.pills(zoom: zoom ?? 1, documentSize: documentSize ?? PlaneExtent(width: 0, height: 0), trailing: [])
     }
 
     @ViewBuilder fileprivate func trailingPill(_ view: Subview) -> some View {

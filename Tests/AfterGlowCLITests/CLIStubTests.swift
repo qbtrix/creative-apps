@@ -1,6 +1,6 @@
 // CLIStubTests.swift: LJ0's second half (afterglow-cli CL-2). The app
 // registry names the five apps in order and adds the fake only when asked;
-// every stub entry point exits 69 with one notBuilt object naming its slice;
+// every stub entry point (CL-7 filled ScriptRunner, CL-9 RealJobs) exits 69 with one notBuilt object naming its slice;
 // FakeIO round trips a file and never overwrites unless told to.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -39,16 +39,13 @@ struct CLIStubTests {
     }
 
     @Test(arguments: [
-        ("run", "slice CL-batch"), ("jobs", "slice CL-jobs"), ("mcp", "afterglow-mcp is not built yet"), ("cli", "slice CL-batch"),
+        ("mcp", "afterglow-mcp is not built yet"),
     ])
     func everyStubExits69NamingItsSlice(entry: String, names: String) {
         let io = FakeIO()
         let apps = Apps.all + [Apps.fake]
         let code: Int32 = switch entry {
-        case "run": ScriptRunner.run("resize.jobs.json", apps: apps, dryRun: false, force: false, io: io)
-        case "jobs": RealJobs.check("Tests/RealJobs/fake/resize", apps: apps, io: io)
-        case "mcp": MCPServer.serve([], apps: apps, io: io)
-        default: CLI.run(["run", "resize.jobs.json"], io: io) // the router hands `run` to ScriptRunner's stub
+        default: MCPServer.serve([], apps: apps, io: io)
         }
         #expect(code == 69)
         #expect(io.stdout.count == 1)
