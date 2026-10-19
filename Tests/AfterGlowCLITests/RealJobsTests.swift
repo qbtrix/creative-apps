@@ -1,5 +1,5 @@
-// RealJobsTests.swift: LJ3 (afterglow-cli CL-8 writes it, CL-9 turns it on;
-// slice CL-jobs). A real job is a folder `Tests/RealJobs/<app>/<job>/` with
+// RealJobsTests.swift: LJ3 (afterglow-cli CL-8 writes it, CL-9 turns it on
+// and adds the digest, JSON, missing-output and pixel checks; slice CL-jobs). A real job is a folder `Tests/RealJobs/<app>/<job>/` with
 // one `*.jobs.json` (the script format, plus `expect`, `platforms` and
 // `why`) and its inputs. Each job's folder is copied into a fresh FakeIO,
 // its own temp dir, under its repo path, so its outputs never touch the
@@ -98,7 +98,7 @@ struct RealJobsLayoutTests {
 
 /// LJ3: every real job passes or is skipped with its reason, and a wrong expectation fails.
 struct RealJobsTests {
-    @Test(.disabled("waits on CL-9"))
+    @Test
     func everyRealJobPassesOrIsSkippedWithItsReason() throws {
         let jobs = RealJobsHarness.jobs(in: RealJobsHarness.jobsTree)
         #expect(!jobs.isEmpty)
@@ -116,7 +116,7 @@ struct RealJobsTests {
         }
     }
 
-    @Test(.disabled("waits on CL-9"))
+    @Test
     func aWrongSha256FailsNamingTheJobAndTheOutputPath() throws {
         let job = "Tests/AfterGlowCLITests/Fixtures/RealJobsBroken/fake/wrong-sha"
         let io = RealJobsHarness.mount(job)
@@ -139,7 +139,7 @@ struct RealJobsTests {
         return FakeIO(files: ["\(job)/input/one.fake": Data(input.utf8), "\(job)/\(job.split(separator: "/").last ?? "").jobs.json": Data(script.utf8)])
     }
 
-    @Test(.disabled("waits on CL-9"))
+    @Test
     func aMacOSOnlyJobIsSkippedOnLinuxWithItsWhyNeverPassed() throws {
         let job = "jobs/fake/mac-only"
         let io = Self.inlineJob(job, #""expect": {"out/one-added.json": {"sha256": "\#(String(repeating: "0", count: 64))"}}, "#
@@ -156,7 +156,7 @@ struct RealJobsTests {
         #endif
     }
 
-    @Test(.disabled("waits on CL-9"))
+    @Test
     func aPixelJobBeforeImageCodecsIsSkippedNeverPassed() throws {
         let job = "jobs/fake/pixels"
         let io = Self.inlineJob(job, #""expect": {"out/one-added.json": {"pixels": {"tolerance": 2, "reference": "expected/one.png"}}}"#)
@@ -167,5 +167,34 @@ struct RealJobsTests {
             Issue.record("a pixel expectation was not skipped: \(RealJobsHarness.printed(io))"); return
         }
         #expect(why.contains("waits on image-codecs"))
+    }
+
+    @Test func aWrongJSONOrAMissingOutputFailsNamingThePath() throws {
+        for (name, expect) in [("json", #"{"out/one-added.json": {"json": []}}"#), ("missing", #"{"out/none.json": {"sha256": "00"}}"#)] {
+            let job = "jobs/fake/\(name)"
+            let io = Self.inlineJob(job, #""expect": "# + expect)
+            let code = RealJobs.check(job, apps: RealJobsHarness.apps, io: io)
+            let report = try #require(RealJobsHarness.report(io), "printed \(io.stdout)")
+            #expect(code != 0, "\(name) passed")
+            #expect(report["ok"] == .bool(false))
+            #expect(RealJobsHarness.printed(io).contains(name == "json" ? "out/one-added.json" : "out/none.json"))
+        }
+    }
+}
+
+/// The digest and the pixel comparison the expectations rest on.
+struct RealJobsCompareTests {
+    @Test func sha256MatchesTheFIPSVectors() {
+        #expect(RealJobs.sha256Hex(Data()) == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        #expect(RealJobs.sha256Hex(Data("abc".utf8)) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+        let twoBlocks = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"
+        #expect(RealJobs.sha256Hex(Data(twoBlocks.utf8)) == "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1")
+    }
+
+    @Test func pixelsMatchWithinTheToleranceInclusiveAndOnlyAtTheSameSize() {
+        #expect(RealJobs.pixelsMatch([10, 20, 30, 255], [12, 18, 30, 255], tolerance: 2))
+        #expect(!RealJobs.pixelsMatch([10, 20, 30, 255], [13, 20, 30, 255], tolerance: 2))
+        #expect(RealJobs.pixelsMatch([0, 0, 0, 0], [0, 0, 0, 0], tolerance: 0))
+        #expect(!RealJobs.pixelsMatch([0, 0, 0, 0], [0, 0, 0], tolerance: 255))
     }
 }
