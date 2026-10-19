@@ -99,3 +99,4 @@
 2026-10-18T22:43Z	blocked	39160459432 (f7e03506) macOS cancelled at 90 min inside scripts/ci: hung in AppSnapshotTests AfterGlowHomeSidebarTests from 21:14:35 (not a Flare suite); journeys never ran; added to #2971; 39171756438 (349578b8) queued
 2026-10-18T23:14Z	heartbeat	39171756438 (349578b8) Linux green, macOS queued since 22:37 with no runner; 39173775025 (46f6ce21) pending; #2971 no supervisor reply; ci.yml unchanged
 2026-10-18T23:47Z	heartbeat	39171756438 (349578b8) macOS started 23:24, in scripts/ci; 39177282982 (d77c9e00) pending; #2971 no supervisor reply; ci.yml unchanged
+2026-10-19T00:20Z	heartbeat	39171756438 (349578b8) macOS still in scripts/ci at 55 min (started 23:24, 90-min limit ~00:54); in-progress log only flushed to 23:29 so no hang diagnosis yet; newer dev runs superseded, 39180214762 (ef6f201f) pending; #2971 no supervisor reply; ci.yml unchanged
