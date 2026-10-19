@@ -5,7 +5,7 @@ Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, a
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
 Next: lane merges #3224 after its macOS build; then poll for a design-scoped or full ci.yml run containing c6ad68f (CB-b) and #3224 (CB-c); Belt-Slice-Done for each, Mac-Finish-Wanted, critic panel on the screens.
-Last check: 2026-10-19T15:21Z #3224 merged as a0de43b. Dev ci.yml 39252895176 (6e70826) was cancelled (macOS job cancelled 15:08Z), so CB-b still needs a green run; 39276059443 (8487b69, contains c6ad68f, not a0de43b) pending, 39268739545 queued; 0 open findings
+Last check: 2026-10-19T15:43Z all slices merged (CB-b c6ad68f, CB-c a0de43b). Dev ci.yml 39268739545 (955f02d, contains c6ad68f): Linux green, macOS running; 39278490377 (b3011ab, contains both) pending; 39276059443 cancelled; 0 open findings
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
