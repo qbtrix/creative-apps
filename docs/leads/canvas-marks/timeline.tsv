@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-19T00:02:29Z\tgoldens\tbranch pushed\tlead/golden-canvas-suiteui\t12 canvas PNGs, gate pass
 2026-10-19T00:03:56Z\tgoldens\tPR open\t#3046\tHead c8cf1e20, gate pass
 00:39Z	CM-16 PR #3060 (fast-lane, feature-done)
+01:01Z	#3060 merged; waiting on dev CI 39183169319
