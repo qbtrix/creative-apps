@@ -1,0 +1,110 @@
+utc	stage	event	ref	note
+2026-10-17T06:00Z	0	stage-start	–	fresh start: no lead/onboarding on the remote; base origin/dev 4a86f5fc; swift 6.3.3 installed
+2026-10-17T06:15Z	2	stage-end	–	plan: 5 waves, OB-5 split into OB-5 (code) and OB-5g (goldens); journeys in their own classes
+2026-10-17T06:15Z	3	stage-start	OB-1	wave 1: OB-1 builder started
+2026-10-17T06:40Z	3	pr-opened	#1998	task OB-1 onboarding contract types and stubs
+2026-10-17T07:05Z	3	pr-merged	#1998	OB-1 merged as 0cf5769d
+2026-10-17T08:37Z	3	ci-run	39018046761	full run on dev 453198ac green, contains #1998
+2026-10-17T10:45Z	3	stage-start	wave 2	OB-2, OB-3, OB-11 builders started (lead resumed after a container restart)
+2026-10-18T12:41Z	3	resume	run act-1a14f05c119-ejlc	no wave-2 PRs or branches found; base moved to 9bd0da5a
+2026-10-18T12:41Z	3	stage-start	wave 2	OB-2, OB-3, OB-11 builders restarted
+2026-10-18T14:08Z	3	pr-merged	#2785	OB-11 samples folder and SampleFilesTests
+2026-10-18T14:08Z	3	pr-merged	#2787	OB-3 Help > Welcome to AfterGlow, page 1
+2026-10-18T14:08Z	3	pr-merged	#2791	OB-2 checks first, disabled
+2026-10-18T14:08Z	3	stage-end	wave 2	OB-2, OB-3, OB-11 merged
+2026-10-18T14:08Z	3	stage-start	wave 3	OB-4, OB-7, OB-8, OB-9, OB-10 builders started; base d506e4aa
+2026-10-18T14:11:04Z	slice-done	OB-a	https://github.com/qbtrix/creative-apps/actions/runs/39132122171
+2026-10-18T14:11:04Z	wave-start	wave 3	OB-4 OB-7 OB-8 OB-9 OB-10 builders launched
+2026-10-18T14:30:54Z	heartbeat	wave 3	OB-7 OB-9 OB-10 in mutation runs; OB-4 OB-8 building
+2026-10-18T14:37:00Z	pr-open	OB-4	#2808 350f156a
+2026-10-18T14:43:19Z	pr-open	OB-10	#2809 a755cf09 mutate 4/4
+2026-10-18T14:43:42Z	pr-open	OB-8	#2810 19822e70 mutate 8/8; 2 tests wait OB-10 (follow-up OB-8b)
+2026-10-18T14:47:05Z	pr-open	OB-9	#2812 b05bd2ac mutate 3/3
+2026-10-18T14:49:24Z	pr-open	OB-7	#2813 0c88dff5 mutate 4/4
+2026-10-18T14:51:26Z	heartbeat	wave 3	all five open; lane macOS build-only runs dispatched; 0 onboarding findings
+2026-10-18T15:10:30Z	merged	OB-4	#2808
+2026-10-18T15:11:21Z	wave-start	wave 4 (early)	OB-5, OB-6 builders launched; OB-4 on dev
+2026-10-18T15:22:14Z	pr-open	OB-6	#2821 8acb4587
+2026-10-18T15:23:13Z	merged	OB-10	#2809
+2026-10-18T15:23:24Z	merged	OB-8 OB-9 OB-7	#2810 #2812 #2813; wave 3 complete
+2026-10-18T15:23:38Z	pr-open	OB-5	#2822 5d607b43
+2026-10-18T15:25:13Z	build-start	OB-12	worktree builder
+2026-10-18T15:25:13Z	build-start	OB-8b	worktree builder
+2026-10-18T15:33:50Z	check	wave3	dev CI 39140935376 and scoped suite 39140922596 at 15e42166 hold #2809-#2813; OB-s slice-done waits on its Linux job
+2026-10-18T15:36:01Z	pr-open	OB-12	#2824 48a729ef
+2026-10-18T15:38:19Z	pr-open	OB-8b	#2825 f119efbf
+2026-10-18T15:46:34Z	heartbeat	lead	4 PRs in lane (#2821 #2822 #2824 #2825); OB-s waits on dev run 39141126140
+2026-10-18T15:50:09Z	merged	OB-6	#2821
+2026-10-18T15:51:50Z	merged	OB-5	#2822; OB-5g waits on the first macOS snapshots holding it
+2026-10-18T15:55:30Z	merged	OB-8b	#2825; OB-m waits on a dev run holding it
+2026-10-18T16:07:13Z	merged	OB-12	#2824
+2026-10-18T16:08:06Z	review	OB-a,OB-s	critic panel round 1 on run 39140922596
+2026-10-18T16:08:24Z	heartbeat	lead	all PRs merged; OB-s/OB-u wait on run 39142469932 Linux; critic panel OB-a/OB-s running
+2026-10-18T16:14:03Z	check	OB-s,OB-u,OB-m	full run 39143942767 and scoped suite 39143959244 at bafd1d38 hold every merged task
+2026-10-18T16:16:29Z	review	OB-a,OB-s	OB-a clean (#2852 minor); OB-s major #2849, minors #2850 #2851
+2026-10-18T16:16:57Z	fix-start	OB-s	fixers for #2849 (major) and #2851; #2850 (UniqueFileNames reuse) and #2852 (OB-a needs-ui) follow once these merge, same files
+2026-10-18T16:26:34Z	pr-open	F-2849	#2857 head 69d35a3c, 2 files +22, Mutate 6/6
+2026-10-18T16:27:25Z	pr-open	F-2851	#2858 head 74cee90d, 3 files +21/-1, Mutate 6/6; footer stripped
+2026-10-18T16:29:38Z	heartbeat	-	full 39143942767 Linux running; scoped 39143959244 macOS running; #2857 #2858 open; findings #2850 #2852 queued behind them
+2026-10-18T16:30:04Z	slice-done	OB-m	run 39143942767 Linux green at bafd1d38
+2026-10-18T16:34:37Z	check	OB-u	scoped suite 39143959244 green, no screens (suite scope runs none); screens come from full 39143942767 macOS job
+2026-10-18T16:55:25Z	merged	F-2851	#2858 merge aee9df9da3ddc4ce802e016259fb487a3ab2eb0f
+2026-10-18T16:55:51Z	heartbeat	-	#2858 merged, #2857 waiting macOS build; full 39143942767 macOS running; fixer started for #2852 (OB-a); #2850 after #2857
+2026-10-18T16:57:07Z	needs-rebase	F-2849	#2857 conflicts with #2858 in Tests/mutations/SuiteModel.SampleCatalog.json; fixer merging origin/dev
+2026-10-18T17:05:31Z	pr-open	F-2852	#2872 head 21f58320, 2 files +4/-4; needs-ui #2867 filed
+2026-10-18T17:16:35Z	push	F-2849	#2857 merged dev in, head f0c7fef8, Mutate 8/8, CI: PASS
+2026-10-18T17:21:30Z	heartbeat	-	full 39143942767 macOS running since 16:40; #2857 (head f0c7fef8) and #2872 await lane macOS builds
+2026-10-18T17:30:06Z	merged	F-2849	#2857 merge cab9e7d87d13ddd7158ccac7522c7d19407bbae2; fixer for #2850 starts
+2026-10-18T17:38:16Z	pr-open	F-2850	#2877 head b94e685e, 3 files +41/-21, Mutate 8/8
+2026-10-18T17:48:22Z	heartbeat	-	full 39143942767 macOS still running (no artifacts yet); next full CI 39149544175 pending at acb73b0c; #2872 #2877 open
+2026-10-18T18:01:41Z	merged	F-2852	#2872 at 23aac48f (finding #2852, OB-a)
+2026-10-18T18:01:52Z	merged	F-2850	#2877 at 13c1cad0 (finding #2850, OB-s); OB-s fix round 1 all merged
+2026-10-18T18:13:07Z	stage	review-2	critic panels OB-u (ui) and OB-m on 39143942767 (bafd1d38); OB-5g builder started from its snapshots
+2026-10-18T18:14:26Z	heartbeat	-	OB-5g builder, OB-u and OB-m critics running; OB-s waits on full run 39152649677 Linux
+2026-10-18T18:18:09Z	review	OB-u	not clean: #2884 (major), #2885 #2886 #2887 (minor); fixers F-2884, F-2886 started (round 1)
+2026-10-18T18:21:13Z	slice-done	OB-s	Belt-Slice-Done: run 39152649677 (71facd44, Linux green, holds #2877)
+2026-10-18T18:31:40Z	pr	OB-5g	#2888 #2889 open
+2026-10-18T18:31:40Z	finding	OB-u	#2895 start-launching snapshot hangs macOS; fixer F-2895
+2026-10-18T18:31:40Z	review	OB-m	not clean: #2890-#2893; fixers F-2890, F-2893
+2026-10-18T18:41:07Z	heartbeat	-	fixers F-2884 F-2886 F-2895 F-2890 F-2893 running; #2888 #2889 open
+2026-10-18T19:08:54Z	pr	OB-5g\t#2888 #2889 merged
+2026-10-18T19:08:54Z	pr	F-2895\t#2901 open
+2026-10-18T19:08:54Z	pr	F-2893\t#2902 open
+2026-10-18T19:08:54Z	pr	F-2886\t#2903 open
+2026-10-18T19:08:54Z	pr	F-2884\t#2905 open
+2026-10-18T19:08:54Z	pr	F-2890\t#2906 open
+2026-10-18T19:30:10Z	merged	F-2895	#2901 f8e3cd15
+2026-10-18T19:36:22Z	heartbeat	-	#2902 #2903 #2905 #2906 wait on lane macOS builds; 39152649677 macOS in ui-test (scripts/ci step failed at 18:38, no hang)
+2026-10-18T19:39:33Z	merged	F-2884	#2905 a6a99476
+2026-10-18T20:04:16Z	check	lane builds green for #2902 #2903, #2906 running; waiting on lane sweep
+2026-10-18T20:06:54Z	merge	#2903 merged b1526f3e; #2891 fixer launched
+2026-10-18T20:08:56Z	fix	#2906 needs-rebase (OnboardingModel.swift, plan); merge fixer launched
+2026-10-18T20:17:46Z	pr	#2966 opened for #2891 (Mutate 16/16, CI: PASS)
+2026-10-18T20:20:10Z	merge	#2902 merged 1c7bc061; #2906 pushed a5c9a4ff, needs-rebase dropped
+2026-10-18T20:20:32Z	fix	#2906 dev merged in (a5c9a4ff), Mutate 19/19, CI: PASS
+2026-10-18T20:30:56Z	check	heartbeat: #2906 #2966 in lane; full dev run 39163553482 f836dc70 pending (contains #2903)
+2026-10-18T20:42:55Z	merge	#2966 merged 28713c70
+2026-10-18T20:45:00Z	merge	#2906 merged ae6e7c81; OB-m follow-ups done
+2026-10-18T20:58:12Z	check	heartbeat: all fix PRs merged; waiting on full dev run 39164756292 ae6e7c81 Linux for OB-u
+2026-10-18T21:25:08Z	check	heartbeat: full dev run 39166900704 f33b5b88 pending (contains #2903); scoped suite 39167050158 f33b5b88 queued, for OB-u round-2 critics
+2026-10-18T21:51:30Z	check	heartbeat: full dev runs keep cancelling while pending (latest 39169434591 e3859e3f); scoped suite 39167050158 still queued
+2026-10-18T22:17:22Z	check	heartbeat: scoped suite 39167050158 f33b5b88 in progress (OB-u round 2 critics on completion); full dev run 39171061138 85f4a229 pending
+2026-10-18T22:22:23Z	review	OB-u round-2 critic panel started on scoped run 39167050158 (f33b5b88)
+2026-10-18T22:28:19Z	review	OB-u round 2: 3 minor findings #3016-#3018; fix round 2 launched
+2026-10-18T22:43:46Z	heartbeat	fix round 2 resumed after container restart (215bcf64 local); monitor re-armed
+2026-10-18T22:47:51Z	pr	OB-u fix round 2: #3021 open (baa32595, Mutate 41/41)
+2026-10-18T23:11:04Z	heartbeat	#3021 waiting on fast lane; samples not on dev
+2026-10-18T23:13:20Z	merge	#3021 merged (e0a627c0634a8586785adf4400d401667f5d7215): OB-u round-2 findings fixed; waiting on full dev run with green Linux
+2026-10-18T23:37:54Z	heartbeat	waiting on dev run 39176304199 (398ea5d4, contains e0a627c0) Linux
+2026-10-19T00:05:27Z	heartbeat	full dev runs queue behind in-progress 39171756438 and newer ones cancel pending; 39178441058 (22046535) pending
+2026-10-19T00:31:34Z	heartbeat	39171756438 still running; pending full run 39180214762 (ef6f201f)
+2026-10-19T00:57:53Z	heartbeat	full run 39180214762 (ef6f201f, contains e0a627c0) Linux running
+2026-10-19T01:04:50Z	slice	OB-u done: Belt-Slice-Done + Mac-Finish-Wanted on #1972 (run 39180214762, Linux green)
+2026-10-19T01:23:20Z	heartbeat	OB-13 still blocked: Bundle/Samples on dev has only README.md; #836-#839 open. Sample monitor re-armed after container restart.
+2026-10-19T01:49:38Z	heartbeat	OB-13 still blocked: Bundle/Samples on dev has only README.md; #836-#839 open.
+2026-10-19T02:16:52Z	heartbeat	OB-13 still blocked on samples #836-#839.
+2026-10-19T02:42:57Z	heartbeat	OB-13 still blocked on samples #836-#839.
+2026-10-19T03:09:59Z	heartbeat	OB-13 still blocked on samples #836-#839.
+2026-10-19T03:36:41Z	heartbeat	OB-13 still blocked on samples #836-#839.
+2026-10-19T04:02:41Z	heartbeat	OB-13 still blocked on samples #836-#839.
+2026-10-19T04:29:01Z	heartbeat	OB-13 still blocked on samples #836-#839.
