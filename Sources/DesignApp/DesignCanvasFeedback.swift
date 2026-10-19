@@ -13,7 +13,7 @@
 // the Text tool the same mark is dashed and is the box a click would place at the
 // pointer (`placement`, observed by this body alone, so the canvas body never re-runs
 // as it follows the pointer). The size badge (`design.canvas.badge`) is the Model's
-// `selectionBadge` in a caption pill hung under the middle of the selection, one size
+// `selectionBadge` in a caption pill hung clear of the selection's bottom handle, one size
 // at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs. It
 // reads the model and never writes it.
 import AppKit
@@ -186,8 +186,8 @@ private struct DesignHoverMark: View {
     }
 }
 
-/// The size badge: `text` in a caption pill, its top `SuiteSpacing.xs` under `anchor` (page points)
-/// at `zoom`, one size at any zoom, identified `design.canvas.badge` with `text` as its label.
+/// The size badge: `text` in a caption pill, its top `SuiteSpacing.xs` under the bottom-middle
+/// handle below `anchor` (page points) at `zoom`, one size at any zoom, identified `design.canvas.badge` with `text` as its label.
 private struct DesignSizeBadge: View {
     let text: String
     let anchor: DesignPoint
@@ -205,7 +205,9 @@ private struct DesignSizeBadge: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text(verbatim: text))
             .accessibilityIdentifier(DesignControlID.canvasBadge)
-            .position(x: CGFloat(anchor.x * scale), y: CGFloat(anchor.y * scale) + SuiteSpacing.xs + SuiteSize.pill / 2)
+            .position(
+                x: CGFloat(anchor.x * scale),
+                y: CGFloat(anchor.y * scale) + SuiteSize.selectionHandle / 2 + SuiteSpacing.xs + SuiteSize.pill / 2)
             .allowsHitTesting(false)
     }
 }

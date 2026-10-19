@@ -1,7 +1,7 @@
 {
   "id": "suite-ai-access",
   "name": "AI access",
-  "description": "Which MCP clients may drive a running app's live document: AIAccessGrants (no grant asks; allow once is never remembered; always and deny are remembered per client per app; revoke forgets one app's grant or a client's everywhere; a file command always asks), stored through the suite preferences store as each app's perApp `aiAccess.<client>` keys beside the app's own; AIAccessRequest and AIAccessEntry; and FakeAIAccess, the approval flow the sheet, the chip and Window > AI Access… run on (afterglow-mcp MC-1, MC-9).",
+  "description": "Which MCP clients may drive a running app's live document: AIAccessGrants (no grant asks; allow once is never remembered; always and deny are remembered per client per app; revoke forgets one app's grant or a client's everywhere; a file command always asks), stored through the suite preferences store as each app's perApp `aiAccess.<client>` keys beside the app's own; AIAccessRequest and AIAccessEntry; FakeAIAccess, the approval flow the sheet, the chip and Window > AI Access… run on; and AIAccessPrompt, their copy and the -AIAccessDemoRequest launch hook (afterglow-mcp MC-1, MC-9, MC-12).",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
     "Sources/SuiteModel/AIAccess/"

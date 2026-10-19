@@ -1,0 +1,23 @@
+[
+  {
+    "label": "a built-in can be removed",
+    "file": "Sources/LibraryModel/Contracts/ExportPresets.swift",
+    "find": "list.filter { $0.id != id || $0.isBuiltIn }",
+    "replace": "list.filter { $0.id != id }",
+    "tests": "LibraryExportPresetTests"
+  },
+  {
+    "label": "duplicate names are kept",
+    "file": "Sources/LibraryModel/Contracts/ExportPresets.swift",
+    "find": "added.name = UniqueFileNames.name(preset.name, extension: \"\", among: taken)",
+    "replace": "_ = taken",
+    "tests": "LibraryExportPresetTests"
+  },
+  {
+    "label": "applied overwrites the folder",
+    "file": "Sources/LibraryModel/Contracts/ExportPresets.swift",
+    "find": "quality: quality, folder: options.folder,",
+    "replace": "quality: quality, folder: \"\",",
+    "tests": "LibraryExportPresetTests"
+  }
+]

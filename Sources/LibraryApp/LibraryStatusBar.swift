@@ -9,8 +9,8 @@
 // warning colors. With no row (an empty live catalog) it draws nothing.
 // The identifier and help come last on each trailing view, so they name the
 // pill once ViewerStatusBar makes the capsule one element (#3197).
-// ViewerStatusBar can't hide its zoom pill yet (#1184), so a row without a
-// zoom shows the fit scale the loupe measured, or 100% in the grid.
+// A row without a zoom (the grid) draws no zoom pill; at Fit the loupe's
+// measured fit scale is the one zoom pill.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -22,7 +22,7 @@ struct LibraryStatusBar: View {
 
     var body: some View {
         if let row = model.statusRow {
-            ViewerStatusBar(zoom: row.shownZoom(fitScale: fitScale) ?? 1, size: row.size) {
+            ViewerStatusBar(zoom: row.shownZoom(fitScale: fitScale), size: row.size) {
                 ForEach(row.pills) { pill in
                     Text(pill.text)
                         .statusPill(Self.style(pill))
