@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-18T23:11:04Z	heartbeat	#3021 waiting on fast lane; samples not on dev
 2026-10-18T23:13:20Z	merge	#3021 merged (e0a627c0634a8586785adf4400d401667f5d7215): OB-u round-2 findings fixed; waiting on full dev run with green Linux
 2026-10-18T23:37:54Z	heartbeat	waiting on dev run 39176304199 (398ea5d4, contains e0a627c0) Linux
+2026-10-19T00:05:27Z	heartbeat	full dev runs queue behind in-progress 39171756438 and newer ones cancel pending; 39178441058 (22046535) pending
