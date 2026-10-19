@@ -4,7 +4,7 @@ Issue: #1513 · Packet: docs/blueprints/library/features/loupe-viewport.md
 Run: act-1a14fc0ecee-9q8k (resumes act-1a14cdfa655-jrmy) · Session: see Belt run page · Started: 2026-10-18T02:45Z
 Stage: 5 fix round 1 (fix PRs in the lane)
 Base: origin/dev 21066130 (wave 2)
-Next: reading scoped library run 39176576523 (db15b8a, has #2878; macOS (library) started 23:43Z, in Scoped build and tests). Full run 39171756438 macOS still in scripts/ci after 24 min: likely the same AfterGlowHomeSidebarTests hang (line:suite; supervisor please route). Green: contact sheet. Red: round 2 (the last), then gaps
+Next: round 2 (the last). Scoped library 39176576523 (db15b8a, has #2878) red: J2 testGridShowsThumbnailsAndSorts hit the 128-char XCUI identifier limit in step 4 live (thumbnails now load); RenderBudgetLibraryTests.bodies scroll 1 > 0 (a launch change landing in the measure). 14/15 journeys pass, audit library identifier 2 unnamed 0, no crashes. Fixes gating: lead-r2-grid-query, lead-r2-budget-quiet. Supervisor: please start a scoped library run once both merge
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
