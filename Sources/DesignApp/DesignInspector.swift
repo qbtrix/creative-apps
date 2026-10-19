@@ -37,7 +37,7 @@ struct DesignInspector: View {
                     // Every layer shows the Text rows; on one that isn't text they are disabled and say why.
                     DesignInspectorText(model: model, perform: perform).id(node.id)
                 } else if let page = model.selectedPage {
-                    DesignPageProperties(page: page).id(page.id)
+                    DesignPageProperties(page: page, perform: perform).id(page.id)
                 }
             }
             // The id sits on a container inside the ScrollView, not on the ScrollView: SuiteWindow's
