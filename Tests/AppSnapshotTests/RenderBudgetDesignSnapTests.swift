@@ -66,7 +66,8 @@ extension BodyCountSuites {
         static func value(in element: Any, depth: Int = 0) -> String? {
             let node = element as AnyObject
             if (node.accessibilityIdentifier?() ?? nil) == DesignControlID.canvasGuides {
-                return (node.accessibilityValue?() ?? nil) as? String
+                let value: Any?? = node.accessibilityValue?()
+                return (value ?? nil) as? String
             }
             guard depth < 60 else { return nil }
             return ((node.accessibilityChildren?() ?? nil) ?? []).lazy.compactMap { value(in: $0, depth: depth + 1) }.first
