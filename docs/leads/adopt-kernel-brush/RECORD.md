@@ -45,3 +45,4 @@ Next: #3011 (AB-p1) waits on the lane's macOS build; then AB-p2 (feature-done): 
 - 2026-10-19T00:56Z #3030 AB-p2 mac build 39175685843 succeeded; waiting for the lane's next sweep to merge.
 - 2026-10-19T01:16Z AB-p2 #3030 merged (84a19ec5), AB-photo's last PR; in full CI 39184285016 at 124fe38c (pending).
 - 2026-10-19T01:36Z waiting: full CI 39185202220 at 036f8d0a contains AB-photo (39184285016 cancelled)
+- 2026-10-19T01:56Z waiting: need a green suiteui/full run containing 84a19ec5 (AB-photo); suiteui 39187049656 / CI 39186699154 at ed0fed9e queued
