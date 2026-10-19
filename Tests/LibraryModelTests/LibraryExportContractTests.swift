@@ -24,18 +24,14 @@ import Testing
     }
 
     @Test func uniqueNamesNeverCollide() {
-        let names = ExportNames.unique(stems: ["IMG_0001", "IMG_0001"], format: .jpeg, sidecar: false,
-                                       existing: ["IMG_0001.jpg"])
-        #expect(names == ["IMG_0001 2.jpg", "IMG_0001 3.jpg"])
+        #expect(ExportNames.unique(stems: ["IMG_0001", "IMG_0001"], format: .jpeg, sidecar: false, existing: ["IMG_0001.jpg"]) == ["IMG_0001 2.jpg", "IMG_0001 3.jpg"])
         #expect(ExportNames.unique(stems: ["IMG_0001"], format: .jpeg, sidecar: false, existing: []) == ["IMG_0001.jpg"])
         #expect(ExportNames.unique(stems: ["a", "b"], format: .png, sidecar: false, existing: ["A.PNG"]) == ["a 2.png", "b.png"])
     }
 
     @Test func sidecarNameMustBeFreeToo() {
-        #expect(ExportNames.unique(stems: ["IMG_0001"], format: .jpeg, sidecar: true,
-                                   existing: ["IMG_0001.xmp"]) == ["IMG_0001 2.jpg"])
-        #expect(ExportNames.unique(stems: ["IMG_0001"], format: .jpeg, sidecar: false,
-                                   existing: ["IMG_0001.xmp"]) == ["IMG_0001.jpg"])
+        #expect(ExportNames.unique(stems: ["IMG_0001"], format: .jpeg, sidecar: true, existing: ["IMG_0001.xmp"]) == ["IMG_0001 2.jpg"])
+        #expect(ExportNames.unique(stems: ["IMG_0001"], format: .jpeg, sidecar: false, existing: ["IMG_0001.xmp"]) == ["IMG_0001.jpg"])
         #expect(ExportSidecar.fileName(for: "IMG_0001 2.jpg") == "IMG_0001 2.xmp")
         #expect(ExportSidecar.fileName(for: "a.b.tif") == "a.b.xmp")
     }

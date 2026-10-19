@@ -1,5 +1,4 @@
-// Contracts/ExportNaming+Kernel.swift: export file names, the adapter onto SuiteModel's
-// UniqueFileNames. The unique rule is final in EX-1; template stems are a slot until EX-9.
+// Contracts/ExportNaming+Kernel.swift: export names, the adapter onto SuiteModel's UniqueFileNames.
 import SuiteModel
 
 /// A name template; `{name}` is the photo's name.
@@ -7,10 +6,8 @@ public struct ExportNaming: Hashable, Sendable, Codable {
     public var template: String
     public static let original = ExportNaming(template: "{name}")
     public init(template: String) { self.template = template }
-
     /// The file stem for `photo`, the `index`-th (0-based) of `count`. Slot: the photo's name.
     public func stem(for photo: PhotoItem, index: Int, count: Int) -> String { photo.name }
-
     /// Why the template can't name files; nil when it can. Slot: only `.original` can.
     public var help: String? {
         self == .original ? nil : "Name templates aren't built yet (export naming)."
@@ -23,8 +20,6 @@ public enum ExportNames {
     /// and names earlier in the list; with `sidecar`, `<chosen stem>.xmp` must be free too.
     public static func unique(stems: [String], format: ExportFormat, sidecar: Bool,
                               existing: Set<String>) -> [String] {
-        // The shared rule runs on stems: a stem is taken when its image name,
-        // or with a sidecar its XMP name, is.
         let image = "." + format.fileExtension
         let suffixes = sidecar ? [image, ".xmp"] : [image]
         var taken = Set(existing.compactMap { name in

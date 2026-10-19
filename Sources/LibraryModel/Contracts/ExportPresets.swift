@@ -1,5 +1,4 @@
-// Contracts/ExportPresets.swift (EX-1 slot, filled by EX-10): saved export settings and
-// the file the export area stores. Library-local: no shared module holds presets yet.
+// Contracts/ExportPresets.swift (EX-1 slot, filled by EX-10): saved export settings, Library-local (#3091).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
