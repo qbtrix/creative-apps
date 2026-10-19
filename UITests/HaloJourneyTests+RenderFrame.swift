@@ -106,8 +106,7 @@ final class HaloRenderFrameJourneyTests: XCTestCase {
     /// timeline; selection isn't the composition, so it never stales the
     /// frame), then Home and → `frame` times; the status timecode reads the frame.
     @MainActor private func scrub(to frame: Int, _ halo: Journey) {
-        let title = halo.app.buttons.matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
+        let title = halo.trackName("Ball")
         XCTAssert(title.waitForExistence(timeout: 10), "no Ball track title in the timeline")
         title.click()
         halo.press(.home)

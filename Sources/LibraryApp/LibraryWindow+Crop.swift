@@ -34,6 +34,12 @@ extension LibraryMenu {
     }
 }
 
+extension EnvironmentValues {
+    /// The window's `cropControls`, read by the loupe and the Develop tab
+    /// (CR-6); empty, with every closure nil, outside a window.
+    @Entry var libraryCrop = LibraryMenu.Crop()
+}
+
 extension LibraryWindow {
     var cropMenu: LibraryMenu.Photo {
         let cropping = model.cropDraft != nil

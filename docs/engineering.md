@@ -152,10 +152,11 @@ every step.
   `scripts/bundle-apps` writes to `.build/apps`.
 - **How they run.** `scripts/ui-test` builds the bundles, generates the
   project, runs the `Journeys` scheme and exports every screenshot to
-  `.build/ui-screens/<app>-<step>.png`. The `macOS` CI job runs it after the
-  bundles are built and uploads the folder as the `ui-screens` artifact
-  (`gh run download <id> -n ui-screens`). A failed step fails the job. Gate:
-  the `macOS` job.
+  `.build/ui-screens/<app>-<step>.png`. The `macOS journeys` CI job runs it
+  on its own runner and uploads the folder as the `ui-screens` artifact
+  (`gh run download <id> -n ui-screens`). A failed step fails that job and
+  files a `finding` issue on dev; the job is report-only, so it never holds
+  `main` or a PR. Gate: none (report-only).
 - **Quarantine is owned and expires.** The supervisor can skip a journey that
   keeps failing on `dev` by adding it to `UITests/quarantine.json` with an
   open owner issue, a reason and an expiry at most 7 days out. An entry with
@@ -189,9 +190,10 @@ every step.
   A count may only go down: a rise fails the journeys and raising the
   baseline needs the captain's review; a fall is written back by CI, which
   pushes the lower baseline to `dev`. New checks come from faults
-  (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS` job.
-- **One page per run: the contact sheet.** After the journeys, the `macOS`
-  job runs `scripts/contact-sheet`, which writes `contact-sheet.html` into
+  (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS
+  journeys` job (report-only).
+- **One page per run: the contact sheet.** After the journeys, the `macOS
+  journeys` job runs `scripts/contact-sheet`, which writes `contact-sheet.html` into
   `ui-screens`: the commit, each app's audit counts against the baseline,
   every journey's steps in order with each screen's violations, and the perf
   reports (`BRUSH-LATENCY` and the like) from `.build/snapshots`. Download
@@ -218,9 +220,9 @@ every step.
 - **Timing is reported, not gated.** A test that asserts a wall-clock or
   allocation budget can fail on a busy machine while the code is fine, so it
   goes in `Tests/perf-suites.txt` (the supervisor edits it). The gate and
-  scoped runs skip it; the `macOS` job's Perf step runs it alone, reports its
-  numbers in the job summary and warns when a bound is missed by more than
-  3x. Gate: none, by design; read the warnings on `dev` runs.
+  scoped runs skip it; it runs alone nightly on the captain's Mac (perf-nightly),
+  which reports its numbers and warns when a bound is missed by more than 3x.
+  Gate: none, by design.
 
 ## Reading cost
 

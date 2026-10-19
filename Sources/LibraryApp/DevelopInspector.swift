@@ -1,5 +1,6 @@
 // DevelopInspector.swift: the inspector's Develop tab (develop DV-9). While a
-// crop draft is set it hosts CropInspector. With no photo to develop it is an
+// crop draft is set it hosts CropInspector with the window's crop controls
+// (`\.libraryCrop`, crop CR-6). With no photo to develop it is an
 // EmptyStateView saying why (`developHelp`). Otherwise, top to bottom:
 // the histogram readout in a well (`library.develop.histogram`: the loupe
 // render's mean and its clip labels as text until S-L1, #2984, draws bars),
@@ -20,10 +21,11 @@ struct DevelopInspector: View {
     /// The window's menu, whose actions the Develop tab calls.
     let menu: LibraryMenu
     let cropDraft: CropSettings?
+    @Environment(\.libraryCrop) private var crop
 
     var body: some View {
-        if let cropDraft {
-            CropInspector(cropDraft: cropDraft)
+        if cropDraft != nil {
+            CropInspector(crop: crop)
         } else if let help = model.developHelp {
             EmptyStateView("Develop", systemImage: "slider.horizontal.3", message: help)
         } else {

@@ -1,6 +1,6 @@
 // LibraryCropRenderTests.swift: crop CR-3, the cropped render's checks
 // (slice CR-b, QB-LIB-V4) and MJ6L (`walkJ6Live`), written first and
-// disabled until CR-4 makes `LiveDevelop.render` turn and crop after tone.
+// enabled by CR-4, which makes `LiveDevelop.render` turn and crop after tone.
 // They call `LiveDevelop().render(_:settings:)` and the live services' crop
 // geometry (LibraryLiveCropTests' helpers), so CR-4 keeps both seams.
 // Runs on Linux and macOS.
@@ -16,7 +16,7 @@ func cropEveryPixelIsOpaque(_ buffer: PixelBuffer) throws -> Bool {
     return true
 }
 
-@Suite(.disabled("waits on CR-4"))
+@Suite
 struct LibraryCropRenderTests {
     let develop = LiveDevelop()
     let gradientSize = PixelSize(width: 600, height: 400)
