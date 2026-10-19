@@ -61,3 +61,4 @@ Next: #3166 (r-b1, head 783c6907, SuiteUI part removed, Mutate 13/13) back in th
 - 07:15Z check: nothing merged; dev CI 39211832383 and 39213562657 cancelled, 39214719821 (34b8df25) pending; macOS build runs queued (runner backlog)
 - 07:37Z check: nothing merged; runners backlogged (dev CI 39203617095 still on macOS; newer dev runs superseded while queued, now 39215489121 at 57d85dfd); lane macOS builds all queued, none failed
 - 08:00Z check: #3166 macOS build 39210328243 green, awaiting lane merge; 9 SL findings open, SL-8 held
+- 08:22Z check: #3166 merged 0ae8bada (closes #3133 #3137); 7 SL findings open; fix-batch round 1 started on #3130 #3131 #3135 (wf_6511ef74-211); SL-8 held until <=5
