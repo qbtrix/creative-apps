@@ -5,7 +5,7 @@ Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, a
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
 Next: round 2 on #3339/#3342/#3343 once #3365 and #3366 merge; critic re-review; gaps; Belt-Contact-Sheet.
-Last check: 2026-10-19T22:56Z: all three macOS builds (#3360 run 39328045147, #3365 39335952174, #3366 39330852461) still queued; macOS runners saturated (21 runs queued). Nothing red; waiting.
+Last check: 2026-10-19T23:22Z: BLOCKED on macOS runners: builds for #3360 (39328045147, queued since 21:30Z), #3365 (39335952174) and #3366 (39330852461) still queued; 22 runs queued repo-wide. No red; nothing actionable from the lead.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |

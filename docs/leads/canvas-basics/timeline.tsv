@@ -120,3 +120,4 @@ utc	stage	event	ref	note
 2026-10-19T22:28Z	3	fix-build	3365	mutating call in #expect
 2026-10-19T22:34Z	3	fix-build-pushed	3365	6edebb32
 2026-10-19T22:56Z	3	wait-macos-build	3360,3365,3366	runner queue 21
+2026-10-19T23:22Z	3	wait-macos-build	3360,3365,3366	runner queue 22, oldest 2h
