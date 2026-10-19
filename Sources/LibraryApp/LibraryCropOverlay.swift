@@ -6,8 +6,8 @@
 // takes no hits: the loupe's canvas drag picks the handle under the press
 // with `handle(at:frame:radius:)` and reports the drag through
 // `LibraryMenu.Crop.drag`, so the canvas keeps the keys (Escape cancels, the
-// arrows nudge). Its elements: the frame `library.crop.frame`, whose label and
-// value read `cropFrameValue` ("4000 × 4000 at 1000, 0"), and each handle
+// arrows nudge). Its elements: the frame `library.crop.frame`, a ProbeElement
+// whose label reads `cropFrameValue` ("4000 × 4000 at 1000, 0"), and each handle
 // `library.crop.handle.<name>` ("library.crop.handle.topLeft"), placed where
 // they are drawn. Values in; it never writes LibraryCatalog.
 import LibraryModel
@@ -27,13 +27,7 @@ struct LibraryCropOverlay: View {
             ZStack(alignment: .topLeading) {
                 CropShade(rect: rect, documentSize: CGSize(width: canvas.width, height: canvas.height), zoom: zoom)
                 SelectionOutline(rect: rect, zoom: zoom)
-                Color.clear
-                    .frame(width: box.width, height: box.height)
-                    .accessibilityElement()
-                    .accessibilityLabel(Text(verbatim: label))
-                    .accessibilityValue(Text(verbatim: label))
-                    .libraryControl(id: "library.crop.frame", enabled: crop.drag != nil, help: CropInspector.noDraft)
-                    .position(x: box.midX, y: box.midY)
+                ProbeElement("library.crop.frame", label: label, rect: rect, zoom: zoom)
                 ForEach(Self.handles, id: \.self) { handle in
                     let point = Self.point(of: handle, in: box)
                     Rectangle()
