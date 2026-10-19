@@ -164,8 +164,7 @@ struct MCPToolsTests {
         #expect(MCPTools.route("fake.rect.add", in: Apps.all) == nil)
     }
 
-    @Test(.disabled("waits on MC-4 and MC-6"))
-    func toolsListThroughTheServerMatchesTheList() throws {
+    @Test func toolsListThroughTheServerMatchesTheList() throws {
         let server = MCPServer(MCPOptions(apps: [Apps.fake], roots: ["/tmp/mcp"]), io: FakeIO(), clock: { 0 })
         var client = MCPTestClient(server, era: .sessionless(MCPVersions.current))
         guard case .array(let tools)? = Self.field(try client.request("tools/list").result, "tools") else {

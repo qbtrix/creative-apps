@@ -1,8 +1,9 @@
 // MCPShapeTests.swift: MJ0's shape checks (afterglow-mcp MC-1). Every
 // contract type exists; the versions are pinned newest first and
 // `negotiate` refuses an unknown one; every stub answers or errors naming
-// the task that builds it (MC-6 built the tools; MCPToolsTests covers them);
-// `serve` still exits 69; the fake approval flow.
+// the task that builds it (MC-4 built the server, MCPProtocolTests covers
+// it; MC-6 built the tools, MCPToolsTests covers them); the fake approval
+// flow.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -43,20 +44,10 @@ struct MCPShapeTests {
                                    "error": .object(["code": .number(-32700), "message": .string("Parse error")])]))
     }
 
-    @Test func parseAndHandleAreStubsNamingMC4() throws {
-        let line = Data(#"{"jsonrpc":"2.0","id":3,"method":"server/discover"}"#.utf8)
-        #expect(JSONRPC.parse(line) == .failure(RPCError(code: -32603, message: "JSONRPC.parse is not built yet (afterglow-mcp MC-4)")))
+    @Test func serverOptionsHaveThePacketsLimits() {
         let server = MCPServer(Self.options, io: FakeIO(), clock: { 0 })
         #expect(server.options.maxOpen == 16 && server.options.idleSeconds == 3600 && server.options.maxCallsPerSecond == 50)
         #expect(!server.options.live && server.options.roots == ["/tmp/mcp"])
-        let reply = try JSONValue(json: try #require(server.handle(line)))
-        #expect(reply == .object(["jsonrpc": .string("2.0"), "id": .null, "error": .object([
-            "code": .number(-32603), "message": .string("MCPServer.handle is not built yet (afterglow-mcp MC-4)"),
-            "data": .object(["supportedVersions": .array(MCPVersions.supported.map(JSONValue.string))]),
-        ])]))
-        let io = FakeIO()
-        #expect(MCPServer.serve(["--app", "fake"], apps: [Apps.fake], io: io) == 69)
-        #expect(io.stderr == ["afterglow-mcp is not built yet"])
     }
 
     @Test func toolsRouteBackAndSessionsAreAStubNamingMC8() {

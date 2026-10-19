@@ -68,9 +68,12 @@ jobs:
           persist-credentials: false
           # The lane's own code, the merge drivers it installs in the scratch
           # clone that integrates a conflicting PR, and the canonical-first
-          # and SuiteUI-first checks with their concept lists: all from main, never the PR.
+          # and SuiteUI-first checks with their concept lists, and test-scope,
+          # which names the apps a code PR's macOS build compiles: all from
+          # main, never the PR.
           sparse-checkout: |
             scripts/fast-lane.sh
+            scripts/test-scope
             scripts/install-merge-drivers
             scripts/merge-json
             scripts/check-dup-logic

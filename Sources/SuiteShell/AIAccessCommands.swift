@@ -1,7 +1,8 @@
 // AIAccessCommands.swift (afterglow-mcp MC-12): Window > AI Access…, and the
 // AppKit side of the approval flow on one FakeAIAccess per process: the
 // approval sheet begun on the main window, and AIAccessChip as a titlebar
-// accessory while a client is connected. MC-13 swaps in the live bridge.
+// accessory while a client is connected. MC-10's LiveCommandChannel swaps in
+// the live bridge; RenderBudgetAIAccessTests (MC-13) drives it on a test window.
 import AppKit
 import SuiteModel
 import SuiteUI
@@ -29,10 +30,10 @@ import SwiftUI
         }
     }
 
-    /// A client asks to drive the main window: connects it, or begins the approval sheet.
-    public func request(client: String, command: String? = nil) {
+    /// A client asks to drive `window` (the main window when nil): connects it, or begins the approval sheet.
+    public func request(client: String, command: String? = nil, in window: NSWindow? = nil) {
         access?.request(client: client, command: command)
-        guard let window = NSApp.mainWindow ?? NSApp.windows.first(where: \.isVisible) else { return }
+        guard let window = window ?? NSApp.mainWindow ?? NSApp.windows.first(where: \.isVisible) else { return }
         host = window
         if let pending = access?.pending, sheet == nil {
             let controller = NSHostingController(rootView: AIAccessSheet(request: pending) { [weak self] in self?.decide($0) })

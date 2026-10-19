@@ -70,19 +70,20 @@ Until beta, CI blocks only on compile and Model tests (captain, 2026-10-16).
 - **Linux builds the Models only.** `scripts/ci` builds and tests the Model
   targets and runs the lints. SwiftUI under `Sources/*App/` and
   `Sources/SuiteUI/` compiles only on macOS: the lane's build-only run for
-  each code PR, and the report-only `macOS` CI job on `dev`.
+  each code PR, and the `macOS` CI job on `dev`.
 - **You can't dispatch CI** (the API answers 403). Two kinds of run come to
   you. A **scoped run** (`ci.yml` with `app=<app>`, titled `scoped: <app>`,
-  job `macOS (<app>)`: builds every target, app bundle and journey bundle,
-  then runs only that app's Model tests, snapshots and journeys; about 10
+  jobs `macOS (<app>)` for the Model tests and snapshots and the report-only
+  `macOS journeys (<app>)` for that app's journeys; about 10
   minutes for Design) is started by the supervisor's verify-dispatch.sh after
   merges to your app; its screens feed reviews and the Verified level. A **full run**
   is dispatched by the lane, at most once per lane run, after it merges a PR
   labelled `feature-done`, a PR touching `Sources/*App`, `Sources/SuiteUI`,
   `Tests/App*` or `UITests`, or the 10th merged PR since the last CI run. A
   full run covers every app, so it counts as a scoped run for yours, and its
-  `Linux` job is the one merged-done reads (rule 6). The macOS job in both
-  is report-only: it never turns a run red.
+  `Linux` job is the one merged-done reads (rule 6). A full run's `macOS`
+  job (scripts/ci) gates `main` with Linux; the journeys job is report-only
+  in both: a red journey files a finding and never turns the gate red.
 - **Code must compile on macOS.** A PR changing any `.swift` file under
   `Sources/`, `Tests/` or `UITests/`, or `project.yml`, Models and shared
   shell files such as `SuiteWindow.swift` included,
