@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-19T15:09Z	lead	resume	act-1a154b13dec-71tm	base 6e70826; hand-offs checked
 2026-10-19T15:54:33Z	heartbeat	check	-	#3287 open in lane; no supervisor answer yet on #1934-#1936; hand-offs unchanged
 2026-10-19T16:17:18Z	heartbeat	check	-	#3287 open in lane (lane backlog: batch -6 queued); no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T16:39:19Z	heartbeat	check	-	#3287 still open in lane; main at 955f02d; no supervisor answer on #1934-#1936; hand-off owners unchanged
