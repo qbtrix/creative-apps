@@ -4,7 +4,7 @@ Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: waiting on dev CI
 Base: 2e27b8db (origin/dev)
-Next: Belt-Contact-Sheet once run 39185202220 (dev 036f8d0a, contains f191be21) is green
+Next: Belt-Contact-Sheet on the first green of full run 39186699154 or scoped suiteui run 39187049656 (dev ed0fed9e, contains f191be21)
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.

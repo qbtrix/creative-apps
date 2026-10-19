@@ -74,3 +74,4 @@ utc	stage	event	ref	note
 00:39Z	LL-17 PR #3061 (fast-lane, feature-done)
 01:01Z	#3061 merged; waiting on dev CI 39183169319
 2026-10-19T01:32Z	run 39183169319 cancelled (superseded); waiting on 39185202220
+2026-10-19T01:58Z	full run 39185202220 cancelled (superseded by later merges); now waiting on 39186699154 / scoped suiteui 39187049656
