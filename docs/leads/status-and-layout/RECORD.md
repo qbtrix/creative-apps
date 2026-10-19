@@ -1,17 +1,17 @@
 # status-and-layout lead record
 
 Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
-Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
+Run: act-1a1543fe40d-7l1y · Session: claude/library-feature-lead-zn216c · Started: 2026-10-19T12:20Z (earlier: act-1a150baa34c-jzk9)
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: SL-8 #3230 (4fb9096f, feature-done) in the lane (macOS build next); on merge with green Linux dev run, Belt-Slice-Done + Mac-Finish-Wanted SL-c, then contact sheet; 4 findings (#3129 #3132 #3134 #3136) wait on SuiteUI
+Next: SL-8 #3230 merged cd7d4120; once a dev run containing it has a green Linux job (39252895176 at 6e70826b pending), Belt-Slice-Done + Mac-Finish-Wanted SL-c, then contact sheet; 4 findings (#3129 #3132 #3134 #3136) wait on SuiteUI
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SL-a | status row and inspector header values, grid columns and loupe fit per width | SL-1, SL-2 | MJ1 | spine (built) | no | 0 | done | 39192572958 | - |
 | SL-b | status row under grid and loupe, J12 at every width | SL-3, SL-4 | J12 | SL-a (SL-4); thumbnails, loupe-viewport (built); SuiteUI #1184 (SL-4, soft) | yes | 0 | done | 39203617095 | - |
-| SL-c | inspector header facts, Library control identifiers, wide-width snapshots | SL-5, SL-6, SL-7, SL-8 | J12 | SL-a (SL-5, SL-7); SL-b (SL-6, SL-8) | yes | 0 | building | - | - |
+| SL-c | inspector header facts, Library control identifiers, wide-width snapshots | SL-5, SL-6, SL-7, SL-8 | J12 | SL-a (SL-5, SL-7); SL-b (SL-6, SL-8) | yes | 0 | merged, awaiting dev Linux run | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -23,7 +23,7 @@ Next: SL-8 #3230 (4fb9096f, feature-done) in the lane (macOS build next); on mer
 | SL-5 | SL-c | 2 | inspector header facts and dateText | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json | LibraryStatusTextTests (SL-5 half) | #3075 | merged a01d82b7 |
 | SL-7 | SL-c | 2 | layout snapshots at each width | Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift | LibraryLayoutSnapshots | #3069 | merged e0b0ac66 |
 | SL-6 | SL-c | 3 | LibraryInspector header library.inspector.header | Sources/LibraryApp/LibraryInspector.swift, Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift | LibraryInspectorSnapshots | #3107 | merged b7e17ed6 |
-| SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | #3230 | in lane 4fb9096f |
+| SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | #3230 | merged cd7d4120 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -73,3 +73,4 @@ Next: SL-8 #3230 (4fb9096f, feature-done) in the lane (macOS build next); on mer
 - 11:04Z check: SL-8 #3230 macOS build 39241507186 queued; #3232 closed dup of #3131
 - 11:26Z check: SL-8 #3230 macOS build 39241507186 in progress
 - 11:50Z check: SL-8 #3230 macOS build 39241507186 green; awaiting lane merge
+- 12:59Z run act-1a1543fe40d-7l1y: SL-8 #3230 merged cd7d4120, all SL-c tasks merged. Dev runs 39249031049 (cd7d4120) and 39250826720 were cancelled while queued; 39252895176 (6e70826b) pending. 4 open findings, all waiting on SuiteUI.
