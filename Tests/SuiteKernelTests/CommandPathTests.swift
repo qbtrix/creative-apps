@@ -8,7 +8,8 @@
 // `<file>: <the call's trimmed line>`, so it excuses that line only, never a
 // new site in the same file. The baselines hold the sites that predate the
 // catalog; adopt-command-catalog removes them as each app moves onto specs.
-// A fixture tree (Fixtures/CommandPath/, .txt so it isn't compiled) proves
+// A baseline line whose site is gone fails too (CC-12), so baselines only
+// shrink. A fixture tree (Fixtures/CommandPath/, .txt so it isn't compiled) proves
 // both directions. Files are read by path from #filePath.
 import Foundation
 import Testing
@@ -94,24 +95,29 @@ enum CommandPathScan {
         return false
     }
 
-    /// The sites `baseline` doesn't list, each named by file and line. Each baseline line excuses one site.
+    /// The sites `baseline` doesn't list, each named by file and line, then the baseline lines
+    /// that name no site (CC-12, the ratchet), each named by its line in the baseline. Each
+    /// baseline line excuses one site, so a baseline only shrinks.
     static func problems(_ sites: [CommandSite], baseline: String, baselineName: String) -> [String] {
-        var allowance: [String: Int] = [:]
-        for raw in baseline.split(separator: "\n") {
+        var listed: [String: [(row: Int, text: String)]] = [:]
+        for (row, raw) in baseline.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
             let line = raw.trimmingCharacters(in: .whitespaces)
             guard !line.hasPrefix("#"), let gap = line.range(of: ": ") else { continue }
-            allowance[key(file: String(line[..<gap.lowerBound]), text: String(line[gap.upperBound...])), default: 0] += 1
+            listed[key(file: String(line[..<gap.lowerBound]), text: String(line[gap.upperBound...])), default: []]
+                .append((row + 1, line))
         }
         var problems: [String] = []
         for site in sites {
             let siteKey = key(file: site.file, text: site.text)
-            if let left = allowance[siteKey], left > 0 {
-                allowance[siteKey] = left - 1
+            if let left = listed[siteKey], !left.isEmpty {
+                listed[siteKey] = Array(left.dropFirst())
             } else {
                 problems.append("\(site.file):\(site.line): `\(site.text)` builds a menu item or button without a command"
                     + " spec and \(baselineName) doesn't list it; build it with MenuCommand(spec, on:) from the app's catalog")
             }
         }
+        let stale = listed.values.flatMap { $0 }.sorted { $0.row < $1.row }
+        problems += stale.map { "\(baselineName):\($0.row): `\($0.text)` names no site; remove it from the baseline" }
         return problems
     }
 }
@@ -157,8 +163,18 @@ enum CommandPathScan {
     @Test func baselineMatchesLineNotFile() throws {
         let problems = CommandPathScan.problems(try Self.fixtureSites(), baseline: try Self.fixtureBaseline("baseline-wrong-line.txt"),
                                                 baselineName: "baseline-wrong-line.txt")
-        #expect(problems.count == 2)
+        #expect(problems.filter { $0.contains("doesn't list it") }.count == 2)
         #expect(problems.first?.hasPrefix("Sources/FixtureApp/Menus/BareMenu.swift.txt:5:") == true)
+    }
+
+    /// CC-12, the ratchet: a baseline line whose site is gone fails, naming the baseline line, so baselines only shrink.
+    @Test func staleBaselineFails() throws {
+        let listed = try Self.fixtureBaseline("baseline-listed.txt")
+        let gone = #"Sources/FixtureApp/Toolbar.swift.txt: Button("Fit") { fit() }"#
+        let problems = CommandPathScan.problems(try Self.fixtureSites(), baseline: listed + gone + "\n", baselineName: "b.txt")
+        #expect(problems == ["b.txt:4: `\(gone)` names no site; remove it from the baseline"])
+        let once = CommandPathScan.problems(try Self.fixtureSites(), baseline: listed + listed, baselineName: "b.txt")
+        #expect(once.count == 2 && once.allSatisfy { $0.hasSuffix("remove it from the baseline") }, "\(once)")
     }
 
     /// Calls built from a spec (one line or several), comments, and longer names are never sites.
