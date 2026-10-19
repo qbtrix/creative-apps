@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 4 build wave 4
 Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: #3154 CL-7 back in lane (needs-rebase dropped, head a53cfee, awaiting macOS build). After it merges: re-dispatch CL-9 (local lead/afterglow-cli-CL-9 @35ee7e6) and start CL-10 (main.swift → LiveIO, enable waits-on-CC-7 tests). Then CL-11 docs, critics.
+Next: #3154 CL-7 in lane (head a53cfee, macOS build queued since 07:05Z). CL-10 builder dispatched 07:44Z stacked on CL-7 (branch lead/afterglow-cli-CL-10, PR held until #3154 merges). After #3154 merges: re-dispatch CL-9 (lead/afterglow-cli-CL-9 @35ee7e6), open CL-10 PR on dev. Then CL-11 docs, critics.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -94,3 +94,7 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - Merged dev into CL-7 (merge commit, no force). CL-4's router already routes `run` → ScriptRunner.run, so `run` is real once #3154 merges. Removed `run`+CL-4 `cli` rows from CLIStubTests.everyStubExits69NamingItsSlice and the `run` row from CLIShapeTests. Full ci PASS (4012), mutate 7/7, 7 files +271/-36.
 - Remaining stub rows: `jobs` (RealJobs.check — CL-9 removes it) and `mcp` (MC slices). When mcp is real, delete CLIShapeTests.everyOtherFormIsAStubThatNamesItsSlice.
 - CL-10 no longer needs to route `run`: only main.swift → LiveIO and the waits-on-CC-7 tests.
+
+## 07:44Z heartbeat
+- #3154 still open, clean, macOS build queued (run 39213749046). No dev merges of ours.
+- Not waiting: CL-10 builder dispatched stacked on lead/afterglow-cli-CL-7; it pushes lead/afterglow-cli-CL-10 and holds its PR until #3154 merges.
