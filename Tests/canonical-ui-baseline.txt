@@ -70,7 +70,6 @@ B Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow error-label
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow error-label
 B Sources/LibraryApp/LibraryControls.swift::* app-inventory
 B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
-B Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar preview-pill
 B Sources/PhotoApp/ExportSheet.swift::ExportSheet sheet-buttons
 B Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet sheet-buttons
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label

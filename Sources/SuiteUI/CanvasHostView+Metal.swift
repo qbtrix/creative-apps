@@ -8,7 +8,8 @@
 // they get them back from the shown images when the path returns to `.cpu`.
 // The drawable is the artboard at the backing scale but never more pixels
 // than the document has (Core Animation magnifies it, nearest from 2 px per
-// pixel, as the tile path does), and it turns with `rotationDegrees`. A layout
+// pixel, as the tile path does), and it turns with `rotationDegrees`; with no
+// artboard (a zero-size host) nothing is presented. A layout
 // presents a new drawable only for a new picture or a new drawable size, so a
 // pan or a rotation moves the one shown. The overlay stays on top on both
 // paths. macOS only.
@@ -131,6 +132,8 @@ extension CanvasHostView {
         metal.contentsScale = scale
         metal.magnificationFilter = documentSize.width > 0 && board.width / documentSize.width >= 2 ? .nearest : .linear
         CATransaction.commit()
+        // No artboard yet (a window's first layout is at zero size): nothing to show, so no drawable.
+        guard !board.isEmpty else { return }
         let size = Self.drawableSize(board: board.size, scale: scale, document: documentSize)
         // A pan, a rotation or a layout that keeps the picture and the drawable's size needs no new drawable:
         // Core Animation moves and scales the one shown.

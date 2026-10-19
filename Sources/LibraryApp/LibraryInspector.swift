@@ -4,10 +4,11 @@
 // and Kind, or several photos' count and capture span), then Info and Develop
 // tabs on SegmentedTabs. Info shows the cull targets' MetadataInspector (the
 // loupe photo in the loupe, else the selected photos) or nothing. Develop
-// shows DevelopInspector. Which tab shows is presentation state kept here;
-// values in, closures out: it reads LibraryCatalog and hands each metadata
-// edit to the closure LibraryWindow gives it. `utcOffset` is the local
-// offset the header's dates use; snapshots pass 0.
+// shows DevelopInspector with the catalog and the window's menu. Which tab
+// shows is presentation state kept here; values in, closures out: it reads
+// LibraryCatalog and hands each metadata edit to the closure LibraryWindow
+// gives it. `utcOffset` is the local offset the header's dates use;
+// snapshots pass 0.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -18,6 +19,8 @@ enum LibraryInspectorTab: Hashable, Sendable {
 
 struct LibraryInspector: View {
     let model: LibraryCatalog
+    /// The window's menu (LibraryMenu.disabled outside one), passed to the Develop tab.
+    var menu = LibraryMenu()
     var onStar: @MainActor (Int) -> Void = { _ in }
     var onFlag: @MainActor (PhotoFlag) -> Void = { _ in }
     var onLabel: @MainActor (PhotoLabel?) -> Void = { _ in }
@@ -33,7 +36,7 @@ struct LibraryInspector: View {
                 selection: tab, onChange: { tab = $0 })
                 .libraryControl(id: "library.inspector.tabs", enabled: true, help: nil)
             if tab == .develop {
-                DevelopInspector(cropDraft: model.cropDraft)
+                DevelopInspector(model: model, menu: menu, cropDraft: model.cropDraft)
             } else if let metadata = model.selectedMetadata {
                 MetadataInspector(metadata: metadata, onStar: onStar, onFlag: onFlag, onLabel: onLabel)
             }

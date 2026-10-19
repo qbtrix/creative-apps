@@ -5,6 +5,18 @@ import CoreGraphics
 import SuiteUI
 import Testing
 
+/// A scrub counts from the slack's edge, not from its first event past it: a 4 pt ⇧-drag whose
+/// first event lands at 4 pt still moves 2 points, ten steps each (#2921).
+@Test func aScrubCountsFromTheSlacksEdge() throws {
+    #expect(ScrubValue.dragOrigin(1.5, restarting: false) == nil)
+    #expect(ScrubValue.dragOrigin(-1.9, restarting: false) == nil)
+    #expect(ScrubValue.dragOrigin(4, restarting: false) == 2)
+    #expect(ScrubValue.dragOrigin(-6, restarting: false) == -2)
+    #expect(ScrubValue.dragOrigin(17, restarting: true) == 17)
+    let origin = try #require(ScrubValue.dragOrigin(4, restarting: false))
+    #expect(ScrubValue.dragged(from: 34, by: 4 - origin, step: 1, multiplier: 10, in: -360...360) == 50)
+}
+
 @Test func dragMovesOneStepPerPoint() {
     #expect(ScrubValue.dragged(from: 50, by: 12, step: 1, in: 0...100) == 62)
     #expect(ScrubValue.dragged(from: 50, by: -7, step: 1, in: 0...100) == 43)

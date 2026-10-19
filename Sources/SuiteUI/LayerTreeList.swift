@@ -12,6 +12,12 @@
 // The only view state is the drop target lit while a drag hovers it, written
 // on enter and exit, never per sample. Each row's controls carry
 // `suite.layers.<id>.<part>`; the row itself is `suite.layers.row.<id>`.
+// To stand in for a sidebar layers panel (#2811) it can take a selected id
+// and `onSelect` (a click on the row; the row draws the selected tint and
+// reads selected), `onRename` (SidebarRow's double-click, Return and
+// "Rename" routes; a non-nil result refuses and keeps the draft), SidebarRow's
+// identifiers and labels (`naming: .sidebar`) and a header with an action
+// (LayerTreeList+Rows.swift). Each defaults to off, so older callers are unchanged.
 // It shows no scroller (wheel, trackpad and keys still scroll), so the
 // audit finds no unnamed page-area button beside a long tree. While it
 // scrolls it reports a drawn frame on series `layers-scroll` (SP4) to the
@@ -46,18 +52,59 @@ public struct LayerTreeList: View {
     private let rows: [LayerRow]
     private let childCount: @MainActor (String) -> Int
     private let onAction: @MainActor (LayerTreeAction) -> Void
+    private let selection: String?
+    let naming: LayerTreeNaming
+    let header: LayerTreeHeader?
+    private let onSelect: (@MainActor (String) -> Void)?
+    private let onRename: (@MainActor (String, String) -> String?)?
+    /// The row that starts with its rename field in this state: a snapshot's refused rename.
+    private let renaming: (id: String, field: SidebarRenameField)?
     @State private var target: String?
     @Environment(\.gridProbe) private var probe
 
     /// `rows` from `LayerTree.rows(expanded:)`; `childCount` names how many
     /// children a closed container holds, so a drop lands after the last one.
+    /// `selection` draws that row selected and a click on a row calls
+    /// `onSelect`; `onRename` gets a row's id and new name and returns nil to
+    /// accept it or the refusal shown under the field it keeps open. Nil
+    /// turns that gesture off; `naming` and `header` are described on their types.
     public init(
-        rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int,
+        rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selection: String? = nil,
+        naming: LayerTreeNaming = .layers, header: LayerTreeHeader? = nil,
+        onSelect: (@MainActor (String) -> Void)? = nil, onRename: (@MainActor (String, String) -> String?)? = nil,
+        onAction: @escaping @MainActor (LayerTreeAction) -> Void
+    ) {
+        self.init(rows: rows, childCount: childCount, selection: selection, naming: naming, header: header,
+                  onSelect: onSelect, onRename: onRename, renaming: nil, onAction: onAction)
+    }
+
+    init(
+        rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selection: String?,
+        naming: LayerTreeNaming, header: LayerTreeHeader?, onSelect: (@MainActor (String) -> Void)?,
+        onRename: (@MainActor (String, String) -> String?)?, renaming: (id: String, field: SidebarRenameField)?,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
         self.rows = rows
         self.childCount = childCount
         self.onAction = onAction
+        self.selection = selection
+        self.naming = naming
+        self.header = header
+        self.onSelect = onSelect
+        self.onRename = onRename
+        self.renaming = renaming
+    }
+
+    /// Whether row `id` draws selected.
+    func isSelected(_ id: String) -> Bool { selection == id }
+
+    /// A click on row `id`: tells the app, when it takes selection.
+    func select(_ id: String) { onSelect?(id) }
+
+    /// Row `id`'s rename, as SidebarRenameField commits it; nil when the list can't rename.
+    func rename(_ id: String) -> (@MainActor (String) -> String?)? {
+        guard let onRename else { return nil }
+        return { onRename(id, $0) }
     }
 
     /// The move a drop of `id` onto `target` makes, or nil when the list
@@ -86,10 +133,26 @@ public struct LayerTreeList: View {
     nonisolated public static func rowIDs(_ rows: [LayerRow]) -> [String] { rows.map(\.id) }
 
     public var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let header {
+                SidebarSectionHeader(section: header.section)
+                    .padding(.horizontal, SuiteSpacing.s)
+                    .padding(.vertical, SuiteSpacing.xs)
+            }
+            list
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(naming.container)
+    }
+
+    private var list: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(rows, id: \.id) { row in
-                    LayerTreeRow(row: row, lit: target == row.id, onAction: onAction)
+                    LayerTreeRow(
+                        row: row, lit: target == row.id, selected: isSelected(row.id), naming: naming,
+                        field: renaming?.id == row.id ? renaming?.field : nil,
+                        onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
                         .equatable()
                         .draggable(row.id)
                         .dropDestination(for: String.self) { items, _ in
@@ -107,8 +170,6 @@ public struct LayerTreeList: View {
         .onScrollGeometryChange(for: Double.self) { Double($0.contentOffset.y) } action: { _, _ in
             probe?.drew(GridProbe.layersScrollSeries, ProcessInfo.processInfo.systemUptime)
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("suite.layers")
     }
 
     private func accept(_ items: [String], onto parent: String) -> Bool {
@@ -131,30 +192,50 @@ public struct LayerTreeList: View {
 }
 
 /// One row: plain values in, so SwiftUI skips it when they compare equal.
-private struct LayerTreeRow: View, Equatable {
+/// The closures are left out of `==`; whether it selects and renames is kept in.
+struct LayerTreeRow: View, Equatable {
     let row: LayerRow
     let lit: Bool
+    let selected: Bool
+    let naming: LayerTreeNaming
     let onAction: @MainActor (LayerTreeAction) -> Void
+    let onSelect: (@MainActor (String) -> Void)?
+    let onRename: (@MainActor (String) -> String?)?
+    @State var field: SidebarRenameField
+    @FocusState var editing: Bool
 
-    nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.row == rhs.row && lhs.lit == rhs.lit }
+    init(
+        row: LayerRow, lit: Bool, selected: Bool, naming: LayerTreeNaming, field: SidebarRenameField?,
+        onAction: @escaping @MainActor (LayerTreeAction) -> Void, onSelect: (@MainActor (String) -> Void)?,
+        onRename: (@MainActor (String) -> String?)?
+    ) {
+        self.row = row
+        self.lit = lit
+        self.selected = selected
+        self.naming = naming
+        self.onAction = onAction
+        self.onSelect = onSelect
+        self.onRename = onRename
+        _field = State(initialValue: field ?? SidebarRenameField())
+    }
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.row == rhs.row && lhs.lit == rhs.lit && lhs.selected == rhs.selected && lhs.naming == rhs.naming
+            && (lhs.onRename == nil) == (rhs.onRename == nil) && (lhs.onSelect == nil) == (rhs.onSelect == nil)
+    }
 
     var body: some View {
         HStack(spacing: SuiteSpacing.xs) {
             Color.clear.frame(width: CGFloat(row.depth) * SuiteSpacing.l, height: SuiteSpacing.xxs)
             disclosure
-            Text(row.name)
-                .lineLimit(1)
-                .foregroundStyle(row.isHidden || row.inheritsHidden ? SuiteColor.secondaryText : Color.primary)
+            title
             Spacer(minLength: SuiteSpacing.s)
-            icon(row.isHidden ? "eye.slash" : "eye", row.isHidden ? "Show \(row.name)" : "Hide \(row.name)", part: "eye") {
-                onAction(.toggleHidden(row.id))
-            }
-            icon(row.isLocked ? "lock" : "lock.open", row.isLocked ? "Unlock \(row.name)" : "Lock \(row.name)", part: "lock") {
-                onAction(.toggleLocked(row.id))
-            }
+            toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
+            toggle(naming.lock(row)) { onAction(.toggleLocked(row.id)) }
         }
         .padding(.horizontal, SuiteSpacing.s)
-        .background(lit ? SuiteColor.rowHover : Color.clear, in: RoundedRectangle(cornerRadius: SuiteRadius.row))
+        .background(selected ? SuiteColor.selectedTint : lit ? SuiteColor.rowHover : Color.clear,
+                    in: RoundedRectangle(cornerRadius: SuiteRadius.row))
         .overlay {
             if lit {
                 RoundedRectangle(cornerRadius: SuiteRadius.row)
@@ -163,15 +244,26 @@ private struct LayerTreeRow: View, Equatable {
             }
         }
         .contentShape(.rect)
+        .onTapGesture { onSelect?(row.id) }
+        .focusable(onRename != nil)
+        .onKeyPress(.return) { requestRename() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(row.name)
-        .accessibilityIdentifier("suite.layers.row.\(row.id)")
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityActions {
+            if onRename != nil { Button(SidebarRow.renameActionName) { _ = requestRename() } }
+        }
+        .accessibilityIdentifier(naming.row(row.id))
+    }
+
+    private func toggle(_ toggle: SidebarToggle, action: @escaping @MainActor () -> Void) -> some View {
+        icon(toggle.systemImage, toggle.title, identifier: naming.identifier(of: toggle, in: row.id), action: action)
     }
 
     @ViewBuilder private var disclosure: some View {
         if row.holdsChildren {
-            icon("chevron.right", row.isExpanded ? "Collapse \(row.name)" : "Expand \(row.name)", part: "disclose",
-                 turned: row.isExpanded) {
+            icon("chevron.right", row.isExpanded ? "Collapse \(row.name)" : "Expand \(row.name)",
+                 identifier: naming.disclosure(row.id), turned: row.isExpanded) {
                 onAction(.disclose(row.id))
             }
         } else {
@@ -179,7 +271,7 @@ private struct LayerTreeRow: View, Equatable {
         }
     }
 
-    private func icon(_ symbol: String, _ title: String, part: String, turned: Bool = false,
+    private func icon(_ symbol: String, _ title: String, identifier: String, turned: Bool = false,
                       action: @escaping @MainActor () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
@@ -192,6 +284,6 @@ private struct LayerTreeRow: View, Equatable {
         .foregroundStyle(SuiteColor.secondaryText)
         .help(title)
         .accessibilityLabel(title)
-        .accessibilityIdentifier("suite.layers.\(row.id).\(part)")
+        .accessibilityIdentifier(identifier)
     }
 }

@@ -2,13 +2,13 @@
 // grid's and the loupe's (status-and-layout SL-4). It draws LibraryCatalog's
 // `statusRow` through ViewerStatusBar: the zoom pill, the size pill (the
 // photo count in the grid, the loupe photo's pixel size), then one pill per
-// row entry: the selection and cell size in the grid, the loupe's Fit and
-// place, and the import, render, save and Preview data pills, each
-// `library.status.<id>` with its help as tooltip and accessibility hint, and
-// a warning entry in warning colors. With no row (an empty live catalog) it
-// draws nothing. ViewerStatusBar can't hide its zoom pill yet (#1184), so a
-// row without a zoom shows the fit scale the loupe measured, or 100% in the
-// grid.
+// row entry: the selection and cell size in the grid, and the import, render,
+// save and Preview data pills, each `library.status.<id>` with its help as
+// tooltip and accessibility hint. The loupe's place is its HUD's. A
+// `.selected` entry draws as an on toggle and a warning or error entry in
+// warning colors. With no row (an empty live catalog) it draws nothing.
+// ViewerStatusBar can't hide its zoom pill yet (#1184), so a row without a
+// zoom shows the fit scale the loupe measured, or 100% in the grid.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -20,17 +20,13 @@ struct LibraryStatusBar: View {
 
     var body: some View {
         if let row = model.statusRow {
-            ViewerStatusBar(zoom: row.zoom ?? (model.loupeItem == nil ? 1 : fitScale), size: row.size) {
+            ViewerStatusBar(zoom: row.shownZoom(fitScale: fitScale) ?? 1, size: row.size) {
                 ForEach(row.pills) { pill in
-                    let face = Text(pill.text)
+                    Text(pill.text)
                         .help(pill.help)
                         .accessibilityHint(pill.help)
                         .accessibilityIdentifier(Self.identifier(pill))
-                    if pill.style == .warning {
-                        face.statusPill(.warning)
-                    } else {
-                        face.statusPill(.plain)
-                    }
+                        .statusPill(Self.style(pill))
                 }
             }
             .accessibilityElement(children: .contain)
@@ -41,5 +37,15 @@ struct LibraryStatusBar: View {
     /// The pill's accessibility identifier: `library.status.<id>`.
     nonisolated static func identifier(_ pill: LibraryStatusPill) -> String {
         "library.status.\(pill.id)"
+    }
+
+    /// How ViewerStatusBar draws the pill.
+    nonisolated static func style(_ pill: LibraryStatusPill) -> StatusPillStyle {
+        switch pill.style {
+        case .plain: .plain
+        case .selected: .toggle(isOn: true)
+        case .warning: .warning
+        case .error: .warning  // until SuiteUI #3167 adds .statusPill(.error)
+        }
     }
 }

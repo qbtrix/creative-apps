@@ -40,5 +40,19 @@
     "find": "public var redoSteps: [Step] { undone }",
     "replace": "public var redoSteps: [Step] { done }",
     "tests": "SuiteKernelTests.HistoryStacksTests"
+  },
+  {
+    "label": "the hash skips the saved mark, so a saved and an unsaved history hash alike",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "        hasher.combine(savedStepID)\n",
+    "replace": "",
+    "tests": "SuiteKernelTests.HistoryHashTests"
+  },
+  {
+    "label": "the hash skips the redo stack, so histories that redo different states hash alike",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "        hasher.combine(undone)\n",
+    "replace": "",
+    "tests": "SuiteKernelTests.HistoryHashTests"
   }
 ]

@@ -1,7 +1,7 @@
 {
   "id": "cli-mcp",
   "name": "MCP server",
-  "description": "`afterglow mcp`: MCPServer, which serves every app's command catalog as MCP tools over stdio. CL-2 stubs MCPServer.serve (exits 69, \"afterglow-mcp is not built yet\"); the afterglow-mcp packet fills it.",
+  "description": "`afterglow mcp`: a Model Context Protocol server over stdio that serves every app's command catalog as tools. MCPVersions pins the protocol revisions (2026-07-28 sessionless; 2025-11-25 and 2025-06-18 start with initialize); JSONRPC frames one JSON-RPC 2.0 message per line; MCPServer (with MCPOptions: apps, roots, limits) answers each line; MCPTools lists the tools and routes a tool name to an MCPRoute; MCPSessions holds the open documents by expiring handle and returns MCPToolResults. afterglow-mcp MC-1 declares them as stubs (serve still exits 69); MC-4, MC-6 and MC-8 fill the server, the tools and the calls.",
   "technology": "Swift 6, Foundation, Linux and macOS",
   "paths": [
     "Sources/AfterGlowCLICore/MCP/"
