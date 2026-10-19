@@ -17,7 +17,8 @@ import Testing
     @Test func titleSwitchedToFixedWidth() throws {
         var model = DesignWorkspace()
         model.useServices(.live)
-        #expect(model.openFixture("cards"))
+        let opened = model.openFixture("cards")
+        #expect(opened)
         model.selectItem("node-5")
         #expect(model.findNode("node-5")?.textStyle.fixedWidth == nil)
         var sent: [DesignIntent] = []
