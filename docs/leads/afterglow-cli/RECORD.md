@@ -159,3 +159,7 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 ## 2026-10-19T10:18Z: heartbeat
 - No merges yet. All five lane PRs are clean, and their macOS build runs are still queued (33 queued repo-wide).
 - The MC-10 and MC-14 builders are running. MC-11 and CL-11 are held.
+
+## 2026-10-19T10:39Z: heartbeat
+- No merges yet. The macOS build for MC-12 (#3203) is now running (run 39225689887). The other lane builds are still queued (28 queued repo-wide).
+- The MC-15 docs builder is running. Every other slice is built and held.

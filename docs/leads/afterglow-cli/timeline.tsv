@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-19T09:49Z	wave	pushed	CL-11	held until #3209,#3211
 2026-10-19T09:55Z	heartbeat	waiting	-	macOS queue 30
 2026-10-19T10:18Z	heartbeat	waiting	-	macOS queue 33
+2026-10-19T10:39Z	heartbeat	waiting	-	MC-12 build in progress
