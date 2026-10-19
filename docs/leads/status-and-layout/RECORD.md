@@ -4,7 +4,7 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: #3166 (r-b1, head 783c6907, SuiteUI part removed, Mutate 13/13) back in the lane; once it merges, fix batch on deferred #3130 #3131 #3135 (round 1 for them); #3129 #3132 #3134 #3136 wait on SuiteUI (#1184 #3167 #3168); SL-8 waits for ≤5 open findings (9 open)
+Next: SL-8 (wave 4, wf_00a7b134-d61) building; on merge with green Linux dev run, Belt-Slice-Done + Mac-Finish-Wanted SL-c, then contact sheet; 4 findings (#3129 #3132 #3134 #3136) wait on SuiteUI
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,7 @@ Next: #3166 (r-b1, head 783c6907, SuiteUI part removed, Mutate 13/13) back in th
 | SL-5 | SL-c | 2 | inspector header facts and dateText | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json | LibraryStatusTextTests (SL-5 half) | #3075 | merged a01d82b7 |
 | SL-7 | SL-c | 2 | layout snapshots at each width | Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift | LibraryLayoutSnapshots | #3069 | merged e0b0ac66 |
 | SL-6 | SL-c | 3 | LibraryInspector header library.inspector.header | Sources/LibraryApp/LibraryInspector.swift, Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift | LibraryInspectorSnapshots | #3107 | merged b7e17ed6 |
-| SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | - | planned |
+| SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | - | building |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
