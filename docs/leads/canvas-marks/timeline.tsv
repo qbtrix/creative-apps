@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-18T23:10:17Z	wait	runs-queued	39171756438	full + scoped suite on 349578b still queued
 2026-10-18T23:30:22Z	wait	run-swap	39175856233	suite scope ran no UI tests; watching scoped suiteui instead
 2026-10-19T00:02:29Z\tgoldens\tbranch pushed\tlead/golden-canvas-suiteui\t12 canvas PNGs, gate pass
+2026-10-19T00:03:56Z\tgoldens\tPR open\t#3046\tHead c8cf1e20, gate pass

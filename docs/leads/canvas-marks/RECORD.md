@@ -2,9 +2,9 @@
 
 Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: goldens from 39175856233 -> golden PR
+Stage: golden PR #3046 open (CM-14/15 baselines)
 Base: 2e27b8db (origin/dev)
-Next: open canvas golden PR, then CM-16 feature-done
+Next: read 39175856233 journeys (#2829 #2848); then CM-16 feature-done (blueprint + label)
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
