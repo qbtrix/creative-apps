@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-19T09:18:48Z	heartbeat	check	-	no change: main 6f9a2b8; #3184 and #3198 open, waiting on their macOS builds; hand-offs open
 2026-10-19T09:41:22Z	heartbeat	check	-	no change
 2026-10-19T10:03:13Z	heartbeat	check	-	#3184 macOS build 39215372795 still queued
+2026-10-19T10:24:31Z	heartbeat	check	-	#3184 macOS build still queued
