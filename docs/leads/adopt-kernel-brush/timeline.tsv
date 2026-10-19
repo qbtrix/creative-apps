@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-19T01:16Z	check	AB-p2 #3030 merged (84a19ec5), AB-photo's last PR; in full CI 39184285016 at 124fe38c (pending).
 2026-10-19T01:36Z	check	waiting: full CI 39185202220 at 036f8d0a contains AB-photo (39184285016 cancelled)
 2026-10-19T01:56Z	check	waiting: need a green suiteui/full run containing 84a19ec5 (AB-photo); suiteui 39187049656 / CI 39186699154 at ed0fed9e queued
+2026-10-19T02:16Z	check	waiting: scoped suiteui 39187049656 at ed0fed9e in progress (contains AB-photo)
