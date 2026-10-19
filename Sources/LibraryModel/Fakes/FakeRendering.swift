@@ -1,7 +1,8 @@
 // Fakes/FakeRendering.swift: fakes of the loupe, develop, crop and export
 // contracts. The loupe is the photo's gradient lifted one byte level per
-// slider step, develop changes nothing, crop centers the aspect, and export
-// plans by the same naming rule in a few lines. The loupe and exporter obey
+// slider step, curve point off the diagonal and levels field off neutral;
+// develop changes nothing, crop centers the aspect, and export plans by the
+// same naming rule in a few lines. The loupe and exporter obey
 // `-LibraryFakeMode`, so the UI track can show every state.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -28,9 +29,15 @@ public struct FakeLoupe: LoupeImaging {
             throw LibraryError.renderFailed("empty photo")
         }
         // Not the develop math: a visible stand-in so the UI track sees every
-        // slider move. Each step of any slider (0.01 EV, or 1) lifts by one
-        // byte level, clamped to the byte range.
-        let steps = DevelopSlider.allCases.map { settings.value($0) / $0.step }.reduce(0, +)
+        // slider move. Each step of any slider (0.01 EV, or 1), each curve
+        // point off the diagonal and each levels field off neutral lifts by
+        // one byte level, clamped to the byte range.
+        let sliderSteps = DevelopSlider.allCases.map { settings.value($0) / $0.step }.reduce(0, +)
+        let curveSteps = settings.curve.points.filter { $0.x != $0.y }.count
+        let levelSteps = DevelopLevels.Field.allCases.filter {
+            settings.levels.value($0) != DevelopLevels.neutral.value($0)
+        }.count
+        let steps = sliderSteps + Double(curveSteps + levelSteps)
         let lift = Int(min(max(steps, -255), 255).rounded())
         var bytes = base.rgba8
         var red = [Int](repeating: 0, count: HistogramBins.binCount), green = red, blue = red

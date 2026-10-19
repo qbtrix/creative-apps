@@ -1,4 +1,5 @@
-// DesignFile.swift: Design's file errors and the workspace's Open and Save.
+// DesignFile.swift: Design's file errors, their alert (DesignFileProblem: a title
+// and a message) and the workspace's Open and Save.
 // `fileData()` writes the open document and `open(_:at:)` replaces it with a
 // file's pages, both through `services.filing` (on the live services that is
 // LiveFiling, the codec: sorted-key JSON, version 1, and every refusal with its
@@ -45,6 +46,23 @@ public enum DesignFileError: Error, Equatable, Sendable {
         case .notAContainer(let id): "It is damaged: a layer that isn't a frame or group holds other layers (\(id))."
         case .invalidNumber(let id): "One of its layers has a size or position that can't be drawn (\(id))."
         }
+    }
+}
+
+/// The alert for a file that can't be opened or saved: a short title naming the file and the
+/// reason underneath as its message, so the alert never shows an empty text field (#3052).
+public struct DesignFileProblem: Sendable, Equatable {
+    public let title: String
+    public let message: String
+
+    /// Opening `file` failed for `reason`.
+    public static func opening(_ file: String, _ reason: String) -> DesignFileProblem {
+        DesignFileProblem(title: "\(file) can't be opened.", message: reason)
+    }
+
+    /// Saving `file` failed for `reason`.
+    public static func saving(_ file: String, _ reason: String) -> DesignFileProblem {
+        DesignFileProblem(title: "\(file) can't be saved.", message: reason)
     }
 }
 
