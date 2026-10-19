@@ -43,3 +43,5 @@ utc	stage	event	ref	note
 04:06Z	3	check	39196649963	SL-b waits on Linux
 04:29Z	3	check	39199491251	SL-b waits
 04:53Z	3	review	SL-b	critic panel on 39195761651
+2026-10-19T05:01:06Z	SL-b	critic	39195761651	panel filed #3129-#3137 (blocker #3131); open findings 9
+2026-10-19T05:01:06Z	SL-b	fix	wf_6545bdf4-43b	fix round 1 started on base bede8342; SL-8 blocked (>5 findings)

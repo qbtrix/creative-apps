@@ -4,7 +4,7 @@ Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
 Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: SL-b critic panel (wf_82a7861c-60c on scoped run 39195761651) files findings; SL-b merged-done waits on dev CI 39199491251 (aed78668) Linux green; SL-8 after SL-6 #3107
+Next: SL-b fix round 1 (wf_6545bdf4-43b, base bede8342) on #3129-#3137; 9 open findings > 5, so SL-8 is blocked until fixes land; SL-b merged-done waits on dev CI 39199491251 (aed78668) Linux green
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -52,5 +52,5 @@ Next: SL-b critic panel (wf_82a7861c-60c on scoped run 39195761651) files findin
 - 03:51Z: SL-6 PR #3107 is open (head 0e390bcd, 5 files, +124/-15, Fixes #2982, Closes #185). J12 step 6 checks that the header contains the title rather than starts with it; the label of a multi-line header could not be confirmed on Linux. Besides the new library-inspector shots, the snapshots library-inspector-none, library-rated, library-metadata* and auto-advance change too.
 - 04:06Z check: dev at b48cf6c4. SL-6 #3107 is in the lane. CI 39195661324 was cancelled; SL-b waits on 39196649963.
 - 04:29Z check: CI 39196649963 was cancelled too; SL-b now waits on 39199491251 (aed78668). Scoped library run 39195761651 (918abfc6, contains SL-3 and SL-4) is in progress; SL-b critics run once its screens upload. SL-6 #3107 is in the lane.
-| SL-b | 39195761651 (scoped library) | 918abfc6 | clarity, journey, design, layout, controls, oracle, mouse, taste | pending | 0 |
+| SL-b | 39195761651 (scoped library) | 918abfc6 | clarity, journey, design, layout, controls, oracle, mouse, taste | filed #3129-#3137 (13 confirmed, 2 refuted) | 1 |
 - 04:53Z scoped library run 39195761651 (918abfc6, has SL-3 and SL-4) failed J12 testLayoutAtWidths: library.status.preview sits 653.5 against the row top 650.0 at 880, so J12 stopped after its first screen. The RenderBudgetLibraryTests p95 miss is perf-only. Critic panel wf_82a7861c-60c started for SL-b (ui) with that failure in its context.
