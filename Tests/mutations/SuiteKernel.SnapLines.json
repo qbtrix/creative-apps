@@ -1,0 +1,23 @@
+[
+  {
+    "label": "toleranceExclusive: a value exactly the tolerance away no longer snaps",
+    "file": "Sources/SuiteKernel/Snap/SnapLines.swift",
+    "find": "guard abs(d) <= tolerance else { continue }",
+    "replace": "guard abs(d) < tolerance else { continue }",
+    "tests": "SnapLineTests/toleranceIsInclusive"
+  },
+  {
+    "label": "oneBucket: a lookup reads only floor(v / 64), so a line across a bucket edge is missed",
+    "file": "Sources/SuiteKernel/Snap/SnapLines.swift",
+    "find": "guard reach >= 0, let low = Self.bucket(v - reach), let high = Self.bucket(v + reach) else { return [] }",
+    "replace": "guard reach >= 0, let low = Self.bucket(v), let high = Self.bucket(v) else { return [] }",
+    "tests": "SnapLineTests/lineAcrossABucketEdgeIsFound"
+  },
+  {
+    "label": "noCentre: lines(on:) leaves out the box's centre",
+    "file": "Sources/SuiteKernel/Snap/SnapLines.swift",
+    "find": "let ys = [box.minY, (box.minY + box.maxY) / 2, box.maxY]",
+    "replace": "let ys = [box.minY, box.maxY]",
+    "tests": "SnapLineTests/linesOfABoxOnItsLines"
+  }
+]
