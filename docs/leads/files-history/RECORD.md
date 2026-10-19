@@ -90,3 +90,4 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - 2026-10-19T02:29:30Z heartbeat: scoped design 39187798386 (0cb8bb88) still queued behind the macOS runner backlog; full 39188162085 (17dc84c7) pending. DE-6 still blocked (#1552, #1500 open).
 - 2026-10-19T02:51:46Z heartbeat: scoped design 39187798386 (0cb8bb88) macOS job in progress; full 39188162085 pending. DE-6 still blocked (#1552, #1500 open).
 - 2026-10-19T03:15Z heartbeat: scoped design 39187798386 (0cb8bb88) red; J16 now passes; every failure is in the known non-FH/DE set (P4 is the shared perf-probe 'no window opened'); full 39188162085 cancelled; waiting on scoped design 39193348540 and full 39192572958 (cc14022e, queued); DE-6 still blocked (#1552, #1500 open).
+- 2026-10-19T03:36Z heartbeat: scoped design 39193348540 and full 39192572958 (cc14022e) still queued on the macOS runner (full's Linux green); no newer design run; no open dev-red; DE-6 still blocked (#1552, #1500 open).
