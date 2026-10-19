@@ -124,8 +124,6 @@ struct LiveArchive: DocumentArchiving {
 
 // MARK: photo/document.json
 
-private struct VersionEntry: Decodable { var format: Int }
-
 private struct SizeEntry: Codable { var width: Int, height: Int }
 
 private struct DocumentEntry: Codable {
