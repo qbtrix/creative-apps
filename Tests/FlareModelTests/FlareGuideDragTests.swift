@@ -46,10 +46,7 @@ private func bounce() -> FlareWorkspace {
     #expect(drag.shown(over: w.guides) == [Guide(axis: .vertical, position: 40), Guide(axis: .horizontal, position: 320)])
     apply(drag.end(overRuler: false), to: &w)
     #expect(w.guideReadout(at: 1) == "y 320" && w.undoActionName == "Undo Move Guide")
-    w.undo()
-    var again = try #require(FlareGuideDrag(guide: 1, of: w.guides))
-    again.move(to: 340)
-    apply(again.end(overRuler: false), to: &w)
+    #expect(drag.end(overRuler: false).last == .view(.endGuideDrag), "the drag left its step open for the next one")
     w.undo()
     #expect(w.document == added && w.undoActionName == "Undo Add Guide")
 }
