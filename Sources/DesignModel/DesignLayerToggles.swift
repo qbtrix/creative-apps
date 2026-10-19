@@ -2,7 +2,10 @@
 // Each toggle shows the node's own flag; when a group around the node is
 // hidden or locked the off symbol says so, so a child row shows its parent's
 // state. A click flips the node's own flag through setNodeHidden or
-// setNodeLocked, one undo step. Linux-safe: no UI imports.
+// setNodeLocked, one undo step. A drag between rows maps through layerDrop to
+// the (parent, index) LayerOrdering.move takes: rows list front to back while
+// children are stored back to front, and the index counts the parent's children
+// after the dragged layer is removed. Linux-safe: no UI imports.
 
 /// The two flags a Layers row toggles; the raw value is the toggle's id.
 public enum DesignLayerFlag: String, CaseIterable, Sendable {
@@ -19,7 +22,37 @@ public struct DesignLayerToggle: Equatable, Sendable {
     public let isOn: Bool
 }
 
+/// Where a Layers drop lands relative to the row under it: in front of it, behind it, or inside it last.
+public enum DesignDropPosition: Sendable {
+    case above, below, into
+}
+
 extension DesignPage {
+    /// The move target for dropping layer `draggedID` at row `rowID`'s `position`: the parent (nil: the
+    /// top level) and the index among its children back to front, counted after `draggedID` is removed,
+    /// as `LayerOrdering.move` expects. nil for an unknown id, a drop onto the dragged row itself, or
+    /// `.into` a row that is not a frame or group. Other refusals (into its own subtree, a lock) are
+    /// `moveLayerHelp`'s.
+    public func layerDrop(_ draggedID: String, onto rowID: String, _ position: DesignDropPosition) -> (parentID: String?, index: Int)? {
+        guard draggedID != rowID, nodes.node(draggedID) != nil, let row = nodes.node(rowID),
+              let rowPath = nodes.ancestors(of: rowID) else { return nil }
+        let parentID: String?
+        var index: Int
+        switch position {
+        case .into:
+            guard row.kind.holdsChildren else { return nil }
+            (parentID, index) = (rowID, row.children.count)
+        case .above, .below:
+            parentID = rowPath.last
+            let siblings = parentID.flatMap { nodes.node($0)?.children } ?? nodes
+            guard let rowIndex = siblings.firstIndex(where: { $0.id == rowID }) else { return nil }
+            index = position == .above ? rowIndex + 1 : rowIndex
+        }
+        let siblings = parentID.flatMap { nodes.node($0)?.children } ?? nodes
+        if let draggedIndex = siblings.firstIndex(where: { $0.id == draggedID }), draggedIndex < index { index -= 1 }
+        return (parentID, index)
+    }
+
     /// Whether node `id` or any node enclosing it on this page is hidden; false for an id not on
     /// it. The one hidden-in-tree rule: the Layers rows, the selection and export all read it.
     public func isHiddenInTree(_ id: String) -> Bool {
@@ -33,6 +66,11 @@ extension DesignWorkspace {
     /// false for an unknown id.
     public func isHiddenInTree(_ id: String) -> Bool {
         pages.contains { $0.isHiddenInTree(id) }
+    }
+
+    /// The move target for a Layers drop on the selected page (DesignPage's `layerDrop`); nil without one.
+    public func layerDrop(_ draggedID: String, onto rowID: String, _ position: DesignDropPosition) -> (parentID: String?, index: Int)? {
+        selectedPage?.layerDrop(draggedID, onto: rowID, position)
     }
 
     /// The eye and lock toggles for node `id`'s row, in that order; empty for an unknown id.
