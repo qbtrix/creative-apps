@@ -2,9 +2,9 @@
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a151f5e8ac-m3tp (resumed from act-1a1504abd7d-2wty; line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: waiting on dev CI
+Stage: done
 Base: ef6f201f (origin/main)
-Next: wait for scoped suiteui run 39187049656 or full CI 39192266668 on dev (both contain b1383770 #3060 and f191be21 #3061). Post Belt-Contact-Sheet on the first green one.
+Next: done. Contact sheet posted on #1510 (scoped suiteui run 39187049656).
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
@@ -55,3 +55,7 @@ Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
 
 ## 2026-10-19T02:42Z resumed (run act-1a151f5e8ac-m3tp)
 - Rebased onto origin/main ef6f201f. The full CI 39183169319 that the feature-done merge triggered was cancelled, and so were the full runs after it. Waiting on 39187049656 (scoped suiteui, ed0fed9e) and 39188162085 (CI, 17dc84c7).
+
+## 2026-10-19T03:01Z done (run act-1a151f5e8ac-m3tp)
+
+Scoped suiteui run 39187049656 (dev ed0fed9e, contains the feature-done PR) finished with success. Belt-Contact-Sheet posted on #1510. Open gaps are listed in the comment. No findings are open.
