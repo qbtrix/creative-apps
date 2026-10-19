@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-19T00:16Z	4	wait-ci	39178441058	39177967096 cancelled by the next dispatch; 39178441058 on 22046535 pending since 23:54Z
 2026-10-19T00:43Z	4	wait-ci	39180214762	39178441058 cancelled by the next dispatch; 39180214762 on ef6f201f pending since 00:18Z
 2026-10-19T01:11Z	4	wait-ci	39180214762	past the concurrency gate; queued for a macOS runner since 00:54Z; 39183169319 on f191be21 pending behind it
+2026-10-19T01:37Z	4	wait-ci	39180214762	Linux job green; macOS job queued for a runner since 00:54Z; later full runs 39183169319 and 39184285016 were the ones cancelled
