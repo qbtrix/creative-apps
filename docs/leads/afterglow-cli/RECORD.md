@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1543c761a-p4tj (resumed from act-1a1514ffe22-lvmw) · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 3 shipping CL-z (resumed run)
 Base: 6e70826be59e092e59269605cfdfbce93c4a2bbe (origin/dev)
-Next: CL-10 #3211 in lane (mac build green, clean). On merge: merge dev into CL-11 (@3a291b22), gate, open its feature-done PR. Only CL-z remains.
+Next: CL-11 #3281 (head c3447624) in lane; on merge wait for a scoped suite/full run containing it, then Belt-Slice-Done: CL-z and Belt-Contact-Sheet on #2998.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -169,3 +169,8 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ### 11:24Z: heartbeat
 - #3209 CL-9 and #3211 CL-10 are clean and waiting for their macOS builds (the queue is backed up). CL-11 3a291b2 is held until both merge.
+
+## 2026-10-19T15:06Z: CL-10 merged, CL-11 PR #3281 open
+- CL-10 #3211 merged about 15:00Z.
+- Merged dev into CL-11 with no conflicts. The diff is docs only, +264/−1. scripts/ci --changed printed CI: PASS. Pushed c3447624.
+- Opened #3281 with the labels fast-lane and feature-done (Slice: CL-z, Refs #2998).
