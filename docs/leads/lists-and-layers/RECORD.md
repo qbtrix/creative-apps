@@ -2,9 +2,9 @@
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
 Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
-Stage: LL-17 #3061 merged (f191be21); dev CI 39183169319 pending
+Stage: waiting on dev CI
 Base: 2e27b8db (origin/dev)
-Next: when 39183169319 is green: Belt-Contact-Sheet on #1510
+Next: Belt-Contact-Sheet once run 39185202220 (dev 036f8d0a, contains f191be21) is green
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.

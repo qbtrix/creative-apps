@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-19T00:03:56Z\tgoldens\tPR open\t#3047\tHead 289650ba, gate pass; open findings #3026 #3027 #3028 #3029 #2839
 00:39Z	LL-17 PR #3061 (fast-lane, feature-done)
 01:01Z	#3061 merged; waiting on dev CI 39183169319
+2026-10-19T01:32Z	run 39183169319 cancelled (superseded); waiting on 39185202220
