@@ -2,9 +2,9 @@
 
 Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a1517272b2-vq6l (resumes earlier runs) · Session: claude/feature-lead-playbook-2k2x84 · Started: 2026-10-19T00:00Z
-Stage: SS-b open: J4/P1 skipped on runner; findings #2538 #3081
+Stage: SS-b round 2: fixer on #3081; #2538 gapped
 Base: d50e891e (origin/dev); main verified at 349578b8
-Next: fix-batch round 2 on #2538 #3081
+Next: SS-b done on a scoped run holding the #3081 fix
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -58,3 +58,5 @@ Next: fix-batch round 2 on #2538 #3081
 2026-10-19T02:31Z	heartbeat	full CI still pending (runners busy)
 2026-10-19T03:02Z	heartbeat	full CI still pending
 2026-10-19T03:24Z	heartbeat	SS-b round 2 starting
+- 03:25Z: SS-b round 2: #2538 -> gap (SuiteUI scroller, needs-ui #2623); fix-batch wf_42b1598c-000 on #3081 (P1 draw 3 samples), featureDone.
+2026-10-19T03:25Z	heartbeat	SS-b round 2 fix-batch launched
