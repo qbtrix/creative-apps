@@ -2,10 +2,10 @@
 
 Issue: #1499 · Packet: docs/blueprints/design/features/files-history.md
 Run: act-1a14d285aef-3epc (line lead for design: shell-parity #1325, canvas-basics #1500, files-history #1499) · Session: claude/design-shell-parity-wlqm8c · Started: 2026-10-18T04:02Z
-Stage: 5 contact sheet (FH-a, FH-b done; Belt-Slice-Done posted). FH-b fix round 2: #2693 (shell journey title after FH-4 subtitle)
+Stage: done (Belt-Contact-Sheet posted on #1499: https://github.com/qbtrix/creative-apps/issues/1499#issuecomment-6266318370)
 Base: 6bb1f3f6072b1873c4827a682b9c1a750dac8f70
-Next: merge the #2693 fix; post Belt-Contact-Sheet on #1499 once a green run contains #3119 and that fix (scoped design 39211721703 has #3119) (2026-10-19T08:56:05Z: #3199 also fixes #3177 P4 and the J reopen at :247, same subtitle cause; head 7fe83c5, waiting on the lane)
-Last check: 2026-10-19T08:27Z
+Next: none. files-history is done; 0 findings open, no gaps.
+Last check: 2026-10-19T11:38Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -102,3 +102,4 @@ Resume point: Stage 3, wave 2 on dev@ae72cc6c.
 - 2026-10-19T06:49Z heartbeat: scoped design 39204091833 (047303c1) macOS red on non-FH tests; J13 J14 J16 pass; P4 fails there but run predates a046f9da; #3020 closed by #3119 merge; P4 verify waits on scoped design 39211721703 (977df193); 39208339251 cancelled; no supervisor reply.
 - 2026-10-19T07:18Z heartbeat: no design macOS result: scoped design 39211721703 (977df193, has a046f9da) queued, CI 39203617095 macOS in progress, 39211832383 cancelled; P4 verify pending; no supervisor reply.
 - 2026-10-19T07:46Z heartbeat: no design macOS result: scoped design 39211721703 still queued, CI 39203617095 macOS in progress; 39214719821 cancelled; P4 verify pending; no supervisor reply.
+- 2026-10-19T11:38:47Z done: #3199 merged as 2382460a (closes #2693, #3177). Lane batch Linux run 39243846261 is green and contains it. Posted Belt-Contact-Sheet on #1499. 0 findings open, no gaps.
