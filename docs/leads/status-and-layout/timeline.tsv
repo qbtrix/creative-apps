@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 03:51Z	3	pr	#3107	SL-6 open
 04:06Z	3	check	39196649963	SL-b waits on Linux
 04:29Z	3	check	39199491251	SL-b waits
+04:53Z	3	review	SL-b	critic panel on 39195761651
