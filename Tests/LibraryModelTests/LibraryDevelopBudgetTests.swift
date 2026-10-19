@@ -37,7 +37,7 @@ private let judgesRenders = true
         return (catalog, ids)
     }
 
-    @Test(.disabled("waits on DV-6")) func setDevelopWithinBudget() {
+    @Test func setDevelopWithinBudget() {
         var (catalog, ids) = large(selecting: 1)
         #expect(catalog.items.count == 10_000 && ids.count == 1)
         var value = 0.0
@@ -53,7 +53,7 @@ private let judgesRenders = true
         #expect(cost.median <= 1 * scale)
     }
 
-    @Test(.disabled("waits on DV-6")) func pasteManyWithinBudget() {
+    @Test func pasteManyWithinBudget() {
         var (catalog, ids) = large(selecting: 1_000)
         #expect(ids.count == 1_000)
         let copies = [DevelopSettings.neutral.setting(.exposure, to: 1).setting(.contrast, to: 13),
@@ -71,7 +71,7 @@ private let judgesRenders = true
         #expect(cost.median <= 50 * scale)
     }
 
-    @Test(.disabled("waits on DV-6")) func previewRender() throws {
+    @Test func previewRender() throws {
         let buffer = try developGradient(width: 512, height: 341)
         let settings = everyControlButColor()
         let live = LiveDevelop()
@@ -82,7 +82,7 @@ private let judgesRenders = true
         #expect(!judgesRenders || cost.median <= 8)
     }
 
-    @Test(.disabled("waits on DV-6")) func fullRender() throws {
+    @Test func fullRender() throws {
         let buffer = try developGradient(width: 2048, height: 1365)
         let settings = everyControlButColor()
         let live = LiveDevelop()
@@ -92,7 +92,7 @@ private let judgesRenders = true
         #expect(!judgesRenders || cost.median <= 120)
     }
 
-    @Test(.disabled("waits on DV-6")) func histogram() throws {
+    @Test func histogram() throws {
         let buffer = try developGradient(width: 2048, height: 1365)
         let live = LiveDevelop()
         let cost = Budget.measure("develop histogram-2048", runs: judgesRenders ? 20 : 3) {
