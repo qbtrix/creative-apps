@@ -4,8 +4,8 @@ Issue: #1500 · Packet: docs/blueprints/design/features/canvas-basics.md
 Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
-Next: fix round 1 (wf_2c06ed4c-eff) on findings #3334-#3345; review again after its PRs merge; round 2 max; leftovers become gaps; then Belt-Contact-Sheet.
-Last check: 2026-10-19T21:34Z: fix round 1 (wf_2c06ed4c-eff) running on #3334-#3345; 12 open findings.
+Next: finish fix round 1 (r-b2 #3335-#3338, r-b3 #3340/#3341 still running); round 2 takes deferred #3339, #3342, #3343; review after merges; leftovers become gaps; Belt-Contact-Sheet.
+Last check: 2026-10-19T21:43Z: round 1: #3334 closed (already fixed on dev by #3315); PR #3360 fixes #3344/#3345 (footer stripped); r-b2 and r-b3 running; #3339/#3342/#3343 deferred (file overlap).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
