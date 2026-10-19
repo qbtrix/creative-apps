@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-18T23:03Z	round1	waiting: full CI 39171756438 macOS queued
 2026-10-18T23:25Z	round1	macOS job of 39171756438 started; waiting on journeys
 2026-10-18T23:48Z	round1	scoped library run 39176576523 in progress; full run likely hung in suite tests
+2026-10-19T00:15:14Z	round2	scoped 39176576523 read; round 2 fixes gating
