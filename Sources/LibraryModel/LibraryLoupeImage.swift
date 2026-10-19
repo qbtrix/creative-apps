@@ -28,6 +28,7 @@ extension LibraryCatalog {
     public mutating func loupeFocusChanged(from cache: LibraryThumbnailCache? = nil) {
         loupeRenderToken &+= 1
         loupeError = nil
+        cropDraft = nil
         let thumbnails = cache?.thumbnails ?? self.thumbnails
         let held = mode == .loupe ? focusedItemID.flatMap { thumbnails[$0] } : nil
         loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }
@@ -37,7 +38,7 @@ extension LibraryCatalog {
     public mutating func loupeRequest(longSide: Int, quality: RenderQuality) -> LoupeRequest? {
         guard let photo = loupeItem else { return nil }
         loupeRenderToken &+= 1
-        return LoupeRequest(photo: photo, settings: photo.develop, longSide: longSide,
+        return LoupeRequest(photo: photo, settings: cropLoupeSettings ?? photo.develop, longSide: longSide,
                             quality: quality, token: loupeRenderToken)
     }
 
