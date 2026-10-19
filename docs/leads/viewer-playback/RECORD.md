@@ -87,3 +87,4 @@ Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all indepen
 - none
 - VP-10 started ahead of wave 3: its deps VP-3 (#1087) and VP-7 (#1085) merged; it needs nothing from VP-1.
 - #3245 merged 16:58Z (fast lane). No dev ci.yml run contains it yet (newest, 39278490377, started 15:30Z on b3011ab9).
+- 17:16Z scoped halo run 39292739235 queued on dev 8f405311, which contains #3245 (ac012db4). Its H-J journeys decide the 4 findings.
