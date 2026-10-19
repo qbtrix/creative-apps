@@ -33,5 +33,12 @@
     "find": "return String(name[first...last])",
     "replace": "return String(name[first...])",
     "tests": "DesignRenameTests.swift"
+  },
+  {
+    "label": "opening a Layers row no longer adds it to the expanded set",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "expandedNodeIDs.insert(id)",
+    "replace": "_ = id",
+    "tests": "DesignLayersExpansionUndoTests"
   }
 ]

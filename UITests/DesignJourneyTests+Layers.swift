@@ -17,9 +17,12 @@
 // Pair's frontmost child (one "Move Layer"); B selected and Object > Arrange >
 // Send to Back puts B last ("Send to Back"). Each step is checked as one step:
 // the Edit menu's Undo names it, one ⌘Z restores the rows before it, and ⇧⌘Z
-// redoes it. Two steps are written and skipped by name: Pair hidden from its
-// own row's eye (waits on L-6, #2758: app-owned expansion) and page "Mobile"
-// renamed with Page > Rename Page…, which has no name field yet (#3148).
+// redoes it. Pair, left open, is hidden from its own row's eye (one element,
+// `suite.sidebar.node-6.hidden`): one "Hide Layer" step that hides its
+// children while Pair stays open, since the expanded rows are the workspace's
+// and no edit or undo closes them; ⌘Z shows it (L-6, #2758). One step is
+// written and skipped by name: page "Mobile" renamed with Page > Rename
+// Page…, which has no name field yet (#3148).
 import XCTest
 
 extension Journey {
@@ -108,28 +111,42 @@ final class DesignLayersJourneyTests: XCTestCase {
         design.shot("layers-sent-to-back")
         oneStep(design, "Undo Send to Back") { self.order(design) == back } before: { self.order(design) == nested }
 
-        // 6. Pair hidden from its own row's eye, then ⌘Z: written, skipped until the app owns expansion.
-        skips.append("hide Pair from its row's eye waits on L-6 (#2758): app-owned expansion")
+        // 6. Pair open, its own row's eye hides it and its children without closing it; ⌘Z shows it.
+        hidePairFromItsRow(design, rows: back)
         // 7. Page "Mobile" renamed with Page > Rename Page…: written, skipped until the menu has a name field.
         skips.append("rename a page with Page > Rename Page… waits on #3148: the menu item has no name field")
         if !skips.isEmpty { throw XCTSkip(skips.joined(separator: "; ")) }
-        hidePairFromItsRow(design)
         renameMobilePage(design)
     }
 
-    // MARK: Skipped steps
-
-    /// Pair's own eye hides Pair ("Undo Hide Layer"); ⌘Z shows it again.
-    @MainActor private func hidePairFromItsRow(_ design: Journey) {
-        let eye = design.element("suite.sidebar.node-6.hidden")
+    /// Opens Pair, clicks its own eye (one element, `suite.sidebar.node-6.hidden`): one "Hide Layer"
+    /// step that hides Pair's children too (their eyes say the group is hidden, the rule the canvas
+    /// draws by) while Pair stays open (`rows` still show); ⌘Z shows Pair and its children again.
+    @MainActor private func hidePairFromItsRow(_ design: Journey, rows: [String]) {
+        design.expandDesignLayer(Self.pair)
+        let id = "suite.sidebar.node-6.hidden"
+        let count = design.app.descendants(matching: .any).matching(identifier: id).count
+        XCTAssertEqual(count, 1, "Pair's eye is \(count) elements, not its own one")
+        let eye = design.element(id)
         XCTAssert(eye.waitForExistence(timeout: 5), "Pair's row has no Hide toggle")
+        // Pair holds Title (nested in step 4), E2 and E1.
+        let children = ["node-5", "node-8", "node-7"].map { design.element("suite.sidebar.\($0).hidden") }
         eye.click()
         XCTAssert(Self.waitUntil { eye.label == "Show Layer" }, "Pair's eye reads \(eye.label) after a click, not Show Layer")
         XCTAssertEqual(editMenuUndo(design), "Undo Hide Layer", "hiding Pair isn't one Hide Layer step")
+        for child in children {
+            let hidden = "Hide Layer (its group is hidden)"
+            XCTAssert(Self.waitUntil { child.label == hidden }, "\(child.identifier) reads \(child.label) with Pair hidden")
+        }
+        XCTAssertEqual(order(design), rows, "hiding Pair closed it or moved a row")
         design.shot("layers-group-hidden")
         design.press(character: "z", .command)
         XCTAssert(Self.waitUntil { eye.label == "Hide Layer" }, "⌘Z left Pair's eye reading \(eye.label)")
+        XCTAssert(Self.waitUntil { children.allSatisfy { $0.label == "Hide Layer" } }, "⌘Z left a child of Pair hidden")
+        XCTAssertEqual(order(design), rows, "⌘Z on Hide Layer closed Pair or moved a row")
     }
+
+    // MARK: Skipped steps
 
     /// Mobile chosen, Page > Rename Page…, "Phone screens", Return: one Rename Page step.
     @MainActor private func renameMobilePage(_ design: Journey) {

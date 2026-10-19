@@ -40,5 +40,12 @@
     "find": "return documentSession.stateText",
     "replace": "return \"Saved\"",
     "tests": "DesignDirtyTests"
+  },
+  {
+    "label": "undo puts back the expanded Layers rows from before the edit",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "(selectedPageID, selectedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs)",
+    "replace": "(selectedPageID, selectedNodeIDs, expandedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs, snapshot.expandedNodeIDs)",
+    "tests": "DesignLayersExpansionUndoTests"
   }
 ]
