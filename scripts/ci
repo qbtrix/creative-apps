@@ -18,7 +18,8 @@
 # then only the tests of the targets the branch touched since its merge base
 # with BASE (default origin/dev), uncommitted and untracked files included
 # (scripts/test-scope changed maps paths to tests). Neither mode runs the
-# perf and timing tests in Tests/perf-suites.txt; CI's Perf step does.
+# perf and timing tests in Tests/perf-suites.txt; CI's Perf step does. Both
+# run the CPU-heavy tests in Tests/heavy-suites.txt in a pass of their own.
 #
 # The no-crash lint fails on crash-prone constructs in Sources/ (tests exempt):
 #   try!  as!  fatalError(  preconditionFailure(  precondition(  unowned  .first!  .last!
@@ -459,6 +460,19 @@ perf=$(python3 scripts/test-scope perf) || fail "Tests/perf-suites.txt: fix the 
 skip_perf=()
 [[ -z "$perf" ]] || skip_perf=(--skip "$perf")
 
+# The CPU-heavy correctness tests in Tests/heavy-suites.txt run in a pass of
+# their own after the rest. In the shared parallel pass they filled CI's
+# 3-core cooperative pool with seconds-long render jobs, and the time-limited
+# model suites timed out together (#2971).
+heavy=$(python3 scripts/test-scope heavy) || fail "Tests/heavy-suites.txt: fix the line above"
+
+# run_heavy [FILTER]: the heavy tests, all or those FILTER takes; nothing when none.
+run_heavy() {
+  local tests
+  tests=$(python3 scripts/test-scope heavy ${1:+"$1"}) || fail "Tests/heavy-suites.txt: fix the line above"
+  [[ -z "$tests" ]] || run_tests "the heavy tests (Tests/heavy-suites.txt)" --filter "$tests" ${skip_perf[@]+"${skip_perf[@]}"}
+}
+
 # run_all: every test but the perf ones.
 run_all() {
   if [[ "$(uname)" == Darwin ]]; then
@@ -468,10 +482,13 @@ run_all() {
     # memory; ci.yml samples memory to confirm it. So it runs on its own, one
     # test at a time (--no-parallel serializes Swift Testing), and the rest stay
     # parallel. Each run prints its wall time.
-    run_tests "all but AppSnapshotTests" --skip "^AppSnapshotTests\.${perf:+|$perf}"
+    run_tests "all but AppSnapshotTests and the heavy tests" --skip "^AppSnapshotTests\.${perf:+|$perf}${heavy:+|$heavy}"
+    run_heavy
     run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
   else
-    run_tests "all" ${skip_perf[@]+"${skip_perf[@]}"}
+    local skip="$perf${perf:+${heavy:+|}}$heavy"
+    run_tests "all but the heavy tests" ${skip:+--skip "$skip"}
+    run_heavy
   fi
 }
 
@@ -489,7 +506,11 @@ else
     run_all
   else
     tests=$(sed -n 1p <<<"$scope") snaps=$(sed -n 2p <<<"$scope")
-    [[ -z "$tests" ]] || run_tests "changed: $tests" --filter "$tests" ${skip_perf[@]+"${skip_perf[@]}"}
+    if [[ -n "$tests" ]]; then
+      skip="$perf${perf:+${heavy:+|}}$heavy"
+      run_tests "changed: $tests" --filter "$tests" ${skip:+--skip "$skip"}
+      run_heavy "$tests"
+    fi
     [[ -z "$snaps" ]] || run_tests "changed snapshots, one at a time: $snaps" --filter "$snaps" ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
     [[ -n "$tests$snaps" ]] || echo "== swift test: no test target covers the changed files; the build above is the check"
   fi
