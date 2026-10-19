@@ -1,13 +1,14 @@
-// FlareJourneyTests+Export.swift: J22 of flare-export (FX-3;
+// FlareJourneyTests+Export.swift: J22 of flare-export (FX-3, live in FX-9;
 // docs/blueprints/flare/features/flare-export.md, section 4), on
-// `-FlareFixture showcase` (550 × 400, 24 fps, 48 frames, scene `scene-1`)
+// `-FlareSample showcase` (550 × 400, 24 fps, 48 frames, scene `scene-1`)
 // with `-FlareExportTo` on this test's own temp folder, so Export writes with
 // no panel. The toolbar's Export… opens SuiteUI's export sheet under Flare's
 // flare.export.* ids with the scan's three warnings; Export writes scene-1.svg
 // (an `<svg>` root 550 by 400) and offers Reveal in Finder; File > Export…
 // and the Lottie chip add the background warning and write scene-1.json
 // (`fr` 24, `w` 550, `h` 400, `op` 48); the PNG sequence with To 12 and Step 2
-// reads "7 files" and writes frame_0000.png … frame_0012.png. One shot per
+// reads "7 files" and writes frame_0000.png … frame_0012.png, each 550 wide
+// in its IHDR (StageRasterizer's pixels, not the fakes' 1 × 1). One shot per
 // step, `flare-export-<step>`.
 import XCTest
 
@@ -16,7 +17,7 @@ final class FlareExportJourneys: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appending(path: "flare-export-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
-        let flare = Journey("Flare", self, arguments: ["-FlareFixture", "showcase", "-FlareExportTo", folder.path])
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "showcase", "-FlareExportTo", folder.path])
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
         // 1. The toolbar's Export…: the sheet, Export enabled.
@@ -88,14 +89,15 @@ final class FlareExportJourneys: XCTestCase {
         XCTAssert(Self.waitFor { count.exists && count.label == "7 files" }, "the file count reads \(count.label), not 7 files")
         flare.shot("export-5-png-rows")
 
-        // 6. Export: "Exported 7 files."; frame_0000.png … frame_0012.png, each a PNG.
+        // 6. Export: "Exported 7 files."; frame_0000.png … frame_0012.png, each a PNG 550 wide.
         png.click()
         expectLine("Exported 7 files.", flare)
         let header: [UInt8] = [0x89, 0x50, 0x4E, 0x47]
         for frame in stride(from: 0, through: 12, by: 2) {
             let file = folder.appending(path: String(format: "frame_%04d.png", frame))
-            let bytes = (try? Data(contentsOf: file)).map { [UInt8]($0.prefix(4)) }
-            XCTAssertEqual(bytes, header, "\(file.lastPathComponent) is missing or not a PNG")
+            let bytes = (try? Data(contentsOf: file)).map { [UInt8]($0) } ?? []
+            XCTAssertEqual(Array(bytes.prefix(4)), header, "\(file.lastPathComponent) is missing or not a PNG")
+            XCTAssertEqual(Self.ihdrWidth(bytes), 550, "\(file.lastPathComponent)'s IHDR width isn't 550")
         }
         let written = try FileManager.default.contentsOfDirectory(atPath: folder.path).filter { $0.hasSuffix(".png") }
         XCTAssertEqual(written.count, 7, "the run wrote \(written.sorted()), not 7 PNGs")
@@ -141,6 +143,12 @@ final class FlareExportJourneys: XCTestCase {
         XCTAssert(Self.waitFor { done.exists }, "the run never finished (no Done)")
         done.click()
         XCTAssert(flare.app.sheets.firstMatch.waitForNonExistence(timeout: 5), "Done left the sheet open")
+    }
+
+    /// The width in a PNG's IHDR: bytes 16 to 19, big-endian, after the signature, the chunk length and "IHDR".
+    private static func ihdrWidth(_ bytes: [UInt8]) -> Int? {
+        guard bytes.count >= 24, bytes[12..<16].elementsEqual(Array("IHDR".utf8)) else { return nil }
+        return bytes[16..<20].reduce(0) { $0 << 8 | Int($1) }
     }
 
     private static func waitFor(_ condition: () -> Bool) -> Bool {
