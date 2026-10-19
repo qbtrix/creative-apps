@@ -163,3 +163,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 ## 2026-10-19T10:39Z: heartbeat
 - No merges yet. The macOS build for MC-12 (#3203) is now running (run 39225689887). The other lane builds are still queued (28 queued repo-wide).
 - The MC-15 docs builder is running. Every other slice is built and held.
+
+## 2026-10-19T11:01Z: heartbeat
+- #3209 and #3211 are still waiting on their macOS builds. CL-11 is held.
