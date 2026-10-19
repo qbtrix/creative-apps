@@ -92,3 +92,8 @@ Next: done. The beta-hardening lane verifies EC-a, EC-b, EC-c and EC-d.
 - Lead branches rebased onto origin/main ef6f201f.
 - Belt-Slice-Done: EC-a on #1344 with scoped suiteui run 39180136006 (ef6f201f, green, contains EC-a's last PR #2841). EC-b, EC-c and EC-d were done before this run.
 - Belt-Contact-Sheet on #1344 with run 39180136006. SJ4 to SJ8 pass; gap #2833 (SP9). No open editor-chrome findings.
+
+## 2026-10-19T04:13Z finish step (run act-1a14d17c86c-d1qr)
+- This run's wave-1 PRs (#2683, #2682, #2687 and the canvas-marks ones) were closed by the supervisor as duplicates of the other lead's merged work.
+- Stage 4.1 was missing: EC-13 #2919 shipped goldens only, without `feature-done` or the status change. #3111 (feature-done, docs only) sets editor-chrome.wave.json `"status": "built"` and `"feature_issue": "#1344"`.
+- Follow-up idea, not filed: `FakeTransportStepping.stepped` adds `s.frame + frames` unchecked (noted in #2683's closing comment).
