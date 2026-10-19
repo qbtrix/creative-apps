@@ -108,3 +108,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 - LJ4 found a real bug: LiveIO.write did not create missing parent folders (batch output dir -> 74 on real disk). Fixed (createDirectory withIntermediateDirectories) + liveWriteMakesFolders test + mutation.
 - @Suite failed to compile in this target; tests use per-test .enabled(if:) traits.
 - PR held until #3154 merges; then merge dev in, rerun ci, open PR (title "feat(suite): afterglow binary runs on the real disk (CL-10)", Slice: CL-z).
+
+## 08:27Z heartbeat
+- #3154 CL-7 still in lane (macOS build queued since 07:05Z). CL-9 and CL-10 held on it.
