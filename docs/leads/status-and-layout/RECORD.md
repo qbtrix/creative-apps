@@ -22,7 +22,7 @@ Next: SL-b fix round 1 (wf_6545bdf4-43b) on #3129-#3137 (#3121 closed as dup of 
 | SL-4 | SL-b | 2 | LibraryStatusBar under grid and loupe from statusRow | Sources/LibraryApp/LibraryStatusBar.swift, Tests/AppSnapshotTests/LibraryStatusSnapshots.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | LibraryStatusSnapshots, J12 | #3087 | merged 0c9e58c3 |
 | SL-5 | SL-c | 2 | inspector header facts and dateText | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json | LibraryStatusTextTests (SL-5 half) | #3075 | merged a01d82b7 |
 | SL-7 | SL-c | 2 | layout snapshots at each width | Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift | LibraryLayoutSnapshots | #3069 | merged e0b0ac66 |
-| SL-6 | SL-c | 3 | LibraryInspector header library.inspector.header | Sources/LibraryApp/LibraryInspector.swift, Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift | LibraryInspectorSnapshots | #3107 | pr-open |
+| SL-6 | SL-c | 3 | LibraryInspector header library.inspector.header | Sources/LibraryApp/LibraryInspector.swift, Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift | LibraryInspectorSnapshots | #3107 | merged b7e17ed6 |
 | SL-8 | SL-c | 4 | identifier sweep for #291; feature-done | UITests/LibraryJourneyTests+Layout.swift, Sources/LibraryApp/LibraryStatusBar.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | J12 enabled | - | planned |
 
 ## Reviews
