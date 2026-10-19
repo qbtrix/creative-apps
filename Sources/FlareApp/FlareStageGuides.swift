@@ -41,12 +41,12 @@ struct FlareStageGuides: View {
     }
 
     /// The guide's line as a ViewportGuide.
-    private static func mark(_ guide: Guide) -> ViewportGuide {
+    private nonisolated static func mark(_ guide: Guide) -> ViewportGuide {
         guide.axis == .horizontal ? .horizontal(y: guide.position) : .vertical(x: guide.position)
     }
 
     /// A strip `thickness` scene points across, centred on the guide's line and spanning the scene.
-    private static func strip(_ guide: Guide, scene: FlareCore.Scene, thickness: Double) -> CGRect {
+    private nonisolated static func strip(_ guide: Guide, scene: FlareCore.Scene, thickness: Double) -> CGRect {
         let half = thickness / 2
         return guide.axis == .horizontal
             ? CGRect(x: 0, y: guide.position - half, width: scene.width, height: thickness)
