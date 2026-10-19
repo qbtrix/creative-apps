@@ -135,8 +135,13 @@ import Testing
     /// `view` at `size` in an offscreen window ordered in, with AppKit
     /// accessibility on, so its nodes report frames.
     private static func host(_ view: some View, size: CGSize) -> NSWindow {
-        NSApplication.shared.accessibilitySetValue(
-            true, forAttribute: NSAccessibility.Attribute(rawValue: "AXManualAccessibility"))
+        // Both attributes, as LibraryMetadataHitTests sets them: with only
+        // AXManualAccessibility the SwiftUI nodes report no labels when this
+        // suite runs alone, and the test passed in CI only because the
+        // Library suite had set AXEnhancedUserInterface first.
+        for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+            NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+        }
         let window = NSWindow(
             contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false

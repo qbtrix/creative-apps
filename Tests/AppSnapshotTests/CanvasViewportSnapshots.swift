@@ -8,10 +8,13 @@
 // with its ruler corner in points, suiteui-canvas-pt-{light,dark}.png (#264).
 // The px and pt viewports side by side are checked against
 // Golden/canvas/canvas-rulers-<appearance>.png in the four appearances
-// (CM-14 commits the baselines).
-import SuiteUI
+// (CM-14 commits the baselines). The gallery's `canvas-no-rulers` page shows
+// the viewport with its rulers hidden, the artboard where it sat beside them,
+// suiteui-canvas-no-rulers-{light,dark}.png (#995).
 import SwiftUI
 import Testing
+
+@testable import SuiteUI
 
 @MainActor
 @Test func suiteCanvasViewport() throws {
@@ -41,6 +44,15 @@ import Testing
     }
     for appearance in SnapshotAppearance.allCases {
         assertGolden(pair, size: CGSize(width: 640, height: 240), name: "canvas-rulers", area: "canvas", appearance: appearance)
+    }
+}
+
+/// The gallery's canvas page with its rulers off.
+@MainActor
+@Test func suiteCanvasRulersHidden() throws {
+    let page = try #require(GalleryCanvas.pages["canvas-no-rulers"])
+    for scheme in [ColorScheme.light, .dark] {
+        try snapshot(page(), name: "suiteui-canvas-no-rulers-\(scheme.name)", scheme: scheme)
     }
 }
 

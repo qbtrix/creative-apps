@@ -5,7 +5,8 @@
 // a format pick `setFormat`, Size `setScale`, Export `start`, and Cancel
 // `cancel` while the run is under way, else Done or Escape `dismiss`. The
 // frame, step and background rows, the warnings, the problem line, Try Again
-// and Reveal in Finder wait on the sheet's options slot (#1989).
+// and Reveal in Finder wait on the sheet's options slot (#1989). `sheet` is the
+// content alone, which the snapshots render.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -31,16 +32,19 @@ struct FlareExportSheetAdapter: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        content.sheet(isPresented: Binding(get: { model.exportingOptions != nil }, set: { if !$0 { close() } })) {
-            SuiteExportSheet(
-                ExportSheetRows(model.exportState, formats: Self.formats) { ExportPick(format: $0.format.rawValue, scale: $0.scale) },
-                formats: Self.formats,
-                onFormat: { id in if let format = ExportFormat(rawValue: id) { perform(.export(.setFormat(format))) } },
-                onScale: { perform(.export(.setScale($0))) },
-                onQuality: { _ in },
-                onExport: { perform(.export(.start)) },
-                onClose: close)
-        }
+        content.sheet(isPresented: Binding(get: { model.exportingOptions != nil }, set: { if !$0 { close() } })) { sheet }
+    }
+
+    /// The sheet's content on the Model's run; FlareExportSnapshots renders it on its own.
+    @MainActor var sheet: some View {
+        SuiteExportSheet(
+            ExportSheetRows(model.exportState, formats: Self.formats) { ExportPick(format: $0.format.rawValue, scale: $0.scale) },
+            formats: Self.formats,
+            onFormat: { id in if let format = ExportFormat(rawValue: id) { perform(.export(.setFormat(format))) } },
+            onScale: { perform(.export(.setScale($0))) },
+            onQuality: { _ in },
+            onExport: { perform(.export(.start)) },
+            onClose: close)
     }
 
     /// Cancel stops a run under way; otherwise the sheet closes.

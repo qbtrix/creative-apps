@@ -2,7 +2,8 @@
 // (`library.inspector.header`, the catalog's inspectorHeader: the collection's
 // name and photo count with nothing selected, one photo's name, Captured, Size
 // and Kind, or several photos' count and capture span), then Info and Develop
-// tabs on SegmentedTabs. Info shows the cull targets' MetadataInspector (the
+// tabs on SegmentedTabs (`library.inspector.tabs`, its segments
+// `library.inspector.info` and `library.inspector.develop`, #291). Info shows the cull targets' MetadataInspector (the
 // loupe photo in the loupe, else the selected photos) or nothing. Develop
 // shows DevelopInspector with the catalog and the window's menu. Which tab
 // shows is presentation state kept here; values in, closures out: it reads
@@ -30,11 +31,12 @@ struct LibraryInspector: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            SegmentedTabs(
-                "Inspector",
-                tabs: [InspectorOption(id: .info, title: "Info"), InspectorOption(id: .develop, title: "Develop")],
-                selection: tab, onChange: { tab = $0 })
-                .libraryControl(id: "library.inspector.tabs", enabled: true, help: nil)
+            // SegmentedTabs identifies the switch and each segment and lists them in suite.controls; an id
+            // on this multi-element view would copy onto every element in it (swiftui-rules 7).
+            SegmentedTabs("Inspector", tabs: Self.tabs, selection: tab, id: Self.tabsID, onChange: { tab = $0 })
+                .transformPreference(LibraryControlsKey.self) {
+                    $0.append(ControlEntry(id: Self.tabsID, enabled: true, reason: nil))
+                }
             if tab == .develop {
                 DevelopInspector(model: model, menu: menu, cropDraft: model.cropDraft)
             } else if let metadata = model.selectedMetadata {
@@ -52,4 +54,14 @@ struct LibraryInspector: View {
 
     /// The header's accessibility identifier, as J12 looks it up.
     static let headerID = "library.inspector.header"
+
+    /// The tab switch's accessibility identifier.
+    nonisolated static let tabsID = "library.inspector.tabs"
+
+    /// The Info and Develop tabs, each segment with its own `library.inspector.<tab>` identifier. J11 clicks
+    /// the identified controls in id order from Info: develop, info, then the switch, so each click changes the tab.
+    nonisolated static let tabs = [
+        InspectorOption(id: LibraryInspectorTab.info, title: "Info", identifier: "library.inspector.info"),
+        InspectorOption(id: LibraryInspectorTab.develop, title: "Develop", identifier: "library.inspector.develop"),
+    ]
 }

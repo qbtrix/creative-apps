@@ -51,7 +51,8 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
         // Reopen: poll from the relaunch until the window is named after the file and shows its canvas.
         let launched = ProcessInfo.processInfo.systemUptime
         let reopened = Journey("Design", self, arguments: reopening)
-        let window = reopened.app.windows[Self.fileName]
+        // The title carries the save state ("crowd.design – Saved", files-history FH-4), so match its start.
+        let window = reopened.app.windows.matching(NSPredicate(format: "title BEGINSWITH %@", Self.fileName)).firstMatch
         let canvas = reopened.element("suite.canvas")
         var (polls, longest, stalls, shownMs, done) = (0, 0.0, 0, Double?.none, false)
         while !done, ProcessInfo.processInfo.systemUptime - launched < 120 {
