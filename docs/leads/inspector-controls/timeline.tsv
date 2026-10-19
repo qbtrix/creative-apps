@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-19T14:56Z	check	39252895176 still in Perf (macOS scripts/ci step failed 13:50); no dev-red issue; 39268739545 (955f02d) pending; #3236 open clean, macOS build 39243165907 green 12:55, awaiting lane merge
 2026-10-19T15:15Z	check	39252895176 cancelled (superseded); 39268739545 (955f02d) in progress; 39276059443 (8487b69) pending; #3236 still open, lane sweep 39275409811 running
 2026-10-19T15:32Z	check	#3236 merged as 452534d (15:18); waiting on a green run containing 452534d; 39268739545 still in progress
+2026-10-19T15:55Z	check	run 39278490377 at b3011ab (contains 452534d) pending; 39276059443 cancelled
