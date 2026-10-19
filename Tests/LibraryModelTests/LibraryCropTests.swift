@@ -1,7 +1,5 @@
-// LibraryCropTests.swift: crop CR-1, the catalog's crop draft on the fakes:
-// begin, aspect, drag, angle, level, apply as one "Crop" step, cancel, reset,
-// the helps, the frame value and the loupe's settings while cropping, and
-// MJ6 (`walkJ6OnFakes`). Runs on Linux and macOS.
+// LibraryCropTests.swift: crop CR-1, the catalog's crop draft on the fakes,
+// and MJ6 (`walkJ6OnFakes`). Runs on Linux and macOS.
 @testable import LibraryModel
 import Testing
 
@@ -84,17 +82,7 @@ struct LibraryCropTests {
         #expect(catalog.history.undo.isEmpty)
     }
 
-    @Test func beginReopensTheStoredCrop() {
-        var catalog = loupe()
-        catalog.beginCrop()
-        catalog.setCropAspect(.square)
-        catalog.applyCrop()
-        catalog.beginCrop()
-        #expect(catalog.cropDraft?.aspect == .square)
-        #expect(catalog.loupeItem.map(catalog.croppedSize) == PixelSize(width: 4000, height: 4000))
-    }
-
-    @Test func aspectDragAndAngleReshapeTheDraftAndRecordNothing() {
+    @Test func aspectDragAngleAndLevelReshapeTheDraftAndRecordNothing() {
         var catalog = loupe()
         catalog.beginCrop()
         catalog.setCropAspect(.square)
@@ -107,6 +95,11 @@ struct LibraryCropTests {
         #expect(catalog.cropDraft?.angle == 45)
         catalog.setCropAngle(.infinity)
         #expect(catalog.cropDraft?.angle == 45)
+        catalog.setCropAngle(1)
+        catalog.levelCrop(by: 2.5)
+        #expect(catalog.cropDraft?.angle == 3.5)
+        catalog.levelCrop(by: nil)
+        #expect(catalog.cropDraft?.angle == 3.5)
         #expect(catalog.history.undo.isEmpty)
     }
 
@@ -121,17 +114,7 @@ struct LibraryCropTests {
         #expect(catalog.cropDraft?.angle == -45)
     }
 
-    @Test func levelAddsTheDeltaAndNilChangesNothing() {
-        var catalog = loupe()
-        catalog.beginCrop()
-        catalog.setCropAngle(1)
-        catalog.levelCrop(by: 2.5)
-        #expect(catalog.cropDraft?.angle == 3.5)
-        catalog.levelCrop(by: nil)
-        #expect(catalog.cropDraft?.angle == 3.5)
-    }
-
-    @Test func applyIsOneCropStepAndClosesTheDraft() {
+    @Test func applyIsOneCropStepAndBeginReopensIt() {
         var catalog = loupe()
         catalog.beginCrop()
         catalog.setCropAspect(.square)
@@ -142,15 +125,22 @@ struct LibraryCropTests {
         #expect(stored(catalog, 1) == draft)
         #expect(catalog.cropDraft == nil)
         #expect(catalog.cropTitle == "Crop")
+        #expect(catalog.loupeItem.map(catalog.croppedSize) == PixelSize(width: 4000, height: 4000))
+        catalog.beginCrop()
+        #expect(catalog.cropDraft == draft)
     }
 
-    @Test func applyingAnUntouchedDraftRecordsNothing() {
+    @Test func cancelAndApplyingAnUntouchedDraftRecordNothing() {
         var catalog = loupe()
         catalog.beginCrop()
         catalog.applyCrop()
+        #expect(catalog.cropDraft == nil)
+        catalog.beginCrop()
+        catalog.setCropAspect(.square)
+        catalog.cancelCrop()
+        #expect(catalog.cropDraft == nil)
         #expect(catalog.history.undo.isEmpty)
         #expect(stored(catalog, 1) == nil)
-        #expect(catalog.cropDraft == nil)
     }
 
     @Test func applyDropsThePhotosThumbnail() throws {
@@ -163,16 +153,6 @@ struct LibraryCropTests {
         catalog.setCropAspect(.square)
         catalog.applyCrop()
         #expect(catalog.thumbnails[shot(1)] == nil)
-    }
-
-    @Test func cancelRecordsNothing() {
-        var catalog = loupe()
-        catalog.beginCrop()
-        catalog.setCropAspect(.square)
-        catalog.cancelCrop()
-        #expect(catalog.cropDraft == nil)
-        #expect(catalog.history.undo.isEmpty)
-        #expect(stored(catalog, 1) == nil)
     }
 
     @Test func resetWhileCroppingResetsTheDraftOnly() {
