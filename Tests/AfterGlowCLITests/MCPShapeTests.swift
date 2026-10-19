@@ -2,7 +2,8 @@
 // contract type exists; the versions are pinned newest first and
 // `negotiate` refuses an unknown one; every stub answers or errors naming
 // the task that builds it (MC-4 built the server; MCPProtocolTests covers
-// it); the fake approval flow.
+// it. MC-6 built the tools; MCPToolsTests covers them); the fake approval
+// flow.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -49,10 +50,10 @@ struct MCPShapeTests {
         #expect(!server.options.live && server.options.roots == ["/tmp/mcp"])
     }
 
-    @Test func toolsAndSessionsAreStubsNamingTheirTask() {
+    @Test func toolsRouteBackAndSessionsAreAStubNamingMC8() {
         #expect(MCPTools.name(app: "photo", command: "layer.add") == "photo.layer.add")
-        #expect(MCPTools.list([Apps.fake]).isEmpty)
-        #expect(MCPTools.route("fake.rect.add", in: [Apps.fake]) == nil)
+        #expect(!MCPTools.list([Apps.fake]).isEmpty)
+        #expect(MCPTools.route("fake.rect.add", in: [Apps.fake]) == .command(app: "fake", id: "rect.add"))
         #expect(Set<MCPRoute>([.open(app: "f"), .new(app: "f"), .save, .export, .close, .command(app: "f", id: "a")]).count == 6)
         #expect(MCPTool(name: "fake.rect.list", title: "List", description: "d", inputSchema: .null).annotations == .object([:]))
         var sessions = MCPSessions(Self.options, io: FakeIO())
