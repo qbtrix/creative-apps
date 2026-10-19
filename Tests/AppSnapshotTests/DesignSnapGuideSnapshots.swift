@@ -7,6 +7,7 @@
 // design-canvas-snap-spacing-200-dark.png. The value tests pin what `design.canvas.guides` reads.
 import DesignModel
 import SuiteKernel
+import SuiteUI
 import SwiftUI
 import Testing
 
