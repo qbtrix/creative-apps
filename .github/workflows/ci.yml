@@ -1,6 +1,6 @@
 # CI: the Linux job runs scripts/ci (lints, every Model target built and
 # tested; Package.swift declares the UI targets on macOS only). The macOS job
-# runs scripts/ci on macOS 26: everything built, every test including the
+# runs scripts/ci with Xcode 27: everything built, every test including the
 # snapshots (`snapshots` artifact), then the five release apps bundled
 # (`app-builds`, a tarball so the executables keep their +x bit) and the size
 # report. Linux and macOS are the gate: both must pass for `promote`, and a
@@ -119,11 +119,11 @@ jobs:
   mac-build:
     name: macOS build
     if: ${{ inputs.build_only }}
-    runs-on: macos-26
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - run: xcodebuild -version
       # NAMES: the apps' target prefixes (Photo Design), empty for a full build.
       - name: Pick the apps
         env:
@@ -168,7 +168,11 @@ jobs:
   macos:
     name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
     if: ${{ !inputs.build_only && !inputs.linux_only }}
-    runs-on: macos-26
+    # One label for every macOS job: the MACOS_RUNNER repo variable when set (a
+    # self-hosted Mac later), else GitHub's xcode-27 image. Its only Xcode is
+    # 27, the Xcode the team's Macs run, so there is nothing to pin with
+    # xcode-select; pin one again if the runner gains a second Xcode.
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
     # scripts/ci takes about 30 min under load (the one-at-a-time snapshot
     # pass is about 20 of it). The UI journeys run in their own job, `macOS
     # journeys`, so they never eat this job's time.
@@ -182,9 +186,7 @@ jobs:
       APP: ${{ inputs.app }}
     steps:
       - uses: actions/checkout@v4
-      # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
-      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
-      - run: swift --version
+      - run: xcodebuild -version && swift --version
       # scripts/ci with a memory sample every 20 s into memory.log: the time,
       # vm_stat's page counts, the system-wide free percentage and the five
       # largest processes by resident memory. The Crash reports step prints
@@ -342,7 +344,7 @@ jobs:
   journeys:
     name: ${{ inputs.app && format('macOS journeys ({0})', inputs.app) || 'macOS journeys' }}
     if: ${{ !inputs.build_only && !inputs.linux_only }}
-    runs-on: macos-26
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
     timeout-minutes: 150
     continue-on-error: true
     outputs:
@@ -356,7 +358,7 @@ jobs:
       APP: ${{ inputs.app }}
     steps:
       - uses: actions/checkout@v4
-      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - run: xcodebuild -version
       # A scoped run's journeys: APP's bundle (suite: the launcher's journeys).
       - name: Pick the journeys
         if: inputs.app
