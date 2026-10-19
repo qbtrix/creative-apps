@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-19T08:27Z	heartbeat	wait	#3154	macOS build queued
 2026-10-19T08:48Z	heartbeat	check	-	#3154 CL-7 is still waiting for its macOS build: run 39213749046 has been queued
 2026-10-19T09:11Z	heartbeat	check	-	#3154 is clean but its macOS build (run 39213749046) is still queued, with 27 CI
+2026-10-19T09:26Z	merge	merged	#3154	CL-7
