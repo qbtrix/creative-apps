@@ -2,7 +2,7 @@
 
 Issue: #1035 · Packet: docs/blueprints/halo/features/viewer-playback.md
 Run: act-1a1543fa006-c4p9 (resumed 2026-10-19T13:02Z; earlier act-1a14c24f6d2-lrkw, line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a1429c87eb-3ecm, resumed 2026-10-16T02:50Z; first run act-1a13ed44a75-delk) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-15T09:05Z
-Stage: 3 polling (wave 6 merged)
+Stage: 3 fix wave 7 (#1705 via PR #3319)
 Base: 2b02948043fe554dde877f184894b7010998117e (origin/dev at 2026-10-19T13:40Z, has #2622)
 Next: #3245 merged 16:58Z; wait for a scoped halo run on dev that contains it: close #1699 #1701 #1703 #1705 if their journeys pass, else take them into a fix wave.
 
@@ -89,3 +89,4 @@ Waves (packet's, checked against dev 2fc9b59): W1 VP-1, VP-2, VP-4a (all indepen
 - #3245 merged 16:58Z (fast lane). No dev ci.yml run contains it yet (newest, 39278490377, started 15:30Z on b3011ab9).
 - 17:16Z scoped halo run 39292739235 queued on dev 8f405311, which contains #3245 (ac012db4). Its H-J journeys decide the 4 findings.
 - 17:58Z run 39292739235: job `macOS (halo)` (Scoped build and tests) failed with 5 issues, none viewer-playback's: HaloTextDraftWindowTests/anUnreturnedDraftStaysOffTheNextLayer (4, layer-row press; text-draft work, gap #2510) and RenderBudgetHaloTests/bodies (1, Ball layer row not shown). #3245 touched only UITests, so neither comes from it. Job `macOS journeys (halo)` still queued; its 4 journeys decide #1699 #1701 #1703 #1705.
+- 18:56Z: journeys job 118197307325 (run 39292739235, contains ac012db4) finished. testLayoutAtWidths, testScrubTheTimeline and testPlayPauseLoopAndStep passed; CI closed #1699 #1701 #1703. testLayersDrawAtThePlayhead (#1705) still fails, on a new cause: since #3217 (LayerTreeList) XCUITest reads the row group's label empty. The artboard and canvas steps pass. Wave 7: PR #3319 reads the name from the row's Text. Other halo layer-row journeys failing in the same run (#1696 #1700 #1702 #1704 #3317) are not this feature's.
