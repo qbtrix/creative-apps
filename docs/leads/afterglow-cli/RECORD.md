@@ -183,3 +183,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ### 16:26Z: heartbeat
 - No merges yet. Two lane sweeps are in progress (from 15:53Z and 16:05Z), 16 runs are queued repo-wide, and the dev CI run has been going since 14:25Z. Every open PR is clean.
+
+### 16:44Z: heartbeat
+- The macOS builds for MC-13 0b414652, MC-4 b8bc58ec and MC-6 c0cf1cfb succeeded. CL-11 is docs only. All four are ready and wait for the lane sweep running on dev since 16:28Z.
