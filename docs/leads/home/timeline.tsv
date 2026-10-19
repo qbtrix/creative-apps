@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-19T13:15Z	5	heartbeat	39221576463	waiting on full run ui-test for AfterGlow journeys; cap spent, red ones become gaps
 2026-10-19T13:36Z	5	heartbeat	39252895176	39221576463 cancelled before AfterGlow journeys; waiting on 39252895176 macOS
 2026-10-19T13:57Z	5	heartbeat	39252895176	macOS job started 13:38Z, Linux green, main promoted to 6e70826b; ui-test pending
+2026-10-19T14:17Z	5	heartbeat	39252895176	macOS at Perf step; ui-test pending
