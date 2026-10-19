@@ -9,7 +9,7 @@
 // point is the Frame Ruler's left edge plus the strip's 8 pt inset and the
 // frame's share of the ruler's width (its last frame, 47, sits 24 pt before
 // the ruler's right edge), on the row of the lane's name button
-// (`halo.timeline.track`). A lane's key count is the hidden
+// (`halo.timeline.name.<id>`). A lane's key count is the hidden
 // `halo.timeline.keys` element's label ("Ball: 3 keyframes", #262). The Model
 // half is HaloKeySelectionTests. One shot per step, `halo-timeline-<step>`.
 import XCTest
@@ -65,8 +65,7 @@ final class HaloTimelineJourneyTests: XCTestCase {
     @MainActor private func click(frame: Int, lane name: String, _ halo: Journey) {
         let ruler = halo.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
         XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline")
-        let title = halo.app.buttons.matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == %@", name)).firstMatch
+        let title = halo.trackName(name)
         XCTAssert(title.waitForExistence(timeout: 5), "no \(name) track title in the timeline")
         let frameWidth = (ruler.frame.width - 24) / Self.lastFrame
         let x = 8 + Double(frame) * frameWidth

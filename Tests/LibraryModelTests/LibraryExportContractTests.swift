@@ -42,10 +42,10 @@ import Testing
         #expect(ExportFormat.jpeg.help(writable: [.jpeg]) == nil)
         #expect(ExportFormat.forFileName("a.JPG") == .jpeg)
         #expect(ExportNaming.original.help == nil && ExportNaming(template: "{n}").help != nil)
-        #expect(ExportPresets.unavailable != nil)
+        #expect(ExportPresets.unavailable == nil)
         let preset = ExportPreset(name: "Web", options: ExportOptions(longEdge: 1024, quality: 80, folder: "/a"))
         #expect(preset.applied(to: ExportOptions(folder: "/b")) == ExportOptions(longEdge: 1024, quality: 80, folder: "/b"))
-        #expect(ExportPresets.decode(ExportPresets.encode(ExportPresetFile(presets: [preset]))) == ExportPresetFile())
+        #expect(ExportPresets.decode(ExportPresets.encode(ExportPresetFile(presets: [preset]))) == ExportPresetFile(presets: ExportPresets.builtIns + [preset]))
     }
 
     @Test func fakeExporterPlansOnTheSharedRule() {

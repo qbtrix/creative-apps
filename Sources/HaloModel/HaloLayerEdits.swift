@@ -4,7 +4,9 @@
 // composition; a refused or unchanged edit records nothing. Deleting a parent
 // un-parents its children through `PropertyKeying.setParent(nil, …)`, so they
 // keep their place on screen at the playhead. Moves, bring/send and duplicate
-// run on SuiteKernel's LayerTree (HaloLayers+Kernel). Linux-safe: no UI imports.
+// run on SuiteKernel's LayerTree (HaloLayers+Kernel). The layer list's rows
+// and the command its drop makes live here too, so the view does no index
+// math. Linux-safe: no UI imports.
 import SuiteKernel
 
 extension HaloProject {
@@ -94,13 +96,22 @@ extension HaloProject {
         }
     }
 
-    /// The final index of a row a list's move drops at `toOffset`: a row moved
-    /// down lands one above the offset. Clamped to the list; nil when `from`
-    /// is out of range.
-    public static func moveTarget(from: Int, toOffset: Int, count: Int) -> Int? {
-        guard (0..<max(count, 0)).contains(from) else { return nil }
-        let target = toOffset > from ? toOffset - 1 : toOffset
-        return min(max(target, 0), count - 1)
+    /// The layer list's rows (SuiteUI's LayerTreeList): the selected
+    /// composition's layers top first, all on one level.
+    public var layerRows: [LayerRow] { selectedComposition?.layerTree.rows(expanded: []) ?? [] }
+
+    /// The command a drop in the layer list makes: layer `id` into `parent`
+    /// (nil among the layers) at `index`, counted from the back among the
+    /// other layers, as LayerTreeList's drop proposes it. It becomes
+    /// `moveLayer` with the top-first index, clamped to the list. Halo's
+    /// layers hold no children, so a drop into a layer, or of an id the
+    /// selected composition doesn't hold, makes none.
+    public func layerDropCommand(_ id: String, into parent: String?, at index: Int) -> HaloCommand? {
+        guard parent == nil, let layers = selectedComposition?.layers, layers.contains(where: { $0.id == id }) else {
+            return nil
+        }
+        let last = layers.count - 1
+        return .moveLayer(id, to: last - min(max(index, 0), last))
     }
 
     /// Moves the selected layer one place by `step` through LayerTree.arrange;

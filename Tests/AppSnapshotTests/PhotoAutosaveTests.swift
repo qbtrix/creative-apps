@@ -163,6 +163,20 @@ private func block(on semaphore: DispatchSemaphore) {
         #expect(codec.encodes.withLock { $0 } == 2 * once, "the next edit didn't try again")
     }
 
+    /// The 8K budget fixture's window autosaves while the zoom budget runs; that must land in a temp
+    /// folder, or the user's next Photo launch offers to restore a test image.
+    @Test func budgetFixtureAutosavesOutsideTheUsersRecoveryFolder() async throws {
+        let id = "budget-\(UUID().uuidString)"
+        let store = PhotoRenderBudgetTests.services.recovery
+        let autosave = makeAutosave(store, window: id)
+        autosave.noteEdit(at: 0)
+        await autosave.tick(model: try edited(), now: 5, codec: ImageIOCodec())
+        defer { try? store.discard(window: id) }
+        #expect(autosave.autosaved)
+        let users = LiveRecovery.defaultDirectory.appending(path: "\(id).ora")
+        #expect(!FileManager.default.fileExists(atPath: users.path(percentEncoded: false)))
+    }
+
     @Test func cleanModelWritesNothing() async throws {
         let autosave = makeAutosave()
         autosave.noteEdit(at: 0)

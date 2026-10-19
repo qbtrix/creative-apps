@@ -9,11 +9,13 @@
 # Until beta only compile and Model tests block (captain, 2026-10-16). The
 # proof a head passed the gate is Linux-side: the worker's `Fast-Check: pass`
 # line followed by `Head: <full head sha>` in the body, or a passing CI
-# `Linux` check on the head. CI's `macOS` and `macOS (<app>)` jobs are
-# report-only, so the lane ignores them (REPORT_ONLY_RE): a red or running
-# one never holds a PR. A PR that changes code (BUILD_RE) also needs a
+# `Linux` check on the head. CI's `macOS` and `macOS journeys` jobs (each
+# also as `... (<app>)`) prove nothing for a PR, so the lane ignores them
+# (REPORT_ONLY_RE): a red or running one never holds a PR. A PR that changes code (BUILD_RE) also needs a
 # passing build-only CI run on its head (build_gate), which the lane
-# dispatches itself, once per head (workers get 403).
+# dispatches itself, once per head (workers get 403), scoped to the apps its
+# code touches (build_apps: main's scripts/test-scope build-apps; anything
+# shared, unknown or unreadable builds every app).
 #
 # A crew PR into BASE_BRANCH with a `Belt-Lead:` body line and no `fast-lane`
 # label gets the label from the sweep (belt_label) unless it carries an
@@ -88,7 +90,7 @@
 # dirs (merge base, head), the Mac-Check run and the latest build-only run on
 # the head, and the PR's added files, logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
-#   conflict|<head sha>  pending|<why>  build-dispatch|<code paths>|<head branch>
+#   conflict|<head sha>  pending|<why>  build-dispatch|<code paths>|<head branch>|<apps or all>
 #   linux-dispatch|<head branch>
 #   build-gate|<what to do>  eligible|<lines>|<files>|<proof>
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds it fixtures.
@@ -128,7 +130,7 @@ CI_WORKFLOWS=("CI")
 # CI job names, so CI runs started by workflow_dispatch (no PR association) still count.
 CI_CHECKS=("Linux")
 # CI's report-only jobs (ci.yml): never red, pending or proof here.
-REPORT_ONLY_RE='^macOS( \(.*\))?$'
+REPORT_ONLY_RE='^macOS( journeys)?( \(.*\))?$'
 CI_FILE="ci.yml"  # the CI workflow file, dispatched on BASE_BRANCH after merges
 SELF_WORKFLOW="Fast Lane"
 # The lane job's own check run on the head. Check runs read off the commit carry
@@ -197,7 +199,10 @@ MAC_JOB="macOS"
 # shared shell files such as SuiteWindow.swift included, merges only once a build-only CI run (ci.yml's
 # `build_only` input: every SwiftPM target with its tests, then the journey
 # bundles; nothing runs) compiled its head; the lane dispatches it, once per
-# head. Linux scripts/ci never builds the app targets (lesson 114: dev stopped
+# head, with `-f app=<apps>` when build_apps names apps (the run then builds
+# only those apps, their Model tests, AppSnapshotTests and their journey
+# bundles). A branch whose ci.yml predates the `app` input refuses the
+# dispatch, so the lane dispatches again without it (a full build). Linux scripts/ci never builds the app targets (lesson 114: dev stopped
 # compiling on macOS, run 38727890123; then a snapshot test, run 38732179619,
 # #1097), and it can't see a macOS-only break in a target it does build:
 # #1210 put an ObjCBool error in Sources/PhotoModel that Linux compiles fine.
@@ -385,9 +390,20 @@ build_paths() {
   grep -E "$BUILD_RE" "$1" | sed -E 's:^((Sources|Tests)/[^/]+|UITests)/.*:\1:' | sort -u | paste -sd, - | sed 's/,/, /g' || true
 }
 
+# build_apps <files.txt>: the apps a build-only run of the PR's BUILD_RE files
+# compiles, comma-separated (photo or design,photo), from main's
+# scripts/test-scope build-apps. `all` when that fails or prints anything
+# else: when in doubt, build everything.
+build_apps() {
+  local apps
+  apps=$(grep -E "$BUILD_RE" "$1" | python3 "$HERE/test-scope" build-apps 2>/dev/null) || apps=all
+  [[ "$apps" =~ ^[a-z]+(,[a-z]+)*$ ]] || apps=all
+  echo "$apps"
+}
+
 # build_gate <pr.json> <files.txt> <mac-check run.json> <build run.json>:
 # nothing when the PR touches no BUILD_RE code, else one line:
-#   ok|<proof>  dispatch|<paths>|<branch>  wait|<url>  refuse|<what to do>
+#   ok|<proof>  dispatch|<paths>|<branch>|<apps>  wait|<url>  refuse|<what to do>
 # A green Mac-Check run on the head (it builds every app) counts; otherwise
 # the latest build-only run on the head ({} when none: dispatch one).
 build_gate() {
@@ -403,7 +419,7 @@ build_gate() {
   [[ -z "${4:-}" || ! -s "$4" ]] || run=$(cat "$4")
   url=$(jq -r '.url // ""' <<<"$run" 2>/dev/null || true)
   if [[ -z "$url" || "$(jq -r '.headSha // ""' <<<"$run")" != "$head" ]]; then
-    echo "dispatch|$paths|$branch"; return
+    echo "dispatch|$paths|$branch|$(build_apps "$2")"; return
   fi
   st=$(jq -r '(.status // "" | ascii_downcase) + " " + (.conclusion // "" | ascii_downcase)' <<<"$run")
   case "$st" in
@@ -1364,9 +1380,9 @@ evaluate() {
     build-dispatch|linux-dispatch)
       # Authors can't dispatch (403, #1040), so the lane does, once per head:
       # the next sweep finds this run on the head and waits for it, then merges.
-      local what="" branch url="" i flags=(-f build_only=true) title="$BUILD_TITLE"
+      local what="" branch url="" i flags=(-f build_only=true) title="$BUILD_TITLE" apps=all
       if [[ "$kind" == linux-dispatch ]]; then branch="$rest"; flags=(-f linux_only=true); title="$LINUX_TITLE"
-      else IFS='|' read -r what branch <<<"$rest"; fi
+      else IFS='|' read -r what branch apps <<<"$rest"; fi
       # A Linux check is started once per head: its comment is the record, read
       # fail-closed so an API hiccup never starts a second run.
       if [[ "$kind" == linux-dispatch ]]; then
@@ -1378,7 +1394,11 @@ evaluate() {
           log "PR #$n: Linux check on head $head already started; waiting for it"; rm -rf "$tmp"; return
         fi
       fi
-      if ! write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]}" --ref "$branch"; then
+      # A scoped build first; a branch whose ci.yml has no `app` input refuses
+      # it, so a full build is the fallback (and the same retry covers a blip).
+      if [[ -n "$apps" && "$apps" != all ]] && write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]}" -f app="$apps" --ref "$branch"; then
+        :
+      elif apps=all; ! write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]}" --ref "$branch"; then
         log "could not dispatch CI on $branch; the next sweep tries again"; rm -rf "$tmp"; return
       fi
       for (( i = 0; i <= RUN_LOOKUP_RETRIES; i++ )); do
@@ -1391,7 +1411,7 @@ evaluate() {
       if [[ "$kind" == linux-dispatch ]]; then
         comment_once "$n" "Fast lane: nothing on head $head proves it yet (no CI check, no Fast-Check marker for it), so the lane started a Linux check on head $head: $url. A later sweep merges this PR once it passes (a code PR gets its macOS build on this head first)."
       else
-        comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
+        comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch ($( [[ "$apps" == all ]] && echo "every app" || echo "apps: $apps" )): $url. A later sweep merges this PR once it compiles; a new push gets a new build."
       fi
       ;;
     build-gate)
