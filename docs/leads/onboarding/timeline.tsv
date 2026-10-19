@@ -110,3 +110,4 @@ utc	stage	event	ref	note
 2026-10-19T04:29:01Z	heartbeat	OB-13 still blocked on samples #836-#839.
 2026-10-19T05:48Z	3	stage-start	wave 8	resumed run act-1a152b291d5-uiwb; OB-13 on live with OJ3 skipping on #837
 2026-10-19T06:40Z	3	pr-opened	#3158	OB-13 OJ3/OJ4 live, blueprint prose, built; macOS build green
+2026-10-19T06:52Z	3	pr-merged	#3158	d99751bcb04942408b4eba02454434d76110aa71
