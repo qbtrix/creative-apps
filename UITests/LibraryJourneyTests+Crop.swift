@@ -50,6 +50,9 @@ extension LibraryJourneyTests {
         try LibraryFiles.writeShoot(in: folder)
         let arguments = ["-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
                          "-LibraryImportOnLaunch", "-LibraryTestValues"]
+        // A live render of a 6000 × 4000 photo takes seconds in a debug build: render waits stretch.
+        CropRun.slack = 6
+        defer { CropRun.slack = 1 }
         let library = cropOpen(arguments, suffix: "-live")
         cropSquare(library)
         cropStraighten(library, suffix: "-live", width: Self.cropLiveWidth)
@@ -280,9 +283,9 @@ extension LibraryJourneyTests {
 
     // MARK: - Helpers
 
-    /// Polls `condition` every tenth of a second for up to `seconds`.
+    /// Polls `condition` every tenth of a second for up to `seconds` times `CropRun.slack`.
     @MainActor private func cropWait(_ seconds: TimeInterval, _ condition: () -> Bool) -> Bool {
-        let deadline = Date(timeIntervalSinceNow: seconds)
+        let deadline = Date(timeIntervalSinceNow: seconds * CropRun.slack)
         repeat {
             if condition() { return true }
             Thread.sleep(forTimeInterval: 0.1)
@@ -355,4 +358,9 @@ extension LibraryJourneyTests {
         let words = cropText(element).split(whereSeparator: { !"+-.0123456789".contains($0) })
         return words.lazy.compactMap { Double($0) }.first ?? .nan
     }
+}
+
+/// How many times longer `cropWait` polls: 1 on the fakes, more on live renders.
+@MainActor private enum CropRun {
+    static var slack: TimeInterval = 1
 }
