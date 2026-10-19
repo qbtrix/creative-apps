@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-19T03:17Z	4	pr-open	#3100	CL-2 PR opened, head 01b5b24, scripts/ci PASS (3868 tests)
 2026-10-19T03:34Z	4	heartbeat	#3100	CL-2 macOS build run 39195008542 dispatched by lane; stripped tool-added attribution footer from PR body
 2026-10-19T03:52:06Z	poll	heartbeat	#3100	macOS build 39195008542 success; awaiting lane sweep merge
+2026-10-19T04:04:09Z	poll	heartbeat	#3100	build green 03:46Z, still open/clean; awaiting lane sweep
