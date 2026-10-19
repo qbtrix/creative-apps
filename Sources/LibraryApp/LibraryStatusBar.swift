@@ -1,10 +1,14 @@
-// LibraryStatusBar.swift: the row under the Library window's content in the
-// loupe and, on preview data (`services.isPreview`), in the grid too
-// (`showsStatusBar`). A ViewerStatusBar whose zoom pill shows the scale the
-// loupe draws at (its zoom against the fit the loupe measured; 100% in the
-// grid) and whose size pill shows the loupe photo's pixel size, or the photo
-// count in the grid. On preview data a "Preview data" warning pill follows,
-// whose tooltip and accessibility hint say it is built-in sample data.
+// LibraryStatusBar.swift: the row under the Library window's content, the
+// grid's and the loupe's (status-and-layout SL-4). It draws LibraryCatalog's
+// `statusRow` through ViewerStatusBar: the zoom pill, the size pill (the
+// photo count in the grid, the loupe photo's pixel size), then one pill per
+// row entry: the selection and cell size in the grid, the loupe's Fit and
+// place, and the import, render, save and Preview data pills, each
+// `library.status.<id>` with its help as tooltip and accessibility hint, and
+// a warning entry in warning colors. With no row (an empty live catalog) it
+// draws nothing. ViewerStatusBar can't hide its zoom pill yet (#1184), so a
+// row without a zoom shows the fit scale the loupe measured, or 100% in the
+// grid.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -14,17 +18,28 @@ struct LibraryStatusBar: View {
     /// The fit scale the loupe measured, which Zoom to Fit draws at.
     var fitScale = 1.0
 
-    /// What the "Preview data" pill means, as its tooltip and accessibility hint.
-    static let previewHelp = "This window shows built-in sample data, not photos on disk."
-
     var body: some View {
-        let zoom = model.loupeItem == nil ? 1 : model.loupeZoom.scale(fit: fitScale)
-        ViewerStatusBar(zoom: zoom, size: model.statusSizeText) {
-            if model.services.isPreview {
-                Text("Preview data").accessibilityIdentifier("library.status.preview").statusPill(.warning)
-                    .help(Self.previewHelp)
-                    .accessibilityHint(Self.previewHelp)
+        if let row = model.statusRow {
+            ViewerStatusBar(zoom: row.zoom ?? (model.loupeItem == nil ? 1 : fitScale), size: row.size) {
+                ForEach(row.pills) { pill in
+                    let face = Text(pill.text)
+                        .help(pill.help)
+                        .accessibilityHint(pill.help)
+                        .accessibilityIdentifier(Self.identifier(pill))
+                    if pill.style == .warning {
+                        face.statusPill(.warning)
+                    } else {
+                        face.statusPill(.plain)
+                    }
+                }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("library.status")
         }
+    }
+
+    /// The pill's accessibility identifier: `library.status.<id>`.
+    nonisolated static func identifier(_ pill: LibraryStatusPill) -> String {
+        "library.status.\(pill.id)"
     }
 }
