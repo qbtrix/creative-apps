@@ -10,10 +10,10 @@
 // after a click on each layer's row, so each drag stops 2 screen points short
 // of its target, inside the window's snap reach of 8 screen points.
 // Written before its code (lead.md, contract rule 13): SN-6 writes it skipped
-// by name; SN-7 draws the guides but every step left on runs View > Snap to
-// Layers, so SN-8 turns them on (the View checkmark, the relaunch, the
-// toggle), and SN-10 sets `snapIsLive`: the drags and guide reads run on the
-// live snap routes.
+// by name; SN-7 draws the guides; SN-8 adds View > Snap to Layers and lifts
+// the skip (the item enabled right after Fit Page, the checkmark, the
+// relaunch, the toggle); SN-10 sets `snapIsLive`: the drags and guide reads
+// run on the live snap routes.
 import XCTest
 
 final class DesignSnapJourneyTests: XCTestCase {
@@ -32,7 +32,6 @@ final class DesignSnapJourneyTests: XCTestCase {
 
     /// SN-c: moves, resizes, several moves, equal spacing and draws snap; the setting turns it off and is remembered.
     @MainActor func testSnapAndSmartGuides() throws {
-        throw XCTSkip("waits on SN-8: every step left on clicks View > Snap to Layers")
         walkSnapAndSmartGuides()
     }
 
@@ -42,6 +41,8 @@ final class DesignSnapJourneyTests: XCTestCase {
 
         // 1. A clean start: Snap to Layers on; note B's, C's, Pair's and A's frames.
         let item = viewItem(design)
+        XCTAssert(item.isEnabled, "View > \(Self.snapItem) is disabled")
+        expectAfterFitPage(design)
         if isChecked(item) { closeView(design) } else { item.click() }
         let frames = Frames(a: frame(design, Self.rowA), b: frame(design, Self.rowB),
                             c: frame(design, Self.rowC), pair: frame(design, Self.rowPair))
@@ -175,6 +176,13 @@ final class DesignSnapJourneyTests: XCTestCase {
         let item = design.app.menuBars.firstMatch.menuItems[Self.snapItem].firstMatch
         XCTAssert(item.waitForExistence(timeout: 5), "no View > \(Self.snapItem)")
         return item
+    }
+
+    /// With View open: Snap to Layers is the item right after Fit Page (SN-8).
+    @MainActor private func expectAfterFitPage(_ design: Journey) {
+        let titles = design.app.menuBars.firstMatch.menuBarItems["View"].menuItems.allElementsBoundByIndex.map(\.title)
+        let fit = titles.firstIndex(of: "Fit Page"), snap = titles.firstIndex(of: Self.snapItem)
+        XCTAssert(fit != nil && snap == fit.map { $0 + 1 }, "View lists \(titles), not \(Self.snapItem) right after Fit Page")
     }
 
     /// Clicks View again, which closes its open menu.
