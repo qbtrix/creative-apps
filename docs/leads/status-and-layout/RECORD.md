@@ -85,3 +85,4 @@ Next: SL-8 #3230 merged cd7d4120; once a dev run containing it has a green Linux
 - 2026-10-19T17:27Z: #3292 waiting on lane sweep; footer stripped
 
 - 2026-10-19T17:52Z: #3292 merged as 1b33afbb; full dev CI 39296061014 pending; Belt-Contact-Sheet once it is green
+- 2026-10-19T18:19Z: check-in: dev CI 39296061014 on 1b33afbb still queued; a UI merge also dispatched dev run 39300369891; the contact sheet waits on a green Linux job
