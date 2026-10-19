@@ -6,8 +6,10 @@
 // fills its bounds, draws no surround or artboard so the viewport's
 // checkerboard shows through, and takes no pointer input: the viewport's
 // gestures do. `rotationDegrees` turns the picture about its centre (a
-// straighten preview). Tile layers magnify nearest from 2 px per pixel up and
-// minify trilinear. macOS only.
+// straighten preview). A pinch zooms about the pointer: the pan moves so the
+// document point under it stays put (ZoomMath.anchoredOrigin); the scroll
+// wheel pans. Tile layers magnify nearest from 2 px per pixel up and minify
+// trilinear. macOS only.
 import AppKit
 import Combine
 import IOSurface
@@ -268,9 +270,17 @@ public final class CanvasHostView: NSView {
     override public func magnify(with event: NSEvent) {
         magnify(by: 1 + event.magnification, at: convert(event.locationInWindow, from: nil))
     }
-    /// One pinch step: the zoom times `factor`, clamped by ZoomMath.
+    /// One pinch step: the zoom times `factor`, clamped by ZoomMath, panned so the document point
+    /// under `point` stays under it (ZoomMath.anchoredOrigin).
     func magnify(by factor: CGFloat, at point: CGPoint) {
+        let (old, origin) = (zoom, artboard.origin)
         zoom = CGFloat(ZoomMath.clamped(Double(zoom * factor)))
+        let board = artboard
+        if board.width > 0 {
+            let wanted = ZoomMath.anchoredOrigin(pointer: point, origin: origin, from: Double(old), to: Double(zoom))
+            pan.width += wanted.x - board.minX
+            pan.height += wanted.y - board.minY
+        }
         (needsLayout, needsDisplay) = (true, true)
     }
 
