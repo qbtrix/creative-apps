@@ -2,9 +2,9 @@
 
 Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a1517272b2-vq6l (resumes earlier runs) · Session: claude/feature-lead-playbook-2k2x84 · Started: 2026-10-19T00:00Z
-Stage: 3 polling (SS-b)
+Stage: fix round 1
 Base: d50e891e (origin/dev); main verified at 349578b8
-Next: all SS-b tasks merged (S-8 #2696 10:16Z, S-5 #2898); on 39173700610 J4 skips (runner can't post held Space) and P1 #2751 fails (P1 draw has 3 samples, under 60): fix round for #2751; #2538 stays on needs-ui #2623
+Next: scoped design run holding #3062; then Belt-Slice-Done SS-b
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -49,3 +49,6 @@ Next: all SS-b tasks merged (S-8 #2696 10:16Z, S-5 #2898); on 39173700610 J4 ski
 - #2751 has the same cause as needs-ui #2623 (CanvasViewport's system horizontal scroller in SuiteUI); blocked, no Design PR. If #2623 is still open when SS-b's rounds end, #2751 joins the gaps.
 - SS-a done on scoped design https://github.com/qbtrix/creative-apps/actions/runs/39122750799 (e3a4582c, holds #2707 d353fee7): J5 testMarqueeMoveResizeSeveral and J6 testAlignAndDistributeSeveral green; Belt-Slice-Done posted on #1495. J4 (#2538) and P1 (#2751) still red on the CanvasViewport scroller, needs-ui #2623.
 2026-10-19T00:00Z	heartbeat	run act-1a1517272b2-vq6l: SS-b waits on #2751 (P1 3 samples) and #2538 (needs-ui #2623)
+
+- Fix round 1 (wf_042b23ed-f4a): #2751 -> PR #3062 (SS-b).
+2026-10-19T01:06Z	heartbeat	round 1 fix PR #3062 for #2751
