@@ -39,14 +39,14 @@ struct CLIStubTests {
     }
 
     @Test(arguments: [
-        ("jobs", "slice CL-jobs"), ("mcp", "afterglow-mcp is not built yet"),
+        ("jobs", "slice CL-jobs"), ("mcp", "MC-11"),
     ])
     func everyStubExits69NamingItsSlice(entry: String, names: String) {
         let io = FakeIO()
         let apps = Apps.all + [Apps.fake]
         let code: Int32 = switch entry {
         case "jobs": RealJobs.check("Tests/RealJobs/fake/resize", apps: apps, io: io)
-        default: MCPServer.serve([], apps: apps, io: io)
+        default: MCPServer.serve(["--live", "--root", "."], apps: apps, io: io) // plain `mcp` serves since MC-4
         }
         #expect(code == 69)
         #expect(io.stdout.count == 1)

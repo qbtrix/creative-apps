@@ -1,0 +1,6 @@
+[
+  {"label": "order by dictionary iteration", "file": "Sources/AfterGlowCLICore/MCP/MCPTools.swift", "find": "app.describeAll().sorted { $0.id < $1.id }.map(tool)", "replace": "Dictionary(app.describeAll().map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.map(tool)", "tests": "MCPToolsTests"},
+  {"label": "params schema inlined instead of nested", "file": "Sources/AfterGlowCLICore/MCP/MCPTools.swift", "find": "inputSchema: object([\"doc\": docSchema, \"params\": command.params], required: [\"doc\"]),", "replace": "inputSchema: command.params,", "tests": "MCPToolsTests"},
+  {"label": "readOnlyHint from undoable instead of kind", "file": "Sources/AfterGlowCLICore/MCP/MCPTools.swift", "find": "[\"readOnlyHint\": .bool(command.kind == .query),", "replace": "[\"readOnlyHint\": .bool(!command.undoable),", "tests": "MCPToolsTests"},
+  {"label": "an unknown command id routed", "file": "Sources/AfterGlowCLICore/MCP/MCPTools.swift", "find": "return app.describeAll().contains { $0.id == rest } ? .command(app: app.name, id: rest) : nil", "replace": "return .command(app: app.name, id: rest)", "tests": "MCPToolsTests"}
+]
