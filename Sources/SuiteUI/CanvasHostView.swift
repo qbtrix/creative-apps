@@ -266,7 +266,11 @@ public final class CanvasHostView: NSView {
         (needsLayout, needsDisplay) = (true, true)
     }
     override public func magnify(with event: NSEvent) {
-        zoom = CGFloat(ZoomMath.clamped(Double(zoom * (1 + event.magnification))))
+        magnify(by: 1 + event.magnification, at: convert(event.locationInWindow, from: nil))
+    }
+    /// One pinch step: the zoom times `factor`, clamped by ZoomMath.
+    func magnify(by factor: CGFloat, at point: CGPoint) {
+        zoom = CGFloat(ZoomMath.clamped(Double(zoom * factor)))
         (needsLayout, needsDisplay) = (true, true)
     }
 
