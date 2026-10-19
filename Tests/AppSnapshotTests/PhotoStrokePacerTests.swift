@@ -77,4 +77,16 @@ import Testing
         #expect(PhotoCanvasMark.traits.contains(.isImage))
         #expect(!PhotoCanvasMark.traits.contains(.isButton))
     }
+
+    @Test func theBrushCursorIsTheBrushSizeAtThePointer() throws {
+        var model = PhotoWorkspace()
+        try model.newCanvas(width: 640, height: 480)
+        model.selectTool(.brush)
+        model.setToolOption(.size(40))
+        #expect(PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks.isEmpty, "no cursor off the canvas")
+        let ring = PhotoCanvasOverlay(model: model, zoom: 2, hover: CGPoint(x: 100, y: 50)).marks
+        #expect(ring == [.brushCursor(CGRect(x: 80, y: 30, width: 40, height: 40))])
+        model.selectTool(.move)
+        #expect(PhotoCanvasOverlay(model: model, zoom: 2, hover: CGPoint(x: 100, y: 50)).marks.isEmpty, "no cursor for Move")
+    }
 }

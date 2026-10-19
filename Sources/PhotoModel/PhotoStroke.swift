@@ -76,14 +76,12 @@ struct PhotoStroke: Sendable, Equatable {
     var layerID: PhotoLayer.ID?
     var before: [Int: PixelBuffer] = [:]
     var coverage: [Int: [Float]] = [:]
-    var samples: [Sample] = []
+    var samples: [StrokeSample] = []
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
     /// Option subtracts, PV-5).
     var modifiers: DragModifiers = []
-
-    typealias Sample = StrokeSample
 }
 
 extension PhotoWorkspace {
@@ -153,7 +151,7 @@ extension PhotoWorkspace {
                 guard let id = current.layerID else { break }
                 // A move after the press starts on the dab the last event laid, so it skips that one.
                 let last = current.samples.last.map { Mask.Point($0.point) }
-                current.samples = [PhotoStroke.Sample(point: end.kernel)]
+                current.samples = [StrokeSample(point: end.kernel)]
                 stamp(
                     along: [last ?? start, end], size: brushOptions.size, layer: id, before: &current.before,
                     coverage: &current.coverage, healing: current.tool == .heal, skippingFirst: last != nil)
@@ -261,7 +259,7 @@ extension PhotoWorkspace {
                 current.samples.last?.point != point.kernel
             else { return }
             let clamped = pressure.isNaN ? 1 : min(max(pressure, 0), 1)
-            current.samples = current.samples.suffix(3) + [PhotoStroke.Sample(point: point.kernel, pressure: clamped)]
+            current.samples = current.samples.suffix(3) + [StrokeSample(point: point.kernel, pressure: clamped)]
             if current.samples.count == 1 { return lay([point], from: clamped, to: clamped, &current) }
         }
         guard let piece = PhotoStroke.smoothed(current.samples, ending: point == nil) else { return }

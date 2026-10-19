@@ -1,5 +1,6 @@
 // PhotoToolOptions.swift: the Tool Options section of the inspector, which
-// shows the active tool's options. The brush, eraser, clone and heal sliders
+// shows the active tool's options. The brush, eraser, clone and heal preset
+// menu (ToolOptions.presets) and sliders
 // and the marquee's actions live here; the crop's, selection's, transform's
 // and eyedropper's own options each live in their file (CropOptions,
 // SelectOptions, TransformOptions, SampleOptions). Values in, intents out.
@@ -7,7 +8,7 @@ import PhotoModel
 import SuiteUI
 import SwiftUI
 
-/// The active tool's options: size, hardness and opacity for the brush (plus
+/// The active tool's options: a preset, size, hardness and opacity for the brush (plus
 /// its color) and the eraser, each tool's own; what to do with a selection;
 /// applying a crop.
 struct ToolOptionsSection: View {
@@ -26,6 +27,7 @@ struct ToolOptionsSection: View {
                 if model.tool == .heal {
                     hint("Option-click to set the source, then paint over a blemish to heal it with the source's texture.")
                 }
+                presetRow(options)
                 InspectorSliderRow("Size", value: options.size, in: ToolOptions.sizeRange, unit: "px", decimals: 0) {
                     perform(.toolOption(.size($0)))
                 }
@@ -63,6 +65,20 @@ struct ToolOptionsSection: View {
                 SampleOptions(model: model, perform: perform)
             }
         }
+    }
+
+    /// The kernel's brush presets as a menu; it names the one the settings
+    /// match, or Custom once any setting differs, and a choice sets them all.
+    private func presetRow(_ options: ToolOptions) -> some View {
+        let custom = InspectorOption(id: "custom", title: "Custom")
+        let presets = ToolOptions.presets.map { InspectorOption(id: $0.id, title: $0.name) }
+        return InspectorPickerRow(
+            "Preset", options: options.preset == nil ? [custom] + presets : presets,
+            selection: options.preset?.id ?? custom.id
+        ) { id in
+            if let preset = ToolOptions.presets.first(where: { $0.id == id }) { perform(.toolOption(.preset(preset))) }
+        }
+        .accessibilityIdentifier("photo.tool.preset")
     }
 
     private func colorRow(_ options: ToolOptions) -> some View {
