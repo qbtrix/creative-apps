@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-18T23:21Z	3	stage-start	wave 1	CL-1; CL-2 blocked on #2996 CC-a
 2026-10-19T01:39Z	3	pr-merged	#3037	CL-1 targets and --version
 2026-10-19T01:39Z	3	stage-start	polling	CL-2 waits on CC-2 #3074
+2026-10-19T01:51Z	3	heartbeat	#3074	CC-2 still open; dev ed0fed9
