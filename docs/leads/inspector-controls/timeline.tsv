@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-19T13:24Z	check	#3236 open clean, lane build pending; dev run 39252895176 (6e70826) still pending
 2026-10-19T13:41Z	check	#3236 open clean (lane build pending); 39252895176 in progress, 39262177225 pending; no green run yet
 2026-10-19T13:58Z	check	39252895176 macOS scripts/ci failed (run not complete, will be red); 39262177225 pending; #3236 still awaiting lane build
+2026-10-19T14:20Z	check	39252895176 macOS still in Perf (scripts/ci step red 13:50, log not final); 39262177225 pending; #3236 open clean awaiting lane build
