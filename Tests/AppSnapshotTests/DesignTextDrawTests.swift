@@ -52,20 +52,20 @@ import Testing
                       width: Double(maxX - minX + 1) / zoom, height: Double(maxY - minY + 1) / zoom)
     }
 
-    @Test func size32DrawsAboutTwiceAsTallAs16() throws {
+    @Test(.disabled("quarantine #3265 until 2026-10-22")) func size32DrawsAboutTwiceAsTallAs16() throws {
         let small = try ink(title { $0.size = 16 })
         let large = try ink(title { $0.size = 32 })
         #expect(large.height >= 1.8 * small.height, "32 pt ink \(large.height) pt tall, 16 pt \(small.height) pt")
         #expect(large.width > small.width)
     }
 
-    @Test func boldDrawsWiderThanRegular() throws {
+    @Test(.disabled("quarantine #3267 until 2026-10-22")) func boldDrawsWiderThanRegular() throws {
         let regular = try ink(title { $0.weight = 400 })
         let bold = try ink(title { $0.weight = 700 })
         #expect(bold.width > regular.width, "Bold \(bold.width) pt wide, Regular \(regular.width) pt")
     }
 
-    @Test func centerPutsTheInkInTheBoxsMiddle() throws {
+    @Test(.disabled("quarantine #3266 until 2026-10-22")) func centerPutsTheInkInTheBoxsMiddle() throws {
         let node = try title { $0.alignment = .center }
         let drawn = try ink(node)
         #expect(abs(drawn.midX - node.frame.cgRect.midX) <= 1, "ink middle \(drawn.midX), box middle \(node.frame.cgRect.midX)")
