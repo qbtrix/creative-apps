@@ -1,8 +1,8 @@
 // BatchTests.swift: LJ2 and the CL-batch checks (afterglow-cli CL-6), written
-// first and disabled until CL-7 fills ScriptRunner (and command-catalog CC-7
-// fills runBatch). `afterglow run <script.jobs.json>` validates the whole
-// script before any input runs, expands its inputs relative to the script in
-// sorted order, plans every output and refuses collisions before writing,
+// first by CL-6 and turned on by CL-7, which fills ScriptRunner over
+// command-catalog CC-7's runBatch. `afterglow run <script.jobs.json>`
+// validates the whole script before any input runs, expands its inputs
+// relative to the script in sorted order, plans every output and refuses collisions before writing,
 // runs each input all or none when atomic, and prints one report.
 //
 // Fixtures/Batch/ holds the canonical scripts, inputs and the expected report;
@@ -65,7 +65,7 @@ struct BatchTests {
     // MARK: LJ2
 
     /// LJ2 step 1: three inputs write three `{stem}-small.fake` outputs, each the input after the steps.
-    @Test(.disabled("waits on CL-7")) func resizeWritesThreeOutputsByName() throws {
+    @Test func resizeWritesThreeOutputsByName() throws {
         let io = try Self.world()
         let run = Self.run("batch/resize.jobs.json", io: io)
         #expect(run.code == 0)
@@ -74,7 +74,7 @@ struct BatchTests {
     }
 
     /// The report: one JSON object, every input with every step, its outputs, and the counts.
-    @Test(.disabled("waits on CL-7")) func reportListsEveryInputAndStep() throws {
+    @Test func reportListsEveryInputAndStep() throws {
         let io = try Self.world()
         let run = Self.run("batch/resize.jobs.json", io: io)
         #expect(run.lines.count == 1)
@@ -84,7 +84,7 @@ struct BatchTests {
     }
 
     /// LJ2 step 2: a second run refuses the collisions and leaves the first run's outputs as they were.
-    @Test(.disabled("waits on CL-7")) func secondRunRefusesTheCollisions() throws {
+    @Test func secondRunRefusesTheCollisions() throws {
         let io = try Self.world()
         #expect(Self.run("batch/resize.jobs.json", io: io).code == 0)
         let before = io.files
@@ -100,7 +100,7 @@ struct BatchTests {
 
     /// LJ2 step 3: atomic, the locked input's move refuses; its output is not written, the others are,
     /// and the report names the step and why.
-    @Test(.disabled("waits on CL-7")) func atomicPerInput() throws {
+    @Test func atomicPerInput() throws {
         let io = try Self.world()
         let run = Self.run("batch/atomic.jobs.json", io: io)
         #expect(run.code == 70)
@@ -121,7 +121,7 @@ struct BatchTests {
     }
 
     /// Not atomic, the locked input stops at the refusal and writes what it has: the input as it was.
-    @Test(.disabled("waits on CL-7")) func nonAtomicStopsAndWritesWhatItHas() throws {
+    @Test func nonAtomicStopsAndWritesWhatItHas() throws {
         let io = try Self.world(["batch/mixed.jobs.json": Self.variant {
             $0["inputs"] = .array([.string("mixed/*.fake")]); $0["atomic"] = .bool(false)
         }])
@@ -134,7 +134,7 @@ struct BatchTests {
 
     // MARK: Validation before any run
 
-    @Test(.disabled("waits on CL-7"), arguments: [JSONValue.number(2), .number(0), .string("1"), .null])
+    @Test(arguments: [JSONValue.number(2), .number(0), .string("1"), .null])
     func versionMustBeOne(version: JSONValue) throws {
         let io = try Self.world(["batch/v.jobs.json": Self.variant { $0["version"] = version }])
         let before = io.files
@@ -144,7 +144,7 @@ struct BatchTests {
         #expect(io.files == before)
     }
 
-    @Test(.disabled("waits on CL-7")) func unknownAppIsAUsageError() throws {
+    @Test func unknownAppIsAUsageError() throws {
         let io = try Self.world(["batch/app.jobs.json": Self.variant { $0["app"] = .string("paint") }])
         let run = Self.run("batch/app.jobs.json", io: io)
         #expect(run.code == 64)
@@ -152,7 +152,7 @@ struct BatchTests {
     }
 
     /// A bad id in the last step refuses the script before the first input runs: nothing is written.
-    @Test(.disabled("waits on CL-7")) func unknownStepIdRefusedBeforeAnyRun() throws {
+    @Test func unknownStepIdRefusedBeforeAnyRun() throws {
         let io = try Self.world(["batch/bad.jobs.json": Self.variant {
             $0["steps"] = .array([.object(["id": .string("rect.select"), "params": .object(["id": .number(1)])]),
                                   .object(["id": .string("rect.explode"), "params": .object([:])])])
@@ -165,7 +165,7 @@ struct BatchTests {
         #expect(io.files == before)
     }
 
-    @Test(.disabled("waits on CL-7")) func missingScriptIsIOAndMalformedIsData() throws {
+    @Test func missingScriptIsIOAndMalformedIsData() throws {
         let none = try Self.world()
         #expect(Self.run("batch/none.jobs.json", io: none).code == 74)
         let io = try Self.world(["batch/broken.jobs.json": Data(#"{"version": 1, "app": "#.utf8)])
@@ -175,7 +175,7 @@ struct BatchTests {
     // MARK: Inputs
 
     /// Inputs expand relative to the script, sorted across every pattern; `{index}` follows that order.
-    @Test(.disabled("waits on CL-7")) func sortedInputs() throws {
+    @Test func sortedInputs() throws {
         let io = try Self.world(["batch/order.jobs.json": Self.variant {
             $0["inputs"] = .array([.string("input/dune.fake"), .string("input/c*.fake"), .string("input/beach.fake")])
             $0["output"] = .object(["dir": .string("out"), "name": .string("{index}-{stem}"), "format": .string("fake")])
@@ -188,7 +188,7 @@ struct BatchTests {
     }
 
     /// An input pattern matching nothing is an error naming it, not an empty run; so is one of several.
-    @Test(.disabled("waits on CL-7"), arguments: [["input/*.png"], ["input/*.fake", "input/*.png"]])
+    @Test(arguments: [["input/*.png"], ["input/*.fake", "input/*.png"]])
     func emptyMatchIsAnError(patterns: [String]) throws {
         let io = try Self.world(["batch/empty.jobs.json": Self.variant { $0["inputs"] = .array(patterns.map(JSONValue.string)) }])
         let before = io.files
@@ -201,7 +201,7 @@ struct BatchTests {
     // MARK: Outputs
 
     /// `{stem}`, `{ext}`, `{index}` (1-based, zero-padded to the input count's width) and `{app}`.
-    @Test(.disabled("waits on CL-7")) func nameTokens() throws {
+    @Test func nameTokens() throws {
         var extra: [String: Data] = [:]
         for n in 1...12 { extra["batch/many/s\(n).fake"] = try Self.fixture("input/beach.fake") }
         extra["batch/tokens.jobs.json"] = try Self.variant {
@@ -216,7 +216,7 @@ struct BatchTests {
     }
 
     /// Without `output`, each document is saved natively next to the script under `out/`.
-    @Test(.disabled("waits on CL-7")) func noOutputSavesNativelyUnderOut() throws {
+    @Test func noOutputSavesNativelyUnderOut() throws {
         let io = try Self.world(["batch/plain.jobs.json": Self.variant { $0["output"] = nil }])
         #expect(Self.run("batch/plain.jobs.json", io: io).code == 0)
         #expect(try Self.rects(io, "batch/out/beach.fake") == Self.resized)
@@ -224,7 +224,7 @@ struct BatchTests {
 
     /// Two inputs planning one path, or one planned output already there, refuse before any write:
     /// the earlier inputs' outputs are not written either.
-    @Test(.disabled("waits on CL-7")) func collisionsBeforeWriting() throws {
+    @Test func collisionsBeforeWriting() throws {
         let same = try Self.world(["batch/same.jobs.json": Self.variant {
             $0["output"] = .object(["dir": .string("out"), "name": .string("small"), "format": .string("fake")])
         }])
@@ -241,7 +241,7 @@ struct BatchTests {
     }
 
     /// A dry run prints the plan as one object and writes nothing; it still refuses a collision.
-    @Test(.disabled("waits on CL-7")) func dryRunPrintsThePlanAndWritesNothing() throws {
+    @Test func dryRunPrintsThePlanAndWritesNothing() throws {
         let io = try Self.world()
         let before = io.files
         let run = Self.run("batch/resize.jobs.json", io: io, dryRun: true)
@@ -257,7 +257,7 @@ struct BatchTests {
     // MARK: Quality
 
     /// 100 fake inputs × 3 steps; the packet's budget is 2 s on Linux CI (reported, not failed on here).
-    @Test(.disabled("waits on CL-7")) func hundredInputsWithinBudget() throws {
+    @Test func hundredInputsWithinBudget() throws {
         var extra: [String: Data] = [:]
         for n in 1...100 { extra["batch/input/n\(n).fake"] = try Self.fixture("input/beach.fake") }
         let io = try Self.world(extra)
@@ -270,7 +270,7 @@ struct BatchTests {
     }
 
     /// 1,000 seeded mutations of the script, each one invalid, exit 64 or 65; none crashes or writes.
-    @Test(.disabled("waits on CL-7")) func fuzzedScriptsNeverCrash() throws {
+    @Test func fuzzedScriptsNeverCrash() throws {
         let base = try Self.fixture("resize.jobs.json")
         var seed: UInt64 = 0x5EED_CAFE
         func next(_ bound: Int) -> Int {
