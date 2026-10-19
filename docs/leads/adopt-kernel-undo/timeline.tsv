@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-19T07:09:14Z	wave	launch	#3138 #3139	#3139 AU-h1 merged 07:03Z (6fc1187); AU-h2 launched (wf_22740c68-dec)
 2026-10-19T07:17:32Z	build	pr	#3184	AU-h2 opened, fast-lane, Fast-Check pass head e1e7e13
 2026-10-19T07:32:16Z	heartbeat	lane-check	-	#3184 open, macOS build 39215372795 queued; AU-h1 (6fc1187) not yet on main (b7e17ed); hand-offs open
+2026-10-19T07:54:13Z	heartbeat	lane-check	-	#3184 macOS build 39215372795 still queued; main b7e17ed lacks AU-h1; full CI 39215489121 on dev 57d85df pending
