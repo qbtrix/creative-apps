@@ -4,20 +4,22 @@
 // mouse on visible controls: Layers rows, the tool box, the top bar's Undo
 // and the View menu, never a shortcut (lesson 152). XCUITest can't see guides
 // drawn in a canvas, so the canvas publishes the last drag's guide summary as
-// the value of `design.canvas.guides` ("x 300, gap x 100", or "none").
+// the label of `design.canvas.guides` ("x 300, gap x 100", or "none"), read by
+// its label since XCUITest reads a SwiftUI value as empty (#262).
 // Screen positions come from the `design.canvas.selection` element's frame
 // after a click on each layer's row, so each drag stops 2 screen points short
 // of its target, inside the window's snap reach of 8 screen points.
 // Written before its code (lead.md, contract rule 13): SN-6 writes it skipped
 // by name; SN-7 draws the guides but every step left on runs View > Snap to
 // Layers, so SN-8 turns them on (the View checkmark, the relaunch, the
-// toggle), and SN-10 sets `snapIsLive` for the drags and guide reads.
+// toggle), and SN-10 sets `snapIsLive`: the drags and guide reads run on the
+// live snap routes.
 import XCTest
 
 final class DesignSnapJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
-    /// False until SN-10: the drags and the guide reads need the live snap routes.
-    static let snapIsLive = false
+    /// True since SN-10: the drags and the guide reads run on the live snap routes.
+    static let snapIsLive = true
     static let snapItem = "Snap to Layers"
     /// The Layers rows of `cards` (DesignFixtures.cards): A, B, C and Pair.
     static let rowA = "design.layer.node-2", rowB = "design.layer.node-3"
@@ -208,18 +210,24 @@ final class DesignSnapJourneyTests: XCTestCase {
         XCTAssert(Self.poll { undo.exists && undo.label == title }, "\(step) made no step \(title) (Undo reads \(undo.label))")
     }
 
-    /// The guides value contains `part`.
+    /// The guides summary contains `part`.
     @MainActor private func expectGuides(_ design: Journey, contain part: String, after step: String) {
         let mark = design.element(Self.guides)
-        XCTAssert(Self.poll { (mark.value as? String ?? "").contains(part) },
-                  "after \(step) \(Self.guides) reads \(mark.value as? String ?? "nothing"), without \(part)")
+        XCTAssert(Self.poll { Self.words(mark).contains(part) },
+                  "after \(step) \(Self.guides) reads \(Self.words(mark)), without \(part)")
     }
 
-    /// The guides value is exactly `expected`.
+    /// The guides summary is exactly `expected`.
     @MainActor private func expectGuides(_ design: Journey, equal expected: String, after step: String) {
         let mark = design.element(Self.guides)
-        XCTAssert(Self.poll { mark.value as? String == expected },
-                  "after \(step) \(Self.guides) reads \(mark.value as? String ?? "nothing"), not \(expected)")
+        XCTAssert(Self.poll { Self.words(mark) == expected },
+                  "after \(step) \(Self.guides) reads \(Self.words(mark)), not \(expected)")
+    }
+
+    /// The guides probe's summary: its label (#262), else its value; empty when it's missing.
+    @MainActor private static func words(_ mark: XCUIElement) -> String {
+        guard mark.exists else { return "" }
+        return mark.label.isEmpty ? mark.value as? String ?? "" : mark.label
     }
 
     /// The inspector's field `name` (its spoken value, "200 points") passes `condition` within five seconds.
