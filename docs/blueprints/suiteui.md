@@ -279,7 +279,7 @@ asserts it), and every relationship names ids that exist.
 | Number entry | existing | `ScrubField` and the bar slider, `ScrubValue`, `NumericInput`, `StudioScrubRow` | `ScrubField.swift`, `ScrubValue.swift`, `NumericInput.swift`, `StudioScrubRow.swift` | reports to Probes; conforms to `ValueScrubbing` |
 | Presets and chips | existing | `PresetGrid`, `ChipRow`, `ChoiceChips` | `PresetGrid.swift`, `ChipRow.swift`, `ChoiceChips.swift` | used by Inspector and the timeline toolbar; conforms to `PresetNavigating` |
 | Curve editors | existing | `CurveEditor`, `ToneCurveEditor` | `CurveEditor.swift`, `ToneCurveEditor.swift` | conforms to `CurvePointEditing` |
-| Rows and lists | existing + planned | Sidebar rows and sections; the layers panel is `LayerTreeList` (Layers panel below), not a `LayerList`; planned: `ListEditing` | `SidebarRow.swift`, `SidebarSection.swift`, `LayerList.swift`, `ListEditing.swift` (last two planned) | drawn by Window shell and app panels; conforms to `ListEditing` |
+| Rows and lists | existing (lists-and-layers, #1510) | Sidebar rows and sections, `SuiteSidebarList`, and `SuiteListEditing`, the rename draft and reorder rules every list shares; the layers panel is `LayerTreeList` (Layers panel below), not a `LayerList` | `SidebarRow.swift`, `SidebarSection.swift`, `SidebarActionRow.swift`, `SuiteSidebarList.swift`, `SuiteListEditing.swift` | drawn by Window shell and app panels; conforms to `ListEditing` |
 | Thumbnail grid | existing | `ThumbnailGrid`, `GridSelection` | `ThumbnailGrid.swift`, `GridSelection.swift` | conforms to `GridSelecting` |
 | Timeline | existing + planned | `TimelineStrip`, `FrameMapping`; planned: restyle, `TimelineKeys` | `TimelineStrip.swift`, `FrameMapping.swift`, `TimelineKeys.swift` (planned) | hosted by Editor shell's slot; conforms to `TimelineMapping`, `KeyEditing` |
 | Viewer chrome | existing + planned | `ViewerStatusBar`; planned: `TransportCapsule` | `ViewerStatusBar.swift`, `TransportCapsule.swift` (planned) | hosted by both shells; conforms to `StatusPillComposing`, `TransportStepping` |
@@ -606,7 +606,7 @@ live conformance and its tests, and the gallery page switches between them
 | UC7 | `CanvasNavigating` | SJ9, SP2 | `ZoomMath`, `ViewerZoom.fitScale`, `CanvasViewport`'s pan step | doubles and halves instead of the zoom stops | canvas-marks |
 | UC8 | `HandleGeometryProviding` | SJ10, SP5 | planned `HandleGeometry.swift` (from Design's selection marks, #273) | corners only | canvas-marks |
 | UC9 | `GridSelecting` | SJ18, SP4 | `GridSelection.click/move/columns` | single selection only | lists-and-layers |
-| UC10 | `ListEditing` | SJ17, SJ22 | planned `ListEditing.swift`; today the rename draft rules sit inside `SidebarRow` | never refuses | lists-and-layers |
+| UC10 | `ListEditing` | SJ17, SJ22 | `SuiteListEditing.swift` (`SuiteListEditing`) | never refuses | lists-and-layers |
 | UC11 | `TimelineMapping` | SJ19, SP3 | `FrameMapping` | a label every 10 frames, no ticks | timeline |
 | UC12 | `KeyEditing` | SJ19 | planned `TimelineKeys.swift` (#63) | clamps each key, not the group | timeline |
 | UC13 | `TransportStepping` | SJ5 | planned, in `TransportCapsule.swift`'s Foundation-only half | never wraps, frames not timecode | editor-chrome |
