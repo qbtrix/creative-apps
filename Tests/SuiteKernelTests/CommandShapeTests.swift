@@ -28,9 +28,10 @@ private struct ShapeDoc: HeadlessDocument {
         #expect(try catalog.describeAll() == [described] && JSONValue(encoding: described).decode(CommandDescription.self) == described)
         var doc = ShapeDoc()
         let step = CommandEnvelope(id: "value.bump", params: spec.example)
-        #expect(throws: CatalogError.notBuilt(id: "value.bump", feature: "command-catalog CC-7")) { try catalog.run(step, on: &doc) }
-        #expect(throws: CatalogError.self) { try catalog.run("value.bump", params: spec.example, on: &doc) }
-        #expect(catalog.runBatch([step, step], on: &doc, atomic: true).stoppedAt == 0 && doc.value == 0)
+        #expect(try catalog.run(step, on: &doc) == CommandOutcome(result: .number(1), undoStep: nil) && doc.value == 1)
+        var full = ShapeDoc(value: 10)
+        #expect(throws: CatalogError.unavailable(id: "value.bump", why: "The value is full.")) { try catalog.run("value.bump", params: spec.example, on: &full) }
+        #expect(catalog.runBatch([step, step], on: &doc, atomic: true).stoppedAt == nil && doc.value == 3)
         #expect(catalog.runBatch([], on: &doc, atomic: false) == BatchReport(steps: [], stoppedAt: nil, rolledBack: false))
         _ = (CommandOutcome(result: .null, undoStep: nil), BatchReport.Step(id: "a", ok: true, undoStep: nil, error: nil), CommandKind.query)
         _ = [CatalogError.unknownCommand("x"), .malformedParams(id: "x", [SchemaIssue(path: "/x", message: "expected number")]),
