@@ -5,8 +5,10 @@
 // Paste names them), `library-develop-mixed` (IMG_0001 … IMG_0003 with only
 // the first's Exposure set: Exposure reads "Mixed", and Sync reads "Sync from
 // IMG_0001"), `library-develop-error` (the loupe's render failed: the line
-// under the histogram) and `library-develop-empty` (nothing selected: the
-// EmptyStateView). macOS only.
+// under the histogram), `library-develop-empty` (nothing selected: the
+// EmptyStateView) and `library-develop-curve` (DV-10: IMG_0001 with a
+// three-point curve and Midtones 1.20, so CURVE and LEVELS show their
+// resets). macOS only.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -101,11 +103,38 @@ import Testing
         try draw(catalog, "library-develop-empty")
     }
 
+    @Test func curveAndLevels() throws {
+        var catalog = try shoot(selecting: 1)
+        let points = [DevelopCurvePoint(x: 0, y: 0), DevelopCurvePoint(x: 0.5, y: 0.65), DevelopCurvePoint(x: 1, y: 1)]
+        catalog.setCurve(points, coalesceKey: nil)
+        catalog.setLevels(.gamma, to: 1.2, coalesceKey: nil)
+        let curve = try #require(catalog.developCurve?.shared)
+        #expect(curve.points.count == 3)
+        #expect(!curve.isIdentity)
+        #expect(curve.samples().count == 256)
+        let levels = try #require(catalog.developLevels?.shared)
+        #expect(levels.value(.gamma) == 1.2)
+        #expect(levels.value(.inWhite) == 1)
+        #expect(catalog.developValue(.exposure) == .value(0))
+        try draw(catalog, "library-develop-curve")
+    }
+
+    @Test func levelsRows() {
+        #expect(DevelopInspector.levelsScale(.inBlack) == 255)
+        #expect(DevelopInspector.levelsScale(.gamma) == 1)
+        #expect(DevelopInspector.levelsRange(.outWhite) == 0...255)
+        #expect(DevelopInspector.levelsRange(.gamma) == DevelopLevels.gammaRange)
+    }
+
     @Test func identifiers() {
         #expect(DevelopInspector.rowID(.exposure) == "library.develop.exposure")
         #expect(DevelopInspector.rowID(.saturation) == "library.develop.saturation")
         #expect(DevelopInspector.histogramID == "library.develop.histogram")
         #expect(DevelopInspector.errorID == "library.develop.error")
+        #expect(DevelopInspector.curveID == "library.develop.curve")
+        #expect(DevelopInspector.levelsID(.inBlack) == "library.develop.levels.blackpoint")
+        #expect(DevelopInspector.levelsID(.gamma) == "library.develop.levels.midtones")
+        #expect(DevelopInspector.levelsID(.outWhite) == "library.develop.levels.outputwhite")
     }
 
     /// The tab at the inspector's ideal width on the panel, as LibraryInspectorSnapshots draws it.

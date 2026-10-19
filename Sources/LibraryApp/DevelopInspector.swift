@@ -7,6 +7,10 @@
 // the render error under it (`library.develop.error`), the TONE and COLOR
 // sections with one bar row per slider ("Mixed" while the targets differ, a
 // Reset context menu per row, the section reset while any row is off 0),
+// CURVE (SuiteUI's ToneCurveEditor over the targets' curve, its engine
+// samples and the loupe histogram, `library.develop.curve`) and LEVELS (a
+// row per field, 0...255 whole numbers, Midtones 0.10...9.99 with two places,
+// `library.develop.levels.<field>`), each with its reset while off neutral (DV-10),
 // Show Original (`\`), Sync from the first selected photo, and Paste
 // Settings with the copied settings named under it. Each row and action
 // carries its `library.develop.*` identifier and is off, saying why, while
@@ -39,6 +43,10 @@ struct DevelopInspector: View {
                         InspectorSection(group.rawValue, onReset: sectionReset(group)) {
                             ForEach(group.sliders, id: \.self) { row($0) }
                         }
+                    }
+                    InspectorSection("Curve", onReset: curveReset) { curve }
+                    InspectorSection("Levels", onReset: levelsReset) {
+                        ForEach(DevelopLevels.Field.allCases, id: \.self) { levelsRow($0) }
                     }
                     actions
                 }
@@ -92,6 +100,58 @@ struct DevelopInspector: View {
         .libraryControl(id: Self.rowID(slider), enabled: enabled, help: help)
     }
 
+    /// The curve's reset while the targets' curve is off the identity (or mixed) and resets can run.
+    private var curveReset: (@MainActor () -> Void)? {
+        guard let reset = develop.resetCurve, model.developCurve != .value(.identity) else { return nil }
+        return reset
+    }
+
+    /// The levels' reset while the targets' levels are off neutral (or mixed) and resets can run.
+    private var levelsReset: (@MainActor () -> Void)? {
+        guard let reset = develop.resetLevels, model.developLevels != .value(.neutral) else { return nil }
+        return reset
+    }
+
+    /// The tone curve over the targets' curve (the identity while mixed), its engine samples and the loupe histogram.
+    private var curve: some View {
+        let shown: ToneCurve = model.developCurve?.shared ?? .identity
+        let points: [CGPoint] = shown.points.map(Self.unit)
+        let samples: [CGPoint] = shown.samples().map(Self.unit)
+        let setCurve: (@MainActor ([DevelopCurvePoint]) -> Void)? = develop.setCurve
+        let endEdit: (@MainActor () -> Void)? = develop.endEdit
+        let onChange: @MainActor ([CGPoint]) -> Void = { (moved: [CGPoint]) -> Void in
+            setCurve?(moved.map { DevelopCurvePoint(x: Double($0.x), y: Double($0.y)) })
+        }
+        let onEnd: @MainActor () -> Void = { () -> Void in endEdit?() }
+        let enabled = setCurve != nil
+        let entry = ControlEntry(id: Self.curveID, enabled: enabled, reason: enabled ? nil : Self.unavailable)
+        return ToneCurveEditor(
+            points: points, samples: samples, histogram: model.curveHistogram, id: Self.curveID,
+            onChange: onChange, onEnd: onEnd)
+            .disabled(!enabled)
+            .help(enabled ? "" : Self.unavailable)
+            .transformPreference(LibraryControlsKey.self) { $0.append(entry) }
+    }
+
+    /// One LEVELS row: the field as 0...255 whole numbers, Midtones as 0.10...9.99 with two places.
+    private func levelsRow(_ field: DevelopLevels.Field) -> some View {
+        let levels: MetadataValue<DevelopLevels>? = model.developLevels
+        let scale: Double = Self.levelsScale(field)
+        let value: Double = (levels?.shared ?? .neutral).value(field) * scale
+        let setLevels: (@MainActor (DevelopLevels.Field, Double) -> Void)? = develop.setLevels
+        let endEdit: (@MainActor () -> Void)? = develop.endEdit
+        let onChange: @MainActor (Double) -> Void = { (shown: Double) -> Void in setLevels?(field, shown / scale) }
+        let onEnd: @MainActor () -> Void = { () -> Void in endEdit?() }
+        let enabled = setLevels != nil
+        let isGamma = field == .gamma
+        return InspectorSliderRow(
+            field.rawValue, value: value, in: Self.levelsRange(field), step: isGamma ? 0.01 : 1,
+            decimals: isGamma ? 2 : 0, mixed: levels == .mixed, onChange: onChange, onEnd: onEnd)
+            .disabled(!enabled)
+            .help(enabled ? "" : Self.unavailable)
+            .libraryControl(id: Self.levelsID(field), enabled: enabled, help: Self.unavailable)
+    }
+
     /// Show Original, Sync and Paste Settings, with the copied settings named under Paste.
     @ViewBuilder private var actions: some View {
         let original = ToolbarAction(
@@ -121,6 +181,18 @@ struct DevelopInspector: View {
     nonisolated static let unavailable = "Open a photo or select photos in the grid to develop them."
     nonisolated static let histogramID = "library.develop.histogram"
     nonisolated static let errorID = "library.develop.error"
+    nonisolated static let curveID = "library.develop.curve"
+    /// `library.develop.levels.blackpoint`, `….midtones`, … `….outputwhite`.
+    nonisolated static func levelsID(_ field: DevelopLevels.Field) -> String {
+        "library.develop.levels." + String(field.rawValue.lowercased().filter { $0 != " " })
+    }
+    /// What a LEVELS row shows per stored unit: 255 for the points (sRGB 0...1 as 0...255), 1 for Midtones.
+    nonisolated static func levelsScale(_ field: DevelopLevels.Field) -> Double { field == .gamma ? 1 : 255 }
+    /// The row's range in shown units.
+    nonisolated static func levelsRange(_ field: DevelopLevels.Field) -> ClosedRange<Double> {
+        field == .gamma ? DevelopLevels.gammaRange : 0...255
+    }
+    nonisolated static func unit(_ point: DevelopCurvePoint) -> CGPoint { CGPoint(x: point.x, y: point.y) }
     /// `library.develop.exposure`, … `library.develop.saturation`.
     nonisolated static func rowID(_ slider: DevelopSlider) -> String {
         "library.develop.\(slider.rawValue.lowercased())"
