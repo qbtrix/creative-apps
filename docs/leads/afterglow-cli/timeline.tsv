@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-19T07:19:44Z	heartbeat	check	#3154	needs-rebase dropped, in lane on a53cfee
 2026-10-19T07:44Z	CL-z	dispatch	CL-10	stacked on CL-7, PR held
 2026-10-19T08:05Z	heartbeat	wait	#3154	macOS build queued since 07:05Z
+2026-10-19T08:06Z	CL-z	built-held	CL-10	d69d134, PR after #3154

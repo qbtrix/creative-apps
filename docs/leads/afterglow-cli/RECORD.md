@@ -101,3 +101,10 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ## 08:05Z heartbeat
 - #3154 still open, clean; its lane macOS build has been queued since 07:05Z (no macOS runner). For the supervisor: our slices are blocked only on macOS runner capacity, not on code.
+
+## CL-10 built (held)
+- Branch lead/afterglow-cli-CL-10 head d69d13442a1b638a4776f84bd95623216f8b792a, 8 files +174/-17 vs CL-7. ci --changed PASS; mutate AfterGlowCLI.main 3/3, AfterGlowCLICore.LiveIO 7/7.
+- main.swift -> CLI.run(args, io: LiveIO()); CLIBinaryTests (LJ4, spawned binary; --version 13-19 ms vs 150 ms); four waits-on-CC-7 CLIArgsTests on.
+- LJ4 found a real bug: LiveIO.write did not create missing parent folders (batch output dir -> 74 on real disk). Fixed (createDirectory withIntermediateDirectories) + liveWriteMakesFolders test + mutation.
+- @Suite failed to compile in this target; tests use per-test .enabled(if:) traits.
+- PR held until #3154 merges; then merge dev in, rerun ci, open PR (title "feat(suite): afterglow binary runs on the real disk (CL-10)", Slice: CL-z).
