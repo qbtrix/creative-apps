@@ -166,3 +166,6 @@ Wave independence: wave 1 CL-1 alone. Wave 2 CL-2 alone (waits on CL-1 for the t
 
 ## 2026-10-19T11:01Z: heartbeat
 - #3209 and #3211 are still waiting on their macOS builds. CL-11 is held.
+
+### 11:24Z: heartbeat
+- #3209 CL-9 and #3211 CL-10 are clean and waiting for their macOS builds (the queue is backed up). CL-11 3a291b2 is held until both merge.
