@@ -48,3 +48,4 @@ Next: #3011 (AB-p1) waits on the lane's macOS build; then AB-p2 (feature-done): 
 - 2026-10-19T01:56Z waiting: need a green suiteui/full run containing 84a19ec5 (AB-photo); suiteui 39187049656 / CI 39186699154 at ed0fed9e queued
 - 2026-10-19T02:16Z waiting: scoped suiteui 39187049656 at ed0fed9e in progress (contains AB-photo)
 - 2026-10-19T02:35Z waiting: scoped suiteui 39187049656 at ed0fed9e still in progress (contains AB-photo); full CI 39188162085 pending
+- 2026-10-19T02:55Z waiting: scoped suiteui 39187049656 at ed0fed9e still in progress (contains AB-photo); full CI 39188162085 pending
