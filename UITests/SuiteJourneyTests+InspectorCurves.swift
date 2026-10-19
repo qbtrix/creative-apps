@@ -212,7 +212,8 @@ extension SuiteJourneyTests {
         XCTAssertEqual(x.maxX, cap.maxX, accuracy: 0.5, "\(width) pt: the X and Cap values end apart")
         let root = gallery.element("suite.gallery.inspector")
         for (label, value) in [("X", x), ("Cap", cap)] {
-            let text = root.staticTexts.matching(NSPredicate(format: "label == %@", label)).firstMatch
+            // A macOS static text may carry its string as its value, not its label.
+            let text = root.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", label, label)).firstMatch
             XCTAssert(text.waitForExistence(timeout: 5), "\(width) pt: no \(label) label")
             for (what, frame) in [("label", text.frame), ("value", value)] {
                 XCTAssert(

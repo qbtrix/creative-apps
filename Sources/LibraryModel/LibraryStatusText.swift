@@ -6,8 +6,16 @@
 // data" pill is last and carries `previewDataHelp`, so a consumer that draws
 // it through ViewerStatusBar's `preview:` takes `row.preview` and the rest
 // from `row.trailing`. Reads `order`, never a sorted copy, so a frame never
-// sorts. `inspectorHeader` names the collection or the selection; the facts
-// for a selection come with SL-5. Linux-safe.
+// sorts. `inspectorHeader` names the collection or the selection with its
+// facts (SL-5): one photo's Captured, Size and Kind, or several photos'
+// capture span. Dates are written by hand (days-from-civil, proleptic
+// Gregorian, no Calendar or formatted()) so Linux and macOS agree. Linux-safe.
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// One pill in the status row; `id` names it in `library.status.<id>`.
 public struct LibraryStatusPill: Hashable, Sendable, Identifiable {
@@ -86,14 +94,87 @@ extension LibraryCatalog {
 
     /// The inspector's header. `utcOffset` is the local offset in seconds
     /// (the view passes TimeZone.current's); tests pass 0. Nothing selected:
-    /// the collection's name and "Photos N"; a selection: its title.
+    /// the collection's name and "Photos N"; one photo: its name, Captured,
+    /// Size and Kind; several: "N Photos" and the capture span.
     public func inspectorHeader(utcOffset: Int) -> LibraryInspectorHeader {
         let photos = items.filter { selection.contains($0.id) }
-        guard let metadata = PhotoMetadata(photos) else {
+        guard let metadata = PhotoMetadata(photos), let first = photos.first else {
             let name = selectedCollection?.name ?? userCollections.first { $0.id == selectedCollectionID }?.name ?? ""
             return LibraryInspectorHeader(title: name, facts: [.init(label: "Photos", value: "\(order.count)")])
         }
-        return LibraryInspectorHeader(title: metadata.title, facts: [])
+        if photos.count == 1 {
+            return LibraryInspectorHeader(title: metadata.title, facts: [
+                .init(label: "Captured", value: Self.dateText(first.captureDate, utcOffset: utcOffset)),
+                .init(label: "Size", value: "\(first.pixelSize.width) × \(first.pixelSize.height)"),
+                .init(label: "Kind", value: Self.kind(first.path)),
+            ])
+        }
+        let dates = photos.map(\.captureDate)
+        let (low, high) = (dates.min() ?? first.captureDate, dates.max() ?? first.captureDate)
+        let earliest = Self.dayText(low, utcOffset: utcOffset), latest = Self.dayText(high, utcOffset: utcOffset)
+        let span = earliest == latest ? earliest : "\(earliest) – \(latest)"
+        return LibraryInspectorHeader(title: metadata.title, facts: [.init(label: "Captured", value: span)])
+    }
+
+    /// "YYYY-MM-DD HH:MM" at `utcOffset` seconds from UTC; "" for a date
+    /// too far out to write.
+    static func dateText(_ date: Date, utcOffset: Int) -> String {
+        guard let (day, minutes) = civilTime(date, utcOffset: utcOffset) else { return "" }
+        return day + " " + LibraryFixtures.padded(minutes / 60, to: 2) + ":" + LibraryFixtures.padded(minutes % 60, to: 2)
+    }
+
+    /// "YYYY-MM-DD" at `utcOffset` seconds from UTC.
+    static func dayText(_ date: Date, utcOffset: Int) -> String {
+        civilTime(date, utcOffset: utcOffset)?.day ?? ""
+    }
+
+    /// The local day as "YYYY-MM-DD" and the minutes into it; nil past
+    /// ±10^14 seconds or for a non-finite date.
+    private static func civilTime(_ date: Date, utcOffset: Int) -> (day: String, minutes: Int)? {
+        let seconds = date.timeIntervalSince1970.rounded(.down)
+        guard seconds.isFinite, abs(seconds) < 1e14, abs(utcOffset) < 1_000_000 else { return nil }
+        let local = Int(seconds) + utcOffset
+        let days = floorDiv(local, 86_400)
+        let (year, month, day) = civil(fromDays: days)
+        let text = (year < 0 ? "-" : "") + LibraryFixtures.padded(abs(year), to: 4) + "-"
+            + LibraryFixtures.padded(month, to: 2) + "-" + LibraryFixtures.padded(day, to: 2)
+        return (text, (local - days * 86_400) / 60)
+    }
+
+    /// Division rounding toward negative infinity; `divisor` is positive.
+    private static func floorDiv(_ value: Int, _ divisor: Int) -> Int {
+        let quotient = value / divisor
+        return value % divisor < 0 ? quotient - 1 : quotient
+    }
+
+    /// The proleptic Gregorian date `days` after 1970-01-01 (the inverse of
+    /// days-from-civil, eras of 400 years from 0000-03-01).
+    private static func civil(fromDays days: Int) -> (year: Int, month: Int, day: Int) {
+        let shifted = days + 719_468
+        let era = floorDiv(shifted, 146_097)
+        let dayOfEra = shifted - era * 146_097
+        let yearOfEra = (dayOfEra - dayOfEra / 1_460 + dayOfEra / 36_524 - dayOfEra / 146_096) / 365
+        let dayOfYear = dayOfEra - (365 * yearOfEra + yearOfEra / 4 - yearOfEra / 100)
+        let mp = (5 * dayOfYear + 2) / 153
+        let day = dayOfYear - (153 * mp + 2) / 5 + 1
+        let month = mp < 10 ? mp + 3 : mp - 9
+        return (yearOfEra + era * 400 + (month <= 2 ? 1 : 0), month, day)
+    }
+
+    /// The Kind fact: "Sample" for a generated photo, JPEG, PNG or HEIC for
+    /// the kinds Library imports, any other extension uppercased, else "File".
+    static func kind(_ path: String?) -> String {
+        guard let path else { return "Sample" }
+        let name = path.split(separator: "/").last.map(String.init) ?? path
+        switch PhotoFileKind.kind(forFileName: name) {
+        case .jpeg: return "JPEG"
+        case .png: return "PNG"
+        case .heic: return "HEIC"
+        case nil:
+            guard let dot = name.lastIndex(of: "."), dot != name.startIndex else { return "File" }
+            let ext = name[name.index(after: dot)...]
+            return ext.isEmpty ? "File" : ext.uppercased()
+        }
     }
 
     /// The zoom ViewerStatusBar shows: 100% for `.actual`, a finite positive

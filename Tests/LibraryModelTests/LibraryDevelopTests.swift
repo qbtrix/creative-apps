@@ -1,8 +1,8 @@
-// LibraryDevelopTests.swift: develop DV-2 writes every check of the Develop
-// tab's edits against LibraryDevelop.swift's signatures, each disabled until
-// the task that fills it: DV-3 the slider, curve and levels edits, the drag's
-// end, the resets and the helps; DV-4 copy, paste, sync, the histogram
-// helpers and MJ2, the develop edits walk. Runs on Linux and macOS.
+// LibraryDevelopTests.swift: develop DV-2 wrote every check of the Develop
+// tab's edits against LibraryDevelop.swift's signatures; DV-3 enabled the
+// slider, curve and levels edits, the drag's end, the resets and the helps;
+// DV-4 copy, paste, sync, the histogram helpers and MJ2, the develop edits
+// walk. Runs on Linux and macOS.
 import CoreColor
 import CoreRaster
 import Foundation
@@ -45,7 +45,7 @@ private func showHistogram(_ catalog: inout LibraryCatalog, _ histogram: Histogr
 }
 
 struct LibraryDevelopTests {
-    @Test(.disabled("waits on DV-3")) func setDevelopActsOnTheLoupePhotoElseTheSelection() {
+    @Test func setDevelopActsOnTheLoupePhotoElseTheSelection() {
         var catalog = shoot()
         catalog.select([shot(3), shot(4)])
         catalog.setDevelop(.exposure, to: 1, coalesceKey: nil)
@@ -56,7 +56,7 @@ struct LibraryDevelopTests {
         #expect(catalog.developTargets == [shot(5)])
     }
 
-    @Test(.disabled("waits on DV-3")) func aDragIsOneStepAndDropsThumbnailsOnRelease() throws {
+    @Test func aDragIsOneStepAndDropsThumbnailsOnRelease() throws {
         var catalog = shoot()
         catalog.select([shot(1)])
         try holdThumbnails(&catalog, [shot(1)])
@@ -74,7 +74,7 @@ struct LibraryDevelopTests {
         #expect(develop(catalog, 1)?.exposure == 0)
     }
 
-    @Test(.disabled("waits on DV-3")) func resetsTouchTheirFieldsAndKeepTheCrop() throws {
+    @Test func resetsTouchTheirFieldsAndKeepTheCrop() throws {
         var catalog = shoot()
         catalog.select([shot(2)])
         let curve = try #require(ToneCurve(points: [point(0, 0), point(0.5, 0.7), point(1, 1)]))
@@ -94,7 +94,7 @@ struct LibraryDevelopTests {
         #expect(develop(catalog, 2)?.isAdjustmentNeutral == true && develop(catalog, 2)?.crop == cropped)
     }
 
-    @Test(.disabled("waits on DV-3")) func curveAndLevelsEditsAndResets() throws {
+    @Test func curveAndLevelsEditsAndResets() throws {
         var catalog = shoot()
         catalog.select([shot(1)])
         let steps = catalog.history.undo.count
@@ -113,14 +113,14 @@ struct LibraryDevelopTests {
         #expect(catalog.undoTitle == "Undo Reset Levels" && develop(catalog, 1)?.levels == .neutral)
     }
 
-    @Test(.disabled("waits on DV-3")) func helpsAndMixedValues() {
+    @Test func helpsAndMixedValues() {
         var catalog = shoot()
         #expect(catalog.developTargets.isEmpty)
         #expect(catalog.developHelp == "Select a photo to develop it.")
         let steps = catalog.history.undo.count
         catalog.setDevelop(.exposure, to: 1, coalesceKey: nil)
         #expect(catalog.history.undo.count == steps && catalog.developValue(.exposure) == nil)
-        // The fakes render every slider; DV-3 adds the live case once DV-6 gives LiveDevelop.waiting.
+        // The fakes render every slider.
         #expect(catalog.sliderHelp(.vibrance) == nil)
         catalog.select([shot(3)])
         catalog.setDevelop(.exposure, to: 1, coalesceKey: nil)
@@ -129,9 +129,43 @@ struct LibraryDevelopTests {
         #expect(catalog.developValue(.exposure) == .mixed)
         #expect(catalog.developValue(.contrast) == .value(0))
         #expect(catalog.developLevels == .value(.neutral))
+        #expect(catalog.developCurve == .value(.identity))
     }
 
-    @Test(.disabled("waits on DV-4")) func pasteIsOneStepKeepingEachCrop() {
+    @Test func liveSliderHelpIsTheRenderersWaitingReason() {
+        let live = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore())
+        var catalog = LibraryCatalog(services: live)
+        catalog.load(LibraryFixtures.photos(named: "shoot"))
+        catalog.select([shot(1)])
+        #expect(catalog.sliderHelp(.vibrance) == LiveDevelop.waiting[.vibrance])
+        #expect(catalog.sliderHelp(.exposure) == LiveDevelop.waiting[.exposure])
+        let steps = catalog.history.undo.count
+        catalog.setDevelop(.vibrance, to: 20, coalesceKey: nil)
+        // Refused while the renderer waits on it (DV-12 empties `waiting`).
+        let refused = LiveDevelop.waiting[.vibrance] != nil
+        #expect(catalog.history.undo.count == (refused ? steps : steps + 1))
+        #expect(develop(catalog, 1)?.vibrance == (refused ? 0 : 20))
+    }
+
+    @Test func aResetEndsAnOpenDragAndNamesNothingWhenNeutral() throws {
+        var catalog = shoot()
+        catalog.select([shot(1), shot(3)])
+        try holdThumbnails(&catalog, [shot(1), shot(3)])
+        let steps = catalog.history.undo.count
+        #expect(catalog.resetDevelop(nil as DevelopGroup?).isEmpty && catalog.history.undo.count == steps)
+        catalog.setDevelop(.exposure, to: 1, coalesceKey: "develop-exposure")
+        #expect(catalog.thumbnails[shot(3)] != nil)
+        #expect(catalog.resetDevelop(.exposure) == [shot(1), shot(3)])
+        #expect(catalog.history.undo.count == steps + 2 && catalog.thumbnails[shot(3)] == nil)
+        catalog.setDevelop(.exposure, to: 2, coalesceKey: "develop-exposure")
+        #expect(catalog.history.undo.count == steps + 3)
+        catalog.endDevelopDrag()
+        try holdThumbnails(&catalog, [shot(1), shot(3)])
+        catalog.resetDevelop(.tone)
+        #expect(catalog.thumbnails[shot(1)] == nil && catalog.thumbnails[shot(3)] == nil)
+    }
+
+    @Test func pasteIsOneStepKeepingEachCrop() {
         var catalog = shoot()
         #expect(!catalog.canPasteSettings)
         catalog.open(shot(1))
@@ -149,7 +183,7 @@ struct LibraryDevelopTests {
         #expect((2...4).allSatisfy { develop(catalog, $0)?.exposure == 0 })
     }
 
-    @Test(.disabled("waits on DV-4")) func copyNeedsOnePhotoAndSummarises() throws {
+    @Test func copyNeedsOnePhotoAndSummarises() throws {
         var catalog = shoot()
         catalog.select([shot(1), shot(2)])
         catalog.copySettings()
@@ -162,7 +196,7 @@ struct LibraryDevelopTests {
         #expect(catalog.copiedSummary == "Exposure +1.00, Contrast 13, Curve")
     }
 
-    @Test(.disabled("waits on DV-4")) func syncTakesTheFirstSelectedInTheOrder() {
+    @Test func syncTakesTheFirstSelectedInTheOrder() {
         var catalog = shoot()
         catalog.select([shot(4)])
         #expect(catalog.syncSource == nil)
@@ -178,9 +212,26 @@ struct LibraryDevelopTests {
         #expect(catalog.syncSettings() == [shot(4)])
         #expect(catalog.history.undo.count == steps + 1 && catalog.undoTitle == "Undo Sync Settings")
         #expect(develop(catalog, 4)?.shadows == 30 && develop(catalog, 2)?.crop == cropped)
+        #expect(develop(catalog, 2)?.shadows == 30 && develop(catalog, 4)?.crop == nil)
+        catalog.select([shot(2), shot(4), shot(5)])
+        #expect(catalog.syncSettings() == [shot(5)])  // IMG_0004 already matches
     }
 
-    @Test(.disabled("waits on DV-4")) func histogramHelpers() throws {
+    @Test func copyIsNoStepAndPasteNeedsATarget() {
+        var catalog = shoot()
+        catalog.select([shot(3)])
+        catalog.setDevelop(.tint, to: -7, coalesceKey: nil)
+        let steps = catalog.history.undo.count
+        catalog.copySettings()
+        #expect(catalog.history.undo.count == steps && catalog.copiedSummary == "Tint -7")
+        catalog.select([])
+        #expect(!catalog.canPasteSettings && catalog.pasteSettings().isEmpty)
+        catalog.select([shot(1)])
+        catalog.copySettings()
+        #expect(catalog.copiedSummary == "No adjustments")
+    }
+
+    @Test func histogramHelpers() throws {
         var catalog = shoot()
         catalog.open(shot(1))
         var red = [Int](repeating: 0, count: HistogramBins.binCount), green = red, blue = red
@@ -193,7 +244,7 @@ struct LibraryDevelopTests {
         #expect(catalog.developError == nil)
     }
 
-    @Test(.disabled("waits on DV-4")) func testDevelopEditsWalk() throws {
+    @Test func testDevelopEditsWalk() throws {
         var catalog = shoot()
         catalog.open(shot(1))
         try holdThumbnails(&catalog, [shot(1)])

@@ -1,6 +1,6 @@
 // LibraryJourneyTests+Layout.swift: J12, Library at every window width
 // (packet docs/blueprints/library/features/status-and-layout.md, Journey
-// steps 1 to 5 and 7; SL-6 adds step 6). On `-LibraryFixture shoot` it
+// steps 1 to 7). On `-LibraryFixture shoot` it
 // launches at 880 × 560 (SuiteSize.windowMinimum), 1024 × 768, 1280 × 800,
 // 1440 × 900 and 1920 × 1080 with `-SuiteWindowSize <w>x<h>`, as Halo's
 // testLayoutAtWidths does, and checks only what lies on the runner's display.
@@ -10,10 +10,12 @@
 // in rows and columns with equal gaps; Sort By Name, then a click and a
 // Shift-click select five; the inspector's Rating, Flag and Label rows line
 // up; the loupe shows "Fit" and "1 of 24" with the photo centered, and
-// Command-1 swaps the Fit pill for "Zoom 100%"; every control listed in
+// Command-1 swaps the Fit pill for "Zoom 100%"; the inspector's one header
+// (`library.inspector.header`) reads "5 Photos" with "Captured" for five
+// photos, and "IMG_0001" with "6000 × 4000" and "JPEG" for one; every control listed in
 // `library.controls` lies inside the window. After the loop the grid has
 // fewer columns at 880 than at 1024. Written before its code (lead.md,
-// contract rule 13): SL-4 draws the status row and drops the skip below.
+// contract rule 13); SL-4 draws the status row and runs it.
 // Every shot is audited under `library`. A plain Text reads its words as its
 // value and a label as its label, so text is read from either.
 import AppKit
@@ -28,11 +30,10 @@ final class LibraryLayoutJourneyTests: XCTestCase {
 
     /// J12: the status row, grid, inspector and loupe line up at every width.
     @MainActor func testLayoutAtWidths() throws {
-        throw XCTSkip("waits on SL-4")
         try walkLayout()
     }
 
-    /// The journey itself, which SL-4 runs once it drops the skip above.
+    /// The journey itself.
     @MainActor private func walkLayout() throws {
         let screen = NSScreen.screens.first?.frame.size ?? .zero
         var columns: [Int: Int] = [:]
@@ -90,6 +91,15 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             // 5. The loupe: "Fit", "1 of 24", the photo centered; Command-1 shows "Zoom 100%"; Escape.
             expectLoupe(library, width: width)
 
+            // 6. Five selected again, then IMG_0001 alone: the inspector's one header reads the selection's facts.
+            if inspector.exists, inspector.frame.maxX <= screen.width {
+                library.element(shown[0].id).click()
+                XCUIElement.perform(withKeyModifiers: .shift) { library.element(shown[4].id).click() }
+                expectHeader(library, title: "5 Photos", facts: ["Captured"], width: width)
+                library.element(shown[0].id).click()
+                expectHeader(library, title: "IMG_0001", facts: ["6000 × 4000", "JPEG"], width: width)
+            }
+
             // 7. Every control library.controls lists lies inside the window.
             let listed = Self.decode(library.element("library.controls"))?.controls ?? []
             XCTAssertFalse(listed.isEmpty, "no library.controls JSON at \(width)")
@@ -140,6 +150,20 @@ final class LibraryLayoutJourneyTests: XCTestCase {
             dots.map(\.frame.maxX).max() ?? 0,
         ]
         XCTAssertLessThanOrEqual((rights.max() ?? 0) - (rights.min() ?? 0), Self.tight, "the metadata controls' right edges at \(width): \(rights)")
+    }
+
+    /// Exactly one `library.inspector.header`, reading `title` and holding each of `facts`.
+    @MainActor private func expectHeader(_ library: Journey, title: String, facts: [String], width: Int) {
+        let headers = library.app.descendants(matching: .any).matching(identifier: "library.inspector.header")
+        let header = headers.firstMatch
+        XCTAssert(header.waitForExistence(timeout: 5), "no library.inspector.header at \(width)")
+        XCTAssertEqual(headers.count, 1, "the inspector shows \(headers.count) headers at \(width)")
+        XCTAssert(wait(5) { Self.text(of: header).contains(title) },
+                  "library.inspector.header reads \(Self.text(of: header)), not \(title), at \(width)")
+        let text = Self.text(of: header)
+        for fact in facts {
+            XCTAssert(text.contains(fact), "library.inspector.header lacks \(fact) at \(width): \(text)")
+        }
     }
 
     /// Double-click IMG_0001: "Fit" and "1 of 24", the photo centered in the

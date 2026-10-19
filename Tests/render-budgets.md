@@ -64,22 +64,32 @@ presenter's), which is what the app draws on. It times the first picture of a
 just-opened document, a full redraw (an adjustment) and a brush frame (one
 64 px brush segment, its damaged tiles). These are records, not budgets; the
 large-image gate (beta-80 row G1) sets those. M2 Pro, optimized
-(`swift build -c release -Xswiftc -enable-testing -Xswiftc -DDEBUG`), median
-of 3 full pictures and 10 brush frames:
+(`swift build -c release -Xswiftc -enable-testing -Xswiftc -DDEBUG`), the
+median of three runs, each the median of 3 full pictures and 10 brush frames
+(max: the worst brush frame over the three runs), 2026-10-19 on a loaded Mac
+(another Photo running):
 
 | Route | First picture | Full redraw | Brush frame (2 tiles) |
 |---|---|---|---|
-| CPU (CoreRender's CPU backend, tiles in parallel) | 60 ms | 58 ms | 1.0 ms (max 1.1) |
-| GPU, uploads and readback every frame (before) | 234 ms | 242 ms | 3.6 ms (max 8.6) |
-| GPU, resident tiles into the presenter's texture | 192 ms | 35 ms | 1.7 ms (max 2.3) |
+| CPU (CoreRender's CPU backend, tiles in parallel) | 74 ms | 74 ms | 1.0 ms (max 1.5) |
+| GPU, uploads and readback every frame (before) | 281 ms | 276 ms | 3.3 ms (max 8.7) |
+| GPU, resident tiles into the presenter's texture | 166 ms | 31 ms | 1.4 ms (max 3.2) |
 
-On 2026-10-18, before creative-core #553/#554/#559, the GPU row was 325 ms and
-4.6 ms. The resident route uploads each of the 1053 non-clear layer tiles
-once (the first picture) and then only the tiles a stroke wrote (14 over the
-10 brush frames). A full redraw uploads nothing, and no frame reads pixels
-back. Its brush frame is still two GPU round trips (the batched composite,
-then the display into the texture), each waited for. The CPU's 1.0 ms has no
-round trip at all. A debug build is 20x to 400x slower, so read these rows.
+Before creative-core #620 the resident row was 192 ms, 35 ms and 1.7 ms (max
+2.3); on 2026-10-18, before #553/#554/#559, the GPU row was 325 ms and 4.6 ms.
+The resident route uploads each of the 1053 non-clear layer tiles once (the
+first picture) and then only the tiles a stroke wrote (14 over the 10 brush
+frames). A full redraw uploads nothing, and no frame reads pixels back.
+
+Where a resident brush frame goes now: the batched composite is committed
+with no wait (about 0.05 ms); a changed 256 px tile uploads in about 0.2 ms
+(the dirty check is storage identity and the Float16 conversion vectorizes),
+the region's tiles across the cores; a blank backdrop is about 0.1 ms per
+tile. The rest is the display into the texture, which waits for the GPU
+(about 0.55 ms) because the canvas presenter draws that texture from its own
+queue. That wait is what keeps the GPU 0.3 to 0.4 ms behind the CPU, whose
+1.0 ms has no round trip at all. A debug build is 20x to 400x slower, so
+read these rows.
 
 ## Photo at 8K: pan and slider by zoom
 

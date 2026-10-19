@@ -4,8 +4,8 @@
 // Y", "100.0 px"), where ticks on a fixed lane landed inside the letters.
 // Renders the real InspectorSliderRow and counts tick blobs along its middle,
 // inside the gap measured from the label's and the value's own widths: all
-// five, or none when the gap is too narrow to space them; the marker's
-// columns are told apart by its ink above the ticks. Every marker column lies
+// five, or none when the gap is too narrow to space them, on a mixed row so
+// the marker and the fill add no ink of their own. Every marker column lies
 // inside that gap, at a low, a middle and a high value (#2963). While typing,
 // a 140 pt Rotation row keeps its whole label (#2952). macOS only.
 import AppKit
@@ -27,14 +27,17 @@ import Testing
     @Test(arguments: cases.indices)
     func ticksSitBetweenLabelAndValue(index: Int) throws {
         let (label, value, unit, decimals, width, wide) = Self.cases[index]
-        // 3/8 along the track: the marker sits between the second and third ticks.
-        let row = InspectorSliderRow(label, value: value, in: (value - 375)...(value + 625), unit: unit, decimals: decimals) { _ in }
+        // Mixed: the ticks alone. On a narrow lane a marker between two ticks
+        // touches both, so counting around it merged them (3 at 156 pt).
+        let row = InspectorSliderRow(label, value: value, in: value...(value + 1000), unit: unit, decimals: decimals, mixed: true) { _ in }
         let image = try Self.render(row, width: width)
-        let blobs = Self.blobs(in: image, across: Self.gap(label, value, unit, decimals, width))
+        let gap = Self.gap(label, "Mixed", width)
+        let blobs = Self.blobs(in: image, across: gap)
+        let seen = "\(blobs.count) ticks at \(blobs) in \(gap)"
         if wide {
-            #expect(blobs == 5, "\(label) at \(width) pt: \(blobs) ticks, want 5")
+            #expect(blobs.count == 5, "\(label) at \(width) pt: \(seen), want 5")
         } else {
-            #expect(blobs == 0 || blobs == 5, "\(label) at \(width) pt: \(blobs) ticks, want 0 or 5")
+            #expect(blobs.count == 0 || blobs.count == 5, "\(label) at \(width) pt: \(seen), want 0 or 5")
         }
     }
 
@@ -46,7 +49,7 @@ import Testing
         for range in [value...(value + 10), (value - 5)...(value + 5), (value - 10)...value] {
             let row = InspectorSliderRow(label, value: value, in: range, unit: unit, decimals: decimals) { _ in }
             let image = try Self.render(row, width: 216)
-            let gap = Self.gap(label, value, unit, decimals, 216)
+            let gap = Self.gap(label, NumericInput.text(value, decimals: decimals, unit: unit), 216)
             let marks = Self.markerColumns(in: image)
             #expect(!marks.isEmpty, "\(label) over \(range): no marker")
             let scale = SnapshotHost.scale
@@ -82,9 +85,9 @@ import Testing
     }
 
     /// The gap between the label and the value, 2 pt clear of each text so its anti-aliased edge doesn't count.
-    private static func gap(_ label: String, _ value: Double, _ unit: String, _ decimals: Int, _ width: CGFloat) -> ClosedRange<CGFloat> {
+    private static func gap(_ label: String, _ value: String, _ width: CGFloat) -> ClosedRange<CGFloat> {
         let labelWidth = Self.width(Text(label).font(SuiteFont.inspectorLabel))
-        let valueWidth = Self.width(Text(NumericInput.text(value, decimals: decimals, unit: unit)).font(SuiteFont.inspectorValue))
+        let valueWidth = Self.width(Text(value).font(SuiteFont.inspectorValue))
         return (SuiteSpacing.m + labelWidth + 2)...(width - SuiteSpacing.m - valueWidth - 2)
     }
 
@@ -112,20 +115,27 @@ import Testing
         return (corner..<(image.width - corner)).filter { inked(image, $0, y) }
     }
 
-    /// Runs of ink along the row's middle line within `gap` (points), each
-    /// column against its own background, skipping the marker's columns.
-    private static func blobs(in image: RGBAImage, across gap: ClosedRange<CGFloat>) -> Int {
+    /// The cores of the ink runs along the row's middle line within `gap`
+    /// (points), each column against its own background, as point ranges.
+    /// A core is a run at 60% or more of the darkest column's ink, so the
+    /// faint anti-aliased edges of two close ticks don't join them into one.
+    private static func blobs(in image: RGBAImage, across gap: ClosedRange<CGFloat>) -> [ClosedRange<CGFloat>] {
         let scale = SnapshotHost.scale
         let middle = Int(SuiteSize.studioRow / 2 * scale)
         let from = Int((gap.lowerBound * scale).rounded(.up)), to = Int((gap.upperBound * scale).rounded(.down))
-        guard from < to else { return 0 }
-        let marks = Set(markerColumns(in: image))
-        var runs = 0
-        var inRun = false
-        for x in from...to where !marks.contains(x) {
-            let ink = inked(image, x, middle)
-            if ink && !inRun { runs += 1 }
-            inRun = ink
+        guard from < to else { return [] }
+        let ground = Int(SuiteSpacing.xxs * scale)
+        let ink = (from...to).map { x in zip(pixel(image, x, middle), pixel(image, x, ground)).map { abs($0 - $1) }.max() ?? 0 }
+        let core = max(21, (ink.max() ?? 0) * 6 / 10)
+        var runs: [ClosedRange<CGFloat>] = []
+        var start: Int?
+        for i in 0...ink.count {
+            let value = i < ink.count ? ink[i] : 0
+            if value >= core, start == nil { start = i }
+            if value < core, let first = start {
+                runs.append(CGFloat(from + first) / scale...CGFloat(from + i - 1) / scale)
+                start = nil
+            }
         }
         return runs
     }

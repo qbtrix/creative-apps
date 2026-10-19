@@ -19,5 +19,7 @@
     "find": "let thumbnails = cache?.thumbnails ?? self.thumbnails",
     "replace": "let thumbnails = self.thumbnails",
     "tests": "LibraryThumbnailCacheTests"
-  }
+  },
+  {"label": "the loupe renders the stored crop while cropping", "file": "Sources/LibraryModel/LibraryLoupeImage.swift", "find": "settings: cropLoupeSettings ?? photo.develop,", "replace": "settings: photo.develop,", "tests": "LibraryCropTests"},
+  {"label": "leaving the photo keeps its crop draft", "file": "Sources/LibraryModel/LibraryLoupeImage.swift", "find": "        cropDraft = nil\n        let thumbnails", "replace": "        let thumbnails", "tests": "LibraryCropTests"}
 ]
