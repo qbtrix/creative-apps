@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-19T03:54Z	4	wait-ci	39192572958	Linux green; macOS queued for a runner since 03:11Z; dev full runs hang in AfterGlowHomeSidebarTests (#2971, range 71facd44..f7e03506, before 531550f)
 2026-10-19T04:20Z	4	wait-ci	39192572958	macOS job started 04:12Z; no supervisor reply on #1507
 2026-10-19T04:48Z	4	wait-ci	39192572958	macOS scripts/ci failed at 04:23Z (no hang this time); Perf step running, later steps pending; reading the log once the job ends
+2026-10-19T05:15Z	4	wait-ci	39192572958	30 SuiteModel 60s time-limit failures (not switching; noted on #2971); ui-test running since 04:53Z

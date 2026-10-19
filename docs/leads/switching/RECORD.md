@@ -2,7 +2,7 @@
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a150baa312-n5va · Session: claude/switching-feature-lead-kyvcdx · Started: 2026-10-18 (earlier run act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 4 (SW-4a #2989 merged as 531550f; waiting on a full dev CI run that completes; 39173775025, 39176304199 and 39177282982 were each cancelled by the next dispatch before getting a runner; 39177967096 and 39178441058 were cancelled too; 39180214762 on ef6f201f hit the 90-min macOS job timeout at 03:11Z inside scripts/ci (tracked in #2971); no full run in the last 100 dev runs has completed uncancelled; now tracking 39192572958 on cc14022e (macOS job started 04:12Z; the hang is in #2971, range 71facd44..f7e03506, before 531550f). Scoped suite runs (39176573924 green on db15b8a6) skip the AfterGlow journeys)
+Stage: 4 (SW-4a #2989 merged as 531550f; waiting on a full dev CI run that completes; 39173775025, 39176304199 and 39177282982 were each cancelled by the next dispatch before getting a runner; 39177967096 and 39178441058 were cancelled too; 39180214762 on ef6f201f hit the 90-min macOS job timeout at 03:11Z inside scripts/ci (tracked in #2971); no full run in the last 100 dev runs has completed uncancelled; now tracking 39192572958 on cc14022e: Linux green; macOS scripts/ci failed 04:23Z on 30 SuiteModel Home/Onboarding tests hitting the 60 s time limit together (not switching files; reported on #2971); ui-test running since 04:53Z)
 Base: origin/dev 2567c02
 Next: green dev macOS run on or after 531550f; review round; Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
 
