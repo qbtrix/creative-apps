@@ -1,0 +1,7 @@
+# Tests/render-cpu-ops.txt: the one registry of ops the GPU canvas route can't run yet
+# (docs/render-contract.md). A GPU-route `return nil` or a dispatcher readback is allowed
+# only with `// render-contract: cpu-op <id>` on its line, <id> listed here. Each entry is
+# debt: the line names the issue that gives the op a GPU path in creative-core (with parity
+# tests), and the entry goes when that lands. Line: `<id>  <what runs on the CPU>  <issue>`.
+adjustment-layer  an adjustment layer reads the picture back and runs on CoreRaster  #3144
+hue-saturation    Hue/Saturation reads the picture back and runs on CoreRaster  #3144
