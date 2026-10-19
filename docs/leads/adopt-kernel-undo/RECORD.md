@@ -98,3 +98,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-17T10:44Z heartbeat: editor-kernel is at stage 3 wave 2, stacked on PR #1992 (EK-1, not merged: it edits Package.swift, so the supervisor merges it). EK-undo is still `planned` in its RECORD and dev 453198a has no kernel type. Still blocked.
 - 2026-10-17T06:38Z heartbeat: editor-kernel's lead (run act-1a1483c0771-g24c, `lead/editor-kernel`) started wave 1 on 2026-10-17T06:36Z: PR #1992 (EK-1, slice EK-a). EK-undo waits on EK-a, so it is at least two editor-kernel waves away; still blocked, nothing to start.
 - Blocked on #1933 editor-kernel: EK-undo (every slice).
+
+- 2026-10-19T17:44:08Z AU-design PR #3287 merged to dev as 90e7a0c; slice-done waits on ci.yml run 39296061014 (dev 1b33afbb).
