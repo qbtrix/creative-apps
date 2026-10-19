@@ -7,8 +7,8 @@
 // tooltip and accessibility hint. The loupe's place is its HUD's. A
 // `.selected` entry draws as an on toggle and a warning or error entry in
 // warning colors. With no row (an empty live catalog) it draws nothing.
-// ViewerStatusBar can't hide its zoom pill yet (#1184), so a row without a
-// zoom shows the fit scale the loupe measured, or 100% in the grid.
+// A row without a zoom (the grid) draws no zoom pill; at Fit the loupe's
+// measured fit scale is the one zoom pill.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -20,7 +20,7 @@ struct LibraryStatusBar: View {
 
     var body: some View {
         if let row = model.statusRow {
-            ViewerStatusBar(zoom: row.shownZoom(fitScale: fitScale) ?? 1, size: row.size) {
+            ViewerStatusBar(zoom: row.shownZoom(fitScale: fitScale), size: row.size) {
                 ForEach(row.pills) { pill in
                     Text(pill.text)
                         .help(pill.help)
