@@ -1,0 +1,16 @@
+[
+  {
+    "label": "availabilityMatchesHelp: Actual Size takes the Fit toolbar item's help",
+    "file": "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "find": "\"Zooms the window to 100%.\", .view, menu())",
+    "replace": "\"Zooms the window to 100%.\", .view, bar(.fit))",
+    "tests": "PhotoCommandCatalogTests"
+  },
+  {
+    "label": "editsRecordOneStep: Duplicate Layer is declared a view command",
+    "file": "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "find": "\"Duplicates the selected layer.\", .edit,",
+    "replace": "\"Duplicates the selected layer.\", .view,",
+    "tests": "PhotoCommandCatalogTests"
+  }
+]
