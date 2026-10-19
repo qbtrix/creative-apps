@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "Selects and moves the first rect of every input, names the outputs by index and checks their bytes.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.select", "params": {"id": 1}},
+    {"id": "rect.move", "params": {"dx": 5, "dy": -5}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{index}-{stem}", "format": "json", "options": {}},
+  "expect": {
+    "out/1-a.json": {"sha256": "1556bc977f00c68315f0b277605ce5e54d349530a1521d8968f352af66525ef4"},
+    "out/2-b.json": {"sha256": "50bc13e64a5f0601feca6ba962ab190eae62400470b32789bb35da3e68cf2a9b"}
+  }
+}
