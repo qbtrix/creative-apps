@@ -1,0 +1,73 @@
+utc	stage	event	ref	note
+2026-10-17T02:36Z	0	stage-start	#1527	setup; base 37d9963; all dependencies unmerged
+2026-10-17T02:36Z	0	stage-end		blocked, no task started
+2026-10-17T03:08Z	0	heartbeat		resumed; re-checked waits at dev 82ac5055: unmerged
+2026-10-17T03:39Z	0	heartbeat		nudged; re-checked waits at dev 1a8eea2a: unmerged
+2026-10-17T05:50Z	0	heartbeat		usage reset; re-checked waits at dev 0e3c08ea; needs-human comment posted
+2026-10-17T06:21Z	0	heartbeat		nudged; re-checked waits at dev fe0f5f17: unmerged
+2026-10-18T20:41Z	0	stage-start	#1527	resumed as run act-1a150baa34c-jzk9; base dev 507719b3; all DV-a waits built
+2026-10-18T20:41Z	2	stage-end	-	combined plan; wave 1 DV-1, DV-7
+2026-10-18T20:41Z	3	stage-start	-	wave 1
+2026-10-18T22:36Z	3	heartbeat	-	resumed after restart; wave 1 PRs read, macOS build failures under investigation
+2026-10-18T22:37Z	3	pr-opened	#3002	DV-1 develop values
+2026-10-18T22:37Z	3	pr-opened	#2995	DV-7 J5 skipped
+2026-10-18T22:37Z	3	ci-run	39166863109	macOS build-only red on dev PhotoZoomSweepTests (#2990 fix); branches refreshed
+2026-10-18T22:50Z	3	heartbeat	-	wave 1 refreshed onto dev: #3002 19b95286, #2995 cd9e24f6; lane macOS builds pending
+2026-10-18T23:00Z	3	heartbeat	-	lane macOS builds queued: #3002 39173937796, #2995 39173827317; feature findings 0
+2026-10-18T23:06Z	3	ci-run	39173937796	macOS build-only green on #3002 (DV-1) head 19b95286; lane merges on next sweep
+2026-10-18T23:21Z	3	heartbeat	-	#3002 green, waiting on lane sweep 39176056596 (earlier sweeps cancelled by concurrency); #2995 39173827317 in progress; feature findings 0
+2026-10-18T23:26Z	3	pr-merged	#3002	DV-1 merged as ee16d135
+2026-10-18T23:28Z	3	wave	2	builders DV-2, DV-5 started on dev db15b8a6 (wf_bd1722d5-344); findings 0
+2026-10-18T23:33Z	3	ci-run	39173827317	macOS build-only green on #2995 (DV-7) head cd9e24f6; lane merges on next sweep
+2026-10-18T23:33Z	3	heartbeat	-	wave 2 builders DV-2, DV-5 running (wf_bd1722d5-344); findings 0
+2026-10-18T23:46Z	3	pr-open	#3039	DV-2 head 3b2c0832, +366/-27, 7 files, Mutate 2/2 FakeRendering + 14/14 LibraryThumbnails; contract ok
+2026-10-18T23:46Z	3	pr-open	#3038	DV-5 head 27c9da40, +303, 2 files, tests only; contract ok
+2026-10-18T23:50Z	3	pr-merged	#2995	DV-7 merged as 9ece98c5
+2026-10-18T23:50Z	3	heartbeat	-	#3039 macOS build 39177954679 and #3038 39177943302 queued behind the runner backlog; findings 0
+2026-10-19T00:13Z	3	heartbeat	-	#3039 (DV-2) and #3038 (DV-5) macOS builds queued since 23:47 behind the runner backlog; findings 0
+2026-10-19T00:37Z	3	pr-merged	#3038	DV-5 merged as 91d02681
+2026-10-19T00:37Z	3	wave	3	DV-6 started on dev 7ccb643d (wf_8e98e414-2ae); DV-3, DV-8 wait on DV-2 #3039 (macOS build queued); findings 0
+00:57Z	-	heartbeat	-	heartbeat: #3039 DV-2 build 39177954679 running; DV-6 building; feature findings 0
+02:11Z	3 wave 2	pr-merged	#3039	DV-2 merged 1f3f72a1
+02:11Z	3 wave 3	pr-open	#3065	DV-6 contract ok; Mutate 4/4; release render budgets miss (Q3 core issue to supervisor)
+02:11Z	3 wave 3	start	DV-3,DV-8	wf_e1e67d4d-c63 on 17dc84c7
+02:33Z	3 wave 3	pr-open	#3086	DV-8 opened (contract check pending in wf_e1e67d4d-c63); #3065 DV-6 waits on the lane
+02:56Z	3 wave 3	merged	#3065	DV-6 merged 4747a796 (DV-c tasks all merged)
+02:56Z	3 wave 4	start	DV-11	wf_c87dcb51-da2 on dev 7def6ae5; DV-4 waits DV-3, DV-9 waits DV-8
+02:59Z	3 wave 3	check	#3095	DV-3 contract check ok, head e2102f85
+02:59Z	3 wave 3	fix	#3086	DV-8: no test, enable rules in view; fix round 1 (Model predicates + LibraryDevelopMenuTests)
+03:00Z	3 wave 3	fix	#3095	PR body Slice line corrected DV-a -> DV-b (lead prompt error); DV-8 fixer sets Slice: DV-d
+03:09Z	3 wave 3	fix	#3086	fix round 1 pushed f38e5472: enable rules moved to Model (developMenuRules), Mutate 3/3 LibraryModel.LibraryDevelopMenu, Slice DV-d, 269 lines/6 files, CI PASS
+03:10Z	3 wave 4	pr	#3098	DV-11 opened d6560ac1 (Slice DV-e, tests only, no Mutate, 109 lines/1 file, contract ok)
+03:18Z	check	check-in	dev CI	no lane merges yet (macOS build queue backlogged); dev CI 39188162085 cancelled before any job; merged-done now waits on 39192572958 at cc14022e (contains every merged task; Linux in progress); scoped library 39189402196 in progress
+03:42Z	3	check	39192572958	DV-a, DV-c done
+04:06Z	3	check	b48cf6c4	DV-3, DV-11 merged
+04:06Z	3	wave	wave5	DV-4 starts
+04:17Z	3	pr	#3113	DV-4 open
+04:29Z	3	check	aed78668	lane
+04:54Z	3	check	bede8342	heartbeat
+2026-10-19T05:01:09Z	heartbeat	check	-	dev bede8342; lane PRs open
+2026-10-19T05:17:25Z	check-in	check	-	dev 047303c1; 0 open findings
+2026-10-19T05:39:53Z	DV-8	fix	#3086	macOS build 39193322413 failed (type checker at LibraryWindow+Develop.swift:24); fixer pushing to lead/develop-DV-8
+2026-10-19T05:39:53Z	DV-4	check	#3113	macOS build 39199122698 success; awaiting lane sweep
+2026-10-19T06:02:59Z	DV-4	merge	#3113	merged f64820f2
+2026-10-19T06:02:59Z	DV-8	fix	#3086	pushed 153381d8; lane Linux check 39207317629
+2026-10-19T06:26:31Z	DV-c	check	#3086	macOS build failed again (39208646635); fixer dispatched
+2026-10-19T06:32:32Z	DV-c	fix	#3086	cae6cdd7 two-argument enabled helper
+06:51Z	check	heartbeat	-	lane waiting on builds
+07:15Z	check	heartbeat	-	macOS builds queued
+07:37Z	check	heartbeat	-	runner backlog
+08:00Z	check	heartbeat	-	DV-b: dev CI 39215489121 (57d85dfd, has f64820f2) still pending; DV-8 #3086 build 39212425550 queued
+08:22Z	check	heartbeat	-	DV-b: dev CI 39215489121 cancelled; newest 39221576463 (6f9a2b88, has f64820f2) pending; DV-8 #3086 build 39212425550 queued
+08:45Z	check	heartbeat	-	DV-b: dev run 39221576463 (6f9a2b88, contains f64820f2) Linux in progress; DV-8 #3086 macOS build 39212425550 queued
+09:09Z	check	heartbeat	-	DV-b: dev runs superseded again; newest 39226253814 (097b0d52) pending; DV-8 #3086 build 39212425550 still queued
+09:31Z	check	heartbeat	-	DV-b: newest dev run 39226253814 (097b0d52) pending; DV-8 #3086 build 39212425550 running
+09:54Z	slice	DV-b done	39221576463	Belt-Slice-Done
+09:54Z	wave	DV-9 start	wf_e3c39652-f90	68d4644e
+10:10Z	wave	DV-9 PR	#3221	21757afc
+2026-10-19T10:17Z	check	heartbeat	-	DV-9 #3221 macOS build 39235663702 queued; DV-10 after merge
+2026-10-19T10:40Z	check	heartbeat	-	DV-9 #3221 macOS build 39235663702 queued; DV-10 after merge
+11:04Z	check	heartbeat	-	DV-9 #3221 macOS build failed (LibraryDevelopSnapshots.swift:34 Develop menu init); fixer dispatched
+11:10Z	fix	DV-9	#3221	DV-9 #3221 fixer pushed 2e67c5df (typed closures in snapshot menu); footer 0; awaiting lane macOS build
+11:26Z	check	heartbeat	-	DV-9 #3221 head 2e67c5df, macOS build 39243123840 dispatched
+11:50Z	check	heartbeat	-	DV-9 #3221 head 2e67c5df, macOS build 39243123840 queued

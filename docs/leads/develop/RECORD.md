@@ -1,0 +1,78 @@
+# develop lead record
+
+Issue: #1527 · Packet: docs/blueprints/library/features/develop.md
+Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
+Stage: 3 wave 4 (DV-11; DV-3 and DV-8 from wave 3 still open)
+Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
+Next: DV-9 #3221 (21757afc) in the lane (macOS build next); then DV-10 after DV-9; DV-12 waits on the core issue and bump
+
+## Slices
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| DV-a | new catalog fields open neutral, survive save, change thumbnail token | DV-1, DV-2 | MJ1 | spine, persist, thumbnails, loupe-viewport (all built) | no | 0 | done | 39192572958 | - |
+| DV-b | slider, curve, levels, reset, copy, paste, sync as undo steps | DV-3, DV-4 | MJ2 | DV-a (DV-3) | no | 0 | done (Belt-Slice-Done, dev CI 39221576463 Linux green) | - | - |
+| DV-c | live renderer passes, fixed order, histogram | DV-5, DV-6 | MJ3 | DV-a | no | 0 | done | 39192572958 | - |
+| DV-d | Develop tab on the fakes, reachable from the inspector | DV-7, DV-8, DV-9, DV-10 | J5 | DV-a (DV-8, DV-9); spine follow-up (DV-9) | yes | 0 | building | - | - |
+| DV-e | vibrance and saturation through CoreRaster | DV-11, DV-12 | MJ4 | DV-c; creative-core issue and its bump (DV-12) | no | 0 | building | - | - |
+| DV-f | integrate: live services, relaunch survival, frame budget | DV-13, DV-14, DV-15 | J5, P3 | DV-d, DV-c, DV-b, DV-e | no | 0 | planned | - | - |
+
+## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| DV-1 | DV-a | 1 | new sliders, ToneCurve, DevelopLevels, back-compatible coding, fingerprint; MJ1 coding half | Sources/LibraryModel/Contracts/DevelopValues.swift, Tests/LibraryModelTests/LibraryDevelopValuesTests.swift, Tests/mutations/LibraryModel.DevelopValues.json | LibraryDevelopValuesTests | #3002 | merged ee16d135 |
+| DV-7 | DV-d | 1 | J5 written whole, skipped with its reasons | UITests/LibraryJourneyTests+Develop.swift | J5 compiles and skips | #2995 | merged 9ece98c5 |
+| DV-2 | DV-a | 2 | slots: LibraryDevelop signatures, thumbnail token, fake loupe lifts; tests disabled | Sources/LibraryModel/LibraryDevelop.swift, Sources/LibraryModel/LibraryThumbnails.swift, Sources/LibraryModel/Fakes/FakeRendering.swift, Tests/LibraryModelTests/LibraryDevelopTests.swift, Tests/LibraryModelTests/LibraryDevelopValuesTests.swift, Tests/mutations/LibraryModel.LibraryThumbnails.json, Tests/mutations/LibraryModel.FakeRendering.json | LibraryDevelopValuesTests (MJ1 whole) | #3039 | merged 1f3f72a1 |
+| DV-5 | DV-c | 2 | render and budget checks, disabled until DV-6 (packet row; tests only) | Tests/LibraryModelTests/LibraryDevelopRenderTests.swift, Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift | both compile, disabled "waits on DV-6" | #3038 | merged 91d02681 |
+| DV-6 | DV-c | 3 | LiveDevelop: pass list, CoreRaster calls, neutral untouched, histogram, waiting; enables DV-5's tests | Sources/LibraryModel/Live/LiveDevelop.swift, Tests/LibraryModelTests/LibraryDevelopRenderTests.swift, Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift, Tests/mutations/LibraryModel.LiveDevelop.json | LibraryDevelopRenderTests, LibraryDevelopBudgetTests | #3065 | merged 4747a796 |
+| DV-3 | DV-b | 3 | slider, curve, levels edits, coalescing, resets, helps | Sources/LibraryModel/LibraryDevelop.swift, Tests/LibraryModelTests/LibraryDevelopTests.swift, Tests/mutations/LibraryModel.LibraryDevelop.json | LibraryDevelopTests | #3095 | merged 7acc00bf |
+| DV-8 | DV-d | 3 | develop area and menu closures | Sources/LibraryApp/LibraryMenus.swift, Sources/LibraryApp/LibraryWindow+Develop.swift, Sources/LibraryApp/LibraryWindow+Thumbnails.swift | macOS build; LibraryDevelopMenuTests (fix 1) | #3086 | pr-open (fix 1 pushed f38e5472) |
+| DV-11 | DV-e | 4 | color checks and MJ4, disabled "waits on DV-12" | Tests/LibraryModelTests/LibraryDevelopColorTests.swift | compiles, disabled | #3098 | merged b48cf6c4 |
+| DV-4, DV-9 | DV-b, DV-d | 4 | see packet (DV-4 after DV-3, DV-9 after DV-8) | see develop.wave.json | see packet | - | planned |
+| DV-10, DV-12, DV-14 | - | 5 | see packet | see develop.wave.json | see packet | - | planned |
+| DV-13 | DV-f | 6 | see packet | see develop.wave.json | see packet | - | planned |
+| DV-15 | DV-f | 7 | blueprint prose, feature-done | docs/blueprints/library.md | see packet | - | planned |
+
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
+
+## Decisions
+- Resume of Belt's rebuilt record. The earlier run was blocked on spine, persist, thumbnails and loupe-viewport. All four are now built on dev, and no DV task had started.
+- Base is origin/dev, not main (CLAUDE.md). main f7e03506 is an ancestor of dev 507719b3.
+- One combined wave plan with status-and-layout and export. Export's EX-a shares Sources/LibraryModel/Fakes/FakeRendering.swift with DV-a, so EX-1 runs only after DV-2 has merged.
+- DV-12 needs `PixelBuffer.saturation(_:)` / `vibrance(_:)` in creative-core. This session's GitHub scope is qbtrix/creative-apps only, so the needs-core issue can't be filed from here. Asked the supervisor (Open). Per open question 1, DV-15 ships with those rows disabled and DV-e becomes a gap if the bump isn't on dev.
+- Wave 1 macOS build-only runs failed on dev's own PhotoZoomSweepTests (TileCanvasView, #3005), fixed on dev by #2990. Each wave 1 branch gets origin/dev merged in (a merge commit), scripts/ci --changed, push, Head moved; no PR content changes.
+- PR bodies: in this environment `gh api -X PATCH` re-adds a "Generated by Claude Code" footer; builders and fixers create and edit PR bodies only with the GitHub MCP tools (create_pull_request, update_pull_request) and re-read the body to confirm it ends at Head:.
+- DV-5's row corrected to the packet: tests only (LibraryDevelopRenderTests, LibraryDevelopBudgetTests), disabled until DV-6; LiveDevelop.swift is DV-6's.
+- Wave 2 contract check flagged #3039's Mutate: line above Fast-Check:. The brief puts it exactly there, so the check was wrong; build-wave.js's contract text now names the line. #3039 meets the contract.
+
+- DV-8 (#3086): the contract check found no test, and the view working out its own enable rules (canEdit, show original, copy needs one target). Fix round 1 moves them into a new LibraryDevelop+Menu.swift (outside DV-3's file) with LibraryDevelopMenuTests and a mutation plan.
+## Open
+- DV-6 (#3065) misses the three QB-LIB-6 release render budgets on the Linux worker (preview 512: 44.7 ms vs 8; histogram 2048: 406 ms vs 10; full 2048: 897 ms vs 120). Per packet Q3 a miss files the fused-pass creative-core issue (`PixelBuffer.developed(...)`, every slider plus curve and levels in one pass, equal to the chained calls within 1e-6), not a looser budget. This session can't reach qbtrix/creative-core; asking the supervisor to file it with `needs-core`. The histogram row is a single core `Histogram(of:)` call.
+- needs-core (qbtrix/creative-core): saturation and vibrance on PixelBuffer, spec in develop.md's header. Not filed: outside this session's repo scope. Supervisor, please file it or grant scope. Draft text: title "CoreRaster: PixelBuffer.saturation(_ amount: Float) and vibrance(_ amount: Float)", amount -100...100, linear light, Rec. 709 luminance kept within 1e-3, grey unchanged, identity at 0, RasterError.invalid on non-finite, 24 MP under 1 s.
+- Filed: #2983 gap, pass menu/model to LibraryInspector and DevelopInspector (DV-9 waits on it); #2984 needs-ui S-L1 HistogramView; #2985 needs-ui S-L6 InspectorSliderRow onReset.
+- 03:42Z check: CI 39192572958 (cc14022e) Linux green and contains DV-1, DV-2, DV-5, DV-6, so DV-a and DV-c are merged-done; Belt-Slice-Done posted for both. #3095, #3086, #3098 still open in the lane (macOS build queue). No panel: DV-d not fully merged.
+- 04:06Z check: DV-3 #3095 merged 7acc00bf and DV-11 #3098 merged b48cf6c4. DV-4 starts on b48cf6c4. DV-8 #3086 is still in the lane. CI 39195661324 was cancelled; 39196649963 (7acc00bf) is pending. 0 open findings.
+| DV-4 | DV-b | lead-dv4-copy-paste-sync | #3113 | merged f64820f2 |
+- 04:17Z DV-4 PR #3113 is open, head dc77c4f4, CI: PASS, mutate 11/11 LibraryModel.LibraryDevelop. Choice: copiedSummary reads "No adjustments" when the copied settings are all neutral.
+- 04:29Z check: DV-4 #3113 and DV-8 #3086 are in the lane. 0 open findings.
+- 04:54Z check: dev at bede8342 (core bump). Lane PRs still open; 0 open findings.
+- 06:02Z check: DV-4 #3113 merged f64820f2. DV-8 #3086 macOS build failed (type checker at LibraryWindow+Develop.swift:24); fixer pushed 153381d8 splitting the menu closures; local gate hit disk-full, so the lane proves the head. 0 open findings.
+- 06:26Z check: dev run 39208339251 (6dd055f6) was cancelled, so DV-b waits on 39209778800 (d4814191). DV-8 #3086 at 153381d8 failed the lane's macOS build (39208646635) with 'failed to produce diagnostic' at LibraryWindow+Develop.swift:28 and :39, the two-argument closures built with `canEdit ? {…} : nil`. Fixer dispatched: route them through a two-argument enabled<First, Second> helper beside the existing ones. 0 open findings.
+- 06:32Z DV-8 fix pushed to #3086 at cae6cdd7: set and setLevels now go through enabled<First, Second>, which removes the closure-literal ternaries; no other such ternaries in DV-8's LibraryApp code; Linux gate passed; Head line moved, body clean. The lane's macOS build decides.
+- 06:51Z check: nothing merged; dev run 39209778800 cancelled, CI 39211832383 (977df193) pending; lane PRs await Linux/macOS builds
+- 07:15Z check: nothing merged; dev CI 39211832383 and 39213562657 cancelled, 39214719821 (34b8df25) pending; macOS build runs queued (runner backlog)
+- 07:37Z check: nothing merged; runners backlogged (dev CI 39203617095 still on macOS; newer dev runs superseded while queued, now 39215489121 at 57d85dfd); lane macOS builds all queued, none failed
+- 08:00Z check: DV-b: dev CI 39215489121 (57d85dfd, has f64820f2) still pending; DV-8 #3086 build 39212425550 queued
+- 08:22Z check: DV-b: dev CI 39215489121 cancelled; newest 39221576463 (6f9a2b88, has f64820f2) pending; DV-8 #3086 build 39212425550 queued
+- 08:45Z check: DV-b: dev run 39221576463 (6f9a2b88, contains f64820f2) Linux in progress; DV-8 #3086 macOS build 39212425550 queued
+- 09:09Z check: DV-b: dev runs superseded again; newest 39226253814 (097b0d52) pending; DV-8 #3086 build 39212425550 still queued
+- 09:31Z check: DV-b: newest dev run 39226253814 (097b0d52) pending; DV-8 #3086 build 39212425550 running
+- 09:54Z check: DV-8 #3086 merged b749dd94. DV-b done: dev run 39221576463 (6f9a2b88, has f64820f2) Linux green, newer runs cancelled/pending before Linux; Belt-Slice-Done posted on #1527, footer stripped. #2983 closed (57d85dfd), DV-9 started (wf_e3c39652-f90). 0 open findings.
+- 10:10Z DV-9 reported: #3221 (21757afc), contract check ok, body clean (0 footer), fast-lane. DV-10 starts once it merges.
+- 2026-10-19T10:17Z check: DV-9 #3221 macOS build 39235663702 queued; DV-10 after merge
+- 2026-10-19T10:40Z check: DV-9 #3221 macOS build 39235663702 queued; DV-10 after merge
+- 11:04Z check: DV-9 #3221 macOS build failed (LibraryDevelopSnapshots.swift:34 Develop menu init); fixer dispatched
+- 11:10Z fix: DV-9 #3221 fixer pushed 2e67c5df (typed closures in snapshot menu); footer 0; awaiting lane macOS build
+- 11:26Z check: DV-9 #3221 head 2e67c5df, macOS build 39243123840 dispatched
+- 11:50Z check: DV-9 #3221 head 2e67c5df, macOS build 39243123840 queued
