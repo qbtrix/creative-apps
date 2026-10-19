@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-19T20:53:08Z	ping	Belt stall ping answered; macOS (suite) in progress
 2026-10-19T21:09:19Z	heartbeat	stage 4: macOS (suite) green; journeys running
 2026-10-19T21:18:26Z	heartbeat	crash-isolation fix: attach by bundle URL
+2026-10-19T22:10:37Z	stage	fix round 1 #3359 merged; fix round 2 (#3356 #3357) PR opened

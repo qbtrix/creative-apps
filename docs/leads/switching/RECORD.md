@@ -119,3 +119,9 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
   - The attach-by-URL fix for line 98.
 - #3353 is declined. Packet switching.md line 130 specifies the current app's item as "Show <App> Window", the launcher included, so the finding conflicts with the packet.
 - #3356 and #3357 change SuiteWindow and AppSwitcher (SuiteUI, MAC_GATED). #3358 is the home's New row, not switching. They are next, in fix round 2.
+- Round 1 fix PR #3359 merged at 22:10Z, after the lane's macOS build 39327605843 passed.
+- Fix round 2, from this branch, restarted on dev:
+  - #3356: `AppSwitcher.toolbarTrailing` reserves the inspector's column (`inspectorWidth`), so the row ends left of it. SuiteWindow passes the inspector's ideal width when it shows.
+  - #3357: an open search field (`isSearching`) reserves `searchFieldRoom` past the buttons, so the row narrows to fit instead of pushing the sidebar toggle into the overflow menu.
+  - Tests: AppSwitcherTests `theRowStaysOutOfTheInspectorsColumn` and `anOpenSearchFieldNarrowsTheRow`. The journeys check the row's maxX against the inspector at 880 and 1000 pt, and check that the sidebar toggle stays hittable with search open.
+- Next: critic round 2 on the next scoped `suite` run that contains round 2.
