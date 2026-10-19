@@ -9,8 +9,9 @@
 // DesignLayersJourneyTests holds the Layers panel's own journeys: J12 renames,
 // reorders and nests layers from their rows and sends one to the back, each
 // one undo step (L-5, #1986), and a group row's eye hides the group (L-6,
-// #2758). A group's row reads as one checkbox (#2410), so its eye is clicked at the toggle column a child row's own eye
-// shows: a toggle sits at the same x in every row (#53).
+// #2758). A group's row reads as one checkbox (#2410), so its eye is clicked
+// at the toggle column a child row's own eye shows: a toggle sits at the same
+// x in every row (#53).
 import XCTest
 
 extension Journey {
