@@ -127,3 +127,4 @@ utc	stage	event	ref	note
 2026-10-19T22:07Z	check	scoped suiteui 39292745070 still queued (since 17:16); full 39329322245 and 39330687224 cancelled (superseded); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
 2026-10-19T22:28Z	check	scoped suiteui 39292745070 still queued (since 17:16); full 39331917840 cancelled 22:11 (superseded); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
 2026-10-19T22:50Z	check	scoped suiteui 39292745070 still queued (since 17:16); full 39333170092 and 39335865885 cancelled (superseded); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T23:13Z	check	scoped suiteui 39292745070 still queued (since 17:16); no completed full dev run after 39335865885; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
