@@ -1,10 +1,10 @@
 # lists-and-layers lead record
 
 Issue: #1510 · Packet: docs/blueprints/suiteui/features/lists-and-layers.md
-Run: act-1a1504abd7d-2wty (line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
+Run: act-1a151f5e8ac-m3tp (resumed from act-1a1504abd7d-2wty; line lead with #1344, #1512, #1510; took over from act-1a14d48ae2f-857a)
 Stage: waiting on dev CI
-Base: 2e27b8db (origin/dev)
-Next: Belt-Contact-Sheet on the first green of full run 39186699154 or scoped suiteui run 39187049656 (dev ed0fed9e, contains f191be21)
+Base: ef6f201f (origin/main)
+Next: wait for scoped suiteui run 39187049656 or full CI 39188162085 on dev (both contain b1383770 #3060 and f191be21 #3061). Post Belt-Contact-Sheet on the first green one.
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
@@ -52,3 +52,6 @@ Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
 - 2026-10-18: resumed under run act-1a14c4f9bb5-swq8; base moved to dev a6150139a815efa68d34af8723a1b58eea894f9c; no task of this feature was built in the meantime (checked dev for each owned symbol).
 - 2026-10-18: wave 1 built, PRs held: scripts/ci fails on dev itself (five quarantine entries expire 2026-10-18), raised as #2504. Builder branches use a dash (lead/lists-and-layers-<id>) because lead/lists-and-layers exists as a ref.
 - 2026-10-18T06:12Z: wave 3 PRs #2648, #2651. Tool footers stripped and verified; line:suiteui added. LL-6 also touches SuiteSidebarList.swift (the rename passes through it between SidebarSection and SuiteWindow). It is in this line, so accepted.
+
+## 2026-10-19T02:42Z resumed (run act-1a151f5e8ac-m3tp)
+- Rebased onto origin/main ef6f201f. The full CI 39183169319 that the feature-done merge triggered was cancelled, and so were the full runs after it. Waiting on 39187049656 (scoped suiteui, ed0fed9e) and 39188162085 (CI, 17dc84c7).
