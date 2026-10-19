@@ -109,3 +109,4 @@ utc	stage	event	ref	note
 2026-10-19T15:32Z	check	#3236 merged as 452534d (15:18); waiting on a green run containing 452534d; 39268739545 still in progress
 2026-10-19T15:55Z	check	run 39278490377 at b3011ab (contains 452534d) pending; 39276059443 cancelled
 2026-10-19T16:17Z	check	39278490377 (b3011ab) still pending behind 39268739545 (in progress); no completed run with 452534d
+2026-10-19T16:39Z	check	39278490377 (b3011ab, has 452534d) still queued since 15:30; 39268739545 in progress; no contact sheet yet
