@@ -41,20 +41,18 @@ struct RecoveryFile: Sendable {
     }
 }
 
-/// The launch offer to bring back unsaved work: the recovered document, the recovery file's date, and the text
-/// the window shows.
+/// The launch offer to bring back unsaved work: the recovered document, the kernel's offer, and the text the
+/// window shows.
 struct RecoveryOffer: Sendable {
     let document: Document
-    let date: Date
     let message: String
-    /// The same offer as the editor kernel's session sees it.
+    /// The offer as the editor kernel's session sees it; its `savedAt` is the recovery file's date.
     let session: FlareRecoveryOffer
 
     /// `time` turns the file's date into the time shown in the message; by default the current locale's date
     /// and time.
     init(document: Document, date: Date, time: (Date) -> String = RecoveryOffer.time) {
         self.document = document
-        self.date = date
         session = FlareWorkspace.recoveryOffer(savedAt: date)
         message = "Restore the unsaved animation from \(time(date))?"
     }

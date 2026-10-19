@@ -15,9 +15,15 @@
 // `route` (CoreRender's dispatcher, CPU or Metal); `follow` keeps it on the
 // app's View > Rendering choice, and a switch redraws the whole picture on the
 // new backend at once (a waiting request redraws all of it too). `backend` names the backend that drew the picture shown.
+// On the GPU route the renderer keeps the layer tiles resident on the backend
+// (ResidentSurfaces) and, while the view draws through its Metal presenter,
+// renders straight into the presenter's texture: no bytes come back, and an
+// update only asks the view to present.
 // Presentation state only: it never changes the workspace.
 import Combine
 import CoreGraphics
+import CoreRender
+import CoreRenderMetal
 import Foundation
 import Observation
 import PhotoModel
@@ -48,9 +54,18 @@ final class CanvasRenderer {
     @ObservationIgnored private var redrawAll = false
     @ObservationIgnored private var following: AnyCancellable?
 
-    /// Draws on `route` from now on: the next `show` redraws every tile there.
+    /// Layer tiles kept on the GPU route's backend between renders; a new one when the backend changes.
+    @ObservationIgnored private var resident: ResidentSurfaces?
+
+    /// Draws on `route` from now on: the next `show` redraws every tile there. A GPU route gets this
+    /// renderer's resident tiles for its backend, so a frame uploads only the layer tiles that changed.
     func use(_ route: PhotoRenderRoute) {
-        self.route = route
+        if let gpu = route.preferred {
+            if resident?.backend.name != gpu.name { resident = ResidentSurfaces(backend: gpu) }
+            self.route = PhotoRenderRoute(preferred: gpu, resident: resident)
+        } else {
+            (self.route, resident) = (route, nil)
+        }
         redrawAll = true
     }
 
@@ -86,12 +101,20 @@ final class CanvasRenderer {
             return
         }
         isRendering = true
-        let since = sameSize && !redrawAll ? revision : nil
+        var since = sameSize && !redrawAll ? revision : nil
         let route = self.route
         redrawAll = false
-        Task {
+        // The resident GPU path draws into the Metal presenter's texture; a new texture starts empty.
+        var target: PhotoDisplayTarget?
+        if route.isGPU, route.residentTiles != nil, let metal = route.preferred as? MetalBackend,
+            let resident = tiles.residentTarget(width: canvas.width, height: canvas.height, on: metal)
+        {
+            target = resident.target
+            if resident.isNew { since = nil }
+        }
+        Task { [since, target] in
             do {
-                let update = try await PhotoRenderer.update(workspace, since: since, route: route)
+                let update = try await PhotoRenderer.update(workspace, since: since, route: route, target: target)
                 tiles.apply(update, prepared: await Self.prepared(update))
                 if backend != update.backend { backend = update.backend }
                 onPicture?(update.revision)

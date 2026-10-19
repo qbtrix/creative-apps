@@ -230,3 +230,15 @@ private func file(_ pages: [DesignPage]) throws -> Data {
     #expect(reason.contains("(file version 99; this version opens up to \(LiveFiling.fileVersion))."))
     #expect(reason.hasSuffix(" Update Design to open it."))
 }
+
+/// #3052: the bad-file alert splits into a title naming the file and a message holding the reason,
+/// so the system alert never lays out an empty text field.
+@Test func aFileProblemSplitsIntoATitleAndTheReason() {
+    let opening = DesignFileProblem.opening("NoPages.design", DesignFileError.noPages.reason)
+    #expect(opening == DesignFileProblem(title: "NoPages.design can't be opened.", message: "It has no pages."))
+    let saving = DesignFileProblem.saving("Saved.design", DesignFileError.noFile.reason)
+    #expect(saving == DesignFileProblem(title: "Saved.design can't be saved.", message: "There is no file open to save."))
+    for problem in [opening, saving] {
+        #expect(!problem.message.isEmpty && !problem.title.contains(problem.message))
+    }
+}
