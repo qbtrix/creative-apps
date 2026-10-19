@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-19T09:17Z	3	stage-start	wave 5	resumed run act-1a153722cda-w61s; waits met (design-window, style-rows done); CB-6 building
 2026-10-19T10:03Z	3	pr-opened	#3208	CB-6 slice CB-b text boxes fit their text (190+/24-, 6 files)
 2026-10-19T10:03Z	3	stage-start	wave 6	CB-9 slice CB-c stacked on CB-6
+2026-10-19T10:22Z	3	pr-opened	#3224	CB-9 slice CB-c page size rows + past-edge, feature-done; stacked on #3208

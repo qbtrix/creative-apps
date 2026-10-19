@@ -4,7 +4,7 @@ Issue: #1500 · Packet: docs/blueprints/design/features/canvas-basics.md
 Run: act-1a153722cda-w61s (before: act-1a14fde5d4b-ss3f, act-1a14d285aef-3epc, act-1a145ed05dc-a83b) · Session: claude/design-shell-parity-wlqm8c (line lead: shell-parity, canvas-basics, files-history) · Started: 2026-10-16T18:15Z
 Stage: 3 wave 6
 Base: 25f6d3376f816cbc2639b02044ae8ff475be6fb9
-Next: CB-9 (wave 6, slice CB-c, feature-done) building on lead/canvas-basics-CB-9, stacked on CB-6's branch; CB-6 PR #3208 waits on the lane's macOS build (run 39230865936). Then poll for a design-scoped or full ci.yml run containing #3208 (CB-b) and CB-9's PR (CB-c).
+Next: when #3208 (CB-6) merges: merge origin/dev into lead/canvas-basics-CB-9, rerun scripts/ci --changed, push, retarget #3224 to dev and move its Head: line. Then poll for a design-scoped or full ci.yml run containing #3208 (CB-b) and #3224 (CB-c).
 Last check: 2026-10-19 (dev 25f6d33); 0 open findings; #3208 head 1f78389 mergeable clean
 
 ## Slices
@@ -27,7 +27,7 @@ Gap issues (one per slice, filed at stage 1): CB-a #1521 (CB-2 closes), CB-b #15
 | CB-3 | CB-a | 3 | Text click-drag fixed-width box; fixedWidth flag | StyleTypes.swift, DesignDrawing.swift, DesignCanvasEditing.swift, DesignTextBoxDrawTests.swift, 3 plans | DesignTextBoxDrawTests | #2871 (080dea8) | merged 18:01Z (4a3e5a0) |
 | CB-5 | CB-b | 4 | commitTextEdit(extent:), setTextStyle refit | DesignText.swift, Live/LiveStyling.swift, DesignTextFitTests.swift, 2 plans | DesignTextFitTests | #2897 (4269cd4) | merged 20:05Z (94d162c) |
 | CB-6 | CB-b | 5 | window commits with measured extent; editor grows/wraps; journey on | DesignWindow.swift, DesignTextFont.swift, DesignTextEditor.swift, DesignTextArtwork.swift, DesignTextFitSnapshots.swift, +TextBox journey | design-text-fit snapshots, journey | #3208 | pr-open (head 1f78389, lane macOS build 39230865936) |
-| CB-9 | CB-c | 6 | page rows, past-edge overlay; journey on; feature-done | DesignIntent.swift, DesignWindow.swift, DesignCanvas.swift, DesignInspectorPage.swift, DesignPastEdge.swift, DesignPageSnapshots.swift, +Page journey | design-inspector-page, design-canvas-past-edge, journey | | building |
+| CB-9 | CB-c | 6 | page rows, past-edge overlay; journey on; feature-done | DesignIntent.swift, DesignWindow.swift, DesignCanvas.swift, DesignInspectorPage.swift, DesignPastEdge.swift, DesignPageSnapshots.swift, +Page journey | design-inspector-page, design-canvas-past-edge, journey | #3224 | pr-open, stacked (base lead/canvas-basics-CB-6 until #3208 merges) |
 
 Waves (packet's Build waves, checked against dev b01e722):
 - Wave 1: CB-1, CB-4, CB-7, CB-8. All independent (disjoint new files; design-contracts is built).
@@ -42,6 +42,8 @@ Waves (packet's Build waves, checked against dev b01e722):
 |---|---|---|---|---|---|
 
 ## Decisions
+- #3224 (CB-9) is based on lead/canvas-basics-CB-6 while #3208 is open: against dev it measured 17 files / 465 lines (CB-6 + CB-9), over the lane's 15/400 hard cap, which would strip fast-lane as not eligible. A non-dev base is skipped quietly by the lane. Alone it is 12 files, +210/-41.
+- CB-9 snapshot is named design-inspector-page-size (design-inspector-page already existed); past-edge drawing reuses the canvas loop moved into paintArtwork in DesignCanvasMarks.swift; a pending-commit row is a check-dup-views exception (Allow-Dup-View line) with needs-ui #3223 for InspectorSliderRow(commit: .onEnd).
 - 2026-10-19 (run act-1a153722cda-w61s): resumed. Waits met: design-window done (all of DW-a..DW-d), style-rows done (SR-t closed with gap #2545, a journey red, not missing code: DesignTextFont/Editor/Artwork carry ST-5t). The supervisor's 10-19 08:40Z note (CB-6 waits on #2480) predates reading style-rows' contact sheet; #2480 is a mac-finish PR on Align/Distribute and touches none of CB-6's files, so CB-6 doesn't wait on it. PRs still target dev (main 6f9a2b8 is behind dev; the lane's base is dev).
 - CB-9 is stacked on CB-6's branch (rule 22) since both edit DesignWindow.swift's perform switch.
 - 2026-10-18T04:02Z (run act-1a14d285aef-3epc): resumed as line lead. design-seams is done (D0-3c #2167 merged), so CB-2 starts, alongside files-history FH-2 (disjoint files). style-rows SR-m is done (CB-5 can go after CB-3); SR-t and design-window DW-b/DW-c/DW-d are still building, so CB-6 and CB-9 wait. This branch is 15 commits behind dev; it holds only docs/leads/canvas-basics, so it is left as is.
@@ -55,6 +57,7 @@ Waves (packet's Build waves, checked against dev b01e722):
 - 2026-10-18T18:40Z: CB-5 notes from the builder, accepted: committing an existing text node records "Edit Text" when only its fitted frame changes; a same-size style change leaves the frame; setTextStyle keeps each node's fixedWidth, so only the Text drag (CB-3) sets it.
 
 ## Open
+- needs-ui #3223 (line:suiteui): commit-on-end inspector row; CB-9's app-local row is a baselined exception until it lands.
 - 2026-10-18T17:36Z: CB-3 PR #2871 opened 17:04Z, fast-lane label, body clean (no attribution). CB-5 builder brief must say: setTextStyle keeps the node's fixedWidth (copy the node's style, don't build a new one; several layers keep each their own flag).
 - 2026-10-18T16:45Z (run act-1a14fde5d4b-ss3f): resumed. CB-2 merged (#2568, closed #1521). No open findings. design-window D0-9d and select-several S-5 wait on CB-a (CB-3), so CB-3 goes now. Brief says base main; PRs still target dev (every lane merge today is to dev; main is promoted from dev).
 - Hand-off 2026-10-17T01:46Z: wave 1 merged (#1535, #1539, #1547, #1549); waves 2 to 6 not started, all waiting on other features. A new container needs `bash scripts/cloud-setup.sh` for Swift before any builder runs scripts/ci.
