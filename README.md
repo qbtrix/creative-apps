@@ -26,7 +26,7 @@ reviews the pictures after merge. Agent rules are in [CLAUDE.md](CLAUDE.md).
 
 ## Running it
 
-You need macOS 26 and Xcode 26 (or Swift 6 on Linux for the Models).
+You need macOS 26 or later and Xcode 27 (or Swift 6 on Linux for the Models). CI builds with Xcode 27 too.
 
 ```bash
 scripts/ci            # lint, build and test: the same gate CI runs

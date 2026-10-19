@@ -278,8 +278,15 @@ extension SuiteJourneyTests {
                 let added = Array(inspectorFades(gallery).dropFirst(before))
                 XCTAssertEqual(added.map(\.name), ["fade-start", "fade-end"], "one Onion click's chip marks")
                 guard added.count == 2, let first = added.first, let last = added.last else { continue }
-                let gap = last.time - first.time, want = reduced ? 0 : 0.14
-                XCTAssertEqual(gap, want, accuracy: refresh, "Onion's fade took \(gap) s, Reduce Motion \(reduced)")
+                let gap = last.time - first.time
+                if reduced {
+                    XCTAssertEqual(gap, 0, accuracy: refresh, "Onion's fade took \(gap) s, Reduce Motion true")
+                } else {
+                    // The pair spans the 0.14 s fade plus the frames before its first commit and after its last;
+                    // the page's first fade ran 0.208 s on scoped run 39211725961. Under 0.14 s it didn't fade at
+                    // all, and past 0.24 s it isn't SuiteMotion.state.
+                    XCTAssert(gap >= 0.14 - refresh && gap <= 0.24, "Onion's fade took \(gap) s, not 0.14 s, Reduce Motion false")
+                }
             }
             gallery.shot(reduced ? "inspector-onion-reduced" : "inspector-onion")
         }

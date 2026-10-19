@@ -13,8 +13,9 @@
 // both through PhotoRenderer.update, which is all the live canvas renders. A
 // pan renders nothing on either backend: the canvas moves the tiles it has.
 // Report: one PHOTO-RENDER-8K line per backend in
-// .build/snapshots/photo-render-budget.txt. In Tests/perf-suites.txt, so the
-// merge gate skips it. macOS only.
+// .build/snapshots/photo-render-budget.txt. The document autosaves into a temp
+// folder, never the user's. In Tests/perf-suites.txt, so the merge gate skips
+// it. macOS only.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal
@@ -28,9 +29,14 @@ import Testing
     /// suite's debug-only counters compile) still times as release.
     static let config = _isDebugAssertConfiguration() ? "debug" : "release"
 
+    /// Live services with autosaves in a temp folder: PhotoZoomBudgetTests hosts this document in a
+    /// real window, whose autosave would otherwise land in the user's recovery folder.
+    static let services = PhotoServices.live.recovering(
+        in: FileManager.default.temporaryDirectory.appending(path: "PhotoRenderBudget-Recovery", directoryHint: .isDirectory))
+
     /// The 8K document, Paint selected with the brush ready.
     static func document() throws -> PhotoWorkspace {
-        var workspace = PhotoWorkspace()
+        var workspace = PhotoWorkspace(services: services)
         try workspace.newCanvas(width: 7680, height: 4320)
         workspace.addLayer()
         workspace.setToolOption(.color(red: 30, green: 120, blue: 210))
