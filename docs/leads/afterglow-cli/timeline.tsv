@@ -31,3 +31,6 @@ utc	stage	event	ref	note
 2026-10-19T06:10:35Z	build	builder started	CL-9	CL-jobs RealJobs body + plan + cli-jobs part
 2026-10-19T06:24:47Z	build	builder holding	CL-9	gate needs CL-7 #3154 on dev; with it CI PASS, mutate 6/6
 2026-10-19T06:31:59Z	build	merged	#3149	CL-5 on dev 5c906476
+2026-10-19T06:55:06Z	build	merged	#3151	CL-4 on dev 43c0e191
+2026-10-19T06:55:06Z	fix	fixer started	#3154	needs-rebase CLIStubTests conflict
+2026-10-19T06:55:06Z	build	builder paused	CL-9	local commit 35ee7e6 kept; resumes after #3154 merges

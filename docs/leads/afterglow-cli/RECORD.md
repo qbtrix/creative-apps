@@ -4,7 +4,7 @@ Issue: #2998 · Packet: docs/blueprints/suite/features/afterglow-cli.md
 Run: act-1a1514ffe22-lvmw · Session: cloud lead (line:suite, with afterglow-mcp #3000) · Started: 2026-10-18T23:21Z
 Stage: 4 build wave 4
 Base: 1200886790fc1044eee6f644fb72508668e570cf (origin/dev after CL-1 #3037 and CC-1 #3056 merged)
-Next: CL-9 builder holding until #3154 CL-7 merges, then opens PR. #3151 CL-4, #3154 CL-7 in lane (CL-5 merged 5c906476) → CL-10 after both. Then CL-11 docs, critics on scoped app=suite run.
+Next: fixer merging dev into #3154 CL-7 (needs-rebase, CLIStubTests). CL-4 merged 43c0e191, CL-5 merged. After #3154 merges: re-dispatch CL-9 (local branch lead/afterglow-cli-CL-9 @35ee7e6, unpushed; rebase on dev, drop "run"+"jobs" stub rows, ci, PR) and start CL-10. Then CL-11 docs, critics.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
