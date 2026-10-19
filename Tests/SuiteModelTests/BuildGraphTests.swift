@@ -2,7 +2,8 @@
 // route R1 of docs/blueprints/suite.md 2.5). Package.swift is the Linux and
 // test graph; project.yml holds the Release graph the bundle is built from.
 // Every non-test target the macOS manifest declares must be a target of
-// project.yml too. Both files are read by path from #filePath and scanned by
+// project.yml too, except the headless `afterglow` CLI's targets, which no
+// bundle ships (afterglow-cli CL-1). Both files are read by path from #filePath and scanned by
 // line, so no YAML library is needed: project.yml's target names sit at a
 // two-space indent under its top-level `targets:` key.
 #if canImport(FoundationEssentials)
@@ -42,10 +43,15 @@ enum BuildGraph {
         return names
     }
 
+    /// The command line tool's targets: built and tested by SwiftPM on Linux
+    /// and macOS, never part of the Release graph.
+    static let headless: Set<String> = ["AfterGlowCLICore", "AfterGlowCLI"]
+
     /// One message per drift: a name of `expected` the manifest lacks, a
     /// manifest name not in `expected`, or a manifest name project.yml lacks.
+    /// The headless targets are left out.
     static func drift(package: String, project: String, expected: Set<String>) -> [String] {
-        let pkg = packageTargets(package)
+        let pkg = packageTargets(package).subtracting(headless)
         let yml = projectTargets(project)
         return expected.subtracting(pkg).sorted().map { "\($0) missing from Package.swift" }
             + pkg.subtracting(expected).sorted().map { "\($0) unexpected in Package.swift" }
@@ -92,7 +98,7 @@ enum BuildGraph {
         .union(["Flare", "Design", "Photo", "Library", "Halo"].flatMap { ["\($0)Model", "\($0)App"] })
 
     @Test func packageScanFindsTheMacOSTargets() throws {
-        #expect(BuildGraph.packageTargets(try Self.read("Package.swift")) == Self.expected)
+        #expect(BuildGraph.packageTargets(try Self.read("Package.swift")) == Self.expected.union(BuildGraph.headless))
     }
 
     @Test func everyPackageTargetIsInTheReleaseGraph() throws {

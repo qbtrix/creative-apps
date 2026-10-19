@@ -1,0 +1,54 @@
+{
+  "id": "afterglow-cli",
+  "name": "afterglow CLI",
+  "description": "The headless `afterglow` command line tool: drives every app's command catalog on files with no window (`afterglow <app> <command> --json '{…}'`, open, export, list-commands, describe) and runs `*.jobs.json` scripts over sets of input files, which are also the real-jobs suites. One JSON object on stdout per run, sysexits exit codes. AfterGlowCLICore holds the router and every route, testable in process; AfterGlowCLI is the thin executable (product `afterglow`). Builds and runs on Linux, so cloud leads and CI drive the apps through it (docs/blueprints/suite/features/afterglow-cli.md).",
+  "technology": "Swift 6, Foundation, Linux and macOS",
+  "tags": [
+    "internal"
+  ],
+  "order": 155,
+  "relationships": [
+    {
+      "source": "afterglow-cli",
+      "target": "suite-kernel",
+      "description": "runs every app's command catalog",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-cli",
+      "target": "suite-model",
+      "description": "reads the suite's app list and document kinds",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-cli",
+      "target": "flare-model",
+      "description": "opens, saves and exports Flare documents through FlareHeadless",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-cli",
+      "target": "design-model",
+      "description": "opens, saves and exports Design documents through DesignHeadless",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-cli",
+      "target": "photo-model",
+      "description": "opens, saves and exports Photo documents through PhotoHeadless",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-cli",
+      "target": "library-model",
+      "description": "opens and exports Library catalogs through LibraryHeadless",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-cli",
+      "target": "halo-model",
+      "description": "opens, saves and exports Halo documents through HaloHeadless",
+      "style": "sync"
+    }
+  ]
+}
