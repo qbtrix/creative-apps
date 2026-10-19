@@ -2,14 +2,14 @@
 
 Issue: #1528 · Packet: docs/blueprints/library/features/status-and-layout.md
 Run: act-1a150baa34c-jzk9 · Session: claude/feature-lead-playbook-4h7pu1 · Started: 2026-10-18T20:38Z
-Stage: 3 wave 2
+Stage: 3 wave 3
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
-Next: lane merges #3087 (SL-4, macOS build pending); then wave 3: SL-6 (SL-4 and SL-5 merged; MetadataInspector header gap); SL-a merged-done waits on a green Linux dev run
+Next: SL-6 builds (wave 3, base 918abfc6); SL-b merged-done waits on dev CI 39195661324 (918abfc6, contains SL-4) Linux green; then Mac-Finish-Wanted SL-b; SL-8 after SL-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SL-a | status row and inspector header values, grid columns and loupe fit per width | SL-1, SL-2 | MJ1 | spine (built) | no | 0 | building | - | - |
+| SL-a | status row and inspector header values, grid columns and loupe fit per width | SL-1, SL-2 | MJ1 | spine (built) | no | 0 | done | 39192572958 | - |
 | SL-b | status row under grid and loupe, J12 at every width | SL-3, SL-4 | J12 | SL-a (SL-4); thumbnails, loupe-viewport (built); SuiteUI #1184 (SL-4, soft) | yes | 0 | building | - | - |
 | SL-c | inspector header facts, Library control identifiers, wide-width snapshots | SL-5, SL-6, SL-7, SL-8 | J12 | SL-a (SL-5, SL-7); SL-b (SL-6, SL-8) | yes | 0 | building | - | - |
 
@@ -19,7 +19,7 @@ Next: lane merges #3087 (SL-4, macOS build pending); then wave 3: SL-6 (SL-4 and
 | SL-1 | SL-a | 1 | LibraryLayout: content width, grid columns, loupe fit | Sources/LibraryModel/LibraryLayout.swift, Tests/LibraryModelTests/LibraryLayoutTests.swift, Tests/mutations/LibraryModel.LibraryLayout.json | LibraryLayoutTests | #3003 | merged db15b8a6 |
 | SL-2 | SL-a | 1 | status contract and statusRow; empty inspector header; MJ1; SL-5 tests disabled; model C4 part | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json, docs/c4/parts/creative-apps/library-model/library-model-sources.json | LibraryStatusTextTests | #3004 | merged d6b996d1 |
 | SL-3 | SL-b | 1 | J12 written whole, skipped "waits on SL-4" | UITests/LibraryJourneyTests+Layout.swift | J12 compiles and skips | #2993 | merged 562f2125 |
-| SL-4 | SL-b | 2 | LibraryStatusBar under grid and loupe from statusRow | Sources/LibraryApp/LibraryStatusBar.swift, Tests/AppSnapshotTests/LibraryStatusSnapshots.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | LibraryStatusSnapshots, J12 | #3087 | pr-open |
+| SL-4 | SL-b | 2 | LibraryStatusBar under grid and loupe from statusRow | Sources/LibraryApp/LibraryStatusBar.swift, Tests/AppSnapshotTests/LibraryStatusSnapshots.swift, docs/c4/parts/creative-apps/library-app/library-app-sources.json | LibraryStatusSnapshots, J12 | #3087 | merged 0c9e58c3 |
 | SL-5 | SL-c | 2 | inspector header facts and dateText | Sources/LibraryModel/LibraryStatusText.swift, Tests/LibraryModelTests/LibraryStatusTextTests.swift, Tests/mutations/LibraryModel.LibraryStatusText.json | LibraryStatusTextTests (SL-5 half) | #3075 | merged a01d82b7 |
 | SL-7 | SL-c | 2 | layout snapshots at each width | Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift | LibraryLayoutSnapshots | #3069 | merged e0b0ac66 |
 | SL-6 | SL-c | 3 | LibraryInspector header library.inspector.header | Sources/LibraryApp/LibraryInspector.swift, Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift | LibraryInspectorSnapshots | - | planned |
@@ -47,3 +47,4 @@ Next: lane merges #3087 (SL-4, macOS build pending); then wave 3: SL-6 (SL-4 and
 - PR #2624 (open, SuiteUI line) deletes Sources/LibraryApp/LibraryStatusBar.swift and moves Library's status line into ViewerStatusBar (`message:`, `preview:`). SL-4 owns that file. If #2624 merges first, SL-4 builds on ViewerStatusBar and its LibraryWindow `statusBar(_:)`, with no Library copy (rule 20).
 - Stage 1 gaps filed: #2981 status row only on preview data in the grid (owner filters-collections), #2982 MetadataInspector draws its own InspectorHeader (owner metadata-more). #291 audit: nothing for SuiteUI; the unnamed Info/Develop tabs need `id:` on SegmentedTabs in LibraryInspector.swift, which goes in SL-8.
 - Line CI findings #2908, #2909, #2910 (LibraryJourneyTests: thumbnails stuck at "loading", lost app connection) are open on line:library with no feature. They count toward no feature's 5-finding cap. SL-3's journey reads the grid, so if thumbnail loading still stalls when SL-3's scoped run happens, take #2908 into the next wave.
+- 03:42Z check: SL-4 merged 0c9e58c3. CI 39192572958 (cc14022e) Linux green, so SL-a is merged-done; Belt-Slice-Done SL-a posted. Wave 3 starts SL-6 on 918abfc6. No panel this wave: no UI slice has all its tasks merged in a run with screens.
