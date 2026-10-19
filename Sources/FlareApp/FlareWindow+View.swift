@@ -1,12 +1,8 @@
-// FlareWindow+View.swift: the router's view area (FlareWindow+Router.swift, stage-edit SE-2). Zoom In and Zoom Out
-// step through FlareZoom's stops from the zoom, or from the fit (`fitted`) while the stage fits; Fit to Window fits
-// again and Actual Size is 100%. Rulers and guides toggle the window's own view state. Clear Guides and the guide
-// drags (FlareGuideDrag's intents) go to the Model, one undo step each. Onion skin and the motion path stay off,
-// with their reason, until the stage draws them.
+// FlareWindow+View.swift: the router's view area (stage-edit SE-2). Zoom steps from the zoom, or from the fit
+// (`fitted`) while the stage fits. Guide edits go to the Model; onion skin and the motion path stay off until drawn.
 import FlareModel
 
 extension FlareWindow {
-    /// Acts on a view intent: zoom and the rulers and guides shown are the window's; guides are the document's.
     func performView(_ intent: FlareIntent.View) {
         guard viewHelp(intent) == nil else { return }
         switch intent {

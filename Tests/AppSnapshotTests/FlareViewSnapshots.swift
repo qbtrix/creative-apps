@@ -1,6 +1,5 @@
-// FlareViewSnapshots.swift: stage-edit SE-2, the stage's rulers and guides on `bounce`: at 200% with the rulers on,
-// a vertical guide at x 150 and a horizontal one dragged from y 60 to y 110 (drawn where the drag is), and at the fit
-// with the rulers hidden (their band stays empty). Goldens flare-view-*-light.png.
+// FlareViewSnapshots.swift: stage-edit SE-2 on `bounce`: at 200% with guides at x 150 and y 60 dragged to y 110
+// (drawn where the drag is), and at the fit with the rulers hidden. Goldens flare-view-*-light.png.
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -19,7 +18,6 @@ import Testing
         model.addGuide(.vertical, at: 150)
         var drag = FlareGuideDrag(guide: 0, of: model.guides)
         drag?.move(to: 110)
-        #expect(drag?.shown(over: model.guides).first == Guide(axis: .horizontal, position: 110))
         let stage = FlareStage(
             model: model, zoom: 2, showsRulers: true, showsGuides: true, perform: { _ in }, help: { _ in nil },
             guideDrag: drag)

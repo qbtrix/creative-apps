@@ -1,21 +1,17 @@
 // FlareGuideDrag.swift: a guide drag on the stage (stage-edit SE-2, J14, QB-F3). The stage keeps one while the
-// pointer is down and draws `shown(over:)`; the document changes once, on release, with the view intents `end`
-// returns: a drag out of a ruler adds its guide ("Add Guide"), a drag of a guide moves it ("Move Guide", its step
-// closed), and either released back over its ruler leaves no guide (a moved one is removed, "Remove Guide").
-// Positions snap to whole scene points, as the guide's readout shows them.
+// pointer is down and draws `shown(over:)`; the document changes once, on release, with the intents `end` returns
+// ("Add Guide", "Move Guide" with its step closed, or "Remove Guide"). Positions snap to whole scene points.
 import FlareCore
 
 public struct FlareGuideDrag: Equatable, Sendable {
-    /// The guide's axis: `.horizontal` for one pulled from the top ruler.
+    /// The guide's axis (`.horizontal` out of the top ruler), its index (nil for a new one), and where it sat when
+    /// the drag began and sits now, in scene points.
     public let axis: Guide.Axis
-    /// The guide being moved; nil for a new one pulled out of a ruler.
     public let index: Int?
-    /// Where the guide sat when the drag began, in scene points.
     public let start: Double
-    /// Where the guide is now, in whole scene points.
     public private(set) var position: Double
 
-    /// A new guide pulled out of the ruler along `axis`, at `position` scene points (0 when that isn't a number).
+    /// A new guide pulled out of the ruler along `axis`, at `position` (0 when that isn't a number).
     public init(axis: Guide.Axis, at position: Double) {
         self.axis = axis
         index = nil
@@ -32,7 +28,7 @@ public struct FlareGuideDrag: Equatable, Sendable {
         position = start
     }
 
-    /// Moves the guide to `position`, to the whole scene point; one that isn't a number leaves it where it was.
+    /// Moves the guide to `position`, to the whole point; one that isn't a number leaves it where it was.
     public mutating func move(to position: Double) {
         guard position.isFinite else { return }
         self.position = position.rounded()
@@ -47,8 +43,8 @@ public struct FlareGuideDrag: Equatable, Sendable {
         return shown
     }
 
-    /// The view intents the release sends, one undo step or none: over its ruler a new guide is dropped and a moved
-    /// one removed; elsewhere a new guide is added and a moved one moved (nothing when it is back where it began).
+    /// The release's intents, one undo step or none: over its ruler a new guide is dropped and a moved one removed;
+    /// elsewhere a new guide is added and a moved one moved (nothing when it is back where it began).
     public func end(overRuler: Bool) -> [FlareIntent] {
         switch (index, overRuler) {
         case (nil, true): return []

@@ -1,15 +1,12 @@
-// FlareStageGuides.swift: the stage's ruler guides (stage-edit SE-2, J14), in the stage's overlay at the artboard's
-// size. While `showsGuides` it draws the selected scene's guides as SuiteUI's ViewportGuideMarks across the artboard,
-// with the drag under way (`drag`, a guide coming out of a ruler, or this view's own line drag) where it is. Each guide is a hidden `flare.stage.guide.<i>` probe whose label is its readout ("y 300")
-// and a thin hit strip: dragging it moves the guide, and releasing it over its ruler (in the stage's `space`) removes
-// it. The document changes once, on release, through the FlareGuideDrag's intents. It only reads `model`.
+// FlareStageGuides.swift: the stage's guides (stage-edit SE-2, J14) as ViewportGuideMarks over the artboard, any drag
+// under way drawn where it is. Each guide is a hidden `flare.stage.guide.<i>` probe ("y 300") and a hit strip that
+// drags it; released over its ruler it is removed. The document changes on release, via FlareGuideDrag's intents.
 import FlareCore
 import FlareModel
 import SuiteUI
 import SwiftUI
 
 struct FlareStageGuides: View {
-    /// The stage's coordinate space: the viewport, with the rulers along its top and leading edges.
     static let space = "flare.stage"
     let model: FlareWorkspace
     let zoom: Double
@@ -23,8 +20,7 @@ struct FlareStageGuides: View {
     var body: some View {
         if showsGuides, let scene = model.selectedScene, zoom > 0 {
             let board = CGRect(x: 0, y: 0, width: scene.width * zoom, height: scene.height * zoom)
-            let current = lineDrag ?? drag
-            let shown = current?.shown(over: model.guides) ?? model.guides
+            let shown = (lineDrag ?? drag)?.shown(over: model.guides) ?? model.guides
             ZStack(alignment: .topLeading) {
                 ViewportGuideMarks(guides: shown.map(Self.mark), zoom: zoom, viewport: board)
                 ForEach(Array(model.guides.enumerated()), id: \.offset) { index, guide in
@@ -38,12 +34,10 @@ struct FlareStageGuides: View {
         }
     }
 
-    /// The guide's line as a ViewportGuide.
     private nonisolated static func mark(_ guide: Guide) -> ViewportGuide {
         guide.axis == .horizontal ? .horizontal(y: guide.position) : .vertical(x: guide.position)
     }
 
-    /// A strip `thickness` scene points across, centred on the guide's line and spanning the scene.
     private nonisolated static func strip(_ guide: Guide, scene: FlareCore.Scene, thickness: Double) -> CGRect {
         let half = thickness / 2
         return guide.axis == .horizontal
@@ -68,9 +62,8 @@ struct FlareStageGuides: View {
                     }
                     .onEnded { value in
                         let edge = guide.axis == .horizontal ? value.location.y : value.location.x
-                        let ended = lineDrag
+                        lineDrag?.end(overRuler: edge < (showsRulers ? SuiteSize.ruler : 0)).forEach { perform($0) }
                         lineDrag = nil
-                        ended?.end(overRuler: edge < (showsRulers ? SuiteSize.ruler : 0)).forEach { perform($0) }
                     }
             )
             .accessibilityHidden(true)

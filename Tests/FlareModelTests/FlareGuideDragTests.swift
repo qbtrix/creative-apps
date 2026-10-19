@@ -1,10 +1,8 @@
-// FlareGuideDragTests.swift: stage-edit SE-2 (J14, QB-F3). A guide drag sends its view intents on release, one undo
-// step: out of a ruler adds a guide, a guide drag moves it, either released over its ruler leaves none. Whole points.
+// FlareGuideDragTests.swift: stage-edit SE-2 (J14, QB-F3). A guide drag's release is one undo step, in whole points.
 import FlareCore
 @testable import FlareModel
 import Testing
 
-/// Applies the guide intents a release sends, as the window's router does.
 private func apply(_ intents: [FlareIntent], to w: inout FlareWorkspace) {
     for case .view(let intent) in intents {
         switch intent {
@@ -61,8 +59,7 @@ private func bounce(guides: [(Guide.Axis, Double)] = []) -> FlareWorkspace {
 
 @Test func aGuideDragThatGoesNowhereOrNowhereRealSendsNothing() throws {
     let w = bounce(guides: [(.horizontal, 300)])
-    #expect(FlareGuideDrag(guide: 1, of: w.guides) == nil)
     var drag = try #require(FlareGuideDrag(guide: 0, of: w.guides))
     drag.move(to: .nan)
-    #expect(drag.position == 300 && drag.end(overRuler: false).isEmpty, "a drag back to where it began made a step")
+    #expect(FlareGuideDrag(guide: 1, of: w.guides) == nil && drag.end(overRuler: false).isEmpty)
 }

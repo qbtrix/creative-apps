@@ -9,9 +9,8 @@
 // Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
 // ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
 // `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
-// while frames drop) and "Text not shown (n)". The rulers show while `showsRulers`; a drag out of one pulls a guide
-// (FlareStageGuides draws and moves them, stage-edit SE-2), and the hidden `flare.stage.zoom` reads the zoom ("Fit",
-// "200%") for journeys. It reports the fit through `onFit`. It only reads `model`; every change goes through `perform`.
+// while frames drop) and "Text not shown (n)". A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
+// `flare.stage.zoom` reads the zoom for journeys. It only reads `model`; every change goes through `perform`.
 import AppKit
 import FlareCore
 import FlareModel
@@ -29,11 +28,10 @@ struct FlareStage: View {
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     /// The rate playback measured, from FlareCanvas's PlaybackDriver; nil while paused.
     var measuredFPS: Double? = nil
-    /// A guide drag to draw, for the snapshots; a drag out of a ruler on screen uses `liveGuide`.
+    /// A guide drag to draw: `guideDrag` for the snapshots, `liveGuide` while one comes out of a ruler.
     var guideDrag: FlareGuideDrag? = nil
     /// The fit's zoom, reported as the viewport changes, so Zoom In from the fit steps from it.
     var onFit: @MainActor (Double) -> Void = { _ in }
-    /// A guide coming out of a ruler, drawn until mouse-up; nil between drags.
     @State private var liveGuide: FlareGuideDrag?
     /// The gesture under way's first point, in scene points; nil between drags.
     @State private var dragStart: CGPoint?
@@ -151,12 +149,8 @@ struct FlareStage: View {
         guard showsGuides else { return }
         var next = liveGuide ?? FlareGuideDrag(axis: drag.axis == .horizontal ? .horizontal : .vertical, at: drag.position)
         next.move(to: drag.position)
-        guard drag.phase == .ended else {
-            liveGuide = next
-            return
-        }
-        liveGuide = nil
-        next.end(overRuler: drag.isOverRuler).forEach { perform($0) }
+        liveGuide = drag.phase == .ended ? nil : next
+        if drag.phase == .ended { next.end(overRuler: drag.isOverRuler).forEach { perform($0) } }
     }
 
     /// Mouse-up: the window gets the drag's last sample and its end, one change and one undo step.

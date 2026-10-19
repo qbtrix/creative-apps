@@ -148,7 +148,6 @@ struct FlareCanvas: View {
     var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
-    /// The stage's fit as it changes (FlareStage's `onFit`).
     var onFit: @MainActor (Double) -> Void = { _ in }
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
