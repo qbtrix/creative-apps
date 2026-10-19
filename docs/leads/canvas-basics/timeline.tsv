@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-19T11:31Z	3	merged	#3208	CB-6 merged c6ad68f; #3224 rebased by merge onto dev, retargeted, head fdb7975
 2026-10-19T11:54Z	3	heartbeat	#3224	lane macOS build 39245781059 pending; no green dev run with c6ad68f yet
 2026-10-19T13:02Z	3	fix	#3224	macOS build 39245781059 failed (actor isolation in paintArtwork); pushed ea150fa, Head moved
+2026-10-19T13:27Z	3	heartbeat	#3224	macOS build 39258144713 success on ea150fa; awaiting lane merge
