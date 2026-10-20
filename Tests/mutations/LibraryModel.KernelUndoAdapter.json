@@ -1,0 +1,30 @@
+[
+  {
+    "label": "endCoalescing leaves the kernel's run open, so the next drag joins the last",
+    "file": "Sources/LibraryModel/LibraryUndo.swift",
+    "find": "        history.kernel.endRun()\n",
+    "replace": "",
+    "tests": "LibraryHistoryTests"
+  },
+  {
+    "label": "undo and redo restore even when the kernel had no step to move",
+    "file": "Sources/LibraryModel/LibraryUndo.swift",
+    "find": "guard moved, let applied else { return }",
+    "replace": "_ = moved; guard let applied = applied ?? Optional(current) else { return }",
+    "tests": "LibraryHistoryTests"
+  },
+  {
+    "label": "edits record without their coalesce key, so a drag is many steps",
+    "file": "Sources/LibraryModel/LibraryUndo.swift",
+    "find": "history.kernel.record(name, before, key: coalesceKey)",
+    "replace": "history.kernel.record(name, before)",
+    "tests": "LibraryHistoryTests"
+  },
+  {
+    "label": "the kernel gets back the photos it handed over, so redo reapplies nothing",
+    "file": "Sources/LibraryModel/LibraryUndo.swift",
+    "find": "            return current.filter { ids.contains($0.id) }\n",
+    "replace": "            return photos.filter { ids.contains($0.id) }\n",
+    "tests": "LibraryHistoryTests"
+  }
+]
