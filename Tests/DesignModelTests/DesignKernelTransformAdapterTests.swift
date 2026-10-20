@@ -4,7 +4,7 @@
 // Design handle; Shift and Option reach the kernel as EditModifiers; a resize
 // is BoxMath.resized, the handles BoxMath.handles' centres, a press
 // HandleHit.handle at the workspace's handleTolerance, and a box of several
-// layers scales each one by BoxMath.scaled. The app's own tests pin the
+// layers scales each one by BoxMath.scaled, never below 1 pt (AT-d2). The app's own tests pin the
 // behaviour; these pin the forwarding.
 // Plan: Tests/mutations/DesignModel.KernelTransformAdapter.json. Runs on Linux
 // and macOS.
@@ -96,6 +96,15 @@ import Testing
             let got = try #require(edit.nodes.node(id)?.frame)
             #expect(abs(got.x - want.minX) < 1e-9 && abs(got.y - want.minY) < 1e-9)
             #expect(abs(got.width - want.width) < 1e-9 && abs(got.height - want.height) < 1e-9)
+        }
+    }
+
+    @Test func aLayerScaledDownStaysAtLeastOnePoint() throws {
+        let page = DesignMarqueeTests.cards()
+        let edit = try LiveTransforming().resize(["A", "B"], handle: .left, by: pt(10_000, 0), modifiers: [], on: page)
+        for id in ["A", "B"] {
+            let got = try #require(edit.nodes.node(id)?.frame)
+            #expect(got.width >= 1 && got.height >= 1, "\(id): \(got)")
         }
     }
 }
