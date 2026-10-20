@@ -388,7 +388,7 @@
     "job": "Import RAW+JPEG pairs and see each pair once.",
     "outcome": "Each RAW+JPEG pair shows as one item, and a rating applies to both files.",
     "needs": [],
-    "needs_note": "raw RW-b",
+    "needs_note": "no packet: RAW+JPEG pairing was cut from library/raw for the beta (re-cut 2026-10-21, open question R1)",
     "closes_with": null,
     "trap": "Pair shows twice; rating applies to one half",
     "run": "C",
@@ -404,16 +404,19 @@
     "weight": "med",
     "job": "Open camera RAW files and see the embedded preview at once.",
     "outcome": "RAW files import and show their embedded preview straight away.",
-    "needs": [],
-    "needs_note": "raw RW-b",
-    "closes_with": null,
+    "needs": [
+      "library/raw",
+      "suiteui/shared-raw"
+    ],
+    "closes_with": "library/raw",
     "trap": "RAW skipped silently on import",
     "run": "Cm",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://home.camerabits.com/tour-photo-mechanic/"
-    ]
+    ],
+    "waits_on": "RW-4"
   },
   "RJ-L23": {
     "id": "RJ-L23",
@@ -663,5 +666,25 @@
     ],
     "waits_on": "LF-3",
     "added_by": "library/file-flow"
+  },
+  "RJ-L70": {
+    "id": "RJ-L70",
+    "app": "library",
+    "weight": "high",
+    "job": "Stand up a sideways 4000x3000 scan with Rotate Right, crop it 4:5 portrait, and export JPEG.",
+    "outcome": "The JPEG is 3000x3750 and its top row matches the scan's left column within 2 levels.",
+    "needs": [
+      "suiteui/orientation-crop"
+    ],
+    "closes_with": "suiteui/orientation-crop",
+    "trap": "4:5 on the landscape original gives 5:4, or export ignores the turn",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "OC-8",
+    "added_by": "suiteui/orientation-crop"
   }
 }
