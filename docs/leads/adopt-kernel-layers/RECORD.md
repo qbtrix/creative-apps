@@ -1,10 +1,10 @@
 # adopt-kernel-layers lead record
 
 Issue: #1936 · Packet: docs/blueprints/suiteui/features/adopt-kernel-layers.md
-Run: act-1a154b13dec-71tm (resume; earlier runs act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-suiteui-lead-gvq11j · Resumed: 2026-10-19
-Stage: 0 (blocked on hand-offs)
-Base: 6e70826 (brief main 6e70826be59e092e59269605cfdfbce93c4a2bbe verified; PRs target dev)
-Next: AL-design: AL-d1/AL-d2 edit DesignNode.swift, owned by design-seams-2 (parked out of beta); AL-d3 waits on layers-panel (LP-b merged, awaiting its run) and shell-parity. #2880 already moved Design ordering onto LayerTree. Supervisor asked on #1936.
+Run: act-1a158c2e32e-bl3z (resume; earlier runs act-1a154b13dec-71tm, act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/suiteui-feature-lead-i2krve · Resumed: 2026-10-20
+Stage: 3 (merging and closing slices)
+Base: dev 11a545e7 (brief main b3011ab9dc5579023722e79f83254e6e2520e612 verified; PRs target dev)
+Next: AL-design #3392 awaits the lane merge (macOS build 39379782419 green), then its Belt-Slice-Done; AL-d3 panel waits on layers-panel #1498. Then Belt-Contact-Sheet on #1936.
 
 Line lead for #1938, #1937 and #1936 (contract rule 19, run act-1a14dfbdefe-il38);
 this record is the adopt-kernel-layers part. The first run led it with #1935 and #1934. This run's brief names `main` at
@@ -68,6 +68,8 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 11:43Z: #3216 merged in a 5-PR lane batch.
 
 - 2026-10-19T15:09Z (act-1a154b13dec-71tm) AL-design: design-seams-2 (#1526) is parked out of the beta cut, so the DesignNode.swift hand-off can't clear before beta; supervisor asked on #1936.
+
+- 2026-10-20T10:05:17Z: run act-1a158c2e32e-bl3z resumed (supervisor 07:08Z: Linux check dev runs are merged-done proof). AL-flare (#3216), AL-halo (#3217) and AL-photo (#3218) are all ancestors of 36789542, green Linux check https://github.com/qbtrix/creative-apps/actions/runs/39401676163; Belt-Slice-Done posted on #1936 for all three. No open findings.
 
 ## Open
 - 2026-10-18T13:45Z: ninth Belt nudge (after a worker restart); continued from stage 3.
