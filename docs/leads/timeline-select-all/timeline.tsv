@@ -1,3 +1,4 @@
 time	event	slice	pr	note
 2026-10-20T10:05:45Z	start	TSA-a	-	run act-1a158c2e32e-bl3z; base dev 11a545e7; wave 1 = TSA-a
 2026-10-20T11:33:48Z	3	pr-opened	#3591	TSA-a (TSA-1+TSA-2) feature-done
+2026-10-20T11:51:57Z	3	heartbeat	#3591	TSA-a: macOS build 39408152243 passed; in lane batch 20261020112639, which went red on another PR's Library audit (CommandPathTests appMatchesItsBaseline library, LibraryWindow+Filters.swift); probe -3 (before #3591) also red, bisect running; no action for this PR
