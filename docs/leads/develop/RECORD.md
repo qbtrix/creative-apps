@@ -103,3 +103,4 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 2026-10-19T23:12Z: dev CI 39336158094 (cf120143) still pending; DV-d done comment waits. #3295 open, fast-lane, no needs-* label.
 - 2026-10-19T23:43Z: 23:39Z check-in: no green dev CI yet (39342355180 on f564907d pending); DV-d awaits it. #3295 (DV-13) open.
 - 2026-10-20T00:13Z: 00:10Z check-in: #3295 macOS build failed on #require around mutating loupeRequest; fixed locally, gating. Rule 23 question posted on #1527 (no green dev run since cf120143; 5 quarantine entries expired 2026-10-20 fail every gate).
+- 2026-10-20T00:41Z: 00:41Z check-in: DV-13 #3295 merged 00:39Z (407cd914). Supervisor answered: green Linux job on a run containing the last PR is the proof; #3380 renewed the quarantine (2019b521). Waiting for a dev run at or after 2019b521 with a green Linux job for DV-d. DV-f also needs DV-15, which waits on DV-e (core bump, DV-12).
