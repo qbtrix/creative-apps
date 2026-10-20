@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 2026-10-20T12:00Z	3	heartbeat	#3396	waiting on the lane (macOS build 39400563705, merge); merged=false
 2026-10-20T12:18Z	3	heartbeat	#3396	waiting on the lane (macOS build 39400563705, merge); merged=false
 2026-10-20T12:36Z	3	heartbeat	#3396	waiting on the lane (macOS build 39400563705, merge); merged=true
+2026-10-20T12:42Z	3	merged	#3396	squash cbaa5110 on dev
