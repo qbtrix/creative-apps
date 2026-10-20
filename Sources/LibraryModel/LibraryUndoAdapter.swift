@@ -1,4 +1,4 @@
-// LibraryUndo.swift: undo and redo for the catalog on the kernel's History.
+// LibraryUndoAdapter.swift: undo and redo for the catalog on the kernel's History.
 // Each step is named ("Set Rating", "Exposure") and holds the photos it
 // changed as they were before it; undo puts them back by id and hands the
 // kernel the photos it replaced, which redo puts back. Edits sharing an open
