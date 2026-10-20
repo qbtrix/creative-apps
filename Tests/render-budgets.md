@@ -197,3 +197,31 @@ NSSplitView tracks a divider drag in a modal loop that a test can't pace, so
 the divider moves through `setPosition(_:ofDividerAt:)`, which is what that
 loop calls. A wheel event made in a test carries no phase, so the grid scrolls
 its clip view directly.
+
+## Photo at 8K: one adjustment step, before and after the live route
+
+`PhotoAdjustSliderLatencyTests` (perf list) times one step on the 8K document,
+from the edit to the canvas texture holding the picture, through the canvas
+renderer's route. Release, M2 Pro, p50 / p95 per step, 30 steps:
+
+| Step | GPU before | GPU after | CPU (unchanged route) |
+|---|---|---|---|
+| Hue/Saturation, Saturation | 636 / 661 ms | 12.4 / 13.4 ms | 102 / 105 ms |
+| Levels, Gamma | 79 / 93 ms | 18.8 / 24.2 ms | 107 / 109 ms |
+| Curves, midpoint | 79 / 113 ms | 17.8 / 19.2 ms | 102 / 124 ms |
+| Levels adjustment layer, Gamma | 820 / 869 ms | 18.0 / 22.2 ms | 110 / 120 ms |
+| Hue/Saturation adjustment layer | 816 / 839 ms | 12.5 / 13.9 ms | 104 / 151 ms |
+| Move tool, top layer | 35 / 41 ms | 33 / 69 ms (busy machine) | 92 / 97 ms |
+
+Before, Hue/Saturation had no GPU op: each band of the picture was read back,
+run through Photo's per-pixel colour matrix on the CPU and uploaded again. Any
+visible adjustment layer sent every redraw, a Move or a brush frame included,
+down the same read-back path. The live route (PhotoLiveTone.swift) keeps each
+band's composite of the pixel layers on the GPU while they are unchanged. It
+runs adjustment layers as CoreRender tone-program passes and writes the picture
+through the image's adjustments in the same pass as the display encode. A
+slider step composites nothing and reads nothing back. The budget is 30 ms
+p95 for an adjustment step and 80 ms for a Move, and the target is 16 ms.
+Levels and Curves still build their tables on the CPU each step (about 2.5 ms),
+and a Move composites every layer again, so those rows sit over the target.
+Blur, a masked adjustment layer and the CPU route keep the old path.

@@ -30,6 +30,20 @@ Its drivers, the `afterglow` CLI and MCP server, are on the suite line
 (`docs/blueprints/suite/features/afterglow-cli.md`, `afterglow-mcp.md`);
 the principle is suite.md 1.5.
 
+Rows whose wave reads `XK3` are the canonical burn-down (captain,
+2026-10-20), cut from the canonical duplicates audit
+(`paw-workspace/docs/design/drafts/2026-10-20-canonical-duplicates-audit.md`):
+`adopt-kernel-autosave` (one recovery path and one support root),
+`suite-imaging` (the new SuiteImaging target: adjustment values and the live
+GPU route, the only target that links CoreRenderMetal), `shared-codecs`,
+`shared-thumbnails`, `adopt-kernel-unsaved-prompt` and
+`adopt-kernel-eyedropper-photo`. Each deletes app-local copies and shrinks
+`Tests/canonical-baseline.txt` in the deleting PR. One delete task per
+packet owns the baseline, so those tasks chain (AK-z, SC-z, UP-z, EP-z, then
+suite-imaging's IM-8d); nothing else in them waits on another packet's
+baseline edit. `suite-imaging` re-cut `tone-controls`: its `Tone/` module
+lives in SuiteImaging, so SuiteKernel stays Foundation and FlareCore only.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 **Wave 4 (beta-80 W1, 2026-10-18).** `font-picker` is SuiteUI's piece of

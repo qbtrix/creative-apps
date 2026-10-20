@@ -88,6 +88,9 @@ struct DesignWindow: View {
     static var bodyRuns = 0
     /// The workspace after the last intent; DesignLiveDragTests reads it.
     static var lastWorkspace: DesignWorkspace?
+    /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
+    // view-static: main-actor
+    static var openExport: (@MainActor () -> Void)?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -289,6 +292,9 @@ struct DesignWindow: View {
     private func start() {
         guard !started else { return }
         started = true
+        #if DEBUG
+        Self.openExport = { perform(.export) }
+        #endif
         if seeded {
             fitting = true
             return fit()

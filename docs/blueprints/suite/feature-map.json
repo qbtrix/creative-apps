@@ -613,6 +613,14 @@
         {
           "app": "photo",
           "packet": "photo/history-panel"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-autosave"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-autosave"
         }
       ]
     },
@@ -2146,6 +2154,141 @@
       "app": "library",
       "c4": [],
       "adopters": []
+    },
+    {
+      "id": "suiteui/adopt-kernel-autosave",
+      "name": "Every app autosaves and recovers through the kernel's schedule, SuiteModel's recovery folder and SuiteUI's modifier, under one support root",
+      "packet": "suiteui/adopt-kernel-autosave",
+      "layer": "kernel",
+      "c4": [
+        "suite-model/suite-store",
+        "suite-kernel `Session`"
+      ],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-autosave"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-autosave"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-autosave"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/suite-imaging",
+      "name": "SuiteImaging: shared adjustment values and the live GPU render route for Photo and Library",
+      "packet": "suiteui/suite-imaging",
+      "layer": "render",
+      "c4": [
+        "suite-imaging ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/suite-imaging"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/suite-imaging"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/shared-codecs",
+      "name": "One ImageIO adapter in SuiteShell over CoreRaster's codecs; the hand-rolled PNG writers deleted",
+      "packet": "suiteui/shared-codecs",
+      "layer": "model",
+      "c4": [
+        "suite-shell/shell-imageio ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "design",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/shared-codecs"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/shared-thumbnails",
+      "name": "One thumbnail store (CoreAsset ThumbnailStore) for Library, Photo and the home",
+      "packet": "suiteui/shared-thumbnails",
+      "layer": "model",
+      "c4": [
+        "suite-shell/shell-documents"
+      ],
+      "adopters": [
+        {
+          "app": "library",
+          "packet": "suiteui/shared-thumbnails"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/shared-thumbnails"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-unsaved-prompt",
+      "name": "One unsaved-changes guard and save status in every editor",
+      "packet": "suiteui/adopt-kernel-unsaved-prompt",
+      "layer": "ui",
+      "c4": [
+        "suiteui/suiteui-sources UnsavedGuard"
+      ],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-eyedropper-photo",
+      "name": "Photo samples colour through the kernel alone; its own sampling contract is deleted",
+      "packet": "suiteui/adopt-kernel-eyedropper-photo",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-sample"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-eyedropper-photo"
+        }
+      ]
     }
   ]
 }

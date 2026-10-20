@@ -78,7 +78,7 @@ extension LibraryCatalog {
         case .pick: .flag(.pick)
         case .reject: .flag(.reject)
         case .unflag: .flag(.none)
-        case .crop, .grid, .confirm, .first, .last: nil
+        case .crop, .grid, .confirm, .first, .last, .label: nil  // .label: DR-5
         }
     }
 

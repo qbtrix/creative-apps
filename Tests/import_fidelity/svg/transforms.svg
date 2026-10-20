@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+<rect id="moved" width="10" height="10" fill="#e02020" transform="translate(5 5)"/>
+<rect id="turned" x="40" y="0" width="20" height="4" fill="#20a040" transform="rotate(90 50 10)"/>
+<g id="scaled" transform="scale(2)"><rect x="35" y="2" width="5" height="5" fill="#2040e0"/></g>
+<rect id="matrix" width="10" height="10" fill="#202020" transform="matrix(1 0 0 1 10 60)"/>
+<rect id="skewed" x="0" y="0" width="10" height="10" fill="#e02020" transform="translate(40 60) skewX(45)"/>
+<g id="nested" transform="translate(70 70)"><g transform="rotate(45)"><rect x="-2" y="-2" width="4" height="20" fill="#20a040"/></g></g>
+</svg>

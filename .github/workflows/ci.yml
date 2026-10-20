@@ -17,9 +17,11 @@
 # branch dispatches would starve the gating macOS jobs.
 #
 # Branch model: crew PRs merge into dev through the fast lane on the worker's
-# Linux scripts/ci --changed marker (plus a build-only macOS compile for code
-# PRs, scoped to the PR's apps when the lane passes `app`). This workflow
-# runs on dev once a feature is built: on
+# Linux scripts/ci --changed marker. Ready PRs land in batches: the lane runs a
+# Linux-only run and, when the batch has code, one macOS gate run (`mac_only`,
+# below) on its lane/batch-<id> branch. With the lane's LANE_MAC_PER_PR=1 it
+# instead asks a build-only macOS compile per code PR (`build_only`, scoped to
+# the PR's apps by `app`). This workflow runs on dev once a feature is built: on
 # workflow_dispatch (the supervisor, Belt, or the lane after a `feature-done`
 # or UI merge) and daily as a safety net. Green Linux and macOS jobs let `promote`
 # fast-forward main to that exact SHA. A red Linux or macOS job makes `dev-red` open
@@ -40,15 +42,23 @@
 # opens dev-red or lowers the audit baseline. verify-dispatch.sh starts one
 # per app after its merges.
 #
-# The fast lane reads the job names "Linux", "macOS" and "macOS build" and the
-# run title "macOS build", and ignores "macOS journeys" (with or without
-# " (<app>)"), so keep them stable.
+# macOS gate run (workflow_dispatch with `mac_only`, the lane's batch check):
+# only the macOS job, scripts/ci in full, or with `app` (a comma list) the
+# scoped step over the union of those apps' tests. No Linux job (the lane
+# dispatches its own Linux-only run), no journeys, no bundles or size report;
+# it never promotes, opens dev-red or lowers the audit baseline.
+#
+# The fast lane reads the job names "Linux", "macOS" (also "macOS (<apps>)")
+# and "macOS build" and the run titles "macOS build" and "macOS gate*", and
+# ignores "macOS journeys" (with or without " (<app>)"), so keep them stable.
 name: CI
 # A build-only run (the fast lane's compile check for code PRs), a Linux-only
-# run (the lane's check on a head it integrated) and a scoped run ("scoped:
-# <app>", how verify-dispatch.sh finds them) get their own titles; " " keeps
-# the default title.
-run-name: "${{ inputs.build_only && 'macOS build' || inputs.linux_only && 'Linux check' || inputs.app && format('scoped: {0}', inputs.app) || ' ' }}"
+# run (the lane's check on a head it integrated or a batch), a macOS gate run
+# (a lane batch's macOS check, "macOS gate" or "macOS gate: <apps>"; the lane
+# counts its queued and running ones against its slots) and a scoped run
+# ("scoped: <app>", how verify-dispatch.sh finds them) get their own titles;
+# " " keeps the default title.
+run-name: "${{ inputs.build_only && 'macOS build' || inputs.linux_only && 'Linux check' || inputs.mac_only && format('macOS gate{0}', inputs.app && format(': {0}', inputs.app) || '') || inputs.app && format('scoped: {0}', inputs.app) || ' ' }}"
 
 on:
   pull_request:
@@ -71,8 +81,12 @@ on:
         description: A full dev run in its own concurrency group, so later dev dispatches don't replace it while it waits for a macOS runner
         type: boolean
         default: false
+      mac_only:
+        description: Only the macOS job, no journeys (the fast lane's macOS gate on a batch branch; with app, a comma list)
+        type: boolean
+        default: false
       app:
-        description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run). With build_only: a comma list of flare, design, photo, library, halo'
+        description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run). With build_only: a comma list of flare, design, photo, library, halo. With mac_only: a comma list of any of them'
         type: string
         default: ''
   schedule:
@@ -97,13 +111,13 @@ permissions:
 # dispatch replaced the waiting full run and, with a long macOS queue, no full
 # dev run ever finished for Promote to fast-forward main.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ !inputs.build_only && inputs.app && format('-{0}', inputs.app) || '' }}${{ inputs.promote && '-promote' || '' }}
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ inputs.mac_only && '-mac' || '' }}${{ !inputs.build_only && inputs.app && format('-{0}', inputs.app) || '' }}${{ inputs.promote && '-promote' || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 jobs:
   linux:
     name: Linux
-    if: ${{ !inputs.build_only && !inputs.app }}
+    if: ${{ !inputs.build_only && !inputs.app && !inputs.mac_only }}
     runs-on: ubuntu-latest
     # Official image; 6.3.3-noble is Ubuntu 24.04, the same OS as the cloud agents.
     container: swift:6.3.3-noble
@@ -196,6 +210,7 @@ jobs:
       issues: write  # scripts/quarantine checks each quarantined journey's owner issue (the Linux container has no gh)
     env:
       APP: ${{ inputs.app }}
+      JOURNEYS_NOTE: ${{ inputs.mac_only && 'none (a lane batch gate runs no journeys)' || format('the `macOS journeys ({0})` job', inputs.app) }}
     steps:
       - uses: actions/checkout@v4
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
@@ -228,7 +243,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
       # A scoped run instead: build every target with its tests, then run only
-      # APP's Model tests and its snapshot tests (one at a time, as scripts/ci
+      # APP's Model tests and its snapshot tests (a macOS gate run's APP is a
+      # comma list: the union of those apps' tests) (one at a time, as scripts/ci
       # does). The filters come from scripts/test-scope, the table scripts/ci
       # --changed maps changed files with; a snapshot test whose name fits no
       # app runs in full runs only. Perf tests are skipped (perf-nightly runs
@@ -247,7 +263,7 @@ jobs:
             echo
             echo "- Model tests: \`swift test --filter '$model'\`"
             if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
-            echo "- UI journeys: the \`macOS journeys ($APP)\` job"
+            echo "- UI journeys: $JOURNEYS_NOTE"
             echo "- Perf and timing tests: skipped (Tests/perf-suites.txt; they run nightly on the captain's Mac)"
             echo
             echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote, Dev red and Audit lower (a scoped run never moves main or the audit baseline)."
@@ -279,8 +295,12 @@ jobs:
           if-no-files-found: warn
       # Release builds wrapped in signed .app bundles, for "Open on this Mac".
       # Runs only after scripts/ci passed, so a red build never ships bundles.
+      # A macOS gate run (mac_only) skips them and the size report: it is a
+      # pass/fail check on a batch branch.
       - run: scripts/bundle-apps
+        if: ${{ !inputs.mac_only }}
       - name: Upload app builds
+        if: ${{ !inputs.mac_only }}
         uses: actions/upload-artifact@v4
         with:
           name: app-builds
@@ -292,10 +312,12 @@ jobs:
       # table in the job summary. Report only: it fails on a script error or a
       # missing bundle, never on a size.
       - name: Size report
+        if: ${{ !inputs.mac_only }}
         run: |
           bash Tests/size_report/test_size_report.sh
           scripts/size-report | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Upload size report
+        if: ${{ !inputs.mac_only }}
         uses: actions/upload-artifact@v4
         with:
           name: size-report
@@ -357,7 +379,7 @@ jobs:
   # job. Audit lower reads its `ui` output and `ui-screens`.
   journeys:
     name: ${{ inputs.app && format('macOS journeys ({0})', inputs.app) || 'macOS journeys' }}
-    if: ${{ !inputs.build_only && !inputs.linux_only && (github.ref == 'refs/heads/dev' || inputs.journeys) }}
+    if: ${{ !inputs.build_only && !inputs.linux_only && !inputs.mac_only && (github.ref == 'refs/heads/dev' || inputs.journeys) }}
     runs-on: macos-26
     timeout-minutes: 150
     continue-on-error: true
@@ -475,7 +497,7 @@ jobs:
   promote:
     name: Promote
     needs: [linux, macos]
-    if: github.ref == 'refs/heads/dev' && !inputs.app
+    if: github.ref == 'refs/heads/dev' && !inputs.app && !inputs.mac_only
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -511,7 +533,7 @@ jobs:
   dev-red:
     name: Dev red
     needs: [linux, macos]
-    if: failure() && github.ref == 'refs/heads/dev' && !inputs.app
+    if: failure() && github.ref == 'refs/heads/dev' && !inputs.app && !inputs.mac_only
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

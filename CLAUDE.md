@@ -12,14 +12,16 @@ points here.
 Cloud workers run on Ubuntu and cannot build SwiftUI. On Linux, Package.swift
 declares only the Model targets, so `scripts/ci` there builds and tests the
 Models and runs the lints (app-state rule, design lint, C4, jscpd). Everything
-under `Sources/*App/` and `Sources/SuiteUI/` is compiled only by the `macOS`
-CI job, and that job runs on `dev` once a feature is built, not on your PR.
-You never start it yourself for routine work. So:
+under `Sources/*App/` and `Sources/SuiteUI/` is compiled only on macOS: by
+the fast lane's batch gate before your PR lands (scoped to the batch's apps),
+and by the full `macOS` job on `dev` once a feature is built. Neither runs
+for your PR alone, and you never start one yourself for routine work. So:
 
 - Put every bit of logic you can in the Model target, where you can test it.
 - Keep view code small, follow `docs/design.md`, and copy the shape of a view
-  that already builds. A UI mistake shows up in the next feature CI as a
-  "dev is red" issue whose culprit range names your PR.
+  that already builds. A UI mistake the batch gate catches comes back as
+  `needs-fix` on your PR; one only the full run sees shows up in the next
+  feature CI as a "dev is red" issue whose culprit range names your PR.
 - The `macOS` job uploads the `snapshots` artifact (PNGs written by
   `Tests/AppSnapshotTests`), and the report-only `macOS journeys` job clicks
   through every app (`UITests/<X>JourneyTests.swift`), uploading
@@ -219,6 +221,7 @@ something. One that can't act yet is disabled and says why:
 
 - `docs/engineering.md`: how code is laid out (Models, views, SuiteUI).
 - `docs/design.md`: the look and behavior rules for every view.
+- `docs/render-contract.md`: how a canvas draws (one GPU route, no CPU work per step); read it before touching a canvas, overlay or render route.
 - Before you open a PR, check your diff against `docs/review-rubric.md` and fix
   every "no".
 
@@ -299,59 +302,59 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `scripts/ci` on its head, which renders the waves and assembles the C4
   parts with the ownership check. Protected paths under `docs/` stay refused,
   and one file outside `docs/`, a rename included, brings the size cap back.
-- A PR that changes or renames a shared shell file (`MAC_GATED` in
-  scripts/fast-lane.sh: SuiteWindow, EditorShell, ToolbarGroup and Tokens in
-  Sources/SuiteUI) also needs a completed CI run on its current head whose
-  `macOS` job is green, or fails only tests that also fail in the latest
-  completed dev run. You can't dispatch CI (403), so the lane does: once per
-  head it runs `ci.yml` on your branch, comments the run URL, and merges on a
-  later sweep when that run passes. A run with a new failure is refused by
-  test name and waits for your next push. A `Mac-Check: <run url>` line a
-  supervisor adds counts too.
-- Any other PR that changes code (`BUILD_RE` in scripts/fast-lane.sh: a
-  `.swift` file under `Sources/`, `Tests/` or `UITests/`, `project.yml`, or
-  `Package.swift`), a Model included, merges only once its head compiles on
-  macOS. Linux `scripts/ci` never builds the apps, and it misses macOS-only
-  breaks in the targets it does build (#1210: an `ObjCBool` error in
-  PhotoModel). The lane dispatches a build-only CI run (`ci.yml` with
-  `build_only`; nothing runs) once per head, comments its URL, and merges
-  when it succeeds. It is scoped to the apps your code touches
-  (`scripts/test-scope build-apps`, passed as `app`): a Photo-only PR builds
-  PhotoModelTests, the PhotoApp product, AppSnapshotTests and the Photo
-  journey bundle. Shared code (SuiteUI, SuiteKernel, SuiteModel, the shell,
-  the CLI, shared snapshot or journey files, `Package.swift`, `project.yml`)
-  or anything it can't place builds every target and journey bundle, as does
-  a branch whose `ci.yml` predates the `app` input. A newer head's build
-  cancels the older one's. A failed build waits for your next push. A PR with no code
-  (docs, data, packets) takes the lane on the Linux check alone.
-- Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
-  the snapshots after the next feature CI and files fixes as new issues.
+- A PR that changes code (`BUILD_RE` in scripts/fast-lane.sh: a `.swift`
+  file under `Sources/`, `Tests/` or `UITests/`, `project.yml`, or
+  `Package.swift`), a Model included, lands only after its batch passes the
+  macOS gate (below). Linux `scripts/ci` never builds the apps, and it misses
+  macOS-only breaks in the targets it does build (#1210: an `ObjCBool` error
+  in PhotoModel). Nothing runs on macOS for your PR alone, and you never
+  start it. A PR with no code (docs, data, packets) needs no macOS gate.
+- The rollback, `LANE_MAC_PER_PR=1` (a repo variable, read by
+  `.github/workflows/fast-lane.yml`), restores the per-PR build: once per head
+  the lane dispatches a build-only CI run (`ci.yml` with `build_only`, scoped
+  by `app` to the apps your code touches, `scripts/test-scope build-apps`;
+  shared code builds everything), comments its URL, and merges when it
+  compiles; a failed build waits for your next push. A `Mac-Check: <run url>`
+  line a supervisor adds counts too. Batches then check Linux only.
 - A crew PR into `dev` whose body has a `Belt-Lead:` line but no `fast-lane`
   label gets the label from the lane's next sweep, with one comment, and is
   evaluated in that sweep under the same rules. `no-fast-lane` or
   `needs-human` on the PR stops it (`OPT_OUT_LABELS` in scripts/fast-lane.sh).
-- Each lane run merges every eligible PR, oldest first. One ready PR
-  squash-merges at once. Two or more are checked together first: the lane
-  merges `dev` plus each PR, in order, onto a scratch `lane/batch-<id>` branch
-  (merge drivers on), runs one Linux-only CI run on it, and on green
-  squash-merges every PR in that order. On red it bisects the batch by prefix
-  (`lane/batch-<id>-<i>` probes, one Linux run each; when the red tip fails
-  only a timing budget test, each probe runs up to 3 times and is called on 2
-  of 3) until it finds the first PR that turns the chain red: the PRs before it merge, that PR gets one
-  comment naming the run and the `needs-fix` label (the comment says "likely"
-  when the measured value sat within 15% of its budget), and the PRs after it
-  wait for the next batch. Fix it, rerun `scripts/ci --changed`, push, and move the
-  `Head:` line; the lane drops the label on the new head. One batch runs at a
-  time; a PR that becomes ready while one is in flight waits for the next
-  sweep (a few minutes). A PR that is behind
+- Ready PRs land in batches, ordered `p0`, then `beta`, then the rest,
+  oldest first within each. The lane merges `dev` plus up to 12 ready PRs
+  (`LANE_BATCH_MAX`), in order, onto a scratch `lane/batch-<id>` branch (merge
+  drivers on) and runs one Linux-only CI run on it. When the batch has code it
+  also runs one macOS gate (`ci.yml` with `mac_only`: `scripts/ci` on macOS
+  scoped to the union of the batch's apps by `scripts/test-scope build-apps`,
+  every app for shared code; no journeys). A green `macOS` job or a
+  `local-ci/macos` commit status on the batch head (the local Mac gate) is the
+  macOS pass. When both are green it squash-merges every PR in that order.
+  A lone PR without code lands at once; a lone code PR is a batch of one. A
+  batch with code forms when a macOS slot frees (a batch just resolved), when
+  12 PRs are ready, or once the oldest ready head is 10 minutes old
+  (`LANE_BATCH_WAIT_MIN`), and never while the lane's own queued and running
+  macOS runs fill `LANE_MAC_SLOTS` (4). On red it bisects the batch by prefix
+  (`lane/batch-<id>-<i>` probes, each with its Linux run and, for code, its
+  macOS gate; when the red tip fails only a timing budget test on Linux, each
+  probe's Linux run goes up to 3 times and is called on 2 of 3) until it finds
+  the first PR that turns the chain red: the PRs before it merge, that PR gets
+  one comment naming the failing job, its run and any open PRs stacked on its
+  branch, and the `needs-fix` label (the comment says "likely" when the
+  measured value sat within 15% of its budget), and the PRs after it wait for
+  the next batch. Fix it, rerun `scripts/ci --changed`, push, and move the
+  `Head:` line; the lane drops the label on the new head. When `dev` alone is
+  red on every job the batch is red on, the batch lands on each PR's own proof
+  so a fix can get through; a job red only with the batch is still bisected.
+  One batch runs at a time; a PR that becomes ready while one is in flight
+  waits for the next sweep (a few minutes). A PR that is behind
   `dev` merges as it is. A PR that conflicts is integrated by the lane: in a
   scratch clone it merges `origin/dev` into the PR branch with the repo's
   merge drivers (`.gitattributes`, from main, which is why that file is
   protected), pushes the merge commit to the branch, starts a Linux-only CI
   run (`ci.yml` with `linux_only`) on it, and merges on a later sweep when
   that run passes. The old `Head:` marker no longer matches, by design: the
-  Linux run is the proof for the integrated head, and a code PR gets its
-  macOS build on that head too. A conflict the drivers can't resolve gets one
+  Linux run is the proof for the integrated head, and a code PR still lands
+  only through its batch's macOS gate. A conflict the drivers can't resolve gets one
   comment naming the files and the `needs-rebase` label; a fixer merges dev,
   resolves, pushes, and the lane drops the label. A fast-lane PR opened
   against `main` is retargeted to `dev`.

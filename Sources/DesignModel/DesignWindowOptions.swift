@@ -2,7 +2,8 @@
 // arguments, parsed once: `-DesignServices fake` (else the live services),
 // `-DesignFixture <name>` (a DesignFixtures name opened as an unsaved file) and
 // `-DesignWindowSize WxH` (both above zero, else nil; the app floors it at the
-// suite's minimum window size). The size parse matches SuiteUI's
+// suite's minimum window size), and the export's `-DesignExportTo <folder>` and
+// `-DesignExportFail <file>` (nil when absent). The size parse matches SuiteUI's
 // SuiteWindowSize.parse, which is macOS-only, so the Model holds its own copy.
 // Also here: `openFixture(_:)`, the status line's selection count, page size
 // ("Page 1440 × 1024 pt") and tool tooltip, and DesignControlID, every tier-1
@@ -26,6 +27,10 @@ public struct DesignWindowOptions: Sendable, Equatable {
     /// `-DesignWindowSize 880x560`; nil when absent or malformed. The app floors it at SuiteSize.windowMinimum.
     public var windowWidth: Double?
     public var windowHeight: Double?
+    /// `-DesignExportTo <folder>`: where an export writes with no panel (DE-10); nil when absent.
+    public var exportFolder: String?
+    /// `-DesignExportFail <file name>`: the file the fake export fails on; nil when absent.
+    public var exportFail: String?
 
     public init(arguments: [String]) {
         func value(after flag: String) -> String? {
@@ -37,6 +42,8 @@ public struct DesignWindowOptions: Sendable, Equatable {
         let size = value(after: "-DesignWindowSize").flatMap(Self.size)
         windowWidth = size?.width
         windowHeight = size?.height
+        exportFolder = value(after: "-DesignExportTo")
+        exportFail = value(after: "-DesignExportFail")
     }
 
     /// "880x560" as two finite numbers above zero; nil otherwise.
