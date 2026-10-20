@@ -12,7 +12,7 @@ Build wave 1. Base origin/dev df54ce81.
 
 | Slice | Tasks | State |
 |---|---|---|
-| LF-a | LF-1, LF-2 | built (one PR, branch library-file-flow/LF-1); gate queued behind DR-1's |
+| LF-a | LF-1, LF-2 | gate running; mutation plan LibraryModel.FileFlow (3) added |
 | LF-u | LF-5, LF-6 | waits on LF-a |
 | LF-m | LF-3, LF-4 | waits on LF-a, SF-5..7, tone-controls LT-m, cull-finish DR-m |
 | LF-z | LF-7, LF-8 | waits on the rest |
