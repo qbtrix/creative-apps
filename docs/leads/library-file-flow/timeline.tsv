@@ -20,3 +20,4 @@
 2026-10-20T20:00:50Z	heartbeat	waiting	LF-a #3624 build 39439515810 still queued since 14:28Z; SF-3 #3514 and SF-4 unmerged
 2026-10-20T20:22:52Z	heartbeat	waiting	LF-a #3624 build 39439515810 still queued since 14:28Z; SF-3 #3514 and SF-4 unmerged
 2026-10-20T20:44:36Z	heartbeat	waiting	LF-a #3624 build 39439515810 still queued since 14:28Z; SF-3 #3514 and SF-4 unmerged
+2026-10-20T21:07:38Z	heartbeat	waiting	LF-a #3624 clean after #3671, macOS build 39439515810 queued; SF-3/SF-4 open
