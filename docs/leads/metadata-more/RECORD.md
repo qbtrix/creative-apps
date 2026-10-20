@@ -61,3 +61,4 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 - 06:48Z check-in: #3423, #3424, #3460 still unmerged; lane macOS builds still queued (39366083753 for 3h). No new findings since 06:20Z. Builders: FC-9, MD-19, MD-6.
 
 - 07:07Z: #3460 lane macOS build 39377907664 succeeded; waiting on the lane merge.
+- 07:15Z check-in: #3423 and #3460 macOS builds green, not yet merged by the lane; #3424 build 39366318428 still queued (since 03:49Z). No new line:library findings in these features' files. Builders: MD-7, MD-10, FC-12; FC-10 blocked on S-L9 #3411.
