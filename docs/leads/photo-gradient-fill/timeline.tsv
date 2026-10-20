@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-20T20:54Z	check	heartbeat	#3681	open; lane macOS build 39484077277 queued since 19:30Z (macOS queue backlog); PG-2/PG-3/PG-4 held
 2026-10-20T21:14Z	check	heartbeat	#3681,#3695,#3705	open; PG-1 macOS build still queued (33 CI runs queued); PG-2/3/4 held
 2026-10-20T21:41Z	heartbeat	poll	-	bases open: #3679 #3681 #3700 #3705 (macOS builds queued), #3695 needs-rebase (not this line); held branches unchanged
+2026-10-20T22:00Z	heartbeat	poll	-	bases #3679 #3681 #3700 #3705 still open (macOS builds queued); #3695 rebased by lane (54c6f578), not merged; held branches unchanged
