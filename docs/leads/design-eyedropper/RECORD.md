@@ -2,15 +2,15 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:16:13Z
-Stage: 3 wave 1 (DY-a PR #3691 in lane; DY-u building)
+Stage: 3 wave 1 (DY-a PR #3691 in lane at f84d4cc5; DY-u pushed, waits #3691)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
-Next: DY-u (DY-3, DY-4) stacked on #3691 (branch design/eyedropper/DY-a). DY-m waits transform:DT-m
+Next: when #3691 merges, merge origin/dev into design/eyedropper/DY-u (94eb67fa), rerun the gate, open its PR. DY-m waits transform:DT-m.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 0 | PR #3691 | – | – |
-| DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 0 | building | – | – |
+| DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 0 | pushed 94eb67fa, PR after #3691 | – | – |
 | DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m; EY-m (done) | no | 0 | waiting | – | – |
 | DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m | yes | 0 | waiting | – | – |
 
@@ -33,5 +33,6 @@ Next: DY-u (DY-3, DY-4) stacked on #3691 (branch design/eyedropper/DY-a). DY-m w
 - Design transform (#3436) has no lead running (no lead/design-transform branch, wave.json planned); its DT-a needs gradient-fill:DG-a (building in run act-1a15a9a4e8b-kn6a). shape-tools DS-a and eyedropper DY-m wait on it; this lead does not build another feature's tasks.
 
 ## Open
+- #3691 first head 667b9d18 failed DesignNodeTests.onlyThePenIsDisabledAndItSaysWhy and DesignDrawTests.theDrawingToolsAreAllEnabled (found by the DY-u builder); fixed at f84d4cc5 and the Head line moved. DY-5 note: keep the eyedropper a no-op in model.drag, since the overlay tap already picks.
 - The session proxy appends a Claude Code footer to PR bodies written via MCP or REST; it cannot be stripped from here. The fast lane strips attribution from the squash commit. Reported for the supervisor.
 - DY-m waits transform:DT-m (Design transform #3436 has no running lead).

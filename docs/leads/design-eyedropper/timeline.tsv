@@ -3,3 +3,5 @@ utc	stage	event	ref	note
 2026-10-20T19:18:03Z	3	build-wave started	DY-a	workflow wf_b1589a06-dae
 2026-10-20T19:30:20Z	3	PR opened	DY-a #3691	head 667b9d18, Fast-Check pass
 2026-10-20T19:31:02Z	3	build-wave started	DY-u	workflow wf_4d1d2cbc-5d4, stacked on #3691
+2026-10-20T19:51:38Z	3	fix pushed	DY-a #3691	f84d4cc5: two tool-list tests; gate PASS
+2026-10-20T19:51:38Z	3	branch pushed	DY-u	94eb67fa, PR after #3691 merges
