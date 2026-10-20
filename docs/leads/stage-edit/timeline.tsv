@@ -191,3 +191,4 @@
 2026-10-20T09:11:58Z	heartbeat	full CI 39395505274 (be364d1e, contains 424b4a60) still queued; old run 39349878829 finished (failure, 2019b521)
 2026-10-20T09:23:46Z	heartbeat	full CI 39395505274 (be364d1e, has 424b4a60) still queued; waiting
 2026-10-20T09:35:09Z	heartbeat	full CI 39395505274 (be364d1e) still queued; 39400855893 cancelled
+2026-10-20T09:47:00Z	heartbeat	waiting on full CI 39402653640 (36789542, contains 424b4a60); 39395505274 still queued
