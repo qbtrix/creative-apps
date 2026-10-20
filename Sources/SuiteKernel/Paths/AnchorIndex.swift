@@ -13,15 +13,17 @@ public struct AnchorIndex: Sendable {
     /// One drawing segment in document space: its element index in the path, its start and the element from there.
     private struct Piece: Sendable { var element: Int, from: Point, to: PathElement }
     /// Most cells one segment is filed in; a wider one (or one with a non-finite point) is searched on every hover.
-    static let maxCellsPerSegment = 1_024
+    static let maxCellsPerSegment = 64
 
     /// How many anchors the index holds.
     public let count: Int
     private let anchors: [Key: [Mark]], handles: [Key: [Mark]]
-    private let pieces: [Piece], segments: [Key: [Int]], wide: [Int]
+    private let pieces: [Piece], segments: [Key: [Int]]
+    /// The segments every hover searches (see `maxCellsPerSegment`), as indexes into `pieces`.
+    let wide: [Int]
 
     /// The grid column or row holding coordinate `v`: `floor(v / cell)`, clamped so a huge value can't trap.
-    public static func slot(_ v: Double) -> Int {
+    static func slot(_ v: Double) -> Int {
         let q = min(max(v / cell, -1e15), 1e15)
         return q.isFinite ? Int(q.rounded(.down)) : 0
     }

@@ -1,6 +1,6 @@
 // AnchorIndexTests.swift (pen-paths PN-1 written, PN-6 turns on): hits and marquees on the anchor grid.
 import Testing
-import SuiteKernel
+@testable import SuiteKernel
 @Suite struct AnchorIndexTests {
     static func p(_ x: Double, _ y: Double) -> Point { Point(x: x, y: y) }
     static func r(_ i: Int) -> AnchorRef { AnchorRef(contour: 0, index: i) }
@@ -61,10 +61,12 @@ import SuiteKernel
                                     VectorAnchor(point: Self.p(40, 120), handleIn: Self.p(90, 130), handleOut: Self.p(0, 90))], closed: true),
             VectorContour(anchors: [VectorAnchor(point: Self.p(-3000, 0)), VectorAnchor(point: Self.p(3000, 2000))], closed: false),
         ])
+        // A quad, a line, a close, then a line over 64 cells but well under the old cap of 1,024.
         let path = VectorPath(elements: curves.elements + [.move(to: Self.p(200, 200)), .quad(control: Self.p(260, 120), to: Self.p(320, 220)),
-                                                            .line(to: Self.p(250, 300)), .close])
+                                                            .line(to: Self.p(250, 300)), .close, .move(to: Self.p(-20, 300)), .line(to: Self.p(340, -50))])
         let m = Matrix(a: 1.5, b: 0, c: 0, d: 1.5, tx: 7, ty: -3)
         let index = AnchorIndex(path, toDocument: m)
+        #expect(index.wide.count == 2, "the two long lines")
         var points = [Self.p(528, 302), Self.p(5000, 5000)]
         for x in stride(from: -40.0, through: 520, by: 9) { for y in stride(from: -80.0, through: 460, by: 11) { points.append(Self.p(x, y)) } }
         for k in 1..<20 {  // beside the long line, which spans too many cells to file
