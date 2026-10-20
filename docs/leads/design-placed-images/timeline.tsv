@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-20T19:29Z	1	stage-end	#3454	v3 packet, 4 slices; PD-a waits on PL-a, DG-a, DT-a, DS-a, DK-m
 2026-10-20T19:29Z	3	heartbeat	#3454	polling waits
 2026-10-20T19:30Z	3	heartbeat	#0	lead/placed-images is another line's lead branch; this record lives on lead/design-placed-images
+2026-10-20T19:45Z	3	heartbeat	-	poll: PL-a #3578 merged (slice not marked done); DG-a #3687 open; DT-a not started; DS-a no PR; DK-a #3690 open, DK-m none
