@@ -4,10 +4,11 @@
 // the window's A hasn't moved; after the release it keeps the last summary, and a new press clears
 // it to "none". `snappedDrag` gates the bound on the live guides (SN-11): on `crowd`, a 120-sample
 // move, resize and draw each run DesignEditor's body 3 times or fewer, and after 60 samples of each
-// `design.canvas.guides` reads the live copy's summary while the window's page is unmoved. Nested
+// `design.canvas.guides` reads the live copy's summary while the window's page is as the press
+// left it (a draw's press adds its layer at no size). Nested
 // in BodyCountSuites, as every suite that reads a body counter or DesignWindow.lastWorkspace is.
-// macOS only.
-#if canImport(AppKit)
+// macOS debug builds only: DesignWindow.lastWorkspace exists only there.
+#if canImport(AppKit) && DEBUG
 import AppKit
 import DesignModel
 import SwiftUI
@@ -55,7 +56,6 @@ extension BodyCountSuites {
         }
 
         @Test(.timeLimit(.minutes(3))) func snappedDrag() async throws {
-            #if DEBUG
             for gesture in [DesignWindowDragTests.Gesture.move, .resize, .draw] {
                 let live = DesignLiveDrag()
                 let w = RenderBudgetWindow(DesignWindow(seed: gesture.seed, live: live))
@@ -64,7 +64,6 @@ extension BodyCountSuites {
                 #expect((step.bodies ?? 0) >= 1, "the snapped \(gesture) never reached the window: \(step)")
                 expectBodies(step, atMost: 3, target: 3)
             }
-            #endif
         }
 
         /// DesignWindowDragTests' 120-sample `gesture` on the window `w` hosts, paused after 60 samples
@@ -90,18 +89,23 @@ extension BodyCountSuites {
                 #expect(Self.value(in: w.host) == DesignGuideOverlay.value(guides, last: nil),
                         "mid-\(gesture) the guides don't read the live copy's \(guides.summary)")
                 let window = try #require(DesignWindow.lastWorkspace, "the \(gesture) never reached the window")
-                #expect(window.selectedPage == gesture.seed.selectedPage, "the window's page changed mid-\(gesture)")
+                // The press goes to the window (D0-8a): a draw's adds its layer there at no size.
+                var pressed = gesture.seed
+                pressed.drag(from: DesignPoint(gesture.from), to: DesignPoint(gesture.from))
+                #expect(window.selectedPage == pressed.selectedPage, "a sample reached the window's page mid-\(gesture)")
                 try await w.ticks(60) { w.send(.leftMouseDragged, at: at(60 + $0)) }
                 w.timed { w.send(.leftMouseUp, at: at(120)) }
             }
         }
 
-        /// The accessibility value of the guides element under `element`, searched depth first.
+        /// What the guides element under `element` reads, searched depth first: its accessibility
+        /// value, else its label, which carries the same words because AppKit hands SwiftUI's value
+        /// on a plain element back as nil (#262).
         static func value(in element: Any, depth: Int = 0) -> String? {
             let node = element as AnyObject
             if (node.accessibilityIdentifier?() ?? nil) == DesignControlID.canvasGuides {
                 let value: Any?? = node.accessibilityValue?()
-                return (value ?? nil) as? String
+                return (value ?? nil) as? String ?? (node.accessibilityLabel?() ?? nil)
             }
             guard depth < 60 else { return nil }
             return ((node.accessibilityChildren?() ?? nil) ?? []).lazy.compactMap { value(in: $0, depth: depth + 1) }.first
