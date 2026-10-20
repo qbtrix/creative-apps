@@ -72,7 +72,8 @@ private func draft(_ tool: FlareTool, _ a: Point, _ b: Point, _ keys: DragModifi
     let layers = engine.document.layers(of: scene) ?? []
     #expect(id == "rectangle-1" && layers.map(\.name) == ["Rectangle 1"])
     #expect(layers.map(\.name) == (fake.document.layers(of: scene) ?? []).map(\.name))
-    #expect(layers.first?.shapes.first?.path == box.shape.path)
+    // The layer's origin is the box's centre (200, 150) and the path sits around it (B1 stopgap).
+    #expect(layers.first?.shapes.first?.path == box.shape.path?.transformed(by: .translation(x: -200, y: -150)))
     #expect(engine.undoActionName == "Undo Add Rectangle")
     try engine.undo()
     #expect(engine.document == FlareFixtures.empty && !engine.canUndo)
