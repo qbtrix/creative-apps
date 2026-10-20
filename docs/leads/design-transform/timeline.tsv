@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-20T20:19Z	poll	heartbeat	-	DT-a blocked 3 polls on DG-a #3687 (macOS build); asked supervisor on #3436
 2026-10-20T20:37Z	DT-a	review	#3436	supervisor: start DT-1 now, stack on DG-a where files overlap
 2026-10-20T20:37Z	DT-a	stage-start	design/dt-a-transform-stubs	builder on DT-1+DT-2, stacked on lead/design-gradient-fill-DG-a (shares DesignNode.swift)
+2026-10-20T20:56Z	DT-a	pr-opened	#3751	head 4209ed6, 397 lines/14 files own diff, stacked on #3687, Mutate 14/14 DesignNode

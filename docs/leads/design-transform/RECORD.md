@@ -4,7 +4,7 @@ Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 polling
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: DT-a builder running (DT-1, DT-2), stacked on DG-a #3687 per supervisor 20:24Z.
+Next: DT-a is #3751 (head 4209ed6), stacked on DG-a #3687; lands after #3687. Critic round to check: inspector file named DesignInspectorTransform+Kernel.swift to pass the duplicate-logic name check (verify it holds no maths), Rotate symbols unverified, Select-a-layer wording differs from packet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
