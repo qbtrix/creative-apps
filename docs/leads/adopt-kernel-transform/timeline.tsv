@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-20T04:32:35Z	check	AL-design #3392 needs-rebase again (04:30Z, head aeec3b0), its lead fixes it; other blockers no PR; main green run still 38363734665
 2026-10-20T04:53:42Z	check	AL-design #3392 rebased again by its lead (head ed7c3c6, clean), not merged; other blockers no PR; main green run still 38363734665
 2026-10-20T05:08:13Z	start	run act-1a157b2050f-ovpu; lead branch rebuilt on main b3011ab; AT-design (AT-d1) starts when adopt-kernel-layers AL-design #3392 merges on dev (open, clean, Head ed7c3c6, waiting on the lane's macOS build); AS-design merged #3385 (2026-10-20T01:39Z). Recheck every heartbeat.
+2026-10-20T05:30:52Z	check	heartbeat: #3484 (CC-u) waits on lane macOS build 39374818329 (lane-noted footer removed from body); AL-design #3392 open clean, not merged (AT-d1 waits); AC-p3/d3/h3 building stacked on CC-u; full CI 39373545059 on dev pending, no Belt-Slice-Done yet
