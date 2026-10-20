@@ -1,5 +1,5 @@
 {
-  "title": "Camera RAW files in Library through the suite's shared RAW decode: embedded previews in the grid, float develop in the loupe, full-size export",
+  "title": "Camera RAW files in Library through the suite's shared RAW decode, and every photo developed in a wide float working space: embedded previews in the grid, full-size 16-bit export",
   "wave": 5,
   "order": 30,
   "status": "planned",
@@ -21,7 +21,7 @@
     "LibraryRawJourneyTests.testImportDevelopExportRaw"
   ],
   "notes": "Re-cut 2026-10-21 (captain: RAW in beta, shared) to Library's thin adoption of suiteui/shared-raw: no Library decoder, no RAW-only develop rows or catalog keys, no RAW+JPEG pairing or grid tag in the beta (open questions R1, R2). The float decode resolves D11 for RAW files.",
-  "quality": "QB-LIB-1 for RAW (preview first), headroom (Exposure -1 keeps the highlight patches apart), QB-V4 for RAW, QB-F1",
+  "quality": "QB-LIB-1 for RAW (preview first), headroom (Exposure -1 keeps the highlight patches apart), QB-V4 for RAW, QB-F1; wide gamut and high bit depth (a P3 photo's out-of-sRGB red survives to a 16-bit TIFF)",
   "library_title": "Camera RAW files through the shared RAW decode",
   "owned": [
     "Tests/LibraryModelTests/LibraryRawTests.swift",
@@ -38,7 +38,8 @@
     "Tests/mutations/LibraryModel.LiveLoupeImaging.json",
     "Tests/mutations/LibraryModel.LiveExporter.json",
     "Sources/LibraryApp/Platform/ImageIODecoder.swift",
-    "docs/blueprints/library/features/raw.wave.json"
+    "docs/blueprints/library/features/raw.wave.json",
+    "Sources/LibraryApp/Platform/JPEGWriter.swift"
   ],
   "slices": [
     {
@@ -87,6 +88,7 @@
         "Tests/mutations/LibraryModel.LiveLoupeImaging.json",
         "Tests/mutations/LibraryModel.LiveExporter.json",
         "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift",
         "Tests/AppSnapshotTests/LibraryRawDecodeTests.swift"
       ],
       "waits": {
@@ -95,7 +97,8 @@
           "RW-4"
         ],
         "export-pack:LX-m": [
-          "RW-3"
+          "RW-3",
+          "RW-4"
         ]
       },
       "ui": true

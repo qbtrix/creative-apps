@@ -48,6 +48,8 @@ pixel for pixel. If that test fails at the pin, SC-a stops and files a
 `Package.swift`/`Package.resolved`: its rebase must keep `2258b62` or newer.
 
 **Hand-offs** (cross-line; the lead checks each before the slice starts):
+- **SC-photo (colour):** SC-4 waits on suite-imaging's IM-m (IM-15,
+  `ImagingColor`) for the working space.
 - **SC-f:** `PhotoHeadless.swift` was also command-catalog's and
   adopt-command-catalog's (built, now in `depends`);
   `PhotoWindow+Export.swift` is photo/export-pack PX-a's;
@@ -105,7 +107,7 @@ library.md (import, export); halo.md (render-out).
 |---|---|---|---|---|
 | SC-f | One registry in SuiteModel lists every image format the suite reads and the four it writes, the plists and the type registry are built from it, and Photo's and Library's panels, import kinds, export formats and the CLI's lists derive from it with the per-app lists deleted and their ratchet strict. | SC-13, SC-14, SC-15, SC-16 | MJ-SC-f, PJ-SC | adopt-suiteui-chrome:AC-export-sheet (SC-15, SC-16: the export sheets, A/C first) |
 | SC-a | Core's PNG is proven to round-trip what both local writers write, the ImageIO import ratchet is live with today's files baselined, and `SuiteImageIO` is declared as stubs in SuiteShell, which links CoreRaster. | SC-1, SC-2 | MJ-SC | suite-imaging:IM-a (SC-2: `Package.swift`, `project.yml`, A/C first) |
-| SC-photo | Photo decodes and encodes PNG and JPEG through core and everything else through `SuiteImageIO`, its own ImageIO code and PNG fallback are gone, and the pasteboard uses the same adapter. | SC-3, SC-4 | MJ-SC-photo, PJ-SC | SC-a; photo/export-pack PX-m (SC-4, cross-line hand-off) |
+| SC-photo | Photo decodes and encodes PNG and JPEG through core and everything else through `SuiteImageIO`, its own ImageIO code and PNG fallback are gone, and the pasteboard uses the same adapter. | SC-3, SC-4 | MJ-SC-photo, PJ-SC | SC-a; photo/export-pack PX-m (SC-4, cross-line hand-off); suite-imaging:IM-m (SC-4, `ImagingColor`) |
 | SC-halo | Halo's rendered frames and PNG sequences are core's PNG bytes, so the headless render, the sequence sink and the viewer agree. | SC-5, SC-6 | MJ-SC-halo, HJ-SC | SC-a |
 | SC-library | Library scans, decodes, orients and writes through `SuiteImageIO` and core's JPEG, with the same pixel size, capture date and metadata as before. | SC-7, SC-8 | MJ-SC-library, LJ-SC | SC-a; SC-f (SC-8, `JPEGWriter.swift`); library spine, metadata-more, raw, export, export-pack (SC-8, cross-line hand-offs) |
 | SC-raster | Design's and Flare's rasterizers hand their pixels to `SuiteImageIO` for PNG instead of their own `CGImageDestination` code. | SC-9, SC-10 | MJ-SC-raster | SC-a |
@@ -212,11 +214,15 @@ public enum SuiteImageIO {
     public static var writable: Set<SuiteImageFormat> { get }
     /// The file's facts without decoding pixels (size already oriented).
     public static func info(_ url: URL) throws -> Info
-    /// Pixels, oriented and in sRGB, as CoreRaster's premultiplied linear buffer. PNG and JPEG are
-    /// read by CoreRaster; everything else by ImageIO. `longestSide` shrinks while decoding.
+        /// Pixels, oriented, in SuiteImaging's working space (linear Display P3, Float32, extended range) from the
+    /// file's own ICC profile through `ImagingColor.toWorking`, as CoreRaster's premultiplied buffer. 16-bit and
+    /// float sources keep their depth; PNG and JPEG are read by CoreRaster, everything else by ImageIO.
+    /// `longestSide` shrinks while decoding.
     public static func decode(_ data: Data, longestSide: Int?) throws -> PixelBuffer
-    /// PNG and JPEG by CoreRaster, HEIC and TIFF by ImageIO.
-    public static func encode(_ buffer: PixelBuffer, as format: Format) throws -> Data
+        /// PNG and JPEG by CoreRaster, HEIC and TIFF by ImageIO. The buffer is in the working space;
+    /// `ImagingColor.toOutput` takes it to `profile` (default sRGB) at the format's depth, and the profile's ICC
+    /// bytes are embedded.
+    public static func encode(_ buffer: PixelBuffer, as format: Format, profile: ColorProfile = .sRGB) throws -> Data
     /// For the CoreGraphics rasterizers: the image as PNG through CoreRaster.
     public static func png(_ image: CGImage) throws -> Data
 }
@@ -246,13 +252,17 @@ public enum SuiteImageIO {
   every catalog fixture re-encodes byte for byte. The scan accepts every
   readable format; the export sheet offers the writable ones this Mac
   writes.
-- **High bit depth.** `decode`: a source with more than 8 bits per
-  component (EXR, 16-bit TIFF and PNG) draws into a Float32
-  extended-linear context, so its range reaches the `PixelBuffer`; `encode`
-  `.tiff(bitDepth: 16)` writes 16 bits from the float buffer. The callers
-  that hand over a float buffer get it (shared-raw's RAW route, Library's
-  float export); Photo's and Library's 8-bit `DecodedImage`/`DisplayImage`
-  routes stay 8-bit (open question Q1).
+- **High bit depth and wide gamut (beta).** `decode` reads the file's ICC
+  profile (core `ColorProfile(iccData:)`; none means sRGB) and its samples
+  at their own depth: a source with more than 8 bits per component (EXR,
+  16-bit TIFF and PNG) draws into a Float32 context, and every source goes
+  through `ImagingColor.toWorking`, so a Display P3 phone photo keeps its
+  out-of-sRGB colours and nothing is cut at 1.0. `encode` runs
+  `ImagingColor.toOutput` to the chosen profile and writes 16 bits for
+  `.tiff(bitDepth: 16)`, embedding the profile. Photo and Library take the
+  float buffer for every file, not only RAW (shared-raw SR-6, library/raw
+  RW-3 and RW-4); their 8-bit `DecodedImage`/`DisplayImage` stay only for
+  thumbnails and paste.
 - **decode.** Sniff the signature: PNG → `PNG.read`, JPEG → core `JPEG.read`
   then the Exif orientation applied with CoreRaster's `rotated`/`flipped`;
   anything else → `CGImageSource` with `kCGImageSourceCreateThumbnailWithTransform`
@@ -308,7 +318,7 @@ Longest chain: SC-13 → SC-14 → SC-15 → SC-16 → SC-8 → SC-12 (6), tied 
 | SC-1 | `CorePNGParityTests` green at the pin; the ratchet fails a fixture `import ImageIO` in `Sources/HaloModel/` | core's PNG can't replace the local writers (then the slice stops for a core bump), or an eighth ImageIO file passes | – (tests; the parity test is the oracle for the deletes) |
 | SC-2 | builds on macOS; `swift build` on Linux unchanged; `SuiteImageIOTests` disabled by name | SuiteShell can't see `PixelBuffer` | – (stubs) |
 | SC-3 | compiles, disabled; `scripts/jobs check` | – | – (tests) |
-| SC-4 | `SuiteImageIOTests` (Exif 6 upright, a P3 PNG converted to sRGB, HEIC round trip); `SuiteImageIOFormatsTests` (each readable format's fixture decodes, each writable one round-trips, a 16-bit TIFF keeps a 1/1000 step that 8 bits loses, an EXR value above 1 survives decode); `PhotoCodecRouteTests` (PNG never falls back); RJ-X46 on the macOS job | a sideways or colour-shifted decode, or the fallback still runs | `PhotoModel.CoreRasterImageCodec`: JPEG routed to the PNG reader → `.formatSniff`; core error swallowed into an empty buffer → `.errorsSurface` |
+| SC-4 | `SuiteImageIOTests` (Exif 6 upright, a P3 PNG converted to sRGB, HEIC round trip); `SuiteImageIOFormatsTests` (each readable format's fixture decodes, each writable one round-trips, a 16-bit TIFF keeps a 1/1000 step that 8 bits loses, an EXR value above 1 survives decode, a Display P3 PNG's out-of-sRGB red decodes outside sRGB and a 16-bit TIFF written with the P3 profile reads back within 1/1000); `PhotoCodecRouteTests` (PNG never falls back); RJ-X46 on the macOS job | a sideways or colour-shifted decode, or the fallback still runs | `PhotoModel.CoreRasterImageCodec`: JPEG routed to the PNG reader → `.formatSniff`; core error swallowed into an empty buffer → `.errorsSurface` |
 | SC-5 | compiles, disabled | – | – (test) |
 | SC-6 | `HaloFramePNGCoreTests`; `HJ-SC` | a frame's bytes differ from core's, or the viewer and the file differ | `HaloModel.HaloHeadless`: alpha written premultiplied → `.straightAlpha`; frame name ignores the plan → `.namedByPlan` |
 | SC-7 | compiles, disabled | – | – (test) |
@@ -343,5 +353,5 @@ SC-z with the strict ratchet and RJ-X46 green on the macOS job. Then
 
 | # | Question | Recommendation |
 |---|---|---|
-| Q1 | Photo's `DecodedImage` and Library's `DisplayImage` are 8-bit, so an EXR or a 16-bit TIFF opens clipped to 8 bits there, and a TIFF exported from them is 8-bit | Beta: accept; the registry and `SuiteImageIO` carry the depth, and shared-raw's float route (`decodeLinear`) is the model to extend to high-bit formats after the beta |
+| Q1 | Which profile does an export default to: sRGB (safest for the web) or Display P3 (keeps a wide photo wide)? | sRGB for JPEG and PNG, the source's profile (P3 when the photo came in P3) for TIFF and HEIC; the export sheet shows it, the CLI takes `profile` |
 | Q2 | WebP, GIF and BMP writing (ImageIO writes some of them on current macOS) | Not exposed in the beta: the writable list stays the four the captain named; adding one is a registry row and an `ExportFormats` row |
