@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-20T11:49:59Z	heartbeat	poll: no merges 11:37-11:50Z; FK-a still waits on SS-2, FG-a (#3532), GF-a (GF-2)
 2026-10-20T12:03:41Z	heartbeat	12:03Z poll: no merges since 11:50Z. Next: FK-a waits on SS-2 (StrokeEditor), #3532 (FG-a), GF-2 (GF-a)
 2026-10-20T12:20:51Z	heartbeat	12:20Z poll: no merges since 12:03Z. Next: FK-a waits on SS-2 (StrokeEditor), #3532 (FG-a), GF-2 (GF-a)
+2026-10-20T12:31:43Z	heartbeat	12:31Z poll: merged #3493 #3489 #3473 #3396 (suite/library), none are FK deps. Next: FK-a waits on SS-2 (StrokeEditor), #3532 (FG-a), GF-2 (GF-a)
