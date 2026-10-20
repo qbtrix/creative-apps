@@ -243,8 +243,8 @@ struct MCPCallTests {
         #expect(rects.count == 2, "the refused call ran nothing")
     }
 
-    /// Timing (quality row "call overhead"): reported, not gated, so it waits on a `Tests/perf-suites.txt` entry too.
-    @Test(.disabled("waits on a perf-suites entry (timing)"))
+    /// Timing (quality row "call overhead"): p95 of the routing overhead, on the perf list (`Tests/perf-suites.txt`).
+    @Test
     func callOverhead() throws {
         var sessions = MCPSessions(Self.options(), io: Self.io())
         let doc = try Self.open(&sessions)
