@@ -17,28 +17,49 @@ import SuiteKernel
         #expect(two.adding(renamed).byID["a"]?.name == "a.png")
         #expect(two.pruned(keeping: ["b"]).byID.keys.sorted() == ["b"])
     }
-    @Test(.disabled("waits on PL-5")) func sniffsEachFormat() {
+    @Test func sniffsEachFormat() {
         #expect(PlaceRules.format(of: Self.png) == .png && PlaceRules.format(of: Data([0xFF, 0xD8, 0xFF, 0xE0])) == .jpeg)
         #expect(PlaceRules.format(of: Data("<?xml version=\"1.0\"?>\n<svg/>".utf8)) == .svg)
         #expect(PlaceRules.format(of: Data([0xEF, 0xBB, 0xBF]) + Data("  <svg/>".utf8)) == .svg)
         #expect(PlaceRules.format(of: Data("plain text".utf8)) == nil && PlaceRules.format(of: Data()) == nil)
     }
-    @Test(.disabled("waits on PL-5")) func equalBytesEqualIDs() {
+    @Test func equalBytesEqualIDs() {
         var changed = Self.png; changed[11] = 14
         #expect(PlaceRules.assetID(of: Self.png) == PlaceRules.assetID(of: Data(Self.png)) && !PlaceRules.assetID(of: Self.png).isEmpty)
         #expect(PlaceRules.assetID(of: Self.png) != PlaceRules.assetID(of: changed))
     }
-    @Test(.disabled("waits on PL-5")) func fitsCentredNeverUpscaledInside() {
+    @Test func fitsCentredNeverUpscaledInside() {
         let fit = PlaceRules.fitted(natural: Self.wide, in: Self.canvas, at: nil)
         #expect(fit.width == 800 && abs(fit.height - 266.67) < 0.01 && abs((fit.minY + fit.maxY) / 2 - 300) < 1e-9)
         #expect(PlaceRules.fitted(natural: Self.small, in: Self.canvas, at: nil) == Rect(minX: 280, minY: 260, maxX: 520, maxY: 340))
         #expect(PlaceRules.fitted(natural: Self.small, in: Self.canvas, at: Point(x: 790, y: 5)) == Rect(minX: 560, minY: 0, maxX: 800, maxY: 80))
     }
-    @Test(.disabled("waits on PL-5")) func coverKeepsAspectEdgesAndReset() {
+    @Test func coverKeepsAspectEdgesAndReset() {
         #expect(PlaceRules.drawnRect(Self.image(), natural: Self.wide) == Rect(minX: -300, minY: 0, maxX: 600, maxY: 300))
         #expect(PlaceRules.drawnRect(Self.image(Point(x: 0, y: 0.5)), natural: Self.wide) == Rect(minX: 0, minY: 0, maxX: 900, maxY: 300))
         let past = PlaceRules.drawnRect(Self.image(Point(x: -1, y: 0.5)), natural: Self.wide)
         #expect(past.minX <= 0 && past.maxX >= 300)
         #expect(PlaceRules.resetBox(Self.image(), natural: Self.wide) == Rect(minX: 0, minY: 100, maxX: 300, maxY: 200))
+    }
+    // The mutation plan's named checks (Tests/mutations/SuiteKernel.PlaceRules.json).
+    @Test func neverUpscales() {
+        let fit = PlaceRules.fitted(natural: Self.small, in: Self.canvas, at: nil)
+        #expect(fit.width == 240 && fit.height == 80)
+        #expect(PlaceRules.fitted(natural: Self.wide, in: Self.canvas, at: nil).minX == 0)
+    }
+    @Test func coverKeepsAspect() {
+        let tall = PlacedImage(assetID: "a", box: Rect(minX: 10, minY: 20, maxX: 110, maxY: 420))
+        let drawn = PlaceRules.drawnRect(tall, natural: Self.wide)
+        #expect(drawn == Rect(minX: -540, minY: 20, maxX: 660, maxY: 420) && drawn.width / drawn.height == 3)
+    }
+    @Test func focusEdgeCovers() {
+        for focus in [Point(x: -1, y: 0.5), Point(x: 2, y: 0.5), Point(x: 0.5, y: 9)] {
+            let drawn = PlaceRules.drawnRect(Self.image(focus), natural: Self.wide)
+            #expect(drawn.minX <= 0 && drawn.maxX >= 300 && drawn.minY <= 0 && drawn.maxY >= 300)
+        }
+    }
+    @Test func svgWithBOM() {
+        #expect(PlaceRules.format(of: Data([0xEF, 0xBB, 0xBF]) + Data("\n<?xml version=\"1.0\"?><svg/>".utf8)) == .svg)
+        #expect(PlaceRules.format(of: Data([0xEF, 0xBB, 0xBF]) + Data("hello".utf8)) == nil)
     }
 }
