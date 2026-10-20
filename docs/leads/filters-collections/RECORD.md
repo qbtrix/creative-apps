@@ -31,7 +31,8 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 | FC-7 | FC-b | 5 | filter methods (not smart); unavailable = nil; enables FC-6 checks | Sources/LibraryModel/LibraryFilter.swift, Tests/mutations/LibraryModel.LibraryFilter.json, FC-6 four files | LibraryFilterBarTests enabled | #3534 | draft, stacked on #3491 |
 | FC-9 | FC-c | 5 | new/add/remove/rename/delete, help; unavailable = nil; enables FC-8 checks but J14 step 7 | Sources/LibraryModel/LibraryCollections.swift, Tests/mutations/LibraryModel.LibraryCollections.json, FC-8 four files | LibraryCollectionsTests enabled | #3546 | draft on #3490 + #3423 |
 | FC-15 | FC-e | 5 | CollectionsStore: folder, atomic write, writeNow, set aside; enables its store test | Sources/LibraryApp/Platform/CollectionsStore.swift, Tests/AppSnapshotTests/LibraryCollectionsStoreTests.swift | LibraryCollectionsStoreTests | #3539 | draft, stacked on #3521 |
-| FC-10, FC-12, FC-14, FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
+| FC-12 | FC-d | 5 | newSmartCollection, smart rule edits as undo steps, smartUnavailable = nil | Sources/LibraryModel/LibraryFilter.swift (+LibraryCollections.swift, seam test one line each) | LibrarySmartCollectionTests enabled | #3551 | draft on #3534 + #3515 |
+| FC-10, FC-14, FC-16 | FC-b, FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
