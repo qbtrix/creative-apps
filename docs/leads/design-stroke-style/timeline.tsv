@@ -5,3 +5,4 @@ time	kind	note
 2026-10-20T19:31:00Z	3	PR opened	DK-a #3690	head 6bb9960e, Fast-Check pass
 2026-10-20T20:15Z	3	check	#3690	macOS build 39484764814 queued on 6bb9960e; no needs-fix; scoped design run 39490030243 on dev predates DK-a
 2026-10-20T20:36Z	-	check	#3690	macOS build 39484764814 still queued (61m)
+2026-10-20T20:58Z	-	check	#3690	macOS build 39484764814 still queued; mac runners busy with older builds
