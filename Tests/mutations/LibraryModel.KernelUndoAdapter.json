@@ -10,7 +10,7 @@
     "label": "undo and redo restore even when the kernel had no step to move",
     "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
     "find": "guard moved, let applied else { return }",
-    "replace": "_ = moved; guard let applied = applied ?? Optional(current) else { return }",
+    "replace": "_ = moved; guard let applied = applied ?? Optional(CatalogChange(photos: current)) else { return }",
     "tests": "LibraryHistoryTests"
   },
   {
