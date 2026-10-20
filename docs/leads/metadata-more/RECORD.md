@@ -19,7 +19,7 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | MD-1 | MD-a | 1 | CameraDetails with its cleaning init, CameraField, CameraRow stubs, selectedPhotos, selectedCameraRows; PhotoItem keywords/title/caption/camera; ImportCandidate.camera | Sources/LibraryModel/Contracts/PhotoDetails.swift, Sources/LibraryModel/PhotoItem.swift, Sources/LibraryModel/Contracts/LibraryValues.swift, Tests/LibraryModelTests/LibraryPhotoDetailsTests.swift, Tests/mutations/LibraryModel.PhotoDetails.json, Tests/mutations/LibraryModel.PhotoItem.json | LibraryPhotoDetailsTests | #3422 | merged 05:30Z |
-| MD-2 | MD-a | 2 | sidecar contract, FakeSidecars, services.sidecars | see packet | LibrarySidecarContractTests | #3460 | ready, dev merged in (745fd1d9), 11 files +296/-12 |
+| MD-2 | MD-a | 2 | sidecar contract, FakeSidecars, services.sidecars | see packet | LibrarySidecarContractTests | #3460 | ready; macOS build green (run 39377907664, 07:07Z) |
 | MD-3 | MD-a | 3 | cameras fixture; the decoder and importer carry camera details; MD-MJ1 | see packet | LibraryCamerasFixtureTests | #3465 | open, draft until #3460 merges (stacked) |
 | MD-4 | MD-a | 3 | inert slots: LibraryKeywords, MetadataEditing title/caption, XMPSidecar, PhotoSearch | see packet | LibraryMetadataSlotsTests | #3473 | open, draft until #3460 merges (stacked) |
 | MD-5 | MD-b | 4 | check-first for MD-b: camera rows, decode, snapshots, MD-J1, all disabled | LibraryCameraRowsTests, LibraryCameraDecodeTests, LibraryCameraSnapshots, LibraryJourneyTests+Camera | compiles, disabled | #3492 | draft, stacked on #3465 |
@@ -59,3 +59,5 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 - #3520 asks the supervisor to list the keyword/search budget suites (and the load-flaky Catalog/Grid ones) in Tests/perf-suites.txt. Open.
 - 06:26Z check-in: #3423, #3424, #3460 unmerged; their lane macOS build-only runs (39366083753, 39366318428, 39377907664) still queued. Open line:library findings: only #3453 (export fidelity, not this feature's files). Building ahead on stacked drafts.
 - 06:48Z check-in: #3423, #3424, #3460 still unmerged; lane macOS builds still queued (39366083753 for 3h). No new findings since 06:20Z. Builders: FC-9, MD-19, MD-6.
+
+- 07:07Z: #3460 lane macOS build 39377907664 succeeded; waiting on the lane merge.
