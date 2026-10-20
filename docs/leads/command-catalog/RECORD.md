@@ -1,10 +1,10 @@
 # command-catalog lead record
 
 Issue: #2996 · Packet: docs/blueprints/suiteui/features/command-catalog.md
-Run: act-1a157b2050f-ovpu (resumed from act-1a1543c764c-0mz9) · Session: claude/feature-lead-suiteui-run-336pic · Started: 2026-10-20T05:08Z
-Stage: CC-a, CC-schema, CC-run, CC-lint built; CC-z merged-done (CC-13 a4814ea3), CC-14 waits on CC-u; CC-u open in #3484
+Run: act-1a15b57e785-3gzs (resumed from act-1a157b2050f-ovpu) · Session: claude/command-catalog-lead-k8yjl2 · Started: 2026-10-20T05:08Z
+Stage: every slice merged-done; Belt-Contact-Sheet posted 2026-10-20 on run 39502742421
 Base: b3011ab9dc5579023722e79f83254e6e2520e612 (main); dev 18464f26
-Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; then CC-14 with the shared prose; Belt-Slice-Done for CC-u and CC-z on a ci.yml app=suiteui or full run that contains their merges.
+Next: none for the lead. Verified (beta-hardening): Mac finisher for CC-u; journeys in scoped suiteui run 39491489760.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,9 +12,9 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 | CC-a | `SuiteKernel/Commands` stubs, fake headless document, five `<X>Headless` stubs | CC-1, CC-2 | CJ0 | – | false | 0 | done | 39203617095 | – |
 | CC-schema | `ParamSchema` validate and document; `SchemaProbe` | CC-3, CC-4, CC-5 | CJ1 | CC-a | false | 0 | done | 39203617095 | – |
 | CC-run | `CommandCatalog` run, batch, ledger, conformance | CC-6, CC-7, CC-8 | CJ2 | CC-a, CC-schema | false | 0 | done | 39221576463 | – |
-| CC-u | gallery `command-catalog` page of spec-built menu items | CC-9, CC-10 | SuiteJourneyTests.testCommandCatalogGallery | CC-a, editor-kernel:EK-u | true | 0 | open #3484 (FP-a wait unchained 2026-10-20) | – | – |
+| CC-u | gallery `command-catalog` page of spec-built menu items | CC-9, CC-10 | SuiteJourneyTests.testCommandCatalogGallery | CC-a, editor-kernel:EK-u | true | 0 | done | 39502742421 | wanted |
 | CC-lint | `CommandPathTests` with shrinking baselines | CC-11, CC-12 | CJ3 | CC-a | false | 0 | done | 39203617095 | – |
-| CC-z | full Linux walk, shared prose, `status: built` | CC-13, CC-14 | CJ4 | CC-schema, CC-run, CC-u, CC-lint, editor-kernel:EK-z | false | 0 | planned | – | – |
+| CC-z | full Linux walk, shared prose, `status: built` | CC-13, CC-14 | CJ4 | CC-schema, CC-run, CC-u, CC-lint, editor-kernel:EK-z | false | 0 | done | 39502742421 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -27,12 +27,12 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 | CC-6 | CC-run | 3 | four catalog test files disabled | Tests/SuiteKernelTests/Command{Catalog,Batch,IDLedger}Tests.swift, CatalogConformanceTests.swift | – | #3101 | merged 9f098e23 |
 | CC-7 | CC-run | 4 | CommandCatalog, typed, envelope, batch bodies | Sources/SuiteKernel/Commands/CommandCatalog.swift, CommandSpec.swift, Tests/mutations/SuiteKernel.CommandCatalog.json | CommandCatalogTests, CommandBatchTests | #3120 | merged 9b33f116 |
 | CC-8 | CC-run | 4 | ledger and conformance bodies | Sources/SuiteKernel/Commands/CommandIDLedger.swift, CatalogConformance.swift, Tests/mutations/SuiteKernel.CatalogConformance.json | CommandIDLedgerTests, CatalogConformanceTests | #3156 | merged 671c98e7 |
-| CC-9 | CC-u | 3+ | MenuCommand(spec:on:), gallery page, snapshots | Sources/SuiteUI/MenuCommand+Catalog.swift, Sources/SuiteUI/Gallery/GalleryCommandCatalog.swift, Sources/SuiteUI/SuiteGallery.swift | MenuCommandCatalogTests | #3484 | open |
-| CC-10 | CC-u | 4+ | render budget, journey on | Tests/AppSnapshotTests/RenderBudgetCommandCatalogTests.swift, UITests/SuiteJourneyTests+CommandCatalog.swift | RenderBudgetCommandCatalogTests | #3484 | open (folded into CC-9, 48 lines) |
+| CC-9 | CC-u | 3+ | MenuCommand(spec:on:), gallery page, snapshots | Sources/SuiteUI/MenuCommand+Catalog.swift, Sources/SuiteUI/Gallery/GalleryCommandCatalog.swift, Sources/SuiteUI/SuiteGallery.swift | MenuCommandCatalogTests | #3484 | merged feebad47 |
+| CC-10 | CC-u | 4+ | render budget, journey on | Tests/AppSnapshotTests/RenderBudgetCommandCatalogTests.swift, UITests/SuiteJourneyTests+CommandCatalog.swift | RenderBudgetCommandCatalogTests | #3484 | merged feebad47 (folded into CC-9) |
 | CC-11 | CC-lint | 2 | CommandPathTests and baselines | Tests/SuiteKernelTests/CommandPathTests.swift, Tests/command-path-baseline/*.txt | CommandPathTests | #3073 | merged 1f116104 |
 | CC-12 | CC-lint | 3 | stale baseline ratchet; lead.md sentence | Tests/SuiteKernelTests/CommandPathTests.swift, docs/factory/lead.md | CommandPathTests.staleBaselineFails | #3102 | merged 1422c727 |
 | CC-13 | CC-z | 5 | CommandWalkTests | Tests/SuiteKernelTests/CommandWalkTests.swift | CommandWalkTests | #3182 | merged a4814ea3 |
-| CC-14 | CC-z | 6 | shared prose, status built, feature-done | docs/blueprints/suiteui.md, docs/engineering.md, Sources/SuiteKernel/SuiteKernel.swift, command-catalog.wave.json | waves check | – | planned |
+| CC-14 | CC-z | 6 | shared prose, status built, feature-done | docs/blueprints/suiteui.md, docs/engineering.md, Sources/SuiteKernel/SuiteKernel.swift, command-catalog.wave.json | waves check | #3588 | merged 0e1199e9 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -99,3 +99,6 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 - 2026-10-20T20:38Z: no qualifying run yet: full CI 39485502739 (8c90de14) and scoped design 39490030243 (014da2f1) still pending; latest completed runs are Linux checks
 
 - 2026-10-20T20:57Z: still no qualifying run completed. Pending: full CI 39485502739 (8c90de14), scoped suiteui 39491489760 (e64cff6b, contains every slice merge), scoped design 39490030243, photo 39492942073, flare 39491495208, halo 39494391226 (all contain the slice merges)
+
+## Decisions (run act-1a15b57e785-3gzs)
+- 2026-10-20T22:10Z: dev's lead.md rule 6 now reads merged-done off the `Linux` job of a dev CI run. Linux check 39502742421 (dev 5684f9dd, `Linux` success) contains feebad47 (#3484) and 0e1199e9 (#3588). Posted Belt-Slice-Done CC-u and CC-z, Mac-Finish-Wanted CC-u, and Belt-Contact-Sheet on #2996.
