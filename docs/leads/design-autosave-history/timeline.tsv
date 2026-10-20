@@ -11,3 +11,5 @@ utc	stage	event	ref	note
 2026-10-20T21:11:10Z	check	heartbeat	#3686	DA-a fixed head 98c5d2a4 macOS build queued; #3710 and #3726 stacked, retarget when #3686 merges
 2026-10-20T21:33:21Z	check	heartbeat	#3686	DA-a macOS build of 98c5d2a4 in progress
 2026-10-20T21:55:10Z	check	heartbeat	#3686	DA-a macOS build 39494359973 green on 98c5d2a4; waits for a lane batch
+2026-10-20T22:43:51Z	fix	needs-fix	#3686	batch Linux failed on new CommandPathTests (Show History Button without spec); fixed with view.history menu spec at 509907a6, 7/7 mutate
+2026-10-20T22:43:51Z	fix	propagate	#3726 #3710	merged DA-a fix into DA-u (f0a68390) and DA-m (4b15af63), CI: PASS, Head lines moved
