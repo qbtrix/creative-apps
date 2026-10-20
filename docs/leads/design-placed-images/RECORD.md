@@ -4,7 +4,7 @@ Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 polling
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: PD-a #3759 head 7b88ec3 clean, 397/11, no label (lane re-labels); Package.swift line means a supervisor merge. PD-u and PD-m wait on PD-a. RJ-D12 job parked as place-in-frame.jobs.pending.json; PD-6 renames it.
+Next: PD-a #3759 head 7b88ec3 clean, waits on a captain merge (Package.swift); blocked poll 2 of 3, question to supervisor at 3. PD-u and PD-m also wait on gradient-fill, transform, autosave, shape-tools, stroke-style and export slices.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
