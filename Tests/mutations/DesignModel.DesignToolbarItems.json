@@ -40,5 +40,19 @@
     "find": "            if workspace.editingTextID != nil { return Self.finishEditing }\n            return workspace.canUndo",
     "replace": "            return workspace.canUndo",
     "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "History is enabled with no file open",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "        case .history:\n            return workspace.isOpen ? nil : Self.noFile",
+    "replace": "        case .history:\n            return nil",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "History's identifier drifts from design.bar.history",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "case .history: \"design.bar.history\"",
+    "replace": "case .history: \"design.bar.panel\"",
+    "tests": "DesignToolbarItemsTests"
   }
 ]

@@ -66,7 +66,7 @@ public enum DesignToolbarItem: String, CaseIterable, Sendable {
         case .save, .zoomOut, .fit, .zoomIn:
             return workspace.isOpen ? nil : Self.noFile
         case .history:
-            return workspace.isOpen ? nil : Self.noHistory
+            return workspace.isOpen ? nil : Self.noFile
         case .undo:
             if workspace.editingTextID != nil { return Self.finishEditing }
             return workspace.canUndo ? nil : "Nothing to undo."
@@ -77,6 +77,5 @@ public enum DesignToolbarItem: String, CaseIterable, Sendable {
     }
 
     static let noFile = "Create or open a file first."
-    static let noHistory = "Create or open a file first to see its history."
     private static let finishEditing = "Finish editing the text first."
 }
