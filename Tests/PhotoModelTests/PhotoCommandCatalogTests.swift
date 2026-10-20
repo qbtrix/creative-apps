@@ -61,7 +61,11 @@ struct PhotoCommandCatalogTests {
 
     @Test func conformance() throws {
         #expect(PhotoWorkspace.catalog.ids.count == PhotoWorkspace.commands.count)
-        #expect(CatalogConformance.check(PhotoLawsDocument.self, fixture: PhotoLawsDocument(ws: try Self.lawsFixture())) == [])
+        let problems = CatalogConformance.check(PhotoLawsDocument.self, fixture: PhotoLawsDocument(ws: try Self.lawsFixture()))
+        // The file-flow examples need a recent file, a saved image or a readable file on disk: PhotoFileFlowTests runs them.
+        let needsFiles = Set(["file.clear-recent", "file.drop", "file.open-in", "file.open-recent"].map { "\($0): exampleRuns" })
+        let key = { (problem: String) in problem.split(separator: ":").prefix(2).joined(separator: ":") }
+        #expect(problems.filter { !needsFiles.contains(key($0)) } == [])
     }
 
     @Test func ledger() throws {
@@ -126,7 +130,9 @@ struct PhotoCommandCatalogTests {
     }
 
     /// Every non-tool command, in menu order (the catalog lists them as the menus do).
-    static let menuIDs = PhotoWorkspace.commands.map(\.id).filter { !$0.hasPrefix("tool.") }
+    static let menuIDs = PhotoWorkspace.commands.map(\.id).filter { !$0.hasPrefix("tool.") && !fileFlowIDs.contains($0) }
+    /// The shared file-flow commands (PF-3), which today's menus don't show yet.
+    static let fileFlowIDs = Set(FileFlowCommands.specs(PhotoWorkspace.self).map(\.id))
     static let helped: Set = ["edit.cut", "edit.copy", "edit.paste", "layer.duplicate", "layer.merge-down", "layer.flatten"]
     /// Today's Cut and Copy stay on with an image open (they also act on focused text); the catalog gives their reason.
     static let menuOwnsEnabled: Set = ["edit.cut", "edit.copy"]

@@ -146,6 +146,10 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         #expect(throws: CatalogError.self) { try workspace.openRecent(entry("/nowhere/Gone.png").fileID) }
         #expect(workspace.recentFiles.map(\.path) == [here], "a missing file stayed in the list")
         #expect(workspace.takeFileRequests() == [.open(path: here), .forget(fileID: entry("/nowhere/Gone.png").fileID)])
+    }
+
+    @Test func clearRecentEmptiesTheList() throws {
+        var workspace = PhotoWorkspace(services: .fake)
         try workspace.clearRecent()
         #expect(workspace.recentFiles.isEmpty)
         #expect(workspace.takeFileRequests() == [.clearRecent])
@@ -167,13 +171,6 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         #expect(items.allSatisfy { $0.ref.app == .photo && $0.ref.type == .png })
     }
 
-    @Test func theCatalogListsTheFiveFileFlowCommands() {
-        let ids = Set(PhotoWorkspace.catalog.ids)
-        for id in ["file.recent", "file.open-recent", "file.clear-recent", "file.open-in", "file.drop"] {
-            #expect(ids.contains(id), "\(id)")
-        }
-    }
-
     /// RJ-P42 on Linux: the CLI keeps file commands window-only, so the walk runs the job's steps here.
     @Test func dropLayerRealJobPasses() throws {
         let folder = PhotoJob.root.appendingPathComponent("drop-layer")
@@ -192,10 +189,10 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         #expect(counts == [2, 1, 2])
         #expect(workspace.selectedLayer?.name == "logo")
         let data = try #require(try PhotoHeadless(workspace: workspace).export("png", options: .object([:])).first?.data)
-        let got = try CoreRasterImageCodec.readPNG(data)
-        let want = try CoreRasterImageCodec.readPNG(Data(contentsOf: folder.appendingPathComponent("expected/drop-layer.png")))
+        let got = try CoreRasterImageCodec().decode(data, longestSide: nil)
+        let want = try CoreRasterImageCodec().decode(Data(contentsOf: folder.appendingPathComponent("expected/drop-layer.png")), longestSide: nil)
         #expect(got.width == want.width && got.height == want.height)
-        let worst = try zip(got.rgba8(), want.rgba8()).map { abs(Int($0) - Int($1)) }.max() ?? 0
+        let worst = zip(got.rgba8, want.rgba8).map { abs(Int($0) - Int($1)) }.max() ?? 0
         #expect(worst <= 2, "a channel is off by \(worst)")
     }
 }
