@@ -49,6 +49,8 @@ Next: SF-8 (live drop and Open In) stacked on SF-4; merge dev into the stacked b
 - SF-3: the drop modifier moved from dropDestination to onDrop(of:delegate:), since only DropDelegate sees the hovering files (DropSession carries no item data); the mark is planned once on enter and cleared on exit. Hover loading on macOS is proven only by SF-4's journey.
 - SF-4: the mark is a SuiteDropHover (session counter drops stale plans; lingers 3 s after a drop so a refusal is read). The journey drags from a floating NSPanel in the test runner; whether the runner's synthesized drag starts a real drag session is unproven until the first scoped run.
 
+- SF-8 (#3529): bridge.perform(_:host:) sends open/place to the app's SuiteDocumentHost and hand-offs to the reader; suiteFileDrop(host:) performs live; suiteDraggable writes every PasteboardCoding representation. Home keeps its handOff call (already live). SF-z still needs SF-9 (blocked) and SF-10.
+
 ## Open
-- #3489, #3493, #3507, #3514 show combined diffs until #3488 (and #3489 for #3507) merge; then merge origin/dev into each branch, rerun the gate, move Head, add fast-lane. #3488's macOS build: actions run 39375669624.
+- #3489, #3493, #3507, #3514, #3522, #3529 show combined diffs until #3488 (and #3489 for #3507) merge; then merge origin/dev into each branch, rerun the gate, move Head, add fast-lane. #3488's macOS build: actions run 39375669624.
 - SF-9 blocked: suiteui export-pack XP-z not merged (export-pack status planned).
