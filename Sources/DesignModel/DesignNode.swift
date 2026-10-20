@@ -12,6 +12,8 @@
 // is hidden or locked together with its subtree. The Layers list runs front to
 // back: the frontmost sibling on top, each node's children under it; the rows
 // come from SuiteKernel's LayerTree (DesignNode+Kernel).
+// Fill: `fill` is the solid color; a `gradient`, when set, paints over it, its
+// points in the node's unit box (0...1 across the frame), so a resize keeps it.
 
 import SuiteKernel
 
@@ -243,17 +245,22 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var stroke: DesignStroke?
     /// How a text node's text is set; every other kind keeps `.default`.
     public var textStyle: DesignTextStyle
+    /// The layer's gradient, its points in the node's unit box; nil paints `fill` (solid). Left out of the
+    /// file when nil, so files written before gradients open unchanged (gradient-fill DG-1).
+    public var gradient: Fill?
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
         children: [DesignNode] = [], isHidden: Bool = false, isLocked: Bool = false,
         fill: DesignColor? = nil, text: String = "", cornerRadius: Double = 0,
-        opacity: Double = 1, stroke: DesignStroke? = nil, textStyle: DesignTextStyle = .default
+        opacity: Double = 1, stroke: DesignStroke? = nil, textStyle: DesignTextStyle = .default,
+        gradient: Fill? = nil
     ) {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
         (self.opacity, self.stroke, self.textStyle) = (opacity, stroke, textStyle)
+        self.gradient = gradient
     }
 
     /// `node` with every field kept and the id replaced (duplicate, paste). A field added to
@@ -262,11 +269,12 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         self.init(
             id: id, name: node.name, kind: node.kind, frame: node.frame, children: node.children,
             isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text,
-            cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)
+            cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle,
+            gradient: node.gradient)
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke and the default text style.
+    /// corners, fully opaque, no stroke, the default text style and no gradient.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -278,7 +286,8 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0,
             opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
             stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
-            textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default)
+            textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
+            gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))
     }
 
     /// Shifts this node and everything under it by `delta`.
