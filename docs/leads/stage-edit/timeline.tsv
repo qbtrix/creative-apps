@@ -172,3 +172,4 @@
 2026-10-20T05:09Z	5	gate	#3312	scripts/ci --changed PASS on a0054178; Head: and Belt-Lead: moved; no-fast-lane lifted
 2026-10-20T05:21Z	5	heartbeat	#3312	open, clean, fast-lane; waiting on the lane sweep
 2026-10-20T05:34Z	5	heartbeat	#3312	still open on fast-lane; lane busy with other PRs
+2026-10-20T05:49Z	heartbeat	#3312 clean; lane pending on stuck macOS journeys job (run 39358949800, 150-min timeout ~05:57Z); cancel 403; awaiting next sweep
