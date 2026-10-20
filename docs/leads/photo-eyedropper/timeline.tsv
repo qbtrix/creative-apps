@@ -1,6 +1,8 @@
 utc	stage	event	ref	note
-2026-10-20T21:10Z	0	stage-start	-	setup: base origin/dev a48992b; toolchain installed
-2026-10-20T21:25Z	0	stage-end	-	waits checked: cross-line contracts on dev; PT-5 gradient/multi-select waits dropped (catalog order only)
-2026-10-20T21:28Z	1	stage-end	-	packet read; slices and tasks copied
-2026-10-20T21:30Z	2	stage-end	-	combined plan W1-W6 across eyedropper, history-panel, transform
-2026-10-20T21:30Z	3	stage-start	-	wave 1: PT-a, PH-a, PE-a
+2026-10-20T19:10Z	0	stage-start	-	setup: base origin/dev a48992b; toolchain installed
+2026-10-20T19:25Z	0	stage-end	-	waits checked: cross-line contracts on dev; PT-5 gradient/multi-select waits dropped (catalog order only)
+2026-10-20T19:28Z	1	stage-end	-	packet read; slices and tasks copied
+2026-10-20T19:30Z	2	stage-end	-	combined plan W1-W6 across eyedropper, history-panel, transform
+2026-10-20T19:30Z	3	stage-start	-	wave 1: PT-a, PH-a, PE-a
+2026-10-20T19:45Z	3	pr-opened	#3706	PE-a eyedropper stubs + tool
+2026-10-20T19:50Z	3	heartbeat	-	PE-a waiting on the lane batch
