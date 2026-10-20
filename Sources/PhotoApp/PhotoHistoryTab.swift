@@ -1,8 +1,9 @@
-// PhotoHistoryTab.swift: the History view of a Photo window. A
-// stub for now: it takes the model and the intent sink like its sibling sections
-// but draws nothing, and the inspector doesn't show it until PV-4 adds it and
-// its list. Values in, intents out.
+// PhotoHistoryTab.swift: the History tab of a Photo window's inspector
+// (history-panel PH-2): SuiteUI's HistoryPanel on the Model's listing ("Open"
+// or "New Image", then every step, the current one marked). A click on a row
+// asks the window to jump there (`HistoryIntent.jump`). Values in, intents out.
 import PhotoModel
+import SuiteUI
 import SwiftUI
 
 struct PhotoHistoryTab: View {
@@ -10,6 +11,6 @@ struct PhotoHistoryTab: View {
     let perform: PhotoPerform
 
     var body: some View {
-        EmptyView()
+        HistoryPanel(listing: model.historyListing) { perform(.history(.jump($0))) }
     }
 }
