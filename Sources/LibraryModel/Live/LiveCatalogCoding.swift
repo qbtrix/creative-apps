@@ -32,15 +32,12 @@ public struct LiveCatalogCoding: CatalogCoding {
 
     public func decode(_ data: Data) throws -> [PhotoItem] {
         let decoder = JSONDecoder()
-        guard let head = try? decoder.decode(Head.self, from: data) else { throw LibraryError.damagedCatalog("") }
-        if head.version > Self.version { throw LibraryError.newerCatalog(version: head.version) }
-        guard head.version == Self.version, let file = try? decoder.decode(FileV1.self, from: data) else {
+        let version = try Self.probeVersion(data)
+        guard version == Self.version, let file = try? decoder.decode(FileV1.self, from: data) else {
             throw LibraryError.damagedCatalog("")
         }
         return try file.photos.map { try $0.photo() }
     }
-
-    struct Head: Decodable { var version: Int }
 
     struct FileV1: Codable {
         var version: Int

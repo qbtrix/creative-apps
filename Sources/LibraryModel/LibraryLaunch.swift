@@ -84,9 +84,9 @@ public struct LibraryLaunch: Sendable, Equatable {
     }
 
     /// The catalog's photos at launch: the fixture's, except `shoot-unimported`
-    /// starts empty so a journey can import the shoot.
+    /// and `cameras-unimported` start empty so a journey can import them.
     public var initialPhotos: [PhotoItem] {
-        fixture == "shoot-unimported" ? [] : LibraryFixtures.photos(named: fixture)
+        fixture?.hasSuffix("-unimported") == true ? [] : LibraryFixtures.photos(named: fixture)
     }
 }
 

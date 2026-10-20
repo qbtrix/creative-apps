@@ -1,7 +1,7 @@
 // HaloLayer.swift: one layer in a Halo composition: what kind it is, the
 // frames it is visible for, its color, opacity, blend mode, the rectangle a
-// solid fills, its keyframe tracks, the layer it follows and a text layer's
-// words. Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
+// solid fills, its keyframe tracks, the layer it follows, a text layer's
+// words and a solid's or shape's gradient (gradient-fill HG-1). Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
 // top first; HaloProject adds and selects them. `blendMode` is CoreRaster's
 // BlendMode, never a mirror of it.
 import CoreRaster
@@ -87,9 +87,12 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
     public var parentID: String?
     /// W0: a text layer's words and size; nil for other kinds (tier 2, #430).
     public var text: HaloTextContent?
+    /// HG-1: the layer's gradient, its points in a unit box (0...1 across the
+    /// layer's bounds); nil fills `color`. Coded under "gradient" only when set.
+    public var gradient: Fill?
 
     enum CodingKeys: String, CodingKey {
-        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text
+        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text, gradient
     }
 
     /// Decodes through the clamping init, so a file can't carry an opacity
@@ -106,6 +109,7 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         tracks = try c.decodeIfPresent([String: [HaloKeyframe]].self, forKey: .tracks) ?? [:]
         parentID = try c.decodeIfPresent(String.self, forKey: .parentID)
         text = try c.decodeIfPresent(HaloTextContent.self, forKey: .text)
+        gradient = try c.decodeIfPresent(Fill.self, forKey: .gradient)
     }
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
@@ -138,6 +142,7 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         copy.tracks = tracks
         copy.parentID = parentID  // W0: duplicateComposition remaps it to the copy's ids
         copy.text = text
+        copy.gradient = gradient
         return copy
     }
 }

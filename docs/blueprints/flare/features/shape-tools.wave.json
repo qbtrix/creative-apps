@@ -1,0 +1,148 @@
+{
+  "title": "A Shape tool for polygons, stars, lines and arrows on the stage, through the kernel's shape rules",
+  "wave": 6,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/shape-tools (adopter of S19); RJ-F25",
+  "waits_on": "suiteui shape-tools' contract slice SH-a (cross-line); gradient-fill's FG-m before FS-6",
+  "depends": [
+    "live-stage",
+    "draw-key-save",
+    "inspector-timeline",
+    "mac-platform",
+    "flare-export"
+  ],
+  "longest_chain": "6 (FS-1 → FS-2 → FS-3 → FS-4 → FS-7 → FS-8)",
+  "journeys": [
+    "FlareShapeJourneyTests.testDrawStarAndArrow"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareWorkspace.swift",
+    "Sources/FlareModel/FlareShape+Kernel.swift",
+    "Tests/FlareModelTests/FlareShapeToolTests.swift",
+    "Sources/FlareApp/FlareToolItems.swift",
+    "Sources/FlareApp/FlareShapeOptions.swift",
+    "Sources/FlareApp/FlareWindow+Inspector.swift",
+    "UITests/FlareJourneyTests+Shapes.swift",
+    "Sources/FlareApp/FlareStageOverlay.swift",
+    "Tests/AppSnapshotTests/FlareShapeDraftTests.swift",
+    "Tests/AppSnapshotTests/FlareShapeSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareShapeTests.swift",
+    "Sources/FlareModel/Live/LiveShapes.swift",
+    "Tests/FlareModelTests/LiveShapesKernelTests.swift",
+    "Tests/mutations/FlareModel.LiveShapes.json",
+    "Tests/mutations/FlareModel.FlareShape+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/RealJobs/flare/rating-star/rating-star.jobs.json",
+    "Tests/RealJobs/flare/rating-star/input/blank.flare",
+    "docs/blueprints/flare/features/shape-tools.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "FS-a",
+      "behavior": "The Shape tool exists with its options in the inspector, and the adapter is declared as stubs.",
+      "tasks": [
+        "FS-1",
+        "FS-2"
+      ],
+      "journeys": [
+        "MJ-FS"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlareWorkspace.swift",
+        "Sources/FlareModel/FlareShape+Kernel.swift",
+        "Tests/FlareModelTests/FlareShapeToolTests.swift",
+        "Sources/FlareApp/FlareToolItems.swift",
+        "Sources/FlareApp/FlareShapeOptions.swift",
+        "Sources/FlareApp/FlareWindow+Inspector.swift",
+        "UITests/FlareJourneyTests+Shapes.swift"
+      ]
+    },
+    {
+      "id": "FS-u",
+      "behavior": "The stage previews every kind's draft, and the snapshots and render budget hold.",
+      "tasks": [
+        "FS-3",
+        "FS-4"
+      ],
+      "journeys": [
+        "J-FS"
+      ],
+      "waits": {
+        "FS-a": [
+          "FS-3",
+          "FS-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareApp/FlareStageOverlay.swift",
+        "Tests/AppSnapshotTests/FlareShapeDraftTests.swift",
+        "Tests/AppSnapshotTests/FlareShapeSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareShapeTests.swift"
+      ]
+    },
+    {
+      "id": "FS-m",
+      "behavior": "Every drawing tool drafts through the kernel's drag rule and path, and a draw adds one shape layer of points and a path as one step.",
+      "tasks": [
+        "FS-5",
+        "FS-6"
+      ],
+      "journeys": [
+        "MJ-FS"
+      ],
+      "waits": {
+        "FS-a": [
+          "FS-5",
+          "FS-6"
+        ],
+        "gradient-fill:FG-m": [
+          "FS-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/Live/LiveShapes.swift",
+        "Tests/FlareModelTests/LiveShapesKernelTests.swift",
+        "Tests/mutations/FlareModel.LiveShapes.json",
+        "Sources/FlareModel/FlareShape+Kernel.swift",
+        "Tests/FlareModelTests/FlareShapeToolTests.swift",
+        "Tests/mutations/FlareModel.FlareShape+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/RealJobs/flare/rating-star/rating-star.jobs.json",
+        "Tests/RealJobs/flare/rating-star/input/blank.flare"
+      ]
+    },
+    {
+      "id": "FS-z",
+      "behavior": "The journey draws a star and an arrow on live services, and the feature is built.",
+      "tasks": [
+        "FS-7",
+        "FS-8"
+      ],
+      "journeys": [
+        "J-FS"
+      ],
+      "waits": {
+        "FS-u": [
+          "FS-7"
+        ],
+        "FS-m": [
+          "FS-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+Shapes.swift",
+        "docs/blueprints/flare/features/shape-tools.wave.json"
+      ]
+    }
+  ]
+}

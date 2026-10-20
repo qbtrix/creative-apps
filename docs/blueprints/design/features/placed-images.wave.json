@@ -1,0 +1,223 @@
+{
+  "title": "Placed images in Design: Place… and canvas drop, pictures in rectangles and frames by cover, Fill, SVG export",
+  "wave": 4,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/placed-images (adopter of S20 and E11); RJ-D12",
+  "waits_on": "suiteui placed-images' contract slice PL-a (cross-line); gradient-fill's DG-a, DG-u, DG-m and DG-z and design-export's DE-u and DE-s (shared files)",
+  "longest_chain": "5 (PD-1 → PD-2 → PD-6 → PD-7 → PD-8)",
+  "journeys": [
+    "DesignPlaceJourneyTests.testPlacePhotoInFrame"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignPlace+Kernel.swift",
+    "Package.swift",
+    "Tests/DesignModelTests/DesignPlaceTests.swift",
+    "Tests/DesignModelTests/DesignPlaceSVGTests.swift",
+    "Tests/RealJobs/design/place-in-frame/",
+    "Sources/DesignApp/DesignPlace.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignInspectorImage.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "Tests/AppSnapshotTests/DesignPlaceSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignPlaceTests.swift",
+    "UITests/DesignJourneyTests+Place.swift",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/mutations/DesignModel.DesignPlace+Kernel.json",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "docs/blueprints/design.md",
+    "docs/blueprints/design/features/placed-images.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PD-a",
+      "behavior": "The picture fields on rectangles and frames and the PlacedImageTarget conformance exist as stubs, CoreRaster is linked, and the checks and RJ-D12's job are written, disabled.",
+      "tasks": [
+        "PD-1",
+        "PD-2"
+      ],
+      "journeys": [
+        "MJ-PD"
+      ],
+      "waits": {
+        "gradient-fill:DG-a": [
+          "PD-1"
+        ],
+        "transform:DT-a": [
+          "PD-1",
+          "PD-2"
+        ],
+        "shape-tools:DS-a": [
+          "PD-1",
+          "PD-2"
+        ],
+        "stroke-style:DK-m": [
+          "PD-1",
+          "PD-2"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignPlace+Kernel.swift",
+        "Package.swift",
+        "Tests/DesignModelTests/DesignPlaceTests.swift",
+        "Tests/DesignModelTests/DesignPlaceSVGTests.swift",
+        "Tests/RealJobs/design/place-in-frame/"
+      ]
+    },
+    {
+      "id": "PD-u",
+      "behavior": "File > Place… and a canvas drop add a picture on the stubs, the canvas draws it by cover, and the inspector shows its rows, with snapshots, the render budget and the journey written.",
+      "tasks": [
+        "PD-3",
+        "PD-4"
+      ],
+      "journeys": [
+        "DJ-P1"
+      ],
+      "waits": {
+        "PD-a": [
+          "PD-3",
+          "PD-4"
+        ],
+        "gradient-fill:DG-u": [
+          "PD-3"
+        ],
+        "design-export:DE-u": [
+          "PD-3"
+        ],
+        "gradient-fill:DG-a": [
+          "PD-4"
+        ],
+        "autosave-history:DA-a": [
+          "PD-3",
+          "PD-4"
+        ],
+        "transform:DT-a": [
+          "PD-3",
+          "PD-4"
+        ],
+        "transform:DT-u": [
+          "PD-3",
+          "PD-4"
+        ],
+        "shape-tools:DS-a": [
+          "PD-3",
+          "PD-4"
+        ],
+        "shape-tools:DS-u": [
+          "PD-3",
+          "PD-4"
+        ],
+        "stroke-style:DK-u": [
+          "PD-3",
+          "PD-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignPlace.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignApp/DesignInspectorImage.swift",
+        "Sources/DesignApp/DesignInspector.swift",
+        "Tests/AppSnapshotTests/DesignPlaceSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignPlaceTests.swift",
+        "UITests/DesignJourneyTests+Place.swift"
+      ]
+    },
+    {
+      "id": "PD-m",
+      "behavior": "Placing fits inside the selected frame or covers it with Fill, a focus move the picture inside its box as one undo step, and SVG export writes the same crop.",
+      "tasks": [
+        "PD-5",
+        "PD-6"
+      ],
+      "journeys": [
+        "MJ-PD"
+      ],
+      "waits": {
+        "PD-a": [
+          "PD-5",
+          "PD-6"
+        ],
+        "gradient-fill:DG-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "design-export:DE-s": [
+          "PD-6"
+        ],
+        "autosave-history:DA-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "transform:DT-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "eyedropper:DY-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "shape-tools:DS-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "stroke-style:DK-m": [
+          "PD-5",
+          "PD-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignPlace+Kernel.swift",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/DesignModelTests/DesignPlaceTests.swift",
+        "Tests/mutations/DesignModel.DesignPlace+Kernel.json",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/DesignModelTests/DesignPlaceSVGTests.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/RealJobs/design/place-in-frame/"
+      ]
+    },
+    {
+      "id": "PD-z",
+      "behavior": "The window runs on live services, the journey passes on live, and the blueprint lists image layers.",
+      "tasks": [
+        "PD-7",
+        "PD-8"
+      ],
+      "journeys": [
+        "DJ-P1"
+      ],
+      "waits": {
+        "PD-u": [
+          "PD-7"
+        ],
+        "PD-m": [
+          "PD-7"
+        ],
+        "gradient-fill:DG-z": [
+          "PD-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Place.swift",
+        "docs/blueprints/design.md",
+        "docs/blueprints/design/features/placed-images.wave.json"
+      ]
+    }
+  ]
+}
