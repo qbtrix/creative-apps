@@ -21,14 +21,16 @@ import Testing
 
     private func editing() throws -> HaloProject {
         var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("keyed")))
-        #expect(project.beginRender(HaloRenderSettings(format: .pngSequence)))
+        let began = project.beginRender(HaloRenderSettings(format: .pngSequence))
+        #expect(began)
         project.setRenderSettings(half)
         return project
     }
 
     private func running() throws -> HaloProject {
         var project = try editing()
-        _ = try #require(project.startRender())
+        let started = project.startRender()
+        _ = try #require(started)
         project.renderProgressed(done: 12)
         return project
     }
