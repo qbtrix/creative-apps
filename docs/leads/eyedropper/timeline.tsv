@@ -11,3 +11,7 @@ utc	stage	event	ref	note
 2026-10-20T05:48Z	3	slice-start	EY-a	builder launched from dev 9a146777
 2026-10-20T05:51Z	3	heartbeat	-	GF-a PR #3421: closed merged
 2026-10-20T06:06Z	3	heartbeat	-	lead polling:
+2026-10-20T06:17Z	3	pr-open	#3525	EY-a part 1 (EY-1)
+2026-10-20T06:17Z	3	pr-open	#3531	EY-a part 2 (EY-2), stacked on #3525
+2026-10-20T06:17Z	3	slice-start	EY-m	stacked on #3525
+2026-10-20T06:17Z	3	slice-start	EY-u	stacked on #3531
