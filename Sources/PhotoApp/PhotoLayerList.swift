@@ -6,7 +6,8 @@
 // (`photo.layer.new`, `.duplicate`, `.delete`, `.fx`, `.visibility`,
 // `.rename`). A row's context menu holds Rename, Duplicate, Delete, Merge
 // Down, Flatten Image, Bring Forward, Send Backward and Show/Hide. Every item
-// is the Layer menu's own, `PhotoMenu.item` on the catalog spec, so its title,
+// is built from the Layer menu's catalog spec on the same state,
+// `ToolbarAction(spec, on:)` titled as the menu titles it, so its title,
 // enablement and reason are the menu's; a row's menu reads the workspace with
 // that row selected, and a pick selects the row, then runs. Values in, intents out.
 import PhotoModel
@@ -90,16 +91,18 @@ struct PhotoLayerList: View {
         return rowCommands(row: id).map { action(menu, $0, in: state, selecting: id) }
     }
 
-    /// `command` as its Layer menu item read on `state`; a pick selects `selecting` first.
+    /// `command` from its catalog spec on `state`, titled as the Layer menu titles it; a pick selects `selecting` first.
     // view-static: main-actor
     private static func action(_ menu: PhotoMenu, _ command: Command, in state: PhotoMenuState,
                                selecting row: PhotoLayer.ID? = nil) -> ToolbarAction {
-        let symbol = PhotoLayerMenu.symbol(command.id, visibility: state.title(command.id))
-        let item = menu.item(command.id, systemImage: symbol, in: state) {
+        let title = state.title(command.id)
+        return ToolbarAction(
+            PhotoMenuState.spec(command.id), on: state, title: title,
+            systemImage: PhotoLayerMenu.symbol(command.id, visibility: title), identifier: "photo.layer." + command.part
+        ) {
             if let row { menu.perform(.selectLayer(row)) }
             if let intent = command.intent { menu.perform(intent) }
         }
-        return ToolbarAction(item, identifier: "photo.layer." + command.part)
     }
 }
 
