@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 building (on FC-7 #3534 + FC-11 #3515); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
+Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 #3551 (draft on FC-7 #3534 + FC-11 #3515; expect a conflict with FC-9 #3546 in LibraryCollections.swift and the seam test); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -70,3 +70,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 07:15Z check-in: #3423 and #3460 macOS builds green, not yet merged by the lane; #3424 build 39366318428 still queued (since 03:49Z). No new line:library findings in these features' files. Builders: MD-7, MD-10, FC-12; FC-10 blocked on S-L9 #3411.
 - 07:29Z: FC-3 #3423 merged. No PR waited on it alone (FC-9 #3546 still waits on #3490, FC-12 carries FC-3 already). FC-a closes when FC-2b #3424 merges.
 - 07:37Z check-in: #3423 and #3460 merged (07:29Z); #3424 lane macOS build 39366318428 still queued since 03:49Z (runner backlog). No new line:library findings. Builders: MD-8, MD-10, FC-12 in their gates; MD-7 #3548 drafted. Fixer for #3465/#3473 dev merge waits for a free slot.
+- FC-12 (#3551, head b05e5828): 7 files +47/-27 over its merge base; Mutate 21/21 LibraryModel.LibraryFilter (4 new). newSmartCollection() saves the filter as smart-<n>, one undo step via FC-3; setFilter on a selected smart collection edits its rules as one "Edit Rules" step. Also sets smartUnavailable = nil in LibraryCollections.swift and updates the seam test expectation; both lines neighbour FC-9 edits, so the second of #3546/#3551 to merge gets a dev merge with that conflict. Help text for "smart collection selected" chosen by the builder.
