@@ -515,17 +515,18 @@
     "job": "Draw a path with the pen, then drag one anchor and its handles.",
     "outcome": "Only the dragged anchor and its handles move; the rest of the path stays put.",
     "needs": [
-      "S18"
+      "S25"
     ],
-    "needs_note": "pen (built), S18 Direct Select",
-    "closes_with": "S18",
+    "needs_note": "pen (built), Direct Select anchor editing (S25)",
+    "closes_with": "S25",
     "trap": "Direct Select acts like Select today",
-    "run": "J",
+    "run": "C",
     "baseline": "partial",
     "since": "2026-10-19",
     "sources": [
       "https://blog.motionarray.com/learn/software/animatedshapes/"
-    ]
+    ],
+    "waits_on": "FP-7"
   },
   "RJ-F28": {
     "id": "RJ-F28",

@@ -735,5 +735,25 @@
     ],
     "waits_on": "SF-9",
     "added_by": "suite/file-flow"
+  },
+  "RJ-X37": {
+    "id": "RJ-X37",
+    "app": "suite",
+    "weight": "high",
+    "job": "Draw a closed four-point path with one smooth point by commands alone, drag the smooth point's out handle with 120 moves, then undo once.",
+    "outcome": "The saved document holds one closed contour of exactly four anchors, the smooth anchor's handles stayed collinear and opposite at every sample, and after one undo its out handle is back where the pen left it.",
+    "needs": [
+      "S25"
+    ],
+    "closes_with": "S25",
+    "trap": "Closing adds a duplicate anchor at the start, or the 120 handle moves land as 120 undo steps",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PN-9",
+    "added_by": "suiteui/pen-paths"
   }
 }
