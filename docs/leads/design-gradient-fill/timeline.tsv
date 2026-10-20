@@ -1,3 +1,4 @@
 time	kind	note
 2026-10-20T15:00Z	setup	lead record created; wave 1 starts
 2026-10-20T18:42:31Z	stage	run act-1a15a9a4e8b-kn6a starts on dev 875b44d2; DG-a builder (DG-1 + DG-2)
+2026-10-20T19:07:24Z	check	wave 1 DG-a builder running (wf w4yvztnfw); no PR yet
