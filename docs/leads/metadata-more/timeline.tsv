@@ -22,3 +22,5 @@
 2026-10-20T05:37:39Z	fixer-start	MD-2	merge dev into #3460 (conflicts after MD-1 squash), then un-draft
 2026-10-20T06:01:03Z	fixer-done	MD-2	#3460 dev merged in, head 745fd1d9, ready (11 files +296/-12)
 2026-10-20T06:01:03Z	builder-start	MD-9	stacked on MD-4 (#3473)
+2026-10-20T06:23:43Z	pr-opened	MD-9	#3533 draft, stacked on #3473; 6 test files +397
+2026-10-20T06:23:43Z	builder-start	MD-14	stacked on MD-4 (#3473)

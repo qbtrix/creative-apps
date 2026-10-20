@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: #3460 is ready (dev merged in); when it merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465; MD-9 building; then MD-14, MD-19 checks, MD-6
+Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465, #3533 after #3473; MD-14 building (on MD-4); then MD-19 checks, MD-6, MD-10
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,8 @@ Next: #3460 is ready (dev merged in); when it merges, merge dev into #3465 and #
 | MD-3 | MD-a | 3 | cameras fixture; the decoder and importer carry camera details; MD-MJ1 | see packet | LibraryCamerasFixtureTests | #3465 | open, draft until #3460 merges (stacked) |
 | MD-4 | MD-a | 3 | inert slots: LibraryKeywords, MetadataEditing title/caption, XMPSidecar, PhotoSearch | see packet | LibraryMetadataSlotsTests | #3473 | open, draft until #3460 merges (stacked) |
 | MD-5 | MD-b | 4 | check-first for MD-b: camera rows, decode, snapshots, MD-J1, all disabled | LibraryCameraRowsTests, LibraryCameraDecodeTests, LibraryCameraSnapshots, LibraryJourneyTests+Camera | compiles, disabled | #3492 | draft, stacked on #3465 |
-| MD-9 | MD-c | 4 | check-first for MD-c: keywords, caption, catalog file, keyword budgets, snapshots, MD-J2, all disabled | see packet | compiles, disabled | - | building (stacked on MD-4) |
+| MD-9 | MD-c | 4 | check-first for MD-c: keywords, caption, catalog file, keyword budgets, snapshots, MD-J2, all disabled | see packet | compiles, disabled | #3533 | draft, stacked on #3473 |
+| MD-14 | MD-d | 5 | XMP/sidecar checks, disabled | LibraryXMPTests, LibrarySidecarPlanTests, LibrarySidecarWriterTests, LibrarySidecarSnapshots, LibraryJourneyTests+Sidecars | compiles, disabled | - | building (stacked on MD-4) |
 | MD-6, MD-10 .. MD-22 | MD-b..MD-e | 5+ | see packet Build waves | see packet | see packet | - | planned |
 
 ## Reviews
@@ -43,6 +44,7 @@ Next: #3460 is ready (dev merged in); when it merges, merge dev into #3465 and #
 - MD-3 (#3465): a fixture whose name ends `-unimported` launches empty (one line in LibraryLaunch.swift); the C4 part names the cameras fixture.
 - MD-4 (#3473): title and caption read real values; set* stay inert for MD-11. Identifiers it chose: library.metadata.keyword.<name>, .removeKeyword.<name>, .keywords, .title, .caption, .sidecar, library.search. No plan, as the packet says.
 - Budget tests can fail under a loaded machine (load ~21 on 4 cores). Builders rerun them alone before calling a gate red.
+- MD-9 (#3533): 6 test files +397. The journey uses MD-4's real ids (library.metadata.keywords, library.metadata.removeKeyword.<name>), not the packet's. Step 7 reads catalog.json on disk (no library.catalog readout). Photos selected by Command-click. Journey launches -LibraryFixture cameras (MD-3); fine once MD-3 merges, journey skipped until MD-13.
 
 ## Open
 - S-L9 #3413 (InspectorTokenRow) and S-L10 #3414 (InspectorTextRow) are soft waits for MD-13. Until they land, those rows use plain SwiftUI placeholders.
