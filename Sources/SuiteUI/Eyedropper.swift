@@ -48,7 +48,7 @@ public struct EyedropperButton: View {
     }
 
     /// The sampler's colour as the nearest 8-bit sRGB colour; nil when it picked nothing.
-    static func hex(_ color: NSColor?) -> HexColor? {
+    nonisolated static func hex(_ color: NSColor?) -> HexColor? {
         guard let rgb = color?.usingColorSpace(.sRGB) else { return nil }
         return HexColor(Color.Resolved(
             red: Float(rgb.redComponent), green: Float(rgb.greenComponent), blue: Float(rgb.blueComponent)))
@@ -58,7 +58,7 @@ public struct EyedropperButton: View {
 /// An eyedropper tool's ring at the pointer: the colour under it and its hex, hollow when there is none.
 public struct SampleLoupe: View {
     /// What the loupe reads when there is no colour under the pointer.
-    public static let empty = "No colour here"
+    public nonisolated static let empty = "No colour here"
     /// The ring's outer diameter: wider than a tool button, so the band reads at a glance.
     static let diameter = SuiteSize.toolButton + SuiteSpacing.m
     private let color: HexColor?
@@ -70,7 +70,7 @@ public struct SampleLoupe: View {
     }
 
     /// The hex the loupe shows and says, or `empty`.
-    static func text(for color: HexColor?) -> String { color?.text ?? empty }
+    nonisolated static func text(for color: HexColor?) -> String { color?.text ?? empty }
 
     public var body: some View {
         ZStack {
