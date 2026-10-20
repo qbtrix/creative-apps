@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-20T20:01:40Z	pr	DA-u	#3726	lead fixed the History help mismatch and added 2 plan entries; scripts/ci --changed PASS, mutate 8/8; opened stacked on #3686
 2026-10-20T20:15:53Z	check	heartbeat	#3686	DA-a macOS build 39483668298 still queued; #3710 and #3726 stacked, wait for #3686
 2026-10-20T20:48:17Z	check	fix	#3686	DA-a macOS build 39483668298 failed (type-checker gave up on AutosaveHooks encoder); fixed at 98c5d2a4, merged into DA-u #3726 (80949b93) and DA-m #3710 (9a2619ef)
+2026-10-20T21:11:10Z	check	heartbeat	#3686	DA-a fixed head 98c5d2a4 macOS build queued; #3710 and #3726 stacked, retarget when #3686 merges
