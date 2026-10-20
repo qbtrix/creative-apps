@@ -6,3 +6,4 @@ time	event	slice	pr	note
 2026-10-20T12:30:45Z	3	heartbeat	#3591	TSA-a in lane batch 20261020122756 (Linux run 39422459237 in progress)
 2026-10-20T12:47:55Z	3	pr-merged	#3591	TSA-a 3e63a8ee (lane batch 39422459237); Linux check 39424989659 pending; scoped suiteui 39424969406 queued
 2026-10-20T12:59:24Z	4	slice-done	TSA-a	Belt-Slice-Done + Mac-Finish-Wanted + Belt-Contact-Sheet on #3537, run 39424989659
+2026-10-20T13:21:34Z	4	heartbeat	#3537	closed by supervisor sentinel 13:00Z; scoped suiteui 39424969406 still queued (critic panel when screens land)
