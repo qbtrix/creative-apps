@@ -97,3 +97,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T01:44:31Z Heartbeat. AL-design PR #3392 got needs-rebase: dev (AS-design) and this PR each added a clause to the design-seams-2 waits_on line. I merged origin/dev, kept both hand-offs and am rerunning `scripts/ci --changed`. Once it passes, I push and move the Head line. AL-d3 waits on layers-panel #1498.
 
 - 2026-10-20T01:58:31Z AL-design #3392: I merged dev and pushed head bea7b697, and moved the Head line. `scripts/ci --changed` PASS (1035 tests). It took a clean build, because a stale cache gave a SuiteModel link error, and one rerun, because snapStep crowd went over its 2 ms p95 gate at load average 13 while the AS-library builder ran (median 0.25 ms; the suite passed 3/3 alone). snapStep is a timing-flake risk for the lane batch.
+
+- 2026-10-20T02:06:30Z Heartbeat. AL-design #3392 at head bea7b697: the lane dropped needs-rebase and dispatched macOS build 39356465239 (queued). AL-d3 waits on layers-panel #1498. There are no supervisor answers.
