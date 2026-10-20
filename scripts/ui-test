@@ -8,7 +8,8 @@
 # Extra arguments go to xcodebuild, so one app's journeys run with
 #   scripts/ui-test -only-testing:PhotoJourneyTests
 # The real-app perf journeys (<X>RealPerfJourneyTests, UITests/Journey+Health.swift:
-# an 8K document, ~3 s gestures, sample, idle CPU and hang checks) are heavy
+# an 8K document, ~3 s gestures, sample, idle CPU and hang checks) and the stress
+# journeys on complex files (<X>StressPerfJourneyTests) are heavy
 # and fail while the lag they catch is in the apps, so a plain run skips them and
 #   scripts/ui-test perf [xcodebuild args]
 # runs only them (perf-nightly.sh does, at night; Tests/render-budgets.md),
@@ -54,7 +55,9 @@ while IFS=$'\t' read -r test owner expires scope reason; do
 done <<<"$live"
 [[ -n "$live" ]] || echo "ui-test: no journeys quarantined"
 realperf=(PhotoJourneyTests/PhotoRealPerfJourneyTests DesignJourneyTests/DesignRealPerfJourneyTests
-  FlareJourneyTests/FlareRealPerfJourneyTests)
+  FlareJourneyTests/FlareRealPerfJourneyTests
+  DesignJourneyTests/DesignStressPerfJourneyTests FlareJourneyTests/FlareStressPerfJourneyTests
+  HaloJourneyTests/HaloStressPerfJourneyTests PhotoJourneyTests/PhotoStressPerfJourneyTests)
 watcher=""
 if [[ "${1:-}" == perf ]]; then
   shift

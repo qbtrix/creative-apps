@@ -24,6 +24,7 @@ import Foundation
         "cards": (3131, 0xe8a2_c216_5a72_77f7),
         "two-pages": (3508, 0x3be3_b5ed_e882_a630),
         "crowd": (627_858, 0x1277_7ecb_0112_efbb),
+        "stress": (1_572_481, 0x71ca_c38f_2635_356a),
     ]
 
     /// A rectangle node with `id`, in the file's own JSON.

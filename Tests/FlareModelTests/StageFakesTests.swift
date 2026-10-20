@@ -1,4 +1,5 @@
-// StageFakesTests.swift: the LM-0a2 fakes on the `empty` and `bounce` fixtures (docs/blueprints/flare.md, 7.1): bounce
+// StageFakesTests.swift: the LM-0a2 fakes on the `empty` and `bounce` fixtures (docs/blueprints/flare.md, 7.1), and the
+// size of `stress` (500 stars of 10 anchors on 200 layers, 600 keys, an empty corner for a marquee): bounce
 // draws 3 items in paint order, a hit at Ball's center returns Ball, removing the last scene throws, and a guide drag
 // of 50 steps is one undo entry.
 import FlareCore
@@ -12,7 +13,7 @@ private func address(_ layerID: String, _ item: StageAddress.Item = .shape(0)) -
 }
 
 @Test func fixturesAreNamedAndValid() throws {
-    #expect(FlareFixtures.all.map(\.name) == ["empty", "bounce", "character", "button", "button with states", "button with machine", "showcase"] && FlareFixtures.named("nope") == nil)
+    #expect(FlareFixtures.all.map(\.name) == ["empty", "bounce", "character", "button", "button with states", "button with machine", "showcase", "stress"] && FlareFixtures.named("nope") == nil)
     #expect(FlareFixtures.named("empty")?.scenes.map(\.layers.isEmpty) == [true])
     for fixture in FlareFixtures.all { try FlareFormat.validate(fixture.document) }
     let scene = try #require(bounce.scenes.first)
@@ -133,4 +134,15 @@ private func address(_ layerID: String, _ item: StageAddress.Item = .shape(0)) -
     #expect(FakeStage(unavailable: reason).drawList(bounce, sceneID: "scene-1", frame: 0, editing: nil).items.isEmpty)
     #expect(FakeHits(unavailable: reason).hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: 80, y: 100), tolerance: 4) == nil)
     #expect(FakeHits(unavailable: reason).bounds(bounce, sceneID: "scene-1", frame: 0, of: [address("ball")]) == nil)
+}
+
+@Test func stressHoldsFiveThousandAnchorsAndSixHundredKeys() throws {
+    let scene = try #require(FlareFixtures.stress.scenes.first)
+    #expect(scene.layers.count == 200 && scene.durationFrames == 600 && scene.fps == 24)
+    let shapes = scene.layers.flatMap(\.shapes)
+    #expect(shapes.count == 500 && shapes.reduce(0) { $0 + $1.points.count } == 5_000)
+    #expect(scene.layers.reduce(0) { $0 + $1.tracks.values.reduce(0) { $0 + $1.count } } == 600)
+    #expect(services.hits.hit(FlareFixtures.stress, sceneID: "scene-1", frame: 0, at: Point(x: 4, y: 4), tolerance: 0) == nil)
+    let quarter = try #require(Rect(enclosing: [Point(x: 2, y: 2), Point(x: 550, y: 400)]))
+    #expect(services.hits.marquee(FlareFixtures.stress, sceneID: "scene-1", frame: 0, rect: quarter).count > 100)
 }

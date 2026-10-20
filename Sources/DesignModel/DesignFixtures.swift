@@ -1,6 +1,7 @@
 // DesignFixtures.swift: the named documents the tests, snapshots and fixture
 // journeys open (docs/blueprints/design.md section 4, Fixtures): `empty`,
-// `cards`, `twoPages` ("two-pages") and `crowd`. Built in code, never read from
+// `cards`, `twoPages` ("two-pages"), `crowd` and `stress` (5,000 loose shapes,
+// for the real-app stress journeys). Built in code, never read from
 // disk. Each one is a workspace that has just opened the document, the same
 // state `open(_:at:)` leaves: first page selected, empty history, no location
 // (an unsaved file). Frames are absolute page points; children are listed back
@@ -9,7 +10,7 @@
 
 public enum DesignFixtures {
     /// The fixture names a launch argument uses, in the blueprint's order.
-    public static let names = ["empty", "cards", "two-pages", "crowd"]
+    public static let names = ["empty", "cards", "two-pages", "crowd", "stress"]
 
     /// The fixture called `name` in `names`, or nil.
     public static func named(_ name: String) -> DesignWorkspace? {
@@ -18,6 +19,7 @@ public enum DesignFixtures {
         case "cards": cards
         case "two-pages": twoPages
         case "crowd": crowd
+        case "stress": stress
         default: nil
         }
     }
@@ -64,6 +66,18 @@ public enum DesignFixtures {
                            children: children))
         }
         return opened([DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: frames)])
+    }
+
+    /// 5,000 layers at the page's top level, so one marquee or Select All picks thousands: 100 columns
+    /// by 50 rows of 10 × 10 shapes, rectangles and ellipses alternating, from (20, 12) every 14 pt across
+    /// and 20 pt down. The page's corners stay empty, so a press there starts a marquee.
+    public static var stress: DesignWorkspace {
+        let shapes = (0..<5_000).map { index in
+            let kind: DesignNodeKind = index.isMultiple(of: 2) ? .rectangle : .ellipse
+            return DesignNode(id: "node-\(index + 1)", name: "\(kind.defaultName) \(index / 2 + 1)", kind: kind,
+                              frame: rect(20 + Double(index % 100) * 14, 12 + Double(index / 100) * 20, 10, 10))
+        }
+        return opened([DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: shapes)])
     }
 
     private static var cardsPage: DesignPage {

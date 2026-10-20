@@ -6,7 +6,10 @@
 // `layered` is `sample` under a "Curves 1" adjustment layer and a masked
 // "Paint" layer (a red stroke, Multiply, 60%); `large` is 4000 x 3000 in
 // three layers of gradients and noise, built from shared one-color tiles so it
-// costs a few buffers, not 12 M pixels each. The blueprint's test-only
+// costs a few buffers, not 12 M pixels each; `stress` is 3840 x 2160 in 100
+// layers (pixel layers, a third of them masked, and every fourth an
+// adjustment layer), each pixel layer painting a sparse diagonal of tiles from
+// one shared tile cache, for the real-app stress journeys. The blueprint's test-only
 // `limit` (about 4 GB) is left out. Each fixture opens with a clean history.
 // PhotoLaunchOptions reads `-PhotoFixture <name>` from the arguments the app
 // passes in (the window's size comes from SuiteUI's `-SuiteWindowSize`);
@@ -17,7 +20,7 @@ import CoreRaster
 
 /// A built-in document (blueprint 4.4).
 public enum PhotoFixture: String, CaseIterable, Sendable {
-    case empty, sample, layered, large
+    case empty, sample, layered, large, stress
 }
 
 /// The launch arguments a Photo window reads (S-12).
@@ -73,6 +76,7 @@ extension PhotoWorkspace {
             try workspace.openSample()
             try workspace.addFixtureLayers()
         case .large: try workspace.openLarge()
+        case .stress: try workspace.openStress()
         }
         return workspace
     }
@@ -146,11 +150,68 @@ extension PhotoWorkspace {
         touch(.all)
     }
 
+    /// 100 layers at 3840 x 2160, top first: 99 above "Background" (a
+    /// top-to-bottom ramp). Layer n (1 at the bottom) is an adjustment layer
+    /// when n is a multiple of 4 (Exposure, Levels, Curves, Hue/Saturation in
+    /// turn, each a mild setting), else a pixel layer "Layer n" painting the
+    /// tiles where (column + row + n) % 10 == 0 in a translucent color, at 80%
+    /// opacity, with a mask hiding its right half when n is a multiple of 3.
+    /// Every tile comes from one cache, so the 99 layers share a few buffers.
+    /// The top layer, a pixel layer, is selected, so Adjust edits the image.
+    private mutating func openStress() throws {
+        let width = 3840, height = 2160
+        var made: [PixelRect: [RGBA: PixelBuffer]] = [:]
+        let background = try Self.tiled(width: width, height: height, made: &made) { _, row in
+            RGBA(r: 0.1 + Float(row) * 0.08, g: 0.3, b: 0.9 - Float(row) * 0.08, a: 1)
+        }
+        start(with: background, name: "stress.png")
+        let colors = [RGBA(r: 0.9, g: 0.3, b: 0.2, a: 0.5), RGBA(r: 0.2, g: 0.8, b: 0.4, a: 0.5),
+                      RGBA(r: 1, g: 1, b: 1, a: 0.4)].map { $0.premultiplied() }
+        let kinds: [AdjustmentKind] = [.exposure, .levels, .curves, .hueSaturation]
+        let white = RGBA(r: 1, g: 1, b: 1, a: 1), black = RGBA(r: 0, g: 0, b: 0, a: 1)
+        for n in 1..<100 {
+            if n.isMultiple(of: 4) {
+                let kind = kinds[(n / 4) % kinds.count]
+                var settings = AdjustmentSettings()
+                for other in AdjustmentKind.allCases where other != kind { settings.apply(.setEnabled(other, false)) }
+                switch kind {
+                case .exposure: settings.apply(.exposure(0.1))
+                case .levels: settings.apply(.blackPoint(0.02))
+                case .curves: settings.apply(.curvePoints([CurvePoint(x: 0, y: 0), CurvePoint(x: 0.5, y: 0.55), CurvePoint(x: 1, y: 1)]))
+                case .hueSaturation, .blur: break
+                }
+                selectedLayerID = insertLayer(named: "\(kind.title) \(n / 4)", pixels: nil, kind: .adjustment(settings), at: 0)
+                continue
+            }
+            let paint = try Self.tiled(width: width, height: height, made: &made) { column, row in
+                (column + row + n) % 10 == 0 ? colors[n % colors.count] : .clear
+            }
+            let id = insertLayer(named: "Layer \(n)", pixels: paint, kind: .pixels, at: 0)
+            selectedLayerID = id
+            guard let at = index(of: id) else { continue }
+            layers[at].opacity = 0.8
+            if n.isMultiple(of: 3) {
+                layers[at].hasMask = true
+                masks[id] = try Self.tiled(width: width, height: height, made: &made) { column, _ in
+                    column < 8 ? white : black
+                }
+            }
+        }
+        touch(.all)
+    }
+
     /// `width` x `height` pixels where each tile is one color, by its column
     /// and row; tiles of one size and color share one buffer.
     private static func tiled(width: Int, height: Int, color: (Int, Int) -> RGBA) throws -> TiledPixels {
-        var layer = try TiledPixels(width: width, height: height)
         var made: [PixelRect: [RGBA: PixelBuffer]] = [:]
+        return try tiled(width: width, height: height, made: &made, color: color)
+    }
+
+    /// `tiled`, sharing the buffers in `made` with earlier calls.
+    private static func tiled(
+        width: Int, height: Int, made: inout [PixelRect: [RGBA: PixelBuffer]], color: (Int, Int) -> RGBA
+    ) throws -> TiledPixels {
+        var layer = try TiledPixels(width: width, height: height)
         for i in layer.tiles.indices {
             let rect = layer.tileRect(i), fill = color(i % layer.columns, i / layer.columns)
             let size = PixelRect(x: 0, y: 0, width: rect.width, height: rect.height)

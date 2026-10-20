@@ -68,6 +68,18 @@ import Testing
         #expect(bottom != (try backgroundPixel(workspace, 3999, 2999)), "the gradient varies")
     }
 
+    @Test func stressIsAHundredLayersAt4K() throws {
+        let workspace = try PhotoWorkspace.fixture(.stress)
+        #expect(workspace.canvas == CanvasSize(width: 3840, height: 2160))
+        #expect(workspace.layers.count == 100)
+        #expect(workspace.layers.last?.name == "Background")
+        let adjustments = workspace.layers.filter { if case .adjustment = $0.kind { true } else { false } }
+        #expect(adjustments.count == 24)
+        #expect(workspace.layers.filter(\.hasMask).count == 25)
+        #expect(workspace.selectedLayer?.id == workspace.layers.first?.id)
+        #expect(workspace.selectedLayer?.kind == .pixels)
+    }
+
     @Test(arguments: PhotoFixture.allCases)
     func everyFixtureRunsOnFakesWithACleanHistory(_ fixture: PhotoFixture) throws {
         let workspace = try PhotoWorkspace.fixture(fixture)

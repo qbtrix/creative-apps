@@ -1,7 +1,8 @@
 // DesignFixturesTests.swift: the named fixtures (DesignFixtures) match the
 // blueprint's Fixtures table (docs/blueprints/design.md section 4) layer for
 // layer: name, kind, frame, parent, back-to-front order, Locked locked and
-// Hidden hidden; `crowd` holds exactly 2,000 layers with unique ids; and every
+// Hidden hidden; `crowd` holds exactly 2,000 layers with unique ids, `stress`
+// 5,000 loose shapes; and every
 // fixture saves to the same bytes after a reopen (QD-V1). Runs on Linux and macOS.
 import DesignModel
 import Testing
@@ -89,6 +90,16 @@ private let cardsTable: [Layer] = [
         #expect(Set(ids).count == ids.count)
     }
 
+    @Test func stressHoldsFiveThousandLooseShapes() throws {
+        let page = try #require(DesignFixtures.stress.pages.first)
+        #expect(page.nodes.count == 5_000)
+        #expect(page.nodes.allSatisfy { $0.children.isEmpty && ($0.kind == .rectangle || $0.kind == .ellipse) })
+        #expect(page.nodes.first?.frame == rc(20, 12, 10, 10))
+        #expect(page.nodes.last?.frame == rc(1406, 992, 10, 10))
+        // The page's top-left corner is empty, so a press there starts a marquee.
+        #expect(DesignFixtures.stress.hitTest(DesignPoint(x: 5, y: 5)) == nil)
+    }
+
     @Test func idsAreUniqueAndMintPastThem() throws {
         for name in DesignFixtures.names {
             var fixture = try #require(DesignFixtures.named(name))
@@ -101,7 +112,7 @@ private let cardsTable: [Layer] = [
     }
 
     @Test func namedFindsEachFixture() {
-        #expect(DesignFixtures.names == ["empty", "cards", "two-pages", "crowd"])
+        #expect(DesignFixtures.names == ["empty", "cards", "two-pages", "crowd", "stress"])
         #expect(DesignFixtures.named("cards")?.pages == DesignFixtures.cards.pages)
         #expect(DesignFixtures.named("two-pages")?.pages == DesignFixtures.twoPages.pages)
         #expect(DesignFixtures.named("crowd")?.pages == DesignFixtures.crowd.pages)
