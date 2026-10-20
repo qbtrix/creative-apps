@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-19T23:58:01Z	heartbeat	check	-	no change: dev CI 39342355180 (f564907d) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
 2026-10-20T00:20:21Z	heartbeat	check	-	no change: dev CI 39346519827 (c7306ee8) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
 2026-10-20T00:42:30Z	answer	supervisor	-	Supervisor answer 00:29Z on #1934: option 1. filters-collections parked; CatalogHistory.swift hand-off released. AU-library starts now; record the order swap in both .wave.json files in AU-library's first PR. AU-design approach confirmed.
+2026-10-20T01:02:07Z	pr-opened	AU-library	#3384	AU-l1+AU-l2 catalog undo on History<[PhotoItem]>, fast-lane, head f6e6f91c, Mutate 4/4
