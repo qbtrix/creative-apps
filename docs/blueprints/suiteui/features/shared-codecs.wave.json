@@ -1,19 +1,21 @@
 {
-  "title": "One ImageIO adapter in SuiteShell over CoreRaster's codecs: every app decodes, orients and encodes image files the same way, and the two hand-rolled PNG writers are deleted",
+  "title": "One image format registry and one ImageIO adapter: every app reads TIFF, WebP, GIF, BMP, OpenEXR, TGA, HEIC, JPEG and PNG and writes TIFF, PNG, JPEG and HEIC from one list, decodes and encodes them the same way, and the two hand-rolled PNG writers are deleted",
   "wave": "XK3",
   "order": 30,
   "status": "planned",
   "feature_issue": "file when ready",
   "beta": true,
-  "covers": "canonical duplicates audit 2026-10-20, top-15 #6 (image file codecs); feature map suiteui/shared-codecs; real job RJ-X46",
-  "waits_on": "suite-imaging IM-a (Package.swift, project.yml); adopt-kernel-autosave AK-z (canonical-baseline.txt) before SC-11; no creative-core bump (dev's pin 2258b62, #3549, already has core PNGRead/PNGWrite, IC-4/IC-5); cross-line hand-offs: photo/export-pack PX-m, library spine, metadata-more, raw, export, export-pack",
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #6 (image file codecs); feature map suiteui/shared-codecs; real job RJ-X46; the captain's TIFF question 2026-10-21 (one format registry, slice SC-f, first)",
+  "waits_on": "SC-f first and waits on nothing: adopt-suiteui-chrome AC-export-sheet (PhotoWindow+Export.swift; not in the beta) and adopt-kernel-autosave AK-8 (PhotoWindow+File.swift) now wait on SC-f; suite-imaging IM-a (Package.swift, project.yml); adopt-kernel-autosave AK-z (canonical-baseline.txt) before SC-11; no creative-core bump (dev's pin 2258b62, #3549, already has core PNGRead/PNGWrite, IC-4/IC-5); cross-line hand-offs: photo/export-pack PX-m, library spine, metadata-more, raw, export, export-pack; SC-f cross-line hand-offs: photo/export-pack PX-a and PX-m, library metadata-more MD-a, export and export-pack (JPEGWriter, ExportPresets); suite-imaging IM-m (ImagingColor, the wide working space) before SC-4",
   "depends": [
     "suite-harness",
-    "editor-kernel"
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
   ],
-  "longest_chain": "6 (SC-1 → SC-2 → SC-3 → SC-4 → SC-8 → SC-12)",
+  "longest_chain": "6 (SC-13 → SC-14 → SC-15 → SC-16 → SC-8 → SC-12, tied with SC-1 → SC-2 → SC-3 → SC-4 → SC-8 → SC-12)",
   "ui_slice": "none",
-  "ui_slice_reason": "no new screen or control: files open and save as before, the same way in every app; the app slices are ui slices because they edit app files, with the windows' existing budget rows",
+  "ui_slice_reason": "no new screen or control: files open and save as before, the panels and export sheets list more formats through controls that exist, the same way in every app; the app slices are ui slices because they edit app files, with the windows' existing budget rows",
   "journeys": [
     "HaloRenderFrameJourneyTests.testRenderFrame",
     "PhotoDocumentsJourneyTests.testSaveLayeredDocumentAndReopen"
@@ -50,9 +52,73 @@
     "Sources/HaloModel/HaloFramePNG.swift",
     "Tests/mutations/HaloModel.HaloFramePNG.json",
     "Tests/canonical-baseline.txt",
-    "docs/blueprints/suiteui/features/shared-codecs.wave.json"
+    "docs/blueprints/suiteui/features/shared-codecs.wave.json",
+    "Tests/SuiteModelTests/SuiteImageFormatsTests.swift",
+    "Tests/SuiteModelTests/FormatListRatchetTests.swift",
+    "Tests/format-lists-baseline.txt",
+    "Tests/AfterGlowCLITests/ImageFormatParityTests.swift",
+    "Sources/SuiteModel/Values/SuiteImageFormats.swift",
+    "Sources/SuiteModel/Values/SuiteTypes.swift",
+    "Bundle/Info/Photo.plist",
+    "Bundle/Info/Library.plist",
+    "Tests/SuiteModelTests/PlistShapeAppsTests.swift",
+    "Tests/mutations/SuiteModel.SuiteImageFormats.json",
+    "docs/c4/parts/creative-apps/suite-model/suite-identity.json",
+    "Sources/PhotoModel/PhotoImageFile.swift",
+    "Sources/PhotoModel/PhotoHeadless.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Sources/PhotoApp/PhotoWindow+Export.swift",
+    "Tests/PhotoModelTests/PhotoFormatsTests.swift",
+    "Tests/mutations/PhotoModel.PhotoHeadless.json",
+    "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "Sources/LibraryModel/Contracts/ExportFormats.swift",
+    "Sources/LibraryModel/Contracts/ExportPresets.swift",
+    "Tests/LibraryModelTests/LibraryFormatsTests.swift",
+    "Tests/mutations/LibraryModel.LibraryValues.json",
+    "Tests/AppSnapshotTests/SuiteImageIOFormatsTests.swift"
   ],
   "slices": [
+    {
+      "id": "SC-f",
+      "behavior": "One registry in SuiteModel lists every image format the suite reads and the four it writes, the plists and the type registry are built from it, and Photo's and Library's panels, import kinds, export formats and the CLI's lists derive from it with the per-app lists deleted and their ratchet strict.",
+      "tasks": [
+        "SC-13",
+        "SC-14",
+        "SC-15",
+        "SC-16"
+      ],
+      "journeys": [
+        "MJ-SC-f",
+        "PJ-SC"
+      ],
+      "owned": [
+        "Tests/SuiteModelTests/SuiteImageFormatsTests.swift",
+        "Tests/SuiteModelTests/FormatListRatchetTests.swift",
+        "Tests/format-lists-baseline.txt",
+        "Tests/AfterGlowCLITests/ImageFormatParityTests.swift",
+        "Sources/SuiteModel/Values/SuiteImageFormats.swift",
+        "Sources/SuiteModel/Values/SuiteTypes.swift",
+        "Bundle/Info/Photo.plist",
+        "Bundle/Info/Library.plist",
+        "Tests/SuiteModelTests/PlistShapeAppsTests.swift",
+        "Tests/mutations/SuiteModel.SuiteImageFormats.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-identity.json",
+        "Sources/PhotoModel/PhotoImageFile.swift",
+        "Sources/PhotoModel/PhotoHeadless.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift",
+        "Sources/PhotoApp/PhotoWindow+Export.swift",
+        "Tests/PhotoModelTests/PhotoFormatsTests.swift",
+        "Tests/mutations/PhotoModel.PhotoHeadless.json",
+        "Sources/LibraryModel/Contracts/LibraryValues.swift",
+        "Sources/LibraryModel/Contracts/ExportFormats.swift",
+        "Sources/LibraryModel/Contracts/ExportPresets.swift",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift",
+        "Tests/LibraryModelTests/LibraryFormatsTests.swift",
+        "Tests/mutations/LibraryModel.LibraryValues.json"
+      ],
+      "waits": {},
+      "ui": true
+    },
     {
       "id": "SC-a",
       "behavior": "Core's PNG is proven to round-trip what both local writers write, the ImageIO import ratchet is live with today's files baselined, and `SuiteImageIO` is declared as stubs in SuiteShell, which links CoreRaster.",
@@ -102,11 +168,15 @@
         "Sources/PhotoModel/CoreRasterImageCodec.swift",
         "Sources/PhotoApp/PhotoPasteboard.swift",
         "Tests/AppSnapshotTests/SuiteImageIOTests.swift",
-        "Tests/mutations/PhotoModel.CoreRasterImageCodec.json"
+        "Tests/mutations/PhotoModel.CoreRasterImageCodec.json",
+        "Tests/AppSnapshotTests/SuiteImageIOFormatsTests.swift"
       ],
       "waits": {
         "SC-a": [
           "SC-3",
+          "SC-4"
+        ],
+        "suite-imaging:IM-m": [
           "SC-4"
         ]
       },
@@ -157,6 +227,9 @@
       "waits": {
         "SC-a": [
           "SC-7",
+          "SC-8"
+        ],
+        "SC-f": [
           "SC-8"
         ]
       },
