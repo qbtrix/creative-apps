@@ -22,3 +22,4 @@
 2026-10-20T20:44:36Z	heartbeat	waiting	LF-a #3624 build 39439515810 still queued since 14:28Z; SF-3 #3514 and SF-4 unmerged
 2026-10-20T21:07:38Z	heartbeat	waiting	LF-a #3624 clean after #3671, macOS build 39439515810 queued; SF-3/SF-4 open
 2026-10-20T21:28:05Z	LF-a	needs-rebase fixed	#3624: merged dev, resolved library-app C4 description, CI: PASS, head 12d9b930a, Head line moved
+2026-10-20T21:28:48Z	heartbeat	waiting	LF-a #3624 at 12d9b930a awaits a new macOS build; SF-3 #3514 still open (supervisor-queued), SF-4 open
