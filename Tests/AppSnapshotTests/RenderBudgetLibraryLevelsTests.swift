@@ -2,9 +2,10 @@
 // window (#3633; Tests/render-budgets.md), through the harness
 // (RenderBudgetHarness.swift). On the `samples` fixture it opens the first
 // cell in the loupe with the cell's "Open" action, switches to Develop and
-// drags the Midtones handle (LevelsHandles) 30 pt left over 120 samples at
-// 120 Hz, the move that re-renders the loupe preview and its histogram every
-// sample. `bodies` gates the window-body count at 0: a Levels sample redraws
+// steps the Midtones handle (LevelsHandles) 120 times at 120 Hz through its
+// adjustable action, each step an edit that re-renders the loupe and its
+// histogram. (A synthetic mouse drag on the off-screen window doesn't reach
+// the handle's gesture; the journey drags it for real.) `bodies` gates the window-body count at 0: a Levels sample redraws
 // the inspector and the loupe, never the window. The step time is printed and
 // judged nowhere (timing rows live in perf-suites). Nested in BodyCountSuites,
 // as every suite that reads a body counter is. macOS only.
@@ -36,15 +37,16 @@ extension BodyCountSuites {
             // A synthetic click on the segmented control waits in its tracking loop, so press it the AX way.
             _ = Self.node("library.inspector.develop", in: w.host)?.accessibilityPerformPress?()
             try await w.settle(untilStable: bodies, turns: 8)
-            let handle = try #require(await w.element(DevelopInspector.levelsID(.gamma)), "no Midtones handle")
-            let drag = try await w.measure("library levels midtones drag, 120 samples", bodies: bodies) {
-                try await w.drag(from: CGPoint(x: handle.midX, y: handle.midY), by: CGVector(dx: -30, dy: 0))
+            let id = DevelopInspector.levelsID(.gamma)
+            #expect(await w.element(id) != nil, "no Midtones handle")
+            var adjustable = false
+            let steps = try await w.measure("library levels midtones, 120 steps", bodies: bodies) {
+                adjustable = try await w.adjust(id, steps: 120)
             }
-            // The edit lands in the inspector and the loupe, never the window body: a sample that reran
-            // it would show here. (Hosted SwiftUI elements read no AX value here, #262, so the gamma
-            // itself is the journey's to check.)
-            #expect(drag.steps == 122, "the drag didn't run: \(drag)")
-            expectBodies(drag, atMost: Self.budget, target: 0)
+            #expect(adjustable, "Midtones isn't adjustable")
+            // Each step lands in the inspector and the loupe (a layout pass), never the window body.
+            #expect(steps.layouts > 0, "the steps changed nothing: \(steps)")
+            expectBodies(steps, atMost: Self.budget, target: 0)
         }
 
         /// Measured on this branch: 0.
