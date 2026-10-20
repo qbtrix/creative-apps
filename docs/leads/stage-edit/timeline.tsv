@@ -177,3 +177,4 @@
 2026-10-20T06:18Z	merged	#3312 merged by fast lane 06:08Z as 424b4a60; full CI 39379088986 dispatched on dev (pending)
 2026-10-20T06:29Z	heartbeat	full CI 39379088986 on dev 424b4a60 still pending (no jobs started)
 2026-10-20T06:41Z	heartbeat	full CI 39379088986 (dev 424b4a60) queued behind full CI 39349878829, running since 00:49Z
+2026-10-20T06:54Z	heartbeat	full CI 39379088986 still queued (no jobs); behind 39349878829
