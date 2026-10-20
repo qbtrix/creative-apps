@@ -30,6 +30,12 @@ import Testing
         #expect(options.scaled(3).format == .png && options.scaled(3).scope == .page)
     }
 
+    @Test func scaleIsOffForVectorFormats() {
+        #expect(DesignExportOptions(format: .png, scale: 2, scope: .page).scaleHelp == nil)
+        #expect(DesignExportOptions(format: .svg, scale: 2, scope: .page).scaleHelp == "SVG and PDF are vectors, so they don't take a scale.")
+        #expect(DesignExportOptions(format: .pdf, scale: 1, scope: .frame).scaleHelp == "SVG and PDF are vectors, so they don't take a scale.")
+    }
+
     @Test func theRunShowsItsOptionsUntilIdle() {
         let options = DesignExportOptions(format: .pdf, scale: 1, scope: .page)
         #expect(DesignExportRun.idle.shownOptions == nil)

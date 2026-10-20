@@ -1,6 +1,6 @@
 // DesignExportSheet+Kernel.swift: what File > Export…'s sheet reads (design-export DE-6):
 // the scope chips' titles, the options it opens with (Selection falls back to Frame when nothing
-// exportable is selected), a whole 1x to 3x scale, the run's options until idle, and the file
+// exportable is selected), a whole 1x to 3x scale (PNG only; `scaleHelp` says why it's off), the run's options until idle, and the file
 // list: the plan's files, then (Selection) each hidden selected layer, skipped. Linux-safe.
 import SuiteKernel
 
@@ -35,6 +35,11 @@ extension DesignExportOptions {
         var options = self
         options.scale = Int(Swift.min(Swift.max(value.rounded(), 1), 3))
         return options
+    }
+
+    /// Why the Scale chips are off: SVG and PDF are vectors, written at 1x whatever the scale.
+    public var scaleHelp: String? {
+        format == .png ? nil : "SVG and PDF are vectors, so they don't take a scale."
     }
 }
 
