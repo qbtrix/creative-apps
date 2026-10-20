@@ -1,0 +1,34 @@
+# shape-tools (Flare) lead record
+
+Issue: #3451 · Packet: docs/blueprints/flare/features/shape-tools.md
+Run: act-1a15b1de023-4xx7 · Started: 2026-10-20T21:05Z (line lead: flare-export #1973, shape-tools #3451, svg-place #3459)
+Stage: 3 (wave 1)
+Base: 6c2c7b05 (origin/dev)
+Next: FS-a slice PR (FS-1, FS-2) and FS-5 (FS-m's first task) building
+
+Loop: v3 (the packet has a `## Slices` table).
+
+## Slices
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| FS-a | Shape tool, options in the inspector, adapter stubs | FS-1, FS-2 | MJ-FS | suiteui SH-a (merged ddf5b86e) | yes | 0 | building | | |
+| FS-u | draft previews, snapshots, render budget | FS-3, FS-4 | J-FS | FS-a | yes | 0 | waiting | | |
+| FS-m | drafts on ShapeRules; draw adds one layer as one step | FS-5, FS-6 | MJ-FS | FS-a; gradient-fill:FG-m (FS-6) | no | 0 | building (FS-5); FS-6 blocked on FG-m | | |
+| FS-z | journey live; built | FS-7, FS-8 | J-FS | FS-u, FS-m | no | 0 | waiting | | |
+
+## Tasks
+| id | slice | wave | PR | state |
+|---|---|---|---|---|
+| FS-1 | FS-a | 1 | | building |
+| FS-2 | FS-a | 1 | | building (same PR as FS-1) |
+| FS-5 | FS-m | 1 | | building (needs no FS-1 code) |
+| FS-3, FS-4 | FS-u | 2 | | waits FS-a |
+| FS-6 | FS-m | 2+ | | waits gradient-fill FG-m (FlareCommandCatalog.swift, Tests/command-ids/flare.txt); Flare gradient-fill is planned, no lead |
+| FS-7 | FS-z | 3 | | waits FS-u, FS-m |
+| FS-8 | FS-z | 4 | | feature-done |
+
+## Decisions
+- Lead branch is lead/flare-shape-tools: lead/shape-tools is the SuiteUI shape-tools lead's (#3449).
+- Base and PR target are dev (CLAUDE.md; the lane retargets main to dev), though the brief names main.
+- SuiteKernel's ShapeSpec, ShapeRules.dragged/path and SuiteUI's ShapeToolOptions are on dev, so SH-a, SH-m and SH-u are met.
+- FS-5 starts in wave 1 beside FS-a: it touches only LiveShapes and its tests, none of FS-1's files (rule 18).
