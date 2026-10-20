@@ -10,7 +10,7 @@ Next: DE-u critics on the next scoped: design or full run on dev (none yet; macO
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DE-a | options, scope, run type, live and fake export slots plan like the fake, UniqueFileNames in SuiteModel | DE-1, DE-0, DE-2 | MJ13 | design-contracts (built); editor-kernel EK-a (DE-2) | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39018046761 | – |
-| DE-u | File > Export… ⇧⌘E opens SuiteUI ExportSheet on the fakes; Export runs the fake steps; Cancel/Escape close; a failed step names its file | DE-6, DE-7 | J19 | DE-a; design-window DW-c; files-history FH-b; snapping SN-c; canvas-basics CB-c; editor-kernel EK-chrome | yes | 0 | merged, waits CI | 39475897385 (pending) | wanted |
+| DE-u | File > Export… ⇧⌘E opens SuiteUI ExportSheet on the fakes; Export runs the fake steps; Cancel/Escape close; a failed step names its file | DE-6, DE-7 | J19 | DE-a; design-window DW-c; files-history FH-b; snapping SN-c; canvas-basics CB-c; editor-kernel EK-chrome | yes | 0 | merged-done (critics wait scoped run) | 39479914225 | wanted |
 | DE-s | the plan picks layers per scope, unique names, sizes per scale, refusals; SVG equals the reference | DE-3, DE-5 | MJ13, MJ14 | DE-a | no | 0 | done | – | – |
 | DE-w | PNG at 1x/2x/3x and one-page PDF off the window from the canvas artwork | DE-8, DE-9 | DesignRasterizerTests | DE-a | yes | 0 | done | – | – |
 | DE-z | real files, never overwriting, progress, failures, journeys on live | DE-10, DE-11 | J17, J18 | DE-u, DE-s, DE-w; files-history FH-b; editor-kernel EK-run | yes | 0 | in lane #3684 | – | – |
