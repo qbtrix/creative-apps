@@ -1,0 +1,23 @@
+[
+  {
+    "label": "capAttribute: the join is written for the cap",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "value: stroke.cap.rawValue",
+    "replace": "value: stroke.join.rawValue",
+    "tests": "StrokeSVGTests"
+  },
+  {
+    "label": "colorAndWidth: stroke-opacity is written for an opaque colour too",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "if alpha < 1 {",
+    "replace": "if alpha <= 1 {",
+    "tests": "StrokeSVGTests"
+  },
+  {
+    "label": "colorAndWidth: the colour is written in upper-case hex, unlike FlareCore's SVG export",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "SampleRules.hex(stroke.color).lowercased()",
+    "replace": "SampleRules.hex(stroke.color)",
+    "tests": "StrokeSVGTests"
+  }
+]

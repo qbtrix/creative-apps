@@ -5,11 +5,10 @@
 // sequence chip, steps the To row (`flare.export.to`) 60 times the way
 // VoiceOver and XCUI adjust it (down and up in turn, so each step stays in the
 // scene's 48 frames and is an edit), then presses Cancel (`flare.export.cancel`).
-// Export… is a toolbar item, and a borderless window shows no toolbar, so the
-// harness window gets `.titled` before the first measure (as
-// RenderBudgetAIAccessTests does for its title-bar chip). The sheet is its own
-// window attached to the hosted one, so its controls are found from
-// `attachedSheet`'s accessibility tree, not the host's. `bodies`
+// The sheet is its own window attached to the hosted one, so its controls are
+// found from `attachedSheet`'s accessibility tree, not the host's. Export… is
+// a toolbar item, so the harness window gets a title bar and an NSToolbar the
+// host bridges its toolbar into. `bodies`
 // gates the window-body counts; `timing` (report-only, for
 // Tests/perf-suites.txt) judges the To steps. Nested in BodyCountSuites, as
 // every suite that reads a body counter is. macOS only.
@@ -45,7 +44,13 @@ extension BodyCountSuites {
             let model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "showcase"]))
             let w = RenderBudgetWindow(FlareWindow(model: model))
             defer { w.close() }
+            // Export… is a toolbar item: the window gets a title bar and the host bridges its toolbar
+            // into it, which only happens as the host joins the window.
             w.window.styleMask.insert(.titled)
+            w.window.contentView = nil
+            w.host.sceneBridgingOptions = [.toolbars]
+            w.window.toolbar = NSToolbar()
+            w.window.contentView = w.host
             let bodies = { () -> Int? in
                 #if DEBUG
                 return FlareWindow.bodyRuns
@@ -56,9 +61,14 @@ extension BodyCountSuites {
             try await w.settle(untilStable: bodies)
             var pressed = false
             let open = try await w.measure("flare export sheet opens", bodies: bodies) {
-                try await w.ticks(1) { _ in pressed = Self.press("flare.export.showSheet", in: w.window) }
+                // The toolbar item's viewer acts on the press but answers false: the sheet is the check.
+                try await w.ticks(1) { _ in
+                    let item = Self.node("flare.export.showSheet", in: w.window)
+                    pressed = item != nil
+                    _ = item?.accessibilityPerformPress?()
+                }
             }
-            try #require(pressed, "no Export… (flare.export.showSheet) to press in the window's toolbar")
+            #expect(pressed, "no Export… (flare.export.showSheet) to press")
             let sheet = try #require(await Self.sheet(of: w.window), "Export… opened no sheet: \(open)")
             #expect(Self.press("flare.export.format.pngSequence", in: sheet), "no PNG sequence chip")
             try await w.settle(untilStable: bodies)

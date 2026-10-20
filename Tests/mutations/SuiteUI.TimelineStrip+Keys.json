@@ -1,3 +1,5 @@
 [
-{"label":"→ and ← swapped","file":"Sources/SuiteUI/TimelineStrip+Keys.swift","find":"if key == .rightArrow { return 1 }","replace":"if key == .rightArrow { return -1 }","tests":"TimelineAccessTests"}
+{"label":"→ and ← swapped","file":"Sources/SuiteUI/TimelineStrip+Keys.swift","find":"if key == .rightArrow { return 1 }","replace":"if key == .rightArrow { return -1 }","tests":"TimelineAccessTests"},
+{"label":"⌘A routes without focus","file":"Sources/SuiteUI/TimelineStrip+Keys.swift","find":"guard focused, let all = onSelectAllKeys else { return nil }","replace":"guard let all = onSelectAllKeys else { return nil }","tests":"TimelineSelectAllTests"},
+{"label":"⌘A runs the closure twice","file":"Sources/SuiteUI/TimelineStrip+Keys.swift","find":"TimelineSelectAll(run: { all() })","replace":"TimelineSelectAll(run: { all(); all() })","tests":"TimelineSelectAllTests"}
 ]
