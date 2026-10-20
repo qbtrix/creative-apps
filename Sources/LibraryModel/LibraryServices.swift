@@ -29,9 +29,9 @@ public struct LibraryServices: Sendable {
     public init(decoder: any PhotoDecoding, importer: any PhotoImporting, thumbnails: any ThumbnailProviding,
                 culling: any PhotoCulling, coding: any CatalogCoding, store: any CatalogStoring,
                 loupe: any LoupeImaging, develop: any DevelopRendering, crop: any CropGeometry,
-                exporter: any PhotoExporting, writer: any JPEGWriting,
+                exporter: any PhotoExporting, trash: any PhotoTrashing = LiveTrash(), writer: any JPEGWriting,
                 sidecars: any SidecarWriting = UnconnectedSidecars(), leveler: (any CropLeveling)? = nil,
-                trash: any PhotoTrashing = LiveTrash(), unavailable: [String: String] = [:], isPreview: Bool) {
+                unavailable: [String: String] = [:], isPreview: Bool) {
         self.decoder = decoder; self.importer = importer; self.thumbnails = thumbnails
         self.culling = culling; self.coding = coding; self.store = store; self.loupe = loupe
         self.develop = develop; self.crop = crop; self.exporter = exporter; self.writer = writer
@@ -49,8 +49,8 @@ public struct LibraryServices: Sendable {
             thumbnails: FakeThumbnails(mode: mode), culling: FakeCulling(mode: mode),
             coding: FakeCatalogCoding(mode: mode), store: FakeCatalogStore(mode: mode),
             loupe: FakeLoupe(mode: mode), develop: FakeDevelop(mode: mode), crop: FakeCrop(),
-            exporter: FakeExporter(mode: mode), writer: FakeJPEGWriter(mode: mode),
-            sidecars: FakeSidecars(mode: mode), leveler: FakeCrop(), trash: FakeTrash(mode: mode), isPreview: true)
+            exporter: FakeExporter(mode: mode), trash: FakeTrash(mode: mode), writer: FakeJPEGWriter(mode: mode),
+            sidecars: FakeSidecars(mode: mode), leveler: FakeCrop(), isPreview: true)
     }
 
     /// The live services over LibraryApp's platform adapters. Every member is
@@ -73,7 +73,7 @@ public struct LibraryServices: Sendable {
             decoder: decoder, importer: LiveImporter(decoder: decoder),
             thumbnails: LiveThumbnails(decoder: decoder, develop: develop), culling: LiveCulling(),
             coding: LiveCatalogCoding(), store: store, loupe: LiveLoupeImaging(decoder: decoder, develop: develop),
-            develop: develop, crop: LiveCrop(), exporter: LiveExporter(decoder: decoder, develop: develop),
-            writer: writer, sidecars: sidecars, trash: LiveTrash(), unavailable: unavailable, isPreview: false)
+            develop: develop, crop: LiveCrop(), exporter: LiveExporter(decoder: decoder, develop: develop), trash: LiveTrash(),
+            writer: writer, sidecars: sidecars, unavailable: unavailable, isPreview: false)
     }
 }
