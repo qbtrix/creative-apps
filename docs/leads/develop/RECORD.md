@@ -2,7 +2,7 @@
 
 Issue: #1527 · Packet: docs/blueprints/library/features/develop.md
 Run: act-1a1543fe40d-7l1y · Session: claude/library-feature-lead-zn216c · Started: 2026-10-19T12:20Z (earlier: act-1a150baa34c-jzk9)
-Stage: 3 wave 4 (DV-11; DV-3 and DV-8 from wave 3 still open)
+Stage: done (Belt-Contact-Sheet run 39369080854)
 Base: 507719b37a0f61d4242352f01481193829be3a87 (origin/dev; the brief's main f7e03506 is its ancestor)
 Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250 (stacked, ready after #3221 merges), EX-6 #3251 body fix
 
@@ -13,8 +13,8 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 | DV-b | slider, curve, levels, reset, copy, paste, sync as undo steps | DV-3, DV-4 | MJ2 | DV-a (DV-3) | no | 0 | done (Belt-Slice-Done, dev CI 39221576463 Linux green) | - | - |
 | DV-c | live renderer passes, fixed order, histogram | DV-5, DV-6 | MJ3 | DV-a | no | 0 | done | 39192572958 | - |
 | DV-d | Develop tab on the fakes, reachable from the inspector | DV-7, DV-8, DV-9, DV-10 | J5 | DV-a (DV-8, DV-9); spine follow-up (DV-9) | yes | 0 | building | - | - |
-| DV-e | vibrance and saturation through CoreRaster | DV-11, DV-12 | MJ4 | DV-c; creative-core issue and its bump (DV-12) | no | 0 | done (per Belt) | - | - |
-| DV-f | integrate: live services, relaunch survival, frame budget | DV-13, DV-14, DV-15 | J5, P3 | DV-d, DV-c, DV-b, DV-e | no | 0 | planned | - | - |
+| DV-e | vibrance and saturation through CoreRaster | DV-11, DV-12 | MJ4 | DV-c; creative-core issue and its bump (DV-12) | no | 0 | done, gap #3425 | 39363625797 | - |
+| DV-f | integrate: live services, relaunch survival, frame budget | DV-13, DV-14, DV-15 | J5, P3 | DV-d, DV-c, DV-b, DV-e | no | 0 | done, gap #3286 | 39369080854 | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -27,10 +27,10 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 | DV-3 | DV-b | 3 | slider, curve, levels edits, coalescing, resets, helps | Sources/LibraryModel/LibraryDevelop.swift, Tests/LibraryModelTests/LibraryDevelopTests.swift, Tests/mutations/LibraryModel.LibraryDevelop.json | LibraryDevelopTests | #3095 | merged 7acc00bf |
 | DV-8 | DV-d | 3 | develop area and menu closures | Sources/LibraryApp/LibraryMenus.swift, Sources/LibraryApp/LibraryWindow+Develop.swift, Sources/LibraryApp/LibraryWindow+Thumbnails.swift | macOS build; LibraryDevelopMenuTests (fix 1) | #3086 | merged b749dd94 |
 | DV-11 | DV-e | 4 | color checks and MJ4, disabled "waits on DV-12" | Tests/LibraryModelTests/LibraryDevelopColorTests.swift | compiles, disabled | #3098 | merged b48cf6c4 |
-| DV-4, DV-9 | DV-b, DV-d | 4 | see packet (DV-4 after DV-3, DV-9 after DV-8) | see develop.wave.json | see packet | - | planned |
+| DV-4, DV-9 | DV-b, DV-d | 4 | see packet (DV-4 after DV-3, DV-9 after DV-8) | see develop.wave.json | see packet | #3295 | merged |
 | DV-10, DV-12, DV-14 | - | 5 | see packet | see develop.wave.json | see packet | - | planned |
 | DV-13 | DV-f | 6 | see packet | see develop.wave.json | see packet | - | planned |
-| DV-15 | DV-f | 7 | blueprint prose, feature-done | docs/blueprints/library.md | see packet | - | planned |
+| DV-15 | DV-f | 7 | blueprint prose, feature-done | docs/blueprints/library.md | see packet | #3433 | merged 53151b2b |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -115,3 +115,4 @@ Next: resumed after container restart: DV-9 #3221 merge state, DV-10 draft #3250
 - 2026-10-20T04:02Z: Q1 applied: DV-12 is gap #3425; DV-e done (comment 6283050572, run 39363625797); DV-15 building on lead/develop-dv15 (docs-only, feature-done)
 - 2026-10-20T04:13Z: DV-15 PR #3433 opened (fast-lane, feature-done), head 9429a353, scripts/ci PASS. Next: merge, then dev Linux proof, then DV-f done (gaps #3286) and contact sheet.
 - 2026-10-20T04:23Z: DV-15 #3433 merged as 53151b2b (04:14Z). Proof pending: dev Linux check 39369080854 (in progress), CI 39368749437 (pending).
+- 2026-10-20T04:40Z: Q1 applied. DV-12 is gap #3425 and DV-14 is gap #3286. DV-f done (comment 6283520965) and Belt-Contact-Sheet (6283522048) on Linux check 39369080854 (53151b2b, green). Feature done.
