@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-9 #3546 (draft on FC-8 #3490 + FC-3 #3423); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 building (on FC-7 #3534 + FC-11 #3515); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
+Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 building (on FC-7 #3534 + FC-11 #3515); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -21,7 +21,7 @@ Next: FC-9 #3546 (draft on FC-8 #3490 + FC-3 #3423); FC-10 blocked on S-L9 #3411
 | FC-1 | FC-a | done | RatingRule and LibraryFilter value types | Sources/LibraryModel/LibraryFilter.swift, Tests/LibraryModelTests/LibraryFilterTests.swift, Tests/mutations/LibraryModel.LibraryFilter.json | LibraryFilterTests | #1976 | merged |
 | FC-2a | FC-a | done | stored filter/collection state, UserCollection, refreshShown | Sources/LibraryModel/LibraryCatalog.swift, Sources/LibraryModel/LibraryCollections.swift | LibraryRefreshShownTests | #1999 | merged |
 | FC-2b | FC-a | 1 | contract: catalog method stubs, shownItems through activeFilter and user collections, recount rows, editCanReorder, LibraryEmptyCollection, MJ1 seam test, plans | Sources/LibraryModel/LibraryCatalog.swift, Sources/LibraryModel/LibraryOrder.swift, Sources/LibraryModel/LibraryCollections.swift, Sources/LibraryModel/LibraryFilter.swift, Sources/LibraryModel/LibraryEmptyCollection.swift, Tests/LibraryModelTests/LibraryCollectionsSeamTests.swift, Tests/mutations/LibraryModel.LibraryCatalog.json, Tests/mutations/LibraryModel.LibraryOrder.json | LibraryCollectionsSeamTests (MJ1) | #3424 | open, macOS build queued |
-| FC-3 | FC-a | 1 | collection edits as undo steps on the kernel adapter (recordCollectionsEdit) | Sources/LibraryModel/LibraryUndoAdapter.swift, Tests/LibraryModelTests/LibraryCollectionsHistoryTests.swift, Tests/mutations/LibraryModel.LibraryCollectionsHistory.json | LibraryCollectionsHistoryTests | #3423 | open, macOS build queued |
+| FC-3 | FC-a | 1 | collection edits as undo steps on the kernel adapter (recordCollectionsEdit) | Sources/LibraryModel/LibraryUndoAdapter.swift, Tests/LibraryModelTests/LibraryCollectionsHistoryTests.swift, Tests/mutations/LibraryModel.LibraryCollectionsHistory.json | LibraryCollectionsHistoryTests | #3423 | merged 07:29Z |
 | FC-4 | FC-a | 2 | menu, bar and area hooks; CollectionsStore stub (UI, macOS) | Sources/LibraryApp/LibraryWindow+Filters.swift, Sources/LibraryApp/Platform/CollectionsStore.swift | builds on macOS | #3461 | open, draft until #3424 merges (stacked) |
 | FC-5 | FC-a | 3 | mount bar, sidebar section, menu items (UI, macOS) | Sources/LibraryApp/LibraryWindow.swift, Sources/LibraryApp/LibraryCommands.swift, Sources/LibraryApp/LibraryBrowser.swift | MJ1, FC-a snapshots | #3466 | open, draft until #3461 merges (stacked); gate ran against the FC-4 branch, so rerun against origin/dev before un-drafting |
 | FC-6 | FC-b | 4 | filter checks, disabled until FC-7 | LibraryFilterBarTests, LibraryFilterBudgetTests, LibraryFilterSnapshots, LibraryJourneyTests+Filters | compiles, disabled | #3491 | draft, stacked on #3466 |
@@ -68,3 +68,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490 + FC-3 #3423); FC-10 blocked on S-L9 #3411
 - 06:57Z: #3423's lane macOS build 39366083753 succeeded; the lane merges it on its next sweep.
 
 - 07:15Z check-in: #3423 and #3460 macOS builds green, not yet merged by the lane; #3424 build 39366318428 still queued (since 03:49Z). No new line:library findings in these features' files. Builders: MD-7, MD-10, FC-12; FC-10 blocked on S-L9 #3411.
+- 07:29Z: FC-3 #3423 merged. No PR waited on it alone (FC-9 #3546 still waits on #3490, FC-12 carries FC-3 already). FC-a closes when FC-2b #3424 merges.
