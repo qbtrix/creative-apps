@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-20T07:57Z	3	gate	XP-1	scripts/ci --changed CI: PASS on 55611e3 (dev af2977c merged)
 2026-10-20T07:57Z	3	pr-open	#3552	XP-1, Slice XP-a, fast-lane
 2026-10-20T07:59Z	3	heartbeat	-	dev 8e06057: core pin 0de5687d, #3144 open, GF-2 and PL-a not on dev, AH-2 not started
+2026-10-20T07:59Z	3	note	#3552	server-added attribution footer removed from the PR body and from the start comments on #3476 and #3518
