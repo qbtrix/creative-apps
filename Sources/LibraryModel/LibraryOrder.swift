@@ -20,11 +20,6 @@ extension LibraryCatalog {
     /// True when an edit to a photo's metadata can move or hide it in `order`.
     var editCanReorder: Bool { sort == .rating || selectedCollectionID == "favorites" }
 
-    /// Sets the grid selection; ids not shown in the selected collection are dropped.
-    public mutating func select(_ ids: Set<String>) {
-        selection = ids.intersection(order)
-    }
-
     /// Opens a shown photo in the loupe. An unknown id is ignored.
     public mutating func open(_ id: String) {
         guard order.contains(id) else { return }
