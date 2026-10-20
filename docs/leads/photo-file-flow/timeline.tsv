@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-20T20:22Z	wave	restart	PF-3	container restart stopped builder; resumed on PF-4
 2026-10-20T20:22Z	check	poll	#3679,#3700	open, no needs-fix
 2026-10-20T20:34Z	check	heartbeat	#3679,#3700	open, no needs-fix; PF-3 building; SF-8 #3529 still closed (PF-7 blocked)
+2026-10-20T20:54Z	check	heartbeat	#3679,#3700	open; macOS builds 39483574632/39486583540 queued since 19:27Z/19:48Z; PF-3 building
