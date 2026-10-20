@@ -2,9 +2,9 @@
 
 Issue: #3443 · Packet: docs/blueprints/halo/features/transform.md
 Run: act-1a15a9f4eda-rqhh · Session: session_01SEp2gy695K32UTCMdrBDFC · Started: 2026-10-20T18:43Z
-Stage: 3 wave 1
+Stage: 3 wave 2
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: stack HT-5 (HT-m part 1, adapter bodies + mutations) on lead/transform-HT-a; watch #3682 in the lane
+Next: collect HT-5 builder (branch lead/transform-HT-m, stacked on #3682); open its PR once #3682 merges if the stacked diff is over 400 lines
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Wave 1: HT-a (HT-1+HT-2, one slice PR), alongside autosave-history HA-a. Wave 2:
 |---|---|---|---|---|---|
 
 ## Decisions
+- Stacked PRs diff against dev with their parent included, so a stacked slice PR opens only when its diff vs dev is within 400 lines and 15 files (in practice once the parent merges); the branch is built and gated at once.
 - Base is origin/dev (CLAUDE.md: never branch from main); main b3011ab9 verified at start.
 - One PR per slice (rule 22): HT-1 and HT-2 ship together as HT-a, failing test first.
 - HT-6 waits on autosave-history HA-6, which waits on gradient-fill HG-m (both own HaloCommandCatalog.swift and Tests/command-ids/halo.txt).
