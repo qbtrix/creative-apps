@@ -11,7 +11,7 @@ import SuiteKernel
 import SuiteModel
 import Testing
 
-@Suite(.disabled("waits on PH-6")) struct PhotoRecoveryFolderTests {
+@Suite struct PhotoRecoveryFolderTests {
     /// A fresh folder under the temporary directory, removed after `body`.
     private func inTemporaryFolder(_ body: (URL) async throws -> Void) async throws {
         let root = FileManager.default.temporaryDirectory
@@ -54,7 +54,7 @@ import Testing
         }
     }
 
-    @Test func aSaveRemovesIt() async throws {
+    @Test func saveRemovesRecovery() async throws {
         try await inTemporaryFolder { root in
             var workspace = try editedFixture(in: root)
             let store = workspace.services.recovery
@@ -69,7 +69,7 @@ import Testing
         }
     }
 
-    @Test func aRelaunchOffersTheNewestAndRestoreGivesTheSameLayers() async throws {
+    @Test func newestOffered() async throws {
         try await inTemporaryFolder { root in
             var older = try editedFixture(in: root)
             older.didSave(as: "older.ora", kind: .document)
@@ -108,6 +108,16 @@ import Testing
         #expect(renamed.documentName == "b.png")
     }
 
+    /// Photo's own autosave timing is gone: the window uses the shared modifier
+    /// (scripts/check-dup-logic, run by scripts/ci, holds the baseline).
+    @Test func photoAutosaveIsGone() {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+        let gone = root.appendingPathComponent("Sources/PhotoApp/PhotoAutosave.swift").path
+        #expect(FileManager.default.fileExists(atPath: root.appendingPathComponent("Sources/PhotoApp").path))
+        #expect(!FileManager.default.fileExists(atPath: gone))
+    }
+
     @Test func damagedBytesThrow() async {
         await #expect(throws: (any Error).self) {
             _ = try await PhotoWorkspace.recovered(from: Data("not a zip".utf8), name: "x")
@@ -118,11 +128,12 @@ import Testing
         try await inTemporaryFolder { root in
             let edited = try editedFixture(in: root)
             let restored = try await PhotoWorkspace.recovered(
-                from: try edited.recoveryBytes(codec: RawCodec()), name: nil, services: .fake, codec: RawCodec())
-            var window = PhotoWorkspace(services: PhotoServices.live.recovering(in: root))
+                from: try edited.recoveryBytes(codec: RawCodec()), name: nil, services: .live, codec: RawCodec())
+            #expect(restored.services.recoveryFolder != nil)
+            var window = PhotoWorkspace(services: .fake)
             window.restoreRecovered(restored)
             #expect(try window.snapshot() == edited.snapshot())
-            #expect(window.services.recoveryFolder != nil)
+            #expect(window.services.recoveryFolder == nil)
             #expect(window.isDirty)
         }
     }
