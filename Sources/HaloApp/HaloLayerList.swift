@@ -10,7 +10,9 @@
 // Each row's decoration carries its kind's SF Symbol, its tooltip
 // (HaloLayerKind.rowHelp: how to rename and reorder it) and its VoiceOver
 // value naming the kind ("Solid layer"); names draw at the inspector's label
-// size, like the rows above the list. A click selects (`selectLayer`); a
+// size, like the rows above the list. A click picks (`pickLayer`): plain
+// selects the layer alone, Command-click adds or drops it, Shift-click adds the
+// run from the last pick, and every picked row draws selected; a
 // double-click on the name, Return on the focused row or the Rename action
 // opens the row's rename field, which sends `renameLayer(id, name)` and closes
 // (the Model refuses a blank name). A drop goes out as LayerTreeList's
@@ -55,8 +57,9 @@ struct HaloLayerList: View {
             } else {
                 LayerTreeList(
                     rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID,
+                    picked: model.pickedLayerIDs,
                     naming: Self.naming, options: Self.options, decorations: Self.decorations(layers),
-                    onSelect: { perform(.selectLayer($0)) },
+                    onPick: { perform(.pickLayer($0, $1)) },
                     onRename: { id, name in
                         perform(.renameLayer(id, name))
                         return nil

@@ -31,7 +31,7 @@ extension HaloProject: HeadlessDocument {
 
     @Test func oneSpecPerCase() {
         let ids = HaloCommand.allCases.map(\.commandID)
-        #expect(ids.count == 58 && Set(ids).count == ids.count)
+        #expect(ids.count == 59 && Set(ids).count == ids.count)
         #expect(catalog.ids == ids.sorted() && HaloProject.commandSpecs.map(\.id) == ids)
     }
 

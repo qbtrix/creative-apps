@@ -23,7 +23,7 @@ extension HaloProject {
         case .sendLayerBackward:
             guard let id = selectedLayer?.id else { return HaloEditError.noLayerSelected.message }
             return comp.layers.last?.id == id ? "This layer is already at the bottom." : nil
-        case .renameLayer(let id, _), .moveLayer(let id, _), .selectLayer(.some(let id)):
+        case .renameLayer(let id, _), .moveLayer(let id, _), .selectLayer(.some(let id)), .pickLayer(let id, _):
             return comp.layers.contains { $0.id == id } ? nil : HaloEditError.unknownLayer(id).message
         case .selectLayer(.none):
             return "A layer stays selected until you pick another."

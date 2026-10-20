@@ -6,6 +6,7 @@
 // dialogs an area's route asks the window to show (`HaloWindowRequest`).
 // Linux-safe: no UI imports.
 import CoreRaster
+import SuiteKernel
 
 /// The nine areas, one availability file each.
 public enum HaloCommandArea: Sendable, CaseIterable {
@@ -20,7 +21,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
     // layers
     case newLayer(HaloLayerKind)
     case duplicateLayer, beginRenameLayer, deleteLayer, bringLayerForward, sendLayerBackward
-    case renameLayer(String, String), moveLayer(String, to: Int), selectLayer(String?)
+    case renameLayer(String, String), moveLayer(String, to: Int), selectLayer(String?), pickLayer(String, Pick)
     // playback
     case playPause, toggleLoop, nextFrame, previousFrame, goToStart, goToEnd, setInPoint, setOutPoint
     case scrub(Int), tick(Double)
@@ -48,6 +49,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         .renameComposition("comp-1", "Intro"),
         .newLayer(.solid), .duplicateLayer, .beginRenameLayer, .renameLayer("comp-1-layer-2", "Ball 2"), .deleteLayer,
         .bringLayerForward, .sendLayerBackward, .moveLayer("comp-1-layer-2", to: 1), .selectLayer("comp-1-layer-2"),
+        .pickLayer("comp-1-layer-2", .toggle),
         .playPause, .toggleLoop, .nextFrame, .previousFrame, .goToStart, .goToEnd, .setInPoint, .setOutPoint,
         .scrub(12), .tick(0.5),
         .setProperty(.x, 100), .setPropertyText(.x, "100"), .endPropertyScrub, .toggleAnimation(.x), .toggleKey(.x),
@@ -69,7 +71,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         case .newComposition, .duplicateComposition, .deleteComposition, .selectComposition, .renameComposition:
             .composition
         case .newLayer, .duplicateLayer, .beginRenameLayer, .renameLayer, .deleteLayer, .bringLayerForward,
-            .sendLayerBackward, .moveLayer, .selectLayer:
+            .sendLayerBackward, .moveLayer, .selectLayer, .pickLayer:
             .layers
         case .playPause, .toggleLoop, .nextFrame, .previousFrame, .goToStart, .goToEnd, .setInPoint, .setOutPoint,
             .scrub, .tick:
@@ -103,6 +105,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         case .sendLayerBackward: "Send Backward"
         case .moveLayer: "Move Layer"
         case .selectLayer: "Select Layer"
+        case .pickLayer: "Pick Layer"
         case .playPause: "Play/Pause"
         case .toggleLoop: "Loop"
         case .nextFrame: "Next Frame"

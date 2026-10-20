@@ -76,6 +76,9 @@ public struct HaloProject: Sendable, Equatable {
     var keySelection = Selection<HaloKeyRef>()
     /// The picked keys as a set, read from `keySelection`.
     public var selectedKeys: Set<HaloKeyRef> { keySelection.set }
+    /// The layers picked in the LAYERS list, a SuiteKernel `Selection` whose
+    /// primary is the selected layer; written by `HaloLayerPicks+Kernel.swift`.
+    var layerSelection = Selection<String>()
     /// The project file's name, path and status; written by `HaloFiles.swift`.
     /// A clean file (saved or opened) marks the history's current step saved,
     /// so the kernel's `isDirty` is true exactly while the work isn't on disk.

@@ -39,6 +39,7 @@ layer.delete
 layer.duplicate
 layer.move
 layer.new
+layer.pick
 layer.rename
 layer.rename-begin
 layer.select
