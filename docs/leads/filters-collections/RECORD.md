@@ -97,3 +97,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 14:25Z FC-4 #3461 head b798d490: lane Linux check 39435897261 and macOS build 39437577080 dispatched; waiting to merge. No new findings from this feature.
 - 14:42Z FC-4 #3461 macOS build 39437577080 still queued. No new findings.
 - 15:08Z check-in: FC-4 #3461 macOS build 39437577080 still queued; no needs-fix. The FC-5+ stack stays draft. Open library findings: none from this feature. No fixers running.
+- 15:28Z check-in: FC-4 #3461 build 39437577080 still queued; no new lane comment. Stack stays draft.
