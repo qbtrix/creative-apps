@@ -42,9 +42,9 @@ list), 8.
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | FG-a | `FlareWorkspace` conforms to `GradientFillTarget` as stubs, the paint readout carries the gradient, and the FILL section shows the switch and the editor on them. | FG-1, FG-2 | MJ-FG | suiteui/gradient-fill GF-a (cross-line) |
-| FG-u | The FILL section's states have snapshots, a stop drag stays in its render budget, and the journey is written. | FG-3, FG-4, FG-9 | FJ-G1 | FG-a; GF-3 (FG-3, cross-line) |
+| FG-u | The FILL section's states have snapshots, a stop drag stays in its render budget, and the journey is written. | FG-3, FG-4 | FJ-G1 | FG-a; GF-3 (FG-3, cross-line) |
 | FG-m | Every fill command runs on the selected shapes as one undo step through the command engine, and the paint readout reads Mixed for differing gradients. | FG-5, FG-6 | MJ-FG | FG-a; key-select-all:KS-a (the catalog); GF-6 and AC-flare (FG-5, cross-line) |
-| FG-z | The FILL section runs on live services, the journey passes on live, and #2315 closes. | FG-7, FG-8 | FJ-G1 | FG-u, FG-m |
+| FG-z | The FILL section runs on live services, the journey passes on live, and #2315 closes. | FG-7, FG-8, FG-9 | FJ-G1 | FG-u, FG-m; FG-9 also waits on stroke-style:FK-a (shared files) |
 
 FG-u waits only on FG-a (rule 18); FG-m never waits on FG-u. MJ-FG is the
 Model walk in `FlareGradientTests` (Linux).

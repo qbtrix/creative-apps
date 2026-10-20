@@ -69,8 +69,7 @@
       "tasks": [
         "HG-2",
         "HG-3",
-        "HG-4",
-        "HG-10"
+        "HG-4"
       ],
       "journeys": [
         "HJ-G1"
@@ -91,11 +90,7 @@
         "Sources/HaloApp/HaloLayerInspector.swift",
         "Tests/AppSnapshotTests/HaloGradientSnapshots.swift",
         "Tests/AppSnapshotTests/RenderBudgetHaloGradientTests.swift",
-        "UITests/HaloJourneyTests+Gradient.swift",
-        "Sources/HaloApp/HaloTextInspector.swift",
-        "Sources/HaloModel/HaloLayer.swift",
-        "Tests/HaloModelTests/HaloLayerAlphaTests.swift",
-        "Tests/mutations/HaloModel.HaloLayer.json"
+        "UITests/HaloJourneyTests+Gradient.swift"
       ]
     },
     {
@@ -138,7 +133,8 @@
       "behavior": "The inspector runs on live services, the journey passes on live, and the blueprint lists gradient fills.",
       "tasks": [
         "HG-8",
-        "HG-9"
+        "HG-9",
+        "HG-10"
       ],
       "journeys": [
         "HJ-G1"
@@ -146,23 +142,38 @@
       "waits": {
         "HG-u": [
           "HG-8",
-          "HG-9"
+          "HG-9",
+          "HG-10"
         ],
         "HG-m": [
-          "HG-8"
+          "HG-8",
+          "HG-10"
         ],
         "core-loop:CL-z": [
           "HG-9"
         ],
         "key-editing:KE-z": [
           "HG-9"
+        ],
+        "shape-tools:HS-a": [
+          "HG-10"
+        ],
+        "stroke-style:HK-a": [
+          "HG-10"
+        ],
+        "placed-images:PH-a": [
+          "HG-10"
         ]
       },
       "ui": true,
       "owned": [
         "UITests/HaloJourneyTests+Gradient.swift",
         "docs/blueprints/halo.md",
-        "docs/blueprints/halo/features/gradient-fill.wave.json"
+        "docs/blueprints/halo/features/gradient-fill.wave.json",
+        "Sources/HaloApp/HaloTextInspector.swift",
+        "Sources/HaloModel/HaloLayer.swift",
+        "Tests/HaloModelTests/HaloLayerAlphaTests.swift",
+        "Tests/mutations/HaloModel.HaloLayer.json"
       ]
     }
   ]

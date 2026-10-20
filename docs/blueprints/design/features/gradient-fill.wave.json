@@ -72,8 +72,7 @@
       "behavior": "The canvas, text and the PNG and PDF exports paint a node's gradient, and the Fill section's snapshots and render budget hold.",
       "tasks": [
         "DG-3",
-        "DG-6",
-        "DG-10"
+        "DG-6"
       ],
       "journeys": [
         "DJ-G1"
@@ -91,13 +90,7 @@
         "Tests/AppSnapshotTests/DesignGradientPaintTests.swift",
         "UITests/DesignJourneyTests+Gradient.swift",
         "Tests/AppSnapshotTests/DesignGradientSnapshots.swift",
-        "Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift",
-        "Sources/DesignApp/DesignInspector.swift",
-        "Sources/DesignApp/DesignInspectorStyle.swift",
-        "Sources/DesignModel/Live/DesignSVG.swift",
-        "Tests/mutations/DesignModel.DesignSVG.json",
-        "Tests/DesignModelTests/DesignSVGAlphaTests.swift",
-        "Tests/AppSnapshotTests/DesignFillAlphaSnapshots.swift"
+        "Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift"
       ]
     },
     {
@@ -105,8 +98,7 @@
       "behavior": "Every fill command runs on Design's selection as one undo step, and the SVG export writes each gradient with the points the canvas draws.",
       "tasks": [
         "DG-4",
-        "DG-5",
-        "DG-9"
+        "DG-5"
       ],
       "journeys": [
         "MJ-DG"
@@ -131,10 +123,7 @@
         "Tests/DesignModelTests/DesignSVGTests.swift",
         "Tests/mutations/DesignModel.DesignSVG.json",
         "Tests/RealJobs/design/gradient-angle/gradient-angle.jobs.json",
-        "Tests/RealJobs/design/gradient-angle/input/background.design",
-        "Sources/DesignModel/DesignNode.swift",
-        "Tests/DesignModelTests/DesignFillAlphaTests.swift",
-        "Tests/mutations/DesignModel.DesignNode.json"
+        "Tests/RealJobs/design/gradient-angle/input/background.design"
       ]
     },
     {
@@ -142,28 +131,92 @@
       "behavior": "The journey passes on live services, and the blueprint says gradients are in the first cut.",
       "tasks": [
         "DG-7",
-        "DG-8"
+        "DG-8",
+        "DG-9",
+        "DG-10"
       ],
       "journeys": [
         "DJ-G1"
       ],
       "waits": {
         "DG-u": [
-          "DG-7"
+          "DG-7",
+          "DG-9",
+          "DG-10"
         ],
         "DG-m": [
           "DG-7",
-          "DG-8"
+          "DG-8",
+          "DG-9",
+          "DG-10"
         ],
         "design-export": [
           "DG-8"
+        ],
+        "transform:DT-a": [
+          "DG-9",
+          "DG-10"
+        ],
+        "shape-tools:DS-a": [
+          "DG-9",
+          "DG-10"
+        ],
+        "stroke-style:DK-a": [
+          "DG-10"
+        ],
+        "design-export:DE-a": [
+          "DG-10"
+        ],
+        "design-export:DE-s": [
+          "DG-10"
+        ],
+        "transform:DT-m": [
+          "DG-10"
+        ],
+        "shape-tools:DS-m": [
+          "DG-10"
+        ],
+        "stroke-style:DK-m": [
+          "DG-10"
+        ],
+        "placed-images:PD-m": [
+          "DG-10"
+        ],
+        "transform:DT-u": [
+          "DG-10"
+        ],
+        "shape-tools:DS-u": [
+          "DG-10"
+        ],
+        "stroke-style:DK-u": [
+          "DG-10"
+        ],
+        "placed-images:PD-u": [
+          "DG-10"
+        ],
+        "pen-paths:DP-a": [
+          "DG-9"
+        ],
+        "pen-paths:DP-m": [
+          "DG-10"
         ]
       },
       "ui": true,
       "owned": [
         "UITests/DesignJourneyTests+Gradient.swift",
         "docs/blueprints/design.md",
-        "docs/blueprints/design/features/gradient-fill.wave.json"
+        "docs/blueprints/design/features/gradient-fill.wave.json",
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignFill+Kernel.swift",
+        "Tests/DesignModelTests/DesignFillAlphaTests.swift",
+        "Tests/mutations/DesignModel.DesignNode.json",
+        "Sources/DesignApp/DesignInspector.swift",
+        "Sources/DesignApp/DesignInspectorStyle.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/DesignModelTests/DesignSVGAlphaTests.swift",
+        "Tests/AppSnapshotTests/DesignFillAlphaSnapshots.swift"
       ]
     }
   ]

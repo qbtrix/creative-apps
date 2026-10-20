@@ -39,9 +39,9 @@ Blueprint sections: halo.md 6 (layer inspector), 7 (render), 8.
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | HG-a | `HaloLayer.gradient` and the draw item's gradient exist and save, and `HaloProject` conforms to `GradientFillTarget` as stubs. | HG-1, HG-5 | MJ-HG | suiteui/gradient-fill GF-a (cross-line) |
-| HG-u | The layer inspector shows the switch and the editor for solid and shape layers on the stubs, with snapshots and the render budget, and the journey is written. | HG-2, HG-3, HG-4, HG-10 | HJ-G1 | HG-a; core-loop:CL-probe (HG-2); GF-3 (HG-3, cross-line) |
+| HG-u | The layer inspector shows the switch and the editor for solid and shape layers on the stubs, with snapshots and the render budget, and the journey is written. | HG-2, HG-3, HG-4 | HJ-G1 | HG-a; core-loop:CL-probe (HG-2); GF-3 (HG-3, cross-line) |
 | HG-m | The renderer draws a layer's gradient inside its outline at its matrix, and every fill command runs as one undo step. | HG-6, HG-7 | MJ-HG | HG-a; key-editing:KE-a (the catalog); GF-6 and AC-halo (HG-7, cross-line) |
-| HG-z | The inspector runs on live services, the journey passes on live, and the blueprint lists gradient fills. | HG-8, HG-9 | HJ-G1 | HG-u, HG-m; core-loop:CL-z, key-editing:KE-z (HG-9) |
+| HG-z | The inspector runs on live services, the journey passes on live, and the blueprint lists gradient fills. | HG-8, HG-9, HG-10 | HJ-G1 | HG-u, HG-m; core-loop:CL-z, key-editing:KE-z (HG-9); HG-10 also waits on placed-images:PH-a, shape-tools:HS-a, stroke-style:HK-a (shared files) |
 
 HG-u waits only on HG-a and another feature's slice (rule 18); HG-m never
 waits on HG-u. MJ-HG is the Model walk in `HaloGradientTests` (Linux).

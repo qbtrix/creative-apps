@@ -59,8 +59,7 @@
       "behavior": "The FILL section's states have snapshots, a stop drag stays in its render budget, and the journey is written.",
       "tasks": [
         "FG-3",
-        "FG-4",
-        "FG-9"
+        "FG-4"
       ],
       "journeys": [
         "FJ-G1"
@@ -75,11 +74,7 @@
       "owned": [
         "Tests/AppSnapshotTests/FlareGradientSnapshots.swift",
         "Tests/AppSnapshotTests/RenderBudgetFlareGradientTests.swift",
-        "UITests/FlareJourneyTests+Gradient.swift",
-        "Sources/FlareApp/FlareInspectorFill.swift",
-        "Sources/FlareModel/FlarePaint.swift",
-        "Tests/FlareModelTests/FlarePaintAlphaTests.swift",
-        "Tests/mutations/FlareModel.FlarePaint.json"
+        "UITests/FlareJourneyTests+Gradient.swift"
       ]
     },
     {
@@ -121,7 +116,8 @@
       "behavior": "The FILL section runs on live services, the journey passes on live, and #2315 closes.",
       "tasks": [
         "FG-7",
-        "FG-8"
+        "FG-8",
+        "FG-9"
       ],
       "journeys": [
         "FJ-G1"
@@ -129,18 +125,27 @@
       "waits": {
         "FG-u": [
           "FG-7",
-          "FG-8"
+          "FG-8",
+          "FG-9"
         ],
         "FG-m": [
           "FG-7",
-          "FG-8"
+          "FG-8",
+          "FG-9"
+        ],
+        "stroke-style:FK-a": [
+          "FG-9"
         ]
       },
       "ui": true,
       "owned": [
         "UITests/FlareJourneyTests+Gradient.swift",
         "docs/blueprints/flare.md",
-        "docs/blueprints/flare/features/gradient-fill.wave.json"
+        "docs/blueprints/flare/features/gradient-fill.wave.json",
+        "Sources/FlareApp/FlareInspectorFill.swift",
+        "Sources/FlareModel/FlarePaint.swift",
+        "Tests/FlareModelTests/FlarePaintAlphaTests.swift",
+        "Tests/mutations/FlareModel.FlarePaint.json"
       ]
     }
   ]

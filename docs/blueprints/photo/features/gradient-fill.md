@@ -45,9 +45,9 @@ Blueprint sections: photo.md 4 (tools), 6 (Tool Options), 8.
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | PG-a | `PhotoTool.gradient` is in the palette with its help ("Not built yet (PG-3).") and its options hold a `Fill`, and Tool Options shows the editor on the stubs. | PG-1, PG-2 | MJ-PG | suiteui/gradient-fill GF-a (cross-line); AC-photo (PG-1) |
-| PG-u | A drag shows its line on the canvas, the options have snapshots and a render budget, and the journey is written. | PG-5, PG-6, PG-9 | PJ-G1 | PG-a; GF-3 (PG-5, cross-line) |
+| PG-u | A drag shows its line on the canvas, the options have snapshots and a render budget, and the journey is written. | PG-5, PG-6 | PJ-G1 | PG-a; GF-3 (PG-5, cross-line) |
 | PG-m | A drag draws the dithered gradient into the selected layer inside the selection as one undo step, and the options take each editor intent. | PG-3, PG-4 | MJ-PG | PG-a; GF-5 (PG-4, cross-line) |
-| PG-z | The tool runs on live services, the journey passes on live, and the blueprint has the tool in. | PG-7, PG-8 | PJ-G1 | PG-u, PG-m |
+| PG-z | The tool runs on live services, the journey passes on live, and the blueprint has the tool in. | PG-7, PG-8, PG-9 | PJ-G1 | PG-u, PG-m |
 
 PG-u waits only on PG-a (rule 18); PG-m never waits on PG-u. MJ-PG is the
 Model walk in `PhotoGradientToolTests` (Linux).
