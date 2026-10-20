@@ -88,3 +88,4 @@ utc	stage	event	ref	note
 2026-10-20T01:10:06Z	heartbeat	Linux job of 39349878829 in progress; AU-library PR #3384 open
 2026-10-20T01:21:23Z	stage	Belt-Slice-Done AD-photo, AD-halo posted (run 39349878829); AD-library waits on #3384
 2026-10-20T01:41:13Z	stage	AU-library #3384 merged; AD-l1 builder started on 3712f0f1
+2026-10-20T03:11Z	3	stage-start	act-1a15749e569-ngtj	relaunch, AD-library; #3396 needs-rebase
