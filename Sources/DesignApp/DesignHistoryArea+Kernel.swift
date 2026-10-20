@@ -78,11 +78,20 @@ struct DesignHistoryArea: ViewModifier {
     }
 
     private var hooks: AutosaveHooks {
+        let model = self.model
         let name = model.documentURL?.lastPathComponent
+        let restore = self.restore
         return AutosaveHooks(
-            window: window, documentName: { name }, isDirty: { [model] in model.isDirty },
-            encoder: { [model] in model.isOpen ? { try model.recoveryBytes() } : nil },
-            restore: { [restore] data in try restore(data, name) })
+            window: window, documentName: { name }, isDirty: { model.isDirty },
+            encoder: { Self.encoder(model) },
+            restore: { data in try restore(data, name) })
+    }
+
+    /// The encode of `model`'s recovery bytes, run off main on this copy; nil with nothing open. A
+    /// named function rather than a ternary in the closure, which the type checker gave up on.
+    private static func encoder(_ model: DesignWorkspace) -> (@Sendable () throws -> Data)? {
+        guard model.isOpen else { return nil }
+        return { try model.recoveryBytes() }
     }
 
     /// A row's jump; a refusal goes to the status line.
