@@ -47,3 +47,5 @@ Next: #3460 is ready (dev merged in); when it merges, merge dev into #3465 and #
 ## Open
 - S-L9 #3413 (InspectorTokenRow) and S-L10 #3414 (InspectorTextRow) are soft waits for MD-13. Until they land, those rows use plain SwiftUI placeholders.
 - Open line:library findings checked 2026-10-20T04:42:28Z: none in this feature's files. dev-red #3386 (macOS, range main..1b33afbb) predates these PRs; not ours.
+- 06:04Z: the lane's macOS build-only runs are still queued (#3423 run 39366083753 and #3424 run 39366318428 since 03:47Z; #3460 run 39377907664 since 06:00Z). This is runner backlog, not these PRs. Building continues on stacked drafts.
+- #3520 asks the supervisor to list the keyword/search budget suites (and the load-flaky Catalog/Grid ones) in Tests/perf-suites.txt. Open.
