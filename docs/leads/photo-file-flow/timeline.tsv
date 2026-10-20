@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-20T19:26Z	3	builder	PF-4	stacked on PF-1 (#3679)
 2026-10-20T19:29Z	3	heartbeat	-	wave 2 building; waits unchanged (GF-2, GF-5, XP-3, XP-4, SM-w, PP-u, SF-8 #3529 open), poll 2 of 3
 2026-10-20T19:43Z	3	pr-opened	#3700	PF-4, head 14fd57c1, 4 files +303 -7 with PF-1
+2026-10-20T19:50Z	wait	poll-3 unchanged; rule 23 question	#3471#issuecomment-6300015942	PP-u, PT-m, PH-m, PE-m, PP-m, SF-8 (#3529 open); #3679, #3700 open
