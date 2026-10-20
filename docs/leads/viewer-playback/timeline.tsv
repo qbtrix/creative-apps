@@ -176,3 +176,4 @@ utc	stage	event	ref	note
 2026-10-20T01:55Z	heartbeat	#1705 verify: scoped halo run 39329203917 on e50f30b3 started 01:52Z (macOS + journeys in progress)
 2026-10-20T02:18Z	stage	#1705 reopened; run 39329203917 red (halo rows absent, #3217), #3291 fixes; verify on 39357615737
 2026-10-20T02:39Z	heartbeat	scoped halo run 39357615737 still queued; #1705 verification waits on it
+2026-10-20T03:00Z	heartbeat	scoped halo run 39357615737 still queued (macOS runners busy); #1705 waits on it
