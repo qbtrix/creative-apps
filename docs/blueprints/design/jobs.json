@@ -222,17 +222,19 @@
     "job": "Place a photo inside a rounded frame and move it inside the crop.",
     "outcome": "The photo keeps its aspect.",
     "needs": [
-      "S20"
+      "S20",
+      "design/placed-images"
     ],
-    "needs_note": "S20 image fills, crop in frame",
-    "closes_with": "S20",
+    "needs_note": "S20 placed images; design/placed-images wires them into Design (pictures in frames by cover)",
+    "closes_with": "design/placed-images",
     "trap": "Image stretched to the frame",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
-    ]
+    ],
+    "waits_on": "PD-6"
   },
   "RJ-D13": {
     "id": "RJ-D13",

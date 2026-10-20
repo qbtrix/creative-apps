@@ -116,6 +116,9 @@
         ],
         "export:EX-a": [
           "RW-1"
+        ],
+        "cull-finish:DR-m": [
+          "RW-2"
         ]
       }
     },
@@ -209,6 +212,9 @@
           "RW-10"
         ],
         "filters-collections:FC-e": [
+          "RW-10"
+        ],
+        "cull-finish": [
           "RW-10"
         ]
       },

@@ -299,13 +299,16 @@
       ],
       "adopters": [
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/svg-place"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/placed-images"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/placed-images"
         }
       ]
     },
@@ -745,23 +748,33 @@
     },
     {
       "id": "S20",
-      "name": "Placed images and footage, image fills, crop in frame",
+      "name": "Placed images and footage, image fills, crop in frame (images: the kernel's placed asset, fit and cover rules and place commands, SuiteUI's Place… panel, drop target and image view; captain 2026-10-20, beta)",
       "layer": "model",
       "c4": [
-        "suite-model/suite-assets + suite-links + suite-pasteboard ⚠",
-        "`shell-media` decode"
+        "suite-kernel/kernel-place ✚",
+        "suiteui PlacePanel, PlaceDrop, PlacedImageView, PlacedImageRows",
+        "suite-model/suite-assets + suite-links + suite-pasteboard ⚠ (linked assets, later)",
+        "`shell-media` decode (footage, later)"
       ],
       "adopters": [
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/placed-images"
         },
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/svg-place"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/placed-images"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/place-image"
         }
-      ]
+      ],
+      "packet": "suiteui/placed-images"
     },
     {
       "id": "S21",
@@ -885,7 +898,8 @@
         "library-model",
         "suite-kernel `History`"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "library/cull-finish"
     },
     {
       "id": "A6",
@@ -1079,6 +1093,15 @@
       "adopters": []
     },
     {
+      "id": "flare/svg-place",
+      "name": "SVG art into Flare as editable layers: Place… and a window drop through the kernel's place command",
+      "packet": "flare/svg-place",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "flare/shape-tools",
       "name": "Flare's Shape tool: polygons, stars, lines and arrows on the stage",
       "packet": "flare/shape-tools",
@@ -1214,6 +1237,15 @@
       "adopters": []
     },
     {
+      "id": "design/placed-images",
+      "name": "Pictures in Design's rectangles and frames by cover: Place…, canvas drop, Fill, SVG export",
+      "packet": "design/placed-images",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "design/autosave-history",
       "name": "Autosave, crash recovery and the History panel in Design",
       "packet": "design/autosave-history",
@@ -1325,6 +1357,15 @@
       "id": "photo/gradient-fill",
       "name": "Photo's Gradient tool: drag a linear or radial gradient into the layer or selection",
       "packet": "photo/gradient-fill",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/place-image",
+      "name": "Photo's File > Place… and drop on an open document: a fitted pixel layer",
+      "packet": "photo/place-image",
       "layer": "app",
       "app": "photo",
       "c4": [],
@@ -1532,6 +1573,15 @@
       "id": "halo/gradient-fill",
       "name": "Gradient fills on Halo's solid and shape layers, drawn by the frame renderer",
       "packet": "halo/gradient-fill",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/placed-images",
+      "name": "A PNG, JPEG or SVG picture in a Halo solid layer: Place…, viewer drop, drawn by the viewer and the render",
+      "packet": "halo/placed-images",
       "layer": "app",
       "app": "halo",
       "c4": [],

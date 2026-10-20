@@ -651,5 +651,25 @@
     ],
     "waits_on": "SS-8",
     "added_by": "suiteui/stroke-style"
+  },
+  "RJ-X36": {
+    "id": "RJ-X36",
+    "app": "suite",
+    "weight": "high",
+    "job": "Put a 3:1 picture into a square box by commands alone, pan it inside the crop with 30 moves, then undo once.",
+    "outcome": "The saved document's picture draws 900 x 300 inside the 300 x 300 box (its 3:1 aspect kept, cropped by the box), and after the pan and one undo its focus is back at the centre.",
+    "needs": [
+      "S20"
+    ],
+    "closes_with": "S20",
+    "trap": "The picture stretches to fill the square, or the 30 moves land as 30 undo steps",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PL-9",
+    "added_by": "suiteui/placed-images"
   }
 }

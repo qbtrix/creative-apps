@@ -30,17 +30,19 @@
     "outcome": "The logo layer scales with an overshoot and fades in over 5 s, in a 1080p H.264 movie.",
     "needs": [
       "S20",
-      "E11"
+      "E11",
+      "halo/placed-images"
     ],
-    "needs_note": "built keys/easing; S20 image or E11 SVG layer",
-    "closes_with": "S20",
+    "needs_note": "built keys/easing; S20 and E11 through halo/placed-images (a PNG or SVG picture in a solid)",
+    "closes_with": "halo/placed-images",
     "trap": "No image or SVG layer, so the logo can't come in",
     "run": "Cm",
     "baseline": "partial",
     "since": "2026-10-19",
     "sources": [
       "https://www.udemy.com/course/after-effects-for-beginners-4-projects-to-get-you-started/"
-    ]
+    ],
+    "waits_on": "PH-5"
   },
   "RJ-H03": {
     "id": "RJ-H03",
@@ -688,5 +690,26 @@
     ],
     "waits_on": "HS-6",
     "added_by": "halo/shape-tools"
+  },
+  "RJ-H36": {
+    "id": "RJ-H36",
+    "app": "halo",
+    "weight": "high",
+    "job": "Place a two-colour PNG logo into a composition by command and render frame 0.",
+    "outcome": "In the rendered PNG the logo's left half is red and its right half blue within 2/255, centred at its own 200 x 100 size, and the pixels just outside it are the background.",
+    "needs": [
+      "S20",
+      "halo/placed-images"
+    ],
+    "closes_with": "halo/placed-images",
+    "trap": "The viewer shows the logo but the render draws the solid's colour, or the logo is stretched to the composition",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PH-5",
+    "added_by": "halo/placed-images"
   }
 }

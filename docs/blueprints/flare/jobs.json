@@ -105,10 +105,11 @@
     "job": "Import an SVG logo from a design tool and animate its parts.",
     "outcome": "Colours and groups arrive intact.",
     "needs": [
-      "E11"
+      "E11",
+      "flare/svg-place"
     ],
-    "needs_note": "E11 SVG reader",
-    "closes_with": "E11",
+    "needs_note": "E11 SVG reader (on the pinned core); flare/svg-place adds Place",
+    "closes_with": "flare/svg-place",
     "trap": "Black fills; groups flattened to one path",
     "run": "C",
     "baseline": "fail",
@@ -116,7 +117,8 @@
     "sources": [
       "https://rive.app/community/forums/support/fsnLLkXUaA62/svg-import-from-illustrator-is-it-bugged/ftRngpXaBEvH",
       "https://rive.app/docs/editor/assets/svg"
-    ]
+    ],
+    "waits_on": "PF-6"
   },
   "RJ-F07": {
     "id": "RJ-F07",
