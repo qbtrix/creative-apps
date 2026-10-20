@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T20:41Z	3	heartbeat	#3683 #3701	open, macOS builds still queued (35 repo-wide); blocked poll 2
 2026-10-20T21:02Z	3	heartbeat	#3683 #3701	still queued; blocked poll 3; posted a supervisor question on #3442
 2026-10-20T21:05Z	3	wave-start	HA-u	builder started on lead/halo-autosave-history-HA-u, stacked on HA-a (HA-3 + HA-4); PR opens once #3683 merges
+2026-10-20T21:18Z	3	slice-built	HA-u	lead/halo-autosave-history-HA-u head 76e5a53, 4 files +253/-2, CI: PASS (scoped to HA-a); PR waits for #3683 to merge
