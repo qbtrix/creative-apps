@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-20T20:13Z	PF-m	supervisor-answer	#3471	PF-3 builder stacked on PF-4; #3529 closed unmerged (SF-8)
 2026-10-20T20:22Z	wave	restart	PF-3	container restart stopped builder; resumed on PF-4
 2026-10-20T20:22Z	check	poll	#3679,#3700	open, no needs-fix
+2026-10-20T20:34Z	check	heartbeat	#3679,#3700	open, no needs-fix; PF-3 building; SF-8 #3529 still closed (PF-7 blocked)
