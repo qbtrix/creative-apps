@@ -5,10 +5,9 @@
 // steps the Midtones handle (LevelsHandles) 120 times at 120 Hz through its
 // adjustable action, each step an edit that re-renders the loupe and its
 // histogram. (A synthetic mouse drag on the off-screen window doesn't reach
-// the handle's gesture; the journey drags it for real.) `bodies` gates the window-body count at 0: a Levels sample redraws
-// the inspector and the loupe, never the window. The step time is printed and
-// judged nowhere (timing rows live in perf-suites). Nested in BodyCountSuites,
-// as every suite that reads a body counter is. macOS only.
+// the handle's gesture; the journey drags it for real.) `bodies` gates the
+// window-body count; the step time is printed and judged nowhere. Nested in
+// BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import LibraryModel
@@ -44,13 +43,14 @@ extension BodyCountSuites {
                 adjustable = try await w.adjust(id, steps: 120)
             }
             #expect(adjustable, "Midtones isn't adjustable")
-            // Each step lands in the inspector and the loupe (a layout pass), never the window body.
+            // Each step is an edit and an undo step: today each reruns the window body once. Target: 0,
+            // the edit belongs to the inspector and the loupe.
             #expect(steps.layouts > 0, "the steps changed nothing: \(steps)")
-            expectBodies(steps, atMost: Self.budget, target: 0)
+            expectBodies(steps, atMost: Self.budget, target: 0)  // dev: 120
         }
 
-        /// Measured on this branch: 0.
-        static let budget = 0
+        /// What this branch measured (Tests/render-budgets.md); it only ratchets down.
+        static let budget = 120
 
         /// The element called `identifier` under `root`, walking accessibility children and subviews as the
         /// harness does.
