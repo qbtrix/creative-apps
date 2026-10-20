@@ -111,3 +111,4 @@ utc	stage	event	ref	note
 2026-10-20T10:19:19Z	rebase	#3587 needs-rebase fixed: merged dev, gate PASS, pushed ee6eee0f, Head moved
 2026-10-20T10:36:28Z	heartbeat	#3584 merged; #3392 merged; #3585 build green, awaiting lane; #3587/#3588 builds queued; AT-d1 started
 2026-10-20T10:57:24Z	heartbeat	10:56Z: #3585 needs-rebase merge resolved (C4 desc), gate running; #3587 clean; #3588 clean; #3593 AT-d1 opened; AT-d2 building; earlier scoped photo/suiteui/full runs cancelled
+2026-10-20T11:09:53Z	stage	AC-d3 #3585 needs-rebase fixed: dev merged (C4 desc conflict kept both clauses), gate PASS, pushed a9eca0ed, Head moved; mergeable clean
