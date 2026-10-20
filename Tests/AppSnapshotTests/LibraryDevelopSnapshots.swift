@@ -119,11 +119,12 @@ import Testing
         try draw(catalog, "library-develop-curve")
     }
 
-    @Test func levelsRows() {
-        #expect(DevelopInspector.levelsScale(.inBlack) == 255)
-        #expect(DevelopInspector.levelsScale(.gamma) == 1)
-        #expect(DevelopInspector.levelsRange(.outWhite) == 0...255)
-        #expect(DevelopInspector.levelsRange(.gamma) == DevelopLevels.gammaRange)
+    /// Each LEVELS handle edits its own field and speaks that field's name.
+    @Test func levelsHandles() {
+        for handle in LevelsHandle.allCases {
+            #expect(DevelopInspector.field(handle).rawValue == handle.rawValue)
+        }
+        #expect(DevelopInspector.field(.gamma) == .gamma && DevelopInspector.field(.outBlack) == .outBlack)
     }
 
     @Test func identifiers() {

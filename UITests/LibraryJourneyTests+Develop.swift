@@ -134,7 +134,7 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         XCTAssert(wait(5) { (try? self.checksum(library)) == developed }, "the developed picture didn't come back")
     }
 
-    /// Step 6: a curve point dragged up 40 pt is "Undo Curve"; Midtones 1.20 is "Undo Levels".
+    /// Step 6: a curve point dragged up 40 pt is "Undo Curve"; the Midtones handle dragged is "Undo Levels".
     @MainActor private func editCurveAndLevels(suffix: String) throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let before = try checksum(library)
@@ -143,10 +143,9 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         XCTAssert(wait(5) { (try? self.checksum(library)) != before }, "the curve didn't re-render the loupe")
         library.shot("develop-curve\(suffix)")
         expectUndo("Undo Curve", library)
-        inspectorItem("Midtones", library).click()
-        library.press(character: "a", .command)
-        library.app.typeText("1.20")
-        library.press(.return)
+        // The Midtones handle (LevelsHandles) dragged left brightens: one "Levels" step.
+        let midtones = inspectorItem("Midtones", library).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        midtones.press(forDuration: 0.1, thenDragTo: midtones.withOffset(CGVector(dx: -20, dy: 0)))
         expectUndo("Undo Levels", library)
     }
 
