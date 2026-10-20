@@ -2,9 +2,9 @@
 
 Issue: #2996 · Packet: docs/blueprints/suiteui/features/command-catalog.md
 Run: act-1a157b2050f-ovpu (resumed from act-1a1543c764c-0mz9) · Session: claude/feature-lead-suiteui-run-336pic · Started: 2026-10-20T05:08Z
-Stage: CC-a, CC-schema, CC-run, CC-lint built; CC-z merged-done (CC-13 a4814ea3), CC-14 waits on CC-u; CC-u building
+Stage: CC-a, CC-schema, CC-run, CC-lint built; CC-z merged-done (CC-13 a4814ea3), CC-14 waits on CC-u; CC-u open in #3484
 Base: b3011ab9dc5579023722e79f83254e6e2520e612 (main); dev 18464f26
-Next: CC-u (CC-9, CC-10) in a builder (branch lead/command-catalog-CC-9, PR to dev); then CC-14 with the shared prose; Belt-Slice-Done for CC-u and CC-z on a ci.yml app=suiteui or full run that contains their merges.
+Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; then CC-14 with the shared prose; Belt-Slice-Done for CC-u and CC-z on a ci.yml app=suiteui or full run that contains their merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: CC-u (CC-9, CC-10) in a builder (branch lead/command-catalog-CC-9, PR to d
 | CC-a | `SuiteKernel/Commands` stubs, fake headless document, five `<X>Headless` stubs | CC-1, CC-2 | CJ0 | – | false | 0 | done | 39203617095 | – |
 | CC-schema | `ParamSchema` validate and document; `SchemaProbe` | CC-3, CC-4, CC-5 | CJ1 | CC-a | false | 0 | done | 39203617095 | – |
 | CC-run | `CommandCatalog` run, batch, ledger, conformance | CC-6, CC-7, CC-8 | CJ2 | CC-a, CC-schema | false | 0 | done | 39221576463 | – |
-| CC-u | gallery `command-catalog` page of spec-built menu items | CC-9, CC-10 | SuiteJourneyTests.testCommandCatalogGallery | CC-a, editor-kernel:EK-u | true | 0 | building (FP-a wait unchained 2026-10-20) | – | – |
+| CC-u | gallery `command-catalog` page of spec-built menu items | CC-9, CC-10 | SuiteJourneyTests.testCommandCatalogGallery | CC-a, editor-kernel:EK-u | true | 0 | open #3484 (FP-a wait unchained 2026-10-20) | – | – |
 | CC-lint | `CommandPathTests` with shrinking baselines | CC-11, CC-12 | CJ3 | CC-a | false | 0 | done | 39203617095 | – |
 | CC-z | full Linux walk, shared prose, `status: built` | CC-13, CC-14 | CJ4 | CC-schema, CC-run, CC-u, CC-lint, editor-kernel:EK-z | false | 0 | planned | – | – |
 
@@ -27,8 +27,8 @@ Next: CC-u (CC-9, CC-10) in a builder (branch lead/command-catalog-CC-9, PR to d
 | CC-6 | CC-run | 3 | four catalog test files disabled | Tests/SuiteKernelTests/Command{Catalog,Batch,IDLedger}Tests.swift, CatalogConformanceTests.swift | – | #3101 | merged 9f098e23 |
 | CC-7 | CC-run | 4 | CommandCatalog, typed, envelope, batch bodies | Sources/SuiteKernel/Commands/CommandCatalog.swift, CommandSpec.swift, Tests/mutations/SuiteKernel.CommandCatalog.json | CommandCatalogTests, CommandBatchTests | #3120 | merged 9b33f116 |
 | CC-8 | CC-run | 4 | ledger and conformance bodies | Sources/SuiteKernel/Commands/CommandIDLedger.swift, CatalogConformance.swift, Tests/mutations/SuiteKernel.CatalogConformance.json | CommandIDLedgerTests, CatalogConformanceTests | #3156 | merged 671c98e7 |
-| CC-9 | CC-u | 3+ | MenuCommand(spec:on:), gallery page, snapshots | Sources/SuiteUI/MenuCommand+Catalog.swift, Sources/SuiteUI/Gallery/GalleryCommandCatalog.swift, Sources/SuiteUI/SuiteGallery.swift | MenuCommandCatalogTests | – | building |
-| CC-10 | CC-u | 4+ | render budget, journey on | Tests/AppSnapshotTests/RenderBudgetCommandCatalogTests.swift, UITests/SuiteJourneyTests+CommandCatalog.swift | RenderBudgetCommandCatalogTests | – | building |
+| CC-9 | CC-u | 3+ | MenuCommand(spec:on:), gallery page, snapshots | Sources/SuiteUI/MenuCommand+Catalog.swift, Sources/SuiteUI/Gallery/GalleryCommandCatalog.swift, Sources/SuiteUI/SuiteGallery.swift | MenuCommandCatalogTests | #3484 | open |
+| CC-10 | CC-u | 4+ | render budget, journey on | Tests/AppSnapshotTests/RenderBudgetCommandCatalogTests.swift, UITests/SuiteJourneyTests+CommandCatalog.swift | RenderBudgetCommandCatalogTests | #3484 | open (folded into CC-9, 48 lines) |
 | CC-11 | CC-lint | 2 | CommandPathTests and baselines | Tests/SuiteKernelTests/CommandPathTests.swift, Tests/command-path-baseline/*.txt | CommandPathTests | #3073 | merged 1f116104 |
 | CC-12 | CC-lint | 3 | stale baseline ratchet; lead.md sentence | Tests/SuiteKernelTests/CommandPathTests.swift, docs/factory/lead.md | CommandPathTests.staleBaselineFails | #3102 | merged 1422c727 |
 | CC-13 | CC-z | 5 | CommandWalkTests | Tests/SuiteKernelTests/CommandWalkTests.swift | CommandWalkTests | #3182 | merged a4814ea3 |
