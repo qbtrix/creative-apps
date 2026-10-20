@@ -22,7 +22,7 @@ catalog run records exactly one undo step per edit, the drag-token fold),
 GF-2 on **CC-u** (it owns `SuiteGallery.swift` before this page lands), GF-9
 on **CC-a** (it owns `FakeCanvasDocument.swift`). editor-kernel (built):
 `History`, `CommandSpec`, `Rect`. suite-harness and editor-in-window (built)
-for the gallery. CC-u already waits on font-picker's FP-a, so GF-2's one
+for the gallery. font-picker's FP-a waits on CC-u, and GF-2 also waits on FP-a, so GF-2's one
 `SuiteGallery.swift` line lands after both. No creative-core issue: `Fill`,
 `GradientStop` and `Color` are on the pinned core.
 
@@ -62,7 +62,7 @@ suite.md 1.5 (commands).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| GF-a | The kernel's `Fill/` module declares every type, rule, intent and command spec as stubs, the gallery's `gradient-editor` page is in the index, and the checks are written, disabled. | GF-1, GF-2 | SJ0 | editor-kernel:EK-u, suite-harness, editor-in-window, command-catalog:CC-u (GF-2) |
+| GF-a | The kernel's `Fill/` module declares every type, rule, intent and command spec as stubs, the gallery's `gradient-editor` page is in the index, and the checks are written, disabled. | GF-1, GF-2 | SJ0 | editor-kernel:EK-u, suite-harness, editor-in-window, command-catalog:CC-u and font-picker:FP-a (GF-2) |
 | GF-u | On the gallery page a click adds a stop, a drag moves it, dragging it off removes it, the colour row recolours the selected stop, the angle row turns a linear fill and the switch changes type, every control identified, within the render budget. | GF-3, GF-4 | GJ1 (`SuiteGradientJourneyTests.testGradientEditorEditsAFill`) | GF-a |
 | GF-m | The rules keep stops sorted in 0...1 with at least two, turn the line about the box centre so the corners land on 0 and 1, and every fill command records exactly one undo step (a drag one), and the SVG writer emits the same points. | GF-5, GF-6, GF-7 | KJ-fill | GF-a; command-catalog:CC-run (GF-6) |
 | GF-z | The gallery runs its intents through `GradientCommands` on a live target, the fake app takes fills so RJ-X30 runs on the CLI, and the feature is built. | GF-8, GF-9, GF-10 | GJ1, KJ-fill | GF-u, GF-m; command-catalog:CC-a (GF-9) |

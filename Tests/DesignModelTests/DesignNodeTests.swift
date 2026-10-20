@@ -1,9 +1,17 @@
 // DesignNodeTests.swift: the plain value types: a node's defaults per kind,
-// the tool-to-kind map, page size text and the Codable round trip the file
-// format builds on. Runs on Linux and macOS.
+// the tool-to-kind map, page size text, a color's light or dark side and the
+// Codable round trip the file format builds on. Runs on Linux and macOS.
 import DesignModel
 import Foundation
 import Testing
+
+@Test func aColorIsDarkUnderTheBrightnessMidpoint() {
+    #expect(DesignColor.black.isDark)
+    #expect(!DesignColor.white.isDark && !DesignColor.shape.isDark)
+    // Pure blue weighs 29 of 255, pure green 150; gray 127 sits just under the midpoint, 128 on it.
+    #expect(DesignColor(0, 0, 255).isDark && !DesignColor(0, 255, 0).isDark)
+    #expect(DesignColor(127, 127, 127).isDark && !DesignColor(128, 128, 128).isDark)
+}
 
 @Test func eachKindHasItsDefaultFillAndSize() {
     #expect(DesignNodeKind.frame.defaultFill == DesignColor.white)

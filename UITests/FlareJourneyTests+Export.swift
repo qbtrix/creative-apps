@@ -86,7 +86,10 @@ final class FlareExportJourneys: XCTestCase {
         type("12", into: "flare.export.to", flare)
         type("2", into: "flare.export.step", flare)
         let count = flare.element("flare.export.count")
-        XCTAssert(Self.waitFor { count.exists && count.label == "7 files" }, "the file count reads \(count.label), not 7 files")
+        XCTAssert(
+            Self.waitFor { count.exists && [count.label, count.value as? String].contains("7 files") },
+            "the file count reads \(count.value ?? count.label), not 7 files"
+        )
         flare.shot("export-5-png-rows")
 
         // 6. Export: "Exported 7 files."; frame_0000.png … frame_0012.png, each a PNG 550 wide.
@@ -123,7 +126,9 @@ final class FlareExportJourneys: XCTestCase {
 
     /// The sheet reads `text` (a warning or the run's line) within ten seconds.
     @MainActor private func expectLine(_ text: String, _ flare: Journey) {
-        let line = flare.app.sheets.firstMatch.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", text)).firstMatch
+        // A SwiftUI Text reaches XCUITest as its value, not its label (as the other journeys match).
+        let reads = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text)
+        let line = flare.app.sheets.firstMatch.staticTexts.matching(reads).firstMatch
         XCTAssert(line.waitForExistence(timeout: 10), "the sheet never read \"\(text)\"")
     }
 
