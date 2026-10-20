@@ -23,6 +23,15 @@ extension View {
         }
         return modifier(SuiteFileDropModifier(app: app, documentName: documentName, plan: plan, perform: perform))
     }
+
+    /// Takes file drops for `app` and performs them: opens and places through the app's document `host`,
+    /// hand-offs through the bridge to the app that reads the file.
+    public func suiteFileDrop(_ app: SuiteApp, bridge: SuiteDocumentsBridge, host: (any SuiteDocumentHost)?,
+                              hasDocument: Bool, places: Set<String>, documentName: String? = nil) -> some View {
+        suiteFileDrop(app, bridge: bridge, hasDocument: hasDocument, places: places, documentName: documentName) { actions in
+            Task { await bridge.perform(actions, host: host) }
+        }
+    }
 }
 
 /// What the drop mark says about a planned drop.
