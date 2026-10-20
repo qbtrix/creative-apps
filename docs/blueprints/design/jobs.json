@@ -241,17 +241,19 @@
     "job": "Give a background a two-stop linear gradient and rotate its angle.",
     "outcome": "Smooth, matches the export.",
     "needs": [
-      "S17"
+      "S24",
+      "design/gradient-fill"
     ],
-    "needs_note": "S17 gradient editor",
-    "closes_with": "S17",
+    "needs_note": "S24 gradient fills; design/gradient-fill wires them into Design",
+    "closes_with": "design/gradient-fill",
     "trap": "Export ignores the gradient angle",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/designer/full-feature-list/"
-    ]
+    ],
+    "waits_on": "DG-5"
   },
   "RJ-D14": {
     "id": "RJ-D14",

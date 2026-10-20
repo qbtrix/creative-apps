@@ -667,11 +667,10 @@
     },
     {
       "id": "S17",
-      "name": "Strokes, dashes, trim paths and gradient editor",
+      "name": "Strokes, dashes and trim paths (gradient fills are S24)",
       "layer": "core",
       "c4": [
-        "flarecore/geometry + document-commands (Fill, Stroke) + export",
-        "suiteui gradient rows ⚠"
+        "flarecore/geometry + document-commands (Fill, Stroke) + export"
       ],
       "adopters": [
         {
@@ -781,6 +780,35 @@
       "adopters": [
         {
           "app": "halo"
+        }
+      ]
+    },
+    {
+      "id": "S24",
+      "name": "Gradient fills: FlareCore's Fill promoted into SuiteKernel, the stop and angle rules, the fill commands, SuiteUI's gradient editor (captain 2026-10-20, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-fill ✚",
+        "suiteui GradientEditor",
+        "flarecore Fill (promoted)"
+      ],
+      "packet": "suiteui/gradient-fill",
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "design/gradient-fill"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/gradient-fill"
+        },
+        {
+          "app": "halo",
+          "packet": "halo/gradient-fill"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/gradient-fill"
         }
       ]
     },
@@ -1021,6 +1049,15 @@
       "adopters": []
     },
     {
+      "id": "flare/gradient-fill",
+      "name": "Flare's gradient fills become editable through the shared editor (#2315)",
+      "packet": "flare/gradient-fill",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "design/design-contracts",
       "name": "The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures",
       "packet": "design/design-contracts",
@@ -1129,6 +1166,15 @@
       "adopters": []
     },
     {
+      "id": "design/gradient-fill",
+      "name": "Gradient fills on Design's shapes, text and frames, through the shared editor and SVG",
+      "packet": "design/gradient-fill",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "photo/photo-seams",
       "name": "The seams: contracts, fakes, services, state, routing, file splits",
       "packet": "photo/photo-seams",
@@ -1186,6 +1232,15 @@
       "id": "photo/shell-parity",
       "name": "Photo opens in `SuiteWindow` with the floating tool box",
       "packet": "photo/shell-parity",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/gradient-fill",
+      "name": "Photo's Gradient tool: drag a linear or radial gradient into the layer or selection",
+      "packet": "photo/gradient-fill",
       "layer": "app",
       "app": "photo",
       "c4": [],
@@ -1357,6 +1412,15 @@
       "id": "halo/core-loop",
       "name": "The core loop, live, measured: comp, layers, keys, ease, play, text, render to files, save and reopen",
       "packet": "halo/core-loop",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/gradient-fill",
+      "name": "Gradient fills on Halo's solid and shape layers, drawn by the frame renderer",
+      "packet": "halo/gradient-fill",
       "layer": "app",
       "app": "halo",
       "c4": [],

@@ -572,5 +572,26 @@
     "sources": [
       "https://rive.app/community/forums/feature-requests/fsyCzA4A9Yar/ability-to-export-animated-svg-smil/ftn0m8jxL51j"
     ]
+  },
+  "RJ-F31": {
+    "id": "RJ-F31",
+    "app": "flare",
+    "weight": "med",
+    "job": "Recolour the middle stop of a shape's imported gradient, turn the gradient to 90 degrees and export SVG.",
+    "outcome": "The SVG's linearGradient carries the new stop colour and runs top to bottom (x1 equals x2, y1 below y2), and the saved file holds the same stops.",
+    "needs": [
+      "S24",
+      "flare/gradient-fill"
+    ],
+    "closes_with": "flare/gradient-fill",
+    "trap": "The stage shows the change but the saved Fill keeps its old endpoints, so the export still runs left to right",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FG-5",
+    "added_by": "flare/gradient-fill"
   }
 }
