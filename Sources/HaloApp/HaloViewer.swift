@@ -23,6 +23,7 @@ struct HaloViewer: View {
             let artboard = CGSize(width: comp.width, height: comp.height)
             VStack(spacing: 0) {
                 HaloViewerCanvas(model: model, perform: perform)
+                    .overlay { HaloViewerHandles(model: model) }
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { viewport = $0 }
                 // Under the artboard, not over it: the layout journey reads
                 // the artboard's frame from the viewer's pixels.
