@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T03:56Z	0	start	#3417	lead started on dev 533daec
 2026-10-20T03:56Z	3	blocked	#3421	wave 1 waits on suiteui GF-1
 2026-10-20T04:06Z	1	built	HG-a	HG-1 and HG-5 built on a local stack over GF-1; gate running
+2026-10-20T04:09:17Z	3	core-api	RasterGradient.swift	PixelBuffer.gradient present at pin; HG-6 drafted

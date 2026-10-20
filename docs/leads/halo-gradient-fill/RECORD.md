@@ -28,7 +28,7 @@
 | HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo: adopt-command-catalog is planned, no lead running |
 | HG-3 | W3 | blocked | – | GF-3 |
 | HG-4 | W3 | blocked | – | after HG-2 |
-| HG-6 | W3 | blocked | – | after HG-1; check pinned core has PixelBuffer.gradient |
+| HG-6 | W3 | drafting | – | core API confirmed; PR waits on GF-6 and AC-halo (packet Depends on) |
 | HG-8 | W4 | blocked | – | after HG-4, HG-6, HG-7 |
 | HG-9 | W5 | blocked | – | CL-z |
 
@@ -48,5 +48,5 @@
 
 - GF-1 #3421: open, mergeable clean, waits on the lane's macOS build.
 - halo core-loop (CL-probe, CL-z) and suiteui adopt-command-catalog (AC-halo) are status planned with no lead branch: HG-2, HG-7 and HG-9 cannot start until those run.
-- Pinned creative-core 0de5687: confirm PixelBuffer.gradient exists before HG-6; else a needs-core issue.
+- Resolved: pinned core has `PixelBuffer.gradient(width:height:shape:from:to:stops:space:dither:)` (CoreRaster/Fill/RasterGradient.swift); no needs-core issue.
 - The contract's `extension HaloDrawItem { var gradient }` is a stored field with an init default (extensions can't store).
