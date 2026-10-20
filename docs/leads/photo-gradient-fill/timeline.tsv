@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T19:30Z	3	fix-pushed	#3681	head 11475571; CI: PASS; +233 -8, 12 files
 2026-10-20T19:30Z	3	builder	PG-3	stacked on PG-1 (#3681); PR held if combined > 400 lines
 2026-10-20T19:50Z	wait	poll-3 unchanged; rule 23 question	#3416#issuecomment-6300013843	GF-2, GF-3, GF-5 not on dev; #3681 open fast-lane; PG-3 building
+2026-10-20T20:08Z	PG-m	branch-held	photo-gradient-fill/PG-3	head a8cc61cf, 515 lines with PG-1 (over cap); PR after #3681 merges; Mutate 3/3
