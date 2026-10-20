@@ -97,3 +97,5 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 - 2026-10-20T20:18Z: full CI 39485502739 at 8c90de14 still pending (contains every slice merge); scoped: design 39490030243 at 014da2f1 pending (would cover AC-design and AT-design); no qualifying run completed yet
 
 - 2026-10-20T20:38Z: no qualifying run yet: full CI 39485502739 (8c90de14) and scoped design 39490030243 (014da2f1) still pending; latest completed runs are Linux checks
+
+- 2026-10-20T20:57Z: still no qualifying run completed. Pending: full CI 39485502739 (8c90de14), scoped suiteui 39491489760 (e64cff6b, contains every slice merge), scoped design 39490030243, photo 39492942073, flare 39491495208, halo 39494391226 (all contain the slice merges)
