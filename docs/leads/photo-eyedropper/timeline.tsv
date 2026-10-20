@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-20T20:54Z	3	heartbeat	#3706	open; per-PR macOS build 39488095382 still queued
 2026-10-20T21:16Z	3	heartbeat	#3706	macOS build 39488095382 still queued
 2026-10-20T21:17Z	3	wave-3 started	PE-4	builder stacked on PE-3
+2026-10-20T21:38Z	3	heartbeat	#3704,#3706,#3762	none merged; mac build 39487466056 queued since 19:54Z, 39488095382 in progress; #3762 mac build dispatched
