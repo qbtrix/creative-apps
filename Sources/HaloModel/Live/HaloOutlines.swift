@@ -1,5 +1,5 @@
 // Live/HaloOutlines.swift (VP-4a): the outline a solid (its rectangle) or a
-// shape (its ellipse) covers in composition space, for VP-4b's
+// shape (its ellipse, or its spec's path, HS-5) covers in composition space, for VP-4b's
 // LiveFrameRendering. An item drawn at translate + positive scale only keeps
 // its world box, so the renderer uses CoreRaster's exact Mask.rectangle /
 // Mask.ellipse; any other matrix maps the outline's points through
@@ -8,6 +8,7 @@
 // Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteKernel
 
 /// The two outlines an item can have.
 enum HaloOutlineShape: Sendable, Hashable {
@@ -68,7 +69,9 @@ enum HaloOutlines {
     static func outline(of item: HaloDrawItem, scale: Double = 1) -> HaloOutline? {
         switch item.kind {
         case .solid: outline(.rectangle, bounds: item.bounds, matrix: item.matrix, scale: scale)
-        case .shape: outline(.ellipse, bounds: item.bounds, matrix: item.matrix, scale: scale)
+        case .shape:
+            if let spec = item.shape { outline(spec, bounds: item.bounds, matrix: item.matrix, scale: scale) }
+            else { outline(.ellipse, bounds: item.bounds, matrix: item.matrix, scale: scale) }
         case .text, .null: nil
         }
     }
@@ -90,6 +93,21 @@ enum HaloOutlines {
             return shape == .rectangle ? .rectangle(world) : .ellipse(world)
         }
         guard let lines = try? path(shape, bounds: r, matrix: m).flattened(tolerance: 0.25 / scale),
+              var points = lines.first, points.count >= 3
+        else { return nil }
+        if points.first == points.last { points.removeLast() }
+        guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
+        return .polygon(points)
+    }
+
+    /// A shape layer's `spec` drawn in `bounds` (layer space) through the
+    /// kernel's ShapeRules, every point mapped through `matrix`, flattened at
+    /// 0.25 / `scale` to a polygon. Nil for a spec ShapeRules refuses, an open
+    /// path (a line or arrow) or a non-finite point.
+    static func outline(_ spec: ShapeSpec, bounds r: HaloLayerRect, matrix m: HaloMatrix, scale: Double = 1) -> HaloOutline? {
+        guard isFinite(m), m.determinant != 0, scale.isFinite, scale > 0,
+              let path = try? ShapeRules.path(spec, in: Rect(minX: r.x, minY: r.y, maxX: r.x + r.width, maxY: r.y + r.height)),
+              let lines = try? path.transformed(by: m).flattened(tolerance: 0.25 / scale),
               var points = lines.first, points.count >= 3
         else { return nil }
         if points.first == points.last { points.removeLast() }

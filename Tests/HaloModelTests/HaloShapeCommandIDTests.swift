@@ -26,19 +26,11 @@ import Testing
         #expect(project.history.undo.isEmpty)
     }
 
-    @Test func theStarJobPasses() throws {
+    /// The render matches the reference (one 1080p render, slow in debug), and the reference shows a star.
+    @Test func theStarJobPassesAndShowsTheStarNotAnEllipse() throws {
         #expect(try HaloJob.check("star-layer") == [])
-    }
-
-    @Test func theStarFrameShowsTheStarNotAnEllipse() throws {
-        let folder = HaloJob.root.appendingPathComponent("star-layer")
-        let script = try JSONDecoder().decode(
-            HaloJob.Script.self, from: Data(contentsOf: folder.appendingPathComponent("star-layer.jobs.json")))
-        var doc = try HaloHeadless.open(
-            Data(contentsOf: folder.appendingPathComponent("input/empty-1080p.halo")), name: "empty-1080p.halo")
-        let report = HaloHeadless.catalog.runBatch(script.steps, on: &doc, atomic: script.atomic)
-        #expect(report.stoppedAt == nil)
-        let png = try HaloJob.produced(doc, script.output?.options ?? .object([:]))
+        let png = try HaloJob.decodePNG(
+            Data(contentsOf: HaloJob.root.appendingPathComponent("star-layer/expected/empty-1080p-0.png")))
         func pixel(_ x: Int, _ y: Int) -> [UInt8] {
             let at = (y * png.width + x) * 4
             return at >= 0 && at + 4 <= png.rgba.count ? Array(png.rgba[at..<(at + 4)]) : []
@@ -47,6 +39,6 @@ import Testing
         let want = [color.red, color.green, color.blue].map { UInt8(($0 * 255).rounded()) } + [255]
         let top = pixel(960, 345), rim = pixel(1055, 376)
         #expect(top.count == 4 && zip(top, want).allSatisfy { abs(Int($0) - Int($1)) <= 2 }, "the top point: \(top)")
-        #expect(rim.count == 4 && rim != top, "the rim between two points: \(rim)")
+        #expect(rim == [0, 0, 0, 0], "the rim between two points, inside the box's ellipse: \(rim)")
     }
 }
