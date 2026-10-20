@@ -20,10 +20,14 @@ import Testing
             let line = board.knob(turned: Double(n) * 1.5)
             #expect(line.hasPrefix("transform.rotate"), "the page stays on the local log: \(line)")
         }
-        #expect(board.end().contains("ends"))
+        let ended = board.end()
+        #expect(ended.contains("ends"))
         #expect(board.history.steps == ["Rotate"])
         #expect(abs(board.item.degrees - 90) < 1e-9 && board.item.box == Self.start.box)
-        #expect(board.undo() && board.item == Self.start && !board.undo())
+        let undone = board.undo()
+        #expect(undone && board.item == Self.start)
+        let undoneAgain = board.undo()
+        #expect(!undoneAgain)
     }
 
     /// Two knob drags are two steps: the end of a drag closes its run.
@@ -62,7 +66,8 @@ import Testing
         #expect(board.item.flipX && abs(board.item.degrees + 90) < 1e-9)
         _ = board.send(.rotate(by: 15, drag: nil))
         #expect(board.history.steps == ["Rotate", "Flip Horizontal", "Rotate"])
-        #expect(board.send(.set(TransformBox(box: Rect(minX: 0, minY: 0, maxX: 0, maxY: 10)), drag: nil)).contains("refused"))
+        let refused = board.send(.set(TransformBox(box: Rect(minX: 0, minY: 0, maxX: 0, maxY: 10)), drag: nil))
+        #expect(refused.contains("refused"))
         #expect(board.history.steps.count == 3)
     }
 }
