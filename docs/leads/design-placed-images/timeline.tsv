@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-20T21:21:54Z	poll	heartbeat	#3759	supervisor added needs-split (stacked count); own diff 397/11; waits on #3687 or supervisor answer on #3751
 2026-10-20T21:44:18Z	dep	pr-merged	#3687	DG-a merged (cross-feature); stacked PR now conflicts with dev
 2026-10-20T21:44:18Z	fix	fix-round	-	fixer merging dev into the stacked PR (merge commit), then re-measure against the cap
+2026-10-20T21:56:21Z	PD-a	fix-round	#3759	dev merged (merge commit 7b88ec3), 397/11, mutate 14/14, CI PASS; needs-split removed; Package.swift line means supervisor merge
