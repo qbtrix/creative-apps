@@ -4,7 +4,7 @@ Issue: #1936 · Packet: docs/blueprints/suiteui/features/adopt-kernel-layers.md
 Run: act-1a158c2e32e-bl3z (resume; earlier runs act-1a154b13dec-71tm, act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/suiteui-feature-lead-i2krve · Resumed: 2026-10-20
 Stage: 4 (done; contact sheet posted)
 Base: dev b538c92c
-Next: merge the docs PR that records the AL-d3 departure (slice/al-design-departure). The feature is otherwise done; the gap is #3628.
+Next: none. The feature is done; the follow-up is gap #3628 (layer-tree-list-parity).
 
 Line lead for #1938, #1937 and #1936 (contract rule 19, run act-1a14dfbdefe-il38);
 this record is the adopt-kernel-layers part. The first run led it with #1935 and #1934. This run's brief names `main` at
@@ -125,3 +125,4 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T15:15:48Z Supervisor answer 14:52Z on #1936: start AL-d3 now on dev's DesignLayersPanel.swift; stop polling #1498 (parked needs-human for the Mac finisher, #3605). AL-d3 builder started.
 - 2026-10-20T15:18:32Z AL-d3 builder stopped before any code: LayerTreeList lacks multi-select (#413), List keyboard/type-select, an app-supplied drop hook with line and tint (#3427/#3510/#3595), inherited group toggle state (#45), app-chosen toggle id endings (.hidden), outline/disclosure structure that expandDesignLayer queries, and List pasteboard focus. A Model accessor for public LayerRow rows is also missing. Asked the supervisor A/B on #1936.
 - 2026-10-20T15:41:42Z Supervisor answer A (15:24Z): AL-design closes without AL-d3. Filed gap #3628 layer-tree-list-parity (gap, line:suiteui, p1). Posted Belt-Slice-Done AL-design and Belt-Contact-Sheet on green Linux check 39424989659, which contains #3392. Docs PR records the departure in the packet.
+- 2026-10-20T16:09:27Z Departure docs PR #3630 merged into dev. Lead work for adopt-kernel-layers is complete.

@@ -122,3 +122,4 @@ utc	stage	event	ref	note
 2026-10-20T15:18:32Z	3	question	#1936	AL-d3 blocked on LayerTreeList parity; asked supervisor A (descope + gap) or B (SuiteUI parity first)
 2026-10-20T15:41:42Z	4	slice-done	#1936	AL-design done on 39424989659 (AL-d3 moved to #3628)
 2026-10-20T15:41:42Z	4	contact-sheet	#1936	Belt-Contact-Sheet posted
+2026-10-20T16:09:27Z	4	merged	#3630	AL-d3 departure recorded in the packet
