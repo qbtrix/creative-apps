@@ -32,36 +32,38 @@ private func across(_ box: FlareCore.Rect) -> FlareCore.Fill {
     return .linear(stops: threeStops, start: Point(x: box.minX, y: y), end: Point(x: box.maxX, y: y))
 }
 
-@Test func fillSelectionIsTheFirstShapesFillInItsBounds() throws {
-    let w = ball()
-    let shape = try #require(ballShapes(w).first)
-    let selection = try #require(w.fillSelection)
-    #expect(selection.fill == shape.fill)
-    #expect(selection.box == shape.bounds)
-    #expect(w.fillHelp == nil)
-}
+@Suite struct FlareGradientTests {
+    @Test func fillSelectionIsTheFirstShapesFillInItsBounds() throws {
+        let w = ball()
+        let shape = try #require(ballShapes(w).first)
+        let selection = try #require(w.fillSelection)
+        #expect(selection.fill == shape.fill)
+        #expect(selection.box == shape.bounds)
+        #expect(w.fillHelp == nil)
+    }
 
-@Test func nothingSelectedHasNoFillAndSaysWhy() {
-    var w = FlareWorkspace(services: .built)
-    w.load(FlareFixtures.bounce)
-    #expect(w.fillSelection == nil)
-    #expect(w.fillHelp == "Select a shape first.")
-}
+    @Test func nothingSelectedHasNoFillAndSaysWhy() {
+        var w = FlareWorkspace(services: .built)
+        w.load(FlareFixtures.bounce)
+        #expect(w.fillSelection == nil)
+        #expect(w.fillHelp == "Select a shape first.")
+    }
 
-@Test func paintCarriesTheGradientAndNotASolid() throws {
-    #expect(ball().paint?.gradient == nil)
-    let box = try #require(ballShapes(ball()).first?.bounds)
-    let w = ball(across(box))
-    #expect(w.paint?.gradient == w.fillSelection)
-    #expect(w.paint?.gradient?.fill == across(box))
-}
+    @Test func paintCarriesTheGradientAndNotASolid() throws {
+        #expect(ball().paint?.gradient == nil)
+        let box = try #require(ballShapes(ball()).first?.bounds)
+        let w = ball(across(box))
+        #expect(w.paint?.gradient == w.fillSelection)
+        #expect(w.paint?.gradient?.fill == across(box))
+    }
 
-@Test func runFillRefusesWithAReasonUntilTheCommandsAreBuilt() {
-    var w = ball()
-    let before = w.document
-    w.runFill(.type(.linear))
-    #expect(w.document == before && !w.canUndo)
-    #expect(w.paintError != nil)
+    @Test func runFillRefusesWithAReasonUntilTheCommandsAreBuilt() {
+        var w = ball()
+        let before = w.document
+        w.runFill(.type(.linear))
+        #expect(w.document == before && !w.canUndo)
+        #expect(w.paintError != nil)
+    }
 }
 
 @Suite(.disabled("FG-5 builds the fill command bodies"))
