@@ -95,3 +95,5 @@ fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T16:00Z: Still no completed full or scoped CI run since 15:21Z (only a Linux check at 27b67332 finished). Full runs 39447117246, 39442633733, 39438701609 and scoped runs at 897ccbb2 wait on macOS runners. Slice lines wait.
 
 - 2026-10-20T16:20Z: No completed full or scoped CI run since 15:21Z (only Linux checks at 27b67332 and 47dd9bb8). Full runs 39447117246, 39442633733, 39438701609 and scoped runs at 897ccbb2 still wait on macOS runners. Slice lines wait.
+
+- 2026-10-20T16:40Z: no qualifying run completed; full CI 39447117246 at 27b67332 still pending, 39442633733 and 39438701609 queued; only Linux checks completed (5eceabf7, 47dd9bb8)
