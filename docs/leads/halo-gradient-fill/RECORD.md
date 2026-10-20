@@ -7,13 +7,13 @@
 - Started: 2026-10-20
 - Stage: 3 polling (wave 1 blocked)
 - Base: dev 533daec
-- Next: HG-a #3516 merged into dev 10:02Z (cf691cca), Belt-Slice-Done waits for the first green dev Linux job after it (newest, 39404133857 on f8b6c4f, predates it); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 (AC-halo's files are on dev); HG-u waits on CL-probe and GF-2/GF-3
+- Next: HG-a done (Belt-Slice-Done posted 2026-10-20T10:32Z, run 39406588924); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 (AC-halo's files are on dev); HG-u waits on CL-probe and GF-2/GF-3
 
 ## Slices
 
 | Slice | Tasks | UI | Waits | State | PRs |
 |---|---|---|---|---|---|
-| HG-a | HG-1, HG-5 | no | suiteui GF-1 | merged | #3516 |
+| HG-a | HG-1, HG-5 | no | suiteui GF-1 | done | #3516; Belt-Slice-Done on run 39406588924 (Linux green, head a6cb012) |
 | HG-u | HG-2, HG-3, HG-4 | yes | HG-a; halo core-loop CL-probe (HG-2); suiteui GF-2, GF-3 | blocked | – |
 | HG-m | HG-6, HG-7 | no | HG-a; suiteui GF-6 and adopt-command-catalog AC-halo (HG-7) | blocked | – |
 | HG-z | HG-8, HG-9 | yes | HG-u, HG-m; halo core-loop CL-z (HG-9) | blocked | – |
