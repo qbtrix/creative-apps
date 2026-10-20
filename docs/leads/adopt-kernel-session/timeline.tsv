@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-20T04:31Z	3	heartbeat	#3396	gate on dev merge; AD-l2 builder running
 2026-10-20T04:51Z	3	heartbeat	#3396	gate on dev merge; AD-l2 builder running
 2026-10-20T05:10Z	3	heartbeat	#3396	gate on dev merge; AD-l2 builder running
+2026-10-20T05:28Z	3	heartbeat	#3396	lane macOS build 39365314009 queued (runner backlog); merged=false
