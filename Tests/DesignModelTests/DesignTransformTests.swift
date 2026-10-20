@@ -67,12 +67,12 @@ private func sample() throws -> DesignWorkspace {
     @Test func helpSaysWhyItCantTransform() throws {
         var workspace = try sample()
         #expect(workspace.transformSelection == workspace.treeNode("node-2")?.transformBox)
-        #expect(workspace.transformHelp != nil)
+        #expect(workspace.turnHelp == "Turning and mirroring a layer isn't built yet.")
         try workspace.setNodeLocked("node-2", true)
-        #expect(workspace.transformHelp == workspace.lockHelp("node-2"))
+        #expect(workspace.turnHelp == workspace.lockHelp("node-2"))
         workspace.deselect()
         #expect(workspace.transformSelection == nil)
-        #expect(workspace.transformHelp == "Select a layer to transform.")
+        #expect(workspace.turnHelp == "Select a layer first.")
     }
 
     @Test(.disabled("waits on DT-5"))
