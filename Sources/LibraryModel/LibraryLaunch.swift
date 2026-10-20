@@ -76,10 +76,10 @@ public struct LibraryLaunch: Sendable, Equatable {
     }
 
     /// Fakes over the fixture's photos when there is a fixture, else the live
-    /// services over the app's platform adapters.
-    public func services(decoder: any PhotoDecoding, writer: any JPEGWriting,
-                         store: any CatalogStoring) -> LibraryServices {
-        guard let fixture else { return .live(decoder: decoder, writer: writer, store: store) }
+    /// services over the app's platform adapters (sidecars off until passed).
+    public func services(decoder: any PhotoDecoding, writer: any JPEGWriting, store: any CatalogStoring,
+                         sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {
+        guard let fixture else { return .live(decoder: decoder, writer: writer, store: store, sidecars: sidecars) }
         return .fake(LibraryFixtures.photos(named: fixture), mode: fakeMode)
     }
 
