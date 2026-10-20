@@ -34,7 +34,9 @@ import Testing
 
     /// `catalog`'s loupe photo rendered by its own (live) loupe service at a long side of 1024.
     private func render(_ catalog: inout LibraryCatalog) async throws -> RenderedPhoto {
-        let request = try #require(catalog.loupeRequest(longSide: 1024, quality: .full))
+        // `loupeRequest` is mutating, so it runs before `#require`, which can't call one.
+        let asked = catalog.loupeRequest(longSide: 1024, quality: .full)
+        let request = try #require(asked)
         let rendered = try await catalog.services.loupe.render(
             request.photo, settings: request.settings, longSide: request.longSide, quality: .full)
         catalog.showLoupeRender(rendered, token: request.token)
