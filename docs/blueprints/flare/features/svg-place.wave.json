@@ -67,6 +67,10 @@
         ],
         "flare-export": [
           "PF-3"
+        ],
+        "key-select-all:KS-a": [
+          "PF-3",
+          "PF-4"
         ]
       },
       "ui": true,
