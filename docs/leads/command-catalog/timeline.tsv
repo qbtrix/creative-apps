@@ -105,3 +105,4 @@ utc	stage	event	ref	note
 2026-10-20T09:30:15Z	heartbeat	#3484 CC-u merged 09:28Z; dev merged into AC-p3/d3/h3, scripts/ci --changed running; #3392 still open
 2026-10-20T09:52:24Z	stage	CC-z PR #3588 opened (feature-done)
 2026-10-20T09:53:08Z	heartbeat	PRs #3584 #3585 #3587 #3588 open awaiting lane macOS builds; scoped:suiteui 39401671725 queued on 36789542 (has #3484); #3392 still open
+2026-10-20T10:15:02Z	heartbeat	10:20Z #3587 needs-rebase merged dev (C4 halo-model part), gate running; #3584 #3585 #3588 open clean awaiting lane macOS build; #3392 open; no completed suiteui/full run yet
