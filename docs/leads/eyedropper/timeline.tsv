@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-20T13:00Z	3	rebased	#3531	dev merged, head 757eff6a, CI: PASS; C4 clauses kept from both sides
 2026-10-20T13:08Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
 2026-10-20T13:40Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
+2026-10-20T13:54Z	3	needs-split	#3597	sentinel saw 1877/42 vs stale base EY-u; own change 263/2; restacking EY-u onto dev, EY-2 untouched
