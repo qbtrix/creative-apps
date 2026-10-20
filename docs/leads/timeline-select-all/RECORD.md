@@ -2,9 +2,9 @@
 
 Issue: #3537 · Packet: docs/blueprints/suiteui/features/timeline-select-all.md
 Run: act-1a158c2e32e-bl3z · Session: claude/suiteui-feature-lead-i2krve · Started: 2026-10-20
-Stage: 2 (building wave 1)
+Stage: 3 (TSA-a PR open)
 Base: dev 11a545e7 (brief main b3011ab9dc5579023722e79f83254e6e2520e612 verified; PRs target dev)
-Next: TSA-a slice PR (TSA-1 + TSA-2 in one PR, rule 22), carries feature-done; then critic panel on a scoped suiteui run, Belt-Slice-Done, Belt-Contact-Sheet.
+Next: #3591 (TSA-a, feature-done) waits on the lane's macOS build and merge; then a green Linux check containing it gives Belt-Slice-Done TSA-a, Mac-Finish-Wanted TSA-a, and Belt-Contact-Sheet on #3537.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
