@@ -279,7 +279,8 @@
                 "name": "Project files",
                 "description": "fileData() through ProjectFiles; beginOpen and finishOpen around a decode the app runs off the main actor; the file name and path, unsaved flag, the last save or open error, and the Open Recent list (name and path; HaloApp persists it). Opening clears history.",
                 "paths": [
-                  "Sources/HaloModel/HaloFiles.swift"
+                  "Sources/HaloModel/HaloFiles.swift",
+                  "Sources/HaloModel/HaloFileFlow+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true,
