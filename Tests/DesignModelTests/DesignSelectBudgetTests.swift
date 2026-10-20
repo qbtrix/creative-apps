@@ -9,7 +9,9 @@
 // QD-S4, a marquee step in Frame 40, whose lookup walks the frames before it.
 // Each is ≤ 1 ms / ≤ 10 ms; QD-S4's gate is a known issue until gap #2695.
 // Each also checks the timed steps did their work, so
-// a body that short-circuits can't pass.
+// a body that short-circuits can't pass. All four tests are timed, so the suite
+// is on the perf list (Tests/perf-suites.txt): the merge gate skips it and
+// perf-nightly runs it.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
