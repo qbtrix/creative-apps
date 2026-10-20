@@ -3,7 +3,8 @@
 // Edit and Select items fold in: while text has focus or a sheet is up, Cut, Copy and Paste stay on so the field gets
 // the key; Cut and Copy are on with an image open (they also act on focused text), Paste with an image on the
 // pasteboard; Edit > Select All is off while a sheet is up; Select > All stays on with no window so a field keeps
-// Command-A. Every other item is the catalog's availability. Run goes through the catalog. Linux-safe.
+// Command-A. Every other item is the catalog's availability. An enabled item's tooltip is its menu summary
+// (PhotoWorkspace.menuSummary), not the agent call's. Run goes through the catalog. Linux-safe.
 import SuiteKernel
 
 public struct PhotoMenuState: Sendable {
@@ -28,7 +29,7 @@ public struct PhotoMenuState: Sendable {
 
     static let specs = Dictionary(uniqueKeysWithValues: PhotoWorkspace.commands.map { spec in
         (spec.id, CommandSpec<PhotoMenuState>.typed(
-            spec.id, title: spec.title, summary: spec.summary, kind: spec.kind, params: JSONValue.self, schema: spec.params,
+            spec.id, title: spec.title, summary: PhotoWorkspace.menuSummary(spec.id), kind: spec.kind, params: JSONValue.self, schema: spec.params,
             result: spec.result, example: spec.example, availability: { $0.availability(spec.id) }) { state, params in
             try PhotoWorkspace.catalog.run(spec.id, params: params, on: &state.workspace).result
         })
