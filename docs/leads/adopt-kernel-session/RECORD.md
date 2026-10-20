@@ -4,14 +4,14 @@ Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
 Run: act-1a1540ed5f3-c3x9 (slices AD-photo, AD-halo, AD-library; AD-flare, AD-design done in act-1a1509b245f-653k)
 Stage: 3 wave B
 Base: 6e70826b (origin/dev); lead branch on main 6f9a2b88
-Next: AD-p2 #3253 (8e5d40de) and AD-h2 #3252 (354e39a8) on dev. Supervisor (issuecomment-6280424029): proof is the first green **Linux job** on a dev run containing 8f405311 (lead.md rule 6). #3380 (quarantine renew) merged as 2019b521 at 00:40Z. Candidate: full 39349878829 (2019b521, Linux job in progress since 01:02Z; contains 8f405311 and #3380). 39346519827 and 39345113796 cancelled before any job. Green Linux job → Belt-Slice-Done AD-photo, AD-halo. AD-library: waits on AU-library (PR #3384 open); relaunch AD-l1 when it merges (checked 2026-10-20T01:10Z). Open findings: 0
+Next: AD-photo and AD-halo done (Linux job 118395364026 of full run 39349878829, head 2019b521, contains 8f405311; Belt-Slice-Done posted 01:20Z). AD-library: waits on AU-library (PR #3384 open); relaunch AD-l1 when it merges, then AD-l2 (feature-done), then Belt-Contact-Sheet (checked 2026-10-20T01:21Z). Open findings: 0
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AD-flare | Flare runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-f1, AD-f2 | MJ-AD-flare | editor-kernel:EK-doc | no | 0 | building | – | – |
-| AD-photo | Photo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-p1, AD-p2 | MJ-AD-photo | editor-kernel:EK-doc | no | 0 | built, awaiting CI (AD-p1 #2826, AD-p2 #3253 merged) | – | – |
-| AD-halo | Halo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-h1, AD-h2 | MJ-AD-halo | editor-kernel:EK-doc | no | 0 | built, awaiting CI (AD-h1 #2827, AD-h2 #3252 merged) | – | – |
+| AD-photo | Photo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-p1, AD-p2 | MJ-AD-photo | editor-kernel:EK-doc | no | 0 | done (AD-p1 #2826, AD-p2 #3253; Belt-Slice-Done issuecomment-6281081759) | 39349878829 (Linux job 118395364026 green) | – |
+| AD-halo | Halo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-h1, AD-h2 | MJ-AD-halo | editor-kernel:EK-doc | no | 0 | done (AD-h1 #2827, AD-h2 #3252; Belt-Slice-Done issuecomment-6281082031) | 39349878829 (Linux job 118395364026 green) | – |
 | AD-design | Design runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-d1, AD-d2 | MJ-AD-design | editor-kernel:EK-doc | no | 0 | ready (FH-1, FH-2 merged) | – | – |
 | AD-library | Library runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-l1, AD-l2 | MJ-AD-library | editor-kernel:EK-doc, adopt-kernel-undo:AU-library | no | 0 | blocked | – | – |
 

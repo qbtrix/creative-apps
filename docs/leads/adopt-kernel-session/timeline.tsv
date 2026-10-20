@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-20T00:33:23Z	heartbeat	supervisor answered rule-23 question: Linux job is proof; waiting on #3380 (quarantine renew) then a green Linux job; AU-library unblocked upstream
 2026-10-20T00:53:14Z	heartbeat	#3380 merged; tracking full 39349878829 (2019b521) Linux job; no AU-library PR yet
 2026-10-20T01:10:06Z	heartbeat	Linux job of 39349878829 in progress; AU-library PR #3384 open
+2026-10-20T01:21:23Z	stage	Belt-Slice-Done AD-photo, AD-halo posted (run 39349878829); AD-library waits on #3384
