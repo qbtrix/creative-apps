@@ -1,7 +1,8 @@
-// DesignToolbarItemsTests.swift: the toolbar's eight commands each act or say
+// DesignToolbarItemsTests.swift: the toolbar's nine commands each act or say
 // why (DS-1, shell-parity). A new workspace offers only New and Open; a drawn
-// rectangle names Undo and leaves Redo with nothing to do; the identifiers the
-// journeys find stay put. Runs on Linux and macOS.
+// rectangle names Undo and leaves Redo with nothing to do; History waits for a
+// file (design/autosave-history DA-3); the identifiers the journeys find stay
+// put. Runs on Linux and macOS.
 import DesignModel
 import Testing
 
@@ -11,7 +12,7 @@ private let closed = "Create or open a file first."
     let workspace = DesignWorkspace()
     #expect(DesignToolbarItem.newFile.unavailableHelp(in: workspace) == nil)
     #expect(DesignToolbarItem.open.unavailableHelp(in: workspace) == nil)
-    for item in [DesignToolbarItem.save, .zoomOut, .fit, .zoomIn] {
+    for item in [DesignToolbarItem.save, .history, .zoomOut, .fit, .zoomIn] {
         #expect(item.unavailableHelp(in: workspace) == closed, "\(item)")
     }
     #expect(DesignToolbarItem.undo.unavailableHelp(in: workspace) == "Nothing to undo.")
@@ -27,7 +28,7 @@ private let closed = "Create or open a file first."
     #expect(DesignToolbarItem.undo.unavailableHelp(in: workspace) == nil)
     #expect(DesignToolbarItem.redo.title(in: workspace) == "Redo")
     #expect(DesignToolbarItem.redo.unavailableHelp(in: workspace) == "Nothing to redo.")
-    for item in [DesignToolbarItem.newFile, .open, .save, .zoomOut, .fit, .zoomIn] {
+    for item in [DesignToolbarItem.newFile, .open, .save, .history, .zoomOut, .fit, .zoomIn] {
         #expect(item.unavailableHelp(in: workspace) == nil, "\(item) is off on an open file")
     }
 }
@@ -65,7 +66,7 @@ private let closed = "Create or open a file first."
 
 @Test func toolbarIdentifiersAreUniqueAndKeepTheJourneyOnes() {
     let ids = DesignToolbarItem.allCases.map(\.identifier)
-    #expect(ids.count == 8)
+    #expect(ids.count == 9)
     #expect(Set(ids).count == ids.count)
     #expect(ids.allSatisfy { $0.hasPrefix("design.bar.") })
     #expect(DesignToolbarItem.undo.identifier == "design.bar.undo")
@@ -80,6 +81,7 @@ private let closed = "Create or open a file first."
         (.save, "Save", "square.and.arrow.down"),
         (.undo, "Undo", "arrow.uturn.backward"),
         (.redo, "Redo", "arrow.uturn.forward"),
+        (.history, "History", "clock.arrow.circlepath"),
         (.zoomOut, "Zoom Out", "minus.magnifyingglass"),
         (.fit, "Fit Page", "arrow.up.left.and.arrow.down.right"),
         (.zoomIn, "Zoom In", "plus.magnifyingglass"),
@@ -88,4 +90,17 @@ private let closed = "Create or open a file first."
         #expect(item.title(in: workspace) == title)
         #expect(item.systemImage == symbol)
     }
+}
+
+@Test func toolbarHistoryShowsThePanelOnceAFileIsOpen() {
+    #expect(DesignToolbarItem.history.identifier == "design.bar.history")
+    #expect(DesignToolbarItem.history.unavailableHelp(in: DesignWorkspace()) == closed)
+    var workspace = openDesign()
+    #expect(DesignToolbarItem.history.unavailableHelp(in: workspace) == nil, "History is off on an open file")
+    workspace.gesture(.rectangle, pt(40, 40), pt(200, 160))
+    workspace.undo()
+    #expect(DesignToolbarItem.history.unavailableHelp(in: workspace) == nil, "History is off after an undo")
+    // History sits after Redo, before the zoom commands, as the toolbar draws it.
+    let order = DesignToolbarItem.allCases
+    #expect(order.firstIndex(of: .history) == (order.firstIndex(of: .redo) ?? 0) + 1)
 }
