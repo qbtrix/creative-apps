@@ -7,13 +7,13 @@
 - Started: 2026-10-20
 - Stage: 3 polling (wave 1 blocked)
 - Base: dev 533daec
-- Next: wait for suiteui GF-1 (#3421) to merge (Sources/SuiteKernel/Fill/ on dev); then start wave 1 (HG-a: HG-1 + HG-5)
+- Next: HG-a #3516 in the fast lane (macOS build-only run pending); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 and AC-halo; HG-u waits on CL-probe and GF-2/GF-3
 
 ## Slices
 
 | Slice | Tasks | UI | Waits | State | PRs |
 |---|---|---|---|---|---|
-| HG-a | HG-1, HG-5 | no | suiteui GF-1 | blocked | – |
+| HG-a | HG-1, HG-5 | no | suiteui GF-1 | PR open | #3516 |
 | HG-u | HG-2, HG-3, HG-4 | yes | HG-a; halo core-loop CL-probe (HG-2); suiteui GF-2, GF-3 | blocked | – |
 | HG-m | HG-6, HG-7 | no | HG-a; suiteui GF-6 and adopt-command-catalog AC-halo (HG-7) | blocked | – |
 | HG-z | HG-8, HG-9 | yes | HG-u, HG-m; halo core-loop CL-z (HG-9) | blocked | – |
@@ -22,13 +22,13 @@
 
 | Task | Wave | State | PR | Note |
 |---|---|---|---|---|
-| HG-1 | W1 | built locally | – | HaloLayer.gradient, HaloDrawItem.gradient, conformance stubs, HaloGradientTests (2 on, 3 waiting on HG-7); PR opens once GF-1 is on dev |
-| HG-5 | W2 | built locally | – | HaloGradientRenderTests, 4 waiting on HG-6; in the HG-a PR (rule 22) |
+| HG-1 | W1 | PR open | #3516 | HaloLayer.gradient, HaloDrawItem.gradient, conformance stubs, HaloGradientTests (2 on, 3 waiting on HG-7); gate CI: PASS at 7d112c5 |
+| HG-5 | W2 | PR open | #3516 | HaloGradientRenderTests, 4 waiting on HG-6; in the HG-a PR (rule 22) |
 | HG-2 | W2 | blocked | – | CL-probe: core-loop is planned, no lead running |
 | HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo: adopt-command-catalog is planned, no lead running |
 | HG-3 | W3 | blocked | – | GF-3 |
 | HG-4 | W3 | blocked | – | after HG-2 |
-| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); gate CI: PASS at 1af5780 |
+| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); rebased onto 7d112c5, now at 610ad65 |
 | HG-8 | W4 | blocked | – | after HG-4, HG-6, HG-7 |
 | HG-9 | W5 | blocked | – | CL-z |
 
@@ -48,7 +48,7 @@
 
 ## Open
 
-- GF-1 #3421: open; its lane macOS build (run 39364860084) passed at 05:42Z after 2h10m queued; waiting on the lane sweep to merge it. No GF-6 or AC-halo PR yet.
+- GF-1 #3421 merged into dev at 9a14677 (05:5xZ) after its macOS build sat queued 2h10m. No GF-6 or AC-halo PR yet.
 - halo core-loop (CL-probe, CL-z) and suiteui adopt-command-catalog (AC-halo) are status planned with no lead branch: HG-2, HG-7 and HG-9 cannot start until those run.
 - Resolved: pinned core has `PixelBuffer.gradient(width:height:shape:from:to:stops:space:dither:)` (CoreRaster/Fill/RasterGradient.swift); no needs-core issue.
 - HALO-GRADIENT-FRAME costs about 1.5–1.7 s on a Linux debug build at 1080p (report only).

@@ -9,3 +9,6 @@ utc	stage	event	ref	note
 2026-10-20T05:01Z	3	poll	#3421	GF-1 macOS build still queued (dev 18464f2); no GF-6 or AC-halo PR; HG-a and HG-6 held locally
 2026-10-20T05:23Z	3	poll	#3421	GF-1 macOS build still queued (dev 6537a1a); no GF-6 or AC-halo PR; HG-a and HG-6 held locally
 2026-10-20T05:44Z	3	poll	#3421	GF-1 macOS build passed 05:42Z; lane merge pending (dev 0422798); no GF-6 or AC-halo PR
+2026-10-20T05:54Z	1	dep	#3421	GF-1 merged into dev 9a14677
+2026-10-20T05:58Z	1	gate	HG-a	scripts/ci --changed PASS on 7d112c5 (GF-1 copy dropped); hg-6-work restacked
+2026-10-20T06:00Z	1	pr	HG-a	#3516 opened, fast-lane
