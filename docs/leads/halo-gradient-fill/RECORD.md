@@ -7,7 +7,7 @@
 - Started: 2026-10-20
 - Stage: 3 polling (wave 1 blocked)
 - Base: dev 533daec
-- Next: HG-a #3516 waits on its lane macOS build (run 39378049451, queued since 06:01Z); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 and AC-halo; HG-u waits on CL-probe and GF-2/GF-3
+- Next: HG-a #3516 waits on its lane macOS build (run 39378049451, queued since 06:01Z); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 (AC-halo's files are on dev); HG-u waits on CL-probe and GF-2/GF-3
 
 ## Slices
 
@@ -25,7 +25,7 @@
 | HG-1 | W1 | PR open | #3516 | HaloLayer.gradient, HaloDrawItem.gradient, conformance stubs, HaloGradientTests (2 on, 3 waiting on HG-7); gate CI: PASS at 7d112c5 |
 | HG-5 | W2 | PR open | #3516 | HaloGradientRenderTests, 4 waiting on HG-6; in the HG-a PR (rule 22) |
 | HG-2 | W2 | blocked | – | CL-probe: core-loop is planned, no lead running |
-| HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo: adopt-command-catalog is planned, no lead running |
+| HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo's HaloCommandCatalog.swift, HaloHeadless.swift and Tests/command-ids/halo.txt are on dev (packet still status planned, no Belt-Slice-Done) |
 | HG-3 | W3 | blocked | – | GF-3 |
 | HG-4 | W3 | blocked | – | after HG-2 |
 | HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); rebased onto 7d112c5, now at 610ad65 |
@@ -49,7 +49,7 @@
 ## Open
 
 - GF-1 #3421 merged into dev at 9a14677 (by 05:54Z) after its macOS build sat queued 2h10m. No GF-6 or AC-halo PR yet.
-- halo core-loop (CL-probe, CL-z) and suiteui adopt-command-catalog (AC-halo) are status planned with no lead branch: HG-2, HG-7 and HG-9 cannot start until those run.
+- halo core-loop (CL-probe, CL-z) is status planned with no lead branch: HG-2 and HG-9 cannot start until it runs. AC-halo's files (catalog, headless, command-ids and path baseline) are already on dev at ab71d30 (checked 06:44Z), so HG-7 waits only on GF-6.
 - Resolved: pinned core has `PixelBuffer.gradient(width:height:shape:from:to:stops:space:dither:)` (CoreRaster/Fill/RasterGradient.swift); no needs-core issue.
 - HALO-GRADIENT-FRAME costs about 1.5–1.7 s on a Linux debug build at 1080p (report only).
 - The contract's `extension HaloDrawItem { var gradient }` is a stored field with an init default (extensions can't store).
