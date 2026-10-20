@@ -3,7 +3,7 @@
     "label": "the & escape is dropped",
     "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
     "find": "return XMLText.escaped(String(kept))",
-    "replace": "return XMLText.escaped(String(kept)).replacingOccurrences(of: \"&amp;\", with: \"&\")",
+    "replace": "return XMLText.escaped(String(kept)).split(separator: \"&amp;\", omittingEmptySubsequences: false).joined(separator: \"&\")",
     "tests": "LibraryXMPTests"
   },
   {
