@@ -1,0 +1,5 @@
+[
+  {"label": "flipInPlace: a flip mirrors the layer about the canvas, so the logo jumps sides", "file": "Sources/PhotoModel/PhotoTransform+Kernel.swift", "find": "layers[at].offsetX = content.x", "replace": "layers[at].offsetX = (canvas?.width ?? 0) - content.x - content.pixels.width", "tests": "PhotoTransformTests"},
+  {"label": "identityCommitsNothing: committing an untouched draft records a Free Transform step", "file": "Sources/PhotoModel/PhotoTransform+Kernel.swift", "find": "guard draft.transform != .identity, let at", "replace": "guard let at", "tests": "PhotoTransformTests"},
+  {"label": "lockedRefuses: a scale, turn or flip on a layer that can't transform goes through", "file": "Sources/PhotoModel/PhotoTransform+Kernel.swift", "find": "        if let help = transformHelp { throw PhotoRefusal(help) }\n        guard let current", "replace": "        guard let current", "tests": "PhotoTransformTests"}
+]

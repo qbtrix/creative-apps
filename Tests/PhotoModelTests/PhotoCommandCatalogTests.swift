@@ -61,8 +61,15 @@ struct PhotoCommandCatalogTests {
 
     @Test func conformance() throws {
         #expect(PhotoWorkspace.catalog.ids.count == PhotoWorkspace.commands.count)
-        #expect(CatalogConformance.check(PhotoLawsDocument.self, fixture: PhotoLawsDocument(ws: try Self.lawsFixture())) == [])
+        #expect(CatalogConformance.check(PhotoLawsDocument.self, fixture: PhotoLawsDocument(ws: try Self.lawsFixture())) == Self.tolerated)
     }
+    /// Free Transform's commit and cancel need a draft the fixture has none of; the kernel's transform.flip is
+    /// titled "Flip" while its step names the axis ("Flip Horizontal"), as the transform packet asks.
+    static let tolerated = [
+        "transform.cancel: exampleRuns: the example refused on the fixture: transform.cancel is unavailable: Start Free Transform first.",
+        "transform.commit: exampleRuns: the example refused on the fixture: transform.commit is unavailable: Start Free Transform first.",
+        "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+    ]
 
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
@@ -125,8 +132,8 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Every non-tool command, in menu order (the catalog lists them as the menus do).
-    static let menuIDs = PhotoWorkspace.commands.map(\.id).filter { !$0.hasPrefix("tool.") }
+    /// Every non-tool command but Free Transform's (transform PT-5, ahead of its menu items), in menu order (the catalog lists them as the menus do).
+    static let menuIDs = PhotoWorkspace.commands.map(\.id).filter { !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") }
     static let helped: Set = ["edit.cut", "edit.copy", "edit.paste", "layer.duplicate", "layer.merge-down", "layer.flatten"]
     /// Today's Cut and Copy stay on with an image open (they also act on focused text); the catalog gives their reason.
     static let menuOwnsEnabled: Set = ["edit.cut", "edit.copy"]

@@ -39,7 +39,7 @@ import Testing
         func applied(_ draft: TransformDraft, to content: PlacedPixels) throws -> PlacedPixels {
             try base.applied(draft, to: content)
         }
-        func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels { try base.flipped(content, axis) }
+        func flipped(_ content: PlacedPixels, _ axis: PhotoModel.FlipAxis) throws -> PlacedPixels { try base.flipped(content, axis) }
     }
 
     /// The selected layer's pixels, flattened.
@@ -231,8 +231,8 @@ import Testing
         let file = { (path: String) in try Data(contentsOf: folder.appendingPathComponent(path)) }
         let script = try JSONDecoder().decode(Script.self, from: file("free-transform.jobs.json"))
         var doc = try PhotoHeadless.open(file("input/logo-on-photo.ora"), name: "logo-on-photo.ora")
-        let before = try #require(doc.workspace.layers.last)
-        #expect([before.offsetX, before.offsetY] == [60, 40])
+        let before = try #require(doc.workspace.selectedLayer)
+        #expect(before.offsetX == 60 && before.offsetY == 40)
         let report = PhotoHeadless.catalog.runBatch(script.steps, on: &doc, atomic: script.atomic)
         #expect(report.stoppedAt == nil, "\(report.steps.compactMap(\.error))")
         let logo = try #require(doc.workspace.selectedLayer), size = try #require(doc.workspace.pixels[logo.id])
@@ -245,7 +245,7 @@ import Testing
         let exported = try #require(doc.export("png", options: .object([:])).first)
         let got = try PhotoHeadless.codec.decode(exported.data, longestSide: nil)
         let want = try PhotoHeadless.codec.decode(file("expected/logo-on-photo.png"), longestSide: nil)
-        #expect([got.width, got.height] == [want.width, want.height])
+        #expect(got.width == want.width && got.height == want.height)
         #expect(got.rgba8.count == want.rgba8.count
             && zip(got.rgba8, want.rgba8).allSatisfy { abs(Int($0) - Int($1)) <= 2 }, "the export matches within 2")
     }

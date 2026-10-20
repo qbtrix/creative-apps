@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P17: Free Transform on a 400 x 200 logo over a photo (the logo is the top, selected layer): scale by half from its top-left corner, turn 15 degrees, commit, then flip it horizontally in place, and export the PNG.",
+  "inputs": ["input/*.ora"],
+  "steps": [
+    {"id": "transform.begin", "params": {}},
+    {"id": "transform.scale", "params": {"sx": 0.5, "sy": 0.5, "anchor": "topLeft"}},
+    {"id": "transform.rotate", "params": {"degrees": 15}},
+    {"id": "transform.commit", "params": {}},
+    {"id": "transform.flip", "params": {"axis": "horizontal"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "png", "options": {}},
+  "expect": {
+    "out/logo-on-photo.png": {"pixels": {"tolerance": 2, "reference": "expected/logo-on-photo.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}
