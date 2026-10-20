@@ -1,0 +1,119 @@
+utc	stage	event	ref	note
+2026-10-17T05:59Z	0	stage-start	#1970	lead started, base 0e3c08ea52648f6654e583a64ddf07ccb5aa328c
+2026-10-17T05:59Z	1	stage-start	#1970	reading the packet
+2026-10-17T06:02Z	2	stage-end	#1970	waves planned: 1 DE-0 DE-2; 2 DE-1 DE-8; 3 DE-3 DE-5 DE-9; then DE-6 DE-7 DE-10 DE-11 on the kernel and window waits
+2026-10-17T06:02Z	3	stage-start	wave 1	DE-0, DE-2 builders started
+2026-10-17T06:07Z	3	finding-filed	#1981 #1982 #1983 #1984	the packet's needs-ui and follow-up issues filed
+2026-10-17T06:07Z	3	heartbeat	wave 1	DE-0 and DE-2 builders running; first Linux build took 4m27s
+2026-10-17T06:20Z	3	pr-opened	#1987	task DE-0 UniqueFileNames, Mutate 3/3; gate red only on dev's app-marks check
+2026-10-17T06:20Z	3	ci-run	origin/dev	check-app-marks red on dev since #1977; fix #1985 open
+2026-10-17T06:28Z	3	heartbeat	wave 1	DE-0 #1987 open waiting on #1985; DE-2 builder running the gate
+2026-10-17T06:32Z	3	ci-run	#1987	dev merged past #1985, scripts/ci --changed CI: PASS on d2aa134, Fast-Check moved
+2026-10-17T06:33Z	3	pr-opened	#1997	task DE-2 export contract and stubs, Mutate 3/3 DesignExport+Kernel, 10/10 DesignServices
+2026-10-17T06:51Z	3	pr-merged	#1987	DE-0 merged into dev as 0d7a3db by the lane (macOS build green)
+2026-10-17T06:51Z	3	stage-start	wave 2	DE-8 builder started on 0d7a3db; DE-1 waits on #1997
+2026-10-17T06:51Z	3	heartbeat	wave 2	#1997 in a lane batch (Linux check running)
+2026-10-17T10:45Z	3	pr-merged	#1997	DE-2 merged into dev as 4f2988a (07:05Z, lane batch of 6)
+2026-10-17T10:45Z	3	stopped	session	usage limit 06:55Z to 10:40Z; DE-8 builder resumed
+2026-10-17T10:45Z	3	stage-start	wave 3	DE-3 and DE-5 builders started on 453198a; DE-1 dropped into them; DE-8 resumed
+2026-10-17T10:46Z	3	slice-done	DE-a	Belt-Slice-Done posted: full run 39018046761 on 453198a contains #1987 and #1997
+2026-10-18T16:31:08Z	design-export	resume	dev@ae72cc6c	run act-1a14fd6514a-4hke; EK-chrome, EK-run merged; SN-c, CB-c not
+2026-10-18T16:31:08Z	design-export	stage-start	wave 3	DE-3 (+DE-2b), DE-5, DE-8 builders
+2026-10-18T16:53:05Z	design-export	heartbeat	wave	builders running, no PRs yet
+2026-10-18T17:05:45Z	design-export	heartbeat	wave 3	DE-3, DE-5, DE-8 builders running; follow-ups already filed
+2026-10-18T17:14:26Z	design-export	prs	wave 3	#2874 DE-3, #2869 DE-5, #2868 DE-8 (fix round 1 on rule 20)
+2026-10-18T17:15:07Z	design-export	heartbeat	wave 3	#2874 #2869 open; #2868 fix round 1 running
+2026-10-18T17:23:30Z	design-export	fix	#2868	DE-8 fix round 1 pushed 85924c5b
+2026-10-18T17:37:26Z	design-export	merge	#2869	DE-5 merged (macOS build 39147606703)
+2026-10-18T17:37:26Z	design-export	heartbeat	wave 3	#2874 DE-3 and #2868 DE-8 waiting on lane macOS builds
+2026-10-18T17:59:56Z	design-export	heartbeat	#2874	#2874 DE-3 macOS build 39148705957 running; #2868 DE-8 macOS build 39149355096 queued; DE-9 starts once #2868 merges
+2026-10-18T18:18:09Z	design-export	merged	#2874	DE-3 merged 18:04Z; DE-s complete on dev (with #2869); full CI 39153086055 pending
+2026-10-18T18:18:09Z	design-export	heartbeat	#2868	DE-8 macOS build 39149355096 still queued; DE-9 waits on it
+2026-10-18T18:40:06Z	design-export	merged	#2868	DE-8 merged 18:32Z (batch run 39153969188)
+2026-10-18T18:40:06Z	design-export	wave	wa1s1kr3m	DE-9 (PDF) builder started on base 2e27b8db
+2026-10-18T18:40:06Z	design-export	heartbeat	39153086055	full CI on c91b1468 still pending; DE-s done line waits on it
+2026-10-18T18:47:47Z	design-export	pr	#2904	DE-9 PDF, head 6000c666, contract check ok, body clean
+2026-10-18T19:03Z	design-export	heartbeat	39155524227	full 39153086055 cancelled; scoped design 39155524227 (dev 2e27b8db, has DE-s and DE-8) queued; #2904 DE-9 awaiting macOS build
+2026-10-18T19:25Z	design-export	heartbeat	#2904	DE-9 macOS build 39155906830 queued; scoped design 39155524227 in progress
+2026-10-18T19:44Z	design-export	slice-done	DE-s	https://github.com/qbtrix/creative-apps/actions/runs/39155524227 (dev 2e27b8db)
+2026-10-18T19:44Z	design-export	critics	DE-s	critic panel wf_911d45d5-238 on run 39155524227
+2026-10-18T19:47Z	design-export	findings	DE-s	panel wf_911d45d5-238: 4 confirmed (#2932 #2933 #2934 minor, #2935 major), 0 refuted
+2026-10-18T19:47Z	design-export	fix-round	DE-s	round 1: fix-batch wf_522f956e-a97 on dev f7e03506, findings 2932-2935
+2026-10-18T20:03:36Z	design-export	heartbeat	#2904	DE-9 open, macOS build green, lane in flight; DE-6 blocked: snapping #1552 and canvas-basics #1500 still open; fix-batch wlsqmteyb round 1 running
+2026-10-18T20:13:50Z	design-export	fix-round-1	#2949,#2950	DE-s round 1 (wf_522f956e-a97): #2949 fixes #2933 #2934 #2935; #2950 fixes #2932; both Fast-Check pass; footers stripped
+2026-10-18T20:24:54Z	design-export	merged	#2904	DE-9 merged 3200018a; DE-w last PR in; no ci.yml run contains it yet; #2949 #2950 open in lane; DE-6 still blocked (#1552, #1500 open)
+2026-10-18T20:48:02Z	design-export	heartbeat	#2949	#2949 merged abf7ca6a (fixes #2933 #2934 #2935); #2950 in lane; DE-w waits on a green run containing 3200018a (39164756292 at ae6e7c81 pending); DE-6 still blocked
+2026-10-18T21:11:23Z	design-export	heartbeat	39164756292	full CI pending (DE-w); #2950 waits on lane macOS build at c33f6f3d; DE-6 deps #1552 #1500 open
+2026-10-18T21:33:10Z	design-export	merged	#2950	fixes #2932 merged 2cc932d1 (DE-s round 1); DE-w waits on 39167964719 / 39167807664; DE-6 deps open
+2026-10-18T21:56:05Z	design-export	heartbeat	39169434591	full 39167964719 cancelled; DE-w waits on full 39169434591 (e3859e3f) or scoped design 39167807664; DE-6 deps open
+2026-10-18T22:18:50Z	design-export	heartbeat	39167807664	scoped design running; full 39169434591 cancelled, now 39171061138 (85f4a229); DE-6 deps open
+2026-10-18T22:41:39Z	design-export	heartbeat	39167807664	DE-w waits on scoped design (contains 3200018a); full 39171756438 queued; #1552 #1500 open
+2026-10-18T23:07:59Z	design-export	heartbeat	39173700610	39167807664 design job failed (pre-#2990 compile) -> not slice-done; next 39173700610; #1552 #1500 open
+2026-10-18T23:29:58Z	design-export	heartbeat	39173700610	DE-w waits on scoped design 39173700610 / full 39176304199; #1552 #1500 open
+2026-10-18T23:53:06Z	design-export	heartbeat	39173700610	DE-w waits on scoped design (design job in progress); 0 open findings; #1552 #1500 open
+2026-10-19T00:17:39Z	design-export	heartbeat	39173700610	scoped design macOS job red (none in DE-w files; DesignRasterizerTests passed) -> DE-w not slice-done; DE-6 still blocked on #1552 #1500; next 39178639545 / 39178441058
+2026-10-19T00:39:17Z	design-export	heartbeat	39178639545	scoped design still running; full 39178441058 cancelled; DE-w not slice-done; DE-6 blocked on #1552 #1500
+2026-10-19T01:01:41Z	design-export	heartbeat	39178639545	scoped design macOS job red, none in DE files (DesignRasterizerTests passed); DE-w not slice-done; DE-6 blocked on #1552 #1500; next 39182410909 / 39183169319
+2026-10-19T01:24:38Z	design-export	heartbeat	39182410909	scoped design running, full 39184285016 pending; DE-w not slice-done; DE-6 blocked on #1552 #1500
+2026-10-19T01:46:15Z	design-export	heartbeat	39182410909	scoped design still running; full runs on dev keep cancelling, newest 39186699154 (ed0fed9e, has d1abaef0) pending; DE-6 deps #1552 #1500 open
+2026-10-19T02:08:30Z	design-export	heartbeat	39182410909	scoped design red (7ccb643d, pre-#3057): J16 same old alert contrast, now fixed by d1abaef0; rest known non-FH/DE; full 39186699154 cancelled; next: scoped design 39187798386 (0cb8bb88), full 39188162085 (17dc84c7)
+2026-10-19T02:29:30Z	design-export	heartbeat	39187798386	scoped design still queued (macOS runner backlog; suiteui scoped in progress); full 39188162085 pending; DE-6 deps #1552 #1500 open
+2026-10-19T02:51:46Z	design-export	heartbeat	39187798386	scoped design macOS job now in progress (0cb8bb88); full 39188162085 pending; DE-6 deps #1552 #1500 open
+2026-10-19T03:15Z	design-export	heartbeat	39187798386	scoped design 39187798386 (0cb8bb88) red; J16 now passes; every failure is in the known non-FH/DE set (P4 is the shared perf-probe 'no window opened'); full 39188162085 cancelled; waiting on scoped design 39193348540 and full 39192572958 (cc14022e, queued); DE-6 still blocked (#1552, #1500 open)
+2026-10-19T03:36Z	design-export	heartbeat	39193348540	scoped design 39193348540 and full 39192572958 (cc14022e) still queued on the macOS runner (full's Linux green); no newer design run; no open dev-red; DE-6 still blocked (#1552, #1500 open)
+2026-10-19T03:58Z	design-export	heartbeat	39193348540	scoped design 39193348540 (cc14022e) macOS job running since 03:50Z; full 39192572958 still queued; newer full 39196649963 (7acc00bf) pending; no open dev-red; DE-6 still blocked (#1552, #1500 open)
+2026-10-19T04:23Z	design-export	heartbeat	39193348540	scoped design 39193348540 (cc14022e) macOS red only on non-DE tests; every DE suite passed; DE-w slice-done held, raised on #1970; DE-6 still blocked (#1552, #1500 open)
+2026-10-19T04:46Z	design-export	heartbeat	39198969299	no design macOS run finished: full 39192572958 macOS still running, scoped design 39198969299 (9f098e23, has 3200018a) running; DE-w slice-done held; DE-6 blocked (#1552, #1500 open); no supervisor reply
+2026-10-19T05:09Z	design-export	heartbeat	39198969299	scoped design 39198969299 (9f098e23, has 3200018a) macOS red only on non-DE tests; no DE test failed; DE-w slice-done held; DE-6 blocked (#1552, #1500 open); no supervisor reply
+2026-10-19T05:30Z	design-export	heartbeat	39204091833	no design macOS run finished (39192572958 running, scoped design 39204091833 queued); DE-w slice-done held; DE-6 blocked (#1552, #1500 open); no supervisor reply
+2026-10-19T05:56Z	design-export	heartbeat	-	no qualifying run for DE-w (39203617095, 39204091833 queued); DE-6 deps #1552 #1500 open; no supervisor reply
+2026-10-19T06:25Z	design-export	heartbeat	-	no qualifying run for DE-w yet (39204091833 in progress, 39203617095 and 39208339251 queued); DE-6 deps #1552 #1500 open; no supervisor reply
+2026-10-19T06:49Z	design-export	heartbeat	-	no qualifying run for DE-w (39204091833 macOS red on non-DE tests; 39203617095 queued; 39211721703 queued); DE-6 deps #1552 #1500 open; no supervisor reply
+2026-10-19T07:18Z	design-export	heartbeat	-	no qualifying run for DE-w (39211721703 queued, 39203617095 macOS in progress); DE-6 deps #1552 #1500 open; no supervisor reply
+2026-10-19T07:46Z	design-export	heartbeat	-	no qualifying run for DE-w (39211721703 queued, 39203617095 macOS in progress); DE-6 deps #1552 #1500 open; no supervisor reply
+2026-10-19T08:27Z	design-export	heartbeat	-	DE-w done (supervisor, 39203617095); DE-u waits SN-8 and CB-9 file handoff (#1552 #1500 open; DW-c done); asked supervisor on #1970 to let DE-u go first
+2026-10-19T08:56:05Z	DE-u	heartbeat	parked: #1552, #1500 open, no reply on #1970
+2026-10-19T09:16:36Z	DE-u	heartbeat	parked: #1552, #1500 open, no reply on #1970
+2026-10-19T09:35:48Z	DE-u	heartbeat	parked: #1552, #1500 open, no reply on #1970
+2026-10-19T09:54:49Z	DE-u	heartbeat	parked: #1552, #1500 open, no reply on #1970
+2026-10-19T10:14:07Z	DE-u	heartbeat	parked: #1552, #1500 open, no reply on #1970
+2026-10-19T10:35:54Z	heartbeat	#3199 macOS build 39226438306 still queued; DE-u parked (#1552, #1500 open, no supervisor reply)
+2026-10-19T10:56:23Z	heartbeat	#3199 macOS build 39226438306 still queued (runners backed up); DE-u parked (#1552, #1500 open, no supervisor reply)
+2026-10-19T11:21:43Z	heartbeat	DE-u parked (#1552, #1500 open, no supervisor reply)
+2026-10-19T11:38:50Z	heartbeat	DE-u parked (#1552, #1500 open, no supervisor reply on #1970); files-history done
+2026-10-19T11:58:46Z	heartbeat	DE-u parked (#1552, #1500 open, no supervisor reply on #1970 since 08:26Z)
+2026-10-19T13:01:29Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970 since 08:26Z; status note posted on #1970
+2026-10-19T13:27:42Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T13:48:03Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T14:12:57Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T14:32:53Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T14:53:59Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T15:16:24Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T15:36:19Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T15:56:03Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T16:16:18Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T16:36:07Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T16:57:08Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T17:17:31Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T17:37:17Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T17:56:59Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T18:16:59Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970; #1499 closed by supervisor sentinel 18:14Z
+2026-10-19T18:36:55Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T18:55:57Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T19:15:45Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T19:34:30Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T19:55:02Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T20:15:26Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T20:35:04Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T20:55:21Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T21:14:48Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T21:33:52Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T21:53:18Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T22:13:55Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T22:34:03Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T22:54:48Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T23:14:10Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T23:34:19Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-19T23:53:40Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
+2026-10-20T00:14:12Z	heartbeat	canvas-basics #1500 closed; DE-u still blocked on snapping #1552 (SN-8) and editor-kernel EK-chrome; no supervisor reply on #1970
+2026-10-20T00:30:00Z	stage	wave 5 start: DE-u builder (DE-6 + DE-7) on origin/dev 0af12d15; supervisor go on #1970
