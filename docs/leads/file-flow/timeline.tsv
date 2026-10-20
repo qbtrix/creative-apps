@@ -10,3 +10,5 @@ utc	stage	event	ref	note
 2026-10-20T05:40Z	3	pr-open	#3493	SF-m part 1 (SF-5 + SF-6) stacked on SF-1, Mutate 5/5 + 4/4, Fast-Check pass at 9eef4fe3
 2026-10-20T05:45Z	3	pr-open	#3507	SF-m part 2 (SF-7) stacked on SF-2, Fast-Check pass at 8c97ef8b
 2026-10-20T05:46Z	3	stage-start	-	wave 2 SF-u
+2026-10-20T05:56Z	3	pr-open	#3514	SF-u part 1 (SF-3) stacked on SF-7, Fast-Check pass at 902f34cc
+2026-10-20T05:56Z	3	stage-start	-	wave 2 SF-u part 2 (SF-4)
