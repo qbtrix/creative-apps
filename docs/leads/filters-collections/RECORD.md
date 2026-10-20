@@ -63,3 +63,4 @@ Next: FC-9 building (on FC-8 #3490 + FC-3 #3423); FC-15 #3539 (draft on FC-13 #3
 - Open line:library findings checked 2026-10-20T04:42:28Z: none in this feature's files. dev-red #3386 (macOS, range main..1b33afbb) predates these PRs; not ours.
 - 06:04Z: the lane's macOS build-only runs are still queued (#3423 run 39366083753 and #3424 run 39366318428 since 03:47Z; #3460 run 39377907664 since 06:00Z). This is runner backlog, not these PRs. Building continues on stacked drafts.
 - 06:26Z check-in: #3423, #3424, #3460 unmerged; their lane macOS build-only runs (39366083753, 39366318428, 39377907664) still queued. Open line:library findings: only #3453 (export fidelity, not this feature's files). Building ahead on stacked drafts.
+- 06:48Z check-in: #3423, #3424, #3460 still unmerged; lane macOS builds still queued (39366083753 for 3h). No new findings since 06:20Z. Builders: FC-9, MD-19, MD-6.
