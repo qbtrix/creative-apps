@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-20T21:14Z	check	heartbeat	#3678,#3729	#3678 in lane batch-20261020205914 (Linux check running); #3729 macOS build queued; no XP-3/XP-4/AX-photo PRs
 2026-10-20T21:41Z	wave-1	merged	#3678	PX-1 merged to dev 21:15Z
 2026-10-20T21:41Z	wave-1	rebased	#3729	PX-3 needs-rebase: merged origin/dev (add/add, dev side == PX-1 head), scripts/ci --changed PASS, head e2c55886, Head line moved
+2026-10-20T22:00Z	heartbeat	poll	-	#3729 head e2c55886 rebased, needs-rebase dropped, lane dispatched macOS build; green dev Linux run 39502742421 (5684f9dd) contains #3678, but PX-a also needs PX-2 (waits XP-3, AX-photo), so no Belt-Slice-Done yet
