@@ -4,7 +4,7 @@ Issue: #1936 · Packet: docs/blueprints/suiteui/features/adopt-kernel-layers.md
 Run: act-1a158c2e32e-bl3z (resume; earlier runs act-1a154b13dec-71tm, act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/suiteui-feature-lead-i2krve · Resumed: 2026-10-20
 Stage: 3 (merging and closing slices)
 Base: dev b538c92c
-Next: AL-d3 (Design panel on LayerTreeList) building on slice/al-d3, per the supervisor's 14:52Z answer on #1936 (start now on dev's DesignLayersPanel.swift; don't wait for LP-a). Then Belt-Slice-Done AL-design, Mac-Finish-Wanted AL-design and Belt-Contact-Sheet on #1936.
+Next: AL-d3 on hold. The builder found LayerTreeList lacks Design-panel parity: multi-select, List keyboard nav, app drop hook/line, inherited toggle state, toggle id endings, outline structure for journeys, and pasteboard focus. Asked the supervisor (#1936 issuecomment-6294314921): A, close AL-design without AL-d3 and file a SuiteUI parity gap (recommended); or B, build SuiteUI parity slices first.
 
 Line lead for #1938, #1937 and #1936 (contract rule 19, run act-1a14dfbdefe-il38);
 this record is the adopt-kernel-layers part. The first run led it with #1935 and #1934. This run's brief names `main` at
@@ -123,3 +123,4 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T06:40:56Z Heartbeat. #3392 AL-design head f6bf7998, no rebase label, waits on macOS build 39379782419; main b3011ab9.
 - 2026-10-20T07:04:50Z Heartbeat. #3392 AL-design head f6bf7998 unchanged; macOS build 39379782419 still queued in the runner backlog; main b3011ab9.
 - 2026-10-20T15:15:48Z Supervisor answer 14:52Z on #1936: start AL-d3 now on dev's DesignLayersPanel.swift; stop polling #1498 (parked needs-human for the Mac finisher, #3605). AL-d3 builder started.
+- 2026-10-20T15:18:32Z AL-d3 builder stopped before any code: LayerTreeList lacks multi-select (#413), List keyboard/type-select, an app-supplied drop hook with line and tint (#3427/#3510/#3595), inherited group toggle state (#45), app-chosen toggle id endings (.hidden), outline/disclosure structure that expandDesignLayer queries, and List pasteboard focus. A Model accessor for public LayerRow rows is also missing. Asked the supervisor A/B on #1936.
