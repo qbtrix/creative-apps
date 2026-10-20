@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-20T04:39Z	3	heartbeat	#3421	dev 18464f2 lacks Fill/; GF-1 is PR #3421 (open, fast-lane); GF-2 waits CC-u
 2026-10-20T04:56Z	3	heartbeat	#3421	dev 18464f2 lacks Fill/; #3421 waits its macOS build (run 39364860084)
 2026-10-20T05:13Z	3	heartbeat	#3421	dev 6537a1a lacks Fill/; #3421 macOS build 39364860084 still queued since 03:32Z (runner queue)
+2026-10-20T05:32Z	3	asked	#3419	#3421 macOS build 39364860084 queued 2h; asked supervisor to re-dispatch or Mac-Check
