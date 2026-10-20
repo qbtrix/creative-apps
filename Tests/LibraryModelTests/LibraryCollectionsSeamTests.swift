@@ -137,7 +137,7 @@ import Testing
         #expect(shoot.addToCollectionHelp("user-1") == UserCollection.unavailable)
         #expect(shoot.removeFromCollectionHelp == UserCollection.unavailable)
         #expect(shoot.deleteCollectionHelp == UserCollection.unavailable)
-        #expect(shoot.newSmartCollectionHelp == UserCollection.smartUnavailable)
+        #expect(shoot.newSmartCollectionHelp == "Set a filter first: a smart collection keeps the filter's rules.")
         #expect(shoot.collectionsSaveRequest() == nil)
         #expect(shoot.collectionsFileValue == "saved")
         #expect(shoot.newCollection() == "")
