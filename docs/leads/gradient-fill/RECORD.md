@@ -3,7 +3,7 @@
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
 Stage: 3 polling (wave 1 blocked)
-Base: 533daec75caf2972ddb5fda9579e481bb43a3f5b
+Base: 53151b2b1c02dbb75565ab67fcdbc008c5ef9817
 Next: wait for suiteui/gradient-fill GF-a (#3418) to merge (Sources/SuiteKernel/Fill/ on dev); then start wave 1 (FG-1)
 
 ## Slices
