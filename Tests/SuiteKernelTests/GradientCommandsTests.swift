@@ -120,4 +120,12 @@ struct FillDoc: GradientFillTarget {
         #expect(throws: CatalogError.self) { try catalog.run("fill.stop-move", params: .object(["index": .number(9), "offset": .number(0.5)]), on: &doc) }
         #expect(doc.history.steps.isEmpty)
     }
+    @Test func solidColorKeepsItsAlpha() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = FillDoc(fill: .solid(.white))
+        let params: JSONValue = .object(["index": .number(0), "r": .number(1), "g": .number(0), "b": .number(0), "a": .number(0.5)])
+        #expect(catalog.availability("fill.stop-color", on: doc) == .available)
+        _ = try catalog.run("fill.stop-color", params: params, on: &doc)
+        #expect(doc.fill == .solid(FillColor(r: 1, g: 0, b: 0, a: 0.5)) && doc.history.steps == ["Gradient Stop Color"])
+    }
 }

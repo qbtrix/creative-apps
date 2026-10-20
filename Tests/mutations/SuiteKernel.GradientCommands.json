@@ -23,7 +23,7 @@
   {
     "label": "aBadStopIndexFails: the stop index not checked, so a move past the end records a step",
     "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
-    "find": "if let stop, !selection.fill.stops.indices.contains(stop) {",
+    "find": "if let stop, !(0..<count).contains(stop) {",
     "replace": "if let stop, stop < 0 {",
     "tests": "GradientCommandsTests"
   },

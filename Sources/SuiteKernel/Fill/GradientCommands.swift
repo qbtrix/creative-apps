@@ -86,11 +86,11 @@ public enum GradientCommands {
                    example: .object(["index": .number(0)]), availability: { stops($0, removing: true) }) { target, p in
                 try edit(&target, "Remove Gradient Stop", stop: p.index) { fill, _ in try refused(GradientRules.removingStop(fill, index: p.index), GradientRules.stopHelp) }
             },
-            .typed("fill.stop-color", title: "Gradient Stop Color", summary: "Sets a stop's colour; changes under one drag token are one undo step.",
+            .typed("fill.stop-color", title: "Gradient Stop Color", summary: "Sets a stop's colour and opacity (a solid's colour at index 0); changes under one drag token are one undo step.",
                    kind: .edit, params: ColorParams.self,
                    schema: .object(rgba.merging(["index": index, "drag": drag]) { old, _ in old }, required: ["index", "r", "g", "b", "a", "drag"]),
                    example: .object(["index": .number(0), "r": .number(1), "g": .number(0), "b": .number(0), "a": .number(1)]),
-                   availability: { stops($0) }) { target, p in
+                   availability: { ready($0) }) { target, p in
                 try edit(&target, "Gradient Stop Color", drag: p.drag, stop: p.index) { fill, _ in
                     GradientRules.recoloring(fill, index: p.index, to: FillColor(r: p.r, g: p.g, b: p.b, a: p.a))
                 }
@@ -123,13 +123,14 @@ public enum GradientCommands {
         return GradientRules.type(of: fill) == .linear ? .available : .unavailable(angleHelp)
     }
     /// The selection's fill after `change` (given the fill and its box), set back once as the step `title`, under `drag`
-    /// when there is one; a `stop` index the fill doesn't have fails first. Nothing fillable selected fails too (the
+    /// when there is one; a `stop` index the fill doesn't have fails first (a solid has one, its colour). Nothing fillable selected fails too (the
     /// availability check refuses it before a catalog run gets here).
     static func edit<T: GradientFillTarget>(_ target: inout T, _ title: String, drag: String? = nil, stop: Int? = nil,
                                              _ change: (Fill, Rect) throws -> Fill) throws -> JSONValue {
         guard let selection = target.fillSelection else { throw CatalogError.failed(id: "fill", message: "Select something with a fill first.") }
-        if let stop, !selection.fill.stops.indices.contains(stop) {
-            throw CatalogError.failed(id: "fill", message: "The gradient has no stop \(stop); it has \(selection.fill.stops.count).")
+        let count = max(selection.fill.stops.count, 1)  // a solid is one stop, its colour
+        if let stop, !(0..<count).contains(stop) {
+            throw CatalogError.failed(id: "fill", message: "The fill has no stop \(stop); it has \(count).")
         }
         try target.setFill(try change(selection.fill, selection.box), in: selection.box, name: title, drag: drag)
         return .object([:])
