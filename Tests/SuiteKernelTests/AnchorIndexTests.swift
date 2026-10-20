@@ -10,21 +10,23 @@ import SuiteKernel
         return AnchorIndex(VectorPath(contours: [VectorContour(anchors: anchors, closed: false)]), toDocument: .identity)
     }
     static let pair = index([p(10, 10), p(300, 10)])
-    @Test(.disabled("waits on PN-6")) func handleBeatsAnchorUnderIt() {
+    @Test func handleBeatsAnchorUnderIt() {
         #expect(Self.pair.hit(Self.p(11, 10), reach: 4, selected: Selection([Self.r(0)])) == .handle(Self.r(0), .handleOut))
     }
-    @Test(.disabled("waits on PN-6")) func unselectedHandlesDontHit() {
+    @Test func unselectedHandlesDontHit() {
         #expect(Self.pair.hit(Self.p(11, 10), reach: 4, selected: Selection()) == .anchor(Self.r(0)))
     }
-    @Test(.disabled("waits on PN-6")) func insideIsExactAcrossCellEdges() {
+    @Test func insideIsExactAcrossCellEdges() {
         let index = Self.index([Self.p(63.9, 10), Self.p(64, 10), Self.p(64.1, 10), Self.p(130, 10)])
         #expect(index.inside(Rect(minX: 63.95, minY: 0, maxX: 128, maxY: 20)) == [Self.r(1), Self.r(2)] && index.count == 4)
     }
-    @Test(.disabled("waits on PN-6")) func negativeCells() {
+    @Test func negativeCells() {
+        // Cells floor toward minus infinity: -1 lands in cell -1, never in cell 0 beside 1.
+        #expect(AnchorIndex.slot(-1) == -1 && AnchorIndex.slot(-70) == -2 && AnchorIndex.slot(1) == 0)
         let index = Self.index([Self.p(-70, -70), Self.p(-1, -1), Self.p(1, 1)])
         #expect(index.inside(Rect(minX: -80, minY: -80, maxX: -0.5, maxY: -0.5)) == [Self.r(0), Self.r(1)])
     }
-    @Test(.disabled("waits on PN-6")) func edgeAnchorFound() {
+    @Test func edgeAnchorFound() {
         let index = Self.index([Self.p(128, 128)])
         #expect(index.hit(Self.p(127.5, 127.5), reach: 2, selected: Selection()) == .anchor(Self.r(0)))
         #expect(index.inside(Rect(minX: 128, minY: 128, maxX: 128, maxY: 128)) == [Self.r(0)])
