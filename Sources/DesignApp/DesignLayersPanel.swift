@@ -1,49 +1,42 @@
 // DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
 // small source-list style: the file's pages, with Add Page and Delete Page in
-// a SidebarActionRow under them (`design.page.add`, `design.page.delete`;
-// each disabled with the Model's reason while it can't run),
-// its first glyph on the page rows' symbol column,
-// then the current page's layer tree (a hint when the page is empty or no file
-// is open), frontmost layer at the top
-// (`frontToBack`; the document keeps paint order). Selection runs through
-// the List, so arrow keys and type-select move through pages and layers; the
-// highlighted rows are the selected layers, or the current page when no layer is.
-// Shift-click on a layer row adds it to the selection or takes it out (#413).
-// The current page always carries a checkmark, so the page you are editing,
-// the one Delete Page removes, stays marked while a layer holds the highlight.
-// A layer with children is a DisclosureGroup whose expanded state is the
-// workspace's (`isExpanded`), sent back as `.setExpanded`, so collapsing the
-// parent of the selection selects the parent (#121). Each layer is SuiteUI's
-// SidebarRow with an eye and a lock toggle (`layerToggles`); a click flips
-// that layer's own flag, one undo step (#45). A layer hidden by itself or by
-// a group around it reads dimmed (SuiteColor.textSecondary, which keeps 4.5:1
-// on a highlighted row), and a child of a hidden or locked group
-// shows the group's state in its toggles. Each row carries the identifier
-// `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
-// group's row, its disclosure's label, reads as one checkbox. That checkbox takes
-// its identifier from the label's elements (its toggles' ids, joined), so the
-// label combines into one element first and the identifier is the row's (#2410).
-// A `.contain` label loses that identifier (#3195's journeys, #3300 to #3304), so the
-// group's eye stays a plain click at the toggle column, which every row shares (#53).
-// A page row is a container identified `design.page.row.<id>` with its checkmark inside: a page name's words sit in its text's value, not
-// its label, so journeys count pages by identifier (#1451). The section headers use SuiteColor.textSecondary; the
-// sidebar style's own header gray is under 4.5:1. While the list has focus, Edit >
-// Cut, Copy and Paste send `.cut`, `.copy` and `.paste` (designPasteboardCommands).
-// A double-click on a layer's name renames it in place (SidebarRow's rename
-// field), sent as `.renameLayer`, one "Rename Layer" step; SidebarRow drops an
-// empty or unchanged name. Dragging a layer row draws an insertion line above or
-// below the row under the pointer, or tints a frame or group the layer would
-// go into (`layerDropLine`, which shows nothing for a drop the Model refuses).
-// The drag is the system's (`onDrag` on each row, a `DropDelegate` on each row):
-// a gesture of the row's own inside the List never saw the pointer move once the
-// list's table took the press (#3427). The line is the panel's own state, written
-// only when it moves, and the dragged id and the rows' heights sit in a box
-// nothing observes, so a drag never runs the editor's body; the drop sends one
-// `.moveLayer` (`layerDrop`), one "Move Layer" step. A page
-// with no layers says so and points at the Frame tool. The rename refusal state
-// (DesignRenameState, `design.layers.rename-refusal`) is the panel's own. The list shows no
-// scroll indicators, as the inspector doesn't, so on a long layer tree no legacy
-// scroller reads as an unlabelled button (#2552). Values in, intents out.
+// a SidebarActionRow under them (`design.page.add`, `design.page.delete`,
+// each disabled with the Model's reason), then the current page's layer tree,
+// frontmost at the top (`frontToBack`), or a hint when the page is empty or no
+// file is open, then SuiteUI's LayerActionBar: Group, Duplicate, Delete and fx
+// (waiting on layer styles), `design.layers.bar.<part>`. A layer row's context
+// menu (built on open, for the rows it opened on) holds Duplicate, Delete,
+// Group, Ungroup and Arrange's four steps. Bar and menu items are the Edit and
+// Object menus' own (`DesignMenu.item` on the catalog spec), so enablement and
+// reasons match; a row outside the selection reads as selected in its menu,
+// and a pick selects it first.
+// Selection runs through the List, so arrow keys and type-select move through
+// pages and layers; the highlighted rows are the selected layers, or the
+// current page when no layer is. Shift-click toggles one layer (#413). The
+// current page always carries a checkmark. A layer with children is a
+// DisclosureGroup whose expanded state is the workspace's (`isExpanded`, sent
+// back as `.setExpanded`; collapsing the selection's parent selects it, #121).
+// Each layer is SuiteUI's SidebarRow with eye and lock toggles
+// (`layerToggles`), one undo step a click (#45); a layer hidden by itself or a
+// group reads dimmed (SuiteColor.textSecondary), and a child shows its
+// group's state in its toggles. Each row carries `design.layer.<id>`: a leaf
+// row is a container with its toggles inside, and a group's row, its
+// disclosure's label, combines into one checkbox whose identifier is the
+// row's (#2410; a `.contain` label loses it, #3300 to #3304), so the group's
+// eye stays a plain click at the shared toggle column (#53). A page row is a
+// container `design.page.row.<id>` (journeys count pages by identifier,
+// #1451). While the list has focus, Edit > Cut, Copy and Paste send `.cut`,
+// `.copy` and `.paste`. A double-click on a layer's name renames it in place
+// (`.renameLayer`, one "Rename Layer" step). Dragging a layer row draws an
+// insertion line above or below the row under the pointer, or tints a frame
+// or group it would go into (`layerDropLine`, nothing for a refused drop),
+// through the system drag (`onDrag` and a `DropDelegate` per row, #3427); the
+// line is the panel's own state and the dragged id and row heights sit in a
+// box nothing observes, so a drag never runs the editor's body. The drop
+// sends one `.moveLayer` (`layerDrop`). The rename refusal
+// (`design.layers.rename-refusal`) is the panel's own state. No scroll
+// indicators, so no legacy scroller reads as an unlabelled button (#2552).
+// Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -87,6 +80,8 @@ struct DesignLayersPanel: View {
                 if let refusal = rename.refusal {
                     InspectorNote(refusal, identifier: DesignRenameState.refusalID)
                 }
+                LayerActionBar(Self.bar(DesignMenu(model: model, perform: perform)))
+                    .padding(.leading, -SuiteInset.barButton.leading)
             } header: {
                 header("Layers")
             }
@@ -99,6 +94,7 @@ struct DesignLayersPanel: View {
         // to the app audit (#2552), as it was in the inspector (#2455).
         .scrollIndicators(.never)
         .font(SuiteFont.inspectorLabel)
+        .layerContextMenu(forSelection: { Self.rowMenu(DesignMenu(model: model, perform: perform), rows: $0) })
         .accessibilityIdentifier("design.layers")
         .designPasteboardCommands(model, perform)
     }
@@ -165,6 +161,44 @@ struct DesignLayersPanel: View {
     /// grow to wrap a note, so each line is short enough to fit the panel on its own.
     nonisolated static func emptyNotes(isOpen: Bool) -> [String] {
         isOpen ? ["No layers on this page.", "Draw a frame with the Frame tool (F)."] : ["No file open."]
+    }
+
+    /// The bar's commands: catalog id, symbol, id part and intent.
+    static let barCommands: [(id: String, symbol: String, part: String, intent: DesignIntent)] = [
+        ("object.group", "rectangle.3.group", "group", .command(.group)),
+        ("edit.duplicate", "plus.square.on.square", "duplicate", .command(.duplicate)),
+        ("edit.delete", "trash", "delete", .deleteSelection),
+    ]
+
+    /// A row menu's commands: catalog id, symbol and intent, Arrange's four steps last.
+    static let rowCommands: [(id: String, symbol: String, intent: DesignIntent)] = [
+        ("edit.duplicate", "plus.square.on.square", .command(.duplicate)), ("edit.delete", "trash", .deleteSelection),
+        ("object.group", "rectangle.3.group", .command(.group)), ("object.ungroup", "rectangle.dashed", .command(.ungroup)),
+    ] + DesignArrangeStep.allCases.map { (DesignMenuState.objectID($0.title), $0.systemImage, .command(.arrange($0))) }
+
+    /// The bar: each command as its menu item on the selection, then fx, disabled until layer styles land.
+    // view-static: main-actor
+    static func bar(_ menu: DesignMenu) -> [ToolbarAction] {
+        barCommands.map { command in
+            ToolbarAction(menu.item(command.id, systemImage: command.symbol) { menu.perform(command.intent) },
+                          identifier: "design.layers.bar." + command.part)
+        } + [LayerActionBar.effects(identifier: "design.layers.bar.fx")]
+    }
+
+    /// The context menu for the layer rows `ids` it opened on: the menu items on the selection, or,
+    /// for one row outside it, with that row selected, which a pick selects first. None for a page row.
+    // view-static: main-actor
+    static func rowMenu(_ menu: DesignMenu, rows ids: Set<String>) -> [ToolbarAction] {
+        guard !ids.isEmpty, ids.allSatisfy({ menu.workspace.selectedPage?.nodes.node($0) != nil }) else { return [] }
+        let outside = ids.count == 1 && !menu.workspace.selectedNodeIDs.contains(ids.first ?? "") ? ids.first : nil
+        var state = menu.state()
+        if let outside { state.workspace.selectItem(outside) }
+        return rowCommands.map { command in
+            ToolbarAction(menu.item(command.id, systemImage: command.symbol, in: state) {
+                if let outside { menu.perform(.select(outside)) }
+                menu.perform(command.intent)
+            })
+        }
     }
 
     /// Add Page and Delete Page (the checked page), each disabled with the Model's reason while it
