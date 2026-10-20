@@ -19,3 +19,4 @@ Clipboard: Clipboard
 Transform: Transform Transforming
 Parent: Parent Parenting
 Bones: Bone
+Gradient: Gradient
