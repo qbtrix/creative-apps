@@ -53,7 +53,9 @@ Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb
 
 - Relaunch: #3522 and #3529 were labelled needs-split (their diffs carried the stale pre-squash commits of the merged slices). Rebuilt by cherry-picking each slice's own two commits onto #3514's head; closed both. Their new PRs open after #3514 merges, so each diff shows one slice.
 - The proxy re-adds an attribution footer on REST comment edits; mcp update_issue_comment strips it, so every comment is re-saved through it.
+- SF-9: file.drop places a step, so CommandWalkTests leaves it out of the walk (file kinds must not change bytes); FakeCanvasFileFlowTests walks it. The fixture carries one recent entry and Halo as Open In so every example runs on it.
 
 ## Open
 - #3514 (SF-3) waits on the supervisor's local Mac gate. Then: PR for claude/file-flow-lead-6ugb9w-sf4 (merge origin/dev in first), then -sf8.
-- SF-9: export-pack (suiteui) is still planned with no issue; FakeCanvasDocument.swift is a suite-line kernel file, so SF-9 builds now and XP-z adds to it later (question posted on #3480).
+- #3731 (SF-9, Slice SF-z) open at 05ecce2c: fake conforms to FileFlowTarget, RJ-X43 under Tests/RealJobs/fake/file-flow, mutate 3/3. XP-9 merges on top later (noted on #3480).
+- After SF-8 and SF-9: SF-10 (C4 parts, wave status built, feature-done).
