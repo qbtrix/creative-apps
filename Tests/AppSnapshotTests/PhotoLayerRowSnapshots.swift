@@ -63,7 +63,7 @@ import Testing
     /// A row's menu reads that row as selected (Background, at the bottom, can't merge down), and a pick selects it first.
     @Test func rowMenuActsOnItsRow() throws {
         let model = try twoLayers()
-        let background = try #require(model.layers.first?.id)
+        let background = try #require(model.layers.first { !$0.isVisible }?.id)
         var sent: [PhotoIntent] = []
         let menu = PhotoMenu(model: model, perform: { sent.append($0) })
         let top = PhotoLayerList.rowMenu(menu, row: try #require(model.selectedLayerID))
