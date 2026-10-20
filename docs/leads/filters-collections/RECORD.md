@@ -85,3 +85,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 10:13Z check-in: FC-4 #3461 open, waiting on its lane macOS build. #3580 moved the library timed budget tests to the perf list, so the gate no longer runs them. No new line:library findings.
 - 10:36Z check-in: nothing merged; #3461/#3473/#3492 waiting on lane macOS builds (#3473 run 39405314225); no new findings.
 - 10:57Z check-in: nothing merged; #3461/#3473/#3492 still waiting on lane macOS builds; no new line:library findings.
+- 11:20Z check-in: nothing merged yet; #3473 macOS build green (run 39405314225, 11:03Z), awaiting lane sweep; #3461/#3492 still on their builds; no new findings.
