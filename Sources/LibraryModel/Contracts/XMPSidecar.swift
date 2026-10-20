@@ -1,4 +1,4 @@
-// Contracts/XMPSidecar.swift (metadata-more MD-4 slot; MD-15 fills the packet,
+// Contracts/XMPSidecar.swift (metadata-more MD-4 slot; MD-15 filled the packet,
 // marker and name, MD-16 the plan and status): the XMP packet Library keeps
 // beside each photo file, the name it goes by, and the catalog's plan of what
 // to write. The packet follows the XMP spec (ISO 16684-1): Dublin Core
@@ -80,11 +80,56 @@ public enum XMPSidecar {
 
 extension LibraryCatalog {
     /// The sidecars to write so each photo file's matches its fields, given
-    /// what was `written`. MD-16; [] until then.
-    public func sidecarWrites(after written: [String: SidecarFields]) -> [SidecarWrite] { [] }
+    /// what was `written`: a photo whose fields equal its written ones is
+    /// skipped, and so is one with nothing to say and nothing written, so
+    /// folders never fill with empty packets. Samples have no file and no sidecar.
+    public func sidecarWrites(after written: [String: SidecarFields]) -> [SidecarWrite] {
+        var plan: [SidecarWrite] = []
+        for photo in items {
+            guard let photoPath = photo.path else { continue }
+            let previous = written[photo.id]
+            if let previous, previous.says(photo) { continue }
+            let fields = SidecarFields(photo: photo)
+            if previous == nil && fields.isEmpty { continue }
+            plan.append(SidecarWrite(
+                photoID: photo.id, path: sidecarPath(for: photoPath), fields: fields, data: XMPSidecar.encode(fields)))
+        }
+        return plan
+    }
 
-    /// The Info tab's Sidecar row for photo `id`. MD-16; nil until then.
+    /// The Info tab's Sidecar row for photo `id`: a sample has none, then
+    /// "Saving…" while `writing`, the failure's own sentence, "Saved to <name>"
+    /// when `written` matches, else "No sidecar yet". Nil for an unknown id.
     public func sidecarStatus(
         for id: String, written: [String: SidecarFields], failures: [String: String], writing: Set<String>
-    ) -> String? { nil }
+    ) -> String? {
+        guard let photo = items.first(where: { $0.id == id }) else { return nil }
+        guard let photoPath = photo.path else { return "Samples have no file, so no sidecar." }
+        if writing.contains(id) { return "Saving…" }
+        if let failure = failures[id] { return failure }
+        guard written[id]?.says(photo) == true else { return "No sidecar yet" }
+        let path = sidecarPath(for: photoPath)
+        let name = path.lastIndex(of: "/").map { String(path[path.index(after: $0)...]) } ?? path
+        return "Saved to \(name)"
+    }
+
+    /// `XMPSidecar.path` against the catalog's files. Only a file whose path
+    /// starts with the photo's stem can share it, so only those are passed.
+    func sidecarPath(for photoPath: String) -> String {
+        let stem = XMPSidecar.stem(of: photoPath)
+        var siblings: Set<String> = []
+        for photo in items {
+            if let path = photo.path, path.hasPrefix(stem) { siblings.insert(path) }
+        }
+        return XMPSidecar.path(for: photoPath, siblings: siblings)
+    }
+}
+
+extension SidecarFields {
+    /// `self == SidecarFields(photo: photo)` without building one, for the
+    /// plan's pass over every photo (QB-LIB-M4); the rating as `init(photo:)` maps it.
+    func says(_ photo: PhotoItem) -> Bool {
+        rating == (photo.flag == .reject ? -1 : photo.rating) && label == photo.label
+            && title == photo.title && caption == photo.caption && keywords == photo.keywords
+    }
 }

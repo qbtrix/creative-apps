@@ -55,6 +55,18 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     catalog.select([shot(2)])
     catalog.setRating(0)
     #expect(catalog.sidecarWrites(after: written).first { $0.photoID == shot(2) }?.fields.isEmpty == true)
+    #expect(catalog.sidecarStatus(for: shot(2), written: written, failures: [:], writing: []) == "No sidecar yet")
+}
+
+@Test func aWrittenRejectIsNotRewritten() throws {
+    var catalog = shoot()
+    catalog.select([shot(2)])
+    catalog.setFlag(.reject)
+    let write = try #require(catalog.sidecarWrites(after: allWritten(shoot())).first)
+    #expect(write.photoID == shot(2) && write.fields.rating == -1)
+    let written = allWritten(catalog)
+    #expect(catalog.sidecarWrites(after: written).isEmpty)
+    #expect(catalog.sidecarStatus(for: shot(2), written: written, failures: [:], writing: []) == "Saved to IMG_0002.xmp")
 }
 
 @Test func theSidecarRowSaysWhereTheSidecarIs() throws {

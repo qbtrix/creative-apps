@@ -52,7 +52,8 @@ private func twoPhotos() -> LibraryCatalog {
     #expect(catalog.keywordSuggestions(prefix: "").isEmpty)
     #expect(catalog.searchSuggestions(prefix: "").isEmpty)
     #expect(catalog.sidecarWrites(after: [:]).isEmpty)
-    #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: []) == nil)
+    #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: [])
+        == "Samples have no file, so no sidecar.")
 }
 
 @Test func theInspectorReadsTitleAndCaptionAcrossTheSelection() {
