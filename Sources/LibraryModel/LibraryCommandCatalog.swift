@@ -2,7 +2,10 @@
 // over LibraryCatalog, so a menu, the afterglow CLI and an agent run one path. Each spec's availability is the
 // reason the menu shows today and its run is today's method: AC-l1's `help(_:)` and `run(_:)` for the actions
 // they cover, the develop and crop methods with the window's enablement and the menu's reason for the Photo menu.
-// Import Folder… and Export… stay out: they need a folder panel and the async importer and export runner.
+// Import Folder… and Export… are window commands (kind `.file`, which LibraryHeadless refuses for the CLI's own
+// import and export): Export… opens the export sheet's state at a folder; Import Folder… needs the window's folder
+// panel and the async importer, so its run is notBuilt here and the window runs it. The grid toolbar's controls
+// (#3632) are these specs plus view.sort and view.thumbnail-size.
 // Ids are `<menu>.<action>` in lowercase; Tests/command-ids/library.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -29,6 +32,8 @@ extension LibraryCatalog {
     struct SortParams: Codable, Sendable { var sort: String }
     struct RatingParams: Codable, Sendable { var stars: Int }
     struct LabelParams: Codable, Sendable { var label: String? }
+    struct SizeParams: Codable, Sendable { var size: Int }
+    struct FolderParams: Codable, Sendable { var folder: String }
 
     /// Every Library menu action as a command spec, in menu order.
     public static let commands: [CommandSpec<LibraryCatalog>] = fileAndEditSpecs + viewSpecs + photoSpecs + metadataSpecs
@@ -71,7 +76,18 @@ extension LibraryCatalog {
     }
 
     static let fileAndEditSpecs: [CommandSpec<LibraryCatalog>] = [
+        .typed("file.import", title: "Import Folder…", summary: "Picks a folder in the window and imports its photos.", kind: .file,
+               params: NoParams.self, schema: ParamSchema.none, example: .object([:]),
+               availability: { available($0.importHelp ?? $0.services.unavailable["importer"]) }
+        ) { _, _ -> JSONValue in throw CatalogError.notBuilt(id: "file.import", feature: "the window's folder panel") },
         plain("file.load-samples", "Load Sample Photos", "Replaces the photos with the 60 sample photos.", .file, .loadSamples),
+        .typed("file.export", title: "Export…", summary: "Opens the export settings for the targets, saving to a folder.", kind: .file,
+               params: FolderParams.self, schema: .object(["folder": .string("The folder to export to.")], required: ["folder"]),
+               example: .object(["folder": .string("/tmp/Export")]), availability: { available($0.exportHelp) }
+        ) { c, p in
+            guard c.beginExport(folder: p.folder) else { throw CatalogError.failed(id: "file.export", message: "Export didn't open.") }
+            return JSONValue.object([:])
+        },
         plain("edit.undo", "Undo", "Puts back the last edit.", .view, .undo),
         plain("edit.redo", "Redo", "Makes the last undone edit again.", .view, .redo),
         .typed("edit.select", title: "Select", summary: "Selects the shown photos with these ids.", kind: .view,
@@ -96,6 +112,10 @@ extension LibraryCatalog {
         action("view.sort", "Sort By", "Orders the photos by capture date, name or rating.", .view, SortParams.self, probe: .setSort(.name),
                schema: .object(["sort": .string("The order.", oneOf: LibrarySort.allCases.map(\.rawValue))], required: ["sort"]),
                example: .object(["sort": .string("Name")])) { .setSort(LibrarySort(rawValue: $1.sort) ?? .captureDate) },
+        action("view.thumbnail-size", "Thumbnail Size", "Sets the grid's thumbnail size, 80 to 320 points in steps of 40.", .view,
+               SizeParams.self, probe: .setCellSize(160),
+               schema: .object(["size": .integer("Points, 80 to 320.", minimum: 80, maximum: 320)], required: ["size"]),
+               example: .object(["size": .number(200)])) { .setCellSize($1.size) },
     ]
 
     static let photoSpecs: [CommandSpec<LibraryCatalog>] = [

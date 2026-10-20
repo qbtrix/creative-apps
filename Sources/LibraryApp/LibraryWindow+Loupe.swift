@@ -55,6 +55,7 @@ extension LibraryWindow {
             setSort: enabled(model.help(.setSort(model.sort)) == nil) { (sort: LibrarySort) in
                 try? model.run(.setSort(sort))
             }, sort: model.sort,
+            setCellSize: { (size: Int) in try? model.run(.setCellSize(size)) },
             first: act(.showFirst),
             last: act(.showLast),
             zoomInTitle: model.zoomInTitle, zoomOutTitle: model.zoomOutTitle,

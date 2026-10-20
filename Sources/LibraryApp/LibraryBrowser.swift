@@ -3,7 +3,8 @@
 // (the catalog file's problem, the last import's result with its failures
 // and close button, or a refused cull change with its close button:
 // `LibraryCatalog.notice`), then
-// the photo grid (LibraryGrid), the loupe (LibraryLoupe), or an empty state.
+// the photo grid (LibraryGrid) under its toolbar row (LibraryGridToolbar),
+// the loupe (LibraryLoupe), or an empty state.
 // Values in, closures out; LibraryCatalog holds the state. The progress row
 // is SuiteUI's BusyNote (`library.import.progress`, with the import's
 // fraction); the import notice is a plain SwiftUI placeholder until SuiteUI's
@@ -104,8 +105,11 @@ struct LibraryBrowser: View {
             LibraryLoupe(model: model, menu: menu, onStep: onStep, onGrid: onGrid)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
-            LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            VStack(spacing: 0) {
+                LibraryGridToolbar(model: model, menu: menu)
+                LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }
 }
