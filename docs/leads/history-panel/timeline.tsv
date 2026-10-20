@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-20T21:38Z	3	heartbeat	#3704,#3706,#3762	none merged; mac build 39487466056 queued since 19:54Z, 39488095382 in progress; #3762 mac build dispatched
 2026-10-20T21:59Z	3	heartbeat	#3704,#3706,#3762	none merged; #3706 mac build green (awaiting lane sweep); #3704 build queued since 19:54Z
 2026-10-20T22:20Z	3	heartbeat	#3704,#3706,#3762	none merged; #3706 clean+mac green, queued for lane batch (lane busy bisecting batch-20261020214541); #3704 build still queued
+2026-10-20T22:44Z	3	slice-done	PH-a	Belt-Slice-Done + Mac-Finish-Wanted posted (run 39507877855)
