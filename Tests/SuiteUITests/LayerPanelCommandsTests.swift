@@ -1,8 +1,8 @@
 // LayerPanelCommandsTests.swift: the Layers panel's commands come from the
-// same catalog specs as the menu bar. A panel button or context item made
-// from a spec-built MenuCommand keeps its title, symbol, enablement, reason
-// and action, over every fake catalog id on an empty document and the
-// fixture, so the panel can't drift from the Layer menu. The fx button waits
+// same catalog specs as the menu bar. A panel button or context item built
+// from a spec, `ToolbarAction(spec, on:)`, has the menu item's title,
+// enablement and reason and runs its action, over every fake catalog id on an
+// empty document and the fixture, so the panel can't drift from the menu. The fx button waits
 // for shared layer styles, disabled with its reason. LayerTreeList gives each
 // row the context menu its app builds for that row's id, and none without
 // one. The bar draws. macOS only.
@@ -18,8 +18,9 @@ import Testing
         for doc in [FakeCanvasDocument(), .fixture] {
             for id in catalog.ids {
                 var ran = 0
-                let item = MenuCommand(try #require(catalog.spec(id)), on: doc, systemImage: "square") { ran += 1 }
-                let action = ToolbarAction(item, identifier: "suite.layer.\(id)")
+                let spec = try #require(catalog.spec(id))
+                let item = MenuCommand(spec, on: doc) {}
+                let action = ToolbarAction(spec, on: doc, systemImage: "square", identifier: "suite.layer.\(id)") { ran += 1 }
                 #expect(action.title == item.title && action.systemImage == "square", "\(id)")
                 #expect(action.isEnabled == item.isEnabled, "\(id)")
                 #expect(action.help == (item.isEnabled ? item.title : item.help), "\(id)")
@@ -28,8 +29,11 @@ import Testing
                 #expect(ran == 1, "\(id)")
             }
         }
-        let off = ToolbarAction(MenuCommand(try #require(catalog.spec("rect.remove")), on: FakeCanvasDocument()) {})
+        let off = ToolbarAction(try #require(catalog.spec("rect.remove")), on: FakeCanvasDocument(), systemImage: "trash") {}
         #expect(off.unavailableHelp == "Remove Rectangle: Select a rectangle first.")
+        let named = ToolbarAction(try #require(catalog.spec("rect.add")), on: FakeCanvasDocument(), title: "Add a Box",
+                                  systemImage: "plus") {}
+        #expect(named.title == "Add a Box" && named.isEnabled)
     }
 
     @Test func effectsWaitForLayerStyles() {

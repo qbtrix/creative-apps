@@ -3,25 +3,16 @@
 // duplicate, delete, add mask, fx, lock, visibility, as far as the app's
 // catalog has them) and, through LayerTreeList's `contextActions`, each row's
 // context menu. Neither holds a command of its own. An app builds each item
-// the way its Layer menu does, `MenuCommand(spec, on: target)` (CommandPath
-// rule), and hands it over as `ToolbarAction(item)`, which keeps the item's
-// title, symbol, enablement, reason and action, so the menu bar, the panel and
-// the CLI and MCP run one command path and can't disagree. The bar draws with
+// from the same catalog spec and target as its Layer menu,
+// `ToolbarAction(spec, on: target)` (MenuCommand+Catalog.swift), so its title,
+// enablement and reason match the menu item's and the menu bar, the panel and
+// the CLI and MCP run one command path. The bar draws with
 // SidebarActionRow; a List-based panel that isn't LayerTreeList (Design's)
 // uses this bar and `layerContextMenu(forSelection:)`, which builds the menu
 // only when it opens, for the rows it opened on. fx is shown disabled with
 // `effectsPending` until shared layer styles land; that feature replaces
 // `effects(identifier:)` with its own spec's item.
 import SwiftUI
-
-extension ToolbarAction {
-    /// The panel's button or context item for a menu item an app built from its catalog spec:
-    /// the same title, symbol, enablement, reason and action. A disabled item's reason is its help.
-    public init(_ item: MenuCommand, identifier: String? = nil) {
-        self.init(item.title, systemImage: item.systemImage ?? "circle.dashed",
-                  unavailableHelp: item.isEnabled ? nil : item.help, identifier: identifier, perform: item.perform)
-    }
-}
 
 /// The row of layer commands at the bottom of a Layers panel.
 public struct LayerActionBar: View {
