@@ -34,7 +34,7 @@ public struct LayerActionBar: View {
     public static let effectsPending = "Layer Effects: layer styles aren't built yet."
 
     /// The fx button until shared layer styles land: disabled, saying why.
-    public static func effects(identifier: String?) -> ToolbarAction {
+    nonisolated public static func effects(identifier: String?) -> ToolbarAction {
         ToolbarAction("Layer Effects", systemImage: "fx", unavailableHelp: effectsPending, identifier: identifier)
     }
 
