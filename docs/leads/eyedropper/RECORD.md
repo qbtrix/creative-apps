@@ -17,7 +17,7 @@ Next: poll #3525 for merge, then restack #3531, #3540 and #3541 (#3541 sits on #
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| EY-1 | EY-a | 1 | The contract as stubs: `SampleSize`, `SampleRGBA`, `SampleRules`, `SampleTarget`, the `color.sample` spec w... | `Sources/SuiteKernel/Sample/SampleRules.swift`, `Sources/SuiteKernel/Sample/SampleCommands.swift`, `Tests/SuiteKernelTests/SampleRulesTests.swift`, `Tests/SuiteKernelTests/SampleCommandsTests.swift`, `docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json` | see packet Acceptance | #3525 | open |
+| EY-1 | EY-a | 1 | The contract as stubs: `SampleSize`, `SampleRGBA`, `SampleRules`, `SampleTarget`, the `color.sample` spec w... | `Sources/SuiteKernel/Sample/SampleRules.swift`, `Sources/SuiteKernel/Sample/SampleCommands.swift`, `Tests/SuiteKernelTests/SampleRulesTests.swift`, `Tests/SuiteKernelTests/SampleCommandsTests.swift`, `docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json` | see packet Acceptance | #3525 | merged |
 | EY-2 | EY-a | 2 | The placeholder `EyedropperButton`, `SampleLoupe` and `SampleSizeChips`; the colour rows' `sampleable:` par... | `Sources/SuiteUI/Eyedropper.swift`, `Sources/SuiteUI/ColorWell.swift`, `Sources/SuiteUI/Gallery/GalleryEyedropper.swift`, `Sources/SuiteUI/Gallery/GalleryCanvasHost.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3531 | open |
 | EY-3 | EY-u | 3 | The views: the `NSColorSampler` button on every colour row (one change and one end per pick), the loupe, th... | `Sources/SuiteUI/Eyedropper.swift`, `Sources/SuiteUI/ColorWell.swift`, `Tests/SuiteUITests/EyedropperTests.swift` | see packet Acceptance | #3541 | open |
 | EY-4 | EY-u | 4 | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteEyedropperSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetEyedropperTests.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3541 | open |
@@ -34,6 +34,7 @@ Next: poll #3525 for merge, then restack #3531, #3540 and #3541 (#3541 sits on #
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-20T09:44Z #3525 (EY-1) merged as d4ed4bde; fixer restacking #3531 and #3540 onto dev and #3541 onto the new EY-a-2. EY-a done once #3531 merges and a green Linux run holds it.
 - 2026-10-20T06:39Z EY-u opened as #3541 (EY-3 and EY-4 in one PR, 397 lines, base lead/eyedropper-EY-a-2). Size options use ChoiceChips, so the journey looks for suite.sample.size.5. ColorRowFitTests checks "Background" at Flare's column. Journey steps 4-5 stay red until EY-7 adds suite.gallery.eyedropper.tool (report-only). Supervisor asked to add RenderBudgetEyedropperTests/loupeTrackTiming to perf-suites.
 - 2026-10-20T06:33Z EY-m (#3540, 168 lines, mutate 4/4 + 3/3) on lead/eyedropper-EY-a. Gate red only on one Library/Design budget test per run under load; both pass alone. SampleRules.notBuilt removed (unused).
 - 2026-10-20T06:17Z EY-a split into #3525 (EY-1, 227 lines, base dev) and #3531 (EY-2, 242 lines, stacked). Deferred ids: suite.gallery.eyedropper.hex to EY-3/EY-4, the page tool to EY-7. PhotoModel keeps its own SampleSize until the Photo adopt.
