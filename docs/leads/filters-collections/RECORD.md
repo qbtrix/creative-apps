@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-6 and FC-11 builders open draft PRs, then FC-13; when #3424 merges un-draft #3461, then #3466 (after a plain scripts/ci --changed on its head); then FC-11, FC-13 checks, FC-7, FC-9
+Next: FC-11 and FC-13 builders open draft PRs; then FC-7, FC-9, FC-15 (wave 5); when #3424 merges un-draft #3461, then #3466 (after a plain scripts/ci --changed on its head); then FC-11, FC-13 checks, FC-7, FC-9
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -27,7 +27,7 @@ Next: FC-6 and FC-11 builders open draft PRs, then FC-13; when #3424 merges un-d
 | FC-6 | FC-b | 4 | filter checks, disabled until FC-7 | LibraryFilterBarTests, LibraryFilterBudgetTests, LibraryFilterSnapshots, LibraryJourneyTests+Filters | compiles, disabled | - | building (stacked on FC-5) |
 | FC-8 | FC-c | 4 | collections checks, disabled until FC-9 (J14 step 7: FC-10) | LibraryCollectionsTests, LibraryCollectionsBudgetTests, LibraryCollectionsSnapshots, LibraryJourneyTests+Collections | compiles, disabled | - | building (stacked on FC-5) |
 | FC-11 | FC-d | 4 | smart collection checks, disabled until FC-12 | LibrarySmartCollectionTests, LibrarySmartSnapshots, LibraryJourneyTests+Smart | compiles, disabled | - | building (stacked on FC-5) |
-| FC-7, FC-9, FC-10, FC-12 .. FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
+| FC-7, FC-9, FC-10, FC-12, FC-14 .. FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -48,7 +48,9 @@ Next: FC-6 and FC-11 builders open draft PRs, then FC-13; when #3424 merges un-d
 - Stacked PRs stay draft until their parent merges. The lane skips drafts before its size check, so a stacked PR over the cap keeps its fast-lane label (scripts/fast-lane.sh: draft skip comes before the "too big" reason that drops the label).
 - FC-5 (#3466) changed FC-4's LibraryWindow+Filters.swift: bar controls go through .libraryControl, and LibraryFiltersMenu takes activeFilter and selectedCollectionID. It adds six menu items to LibraryJourneyTests. It leaves out the Collections + button and filed needs-ui #3464. It redrew library-layout-1280/1440/1920.png. The No Matching Photos snapshot comes with FC-7.
 - FC-8 (#3490): J14 step 1 doesn't check that All Photos is selected after undo, and step 6 doesn't check the All Photos selection. The Model tests cover both. Left out to stay under the line cap.
+- FC-6 (#3491): J13 skips as a whole test, following the PerfExport journey's pattern. The three snapshot states are one test, to stay under the line cap. The PR body asks for LibraryFilterBudgetTests to be added to Tests/perf-suites.txt (protected, the supervisor's) before FC-7 enables it.
 
 ## Open
+- Before FC-7 and FC-9 enable their budget tests, raise one issue for the supervisor asking to add LibraryFilterBudgetTests and LibraryCollectionsBudgetTests to Tests/perf-suites.txt.
 - S-L9 #3411 (sidebar drop): FC-10 waits on it. S-L10 #3412 (isRenamable): nothing waits on it.
 - Open line:library findings checked 2026-10-20T04:42:28Z: none in this feature's files. dev-red #3386 (macOS, range main..1b33afbb) predates these PRs; not ours.

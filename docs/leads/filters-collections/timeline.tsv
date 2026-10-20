@@ -26,3 +26,5 @@ utc	stage	event	ref	note
 2026-10-20T05:16:46Z	builder-restart	FC-6, FC-8	container restart stopped both; resumed from their worktrees (FC-8 had a commit, FC-6 partial files)
 2026-10-20T05:35:34Z	pr-opened	FC-8	#3490 draft, stacked on #3466
 2026-10-20T05:35:34Z	builder-start	FC-11	stacked on FC-5
+2026-10-20T05:36:00Z	pr-opened	FC-6	#3491 draft, stacked on #3466
+2026-10-20T05:36:00Z	builder-start	FC-13	stacked on FC-5
