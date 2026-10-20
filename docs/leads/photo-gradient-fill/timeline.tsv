@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-20T20:22Z	check	poll	#3681,#3695,#3705	all open, no needs-fix
 2026-10-20T20:26Z	PG-2	built	photo-gradient-fill/PG-2@bdb1eec0	6 files +83/-2 vs PG-1 (excl GF-2 merge); snapshots photo-gradient-options-light/dark.png; CI PASS; PR held until #3681 + #3695 merge
 2026-10-20T20:34Z	check	heartbeat	#3681,#3695,#3705	all open, no needs-fix; lane batch 20261020202737 in flight; PG-3/PG-2 PRs held; PG-4 building
+2026-10-20T20:51Z	PG-4	built	photo-gradient-fill/PG-4@84669918	5 files +142/-7 vs PG-1 (excl GF-5 merge); Mutate 4/4 PhotoModel.ToolOptions; CI PASS; PR held until #3681 + #3705 merge
