@@ -281,17 +281,18 @@
     "job": "Rotate a layer 15° with the handles.",
     "outcome": "Bounds and the inspector agree.",
     "needs": [
-      "S7"
+      "S7",
+      "design/transform"
     ],
-    "needs_note": "S7 transform",
-    "closes_with": "S7",
+    "closes_with": "design/transform",
     "trap": "Inspector shows the unrotated box",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/designer/full-feature-list/"
-    ]
+    ],
+    "waits_on": "DT-6"
   },
   "RJ-D16": {
     "id": "RJ-D16",
@@ -371,17 +372,18 @@
     "job": "Force-quit with unsaved work, relaunch.",
     "outcome": "Design offers to restore it.",
     "needs": [
-      "S12"
+      "S12",
+      "design/autosave-history"
     ],
-    "needs_note": "S12 autosave and recovery",
-    "closes_with": "S12",
+    "closes_with": "design/autosave-history",
     "trap": "Work lost (only saved files survive today)",
     "run": "J",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://community.adobe.com/t5/after-effects-discussions/recover-unsaved-after-effects-project/m-p/8492557"
-    ]
+    ],
+    "waits_on": "DA-7"
   },
   "RJ-D21": {
     "id": "RJ-D21",
@@ -428,10 +430,12 @@
     "job": "Pick a colour from a placed photo with the eyedropper.",
     "outcome": "The picked swatch equals the document pixel under the cursor, not the screen-scaled colour.",
     "needs": [
-      "S13"
+      "S13",
+      "design/eyedropper",
+      "S20"
     ],
-    "needs_note": "S13 eyedropper",
-    "closes_with": "S13",
+    "needs_note": "S13 and design/eyedropper pick the colour; S20 adds the placed photo it is picked from",
+    "closes_with": "S20",
     "trap": "Picks the screen-scaled colour",
     "run": "J",
     "baseline": "fail",
@@ -604,5 +608,89 @@
     "sources": [
       "captain"
     ]
+  },
+  "RJ-D33": {
+    "id": "RJ-D33",
+    "app": "design",
+    "weight": "high",
+    "job": "Nudge a card 30 times, jump back 10 steps in History, save and reopen.",
+    "outcome": "The reopened card sits where the 20th nudge left it (20 points right).",
+    "needs": [
+      "S12",
+      "design/autosave-history"
+    ],
+    "closes_with": "design/autosave-history",
+    "trap": "The jump records a step, or the save writes the state before the jump",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DA-6",
+    "added_by": "design/autosave-history"
+  },
+  "RJ-D34": {
+    "id": "RJ-D34",
+    "app": "design",
+    "weight": "med",
+    "job": "Pick a red ellipse's colour with the eyedropper onto a white rectangle under it, and save.",
+    "outcome": "The point over both reads red, and the saved rectangle's fill is #FF0000.",
+    "needs": [
+      "S13",
+      "design/eyedropper"
+    ],
+    "closes_with": "design/eyedropper",
+    "trap": "The sample reads the selected rectangle instead of the ellipse on top",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DY-6",
+    "added_by": "design/eyedropper"
+  },
+  "RJ-D35": {
+    "id": "RJ-D35",
+    "app": "design",
+    "weight": "med",
+    "job": "Draw a five-point star badge with the Shape tool, save, reopen and export SVG.",
+    "outcome": "The reopened layer is still a star with its points and ratio, and the SVG path has ten vertices with the first at the top centre.",
+    "needs": [
+      "S19",
+      "design/shape-tools"
+    ],
+    "closes_with": "design/shape-tools",
+    "trap": "The star reopens as a rectangle, or the SVG writes its box",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-6",
+    "added_by": "design/shape-tools"
+  },
+  "RJ-D36": {
+    "id": "RJ-D36",
+    "app": "design",
+    "weight": "med",
+    "job": "Give a rectangle a 2 pt dashed border with round caps and export SVG.",
+    "outcome": "The SVG rect has stroke-dasharray \"8 4\" and stroke-linecap \"round\".",
+    "needs": [
+      "S17",
+      "design/stroke-style"
+    ],
+    "closes_with": "design/stroke-style",
+    "trap": "The SVG drops the dash or writes it unscaled",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DK-7",
+    "added_by": "design/stroke-style"
   }
 }
