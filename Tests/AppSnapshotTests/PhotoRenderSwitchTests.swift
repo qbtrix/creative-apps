@@ -37,12 +37,13 @@ import Testing
         }
     }
 
-    /// Waits up to 20 s for `renderer` to show `workspace`'s revision drawn by `backend`.
+    /// Waits up to 60 s for `renderer` to show `workspace`'s revision drawn by `backend`, with no render running
+    /// or waiting: by then every tile set and composite a switch dropped has been released.
     static func drawn(_ renderer: CanvasRenderer, _ workspace: PhotoWorkspace, on backend: String) async throws {
-        for _ in 0..<2000 where renderer.revision != workspace.revision || renderer.backend != backend {
+        for _ in 0..<6000 where renderer.revision != workspace.revision || renderer.backend != backend || !renderer.isIdle {
             try await Task.sleep(for: .milliseconds(10))
         }
-        #expect(renderer.revision == workspace.revision && renderer.backend == backend, "shows \(String(describing: renderer.revision)) of \(workspace.revision) on \(renderer.backend ?? "-"), wanted \(backend); \(renderer.failure ?? "no failure")")
+        #expect(renderer.revision == workspace.revision && renderer.backend == backend && renderer.isIdle, "shows \(String(describing: renderer.revision)) of \(workspace.revision) on \(renderer.backend ?? "-"), wanted \(backend); \(renderer.failure ?? "no failure")")
         #expect(renderer.failure == nil, "\(renderer.failure ?? "")")
     }
 
@@ -95,7 +96,6 @@ import Testing
             try await Self.drawn(renderer, workspace, on: metal.name)
         }
         // A tile set the renderer dropped is released on the backend: a round trip leaves no copy behind.
-        for _ in 0..<200 where metal.residentBytes > baseline { try await Task.sleep(for: .milliseconds(10)) }
         #expect(metal.residentBytes <= baseline, "GPU memory grew from \(baseline) to \(metal.residentBytes) bytes over 4 round trips")
         let worst = try await Self.worst(rig.presenter, workspace)
         #expect(worst <= 2, "the canvas differs from the picture by up to \(worst)")
@@ -109,7 +109,7 @@ import Testing
         try await Self.drawn(try #require(rig.renderer), workspace, on: metal.name)
         #expect(metal.residentBytes > 0)
         rig.renderer = nil
-        for _ in 0..<200 where metal.residentBytes > 0 { try await Task.sleep(for: .milliseconds(10)) }
+        for _ in 0..<1000 where metal.residentBytes > 0 { try await Task.sleep(for: .milliseconds(10)) }
         #expect(metal.residentBytes == 0, "\(metal.residentBytes) bytes stayed on the GPU after the window's renderer went")
     }
 
@@ -123,6 +123,11 @@ import Testing
         try await Self.drawn(renderer, workspace, on: "cpu")
         preference.set(.gpu)
         try await Self.drawn(renderer, workspace, on: metal.name)
+        // The switch's own frame may draw before the host's presenter exists (the two observers run in either
+        // order), off the live route and so with no cached composite; an edit's frame draws on it for sure.
+        workspace.adjust(.exposure(0.05))
+        renderer.show(workspace)
+        try await Self.drawn(renderer, workspace, on: metal.name)
         let baseline = metal.residentBytes
         // Edits and switches back to back: each switch lands while the render before it is still drawing.
         for step in 0..<8 {
@@ -134,9 +139,8 @@ import Testing
         }
         preference.set(.gpu)
         try await Self.drawn(renderer, workspace, on: metal.name)
-        // A tile set a finished render still held is released as its task ends, just after the picture lands.
-        for _ in 0..<200 where metal.residentBytes > baseline + baseline / 2 { try await Task.sleep(for: .milliseconds(10)) }
-        #expect(metal.residentBytes <= baseline + baseline / 2, "GPU memory went from \(baseline) to \(metal.residentBytes) bytes")
+        // Idle, every set a switch dropped mid-render is gone: what is left is this route's tiles and composites.
+        #expect(metal.residentBytes <= baseline + baseline / 4, "GPU memory went from \(baseline) to \(metal.residentBytes) bytes")
         let worst = try await Self.worst(rig.presenter, workspace)
         #expect(worst <= 2, "the canvas differs from the picture by up to \(worst)")
     }
