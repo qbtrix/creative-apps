@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-20T19:31:02Z	3	build-wave started	DY-u	workflow wf_4d1d2cbc-5d4, stacked on #3691
 2026-10-20T19:51:38Z	3	fix pushed	DY-a #3691	f84d4cc5: two tool-list tests; gate PASS
 2026-10-20T19:51:38Z	3	branch pushed	DY-u	94eb67fa, PR after #3691 merges
+2026-10-20T20:15Z	3	check	#3691	macOS build 39487327792 queued on f84d4cc5; no needs-fix; DY-u waits
