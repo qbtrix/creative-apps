@@ -12,8 +12,8 @@ Build wave 1. Base origin/dev df54ce81.
 
 | Slice | Tasks | State |
 |---|---|---|
-| LF-a | LF-1, LF-2 | gate running; mutation plan LibraryModel.FileFlow (3) added |
-| LF-u | LF-5, LF-6 | waits on LF-a |
+| LF-a | LF-1, LF-2 (+LF-6 folded) | CI: PASS on 55f59f7b; mutate LibraryModel.FileFlow running; PR next |
+| LF-u | LF-5, LF-6 | LF-6 (journey, skipped, ~30 lines) folded into LF-a's PR; LF-5 waits on SF-3 (#3514, the drop mark) and SF-4 (the drag-hover budget pattern) |
 | LF-m | LF-3, LF-4 | waits on LF-a, SF-5..7, tone-controls LT-m, cull-finish DR-m |
 | LF-z | LF-7, LF-8 | waits on the rest |
 
@@ -32,3 +32,4 @@ Build wave 1. Base origin/dev df54ce81.
 - Spine (#1044) is closed as completed with no open PRs; its wave.json still reads "building", which is stale. LF-a's wait on spine is met.
 - LF-2 puts the drop on the whole window (LibraryWindow), not only the grid as the packet names: an empty catalog shows no grid and must still take a drop.
 - LF-2's hand-off host is a snapshot catalog (`LibraryShell.host`); LF-3 swaps it for a host that reaches the window's live catalog.
+- LF-5 can't land on LF-a alone: the `library-drop-mark` snapshot needs SF-3's mark (#3514, open) and `dragHoverInTwoBodies` needs SF-4's way to hover a file drag in the harness (not started). Open Recent is a Commands menu, not a view, so "one Open Recent" is checked in LFJ1 (LF-6), which folds into LF-a's PR.
