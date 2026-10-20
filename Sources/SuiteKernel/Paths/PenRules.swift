@@ -11,23 +11,24 @@ public enum PenRules {
     public static let notBuilt = CatalogError.notBuilt(id: "path", feature: "pen-paths PN-7")
 
     /// The draft after a press at `point`, with a drag's `handleOut` (nil, or the point itself, for a click). A closed or
-    /// missing draft starts a new one; a non-finite point changes nothing.
+    /// missing draft starts a new one; a non-finite point or `handleOut` changes nothing.
     public static func add(_ point: Point, handleOut: Point?, to draft: PenDraft?, scale: Double) -> PenDraft {
         var draft = draft.flatMap { $0.contour.closed ? nil : $0 } ?? PenDraft(contour: VectorContour(anchors: [], closed: false), scale: scale)
         draft.scale = scale
-        guard point.isFinite else { return draft }
+        guard point.isFinite, handleOut?.isFinite ?? true else { return draft }
         if let last = draft.contour.anchors.last, near(last.point, point, scaled(anchorTolerance, scale)) { return draft }
-        let out = handleOut.flatMap { $0 != point && $0.isFinite ? $0 : nil }
+        let out = handleOut.flatMap { $0 != point ? $0 : nil }
         draft.contour.anchors.append(VectorAnchor(point: point, handleIn: out.map { mirror($0, through: point) }, handleOut: out,
                                                   kind: out == nil ? .corner : .symmetric))
         return draft
     }
 
     /// Whether a press at `point` closes `draft`: three or more anchors `anchorTolerance` apart and `point` within
-    /// `closeDistance` of the first, both on screen at the draft's scale.
+    /// `closeDistance` of the first, both on screen at the draft's scale. A press near the last anchor is ignored first.
     public static func closes(_ point: Point, _ draft: PenDraft) -> Bool {
-        let points = draft.contour.anchors.map(\.point)
-        guard !draft.contour.closed, let first = points.first, distinct(points, scaled(anchorTolerance, draft.scale)) >= 3
+        let points = draft.contour.anchors.map(\.point), tolerance = scaled(anchorTolerance, draft.scale)
+        guard !draft.contour.closed, let first = points.first, let last = points.last, !near(last, point, tolerance),
+              distinct(points, tolerance) >= 3
         else { return false }
         return near(first, point, scaled(closeDistance, draft.scale), inclusive: true)
     }

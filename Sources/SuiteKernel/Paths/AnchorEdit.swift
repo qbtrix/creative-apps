@@ -4,8 +4,10 @@
 import FlareCore
 
 public enum AnchorEdit {
-    /// The path with each of `anchors` and its handles shifted by (dx, dy); refs past the path are ignored.
+    /// The path with each of `anchors` and its handles shifted by (dx, dy); refs past the path are ignored, and a
+    /// non-finite shift changes nothing.
     public static func moved(_ path: VectorPath, _ anchors: Set<AnchorRef>, dx: Double, dy: Double) -> VectorPath {
+        guard dx.isFinite, dy.isFinite else { return path }
         func shift(_ p: Point) -> Point { Point(x: p.x + dx, y: p.y + dy) }
         return edit(path, anchors) { a in
             a.point = shift(a.point)
@@ -15,9 +17,11 @@ public enum AnchorEdit {
     }
 
     /// The path with `ref`'s handle at `end` moved `to`. A smooth anchor's other handle turns opposite at its own length,
-    /// a symmetric one's at the new length; `breaking` leaves the other handle put and makes the anchor a corner.
+    /// a symmetric one's at the new length; `breaking` leaves the other handle put and makes the anchor a corner. A
+    /// non-finite `to` changes nothing.
     public static func movingHandle(_ path: VectorPath, _ ref: AnchorRef, _ end: HandleEnd, to: Point, breaking: Bool) -> VectorPath {
-        edit(path, [ref]) { a in
+        guard to.isFinite else { return path }
+        return edit(path, [ref]) { a in
             let other = end == .handleIn ? a.handleOut : a.handleIn
             var partner = other
             let ux = a.point.x - to.x, uy = a.point.y - to.y, length = (ux * ux + uy * uy).squareRoot()

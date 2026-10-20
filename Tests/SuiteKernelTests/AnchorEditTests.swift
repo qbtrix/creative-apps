@@ -34,6 +34,36 @@ import SuiteKernel
         #expect(outline.first == Self.p(0, 0) && outline.last == Self.p(200, 0))
         #expect(outline.allSatisfy { abs($0.y) < 1e-9 && $0.x >= 0 && $0.x <= 200 })
     }
+    /// Distance from `q` to the polyline `line`.
+    static func distance(_ q: Point, to line: [Point]) -> Double {
+        zip(line, line.dropFirst()).map { a, b in
+            let dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy
+            let t = l2 > 0 ? max(0, min(1, ((q.x - a.x) * dx + (q.y - a.y) * dy) / l2)) : 0
+            let ex = a.x + t * dx - q.x, ey = a.y + t * dy - q.y
+            return (ex * ex + ey * ey).squareRoot()
+        }.min() ?? .infinity
+    }
+    @Test func insertKeepsCurvedOutline() throws {
+        let curve = VectorPath(contours: [VectorContour(anchors: [VectorAnchor(point: Self.p(0, 0), handleOut: Self.p(0, 100)),
+            VectorAnchor(point: Self.p(200, 0), handleIn: Self.p(200, 100))], closed: false)])
+        // (100, 75) is the cubic's point at t 0.5.
+        let at = try #require(try curve.nearest(to: Self.p(100, 75), tolerance: 1))
+        #expect(at.element == 1 && abs(at.t - 0.5) < 1e-6)
+        let (inserted, ref) = try AnchorEdit.inserting(curve, at: at)
+        let mid = try #require(inserted.contours.first?.anchors.dropFirst().first)
+        #expect(ref == AnchorRef(contour: 0, index: 1) && inserted.contours.first?.anchors.count == 3)
+        #expect(abs(mid.point.x - 100) < 1e-6 && abs(mid.point.y - 75) < 1e-6)
+        let before = Array(try curve.flattened(tolerance: 0.01).joined()), after = Array(try inserted.flattened(tolerance: 0.01).joined())
+        #expect(after.first == before.first && after.last == before.last)
+        #expect(after.allSatisfy { Self.distance($0, to: before) < 0.05 } && before.allSatisfy { Self.distance($0, to: after) < 0.05 })
+    }
+    @Test func nonFiniteEditIsANoOp() {
+        let path = Self.path()
+        #expect(AnchorEdit.moved(path, [Self.mid], dx: .nan, dy: 0) == path)
+        #expect(AnchorEdit.moved(path, [Self.mid], dx: 0, dy: .infinity) == path)
+        #expect(AnchorEdit.movingHandle(path, Self.mid, .handleOut, to: Self.p(.nan, 20), breaking: false) == path)
+        #expect(AnchorEdit.movingHandle(path, Self.mid, .handleIn, to: Self.p(80, .infinity), breaking: true) == path)
+    }
     @Test func removeSeveralInOrder() throws {
         let removed = try AnchorEdit.removing(Self.path(), [AnchorRef(contour: 0, index: 0), Self.mid])
         #expect(removed.contours.first?.anchors.map(\.point) == [Self.p(200, 0)])

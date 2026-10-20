@@ -1,6 +1,6 @@
 // PenRulesTests.swift (pen-paths PN-1 written, PN-5 turns on): Flare's Pen rules, tolerances on screen.
 import Testing
-import SuiteKernel
+@testable import SuiteKernel
 @Suite struct PenRulesTests {
     /// The draft after a press at each point, at `scale`.
     static func draft(_ points: [(Double, Double)], scale: Double = 1) -> PenDraft? {
@@ -30,6 +30,28 @@ import SuiteKernel
         #expect(PenRules.finishHelp(nil) == "Click with the Pen to start a path.")
         #expect(PenRules.finishHelp(Self.draft([(0, 0)])) == "Click a second point to finish the path.")
         #expect(PenRules.finishHelp(Self.draft([(0, 0), (50, 0)])) == nil)
+    }
+    @Test func pressOnLastAnchorDoesNotClose() throws {
+        // (3.5, 0) is within closeDistance of the first anchor but within anchorTolerance of the last: Flare ignores it.
+        let d = try #require(Self.draft([(0, 0), (100, 0), (3, 0)]))
+        #expect(d.contour.anchors.count == 3 && !PenRules.closes(Point(x: 3.5, y: 0), d) && PenRules.closes(Point(x: 0, y: 0), d))
+    }
+    @Test func nonFiniteHandleAddsNothing() throws {
+        let d = try #require(Self.draft([(0, 0)]))
+        for bad in [Point(x: .nan, y: 0), Point(x: 30, y: .infinity)] {
+            #expect(PenRules.add(Point(x: 50, y: 0), handleOut: bad, to: d, scale: 1) == d)
+        }
+    }
+    @Test func scaleGuardMatchesFlare() throws {
+        #expect(PenRules.scaled(PenRules.anchorTolerance, 1) == PenRules.anchorTolerance)
+        #expect(PenRules.scaled(PenRules.anchorTolerance, 0.4) == PenRules.anchorTolerance / 0.4)
+        #expect(PenRules.scaled(PenRules.anchorTolerance, 8) == PenRules.anchorTolerance / 8)
+        for scale: Double in [0, -1, .nan, -.infinity, .leastNonzeroMagnitude] {
+            #expect(PenRules.scaled(PenRules.anchorTolerance, scale) == .infinity)
+            let d = try #require(Self.draft([(0, 0), (50, 0), (50, 50), (0, 0)], scale: scale))
+            #expect(d.contour.anchors.count == 1 && !PenRules.closes(Point(x: 0, y: 0), d))
+            #expect(throws: (any Error).self) { try PenRules.path(d) }
+        }
     }
     @Test func degenerateThrows() throws {
         let d = try #require(Self.draft([(3, 3), (3.5, 3)]))

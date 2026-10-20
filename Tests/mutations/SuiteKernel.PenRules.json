@@ -26,5 +26,26 @@
     "find": "draft.contour.anchors.count >= 2",
     "replace": "draft.contour.anchors.count >= 1",
     "tests": "PenRulesTests"
+  },
+  {
+    "label": "pressOnLastAnchorDoesNotClose: closes skips the near-last-anchor check",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "let last = points.last, !near(last, point, tolerance),",
+    "replace": "let last = points.last,",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "nonFiniteHandleAddsNothing: a non-finite handleOut still adds a corner anchor",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "guard point.isFinite, handleOut?.isFinite ?? true else { return draft }",
+    "replace": "guard point.isFinite else { return draft }",
+    "tests": "PenRulesTests"
+  },
+  {
+    "label": "scaleGuardMatchesFlare: only a zero scale is degenerate, so a negative one gives a negative tolerance",
+    "file": "Sources/SuiteKernel/Paths/PenRules.swift",
+    "find": "guard scale > 0 else { return .infinity }",
+    "replace": "guard scale != 0 else { return .infinity }",
+    "tests": "PenRulesTests"
   }
 ]

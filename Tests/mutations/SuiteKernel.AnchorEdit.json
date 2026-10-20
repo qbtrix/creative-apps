@@ -33,5 +33,19 @@
     "find": "case .move: (contour, index, closed) = (contour + 1, 0, false)",
     "replace": "case .move: (contour, index, closed) = (contour + 1, 1, false)",
     "tests": "AnchorEditTests"
+  },
+  {
+    "label": "nonFiniteEditIsANoOp: a non-finite dy reaches the moved anchors",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "guard dx.isFinite, dy.isFinite else { return path }",
+    "replace": "guard dx.isFinite else { return path }",
+    "tests": "AnchorEditTests"
+  },
+  {
+    "label": "nonFiniteEditIsANoOp: a handle target with a non-finite y is written to the anchor",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "guard to.isFinite else { return path }",
+    "replace": "guard to.x.isFinite else { return path }",
+    "tests": "AnchorEditTests"
   }
 ]
