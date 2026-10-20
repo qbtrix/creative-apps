@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T03:17Z	0	stage-start	#3419	setup on dev 233aff5; main b3011ab verified
 2026-10-20T03:17Z	0	stopped	#3418	no task can start: GF-a not merged
 2026-10-20T03:49Z	3	heartbeat	#3418	dev 533daec has no Sources/SuiteKernel/Fill; GF-1 building, GF-2 waits CC-u
+2026-10-20T04:05Z	3	heartbeat	#3418	dev 533daec still lacks Fill/; GF-1 pushed (ed1ed79, no merge yet); GF-2 waits CC-u

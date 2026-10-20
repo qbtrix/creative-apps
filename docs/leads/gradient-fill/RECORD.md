@@ -36,5 +36,5 @@ Next: wait for suiteui/gradient-fill GF-a (#3418) to merge (Sources/SuiteKernel/
 - #2315 is already closed, so FG-8 references it and does not use a closing keyword.
 
 ## Open
-- Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs in progress, GF-2 blocked on command-catalog CC-u); Sources/SuiteKernel/Fill/ (Fill, FillSelection, GradientFillTarget, GradientIntent, GradientEditor) is not on dev. Every Flare task needs it.
+- Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs pushed at ed1ed79 on claude/gradient-fill-lead-1i5sqe, not merged, GF-2 blocked on command-catalog CC-u); Sources/SuiteKernel/Fill/ (Fill, FillSelection, GradientFillTarget, GradientIntent, GradientEditor) is not on dev. Every Flare task needs it.
 - FG-5 also waits on GF-6 and adopt-command-catalog's AC-flare (Belt-Slice-Done on #2999's feature issue).
