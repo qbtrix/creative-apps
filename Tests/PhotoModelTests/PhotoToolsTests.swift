@@ -133,7 +133,8 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     let steps = workspace.historySteps.count
     stroke(&workspace, from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 150, y: 150))
     let after = try #require(workspace.layers.first { $0.id == curves.id })
-    #expect([after.offsetX, after.offsetY] == [curves.offsetX, curves.offsetY])
+    #expect(after.offsetX == curves.offsetX)
+    #expect(after.offsetY == curves.offsetY)
     #expect(workspace.historySteps.count == steps)
     #expect(workspace.statusMessage == "Select an image layer in the sidebar to move it.")
 }
