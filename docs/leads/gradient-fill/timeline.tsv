@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-20T05:53Z	3	unblocked	#3421	GF-1 merged as 9a146777; Sources/SuiteKernel/Fill on dev
 2026-10-20T06:25Z	3	building	FG-1	feat/flare-gradient-fg-a: stubs + FlareGradientTests pass locally; running scripts/ci --changed
 2026-10-20T06:09Z	3	pr	FG-1	#3526 open at 37c65fb2, fast-lane, scripts/ci --changed PASS
+2026-10-20T06:16Z	3	pr	FG-6	#3532 open at 8bbb9c89 stacked on #3526, fast-lane, scripts/ci --changed PASS
