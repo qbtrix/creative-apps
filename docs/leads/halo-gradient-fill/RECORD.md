@@ -7,7 +7,7 @@
 - Started: 2026-10-20
 - Stage: 3 polling (wave 1 blocked)
 - Base: dev 533daec
-- Next: HG-a #3516 merged into dev 10:02Z (cf691cca); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 (AC-halo's files are on dev); HG-u waits on CL-probe and GF-2/GF-3
+- Next: HG-a #3516 merged into dev 10:02Z (cf691cca), Belt-Slice-Done waits for the first green dev Linux job after it (newest, 39404133857 on f8b6c4f, predates it); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 (AC-halo's files are on dev); HG-u waits on CL-probe and GF-2/GF-3
 
 ## Slices
 
@@ -28,7 +28,7 @@
 | HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo's HaloCommandCatalog.swift, HaloHeadless.swift and Tests/command-ids/halo.txt are on dev (packet still status planned, no Belt-Slice-Done) |
 | HG-3 | W3 | blocked | – | GF-3 |
 | HG-4 | W3 | blocked | – | after HG-2 |
-| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); rebased onto dev 11a545e after #3516 merged, now at 0bc7526 |
+| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); rebased onto dev 11a545e after #3516 merged, now at 0bc7526, scripts/ci --changed PASS 2026-10-20T10:10Z |
 | HG-8 | W4 | blocked | – | after HG-4, HG-6, HG-7 |
 | HG-9 | W5 | blocked | – | CL-z |
 
