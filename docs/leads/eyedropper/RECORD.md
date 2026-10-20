@@ -2,14 +2,14 @@
 
 Issue: #3448 · Packet: docs/blueprints/suiteui/features/eyedropper.md
 Run: act-1a1579fdd22-6z1j · Session: session_01PjyLDm83LyEExMuxXuYsXP · Started: 2026-10-20T04:46Z
-Stage: 0 setup
+Stage: 3 wave 1
 Base: 18464f26b93c6826d069e0107545d7aacfac033c
-Next: poll gradient-fill GF-a (#3418, PR #3421); start EY-a once GF-a has merged
+Next: EY-a builder on lead/eyedropper-EY-a from dev 9a146777 (may split into EY-1 and EY-2); then EY-u and EY-m stacked on it
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| EY-a | The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper ... | EY-1, EY-2 | SJ0 | gradient-fill:GF-a | true | 0 | planned | – | – |
+| EY-a | The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper ... | EY-1, EY-2 | SJ0 | gradient-fill:GF-a | true | 0 | building | – | – |
 | EY-u | On the gallery page every colour row's eyedropper picks a colour from the screen as one gesture, the loupe follows the p... | EY-3, EY-4 | EJ1 | EY-a | true | 0 | planned | – | – |
 | EY-m | The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document po... | EY-5, EY-6 | KJ-sample | EY-a | false | 0 | planned | – | – |
 | EY-z | The gallery samples through color.sample on a live target, the fake app samples its topmost rect so RJ-X33 runs on the C... | EY-7, EY-8, EY-9 | EJ1, KJ-sample | EY-u, EY-m, transform-tools:TT-z | true | 0 | planned | – | – |
@@ -34,6 +34,7 @@ Next: poll gradient-fill GF-a (#3418, PR #3421); start EY-a once GF-a has merged
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-20T05:48Z GF-a (#3421) merged; EY-a starts from dev 9a146777. Packet estimate ~420 lines, so the builder may split it into two stacked PRs, both Slice: EY-a.
 - Base is origin/dev, not main: the packets exist only on dev and CLAUDE.md sends every PR to dev (the lane retargets main). Brief step one verified main HEAD b3011ab.
 - Line lead (rule 19) over #3449 shape-tools, #3448 eyedropper, #3446 transform-tools; one combined plan.
 - Combined plan by slice PRs: wave 1 SH-a, TT-a; wave 2 (stacked on each contract PR, rule 22) SH-m, TT-m, SH-u, TT-u; wave 3 SH-7, TT-7 (z slices, part one) and EY-a once GF-a merges; then EY-u/EY-m; fake tasks TT-8, EY-8, SH-8 in that order as their waits clear; the x-9 status tasks last with feature-done.
