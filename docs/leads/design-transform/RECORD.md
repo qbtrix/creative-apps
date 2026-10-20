@@ -4,7 +4,7 @@ Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 polling
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: re-read #3687 (gradient-fill DG-a); once merged, build DT-a (DT-1 + DT-2) as one slice PR from origin/dev.
+Next: DT-a builder running (DT-1, DT-2), stacked on DG-a #3687 per supervisor 20:24Z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
