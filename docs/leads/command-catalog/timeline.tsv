@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-20T05:30:52Z	check	heartbeat: #3484 (CC-u) waits on lane macOS build 39374818329 (lane-noted footer removed from body); AL-design #3392 open clean, not merged (AT-d1 waits); AC-p3/d3/h3 building stacked on CC-u; full CI 39373545059 on dev pending, no Belt-Slice-Done yet
 2026-10-20T05:51:13Z	check	heartbeat: #3484 macOS build 39374818329 queued; #3392 macOS build 39371121699 in progress (AT-d1 waits); AC menus building; full CI 39373545059 pending; no Belt-Slice-Done yet
 2026-10-20T06:16:17Z	check	heartbeat: #3484 macOS build 39374818329 still queued; #3392 (other lead) needs-rebase, AT-d1 waits; full CI 39373545059 cancelled, no Belt-Slice-Done; AC menus built, PRs wait #3484
+2026-10-20T06:36:27Z	check	heartbeat: macOS runner backed up (41 ci.yml runs queued); #3484 build 39374818329 is the oldest queued; #3392 (other lead) rebased, build 39379782419 queued, AT-d1 waits; no Belt-Slice-Done due
