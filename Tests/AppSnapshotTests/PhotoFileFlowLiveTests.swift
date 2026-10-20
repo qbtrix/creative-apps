@@ -89,8 +89,10 @@ extension BodyCountSuites {
             let w = RenderBudgetWindow(PhotoWindow(model: PhotoWorkspace(services: .fake)))
             defer { w.close() }
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
-            try #require(edited.files).bridge = bridge
-            try #require(edited.send)(.openFile(try Self.beach()))
+            let files = try #require(edited.files)
+            files.bridge = bridge
+            let send = try #require(edited.send)
+            send(.openFile(try Self.beach()))
             _ = try await Self.events(recording, count: 2)
             #expect(UserDefaults.standard.stringArray(forKey: "PhotoRecentFiles") == nil, "the old list's key stayed")
             #expect(await recording.paths.filter { $0 == old }.count == 1, "the old list wasn't imported exactly once")
