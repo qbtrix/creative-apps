@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-20T10:59:19Z	heartbeat	poll: full CI 39402653640 cancelled; tracking 39409307241 (a54a892a) queued; no merges since 10:47Z, FK-a deps pending
 2026-10-20T11:13:10Z	heartbeat	poll: full CI 39409307241 (a54a892a) still queued, 39411425197 (575cc800) pending; FK-a deps #3532/GF-2/SS-a not merged (merged since 10:59Z: #3586, #3540)
 2026-10-20T11:25:15Z	heartbeat	poll: SS-1 #3583 merged 11:20Z; FK-a still waits on SS-2 (StrokeEditor), FG-a (#3532) and GF-a (GF-2)
+2026-10-20T11:37:08Z	heartbeat	poll: no merges 11:25-11:37Z; FK-a still waits on SS-2, FG-a (#3532), GF-a (GF-2)
