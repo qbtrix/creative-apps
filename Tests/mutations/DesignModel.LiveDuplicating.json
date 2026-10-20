@@ -1,9 +1,9 @@
 [
   {
-    "label": "the copy lands below its original",
+    "label": "the copies are not selected",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "siblings.insert(placed, at: at + 1)",
-    "replace": "siblings.insert(placed, at: at)",
+    "find": "return DesignEdit(name: \"Duplicate\", nodes: nodes, selection: copies)",
+    "replace": "return DesignEdit(name: \"Duplicate\", nodes: nodes, selection: [])",
     "tests": "DesignDuplicateTests"
   },
   {
@@ -17,7 +17,7 @@
     "label": "the copy keeps the lock",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
     "find": "copy.isLocked = false",
-    "replace": "copy.isLocked = original.isLocked",
+    "replace": "copy.isLocked = copy.isLocked",
     "tests": "DesignDuplicateTests"
   },
   {
