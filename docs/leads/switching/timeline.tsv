@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-19T23:59:52Z	stage	fix round 2 #3367 merged; critic round 2 waits on a scoped suite run with 1299651e
 2026-10-20T00:47:20Z	heartbeat	critic round 2 waits on dev CI 39346519827 (c7306ee8, has #3367): pending, no job started; no scoped suite run with 1299651e yet
 2026-10-20T13:39:32Z	stage	stage 4 round 2 starts on full run 39349878829 (dev 2019b521)
+2026-10-20T13:40:57Z	heartbeat	critic round 2 panel running (wf_f59deead-918) on run 39349878829
