@@ -31,7 +31,7 @@ struct PhotoMenuStateTests {
                                            pasteboardHasImage: c.3, pasteboardIsEmpty: c.4)
                 for id in PhotoCommandCatalogTests.menuIDs {
                     let spec = PhotoMenuState.spec(id)
-                    #expect(spec.id == id && spec.summary == PhotoWorkspace.catalog.spec(id)?.summary)
+                    #expect(spec.id == id && spec.summary == PhotoWorkspace.menuSummary(id))
                     #expect((spec.availability(state).why == nil) == Self.oldEnabled(id, ws, c), "\(id) in \(name) \(c)")
                     #expect(state.title(id) == ws.menuTitle(id))
                 }
@@ -53,6 +53,19 @@ struct PhotoMenuStateTests {
                                                          history: { $0.workspace.history.kernel })
         _ = try catalog.run("layer.new", params: .object([:]), on: &state)
         #expect(state.workspace.layers.count == layers + 1)
+    }
+
+    /// An enabled item's tooltip is its menu summary: what clicking does, never the agent call's params
+    /// (Open's RGBA bytes, Save's "marks saved", a sheet's "given size").
+    @Test func tooltipsSayWhatTheItemDoes() {
+        #expect(PhotoMenuState.spec("file.open").summary == "Opens an image file.")
+        #expect(PhotoMenuState.spec("file.save").summary == "Saves the image to its file.")
+        for id in PhotoCommandCatalogTests.menuIDs {
+            let summary = PhotoMenuState.spec(id).summary
+            for agentOnly in ["bytes", "given", "Marks", "of a kind", "png or jpeg", "by an angle"] {
+                #expect(!summary.contains(agentOnly), "\(id): \(summary)")
+            }
+        }
     }
 
     @Test func unknownIDIsNeverAvailable() {

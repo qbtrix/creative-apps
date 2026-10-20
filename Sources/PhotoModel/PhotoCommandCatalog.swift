@@ -39,6 +39,15 @@ extension PhotoWorkspace {
         "image.rotate-ccw": "Rotate 90° Counterclockwise", "image.rotate-180": "Rotate 180°", "image.straighten": "Straighten…",
         "layer.rename": "Rename Layer…", "layer.bring-forward": "Bring Forward", "layer.send-backward": "Send Backward",
     ]
+    /// The tooltip of the menu item for `id`: what clicking it does, where the catalog's summary describes the agent call.
+    public static func menuSummary(_ id: String) -> String { menuSummaries[id] ?? catalog.spec(id)?.summary ?? id }
+    static let menuSummaries = [
+        "file.new": "Opens a new white 1920 × 1080 image.", "file.open": "Opens an image file.",
+        "file.save": "Saves the image to its file.", "file.save-as": "Saves the image to a new file.",
+        "file.export": "Exports a flattened copy of the image.", "image.resize": "Changes the image's size.",
+        "image.straighten": "Rotates the image to level it.",
+        "layer.new-adjustment": "Adds an adjustment layer above the selected layer.",
+    ]
 
     /// `help`'s reason as an availability: nil is available.
     static func gate(_ help: @escaping @Sendable (PhotoWorkspace) -> String?) -> @Sendable (PhotoWorkspace) -> Availability {

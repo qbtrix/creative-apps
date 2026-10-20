@@ -51,12 +51,30 @@ SuiteUI, and `SuiteKernelTests` covers it on Linux.
 | `Export/` | `ExportRun<Options>`: idle, editing, running, finished or failed |
 | `Session/` | `DocumentSession` (dirty, save status, autosave, recovery) and `VersionedJSON` |
 | `Stroke/` | `StrokeSmoother`, `DabSpacer`, `BrushSettings`, `BrushPreset`, `LiveCopy` |
+| `Commands/` | `CommandSpec`, `CommandCatalog` (list, describe, run, batch), `ParamSchema`, `JSONValue` and `HeadlessDocument`: the command layer below |
+
+**The command layer.** Every action an app offers is a command in its
+catalog (packet `docs/blueprints/suiteui/features/command-catalog.md`). A
+`CommandSpec` has a stable id (`edit.copy`), typed params with a
+JSON schema, a kind (query, view, edit, file), a description written for
+people and for models, and an availability that says why not when it can't
+run. An `edit` run records exactly one undo step. Each Model's
+`<X>Headless.swift` conforms its document to `HeadlessDocument` and lists its
+catalog, so the `afterglow` CLI, the MCP server and the crews' tests open,
+edit, undo, save and export a document with no window. Menus and buttons run
+the same specs: SuiteUI's `MenuCommand(spec, on:)` takes its title from the
+spec, is enabled when the spec is available, and shows the spec's summary as
+help, or "Title: why" when disabled. Gate: `CommandPathTests` fails when an
+app builds a menu item or toolbar button without a spec and the site isn't in
+that app's baseline in `Tests/command-path-baseline/`, which only shrinks.
 
 SuiteUI sits beside the apps. It knows nothing about any app Model, and it
 links SuiteKernel only to draw the kernel's values: `LayerTreeList` (the one
 layers panel), `SelectionHandles`, `SnapGuideMarks`, `SuiteExportSheet`,
 `SuiteStrokePacer`, `SuitePointerPressure`, `BrushCursorMark` and `ToolKeys`,
-all shown on the gallery's `editor-kernel` page.
+all shown on the gallery's `editor-kernel` page, and `MenuCommand(spec, on:)`,
+which builds a menu item from a command spec (the gallery's `command-catalog`
+page).
 
 - **State lives in the Model; views are dumb.** A view holds its Model in one
   `@State private var model` at the window root and passes values and closures

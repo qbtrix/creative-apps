@@ -6,8 +6,8 @@
 // 1 pt of the lane origin (name column, divider, the strip's s inset) plus
 // frame × frame width. L4: HaloLayerInspector with Ball selected at frame 12,
 // hosted at the inspector's minimum, ideal and maximum widths in a window far
-// off every screen with accessibility on; every `halo.inspector.row.<raw>`
-// bar starts and ends within 0.5 pt of the others, every
+// off every screen with accessibility on and no control focused; every
+// `halo.inspector.row.<raw>` bar starts and ends within 0.5 pt of the others, every
 // `halo.inspector.key.<raw>` stopwatch starts within 0.5 pt of the others
 // (one column), and each bar is wide enough for its title, the s gap and its
 // value inside its m padding. L5: HaloViewer hosted at the content minimum;
@@ -215,6 +215,11 @@ import Testing
         window.setFrameOrigin(NSPoint(x: -24_000, y: -24_000))
         window.orderFrontRegardless()
         try await Task.sleep(for: .milliseconds(500))
+        // The window's first focusable control takes focus, and its focus effect grows its accessibility
+        // frame by 3 pt on every side (L4's first bar read 9...191 against 12...188). The rules measure
+        // layout, not focus, so no control keeps it.
+        window.makeFirstResponder(nil)
+        try await Task.sleep(for: .milliseconds(300))
     }
 
     func close() { window.close() }
