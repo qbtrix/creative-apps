@@ -1,9 +1,9 @@
 // DesignExport+Kernel.swift: File > Export…'s sheet (design-export DE-6) on SuiteUI's
 // SuiteExportSheet. DesignExportArea keeps the run (DesignExportRun) as its own state, so editing
 // the sheet never runs the window's body; each change of `request` opens it on the Model's
-// `exportSheetDefaults`. Ids hang off `design.export`: Format, Size, then DesignExportRows' Scale
-// (`scale.<n>x`) and Scope (`scope.<scope>`) chips, the file list (`items`) and the plan's
-// refusal (`result`). `sheet` is the content alone, which DesignExportSnapshots renders.
+// `exportSheetDefaults`. Ids hang off `design.export`: Format (no Size row: Scale is the one
+// scale control), then DesignExportRows' Scale (`scale.<n>x`, off with `scaleHelp` for SVG and
+// PDF) and Scope (`scope.<scope>`) chips, the file list (`items`) and the plan's refusal (`result`). `sheet` is the content alone, which DesignExportSnapshots renders.
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -37,7 +37,7 @@ struct DesignExportArea: ViewModifier {
     ) -> some View {
         let options = run.shownOptions ?? model.exportSheetDefaults
         return SuiteExportSheet(
-            ExportSheetRows(run, formats: formats) { ExportPick(format: $0.format.rawValue, scale: Double($0.scale)) },
+            ExportSheetRows(run, formats: formats, showsSize: false) { ExportPick(format: $0.format.rawValue, scale: Double($0.scale)) },
             formats: formats,
             idPrefix: "design.export",
             onFormat: { id in
@@ -70,8 +70,11 @@ struct DesignExportRows: View {
             labeled("Scale", DesignControlID.exportScale) {
                 ChoiceChips(
                     options: [1, 2, 3].map { InspectorOption(id: $0, title: "\($0)x", identifier: "design.export.scale.\($0)x") },
-                    selected: options.scale
+                    selected: options.scaleHelp == nil ? options.scale : nil
                 ) { edit(options.scaled(Double($0))) }
+                    .disabled(options.scaleHelp != nil)
+                    .help(options.scaleHelp ?? "")
+                if let help = options.scaleHelp { InspectorNote(help) }
             }
             labeled("Scope", DesignControlID.exportScope) {
                 ChoiceChips(
