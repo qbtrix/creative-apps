@@ -8,7 +8,7 @@ and where its check runs: **C** the CLI on Linux, **Cm** the CLI headless on mac
 **baseline** is the hand estimate when the job was added; the live status comes from the nightly run.
 The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 
-38 jobs: 15 C, 18 Cm, 5 J. Baseline 6 pass, 8 partial, 24 fail, 0 unknown; baseline score **2.9/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
+38 jobs: 16 C, 18 Cm, 4 J. Baseline 6 pass, 8 partial, 24 fail, 0 unknown; baseline score **2.9/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
 
 | id | job → outcome | weight | needs | closes with | baseline | trap | run | sources |
 |---|---|---|---|---|---|---|---|---|
@@ -24,7 +24,7 @@ The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 | RJ-H10 | Parent five layers to a null and move the group. → The five layers keep their positions when parented and move together with the null. | med | `halo/layer-keys` (layer-keys (built)) | `halo/layer-keys` | pass | Children jump when parented | C | [1](https://support.apple.com/guide/motion/welcome/mac) |
 | RJ-H11 | Apply ease-in-out presets to position keys. → The motion slows at both ends. | high | `halo/easing` (halo/easing (built)) | `halo/easing` | pass | Render ignores easing | C | [1](https://www.canva.com/design-school/resources/how-to-create-your-first-scene-in-cavalry) |
 | RJ-H12 | Shape a speed curve in the graph editor. → The speed curve shaped in the graph editor is the motion the render shows. | med | `S16` (S16 graph editor) | `S16` | partial | Per-segment curve editor only | J | [1](https://support.apple.com/guide/motion/welcome/mac) |
-| RJ-H13 | Select several keys across layers and drag them later in time. → Every selected key moves by the same time offset, hidden layers' keys included. | med | `S16`, `suiteui/timeline` (S16 (SuiteUI timeline built, Halo half unfiled)) | `S16` | fail | Keys of hidden layers stay behind | J | [1](https://support.apple.com/guide/motion/welcome/mac) |
+| RJ-H13 | Select several keys across layers and drag them later in time. → Every selected key moves by the same time offset, hidden layers' keys included. | med | `S16`, `suiteui/timeline`, `halo/key-editing` (S16 (SuiteUI timeline built); halo/key-editing wires picking across lanes, Select All Keys and the key drag into Halo) | `halo/key-editing` | fail | Keys of hidden layers stay behind | C | [1](https://support.apple.com/guide/motion/welcome/mac) |
 | RJ-H14 | Set a work area of 2 to 5 s and render only that. → The render is exactly 3 s long and starts at the 2 s frame. | med | `S16` (S16 work area) | `S16` | fail | Render covers the whole comp | Cm | [1](https://community.adobe.com/t5/after-effects-beta-discussions/feature-focus-exporting-h-264-from-the-after-effects-render-queue-now-available-in-ae-2023/m-p/13885413/highlight/true) |
 | RJ-H15 | Drop in a music track, see its waveform, key to the beat, render with audio. → The render has an audio track in sync with the keyed beats. | med | `S23` (S23 audio lane) | `S23` | fail | Render drops audio; sync drifts | Cm | [1](https://superrendersfarm.com/article/cavalry-motion-design-review-2026) |
 | RJ-H16 | Import a video clip and an image as layers and scale them to fit. → The clip and the image are layers scaled to fit the comp, and both show in the render. | med | `S20`, `E9` (S20 placed footage, E9 decode) | `S20` | fail | No footage or image layers | Cm | [1](https://support.apple.com/guide/motion/welcome/mac) |

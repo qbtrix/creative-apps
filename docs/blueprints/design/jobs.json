@@ -102,20 +102,21 @@
     "app": "design",
     "weight": "med",
     "job": "Draw a logo with the pen (curves, close the path), then move one point.",
-    "outcome": "Path stays closed and smooth.",
+    "outcome": "The saved path has one closed contour of exactly four anchors; the moved anchor and its handles moved by the same offset and the others are unchanged.",
     "needs": [
-      "S18"
+      "S25"
     ],
-    "needs_note": "F7 pen + S18 point editing",
-    "closes_with": "S18",
+    "needs_note": "the Pen and point editing (S25)",
+    "closes_with": "S25",
     "trap": "Closing the path adds a duplicate point",
-    "run": "J",
+    "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://help.figma.com/hc/en-us/articles/360039957534-Boolean-operations",
       "https://affinity.serif.com/en-gb/designer/full-feature-list/"
-    ]
+    ],
+    "waits_on": "DP-6"
   },
   "RJ-D07": {
     "id": "RJ-D07",

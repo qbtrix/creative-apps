@@ -8,7 +8,7 @@ and where its check runs: **C** the CLI on Linux, **Cm** the CLI headless on mac
 **baseline** is the hand estimate when the job was added; the live status comes from the nightly run.
 The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 
-38 jobs: 21 C, 12 Cm, 5 J. Baseline 9 pass, 8 partial, 21 fail, 0 unknown; baseline score **3.7/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
+39 jobs: 22 C, 12 Cm, 5 J. Baseline 9 pass, 8 partial, 22 fail, 0 unknown; baseline score **3.6/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
 
 | id | job → outcome | weight | needs | closes with | baseline | trap | run | sources |
 |---|---|---|---|---|---|---|---|---|
@@ -50,3 +50,4 @@ The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 | RJ-P36 | Sample a 5 x 5 mean by command on a red and blue checkerboard, and a point outside the image. → The centred 5 x 5 square reads the 13-red, 12-blue mix within 1 per channel, and the outside point reads null. | med | `S13`, `photo/eyedropper` | `photo/eyedropper` | fail | The sample reads the active layer, or the square is anchored at its corner | C | captain |
 | RJ-P37 | Place a PNG logo onto an open 800 x 600 image and save the flattened result. → The output is 800 x 600 with the 200 x 100 logo centred (its red half at x 350, its blue half at x 450) on a new layer, and the canvas around it unchanged. | high | `S20`, `photo/place-image` | `photo/place-image` | fail | The place opens the logo as a new document, or lands it at the top-left corner | C | captain |
 | RJ-P42 | Drop a PNG from Finder onto an open image. → It becomes one centred layer named after the file in one undo step; undo removes it. | med | `suite/file-flow`, `photo/file-flow` | `photo/file-flow` | fail | The drop replaces the document or opens a second window, or takes two undo steps | C | captain |
+| RJ-P43 | Select three layers, fade them to 50% opacity and nudge them 40 px right together. → All three layers are at 50% and 40 px right in the export; the fourth layer is unchanged. | high | `suiteui/adopt-kernel-selection`, `photo/multi-layer-select` (photo/multi-layer-select puts Photo's layer selection on the kernel Selection and applies layer actions to every selected layer) | `photo/multi-layer-select` | fail | Only the last-clicked layer changes | C | captain |

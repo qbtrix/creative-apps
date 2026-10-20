@@ -718,7 +718,7 @@
     },
     {
       "id": "S18",
-      "name": "Point editing and booleans (re-cut: Flare Direct Select F4b)",
+      "name": "Booleans on paths (point editing and Flare's Direct Select F4b are S25)",
       "layer": "kernel",
       "c4": [
         "flarecore/geometry",
@@ -855,6 +855,27 @@
         {
           "app": "photo",
           "packet": "photo/gradient-fill"
+        }
+      ]
+    },
+    {
+      "id": "S25",
+      "name": "The Pen and point editing: FlareCore's anchors view under kernel names, the pen and anchor rules and path commands in SuiteKernel, SuiteUI's path edit overlay; 5,000 anchors stay fast (captain 2026-10-20, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-paths ✚",
+        "suiteui PathEditOverlay, CanvasMarks PathMarks",
+        "flarecore/geometry PathOps (core bump to >= e09c6c30)"
+      ],
+      "packet": "suiteui/pen-paths",
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "design/pen-paths"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/pen-paths"
         }
       ]
     },
@@ -1806,8 +1827,58 @@
         {
           "app": "library",
           "packet": "suiteui/adopt-kernel-selection"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/multi-layer-select"
         }
       ]
+    },
+    {
+      "id": "suiteui/timeline-select-all",
+      "name": "Select All Keys on the shared timeline: ⌘A while the strip has focus asks the host to pick every key (captain 2026-10-20, beta)",
+      "packet": "suiteui/timeline-select-all",
+      "layer": "ui",
+      "c4": [
+        "suiteui TimelineStrip"
+      ],
+      "adopters": [
+        {
+          "app": "halo",
+          "packet": "halo/key-editing"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/key-select-all"
+        }
+      ]
+    },
+    {
+      "id": "halo/key-editing",
+      "name": "Halo moves keys: picks across lanes, Select All Keys, a snapped group drag as one undo step (captain 2026-10-20, beta)",
+      "packet": "halo/key-editing",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/key-select-all",
+      "name": "Flare's timeline: Select All Keys from ⌘A and the context menu, on the kernel Selection (captain 2026-10-20, beta)",
+      "packet": "flare/key-select-all",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/multi-layer-select",
+      "name": "Photo selects several layers (Shift range, ⌘ toggle, All Layers) and moves, hides, deletes and fades them together (captain 2026-10-20, beta)",
+      "packet": "photo/multi-layer-select",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
     },
     {
       "id": "suiteui/adopt-kernel-layers",

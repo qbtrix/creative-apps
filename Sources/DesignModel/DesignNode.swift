@@ -137,6 +137,13 @@ public struct DesignColor: Sendable, Hashable, Codable {
     public static let black = DesignColor(0, 0, 0)
     /// Every other shape.
     public static let shape = DesignColor(217, 217, 217)
+
+    /// Whether the color reads dark: its weighted brightness (299 R + 587 G + 114 B, per mille)
+    /// is under the 0...255 midpoint. Integer math, no libm. The text editor picks the light
+    /// highlight behind dark ink and the dark one behind light ink by it.
+    public var isDark: Bool {
+        299 * Int(red) + 587 * Int(green) + 114 * Int(blue) < 128_000
+    }
 }
 
 public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
