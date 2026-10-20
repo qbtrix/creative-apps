@@ -89,9 +89,7 @@ struct FlareLayersList: View {
     // view-static: main-actor
     static func bar(_ model: FlareWorkspace, perform: @escaping @MainActor (FlareIntent) -> Void) -> [ToolbarAction] {
         var actions = barCommands.compactMap { command in
-            item(command.id, command.symbol, on: model, perform: perform).map {
-                ToolbarAction($0, identifier: "flare.layers.bar." + command.part)
-            }
+            action(command.id, command.symbol, on: model, identifier: "flare.layers.bar." + command.part, perform: perform)
         }
         actions.insert(LayerActionBar.effects(identifier: "flare.layers.bar.fx"), at: 3)
         return actions
@@ -103,20 +101,20 @@ struct FlareLayersList: View {
         var row = model
         row.selectItem(id)
         return rowCommands.compactMap { command in
-            item(command.id, command.symbol, on: row) { intent in
+            action(command.id, command.symbol, on: row) { intent in
                 perform(.layers(.select(id: id)))
                 perform(intent)
-            }.map { ToolbarAction($0) }
+            }
         }
     }
 
-    /// Catalog command `id` as a menu item on `model`, sending its intent for the selected layer; nil for an id
+    /// Catalog command `id` as a panel item on `model`, sending its intent for the selected layer; nil for an id
     /// the catalog lacks (FlareLayerPanelCommandsTests holds every id to the catalog).
     // view-static: main-actor
-    private static func item(_ id: String, _ symbol: String, on model: FlareWorkspace,
-                             perform: @escaping @MainActor (FlareIntent) -> Void) -> MenuCommand? {
+    private static func action(_ id: String, _ symbol: String, on model: FlareWorkspace, identifier: String? = nil,
+                               perform: @escaping @MainActor (FlareIntent) -> Void) -> ToolbarAction? {
         guard let spec = FlareWorkspace.catalog.spec(id) else { return nil }
-        return MenuCommand(spec, on: model, title: model.menuTitle(id), systemImage: symbol) {
+        return ToolbarAction(spec, on: model, title: model.menuTitle(id), systemImage: symbol, identifier: identifier) {
             if let intent = intent(id, layer: model.selectedLayerID ?? "") { perform(intent) }
         }
     }
