@@ -4,14 +4,14 @@ Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a15821c836-93pf · Session: claude/feature-lead-playbook-v981be · Started: 2026-10-20T07:09Z
 Stage: 3 wave 1
 Base: 5a17e0e54b9c356c371e90c7fc10f062bbb0dde1
-Next: #3586 (XP-6) waits on the lane (macOS build, then a sweep); once it merges, run the XP-m critic panel when XP-7's prerequisites (XP-2, SM-w) are on dev. XP-2 waits on shell-media:SM-a.
+Next: XP-6 merged (b538c92c). XP-2 starts once shell-media:SM-a is on dev; XP-7 once XP-2 and SM-w are. The XP-m critic panel runs when XP-7 has merged (the slice is whole then; it has no screens of its own).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | XP-a | Export options, rules and format list as stubs; metadata contract and fake; Size and Metadata rows on a gallery page; checks written, disabled | XP-1, XP-2, XP-3 | SJ0 | AH-a (XP-1, shared C4 part), shell-media:SM-a (XP-2), tone-controls:TC-a + PL-a (XP-3) | no | 0 | building (XP-1 merged) | – | – |
 | XP-u | Size modes with ratio lock and readout, Metadata picker, identified, within budget | XP-4, XP-5 | XJ1 | XP-a | yes | 0 | waiting | – | – |
-| XP-m | Exact pixels, dropped tags, refusals; live metadata copy on JPEG and HEIC | XP-6, XP-7 | KJ-export, StillMetadataTests | XP-1 (XP-6); XP-2 + shell-media:SM-w (XP-7) | no | 0 | building (XP-6 PR open) | – | – |
+| XP-m | Exact pixels, dropped tags, refusals; live metadata copy on JPEG and HEIC | XP-6, XP-7 | KJ-export, StillMetadataTests | XP-1 (XP-6); XP-2 + shell-media:SM-w (XP-7) | no | 0 | building (XP-6 merged; XP-7 waits XP-2, SM-w) | – | – |
 | XP-z | Gallery sheet plans through the rules; fake app exports at a size (RJ-X42); built | XP-8, XP-9, XP-10 | XJ1, KJ-export | XP-u, XP-m, tone-controls:TC-z, AH-z, TT-z, EY-z, SH-z, SS-d, PL-z | no | 0 | waiting | – | – |
 
 ## Tasks
@@ -22,7 +22,7 @@ Next: #3586 (XP-6) waits on the lane (macOS build, then a sweep); once it merges
 | XP-3 | XP-a | – | ExportPick.size/.metadata, placeholder rows, gallery page, journey skipped | Sources/SuiteUI/ExportSheet.swift, Sources/SuiteUI/Gallery/GalleryExportPack.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+Export.swift | SJ0 | – | waits TC-a, PL-a |
 | XP-4 | XP-u | – | Size and Metadata rows | Sources/SuiteUI/ExportSheet.swift, Tests/SuiteUITests/ExportPackRowsTests.swift | ExportPackRowsTests | – | waits XP-3 |
 | XP-5 | XP-u | – | Snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetExportPackTests.swift, UITests/SuiteJourneyTests+Export.swift | XJ1 | – | waits XP-4 |
-| XP-6 | XP-m | 1 (stacked on XP-1) | ExportRules bodies, ExportOptions(json:), format list | Sources/SuiteKernel/Export/ExportOptions.swift, Tests/SuiteKernelTests/ExportOptionsTests.swift, Tests/mutations/SuiteKernel.ExportOptions.json | ExportOptionsTests on; Mutate | #3586 | PR open (head d5bb13d, dev merged in, 3 files +192/-17, CI: PASS, Mutate 5/5) |
+| XP-6 | XP-m | 1 (stacked on XP-1) | ExportRules bodies, ExportOptions(json:), format list | Sources/SuiteKernel/Export/ExportOptions.swift, Tests/SuiteKernelTests/ExportOptionsTests.swift, Tests/mutations/SuiteKernel.ExportOptions.json | ExportOptionsTests on; Mutate | #3586 | merged #3586 by 11:14Z as b538c92c (fast lane; Mutate 5/5) |
 | XP-7 | XP-m | – | StillMetadata live on ImageIO | Sources/SuiteShell/Media/StillMetadata.swift, Tests/AppSnapshotTests/StillMetadataTests.swift, Tests/RealJobs/fixtures/gps-phone.jpg | StillMetadataTests | – | waits XP-2, SM-w |
 | XP-8 | XP-z | – | Gallery sheet plans through ExportRules; live test | Sources/SuiteUI/Gallery/GalleryExportPack.swift, Tests/SuiteUITests/ExportPackLiveTests.swift | ExportPackLiveTests | – | waits XP-5, XP-6 |
 | XP-9 | XP-z | – | Fake app exports with ExportOptions(json:); RJ-X42 | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasExportTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/export-pack/ | FakeCanvasExportTests | – | waits XP-6, TC-z and A/C waits |
