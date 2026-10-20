@@ -58,4 +58,4 @@ Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb
 ## Open
 - #3514 (SF-3) waits on the supervisor's local Mac gate. Then: PR for claude/file-flow-lead-6ugb9w-sf4 (merge origin/dev in first), then -sf8.
 - #3731 (SF-9, Slice SF-z) open at 05ecce2c: fake conforms to FileFlowTarget, RJ-X43 under Tests/RealJobs/fake/file-flow, mutate 3/3. XP-9 merges on top later (noted on #3480).
-- After SF-8 and SF-9: SF-10 (C4 parts, wave status built, feature-done).
+- SF-10 staged on claude/file-flow-lead-6ugb9w-sf10 @ 99794781 (docs only, waves render OK); open it with feature-done once SF-8 and #3731 merge, after scripts/ci on its head.
