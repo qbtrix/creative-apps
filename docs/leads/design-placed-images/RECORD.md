@@ -4,7 +4,7 @@ Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 polling
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: re-read PL-a, DG-a (#3687), transform:DT-a, shape-tools:DS-a, stroke-style:DK-m; build PD-a once all have merged.
+Next: PD-a builder running (PD-1, PD-2) per supervisor 20:24Z; PL-a stubs on dev; DS-a seam if needed.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

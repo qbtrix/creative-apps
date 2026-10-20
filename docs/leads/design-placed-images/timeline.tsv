@@ -6,3 +6,5 @@ utc	stage	event	ref	note
 2026-10-20T19:45Z	3	heartbeat	-	poll: PL-a #3578 merged (slice not marked done); DG-a #3687 open; DT-a not started; DS-a no PR; DK-a #3690 open, DK-m none
 2026-10-20T20:02Z	3	heartbeat	-	poll 20:01: no change (#3687, #3684, #3686, #3690 open; #3698 in lane)
 2026-10-20T20:19Z	poll	heartbeat	-	PD-a blocked 3 polls on PL-a/DG-a/DT-a/DS-a/DK-m; asked supervisor on #3454
+2026-10-20T20:37Z	PD-a	review	#3454	supervisor: start PD-a now, PL-a stubs (#3578) count as available, seam for DS-a
+2026-10-20T20:37Z	PD-a	stage-start	design/pd-a-placed-image-stubs	builder on PD-1+PD-2, stacks on DG-a only if DesignNode shared
