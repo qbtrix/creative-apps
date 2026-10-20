@@ -24,13 +24,13 @@ extension MenuCommand {
 
 extension ToolbarAction {
     /// A toolbar button for `spec` on `target`: the spec's title, and while it can't run, its reason as the tooltip,
-    /// worded as the menu item's (`MenuCommand(spec, on:)`), so a button and its menu item never disagree.
+    /// worded as the menu item's help ("<title>: <why>"), so a button and its menu item never disagree.
     public init<T>(
         _ spec: CommandSpec<T>, on target: T, title: String? = nil, systemImage: String, identifier: String? = nil,
         perform: @escaping @MainActor () -> Void
     ) {
-        let item = MenuCommand(spec, on: target, title: title, systemImage: systemImage, perform: perform)
-        self.init(item.title, systemImage: systemImage, unavailableHelp: item.isEnabled ? nil : item.help,
+        let name = title ?? spec.title
+        self.init(name, systemImage: systemImage, unavailableHelp: spec.availability(target).why.map { "\(name): \($0)" },
                   identifier: identifier, perform: perform)
     }
 }
