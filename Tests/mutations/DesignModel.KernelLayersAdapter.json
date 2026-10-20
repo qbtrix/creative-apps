@@ -1,0 +1,37 @@
+[
+  {
+    "label": "rows drop the kernel row's depth",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "DesignRow(node: $0, depth: row.depth)",
+    "replace": "DesignRow(node: $0, depth: 0)",
+    "tests": "DesignTreeTests|DesignTreeEdgeTests"
+  },
+  {
+    "label": "the lock check drops the kernel's cascade",
+    "file": "Sources/DesignModel/DesignLocking.swift",
+    "find": "$0.nodes.layerTree.isEffectivelyLocked(id)",
+    "replace": "$0.nodes.layerTree.node(id)?.isLocked == true",
+    "tests": "DesignSubtreeLockTests|DesignInspectorLockTests|DesignTextLockTests|DesignLayerTogglesTests"
+  },
+  {
+    "label": "duplicate takes the kernel's empty result as success",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "guard !copies.isEmpty else { throw .nothingSelected }",
+    "replace": "",
+    "tests": "DesignDuplicateTests|DesignContractLawTests"
+  },
+  {
+    "label": "group hands the kernel a payload that is not a group",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "payload: DesignNodePayload(node: made)",
+    "replace": "payload: DesignNodePayload(node: DesignNode(id: made.id, name: made.name, kind: .rectangle, frame: made.frame))",
+    "tests": "DesignGroupTests"
+  },
+  {
+    "label": "ungroup drops the kernel's ungroup",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "                try tree.ungroup(group.id)\n",
+    "replace": "",
+    "tests": "DesignGroupTests"
+  }
+]
