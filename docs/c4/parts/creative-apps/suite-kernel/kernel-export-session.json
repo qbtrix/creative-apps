@@ -1,10 +1,12 @@
 {
   "id": "kernel-export-session",
   "name": "Export run and document session",
-  "description": "Export/ExportRun.swift: ExportRun<Options> (idle, editing, running with done and total, finished with the written files, failed with words; begin, start, progress that never goes back, end, dismiss). Session/DocumentSession.swift: SaveStatus, DocumentSession (dirty from the saved and current tokens, autosave due a delay after the last edit, didSave and didEdit, stateText: the save indicator word every app shows), UnsavedPrompt (the one unsaved-changes alert wording and Save / Don't Save / Cancel choices every app builds) and RecoveryOffer. Session/VersionedJSON.swift: VersionedJSON (probe a file's version before decoding, a decoding error in words) and VersionError. Stubs from EK-3; bodies EK-22 and EK-24.",
+  "description": "Export/ExportRun.swift: ExportRun<Options> (idle, editing, running with done and total, finished with the written files, failed with words; begin, start, progress that never goes back, end, dismiss). Export/ExportOptions.swift: SuiteExportOptions (format, size, quality, metadata policy, alpha, frame rate, loop; init(json:defaults:) and its ParamSchema, the one params schema every export reads), SuiteExportSize (scale, pixels with stretch, long edge), ExportMetadata (All, All but location, None), ExportFormatSpec and ExportFormats (the suite's format list and what each carries), ExportRules (exact output pixels, the metadata tags to drop, why options can't run) and ExportOptionRefusal; stubs from export-pack XP-1, bodies XP-6. Session/DocumentSession.swift: SaveStatus, DocumentSession (dirty from the saved and current tokens, autosave due a delay after the last edit, didSave and didEdit, stateText: the save indicator word every app shows), UnsavedPrompt (the one unsaved-changes alert wording and Save / Don't Save / Cancel choices every app builds) and RecoveryOffer. Session/VersionedJSON.swift: VersionedJSON (probe a file's version before decoding, a decoding error in words) and VersionError. Stubs from EK-3; bodies EK-22 and EK-24. Session/AutosaveSchedule.swift: AutosaveSchedule, when an open document writes its recovery copy (once per edit a delay after it, a write a save or discard overtook deleted, a failed write retried on the next edit); stub from autosave-history AH-1, body AH-5.",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
+    "Sources/SuiteKernel/Export/ExportOptions.swift",
     "Sources/SuiteKernel/Export/ExportRun.swift",
+    "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
     "Sources/SuiteKernel/Session/DocumentSession.swift",
     "Sources/SuiteKernel/Session/VersionedJSON.swift"
   ],
