@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T18:49Z	0	stage-start	#3443	base e382f9d7
 2026-10-20T18:49Z	2	stage-end	#3443	plan: HT-a wave 1, HT-5 stacked
 2026-10-20T18:49Z	3	stage-start	#3443	wave 1 HT-a
+2026-10-20T19:31Z	3	pr-opened	#3682	slice HT-a (HT-1 adapter stubs, HT-2 viewer handles), 278 lines 6 files
