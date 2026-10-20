@@ -2,7 +2,7 @@
 
 Issue: #1035 · Packet: docs/blueprints/halo/features/viewer-playback.md
 Run: act-1a1543fa006-c4p9 (resumed 2026-10-19T13:02Z; earlier act-1a14c24f6d2-lrkw, line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a1429c87eb-3ecm, resumed 2026-10-16T02:50Z; first run act-1a13ed44a75-delk) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-15T09:05Z
-Stage: 3 fix wave 8 (#1705 reopened: run 39329203917 red on missing halo layer rows from #3217, fixed by #3291; scoped run 39357615737 cancelled unrun at 07:32Z when the next scoped dispatch replaced it; verifying on full run 39387926961 (af2977c0, contains e50f30b3) or the next scoped halo run)
+Stage: 3 fix wave 8 (#1705 reopened: run 39329203917 red on missing halo layer rows from #3217, fixed by #3291; scoped run 39357615737 and full run 39387926961 cancelled unrun; verifying on scoped halo run 39388363410 (af2977c0, contains e50f30b3), fallback full run 39389343595 (8e060576))
 Base: 2b02948043fe554dde877f184894b7010998117e (origin/dev at 2026-10-19T13:40Z, has #2622)
 Next: #3245 merged 16:58Z; wait for a scoped halo run on dev that contains it: close #1699 #1701 #1703 #1705 if their journeys pass, else take them into a fix wave.
 
