@@ -232,3 +232,15 @@ private func rescannedCounts(_ catalog: LibraryCatalog) -> [String: Int] {
     #expect(counts(catalog) == rescannedCounts(catalog))
     #expect(catalog.items.filter(\.isFlagged).map(\.id) == ["P1", "P15", "P20", "P25"])
 }
+
+/// The kernel's 100-step limit: the 101st edit rolls the oldest into the base.
+@Test func theCatalogKeepsAtMostAHundredSteps() {
+    var catalog = catalogWithLoupe()
+    for step in 0..<101 {
+        catalog.recordEdit("Set Rating", ids: ["P1"]) { $0.rating = step % 2 == 0 ? 4 : 5 }
+    }
+    #expect(catalog.history.undo.count == 100)
+    for _ in 0..<101 { catalog.undo() }
+    #expect(catalog.undoTitle == nil)
+    #expect(catalog.items.map(\.rating) == [4, 2, 3])
+}
