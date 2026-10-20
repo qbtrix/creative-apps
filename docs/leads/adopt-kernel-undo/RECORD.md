@@ -100,3 +100,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - Blocked on #1933 editor-kernel: EK-undo (every slice).
 
 - 2026-10-19T17:44:08Z AU-design PR #3287 merged to dev as 90e7a0c; slice-done waits on ci.yml run 39296061014 (dev 1b33afbb).
+
+- 2026-10-20T00:42:30Z Supervisor answer 00:29Z on #1934: option 1. filters-collections parked; CatalogHistory.swift hand-off released. AU-library starts now; record the order swap in both .wave.json files in AU-library's first PR. AU-design approach confirmed.
