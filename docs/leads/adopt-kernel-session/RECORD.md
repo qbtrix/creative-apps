@@ -4,7 +4,7 @@ Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
 Run: act-1a1540ed5f3-c3x9 (slices AD-photo, AD-halo, AD-library; AD-flare, AD-design done in act-1a1509b245f-653k)
 Stage: 3 wave B
 Base: 6e70826b (origin/dev); lead branch on main 6f9a2b88
-Next: AD-p2 #3253 (8e5d40de) and AD-h2 #3252 (354e39a8) on dev; candidate runs: full 39345113796 (1299651e, pending; contains 8f405311), full 39296061014 (1b33afbb, queued), scoped suiteui 39292745070 (8f405311, queued). Every full run since 17:15Z was cancelled by a newer dispatch (latest: 39342355180, 39336158094, 39335865885). Green → Belt-Slice-Done AD-photo, AD-halo. AD-l1 blocked on adopt-kernel-undo:AU-library; rule 23 question posted on #1940 (issuecomment-6279954269), no supervisor reply (checked 2026-10-20T00:13Z), AU-library polling stopped. Open findings: 0
+Next: AD-p2 #3253 (8e5d40de) and AD-h2 #3252 (354e39a8) on dev. Supervisor (issuecomment-6280424029): proof is the first green **Linux job** on a dev run containing 8f405311 (lead.md rule 6), not a completed run; dev's scripts/ci is red on expired quarantine entries until #3380 merges, so use a run whose head contains #3380. Candidate: full 39346519827 (c7306ee8, pending, no jobs started; contains 8f405311 but not #3380). 39345113796 cancelled before any job. Green Linux job → Belt-Slice-Done AD-photo, AD-halo. AD-library: supervisor released filters-collections so AU-library starts; relaunch AD-l1 when AU-library merges (checked 2026-10-20T00:33Z). Open findings: 0
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
