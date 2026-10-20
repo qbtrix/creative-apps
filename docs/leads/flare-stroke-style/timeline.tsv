@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-20T10:12:08Z	heartbeat	FG-1 #3526 merged 10:02Z; FK-a still waits on #3532 (FG-a), GF-2 (GF-a), SS-a
 2026-10-20T10:24:09Z	heartbeat	FK-a still waits on #3532 (FG-a), GF-2 (GF-a), SS-a; none merged since 10:10Z
 2026-10-20T10:35:52Z	heartbeat	FK-a still waits on #3532 (FG-a), GF-2 (GF-a), SS-a; none merged since 10:23Z
+2026-10-20T10:47:40Z	heartbeat	poll: full CI 39402653640 (36789542) still queued; newer CI 39409307241 (a54a892a) pending; FK-a deps #3532/GF-a/SS-a not merged
