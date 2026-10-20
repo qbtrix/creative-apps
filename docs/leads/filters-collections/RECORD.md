@@ -107,3 +107,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 18:05Z check-in: dev at d7f615dcb (SS-2, not ours). Six ready PRs unmerged, no needs-fix/needs-rebase; scoped 39424958645 still queued; #3520 perf lines absent, MD-10 stays draft. No findings, no fixers.
 - 18:26Z check-in: dev at 9c9d41a7b (#3654 library develop fix, #3626 suitekernel; neither ours). Six ready PRs unmerged, unlabelled; scoped 39424958645 still queued; #3520 perf lines absent, MD-10 stays draft. No findings, no fixers.
 - 18:48Z check-in: FC-4 #3461 still unmerged, unlabelled (lane batches macOS now, #3409). No findings, no FC fixers.
+- 19:13Z check-in: dev a48992b7c (only #3085, not ours). Ready on lane: MD-8 #3550, MD-11 #3570, MD-15 #3574, MD-20 #3575, FC-4 #3461; no needs-fix/needs-rebase. #3520 Library lines still absent; MD-10 stays draft. Scoped 39424958645 still queued. No findings for #1555/#1563.
