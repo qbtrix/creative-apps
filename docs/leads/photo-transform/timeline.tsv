@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T20:08Z	3	branch-pushed	lead/transform-PT-2	PT-2 head 06dc7b1, CI PASS, own diff 7 files +320/-26; PR waits for #3704 (stacked diff over cap)
 2026-10-20T20:08Z	3	open-item	TransformIntent	PhotoApp TransformIntent shares a name with SuiteKernel.TransformIntent; rename (FreeTransformIntent) in PT-5
 2026-10-20T20:08Z	3	wave-start	PT-4,PT-3	wave 2 transform builders launched
+2026-10-20T20:11Z	3	heartbeat	#3704	PR open, lane waiting on macOS batch gate; builders running
