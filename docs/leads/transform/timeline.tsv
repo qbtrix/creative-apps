@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-20T21:05Z	3	wave-start	HT-u	builder started on lead/transform-HT-u, stacked on HT-a (HT-3 + HT-4); PR opens once #3682 merges
 2026-10-20T21:20Z	3	slice-built	HT-u	lead/transform-HT-u head 71d3bda, 6 files +300/-12, CI: PASS; PR waits for #3682 to merge; p95 budget printed, not checked (perf-suites is supervisor-only); turned snapshot needs HT-5 (#3702)
 2026-10-20T21:27Z	3	heartbeat	#3682 #3702	supervisor answered: PRs are queued for the local Mac gate; once a parent squash-merges, rebase HT-u --onto dev and open its PR
+2026-10-20T21:49Z	3	heartbeat	#3682 #3702	open, in the supervisor's local Mac gate queue; HT-u ready to rebase
