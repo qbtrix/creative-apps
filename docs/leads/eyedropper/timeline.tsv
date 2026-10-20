@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-20T06:21Z	3	heartbeat	-	lead polling: #3525 open #3531 open
 2026-10-20T06:33Z	3	pr-open	#3540	EY-m (EY-5, EY-6), stacked on #3525
 2026-10-20T06:36Z	3	heartbeat	-	lead polling: #3525 open #3531 open #3540 open
+2026-10-20T06:39Z	3	pr-open	#3541	EY-u, 397 lines, stacked on #3531
