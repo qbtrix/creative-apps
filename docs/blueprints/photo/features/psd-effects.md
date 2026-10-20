@@ -22,7 +22,9 @@ RJ-P46 (new). PSD save stays out (RJ-P09 keeps its row).
 **Depends on:** creative-core `layer-style-engine` **LE-psd** (the reader
 fills `PixelLayer.style` from `lfx2` and lists what it dropped in
 `LayeredImage.notes`; `BlendMode.linearDodge` and `.linearBurn` with their
-PSD keys) through a `scripts/bump-core` PR, before PS-3 and PS-4 (cross-line);
+PSD keys) through a `scripts/bump-core` PR, before PS-3 and PS-4 (cross-line;
+that bump also adds the two new cases to Halo's exhaustive blend switches,
+`HaloViewerCanvas.swift` and `HaloKeying.swift`, as the core packet says);
 `suiteui/layer-styles` **LS-m** (`StyleProgram.style`, cross-line) before
 PS-3. Same line: `masks-clipping` **PK-m** (the last owner of
 `PhotoDocumentFile.swift` and the mask and clip flags PS-3 sets) and
