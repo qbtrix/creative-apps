@@ -33,6 +33,9 @@ Each app has three layers. Each depends only on the ones below it.
 3. **`<X>App`**: SwiftUI views and the `App` scene, built from **SuiteUI**.
    Views read the Model and call its methods. Nothing else.
 
+A canvas draws by `docs/render-contract.md`: one GPU route to the screen, no
+CPU pixel work or readback per step, no canvas-sized SwiftUI offscreen pass.
+
 Every Model also links the **kernel tier**, `SuiteKernel`
 (`Sources/SuiteKernel/`, packet
 `docs/blueprints/suiteui/features/editor-kernel.md`): one Linux-safe library
