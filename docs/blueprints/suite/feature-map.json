@@ -2583,6 +2583,155 @@
           "packet": "suiteui/timeline-keys"
         }
       ]
+    },
+    {
+      "id": "suite/command-state",
+      "name": "Every action is a command and every toggle reports its state: suite.controls carries selected, Show Original is a command, the 89 bare controls leave the baseline under a ratchet",
+      "packet": "suite/command-state",
+      "layer": "model",
+      "c4": [
+        "suiteui/suiteui-sources ControlInventory"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "design",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "library",
+          "packet": "suite/command-state"
+        }
+      ]
+    },
+    {
+      "id": "suite/report-problem",
+      "name": "Help > Report a Problem and Beta Notes: a redacted report with the newest crash logs that the person sends, and the known issues; the CLI prints the same",
+      "packet": "suite/report-problem",
+      "layer": "model",
+      "c4": [
+        "suite-model/suite-help ✚",
+        "suite-shell/shell-adoption"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "design",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "library",
+          "packet": "suite/editor-menus"
+        }
+      ]
+    },
+    {
+      "id": "suite/cli-bundle",
+      "name": "The afterglow CLI inside AfterGlow.app and Help > Connect an AI Assistant with an ask-first Install Command-Line Tool",
+      "packet": "suite/cli-bundle",
+      "layer": "model",
+      "c4": [
+        "afterglow-bundle",
+        "suite-model/suite-packaging"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "suite/editor-menus",
+      "name": "Switch To, AI Access, the Help group and the live command channel in every editor, and a window after the last one closes",
+      "packet": "suite/editor-menus",
+      "layer": "model",
+      "c4": [
+        "suite-shell/shell-adoption"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "design",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "library",
+          "packet": "suite/editor-menus"
+        }
+      ]
+    },
+    {
+      "id": "suite/sample-files",
+      "name": "The welcome tour's sample files, made by afterglow scripts and shipped in the bundle (#836 to #839)",
+      "packet": "suite/sample-files",
+      "layer": "model",
+      "c4": [
+        "afterglow-bundle"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "design",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "library",
+          "packet": "suite/sample-files"
+        }
+      ]
+    },
+    {
+      "id": "suite/no-placeholders",
+      "name": "No placeholder menu items in the beta: launcher Check for Updates and Assets and Flare's beta.2 items hidden, a ratchet keeps new ones out",
+      "packet": "suite/no-placeholders",
+      "layer": "model",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suite/no-placeholders"
+        }
+      ]
     }
   ]
 }
