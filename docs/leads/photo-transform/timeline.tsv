@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-20T20:08Z	3	wave-start	PT-4,PT-3	wave 2 transform builders launched
 2026-10-20T20:11Z	3	heartbeat	#3704	PR open, lane waiting on macOS batch gate; builders running
 2026-10-20T20:19Z	3	restart	PT-3,PT-4	container restart killed builders; relaunched in surviving worktrees
+2026-10-20T20:26Z	3	pushed	PT-4 889e2f2	CI PASS, Mutate 2/2; own diff 5 files +180/-42; PR waits on #3704 (487 lines vs dev)
