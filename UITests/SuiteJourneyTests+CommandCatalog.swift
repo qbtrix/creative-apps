@@ -15,7 +15,6 @@ extension SuiteJourneyTests {
 
     /// CC-9: the command-catalog page lists the fake's commands, says why Remove can't run, and runs Add.
     @MainActor func testCommandCatalogGallery() throws {
-        throw XCTSkip("waits on CC-10")
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
 
