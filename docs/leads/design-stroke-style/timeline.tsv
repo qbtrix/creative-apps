@@ -6,3 +6,4 @@ time	kind	note
 2026-10-20T20:15Z	3	check	#3690	macOS build 39484764814 queued on 6bb9960e; no needs-fix; scoped design run 39490030243 on dev predates DK-a
 2026-10-20T20:36Z	-	check	#3690	macOS build 39484764814 still queued (61m)
 2026-10-20T20:58Z	-	check	#3690	macOS build 39484764814 still queued; mac runners busy with older builds
+2026-10-20T21:20Z	-	check	#3690	macOS build 39484764814 still queued (105m)
