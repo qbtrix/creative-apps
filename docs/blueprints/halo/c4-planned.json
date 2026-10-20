@@ -63,10 +63,11 @@
               {
                 "id": "halo-layers",
                 "name": "Layers",
-                "description": "HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values.",
+                "description": "HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values. A solid or shape layer's gradient fill (the kernel's Fill in the layer's unit box) and its GradientFillTarget conformance (HaloFill+Kernel).",
                 "paths": [
                   "Sources/HaloModel/HaloLayer.swift",
-                  "Sources/HaloModel/HaloLayerDefaults.swift"
+                  "Sources/HaloModel/HaloLayerDefaults.swift",
+                  "Sources/HaloModel/HaloFill+Kernel.swift"
                 ],
                 "status": "existing",
                 "authored": true,
@@ -104,10 +105,11 @@
               {
                 "id": "halo-commands",
                 "name": "Commands and availability",
-                "description": "HaloCommand: every menu, toolbar and key command of v1, by area, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. It dispatches to one file per area under Availability/; W0 writes them as stubs and each feature replaces its own area's file when its action works.",
+                "description": "HaloCommand: every menu, toolbar and key command of v1, by area, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. It dispatches to one file per area under Availability/; W0 writes them as stubs and each feature replaces its own area's file when its action works. HaloCommandCatalog: the same actions as SuiteKernel command specs, the fill commands included.",
                 "paths": [
                   "Sources/HaloModel/HaloCommand.swift",
-                  "Sources/HaloModel/Availability/"
+                  "Sources/HaloModel/Availability/",
+                  "Sources/HaloModel/HaloCommandCatalog.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -487,13 +489,14 @@
               {
                 "id": "halo-inspector",
                 "name": "Inspector",
-                "description": "The inspector: the composition header and rows, the layer list (select, rename, reorder, delete), the selected layer's TRANSFORM rows with keyframe buttons, parent and blend pickers, the EASING group (chips and curve) and the TEXT section.",
+                "description": "The inspector: the composition header and rows, the layer list (select, rename, reorder, delete), the selected layer's TRANSFORM rows with keyframe buttons, parent and blend pickers, the EASING group (chips and curve) and the TEXT section. HaloFillInspector: the shared GradientEditor under the colour row for solid and shape layers.",
                 "paths": [
                   "Sources/HaloApp/HaloCompositionInspector.swift",
                   "Sources/HaloApp/HaloLayerList.swift",
                   "Sources/HaloApp/HaloLayerInspector.swift",
                   "Sources/HaloApp/HaloEasingInspector.swift",
-                  "Sources/HaloApp/HaloTextInspector.swift"
+                  "Sources/HaloApp/HaloTextInspector.swift",
+                  "Sources/HaloApp/HaloFillInspector.swift"
                 ],
                 "status": "existing",
                 "authored": true,

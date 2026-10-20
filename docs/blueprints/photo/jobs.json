@@ -372,17 +372,20 @@
     "job": "Fill a selection with a sky gradient.",
     "outcome": "Smooth, no banding, stays inside the selection.",
     "needs": [
-      "E6"
+      "E6",
+      "S24",
+      "photo/gradient-fill"
     ],
-    "needs_note": "E6 fill tools",
-    "closes_with": "E6",
+    "needs_note": "E6's raster gradient (on the pinned core); photo/gradient-fill adds the Gradient tool",
+    "closes_with": "photo/gradient-fill",
     "trap": "Solid fill works; no gradient tool; banding in 8-bit",
     "run": "C",
     "baseline": "partial",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PG-3"
   },
   "RJ-P20": {
     "id": "RJ-P20",
