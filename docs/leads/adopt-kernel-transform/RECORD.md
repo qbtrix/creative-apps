@@ -2,9 +2,9 @@
 
 Issue: #1938 · Packet: docs/blueprints/suiteui/features/adopt-kernel-transform.md
 Run: act-1a157b2050f-ovpu (resumed from act-1a1543c764c-0mz9) · Session: claude/feature-lead-suiteui-run-336pic · Started: 2026-10-20T05:08Z
-Stage: 3 wave 2 (AT-flare, AT-photo done; AT-design blocked on AL-design)
+Stage: done
 Base: b3011ab9dc5579023722e79f83254e6e2520e612 (main); dev 18464f26
-Next: AT-design (AT-d1) starts when adopt-kernel-layers AL-design #3392 merges on dev (open, clean, Head ed7c3c6, waiting on the lane's macOS build); AS-design merged #3385 (2026-10-20T01:39Z). Recheck every heartbeat.
+Next: beta-hardening lane verifies AT-design, AT-photo, AT-flare
 
 Line lead for #1938, #1937 and #1936 (contract rule 19); this record is the
 adopt-kernel-transform part. The brief names `main` at
@@ -15,15 +15,15 @@ fast-lane PR opened against `main` to `dev`).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AT-design | Design transform on `EditorHandle`, `BoxMath`, `HandleHit`, `LayerTransform` behind its API; copy deleted | AT-d1, AT-d2 | MJ-AT-design (`DesignResizeTests`) | editor-kernel:EK-box, adopt-kernel-selection:AS-design, adopt-kernel-layers:AL-design (AT-d1) | false | 0 | blocked | – | – |
+| AT-design | Design transform on `EditorHandle`, `BoxMath`, `HandleHit`, `LayerTransform` behind its API; copy deleted | AT-d1, AT-d2 | MJ-AT-design (`DesignResizeTests`) | editor-kernel:EK-box, adopt-kernel-selection:AS-design, adopt-kernel-layers:AL-design (AT-d1) | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39495828474 | – |
 | AT-photo | Photo transform on the same kernel types behind its API; copy deleted | AT-p1, AT-p2 | MJ-AT-photo (`PhotoMoveTests`) | editor-kernel:EK-box (AT-p1), met: #2711 | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39132122171 | – |
 | AT-flare | Flare `BoxGestureMath` takes handle numbering, mirror and zero-size guards from the kernel; copy deleted | AT-f1, AT-f2 | MJ-AT-flare (`BoxGestureMathTests`) | editor-kernel:EK-box (AT-f1), met: #2711 | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39131124501 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| AT-d1 | AT-design | 1 | Design adapter: `DesignHandle` = `EditorHandle`, `resized`/`handles`/`handle(at:)`/`scaled` call `BoxMath`/`HandleHit`; `DesignModifiers` = `EditModifiers` | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/Live/LiveTransforming.swift, Sources/DesignModel/DesignCanvasEditing.swift, Tests/DesignModelTests/DesignResizeTests.swift, Tests/DesignModelTests/DesignSeveralTransformTests.swift, Tests/DesignModelTests/DesignCompactSelectionTests.swift, Tests/DesignModelTests/DesignCanvasTests.swift, Tests/mutations/DesignModel.KernelTransformAdapter.json | those four unchanged; `scripts/mutate --plan DesignModel.KernelTransformAdapter` (dropped `endRun()` forward; refusal mapped to success) | – | waiting (EK-box, AS-design, AL-design) |
-| AT-d2 | AT-design | 2 | Design delete: box math in `DesignNode.swift`, `scaled`, handle hit; plans repointed | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/Live/LiveTransforming.swift, Sources/DesignModel/DesignCanvasEditing.swift, Tests/mutations/DesignModel.LiveTransforming.json, Tests/mutations/DesignModel.DesignNode.json | same tests; `scripts/mutate --validate` | – | waiting (AT-d1) |
+| AT-d1 | AT-design | 1 | Design adapter: `DesignHandle` = `EditorHandle`, `resized`/`handles`/`handle(at:)`/`scaled` call `BoxMath`/`HandleHit`; `DesignModifiers` = `EditModifiers` | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/Live/LiveTransforming.swift, Sources/DesignModel/DesignCanvasEditing.swift, Tests/DesignModelTests/DesignResizeTests.swift, Tests/DesignModelTests/DesignSeveralTransformTests.swift, Tests/DesignModelTests/DesignCompactSelectionTests.swift, Tests/DesignModelTests/DesignCanvasTests.swift, Tests/mutations/DesignModel.KernelTransformAdapter.json | those four unchanged; `scripts/mutate --plan DesignModel.KernelTransformAdapter` (dropped `endRun()` forward; refusal mapped to success) | #3593 | merged |
+| AT-d2 | AT-design | 2 | Design delete: box math in `DesignNode.swift`, `scaled`, handle hit; plans repointed | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/Live/LiveTransforming.swift, Sources/DesignModel/DesignCanvasEditing.swift, Tests/mutations/DesignModel.LiveTransforming.json, Tests/mutations/DesignModel.DesignNode.json | same tests; `scripts/mutate --validate` | #3604 | merged (feature-done) |
 | AT-p1 | AT-photo | 1 | Photo adapter: `TransformHandle` = `EditorHandle`, kernel `LayerTransform`, `handle(at:in:tolerance:)` calls `HandleHit`, `dragged` calls `BoxMath.resized`/`snappedDegrees`; `LiveTransform.applied` stays `NotBuilt` | Sources/PhotoModel/Contracts/LayerContracts.swift, Sources/PhotoModel/Live/LiveTransform.swift, Sources/PhotoModel/Live/LiveTransform+Kernel.swift, Sources/PhotoModel/Live/NotBuilt.swift, Sources/PhotoModel/Fakes/FakeGeometry.swift, Tests/PhotoModelTests/PhotoKernelTransformTests.swift, Tests/PhotoModelTests/PhotoMoveTests.swift, Tests/PhotoModelTests/PhotoDragRoutingTests.swift, Tests/mutations/PhotoModel.KernelTransformAdapter.json | PhotoMoveTests, PhotoDragRoutingTests unchanged; `scripts/mutate --plan PhotoModel.KernelTransformAdapter` | #2756 | merged |
 | AT-p2 | AT-photo | 2 | Photo delete: `PhotoTransform.swift` no-op and the handle enum in `PhotoContractTypes.swift`; plans repointed | Sources/PhotoModel/PhotoTransform.swift, Sources/PhotoModel/Live/LiveTransform.swift, Sources/PhotoModel/Contracts/PhotoContractTypes.swift, Tests/mutations/PhotoModel.PhotoTransform.json | same tests; `scripts/mutate --validate` | – | folded (see Decisions) |
 | AT-f1 | AT-flare | 1 | Flare adapter: `BoxGestureMath` keeps FlareCore placement and oblique fit, takes handle numbering and guards from `EditorHandle`/`BoxMath` | Sources/FlareModel/Live/BoxGestureMath.swift, Sources/FlareModel/Live/BoxGestureMath+Kernel.swift, Tests/FlareModelTests/BoxGestureMathKernelTests.swift, Tests/FlareModelTests/BoxGestureMathTests.swift, Tests/FlareModelTests/LiveShapesBoxTests.swift, Tests/mutations/FlareModel.KernelTransformAdapter.json | BoxGestureMathTests, LiveShapesBoxTests unchanged; `scripts/mutate --plan FlareModel.KernelTransformAdapter` | #2755 | merged |
@@ -123,3 +123,7 @@ fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T20:38Z: no qualifying run yet: full CI 39485502739 (8c90de14) and scoped design 39490030243 (014da2f1) still pending; latest completed runs are Linux checks
 
 - 2026-10-20T20:57Z: still no qualifying run completed. Pending: full CI 39485502739 (8c90de14), scoped suiteui 39491489760 (e64cff6b, contains every slice merge), scoped design 39490030243, photo 39492942073, flare 39491495208, halo 39494391226 (all contain the slice merges)
+
+## Run act-1a15b23f1eb-iz6h
+
+- 2026-10-20T21:15Z: AT-design merged-done on Linux check 39495828474 (dev 6c2c7b05 contains #3593 and #3604; supervisor 05:03Z: a Linux check run's green Linux job is the merged-done proof). Belt-Slice-Done: AT-design and Belt-Contact-Sheet posted on #1938. No open findings. Lead work done; verification is the beta-hardening lane's.
