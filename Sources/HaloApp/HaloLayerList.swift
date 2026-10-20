@@ -21,7 +21,13 @@
 // no layers shows "No layers yet. Add one from Layer > New."
 // (`halo.layer.empty`). The list takes focus, so Delete (⌫) there sends
 // `deleteLayer` (in the viewer and timeline ⌫ deletes the picked keys first,
-// HaloViewer). Values in, commands out.
+// HaloViewer). Under the rows sits SuiteUI's LayerActionBar: New Layer (a
+// solid), Duplicate, Delete and fx (waiting on layer styles), each
+// `halo.layer.bar.<part>`; a row's context menu holds Rename…, Duplicate,
+// Delete, Bring Forward and Send Backward. Every item is the Layer menu's own
+// (HaloMenuTarget.item on the catalog spec), so title, enablement and reason
+// match it; a row's menu reads the project with that row selected, and a pick
+// selects the row first. Values in, commands out.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -54,10 +60,12 @@ struct HaloLayerList: View {
                         perform(.renameLayer(id, name))
                         return nil
                     },
+                    contextActions: { Self.rowMenu(target, row: $0) },
                     onAction: act)
                 // Names at the inspector's label size, as the Parent and Blend rows above.
                 .font(SuiteFont.inspectorLabel)
             }
+            LayerActionBar(Self.bar(target))
             if let refusal = rowRefusal(in: layers) {
                 InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
                     .accessibilityElement(children: .combine)
@@ -68,6 +76,43 @@ struct HaloLayerList: View {
         .focusable()
         .focusEffectDisabled()
         .onDeleteCommand { perform(.deleteLayer) }
+    }
+
+    /// The Layer menu's target over this list's project.
+    private var target: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
+
+    /// The bar's commands with their symbols and id parts; New adds a solid, the Layer menu's first kind.
+    nonisolated static let barCommands: [(command: HaloCommand, symbol: String, part: String)] = [
+        (.newLayer(.solid), "plus", "new"), (.duplicateLayer, "plus.square.on.square", "duplicate"),
+        (.deleteLayer, "trash", "delete"),
+    ]
+
+    /// A row menu's commands with their symbols.
+    nonisolated static let rowCommands: [(command: HaloCommand, symbol: String)] = [
+        (.beginRenameLayer, "pencil"), (.duplicateLayer, "plus.square.on.square"), (.deleteLayer, "trash"),
+        (.bringLayerForward, "square.2.layers.3d.top.filled"), (.sendLayerBackward, "square.2.layers.3d.bottom.filled"),
+    ]
+
+    /// The bar: each command as its Layer menu item, then fx, disabled until layer styles land.
+    // view-static: main-actor
+    static func bar(_ target: HaloMenuTarget) -> [ToolbarAction] {
+        barCommands.map { entry in
+            let title = entry.command == .newLayer(.solid) ? "New Layer" : nil
+            return ToolbarAction(target.item(entry.command, title: title, systemImage: entry.symbol),
+                                 identifier: "halo.layer.bar." + entry.part)
+        } + [LayerActionBar.effects(identifier: "halo.layer.bar.fx")]
+    }
+
+    /// Row `id`'s context menu: each item as the Layer menu shows it with that row selected; a pick selects it first.
+    // view-static: main-actor
+    static func rowMenu(_ target: HaloMenuTarget, row id: String) -> [ToolbarAction] {
+        var model = target.model
+        model?.selectLayer(id)
+        let row = HaloMenuTarget(model: model) { command in
+            target.perform?(.selectLayer(id))
+            target.perform?(command)
+        }
+        return rowCommands.map { ToolbarAction(row.item($0.command, systemImage: $0.symbol)) }
     }
 
     /// Each row's kind symbol, tooltip and VoiceOver value, by layer id.
