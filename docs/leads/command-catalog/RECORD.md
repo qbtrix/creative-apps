@@ -55,3 +55,4 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 ## Decisions (run act-1a157b2050f-ovpu)
 - 2026-10-20: unchained CC-9 from font-picker:FP-a. The wait was only file order on `SuiteGallery.swift`; FP-a has no issue, no lead and no PR. The order is reversed instead: FP-a (FP-1) waits on command-catalog:CC-u, and gradient-fill GF-a (GF-2) also waits on FP-a, so GF-2 still lands after both as before (it already waited on FP-a through CC-u). `scripts/waves check`: OK. Packets' prose updated to match. Folded into the CC-9 PR (rule 12: under 50 lines).
 - PRs still target `dev`, not `main` as the brief's step list implies: CLAUDE.md and the lane only take crew PRs on dev (a main PR is retargeted).
+- 2026-10-20T09:52:24Z: CC-z (CC-14) opened as #3588 (head 14cae3ba, 4 files +29/-4, feature-done); scripts/ci --changed PASS. Belt-Slice-Done for CC-u and CC-z waits on a completed full or app=suiteui run on dev containing #3484 and #3588.
