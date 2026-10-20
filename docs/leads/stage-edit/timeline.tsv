@@ -232,3 +232,4 @@
 2026-10-20T17:50:58Z	heartbeat	full CI 39467874733 cancelled (superseded); waiting on full CI 39469318877 on d7f615dc (contains 424b4a60), pending
 2026-10-20T18:03:47Z	heartbeat	full CI 39469318877 on d7f615dc (contains 424b4a60) still pending; awaiting green for contact sheet
 2026-10-20T18:14:53Z	heartbeat	full CI 39469318877 on d7f615dc still pending (macOS runner backlog); awaiting green for contact sheet
+2026-10-20T18:27:20Z	heartbeat	full CI 39469318877 on d7f615dc still pending ~40 min (macOS backlog); merges since: #3626, #3654
