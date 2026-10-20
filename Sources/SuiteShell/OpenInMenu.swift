@@ -2,6 +2,7 @@
 // app's Open… item. Open Recent lists the app's files newest first with Clear Menu, or a disabled
 // "No Recent Files". Open In lists the open document's other readers, or stays off with its reason: "Open a
 // document first." with none open, else the routing slot's sentence. `SuiteFileMenu` is what both show.
+import SuiteKernel
 import SuiteModel
 import SwiftUI
 
