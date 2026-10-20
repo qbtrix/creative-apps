@@ -2,9 +2,9 @@
 
 Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
-Stage: 3 wave 2
+Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: the wave 2 builder (FC-4, stacked on FC-2b) opens its PR; then wave 3: FC-5, FC-6, FC-8 (FC-11, FC-13 after)
+Next: FC-5 builder (stacked on FC-4) opens a draft PR; when #3424 merges un-draft #3461, when #3461 merges un-draft FC-5; then FC-6, FC-8, FC-11, FC-13 checks
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,8 +22,8 @@ Next: the wave 2 builder (FC-4, stacked on FC-2b) opens its PR; then wave 3: FC-
 | FC-2a | FC-a | done | stored filter/collection state, UserCollection, refreshShown | Sources/LibraryModel/LibraryCatalog.swift, Sources/LibraryModel/LibraryCollections.swift | LibraryRefreshShownTests | #1999 | merged |
 | FC-2b | FC-a | 1 | contract: catalog method stubs, shownItems through activeFilter and user collections, recount rows, editCanReorder, LibraryEmptyCollection, MJ1 seam test, plans | Sources/LibraryModel/LibraryCatalog.swift, Sources/LibraryModel/LibraryOrder.swift, Sources/LibraryModel/LibraryCollections.swift, Sources/LibraryModel/LibraryFilter.swift, Sources/LibraryModel/LibraryEmptyCollection.swift, Tests/LibraryModelTests/LibraryCollectionsSeamTests.swift, Tests/mutations/LibraryModel.LibraryCatalog.json, Tests/mutations/LibraryModel.LibraryOrder.json | LibraryCollectionsSeamTests (MJ1) | #3424 | open, macOS build queued |
 | FC-3 | FC-a | 1 | collection edits as undo steps on the kernel adapter (recordCollectionsEdit) | Sources/LibraryModel/LibraryUndoAdapter.swift, Tests/LibraryModelTests/LibraryCollectionsHistoryTests.swift, Tests/mutations/LibraryModel.LibraryCollectionsHistory.json | LibraryCollectionsHistoryTests | #3423 | open, macOS build queued |
-| FC-4 | FC-a | 2 | menu, bar and area hooks; CollectionsStore stub (UI, macOS) | Sources/LibraryApp/LibraryWindow+Filters.swift, Sources/LibraryApp/Platform/CollectionsStore.swift | builds on macOS | - | building (stacked on feat/library-fc2b-contract) |
-| FC-5 | FC-a | 3 | mount bar, sidebar section, menu items (UI, macOS) | Sources/LibraryApp/LibraryWindow.swift, Sources/LibraryApp/LibraryCommands.swift, Sources/LibraryApp/LibraryBrowser.swift | MJ1, FC-a snapshots | - | planned |
+| FC-4 | FC-a | 2 | menu, bar and area hooks; CollectionsStore stub (UI, macOS) | Sources/LibraryApp/LibraryWindow+Filters.swift, Sources/LibraryApp/Platform/CollectionsStore.swift | builds on macOS | #3461 | open, draft until #3424 merges (stacked) |
+| FC-5 | FC-a | 3 | mount bar, sidebar section, menu items (UI, macOS) | Sources/LibraryApp/LibraryWindow.swift, Sources/LibraryApp/LibraryCommands.swift, Sources/LibraryApp/LibraryBrowser.swift | MJ1, FC-a snapshots | - | building (stacked on feat/library-fc4-filters-area) |
 | FC-6 .. FC-16 | FC-b..FC-e | 3+ | see packet | see packet task table | see packet | - | planned |
 
 ## Reviews
@@ -41,6 +41,8 @@ Next: the wave 2 builder (FC-4, stacked on FC-2b) opens its PR; then wave 3: FC-
 - The wave 1 PR bodies got the session's attribution footer, and the lane flagged it. I removed it from #3422, #3423 and #3424. Builder prompts now say: no footer.
 - FC-4 and FC-5 together are about 550 lines, over the 400 cap, so FC-a ships as more than one PR. The cap wins over rule 22.
 - Open PR #3396 (AD-l1) also edits the library-model-sources C4 part. The lane integrates any conflict.
+
+- Stacked PRs stay draft until their parent merges. The lane skips drafts before its size check, so a stacked PR over the cap keeps its fast-lane label (scripts/fast-lane.sh: draft skip comes before the "too big" reason that drops the label).
 
 ## Open
 - S-L9 #3411 (sidebar drop): FC-10 waits on it. S-L10 #3412 (isRenamable): nothing waits on it.

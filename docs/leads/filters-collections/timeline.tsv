@@ -17,3 +17,6 @@ utc	stage	event	ref	note
 2026-10-20T04:22Z	stage-end	3 wave 1
 2026-10-20T04:22Z	stage-start	3 wave 2
 2026-10-20T04:42:28Z	check	findings none in feature; dev-red #3386 not ours; FC-4 builder gate rerun on committed head
+2026-10-20T04:45:20Z	pr-opened	FC-4 #3461 (draft, stacked on #3424)
+2026-10-20T04:45:20Z	stage-end	3 wave 2
+2026-10-20T04:45:20Z	stage-start	3 wave 3: FC-5 building
