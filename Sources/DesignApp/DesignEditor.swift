@@ -1,7 +1,8 @@
 // DesignEditor.swift: what a Design window shows, laid out on SuiteUI's
 // SuiteWindow: the title (the file's name, "Untitled" for an open file with
-// none, else "Design"), the toolbar's eight commands (DesignToolbarItem: New,
-// Open and Save beside the title; Undo, Redo and the zoom commands trailing),
+// none, else "Design"), the toolbar's nine commands (DesignToolbarItem: New,
+// Open and Save beside the title; Undo, Redo, History and the zoom commands
+// trailing, History toggling the window's panel, DesignHistoryArea),
 // the pages and layer tree in the sidebar (DesignLayersPanel), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
 // file is open and the status line under it (zoom, "Page 1440 × 1024 pt", the last
@@ -31,10 +32,12 @@ struct DesignEditor: View {
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
     var onZoom: @MainActor (Double) -> Void = { _ in }
     var perform: DesignPerform = { _ in }
+    /// The window's History panel, which the History button toggles.
+    @Environment(\.designHistory) private var history
 
     /// The commands beside the title, then the trailing ones, in toolbar order.
     private static let documentItems: [DesignToolbarItem] = [.newFile, .open, .save]
-    private static let trailingItems: [DesignToolbarItem] = [.undo, .redo, .zoomOut, .fit, .zoomIn]
+    private static let trailingItems: [DesignToolbarItem] = [.undo, .redo, .history, .zoomOut, .fit, .zoomIn]
 
     #if DEBUG
     /// How many times an editor's body ran; DesignWindowDragTests counts a drag's.
@@ -99,7 +102,7 @@ struct DesignEditor: View {
 
     /// One toolbar command: the Model's title, symbol, reason and identifier, sending its intent.
     private func action(_ item: DesignToolbarItem) -> ToolbarAction {
-        let intent = item.intent
+        guard let intent = item.intent else { return DesignHistoryArea.toolbarAction(model, history) }
         return ToolbarAction(
             item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model),
             identifier: item.identifier
