@@ -4,6 +4,8 @@ edit.redo
 edit.select
 edit.select-all
 edit.undo
+file.export
+file.import
 file.load-samples
 metadata.auto-advance
 metadata.clear-flag
@@ -20,6 +22,7 @@ view.actual-size
 view.grid
 view.loupe
 view.sort
+view.thumbnail-size
 view.zoom-in
 view.zoom-out
 view.zoom-to-fit

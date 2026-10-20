@@ -3,7 +3,9 @@
 // when the spec is available on the target, and its help is the spec's
 // summary or, disabled, "<title>: <why>". Checked over the fake catalog on an
 // empty document and on the fixture, plus the gallery page's rows and Edit
-// row title. macOS only.
+// row title. A ToolbarAction built from a spec follows the same rule: the
+// spec's title, enabled when available, else "<title>: <why>" as its tooltip.
+// macOS only.
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
@@ -52,6 +54,20 @@ import Testing
                 if let why { #expect(built.help == "\(built.title): \(why)", "\(id) hides its why-not") }
             }
         }
+    }
+
+    @Test func toolbarActionFromTheSpec() throws {
+        var ran = 0
+        let remove = ToolbarAction(try #require(catalog.spec("rect.remove")), on: FakeCanvasDocument(), systemImage: "minus",
+                                   identifier: "test.remove") { ran += 1 }
+        #expect(remove.title == "Remove Rectangle" && !remove.isEnabled && remove.identifier == "test.remove")
+        #expect(remove.help == "Remove Rectangle: Select a rectangle first.")
+        let add = ToolbarAction(try #require(catalog.spec("rect.add")), on: FakeCanvasDocument(), title: "Add", systemImage: "plus") {
+            ran += 1
+        }
+        #expect(add.title == "Add" && add.isEnabled)
+        add.perform()
+        #expect(ran == 1)
     }
 
     @Test func galleryRowsAndUndoTitle() throws {

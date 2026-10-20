@@ -63,6 +63,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
             "view.actual-size": .actualSize, "view.sort": .setSort(.name), "metadata.set-rating": .setRating(3),
             "metadata.pick": .setFlag(.pick), "metadata.reject": .setFlag(.reject), "metadata.clear-flag": .setFlag(.none),
             "metadata.set-label": .setLabel(.red), "metadata.auto-advance": .toggleAutoAdvance,
+            "view.thumbnail-size": .setCellSize(160),
         ]
         if let action = actions[id] { return .some(c.help(action)) }
         return switch id {
@@ -71,6 +72,8 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "photo.reset-develop": .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "photo.crop": .some(menu(c.cropHelp == nil, "crop", "Crop isn't connected yet."))
         case "photo.reset-crop": .some(menu(c.resetCropHelp == nil, "crop", "Crop isn't connected yet."))
+        case "file.import": .some(c.importHelp ?? c.services.unavailable["importer"])
+        case "file.export": .some(c.exportHelp)
         default: nil
         }
     }
@@ -135,7 +138,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
                     && (try? ran.save()) == (try? doc.save())
                 let noOpEdit = unchanged && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes", "redoRestoresBytes"]
                     .contains { problem.contains(": \($0):") }
-                return !(off && problem.contains("exampleRuns")) && !noOpEdit
+                // Import needs the window's folder panel; the CLI imports through LibraryHeadless instead.
+                let windowOnly = problem.hasPrefix("file.import: exampleRuns")
+                return !(off && problem.contains("exampleRuns")) && !noOpEdit && !windowOnly
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             for spec in LibraryCatalog.commands where spec.kind == .edit && spec.availability(c).why == nil {
@@ -163,13 +168,14 @@ struct LibraryCatalogDoc: HeadlessDocument {
     }
 
     static let golden = [
-        "file.load-samples | Load Sample Photos | on",
+        "file.import | Import Folder… | on", "file.load-samples | Load Sample Photos | on", "file.export | Export… | on",
         "edit.undo | Undo | There is nothing to undo.", "edit.redo | Redo | There is nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on", "edit.deselect | Deselect | on",
         "view.grid | Grid | The grid is already showing.", "view.loupe | Loupe | on",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on",
         "view.zoom-to-fit | Zoom to Fit | Open a photo in the loupe to zoom.",
         "view.actual-size | Actual Size | Open a photo in the loupe to zoom.", "view.sort | Sort By | on",
+        "view.thumbnail-size | Thumbnail Size | on",
         "photo.copy-settings | Copy Settings | Develop isn't connected yet.", "photo.paste-settings | Paste Settings | Develop isn't connected yet.",
         "photo.reset-develop | Reset Develop | on", "photo.crop | Crop | Crop isn't connected yet.",
         "photo.reset-crop | Reset Crop | Crop isn't connected yet.",
