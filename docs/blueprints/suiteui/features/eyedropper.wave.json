@@ -1,0 +1,162 @@
+{
+  "title": "One eyedropper: SuiteUI's screen pick on every colour row and the canvas loupe, the kernel's mean and color.sample",
+  "wave": 4,
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S13 (eyedropper; PV-9 re-cut); real job RJ-X33; captain 2026-10-20: everyday tools in the beta, built once",
+  "waits_on": "gradient-fill's GF-a (FillColor) and transform-tools' TT-z (the fake document) slices; canvas-host (built)",
+  "depends": [
+    "inspector-controls",
+    "canvas-host"
+  ],
+  "longest_chain": "6 (EY-1 → EY-2 → EY-3 → EY-4 → EY-7 → EY-9)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteEyedropperJourneyTests.testEyedropperPicksFromCanvas"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Sample/SampleRules.swift",
+    "Sources/SuiteKernel/Sample/SampleCommands.swift",
+    "Tests/SuiteKernelTests/SampleRulesTests.swift",
+    "Tests/SuiteKernelTests/SampleCommandsTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json",
+    "Sources/SuiteUI/Eyedropper.swift",
+    "Sources/SuiteUI/ColorWell.swift",
+    "Sources/SuiteUI/Gallery/GalleryEyedropper.swift",
+    "Sources/SuiteUI/Gallery/GalleryCanvasHost.swift",
+    "UITests/SuiteJourneyTests+Eyedropper.swift",
+    "Tests/SuiteUITests/EyedropperTests.swift",
+    "Tests/AppSnapshotTests/SuiteEyedropperSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetEyedropperTests.swift",
+    "Tests/mutations/SuiteKernel.SampleRules.json",
+    "Tests/mutations/SuiteKernel.SampleCommands.json",
+    "Tests/SuiteUITests/EyedropperLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeSampleTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/sample-color/sample-color.jobs.json",
+    "Tests/RealJobs/fake/sample-color/input/two-fills.fake",
+    "docs/blueprints/suiteui/features/eyedropper.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "EY-a",
+      "behavior": "The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper parameter, the gallery's eyedropper page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "EY-1",
+        "EY-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "gradient-fill:GF-a": [
+          "EY-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Sample/SampleRules.swift",
+        "Sources/SuiteKernel/Sample/SampleCommands.swift",
+        "Tests/SuiteKernelTests/SampleRulesTests.swift",
+        "Tests/SuiteKernelTests/SampleCommandsTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json",
+        "Sources/SuiteUI/Eyedropper.swift",
+        "Sources/SuiteUI/ColorWell.swift",
+        "Sources/SuiteUI/Gallery/GalleryEyedropper.swift",
+        "Sources/SuiteUI/Gallery/GalleryCanvasHost.swift",
+        "UITests/SuiteJourneyTests+Eyedropper.swift"
+      ]
+    },
+    {
+      "id": "EY-u",
+      "behavior": "On the gallery page every colour row's eyedropper picks a colour from the screen as one gesture, the loupe follows the pointer with the colour under it, and the size chips change the square, within the render budget.",
+      "tasks": [
+        "EY-3",
+        "EY-4"
+      ],
+      "journeys": [
+        "EJ1"
+      ],
+      "waits": {
+        "EY-a": [
+          "EY-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Eyedropper.swift",
+        "Sources/SuiteUI/ColorWell.swift",
+        "Tests/SuiteUITests/EyedropperTests.swift",
+        "Tests/AppSnapshotTests/SuiteEyedropperSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetEyedropperTests.swift",
+        "UITests/SuiteJourneyTests+Eyedropper.swift"
+      ]
+    },
+    {
+      "id": "EY-m",
+      "behavior": "The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document point or null.",
+      "tasks": [
+        "EY-5",
+        "EY-6"
+      ],
+      "journeys": [
+        "KJ-sample"
+      ],
+      "waits": {
+        "EY-a": [
+          "EY-5",
+          "EY-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Sample/SampleRules.swift",
+        "Tests/SuiteKernelTests/SampleRulesTests.swift",
+        "Tests/mutations/SuiteKernel.SampleRules.json",
+        "Sources/SuiteKernel/Sample/SampleCommands.swift",
+        "Tests/SuiteKernelTests/SampleCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.SampleCommands.json"
+      ]
+    },
+    {
+      "id": "EY-z",
+      "behavior": "The gallery samples through color.sample on a live target, the fake app samples its topmost rect so RJ-X33 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "EY-7",
+        "EY-8",
+        "EY-9"
+      ],
+      "journeys": [
+        "EJ1",
+        "KJ-sample"
+      ],
+      "waits": {
+        "EY-u": [
+          "EY-7"
+        ],
+        "EY-m": [
+          "EY-7",
+          "EY-8"
+        ],
+        "transform-tools:TT-z": [
+          "EY-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryEyedropper.swift",
+        "Tests/SuiteUITests/EyedropperLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeSampleTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/sample-color/sample-color.jobs.json",
+        "Tests/RealJobs/fake/sample-color/input/two-fills.fake",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json",
+        "docs/blueprints/suiteui/features/eyedropper.wave.json"
+      ]
+    }
+  ]
+}
