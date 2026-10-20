@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-20T10:10Z	1	check	HG-m	HG-6 rebased on 11a545e, scripts/ci --changed PASS; GF-6 still has no PR; no green dev Linux run contains #3516 yet
 2026-10-20T10:32Z	1	done	HG-a	Belt-Slice-Done: HG-a on run 39406588924 (Linux green, a6cb012 contains cf691cca); GF-6 still has no PR
 2026-10-20T10:54Z	1	poll	HG-m	no PR yet for suiteui GF-2/GF-3/GF-6 or halo CL-probe; HG-m and HG-u stay blocked (open gradient-fill PR: flare FG-6 #3532)
+2026-10-20T11:17Z	1	poll	HG-m	still no PR for suiteui GF-2/GF-3/GF-6; halo core-loop active (#3590 open) but no CL-probe PR; HG-m and HG-u stay blocked
