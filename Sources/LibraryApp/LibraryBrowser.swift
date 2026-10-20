@@ -15,7 +15,8 @@ import SwiftUI
 
 /// The notice row over the photo grid, or the empty state whose one button is
 /// Import Folder… (disabled until import lands, its message then saying why and
-/// pointing to File > Load Sample Photos; none for a newer catalog); an empty collection in a non-empty catalog gets an empty
+/// pointing to File > Load Sample Photos; none for a newer catalog), beside Try
+/// Sample Photos, and that takes a dropped folder as an import; an empty collection in a non-empty catalog gets an empty
 /// state that says how to fill it, with a button back to All Photos. In loupe
 /// mode it shows the loupe's photo (LibraryLoupe) instead of the grid.
 struct LibraryBrowser: View {
@@ -83,12 +84,37 @@ struct LibraryBrowser: View {
             identifier: "library.import", perform: action ?? {})
     }
 
+    /// Why Try Sample Photos can't act when the catalog doesn't say.
+    static let samplesFallbackHelp = "Sample photos aren't available here."
+
+    /// Try Sample Photos (`library.samples`): File > Load Sample Photos as the empty catalog's
+    /// second way in, disabled with its reason while it can't run.
+    var samplesAction: ToolbarAction {
+        let action = menu.edit.loadSamples
+        let reason = model.help(.loadSamples) ?? Self.samplesFallbackHelp
+        return ToolbarAction(
+            "Try Sample Photos", systemImage: "photo.badge.plus", unavailableHelp: action == nil ? reason : nil,
+            identifier: "library.samples", perform: action ?? {})
+    }
+
+    /// A drop on the empty catalog imports its first folder; refused while import can't run or nothing dropped is a folder.
+    private func dropFolder(_ urls: [URL]) -> Bool {
+        guard let importDropped = menu.file.importDropped,
+              let folder = LibraryCatalog.droppedFolder(urls.map(\.path)) else { return false }
+        importDropped(folder)
+        return true
+    }
+
     @ViewBuilder private var content: some View {
         if model.showsEmptyState {
             let empty = model.emptyState(importReason: importAction.unavailableHelp)
             if empty.offersImport {
-                EmptyStateView(empty.title, systemImage: "photo.stack", message: empty.message, action: importAction)
-                    .libraryControl(importAction)
+                EmptyStateView(
+                    empty.title, systemImage: "photo.stack", message: empty.message, action: importAction,
+                    secondary: samplesAction, onDrop: dropFolder
+                )
+                .libraryControl(importAction)
+                .libraryControl(samplesAction)
             } else {
                 EmptyStateView(empty.title, systemImage: "photo.stack", message: empty.message)
             }

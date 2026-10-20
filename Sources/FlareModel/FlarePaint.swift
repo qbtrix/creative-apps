@@ -1,7 +1,9 @@
 // FlarePaint.swift: fill and stroke on the workspace (inspector-timeline IT-2). `paint` reads the shapes the inspector
 // edits: the direct-selected shapes under Direct Select, else every shape of the inspector's layers; a value that
 // differs across them reads nil (Mixed), and a shape with no stroke reads as a zero-width one. Each setter is one undo
-// step through `services.properties` ("Set Fill" / "Set Stroke"); a bad hex or no shape refuses with a reason in
+// step through `services.properties` ("Set Fill" / "Set Stroke"). The Width bar's drag is `scrubStrokeWidth`: every
+// sample lands on the shapes at once, and the samples coalesce into one "Set Stroke" step until `endPropertyScrub()`,
+// the end the TRANSFORM rows' scrub uses too (FlareAnimate.swift). A bad hex or no shape refuses with a reason in
 // `paintError` and changes nothing, and a successful set clears it. Hex parsing is NewDocumentSpec's. `gradient`
 // (gradient-fill FG-1, FG-6) is the first shape's gradient in its bounds when every edited shape has that same
 // gradient, nil (Mixed) when they differ; a hex set turns a gradient solid.
@@ -50,8 +52,15 @@ extension FlareWorkspace {
         paintStep(nil) { try properties.setFill(.solid(color), of: items, in: &$0) }
     }
 
-    /// Sets the stroke width, called once on the bar's release.
+    /// Sets the stroke width as one undo step.
     public mutating func setStrokeWidth(_ width: Double) { editStroke { $0.width = width } }
+
+    /// Sets the stroke width during a Width bar drag: shown at once, and every sample until `endPropertyScrub()` shares
+    /// one undo step.
+    public mutating func scrubStrokeWidth(_ width: Double) {
+        let items = paintShapes.map(\.0)
+        editStroke(coalesceKey: "stroke-width-\(items)-\(propertyScrubSerial)") { $0.width = width }
+    }
 
     /// Sets the stroke cap.
     public mutating func setStrokeCap(_ cap: Stroke.Cap) { editStroke { $0.cap = cap } }
@@ -85,8 +94,9 @@ extension FlareWorkspace {
         }
     }
 
-    /// One "Set Stroke" step: `change` applied to each shape's own stroke, so a field the set doesn't name stays.
-    private mutating func editStroke(_ change: (inout Stroke) -> Void) {
+    /// One "Set Stroke" step: `change` applied to each shape's own stroke, so a field the set doesn't name stays. With
+    /// `coalesceKey` it joins that key's open step; no group then, since a group ends coalescing.
+    private mutating func editStroke(coalesceKey: String? = nil, _ change: (inout Stroke) -> Void) {
         let found = paintShapes
         guard !found.isEmpty else { return paintError = Self.noShape }
         var batches: [(Stroke, [StageAddress])] = []
@@ -97,8 +107,10 @@ extension FlareWorkspace {
             else { batches.append((stroke, [address])) }
         }
         let properties = services.properties
-        paintStep(batches.count > 1 ? "Set Stroke" : nil) { engine in
-            for (stroke, items) in batches { try properties.setStroke(stroke, of: items, in: &engine) }
+        paintStep(batches.count > 1 && coalesceKey == nil ? "Set Stroke" : nil) { engine in
+            for (stroke, items) in batches {
+                try properties.setStroke(stroke, of: items, coalesceKey: coalesceKey, in: &engine)
+            }
         }
     }
 

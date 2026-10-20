@@ -6,7 +6,8 @@
 // checks the available state against Golden/chrome/empty-state-<appearance>.png
 // in the four appearances (EC-12 commits the baselines). The button registers
 // in `suite.controls` with role "primary" and, while disabled, its tooltip as
-// the reason; the variant with no action registers nothing. SwiftUI builds a
+// the reason; the variant with no action registers nothing, and a second
+// action registers beside it with no role. SwiftUI builds a
 // hosting view's accessibility tree only for an assistive client, so the
 // inventory stands in for it. macOS only.
 import SwiftUI
@@ -70,6 +71,24 @@ import Testing
             }
             #expect(store.inventory.violations().isEmpty)
         }
+    }
+
+    /// A second way in (#3639) registers beside the primary with no role, disabled with its reason.
+    @Test func theSecondButtonRegistersAsSecondary() throws {
+        let samples = ToolbarAction(
+            "Try Sample Photos", systemImage: "photo", unavailableHelp: "No samples here.",
+            identifier: "suite.empty.samples")
+        let store = SuiteControlStore()
+        let view = EmptyStateView(
+            "No Photos", systemImage: "photo.on.rectangle", message: "Import photos to start your catalog.",
+            action: Self.available, secondary: samples, onDrop: { _ in true })
+        _ = try #require(render(view.environment(\.suiteControlStore, store), scheme: .light))
+        let entries = store.inventory.document().controls
+        #expect(Set(entries.map(\.id)) == ["suite.empty.import", "suite.empty.samples"])
+        let second = entries.first { $0.id == "suite.empty.samples" }
+        #expect(second == samples.controlEntry())
+        #expect(second?.role == nil && second?.enabled == false && second?.reason == "No samples here.")
+        #expect(store.inventory.violations().isEmpty)
     }
 
     @Test func withNoActionThereIsNoButton() throws {
