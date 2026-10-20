@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "–",
-  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b) and SN-c (D2-4b)",
+  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b) and SN-c (D2-4b); DesignNode.swift goes to adopt-kernel-layers' AL-design (AL-d1, AL-d2) first (supervisor, #1936, 2026-10-20)",
   "depends": [
     "design-contracts"
   ],
