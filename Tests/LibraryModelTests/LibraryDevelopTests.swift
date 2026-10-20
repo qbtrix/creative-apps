@@ -271,7 +271,9 @@ struct LibraryDevelopTests {
         let tone = catalog.toneHistogram
         #expect(tone.clipsHighlights && !tone.clipsShadows)
         #expect(tone.heights.count == HistogramBins.binCount)
-        #expect(tone.heights.max() == 1 && tone.heights.first == 1.0 / 6)
+        let first: Double = 1.0 / 6
+        #expect(tone.heights.max() == 1)
+        #expect(tone.heights.first == first)
         #expect(catalog.developError == nil)
     }
 
