@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-20T19:33Z	3	stage-start	wave 2	HT-5 (HT-m) stacked on lead/transform-HT-a; TT-m done
 2026-10-20T19:45Z	3	pr-open	#3702	HT-5 slice HT-m, stacked on #3682; Mutate 3/3; CI: PASS
 2026-10-20T19:56Z	3	heartbeat	#3682 #3702	both open, awaiting the macOS batch gate; HG-m (for HT-6) not done
+2026-10-20T20:18Z	3	heartbeat	#3682 #3702	open; #3682's macOS build (run 39481944279) has been queued since 19:15Z; blocked poll 1
