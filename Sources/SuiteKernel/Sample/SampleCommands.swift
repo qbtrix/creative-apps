@@ -1,5 +1,4 @@
-// SampleCommands.swift (eyedropper EY-1 spec with its id, schema and availability, run throwing
-// `SampleRules.notBuilt`; EY-6 body): `color.sample`, the query every app registers with one line,
+// SampleCommands.swift (eyedropper EY-1 spec with its id, schema and availability; EY-6 body): `color.sample`, the query every app registers with one line,
 // `+ SampleCommands.specs(<X>Workspace.self)`, so an agent reads a colour the way the eyedropper does.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -36,7 +35,9 @@ public enum SampleCommands {
                                    required: ["x", "y", "size"]),
                    result: .object(["color": nullable(color)], required: ["color"]),
                    example: .object(["x": .number(0), "y": .number(0)]),
-                   availability: { $0.sampleHelp.map(Availability.unavailable) ?? .available }) { _, _ in try stub() },
+                   availability: { $0.sampleHelp.map(Availability.unavailable) ?? .available }) { target, params in
+                       Result(color: target.sampledColor(at: Point(x: params.x, y: params.y), size: params.size ?? .point).map(Sampled.init))
+                   },
         ]
     }
 
@@ -49,5 +50,21 @@ public enum SampleCommands {
         return copy
     }
 
-    static func stub() throws -> JSONValue { throw SampleRules.notBuilt }
+    /// `color.sample`'s result: the colour, encoded as null when there is none.
+    struct Result: Encodable {
+        var color: Sampled?
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(color, forKey: .color)
+        }
+        enum CodingKeys: String, CodingKey { case color }
+    }
+    /// A sampled colour as its hex and its 0...255 channels.
+    struct Sampled: Encodable {
+        var hex: String, r, g, b, a: Int
+        init(_ color: FillColor) {
+            hex = SampleRules.hex(color)
+            (r, g, b, a) = (SampleRules.byte(color.r), SampleRules.byte(color.g), SampleRules.byte(color.b), SampleRules.byte(color.a))
+        }
+    }
 }
