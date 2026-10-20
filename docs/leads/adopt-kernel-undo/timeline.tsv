@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-20T00:20:21Z	heartbeat	check	-	no change: dev CI 39346519827 (c7306ee8) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
 2026-10-20T00:42:30Z	answer	supervisor	-	Supervisor answer 00:29Z on #1934: option 1. filters-collections parked; CatalogHistory.swift hand-off released. AU-library starts now; record the order swap in both .wave.json files in AU-library's first PR. AU-design approach confirmed.
 2026-10-20T01:02:07Z	pr-opened	AU-library	#3384	AU-l1+AU-l2 catalog undo on History<[PhotoItem]>, fast-lane, head f6e6f91c, Mutate 4/4
+2026-10-20T01:04:25Z	check	AU-design	-	full run 39296061014 (dev 1b33afbb, holds 90e7a0c) failed: macOS scripts/ci journey quarantine entries expired (supervisor-owned, dev-red #3386), not AU-design; main b3011ab9; AU-design waits for the next green run. AU-library #3384 macOS build 39351224956 queued
