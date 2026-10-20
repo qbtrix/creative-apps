@@ -133,7 +133,7 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
     /// The narrowest column: the image plus the cell's padding on both sides.
     private var columnWidth: CGFloat { cellSize.width + SuiteSpacing.xs * 2 }
     /// Between cells, so two images sit `SuiteSpacing.s` apart once each cell's padding is added.
-    private static var spacing: CGFloat { SuiteSpacing.s - SuiteSpacing.xs * 2 }
+    private static let spacing = SuiteSpacing.s - SuiteSpacing.xs * 2
 
     private var grid: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: columnWidth), spacing: Self.spacing)], spacing: Self.spacing) {
