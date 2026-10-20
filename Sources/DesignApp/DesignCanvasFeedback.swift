@@ -14,7 +14,10 @@
 // pointer (`placement`, observed by this body alone, so the canvas body never re-runs
 // as it follows the pointer). The size badge (`design.canvas.badge`) is the Model's
 // `selectionBadge` in a caption pill hung clear of the selection's bottom handle, one size
-// at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs. The
+// at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs, and an
+// open text edit's box is read at its draft's measured size (#3335). Under it, while the
+// typed text draws too small to read, the Model's `textLegibilityHint` hangs in a second
+// pill (`design.canvas.textHint`, #3336). The
 // smart guides (DesignGuideOverlay, `design.canvas.guides`) draw the same copy's
 // `snapGuides`. It reads the model and never writes it.
 import AppKit
@@ -49,8 +52,13 @@ struct DesignCanvasFeedback: View {
         if store.shows(model), let rect = now.mark {
             DesignHoverMark(rect: rect, zoom: zoom, name: now.pointer.name, dashed: now.placement != nil)
         }
-        if let badge = model.selectionBadge, let anchor = model.selectionBadgeAnchor {
+        // An open text edit's box as its draft measures, so the badge grows with the typing (#3335).
+        let draft = DesignTextOverlay.draftExtent(model)
+        if let badge = model.selectionBadge(draft: draft), let anchor = model.selectionBadgeAnchor(draft: draft) {
             DesignSizeBadge(text: badge, anchor: anchor, zoom: zoom)
+            if let hint = model.textLegibilityHint(zoom: zoom) {
+                DesignSizeBadge(text: hint, anchor: anchor, zoom: zoom, row: 1, identifier: "design.canvas.textHint")
+            }
         }
         DesignGuideOverlay(guides: DesignGuidePin.guides ?? model.snapGuides, zoom: zoom)
     }
@@ -190,10 +198,13 @@ private struct DesignHoverMark: View {
 
 /// The size badge: `text` in a caption pill, its top `SuiteSpacing.xs` under the bottom-middle
 /// handle below `anchor` (page points) at `zoom`, one size at any zoom, identified `design.canvas.badge` with `text` as its label.
+/// A later `row` hangs one pill lower per row, under another `identifier` (the text legibility hint).
 private struct DesignSizeBadge: View {
     let text: String
     let anchor: DesignPoint
     let zoom: Double
+    var row: CGFloat = 0
+    var identifier = DesignControlID.canvasBadge
 
     var body: some View {
         let scale = usable(zoom)
@@ -206,10 +217,11 @@ private struct DesignSizeBadge: View {
             .fixedSize()
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text(verbatim: text))
-            .accessibilityIdentifier(DesignControlID.canvasBadge)
+            .accessibilityIdentifier(identifier)
             .position(
                 x: CGFloat(anchor.x * scale),
-                y: CGFloat(anchor.y * scale) + SuiteSize.selectionHandle / 2 + SuiteSpacing.xs + SuiteSize.pill / 2)
+                y: CGFloat(anchor.y * scale) + SuiteSize.selectionHandle / 2 + SuiteSpacing.xs + SuiteSize.pill / 2
+                    + row * (SuiteSize.pill + SuiteSpacing.xs))
             .allowsHitTesting(false)
     }
 }

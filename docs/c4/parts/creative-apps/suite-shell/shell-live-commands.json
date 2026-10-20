@@ -1,0 +1,10 @@
+{
+  "id": "shell-live-commands",
+  "name": "Live command channel",
+  "description": "LiveCommandChannel (afterglow-mcp MC-10): a running app's end of LiveWire. A Unix socket at ~/Library/Application Support/AfterGlow/live/<app>-<pid>.sock (folder 0700, socket 0600, dead sockets removed at start) serving only peers of the same user, newline-delimited JSON-RPC 2.0: live/describe answers the catalog, live/run needs an AI access grant (asking through the approval sheet when there is none; -32010 without one) and runs the command through the catalog on the main actor, answering {result, undoStep}. Each run appends one AIAccessAuditLine to ~/Library/Logs/AfterGlow/ai-access.log. Started by .suiteApp(_:host:live:).",
+  "technology": "Swift 6, Foundation and Darwin sockets, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/LiveCommandChannel.swift"
+  ],
+  "order": 80
+}

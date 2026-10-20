@@ -101,7 +101,7 @@ targets:
     type: framework
     platform: macOS
     sources: [Sources/SuiteShell]
-    dependencies: [{ target: SuiteUI }, { target: SuiteModel }]
+    dependencies: [{ target: SuiteUI }, { target: SuiteModel }, { target: SuiteKernel }]
   FlareModel: { templates: [Model] }
   DesignModel: { templates: [Model] }
   PhotoModel: { templates: [Model] }

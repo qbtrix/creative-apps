@@ -61,5 +61,19 @@
     "find": "public var inspectorDetails: [String] { [sizeText] }",
     "replace": "public var inspectorDetails: [String] { [] }",
     "tests": "DesignInspectorContentTests.swift"
+  },
+  {
+    "label": "the header reads the node's stored frame while its text is typed (#3335)",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "node.inspectorDetails(liveFrame(of: node, draft: extent))",
+    "replace": "node.inspectorDetails",
+    "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "the header's size line reads height by width",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "[\"\\(wholePoints(box.width)) × \\(wholePoints(box.height)) pt\"]",
+    "replace": "[\"\\(wholePoints(box.height)) × \\(wholePoints(box.width)) pt\"]",
+    "tests": "DesignTextLiveFitTests"
   }
 ]
