@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-20T21:45Z	3	gate-pass	FS-5	scripts/ci --changed PASS; mutate FlareModel.LiveShapes 6/6; PR waits #3767
 2026-10-20T21:57Z	3	gate-pass	FS-u	CI PASS; PNGs flare-shape-options-*, flare-shape-star-draft-*; #3781 perf list
 2026-10-20T22:14Z	4	heartbeat	#3767	lane dispatched macOS build run 39504410818 (queued)
+2026-10-20T22:44Z	4	heartbeat	#3767	macOS build still queued behind 5 macOS runs
