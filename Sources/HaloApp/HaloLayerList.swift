@@ -25,7 +25,8 @@
 // solid), Duplicate, Delete and fx (waiting on layer styles), each
 // `halo.layer.bar.<part>`; a row's context menu holds Rename…, Duplicate,
 // Delete, Bring Forward and Send Backward. Every item is the Layer menu's own
-// (HaloMenuTarget.item on the catalog spec), so title, enablement and reason
+// (`ToolbarAction(spec, on:)` on HaloMenuTarget's state, the spec and title
+// HaloMenuTarget.item uses), so title, enablement and reason
 // match it; a row's menu reads the project with that row selected, and a pick
 // selects the row first. Values in, commands out.
 import HaloModel
@@ -98,8 +99,8 @@ struct HaloLayerList: View {
     static func bar(_ target: HaloMenuTarget) -> [ToolbarAction] {
         barCommands.map { entry in
             let title = entry.command == .newLayer(.solid) ? "New Layer" : nil
-            return ToolbarAction(target.item(entry.command, title: title, systemImage: entry.symbol),
-                                 identifier: "halo.layer.bar." + entry.part)
+            return action(target, entry.command, title: title, systemImage: entry.symbol,
+                          identifier: "halo.layer.bar." + entry.part)
         } + [LayerActionBar.effects(identifier: "halo.layer.bar.fx")]
     }
 
@@ -112,7 +113,15 @@ struct HaloLayerList: View {
             target.perform?(.selectLayer(id))
             target.perform?(command)
         }
-        return rowCommands.map { ToolbarAction(row.item($0.command, systemImage: $0.symbol)) }
+        return rowCommands.map { action(row, $0.command, systemImage: $0.symbol) }
+    }
+
+    /// `command` from its catalog spec on `target`'s state, titled as the Layer menu titles it.
+    // view-static: main-actor
+    private static func action(_ target: HaloMenuTarget, _ command: HaloCommand, title: String? = nil,
+                               systemImage: String, identifier: String? = nil) -> ToolbarAction {
+        ToolbarAction(HaloMenuState.spec(command.commandID), on: target.state, title: title ?? target.title(for: command),
+                      systemImage: systemImage, identifier: identifier) { target.perform?(command) }
     }
 
     /// Each row's kind symbol, tooltip and VoiceOver value, by layer id.
