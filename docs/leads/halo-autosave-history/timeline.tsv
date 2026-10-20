@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T18:49Z	0	stage-start	#3442	base e382f9d7
 2026-10-20T18:49Z	2	stage-end	#3442	plan: HA-a wave 1, HA-5 stacked
 2026-10-20T18:49Z	3	stage-start	#3442	wave 1 HA-a
+2026-10-20T19:31Z	3	pr-opened	#3683	slice HA-a (HA-1 stubs, HA-2 history panel + History button), 348 lines 11 files
