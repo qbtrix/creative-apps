@@ -1,0 +1,23 @@
+[
+  {
+    "label": "a reject keeps its stars",
+    "file": "Sources/LibraryModel/Contracts/SidecarContracts.swift",
+    "find": "rating = photo.flag == .reject ? -1 : photo.rating",
+    "replace": "rating = photo.rating",
+    "tests": "LibrarySidecarContractTests.swift"
+  },
+  {
+    "label": "UnconnectedSidecars.write returns",
+    "file": "Sources/LibraryModel/Contracts/SidecarContracts.swift",
+    "find": "public func write(_ data: Data, sidecar path: String) async throws { throw LibraryError.invalid(Self.unavailable) }",
+    "replace": "public func write(_ data: Data, sidecar path: String) async throws {}",
+    "tests": "LibrarySidecarContractTests.swift"
+  },
+  {
+    "label": "a label alone counts as nothing to say",
+    "file": "Sources/LibraryModel/Contracts/SidecarContracts.swift",
+    "find": "rating == 0 && label == nil }",
+    "replace": "rating == 0 }",
+    "tests": "LibrarySidecarContractTests.swift"
+  }
+]
