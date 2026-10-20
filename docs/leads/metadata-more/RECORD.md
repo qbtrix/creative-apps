@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465, #3533 and #3544 after #3473; MD-19 building (on MD-4 + MD-3); MD-6 building (on MD-5); then MD-10
+Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 building (on MD-5); MD-10 next (on MD-9)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -25,7 +25,7 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 | MD-5 | MD-b | 4 | check-first for MD-b: camera rows, decode, snapshots, MD-J1, all disabled | LibraryCameraRowsTests, LibraryCameraDecodeTests, LibraryCameraSnapshots, LibraryJourneyTests+Camera | compiles, disabled | #3492 | draft, stacked on #3465 |
 | MD-9 | MD-c | 4 | check-first for MD-c: keywords, caption, catalog file, keyword budgets, snapshots, MD-J2, all disabled | see packet | compiles, disabled | #3533 | draft, stacked on #3473 |
 | MD-14 | MD-d | 5 | XMP/sidecar checks, disabled | LibraryXMPTests, LibrarySidecarPlanTests, LibrarySidecarWriterTests, LibrarySidecarSnapshots, LibraryJourneyTests+Sidecars | compiles, disabled | #3544 | draft, stacked on #3473 |
-| MD-19 | MD-e | 4 | check-first for MD-e: search parsing, order, budget, MD-J4, all disabled | LibrarySearchTests, LibrarySearchOrderTests, LibrarySearchBudgetTests, LibraryJourneyTests+Search | compiles, disabled | - | building (on MD-4 + MD-3) |
+| MD-19 | MD-e | 4 | check-first for MD-e: search parsing, order, budget, MD-J4, all disabled | LibrarySearchTests, LibrarySearchOrderTests, LibrarySearchBudgetTests, LibraryJourneyTests+Search | compiles, disabled | #3545 | draft on #3473 + #3465 |
 | MD-6 | MD-b | 5 | CameraDetails(exif:tiff:), display texts, CameraRow.rows(for:) ranges and counts; enables LibraryCameraRowsTests | PhotoDetails.swift, LibraryCameraRowsTests, plan LibraryModel.PhotoDetails.json | LibraryCameraRowsTests | - | building (stacked on MD-5) |
 | MD-7, MD-8, MD-10 .. MD-22 | MD-b..MD-e | 5+ | see packet Build waves | see packet | see packet | - | planned |
 
@@ -48,6 +48,7 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 - Budget tests can fail under a loaded machine (load ~21 on 4 cores). Builders rerun them alone before calling a gate red.
 - MD-9 (#3533): 6 test files +397. The journey uses MD-4's real ids (library.metadata.keywords, library.metadata.removeKeyword.<name>), not the packet's. Step 7 reads catalog.json on disk (no library.catalog readout). Photos selected by Command-click. Journey launches -LibraryFixture cameras (MD-3); fine once MD-3 merges, journey skipped until MD-13.
 - MD-14 (#3544): 5 files +398. Model tests use the shoot fixture (cameras not on its base); the journey launches cameras. Writer tests go through any SidecarWriting with UnconnectedSidecars, so MD-17 swaps in XMPSidecarWriter. The snapshot test checks the Model's sidecarStatus text until MD-18 gives LibraryInspector a status input. ImageIO metadata APIs checked with apple-docs.
+- MD-19 (#3545, head 0221a66a): 4 test files, +343, all disabled (MD-20/MD-21/MD-22). Adds a no-op @_disfavoredOverload setSearch(_:) stand-in in LibrarySearchOrderTests that MD-21 must delete. Keyword edits in the order tests use internal recordEdit until MD-10.
 
 ## Open
 - S-L9 #3413 (InspectorTokenRow) and S-L10 #3414 (InspectorTextRow) are soft waits for MD-13. Until they land, those rows use plain SwiftUI placeholders.
