@@ -44,6 +44,7 @@
 // lists every control the editor registers with its DesignControlID.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -88,6 +89,9 @@ struct DesignWindow: View {
     static var bodyRuns = 0
     /// The workspace after the last intent; DesignLiveDragTests reads it.
     static var lastWorkspace: DesignWorkspace?
+    /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
+    // view-static: main-actor
+    static var openExport: (@MainActor () -> Void)?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -169,6 +173,7 @@ struct DesignWindow: View {
         case .setFrame(let id, let x, let y, let width, let height):
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
+        case .fill(let intent): model.runFill(intent)
         case .align(let edge): model.alignLayer(edge)
         case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
@@ -289,6 +294,9 @@ struct DesignWindow: View {
     private func start() {
         guard !started else { return }
         started = true
+        #if DEBUG
+        Self.openExport = { perform(.export) }
+        #endif
         if seeded {
             fitting = true
             return fit()

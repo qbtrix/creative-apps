@@ -1,5 +1,5 @@
 // LibraryMetadataPersistTests.swift: keywords, title, caption and camera in catalog v1 (metadata-more
-// MD-12), each key only when non-empty. Written before its code (rule 13, MD-9): waits on MD-12.
+// MD-12), each key only when non-empty. Written before its code (rule 13, MD-9); enabled by MD-12.
 import CoreColor
 import Foundation
 @testable import LibraryModel
@@ -12,7 +12,7 @@ private func photoObjects(_ photos: [PhotoItem]) throws -> [[String: Any]] {
     return try #require((object as? [String: Any])?["photos"] as? [[String: Any]])
 }
 
-@Test(.disabled("waits on MD-12")) func aPhotoWithAllItsMetadataRoundTripsEqual() throws {
+@Test func aPhotoWithAllItsMetadataRoundTripsEqual() throws {
     let camera = CameraDetails(
         make: "Fujifilm", model: "X-T5", lens: "23mm", iso: 400, exposureTime: 1.0 / 250, fNumber: 2.8, focalLength: 23)
     let photo = PhotoItem(
@@ -26,14 +26,14 @@ private func photoObjects(_ photos: [PhotoItem]) throws -> [[String: Any]] {
     #expect(written["title"] as? String == "Harbour at dawn" && written["caption"] as? String == "Low tide")
 }
 
-@Test(.disabled("waits on MD-12")) func theGoldenStaysByteEqualAndDecodesEmpty() throws {
+@Test func theGoldenStaysByteEqualAndDecodesEmpty() throws {
     let data = try coding.encode(LibraryPersistGolden.photos)
     #expect(String(decoding: data, as: UTF8.self) == LibraryPersistGolden.catalogV1)
     let decoded = try coding.decode(Data(LibraryPersistGolden.catalogV1.utf8))
     #expect(decoded.allSatisfy { $0.keywords.isEmpty && $0.title.isEmpty && $0.caption.isEmpty && $0.camera == .none })
 }
 
-@Test(.disabled("waits on MD-12")) func onlyTheFieldsAPhotoHasAreWritten() throws {
+@Test func onlyTheFieldsAPhotoHasAreWritten() throws {
     let photo = PhotoItem(
         name: "IMG_0011", captureDate: Date(timeIntervalSince1970: 0), color: Color3(0, 0, 0),
         camera: CameraDetails(iso: 800))

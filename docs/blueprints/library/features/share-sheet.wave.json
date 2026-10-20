@@ -1,0 +1,134 @@
+{
+  "title": "Share from Library: File > Share and a toolbar Share button send the selected photos (developed, location off) through the system share sheet",
+  "wave": 7,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 Library must-haves (audit row 11); suite audit V1 row (File > Share on every exporter: Library first); real job RJ-L55 (new)",
+  "waits_on": "export-pack (wave 5: the sharing preset, location off); file-flow LF-m (catalog and ledger); spine (building); blueprint 1.3's sharing non-goal re-cut by the captain's 2026-10-21 call",
+  "depends": [
+    "spine",
+    "export-pack"
+  ],
+  "longest_chain": "5 (SH-1 → SH-2 → SH-4 → SH-5 → SH-6)",
+  "journeys": [
+    "LibraryShareJourneyTests.testShareThreePhotos"
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryShare+Kernel.swift",
+    "Tests/LibraryModelTests/LibrarySharePrepTests.swift",
+    "Sources/SuiteUI/ShareButton.swift",
+    "Tests/SuiteUITests/ShareButtonTests.swift",
+    "Sources/LibraryApp/LibraryShareItems.swift",
+    "Sources/LibraryApp/LibraryMenus+Share.swift",
+    "UITests/LibraryJourneyTests+Share.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryShareTests.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.LibraryShare+Kernel.json",
+    "Tests/RealJobs/library/share-three/share-three.jobs.json",
+    "docs/blueprints/library/features/share-sheet.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "SH-a",
+      "behavior": "Library declares the share preparation and its command, and SuiteUI the share button, as stubs, with the checks written and disabled.",
+      "tasks": [
+        "SH-1",
+        "SH-2"
+      ],
+      "journeys": [
+        "MJ-SH"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryShare+Kernel.swift",
+        "Tests/LibraryModelTests/LibrarySharePrepTests.swift",
+        "Sources/SuiteUI/ShareButton.swift",
+        "Tests/SuiteUITests/ShareButtonTests.swift"
+      ],
+      "waits": {},
+      "ui": true
+    },
+    {
+      "id": "SH-u",
+      "behavior": "File > Share and the grid's and loupe's Share buttons open the system share sheet for the selection on the stubs, within the render budget.",
+      "tasks": [
+        "SH-4",
+        "SH-4b"
+      ],
+      "journeys": [
+        "LJ-SH"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryShareItems.swift",
+        "Sources/LibraryApp/LibraryMenus+Share.swift",
+        "UITests/LibraryJourneyTests+Share.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryShareTests.swift"
+      ],
+      "waits": {
+        "SH-a": [
+          "SH-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SH-m",
+      "behavior": "Preparing writes one developed, location-free JPEG per selected photo into an emptied-at-launch share folder through the existing exporter, as a catalog command.",
+      "tasks": [
+        "SH-3",
+        "SH-3c"
+      ],
+      "journeys": [
+        "MJ-SH"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryShare+Kernel.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/LibraryModelTests/LibrarySharePrepTests.swift",
+        "Tests/mutations/LibraryModel.LibraryShare+Kernel.json",
+        "Tests/RealJobs/library/share-three/share-three.jobs.json"
+      ],
+      "waits": {
+        "SH-a": [
+          "SH-3"
+        ],
+        "file-flow:LF-m": [
+          "SH-3"
+        ],
+        "catalog-backup:BK-m": [
+          "SH-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SH-z",
+      "behavior": "Sharing runs live end to end, RJ-L55 passes, and the feature is built.",
+      "tasks": [
+        "SH-5",
+        "SH-6"
+      ],
+      "journeys": [
+        "LJ-SH",
+        "MJ-SH"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryShareItems.swift",
+        "UITests/LibraryJourneyTests+Share.swift",
+        "docs/blueprints/library/features/share-sheet.wave.json"
+      ],
+      "waits": {
+        "SH-u": [
+          "SH-5"
+        ],
+        "SH-m": [
+          "SH-5"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

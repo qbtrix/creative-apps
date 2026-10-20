@@ -1,0 +1,23 @@
+[
+  {
+    "label": "widthDragIsOneStep: the width scrub's drag token isn't passed, so 120 samples are 120 undo steps",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "\"Stroke Width\", drag: p.drag",
+    "replace": "\"Stroke Width\", drag: nil",
+    "tests": "StrokeCommandsTests"
+  },
+  {
+    "label": "addNeedsNoStroke: stroke.add is allowed on a layer that already has a stroke",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "return target.selectedStroke == nil ? .available : .unavailable(strokedHelp)",
+    "replace": "return .available",
+    "tests": "StrokeCommandsTests"
+  },
+  {
+    "label": "trimHonoursHelp: the target's trimHelp isn't checked, so an app without trim reads the core's reason",
+    "file": "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "find": "if trims, let why = target.trimHelp { return .unavailable(why) }",
+    "replace": "",
+    "tests": "StrokeCommandsTests"
+  }
+]

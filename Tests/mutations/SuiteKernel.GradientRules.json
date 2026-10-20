@@ -1,0 +1,44 @@
+[
+  {
+    "label": "rotated45: degrees used as radians, so 45 turns the line about 2578°",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "let radians = turned * .pi / 180",
+    "replace": "let radians = turned",
+    "tests": "GradientRulesTests"
+  },
+  {
+    "label": "rotated135: half without abs, so a turn past 90° lands its ends inside the box",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "let half = (abs(box.width * cosine) + abs(box.height * sine)) / 2",
+    "replace": "let half = (box.width * cosine + box.height * sine) / 2",
+    "tests": "GradientRulesTests"
+  },
+  {
+    "label": "removeKeepsTwo: >= for >, so a two-stop gradient loses one",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "guard stops.indices.contains(index), stops.count > 2 else { return nil }",
+    "replace": "guard stops.indices.contains(index), stops.count >= 2 else { return nil }",
+    "tests": "GradientRulesTests"
+  },
+  {
+    "label": "moveResorts: no re-sort after a move, so stops leave 0...1 order",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "let order = stops.indices.sorted { (stops[$0].offset, $0) < (stops[$1].offset, $1) }",
+    "replace": "let order = Array(stops.indices)",
+    "tests": "GradientRulesTests"
+  },
+  {
+    "label": "colorHardEdgeAndClamp: the first of two stops at one offset wins there",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "guard let index = stops.lastIndex(where: { $0.offset <= offset }) else { return stops.first?.color ?? .black }",
+    "replace": "guard let index = stops.lastIndex(where: { $0.offset < offset }) else { return stops.first?.color ?? .black }",
+    "tests": "GradientRulesTests"
+  },
+  {
+    "label": "addingStopTakesTheColorThere: the cap not checked, so a 65th stop is added",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "guard type(of: fill) != .solid, offset.isFinite, fill.stops.count < maxStops else { return nil }",
+    "replace": "guard type(of: fill) != .solid, offset.isFinite else { return nil }",
+    "tests": "GradientRulesTests"
+  }
+]

@@ -755,5 +755,456 @@
     ],
     "waits_on": "PN-9",
     "added_by": "suiteui/pen-paths"
+  },
+  "RJ-X44": {
+    "id": "RJ-X44",
+    "app": "suite",
+    "weight": "high",
+    "job": "Kill Photo, Flare, Design and Halo mid-edit under one support folder, then relaunch each.",
+    "outcome": "Each relaunch offers only its own document's edit, Restore brings it back, every app's copy is still on disk, and nothing was written outside the support folder.",
+    "needs": [
+      "suiteui/adopt-kernel-autosave",
+      "S12"
+    ],
+    "closes_with": "suiteui/adopt-kernel-autosave",
+    "trap": "One app's launch deletes another app's recovery copy, or an app ignores -SuiteSupportDir",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AK-9",
+    "added_by": "suiteui/adopt-kernel-autosave"
+  },
+  "RJ-X45": {
+    "id": "RJ-X45",
+    "app": "suite",
+    "weight": "high",
+    "job": "Set the same exposure and saturation on the same photo in Photo and in Library by command, then export both.",
+    "outcome": "The two exports match within 1 level per channel and both differ clearly from the original.",
+    "needs": [
+      "suiteui/suite-imaging",
+      "S1",
+      "library/export-pack"
+    ],
+    "closes_with": "suiteui/suite-imaging",
+    "trap": "The same slider gives a different picture in each app (gamma read as its reciprocal, saturation missing, levels units mixed)",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "IM-9",
+    "added_by": "suiteui/suite-imaging"
+  },
+  "RJ-X46": {
+    "id": "RJ-X46",
+    "app": "suite",
+    "weight": "high",
+    "job": "Open an Exif-rotated JPEG and a HEIC from the same camera and export each as PNG.",
+    "outcome": "Both exports are upright at 3024 x 4032 and match the reference and each other within 3 levels.",
+    "needs": [
+      "suiteui/shared-codecs"
+    ],
+    "closes_with": "suiteui/shared-codecs",
+    "trap": "One decode path ignores the orientation or drops the colour profile",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SC-3",
+    "added_by": "suiteui/shared-codecs"
+  },
+  "RJ-X47": {
+    "id": "RJ-X47",
+    "app": "suite",
+    "weight": "med",
+    "job": "Relaunch Library on the same catalog and show the grid.",
+    "outcome": "The relaunched grid decodes no unchanged photo, and a photo whose develop settings changed decodes once.",
+    "needs": [
+      "suiteui/shared-thumbnails"
+    ],
+    "closes_with": "suiteui/shared-thumbnails",
+    "trap": "Every relaunch decodes every photo again, or a developed photo shows its old thumbnail from disk",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "ST-1",
+    "added_by": "suiteui/shared-thumbnails"
+  },
+  "RJ-X48": {
+    "id": "RJ-X48",
+    "app": "suite",
+    "weight": "high",
+    "job": "Make an edit in each of the four editors and close the window.",
+    "outcome": "Each asks Save, Don't Save or Cancel with the same words; Cancel keeps the window, Don't Save closes it, a failed save keeps it open.",
+    "needs": [
+      "suiteui/adopt-kernel-unsaved-prompt"
+    ],
+    "closes_with": "suiteui/adopt-kernel-unsaved-prompt",
+    "trap": "An editor closes a dirty window without asking (Halo today), or asks with different words",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "UP-2",
+    "added_by": "suiteui/adopt-kernel-unsaved-prompt"
+  },
+  "RJ-X49": {
+    "id": "RJ-X49",
+    "app": "suite",
+    "weight": "low",
+    "job": "Sample a 5 x 5 colour at the corner and at the centre of a photo by command.",
+    "outcome": "The corner reads the mean of its in-image pixels and the centre the 25-pixel mean, both equal to the kernel's mean.",
+    "needs": [
+      "suiteui/adopt-kernel-eyedropper-photo"
+    ],
+    "closes_with": "suiteui/adopt-kernel-eyedropper-photo",
+    "trap": "Off-image pixels count as black, so the corner reads darker",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "EP-1",
+    "added_by": "suiteui/adopt-kernel-eyedropper-photo"
+  },
+  "RJ-X51": {
+    "id": "RJ-X51",
+    "app": "suite",
+    "weight": "high",
+    "job": "By commands alone, add a drop shadow to a layer, drag its distance in 120 steps, copy the style onto a second layer, undo once, and export a PNG.",
+    "outcome": "After one undo the second layer has no style and the first keeps the last distance; in the PNG the shadow's darkest pixel sits at the shape's edge offset by the distance along the angle (y down) within 1 px, and the shadow is not cut at the layer's bounds.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The 120 steps land as 120 undo steps, the shadow is clipped at the layer's edge, or the angle is read as radians or with y up",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PY-6",
+    "added_by": "suiteui/layer-styles"
+  },
+  "RJ-X50": {
+    "id": "RJ-X50",
+    "app": "suite",
+    "weight": "high",
+    "job": "Open a camera RAW file with the afterglow CLI, pull its exposure down one stop, and export it as PNG at full size.",
+    "outcome": "The PNG is the RAW file's full 48 x 64 size, upright, within 3 levels of the reference, and its two highlight patches differ by more than 20 levels.",
+    "needs": [
+      "suiteui/shared-raw",
+      "S1"
+    ],
+    "closes_with": "suiteui/shared-raw",
+    "trap": "The export is the embedded preview's size, or the decode went through 8 bits so the clipped highlights come back flat",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SR-7",
+    "added_by": "suiteui/shared-raw"
+  },
+  "RJ-X70": {
+    "id": "RJ-X70",
+    "app": "suite",
+    "weight": "high",
+    "job": "In Photo, by command: select an ellipse around a face, subtract a lasso over the chin, invert, feather 8 px, fill white, and export.",
+    "outcome": "The face centre is unchanged, the notch and surround are white, and the edge ramp from 10% to 90% white is at least 6 px wide.",
+    "needs": [
+      "S5"
+    ],
+    "closes_with": "S5",
+    "trap": "Option adds instead of subtracting, the feather is ignored, or Invert selects the whole canvas",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AR-10",
+    "added_by": "suiteui/area-selection"
+  },
+  "RJ-X71": {
+    "id": "RJ-X71",
+    "app": "suite",
+    "weight": "med",
+    "job": "In Design, by command: pick a grouped card by its text, move it, enter the group, pick the text and move it alone, then save.",
+    "outcome": "After the first move both layers moved 40; after the second only the text moved 10 more.",
+    "needs": [
+      "S5"
+    ],
+    "closes_with": "S5",
+    "trap": "The pick lands on the text, so the first move pulls the text out of its card",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AR-14",
+    "added_by": "suiteui/area-selection"
+  },
+  "RJ-X72": {
+    "id": "RJ-X72",
+    "app": "suite",
+    "weight": "high",
+    "job": "Copy a red rectangle in Design and paste it into a new image in Photo, then export.",
+    "outcome": "Photo gains one 400x200 px layer (2x) whose centre pixel is pure red.",
+    "needs": [
+      "suiteui/clipboard-interop"
+    ],
+    "closes_with": "suiteui/clipboard-interop",
+    "trap": "Photo's Paste is greyed because Design wrote only its own layer type",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "CB-6",
+    "added_by": "suiteui/clipboard-interop"
+  },
+  "RJ-X73": {
+    "id": "RJ-X73",
+    "app": "suite",
+    "weight": "high",
+    "job": "Paste a screenshot PNG into Design, Flare and Halo and save each.",
+    "outcome": "Each file has one new placed-image layer at the pasted pixel size, centred (Halo: in point at the playhead).",
+    "needs": [
+      "suiteui/clipboard-interop",
+      "S20"
+    ],
+    "closes_with": "suiteui/clipboard-interop",
+    "trap": "The paste is refused, lands at the top-left corner, or starts at time 0 in Halo",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "CB-10",
+    "added_by": "suiteui/clipboard-interop"
+  },
+  "RJ-X74": {
+    "id": "RJ-X74",
+    "app": "suite",
+    "weight": "high",
+    "job": "Make a 29.97 fps, 10 s Halo composition with a keyed text layer by command and render a PNG sequence.",
+    "outcome": "300 files, frame 299 timed at 299 x 1001 / 30000 s within 1 microsecond, and drop-frame timecode 00:01:00;02 at frame 1800.",
+    "needs": [
+      "suiteui/frame-rates"
+    ],
+    "closes_with": "suiteui/frame-rates",
+    "trap": "The composition silently runs at 30, so keys drift a frame on an editor timeline",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FR-8",
+    "added_by": "suiteui/frame-rates"
+  },
+  "RJ-X75": {
+    "id": "RJ-X75",
+    "app": "suite",
+    "weight": "high",
+    "job": "In Flare and Halo, draw a 200x200 rectangle by command, set its anchor to the centre, key rotation 0 to 360 over 24 frames, and export frames 0 and 12.",
+    "outcome": "The opaque pixels' centroid at frame 12 is within 1 px of frame 0's in both apps.",
+    "needs": [
+      "suiteui/anchor-parenting"
+    ],
+    "closes_with": "suiteui/anchor-parenting",
+    "trap": "The spin orbits the canvas's top-left corner, or setting the anchor moves the layer",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AN-10",
+    "added_by": "suiteui/anchor-parenting"
+  },
+  "RJ-X76": {
+    "id": "RJ-X76",
+    "app": "suite",
+    "weight": "med",
+    "job": "In Photo, pick the Brush, press size-up twice from 20 px, set opacity 50 by command, stroke on white, and export.",
+    "outcome": "The stroke is 30 px tall within 1 and its centre is 50% grey within 3 levels.",
+    "needs": [
+      "suiteui/brush-keys"
+    ],
+    "closes_with": "suiteui/brush-keys",
+    "trap": "The size steps by 1 so two presses barely change it, or the opacity command sets flow",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "BK-8",
+    "added_by": "suiteui/brush-keys"
+  },
+  "RJ-X60": {
+    "id": "RJ-X60",
+    "app": "suite",
+    "weight": "high",
+    "job": "Apply the built-in high-contrast black and white look to the same photo in Photo and in Library by command, save it as a look named Mine, and export both.",
+    "outcome": "Both exports are grey (red, green and blue within 1 level on every pixel) and match each other within 1 level; look.list names Mine after a relaunch.",
+    "needs": [
+      "suiteui/adjust-everywhere",
+      "S15",
+      "library/export-pack"
+    ],
+    "closes_with": "suiteui/adjust-everywhere",
+    "trap": "The two apps make black and white differently (one desaturates, one mixes the weights), or the saved look is gone after a relaunch",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AJ-14",
+    "added_by": "suiteui/adjust-everywhere"
+  },
+  "RJ-X61": {
+    "id": "RJ-X61",
+    "app": "suite",
+    "weight": "high",
+    "job": "Turn Library's Show Original on and off with the afterglow CLI and read its state back.",
+    "outcome": "After the first run view.read reports showOriginal true, after the second false, and the photo's develop values are unchanged both times.",
+    "needs": [
+      "suite/command-state",
+      "AI2"
+    ],
+    "closes_with": "suite/command-state",
+    "trap": "A toggle an agent can't see or set, so it flips it blind or not at all",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "CS-3",
+    "added_by": "suite/command-state"
+  },
+  "RJ-X62": {
+    "id": "RJ-X62",
+    "app": "suite",
+    "weight": "high",
+    "job": "Connect an AI assistant to the downloaded app: copy the command from Help > Connect an AI Assistant and run its MCP handshake.",
+    "outcome": "The command's path is inside AfterGlow.app, codesign verifies it, and tools/list returns at least one tool for each of the five apps.",
+    "needs": [
+      "suite/cli-bundle",
+      "AI3"
+    ],
+    "closes_with": "suite/cli-bundle",
+    "trap": "The sheet shows a command that points into the source tree, or an unsigned binary that Gatekeeper stops",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "CB-3",
+    "added_by": "suite/cli-bundle"
+  },
+  "RJ-X63": {
+    "id": "RJ-X63",
+    "app": "suite",
+    "weight": "high",
+    "job": "In each editor, go to Home with Control-Command-0, open Window > AI Access, run one live command, then close the last window and click the Dock icon.",
+    "outcome": "In all five editors Home comes forward, the AI Access window opens, the live command's change shows in the document, and a window exists after the Dock click.",
+    "needs": [
+      "suite/editor-menus",
+      "AI3"
+    ],
+    "closes_with": "suite/editor-menus",
+    "trap": "An editor that strands the tester: no way back to Home, no AI access, or a closed window that never comes back",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "EM-8",
+    "added_by": "suite/editor-menus"
+  },
+  "RJ-X64": {
+    "id": "RJ-X64",
+    "app": "suite",
+    "weight": "med",
+    "job": "Open every menu in the launcher and in Flare and click every enabled item once.",
+    "outcome": "Every enabled item changes the document, opens a window or sheet, or changes a shown view state; no visible item says it isn't available yet; only Settings is in the placeholder baseline.",
+    "needs": [
+      "suite/no-placeholders"
+    ],
+    "closes_with": "suite/no-placeholders",
+    "trap": "A menu item that looks real and does nothing, reported as a bug on day one",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "NP-5",
+    "added_by": "suite/no-placeholders"
+  },
+  "RJ-X65": {
+    "id": "RJ-X65",
+    "app": "suite",
+    "weight": "high",
+    "job": "Report a problem from Photo after two Photo crashes, with other apps' and old crash files in the folder.",
+    "outcome": "The report lists exactly the two recent Photo crashes, newest first; no home path, user name or host name appears; the run succeeds with the network denied.",
+    "needs": [
+      "suite/report-problem"
+    ],
+    "closes_with": "suite/report-problem",
+    "trap": "The report leaks the tester's home path or user name, picks up another app's crash, or the app sends it itself",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "RP-5",
+    "added_by": "suite/report-problem"
+  },
+  "RJ-X66": {
+    "id": "RJ-X66",
+    "app": "suite",
+    "weight": "high",
+    "job": "Open each of the five bundled welcome-tour samples headless with its app and export a PNG.",
+    "outcome": "Each export has more than 10% non-background pixels, Bounce at frame 15 differs from frame 0, and make-samples --check reports no drift.",
+    "needs": [
+      "suite/sample-files",
+      "AI2"
+    ],
+    "closes_with": "suite/sample-files",
+    "trap": "A sample that exists but is stale or empty, so the tour opens a blank canvas",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SS-7",
+    "added_by": "suite/sample-files"
   }
 }

@@ -1,11 +1,13 @@
-// HaloRenderSheetSnapshots.swift: the Render sheet (render-out RO-8) on
-// `keyed` with the fakes, each stage set through the Model's public methods:
-// settings (PNG, Half, summary), "Frame 12 of 48", finished, and failed at
-// frame 5. The control inventory stands in for the accessibility tree, so a
-// stage missing a control, or Render on with no folder, fails. Light and
-// Dark: halo-render-sheet-*.png. macOS only.
+// HaloRenderSheetSnapshots.swift: File > Render… on SuiteUI's export sheet
+// (core-loop CL-4, #1971) on `keyed` with the fakes, each state set through
+// the Model's kernel methods on CL-2's stubs: editing (PNG sequence, Half,
+// the summary), running at "Frame 12 of 48", finished and failed at frame 5.
+// The control inventory stands in for the accessibility tree, so a state
+// missing a control fails; the readout pins the rows the sheet draws. Light
+// and Dark: halo-render-sheet-*.png. macOS only.
 import AppKit
 import HaloModel
+import SuiteKernel
 import SwiftUI
 import Testing
 
@@ -17,88 +19,96 @@ import Testing
     private let folder = URL(fileURLWithPath: "/nonexistent/Renders", isDirectory: true)
     private let half = HaloRenderSettings(format: .pngSequence, halfSize: true)
 
-    private func opened() throws -> HaloProject {
+    private func editing() throws -> HaloProject {
         var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("keyed")))
-        project.openRenderSheet()
+        let began = project.beginRender(HaloRenderSettings(format: .pngSequence))
+        #expect(began)
+        project.setRenderSettings(half)
         return project
     }
 
     private func running() throws -> HaloProject {
-        var project = try opened()
-        let started = project.startRender(half)
+        var project = try editing()
+        let started = project.startRender()
         _ = try #require(started)
-        project.renderProgress(frame: 12)
+        project.renderProgressed(done: 12)
         return project
     }
 
-    private func controls(_ sheet: HaloRenderSheet) throws -> [ControlEntry] {
-        let store = SuiteControlStore()
-        _ = try #require(render(sheet.environment(\.suiteControlStore, store), scheme: .light))
-        return store.inventory.document().controls
+    private func sheet(_ project: HaloProject, output: URL? = nil) -> HaloRenderExportAdapter {
+        HaloRenderExportAdapter(model: project, destination: folder, output: output) { _ in }
     }
 
-    private func shoot(_ sheet: HaloRenderSheet, _ name: String) throws {
+    private func controls(_ sheet: HaloRenderExportAdapter) throws -> [String: ControlEntry] {
+        let store = SuiteControlStore()
+        _ = try #require(render(sheet.environment(\.suiteControlStore, store), scheme: .light))
+        return Dictionary(store.inventory.document().controls.map { ($0.id, $0) }) { a, _ in a }
+    }
+
+    private func shoot(_ sheet: HaloRenderExportAdapter, _ name: String) throws {
         try snapshot(sheet, name: "halo-render-sheet\(name)-light", scheme: .light)
         try snapshot(sheet, name: "halo-render-sheet\(name)-dark", scheme: .dark)
     }
 
-    @Test func settings() throws {
-        let project = try opened()
-        let sheet = HaloRenderSheet(model: project, destination: folder, initial: half)
-        #expect(sheet.stage == .settings)
-        #expect(sheet.renderHelp == nil)
+    @Test func editingState() throws {
+        let project = try editing()
+        #expect(project.renderRun == .editing(half))
         #expect(project.renderSummary(half, existing: []) == "48 PNG files, 960 × 540, into a new folder \"Bounce\"")
-        #expect(try controls(sheet) == [
-            ControlEntry(id: "halo.render.cancel", enabled: true),
-            ControlEntry(id: "halo.render.destination", enabled: true),
-            ControlEntry(id: "halo.render.format", enabled: true),
-            ControlEntry(id: "halo.render.size", enabled: true),
-            ControlEntry(id: "halo.render.start", enabled: true),
-        ])
-        let formats = HaloRenderSettings.Format.allCases.map { HaloRenderSheet.segmentID($0) }
-        #expect(formats == ["halo.render.format.png", "halo.render.format.movie"])
-        let sizes = HaloRenderSize.allCases.map { HaloRenderSheet.segmentID($0) }
-        #expect(sizes == ["halo.render.size.full", "halo.render.size.half"])
-        try shoot(sheet, "")
-        let none = HaloRenderSheet(model: project, destination: nil, initial: half)
-        let start = try controls(none).first { $0.id == "halo.render.start" }
-        #expect(start == ControlEntry(id: "halo.render.start", enabled: false, reason: HaloRenderSheet.noDestination))
+        let view = sheet(project)
+        #expect(view.readout.rows == [.format("pngSequence"), .size(0.5)])
+        #expect(view.readout.editable)
+        #expect(HaloRenderExportAdapter.formats.map { ExportSheetIDs("halo.render").format($0.id) }
+            == ["halo.render.format.pngSequence", "halo.render.format.movie"])
+        let found = try controls(view)
+        #expect(Set(found.keys) == ["halo.render.cancel", "halo.render.destination", "halo.render.format", "halo.render.start"])
+        #expect(found["halo.render.start"]?.enabled == true)
+        #expect(found["halo.render.destination"]?.enabled == true)
+        try shoot(view, "")
     }
 
     @Test func progress() throws {
         let project = try running()
+        #expect(project.renderRun == .running(half, done: 12, total: 48))
         #expect(project.renderProgressText == "Frame 12 of 48")
-        let sheet = HaloRenderSheet(model: project, destination: folder)
-        #expect(sheet.stage == .running)
-        #expect(try controls(sheet) == [ControlEntry(id: "halo.render.cancel", enabled: true)])
-        try shoot(sheet, "-progress")
+        let view = sheet(project)
+        #expect(view.readout.progress == ExportProgress(done: 12, total: 48))
+        let found = try controls(view)
+        #expect(found["halo.render.cancel"]?.enabled == true)
+        #expect(found["halo.render.start"]?.enabled == false)
+        #expect(found["halo.render.destination"]?.enabled == false)
+        #expect(found["halo.render.dismiss"] == nil)
+        try shoot(view, "-progress")
     }
 
     @Test func done() throws {
         var project = try running()
-        project.finishRender(.finished(frames: 48))
+        project.endRender(.finished(frames: 48))
         #expect(project.renderOutcomeText == "Rendered 48 frames.")
-        let sheet = HaloRenderSheet(model: project, destination: folder, output: folder.appending(path: "Bounce"))
-        #expect(sheet.stage == .ended)
-        #expect(try controls(sheet) == [
-            ControlEntry(id: "halo.render.close", enabled: true),
-            ControlEntry(id: "halo.render.reveal", enabled: true),
-        ])
-        try shoot(sheet, "-done")
+        let view = sheet(project, output: folder.appending(path: "Bounce"))
+        #expect(view.readout.line == .finished("Exported Bounce"))
+        let found = try controls(view)
+        #expect(found["halo.render.dismiss"]?.enabled == true)
+        #expect(found["halo.render.reveal"]?.enabled == true)
+        #expect(found["halo.render.cancel"] == nil)
+        #expect(found["halo.render.tryAgain"] == nil)
+        try shoot(view, "-done")
     }
 
     @Test func failed() throws {
         var project = try running()
-        project.finishRender(.failed(frame: 5, message: "Disk full"))
-        #expect(project.renderOutcomeText == "Render stopped at frame 5: Disk full.")
-        let sheet = HaloRenderSheet(model: project, destination: folder)
-        #expect(sheet.stage == .failed)
-        #expect(try controls(sheet) == [ControlEntry(id: "halo.render.close", enabled: true)])
-        try shoot(sheet, "-failed")
+        project.endRender(.failed(frame: 5, message: "Disk full"))
+        #expect(project.renderRun == .failed(half, "Render stopped at frame 5: Disk full."))
+        let view = sheet(project)
+        #expect(view.readout.line == .failed("Render stopped at frame 5: Disk full."))
+        let found = try controls(view)
+        #expect(found["halo.render.dismiss"]?.enabled == true)
+        #expect(found["halo.render.tryAgain"]?.enabled == true)
+        #expect(found["halo.render.reveal"] == nil)
+        try shoot(view, "-failed")
     }
 
     @Test func progressSinkCountsEveryWrittenFrame() throws {
-        let project = try opened()
+        let project = try editing()
         let composition = try #require(project.selectedComposition)
         let plan = try project.services.compositionRendering.plan(composition, settings: half)
         var counts: [Int] = []
