@@ -1,6 +1,6 @@
 // LibrarySidecarPlanTests.swift: which sidecars the catalog writes after a change, the Info tab's
 // Sidecar row (metadata-more MD-16), and QB-LIB-M4's plan budget. Written before its code (contract
-// rule 13, MD-14): every test waits on MD-16. `shoot` stands in for `cameras` (not on this base):
+// rule 13, MD-14); MD-16 turned them on. `shoot` stands in for `cameras` (not on this base):
 // its photos have files, and each test sets what they say. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -34,7 +34,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     Dictionary(uniqueKeysWithValues: catalog.items.map { ($0.id, SidecarFields(photo: $0)) })
 }
 
-@Test(.disabled("waits on MD-16")) func onlyPhotosWithSomethingToSayArePlanned() throws {
+@Test func onlyPhotosWithSomethingToSayArePlanned() throws {
     let catalog = shoot()
     let plan = catalog.sidecarWrites(after: [:])
     #expect(plan.map(\.photoID).sorted() == [shot(1), shot(2), shot(3)])
@@ -43,7 +43,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     #expect(catalog.sidecarWrites(after: allWritten(catalog)).isEmpty)
 }
 
-@Test(.disabled("waits on MD-16")) func oneChangeIsOneWriteAndClearingWritesEmptyFields() throws {
+@Test func oneChangeIsOneWriteAndClearingWritesEmptyFields() throws {
     var catalog = shoot()
     let written = allWritten(catalog)
     catalog.select([shot(4)])
@@ -57,7 +57,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     #expect(catalog.sidecarWrites(after: written).first { $0.photoID == shot(2) }?.fields.isEmpty == true)
 }
 
-@Test(.disabled("waits on MD-16")) func theSidecarRowSaysWhereTheSidecarIs() throws {
+@Test func theSidecarRowSaysWhereTheSidecarIs() throws {
     let catalog = shoot()
     let written = allWritten(catalog)
     func status(_ written: [String: SidecarFields], _ failure: String? = nil, writing: Bool = false) -> String? {
@@ -70,7 +70,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     #expect(status([:], "Not saved: The folder is read-only.") == "Not saved: The folder is read-only.")
 }
 
-@Test(.disabled("waits on MD-16")) func aSampleIsNeverPlannedAndSaysSo() throws {
+@Test func aSampleIsNeverPlannedAndSaysSo() throws {
     var samples = LibraryCatalog()
     samples.loadSamples()
     samples.select(Set(samples.items.map(\.id)))
@@ -83,7 +83,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
 }
 
 /// QB-LIB-M4: one changed photo of 10,000 plans in 10 ms debug, 1 ms release.
-@Test(.disabled("waits on MD-16")) func planWithinBudget() {
+@Test func planWithinBudget() {
     var catalog = LibraryCatalog()
     catalog.load(LibraryFixtures.photos(named: "large").map {
         PhotoItem(id: "/large/\($0.name).jpg", name: $0.name, captureDate: $0.captureDate, color: $0.color,
