@@ -91,3 +91,4 @@ Next: #3465 (head 00f26ebb) and #3473 (head 7e6638e9, dev merged in) ready for t
 - 11:20Z check-in: nothing merged yet; #3473 macOS build green (run 39405314225, 11:03Z), awaiting lane sweep; #3461/#3492 still on their builds; no new findings.
 - 11:38Z: MD-5 #3492 merged (ebe7e010b). Fixer started on MD-6 #3547: merge dev in, scripts/ci --changed, Head:, un-draft. #3473 MD-4 build green, awaiting lane merge.
 - 11:50Z: MD-6 #3547 un-drafted, dev merged in (head 5b7a0a2d, 3 files +130/-26, CI: PASS, mutate 8/8); waits on lane macOS build. Next when MD-6 merges: MD-7 #3548, then MD-8 #3550.
+- 12:01Z check-in: no new merges (dev unchanged since MD-5); #3473 clean with green macOS build, awaiting lane sweep; #3461 and #3547 on their builds; no new findings.
