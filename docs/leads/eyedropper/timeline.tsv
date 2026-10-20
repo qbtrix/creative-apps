@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-20T11:20Z	3	restack	#3531	5a8499cd; #3541 e8e883c6
 2026-10-20T11:21Z	3	builder-start	EY-7	stacked on #3541
 2026-10-20T11:30Z	3	slice-done	EY-m	https://github.com/qbtrix/creative-apps/actions/runs/39413721862
+2026-10-20T11:38Z	3	pr-open	#3597	EY-7
