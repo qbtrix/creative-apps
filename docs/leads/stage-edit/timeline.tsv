@@ -173,3 +173,4 @@
 2026-10-20T05:21Z	5	heartbeat	#3312	open, clean, fast-lane; waiting on the lane sweep
 2026-10-20T05:34Z	5	heartbeat	#3312	still open on fast-lane; lane busy with other PRs
 2026-10-20T05:49Z	heartbeat	#3312 clean; lane pending on stuck macOS journeys job (run 39358949800, 150-min timeout ~05:57Z); cancel 403; awaiting next sweep
+2026-10-20T06:06Z	heartbeat	#3312 held by red macOS journeys of run 39358949800 on a0054178 (lane REPORT_ONLY_RE skips only macOS); merged origin/dev, ci --changed PASS, pushed a253c272, Head marker moved
