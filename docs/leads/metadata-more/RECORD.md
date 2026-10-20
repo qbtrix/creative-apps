@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: #3465 (head 00f26ebb) and #3473 (head 1d8c098d) ready for the lane; when #3465 merges, merge dev into MD-5 #3492 and un-draft; when #3473 merges, the same for MD-9 #3533, MD-14 #3544, MD-19 #3545 (the second of #3465/#3473 to merge likely gets needs-rebase on the library-model-sources C4 part: keep both clauses); MD-6 #3547, MD-7 #3548, MD-8 #3550 drafts; MD-12 #3569 (draft on MD-9 #3533); MD-11 #3570 (draft on MD-9 #3533); MD-10 building (on MD-9 #3533); MD-15 #3574 (draft on MD-14 #3544); MD-16 building (feat/library-md16-sidecar-plan on MD-15 #3574); MD-20 #3575 (draft on MD-19 #3545); MD-17 #3579 (draft on MD-15 #3574); MD-21 waits on filters-collections (packet)
+Next: #3465 (head 00f26ebb) and #3473 (head 1d8c098d) ready for the lane; when #3465 merges, merge dev into MD-5 #3492 and un-draft; when #3473 merges, the same for MD-9 #3533, MD-14 #3544, MD-19 #3545 (the second of #3465/#3473 to merge likely gets needs-rebase on the library-model-sources C4 part: keep both clauses); MD-6 #3547, MD-7 #3548, MD-8 #3550 drafts; MD-12 #3569 (draft on MD-9 #3533); MD-11 #3570 (draft on MD-9 #3533); MD-10 #3581 (draft on MD-9 #3533); MD-15 #3574 (draft on MD-14 #3544); MD-16 building (feat/library-md16-sidecar-plan on MD-15 #3574); MD-20 #3575 (draft on MD-19 #3545); MD-17 #3579 (draft on MD-15 #3574); MD-21 waits on filters-collections (packet)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
