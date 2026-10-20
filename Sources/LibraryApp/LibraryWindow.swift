@@ -118,7 +118,7 @@ struct LibraryWindow: View {
         let current = self.menu
         let action: LibraryMenu.Action?
         switch key {
-        case .rating, .pick, .reject, .unflag:
+        case .rating, .pick, .reject, .unflag, .label:
             guard let cull = current.cull.key else { return .ignored }
             cull(key)
             return .handled
