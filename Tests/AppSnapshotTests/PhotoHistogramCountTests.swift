@@ -4,10 +4,11 @@
 // must stop, not run to its end. On a 100-layer image each count is seconds of
 // CPU, and a run of toggles, nudges or slider steps left one count per step
 // running long after the hand stopped (idle CPU findings #3662 to #3664).
-// The panel is hosted on the render budget harness with a count that waits
-// 2 s and notes whether it finished uncancelled; four exposure steps 250 ms
-// apart (each rests past the 150 ms wait, so each starts a count) must finish
-// one count, the last. macOS only.
+// The panel is hosted on the render budget harness with a count that holds
+// until the test lets it go and notes whether it ended uncancelled. The first
+// key's count and four exposure steps each start one (the test waits for each
+// to start, so no timing decides it); once they are let go, only the last
+// may finish. macOS only.
 #if canImport(AppKit)
 import PhotoModel
 import Synchronization
@@ -18,27 +19,45 @@ import Testing
 
 @MainActor @Suite struct PhotoHistogramCountTests {
     @Test(.timeLimit(.minutes(1))) func aSupersededCountStops() async throws {
-        let finished = Mutex(0)
-        let count: @Sendable (PhotoWorkspace) async -> [Double] = { _ in
-            try? await Task.sleep(for: .seconds(2))
-            if !Task.isCancelled { finished.withLock { $0 += 1 } }
-            return []
-        }
+        let counts = Counts()
         var model = try PhotoWorkspace.fixture(.sample)
-        let w = RenderBudgetWindow(AdjustmentsPanel(model: model, perform: { _ in }, count: count))
+        let w = RenderBudgetWindow(AdjustmentsPanel(model: model, perform: { _ in }, count: counts.count))
         defer { w.close() }
-        // The first key's count, on appear, lands before the steps start.
-        try await Task.sleep(for: .milliseconds(2600))
-        let before = finished.withLock { $0 }
+        try await counts.waitForStarts(1)
         for step in 1...4 {
             model.adjust(.exposure(Float(step) / 10))
-            w.host.rootView = AdjustmentsPanel(model: model, perform: { _ in }, count: count)
-            try await Task.sleep(for: .milliseconds(250))
+            w.host.rootView = AdjustmentsPanel(model: model, perform: { _ in }, count: counts.count)
+            try await counts.waitForStarts(step + 1)
         }
-        try await Task.sleep(for: .milliseconds(2600))
-        let after = finished.withLock { $0 }
-        #expect(before == 1, "the first count never finished")
-        #expect(after - before == 1, "\(after - before) of 4 counts ran to their end; only the last should")
+        counts.release()
+        try await Task.sleep(for: .milliseconds(500))
+        let finished = counts.finished
+        #expect(finished == 1, "\(finished) of 5 counts ran to their end; only the last should")
+    }
+
+    /// Counts that hold until `release`, noting how many started and how many ended uncancelled.
+    final class Counts: Sendable {
+        private let state = Mutex((started: 0, finished: 0, released: false))
+        var finished: Int { state.withLock { $0.finished } }
+
+        var count: @Sendable (PhotoWorkspace) async -> [Double] {
+            { [self] _ in
+                state.withLock { $0.started += 1 }
+                while !state.withLock({ $0.released }) {
+                    do { try await Task.sleep(for: .milliseconds(20)) } catch { return [] }
+                }
+                if !Task.isCancelled { state.withLock { $0.finished += 1 } }
+                return []
+            }
+        }
+
+        func release() { state.withLock { $0.released = true } }
+
+        /// Waits (up to 20 s) until `n` counts have started.
+        func waitForStarts(_ n: Int) async throws {
+            for _ in 0..<1000 where state.withLock({ $0.started }) < n { try await Task.sleep(for: .milliseconds(20)) }
+            try #require(state.withLock { $0.started } >= n, "count \(n) never started")
+        }
     }
 }
 #endif
