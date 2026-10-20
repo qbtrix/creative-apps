@@ -82,3 +82,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 09:51Z check-in: #3424 FC-2b macOS build green, waiting on the lane's merge sweep. No new line:library findings in this feature's files (open ones are export journeys and #3565, not ours).
 - 10:02Z: FC-2b #3424 merged to dev. Fixer merging dev into FC-4 #3461 and un-drafting. FC-a closes after FC-4 #3461 and FC-5 #3466 merge and a green library run.
 - 10:10Z: FC-4 #3461 un-drafted, dev merged in without conflicts, head cad6bfe1, own diff 3 files +278/-1; gate pass (lints and build, no test scope).
+- 10:13Z check-in: FC-4 #3461 open, waiting on its lane macOS build. #3580 moved the library timed budget tests to the perf list, so the gate no longer runs them. No new line:library findings.
