@@ -2,7 +2,7 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
-Stage: 3 wave 2 (10:15Z: FG-1 #3526 merged as 11a545e7; FG-6 #3532 got needs-rebase, dev merged in (conflicts in FlarePaint.swift and the FlarePaint plan resolved to FG-6), gate PASS, pushed e3e06e1f, Head moved; awaiting the lane's new macOS build)
+Stage: 3 wave 2 (10:38Z: FG-1 #3526 merged as 11a545e7; FG-6 #3532 at e3e06e1f, needs-rebase dropped, macOS build 39406950210 queued since 10:18Z)
 Base: 042279839a5e71c43540063bebded9d01cdc1c18
 Next: merge #3532 once its new build passes; FG-a slice done once FG-2 lands (needs GF-2); FG-3/4 wait on GF-3, FG-5 on GF-6 and AC-flare (fix oneStepForSeveral with Ball + Shadow)
 
