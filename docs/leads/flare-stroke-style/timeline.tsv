@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-20T05:03Z	3	heartbeat	#3421	blocked: FK-a waits on FG-a and SS-a, neither merged
 2026-10-20T05:21Z	3	heartbeat	#3421	FG-a and SS-a still blocked on GF-a (#3421 open); nothing on dev
 2026-10-20T05:34Z	3	heartbeat	#3421	GF-a, FG-a and SS-a not on dev; FK-a still blocked
+2026-10-20T05:49Z	heartbeat	GF-1 #3421 merged (9a146777); GF-a still needs GF-2; FG-a, SS-a not merged; FK-a blocked
