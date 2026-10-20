@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-20T20:05Z	3	relaunch	-	run act-1a15adc3ee8-qw4q; #3514 Head moved to d2970e8a; SF-4/SF-8 rebuilt; #3522/#3529 closed
 2026-10-20T20:08Z	3	slice-done	-	SF-a, SF-m on run 39484284755; Mac-Finish-Wanted SF-a
 2026-10-20T20:40Z	3	pr-open	#3731	SF-z part 2 (SF-9) on dev, Fast-Check pass at 05ecce2c
+2026-10-20T20:50Z	3	staged	-	SF-10 branch pushed, waits on SF-8 and #3731
