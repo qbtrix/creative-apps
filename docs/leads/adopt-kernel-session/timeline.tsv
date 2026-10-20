@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 2026-10-20T12:36Z	3	heartbeat	#3396	waiting on the lane (macOS build 39400563705, merge); merged=true
 2026-10-20T12:42Z	3	merged	#3396	squash cbaa5110 on dev
 2026-10-20T12:44Z	3	opened	#3603	docs(c4) clause for LibrarySession+Kernel; waiting on full CI 39423713631 for slice-done
+2026-10-20T13:03Z	3	ci	39423713631	full CI on 3ebb876f cancelled (superseded); watching scoped suiteui 39424969406 and full 39426412729 on 897ccbb2
