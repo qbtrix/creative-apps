@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-20T20:13Z	PX-m	supervisor-answer	#3470	PX-4 parked; no XP-3/XP-4/AX-photo PRs; #3678 #3729 open
 2026-10-20T20:22Z	check	poll	#3678,#3729	open, no needs-fix; PX-2/PX-5 still wait on XP-3/XP-4/AX-photo
 2026-10-20T20:34Z	check	heartbeat	#3678,#3729	open, no needs-fix; no XP-3/XP-4/AX-photo PRs yet (PX-2/PX-5 wait); PX-4 parked
+2026-10-20T20:54Z	check	heartbeat	#3678,#3729	#3678 Linux+macOS build green on 061e0972, mergeable clean, awaiting lane sweep; #3729 macOS build 39490046479 queued; no XP-3/XP-4/AX-photo PRs
