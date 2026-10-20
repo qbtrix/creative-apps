@@ -11,3 +11,4 @@
 2026-10-20T16:44Z	heartbeat	no change: #3624 open; macOS build runs 39438676925/39439515810 still queued since 14:2xZ (2h20m, runner backlog); blockers SF-3 #3514, AC-library #2999, MD-10..13 unchanged
 2026-10-20T17:07Z	heartbeat	no change: #3624 open; macOS build runs 39438676925/39439515810 still queued since 14:2xZ (~2h40m); blockers SF-3 #3514, AC-library #2999, MD-10..13 unchanged
 2026-10-20T17:29Z	heartbeat	LF-a #3624 macOS build 39439515810 still queued; SF-7 #3507 merged 17:23Z (LF-3/LF-4 still wait on LF-a, SF-5/6, LT-m, DR-m); SF-3 #3514 open
+2026-10-20T17:51:17Z	heartbeat	waiting	LF-a #3624 macOS build 39439515810 still queued since 14:28Z; LF-5 waits on SF-3 #3514 (open, needs-rebase) and SF-4
