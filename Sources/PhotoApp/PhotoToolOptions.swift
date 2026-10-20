@@ -66,8 +66,8 @@ struct ToolOptionsSection: View {
                 hint(Self.eyedropperHint)
                 SampleOptions(model: model, perform: perform)
             case .gradient:
-                // The stop editor comes with PhotoFillToolOptions (gradient-fill PG-2).
                 hint(Self.gradientHint)
+                PhotoFillToolOptions(model: model, perform: perform)
             }
         }
     }
