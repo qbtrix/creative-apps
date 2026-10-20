@@ -4,6 +4,7 @@ Sources/DesignApp/DesignCommands.swift: Button("Open…", systemImage: DesignToo
 Sources/DesignApp/DesignCommands.swift: Button("Close", systemImage: "xmark") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
 Sources/DesignApp/DesignCommands.swift: Button("Save", systemImage: DesignToolbarItem.save.systemImage) { menu.perform(.save) }
 Sources/DesignApp/DesignCommands.swift: Button("Save As…", systemImage: "square.and.arrow.down.on.square") { menu.perform(.saveAs) }
+Sources/DesignApp/DesignCommands.swift: Button("Export…", systemImage: "square.and.arrow.up") { menu.perform(.export) }
 Sources/DesignApp/DesignCommands.swift: Button(inField ? field.undoTitle : menu.undoTitle, systemImage: DesignToolbarItem.undo.systemImage) {
 Sources/DesignApp/DesignCommands.swift: Button(inField ? field.redoTitle : menu.redoTitle, systemImage: DesignToolbarItem.redo.systemImage) {
 Sources/DesignApp/DesignCommands.swift: Button("Delete", systemImage: "trash") { menu.perform(.deleteSelection) }

@@ -8,10 +8,11 @@
     "outcome": "Output is exactly 1080×1350, the subject stays where it was framed, nothing is squashed.",
     "needs": [
       "photo/photo-crop",
-      "S11"
+      "S11",
+      "photo/export-pack"
     ],
     "needs_note": "photo/photo-crop (built), S11 export at a size",
-    "closes_with": "S11",
+    "closes_with": "photo/export-pack",
     "trap": "No 4:5 chip (chips are Free, Original, 1:1, 3:2, 4:3, 16:9), so it takes a typed ratio, then Image Size, then Export: two resamples and an easy 1349 px or squash",
     "run": "Cm",
     "baseline": "partial",
@@ -20,7 +21,8 @@
       "captain",
       "https://photoshopcafe.com/how-to-resize-and-prepare-pictures-for-posting-on-instagram-in-photoshop-2022/",
       "https://imagen-ai.com/tools/resize-for-instagram-portrait-45.md"
-    ]
+    ],
+    "waits_on": "PX-3"
   },
   "RJ-P02": {
     "id": "RJ-P02",
@@ -235,10 +237,11 @@
     "outcome": "Greys read neutral.",
     "needs": [
       "S1",
-      "E3"
+      "E3",
+      "photo/tone-controls"
     ],
     "needs_note": "S1 tone rows (E3)",
-    "closes_with": "S1",
+    "closes_with": "photo/tone-controls",
     "trap": "Only the whole image, not as an adjustment layer",
     "run": "C",
     "baseline": "fail",
@@ -246,7 +249,8 @@
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/",
       "https://www.apple.com/pixelmator-pro/"
-    ]
+    ],
+    "waits_on": "PT-4"
   },
   "RJ-P13": {
     "id": "RJ-P13",
@@ -255,10 +259,11 @@
     "job": "Rescue a backlit portrait with Shadows/Highlights and Contrast.",
     "outcome": "The face lifts, the sky keeps detail.",
     "needs": [
-      "S1"
+      "S1",
+      "photo/tone-controls"
     ],
     "needs_note": "S1 tone rows",
-    "closes_with": "S1",
+    "closes_with": "photo/tone-controls",
     "trap": "Clipped highlights with no warning",
     "run": "C",
     "baseline": "fail",
@@ -266,7 +271,8 @@
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/",
       "https://www.apple.com/pixelmator-pro/"
-    ]
+    ],
+    "waits_on": "PT-4"
   },
   "RJ-P14": {
     "id": "RJ-P14",
@@ -276,17 +282,19 @@
     "outcome": "Edges are crisp with no bright halos at the default amount.",
     "needs": [
       "S1",
-      "E4"
+      "E4",
+      "photo/tone-controls"
     ],
     "needs_note": "S1 / E4 (engine has unsharp)",
-    "closes_with": "S1",
+    "closes_with": "photo/tone-controls",
     "trap": "Halos; sharpen runs before resize",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PT-4"
   },
   "RJ-P15": {
     "id": "RJ-P15",
@@ -333,17 +341,19 @@
     "job": "Paste a logo and scale it from a corner, rotate it 15°, flip it.",
     "outcome": "It keeps its aspect and stays sharp.",
     "needs": [
-      "S7"
+      "S7",
+      "photo/transform"
     ],
-    "needs_note": "S7 transform (re-cut PV-7)",
-    "closes_with": "S7",
+    "needs_note": "S7 transform; photo/transform wires it into Photo",
+    "closes_with": "photo/transform",
     "trap": "Aspect squash on a corner drag; repeated scaling blurs it",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PT-5"
   },
   "RJ-P18": {
     "id": "RJ-P18",
@@ -353,17 +363,19 @@
     "outcome": "The image is centred and the new area is white.",
     "needs": [
       "S7",
-      "E5"
+      "E5",
+      "photo/transform"
     ],
-    "needs_note": "S7 (canvas pad, E5)",
-    "closes_with": "S7",
+    "needs_note": "S7 Canvas Size on E5's pad (done); photo/transform wires it",
+    "closes_with": "photo/transform",
     "trap": "New area transparent, or the image shifted by a pixel",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PT-6"
   },
   "RJ-P19": {
     "id": "RJ-P19",
@@ -431,17 +443,18 @@
     "job": "Pick a colour from the photo with the eyedropper for a title.",
     "outcome": "The swatch matches the pixel.",
     "needs": [
-      "S13"
+      "S13",
+      "photo/eyedropper"
     ],
-    "needs_note": "S13 eyedropper",
-    "closes_with": "S13",
+    "closes_with": "photo/eyedropper",
     "trap": "Picks the screen colour, not the document's",
     "run": "J",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PE-7"
   },
   "RJ-P23": {
     "id": "RJ-P23",
@@ -541,17 +554,18 @@
     "job": "Jump back 10 steps by clicking the History panel.",
     "outcome": "One click goes back 10 steps, and the canvas, the History panel and the Edit menu's Undo item agree.",
     "needs": [
-      "S12"
+      "S12",
+      "photo/history-panel"
     ],
-    "needs_note": "S12 History panel",
-    "closes_with": "S12",
+    "closes_with": "photo/history-panel",
     "trap": "Panel and Edit menu disagree",
     "run": "J",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://shotkit.com/pixelmator-pro-vs-photoshop/"
-    ]
+    ],
+    "waits_on": "PH-7"
   },
   "RJ-P29": {
     "id": "RJ-P29",
@@ -681,5 +695,68 @@
     "sources": [
       "https://www.apple.com/pixelmator-pro/"
     ]
+  },
+  "RJ-P36": {
+    "id": "RJ-P36",
+    "app": "photo",
+    "weight": "med",
+    "job": "Sample a 5 x 5 mean by command on a red and blue checkerboard, and a point outside the image.",
+    "outcome": "The centred 5 x 5 square reads the 13-red, 12-blue mix within 1 per channel, and the outside point reads null.",
+    "needs": [
+      "S13",
+      "photo/eyedropper"
+    ],
+    "closes_with": "photo/eyedropper",
+    "trap": "The sample reads the active layer, or the square is anchored at its corner",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PE-6",
+    "added_by": "photo/eyedropper"
+  },
+  "RJ-P37": {
+    "id": "RJ-P37",
+    "app": "photo",
+    "weight": "high",
+    "job": "Place a PNG logo onto an open 800 x 600 image and save the flattened result.",
+    "outcome": "The output is 800 x 600 with the 200 x 100 logo centred (its red half at x 350, its blue half at x 450) on a new layer, and the canvas around it unchanged.",
+    "needs": [
+      "S20",
+      "photo/place-image"
+    ],
+    "closes_with": "photo/place-image",
+    "trap": "The place opens the logo as a new document, or lands it at the top-left corner",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PP-6",
+    "added_by": "photo/place-image"
+  },
+  "RJ-P42": {
+    "id": "RJ-P42",
+    "app": "photo",
+    "weight": "med",
+    "job": "Drop a PNG from Finder onto an open image.",
+    "outcome": "It becomes one centred layer named after the file in one undo step; undo removes it.",
+    "needs": [
+      "suite/file-flow",
+      "photo/file-flow"
+    ],
+    "closes_with": "photo/file-flow",
+    "trap": "The drop replaces the document or opens a second window, or takes two undo steps",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PF-3",
+    "added_by": "photo/file-flow"
   }
 }
