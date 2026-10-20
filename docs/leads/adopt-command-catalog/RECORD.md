@@ -78,3 +78,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-20T14:18:51Z: AC-z2 #3606 merged 14:00Z as 59708c02; every slice merged. Full CI 39436941980 at 56e73319 (has AC-design 2128ac4b and AC-z 59708c02) pending; slice lines wait on it.
 
 - 2026-10-20T14:40Z: Full CI 39436941980 cancelled. Full CI 39438701609 at 9f880c85 (contains every slice, incl. 6fa96843) queued; scoped runs at 897ccbb2 still queued. Slice lines wait.
+
+- 2026-10-20T15:00Z: Full CI 39438701609 (9f880c85) and newer 39442633733 (0dd23d65, also contains every slice) both queued; macOS queue backed up. Scoped runs at 897ccbb2 still queued. Slice lines wait.
