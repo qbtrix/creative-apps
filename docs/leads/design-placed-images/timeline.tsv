@@ -11,3 +11,5 @@ utc	stage	event	ref	note
 2026-10-20T20:59Z	PD-a	pr-opened	#3759	head 4ade2ec, 397 lines/11 files own diff, stacked on #3687, touches Package.swift (CoreRaster) so supervisor merges, Mutate 14/14 DesignNode
 2026-10-20T21:00:34Z	poll	heartbeat	#3759	PD-a open, own diff 397/11 over DG-a stack; #3687 open
 2026-10-20T21:21:54Z	poll	heartbeat	#3759	supervisor added needs-split (stacked count); own diff 397/11; waits on #3687 or supervisor answer on #3751
+2026-10-20T21:44:18Z	dep	pr-merged	#3687	DG-a merged (cross-feature); stacked PR now conflicts with dev
+2026-10-20T21:44:18Z	fix	fix-round	-	fixer merging dev into the stacked PR (merge commit), then re-measure against the cap
