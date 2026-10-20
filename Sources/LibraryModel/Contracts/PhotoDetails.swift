@@ -1,6 +1,6 @@
 // Contracts/PhotoDetails.swift: what the camera recorded for a photo, and the
 // Info tab's camera rows (metadata-more MD-1; the tag reading, display texts
-// and rows are filled by MD-6). Linux-safe value types.
+// and rows are MD-6's). Linux-safe value types.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -35,24 +35,55 @@ public struct CameraDetails: Hashable, Sendable {
 
     /// From ImageIO's Exif and TIFF dictionaries, keyed by tag name ("Make",
     /// "Model", "LensModel", "ISOSpeedRatings", "ExposureTime", "FNumber",
-    /// "FocalLength"). MD-1: returns `.none`; MD-6 reads the tags.
+    /// "FocalLength"). ISO is a list (its first) or one number; a tag of
+    /// the wrong kind is ignored.
     public init(exif: [String: Any], tiff: [String: Any]) {
-        self = .none
+        let iso = exif["ISOSpeedRatings"]
+        self.init(
+            make: tiff["Make"] as? String, model: tiff["Model"] as? String, lens: exif["LensModel"] as? String,
+            iso: (iso as? [Int])?.first ?? iso as? Int,
+            exposureTime: Self.number(exif["ExposureTime"]), fNumber: Self.number(exif["FNumber"]),
+            focalLength: Self.number(exif["FocalLength"]))
     }
 
     /// True when the file said nothing usable.
     public var isEmpty: Bool { self == .none }
 
-    /// "Fixture Optics FX-1" (the make left off when the model starts with it). MD-1: nil; MD-6.
-    public var cameraText: String? { nil }
-    /// "1/250 s" or "2.5 s". MD-1: nil; MD-6.
-    public var shutterText: String? { nil }
-    /// "f/2.8" or "f/8". MD-1: nil; MD-6.
-    public var apertureText: String? { nil }
-    /// "35 mm". MD-1: nil; MD-6.
-    public var focalText: String? { nil }
-    /// "ISO 400". MD-1: nil; MD-6.
-    public var isoText: String? { nil }
+    /// "Fixture Optics FX-1" (the make left off when the model starts with it, any case).
+    public var cameraText: String? {
+        guard let make else { return model }
+        guard let model else { return make }
+        return model.lowercased().hasPrefix(make.lowercased()) ? model : make + " " + model
+    }
+    /// "1/250 s" or "2.5 s".
+    public var shutterText: String? { exposureTime.map { Self.shutter($0) + " s" } }
+    /// "f/2.8" or "f/8".
+    public var apertureText: String? { fNumber.map(Self.aperture) }
+    /// "35 mm".
+    public var focalText: String? { focalLength.map { Self.decimal($0) + " mm" } }
+    /// "ISO 400".
+    public var isoText: String? { iso.map { "ISO \($0)" } }
+
+    /// A tag's number: a Double or an Int; nil for anything else.
+    static func number(_ value: Any?) -> Double? {
+        if let double = value as? Double { return double }
+        return (value as? Int).map(Double.init)
+    }
+
+    /// One decimal, ".0" dropped: 2.8 → "2.8", 2.0 → "2" (locale-independent).
+    static func decimal(_ value: Double) -> String {
+        ExportSidecar.number((value * 10).rounded() / 10)
+    }
+
+    /// "1/250" when 1/n is within 5% of `seconds`, else "0.3" or "2.5" (no unit).
+    static func shutter(_ seconds: Double) -> String {
+        guard seconds < 1 else { return decimal(seconds) }
+        let n = (1 / seconds).rounded()
+        guard n.isFinite, n <= 1_000_000, abs(1 / n - seconds) / seconds < 0.05 else { return decimal(seconds) }
+        return "1/\(Int(n))"
+    }
+
+    static func aperture(_ fNumber: Double) -> String { "f/" + decimal(fNumber) }
 
     /// `value` without leading and trailing spaces and NULs; nil when nothing is left.
     static func text(_ value: String?) -> String? {
@@ -90,8 +121,46 @@ public struct CameraRow: Hashable, Sendable {
 
 extension CameraRow {
     /// One row per field any photo has, in `CameraField` order: a shared
-    /// value, a range ("ISO 100–3200"), or a count ("2 cameras"). MD-1: []; MD-6.
-    public static func rows(for photos: [PhotoItem]) -> [CameraRow] { [] }
+    /// value, a range ("ISO 100–3200"), or a count ("2 cameras"). None, not
+    /// even Taken, when no photo has camera details ("No camera details").
+    public static func rows(for photos: [PhotoItem]) -> [CameraRow] {
+        guard photos.contains(where: { !$0.camera.isEmpty }) else { return [] }
+        return CameraField.allCases.compactMap { row($0, photos) }
+    }
+
+    private static func row(_ field: CameraField, _ photos: [PhotoItem]) -> CameraRow? {
+        let cameras = photos.map(\.camera)
+        switch field {
+        case .camera: return named(field, cameras.compactMap(\.cameraText), key: "camera", plural: "cameras")
+        case .lens: return named(field, cameras.compactMap(\.lens), key: "lens", plural: "lenses")
+        case .aperture: return ranged(field, cameras.compactMap(\.fNumber), CameraDetails.aperture) { $0 }
+        case .shutter: return ranged(field, cameras.compactMap(\.exposureTime), CameraDetails.shutter) { $0 + " s" }
+        case .iso: return ranged(field, cameras.compactMap(\.iso), { String($0) }) { "ISO " + $0 }
+        case .focalLength: return ranged(field, cameras.compactMap(\.focalLength), CameraDetails.decimal) { $0 + " mm" }
+        case .taken:
+            let dates = photos.map(\.captureDate)
+            guard let first = dates.min(), let last = dates.max() else { return nil }
+            return CameraRow(field: field, value: .dates(first, last), search: nil)
+        }
+    }
+
+    /// One name with the search that finds it, or a count ("3 lenses"); nil with no names.
+    private static func named(_ field: CameraField, _ names: [String], key: String, plural: String) -> CameraRow? {
+        guard let name = names.first else { return nil }
+        let distinct = Set(names).count
+        guard distinct > 1 else { return CameraRow(field: field, value: .text(name), search: "\(key):\"\(name)\"") }
+        return CameraRow(field: field, value: .text("\(distinct) \(plural)"), search: nil)
+    }
+
+    /// The lowest to the highest value, each as `each`, wrapped in `whole`
+    /// ("ISO 100–3200"); one value when both ends read the same.
+    private static func ranged<T: Comparable>(
+        _ field: CameraField, _ values: [T], _ each: (T) -> String, whole: (String) -> String
+    ) -> CameraRow? {
+        guard let low = values.min(), let high = values.max() else { return nil }
+        let (from, to) = (each(low), each(high))
+        return CameraRow(field: field, value: .text(whole(from == to ? from : from + "–" + to)), search: nil)
+    }
 }
 
 extension LibraryCatalog {
