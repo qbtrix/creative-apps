@@ -3,5 +3,5 @@ utc	stage	event	ref	note
 2026-10-20T03:56Z	3	blocked	#3421	wave 1 waits on suiteui GF-1
 2026-10-20T04:06Z	1	built	HG-a	HG-1 and HG-5 built on a local stack over GF-1; gate running
 2026-10-20T04:09:17Z	3	core-api	RasterGradient.swift	PixelBuffer.gradient present at pin; HG-6 drafted
-2026-10-20T04:30Z	3	built	HG-6	HG-6 on hg-6-work over HG-a; mutations 3/3; gate running; #3421 still open
-2026-10-20T04:35Z	3	gate	HG-6	scripts/ci --changed PASS on hg-6-work 1af5780; #3421 macOS build still queued
+2026-10-20T04:12Z	3	built	HG-6	HG-6 on hg-6-work over HG-a; mutations 3/3; gate running; #3421 still open
+2026-10-20T04:16Z	3	gate	HG-6	scripts/ci --changed PASS on hg-6-work 1af5780; #3421 macOS build still queued
