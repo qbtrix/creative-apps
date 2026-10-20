@@ -1,5 +1,5 @@
-// HistoryCommands.swift (autosave-history AH-1 specs with real ids, schemas and availability, runs throwing
-// `HistoryCommands.notBuilt`; AH-6 bodies): the History panel's two commands every app registers with one line,
+// HistoryCommands.swift (autosave-history AH-1 specs with real ids, schemas and availability, AH-6 bodies):
+// the History panel's two commands every app registers with one line,
 // `+ HistoryCommands.specs(<X>Workspace.self)`, read from the kernel `History` the app already runs on.
 
 /// What the History panel shows: the state before the first step, every step, and where the document is.
@@ -19,9 +19,20 @@ public struct HistoryListing: Hashable, Sendable, Codable {
 }
 
 extension History {
-    /// This history as the panel lists it, the state before its first step named `base`.
-    /// Stub: `base` alone, no steps; AH-6 fills this in.
-    public func listing(base: String) -> HistoryListing { HistoryListing(base: base, steps: [], index: 0) }
+    /// This history as the panel lists it, the state before its first step named `base`. `savedIndex` is the
+    /// position whose step id is the saved one, nil when that state rolled past the limit or was undone and replaced.
+    public func listing(base: String) -> HistoryListing {
+        let all = undoSteps + redoSteps.reversed()
+        let ids = [all.first?.idBefore ?? currentStepID] + all.map(\.idAfter)
+        return HistoryListing(base: base, steps: steps, index: index, savedIndex: ids.firstIndex(of: savedStepID))
+    }
+
+    /// The jump a `HistoryJumping` conformance makes: ends the open run, so the next edit never folds into the
+    /// step the jump landed on, then undoes or redoes through `apply` until `index` steps are applied.
+    public mutating func jumpEndingRun(to index: Int, _ apply: (Payload) -> Payload) {
+        endRun()
+        jump(to: index, apply)
+    }
 }
 
 /// A document whose history the panel lists and jumps in.
@@ -33,8 +44,6 @@ public protocol HistoryJumping: Sendable {
 }
 
 public enum HistoryCommands {
-    /// What a history command's run throws until AH-6 builds the bodies.
-    public static let notBuilt = CatalogError.notBuilt(id: "history", feature: "autosave-history AH-6")
     /// Why `history.jump` can't run on a document with no steps.
     static let noStepsHelp = "There are no steps yet."
 
@@ -52,14 +61,21 @@ public enum HistoryCommands {
     public static func specs<T: HistoryJumping>(_ target: T.Type) -> [CommandSpec<T>] {
         [
             .typed("history.read", title: "Read History", summary: "Reads the history: the state before the first step, every step's name, how many are applied and which was saved.",
-                   kind: .query, params: Empty.self, schema: .none, result: listing, example: .object([:])) { _, _ in try stub() },
+                   kind: .query, params: Empty.self, schema: .none, result: listing, example: .object([:])) { doc, _ in doc.historyListing },
             .typed("history.jump", title: "Jump in History", summary: "Undoes or redoes until the given number of steps is applied; the jump records no step.",
                    kind: .view, params: JumpParams.self, schema: .object(["index": count], required: ["index"]),
                    example: .object(["index": .number(0)]),
-                   availability: { $0.historyListing.steps.isEmpty ? .unavailable(noStepsHelp) : .available }) { _, _ in try stub() },
+                   availability: { $0.historyListing.steps.isEmpty ? .unavailable(noStepsHelp) : .available }) { doc, p in try jump(&doc, to: p.index) },
         ]
     }
 
-    /// Every run until AH-6: refuses with `notBuilt`.
-    static func stub() throws -> JSONValue { throw notBuilt }
+    /// `history.jump`'s body: an index outside `0...steps.count` throws its sentence and leaves `doc` as it was;
+    /// any other lands there through the document's own jump, which records no step and ends the open run.
+    static func jump<T: HistoryJumping>(_ doc: inout T, to index: Int) throws -> JSONValue {
+        guard (0...doc.historyListing.steps.count).contains(index) else {
+            throw CatalogError.failed(id: "history.jump", message: "There is no step \(index).")
+        }
+        try doc.jumpHistory(to: index)
+        return .object([:])
+    }
 }

@@ -187,6 +187,15 @@ public struct SelectionHandlesEditor: View {
     }
 }
 
+extension SelectionHandlesEditor {
+    /// The box turned `degrees` clockwise about its centre (transform-tools). TT-2 takes the turn and
+    /// ignores it, so the box draws and drags unturned; TT-3 draws it turned and maps each sample back.
+    public init(rect: CGRect, degrees: Double, zoom: Double, onResize: @escaping @MainActor (CGRect) -> Void,
+                onRotate: @escaping @MainActor (Double) -> Void, onEnd: @escaping @MainActor () -> Void) {
+        self.init(rect: rect, zoom: zoom, onResize: onResize, onRotate: onRotate, onEnd: onEnd)
+    }
+}
+
 /// Where a SelectionHandlesEditor reports each drag sample, on series
 /// `handle-drag`; a probe host sets it, and nil records nothing.
 struct HandleDragProbe: Sendable {
