@@ -8,7 +8,7 @@ and where its check runs: **C** the CLI on Linux, **Cm** the CLI headless on mac
 **baseline** is the hand estimate when the job was added; the live status comes from the nightly run.
 The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 
-38 jobs: 16 C, 18 Cm, 4 J. Baseline 6 pass, 8 partial, 24 fail, 0 unknown; baseline score **2.9/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
+39 jobs: 17 C, 18 Cm, 4 J. Baseline 6 pass, 8 partial, 25 fail, 0 unknown; baseline score **2.8/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
 
 | id | job → outcome | weight | needs | closes with | baseline | trap | run | sources |
 |---|---|---|---|---|---|---|---|---|
@@ -50,3 +50,4 @@ The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 | RJ-H36 | Place a two-colour PNG logo into a composition by command and render frame 0. → In the rendered PNG the logo's left half is red and its right half blue within 2/255, centred at its own 200 x 100 size, and the pixels just outside it are the background. | high | `S20`, `halo/placed-images` | `halo/placed-images` | fail | The viewer shows the logo but the render draws the solid's colour, or the logo is stretched to the composition | C | captain |
 | RJ-H41 | Render a lower third as ProRes 4444 with a transparent background. → The movie is ProRes 4444 with alpha: a background-only pixel has alpha 0, a bar pixel alpha 255. | med | `S11`, `halo/export-pack` | `halo/export-pack` | fail | Alpha renders black, or the file says ProRes but carries no alpha | Cm | captain |
 | RJ-H42 | Reopen a project from Open Recent and drop a .halo and a PNG on Halo. → Open Recent equals the suite list filtered to Halo; the .halo opens and the PNG goes to Photo. | med | `suite/file-flow`, `halo/file-flow` | `halo/file-flow` | fail | Halo keeps its own list, or an image drop is silently ignored | C | captain |
+| RJ-H70 | Change a 10 s composition to 15 s with a navy background, then render frame 400. → Frame 400 renders with a navy corner within 2 levels and the keys stay at frames 30 and 270. | high | `suiteui/document-setup` | `suiteui/document-setup` | fail | The comp can't be changed without rebuilding it, or the keys stretch to the new length | C | captain |

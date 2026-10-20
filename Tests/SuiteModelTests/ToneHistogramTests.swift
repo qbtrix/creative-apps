@@ -16,16 +16,20 @@ import Musl
 #endif
 
 @Test func channelsSumPerBinWithTheTallestAtOne() {
-    let shape = ToneHistogram(channels: [[1, 0, 3], [1, 2, 3]], shadowClipped: 0, highlightClipped: 4)
-    #expect(shape.heights == [2.0 / 6, 2.0 / 6, 1])
+    let counts: [[Int]] = [[1, 0, 3], [1, 2, 3]]
+    let shape = ToneHistogram(channels: counts, shadowClipped: 0, highlightClipped: 4)
+    let expected: [Double] = [2.0 / 6, 2.0 / 6, 1]
+    #expect(shape.heights == expected)
     #expect(!shape.clipsShadows && shape.clipsHighlights)
 }
 
 @Test func noCountsDrawNothingAndNeverNaN() {
-    #expect(ToneHistogram(channels: [[0, 0], [0, 0]]).heights.isEmpty)
+    let zeros: [[Int]] = [[0, 0], [0, 0]], negative: [[Int]] = [[-5, 2]], ragged: [[Int]] = [[3, 1, 9], [1]]
+    let clampedNegative: [Double] = [0, 1], shortest: [Double] = [1]
+    #expect(ToneHistogram(channels: zeros).heights.isEmpty)
     #expect(ToneHistogram(channels: []).heights.isEmpty)
-    #expect(ToneHistogram(channels: [[-5, 2]]).heights == [0, 1])
-    #expect(ToneHistogram(channels: [[3, 1, 9], [1]]).heights == [1])
+    #expect(ToneHistogram(channels: negative).heights == clampedNegative)
+    #expect(ToneHistogram(channels: ragged).heights == shortest)
     #expect(ToneHistogram.empty == ToneHistogram(channels: []))
 }
 

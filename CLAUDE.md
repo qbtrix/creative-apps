@@ -221,6 +221,7 @@ something. One that can't act yet is disabled and says why:
 
 - `docs/engineering.md`: how code is laid out (Models, views, SuiteUI).
 - `docs/design.md`: the look and behavior rules for every view.
+- `docs/render-contract.md`: how a canvas draws (one GPU route, no CPU work per step); read it before touching a canvas, overlay or render route.
 - Before you open a PR, check your diff against `docs/review-rubric.md` and fix
   every "no".
 

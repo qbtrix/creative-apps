@@ -184,10 +184,11 @@
     "job": "Copy a shape as SVG and paste it into a code editor.",
     "outcome": "Valid SVG with the same colours.",
     "needs": [
-      "A1"
+      "A1",
+      "suiteui/clipboard-interop"
     ],
     "needs_note": "A1 copy as SVG or CSS",
-    "closes_with": "A1",
+    "closes_with": "suiteui/clipboard-interop",
     "trap": "Pastes a PNG instead",
     "run": "C",
     "baseline": "fail",
