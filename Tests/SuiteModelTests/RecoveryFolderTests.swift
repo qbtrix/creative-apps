@@ -1,6 +1,6 @@
-// RecoveryFolderTests.swift (autosave-history AH-1 written, AH-7 turns on): the recovery files over the suite
+// RecoveryFolderTests.swift (autosave-history AH-1 written, AH-7 on): the recovery files over the suite
 // store, in a temp folder. A write reads back, two windows come newest first, a pair whose JSON is missing or
-// damaged is dropped and deleted, and discard removes both files. Disabled by name until AH-7 builds the body.
+// damaged is dropped and deleted, and discard removes both files.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -20,23 +20,23 @@ import Testing
         FileManager.default.fileExists(atPath: store.folder + "/Recovery/" + name)
     }
 
-    @Test(.disabled("waits on AH-7")) func writeThenLeftBehind() throws {
+    @Test func writeThenLeftBehind() throws {
         let (folder, store) = Self.make()
         try folder.write(Data("one".utf8), window: "w1", name: "Poster", at: 100)
         #expect(try folder.leftBehind() == [RecoveryItem(window: "w1", name: "Poster", savedAt: 100, data: Data("one".utf8))])
         #expect(Self.exists(store, "w1.fake") && Self.exists(store, "w1.json"))
     }
-    @Test(.disabled("waits on AH-7")) func emptyFolderLeavesNothing() throws {
+    @Test func emptyFolderLeavesNothing() throws {
         #expect(try Self.make().0.leftBehind().isEmpty)
     }
-    @Test(.disabled("waits on AH-7")) func newestFirst() throws {
+    @Test func newestFirst() throws {
         let (folder, _) = Self.make()
         try folder.write(Data("a".utf8), window: "w1", name: nil, at: 100)
         try folder.write(Data("b".utf8), window: "w2", name: "Untitled", at: 200)
         #expect(try folder.leftBehind().map(\.window) == ["w2", "w1"])
         #expect(try folder.leftBehind().first?.name == "Untitled")
     }
-    @Test(.disabled("waits on AH-7")) func damagedPairDropped() throws {
+    @Test func damagedPairDropped() throws {
         let (folder, store) = Self.make()
         try folder.write(Data("a".utf8), window: "w1", name: nil, at: 100)
         try folder.write(Data("b".utf8), window: "w2", name: nil, at: 200)
@@ -46,7 +46,7 @@ import Testing
         #expect(try folder.leftBehind().map(\.window) == ["w1"])
         #expect(!Self.exists(store, "w2.fake") && !Self.exists(store, "w3.fake") && !Self.exists(store, "w3.json"))
     }
-    @Test(.disabled("waits on AH-7")) func discardRemovesBoth() throws {
+    @Test func discardRemovesBoth() throws {
         let (folder, store) = Self.make()
         try folder.write(Data("a".utf8), window: "w1", name: nil, at: 100)
         try folder.write(Data("b".utf8), window: "w2", name: nil, at: 200)
