@@ -93,3 +93,4 @@ Next: #3465 (head 00f26ebb) and #3473 (head 7e6638e9, dev merged in) ready for t
 - 11:50Z: MD-6 #3547 un-drafted, dev merged in (head 5b7a0a2d, 3 files +130/-26, CI: PASS, mutate 8/8); waits on lane macOS build. Next when MD-6 merges: MD-7 #3548, then MD-8 #3550.
 - 12:01Z check-in: no new merges (dev unchanged since MD-5); #3473 clean with green macOS build, awaiting lane sweep; #3461 and #3547 on their builds; no new findings.
 - 12:24Z check-in: no dev merges since 11:20Z; lane runs active (batching); #3473 clean+green awaits merge; #3461, #3547 on builds; no new findings.
+- 12:47Z MD-4 #3473 merged (92976e6ac); MD-a PRs all on dev, Belt-Slice-Done waits on a green library run containing it. Fixers started: MD-9 #3533, MD-14 #3544, MD-19 #3545 (merge dev in, CI, un-draft). MD-6 #3547 waits on lane macOS build.
