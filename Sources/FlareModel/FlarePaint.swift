@@ -1,9 +1,10 @@
 // FlarePaint.swift: fill and stroke on the workspace (inspector-timeline IT-2). `paint` reads the shapes the inspector
 // edits: the direct-selected shapes under Direct Select, else every shape of the inspector's layers; a value that
 // differs across them reads nil (Mixed), and a shape with no stroke reads as a zero-width one. Each setter is one undo
-// step through `services.properties` ("Set Fill" / "Set Stroke"); a bad hex, a gradient fill or no shape refuses with
-// a reason in `paintError` and changes nothing, and a successful set clears it. Hex parsing is NewDocumentSpec's.
-// `gradient` (gradient-fill FG-1) is the first shape's gradient in its bounds when every edited shape has a gradient.
+// step through `services.properties` ("Set Fill" / "Set Stroke"); a bad hex or no shape refuses with a reason in
+// `paintError` and changes nothing, and a successful set clears it. Hex parsing is NewDocumentSpec's. `gradient`
+// (gradient-fill FG-1, FG-6) is the first shape's gradient in its bounds when every edited shape has that same
+// gradient, nil (Mixed) when they differ; a hex set turns a gradient solid.
 import FlareCore
 import SuiteKernel
 
@@ -23,7 +24,6 @@ public struct PaintReadout: Sendable, Equatable {
 
 extension FlareWorkspace {
     static let badHex = "Use 6 hex digits, like FF3B30."
-    static let gradientRefusal = "Gradients can't be edited yet."
     static let noShape = "Select a shape first."
 
     /// The fill and stroke of the shapes the inspector edits; nil with none.
@@ -38,17 +38,14 @@ extension FlareWorkspace {
             fillIsGradient: solid.count < fills.count,
             strokeHex: Self.same(strokes.map { Self.hexDigits($0.color) }), strokeWidth: Self.same(strokes.map(\.width)),
             cap: Self.same(strokes.map(\.cap)), join: Self.same(strokes.map(\.join)),
-            gradient: solid.isEmpty ? fillSelection : nil)
+            gradient: solid.isEmpty && Self.same(fills) != nil ? fillSelection : nil)
     }
 
-    /// Sets the selection's solid fill; refuses a bad hex or a gradient with a reason.
+    /// Sets the selection's solid fill, a gradient included; refuses a bad hex with a reason.
     public mutating func setFill(hex: String) {
         guard let color = NewDocumentSpec.color(hex: hex) else { return paintError = Self.badHex }
         let found = paintShapes
         guard !found.isEmpty else { return paintError = Self.noShape }
-        guard found.allSatisfy({ if case .solid = $0.1.fill { true } else { false } }) else {
-            return paintError = Self.gradientRefusal
-        }
         let properties = services.properties, items = found.map(\.0)
         paintStep(nil) { try properties.setFill(.solid(color), of: items, in: &$0) }
     }

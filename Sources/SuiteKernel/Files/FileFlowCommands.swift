@@ -78,28 +78,41 @@ public enum FileFlowCommands {
     public static func specs<T: FileFlowTarget>(_ target: T.Type) -> [CommandSpec<T>] {
         [
             .typed("file.recent", title: "Recent Files", summary: "This app's recent files, newest first.", kind: .query,
-                   params: NoParams.self, result: .array(of: entrySchema), example: .object([:])) { _, _ -> [RecentFileEntry] in
-                throw CatalogError.notBuilt(id: "file.recent", feature: "SF-6")
+                   params: NoParams.self, result: .array(of: entrySchema), example: .object([:])) { target, _ -> [RecentFileEntry] in
+                target.recentFiles
             },
             .typed("file.open-recent", title: "Open Recent", summary: "Opens a file from this app's recent list.", kind: .file,
-                   params: OpenRecent.self, example: .object(["fileID": .string("path:/tmp/example")])) { _, _ -> JSONValue in
-                throw CatalogError.notBuilt(id: "file.open-recent", feature: "SF-6")
+                   params: OpenRecent.self, example: .object(["fileID": .string("path:/tmp/example")])) { target, params -> JSONValue in
+                guard target.recentFiles.contains(where: { $0.fileID == params.fileID }) else {
+                    throw CatalogError.failed(id: "file.open-recent", message: "\(params.fileID) is not in Recent Files.")
+                }
+                try target.openRecent(params.fileID)
+                return .null
             },
             .typed("file.clear-recent", title: "Clear Menu", summary: "Empties this app's recent list.", kind: .view,
                    params: NoParams.self, example: .object([:]),
-                   availability: { $0.recentFiles.isEmpty ? .unavailable("No Recent Files") : .available }) { _, _ -> JSONValue in
-                throw CatalogError.notBuilt(id: "file.clear-recent", feature: "SF-6")
+                   availability: { $0.recentFiles.isEmpty ? .unavailable("No Recent Files") : .available }) { target, _ -> JSONValue in
+                try target.clearRecent()
+                return .null
             },
             .typed("file.open-in", title: "Open In", summary: "Hands the open document to another app that reads it.",
                    kind: .file, params: OpenIn.self, example: .object(["app": .string("halo")]),
-                   availability: { $0.openInHelp.map { .unavailable($0) } ?? .available }) { _, _ -> JSONValue in
-                throw CatalogError.notBuilt(id: "file.open-in", feature: "SF-6")
+                   availability: { $0.openInHelp.map { .unavailable($0) } ?? .available }) { target, params -> JSONValue in
+                guard target.openInApps.contains(params.app) else {
+                    throw CatalogError.failed(id: "file.open-in", message: "\(params.app) doesn't open this document.")
+                }
+                try target.openIn(params.app)
+                return .null
             },
             .typed("file.drop", title: "Drop Files",
                    summary: "Opens, places or hands off each file as if dropped on the window; returns the actions taken.",
                    kind: .file, params: Drop.self, result: .array(of: actionSchema),
-                   example: .object(["paths": .array([.string("/tmp/example.png")])])) { _, _ -> [DropAction] in
-                throw CatalogError.notBuilt(id: "file.drop", feature: "SF-6")
+                   example: .object(["paths": .array([.string("/tmp/example.png")])])) { target, params -> [DropAction] in
+                let probe = target
+                let actions = DropPlan.plan(params.paths, into: target.appID, hasDocument: target.hasDocument,
+                                            places: target.placesExtensions, readers: { probe.readers(ofExtension: $0) })
+                try target.perform(actions)
+                return actions
             },
         ]
     }
