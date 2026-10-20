@@ -1,0 +1,43 @@
+# autosave-history (Halo) lead record
+
+Issue: #3442 · Packet: docs/blueprints/halo/features/autosave-history.md
+Run: act-1a15a9f4eda-rqhh · Session: session_01SEp2gy695K32UTCMdrBDFC · Started: 2026-10-20T18:43Z
+Stage: 3 wave 1
+Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
+Next: check PR of HA-a (HA-1 + HA-2) opened; then stack HA-5 (HA-m part 1) on it
+
+## Slices
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| HA-a | adapter stubs; History panel and autosave hooks on the window, reachable by a visible control | HA-1, HA-2 (+ HA-3's History button) | MJ-HA | – | yes | 0 | building | – | – |
+| HA-u | panel follows undo and jumps; Edit > Show History; snapshots, budget | HA-3, HA-4 | J-HA | HA-a; menu item: adopt-command-catalog AC-halo | yes | 0 | waiting | – | – |
+| HA-m | jump lands without a step; recovery reopens dirty; catalog commands | HA-5, HA-6 | MJ-HA | HA-a; HA-6: gradient-fill:HG-m | no | 0 | waiting | – | – |
+| HA-z | journey jumps and recovers on live; feature built | HA-7, HA-8 | J-HA | HA-u, HA-m, suiteui AH-z | yes | 0 | waiting | – | – |
+
+## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| HA-1 | HA-a | 1 | adapter stubs; HaloRecoveryTests disabled | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift | compiles, disabled | – | building |
+| HA-2 | HA-a | 1 | HaloHistoryArea + autosave hooks on the window, History button by the transport; journey skipped | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloWindow.swift, Sources/HaloApp/HaloControls.swift, UITests/HaloJourneyTests+History.swift | HaloWindowSnapshots panel | – | building |
+| HA-5 | HA-m | 2 | adapter bodies: jump, recovery bytes, recovered project | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift, Tests/mutations/HaloModel.HaloRecovery+Kernel.json | HaloRecoveryTests; Mutate | – | waiting (stacked on HA-a) |
+| HA-6 | HA-m | 3 | two specs, id list, RJ-H33 | Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloHistoryCommandIDTests.swift, Tests/RealJobs/halo/history-jump/* | HaloHistoryCommandIDTests | – | waiting (HG-m) |
+| HA-3 | HA-u | 2 | panel follows undo and jumps; Edit > Show History once AC-halo is done | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloEditMenu.swift, Tests/AppSnapshotTests/HaloHistoryAreaTests.swift | HaloHistoryAreaTests | – | waiting |
+| HA-4 | HA-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloHistorySnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloHistoryTests.swift | arrowWalkInThreeBodies | – | waiting |
+| HA-7 | HA-z | 4 | journey on live | UITests/HaloJourneyTests+History.swift | testJumpAndRecover | – | waiting |
+| HA-8 | HA-z | 5 | status built, feature-done | docs/blueprints/halo/features/autosave-history.wave.json | waves render | – | waiting |
+
+Wave 1: HA-a (one slice PR), alongside transform HT-a. Wave 2: HA-5 stacked on HA-a; HA-3 once HA-a merges.
+
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
+
+## Decisions
+- Lead branch is lead/halo-autosave-history: lead/autosave-history belongs to the suiteui lead.
+- Base is origin/dev; main b3011ab9 verified at start.
+- HaloEditMenu.swift is AC-halo's until its Belt-Slice-Done (#2999 has none; AC-h3 waits on CC-u). So HA-a makes the panel reachable from the History button by the transport (moved from HA-3 into HA-a, same feature, HaloControls.swift), and Edit > Show History moves to HA-u once AC-halo is done.
+
+## Open
+- AC-halo (#2999) not done: holds the Edit > Show History item.
+- HG-m (gradient-fill #3417) blocked on GF-6: holds HA-6.
+- HA-7 waits on suiteui autosave-history AH-z.

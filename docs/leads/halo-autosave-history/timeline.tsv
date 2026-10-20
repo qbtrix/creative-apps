@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-20T18:49Z	0	stage-start	#3442	base e382f9d7
+2026-10-20T18:49Z	2	stage-end	#3442	plan: HA-a wave 1, HA-5 stacked
+2026-10-20T18:49Z	3	stage-start	#3442	wave 1 HA-a
