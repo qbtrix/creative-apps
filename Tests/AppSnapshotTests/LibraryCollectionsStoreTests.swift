@@ -1,11 +1,6 @@
-// LibraryCollectionsStoreTests.swift: CollectionsStore, the collections file
-// on the file system (filters-collections FC-15 check row; slice FC-e).
-// Written before its code (FC-13): every test waits on FC-15, which builds
-// the store and drops the `.disabled` traits. Each test works in a fresh temp
-// folder: no file reads as nil; a write round-trips and leaves only
-// collections.json; writeNow has written the bytes when it returns;
-// setAside renames to collections.json.bad, replacing an older one, and the
-// next read is nil. macOS only.
+// LibraryCollectionsStoreTests.swift: CollectionsStore on the file system
+// (filters-collections FC-15 check row; slice FC-e). Written before its code
+// (FC-13): FC-15 drops the `.disabled` traits. Each test uses a fresh temp folder.
 #if os(macOS)
 import Foundation
 import LibraryModel
@@ -14,42 +9,27 @@ import Testing
 @testable import LibraryApp
 
 @Suite struct LibraryCollectionsStoreTests {
-    /// A store over a fresh, existing temp folder.
     private func store() throws -> CollectionsStore {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("LibraryCollectionsStoreTests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return CollectionsStore(directory: url.path)
     }
-
     private func names(in store: CollectionsStore) throws -> [String] {
         try FileManager.default.contentsOfDirectory(atPath: store.folder.path).sorted()
     }
 
-    @Test(.disabled("waits on FC-15")) func readIsNilWithNoFile() async throws {
+    /// No file reads nil; writes round-trip; writeNow has written when it returns.
+    @Test(.disabled("waits on FC-15")) func readsNilThenWritesRoundTrip() async throws {
         let store = try store()
         defer { try? FileManager.default.removeItem(at: store.folder) }
         #expect(try await store.read() == nil)
-    }
-
-    @Test(.disabled("waits on FC-15")) func writeThenReadGivesTheBytes() async throws {
-        let store = try store()
-        defer { try? FileManager.default.removeItem(at: store.folder) }
-        let data = Data("{\n  \"version\" : 1\n}\n".utf8)
-        try await store.write(data)
-        #expect(try await store.read() == data)
-        let second = Data("{\n  \"collections\" : [\n\n  ],\n  \"version\" : 1\n}\n".utf8)
-        try await store.write(second)
-        #expect(try await store.read() == second)
-        #expect(try names(in: store) == ["collections.json"])
-    }
-
-    @Test(.disabled("waits on FC-15")) func writeNowWritesBeforeItReturns() throws {
-        let store = try store()
-        defer { try? FileManager.default.removeItem(at: store.folder) }
-        let data = Data("{\n  \"version\" : 1\n}\n".utf8)
-        try store.writeNow(data)
-        #expect(try Data(contentsOf: store.fileURL) == data)
+        for text in ["{\n  \"version\" : 1\n}\n", "{\n  \"collections\" : [\n\n  ],\n  \"version\" : 1\n}\n"] {
+            try await store.write(Data(text.utf8))
+            #expect(try await store.read() == Data(text.utf8))
+        }
+        try store.writeNow(Data("{}\n".utf8))
+        #expect(try Data(contentsOf: store.fileURL) == Data("{}\n".utf8))
         #expect(try names(in: store) == ["collections.json"])
     }
 

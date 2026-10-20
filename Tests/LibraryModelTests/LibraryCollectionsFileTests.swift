@@ -1,16 +1,8 @@
 // LibraryCollectionsFileTests.swift: the collections file (filters-collections
-// FC-14 check row; slice FC-e). Written before its code (FC-13, contract
-// rule 13): every test waits on FC-14, which drops the `.disabled` traits.
-// A manual and a smart collection, a filter and the selection encode byte for
-// byte to the golden below and decode back equal; equal state encodes equal
-// whatever the sets' order; a damaged or newer file throws; save requests
-// follow the revisions and `catalogState.canSave`; an unknown selected id
-// selects All Photos; a set-aside file sets the notice; 20 collections over
-// 10,000 ids encode and decode within 200 ms debug (20 ms release). FC-14's
-// planned mutations, each caught here: photo ids unsorted (the golden, equal
-// state in any set order); `canSave` guard dropped (nothing saved over a
-// newer catalog); `selected` not encoded (the golden, decode back); `version
-// > 1` accepted (newer files throw). Runs on Linux and macOS.
+// FC-14 check row; slice FC-e). Written before its code (FC-13): FC-14 drops
+// the `.disabled` traits. FC-14's planned mutations and what catches them:
+// ids unsorted (golden, set order); `canSave` guard dropped (newer catalog);
+// `selected` not encoded (golden, decode back); `version > 1` accepted (newer).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -26,10 +18,8 @@ private let scale = 0.1
 #endif
 
 @Suite struct LibraryCollectionsFileTests {
-    /// The packet's format: sorted keys, pretty, no escaped slashes, a
-    /// trailing newline, set members sorted, collections in sidebar order.
-    /// Written from JSONEncoder's Linux output for these records; if FC-14's
-    /// records print differently, FC-14 pastes its real Linux output here.
+    /// Sorted keys, pretty, unescaped slashes, a trailing newline, sets sorted,
+    /// collections in sidebar order. From JSONEncoder's Linux output.
     private static let golden = """
         {
           "collections" : [
@@ -75,16 +65,13 @@ private let scale = 0.1
 
         """
 
-    /// The shoot's `IMG_<n>` id.
     private func id(_ n: Int) -> String { "/fixture/shoot/IMG_" + LibraryFixtures.padded(n, to: 4) + ".jpg" }
-
     private func shoot() -> LibraryCatalog {
         var catalog = LibraryCatalog()
         catalog.load(LibraryFixtures.photos(named: "shoot"))
         catalog.setSort(.name)
         return catalog
     }
-
     /// Shoot with the golden's state, one change past the saved revision.
     private func goldenCatalog() -> LibraryCatalog {
         var catalog = shoot()
@@ -102,16 +89,11 @@ private let scale = 0.1
         return catalog
     }
 
-    private func isDamaged(_ error: LibraryError?) -> Bool {
-        if case .damagedCatalog = error { true } else { false }
-    }
-
     @Test(.disabled("waits on FC-14")) func encodesToTheGoldenAndDecodesBackEqual() throws {
         let catalog = goldenCatalog()
         let request = try #require(catalog.collectionsSaveRequest())
         #expect(request.revision == catalog.collectionsRevision)
         #expect(String(decoding: request.data, as: UTF8.self) == Self.golden)
-
         var back = shoot()
         try back.restoreCollections(request.data)
         #expect(back.userCollections == catalog.userCollections)
@@ -123,14 +105,6 @@ private let scale = 0.1
     }
 
     @Test(.disabled("waits on FC-14")) func equalStateEncodesEqualWhateverTheSetOrder() throws {
-        let ids = (1...24).map(id)
-        var forward = Set<String>()
-        for photo in ids { forward.insert(photo) }
-        var backward = Set<String>(minimumCapacity: 512)
-        for photo in ids.reversed() { backward.insert(photo) }
-        var labels = Set<PhotoLabel>(minimumCapacity: 64)
-        for label in PhotoLabel.allCases.reversed() { labels.insert(label) }
-
         func encoded(_ photos: Set<String>, _ labels: Set<PhotoLabel>, _ flags: Set<PhotoFlag>) throws -> Data {
             var catalog = shoot()
             catalog.userCollections = [UserCollection(id: "user-1", name: "All", contents: .photos(photos))]
@@ -140,7 +114,11 @@ private let scale = 0.1
             catalog.collectionsRevision += 1
             return try #require(catalog.collectionsSaveRequest()).data
         }
-        let first = try encoded(forward, Set(PhotoLabel.allCases), [.pick, .none])
+        var backward = Set<String>(minimumCapacity: 512)
+        for n in (1...24).reversed() { backward.insert(id(n)) }
+        var labels = Set<PhotoLabel>(minimumCapacity: 64)
+        for label in PhotoLabel.allCases.reversed() { labels.insert(label) }
+        let first = try encoded(Set((1...24).map(id)), Set(PhotoLabel.allCases), [.pick, .none])
         let second = try encoded(backward, labels, [.none, .pick])
         #expect(first == second)
     }
@@ -150,7 +128,7 @@ private let scale = 0.1
         let before = catalog
         for text in ["not json", "{}"] {
             let error = #expect(throws: LibraryError.self) { try catalog.restoreCollections(Data(text.utf8)) }
-            #expect(isDamaged(error), "\(text) threw \(String(describing: error))")
+            if case .damagedCatalog = error {} else { Issue.record("\(text) threw \(String(describing: error))") }
         }
         let newer = Self.golden.replacingOccurrences(of: "\"version\" : 1", with: "\"version\" : 2")
         for text in [#"{"version": 2}"#, newer] {
@@ -161,11 +139,10 @@ private let scale = 0.1
         #expect(catalog == before)
     }
 
-    @Test(.disabled("waits on FC-14")) func saveRequestsFollowTheRevisions() throws {
+    @Test(.disabled("waits on FC-14")) func saveRequestsFollowTheRevisionsAndCanSave() throws {
         var catalog = shoot()
         #expect(catalog.collectionsSaveRequest() == nil)
         #expect(catalog.collectionsFileValue == "saved")
-
         catalog.collectionsRevision += 1
         let first = try #require(catalog.collectionsSaveRequest())
         #expect(catalog.collectionsFileValue == "dirty")
@@ -177,16 +154,13 @@ private let scale = 0.1
         catalog.didSaveCollections(revision: second.revision)
         #expect(catalog.collectionsSaveRequest() == nil)
         #expect(catalog.collectionsFileValue == "saved")
-    }
-
-    @Test(.disabled("waits on FC-14")) func nothingIsSavedOverANewerCatalog() {
-        var catalog = goldenCatalog()
-        catalog.catalogState = .newer(version: 2)
-        #expect(catalog.collectionsSaveRequest() == nil)
-        catalog.catalogState = .loading
-        #expect(catalog.collectionsSaveRequest() == nil)
-        catalog.catalogState = .ready
-        #expect(catalog.collectionsSaveRequest() != nil)
+        var newer = goldenCatalog()  // nothing is saved over a newer or loading catalog
+        newer.catalogState = .newer(version: 2)
+        #expect(newer.collectionsSaveRequest() == nil)
+        newer.catalogState = .loading
+        #expect(newer.collectionsSaveRequest() == nil)
+        newer.catalogState = .ready
+        #expect(newer.collectionsSaveRequest() != nil)
     }
 
     @Test(.disabled("waits on FC-14")) func anUnknownSelectedIDSelectsAllPhotos() throws {
@@ -208,6 +182,7 @@ private let scale = 0.1
         #expect(catalog.selectedCollectionID == "all")
     }
 
+    /// 20 collections over 10,000 ids encode and decode within 200 ms debug.
     @Test(.disabled("waits on FC-14")) func twentyCollectionsOverTenThousandIDsWithinBudget() throws {
         var catalog = LibraryCatalog()
         catalog.load(LibraryFixtures.photos(named: "large"))
@@ -220,14 +195,11 @@ private let scale = 0.1
         catalog.recount()
         catalog.collectionsRevision += 1
         var restored = 0
-        var failed = false
         let cost = Budget.measure("collections file-20x10000", runs: 5) {
-            guard let request = catalog.collectionsSaveRequest() else { failed = true; return }
             var back = LibraryCatalog()
-            do { try back.restoreCollections(request.data) } catch { failed = true }
+            try? back.restoreCollections(catalog.collectionsSaveRequest()?.data)
             restored = back.userCollections.count
         }
-        #expect(!failed)
         #expect(restored == 20)
         #expect(cost.median <= 200 * scale)
     }

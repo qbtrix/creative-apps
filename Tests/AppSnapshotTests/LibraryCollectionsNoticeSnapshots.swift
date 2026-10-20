@@ -1,10 +1,6 @@
-// LibraryCollectionsNoticeSnapshots.swift: the damaged collections file
-// (filters-collections FC-13; slice FC-e). The sample photos after a
-// collections file that couldn't be read was set aside: no collections of
-// yours, All Photos selected, the warning notice in the browser's notice
-// slot. Written before its code: FC-14 builds `failRestoreCollections` and
-// drops the `.disabled` trait. Writes library-collections-damaged-{light,dark}.png.
-// macOS only.
+// LibraryCollectionsNoticeSnapshots.swift: the samples after a damaged
+// collections file was set aside (filters-collections FC-13; slice FC-e).
+// FC-14 drops the `.disabled` trait. library-collections-damaged-{light,dark}.png.
 import LibraryModel
 import SwiftUI
 import Testing
