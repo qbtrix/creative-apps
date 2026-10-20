@@ -244,17 +244,20 @@
     "outcome": "Every selected key moves by the same time offset, hidden layers' keys included.",
     "needs": [
       "S16",
-      "suiteui/timeline"
+      "suiteui/timeline",
+      "halo/key-editing"
     ],
-    "needs_note": "S16 (SuiteUI timeline built, Halo half unfiled)",
-    "closes_with": "S16",
+    "needs_note": "S16 (SuiteUI timeline built); halo/key-editing wires picking across lanes, Select All Keys and the key drag into Halo",
+    "closes_with": "halo/key-editing",
     "trap": "Keys of hidden layers stay behind",
-    "run": "J",
+    "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://support.apple.com/guide/motion/welcome/mac"
-    ]
+    ],
+    "waits_on": "KE-4",
+    "test": "Tests/RealJobs/halo/move-keys/move-keys.jobs.json"
   },
   "RJ-H14": {
     "id": "RJ-H14",
@@ -711,5 +714,47 @@
     ],
     "waits_on": "PH-5",
     "added_by": "halo/placed-images"
+  },
+  "RJ-H41": {
+    "id": "RJ-H41",
+    "app": "halo",
+    "weight": "med",
+    "job": "Render a lower third as ProRes 4444 with a transparent background.",
+    "outcome": "The movie is ProRes 4444 with alpha: a background-only pixel has alpha 0, a bar pixel alpha 255.",
+    "needs": [
+      "S11",
+      "halo/export-pack"
+    ],
+    "closes_with": "halo/export-pack",
+    "trap": "Alpha renders black, or the file says ProRes but carries no alpha",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HX-3",
+    "added_by": "halo/export-pack"
+  },
+  "RJ-H42": {
+    "id": "RJ-H42",
+    "app": "halo",
+    "weight": "med",
+    "job": "Reopen a project from Open Recent and drop a .halo and a PNG on Halo.",
+    "outcome": "Open Recent equals the suite list filtered to Halo; the .halo opens and the PNG goes to Photo.",
+    "needs": [
+      "suite/file-flow",
+      "halo/file-flow"
+    ],
+    "closes_with": "halo/file-flow",
+    "trap": "Halo keeps its own list, or an image drop is silently ignored",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HF-3",
+    "added_by": "halo/file-flow"
   }
 }
