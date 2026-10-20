@@ -2,9 +2,9 @@
 
 Issue: #1514 · Packet: docs/blueprints/flare/features/stage-edit.md
 Run: act-1a157ad4612-4xcw · Session: claude/feature-lead-playbook-dp4pbl · Started: 2026-10-16T18:20Z (resumed 2026-10-19T12:00Z; resumed 2026-10-20 under act-1a157ad4612-4xcw, line lead: stage-edit #1514, stroke-style #3452)
-Stage: SE-5b waiting
+Stage: SE-5b merged (#3312 → 424b4a60); waiting on dev full CI
 Base: 18464f26 (origin/dev)
-Next: #3312 (a0054178) gated and back on fast-lane; wait for it to merge and a green dev CI, then Belt-Contact-Sheet on #1514
+Next: wait for full CI run 39379088986 on dev 424b4a60; when green, post Belt-Contact-Sheet on #1514 and mark the stage done
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
