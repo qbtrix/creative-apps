@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-20T19:14:58Z	heartbeat	FK-a still blocked: FG-2 and GF-2 have no PRs yet
 2026-10-20T19:26:52Z	heartbeat	FK-a still blocked: FG-2 and GF-2 have no PRs yet
 2026-10-20T19:39:34Z	heartbeat	GF-2 #3695 open, FG-2 no PR yet; FK-a still blocked
+2026-10-20T19:51:21Z	heartbeat	GF-2 #3695 still open, FG-2 no PR yet; FK-a still blocked
