@@ -67,6 +67,10 @@ on:
         description: Also run the report-only UI journeys (runs on dev always do)
         type: boolean
         default: false
+      promote:
+        description: A full dev run in its own concurrency group, so later dev dispatches don't replace it while it waits for a macOS runner
+        type: boolean
+        default: false
       app:
         description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run). With build_only: a comma list of flare, design, photo, library, halo'
         type: string
@@ -87,9 +91,13 @@ permissions:
 # gets its own group, so a Design run never displaces a pending Photo or full
 # run. A branch's build-only runs share one group whatever their `app`, so a
 # new head's build cancels the old head's (the lane reads the build by head,
-# and an old head's build is no longer the one it waits on).
+# and an old head's build is no longer the one it waits on). A `promote` run
+# (a full dev run the fast lane or the captain starts to move main) has its own
+# group: GitHub keeps one pending run per group, so without it every later dev
+# dispatch replaced the waiting full run and, with a long macOS queue, no full
+# dev run ever finished for Promote to fast-forward main.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ !inputs.build_only && inputs.app && format('-{0}', inputs.app) || '' }}
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ !inputs.build_only && inputs.app && format('-{0}', inputs.app) || '' }}${{ inputs.promote && '-promote' || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 jobs:
