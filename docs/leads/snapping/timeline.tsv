@@ -191,3 +191,4 @@ utc	stage	event	ref	note
 2026-10-20T04:33Z	check	no run completed; CI 39365038310 cancelled; scoped design 39368177785 and full CI 39349878829 still queued
 2026-10-20T04:55Z	check	no run completed; scoped design 39368177785, CI 39349878829, CI 39368749437 still queued
 2026-10-20T14:55Z	done	Belt-Slice-Done SN-b, SN-c, SN-f on Linux check 39439525908 (9f880c85); Mac-Finish-Wanted SN-c; Belt-Contact-Sheet posted
+2026-10-20T15:10Z	fix	SN-c round 2 of 2 for finding #3430: snap journey opens Desktop before reading its rows (branch fix/snap-journey-expand-desktop)

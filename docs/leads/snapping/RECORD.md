@@ -4,7 +4,7 @@ Issue: #1552 · Gaps: SN-a #2152, SN-e #2154, SN-b #2155, SN-c #2156, SN-f #2157
 Run: act-1a159c9b6b4-va3c (resumes act-1a1543ffff8-c9jg and earlier) · Session: claude/design-lead-snapping-gradient-stroke-brepev · Started: 2026-10-20T14:50Z
 Stage: 5 (done)
 Base: 0dd23d65 (origin/dev); main verified at b3011ab9
-Next: nothing; every slice is Belt-Slice-Done and the Belt-Contact-Sheet is posted on #1552. SN-c waits on the Mac finisher (Mac-Finish-Wanted posted).
+Next: nothing; every slice is Belt-Slice-Done and the Belt-Contact-Sheet is posted on #1552. SN-c waits on the Mac finisher (Mac-Finish-Wanted posted); SN-c fix round 2 of 2 (finding #3430) is building.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: nothing; every slice is Belt-Slice-Done and the Belt-Contact-Sheet is post
 | SN-a | guide types, modifier, candidates, engine shape and stubs | SN-1, SN-12, SN-9 | MJ12 | design-contracts (built); editor-kernel EK-a | no | 0 | done | – | – |
 | SN-e | snap engine: edges/centres, gaps and spacing | SN-2, SN-3 | MJ10 | SN-a | no | 0 | done | – | – |
 | SN-b | move, resize, draw snap before whole points; ⌘ off | SN-4, SN-5 | MJ11 | SN-a, SN-e, design-seams, canvas-basics CB-a, select-several SS-b | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39439525908 | – |
-| SN-c | smart guides on canvas; View > Snap to Layers | SN-6, SN-7, SN-8 | testSnapAndSmartGuides | SN-a; design-window DW-d, DW-a; canvas-basics CB-c; files-history FH-b | yes | 1 | done | https://github.com/qbtrix/creative-apps/actions/runs/39439525908 | wanted |
+| SN-c | smart guides on canvas; View > Snap to Layers | SN-6, SN-7, SN-8 | testSnapAndSmartGuides | SN-a; design-window DW-d, DW-a; canvas-basics CB-c; files-history FH-b | yes | 2 | done | https://github.com/qbtrix/creative-apps/actions/runs/39439525908 | wanted |
 | SN-f | live guides and budgets on the live services | SN-10, SN-11 | testSnapAndSmartGuides | SN-b, SN-e, SN-c | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39439525908 | – |
 
 ## Tasks
@@ -38,6 +38,7 @@ Waves follow the packet's tasks and the `.wave.json` waits; they are not yet che
 | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-20T15:10Z (act-1a159c9b6b4-va3c): finding #3430 (testSnapAndSmartGuides, run 39395510111 at be364d1e: "no Layers row design.layer.node-2") is snapping's own: `cards` opens with Desktop collapsed (DesignWorkspace.load clears the expanded rows) and the journey read A's row before any selection expanded it; Select passes because it selects on the canvas first. SN-c fix round 2 of 2: each launch opens Desktop through `expandDesignLayer`, rows are clicked through `clickDesignLayer` (#2496). Last round; anything after it becomes a `gap`.
 - 2026-10-20T14:55Z (act-1a159c9b6b4-va3c): SN-8 merged as #3282 and the finish fixes #3326 and #3390 are on dev, so snapping is built. Linux check 39439525908 on 9f880c85 (Linux job green) holds every slice's last PR: Belt-Slice-Done for SN-b, SN-c, SN-f, Mac-Finish-Wanted for SN-c, then Belt-Contact-Sheet on #1552. lead/snapping rebuilt on origin/main b3011ab9 with these two files (brief rule 2). Comments posted via REST get a tool footer appended; removed with the MCP comment edit.
 - Lane macOS builds of #3246 (39259521758) and #3254 (39262123853) failed on two test-file errors: SnapGuideMarks needs `import SuiteUI`; `accessibilityValue?()` is ambiguous on AnyObject, read as `Any??`. Fixed on SN-c (eb8b40dd), merged into SN-f; lead fixed it directly (2-line fix, fix round 1 of 2 for SN-c (macOS build green after it)).
 - SN-c's PR #3246 holds SN-7 only: CB-9 #3224 was still open at push. SN-8 follows as its own PR in SN-c; the journey keeps its "waits on SN-8" skip until then. File renamed DesignSnapGuides+Kernel.swift (view DesignGuideOverlay) because the duplicate-logic lint rejects another Snap-named file and DesignSnapGuides is a DesignModel typealias.
