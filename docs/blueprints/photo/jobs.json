@@ -681,5 +681,26 @@
     "sources": [
       "https://www.apple.com/pixelmator-pro/"
     ]
+  },
+  "RJ-P36": {
+    "id": "RJ-P36",
+    "app": "photo",
+    "weight": "high",
+    "job": "Place a PNG logo onto an open 800 x 600 image and save the flattened result.",
+    "outcome": "The output is 800 x 600 with the 200 x 100 logo centred (its red half at x 350, its blue half at x 450) on a new layer, and the canvas around it unchanged.",
+    "needs": [
+      "S20",
+      "photo/place-image"
+    ],
+    "closes_with": "photo/place-image",
+    "trap": "The place opens the logo as a new document, or lands it at the top-left corner",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PP-6",
+    "added_by": "photo/place-image"
   }
 }
