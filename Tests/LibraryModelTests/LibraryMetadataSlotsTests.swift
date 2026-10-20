@@ -38,18 +38,13 @@ private func twoPhotos() -> LibraryCatalog {
     #expect(twoPhotos().items.allSatisfy(blank.matches))
 }
 
-@Test func theInertSlotsChangeNothing() {
+@Test func theInertSlotsChangeNothing() {  // the keyword edits are real since MD-10
     var catalog = twoPhotos()
     catalog.select(["P1", "P2"])
     let before = catalog
-    catalog.addKeywords("Sunset")
-    catalog.addKeyword(toAll: "Sunset")
-    catalog.removeKeyword("Beach")
     catalog.setTitle("Bay")
     catalog.setCaption("Evening")
     #expect(catalog == before)
-    #expect(catalog.keywordStates.isEmpty)
-    #expect(catalog.keywordSuggestions(prefix: "").isEmpty)
     #expect(catalog.searchSuggestions(prefix: "").isEmpty)
     #expect(catalog.sidecarWrites(after: [:]).isEmpty)
     #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: []) == nil)
