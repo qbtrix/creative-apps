@@ -118,7 +118,7 @@ extension HaloProject {
         case .sendLayerBackward: plain(c, "layer.send-backward", "Send Backward", .edit, "Moves the selected layer down one.")
         case .moveLayer: typed(c, "layer.move", "Move Layer", .edit, "Moves a layer to a place in the stack, 0 on top.", Param.Move.self, obj(["id": Param.id, "index": .integer(minimum: 0)]), ["id": .string("comp-1-layer-2"), "index": .number(1)]) { .moveLayer($0.id, to: $0.index) }
         case .selectLayer: typed(c, "layer.select", "Select Layer", .view, "Selects a layer.", Param.ID.self, obj(["id": Param.id]), ["id": .string("comp-1-layer-2")]) { .selectLayer($0.id) }
-        case .pickLayer: typed(c, "layer.pick", "Pick Layer", .view, "Picks a layer in the layer list: toggle adds or drops it, extend adds the run from the last pick, replace picks it alone.", Param.Picked.self, obj(["id": Param.id, "pick": .string(oneOf: ["replace", "toggle", "extend"])]), ["id": .string("comp-1-layer-2"), "pick": .string("toggle")]) { try .pickLayer($0.id, $0.kernelPick()) }
+        case .pickLayer: typed(c, "layer.pick", "Pick Layer", .view, "Picks a layer in the layer list: toggle adds or drops it, extend adds the run from the last pick, replace picks it alone.", Param.Picked.self, obj(["id": Param.id, "pick": .string(oneOf: ["replace", "toggle", "extend"])]), ["id": .string("comp-1-layer-2"), "pick": .string("replace")]) { try .pickLayer($0.id, $0.kernelPick()) }
         case .playPause: plain(c, "animation.play-pause", "Play/Pause", .view, "Starts or stops playback.")
         case .toggleLoop: plain(c, "animation.loop", "Loop", .view, "Turns looping playback on or off.")
         case .nextFrame: plain(c, "animation.next-frame", "Next Frame", .view, "Moves the playhead one frame on.")

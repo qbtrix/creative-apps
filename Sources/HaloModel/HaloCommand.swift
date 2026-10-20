@@ -49,7 +49,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         .renameComposition("comp-1", "Intro"),
         .newLayer(.solid), .duplicateLayer, .beginRenameLayer, .renameLayer("comp-1-layer-2", "Ball 2"), .deleteLayer,
         .bringLayerForward, .sendLayerBackward, .moveLayer("comp-1-layer-2", to: 1), .selectLayer("comp-1-layer-2"),
-        .pickLayer("comp-1-layer-2", .toggle),
+        .pickLayer("comp-1-layer-2", .replace),
         .playPause, .toggleLoop, .nextFrame, .previousFrame, .goToStart, .goToEnd, .setInPoint, .setOutPoint,
         .scrub(12), .tick(0.5),
         .setProperty(.x, 100), .setPropertyText(.x, "100"), .endPropertyScrub, .toggleAnimation(.x), .toggleKey(.x),
