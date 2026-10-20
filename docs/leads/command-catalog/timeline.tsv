@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-20T11:59:34Z	heartbeat	no merges since 0e1199e9; #3585/#3587/#3593 open and clean, waiting on queued lane macOS builds; full CI 39416190119 still pending
 2026-10-20T12:21:40Z	heartbeat	dev still 0e1199e9; #3593 build 39412643506 and #3587 build 39407145335 green, awaiting lane sweep; #3585 macOS build 39413777039 queued; full CI 39416190119 pending
 2026-10-20T12:41:24Z	heartbeat	dev 3ebb876f; #3593/#3587 builds green, clean, awaiting lane sweep (lane busy with batch 20261020122756); #3585 build 39413777039 queued; full CI 39416190119 cancelled, superseded by 39423713631 on 3ebb876f (pending, contains CC-u/CC-z/AC-photo)
+2026-10-20T13:16:33Z	heartbeat	awaiting run for Belt-Slice-Done
