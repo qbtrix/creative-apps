@@ -45,7 +45,7 @@ struct FileFlowProbe: FileFlowTarget {
                           "file.open-in": .file, "file.drop": .file])
     }
 
-    @Test(.disabled("waits on SF-6")) func dropPlansOnceAndPerformsOnce() throws {
+    @Test func dropPlansOnceAndPerformsOnce() throws {
         let catalog = try #require(FileFlowProbe.catalog)
         var probe = FileFlowProbe()
         let outcome = try catalog.run("file.drop", params: .object(["paths": .array([.string("/w/a.png"), .string("/w/b.halo")])]),
@@ -54,7 +54,7 @@ struct FileFlowProbe: FileFlowTarget {
         #expect(try outcome.result.decode([DropAction].self) == probe.performed.first)
     }
 
-    @Test(.disabled("waits on SF-6")) func openInWithHelpIsUnavailableWithIt() throws {
+    @Test func openInWithHelpIsUnavailableWithIt() throws {
         let catalog = try #require(FileFlowProbe.catalog)
         var probe = FileFlowProbe()
         #expect(catalog.availability("file.open-in", on: probe).why == "No other app opens Photo documents files.")
@@ -63,7 +63,7 @@ struct FileFlowProbe: FileFlowTarget {
         #expect(probe.handedTo == ["library"])
     }
 
-    @Test(.disabled("waits on SF-6")) func clearRecentOnAnEmptyListIsUnavailable() throws {
+    @Test func clearRecentOnAnEmptyListIsUnavailable() throws {
         let catalog = try #require(FileFlowProbe.catalog)
         var probe = FileFlowProbe()
         _ = try catalog.run("file.clear-recent", params: .object([:]), on: &probe)
@@ -71,7 +71,7 @@ struct FileFlowProbe: FileFlowTarget {
         #expect(catalog.availability("file.clear-recent", on: probe).why == "No Recent Files")
     }
 
-    @Test(.disabled("waits on SF-6")) func openRecentOpensOrSaysTheFileIsGone() throws {
+    @Test func openRecentOpensOrSaysTheFileIsGone() throws {
         let catalog = try #require(FileFlowProbe.catalog)
         var probe = FileFlowProbe()
         let listed = try catalog.run("file.recent", params: .object([:]), on: &probe).result.decode([RecentFileEntry].self)

@@ -67,11 +67,17 @@ public struct DesignRect: Sendable, Hashable, Codable {
     }
 
     /// The handles a selection of this rectangle shows, each with its center, for handles `size`
-    /// points across: all eight on the corners and side midpoints, or for a compact rectangle only
-    /// the corners, each pushed out by half a handle so it sits outside and leaves the inside readable.
+    /// points across: all eight on the corners and side midpoints (the centres of the kernel's
+    /// `BoxMath.handles`, without its rotate knob), or for a compact rectangle only the corners,
+    /// each pushed out by half a handle so it sits outside and leaves the inside readable.
     public func handles(size: Double) -> [DesignHandle: DesignPoint] {
         guard isCompact(handleSize: size) else {
-            return Dictionary(uniqueKeysWithValues: DesignHandle.allCases.map { ($0, point(of: $0)) })
+            var shown: [DesignHandle: DesignPoint] = [:]
+            for (handle, square) in BoxMath.handles(of: kernelRect, size: size) {
+                guard let handle = DesignHandle(handle) else { continue }
+                shown[handle] = DesignPoint(x: (square.minX + square.maxX) / 2, y: (square.minY + square.maxY) / 2)
+            }
+            return shown
         }
         return Dictionary(
             uniqueKeysWithValues: DesignHandle.allCases.filter(\.isCorner).map { handle in
@@ -80,34 +86,67 @@ public struct DesignRect: Sendable, Hashable, Codable {
             })
     }
 
-    /// This rectangle with `handle` dragged by `delta`: a corner moves its two edges, a side one.
+    /// This rectangle with `handle` dragged by `delta`: the kernel's `BoxMath.resized`, Shift
+    /// for `keepAspect` and Option for `fromCenter`. A corner moves its two edges, a side one.
     /// `keepAspect` (corners only) keeps width:height and follows the axis that changed more in
     /// relative terms; `fromCenter` moves the opposite edges by the negative delta, so the center
     /// stays. Width and height never go below 1 and never flip. A non-finite delta returns `self`.
     public func resized(_ handle: DesignHandle, by delta: DesignPoint, keepAspect: Bool, fromCenter: Bool) -> DesignRect {
-        guard delta.isFinite else { return self }
-        let (h, v) = handle.direction
-        let grow = fromCenter ? 2.0 : 1.0
-        var newWidth = width + Double(h) * delta.x * grow
-        var newHeight = height + Double(v) * delta.y * grow
-        if keepAspect, handle.isCorner, width > 0, height > 0 {
-            let (scaleX, scaleY) = (newWidth / width, newHeight / height)
-            let scale = Swift.max((scaleX - 1).magnitude >= (scaleY - 1).magnitude ? scaleX : scaleY, 1 / width, 1 / height)
-            (newWidth, newHeight) = (width * scale, height * scale)
-        }
-        (newWidth, newHeight) = (Swift.max(newWidth, 1), Swift.max(newHeight, 1))
-        func origin(_ start: Double, _ length: Double, _ newLength: Double, _ side: Int) -> Double {
-            if fromCenter, side != 0 { return start + (length - newLength) / 2 }
-            return side < 0 ? start + length - newLength : start
-        }
-        return DesignRect(
-            x: origin(x, width, newWidth, h), y: origin(y, height, newHeight, v), width: newWidth, height: newHeight)
+        var modifiers: DesignModifiers = []
+        if keepAspect { modifiers.insert(.shift) }
+        if fromCenter { modifiers.insert(.option) }
+        return resized(handle, by: delta, modifiers: modifiers)
+    }
+
+    /// `resized(_:by:keepAspect:fromCenter:)` with Shift and Option read from `modifiers`.
+    func resized(_ handle: DesignHandle, by delta: DesignPoint, modifiers: DesignModifiers) -> DesignRect {
+        let edit = modifiers.editModifiers
+        return DesignRect(BoxMath.resized(kernelRect, handle.editorHandle, by: Point(x: delta.x, y: delta.y), modifiers: edit))
+    }
+
+    /// This rectangle as the kernel's edges.
+    var kernelRect: Rect { Rect(minX: x, minY: y, maxX: maxX, maxY: maxY) }
+
+    /// The rectangle the kernel's edges `rect` cover.
+    init(_ rect: Rect) {
+        self.init(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height)
     }
 }
 
 /// A selection handle of a node's frame: the four corners and the four side midpoints.
+/// Each is the kernel's `EditorHandle` of the same name; the kernel's inside and rotate knob
+/// are no Design handle.
 public enum DesignHandle: String, CaseIterable, Sendable {
     case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+
+    /// The kernel's handle of this name.
+    var editorHandle: EditorHandle {
+        switch self {
+        case .topLeft: .topLeft
+        case .top: .top
+        case .topRight: .topRight
+        case .right: .right
+        case .bottomRight: .bottomRight
+        case .bottom: .bottom
+        case .bottomLeft: .bottomLeft
+        case .left: .left
+        }
+    }
+
+    /// The Design handle of the kernel's `handle`; nil for its inside and rotate knob.
+    init?(_ handle: EditorHandle) {
+        switch handle {
+        case .topLeft: self = .topLeft
+        case .top: self = .top
+        case .topRight: self = .topRight
+        case .right: self = .right
+        case .bottomRight: self = .bottomRight
+        case .bottom: self = .bottom
+        case .bottomLeft: self = .bottomLeft
+        case .left: self = .left
+        case .inside, .rotate: return nil
+        }
+    }
 
     /// Which edge the handle moves on each axis: -1 left or top, 0 neither, 1 right or bottom.
     var direction: (x: Int, y: Int) {
@@ -123,7 +162,7 @@ public enum DesignHandle: String, CaseIterable, Sendable {
         }
     }
 
-    var isCorner: Bool { direction.x != 0 && direction.y != 0 }
+    var isCorner: Bool { editorHandle.isCorner }
 }
 
 /// Plain 8-bit sRGB. ponytail: bytes only; CoreColor's Color3 replaces this with #21.
@@ -277,6 +316,14 @@ public struct DesignModifiers: OptionSet, Sendable, Hashable {
 
     public static let shift = DesignModifiers(rawValue: 1)
     public static let option = DesignModifiers(rawValue: 2)
+
+    /// The kernel's modifiers: Shift and Option. `noSnap` stays Design's.
+    var editModifiers: EditModifiers {
+        var modifiers: EditModifiers = []
+        if contains(.shift) { modifiers.insert(.shift) }
+        if contains(.option) { modifiers.insert(.option) }
+        return modifiers
+    }
 }
 
 public enum DesignDirection: Sendable, CaseIterable { case up, down, left, right }
