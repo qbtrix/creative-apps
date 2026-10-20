@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-17T06:28Z	3	pr-merged	#1976	FC-1 filter rules merged to dev by the lane
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
 2026-10-20T21:48Z	3 build W1	check	-	still blocked: TC-a has no PR
+2026-10-20T22:10Z	3 build W1	check	-	still blocked: TC-a has no PR
