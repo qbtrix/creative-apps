@@ -72,3 +72,9 @@ fast-lane PR opened against `main` to `dev`).
 - AL-design merged (#3392, dev 6ace17f2), so DesignNode.swift's hand-off is met; AS-design was met by #3385.
 - design-seams-2 (status planned) lists "the beta gap adopts (... transform ...) before S2-a" in its waits_on and owns no active slice on DesignCanvasEditing.swift, so AT-design goes first on that file.
 - AT-d1 builder started on lead/adopt-kernel-transform-AT-d1 (adapter test first, mutation plan DesignModel.KernelTransformAdapter with 2+ planted bugs).
+
+## 2026-10-20 10:54Z: AT-d1 opened as #3593; AT-d2 started
+
+- #3593 head f297417d, 262 lines / 5 files, gate PASS, mutate KernelTransformAdapter 5/5, LiveTransforming still 8/8.
+- Deviations from the packet: DesignHandle maps both ways onto EditorHandle (10 cases, not a typealias); DesignModifiers forwards Shift/Option only (noSnap stays Design's); a zero-width/height box keeps Design's scaling rule (private `stretched`) because aBoxOfNoWidthNeverDividesByZero pins it.
+- AT-d2 builder started stacked on AT-d1 (lead/adopt-kernel-transform-AT-d2); its PR opens once #3593 merges, carrying feature-done and status built.

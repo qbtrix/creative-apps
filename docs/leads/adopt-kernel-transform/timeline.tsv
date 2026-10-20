@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-20T09:53:11Z	heartbeat	PRs #3584 #3585 #3587 #3588 open awaiting lane macOS builds; scoped:suiteui 39401671725 queued on 36789542 (has #3484); #3392 still open
 2026-10-20T10:15:06Z	heartbeat	10:20Z #3587 needs-rebase merged dev (C4 halo-model part), gate running; #3584 #3585 #3588 open clean awaiting lane macOS build; #3392 open; no completed suiteui/full run yet
 2026-10-20T10:36:35Z	heartbeat	#3584 merged; #3392 merged; #3585 build green, awaiting lane; #3587/#3588 builds queued; AT-d1 started
+2026-10-20T10:54:40Z	slice-pr	AT-d1 #3593 opened head f297417d; AT-d2 builder started
