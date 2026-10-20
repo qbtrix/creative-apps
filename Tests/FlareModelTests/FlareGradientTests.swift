@@ -28,8 +28,8 @@ private func ballShapes(_ w: FlareWorkspace) -> [FlareShape] {
 
 /// A left-to-right linear fill across `box`'s middle.
 private func across(_ box: FlareCore.Rect) -> FlareCore.Fill {
-    let y = box.y + box.height / 2
-    return .linear(stops: threeStops, start: Point(x: box.x, y: y), end: Point(x: box.x + box.width, y: y))
+    let y = (box.minY + box.maxY) / 2
+    return .linear(stops: threeStops, start: Point(x: box.minX, y: y), end: Point(x: box.maxX, y: y))
 }
 
 @Test func fillSelectionIsTheFirstShapesFillInItsBounds() throws {
@@ -71,8 +71,8 @@ struct FlareGradientCommandTests {
         var w = ball(across(box))
         w.runFill(.angle(90, drag: nil))
         guard case .linear(_, let start, let end)? = ballShapes(w).first?.fill else { return #expect(Bool(false)) }
-        #expect(abs(start.x - (box.x + box.width / 2)) < 1e-9 && abs(end.x - start.x) < 1e-9)
-        #expect(abs(start.y - box.y) < 1e-9 && abs(end.y - (box.y + box.height)) < 1e-9)
+        #expect(abs(start.x - (box.minX + box.maxX) / 2) < 1e-9 && abs(end.x - start.x) < 1e-9)
+        #expect(abs(start.y - box.minY) < 1e-9 && abs(end.y - box.maxY) < 1e-9)
     }
 
     @Test func stopColorKeepsThePoints() throws {
