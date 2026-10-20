@@ -1,0 +1,100 @@
+2026-10-17T03:07Z	0	stage-start	#1553	resumed; lead/crop created from origin/dev
+2026-10-17T03:39Z	2	heartbeat		no reply on base question; origin/dev moved to 1a8eea2a, main to 1af9b4d7; no new code
+2026-10-17T05:43Z	2	heartbeat		still waiting on base answer; origin/dev 0e3c08ea
+2026-10-19T04:40Z	0	stage-start	#1553	new run act-1a1526bcdef-i2tx; base dev aed78668
+2026-10-19T04:45Z	1	issues	#3116 #3117	S-L3 CropHandles; crop kernel gap; core ask on #1553
+2026-10-19T04:46Z	3	wave-start	W1	CR-1, CR-2
+2026-10-19T04:52Z	3	decision	#2983	CR-6 dependency open; lead adds CR-0 to wave 2
+2026-10-19T05:49Z	3	pr-opened	#3142	CR-1 LibraryCrop catalog methods
+2026-10-19T05:49Z	3	heartbeat		Belt nudge; CR-2 built locally, PR next
+2026-10-19T05:52:08Z	task-start	CR-0	#2983 builder started early (no CR-a dependency)
+2026-10-19T05:52:56Z	pr-opened	CR-2	#3152
+2026-10-19T05:54:05Z	wave-start	W2	CR-3, CR-5, CR-9 on CR-a branches; CR-0 on dev
+2026-10-19T06:06:23Z	pr-opened	CR-0	#3162
+2026-10-19T06:15:58Z	heartbeat	W2	CR-3, CR-5, CR-9 gates running; #3142, #3152, #3162 in the lane
+2026-10-19T06:17:50Z	task-built	CR-5	bb5b943d, 372 lines, unpushed until CR-a merges; CR-5b planned
+2026-10-19T06:19:04Z	task-built	CR-9	3433e9ee, 109 lines, unpushed until CR-a merges
+2026-10-19T06:19:31Z	task-built	CR-3	2cd61962, 297 lines, unpushed until CR-a merges
+2026-10-19T07:05:00Z	task-merged	CR-1	#3142 squashed to dev 71b157ab
+2026-10-19T07:06:00Z	task-fixed	CR-2	#3152 needs-rebase: dev merged, canonical-baseline both lines, head cd44ef15, gate PASS
+2026-10-19T07:09:18Z	task-pr	CR-3	#3183, rebased onto dev (needs only CR-1), head ec80f395, gate PASS
+2026-10-19T07:12:00Z	task-start	CR-4	builder on lead/crop-CR-3
+2026-10-19T07:15:00Z	ci	CR-0	#3162 macOS build success 39208308825
+2026-10-19T07:16:00Z	task-start	CR-5b	builder on CR-5 bb5b943d
+2026-10-19T07:26:37Z	task-built	CR-4	a98d0558, gate PASS, mutate 4/4 + 7/7; release cropped render 1429ms > 120ms
+2026-10-19T07:30:00Z	core-ask	CR-4	supervisor asked to file needs-core rotate row-split issue
+2026-10-19T07:40:00Z	task-merged	CR-0	#3162 squashed 57d85dfd
+2026-10-19T07:40:00Z	task-built	CR-5b	9953d2fd, mutate 9/9, command-path baseline line text changed (same site)
+2026-10-19T07:41:00Z	task-start	CR-6	builder on CR-5b + dev
+2026-10-19T07:45:23Z	task-built	CR-6	1d73ff8f, gate PASS, mutate 15/15, 4 snapshots, needs-ui #3116 (exists)
+2026-10-19T07:46:00Z	task-start	CR-7	builder on CR-6 + CR-4
+2026-10-19T07:50:00Z	wait	CR-2	#3152 macOS build-only run pending on cd44ef15; CR-3 #3183 pending
+2026-10-19T07:58:00Z	task-built	CR-7	513a9dd6 on CR-6+CR-4 merge, gate PASS, journey compiles only on macOS
+2026-10-19T07:59:00Z	task-fixed	CR-4	LibraryServicesTests no-stubs fix (4e45b1e3) folded into CR-4 as a5ac770f
+2026-10-19T08:16:00Z	wait	CR-2,CR-3	macOS build-only runs 39213726899 (#3152) and 39214703830 (#3183) still queued since 07:05/07:14; no runner
+2026-10-19T08:38:00Z	blocked	CR-2,CR-3	macOS build runs still queued ~90 min; asked supervisor on #1553 (6263151998)
+2026-10-19T08:58:00Z	ci	CR-2	#3152 macOS build success 39213726899; lane merges on next sweep
+2026-10-19T09:08:54Z	merge	CR-2	#3152 merged 2ed7b07a
+2026-10-19T09:10:00Z	build	CR-5,CR-9	rebased onto dev (746fa691, 80715569); scripts/ci --changed running
+2026-10-19T09:16:00Z	pr	CR-5,CR-9	#3205, #3206 opened, gate PASS
+2026-10-19T09:39:00Z	wait	CR-3,CR-5,CR-9	macOS build runs 39214703830 (#3183, queued since 07:14), 39229180139 (#3205), 39229203568 (#3206) all queued; blocker already with supervisor (6263151998)
+2026-10-19T10:01:00Z	wait	CR-3,CR-5,CR-9	none merged; macOS runs still queued; all three merge clean onto dev 3dbba7d3 (after #3086 loupe renders)
+2026-10-19T10:24:00Z	wait	CR-3,CR-5,CR-9	none merged; macOS build jobs still queued (CR-3 since 07:14); all merge clean onto dev 895fb2d0; #782 still open (CR-8 blocked)
+2026-10-19T10:28:00Z	ci	CR-9	#3206 macOS build 39229203568 success; lane merges on next sweep
+2026-10-19T10:42:00Z	fix	CR-5	#3205 macOS build failed at LibraryWindow+Crop.swift:60 (type checker gave up on the Crop initializer); fixed 8fe517ca with typed locals, gate PASS, Head moved; lane rebuilds
+2026-10-19T10:48:00Z	merge	CR-9	#3206 merged e8d48987
+2026-10-19T10:50:00Z	ci	CR-5	lane dispatched macOS build 39240353249 on 8fe517ca
+2026-10-19T11:06:00Z	wait	CR-3,CR-5	none merged; macOS builds 39214703830 (CR-3, since 07:14) and 39240353249 (CR-5) queued; dev d80a1b26
+2026-10-19T11:28:00Z	wait	CR-3,CR-5	none merged; macOS builds 39214703830 (CR-3) and 39240353249 (CR-5) still queued; dev c6ad68f7
+2026-10-19T11:50:00Z	wait	CR-3,CR-5	none merged; macOS builds 39214703830 (CR-3) and 39240353249 (CR-5) still queued; dev fa8c815f
+2026-10-19T12:01:00Z	build	CR-5	macOS build 39240353249 passed on 8fe517ca; awaiting lane merge; CR-3 build 39214703830 still queued
+2026-10-19T13:05:00Z	3	stage-start	act-1a1543fe41f-0zuy	resumed; lead/crop rebased onto main 6f9a2b88; CR-5 merged b2078f5f; CR-4, CR-6 rebuilding (unpushed builds lost)
+2026-10-19T14:25:00Z	3	resume	act-1a1543fe41f-0zuy	CR-4 #3270 built green; CR-6 #3249 mac build red, fix round 1; #3183 merged
+2026-10-19T14:40:00Z	3	fix	act-1a1543fe41f-0zuy	CR-6 fix round 1 576bbbee pushed; CR-7 builder running
+2026-10-19T14:45:00Z	4	built	act-1a1543fe41f-0zuy	CR-7 branch pushed; #3270 and #3249 in a lane run
+2026-10-19T14:43:00Z	4	heartbeat	act-1a1543fe41f-0zuy	lane batch 141529 red, bisecting; CR-6 mac build 39270043227 running; CR-7 ec33c91f ready
+2026-10-19T15:01:00Z	4	heartbeat	act-1a1543fe41f-0zuy	CR-6 mac build 39270043227 green; #3270/#3249 not in batch 141529, wait for next batch
+2026-10-19T15:18:00Z	4	heartbeat	act-1a1543fe41f-0zuy	batch 150449 (older PRs) merging; #3270/#3249 wait for the next batch
+2026-10-19T15:36:00Z	4	heartbeat	act-1a1543fe41f-0zuy	batch 152144 (has #3249) red on export command-path baseline, not crop; bisecting
+2026-10-19T15:52:00Z	4	heartbeat	act-1a1543fe41f-0zuy	batch 152144 culprit is #3251 (after #3249); probes queued
+2026-10-19T16:10:00Z	4	heartbeat	act-1a1543fe41f-0zuy	batch 152144 probes -4 running, -6 queued (slow runners); #3249/#3270 unchanged
+2026-10-19T16:30:35Z	heartbeat	batch 152144 probe -4 green; probe -6 (incl #3249) running; #3249/#3270 open, no needs-fix
+2026-10-19T16:48:47Z	heartbeat	batch 152144 probe -6 (through #3249) green; awaiting lane sweep to merge prefix; #3270 waits next batch
+2026-10-19T17:08:06Z	merged	#3249 CR-6 merged 98e8d9cf; #3270 CR-4 in batch 170158
+2026-10-19T17:31:42Z	stage	CR-4 merged 76e1a4d5; CR-7 PR #3299 opened at 26b91eb8; dev runs 39292750714 (scoped library) / 39294573974 (full) at 8f405311 pending for CR-b
+2026-10-19T17:49:16Z	heartbeat	mac queue backed up: scoped library 39292750714 queued; full 39294573974 cancelled, superseded by full 39296061014 at 1b33afbb (contains CR-4); #3299 waits on mac build 39295894539 (queued)
+2026-10-19T18:07:25Z	heartbeat	no change: library 39292750714 queued, full 39296061014 pending, #3299 mac build 39295894539 queued
+2026-10-19T18:25:44Z	heartbeat	#3299 mac build 39295894539 success, awaiting lane merge; library 39292750714 and full 39296061014 still queued
+2026-10-19T18:43:35Z	merged	#3299 CR-7 merged 7e7bd886 (batch run 39302934472); no dev library/full run at or after 7e7bd886 yet; CR-b candidates 39292750714 / 39296061014 still queued
+2026-10-19T19:02:33Z	heartbeat	full CI 39306309509 at 7e7bd886 pending (contains both slices); macOS queue still backed up
+2026-10-19T19:21:22Z	heartbeat	full CI 39306309509 cancelled (superseded); 39308088122 at 1f4500f1 pending, contains both slices
+2026-10-19T19:40:15Z	heartbeat	full CI 39308088122 cancelled (superseded); 39311818078 at dda01faa pending, contains both; macOS queue stalled
+2026-10-19T19:58:55Z	heartbeat	no change: 39311818078 (dda01faa) pending, 39296061014 and 39292750714 queued
+2026-10-19T20:18:14Z	heartbeat	no change: 39311818078 (dda01faa) pending, 39296061014 and 39292750714 queued (~3h)
+2026-10-19T20:37:27Z	heartbeat	no change: 39311818078 (dda01faa) pending, 39296061014 queued (~3h); macOS queue stalled
+2026-10-19T20:56:04Z	heartbeat	no change: 39311818078 (dda01faa) pending, 39296061014 queued (~3h15m); macOS queue stalled
+2026-10-19T21:14:42Z	heartbeat	new scoped library run 39323823976 at dda01faa (both slices) queued; 39311818078 pending; macOS queue stalled
+2026-10-19T21:32:57Z	heartbeat	39311818078 superseded; newest full 39327922875 (8257c513) pending; scoped library 39323823976 queued
+2026-10-19T21:52:16Z	heartbeat	newest full 39330687224 (23e682ad) pending; scoped library 39323823976 queued; macOS queue stalled
+2026-10-19T22:11:45Z	heartbeat	newest full 39331917840 (bd10d93a) pending; scoped library 39323823976 queued; macOS queue stalled
+2026-10-19T22:30:18Z	heartbeat	newest full 39333170092 (a7e93ca4) pending; scoped library 39323823976 queued; macOS queue stalled
+2026-10-19T22:49:10Z	heartbeat	no proof yet; scoped library 39323823976 queued; newest full 39336158094 pending (cf120143)
+2026-10-19T23:08:19Z	heartbeat	no proof yet; scoped library 39323823976 queued; full 39336158094 pending (cf120143)
+2026-10-19T23:27:02Z	heartbeat	no proof yet; scoped library 39323823976 queued; full 39336158094 pending (cf120143)
+2026-10-19T23:46:20Z	heartbeat	no proof yet; scoped library 39323823976 queued; newest full 39342355180 pending (f564907d)
+2026-10-20T00:05:04Z	heartbeat	no proof yet; scoped library 39323823976 queued; newest full 39345113796 pending (1299651e)
+2026-10-20T00:23:45Z	heartbeat	no proof yet; scoped library 39323823976 queued; newest full 39346519827 pending (c7306ee8)
+2026-10-20T00:42:04Z	heartbeat	no proof yet; scoped library 39323823976 queued; full 39346519827 pending (c7306ee8)
+2026-10-20T01:01:15Z	heartbeat	no proof yet; scoped library 39323823976 queued; newest full 39349878829 pending (2019b521)
+2026-10-20T01:19:37Z	heartbeat	scoped library 39323823976 in_progress; full 39349878829 queued (2019b521), 39352633488 pending (53630c3b)
+2026-10-20T01:45:29Z	fix-round-1	CR-d J6 focus fix #3393 (scoped 39323823976 red at Crop.swift:86)
+2026-10-20T02:03:04Z	heartbeat	#3393 open, macOS build 39356490382 queued
+2026-10-20T02:21:09Z	heartbeat	#3393 macOS build green, awaiting lane merge
+2026-10-20T02:39:00Z	heartbeat	#3393 merged 1dd89fdd; full CI 39359599960 at 25a8d9a2 pending
+2026-10-20T02:57:04Z	heartbeat	full CI 39359599960 at 25a8d9a2 still pending; macOS queue stalled
+2026-10-20T03:16:04Z	heartbeat	full CI 39359599960 at 25a8d9a2 still pending; macOS queue stalled since ~01:20Z
+2026-10-20T03:35:20Z	heartbeat	full CI 39359599960 cancelled (superseded); waiting on full CI 39365038310 at 533daec7 (contains 1dd89fdd, pending); macOS queue stalled
+2026-10-20T03:53:53Z	heartbeat	full CI 39365038310 at 533daec7 still pending; macOS queue stalled
+2026-10-20T04:11:52Z	heartbeat	full CI 39365038310 at 533daec7 still pending; macOS queue stalled since ~01:20Z (scoped flare/halo/design/library all queued)
+2026-10-20T04:30:43Z	heartbeat	full CI 39365038310 cancelled (superseded); waiting on full CI 39368749437 at 53151b2b (contains 1dd89fdd, pending); macOS queue stalled
+2026-10-20T04:50:05Z	heartbeat	full CI 39368749437 at 53151b2b still pending; macOS queue stalled since ~01:20Z
