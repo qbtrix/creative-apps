@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-20T05:58Z	1	pr	HG-a	#3516 opened, fast-lane
 2026-10-20T06:21Z	1	poll	HG-a	#3516 clean; lane macOS build 39378049451 queued; attribution footer removed from body; no GF-6 or AC-halo PR
 2026-10-20T06:44Z	1	poll	HG-a	#3516 open, clean, fast-lane; macOS build 39378049451 still queued; no GF-6 PR; AC-halo files found on dev
+2026-10-20T07:07Z	1	poll	HG-a	#3516 open, clean; macOS build 39378049451 still queued (66 min); no GF-6 PR
