@@ -34,6 +34,7 @@ Next: poll #3525 for merge, then restack #3531, #3540 and #3541 (#3541 sits on #
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-20T10:46Z #3531 got needs-rebase (suiteui-sources.json description); fixer merges dev keeping all clauses, then restacks #3541.
 - 2026-10-20T10:03Z Restacked after EY-1: #3531 -> dev head 67f26a6a (C4 description kept both), #3540 -> dev head b01a356d (kept slice code over EY-1 stubs), #3541 on EY-a-2 head 4500f6bf; all CI: PASS.
 - 2026-10-20T09:44Z #3525 (EY-1) merged as d4ed4bde; fixer restacking #3531 and #3540 onto dev and #3541 onto the new EY-a-2. EY-a done once #3531 merges and a green Linux run holds it.
 - 2026-10-20T06:39Z EY-u opened as #3541 (EY-3 and EY-4 in one PR, 397 lines, base lead/eyedropper-EY-a-2). Size options use ChoiceChips, so the journey looks for suite.sample.size.5. ColorRowFitTests checks "Background" at Flare's column. Journey steps 4-5 stay red until EY-7 adds suite.gallery.eyedropper.tool (report-only). Supervisor asked to add RenderBudgetEyedropperTests/loupeTrackTiming to perf-suites.
