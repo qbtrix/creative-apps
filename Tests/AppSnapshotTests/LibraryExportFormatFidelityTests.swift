@@ -40,16 +40,21 @@ import UniformTypeIdentifiers
     }
 
     /// `IMG_0001.jpg` in `root`: a 1600 × 1200 sRGB JPEG whose color runs
-    /// across both axes, developed at exposure +0.5.
+    /// across both axes, developed at exposure +0.5. Blue is a soft wave about
+    /// 38 px long at 1024, as in LibraryExportFidelityTests (#3372): a hard
+    /// 160-level checker put HEIC's halved chroma at 24 dB, measuring the
+    /// fixture, not the writer.
     private func writePhoto(in root: URL) throws -> PhotoItem {
         let (width, height) = (1600, 1200)
+        let across = (0..<width).map { sin(Double($0) * 2 * .pi / 60) }
+        let down = (0..<height).map { cos(Double($0) * 2 * .pi / 52) }
         var bytes = [UInt8](repeating: 255, count: width * height * 4)
         for y in 0..<height {
             for x in 0..<width {
                 let at = (y * width + x) * 4
                 bytes[at] = UInt8(x * 255 / (width - 1))
                 bytes[at + 1] = UInt8(y * 255 / (height - 1))
-                bytes[at + 2] = UInt8(((x / 40 + y / 40) % 2) * 160 + 40)
+                bytes[at + 2] = UInt8((128 + 64 * across[x] * down[y]).rounded())
             }
         }
         let url = root.appending(path: "IMG_0001.jpg")

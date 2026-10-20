@@ -51,11 +51,14 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// The thumbnail cell's width step, in points; it stays in 80...320.
     public static let cellSizeStep = 40
 
-    public internal(set) var collections: [LibraryCollection] = [
+    /// The sidebar's built-in rows; your collections follow them.
+    static let builtInCollections = [
         LibraryCollection(id: "all", name: "All Photos", count: 0),
         LibraryCollection(id: "favorites", name: "Favorites", count: 0),
         LibraryCollection(id: "recent", name: "Recently Added", count: 0),
     ]
+
+    public internal(set) var collections = builtInCollections
     public internal(set) var selectedCollectionID = "all"
     public internal(set) var items: [PhotoItem] = []
     public internal(set) var sort = LibrarySort.captureDate
@@ -147,11 +150,7 @@ public struct LibraryCatalog: Sendable, Equatable {
         guard collections.contains(where: { $0.id == id }) else { return }
         selectedCollectionID = id
         selection = []
-        rebuildOrder()
-        if mode == .loupe, !(focusedItemID.map(order.contains) ?? false) {
-            mode = .grid
-            focusedItemID = nil
-        }
+        refreshShown()
     }
 
     public mutating func loadSamples(seed: UInt64 = LibrarySample.defaultSeed) {
@@ -194,23 +193,34 @@ public struct LibraryCatalog: Sendable, Equatable {
         select(selection)
     }
 
-    /// Every count from scratch: for a load or an import, which add photos.
-    /// Recently Added holds the newest `recentLimit`, so its count needs no sort.
+    /// Every row and count from scratch: the built-ins, then one row per
+    /// collection of yours, each counted before the bar's filter. A selected
+    /// collection that is gone falls back to All Photos. Recently Added holds
+    /// the newest `recentLimit`, so its count needs no sort.
     mutating func recount() {
         let favorites = items.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) }
         let counts = ["all": items.count, "favorites": favorites, "recent": min(items.count, Self.recentLimit)]
-        for index in collections.indices {
-            collections[index].count = counts[collections[index].id] ?? 0
-        }
+        var rows = Self.builtInCollections.map { LibraryCollection(id: $0.id, name: $0.name, count: counts[$0.id] ?? 0) }
+        rows += userCollections.map { LibraryCollection(id: $0.id, name: $0.name, count: photos(of: $0).count) }
+        collections = rows
+        if !collections.contains(where: { $0.id == selectedCollectionID }) { selectCollection("all") }
     }
 
     /// The counts after a metadata edit, undo or redo that replaced `before`
     /// with `after` in place: no photo was added or removed and no capture
     /// date changed, so only Favorites moves, by the flags that changed.
+    /// A smart collection moves by the changed photos its rules admit.
     mutating func recount(replacing before: [PhotoItem], with after: [PhotoItem]) {
-        let delta = after.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) } - before.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) }
-        guard delta != 0, let index = collections.firstIndex(where: { $0.id == "favorites" }) else { return }
-        collections[index].count += delta
+        let delta = after.count(where: \.isFlagged) - before.count(where: \.isFlagged)
+        if delta != 0, let index = collections.firstIndex(where: { $0.id == "favorites" }) {
+            collections[index].count += delta
+        }
+        for user in userCollections {
+            guard case .rules(let rules) = user.contents,
+                let index = collections.firstIndex(where: { $0.id == user.id })
+            else { continue }
+            collections[index].count += after.count(where: rules.matches) - before.count(where: rules.matches)
+        }
     }
 
     /// The photos with every id unique; the first photo with an id keeps it,
@@ -237,12 +247,34 @@ public struct LibraryCatalog: Sendable, Equatable {
         }
     }
 
-    /// The selected collection's photos, unsorted.
+    /// The selected collection's photos through `activeFilter`, unsorted.
     var shownItems: [PhotoItem] {
+        let base = collectionItems
+        let filter = activeFilter
+        return filter.isActive ? base.filter(filter.matches) : base
+    }
+
+    /// The selected collection's photos before the bar's filter: a set of
+    /// yours its photos, a smart one every photo (its rules are the filter).
+    var collectionItems: [PhotoItem] {
         switch selectedCollectionID {
         case "favorites": items.filter(\.isFlagged)
         case "recent": recentItems
-        default: items
+        default:
+            if case .photos(let ids) = selectedUserCollection?.contents {
+                items.filter { ids.contains($0.id) }
+            } else {
+                items
+            }
+        }
+    }
+
+    /// The photos a collection of yours holds before the bar's filter: its
+    /// set's photos, or the photos a smart one's rules admit.
+    func photos(of collection: UserCollection) -> [PhotoItem] {
+        switch collection.contents {
+        case .photos(let ids): items.filter { ids.contains($0.id) }
+        case .rules(let rules): items.filter(rules.matches)
         }
     }
 

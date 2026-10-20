@@ -102,27 +102,34 @@ struct DesignLayersPanel: View {
     }
 
     /// The rows' drag: the pointer `y` points down row `rowID` moves the line only when it changes,
-    /// leaving a row clears its line, and the drop sends the one move the line showed.
+    /// leaving a row clears its line, and the drop at `y` sends the one move the line there shows.
+    /// The drop works out its own line rather than reading the last hover's, so a release that
+    /// lands before the hover is reported still moves the layer (#3556).
     private var layerDrag: DesignLayerDrag {
         DesignLayerDrag(line: dropLine, frames: rowFrames, changed: { rowID, y in
-            let line = rowFrames.dragged.flatMap { id in
-                rowFrames.frames[rowID].flatMap { frame in
-                    model.layerDropLine(id, over: rowID, y: Double(y), height: Double(frame.height))
-                }
-            }.map { DesignLayerDropLine(rowID: rowID, position: $0) }
+            let line = dropLine(over: rowID, y: y)
             if line != dropLine { dropLine = line }
         }, exited: { rowID in
             if dropLine?.rowID == rowID { dropLine = nil }
-        }, dropped: { rowID in
+        }, dropped: { rowID, y in
             defer {
                 rowFrames.dragged = nil
                 if dropLine != nil { dropLine = nil }
             }
-            guard let id = rowFrames.dragged, let line = dropLine, line.rowID == rowID,
+            guard let id = rowFrames.dragged, let line = dropLine(over: rowID, y: y),
                   let target = model.layerDrop(id, onto: rowID, line.position) else { return false }
             perform(.moveLayer(id, parent: target.parentID, index: target.index))
             return true
         })
+    }
+
+    /// The line the dragged layer shows `y` points down row `rowID`, or nil when the Model refuses that drop.
+    private func dropLine(over rowID: String, y: CGFloat) -> DesignLayerDropLine? {
+        rowFrames.dragged.flatMap { id in
+            rowFrames.frames[rowID].flatMap { frame in
+                model.layerDropLine(id, over: rowID, y: Double(y), height: Double(frame.height))
+            }
+        }.map { DesignLayerDropLine(rowID: rowID, position: $0) }
     }
 
     private func header(_ title: String) -> some View {
@@ -207,7 +214,7 @@ struct DesignLayerDrag {
     let frames: DesignLayerRowFrames
     let changed: @MainActor (String, CGFloat) -> Void
     let exited: @MainActor (String) -> Void
-    let dropped: @MainActor (String) -> Bool
+    let dropped: @MainActor (String, CGFloat) -> Bool
 }
 
 /// A layer row as a drop target: it reports where over the row the drag is, and the drop.
@@ -222,7 +229,7 @@ private struct DesignLayerDropTarget: DropDelegate {
 
     func dropExited(info: DropInfo) { drag.exited(rowID) }
 
-    func performDrop(info: DropInfo) -> Bool { drag.dropped(rowID) }
+    func performDrop(info: DropInfo) -> Bool { drag.dropped(rowID, info.location.y) }
 }
 
 /// One page: its symbol and name, with a checkmark on the current page.

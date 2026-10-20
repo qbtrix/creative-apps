@@ -1,7 +1,8 @@
 // DesignExportSnapshots.swift: File > Export… (design-export DE-6). The File menu with
 // Export… ⇧⌘E off and on (design-export-menu); the sheet on `cards` at PNG 1x Frame with
 // Desktop selected (design-export-sheet), and Selection with A and the hidden layer, the hidden
-// one skipped (design-export-sheet-selection). The run's states come with DE-7. Light and dark.
+// one skipped (design-export-sheet-selection), and SVG with Scale off (design-export-sheet-svg).
+// No Size row: Scale is the sheet's one scale control. The run's states come with DE-7. Light and dark.
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -67,5 +68,15 @@ import Testing
         #expect(rows.map(\.id) == ["node-2", "node-10"])
         #expect(rows.last?.skipped == "Hidden layers aren't exported")
         try shoot(model, .editing(options), "design-export-sheet-selection")
+    }
+
+    @Test func vector() throws {
+        let options = DesignExportOptions(format: .svg, scale: 2, scope: .frame)
+        let rows = ExportSheetRows(DesignExportRun.editing(options), formats: DesignExportArea.formats, showsSize: false) {
+            ExportPick(format: $0.format.rawValue, scale: Double($0.scale))
+        }
+        #expect(rows.rows == [.format("svg")])
+        #expect(options.scaleHelp != nil)
+        try shoot(cards(), .editing(options), "design-export-sheet-svg")
     }
 }

@@ -45,10 +45,29 @@ public struct ExportFormatSpec: Hashable, Sendable {
 /// The suite's format list.
 public enum ExportFormats {
     /// png, jpeg, heic, tiff, svg, pdf, mp4 (H.264), mp4-hevc, mov-prores (ProRes 4444, alpha), gif, apng.
-    public static let all: [ExportFormatSpec] = []
+    public static let all: [ExportFormatSpec] = [
+        entry("png", "PNG", "png", .still, alpha: true, metadata: true),
+        entry("jpeg", "JPEG", "jpg", .still, quality: true, metadata: true),
+        entry("heic", "HEIC", "heic", .still, quality: true, alpha: true, metadata: true),
+        entry("tiff", "TIFF", "tiff", .still, alpha: true, metadata: true),
+        entry("svg", "SVG", "svg", .vector, alpha: true),
+        entry("pdf", "PDF", "pdf", .vector, alpha: true),
+        entry("mp4", "H.264", "mp4", .movie, quality: true, even: true),
+        entry("mp4-hevc", "HEVC", "mp4", .movie, quality: true, even: true),
+        entry("mov-prores", "ProRes 4444", "mov", .movie, alpha: true, even: true),
+        entry("gif", "GIF", "gif", .animated, alpha: true),
+        entry("apng", "Animated PNG", "png", .animated, alpha: true),
+    ]
 
     /// The format with this id, nil when the suite has none.
     public static func spec(_ id: String) -> ExportFormatSpec? { all.first { $0.id == id } }
+
+    /// One row of the list; every flag off unless named.
+    private static func entry(_ id: String, _ name: String, _ fileExtension: String, _ kind: ExportFormatSpec.Kind,
+                              quality: Bool = false, alpha: Bool = false, metadata: Bool = false, even: Bool = false) -> ExportFormatSpec {
+        ExportFormatSpec(id: id, name: name, fileExtension: fileExtension, kind: kind,
+                         hasQuality: quality, keepsAlpha: alpha, carriesMetadata: metadata, needsEvenSize: even)
+    }
 }
 
 /// Why export options can't run, in words the sheet and the CLI show.
@@ -71,7 +90,39 @@ public struct SuiteExportOptions: Hashable, Codable, Sendable {
     }
 
     /// The one params schema: every key optional, each missing one from `defaults`; an unknown key throws.
-    public init(json: JSONValue, defaults: SuiteExportOptions) throws { self = defaults }
+    /// `.null` is `defaults`; a schema issue throws with its JSON pointer ("/colour: unexpected key").
+    public init(json: JSONValue, defaults: SuiteExportOptions) throws {
+        self = defaults
+        if case .null = json { return }
+        if let issue = Self.schema.validate(json).first {
+            throw ExportOptionRefusal.invalid("\(issue.path.isEmpty ? "options" : issue.path): \(issue.message)")
+        }
+        guard case .object(let o) = json else { return }
+        if case .string(let f)? = o["format"] { format = f }
+        if case .object(let s)? = o["size"] { size = try Self.size(s) }
+        if case .number(let q)? = o["quality"] { quality = q }
+        if case .string(let m)? = o["metadata"], let policy = ExportMetadata(rawValue: m) { metadata = policy }
+        if case .bool(let a)? = o["alpha"] { alpha = a }
+        if case .number(let r)? = o["fps"] { fps = Int(exactly: r) }
+        if case .bool(let l)? = o["loop"] { loop = l }
+    }
+
+    /// The size object's one mode: `{"scale": s}`, `{"pixels": [w, h], "stretch": b}` or `{"longEdge": n}`.
+    private static func size(_ s: [String: JSONValue]) throws -> SuiteExportSize {
+        let free = s["stretch"] == nil
+        switch (s["scale"], s["pixels"], s["longEdge"]) {
+        case (.number(let x)?, nil, nil) where free: return .scale(x)
+        case (nil, nil, .number(let n)?) where free:
+            if let n = Int(exactly: n) { return .longEdge(n) }
+        case (nil, .array(let wh)?, nil):
+            if wh.count == 2, case .number(let w)? = wh.first, case .number(let h)? = wh.last,
+               let w = Int(exactly: w), let h = Int(exactly: h) {
+                return .pixels(width: w, height: h, stretch: s["stretch"] == .bool(true))
+            }
+        default: break
+        }
+        throw ExportOptionRefusal.invalid("/size: give one of scale, pixels or longEdge; stretch goes with pixels.")
+    }
 
     /// `{"format", "size": {"scale" | "pixels": [w, h] | "longEdge", "stretch"}, "quality", "metadata", "alpha", "fps", "loop"}`.
     public static let schema = ParamSchema.object([
@@ -97,12 +148,99 @@ public enum ExportRules {
 
     /// Exact output pixels for a scope `source` pixels big at 1x.
     public static func pixels(of source: (width: Int, height: Int), _ size: SuiteExportSize,
-                              evenSize: Bool) throws -> (width: Int, height: Int) { source }
+                              evenSize: Bool) throws -> (width: Int, height: Int) {
+        guard source.width >= 1, source.height >= 1 else { throw refuse("The artwork has no size to export.") }
+        let (sw, sh) = (Double(source.width), Double(source.height))
+        var (w, h) = source
+        switch size {
+        case .scale(let s):
+            guard s.isFinite, s > 0 else { throw refuse("A scale has to be more than 0.") }
+            (w, h) = (whole(sw * s), whole(sh * s))
+        case .longEdge(let n):
+            guard n >= 1 else { throw refuse("The long edge needs at least 1 px.") }
+            let short = whole(Double(n) * min(sw, sh) / max(sw, sh))
+            (w, h) = source.width >= source.height ? (n, short) : (short, n)
+        case .pixels(let pw, let ph, let stretch):
+            guard pw >= 1, ph >= 1 else { throw refuse("A size needs at least 1 px on each side.") }
+            guard pw <= maxSide, ph <= maxSide else { throw pastLimit(pw, ph) }
+            if !stretch, !keepsShape(pw, ph, sw, sh) {
+                throw refuse("\(pw) × \(ph) doesn't keep the artwork's \(ratio(source)) shape. Unlock the ratio to stretch.")
+            }
+            (w, h) = (pw, ph)
+        }
+        guard w <= maxSide, h <= maxSide else { throw pastLimit(w, h) }
+        (w, h) = (max(w, 1), max(h, 1))
+        if evenSize { (w, h) = (max(w - w % 2, 2), max(h - h % 2, 2)) }
+        return (w, h)
+    }
 
     /// ImageIO property paths to drop ("{GPS}", "{Exif}.BodySerialNumber", "{MakerApple}", ...) and the XMP
     /// properties a sidecar leaves out ("exif:GPSLatitude", "xmp:CreateDate" under `.none`).
-    public static func dropped(_ m: ExportMetadata) -> (properties: Set<String>, xmp: Set<String>) { ([], []) }
+    public static func dropped(_ m: ExportMetadata) -> (properties: Set<String>, xmp: Set<String>) {
+        switch m {
+        case .all: ([], [])
+        case .noLocation: (location, locationXMP)
+        case .none: (location.union(rest), locationXMP.union(restXMP))
+        }
+    }
 
     /// Why these options can't run, or nil.
-    public static func refusal(_ o: SuiteExportOptions, source: (width: Int, height: Int), formats: [ExportFormatSpec]) -> String? { nil }
+    public static func refusal(_ o: SuiteExportOptions, source: (width: Int, height: Int), formats: [ExportFormatSpec]) -> String? {
+        guard let spec = formats.first(where: { $0.id == o.format }) else { return "There's no export format \"\(o.format)\"." }
+        if spec.hasQuality, !(0...1).contains(o.quality) { return "Quality runs from 0 to 1." }
+        if o.alpha, !spec.keepsAlpha {
+            let other = formats.first { $0.kind == spec.kind && $0.keepsAlpha }
+            return "\(spec.name) can't keep transparency." + (other.map { " Choose \($0.name)." } ?? "")
+        }
+        do {
+            _ = try pixels(of: source, o.size, evenSize: spec.needsEvenSize)
+            return nil
+        } catch {
+            return String(describing: error)
+        }
+    }
+
+    /// Where the picture was made and what made it: GPS, IPTC place names, serial numbers, maker notes.
+    static let location: Set<String> = ["{GPS}", "{IPTC}.City", "{IPTC}.SubLocation", "{IPTC}.Province/State",
+        "{IPTC}.Country/PrimaryLocationCode", "{IPTC}.Country/PrimaryLocationName", "{Exif}.BodySerialNumber",
+        "{Exif}.LensSerialNumber", "{ExifAux}.SerialNumber", "{Exif}.MakerNote", "{MakerApple}", "{MakerCanon}",
+        "{MakerNikon}", "{MakerMinolta}", "{MakerFuji}", "{MakerOlympus}", "{MakerPentax}"]
+    static let locationXMP: Set<String> = ["exif:GPSLatitude", "exif:GPSLongitude", "exif:GPSAltitude", "exif:GPSAltitudeRef",
+        "exif:GPSTimeStamp", "exif:GPSImgDirection", "exif:GPSSpeed", "exif:GPSDestLatitude", "exif:GPSDestLongitude",
+        "Iptc4xmpCore:Location", "photoshop:City", "photoshop:State", "photoshop:Country",
+        "exifEX:BodySerialNumber", "exifEX:LensSerialNumber", "aux:SerialNumber"]
+    /// Everything else `.none` drops: every dictionary but `{TIFF}.Orientation` and the colour profile.
+    static let rest: Set<String> = ["{Exif}", "{ExifAux}", "{IPTC}", "{8BIM}", "{DNG}", "{CIFF}",
+        "{TIFF}.Make", "{TIFF}.Model", "{TIFF}.Software", "{TIFF}.DateTime", "{TIFF}.Artist", "{TIFF}.Copyright",
+        "{TIFF}.HostComputer", "{TIFF}.ImageDescription", "{PNG}.Author", "{PNG}.Copyright", "{PNG}.CreationTime",
+        "{PNG}.Description", "{PNG}.Software", "{PNG}.Title", "{PNG}.Comment"]
+    static let restXMP: Set<String> = ["xmp:CreateDate", "xmp:ModifyDate", "xmp:MetadataDate", "xmp:CreatorTool",
+        "xmp:Rating", "xmp:Label", "dc:creator", "dc:rights", "dc:title", "dc:description", "dc:subject",
+        "photoshop:DateCreated", "exif:DateTimeOriginal", "tiff:Make", "tiff:Model", "tiff:Artist"]
+
+    /// True when `w` × `h` is the artwork's shape to within a pixel of rounding: one side is the other's
+    /// proportional length rounded (`|w·sh − h·sw| ≤ max(sw, sh) / 2`).
+    private static func keepsShape(_ w: Int, _ h: Int, _ sw: Double, _ sh: Double) -> Bool {
+        abs(Double(w) * sh - Double(h) * sw) * 2 <= max(sw, sh)
+    }
+
+    /// `x` rounded to whole pixels; anything past the limit reads as one past it.
+    private static func whole(_ x: Double) -> Int {
+        let r = x.rounded()
+        return r > Double(maxSide) ? maxSide + 1 : Int(r)
+    }
+
+    /// The artwork's shape in lowest terms ("4:5").
+    private static func ratio(_ s: (width: Int, height: Int)) -> String {
+        var (a, b) = (s.width, s.height)
+        while b != 0 { (a, b) = (b, a % b) }
+        let d = max(a, 1)
+        return "\(s.width / d):\(s.height / d)"
+    }
+
+    private static func pastLimit(_ w: Int, _ h: Int) -> ExportOptionRefusal {
+        refuse("\(w) × \(h) px is past the \(maxSide) px limit on a side.")
+    }
+
+    private static func refuse(_ why: String) -> ExportOptionRefusal { .invalid(why) }
 }
