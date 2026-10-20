@@ -8,3 +8,5 @@ utc	stage	event	ref	note
 2026-10-20T19:56Z	3	heartbeat	#3682 #3702	both open, awaiting the macOS batch gate; HG-m (for HT-6) not done
 2026-10-20T20:18Z	3	heartbeat	#3682 #3702	open; #3682's macOS build (run 39481944279) has been queued since 19:15Z; blocked poll 1
 2026-10-20T20:41Z	3	heartbeat	#3682 #3702	open; run 39481944279 still queued; 35 macOS builds queued repo-wide; blocked poll 2
+2026-10-20T21:02Z	3	heartbeat	#3682 #3702	still queued; blocked poll 3; posted a supervisor question on #3443
+2026-10-20T21:05Z	3	wave-start	HT-u	builder started on lead/transform-HT-u, stacked on HT-a (HT-3 + HT-4); PR opens once #3682 merges
