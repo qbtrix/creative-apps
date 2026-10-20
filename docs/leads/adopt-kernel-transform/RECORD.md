@@ -78,3 +78,5 @@ fast-lane PR opened against `main` to `dev`).
 - #3593 head f297417d, 262 lines / 5 files, gate PASS, mutate KernelTransformAdapter 5/5, LiveTransforming still 8/8.
 - Deviations from the packet: DesignHandle maps both ways onto EditorHandle (10 cases, not a typealias); DesignModifiers forwards Shift/Option only (noSnap stays Design's); a zero-width/height box keeps Design's scaling rule (private `stretched`) because aBoxOfNoWidthNeverDividesByZero pins it.
 - AT-d2 builder started stacked on AT-d1 (lead/adopt-kernel-transform-AT-d2); its PR opens once #3593 merges, carrying feature-done and status built.
+
+- 2026-10-20T11:27:49Z: AT-d2 built (head 070f878a, stacked on AT-d1): one `scaled` on BoxMath.scaled with the no-length-axis rule (private `stretched` gone); compact handle hit walks only the corners; DesignNode plan +4 mutations, LiveTransforming repointed +1 (new test aLayerScaledDownStaysAtLeastOnePoint); wave.json status built, feature_issue #1938. Gate PASS; mutate 8/8, 9/9, 5/5. AT-photo and AT-flare are done (Belt-Slice-Done on #1938), so marking built is right. Its PR opens once #3593 merges (merge dev in, gate again), carrying feature-done.
