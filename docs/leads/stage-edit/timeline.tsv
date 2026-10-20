@@ -1,0 +1,171 @@
+2026-10-16T20:59Z	heartbeat	-	#1514	stage 0 stopped: waiting on draw-key-save #1365
+2026-10-16T21:30Z	heartbeat	-	#1514	stage 0: #1365 still open; status pushed to lead/stage-edit
+2026-10-16T22:01Z	heartbeat	-	#1514	stage 0: #1365 still open (dev 13225ee2); waiting
+2026-10-16T22:32Z	heartbeat	-	#1514	stage 0: #1365 still open (dev 6baabdb4); waiting
+2026-10-16T23:03Z	heartbeat	-	#1514	stage 0: #1365 still open (dev caa3c666); waiting
+2026-10-16T23:35Z	heartbeat	-	#1514	stage 0: #1365 still open; draw-key-save.wave.json now built on dev (dbe98d9e), waves.md still planned; asked supervisor
+2026-10-17T00:06Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev 24201bb0
+2026-10-17T00:37Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev 403ea29e
+2026-10-17T01:08Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev 7ac0a317
+2026-10-17T01:40Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev a18bd1c4
+2026-10-17T02:34Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev 010f57e9
+2026-10-17T03:04Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev 06371387
+2026-10-17T03:36Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev 1a8eea2a
+2026-10-17T04:07Z	heartbeat	-	#1514	stage 0: waiting on supervisor ruling for #1365; dev bd11faf7
+2026-10-18T02:52Z	3	resume	#1514	run act-1a14cda2f27-e9ty resumed; supervisor ruling applied; waves planned
+2026-10-18T02:53Z	3	stage-start	wave 1	build SE-4 SE-2a beside flare-export wave 2
+2026-10-18T03:52Z	3	heartbeat	wave	container restarted; wave PRs #2532 #2533 #2534 open, FX-2a builder unfinished; relaunching FX-2a
+2026-10-18T03:24Z	3	merged	SE-2a	#2532
+2026-10-18T03:24Z	3	merged	SE-4	#2534
+2026-10-18T03:59Z	3	wave-start	SE-3	wave 2: SE-3 builder launched (suite pasteboard per rule 20)
+2026-10-18T04:01Z	3	heartbeat	findings	Flare CI findings read; #2485 queued for SE-5; feature findings 0
+2026-10-18T04:12Z	3	pr-opened	SE-3	#2565 b914f7fe
+2026-10-18T04:21Z	3	check	SE-3	#2565 lane macOS build pending; EK-box, #273, #995 still open; findings 0
+2026-10-18T04:42Z	3	merged	SE-3	#2565 merged 04:35Z
+2026-10-18T05:05Z	3	check	SE-3	full CI 39098181461 on e01529f4 (SE-3 merge) in progress; EK-box, #273, #995 open; no new Flare findings
+2026-10-18T05:30Z	finding	#2618 J15 Copy disabled; fixer started (round 1)
+2026-10-18T05:30Z	check	scoped flare 39098049090 done (J15 red); full CI 39098181461 still running; EK-a stubs #2577 merged, no BoxMath/HandleHit; #273, #995 open
+2026-10-18T05:46Z	pr-opened	#2639 fix(flare) menu re-reads edit reasons, Fixes #2618, head dd609d0e
+2026-10-18T05:52Z	check	EK-3 merged stubs only; SE-0 waits on EK-20 BoxMath/HandleHit bodies; #2639 (Fixes #2618) in lane; full CI 39098181461 running
+2026-10-18T06:14Z	check	full CI 39098181461 still running; #2639 not merged yet; EK-20 bodies not on dev (SE-0 waits); #273 has PR #2640 open; #995 open
+06:37Z	check	full CI 39098181461 success (macOS report-only red); #2639 waits on macOS build 39102081973; EK-20 bodies not on dev (SE-0 waits); new flare finding #2664 is fill-stroke, not stage-edit
+06:58Z	check	#2639 macOS build 39102081973 success; waits on lane sweep; EK-20 bodies still not on dev
+07:10Z	check	#2639 still open, lane sweep 39106241153 in progress
+2026-10-18T07:27Z	check	#2639 still open (clean, mac build green); lane backlog 48 PRs, sweep 39107445380 in progress; no EK-20 bodies on dev (SE-0 waits)
+2026-10-18T07:48Z	check	lane merging oldest-first, reached #2638 (dev 2202c7c3); #2639 next in order; no EK-20 bodies on dev
+2026-10-18T08:19Z	check	#2639 had needs-fix from lane batch 39107425830; reproduced: scripts/ci PASS on dev(2202c7c3)+#2639, only failure a Photo timing test in perf-suites; pushed dev merge as head 514c4980, Head line moved; new line:flare findings #2664 #2697 not stage-edit scope; no EK-20 bodies on dev
+2026-10-18T08:42Z	check	lane sweep 39111897240 running (not stalled); #2639 head 514c4980 needs-fix answered, macOS build 39111988046 in progress; dev 2202c7c3, no EK-20 bodies; #2640 (#273) open clean, #995 open
+2026-10-18T09:05Z	check	dev d6271ae4 (#2646 EK-20 tests landed disabled; bodies not yet); #2639 needs-fix dropped, macOS build 39111988046 pending; lane backlog 30 ready PRs behind a batch; #2640, #995 open
+2026-10-18T09:27Z	check	#2639 merged to dev (ed52eaa8), fixes #2618 J15 round 1; awaiting a flare/full CI run to confirm J15. SE-0 still waits on EK-20 bodies; #2640 (#273) open; #995 open.
+2026-10-18T09:49Z	check	EK-20 bodies in open PR #2711 (SE-0 starts on merge). Scoped flare 39115442636 on ed52eaa8 (contains #2639) running; J15 verdict pending. #2640, #995 open.
+2026-10-18T10:12Z	check	J15 still red in scoped flare 39115442636 (ed52eaa8); finding #2730 filed; fix round 2 of 2 started (fix/flare-j15-edit-menu-2). #273 merged (#2640); #995 open; #2711 (EK-20) open, SE-0 waits
+2026-10-18T10:23Z	fix	J15 round 2: PR #2733 (Fixes #2730), head 8ca2bc64; root cause SidebarRow title rename gesture swallows click (#2496, suiteui); journey picks rows via blank space. Also fixes testLaunchShowsWindowShell pick
+2026-10-18T10:35Z	check	#2711 (EK-20) merged 10:31Z; SE-0 builder started from origin/dev 5e1844e6; #2733 (J15 round 2) open, awaiting lane; #995 open (SE-2b waits)
+2026-10-18T10:46Z	stage	SE-0 shipped: PR #2740 head b12a32b0 (+285/-4, 5 files, mutate 5/5, scripts/ci PASS); rule-20 gap: local atan2 turn angle, filed #2741 for a SuiteKernel BoxMath turn helper; worktree cleaned
+2026-10-18T10:57Z	check	SE-0 #2740 and J15 r2 #2733 open, waiting on the lane; #995 open; no new findings
+2026-10-18T11:19Z	check	#2733 merged (J15 round 2); deciding run 39122755577 queued; SE-0 #2740 open; #995 open
+2026-10-18T11:40Z	check	SE-0 #2740 macOS build 39121118196 green, awaiting lane sweep; J15 run 39122755577 still queued; #995 open
+2026-10-18T12:04Z	check	SE-0 #2740 merged 11:54Z; SE-1 builder started (closes #204, J5); J15 run 39122755577 in progress; #995 open (SE-2 blocked)
+2026-10-18T12:27Z	check	scoped flare run 39122755577: J15 original fault (#2730) gone; new fault #2768 (pasted "Ball copy" control lacks identifier, audit 22>12); fixer started (fix round 1 for #2768); SE-1 builder running; #995 open so SE-2 blocked
+2026-10-18T12:29Z	check	#2768 blocked on SuiteUI: timelineIdentifierPrefix is internal (needs-ui #1789; PR #2622 makes it public). Fix round 1 spent no code; fixer commented on #2768 and #1789 with the one-line Flare follow-up. Resume once the accessor is public on dev
+2026-10-18T12:33Z	pr	SE-1 PR #2774 head 1cf2e7dc (395 lines, 7 files, mutate 3/3, CI PASS full); footer stripped; canonical-baseline +1 with Allow-Dup (critics to check rule 20); handle-lag follow-up filed as gap #2775 (for SE-2, owns FlareStage.swift)
+2026-10-18T12:35Z	check	status: SE-0 #2740, SE-3 #2565, SE-4 #2534 merged; SE-2 Model half #2532 merged, view half waits #995; SE-1 #2774 in lane; SE-5 after SE-1 and SE-2
+2026-10-18T12:36Z	check	#2774 SE-1 clean, in lane; #995 open (SE-2 view half waits); #2622 open (#2768 waits)
+2026-10-18T12:49Z	check	#2774 macOS build dispatched (run 39128115841); #995 open; #2622 open
+2026-10-18T13:12:19Z	check	#2774 macOS build green 39128115841, awaiting lane merge; #995 open
+2026-10-18T13:33:51Z	merge	#2774 SE-1 merged bf3ee823; #995 open (SE-2 view waits)
+2026-10-18T13:55:21Z	check	waiting on #995 for SE-2 view
+2026-10-18T14:17:00Z	check	#995 still open; SE-2 view waits
+2026-10-18T14:39:03Z	check	#995 still open; SE-2 view waits
+2026-10-18T15:01:17Z	check	#995 still open; SE-2 view waits
+2026-10-18T15:23:11Z	check	#995 not landed; SE-2 view waits
+2026-10-18T15:45:17Z	check	dev 6d589da5: #995 not landed; SE-2 view waits
+2026-10-18T16:07:31Z	check	dev 9f396428: #995 not landed; SE-2 view waits
+2026-10-18T16:29:22Z	check	dev ae72cc6c: #995 not landed; SE-2 view waits
+2026-10-18T16:51:41Z	check	dev e3c46ea8: #995 not landed; SE-2 view waits
+2026-10-18T17:12:35Z	check	dev e55c8d3c (#2856 scroll bars, not rulers): #995 not landed; SE-2 view waits
+2026-10-18T17:33:31Z	check	dev bea7db20: #995 not landed; SE-2 view waits
+2026-10-18T17:55:14Z	check	dev ad5c9271: #2866 #2860, no blocker cleared (#995 #1989 #2622 open)
+2026-10-18T18:16:41Z	check	dev c91b1468: #2879 #2874 #2873 #2877 #2872 #2871 #2863, no blocker cleared (#995 #1989 #2622 open)
+2026-10-18T19:52:00Z	wave	wave 4 start: SE-5a (SE-5 split); dev f7e0350; #995 #2622 open
+2026-10-18T21:09:29Z	3	pr-opened	#2945	SE-5a J3 in full + order journey, Fixes #2485; macOS build green
+2026-10-18T21:27Z	3	pr-merged	#2945	SE-5a journeys (a46ef519)
+2026-10-18T21:27Z	3	heartbeat	-	dev b40c77f6; #995 #2622 open; no open findings
+2026-10-18T21:49Z	3	heartbeat	-	dev 83676f62; #995 #2622 open; 0 findings
+2026-10-18T22:06Z	3	heartbeat	-	dev f221b370; #995 #2622 open; 0 findings
+2026-10-18T22:23Z	3	heartbeat	-	dev 349578b8; #995 and #2622 open; 0 findings; SE-2b, SE-5b and #2768 fix still blocked
+2026-10-18T22:40Z	3	heartbeat	-	dev 349578b8; #995 and #2622 open; 0 findings; full CI 39171756438 queued
+2026-10-18T22:57Z	3	heartbeat	-	dev afa91212; #995 and #2622 open; 0 findings; full CI 39171756438 queued
+2026-10-18T23:14Z	3	heartbeat	-	dev e0a627c0; #995 and #2622 open; 0 findings; full CI 39171756438 queued
+2026-10-18T23:32Z	3	heartbeat	-	dev d77c9e00; full CI 39171756438 running; #995 #2622 open, SE-2b SE-5b blocked
+2026-10-18T23:49Z	3	heartbeat	-	dev 9ece98c5; full CI 39171756438 macOS running; #995 #2622 open, SE-2b SE-5b blocked
+2026-10-19T00:06Z	3	heartbeat	-	dev d50e891e; full CI 39171756438 running; #995 #2622 open, SE-2b SE-5b blocked
+2026-10-19T00:22Z	3	heartbeat	-	dev db8f8f61; full CI 39171756438 running; #995 #2622 open, SE-2b SE-5b blocked
+2026-10-19T00:39Z	3	heartbeat	-	dev 7ccb643d; full CI 39171756438 running; #995 #2622 open, SE-2b SE-5b blocked
+2026-10-19T00:56Z	3	heartbeat	-	dev f191be21; full CI 39171756438 cancelled; watching 39180214762 (queued); #995 #2622 open, SE-2b SE-5b blocked
+2026-10-19T01:13Z	3	heartbeat	-	dev 124fe38c; #995 #1989 #2622 open; full CI 39180214762 and scoped flare 39181656819 queued; findings #3036 #2484 (2)
+2026-10-19T01:31Z	3	heartbeat	-	dev 12008867; #995 #1989 #2622 open; full CI 39180214762 queued, scoped flare 39181656819 running; findings #3036 #2484 (2)
+2026-10-19T01:48Z	3	heartbeat	-	dev ed0fed9e; #995 #1989 #2622 open; full CI 39180214762 and scoped flare 39181656819 running; findings #3036 #2484 (2)
+2026-10-19T02:05Z	3	heartbeat	-	dev 17dc84c7; #995 #1989 #2622 open; scoped flare 39181656819 (7ccb643d) success, full CI 39180214762 running; findings #3036 #2484 (2); no slice due (FX-u/FX-z wait on FX-3b)
+2026-10-19T02:22Z	3	heartbeat	-	dev 17dc84c7; #995 #1989 #2622 open; full CI 39180214762 running; findings #3036 #2484 (2)
+2026-10-19T02:39Z	3	heartbeat	-	dev 17dc84c7; #995 #1989 #2622 open; full CI 39180214762 running; findings #3036 #2484 (2)
+2026-10-19T02:56Z	3	heartbeat	-	dev 7def6ae5; #995 #1989 #2622 open; full CI 39180214762 running; findings #3036 #2484 (2)
+2026-10-19T03:13Z	3	heartbeat	-	dev cc14022e; #995 #1989 #2622 open, blocked; full CI 39180214762 cancelled, superseded by 39192572958 (queued); scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T03:29Z	3	heartbeat	-	dev 918abfc6; #995 #1989 #2622 open, blocked; full CI 39192572958 queued; scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T03:45Z	3	heartbeat	-	dev 7acc00bf; #995 #1989 #2622 open, blocked; full CI 39192572958 queued; scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T04:03Z	3	heartbeat	-	dev b48cf6c4; #995 #1989 #2622 open, blocked; full CI 39192572958 queued (1h); scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T04:20Z	3	heartbeat	-	dev 9f098e23; #995 #1989 #2622 open, blocked; full CI 39192572958 in progress; scoped flare 39193351004 in progress; findings 3036 2484 (2)
+2026-10-19T04:37Z	3	heartbeat	-	dev aed78668; #995 #1989 #2622 open, blocked; full CI 39192572958 in progress; scoped flare 39193351004 in progress; findings 3036 2484 (2)
+2026-10-19T04:54Z	3	heartbeat	-	dev bede8342; #995 #1989 #2622 open; full CI 39192572958 in progress (cc14022e); scoped flare 39193351004 success (cc14022e), no slice due (FX-u/FX-z blocked); findings #3036 #2484
+2026-10-19T05:12Z	3	heartbeat	-	dev aefebf4f; #995 #1989 #2622 open; full CI 39192572958 in progress (cc14022e); findings #3036 #2484
+2026-10-19T05:29Z	3	heartbeat	-	dev 047303c1; #995 #1989 #2622 open; full CI 39192572958 in progress (cc14022e); findings #3036 #2484
+2026-10-19T05:48Z	3	heartbeat	-	dev 9b33f116; #995 #1989 #2622 open; full CI 39192572958 cancelled (superseded), now tracking full CI 39203617095 (b7e17ed6, queued); findings #3036 #2484
+2026-10-19T06:09Z	3	heartbeat	-	dev 6dd055f6; #995 #1989 #2622 open; full CI 39203617095 queued (b7e17ed6); findings #3036 #2484
+2026-10-19T06:27Z	3	heartbeat	-	dev d4814191; #995 #1989 #2622 open; full CI 39203617095 queued (b7e17ed6); findings #3036 #2484
+2026-10-19T06:44Z	3	heartbeat	-	dev 977df193; #995 #1989 #2622 open; full CI 39203617095 queued; findings 3036,2484
+2026-10-19T07:02Z	3	heartbeat	-	dev d99751bc; #995 #1989 #2622 open; full CI 39203617095 queued; findings 3036,2484
+2026-10-19T07:22Z	3	heartbeat	-	dev 57d85dfd; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T07:39Z	3	heartbeat	-	dev 57d85dfd; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T07:56Z	3	heartbeat	-	dev 57d85dfd; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T08:13Z	3	heartbeat	-	dev 9cb4a95d; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T08:30Z	3	heartbeat	-	dev 6f9a2b88; #995 #1989 #2622 open; full CI 39203617095 in_progress; findings 2 open (#3036 #2484)
+2026-10-19T08:47Z	3	check	39203617095	dev 0b9ec8ab; #995 #1989 #2622 open; full CI 39203617095 cancelled (macOS cancelled, Linux green), now watching full CI 39225019255 on 0b9ec8ab; findings 2 open (#3036 #2484)
+2026-10-19T09:04Z	3	heartbeat	-	dev 097b0d52; #995 #1989 #2622 open; full CI 39225019255 cancelled (superseded), latest full 39226253814 pending; findings 2 open (#3036 #2484)
+2026-10-19T09:20Z	3	heartbeat	-	dev 25f6d337; #995 #1989 #2622 open; latest full CI 39226253814 pending; findings 2 open (#3036 #2484)
+2026-10-19T09:37Z	3	heartbeat	-	dev b749dd94; #995 #1989 #2622 open; full CI 39226253814 cancelled (superseded), latest full 39230710902 pending; findings 2 open (#3036 #2484)
+2026-10-19T09:53Z	3	heartbeat	-	dev 68d4644e; #995 #1989 #2622 open; full CI 39230710902 cancelled (superseded), latest full 39232536792 pending; findings 2 open (#3036 #2484)
+2026-10-19T10:11Z	3	heartbeat	-	dev 3dbba7d3; #995 #1989 #2622 open; full CI 39232536792 and 39234075413 cancelled, 39234246603 pending; findings #3036 #2484
+2026-10-19T10:28Z	3	heartbeat	-	dev 895fb2d0; #995 #1989 #2622 open; full CI 39234246603 cancelled, 39236881849 pending; findings #3036 #2484
+2026-10-19T10:44Z	3	heartbeat	-	dev 895fb2d0; #995 #1989 #2622 open; full CI 39236881849 pending; findings #3036 #2484
+2026-10-19T11:03Z	3	heartbeat	-	dev d80a1b26; #995 #1989 #2622 open; full CI 39236881849 pending, scoped runs queued; findings #3036 #2484
+2026-10-19T11:23Z	3	heartbeat	-	dev c6ad68f7; #995 #1989 #2622 open; full CI 39236881849 cancelled, 39243183625 pending; findings #3036 #2484
+2026-10-19T11:39Z	3	heartbeat	-	dev fa8c815f; #995 #1989 #2622 open; full CI 39243183625 cancelled, 39244857355 pending; scoped flare 39246056734 queued; findings #3036 #2484
+2026-10-19T11:54Z	3	stage-start	-	resume act-1a15400ea40-y423; dev cd7d4120; #995 #1989 #2622 open; inspector-timeline built
+2026-10-19T11:56Z	3	comment	#3035	runner lacks Accessibility for CGEvent posting; handed to supervisor
+2026-10-19T12:58Z	3	heartbeat	-	#995 open; nothing startable
+2026-10-19T13:27Z	3	heartbeat	-	#995 has a PR in the lane
+2026-10-19T13:50Z	waiting	heartbeat	#995	still open
+2026-10-19T14:16Z	waiting	heartbeat	#995	still open
+2026-10-19T14:36Z	waiting	heartbeat	#995	still open
+2026-10-19T14:55Z	waiting	heartbeat	#995	still open
+2026-10-19T15:19Z	waiting	heartbeat	#995	still open
+2026-10-19T15:39Z	SE-2b	heartbeat	#995	#995 open; findings #3035 #2768
+2026-10-19T15:58Z	SE-2b	heartbeat	#995	#995 open; findings #3035 #2768
+2026-10-19T16:18Z	SE-2b	heartbeat	#995	#995 open; findings #3035 #2768
+2026-10-19T16:38Z	SE-2b	heartbeat	#995	#995 open, PR #3247 fast-lane; findings #3035 #2768
+2026-10-19T16:58Z	waiting	heartbeat	#3247	#995 open; PR #3247 in lane; findings #3035 #2768 unchanged
+2026-10-19T17:19Z	SE-2b	heartbeat	#3247	#995 closed (#3247 merged); SE-2b builder launched
+2026-10-19T17:37Z	SE-2b	heartbeat	-	SE-2b builder running
+2026-10-19T17:47Z	SE-2b	heartbeat	#3309	SE-2b PR #3309 opened
+2026-10-19T17:51Z	SE-2b	heartbeat	#3312	SE-5b PR opened
+2026-10-19T17:57Z	SE-2b	heartbeat	#3309	macOS build 39297215631 queued on 35a92cb; #3312 held
+2026-10-19T18:17Z	SE-2b	heartbeat	#3309	macOS build 39297215631 still queued (runner backlog); #3312 held
+2026-10-19T18:37Z	SE-2b	heartbeat	#3309	macOS build 39297215631 still queued (19 queued); #3312 held
+2026-10-19T19:01Z	SE-2b:	heartbeat	#3309 364d305	C4 part conflict merged (both clauses kept), ci --changed PASS
+2026-10-19T19:18Z	SE-2b:	heartbeat	#3309 run 39309420168	build queued; #3312 lost fast-lane at 17:53 for size counted with parent diff
+2026-10-19T19:38Z	SE-2b:	heartbeat	#3309 run 39309420168	build still queued at 19:38Z
+2026-10-19T19:58Z	SE-2b	heartbeat	#3309	19:58Z: build run 39309420168 still queued; #3312 held
+2026-10-19T20:18Z	SE-2b	heartbeat	#3309	20:18Z: build run 39309420168 still queued; #3312 held
+2026-10-19T20:38Z	SE-2b	heartbeat	#3309	20:38Z: build run 39309420168 still queued; #3312 held
+2026-10-19T20:54Z	SE-2b	heartbeat	#3309	20:54Z: build run 39309420168 still queued; #3312 held
+2026-10-19T21:11Z	SE-2b	heartbeat	#3312	21:11Z: #3309 build still queued. QUESTION for supervisor: prakashUXtech pushed b364e971 (chore(quarantine), UITests/quarantine.json, protected) onto claude/stage-edit-se5b (#3312) at 21:10Z. Left in place. Intended to ride #3312 under captain review, or wrong branch? If kept, #3312 can't take the fast lane.
+2026-10-19T21:35Z	SE-2b	heartbeat	#3312	21:35Z: build 39309420168 queued; quarantine commit b364e971 on #3312 still awaiting supervisor answer
+2026-10-19T21:53Z	SE-2b	heartbeat	#3312	21:53Z: build 39309420168 still queued; quarantine commit b364e971 on #3312 awaiting supervisor
+2026-10-19T22:12Z	SE-2b	heartbeat	#3312	22:12Z: build 39309420168 queued since ~18:50Z; quarantine commit on #3312 awaiting supervisor
+2026-10-19T22:31Z	SE-2b	heartbeat	#3312	22:31Z: build 39309420168 now in_progress; quarantine commit on #3312 awaiting supervisor
+2026-10-19T22:56Z	SE-5b	heartbeat	#3312 ce06e07b	#3309 merged; dev merged into SE-5b, gate pass, Head moved; no-fast-lane kept for the quarantine commit
+2026-10-19T23:14Z	SE-5b	heartbeat	#3312 ce06e07b	unchanged; quarantine commit b364e971 needs the supervisor
+2026-10-19T23:34Z	SE-5b	heartbeat	#3312 ce06e07b	unchanged; quarantine commit b364e971 needs the supervisor
+2026-10-19T23:53Z	SE-5b	heartbeat	#3312 ce06e07b	unchanged; quarantine commit b364e971 needs the supervisor
+2026-10-20T00:12Z	SE-5b	heartbeat	#3312 ce06e07b	unchanged; quarantine commit b364e971 (renews entries expiring 2026-10-20) needs the supervisor
+2026-10-20T00:31Z	SE-5b	heartbeat	#3312 ce06e07b	unchanged; quarantine commit b364e971 needs the supervisor
+2026-10-20T00:49Z	SE-5b	heartbeat	#3312 ce06e07b	unchanged; quarantine commit b364e971 needs the supervisor
+2026-10-20T01:09Z	SE-5b	heartbeat	#3312 ce06e07b	unchanged; quarantine commit b364e971 needs the supervisor
+2026-10-20T01:28Z	awaiting	heartbeat	#3312	#3312 open at ce06e07b, no-fast-lane (quarantine commit b364e971), supervisor to merge
+2026-10-20T01:47Z	awaiting	heartbeat	#3312	#3312 open at ce06e07b, no-fast-lane, supervisor to merge
+2026-10-20T02:06Z	awaiting	heartbeat	#3312	#3312 open at ce06e07b, no-fast-lane, supervisor to merge
+2026-10-20T02:24Z	awaiting	heartbeat	#3312	#3312 open at ce06e07b, no-fast-lane, supervisor to merge
+2026-10-20T02:55Z	SE-5b	heartbeat	#3312	#3312 open at a0054178 (feature-done, no-fast-lane); supervisor merges
+2026-10-20T03:23Z	SE-5b	heartbeat	#3312	#3312 open at a0054178; supervisor merges
+2026-10-20T03:42Z	SE-5b	heartbeat	#3312	#3312 open at a0054178 (needs captain review)
+2026-10-20T05:02Z	resume	resume	#3312	run act-1a157ad4612-4xcw; #3309 merged; #3312 docs-only vs dev at a0054178, still no-fast-lane
