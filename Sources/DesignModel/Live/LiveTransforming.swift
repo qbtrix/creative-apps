@@ -17,7 +17,9 @@
 // - A box of no width or height never divides: that axis maps onto the new box.
 // - `DesignRect.union` is the one selection-bounds union: Align, Group and the
 //   fakes measure a selection with it too.
+// - The box's math is SuiteKernel's BoxMath (adopt-kernel-transform AT-d1).
 // Linux-safe.
+import SuiteKernel
 
 public struct LiveTransforming: SelectionTransforming {
     public init() {}
@@ -45,7 +47,7 @@ public struct LiveTransforming: SelectionTransforming {
                        on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         let roots = try targets(ids, on: page)
         guard let box = DesignRect.union(ids.compactMap { page.nodes.node($0)?.frame }) else { throw .nothingSelected }
-        let new = box.resized(handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
+        let new = box.resized(handle, by: delta, modifiers: modifiers)
         var nodes = page.nodes
         for root in roots { _ = nodes.update(root.id) { $0 = scaled($0, from: box, to: new) } }
         guard nodes != page.nodes else { throw .unchanged }
@@ -97,8 +99,21 @@ public struct LiveTransforming: SelectionTransforming {
         ((page.nodes.ancestors(of: id) ?? []) + [id]).contains { page.nodes.node($0).map(test) == true }
     }
 
-    /// `node` and its subtree with each frame keeping its place and share of `box` inside `new`.
+    /// `node` and its subtree with each frame keeping its place and share of `box` inside `new`:
+    /// the kernel's `BoxMath.scaled`, at least 1 pt wide and high. The kernel only moves an axis
+    /// the box has no length on, so a box of no width or height keeps Design's `stretched`.
     private func scaled(_ node: DesignNode, from box: DesignRect, to new: DesignRect) -> DesignNode {
+        guard box.width > 0, box.height > 0 else { return stretched(node, from: box, to: new) }
+        var node = node
+        let frame = BoxMath.scaled(node.frame.kernelRect, from: box.kernelRect, to: new.kernelRect)
+        node.frame = DesignRect(x: frame.minX, y: frame.minY, width: Swift.max(frame.width, 1), height: Swift.max(frame.height, 1))
+        node.children = node.children.map { scaled($0, from: box, to: new) }
+        return node
+    }
+
+    /// `scaled` by Design's own rule, for a box of no width or height: that axis maps onto the
+    /// new box's start and length.
+    private func stretched(_ node: DesignNode, from box: DesignRect, to new: DesignRect) -> DesignNode {
         // One axis: a box of no length maps everything onto the new box's start and length.
         func place(_ value: Double, _ start: Double, _ length: Double, _ newStart: Double, _ newLength: Double) -> Double {
             length > 0 ? newStart + (value - start) * newLength / length : newStart
@@ -111,7 +126,7 @@ public struct LiveTransforming: SelectionTransforming {
         node.frame = DesignRect(
             x: place(frame.x, box.x, box.width, new.x, new.width), y: place(frame.y, box.y, box.height, new.y, new.height),
             width: size(frame.width, box.width, new.width), height: size(frame.height, box.height, new.height))
-        node.children = node.children.map { scaled($0, from: box, to: new) }
+        node.children = node.children.map { stretched($0, from: box, to: new) }
         return node
     }
 }
