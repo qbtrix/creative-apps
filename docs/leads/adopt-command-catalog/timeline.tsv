@@ -115,3 +115,4 @@ utc	stage	event	ref	note
 2026-10-20T11:18:50Z	heartbeat	11:18Z: #3585 clean at a9eca0ed (needs-rebase to drop), #3587/#3588/#3593 clean awaiting lane; scoped runs on 575cc800 still queued; AT-d2 builder in mutate step
 2026-10-20T11:39:05Z	heartbeat	#3585 and #3587 open, clean, macOS builds queued (39413777039 for #3585); AC-z2 waits
 2026-10-20T11:59:30Z	heartbeat	no merges since 0e1199e9; #3585/#3587/#3593 open and clean, waiting on queued lane macOS builds; full CI 39416190119 still pending
+2026-10-20T12:21:36Z	heartbeat	dev still 0e1199e9; #3593 build 39412643506 and #3587 build 39407145335 green, awaiting lane sweep; #3585 macOS build 39413777039 queued; full CI 39416190119 pending
