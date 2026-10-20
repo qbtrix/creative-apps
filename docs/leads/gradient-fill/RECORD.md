@@ -2,9 +2,9 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
-Stage: 3 wave 2 (FG-1 #3526 and FG-6 #3532 open in the lane)
+Stage: 3 wave 2 (FG-1 #3526 and FG-6 #3532 queued for the lane macOS build: runs 39379666154, 39379693778)
 Base: 042279839a5e71c43540063bebded9d01cdc1c18
-Next: watch #3526 and #3532 through the lane; FG-5 waits GF-6 + AC-flare (fix oneStepForSeveral: Ball has one shape, use Ball + Shadow); FG-2 waits GF-2 (SuiteUI GradientEditor)
+Next: merge #3526 and #3532 when their builds pass; GF-2, GF-3, GF-6 and AC-flare not on dev at 06:37Z, so FG-2, FG-3/4, FG-5 stay held (FG-5: fix oneStepForSeveral with Ball + Shadow)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
