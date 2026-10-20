@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-20T08:59:33Z	heartbeat	FK-a blocked: FG-a (#3526, #3532), GF-2 and SS-a not on dev; no merges since 08:45Z
 2026-10-20T09:11:58Z	heartbeat	FK-a blocked: FG-a (#3526, #3532), GF-2 and SS-a not on dev; no merges since 08:59Z
 2026-10-20T09:23:46Z	heartbeat	FK-a blocked: FG-a, GF-2, SS-a not on dev (merged since 09:11Z: #3465, #3487, unrelated)
+2026-10-20T09:35:09Z	heartbeat	FK-a still blocked on FG-a, SS-a, GF-2; none merged since 09:24Z
