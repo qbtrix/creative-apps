@@ -1,0 +1,193 @@
+utc	stage	event	ref	note
+2026-10-16T20:49Z	0	stage-start		setup; branch from origin/dev 1d68b22
+2026-10-16T20:49Z	0	stage-end		lead/snapping created
+2026-10-16T20:49Z	1	stage-end		packet read (slices, tasks, waits); issues not filed
+2026-10-16T21:20Z	1	heartbeat		still blocked: no Swift toolchain; supervisor answers pending (base, issue filing)
+2026-10-16T21:50Z	1	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
+2026-10-16T22:29Z	1	heartbeat		still blocked: no Swift toolchain; supervisor answers pending
+2026-10-17T15:40Z	2	resume		run act-1a14a8f0634-uwzw; base origin/dev a575d03
+2026-10-17T15:44Z	2	issues filed		needs-ui #2151; gaps #2152 #2154 #2155 #2156 #2157
+2026-10-17T15:45Z	2	waiting	SN-1,SN-12	waits on editor-kernel EK-a (#1933)
+2026-10-17T16:15Z	2	heartbeat	#1933	waiting on editor-kernel EK-a (open)
+2026-10-17T16:38Z	2	heartbeat	#1933	waiting on editor-kernel EK-a (open)
+2026-10-17T16:59Z	2	heartbeat	#1933	waiting on editor-kernel EK-a (open)
+2026-10-17T17:20Z	2	heartbeat	#1933	EK-a still open; waiting
+2026-10-17T17:42Z	2	heartbeat	#1933	EK-a still open; waiting
+2026-10-17T18:08Z	2	heartbeat	#1933	EK-a still open; waiting
+2026-10-17T18:26Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T18:48Z	heartbeat	stage 2, EK-a #1933 still open; design-seams 0 open findings
+2026-10-17T19:09Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T19:30Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T19:53Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T20:15Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T20:37Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T20:58Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T21:20Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T21:41Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T22:02Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T22:23Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T22:45Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T23:07Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T23:28Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-17T23:50Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T00:11Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T00:32Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T00:54Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T01:16Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T01:37Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T02:00Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T02:21Z	heartbeat	stage 2, EK-a #1933 still open
+2026-10-18T02:28Z	2	stopped	#1933	run act-1a14cd4adaa-upx1: EK-a still open (EK-2/3/29 have no PR; editor-kernel lead quiet since 2026-10-17T10:46Z); no feature in the brief can start
+2026-10-18T02:42Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T03:05Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T03:28Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T03:49Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T04:11Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T04:33Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T04:55Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T05:16Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T05:38Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T05:59Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T06:21Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T06:42Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T07:04Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T07:25Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T07:47Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T08:09Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T08:30Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T08:52Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T09:14Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T09:35Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T09:57Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T10:18Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T10:41Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T11:03Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T11:24Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T11:46Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T12:09Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T12:30Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T12:51Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T13:13Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T13:34Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T13:56Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T14:18Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T14:39Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T15:00Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T15:22Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T15:43Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T16:05Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T16:26Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T16:47Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T17:08Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T17:29Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T17:51Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T18:13Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T18:34Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T18:56Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T19:17Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T19:38Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T19:59Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T20:21Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T20:43Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T21:04Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T21:25Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T21:48Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T22:09Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T22:32Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T22:54Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T23:16Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T23:37Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-18T23:59Z	heartbeat	stage 2, EK-a #1933 still open; lead/snapping rebuilt on main 349578b by Belt (run act-1a14a8f0634-uwzw)
+2026-10-19T00:00Z	heartbeat	run act-1a1517272b2-vq6l: EK-a done; wave 1 SN-1+SN-12, SN-6 starting
+2026-10-19T00:01Z	heartbeat	wave 1 launched: SN-1 (+SN-12), SN-2, SN-6
+2026-10-19T00:21Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-19T00:42Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-19T01:04Z	heartbeat	stage 2, EK-a #1933 still open (run act-1a14a8f0634-uwzw)
+2026-10-19T01:06Z	heartbeat	wave 1 PRs: SN-1 #3058, SN-2 #3066, SN-6 #3055; bodies cleaned of tool footers
+2026-10-19T01:12Z	heartbeat	wave 1 PR bodies end on the marker lines; lane building #3058, #3055 on macOS
+2026-10-19T01:16Z	heartbeat	SN-1 #3058 merged 4ff4c7f5; wave 2 SN-9 building (wf_0ef6c4c0-bfd)
+2026-10-19T01:25Z	heartbeat	SN-9 PR #3071 (SN-a's last task), gate pass, Mutate 8/8
+2026-10-19T01:26Z	heartbeat	run act-1a14a8f0634-uwzw stands down on snapping: act-1a1517272b2-vq6l owns it (wave 2); no more heartbeats from this run
+2026-10-19T01:30Z	heartbeat	container restart; #3055 (SN-6) merged 12008867; #3066 and #3071 wait on lane macOS builds
+2026-10-19T01:51Z	heartbeat	#3071 macOS build 39185634495 running
+2026-10-19T02:11Z	heartbeat	#3071 merged 0cb8bb88; earlier full runs cancelled by newer ones
+2026-10-19T02:31Z	heartbeat	full CI 39188162085 still pending (runners busy); scoped design 39187798386 on 0cb8bb88 queued
+2026-10-19T03:02Z	heartbeat	#3066 needs-fix: DesignSnapCandidateTests expected stub line engine; updated to SnapLines' real offsets, merged dev, gate pass, pushed 9ef67e6b
+2026-10-19T03:24Z	heartbeat	Belt-Slice-Done SN-a posted on #1552; #3066 fixed for needs-fix
+2026-10-19T03:44Z	heartbeat	check-in: #3066 build green, lane merge pending
+2026-10-19T03:55Z	heartbeat	SN-3 wave launched
+2026-10-19T04:05Z	heartbeat	check-in: SN-3 builder at work
+2026-10-19T04:15Z	heartbeat	SN-3 PR #3112 opened
+2026-10-19T04:26Z	heartbeat	check-in: #3112 waits on its lane macOS build
+2026-10-19T04:46Z	heartbeat	check-in: #3112 build queued 24 min
+2026-10-19T05:07Z	heartbeat	check-in: #3112 build green
+2026-10-19T05:13Z	heartbeat	SN-3 merged
+2026-10-19T05:28Z	heartbeat	check-in: waiting on full CI 39203617095
+2026-10-19T05:49Z	heartbeat	check-in: full CI 39203617095 in progress
+2026-10-19T06:12Z	heartbeat	SN-e done
+2026-10-19T06:15Z	heartbeat	SN-4 wave launched
+2026-10-19T06:36Z	heartbeat	check-in: SN-4 builder at work; CB-c, FH-b not done; full CI macOS still queued
+2026-10-19T06:57Z	heartbeat	check-in: SN-4 builder at work; CB-c, FH-b not done
+2026-10-19T07:22Z	heartbeat	SN-4 PR opened
+2026-10-19T07:23Z	heartbeat	SN-4 wave checked
+2026-10-19T07:42Z	heartbeat	check-in: build queued; CB-c, FH-b not done
+2026-10-19T08:03Z	heartbeat	check-in: build running; CB-c, FH-b not done
+2026-10-19T08:25Z	heartbeat	SN-4 merged; FH-b done
+2026-10-19T08:46Z	heartbeat	builder running
+2026-10-19T08:58Z	heartbeat	SN-5 PR open
+2026-10-19T09:08Z	heartbeat	macOS build 39226667921
+2026-10-19T09:30Z	heartbeat	macOS queue backed up
+2026-10-19T09:52Z	heartbeat	macOS queue saturated
+2026-10-19T10:13Z	heartbeat	macOS queue saturated (35)
+2026-10-19T10:35Z	heartbeat	macOS queue saturated (29)
+2026-10-19T10:57Z	heartbeat	macOS queue draining (26)
+2026-10-19T11:21Z	heartbeat	build 39226667921 looks stranded in queue
+2026-10-19T11:43Z	heartbeat	awaiting lane sweep
+2026-10-19T12:30Z	0	stage-start	act-1a1543ffff8-c9jg	resume; lead/snapping rebuilt on main 6f9a2b88; SN-b merged (#3204)
+2026-10-19T12:40Z	3	stage-start	wave 6	SN-c builder launched on dev 6e70826b (SN-7; SN-8 if #3224 merged); findings 0
+2026-10-19T13:30Z	3	check	wave 6	SN-c PR #3246 open (SN-7, head b1978a63); #3224 open; SN-f builder launched stacked on it; findings 0
+2026-10-19T13:52Z	3	check	wave 6	SN-f PR #3254 open (head 7878831f, stacked on #3246); #3246 macOS build 39259521758 queued; #3224 open; findings 0
+2026-10-19T14:25Z	3	fix	wave 6	macOS build of #3246/#3254 red (test imports, ambiguous accessibilityValue); fixed eb8b40dd, SN-f ef2428b9; #3224 still open; findings 0
+2026-10-19T14:47Z	check	#3246/#3254 Linux checks green; lane macOS builds 39271489018 (SN-c) and 39271579382 (SN-f) in progress; #3224 open; no scoped design run with SN-c yet; findings 0
+2026-10-19T15:04Z	check	lane macOS builds green: 39271489018 (#3246 SN-c) and 39271579382 (#3254 SN-f); both await the lane merge sweep; #3224 open; findings 0
+2026-10-19T15:24Z	stage	#3224 (CB-9) merged 15:18Z (a0de43bd); SN-8 builder launched on lead/snapping-SN-8 stacked on SN-f, with feature-done and wave status built; #3246/#3254 green, awaiting the lane sweep; findings 0
+2026-10-19T15:39Z	stage	SN-8 is PR #3282; lane flagged needs-rebase on #3246/#3254 (C4 design-app-sources conflict with dev DesignPastEdge); merged dev into SN-c (281214cc), SN-c into SN-f (1aec42ca), SN-f into SN-8 (1ee1277f); scripts/ci --changed PASS on each; Head lines moved; findings 0
+2026-10-19T15:44Z	check	no snapping PR merged yet; macOS builds queued 39279493053 (#3246 281214cc) and 39279616696 (#3282 02402a19, superseded); #3254 needs-rebase label stale (1aec42ca merges clean with dev); dev CI 39278490377 pending; findings 0
+2026-10-19T16:03Z	check	lane dropped needs-rebase on #3254; macOS builds queued for all three heads (runner backlog): 39279493053 #3246, 39281063393 #3254, 39281152511 #3282; none merged; dev CI 39278490377 pending; findings 0
+2026-10-19T16:25Z	check	lane macOS builds green: 39279493053 (#3246 281214cc), 39281063393 (#3254 1aec42ca), 39281152511 (#3282 1ee1277f); none merged yet; dev CI 39278490377 still pending; findings 0
+2026-10-19T16:47Z	check	none merged: the lane is bisecting batch 20261019152144 (probe 7, run 39286276249), so ready PRs wait for the next batch; no new lane comments on #3246/#3254/#3282; dev CI 39278490377 in progress; findings 0
+2026-10-19T17:14Z	check	needs-rebase on #3246/#3254/#3282 (DesignCanvasFeedback comment conflict with #3244) resolved; dev merged in, gate PASS, heads moved; findings open 0
+2026-10-19T17:38Z	check	needs-rebase cleared on all three; macOS builds 39292851753/39292936585/39293061801 queued (runner backlog); none merged; findings open 0
+2026-10-19T17:59Z	check	macOS build for #3246 running, #3254/#3282 queued; none merged; no needs-fix\/needs-rebase; findings open 0
+2026-10-19T18:22Z	check	#3246 merged c5ec57aa; #3254/#3282 needs-rebase, merging dev in
+2026-10-19T18:35Z	check	#3254 -> 60b9609a, #3282 -> 3b82da03 (dev merged in, CI: PASS), Head lines moved
+2026-10-19T18:50Z	check	SN-f and SN-8 macOS builds green, awaiting lane merge
+2026-10-19T19:16Z	check	#3254 merged deed2777; #3282 -> 5c3fd616 (dev merged in, CI: PASS)
+2026-10-19T19:36Z	check	#3282 macOS build 39309349907 queued
+2026-10-19T19:57Z	check	#3282 build 39309349907 still queued; mergeable clean; 0 findings open
+2026-10-19T20:18Z	check	#3282 build 39309349907 still queued (macOS runners stalled); mergeable clean; 0 findings open
+2026-10-19T20:39Z	check	#3282 build 39309349907 still queued (no ci.yml run started since 19:32Z); mergeable clean; 0 findings open
+2026-10-19T21:00Z	check	#3282 build 39309349907 still queued (macOS stalled, Linux moving); mergeable clean; 0 findings open
+2026-10-19T21:21Z	check	#3282 macOS build 39309349907 in_progress; open findings 0
+2026-10-19T21:44Z	check	#3282 merged 8257c513 (build 39309349907 green); dev CI 39329322245 pending; open findings 0
+2026-10-19T22:05Z	check	no completed run contains 8257c513 (dev CI runs superseded/cancelled; 39331917840 pending); open findings 0
+2026-10-19T22:27Z	check	no completed run contains 8257c513 (39333170092 pending); open findings 0
+2026-10-19T22:49Z	check	no completed run contains 8257c513 (39336158094 pending); open findings 0
+2026-10-19T23:11Z	check	no completed run contains 8257c513 (39336158094 on cf120143 still pending, not superseded); open findings 0
+2026-10-19T23:33Z	check	no completed run contains 8257c513 (39336158094 on cf120143 pending, no jobs started); open findings 0
+2026-10-19T23:54Z	check	39336158094 cancelled; 39342355180 on f564907d pending; no completed run contains 8257c513; open findings 0
+2026-10-20T00:16Z	check	scoped: design 39346088549 (1299651e, contains 8257c513) queued; open findings 0
+2026-10-20T00:37Z	check	scoped: design 39346088549 still queued (macOS runner); open findings 0
+2026-10-20T00:58Z	check	scoped: design 39346088549 still queued (macOS runner); open findings 0
+2026-10-20T01:19Z	check	scoped: design 39346088549 still queued (macOS runner, 69 min); no other completed run contains 8257c513; snapping findings 0, no needs-fix/needs-rebase
+2026-10-20T01:40Z	check	scoped: design 39346088549 and full CI 39349878829 (2019b521, Linux green) both still queued for macOS runners; snapping findings 0
+2026-10-20T02:01Z	check	scoped: design 39346088549 and full CI 39349878829 both still queued for macOS runners; snapping findings 0
+2026-10-20T02:22Z	check	scoped: design 39346088549 and full CI 39349878829 still queued; macOS runners busy with older runs (scoped: flare since 22:19Z); snapping findings 0
+2026-10-20T02:43Z	check	scoped: design 39346088549 and full CI 39349878829 still queued for macOS runners; snapping findings 0
+2026-10-20T03:04Z	check	scoped: design 39346088549 and full CI 39349878829 still queued for macOS runners; snapping findings 0
+2026-10-20T03:26Z	check	scoped: design 39346088549 macOS (design) in progress since 03:17Z, journeys queued; full CI 39349878829 still queued; snapping findings 0
+2026-10-20T03:50Z	check	scoped design 39346088549 red on RenderBudgetDesignSnapTests only (fixed by #3326 after 1299651e); waiting on 39349878829 / 39365038310
+2026-10-20T04:11Z	check	no run completed; new scoped design 39368177785 on 533daec7 (contains 8a9c8885) queued
+2026-10-20T04:33Z	check	no run completed; CI 39365038310 cancelled; scoped design 39368177785 and full CI 39349878829 still queued
+2026-10-20T04:55Z	check	no run completed; scoped design 39368177785, CI 39349878829, CI 39368749437 still queued
+2026-10-20T14:55Z	done	Belt-Slice-Done SN-b, SN-c, SN-f on Linux check 39439525908 (9f880c85); Mac-Finish-Wanted SN-c; Belt-Contact-Sheet posted
