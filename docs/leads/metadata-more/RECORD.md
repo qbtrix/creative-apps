@@ -2,9 +2,9 @@
 
 Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
-Stage: 3 wave 1
+Stage: 3 wave 2
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: the wave 1 builder (MD-1) opens its PR; then MD-2 in wave 2
+Next: the wave 2 builder (MD-2, stacked on MD-1) opens its PR; then MD-3 and MD-4 in wave 3
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,8 +18,8 @@ Next: the wave 1 builder (MD-1) opens its PR; then MD-2 in wave 2
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| MD-1 | MD-a | 1 | CameraDetails with its cleaning init, CameraField, CameraRow stubs, selectedPhotos, selectedCameraRows; PhotoItem keywords/title/caption/camera; ImportCandidate.camera | Sources/LibraryModel/Contracts/PhotoDetails.swift, Sources/LibraryModel/PhotoItem.swift, Sources/LibraryModel/Contracts/LibraryValues.swift, Tests/LibraryModelTests/LibraryPhotoDetailsTests.swift, Tests/mutations/LibraryModel.PhotoDetails.json, Tests/mutations/LibraryModel.PhotoItem.json | LibraryPhotoDetailsTests | - | building |
-| MD-2 | MD-a | 2 | sidecar contract, FakeSidecars, services.sidecars | see packet | LibrarySidecarContractTests | - | planned |
+| MD-1 | MD-a | 1 | CameraDetails with its cleaning init, CameraField, CameraRow stubs, selectedPhotos, selectedCameraRows; PhotoItem keywords/title/caption/camera; ImportCandidate.camera | Sources/LibraryModel/Contracts/PhotoDetails.swift, Sources/LibraryModel/PhotoItem.swift, Sources/LibraryModel/Contracts/LibraryValues.swift, Tests/LibraryModelTests/LibraryPhotoDetailsTests.swift, Tests/mutations/LibraryModel.PhotoDetails.json, Tests/mutations/LibraryModel.PhotoItem.json | LibraryPhotoDetailsTests | #3422 | open, macOS build queued |
+| MD-2 | MD-a | 2 | sidecar contract, FakeSidecars, services.sidecars | see packet | LibrarySidecarContractTests | - | building (stacked on feat/library-md1-photo-details) |
 | MD-3 | MD-a | 3 | cameras fixture; the decoder and importer carry camera details; MD-MJ1 | see packet | LibraryCamerasFixtureTests | - | planned |
 | MD-4 | MD-a | 3 | inert slots: LibraryKeywords, MetadataEditing title/caption, XMPSidecar, PhotoSearch | see packet | LibraryMetadataSlotsTests | - | planned |
 | MD-5 .. MD-22 | MD-b..MD-e | 4+ | see packet Build waves | see packet | see packet | - | planned |
@@ -33,6 +33,7 @@ Next: the wave 1 builder (MD-1) opens its PR; then MD-2 in wave 2
 - This run (act-1a15749e510-0ox5) resumes the record. Nothing of metadata-more is on dev yet.
 - Base is origin/dev, and PRs target dev, per CLAUDE.md. The lane retargets main.
 - One combined wave plan with filters-collections. MD-1's files are disjoint from FC-2b's and FC-3's, so all three run in wave 1.
+- I removed the attribution footer from #3422's body after the lane flagged it. Builder prompts now say: no footer.
 - Canonical first (rule 20): MD-2 checks ExportSidecar (export's XMP sidecar) before it writes new XMP code, and MD-15 reuses it or extracts from it.
 
 ## Open
