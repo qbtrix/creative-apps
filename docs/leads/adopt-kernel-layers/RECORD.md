@@ -4,7 +4,7 @@ Issue: #1936 · Packet: docs/blueprints/suiteui/features/adopt-kernel-layers.md
 Run: act-1a158c2e32e-bl3z (resume; earlier runs act-1a154b13dec-71tm, act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/suiteui-feature-lead-i2krve · Resumed: 2026-10-20
 Stage: 3 (merging and closing slices)
 Base: dev b538c92c
-Next: AL-d3 (Design panel on LayerTreeList) waits on layers-panel's Belt-Slice-Done LP-a on #1498 (supervisor answer 00:29Z on #1936; not yet posted, LP-a awaits a done-run containing 94c8fd34). Dev's DesignLayersPanel.swift (328 lines) does not use LayerTreeList yet, so AL-d3 is real work. Then Belt-Slice-Done AL-design and Belt-Contact-Sheet on #1936.
+Next: AL-d3 (Design panel on LayerTreeList) building on slice/al-d3, per the supervisor's 14:52Z answer on #1936 (start now on dev's DesignLayersPanel.swift; don't wait for LP-a). Then Belt-Slice-Done AL-design, Mac-Finish-Wanted AL-design and Belt-Contact-Sheet on #1936.
 
 Line lead for #1938, #1937 and #1936 (contract rule 19, run act-1a14dfbdefe-il38);
 this record is the adopt-kernel-layers part. The first run led it with #1935 and #1934. This run's brief names `main` at
@@ -122,3 +122,4 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T06:19:39Z Heartbeat. #3392 AL-design needs-rebase (4th; design-seams-2 waits_on again): merged dev taking dev's text so the PR no longer touches that file; CI: PASS, head f6bf7998, Head line moved. Earlier macOS build 39371121699 on ed7c3c69 passed.
 - 2026-10-20T06:40:56Z Heartbeat. #3392 AL-design head f6bf7998, no rebase label, waits on macOS build 39379782419; main b3011ab9.
 - 2026-10-20T07:04:50Z Heartbeat. #3392 AL-design head f6bf7998 unchanged; macOS build 39379782419 still queued in the runner backlog; main b3011ab9.
+- 2026-10-20T15:15:48Z Supervisor answer 14:52Z on #1936: start AL-d3 now on dev's DesignLayersPanel.swift; stop polling #1498 (parked needs-human for the Mac finisher, #3605). AL-d3 builder started.
