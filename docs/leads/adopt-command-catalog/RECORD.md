@@ -4,7 +4,7 @@ Issue: #2999 · Packet: docs/blueprints/suiteui/features/adopt-command-catalog.m
 Run: act-1a157b2050f-ovpu (resumed from act-1a1543c764c-0mz9) · Session: claude/feature-lead-suiteui-run-336pic · Started: 2026-10-20T05:08Z
 Stage: 3 wave 4 (AC-flare, AC-library, AC-z listed done by Belt; AC-photo, AC-design, AC-halo wait on CC-u for their menus-from-specs tasks AC-p3, AC-d3, AC-h3)
 Base: b3011ab9dc5579023722e79f83254e6e2520e612 (main); dev 18464f26
-Next: AC-p3, AC-d3, AC-h3 building, stacked on CC-u (#3484); PRs to dev once #3484 merges; then AC-z2 (feature-done).
+Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#3484); PRs to dev once #3484 merges; then AC-z2 (feature-done).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -21,17 +21,17 @@ Next: AC-p3, AC-d3, AC-h3 building, stacked on CC-u (#3484); PRs to dev once #34
 |---|---|---|---|---|---|---|---|
 | AC-p1 | AC-photo | 1 | Photo catalog | Sources/PhotoModel/PhotoCommandCatalog.swift | PhotoCommandCatalogTests | #3187 | merged c083b7ad |
 | AC-p2 | AC-photo | 2 | Photo headless | Sources/PhotoModel/PhotoHeadless.swift | PhotoHeadlessTests | #3225 | merged f3936261 |
-| AC-p3 | AC-photo | 2 | Photo menus from specs | Sources/PhotoApp/PhotoCommands*.swift | menu golden | – | blocked |
+| AC-p3 | AC-photo | 2 | Photo menus from specs | Sources/PhotoApp/PhotoCommands*.swift | menu golden | – | built beae2410, PR waits #3484 |
 | AC-d1 | AC-design | 1 | Design catalog | Sources/DesignModel/DesignCommandCatalog.swift | DesignCommandCatalogTests | #3188 | merged 25f6d337 |
 | AC-d2 | AC-design | 2 | Design headless | Sources/DesignModel/DesignHeadless.swift | DesignHeadlessTests | #3210 | pr a1a332dc |
-| AC-d3 | AC-design | 2 | Design menus from specs | Sources/DesignApp/DesignCommands.swift | menu golden | – | blocked |
+| AC-d3 | AC-design | 2 | Design menus from specs | Sources/DesignApp/DesignCommands.swift | menu golden | – | built fae0354e, PR waits #3484 |
 | AC-f1 | AC-flare | 1 | FlareCore commands | Sources/FlareModel/FlareCoreCommandCatalog.swift | FlareCoreCommandCatalogTests | #3189 | merged fbfde9a1 |
 | AC-f2 | AC-flare | 2 | Flare app actions | Sources/FlareModel/FlareCommandCatalog.swift | FlareCommandCatalogTests | – | building |
 | AC-f3 | AC-flare | 3 | Flare headless | Sources/FlareModel/FlareHeadless.swift | FlareHeadlessTests | – | blocked |
 | AC-f4 | AC-flare | 3 | Flare menus from specs | Sources/FlareApp/FlareCommands.swift | menu golden | – | blocked |
 | AC-h1 | AC-halo | 1 | Halo catalog | Sources/HaloModel/HaloCommandCatalog.swift | HaloCommandCatalogTests | #3191 | merged 80c205d5 |
 | AC-h2 | AC-halo | 2 | Halo headless | Sources/HaloModel/HaloHeadless.swift | HaloHeadlessTests | #3207 | pr 98b2db9f |
-| AC-h3 | AC-halo | 2 | Halo menus from specs | Sources/HaloApp/HaloCommands.swift | menu golden | – | blocked |
+| AC-h3 | AC-halo | 2 | Halo menus from specs | Sources/HaloApp/HaloCommands.swift | menu golden | – | built c7f0e5e2, PR waits #3484 |
 | AC-l1 | AC-library | 1 | Library actions into the Model | Sources/LibraryModel/LibraryActions.swift | LibraryActionTests | #3190 | merged ec18f81b |
 | AC-l2 | AC-library | 2 | Library catalog | Sources/LibraryModel/LibraryCommandCatalog.swift | LibraryCommandCatalogTests | – | building |
 | AC-l3 | AC-library | 3 | Library headless | Sources/LibraryModel/LibraryHeadless.swift | LibraryHeadlessTests | – | blocked |
@@ -69,3 +69,4 @@ Next: AC-p3, AC-d3, AC-h3 building, stacked on CC-u (#3484); PRs to dev once #34
 ## Decisions (run act-1a157b2050f-ovpu)
 - 2026-10-20: command-catalog CC-u unchained from font-picker FP-a (see command-catalog RECORD), so AC-*3 now wait only on CC-u, which is building.
 - PRs target `dev` (CLAUDE.md, the lane).
+- AC-p3/d3/h3 (built, branches lead/adopt-command-catalog-AC-{p3,d3,h3}): each app gets <App>MenuState in its Model. Baselines can't be emptied: Photo keeps Close, Clear Menu (no catalog spec) and sheet buttons; Design keeps Close, Export…, zoom items (no catalog commands) and "OK"; Halo keeps sheet/alert buttons outside the menu files. Enabled items' help is now the spec summary; Halo's Space hints are gone (gap candidate for kernel export/zoom specs).
