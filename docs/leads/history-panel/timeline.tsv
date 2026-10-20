@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-20T19:52Z	3	wave-start	-	wave 2 (history): PH-6 and PH-3 stacked on PH-a
 2026-10-20T20:10Z	3	branch-pushed	lead/history-panel-PH-3	PH-3 head 5272984, CI PASS (Linux; view+tests macOS-only), own diff 2 files +118/-4; PR waits for #3708
 2026-10-20T20:10Z	3	open-item	PH-5	canonical: PhotoWorkspace.jumpToHistoryStep already jumps via kernel; PH-5 body = that + endAdjust + range throw
+2026-10-20T20:11Z	3	heartbeat	#3708	PR open, lane waiting on macOS batch gate; builders running
