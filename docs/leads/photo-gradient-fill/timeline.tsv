@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-20T20:34Z	check	heartbeat	#3681,#3695,#3705	all open, no needs-fix; lane batch 20261020202737 in flight; PG-3/PG-2 PRs held; PG-4 building
 2026-10-20T20:51Z	PG-4	built	photo-gradient-fill/PG-4@84669918	5 files +142/-7 vs PG-1 (excl GF-5 merge); Mutate 4/4 PhotoModel.ToolOptions; CI PASS; PR held until #3681 + #3705 merge
 2026-10-20T20:54Z	check	heartbeat	#3681	open; lane macOS build 39484077277 queued since 19:30Z (macOS queue backlog); PG-2/PG-3/PG-4 held
+2026-10-20T21:14Z	check	heartbeat	#3681,#3695,#3705	open; PG-1 macOS build still queued (33 CI runs queued); PG-2/3/4 held
