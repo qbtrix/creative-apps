@@ -21,12 +21,16 @@ public struct HaloDrawItem: Sendable, Hashable {
     public var blendMode: BlendMode
     /// The words of a text layer; nil otherwise.
     public var text: HaloTextContent?
+    /// HG-1: the layer's gradient in a unit box over `bounds`; nil fills
+    /// `color`. HaloDrawRules carries it from the layer (HG-6).
+    public var gradient: Fill?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
-        color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil
+        color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
+        self.gradient = gradient
     }
 }
 
