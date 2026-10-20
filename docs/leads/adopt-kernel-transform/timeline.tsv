@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-20T10:57:32Z	heartbeat	10:56Z: #3585 needs-rebase merge resolved (C4 desc), gate running; #3587 clean; #3588 clean; #3593 AT-d1 opened; AT-d2 building; earlier scoped photo/suiteui/full runs cancelled
 2026-10-20T11:18:57Z	heartbeat	11:18Z: #3585 clean at a9eca0ed (needs-rebase to drop), #3587/#3588/#3593 clean awaiting lane; scoped runs on 575cc800 still queued; AT-d2 builder in mutate step
 2026-10-20T11:27:49Z	stage	AT-d2 built on lead/adopt-kernel-transform-AT-d2 (070f878a), gate PASS, Mutate DesignNode 8/8, LiveTransforming 9/9, KernelTransformAdapter 5/5; PR waits for #3593 to merge
+2026-10-20T11:39:13Z	heartbeat	#3593 AT-d1 open, clean, waiting on lane macOS build; AT-d2 PR waits
