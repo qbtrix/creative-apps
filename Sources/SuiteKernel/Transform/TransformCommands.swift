@@ -1,6 +1,6 @@
 // TransformCommands.swift (transform-tools TT-1 shape, TT-6 body): the six transform.* commands any app
 // with a TransformTarget registers, and the intents a view sends them as. Ids, titles, schemas and
-// availability are the contract; each run throws `notBuilt` until TT-6 applies one TransformRules rule.
+// availability are the contract; each run applies one TransformRules rule and calls `setTransform` once.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -86,7 +86,7 @@ public enum TransformCommands {
         return [
             .typed("transform.read", title: "Transform", summary: "Reads the selection's box, turn and mirrors.", kind: .query,
                    params: NoParams.self, schema: .none, result: readingSchema, example: .object([:]),
-                   availability: can) { (_: inout T, _: NoParams) throws -> Reading in try notBuilt("transform.read") },
+                   availability: can) { (t: inout T, _: NoParams) throws -> Reading in reading(try selection(t, "transform.read")) },
             .typed("transform.set", title: "Transform", summary: "Sets any of the selection's x, y, width, height and turn.",
                    kind: .edit, params: SetParams.self,
                    schema: .object(["x": number("Left, document points."), "y": number("Top, document points."),
@@ -94,30 +94,70 @@ public enum TransformCommands {
                                     "degrees": number("Clockwise turn in degrees."), "drag": dragSchema],
                                    required: ["x", "y", "w", "h", "degrees", "drag"]),
                    result: readingSchema, example: .object(["w": .number(240)]),
-                   availability: can) { (_: inout T, _: SetParams) throws -> Reading in try notBuilt("transform.set") },
+                   availability: can) { (t: inout T, p: SetParams) throws -> Reading in try set(&t, p) },
             .typed("transform.rotate", title: "Rotate", summary: "Turns the selection clockwise by degrees about its centre.",
                    kind: .edit, params: RotateParams.self,
                    schema: .object(["degrees": .number("Degrees to turn by, clockwise."), "drag": dragSchema], required: ["degrees", "drag"]),
                    result: readingSchema, example: .object(["degrees": .number(15)]),
-                   availability: can) { (_: inout T, _: RotateParams) throws -> Reading in try notBuilt("transform.rotate") },
+                   availability: can) { (t: inout T, p: RotateParams) throws -> Reading in
+                let turned = TransformRules.rotated(try selection(t, "transform.rotate"), by: p.degrees)
+                return try commit(&t, turned, name: "Rotate", drag: p.drag)
+            },
             .typed("transform.scale", title: "Scale", summary: "Scales the selection about an anchor, the centre by default.",
                    kind: .edit, params: ScaleParams.self,
                    schema: .object(["sx": .number("Horizontal factor, above 0."), "sy": .number("Vertical factor, above 0."),
                                     "anchor": .optional(.string("The point that stays.", oneOf: BoxAnchor.allCases.map(\.rawValue))),
                                     "drag": dragSchema], required: ["sx", "sy", "anchor", "drag"]),
                    result: readingSchema, example: .object(["sx": .number(2), "sy": .number(2)]),
-                   availability: can) { (_: inout T, _: ScaleParams) throws -> Reading in try notBuilt("transform.scale") },
+                   availability: can) { (t: inout T, p: ScaleParams) throws -> Reading in try scale(&t, p) },
             .typed("transform.flip", title: "Flip", summary: "Mirrors the selection about its centre: Flip Horizontal or Flip Vertical.",
                    kind: .edit, params: FlipParams.self,
                    schema: .object(["axis": .string("Which way to mirror.", oneOf: FlipDirection.allCases.map(\.rawValue))], required: ["axis"]),
                    result: readingSchema, example: .object(["axis": .string("horizontal")]),
-                   availability: canFlip) { (_: inout T, _: FlipParams) throws -> Reading in try notBuilt("transform.flip") },
+                   availability: canFlip) { (t: inout T, p: FlipParams) throws -> Reading in
+                let name = p.axis == .horizontal ? "Flip Horizontal" : "Flip Vertical"
+                return try commit(&t, TransformRules.flipped(try selection(t, "transform.flip"), p.axis), name: name, drag: nil)
+            },
             .typed("transform.reset", title: "Reset Rotation", summary: "Turns the selection back to 0 and clears its mirrors.",
                    kind: .edit, params: NoParams.self, schema: .none, result: readingSchema, example: .object([:]),
-                   availability: can) { (_: inout T, _: NoParams) throws -> Reading in try notBuilt("transform.reset") },
+                   availability: can) { (t: inout T, _: NoParams) throws -> Reading in
+                let box = try selection(t, "transform.reset").box
+                return try commit(&t, TransformBox(box: box), name: "Reset Rotation", drag: nil)
+            },
         ]
     }
 
-    /// A stub run's refusal until TT-6 builds the commands.
-    static func notBuilt<R>(_ id: String) throws -> R { throw CatalogError.notBuilt(id: id, feature: "transform-tools") }
+    /// The target's selection, or `failed` for `id` when nothing is selected.
+    static func selection<T: TransformTarget>(_ target: T, _ id: String) throws -> TransformBox {
+        guard let t = target.transformSelection else { throw CatalogError.failed(id: id, message: "Select something to transform first.") }
+        return t
+    }
+
+    /// `transform.set`: the given parts replace the selection's, the rest stay; a side below 1 throws.
+    static func set<T: TransformTarget>(_ target: inout T, _ p: SetParams) throws -> Reading {
+        let t = try selection(target, "transform.set")
+        let (x, y) = (p.x ?? t.box.minX, p.y ?? t.box.minY), (w, h) = (p.w ?? t.box.width, p.h ?? t.box.height)
+        guard w >= 1, h >= 1 else { throw CatalogError.failed(id: "transform.set", message: "Width and height must be at least 1.") }
+        let box = Rect(minX: x, minY: y, maxX: x + w, maxY: y + h)
+        let degrees = TransformRules.normalized(p.degrees ?? t.degrees)
+        return try commit(&target, TransformBox(box: box, degrees: degrees, flipX: t.flipX, flipY: t.flipY), name: "Transform", drag: p.drag)
+    }
+
+    /// `transform.scale`: both factors above 0, about the anchor (the centre when none is given).
+    static func scale<T: TransformTarget>(_ target: inout T, _ p: ScaleParams) throws -> Reading {
+        let t = try selection(target, "transform.scale")
+        guard p.sx > 0, p.sy > 0 else { throw CatalogError.failed(id: "transform.scale", message: "Scale factors must be above 0.") }
+        return try commit(&target, TransformRules.scaled(t, sx: p.sx, sy: p.sy, about: p.anchor ?? .center), name: "Scale", drag: p.drag)
+    }
+
+    /// Hands `t` to the target as one undo step named `name`, `drag` passed through so a drag folds into one.
+    static func commit<T: TransformTarget>(_ target: inout T, _ t: TransformBox, name: String, drag: String?) throws -> Reading {
+        try target.setTransform(t, name: name, drag: drag)
+        return reading(t)
+    }
+
+    /// `t` as `transform.read` reports it.
+    static func reading(_ t: TransformBox) -> Reading {
+        Reading(x: t.box.minX, y: t.box.minY, w: t.box.width, h: t.box.height, degrees: t.degrees, flipX: t.flipX, flipY: t.flipY)
+    }
 }
