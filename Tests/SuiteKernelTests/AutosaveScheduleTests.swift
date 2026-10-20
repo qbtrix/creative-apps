@@ -1,7 +1,7 @@
 // AutosaveScheduleTests.swift (autosave-history AH-1 written, AH-5 turns on): when an open document writes its
 // recovery copy. No ticket before the delay, one ticket per edit, a write a save or discard overtook is deleted,
 // a failed write waits for the next edit, and a delay that isn't a finite non-negative number is never due.
-// Disabled by name until AH-5 builds `AutosaveSchedule`'s body.
+// AH-5 built `AutosaveSchedule`'s body and turned every test on.
 import Testing
 import SuiteKernel
 
@@ -13,7 +13,7 @@ import SuiteKernel
         return schedule
     }
 
-    @Test(.disabled("waits on AH-5")) func noTicketBeforeDelay() {
+    @Test func noTicketBeforeDelay() {
         var schedule = AutosaveSchedule(delay: 2)
         #expect(schedule.begin(now: 100, dirty: true) == nil)
         schedule.noteEdit(at: 10)
@@ -21,15 +21,15 @@ import SuiteKernel
         #expect(schedule.begin(now: 11.999, dirty: true) == nil)
         #expect(!schedule.isWritten)
     }
-    @Test(.disabled("waits on AH-5")) func dueExactlyAtDelay() {
+    @Test func dueExactlyAtDelay() {
         var schedule = Self.edited()
         #expect(schedule.begin(now: 12, dirty: true)?.edit == 10)
     }
-    @Test(.disabled("waits on AH-5")) func cleanDocumentNeverDue() {
+    @Test func cleanDocumentNeverDue() {
         var schedule = Self.edited()
         #expect(schedule.begin(now: 100, dirty: false) == nil)
     }
-    @Test(.disabled("waits on AH-5")) func oneTicketPerEdit() throws {
+    @Test func oneTicketPerEdit() throws {
         var schedule = Self.edited()
         let begun = schedule.begin(now: 12, dirty: true)
         let ticket = try #require(begun)
@@ -42,7 +42,7 @@ import SuiteKernel
         #expect(schedule.begin(now: 22, dirty: true) == nil)
         #expect(schedule.begin(now: 23, dirty: true)?.edit == 21)
     }
-    @Test(.disabled("waits on AH-5")) func saveDuringWriteDiscards() throws {
+    @Test func saveDuringWriteDiscards() throws {
         var schedule = Self.edited()
         let begun = schedule.begin(now: 12, dirty: true)
         let ticket = try #require(begun)
@@ -51,7 +51,7 @@ import SuiteKernel
         #expect(!schedule.isWritten)
         #expect(schedule.begin(now: 100, dirty: true) == nil)
     }
-    @Test(.disabled("waits on AH-5")) func discardDuringWriteDiscards() throws {
+    @Test func discardDuringWriteDiscards() throws {
         var schedule = Self.edited()
         let begun = schedule.begin(now: 12, dirty: true)
         let ticket = try #require(begun)
@@ -59,12 +59,12 @@ import SuiteKernel
         #expect(schedule.finish(ticket, wrote: true) == .discard)
         #expect(schedule.begin(now: 100, dirty: true) == nil)
     }
-    @Test(.disabled("waits on AH-5")) func editDuringSaveStaysDue() {
+    @Test func editDuringSaveStaysDue() {
         var schedule = Self.edited()
         schedule.didSave(stillDirty: true)
         #expect(schedule.begin(now: 12, dirty: true)?.edit == 10)
     }
-    @Test(.disabled("waits on AH-5")) func failedWriteWaitsForEdit() throws {
+    @Test func failedWriteWaitsForEdit() throws {
         var schedule = Self.edited()
         let begun = schedule.begin(now: 12, dirty: true)
         let ticket = try #require(begun)
@@ -75,7 +75,7 @@ import SuiteKernel
         schedule.noteEdit(at: 51)
         #expect(schedule.begin(now: 53, dirty: true)?.edit == 51)
     }
-    @Test(.disabled("waits on AH-5")) func nanDelayNeverDue() {
+    @Test func nanDelayNeverDue() {
         for delay in [Double.nan, -1, .infinity, -.infinity] {
             var schedule = AutosaveSchedule(delay: delay)
             schedule.noteEdit(at: 10)
