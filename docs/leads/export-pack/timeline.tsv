@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-20T21:45:10Z	3	poll	SM-a not on dev; XP-2 waits
 2026-10-20T21:57Z	poll	poll: SM-a not on dev; XP-2 still blocked
 2026-10-20T22:09Z	poll	poll: SM-a not on dev; XP-2 blocked
+2026-10-20T22:21Z	poll	poll: SM-a not on dev; XP-2 blocked
