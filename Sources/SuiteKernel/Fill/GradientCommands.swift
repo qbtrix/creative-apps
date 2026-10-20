@@ -1,7 +1,8 @@
 // GradientCommands.swift (gradient-fill GF-1 specs, GF-6 bodies): the eight fill commands every app registers with
 // one line, `+ GradientCommands.specs(<X>Workspace.self)`, and the editor's gestures as those commands. Each edit reads
 // the target's `fillSelection`, applies one `GradientRules` rule in its box and calls `setFill` exactly once with its
-// title, passing a drag token through so the target's `History` folds a drag into one undo step.
+// title, passing a drag token through so the target's `History` folds a drag into one undo step. `fill.type` also
+// saves the fill's `FillMemory`, so a switch back gives the angle, centre and radius it left.
 
 /// One gesture of the gradient editor; the app runs its `command` through its catalog.
 public enum GradientIntent: Hashable, Sendable {
@@ -63,7 +64,11 @@ public enum GradientCommands {
                    params: TypeParams.self, schema: .object(["type": type], required: ["type"]),
                    example: .object(["type": .string("linear")]), availability: { ready($0) }) { target, p throws -> JSONValue in
                 guard p.type != .none else { try target.clearFill(name: "Fill Type"); return JSONValue.object([:]) }
-                return try edit(&target, "Fill Type") { GradientRules.converted($0, to: p.type, in: $1) }
+                guard let selection = target.fillSelection else { throw CatalogError.failed(id: "fill.type", message: "Select something with a fill first.") }
+                let memory = GradientRules.remembering(selection.fill, in: selection.memory)
+                let fill = GradientRules.converted(selection.fill, to: p.type, in: selection.box, memory: memory)
+                try target.setFill(fill, memory: memory, in: selection.box, name: "Fill Type", drag: nil)
+                return JSONValue.object([:])
             },
             .typed("fill.gradient", title: "Set Gradient", summary: "Sets the selection's gradient: its type, 2 to 64 stops and a linear fill's angle.",
                    kind: .edit, params: GradientParams.self,

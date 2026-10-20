@@ -54,5 +54,12 @@
     "find": "if selection.isEmpty { return .object([\"type\": .string(FillType.none.rawValue), \"stops\": .array([]), \"angle\": .null]) }",
     "replace": "",
     "tests": "FillNoneTests"
+  },
+  {
+    "label": "typeSwitchesSaveTheMemoryAsOneStepEach: fill.type drops the memory, so linear comes back at 0°",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "try target.setFill(fill, memory: memory, in: selection.box, name: \"Fill Type\", drag: nil)",
+    "replace": "try target.setFill(fill, in: selection.box, name: \"Fill Type\", drag: nil)",
+    "tests": "FillMemoryTests"
   }
 ]
