@@ -119,3 +119,5 @@ fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T19:58Z: full CI 39475897385 at 875b44d2 cancelled (replaced); new pending full CI 39485502739 at 8c90de14 (contains 875b44d2, so every slice merge); no qualifying run completed yet
 
 - 2026-10-20T20:18Z: full CI 39485502739 at 8c90de14 still pending (contains every slice merge); scoped: design 39490030243 at 014da2f1 pending (would cover AC-design and AT-design); no qualifying run completed yet
+
+- 2026-10-20T20:38Z: no qualifying run yet: full CI 39485502739 (8c90de14) and scoped design 39490030243 (014da2f1) still pending; latest completed runs are Linux checks
