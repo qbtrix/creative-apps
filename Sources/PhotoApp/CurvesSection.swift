@@ -42,6 +42,8 @@ struct CurvesEditor: View {
 struct AdjustmentsPanel: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
+    /// Counts the histogram of a workspace; a test passes its own to see which counts finish.
+    var count: @Sendable (PhotoWorkspace) async -> [Double] = { $0.curvesHistogram() }
     @State private var histogram: [Double] = []
 
     var body: some View {
@@ -53,8 +55,8 @@ struct AdjustmentsPanel: View {
             // composites 256 rows on the CPU, and a superseded one ran to its end).
             try? await Task.sleep(for: .milliseconds(150))
             guard !Task.isCancelled else { return }
-            let workspace = model
-            let counted = await Task.detached(priority: .userInitiated) { workspace.curvesHistogram() }.value
+            let (workspace, count) = (model, count)
+            let counted = await Task.detached(priority: .userInitiated) { await count(workspace) }.value
             if !Task.isCancelled { histogram = counted }
         }
     }
