@@ -40,15 +40,21 @@ import UniformTypeIdentifiers
 
     /// `IMG_0001.jpg` in `root`: a 4000 × 3000 sRGB JPEG at full quality whose
     /// color runs across both axes, so resampling has detail to get wrong.
+    /// Blue is a soft wave about 38 px long at 1024, photo-like rather than a
+    /// hard checkerboard: a 160-level checker of 10 px squares at 1024 put
+    /// (b) 4.2/255 apart on the two resamplers' edges (#3276) and (c) at
+    /// 22 dB on JPEG's halved chroma (#3277), measuring the fixture, not QB-V4.
     private func writePhoto(in root: URL) throws -> PhotoItem {
         let (width, height) = (4000, 3000)
+        let across = (0..<width).map { sin(Double($0) * 2 * .pi / 150) }
+        let down = (0..<height).map { cos(Double($0) * 2 * .pi / 130) }
         var bytes = [UInt8](repeating: 255, count: width * height * 4)
         for y in 0..<height {
             for x in 0..<width {
                 let at = (y * width + x) * 4
                 bytes[at] = UInt8(x * 255 / (width - 1))
                 bytes[at + 1] = UInt8(y * 255 / (height - 1))
-                bytes[at + 2] = UInt8(((x / 40 + y / 40) % 2) * 160 + 40)
+                bytes[at + 2] = UInt8((128 + 64 * across[x] * down[y]).rounded())
             }
         }
         let url = root.appending(path: "IMG_0001.jpg")
@@ -120,7 +126,7 @@ import UniformTypeIdentifiers
     }
 
     /// (b) The export at 1024 looks like the loupe's `.full` render at 1024.
-    @Test(.disabled("quarantine #3276 until 2026-10-22")) func renderMatchesTheLoupe() async throws {
+    @Test func renderMatchesTheLoupe() async throws {
         let photo = try writePhoto(in: try folder())
         let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
         let loupe = try await LiveLoupeImaging(decoder: decoder, develop: develop)
@@ -131,7 +137,7 @@ import UniformTypeIdentifiers
     }
 
     /// (c) Written at quality 95: an sRGB JPEG within 40 dB of (a), never overwritten.
-    @Test(.disabled("quarantine #3277 until 2026-10-22")) func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
+    @Test func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
         let root = try folder()
         let photo = try writePhoto(in: root)
         let out = root.appending(path: "out")
