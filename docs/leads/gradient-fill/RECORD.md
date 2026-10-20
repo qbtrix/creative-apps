@@ -2,9 +2,9 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
-Stage: 3 wave 2 (09:55Z: FG-1 #3526 and FG-6 #3532 builds green (39379666154, 39379693778), both clean and unmerged; lane run 39403915337 pending; no supervisor reply)
+Stage: 3 wave 2 (10:03Z: FG-1 #3526 merged to dev as 11a545e7; FG-6 #3532 build green, awaiting the lane sweep)
 Base: 042279839a5e71c43540063bebded9d01cdc1c18
-Next: merge #3526 and #3532 on the lane sweep; GF-2, GF-3, GF-6 and AC-flare not on dev at 09:55Z (head f8b6c4f7), so FG-2, FG-3/4, FG-5 stay held (FG-5: fix oneStepForSeveral with Ball + Shadow)
+Next: merge #3532; FG-a slice done once FG-2 lands (needs GF-2); FG-3/4 wait on GF-3, FG-5 on GF-6 and AC-flare (fix oneStepForSeveral with Ball + Shadow)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
