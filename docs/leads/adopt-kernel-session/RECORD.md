@@ -4,7 +4,7 @@ Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
 Run: act-1a1540ed5f3-c3x9 (slices AD-photo, AD-halo, AD-library; AD-flare, AD-design done in act-1a1509b245f-653k)
 Stage: 3 wave B
 Base: 6e70826b (origin/dev); lead branch on main 6f9a2b88
-Next: AD-photo and AD-halo done (Linux job 118395364026 of full run 39349878829, head 2019b521, contains 8f405311; Belt-Slice-Done posted 01:20Z). AD-library: waits on AU-library (PR #3384 open); relaunch AD-l1 when it merges, then AD-l2 (feature-done), then Belt-Contact-Sheet (checked 2026-10-20T01:21Z). Open findings: 0
+Next: AD-photo, AD-halo done (run 39349878829). AU-library #3384 merged 01:38Z; AD-l1 builder started on origin/dev 3712f0f1 (2026-10-20T01:41Z). Then AD-l2 (feature-done), then Belt-Contact-Sheet. Open findings: 0
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,7 +13,7 @@ Next: AD-photo and AD-halo done (Linux job 118395364026 of full run 39349878829,
 | AD-photo | Photo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-p1, AD-p2 | MJ-AD-photo | editor-kernel:EK-doc | no | 0 | done (AD-p1 #2826, AD-p2 #3253; Belt-Slice-Done issuecomment-6281081759) | 39349878829 (Linux job 118395364026 green) | – |
 | AD-halo | Halo runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-h1, AD-h2 | MJ-AD-halo | editor-kernel:EK-doc | no | 0 | done (AD-h1 #2827, AD-h2 #3252; Belt-Slice-Done issuecomment-6281082031) | 39349878829 (Linux job 118395364026 green) | – |
 | AD-design | Design runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-d1, AD-d2 | MJ-AD-design | editor-kernel:EK-doc | no | 0 | ready (FH-1, FH-2 merged) | – | – |
-| AD-library | Library runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-l1, AD-l2 | MJ-AD-library | editor-kernel:EK-doc, adopt-kernel-undo:AU-library | no | 0 | blocked | – | – |
+| AD-library | Library runs its session on DocumentSession, SaveStatus, RecoveryOffer and VersionedJSON behind its existing API; its copy deleted | AD-l1, AD-l2 | MJ-AD-library | editor-kernel:EK-doc, adopt-kernel-undo:AU-library | no | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -26,7 +26,7 @@ Next: AD-photo and AD-halo done (Linux job 118395364026 of full run 39349878829,
 | AD-h2 | AD-halo | 2 | Halo delete | `Sources/HaloModel/HaloFiles.swift`, `Sources/HaloModel/Live/HaloFileEnvelope.swift`, `Sources/HaloModel/Live/HaloFileValidation.swift`, `Tests/mutations/HaloModel.HaloFiles.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | #3252 | merged 17:15Z (head 5eb72fac; 2 files +29/−12; mutate 4/4 + HaloFiles 3/3) |
 | AD-d1 | AD-design | 1 | Design adapter | `Sources/DesignModel/DesignFile.swift`, `Sources/DesignModel/Live/LiveFiling.swift`, `Tests/DesignModelTests/DesignFileTests.swift`, `Tests/DesignModelTests/DesignDocumentTests.swift`, `Tests/mutations/DesignModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | #3010 | open (lane mac build) |
 | AD-d2 | AD-design | 2 | Design delete | `Sources/DesignModel/DesignFile.swift`, `Sources/DesignModel/Live/LiveFiling.swift`, `Tests/mutations/DesignModel.LiveFiling.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits AD-d1 |
-| AD-l1 | AD-library | 1 | Library adapter | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift`, `Tests/LibraryModelTests/LibraryReadoutsTests.swift`, `Tests/mutations/LibraryModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits adopt-kernel-undo:AU-library |
+| AD-l1 | AD-library | 1 | Library adapter | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift`, `Tests/LibraryModelTests/LibraryReadoutsTests.swift`, `Tests/mutations/LibraryModel.KernelSessionAdapter.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | building (AU-library #3384 merged 01:38Z) |
 | AD-l2 | AD-library | 2 | Library delete | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Tests/mutations/LibraryModel.LibraryReadouts.json` | app tests unchanged + mutate KernelSessionAdapter plan (x1) / --validate (x2) | – | waits AD-l1 |
 
 ## Reviews
