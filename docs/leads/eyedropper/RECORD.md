@@ -34,6 +34,7 @@ Next: #3531 and #3541 then #3597 restack to dev; EY-8 waits on transform-tools:T
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-20T20:28Z EY-z #3597 macOS build 39447943388 failed (CGPoint not in scope in EyedropperLiveTests); fixer adds import CoreGraphics.
 - 2026-10-20T14:32:09Z #3597 flagged needs-split was a stale-stack artifact; after restack its own diff is 263 lines / 2 files, so no split.
 - 2026-10-20T13:54Z #3597 needs-split is a stale-stack artifact (its own diff is 263 lines / 2 files): restack EY-u onto dev instead of splitting, leaving EY-2 (macOS build green) as is.
 - 2026-10-20T12:23Z #3531 macOS build red (Sendable closure in .merging on a literal). Fix: register GalleryEyedropper.pages in SuiteGallery.areas like every other area.
