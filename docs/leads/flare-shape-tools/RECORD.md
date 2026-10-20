@@ -8,6 +8,8 @@ Next: FS-a slice PR (FS-1, FS-2) and FS-5 (FS-m's first task) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
+Last stage: 4 (in lane), 2026-10-20T22:44Z: wave-1 PR waits on its lane macOS build (runner queue backed up); next: rebase stacked slices onto dev after it merges, open their PRs.
+
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
