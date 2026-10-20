@@ -2,9 +2,9 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
-Stage: 3 wave 1 (FG-1 building)
+Stage: 3 wave 1 (FG-1 PR #3526 open; FG-6 building)
 Base: 042279839a5e71c43540063bebded9d01cdc1c18
-Next: open the FG-1 PR (branch feat/flare-gradient-fg-a, slice FG-a) once scripts/ci --changed passes; then FG-6 stacked on it; FG-2 waits GF-2 (SuiteUI GradientEditor)
+Next: FG-6 stacked on feat/flare-gradient-fg-a (branch feat/flare-gradient-fg-m); watch #3526 through the lane; FG-2 waits GF-2 (SuiteUI GradientEditor)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
