@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-20T09:17Z	3	heartbeat	#3396	waiting on the lane (macOS build, merge); merged=false
 2026-10-20T09:21Z	3	pushed	#3396	4th C4 conflict: PR no longer touches the C4 part; gate PASS, head b4200a5f
 2026-10-20T09:35Z	3	heartbeat	#3396	waiting on the lane (macOS build, merge); merged=false
+2026-10-20T09:53Z	3	heartbeat	#3396	waiting on the lane (macOS build, merge); merged=false
