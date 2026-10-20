@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T21:05Z	0	stage-start	#3459	line lead act-1a15b1de023-4xx7; base dev 6c2c7b05; lead/svg-place created
 2026-10-20T21:05Z	2	stage-end	plan	wave 1 = PF-a (PF-1+PF-2); PF-u waits KS-a; PF-m waits FG-m, FS-m, FK-m
 2026-10-20T21:39Z	3	heartbeat	-	wave 1 builders done; opening PRs
+2026-10-20T21:43Z	4	pr-opened	#3768	PF-a (PF-1, PF-2), fast-lane

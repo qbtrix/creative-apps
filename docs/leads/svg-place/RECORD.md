@@ -11,7 +11,7 @@ Loop: v3 (the packet has a `## Slices` table).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PF-a | PlacedImageTarget conformance and report as stubs; checks and RJ-F06 written, disabled | PF-1, PF-2 | MJ-PF | suiteui PL-a (on dev) | no | 0 | building | | |
+| PF-a | PlacedImageTarget conformance and report as stubs; checks and RJ-F06 written, disabled | PF-1, PF-2 | MJ-PF | suiteui PL-a (on dev) | no | 0 | in lane (#3768) | | |
 | PF-u | Place… and window drop on the stubs; report; snapshots, budget, journey written | PF-3, PF-4 | FJ-P1 | PF-a; key-select-all:KS-a (FlareCommands.swift); adopt-command-catalog AC-flare | yes | 0 | waiting (KS-a planned) | | |
 | PF-m | groups as layers, fitted, one undo step; rasters refused; catalog | PF-5, PF-6 | MJ-PF | PF-a; gradient-fill:FG-m (PF-6); PL-7; shape-tools:FS-m; stroke-style:FK-m | no | 0 | waiting | | |
 | PF-z | live window and journey; flare.md lists Place | PF-7, PF-8 | FJ-P1 | PF-u, PF-m; gradient-fill:FG-z | no | 0 | waiting | | |
