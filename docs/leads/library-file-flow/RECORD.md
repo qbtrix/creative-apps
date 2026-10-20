@@ -12,7 +12,7 @@ Build wave 1. Base origin/dev df54ce81.
 
 | Slice | Tasks | State |
 |---|---|---|
-| LF-a | LF-1, LF-2 (+LF-6 folded) | CI: PASS on 55f59f7b; mutate LibraryModel.FileFlow running; PR next |
+| LF-a | LF-1, LF-2 (+LF-6 folded) | PR #3624 (fast-lane), CI: PASS on 6187015c, Mutate 3/3 LibraryModel.FileFlow |
 | LF-u | LF-5, LF-6 | LF-6 (journey, skipped, ~30 lines) folded into LF-a's PR; LF-5 waits on SF-3 (#3514, the drop mark) and SF-4 (the drag-hover budget pattern) |
 | LF-m | LF-3, LF-4 | waits on LF-a, SF-5..7, tone-controls LT-m, cull-finish DR-m |
 | LF-z | LF-7, LF-8 | waits on the rest |
@@ -21,8 +21,8 @@ Build wave 1. Base origin/dev df54ce81.
 
 | Task | Branch | PR | State |
 |---|---|---|---|
-| LF-1 | library-file-flow/LF-1 | - | built |
-| LF-2 | library-file-flow/LF-1 | - | built, folded into LF-a's PR (one PR per slice) |
+| LF-1 | library-file-flow/LF-1 | #3624 | built |
+| LF-2 | library-file-flow/LF-1 | #3624 | built, folded into LF-a's PR (one PR per slice) |
 
 ## Decisions
 
