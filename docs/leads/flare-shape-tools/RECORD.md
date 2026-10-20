@@ -12,7 +12,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FS-a | Shape tool, options in the inspector, adapter stubs | FS-1, FS-2 | MJ-FS | suiteui SH-a (merged ddf5b86e) | yes | 0 | in lane (#3767) | | |
-| FS-u | draft previews, snapshots, render budget | FS-3, FS-4 | J-FS | FS-a | yes | 0 | building (stacked on #3767) | | |
+| FS-u | draft previews, snapshots, render budget | FS-3, FS-4 | J-FS | FS-a | yes | 0 | gated, PR after FS-5 | | |
 | FS-m | drafts on ShapeRules; draw adds one layer as one step | FS-5, FS-6 | MJ-FS | FS-a; gradient-fill:FG-m (FS-6) | no | 0 | building (FS-5); FS-6 blocked on FG-m | | |
 | FS-z | journey live; built | FS-7, FS-8 | J-FS | FS-u, FS-m | no | 0 | waiting | | |
 
@@ -22,7 +22,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | FS-1 | FS-a | 1 | #3767 | in lane |
 | FS-2 | FS-a | 1 | #3767 | in lane |
 | FS-5 | FS-m | 1 | | ready: CI PASS, mutate 6/6, head 1ddb3f44 on flare/fs-5-live-shapes-kernel; PR opens after #3767 merges (rebased onto dev; with FS-a it is 17 files) |
-| FS-3, FS-4 | FS-u | 2 | | building, stacked on flare/fs-a-shape-tool |
+| FS-3, FS-4 | FS-u | 2 | | ready: CI PASS, mutate FlareModel.FlareDrag 3/3, head da0fbf19 on flare/fs-u-shape-drafts (stacked on FS-5); PR after FS-5; perf-list entry asked in #3781 |
 | FS-6 | FS-m | 2+ | | waits gradient-fill FG-m (FlareCommandCatalog.swift, Tests/command-ids/flare.txt); Flare gradient-fill is planned, no lead |
 | FS-7 | FS-z | 3 | | waits FS-u, FS-m |
 | FS-8 | FS-z | 4 | | feature-done |
