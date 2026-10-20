@@ -86,6 +86,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeZoom = LoupeZoom.fit
     public internal(set) var loupeRender: RenderedPhoto?
     public internal(set) var loupeRenderToken = 0
+    /// The token the shown `loupeRender` landed under (the focus change's for the held thumbnail).
+    public internal(set) var loupeShownToken = 0
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
@@ -120,7 +122,8 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
             && lhs.cullError == rhs.cullError && lhs.exportState == rhs.exportState
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
-            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeError == rhs.loupeError
+            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
+            && lhs.loupeError == rhs.loupeError
             && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
