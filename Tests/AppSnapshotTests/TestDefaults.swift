@@ -1,6 +1,8 @@
 // TestDefaults.swift: the defaults every store and window in this test process
-// reads, registered once, so nothing a test does lands in the user's real
-// ~/Library/Application Support (TestIsolationTests holds it).
+// reads, registered before the first hosted window, so the stores tests write
+// through stay out of the user's real ~/Library/Application Support
+// (TestIsolationTests checks they follow it). A windowless test that wrote
+// through a default store before any window was hosted would still miss it.
 // `ApplePersistenceIgnoreState` is the journeys' launch flag: with it
 // FlareRecovery keeps no recovery file, so a hosted FlareWindow neither writes
 // Flare/Recovery.flare nor offers a stale one as an alert sheet over every
@@ -20,12 +22,15 @@ enum TestDefaults {
     static let folder = FileManager.default.temporaryDirectory
         .appending(path: "AppSnapshotTests-\(ProcessInfo.processInfo.processIdentifier)", directoryHint: .isDirectory)
 
-    static let registered: Void = {
+    static let registered: Void = { register(in: folder) }()
+
+    /// Registers the defaults with `root` standing in for Application Support.
+    static func register(in root: URL) {
         UserDefaults.standard.register(defaults: [
             "ApplePersistenceIgnoreState": true,
-            "PhotoRecoveryDir": folder.appending(path: "Photo/Recovery").path(percentEncoded: false),
-            "LibraryCatalogDir": folder.appending(path: "Library").path(percentEncoded: false),
-            "SuiteSupportDir": folder.appending(path: "AfterGlow").path(percentEncoded: false),
+            "PhotoRecoveryDir": root.appending(path: "Photo/Recovery").path(percentEncoded: false),
+            "LibraryCatalogDir": root.appending(path: "Library").path(percentEncoded: false),
+            "SuiteSupportDir": root.appending(path: "AfterGlow").path(percentEncoded: false),
         ])
-    }()
+    }
 }

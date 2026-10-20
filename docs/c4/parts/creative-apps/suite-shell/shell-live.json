@@ -1,7 +1,7 @@
 {
   "id": "shell-live",
   "name": "Live services",
-  "description": "SuiteServices.live and one slot file per member; each feature swaps only its own slot.",
+  "description": "SuiteServices.live and one slot file per member; each feature swaps only its own slot. SuiteLocations.processSupportFolder is the support folder a real process uses.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/SuiteShell/SuiteServices+Live.swift",
