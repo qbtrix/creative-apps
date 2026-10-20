@@ -2,9 +2,9 @@
 
 Issue: #3537 · Packet: docs/blueprints/suiteui/features/timeline-select-all.md
 Run: act-1a158c2e32e-bl3z · Session: claude/suiteui-feature-lead-i2krve · Started: 2026-10-20
-Stage: 3 (TSA-a PR open)
+Stage: 4 (done)
 Base: dev 11a545e7 (brief main b3011ab9dc5579023722e79f83254e6e2520e612 verified; PRs target dev)
-Next: #3591 merged 12:42Z as 3e63a8ee; wait for Linux check 39424989659 on dev 897ccbb2 (contains it) to go green, then Belt-Slice-Done TSA-a, Mac-Finish-Wanted TSA-a, Belt-Contact-Sheet on #3537; critic panel on scoped suiteui run 39424969406 once it shows the screens.
+Next: none. TSA-a done: Belt-Slice-Done, Mac-Finish-Wanted and Belt-Contact-Sheet posted on #3537 with Linux check 39424989659 (dev 897ccbb2, contains #3591 3e63a8ee). The critic panel can still read scoped suiteui run 39424969406 when it finishes; any finding becomes a finding issue.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

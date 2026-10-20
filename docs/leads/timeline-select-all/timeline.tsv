@@ -5,3 +5,4 @@ time	event	slice	pr	note
 2026-10-20T12:14:20Z	3	heartbeat	#3591	TSA-a eligible in lane sweep 39417453369 (macOS build green); not in batch 20261020121229, waits for the next batch
 2026-10-20T12:30:45Z	3	heartbeat	#3591	TSA-a in lane batch 20261020122756 (Linux run 39422459237 in progress)
 2026-10-20T12:47:55Z	3	pr-merged	#3591	TSA-a 3e63a8ee (lane batch 39422459237); Linux check 39424989659 pending; scoped suiteui 39424969406 queued
+2026-10-20T12:59:24Z	4	slice-done	TSA-a	Belt-Slice-Done + Mac-Finish-Wanted + Belt-Contact-Sheet on #3537, run 39424989659
