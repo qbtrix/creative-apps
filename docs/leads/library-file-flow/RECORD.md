@@ -33,3 +33,5 @@ Build wave 1. Base origin/dev df54ce81.
 - LF-2 puts the drop on the whole window (LibraryWindow), not only the grid as the packet names: an empty catalog shows no grid and must still take a drop.
 - LF-2's hand-off host is a snapshot catalog (`LibraryShell.host`); LF-3 swaps it for a host that reaches the window's live catalog.
 - LF-5 can't land on LF-a alone: the `library-drop-mark` snapshot needs SF-3's mark (#3514, open) and `dragHoverInTwoBodies` needs SF-4's way to hover a file drag in the harness (not started). Open Recent is a Commands menu, not a view, so "one Open Recent" is checked in LFJ1 (LF-6), which folds into LF-a's PR.
+
+- 2026-10-20T16:44Z: macOS build-only runs for this feature have been queued since ~14:25Z (runner backlog); lead keeps waiting, no action needed from the supervisor unless the queue is stuck.
