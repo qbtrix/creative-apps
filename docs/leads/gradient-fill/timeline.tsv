@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-20T09:12Z	heartbeat	builds still queued (2h53m); PRs clean; no supervisor reply on #3419; blockers not on dev (dev head be364d1e)
 2026-10-20T09:34Z	heartbeat	FG-1 build 39379666154 started (in_progress); FG-6 build still queued; blockers not on dev (dev head 36789542)
 2026-10-20T09:35Z	build	FG-1 #3526 macOS build 39379666154 success (09:25-09:34Z); awaiting lane merge
+2026-10-20T09:48Z	build	FG-6 #3532 macOS build 39379693778 success; both PRs await lane merge
