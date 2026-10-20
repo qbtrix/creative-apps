@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-20T19:48:12Z	check	-	lane backlog: 56 runs queued; FC-4 #3461 macOS run 39437577080 queued since 14:15Z; nothing merged (MD #3550 #3570 #3574 #3575, LX #3696 waiting)
 2026-10-20T20:14:59Z	check	-	nothing merged; 59 runs queued; dev took #3680 (no conflict with ours); #3582/#3579 still dirty drafts awaiting parents; no supervisor reply on #1563
 2026-10-20T20:50Z	check	footer stripped from #3696 #3699 and comments on #1563 #1555 #3478; FC-4 #3461 and MD-8 #3550 macOS builds green, awaiting lane batch; nothing merged yet
+2026-10-20T21:23Z	stage	FC-4 #3461 merged; FC-5 #3466 merged dev in (resolved LibraryBrowser, Filters, Catalog conflicts; Favorites comment -> Picks), CI: PASS, head 22c58cd, un-drafted; FC-6/8/11/13 drafts wait on FC-5
