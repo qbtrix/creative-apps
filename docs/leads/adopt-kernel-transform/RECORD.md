@@ -80,3 +80,4 @@ fast-lane PR opened against `main` to `dev`).
 - AT-d2 builder started stacked on AT-d1 (lead/adopt-kernel-transform-AT-d2); its PR opens once #3593 merges, carrying feature-done and status built.
 
 - 2026-10-20T11:27:49Z: AT-d2 built (head 070f878a, stacked on AT-d1): one `scaled` on BoxMath.scaled with the no-length-axis rule (private `stretched` gone); compact handle hit walks only the corners; DesignNode plan +4 mutations, LiveTransforming repointed +1 (new test aLayerScaledDownStaysAtLeastOnePoint); wave.json status built, feature_issue #1938. Gate PASS; mutate 8/8, 9/9, 5/5. AT-photo and AT-flare are done (Belt-Slice-Done on #1938), so marking built is right. Its PR opens once #3593 merges (merge dev in, gate again), carrying feature-done.
+- 2026-10-20T13:16:33Z: AT-d1 #3593 merged. AT-d2 opened as #3604 (head 33fd4388, fast-lane + feature-done), mergeable clean, waiting on the lane's macOS build.
