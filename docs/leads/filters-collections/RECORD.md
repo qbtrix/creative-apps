@@ -1,10 +1,10 @@
 # filters-collections lead record
 
 Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
-Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
+Run: act-1a15ac11868-4kb6 (resumes act-1a15749e510-0ox5) · Session: line lead (library: #1555, #1563, #3478) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 #3551 (draft on FC-7 #3534 + FC-11 #3515; expect a conflict with FC-9 #3546 in LibraryCollections.swift and the seam test); FC-4 #3461 (head cad6bfe1) ready for the lane, waits on its macOS build; when #3461 merges un-draft #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
+Next: FC-4 #3461 (head b798d490) ready; its lane macOS build 39437577080 has been queued since 14:15Z. When it merges: merge dev into FC-5 #3466, run scripts/ci --changed, un-draft (FC-a then complete), then the FC-6/8/11/13 test drafts, then FC-7 #3534, FC-9 #3546, FC-12 #3551, FC-15 #3539 (dirty ones need a dev merge). FC-10 is blocked on S-L9 #3411. FC-14 and FC-16 are planned.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -58,6 +58,8 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - FC-7 (#3534): own diff 7 files +71/-30, Mutate 17/17 LibraryModel.LibraryFilter. Also edited LibraryCollectionsSeamTests (FC-2's stub check expected unavailable filter methods; enabled theBarHidesRejectsThroughItsToggle). The packet's refreshShown-without-loupe mutation already lives in LibraryCollections.json, so FC-7 mutates setFilter's loupe check instead. Smart 'Edit Rules' left to FC-12; C4 prose left to FC-16.
 - FC-15 (#3539): CollectionsStore mirrors CatalogStore (folder, atomic write, set aside). setAside() returns the full path ending collections.json.bad, so FC-14's notice must show only the file name. No mutation plan: app-target I/O, macOS only. J16 stays skipped until FC-14.
 - FC-9 (#3546, head 547631b1): own diff 10 files +166/-45; Mutate 11/11 LibraryModel.LibraryCollections and 11/11 LibraryModel.KernelUndoAdapter. It edited FC-3's LibraryUndoAdapter (undo steps remember selectedBefore, so undoing a Delete reselects the collection) and FC-2's seam test (built actions no longer unavailable). J14 step 7 still waits on FC-10.
+
+- 19:35Z (act-1a15ac11868-4kb6): FC-1, FC-2a, FC-2b and FC-3 are merged; FC-a is not done yet (FC-4 and FC-5 are open). No open findings carry Feature: filters-collections.
 
 ## Open
 - #3520 asks the supervisor to list LibraryFilterBudgetTests, LibraryCollectionsBudgetTests (and the keyword/search suites, plus the load-flaky Catalog/Grid budget suites) in Tests/perf-suites.txt. Open.

@@ -39,3 +39,5 @@ utc	stage	event	ref	note
 2026-10-20T06:33:23Z	pr-opened	FC-15	#3539 draft, stacked on #3521; own diff 2 files +52/-17
 2026-10-20T06:48:47Z	check-in	-	parents unmerged, lane macOS builds queued 3h; no new findings
 2026-10-20T06:57:12Z	lane-build-green	FC-3	#3423 macOS build 39366083753 success
+2026-10-20T19:35:00Z	resume	-	run act-1a15ac11868-4kb6
+2026-10-20T19:35:00Z	check-in	-	FC-4 #3461 macOS build 39437577080 queued since 14:15Z; no findings
