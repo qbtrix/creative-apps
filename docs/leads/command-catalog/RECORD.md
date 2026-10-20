@@ -79,3 +79,5 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 - 2026-10-20T17:20Z: full CI 39447117246 at 27b67332 cancelled (replaced); new full CI 39464293440 at 39a1c97e pending, contains every slice; no qualifying run completed yet
 
 - 2026-10-20T17:40Z: full CI 39464293440 at 39a1c97e cancelled (replaced while pending); new full CI 39467874733 at 59fe72db pending, contains every slice; no qualifying run completed yet
+
+- 2026-10-20T18:00Z: full CI 39467874733 at 59fe72db cancelled (replaced while pending); new full CI 39469318877 at d7f615dc pending, contains every slice; no qualifying run completed yet
