@@ -4,7 +4,7 @@
 // clicking the row and typing in the field it opens. Until SH-7 draws through shape.draw the
 // page logs a drag as "drag <kind> W x H", so steps 2 to 4 check that line; SH-7 tightens
 // them to the command's. Points 8 (step 3) and the clamp to 3 (step 5) read through SH-6's
-`applied`, and the square box through SH-5's `dragged`; until those land those checks fail.
+// `applied`, and the square box through SH-5's `dragged`; until those land those checks fail.
 import XCTest
 
 extension SuiteJourneyTests {
