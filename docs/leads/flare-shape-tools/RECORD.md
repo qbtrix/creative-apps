@@ -21,7 +21,7 @@ Loop: v3 (the packet has a `## Slices` table).
 |---|---|---|---|---|
 | FS-1 | FS-a | 1 | #3767 | in lane |
 | FS-2 | FS-a | 1 | #3767 | in lane |
-| FS-5 | FS-m | 1 | | gate running; restacked on FS-a (both edit LiveShapes.swift) |
+| FS-5 | FS-m | 1 | | ready: CI PASS, mutate 6/6, head 1ddb3f44 on flare/fs-5-live-shapes-kernel; PR opens after #3767 merges (rebased onto dev; with FS-a it is 17 files) |
 | FS-3, FS-4 | FS-u | 2 | | building, stacked on flare/fs-a-shape-tool |
 | FS-6 | FS-m | 2+ | | waits gradient-fill FG-m (FlareCommandCatalog.swift, Tests/command-ids/flare.txt); Flare gradient-fill is planned, no lead |
 | FS-7 | FS-z | 3 | | waits FS-u, FS-m |

@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-20T21:39Z	3	heartbeat	-	wave 1 builders done; opening PRs
 2026-10-20T21:43Z	4	pr-opened	#3767	FS-a (FS-1, FS-2), fast-lane
 2026-10-20T21:43Z	3	stage-start	FS-u	wave 2 builder stacked on FS-a
+2026-10-20T21:45Z	3	gate-pass	FS-5	scripts/ci --changed PASS; mutate FlareModel.LiveShapes 6/6; PR waits #3767
