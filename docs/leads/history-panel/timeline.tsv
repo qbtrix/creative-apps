@@ -5,3 +5,5 @@ utc	stage	event	ref	note
 2026-10-20T19:30Z	2	stage-end	-	combined plan W1-W6 across eyedropper, history-panel, transform
 2026-10-20T19:30Z	3	stage-start	-	wave 1: PT-a, PH-a, PE-a
 2026-10-20T19:50Z	3	heartbeat	-	PH-a builder still running
+2026-10-20T19:52Z	3	pr-opened	#3708	PH-a: 12 files +336/-27, Mutate 2/2, head 9d5d8f6; jump row is a stub until PH-5; one line added to command-path baseline (Window > History)
+2026-10-20T19:52Z	3	wave-start	-	wave 2 (history): PH-6 and PH-3 stacked on PH-a
