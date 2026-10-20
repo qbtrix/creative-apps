@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: #3460 merged: fixer (next free slot) merges dev into #3465 and #3473 and un-drafts them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 #3547 (draft on MD-5 #3492); MD-7 #3548 (draft on MD-6 #3547); MD-8 building (on MD-7 #3548); MD-10 building (on MD-9 #3533)
+Next: #3460 merged: fixer running: merges dev into #3465 and #3473 and un-drafts them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 #3547 (draft on MD-5 #3492); MD-7 #3548 (draft on MD-6 #3547); MD-8 #3550 (draft on MD-7 #3548); MD-10 building (on MD-9 #3533)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -28,7 +28,8 @@ Next: #3460 merged: fixer (next free slot) merges dev into #3465 and #3473 and u
 | MD-19 | MD-e | 4 | check-first for MD-e: search parsing, order, budget, MD-J4, all disabled | LibrarySearchTests, LibrarySearchOrderTests, LibrarySearchBudgetTests, LibraryJourneyTests+Search | compiles, disabled | #3545 | draft on #3473 + #3465 |
 | MD-6 | MD-b | 5 | CameraDetails(exif:tiff:), display texts, CameraRow.rows(for:) ranges and counts; enables LibraryCameraRowsTests | PhotoDetails.swift, LibraryCameraRowsTests, plan LibraryModel.PhotoDetails.json | LibraryCameraRowsTests | #3547 | draft on #3492 |
 | MD-7 | MD-b | 6 | ImageIODecoder reads Exif/TIFF into CameraDetails; LibraryCameraDecodeTests on | LA/Platform/ImageIODecoder.swift, AT/LibraryCameraDecodeTests.swift | LibraryCameraDecodeTests (macOS) | #3548 | draft, stacked on #3547 |
-| MD-8, MD-10 .. MD-22 | MD-b..MD-e | 5+ | see packet Build waves | see packet | see packet | - | planned |
+| MD-8 | MD-b | 7 | Info tab Camera section (InspectorSection/InspectorRow/InspectorNote), MD-J1 on | LA/LibraryInspector.swift, AT/LibraryCameraSnapshots.swift, UITests/LibraryJourneyTests+Camera.swift | LibraryCameraSnapshots, MD-J1 | #3550 | draft, stacked on #3548 |
+| MD-10 .. MD-22 | MD-c..MD-e | 5+ | see packet Build waves | see packet | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -66,3 +67,4 @@ Next: #3460 merged: fixer (next free slot) merges dev into #3465 and #3473 and u
 - MD-7 (#3548, head ad6ca8dc): 2 files +18/-9 over MD-6; tag reading stays in the Model (decoder hands bridged Exif/TIFF dictionaries to CameraDetails). Decode tests run on macOS only, so the Linux gate proved compile and lints. No mutation plan (App target, per packet).
 - 07:29Z: MD-2 #3460 merged. MD-3 #3465 and MD-4 #3473 now wait only on a dev merge; queued for a fixer once a builder slot frees (MD-8, MD-10, FC-12 running).
 - 07:37Z check-in: #3423 and #3460 merged (07:29Z); #3424 lane macOS build 39366318428 still queued since 03:49Z (runner backlog). No new line:library findings. Builders: MD-8, MD-10, FC-12 in their gates; MD-7 #3548 drafted. Fixer for #3465/#3473 dev merge waits for a free slot.
+- MD-8 (#3550, head e57f5481): 3 files +59/-11 over MD-7. Taken date is formatted in the view with Date.FormatStyle (the Model helper is internal), so snapshot text follows the CI Mac locale; critics should check. Adds identifier library.metadata.camera.none. PNGs: library-camera{,-mixed,-none}-{light,dark}.png. MD-b slice code complete once the stack merges.
