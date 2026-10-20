@@ -71,9 +71,9 @@ status-and-layout and on filters-collections' FC-e, which edit them too.
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| RW-a | The raw types, the decoder's raw requirements with defaults, the fake raw files and the `raw-shoot` fixture exist, and a catalog file without raw settings encodes byte for byte as before. | RW-1, RW-2 | RJ0 | develop:DV-a, crop:CR-a, export:EX-a, metadata-more:MD-a (RW-1); metadata-more:MD-e (RW-2) |
-| RW-b | Importing a folder of raw files is as fast as JPEGs because the grid draws each camera's embedded preview, a RAW and its JPEG come in as one photo, and the grid marks raw photos. | RW-3, RW-4, RW-5, RW-6, RW-7 | RJ1 | RW-a (RW-3); metadata-more:MD-b (RW-6) |
-| RW-c | The Develop tab shows the RAW controls this file's decoder offers, each change is one undo step, and the grid, the loupe and export all decode with them. | RW-8, RW-9, RW-10 | RJ2 | RW-b (RW-8, RW-10); develop (RW-8, RW-10); persist (RW-8); export (RW-9); status-and-layout, filters-collections:FC-e (RW-10) |
+| RW-a | The raw types, the decoder's raw requirements with defaults, the fake raw files and the `raw-shoot` fixture exist, and a catalog file without raw settings encodes byte for byte as before. | RW-1, RW-2 | RJ0 | develop:DV-a, crop:CR-a, export:EX-a, metadata-more:MD-a, tone-controls:LT-a, export-pack:LX-a (RW-1); metadata-more:MD-e, cull-finish:DR-m (RW-2, `LibraryCatalog.swift`) |
+| RW-b | Importing a folder of raw files is as fast as JPEGs because the grid draws each camera's embedded preview, a RAW and its JPEG come in as one photo, and the grid marks raw photos. | RW-3, RW-4, RW-5, RW-6, RW-7 | RJ1 | RW-a (RW-3); metadata-more:MD-b (RW-6); file-flow:LF-a (all, beta first) |
+| RW-c | The Develop tab shows the RAW controls this file's decoder offers, each change is one undo step, and the grid, the loupe and export all decode with them. | RW-8, RW-9, RW-10 | RJ2 | RW-b (RW-8, RW-10); develop (RW-8, RW-10); tone-controls:LT-a (RW-8); persist (RW-8); export, export-pack:LX-m (RW-9); status-and-layout, filters-collections:FC-e, cull-finish (RW-10, `LibraryMenus.swift` and the C4 part) |
 
 Screen early: RW-b (the grid's RAW mark, `RawDecoding`) and RW-c (the
 Develop tab's RAW section) own `Sources/LibraryApp/` files, so both are UI

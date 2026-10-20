@@ -116,6 +116,15 @@
         ],
         "export:EX-a": [
           "RW-1"
+        ],
+        "cull-finish:DR-m": [
+          "RW-2"
+        ],
+        "tone-controls:LT-a": [
+          "RW-1"
+        ],
+        "export-pack:LX-a": [
+          "RW-1"
         ]
       }
     },
@@ -155,6 +164,13 @@
         ],
         "metadata-more:MD-b": [
           "RW-6"
+        ],
+        "file-flow:LF-a": [
+          "RW-3",
+          "RW-4",
+          "RW-5",
+          "RW-6",
+          "RW-7"
         ]
       },
       "ui": true
@@ -210,6 +226,15 @@
         ],
         "filters-collections:FC-e": [
           "RW-10"
+        ],
+        "cull-finish": [
+          "RW-10"
+        ],
+        "tone-controls:LT-a": [
+          "RW-8"
+        ],
+        "export-pack:LX-m": [
+          "RW-9"
         ]
       },
       "ui": true

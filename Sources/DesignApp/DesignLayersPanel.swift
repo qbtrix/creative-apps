@@ -34,9 +34,12 @@
 // empty or unchanged name. Dragging a layer row draws an insertion line above or
 // below the row under the pointer, or tints a frame or group the layer would
 // go into (`layerDropLine`, which shows nothing for a drop the Model refuses).
-// The line is the panel's own state, written only when it moves, and the rows'
-// frames sit in a box nothing observes, so a drag never runs the editor's body;
-// the release sends one `.moveLayer` (`layerDrop`), one "Move Layer" step. A page
+// The drag is the system's (`onDrag` on each row, a `DropDelegate` on each row):
+// a gesture of the row's own inside the List never saw the pointer move once the
+// list's table took the press (#3427). The line is the panel's own state, written
+// only when it moves, and the dragged id and the rows' heights sit in a box
+// nothing observes, so a drag never runs the editor's body; the drop sends one
+// `.moveLayer` (`layerDrop`), one "Move Layer" step. A page
 // with no layers says so and points at the Frame tool. The rename refusal state
 // (DesignRenameState, `design.layers.rename-refusal`) is the panel's own. The list shows no
 // scroll indicators, as the inspector doesn't, so on a long layer tree no legacy
@@ -44,6 +47,7 @@
 import DesignModel
 import SuiteUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct DesignLayersPanel: View {
     let model: DesignWorkspace
@@ -52,7 +56,7 @@ struct DesignLayersPanel: View {
     @State private var rename = DesignRenameState()
     /// Where a dragged layer would land; nil with no drag, or over a row that refuses it.
     @State private var dropLine: DesignLayerDropLine?
-    /// The layer rows' frames for the drag to hit-test; a box SwiftUI doesn't watch.
+    /// The dragged layer and the rows' frames; a box SwiftUI doesn't watch.
     @State private var rowFrames = DesignLayerRowFrames()
 
     var body: some View {
@@ -97,21 +101,35 @@ struct DesignLayersPanel: View {
         .designPasteboardCommands(model, perform)
     }
 
-    /// The rows' drag: hit-tests the pointer against the rows, moves the line only when it changes,
-    /// and on release sends the one move the line showed.
+    /// The rows' drag: the pointer `y` points down row `rowID` moves the line only when it changes,
+    /// leaving a row clears its line, and the drop at `y` sends the one move the line there shows.
+    /// The drop works out its own line rather than reading the last hover's, so a release that
+    /// lands before the hover is reported still moves the layer (#3556).
     private var layerDrag: DesignLayerDrag {
-        DesignLayerDrag(line: dropLine, frames: rowFrames, changed: { id, point in
-            let line = rowFrames.row(at: point).flatMap { rowID, frame in
-                model.layerDropLine(id, over: rowID, y: Double(point.y - frame.minY), height: Double(frame.height))
-                    .map { DesignLayerDropLine(rowID: rowID, position: $0) }
-            }
+        DesignLayerDrag(line: dropLine, frames: rowFrames, changed: { rowID, y in
+            let line = dropLine(over: rowID, y: y)
             if line != dropLine { dropLine = line }
-        }, ended: { id in
-            if let line = dropLine, let target = model.layerDrop(id, onto: line.rowID, line.position) {
-                perform(.moveLayer(id, parent: target.parentID, index: target.index))
+        }, exited: { rowID in
+            if dropLine?.rowID == rowID { dropLine = nil }
+        }, dropped: { rowID, y in
+            defer {
+                rowFrames.dragged = nil
+                if dropLine != nil { dropLine = nil }
             }
-            if dropLine != nil { dropLine = nil }
+            guard let id = rowFrames.dragged, let line = dropLine(over: rowID, y: y),
+                  let target = model.layerDrop(id, onto: rowID, line.position) else { return false }
+            perform(.moveLayer(id, parent: target.parentID, index: target.index))
+            return true
         })
+    }
+
+    /// The line the dragged layer shows `y` points down row `rowID`, or nil when the Model refuses that drop.
+    private func dropLine(over rowID: String, y: CGFloat) -> DesignLayerDropLine? {
+        rowFrames.dragged.flatMap { id in
+            rowFrames.frames[rowID].flatMap { frame in
+                model.layerDropLine(id, over: rowID, y: Double(y), height: Double(frame.height))
+            }
+        }.map { DesignLayerDropLine(rowID: rowID, position: $0) }
     }
 
     private func header(_ title: String) -> some View {
@@ -182,30 +200,36 @@ struct DesignLayerDropLine: Equatable {
     let position: DesignDropPosition
 }
 
-/// Each visible layer row's frame in global coordinates, written as rows lay out. A plain box,
-/// so a row moving or scrolling re-renders nothing.
+/// The layer being dragged, set when its row's drag starts, and each visible layer row's frame,
+/// written as rows lay out. A plain box, so a drag starting, a row moving or scrolling re-renders nothing.
 @MainActor final class DesignLayerRowFrames {
+    var dragged: String?
     var frames: [String: CGRect] = [:]
-
-    /// The row under `point`, with its frame, its top and bottom stretched by the gap between rows.
-    func row(at point: CGPoint) -> (String, CGRect)? {
-        let slack = SuiteSpacing.xxs
-        guard let hit = frames.first(where: {
-            $0.value.minX <= point.x && point.x <= $0.value.maxX
-                && $0.value.minY - slack <= point.y && point.y <= $0.value.maxY + slack
-        }) else { return nil }
-        let frame = hit.value
-        return (hit.key, CGRect(x: frame.minX, y: frame.minY - slack, width: frame.width, height: frame.height + 2 * slack))
-    }
 }
 
-/// What a layer row's drag reads and calls: the current line, the frames box, and the panel's
-/// handlers for a moved pointer and a release.
+/// What a layer row's drag reads and calls: the current line, the box, and the panel's handlers
+/// for the pointer `y` points down a row, the pointer leaving a row, and a drop on one.
 struct DesignLayerDrag {
     let line: DesignLayerDropLine?
     let frames: DesignLayerRowFrames
-    let changed: @MainActor (String, CGPoint) -> Void
-    let ended: @MainActor (String) -> Void
+    let changed: @MainActor (String, CGFloat) -> Void
+    let exited: @MainActor (String) -> Void
+    let dropped: @MainActor (String, CGFloat) -> Bool
+}
+
+/// A layer row as a drop target: it reports where over the row the drag is, and the drop.
+private struct DesignLayerDropTarget: DropDelegate {
+    let rowID: String
+    let drag: DesignLayerDrag
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        drag.changed(rowID, info.location.y)
+        return DropProposal(operation: drag.frames.dragged == nil ? .forbidden : .move)
+    }
+
+    func dropExited(info: DropInfo) { drag.exited(rowID) }
+
+    func performDrop(info: DropInfo) -> Bool { drag.dropped(rowID, info.location.y) }
 }
 
 /// One page: its symbol and name, with a checkmark on the current page.
@@ -300,10 +324,11 @@ private struct DesignLayerRow: View {
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { drag.frames.frames[id] = $0 }
         .onDisappear { drag.frames.frames[id] = nil }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: SuiteSpacing.xs, coordinateSpace: .global)
-                .onChanged { drag.changed(id, $0.location) }
-                .onEnded { _ in drag.ended(id) })
+        .onDrag {
+            drag.frames.dragged = id
+            return NSItemProvider(object: id as NSString)
+        }
+        .onDrop(of: [.plainText], delegate: DesignLayerDropTarget(rowID: id, drag: drag))
         .accessibilityElement(children: isDisclosureLabel ? .combine : .contain)
         .accessibilityIdentifier("design.layer.\(id)")
     }

@@ -1,0 +1,140 @@
+{
+  "title": "Rotate and scale handles in the viewer, keyed at the playhead through the kernel's transform commands",
+  "wave": "W4",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/transform (adopter of S7); RJ-H21, RJ-H34",
+  "waits_on": "suiteui transform-tools' contract slice TT-a (cross-line); autosave-history's HA-m before HT-6",
+  "depends": [
+    "foundation",
+    "viewer-playback",
+    "layer-keys",
+    "text-layers",
+    "history-files",
+    "core-loop"
+  ],
+  "longest_chain": "6 (HT-1 → HT-2 → HT-3 → HT-4 → HT-7 → HT-8)",
+  "journeys": [
+    "HaloTransformJourneyTests.testRotateAndScaleInViewer"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloTransform+Kernel.swift",
+    "Tests/HaloModelTests/HaloTransformTests.swift",
+    "Sources/HaloApp/HaloViewerHandles.swift",
+    "Sources/HaloApp/HaloViewer.swift",
+    "UITests/HaloJourneyTests+Transform.swift",
+    "Tests/AppSnapshotTests/HaloViewerHandlesTests.swift",
+    "Tests/AppSnapshotTests/HaloTransformSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloTransformTests.swift",
+    "Tests/mutations/HaloModel.HaloTransform+Kernel.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/HaloModelTests/HaloTransformCommandIDTests.swift",
+    "Tests/RealJobs/halo/key-turn/key-turn.jobs.json",
+    "Tests/RealJobs/halo/key-turn/input/one-shape.halo",
+    "docs/blueprints/halo/features/transform.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HT-a",
+      "behavior": "The adapter is declared as stubs and the selected layer shows its handles in the viewer.",
+      "tasks": [
+        "HT-1",
+        "HT-2"
+      ],
+      "journeys": [
+        "MJ-HT"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloTransform+Kernel.swift",
+        "Tests/HaloModelTests/HaloTransformTests.swift",
+        "Sources/HaloApp/HaloViewerHandles.swift",
+        "Sources/HaloApp/HaloViewer.swift",
+        "UITests/HaloJourneyTests+Transform.swift"
+      ]
+    },
+    {
+      "id": "HT-u",
+      "behavior": "Handle drags preview live and commit once, and the snapshots and render budget hold.",
+      "tasks": [
+        "HT-3",
+        "HT-4"
+      ],
+      "journeys": [
+        "J-HT"
+      ],
+      "waits": {
+        "HT-a": [
+          "HT-3",
+          "HT-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloViewerHandles.swift",
+        "Tests/AppSnapshotTests/HaloViewerHandlesTests.swift",
+        "Tests/AppSnapshotTests/HaloTransformSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloTransformTests.swift"
+      ]
+    },
+    {
+      "id": "HT-m",
+      "behavior": "A turn or scale writes the layer's tracks at the playhead, keyed when animated, as one step, and the transform commands run from the catalog.",
+      "tasks": [
+        "HT-5",
+        "HT-6"
+      ],
+      "journeys": [
+        "MJ-HT"
+      ],
+      "waits": {
+        "HT-a": [
+          "HT-5",
+          "HT-6"
+        ],
+        "autosave-history:HA-m": [
+          "HT-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/HaloTransform+Kernel.swift",
+        "Tests/HaloModelTests/HaloTransformTests.swift",
+        "Tests/mutations/HaloModel.HaloTransform+Kernel.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/HaloModelTests/HaloTransformCommandIDTests.swift",
+        "Tests/RealJobs/halo/key-turn/key-turn.jobs.json",
+        "Tests/RealJobs/halo/key-turn/input/one-shape.halo"
+      ]
+    },
+    {
+      "id": "HT-z",
+      "behavior": "The journey turns and scales a layer on live services, and the feature is built.",
+      "tasks": [
+        "HT-7",
+        "HT-8"
+      ],
+      "journeys": [
+        "J-HT"
+      ],
+      "waits": {
+        "HT-u": [
+          "HT-7"
+        ],
+        "HT-m": [
+          "HT-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+Transform.swift",
+        "docs/blueprints/halo/features/transform.wave.json"
+      ]
+    }
+  ]
+}
