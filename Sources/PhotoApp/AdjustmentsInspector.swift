@@ -36,7 +36,7 @@ struct AdjustmentsInspector: View {
                 }
             }
             section(.levels) {
-                HistogramView(histogram, emptyMessage: "Open an image to see its histogram.", id: "photo.levels.histogram")
+                HistogramView(histogram, emptyMessage: "No histogram yet.", id: "photo.levels.histogram")
                 levelsRow("Black", settings.blackPoint) { .blackPoint($0) }
                 levelsRow("White", settings.whitePoint) { .whitePoint($0) }
                 gammaRow

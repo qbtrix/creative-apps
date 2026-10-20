@@ -3,7 +3,7 @@
 // name and photo count with nothing selected, one photo's name, Captured, Size
 // and Kind, or several photos' count and capture span), then SuiteUI's
 // HistogramView of the loupe render (`library.develop.histogram`, valued with
-// the render's mean, and saying why while there is none), pinned above both
+// the render's mean, and saying why while it has no bins), pinned above both
 // tabs, then Info and Develop
 // tabs on SegmentedTabs (`library.inspector.tabs`, its segments
 // `library.inspector.info` and `library.inspector.develop`, #291). Info shows the cull targets' MetadataInspector (the
@@ -39,7 +39,7 @@ struct LibraryInspector: View {
         VStack(alignment: .leading, spacing: 0) {
             header
             HistogramView(
-                model.toneHistogram, emptyMessage: Self.noHistogram, value: model.histogramValue,
+                model.toneHistogram, emptyMessage: model.histogramEmptyMessage, value: model.histogramValue,
                 id: DevelopInspector.histogramID)
             .padding(.horizontal, SuiteSpacing.m)
             .padding(.vertical, SuiteSpacing.s)
@@ -114,9 +114,6 @@ struct LibraryInspector: View {
 
     /// The header's accessibility identifier, as J12 looks it up.
     static let headerID = "library.inspector.header"
-
-    /// What the histogram says before the loupe has rendered a photo.
-    nonisolated static let noHistogram = "Open a photo in the loupe to see its histogram."
 
     /// The tab switch's accessibility identifier.
     nonisolated static let tabsID = "library.inspector.tabs"

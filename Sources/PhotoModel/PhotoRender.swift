@@ -97,6 +97,7 @@ extension PhotoWorkspace {
     /// task counting it is cancelled (it stops before the next row).
     /// Cost: it reads at most 256 evenly spaced rows, so about 256 x width
     /// pixels composited, adjusted and counted, whatever the image's height.
+    /// A cancelled task stops between rows and gets `empty`.
     public func curvesHistogram() -> ToneHistogram {
         guard let canvas else { return .empty }
         var counts = [Int](repeating: 0, count: 256)
