@@ -58,11 +58,10 @@
   "slices": [
     {
       "id": "AL-design",
-      "behavior": "Design runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted, and its layers panel is `LayerTreeList`.",
+      "behavior": "Design runs its layers on `LayerTree<Payload>`, `LayerNode`, `LayerRow` and the follow link behind its existing API, its tests and journeys green, and its copy is deleted (its layers panel stays its own list: AL-d3 moved to layer-tree-list-parity, #3628).",
       "tasks": [
         "AL-d1",
-        "AL-d2",
-        "AL-d3"
+        "AL-d2"
       ],
       "journeys": [
         "MJ-AL-design"
@@ -87,9 +86,6 @@
       "waits": {
         "editor-kernel:EK-tree": [
           "AL-d1"
-        ],
-        "editor-kernel:EK-u": [
-          "AL-d3"
         ]
       },
       "ui": true
