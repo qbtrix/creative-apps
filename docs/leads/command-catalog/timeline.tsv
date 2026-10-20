@@ -108,3 +108,4 @@ utc	stage	event	ref	note
 2026-10-20T10:15:02Z	heartbeat	10:20Z #3587 needs-rebase merged dev (C4 halo-model part), gate running; #3584 #3585 #3588 open clean awaiting lane macOS build; #3392 open; no completed suiteui/full run yet
 2026-10-20T10:36:32Z	heartbeat	#3584 merged; #3392 merged; #3585 build green, awaiting lane; #3587/#3588 builds queued; AT-d1 started
 2026-10-20T10:57:28Z	heartbeat	10:56Z: #3585 needs-rebase merge resolved (C4 desc), gate running; #3587 clean; #3588 clean; #3593 AT-d1 opened; AT-d2 building; earlier scoped photo/suiteui/full runs cancelled
+2026-10-20T11:18:54Z	heartbeat	11:18Z: #3585 clean at a9eca0ed (needs-rebase to drop), #3587/#3588/#3593 clean awaiting lane; scoped runs on 575cc800 still queued; AT-d2 builder in mutate step
