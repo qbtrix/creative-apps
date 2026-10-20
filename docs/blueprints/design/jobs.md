@@ -8,7 +8,7 @@ and where its check runs: **C** the CLI on Linux, **Cm** the CLI headless on mac
 **baseline** is the hand estimate when the job was added; the live status comes from the nightly run.
 The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 
-38 jobs: 21 C, 9 Cm, 8 J. Baseline 6 pass, 3 partial, 29 fail, 0 unknown; baseline score **2.4/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
+39 jobs: 21 C, 10 Cm, 8 J. Baseline 6 pass, 3 partial, 30 fail, 0 unknown; baseline score **2.4/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
 
 | id | job → outcome | weight | needs | closes with | baseline | trap | run | sources |
 |---|---|---|---|---|---|---|---|---|
@@ -50,3 +50,4 @@ The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 | RJ-D36 | Give a rectangle a 2 pt dashed border with round caps and export SVG. → The SVG rect has stroke-dasharray "8 4" and stroke-linecap "round". | med | `S17`, `design/stroke-style` | `design/stroke-style` | fail | The SVG drops the dash or writes it unscaled | C | captain |
 | RJ-D41 | Export a 540x675 pt frame as JPEG at exactly 1080x1350, and as PNG at a 512 px long edge. → The JPEG is exactly 1080x1350 with its transparent corner on the frame's fill; the PNG is 410x512 with alpha. | high | `S11`, `design/export-pack` | `design/export-pack` | fail | 2x applied on top (2160x2700), or the JPEG's transparent corner comes out black | Cm | captain |
 | RJ-D42 | Save two Design files, then reopen one from File > Open Recent; drop a Halo project on Design. → Open Recent lists only the two Design files, newest first; the Halo project is handed to Halo and the Design document is unchanged. | high | `suite/file-flow`, `design/file-flow` | `design/file-flow` | fail | Design has no Open Recent, or it lists every app's files | C | captain |
+| RJ-D50 | Set a three-line justified paragraph in Design with line height 1.5, letter spacing 20 and italic, then export a PNG. → The first two lines' ink spans the box width within 2 px and the last line doesn't; the baseline gap is 1.5 times ascent plus descent within 1 px. | med | `suiteui/text-style`, `E8` | `suiteui/text-style` | fail | Line height or justify is set in the inspector but the export ignores it | Cm | captain |
