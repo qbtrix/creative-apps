@@ -19,7 +19,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 | AU-photo | Photo undo on `History<PhotoEdit>` and `HistoryReading` behind its API; stack, id, base and jump code deleted | AU-p1, AU-p2 | MJ-AU-photo (`PhotoHistoryStepsTests`) | – | false | 0 | done | 39133431238 | – |
 | AU-library | Library undo on `History<[PhotoItem]>` and `HistoryReading` behind its API; `CatalogHistory.swift` deleted | AU-l1, AU-l2 | MJ-AU-library (`LibraryHistoryTests`) | filters-collections, spine | false | 0 | done | 39469631014 | – |
 | AU-halo | Halo `ProjectHistory` (live and fake) wraps `History<HaloDocumentState>`; `HaloHistoryRules.swift` and the stack code deleted | AU-h1, AU-h2 | MJ-AU-halo (`ProjectHistoryContractTests`) | #2747 (kernel payload read + Equatable) | false | 0 | done | 39469631014 | – |
-| AU-flare | `FlareWorkspace` conforms to `HistoryReading` over `CommandEngine`; the Flare-only undo/redo name spelling goes | AU-f1, AU-f2 | MJ-AU-flare (`SceneUndoSelectionTests`) | stage-edit | false | 0 | building | – | – |
+| AU-flare | `FlareWorkspace` conforms to `HistoryReading` over `CommandEngine`; the Flare-only undo/redo name spelling goes | AU-f1, AU-f2 | MJ-AU-flare (`SceneUndoSelectionTests`) | stage-edit | false | 0 | building: failing test committed, conformance written, gate pending
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
