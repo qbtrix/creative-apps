@@ -780,5 +780,45 @@
     ],
     "waits_on": "PM-6",
     "test": "Tests/RealJobs/photo/fade-layers/fade-layers.jobs.json"
+  },
+  "RJ-P70": {
+    "id": "RJ-P70",
+    "app": "photo",
+    "weight": "med",
+    "job": "Flip a two-layer image horizontally with Flip Canvas and export PNG.",
+    "outcome": "The PNG equals the original mirrored, pixel for pixel.",
+    "needs": [
+      "suiteui/orientation-crop"
+    ],
+    "closes_with": "suiteui/orientation-crop",
+    "trap": "Only the selected layer flips, or the top layer keeps its old offset",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "OC-12",
+    "added_by": "suiteui/orientation-crop"
+  },
+  "RJ-P71": {
+    "id": "RJ-P71",
+    "app": "photo",
+    "weight": "high",
+    "job": "Make a new 4x6 in image at 300 ppi with a transparent background, draw a red square, and export PNG.",
+    "outcome": "The PNG is 1200x1800, its corner alpha is 0, and its pHYs says 300 ppi.",
+    "needs": [
+      "suiteui/document-setup"
+    ],
+    "closes_with": "suiteui/document-setup",
+    "trap": "The image comes out 1920x1080 white, or 4x6 px",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-8",
+    "added_by": "suiteui/document-setup"
   }
 }

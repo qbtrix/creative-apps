@@ -268,10 +268,11 @@
     "job": "Parent a hand to an arm so it follows the arm's rotation.",
     "outcome": "The hand keeps its on-screen position when parented and then follows the arm's rotation.",
     "needs": [
-      "S8"
+      "S8",
+      "suiteui/anchor-parenting"
     ],
     "needs_note": "S8 parenting",
-    "closes_with": "S8",
+    "closes_with": "suiteui/anchor-parenting",
     "trap": "Child jumps when parented",
     "run": "C",
     "baseline": "fail",

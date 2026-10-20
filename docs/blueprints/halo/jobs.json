@@ -756,5 +756,25 @@
     ],
     "waits_on": "HF-3",
     "added_by": "halo/file-flow"
+  },
+  "RJ-H70": {
+    "id": "RJ-H70",
+    "app": "halo",
+    "weight": "high",
+    "job": "Change a 10 s composition to 15 s with a navy background, then render frame 400.",
+    "outcome": "Frame 400 renders with a navy corner within 2 levels and the keys stay at frames 30 and 270.",
+    "needs": [
+      "suiteui/document-setup"
+    ],
+    "closes_with": "suiteui/document-setup",
+    "trap": "The comp can't be changed without rebuilding it, or the keys stretch to the new length",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-12",
+    "added_by": "suiteui/document-setup"
   }
 }
