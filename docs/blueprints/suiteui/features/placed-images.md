@@ -144,7 +144,7 @@ public struct PlacedAsset: Codable, Hashable, Sendable, Identifiable {
     public var natural: Size         // pixels for PNG and JPEG, user units for SVG
     public var data: Data
 }
-/// What an app's image layer stores. `box` is in the app's space; `focus` (unit, 0.5 centre) is
+/// What an app's layer with a picture stores. `box` is in the app's space; `focus` (unit, 0.5 centre) is
 /// the point of the asset the cover crop keeps in view.
 public struct PlacedImage: Codable, Hashable, Sendable {
     public var assetID: String; public var box: Rect; public var focus: Point = Point(x: 0.5, y: 0.5)
@@ -351,5 +351,4 @@ behind the platform decoder), linked (not embedded) assets and relink, the suite
 asset library, footage (S20's video half rides shell-media, E9), Flare raster
 layers (FlareCore has no image shape: a creative-core issue), drawing SVG
 strokes in CoreRaster (no public stroke outliner in FlareCore yet: Halo lists
-them as skipped), masks from images, and placing into a frame's fill in
-place of a layer.
+them as skipped), and masks from images.

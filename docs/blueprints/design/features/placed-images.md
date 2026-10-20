@@ -56,7 +56,7 @@ Blueprint sections: design.md 3 (canvas), 4 (inspector), 6 (export).
 | PD-a | The picture fields on rectangles and frames and the `PlacedImageTarget` conformance exist as stubs, CoreRaster is linked, and the checks and RJ-D12's job are written, disabled. | PD-1, PD-2 | MJ-PD | suiteui/placed-images PL-a (cross-line); gradient-fill:DG-a |
 | PD-u | File > Place… and a canvas drop add a picture on the stubs, the canvas draws it by cover, and the inspector shows its rows, with snapshots, the render budget and the journey written. | PD-3, PD-4 | DJ-P1 | PD-a; gradient-fill:DG-u, design-export:DE-u (PD-3); gradient-fill:DG-a (PD-4); PL-3 (cross-line) |
 | PD-m | Placing fits inside the selected frame or covers it with Fill, a focus move the picture inside its box as one undo step, and SVG export writes the same crop. | PD-5, PD-6 | MJ-PD | PD-a; gradient-fill:DG-m; design-export:DE-s (PD-6); PL-7 (cross-line) |
-| PD-z | The window runs on live services, the journey passes on live, and the blueprint lists image layers. | PD-7, PD-8 | DJ-P1 | PD-u, PD-m; gradient-fill:DG-z (PD-8) |
+| PD-z | The window runs on live services, the journey passes on live, and the blueprint lists pictures in rectangles and frames. | PD-7, PD-8 | DJ-P1 | PD-u, PD-m; gradient-fill:DG-z (PD-8) |
 
 PD-u waits only on PD-a and other features' slices (rule 18); PD-m never
 waits on PD-u. MJ-PD is the Model walk in `DesignPlaceTests` (Linux).
@@ -132,7 +132,7 @@ its extension. `setPlaced` with an asset on a layer without one is Fill.
 | PD-5 | – | Conformance bodies; the five specs in the catalog and the id list; turns on `DesignPlaceTests` | `Sources/DesignModel/DesignPlace+Kernel.swift`, `Sources/DesignModel/DesignCommandCatalog.swift`, `Tests/command-ids/design.txt`, `Tests/DesignModelTests/DesignPlaceTests.swift`, `Tests/mutations/DesignModel.DesignPlace+Kernel.json` | PD-1, PL-7, gradient-fill:DG-m | ~300, 5 |
 | PD-6 | – | `DesignSVG` writes a rectangle's or frame's picture as a `<clipPath>` of its rounded box and an `<image href="data:…">` at `drawnRect`, after its fill; turns on `DesignPlaceSVGTests` and RJ-D12 | `Sources/DesignModel/Live/DesignSVG.swift`, `Tests/DesignModelTests/DesignPlaceSVGTests.swift`, `Tests/mutations/DesignModel.DesignSVG.json`, `Tests/RealJobs/design/place-in-frame/` | PD-2, gradient-fill:DG-m, design-export:DE-s | ~180, 4 |
 | PD-7 | – | Live: the journey turned on, on live services | `UITests/DesignJourneyTests+Place.swift` | PD-3, PD-4, PD-5, PD-6 | ~40, 1 |
-| PD-8 | – | design.md lists image layers and Place; `status: built`; `feature-done` | `docs/blueprints/design.md`, `docs/blueprints/design/features/placed-images.wave.json` | PD-7, gradient-fill:DG-z | ~30, 2 |
+| PD-8 | – | design.md lists pictures in rectangles and frames and Place; `status: built`; `feature-done` | `docs/blueprints/design.md`, `docs/blueprints/design/features/placed-images.wave.json` | PD-7, gradient-fill:DG-z | ~30, 2 |
 
 ## Build waves
 

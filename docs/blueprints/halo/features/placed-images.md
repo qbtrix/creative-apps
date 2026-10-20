@@ -99,7 +99,7 @@ extension HaloLayer {
     public var placedFocus: Point
 }
 // Sources/HaloModel/Contracts/HaloDocumentValues.swift (PH-1)
-extension HaloDrawItem { public var placed: (asset: PlacedAsset, image: PlacedImage)? }   // HaloDrawRules fills it (PH-5)
+extension HaloDrawItem { public var placedAsset: PlacedAsset?; public var placedImage: PlacedImage? }   // HaloDrawRules fills both (PH-5)
 // Sources/HaloModel/HaloPlace+Kernel.swift (PH-1 stubs, PH-6 bodies)
 extension HaloProject: PlacedImageTarget {
     public var placeHelp: String? { get }              // no composition; a text or null layer selected for fill

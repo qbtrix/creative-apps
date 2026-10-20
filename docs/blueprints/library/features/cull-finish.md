@@ -44,8 +44,10 @@ Trash is a service (`PhotoTrashing`) like every Library side effect: `FakeTrash`
 on Linux and in tests, `LiveTrash` on `FileManager.trashItem` on macOS, in
 LibraryModel so the CLI uses it headless (RJ-L06 runs `Cm`). **Never
 permanent:** no Library file calls `removeItem`, `unlink` or empties the
-Trash; `LibraryNeverDeletesTests` scans `Sources/LibraryModel` and
-`Sources/LibraryApp` for them and fails.
+Trash on a photo; `LibraryNeverDeletesTests` scans `Sources/LibraryModel` and
+`Sources/LibraryApp` for them and fails. Its one allowed line is
+`Platform/CatalogStore.swift`'s replace of an older `.bad` copy of the catalog
+file (persist's set-aside, never a photo), listed by file and text in the test.
 
 Blueprint sections: library.md 1.3 (never deletes, amended), 3 (cull), 6.2
 (menus).
@@ -166,7 +168,7 @@ import(folder): known = item paths ∪ excludedPaths                     # DR-6,
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | DR-1 | – | `PhotoTrashing`, the services member, `FakeTrash` (a dictionary of moved paths, failures by path), the `LiveTrash` stub, `LibraryKey.label` and its characters, the catalog extension as stubs, `TrashedPhoto` | `Sources/LibraryModel/Contracts/TrashContracts.swift`, `Sources/LibraryModel/LibraryServices.swift`, `Sources/LibraryModel/Fakes/FakeTrash.swift`, `Sources/LibraryModel/Live/LiveTrash.swift`, `Sources/LibraryModel/LibraryKeys.swift`, `Sources/LibraryModel/LibraryDeleteRejects.swift` | filters-collections:FC-a, metadata-more:MD-a | ~220, 6 |
-| DR-2 | – | Checks first, disabled by name: `LibraryDeleteRejectsTests`, `LibraryLabelKeysTests`, `LibraryNeverDeletesTests` (enabled: it passes today); RJ-L06's job folder with `waits_on: DR-8` | `Tests/LibraryModelTests/LibraryDeleteRejectsTests.swift`, `Tests/LibraryModelTests/LibraryLabelKeysTests.swift`, `Tests/LibraryModelTests/LibraryNeverDeletesTests.swift`, `Tests/RealJobs/library/delete-rejects/` | DR-1 | ~320, 9 |
+| DR-2 | – | Checks first, disabled by name: `LibraryDeleteRejectsTests`, `LibraryLabelKeysTests`, `LibraryNeverDeletesTests` (enabled: it passes today with its one allowed line, `CatalogStore`'s set-aside); RJ-L06's job folder with `waits_on: DR-8` | `Tests/LibraryModelTests/LibraryDeleteRejectsTests.swift`, `Tests/LibraryModelTests/LibraryLabelKeysTests.swift`, `Tests/LibraryModelTests/LibraryNeverDeletesTests.swift`, `Tests/RealJobs/library/delete-rejects/` | DR-1 | ~320, 9 |
 | DR-3 | – | Reachable: Photo > Delete Rejected Photos… ⌘⌫ (its title and help from the Model), the `confirmationDialog` in `LibraryWindow+Trash`, mounted by the window; Set Label's items name 6–9 | `Sources/LibraryApp/LibraryWindow+Trash.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryMenus.swift` | DR-1, metadata-more:MD-e | ~180, 4 |
 | DR-4 | – | Snapshots, the render budget test, the journey written and skipped (`XCTSkip("waits on DR-9")`) | `Tests/AppSnapshotTests/LibraryCullFinishSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetLibraryDeleteRejectsTests.swift`, `UITests/LibraryJourneyTests+CullFinish.swift` | DR-3 | ~220, 3 |
 | DR-5 | – | Label keys: `cullChange(for: .label)` is `.label`, one "Set Label" step on the targets, never moving the loupe (Auto Advance leaves labels alone); turns on `LibraryLabelKeysTests` | `Sources/LibraryModel/LibraryCulling.swift`, `Tests/LibraryModelTests/LibraryLabelKeysTests.swift`, `Tests/mutations/LibraryModel.LibraryCulling.json` | DR-2 | ~120, 3 |
@@ -199,7 +201,7 @@ live Trash, DR-10 is the prose task.
 | id | test | fails when | mutations |
 |---|---|---|---|
 | DR-1 | builds; `LibraryKey(character: "6")` is `.label(.red)` and "5" still rates; every existing Library test passes | a key maps wrong, or a rating key changes | – (stubs) |
-| DR-2 | the suites compile, disabled by name; `LibraryNeverDeletesTests` passes on today's sources | a source already deletes | – (checks) |
+| DR-2 | the suites compile, disabled by name; `LibraryNeverDeletesTests` passes on today's sources, `CatalogStore`'s set-aside its only allowed hit | a source deletes outside that line | – (checks) |
 | DR-3 | `LibraryCullFinishSnapshots.confirm` (DR-4's, first in the slice PR) | the item or the dialog is missing | – (UI) |
 | DR-4 | `LibraryCullFinishSnapshots`; `RenderBudgetLibraryDeleteRejectsTests.deleteOf300InThreeBodies` | budget over | – (UI) |
 | DR-5 | `LibraryLabelKeysTests`: 6, 7, 8, 9 set Red, Yellow, Green, Blue on the loupe photo, else the selection, one step each; a label key never moves the loupe with Auto Advance on; 0–5, P, X, U unchanged | a key sets the wrong label, two steps, or advances | `LibraryModel.LibraryCulling`: `.label` mapped to nil → `.sixIsRed`; label treated as a flag for Auto Advance → `.labelNeverAdvances` |
