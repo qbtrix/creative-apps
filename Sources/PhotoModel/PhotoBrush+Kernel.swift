@@ -82,13 +82,14 @@ extension ToolOptions {
     public var preset: BrushPreset? { Self.presets.first { $0.settings == settings } }
 
     /// `edit` as the kernel's settings edits, opacity floored at Photo's 1%
-    /// (a NaN stays NaN, so the kernel ignores it); none for a color.
+    /// (a NaN stays NaN, so the kernel ignores it); none for a color or a
+    /// gradient edit.
     static func brushEdits(_ edit: ToolOptionEdit) -> [BrushEdit] {
         switch edit {
         case .size(let value): [.size(value)]
         case .hardness(let value): [.hardness(value)]
         case .opacity(let value): [.opacity(value.isNaN ? value : max(value, opacityRange.lowerBound))]
-        case .color: []
+        case .color, .gradient: []
         case .preset(let preset):
             [.size(preset.settings.size), .hardness(preset.settings.hardness), .flow(preset.settings.flow),
              .spacing(preset.settings.spacing)] + brushEdits(.opacity(percent: preset.settings.opacity))

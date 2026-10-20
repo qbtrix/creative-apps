@@ -8,7 +8,6 @@ import PhotoModel
 import SuiteKernel
 import Testing
 
-@Suite(.disabled("waits on PG-4"))
 struct PhotoGradientOptionsTests {
     /// A workspace with the Gradient tool picked, its options the default.
     static func picked() -> PhotoWorkspace {
