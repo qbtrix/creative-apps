@@ -1,0 +1,141 @@
+{
+  "title": "Editable gradient fills: the shared editor in FILL, every edit a fill command",
+  "wave": 6,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/gradient-fill (adopter of S24); #2315; RJ-F31",
+  "waits_on": "suiteui gradient-fill's contract slice GF-a (cross-line; tasks start once it merges)",
+  "depends": [
+    "inspector-timeline",
+    "flare-export"
+  ],
+  "longest_chain": "5 (FG-1 → FG-2 → FG-4 → FG-7 → FG-8)",
+  "journeys": [
+    "FlareGradientJourneyTests.testEditImportedGradient"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareFill+Kernel.swift",
+    "Sources/FlareModel/FlarePaint.swift",
+    "Tests/FlareModelTests/FlareGradientTests.swift",
+    "Sources/FlareApp/FlareInspectorFill.swift",
+    "Tests/AppSnapshotTests/FlareGradientSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareGradientTests.swift",
+    "UITests/FlareJourneyTests+Gradient.swift",
+    "Tests/mutations/FlareModel.FlareFill+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/RealJobs/flare/gradient-edit/gradient-edit.jobs.json",
+    "Tests/RealJobs/flare/gradient-edit/input/gradient-circle.flare",
+    "Tests/FlareModelTests/FlarePaintGradientTests.swift",
+    "Tests/mutations/FlareModel.FlarePaint.json",
+    "docs/blueprints/flare.md",
+    "docs/blueprints/flare/features/gradient-fill.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "FG-a",
+      "behavior": "FlareWorkspace conforms to GradientFillTarget as stubs, the paint readout carries the gradient, and the FILL section shows the switch and the editor on them.",
+      "tasks": [
+        "FG-1",
+        "FG-2"
+      ],
+      "journeys": [
+        "MJ-FG"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlareFill+Kernel.swift",
+        "Sources/FlareModel/FlarePaint.swift",
+        "Tests/FlareModelTests/FlareGradientTests.swift",
+        "Sources/FlareApp/FlareInspectorFill.swift"
+      ]
+    },
+    {
+      "id": "FG-u",
+      "behavior": "The FILL section's states have snapshots, a stop drag stays in its render budget, and the journey is written.",
+      "tasks": [
+        "FG-3",
+        "FG-4"
+      ],
+      "journeys": [
+        "FJ-G1"
+      ],
+      "waits": {
+        "FG-a": [
+          "FG-3",
+          "FG-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/FlareGradientSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareGradientTests.swift",
+        "UITests/FlareJourneyTests+Gradient.swift"
+      ]
+    },
+    {
+      "id": "FG-m",
+      "behavior": "Every fill command runs on the selected shapes as one undo step through the command engine, and the paint readout reads Mixed for differing gradients.",
+      "tasks": [
+        "FG-5",
+        "FG-6"
+      ],
+      "journeys": [
+        "MJ-FG"
+      ],
+      "waits": {
+        "FG-a": [
+          "FG-5",
+          "FG-6"
+        ],
+        "key-select-all:KS-a": [
+          "FG-5",
+          "FG-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/FlareFill+Kernel.swift",
+        "Tests/FlareModelTests/FlareGradientTests.swift",
+        "Tests/mutations/FlareModel.FlareFill+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/RealJobs/flare/gradient-edit/gradient-edit.jobs.json",
+        "Tests/RealJobs/flare/gradient-edit/input/gradient-circle.flare",
+        "Sources/FlareModel/FlarePaint.swift",
+        "Tests/FlareModelTests/FlarePaintGradientTests.swift",
+        "Tests/mutations/FlareModel.FlarePaint.json"
+      ]
+    },
+    {
+      "id": "FG-z",
+      "behavior": "The FILL section runs on live services, the journey passes on live, and #2315 closes.",
+      "tasks": [
+        "FG-7",
+        "FG-8"
+      ],
+      "journeys": [
+        "FJ-G1"
+      ],
+      "waits": {
+        "FG-u": [
+          "FG-7",
+          "FG-8"
+        ],
+        "FG-m": [
+          "FG-7",
+          "FG-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+Gradient.swift",
+        "docs/blueprints/flare.md",
+        "docs/blueprints/flare/features/gradient-fill.wave.json"
+      ]
+    }
+  ]
+}

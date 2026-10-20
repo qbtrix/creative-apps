@@ -1,0 +1,196 @@
+{
+  "title": "Tone and sharpen controls: the kernel's tone settings, rules and commands, SuiteUI's tone rows",
+  "wave": 4,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S1 (tone rows, shared half) and the sharpen half of S2's engine (effects-engine #433); real job RJ-X41; captain 2026-10-20: everyday tone tools in the beta, built once",
+  "waits_on": "photo #3144 (the core pin with creative-core #624's ToneProgram; cross-line); gradient-fill's GF-a and GF-z slices (slice waits: SuiteGallery.swift, canonical-concepts.txt, FakeCanvasDocument.swift); editor-kernel, suite-harness (built)",
+  "longest_chain": "6 (TC-1 → TC-2 → TC-3 → TC-4 → TC-8 → TC-10)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteToneJourneyTests.testToneRowsSetAndReset"
+  ],
+  "owned": [
+    "Package.swift",
+    "Sources/SuiteKernel/Tone/ToneSettings.swift",
+    "Sources/SuiteKernel/Tone/ToneRules.swift",
+    "Sources/SuiteKernel/Tone/ToneCommands.swift",
+    "Tests/SuiteKernelTests/ToneSettingsTests.swift",
+    "Tests/SuiteKernelTests/ToneRulesTests.swift",
+    "Tests/SuiteKernelTests/ToneCommandsTests.swift",
+    "Tests/SuiteKernelTests/KernelShapeTests.swift",
+    "Tests/canonical-concepts.txt",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-tone.json",
+    "Sources/SuiteUI/ToneRows.swift",
+    "Sources/SuiteUI/Gallery/GalleryToneRows.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "UITests/SuiteJourneyTests+Tone.swift",
+    "Tests/SuiteUITests/ToneRowsTests.swift",
+    "Tests/AppSnapshotTests/SuiteToneRowsSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetToneRowsTests.swift",
+    "Tests/mutations/SuiteKernel.ToneRules.json",
+    "Tests/mutations/SuiteKernel.ToneCommands.json",
+    "Tests/mutations/SuiteKernel.ToneSettings.json",
+    "Tests/SuiteUITests/ToneRowsLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeCanvasToneTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/tone-controls/tone-controls.jobs.json",
+    "Tests/RealJobs/fake/tone-controls/input/one.fake",
+    "docs/blueprints/suiteui/features/tone-controls.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "TC-a",
+      "behavior": "The kernel's `Tone/` module declares the settings, rules, intents and command specs as stubs, the gallery's `tone-rows` page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "TC-1",
+        "TC-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "gradient-fill:GF-a": [
+          "TC-1",
+          "TC-2"
+        ],
+        "autosave-history:AH-a": [
+          "TC-1"
+        ],
+        "placed-images:PL-a": [
+          "TC-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Package.swift",
+        "Sources/SuiteKernel/Tone/ToneSettings.swift",
+        "Sources/SuiteKernel/Tone/ToneRules.swift",
+        "Sources/SuiteKernel/Tone/ToneCommands.swift",
+        "Tests/SuiteKernelTests/ToneSettingsTests.swift",
+        "Tests/SuiteKernelTests/ToneRulesTests.swift",
+        "Tests/SuiteKernelTests/ToneCommandsTests.swift",
+        "Tests/SuiteKernelTests/KernelShapeTests.swift",
+        "Tests/canonical-concepts.txt",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-tone.json",
+        "Sources/SuiteUI/ToneRows.swift",
+        "Sources/SuiteUI/Gallery/GalleryToneRows.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "UITests/SuiteJourneyTests+Tone.swift"
+      ]
+    },
+    {
+      "id": "TC-u",
+      "behavior": "On the gallery page every slider drags, types and resets, Auto and the section resets emit their intents, Vibrance shows its waiting reason, every control identified, within the render budget.",
+      "tasks": [
+        "TC-3",
+        "TC-4"
+      ],
+      "journeys": [
+        "TJ1"
+      ],
+      "waits": {
+        "TC-a": [
+          "TC-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/ToneRows.swift",
+        "Tests/SuiteUITests/ToneRowsTests.swift",
+        "Tests/AppSnapshotTests/SuiteToneRowsSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetToneRowsTests.swift",
+        "UITests/SuiteJourneyTests+Tone.swift"
+      ]
+    },
+    {
+      "id": "TC-m",
+      "behavior": "Settings clamp and round-trip with Library's keys, the rules give the program, the unsharp pass and Auto's values, and every tone command records exactly one undo step (a drag one).",
+      "tasks": [
+        "TC-5",
+        "TC-6",
+        "TC-7"
+      ],
+      "journeys": [
+        "KJ-tone"
+      ],
+      "waits": {
+        "TC-a": [
+          "TC-5",
+          "TC-6",
+          "TC-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Tone/ToneRules.swift",
+        "Tests/SuiteKernelTests/ToneRulesTests.swift",
+        "Tests/mutations/SuiteKernel.ToneRules.json",
+        "Sources/SuiteKernel/Tone/ToneCommands.swift",
+        "Tests/SuiteKernelTests/ToneCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.ToneCommands.json",
+        "Sources/SuiteKernel/Tone/ToneSettings.swift",
+        "Tests/SuiteKernelTests/ToneSettingsTests.swift",
+        "Tests/mutations/SuiteKernel.ToneSettings.json"
+      ]
+    },
+    {
+      "id": "TC-z",
+      "behavior": "The gallery runs its intents through `ToneCommands` on a live target, the fake app takes tone so RJ-X41 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "TC-8",
+        "TC-9",
+        "TC-10"
+      ],
+      "journeys": [
+        "TJ1",
+        "KJ-tone"
+      ],
+      "waits": {
+        "TC-u": [
+          "TC-8"
+        ],
+        "TC-m": [
+          "TC-8",
+          "TC-9"
+        ],
+        "gradient-fill:GF-z": [
+          "TC-9"
+        ],
+        "autosave-history:AH-z": [
+          "TC-9"
+        ],
+        "transform-tools:TT-z": [
+          "TC-9"
+        ],
+        "eyedropper:EY-z": [
+          "TC-9"
+        ],
+        "shape-tools:SH-z": [
+          "TC-9"
+        ],
+        "stroke-style:SS-d": [
+          "TC-9"
+        ],
+        "placed-images:PL-z": [
+          "TC-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryToneRows.swift",
+        "Tests/SuiteUITests/ToneRowsLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeCanvasToneTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/tone-controls/tone-controls.jobs.json",
+        "Tests/RealJobs/fake/tone-controls/input/one.fake",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-tone.json",
+        "docs/blueprints/suiteui/features/tone-controls.wave.json"
+      ]
+    }
+  ]
+}
