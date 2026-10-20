@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-20T05:12Z	0	stage-start	-	lead branch created from origin/dev 6537a1a0
+2026-10-20T05:12Z	0	stage-end	-	no lead/file-flow on the remote; RECORD.md from the template
+2026-10-20T05:12Z	1	stage-end	-	packet read; SF-9 waits on suiteui export-pack XP-z
+2026-10-20T05:12Z	2	stage-end	-	waves planned: SF-a, then SF-m and SF-u, then SF-z
+2026-10-20T05:12Z	3	stage-start	-	wave 1 SF-a
