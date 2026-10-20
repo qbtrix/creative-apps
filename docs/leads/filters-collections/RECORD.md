@@ -98,3 +98,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 14:42Z FC-4 #3461 macOS build 39437577080 still queued. No new findings.
 - 15:08Z check-in: FC-4 #3461 macOS build 39437577080 still queued; no needs-fix. The FC-5+ stack stays draft. Open library findings: none from this feature. No fixers running.
 - 15:28Z check-in: FC-4 #3461 build 39437577080 still queued; no new lane comment. Stack stays draft.
+- 15:50Z check-in: no new library merges since MD-7 7e36d64db. No needs-fix or needs-rebase labels on this run's PRs. MD-8 #3550: the lane dispatched macOS build 39450013937. Scoped run 39424958645 still queued, so MD-a is not done. perf-suites.txt has no keyword or filter lines yet (#3520), so MD-10 #3581 stays draft. The supervisor's UI review filed findings #3631-#3640. #3637's Camera half maps to MD-8 #3550 (commented). No fixers running.
