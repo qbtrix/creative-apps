@@ -4,7 +4,7 @@ Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
 Run: act-1a15749e569-ngtj (slice AD-library; AD-flare, AD-design, AD-photo, AD-halo done in earlier runs)
 Stage: 3 wave B
 Base: 25a8d9a2 (origin/dev); lead branch rebased on main b3011ab9
-Next: #3396 merged as cbaa5110 (12:32Z). Docs-only C4 clause follow-up (slice/ad-l3-c4) being gated; then a green ci.yml run on dev containing cbaa5110 gives Belt-Slice-Done: AD-library and Belt-Contact-Sheet. Open findings: 0
+Next: #3396 merged as cbaa5110 (12:32Z). Docs-only C4 clause follow-up #3603 (fast-lane, gate passed); then a green ci.yml run on dev containing cbaa5110 gives Belt-Slice-Done: AD-library and Belt-Contact-Sheet. Open findings: 0
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
