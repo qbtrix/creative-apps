@@ -10,7 +10,7 @@ Next: #3531 and #3541 then #3597 restack to dev; EY-8 waits on transform-tools:T
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | EY-a | The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper ... | EY-1, EY-2 | SJ0 | gradient-fill:GF-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39436506345 | wanted |
-| EY-u | On the gallery page every colour row's eyedropper picks a colour from the screen as one gesture, the loupe follows the p... | EY-3, EY-4 | EJ1 | EY-a | true | 0 | merged | – | – |
+| EY-u | On the gallery page every colour row's eyedropper picks a colour from the screen as one gesture, the loupe follows the p... | EY-3, EY-4 | EJ1 | EY-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39448853502 | wanted |
 | EY-m | The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document po... | EY-5, EY-6 | KJ-sample | EY-a | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39413721862 | – |
 | EY-z | The gallery samples through color.sample on a live target, the fake app samples its topmost rect so RJ-X33 runs on the C... | EY-7, EY-8, EY-9 | EJ1, KJ-sample | EY-u, EY-m, transform-tools:TT-z | true | 0 | planned | – | – |
 
