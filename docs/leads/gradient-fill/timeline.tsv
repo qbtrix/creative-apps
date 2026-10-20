@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-20T10:38Z	heartbeat	#3532 build 39406950210 queued; GF-2, GF-3, GF-6, AC-flare not on dev (head a54a892a); no supervisor reply
 2026-10-20T10:59Z	heartbeat	#3532 build 39406950210 still queued (macOS backlog); blockers not on dev (head 575cc800); no supervisor reply
 2026-10-20T11:20Z	build	#3532 macOS build 39406950210 green; awaiting lane merge
+2026-10-20T11:21Z	heartbeat	#3532 build green, awaiting lane sweep; blockers not on dev (head 0e1199e9); no supervisor reply
