@@ -79,8 +79,11 @@ design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
 suite SuiteModelTests.StoreBudgetTests
+suite SuiteModelTests.HandOffBudgetTests
+suite SuiteModelTests.HomeBudgetTests
 
 suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
 suiteui SuiteUITests.ListBudgetTests
 suiteui SuiteUITests.TimelineBudgetTests
+suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetEyedropperTests/loupeTrackTiming
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget
