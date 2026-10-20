@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 2026-10-20T05:20Z	0	stage-start	act-1a157b204fb-js9h	resume; lead branch rebuilt on main b3011ab9
 2026-10-20T05:20Z	3	slice-done	MC-a	run 39331727327 (scoped suite, holds #3200)
 2026-10-20T05:20Z	4	stage-end	#3000	contact sheet on run 39370860805
+2026-10-20T05:24Z	4	stopped	#3000	Belt-Slice-Done MC-a + Belt-Contact-Sheet posted
