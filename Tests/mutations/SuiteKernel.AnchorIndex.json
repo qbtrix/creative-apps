@@ -26,5 +26,33 @@
     "find": "selected.contains($0.ref)",
     "replace": "true || selected.contains($0.ref)",
     "tests": "AnchorIndexTests"
+  },
+  {
+    "label": "segmentHitsMatchAWholePathSearch: a segment's rows come from its ends only, so a curve bulging past them is missed",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "slot(min(min(from.y, c1.y), min(c2.y, end.y)))...slot(max(max(from.y, c1.y), max(c2.y, end.y)))",
+    "replace": "slot(min(from.y, end.y))...slot(max(from.y, end.y))",
+    "tests": "AnchorIndexTests"
+  },
+  {
+    "label": "segmentHitsMatchAWholePathSearch: wide segments are never searched, so a long line is missed",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "var near = Set(wide)",
+    "replace": "var near = Set<Int>()",
+    "tests": "AnchorIndexTests"
+  },
+  {
+    "label": "segmentHitsMatchAWholePathSearch: the hit keeps the local element index, not the path's",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "location.element = found[location.element / 2].element",
+    "replace": "location.element = location.element / 2",
+    "tests": "AnchorIndexTests"
+  },
+  {
+    "label": "handleTiesGoToHandleIn: equidistant handles of one anchor resolve in visit order",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "end == .handleOut ? 2 : end == .handleIn ? 1 : 0",
+    "replace": "end == nil ? 0 : 1",
+    "tests": "AnchorIndexTests"
   }
 ]

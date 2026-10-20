@@ -1,5 +1,7 @@
 // AnchorIndex.swift (pen-paths PN-1 stub, PN-6 body): anchors and handles on a uniform grid of `cell` document points,
-// so a hover reads a few cells and a marquee reads the cells it covers, not every anchor.
+// so a hover reads a few cells and a marquee reads the cells it covers, not every anchor. Each drawing segment is filed
+// in the cells its control box covers, so a segment hover searches only the segments near it.
+import FlareCore
 /// The anchors and handles of one path, in document space, bucketed by grid cell.
 public struct AnchorIndex: Sendable {
     public static let cell = 64.0
@@ -8,11 +10,15 @@ public struct AnchorIndex: Sendable {
     /// One anchor or handle: its anchor, that anchor's position in path order, the handle end (nil for the anchor) and
     /// where it is.
     private struct Mark: Sendable { var ref: AnchorRef, at: Int, end: HandleEnd?, point: Point }
+    /// One drawing segment in document space: its element index in the path, its start and the element from there.
+    private struct Piece: Sendable { var element: Int, from: Point, to: PathElement }
+    /// Most cells one segment is filed in; a wider one (or one with a non-finite point) is searched on every hover.
+    static let maxCellsPerSegment = 1_024
 
     /// How many anchors the index holds.
     public let count: Int
     private let anchors: [Key: [Mark]], handles: [Key: [Mark]]
-    private let path: VectorPath, toDocument: Matrix
+    private let pieces: [Piece], segments: [Key: [Int]], wide: [Int]
 
     /// The grid column or row holding coordinate `v`: `floor(v / cell)`, clamped so a huge value can't trap.
     public static func slot(_ v: Double) -> Int {
@@ -42,7 +48,42 @@ public struct AnchorIndex: Sendable {
                 count += 1
             }
         }
-        (self.count, self.anchors, self.handles, self.path, self.toDocument) = (count, anchors, handles, path, toDocument)
+        (self.count, self.anchors, self.handles) = (count, anchors, handles)
+        (pieces, segments, wide) = Self.fileSegments(path.transformed(by: toDocument))
+    }
+
+    /// The drawing segments of `doc` (a close becomes a line back to its start), each filed in the cells of its
+    /// control box, or in `wide` past `maxCellsPerSegment` cells or with a non-finite point.
+    private static func fileSegments(_ doc: VectorPath) -> ([Piece], [Key: [Int]], [Int]) {
+        var pieces: [Piece] = [], cells: [Key: [Int]] = [:], wide: [Int] = []
+        pieces.reserveCapacity(doc.elements.count)
+        var last: Point?, start: Point?
+        let elements = doc.elements
+        for i in elements.indices {
+            var from = last ?? start, to = elements[i], c1: Point, c2: Point, end: Point, closing = false
+            switch to {
+            case .move(let p): last = p; start = p; continue
+            case .close:
+                guard let s = start else { last = nil; continue }
+                from = last; to = .line(to: s); c1 = s; c2 = s; end = s; last = nil; closing = true
+            case .line(let p): c1 = p; c2 = p; end = p
+            case .quad(let c, let p): c1 = c; c2 = c; end = p
+            case .cubic(let a, let b, let p): c1 = a; c2 = b; end = p
+            }
+            if !closing {
+                if from == nil { start = end }
+                last = end
+            }
+            guard let from else { continue }
+            let n = pieces.count
+            pieces.append(Piece(element: i, from: from, to: to))
+            guard from.isFinite, c1.isFinite, c2.isFinite, end.isFinite else { wide.append(n); continue }
+            let (cx, cy) = (slot(min(min(from.x, c1.x), min(c2.x, end.x)))...slot(max(max(from.x, c1.x), max(c2.x, end.x))),
+                            slot(min(min(from.y, c1.y), min(c2.y, end.y)))...slot(max(max(from.y, c1.y), max(c2.y, end.y))))
+            guard Double(cx.count) * Double(cy.count) <= Double(maxCellsPerSegment) else { wide.append(n); continue }
+            for y in cy { for x in cx { cells[Key(x: x, y: y), default: []].append(n) } }
+        }
+        return (pieces, cells, wide)
     }
 
     /// What is under `point` within `reach`, nearest first: a selected anchor's handle, then an anchor, then a segment.
@@ -56,9 +97,17 @@ public struct AnchorIndex: Sendable {
         if let mark = nearest(in: anchors, area, to: point, reach: reach, where: { _ in true }) {
             return .anchor(mark.ref)
         }
-        guard reach > 0,
-              let location = try? path.transformed(by: toDocument).nearest(to: point, tolerance: reach / 8),
-              location.distance <= reach else { return nil }
+        guard reach > 0 else { return nil }
+        // Every segment within reach has its control box in a cell `area` covers. In element order, so ties go to the
+        // earlier element as in a search of the whole path.
+        var near = Set(wide)
+        visit(segments, area) { near.insert($0) }
+        let found = near.sorted().filter(pieces.indices.contains).map { pieces[$0] }
+        guard !found.isEmpty else { return nil }
+        let local = VectorPath(elements: found.flatMap { [.move(to: $0.from), $0.to] })
+        guard var location = try? local.nearest(to: point, tolerance: reach / 8), location.distance <= reach,
+              found.indices.contains(location.element / 2) else { return nil }
+        location.element = found[location.element / 2].element
         return .segment(location)
     }
 
@@ -73,7 +122,8 @@ public struct AnchorIndex: Sendable {
         return found.sorted { $0.at < $1.at }.map(\.ref)
     }
 
-    /// The mark in `buckets` nearest `point` within `reach` that `keep` allows; ties go to the lower ref.
+    /// The mark in `buckets` nearest `point` within `reach` that `keep` allows; ties go to the earlier anchor, then to
+    /// the anchor itself, then handleIn before handleOut.
     private func nearest(in buckets: [Key: [Mark]], _ area: Rect, to point: Point, reach: Double,
                          where keep: (Mark) -> Bool) -> Mark? {
         var best: (mark: Mark, distance: Double)?
@@ -81,15 +131,17 @@ public struct AnchorIndex: Sendable {
             let distance = ((mark.point.x - point.x) * (mark.point.x - point.x)
                 + (mark.point.y - point.y) * (mark.point.y - point.y)).squareRoot()
             guard distance <= reach, keep(mark) else { return }
-            if let b = best, (b.distance, b.mark.at) <= (distance, mark.at) { return }
+            if let b = best, (b.distance, b.mark.at, Self.rank(b.mark.end)) <= (distance, mark.at, Self.rank(mark.end)) { return }
             best = (mark, distance)
         }
         return best?.mark
     }
 
-    /// Calls `body` with every mark in the cells `rect` covers, both edge cells included. A rect covering more cells than
+    private static func rank(_ end: HandleEnd?) -> Int { end == .handleOut ? 2 : end == .handleIn ? 1 : 0 }
+
+    /// Calls `body` with every item in the cells `rect` covers, both edge cells included. A rect covering more cells than
     /// are filled walks the filled cells instead.
-    private func visit(_ buckets: [Key: [Mark]], _ rect: Rect, _ body: (Mark) -> Void) {
+    private func visit<T>(_ buckets: [Key: [T]], _ rect: Rect, _ body: (T) -> Void) {
         guard rect.minX <= rect.maxX, rect.minY <= rect.maxY else { return }
         let (x0, x1, y0, y1) = (Self.slot(rect.minX), Self.slot(rect.maxX), Self.slot(rect.minY), Self.slot(rect.maxY))
         let xs = x0...x1, ys = y0...y1
