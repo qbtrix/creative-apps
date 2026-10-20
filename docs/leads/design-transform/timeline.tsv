@@ -12,3 +12,5 @@ utc	stage	event	ref	note
 2026-10-20T21:00:34Z	DT-a	review	#3751	supervisor sentinel needs-split (645/17 incl. DG-a stack); own diff 397/14; replied, asked to hold until #3687
 2026-10-20T21:00:34Z	poll	heartbeat	-	#3687 open, #3698 open, #3684 open, #3686 open
 2026-10-20T21:21:54Z	poll	heartbeat	#3751	lane refused (645/17 stacked), needs-split; supervisor question open; #3687 still open
+2026-10-20T21:44:18Z	dep	pr-merged	#3687	DG-a merged (cross-feature); stacked PR now conflicts with dev
+2026-10-20T21:44:18Z	fix	fix-round	-	fixer merging dev into the stacked PR (merge commit), then re-measure against the cap
