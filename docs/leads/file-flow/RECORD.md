@@ -4,14 +4,14 @@ Issue: #3480 · Packet: docs/blueprints/suite/features/file-flow.md
 Run: act-1a157b72668-0qpi · Session: claude/file-flow-lead-kfs51t · Started: 2026-10-20T05:12Z
 Stage: 3 wave 2
 Base: 6537a1a02f512db2df50d253384529f1b354b184
-Next: SF-m (SF-5 DropPlan body) stacked on SF-a; merge dev into the SF-2 branch once #3488 merges
+Next: SF-u (SF-3 views) stacked on SF-2; merge dev into the stacked branches once #3488 merges, then label them fast-lane
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SF-a | kernel drop rule and file commands as stubs; SuiteShell menu group, drop modifier, drag source, bridge on the fakes; home takes a drop; checks written, disabled | SF-1, SF-2 | – | targets, home, switching (all built) | yes | 0 | PR #3488 + #3489 | – | – |
 | SF-u | drop highlight, Open Recent, Open In, drag source views within the render budget; journeys on | SF-3, SF-4 | SJ11, SJ14 | SF-a | yes | 0 | waiting | – | – |
-| SF-m | DropPlan routing, file commands bodies, bridge live | SF-5, SF-6, SF-7 | KJ (DropRoutingTests, FileFlowCommandsTests) | SF-a | no | 0 | waiting | – | – |
+| SF-m | DropPlan routing, file commands bodies, bridge live | SF-5, SF-6, SF-7 | KJ (DropRoutingTests, FileFlowCommandsTests) | SF-a | no | 0 | PR #3493 + #3507 | – | – |
 | SF-z | live drop and drag, fake conforms (RJ-X43), feature built | SF-8, SF-9, SF-10 | SJ11, SJ14, RJ-X43 | SF-u, SF-m; suiteui export-pack XP-z (SF-9); afterglow-cli (built) | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -19,9 +19,9 @@ Next: SF-m (SF-5 DropPlan body) stacked on SF-a; merge dev into the SF-2 branch 
 |---|---|---|---|---|---|---|---|
 | SF-1 | SF-a | 1 | DropPlan and FileFlowCommands stubs, suites disabled | Sources/SuiteKernel/Files/DropPlan.swift, Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-files.json | KernelShapeTests, suites compile disabled | #3488 | PR open |
 | SF-2 | SF-a | 1 | SuiteShell file contracts as stubs, home drop | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Sources/SuiteShell/SuiteDocumentsBridge.swift, Sources/AfterGlowApp/HomeWindow.swift, docs/c4/parts/creative-apps/suite-shell/shell-documents.json, UITests/AfterGlowJourneyTests+FileFlow.swift | journey skipped "waits on SF-4" | #3489 | PR open (stacked) |
-| SF-5 | SF-m | 2 | DropPlan body | Sources/SuiteKernel/Files/DropPlan.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/mutations/SuiteKernel.DropPlan.json | DropRoutingTests | – | waiting |
-| SF-6 | SF-m | 2 | file commands bodies | Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, Tests/mutations/SuiteKernel.FileFlowCommands.json | FileFlowCommandsTests | – | waiting |
-| SF-7 | SF-m | 2 | bridge live | Sources/SuiteShell/SuiteDocumentsBridge.swift, Tests/AppSnapshotTests/SuiteDocumentsBridgeTests.swift | SuiteDocumentsBridgeTests (macOS) | – | waiting |
+| SF-5 | SF-m | 2 | DropPlan body | Sources/SuiteKernel/Files/DropPlan.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/mutations/SuiteKernel.DropPlan.json | DropRoutingTests | #3493 | PR open (stacked on SF-1), Mutate 5/5 |
+| SF-6 | SF-m | 2 | file commands bodies | Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, Tests/mutations/SuiteKernel.FileFlowCommands.json | FileFlowCommandsTests | #3493 | PR open (stacked on SF-1), Mutate 4/4 |
+| SF-7 | SF-m | 2 | bridge live | Sources/SuiteShell/SuiteDocumentsBridge.swift, Tests/AppSnapshotTests/SuiteDocumentsBridgeTests.swift | SuiteDocumentsBridgeTests (macOS) | #3507 | PR open (stacked on SF-2) |
 | SF-3 | SF-u | 2 | views | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileFlowViewTests.swift | SuiteFileFlowViewTests | – | waiting |
 | SF-4 | SF-u | 2 | snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFileDropTests.swift, UITests/AfterGlowJourneyTests+FileFlow.swift | RenderBudgetFileDropTests, journeys | – | waiting |
 | SF-8 | SF-z | 3 | live drop and drag | Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileDropLiveTests.swift | SuiteFileDropLiveTests | – | waiting |
@@ -40,8 +40,12 @@ Next: SF-m (SF-5 DropPlan body) stacked on SF-a; merge dev into the SF-2 branch 
 - The journey lives in UITests/AfterGlowJourneyTests+FileFlow.swift (class SuiteFileFlowJourneyTests): SuiteHarness compiles only into the launcher's journey bundle; SuiteJourneyTests is SuiteUI's gallery bundle.
 - The launcher keeps its own Open Recent (LauncherCommandsHome); SuiteFileCommands is for adopting apps, so File has no second Open Recent.
 - SF-a split into two PRs (#3488 SF-1 302 lines, #3489 SF-2 239 lines, stacked on branch claude/file-flow-lead-kfs51t-sf2): together 539 lines, over the lane's 400 cap.
+- SF-m ships as two PRs: #3493 (SF-5 + SF-6, kernel, on SF-1) and #3507 (SF-7, shell, on SF-2), since SF-7 needs SF-2's bridge.
+- Own type in the drop rule is "this app is the only reader" (readers == [app]), so .png in Photo still places into an open document.
+- SF-7 has no mutation plan: SuiteShell builds only on macOS and rule 14 covers Model code.
+- The GitHub MCP appends an attribution footer on PR create; every PR body is rewritten with update_pull_request right after to drop it.
 - Drop rule order: own type (owner == app) opens first, then place (document open and ext in places), then open if this app reads it, then hand off to the first reader, else refuse. The packet's test ownTypeOpensEvenWithADocumentOpen needs own type before place.
 
 ## Open
-- #3489 shows 539 lines until #3488 merges; then merge origin/dev into its branch, rerun the gate, move Head.
+- #3489, #3493, #3507 show combined diffs until #3488 (and #3489 for #3507) merge; then merge origin/dev into each branch, rerun the gate, move Head, add fast-lane. #3488's macOS build: actions run 39375669624.
 - SF-9 blocked: suiteui export-pack XP-z not merged (export-pack status planned).
