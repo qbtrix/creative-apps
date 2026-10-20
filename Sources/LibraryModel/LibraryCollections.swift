@@ -73,30 +73,17 @@ extension LibraryCatalog {
         return ""
     }
 
-    /// Renames a collection of yours; built-ins are ignored.
+    /// Rename (built-ins ignored), add `ids` (the menu and a drop), add the
+    /// cull targets, remove the cull targets, and delete a collection of yours.
     public mutating func renameCollection(_ id: String, to name: String) {
         guard UserCollection.unavailable == nil else { return }
     }
-
-    /// Adds `ids` to the collection `id` (the menu and a drop).
     public mutating func add(_ ids: Set<String>, to id: String) {
         guard UserCollection.unavailable == nil else { return }
     }
-
-    /// Adds the cull targets to the collection `id`.
-    public mutating func addToCollection(_ id: String) {
-        add(cullTargets, to: id)
-    }
-
-    /// Removes the cull targets from the selected collection of yours.
-    public mutating func removeFromCollection() {
-        guard removeFromCollectionHelp == nil else { return }
-    }
-
-    /// Deletes a collection of yours.
-    public mutating func deleteCollection(_ id: String) {
-        guard deleteCollectionHelp == nil else { return }
-    }
+    public mutating func addToCollection(_ id: String) { add(cullTargets, to: id) }
+    public mutating func removeFromCollection() { guard removeFromCollectionHelp == nil else { return } }
+    public mutating func deleteCollection(_ id: String) { guard deleteCollectionHelp == nil else { return } }
 
     public func addToCollectionHelp(_ id: String) -> String? { UserCollection.unavailable }
     public var removeFromCollectionHelp: String? { UserCollection.unavailable }

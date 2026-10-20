@@ -126,29 +126,12 @@ extension LibraryCatalog {
     public var newSmartCollectionHelp: String? { UserCollection.smartUnavailable }
 
     /// Sets the bar's filter; with a smart collection selected, its rules.
-    public mutating func setFilter(_ filter: LibraryFilter) {
-        guard filterHelp == nil else { return }
-    }
-
-    public mutating func toggleFilterFlag(_ flag: PhotoFlag) {
-        guard filterHelp == nil else { return }
-    }
-
-    public mutating func setRatingRule(_ rule: RatingRule) {
-        guard filterHelp == nil else { return }
-    }
-
-    public mutating func toggleFilterLabel(_ label: PhotoLabel) {
-        guard filterHelp == nil else { return }
-    }
-
-    public mutating func toggleHideRejected() {
-        guard filterHelp == nil else { return }
-    }
-
-    public mutating func clearFilter() {
-        guard clearFilterHelp == nil else { return }
-    }
+    public mutating func setFilter(_ filter: LibraryFilter) { guard filterHelp == nil else { return } }
+    public mutating func toggleFilterFlag(_ flag: PhotoFlag) { guard filterHelp == nil else { return } }
+    public mutating func setRatingRule(_ rule: RatingRule) { guard filterHelp == nil else { return } }
+    public mutating func toggleFilterLabel(_ label: PhotoLabel) { guard filterHelp == nil else { return } }
+    public mutating func toggleHideRejected() { guard filterHelp == nil else { return } }
+    public mutating func clearFilter() { guard clearFilterHelp == nil else { return } }
 
     /// Makes "New Smart Collection" from the bar's filter; returns its id,
     /// or nil while smart collections are unavailable.
