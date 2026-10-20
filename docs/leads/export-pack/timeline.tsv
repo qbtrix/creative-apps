@@ -20,3 +20,5 @@ utc	stage	event	ref	note
 08:59Z	3	heartbeat	-	poll: runner free; XP-1 build 39390799799 in progress since 08:53Z, PN-2 build 39391184437 queued next; no supervisor answer needed now
 09:12Z	3	check	XP-1	lane macOS build 39390799799 success (09:03Z); #3552 waits for the lane sweep
 09:24Z	3	heartbeat	-	poll: #3552 build green, waiting for a lane sweep to merge it (lane runs are cycling); PN-2 build 39391184437 still queued
+09:28Z	3	merged	XP-1	#3552 squash-merged by the fast lane
+09:42Z	3	pr	XP-6	#3586 opened (dev merged in, add/add conflicts resolved to XP-6 side, CI: PASS, Mutate 5/5), fast-lane
