@@ -1,30 +1,30 @@
 # file-flow lead record
 
 Issue: #3480 · Packet: docs/blueprints/suite/features/file-flow.md
-Run: act-1a157b72668-0qpi · Session: claude/file-flow-lead-kfs51t · Started: 2026-10-20T05:12Z
-Stage: 3 wave 2
+Run: act-1a15adc3ee8-qw4q · Session: claude/file-flow-lead-6ugb9w · Started: 2026-10-20T05:12Z (relaunched 2026-10-20T19:30Z; first run act-1a157b72668-0qpi)
+Stage: 3 wave 3
 Base: 6537a1a02f512db2df50d253384529f1b354b184
-Next: SF-8 (live drop and Open In) stacked on SF-4; merge dev into the stacked branches once #3488 merges, then label them fast-lane
+Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb9w branches once #3514 is on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SF-a | kernel drop rule and file commands as stubs; SuiteShell menu group, drop modifier, drag source, bridge on the fakes; home takes a drop; checks written, disabled | SF-1, SF-2 | – | targets, home, switching (all built) | yes | 0 | PR #3488 + #3489 | – | – |
-| SF-u | drop highlight, Open Recent, Open In, drag source views within the render budget; journeys on | SF-3, SF-4 | SJ11, SJ14 | SF-a | yes | 0 | PRs #3514 (SF-3), #3522 (SF-4) | – | – |
-| SF-m | DropPlan routing, file commands bodies, bridge live | SF-5, SF-6, SF-7 | KJ (DropRoutingTests, FileFlowCommandsTests) | SF-a | no | 0 | PR #3493 + #3507 | – | – |
+| SF-a | kernel drop rule and file commands as stubs; SuiteShell menu group, drop modifier, drag source, bridge on the fakes; home takes a drop; checks written, disabled | SF-1, SF-2 | – | targets, home, switching (all built) | yes | 0 | done (#3488, #3489) | [39484284755](https://github.com/qbtrix/creative-apps/actions/runs/39484284755) | wanted |
+| SF-u | drop highlight, Open Recent, Open In, drag source views within the render budget; journeys on | SF-3, SF-4 | SJ11, SJ14 | SF-a | yes | 0 | #3514 (SF-3) open; SF-4 rebuilt on claude/file-flow-lead-6ugb9w-sf4 | – | – |
+| SF-m | DropPlan routing, file commands bodies, bridge live | SF-5, SF-6, SF-7 | KJ (DropRoutingTests, FileFlowCommandsTests) | SF-a | no | 0 | done (#3493, #3507) | [39484284755](https://github.com/qbtrix/creative-apps/actions/runs/39484284755) | – |
 | SF-z | live drop and drag, fake conforms (RJ-X43), feature built | SF-8, SF-9, SF-10 | SJ11, SJ14, RJ-X43 | SF-u, SF-m; suiteui export-pack XP-z (SF-9); afterglow-cli (built) | yes | 0 | waiting | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| SF-1 | SF-a | 1 | DropPlan and FileFlowCommands stubs, suites disabled | Sources/SuiteKernel/Files/DropPlan.swift, Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-files.json | KernelShapeTests, suites compile disabled | #3488 | PR open |
-| SF-2 | SF-a | 1 | SuiteShell file contracts as stubs, home drop | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Sources/SuiteShell/SuiteDocumentsBridge.swift, Sources/AfterGlowApp/HomeWindow.swift, docs/c4/parts/creative-apps/suite-shell/shell-documents.json, UITests/AfterGlowJourneyTests+FileFlow.swift | journey skipped "waits on SF-4" | #3489 | PR open (stacked) |
-| SF-5 | SF-m | 2 | DropPlan body | Sources/SuiteKernel/Files/DropPlan.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/mutations/SuiteKernel.DropPlan.json | DropRoutingTests | #3493 | PR open (stacked on SF-1), Mutate 5/5 |
-| SF-6 | SF-m | 2 | file commands bodies | Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, Tests/mutations/SuiteKernel.FileFlowCommands.json | FileFlowCommandsTests | #3493 | PR open (stacked on SF-1), Mutate 4/4 |
-| SF-7 | SF-m | 2 | bridge live | Sources/SuiteShell/SuiteDocumentsBridge.swift, Tests/AppSnapshotTests/SuiteDocumentsBridgeTests.swift | SuiteDocumentsBridgeTests (macOS) | #3507 | PR open (stacked on SF-2) |
-| SF-3 | SF-u | 2 | views | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileFlowViewTests.swift | SuiteFileFlowViewTests | – | PR #3514 |
-| SF-4 | SF-u | 2 | snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFileDropTests.swift, UITests/AfterGlowJourneyTests+FileFlow.swift | RenderBudgetFileDropTests, SuiteFileFlowSnapshots, journey | #3522 | PR open (stacked) |
-| SF-8 | SF-z | 3 | live drop and drag | Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileDropLiveTests.swift | SuiteFileDropLiveTests | – | waiting |
+| SF-1 | SF-a | 1 | DropPlan and FileFlowCommands stubs, suites disabled | Sources/SuiteKernel/Files/DropPlan.swift, Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-files.json | KernelShapeTests, suites compile disabled | #3488 | merged |
+| SF-2 | SF-a | 1 | SuiteShell file contracts as stubs, home drop | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Sources/SuiteShell/SuiteDocumentsBridge.swift, Sources/AfterGlowApp/HomeWindow.swift, docs/c4/parts/creative-apps/suite-shell/shell-documents.json, UITests/AfterGlowJourneyTests+FileFlow.swift | journey skipped "waits on SF-4" | #3489 | merged |
+| SF-5 | SF-m | 2 | DropPlan body | Sources/SuiteKernel/Files/DropPlan.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/mutations/SuiteKernel.DropPlan.json | DropRoutingTests | #3493 | merged, Mutate 5/5 |
+| SF-6 | SF-m | 2 | file commands bodies | Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, Tests/mutations/SuiteKernel.FileFlowCommands.json | FileFlowCommandsTests | #3493 | merged, Mutate 4/4 |
+| SF-7 | SF-m | 2 | bridge live | Sources/SuiteShell/SuiteDocumentsBridge.swift, Tests/AppSnapshotTests/SuiteDocumentsBridgeTests.swift | SuiteDocumentsBridgeTests (macOS) | #3507 | merged |
+| SF-3 | SF-u | 2 | views | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileFlowViewTests.swift | SuiteFileFlowViewTests | #3514 | PR open, Fast-Check pass at d2970e8a |
+| SF-4 | SF-u | 2 | snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFileDropTests.swift, UITests/AfterGlowJourneyTests+FileFlow.swift | RenderBudgetFileDropTests, SuiteFileFlowSnapshots, journey | #3522 closed (needs-split) | rebuilt at 812acde1, gate pass, PR after #3514 |
+| SF-8 | SF-z | 3 | live drop and drag | Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileDropLiveTests.swift | SuiteFileDropLiveTests | #3529 closed (needs-split) | rebuilt at 3db84201, gate pass, PR after SF-4 |
 | SF-9 | SF-z | 3 | fake conforms to FileFlowTarget | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasFileFlowTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/file-flow/ | FakeCanvasFileFlowTests, RJ-X43 | – | blocked (XP-z) |
 | SF-10 | SF-z | 3 | C4 parts, wave.json built, feature-done | docs/c4/parts/creative-apps/suite-kernel/kernel-files.json, docs/blueprints/suite/features/file-flow.wave.json | scripts/ci | – | waiting |
 
@@ -51,6 +51,9 @@ Next: SF-8 (live drop and Open In) stacked on SF-4; merge dev into the stacked b
 
 - SF-8 (#3529): bridge.perform(_:host:) sends open/place to the app's SuiteDocumentHost and hand-offs to the reader; suiteFileDrop(host:) performs live; suiteDraggable writes every PasteboardCoding representation. Home keeps its handOff call (already live). SF-z still needs SF-9 (blocked) and SF-10.
 
+- Relaunch: #3522 and #3529 were labelled needs-split (their diffs carried the stale pre-squash commits of the merged slices). Rebuilt by cherry-picking each slice's own two commits onto #3514's head; closed both. Their new PRs open after #3514 merges, so each diff shows one slice.
+- The proxy re-adds an attribution footer on REST comment edits; mcp update_issue_comment strips it, so every comment is re-saved through it.
+
 ## Open
-- #3489, #3493, #3507, #3514, #3522, #3529 show combined diffs until #3488 (and #3489 for #3507) merge; then merge origin/dev into each branch, rerun the gate, move Head, add fast-lane. #3488's macOS build: actions run 39375669624.
-- SF-9 blocked: suiteui export-pack XP-z not merged (export-pack status planned).
+- #3514 (SF-3) waits on the supervisor's local Mac gate. Then: PR for claude/file-flow-lead-6ugb9w-sf4 (merge origin/dev in first), then -sf8.
+- SF-9: export-pack (suiteui) is still planned with no issue; FakeCanvasDocument.swift is a suite-line kernel file, so SF-9 builds now and XP-z adds to it later (question posted on #3480).
