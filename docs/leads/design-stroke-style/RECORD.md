@@ -2,14 +2,14 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:15:51Z (prior run act-1a159c9b6b4-va3c opened no PR)
-Stage: 3 wave 1 (DK-a building)
+Stage: 3 wave 1 (DK-a PR #3690 in lane)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
-Next: DK-a PR (DK-1 + DK-2 on SS-2's StrokeEditor, merged #3601). DK-u waits shape-tools:DS-u, DK-m waits shape-tools:DS-m (both wait Design transform DT-a/DT-m)
+Next: #3690 merges via the lane; critic panel once a scoped design run shows the Stroke section. DK-u waits shape-tools:DS-u, DK-m waits shape-tools:DS-m (both wait Design transform DT-a/DT-m)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor on them | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 0 | building | – | – |
+| DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor on them | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 0 | PR #3690 | – | – |
 | DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 0 | waiting | – | – |
 | DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d (DK-7) | no | 0 | waiting | – | – |
 | DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | waiting | – | – |
@@ -17,8 +17,8 @@ Next: DK-a PR (DK-1 + DK-2 on SS-2's StrokeEditor, merged #3601). DK-u waits sha
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| DK-1 | DK-a | 1 | adapter and DesignNode.vectorStroke stubs; DesignStrokeTests disabled | Sources/DesignModel/DesignStroke+Kernel.swift, Tests/DesignModelTests/DesignStrokeTests.swift | DesignStrokeTests | – | building |
-| DK-2 | DK-a | 1 | Stroke section is StrokeEditor (no trim) on the stubs; journey skipped | Sources/DesignApp/DesignInspectorStyle.swift, UITests/DesignJourneyTests+Stroke.swift | DesignInspectorSnapshots | – | building |
+| DK-1 | DK-a | 1 | adapter and DesignNode.vectorStroke stubs; DesignStrokeTests disabled | Sources/DesignModel/DesignStroke+Kernel.swift, Tests/DesignModelTests/DesignStrokeTests.swift | DesignStrokeTests | #3690 | PR |
+| DK-2 | DK-a | 1 | Stroke section is StrokeEditor (no trim) on the stubs; journey skipped | Sources/DesignApp/DesignInspectorStyle.swift, UITests/DesignJourneyTests+Stroke.swift | DesignInspectorSnapshots | #3690 | PR |
 
 ## Critic reviews
 | slice | run | commit | lenses | filed | after round |
