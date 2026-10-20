@@ -42,5 +42,6 @@ Next: #3552 (XP-1) waits on the lane (macOS build); once it merges, merge dev in
 - XP-1 and XP-6 run in one builder, one after another: XP-6 fills XP-1's stub bodies.
 
 ## Open
+- 08:37Z: the lane's macOS build has been queued for 30 min behind run 39362977551 (#3409, running since 03:11Z); third identical poll, so asked the supervisor on #3477 (6286926687).
 - XP-2 waits on shell-media SM-a (suite line, packet planned, no lead branch).
 - XP-3 waits on tone-controls TC-a, which waits on #3144 (core pin 9ed9ef0), gradient-fill GF-a, AH-a, PL-a.
