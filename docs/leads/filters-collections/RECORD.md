@@ -92,3 +92,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 12:47Z check-in: FC-4 #3461 not merged; FC cascade waits.
 - 13:12Z check-in: FC-4 #3461 not merged; no new findings.
 - 13:32Z check-in: FC-4 #3461 not merged yet; stack stays draft. No new line:library findings.
+- 13:55Z check-in: FC-4 #3461 has carried needs-fix since 12:09Z (the Linux check fails once it lands on dev, job 118609940318: 1 failing test). Started a fixer: merge dev, root-cause, push, move Head. No new findings.
