@@ -1,3 +1,4 @@
 time	kind	note
 2026-10-20T15:00Z	setup	lead record created; wave 1 starts
 2026-10-20T19:15:51Z	stage	start	-	run act-1a15abb305f-lc8g on dev a48992b7; DK-a builder (wave 1 with eyedropper DY-a)
+2026-10-20T19:18:03Z	3	build-wave started	DK-a	workflow wf_c18b376e-723
