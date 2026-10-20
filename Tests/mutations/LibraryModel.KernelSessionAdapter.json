@@ -40,5 +40,12 @@
     "find": "try VersionedJSON.probe(data, supported: version)",
     "replace": "try VersionedJSON.probe(data)",
     "tests": "LibrarySessionKernelTests|LibraryCatalogCodingTests"
+  },
+  {
+    "label": "dirtyIsSaved: the status stops reading the session's dirty flag, so an unwritten change reads saved",
+    "file": "Sources/LibraryModel/LibrarySession+Kernel.swift",
+    "find": "return dirty ? .unsaved : .saved",
+    "replace": "return .saved",
+    "tests": "LibrarySessionKernelTests"
   }
 ]

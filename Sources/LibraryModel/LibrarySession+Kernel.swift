@@ -19,17 +19,18 @@ extension LibraryCatalog {
     /// The catalog file's session: saved at the revision last written (or
     /// read), current at the revision on screen now.
     public var catalogSession: DocumentSession {
-        var session = DocumentSession(token: savedRevision, status: catalogSaveStatus)
+        var session = DocumentSession(token: savedRevision)
         session.currentToken = saveRevision
+        session.status = catalogSaveStatus(dirty: session.isDirty)
         return session
     }
 
     /// The save status: the last save's error, read-only while the file can't
-    /// be saved over (loading, or newer), else saved when no change is unwritten.
-    var catalogSaveStatus: SaveStatus {
+    /// be saved over (loading, or newer), else unsaved while the session is dirty.
+    func catalogSaveStatus(dirty: Bool) -> SaveStatus {
         if let saveError { return .failed(saveError) }
         guard catalogState.canSave else { return .readOnly }
-        return saveRevision == savedRevision ? .saved : .unsaved
+        return dirty ? .unsaved : .saved
     }
 }
 
