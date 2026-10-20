@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-20T11:21Z	heartbeat	#3532 build green, awaiting lane sweep; blockers not on dev (head 0e1199e9); no supervisor reply
 2026-10-20T11:43Z	heartbeat	#3532 green since 11:19Z, unmerged; lane run 39415962455 in progress; blockers not on dev (head 0e1199e9); no supervisor reply
 2026-10-20T12:07Z	heartbeat	#3532 green, unmerged: lane batch-20261020112639 red, bisecting (probe -0 running); blockers not on dev (head 0e1199e9); no supervisor reply
+2026-10-20T12:30Z	heartbeat	batch-20261020112639 settled: 4 PRs merged (dev 3ebb876f), #3532 not in it; #3532 green, clean, no needs-fix, lane run 39421163733 in progress; GF-2/GF-3/GF-6/AC-flare still not on dev
