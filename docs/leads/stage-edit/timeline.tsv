@@ -229,3 +229,4 @@
 2026-10-20T17:15:13Z	heartbeat	full CI 39447117246 cancelled (superseded); new full CI 39464293440 on 39a1c97e (contains 424b4a60) pending; contact sheet waits on it
 2026-10-20T17:26:59Z	heartbeat	full CI 39464293440 on 39a1c97e still pending (no runner yet); contact sheet waits on it
 2026-10-20T17:39:40Z	heartbeat	full CI 39464293440 cancelled (superseded); waiting on full CI 39467874733 on 59fe72db (contains 424b4a60), pending
+2026-10-20T17:50:58Z	heartbeat	full CI 39467874733 cancelled (superseded); waiting on full CI 39469318877 on d7f615dc (contains 424b4a60), pending
