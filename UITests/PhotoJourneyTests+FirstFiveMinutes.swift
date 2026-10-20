@@ -70,7 +70,7 @@ final class PhotoFirstFiveJourneys: XCTestCase {
     }
 
     /// Where a new user gets stuck, by finding issue.
-    private static let stuckBrightness = "(first five minutes: finding #TBD)"
+    private static let stuckBrightness = "(first five minutes: finding #3527)"
 
     /// Photo on a fresh profile with an 800 × 600 beach.png open, as Open… would leave it.
     @MainActor private func open(exportTo: URL?) throws -> Journey {

@@ -47,7 +47,7 @@ final class DesignFirstFiveJourneys: XCTestCase {
     }
 
     /// Where a new user gets stuck, by finding issue.
-    private static let stuckExport = "(first five minutes: finding #TBD)"
+    private static let stuckExport = "(first five minutes: finding #3528)"
 
     /// Design on a fresh profile, after the top bar's New File.
     @MainActor private func newDesign(_ arguments: [String]) -> Journey {
