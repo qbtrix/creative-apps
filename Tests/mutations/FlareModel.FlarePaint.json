@@ -1,0 +1,16 @@
+[
+  {
+    "label": "a solid fill reads as a gradient",
+    "file": "Sources/FlareModel/FlarePaint.swift",
+    "find": "            gradient: solid.isEmpty ? fillSelection : nil)",
+    "replace": "            gradient: fillSelection)",
+    "tests": "FlareGradientTests"
+  },
+  {
+    "label": "the readout drops the gradient",
+    "file": "Sources/FlareModel/FlarePaint.swift",
+    "find": "            gradient: solid.isEmpty ? fillSelection : nil)",
+    "replace": "            gradient: nil)",
+    "tests": "FlareGradientTests"
+  }
+]

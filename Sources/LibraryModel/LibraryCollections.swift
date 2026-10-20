@@ -1,7 +1,15 @@
 // LibraryCollections.swift: the collections you make (ids "user-<n>") and the
 // smart collections (ids "smart-<n>"), their names and contents, and the
 // refresh that keeps the selection and the loupe true to what is shown when
-// the photos a collection shows change. Linux-safe.
+// the photos a collection shows change. Until each part is built (FC-9,
+// FC-14), the editing and file calls change nothing and their help answers
+// the `unavailable` text. Linux-safe.
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// A collection you made from a set of photos, or a smart collection whose
 /// photos are the ones its rules admit.
@@ -50,5 +58,60 @@ extension LibraryCatalog {
             mode = .grid
             focusedItemID = nil
         }
+    }
+
+    /// The selected collection of yours, or nil for a built-in one.
+    public var selectedUserCollection: UserCollection? {
+        guard UserCollection.isUserID(selectedCollectionID) else { return nil }
+        return userCollections.first { $0.id == selectedCollectionID }
+    }
+
+    /// Makes "New Collection" from the cull targets; returns its id, or ""
+    /// while collections are unavailable.
+    @discardableResult public mutating func newCollection() -> String {
+        guard UserCollection.unavailable == nil else { return "" }
+        return ""
+    }
+
+    /// Rename (built-ins ignored), add `ids` (the menu and a drop), add the
+    /// cull targets, remove the cull targets, and delete a collection of yours.
+    public mutating func renameCollection(_ id: String, to name: String) {
+        guard UserCollection.unavailable == nil else { return }
+    }
+    public mutating func add(_ ids: Set<String>, to id: String) {
+        guard UserCollection.unavailable == nil else { return }
+    }
+    public mutating func addToCollection(_ id: String) { add(cullTargets, to: id) }
+    public mutating func removeFromCollection() { guard removeFromCollectionHelp == nil else { return } }
+    public mutating func deleteCollection(_ id: String) { guard deleteCollectionHelp == nil else { return } }
+
+    public func addToCollectionHelp(_ id: String) -> String? { UserCollection.unavailable }
+    public var removeFromCollectionHelp: String? { UserCollection.unavailable }
+    public var deleteCollectionHelp: String? { UserCollection.unavailable }
+
+    /// The collections file to write, or nil when nothing needs saving.
+    public func collectionsSaveRequest() -> (revision: Int, data: Data)? {
+        guard UserCollection.fileUnavailable == nil else { return nil }
+        return nil
+    }
+
+    /// Records that the file for `revision` was written.
+    public mutating func didSaveCollections(revision: Int) {
+        guard UserCollection.fileUnavailable == nil else { return }
+    }
+
+    /// Restores your collections from the file's `data` (nil: no file).
+    public mutating func restoreCollections(_ data: Data?) throws {
+        guard UserCollection.fileUnavailable == nil else { return }
+    }
+
+    /// A file that couldn't be read was set aside as `name`.
+    public mutating func failRestoreCollections(setAsideAs name: String) {
+        guard UserCollection.fileUnavailable == nil else { return }
+    }
+
+    /// "saved" or "dirty", for the journeys.
+    public var collectionsFileValue: String {
+        collectionsRevision == collectionsSavedRevision ? "saved" : "dirty"
     }
 }
