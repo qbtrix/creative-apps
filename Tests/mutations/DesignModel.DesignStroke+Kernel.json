@@ -1,0 +1,5 @@
+[
+{"label":"the kernel stroke drops the width","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"return VectorStroke(color: color, width: stroke.width)","replace":"return VectorStroke(color: color, width: 1)","tests":"DesignStrokeTests"},
+{"label":"the kernel stroke drops the red channel","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"r: Double(c.red) / 255","replace":"r: 0","tests":"DesignStrokeTests"},
+{"label":"the Dash picker blames the stroke commands, not core","file":"Sources/DesignModel/DesignStroke+Kernel.swift","find":"Self.addStrokeFirstHelp : StrokeRules.waitingCore","replace":"Self.addStrokeFirstHelp : Self.strokeStylesHelp","tests":"DesignStrokeTests"}
+]

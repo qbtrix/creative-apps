@@ -26,6 +26,13 @@ private func rectangle(_ stroke: DesignStroke? = .default) throws -> DesignWorks
         #expect(stroke?.join == .miter && stroke?.cap == .butt)
     }
 
+    @Test func aKernelColourComesBackAsTheSameChannels() {
+        let color = DesignColor(255, 0, 51)
+        #expect(DesignColor(FillColor(r: 1, g: 0, b: 0.2, a: 1)) == color)
+        #expect(DesignColor(FillColor(r: 2, g: -1, b: .nan, a: 1)) == DesignColor(255, 0, 0))
+        #expect(DesignColor(FillColor(r: 0.5, g: 0.5, b: 0.5, a: 1)) == DesignColor(128, 128, 128))
+    }
+
     @Test func noStrokeReadsNil() {
         let node = DesignNode(id: "a", name: "A", kind: .rectangle, frame: DesignRect(x: 0, y: 0, width: 10, height: 10))
         #expect(node.vectorStroke == nil)
@@ -40,6 +47,21 @@ private func rectangle(_ stroke: DesignStroke? = .default) throws -> DesignWorks
 
     @Test func trimIsForAnimation() throws {
         #expect(try rectangle().trimHelp == "Trim paths are for animation, in Flare and Halo.")
+    }
+
+    @Test func thePickersSayWhyTheyAreOff() throws {
+        let stroked = try rectangle()
+        #expect(stroked.strokeHelp == nil)
+        #expect(stroked.strokeStyleHelp == "Stroke styles isn't built yet.")
+        #expect(stroked.strokeDashHelp == StrokeRules.waitingCore)
+        let plain = try rectangle(nil)
+        #expect(plain.strokeStyleHelp == "Add a stroke first." && plain.strokeDashHelp == "Add a stroke first.")
+    }
+
+    @Test func thePickersAreListedControls() {
+        let all = Set(DesignControlID.all)
+        #expect(all.contains("design.inspector.stroke-join") && all.contains("design.inspector.stroke-cap"))
+        #expect(all.contains(DesignControlID.inspectorStrokeDash))
     }
 
     @Test func setStrokeRefusesUntilTheBodiesAreBuilt() throws {

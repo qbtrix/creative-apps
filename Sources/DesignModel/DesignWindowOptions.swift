@@ -109,6 +109,10 @@ public enum DesignControlID {
     public static let inspectorStrokeAdd = "design.inspector.stroke-add"
     /// The Style section's Remove Stroke button, shown while the selection has a stroke.
     public static let inspectorStrokeRemove = "design.inspector.stroke-remove"
+    /// The Stroke editor's Join, Cap and Dash pickers (stroke-style DK-2).
+    public static let inspectorStrokeJoin = "design.inspector.stroke-join"
+    public static let inspectorStrokeCap = "design.inspector.stroke-cap"
+    public static let inspectorStrokeDash = "design.inspector.stroke-dash"
     public static let inspectorTextFamily = "design.inspector.text-family"
     public static let inspectorTextSize = "design.inspector.text-size"
     public static let inspectorTextWeight = "design.inspector.text-weight"
@@ -143,6 +147,7 @@ public enum DesignControlID {
         statusTool, statusSave, statusSelection, statusNote, pageAdd, pageDelete,
         inspectorHeader, inspectorFill, inspectorCornerRadius, inspectorOpacity,
         inspectorStrokeColor, inspectorStrokeWidth, inspectorStrokeAdd, inspectorStrokeRemove,
+        inspectorStrokeJoin, inspectorStrokeCap, inspectorStrokeDash,
         inspectorTextFamily, inspectorTextSize,
         inspectorTextWeight, inspectorTextAlignment, inspectorTextWidth, inspectorPageWidth, inspectorPageHeight,
         exportSheet, exportFormat, exportScale, exportScope, exportItems, exportRun,

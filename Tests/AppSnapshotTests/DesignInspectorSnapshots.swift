@@ -5,9 +5,12 @@
 // against the X field's on the hosted view), a rectangle inside a locked group
 // (disabled the same way), and A on `cards` styled: radius 12, opacity 50% and
 // a 4 pt stroke. Writes design-inspector-page-, -node-, -locked-,
-// -locked-group- and -style-{light,dark}.png. macOS only.
+// -locked-group- and -style-{light,dark}.png. The Stroke editor (stroke-style
+// DK-2) on A, stroked and not: design-stroke-editor- and
+// design-stroke-no-stroke-{light,dark}.png. macOS only.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -16,10 +19,10 @@ import Testing
 
 @MainActor
 @Suite struct DesignInspectorSnapshots {
-    private func shoot(_ state: String, _ model: DesignWorkspace) throws {
+    private func shoot(_ state: String, _ model: DesignWorkspace, prefix: String = "design-inspector") throws {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PanelSample(model: model), name: "design-inspector-\(state)-\(scheme == .dark ? "dark" : "light")",
+                PanelSample(model: model), name: "\(prefix)-\(state)-\(scheme == .dark ? "dark" : "light")",
                 scheme: scheme)
         }
     }
@@ -59,6 +62,19 @@ import Testing
         #expect(a.stroke == DesignStroke(color: .black, width: 4))
         #expect(model.opacityPercentText == "50%")
         try shoot("style", model)
+    }
+
+    /// The Stroke editor: Color, Width and the Join, Cap and Dash pickers, off with their reasons until DK-6.
+    @Test func strokeEditor() throws {
+        var model = DesignFixtures.cards
+        model.useServices(.live)
+        model.selectItem("node-2")
+        #expect(model.selectedStroke == nil)
+        try shoot("no-stroke", model, prefix: "design-stroke")
+        try model.setStyle(.stroke(DesignStroke(color: .black, width: 2)))
+        #expect(model.selectedStroke?.width == 2)
+        #expect(model.strokeStyleHelp != nil && model.strokeDashHelp != nil)
+        try shoot("editor", model, prefix: "design-stroke")
     }
 
     /// The hint starts where the X field does, not at the gutter (#276).

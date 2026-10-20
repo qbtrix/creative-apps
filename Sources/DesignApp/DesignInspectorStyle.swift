@@ -12,6 +12,7 @@
 // DesignNodeProperties.hintSpace (SuiteUI's InspectorNote draws it).
 // Every control's help comes from the Model. Values in, intents out.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -116,15 +117,19 @@ struct DesignInspectorStyle: View {
         }
     }
 
-    /// Add Stroke while no selected layer has one; else Color, Width and Remove Stroke.
+    /// Add Stroke while no selected layer has one; else Color, Width, Join, Cap, Dash and Remove Stroke, all
+    /// read through the kernel stroke (`vectorStroke`, `selectedStroke`), never DesignStroke's fields. No trim:
+    /// Design leaves it to the animation apps (`trimHelp`). A placeholder until SuiteUI's StrokeEditor lands.
     @ViewBuilder
     private func strokeRows(_ shown: DesignWorkspace, send: DesignStyleSend, help: String?) -> some View {
-        if let first = shown.selectedNodes.lazy.compactMap(\.stroke).first {
+        if let first = shown.selectedNodes.lazy.compactMap(\.vectorStroke).first {
             // nil when the layers differ (a layer with no stroke differs from one with a stroke).
-            let color: DesignColor? = shown.sharedValue { $0.stroke?.color } ?? nil
-            let width: Double? = shown.sharedValue { $0.stroke?.width } ?? nil
+            let color: FillColor? = shown.sharedValue { $0.vectorStroke?.color } ?? nil
+            let width: Double? = shown.sharedValue { $0.vectorStroke?.width } ?? nil
+            let keep = DesignColor(color ?? first.color)
             if let color {
-                InspectorColorWellRow("Color", color: HexColor(color.red, color.green, color.blue)) {
+                let well = DesignColor(color)
+                InspectorColorWellRow("Color", color: HexColor(well.red, well.green, well.blue)) {
                     perform(.setStyle(.stroke(DesignStroke(color: DesignColor($0.red, $0.green, $0.blue), width: width ?? first.width))))
                 }
                 .disabled(help != nil)
@@ -136,20 +141,44 @@ struct DesignInspectorStyle: View {
                 }
             }
             InspectorSliderRow(
-                "Width", value: width ?? first.width, in: 0...1000, step: 1, unit: "pt", decimals: 1, mixed: width == nil,
-                onChange: { send.preview(.stroke(DesignStroke(color: color ?? first.color, width: $0))) }, onEnd: send.end
+                "Width", value: width ?? first.width, in: StrokeRules.widths, step: 1, unit: "pt", decimals: 1,
+                mixed: width == nil, onChange: { send.preview(.stroke(DesignStroke(color: keep, width: $0))) }, onEnd: send.end
             )
             .disabled(help != nil)
             .help(help ?? "")
             .suiteControl(id: DesignControlID.inspectorStrokeWidth, enabled: help == nil, reason: help)
+            let join: StrokeJoin? = shown.sharedValue { $0.vectorStroke?.join } ?? nil
+            let cap: StrokeCap? = shown.sharedValue { $0.vectorStroke?.cap } ?? nil
+            stylePicker("Join", id: DesignControlID.inspectorStrokeJoin, selection: join?.rawValue,
+                        choices: StrokeJoin.allCases.map(\.rawValue), help: shown.strokeStyleHelp)
+            stylePicker("Cap", id: DesignControlID.inspectorStrokeCap, selection: cap?.rawValue,
+                        choices: StrokeCap.allCases.map(\.rawValue), help: shown.strokeStyleHelp)
+            stylePicker("Dash", id: DesignControlID.inspectorStrokeDash, selection: StrokeRules.preset(of: first).rawValue,
+                        choices: DashPreset.allCases.map(\.rawValue), help: shown.strokeDashHelp)
             InspectorAction(ToolbarAction(
-                "Remove Stroke", systemImage: "minus", unavailableHelp: help, identifier: "design.inspector.stroke-remove"
+                "Remove Stroke", systemImage: "minus", unavailableHelp: help, identifier: DesignControlID.inspectorStrokeRemove
             ) { send.commit(.stroke(nil)) })
         } else {
             InspectorAction(ToolbarAction(
-                "Add Stroke", systemImage: "plus", unavailableHelp: help, identifier: "design.inspector.stroke-add"
+                "Add Stroke", systemImage: "plus", unavailableHelp: help, identifier: DesignControlID.inspectorStrokeAdd
             ) { send.commit(.stroke(.default)) })
         }
+    }
+
+    /// A Join, Cap or Dash menu over `choices`; Mixed when `selection` is nil. Disabled with `help`, which
+    /// stays set until DK-6 builds `setStroke` (Dash until the core bump); a pick then goes to `setStroke`.
+    private func stylePicker(
+        _ label: String, id: String, selection: String?, choices: [String], help: String?
+    ) -> some View {
+        let mixed = "mixed", current = selection ?? mixed
+        let options = (selection == nil ? [mixed] : []) + choices
+        return InspectorPickerRow(
+            label, options: options.map { InspectorOption(id: $0, title: $0.capitalized) }, selection: current
+        ) { _ in }
+            .disabled(help != nil)
+            .help(help ?? label)
+            .accessibilityValue(Text(verbatim: current.capitalized))
+            .suiteControl(id: id, enabled: help == nil, reason: help)
     }
 }
 
