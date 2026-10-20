@@ -5,3 +5,4 @@ time	kind	note
 2026-10-20T19:28:33Z	check	PR	#3687	DG-a opened (DG-1 + DG-2), head 502830b8, 258 lines, Mutate 10/10
 2026-10-20T19:53:22Z	check	heartbeat	#3687	DG-a open, macOS build queued; no needs-fix
 2026-10-20T20:15:53Z	check	heartbeat	#3687	DG-a macOS build still queued; no needs-fix
+2026-10-20T20:48:17Z	heartbeat	DG-a #3687 waiting on macOS build; DG-u/m/z blocked on SuiteUI GF-2..7 (#3677)
