@@ -4,7 +4,7 @@ Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
 Stage: 3 build W1
 Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
-Next: PP-a builder (wave 1, one PR); PP-3 once placed-images PL-2 merges
+Next: #3764 (PP-a) in the lane; PP-3 once placed-images PL-2 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,8 +17,8 @@ Next: PP-a builder (wave 1, one PR); PP-3 once placed-images PL-2 merges
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PP-1 | PP-a | 1 | conformance as stubs; PhotoPlaceTests disabled | Sources/PhotoModel/PhotoPlace+Kernel.swift, Tests/PhotoModelTests/PhotoPlaceTests.swift | suite compiles, disabled | – | building |
-| PP-2 | PP-a | 1 | RJ-P37 job folder, waits_on PP-6 | Tests/RealJobs/photo/place-logo/ | job listed, skipped | – | building |
+| PP-1 | PP-a | 1 | conformance as stubs; PhotoPlaceTests disabled | Sources/PhotoModel/PhotoPlace+Kernel.swift, Tests/PhotoModelTests/PhotoPlaceTests.swift | suite compiles, disabled | #3764 | in lane |
+| PP-2 | PP-a | 1 | RJ-P37 job folder, waits_on PP-6 | Tests/RealJobs/photo/place-logo/ | job listed, skipped | #3764 | in lane |
 | PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceSnapshots.logo | – | waiting (PL-2) |
 | PP-4 | PP-u | 3 | snapshots, budget, journey skipped | Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift, RenderBudgetPhotoPlaceTests.swift, UITests/PhotoJourneyTests+Place.swift | snapshots | – | waiting |
 | PP-5 | PP-m | 4 | conformance bodies; insertPixelLayer from paste; tests on (PP-6 folded in) | PhotoPlace+Kernel.swift, PhotoClipboard.swift, tests, mutations, catalog, ids | PhotoPlaceTests; .centredOnCanvas .largeFitsCanvas .aboveSelection | – | waiting |
@@ -47,3 +47,5 @@ Next: PP-a builder (wave 1, one PR); PP-3 once placed-images PL-2 merges
 - One PR per slice (rule 22), split per task when a slice is over the 400-line cap: PM-a (~600, so PM-1, PM-2 and PM-3 each get a PR).
 
 ## Open
+- PP-2's job is skipped by its `.jobs.pending.json` name (the real-jobs harness ignores `waits_on`); PP-6 renames it to `place-logo.jobs.json` to turn it on. `rasterSize` throws in the stub; PP-5 reads the header.
+- The GitHub tools append an attribution footer on create; each PR body and comment is re-set without it right after creation (brief rule 3).
