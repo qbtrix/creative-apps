@@ -58,6 +58,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "Heal"
         case .crop: "Crop"
         case .eyedropper: "Eyedropper"
+        case .gradient: "Gradient"
         }
     }
 
@@ -71,6 +72,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "bandage"
         case .crop: "crop"
         case .eyedropper: "eyedropper"
+        case .gradient: "square.bottomhalf.filled"
         }
     }
 
@@ -84,6 +86,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "j"
         case .crop: "c"
         case .eyedropper: "i"
+        case .gradient: "g"
         }
     }
 
