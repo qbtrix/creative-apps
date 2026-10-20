@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-20T09:48Z	build	FG-6 #3532 macOS build 39379693778 success; both PRs await lane merge
 2026-10-20T09:55Z	heartbeat	both builds green; #3526 #3532 clean, awaiting lane sweep; blockers not on dev (dev head f8b6c4f7); no supervisor reply
 2026-10-20T10:03Z	merged	FG-1 #3526 merged as 11a545e7; #3532 awaiting lane
+2026-10-20T10:15Z	fix	#3532 needs-rebase: merged dev, resolved to FG-6, gate PASS, pushed e3e06e1f, Head moved
