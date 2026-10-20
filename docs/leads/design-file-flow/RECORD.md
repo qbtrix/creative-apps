@@ -4,7 +4,7 @@ Issue: #3469 · Packet: docs/blueprints/design/features/file-flow.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 wave 1
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: DF-1 #3698 got needs-rebase (C4 part design-model-sources.json): fixer merging dev in. DF-2 waits on #3684 (open, clean), #3686 (open, clean) and PD-u.
+Next: DF-1 #3698 head 0d9a0fd (dev merged, C4 part resolved), 118/3, back in the lane. DF-2 waits on #3684, #3686 and PD-u.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
