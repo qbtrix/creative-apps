@@ -1,0 +1,3 @@
+utc	stage	event	ref	note
+2026-10-20T23:47Z	0	stage-start	-	setup on 2cc149f57
+2026-10-20T23:47Z	3	stage-start	-	blocked: HX-a waits on HG-a, PH-a
