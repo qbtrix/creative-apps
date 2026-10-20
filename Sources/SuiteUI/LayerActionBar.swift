@@ -7,8 +7,9 @@
 // rule), and hands it over as `ToolbarAction(item)`, which keeps the item's
 // title, symbol, enablement, reason and action, so the menu bar, the panel and
 // the CLI and MCP run one command path and can't disagree. The bar draws with
-// SidebarActionRow; a list that isn't LayerTreeList (Design's) uses this bar
-// and `layerContextMenu(_:)` the same way. fx is shown disabled with
+// SidebarActionRow; a List-based panel that isn't LayerTreeList (Design's)
+// uses this bar and `layerContextMenu(forSelection:)`, which builds the menu
+// only when it opens, for the rows it opened on. fx is shown disabled with
 // `effectsPending` until shared layer styles land; that feature replaces
 // `effects(identifier:)` with its own spec's item.
 import SwiftUI
@@ -45,8 +46,11 @@ public struct LayerActionBar: View {
 }
 
 extension View {
-    /// A Layers row's context menu from the app's spec-built actions; none for an empty list.
-    public func layerContextMenu(_ actions: [ToolbarAction]) -> some View {
-        modifier(SidebarContextMenu(items: SidebarContextMenu.items(for: actions)))
+    /// A List-based Layers panel's context menu (Design's), built only when it opens, for the rows it
+    /// opened on: the selection when a selected row is right-clicked, else that row. No actions, no menu.
+    public func layerContextMenu(forSelection actions: @escaping @MainActor (Set<String>) -> [ToolbarAction]) -> some View {
+        contextMenu(forSelectionType: String.self) { ids in
+            SidebarContextMenu.buttons(SidebarContextMenu.items(for: actions(ids)) ?? [])
+        }
     }
 }
