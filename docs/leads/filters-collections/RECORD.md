@@ -90,3 +90,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 12:01Z check-in: no new merges (dev unchanged since MD-5); #3473 clean with green macOS build, awaiting lane sweep; #3461 and #3547 on their builds; no new findings.
 - 12:24Z check-in: no dev merges since 11:20Z; lane runs active (batching); #3473 clean+green awaits merge; #3461, #3547 on builds; no new findings.
 - 12:47Z check-in: FC-4 #3461 not merged; FC cascade waits.
+- 13:12Z check-in: FC-4 #3461 not merged; no new findings.
