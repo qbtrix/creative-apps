@@ -624,5 +624,28 @@
     ],
     "waits_on": "FL-3",
     "added_by": "flare/file-flow"
+  },
+  "RJ-F43": {
+    "id": "RJ-F43",
+    "app": "flare",
+    "weight": "med",
+    "job": "Select every key in the timeline and delete them in one go.",
+    "outcome": "No layer has a key left, hidden layers included, and one undo brings them all back.",
+    "needs": [
+      "S16",
+      "suiteui/timeline-select-all",
+      "flare/key-select-all"
+    ],
+    "needs_note": "suiteui/timeline-select-all routes ⌘A; flare/key-select-all picks every key on the kernel Selection",
+    "closes_with": "flare/key-select-all",
+    "trap": "Select All picks the stage's art or one layer's keys, so keys stay behind",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "KS-1",
+    "test": "Tests/RealJobs/flare/select-all-keys/select-all-keys.jobs.json"
   }
 }

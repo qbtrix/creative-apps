@@ -43,7 +43,7 @@ Blueprint sections: flare.md 2 (menus), 3.4 (edit), 5 (files).
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | PF-a | `FlareWorkspace`'s `PlacedImageTarget` conformance and its import report exist as stubs, and the checks and RJ-F06's job are written, disabled. | PF-1, PF-2 | MJ-PF | suiteui/placed-images PL-a (cross-line) |
-| PF-u | File > Place… and a window drop run `place.image` on the stubs, the status line shows the report, with snapshots, the render budget and the journey written. | PF-3, PF-4 | FJ-P1 | PF-a; flare-export (built, it owns `FlareWindow.swift`) |
+| PF-u | File > Place… and a window drop run `place.image` on the stubs, the status line shows the report, with snapshots, the render budget and the journey written. | PF-3, PF-4 | FJ-P1 | PF-a; key-select-all:KS-a (`FlareCommands.swift`); flare-export (built, it owns `FlareWindow.swift`) |
 | PF-m | Placing an SVG adds its groups as layers with their colours, fitted and centred in the edited owner, as one undo step, refuses rasters with the reason, and runs from the catalog. | PF-5, PF-6 | MJ-PF | PF-a; gradient-fill:FG-m (PF-6); PL-7 (cross-line) |
 | PF-z | The window runs on live services, the journey passes on live, and the blueprint lists Place. | PF-7, PF-8 | FJ-P1 | PF-u, PF-m; gradient-fill:FG-z (PF-8) |
 

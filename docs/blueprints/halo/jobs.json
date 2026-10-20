@@ -244,17 +244,20 @@
     "outcome": "Every selected key moves by the same time offset, hidden layers' keys included.",
     "needs": [
       "S16",
-      "suiteui/timeline"
+      "suiteui/timeline",
+      "halo/key-editing"
     ],
-    "needs_note": "S16 (SuiteUI timeline built, Halo half unfiled)",
-    "closes_with": "S16",
+    "needs_note": "S16 (SuiteUI timeline built); halo/key-editing wires picking across lanes, Select All Keys and the key drag into Halo",
+    "closes_with": "halo/key-editing",
     "trap": "Keys of hidden layers stay behind",
-    "run": "J",
+    "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://support.apple.com/guide/motion/welcome/mac"
-    ]
+    ],
+    "waits_on": "KE-4",
+    "test": "Tests/RealJobs/halo/move-keys/move-keys.jobs.json"
   },
   "RJ-H14": {
     "id": "RJ-H14",
