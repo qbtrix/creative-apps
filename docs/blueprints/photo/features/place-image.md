@@ -46,7 +46,7 @@ Blueprint sections: photo.md 2 (menus), 4 (layers).
 | PP-a | `PhotoWorkspace`'s `PlacedImageTarget` conformance exists as stubs, and the checks and RJ-P37's job are written, disabled. | PP-1, PP-2 | MJ-PP | suiteui/placed-images PL-a (cross-line) |
 | PP-u | File > Place… and a drop on an open document run `place.image` on the stubs, a drop with no document still opens, with snapshots, the render budget and the journey written. | PP-3, PP-4 | PJ-P1 | PP-a; photo-seams, photo-render-adopt, shell-parity (built; they own `PhotoCommands+File.swift` and `PhotoEditor.swift`); PL-3 (cross-line) |
 | PP-m | Placing a PNG or JPEG adds a pixel layer above the selection, fitted and centred or at the drop point, as one undo step, refuses SVG with the reason, and runs from the catalog. | PP-5, PP-6 | MJ-PP | PP-a; gradient-fill:PG-m (PP-6); PL-7 (cross-line) |
-| PP-z | The window runs on live services, the journey passes on live, and the blueprint lists Place. | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; gradient-fill:PG-z (PP-8) |
+| PP-z | The window runs on live services, the journey passes on live, and the blueprint lists Place. | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; gradient-fill:PG-z, multi-layer-select:PM-z (PP-8) |
 
 PP-u waits only on PP-a (rule 18); PP-m never waits on PP-u. MJ-PP is the
 Model walk in `PhotoPlaceTests` (Linux).
