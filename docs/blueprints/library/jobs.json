@@ -116,7 +116,8 @@
     "sources": [
       "https://community.adobe.com/t5/lightroom-classic-discussions/prevent-re-import-of-images-previously-deleted-from-lightroom-classic/td-p/13988083",
       "https://community.adobe.com/t5/lightroom-classic-discussions/lightroom-classic-continues-to-break-workflows-especially-when-deleting/m-p/12517273"
-    ]
+    ],
+    "waits_on": "DR-8"
   },
   "RJ-L07": {
     "id": "RJ-L07",
@@ -290,9 +291,12 @@
     "weight": "high",
     "job": "Export for sharing without location.",
     "outcome": "No GPS, serial or MakerNote in the JPEG or in any sidecar; copyright kept if asked.",
-    "needs": [],
-    "needs_note": "none: ExportOptions has no metadata field and the map says 'not planned'",
-    "closes_with": null,
+    "needs": [
+      "S11",
+      "library/export-pack"
+    ],
+    "needs_note": "S11 (the metadata option); library/export-pack adds the row",
+    "closes_with": "library/export-pack",
     "trap": "The EX-f XMP sidecar or a property copy carries GPS and CreateDate beside a 'clean' JPEG",
     "run": "Cm",
     "baseline": "fail",
@@ -302,7 +306,8 @@
       "https://community.adobe.com/questions-675/lr-classic-mac-location-data-problems-on-export-983562",
       "https://robservatory.com/retain-location-metadata-on-photos-sourced-from-photos/",
       "https://www.intego.com/mac-security-blog/how-to-remove-gps-location-data-from-photos-on-iphone-or-mac"
-    ]
+    ],
+    "waits_on": "LX-3"
   },
   "RJ-L17": {
     "id": "RJ-L17",
@@ -616,5 +621,47 @@
     "sources": [
       "https://home.camerabits.com/tour-photo-mechanic/"
     ]
+  },
+  "RJ-L41": {
+    "id": "RJ-L41",
+    "app": "library",
+    "weight": "med",
+    "job": "Auto tone and sharpen a dim, flat photo in Develop, then export it for the web.",
+    "outcome": "The export's luma spans 0.05 to 0.95, its grey patch reads neutral, and its edges are sharper than an unsharpened export.",
+    "needs": [
+      "S1",
+      "library/tone-controls"
+    ],
+    "closes_with": "library/tone-controls",
+    "trap": "Auto stretches levels but leaves a cast, or the export drops Sharpen",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LT-5",
+    "added_by": "library/tone-controls"
+  },
+  "RJ-L42": {
+    "id": "RJ-L42",
+    "app": "library",
+    "weight": "high",
+    "job": "Drop a folder of three photos and a Halo project on Library, then undo.",
+    "outcome": "Three photos import in one step and are selected; one undo removes them; the Halo project is handed to Halo.",
+    "needs": [
+      "suite/file-flow",
+      "library/file-flow"
+    ],
+    "closes_with": "library/file-flow",
+    "trap": "Folders aren't expanded, each file is its own undo step, or the Halo project imports as a broken photo",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "LF-3",
+    "added_by": "library/file-flow"
   }
 }

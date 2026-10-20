@@ -1,0 +1,152 @@
+{
+  "title": "Place SVG art: File > Place… and a window drop add an SVG's groups as editable layers through the kernel's place command",
+  "wave": 7,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/svg-place (adopter of S20 and E11); RJ-F06",
+  "waits_on": "suiteui placed-images' contract slice PL-a (cross-line); gradient-fill's FG-m and FG-z (shared files)",
+  "depends": [
+    "live-scenes",
+    "layers-files",
+    "draw-key-save"
+  ],
+  "longest_chain": "5 (PF-1 → PF-3 → PF-4 → PF-7 → PF-8)",
+  "journeys": [
+    "FlarePlaceJourneyTests.testPlaceSVGArt"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "Tests/FlareModelTests/FlarePlaceTests.swift",
+    "Tests/RealJobs/flare/place-svg/",
+    "Sources/FlareApp/FlarePlace.swift",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Sources/FlareApp/FlareWindow.swift",
+    "Tests/AppSnapshotTests/FlarePlaceSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlarePlaceTests.swift",
+    "UITests/FlareJourneyTests+Place.swift",
+    "Tests/mutations/FlareModel.FlarePlace+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "docs/blueprints/flare.md",
+    "docs/blueprints/flare/features/svg-place.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PF-a",
+      "behavior": "FlareWorkspace's PlacedImageTarget conformance and its import report exist as stubs, and the checks and RJ-F06's job are written, disabled.",
+      "tasks": [
+        "PF-1",
+        "PF-2"
+      ],
+      "journeys": [
+        "MJ-PF"
+      ],
+      "waits": {},
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/FlarePlace+Kernel.swift",
+        "Tests/FlareModelTests/FlarePlaceTests.swift",
+        "Tests/RealJobs/flare/place-svg/"
+      ]
+    },
+    {
+      "id": "PF-u",
+      "behavior": "File > Place… and a window drop run place.image on the stubs, the status line shows the report, with snapshots, the render budget and the journey written.",
+      "tasks": [
+        "PF-3",
+        "PF-4"
+      ],
+      "journeys": [
+        "FJ-P1"
+      ],
+      "waits": {
+        "PF-a": [
+          "PF-3"
+        ],
+        "flare-export": [
+          "PF-3"
+        ],
+        "key-select-all:KS-a": [
+          "PF-3",
+          "PF-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareApp/FlarePlace.swift",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Sources/FlareApp/FlareWindow.swift",
+        "Tests/AppSnapshotTests/FlarePlaceSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlarePlaceTests.swift",
+        "UITests/FlareJourneyTests+Place.swift"
+      ]
+    },
+    {
+      "id": "PF-m",
+      "behavior": "Placing an SVG adds its groups as layers with their colours, fitted and centred in the edited owner, as one undo step, refuses rasters with the reason, and runs from the catalog.",
+      "tasks": [
+        "PF-5",
+        "PF-6"
+      ],
+      "journeys": [
+        "MJ-PF"
+      ],
+      "waits": {
+        "PF-a": [
+          "PF-5",
+          "PF-6"
+        ],
+        "gradient-fill:FG-m": [
+          "PF-6"
+        ],
+        "shape-tools:FS-m": [
+          "PF-5",
+          "PF-6"
+        ],
+        "stroke-style:FK-m": [
+          "PF-5",
+          "PF-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/FlarePlace+Kernel.swift",
+        "Tests/FlareModelTests/FlarePlaceTests.swift",
+        "Tests/mutations/FlareModel.FlarePlace+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/RealJobs/flare/place-svg/"
+      ]
+    },
+    {
+      "id": "PF-z",
+      "behavior": "The window runs on live services, the journey passes on live, and the blueprint lists Place.",
+      "tasks": [
+        "PF-7",
+        "PF-8"
+      ],
+      "journeys": [
+        "FJ-P1"
+      ],
+      "waits": {
+        "PF-u": [
+          "PF-7"
+        ],
+        "PF-m": [
+          "PF-7"
+        ],
+        "gradient-fill:FG-z": [
+          "PF-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+Place.swift",
+        "docs/blueprints/flare.md",
+        "docs/blueprints/flare/features/svg-place.wave.json"
+      ]
+    }
+  ]
+}
