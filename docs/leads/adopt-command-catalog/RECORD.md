@@ -108,3 +108,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-20T19:18Z: full CI 39475897385 at 875b44d2 still pending (contains every slice merge); scoped: suite 39479908321 at a48992b7 queued (suite scope, not suiteui); no qualifying run completed yet
 
 - 2026-10-20T19:38Z: full CI 39475897385 at 875b44d2 still pending (contains every slice merge); latest completed runs are Linux checks only; no qualifying run completed yet
+
+- 2026-10-20T19:58Z: full CI 39475897385 at 875b44d2 cancelled (replaced); new pending full CI 39485502739 at 8c90de14 (contains 875b44d2, so every slice merge); no qualifying run completed yet
