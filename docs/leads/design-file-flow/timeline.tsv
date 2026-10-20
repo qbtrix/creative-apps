@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T19:27Z	0	stage-start	#3469	setup: main b3011ab9 verified, base origin/dev a48992b7
 2026-10-20T19:29Z	1	stage-end	#3469	v3 packet, 4 slices; SF-a merged
 2026-10-20T19:29Z	3	stage-start	#3469	wave 1: DF-1 (Model stubs) building
+2026-10-20T19:30Z	3	heartbeat	#0	lead/file-flow is another line's lead branch; this record lives on lead/design-file-flow
