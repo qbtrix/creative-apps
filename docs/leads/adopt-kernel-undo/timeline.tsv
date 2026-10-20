@@ -121,3 +121,4 @@ utc	stage	event	ref	note
 2026-10-20T19:35:46Z	AU-flare	#3674 still open; lane macOS build 39477990421 queued (runner backlog)
 2026-10-20T19:54:23Z	AU-flare	#3674 open; macOS build job still queued for macos-26 runner (pool busy since 14:00 CI runs)
 2026-10-20T20:25:18Z	AU-flare	#3674 open; macOS build 39477990421 queued 1h38m; supervisor asked on #1934
+2026-10-20T20:43:59Z	AU-flare	#3674 open; macOS build 39477990421 still queued; no supervisor reply yet
