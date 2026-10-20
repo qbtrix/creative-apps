@@ -113,3 +113,5 @@ utc	stage	event	ref	note
 2026-10-20T06:19:39Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39373545059 cancelled (superseded), 39379088986 on 424b4a60 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
 2026-10-20T06:40:56Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39379088986 on 424b4a60 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
 2026-10-20T07:04:50Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39379088986 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T18:24:22Z	slice-done	AU-design,AU-library,AU-halo	39469631014	Belt-Slice-Done posted (Linux check proof per supervisor 07:07Z)
+2026-10-20T18:24:22Z	start	AU-flare	-	stage-edit built, layers-files closed; AU-f1+AU-f2 building

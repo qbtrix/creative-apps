@@ -1,10 +1,10 @@
 # adopt-kernel-undo lead record
 
 Issue: #1934 · Packet: docs/blueprints/suiteui/features/adopt-kernel-undo.md
-Run: act-1a154b13dec-71tm (resume; earlier runs act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-suiteui-lead-gvq11j · Resumed: 2026-10-19
-Stage: 3 wave 1 (AU-design PR #3287)
+Run: act-1a15a8a9680-umw7 (resume; earlier runs act-1a154b13dec-71tm, act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-undo-1z23j3 · Resumed: 2026-10-20
+Stage: 3 wave 1 (AU-flare)
 Base: 6e70826 (brief main 6e70826be59e092e59269605cfdfbce93c4a2bbe verified; PRs target dev)
-Next: AU-design PR #3287 (head 0f6283f, gate pass, Mutate 5/5) waits on the lane; post Belt-Slice-Done once a green ci.yml run on main contains its merge. AU-library waits on filters-collections (parked out of beta, FC-3 CatalogHistory unbuilt): supervisor asked on #1934. AU-flare waits on stage-edit (building, waiting on #995).
+Next: AU-flare (AU-f1 + AU-f2 in one slice PR); then Belt-Contact-Sheet once its run lands.
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-undo half. The brief's integration branch is `main` at
@@ -15,11 +15,11 @@ retargets a fast-lane PR opened against `main` to `dev`).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AU-design | Design undo on `History<DesignSnapshot>` and `HistoryReading` behind its API; stack, run and limit code deleted | AU-d1, AU-d2 | MJ-AU-design (`DesignUndoTests`) | design-seams-2, files-history, design-window | false | 0 | blocked | – | – |
+| AU-design | Design undo on `History<DesignSnapshot>` and `HistoryReading` behind its API; stack, run and limit code deleted | AU-d1, AU-d2 | MJ-AU-design (`DesignUndoTests`) | design-seams-2, files-history, design-window | false | 0 | done | 39469631014 | – |
 | AU-photo | Photo undo on `History<PhotoEdit>` and `HistoryReading` behind its API; stack, id, base and jump code deleted | AU-p1, AU-p2 | MJ-AU-photo (`PhotoHistoryStepsTests`) | – | false | 0 | done | 39133431238 | – |
-| AU-library | Library undo on `History<[PhotoItem]>` and `HistoryReading` behind its API; `CatalogHistory.swift` deleted | AU-l1, AU-l2 | MJ-AU-library (`LibraryHistoryTests`) | filters-collections, spine | false | 0 | blocked | – | – |
-| AU-halo | Halo `ProjectHistory` (live and fake) wraps `History<HaloDocumentState>`; `HaloHistoryRules.swift` and the stack code deleted | AU-h1, AU-h2 | MJ-AU-halo (`ProjectHistoryContractTests`) | #2747 (kernel payload read + Equatable) | false | 0 | blocked | – | – |
-| AU-flare | `FlareWorkspace` conforms to `HistoryReading` over `CommandEngine`; the Flare-only undo/redo name spelling goes | AU-f1, AU-f2 | MJ-AU-flare (`SceneUndoSelectionTests`) | stage-edit | false | 0 | blocked | – | – |
+| AU-library | Library undo on `History<[PhotoItem]>` and `HistoryReading` behind its API; `CatalogHistory.swift` deleted | AU-l1, AU-l2 | MJ-AU-library (`LibraryHistoryTests`) | filters-collections, spine | false | 0 | done | 39469631014 | – |
+| AU-halo | Halo `ProjectHistory` (live and fake) wraps `History<HaloDocumentState>`; `HaloHistoryRules.swift` and the stack code deleted | AU-h1, AU-h2 | MJ-AU-halo (`ProjectHistoryContractTests`) | #2747 (kernel payload read + Equatable) | false | 0 | done | 39469631014 | – |
+| AU-flare | `FlareWorkspace` conforms to `HistoryReading` over `CommandEngine`; the Flare-only undo/redo name spelling goes | AU-f1, AU-f2 | MJ-AU-flare (`SceneUndoSelectionTests`) | stage-edit | false | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -133,3 +133,4 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T06:19:39Z Heartbeat. No green full or suiteui run yet: full CI 39373545059 cancelled (superseded), 39379088986 on 424b4a60 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers.
 - 2026-10-20T06:40:56Z Heartbeat. No green full or suiteui run yet: full CI 39379088986 on 424b4a60 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers.
 - 2026-10-20T07:04:50Z Heartbeat. No green full or suiteui run yet: full CI 39379088986 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers.
+- 2026-10-20T18:24:22Z (act-1a15a8a9680-umw7) Supervisor 07:07Z: automatic `Linux check` dev runs are merged-done proof. Dev Linux check 39469631014 on d7f615dc (green) contains AU-halo #3184 (11a5605), AU-design #3287 (90e7a0c) and AU-library #3384 (7969bfb); posted Belt-Slice-Done for all three on #1934. AU-flare: stage-edit.wave.json is `built` on dev (#3312, 424b4a6) and layers-files #1516 is closed, so the FlareWorkspace.swift hand-off is clear; AU-flare starts now as one slice PR (AU-f1 + AU-f2).
