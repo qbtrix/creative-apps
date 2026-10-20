@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:15:51Z (prior run act-1a159c9b6b4-va3c opened no PR)
-Stage: 3 wave 1 (DK-a PR #3690 in lane)
+Stage: 3 wave 1 (DK-a PR #3690 in lane at 5790b916)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
 Next: #3690 merges via the lane; critic panel once a scoped design run shows the Stroke section. DK-u waits shape-tools:DS-u, DK-m waits shape-tools:DS-m (both wait Design transform DT-a/DT-m)
 
