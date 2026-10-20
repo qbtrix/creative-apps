@@ -12,6 +12,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import SuiteKernel
+import SuiteModel
 
 extension PhotoWorkspace {
     /// The saved token of an image that was never saved (a restored
@@ -90,4 +91,24 @@ extension PhotoWorkspace {
     public static func recovered(from data: Data, name: String?) async throws -> PhotoWorkspace {
         throw ArchiveError.damaged("recovered(from:name:) waits on history-panel PH-6")
     }
+
+    public func recoveryBytes(codec: any PhotoImageCodec) throws -> Data {
+        throw ArchiveError.damaged("recoveryBytes waits on history-panel PH-6")
+    }
+
+    public func recoveryEncoder(codec: any PhotoImageCodec) -> @Sendable () throws -> Data {
+        { throw ArchiveError.damaged("recoveryEncoder waits on history-panel PH-6") }
+    }
+
+    public static func recovered(
+        from data: Data, name: String?, services: PhotoServices, codec: any PhotoImageCodec
+    ) async throws -> PhotoWorkspace {
+        throw ArchiveError.damaged("recovered(from:name:) waits on history-panel PH-6")
+    }
+
+    public mutating func restoreRecovered(_ restored: PhotoWorkspace) {}
+}
+
+extension PhotoServices {
+    public var recoveryFolder: RecoveryFolder? { nil }
 }
