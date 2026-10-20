@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-20T21:38Z	3	slice pushed	PE-4	lead/eyedropper-PE-4 ced0fce, +143, CI PASS, timing print-only; PR after PE-3
 2026-10-20T21:59Z	3	heartbeat	#3704,#3706,#3762	none merged; #3706 mac build green (awaiting lane sweep); #3704 build queued since 19:54Z
 2026-10-20T22:20Z	3	heartbeat	#3704,#3706,#3762	none merged; #3706 clean+mac green, queued for lane batch (lane busy bisecting batch-20261020214541); #3704 build still queued
+2026-10-20T22:44Z	3	merged	#3706	PE-a merged 22:41Z in a batch of 8; PE-5 and PE-3 PRs being opened
