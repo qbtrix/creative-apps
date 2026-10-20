@@ -1,0 +1,229 @@
+{
+  "title": "One ImageIO adapter in SuiteShell over CoreRaster's codecs: every app decodes, orients and encodes image files the same way, and the two hand-rolled PNG writers are deleted",
+  "wave": "XK3",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #6 (image file codecs); feature map suiteui/shared-codecs; real job RJ-X46",
+  "waits_on": "suite-imaging IM-a (Package.swift, project.yml); adopt-kernel-autosave AK-z (canonical-baseline.txt) before SC-11; no creative-core bump (dev's pin 2258b62, #3549, already has core PNGRead/PNGWrite, IC-4/IC-5); cross-line hand-offs: photo/export-pack PX-m, library spine, metadata-more, raw, export, export-pack",
+  "depends": [
+    "suite-harness",
+    "editor-kernel"
+  ],
+  "longest_chain": "6 (SC-1 → SC-2 → SC-3 → SC-4 → SC-8 → SC-12)",
+  "ui_slice": "none",
+  "ui_slice_reason": "no new screen or control: files open and save as before, the same way in every app; the app slices are ui slices because they edit app files, with the windows' existing budget rows",
+  "journeys": [
+    "HaloRenderFrameJourneyTests.testRenderFrame",
+    "PhotoDocumentsJourneyTests.testSaveLayeredDocumentAndReopen"
+  ],
+  "owned": [
+    "Tests/PhotoModelTests/CorePNGParityTests.swift",
+    "Tests/SuiteModelTests/ImageIOImportRatchetTests.swift",
+    "Tests/imageio-baseline.txt",
+    "Tests/AppSnapshotTests/SuiteImageIOTests.swift",
+    "Tests/PhotoModelTests/Fixtures/png-parity/",
+    "Sources/SuiteShell/SuiteImageIO.swift",
+    "Package.swift",
+    "project.yml",
+    "docs/c4/parts/creative-apps/suite-shell/shell-imageio.json",
+    "Tests/PhotoModelTests/PhotoCodecRouteTests.swift",
+    "Tests/RealJobs/photo/rotated-photo/rotated-photo.jobs.json",
+    "Tests/RealJobs/photo/rotated-photo/input/rotated-6.jpg",
+    "Tests/RealJobs/photo/rotated-photo/input/rotated-6.heic",
+    "Sources/PhotoApp/ImageIOCodec.swift",
+    "Sources/PhotoModel/CoreRasterImageCodec.swift",
+    "Sources/PhotoApp/PhotoPasteboard.swift",
+    "Tests/mutations/PhotoModel.CoreRasterImageCodec.json",
+    "Tests/HaloModelTests/HaloFramePNGCoreTests.swift",
+    "Sources/HaloModel/HaloHeadless.swift",
+    "Sources/HaloApp/HaloPNGWriter.swift",
+    "Tests/mutations/HaloModel.HaloHeadless.json",
+    "Tests/AppSnapshotTests/LibraryImageIOTests.swift",
+    "Tests/AppSnapshotTests/Fixtures/library-imageio-expected.json",
+    "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+    "Sources/LibraryApp/Platform/JPEGWriter.swift",
+    "Tests/AppSnapshotTests/RasterizerPNGTests.swift",
+    "Sources/DesignApp/DesignRasterizer.swift",
+    "Sources/FlareApp/StageRasterizer.swift",
+    "Sources/HaloModel/HaloFramePNG.swift",
+    "Tests/mutations/HaloModel.HaloFramePNG.json",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/suiteui/features/shared-codecs.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "SC-a",
+      "behavior": "Core's PNG is proven to round-trip what both local writers write, the ImageIO import ratchet is live with today's files baselined, and `SuiteImageIO` is declared as stubs in SuiteShell, which links CoreRaster.",
+      "tasks": [
+        "SC-1",
+        "SC-2"
+      ],
+      "journeys": [
+        "MJ-SC"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/CorePNGParityTests.swift",
+        "Tests/SuiteModelTests/ImageIOImportRatchetTests.swift",
+        "Tests/imageio-baseline.txt",
+        "Tests/AppSnapshotTests/SuiteImageIOTests.swift",
+        "Tests/PhotoModelTests/Fixtures/png-parity/",
+        "Sources/SuiteShell/SuiteImageIO.swift",
+        "Package.swift",
+        "project.yml",
+        "docs/c4/parts/creative-apps/suite-shell/shell-imageio.json"
+      ],
+      "waits": {
+        "suite-imaging:IM-a": [
+          "SC-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SC-photo",
+      "behavior": "Photo decodes and encodes PNG and JPEG through core and everything else through `SuiteImageIO`, its own ImageIO code and PNG fallback are gone, and the pasteboard uses the same adapter.",
+      "tasks": [
+        "SC-3",
+        "SC-4"
+      ],
+      "journeys": [
+        "MJ-SC-photo",
+        "PJ-SC"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoCodecRouteTests.swift",
+        "Tests/RealJobs/photo/rotated-photo/rotated-photo.jobs.json",
+        "Tests/RealJobs/photo/rotated-photo/input/rotated-6.jpg",
+        "Tests/RealJobs/photo/rotated-photo/input/rotated-6.heic",
+        "Sources/SuiteShell/SuiteImageIO.swift",
+        "Sources/PhotoApp/ImageIOCodec.swift",
+        "Sources/PhotoModel/CoreRasterImageCodec.swift",
+        "Sources/PhotoApp/PhotoPasteboard.swift",
+        "Tests/AppSnapshotTests/SuiteImageIOTests.swift",
+        "Tests/mutations/PhotoModel.CoreRasterImageCodec.json"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-3",
+          "SC-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-halo",
+      "behavior": "Halo's rendered frames and PNG sequences are core's PNG bytes, so the headless render, the sequence sink and the viewer agree.",
+      "tasks": [
+        "SC-5",
+        "SC-6"
+      ],
+      "journeys": [
+        "MJ-SC-halo",
+        "HJ-SC"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloFramePNGCoreTests.swift",
+        "Sources/HaloModel/HaloHeadless.swift",
+        "Sources/HaloApp/HaloPNGWriter.swift",
+        "Tests/mutations/HaloModel.HaloHeadless.json"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-5",
+          "SC-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-library",
+      "behavior": "Library scans, decodes, orients and writes through `SuiteImageIO` and core's JPEG, with the same pixel size, capture date and metadata as before.",
+      "tasks": [
+        "SC-7",
+        "SC-8"
+      ],
+      "journeys": [
+        "MJ-SC-library",
+        "LJ-SC"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/LibraryImageIOTests.swift",
+        "Tests/AppSnapshotTests/Fixtures/library-imageio-expected.json",
+        "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-7",
+          "SC-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-raster",
+      "behavior": "Design's and Flare's rasterizers hand their pixels to `SuiteImageIO` for PNG instead of their own `CGImageDestination` code.",
+      "tasks": [
+        "SC-9",
+        "SC-10"
+      ],
+      "journeys": [
+        "MJ-SC-raster"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/RasterizerPNGTests.swift",
+        "Sources/DesignApp/DesignRasterizer.swift",
+        "Sources/FlareApp/StageRasterizer.swift"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-9",
+          "SC-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-z",
+      "behavior": "`HaloFramePNG.swift` is deleted with the baseline shrunk, only `SuiteImageIO.swift` imports ImageIO, and the feature is built.",
+      "tasks": [
+        "SC-11",
+        "SC-12"
+      ],
+      "journeys": [
+        "MJ-SC",
+        "HJ-SC"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloFramePNG.swift",
+        "Tests/mutations/HaloModel.HaloFramePNG.json",
+        "Tests/PhotoModelTests/CorePNGParityTests.swift",
+        "Tests/canonical-baseline.txt",
+        "Tests/imageio-baseline.txt",
+        "Tests/SuiteModelTests/ImageIOImportRatchetTests.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-imageio.json",
+        "docs/blueprints/suiteui/features/shared-codecs.wave.json"
+      ],
+      "waits": {
+        "SC-photo": [
+          "SC-12"
+        ],
+        "SC-halo": [
+          "SC-11"
+        ],
+        "SC-library": [
+          "SC-12"
+        ],
+        "SC-raster": [
+          "SC-12"
+        ],
+        "adopt-kernel-autosave:AK-z": [
+          "SC-11"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}
