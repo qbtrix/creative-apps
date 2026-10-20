@@ -14,8 +14,9 @@
 // histogram as presentation state and counts it off the main actor only when
 // curvesHistogramKey changes (pixels, layers, exposure, levels), never during
 // a curve drag, and not during a canvas drag either: a brush stroke changes
-// the pixels every frame, so the count waits for the drag's end. Values in,
-// intents out.
+// the pixels every frame, so the count waits for the drag's end. A slider
+// drag changes the key every step, so the count waits until the key has held
+// for 150 ms. Values in, intents out.
 import CoreRaster
 import PhotoModel
 import SuiteUI
@@ -48,6 +49,10 @@ struct AdjustmentsPanel: View {
         // Nil while dragging, so a brush stroke never recounts; its end does, once.
         .task(id: model.isDragging ? nil : model.curvesHistogramKey) {
             guard !model.isDragging else { return }
+            // A slider drag changes the key every step: count once it rests, not once per step (each count
+            // composites 256 rows on the CPU, and a superseded one ran to its end).
+            try? await Task.sleep(for: .milliseconds(150))
+            guard !Task.isCancelled else { return }
             let workspace = model
             let counted = await Task.detached(priority: .userInitiated) { workspace.curvesHistogram() }.value
             if !Task.isCancelled { histogram = counted }

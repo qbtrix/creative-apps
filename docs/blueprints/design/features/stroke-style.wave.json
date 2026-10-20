@@ -1,0 +1,169 @@
+{
+  "title": "Strokes with joins, caps and dashes through the shared stroke editor; DesignStroke becomes the kernel's",
+  "wave": 3,
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/stroke-style (adopter of S17); RJ-D36",
+  "waits_on": "suiteui stroke-style's contract slice SS-a (cross-line) and SS-d before DK-7; shape-tools' DS-u and DS-m slices",
+  "depends": [
+    "design-window",
+    "style-rows",
+    "select-several",
+    "design-export",
+    "layers-panel",
+    "canvas-basics",
+    "snapping"
+  ],
+  "longest_chain": "6 (DK-1 → DK-2 → DK-3 → DK-4 → DK-8 → DK-9)",
+  "journeys": [
+    "DesignStrokeJourneyTests.testDashedBorder"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignStroke+Kernel.swift",
+    "Tests/DesignModelTests/DesignStrokeTests.swift",
+    "Sources/DesignApp/DesignInspectorStyle.swift",
+    "UITests/DesignJourneyTests+Stroke.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Tests/AppSnapshotTests/DesignStrokePaintTests.swift",
+    "Tests/AppSnapshotTests/DesignStrokeSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignStrokeTests.swift",
+    "Sources/DesignModel/Contracts/StyleTypes.swift",
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/Live/LiveStyling.swift",
+    "Sources/DesignModel/Contracts/UseCases.swift",
+    "Sources/DesignModel/DesignActions+Edit.swift",
+    "Sources/DesignModel/Live/LiveFiling.swift",
+    "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+    "Tests/DesignModelTests/DesignStrokeMigrationTests.swift",
+    "Tests/mutations/DesignModel.DesignNode.json",
+    "Tests/mutations/DesignModel.DesignStroke+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Tests/DesignModelTests/DesignSVGTests.swift",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "Tests/RealJobs/design/dashed-border/dashed-border.jobs.json",
+    "Tests/RealJobs/design/dashed-border/input/one-rect.design",
+    "docs/blueprints/design/features/stroke-style.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DK-a",
+      "behavior": "The adapter and the views' stroke accessor are declared as stubs, and the inspector's Stroke section is the shared editor on them.",
+      "tasks": [
+        "DK-1",
+        "DK-2"
+      ],
+      "journeys": [
+        "MJ-DK"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignStroke+Kernel.swift",
+        "Tests/DesignModelTests/DesignStrokeTests.swift",
+        "Sources/DesignApp/DesignInspectorStyle.swift",
+        "UITests/DesignJourneyTests+Stroke.swift"
+      ]
+    },
+    {
+      "id": "DK-u",
+      "behavior": "The canvas strokes dashes, joins and caps, and the snapshots and render budget hold.",
+      "tasks": [
+        "DK-3",
+        "DK-4"
+      ],
+      "journeys": [
+        "J-DK"
+      ],
+      "waits": {
+        "DK-a": [
+          "DK-3",
+          "DK-4"
+        ],
+        "shape-tools:DS-u": [
+          "DK-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Tests/AppSnapshotTests/DesignStrokePaintTests.swift",
+        "Tests/AppSnapshotTests/DesignStrokeSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignStrokeTests.swift"
+      ]
+    },
+    {
+      "id": "DK-m",
+      "behavior": "Design's stroke is the kernel's with old files read, every stroke command is one step for the whole selection, and the SVG writes joins, caps and dashes.",
+      "tasks": [
+        "DK-5",
+        "DK-6",
+        "DK-7"
+      ],
+      "journeys": [
+        "MJ-DK"
+      ],
+      "waits": {
+        "DK-a": [
+          "DK-5",
+          "DK-6",
+          "DK-7"
+        ],
+        "shape-tools:DS-m": [
+          "DK-5",
+          "DK-6",
+          "DK-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/Contracts/StyleTypes.swift",
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/Live/LiveStyling.swift",
+        "Sources/DesignModel/Contracts/UseCases.swift",
+        "Sources/DesignModel/DesignActions+Edit.swift",
+        "Sources/DesignModel/Live/LiveFiling.swift",
+        "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+        "Tests/DesignModelTests/DesignStrokeMigrationTests.swift",
+        "Tests/mutations/DesignModel.DesignNode.json",
+        "Sources/DesignModel/DesignStroke+Kernel.swift",
+        "Tests/DesignModelTests/DesignStrokeTests.swift",
+        "Tests/mutations/DesignModel.DesignStroke+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/DesignModelTests/DesignSVGTests.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/RealJobs/design/dashed-border/dashed-border.jobs.json",
+        "Tests/RealJobs/design/dashed-border/input/one-rect.design"
+      ]
+    },
+    {
+      "id": "DK-z",
+      "behavior": "The journey dashes a border on live services, and the feature is built.",
+      "tasks": [
+        "DK-8",
+        "DK-9"
+      ],
+      "journeys": [
+        "J-DK"
+      ],
+      "waits": {
+        "DK-u": [
+          "DK-8"
+        ],
+        "DK-m": [
+          "DK-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Stroke.swift",
+        "docs/blueprints/design/features/stroke-style.wave.json"
+      ]
+    }
+  ]
+}

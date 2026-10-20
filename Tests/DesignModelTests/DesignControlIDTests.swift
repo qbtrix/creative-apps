@@ -57,6 +57,13 @@ import Testing
         }
     }
 
+    /// File > Export…'s sheet (design-export DE-6), its buttons under SuiteExportSheet's prefix.
+    @Test func theListHoldsTheExportSheet() {
+        let ids = ["sheet", "format", "scale", "scope", "items", "start", "cancel", "dismiss", "result"]
+        #expect(Set(ids.map { "design.export.\($0)" }).isSubset(of: Set(DesignControlID.all)))
+        #expect(DesignControlID.exportRun == "design.export.start" && DesignControlID.exportDone == "design.export.dismiss")
+    }
+
     @Test func theListHoldsEachAlignAndDistributeButton() {
         let all = Set(DesignControlID.all)
         for edge in DesignAlignEdge.allCases {

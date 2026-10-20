@@ -1,0 +1,23 @@
+[
+  {
+    "label": "dashScalesWithWidth: the dashed pattern isn't scaled by the width, so a 4 pt line gets 1 pt dashes",
+    "file": "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "find": "case .dashed: return [4 * w, 2 * w]",
+    "replace": "case .dashed: return [4, 2]",
+    "tests": "StrokeRulesTests"
+  },
+  {
+    "label": "hairlineDashVisible: min for max(width, 1), so a hairline's dashes shrink below 1 pt",
+    "file": "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "find": "let w = max(clampedWidth(width), 1)",
+    "replace": "let w = min(clampedWidth(width), 1)",
+    "tests": "StrokeRulesTests"
+  },
+  {
+    "label": "widthsClamp: the width's upper limit is dropped, so 2000 pt stays 2000",
+    "file": "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "find": "min(max(width, widths.lowerBound), widths.upperBound)",
+    "replace": "max(width, widths.lowerBound)",
+    "tests": "StrokeRulesTests"
+  }
+]

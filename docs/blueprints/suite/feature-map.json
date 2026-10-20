@@ -299,13 +299,16 @@
       ],
       "adopters": [
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/svg-place"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/placed-images"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/placed-images"
         }
       ]
     },
@@ -361,15 +364,18 @@
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/tone-controls"
         },
         {
-          "app": "library"
+          "app": "library",
+          "packet": "library/tone-controls"
         },
         {
           "app": "halo"
         }
-      ]
+      ],
+      "packet": "suiteui/tone-controls"
     },
     {
       "id": "S2",
@@ -472,15 +478,19 @@
         "suite-kernel `Transform`/`Box`, kernel-geometry `EditorHandle`",
         "suiteui CanvasMarks"
       ],
+      "packet": "suiteui/transform-tools",
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/transform"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/transform"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/transform"
         }
       ]
     },
@@ -560,18 +570,27 @@
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/export-pack"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/export-pack"
         },
         {
-          "app": "library"
+          "app": "library",
+          "packet": "library/export-pack"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/export-pack"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/export-pack"
         }
-      ]
+      ],
+      "packet": "suiteui/export-pack"
     },
     {
       "id": "S12",
@@ -581,15 +600,27 @@
         "suite-kernel `Session` + `History`",
         "suite-model/suite-store"
       ],
+      "packet": "suiteui/autosave-history",
       "adopters": [
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/autosave-history"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/autosave-history"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/history-panel"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-autosave"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-autosave"
         }
       ]
     },
@@ -598,15 +629,18 @@
       "name": "Eyedropper (re-cut: PV-9)",
       "layer": "ui",
       "c4": [
-        "suiteui ColorWell",
-        "corerender readback"
+        "suite-kernel/kernel-sample ✚",
+        "suiteui ColorWell + Eyedropper (NSColorSampler)"
       ],
+      "packet": "suiteui/eyedropper",
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/eyedropper"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/eyedropper"
         }
       ]
     },
@@ -670,23 +704,29 @@
       "name": "Strokes, dashes and trim paths (gradient fills are S24)",
       "layer": "core",
       "c4": [
-        "flarecore/geometry + document-commands (Fill, Stroke) + export"
+        "suite-kernel/kernel-fill (VectorStroke, StrokeRules, StrokeCommands)",
+        "flarecore/geometry path ops + Stroke dash and trim (core stroke-style, to file)",
+        "suiteui StrokeEditor"
       ],
+      "packet": "suiteui/stroke-style",
       "adopters": [
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/stroke-style"
         },
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/stroke-style"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/stroke-style"
         }
       ]
     },
     {
       "id": "S18",
-      "name": "Point editing and booleans (re-cut: Flare Direct Select F4b)",
+      "name": "Booleans on paths (point editing and Flare's Direct Select F4b are S25)",
       "layer": "kernel",
       "c4": [
         "flarecore/geometry",
@@ -707,40 +747,54 @@
       "name": "Shape tools: polygon, star, rounded rect, line, arrow",
       "layer": "core",
       "c4": [
-        "flarecore/geometry PathBuilders ⚠",
-        "suiteui tool rail"
+        "suite-kernel/kernel-shapes ✚ over flarecore PathBuilders",
+        "suiteui ShapeToolOptions"
       ],
+      "packet": "suiteui/shape-tools",
       "adopters": [
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/shape-tools"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/shape-tools"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/shape-tools"
         }
       ]
     },
     {
       "id": "S20",
-      "name": "Placed images and footage, image fills, crop in frame",
+      "name": "Placed images and footage, image fills, crop in frame (images: the kernel's placed asset, fit and cover rules and place commands, SuiteUI's Place… panel, drop target and image view; captain 2026-10-20, beta)",
       "layer": "model",
       "c4": [
-        "suite-model/suite-assets + suite-links + suite-pasteboard ⚠",
-        "`shell-media` decode"
+        "suite-kernel/kernel-place ✚",
+        "suiteui PlacePanel, PlaceDrop, PlacedImageView, PlacedImageRows",
+        "suite-model/suite-assets + suite-links + suite-pasteboard ⚠ (linked assets, later)",
+        "`shell-media` decode (footage, later)"
       ],
       "adopters": [
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/placed-images"
         },
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/svg-place"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/placed-images"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/place-image"
         }
-      ]
+      ],
+      "packet": "suiteui/placed-images"
     },
     {
       "id": "S21",
@@ -813,6 +867,27 @@
       ]
     },
     {
+      "id": "S25",
+      "name": "The Pen and point editing: FlareCore's anchors view under kernel names, the pen and anchor rules and path commands in SuiteKernel, SuiteUI's path edit overlay; 5,000 anchors stay fast (captain 2026-10-20, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-paths ✚",
+        "suiteui PathEditOverlay, CanvasMarks PathMarks",
+        "flarecore/geometry PathOps (core bump to >= e09c6c30)"
+      ],
+      "packet": "suiteui/pen-paths",
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "design/pen-paths"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/pen-paths"
+        }
+      ]
+    },
+    {
       "id": "A1",
       "name": "Copy as SVG or CSS",
       "layer": "app",
@@ -864,7 +939,8 @@
         "library-model",
         "suite-kernel `History`"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "library/cull-finish"
     },
     {
       "id": "A6",
@@ -1058,6 +1134,33 @@
       "adopters": []
     },
     {
+      "id": "flare/svg-place",
+      "name": "SVG art into Flare as editable layers: Place… and a window drop through the kernel's place command",
+      "packet": "flare/svg-place",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/shape-tools",
+      "name": "Flare's Shape tool: polygons, stars, lines and arrows on the stage",
+      "packet": "flare/shape-tools",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/stroke-style",
+      "name": "Flare's STROKE as the shared editor, with keyed trim paths for draw-ons",
+      "packet": "flare/stroke-style",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "design/design-contracts",
       "name": "The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures",
       "packet": "design/design-contracts",
@@ -1175,6 +1278,60 @@
       "adopters": []
     },
     {
+      "id": "design/placed-images",
+      "name": "Pictures in Design's rectangles and frames by cover: Place…, canvas drop, Fill, SVG export",
+      "packet": "design/placed-images",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/autosave-history",
+      "name": "Autosave, crash recovery and the History panel in Design",
+      "packet": "design/autosave-history",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/transform",
+      "name": "Rotate and flip Design's layers with turned handles, transform rows and the Object menu",
+      "packet": "design/transform",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/eyedropper",
+      "name": "Design's Eyedropper tool: the selection's fill or stroke from the colour under the pointer",
+      "packet": "design/eyedropper",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/shape-tools",
+      "name": "Design's Shape tool: polygons, stars, lines and arrows as editable shape layers",
+      "packet": "design/shape-tools",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/stroke-style",
+      "name": "Design's strokes with joins, caps and dashes through the shared stroke editor",
+      "packet": "design/stroke-style",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "photo/photo-seams",
       "name": "The seams: contracts, fakes, services, state, routing, file splits",
       "packet": "photo/photo-seams",
@@ -1241,6 +1398,42 @@
       "id": "photo/gradient-fill",
       "name": "Photo's Gradient tool: drag a linear or radial gradient into the layer or selection",
       "packet": "photo/gradient-fill",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/place-image",
+      "name": "Photo's File > Place… and drop on an open document: a fitted pixel layer",
+      "packet": "photo/place-image",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/transform",
+      "name": "Free Transform, layer flips and Canvas Size on the shared transform commands and handles",
+      "packet": "photo/transform",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/history-panel",
+      "name": "Photo's History tab on the shared panel, and autosave on the shared schedule and recovery folder",
+      "packet": "photo/history-panel",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/eyedropper",
+      "name": "Photo's Eyedropper tool: sample size, the loupe and the brush colour on the shared mean",
+      "packet": "photo/eyedropper",
       "layer": "app",
       "app": "photo",
       "c4": [],
@@ -1427,6 +1620,51 @@
       "adopters": []
     },
     {
+      "id": "halo/placed-images",
+      "name": "A PNG, JPEG or SVG picture in a Halo solid layer: Place…, viewer drop, drawn by the viewer and the render",
+      "packet": "halo/placed-images",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/autosave-history",
+      "name": "Autosave, crash recovery and the History panel in Halo",
+      "packet": "halo/autosave-history",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/transform",
+      "name": "Rotate and scale handles in Halo's viewer, keyed at the playhead",
+      "packet": "halo/transform",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/shape-tools",
+      "name": "Halo's shape layers of every kind, drawn by drag in the viewer",
+      "packet": "halo/shape-tools",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/stroke-style",
+      "name": "Strokes, dashes and keyed trim paths on Halo's shape layers",
+      "packet": "halo/stroke-style",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "suite/targets",
       "name": "The suite's targets exist, today's size is measured",
       "packet": "suite/targets",
@@ -1597,8 +1835,58 @@
         {
           "app": "library",
           "packet": "suiteui/adopt-kernel-selection"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/multi-layer-select"
         }
       ]
+    },
+    {
+      "id": "suiteui/timeline-select-all",
+      "name": "Select All Keys on the shared timeline: ⌘A while the strip has focus asks the host to pick every key (captain 2026-10-20, beta)",
+      "packet": "suiteui/timeline-select-all",
+      "layer": "ui",
+      "c4": [
+        "suiteui TimelineStrip"
+      ],
+      "adopters": [
+        {
+          "app": "halo",
+          "packet": "halo/key-editing"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/key-select-all"
+        }
+      ]
+    },
+    {
+      "id": "halo/key-editing",
+      "name": "Halo moves keys: picks across lanes, Select All Keys, a snapped group drag as one undo step (captain 2026-10-20, beta)",
+      "packet": "halo/key-editing",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/key-select-all",
+      "name": "Flare's timeline: Select All Keys from ⌘A and the context menu, on the kernel Selection (captain 2026-10-20, beta)",
+      "packet": "flare/key-select-all",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/multi-layer-select",
+      "name": "Photo selects several layers (Shift range, ⌘ toggle, All Layers) and moves, hides, deletes and fades them together (captain 2026-10-20, beta)",
+      "packet": "photo/multi-layer-select",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
     },
     {
       "id": "suiteui/adopt-kernel-layers",
@@ -1723,6 +2011,282 @@
         {
           "app": "photo",
           "packet": "suiteui/adopt-kernel-transform"
+        }
+      ]
+    },
+    {
+      "id": "suite/file-flow",
+      "name": "Suite file flow: drop files from Finder on any app, drag between apps, Open Recent and Open In in every app (suite v1 F6, F7; captain 2026-10-20, beta)",
+      "packet": "suite/file-flow",
+      "layer": "model",
+      "c4": [
+        "suite-kernel/kernel-files ✚",
+        "suite-shell/shell-documents ✚",
+        "suite-model recents, routing, pasteboard (built)"
+      ],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "design/file-flow"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/file-flow"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/file-flow"
+        },
+        {
+          "app": "halo",
+          "packet": "halo/file-flow"
+        },
+        {
+          "app": "library",
+          "packet": "library/file-flow"
+        }
+      ]
+    },
+    {
+      "id": "photo/tone-controls",
+      "name": "Photo's tone rows: White Balance, Tone, Presence and Sharpen on the image and adjustment layers, live on the GPU",
+      "packet": "photo/tone-controls",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/tone-controls",
+      "name": "Library's Develop tone rows from SuiteUI with Auto and Sharpen, and the loupe on the GPU",
+      "packet": "library/tone-controls",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/export-pack",
+      "name": "Design: export a frame as JPEG or PNG at an exact pixel size",
+      "packet": "design/export-pack",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/export-pack",
+      "name": "Photo: export at a size, HEIC and TIFF, on the suite's export sheet",
+      "packet": "photo/export-pack",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/export-pack",
+      "name": "Flare: export a scene as MP4 or a looping GIF",
+      "packet": "flare/export-pack",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/export-pack",
+      "name": "Halo: render ProRes 4444 with a transparent background",
+      "packet": "halo/export-pack",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/export-pack",
+      "name": "Library: export without location (the Metadata row), in the file and the sidecar",
+      "packet": "library/export-pack",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/file-flow",
+      "name": "Design: Open Recent, Open In, file drops and dragging a selection out",
+      "packet": "design/file-flow",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/file-flow",
+      "name": "Photo: Open Recent from the suite list, Open In, drops that open or place images",
+      "packet": "photo/file-flow",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/file-flow",
+      "name": "Flare: Open Recent from the suite list, Open In Halo, file drops",
+      "packet": "flare/file-flow",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/file-flow",
+      "name": "Halo: Open Recent from the suite list, file drops, Flare scenes by Open In",
+      "packet": "halo/file-flow",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/file-flow",
+      "name": "Library: drop to import, drag thumbnails out, Open In",
+      "packet": "library/file-flow",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/adopt-kernel-autosave",
+      "name": "Every app autosaves and recovers through the kernel's schedule, SuiteModel's recovery folder and SuiteUI's modifier, under one support root",
+      "packet": "suiteui/adopt-kernel-autosave",
+      "layer": "kernel",
+      "c4": [
+        "suite-model/suite-store",
+        "suite-kernel `Session`"
+      ],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-autosave"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adopt-kernel-autosave"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-autosave"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/suite-imaging",
+      "name": "SuiteImaging: shared adjustment values and the live GPU render route for Photo and Library",
+      "packet": "suiteui/suite-imaging",
+      "layer": "render",
+      "c4": [
+        "suite-imaging ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/suite-imaging"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/suite-imaging"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/shared-codecs",
+      "name": "One ImageIO adapter in SuiteShell over CoreRaster's codecs; the hand-rolled PNG writers deleted",
+      "packet": "suiteui/shared-codecs",
+      "layer": "model",
+      "c4": [
+        "suite-shell/shell-imageio ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "design",
+          "packet": "suiteui/shared-codecs"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/shared-codecs"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/shared-thumbnails",
+      "name": "One thumbnail store (CoreAsset ThumbnailStore) for Library, Photo and the home",
+      "packet": "suiteui/shared-thumbnails",
+      "layer": "model",
+      "c4": [
+        "suite-shell/shell-documents"
+      ],
+      "adopters": [
+        {
+          "app": "library",
+          "packet": "suiteui/shared-thumbnails"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/shared-thumbnails"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-unsaved-prompt",
+      "name": "One unsaved-changes guard and save status in every editor",
+      "packet": "suiteui/adopt-kernel-unsaved-prompt",
+      "layer": "ui",
+      "c4": [
+        "suiteui/suiteui-sources UnsavedGuard"
+      ],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adopt-kernel-unsaved-prompt"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adopt-kernel-eyedropper-photo",
+      "name": "Photo samples colour through the kernel alone; its own sampling contract is deleted",
+      "packet": "suiteui/adopt-kernel-eyedropper-photo",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-sample"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adopt-kernel-eyedropper-photo"
         }
       ]
     }

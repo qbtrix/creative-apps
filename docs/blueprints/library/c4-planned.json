@@ -52,7 +52,7 @@
               {
                 "id": "library-app-areas",
                 "name": "Window areas",
-                "description": "One file per feature that builds its menu closures and runs its async work, handing results to catalog methods: Edit, Import, Thumbnails, Cull, Persist, Loupe, Develop, Crop, Export. The spine creates each as a stub.",
+                "description": "One file per feature that builds its menu closures and runs its async work, handing results to catalog methods: Edit, Import, Thumbnails, Cull, Persist, Loupe, Develop, Crop, Export. The spine creates each as a stub. LibraryWindow+Trash: the Delete Rejected Photos confirmation.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/LibraryApp/LibraryWindow+Edit.swift",
@@ -63,7 +63,8 @@
                   "Sources/LibraryApp/LibraryWindow+Loupe.swift",
                   "Sources/LibraryApp/LibraryWindow+Develop.swift",
                   "Sources/LibraryApp/LibraryWindow+Crop.swift",
-                  "Sources/LibraryApp/LibraryWindow+Export.swift"
+                  "Sources/LibraryApp/LibraryWindow+Export.swift",
+                  "Sources/LibraryApp/LibraryWindow+Trash.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -157,13 +158,15 @@
               {
                 "id": "library-catalog",
                 "name": "Catalog state",
-                "description": "LibraryCatalog's stored state (every property v1 needs, declared once by the spine), PhotoItem, sort and the cached display order, collections and their empty-state copy.",
+                "description": "LibraryCatalog's stored state (every property v1 needs, declared once by the spine), PhotoItem, sort and the cached display order, collections and their empty-state copy. Its undo history on the kernel's History (a Delete Rejects step puts files back from the Trash) and its actions as SuiteKernel command specs.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/LibraryCatalog.swift",
                   "Sources/LibraryModel/PhotoItem.swift",
                   "Sources/LibraryModel/LibraryOrder.swift",
-                  "Sources/LibraryModel/LibraryEmptyCollection.swift"
+                  "Sources/LibraryModel/LibraryEmptyCollection.swift",
+                  "Sources/LibraryModel/LibraryUndoAdapter.swift",
+                  "Sources/LibraryModel/LibraryCommandCatalog.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -223,7 +226,8 @@
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/LibraryImport.swift",
-                  "Sources/LibraryModel/Live/LiveImporter.swift"
+                  "Sources/LibraryModel/Live/LiveImporter.swift",
+                  "Sources/LibraryModel/LibraryFileFlow+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -243,12 +247,15 @@
               {
                 "id": "library-culling",
                 "name": "Culling",
-                "description": "Rating, flag and label on a set of ids with undo, the keyboard mapping, Auto Advance, and mixed values for the inspector.",
+                "description": "Rating, flag and label on a set of ids with undo, the keyboard mapping, Auto Advance, and mixed values for the inspector. The single keys (0-5 rate, P X U flag, 6-9 colour label) and Delete Rejects: the selected collection's rejects moved to the Trash through PhotoTrashing (LiveTrash on FileManager.trashItem), their paths remembered so import skips them.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/MetadataEditing.swift",
                   "Sources/LibraryModel/LibraryCulling.swift",
-                  "Sources/LibraryModel/Live/LiveCulling.swift"
+                  "Sources/LibraryModel/Live/LiveCulling.swift",
+                  "Sources/LibraryModel/LibraryKeys.swift",
+                  "Sources/LibraryModel/LibraryDeleteRejects.swift",
+                  "Sources/LibraryModel/Live/LiveTrash.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -287,7 +294,9 @@
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/LibraryDevelop.swift",
-                  "Sources/LibraryModel/Live/LiveDevelop.swift"
+                  "Sources/LibraryModel/Live/LiveDevelop.swift",
+                  "Sources/LibraryModel/LibraryTone+Kernel.swift",
+                  "Sources/LibraryModel/LibraryDevelop+Imaging.swift"
                 ],
                 "status": "planned",
                 "authored": true
