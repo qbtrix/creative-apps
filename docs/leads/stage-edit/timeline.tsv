@@ -184,3 +184,4 @@
 2026-10-20T07:44:51Z	heartbeat	full CI 39386394161 cancelled (superseded); now tracking 39387926961 on af2977c0 (contains 424b4a60); pending behind 39349878829
 2026-10-20T07:55:50Z	heartbeat	no full CI containing 424b4a60 has finished; newest pending full run tracked (see Next); 39349878829 still running
 2026-10-20T08:10:56Z	heartbeat	full CI 39389343595 (8e060576, has 424b4a60) queued behind 39349878829
+2026-10-20T08:23:40Z	heartbeat	full CI 39389343595 (8e060576, contains 424b4a60) still queued behind 39349878829
