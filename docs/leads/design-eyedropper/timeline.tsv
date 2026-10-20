@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T19:16:13Z	stage	start	-	run act-1a15abb305f-lc8g on dev a48992b7; DY-a builder (wave 1 with stroke-style DK-a)
 2026-10-20T19:18:03Z	3	build-wave started	DY-a	workflow wf_b1589a06-dae
 2026-10-20T19:30:20Z	3	PR opened	DY-a #3691	head 667b9d18, Fast-Check pass
+2026-10-20T19:31:02Z	3	build-wave started	DY-u	workflow wf_4d1d2cbc-5d4, stacked on #3691
