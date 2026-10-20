@@ -4,7 +4,7 @@
 // the shared Open Recent, Clear Menu, Open In and drop commands run on.
 // It accepts open, new and place hand-offs, places dropped images as layers
 // in one "Place" step, leaves what only the window can do as
-// `PhotoFileRequest`s, and imports the old saved recents once.
+// `PhotoFileRequest`s, and turns the old saved recents into refs for PF-2's one-time import.
 // Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials

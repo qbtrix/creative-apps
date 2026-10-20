@@ -114,19 +114,13 @@ final class PhotoFileSession {
         return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
     }()
 
-    /// Notes `url` in Open Recent: the system's list, the window's own, and the
-    /// suite's shared recents as `event`, when the suite knows the file's type.
-    /// The first note moves Photo's old saved list into the shared recents once
-    /// and removes its key (PF-3).
+    /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
+    /// no declared document types may not get the system's), and the suite's
+    /// shared recents as `event`, when the suite knows the file's type.
     func noteRecent(_ url: URL, _ event: RecentEvent) {
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
         store(Array(([url] + recentFiles.filter { $0 != url }).prefix(10)))
         let bridge = self.bridge ?? Self.suiteBridge
-        var stored = UserDefaults.standard.stringArray(forKey: Self.recentKey)
-        if stored != nil {
-            for ref in PhotoWorkspace.takeOldRecents(&stored, registry: bridge.registry) { bridge.noted(ref, .opened) }
-            UserDefaults.standard.removeObject(forKey: Self.recentKey)
-        }
         guard let type = bridge.registry.type(forExtension: url.pathExtension)?.id else { return }
         let path = url.path(percentEncoded: false)
         bridge.noted(SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,
@@ -140,14 +134,14 @@ final class PhotoFileSession {
 
     private nonisolated static let recentKey = "PhotoRecentFiles"
 
-    /// Photo's old saved list, until the first note imports it into the shared recents.
+    /// The saved list; Open Recent reads it with no window open.
     nonisolated static func storedRecent() -> [URL] {
         (UserDefaults.standard.stringArray(forKey: recentKey) ?? []).map { URL(fileURLWithPath: $0) }
     }
 
-    /// The window's list only; the suite's shared recents are the saved one now.
     private func store(_ urls: [URL]) {
         recentFiles = urls
+        UserDefaults.standard.set(urls.map(\.path), forKey: Self.recentKey)
     }
 }
 
