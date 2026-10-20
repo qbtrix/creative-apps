@@ -5,7 +5,9 @@
 // first), and building them through `layerRows` takes ≤ 5 ms on a device, so
 // ≤ 50 ms under the Linux debug gate (DesignBudget.linuxDebugGate). The gate
 // reads the median of the runs, not one sample, so a single slow run on a
-// busy worker doesn't fail it. P3 (`testLayerListScroll`) is the screen half.
+// busy worker doesn't fail it. P3 (`testLayerListScroll`) is the screen half. `layerRows` is on
+// the perf list (Tests/perf-suites.txt), so the merge gate skips it and perf-nightly runs it;
+// the row-count test is deterministic and stays in the gate.
 import DesignModel
 import Testing
 

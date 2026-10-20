@@ -878,5 +878,189 @@
     ],
     "waits_on": "EP-1",
     "added_by": "suiteui/adopt-kernel-eyedropper-photo"
+  },
+  "RJ-X50": {
+    "id": "RJ-X50",
+    "app": "suite",
+    "weight": "high",
+    "job": "Open a camera RAW file with the afterglow CLI, pull its exposure down one stop, and export it as PNG at full size.",
+    "outcome": "The PNG is the RAW file's full 48 x 64 size, upright, within 3 levels of the reference, and its two highlight patches differ by more than 20 levels.",
+    "needs": [
+      "suiteui/shared-raw",
+      "S1"
+    ],
+    "closes_with": "suiteui/shared-raw",
+    "trap": "The export is the embedded preview's size, or the decode went through 8 bits so the clipped highlights come back flat",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SR-7",
+    "added_by": "suiteui/shared-raw"
+  },
+  "RJ-X70": {
+    "id": "RJ-X70",
+    "app": "suite",
+    "weight": "high",
+    "job": "In Photo, by command: select an ellipse around a face, subtract a lasso over the chin, invert, feather 8 px, fill white, and export.",
+    "outcome": "The face centre is unchanged, the notch and surround are white, and the edge ramp from 10% to 90% white is at least 6 px wide.",
+    "needs": [
+      "S5"
+    ],
+    "closes_with": "S5",
+    "trap": "Option adds instead of subtracting, the feather is ignored, or Invert selects the whole canvas",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AR-10",
+    "added_by": "suiteui/area-selection"
+  },
+  "RJ-X71": {
+    "id": "RJ-X71",
+    "app": "suite",
+    "weight": "med",
+    "job": "In Design, by command: pick a grouped card by its text, move it, enter the group, pick the text and move it alone, then save.",
+    "outcome": "After the first move both layers moved 40; after the second only the text moved 10 more.",
+    "needs": [
+      "S5"
+    ],
+    "closes_with": "S5",
+    "trap": "The pick lands on the text, so the first move pulls the text out of its card",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AR-14",
+    "added_by": "suiteui/area-selection"
+  },
+  "RJ-X72": {
+    "id": "RJ-X72",
+    "app": "suite",
+    "weight": "high",
+    "job": "Copy a red rectangle in Design and paste it into a new image in Photo, then export.",
+    "outcome": "Photo gains one 400x200 px layer (2x) whose centre pixel is pure red.",
+    "needs": [
+      "suiteui/clipboard-interop"
+    ],
+    "closes_with": "suiteui/clipboard-interop",
+    "trap": "Photo's Paste is greyed because Design wrote only its own layer type",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "CB-6",
+    "added_by": "suiteui/clipboard-interop"
+  },
+  "RJ-X73": {
+    "id": "RJ-X73",
+    "app": "suite",
+    "weight": "high",
+    "job": "Paste a screenshot PNG into Design, Flare and Halo and save each.",
+    "outcome": "Each file has one new placed-image layer at the pasted pixel size, centred (Halo: in point at the playhead).",
+    "needs": [
+      "suiteui/clipboard-interop",
+      "S20"
+    ],
+    "closes_with": "suiteui/clipboard-interop",
+    "trap": "The paste is refused, lands at the top-left corner, or starts at time 0 in Halo",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "CB-10",
+    "added_by": "suiteui/clipboard-interop"
+  },
+  "RJ-X74": {
+    "id": "RJ-X74",
+    "app": "suite",
+    "weight": "high",
+    "job": "Make a 29.97 fps, 10 s Halo composition with a keyed text layer by command and render a PNG sequence.",
+    "outcome": "300 files, frame 299 timed at 299 x 1001 / 30000 s within 1 microsecond, and drop-frame timecode 00:01:00;02 at frame 1800.",
+    "needs": [
+      "suiteui/frame-rates"
+    ],
+    "closes_with": "suiteui/frame-rates",
+    "trap": "The composition silently runs at 30, so keys drift a frame on an editor timeline",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FR-8",
+    "added_by": "suiteui/frame-rates"
+  },
+  "RJ-X75": {
+    "id": "RJ-X75",
+    "app": "suite",
+    "weight": "high",
+    "job": "In Flare and Halo, draw a 200x200 rectangle by command, set its anchor to the centre, key rotation 0 to 360 over 24 frames, and export frames 0 and 12.",
+    "outcome": "The opaque pixels' centroid at frame 12 is within 1 px of frame 0's in both apps.",
+    "needs": [
+      "suiteui/anchor-parenting"
+    ],
+    "closes_with": "suiteui/anchor-parenting",
+    "trap": "The spin orbits the canvas's top-left corner, or setting the anchor moves the layer",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AN-10",
+    "added_by": "suiteui/anchor-parenting"
+  },
+  "RJ-X76": {
+    "id": "RJ-X76",
+    "app": "suite",
+    "weight": "med",
+    "job": "In Photo, pick the Brush, press size-up twice from 20 px, set opacity 50 by command, stroke on white, and export.",
+    "outcome": "The stroke is 30 px tall within 1 and its centre is 50% grey within 3 levels.",
+    "needs": [
+      "suiteui/brush-keys"
+    ],
+    "closes_with": "suiteui/brush-keys",
+    "trap": "The size steps by 1 so two presses barely change it, or the opacity command sets flow",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "BK-8",
+    "added_by": "suiteui/brush-keys"
+  },
+  "RJ-X60": {
+    "id": "RJ-X60",
+    "app": "suite",
+    "weight": "high",
+    "job": "Apply the built-in high-contrast black and white look to the same photo in Photo and in Library by command, save it as a look named Mine, and export both.",
+    "outcome": "Both exports are grey (red, green and blue within 1 level on every pixel) and match each other within 1 level; look.list names Mine after a relaunch.",
+    "needs": [
+      "suiteui/adjust-everywhere",
+      "S15",
+      "library/export-pack"
+    ],
+    "closes_with": "suiteui/adjust-everywhere",
+    "trap": "The two apps make black and white differently (one desaturates, one mixes the weights), or the saved look is gone after a relaunch",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AJ-14",
+    "added_by": "suiteui/adjust-everywhere"
   }
 }
