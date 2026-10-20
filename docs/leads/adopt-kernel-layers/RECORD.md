@@ -115,3 +115,4 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T05:06:18Z Heartbeat. #3392 AL-design head ed7c3c69, needs-rebase dropped, macOS build 39371121699 queued; main b3011ab9.
 - 2026-10-20T05:28:27Z Heartbeat. #3392 AL-design head ed7c3c69 still waits on macOS build 39371121699 (queued); main b3011ab9.
 - 2026-10-20T05:50:10Z Heartbeat. #3392 AL-design head ed7c3c69 still waits on macOS build 39371121699 (queued, macOS runners backlogged); main b3011ab9.
+- 2026-10-20T06:19:39Z Heartbeat. #3392 AL-design needs-rebase (4th; design-seams-2 waits_on again): merged dev taking dev's text so the PR no longer touches that file; CI: PASS, head f6bf7998, Head line moved. Earlier macOS build 39371121699 on ed7c3c69 passed.
