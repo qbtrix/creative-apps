@@ -13,7 +13,7 @@ Next: nothing; every slice is Belt-Slice-Done and the Belt-Contact-Sheet is post
 | SN-e | snap engine: edges/centres, gaps and spacing | SN-2, SN-3 | MJ10 | SN-a | no | 0 | done | – | – |
 | SN-b | move, resize, draw snap before whole points; ⌘ off | SN-4, SN-5 | MJ11 | SN-a, SN-e, design-seams, canvas-basics CB-a, select-several SS-b | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39439525908 | – |
 | SN-c | smart guides on canvas; View > Snap to Layers | SN-6, SN-7, SN-8 | testSnapAndSmartGuides | SN-a; design-window DW-d, DW-a; canvas-basics CB-c; files-history FH-b | yes | 1 | done | https://github.com/qbtrix/creative-apps/actions/runs/39439525908 | wanted |
-| SN-f | live guides and budgets on the live services | SN-10, SN-11 | testSnapAndSmartGuides | SN-b, SN-e, SN-c | no | 0 | waiting | – | – |
+| SN-f | live guides and budgets on the live services | SN-10, SN-11 | testSnapAndSmartGuides | SN-b, SN-e, SN-c | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39439525908 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
