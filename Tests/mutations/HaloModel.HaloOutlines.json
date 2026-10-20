@@ -1,0 +1,4 @@
+[
+{"label": "spec ignored: a shape layer with a spec still draws the ellipse", "file": "Sources/HaloModel/Live/HaloOutlines.swift", "find": "            if let spec = item.shape { outline(spec,", "replace": "            if let spec = item.shape, false { outline(spec,", "tests": "HaloShapeTests"},
+{"label": "the spec path skips the layer matrix", "file": "Sources/HaloModel/Live/HaloOutlines.swift", "find": "path.transformed(by: m).flattened(", "replace": "path.flattened(", "tests": "HaloShapeTests"}
+]
