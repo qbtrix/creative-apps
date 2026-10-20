@@ -76,3 +76,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-20T13:16:33Z: AC-d3 #3585 and AC-h3 #3587 merged. AC-z2 opened as #3606 (head 0742cf4a, fast-lane + feature-done; suiteui.md Menu commands row says every app builds its menus from its catalog, wave status built; scripts/ci --changed PASS). Belt-Slice-Done waits on a successful run containing the slices; scoped runs 39424969406 (suiteui), 39424984298 (photo), 39424963422 (design) and 39426337532 (halo) are queued on 897ccbb2.
 
 - 2026-10-20T14:18:51Z: AC-z2 #3606 merged 14:00Z as 59708c02; every slice merged. Full CI 39436941980 at 56e73319 (has AC-design 2128ac4b and AC-z 59708c02) pending; slice lines wait on it.
+
+- 2026-10-20T14:40Z: Full CI 39436941980 cancelled. Full CI 39438701609 at 9f880c85 (contains every slice, incl. 6fa96843) queued; scoped runs at 897ccbb2 still queued. Slice lines wait.
