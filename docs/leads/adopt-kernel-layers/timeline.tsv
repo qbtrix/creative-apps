@@ -103,3 +103,4 @@ utc	stage	event	ref	note
 2026-10-20T04:44:02Z	heartbeat	-	-	#3392 AL-design needs-rebase (3rd, design-seams-2 waits_on) resolved: merged dev, CI: PASS, head ed7c3c69, Head line moved; awaits macOS build and lane
 2026-10-20T05:06:18Z	heartbeat	-	-	#3392 AL-design head ed7c3c69, needs-rebase dropped, macOS build 39371121699 queued; main b3011ab9
 2026-10-20T05:28:27Z	heartbeat	-	-	#3392 AL-design head ed7c3c69 still waits on macOS build 39371121699 (queued); main b3011ab9
+2026-10-20T05:50:10Z	heartbeat	-	-	#3392 AL-design head ed7c3c69 still waits on macOS build 39371121699 (queued, macOS runners backlogged); main b3011ab9
