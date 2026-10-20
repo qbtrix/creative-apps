@@ -129,7 +129,7 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     let catalog = LibraryCatalog()
     let live = catalog.emptyState(importReason: nil)
     #expect(live == LibraryEmptyState(
-        title: "No Photos", message: "Photos you import appear here, sorted by the date they were taken.",
+        title: "No Photos", message: "Import a folder or drop one here. Photos appear sorted by the date they were taken.",
         offersImport: true))
     let off = catalog.emptyState(importReason: "Import isn't connected yet (import).")
     #expect(off.title == "No Photos" && off.offersImport)
