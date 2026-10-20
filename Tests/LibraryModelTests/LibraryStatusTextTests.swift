@@ -56,7 +56,7 @@ private func pill(_ id: String, _ row: LibraryStatusRow?) -> LibraryStatusPill? 
     catalog.selectCollection("favorites")
     #expect(catalog.statusRow?.size == "0 photos")
     let header = catalog.inspectorHeader(utcOffset: 0)
-    #expect(header.title == "Favorites")
+    #expect(header.title == "Picks")
     #expect(header.facts == [.init(label: "Photos", value: "0")])
 }
 
