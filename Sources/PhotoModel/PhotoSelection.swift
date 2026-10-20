@@ -79,11 +79,20 @@ extension PhotoWorkspace {
     /// weighted by the selection's coverage there, as one undo step named
     /// `name` that keeps the tiles it changed.
     mutating func editSelection(named name: String, _ pixel: (RGBA) -> RGBA) {
-        guard let selection, let id = selectedLayerID, let at = index(of: id), let bounds = bounds(of: layers[at]),
-            let area = selection.intersection(bounds), var tiled = pixels[id]
+        guard let selection else { return }
+        editSelection(named: name, in: selection, masked: true) { _, _, p in pixel(p) }
+    }
+
+    /// Replaces each pixel of the selected layer inside `region` (canvas
+    /// pixels) with `pixel(x, y, old)`, (x, y) in canvas pixels, weighted by
+    /// the selection's coverage when `masked`, as one undo step named `name`.
+    mutating func editSelection(named name: String, in region: PixelRect, masked: Bool, _ pixel: (Int, Int, RGBA) -> RGBA) {
+        guard let id = selectedLayerID, let at = index(of: id), let bounds = bounds(of: layers[at]),
+            let area = region.intersection(bounds), var tiled = pixels[id]
         else { return }
-        let local = area.offsetBy(-layers[at].offsetX, -layers[at].offsetY)
-        let weight = coverageWeight(offsetX: layers[at].offsetX, offsetY: layers[at].offsetY)
+        let (dx, dy) = (layers[at].offsetX, layers[at].offsetY)
+        let local = area.offsetBy(-dx, -dy)
+        let weight = masked ? coverageWeight(offsetX: dx, offsetY: dy) : nil
         var before: [Int: PixelBuffer] = [:]
         for i in tiled.tileIndices(in: local) where tiled.tiles.indices.contains(i) {
             let rect = tiled.tileRect(i), old = tiled.tiles[i]
@@ -92,8 +101,8 @@ extension PhotoWorkspace {
                 for x in (part.x - rect.x)..<(part.maxX - rect.x) {
                     // Inside the tile by construction, and the new pixels are finite.
                     guard let p = try? old.pixel(x: x, y: y) else { continue }
-                    let w = weight?(rect.x + x, rect.y + y) ?? 1
-                    try? tiled.tiles[i].setPixel(x: x, y: y, w >= 1 ? pixel(p) : Self.mix(p, pixel(p), w))
+                    let w = weight?(rect.x + x, rect.y + y) ?? 1, new = pixel(rect.x + x + dx, rect.y + y + dy, p)
+                    try? tiled.tiles[i].setPixel(x: x, y: y, w >= 1 ? new : Self.mix(p, new, w))
                 }
             }
             if tiled.tiles[i] != old { before[i] = old }

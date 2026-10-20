@@ -12,6 +12,7 @@ file.new
 file.open
 file.save
 file.save-as
+image.gradient
 image.resize
 image.rotate-180
 image.rotate-ccw
@@ -31,6 +32,7 @@ layer.send-backward
 layer.toggle-visibility
 select.all
 select.deselect
+select.rect
 tool.brush
 tool.clone
 tool.crop

@@ -66,15 +66,18 @@ import Testing
     }
 
     @Test func noBanding() throws {
-        // Black to white over 2048 rows is 8 rows per 8-bit level: undithered, each level repeats 8 rows.
+        // Black to white over 2048 rows is about 8 rows per 8-bit level: undithered, each level repeats 8 rows.
+        // Rows of pure black or white are the stops themselves (OKLab stays under half a level for ~100 rows
+        // next to black), not a band, so they don't count.
         var workspace = try Self.gray(8, 2048)
         stroke(&workspace, .gradient, from: point(4, 0), to: point(4, 2047))
         let image = try workspace.exportPixels(as: .png)
         let rows = stride(from: 0, to: image.rgba8.count, by: image.width * 4).map {
             Array(image.rgba8[$0..<min($0 + image.width * 4, image.rgba8.count)])
         }
+        let flat = Set([0, 255].map { v in Array([[UInt8]](repeating: [UInt8(v), UInt8(v), UInt8(v), 255], count: 8).joined()) })
         var run = 1, longest = 1
-        for (above, row) in zip(rows, rows.dropFirst()) {
+        for (above, row) in zip(rows, rows.dropFirst()) where !flat.contains(row) {
             run = row == above ? run + 1 : 1
             longest = max(longest, run)
         }
