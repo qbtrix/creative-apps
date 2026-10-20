@@ -124,3 +124,4 @@ utc	stage	event	ref	note
 2026-10-20T20:43:59Z	AU-flare	#3674 open; macOS build 39477990421 still queued; no supervisor reply yet
 2026-10-20T21:02:35Z	AU-flare	#3674 lane macOS build 39477990421 now in_progress
 2026-10-20T21:04:49Z	AU-flare	#3674 lane macOS build 39477990421 success; awaiting lane merge
+2026-10-20T21:23:30Z	AU-flare	#3674 mergeable clean, all checks green; lane sweep 39497329661 in progress
