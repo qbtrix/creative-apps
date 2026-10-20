@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-20T20:26Z	3	pushed	PT-4 889e2f2	CI PASS, Mutate 2/2; own diff 5 files +180/-42; PR waits on #3704 (487 lines vs dev)
 2026-10-20T20:32Z	3	heartbeat	-	#3704/#3706/#3708 open, clean, waiting on lane batch 39492157468 (macOS)
 2026-10-20T20:34Z	3	pushed	PT-3 928cbea	CI PASS, Mutate 4/4 PhotoCanvasSizeDraft; 470 lines vs PT-2 (over cap) -> splitting into PT-3m (model) + PT-3 (UI); OK calls PT-1 stub resizeCanvas; local image.canvas-size spec for PT-6 to register
+2026-10-20T20:39Z	3	split	PT-3m c695ced / PT-3 dfff053	PT-3m model 4 files +183/-1, CI PASS, Mutate 4/4; PT-3 UI 7 files +278/-8 on PT-3m, CI PASS; both wait on #3704 then PT-2
