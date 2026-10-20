@@ -217,3 +217,4 @@
 2026-10-20T14:45:56Z	heartbeat	full CI 39438701609 on 9f880c85 still queued; awaiting green run for contact sheet
 2026-10-20T15:02:37Z	heartbeat	full CI 39442633733 on 0dd23d65 queued (newest; contains 424b4a60); 39438701609 still queued
 2026-10-20T15:15:28Z	heartbeat	newest full CI 39445920994 on 35b6f8a8 pending; 39442633733 and 39438701609 queued; all contain 424b4a60
+2026-10-20T15:26:41Z	heartbeat	newest full CI 39447117246 on 27b67332 pending (39445920994 cancelled); 39442633733 and 39438701609 still queued
