@@ -211,3 +211,4 @@
 2026-10-20T13:27:57Z	heartbeat	full CI 39409307241 (a54a892a) still in_progress; 39426412729 cancelled at 13:17Z; no merges since 13:03Z
 2026-10-20T13:40:03Z	heartbeat	full CI 39409307241 (a54a892a) still in_progress; 39429064045 (f729e906) pending; both contain 424b4a60
 2026-10-20T13:53:25Z	heartbeat	full CI 39409307241 (a54a892a) in_progress, no update since 12:31Z; 39429064045 (f729e906) pending; both contain 424b4a60
+2026-10-20T14:10:11Z	heartbeat	full CI 39429064045 cancelled; 39409307241 still stuck (no update since 12:31Z); new full run 39434846672 on 4f365bf8 pending; no green full run yet
