@@ -124,3 +124,4 @@ utc	stage	event	ref	note
 2026-10-20T19:53:22Z	check	heartbeat	#3684	DE-z open, macOS build queued (lane per-PR mode); no needs-fix; no scoped design run yet for DE-u critics
 2026-10-20T20:15:53Z	check	heartbeat	#3684	DE-z macOS build 39482727435 still queued; scoped: design 39490030243 pending on dev 014da2f1 (contains DE-u); DE-u critics run when it finishes
 2026-10-20T20:48:02Z	check	heartbeat	#3684	DE-z macOS build queued; DE-u critics wait on scoped: design 39490030243 (pending)
+2026-10-20T21:11:10Z	check	heartbeat	#3684	DE-z macOS build 39482727435 still queued (50 runs queued repo-wide); scoped: design 39490030243 still pending, DE-u critics wait
