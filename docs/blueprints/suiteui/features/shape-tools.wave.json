@@ -1,0 +1,157 @@
+{
+  "title": "One set of shape tools: the kernel's shape spec, path and drag rules and shape.draw, SuiteUI's shape options",
+  "wave": 4,
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S19 (shape tools: polygon, star, rounded rect, line, arrow); real job RJ-X34; captain 2026-10-20: everyday tools in the beta, built once",
+  "waits_on": "eyedropper's EY-z slice before the fake-app task; editor-kernel (built); FlareCore PathBuilders on the pinned core",
+  "longest_chain": "6 (SH-1 → SH-2 → SH-3 → SH-4 → SH-7 → SH-9)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteShapeJourneyTests.testShapeToolsDrawStarAndArrow"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Shapes/ShapeSpec.swift",
+    "Sources/SuiteKernel/Shapes/ShapeRules.swift",
+    "Sources/SuiteKernel/Shapes/ShapeCommands.swift",
+    "Tests/SuiteKernelTests/ShapeRulesTests.swift",
+    "Tests/SuiteKernelTests/ShapeCommandsTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-shapes.json",
+    "Sources/SuiteUI/ShapeToolOptions.swift",
+    "Sources/SuiteUI/Gallery/GalleryShapeTools.swift",
+    "Sources/SuiteUI/Gallery/GalleryEditorKernel.swift",
+    "UITests/SuiteJourneyTests+Shapes.swift",
+    "Tests/SuiteUITests/ShapeToolOptionsTests.swift",
+    "Tests/AppSnapshotTests/SuiteShapeToolsSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetShapeToolsTests.swift",
+    "Tests/mutations/SuiteKernel.ShapeRules.json",
+    "Tests/mutations/SuiteKernel.ShapeCommands.json",
+    "Tests/SuiteUITests/ShapeToolsLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeShapeTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/draw-star/draw-star.jobs.json",
+    "Tests/RealJobs/fake/draw-star/input/empty.fake",
+    "docs/blueprints/suiteui/features/shape-tools.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "SH-a",
+      "behavior": "The kernel's shape spec is complete and its rules, target, intents and two command specs are declared as stubs, the gallery's shape-tools page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "SH-1",
+        "SH-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "editor-kernel": [
+          "SH-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Shapes/ShapeSpec.swift",
+        "Sources/SuiteKernel/Shapes/ShapeRules.swift",
+        "Sources/SuiteKernel/Shapes/ShapeCommands.swift",
+        "Tests/SuiteKernelTests/ShapeRulesTests.swift",
+        "Tests/SuiteKernelTests/ShapeCommandsTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-shapes.json",
+        "Sources/SuiteUI/ShapeToolOptions.swift",
+        "Sources/SuiteUI/Gallery/GalleryShapeTools.swift",
+        "Sources/SuiteUI/Gallery/GalleryEditorKernel.swift",
+        "UITests/SuiteJourneyTests+Shapes.swift"
+      ]
+    },
+    {
+      "id": "SH-u",
+      "behavior": "On the gallery page the kind chips switch the rows, each row edits its option and shows why a value is out of range, every control identified, within the render budget.",
+      "tasks": [
+        "SH-3",
+        "SH-4"
+      ],
+      "journeys": [
+        "PJ1"
+      ],
+      "waits": {
+        "SH-a": [
+          "SH-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/ShapeToolOptions.swift",
+        "Tests/SuiteUITests/ShapeToolOptionsTests.swift",
+        "Tests/AppSnapshotTests/SuiteShapeToolsSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetShapeToolsTests.swift",
+        "UITests/SuiteJourneyTests+Shapes.swift"
+      ]
+    },
+    {
+      "id": "SH-m",
+      "behavior": "The rules build every kind's path in a box and the drag's box with Shift and Option, refuse out-of-range counts in words, and shape.draw adds one shape as one undo step.",
+      "tasks": [
+        "SH-5",
+        "SH-6"
+      ],
+      "journeys": [
+        "KJ-shapes"
+      ],
+      "waits": {
+        "SH-a": [
+          "SH-5",
+          "SH-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Shapes/ShapeRules.swift",
+        "Tests/SuiteKernelTests/ShapeRulesTests.swift",
+        "Tests/mutations/SuiteKernel.ShapeRules.json",
+        "Sources/SuiteKernel/Shapes/ShapeCommands.swift",
+        "Tests/SuiteKernelTests/ShapeCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.ShapeCommands.json"
+      ]
+    },
+    {
+      "id": "SH-z",
+      "behavior": "The gallery draws through shape.draw on a live target, the fake app keeps shape specs so RJ-X34 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "SH-7",
+        "SH-8",
+        "SH-9"
+      ],
+      "journeys": [
+        "PJ1",
+        "KJ-shapes"
+      ],
+      "waits": {
+        "SH-u": [
+          "SH-7"
+        ],
+        "SH-m": [
+          "SH-7",
+          "SH-8"
+        ],
+        "eyedropper:EY-z": [
+          "SH-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryShapeTools.swift",
+        "Tests/SuiteUITests/ShapeToolsLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeShapeTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/draw-star/draw-star.jobs.json",
+        "Tests/RealJobs/fake/draw-star/input/empty.fake",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-shapes.json",
+        "docs/blueprints/suiteui/features/shape-tools.wave.json"
+      ]
+    }
+  ]
+}

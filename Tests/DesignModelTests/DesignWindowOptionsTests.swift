@@ -21,6 +21,21 @@ import Testing
         #expect(DesignWindowOptions(arguments: ["app", "-DesignFixture"]).fixture == nil)
     }
 
+    /// design-export DE-6: the journeys' export folder and the file the fakes fail to write.
+    @Test func exportArgumentsNameTheFolderAndTheFailingFile() {
+        let options = DesignWindowOptions(arguments: [
+            "app", "-DesignExportTo", "/tmp/out", "-DesignExportFail", "Desktop.png", "-DesignFixture", "cards",
+        ])
+        #expect(options.exportFolder == "/tmp/out")
+        #expect(options.exportFail == "Desktop.png")
+        #expect(options.fixture == "cards")
+        let none = DesignWindowOptions(arguments: ["app"])
+        #expect(none.exportFolder == nil && none.exportFail == nil)
+        #expect(DesignWindowOptions(arguments: ["app", "-DesignExportTo"]).exportFolder == nil)
+        #expect(DesignWindowOptions(arguments: ["app", "-DesignExportFail"]).exportFail == nil)
+        #expect(DesignWindowOptions(arguments: ["app", "-DesignExportFail", "A"]).exportFolder == nil)
+    }
+
     @Test func windowSizeParsesWidthByHeight() {
         let options = DesignWindowOptions(arguments: ["app", "-DesignWindowSize", "880x560", "-DesignFixture", "cards"])
         #expect(options.windowWidth == 880 && options.windowHeight == 560)

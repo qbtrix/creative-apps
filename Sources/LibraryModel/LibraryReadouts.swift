@@ -122,9 +122,10 @@ extension LibraryCatalog {
         return "mean \(tenThousandths / 10_000)." + String(repeating: "0", count: 4 - fraction.count) + fraction
     }
 
-    /// `saved` when every change is on disk, else `dirty` (the `library.catalog` value).
+    /// `saved` when every change is on disk, else `dirty` (the `library.catalog`
+    /// value), read from the kernel's session (LibrarySession+Kernel.swift).
     public var catalogValue: String {
-        saveRevision == savedRevision ? "saved" : "dirty"
+        catalogSession.isDirty ? "dirty" : "saved"
     }
 
     /// The notice slot's content, first match wins: the catalog file's
@@ -178,7 +179,7 @@ extension LibraryCatalog {
         case .loading, .ready:
             return LibraryEmptyState(
                 title: "No Photos",
-                message: hint ?? "Photos you import appear here, sorted by the date they were taken.",
+                message: hint ?? "Import a folder or drop one here. Photos appear sorted by the date they were taken.",
                 offersImport: true)
         }
     }

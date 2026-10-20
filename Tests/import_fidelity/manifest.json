@@ -1,0 +1,1456 @@
+{
+ "psd": [
+  {
+   "file": "psd/flat_background.psd",
+   "what": "one Background layer",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ]
+  },
+  {
+   "file": "psd/normal_stack.psd",
+   "what": "offset layers, one hanging off the canvas, a Unicode name",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Red",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Café ☕",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Off canvas",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ]
+  },
+  {
+   "file": "psd/nested_groups.psd",
+   "what": "groups three deep, one closed",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Outer",
+     "kind": "group",
+     "hidden": false,
+     "blend": null,
+     "children": [
+      {
+       "name": "Outer leaf",
+       "kind": "pixels",
+       "hidden": false,
+       "blend": "normal",
+       "opacity": 255,
+       "clip": false,
+       "mask": false
+      },
+      {
+       "name": "Middle",
+       "kind": "group",
+       "hidden": false,
+       "blend": null,
+       "children": [
+        {
+         "name": "Inner",
+         "kind": "group",
+         "hidden": false,
+         "blend": null,
+         "children": [
+          {
+           "name": "Deep leaf",
+           "kind": "pixels",
+           "hidden": false,
+           "blend": "normal",
+           "opacity": 255,
+           "clip": false,
+           "mask": false
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Empty group",
+     "kind": "group",
+     "hidden": false,
+     "blend": null,
+     "children": []
+    }
+   ]
+  },
+  {
+   "file": "psd/hidden_layers.psd",
+   "what": "a hidden layer and a hidden group",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Shown",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Hidden",
+     "kind": "pixels",
+     "hidden": true,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Hidden group",
+     "kind": "group",
+     "hidden": true,
+     "blend": null,
+     "children": [
+      {
+       "name": "Inside hidden",
+       "kind": "pixels",
+       "hidden": false,
+       "blend": "normal",
+       "opacity": 255,
+       "clip": false,
+       "mask": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "file": "psd/masks.psd",
+   "what": "hard masks: default hide, default show, disabled",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Masked",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": true
+    },
+    {
+     "name": "Holed",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": true
+    },
+    {
+     "name": "Mask off",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": true
+    }
+   ]
+  },
+  {
+   "file": "psd/clipping.psd",
+   "what": "a layer clipped to the one below",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Base",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Clipped",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": true,
+     "mask": false
+    }
+   ]
+  },
+  {
+   "file": "psd/blend_opacity.psd",
+   "what": "multiply, screen, overlay, difference and 50% opacity",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Multiply",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "multiply",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Screen",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "screen",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Overlay",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "overlay",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Difference",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "difference",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Half",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 128,
+     "clip": false,
+     "mask": false
+    }
+   ],
+   "gap": 3500
+  },
+  {
+   "file": "psd/blend_extended.psd",
+   "what": "linear dodge and linear burn keys",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Linear dodge",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "linearDodge",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Linear burn",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "linearBurn",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ],
+   "gap": 3497
+  },
+  {
+   "file": "psd/adjustment_layer.psd",
+   "what": "an Invert adjustment layer over the picture",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Square",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Invert",
+     "kind": "adjustment",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ],
+   "gap": 3494
+  },
+  {
+   "file": "psd/fill_layer.psd",
+   "what": "a solid colour fill layer shown through its mask",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Color Fill",
+     "kind": "fill",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": true
+    }
+   ],
+   "gap": 3495
+  },
+  {
+   "file": "psd/text_layer.psd",
+   "what": "a type layer (TySh) with its rendered pixels",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Headline",
+     "kind": "text",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ],
+   "gap": 3498
+  },
+  {
+   "file": "psd/smart_object.psd",
+   "what": "a placed smart object (SoLd) with its rendered pixels",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Placed logo",
+     "kind": "smartObject",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ],
+   "gap": 3498
+  },
+  {
+   "file": "psd/layer_effects.psd",
+   "what": "a layer with a stroke effect (lfx2)",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Badge",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ],
+   "gap": 3496
+  },
+  {
+   "file": "psd/rgb16.psd",
+   "what": "16 bits per channel with a group and a mask",
+   "width": 64,
+   "height": 64,
+   "bits": 16,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Deep",
+     "kind": "group",
+     "hidden": false,
+     "blend": null,
+     "children": [
+      {
+       "name": "Sixteen",
+       "kind": "pixels",
+       "hidden": false,
+       "blend": "normal",
+       "opacity": 255,
+       "clip": false,
+       "mask": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "file": "psd/gray8.psd",
+   "what": "grayscale with two layers",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Background",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Gray box",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ]
+  },
+  {
+   "file": "psd/large_canvas.psd",
+   "what": "a 2400 x 300 banner with no Background, small layers at the far edges",
+   "width": 2400,
+   "height": 300,
+   "bits": 8,
+   "tree": [
+    {
+     "name": "Left edge",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Far corner",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    },
+    {
+     "name": "Middle",
+     "kind": "pixels",
+     "hidden": false,
+     "blend": "normal",
+     "opacity": 255,
+     "clip": false,
+     "mask": false
+    }
+   ]
+  },
+  {
+   "file": "psd/zip_channels.psd",
+   "what": "layer channels zip-compressed",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "refuse": "zip"
+  },
+  {
+   "file": "psd/cmyk.psd",
+   "what": "CMYK colour mode",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "refuse": "colour mode 4"
+  },
+  {
+   "file": "psd/large_document.psb",
+   "what": "large document format (PSB)",
+   "width": 64,
+   "height": 64,
+   "bits": 8,
+   "refuse": "large document format"
+  }
+ ],
+ "svg": [
+  {
+   "file": "svg/basic_shapes.svg",
+   "what": "every basic shape and a curved path",
+   "layers": [
+    "rect",
+    "rounded",
+    "circle",
+    "ellipse",
+    "line",
+    "polyline",
+    "polygon",
+    "path"
+   ],
+   "probes": [
+    {
+     "x": 15,
+     "y": 12,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 31,
+     "y": 6,
+     "rgba": null
+    },
+    {
+     "x": 40,
+     "y": 12,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 65,
+     "y": 12,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ]
+    },
+    {
+     "x": 88,
+     "y": 12,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 25,
+     "y": 35,
+     "rgba": [
+      0.1255,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 70,
+     "y": 40,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ]
+    },
+    {
+     "x": 70,
+     "y": 33,
+     "rgba": null
+    },
+    {
+     "x": 20,
+     "y": 65,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 70,
+     "y": 80,
+     "rgba": [
+      0.1255,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 5,
+     "y": 95,
+     "rgba": null
+    }
+   ]
+  },
+  {
+   "file": "svg/nested_groups.svg",
+   "what": "groups four deep under two top-level groups",
+   "layers": [
+    "toolbar",
+    "footer"
+   ],
+   "groups": [
+    "row-1",
+    "row-2",
+    "icon-a",
+    "icon-a-glyph"
+   ],
+   "probes": [
+    {
+     "x": 20,
+     "y": 10,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 20,
+     "y": 30,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 45,
+     "y": 30,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ]
+    },
+    {
+     "x": 50,
+     "y": 88,
+     "rgba": [
+      0.1255,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    }
+   ],
+   "gap": 3501
+  },
+  {
+   "file": "svg/transforms.svg",
+   "what": "translate, rotate about a point, scale, matrix, skewX, nested",
+   "layers": [
+    "moved",
+    "turned",
+    "scaled",
+    "matrix",
+    "skewed",
+    "nested"
+   ],
+   "probes": [
+    {
+     "x": 10,
+     "y": 10,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 2,
+     "y": 2,
+     "rgba": null
+    },
+    {
+     "x": 58,
+     "y": 15,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 55,
+     "y": 2,
+     "rgba": null
+    },
+    {
+     "x": 75,
+     "y": 10,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ]
+    },
+    {
+     "x": 15,
+     "y": 65,
+     "rgba": [
+      0.1255,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 55,
+     "y": 68,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 41,
+     "y": 68,
+     "rgba": null
+    },
+    {
+     "x": 63,
+     "y": 77,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "file": "svg/gradients.svg",
+   "what": "linear and radial gradients, an href chain, gradientTransform",
+   "layers": [
+    "horizontal",
+    "vertical",
+    "radial",
+    "transformed"
+   ],
+   "probes": [
+    {
+     "x": 0.5,
+     "y": 20,
+     "rgba": [
+      0.9875,
+      0,
+      0.0125,
+      1
+     ]
+    },
+    {
+     "x": 20,
+     "y": 20,
+     "rgba": [
+      0.5,
+      0,
+      0.5,
+      1
+     ]
+    },
+    {
+     "x": 30,
+     "y": 5,
+     "rgba": [
+      0.25,
+      0,
+      0.75,
+      1
+     ]
+    },
+    {
+     "x": 20,
+     "y": 60,
+     "rgba": [
+      0.75,
+      0,
+      0.25,
+      1
+     ]
+    },
+    {
+     "x": 75,
+     "y": 25,
+     "rgba": [
+      1,
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "x": 75,
+     "y": 35,
+     "rgba": [
+      0.5,
+      0.5,
+      0.5,
+      1
+     ]
+    },
+    {
+     "x": 70,
+     "y": 60,
+     "rgba": [
+      0.75,
+      0,
+      0.25,
+      1
+     ]
+    },
+    {
+     "x": 70,
+     "y": 80,
+     "rgba": [
+      0.25,
+      0,
+      0.75,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "file": "svg/clip_paths.svg",
+   "what": "a clip path on a shape, and one inside a group",
+   "layers": [
+    "clipped",
+    "group"
+   ],
+   "reported": [
+    "nested clip-path"
+   ],
+   "probes": [
+    {
+     "x": 25,
+     "y": 25,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 3,
+     "y": 3,
+     "rgba": null
+    },
+    {
+     "x": 60,
+     "y": 70,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ]
+    },
+    {
+     "x": 80,
+     "y": 70,
+     "rgba": null,
+     "excuse": "nested clip-path"
+    }
+   ]
+  },
+  {
+   "file": "svg/masks.svg",
+   "what": "a luminance mask",
+   "layers": [
+    "masked"
+   ],
+   "reported": [
+    "mask"
+   ],
+   "probes": [
+    {
+     "x": 25,
+     "y": 50,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 75,
+     "y": 50,
+     "rgba": null,
+     "excuse": "mask"
+    }
+   ]
+  },
+  {
+   "file": "svg/dashed_strokes.svg",
+   "what": "dashed strokes with an offset",
+   "layers": [
+    "dashed",
+    "offset"
+   ],
+   "probes": [
+    {
+     "x": 5,
+     "y": 20,
+     "rgba": [
+      0.1255,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 15,
+     "y": 20,
+     "rgba": null,
+     "excuse": "stroke-dasharray"
+    },
+    {
+     "x": 10,
+     "y": 60,
+     "rgba": null,
+     "excuse": "stroke-dasharray"
+    },
+    {
+     "x": 20,
+     "y": 60,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    }
+   ],
+   "gap": 3502
+  },
+  {
+   "file": "svg/text.svg",
+   "what": "plain text, tspans, centred and bold text",
+   "layers": [
+    "plain",
+    "spans",
+    "centred"
+   ],
+   "reported": [
+    "tspan"
+   ],
+   "texts": [
+    {
+     "string": "Hello"
+    },
+    {
+     "string": "Two styled words"
+    },
+    {
+     "string": "Title",
+     "anchor": "center",
+     "weight": 700
+    }
+   ],
+   "gap": 3506
+  },
+  {
+   "file": "svg/embedded_raster.svg",
+   "what": "an embedded PNG next to vector art",
+   "layers": [
+    "dot"
+   ],
+   "reported": [
+    "image"
+   ],
+   "probes": [
+    {
+     "x": 75,
+     "y": 75,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ]
+    },
+    {
+     "x": 25,
+     "y": 25,
+     "rgba": null
+    }
+   ]
+  },
+  {
+   "file": "svg/viewbox_offset.svg",
+   "what": "a viewBox with a negative origin, scaled 2x by width and height",
+   "layers": [
+    "origin",
+    "centre"
+   ],
+   "size": [
+    200,
+    100
+   ],
+   "probes": [
+    {
+     "x": 10,
+     "y": 10,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 100,
+     "y": 50,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 150,
+     "y": 80,
+     "rgba": null
+    }
+   ]
+  },
+  {
+   "file": "svg/units_no_viewbox.svg",
+   "what": "no viewBox, a size in mm, lengths in % and pt",
+   "layers": [
+    "half",
+    "points"
+   ],
+   "size": [
+    302.3622,
+    151.1811
+   ],
+   "probes": [
+    {
+     "x": 75,
+     "y": 37,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ]
+    },
+    {
+     "x": 160,
+     "y": 40,
+     "rgba": null
+    },
+    {
+     "x": 207,
+     "y": 107,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "file": "svg/nested_svg.svg",
+   "what": "an inner svg viewport with its own viewBox",
+   "layers": [
+    "frame",
+    "inner"
+   ],
+   "probes": [
+    {
+     "x": 20,
+     "y": 20,
+     "rgba": [
+      0.1255,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 55,
+     "y": 55,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ],
+     "excuse": "svg"
+    },
+    {
+     "x": 2,
+     "y": 2,
+     "rgba": [
+      0.1255,
+      0.1255,
+      0.1255,
+      1.0
+     ]
+    },
+    {
+     "x": 85,
+     "y": 85,
+     "rgba": null
+    }
+   ],
+   "gap": 3505
+  },
+  {
+   "file": "svg/fill_rule.svg",
+   "what": "an even-odd path with a hole",
+   "layers": [
+    "ring"
+   ],
+   "probes": [
+    {
+     "x": 20,
+     "y": 20,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 50,
+     "y": 50,
+     "rgba": null,
+     "excuse": "fill-rule"
+    }
+   ],
+   "gap": 3503
+  },
+  {
+   "file": "svg/hidden_content.svg",
+   "what": "display none, visibility hidden, a hidden group",
+   "layers": [
+    "shown"
+   ],
+   "probes": [
+    {
+     "x": 15,
+     "y": 15,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      1.0
+     ]
+    },
+    {
+     "x": 50,
+     "y": 15,
+     "rgba": null,
+     "excuse": "display"
+    },
+    {
+     "x": 85,
+     "y": 15,
+     "rgba": null,
+     "excuse": "visibility"
+    },
+    {
+     "x": 15,
+     "y": 65,
+     "rgba": null,
+     "excuse": "display"
+    }
+   ],
+   "gap": 3504
+  },
+  {
+   "file": "svg/use_symbols.svg",
+   "what": "a symbol drawn twice by use",
+   "layers": [],
+   "reported": [
+    "use"
+   ],
+   "probes": [
+    {
+     "x": 20,
+     "y": 20,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ],
+     "excuse": "use"
+    },
+    {
+     "x": 70,
+     "y": 70,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ],
+     "excuse": "use"
+    }
+   ]
+  },
+  {
+   "file": "svg/css_classes.svg",
+   "what": "fills from a style sheet, as design tools export",
+   "layers": [
+    "classed",
+    "cool"
+   ],
+   "reported": [
+    "style"
+   ],
+   "probes": [
+    {
+     "x": 25,
+     "y": 25,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      1.0
+     ],
+     "excuse": "style"
+    },
+    {
+     "x": 75,
+     "y": 25,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      1.0
+     ],
+     "excuse": "style"
+    }
+   ]
+  },
+  {
+   "file": "svg/opacity_strokes.svg",
+   "what": "group opacity, fill and stroke opacity, joins and caps",
+   "layers": [
+    "faded",
+    "see-through",
+    "joined"
+   ],
+   "probes": [
+    {
+     "x": 25,
+     "y": 25,
+     "rgba": [
+      0.8784,
+      0.1255,
+      0.1255,
+      0.5
+     ]
+    },
+    {
+     "x": 75,
+     "y": 25,
+     "rgba": [
+      0.1255,
+      0.251,
+      0.8784,
+      0.25
+     ]
+    },
+    {
+     "x": 50,
+     "y": 90,
+     "rgba": [
+      0.1255,
+      0.6275,
+      0.251,
+      0.8
+     ]
+    }
+   ]
+  }
+ ]
+}

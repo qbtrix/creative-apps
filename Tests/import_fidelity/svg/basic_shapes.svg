@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+<rect id="rect" x="5" y="5" width="20" height="15" fill="#e02020"/>
+<rect id="rounded" x="30" y="5" width="20" height="15" rx="5" fill="#20a040"/>
+<circle id="circle" cx="65" cy="12" r="8" fill="#2040e0"/>
+<ellipse id="ellipse" cx="88" cy="12" rx="10" ry="5" fill="#e02020"/>
+<line id="line" x1="5" y1="35" x2="45" y2="35" stroke="#202020" stroke-width="4"/>
+<polyline id="polyline" points="55,30 70,40 85,30" fill="none" stroke="#2040e0" stroke-width="4"/>
+<polygon id="polygon" points="10,60 30,60 20,80" fill="#20a040"/>
+<path id="path" d="M50 60 C50 50 70 50 70 60 S90 70 90 60 L90 90 A20 20 0 0 1 50 90 Z" fill="#202020"/>
+</svg>
