@@ -144,6 +144,7 @@ private struct DesignNodeProperties: View {
             DesignInspectorStyle(model: model, perform: perform)
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
+                    DesignInspectorFill(model: model, perform: perform)
                     InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
                         perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
                     }

@@ -54,7 +54,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// The sidebar's built-in rows; your collections follow them.
     static let builtInCollections = [
         LibraryCollection(id: "all", name: "All Photos", count: 0),
-        LibraryCollection(id: "favorites", name: "Favorites", count: 0),
+        // Id "favorites" predates the name; picks are called Picks everywhere a person reads (#3639).
+        LibraryCollection(id: "favorites", name: "Picks", count: 0),
         LibraryCollection(id: "recent", name: "Recently Added", count: 0),
     ]
 
@@ -185,7 +186,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     }
 
     /// Applies `edit` to every selected photo, then keeps the counts and the
-    /// selection true to the collection (unflagging in Favorites drops a photo).
+    /// selection true to the collection (unflagging in Picks drops a photo).
     mutating func editSelected(_ edit: (inout PhotoItem) -> Void) {
         guard !selection.isEmpty else { return }
         for index in items.indices where selection.contains(items[index].id) {
@@ -211,7 +212,7 @@ public struct LibraryCatalog: Sendable, Equatable {
 
     /// The counts after a metadata edit, undo or redo that replaced `before`
     /// with `after` in place: no photo was added or removed and no capture
-    /// date changed, so only Favorites moves, by the flags that changed.
+    /// date changed, so only Picks moves, by the flags that changed.
     /// A smart collection moves by the changed photos its rules admit.
     mutating func recount(replacing before: [PhotoItem], with after: [PhotoItem]) {
         let delta = after.count(where: \.isFlagged) - before.count(where: \.isFlagged)

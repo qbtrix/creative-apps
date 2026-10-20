@@ -311,11 +311,8 @@ struct DesignShowHistoryItem: View {
     let panel: DesignHistoryShown?
 
     var body: some View {
-        Button(panel?.isShown == true ? "Hide History" : "Show History", systemImage: "clock.arrow.circlepath") {
-            panel?.toggle()
-        }
-        .disabled(panel == nil)
-        .help(panel == nil ? "Open a Design window to see its history." : "Show or hide this window's steps.")
+        MenuCommand(DesignMenuState.spec("view.history"), on: DesignMenuState(hasWindow: panel != nil),
+                    title: panel?.isShown == true ? "Hide History" : nil, systemImage: "clock.arrow.circlepath") { panel?.toggle() }
     }
 }
 
