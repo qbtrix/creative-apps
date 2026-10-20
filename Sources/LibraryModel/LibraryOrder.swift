@@ -18,7 +18,10 @@ extension LibraryCatalog {
     }
 
     /// True when an edit to a photo's metadata can move or hide it in `order`.
-    var editCanReorder: Bool { sort == .rating || selectedCollectionID == "favorites" }
+    var editCanReorder: Bool {
+        sort == .rating || selectedCollectionID == "favorites" || activeFilter.isActive
+            || UserCollection.isUserID(selectedCollectionID)
+    }
 
     /// Opens a shown photo in the loupe. An unknown id is ignored.
     public mutating func open(_ id: String) {

@@ -88,9 +88,9 @@ and tests only, except FC-10's drag and FC-15's file I/O.
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| FC-a | With no filter and no collection of yours Library behaves exactly as today, while the filter and collection state, the undo of a collection change, every catalog method, the filter bar, the sidebar's Collections section and every new menu item exist, each control disabled with "… isn't built yet (filters-collections)." | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | features cull, persist, thumbnails, import, status-and-layout, export |
+| FC-a | With no filter and no collection of yours Library behaves exactly as today, while the filter and collection state, the undo of a collection change, every catalog method, the filter bar, the sidebar's Collections section and every new menu item exist, each control disabled with "… isn't built yet (filters-collections)." | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | features cull, persist, thumbnails, import, status-and-layout, export; file-flow:LF-a (beta first) |
 | FC-b | The filter bar narrows any collection by flag, by rating at least or exactly N, and by hiding rejects, shows "N of M", and says so with Clear Filter when nothing matches. | FC-6, FC-7 | J13 | FC-a (FC-6, FC-7) |
-| FC-c | New Collection takes the selection, Photo > Add to Collection, Remove from Collection, rename and delete each record one undo step, and dragging the selection onto a sidebar row adds it. | FC-8, FC-9, FC-10 | J14 | FC-a (FC-8, FC-9, FC-10); S-L9 (FC-10) |
+| FC-c | New Collection takes the selection, Photo > Add to Collection, Remove from Collection, rename and delete each record one undo step, and dragging the selection onto a sidebar row adds it. | FC-8, FC-9, FC-10 | J14 | FC-a (FC-8, FC-9, FC-10); S-L9 (FC-10); file-flow:LF-a (FC-8, FC-9, FC-10) |
 | FC-d | New Smart Collection from Filter saves the filter as a collection whose count follows every rating, and while it is selected the filter bar edits its rules as one undo step each. | FC-11, FC-12 | J15 | FC-a (FC-11, FC-12); FC-b (FC-12) |
 | FC-e | Your collections, their rules, the filter and the selected collection survive a relaunch, and a damaged collections file is set aside with a notice, never overwritten. | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a (FC-13, FC-15); FC-c (FC-14, FC-16); FC-b, FC-d (FC-16) |
 

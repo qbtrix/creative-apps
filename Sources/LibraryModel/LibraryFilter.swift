@@ -87,4 +87,56 @@ public struct LibraryFilter: Hashable, Sendable {
         guard names.count > 1 else { return names.first ?? "" }
         return names.dropLast().joined(separator: ", ") + " or " + names[names.count - 1]
     }
+
+    /// Set to nil by the task that builds the bar (FC-7).
+    public static let unavailable: String? = "Filters aren't built yet (filters-collections)."
+}
+
+extension LibraryCatalog {
+    /// The selected smart collection's rules, else the bar's `filter`.
+    public var activeFilter: LibraryFilter {
+        if case .rules(let rules) = selectedUserCollection?.contents { return rules }
+        return filter
+    }
+
+    /// "<summary>; <shown> of <in the collection>".
+    public var filterValue: String {
+        activeFilter.summary + "; \(order.count) of \(collectionItems.count)"
+    }
+
+    /// "Rules of <name>" while a smart collection is selected.
+    public var filterCaption: String? {
+        guard let collection = selectedUserCollection, collection.isSmart else { return nil }
+        return "Rules of \(collection.name)"
+    }
+
+    /// A collection that isn't smart has photos, and the filter shows none.
+    public var isHiddenByFilter: Bool {
+        selectedUserCollection?.isSmart != true && order.isEmpty && !collectionItems.isEmpty
+    }
+
+    public var filterHelp: String? {
+        LibraryFilter.unavailable ?? (items.isEmpty ? "Import or load photos to filter them." : nil)
+    }
+
+    public var clearFilterHelp: String? {
+        filterHelp ?? (activeFilter.isActive ? nil : "No filter is on.")
+    }
+
+    public var newSmartCollectionHelp: String? { UserCollection.smartUnavailable }
+
+    /// Sets the bar's filter; with a smart collection selected, its rules.
+    public mutating func setFilter(_ filter: LibraryFilter) { guard filterHelp == nil else { return } }
+    public mutating func toggleFilterFlag(_ flag: PhotoFlag) { guard filterHelp == nil else { return } }
+    public mutating func setRatingRule(_ rule: RatingRule) { guard filterHelp == nil else { return } }
+    public mutating func toggleFilterLabel(_ label: PhotoLabel) { guard filterHelp == nil else { return } }
+    public mutating func toggleHideRejected() { guard filterHelp == nil else { return } }
+    public mutating func clearFilter() { guard clearFilterHelp == nil else { return } }
+
+    /// Makes "New Smart Collection" from the bar's filter; returns its id,
+    /// or nil while smart collections are unavailable.
+    @discardableResult public mutating func newSmartCollection() -> String? {
+        guard newSmartCollectionHelp == nil else { return nil }
+        return nil
+    }
 }

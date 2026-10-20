@@ -1,7 +1,7 @@
 // LibraryDevelopRenderSnapshots.swift: `library-develop-render` (develop
 // DV-13), Light and Dark. The shoot fixture sorted by name with IMG_0001 in
 // the loupe at Exposure +1, rendered through the live path: LiveLoupeImaging
-// over LiveDevelop (CoreRaster) draws the sample gradient, develops it and
+// over LiveDevelop (CoreRaster) decodes the fake decoder's gradient, develops it and
 // takes its histogram. The loupe shows that picture and the Develop tab beside
 // it reads Exposure +1.00 EV and the rendered histogram's mean; on the live
 // develop service Vibrance and Saturation show disabled with their reason.
@@ -19,10 +19,12 @@ import Testing
     /// The shoot by name on the live develop and loupe services, IMG_0001 open in the loupe.
     private func shootOnFirst() throws -> LibraryCatalog {
         var catalog = LibraryCatalog()
-        catalog.load(LibraryFixtures.photos(named: "shoot"))
+        let shoot = LibraryFixtures.photos(named: "shoot")
+        catalog.load(shoot)
         catalog.services.isPreview = false
         catalog.services.develop = LiveDevelop()
-        catalog.services.loupe = LiveLoupeImaging(decoder: FakeDecoder(photos: []), develop: LiveDevelop())
+        // The shoot's photos have paths, so the loupe decodes them: the fake decoder draws each one's gradient.
+        catalog.services.loupe = LiveLoupeImaging(decoder: FakeDecoder(photos: shoot), develop: LiveDevelop())
         catalog.setSort(.name)
         let first = try #require(catalog.sortedItems.first)
         #expect(first.name == "IMG_0001")

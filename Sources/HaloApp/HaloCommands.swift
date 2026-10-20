@@ -1,13 +1,12 @@
 // HaloCommands.swift: what every Halo menu shares, and the Layer menu. The
 // focused window publishes its HaloProject (`haloProject`, read only) next to
-// `haloPerform`; a menu item reads the project for its title and for
-// `unavailableHelp(for:)`, and sends its HaloCommand through `haloPerform`.
-// An item that can't act is disabled, never hidden, with the Model's reason
-// as help. The plain keys (Space, arrows, Home, End, I, O, Delete) act only
-// while the viewer or timeline has focus, so items name them in their help
-// instead of taking them as key equivalents: typing in a field never plays,
-// moves or deletes. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate,
-// Rename…, Delete, Bring Forward, Send Backward.
+// `haloPerform`; a menu item is SuiteUI's MenuCommand on its catalog spec over
+// HaloMenuState (AC-h3): titled by the Model, disabled, never hidden, with the
+// spec's reason as help, and it sends its HaloCommand through `haloPerform`.
+// The plain keys (Space, arrows, Home, End, I, O, Delete) act only while the
+// viewer or timeline has focus, so items don't take them as key equivalents:
+// typing in a field never plays, moves or deletes. Layer: New ▸ (Solid,
+// Shape, Text, Null), Duplicate, Rename…, Delete, Bring Forward, Send Backward.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -22,28 +21,20 @@ struct HaloMenuTarget {
     let model: HaloProject?
     let perform: (@MainActor (HaloCommand) -> Void)?
 
+    /// What the items read: the project, nil with nowhere to send a command.
+    var state: HaloMenuState { HaloMenuState(project: perform == nil ? nil : model) }
+
     /// Nil when `command` can act now; else why not.
-    func help(for command: HaloCommand) -> String? {
-        guard let model, perform != nil else { return "Open a Halo window first." }
-        return model.unavailableHelp(for: command)
-    }
+    func help(for command: HaloCommand) -> String? { state.availability(command.commandID).why }
 
-    func title(for command: HaloCommand) -> String { model?.title(for: command) ?? command.title }
-}
+    func title(for command: HaloCommand) -> String { state.title(command) }
 
-extension MenuCommand {
-    /// One menu item for one command: titled by the Model, disabled with its
-    /// reason as help. `key` names the focus-scoped plain key that also does it.
-    init(
-        command: HaloCommand, target: HaloMenuTarget, title: String? = nil, systemImage: String? = nil,
-        shortcut: KeyboardShortcut? = nil, key: String? = nil
-    ) {
-        let reason = target.help(for: command)
-        let text = title ?? target.title(for: command)
-        self.init(
-            text, systemImage: systemImage, shortcut: shortcut,
-            help: reason ?? key.map { "Press \($0) while the viewer or timeline has focus." } ?? text,
-            isEnabled: reason == nil) { target.perform?(command) }
+    /// The menu item for `command`, built from its catalog spec; `title` overrides the Model's.
+    func item(
+        _ command: HaloCommand, title: String? = nil, systemImage: String? = nil, shortcut: KeyboardShortcut? = nil
+    ) -> MenuCommand {
+        MenuCommand(HaloMenuState.spec(command.commandID), on: state, title: title ?? self.title(for: command),
+                    systemImage: systemImage, shortcut: shortcut) { perform?(command) }
     }
 }
 
@@ -59,17 +50,17 @@ struct HaloCommands: Commands {
         CommandMenu("Layer") {
             Menu("New") {
                 ForEach(HaloLayerKind.allCases, id: \.self) { kind in
-                    MenuCommand(command: .newLayer(kind), target: target, systemImage: kind.systemImage)
+                    target.item(.newLayer(kind), systemImage: kind.systemImage)
                 }
             }
-            MenuCommand(
-                command: .duplicateLayer, target: target, systemImage: "plus.square.on.square",
+            target.item(
+                .duplicateLayer, systemImage: "plus.square.on.square",
                 shortcut: KeyboardShortcut("d", modifiers: [.command, .shift]))
-            MenuCommand(command: .beginRenameLayer, target: target)
-            MenuCommand(command: .deleteLayer, target: target, systemImage: "trash", key: "Delete")
+            target.item(.beginRenameLayer)
+            target.item(.deleteLayer, systemImage: "trash")
             Divider()
-            MenuCommand(command: .bringLayerForward, target: target, shortcut: KeyboardShortcut("]"))
-            MenuCommand(command: .sendLayerBackward, target: target, shortcut: KeyboardShortcut("["))
+            target.item(.bringLayerForward, shortcut: KeyboardShortcut("]"))
+            target.item(.sendLayerBackward, shortcut: KeyboardShortcut("["))
         }
     }
 }

@@ -16,7 +16,7 @@ share a file chain in the order each slice's hand-off note gives.
 
 **Hand-offs** (files other packets own; cross-line, so not in `waits`, and
 the lead checks each before its slice starts):
-- **AL-design:** `DesignNode.swift` is owned by design-contracts (built) and design-seams-2: start after design-seams-2's slice on it. Panel: `DesignLayersPanel.swift` is owned by design-window, layers-panel and shell-parity (Design): start after their slices on it.
+- **AL-design:** `DesignNode.swift` is owned by design-contracts (built) and design-seams-2; it goes to AL-design first (supervisor, #1936, 2026-10-20). AL-d1 and AL-d2 start now on top of #2880's LayerTree ordering; AL-d3 waits on layers-panel's Belt-Slice-Done. Panel: `DesignLayersPanel.swift` is owned by design-window, layers-panel and shell-parity (Design): start after their slices on it.
 - **AL-photo:** `PhotoWorkspace.swift` and `PhotoLayerOps.swift` are owned by photo-seams and photo-adjustment-layers: start after both. Panel: `PhotoLayerList.swift` is owned by no open packet.
 - **AL-halo:** `HaloKeyRules.swift` is shared with adopt-kernel-easing's Halo slice: that slice goes first and this one takes the file after it. `owned_files_planned` holds for Halo. Panel: `HaloLayerList.swift` is owned by Halo's foundation (built).
 - **AL-flare:** `FlareLayers.swift` is owned by layers-files; this slice edits `Sources/FlareApp/` (the panel reads `LayerRow`), so it is `"ui": true` and its render budget row is the panel's existing one. Panel: `FlareWindow+Layers.swift` is owned by layers-files and draw-key-save (Flare): start after their slices on it.
