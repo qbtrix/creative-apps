@@ -73,11 +73,15 @@ import Testing
 }
 
 @MainActor private func shapeWindow(_ view: some View) -> NSWindow {
-    NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: "AXManualAccessibility"))
+    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+        NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+    }
     let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 320, height: 480), styleMask: [.titled], backing: .buffered, defer: false)
     window.contentView = NSHostingView(rootView: view.frame(width: 320, height: 480))
     window.orderFrontRegardless()
-    RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+    spinUntil {
+        shapeNodes(in: window).contains { ($0.accessibilityIdentifier?() ?? nil) == "suite.shape.chip-rectangle" }
+    }
     return window
 }
 
