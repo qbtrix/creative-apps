@@ -328,6 +328,16 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   every app for shared code; no journeys). A green `macOS` job or a
   `local-ci/macos` commit status on the batch head (the local Mac gate) is the
   macOS pass. When both are green it squash-merges every PR in that order.
+  The local Mac gate is the supervisor's `local-macos-gate.sh` loop on the
+  captain's Mac (workspace `belt-pilot/`, not this repo): every 2 minutes it
+  takes a batch head or probe whose GitHub `macOS` job hasn't finished, runs
+  the same scoped step (or `scripts/ci` for every app) through `scripts/gate`,
+  and posts `local-ci/macos` = success when it passes. It is a fast pass
+  only: the Mac runs Xcode 27 while CI runs Xcode 26.6, and some tests fail
+  only on the newer SDK, so on a local fail it posts nothing and the GitHub
+  job decides. It never posts failure or pending, so it can't eject a PR or
+  hold back the GitHub run. One run at a time by day, up to 3 from 22:00 to
+  08:00, none during the 04:15-05:45 perf window.
   A lone PR without code lands at once; a lone code PR is a batch of one. A
   batch with code forms when a macOS slot frees (a batch just resolved), when
   12 PRs are ready, or once the oldest ready head is 10 minutes old

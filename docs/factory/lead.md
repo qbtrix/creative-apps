@@ -91,7 +91,8 @@ Until beta, CI blocks only on compile and Model tests (captain, 2026-10-16).
   merges only once its batch passed the lane's macOS gate (lesson 114;
   #1097; #1210 broke the macOS build from PhotoModel, which Linux compiled):
   scripts/ci on macOS scoped to the batch's apps, next to the batch's Linux
-  check. A red batch is bisected and the PR that broke it gets `needs-fix`
+  check. The captain's Mac often passes it first (a `local-ci/macos` status);
+  a red there is not your red, only the GitHub `macOS` job can fail a batch. A red batch is bisected and the PR that broke it gets `needs-fix`
   and a comment naming the failing job; the PRs stacked on its branch wait
   with it. Fix it first, push, and restack them.
 - **You can read runs.** `gh run list --workflow ci.yml --branch dev --json
