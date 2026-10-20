@@ -1,6 +1,6 @@
 // LiveShapes.swift: the live shape tools, part one (docs/blueprints/flare/features/live-stage.md, task ST-6).
-// Rectangle and Ellipse drafts are FlareCore's `PathBuilders` paths for the dragged box (Shift squares it, Option
-// draws from the center); a Pen draft adds an anchor per click, and a drag makes that anchor smooth with mirrored
+// Rectangle and Ellipse drafts, and every kind `shape` draws, are the kernel's `ShapeRules.path` in the box
+// `ShapeRules.dragged` gives (Shift squares it, Option draws from the center; shape-tools FS-5, rule 20); a Pen draft adds an anchor per click, and a drag makes that anchor smooth with mirrored
 // handles (G1), so its segments are cubics; a click near the first anchor closes the path. A commit is one engine
 // group, "Add Rectangle", "Add Ellipse" or "Add Path", of `AddLayer` and `AddShape`, with the layer id and name
 // the fake gives ("rectangle-1", "Rectangle 1"), and throws `CommandError.layerLocked` above a locked layer. The same
@@ -8,6 +8,7 @@
 // later frame keeps 0 and the shape animates (#1731).
 // ST-8 and ST-9 add the box gestures and edits in their own files; ST-9 adds the `ShapeBuilding` conformance.
 import FlareCore
+import SuiteKernel
 
 public struct LiveShapes: Sendable {
     public init() {}
@@ -32,18 +33,32 @@ public struct LiveShapes: Sendable {
         case .select, .directSelect, .shape: return nil
         case .pen: return pen(at: start, to: end, previous: previous)
         case .rectangle, .ellipse:
-            var dx = end.x - start.x, dy = end.y - start.y
-            let side = max(abs(dx), abs(dy))
-            if modifiers.contains(.shift) { (dx, dy) = (dx < 0 ? -side : side, dy < 0 ? -side : side) }
-            let from = modifiers.contains(.option) ? Point(x: start.x - dx, y: start.y - dy) : start
-            guard let box = Rect(enclosing: [from, Point(x: start.x + dx, y: start.y + dy)]),
-                  box.width > 0, box.height > 0, box.width.isFinite, box.height.isFinite,
-                  let path = try? (tool == .rectangle ? PathBuilders.rectangle(in: box) : PathBuilders.ellipse(in: box))
-            else { return nil }
-            var points = path.elements.compactMap(Self.end)
-            if points.count > 1, points.last == points.first { points.removeLast() }
-            return ShapeDraft(tool: tool, shape: FlareShape(points: points, closed: true, path: path))
+            return Self.shape(.defaults(tool == .rectangle ? .rectangle : .ellipse), from: start, to: end,
+                              modifiers: modifiers).map { ShapeDraft(tool: tool, shape: $0) }
         }
+    }
+
+    /// `spec`'s shape for a drag: the kernel's `ShapeRules.dragged` box (Shift squares it or snaps a line to 45°,
+    /// Option grows it from the centre) and `ShapeRules.path` in it, with the path's end points as the shape's points.
+    /// `spec` keeps its options; a line's ends come from the drag. Nil for an empty drag, a closed kind without area,
+    /// or a spec the kernel refuses. A line or an arrow is open, stroked and unfilled.
+    public static func shape(_ spec: ShapeSpec, from start: Point, to end: Point,
+                             modifiers: DragModifiers) -> FlareShape? {
+        var keys: EditModifiers = []
+        if modifiers.contains(.shift) { keys.insert(.shift) }
+        if modifiers.contains(.option) { keys.insert(.option) }
+        guard start.isFinite, end.isFinite,
+              let (box, dragged) = ShapeRules.dragged(spec.kind, from: start, to: end, modifiers: keys) else { return nil }
+        let open = spec.kind == .line || spec.kind == .arrow
+        guard open || (box.width > 0 && box.height > 0) else { return nil }
+        var drawn = spec
+        (drawn.start, drawn.end) = (dragged.start, dragged.end)
+        guard let path = try? ShapeRules.path(drawn, in: box) else { return nil }
+        var points = path.elements.compactMap(Self.end)
+        if points.count > 1, points.last == points.first { points.removeLast() }
+        guard open else { return FlareShape(points: points, closed: true, path: path) }
+        return FlareShape(points: points, closed: false, fill: .solid(FlareColor(r: 0, g: 0, b: 0, a: 0)),
+                          path: path, stroke: Stroke())
     }
 
     public func commit(_ draft: ShapeDraft, owner: LayerOwner, aboveLayerID: String?,
