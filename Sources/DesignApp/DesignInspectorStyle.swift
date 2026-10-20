@@ -24,7 +24,7 @@ import SwiftUI
     /// One value of a scrub, shown on the live box's copy; straight to the workspace without a box.
     func preview(_ change: DesignStyleChange) {
         guard let live else { return perform(.setStyle(change)) }
-        if live.workspace == nil { live.begin(from: model) }
+        if !live.isLive { live.begin(from: model) }
         live.preview(change)
     }
 

@@ -6,10 +6,9 @@
 // bytes. The real `ImageIODecoder` and `JPEGWriter` read and write the files;
 // the bytes and pixels are the oracle.
 //
-// Written before its code (lead.md, contract rule 13): every test is disabled
-// "waits on EX-8", which enables them, encodes by the name's extension and
-// adds `writableFormats()` equal to the ImageIO list ∩ the four formats.
-// macOS only.
+// Written before its code (lead.md, contract rule 13, EX-7); EX-8 enables
+// them, encodes by the name's extension and checks `writableFormats()` equals
+// the ImageIO list ∩ the four formats. macOS only.
 #if os(macOS)
 import CoreGraphics
 import CoreRaster
@@ -102,8 +101,30 @@ import UniformTypeIdentifiers
         return mse == 0 ? .infinity : 10 * log10(255 * 255 / mse)
     }
 
+    /// `writableFormats()` is ImageIO's writable list ∩ the four formats, and
+    /// always holds JPEG, PNG and TIFF.
+    @Test func writableFormatsMatchImageIO() {
+        let types = Set(CGImageDestinationCopyTypeIdentifiers() as? [String] ?? [])
+        let identifiers: [ExportFormat: String] = [
+            .jpeg: "public.jpeg", .png: "public.png", .tiff: "public.tiff", .heic: "public.heic",
+        ]
+        let expected = Set(ExportFormat.allCases.filter { identifiers[$0].map(types.contains) ?? false })
+        #expect(JPEGWriter.writableFormats() == expected)
+        #expect(JPEGWriter.writableFormats().isSuperset(of: [.jpeg, .png, .tiff]))
+    }
+
+    /// A name with no export format's extension is refused, and nothing is written.
+    @Test func unknownExtensionIsRefused() async throws {
+        let out = try folder()
+        let image = try #require(DisplayImage(size: PixelSize(width: 2, height: 2), rgba8: [UInt8](repeating: 200, count: 16)))
+        await #expect(throws: LibraryError.self) {
+            try await JPEGWriter().write(image, quality: 90, folder: out.path, fileName: "IMG_0001.gif")
+        }
+        #expect(!FileManager.default.fileExists(atPath: out.appending(path: "IMG_0001.gif").path))
+    }
+
     /// PNG starts 89 50 4E 47 and decodes back to the render, bit for bit.
-    @Test(.disabled("waits on EX-8")) func pngIsLossless() async throws {
+    @Test func pngIsLossless() async throws {
         let (rendered, bytes, decoded) = try await roundTrip(.png)
         #expect([UInt8](bytes.prefix(4)) == [0x89, 0x50, 0x4E, 0x47], "the PNG doesn't start 89 50 4E 47")
         #expect(decoded.size == rendered.size)
@@ -111,7 +132,7 @@ import UniformTypeIdentifiers
     }
 
     /// TIFF starts II*\0 or MM\0* and decodes back to the render, bit for bit.
-    @Test(.disabled("waits on EX-8")) func tiffIsLossless() async throws {
+    @Test func tiffIsLossless() async throws {
         let (rendered, bytes, decoded) = try await roundTrip(.tiff)
         let magic = [UInt8](bytes.prefix(4))
         #expect(magic == [0x49, 0x49, 0x2A, 0x00] || magic == [0x4D, 0x4D, 0x00, 0x2A], "the TIFF starts \(magic)")
@@ -120,9 +141,8 @@ import UniformTypeIdentifiers
     }
 
     /// HEIC, when this Mac can write it, holds `ftyp` at byte 4 and is within 35 dB.
-    @Test(.disabled("waits on EX-8")) func heicIsCloseWhenWritable() async throws {
-        let types = CGImageDestinationCopyTypeIdentifiers() as? [String] ?? []
-        guard types.contains(UTType.heic.identifier) else { return }
+    @Test func heicIsCloseWhenWritable() async throws {
+        guard JPEGWriter.writableFormats().contains(.heic) else { return }
         let (rendered, bytes, decoded) = try await roundTrip(.heic)
         #expect([UInt8](bytes.dropFirst(4).prefix(4)) == Array("ftyp".utf8), "the HEIC has no ftyp at byte 4")
         #expect(decoded.size == rendered.size)

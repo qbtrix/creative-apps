@@ -1,22 +1,25 @@
 // DesignJourneyTests+Page.swift: CB-c, the page's size and the layers past
 // its edge (packet docs/blueprints/design/features/canvas-basics.md, Journey
-// steps 4). On `-DesignFixture cards` at 1024 × 768 it clicks the page's row
-// in Pages and finds the inspector's Width 1440 and Height 1024
+// steps 4; job RJ-D32). On `-DesignFixture cards` at 1024 × 768 it clicks the
+// page's row in Pages and finds the inspector's Width 1440 and Height 1024
 // (`design.inspector.page-width`, `design.inspector.page-height`), clicks
-// Width, types 800 and presses Return: the status line reads "800 × 1024 pt"
-// and the toolbar's Undo (`design.bar.undo`) reads "Undo Change Page Size".
-// It shoots the canvas, where Desktop's part past 800 still shows, dimmed (the
-// shot is attached; the pixels are CB-9's snapshot), then clicks Undo and
-// finds Width back at 1440. Every step uses the mouse on visible controls but
-// the typed number. Written before its code (lead.md, contract rule 13); the
-// fields arrived with CB-9. A ScrubField reads its number as its value, spoken with its
-// unit, and a plain Text its words as its value, so both are read by label or value.
+// Width, types 800 over the value the click selected and clicks the page's row
+// to commit, as a mouse user does: the status line reads "800 × 1024 pt" and
+// the toolbar's Undo (`design.bar.undo`) reads "Undo Change Page Size". It
+// shoots the canvas, where Desktop's part past 800 still shows, dimmed (the
+// shot is attached; the pixels are CB-9's snapshot). Then Height the same way
+// to 768: "800 × 768 pt", one more step. Undo puts Height back at 1024, a
+// second Undo Width at 1440. Every step uses the mouse on visible controls but
+// the typed numbers: no Command-A and no Return, so the journey fails if a
+// ScrubField stops selecting its value on open or committing on focus loss.
+// A ScrubField reads its number as its value, spoken with its unit, and a
+// plain Text its words as its value, so both are read by label or value.
 import XCTest
 
 final class DesignPageJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
 
-    /// CB-c: Width and Height in the inspector, one undo step, Desktop dimmed past the page.
+    /// CB-c: Width and Height in the inspector, one undo step each, Desktop dimmed past the page.
     @MainActor func testPageSizeAndPastThePage() throws {
         try walkPageSize()
     }
@@ -31,7 +34,8 @@ final class DesignPageJourneyTests: XCTestCase {
         let sidebar = design.element("suite.sidebar")
         let rows = sidebar.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'design.page.row.'"))
         XCTAssert(rows.firstMatch.waitForExistence(timeout: 5), "no page row in Pages (design.page.row.<id>)")
-        rows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        let pageRow = rows.firstMatch
+        pageRow.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
         let inspector = design.element("suite.inspector")
         let width = inspector.descendants(matching: .any)["design.inspector.page-width"].firstMatch
         let height = inspector.descendants(matching: .any)["design.inspector.page-height"].firstMatch
@@ -41,28 +45,53 @@ final class DesignPageJourneyTests: XCTestCase {
         XCTAssert(reads(height, "1024"), "Height reads \(text(height)), not 1024")
         design.shot("page-size")
 
-        // 2. Click Width, type 800, Return: the status line and the toolbar's Undo say so.
-        width.click()
-        let field = inspector.textFields.firstMatch
-        XCTAssert(field.waitForExistence(timeout: 5), "clicking Width opened no field")
-        design.press(character: "a", .command)
-        field.typeText("800")
-        design.press(.return)
-        XCTAssert(waitUntil { self.reads(width, "800") }, "Width reads \(text(width)), not 800")
+        // 2. Click Width, type 800, click the page's row: the status line and the toolbar's Undo say so.
         let status = design.element("suite.status")
-        let size = status.staticTexts.matching(
-            NSPredicate(format: "label == %@ OR value == %@", "800 × 1024 pt", "800 × 1024 pt")).firstMatch
-        XCTAssert(size.waitForExistence(timeout: 5), "the status line doesn't read 800 × 1024 pt")
         let undo = design.element("design.bar.undo")
+        enter("800", into: width, clickingAwayOn: pageRow, in: inspector)
+        XCTAssert(waitUntil { self.reads(width, "800") }, "Width reads \(text(width)), not 800")
+        XCTAssert(statusReads(status, "800 × 1024 pt"), "the status line doesn't read 800 × 1024 pt")
         XCTAssert(waitUntil { undo.label == "Undo Change Page Size" }, "the toolbar's Undo reads \(undo.label), not Undo Change Page Size")
 
         // 3. Desktop's part past 800 still shows, dimmed: the canvas is shot and attached.
         design.shot("page-past-the-edge", element: design.element("suite.viewport"))
 
-        // 4. Click Undo: Width reads 1440 again.
+        // 4. Click Height, type 768, click the page's row: Height reads 768, the status line 800 × 768 pt.
+        enter("768", into: height, clickingAwayOn: pageRow, in: inspector)
+        XCTAssert(waitUntil { self.reads(height, "768") }, "Height reads \(text(height)), not 768")
+        XCTAssert(reads(width, "800"), "changing Height moved Width to \(text(width))")
+        XCTAssert(statusReads(status, "800 × 768 pt"), "the status line doesn't read 800 × 768 pt")
+        XCTAssert(waitUntil { undo.label == "Undo Change Page Size" }, "after Height the toolbar's Undo reads \(undo.label)")
+        design.shot("page-height")
+
+        // 5. Click Undo: Height reads 1024 and Width stays 800, one step; click it again: Width reads 1440.
+        undo.click()
+        XCTAssert(waitUntil { self.reads(height, "1024") }, "Undo left Height at \(text(height)), not 1024")
+        XCTAssert(reads(width, "800"), "undoing Height moved Width to \(text(width))")
+        XCTAssert(statusReads(status, "800 × 1024 pt"), "after one Undo the status line doesn't read 800 × 1024 pt")
         undo.click()
         XCTAssert(waitUntil { self.reads(width, "1440") }, "Undo left Width at \(text(width)), not 1440")
+        XCTAssert(reads(height, "1024"), "undoing Width moved Height to \(text(height))")
         design.shot("page-size-undone")
+    }
+
+    /// Clicks `side`, types `number` over the value the click selected, then clicks `away` to commit:
+    /// a mouse user's path, with no Command-A and no Return.
+    @MainActor private func enter(
+        _ number: String, into side: XCUIElement, clickingAwayOn away: XCUIElement, in inspector: XCUIElement
+    ) {
+        side.click()
+        let field = inspector.textFields.firstMatch
+        XCTAssert(field.waitForExistence(timeout: 5), "clicking \(side.identifier) opened no field")
+        field.typeText(number)
+        away.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        XCTAssert(waitUntil { !field.exists }, "clicking away left the \(side.identifier) field open")
+    }
+
+    /// Whether the status line shows `words`, read by label or value, within five seconds.
+    @MainActor private func statusReads(_ status: XCUIElement, _ words: String) -> Bool {
+        status.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", words, words))
+            .firstMatch.waitForExistence(timeout: 5)
     }
 
     /// Whether `element`'s number, read by label or value ("1440 pt"), is `number`.

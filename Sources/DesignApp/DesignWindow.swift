@@ -34,7 +34,8 @@
 // Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
 // then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
 // draws, so the window doesn't run per sample. Mouse-up, or the scrub's end
-// run, replays the last one into the workspace as one step (`live.end(into:)`).
+// run, replays the last one into the workspace as one step (`live.land(into:)`),
+// written before the copy is cleared.
 //
 // `.suiteProbes()` sits on the root (D0-7a), so the window's `suite.controls`
 // lists every control the editor registers with its DesignControlID.
@@ -142,7 +143,7 @@ struct DesignWindow: View {
         case .tool(let tool): model.selectTool(tool)
         case .drag(let from, let to, let modifiers):
             let start = DesignPoint(from)
-            if live.workspace == nil {
+            if !live.isLive {
                 // The press goes to the workspace, so the selection shows at once.
                 model.drag(from: start, to: start, modifiers: modifiers)
                 live.begin(from: model)
@@ -215,8 +216,10 @@ struct DesignWindow: View {
 
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
     private func endLive(otherwise: () -> Void) {
-        guard live.workspace != nil else { return otherwise() }
-        if let refusal = live.end(into: &model) { note = refusal.help }
+        guard live.isLive else { return otherwise() }
+        let refusal = live.land(into: &model)
+        live.clearAfterLanding()
+        if let refusal { note = refusal.help }
     }
 
     /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.

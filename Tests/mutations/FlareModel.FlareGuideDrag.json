@@ -1,0 +1,7 @@
+[
+  {"label": "a guide drag sends its moves without closing the step", "file": "Sources/FlareModel/FlareGuideDrag.swift", "find": "            return [.view(.moveGuide(index: index, to: position, dragStart: start)), .view(.endGuideDrag)]\n", "replace": "            return [.view(.moveGuide(index: index, to: position, dragStart: position))]\n", "tests": "FlareGuideDragTests"},
+  {"label": "a guide dropped on its ruler stays", "file": "Sources/FlareModel/FlareGuideDrag.swift", "find": "        case (let index?, true): return [.view(.removeGuide(index: index))]\n", "replace": "        case (let index?, true): return [.view(.moveGuide(index: index, to: position, dragStart: start))]\n", "tests": "FlareGuideDragTests"},
+  {"label": "a new guide dropped on its ruler is placed anyway", "file": "Sources/FlareModel/FlareGuideDrag.swift", "find": "        case (nil, true): return []\n", "replace": "        case (nil, true): return [.view(.addGuide(horizontal: axis == .horizontal, at: position))]\n", "tests": "FlareGuideDragTests"},
+  {"label": "guides keep the drag's fraction of a point", "file": "Sources/FlareModel/FlareGuideDrag.swift", "find": "        self.position = position.rounded()\n", "replace": "        self.position = position\n", "tests": "FlareGuideDragTests"},
+  {"label": "the drawn guides leave the dragged one where it was", "file": "Sources/FlareModel/FlareGuideDrag.swift", "find": "        if shown.indices.contains(index) { shown[index] = guide }\n", "replace": "", "tests": "FlareGuideDragTests"}
+]

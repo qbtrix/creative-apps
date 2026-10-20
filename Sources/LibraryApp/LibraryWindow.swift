@@ -82,10 +82,8 @@ struct LibraryWindow: View {
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
-        // The export area moves `exportState` off `.idle`; nothing does in wave 1.
-        .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) {
-            LibraryExportSheet()
-        }
+        // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
+        .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
         .task {
             importAreaLaunch()
             persistAreaLaunch()

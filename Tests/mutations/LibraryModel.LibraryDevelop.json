@@ -45,7 +45,7 @@
     "label": "a reset leaves its own step open, so the next drag joins it",
     "file": "Sources/LibraryModel/LibraryDevelop.swift",
     "find": "return history.undo.count > steps ? endDevelopDrag() : []",
-    "replace": "return history.undo.count > steps ? Set(history.top?.after.map(\\.id) ?? []) : []",
+    "replace": "return history.undo.count > steps ? Set(history.top?.payload.map(\\.id) ?? []) : []",
     "tests": "LibraryDevelopTests"
   },
   {

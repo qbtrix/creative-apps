@@ -20,3 +20,64 @@ utc	stage	event	ref	note
 2026-10-18T00:30Z	3	pr-opened	SW-4a	switch journeys with adoption skips; feature-done
 2026-10-18T21:25Z	3	ci-red	#2989	macOS build failed on dev break (TileCanvasView, #2942); fix #2990
 2026-10-18T21:55Z	3	merge-dev	#2989	#2990 on dev; dev merged into SW-4a
+2026-10-18T22:43Z	4	merged	#2989	SW-4a squash-merged as 531550f (feature-done)
+2026-10-18T23:15Z	4	wait-ci	39173775025	full dev CI with 531550f pending, no runner yet
+2026-10-18T23:27Z	4	wait-ci	39176304199	39173775025 cancelled when superseded; new full dev CI on 398ea5d4 (contains 531550f) pending
+2026-10-18T23:50Z	4	wait-ci	39177967096	39176304199 and 39177282982 cancelled by newer dispatches; scoped suite 39176573924 green but runs no AfterGlow journeys
+2026-10-19T00:16Z	4	wait-ci	39178441058	39177967096 cancelled by the next dispatch; 39178441058 on 22046535 pending since 23:54Z
+2026-10-19T00:43Z	4	wait-ci	39180214762	39178441058 cancelled by the next dispatch; 39180214762 on ef6f201f pending since 00:18Z
+2026-10-19T01:11Z	4	wait-ci	39180214762	past the concurrency gate; queued for a macOS runner since 00:54Z; 39183169319 on f191be21 pending behind it
+2026-10-19T01:37Z	4	wait-ci	39180214762	Linux job green; macOS job queued for a runner since 00:54Z; later full runs 39183169319 and 39184285016 were the ones cancelled
+2026-10-19T02:05Z	4	wait-ci	39180214762	macOS job got a runner at 01:41Z; in scripts/ci
+2026-10-19T02:31Z	4	wait-ci	39180214762	macOS job still in scripts/ci (50 min in)
+2026-10-19T02:57Z	4	wait-ci	39180214762	macOS job still in scripts/ci (75 min in); journeys not started
+2026-10-19T03:26Z	4	wait-ci	39180214762	macOS hit 1h30m job timeout in scripts/ci (#2971); next full run 39192572958 queued on cc14022e
+2026-10-19T03:54Z	4	wait-ci	39192572958	Linux green; macOS queued for a runner since 03:11Z; dev full runs hang in AfterGlowHomeSidebarTests (#2971, range 71facd44..f7e03506, before 531550f)
+2026-10-19T04:20Z	4	wait-ci	39192572958	macOS job started 04:12Z; no supervisor reply on #1507
+2026-10-19T04:48Z	4	wait-ci	39192572958	macOS scripts/ci failed at 04:23Z (no hang this time); Perf step running, later steps pending; reading the log once the job ends
+2026-10-19T05:15Z	4	wait-ci	39192572958	30 SuiteModel 60s time-limit failures (not switching; noted on #2971); ui-test running since 04:53Z
+2026-10-19T05:40Z	4	wait-ci	39192572958	ui-test still running at 05:40Z (log frozen at 05:02Z); 90-min job limit ~05:42Z
+2026-10-19T05:55Z	4	blocked	39192572958	cancelled at 90-min limit in Photo journeys; AfterGlow never ran; no screens; asked supervisor on #1507; next run 39203617095 queued
+2026-10-19T06:28Z	4	stage-start	act-1a152d6e775-atvh	relaunched; supervisor: scoped suite run counts; tracking 39209833935 (d481419, macOS queued)
+2026-10-19T06:56Z	4	heartbeat	39209833935	macOS (suite): queued -
+2026-10-19T07:17Z	4	blocked	#3176	supervisor 06:43Z: suite scope skips switching journeys until #3176 merges; 39209833935 dropped as evidence
+2026-10-19T07:36Z	4	heartbeat	#3176	#3176 merged (), no scoped suite run on dev yet
+2026-10-19T07:49Z	4	blocked	#3176	still open, unchanged since 06:44Z (touches protected .github/ and scripts/, supervisor merges)
+2026-10-19T08:06Z	4	heartbeat	#3176	#3176 open
+2026-10-19T08:27Z	4	heartbeat	#3176	#3176 open
+2026-10-19T08:47Z	4	heartbeat	#3176	#3176 open
+2026-10-19T09:08Z	4	heartbeat	#3176	#3176 open
+2026-10-19T09:28Z	4	heartbeat	#3176	#3176 open
+2026-10-19T10:06Z	4	heartbeat	#3176	#3176 open
+2026-10-19T10:27Z	4	heartbeat	#3176	#3176 open
+2026-10-19T10:47Z	4	heartbeat	#3176	#3176 open
+2026-10-19T11:08Z	4	heartbeat	#3176	#3176 open
+2026-10-19T11:28Z	4	heartbeat	#3176	#3176 open
+2026-10-19T11:48Z	4	blocked	#3176	still open; new scoped suite run 39241180774 (e8d4898) still has suite) journeys="" in ci.yml, so no switching journeys; watcher hit its 2 h limit, not restarted
+2026-10-19T12:49Z	4	blocked	#3176	worker restarted; #3176 still open (no change since 06:44Z); dev ci.yml still has suite) journeys=""; no supervisor reply
+2026-10-19T13:09Z	4	heartbeat	#3176	#3176 open
+2026-10-19T13:30Z	4	heartbeat	#3176	#3176 open
+2026-10-19T13:50Z	4	heartbeat	#3176	#3176 open
+2026-10-19T14:11Z	4	heartbeat	#3176	#3176 open
+2026-10-19T14:31Z	4	heartbeat	#3176	#3176 open
+2026-10-19T17:18Z	4	relaunch	39292755765	#3176 merged; scoped suite run queued on 8f405311
+2026-10-19T17:39Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T17:49Z	4	heartbeat	39292755765	stall ping answered on #1507; run still queued
+2026-10-19T17:59Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T18:19Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T18:20Z	4	heartbeat	39292755765	second stall ping; run still queued
+2026-10-19T18:39Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T18:51Z	4	heartbeat	39292755765	third stall ping; run still queued
+2026-10-19T19:00Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T19:20Z	4	heartbeat	39292755765	scoped suite run waiting
+2026-10-19T19:21:34Z	heartbeat	stage 4: evidence run 39292755765 queued on macos-26 backlog; reported on #1507
+2026-10-19T19:43:14Z	heartbeat	stage 4: evidence run 39292755765 still queued for macos-26
+2026-10-19T19:51:59Z	ping	Belt stall ping answered on #1507; run still queued
+2026-10-19T20:05:22Z	heartbeat	stage 4: run 39292755765 still queued (macos-26 backlog)
+2026-10-19T20:22:42Z	ping	Belt stall ping answered; run still queued
+2026-10-19T20:26:51Z	heartbeat	stage 4: run 39292755765 still queued
+2026-10-19T20:47:55Z	heartbeat	stage 4: run 39292755765 still queued
+2026-10-19T20:53:08Z	ping	Belt stall ping answered; macOS (suite) in progress
+2026-10-19T21:09:19Z	heartbeat	stage 4: macOS (suite) green; journeys running
+2026-10-19T21:18:26Z	heartbeat	crash-isolation fix: attach by bundle URL
+2026-10-19T22:10:37Z	stage	fix round 1 #3359 merged; fix round 2 (#3356 #3357) PR opened

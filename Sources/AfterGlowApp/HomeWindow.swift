@@ -7,6 +7,7 @@
 // HM-2b: the New row (HomeNewRow) and the inspector (HomeInspector).
 import AppKit
 import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -43,6 +44,7 @@ struct HomeWindow: View {
         } inspector: {
             HomeInspector(model: model, services: services)
         }
+        .suiteSwitcher(current: .launcher)
         .searchable(text: Binding(get: { model.query }, set: { model.search($0, now: Date()) }))
         .task { await model.reload(now: Date()); await model.observe(now: { Date() }) }
         .task(id: model.state.cards.compactMap(\.item.thumbnail)) {  // load each thumbnail once

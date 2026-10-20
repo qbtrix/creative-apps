@@ -58,7 +58,7 @@ private func storedPropertyChanges() -> [(String, (inout LibraryCatalog) -> Void
         ("selection", { $0.selection = ["a"] }),
         ("mode", { $0.mode = .loupe }),
         ("focusedItemID", { $0.focusedItemID = "a" }),
-        ("history", { $0.history.push(.init(name: "Set Rating", before: [], after: [])) }),
+        ("history", { $0.history.kernel.record("Set Rating", []) }),
         ("order", { $0.order = ["a"] }),
         ("importState", { $0.importState = .running(ImportProgress(done: 0, total: 1)) }),
         ("importNotice", { $0.importNotice = ImportNotice(folder: "Shoot") }),

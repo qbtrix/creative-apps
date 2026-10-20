@@ -2,7 +2,10 @@
 // D0-8a) on the real window. A 120-sample drag of A on `cards` leaves the
 // window's workspace untouched until mouse-up while the live copy moves, and
 // mouse-up lands it as one Move step with the copy cleared. A scrub's previews
-// change only the copy and its end commits one Change Opacity step. The window
+// change only the copy and its end commits one Change Opacity step. A landed
+// drag's copy stays shown, not live, for one main-actor turn, so the canvas
+// never draws the window's old workspace before the landed one reaches it, and
+// a press in that turn keeps its new copy. The window
 // is hosted off screen through the render-budget harness; it reads
 // DesignWindow.lastWorkspace, a static, so it is nested in BodyCountSuites,
 // which runs those suites one at a time. On `cards`, A is node-2 at
@@ -76,6 +79,31 @@ extension BodyCountSuites {
             model.undo()
             #expect(!model.canUndo)
             #expect(live.workspace == nil)
+        }
+
+        @Test func aLandedCopyShowsForOneTurnAndANewPressKeepsItsOwn() async throws {
+            var model = Self.cards()
+            model.selectItem("node-2")
+            model.drag(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 150, y: 140))
+            let live = DesignLiveDrag()
+            live.begin(from: model)
+            live.sample(from: DesignPoint(x: 150, y: 140), to: DesignPoint(x: 190, y: 140), modifiers: [])
+            #expect(live.isLive)
+
+            var landed = model
+            #expect(live.land(into: &landed) == nil)
+            #expect(landed.selectedNode?.frame.x == 140)
+            live.clearAfterLanding()
+            #expect(!live.isLive)
+            #expect(live.workspace?.selectedNode?.frame.x == 140, "the copy went before the window drew the landing")
+            try await Task.sleep(for: .milliseconds(20))
+            #expect(live.workspace == nil)
+
+            live.begin(from: landed)
+            live.clearAfterLanding()
+            live.begin(from: landed)
+            try await Task.sleep(for: .milliseconds(20))
+            #expect(live.isLive, "the last landing's clear dropped a new press's copy")
         }
     }
 }

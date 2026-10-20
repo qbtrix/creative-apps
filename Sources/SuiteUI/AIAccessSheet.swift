@@ -21,6 +21,9 @@ public struct AIAccessSheet: View {
                     Text(AIAccessPrompt.message(request)).font(SuiteFont.body)
                         .foregroundStyle(SuiteColor.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
+                    Text(AIAccessPrompt.choiceHelp(request)).font(SuiteFont.caption)
+                        .foregroundStyle(SuiteColor.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             } icon: {
                 Image(systemName: "sparkles").font(SuiteFont.title).foregroundStyle(SuiteColor.accent)
