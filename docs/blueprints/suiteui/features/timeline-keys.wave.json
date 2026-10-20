@@ -1,0 +1,226 @@
+{
+  "title": "Timeline keys, one home: colour keys and span slide in SuiteKernel's Keys; Flare keys fill colour, stroke colour and stroke width from the inspector; Halo slides and trims layer bars on the SuiteUI timeline",
+  "wave": "XK4",
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 cluster C13 (Flare audit B3; Halo audit B3, under-specified 7); feature map E14 (Flare adopter) and the slide/trim row of S16; real jobs RJ-F13 (re-pointed) and RJ-H51 (new)",
+  "waits_on": "adopt-kernel-easing AE-flare and AE-halo (Keys is the one home; read it first); the stage-matches-export fix in flight (creative-core fix/flare-sampler, creative-apps fix/flare-stage-matches-export: the stage draws colour keys); timeline and timeline-select-all (built; TimelineStrip files); adjust-everywhere AJ-halo (HaloLayer.swift) and text-style TS-halo (Halo's catalog and ledger); flare gradient-fill FG-a and stroke-style FK-a, halo key-editing KE-a and core-loop CL-probe hand-offs",
+  "depends": [
+    "editor-kernel"
+  ],
+  "longest_chain": "5 (TK-1 → TK-2 → TK-6 → TK-9 → TK-10)",
+  "journeys": [
+    "FlareFillKeyJourneyTests.testKeyFillColour",
+    "HaloSpanJourneyTests.testSlideAndTrimLayers"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+    "Sources/SuiteKernel/Keys/SpanRules.swift",
+    "Tests/SuiteKernelTests/ColorKeyRulesTests.swift",
+    "Tests/SuiteKernelTests/SpanRulesTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-keys.json",
+    "Sources/HaloModel/HaloSpan+Kernel.swift",
+    "Tests/HaloModelTests/HaloSpanTests.swift",
+    "Sources/FlareApp/FlareInspectorFill.swift",
+    "UITests/FlareJourneyTests+FillKeys.swift",
+    "Sources/SuiteUI/TimelineStrip.swift",
+    "Sources/SuiteUI/TimelineLaneInput.swift",
+    "Sources/HaloApp/HaloTimelineView.swift",
+    "UITests/HaloJourneyTests+Span.swift",
+    "Tests/AppSnapshotTests/RenderBudgetTimelineSpanTests.swift",
+    "Tests/mutations/SuiteKernel.ColorKeyRules.json",
+    "Tests/mutations/SuiteKernel.SpanRules.json",
+    "Sources/HaloModel/HaloLayer.swift",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/mutations/HaloModel.HaloSpan+Kernel.json",
+    "Tests/FlareModelTests/FlareColorKeysTests.swift",
+    "Sources/FlareModel/FlareColorKeys+Kernel.swift",
+    "Sources/FlareModel/Live/LiveProperties+Paint.swift",
+    "Tests/mutations/FlareModel.FlareColorKeys+Kernel.json",
+    "Tests/RealJobs/flare/fill-colour-key/fill-colour-key.jobs.json",
+    "Sources/FlareApp/FlareWindow+Inspector.swift",
+    "Sources/HaloApp/HaloWindow+Span.swift",
+    "Tests/RealJobs/halo/stagger-layers/stagger-layers.jobs.json",
+    "Tests/RealJobs/halo/stagger-layers/input/three-words.halo",
+    "docs/blueprints/suiteui/features/timeline-keys.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "TK-a",
+      "behavior": "SuiteKernel declares the colour key and span slide rules as stubs and Halo the slide and trim command specs, with every Model check written and disabled.",
+      "tasks": [
+        "TK-1",
+        "TK-2"
+      ],
+      "journeys": [
+        "MJ-TK"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+        "Sources/SuiteKernel/Keys/SpanRules.swift",
+        "Tests/SuiteKernelTests/ColorKeyRulesTests.swift",
+        "Tests/SuiteKernelTests/SpanRulesTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-keys.json",
+        "Sources/HaloModel/HaloSpan+Kernel.swift",
+        "Tests/HaloModelTests/HaloSpanTests.swift"
+      ],
+      "waits": {
+        "frame-rates:FR-a": [
+          "TK-1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "TK-u",
+      "behavior": "Flare's FILL and STROKE rows show key buttons and Halo's timeline bars trim and slide on the stubs, every control identified and within the render budget.",
+      "tasks": [
+        "TK-3",
+        "TK-4"
+      ],
+      "journeys": [
+        "FJ-TK",
+        "HJ-TK"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareInspectorFill.swift",
+        "UITests/FlareJourneyTests+FillKeys.swift",
+        "Sources/SuiteUI/TimelineStrip.swift",
+        "Sources/SuiteUI/TimelineLaneInput.swift",
+        "Sources/HaloApp/HaloTimelineView.swift",
+        "UITests/HaloJourneyTests+Span.swift",
+        "Tests/AppSnapshotTests/RenderBudgetTimelineSpanTests.swift"
+      ],
+      "waits": {
+        "TK-a": [
+          "TK-3",
+          "TK-4"
+        ],
+        "timeline": [
+          "TK-4"
+        ],
+        "timeline-select-all": [
+          "TK-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "TK-m",
+      "behavior": "Colour keys toggle and sample on the kernel's rules, a slide moves a span and every key by the same clamped delta, and Halo's slide and trim are one undo step each through its catalog.",
+      "tasks": [
+        "TK-5",
+        "TK-6"
+      ],
+      "journeys": [
+        "MJ-TK",
+        "MJ-TK-halo"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+        "Sources/SuiteKernel/Keys/SpanRules.swift",
+        "Tests/SuiteKernelTests/ColorKeyRulesTests.swift",
+        "Tests/SuiteKernelTests/SpanRulesTests.swift",
+        "Tests/mutations/SuiteKernel.ColorKeyRules.json",
+        "Tests/mutations/SuiteKernel.SpanRules.json",
+        "Sources/HaloModel/HaloSpan+Kernel.swift",
+        "Sources/HaloModel/HaloLayer.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/HaloModelTests/HaloSpanTests.swift",
+        "Tests/mutations/HaloModel.HaloSpan+Kernel.json"
+      ],
+      "waits": {
+        "TK-a": [
+          "TK-5",
+          "TK-6"
+        ],
+        "adopt-kernel-easing:AE-halo": [
+          "TK-6"
+        ],
+        "adjust-everywhere:AJ-halo": [
+          "TK-6"
+        ],
+        "text-style:TS-halo": [
+          "TK-6"
+        ],
+        "anchor-parenting:AN-halo": [
+          "TK-6"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "TK-flare",
+      "behavior": "In Flare a key button keys fill colour, stroke colour and stroke width at the playhead, and with recording on a fill or stroke edit keys instead of changing every frame.",
+      "tasks": [
+        "TK-7",
+        "TK-8"
+      ],
+      "journeys": [
+        "FJ-TK",
+        "MJ-TK-flare"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlareColorKeysTests.swift",
+        "Sources/FlareModel/FlareColorKeys+Kernel.swift",
+        "Sources/FlareModel/Live/LiveProperties+Paint.swift",
+        "Tests/mutations/FlareModel.FlareColorKeys+Kernel.json",
+        "Tests/RealJobs/flare/fill-colour-key/fill-colour-key.jobs.json",
+        "Sources/FlareApp/FlareWindow+Inspector.swift",
+        "UITests/FlareJourneyTests+FillKeys.swift"
+      ],
+      "waits": {
+        "TK-m": [
+          "TK-7"
+        ],
+        "TK-u": [
+          "TK-8"
+        ],
+        "adopt-kernel-easing:AE-flare": [
+          "TK-7"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "TK-z",
+      "behavior": "Halo's slide and trim run live end to end, RJ-H51 passes, the kernel part names its adopters, and the feature is built.",
+      "tasks": [
+        "TK-9",
+        "TK-10"
+      ],
+      "journeys": [
+        "HJ-TK",
+        "FJ-TK",
+        "MJ-TK"
+      ],
+      "owned": [
+        "Sources/HaloApp/HaloWindow+Span.swift",
+        "UITests/HaloJourneyTests+Span.swift",
+        "Tests/RealJobs/halo/stagger-layers/stagger-layers.jobs.json",
+        "Tests/RealJobs/halo/stagger-layers/input/three-words.halo",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-keys.json",
+        "docs/blueprints/suiteui/features/timeline-keys.wave.json"
+      ],
+      "waits": {
+        "TK-m": [
+          "TK-9"
+        ],
+        "TK-u": [
+          "TK-9"
+        ],
+        "TK-flare": [
+          "TK-10"
+        ],
+        "frame-rates:FR-a": [
+          "TK-10"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}
