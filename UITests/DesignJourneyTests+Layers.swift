@@ -93,8 +93,7 @@ final class DesignLayersJourneyTests: XCTestCase {
 
         // 3. Drag B onto C's top edge: B lists above C, one Move Layer step.
         XCTAssert(Self.isAbove(c, b), "two-pages doesn't list C above B")
-        b.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .press(forDuration: 0.6, thenDragTo: c.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1)))
+        rowDrag(b, to: c.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1)))
         XCTAssert(Self.waitUntil { Self.isAbove(b, c) }, "dragging B onto C's top edge didn't list B above C")
         XCTAssert(Self.waitUntil { undo.label == "Undo Move Layer" }, "the drag made no Move Layer step (Undo reads \(undo.label))")
         design.shot("layers-moved")
@@ -102,8 +101,7 @@ final class DesignLayersJourneyTests: XCTestCase {
 
         // 4. Drag Title onto the middle of Pair's row: Title is nested at E1's depth, one Move Layer step.
         let title = design.element(Self.titleRow), pair = design.element(Self.pairRow)
-        title.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .press(forDuration: 0.6, thenDragTo: pair.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+        rowDrag(title, to: pair.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
         XCTAssert(Self.waitUntil { undo.label == "Undo Move Layer" && !Self.isDepth(title, of: a) },
                   "dragging Title onto Pair didn't move it out of Desktop's rows")
         design.expandDesignLayer(Self.pairRow)
@@ -132,6 +130,14 @@ final class DesignLayersJourneyTests: XCTestCase {
         XCTAssert(renamePage.waitForExistence(timeout: 3), "the Page menu shows no Rename Page…")
         XCTAssertFalse(renamePage.isEnabled, "Page > Rename Page… is on with no name field to rename from")
         design.press(.escape)
+    }
+
+    /// Drags `row` from its middle to `target` the way a hand does with the mouse: a held click,
+    /// a slow move, and a short hold before the release, so the system drag reports the pointer
+    /// over the target row. On macOS the velocity form of `press` drives only the Touch Bar.
+    @MainActor private func rowDrag(_ row: XCUIElement, to target: XCUICoordinate) {
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .click(forDuration: 0.6, thenDragTo: target, withVelocity: 200, thenHoldForDuration: 0.5)
     }
 
     /// One ⌘Z makes `undone` true and ⇧⌘Z makes `redone` true again: the last step was one `step`.

@@ -1,7 +1,7 @@
 // ExportOptionsTests.swift: the suite's export options, rules and format list (export-pack XP-1, XP-6).
-// XP-1's checks run now: the values round-trip, the schema is closed, and
-// Export/ imports only Foundation. The XP-6 rows wait, disabled, until XP-6
-// fills the bodies. KJ-export is the rules' Linux walk.
+// The values round-trip, the schema is closed, Export/ imports only Foundation,
+// and the XP-6 rows check the bodies: exact pixels, refusals, the dropped tags
+// and the JSON schema. KJ-export is the rules' Linux walk.
 import Foundation
 import Testing
 import SuiteKernel
@@ -43,9 +43,9 @@ import SuiteKernel
         }
     }
 
-    // MARK: XP-6 rows
+    // MARK: XP-6 rows (bodies)
 
-    @Test(.disabled("waits on XP-6")) func pixelsAreExact() throws {
+    @Test func pixelsAreExact() throws {
         let exact = try ExportRules.pixels(of: Self.artboard, .pixels(width: 1080, height: 1350), evenSize: false)
         #expect(exact == (1080, 1350))
         let doubled = try ExportRules.pixels(of: Self.artboard, .scale(2), evenSize: false)
@@ -56,7 +56,7 @@ import SuiteKernel
         #expect(stretched == (1080, 1351))
     }
 
-    @Test(.disabled("waits on XP-6")) func longEdgeRoundsTheShortSide() throws {
+    @Test func longEdgeRoundsTheShortSide() throws {
         let tall = try ExportRules.pixels(of: Self.artboard, .longEdge(2048), evenSize: false)
         #expect(tall == (1638, 2048))
         // 2047 × 4 / 5 = 1637.6: rounding gives 1638, flooring would give 1637.
@@ -66,7 +66,7 @@ import SuiteKernel
         #expect(wide == (2047, 1638))
     }
 
-    @Test(.disabled("waits on XP-6")) func aShapeThatDoesNotKeepTheRatioIsRefused() {
+    @Test func aShapeThatDoesNotKeepTheRatioIsRefused() {
         #expect(throws: ExportOptionRefusal.invalid(
             "1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.")) {
             try ExportRules.pixels(of: Self.artboard, .pixels(width: 1080, height: 1351), evenSize: false)
@@ -76,7 +76,7 @@ import SuiteKernel
                 == "1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.")
     }
 
-    @Test(.disabled("waits on XP-6")) func evenSizesRoundDownAndLimitsHold() throws {
+    @Test func evenSizesRoundDownAndLimitsHold() throws {
         let h264 = try #require(ExportFormats.spec("mp4"))
         #expect(h264.needsEvenSize && h264.name == "H.264")
         let even = try ExportRules.pixels(of: (1081, 607), .scale(1), evenSize: h264.needsEvenSize)
@@ -92,7 +92,7 @@ import SuiteKernel
         #expect(throws: ExportOptionRefusal.self) { try ExportRules.pixels(of: Self.artboard, .longEdge(0), evenSize: false) }
     }
 
-    @Test(.disabled("waits on XP-6")) func noLocationDropsGPSAndKeepsTheDate() {
+    @Test func noLocationDropsGPSAndKeepsTheDate() {
         let none = ExportRules.dropped(.all)
         #expect(none.properties.isEmpty && none.xmp.isEmpty)
         let private_ = ExportRules.dropped(.noLocation)
@@ -107,7 +107,7 @@ import SuiteKernel
         #expect(!Self.drops(bare.properties, "{TIFF}.Orientation") && bare.xmp.contains("xmp:CreateDate"))
     }
 
-    @Test(.disabled("waits on XP-6")) func theFormatListSaysWhatEachCarries() throws {
+    @Test func theFormatListSaysWhatEachCarries() throws {
         #expect(ExportFormats.all.map(\.id)
                 == ["png", "jpeg", "heic", "tiff", "svg", "pdf", "mp4", "mp4-hevc", "mov-prores", "gif", "apng"])
         let png = try #require(ExportFormats.spec("png")), svg = try #require(ExportFormats.spec("svg"))
@@ -117,7 +117,7 @@ import SuiteKernel
         #expect(ExportFormats.spec("webp") == nil)
     }
 
-    @Test(.disabled("waits on XP-6")) func refusalsSayWhy() {
+    @Test func refusalsSayWhy() {
         let ok = SuiteExportOptions(format: "png", size: .scale(2))
         #expect(ExportRules.refusal(ok, source: Self.artboard, formats: ExportFormats.all) == nil)
         let alpha = SuiteExportOptions(format: "mp4", size: .scale(1), alpha: true)
@@ -129,7 +129,7 @@ import SuiteKernel
         #expect(ExportRules.refusal(unknown, source: Self.artboard, formats: ExportFormats.all) != nil)
     }
 
-    @Test(.disabled("waits on XP-6")) func jsonReadsEachKeyAndRefusesUnknownOnes() throws {
+    @Test func jsonReadsEachKeyAndRefusesUnknownOnes() throws {
         let defaults = SuiteExportOptions(format: "png")
         let size = try SuiteExportOptions(json: Self.json(#"{"format":"jpeg","size":{"pixels":[1080,1350]},"metadata":"noLocation"}"#),
                                      defaults: defaults)
