@@ -249,10 +249,11 @@
     "job": "Animate a fill colour from blue to orange over 1 s.",
     "outcome": "The fill colour reads blue at 0 s and orange at 1 s, in the preview and in the export.",
     "needs": [
-      "E14"
+      "E14",
+      "suiteui/timeline-keys"
     ],
     "needs_note": "E14 colour keys",
-    "closes_with": "E14",
+    "closes_with": "suiteui/timeline-keys",
     "trap": "Only transform and opacity tracks exist",
     "run": "C",
     "baseline": "fail",

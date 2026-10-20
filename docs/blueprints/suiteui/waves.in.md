@@ -74,6 +74,16 @@ that isn't filed yet: Flare's half of frame-rates (a rational scene rate) and
 of anchor-parenting (a transform anchor, a layer parent, Lottie `a` and
 `parent`).
 
+The same wave also carries the imaging, text and keys beta gaps:
+`adjust-everywhere` (C8: Black & White, Invert, filters and looks in
+SuiteImaging, the preset store in SuiteModel), `fill-heal` (C10: paint bucket,
+spot heal, heal and remove on core's engines), `text-style` (C11: the kernel's
+text style and SuiteUI's style row; Photo's half is `photo/text-layers`) and
+`timeline-keys` (C13: colour keys and span slide in the kernel's Keys). Their
+app slices on one app's files come after the packets above on the same
+files and then wait on each other in that order, so the adopts land one
+after another.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 **Wave 4 (beta-80 W1, 2026-10-18).** `font-picker` is SuiteUI's piece of
