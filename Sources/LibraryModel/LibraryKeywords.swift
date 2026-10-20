@@ -157,6 +157,10 @@ extension LibraryCatalog {
     private static func adding(_ keyed: [(String, String)], to keywords: [String]) -> [String] {
         var result = keywords
         for (name, key) in keyed {
+            if (result.last?.lowercased() ?? "") < key {  // after them all: one name lowercased
+                result.append(name)
+                continue
+            }
             var low = 0, high = result.count  // the first keyword at or after `key` in any case
             while low < high {
                 let mid = (low + high) / 2
@@ -178,7 +182,8 @@ extension LibraryCatalog {
         var spelling: [String: String] = [:]
         // A name ending in an ASCII byte lowercases to one ending in that byte
         // lowercased, so most of a large catalog is passed over unhashed.
-        let endings = seen.compactMap { $0.utf8.last }
+        var endings = [Bool](repeating: false, count: 128)  // by ASCII byte
+        for last in seen.compactMap({ $0.utf8.last }) where last < 0x80 { endings[Int(last)] = true }
         var checked: Set<String> = []  // each spelling is lowercased once
         for index in items.indices where spelling.count < names.count {
             for keyword in items[index].keywords where Self.mayEnd(keyword, in: endings) && checked.insert(keyword).inserted {
@@ -191,9 +196,9 @@ extension LibraryCatalog {
 
     /// Whether `keyword` lowercased can end in one of `endings`: false only
     /// for an ASCII last byte none of them is.
-    private static func mayEnd(_ keyword: String, in endings: [UInt8]) -> Bool {
+    private static func mayEnd(_ keyword: String, in endings: [Bool]) -> Bool {
         guard let last = keyword.utf8.last, last < 0x80 else { return true }
-        return endings.contains((0x41...0x5A).contains(last) ? last | 0x20 : last)
+        return endings[Int(last >= 0x41 && last <= 0x5A ? last | 0x20 : last)]
     }
 
     /// The spellings on photos taken within an hour of any of `targets`.
