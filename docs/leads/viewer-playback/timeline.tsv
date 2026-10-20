@@ -191,3 +191,4 @@ utc	stage	event	ref	note
 2026-10-20T07:20Z	heartbeat	#1705 verify: run 39357615737 still queued (macOS backlog, 39 queued)
 2026-10-20T07:42Z	stage	#1705 verify: scoped run 39357615737 cancelled unrun (superseded 07:32Z); now verifying on full run 39387926961 (af2977c0)
 2026-10-20T08:04Z	heartbeat	#1705 verify: full run 39387926961 cancelled; tracking scoped halo 39388363410 (queued), fallback full 39389343595
+2026-10-20T08:26Z	heartbeat	#1705 verify: scoped halo 39388363410 and full 39389343595 both still queued (macOS backlog)
