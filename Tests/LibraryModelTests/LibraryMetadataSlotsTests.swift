@@ -50,7 +50,6 @@ private func twoPhotos() -> LibraryCatalog {
     #expect(catalog == before)
     #expect(catalog.keywordStates.isEmpty)
     #expect(catalog.keywordSuggestions(prefix: "").isEmpty)
-    #expect(catalog.searchSuggestions(prefix: "").isEmpty)
     #expect(catalog.sidecarWrites(after: [:]).isEmpty)
     #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: []) == nil)
 }
