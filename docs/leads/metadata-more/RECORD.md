@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: #3460 merged: fixer running: merges dev into #3465 and #3473 and un-drafts them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 #3547 (draft on MD-5 #3492); MD-7 #3548 (draft on MD-6 #3547); MD-8 #3550 (draft on MD-7 #3548); MD-10 building (on MD-9 #3533)
+Next: #3465 (head 00f26ebb) and #3473 (head 1d8c098d) ready for the lane; when #3465 merges, merge dev into MD-5 #3492 and un-draft; when #3473 merges, the same for MD-9 #3533, MD-14 #3544, MD-19 #3545 (the second of #3465/#3473 to merge likely gets needs-rebase on the library-model-sources C4 part: keep both clauses); MD-6 #3547, MD-7 #3548, MD-8 #3550 drafts; MD-10, MD-11, MD-12 building (on MD-9 #3533)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,8 +20,8 @@ Next: #3460 merged: fixer running: merges dev into #3465 and #3473 and un-drafts
 |---|---|---|---|---|---|---|---|
 | MD-1 | MD-a | 1 | CameraDetails with its cleaning init, CameraField, CameraRow stubs, selectedPhotos, selectedCameraRows; PhotoItem keywords/title/caption/camera; ImportCandidate.camera | Sources/LibraryModel/Contracts/PhotoDetails.swift, Sources/LibraryModel/PhotoItem.swift, Sources/LibraryModel/Contracts/LibraryValues.swift, Tests/LibraryModelTests/LibraryPhotoDetailsTests.swift, Tests/mutations/LibraryModel.PhotoDetails.json, Tests/mutations/LibraryModel.PhotoItem.json | LibraryPhotoDetailsTests | #3422 | merged 05:30Z |
 | MD-2 | MD-a | 2 | sidecar contract, FakeSidecars, services.sidecars | see packet | LibrarySidecarContractTests | #3460 | merged 07:29Z |
-| MD-3 | MD-a | 3 | cameras fixture; the decoder and importer carry camera details; MD-MJ1 | see packet | LibraryCamerasFixtureTests | #3465 | open, draft until #3460 merges (stacked) |
-| MD-4 | MD-a | 3 | inert slots: LibraryKeywords, MetadataEditing title/caption, XMPSidecar, PhotoSearch | see packet | LibraryMetadataSlotsTests | #3473 | open, draft until #3460 merges (stacked) |
+| MD-3 | MD-a | 3 | cameras fixture; the decoder and importer carry camera details; MD-MJ1 | see packet | LibraryCamerasFixtureTests | #3465 | ready (dev merged, head 00f26ebb) |
+| MD-4 | MD-a | 3 | inert slots: LibraryKeywords, MetadataEditing title/caption, XMPSidecar, PhotoSearch | see packet | LibraryMetadataSlotsTests | #3473 | ready (dev merged, head 1d8c098d) |
 | MD-5 | MD-b | 4 | check-first for MD-b: camera rows, decode, snapshots, MD-J1, all disabled | LibraryCameraRowsTests, LibraryCameraDecodeTests, LibraryCameraSnapshots, LibraryJourneyTests+Camera | compiles, disabled | #3492 | draft, stacked on #3465 |
 | MD-9 | MD-c | 4 | check-first for MD-c: keywords, caption, catalog file, keyword budgets, snapshots, MD-J2, all disabled | see packet | compiles, disabled | #3533 | draft, stacked on #3473 |
 | MD-14 | MD-d | 5 | XMP/sidecar checks, disabled | LibraryXMPTests, LibrarySidecarPlanTests, LibrarySidecarWriterTests, LibrarySidecarSnapshots, LibraryJourneyTests+Sidecars | compiles, disabled | #3544 | draft, stacked on #3473 |
@@ -69,3 +69,4 @@ Next: #3460 merged: fixer running: merges dev into #3465 and #3473 and un-drafts
 - 07:37Z check-in: #3423 and #3460 merged (07:29Z); #3424 lane macOS build 39366318428 still queued since 03:49Z (runner backlog). No new line:library findings. Builders: MD-8, MD-10, FC-12 in their gates; MD-7 #3548 drafted. Fixer for #3465/#3473 dev merge waits for a free slot.
 - MD-8 (#3550, head e57f5481): 3 files +59/-11 over MD-7. Taken date is formatted in the view with Date.FormatStyle (the Model helper is internal), so snapshot text follows the CI Mac locale; critics should check. Adds identifier library.metadata.camera.none. PNGs: library-camera{,-mixed,-none}-{light,dark}.png. MD-b slice code complete once the stack merges.
 - 07:59Z check-in: #3424 still open, mergeable clean; lane macOS build 39366318428 still queued (4h10m, runner backlog). No new line:library findings. Running: MD-10 (gate), MD-11 (building on MD-9), fixer for #3465/#3473. Drafts recorded: MD-8 #3550, FC-12 #3551.
+- 08:05Z: fixer merged dev into #3465 (CI: PASS on 2nd run) and #3473 (only LibraryCatalogBudgetTests/LibraryGridBudgetTests failed under load; both pass alone, so Fast-Check: pass kept, noted in the body); both un-drafted. Both edit the same C4 description in library-model-sources.json. MD-12 builder launched (feat/library-md12-metadata-persist on MD-9).
