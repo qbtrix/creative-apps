@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-20T21:48Z	3	slice pushed	PT-5	lead/transform-PT-5 d05dee8, 12 files +240/-30, CI PASS, Mutate 3/3; PR after PT-4. Core gap: transform.flip title "Flip" vs undo "Flip Horizontal/Vertical" (needs-core; core repo out of session scope). Masks not transformed yet.
 2026-10-20T21:59Z	3	heartbeat	#3704,#3706,#3762	none merged; #3706 mac build green (awaiting lane sweep); #3704 build queued since 19:54Z
 2026-10-20T22:20Z	3	heartbeat	#3704,#3706,#3762	none merged; #3706 clean+mac green, queued for lane batch (lane busy bisecting batch-20261020214541); #3704 build still queued
+2026-10-20T22:44Z	3	waiting	#3704	PT-1 macOS build green; waiting for a lane batch
