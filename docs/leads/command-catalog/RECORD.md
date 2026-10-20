@@ -75,3 +75,5 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 - 2026-10-20T16:40Z: no qualifying run completed; full CI 39447117246 at 27b67332 still pending, 39442633733 and 39438701609 queued; only Linux checks completed (5eceabf7, 47dd9bb8)
 
 - 2026-10-20T17:00Z: no qualifying run completed; full CI 39447117246 at 27b67332 still pending; only a Linux check completed (7b45f176)
+
+- 2026-10-20T17:20Z: full CI 39447117246 at 27b67332 cancelled (replaced); new full CI 39464293440 at 39a1c97e pending, contains every slice; no qualifying run completed yet
