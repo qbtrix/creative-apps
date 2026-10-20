@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 10:56Z	3	poll	-	#3586 build passed, not merged yet; waits on the lane sweep; core pin 0de5687d unchanged
 11:15Z	3	merged	XP-6	#3586 merged as b538c92c
 11:34Z	3	poll	-	dev 0e1199e9: no core bump, SM-a, PL-a, GF-2, AH-2 or #3144; nothing to start
+11:47Z	3	poll	-	dev still 0e1199e9 (core pin 0de5687d); PN-2 head e65ce2e mergeable, waits on the lane build; no slice unblocked
