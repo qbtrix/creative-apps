@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-20T08:42:34Z	heartbeat	#3484 build 39374818329 and #3392 build 39379782419 still queued; no full/suiteui run done on dev
 2026-10-20T09:03:06Z	heartbeat	#3484 build 39374818329 in progress since 08:53Z; #3392 build still queued; no full/suiteui run done on dev
 2026-10-20T09:20:26Z	heartbeat	#3484 macOS build 39374818329 success 09:04Z, mergeable clean, awaiting lane sweep; #3392 build still queued
+2026-10-20T09:30:15Z	heartbeat	#3484 CC-u merged 09:28Z; dev merged into AC-p3/d3/h3, scripts/ci --changed running; #3392 still open
