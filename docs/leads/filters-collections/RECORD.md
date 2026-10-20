@@ -76,3 +76,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 08:21Z check-in: #3424 still open (clean; lane macOS build 39366318428 still queued). #3465 and #3473 ready, clean, waiting on their lane macOS builds. New line:library CI findings #3560-#3565 from dev run 39349878829 (develop, export, export presets, inspector-develop unlabeled button): other features' journeys, none in this feature's files. Running: MD-10, MD-11, MD-15.
 
 - Check-in 2026-10-20T08:43Z: #3424, #3465, #3473 still open (clean, fast-lane); #3424 lane macOS build 39366318428 still queued since 03:49Z (macOS runner backlog). No merges to cascade. No new line:library findings since 08:15Z. Running builders: MD-10, MD-16, MD-17.
+- Check-in 2026-10-20T09:05Z: no dev merges since 08:40Z; #3424 macOS build 39366318428 still queued (5h15m). #3424, #3465, #3473 open and clean. No new line:library findings. Running: MD-10, MD-16. MD-17 drafted (#3579).
