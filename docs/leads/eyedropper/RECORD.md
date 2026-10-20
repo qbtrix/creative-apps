@@ -9,7 +9,7 @@ Next: #3531 and #3541 then #3597 restack to dev; EY-8 waits on transform-tools:T
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| EY-a | The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper ... | EY-1, EY-2 | SJ0 | gradient-fill:GF-a | true | 0 | pr-open | – | – |
+| EY-a | The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper ... | EY-1, EY-2 | SJ0 | gradient-fill:GF-a | true | 0 | merged | – | – |
 | EY-u | On the gallery page every colour row's eyedropper picks a colour from the screen as one gesture, the loupe follows the p... | EY-3, EY-4 | EJ1 | EY-a | true | 0 | pr-open | – | – |
 | EY-m | The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document po... | EY-5, EY-6 | KJ-sample | EY-a | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39413721862 | – |
 | EY-z | The gallery samples through color.sample on a live target, the fake app samples its topmost rect so RJ-X33 runs on the C... | EY-7, EY-8, EY-9 | EJ1, KJ-sample | EY-u, EY-m, transform-tools:TT-z | true | 0 | planned | – | – |
@@ -18,7 +18,7 @@ Next: #3531 and #3541 then #3597 restack to dev; EY-8 waits on transform-tools:T
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | EY-1 | EY-a | 1 | The contract as stubs: `SampleSize`, `SampleRGBA`, `SampleRules`, `SampleTarget`, the `color.sample` spec w... | `Sources/SuiteKernel/Sample/SampleRules.swift`, `Sources/SuiteKernel/Sample/SampleCommands.swift`, `Tests/SuiteKernelTests/SampleRulesTests.swift`, `Tests/SuiteKernelTests/SampleCommandsTests.swift`, `docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json` | see packet Acceptance | #3525 | merged |
-| EY-2 | EY-a | 2 | The placeholder `EyedropperButton`, `SampleLoupe` and `SampleSizeChips`; the colour rows' `sampleable:` par... | `Sources/SuiteUI/Eyedropper.swift`, `Sources/SuiteUI/ColorWell.swift`, `Sources/SuiteUI/Gallery/GalleryEyedropper.swift`, `Sources/SuiteUI/Gallery/GalleryCanvasHost.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3531 | open |
+| EY-2 | EY-a | 2 | The placeholder `EyedropperButton`, `SampleLoupe` and `SampleSizeChips`; the colour rows' `sampleable:` par... | `Sources/SuiteUI/Eyedropper.swift`, `Sources/SuiteUI/ColorWell.swift`, `Sources/SuiteUI/Gallery/GalleryEyedropper.swift`, `Sources/SuiteUI/Gallery/GalleryCanvasHost.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3531 | merged |
 | EY-3 | EY-u | 3 | The views: the `NSColorSampler` button on every colour row (one change and one end per pick), the loupe, th... | `Sources/SuiteUI/Eyedropper.swift`, `Sources/SuiteUI/ColorWell.swift`, `Tests/SuiteUITests/EyedropperTests.swift` | see packet Acceptance | #3541 | open |
 | EY-4 | EY-u | 4 | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteEyedropperSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetEyedropperTests.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3541 | open |
 | EY-5 | EY-m | 2 | `SampleRules` bodies; turns on `SampleRulesTests` | `Sources/SuiteKernel/Sample/SampleRules.swift`, `Tests/SuiteKernelTests/SampleRulesTests.swift`, `Tests/mutations/SuiteKernel.SampleRules.json` | see packet Acceptance | #3540 | merged |

@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-20T13:08Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
 2026-10-20T13:40Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
 2026-10-20T13:54Z	3	needs-split	#3597	sentinel saw 1877/42 vs stale base EY-u; own change 263/2; restacking EY-u onto dev, EY-2 untouched
+2026-10-20T14:05Z	3	merged	#3531	EY-2 merged df54ce81; EY-a waits on a Linux run; #3541 retargeted to dev
