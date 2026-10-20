@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 09:56Z	3	check	XP-6	#3586 lane macOS build 39403374325 dispatched 09:48Z
 10:08Z	3	check	XP-6	lane macOS build 39403374325 still queued (runner backlog)
 10:19Z	3	check	XP-6	build 39403374325 still queued (31 min, runner backlog)
+10:31Z	3	poll	-	macOS builds for #3586 and #3553 still queued; dev a54a892a, core pin 0de5687d unchanged; no SM-a, GF-2, AH-2, PL-a or #3144 on dev
