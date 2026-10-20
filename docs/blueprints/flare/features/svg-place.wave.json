@@ -96,6 +96,14 @@
         ],
         "gradient-fill:FG-m": [
           "PF-6"
+        ],
+        "shape-tools:FS-m": [
+          "PF-5",
+          "PF-6"
+        ],
+        "stroke-style:FK-m": [
+          "PF-5",
+          "PF-6"
         ]
       },
       "ui": false,

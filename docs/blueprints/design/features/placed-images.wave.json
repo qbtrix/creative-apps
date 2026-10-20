@@ -49,6 +49,18 @@
       "waits": {
         "gradient-fill:DG-a": [
           "PD-1"
+        ],
+        "transform:DT-a": [
+          "PD-1",
+          "PD-2"
+        ],
+        "shape-tools:DS-a": [
+          "PD-1",
+          "PD-2"
+        ],
+        "stroke-style:DK-m": [
+          "PD-1",
+          "PD-2"
         ]
       },
       "ui": false,
@@ -83,6 +95,30 @@
           "PD-3"
         ],
         "gradient-fill:DG-a": [
+          "PD-4"
+        ],
+        "autosave-history:DA-a": [
+          "PD-3",
+          "PD-4"
+        ],
+        "transform:DT-a": [
+          "PD-3",
+          "PD-4"
+        ],
+        "transform:DT-u": [
+          "PD-3",
+          "PD-4"
+        ],
+        "shape-tools:DS-a": [
+          "PD-3",
+          "PD-4"
+        ],
+        "shape-tools:DS-u": [
+          "PD-3",
+          "PD-4"
+        ],
+        "stroke-style:DK-u": [
+          "PD-3",
           "PD-4"
         ]
       },
@@ -119,6 +155,26 @@
           "PD-6"
         ],
         "design-export:DE-s": [
+          "PD-6"
+        ],
+        "autosave-history:DA-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "transform:DT-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "eyedropper:DY-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "shape-tools:DS-m": [
+          "PD-5",
+          "PD-6"
+        ],
+        "stroke-style:DK-m": [
+          "PD-5",
           "PD-6"
         ]
       },

@@ -333,17 +333,19 @@
     "job": "Paste a logo and scale it from a corner, rotate it 15°, flip it.",
     "outcome": "It keeps its aspect and stays sharp.",
     "needs": [
-      "S7"
+      "S7",
+      "photo/transform"
     ],
-    "needs_note": "S7 transform (re-cut PV-7)",
-    "closes_with": "S7",
+    "needs_note": "S7 transform; photo/transform wires it into Photo",
+    "closes_with": "photo/transform",
     "trap": "Aspect squash on a corner drag; repeated scaling blurs it",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PT-5"
   },
   "RJ-P18": {
     "id": "RJ-P18",
@@ -353,17 +355,19 @@
     "outcome": "The image is centred and the new area is white.",
     "needs": [
       "S7",
-      "E5"
+      "E5",
+      "photo/transform"
     ],
-    "needs_note": "S7 (canvas pad, E5)",
-    "closes_with": "S7",
+    "needs_note": "S7 Canvas Size on E5's pad (done); photo/transform wires it",
+    "closes_with": "photo/transform",
     "trap": "New area transparent, or the image shifted by a pixel",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PT-6"
   },
   "RJ-P19": {
     "id": "RJ-P19",
@@ -431,17 +435,18 @@
     "job": "Pick a colour from the photo with the eyedropper for a title.",
     "outcome": "The swatch matches the pixel.",
     "needs": [
-      "S13"
+      "S13",
+      "photo/eyedropper"
     ],
-    "needs_note": "S13 eyedropper",
-    "closes_with": "S13",
+    "closes_with": "photo/eyedropper",
     "trap": "Picks the screen colour, not the document's",
     "run": "J",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ]
+    ],
+    "waits_on": "PE-7"
   },
   "RJ-P23": {
     "id": "RJ-P23",
@@ -541,17 +546,18 @@
     "job": "Jump back 10 steps by clicking the History panel.",
     "outcome": "One click goes back 10 steps, and the canvas, the History panel and the Edit menu's Undo item agree.",
     "needs": [
-      "S12"
+      "S12",
+      "photo/history-panel"
     ],
-    "needs_note": "S12 History panel",
-    "closes_with": "S12",
+    "closes_with": "photo/history-panel",
     "trap": "Panel and Edit menu disagree",
     "run": "J",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://shotkit.com/pixelmator-pro-vs-photoshop/"
-    ]
+    ],
+    "waits_on": "PH-7"
   },
   "RJ-P29": {
     "id": "RJ-P29",
@@ -684,6 +690,27 @@
   },
   "RJ-P36": {
     "id": "RJ-P36",
+    "app": "photo",
+    "weight": "med",
+    "job": "Sample a 5 x 5 mean by command on a red and blue checkerboard, and a point outside the image.",
+    "outcome": "The centred 5 x 5 square reads the 13-red, 12-blue mix within 1 per channel, and the outside point reads null.",
+    "needs": [
+      "S13",
+      "photo/eyedropper"
+    ],
+    "closes_with": "photo/eyedropper",
+    "trap": "The sample reads the active layer, or the square is anchored at its corner",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PE-6",
+    "added_by": "photo/eyedropper"
+  },
+  "RJ-P37": {
+    "id": "RJ-P37",
     "app": "photo",
     "weight": "high",
     "job": "Place a PNG logo onto an open 800 x 600 image and save the flattened result.",

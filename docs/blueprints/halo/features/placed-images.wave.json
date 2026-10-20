@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "beta": true,
-  "covers": "halo/placed-images (adopter of S20 and E11); RJ-H02 (closes here), RJ-H33 (new)",
+  "covers": "halo/placed-images (adopter of S20 and E11); RJ-H02 (closes here), RJ-H36 (new)",
   "waits_on": "suiteui placed-images' contract slice PL-a (cross-line); gradient-fill's HG-a, HG-u, HG-m and HG-z and core-loop's CL-probe (shared files)",
   "depends": [
     "foundation",
@@ -58,6 +58,14 @@
       "waits": {
         "gradient-fill:HG-a": [
           "PH-1"
+        ],
+        "shape-tools:HS-a": [
+          "PH-1",
+          "PH-2"
+        ],
+        "stroke-style:HK-a": [
+          "PH-1",
+          "PH-2"
         ]
       },
       "ui": false,
@@ -91,6 +99,18 @@
         ],
         "core-loop:CL-probe": [
           "PH-3"
+        ],
+        "transform:HT-a": [
+          "PH-3",
+          "PH-4"
+        ],
+        "shape-tools:HS-a": [
+          "PH-3",
+          "PH-4"
+        ],
+        "stroke-style:HK-a": [
+          "PH-3",
+          "PH-4"
         ]
       },
       "ui": true,
@@ -122,6 +142,22 @@
           "PH-6"
         ],
         "gradient-fill:HG-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "autosave-history:HA-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "transform:HT-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "shape-tools:HS-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "stroke-style:HK-m": [
           "PH-5",
           "PH-6"
         ]

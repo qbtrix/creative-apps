@@ -26,6 +26,8 @@ its **DG-u** (`DesignCanvasMarks.swift`) before PD-3, its **DG-m**
 PD-6. design-seams-2 (p3) now waits on this packet's slices, since both own
 `DesignNode.swift`, `DesignCanvas.swift` and `DesignCanvasMarks.swift`.
 
+**Beta gaps A (#3432, merged first).** Its packets share files with this one, so these slices also wait on theirs: PD-a on `transform:DT-a`, `shape-tools:DS-a`, `stroke-style:DK-m`; PD-u on `autosave-history:DA-a`, `transform:DT-a`, `transform:DT-u`, `shape-tools:DS-a`, `shape-tools:DS-u`, `stroke-style:DK-u`; PD-m on `autosave-history:DA-m`, `transform:DT-m`, `eyedropper:DY-m`, `shape-tools:DS-m`, `stroke-style:DK-m`.
+
 **Hand-offs:** `DesignCommandCatalog.swift` and `Tests/command-ids/design.txt`
 are adopt-command-catalog's (#2999): PD-5 starts after AC-design's
 `Belt-Slice-Done:`.

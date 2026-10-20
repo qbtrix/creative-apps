@@ -19,6 +19,8 @@ gradient-fill's **FG-z** (`flare.md`) before PF-8; live-scenes, layers-files and
 draw-key-save (built). creative-core: nothing new; `SVGImport` (#439) is on
 the pinned core.
 
+**Beta gaps A (#3432, merged first).** Its packets share files with this one, so these slices also wait on theirs: PF-m on `shape-tools:FS-m`, `stroke-style:FK-m`.
+
 **Hand-offs:** `FlareCommands.swift` is adopt-command-catalog's (#2999): PF-3
 starts after AC-flare's `Belt-Slice-Done:`. The stage view is stage-edit's
 (`FlareStage.swift`), so the drop target sits on the window, not the stage,

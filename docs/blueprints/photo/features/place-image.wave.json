@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "beta": true,
-  "covers": "photo/place-image (adopter of S20); RJ-P36",
+  "covers": "photo/place-image (adopter of S20); RJ-P37",
   "waits_on": "suiteui placed-images' contract slice PL-a (cross-line); gradient-fill's PG-m and PG-z (shared files); adopt-command-catalog AC-photo and adopt-suiteui-chrome AC-tools (cross-line, PP-3)",
   "depends": [
     "photo-documents",
@@ -35,7 +35,7 @@
   "slices": [
     {
       "id": "PP-a",
-      "behavior": "PhotoWorkspace's PlacedImageTarget conformance exists as stubs, and the checks and RJ-P36's job are written, disabled.",
+      "behavior": "PhotoWorkspace's PlacedImageTarget conformance exists as stubs, and the checks and RJ-P37's job are written, disabled.",
       "tasks": [
         "PP-1",
         "PP-2"
@@ -101,6 +101,18 @@
           "PP-6"
         ],
         "gradient-fill:PG-m": [
+          "PP-6"
+        ],
+        "transform:PT-m": [
+          "PP-5",
+          "PP-6"
+        ],
+        "history-panel:PH-m": [
+          "PP-5",
+          "PP-6"
+        ],
+        "eyedropper:PE-m": [
+          "PP-5",
           "PP-6"
         ]
       },

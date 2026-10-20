@@ -9,7 +9,7 @@ open a drop still opens the file, as today. It runs through SuiteKernel's
 **Line:** `line:photo` · **Wave:** 4 (`waves.md`) · **Lead branch:** `lead/place-image`
 **Beta:** captain, 2026-10-20 ("Photo Place if it isn't there"; it isn't: a drop opens the file and Paste is the only way in). Labels `beta` and `p1` when filed.
 
-**Covers:** feature map `photo/place-image` (adopter of S20); real job RJ-P36
+**Covers:** feature map `photo/place-image` (adopter of S20); real job RJ-P37
 (new).
 
 **Depends on:** `suiteui/placed-images` **PL-a** (cross-line); PP-5 needs its
@@ -17,6 +17,8 @@ open a drop still opens the file, as today. It runs through SuiteKernel's
 gradient-fill's **PG-m** (it owns `PhotoCommandCatalog.swift` and
 `Tests/command-ids/photo.txt`) before PP-6, its **PG-z** (`photo.md`) before
 PP-8; photo-documents and photo-edit (built).
+
+**Beta gaps A (#3432, merged first).** Its packets share files with this one, so these slices also wait on theirs: PP-m on `transform:PT-m`, `history-panel:PH-m`, `eyedropper:PE-m`.
 
 **Hand-offs:** `PhotoCommands+File.swift` is adopt-command-catalog's (#2999)
 and `PhotoEditor.swift` adopt-suiteui-chrome's (AC-tools): PP-3 starts after
@@ -41,7 +43,7 @@ Blueprint sections: photo.md 2 (menus), 4 (layers).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| PP-a | `PhotoWorkspace`'s `PlacedImageTarget` conformance exists as stubs, and the checks and RJ-P36's job are written, disabled. | PP-1, PP-2 | MJ-PP | suiteui/placed-images PL-a (cross-line) |
+| PP-a | `PhotoWorkspace`'s `PlacedImageTarget` conformance exists as stubs, and the checks and RJ-P37's job are written, disabled. | PP-1, PP-2 | MJ-PP | suiteui/placed-images PL-a (cross-line) |
 | PP-u | File > Place… and a drop on an open document run `place.image` on the stubs, a drop with no document still opens, with snapshots, the render budget and the journey written. | PP-3, PP-4 | PJ-P1 | PP-a; photo-seams, photo-render-adopt, shell-parity (built; they own `PhotoCommands+File.swift` and `PhotoEditor.swift`); PL-3 (cross-line) |
 | PP-m | Placing a PNG or JPEG adds a pixel layer above the selection, fitted and centred or at the drop point, as one undo step, refuses SVG with the reason, and runs from the catalog. | PP-5, PP-6 | MJ-PP | PP-a; gradient-fill:PG-m (PP-6); PL-7 (cross-line) |
 | PP-z | The window runs on live services, the journey passes on live, and the blueprint lists Place. | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; gradient-fill:PG-z (PP-8) |
@@ -64,7 +66,7 @@ Model walk in `PhotoPlaceTests` (Linux).
 
 | job | closes or adds | run | check | fixture |
 |---|---|---|---|---|
-| RJ-P36 | adds, closes with `photo/place-image` | C | `Tests/RealJobs/photo/place-logo/place-logo.jobs.json`: `place.image` of `logo.png` (base64, 200 × 100, red left half, blue right half), output the flattened PNG | `input/canvas.png` (800 × 600 white) |
+| RJ-P37 | adds, closes with `photo/place-image` | C | `Tests/RealJobs/photo/place-logo/place-logo.jobs.json`: `place.image` of `logo.png` (base64, 200 × 100, red left half, blue right half), output the flattened PNG | `input/canvas.png` (800 × 600 white) |
 
 Trap: the place opens the logo as a new document, or lands it at the top-left
 corner. Assertion: the output is 800 × 600 (the canvas, not the logo), the
@@ -104,11 +106,11 @@ extension PhotoWorkspace {
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | PP-1 | – | The conformance as stubs; `PhotoPlaceTests` written, disabled | `Sources/PhotoModel/PhotoPlace+Kernel.swift`, `Tests/PhotoModelTests/PhotoPlaceTests.swift` | PL-a | ~140, 2 |
-| PP-2 | – | RJ-P36's job folder with `waits_on: PP-6`, its fixtures | `Tests/RealJobs/photo/place-logo/` | PP-1 | ~80, 4 |
+| PP-2 | – | RJ-P37's job folder with `waits_on: PP-6`, its fixtures | `Tests/RealJobs/photo/place-logo/` | PP-1 | ~80, 4 |
 | PP-3 | – | Reachable: File > Place… ⇧⌘P (the panel limited to PNG and JPEG); `PhotoEditor`'s drop: on an open document a PNG or JPEG runs `place.image` at the drop point through `placeDropTarget`, anything else or no document opens as today | `Sources/PhotoApp/PhotoPlace.swift`, `Sources/PhotoApp/PhotoCommands+File.swift`, `Sources/PhotoApp/PhotoEditor.swift` | PP-1 | ~160, 3 |
 | PP-4 | – | Snapshots, the render budget test, the journey written and skipped (`XCTSkip("waits on PP-7")`) | `Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetPhotoPlaceTests.swift`, `UITests/PhotoJourneyTests+Place.swift` | PP-3 | ~200, 3 |
 | PP-5 | – | Conformance bodies; `insertPixelLayer` lifted out of `paste`, which now calls it; turns on `PhotoPlaceTests` | `Sources/PhotoModel/PhotoPlace+Kernel.swift`, `Sources/PhotoModel/PhotoClipboard.swift`, `Tests/PhotoModelTests/PhotoPlaceTests.swift`, `Tests/mutations/PhotoModel.PhotoPlace+Kernel.json` | PP-1, PL-7 | ~260, 4 |
-| PP-6 | – | The five specs in the catalog and the id list; turns on RJ-P36 | `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/RealJobs/photo/place-logo/` | PP-2, PP-5, gradient-fill:PG-m | ~40, 3 |
+| PP-6 | – | The five specs in the catalog and the id list; turns on RJ-P37 | `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/RealJobs/photo/place-logo/` | PP-2, PP-5, gradient-fill:PG-m | ~40, 3 |
 | PP-7 | – | Live: the journey turned on, on live services | `UITests/PhotoJourneyTests+Place.swift` | PP-4, PP-6 | ~40, 1 |
 | PP-8 | – | photo.md lists Place; `status: built`; `feature-done` | `docs/blueprints/photo.md`, `docs/blueprints/photo/features/place-image.wave.json` | PP-7, gradient-fill:PG-z | ~30, 2 |
 
@@ -136,7 +138,7 @@ PP-8 is the prose task.
 | PP-3 | `PhotoPlaceSnapshots.logo` (PP-4's, first in the slice PR) | the menu item or drop is missing | – (UI) |
 | PP-4 | `PhotoPlaceSnapshots`; `RenderBudgetPhotoPlaceTests.placeLargeInThreeBodies` | budget over | – (UI) |
 | PP-5 | `PhotoPlaceTests`: a 200 × 100 PNG on 800 × 600 adds a layer `logo` at (300, 250), above the selected layer, selected; a 4000 × 3000 JPEG lands at 800 × 600 with "Placed at 20%."; a place at a drop point near the edge stays inside; SVG and text refused with their reasons and nothing added; one undo removes the layer; Paste still places at 100% centred (its own rule) | a box, layer order, name or step count is wrong, or Paste changes | `PhotoModel.PhotoPlace+Kernel`: origin dropped → `.centredOnCanvas`; resample skipped (layer larger than canvas) → `.largeFitsCanvas`; inserted below the selection → `.aboveSelection` |
-| PP-6 | `CommandPathTests` and the id ledger list the five ids; RJ-P36 passes on Linux | an id is missing, or the job fails | – (registration; the behaviour's mutations are PP-5's) |
+| PP-6 | `CommandPathTests` and the id ledger list the five ids; RJ-P37 passes on Linux | an id is missing, or the job fails | – (registration; the behaviour's mutations are PP-5's) |
 | PP-7 | `PhotoPlaceJourneyTests.testPlaceLogo` steps 1 to 5 | a step fails | – |
 | PP-8 | `scripts/waves render --dry-run` | status not built | – |
 
@@ -151,7 +153,7 @@ PP-8 is the prose task.
 
 ## Done check
 
-Per slice (rules 6, 15, 17, 21): PP-m merged-done with RJ-P36 green in the
+Per slice (rules 6, 15, 17, 21): PP-m merged-done with RJ-P37 green in the
 Linux job; PP-u's feel gate and `Mac-Finish:`; PP-z's journey on live. Then
 `Belt-Contact-Sheet:` with `photo-place-*`.
 

@@ -11,7 +11,7 @@ commands, so the CLI and an agent can bring a logo in too.
 **Beta:** captain, 2026-10-20. Labels `beta` and `p1` when filed.
 
 **Covers:** feature map `halo/placed-images` (adopter of S20 and E11); real
-jobs RJ-H02 (the logo reveal, closes here) and RJ-H33 (new).
+jobs RJ-H02 (the logo reveal, closes here) and RJ-H36 (new).
 
 **Depends on:** `suiteui/placed-images` **PL-a** (cross-line); PH-6 needs its
 **PL-7**, PH-3 its **PL-3** (`drawPlaced`, `PlacedImageRows`), PH-5 its
@@ -22,6 +22,8 @@ jobs RJ-H02 (the logo reveal, closes here) and RJ-H33 (new).
 its **HG-z** (`halo.md`) before PH-8; core-loop's **CL-probe**
 (`HaloLayerInspector.swift`) before PH-3; foundation, viewer-playback,
 render-out and text-layers (built).
+
+**Beta gaps A (#3432, merged first).** Its packets share files with this one, so these slices also wait on theirs: PH-a on `shape-tools:HS-a`, `stroke-style:HK-a`; PH-u on `transform:HT-a`, `shape-tools:HS-a`, `stroke-style:HK-a`; PH-m on `autosave-history:HA-m`, `transform:HT-m`, `shape-tools:HS-m`, `stroke-style:HK-m`.
 
 **Hand-offs:** `HaloCommandCatalog.swift`, `HaloFileMenu.swift` and
 `Tests/command-ids/halo.txt` are adopt-command-catalog's (#2999): PH-3 and
@@ -74,10 +76,10 @@ waits on PH-u. MJ-PH is the Model walk in `HaloPlaceTests` (Linux).
 
 | job | closes or adds | run | check | fixture |
 |---|---|---|---|---|
-| RJ-H33 | adds, closes with `halo/placed-images` | C | `Tests/RealJobs/halo/place-logo/place-logo.jobs.json`: `place.image` of `logo.png` (base64, 200 × 100, a red left half and a blue right half), `timeline.scrub` 0, export the frame as PNG | `input/empty-400.halo` (one 400 × 400 composition, black background) |
+| RJ-H36 | adds, closes with `halo/placed-images` | C | `Tests/RealJobs/halo/place-logo/place-logo.jobs.json`: `place.image` of `logo.png` (base64, 200 × 100, a red left half and a blue right half), `timeline.scrub` 0, export the frame as PNG | `input/empty-400.halo` (one 400 × 400 composition, black background) |
 | RJ-H02 | closes with `halo/placed-images` | Cm | `Tests/RealJobs/halo/logo-reveal/logo-reveal.jobs.json`: `place.image` of `logo.svg`, keys on scale (overshoot) and opacity over 5 s, `render.start` H.264 1080p | `input/empty-1080.halo` |
 
-RJ-H33's trap: the viewer shows the logo but the render path draws the
+RJ-H36's trap: the viewer shows the logo but the render path draws the
 solid's colour, or the logo is squashed to the composition. Assertion: in the
 PNG the pixel at (150, 200) is within 2/255 of red and (250, 200) of blue, and
 (90, 200) and (310, 200), outside the 200 × 100 logo, are background.
@@ -127,7 +129,7 @@ one "Place Image" step through `edit`.
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | PH-1 | – | The solid's two fields, the draw item's copy, the conformance and `HaloPlacedDrawing` as stubs; `HaloPlaceTests` written, disabled | `Sources/HaloModel/HaloLayer.swift`, `Sources/HaloModel/Contracts/HaloDocumentValues.swift`, `Sources/HaloModel/HaloPlace+Kernel.swift`, `Sources/HaloModel/Live/HaloPlacedDrawing.swift`, `Tests/HaloModelTests/HaloPlaceTests.swift` | PL-a, gradient-fill:HG-a | ~220, 5 |
-| PH-2 | – | Checks first for the render: `HaloPlaceRenderTests` disabled; RJ-H33's and RJ-H02's job folders with `waits_on: PH-5` | `Tests/HaloModelTests/HaloPlaceRenderTests.swift`, `Tests/RealJobs/halo/place-logo/`, `Tests/RealJobs/halo/logo-reveal/` | PH-1 | ~200, 7 |
+| PH-2 | – | Checks first for the render: `HaloPlaceRenderTests` disabled; RJ-H36's and RJ-H02's job folders with `waits_on: PH-5` | `Tests/HaloModelTests/HaloPlaceRenderTests.swift`, `Tests/RealJobs/halo/place-logo/`, `Tests/RealJobs/halo/logo-reveal/` | PH-1 | ~200, 7 |
 | PH-3 | – | Reachable: File > Place… ⇧⌘P, the viewer's `placeDropTarget` at the drop point in composition space, ⌥-drag on a solid with a picture runs `place.focus` under one drag token, the viewer draws a solid's picture with `drawPlaced(..., strokes: false)`; `HaloPlaceInspector` (`PlacedImageRows` and the Fill toggle) slotted under the colour row | `Sources/HaloApp/HaloPlace.swift`, `Sources/HaloApp/HaloFileMenu.swift`, `Sources/HaloApp/HaloViewer.swift`, `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloPlaceInspector.swift`, `Sources/HaloApp/HaloLayerInspector.swift` | PH-1, gradient-fill:HG-u, core-loop:CL-probe | ~320, 6 |
 | PH-4 | – | Snapshots, the render budget test, the journey written and skipped (`XCTSkip("waits on PH-7")`) | `Tests/AppSnapshotTests/HaloPlaceSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetHaloPlaceTests.swift`, `UITests/HaloJourneyTests+Place.swift` | PH-3 | ~220, 3 |
 | PH-5 | – | `HaloDrawRules` carries the picture; `HaloPlacedDrawing` decodes once per asset id (raster) or fills `PlacedVector` (even-odd per item), through the matrix, clipped to the outline; one call in the solid branch of `LiveFrameRendering`; turns on `HaloPlaceRenderTests` and both jobs | `Sources/HaloModel/Live/HaloDrawRules.swift`, `Sources/HaloModel/Live/HaloPlacedDrawing.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Tests/HaloModelTests/HaloPlaceRenderTests.swift`, `Tests/mutations/HaloModel.HaloPlacedDrawing.json`, `Tests/RealJobs/halo/place-logo/`, `Tests/RealJobs/halo/logo-reveal/` | PH-2, gradient-fill:HG-m | ~340, 7 |
@@ -159,7 +161,7 @@ is the prose task.
 | PH-2 | compiles, disabled; both jobs disabled by `waits_on` | – | – |
 | PH-3 | `HaloPlaceSnapshots.logo` (PH-4's, first in the slice PR) | the picture isn't drawn | – (UI) |
 | PH-4 | `HaloPlaceSnapshots`; `RenderBudgetHaloPlaceTests.focusDragInThreeBodies` | budget over | – (UI) |
-| PH-5 | `HaloPlaceRenderTests`: RJ-H33's four pixels; a 2× scale key doubles the logo's footprint; a picture never draws outside its solid's outline at a 30° turn; the SVG ring keeps its hole; a JPEG is decoded once for two solids showing it; RJ-H33 passes on Linux | a pixel is off by more than 2/255, or the asset decodes per frame | `HaloModel.HaloPlacedDrawing`: picture branch skipped → `.logoPixels`; matrix not applied → `.scaleKeyScalesPicture`; outline clip skipped → `.staysInsideOutline`; cache key per layer, not per asset → `.decodesOncePerAsset` |
+| PH-5 | `HaloPlaceRenderTests`: RJ-H36's four pixels; a 2× scale key doubles the logo's footprint; a picture never draws outside its solid's outline at a 30° turn; the SVG ring keeps its hole; a JPEG is decoded once for two solids showing it; RJ-H36 passes on Linux | a pixel is off by more than 2/255, or the asset decodes per frame | `HaloModel.HaloPlacedDrawing`: picture branch skipped → `.logoPixels`; matrix not applied → `.scaleKeyScalesPicture`; outline clip skipped → `.staysInsideOutline`; cache key per layer, not per asset → `.decodesOncePerAsset` |
 | PH-6 | `HaloPlaceTests`: `place.image` adds a clear solid at the fitted box, on top of the selection; `fill: true` on a text layer is unavailable with its reason; 30 focus moves under one token are one step; undo of a place removes the solid and its picture | a box, refusal or step count is wrong | `HaloModel.HaloPlace+Kernel`: text layers allowed to fill → `.textRefusesFill`; drag key dropped → `.focusDragIsOneStep` |
 | PH-7 | `HaloPlaceJourneyTests.testPlaceLogo` steps 1 to 5 | a step fails | – |
 | PH-8 | `scripts/waves render --dry-run` | status not built | – |
@@ -176,7 +178,7 @@ is the prose task.
 
 ## Done check
 
-Per slice (rules 6, 15, 17, 21): PH-m merged-done with RJ-H33 green in the
+Per slice (rules 6, 15, 17, 21): PH-m merged-done with RJ-H36 green in the
 Linux job; PH-u's feel gate and `Mac-Finish:`; PH-z's journey on live and
 RJ-H02 green in the scoped run (`Cm`). Then `Belt-Contact-Sheet:` with
 `halo-place-*`.

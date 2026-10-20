@@ -22,6 +22,10 @@ file's waves, not this one's.
 | 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1075 | built |
 | 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1076 | built |
 | 2 | Adjustment layers | PV-6 | `photo-adjustment-layers.md` | #580 | p1 | photo-edit (hands over `PhotoCommands+Layer.swift`) | nothing (CR-5 optional) | #1501 | built |
+| 3 | The Gradient tool: drag a linear or radial gradient into the layer or selection, stops set with the shared editor | – | `gradient-fill.md` | photo/gradient-fill (adopter of S24 and of E6's raster gradient); RJ-P19 | – | – | – | file when ready | planned |
+| 3 | Free Transform, layer flips and Canvas Size on the kernel's transform commands and SuiteUI's turned handles | – | `transform.md` | photo/transform (adopter of S7; PV-7's stubs); RJ-P17, RJ-P18 | – | – | – | file when ready | planned |
+| 3 | The History tab on the shared panel, and autosave on the shared schedule and recovery folder | – | `history-panel.md` | photo/history-panel (adopter of S12; PV-4's stubs); RJ-P28; RJ-X24's Photo leg | – | – | – | file when ready | planned |
+| 3 | The Eyedropper tool: sample size, the loupe and the brush colour, on the kernel's mean and color.sample | – | `eyedropper.md` | photo/eyedropper (adopter of S13; PV-9's stubs); RJ-P22, RJ-P36 | – | – | – | file when ready | planned |
 | R1 | Photo's canvas draws through CoreRender, with View > Rendering | – | `photo-render-adopt.md` | beta-80 row R1, Photo adopter (pulled forward by the captain, 2026-10-18) | p1 | SuiteUI canvas-host (RenderingPreference, RenderingCommands, CanvasHostView) | CoreRender and CoreRenderMetal at 3094ab1 | – | built |
 | SP2 | Photo opens in `SuiteWindow` with the floating tool box | – | `shell-parity.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Photo half | p1 | editor-in-window (SuiteUI, #1079); photo-seams #812 | nothing | #1502 | built |
 

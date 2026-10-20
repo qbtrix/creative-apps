@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "beta": true,
-  "covers": "feature map S20 (placed images, image fills, crop in frame; shared half) and E11's app adoption (shared half); real job RJ-X31; captain 2026-10-20: everyday tools in the beta, built once",
+  "covers": "feature map S20 (placed images, image fills, crop in frame; shared half) and E11's app adoption (shared half); real job RJ-X36; captain 2026-10-20: everyday tools in the beta, built once",
   "waits_on": "gradient-fill's GF-a and GF-z slices (shared files) and command-catalog's CC-run (#2996); editor-kernel, suite-harness and editor-in-window (built)",
   "longest_chain": "6 (PL-1 → PL-2 → PL-3 → PL-4 → PL-8 → PL-10)",
   "journeys": [
@@ -66,6 +66,10 @@
           "PL-2"
         ],
         "editor-in-window": [
+          "PL-2"
+        ],
+        "autosave-history:AH-a": [
+          "PL-1",
           "PL-2"
         ]
       },
@@ -153,7 +157,7 @@
     },
     {
       "id": "PL-z",
-      "behavior": "The gallery runs its intents through PlaceCommands on a live target, the fake app takes placed images so RJ-X31 runs on the CLI, and the feature is built.",
+      "behavior": "The gallery runs its intents through PlaceCommands on a live target, the fake app takes placed images so RJ-X36 runs on the CLI, and the feature is built.",
       "tasks": [
         "PL-8",
         "PL-9",
@@ -173,6 +177,31 @@
         ],
         "gradient-fill:GF-z": [
           "PL-9"
+        ],
+        "autosave-history:AH-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "transform-tools:TT-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "eyedropper:EY-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "shape-tools:SH-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "stroke-style:SS-d": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
         ]
       },
       "ui": true,

@@ -19,7 +19,7 @@ picture model, fit maths or drop handling.
 
 **Covers:** feature map S20 (placed images, image fills, crop in frame; the
 shared half) and the shared half of E11's app adoption (SVG art into Design,
-Halo and Flare); real job RJ-X31 (new). The adopts are packets on their own
+Halo and Flare); real job RJ-X36 (new). The adopts are packets on their own
 lines: `design/placed-images`, `halo/placed-images`, `flare/svg-place`,
 `photo/place-image`, each waiting on this packet's PL-a.
 
@@ -32,6 +32,8 @@ undo step per run, the drag-token fold). editor-kernel (built): `History`,
 gallery. creative-core: nothing new. `SVGImport.scene(from:name:)` (vector-import
 #439), `Path.flattened(tolerance:)`, `RenderList` and CoreRaster's `PNG.info`,
 `JPEG.info` (image-codecs #562) are all on the pinned core `0de5687d`.
+
+**Beta gaps A (#3432, merged first).** Its packets share files with this one, so these slices also wait on theirs: PL-a on `autosave-history:AH-a`; PL-z on `autosave-history:AH-z`, `transform-tools:TT-z`, `eyedropper:EY-z`, `shape-tools:SH-z`, `stroke-style:SS-d`.
 
 **Where the pieces live (rule 20).** SuiteKernel links FlareCore and nothing
 else (`KernelShapeTests.importsOnlyFoundationAndFlareCore`), so:
@@ -81,7 +83,7 @@ suite.md 1.5 (commands), 5.2 (assets).
 | PL-a | The kernel's `Place/` module declares every type, rule and command spec as stubs, SuiteUI's panel, drop target, view and rows exist as placeholders on the gallery's `place-image` page, and the checks are written, disabled. | PL-1, PL-2 | SJ0 | gradient-fill:GF-a, editor-kernel, suite-harness, editor-in-window |
 | PL-u | On the gallery page a dropped or chosen PNG, JPEG or SVG shows in its box at its own aspect, the drop highlights only for files it takes, and the rows show the file and size with Replace… and Reset Size, every control identified, within the render budget. | PL-3, PL-4 | PJ1 (`SuitePlaceJourneyTests.testPlaceImageOnGallery`) | PL-a |
 | PL-m | The rules sniff the format, refuse what they can't take with a reason, fit a new image inside the canvas without upscaling, crop by cover around the focus so nothing stretches, flatten an SVG into paint, and every place command records exactly one undo step (a focus drag one). | PL-5, PL-6, PL-7 | KJ-place | PL-a; command-catalog:CC-run (PL-7) |
-| PL-z | The gallery runs its intents through `PlaceCommands` on a live target, the fake app takes placed images so RJ-X31 runs on the CLI, and the feature is built. | PL-8, PL-9, PL-10 | PJ1, KJ-place | PL-u, PL-m; gradient-fill:GF-z (PL-9) |
+| PL-z | The gallery runs its intents through `PlaceCommands` on a live target, the fake app takes placed images so RJ-X36 runs on the CLI, and the feature is built. | PL-8, PL-9, PL-10 | PJ1, KJ-place | PL-u, PL-m; gradient-fill:GF-z (PL-9) |
 
 PL-u waits only on PL-a (rule 18); PL-m never waits on PL-u. KJ-place is the
 rules' and commands' Linux walk in `SuiteKernelTests`.
@@ -115,7 +117,7 @@ finisher drags a file from Finder once per slice (rule 17).
 
 | job | closes or adds | run | check | fixture |
 |---|---|---|---|---|
-| RJ-X31 | adds, closes with S20 | C | `Tests/RealJobs/fake/place-image/place-image.jobs.json`: `rect.select` the square, `place.image` of `wide.png` (base64) with `fill: true`, `place.focus` 0.25, 0.5 under one drag token in 30 samples, `edit.undo` once; the saved rects | `input/one.fake` (an 800 × 600 canvas holding one 300 × 300 rect), `input/wide.png` (1200 × 400) |
+| RJ-X36 | adds, closes with S20 | C | `Tests/RealJobs/fake/place-image/place-image.jobs.json`: `rect.select` the square, `place.image` of `wide.png` (base64) with `fill: true`, `place.focus` 0.25, 0.5 under one drag token in 30 samples, `edit.undo` once; the saved rects | `input/one.fake` (an 800 × 600 canvas holding one 300 × 300 rect), `input/wide.png` (1200 × 400) |
 
 Trap: the picture stretches to fill the square, or the 30 focus samples land as
 30 undo steps. Assertion: the saved image's drawn rect (from `place.read`) is
@@ -280,7 +282,7 @@ canvas, so the gesture is the same in every app.
 | PL-6 | – | `PlaceRules.vector`'s body in `PlaceVector.swift` (SVGImport, RenderList, flatten, paint mapping); turns on `PlaceVectorTests` | `Sources/SuiteKernel/Place/PlaceVector.swift`, `Tests/SuiteKernelTests/PlaceVectorTests.swift`, `Tests/mutations/SuiteKernel.PlaceVector.json`, `Tests/SuiteKernelTests/Fixtures/place/` | PL-1 | ~240, 4 |
 | PL-7 | – | `PlaceCommands` bodies and `PlaceIntent.command`; turns on `PlaceCommandsTests` on a test target (one step per run, a focus drag one step, every why-not) | `Sources/SuiteKernel/Place/PlaceCommands.swift`, `Tests/SuiteKernelTests/PlaceCommandsTests.swift`, `Tests/mutations/SuiteKernel.PlaceCommands.json` | PL-5, PL-6, command-catalog:CC-run | ~320, 3 |
 | PL-8 | – | The gallery page runs each intent through `PlaceCommands` on a local target with a `History`; `PlacedImageView` draws vectors from `PlacedVector`; the live test | `Sources/SuiteUI/Gallery/GalleryPlaceImage.swift`, `Sources/SuiteUI/PlacedImageView.swift`, `Tests/SuiteUITests/PlaceLiveTests.swift` | PL-4, PL-7 | ~200, 3 |
-| PL-9 | – | The fake app takes placed images: `FakeRect.placed` and `FakeCanvasDocument.assets` (omitted when empty, so old jobs' JSON is unchanged), the conformance and the specs; RJ-X31's job folder | `Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift`, `Tests/SuiteKernelTests/FakeCanvasPlaceTests.swift`, `Tests/mutations/SuiteKernel.FakeCanvasDocument.json`, `Tests/RealJobs/fake/place-image/` | PL-7, gradient-fill:GF-z | ~220, 4 |
+| PL-9 | – | The fake app takes placed images: `FakeRect.placed` and `FakeCanvasDocument.assets` (omitted when empty, so old jobs' JSON is unchanged), the conformance and the specs; RJ-X36's job folder | `Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift`, `Tests/SuiteKernelTests/FakeCanvasPlaceTests.swift`, `Tests/mutations/SuiteKernel.FakeCanvasDocument.json`, `Tests/RealJobs/fake/place-image/` | PL-7, gradient-fill:GF-z | ~220, 4 |
 | PL-10 | – | The C4 part names the commands and the views; `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-kernel/kernel-place.json`, `docs/blueprints/suiteui/features/placed-images.wave.json` | PL-8, PL-9 | ~20, 2 |
 
 PL-1 declares every rule and spec, so PL-5, PL-6 and PL-7 each fill one file
@@ -313,7 +315,7 @@ PL-10 is the status task.
 | PL-6 | `PlaceVectorTests` on fixtures `two-groups.svg` (a red and a blue group), `ring.svg` (a hole), `gradient.svg`: two items with their colours in paint order; the ring's two contours (even-odd leaves the hole); the gradient item's `Fill` is linear with the SVG's stops; `size` from the viewBox; a `filter` lands in `skipped`; a damaged file throws its reason | a colour is lost, a hole fills, or groups merge into one item | `SuiteKernel.PlaceVector`: fill mapped to black → `.keepsColours`; only the first contour kept → `.ringKeepsHole`; skipped report dropped → `.reportsSkipped` |
 | PL-7 | `PlaceCommandsTests`: `place.image` records one step named "Place Image" and returns the id; 30 `place.focus` under one drag token undo in one; `fill: true` puts the picture into the selected layer at `placeFillBox` (no new layer) and with none is unavailable with its reason; `place.image` with text bytes is unavailable with `formatHelp`, over 32 MB with `sizeHelp`, an SVG on a raster-only target with `formatHelp`; `place.focus` on a box at the natural aspect is unavailable; `PlaceIntent.command` round-trips each case | a run records zero or two steps, or a why-not is missing | `SuiteKernel.PlaceCommands`: drag not passed to `setPlaced` → `.focusDragIsOneStep`; `fill` adds a layer instead of filling the selected one → `.fillUsesTheSelectedLayer`; format set not checked → `.refusesUnlistedFormat`; size check after decode skipped → `.refusesOver32MB` |
 | PL-8 | `PlaceLiveTests`: a focus drag on the page leaves one undo step; the SVG draws its two colours; `testPlaceImageOnGallery` on live | the page stays on the local log, or a vector draws grey | – (UI) |
-| PL-9 | `FakeCanvasPlaceTests`: a placed image and its asset survive save and open; two rects showing one file store one asset; a locked rect refuses with its reason; the old `add-rect` job's JSON is unchanged; RJ-X31 passes on Linux | an asset is lost or doubled, a locked rect takes it, or old JSON changes | `SuiteKernel.FakeCanvasDocument`: assets encoded when empty → `.oldJSONUnchanged`; locked check skipped in `setPlaced` → `.lockedRefuses`; prune keeps orphans → `.saveDropsOrphanAssets` |
+| PL-9 | `FakeCanvasPlaceTests`: a placed image and its asset survive save and open; two rects showing one file store one asset; a locked rect refuses with its reason; the old `add-rect` job's JSON is unchanged; RJ-X36 passes on Linux | an asset is lost or doubled, a locked rect takes it, or old JSON changes | `SuiteKernel.FakeCanvasDocument`: assets encoded when empty → `.oldJSONUnchanged`; locked check skipped in `setPlaced` → `.lockedRefuses`; prune keeps orphans → `.saveDropsOrphanAssets` |
 | PL-10 | `scripts/waves render --dry-run` | status not built | – |
 
 ## Quality tests
@@ -332,7 +334,7 @@ PL-10 is the status task.
 
 Per slice (rules 6, 15, 17, 21): PL-m merged-done on the Linux job with
 `Mutate:` scores clean; PL-u's feel gate (`mouse`, `taste`, `job` lenses) and
-its `Mac-Finish:` line; PL-z's journey on live and RJ-X31 green in the Linux
+its `Mac-Finish:` line; PL-z's journey on live and RJ-X36 green in the Linux
 job. Then `Belt-Contact-Sheet:` with `suiteui-place-*`.
 
 ## Adopted by
@@ -340,7 +342,7 @@ job. Then `Belt-Contact-Sheet:` with `suiteui-place-*`.
 `design/placed-images` (pictures in rectangles and frames, by cover, RJ-D12),
 `halo/placed-images` (a picture in a solid layer from PNG, JPEG or SVG, RJ-H02),
 `flare/svg-place` (SVG art as editable layers, RJ-F06), `photo/place-image`
-(File > Place… and canvas drop as a new layer, RJ-P36). Each waits on PL-a
+(File > Place… and canvas drop as a new layer, RJ-P37). Each waits on PL-a
 and runs its UI on these stubs.
 
 ## Not in this packet
