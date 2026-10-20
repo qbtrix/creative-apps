@@ -1,10 +1,6 @@
-// HaloShapeSnapshots.swift: shape-tools HS-4, the packet's screens on
-// `three-layers` on `.fake`. `halo-shape-tool`: the viewer with the shape
-// tool on (its Shape button selected once HS-5 enables it) beside the Shape
-// popover's options, as the popover shows them. `halo-shape-star`: the
-// viewer mid-drag, a six-point star's draft stroked over the artboard from
-// composition (760, 340) to (1160, 740). Light and Dark. Writes
-// halo-shape-tool-*.png and halo-shape-star-*.png. macOS only.
+// HaloShapeSnapshots.swift: shape-tools HS-4 on `three-layers`, Light and
+// Dark. halo-shape-tool-*.png: the viewer, tool on, beside the Shape options.
+// halo-shape-star-*.png: a six-point star's draft mid-drag. macOS only.
 import HaloModel
 import SuiteKernel
 import SuiteUI
