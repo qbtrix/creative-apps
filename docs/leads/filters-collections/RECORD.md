@@ -69,3 +69,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 
 - 07:15Z check-in: #3423 and #3460 macOS builds green, not yet merged by the lane; #3424 build 39366318428 still queued (since 03:49Z). No new line:library findings in these features' files. Builders: MD-7, MD-10, FC-12; FC-10 blocked on S-L9 #3411.
 - 07:29Z: FC-3 #3423 merged. No PR waited on it alone (FC-9 #3546 still waits on #3490, FC-12 carries FC-3 already). FC-a closes when FC-2b #3424 merges.
+- 07:37Z check-in: #3423 and #3460 merged (07:29Z); #3424 lane macOS build 39366318428 still queued since 03:49Z (runner backlog). No new line:library findings. Builders: MD-8, MD-10, FC-12 in their gates; MD-7 #3548 drafted. Fixer for #3465/#3473 dev merge waits for a free slot.
