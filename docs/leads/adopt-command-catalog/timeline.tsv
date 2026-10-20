@@ -106,3 +106,4 @@ utc	stage	event	ref	note
 2026-10-20T09:20:23Z	heartbeat	#3484 macOS build 39374818329 success 09:04Z, mergeable clean, awaiting lane sweep; #3392 build still queued
 2026-10-20T09:30:12Z	heartbeat	#3484 CC-u merged 09:28Z; dev merged into AC-p3/d3/h3, scripts/ci --changed running; #3392 still open
 2026-10-20T09:43:56Z	stage	AC-p3/d3/h3 PRs #3584 #3585 #3587 opened, awaiting lane macOS builds
+2026-10-20T09:53:04Z	heartbeat	PRs #3584 #3585 #3587 #3588 open awaiting lane macOS builds; scoped:suiteui 39401671725 queued on 36789542 (has #3484); #3392 still open
