@@ -22,19 +22,20 @@
 // or slider step. Values in, intents out.
 import CoreRaster
 import PhotoModel
+import SuiteModel
 import SuiteUI
 import SwiftUI
 
 struct CurvesEditor: View {
     let settings: AdjustmentSettings
-    let histogram: [Double]
+    let histogram: ToneHistogram
     let onEdit: @MainActor (AdjustmentEdit) -> Void
     let onEnd: @MainActor () -> Void
 
     var body: some View {
         ToneCurveEditor(
             points: settings.curvePoints.map(Self.unit), samples: settings.curveSamples().map(Self.unit),
-            histogram: histogram, id: "photo.curves",
+            histogram: histogram.heights, id: "photo.curves",
             onChange: { points in onEdit(.curvePoints(points.map { CurvePoint(x: Float($0.x), y: Float($0.y)) })) },
             onEnd: onEnd)
     }
@@ -46,8 +47,8 @@ struct AdjustmentsPanel: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
     /// Counts the histogram of a workspace; a test passes its own to see which counts finish.
-    var count: @Sendable (PhotoWorkspace) async -> [Double] = AdjustmentsPanel.count
-    @State private var histogram: [Double] = []
+    var count: @Sendable (PhotoWorkspace) async -> ToneHistogram = AdjustmentsPanel.count
+    @State private var histogram = ToneHistogram.empty
 
     var body: some View {
         inspector
@@ -65,7 +66,7 @@ struct AdjustmentsPanel: View {
 
     /// The histogram, counted off the main actor (a nonisolated async function runs on the global executor)
     /// inside the calling task, so cancelling that task stops the count.
-    nonisolated static func count(_ workspace: PhotoWorkspace) async -> [Double] { workspace.curvesHistogram() }
+    nonisolated static func count(_ workspace: PhotoWorkspace) async -> ToneHistogram { workspace.curvesHistogram() }
 
     /// An adjustment layer's sections have no enable switch: its row's eye turns it off.
     static func showsEnable(for target: AdjustTarget) -> Bool {
