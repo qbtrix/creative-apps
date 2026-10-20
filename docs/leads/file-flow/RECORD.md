@@ -56,6 +56,6 @@ Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb
 - SF-9: file.drop places a step, so CommandWalkTests leaves it out of the walk (file kinds must not change bytes); FakeCanvasFileFlowTests walks it. The fixture carries one recent entry and Halo as Open In so every example runs on it.
 
 ## Open
-- #3514 (SF-3) waits on the supervisor's local Mac gate. Then: PR for claude/file-flow-lead-6ugb9w-sf4 (merge origin/dev in first), then -sf8.
+- #3514 (SF-3) was rewritten onto newer dev with an OpenInMenu import fix (head 9c708ebd); the lane's macOS build 39494113551 is queued. SF-4 (af2287f7) and SF-8 (fa2d2c41) cherry-picked onto it again, gate PASS on both. Then: PR for claude/file-flow-lead-6ugb9w-sf4 (merge origin/dev in first), then -sf8.
 - #3731 (SF-9, Slice SF-z) open at 05ecce2c: fake conforms to FileFlowTarget, RJ-X43 under Tests/RealJobs/fake/file-flow, mutate 3/3. XP-9 merges on top later (noted on #3480).
 - SF-10 staged on claude/file-flow-lead-6ugb9w-sf10 @ 99794781 (docs only, waves render OK); open it with feature-done once SF-8 and #3731 merge, after scripts/ci on its head.
