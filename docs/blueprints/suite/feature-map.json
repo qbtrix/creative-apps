@@ -927,7 +927,8 @@
         "flare-model",
         "flarecore `import` + export"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "flare/lottie-open"
     },
     {
       "id": "A3",
@@ -972,7 +973,8 @@
         "corecatalog/catalog-store",
         "suiteui LayerTreeList"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "library/folders"
     },
     {
       "id": "A7",
@@ -983,7 +985,8 @@
         "library-model",
         "suite-kernel `Export` run pattern"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "library/catalog-files"
     },
     {
       "id": "A8",
@@ -2732,6 +2735,69 @@
           "packet": "suite/no-placeholders"
         }
       ]
+    },
+    {
+      "id": "library/catalog-files",
+      "name": "Library manages its files: copy on import into dated folders, remove from the catalog keeping the files, relink missing photos",
+      "packet": "library/catalog-files",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/folders",
+      "name": "Folders in Library's sidebar, with counts and subfolders",
+      "packet": "library/folders",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/catalog-backup",
+      "name": "Rolling catalog backups in the suite store and Restore Catalog Backup",
+      "packet": "library/catalog-backup",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/share-sheet",
+      "name": "Share the selected photos (developed, location off) through the system share sheet",
+      "packet": "library/share-sheet",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/large-catalog",
+      "name": "Library within budget at 10,000 photos: launch, scroll, selection, loupe step, export plan",
+      "packet": "library/large-catalog",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/lottie-open",
+      "name": "Open a Lottie JSON in Flare, every skipped item named, saved as .flare",
+      "packet": "flare/lottie-open",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/lottie-player-check",
+      "name": "A CI check that Flare's Lottie plays the same in a pinned reference player",
+      "packet": "flare/lottie-player-check",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
     }
   ]
 }
