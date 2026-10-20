@@ -208,6 +208,9 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
     /// Whether other nodes can be moved inside this one.
     public var holdsChildren: Bool { self == .frame || self == .group }
 
+    /// Whether a node of this kind can show a placed picture: rectangles and frames (placed-images PD-1).
+    public var holdsPicture: Bool { self == .frame || self == .rectangle }
+
     /// A new node's fill: white for frames, black for text, light grey for the rest.
     public var defaultFill: DesignColor {
         switch self {
@@ -246,18 +249,27 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     /// The kernel's gradient fill, its points in the node's unit box (0...1 across its frame), so a
     /// resize never touches it; nil paints `fill` (solid). Written only when set (gradient-fill DG-1).
     public var gradient: Fill?
+    /// The kernel's picture this rectangle or frame shows in its frame (the frame is the picture's box);
+    /// nil for none, and always nil on other kinds. Written only when set (placed-images PD-1).
+    public var placedAsset: PlacedAsset?
+    /// The point of the picture (unit, 0.5 centre) its cover crop keeps in view. Written only when not the centre.
+    public var placedFocus: Point
+
+    /// The focus a new picture starts with, and the one a file without the key opens with.
+    static let centreFocus = Point(x: 0.5, y: 0.5)
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
         children: [DesignNode] = [], isHidden: Bool = false, isLocked: Bool = false,
         fill: DesignColor? = nil, text: String = "", cornerRadius: Double = 0,
         opacity: Double = 1, stroke: DesignStroke? = nil, textStyle: DesignTextStyle = .default,
-        gradient: Fill? = nil
+        gradient: Fill? = nil, placedAsset: PlacedAsset? = nil, placedFocus: Point? = nil
     ) {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
         (self.opacity, self.stroke, self.textStyle, self.gradient) = (opacity, stroke, textStyle, gradient)
+        (self.placedAsset, self.placedFocus) = (kind.holdsPicture ? placedAsset : nil, placedFocus ?? Self.centreFocus)
     }
 
     /// `node` with every field kept and the id replaced (duplicate, paste). A field added to
@@ -268,10 +280,39 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text,
             cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)
         gradient = node.gradient
+        placedAsset = node.placedAsset
+        placedFocus = node.placedFocus
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
+        case gradient, placedAsset, placedFocus
+    }
+
+    /// Writes a node; a field at its default that a file before it lacked (no stroke, no gradient, no
+    /// picture, a centred focus) is left out, so a file without them saves the same bytes it opened with.
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(frame, forKey: .frame)
+        try container.encode(children, forKey: .children)
+        try container.encode(isHidden, forKey: .isHidden)
+        try container.encode(isLocked, forKey: .isLocked)
+        try container.encode(fill, forKey: .fill)
+        try container.encode(text, forKey: .text)
+        try container.encode(cornerRadius, forKey: .cornerRadius)
+        try container.encode(opacity, forKey: .opacity)
+        try container.encodeIfPresent(stroke, forKey: .stroke)
+        try container.encode(textStyle, forKey: .textStyle)
+        try container.encodeIfPresent(gradient, forKey: .gradient)
+        try container.encodeIfPresent(placedAsset, forKey: .placedAsset)
+        if placedFocus != Self.centreFocus { try container.encode(placedFocus, forKey: .placedFocus) }
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke, the default text style and no gradient.
+    /// corners, fully opaque, no stroke, the default text style, no gradient and no picture.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -284,7 +325,9 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
             stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
             textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
-            gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))
+            gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),
+            placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),
+            placedFocus: container.decodeIfPresent(Point.self, forKey: .placedFocus))
     }
 
     /// Shifts this node and everything under it by `delta`.
