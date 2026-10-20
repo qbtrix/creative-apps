@@ -2,7 +2,7 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:16:13Z
-Stage: 3 wave 1 (DY-a PR #3691 in lane at f84d4cc5; DY-u pushed, waits #3691)
+Stage: 3 wave 1 (DY-a PR #3691 in lane at 344cbd8f; DY-u pushed, waits #3691)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
 Next: when #3691 merges, merge origin/dev into design/eyedropper/DY-u (94eb67fa), rerun the gate, open its PR. DY-m waits transform:DT-m.
 
@@ -33,6 +33,6 @@ Next: when #3691 merges, merge origin/dev into design/eyedropper/DY-u (94eb67fa)
 - Design transform (#3436) has no lead running (no lead/design-transform branch, wave.json planned); its DT-a needs gradient-fill:DG-a (building in run act-1a15a9a4e8b-kn6a). shape-tools DS-a and eyedropper DY-m wait on it; this lead does not build another feature's tasks.
 
 ## Open
-- #3691 first head 667b9d18 failed DesignNodeTests.onlyThePenIsDisabledAndItSaysWhy and DesignDrawTests.theDrawingToolsAreAllEnabled (found by the DY-u builder); fixed at f84d4cc5 and the Head line moved. DY-5 note: keep the eyedropper a no-op in model.drag, since the overlay tap already picks.
+- #3691 first head 667b9d18 failed DesignNodeTests.onlyThePenIsDisabledAndItSaysWhy and DesignDrawTests.theDrawingToolsAreAllEnabled (found by the DY-u builder); fixed at 344cbd8f and the Head line moved. DY-5 note: keep the eyedropper a no-op in model.drag, since the overlay tap already picks.
 - The session proxy appends a Claude Code footer to PR bodies written via MCP or REST; it cannot be stripped from here. The fast lane strips attribution from the squash commit. Reported for the supervisor.
 - DY-m waits transform:DT-m (Design transform #3436 has no running lead).
