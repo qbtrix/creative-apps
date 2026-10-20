@@ -19,6 +19,8 @@ public struct LibraryServices: Sendable {
     public var sidecars: any SidecarWriting
     /// Crop's Auto (Contracts/CropLeveling.swift); nil until one can level.
     public var leveler: (any CropLeveling)?
+    /// Delete Rejects' Trash (Contracts/TrashContracts.swift).
+    public var trash: any PhotoTrashing
     /// Why a member can't act yet, by member name; empty once all are live.
     public var unavailable: [String: String]
     /// True for `.fake` (fixture data on screen); drives the "Preview data" pill.
@@ -29,12 +31,13 @@ public struct LibraryServices: Sendable {
                 loupe: any LoupeImaging, develop: any DevelopRendering, crop: any CropGeometry,
                 exporter: any PhotoExporting, writer: any JPEGWriting,
                 sidecars: any SidecarWriting = UnconnectedSidecars(), leveler: (any CropLeveling)? = nil,
-                unavailable: [String: String] = [:], isPreview: Bool) {
+                trash: any PhotoTrashing = LiveTrash(), unavailable: [String: String] = [:], isPreview: Bool) {
         self.decoder = decoder; self.importer = importer; self.thumbnails = thumbnails
         self.culling = culling; self.coding = coding; self.store = store; self.loupe = loupe
         self.develop = develop; self.crop = crop; self.exporter = exporter; self.writer = writer
         self.sidecars = sidecars
         self.leveler = leveler
+        self.trash = trash
         self.unavailable = unavailable; self.isPreview = isPreview
     }
 
@@ -47,7 +50,7 @@ public struct LibraryServices: Sendable {
             coding: FakeCatalogCoding(mode: mode), store: FakeCatalogStore(mode: mode),
             loupe: FakeLoupe(mode: mode), develop: FakeDevelop(mode: mode), crop: FakeCrop(),
             exporter: FakeExporter(mode: mode), writer: FakeJPEGWriter(mode: mode),
-            sidecars: FakeSidecars(mode: mode), leveler: FakeCrop(), isPreview: true)
+            sidecars: FakeSidecars(mode: mode), leveler: FakeCrop(), trash: FakeTrash(mode: mode), isPreview: true)
     }
 
     /// The live services over LibraryApp's platform adapters. Every member is
@@ -61,7 +64,7 @@ public struct LibraryServices: Sendable {
             ("importer", LiveImporter.unavailable), ("thumbnails", LiveThumbnails.unavailable),
             ("culling", LiveCulling.unavailable), ("coding", LiveCatalogCoding.unavailable),
             ("loupe", LiveLoupeImaging.unavailable), ("develop", LiveDevelop.unavailable),
-            ("crop", LiveCrop.unavailable), ("exporter", LiveExporter.unavailable),
+            ("crop", LiveCrop.unavailable), ("exporter", LiveExporter.unavailable), ("trash", LiveTrash.unavailable),
             ("sidecars", sidecars is UnconnectedSidecars ? UnconnectedSidecars.unavailable : nil),
         ]
         var unavailable: [String: String] = [:]
@@ -71,6 +74,6 @@ public struct LibraryServices: Sendable {
             thumbnails: LiveThumbnails(decoder: decoder, develop: develop), culling: LiveCulling(),
             coding: LiveCatalogCoding(), store: store, loupe: LiveLoupeImaging(decoder: decoder, develop: develop),
             develop: develop, crop: LiveCrop(), exporter: LiveExporter(decoder: decoder, develop: develop),
-            writer: writer, sidecars: sidecars, unavailable: unavailable, isPreview: false)
+            writer: writer, sidecars: sidecars, trash: LiveTrash(), unavailable: unavailable, isPreview: false)
     }
 }
