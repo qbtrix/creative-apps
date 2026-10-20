@@ -189,7 +189,7 @@ struct DesignLayersPanel: View {
     /// for one row outside it, with that row selected, which a pick selects first. None for a page row.
     // view-static: main-actor
     static func rowMenu(_ menu: DesignMenu, rows ids: Set<String>) -> [ToolbarAction] {
-        guard !ids.isEmpty, ids.allSatisfy({ menu.workspace.selectedPage?.nodes.node($0) != nil }) else { return [] }
+        guard !ids.isEmpty, ids.isDisjoint(with: menu.workspace.pages.map(\.id)) else { return [] }
         let outside = ids.count == 1 && !menu.workspace.selectedNodeIDs.contains(ids.first ?? "") ? ids.first : nil
         var state = menu.state()
         if let outside { state.workspace.selectItem(outside) }
