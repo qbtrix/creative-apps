@@ -22,8 +22,8 @@
 
 | Task | Wave | State | PR | Note |
 |---|---|---|---|---|
-| HG-1 | W1 | blocked | – | Fill types not on dev until GF-1 merges |
-| HG-5 | W2 | blocked | – | folds into the HG-a PR (rule 22) |
+| HG-1 | W1 | built locally | – | HaloLayer.gradient, HaloDrawItem.gradient, conformance stubs, HaloGradientTests (2 on, 3 waiting on HG-7); PR opens once GF-1 is on dev |
+| HG-5 | W2 | built locally | – | HaloGradientRenderTests, 4 waiting on HG-6; in the HG-a PR (rule 22) |
 | HG-2 | W2 | blocked | – | CL-probe: core-loop is planned, no lead running |
 | HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo: adopt-command-catalog is planned, no lead running |
 | HG-3 | W3 | blocked | – | GF-3 |
@@ -49,3 +49,4 @@
 - GF-1 #3421: open, mergeable clean, waits on the lane's macOS build.
 - halo core-loop (CL-probe, CL-z) and suiteui adopt-command-catalog (AC-halo) are status planned with no lead branch: HG-2, HG-7 and HG-9 cannot start until those run.
 - Pinned creative-core 0de5687: confirm PixelBuffer.gradient exists before HG-6; else a needs-core issue.
+- The contract's `extension HaloDrawItem { var gradient }` is a stored field with an init default (extensions can't store).
