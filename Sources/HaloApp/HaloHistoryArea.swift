@@ -8,7 +8,9 @@
 // hooks the Model gives: the file name, the unsaved mark and HaloFiles' bytes.
 // The shelf is the window's own presentation state, never the Model's; the
 // History button by the transport (HaloHistoryControl in HaloControls.swift)
-// toggles it. On HA-1's stubs a jump throws and does nothing, and the folder
+// toggles it (HA-3). Every jump goes through the window's `jumpHistory(_:)`
+// once; the panel follows an undo or a jump because each window body hands it
+// the Model's listing as it now is. On HA-1's stubs a jump throws and does nothing, and the folder
 // is nil, so autosave stays off until HA-7. No history logic lives here.
 import HaloModel
 import SuiteKernel
@@ -30,9 +32,24 @@ extension EnvironmentValues {
 }
 
 extension HaloWindow {
+    #if DEBUG
+    /// Jumps the panel sent to the Model; HaloHistoryAreaTests counts one per row press.
+    // view-static: main-actor
+    static var historyJumps = 0
+    #endif
+
     /// The History panel and the autosave hooks over `content`.
     func historyScene(_ content: some View) -> some View {
-        content.modifier(HaloHistoryArea(model: model) { index in _ = try? model.jumpHistory(to: index) })
+        content.modifier(HaloHistoryArea(model: model) { index in jumpHistory(index) })
+    }
+
+    /// A row click or Return in the panel: one jump on the Model, which the panel then follows
+    /// as it follows an undo (each body hands it the listing as it now is).
+    func jumpHistory(_ index: Int) {
+        #if DEBUG
+        Self.historyJumps += 1
+        #endif
+        _ = try? model.jumpHistory(to: index)
     }
 }
 
