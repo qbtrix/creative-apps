@@ -3,7 +3,8 @@
 // (max n + 1) and is selected; Add refuses smart and built-in targets and a
 // collection that holds them all; Remove works only in one you made; Delete
 // never touches `items`; Rename trims and refuses empty names and built-ins.
-// Each command is one named step undo reverts exactly. Written before its
+// Each command is one named step undo reverts exactly; undo reselects only a
+// collection its step removed. Written before its
 // code (lead.md, contract rule 13, FC-8); FC-9 removes the `.disabled`.
 import Testing
 @testable import LibraryModel
@@ -126,6 +127,15 @@ import Testing
         #expect(catalog.undoTitle == "Undo Delete Collection")
         catalog.undo()
         #expect(state(catalog) == before && catalog.items == items)
+    }
+
+    @Test func undoReselectsOnlyACollectionTheStepRemoved() {
+        var catalog = withKeepers()
+        catalog.selectCollection("user-1")
+        catalog.renameCollection("user-1", to: "Selects")
+        catalog.selectCollection("all")
+        catalog.undo()
+        #expect(catalog.selectedCollectionID == "all" && catalog.userCollections.first?.name == "Keepers")
     }
 
     @Test func renameTrimsAndRefusesEmptyAndBuiltIns() {
