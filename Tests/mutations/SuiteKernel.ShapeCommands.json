@@ -1,0 +1,16 @@
+[
+  {
+    "label": "refusesBadSpec: shape.draw draws a spec its help refuses",
+    "file": "Sources/SuiteKernel/Shapes/ShapeCommands.swift",
+    "find": "                let spec = p.spec\n                if let help = ShapeRules.help(spec) { throw ShapeRefusal.invalid(help) }\n",
+    "replace": "                let spec = p.spec\n",
+    "tests": "ShapeCommandsTests"
+  },
+  {
+    "label": "toolIsViewOnly: tool.shape is an edit, so it names an undo step",
+    "file": "Sources/SuiteKernel/Shapes/ShapeCommands.swift",
+    "find": "kind: .view, params: Tool.self",
+    "replace": "kind: .edit, params: Tool.self",
+    "tests": "ShapeCommandsTests"
+  }
+]
