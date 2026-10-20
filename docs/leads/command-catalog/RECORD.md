@@ -59,3 +59,5 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 - 2026-10-20T13:16:33Z: CC-u #3484 and CC-z #3588 merged; full CI 39416190119 and 39423713631 cancelled. Waiting on scoped suiteui run 39424969406 (queued, 897ccbb2) for Belt-Slice-Done.
 
 - 2026-10-20T14:18:51Z: Waiting on a successful run: scoped suiteui 39424969406 at 897ccbb2 still queued; full CI 39436941980 at 56e73319 pending.
+
+- 2026-10-20T14:40Z: Full CI 39436941980 cancelled. Full CI 39438701609 at 9f880c85 (contains every slice, incl. 6fa96843) queued; scoped runs at 897ccbb2 still queued. Slice lines wait.

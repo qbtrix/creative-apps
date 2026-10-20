@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-20T13:37:30Z	heartbeat	13:37Z: #3604 macOS build 39429014286 queued; #3606 open, no lane comment yet; scoped runs 39424969406/39424984298/39424963422/39426337532 still queued (macOS runner backlog); no Belt-Slice-Done yet
 2026-10-20T13:58:33Z	heartbeat	14:00Z: #3604 (macOS build 39429014286 queued) and #3606 open, clean, no needs-* label; scoped suiteui/photo/design/halo runs at 897ccbb2 still queued; no slice lines yet
 2026-10-20T14:18:51Z	heartbeat	Waiting on a successful run: scoped suiteui 39424969406 at 897ccbb2 still queued; full CI 39436941980 at 56e73319 pending.
+2026-10-20T14:40Z	heartbeat	Full CI 39436941980 cancelled. Full CI 39438701609 at 9f880c85 (contains every slice, incl. 6fa96843) queued; scoped runs at 897ccbb2 still queued. Slice lines wait.
