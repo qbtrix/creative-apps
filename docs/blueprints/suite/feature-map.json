@@ -718,7 +718,7 @@
     },
     {
       "id": "S18",
-      "name": "Point editing and booleans (re-cut: Flare Direct Select F4b)",
+      "name": "Booleans on paths (point editing and Flare's Direct Select F4b are S25)",
       "layer": "kernel",
       "c4": [
         "flarecore/geometry",
@@ -855,6 +855,27 @@
         {
           "app": "photo",
           "packet": "photo/gradient-fill"
+        }
+      ]
+    },
+    {
+      "id": "S25",
+      "name": "The Pen and point editing: FlareCore's anchors view under kernel names, the pen and anchor rules and path commands in SuiteKernel, SuiteUI's path edit overlay; 5,000 anchors stay fast (captain 2026-10-20, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-paths ✚",
+        "suiteui PathEditOverlay, CanvasMarks PathMarks",
+        "flarecore/geometry PathOps (core bump to >= e09c6c30)"
+      ],
+      "packet": "suiteui/pen-paths",
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "design/pen-paths"
+        },
+        {
+          "app": "flare",
+          "packet": "flare/pen-paths"
         }
       ]
     },
