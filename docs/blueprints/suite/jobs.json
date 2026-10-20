@@ -44,9 +44,12 @@
     "weight": "high",
     "job": "Privacy: Library export with location off leaves no GPS in the JPEG, the HEIC or the XMP sidecar.",
     "outcome": "No GPS tags in the exported JPEG, the HEIC or the XMP sidecar.",
-    "needs": [],
-    "needs_note": "none (no metadata option in ExportOptions)",
-    "closes_with": null,
+    "needs": [
+      "S11",
+      "library/export-pack"
+    ],
+    "needs_note": "S11 (the metadata option); library/export-pack adds the row",
+    "closes_with": "library/export-pack",
     "trap": "Sidecar carries xmp:CreateDate and GPS beside a clean file",
     "run": "Cm",
     "baseline": "fail",
@@ -55,7 +58,8 @@
       "https://community.adobe.com/t5/lightroom-classic-bugs/p-save-metadata-to-file-doesn-t-clear-gps-exif-fields-for-dngs/idc-p/13864003",
       "https://robservatory.com/retain-location-metadata-on-photos-sourced-from-photos/",
       "https://community.adobe.com/questions-675/lr-classic-mac-location-data-problems-on-export-983562"
-    ]
+    ],
+    "waits_on": "LX-3"
   },
   "RJ-X04": {
     "id": "RJ-X04",
@@ -531,5 +535,205 @@
     "sources": [
       "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
     ]
+  },
+  "RJ-X30": {
+    "id": "RJ-X30",
+    "app": "suite",
+    "weight": "high",
+    "job": "Give a shape a three-stop linear gradient at 45 degrees by commands alone, drag its middle stop with 120 moves, then undo once.",
+    "outcome": "The saved document holds stops at 0, 0.5 and 1 on a 45-degree line through the shape's centre, and after the drag and one undo the middle stop is back at 0.5.",
+    "needs": [
+      "S24"
+    ],
+    "closes_with": "S24",
+    "trap": "The 120 moves land as 120 undo steps, or the angle is saved in radians",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "GF-9",
+    "added_by": "suiteui/gradient-fill"
+  },
+  "RJ-X31": {
+    "id": "RJ-X31",
+    "app": "suite",
+    "weight": "high",
+    "job": "Make 30 edits by command, jump back 10 steps in the history with one command, then make one more edit.",
+    "outcome": "The jump lands on step 20 without recording a step, the document is the state after edit 20, and the new edit replaces the 10 undone steps.",
+    "needs": [
+      "S12"
+    ],
+    "closes_with": "S12",
+    "trap": "The jump records a step of its own, or the undone steps survive the new edit",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AH-9",
+    "added_by": "suiteui/autosave-history"
+  },
+  "RJ-X32": {
+    "id": "RJ-X32",
+    "app": "suite",
+    "weight": "high",
+    "job": "Rotate a shape 15 degrees with one 60-sample drag by commands, flip it, then undo once.",
+    "outcome": "The saved shape reads 15 degrees with its position unchanged after the undo of the flip, and a second undo reads 0: the drag was one step.",
+    "needs": [
+      "S7"
+    ],
+    "closes_with": "S7",
+    "trap": "The drag lands as 60 undo steps, the turn saves in radians, or the flip moves the shape",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TT-8",
+    "added_by": "suiteui/transform-tools"
+  },
+  "RJ-X33": {
+    "id": "RJ-X33",
+    "app": "suite",
+    "weight": "med",
+    "job": "Read the colour under three points by command: over a red shape on top of another, in a gradient's middle, and on empty canvas.",
+    "outcome": "The overlap reads the top shape's red, the gradient reads its 50% mix within 1 per channel, and empty canvas reads null.",
+    "needs": [
+      "S13"
+    ],
+    "closes_with": "S13",
+    "trap": "The sample reads the selected or lower shape",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "EY-8",
+    "added_by": "suiteui/eyedropper"
+  },
+  "RJ-X34": {
+    "id": "RJ-X34",
+    "app": "suite",
+    "weight": "med",
+    "job": "Draw a five-point star by command, try a two-sided polygon, then undo.",
+    "outcome": "The star is saved with its kind, points and inner ratio; the polygon is refused with \"A polygon needs 3 to 64 sides.\" and adds nothing; one undo removes the star.",
+    "needs": [
+      "S19"
+    ],
+    "closes_with": "S19",
+    "trap": "An out-of-range count is silently clamped, or the star saves as a flat path",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SH-8",
+    "added_by": "suiteui/shape-tools"
+  },
+  "RJ-X35": {
+    "id": "RJ-X35",
+    "app": "suite",
+    "weight": "high",
+    "job": "Add a 4 pt stroke by command, make it dashed, scrub its trim end to 50% with 60 samples, then undo once.",
+    "outcome": "Before the undo the stroke reads dash [16, 8] and trim end 0.5; after it there is no trim: the scrub was one step.",
+    "needs": [
+      "S17"
+    ],
+    "closes_with": "S17",
+    "trap": "The dash pattern ignores the width, or the trim saves as a percentage",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SS-8",
+    "added_by": "suiteui/stroke-style"
+  },
+  "RJ-X36": {
+    "id": "RJ-X36",
+    "app": "suite",
+    "weight": "high",
+    "job": "Put a 3:1 picture into a square box by commands alone, pan it inside the crop with 30 moves, then undo once.",
+    "outcome": "The saved document's picture draws 900 x 300 inside the 300 x 300 box (its 3:1 aspect kept, cropped by the box), and after the pan and one undo its focus is back at the centre.",
+    "needs": [
+      "S20"
+    ],
+    "closes_with": "S20",
+    "trap": "The picture stretches to fill the square, or the 30 moves land as 30 undo steps",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PL-9",
+    "added_by": "suiteui/placed-images"
+  },
+  "RJ-X41": {
+    "id": "RJ-X41",
+    "app": "suite",
+    "weight": "high",
+    "job": "Warm a picture by commands alone: set temperature in 120 drag steps, set shadows, then undo once.",
+    "outcome": "After the undo shadows is 0 and temperature 35; the saved tone has only the temperature key; vibrance is refused with its waiting reason.",
+    "needs": [
+      "S1"
+    ],
+    "closes_with": "S1",
+    "trap": "120 steps land as 120 undo steps, or vibrance is accepted while it can't render",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TC-9",
+    "added_by": "suiteui/tone-controls"
+  },
+  "RJ-X42": {
+    "id": "RJ-X42",
+    "app": "suite",
+    "weight": "high",
+    "job": "Export a 4:5 artwork as JPEG at exactly 1080x1350 by commands alone, then at a long edge of 2048.",
+    "outcome": "The first file is exactly 1080x1350, 1080x1351 without stretch is refused with its sentence, the long-edge file is 1638x2048.",
+    "needs": [
+      "S11"
+    ],
+    "closes_with": "S11",
+    "trap": "A 2x scale applied on top (2160x2700), off-by-one rounding, or a squashed image",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "XP-9",
+    "added_by": "suiteui/export-pack"
+  },
+  "RJ-X43": {
+    "id": "RJ-X43",
+    "app": "suite",
+    "weight": "high",
+    "job": "Drop another app's document, an image and an unknown file on an app by commands alone, then list Open Recent.",
+    "outcome": "The other app's document and the image are handed to the apps that read them, the unknown file is refused with its sentence, and Open Recent lists only this app's files.",
+    "needs": [
+      "suite/file-flow"
+    ],
+    "closes_with": "suite/file-flow",
+    "trap": "Another app's document opens here as an import, an unreadable file is silently ignored, or Open Recent lists every app's files",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SF-9",
+    "added_by": "suite/file-flow"
   }
 }
