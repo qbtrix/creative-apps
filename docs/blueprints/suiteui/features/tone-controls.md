@@ -2,7 +2,7 @@
 
 **Feature:** one set of tone and sharpen controls for the suite. SuiteImaging
 (suite-imaging's target) gets a `Tone/` module: `ToneSettings` (White Balance temperature and tint,
-Exposure, Contrast, Highlights, Shadows, Whites, Blacks, Vibrance,
+Exposure, Brightness, Contrast, Highlights, Shadows, Whites, Blacks, Vibrance,
 Saturation, and Sharpen amount, radius and threshold), the rules that turn
 them into one CoreRender `ToneProgram` plus one unsharp pass, Auto from
 CoreRaster's `AutoTone`, and the tone commands every app registers. SuiteUI
@@ -17,7 +17,9 @@ through its catalog.
 model) and the sharpen control S2's engine already has; real job RJ-X41
 (new). Two adopts, each its own packet on its line: `photo/tone-controls`
 and `library/tone-controls`, each waiting on this packet's TC-a. Halo stays
-an S1 adopter with no packet yet.
+an S1 adopter with no packet yet. Brightness (finding #3527) is a TONE
+slider here, beside Contrast (re-cut 2026-10-21 by the beta gaps packets:
+one tone home, no second slider row).
 
 **Depends on:** suite-imaging's contract slice **IM-a** (TC-1): the
 `SuiteImaging` target, which links CoreRaster and CoreRender. The core pin
@@ -124,7 +126,7 @@ Sharpen set, resets showing), `-vibrance-waiting` (the help shown),
 ```swift
 // Sources/SuiteImaging/Tone/ToneSettings.swift (TC-1 values and stubs, TC-7 coding and clamping)
 public enum ToneSlider: String, CaseIterable, Codable, Sendable {      // raw value: the JSON key and command param
-    case temperature, tint, exposure, contrast, highlights, shadows, whites, blacks, vibrance, saturation
+    case temperature, tint, exposure, brightness, contrast, highlights, shadows, whites, blacks, vibrance, saturation
     case sharpenAmount, sharpenRadius, sharpenThreshold
     public var title: String { get }               // "Temperature", "Amount", ...
     public var group: ToneGroup { get }
@@ -188,7 +190,9 @@ Commands (all `edit` but `tone.read`; ids go in each adopter's
 ## Pseudocode
 
 - **program / adjustments.** In this order, each skipped at neutral:
-  `whiteBalance(temperature, tint)`, `exposure(stops)`, `contrast`,
+  `whiteBalance(temperature, tint)`, `exposure(stops)`, Brightness as an
+  sRGB `levels` gamma (`gamma = 2^(brightness / 100)`, black and white
+  fixed, so +100 lifts the midtones about a stop and never clips), `contrast`,
   `highlightsShadows(highlights, shadows)`, Whites and Blacks as sRGB
   `levels` (Library's rule from `LiveDevelop`: at most a quarter of the range,
   so `levels` never throws), Saturation as `hueSaturation(hue: 0,
@@ -253,7 +257,7 @@ Longest chain: TC-1 → TC-2 → TC-3 → TC-4 → TC-8 → TC-10 (6). Chain of 
 | TC-2 | SJ0: the index lists `tone-rows`; the page opens | the page is missing | – (UI) |
 | TC-3 | `ToneRowsTests`: a drag emits `.set`s under one token; a typed value emits one `.set`; Auto emits `.auto`; a section's Reset emits `.reset(group)` and shows only off neutral; Vibrance is disabled with `waiting`'s reason; Radius is off at Amount 0 | an intent is wrong or doubled, or a disabled row acts | – (UI) |
 | TC-4 | `SuiteToneRowsSnapshots`; `RenderBudgetToneRowsTests.sliderDragInThreeBodies`; `testToneRowsSetAndReset` steps 1 to 6 | budget over, or a step fails | – (UI) |
-| TC-5 | `ToneRulesTests`: neutral gives an empty program and nil unsharp; temperature 30 gives one `whiteBalance` step; `program` and `adjustments` list the same steps in the same order; Whites 100 gives `inWhite` 0.75; Amount 80, Radius 1.5, Threshold 4 give (0.8, 1.5, 4/255); `auto` of the identity suggestion keeps the settings; Vibrance is never in the program while waiting | a step, an order or a value is wrong | `SuiteImaging.ToneRules`: neutral check dropped (exposure 0 emits a step) → `.neutralIsEmpty`; whites sign flipped → `.whitesBrighten`; threshold not divided by 255 → `.unsharpThreshold`; vibrance not skipped → `.vibranceWaits` |
+| TC-5 | `ToneRulesTests`: neutral gives an empty program and nil unsharp; temperature 30 gives one `whiteBalance` step; `program` and `adjustments` list the same steps in the same order; Whites 100 gives `inWhite` 0.75; Brightness 100 gives one `levels` step with gamma 2 and black 0, white 1; Amount 80, Radius 1.5, Threshold 4 give (0.8, 1.5, 4/255); `auto` of the identity suggestion keeps the settings; Vibrance is never in the program while waiting | a step, an order or a value is wrong | `SuiteImaging.ToneRules`: neutral check dropped (exposure 0 emits a step) → `.neutralIsEmpty`; whites sign flipped → `.whitesBrighten`; brightness gamma inverted → `.brightnessLifts`; threshold not divided by 255 → `.unsharpThreshold`; vibrance not skipped → `.vibranceWaits` |
 | TC-6 | `ToneCommandsTests`: each run records one step named its title; 120 `tone.set` under one drag token undo in one; `tone.set` vibrance is unavailable with its reason; `tone.reset` on neutral is unavailable; `tone.auto` records one "Auto Tone"; `ToneIntent.command` round-trips each case | a run records zero or two steps, or a why-not is missing | `SuiteImaging.ToneCommands`: drag not passed to `setTone` → `.dragIsOneStep`; waiting check skipped → `.vibranceUnavailable`; `setTone` called twice in `tone.auto` → `.autoIsOneStep` |
 | TC-7 | `ToneSettingsTests`: a neutral value writes no key; Library's catalog JSON fixture (ten keys) decodes to the same values; −250 clamps to −100; NaN keeps the old value; `reset(.tone)` leaves white balance | a key, a clamp or a reset is wrong | `SuiteImaging.ToneSettings`: neutral encoded → `.neutralWritesNoKey`; clamp skipped → `.clampsToRange`; reset clears every group → `.resetKeepsOtherGroups` |
 | TC-8 | `ToneRowsLiveTests`: a slider drag on the page leaves one undo step; `testToneRowsSetAndReset` on live | the page stays on the local log | – (UI) |

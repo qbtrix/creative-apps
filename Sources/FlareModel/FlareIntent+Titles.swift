@@ -127,6 +127,7 @@ extension FlareIntent.Inspector {
         case .setFill: "Fill"
         case .setStrokeColor: "Stroke Color"
         case .setStrokeWidth: "Stroke Width"
+        case .scrubStrokeWidth: "Scrub Stroke Width"
         case .setStrokeCap: "Stroke Cap"
         case .setStrokeJoin: "Stroke Join"
         case .setSceneSize: "Scene Size"

@@ -1,5 +1,6 @@
 // FakeCanvasDocument.swift (command-catalog CC-2): a Linux headless document of named rects, with the six
-// commands the catalog's tests, the gallery page, the afterglow CLI and the MCP server drive before any app adopts.
+// commands the catalog's tests, the gallery page, the afterglow CLI and the MCP server drive before any app adopts;
+// file-flow SF-9 adds the five file-flow commands over fixed readers, so RJ-X43 runs `file.drop` on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -46,12 +47,19 @@ public struct FakeCanvasDocument: HeadlessDocument {
 
     /// The rects back to front, the selected rect's id, and the history whose steps hold the rects to go back to.
     public private(set) var rects: [FakeRect], selection: Int?, history = History<[FakeRect]>()
-    public init(rects: [FakeRect] = [], selection: Int? = nil) { (self.rects, self.selection) = (rects, selection) }
+    /// The fake's recent files, newest first; Clear Menu empties them.
+    public private(set) var recents: [RecentFileEntry]
+    public init(rects: [FakeRect] = [], selection: Int? = nil, recents: [RecentFileEntry] = []) {
+        (self.rects, self.selection, self.recents) = (rects, selection, recents)
+    }
 
     /// The document every example runs on: "Rect 1" selected and free, "Rect 2" locked.
     public static let fixture = FakeCanvasDocument(rects: [FakeRect(id: 1, name: "Rect 1", x: 10, y: 10, w: 100, h: 60),
                                                            FakeRect(id: 2, name: "Rect 2", x: 140, y: 40, w: 80, h: 80, locked: true)],
-                                                   selection: 1)
+                                                   selection: 1, recents: [example])
+    /// The fixture's one recent file, the file-flow examples' `path:/tmp/example`.
+    static let example = RecentFileEntry(fileID: "path:/tmp/example", name: "example", path: "/tmp/example", app: app,
+                                         lastUsed: Date(timeIntervalSince1970: 0))
     public static let app = "fake", openExtensions = ["fake"], exportFormats = ["json"]
 
     /// The selected rect, nil when nothing is selected.
@@ -121,8 +129,10 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
     }
 
-    /// The fake's eight ids: its six commands plus `edit.undo` and `edit.redo`. Empty only if an id were refused.
-    public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(app: app, specs, history: { $0.history })) ?? .empty(app: app)
+    /// The fake's thirteen ids: its six commands, `edit.undo` and `edit.redo`, and the five file-flow commands.
+    /// Empty only if an id were refused.
+    public static let catalog = (try? CommandCatalog<FakeCanvasDocument>(
+        app: app, specs + FileFlowCommands.specs(FakeCanvasDocument.self), history: { $0.history })) ?? .empty(app: app)
     /// A rect's result schema.
     static let rectSchema = ParamSchema.object(["id": .integer(), "name": .string(), "x": .number(), "y": .number(),
                                                 "w": .number(), "h": .number(), "locked": .boolean],
@@ -149,6 +159,42 @@ public struct FakeCanvasDocument: HeadlessDocument {
         .typed("edit.redo", title: "Redo", summary: "Redoes the last undone edit.", kind: .view, params: NoParams.self, example: .object([:]),
                availability: { $0.history.canRedo ? .available : .unavailable("There is nothing to redo.") }) { doc, _ in doc.step(redo: true) },
     ]
+}
+
+/// The fake as a file-flow target: it reads `.fake`, places `.png` as a rect named after the file, and hands its
+/// document to Halo. Its readers are a fixed table, never the suite's routing; nothing leaves the process.
+extension FakeCanvasDocument: FileFlowTarget {
+    /// The apps that read each extension the fake knows, default first.
+    static let readerTable: [String: [String]] = ["fake": ["fake"], "halo": ["halo"], "png": ["photo", "design", "fake"]]
+    public var appID: String { Self.app }
+    public var recentFiles: [RecentFileEntry] { recents }
+    public var hasDocument: Bool { true }
+    public var placesExtensions: Set<String> { ["png"] }
+    public var openInApps: [String] { ["halo"] }
+    public var openInHelp: String? { nil }
+    public func readers(ofExtension ext: String) -> [String] { Self.readerTable[ext] ?? [] }
+    /// Moves the file to the top of the list; the fake has no window to open it in.
+    public mutating func openRecent(_ fileID: String) throws {
+        guard let index = recents.firstIndex(where: { $0.fileID == fileID }) else { return }
+        recents.insert(recents.remove(at: index), at: 0)
+    }
+    public mutating func clearRecent() throws { recents = [] }
+    /// The fake has no other app to hand to, so Open In changes nothing.
+    public mutating func openIn(_ app: String) throws {}
+    /// Places each `.place` file as a 100 by 100 rect named after it, all as one "Place" step; opens and hand-offs
+    /// have no other window to go to in the fake, and refusals change nothing.
+    public mutating func perform(_ actions: [DropAction]) throws {
+        let placed = actions.compactMap { action -> String? in
+            guard case .place(let path) = action else { return nil }
+            return path.split(separator: "/").last.map(String.init) ?? path
+        }
+        guard !placed.isEmpty else { return }
+        history.record("Place", rects)
+        for name in placed {
+            let id = (rects.map(\.id).max() ?? 0) + 1
+            rects.append(FakeRect(id: id, name: name, x: 0, y: 0, w: 100, h: 100)); selection = id
+        }
+    }
 }
 
 extension CommandCatalog {
