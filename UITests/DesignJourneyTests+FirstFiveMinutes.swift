@@ -14,7 +14,7 @@ final class DesignFirstFiveJourneys: XCTestCase {
     @MainActor func testFirst5NewDesignWithFrame() {
         let design = newDesign([])
         draw("Frame", from: CGVector(dx: 0.1, dy: 0.1), to: CGVector(dx: 0.6, dy: 0.7), design)
-        design.shot("first5-frame")
+        design.snap("first5-frame")
     }
 
     /// The Rectangle tool and the Text tool: a shape and a typed title.
@@ -25,7 +25,7 @@ final class DesignFirstFiveJourneys: XCTestCase {
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.3, dy: 0.75), to: CGVector(dx: 0.3, dy: 0.75))
         design.app.typeText("Summer sale\r")
         XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing a title made no text")
-        design.shot("first5-shape-and-text")
+        design.snap("first5-shape-and-text")
     }
 
     /// File > Export…, PNG, Export: a PNG of the frame in the export folder.
@@ -37,7 +37,7 @@ final class DesignFirstFiveJourneys: XCTestCase {
         let png = design.element("design.export.format.png")
         XCTAssert(png.waitForExistence(timeout: 5), "the Export sheet offers no PNG \(Self.stuckExport)")
         png.click()
-        design.shot("first5-export-sheet")
+        design.snap("first5-export-sheet")
         design.reachable("Export", in: design.app.sheets.firstMatch, stuck: Self.stuckExport).click()
         let file = FirstFive.file(in: exports, ext: "png", timeout: 30)
         let written = try XCTUnwrap(file, "Export wrote no PNG \(Self.stuckExport)")

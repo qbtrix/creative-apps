@@ -12,7 +12,7 @@ final class FlareFirstFiveJourneys: XCTestCase {
     /// New Animation, Create, then the Ellipse tool: a shape on the stage.
     @MainActor func testFirst5NewAnimationAndShape() {
         let flare = newAnimationWithShape([])
-        flare.shot("first5-shape")
+        flare.snap("first5-shape")
     }
 
     /// Auto-key, Go to End, drag the shape: its lane holds a key; Play plays.
@@ -22,10 +22,12 @@ final class FlareFirstFiveJourneys: XCTestCase {
         flare.reachable("Go to End", stuck: Self.stuckAnimate).click()
         flare.reachable("Select", in: flare.element("suite.tools")).click()
         flare.drag(on: "suite.canvas", from: CGVector(dx: 0.4, dy: 0.4), to: CGVector(dx: 0.7, dy: 0.4))
-        let keys = flare.element("flare.timeline").descendants(matching: .any).matching(NSPredicate(
-            format: "label BEGINSWITH 'Key at frame' OR value CONTAINS 'keyframe'"))
-        XCTAssert(keys.firstMatch.waitForExistence(timeout: 5), "moving the shape at the end keyed nothing \(Self.stuckAnimate)")
-        flare.shot("first5-keyed")
+        // Keyed: the lane shows a key, or the inspector's X row its key diamond.
+        let key = flare.element("flare.timeline").descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH 'Key at frame'")).firstMatch
+        let diamond = flare.element("flare.inspector.x.key.diamond")
+        XCTAssert(FirstFive.wait(5) { key.exists || diamond.exists }, "moving the shape at the end keyed nothing \(Self.stuckAnimate)")
+        flare.snap("first5-keyed")
         let play = flare.reachable("Play/Pause")
         play.click()
         XCTAssert(FirstFive.wait(3) { (play.value as? String) == "Playing" || play.isSelected }, "Play didn't play")
@@ -40,7 +42,7 @@ final class FlareFirstFiveJourneys: XCTestCase {
         let lottie = flare.element("flare.export.format.lottie")
         XCTAssert(lottie.waitForExistence(timeout: 5), "the Export sheet offers no Lottie")
         lottie.click()
-        flare.shot("first5-export-sheet")
+        flare.snap("first5-export-sheet")
         flare.reachable("Export", in: flare.app.sheets.firstMatch).click()
         let written = try XCTUnwrap(FirstFive.file(in: exports, ext: "json", timeout: 30), "Export wrote no Lottie file")
         let json = try JSONSerialization.jsonObject(with: Data(contentsOf: written)) as? [String: Any]

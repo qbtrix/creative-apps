@@ -14,7 +14,7 @@ final class PhotoFirstFiveJourneys: XCTestCase {
         let fresh = Journey("Photo", self, arguments: photoArguments() + FirstFive.freshProfile())
         fresh.timeBox()
         fresh.reachable("Open…")
-        fresh.shot("first5-empty")
+        fresh.snap("first5-empty")
         fresh.app.terminate()
 
         let photo = try open(exportTo: nil)
@@ -25,7 +25,7 @@ final class PhotoFirstFiveJourneys: XCTestCase {
         photo.reachable("Apply Crop").click()
         let original = labelled("800 × 600 px", photo)
         XCTAssert(original.waitForNonExistence(timeout: 10), "Apply Crop left the photo 800 × 600 px")
-        photo.shot("first5-cropped")
+        photo.snap("first5-cropped")
     }
 
     /// Brighten the photo: a control a new user would call Brightness, in the window or one menu deep.
@@ -48,7 +48,7 @@ final class PhotoFirstFiveJourneys: XCTestCase {
             .press(forDuration: 0.1, thenDragTo: brightness.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)))
         XCTAssert(FirstFive.wait(5) { photo.element("suite.canvas").screenshot().pngRepresentation != before },
                   "dragging Brightness didn't change the photo")
-        photo.shot("first5-brighter")
+        photo.snap("first5-brighter")
     }
 
     /// File > Export…, JPEG, Export: an 800 × 600 JPEG in the export folder.
@@ -60,7 +60,7 @@ final class PhotoFirstFiveJourneys: XCTestCase {
         let jpeg = photo.app.sheets.radioButtons["JPEG"]
         XCTAssert(jpeg.waitForExistence(timeout: 5), "the Export sheet offers no JPEG")
         jpeg.click()
-        photo.shot("first5-export-sheet")
+        photo.snap("first5-export-sheet")
         photo.reachable("Export", in: photo.app.sheets.firstMatch).click()
         let file = FirstFive.file(in: exports, ext: "jpg") ?? FirstFive.file(in: exports, ext: "jpeg", timeout: 1)
         let written = try XCTUnwrap(file, "Export wrote no JPEG into the export folder")

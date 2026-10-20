@@ -12,7 +12,7 @@ final class LibraryFirstFiveJourneys: XCTestCase {
     /// Import Folder… in the toolbar: the grid shows the folder's 24 photos.
     @MainActor func testFirst5ImportFolder() throws {
         let library = try importShoot([])
-        library.shot("first5-imported")
+        library.snap("first5-imported")
     }
 
     /// Metadata > Set Rating > 3 Stars and Set Flag > Pick on a clicked photo: its cell says so.
@@ -22,9 +22,11 @@ final class LibraryFirstFiveJourneys: XCTestCase {
         photo.click()
         library.choose(menu: ["Metadata", "Set Rating", "3 Stars"], stuck: Self.stuckRate)
         library.choose(menu: ["Metadata", "Set Flag", "Pick"], stuck: Self.stuckRate)
-        XCTAssert(FirstFive.wait(5) { photo.label.localizedCaseInsensitiveContains("3 stars") && photo.label.localizedCaseInsensitiveContains("pick") },
-                  "IMG_0001 reads \(photo.label), not 3 stars and picked")
-        library.shot("first5-rated")
+        // The grid badge names a pick "Flagged".
+        let marked = { (label: String) in label.localizedCaseInsensitiveContains("3 stars")
+            && (label.localizedCaseInsensitiveContains("pick") || label.localizedCaseInsensitiveContains("flagged")) }
+        XCTAssert(FirstFive.wait(5) { marked(photo.label) }, "IMG_0001 reads \(photo.label), not 3 stars and picked")
+        library.snap("first5-rated")
     }
 
     /// File > Export…, Export: a JPEG of the clicked photo at the sheet's long edge.
@@ -36,7 +38,7 @@ final class LibraryFirstFiveJourneys: XCTestCase {
         let longEdge = library.element("library.export.longEdge")
         XCTAssert(longEdge.waitForExistence(timeout: 5), "the Export sheet shows no size")
         let edge = Int((longEdge.value as? String) ?? "") ?? 0
-        library.shot("first5-export-sheet")
+        library.snap("first5-export-sheet")
         library.reachable("Export", in: library.app.sheets.firstMatch).click()
         let written = try XCTUnwrap(FirstFive.file(in: exports, ext: "jpg"), "Export wrote no JPEG")
         XCTAssertEqual(Array(try Data(contentsOf: written).prefix(2)), [0xFF, 0xD8], "\(written.lastPathComponent) isn't a JPEG")

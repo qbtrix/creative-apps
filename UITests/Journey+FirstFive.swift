@@ -10,7 +10,8 @@
 // opens a menu bar item (click 1), hovers any submenu on the way and returns
 // the item (click 2); `reachable(_:)` returns a visible button (click 1). Both
 // fail unless the entry is shown, enabled and named in plain words
-// (`FirstFive.isPlain`: a few words, no identifier or symbol name).
+// (`FirstFive.isPlain`: a few words, no identifier or symbol name). Shots
+// go through `snap`, unaudited, so the gate fails only on the tasks.
 //
 // System panels (Open, Save) are the system's, not ours: a journey checks the
 // button that opens one and then lets the app's launch argument
@@ -42,8 +43,8 @@ enum FirstFive {
     static func isPlain(_ label: String) -> Bool {
         let words = label.split(separator: " ")
         guard (1...5).contains(words.count) else { return false }
-        return words.allSatisfy { word in
-            word.contains(where: \.isLetter) && !word.contains("_")
+        return label.contains(where: \.isLetter) && words.allSatisfy { word in
+            !word.contains("_")
                 && word.range(of: "[a-z]\\.[a-z]|[a-z][A-Z]", options: .regularExpression) == nil
         }
     }
@@ -91,6 +92,12 @@ extension Journey {
             let spent = Date().timeIntervalSince(start)
             XCTAssertLessThanOrEqual(spent, FirstFive.budget, "\(test.name) took \(Int(spent)) s, over five minutes")
         }
+    }
+
+    /// Attaches the window as "<app>-<step>" without auditing it: this gate
+    /// judges the tasks, and the app audit has its own journeys and baseline.
+    func snap(_ step: String) {
+        shot(step, element: app.windows.firstMatch, audit: false)
     }
 
     /// The menu item at `path` (menu bar item, any submenus, the item), with

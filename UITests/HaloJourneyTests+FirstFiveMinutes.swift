@@ -12,7 +12,7 @@ final class HaloFirstFiveJourneys: XCTestCase {
     /// New Composition…, Create: the inspector names the new composition.
     @MainActor func testFirst5NewComposition() {
         let halo = newComposition([])
-        halo.shot("first5-composition")
+        halo.snap("first5-composition")
     }
 
     /// Layer > New > Text, type a title, Animate Opacity, Go to End, drag Opacity: keyed twice.
@@ -28,7 +28,7 @@ final class HaloFirstFiveJourneys: XCTestCase {
         halo.drag(on: "halo.inspector.row.opacity", from: CGVector(dx: 0.8, dy: 0.5), to: CGVector(dx: 0.2, dy: 0.5))
         XCTAssert(FirstFive.wait(3) { (animate.value as? String) == "Keyed at this frame" },
                   "dragging Opacity at the end keyed nothing \(Self.stuckAnimate)")
-        halo.shot("first5-faded")
+        halo.snap("first5-faded")
     }
 
     /// File > Render…, Movie, Render: an MPEG-4 movie in the render folder.
@@ -39,7 +39,7 @@ final class HaloFirstFiveJourneys: XCTestCase {
         halo.choose(menu: ["File", "Render…"])
         segment("Movie", in: "halo.render.format", halo)
         segment("Half", in: "halo.render.size", halo)
-        halo.shot("first5-render-sheet")
+        halo.snap("first5-render-sheet")
         halo.reachable("Render", in: halo.app.sheets.firstMatch).click()
         let written = try XCTUnwrap(FirstFive.file(in: renders, ext: "mp4", timeout: 240), "Render wrote no .mp4")
         let head = try Data(contentsOf: written).prefix(12)
