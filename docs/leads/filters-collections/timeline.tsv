@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-20T05:09:43Z	pr-opened	FC-5	#3466 draft, stacked on #3461; gate base caveat
 2026-10-20T05:09:43Z	builder-start	FC-6	stacked on FC-5
 2026-10-20T05:09:43Z	builder-start	FC-8	stacked on FC-5
+2026-10-20T05:16:46Z	builder-restart	FC-6, FC-8	container restart stopped both; resumed from their worktrees (FC-8 had a commit, FC-6 partial files)
