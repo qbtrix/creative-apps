@@ -119,3 +119,4 @@ utc	stage	event	ref	note
 2026-10-20T00:30:00Z	stage	wave 5 start: DE-u builder (DE-6 + DE-7) on origin/dev 0af12d15; supervisor go on #1970
 2026-10-20T18:42:31Z	stage	run act-1a15a9a4e8b-kn6a starts on dev 875b44d2; DE-u merged (#3389, #3391), DE-z builder next
 2026-10-20T19:07:24Z	check	dev CI 39475897385 still pending (no jobs) at 33 min; DE-u slice-done waits; DE-z builder running (wf w4yvztnfw)
+2026-10-20T19:28:33Z	check	PR	#3684	DE-z opened (DE-10 + DE-11), head b4c35e57, fast-lane + feature-done; CI 39475897385 still pending

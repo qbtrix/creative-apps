@@ -2,9 +2,9 @@
 
 Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z (prior runs act-1a14852c11d-65cg, act-1a14fd6514a-4hke, act-1a156b3f640-ytq0)
-Stage: 3 wave 1 of this run (DE-z building)
+Stage: 3 wave 1 of this run (DE-z in the lane, #3684)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: DE-u slice-done once dev CI 39475897385 (875b44d2, carries #3389 and #3391) is green on Linux; DE-z builder (DE-10 + DE-11, one PR, feature-done) running
+Next: DE-u slice-done once dev CI 39475897385 (875b44d2, carries #3389 and #3391) is green on Linux; DE-z #3684 (head b4c35e57, feature-done) waits on its batch; its CI then the contact sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,7 +13,7 @@ Next: DE-u slice-done once dev CI 39475897385 (875b44d2, carries #3389 and #3391
 | DE-u | File > Export… ⇧⌘E opens SuiteUI ExportSheet on the fakes; Export runs the fake steps; Cancel/Escape close; a failed step names its file | DE-6, DE-7 | J19 | DE-a; design-window DW-c; files-history FH-b; snapping SN-c; canvas-basics CB-c; editor-kernel EK-chrome | yes | 0 | merged, waits CI | 39475897385 (pending) | wanted |
 | DE-s | the plan picks layers per scope, unique names, sizes per scale, refusals; SVG equals the reference | DE-3, DE-5 | MJ13, MJ14 | DE-a | no | 0 | done | – | – |
 | DE-w | PNG at 1x/2x/3x and one-page PDF off the window from the canvas artwork | DE-8, DE-9 | DesignRasterizerTests | DE-a | yes | 0 | done | – | – |
-| DE-z | real files, never overwriting, progress, failures, journeys on live | DE-10, DE-11 | J17, J18 | DE-u, DE-s, DE-w; files-history FH-b; editor-kernel EK-run | yes | 0 | building | – | – |
+| DE-z | real files, never overwriting, progress, failures, journeys on live | DE-10, DE-11 | J17, J18 | DE-u, DE-s, DE-w; files-history FH-b; editor-kernel EK-run | yes | 0 | in lane #3684 | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -28,8 +28,8 @@ Next: DE-u slice-done once dev CI 39475897385 (875b44d2, carries #3389 and #3391
 | DE-9 | DE-w | 3 | DesignRasterizer.pdf, pdfOnePage test | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/DesignRasterizerTests.swift | pdfOnePage (macOS) | – | planned |
 | DE-6 | DE-u | 4 | File > Export… ⇧⌘E, DesignExportArea hosting SuiteUI ExportSheet on the fakes, ids, launch args, J19 skipped, snapshots, render budget test | per packet | DesignExportSnapshots, J19 | #3389 | merged |
 | DE-7 | DE-u | 5 | the run on the fakes, Cancel/Escape/Return, -DesignExportFail, J19 on, J17/J18 skipped | per packet | J19 | #3391 | merged 18:30Z (ad0f902e) |
-| DE-10 | DE-z | 6 | real files, never overwriting, progress, rememberExport, J17 on | per packet | J17 | – | building (wave 1, with DE-11) |
-| DE-11 | DE-z | 7 | failures, Cancel mid-run, blueprint rows, feature-done, Closes #418 | per packet | J18 | – | building (wave 1, with DE-10) |
+| DE-10 | DE-z | 6 | real files, never overwriting, progress, rememberExport, J17 on | per packet | J17 | #3684 | open (b4c35e57) |
+| DE-11 | DE-z | 7 | failures, Cancel mid-run, blueprint rows, feature-done, Closes #418 | per packet | J18 | #3684 | open (b4c35e57) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
