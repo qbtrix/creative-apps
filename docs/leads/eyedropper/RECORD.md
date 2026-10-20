@@ -34,6 +34,7 @@ Next: poll #3525 for merge, then restack #3531, #3540 and #3541 (#3541 sits on #
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-20T11:20Z #3531 needs-rebase fixed: dev merged at 5a8499cd (C4 description keeps the eyedropper and HistoryPanel clauses); #3541 restacked at e8e883c6 (397 lines); both CI: PASS.
 - 2026-10-20T11:02Z #3540 (EY-m) merged as 8d8919ca; EY-m done waits on a green dev Linux run; EY-7 starts once the #3541 restack lands.
 - 2026-10-20T10:46Z #3531 got needs-rebase (suiteui-sources.json description); fixer merges dev keeping all clauses, then restacks #3541.
 - 2026-10-20T10:03Z Restacked after EY-1: #3531 -> dev head 67f26a6a (C4 description kept both), #3540 -> dev head b01a356d (kept slice code over EY-1 stubs), #3541 on EY-a-2 head 4500f6bf; all CI: PASS.
