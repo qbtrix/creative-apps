@@ -13,7 +13,9 @@ extension AfterGlowJourneyTests {
         // The sheet asks, naming the client and the app.
         let sheet = home.app.sheets.firstMatch
         XCTAssert(sheet.waitForExistence(timeout: 10), "no approval sheet for the demo request")
-        XCTAssert(sheet.staticTexts["Allow “Test Client” to control AfterGlow?"].exists, "the sheet doesn't name the client and app")
+        XCTAssert(sheet.staticTexts["Allow the AI assistant “Test Client” to work in AfterGlow?"].exists, "the sheet doesn't name the client and app")
+        let help = "Allow Once lasts until “Test Client” disconnects. Always Allow remembers “Test Client” for AfterGlow."
+        XCTAssert(sheet.staticTexts[help].exists, "the sheet doesn't tell the two allows apart")
         for title in ["Deny", "Always Allow"] { XCTAssert(sheet.buttons[title].exists, "the sheet has no \(title)") }
         home.shot("ai-access-sheet")
 
@@ -22,7 +24,8 @@ extension AfterGlowJourneyTests {
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "the sheet stayed after Allow Once")
         let chip = home.element("suite.aiaccess.chip")
         XCTAssert(chip.waitForExistence(timeout: 5), "no Controlled by chip after Allow Once")
-        XCTAssertEqual(chip.label, "Controlled by Test Client")
+        // Falls back to the value the way Home's journey does (#262).
+        XCTAssertEqual(chip.label.isEmpty ? (chip.value as? String) ?? "" : chip.label, "Controlled by Test Client")
         home.shot("ai-access-chip")
 
         // Stop: the chip goes.

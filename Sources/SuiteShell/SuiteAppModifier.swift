@@ -5,6 +5,7 @@
 // support folder, sends the other documents to the host, and sets the window's
 // app switcher from the same Switch To items as the menu. Given `live`, it
 // also starts the app's live command channel (afterglow-mcp MC-10).
+// `.suiteSwitcher(current:)` sets that switcher alone, for the launcher's home.
 import Foundation
 import SuiteModel
 import SuiteUI
@@ -21,5 +22,15 @@ extension Scene {
             delegate.receiver = StoreHandOffs(store: FileStore(folder: support), from: app, deliver: HandOffTransport.deliver)
         }
         return environment(\.suiteSwitcher, SuiteSwitcherBridge.state(current: app))
+    }
+}
+
+extension View {
+    /// Sets the window's app switcher to the Switch To items for `app`, with
+    /// `app` current: the launcher's home, which takes no hand-offs, uses it
+    /// alone (the apps get it from `.suiteApp(_:host:)`).
+    @MainActor
+    public func suiteSwitcher(current app: SuiteApp) -> some View {
+        environment(\.suiteSwitcher, SuiteSwitcherBridge.state(current: app))
     }
 }

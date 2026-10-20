@@ -583,5 +583,24 @@
     "sources": [
       "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
     ]
+  },
+  "RJ-D32": {
+    "id": "RJ-D32",
+    "app": "design",
+    "weight": "med",
+    "job": "Resize the page to a new device size, then find a layer that now sits off it.",
+    "outcome": "Width and Height each change in one undo step; layers off the page stay visible, dimmed.",
+    "needs": [
+      "design/canvas-basics"
+    ],
+    "needs_note": "canvas-basics CB-c (page size in the inspector, layers past the edge)",
+    "closes_with": "design/canvas-basics",
+    "trap": "Page size fixed at creation; off-page layers vanish",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain"
+    ]
   }
 }

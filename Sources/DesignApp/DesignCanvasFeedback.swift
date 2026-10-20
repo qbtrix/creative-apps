@@ -14,8 +14,9 @@
 // pointer (`placement`, observed by this body alone, so the canvas body never re-runs
 // as it follows the pointer). The size badge (`design.canvas.badge`) is the Model's
 // `selectionBadge` in a caption pill hung clear of the selection's bottom handle, one size
-// at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs. It
-// reads the model and never writes it.
+// at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs. The
+// smart guides (DesignGuideOverlay, `design.canvas.guides`) draw the same copy's
+// `snapGuides`. It reads the model and never writes it.
 import AppKit
 import DesignModel
 import SuiteUI
@@ -51,6 +52,7 @@ struct DesignCanvasFeedback: View {
         if let badge = model.selectionBadge, let anchor = model.selectionBadgeAnchor {
             DesignSizeBadge(text: badge, anchor: anchor, zoom: zoom)
         }
+        DesignGuideOverlay(guides: DesignGuidePin.guides ?? model.snapGuides, zoom: zoom)
     }
 }
 

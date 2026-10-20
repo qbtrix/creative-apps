@@ -5,9 +5,11 @@
 // editing (light and dark), the PNG sequence 0...12 step 2 (7 files), To at 90
 // (Export refused), running at 3 of 7, finished ("Exported 7 files.") and
 // failed (scene-1.svg already in Exports). Each test checks the Model state it
-// shows first. The frame rows, the file count, the warnings and the problem
-// line wait on the sheet's options slot (#1989), so until then these PNGs show
-// the format, size, progress and result rows. flare-export-*.png. macOS only.
+// shows first. Under the format and size rows each shows Flare's options rows
+// (FlareExportOptionRows): the Frame or From, To and Step rows, the 1x and 2x
+// chips, Transparent background, the three warnings, and while editing the
+// file count or, at To 90, the problem line "Frames 0–90 aren't all in the
+// scene."; finished reads "Exported 7 files.". flare-export-*.png. macOS only.
 import FlareModel
 import SuiteUI
 import SwiftUI

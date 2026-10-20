@@ -8,7 +8,7 @@ and where its check runs: **C** the CLI on Linux, **Cm** the CLI headless on mac
 **baseline** is the hand estimate when the job was added; the live status comes from the nightly run.
 The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 
-31 jobs: 15 C, 8 Cm, 8 J. Baseline 6 pass, 3 partial, 22 fail, 0 unknown; baseline score **3.0/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
+32 jobs: 15 C, 8 Cm, 9 J. Baseline 6 pass, 3 partial, 23 fail, 0 unknown; baseline score **2.9/10** (10 × Σ weight × credit ÷ Σ weight; pass 1, partial 0.5, else 0).
 
 | id | job → outcome | weight | needs | closes with | baseline | trap | run | sources |
 |---|---|---|---|---|---|---|---|---|
@@ -43,3 +43,4 @@ The done rule: docs/factory/packets.md (Jobs) and docs/factory/lead.md rule 21.
 | RJ-D29 | Export a 1 px hairline icon at 1x. → Lines are crisp, not two grey pixels. | med | `design/canvas-basics` (canvas-basics CB-a whole points (beta)) | `design/canvas-basics` | fail | Half-point positions blur 1 px lines | Cm | [1](https://evolvingweb.com/blog/troubleshooting-blurry-svg-icons-sketch-illustrator) |
 | RJ-D30 | Open a 20-artboard, 500-layer file. → Opens in under 2 s, zoom and pan stay smooth. | med | `G1` (G1 gate (Design adopter)) | `G1` | partial | Untested at this size | Cm | [1](https://affinity.serif.com/en-gb/designer/full-feature-list/) |
 | RJ-D31 | Zoom to the selection, fit the page, read positions on the rulers. → The view frames the selection's rotated bounds, the page fits the window, and the ruler positions match the inspector. | high | built (#2213, #1601) | – | pass | Zoom to selection ignores rotated layers | J | [1](https://www.nobledesktop.com/classes/figma-bootcamp/syllabus) |
+| RJ-D32 | Resize the page to a new device size, then find a layer that now sits off it. → Width and Height each change in one undo step; layers off the page stay visible, dimmed. | med | `design/canvas-basics` (canvas-basics CB-c (page size in the inspector, layers past the edge)) | `design/canvas-basics` | fail | Page size fixed at creation; off-page layers vanish | J | captain |

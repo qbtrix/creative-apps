@@ -39,7 +39,9 @@
 // (AppSwitcher.swift) with no shared toolbar glass behind it: the environment's
 // `suiteSwitcher`, or AppSwitcherState.placeholder for this process's name.
 // The window measures its width (onGeometryChange) and gives the row
-// AppSwitcher.toolbarFit for it and its actions' titles (drawn icon only), so
+// AppSwitcher.toolbarFit for it and its actions' titles (drawn icon only), the
+// shown inspector's column and whether a `.searchable` field on the window is
+// open (the environment's `isSearching`), so
 // the row leaves the sidebar toggle, document actions, title, actions and
 // inspector toggle their room and none of them goes into the toolbar's
 // overflow; in a crowded toolbar the row narrows to its compact step, and
@@ -71,6 +73,8 @@ public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     @State private var windowWidth: CGFloat = 0
     /// The app switcher to show; nil shows the placeholder.
     @Environment(\.suiteSwitcher) private var switcher
+    /// True while a `.searchable` field applied to this window is open (#3357).
+    @Environment(\.isSearching) private var isSearching
 }
 
 extension SuiteWindow where Sidebar == SuiteSidebarList {
@@ -285,7 +289,8 @@ extension SuiteWindow {
                 // the actions, the current app's item alone.
                 let fit = AppSwitcher.toolbarFit(
                     windowWidth: windowWidth, itemCount: state.items.count,
-                    documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) })
+                    documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) },
+                    inspectorWidth: showsInspector ? inspectorColumn.ideal : 0, searching: isSearching)
                 AppSwitcher(
                     items: state.shownItems(everyItem: fit.showsEveryItem), current: state.current,
                     spacing: fit.spacing, onSelect: state.onSelect)

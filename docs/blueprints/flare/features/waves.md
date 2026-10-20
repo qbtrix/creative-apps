@@ -20,11 +20,12 @@ lists its tasks, owned files and acceptance tests.
 | 4 | Select, transform, zoom and edit on the stage | `stage-edit.md` | #204, #375, #384; IN-1 #397 (stage half) | `draw-key-save`; tasks SE-1, SE-2 on #273 and #995 | file when ready | planned |
 | 4 | Key in the inspector, ease and edit the timeline | `inspector-timeline.md` | #186, #348, #349 (SCENE), #376, #377, #378; IN-2 #385; IN-1 #397 (inspector half) | `draw-key-save`; tasks IT-7 on #63, IT-9 on #340 | #1515 | built |
 | 4 | Scenes and layers, new from a preset, files that never fail silently | `layers-files.md` | #350, #351, #392, #393; IN-4 #398 (files half) | `draw-key-save`; tasks LF-1 on #146, LF-2 on #73 | #1516 | built |
-| 5 | Export an SVG frame, a Lottie or a PNG sequence on the kernel's export run, never overwriting, with an exact round trip | `flare-export.md` | #354, #355, #374; LA-1 (StageRasterizer); #366 (the SVG Design's import reads) | `draw-key-save`; cross-line: FX-2 on editor-kernel:EK-a, FX-4 on editor-kernel:EK-run, FX-3 on editor-kernel:EK-chrome (in `waits_cross_line`); in the app, FX-5 on `inspector-timeline` | file when ready | planned |
+| 5 | Export an SVG frame, a Lottie or a PNG sequence on the kernel's export run, never overwriting, with an exact round trip | `flare-export.md` | #354, #355, #374; LA-1 (StageRasterizer); #366 (the SVG Design's import reads) | `draw-key-save`; cross-line: FX-2 on editor-kernel:EK-a, FX-4 on editor-kernel:EK-run, FX-3 on editor-kernel:EK-chrome (in `waits_cross_line`); in the app, FX-5 on `inspector-timeline` | #1973 | built |
 
 Longest chain per feature: mac-platform 3, live-stage 4, live-keys 4,
 live-scenes 3, draw-key-save 7 (the reason is in its Build waves), stage-edit
-3, inspector-timeline 4 (reason in its Build waves), layers-files 3.
+3, inspector-timeline 4 (reason in its Build waves), layers-files 3,
+flare-export 5 (FX-2 → FX-3 → FX-5 → FX-9 → FX-10).
 
 Shipped while these packets were written, so no packet: LM-0c3 fake export
 and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
@@ -84,8 +85,7 @@ and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
 
 ## Not in a packet yet (later features)
 
-In usage order (section 1's map). Tier 2: export (F15a #354, F15b #355, IN-7
-#374), symbols, instances and swatches (F12a #14, F12b #380, the INSTANCE
+In usage order (section 1's map). Tier 2: symbols, instances and swatches (F12a #14, F12b #380, the INSTANCE
 section of #349, IN-5), onion skin and motion path (F10 #379, IN-3), and
 Direct Select's anchor marks (F4b #390). Tier 3: interactions (F13a #352,
 F13b #353, F14 #381, IN-6), Assist (F16a #382, F16b #383, IN-8), and the
