@@ -51,3 +51,4 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 - Open line:library findings checked 2026-10-20T04:42:28Z: none in this feature's files. dev-red #3386 (macOS, range main..1b33afbb) predates these PRs; not ours.
 - 06:04Z: the lane's macOS build-only runs are still queued (#3423 run 39366083753 and #3424 run 39366318428 since 03:47Z; #3460 run 39377907664 since 06:00Z). This is runner backlog, not these PRs. Building continues on stacked drafts.
 - #3520 asks the supervisor to list the keyword/search budget suites (and the load-flaky Catalog/Grid ones) in Tests/perf-suites.txt. Open.
+- 06:26Z check-in: #3423, #3424, #3460 unmerged; their lane macOS build-only runs (39366083753, 39366318428, 39377907664) still queued. Open line:library findings: only #3453 (export fidelity, not this feature's files). Building ahead on stacked drafts.
