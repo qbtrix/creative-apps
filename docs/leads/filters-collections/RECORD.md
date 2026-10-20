@@ -79,3 +79,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - Check-in 2026-10-20T09:05Z: no dev merges since 08:40Z; #3424 macOS build 39366318428 still queued (5h15m). #3424, #3465, #3473 open and clean. No new line:library findings. Running: MD-10, MD-16. MD-17 drafted (#3579).
 - 09:28Z check-in: #3424 lane macOS build 39366318428 still queued (since 03:49Z); stack unchanged; no new findings.
 - 09:41Z: #3424 FC-2b lane macOS build 39366318428 succeeded; PR clean, lane merges it on its next sweep. Then cascade per Next.
+- 09:51Z check-in: #3424 FC-2b macOS build green, waiting on the lane's merge sweep. No new line:library findings in this feature's files (open ones are export journeys and #3565, not ours).
