@@ -69,7 +69,7 @@
 # being written (the Generated workflow writes them on dev).
 #
 # The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
-# test_scope and bump_core test the scripts of the same names (some need jq).
+# sample_surfaces, test_scope and bump_core test the scripts of the same names (some need jq).
 #
 # The journey quarantine check runs Tests/quarantine, then scripts/quarantine
 # check on UITests/quarantine.json: every entry names a journey that exists in
@@ -362,6 +362,8 @@ echo "== ci findings (Tests/ci_findings)"
 bash Tests/ci_findings/test_ci_findings.sh || fail "ci findings: scripts/ci-findings broke its stub-gh tests"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
+echo "== sample surfaces (Tests/sample_surfaces)"
+bash Tests/sample_surfaces/test_sample_surfaces.sh || fail "sample surfaces: scripts/sample-surfaces broke its fixture test"
 echo "== test scope (Tests/test_scope)"
 bash Tests/test_scope/test_test_scope.sh || fail "test scope: scripts/test-scope or Tests/perf-suites.txt broke its tests"
 echo "== journey quarantine (UITests/quarantine.json)"
