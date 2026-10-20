@@ -6,6 +6,7 @@
 // (PhotoStroke.swift's `endDrag`). Both are stubs that change nothing, so the
 // tool keeps its help "Not built yet (PG-3)." until PG-3. Linux-safe.
 import CoreRaster
+import FlareCore
 import SuiteKernel
 
 extension PhotoWorkspace {
@@ -13,6 +14,10 @@ extension PhotoWorkspace {
     /// when there is one, from `a` (offset 0) to `b` (offset 1) in canvas
     /// pixels, as one "Gradient" undo step. Stub: draws nothing; PG-3 builds it.
     public mutating func drawGradient(from a: Mask.Point, to b: Mask.Point) throws {}
+
+    /// `fill` drawn as `drawGradient(from:to:)` draws the tool's; what
+    /// `image.gradient` runs. Stub: draws nothing.
+    mutating func drawGradient(_ fill: Fill, from a: Mask.Point, to b: Mask.Point) throws {}
 
     /// One editor gesture on the tool's gradient (`toolOptions.gradient`),
     /// through `GradientRules`; not undoable, as every tool option. Stub:

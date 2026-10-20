@@ -81,24 +81,25 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     #expect(changed || before.toolHelp(tool)?.isEmpty == false, "\(tool) is dead on .live with no help saying why")
 }
 
-/// The Gradient tool is in the palette, disabled with its help until PG-3
-/// draws, on both services, and a drag with it changes nothing yet.
-@Test func theGradientToolIsDisabledWithItsHelp() throws {
+/// The Gradient tool is in the palette and enabled on both services (PG-3):
+/// a drag draws into the selected layer as one "Gradient" step.
+@Test func theGradientToolDrawsOnADrag() throws {
     #expect(PhotoTool.allCases.contains(.gradient))
-    #expect(PhotoTool.gradient.unavailableHelp == "Not built yet (PG-3).")
-    #expect(!PhotoTool.gradient.isEnabled)
-    #expect(PhotoWorkspace().toolHelp(.gradient) == "Not built yet (PG-3).")
-    #expect(PhotoWorkspace(services: .fake).toolHelp(.gradient) == "Not built yet (PG-3).")
+    #expect(PhotoTool.gradient.unavailableHelp == nil)
+    #expect(PhotoTool.gradient.isEnabled)
+    #expect(PhotoWorkspace().toolHelp(.gradient) == nil)
+    #expect(PhotoWorkspace(services: .fake).toolHelp(.gradient) == nil)
     var workspace = try PhotoWorkspace.fixture(.sample)
     let before = workspace
     workspace.selectTool(.gradient)
     stroke(&workspace, from: Mask.Point(x: 520, y: 180), to: Mask.Point(x: 600, y: 260))
-    #expect(workspace.pixels == before.pixels && !workspace.isDragging)
-    #expect(workspace.historySteps.count == before.historySteps.count)
+    #expect(workspace.pixels != before.pixels && !workspace.isDragging)
+    #expect(workspace.historySteps.count == before.historySteps.count + 1)
+    #expect(workspace.undoActionName == "Undo Gradient")
 }
 
 /// The palette's tools are the catalog's `tool.` commands, each in the id
-/// ledger, and the gradient's is unavailable with the tool's help.
+/// ledger.
 @Test func theToolCommandIDsMatchTheCatalog() throws {
     let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
     let ledger = Set(try String(contentsOf: url, encoding: .utf8).split(separator: "\n").map(String.init))
