@@ -89,10 +89,10 @@ extension LibraryCatalog {
         var spellings: [String] = [], lowered: [String] = [], isTheirs: [Bool] = []
         var uses: [Int] = [], company: [Int] = []
         var photoIDs: [Int] = []
-        for photo in items {
+        for index in items.indices {  // by index: no photo is copied
             photoIDs.removeAll(keepingCapacity: true)
             var withTheirs = false
-            for keyword in photo.keywords {
+            for keyword in items[index].keywords {
                 let id = number[keyword] ?? spellings.count
                 if id == spellings.count {
                     number[keyword] = id
@@ -135,7 +135,10 @@ extension LibraryCatalog {
     /// The photos the keyword edits act on: the cull targets, in catalog order.
     private var keywordTargets: [PhotoItem] {
         let ids = cullTargets
-        if ids.count == 1, let id = ids.first { return items.first { $0.id == id }.map { [$0] } ?? [] }
+        if ids.count == 1, let id = ids.first {
+            for index in items.indices where items[index].id == id { return [items[index]] }
+            return []
+        }
         return ids.isEmpty ? [] : items.filter { ids.contains($0.id) }
     }
 
@@ -177,8 +180,8 @@ extension LibraryCatalog {
         // lowercased, so most of a large catalog is passed over unhashed.
         let endings = seen.compactMap { $0.utf8.last }
         var checked: Set<String> = []  // each spelling is lowercased once
-        for photo in items where spelling.count < names.count {
-            for keyword in photo.keywords where Self.mayEnd(keyword, in: endings) && checked.insert(keyword).inserted {
+        for index in items.indices where spelling.count < names.count {
+            for keyword in items[index].keywords where Self.mayEnd(keyword, in: endings) && checked.insert(keyword).inserted {
                 let key = keyword.lowercased()
                 if seen.contains(key), spelling[key] == nil { spelling[key] = keyword }
             }
