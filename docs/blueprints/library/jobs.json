@@ -388,7 +388,7 @@
     "job": "Import RAW+JPEG pairs and see each pair once.",
     "outcome": "Each RAW+JPEG pair shows as one item, and a rating applies to both files.",
     "needs": [],
-    "needs_note": "raw RW-b",
+    "needs_note": "no packet: RAW+JPEG pairing was cut from library/raw for the beta (re-cut 2026-10-21, open question R1)",
     "closes_with": null,
     "trap": "Pair shows twice; rating applies to one half",
     "run": "C",
@@ -404,16 +404,19 @@
     "weight": "med",
     "job": "Open camera RAW files and see the embedded preview at once.",
     "outcome": "RAW files import and show their embedded preview straight away.",
-    "needs": [],
-    "needs_note": "raw RW-b",
-    "closes_with": null,
+    "needs": [
+      "library/raw",
+      "suiteui/shared-raw"
+    ],
+    "closes_with": "library/raw",
     "trap": "RAW skipped silently on import",
     "run": "Cm",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://home.camerabits.com/tour-photo-mechanic/"
-    ]
+    ],
+    "waits_on": "RW-4"
   },
   "RJ-L23": {
     "id": "RJ-L23",
