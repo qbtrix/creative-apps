@@ -1,10 +1,7 @@
-// RenderBudgetEyedropperTests.swift (eyedropper EY-4): the loupe's render budget (packet Quality tests) through
-// the harness (RenderBudgetHarness.swift). A canvas of the gallery page's red, green and black swatches carries a
-// SampleLoupe that a pointer model moves 120 times, one sample per 120 Hz tick, as an eyedropper tool's hover
-// would. Only the loupe's own layer reads the pointer, so the page (the window body the budget counts) runs at most
-// 3 times. `loupeTrackInThreeBodies` gates the bodies; `loupeTrackTiming` (report-only, Tests/perf-suites.txt
-// once the supervisor lists it) judges the step time. Nested in BodyCountSuites: it reads a global counter.
-// macOS only.
+// RenderBudgetEyedropperTests.swift (eyedropper EY-4): the loupe's render budget (RenderBudgetHarness.swift). A
+// pointer model moves a SampleLoupe over red, green and black swatches 120 times, one per 120 Hz tick; only the
+// loupe's layer reads it, so the page body runs at most 3 times. `loupeTrackTiming` is report-only (perf-suites).
+// Nested in BodyCountSuites: it reads a global counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import Observation
@@ -33,13 +30,7 @@ extension BodyCountSuites {
             let pointer = LoupePointer()
             let w = RenderBudgetWindow(LoupeBudgetPage(pointer: pointer))
             defer { w.close() }
-            let bodies = { () -> Int? in
-                #if DEBUG
-                return LoupeBudgetPage.bodyRuns
-                #else
-                return nil
-                #endif
-            }
+            let bodies = { () -> Int? in LoupeBudgetPage.bodyRuns }
             try await w.settle(untilStable: bodies)
             let side = LoupeBudgetPage.side
             let track = try await w.measure("eyedropper loupe track, 120 samples", bodies: bodies) {
