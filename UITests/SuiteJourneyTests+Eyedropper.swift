@@ -1,16 +1,13 @@
 // SuiteJourneyTests+Eyedropper.swift (eyedropper EY-2 written, EY-4 turns on): the packet's journey steps 2 to 5
 // on the gallery's `eyedropper` page. The button opens the system sampler and a click on the red swatch sets the
 // row; Escape picks nothing; the page's tool shows the loupe over green; 5 × 5 reads the mean at the swatch edge.
-// Skipped by name until EY-3 builds the views and EY-4 turns it on.
+// On since EY-4; steps 4 and 5 need the page's tool (EY-7).
 import XCTest
 
 final class SuiteEyedropperJourneyTests: XCTestCase {
-    /// True until EY-4: the views are placeholders, so the steps would fail on what isn't built.
-    static let waiting = true
     static let page = "eyedropper"
 
     @MainActor func testEyedropperPicksFromCanvas() throws {
-        if Self.waiting { throw XCTSkip("waits on EY-4") }
         let gallery = Journey(
             "Library", self, name: "suiteui", arguments: ["-SuiteGallery", Self.page, "-SuiteGalleryFakes", "-SuitePerfProbe"])
         XCTAssert(gallery.element("suite.gallery.\(Self.page)").waitForExistence(timeout: 30), "no \(Self.page) page")
@@ -48,7 +45,7 @@ final class SuiteEyedropperJourneyTests: XCTestCase {
         XCTAssert(lines(log).last?.hasPrefix("color.sample") == true, "the tool's click didn't sample: \(lines(log))")
 
         // Step 5: 5 × 5 at the swatch edge reads the mean of what it covers, not the pixel under the point.
-        let five = gallery.app.radioButtons["5 × 5"].firstMatch
+        let five = gallery.element("suite.sample.size.5")
         XCTAssert(five.waitForExistence(timeout: 5), "no 5 × 5 size chip")
         five.click()
         gallery.shot("eyedropper-sizes")
