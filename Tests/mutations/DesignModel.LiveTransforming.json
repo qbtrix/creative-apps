@@ -11,7 +11,7 @@
     "file": "Sources/DesignModel/Live/LiveTransforming.swift",
     "find": "width: Swift.max(width, 1), height: Swift.max(height, 1))",
     "replace": "width: width, height: height)",
-    "tests": "DesignSeveralTransformTests"
+    "tests": "DesignKernelTransformAdapterTests"
   },
   {
     "label": "a locked layer does not refuse",
