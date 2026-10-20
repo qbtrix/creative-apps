@@ -1,17 +1,29 @@
-// PhotoWindow+Sample.swift: the eyedropper area of a Photo window (PV-9:
-// sample size, sampling a color): its intents, its route and its hook on the
-// window. PV-0 stub: SampleIntent has no case yet (the eyedropper samples
-// through its canvas drag), and PhotoSampleArea is the identity until PV-9
-// needs it.
+// PhotoWindow+Sample.swift: the eyedropper area of a Photo window (eyedropper
+// PE-2): its intents and their route. The size chips set the square the tool
+// reads; a pick samples the composite through the Model's SampleTarget
+// adapter (PhotoSample+Kernel) and makes it the brush colour, with no undo
+// step, and a refused pick beeps. PE-3 wires the canvas click and the loupe
+// to `.pick(at:)`; PhotoSampleArea is the identity until then.
+import AppKit
 import PhotoModel
+import SuiteKernel
 import SwiftUI
 
-/// What the eyedropper area can be asked to do (PV-9 adds the cases).
-enum SampleIntent {}
+/// What the eyedropper area can be asked to do.
+enum SampleIntent {
+    /// The square the eyedropper reads.
+    case size(SampleSize)
+    /// Sample the composite at `point` (canvas pixels) into the brush colour.
+    case pick(at: Point)
+}
 
 extension PhotoWindow {
     func performSample(_ intent: SampleIntent) {
-        switch intent {}
+        switch intent {
+        case .size(let size): model.setSampleSize(size)
+        case .pick(let point):
+            do { try model.pickBrushColor(at: point) } catch { NSSound.beep() }
+        }
     }
 }
 

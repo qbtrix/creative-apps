@@ -8,8 +8,10 @@
 // selection and drag serial live here too (FlareEasing.swift uses them); a
 // change of layer selection drops the segment. Stored state is `internal(set)`
 // so each area's extension file (docs/blueprints/flare.md, section 2) can set it; that includes the paint and
-// timeline-edit state (inspector-timeline), cleared on load like the rest of the per-document state.
+// timeline-edit state (inspector-timeline), cleared on load like the rest of the per-document state. It reads as
+// SuiteKernel's HistoryReading over the engine (adopt-kernel-undo AU-f1), so the shared Edit menu reads one protocol.
 import FlareCore
+import SuiteKernel
 
 /// The drawing tools on Flare's tool palette.
 public enum FlareTool: String, CaseIterable, Sendable {
@@ -28,7 +30,7 @@ public enum FlareTool: String, CaseIterable, Sendable {
     public var isEnabled: Bool { unavailableHelp == nil }
 }
 
-public struct FlareWorkspace: Sendable, Equatable {
+public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     var engine: CommandEngine?
     /// The use cases the workspace edits through; `.live` or `.fake()`.
     public internal(set) var services: FlareServices
@@ -113,9 +115,12 @@ public struct FlareWorkspace: Sendable, Equatable {
 
     public var canUndo: Bool { engine?.canUndo ?? false }
     public var canRedo: Bool { engine?.canRedo ?? false }
-    /// "Undo Set Keyframe Easing", for the Edit menu; nil with nothing to undo.
-    public var undoActionName: String? { engine?.undoActionName }
-    public var redoActionName: String? { engine?.redoActionName }
+    /// The next undo step's name without the menu's prefix ("Set Keyframe Easing"); nil with nothing to undo.
+    public var undoName: String? { engine?.undoActionName.map { String($0.dropFirst("Undo ".count)) } }
+    public var redoName: String? { engine?.redoActionName.map { String($0.dropFirst("Redo ".count)) } }
+    /// "Undo Set Keyframe Easing", the Edit menu's title over `undoName`; nil with nothing to undo.
+    public var undoActionName: String? { undoName.map { "Undo \($0)" } }
+    public var redoActionName: String? { redoName.map { "Redo \($0)" } }
 
     /// Replaces the open document with a new one holding one default scene in
     /// a fresh engine (no undo history), and selects that scene.

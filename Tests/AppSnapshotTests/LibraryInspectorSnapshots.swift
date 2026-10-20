@@ -2,8 +2,8 @@
 // above the Info and Develop tabs (status-and-layout SL-6), on the shoot
 // fixture sorted by name, Light and Dark, at UTC: IMG_0001 alone
 // (`library-inspector`: Captured, Size and Kind) and IMG_0001 … IMG_0005
-// (`library-inspector-several`: "5 Photos" and the capture day). With nothing
-// selected the header names the collection and its count
+// (`library-inspector-several`: "5 Photos", the active IMG_0001 and the
+// capture day). With nothing selected the header names the collection and its count
 // (`library-inspector-none` is LibraryShellSnapshots'). The header carries
 // `library.inspector.header`, and MetadataInspector draws no title of its own
 // (#2982), so the inspector shows one. macOS only.
@@ -41,8 +41,8 @@ import Testing
         let catalog = try shoot(selecting: 5)
         let header = catalog.inspectorHeader(utcOffset: 0)
         #expect(header.title == "5 Photos")
-        #expect(header.facts.map(\.label) == ["Captured"])
-        #expect(header.facts.first?.value == "2026-06-01")
+        #expect(header.facts.map(\.label) == ["Active", "Captured"])
+        #expect(header.facts.map(\.value) == ["IMG_0001", "2026-06-01"])
         try shoot(catalog, "library-inspector-several")
     }
 
