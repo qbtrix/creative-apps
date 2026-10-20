@@ -18,7 +18,7 @@ struct LibraryCatalogSteps: HistoryReading {
     var canRedo: Bool { catalog.history.redoTop != nil }
     var undoName: String? { catalog.history.top?.name }
     var redoName: String? { catalog.history.redoTop?.name }
-    var isDirty: Bool { catalog.saveRevision != catalog.savedRevision }
+    var isDirty: Bool { catalog.catalogSession.isDirty }
 }
 
 extension LibraryCatalog {

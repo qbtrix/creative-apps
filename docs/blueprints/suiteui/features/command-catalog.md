@@ -19,8 +19,9 @@ S14 (the command palette lists catalog entries, so it is built on this).
 
 **Depends on:** editor-kernel (#1933): only its contract slice EK-a (the
 `SuiteKernel` target, on dev) and EK-undo (`HistoryReading`, on dev), so
-nothing here waits on open work except CC-9 (EK-u and font-picker's
-FP-a, which edit `SuiteGallery.swift` first) and CC-14 (EK-z, for the
+nothing here waits on open work except CC-9 (EK-u, which edits
+`SuiteGallery.swift` first; font-picker's FP-a now edits it after CC-u,
+lead decision 2026-10-20) and CC-14 (EK-z, for the
 shared prose files). No
 creative-core issue: FlareCore stays as it is (see "FlareCore's engine").
 
@@ -66,14 +67,14 @@ target's.
 | CC-a | `SuiteKernel/Commands` exists with every public type and signature as a documented stub, a fake headless document with six commands, and one `<X>Headless` stub in each app Model, so the CLI, the MCP server, the UI page and the adopt slices build against it at once. | CC-1, CC-2 | CJ0 | – |
 | CC-schema | `ParamSchema` writes JSON Schema 2020-12 for the subset the suite uses and validates a JSON value with a path per issue, and `SchemaProbe` derives a schema from any `Decodable` type by running its init on a recording decoder. | CC-3, CC-4, CC-5 | CJ1 | CC-a |
 | CC-run | `CommandCatalog` runs a command by id or envelope: unknown, malformed, unavailable and failed runs each name their cause and change nothing, an `edit` run records exactly one undo step, a batch runs atomic or stops at the first refusal, and the id ledger and the conformance suite check any app's catalog. | CC-6, CC-7, CC-8 | CJ2 | CC-a |
-| CC-u | The gallery's `command-catalog` page lists the fake catalog as menu items built from specs: enabled ones run on the fake document, disabled ones show their why-not as help, within the render budget. | CC-9, CC-10 | `SuiteJourneyTests.testCommandCatalogGallery` | CC-a; editor-kernel:EK-u and font-picker:FP-a (CC-9, for `SuiteGallery.swift`) |
+| CC-u | The gallery's `command-catalog` page lists the fake catalog as menu items built from specs: enabled ones run on the fake document, disabled ones show their why-not as help, within the render budget. | CC-9, CC-10 | `SuiteJourneyTests.testCommandCatalogGallery` | CC-a; editor-kernel:EK-u (CC-9, for `SuiteGallery.swift`) |
 | CC-lint | A Linux test fails when an app's menu item or toolbar button is built without a command spec and isn't in that app's shrinking baseline, so the one path is enforced, not remembered. | CC-11, CC-12 | CJ3 | CC-a |
 | CC-z | The full Linux walk runs the fake document through list, describe, every example, a batch, undo and save, the blueprints name the command layer, and the feature is built. | CC-13, CC-14 | CJ4 | every slice above; editor-kernel:EK-z (CC-14) |
 
 CC-a is the contract (rule 12) and declares every signature the UI, the
 logic slices, the CLI and the adopt slices call, as stubs (rule 18): a stub
 returns the fake's value or throws `CatalogError.notBuilt`. CC-u is the UI
-slice (`"ui": true`); it waits only on CC-a (and on EK-u and FP-a for the gallery file)
+slice (`"ui": true`); it waits only on CC-a (and on EK-u for the gallery file)
 and its first task puts the page in the gallery index, the visible control.
 CC-schema, CC-run and CC-lint never wait on CC-u. CC-z integrates.
 

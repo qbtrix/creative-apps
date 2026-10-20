@@ -1,0 +1,156 @@
+{
+  "title": "Halo moves keys: picks across lanes, Select All Keys, a snapped group drag as one undo step, each a command",
+  "wave": "W4",
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/key-editing (adopter of suiteui/timeline TL-c, TL-d and suiteui/timeline-select-all); RJ-H13; #2763; the stress gate's Halo move-keys gap (PR #3499)",
+  "waits_on": "suiteui/timeline-select-all's TSA-a (cross-line, KE-2 only); adopt-command-catalog AC-halo before KE-1 (hand-off); PR #3499 before KE-7",
+  "depends": [
+    "foundation",
+    "history-files",
+    "easing",
+    "viewer-playback"
+  ],
+  "longest_chain": "5 (KE-1 → KE-2 → KE-5 → KE-7 → KE-8)",
+  "journeys": [
+    "HaloKeyEditingJourneyTests.testSelectAllAndMoveKeys"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloCommand.swift",
+    "Sources/HaloModel/Availability/HaloAvailability+Easing.swift",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Sources/HaloModel/HaloKeyPick+Kernel.swift",
+    "Sources/HaloModel/HaloKeyMove+Kernel.swift",
+    "Tests/HaloModelTests/HaloKeyEditingTests.swift",
+    "Sources/HaloApp/HaloTimelineView.swift",
+    "Sources/HaloApp/HaloAnimationMenu.swift",
+    "Sources/HaloApp/HaloWindow+Easing.swift",
+    "Sources/HaloModel/HaloKeySelection.swift",
+    "Tests/HaloModelTests/HaloKeySelectionTests.swift",
+    "Tests/mutations/HaloModel.HaloKeySelection.json",
+    "Tests/mutations/HaloModel.HaloKeyPick+Kernel.json",
+    "Tests/mutations/HaloModel.HaloKeyMove+Kernel.json",
+    "Tests/HaloModelTests/HaloKeysBudgetTests.swift",
+    "Tests/RealJobs/halo/move-keys/move-keys.jobs.json",
+    "Tests/RealJobs/halo/move-keys/input/bounce.halo",
+    "Tests/AppSnapshotTests/HaloKeyEditingSnapshots.swift",
+    "UITests/HaloJourneyTests+KeyEditing.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloKeyEditingTests.swift",
+    "UITests/HaloJourneyTests+StressPerf.swift",
+    "docs/blueprints/halo.md",
+    "docs/blueprints/halo/features/key-editing.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "KE-a",
+      "behavior": "The four commands exist with their catalog ids and stubbed Model calls, and the timeline sends them: picks by click, Shift and ⌘, Select All Keys from ⌘A, the Animation menu and the context menu, and key drags, on the stubs.",
+      "tasks": [
+        "KE-1",
+        "KE-2"
+      ],
+      "journeys": [
+        "MJ-KE"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloCommand.swift",
+        "Sources/HaloModel/Availability/HaloAvailability+Easing.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Sources/HaloModel/HaloKeyPick+Kernel.swift",
+        "Sources/HaloModel/HaloKeyMove+Kernel.swift",
+        "Tests/HaloModelTests/HaloKeyEditingTests.swift",
+        "Sources/HaloApp/HaloTimelineView.swift",
+        "Sources/HaloApp/HaloAnimationMenu.swift",
+        "Sources/HaloApp/HaloWindow+Easing.swift"
+      ]
+    },
+    {
+      "id": "KE-u",
+      "behavior": "The picked keys across lanes, the menus and a key drag look right and stay inside their render budget.",
+      "tasks": [
+        "KE-5",
+        "KE-6"
+      ],
+      "journeys": [
+        "HJ-K1"
+      ],
+      "waits": {
+        "KE-a": [
+          "KE-5",
+          "KE-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/HaloKeyEditingSnapshots.swift",
+        "UITests/HaloJourneyTests+KeyEditing.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloKeyEditingTests.swift"
+      ]
+    },
+    {
+      "id": "KE-m",
+      "behavior": "Picks span layers, Select All Keys picks every key of the composition (hidden layers too), and a move shifts every picked key as one undo step or refuses whole.",
+      "tasks": [
+        "KE-3",
+        "KE-4"
+      ],
+      "journeys": [
+        "MJ-KE"
+      ],
+      "waits": {
+        "KE-a": [
+          "KE-3",
+          "KE-4"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/HaloKeyPick+Kernel.swift",
+        "Sources/HaloModel/HaloKeySelection.swift",
+        "Tests/HaloModelTests/HaloKeySelectionTests.swift",
+        "Tests/mutations/HaloModel.HaloKeySelection.json",
+        "Tests/mutations/HaloModel.HaloKeyPick+Kernel.json",
+        "Sources/HaloModel/HaloKeyMove+Kernel.swift",
+        "Tests/HaloModelTests/HaloKeyEditingTests.swift",
+        "Tests/mutations/HaloModel.HaloKeyMove+Kernel.json",
+        "Tests/HaloModelTests/HaloKeysBudgetTests.swift",
+        "Tests/RealJobs/halo/move-keys/move-keys.jobs.json",
+        "Tests/RealJobs/halo/move-keys/input/bounce.halo"
+      ]
+    },
+    {
+      "id": "KE-z",
+      "behavior": "The journey and the stress gate's Halo move-keys gesture pass on live, and the blueprint says Halo moves keys.",
+      "tasks": [
+        "KE-7",
+        "KE-8"
+      ],
+      "journeys": [
+        "HJ-K1"
+      ],
+      "waits": {
+        "KE-u": [
+          "KE-7"
+        ],
+        "KE-m": [
+          "KE-7"
+        ],
+        "core-loop:CL-z": [
+          "KE-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+KeyEditing.swift",
+        "UITests/HaloJourneyTests+StressPerf.swift",
+        "docs/blueprints/halo.md",
+        "docs/blueprints/halo/features/key-editing.wave.json"
+      ]
+    }
+  ]
+}

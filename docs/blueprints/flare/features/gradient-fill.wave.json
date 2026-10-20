@@ -90,6 +90,10 @@
         "FG-a": [
           "FG-5",
           "FG-6"
+        ],
+        "key-select-all:KS-a": [
+          "FG-5",
+          "FG-6"
         ]
       },
       "ui": false,

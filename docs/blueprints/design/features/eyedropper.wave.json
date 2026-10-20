@@ -1,0 +1,147 @@
+{
+  "title": "An Eyedropper tool that sets the selection's fill or stroke from the colour under the pointer",
+  "wave": 3,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/eyedropper (adopter of S13); RJ-D34",
+  "waits_on": "suiteui eyedropper's contract slice EY-a (cross-line); transform's DT-m before DY-5 and DY-6",
+  "depends": [
+    "design-window",
+    "select-several",
+    "style-rows",
+    "design-export",
+    "layers-panel",
+    "canvas-basics",
+    "snapping"
+  ],
+  "longest_chain": "6 (DY-1 → DY-2 → DY-3 → DY-4 → DY-7 → DY-8)",
+  "journeys": [
+    "DesignEyedropperJourneyTests.testPickFillFromShape"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignSample+Kernel.swift",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Tests/DesignModelTests/DesignSampleTests.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "UITests/DesignJourneyTests+Eyedropper.swift",
+    "Sources/DesignApp/DesignEyedropperLoupe.swift",
+    "Sources/DesignApp/DesignCanvasFeedback.swift",
+    "Tests/AppSnapshotTests/DesignEyedropperOverlayTests.swift",
+    "Tests/AppSnapshotTests/DesignEyedropperSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignEyedropperTests.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/mutations/DesignModel.DesignSample+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/DesignModelTests/DesignSampleCommandTests.swift",
+    "Tests/RealJobs/design/pick-fill/pick-fill.jobs.json",
+    "Tests/RealJobs/design/pick-fill/input/two-shapes.design",
+    "docs/blueprints/design/features/eyedropper.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DY-a",
+      "behavior": "The Eyedropper tool exists on the palette and the adapter is declared as stubs.",
+      "tasks": [
+        "DY-1",
+        "DY-2"
+      ],
+      "journeys": [
+        "MJ-DY"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignSample+Kernel.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/DesignModelTests/DesignSampleTests.swift",
+        "Sources/DesignApp/DesignIntent.swift",
+        "UITests/DesignJourneyTests+Eyedropper.swift"
+      ]
+    },
+    {
+      "id": "DY-u",
+      "behavior": "The loupe follows the pointer while the tool is active, a click and an Option-click send their picks, and the snapshots and render budget hold.",
+      "tasks": [
+        "DY-3",
+        "DY-4"
+      ],
+      "journeys": [
+        "J-DY"
+      ],
+      "waits": {
+        "DY-a": [
+          "DY-3",
+          "DY-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignEyedropperLoupe.swift",
+        "Sources/DesignApp/DesignCanvasFeedback.swift",
+        "Tests/AppSnapshotTests/DesignEyedropperOverlayTests.swift",
+        "Tests/AppSnapshotTests/DesignEyedropperSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignEyedropperTests.swift"
+      ]
+    },
+    {
+      "id": "DY-m",
+      "behavior": "A pick reads the topmost visible layer's colour at the point and applies it to the selection's fill or stroke as one step, by the tool or by command.",
+      "tasks": [
+        "DY-5",
+        "DY-6"
+      ],
+      "journeys": [
+        "MJ-DY"
+      ],
+      "waits": {
+        "DY-a": [
+          "DY-5",
+          "DY-6"
+        ],
+        "transform:DT-m": [
+          "DY-5",
+          "DY-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignSample+Kernel.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Tests/DesignModelTests/DesignSampleTests.swift",
+        "Tests/mutations/DesignModel.DesignSample+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/DesignModelTests/DesignSampleCommandTests.swift",
+        "Tests/RealJobs/design/pick-fill/pick-fill.jobs.json",
+        "Tests/RealJobs/design/pick-fill/input/two-shapes.design"
+      ]
+    },
+    {
+      "id": "DY-z",
+      "behavior": "The journey picks a fill and a stroke on live services, and the feature is built.",
+      "tasks": [
+        "DY-7",
+        "DY-8"
+      ],
+      "journeys": [
+        "J-DY"
+      ],
+      "waits": {
+        "DY-u": [
+          "DY-7"
+        ],
+        "DY-m": [
+          "DY-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Eyedropper.swift",
+        "docs/blueprints/design/features/eyedropper.wave.json"
+      ]
+    }
+  ]
+}
