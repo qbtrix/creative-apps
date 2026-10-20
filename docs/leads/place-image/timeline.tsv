@@ -1,0 +1,5 @@
+utc	stage	event	ref	note
+2026-10-20T20:40Z	0	stage-start	-	setup: brief main b3011ab verified; base origin/dev 6c2c7b0
+2026-10-20T21:00Z	0	stage-end	-	waits checked on photo-gradient-fill, photo-transform, history-panel, photo-eyedropper, placed-images, tone-controls
+2026-10-20T21:05Z	1	stage-end	-	packets read; slices and tasks copied
+2026-10-20T21:08Z	2	stage-end	-	combined plan W1-W6 across place-image, tone-controls, multi-layer-select

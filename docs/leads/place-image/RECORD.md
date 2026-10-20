@@ -1,0 +1,49 @@
+# place-image lead record
+
+Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
+Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
+Stage: 2 plan done
+Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
+Next: PP-a builder (wave 1, one PR); PP-3 once placed-images PL-2 merges
+
+## Slices
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| PP-a | PlacedImageTarget conformance as stubs; checks and RJ-P37 job written, disabled | PP-1, PP-2 | MJ-PP | placed-images PL-1 (merged #3578) | no | 0 | building | – | – |
+| PP-u | File > Place… and drop run place.image on stubs; snapshots, budget, journey written | PP-3, PP-4 | PJ-P1 | PP-a; placed-images PL-2 (PP-3) | yes | 0 | waiting | – | – |
+| PP-m | placing PNG/JPEG adds a fitted pixel layer above the selection as one step; SVG refused; catalog | PP-5, PP-6 | MJ-PP | PP-a; PG-m (PP-6) | no | 0 | waiting | – | – |
+| PP-z | live, journey on live, blueprint lists Place | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; PG-z, PM-z (PP-8) | yes | 0 | waiting | – | – |
+
+## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| PP-1 | PP-a | 1 | conformance as stubs; PhotoPlaceTests disabled | Sources/PhotoModel/PhotoPlace+Kernel.swift, Tests/PhotoModelTests/PhotoPlaceTests.swift | suite compiles, disabled | – | building |
+| PP-2 | PP-a | 1 | RJ-P37 job folder, waits_on PP-6 | Tests/RealJobs/photo/place-logo/ | job listed, skipped | – | building |
+| PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceSnapshots.logo | – | waiting (PL-2) |
+| PP-4 | PP-u | 3 | snapshots, budget, journey skipped | Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift, RenderBudgetPhotoPlaceTests.swift, UITests/PhotoJourneyTests+Place.swift | snapshots | – | waiting |
+| PP-5 | PP-m | 4 | conformance bodies; insertPixelLayer from paste; tests on (PP-6 folded in) | PhotoPlace+Kernel.swift, PhotoClipboard.swift, tests, mutations, catalog, ids | PhotoPlaceTests; .centredOnCanvas .largeFitsCanvas .aboveSelection | – | waiting |
+| PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | – | waiting |
+| PP-8 | PP-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, place-image.wave.json | scripts/ci | – | waiting |
+
+## Waves (combined plan, all three features)
+- W1: PM-1 (SuiteUI LayerTreeList multi-select, no waits) and PP-a (PP-1 and PP-2 in one PR; waits met by PL-1 #3578 and PL-m on dev). The files do not overlap.
+- W2: PM-2 once photo-gradient-fill PG-a is slice-done; PP-3 once placed-images PL-2 has merged; PT-1 once suiteui tone-controls TC-a is slice-done.
+- W3: PM-3 (after PM-2), PP-4 (after PP-3), PT-2 (after PT-1), PM-4 (after PM-2).
+- W4: PP-5 with PP-6 folded in, then PM-5 and PM-6, stacked in that order on the catalog. All three wait on PG-m. PT-3 and PT-4 wait on TC-5 and TC-6, IM-photo and the catalog chain. PM-7, PM-8, PT-5 and PT-6 also run here.
+- W5: PP-7, PM-9, PT-7 (live journeys). W6: PP-8, PM-10, PT-8 (feature-done; each waits on PG-z).
+
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
+| – | – | – | – | – | – |
+
+## Decisions
+- v3 loop: each packet has a `## Slices` table.
+- Base `dev`, not `main`. The brief step one checked main at b3011ab, but the packets exist only on dev (6c2c7b0), and CLAUDE.md and the lead contract say to branch from and target dev.
+- Line lead (rule 19) for #3455 place-image, #3468 tone-controls (Photo) and #3535 multi-layer-select. There is one combined wave plan, and all three records show the same waves.
+- Photo tone-controls records on `lead/photo-tone-controls`, because `lead/tone-controls` belongs to the live SuiteUI tone-controls lead (#3476). PRs keep `Feature: tone-controls`.
+- PP-1 starts on PL-1 (#3578, merged) rather than all of PL-a. PP-1 is Model-only and uses only the kernel `PlacedImageTarget` and Place types, which are on dev; PL-m (rule bodies) is done too. PL-2 is SuiteUI views, and only PP-3 needs it.
+- PP-6 (under 50 lines) is folded into PP-5's PR, as the packet says.
+- One PR per slice (rule 22), split per task when a slice is over the 400-line cap: PM-a (~600, so PM-1, PM-2 and PM-3 each get a PR).
+
+## Open
