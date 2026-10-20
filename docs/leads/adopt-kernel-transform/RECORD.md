@@ -83,3 +83,5 @@ fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T13:16:33Z: AT-d1 #3593 merged. AT-d2 opened as #3604 (head 33fd4388, fast-lane + feature-done), mergeable clean, waiting on the lane's macOS build.
 
 - 2026-10-20T14:18:51Z: AT-d2 #3604 merged 14:14Z as 6fa96843 after macOS build 39429014286 passed; AT-design waits on a run at or after 6fa96843 (39436941980 at 56e73319 predates it).
+
+- 2026-10-20T14:40Z: Full CI 39436941980 cancelled. Full CI 39438701609 at 9f880c85 (contains every slice, incl. 6fa96843) queued; scoped runs at 897ccbb2 still queued. Slice lines wait.
