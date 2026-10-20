@@ -1,0 +1,30 @@
+[
+  {
+    "label": "IMG_0024 gets camera details",
+    "file": "Sources/LibraryModel/LibraryFixtures.swift",
+    "find": "camera: n == 24 ? .none : camera(n))",
+    "replace": "camera: camera(n))",
+    "tests": "LibraryCamerasFixtureTests.swift"
+  },
+  {
+    "label": "the 50mm lens is at f/2.8",
+    "file": "Sources/LibraryModel/LibraryFixtures.swift",
+    "find": "case 2: (\"50mm F1.8\", 1.8, 50)",
+    "replace": "case 2: (\"50mm F1.8\", 2.8, 50)",
+    "tests": "LibraryCamerasFixtureTests.swift"
+  },
+  {
+    "label": "the ISO stops at 3200",
+    "file": "Sources/LibraryModel/LibraryFixtures.swift",
+    "find": "iso: 100 << ((n - 1) % 7),",
+    "replace": "iso: 100 << ((n - 1) % 6),",
+    "tests": "LibraryCamerasFixtureTests.swift"
+  },
+  {
+    "label": "Sunset starts on IMG_0004",
+    "file": "Sources/LibraryModel/LibraryFixtures.swift",
+    "find": "if (3...6).contains(n) { keywords.append(\"Sunset\") }",
+    "replace": "if (4...6).contains(n) { keywords.append(\"Sunset\") }",
+    "tests": "LibraryCamerasFixtureTests.swift"
+  }
+]
