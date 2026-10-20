@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 building (on MD-5); MD-10 next (on MD-9)
+Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 building (on MD-5); MD-10 building (on MD-9 #3533)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
