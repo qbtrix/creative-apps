@@ -1,5 +1,6 @@
-// SampleCommands.swift (eyedropper EY-1 spec with its id, schema and availability; EY-6 body): `color.sample`, the query every app registers with one line,
-// `+ SampleCommands.specs(<X>Workspace.self)`, so an agent reads a colour the way the eyedropper does.
+// SampleCommands.swift (eyedropper EY-1 spec with its id, schema and availability; EY-6 body): `color.sample`, the
+// query every app registers with one line, `+ SampleCommands.specs(<X>Workspace.self)`, so an agent reads a colour
+// the way the eyedropper does.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
