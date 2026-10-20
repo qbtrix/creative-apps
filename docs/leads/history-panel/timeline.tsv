@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-20T20:54Z	3	heartbeat	#3708	open; macOS build 39488121154 green, waiting on lane sweep
 2026-10-20T21:16Z	3	merged	#3708 PH-a	merged 21:15Z by fast lane; opening PH-3 (merge dev, gate, PR)
 2026-10-20T21:17Z	3	wave-3 started	PH-4	builder stacked on PH-3
+2026-10-20T21:19Z	3	PR opened	#3762	PH-3 (Slice PH-u) head 96a4155, +118/-4, fast-lane
