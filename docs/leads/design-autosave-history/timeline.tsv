@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T20:48:17Z	check	fix	#3686	DA-a macOS build 39483668298 failed (type-checker gave up on AutosaveHooks encoder); fixed at 98c5d2a4, merged into DA-u #3726 (80949b93) and DA-m #3710 (9a2619ef)
 2026-10-20T21:11:10Z	check	heartbeat	#3686	DA-a fixed head 98c5d2a4 macOS build queued; #3710 and #3726 stacked, retarget when #3686 merges
 2026-10-20T21:33:21Z	check	heartbeat	#3686	DA-a macOS build of 98c5d2a4 in progress
+2026-10-20T21:55:10Z	check	heartbeat	#3686	DA-a macOS build 39494359973 green on 98c5d2a4; waits for a lane batch
