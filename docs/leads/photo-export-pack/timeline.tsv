@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T19:27Z	3	fix-pushed	#3678	head 061e0972; enabled PhotoExportStubTests; CI: PASS
 2026-10-20T19:27Z	3	builder	PX-3	stacked on PX-1 (#3678); XP-6 merged (#3586)
 2026-10-20T19:29Z	3	heartbeat	-	wave 2 building; waits unchanged (GF-2, GF-5, XP-3, XP-4, SM-w, PP-u, SF-8 #3529 open), poll 2 of 3
+2026-10-20T19:50Z	wait	poll-3 unchanged; rule 23 question	#3470#issuecomment-6300014840	XP-3, XP-4, AX-photo, SM-w not on dev; #3678 open; PX-3 building
