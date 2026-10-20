@@ -6,7 +6,7 @@
 import XCTest
 
 final class LibraryCollectionsJourneyTests: XCTestCase {
-    private static let waitsOn: String? = "waits on FC-9"
+    private static let waitsOn: String? = nil
     private static let dropWaitsOn: String? = "waits on FC-10"
 
     @MainActor func testMakeACollection() throws {

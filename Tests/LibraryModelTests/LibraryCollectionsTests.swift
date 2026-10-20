@@ -34,7 +34,7 @@ import Testing
     }
     private func count(_ id: String, _ c: LibraryCatalog) -> Int? { c.collections.first { $0.id == id }?.count }
 
-    @Test(.disabled("waits on FC-9")) func newCollectionHoldsTheSelectionAndIsOneStep() {
+    @Test func newCollectionHoldsTheSelectionAndIsOneStep() {
         var catalog = shoot()
         catalog.select([id(1), id(2), id(3)])
         let before = state(catalog)
@@ -54,7 +54,7 @@ import Testing
         #expect(catalog.selectedUserCollection?.name == "Untitled Collection 2")
     }
 
-    @Test(.disabled("waits on FC-9")) func newCollectionWithNoneSelectedIsEmpty() {
+    @Test func newCollectionWithNoneSelectedIsEmpty() {
         var catalog = shoot()
         catalog.select([])
         let made = catalog.newCollection()
@@ -63,7 +63,7 @@ import Testing
         #expect(count(made, catalog) == 0 && catalog.order.isEmpty && catalog.isSelectedCollectionEmpty)
     }
 
-    @Test(.disabled("waits on FC-9")) func idsAreNeverReusedWhileOneExists() {
+    @Test func idsAreNeverReusedWhileOneExists() {
         var catalog = shoot([UserCollection(id: "user-1", name: "A", contents: .photos([])),
                              UserCollection(id: "user-3", name: "B", contents: .photos([]))])
         #expect(catalog.newCollection() == "user-4")  // max n + 1, not count + 1
@@ -71,7 +71,7 @@ import Testing
         #expect(catalog.newCollection() == "user-5")
     }
 
-    @Test(.disabled("waits on FC-9")) func addRefusesSmartAndBuiltInTargets() {
+    @Test func addRefusesSmartAndBuiltInTargets() {
         var catalog = withKeepers()
         catalog.select([id(10)])
         let before = state(catalog)
@@ -83,7 +83,7 @@ import Testing
         #expect(catalog.addToCollectionHelp("user-1") == nil)
     }
 
-    @Test(.disabled("waits on FC-9")) func addIsOneStepAndRefusesWhenAllAreIn() {
+    @Test func addIsOneStepAndRefusesWhenAllAreIn() {
         var catalog = withKeepers()
         catalog.select([id(10)])
         let before = state(catalog)
@@ -97,7 +97,7 @@ import Testing
         #expect(state(catalog) == before)
     }
 
-    @Test(.disabled("waits on FC-9")) func removeWorksOnlyInACollectionYouMade() {
+    @Test func removeWorksOnlyInACollectionYouMade() {
         var catalog = withKeepers()
         catalog.select([id(2)])
         let outside = "Open a collection you made to remove photos from it."
@@ -115,7 +115,7 @@ import Testing
         #expect(state(catalog) == before)
     }
 
-    @Test(.disabled("waits on FC-9")) func deleteNeverChangesItems() {
+    @Test func deleteNeverChangesItems() {
         var catalog = withKeepers()
         catalog.selectCollection("user-1")
         let items = catalog.items
@@ -128,7 +128,7 @@ import Testing
         #expect(state(catalog) == before && catalog.items == items)
     }
 
-    @Test(.disabled("waits on FC-9")) func renameTrimsAndRefusesEmptyAndBuiltIns() {
+    @Test func renameTrimsAndRefusesEmptyAndBuiltIns() {
         var catalog = withKeepers()
         catalog.renameCollection("user-1", to: "  Selects \n")
         #expect(catalog.collections.first { $0.id == "user-1" }?.name == "Selects")

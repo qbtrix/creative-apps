@@ -18,7 +18,7 @@ import Testing
         return catalog
     }
 
-    @Test(.disabled("waits on FC-9")) func collectionsSidebar() throws {
+    @Test func collectionsSidebar() throws {
         var catalog = shoot()
         catalog.select(Set(catalog.order.prefix(3)))
         catalog.newCollection()
@@ -29,7 +29,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on FC-9")) func newCollectionIsEmpty() throws {
+    @Test func newCollectionIsEmpty() throws {
         var catalog = shoot()
         catalog.select([])
         catalog.newCollection()
