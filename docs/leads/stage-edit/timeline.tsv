@@ -219,3 +219,4 @@
 2026-10-20T15:15:28Z	heartbeat	newest full CI 39445920994 on 35b6f8a8 pending; 39442633733 and 39438701609 queued; all contain 424b4a60
 2026-10-20T15:26:41Z	heartbeat	newest full CI 39447117246 on 27b67332 pending (39445920994 cancelled); 39442633733 and 39438701609 still queued
 2026-10-20T15:38:48Z	heartbeat	full CI 39447117246 (27b67332) still pending; awaiting green for contact sheet
+2026-10-20T15:50:06Z	heartbeat	full CI 39447117246 (27b67332) still pending; Linux check 39448853502 on it green; dev now 47dd9bb8 (core bump #3549)
