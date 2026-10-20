@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-20T04:32:26Z	check	AL-design #3392 needs-rebase again (04:30Z, head aeec3b0), its lead fixes it; other blockers no PR; main green run still 38363734665
 2026-10-20T04:53:33Z	check	AL-design #3392 rebased again by its lead (head ed7c3c6, clean), not merged; other blockers no PR; main green run still 38363734665
 2026-10-20T05:08:13Z	start	run act-1a157b2050f-ovpu; lead branch rebuilt on main b3011ab; AC-p3, AC-d3, AC-h3 start once command-catalog CC-u (lead/command-catalog-CC-9, building now) merges on dev; recheck every heartbeat.
+2026-10-20T05:24:44Z	build	CC-u open in #3484 (head b050ed95); AC-p3, AC-d3, AC-h3 started in a builder, stacked on lead/command-catalog-CC-9 (rule 22); PRs to dev open once #3484 merges

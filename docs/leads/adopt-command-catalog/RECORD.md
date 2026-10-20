@@ -4,7 +4,7 @@ Issue: #2999 · Packet: docs/blueprints/suiteui/features/adopt-command-catalog.m
 Run: act-1a157b2050f-ovpu (resumed from act-1a1543c764c-0mz9) · Session: claude/feature-lead-suiteui-run-336pic · Started: 2026-10-20T05:08Z
 Stage: 3 wave 4 (AC-flare, AC-library, AC-z listed done by Belt; AC-photo, AC-design, AC-halo wait on CC-u for their menus-from-specs tasks AC-p3, AC-d3, AC-h3)
 Base: b3011ab9dc5579023722e79f83254e6e2520e612 (main); dev 18464f26
-Next: AC-p3, AC-d3, AC-h3 start once command-catalog CC-u (lead/command-catalog-CC-9, building now) merges on dev; recheck every heartbeat.
+Next: AC-p3, AC-d3, AC-h3 building, stacked on CC-u (#3484); PRs to dev once #3484 merges; then AC-z2 (feature-done).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
