@@ -174,3 +174,4 @@ utc	stage	event	ref	note
 2026-10-20T01:11Z	heartbeat	#1705 verify: scoped halo run 39329203917 still queued; scoped runs drain serially (photo 39299899936 in progress, library 39323823976 ahead of halo)
 2026-10-20T01:33Z	heartbeat	#1705 verify: scoped halo run 39329203917 still queued; photo run done, library 39323823976 now running (next ahead of halo)
 2026-10-20T01:55Z	heartbeat	#1705 verify: scoped halo run 39329203917 on e50f30b3 started 01:52Z (macOS + journeys in progress)
+2026-10-20T02:18Z	stage	#1705 reopened; run 39329203917 red (halo rows absent, #3217), #3291 fixes; verify on 39357615737
