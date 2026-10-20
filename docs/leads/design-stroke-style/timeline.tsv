@@ -3,3 +3,4 @@ time	kind	note
 2026-10-20T19:15:51Z	stage	start	-	run act-1a15abb305f-lc8g on dev a48992b7; DK-a builder (wave 1 with eyedropper DY-a)
 2026-10-20T19:18:03Z	3	build-wave started	DK-a	workflow wf_c18b376e-723
 2026-10-20T19:31:00Z	3	PR opened	DK-a #3690	head 6bb9960e, Fast-Check pass
+2026-10-20T20:15Z	3	check	#3690	macOS build 39484764814 queued on 6bb9960e; no needs-fix; scoped design run 39490030243 on dev predates DK-a
