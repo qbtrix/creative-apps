@@ -4,6 +4,7 @@ Issue: #1934 · Packet: docs/blueprints/suiteui/features/adopt-kernel-undo.md
 Run: act-1a15a8a9680-umw7 (resume; earlier runs act-1a154b13dec-71tm, act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-undo-1z23j3 · Resumed: 2026-10-20
 Stage: 3 wave 1 (AU-flare)
 Base: 6e70826 (brief main 6e70826be59e092e59269605cfdfbce93c4a2bbe verified; PRs target dev)
+Blocked: #3674's lane macOS build (run 39477990421) has sat queued for a macos-26 runner since 18:48Z; asked the supervisor on #1934 (issuecomment-6300703694).
 Next: Belt-Slice-Done AU-flare once #3674 merges and a green dev Linux check contains it; then Belt-Contact-Sheet.
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
