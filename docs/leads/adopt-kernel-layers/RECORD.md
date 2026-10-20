@@ -89,3 +89,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T01:02:07Z heartbeat: AL-d1 and AL-d2 are next, after the AS-design PR, since both touch Design. Full run 39296061014 is in progress.
 
 - 2026-10-20T01:04:25Z AL-design started: AL-d1 (adapter) and AL-d2 (delete) as one PR on slice/al-design, per the supervisor's answer on #1936. AL-d3 (panel) waits on layers-panel's Belt-Slice-Done. The DesignNode.swift swap with design-seams-2 goes in both .wave.json files as `waits_on` text, because scripts/waves resolves `waits` keys only within one app.
+
+- 2026-10-20T01:24:03Z heartbeat: no change: #3384 and #3385 open (lane macOS builds 39351224956, 39351246989 queued); dev CI 39352633488 (53630c3b) pending, scoped suiteui 39352972722 queued; main b3011ab9 (dev-red #3386); no new supervisor answer; stage-edit #1514 and layers-panel #1498 have no Belt-Slice-Done; AL-design builder running.
