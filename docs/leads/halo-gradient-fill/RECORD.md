@@ -28,7 +28,7 @@
 | HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo: adopt-command-catalog is planned, no lead running |
 | HG-3 | W3 | blocked | – | GF-3 |
 | HG-4 | W3 | blocked | – | after HG-2 |
-| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on) |
+| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); gate CI: PASS at 1af5780 |
 | HG-8 | W4 | blocked | – | after HG-4, HG-6, HG-7 |
 | HG-9 | W5 | blocked | – | CL-z |
 
@@ -48,7 +48,7 @@
 
 ## Open
 
-- GF-1 #3421: open, mergeable clean, waits on the lane's macOS build.
+- GF-1 #3421: open, mergeable clean; its lane macOS build (run 39364860084) still queued at 04:35Z, no runner.
 - halo core-loop (CL-probe, CL-z) and suiteui adopt-command-catalog (AC-halo) are status planned with no lead branch: HG-2, HG-7 and HG-9 cannot start until those run.
 - Resolved: pinned core has `PixelBuffer.gradient(width:height:shape:from:to:stops:space:dither:)` (CoreRaster/Fill/RasterGradient.swift); no needs-core issue.
 - HALO-GRADIENT-FRAME costs about 1.5–1.7 s on a Linux debug build at 1080p (report only).
