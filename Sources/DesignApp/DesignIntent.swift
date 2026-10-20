@@ -7,6 +7,7 @@
 // types and SwiftUI's. The cases are the contract the view files build on.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -47,6 +48,8 @@ enum DesignIntent {
     case renameLayer(String, String)
     /// The inspector's Width or Height committed: the selected page's size, one "Change Page Size" step.
     case setPageSize(width: Double, height: Double)
+    /// A fill editor gesture (the inspector's Fill switch) on the selected layers, run through the catalog.
+    case fill(GradientIntent)
 }
 
 /// Where a view sends its intents.

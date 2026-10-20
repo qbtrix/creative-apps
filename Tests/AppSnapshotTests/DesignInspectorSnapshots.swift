@@ -4,10 +4,13 @@
 // disabled, with the hint saying why in the value column, whose x is checked
 // against the X field's on the hosted view), a rectangle inside a locked group
 // (disabled the same way), and A on `cards` styled: radius 12, opacity 50% and
-// a 4 pt stroke. Writes design-inspector-page-, -node-, -locked-,
-// -locked-group- and -style-{light,dark}.png. macOS only.
+// a 4 pt stroke, and a selected rectangle's Fill switch (Solid, Linear,
+// Radial) on the DG-1 stubs, disabled with its hint. Writes
+// design-inspector-page-, -node-, -locked-, -locked-group-, -style- and
+// -fill-{light,dark}.png. macOS only.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -59,6 +62,20 @@ import Testing
         #expect(a.stroke == DesignStroke(color: .black, width: 4))
         #expect(model.opacityPercentText == "50%")
         try shoot("style", model)
+    }
+
+    /// A selected rectangle's Fill section with the type switch (gradient-fill DG-2): Solid
+    /// selected, the chips disabled with the stub's help until DG-4 builds the commands.
+    @Test func fillSwitch() throws {
+        var model = DesignWorkspace()
+        model.newFile()
+        model.useServices(.live)
+        let box = DesignRect(x: 40, y: 40, width: 200, height: 100)
+        let rectangle = try model.addNode(.rectangle, frame: box, in: "node-1")
+        model.selectItem(rectangle)
+        #expect(model.fillSelection.map { GradientRules.type(of: $0.fill) } == .solid)
+        #expect(model.fillHelp != nil, "the switch says why until DG-4")
+        try shoot("fill", model)
     }
 
     /// The hint starts where the X field does, not at the gutter (#276).
