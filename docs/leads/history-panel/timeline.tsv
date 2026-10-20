@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-20T20:32Z	3	pushed	PH-6 678b11c	CI PASS, Mutate 2/2; 993 lines/10 files vs PH-a; blocked: packet PH-m waits on AH-z (.autosaveRecovery still a stub on dev). Plan once AH-z on dev: split into PH-6a model+tests (~398), PH-6b app wiring+PhotoAutosave delete+baseline+C4 (~298), PH-6c delete PhotoAutosaveTests (296); recovery journey needs update in PH-7
 2026-10-20T20:32Z	3	heartbeat	-	#3704/#3706/#3708 open, clean, waiting on lane batch 39492157468 (macOS)
 2026-10-20T20:54Z	3	heartbeat	#3708	open; macOS build 39488121154 green, waiting on lane sweep
+2026-10-20T21:16Z	3	merged	#3708 PH-a	merged 21:15Z by fast lane; opening PH-3 (merge dev, gate, PR)
