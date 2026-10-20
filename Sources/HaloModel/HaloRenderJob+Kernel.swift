@@ -3,8 +3,7 @@
 // The stored `renderJob: HaloRenderJobState?` keeps its shape; `renderRun`
 // reads it as the kernel's run, and every transition builds that run, lets
 // the kernel decide (`begin`, `start`, `progressed`, `end`, `dismiss`) and
-// writes the result back. HaloRenderJob.swift's old moves write `renderJob`
-// too until CL-6 removes them. The frames
+// writes the result back. The only file that writes `renderJob`. The frames
 // are rendered off the main actor by the app through
 // `services.compositionRendering.run`; this file keeps the state the sheet
 // shows. A cancel is never stored: it goes straight to idle. Linux-safe: no
@@ -25,6 +24,12 @@ extension HaloProject {
         case (_, .failed?): return .failed(job.settings, renderOutcomeText ?? "")
         case (_, .cancelled?): return .idle
         }
+    }
+
+    /// Whether a render has started and not ended yet.
+    var renderRunning: Bool {
+        if case .running = renderRun { return true }
+        return false
     }
 
     /// Opens the Render sheet on `settings` (idle → editing). False, and no
