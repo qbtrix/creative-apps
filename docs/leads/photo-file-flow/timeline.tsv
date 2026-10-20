@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-20T20:22Z	check	poll	#3679,#3700	open, no needs-fix
 2026-10-20T20:34Z	check	heartbeat	#3679,#3700	open, no needs-fix; PF-3 building; SF-8 #3529 still closed (PF-7 blocked)
 2026-10-20T20:54Z	check	heartbeat	#3679,#3700	open; macOS builds 39483574632/39486583540 queued since 19:27Z/19:48Z; PF-3 building
+2026-10-20T20:55Z	PF-3	built	photo-file-flow/PF-3@6451dc74	15 files +323/-73 vs PF-4 (at cap); Mutate 3/3 PhotoModel.PhotoFileFlow+Kernel; CI PASS; RJ-P42 drop-layer pending gap #3741; PR held until #3700 merges
