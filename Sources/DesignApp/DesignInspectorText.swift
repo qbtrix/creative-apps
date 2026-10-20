@@ -44,9 +44,6 @@ struct DesignInspectorText: View {
         InspectorOption(id: false, title: "Auto width"), InspectorOption(id: true, title: "Fixed width"),
     ]
 
-    /// The Width row's id.
-    static let widthID = "design.inspector.text-width"
-
     /// "System" first, then the families installed on this Mac.
     private static let families: [String] = ["System"] + NSFontManager.shared.availableFontFamilies
 
@@ -90,7 +87,7 @@ struct DesignInspectorText: View {
                     commit { $0.alignment = alignment }
                 }
                 chipsRow("Width", options: Self.widthModes, selected: style.map { $0.fixedWidth == true }, help: help,
-                         id: Self.widthID) { fixed in
+                         id: DesignControlID.inspectorTextWidth) { fixed in
                     commit { $0.fixedWidth = fixed }
                 }
                 if let help { InspectorNote(help) }
