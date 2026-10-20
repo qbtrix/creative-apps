@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "–",
-  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b) and SN-c (D2-4b); DesignNode.swift goes to adopt-kernel-layers' AL-design (AL-d1, AL-d2) first (supervisor, #1936, 2026-10-20); suiteui's adopt-kernel-selection AS-design (D2-3b: AS-design takes DesignCanvasEditing.swift first; supervisor, #1935, 2026-10-20)",
+  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b) and SN-c (D2-4b); DesignNode.swift goes to adopt-kernel-layers' AL-design (AL-d1, AL-d2) first (supervisor, #1936, 2026-10-20); suiteui's adopt-kernel-selection AS-design (D2-3b: AS-design takes DesignCanvasEditing.swift first; supervisor, #1935, 2026-10-20); the beta gap adopts (autosave-history, transform, eyedropper, shape-tools, stroke-style) before S2-a, which share DesignNode, DesignWorkspace, DesignCanvasMarks and the window",
   "depends": [
     "design-contracts"
   ],
@@ -104,6 +104,34 @@
           "D2-2"
         ],
         "gradient-fill": [
+          "D2-1a"
+        ],
+        "autosave-history": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "transform": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "eyedropper": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "shape-tools": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "stroke-style": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "placed-images": [
           "D2-1a"
         ]
       }

@@ -551,5 +551,125 @@
     ],
     "waits_on": "GF-9",
     "added_by": "suiteui/gradient-fill"
+  },
+  "RJ-X31": {
+    "id": "RJ-X31",
+    "app": "suite",
+    "weight": "high",
+    "job": "Make 30 edits by command, jump back 10 steps in the history with one command, then make one more edit.",
+    "outcome": "The jump lands on step 20 without recording a step, the document is the state after edit 20, and the new edit replaces the 10 undone steps.",
+    "needs": [
+      "S12"
+    ],
+    "closes_with": "S12",
+    "trap": "The jump records a step of its own, or the undone steps survive the new edit",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AH-9",
+    "added_by": "suiteui/autosave-history"
+  },
+  "RJ-X32": {
+    "id": "RJ-X32",
+    "app": "suite",
+    "weight": "high",
+    "job": "Rotate a shape 15 degrees with one 60-sample drag by commands, flip it, then undo once.",
+    "outcome": "The saved shape reads 15 degrees with its position unchanged after the undo of the flip, and a second undo reads 0: the drag was one step.",
+    "needs": [
+      "S7"
+    ],
+    "closes_with": "S7",
+    "trap": "The drag lands as 60 undo steps, the turn saves in radians, or the flip moves the shape",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TT-8",
+    "added_by": "suiteui/transform-tools"
+  },
+  "RJ-X33": {
+    "id": "RJ-X33",
+    "app": "suite",
+    "weight": "med",
+    "job": "Read the colour under three points by command: over a red shape on top of another, in a gradient's middle, and on empty canvas.",
+    "outcome": "The overlap reads the top shape's red, the gradient reads its 50% mix within 1 per channel, and empty canvas reads null.",
+    "needs": [
+      "S13"
+    ],
+    "closes_with": "S13",
+    "trap": "The sample reads the selected or lower shape",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "EY-8",
+    "added_by": "suiteui/eyedropper"
+  },
+  "RJ-X34": {
+    "id": "RJ-X34",
+    "app": "suite",
+    "weight": "med",
+    "job": "Draw a five-point star by command, try a two-sided polygon, then undo.",
+    "outcome": "The star is saved with its kind, points and inner ratio; the polygon is refused with \"A polygon needs 3 to 64 sides.\" and adds nothing; one undo removes the star.",
+    "needs": [
+      "S19"
+    ],
+    "closes_with": "S19",
+    "trap": "An out-of-range count is silently clamped, or the star saves as a flat path",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SH-8",
+    "added_by": "suiteui/shape-tools"
+  },
+  "RJ-X35": {
+    "id": "RJ-X35",
+    "app": "suite",
+    "weight": "high",
+    "job": "Add a 4 pt stroke by command, make it dashed, scrub its trim end to 50% with 60 samples, then undo once.",
+    "outcome": "Before the undo the stroke reads dash [16, 8] and trim end 0.5; after it there is no trim: the scrub was one step.",
+    "needs": [
+      "S17"
+    ],
+    "closes_with": "S17",
+    "trap": "The dash pattern ignores the width, or the trim saves as a percentage",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SS-8",
+    "added_by": "suiteui/stroke-style"
+  },
+  "RJ-X36": {
+    "id": "RJ-X36",
+    "app": "suite",
+    "weight": "high",
+    "job": "Put a 3:1 picture into a square box by commands alone, pan it inside the crop with 30 moves, then undo once.",
+    "outcome": "The saved document's picture draws 900 x 300 inside the 300 x 300 box (its 3:1 aspect kept, cropped by the box), and after the pan and one undo its focus is back at the centre.",
+    "needs": [
+      "S20"
+    ],
+    "closes_with": "S20",
+    "trap": "The picture stretches to fill the square, or the 30 moves land as 30 undo steps",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PL-9",
+    "added_by": "suiteui/placed-images"
   }
 }
