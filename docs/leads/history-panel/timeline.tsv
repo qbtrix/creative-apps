@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-20T20:11Z	3	heartbeat	#3708	PR open, lane waiting on macOS batch gate; builders running
 2026-10-20T20:19Z	3	restart	PH-6	container restart killed builder; relaunched in surviving worktree
 2026-10-20T20:32Z	3	pushed	PH-6 678b11c	CI PASS, Mutate 2/2; 993 lines/10 files vs PH-a; blocked: packet PH-m waits on AH-z (.autosaveRecovery still a stub on dev). Plan once AH-z on dev: split into PH-6a model+tests (~398), PH-6b app wiring+PhotoAutosave delete+baseline+C4 (~298), PH-6c delete PhotoAutosaveTests (296); recovery journey needs update in PH-7
+2026-10-20T20:32Z	3	heartbeat	-	#3704/#3706/#3708 open, clean, waiting on lane batch 39492157468 (macOS)
