@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 10:19Z	3	check	XP-6	build 39403374325 still queued (31 min, runner backlog)
 10:31Z	3	poll	-	macOS builds for #3586 and #3553 still queued; dev a54a892a, core pin 0de5687d unchanged; no SM-a, GF-2, AH-2, PL-a or #3144 on dev
 10:44Z	3	poll	-	#3586 macOS build 39403374325 succeeded 10:43Z; waits on the lane's next sweep to merge; core pin 0de5687d unchanged
+10:56Z	3	poll	-	#3586 build passed, not merged yet; waits on the lane sweep; core pin 0de5687d unchanged
