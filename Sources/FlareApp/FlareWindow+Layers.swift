@@ -3,13 +3,20 @@
 // LF-1): select a scene or layer, its eye and lock toggles, reorder and rename
 // either kind of row by id, New Scene and New Layer. Remove takes a scene or a
 // layer; a scene's Remove is refused with the Model's removeSceneHelp, which
-// is also the remove control's tooltip. Duplicate waits for the row context
-// menus (LF-2) and says so. SCENES is a SuiteSidebarList section; LAYERS is
-// SuiteUI's LayerTreeList (adopt-kernel-layers AL-f3) over the kernel's
-// `layerRows`, top first, named `.sidebar`: rows `suite.sidebar.row.<id>`,
-// eye and lock `suite.sidebar.<id>.visible` / `.locked` (FlareLayerFlag's raw
-// values), New Layer in its header. A reorder drop goes through the Model's
-// `layerMove` onto the same `.move` intent the list drag sent before.
+// is also the remove control's tooltip. SCENES is a SuiteSidebarList section;
+// LAYERS is SuiteUI's LayerTreeList (adopt-kernel-layers AL-f3) over the
+// kernel's `layerRows`, top first, named `.sidebar`: rows
+// `suite.sidebar.row.<id>`, eye and lock `suite.sidebar.<id>.visible` /
+// `.locked` (FlareLayerFlag's raw values). A reorder drop goes through the
+// Model's `layerMove` onto the same `.move` intent the list drag sent before.
+// Under the rows sits SuiteUI's LayerActionBar: New Layer, Duplicate, Delete,
+// fx (waiting on layer styles), Lock and Hide for the selected layer
+// (`flare.layers.bar.<part>`); a row's context menu holds Duplicate, Delete,
+// Bring Forward, Send Backward, Lock and Hide. Each item is built from its
+// catalog spec on the workspace (`layers.*`, `edit.duplicate`,
+// `object.bring-forward`, `.send-backward`), titled by `menuTitle`, so its
+// enablement and reason are the catalog's; a row's menu reads the workspace
+// with that row selected, and a pick selects the row first.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -25,37 +32,102 @@ extension SidebarSection {
     }
 }
 
-/// The LAYERS panel: the shared list over the edited owner's layers, with eye, lock, rename and drag to reorder.
-/// New Layer shows while a scene is selected. Every gesture leaves as a `.layers` intent through `perform`.
+/// The LAYERS panel: the shared list over the edited owner's layers, with eye, lock, rename and drag to reorder,
+/// then the layer command bar. Every gesture leaves as an intent through `perform`.
 struct FlareLayersList: View {
     let model: FlareWorkspace
     /// Whether the rows sit in the host's scroll view (a snapshot) rather than the list's own.
     var embedded = false
-    let perform: @MainActor (FlareIntent.Layers) -> Void
+    let perform: @MainActor (FlareIntent) -> Void
 
     var body: some View {
-        LayerTreeList(
-            rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID, naming: .sidebar,
-            header: LayerTreeHeader(
-                title: "Layers",
-                action: model.selectedScene == nil
-                    ? nil : ToolbarAction("New Layer", systemImage: "plus") { perform(.addLayer) }),
-            options: LayerTreeOptions(reorders: true, embedded: embedded),
-            onSelect: { perform(.select(id: $0)) },
-            onRename: { id, name in
-                perform(.rename(id: id, name: name))
-                return nil
-            },
-            onAction: act)
+        VStack(alignment: .leading, spacing: 0) {
+            LayerTreeList(
+                rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID, naming: .sidebar,
+                header: LayerTreeHeader(title: "Layers", action: nil),
+                options: LayerTreeOptions(reorders: true, embedded: embedded),
+                onSelect: { perform(.layers(.select(id: $0))) },
+                onRename: { id, name in
+                    perform(.layers(.rename(id: id, name: name)))
+                    return nil
+                },
+                contextActions: { Self.rowMenu(model, row: $0, perform: perform) },
+                onAction: act)
+            LayerActionBar(Self.bar(model, perform: perform))
+        }
+    }
+
+    /// The bar's catalog ids with their symbols and id parts.
+    nonisolated static let barCommands: [(id: String, symbol: String, part: String)] = [
+        ("layers.add", "plus", "new"), ("edit.duplicate", "plus.square.on.square", "duplicate"),
+        ("layers.remove", "trash", "delete"), ("layers.toggle-locked", "lock", "lock"),
+        ("layers.toggle-visible", "eye.slash", "visibility"),
+    ]
+
+    /// A row menu's catalog ids with their symbols.
+    nonisolated static let rowCommands: [(id: String, symbol: String)] = [
+        ("edit.duplicate", "plus.square.on.square"), ("layers.remove", "trash"),
+        ("object.bring-forward", "square.2.layers.3d.top.filled"), ("object.send-backward", "square.2.layers.3d.bottom.filled"),
+        ("layers.toggle-locked", "lock"), ("layers.toggle-visible", "eye.slash"),
+    ]
+
+    /// The intent catalog command `id` sends for layer `layer`.
+    nonisolated static func intent(_ id: String, layer: String) -> FlareIntent? {
+        switch id {
+        case "layers.add": .layers(.addLayer)
+        case "edit.duplicate": .edit(.duplicate)
+        case "layers.remove": .layers(.remove(id: layer))
+        case "layers.toggle-locked": .layers(.toggle(id: layer, flag: FlareLayerFlag.locked.rawValue))
+        case "layers.toggle-visible": .layers(.toggle(id: layer, flag: FlareLayerFlag.visible.rawValue))
+        case "object.bring-forward": .edit(.bringForward)
+        case "object.send-backward": .edit(.sendBackward)
+        default: nil
+        }
+    }
+
+    /// The bar: each command from its spec on the workspace, fx after Delete, disabled until layer styles land.
+    // view-static: main-actor
+    static func bar(_ model: FlareWorkspace, perform: @escaping @MainActor (FlareIntent) -> Void) -> [ToolbarAction] {
+        var actions = barCommands.compactMap { command in
+            item(command.id, command.symbol, on: model, perform: perform).map {
+                ToolbarAction($0, identifier: "flare.layers.bar." + command.part)
+            }
+        }
+        actions.insert(LayerActionBar.effects(identifier: "flare.layers.bar.fx"), at: 3)
+        return actions
+    }
+
+    /// Row `id`'s context menu: each item from its spec with that row selected; a pick selects the row first.
+    // view-static: main-actor
+    static func rowMenu(_ model: FlareWorkspace, row id: String, perform: @escaping @MainActor (FlareIntent) -> Void) -> [ToolbarAction] {
+        var row = model
+        row.selectItem(id)
+        return rowCommands.compactMap { command in
+            item(command.id, command.symbol, on: row) { intent in
+                perform(.layers(.select(id: id)))
+                perform(intent)
+            }.map { ToolbarAction($0) }
+        }
+    }
+
+    /// Catalog command `id` as a menu item on `model`, sending its intent for the selected layer; nil for an id
+    /// the catalog lacks (FlareLayerPanelCommandsTests holds every id to the catalog).
+    // view-static: main-actor
+    private static func item(_ id: String, _ symbol: String, on model: FlareWorkspace,
+                             perform: @escaping @MainActor (FlareIntent) -> Void) -> MenuCommand? {
+        guard let spec = FlareWorkspace.catalog.spec(id) else { return nil }
+        return MenuCommand(spec, on: model, title: model.menuTitle(id), systemImage: symbol) {
+            if let intent = intent(id, layer: model.selectedLayerID ?? "") { perform(intent) }
+        }
     }
 
     private func act(_ action: LayerTreeAction) {
         switch action {
-        case .toggleHidden(let id): perform(.toggle(id: id, flag: FlareLayerFlag.visible.rawValue))
-        case .toggleLocked(let id): perform(.toggle(id: id, flag: FlareLayerFlag.locked.rawValue))
+        case .toggleHidden(let id): perform(.layers(.toggle(id: id, flag: FlareLayerFlag.visible.rawValue)))
+        case .toggleLocked(let id): perform(.layers(.toggle(id: id, flag: FlareLayerFlag.locked.rawValue)))
         case .move(let drop):
             if let move = model.layerMove(drop.id, parent: drop.parentID, index: drop.index) {
-                perform(.move(section: "layers", from: move.from, to: move.to))
+                perform(.layers(.move(section: "layers", from: move.from, to: move.to)))
             }
         // Flare's layers are flat: no row discloses.
         case .disclose: break
