@@ -48,7 +48,8 @@ func aTurnedRightHandleGrowsTheBoxAlongItsOwnEdge() throws {
     #expect(abs(grown.width - 240) < 1e-6 && abs(grown.height - 120) < 1e-6)
     // The left edge's middle, turned to (200, 40), stays put: the grown box's centre is 120 below it.
     #expect(abs(grown.midX - 200) < 1e-6 && abs(grown.midY - 160) < 1e-6)
-    #expect(drag.ended())
+    let ended = drag.ended()
+    #expect(ended)
 }
 
 @Test(.enabled(if: rulesBuilt, "waits on TT-5's TransformRules.local"))
