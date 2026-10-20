@@ -22,3 +22,4 @@ Bones: Bone
 Gradient: Gradient
 Autosave: Autosave
 Pen: PenDraft PenRules PenTool
+Placed image: PlacedImage PlacedAsset ImageLayer PlaceImage
