@@ -29,7 +29,7 @@ import SuiteKernel
         let fill = Fill.linear(stops: [GradientStop(offset: 0, color: FillColor(r: 1, g: 0, b: 0)), GradientStop(offset: 0.25, color: .white)],
                                start: Point(x: 0, y: 0), end: Point(x: 10, y: 0))
         let svg = GradientSVG.definition(fill, id: "s")
-        #expect(svg.contains(#"<stop offset="0" stop-color="#ff0000"/><stop offset="0.25" stop-color="#ffffff"/>"#))
+        #expect(svg.contains(##"<stop offset="0" stop-color="#ff0000"/><stop offset="0.25" stop-color="#ffffff"/>"##))
         #expect(svg.hasPrefix("<linearGradient") && svg.hasSuffix("</linearGradient>"))
         #expect(GradientSVG.definition(.solid(.white), id: "s").isEmpty)
     }
