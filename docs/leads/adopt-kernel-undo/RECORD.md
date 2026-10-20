@@ -108,3 +108,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T01:04:25Z The full run 39296061014 (dev 1b33afbb, which holds AU-design 90e7a0c) failed. Its macOS `scripts/ci` stopped on expired journey quarantine entries (dev-red #3386; the quarantine is the supervisor's), not on AU-design. Main is still b3011ab9, so AU-design waits for the next green run. The lane's macOS build 39351224956 for AU-library #3384 is queued.
 
 - 2026-10-20T01:24:03Z heartbeat: no change: #3384 and #3385 open (lane macOS builds 39351224956, 39351246989 queued); dev CI 39352633488 (53630c3b) pending, scoped suiteui 39352972722 queued; main b3011ab9 (dev-red #3386); no new supervisor answer; stage-edit #1514 and layers-panel #1498 have no Belt-Slice-Done; AL-design builder running.
+
+- 2026-10-20T01:39:11Z AU-library PR #3384 merged as 7969bfba. Waiting on a green ci.yml run containing it. AU-design (90e7a0c) is waiting on a green run too: dev CI 39352633488 and scoped suiteui run 39352972722 on 53630c3b are pending.
