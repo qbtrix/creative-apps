@@ -280,7 +280,11 @@ public struct HaloProject: Sendable, Equatable {
     /// Selects a layer of the selected composition by id. An unknown id is
     /// ignored. Not an undo step.
     public mutating func selectLayer(_ id: String) {
-        if selectedComposition?.layers.contains(where: { $0.id == id }) == true { document.selectedLayerID = id }
+        guard selectedComposition?.layers.contains(where: { $0.id == id }) == true else { return }
+        document.selectedLayerID = id
+        // A plain select is the list's only pick and the anchor of the next Shift-click.
+        layerSelection = Selection([id])
+        layerSelection.anchor = id
     }
 
     /// Sets the selected layer's opacity in its one static home,
