@@ -28,7 +28,7 @@
 | HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo: adopt-command-catalog is planned, no lead running |
 | HG-3 | W3 | blocked | – | GF-3 |
 | HG-4 | W3 | blocked | – | after HG-2 |
-| HG-6 | W3 | drafting | – | core API confirmed; PR waits on GF-6 and AC-halo (packet Depends on) |
+| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on) |
 | HG-8 | W4 | blocked | – | after HG-4, HG-6, HG-7 |
 | HG-9 | W5 | blocked | – | CL-z |
 
@@ -42,6 +42,8 @@
 - Base is dev (CLAUDE.md; the lane retargets main to dev).
 - Record lives at docs/leads/halo-gradient-fill/ on lead/halo-gradient-fill: lead/gradient-fill is the Flare lead's.
 - HG-1 waits on GF-1 merging only, not the whole GF-a slice: HG-1 uses only the Fill types and GradientFillTarget; GF-2's editor matters only to HG-2.
+- HG-6 render tests sample a 65 px box (33 px when moved): an odd size puts a pixel centre on the gradient's centre; at 64 px the centre pixel sat at t≈0.016, which perceptual interpolation reads as r 0.905.
+- RJ-H32 (gradient-frame real job) lands with HG-7: its script runs `fill.gradient`, which needs GF-6 and AC-halo.
 - Model targets already depend on SuiteKernel (Package.swift line 60), so no package change is needed.
 
 ## Open
@@ -49,4 +51,5 @@
 - GF-1 #3421: open, mergeable clean, waits on the lane's macOS build.
 - halo core-loop (CL-probe, CL-z) and suiteui adopt-command-catalog (AC-halo) are status planned with no lead branch: HG-2, HG-7 and HG-9 cannot start until those run.
 - Resolved: pinned core has `PixelBuffer.gradient(width:height:shape:from:to:stops:space:dither:)` (CoreRaster/Fill/RasterGradient.swift); no needs-core issue.
+- HALO-GRADIENT-FRAME costs about 1.5–1.7 s on a Linux debug build at 1080p (report only).
 - The contract's `extension HaloDrawItem { var gradient }` is a stored field with an init default (extensions can't store).
