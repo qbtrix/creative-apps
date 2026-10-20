@@ -12,3 +12,4 @@ time	event	slice	pr	note
 2026-10-20T14:27:48Z	4	heartbeat	#3537	scoped suiteui 39424969406 still queued (critic panel when screens land)
 2026-10-20T14:50:05Z	4	heartbeat	#3537	scoped suiteui 39424969406 still queued
 2026-10-20T15:16:20Z	4	heartbeat	#3537	scoped suiteui 39424969406 still queued
+2026-10-20T15:42:00Z	3	heartbeat	-	TSA-a critic panel waits on scoped run 39424969406 screens
