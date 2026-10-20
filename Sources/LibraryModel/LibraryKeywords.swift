@@ -85,7 +85,7 @@ extension LibraryCatalog {
         // whether a target has it on first sight; a photo with one of the
         // targets' keywords then counts company for all of its own.
         let theirs = Set(targets.flatMap(\.keywords).map { $0.lowercased() })
-        var number: [String: Int] = [:]
+        var number = SpellingNumbers()
         var spellings: [String] = [], lowered: [String] = [], isTheirs: [Bool] = []
         var uses: [Int] = [], company: [Int] = []
         var photoIDs: [Int] = []
@@ -93,9 +93,8 @@ extension LibraryCatalog {
             photoIDs.removeAll(keepingCapacity: true)
             var withTheirs = false
             for keyword in items[index].keywords {
-                let id = number[keyword] ?? spellings.count
+                let id = number.id(of: keyword, in: spellings)
                 if id == spellings.count {
-                    number[keyword] = id
                     spellings.append(keyword)
                     lowered.append(keyword.lowercased())
                     isTheirs.append(theirs.contains(lowered[id]))
@@ -228,6 +227,37 @@ extension LibraryCatalog {
     /// `text` trimmed, with each run of inner whitespace as one space.
     private static func collapsed(_ text: String) -> String {
         text.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ")
+    }
+}
+
+/// Numbers spellings by an open-addressed table of `String.hashValue`s,
+/// cheaper than a dictionary in a debug build.
+private struct SpellingNumbers {
+    private var slots = [Int](repeating: -1, count: 64)  // a spelling's number, or -1
+    private var used = 0
+
+    /// `keyword`'s number in `spellings`, else `spellings.count`, which it then takes.
+    mutating func id(of keyword: String, in spellings: [String]) -> Int {
+        let mask = slots.count - 1
+        var slot = keyword.hashValue & mask
+        while slots[slot] >= 0 {
+            if spellings[slots[slot]] == keyword { return slots[slot] }
+            slot = (slot + 1) & mask
+        }
+        slots[slot] = spellings.count
+        used += 1
+        if used * 2 > slots.count { grow(spellings + [keyword]) }
+        return spellings.count
+    }
+
+    private mutating func grow(_ spellings: [String]) {
+        slots = [Int](repeating: -1, count: slots.count * 2)
+        let mask = slots.count - 1
+        for (id, spelling) in spellings.enumerated() {
+            var slot = spelling.hashValue & mask
+            while slots[slot] >= 0 { slot = (slot + 1) & mask }
+            slots[slot] = id
+        }
     }
 }
 
