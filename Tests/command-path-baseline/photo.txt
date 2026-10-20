@@ -3,41 +3,10 @@ Sources/PhotoApp/ExportSheet.swift: Button("Cancel", action: onCancel).keyboardS
 Sources/PhotoApp/ExportSheet.swift: Button("Export", action: onExport).keyboardShortcut(.defaultAction)
 Sources/PhotoApp/ImageSizeSheet.swift: Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
 Sources/PhotoApp/ImageSizeSheet.swift: Button("Resize", action: resize)
-Sources/PhotoApp/PhotoCommands+Edit.swift: Button(menu.undoTitle, systemImage: PhotoEditItem.undo.systemImage) { menu.perform(.undo) }
-Sources/PhotoApp/PhotoCommands+Edit.swift: Button(menu.redoTitle, systemImage: PhotoEditItem.redo.systemImage) { menu.perform(.redo) }
-Sources/PhotoApp/PhotoCommands+Edit.swift: Button("Select All", systemImage: item.systemImage) { menu.selectAll() }
-Sources/PhotoApp/PhotoCommands+Edit.swift: return Button(title, systemImage: item.systemImage) { menu.edit(intent) }
-Sources/PhotoApp/PhotoCommands+Edit.swift: Button("Delete Selection", systemImage: PhotoEditItem.deleteSelection.systemImage) {
-Sources/PhotoApp/PhotoCommands+Edit.swift: Button("Fill Selection", systemImage: PhotoEditItem.fillSelection.systemImage) {
-Sources/PhotoApp/PhotoCommands+File.swift: Button("New Image") { menu.perform(.newImage) }.keyboardShortcut("n")
-Sources/PhotoApp/PhotoCommands+File.swift: Button("Open…") { menu.perform(.open) }.keyboardShortcut("o")
 Sources/PhotoApp/PhotoCommands+File.swift: Button(url.lastPathComponent) { openRecent(url, recent.target) }
 Sources/PhotoApp/PhotoCommands+File.swift: Button("Clear Menu") { clearRecent(recent.target) }.disabled(!recent.canClear)
 Sources/PhotoApp/PhotoCommands+File.swift: Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
-Sources/PhotoApp/PhotoCommands+File.swift: Button("Save") { menu.perform(.save) }.keyboardShortcut("s").disabled(!menu.hasImage)
-Sources/PhotoApp/PhotoCommands+File.swift: Button("Save As…") { menu.perform(.saveAs) }.keyboardShortcut("s", modifiers: [.command, .shift])
-Sources/PhotoApp/PhotoCommands+File.swift: Button("Export…") { menu.perform(.export(.openSheet)) }.keyboardShortcut("e", modifiers: [.command, .shift])
-Sources/PhotoApp/PhotoCommands+Image.swift: Button("Image Size…") { perform(.imageSize) }
-Sources/PhotoApp/PhotoCommands+Image.swift: Button("Rotate 90° Clockwise") { perform(.rotate(.degrees90)) }
-Sources/PhotoApp/PhotoCommands+Image.swift: Button("Rotate 90° Counterclockwise") { perform(.rotate(.degrees270)) }
-Sources/PhotoApp/PhotoCommands+Image.swift: Button("Rotate 180°") { perform(.rotate(.degrees180)) }
-Sources/PhotoApp/PhotoCommands+Image.swift: Button("Straighten…") { perform(.straighten) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button("New Layer", systemImage: "plus") { menu.perform(.addLayer) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button("Delete Layer", systemImage: "trash") { menu.perform(.deleteLayer) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button("Rename Layer…", systemImage: "pencil") { menu.perform(.renameLayer) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button(menu.visibilityTitle, systemImage: menu.visibilityTitle == "Show Layer" ? "eye" : "eye.slash") {
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button("Bring Forward", systemImage: "square.2.layers.3d.top.filled") { menu.perform(.bringForward) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button("Send Backward", systemImage: "square.2.layers.3d.bottom.filled") { menu.perform(.sendBackward) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button("Select Layer Above", systemImage: "arrow.up") { menu.perform(.selectLayerAbove) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button("Select Layer Below", systemImage: "arrow.down") { menu.perform(.selectLayerBelow) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: Button(kind.title) { menu.perform(.adjustmentLayer(.add(kind))) }
-Sources/PhotoApp/PhotoCommands+Layer.swift: return Button(title, systemImage: Self.systemImage(intent)) { menu.perform(.edit(intent)) }
-Sources/PhotoApp/PhotoCommands+Select.swift: Button("All") { menu.selectAll() }.keyboardShortcut("a").disabled(focused.map { !$0.hasImage } ?? false)
-Sources/PhotoApp/PhotoCommands+Select.swift: Button("Deselect") { menu.perform(.deselect) }.keyboardShortcut("d").disabled(!menu.canDeselect)
-Sources/PhotoApp/PhotoCommands+View.swift: Button("Zoom In") { menu.perform(.zoomIn) }.keyboardShortcut("=").disabled(!menu.hasImage)
-Sources/PhotoApp/PhotoCommands+View.swift: Button("Zoom Out") { menu.perform(.zoomOut) }.keyboardShortcut("-").disabled(!menu.hasImage)
-Sources/PhotoApp/PhotoCommands+View.swift: Button("Actual Size") { menu.perform(.actualSize) }.keyboardShortcut("1").disabled(!menu.hasImage)
-Sources/PhotoApp/PhotoCommands+View.swift: Button("Fit on Screen") { menu.perform(.fit) }.keyboardShortcut("0").disabled(!menu.hasImage)
+Sources/PhotoApp/PhotoCommands+View.swift: MenuCommand("History", help: historyHelp, isEnabled: menu.hasImage) {
 Sources/PhotoApp/PhotoWindow.swift: Button("Rename", action: commitRename)
 Sources/PhotoApp/PhotoWindow.swift: Button("Cancel", role: .cancel) {}
 Sources/PhotoApp/PhotoWindow.swift: Button("OK", role: .cancel) {}

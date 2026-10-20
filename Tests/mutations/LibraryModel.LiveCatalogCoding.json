@@ -1,0 +1,30 @@
+[
+  {
+    "label": "keywords are always written: every old catalog gains an empty \"keywords\" key and its bytes change",
+    "file": "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "find": "keywords = photo.keywords.isEmpty ? nil : photo.keywords",
+    "replace": "keywords = photo.keywords",
+    "tests": "LibraryMetadataPersistTests"
+  },
+  {
+    "label": "the caption decodes from the title key: a reopened photo shows its title as its caption",
+    "file": "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "find": "caption: caption ?? \"\"",
+    "replace": "caption: title ?? \"\"",
+    "tests": "LibraryMetadataPersistTests"
+  },
+  {
+    "label": "the aperture is dropped from the stored camera details: it is gone after a relaunch",
+    "file": "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "find": "fNumber = details.fNumber",
+    "replace": "fNumber = nil",
+    "tests": "LibraryMetadataPersistTests"
+  },
+  {
+    "label": "an empty camera is written as {}: photos without Exif change the catalog's bytes",
+    "file": "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "find": "camera = photo.camera.isEmpty ? nil : Camera(photo.camera)",
+    "replace": "camera = Camera(photo.camera)",
+    "tests": "LibraryMetadataPersistTests"
+  }
+]

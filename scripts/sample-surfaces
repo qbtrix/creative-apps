@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+# scripts/sample-surfaces: how much of an app's main thread a `/usr/bin/sample`
+# report spent allocating render surfaces. The real-app perf journeys
+# (UITests/Journey+Health.swift, through scripts/realperf-watch) sample the
+# app for 3 s during a drag and run this on the report. It reads the "Call
+# graph:" section: the main thread is the thread whose header says "Main
+# Thread" (when it ran blocks from several queues) or names
+# com.apple.main-thread, and its count is the total. A frame matching SURFACE
+# (IOSurfaceCreate, a SurfacePool::alloc such as SwiftUI RenderBox's
+# RB::SurfacePool::alloc) adds its count once, and the frames under it are
+# skipped, so a nested match never counts twice. A frame's
+# depth is the column its count starts at. It also prints the five busiest
+# lines of "Sort by top of stack" (every thread), for the log.
+# Tests/sample_surfaces/test_sample_surfaces.sh is its fixture test. Stdlib
+# Python 3 only.
+#
+# Usage: scripts/sample-surfaces <sample.txt> [--max-percent 20]
+#   exit 0: under the limit; 1: over it; 2: no main thread in the report
+import re
+import sys
+
+SURFACE = re.compile(r"IOSurfaceCreate|SurfacePool::alloc")
+LINE = re.compile(r"^([ +!:|]*)(\d+) (.*)$")
+
+
+def surface_share(text):
+    """(main-thread samples, of them under a surface allocation, the matched frames by count)."""
+    total = hits = 0
+    frames = {}
+    graph = in_main = False
+    skip = None
+    for line in text.splitlines():
+        if line.startswith("Call graph:"):
+            graph = True
+            continue
+        if not graph:
+            continue
+        if not line.strip() or line.startswith("Total number in stack"):
+            break
+        match = LINE.match(line)
+        if not match:
+            continue
+        depth, count, symbol = len(match.group(1)), int(match.group(2)), match.group(3)
+        if "+" not in match.group(1):  # a thread's header line
+            in_main = "com.apple.main-thread" in symbol or ": Main Thread" in symbol
+            if in_main:
+                total += count
+            skip = None
+            continue
+        if not in_main:
+            continue
+        if skip is not None and depth > skip:
+            continue
+        skip = None
+        if SURFACE.search(symbol):
+            hits += count
+            name = symbol.split("  (in ")[0]
+            frames[name] = frames.get(name, 0) + count
+            skip = depth
+    return total, hits, frames
+
+
+def top_of_stack(text, limit=5):
+    """The first `limit` lines of "Sort by top of stack" (every thread), trimmed."""
+    lines = text.split("Sort by top of stack", 1)
+    if len(lines) < 2:
+        return []
+    rows = []
+    for line in lines[1].splitlines()[1:]:
+        if not line.strip():
+            break
+        rows.append(" ".join(line.split()))
+    return rows[:limit]
+
+
+def main(argv):
+    args = argv[1:]
+    limit = 20.0
+    if "--max-percent" in args:
+        at = args.index("--max-percent")
+        limit = float(args[at + 1])
+        del args[at:at + 2]
+    if len(args) != 1:
+        print("usage: scripts/sample-surfaces <sample.txt> [--max-percent 20]", file=sys.stderr)
+        return 2
+    try:
+        with open(args[0], encoding="utf-8", errors="replace") as handle:
+            text = handle.read()
+    except OSError as error:
+        print(f"sample-surfaces: {error}", file=sys.stderr)
+        return 2
+    total, hits, frames = surface_share(text)
+    if total == 0:
+        print("sample-surfaces: no main thread in the call graph")
+        return 2
+    percent = 100.0 * hits / total
+    verdict = "OVER" if percent > limit else "ok"
+    print(f"main thread: {total} samples, {hits} under surface allocation ({percent:.1f}%, limit {limit:g}%) {verdict}")
+    for name, count in sorted(frames.items(), key=lambda item: -item[1])[:5]:
+        print(f"  {count:6d}  {name}")
+    for row in top_of_stack(text):
+        print(f"  top of stack: {row}")
+    return 1 if percent > limit else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

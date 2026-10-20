@@ -7,11 +7,12 @@
 // types and SwiftUI's. The cases are the contract the view files build on.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 enum DesignIntent {
-    case newFile, open, save, saveAs
+    case newFile, open, save, saveAs, export
     case undo, redo
     case tool(DesignTool)
     case drag(CGPoint, CGPoint, DesignModifiers)
@@ -25,6 +26,8 @@ enum DesignIntent {
     case addPage, deletePage
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)
     case setFill(String, DesignColor)
+    /// A Fill section gesture (type switch, stop, angle), run as its kernel fill command (`runFill`).
+    case fill(GradientIntent)
     case align(DesignAlignEdge)
     case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)
