@@ -4,7 +4,7 @@ Issue: #3442 · Packet: docs/blueprints/halo/features/autosave-history.md
 Run: act-1a15a9f4eda-rqhh · Session: session_01SEp2gy695K32UTCMdrBDFC · Started: 2026-10-20T18:43Z
 Stage: 3 wave 2
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: collect HA-5 builder (branch lead/halo-autosave-history-HA-m, stacked on #3683); open its PR once #3683 merges if the stacked diff is over 400 lines
+Next: watch #3683 (HA-a) and #3701 (HA-5, stacked on #3683, 370 lines/12 files vs dev) in the lane; then HA-3 (HA-u)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,7 +19,7 @@ Next: collect HA-5 builder (branch lead/halo-autosave-history-HA-m, stacked on #
 |---|---|---|---|---|---|---|---|
 | HA-1 | HA-a | 1 | adapter stubs; HaloRecoveryTests disabled | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift | compiles, disabled | #3683 | open |
 | HA-2 | HA-a | 1 | HaloHistoryArea + autosave hooks on the window, History button by the transport; journey skipped | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloWindow.swift, Sources/HaloApp/HaloControls.swift, UITests/HaloJourneyTests+History.swift | HaloWindowSnapshots panel | #3683 | open |
-| HA-5 | HA-m | 2 | adapter bodies: jump, recovery bytes, recovered project | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift, Tests/mutations/HaloModel.HaloRecovery+Kernel.json | HaloRecoveryTests; Mutate | – | building (lead/halo-autosave-history-HA-m) |
+| HA-5 | HA-m | 2 | adapter bodies: jump, recovery bytes, recovered project | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift, Tests/mutations/HaloModel.HaloRecovery+Kernel.json | HaloRecoveryTests; Mutate | – | PR #3701 open (head f7e6170, Mutate 3/3) |
 | HA-6 | HA-m | 3 | two specs, id list, RJ-H33 | Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloHistoryCommandIDTests.swift, Tests/RealJobs/halo/history-jump/* | HaloHistoryCommandIDTests | – | waiting (HG-m) |
 | HA-3 | HA-u | 2 | panel follows undo and jumps; Edit > Show History once AC-halo is done | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloEditMenu.swift, Tests/AppSnapshotTests/HaloHistoryAreaTests.swift | HaloHistoryAreaTests | – | waiting |
 | HA-4 | HA-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloHistorySnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloHistoryTests.swift | arrowWalkInThreeBodies | – | waiting |
