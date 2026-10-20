@@ -4,7 +4,7 @@ Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 polling
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: DT-a is #3751 (head 4209ed6), stacked on DG-a #3687; supervisor labelled needs-split on the stacked count (645/17), own diff is 397/14; asked supervisor to hold until #3687 merges, else split model+tests / wiring. Critic round: +Kernel inspector name (no maths), Rotate symbols, Select-a-layer wording.
+Next: DT-a #3751 head 18116b8 (dev merged after DG-a #3687 landed), 397/14, in the lane. Then DT-u (needs DG-u) and DT-m. Critic round: +Kernel inspector name (no maths), Rotate symbols unverified, Select-a-layer wording.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

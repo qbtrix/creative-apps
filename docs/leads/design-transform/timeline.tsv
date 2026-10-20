@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-20T21:21:54Z	poll	heartbeat	#3751	lane refused (645/17 stacked), needs-split; supervisor question open; #3687 still open
 2026-10-20T21:44:18Z	dep	pr-merged	#3687	DG-a merged (cross-feature); stacked PR now conflicts with dev
 2026-10-20T21:44:18Z	fix	fix-round	-	fixer merging dev into the stacked PR (merge commit), then re-measure against the cap
+2026-10-20T21:54:28Z	DT-a	fix-round	#3751	dev merged (merge commit 18116b8), 397/14, mutate 14/14, CI PASS; needs-split removed; back in lane
