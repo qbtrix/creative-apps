@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 12:18Z	3	poll	-	dev still 0e1199e9; no slice unblocked
 12:29Z	3	poll	-	dev 3ebb876f (#3396 #3473 #3489 #3493): no core bump, SM-a, PL-a, GF-2, AH-2 or #3144; nothing to start
 12:41Z	3	poll	-	dev still 3ebb876f; no slice unblocked
+2026-10-20T13:00:54Z	3	poll	dev 897ccbb2: no prerequisites on dev yet
