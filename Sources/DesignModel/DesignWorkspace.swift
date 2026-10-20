@@ -25,6 +25,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 /// A page of a design file: one canvas holding a tree of nodes.
 public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
@@ -84,8 +85,13 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
     public internal(set) var pages: [DesignPage] = []
     public internal(set) var selectedPageID: String?
+    /// The selected layers on the selected page: SuiteKernel's ordered selection (DesignSelection).
+    var selection = Selection<String>()
     /// The selected layers on the selected page, in the order they were selected (DesignSelection).
-    public internal(set) var selectedNodeIDs: [String] = []
+    public internal(set) var selectedNodeIDs: [String] {
+        get { selection.ordered }
+        set { selection.replace(newValue) }
+    }
     /// The primary selection: the last layer selected. Setting it replaces the whole selection.
     public internal(set) var selectedNodeID: String? {
         get { selectedNodeIDs.last }
