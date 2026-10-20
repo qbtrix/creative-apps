@@ -7,8 +7,8 @@
 // (waiting on layer styles), `design.layers.bar.<part>`. A layer row's context
 // menu (built on open, for the rows it opened on) holds Duplicate, Delete,
 // Group, Ungroup and Arrange's four steps. Bar and menu items are the Edit and
-// Object menus' own (`DesignMenu.item` on the catalog spec), so enablement and
-// reasons match; a row outside the selection reads as selected in its menu,
+// Object menus' catalog specs on the same state (`ToolbarAction(spec, on:)`),
+// so enablement and reasons match; a row outside the selection reads as selected in its menu,
 // and a pick selects it first.
 // Selection runs through the List, so arrow keys and type-select move through
 // pages and layers; the highlighted rows are the selected layers, or the
@@ -180,8 +180,8 @@ struct DesignLayersPanel: View {
     // view-static: main-actor
     static func bar(_ menu: DesignMenu) -> [ToolbarAction] {
         barCommands.map { command in
-            ToolbarAction(menu.item(command.id, systemImage: command.symbol) { menu.perform(command.intent) },
-                          identifier: "design.layers.bar." + command.part)
+            ToolbarAction(DesignMenuState.spec(command.id), on: menu.state(), systemImage: command.symbol,
+                          identifier: "design.layers.bar." + command.part) { menu.perform(command.intent) }
         } + [LayerActionBar.effects(identifier: "design.layers.bar.fx")]
     }
 
@@ -194,10 +194,10 @@ struct DesignLayersPanel: View {
         var state = menu.state()
         if let outside { state.workspace.selectItem(outside) }
         return rowCommands.map { command in
-            ToolbarAction(menu.item(command.id, systemImage: command.symbol, in: state) {
+            ToolbarAction(DesignMenuState.spec(command.id), on: state, systemImage: command.symbol) {
                 if let outside { menu.perform(.select(outside)) }
                 menu.perform(command.intent)
-            })
+            }
         }
     }
 
