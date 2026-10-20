@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-13 builder opens a draft PR; then FC-7, FC-9, FC-15 (wave 5); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts
+Next: FC-13 builder opens a draft PR; FC-7 building (stacked on FC-6 #3491); then FC-9, FC-15 (wave 5); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,10 +24,11 @@ Next: FC-13 builder opens a draft PR; then FC-7, FC-9, FC-15 (wave 5); when #342
 | FC-3 | FC-a | 1 | collection edits as undo steps on the kernel adapter (recordCollectionsEdit) | Sources/LibraryModel/LibraryUndoAdapter.swift, Tests/LibraryModelTests/LibraryCollectionsHistoryTests.swift, Tests/mutations/LibraryModel.LibraryCollectionsHistory.json | LibraryCollectionsHistoryTests | #3423 | open, macOS build queued |
 | FC-4 | FC-a | 2 | menu, bar and area hooks; CollectionsStore stub (UI, macOS) | Sources/LibraryApp/LibraryWindow+Filters.swift, Sources/LibraryApp/Platform/CollectionsStore.swift | builds on macOS | #3461 | open, draft until #3424 merges (stacked) |
 | FC-5 | FC-a | 3 | mount bar, sidebar section, menu items (UI, macOS) | Sources/LibraryApp/LibraryWindow.swift, Sources/LibraryApp/LibraryCommands.swift, Sources/LibraryApp/LibraryBrowser.swift | MJ1, FC-a snapshots | #3466 | open, draft until #3461 merges (stacked); gate ran against the FC-4 branch, so rerun against origin/dev before un-drafting |
-| FC-6 | FC-b | 4 | filter checks, disabled until FC-7 | LibraryFilterBarTests, LibraryFilterBudgetTests, LibraryFilterSnapshots, LibraryJourneyTests+Filters | compiles, disabled | - | building (stacked on FC-5) |
+| FC-6 | FC-b | 4 | filter checks, disabled until FC-7 | LibraryFilterBarTests, LibraryFilterBudgetTests, LibraryFilterSnapshots, LibraryJourneyTests+Filters | compiles, disabled | #3491 | draft, stacked on #3466 |
 | FC-8 | FC-c | 4 | collections checks, disabled until FC-9 (J14 step 7: FC-10) | LibraryCollectionsTests, LibraryCollectionsBudgetTests, LibraryCollectionsSnapshots, LibraryJourneyTests+Collections | compiles, disabled | - | building (stacked on FC-5) |
 | FC-11 | FC-d | 4 | smart collection checks, disabled until FC-12 | LibrarySmartCollectionTests, LibrarySmartSnapshots, LibraryJourneyTests+Smart | compiles, disabled | #3515 | draft, stacked on #3466 |
-| FC-7, FC-9, FC-10, FC-12, FC-14 .. FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
+| FC-7 | FC-b | 5 | filter methods (not smart); unavailable = nil; enables FC-6 checks | Sources/LibraryModel/LibraryFilter.swift, Tests/mutations/LibraryModel.LibraryFilter.json, FC-6 four files | LibraryFilterBarTests enabled | - | building (stacked on FC-6) |
+| FC-9, FC-10, FC-12, FC-14 .. FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -51,6 +52,6 @@ Next: FC-13 builder opens a draft PR; then FC-7, FC-9, FC-15 (wave 5); when #342
 - FC-6 (#3491): J13 skips as a whole test, following the PerfExport journey's pattern. The three snapshot states are one test, to stay under the line cap. The PR body asks for LibraryFilterBudgetTests to be added to Tests/perf-suites.txt (protected, the supervisor's) before FC-7 enables it.
 
 ## Open
-- Before FC-7 and FC-9 enable their budget tests, raise one issue for the supervisor asking to add LibraryFilterBudgetTests and LibraryCollectionsBudgetTests to Tests/perf-suites.txt.
+- #3520 asks the supervisor to list LibraryFilterBudgetTests, LibraryCollectionsBudgetTests (and the keyword/search suites, plus the load-flaky Catalog/Grid budget suites) in Tests/perf-suites.txt. Open.
 - S-L9 #3411 (sidebar drop): FC-10 waits on it. S-L10 #3412 (isRenamable): nothing waits on it.
 - Open line:library findings checked 2026-10-20T04:42:28Z: none in this feature's files. dev-red #3386 (macOS, range main..1b33afbb) predates these PRs; not ours.
