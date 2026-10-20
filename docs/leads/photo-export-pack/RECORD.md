@@ -11,7 +11,7 @@ Next: PX-1 builder (PhotoExport+Kernel stubs) then PX-3 stacked on it; PX-2 wait
 |---|---|---|---|---|---|---|---|---|---|
 | PX-a | Photo export reads ExportOptions on stubs; Export… opens SuiteExportSheet with Size row and four formats | PX-1, PX-2 | MJ-PX | XP-1, XP-6 (merged, PX-1); XP-3 + AX-photo (PX-2) | yes | 0 | building | – | – |
 | PX-u | sheet snapshots, render budget, journey written | PX-5, PX-6 | PJ-X1 | PX-a; XP-4 (PX-5) | yes | 0 | waiting | – | – |
-| PX-m | exact-size resample, PNG/JPEG/HEIC/TIFF through the shared encoder, headless and in app | PX-3, PX-4 | MJ-PX | PX-1 + XP-6 (PX-3, met); SM-w (PX-4) | yes | 0 | building (PX-1 merged; PX-3 #3729 open) | – | – |
+| PX-m | exact-size resample, PNG/JPEG/HEIC/TIFF through the shared encoder, headless and in app | PX-3, PX-4 | MJ-PX | PX-1 + XP-6 (PX-3, met); SM-w (PX-4) | yes | 0 | building (PX-1, PX-3 merged; PX-4 parked) | – | – |
 | PX-z | live services, journey, blueprint, built | PX-7, PX-8 | PJ-X1 | PX-u, PX-m; tone-controls:PT-z, place-image:PP-z (PX-8) | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -19,7 +19,7 @@ Next: PX-1 builder (PhotoExport+Kernel stubs) then PX-3 stacked on it; PX-2 wait
 |---|---|---|---|---|---|---|---|
 | PX-1 | PX-a | 1 | PhotoExport+Kernel stubs; PhotoExportPackTests disabled | Sources/PhotoModel/PhotoExport+Kernel.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift | compiles; existing export tests pass | #3678 | merged 21:15Z (head 061e0972) |
 | PX-2 | PX-a | – | Export… opens SuiteExportSheet; Photo's ExportSheet.swift deleted | Sources/PhotoApp/PhotoWindow+Export.swift, Sources/PhotoApp/ExportSheet.swift | PhotoExportPackSnapshots.sheet | – | waits XP-3, AX-photo |
-| PX-3 | PX-m | 1 (stacked on PX-1) | exportPixels and headless export on ExportOptions; RJ-P01 | Sources/PhotoModel/PhotoExport+Kernel.swift, Sources/PhotoModel/PhotoHeadless.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift, Tests/mutations/PhotoModel.PhotoExport+Kernel.json, Tests/RealJobs/photo/instagram/ | PhotoExportPackTests | #3729 | open (dev merged in after needs-rebase, head e2c55886, Mutate 4/4) |
+| PX-3 | PX-m | 1 (stacked on PX-1) | exportPixels and headless export on ExportOptions; RJ-P01 | Sources/PhotoModel/PhotoExport+Kernel.swift, Sources/PhotoModel/PhotoHeadless.swift, Tests/PhotoModelTests/PhotoExportPackTests.swift, Tests/mutations/PhotoModel.PhotoExport+Kernel.json, Tests/RealJobs/photo/instagram/ | PhotoExportPackTests | #3729 | merged 22:41Z (head e2c55886, Mutate 4/4) |
 | PX-4 | PX-m | – | app writes formats through services.media.still | Sources/PhotoApp/ImageIOCodec.swift, Tests/AppSnapshotTests/PhotoExportFormatsTests.swift | PhotoExportFormatsTests | – | parked (supervisor: no third codec path; waits shared-codecs XK3 + shell-media, no issue yet) |
 | PX-5 | PX-u | – | snapshots, render budget | Tests/AppSnapshotTests/PhotoExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoExportPackTests.swift | RenderBudgetPhotoExportPackTests.typingWidthInTwoBodies | – | waits PX-2, XP-4 |
 | PX-6 | PX-u | – | journey written, skipped | UITests/PhotoJourneyTests+ExportPack.swift | compiles, skipped | – | waits PX-2 |
