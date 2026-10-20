@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-20T20:12Z	3	open-item	PE-6	old Eyedropper drag->sampleDrag path now unreachable from the window; PE-6 decides remove or keep for agents
 2026-10-20T20:32Z	3	heartbeat	-	#3704/#3706/#3708 open, clean, waiting on lane batch 39492157468 (macOS)
 2026-10-20T20:54Z	3	heartbeat	#3706	open; per-PR macOS build 39488095382 still queued
+2026-10-20T21:16Z	3	heartbeat	#3706	macOS build 39488095382 still queued
