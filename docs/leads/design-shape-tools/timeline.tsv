@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-20T21:20Z	-	check	#3436	transform still unled
 2026-10-20T21:42Z	-	check	#3436	transform still unled
 2026-10-20T22:10Z	-	fix	#3436	transform still unled
+2026-10-20T22:35Z	check	needs-rebase cleared	#3690 #3691	lane dropped label; macOS builds dispatched 22:21 on 5790b916 / 344cbd8f; lane asked to drop attribution footer: session proxy re-appends it on every PATCH (retried, re-added), lane strips it at squash
