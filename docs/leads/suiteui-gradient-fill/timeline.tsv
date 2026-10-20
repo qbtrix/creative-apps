@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-20T03:19Z	0	stage-start	-	lead branch from origin/dev 233aff5c
+2026-10-20T03:19Z	2	stage-end	-	plan: GF-1 wave 1; GF-5, GF-7 wave 2; GF-6 wave 3; GF-9 wave 4; GF-2 blocked on CC-u
+2026-10-20T03:19Z	3	stage-start	-	wave 1 GF-1
