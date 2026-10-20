@@ -11,7 +11,7 @@ Next: poll #3525 for merge, then restack #3531, #3540 and #3541 (#3541 sits on #
 |---|---|---|---|---|---|---|---|---|---|
 | EY-a | The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper ... | EY-1, EY-2 | SJ0 | gradient-fill:GF-a | true | 0 | pr-open | – | – |
 | EY-u | On the gallery page every colour row's eyedropper picks a colour from the screen as one gesture, the loupe follows the p... | EY-3, EY-4 | EJ1 | EY-a | true | 0 | pr-open | – | – |
-| EY-m | The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document po... | EY-5, EY-6 | KJ-sample | EY-a | false | 0 | pr-open | – | – |
+| EY-m | The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document po... | EY-5, EY-6 | KJ-sample | EY-a | false | 0 | merged | – | – |
 | EY-z | The gallery samples through color.sample on a live target, the fake app samples its topmost rect so RJ-X33 runs on the C... | EY-7, EY-8, EY-9 | EJ1, KJ-sample | EY-u, EY-m, transform-tools:TT-z | true | 0 | planned | – | – |
 
 ## Tasks
@@ -21,8 +21,8 @@ Next: poll #3525 for merge, then restack #3531, #3540 and #3541 (#3541 sits on #
 | EY-2 | EY-a | 2 | The placeholder `EyedropperButton`, `SampleLoupe` and `SampleSizeChips`; the colour rows' `sampleable:` par... | `Sources/SuiteUI/Eyedropper.swift`, `Sources/SuiteUI/ColorWell.swift`, `Sources/SuiteUI/Gallery/GalleryEyedropper.swift`, `Sources/SuiteUI/Gallery/GalleryCanvasHost.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3531 | open |
 | EY-3 | EY-u | 3 | The views: the `NSColorSampler` button on every colour row (one change and one end per pick), the loupe, th... | `Sources/SuiteUI/Eyedropper.swift`, `Sources/SuiteUI/ColorWell.swift`, `Tests/SuiteUITests/EyedropperTests.swift` | see packet Acceptance | #3541 | open |
 | EY-4 | EY-u | 4 | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteEyedropperSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetEyedropperTests.swift`, `UITests/SuiteJourneyTests+Eyedropper.swift` | see packet Acceptance | #3541 | open |
-| EY-5 | EY-m | 2 | `SampleRules` bodies; turns on `SampleRulesTests` | `Sources/SuiteKernel/Sample/SampleRules.swift`, `Tests/SuiteKernelTests/SampleRulesTests.swift`, `Tests/mutations/SuiteKernel.SampleRules.json` | see packet Acceptance | #3540 | open |
-| EY-6 | EY-m | 3 | The `color.sample` body; turns on `SampleCommandsTests` on a test target | `Sources/SuiteKernel/Sample/SampleCommands.swift`, `Tests/SuiteKernelTests/SampleCommandsTests.swift`, `Tests/mutations/SuiteKernel.SampleCommands.json` | see packet Acceptance | #3540 | open |
+| EY-5 | EY-m | 2 | `SampleRules` bodies; turns on `SampleRulesTests` | `Sources/SuiteKernel/Sample/SampleRules.swift`, `Tests/SuiteKernelTests/SampleRulesTests.swift`, `Tests/mutations/SuiteKernel.SampleRules.json` | see packet Acceptance | #3540 | merged |
+| EY-6 | EY-m | 3 | The `color.sample` body; turns on `SampleCommandsTests` on a test target | `Sources/SuiteKernel/Sample/SampleCommands.swift`, `Tests/SuiteKernelTests/SampleCommandsTests.swift`, `Tests/mutations/SuiteKernel.SampleCommands.json` | see packet Acceptance | #3540 | merged |
 | EY-7 | EY-z | 5 | The gallery page's tool samples its canvas through `color.sample` on a local target and sets the row as one... | `Sources/SuiteUI/Gallery/GalleryEyedropper.swift`, `Tests/SuiteUITests/EyedropperLiveTests.swift` | see packet Acceptance | – | planned |
 | EY-8 | EY-z | 4 | The fake app samples: `FakeCanvasDocument` conforms to `SampleTarget` (the topmost rect under the point, it... | `Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift`, `Tests/SuiteKernelTests/FakeSampleTests.swift`, `Tests/mutations/SuiteKernel.FakeCanvasDocument.json`, `Tests/RealJobs/fake/sample-color/sample-color.jobs.json`, `Tests/RealJobs/fake/sample-color/input/two-fills.fake` | see packet Acceptance | – | planned |
 | EY-9 | EY-z | 6 | The C4 part names the command, the button and the loupe; `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-kernel/kernel-sample.json`, `docs/blueprints/suiteui/features/eyedropper.wave.json` | see packet Acceptance | – | planned |
@@ -34,6 +34,7 @@ Next: poll #3525 for merge, then restack #3531, #3540 and #3541 (#3541 sits on #
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-20T11:02Z #3540 (EY-m) merged as 8d8919ca; EY-m done waits on a green dev Linux run; EY-7 starts once the #3541 restack lands.
 - 2026-10-20T10:46Z #3531 got needs-rebase (suiteui-sources.json description); fixer merges dev keeping all clauses, then restacks #3541.
 - 2026-10-20T10:03Z Restacked after EY-1: #3531 -> dev head 67f26a6a (C4 description kept both), #3540 -> dev head b01a356d (kept slice code over EY-1 stubs), #3541 on EY-a-2 head 4500f6bf; all CI: PASS.
 - 2026-10-20T09:44Z #3525 (EY-1) merged as d4ed4bde; fixer restacking #3531 and #3540 onto dev and #3541 onto the new EY-a-2. EY-a done once #3531 merges and a green Linux run holds it.
