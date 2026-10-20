@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-20T14:05Z	3	merged	#3531	EY-2 merged df54ce81; EY-a waits on a Linux run; #3541 retargeted to dev
 2026-10-20T14:10Z	3	heartbeat	-	lead polling PRs 3541 3597 
 2026-10-20T14:12Z	3	restack	#3541 #3597	EY-u b1e03792 on dev, EY-z a0bdb43f (own diff 263/2); fixer removing EY-u's GalleryCanvasHost .merging (the Sendable error EY-2 hit)
+2026-10-20T14:22Z	3	slice-done	EY-a	https://github.com/qbtrix/creative-apps/actions/runs/39436506345 (Belt-Slice-Done + Mac-Finish-Wanted on #3448)
