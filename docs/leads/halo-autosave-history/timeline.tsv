@@ -8,3 +8,5 @@ utc	stage	event	ref	note
 2026-10-20T19:56Z	3	heartbeat	#3683 #3701	added the missing Allow-Dup line to #3701 after the lane refused it; HG-m (for HA-6) not done; AC-halo #2999 open
 2026-10-20T20:18Z	3	heartbeat	#3683 #3701	open, waiting on queued macOS builds; HG-m not done; #2999 open; blocked poll 1
 2026-10-20T20:41Z	3	heartbeat	#3683 #3701	open, macOS builds still queued (35 repo-wide); blocked poll 2
+2026-10-20T21:02Z	3	heartbeat	#3683 #3701	still queued; blocked poll 3; posted a supervisor question on #3442
+2026-10-20T21:05Z	3	wave-start	HA-u	builder started on lead/halo-autosave-history-HA-u, stacked on HA-a (HA-3 + HA-4); PR opens once #3683 merges
