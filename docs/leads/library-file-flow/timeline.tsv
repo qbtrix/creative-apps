@@ -25,3 +25,4 @@
 2026-10-20T21:28:48Z	heartbeat	waiting	LF-a #3624 at 12d9b930a awaits a new macOS build; SF-3 #3514 still open (supervisor-queued), SF-4 open
 2026-10-20T21:50:11Z	heartbeat	waiting	LF-a #3624 macOS build 39500950721 green at 12d9b930a; waits for the lane sweep; SF-3 #3514, SF-4 open
 2026-10-20T22:13:12Z	heartbeat	waiting	LF-a #3624 macOS build 39500950721 green, awaits lane sweep; LF-5 blocked on SF-3 #3514 (supervisor-queued) and SF-4
+2026-10-20T22:35:23Z	heartbeat	waiting	LF-a #3624 still open, macOS green; lane active; LF-5 blocked on SF-3 #3514, SF-4
