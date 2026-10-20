@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T18:42:31Z	stage	start	-	run act-1a15a9a4e8b-kn6a on dev 875b44d2; DA-a builder
 2026-10-20T19:07:24Z	check	heartbeat	w4yvztnfw	wave 1 DA-a builder running; no PR yet
 2026-10-20T19:28:33Z	check	PR	#3686	DA-a opened (DA-1 + DA-2), head 5a79039a; file renamed DesignHistoryArea+Kernel.swift for check-dup-logic
+2026-10-20T19:29:55Z	wave	start	widwznsim	wave 2: DA-u (DA-3+DA-4), DA-5; stacked on #3686, base dev a48992b7

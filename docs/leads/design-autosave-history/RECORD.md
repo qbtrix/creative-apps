@@ -10,8 +10,8 @@ Next: DA-a #3686 (head 5a79039a) in the lane; wave 2 stacks on it: DA-m's DA-5 s
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DA-a | adapter stubs; History panel and autosave hooks on the window; View > Show History | DA-1, DA-2 | MJ-DA | shell-parity (built) | yes | 0 | in lane #3686 | – | – |
-| DA-u | toolbar History button; panel follows undo and jumps; snapshots and budget | DA-3, DA-4 | J-DA | DA-a | yes | 0 | planned | – | – |
-| DA-m | jump records no step; recovery bytes reopen dirty; history commands in the catalog | DA-5, DA-6 | MJ-DA | DA-a; gradient-fill:DG-m (DA-6) | no | 0 | planned | – | – |
+| DA-u | toolbar History button; panel follows undo and jumps; snapshots and budget | DA-3, DA-4 | J-DA | DA-a | yes | 0 | building (wave 2, stacked on #3686) | – | – |
+| DA-m | jump records no step; recovery bytes reopen dirty; history commands in the catalog | DA-5, DA-6 | MJ-DA | DA-a; gradient-fill:DG-m (DA-6) | no | 0 | DA-5 building (wave 2, stacked on #3686); DA-6 waits DG-m | – | – |
 | DA-z | journey jumps and recovers on live; built | DA-7, DA-8 | J-DA | DA-u, DA-m; suiteui autosave-history AH-z (AH-8 #3629) | yes | 0 | planned | – | – |
 
 ## Tasks
@@ -19,9 +19,9 @@ Next: DA-a #3686 (head 5a79039a) in the lane; wave 2 stacks on it: DA-m's DA-5 s
 |---|---|---|---|---|---|---|---|
 | DA-1 | DA-a | 1 | adapter signatures as stubs; DesignRecoveryTests disabled | Sources/DesignModel/DesignRecovery+Kernel.swift, Tests/DesignModelTests/DesignRecoveryTests.swift | compiles, disabled | #3686 | open (5a79039a) |
 | DA-2 | DA-a | 1 | DesignHistoryArea (trailing panel, .autosaveRecovery), one window line, View > Show History, journey skipped | Sources/DesignApp/DesignHistoryArea.swift, DesignWindow.swift, DesignCommands.swift, UITests/DesignJourneyTests+History.swift | DesignEditorSnapshots history panel | #3686 | open (5a79039a; ships as DesignHistoryArea+Kernel.swift) |
-| DA-3 | DA-u | 2 | toolbar History button, panel follows undo | Sources/DesignApp/DesignHistoryArea.swift, Sources/DesignModel/DesignToolbarItems.swift, Tests/AppSnapshotTests/DesignHistoryAreaTests.swift | DesignHistoryAreaTests | – | waits DA-2 |
-| DA-4 | DA-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/DesignHistorySnapshots.swift, RenderBudgetDesignHistoryTests.swift | arrowWalkInThreeBodies | – | waits DA-3 |
-| DA-5 | DA-m | 2 | adapter bodies; tests on; plan | Sources/DesignModel/DesignRecovery+Kernel.swift, Tests/DesignModelTests/DesignRecoveryTests.swift, Tests/mutations/DesignModel.DesignRecovery+Kernel.json | DesignRecoveryTests, Mutate | – | waits DA-1 |
+| DA-3 | DA-u | 2 | toolbar History button, panel follows undo | Sources/DesignApp/DesignHistoryArea.swift, Sources/DesignModel/DesignToolbarItems.swift, Tests/AppSnapshotTests/DesignHistoryAreaTests.swift | DesignHistoryAreaTests | – | building (wave 2, with DA-4) |
+| DA-4 | DA-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/DesignHistorySnapshots.swift, RenderBudgetDesignHistoryTests.swift | arrowWalkInThreeBodies | – | building (wave 2, with DA-3) |
+| DA-5 | DA-m | 2 | adapter bodies; tests on; plan | Sources/DesignModel/DesignRecovery+Kernel.swift, Tests/DesignModelTests/DesignRecoveryTests.swift, Tests/mutations/DesignModel.DesignRecovery+Kernel.json | DesignRecoveryTests, Mutate | – | building (wave 2) |
 | DA-6 | DA-m | – | history specs in catalog and id list; RJ-D33 | DesignCommandCatalog.swift, Tests/command-ids/design.txt, DesignHistoryCommandTests.swift, Tests/RealJobs/design/history-jump/* | DesignHistoryCommandTests | – | waits gradient-fill:DG-m |
 | DA-7 | DA-z | – | journey on live | UITests/DesignJourneyTests+History.swift | testJumpAndRecover | – | waits DA-4, DA-6, AH-z |
 | DA-8 | DA-z | last | status built, feature-done | autosave-history.wave.json | waves render --dry-run | – | waits DA-7 |
@@ -37,3 +37,4 @@ Next: DA-a #3686 (head 5a79039a) in the lane; wave 2 stacks on it: DA-m's DA-5 s
 
 ## Open
 - DA-6 waits on gradient-fill:DG-m, which waits on suiteui GF-6 (not on dev): both own DesignCommandCatalog.swift and Tests/command-ids/design.txt.
+- Wave 2 (wf widwznsim): DA-u (DA-3 + DA-4) and DA-5 open as PRs based on #3686's branch (lead/design-autosave-history-DA-a); the lane skips a non-dev base, and the lead retargets each to dev once #3686 merges. DA-m ships as two PRs (DA-5 now, DA-6 after gradient-fill DG-m), since DA-6 is blocked across features.
