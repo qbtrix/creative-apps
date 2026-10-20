@@ -7,7 +7,7 @@
 - Started: 2026-10-20
 - Stage: 3 polling (wave 1 blocked)
 - Base: dev 533daec
-- Next: HG-a #3516 in the fast lane (macOS build-only run pending); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 and AC-halo; HG-u waits on CL-probe and GF-2/GF-3
+- Next: HG-a #3516 waits on its lane macOS build (run 39378049451, queued since 06:01Z); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 and AC-halo; HG-u waits on CL-probe and GF-2/GF-3
 
 ## Slices
 
@@ -53,3 +53,4 @@
 - Resolved: pinned core has `PixelBuffer.gradient(width:height:shape:from:to:stops:space:dither:)` (CoreRaster/Fill/RasterGradient.swift); no needs-core issue.
 - HALO-GRADIENT-FRAME costs about 1.5–1.7 s on a Linux debug build at 1080p (report only).
 - The contract's `extension HaloDrawItem { var gradient }` is a stored field with an init default (extensions can't store).
+- The PR tool appends an attribution footer to bodies it creates; #3516's was removed by an edit at 06:20Z. Every later PR body and comment gets the same check after posting.
