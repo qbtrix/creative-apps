@@ -4,7 +4,7 @@ Issue: #3469 · Packet: docs/blueprints/design/features/file-flow.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 wave 1
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: DF-1 (adapter stubs + disabled DesignFileFlowTests, Model only) is building; DF-2 joins the slice once design-export (#3684), DA-a (#3686) and PD-u merge.
+Next: DF-1 is in the fast lane (#3698, head b4dce95); DF-2 joins the slice once design-export (#3684), DA-a (#3686) and PD-u merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,7 +17,7 @@ Next: DF-1 (adapter stubs + disabled DesignFileFlowTests, Model only) is buildin
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| DF-1 | DF-a | 1 | adapter stubs, tests disabled | Sources/DesignModel/DesignFileFlow+Kernel.swift, Tests/DesignModelTests/DesignFileFlowTests.swift | compiles; DesignFileFlowTests disabled | – | building |
+| DF-1 | DF-a | 1 | adapter stubs, tests disabled | Sources/DesignModel/DesignFileFlow+Kernel.swift, Tests/DesignModelTests/DesignFileFlowTests.swift | compiles; DesignFileFlowTests disabled | #3698 | in lane |
 | DF-2 | DF-a | 2 | .suiteApp, SuiteFileCommands, .suiteFileDrop | Sources/DesignApp/DesignApp.swift, Sources/DesignApp/DesignCommands.swift, Sources/DesignApp/DesignWindow.swift | DesignFileFlowSnapshots.menu | – | waiting |
 | DF-3 | DF-m | 3 | adapter bodies, specs, RJ-D42 | Sources/DesignModel/DesignFileFlow+Kernel.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/DesignModelTests/DesignFileFlowTests.swift, Tests/mutations/DesignModel.DesignFileFlow+Kernel.json, Tests/RealJobs/design/open-recent/ | DesignFileFlowTests, RJ-D42 | – | waiting |
 | DF-4 | DF-m | 3 | bridge notes, drag-out | Sources/DesignApp/DesignWindow+Files.swift, Sources/DesignApp/DesignPasteboardBridge.swift, Tests/AppSnapshotTests/DesignFileFlowLiveTests.swift | DesignFileFlowLiveTests | – | waiting |
