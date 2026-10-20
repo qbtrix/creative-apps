@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "editor-kernel design (2026-10-17), inventory row 'undo'; captain's canonical-first call on #1552",
-  "waits_on": "editor-kernel:EK-undo only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "waits_on": "editor-kernel:EK-undo only (every slice); cross-line hand-offs in the packet's Hand-offs list; AU-library takes CatalogHistory.swift before filters-collections' FC-3 (supervisor, #1934, 2026-10-20)",
   "ui_slice": "none",
   "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it",
   "owned": [

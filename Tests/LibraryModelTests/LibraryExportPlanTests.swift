@@ -1,7 +1,7 @@
 // LibraryExportPlanTests.swift: EX-2, the live exporter. The plan fits the
 // long edge and never enlarges; render decodes at full size, develops with
 // the photo's settings, resizes to the plan, draws samples without a decode
-// and passes decode errors through.
+// and passes decode errors through. EX-14: a cropped photo plans at its crop.
 import CoreColor
 import CoreRaster
 import Foundation
@@ -61,6 +61,23 @@ private func photo(_ id: String, _ size: PixelSize, file: Bool = true,
         #expect(sizes(longEdge: 8192) == full)
         #expect(sizes(longEdge: nil) == full)
         #expect(LiveExporter.unavailable == nil)
+    }
+
+    /// EX-14: the plan sizes the crop, not the photo.
+    @Test func planSizesTheCrop() throws {
+        let full = PixelSize(width: 6000, height: 4000)
+        let exporter = LiveExporter(decoder: FakeDecoder(photos: []), develop: FakeDevelop())
+        func planned(_ crop: CropSettings) -> PixelSize? {
+            let item = photo("c", full, develop: DevelopSettings.neutral.setting(crop: crop))
+            return exporter.plan([item], options: ExportOptions(longEdge: 1024, folder: "/out"), existingNames: [])
+                .items.first?.size
+        }
+        let square = try LiveCrop().initial(aspect: .square, angle: 0, photo: full)
+        #expect(planned(square) == PixelSize(width: 1024, height: 1024))
+        let straightened = try LiveCrop().initial(aspect: .threeTwo, angle: 2, photo: full)
+        let frame = try LiveCrop().frame(straightened, photo: full)
+        #expect(frame.width < 6000, "a 2° straighten trims the frame")
+        #expect(planned(straightened) == PixelSize(width: frame.width, height: frame.height).fitting(longSide: 1024))
     }
 
     @Test func planNamesThroughTheSharedRule() {

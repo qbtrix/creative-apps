@@ -18,7 +18,7 @@ share a file chain in the order each slice's hand-off note gives.
 the lead checks each before its slice starts):
 - **AU-design:** `DesignHistory.swift` is owned by design-seams-2 and files-history: this slice starts once both have merged their edits to it (their `Belt-Slice-Done:` lines), and `DesignWorkspace.swift` after design-window.
 - **AU-photo:** `PhotoWorkspace.swift` is owned by photo-seams: this slice starts once photo-seams has merged its edits to it.
-- **AU-library:** `CatalogHistory.swift` is owned by filters-collections and spine; `LibraryReadouts.swift` has a plan whose `find` lines this slice repoints in the same PR.
+- **AU-library:** `CatalogHistory.swift` is owned by filters-collections and spine. Released by the supervisor on #1934 (2026-10-20): AU-library goes first and replaces it with `LibraryUndoAdapter.swift`, and filters-collections' FC-a waits on it for FC-3 (adopt-kernel-undo's `waits_on` and filters-collections' `notes` record the swap, since a `waits` key can't cross apps). The `LibraryReadouts.swift` plan's `find` lines never read the history; only `LibraryModel.LibraryDevelop`'s `.after` replace moves to `.payload`.
 - **AU-halo:** `LiveProjectHistory.swift` is owned by history-files and foundation (both built); `HaloProject.swift` by foundation. Halo's `c4-planned.json` has `owned_files_planned`, so the deleted file leaves its component's paths in the same PR.
 - **AU-flare:** `FlareWorkspace.swift` is owned by Flare's stage-edit and layers-files packets: this slice starts after their `Belt-Slice-Done:` lines on the file.
 

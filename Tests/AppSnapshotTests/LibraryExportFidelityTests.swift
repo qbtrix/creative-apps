@@ -10,7 +10,8 @@
 // `JPEGWriter` read and write the files; the bytes and pixels are the oracle.
 //
 // Written before its code (lead.md, contract rule 13) by EX-4 and enabled by
-// EX-5, which builds `JPEGWriter`; EX-14 adds the cropped photo. macOS only.
+// EX-5, which builds `JPEGWriter`. EX-14 runs (a) and (b) again on the photo
+// cropped 3:2 and straightened 2°, sized by the exporter's own plan. macOS only.
 #if os(macOS)
 import CoreGraphics
 import CoreRaster
@@ -40,15 +41,22 @@ import UniformTypeIdentifiers
 
     /// `IMG_0001.jpg` in `root`: a 4000 × 3000 sRGB JPEG at full quality whose
     /// color runs across both axes, so resampling has detail to get wrong.
-    private func writePhoto(in root: URL) throws -> PhotoItem {
+    /// Blue is a soft wave about 38 px long at 1024, photo-like rather than a
+    /// hard checkerboard: a 160-level checker of 10 px squares at 1024 put
+    /// (b) 4.2/255 apart on the two resamplers' edges (#3276) and (c) at
+    /// 22 dB on JPEG's halved chroma (#3277), measuring the fixture, not QB-V4.
+    private func writePhoto(in root: URL,
+                            develop: DevelopSettings = DevelopSettings.neutral.setting(.exposure, to: 0.5)) throws -> PhotoItem {
         let (width, height) = (4000, 3000)
+        let across = (0..<width).map { sin(Double($0) * 2 * .pi / 150) }
+        let down = (0..<height).map { cos(Double($0) * 2 * .pi / 130) }
         var bytes = [UInt8](repeating: 255, count: width * height * 4)
         for y in 0..<height {
             for x in 0..<width {
                 let at = (y * width + x) * 4
                 bytes[at] = UInt8(x * 255 / (width - 1))
                 bytes[at + 1] = UInt8(y * 255 / (height - 1))
-                bytes[at + 2] = UInt8(((x / 40 + y / 40) % 2) * 160 + 40)
+                bytes[at + 2] = UInt8((128 + 64 * across[x] * down[y]).rounded())
             }
         }
         let url = root.appending(path: "IMG_0001.jpg")
@@ -69,11 +77,20 @@ import UniformTypeIdentifiers
         return PhotoItem(
             id: url.path, name: "IMG_0001", captureDate: Date(timeIntervalSince1970: 0), color: .init(0.5, 0.5, 0.5),
             path: url.path, pixelSize: PixelSize(width: width, height: height),
-            develop: DevelopSettings.neutral.setting(.exposure, to: 0.5))
+            develop: develop)
+    }
+
+    /// The fixture cropped 3:2 and straightened 2°, with its planned item at 1024.
+    private func writeCroppedPhoto(in root: URL) throws -> (PhotoItem, ExportPlan.Item) {
+        let crop = try LiveCrop().initial(aspect: .threeTwo, angle: 2, photo: PixelSize(width: 4000, height: 3000))
+        let photo = try writePhoto(in: root, develop: DevelopSettings.neutral.setting(.exposure, to: 0.5).setting(crop: crop))
+        let plan = LiveExporter(decoder: decoder, develop: develop)
+            .plan([photo], options: ExportOptions(longEdge: 1024, folder: root.path), existingNames: [])
+        return (photo, try #require(plan.items.first))
     }
 
     /// Decode at full size → develop → lanczos3 to the item's size, by hand.
-    private func byHand(_ photo: PhotoItem) async throws -> DisplayImage {
+    private func byHand(_ photo: PhotoItem, at item: ExportPlan.Item) async throws -> DisplayImage {
         let path = try #require(photo.path)
         let decoded = try await decoder.decode(path: path, maxLongSide: nil)
         let buffer = try PixelBuffer(rgba8: decoded.rgba8, width: decoded.size.width, height: decoded.size.height)
@@ -113,14 +130,14 @@ import UniformTypeIdentifiers
         let photo = try writePhoto(in: try folder())
         let exporter = LiveExporter(decoder: decoder, develop: develop)
         let rendered = try await exporter.render(item, photo: photo)
-        let expected = try await byHand(photo)
+        let expected = try await byHand(photo, at: item)
         #expect(rendered.size == PixelSize(width: 1024, height: 768))
         #expect(rendered.size == expected.size)
         #expect(rendered.rgba8 == expected.rgba8, "the export's pixels differ from decode → develop → lanczos3")
     }
 
     /// (b) The export at 1024 looks like the loupe's `.full` render at 1024.
-    @Test(.disabled("quarantine #3276 until 2026-10-22")) func renderMatchesTheLoupe() async throws {
+    @Test func renderMatchesTheLoupe() async throws {
         let photo = try writePhoto(in: try folder())
         let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
         let loupe = try await LiveLoupeImaging(decoder: decoder, develop: develop)
@@ -130,8 +147,38 @@ import UniformTypeIdentifiers
         #expect(difference <= 1, "the export is \(difference)/255 from the loupe on average")
     }
 
+    /// (a) on the cropped, straightened photo: the plan's size, and bit for bit.
+    @Test func croppedRenderEqualsTheHandMadePipeline() async throws {
+        let (photo, item) = try writeCroppedPhoto(in: try folder())
+        #expect(item.size.longSide == 1024)
+        #expect(abs(Double(item.size.width) / Double(item.size.height) - 1.5) < 0.005, "planned \(item.size), not 3:2")
+        let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
+        let expected = try await byHand(photo, at: item)
+        #expect(rendered.size == item.size, "rendered \(rendered.size), planned \(item.size)")
+        #expect(rendered.rgba8 == expected.rgba8, "the cropped export differs from decode → develop → lanczos3")
+    }
+
+    /// (b) on the cropped, straightened photo: the loupe decodes the whole
+    /// photo before it crops, so it is asked at the long side whose crop comes
+    /// out at the plan's size.
+    @Test func croppedRenderMatchesTheLoupe() async throws {
+        let (photo, item) = try writeCroppedPhoto(in: try folder())
+        let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
+        let loupe = LiveLoupeImaging(decoder: decoder, develop: develop)
+        let frame = try LiveCrop().frame(try #require(photo.develop.crop), photo: photo.pixelSize)
+        let guess = Int((Double(item.size.longSide) * 4000 / Double(max(frame.width, 1))).rounded())
+        var match: DisplayImage?
+        for side in (guess - 3)...(guess + 3) where match == nil {
+            let image = try await loupe.render(photo, settings: photo.develop, longSide: side, quality: .full).image
+            if image.size == rendered.size { match = image }
+        }
+        let shown = try #require(match, "no loupe size near \(guess) crops to \(rendered.size)")
+        let difference = meanDifference(rendered, shown)
+        #expect(difference <= 1, "the cropped export is \(difference)/255 from the loupe on average")
+    }
+
     /// (c) Written at quality 95: an sRGB JPEG within 40 dB of (a), never overwritten.
-    @Test(.disabled("quarantine #3277 until 2026-10-22")) func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
+    @Test func writtenFileIsAnSRGBJPEGThatNeverOverwrites() async throws {
         let root = try folder()
         let photo = try writePhoto(in: root)
         let out = root.appending(path: "out")
