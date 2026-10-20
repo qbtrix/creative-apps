@@ -1,0 +1,153 @@
+{
+  "title": "Shape layers of every kind: a Shape button by the viewer, drawn by drag, rendered from the saved spec",
+  "wave": "W4",
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/shape-tools (adopter of S19); RJ-H35",
+  "waits_on": "suiteui shape-tools' contract slice SH-a (cross-line); gradient-fill's HG-a and transform's HT-a before HS-1 and HS-2, transform's HT-m before HS-6",
+  "depends": [
+    "foundation",
+    "viewer-playback",
+    "layer-keys",
+    "text-layers",
+    "history-files",
+    "core-loop"
+  ],
+  "longest_chain": "6 (HS-1 → HS-2 → HS-3 → HS-4 → HS-7 → HS-8)",
+  "journeys": [
+    "HaloShapeJourneyTests.testDrawStarLayer"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloLayer.swift",
+    "Sources/HaloModel/HaloShape+Kernel.swift",
+    "Tests/HaloModelTests/HaloShapeTests.swift",
+    "Sources/HaloApp/HaloShapeTool.swift",
+    "Sources/HaloApp/HaloViewer.swift",
+    "UITests/HaloJourneyTests+Shapes.swift",
+    "Tests/AppSnapshotTests/HaloShapeToolTests.swift",
+    "Tests/AppSnapshotTests/HaloShapeSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloShapeTests.swift",
+    "Sources/HaloModel/Live/HaloOutlines.swift",
+    "Tests/mutations/HaloModel.HaloShape+Kernel.json",
+    "Tests/mutations/HaloModel.HaloOutlines.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/HaloModelTests/HaloShapeCommandIDTests.swift",
+    "Tests/RealJobs/halo/star-layer/star-layer.jobs.json",
+    "Tests/RealJobs/halo/star-layer/input/empty-1080p.halo",
+    "docs/blueprints/halo/features/shape-tools.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HS-a",
+      "behavior": "Shape layers carry a spec, the adapter is declared as stubs, and the Shape button and its options show by the viewer.",
+      "tasks": [
+        "HS-1",
+        "HS-2"
+      ],
+      "journeys": [
+        "MJ-HS"
+      ],
+      "waits": {
+        "gradient-fill:HG-a": [
+          "HS-1"
+        ],
+        "transform:HT-a": [
+          "HS-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloLayer.swift",
+        "Sources/HaloModel/HaloShape+Kernel.swift",
+        "Tests/HaloModelTests/HaloShapeTests.swift",
+        "Sources/HaloApp/HaloShapeTool.swift",
+        "Sources/HaloApp/HaloViewer.swift",
+        "UITests/HaloJourneyTests+Shapes.swift"
+      ]
+    },
+    {
+      "id": "HS-u",
+      "behavior": "A viewer drag draws a shape layer with a live draft, and the snapshots and render budget hold.",
+      "tasks": [
+        "HS-3",
+        "HS-4"
+      ],
+      "journeys": [
+        "J-HS"
+      ],
+      "waits": {
+        "HS-a": [
+          "HS-3",
+          "HS-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloShapeTool.swift",
+        "Tests/AppSnapshotTests/HaloShapeToolTests.swift",
+        "Tests/AppSnapshotTests/HaloShapeSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloShapeTests.swift"
+      ]
+    },
+    {
+      "id": "HS-m",
+      "behavior": "A draw adds one shape layer as one step and the renderer draws its spec's path, today's ellipse kept for old layers.",
+      "tasks": [
+        "HS-5",
+        "HS-6"
+      ],
+      "journeys": [
+        "MJ-HS"
+      ],
+      "waits": {
+        "HS-a": [
+          "HS-5",
+          "HS-6"
+        ],
+        "transform:HT-m": [
+          "HS-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/HaloShape+Kernel.swift",
+        "Sources/HaloModel/Live/HaloOutlines.swift",
+        "Tests/HaloModelTests/HaloShapeTests.swift",
+        "Tests/mutations/HaloModel.HaloShape+Kernel.json",
+        "Tests/mutations/HaloModel.HaloOutlines.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/HaloModelTests/HaloShapeCommandIDTests.swift",
+        "Tests/RealJobs/halo/star-layer/star-layer.jobs.json",
+        "Tests/RealJobs/halo/star-layer/input/empty-1080p.halo"
+      ]
+    },
+    {
+      "id": "HS-z",
+      "behavior": "The journey draws and renders a star layer on live services, and the feature is built.",
+      "tasks": [
+        "HS-7",
+        "HS-8"
+      ],
+      "journeys": [
+        "J-HS"
+      ],
+      "waits": {
+        "HS-u": [
+          "HS-7"
+        ],
+        "HS-m": [
+          "HS-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+Shapes.swift",
+        "docs/blueprints/halo/features/shape-tools.wave.json"
+      ]
+    }
+  ]
+}

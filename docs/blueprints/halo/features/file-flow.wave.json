@@ -1,0 +1,171 @@
+{
+  "title": "Halo's Open Recent from the suite list, file drops, and Flare scenes arriving by Open In",
+  "wave": "W4",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/file-flow (adopter of suite/file-flow); #865 (adopt the suite: SuiteDocumentHost, .suiteApp); RJ-H42",
+  "waits_on": "suite file-flow's SF-a (cross-line; HF-3 needs SF-5 and SF-6, HF-4 SF-7, HF-7 SF-8); gradient-fill's HG-m (the catalog files) and export-pack's HX-z (halo.md), slice waits",
+  "longest_chain": "5 (HF-1 → HF-2 → HF-6 → HF-7 → HF-8)",
+  "journeys": [
+    "HaloFileFlowJourneyTests.testOpenRecentAndDrop"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloFileFlow+Kernel.swift",
+    "Tests/HaloModelTests/HaloFileFlowTests.swift",
+    "Sources/HaloApp/HaloApp.swift",
+    "Sources/HaloApp/HaloFileMenu.swift",
+    "Sources/HaloApp/HaloViewer.swift",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/mutations/HaloModel.HaloFileFlow+Kernel.json",
+    "Tests/RealJobs/halo/open-recent/",
+    "Sources/HaloModel/HaloFiles.swift",
+    "Sources/HaloApp/HaloWindow+File.swift",
+    "Tests/AppSnapshotTests/HaloFileFlowLiveTests.swift",
+    "Tests/AppSnapshotTests/HaloFileFlowSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloFileDropTests.swift",
+    "UITests/HaloJourneyTests+FileFlow.swift",
+    "docs/blueprints/halo.md",
+    "docs/blueprints/halo/features/file-flow.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HF-a",
+      "behavior": "Halo conforms to `SuiteDocumentHost` and `FileFlowTarget` on stubs, its scene adopts `.suiteApp`, and its File menu and window use the suite's Open Recent, Open In and drop on the fakes.",
+      "tasks": [
+        "HF-1",
+        "HF-2"
+      ],
+      "journeys": [
+        "MHF"
+      ],
+      "waits": {
+        "foundation": [
+          "HF-1",
+          "HF-2"
+        ],
+        "transform:HT-a": [
+          "HF-2"
+        ],
+        "shape-tools:HS-a": [
+          "HF-2"
+        ],
+        "placed-images:PH-u": [
+          "HF-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloFileFlow+Kernel.swift",
+        "Tests/HaloModelTests/HaloFileFlowTests.swift",
+        "Sources/HaloApp/HaloApp.swift",
+        "Sources/HaloApp/HaloFileMenu.swift",
+        "Sources/HaloApp/HaloViewer.swift"
+      ]
+    },
+    {
+      "id": "HF-u",
+      "behavior": "The menu and the drop mark have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "HF-5",
+        "HF-6"
+      ],
+      "journeys": [
+        "HFJ1"
+      ],
+      "waits": {
+        "HF-a": [
+          "HF-5",
+          "HF-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/HaloFileFlowSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloFileDropTests.swift",
+        "UITests/HaloJourneyTests+FileFlow.swift"
+      ]
+    },
+    {
+      "id": "HF-m",
+      "behavior": "Halo accepts open, new and Flare-scene hand-offs, imports its old recents once, lists the suite's, and notes every open and save there.",
+      "tasks": [
+        "HF-3",
+        "HF-4"
+      ],
+      "journeys": [
+        "MHF"
+      ],
+      "waits": {
+        "HF-a": [
+          "HF-3",
+          "HF-4"
+        ],
+        "gradient-fill:HG-m": [
+          "HF-3"
+        ],
+        "autosave-history:HA-m": [
+          "HF-3"
+        ],
+        "transform:HT-m": [
+          "HF-3"
+        ],
+        "shape-tools:HS-m": [
+          "HF-3"
+        ],
+        "stroke-style:HK-m": [
+          "HF-3"
+        ],
+        "placed-images:PH-m": [
+          "HF-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloFileFlow+Kernel.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/HaloModelTests/HaloFileFlowTests.swift",
+        "Tests/mutations/HaloModel.HaloFileFlow+Kernel.json",
+        "Tests/RealJobs/halo/open-recent/",
+        "Sources/HaloModel/HaloFiles.swift",
+        "Sources/HaloApp/HaloWindow+File.swift",
+        "Tests/AppSnapshotTests/HaloFileFlowLiveTests.swift"
+      ]
+    },
+    {
+      "id": "HF-z",
+      "behavior": "Drop, Open Recent and Open In run on live services, the journey passes, and the feature is built.",
+      "tasks": [
+        "HF-7",
+        "HF-8"
+      ],
+      "journeys": [
+        "HFJ1"
+      ],
+      "waits": {
+        "HF-u": [
+          "HF-7",
+          "HF-8"
+        ],
+        "HF-m": [
+          "HF-7"
+        ],
+        "export-pack:HX-z": [
+          "HF-8"
+        ],
+        "placed-images:PH-z": [
+          "HF-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+FileFlow.swift",
+        "docs/blueprints/halo.md",
+        "docs/blueprints/halo/features/file-flow.wave.json"
+      ]
+    }
+  ]
+}

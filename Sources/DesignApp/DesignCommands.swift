@@ -1,4 +1,5 @@
-// DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…;
+// DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…,
+// Export… ⇧⌘E (the export sheet, DesignExportArea);
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
@@ -153,7 +154,7 @@ struct DesignCommands: Commands {
     }
 }
 
-/// File: New File and Open…, then Close, Save and Save As….
+/// File: New File and Open…, then Close, Save, Save As… and Export….
 struct DesignFileMenu: View {
     let menu: DesignMenu
 
@@ -172,6 +173,10 @@ struct DesignFileMenu: View {
         Button("Save As…", systemImage: "square.and.arrow.down.on.square") { menu.perform(.saveAs) }
             .keyboardShortcut("s", modifiers: [.command, .shift])
             .disabled(!menu.isOpen)
+        Button("Export…", systemImage: "square.and.arrow.up") { menu.perform(.export) }
+            .keyboardShortcut("e", modifiers: [.command, .shift])
+            .disabled(!menu.isOpen)
+            .help(menu.noFileHelp ?? "")
     }
 }
 
