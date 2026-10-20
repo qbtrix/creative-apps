@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-20T05:51:13Z	check	heartbeat: #3484 macOS build 39374818329 queued; #3392 macOS build 39371121699 in progress (AT-d1 waits); AC menus building; full CI 39373545059 pending; no Belt-Slice-Done yet
 2026-10-20T05:52:11Z	build	AC-p3 beae2410, AC-d3 fae0354e, AC-h3 c7f0e5e2 built, CI: PASS; PRs wait on #3484
 2026-10-20T06:16:17Z	check	heartbeat: #3484 macOS build 39374818329 still queued; #3392 (other lead) needs-rebase, AT-d1 waits; full CI 39373545059 cancelled, no Belt-Slice-Done; AC menus built, PRs wait #3484
+2026-10-20T06:36:27Z	check	heartbeat: macOS runner backed up (41 ci.yml runs queued); #3484 build 39374818329 is the oldest queued; #3392 (other lead) rebased, build 39379782419 queued, AT-d1 waits; no Belt-Slice-Done due
