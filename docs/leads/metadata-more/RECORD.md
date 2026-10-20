@@ -84,3 +84,4 @@ Next: #3465 (head 00f26ebb) and #3473 (head 7e6638e9, dev merged in) ready for t
 - 09:28Z check-in: #3465 MD-3 merged to dev (c4204d5bf). Fixer merging dev into MD-5 #3492 and un-drafting. #3473 MD-4 got needs-rebase (dirty after MD-3): fixer merging dev in, keeping both C4 clauses. No new line:library findings.
 - 09:45Z: MD-5 #3492 un-drafted, dev merged in, head 212171a9 (diff vs dev: 4 test files +398); gate pass with LibraryGridBudgetTests rerun alone. MD-4 #3473 fixer still running.
 - 09:50Z: MD-4 #3473 dev merged in (C4 library-model-sources kept both clauses), head 7e6638e9, gate pass; needs-rebase dropped by the lane. Waiting on its lane macOS build; then cascade MD-9 #3533, MD-14 #3544, MD-19 #3545.
+- 09:51Z check-in: #3473 MD-4 waits on its lane macOS build for 7e6638e9; MD-5 #3492 ready. No new line:library findings in this feature's files (open ones are export journeys and #3565, not ours).
