@@ -17,12 +17,12 @@ Next: FG-6 stacked on feat/flare-gradient-fg-a (branch feat/flare-gradient-fg-m)
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FG-1 | FG-a | 1 | conformance + runFill stubs; PaintReadout.gradient; tests disabled | Sources/FlareModel/FlareFill+Kernel.swift, Sources/FlareModel/FlarePaint.swift, Tests/FlareModelTests/FlareGradientTests.swift | suite compiles disabled; old files decode | – | waiting GF-a |
+| FG-1 | FG-a | 1 | conformance + runFill stubs; PaintReadout.gradient; tests disabled | Sources/FlareModel/FlareFill+Kernel.swift, Sources/FlareModel/FlarePaint.swift, Tests/FlareModelTests/FlareGradientTests.swift | suite compiles disabled; old files decode | #3526 | PR open (37c65fb2; --changed PASS; mutate 2/2) |
 | FG-2 | FG-a | 1 | FILL shows switch + GradientEditor on stubs; refusal string gone | Sources/FlareApp/FlareInspectorFill.swift | FlareGradientSnapshots.fillGradient | – | waiting FG-1 |
 | FG-3 | FG-u | 2 | snapshots + render budget | Tests/AppSnapshotTests/FlareGradientSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareGradientTests.swift | RenderBudgetFlareGradientTests.stopDragInThreeBodies | – | waiting FG-a, GF-3 |
 | FG-4 | FG-u | 2 | journey written, skipped | UITests/FlareJourneyTests+Gradient.swift | compiles, skipped | – | waiting FG-a |
 | FG-5 | FG-m | 2 | conformance bodies, specs in catalog, RJ-F31 | Sources/FlareModel/FlareFill+Kernel.swift, Tests/FlareModelTests/FlareGradientTests.swift, Tests/mutations/FlareModel.FlareFill+Kernel.json, Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt, Tests/RealJobs/flare/gradient-edit/gradient-edit.jobs.json, Tests/RealJobs/flare/gradient-edit/input/gradient-circle.flare | FlareGradientTests | – | waiting FG-a, GF-6, AC-flare |
-| FG-6 | FG-m | 2 | Mixed for differing gradients; solid setter replaces gradient | Sources/FlareModel/FlarePaint.swift, Tests/FlareModelTests/FlarePaintGradientTests.swift, Tests/mutations/FlareModel.FlarePaint.json | FlarePaintGradientTests | – | waiting FG-a |
+| FG-6 | FG-m | 2 | Mixed for differing gradients; solid setter replaces gradient | Sources/FlareModel/FlarePaint.swift, Tests/FlareModelTests/FlarePaintGradientTests.swift, Tests/mutations/FlareModel.FlarePaint.json | FlarePaintGradientTests | – | building (feat/flare-gradient-fg-m) |
 | FG-7 | FG-z | 3 | journey on live | UITests/FlareJourneyTests+Gradient.swift | FlareGradientJourneyTests.testEditImportedGradient | – | waiting FG-u, FG-m |
 | FG-8 | FG-z | 4 | flare.md, status built, feature-done | docs/blueprints/flare.md, docs/blueprints/flare/features/gradient-fill.wave.json | scripts/waves render --dry-run | – | waiting FG-7 |
 
