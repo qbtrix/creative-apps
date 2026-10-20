@@ -12,5 +12,19 @@
     "find": "if let label { parts.append(\"\\(label.rawValue) label\") }",
     "replace": "if label == nil { parts.append(\"No label\") }",
     "tests": "LibraryPhotoItemTests.swift"
+  },
+  {
+    "label": "withID drops the keywords",
+    "file": "Sources/LibraryModel/PhotoItem.swift",
+    "find": "path: path, pixelSize: pixelSize, develop: develop, availability: availability,\n            keywords: keywords, ",
+    "replace": "path: path, pixelSize: pixelSize, develop: develop, availability: availability,\n            ",
+    "tests": "LibraryPhotoDetailsTests.swift"
+  },
+  {
+    "label": "withSize drops the camera",
+    "file": "Sources/LibraryModel/PhotoItem.swift",
+    "find": "path: path, pixelSize: size, develop: develop, availability: availability,\n            keywords: keywords, title: title, caption: caption, camera: camera)",
+    "replace": "path: path, pixelSize: size, develop: develop, availability: availability,\n            keywords: keywords, title: title, caption: caption)",
+    "tests": "LibraryPhotoDetailsTests.swift"
   }
 ]

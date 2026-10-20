@@ -117,6 +117,9 @@
         ],
         "gradient-fill:PG-m": [
           "PT-5"
+        ],
+        "multi-layer-select:PM-m": [
+          "PT-5"
         ]
       },
       "ui": false,
