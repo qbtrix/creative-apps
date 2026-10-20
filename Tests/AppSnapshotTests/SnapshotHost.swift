@@ -69,7 +69,8 @@ struct SnapshotHost {
     /// `SuiteHex.increasedContrast` around the whole layout and draw, and the
     /// tokens resolve their contrast columns.
     func render(_ view: some View, size: CGSize) -> NSBitmapImageRep? {
-        SuiteHex.$increasedContrast.withValue(appearance.contrast == .increased) { draw(view, size: size) }
+        _ = DragSessions.faked  // a drag an earlier test leaked would block this run-loop turn
+        return SuiteHex.$increasedContrast.withValue(appearance.contrast == .increased) { draw(view, size: size) }
     }
 
     private func draw(_ view: some View, size: CGSize) -> NSBitmapImageRep? {
