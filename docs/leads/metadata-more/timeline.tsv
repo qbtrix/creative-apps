@@ -10,3 +10,6 @@
 2026-10-20T04:22Z	stage-end	3 wave 1
 2026-10-20T04:22Z	stage-start	3 wave 2
 2026-10-20T04:42:28Z	check	findings none in feature; dev-red #3386 not ours; MD-2 builder running
+2026-10-20T04:45:20Z	pr-opened	MD-2 #3460 (draft, stacked on #3422)
+2026-10-20T04:45:20Z	stage-end	3 wave 2
+2026-10-20T04:45:20Z	stage-start	3 wave 3: MD-3, MD-4 building
