@@ -4,7 +4,9 @@
 // visible controls: a clicked text box hugs "A longer line of text" (W over
 // 120, H at least 16); Title at size 48 refits (H at least 48, W grown); a
 // box dragged 150 pt wide keeps its width and wraps two sentences onto more
-// than one line. Written before its code (lead.md, contract rule 13) by CB-4;
+// than one line. Typing replaces the placeholder with no Command-A (#3338),
+// W follows the typing before the commit (#3335), and the Width chips switch
+// the dragged box to auto width as one step (#3337). Written before its code (lead.md, contract rule 13) by CB-4;
 // CB-6 turned it on: the window commits an open edit with its measured extent
 // before the click acts. Frame fields are SuiteUI ScrubFields, read by their
 // names ("Width", "Height") and their spoken values ("150 points").
@@ -35,8 +37,13 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         // A clicked box on Desktop's blank area, left of the cards and below them: (72, 870) on the page.
         tools["Text"].click()
         canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.85)).click()
-        design.app.typeKey("a", modifierFlags: .command)
+        // No Command-A: the field selects its placeholder as it takes focus, so typing replaces it (#3338).
         design.app.typeText("A longer line of text")
+        let field = design.element("design.text")
+        XCTAssertEqual(field.value as? String, "A longer line of text", "typing didn't replace the placeholder")
+        // The inspector reads the box as it grows, before the commit (#3335).
+        let typingWidth = frameValue(design, "Width")
+        XCTAssertGreaterThan(typingWidth ?? 0, 120, "W didn't follow the typing: \(String(describing: typingWidth))")
         design.shot("text-fit-typing")
         commitByClickingBlank(design)
         XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
@@ -71,7 +78,6 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         let points = Double(canvas.frame.width) / Self.pageWidth
         let start = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.75))
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 150 * points, dy: 24 * points)))
-        design.app.typeKey("a", modifierFlags: .command)
         design.app.typeText("The first sentence runs past the box. The second one wraps below it.")
         design.shot("text-fit-wrapping")
         commitByClickingBlank(design)
@@ -82,6 +88,13 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         XCTAssertEqual(fixedWidth ?? 0, 150, accuracy: 0.5, "the dragged box didn't keep its 150 pt width")
         XCTAssertGreaterThan(fixedHeight ?? 0, 24, "the dragged box didn't grow down past one line: H \(String(describing: fixedHeight))")
         design.shot("text-fit-fixed")
+
+        // The Width chips switch it to auto width as one step (#3337).
+        let modes = design.element("design.inspector.text-width")
+        XCTAssert(modes.waitForExistence(timeout: 5), "no Width chips in the Text section")
+        modes.buttons["Auto width"].firstMatch.click()
+        XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "Auto width made no undo step")
+        design.shot("text-fit-auto-mode")
     }
 
     /// Clicks the canvas's blank area, (864, 921) on the page, below the cards: it commits an open edit.

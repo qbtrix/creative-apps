@@ -17,8 +17,12 @@ public struct FakeAIAccess: Sendable {
     public private(set) var grants: AIAccessGrants
     public private(set) var pending: AIAccessRequest?
     public private(set) var connectedClient: String?
+    /// The demo client still to ask again after a Stop, as a real one would on its next call; once only.
+    public private(set) var retryClient: String?
 
-    public init(app: String, grants: AIAccessGrants = AIAccessGrants()) { (self.app, self.grants) = (app, grants) }
+    public init(app: String, grants: AIAccessGrants = AIAccessGrants(), demoClient: String? = nil) {
+        (self.app, self.grants, self.retryClient) = (app, grants, demoClient)
+    }
 
     /// A client asks to drive the app: connects it when the grants allow, otherwise the sheet asks.
     public mutating func request(client: String, command: String? = nil) {
@@ -37,8 +41,14 @@ public struct FakeAIAccess: Sendable {
         if decision != .deny { connectedClient = request.client }
     }
 
-    /// The chip's Stop button: the client is disconnected and an allow-once grant ends, so the next request asks.
-    public mutating func stop() { connectedClient = nil }
+    /// The chip's Stop button: the client is disconnected and an allow-once grant ends, so the next request asks;
+    /// the demo client then sends that request, the first time only.
+    public mutating func stop() {
+        connectedClient = nil
+        guard let client = retryClient else { return }
+        retryClient = nil
+        request(client: client)
+    }
 
     /// Window > AI Access…'s revoke: forgets `client`'s grant here and disconnects it.
     public mutating func revoke(client: String) { grants.revoke(client: client, app: app); if connectedClient == client { connectedClient = nil } }
