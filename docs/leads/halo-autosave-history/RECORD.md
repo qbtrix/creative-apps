@@ -2,9 +2,9 @@
 
 Issue: #3442 · Packet: docs/blueprints/halo/features/autosave-history.md
 Run: act-1a15a9f4eda-rqhh · Session: session_01SEp2gy695K32UTCMdrBDFC · Started: 2026-10-20T18:43Z
-Stage: 3 wave 1
+Stage: 3 wave 2
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: stack HA-5 (HA-m part 1, recovery and jump bodies + mutations) on lead/halo-autosave-history-HA-a; watch #3683 in the lane
+Next: collect HA-5 builder (branch lead/halo-autosave-history-HA-m, stacked on #3683); open its PR once #3683 merges if the stacked diff is over 400 lines
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,6 +33,7 @@ Wave 1: HA-a (one slice PR), alongside transform HT-a. Wave 2: HA-5 stacked on H
 |---|---|---|---|---|---|
 
 ## Decisions
+- Stacked PRs diff against dev with their parent included, so a stacked slice PR opens only when its diff vs dev is within 400 lines and 15 files (in practice once the parent merges); the branch is built and gated at once.
 - Lead branch is lead/halo-autosave-history: lead/autosave-history belongs to the suiteui lead.
 - Base is origin/dev; main b3011ab9 verified at start.
 - HaloEditMenu.swift is AC-halo's until its Belt-Slice-Done (#2999 has none; AC-h3 waits on CC-u). So HA-a makes the panel reachable from the History button by the transport (moved from HA-3 into HA-a, same feature, HaloControls.swift), and Edit > Show History moves to HA-u once AC-halo is done.
