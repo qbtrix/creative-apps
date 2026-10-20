@@ -1,10 +1,9 @@
 // HaloTransformTests.swift: transform HT-1 and HT-5. HaloProject as a
 // SuiteKernel TransformTarget. On the stubs (HT-1) nothing selected says why,
 // Flip says it isn't in Halo yet and the selected layer reads its drawn box.
-// The HT-5 bodies are disabled until HT-5 lands: a turn at 12 on an animated
-// Rotation keys 12, on a static one sets the value, a scale about the centre
-// keeps the centre and a 120-sample drag is one step. On `-HaloFixture keyed`
-// Ball. Linux and macOS.
+// HT-5: a turn at 12 on an animated Rotation keys 12, on a static one sets
+// the value, a scale about the centre keeps the centre and a 120-sample drag
+// is one step. On `-HaloFixture keyed` Ball. Linux and macOS.
 import FlareCore
 @testable import HaloModel
 import SuiteKernel
@@ -55,8 +54,7 @@ private func centre(_ t: TransformBox) -> (Double, Double) {
         #expect(project.transformHelp == nil)
     }
 
-    @Test(.disabled("HT-5 bodies"))
-    func aTurnOnAnimatedRotationKeysThisFrame() throws {
+    @Test func aTurnOnAnimatedRotationKeysThisFrame() throws {
         var project = try ballProject(at: 0)
         project.toggleAnimation(.rotation)
         project.scrub(to: 12)
@@ -67,8 +65,7 @@ private func centre(_ t: TransformBox) -> (Double, Double) {
         #expect(project.history.undoTitle == "Undo Rotate")
     }
 
-    @Test(.disabled("HT-5 bodies"))
-    func aTurnOnStaticRotationSetsTheValue() throws {
+    @Test func aTurnOnStaticRotationSetsTheValue() throws {
         var project = try ballProject()
         let item = try #require(project.transformSelection)
         try project.setTransform(TransformRules.rotated(item, by: 30), name: "Rotate", drag: nil)
@@ -77,8 +74,7 @@ private func centre(_ t: TransformBox) -> (Double, Double) {
         #expect(project.history.undo.count == 1)
     }
 
-    @Test(.disabled("HT-5 bodies"))
-    func aScaleAboutTheCentreKeepsTheCentre() throws {
+    @Test func aScaleAboutTheCentreKeepsTheCentre() throws {
         var project = try ballProject()
         let item = try #require(project.transformSelection)
         try project.setTransform(TransformRules.scaled(item, sx: 2, sy: 2, about: .center), name: "Scale", drag: nil)
@@ -89,8 +85,7 @@ private func centre(_ t: TransformBox) -> (Double, Double) {
         #expect(row(.scaleX, in: project)?.value == row(.scaleY, in: project)?.value)
     }
 
-    @Test(.disabled("HT-5 bodies"))
-    func dragIsOneStep() throws {
+    @Test func dragIsOneStep() throws {
         var project = try ballProject()
         let start = try #require(project.transformSelection)
         for n in 1...120 {
