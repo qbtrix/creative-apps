@@ -146,6 +146,9 @@
         ],
         "gradient-fill:PG-z": [
           "PP-8"
+        ],
+        "multi-layer-select:PM-z": [
+          "PP-8"
         ]
       },
       "ui": true,

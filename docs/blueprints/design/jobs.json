@@ -102,20 +102,21 @@
     "app": "design",
     "weight": "med",
     "job": "Draw a logo with the pen (curves, close the path), then move one point.",
-    "outcome": "Path stays closed and smooth.",
+    "outcome": "The saved path has one closed contour of exactly four anchors; the moved anchor and its handles moved by the same offset and the others are unchanged.",
     "needs": [
-      "S18"
+      "S25"
     ],
-    "needs_note": "F7 pen + S18 point editing",
-    "closes_with": "S18",
+    "needs_note": "the Pen and point editing (S25)",
+    "closes_with": "S25",
     "trap": "Closing the path adds a duplicate point",
-    "run": "J",
+    "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://help.figma.com/hc/en-us/articles/360039957534-Boolean-operations",
       "https://affinity.serif.com/en-gb/designer/full-feature-list/"
-    ]
+    ],
+    "waits_on": "DP-6"
   },
   "RJ-D07": {
     "id": "RJ-D07",
@@ -694,5 +695,47 @@
     ],
     "waits_on": "DK-7",
     "added_by": "design/stroke-style"
+  },
+  "RJ-D41": {
+    "id": "RJ-D41",
+    "app": "design",
+    "weight": "high",
+    "job": "Export a 540x675 pt frame as JPEG at exactly 1080x1350, and as PNG at a 512 px long edge.",
+    "outcome": "The JPEG is exactly 1080x1350 with its transparent corner on the frame's fill; the PNG is 410x512 with alpha.",
+    "needs": [
+      "S11",
+      "design/export-pack"
+    ],
+    "closes_with": "design/export-pack",
+    "trap": "2x applied on top (2160x2700), or the JPEG's transparent corner comes out black",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DX-3",
+    "added_by": "design/export-pack"
+  },
+  "RJ-D42": {
+    "id": "RJ-D42",
+    "app": "design",
+    "weight": "high",
+    "job": "Save two Design files, then reopen one from File > Open Recent; drop a Halo project on Design.",
+    "outcome": "Open Recent lists only the two Design files, newest first; the Halo project is handed to Halo and the Design document is unchanged.",
+    "needs": [
+      "suite/file-flow",
+      "design/file-flow"
+    ],
+    "closes_with": "design/file-flow",
+    "trap": "Design has no Open Recent, or it lists every app's files",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DF-3",
+    "added_by": "design/file-flow"
   }
 }
