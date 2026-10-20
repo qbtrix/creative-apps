@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-20T21:08Z	2	stage-end	-	combined plan W1-W6 across place-image, tone-controls, multi-layer-select
 2026-10-20T21:06Z	3	wave-start	W1	builder for PP-a launched (test-first, stacked on dev)
 2026-10-20T21:21Z	3	pr-open	#3764	PP-a head 4f70765; CI --changed PASS; 677 Photo tests pass, 6 checks disabled until PP-5
+2026-10-20T21:27Z	3	check	W1	#3764 in lane; no PL-2 PR yet (PP-3 waits)
