@@ -84,3 +84,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-20T15:21Z: Full CI 39442633733 (0dd23d65), 39438701609 (9f880c85) and newer 39447117246 (27b67332, pending) all contain every slice; none started. Scoped runs at 897ccbb2 still queued. Slice lines wait.
 
 - 2026-10-20T15:41Z: No full or scoped CI run has completed since 15:21Z; 39447117246 (27b67332), 39442633733, 39438701609 and scoped runs at 897ccbb2 still waiting on macOS runners. Slice lines wait.
+
+- 2026-10-20T16:00Z: Still no completed full or scoped CI run since 15:21Z (only a Linux check at 27b67332 finished). Full runs 39447117246, 39442633733, 39438701609 and scoped runs at 897ccbb2 wait on macOS runners. Slice lines wait.
