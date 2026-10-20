@@ -187,3 +187,4 @@ utc	stage	event	ref	note
 2026-10-20T05:53Z	heartbeat	#1705 verify: run 39357615737 still queued (macOS backlog, ~3h40m)
 2026-10-20T06:16Z	heartbeat	#1705 verify: run 39357615737 still queued; macOS queue is moving (02:26Z runs finished)
 2026-10-20T06:38Z	heartbeat	#1705 verify: run 39357615737 still queued (macOS backlog, 41 queued)
+2026-10-20T06:59Z	heartbeat	#1705 verify: run 39357615737 still queued (macOS backlog, 37 queued)
