@@ -31,3 +31,4 @@
 2026-10-20T06:48:50Z	check-in	-	parents unmerged, lane macOS builds queued 3h; no new findings
 2026-10-20T19:35:00Z	resume	-	run act-1a15ac11868-4kb6
 2026-10-20T19:35:00Z	slice-done	MD-a	run 39479914225, #1555 comment 6299308121
+2026-10-20T19:48:12Z	check	-	lane backlog: 56 runs queued; FC-4 #3461 macOS run 39437577080 queued since 14:15Z; nothing merged (MD #3550 #3570 #3574 #3575, LX #3696 waiting)
