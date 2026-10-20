@@ -203,3 +203,4 @@
 2026-10-20T11:37:08Z	heartbeat	poll: 39411425197 cancelled; tracking 39409307241 (a54a892a, queued) and new full run 39416190119 (0e1199e9, pending)
 2026-10-20T11:49:59Z	heartbeat	poll: full CI 39416190119 (0e1199e9) pending, 39409307241 (a54a892a) queued; no result yet
 2026-10-20T12:03:41Z	heartbeat	12:03Z poll: full CI 39416190119 (0e1199e9) still pending, 39409307241 queued; no merges since 11:50Z. Next: green full CI with 424b4a60 -> contact sheet on #1514
+2026-10-20T12:20:51Z	heartbeat	12:20Z poll: full CI 39416190119 (0e1199e9) still pending since 11:36Z, 39409307241 queued; no merges since 12:03Z. Next: green full CI with 424b4a60 -> contact sheet on #1514
