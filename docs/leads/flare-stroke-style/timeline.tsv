@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T05:03Z	0	stage-start	18464f26	base 18464f26, v3 packet
 2026-10-20T05:03Z	1	stage-end	stroke-style	packet read: slices and tasks recorded
 2026-10-20T05:03Z	3	heartbeat	#3421	blocked: FK-a waits on FG-a and SS-a, neither merged
+2026-10-20T05:21Z	3	heartbeat	#3421	FG-a and SS-a still blocked on GF-a (#3421 open); nothing on dev
