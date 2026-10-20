@@ -94,3 +94,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-20T17:00Z: no qualifying run completed; full CI 39447117246 at 27b67332 still pending; only a Linux check completed (7b45f176)
 
 - 2026-10-20T17:20Z: full CI 39447117246 at 27b67332 cancelled (replaced); new full CI 39464293440 at 39a1c97e pending, contains every slice; no qualifying run completed yet
+
+- 2026-10-20T17:40Z: full CI 39464293440 at 39a1c97e cancelled (replaced while pending); new full CI 39467874733 at 59fe72db pending, contains every slice; no qualifying run completed yet
