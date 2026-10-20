@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-20T21:16Z	3	heartbeat	#3704	macOS build 39487466056 still queued
 2026-10-20T21:17Z	3	wave-3 started	PT-5,PT-7	builders stacked on PT-4 and PT-3
 2026-10-20T21:36Z	3	slice pushed	PT-7	lead/transform-PT-7 91ee61c, +128, CI PASS; cornerDrag+draftTurned disabled until PT-5 on dev (enable before PR); rotationScrub row still owed
+2026-10-20T21:38Z	3	heartbeat	#3704,#3706,#3762	none merged; mac build 39487466056 queued since 19:54Z, 39488095382 in progress; #3762 mac build dispatched
