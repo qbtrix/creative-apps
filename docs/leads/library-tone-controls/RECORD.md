@@ -1,8 +1,8 @@
 # tone-controls (Library) lead record
 
 Issue: #3475 · Packet: docs/blueprints/library/features/tone-controls.md
-Run: act-1a15b10caae-y18c · Session: claude/lead-raw-tone-controls-ca9b2k · Started: 2026-10-20T20:48Z
-Stage: 0 setup (blocked at 0.4; re-checked at dev 9781100b, 2026-10-20T20:48Z)
+Run: act-1a15b98bc49-4lk9 · Session: claude/task-k1zaw1 · Started: 2026-10-20T23:00Z (earlier run act-1a15b10caae-y18c on claude/lead-raw-tone-controls-ca9b2k)
+Stage: 0 setup (blocked at 0.4; re-checked at dev 2cc149f5, 2026-10-20T23:48Z)
 Base: 9781100bc432e119320c1bbbff41849ff4aeebdb (origin/dev; brief named main b3011ab9, see Decisions)
 Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRows) to merge, then start LT-1/LT-2
 
@@ -27,6 +27,7 @@ Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRow
 ## Decisions
 - Record branch is lead/library-tone-controls, not lead/tone-controls: that branch holds the live suiteui tone-controls lead's record (#3476, run act-1a15821c836-93pf) and pushing there would clobber it.
 - Base is dev, not main: the packet exists only on dev, and PRs target dev.
+- Run act-1a15b98bc49-4lk9 keeps this record branch: Belt's nudge names lead/tone-controls, but that is the suiteui lead's live record (see above).
 - Stage 0.4: no task can start. LT-1 needs ToneSettings/ToneRules/ToneRows from suiteui TC-a, absent from Sources; per #3476's record TC-a itself waits on gradient-fill GF-2 (and AH-a, PL-a).
 
 ## Open
