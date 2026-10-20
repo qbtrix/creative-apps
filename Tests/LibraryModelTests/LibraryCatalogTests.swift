@@ -6,7 +6,7 @@ import Testing
 @Test func startsEmptyOnAllPhotos() {
     let catalog = LibraryCatalog()
     #expect(catalog.isEmpty)
-    #expect(catalog.collections.map(\.name) == ["All Photos", "Favorites", "Recently Added"])
+    #expect(catalog.collections.map(\.name) == ["All Photos", "Picks", "Recently Added"])
     #expect(catalog.selectedCollection?.id == "all")
 }
 
