@@ -16,3 +16,4 @@
 2026-10-20T05:09:43Z	pr-opened	MD-3	#3465 draft, stacked on #3460
 2026-10-20T05:09:43Z	pr-opened	MD-4	#3473 draft, stacked on #3460
 2026-10-20T05:09:43Z	builder-start	MD-5	stacked on MD-3
+2026-10-20T05:16:46Z	builder-restart	MD-5	container restart stopped it; resumed from its worktree (partial rows test)
