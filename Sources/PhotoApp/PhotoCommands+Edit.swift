@@ -13,6 +13,8 @@
 // Command-A (PhotoCommands+Select.swift), so Edit > Select All has no
 // shortcut and runs the same text-first PhotoMenu.selectAll.
 import AppKit
+import PhotoModel
+import SuiteUI
 import SwiftUI
 
 extension PhotoCommands {
@@ -76,10 +78,12 @@ struct PhotoUndoMenu: View {
     let menu: PhotoMenu
 
     var body: some View {
-        Button(menu.undoTitle, systemImage: PhotoEditItem.undo.systemImage) { menu.perform(.undo) }
-            .keyboardShortcut("z").disabled(!menu.canUndo)
-        Button(menu.redoTitle, systemImage: PhotoEditItem.redo.systemImage) { menu.perform(.redo) }
-            .keyboardShortcut("z", modifiers: [.command, .shift]).disabled(!menu.canRedo)
+        menu.item("edit.undo", systemImage: PhotoEditItem.undo.systemImage, shortcut: KeyboardShortcut("z")) {
+            menu.perform(.undo)
+        }
+        menu.item("edit.redo", systemImage: PhotoEditItem.redo.systemImage, shortcut: KeyboardShortcut("z", modifiers: [.command, .shift])) {
+            menu.perform(.redo)
+        }
     }
 }
 
@@ -89,27 +93,19 @@ struct PhotoPasteboardMenu: View {
     @FocusedValue(\.photoPasteboard) private var pasteboard
 
     var body: some View {
-        let textFocused = PhotoTextFocus.shared.isEditingText
+        let state = menu.state(textFocused: PhotoTextFocus.shared.isEditingText, pasteboard: pasteboard ?? PhotoPasteboardState())
         ForEach(PhotoEditItem.pasteboardGroup, id: \.self) { item in
             switch item {
-            case .cut: edit("Cut", .cut, item, key: "x", textFocused: textFocused)
-            case .copy: edit("Copy", .copy, item, key: "c", textFocused: textFocused)
-            case .paste: edit("Paste", .paste, item, key: "v", textFocused: textFocused)
-            default:
-                Button("Select All", systemImage: item.systemImage) { menu.selectAll() }
-                    .disabled(!menu.canSelectAll && !textFocused)
+            case .cut: edit("edit.cut", .cut, item, key: "x", state)
+            case .copy: edit("edit.copy", .copy, item, key: "c", state)
+            case .paste: edit("edit.paste", .paste, item, key: "v", state)
+            default: menu.item("edit.select-all", systemImage: item.systemImage, in: state) { menu.selectAll() }
             }
         }
     }
 
-    private func edit(
-        _ title: String, _ intent: EditIntent, _ item: PhotoEditItem, key: KeyEquivalent, textFocused: Bool
-    ) -> some View {
-        let held = pasteboard ?? PhotoPasteboardState()
-        return Button(title, systemImage: item.systemImage) { menu.edit(intent) }
-            .keyboardShortcut(key)
-            .disabled(menu.isEditDisabled(intent, pasteboard: held, textHasFocus: textFocused))
-            .help(menu.editHelp(intent, pasteboard: held).map { "\(title): \($0)" } ?? title)
+    private func edit(_ id: String, _ intent: EditIntent, _ item: PhotoEditItem, key: KeyEquivalent, _ state: PhotoMenuState) -> MenuCommand {
+        menu.item(id, systemImage: item.systemImage, shortcut: KeyboardShortcut(key), in: state) { menu.edit(intent) }
     }
 }
 
@@ -119,14 +115,12 @@ struct PhotoSelectionEditMenu: View {
 
     var body: some View {
         Divider()
-        Button("Delete Selection", systemImage: PhotoEditItem.deleteSelection.systemImage) {
+        menu.item("edit.delete-selection", systemImage: PhotoEditItem.deleteSelection.systemImage) {
             menu.perform(.deleteSelection)
         }
-        .disabled(!menu.canEditSelection)
-        Button("Fill Selection", systemImage: PhotoEditItem.fillSelection.systemImage) {
+        menu.item("edit.fill-selection", systemImage: PhotoEditItem.fillSelection.systemImage) {
             menu.perform(.fillSelection)
         }
-        .disabled(!menu.canEditSelection)
     }
 }
 
