@@ -105,3 +105,4 @@ utc	stage	event	ref	note
 2026-10-20T06:58Z	3	heartbeat	#3396	lane macOS build 39365314009 queued (runner backlog); merged=false
 2026-10-20T07:28Z	3	heartbeat	#3396	lane macOS build 39376134764 queued/-; merged=false
 2026-10-20T07:45Z	3	pushed	#3396	3rd C4-part conflict resolved, gate PASS, head 9a69642b
+2026-10-20T07:47Z	3	heartbeat	#3396	lane macOS build 39376134764 completed/cancelled; merged=false
