@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-20T21:00Z	PF-3	built	photo-file-flow/PF-3@e40c105b	rework done: window unchanged vs PF-4 (old list kept), import moves to PF-2; 14 files +312/-68; Mutate 3/3; full CI PASS; PR held until #3700 merges
 2026-10-20T21:14Z	check	heartbeat	#3679,#3700	open; macOS builds still queued; PF-3 held at e40c105b
 2026-10-20T21:41Z	heartbeat	poll	-	bases open: #3679 #3681 #3700 #3705 (macOS builds queued), #3695 needs-rebase (not this line); held branches unchanged
+2026-10-20T22:00Z	heartbeat	poll	-	bases #3679 #3681 #3700 #3705 still open (macOS builds queued); #3695 rebased by lane (54c6f578), not merged; held branches unchanged
