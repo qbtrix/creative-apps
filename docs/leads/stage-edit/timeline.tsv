@@ -235,3 +235,4 @@
 2026-10-20T18:27:20Z	heartbeat	full CI 39469318877 on d7f615dc still pending ~40 min (macOS backlog); merges since: #3626, #3654
 2026-10-20T18:39:12Z	heartbeat	39469318877 cancelled (superseded); tracking newer full CI 39475897385 on 875b44d2 (pending)
 2026-10-20T18:50:51Z	heartbeat	full CI 39475897385 (875b44d2) still pending on macOS runner
+2026-10-20T19:02:58Z	heartbeat	full CI 39475897385 on 875b44d2 still pending (macOS queue); contact sheet waits on it
