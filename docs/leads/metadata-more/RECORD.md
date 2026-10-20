@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: MD-3 and MD-4 builders open draft PRs; when #3422 merges un-draft #3460, then MD-3 and MD-4 as their parents merge; then MD-5..
+Next: MD-5 builder (stacked on MD-3) opens a draft PR; when #3422 merges un-draft #3460, then #3465 and #3473 as their parents merge; then MD-9, MD-14, MD-19 checks, MD-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,9 +20,10 @@ Next: MD-3 and MD-4 builders open draft PRs; when #3422 merges un-draft #3460, t
 |---|---|---|---|---|---|---|---|
 | MD-1 | MD-a | 1 | CameraDetails with its cleaning init, CameraField, CameraRow stubs, selectedPhotos, selectedCameraRows; PhotoItem keywords/title/caption/camera; ImportCandidate.camera | Sources/LibraryModel/Contracts/PhotoDetails.swift, Sources/LibraryModel/PhotoItem.swift, Sources/LibraryModel/Contracts/LibraryValues.swift, Tests/LibraryModelTests/LibraryPhotoDetailsTests.swift, Tests/mutations/LibraryModel.PhotoDetails.json, Tests/mutations/LibraryModel.PhotoItem.json | LibraryPhotoDetailsTests | #3422 | open, macOS build queued |
 | MD-2 | MD-a | 2 | sidecar contract, FakeSidecars, services.sidecars | see packet | LibrarySidecarContractTests | #3460 | open, draft until #3422 merges (stacked) |
-| MD-3 | MD-a | 3 | cameras fixture; the decoder and importer carry camera details; MD-MJ1 | see packet | LibraryCamerasFixtureTests | - | building (stacked on MD-2) |
-| MD-4 | MD-a | 3 | inert slots: LibraryKeywords, MetadataEditing title/caption, XMPSidecar, PhotoSearch | see packet | LibraryMetadataSlotsTests | - | building (stacked on MD-2) |
-| MD-5 .. MD-22 | MD-b..MD-e | 4+ | see packet Build waves | see packet | see packet | - | planned |
+| MD-3 | MD-a | 3 | cameras fixture; the decoder and importer carry camera details; MD-MJ1 | see packet | LibraryCamerasFixtureTests | #3465 | open, draft until #3460 merges (stacked) |
+| MD-4 | MD-a | 3 | inert slots: LibraryKeywords, MetadataEditing title/caption, XMPSidecar, PhotoSearch | see packet | LibraryMetadataSlotsTests | #3473 | open, draft until #3460 merges (stacked) |
+| MD-5 | MD-b | 4 | check-first for MD-b: camera rows, decode, snapshots, MD-J1, all disabled | LibraryCameraRowsTests, LibraryCameraDecodeTests, LibraryCameraSnapshots, LibraryJourneyTests+Camera | compiles, disabled | - | building (stacked on MD-3) |
+| MD-6 .. MD-22 | MD-b..MD-e | 5+ | see packet Build waves | see packet | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -38,6 +39,9 @@ Next: MD-3 and MD-4 builders open draft PRs; when #3422 merges un-draft #3460, t
 
 - Stacked PRs stay draft until their parent merges, so the lane does not drop fast-lane for size.
 - MD-2 (#3460) also updated LibraryServicesTests and LibraryLaunchTests for the new sidecars reason, and created the LibraryModel.LibraryServices plan.
+- MD-3 (#3465): a fixture whose name ends `-unimported` launches empty (one line in LibraryLaunch.swift); the C4 part names the cameras fixture.
+- MD-4 (#3473): title and caption read real values; set* stay inert for MD-11. Identifiers it chose: library.metadata.keyword.<name>, .removeKeyword.<name>, .keywords, .title, .caption, .sidecar, library.search. No plan, as the packet says.
+- Budget tests can fail under a loaded machine (load ~21 on 4 cores). Builders rerun them alone before calling a gate red.
 
 ## Open
 - S-L9 #3413 (InspectorTokenRow) and S-L10 #3414 (InspectorTextRow) are soft waits for MD-13. Until they land, those rows use plain SwiftUI placeholders.

@@ -13,3 +13,6 @@
 2026-10-20T04:45:20Z	pr-opened	MD-2 #3460 (draft, stacked on #3422)
 2026-10-20T04:45:20Z	stage-end	3 wave 2
 2026-10-20T04:45:20Z	stage-start	3 wave 3: MD-3, MD-4 building
+2026-10-20T05:09:43Z	pr-opened	MD-3	#3465 draft, stacked on #3460
+2026-10-20T05:09:43Z	pr-opened	MD-4	#3473 draft, stacked on #3460
+2026-10-20T05:09:43Z	builder-start	MD-5	stacked on MD-3
