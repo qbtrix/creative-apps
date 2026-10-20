@@ -268,9 +268,10 @@ struct LibraryDevelopTests {
         red[255] = 4; green[255] = 2; blue[0] = 1
         try showHistogram(&catalog, HistogramBins(red: red, green: green, blue: blue,
                                                   shadowClipped: 0, highlightClipped: 6))
-        #expect(catalog.histogramClips == ["Highlights clipped"])
-        #expect(catalog.curveHistogram.count == HistogramBins.binCount)
-        #expect(catalog.curveHistogram.max() == 1 && catalog.curveHistogram.first == 1.0 / 6)
+        let tone = catalog.toneHistogram
+        #expect(tone.clipsHighlights && !tone.clipsShadows)
+        #expect(tone.heights.count == HistogramBins.binCount)
+        #expect(tone.heights.max() == 1 && tone.heights.first == 1.0 / 6)
         #expect(catalog.developError == nil)
     }
 

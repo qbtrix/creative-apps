@@ -5,6 +5,7 @@
 // and macOS.
 import CoreRaster
 import PhotoModel
+import SuiteModel
 import Testing
 
 @Suite struct PhotoCurvesTests {
@@ -125,14 +126,15 @@ import Testing
         let plainBin = try Histogram(of: workspace.composite(), encoding: .sRGB).luminance.firstIndex { $0 > 0 }
         workspace.adjust(.exposure(1))
         workspace.adjust(.curvePoints(Self.lift))
-        let heights = workspace.curvesHistogram()
+        let shape = workspace.curvesHistogram()
         var input = workspace
         input.adjust(.setEnabled(.curves, false))
-        let counts = try Histogram(of: input.composite(), encoding: .sRGB).luminance
-        let tallest = Double(counts.max() ?? 0)
-        #expect(heights == counts.map { Double($0) / tallest })
-        #expect(heights.firstIndex(of: 1) != plainBin)
-        #expect(PhotoWorkspace().curvesHistogram().isEmpty)
+        let counted = try Histogram(of: input.composite(), encoding: .sRGB)
+        #expect(shape == ToneHistogram(
+            channels: [counted.luminance], shadowClipped: counted.shadowClipped,
+            highlightClipped: counted.highlightClipped))
+        #expect(shape.heights.firstIndex(of: 1) != plainBin)
+        #expect(PhotoWorkspace().curvesHistogram() == .empty)
     }
 
     @Test func endAdjustMakesEachCurveGestureItsOwnUndoStep() throws {
