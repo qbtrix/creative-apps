@@ -19,7 +19,10 @@
 // `suite.timeline.key.<id>.<frame>`, names `suite.timeline.name.<id>`), and
 // publishes Badge's lane value as the label of a hidden 1 x 1 pt element,
 // `suite.gallery.timeline.value.badge`, since XCUITest reads SwiftUI values
-// as "" (#262; the HaloReadout pattern).
+// as "" (#262; the HaloReadout pattern). A Select All Keys button
+// (`gallery.timeline.selectAll`) and the strip's onSelectAllKeys (⌘A while it
+// has focus) share one closure that picks every key and logs `select-all`
+// (TSA-1).
 import SwiftUI
 
 enum GalleryTimeline {
@@ -78,7 +81,11 @@ struct GalleryTimelineFixture {
 }
 
 /// One timeline page: the switches, the strip over the page's state, the log.
-private struct GalleryTimelinePage: View {
+struct GalleryTimelinePage: View {
+    #if DEBUG
+    // view-static: main-actor
+    static var bodyRuns = 0
+    #endif
     let fixture: GalleryTimelineFixture
     @Environment(\.galleryRequest) private var request
     @State private var keys: [String: [TimelineKey]]
@@ -120,11 +127,17 @@ private struct GalleryTimelinePage: View {
     }
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             HStack(spacing: SuiteSpacing.xs) {
                 pageSwitch("No tracks", id: "no-tracks", isOn: noTracks) { noTracks.toggle() }
                 pageSwitch("Nothing picked", id: "nothing-picked", isOn: nothingPicked) { nothingPicked.toggle() }
                 pageSwitch("Toolbar", id: "toolbar", isOn: toolbar) { toolbar.toggle() }
+                Button("Select All Keys") { selectAll() }
+                    .help("Select All Keys")
+                    .suiteControl(id: "gallery.timeline.selectAll", enabled: true, reason: nil)
             }
             // No outer ScrollView: the strip is offered the room between the
             // switches and the log, capped below its ideal height on the long
@@ -176,7 +189,8 @@ private struct GalleryTimelinePage: View {
             onWorkArea: { range in
                 workArea = range
                 write(range.map { "work \($0.lowerBound)…\($0.upperBound)" } ?? "work off")
-            })
+            },
+            onSelectAllKeys: { selectAll() })
             .contextMenu { easingItems }
             .environment(\.timelineIdentifierPrefix, "suite.timeline")
     }
@@ -231,6 +245,13 @@ private struct GalleryTimelinePage: View {
         }
         nothingPicked = false
         write("pick \(id) \(frame) \(mode.rawValue)")
+    }
+
+    /// Picks every key on every track: the button and ⌘A on the strip (TSA-1).
+    private func selectAll() {
+        picked = Set(fixture.order.flatMap { id in (keys[id] ?? []).map { LaneKey(track: id, frame: $0.frame) } })
+        nothingPicked = false
+        write("select-all")
     }
 
     /// Moves every picked key by `delta` frames through the key rules; a moved

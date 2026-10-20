@@ -2,7 +2,7 @@
   "title": "One typed command catalog in SuiteKernel that every app registers its actions in: menus, the afterglow CLI, MCP and the crews' tests drive the same path (AI-accessible first)",
   "wave": "XK1",
   "order": 5,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "#2996",
   "covers": "captain's AI-accessible-first call (every action is a command; UI, CLI and MCP drive one channel); beta-80 plan W0 (p0); suite.md 1.5; re-cut: S14 command palette lists catalog entries",
   "waits_on": "editor-kernel's EK-a and EK-undo (both on dev); CC-9 waits on EK-u and font-picker's FP-a for SuiteGallery.swift, CC-14 on EK-z for the shared prose; suite afterglow-cli and afterglow-mcp, and adopt-command-catalog, wait on CC-a",
@@ -175,9 +175,6 @@
           "CC-9"
         ],
         "editor-kernel:EK-u": [
-          "CC-9"
-        ],
-        "font-picker:FP-a": [
           "CC-9"
         ]
       },
