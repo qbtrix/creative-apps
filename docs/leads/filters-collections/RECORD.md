@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 #3551 (draft on FC-7 #3534 + FC-11 #3515; expect a conflict with FC-9 #3546 in LibraryCollections.swift and the seam test); FC-4 #3461 being merged with dev and un-drafted (FC-2b merged); when #3461 merges un-draft #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
+Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 #3551 (draft on FC-7 #3534 + FC-11 #3515; expect a conflict with FC-9 #3546 in LibraryCollections.swift and the seam test); FC-4 #3461 (head cad6bfe1) ready for the lane, waits on its macOS build; when #3461 merges un-draft #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -81,3 +81,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 09:41Z: #3424 FC-2b lane macOS build 39366318428 succeeded; PR clean, lane merges it on its next sweep. Then cascade per Next.
 - 09:51Z check-in: #3424 FC-2b macOS build green, waiting on the lane's merge sweep. No new line:library findings in this feature's files (open ones are export journeys and #3565, not ours).
 - 10:02Z: FC-2b #3424 merged to dev. Fixer merging dev into FC-4 #3461 and un-drafting. FC-a closes after FC-4 #3461 and FC-5 #3466 merge and a green library run.
+- 10:10Z: FC-4 #3461 un-drafted, dev merged in without conflicts, head cad6bfe1, own diff 3 files +278/-1; gate pass (lints and build, no test scope).
