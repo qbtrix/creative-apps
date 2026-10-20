@@ -201,3 +201,4 @@
 2026-10-20T11:13:10Z	heartbeat	poll: full CI 39409307241 (a54a892a) still queued, 39411425197 (575cc800) pending; FK-a deps #3532/GF-2/SS-a not merged (merged since 10:59Z: #3586, #3540)
 2026-10-20T11:25:15Z	heartbeat	poll: full CI 39409307241 (a54a892a) still queued; 39411425197 (575cc800) pending
 2026-10-20T11:37:08Z	heartbeat	poll: 39411425197 cancelled; tracking 39409307241 (a54a892a, queued) and new full run 39416190119 (0e1199e9, pending)
+2026-10-20T11:49:59Z	heartbeat	poll: full CI 39416190119 (0e1199e9) pending, 39409307241 (a54a892a) queued; no result yet
