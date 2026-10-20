@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-20T22:40Z	heartbeat	poll	#3416	no base merged, heads unchanged, all bases waiting on macOS builds; no supervisor answer to issuecomment-6303075999 yet
 2026-10-20T23:45Z	3	base-merged	#3705	GF-5 merged 23:45Z; PG-4 now waits #3681 only
 2026-10-20T23:56Z	3	heartbeat	-	worker restart; waiting #3681 (PG-1, fast-lane) and #3695 (GF-2)
+2026-10-20T23:57Z	3	mac-red	#3681	macOS build 39484077277 failed: PhotoToolsTests:136 ambiguous == (array literal, Foundation import); fixing on PG-1
