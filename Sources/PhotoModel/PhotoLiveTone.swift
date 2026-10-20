@@ -56,14 +56,15 @@ struct PhotoLiveStack: Sendable {
 
 extension PhotoWorkspace {
     /// The live route's plan for this stack; nil when it needs the dispatcher route (see the header).
+    // render-contract: gpu-route
     func liveStack() -> PhotoLiveStack? {
-        guard services.adjustmentLayers is LiveAdjustmentLayering, let image = adjustments.toneOperations else { return nil }
+        guard services.adjustmentLayers is LiveAdjustmentLayering, let image = adjustments.toneOperations else { return nil }  // render-contract: cpu-op live-blur
         let shown = layers.reversed().filter { $0.isVisible && $0.opacity > 0 }  // bottom first
-        guard shown.allSatisfy({ (0...1).contains(Float($0.opacity)) }) else { return nil }
+        guard shown.allSatisfy({ (0...1).contains(Float($0.opacity)) }) else { return nil }  // render-contract: cpu-op layer-opacity-range
         var operations: [PhotoLayer.ID: [ToneProgram.Operation]] = [:]
         for layer in shown {
             guard case .adjustment(var settings) = layer.kind else { continue }
-            guard !(layer.isMaskEnabled && masks[layer.id] != nil) else { return nil }
+            guard !(layer.isMaskEnabled && masks[layer.id] != nil) else { return nil }  // render-contract: cpu-op masked-adjustment-layer
             settings.apply(.setEnabled(.blur, false))  // a layer never blurs (LiveAdjustmentLayering)
             operations[layer.id] = settings.toneOperations ?? []
         }
@@ -81,7 +82,7 @@ extension PhotoWorkspace {
             }
             return PhotoLiveStack(base: Array(shown[..<split]), steps: steps, display: try ToneProgram(operations: folded + image))
         } catch {
-            return nil  // an operation the program can't run: the dispatcher route draws it
+            return nil  // render-contract: cpu-op tone-program-op (the dispatcher route draws it)
         }
     }
 
