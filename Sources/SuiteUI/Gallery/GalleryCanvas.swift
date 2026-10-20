@@ -16,7 +16,8 @@
 // `surface` and `surface-empty` show CanvasSurface with a 400 x 300 artboard
 // and a 0 x 0 one, which draws 1 x 1 pt, and log the artboard's rect
 // (SJ26). Every page's log is the element `suite.gallery.log`. `probe` is
-// the one-element page the probe journeys read.
+// the one-element page the probe journeys read. `transform-handles` is
+// GalleryTransform.swift's box, handles and TransformRows (transform-tools).
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -30,6 +31,7 @@ enum GalleryCanvas {
         "surface": { AnyView(GallerySurfacePage(artboard: CGSize(width: 400, height: 300))) },
         "surface-empty": { AnyView(GallerySurfacePage(artboard: .zero)) },
         "probe": { AnyView(GalleryProbePage()) },
+        "transform-handles": { AnyView(GalleryTransformPage()) },
     ]
 
     /// Every page's document, in pixels.
@@ -56,7 +58,7 @@ enum GalleryCanvas {
 
 /// A page's log: the newest 40 lines, each drag's end counted. The whole log
 /// is the label of `suite.gallery.log`; the newest line shows at the foot.
-private struct GalleryCanvasLog {
+struct GalleryCanvasLog {
     private(set) var entries: [String] = []
     private(set) var drags = 0
 
@@ -71,7 +73,7 @@ private struct GalleryCanvasLog {
     }
 }
 
-private struct GalleryCanvasLogLine: View {
+struct GalleryCanvasLogLine: View {
     let log: GalleryCanvasLog
 
     var body: some View {
