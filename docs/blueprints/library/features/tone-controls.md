@@ -14,8 +14,10 @@ RJ-L41 (new: auto tone and sharpen a photo for the web).
 **Depends on:** `suiteui/tone-controls` **TC-a** (cross-line); LT-3 and LT-4
 need **TC-5**, LT-5 **TC-6**, LT-6 **TC-3**. Same line: `develop` (the
 feature, open as #1527; it owns `DevelopValues.swift`, `LiveDevelop.swift`
-and `DevelopInspector.swift`). LT-1 edits `Package.swift` after TC-1 does
-(cross-line) and is a supervisor merge.
+and `DevelopInspector.swift`). Cross-line: suiteui **suite-imaging**
+IM-library before LT-4 (re-cut 2026-10-20: the loupe's GPU route is
+SuiteImaging's, so this packet adds no Metal code and edits no
+`Package.swift`; IM-1 links SuiteImaging, with CoreRender, into LibraryModel).
 
 **Rule 20.** `DevelopSettings` holds the kernel's `ToneSettings` for its ten
 sliders and keeps its curve, levels and crop; the JSON keys don't change,
@@ -24,16 +26,15 @@ rows go: the rows are `ToneRows`, and `LiveDevelop.waiting` reads
 `ToneRules.waiting` (Saturation renders now; Vibrance waits on core).
 `LibraryTone+Kernel.swift` is the adapter.
 
-**Render path.** New for Library, not a second copy: `LibraryLiveTone`
-(Model, Linux-tested) plans the loupe's GPU work from the settings
-(`ToneRules.unsharp`, then `ToneRules.program` with the curve and levels
-appended), and `LibraryLoupe+Metal.swift` keeps the photo as a resident
-CoreRender surface and writes it through `MetalBackend.display(_:into:…:
-tone:)` into the shared `CanvasHost`'s resident texture (canvas-host's G1
-path, which Photo already uses). LT-1 adds `CoreRender` to LibraryModel and
-`CoreRenderMetal` to LibraryApp in `Package.swift`. Export, thumbnails and
-the histogram stay on `LiveDevelop` (CPU), which runs
-`ToneRules.adjustments`, so they match the loupe.
+**Render path.** Not a second copy: suite-imaging's IM-library already draws
+the loupe through SuiteImaging's `LiveToneSurface` into the shared
+`CanvasHost`'s resident texture. This packet adds the tone steps to that
+route: `LibraryDevelop+Imaging.swift` (IM-10's adapter) passes
+`ToneRules.unsharp` and `ToneRules.program` (tone first, then the levels and
+curve, through `ImagingProgram.program(_:tone:)`) to the surface. Export,
+thumbnails and the histogram stay on `LiveDevelop` (CPU), which runs
+`ImagingProgram.adjustments` with the same tone steps, so they match the
+loupe.
 
 Blueprint sections: library.md (Develop, Loupe), 8.
 
@@ -41,13 +42,13 @@ Blueprint sections: library.md (Develop, Loupe), 8.
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| LT-a | `DevelopSettings` holds `ToneSettings` with the same keys, Library links CoreRender, the adapter conforms on stubs, and Develop shows `ToneRows` on them. | LT-1, LT-2 | MJ-LT | TC-a (cross-line); develop; crop (built: it shares LiveDevelop, DevelopInspector and the loupe) |
+| LT-a | `DevelopSettings` holds `ToneSettings` with the same keys, Library links SuiteImaging, the adapter conforms on stubs, and Develop shows `ToneRows` on them. | LT-1, LT-2 | MJ-LT | TC-a (cross-line); develop; crop (built: it shares LiveDevelop, DevelopInspector and the loupe) |
 | LT-u | The Develop rows have snapshots and a render budget, and the journey is written. | LT-6, LT-7 | LJ-T1 | LT-a; TC-3 (LT-6, cross-line) |
-| LT-m | Export runs the shared list, the loupe draws each step on the GPU in one write, and every tone command is one undo step over the selected photos. | LT-3, LT-4, LT-5 | MJ-LT | LT-a; TC-5, TC-6 (cross-line); cull-finish:DR-m (LT-5, A/C first) |
+| LT-m | Export runs the shared list, the loupe draws each step on the GPU in one write, and every tone command is one undo step over the selected photos. | LT-3, LT-4, LT-5 | MJ-LT | LT-a; TC-5, TC-6 (cross-line); suite-imaging:IM-library (LT-4, cross-line); cull-finish:DR-m (LT-5, A/C first) |
 | LT-z | Develop runs on live services, the journey passes on live, and the feature is built. | LT-8, LT-9 | LJ-T1 | LT-u, LT-m |
 
 LT-u waits only on LT-a (rule 18); LT-m never waits on LT-u. LT-m is marked
-`"ui": true` because LT-4 adds the loupe's Metal path. MJ-LT is the Model walk
+`"ui": true` because LT-4 edits the loupe. MJ-LT is the Model walk
 in `LibraryToneTests` (Linux).
 
 ## Journey steps
@@ -87,21 +88,19 @@ public struct DevelopSettings { public private(set) var tone: ToneSettings; publ
 // encode/decode flatten `tone` into the same container: the keys stay "exposure", "temperature", ...
 // Sources/LibraryModel/LibraryTone+Kernel.swift (LT-1 stubs, LT-5 bodies)
 extension LibraryCatalog: ToneTarget { ... }   // the develop targets' settings ("Mixed" stays the view's job)
-// Sources/LibraryModel/Live/LibraryLiveTone.swift (LT-1 stub returning an empty plan, LT-4 body)
-public struct LibraryLiveTone: Sendable {
-    public static func plan(_ s: DevelopSettings) throws -> (unsharp: (amount: Double, sigma: Double, threshold: Double)?, program: ToneProgram)
-}
+// The loupe's plan is suite-imaging's adapter, Sources/LibraryModel/LibraryDevelop+Imaging.swift (IM-10); LT-4
+// adds the tone half: the unsharp parameters and `ImagingProgram.program(adjust, tone: ToneRules.program(s.tone))`.
 ```
 
 ## Pseudocode
 
-- **plan.** `ToneRules.unsharp(s.tone)`, then a program of
-  `ToneRules.program(s.tone)` + the curve and levels as sRGB `curves` and
-  `levels` operations, each skipped at neutral (LiveDevelop's order).
+- **plan.** `ToneRules.unsharp(s.tone)`, then
+  `ImagingProgram.program(adjust, tone: ToneRules.program(s.tone))`: tone
+  first, then the levels and curve as sRGB steps, each skipped at neutral.
 - **loupe.** On a settings change: a sharpen change re-runs the unsharp pass
   into the cached base; any other change only rewrites the drawable through
-  `display(…tone: plan.program)`. CPU route or no Metal device: the existing
-  CPU render, unchanged.
+  `LiveToneSurface.draw(plan.program, unsharp:)` (suite-imaging). CPU route or
+  no Metal device: IM-library's CPU route, unchanged.
 - **setTone.** Applies to every develop target as one catalog edit through
   `CatalogHistory` (Sync's rule), a drag folding.
 
@@ -109,10 +108,10 @@ public struct LibraryLiveTone: Sendable {
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| LT-1 | – | `DevelopSettings.tone` with flattened coding; `DevelopSlider` folded into `ToneSlider`; CoreRender and CoreRenderMetal linked; the adapter and `LibraryLiveTone` as stubs; `LibraryToneTests` written, disabled | `Package.swift`, `Sources/LibraryModel/Contracts/DevelopValues.swift`, `Sources/LibraryModel/LibraryTone+Kernel.swift`, `Sources/LibraryModel/Live/LibraryLiveTone.swift`, `Tests/LibraryModelTests/LibraryToneTests.swift` | TC-a, TC-1 (Package.swift) | ~260, 5 |
+| LT-1 | – | `DevelopSettings.tone` with flattened coding; `DevelopSlider` folded into `ToneSlider`; the adapter as stubs; `LibraryToneTests` written, disabled | `Sources/LibraryModel/Contracts/DevelopValues.swift`, `Sources/LibraryModel/LibraryTone+Kernel.swift`, `Tests/LibraryModelTests/LibraryToneTests.swift` | TC-a | ~220, 3 |
 | LT-2 | – | Develop's TONE and COLOR rows become `ToneRows`; intents to the catalog's commands | `Sources/LibraryApp/DevelopInspector.swift` | LT-1 | ~120, 1 |
 | LT-3 | – | `LiveDevelop` runs `ToneRules.unsharp` and `ToneRules.adjustments`, its `waiting` from `ToneRules`; the export test | `Sources/LibraryModel/Live/LiveDevelop.swift`, `Tests/LibraryModelTests/LiveDevelopToneTests.swift`, `Tests/mutations/LibraryModel.LiveDevelop.json` | LT-1, TC-5 | ~180, 3 |
-| LT-4 | – | `LibraryLiveTone.plan` and the loupe's Metal path on the shared `CanvasHost` resident texture; turns on `LibraryToneTests` | `Sources/LibraryModel/Live/LibraryLiveTone.swift`, `Sources/LibraryApp/LibraryLoupe+Metal.swift`, `Sources/LibraryApp/LibraryLoupe.swift`, `Tests/LibraryModelTests/LibraryToneTests.swift`, `Tests/mutations/LibraryModel.LibraryLiveTone.json` | LT-1, TC-5 | ~340, 5 |
+| LT-4 | – | The tone steps and the unsharp pass on SuiteImaging's loupe route: `LibraryDevelop+Imaging.swift` hands `ToneRules.unsharp` and the tone program to `LiveToneSurface`; turns on `LibraryToneTests` | `Sources/LibraryModel/LibraryDevelop+Imaging.swift`, `Sources/LibraryApp/LibraryLoupe.swift`, `Tests/LibraryModelTests/LibraryToneTests.swift`, `Tests/mutations/LibraryModel.LibraryDevelop+Imaging.json` | LT-1, TC-5, suite-imaging IM-11 | ~220, 4 |
 | LT-5 | – | The adapter's bodies (every develop target, one step; Auto from the loupe render); `ToneCommands.specs` in the catalog; the ids; RJ-L41's job folder | `Sources/LibraryModel/LibraryTone+Kernel.swift`, `Sources/LibraryModel/LibraryCommandCatalog.swift`, `Tests/command-ids/library.txt`, `Tests/LibraryModelTests/LibraryToneCommandTests.swift`, `Tests/mutations/LibraryModel.LibraryTone+Kernel.json`, `Tests/RealJobs/library/auto-sharpen/` | LT-1, TC-6 | ~260, 6 |
 | LT-6 | – | Snapshots and the render budget test | `Tests/AppSnapshotTests/LibraryToneSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetLibraryToneTests.swift` | LT-2, TC-3 | ~160, 2 |
 | LT-7 | – | The journey written and skipped (`XCTSkip("waits on LT-8")`) | `UITests/LibraryJourneyTests+Tone.swift` | LT-2 | ~120, 1 |
@@ -136,7 +135,7 @@ Longest chain: LT-1 → LT-2 → LT-7 → LT-8 → LT-9 (5). Chain of 4: the jou
 | LT-1 | every catalog fixture under `Tests/LibraryModelTests/Fixtures/` decodes to the same develop values and re-encodes byte for byte; `LibraryToneTests` disabled by name | a catalog's keys change | – (stub) |
 | LT-2 | `LibraryToneSnapshots.develop` (LT-6's, first in the slice PR) | the rows are missing | – (UI) |
 | LT-3 | `LiveDevelopToneTests`: neutral returns the input; Saturation 40 renders (no waiting error); Sharpen 60 raises edge contrast; the order matches `ToneRules.adjustments` | export drops a step | `LibraryModel.LiveDevelop`: unsharp skipped → `.exportSharpens`; saturation still waiting → `.saturationRenders` |
-| LT-4 | `LibraryToneTests`: the plan's program on the CPU (`ToneProgram.map`) equals `LiveDevelop` within 2 levels; a shadows step changes only the program (`stepIsOneWrite`); a sharpen step re-runs the base once | the loupe and export differ, or a step re-renders on the CPU | `LibraryModel.LibraryLiveTone`: curve appended before tone → `.matchesExport`; sharpen re-run on every step → `.stepIsOneWrite` |
+| LT-4 | `LibraryToneTests`: the plan's program on the CPU (`ToneProgram.map`) equals `LiveDevelop` within 2 levels; a shadows step changes only the program (`stepIsOneWrite`); a sharpen step re-runs the base once | the loupe and export differ, or a step re-renders on the CPU | `LibraryModel.LibraryDevelop+Imaging`: curve placed before tone → `.matchesExport`; unsharp parameters passed on every step, re-running the base → `.stepIsOneWrite` |
 | LT-5 | `LibraryToneCommandTests`: `tone.set` over three targets is one step; Auto is one "Auto Tone"; the ids match; RJ-L41 passes on Linux | a target is skipped or steps double | `LibraryModel.LibraryTone+Kernel`: only the first target set → `.allTargets`; Auto's white balance dropped → `.autoNeutralizes` |
 | LT-6 | `LibraryToneSnapshots`; `RenderBudgetLibraryToneTests.shadowsDragInThreeBodies` | budget over | – (UI) |
 | LT-7 | compiles, skipped | – | – |

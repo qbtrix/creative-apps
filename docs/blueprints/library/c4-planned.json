@@ -79,7 +79,6 @@
                   "Sources/LibraryApp/LibraryGrid.swift",
                   "Sources/LibraryApp/DisplayImage+Image.swift",
                   "Sources/LibraryApp/LibraryLoupe.swift",
-                  "Sources/LibraryApp/LibraryLoupe+Metal.swift",
                   "Sources/LibraryApp/LibraryStatusBar.swift"
                 ],
                 "status": "existing",
@@ -297,7 +296,7 @@
                   "Sources/LibraryModel/LibraryDevelop.swift",
                   "Sources/LibraryModel/Live/LiveDevelop.swift",
                   "Sources/LibraryModel/LibraryTone+Kernel.swift",
-                  "Sources/LibraryModel/Live/LibraryLiveTone.swift"
+                  "Sources/LibraryModel/LibraryDevelop+Imaging.swift"
                 ],
                 "status": "planned",
                 "authored": true

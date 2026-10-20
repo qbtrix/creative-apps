@@ -1,0 +1,30 @@
+[
+  {
+    "label": "a failing path moves anyway",
+    "file": "Sources/LibraryModel/Fakes/FakeTrash.swift",
+    "find": "guard mode != .fail, !failing.contains(path) else {",
+    "replace": "guard mode != .fail else {",
+    "tests": "LibraryTrashStubTests.swift"
+  },
+  {
+    "label": "put back keeps the trashed entry",
+    "file": "Sources/LibraryModel/Fakes/FakeTrash.swift",
+    "find": "            moved[trashed] = nil\n",
+    "replace": "",
+    "tests": "LibraryTrashStubTests.swift"
+  },
+  {
+    "label": "a same-named file overwrites in the Trash",
+    "file": "Sources/LibraryModel/Fakes/FakeTrash.swift",
+    "find": "            while moved[trashed] != nil {",
+    "replace": "            while moved[trashed] != nil && false {",
+    "tests": "LibraryTrashStubTests.swift"
+  },
+  {
+    "label": "the label keys shift",
+    "file": "Sources/LibraryModel/LibraryKeys.swift",
+    "find": "(\"6\", .red), (\"7\", .yellow)",
+    "replace": "(\"6\", .yellow), (\"7\", .red)",
+    "tests": "LibraryTrashStubTests.swift"
+  }
+]

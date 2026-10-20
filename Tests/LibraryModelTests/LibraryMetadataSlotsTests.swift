@@ -70,7 +70,7 @@ private func twoPhotos() -> LibraryCatalog {
         MetadataInspectorID.sidecar, MetadataInspectorID.search,
     ]
     let existing = [MetadataInspectorID.flag, MetadataInspectorID.label(nil)] + (1...5).map(MetadataInspectorID.star)
-        + CameraField.allCases.map(MetadataInspectorID.camera)
+        + CameraField.allCases.map(MetadataInspectorID.camera) + PhotoFlag.allCases.map(MetadataInspectorID.flag)
     #expect(Set(ids).count == ids.count)
     #expect(Set(ids).isDisjoint(with: existing))
     #expect(ids.allSatisfy { $0.hasPrefix("library.") })

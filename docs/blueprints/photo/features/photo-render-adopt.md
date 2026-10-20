@@ -22,6 +22,9 @@ CoreRenderMetal, metal-backend MB-1 to MB-17), and SuiteUI's canvas-host
 feature (RenderingPreference, RenderingCommands, CanvasHostView and its
 CAMetalLayer path).
 
+**Render contract:** the rules this route keeps (no whole-canvas fallback, no
+readback per step, the parity tolerance) are `docs/render-contract.md`.
+
 ## Journey steps
 
 1. Open a large photo. View > Rendering shows Automatic checked and "Drawing

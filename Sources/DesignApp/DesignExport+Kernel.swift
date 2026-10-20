@@ -3,7 +3,9 @@
 // the sheet never runs the window's body; each change of `request` opens it on the Model's
 // `exportSheetDefaults`. Ids hang off `design.export`: Format (no Size row: Scale is the one
 // scale control), then DesignExportRows' Scale (`scale.<n>x`, off with `scaleHelp` for SVG and
-// PDF) and Scope (`scope.<scope>`) chips, the file list (`items`) and the plan's refusal (`result`). `sheet` is the content alone, which DesignExportSnapshots renders.
+// PDF) and Scope (`scope.<scope>`) chips, the file list (`items`) and the plan's refusal (`result`).
+// Export (DE-7) runs the fake steps in a task, the summary on the sheet and the status line;
+// Cancel mid-run cancels it. `sheet` is the content alone, which DesignExportSnapshots renders.
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -15,6 +17,7 @@ struct DesignExportArea: ViewModifier {
     let request: Int
     let onNote: @MainActor (String) -> Void
     @State private var run: DesignExportRun = .idle
+    @State private var task: Task<Void, Never>?
 
     /// The format chips: one per DesignExportFormat, its id the raw value.
     nonisolated static let formats = DesignExportFormat.allCases.map {
@@ -24,10 +27,37 @@ struct DesignExportArea: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onChange(of: request) { _ = run.begin(model.exportSheetDefaults) }
-            .sheet(isPresented: Binding(get: { run != .idle }, set: { if !$0 { run.dismiss() } })) {
-                Self.sheet(model: model, run: run, edit: { _ = run.begin($0) },
-                           export: { onNote("Exporting isn't built yet.") }, close: { run.dismiss() })
+            .sheet(isPresented: Binding(get: { run != .idle }, set: { if !$0 { close() } })) {
+                Self.sheet(model: model, run: run, edit: { _ = run.begin($0) }, export: export, close: close)
             }
+    }
+
+    /// Cancel or Escape: stops a run under way (it ends idle), else closes the sheet.
+    private func close() {
+        if case .running = run { task?.cancel() } else { run.dismiss() }
+    }
+
+    /// Export on the fakes (DE-7): one step per planned file, writing nothing; `-DesignExportFail` fails its file.
+    private func export() {
+        guard case .editing(let options) = run else { return }
+        let failing = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments).exportFail
+        let files = model.exportFiles(options)
+        guard run.start(total: (try? files.get())?.count ?? 0) else { return }
+        task = Task {
+            do {
+                let names = try files.get()
+                for (index, name) in names.enumerated() {
+                    try await Task.sleep(for: .milliseconds(150))
+                    try DesignWorkspace.fakeWrite(name, failing: failing)
+                    run.progressed(done: index + 1)
+                }
+                run.end(.success(names))
+                onNote(DesignWorkspace.exportSummary(names))
+            } catch {
+                run.end(.failure(error))
+                if let failure = error as? DesignExportFailure { onNote(failure.description) }
+            }
+        }
     }
 
     /// The sheet's content on `run`; `edit` takes new options, `export` starts, `close` is Cancel or Done.
@@ -37,7 +67,7 @@ struct DesignExportArea: ViewModifier {
     ) -> some View {
         let options = run.shownOptions ?? model.exportSheetDefaults
         return SuiteExportSheet(
-            ExportSheetRows(run, formats: formats, showsSize: false) { ExportPick(format: $0.format.rawValue, scale: Double($0.scale)) },
+            ExportSheetRows(run.summarized, formats: formats, showsSize: false) { ExportPick(format: $0.format.rawValue, scale: Double($0.scale)) },
             formats: formats,
             idPrefix: "design.export",
             onFormat: { id in
