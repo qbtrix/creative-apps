@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-20T21:05Z	3	wave-start	HA-u	builder started on lead/halo-autosave-history-HA-u, stacked on HA-a (HA-3 + HA-4); PR opens once #3683 merges
 2026-10-20T21:18Z	3	slice-built	HA-u	lead/halo-autosave-history-HA-u head 76e5a53, 4 files +253/-2, CI: PASS (scoped to HA-a); PR waits for #3683 to merge
 2026-10-20T21:27Z	3	heartbeat	#3683 #3701	supervisor answered: PRs are queued for the local Mac gate; once a parent squash-merges, rebase HA-u --onto dev and open its PR
+2026-10-20T21:49Z	3	heartbeat	#3683 #3701	open, in the supervisor's local Mac gate queue; HA-u ready to rebase
