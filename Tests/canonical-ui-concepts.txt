@@ -24,3 +24,5 @@ Ruler: Ruler
 Zoom: ZoomControl ZoomBar
 EmptyState: EmptyState Placeholder
 ToolPalette: ToolPalette ToolRail Palette
+Histogram: Histogram
+Levels: Levels
