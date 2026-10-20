@@ -7,6 +7,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 import SuiteModel
 
 public enum ExportSidecar {
@@ -19,11 +20,11 @@ public enum ExportSidecar {
         return String(imageName[..<dot]) + ".xmp"
     }
 
-    /// The XMP packet for `photo` as exported, UTF-8, attributes in a fixed order.
-    public static func xmp(for photo: PhotoItem) -> Data? {
+    /// The XMP packet for `photo` as exported under `metadata`, UTF-8, attributes in a fixed order.
+    public static func xmp(for photo: PhotoItem, metadata: ExportMetadata) -> Data? {
         let head = XMPSidecar.head + "<rdf:Description rdf:about=\"\" xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\" "
             + "xmlns:library=\"\(XMPSidecar.libraryNamespace)\""
-        let body = attributes(for: photo).map { " \($0.name)=\"\(XMLText.escaped($0.value))\"" }.joined()
+        let body = kept(attributes(for: photo), metadata: metadata).map { " \($0.name)=\"\(XMLText.escaped($0.value))\"" }.joined()
         return Data((head + body + "/></rdf:RDF></x:xmpmeta>").utf8)
     }
 
@@ -45,6 +46,12 @@ public enum ExportSidecar {
             out.append(("library:Crop", rect.map(number).joined(separator: " ")))
         }
         return out
+    }
+
+    /// The attributes `metadata` keeps. Stub until LX-3: every one.
+    static func kept(_ attributes: [(name: String, value: String)],
+                     metadata: ExportMetadata) -> [(name: String, value: String)] {
+        attributes
     }
 
     /// `2` for a whole value, else the shortest round-tripping decimal (`0.5`).
