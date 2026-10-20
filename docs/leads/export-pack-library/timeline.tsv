@@ -3,3 +3,4 @@ time	event	task	note
 2026-10-20T19:25:32Z	builder-start	LX-1+LX-3	builder subagent (worktree): LX-1 PR, then LX-3 stacked draft
 2026-10-20T19:39:39Z	built	LX-1	PR #3696 head c6102dd, fast-lane, ci --changed PASS
 2026-10-20T19:39:39Z	built	LX-3	PR #3699 draft head f165c5c, mutate 7/7 + 6/6
+2026-10-20T19:48:12Z	check	-	lane backlog: 56 runs queued; FC-4 #3461 macOS run 39437577080 queued since 14:15Z; nothing merged (MD #3550 #3570 #3574 #3575, LX #3696 waiting)
