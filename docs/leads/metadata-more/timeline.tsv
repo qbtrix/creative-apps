@@ -25,3 +25,4 @@
 2026-10-20T06:23:43Z	pr-opened	MD-9	#3533 draft, stacked on #3473; 6 test files +397
 2026-10-20T06:23:43Z	builder-start	MD-14	stacked on MD-4 (#3473)
 2026-10-20T06:26:08Z	check-in	-	parents unmerged, lane macOS builds queued; no findings for this feature
+2026-10-20T06:33:46Z	builder-start	MD-19	branch from MD-4, MD-3 merged in
