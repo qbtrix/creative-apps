@@ -1,3 +1,8 @@
 2026-10-17T03:07Z	0	stage-start	#1555	resumed; lead/metadata-more created from origin/dev
 2026-10-17T03:39Z	2	heartbeat		no reply on base question; origin/dev moved to 1a8eea2a, main to 1af9b4d7; no new code
 2026-10-17T05:43Z	2	heartbeat		still waiting on base answer; origin/dev 0e3c08ea
+2026-10-20T03:16Z	2	stage-start	-	resume as run act-1a15749e510-0ox5; base origin/dev 233aff5c
+2026-10-20T03:16Z	2	finding-filed	#3413	S-L9 InspectorTokenRow (needs-ui)
+2026-10-20T03:16Z	2	finding-filed	#3414	S-L10 InspectorTextRow (needs-ui)
+2026-10-20T03:16Z	2	stage-end	-	plan: MD-1 in wave 1
+2026-10-20T03:16Z	3	stage-start	-	wave 1 builder MD-1
