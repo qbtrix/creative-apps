@@ -1,7 +1,6 @@
-// HistoryCommandsTests.swift (autosave-history AH-1 written, AH-6 turns on): `history.read` and `history.jump` on a
+// HistoryCommandsTests.swift (autosave-history AH-1 written, AH-6 turned on): `history.read` and `history.jump` on a
 // test target with a kernel `History`. A read lists every step with the applied count, a jump lands on its index
-// without recording a step, ends the open run, and an index outside the steps throws its sentence. The spec shape
-// check runs now; the rest are disabled by name until AH-6 builds the bodies.
+// without recording a step, ends the open run, and an index outside the steps throws its sentence.
 import Testing
 import SuiteKernel
 
@@ -14,11 +13,10 @@ struct HistoryDoc: HistoryJumping {
         history.record(name, self.value, key: key)
         self.value = value
     }
-    /// The one-line conformance an app writes: the open run ended, then `History.jump(to:)`.
+    /// The one-line conformance an app writes: `History.jumpEndingRun(to:)` over its undo adapter.
     mutating func jumpHistory(to index: Int) throws {
-        history.endRun()
         var current = value
-        history.jump(to: index) { old in defer { current = old }; return current }
+        history.jumpEndingRun(to: index) { old in defer { current = old }; return current }
         value = current
     }
     /// Undoes the last step; false when there is none.
@@ -51,13 +49,13 @@ struct HistoryDoc: HistoryJumping {
         #expect(jump.params.validate(Self.jump(3)).isEmpty)
         #expect(!jump.params.validate(.object([:])).isEmpty)
     }
-    @Test(.disabled("waits on AH-6")) func readListsStepsAndIndex() throws {
+    @Test func readListsStepsAndIndex() throws {
         let catalog = try #require(Self.catalog)
         var doc = Self.doc(undone: 2)
         let listing = try catalog.run("history.read", params: .object([:]), on: &doc).result.decode(HistoryListing.self)
         #expect(listing == HistoryListing(base: "Open", steps: Self.names, index: 3, savedIndex: 0))
     }
-    @Test(.disabled("waits on AH-6")) func savedIndexFollowsSaveAndRollsOff() {
+    @Test func savedIndexFollowsSaveAndRollsOff() {
         var doc = Self.doc()
         doc.history.markSaved()
         #expect(doc.historyListing.savedIndex == 5)
@@ -65,7 +63,7 @@ struct HistoryDoc: HistoryJumping {
         for (n, name) in Self.names.enumerated() { short.set(n + 1, name) }
         #expect(short.historyListing.steps == ["Four", "Five"] && short.historyListing.savedIndex == nil)
     }
-    @Test(.disabled("waits on AH-6")) func jumpRecordsNoStep() throws {
+    @Test func jumpRecordsNoStep() throws {
         let catalog = try #require(Self.catalog)
         var doc = Self.doc(undone: 2)
         let outcome = try catalog.run("history.jump", params: Self.jump(1), on: &doc)
@@ -73,7 +71,7 @@ struct HistoryDoc: HistoryJumping {
         #expect(doc.history.steps == Self.names && doc.history.index == 1 && doc.value == 1)
         #expect(doc.undo() && doc.value == 0)
     }
-    @Test(.disabled("waits on AH-6")) func jumpLandsOnIndex() throws {
+    @Test func jumpLandsOnIndex() throws {
         let catalog = try #require(Self.catalog)
         for index in 0...5 {
             var doc = Self.doc(undone: 2)
@@ -81,7 +79,7 @@ struct HistoryDoc: HistoryJumping {
             #expect(doc.history.index == index && doc.value == index, "\(index)")
         }
     }
-    @Test(.disabled("waits on AH-6")) func outOfRangeThrowsSentence() throws {
+    @Test func outOfRangeThrowsSentence() throws {
         let catalog = try #require(Self.catalog)
         var doc = Self.doc()
         #expect(throws: CatalogError.failed(id: "history.jump", message: "There is no step 6.")) {
@@ -89,13 +87,13 @@ struct HistoryDoc: HistoryJumping {
         }
         #expect(doc.history.index == 5 && doc.value == 5)
     }
-    @Test(.disabled("waits on AH-6")) func noStepsUnavailable() throws {
+    @Test func noStepsUnavailable() throws {
         let catalog = try #require(Self.catalog)
         #expect(catalog.availability("history.jump", on: HistoryDoc()) == .unavailable("There are no steps yet."))
         #expect(catalog.availability("history.jump", on: Self.doc()) == .available)
         #expect(catalog.availability("history.read", on: HistoryDoc()) == .available)
     }
-    @Test(.disabled("waits on AH-6")) func jumpEndsRun() throws {
+    @Test func jumpEndsRun() throws {
         let catalog = try #require(Self.catalog)
         var doc = HistoryDoc()
         doc.set(1, "Move", key: "drag")
