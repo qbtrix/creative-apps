@@ -87,3 +87,5 @@ Next: #3484 (CC-u: CC-9, CC-10) merges through the lane after its macOS build; t
 - 2026-10-20T18:39Z: full CI 39469318877 at d7f615dc replaced while pending; new full CI 39475897385 at 875b44d2 pending, contains every slice; no qualifying run completed yet
 
 - 2026-10-20T18:58Z: full CI 39475897385 at 875b44d2 still pending (queued since 18:34Z, contains every slice); Linux check 39476966994 at 875b44d2 passed (does not count); no qualifying run completed yet
+
+- 2026-10-20T19:18Z: full CI 39475897385 at 875b44d2 still pending (contains every slice merge); scoped: suite 39479908321 at a48992b7 queued (suite scope, not suiteui); no qualifying run completed yet
