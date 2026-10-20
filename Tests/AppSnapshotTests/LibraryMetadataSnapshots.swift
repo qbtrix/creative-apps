@@ -1,6 +1,6 @@
 // LibraryMetadataSnapshots.swift: Library's MetadataInspector for one rated,
-// blue-labelled sample photo, and for three photos with mixed ratings and
-// labels, in Light and Dark. Writes library-metadata-{light,dark}.png and
+// picked, blue-labelled sample photo, and for three photos with mixed ratings,
+// flags and labels, in Light and Dark. Flag is three ChoiceChips (#3637). Writes library-metadata-{light,dark}.png and
 // library-metadata-mixed-{light,dark}.png. At the ideal inspector width the
 // mixed panel is as tall as the single one: "Mixed" never wraps (#1719).
 // macOS only.
@@ -21,22 +21,48 @@ import Testing
         var mixed = one
         one.select(Set(order.prefix(1)))
         one.setRating(4)
+        one.setFlag(.pick)
         one.setLabel(.blue)
         mixed.select(Set(order.prefix(3)))
         mixed.setRating(2)
         mixed.select(Set(order.prefix(1)))
         mixed.setRating(5)
+        mixed.setFlag(.reject)
         mixed.setLabel(.red)
         mixed.select(Set(order.prefix(3)))
         let single = try #require(one.selectedMetadata)
         let several = try #require(mixed.selectedMetadata)
         #expect(single.rating == .value(4) && single.label == .value(.blue))
         #expect(several.rating == .mixed && several.label == .mixed && several.title == "3 Photos")
+        #expect(single.flag == .value(.pick) && several.flag == .mixed)
         for scheme in [ColorScheme.light, .dark] {
             let suffix = scheme == .dark ? "dark" : "light"
             try snapshot(panel(single), name: "library-metadata-\(suffix)", scheme: scheme)
             try snapshot(panel(several), name: "library-metadata-mixed-\(suffix)", scheme: scheme)
         }
+    }
+
+    /// Flag is one chip per PhotoFlag, each with its own identifier; the shared flag's chip is on, none while mixed.
+    @Test func flagIsThreeChips() throws {
+        var catalog = LibraryCatalog()
+        catalog.loadSamples()
+        let order = catalog.sortedItems.map(\.id)
+        catalog.select(Set(order.prefix(1)))
+        catalog.setFlag(.pick)
+        let picked = try #require(catalog.selectedMetadata)
+        catalog.select(Set(order.prefix(2)))
+        let mixed = try #require(catalog.selectedMetadata)
+        let options = MetadataInspector.flagOptions
+        #expect(options.map(\.id) == PhotoFlag.allCases)
+        #expect(options.map(\.title) == ["None", "Pick", "Reject"])
+        #expect(options.map(\.identifier) == PhotoFlag.allCases.map(MetadataInspectorID.flag))
+        #expect(picked.flag.shared == .pick && mixed.flag == .mixed && mixed.flag.shared == nil)
+        // Every chip's title fits its column at the ideal inspector width (one line, no "…").
+        let font = NSFont.systemFont(ofSize: 10, weight: .semibold)
+        let widest = options.map { ($0.title as NSString).size(withAttributes: [.font: font]).width }.max() ?? 0
+        let label = ("Flag" as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 11)]).width
+        let chips = SuiteSize.inspectorWidth.ideal - 4 * SuiteSpacing.m - label - SuiteSpacing.s
+        #expect(widest + 2 * SuiteSpacing.xs <= (chips - 2 * SuiteSpacing.xs) / 3, "a flag chip is too narrow")
     }
 
     @Test func mixedRowsKeepOneLineHeight() throws {

@@ -1,0 +1,316 @@
+{
+  "title": "Orientation and crop on SuiteKernel: rotate 90, flip and a crop whose aspect can swap to portrait, one kernel Crop module (#3117) with Library and Photo adopting, and Photo's Flip Canvas restored",
+  "wave": "XK4",
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 C9 (Library rows 1 and 2, Photo row 7); #3117; feature map suiteui/orientation-crop (new); real jobs RJ-L70, RJ-P70 (new)",
+  "waits_on": "suite-imaging IM-z (Library's DevelopValues.swift, OC-library-m); clipboard-interop CB-z (the canonical-baseline.txt chain, OC-z); photo/transform PT-m and the Library and Photo catalog chains (cross-line)",
+  "depends": [
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "8 (OC-1 → OC-2 → OC-5 → OC-6 → OC-9 → OC-10 → OC-15 → OC-16)",
+  "journeys": [
+    "SuiteCropJourneyTests.testAspectSwapInGallery",
+    "LibraryJourneyTests.testRotateFlipAndPortraitCrop",
+    "PhotoCropJourneyTests.testFlipCanvasAndPortraitCrop"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Crop/Orientation.swift",
+    "Sources/SuiteKernel/Crop/Crop.swift",
+    "Sources/SuiteKernel/Crop/CropCommands.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-crop.json",
+    "Tests/SuiteKernelTests/OrientationTests.swift",
+    "Tests/SuiteKernelTests/CropRulesTests.swift",
+    "Tests/mutations/SuiteKernel.Orientation.json",
+    "Tests/mutations/SuiteKernel.Crop.json",
+    "Sources/SuiteUI/CropAspectPicker.swift",
+    "Sources/SuiteUI/Gallery/GalleryCrop.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Tests/SuiteUITests/CropAspectPickerTests.swift",
+    "UITests/SuiteJourneyTests+Crop.swift",
+    "Tests/AppSnapshotTests/RenderBudgetCropPickerTests.swift",
+    "Tests/LibraryModelTests/LibraryOrientationTests.swift",
+    "Tests/RealJobs/library/stand-up-and-crop/stand-up-and-crop.jobs.json",
+    "Tests/RealJobs/library/stand-up-and-crop/input/sideways.jpg",
+    "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+    "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "Sources/LibraryModel/Live/LiveCrop.swift",
+    "Tests/mutations/LibraryModel.LibraryCrop+Kernel.json",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/library.list-commands.json",
+    "Sources/LibraryApp/LibraryCommands.swift",
+    "Sources/LibraryApp/CropInspector.swift",
+    "Sources/LibraryApp/LibraryGrid.swift",
+    "Tests/command-path-baseline/library.txt",
+    "UITests/LibraryJourneyTests+Crop.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryTests.swift",
+    "Tests/PhotoModelTests/PhotoOrientationTests.swift",
+    "Tests/RealJobs/photo/flip-canvas/flip-canvas.jobs.json",
+    "Tests/RealJobs/photo/flip-canvas/input/two-layers.ora",
+    "Sources/PhotoModel/PhotoOrientation+Kernel.swift",
+    "Sources/PhotoModel/PhotoCrop+Kernel.swift",
+    "Sources/PhotoModel/PhotoImageOps.swift",
+    "Tests/mutations/PhotoModel.PhotoOrientation+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json",
+    "Sources/PhotoApp/PhotoCommands.swift",
+    "Sources/PhotoApp/CropOptions.swift",
+    "Sources/PhotoApp/PhotoIntent.swift",
+    "Tests/command-path-baseline/photo.txt",
+    "UITests/PhotoJourneyTests+Crop.swift",
+    "Tests/AppSnapshotTests/PhotoRenderBudgetTests.swift",
+    "Sources/LibraryModel/LibraryCrop.swift",
+    "Sources/PhotoModel/PhotoCropSize.swift",
+    "docs/blueprints/library/c4-planned.json",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/suiteui/features/orientation-crop.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "OC-a",
+      "behavior": "The kernel declares Orientation, CropFrame, CropAspect with an orientation, the crop rules and the image and crop command specs as stubs, with their tests written and disabled.",
+      "tasks": [
+        "OC-1",
+        "OC-2"
+      ],
+      "journeys": [
+        "MJ-OC"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Crop/Orientation.swift",
+        "Sources/SuiteKernel/Crop/Crop.swift",
+        "Sources/SuiteKernel/Crop/CropCommands.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-crop.json",
+        "Tests/SuiteKernelTests/OrientationTests.swift",
+        "Tests/SuiteKernelTests/CropRulesTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "OC-m",
+      "behavior": "Four right turns are no turn, a turn then a flip equals the matching flip then turn, a 4:5 portrait crop fits a landscape photo at its largest size, and a handle drag keeps the aspect inside the bounds.",
+      "tasks": [
+        "OC-3",
+        "OC-4"
+      ],
+      "journeys": [
+        "MJ-OC"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Crop/Orientation.swift",
+        "Tests/SuiteKernelTests/OrientationTests.swift",
+        "Tests/mutations/SuiteKernel.Orientation.json",
+        "Sources/SuiteKernel/Crop/Crop.swift",
+        "Sources/SuiteKernel/Crop/CropCommands.swift",
+        "Tests/SuiteKernelTests/CropRulesTests.swift",
+        "Tests/mutations/SuiteKernel.Crop.json"
+      ],
+      "waits": {
+        "OC-a": [
+          "OC-3",
+          "OC-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OC-u",
+      "behavior": "SuiteUI has one crop aspect picker with an orientation toggle and a custom ratio, reachable from the gallery on the fakes.",
+      "tasks": [
+        "OC-5",
+        "OC-6"
+      ],
+      "journeys": [
+        "SJ-OC"
+      ],
+      "owned": [
+        "Sources/SuiteUI/CropAspectPicker.swift",
+        "Sources/SuiteUI/Gallery/GalleryCrop.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Tests/SuiteUITests/CropAspectPickerTests.swift",
+        "UITests/SuiteJourneyTests+Crop.swift",
+        "Tests/AppSnapshotTests/RenderBudgetCropPickerTests.swift"
+      ],
+      "waits": {
+        "OC-a": [
+          "OC-5"
+        ],
+        "document-setup:DS-u": [
+          "OC-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "OC-library-m",
+      "behavior": "Library stores a photo's orientation with its develop settings and applies it before the crop in the loupe, thumbnails and export, its crop draft runs on the kernel, and every old catalog opens unchanged.",
+      "tasks": [
+        "OC-7",
+        "OC-8"
+      ],
+      "journeys": [
+        "MJ-OC-library"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryOrientationTests.swift",
+        "Tests/RealJobs/library/stand-up-and-crop/stand-up-and-crop.jobs.json",
+        "Tests/RealJobs/library/stand-up-and-crop/input/sideways.jpg",
+        "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+        "Sources/LibraryModel/Contracts/DevelopValues.swift",
+        "Sources/LibraryModel/Live/LiveCrop.swift",
+        "Tests/mutations/LibraryModel.LibraryCrop+Kernel.json",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/library.list-commands.json"
+      ],
+      "waits": {
+        "OC-a": [
+          "OC-7"
+        ],
+        "OC-m": [
+          "OC-8"
+        ],
+        "suite-imaging:IM-z": [
+          "OC-8"
+        ],
+        "clipboard-interop:CB-library": [
+          "OC-8"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OC-library-u",
+      "behavior": "Library's Photo menu, grid and loupe have Rotate Left and Right and Flip, and its crop inspector uses the shared aspect picker with the orientation toggle and a custom ratio.",
+      "tasks": [
+        "OC-9",
+        "OC-10"
+      ],
+      "journeys": [
+        "LJ-OC"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Sources/LibraryApp/CropInspector.swift",
+        "Sources/LibraryApp/LibraryGrid.swift",
+        "Tests/command-path-baseline/library.txt",
+        "UITests/LibraryJourneyTests+Crop.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryTests.swift"
+      ],
+      "waits": {
+        "OC-u": [
+          "OC-9"
+        ],
+        "OC-library-m": [
+          "OC-9"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "OC-photo-m",
+      "behavior": "Photo flips the whole canvas horizontally or vertically as one undo step with every layer keeping its place, its quarter turns run through the kernel's Orientation, and its crop sizing runs on the kernel's rules.",
+      "tasks": [
+        "OC-11",
+        "OC-12"
+      ],
+      "journeys": [
+        "MJ-OC-photo"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoOrientationTests.swift",
+        "Tests/RealJobs/photo/flip-canvas/flip-canvas.jobs.json",
+        "Tests/RealJobs/photo/flip-canvas/input/two-layers.ora",
+        "Sources/PhotoModel/PhotoOrientation+Kernel.swift",
+        "Sources/PhotoModel/PhotoCrop+Kernel.swift",
+        "Sources/PhotoModel/PhotoImageOps.swift",
+        "Tests/mutations/PhotoModel.PhotoOrientation+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json"
+      ],
+      "waits": {
+        "OC-a": [
+          "OC-11"
+        ],
+        "OC-m": [
+          "OC-12"
+        ],
+        "document-setup:DS-photo": [
+          "OC-12"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OC-photo-u",
+      "behavior": "Photo's Image menu has Flip Canvas Horizontal and Vertical, and its crop options use the shared aspect picker.",
+      "tasks": [
+        "OC-13",
+        "OC-14"
+      ],
+      "journeys": [
+        "PJ-OC"
+      ],
+      "owned": [
+        "Sources/PhotoApp/PhotoCommands.swift",
+        "Sources/PhotoApp/CropOptions.swift",
+        "Sources/PhotoApp/PhotoIntent.swift",
+        "Tests/command-path-baseline/photo.txt",
+        "UITests/PhotoJourneyTests+Crop.swift",
+        "Tests/AppSnapshotTests/PhotoRenderBudgetTests.swift"
+      ],
+      "waits": {
+        "OC-u": [
+          "OC-13"
+        ],
+        "OC-photo-m": [
+          "OC-13"
+        ],
+        "area-selection:AR-photo-u": [
+          "OC-13"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "OC-z",
+      "behavior": "Library's and Photo's crop draft copies are deleted with the baseline shrunk by two lines, #3117 closes, RJ-L70 and RJ-P70 pass, and the feature is built.",
+      "tasks": [
+        "OC-15",
+        "OC-16"
+      ],
+      "journeys": [
+        "MJ-OC",
+        "LJ-OC",
+        "PJ-OC"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCrop.swift",
+        "Sources/PhotoModel/PhotoCropSize.swift",
+        "docs/blueprints/library/c4-planned.json",
+        "Tests/canonical-baseline.txt",
+        "docs/blueprints/suiteui/features/orientation-crop.wave.json"
+      ],
+      "waits": {
+        "OC-library-u": [
+          "OC-15"
+        ],
+        "OC-photo-u": [
+          "OC-15"
+        ],
+        "clipboard-interop:CB-z": [
+          "OC-15"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}
