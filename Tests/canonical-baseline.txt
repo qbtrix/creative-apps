@@ -50,7 +50,6 @@ Sources/LibraryApp/LibraryCropOverlay.swift
 Sources/LibraryApp/LibraryExportSheet.swift
 Sources/LibraryApp/LibraryWindow+Crop.swift
 Sources/LibraryApp/LibraryWindow+Export.swift
-Sources/LibraryModel/CatalogHistory.swift
 Sources/LibraryModel/Contracts/CropLeveling.swift
 Sources/LibraryModel/Contracts/ExportFormats.swift
 Sources/LibraryModel/Contracts/ExportPresets.swift

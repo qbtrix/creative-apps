@@ -1,88 +1,39 @@
-// CatalogHistory.swift: undo and redo for the catalog. Each step is named
-// ("Set Rating", "Exposure") and holds the photos it changed as they were
-// before and after, so undo puts `before` back by id and redo puts `after`
-// back. Steps that share an open coalesce key (one slider drag) stay one step.
-// The catalog's recordEdit, undo and redo extend LibraryCatalog at the end of
-// this file; undo and redo never move the loupe (#426). Linux-safe.
+// LibraryUndoAdapter.swift: undo and redo for the catalog on the kernel's History.
+// Each step is named ("Set Rating", "Exposure") and holds the photos it
+// changed as they were before it; undo puts them back by id and hands the
+// kernel the photos it replaced, which redo puts back. Edits sharing an open
+// coalesce key (one slider drag) stay one step. The 100-step limit is the
+// kernel's. Undo and redo never move the loupe (#426). Linux-safe.
 
-/// The undo and redo stacks of named before-and-after steps.
+import SuiteKernel
+
+/// The catalog's undo history: the kernel's steps of photos before an edit.
 public struct CatalogHistory: Hashable, Sendable {
-    /// One undoable change: the photos it touched, before and after.
-    public struct Step: Hashable, Sendable {
-        /// The menu name, e.g. "Set Rating" in "Undo Set Rating".
-        public let name: String
-        public let before: [PhotoItem]
-        public internal(set) var after: [PhotoItem]
-        /// Pushes with the same key while the history is open join this step.
-        public let coalesceKey: String?
+    public typealias Step = History<[PhotoItem]>.Step
 
-        public init(name: String, before: [PhotoItem], after: [PhotoItem], coalesceKey: String? = nil) {
-            self.name = name
-            self.before = before
-            self.after = after
-            self.coalesceKey = coalesceKey
-        }
-    }
+    /// The kernel's history; each payload is the photos to put back.
+    public internal(set) var kernel = History<[PhotoItem]>(limit: 100)
+    /// True while the top step can still take a coalesced edit.
+    public internal(set) var open = false
+
+    public init() {}
 
     /// Oldest first; the last is the step Undo reverts.
-    public internal(set) var undo: [Step]
+    public var undo: [Step] { kernel.undoSteps }
     /// Oldest undone last; the last is the step Redo reapplies.
-    public internal(set) var redo: [Step]
-    /// True while the top step can still take a coalesced push.
-    public internal(set) var open: Bool
-
-    public init() {
-        undo = []
-        redo = []
-        open = false
-    }
-
+    public var redo: [Step] { kernel.redoSteps }
     /// The step Undo would revert; nil when there is nothing to undo.
-    public var top: Step? { undo.last }
-
+    public var top: Step? { kernel.undoSteps.last }
     /// The step Redo would reapply; nil when there is nothing to redo.
-    public var redoTop: Step? { redo.last }
-
-    /// Records a step and clears redo. When the step's coalesce key matches
-    /// the open top's, the top takes the step's `after` instead.
-    public mutating func push(_ step: Step) {
-        redo = []
-        if open, let key = step.coalesceKey, let last = undo.indices.last, undo[last].coalesceKey == key {
-            undo[last].after = step.after
-        } else {
-            undo.append(step)
-        }
-        open = true
-    }
-
-    /// Ends the current gesture: the next push starts a new step.
-    public mutating func endCoalescing() {
-        open = false
-    }
-
-    /// Moves the top step to redo and returns it; nil when there is none.
-    public mutating func popUndo() -> Step? {
-        open = false
-        guard let step = undo.popLast() else { return nil }
-        redo.append(step)
-        return step
-    }
-
-    /// Moves the last undone step back to undo and returns it; nil when there is none.
-    public mutating func popRedo() -> Step? {
-        open = false
-        guard let step = redo.popLast() else { return nil }
-        undo.append(step)
-        return step
-    }
+    public var redoTop: Step? { kernel.redoSteps.last }
 }
 
 extension LibraryCatalog {
     /// "Undo Set Rating"; nil when there is nothing to undo.
-    public var undoTitle: String? { history.top.map { "Undo " + $0.name } }
+    public var undoTitle: String? { history.kernel.undoName.map { "Undo " + $0 } }
 
     /// "Redo Set Rating"; nil when there is nothing to redo.
-    public var redoTitle: String? { history.redoTop.map { "Redo " + $0.name } }
+    public var redoTitle: String? { history.kernel.redoName.map { "Redo " + $0 } }
 
     /// Applies `edit` to the photos with `ids` and records it as the step
     /// `name`. An edit that changes nothing records nothing. Edits sharing an
@@ -98,7 +49,8 @@ extension LibraryCatalog {
         let after = indices.map { items[$0] }
         guard before != after else { return }
         saveRevision += 1
-        history.push(CatalogHistory.Step(name: name, before: before, after: after, coalesceKey: coalesceKey))
+        history.kernel.record(name, before, key: coalesceKey)
+        history.open = true
         refreshAfterHistoryChange(replacing: before, with: after)
     }
 
@@ -112,19 +64,38 @@ extension LibraryCatalog {
 
     /// Ends the current gesture: the next recorded edit is a new step.
     public mutating func endCoalescing() {
-        history.endCoalescing()
+        history.kernel.endRun()
+        history.open = false
     }
 
     /// Puts the top step's photos back as they were; the loupe stays put.
     public mutating func undo() {
-        guard let step = history.popUndo() else { return }
-        restore(step.before)
+        step { $0.undo($1) }
     }
 
     /// Reapplies the last undone step; the loupe stays put.
     public mutating func redo() {
-        guard let step = history.popRedo() else { return }
-        restore(step.after)
+        step { $0.redo($1) }
+    }
+
+    /// Moves the kernel one step with `move`, then restores the photos it
+    /// handed back. The kernel gets the photos they replace as the opposite
+    /// step; nothing changes when there is no step to move.
+    private mutating func step(
+        _ move: (inout History<[PhotoItem]>, ([PhotoItem]) -> [PhotoItem]) -> Bool
+    ) {
+        var kernel = history.kernel
+        let current = items
+        var applied: [PhotoItem]?
+        let moved = move(&kernel) { photos in
+            applied = photos
+            let ids = Set(photos.map(\.id))
+            return current.filter { ids.contains($0.id) }
+        }
+        guard moved, let applied else { return }
+        history.kernel = kernel
+        history.open = false
+        restore(applied)
     }
 
     /// Replaces each photo by id with its copy in `photos`, then refreshes.

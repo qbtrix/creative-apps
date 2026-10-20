@@ -52,7 +52,7 @@ extension LibraryCatalog {
     /// Ends the gesture: the next edit is a new step. Drops the held thumbnails
     /// of the photos the gesture changed and returns their ids.
     @discardableResult public mutating func endDevelopDrag() -> Set<String> {
-        let ids = history.open ? history.top.map(Self.developChanged) ?? [] : []
+        let ids = history.open ? history.top.map(developChanged) ?? [] : []
         endCoalescing()
         for id in ids { invalidateThumbnail(id) }
         return ids
@@ -92,9 +92,11 @@ extension LibraryCatalog {
         return MetadataValue.of(values)
     }
 
-    /// The ids of the photos whose develop settings `step` changed.
-    private static func developChanged(_ step: CatalogHistory.Step) -> Set<String> {
-        Set(zip(step.before, step.after).filter { $0.develop != $1.develop }.map(\.1.id))
+    /// The ids of the photos whose develop settings differ now from before
+    /// `step`; read while `step` is the open top, so now is its after.
+    private func developChanged(_ step: CatalogHistory.Step) -> Set<String> {
+        let now = Dictionary(items.map { ($0.id, $0.develop) }, uniquingKeysWith: { first, _ in first })
+        return Set(step.payload.filter { now[$0.id] != $0.develop }.map(\.id))
     }
 
     /// `change` on `ids` (every target by default) as ONE step `name` of its
