@@ -110,3 +110,4 @@ utc	stage	event	ref	note
 2026-10-20T10:57:28Z	heartbeat	10:56Z: #3585 needs-rebase merge resolved (C4 desc), gate running; #3587 clean; #3588 clean; #3593 AT-d1 opened; AT-d2 building; earlier scoped photo/suiteui/full runs cancelled
 2026-10-20T11:18:54Z	heartbeat	11:18Z: #3585 clean at a9eca0ed (needs-rebase to drop), #3587/#3588/#3593 clean awaiting lane; scoped runs on 575cc800 still queued; AT-d2 builder in mutate step
 2026-10-20T11:39:10Z	heartbeat	CC-z #3588 merged as 0e1199e9; full CI 39416190119 on it pending (feature-done); scoped suiteui 39411359277 still queued
+2026-10-20T11:59:34Z	heartbeat	no merges since 0e1199e9; #3585/#3587/#3593 open and clean, waiting on queued lane macOS builds; full CI 39416190119 still pending
