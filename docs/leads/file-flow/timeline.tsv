@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-20T21:45Z	3	check	#3514	gate PASS on 9c708ebd, Head marker moved to it; lane mac build 39494113551 still queued; #3731 clean
 2026-10-20T21:55Z	3	check	#3514	mac build 39494113551 still queued (38 runs queued, mac runners busy since 16:01Z); #3731 clean; waiting
 2026-10-20T22:17Z	3	check	#3514	mac build 39494113551 still queued; #3514 and #3731 open (dev moved, mergeability recomputing); waiting
+2026-10-20T22:44Z	3	question	#3480	mac build 39494113551 queued 2h; asked supervisor for a mac slot or Mac-Check for #3514 and #3731
