@@ -58,6 +58,15 @@ semantics; no task reads another product's code.
 Blueprint sections: suiteui.md 2.2 (components), 7.1 (budgets), 7.5 (feel);
 suite.md 1.5 (commands).
 
+**Gap audit C3 (2026-10-21).** Every colour row needs opacity, and a fill needs "none". Two follow-up PRs on this
+feature: the kernel's opt-in no fill (`FillType.none`, `FillType.paints`, `FillSelection.isEmpty`,
+`GradientFillTarget.clearFill` with a refusing default, `fill.read` type "none", the stop and angle commands waiting
+with `GradientCommands.noneHelp`; `FillNoneTests`), and the opacity colour row (`InspectorColorWellRow(_:color:opacity:)`,
+whose typed hex and eyedropper picks keep the opacity; `GradientEditor`'s stop colour uses it; `ColorAlphaTests`).
+`fill.stop-color` also recolours a solid at index 0, alpha kept. Each adopt packet carries the app side as one task
+(DG-9 and DG-10, FG-9, HG-10, PG-9): its colour rows switch to the opacity init, and Design's colour gains alpha and
+its fill can be none.
+
 ## Slices
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |

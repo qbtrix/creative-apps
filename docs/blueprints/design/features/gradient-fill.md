@@ -50,8 +50,8 @@ Blueprint sections: design.md 1 (first cut), 5.4 (`StyleEditing`), 6
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | DG-a | `DesignNode.gradient` exists and saves, `DesignWorkspace` conforms to `GradientFillTarget` as stubs, and the inspector's Fill section shows the switch and the editor on them. | DG-1, DG-2 | MJ-DG | suiteui/gradient-fill GF-a (cross-line) |
-| DG-u | The canvas, text and the PNG and PDF exports paint a node's gradient, and the Fill section's snapshots and render budget hold. | DG-3, DG-6 | DJ-G1 | DG-a; GF-3 (DG-6, cross-line) |
-| DG-m | Every fill command runs on Design's selection as one undo step, and the SVG export writes each gradient with the points the canvas draws. | DG-4, DG-5 | MJ-DG | DG-a; GF-6 and AC-design (DG-4); GF-7 and design-export:DE-s (DG-5) |
+| DG-u | The canvas, text and the PNG and PDF exports paint a node's gradient, and the Fill section's snapshots and render budget hold. | DG-3, DG-6, DG-10 | DJ-G1 | DG-a; GF-3 (DG-6, cross-line) |
+| DG-m | Every fill command runs on Design's selection as one undo step, and the SVG export writes each gradient with the points the canvas draws. | DG-4, DG-5, DG-9 | MJ-DG | DG-a; GF-6 and AC-design (DG-4); GF-7 and design-export:DE-s (DG-5) |
 | DG-z | The journey passes on live services, and the blueprint says gradients are in the first cut. | DG-7, DG-8 | DJ-G1 | DG-u, DG-m; design-export (DG-8) |
 
 DG-a carries the first UI task (DG-2, the Fill section on the stubs), so the screen is reachable once the contract merges; DG-u waits only on DG-a (rule 18) and DG-m never waits on DG-u. MJ-DG is the
@@ -121,6 +121,8 @@ extension DesignNode { public func fill(in frame: Rect) -> Fill }   // solid or 
 | DG-5 | – | SVG gradients; RJ-D13's job folder | `Sources/DesignModel/Live/DesignSVG.swift`, `Tests/DesignModelTests/DesignSVGTests.swift`, `Tests/mutations/DesignModel.DesignSVG.json`, `Tests/RealJobs/design/gradient-angle/gradient-angle.jobs.json`, `Tests/RealJobs/design/gradient-angle/input/background.design` | DG-1, GF-7, design-export:DE-s | ~180, 5 |
 | DG-7 | – | Live: the journey runs on live services and turned on | `UITests/DesignJourneyTests+Gradient.swift` | DG-6, DG-4 | ~60, 1 |
 | DG-8 | – | `design.md` first-cut line and rows; `status: built`; `feature-done` | `docs/blueprints/design.md`, `docs/blueprints/design/features/gradient-fill.wave.json` | DG-7, DG-5, design-export | ~40, 2 |
+| DG-9 | – | `DesignColor` gains alpha (old files open at 1) and `DesignNode.fill` can be none; the adapter reads `FillSelection.isEmpty` and implements `clearFill`, so `fill.type` none empties a node as one step and the switch offers None (gap audit C3) | `Sources/DesignModel/DesignNode.swift`, `Sources/DesignModel/DesignFill+Kernel.swift`, `Tests/DesignModelTests/DesignFillAlphaTests.swift`, `Tests/mutations/DesignModel.DesignNode.json` | DG-1, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~200, 4 |
+| DG-10 | – | Every Design colour row (fill, stroke, frame) switches to `InspectorColorWellRow(_:color:opacity:)`; the canvas paints fill alpha and nothing for none; the PNG and SVG exports keep alpha (`fill-opacity`, `stroke-opacity`) and write `fill="none"` (gap audit C3) | `Sources/DesignApp/DesignInspector.swift`, `Sources/DesignApp/DesignInspectorStyle.swift`, `Sources/DesignApp/DesignCanvasMarks.swift`, `Sources/DesignModel/Live/DesignSVG.swift`, `Tests/mutations/DesignModel.DesignSVG.json`, `Tests/DesignModelTests/DesignSVGAlphaTests.swift`, `Tests/AppSnapshotTests/DesignFillAlphaSnapshots.swift` | DG-9, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~240, 7 |
 
 ## Build waves
 
@@ -129,6 +131,8 @@ extension DesignNode { public func fill(in frame: Rect) -> Fill }   // solid or 
 - Wave 3: DG-6. Independent in this wave: DG-6 alone.
 - Wave 4: DG-7. Independent in this wave: DG-7 alone.
 - Wave 5: DG-8 (shared prose, `feature-done`, final). Independent in this wave: DG-8 alone.
+- With its slice (gap audit C3, added 2026-10-21): DG-9, after DG-1 and the suiteui C3 pull request.
+- With its slice (gap audit C3, added 2026-10-21): DG-10, after DG-9 and the suiteui C3 pull request.
 
 Longest chain: DG-1 → DG-2 → DG-6 → DG-7 → DG-8 (5). Chain of 5: the
 section needs the field, the budget times the section, the journey runs on
@@ -146,6 +150,8 @@ it live, DG-8 is the prose task.
 | DG-5 | `DesignSVGTests`: a 90° gradient writes vertical frame-space points and `fill="url(#g-…)"`; RJ-D13 passes on Linux | the export ignores the angle | `DesignModel.DesignSVG`: unit points written → `.gradientInFrameSpace`; `defs` skipped for text → `.textGradient` |
 | DG-7 | `DesignGradientJourneyTests.testGradientFillAngle` steps 1 to 5 on live | a step fails | – |
 | DG-8 | `scripts/waves render --dry-run` | status not built | – |
+| DG-9 | `DesignFillAlphaTests`: a file without alpha opens at 1; a 50% fill saves and opens at 0.5; `fill.type` none empties the node as one step and undo fills it again; an empty node reads type none | alpha is lost on save, or none takes two steps | `DesignModel.DesignNode`: alpha not encoded → `.alphaRoundTrips`; `DesignModel.DesignFill+Kernel`: `clearFill` not recorded → `.noneIsOneStep` |
+| DG-10 | `DesignSVGAlphaTests`: a 50% red fill writes `fill-opacity="0.5"` and an empty fill writes `fill="none"`; `DesignFillAlphaSnapshots`: a half-clear fill over the checkerboard and an empty node, light and dark | an export drops the alpha or paints an empty node | `DesignModel.DesignSVG`: opacity dropped → `.fillOpacityWritten`; none written as black → `.noneWritesNone` |
 
 ## Quality tests
 

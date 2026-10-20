@@ -37,7 +37,8 @@
     "Sources/PhotoApp/PhotoCanvasOverlay.swift",
     "UITests/PhotoJourneyTests+Gradient.swift",
     "docs/blueprints/photo.md",
-    "docs/blueprints/photo/features/gradient-fill.wave.json"
+    "docs/blueprints/photo/features/gradient-fill.wave.json",
+    "Tests/PhotoModelTests/PhotoToolColorAlphaTests.swift"
   ],
   "slices": [
     {
@@ -70,7 +71,8 @@
       "behavior": "A drag shows its line on the canvas, the options have snapshots and a render budget, and the journey is written.",
       "tasks": [
         "PG-5",
-        "PG-6"
+        "PG-6",
+        "PG-9"
       ],
       "journeys": [
         "PJ-G1"
@@ -86,7 +88,11 @@
         "Tests/AppSnapshotTests/PhotoGradientSnapshots.swift",
         "Tests/AppSnapshotTests/RenderBudgetPhotoGradientTests.swift",
         "Sources/PhotoApp/PhotoCanvasOverlay.swift",
-        "UITests/PhotoJourneyTests+Gradient.swift"
+        "UITests/PhotoJourneyTests+Gradient.swift",
+        "Sources/PhotoApp/PhotoToolOptions.swift",
+        "Sources/PhotoModel/ToolOptions.swift",
+        "Tests/PhotoModelTests/PhotoToolColorAlphaTests.swift",
+        "Tests/mutations/PhotoModel.ToolOptions.json"
       ]
     },
     {

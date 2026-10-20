@@ -42,7 +42,7 @@ list), 8.
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | FG-a | `FlareWorkspace` conforms to `GradientFillTarget` as stubs, the paint readout carries the gradient, and the FILL section shows the switch and the editor on them. | FG-1, FG-2 | MJ-FG | suiteui/gradient-fill GF-a (cross-line) |
-| FG-u | The FILL section's states have snapshots, a stop drag stays in its render budget, and the journey is written. | FG-3, FG-4 | FJ-G1 | FG-a; GF-3 (FG-3, cross-line) |
+| FG-u | The FILL section's states have snapshots, a stop drag stays in its render budget, and the journey is written. | FG-3, FG-4, FG-9 | FJ-G1 | FG-a; GF-3 (FG-3, cross-line) |
 | FG-m | Every fill command runs on the selected shapes as one undo step through the command engine, and the paint readout reads Mixed for differing gradients. | FG-5, FG-6 | MJ-FG | FG-a; key-select-all:KS-a (the catalog); GF-6 and AC-flare (FG-5, cross-line) |
 | FG-z | The FILL section runs on live services, the journey passes on live, and #2315 closes. | FG-7, FG-8 | FJ-G1 | FG-u, FG-m |
 
@@ -103,6 +103,7 @@ public var gradient: FillSelection?   // nil for solid or Mixed; replaces `fillI
 | FG-6 | – | `PaintReadout` reads Mixed for differing gradients; the solid setter turns a gradient solid instead of refusing; `gradientRefusal` deleted | `Sources/FlareModel/FlarePaint.swift`, `Tests/FlareModelTests/FlarePaintGradientTests.swift`, `Tests/mutations/FlareModel.FlarePaint.json` | FG-1 | ~140, 3 |
 | FG-7 | – | Live: the journey turned on, on live services | `UITests/FlareJourneyTests+Gradient.swift` | FG-4, FG-5 | ~40, 1 |
 | FG-8 | – | flare.md: gradient editing leaves the Later list; `status: built`; `feature-done`; `Fixes #2315` | `docs/blueprints/flare.md`, `docs/blueprints/flare/features/gradient-fill.wave.json` | FG-7, FG-6, FG-3 | ~30, 2 |
+| FG-9 | – | The FILL and STROKE colour rows switch to `InspectorColorWellRow(_:color:opacity:)` and the paint setters carry the opacity, so a picked alpha reaches the shape and a typed hex keeps it (gap audit C3) | `Sources/FlareApp/FlareInspectorFill.swift`, `Sources/FlareModel/FlarePaint.swift`, `Tests/FlareModelTests/FlarePaintAlphaTests.swift`, `Tests/mutations/FlareModel.FlarePaint.json` | FG-2, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~160, 4 |
 
 ## Build waves
 
@@ -111,6 +112,7 @@ public var gradient: FillSelection?   // nil for solid or Mixed; replaces `fillI
 - Wave 3: FG-3, FG-4. Independent in this wave: both.
 - Wave 4: FG-7. Independent in this wave: FG-7 alone.
 - Wave 5: FG-8 (shared prose, `feature-done`, final). Independent in this wave: FG-8 alone.
+- With its slice (gap audit C3, added 2026-10-21): FG-9, after FG-2 and the suiteui C3 pull request.
 
 Longest chain: FG-1 → FG-2 → FG-4 → FG-7 → FG-8 (5). Chain of 5: the
 section needs the readout, the journey drives the section, FG-7 turns it on
@@ -128,6 +130,7 @@ live, FG-8 is the prose task.
 | FG-6 | `FlarePaintGradientTests`: two different gradients read Mixed; the same gradient reads it; `setFill(hex:)` on a gradient makes it solid | a readout or the setter is wrong | `FlareModel.FlarePaint`: gradients compared by type only → `.differingGradientsAreMixed`; refusal kept → `.solidReplacesGradient` |
 | FG-7 | `FlareGradientJourneyTests.testEditImportedGradient` steps 1 to 5 | a step fails | – |
 | FG-8 | `scripts/waves render --dry-run` | status not built | – |
+| FG-9 | `FlarePaintAlphaTests`: a fill set at 50% stores alpha 0.5, a hex set after it keeps 0.5, a stroke colour keeps its alpha | the alpha resets to 1 | `FlareModel.FlarePaint`: alpha forced to 1 → `.fillKeepsAlpha`; hex setter drops alpha → `.hexKeepsAlpha` |
 
 ## Quality tests
 

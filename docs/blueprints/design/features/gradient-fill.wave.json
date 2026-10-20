@@ -39,7 +39,12 @@
     "Tests/RealJobs/design/gradient-angle/gradient-angle.jobs.json",
     "Tests/RealJobs/design/gradient-angle/input/background.design",
     "docs/blueprints/design.md",
-    "docs/blueprints/design/features/gradient-fill.wave.json"
+    "docs/blueprints/design/features/gradient-fill.wave.json",
+    "Tests/DesignModelTests/DesignFillAlphaTests.swift",
+    "Tests/mutations/DesignModel.DesignNode.json",
+    "Sources/DesignApp/DesignInspectorStyle.swift",
+    "Tests/DesignModelTests/DesignSVGAlphaTests.swift",
+    "Tests/AppSnapshotTests/DesignFillAlphaSnapshots.swift"
   ],
   "slices": [
     {
@@ -67,7 +72,8 @@
       "behavior": "The canvas, text and the PNG and PDF exports paint a node's gradient, and the Fill section's snapshots and render budget hold.",
       "tasks": [
         "DG-3",
-        "DG-6"
+        "DG-6",
+        "DG-10"
       ],
       "journeys": [
         "DJ-G1"
@@ -85,7 +91,13 @@
         "Tests/AppSnapshotTests/DesignGradientPaintTests.swift",
         "UITests/DesignJourneyTests+Gradient.swift",
         "Tests/AppSnapshotTests/DesignGradientSnapshots.swift",
-        "Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift"
+        "Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift",
+        "Sources/DesignApp/DesignInspector.swift",
+        "Sources/DesignApp/DesignInspectorStyle.swift",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/DesignModelTests/DesignSVGAlphaTests.swift",
+        "Tests/AppSnapshotTests/DesignFillAlphaSnapshots.swift"
       ]
     },
     {
@@ -93,7 +105,8 @@
       "behavior": "Every fill command runs on Design's selection as one undo step, and the SVG export writes each gradient with the points the canvas draws.",
       "tasks": [
         "DG-4",
-        "DG-5"
+        "DG-5",
+        "DG-9"
       ],
       "journeys": [
         "MJ-DG"
@@ -118,7 +131,10 @@
         "Tests/DesignModelTests/DesignSVGTests.swift",
         "Tests/mutations/DesignModel.DesignSVG.json",
         "Tests/RealJobs/design/gradient-angle/gradient-angle.jobs.json",
-        "Tests/RealJobs/design/gradient-angle/input/background.design"
+        "Tests/RealJobs/design/gradient-angle/input/background.design",
+        "Sources/DesignModel/DesignNode.swift",
+        "Tests/DesignModelTests/DesignFillAlphaTests.swift",
+        "Tests/mutations/DesignModel.DesignNode.json"
       ]
     },
     {

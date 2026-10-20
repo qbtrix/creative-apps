@@ -37,7 +37,10 @@
     "Sources/HaloModel/HaloCommandCatalog.swift",
     "Tests/command-ids/halo.txt",
     "docs/blueprints/halo.md",
-    "docs/blueprints/halo/features/gradient-fill.wave.json"
+    "docs/blueprints/halo/features/gradient-fill.wave.json",
+    "Sources/HaloApp/HaloTextInspector.swift",
+    "Tests/HaloModelTests/HaloLayerAlphaTests.swift",
+    "Tests/mutations/HaloModel.HaloLayer.json"
   ],
   "slices": [
     {
@@ -66,7 +69,8 @@
       "tasks": [
         "HG-2",
         "HG-3",
-        "HG-4"
+        "HG-4",
+        "HG-10"
       ],
       "journeys": [
         "HJ-G1"
@@ -87,7 +91,11 @@
         "Sources/HaloApp/HaloLayerInspector.swift",
         "Tests/AppSnapshotTests/HaloGradientSnapshots.swift",
         "Tests/AppSnapshotTests/RenderBudgetHaloGradientTests.swift",
-        "UITests/HaloJourneyTests+Gradient.swift"
+        "UITests/HaloJourneyTests+Gradient.swift",
+        "Sources/HaloApp/HaloTextInspector.swift",
+        "Sources/HaloModel/HaloLayer.swift",
+        "Tests/HaloModelTests/HaloLayerAlphaTests.swift",
+        "Tests/mutations/HaloModel.HaloLayer.json"
       ]
     },
     {
