@@ -96,7 +96,7 @@ extension LibraryCatalog {
     /// `step`; read while `step` is the open top, so now is its after.
     private func developChanged(_ step: CatalogHistory.Step) -> Set<String> {
         let now = Dictionary(items.map { ($0.id, $0.develop) }, uniquingKeysWith: { first, _ in first })
-        return Set(step.payload.filter { now[$0.id] != $0.develop }.map(\.id))
+        return Set(step.photos.filter { now[$0.id] != $0.develop }.map(\.id))
     }
 
     /// `change` on `ids` (every target by default) as ONE step `name` of its
