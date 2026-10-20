@@ -62,10 +62,12 @@ struct PhotoCommandCatalogTests {
     @Test func conformance() throws {
         #expect(PhotoWorkspace.catalog.ids.count == PhotoWorkspace.commands.count)
         let fixture = PhotoLawsDocument(ws: try Self.lawsFixture())
-        // A command unavailable on the fixture (a tool not built yet) refuses its example, as in the other apps' laws.
+        // Only exampleRuns, and only for a command whose availability says why it is off on the fixture (tool.gradient
+        // until PG-3): its example refuses as unavailable, the filter Design's and Library's laws use. Every other law holds.
         let problems = CatalogConformance.check(PhotoLawsDocument.self, fixture: fixture).filter { problem in
             let id = String(problem.prefix { $0 != ":" })
-            return !(problem.contains("exampleRuns") && PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil)
+            let off = PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil
+            return !(off && problem.hasPrefix("\(id): exampleRuns:"))
         }
         #expect(problems == [])
     }
