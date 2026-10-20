@@ -4,7 +4,7 @@ Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
 Run: act-1a15749e569-ngtj (slice AD-library; AD-flare, AD-design, AD-photo, AD-halo done in earlier runs)
 Stage: 3 wave B
 Base: 25a8d9a2 (origin/dev); lead branch rebased on main b3011ab9
-Next: #3396 (AD-l1 + AD-l2 folded, feature-done, head 2bddbead after a 2nd C4-part conflict) waits the lane's macOS build and merge; then a green ci.yml run on dev containing it gives Belt-Slice-Done: AD-library and Belt-Contact-Sheet. Open findings: 0
+Next: #3396 (AD-l1 + AD-l2 folded, feature-done, head 9a69642b after a 3rd C4-part conflict) waits the lane's macOS build and merge; then a green ci.yml run on dev containing it gives Belt-Slice-Done: AD-library and Belt-Contact-Sheet. Open findings: 0
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
