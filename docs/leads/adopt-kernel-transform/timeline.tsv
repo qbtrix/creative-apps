@@ -1,0 +1,99 @@
+utc	stage	event	ref	note
+2026-10-18T08:35Z	0	stage-start	#1938	line lead for #1938 #1937 #1936 (act-1a14dfbdefe-il38); base dev 2202c7c; brief main e01529f verified
+2026-10-18T08:35Z	0	stopped	#1938	blocked: EK-box bodies (EK-20) unmerged; BoxMath and HandleHit on dev are EK-3 stubs
+2026-10-18T08:23Z	0	recheck	#1938	Belt nudge; dev unchanged at 2202c7c, EK-box unmerged, editor-kernel blocked on dev-red #2667
+2026-10-18T08:23Z	0	stopped	#1938	still blocked on EK-box
+2026-10-18T08:54Z	0	recheck	#1938	Belt nudge 2; dev 93b1e91, EK-box still stubs, editor-kernel waiting on lane batch
+2026-10-18T08:54Z	0	stopped	#1938	still blocked on EK-box
+2026-10-18T09:25Z	0	recheck	#1938	Belt nudge 3; dev ed52eaa8; EK-19 tests #2646 merged, so EK-20 (the body this feature needs) is now unblocked for editor-kernel's wave 4
+2026-10-18T09:25Z	0	stopped	#1938	still blocked on EK-box
+2026-10-18T09:56Z	0	recheck	#1938	Belt nudge 4; dev 02c20bfb; EK-19 tests #2646 on dev; EK-20 body not started
+2026-10-18T09:56Z	0	stopped	#1938	still blocked on EK-box bodies
+2026-10-18T10:27Z	0	recheck	#1938	Belt nudge 5; dev a80ed944; EK-20 still planned
+2026-10-18T10:27Z	0	stopped	#1938	still blocked on EK-box bodies
+2026-10-18T11:00Z	0	stage-end	#2711	EK-20 merged; AT-photo, AT-flare unblocked
+2026-10-18T11:00Z	1	stage-end	-	packet read; AT-p1 files widened to LayerContracts/NotBuilt/FakeGeometry
+2026-10-18T11:00Z	2	stage-end	-	wave 1 AT-p1, AT-f1; wave 2 AT-p2, AT-f2; AT-d1 waits AS-design, AL-design
+2026-10-18T11:00Z	3	stage-start	7bd94d21	wave 1 builders AT-p1, AT-f1
+2026-10-18T12:20Z	3	pr-merged	#2755	AT-f1 merged, Mutate 5/5
+2026-10-18T12:20Z	3	pr-merged	#2756	AT-p1 merged, Mutate 5/5
+2026-10-18T13:45Z	3	wave-end	1	wave 1 merged; wave 2 AT-p2, AT-f2 folded (nothing to delete)
+2026-10-18T13:45Z	3	slice-done	AT-flare	https://github.com/qbtrix/creative-apps/actions/runs/39131124501
+2026-10-18T14:30Z	3	slice-done	AT-photo	https://github.com/qbtrix/creative-apps/actions/runs/39132122171
+2026-10-18T15:12Z	3	check	-	no change: AT-design still blocked by design-seams-2
+2026-10-18T15:45Z	3	heartbeat	-	AT-design still blocked on design-seams-2
+2026-10-18T16:08Z	3	heartbeat	-	AT-design still blocked on design-seams-2
+16:32Z	check	heartbeat	-	AT-design still blocked by design-seams-2
+16:53Z	check	heartbeat	-	AT-design still blocked by design-seams-2
+17:16Z	check	heartbeat	-	AT-design still blocked by design-seams-2
+2026-10-18T23:53Z	3	recheck	#1938	run act-1a1516d2305-soy7 resumed; dev b3283d3; AS-design and AL-design still blocked behind design-seams-2; AT-design stays blocked
+2026-10-19T00:27Z	3	heartbeat	db8f8f616470a325522b00fc66052c177414a702	recheck: still blocked (see Open)
+2026-10-19T00:44Z	3	heartbeat	#3056	still blocked (see Open)
+2026-10-19T00:57Z	heartbeat	check: AT-design still waits on AS-design and AL-design
+2026-10-19T01:12Z	heartbeat	check: AT-design still waits on AS-design and AL-design
+2026-10-19T01:33Z	heartbeat	check: AT-design still waits on AS-design and AL-design
+2026-10-19T01:50:41Z	heartbeat	still blocked: AS-design, AL-design blocked
+2026-10-19T02:11:05Z	heartbeat	still blocked: AS-design, AL-design blocked
+2026-10-19T02:30:28Z	heartbeat	still blocked: AS-design, AL-design blocked
+2026-10-19T02:52:47Z	heartbeat	AT-design still waits on AS-design and AL-design
+2026-10-19T03:15:31Z	heartbeat	AT-design still waits on AS-design and AL-design (not on dev)
+2026-10-19T04:03Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev
+2026-10-19T04:34Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev (aed78668); CC-7 #3120 open
+2026-10-19T04:57Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev (bede8342)
+2026-10-19T05:20Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev
+2026-10-19T06:05Z	heartbeat	AS-design and AL-design still not on dev (no Slice: lines); AT-design blocked
+2026-10-19T06:28Z	heartbeat	AS-design and AL-design still not on dev (d4814191); AT-design blocked
+2026-10-19T06:56:53Z	heartbeat	AT-design waits on AS-design and AL-design (not on dev at 977df193)
+2026-10-19T07:23:32Z	heartbeat	AT-design waits on AS-design and AL-design (not on dev at 57d85dfd)
+2026-10-19T07:45:05Z	heartbeat	AT-design waits on AS-design and AL-design (not on dev)
+2026-10-19T08:09:26Z	check	AS-design, AL-design not on dev; AT-design waits
+2026-10-19T08:31:12Z	check	AS-design, AL-design not on dev; AT-design waits
+2026-10-19T08:53:29Z	check	AS-design, AL-design not on dev; AT-design waits
+2026-10-19T09:15:16Z	check	AS-design, AL-design not on dev; AT-design waits
+2026-10-19T09:36:38Z	check	AS-design, AL-design not on dev; AT-design waits
+2026-10-19T09:59:20Z	heartbeat	AT-design waits: FP-a, AS-design, AL-design not on dev
+2026-10-19T10:20:29Z	heartbeat	#3189 #3190 #3207 #3210 wait on macOS builds; AC-p2 building; FP-a/AS-design/AL-design not on dev
+2026-10-19T10:42:02Z	heartbeat	#3189 #3190 #3207 #3210 #3225 wait on macOS builds; FP-a/AS-design/AL-design not on dev
+2026-10-19T11:04:22Z	heartbeat	#3189 #3190 #3207 #3210 #3225 wait on macOS builds (runner backlog); FP-a/AS-design/AL-design not on dev
+2026-10-19T11:27:01Z	heartbeat	5 PRs open on lane macOS builds (AC-l1 build 39220366051 green, awaiting sweep); FP-a/AS-design/AL-design not on dev
+2026-10-19T11:51:41Z	heartbeat	AC-f1/AC-l1/AC-p2 merged; AC-f2, AC-l2 builders running; #3207, #3210 on lane macOS builds; FP-a/AS-design/AL-design not on dev
+2026-10-19T13:01:46Z	stage-start	run act-1a1543c764c-0mz9; AT-design blocked on AS-design, AL-design
+2026-10-19T14:13:33Z	heartbeat	AC-f2 #3255, AC-l2 #3248 opened; #3210, #3207 waiting on the sweep; FP-a/AS-design/AL-design not on dev (955f02d0)
+2026-10-19T15:37:36Z	heartbeat	blocked unchanged (see Stage); checked dev and open PRs
+2026-10-19T15:59:47Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T16:21:41Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T16:43:28Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T17:06:05Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T17:33:45Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T18:12:17Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev (0), open PRs (0)
+2026-10-19T18:35:07Z	heartbeat	Blockers unchanged: FP-a, AS-design, AL-design not on dev, no open PRs.
+2026-10-19T18:56:34Z	heartbeat	Blockers unchanged: FP-a, AS-design, AL-design have no PRs on dev.
+19:18Z	check	still blocked: FP-a, AS-design, AL-design have no PR on dev
+19:41Z	check	still blocked: FP-a, AS-design, AL-design have no PR on dev
+20:02Z	check	still blocked: FP-a, AS-design, AL-design have no PR on dev
+2026-10-19T20:25:51Z	check	Blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T20:39:04Z	check	Blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T20:56:57Z	check	blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T21:16:20Z	check	blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T21:37:46Z	check	AT-design waits on AS-design/AL-design: no PRs on dev yet
+2026-10-19T21:59:37Z	check	AC-z1 #3351 open, lane macOS build 39327075170 queued; no PR yet for FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z
+2026-10-19T22:21:12Z	check	AC-z1 #3351 open, lane macOS build 39327075170 still queued (since 21:23Z); no PR yet for FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z
+2026-10-19T22:43:37Z	check	#3351 open, fast-lane; macOS build 39327075170 in_progress since 22:34Z; no blocker slice PRs on dev
+2026-10-19T23:05:13Z	check	#3351 macOS build 39327075170 success 22:43Z; awaiting lane sweep merge; no blocker slice PRs on dev
+2026-10-19T23:27:42Z	check	AC-z1 #3351 open, macOS build green, awaits lane merge sweep; FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z: no PRs on dev
+2026-10-19T23:48:51Z	check	AC-z1 #3351 merged into dev 23:30Z; blockers FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z: no PRs on dev
+2026-10-20T00:11:00Z	check	heartbeat: no PR on dev yet for FP-a, AS-design, AL-design, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 or CC-z; remaining slices stay blocked
+2026-10-20T00:32:46Z	check	heartbeat: still no PR on dev for any blocker slice; no new green main run since 2026-10-13
+2026-10-20T00:53:42Z	check	heartbeat: no blocker-slice PR on dev; no new green main run
+2026-10-20T01:15:16Z	check	AS-design PR #3385 open (not merged); no PR yet for FP-a/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml still 38363734665 (2026-10-13), no Belt-Slice-Done due
+2026-10-20T01:37:19Z	check	AS-design #3385 and AL-design #3392 open (not merged); no PR yet for FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml still 38363734665 (2026-10-13)
+2026-10-20T01:59:28Z	check	AS-design #3385 merged 01:39Z; AL-design #3392 open; no PR for FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml 38363734665 (2026-10-13); AT-design and AC-z2 still blocked
+2026-10-20T02:21:06Z	check	no change: AL-design #3392 open; AC-z2 deps and FP-a have no PR; latest green main ci.yml 38363734665 (2026-10-13)
+2026-10-20T02:42:39Z	check	no change: AL-design #3392 open (clean); AC-z2 deps and FP-a have no PR; latest green main ci.yml 38363734665 (2026-10-13)
+2026-10-20T03:04:57Z	check	AL-design #3392 open (clean); FP-a, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 and CC-z have no PR; latest green main ci.yml is from 10-13
+2026-10-20T03:26:49Z	check	AL-design #3392 open (clean); FP-a, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 and CC-z have no PR; latest green main ci.yml is from 10-13
+2026-10-20T03:48:11Z	check	AL-design #3392 (lead act-1a154b13dec-71tm) now needs-rebase: conflict in design-model-sources.json c4 part, its lead fixes it; FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z no PR; main green run still 38363734665
+2026-10-20T04:10:13Z	check	AL-design #3392 rebased by its lead (head aeec3b0, clean, needs-rebase dropped), not merged; other blockers no PR; main green run still 38363734665
+2026-10-20T04:32:35Z	check	AL-design #3392 needs-rebase again (04:30Z, head aeec3b0), its lead fixes it; other blockers no PR; main green run still 38363734665
+2026-10-20T04:53:42Z	check	AL-design #3392 rebased again by its lead (head ed7c3c6, clean), not merged; other blockers no PR; main green run still 38363734665
+2026-10-20T05:08:13Z	start	run act-1a157b2050f-ovpu; lead branch rebuilt on main b3011ab; AT-design (AT-d1) starts when adopt-kernel-layers AL-design #3392 merges on dev (open, clean, Head ed7c3c6, waiting on the lane's macOS build); AS-design merged #3385 (2026-10-20T01:39Z). Recheck every heartbeat.
