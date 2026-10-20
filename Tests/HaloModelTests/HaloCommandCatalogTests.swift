@@ -32,7 +32,8 @@ extension HaloProject: HeadlessDocument {
     @Test func oneSpecPerCase() {
         let ids = HaloCommand.allCases.map(\.commandID)
         #expect(ids.count == 58 && Set(ids).count == ids.count)
-        #expect(catalog.ids == ids.sorted() && HaloProject.commandSpecs.map(\.id) == ids)
+        let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
+        #expect(catalog.ids == (ids + shapes).sorted() && HaloProject.commandSpecs.map(\.id) == ids + shapes)
     }
 
     @Test func areaHelpMatches() {
