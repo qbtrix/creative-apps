@@ -42,7 +42,8 @@ extension PhotoWorkspace {
         case .solid: throw GradientDrawError.notAGradient
         }
         guard fill.stops.count >= 2 else { throw GradientDrawError.notAGradient }
-        let region = selection ?? bounds
+        let selected: PixelRect? = selection
+        let region = selected ?? bounds
         guard let area = region.intersection(bounds) else { return }
         let stops = fill.stops.map { stop in
             RasterGradientStop(offset: Float(stop.offset), color: Self.linearLight(stop.color))
@@ -52,7 +53,7 @@ extension PhotoWorkspace {
             from: Mask.Point(x: a.x - Double(area.x), y: a.y - Double(area.y)),
             to: Mask.Point(x: b.x - Double(area.x), y: b.y - Double(area.y)),
             stops: stops, dither: true)
-        editSelection(named: "Gradient", in: region, masked: selection != nil) { x, y, old in
+        editSelection(named: "Gradient", in: region, masked: selected != nil) { x, y, old in
             // Inside `area` by construction: the edit visits only region ∩ the layer.
             guard let g = try? ramp.pixel(x: x - area.x, y: y - area.y) else { return old }
             let k = 1 - g.a
