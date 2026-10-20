@@ -4,7 +4,7 @@ Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 polling
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: DT-a #3751 head 18116b8 (dev merged after DG-a #3687 landed), 397/14, in the lane. Then DT-u (needs DG-u) and DT-m. Critic round: +Kernel inspector name (no maths), Rotate symbols unverified, Select-a-layer wording.
+Next: DT-a #3751 head 18116b8 clean, 397/14, fast-lane, in the lane. DT-u still waits on DG-u (not open or merged yet); DT-m on DG-m and DA-m (#3710 open). Critic round: +Kernel inspector name (no maths), Rotate symbols unverified, Select-a-layer wording.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
