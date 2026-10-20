@@ -4,7 +4,7 @@ Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z (prior runs act-1a14852c11d-65cg, act-1a14fd6514a-4hke, act-1a156b3f640-ytq0)
 Stage: 3 wave 1 of this run (DE-z in the lane, #3684)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: DE-u slice-done once dev CI 39475897385 (875b44d2, carries #3389 and #3391) is green on Linux; DE-z #3684 (head b4c35e57, feature-done) waits on its batch; its CI then the contact sheet
+Next: DE-u critics on the next scoped: design or full run on dev (none yet; macOS queue backed up); DE-z #3684 (head b4c35e57, feature-done) waits on its batch; its CI then the contact sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -124,3 +124,4 @@ Last check: 2026-10-20T00:14:12Z (#1500 closed; DE-u blocked on #1552, EK-chrome
 - Decision: lead/design-export rebuilt from origin/dev plus this record, not rebased on main: main trails dev, and slice PRs target dev (CLAUDE.md, fast lane).
 - Decision: DE-6 + DE-7 come to ~620 lines, over the 400 cap; DE-u ships as a DE-6 PR plus a stacked DE-7 PR when one PR would exceed the cap.
 - Findings queue for design-export: empty at 00:30Z.
+- DE-u merged-done: ci.yml on dev a48992b7 (run 39479914225, Linux green) contains #3389 and #3391; Belt-Slice-Done posted on #1970 (comment 6299503101). Run 39475897385 on 875b44d2 still pending, superseded.

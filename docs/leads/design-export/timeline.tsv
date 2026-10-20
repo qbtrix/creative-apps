@@ -120,3 +120,4 @@ utc	stage	event	ref	note
 2026-10-20T18:42:31Z	stage	run act-1a15a9a4e8b-kn6a starts on dev 875b44d2; DE-u merged (#3389, #3391), DE-z builder next
 2026-10-20T19:07:24Z	check	dev CI 39475897385 still pending (no jobs) at 33 min; DE-u slice-done waits; DE-z builder running (wf w4yvztnfw)
 2026-10-20T19:28:33Z	check	PR	#3684	DE-z opened (DE-10 + DE-11), head b4c35e57, fast-lane + feature-done; CI 39475897385 still pending
+2026-10-20T19:30:54Z	check	slice-done	DE-u	Belt-Slice-Done on #1970 from run 39479914225 (Linux green, dev a48992b7); critics wait for a scoped design run
