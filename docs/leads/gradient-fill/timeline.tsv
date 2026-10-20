@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-20T07:42Z	heartbeat	builds 39379666154/39379693778 still queued; #3526 #3532 clean; blockers GF-2/GF-3/GF-6/AC-flare not on dev
 2026-10-20T08:05Z	heartbeat	builds 39379666154/39379693778 still queued (1h46m); #3526 #3532 clean, no new lane comments; blockers GF-2/GF-3/GF-6/AC-flare not on dev (dev head 83750492)
 2026-10-20T08:26Z	heartbeat	builds still queued (2h07m); flagged stalled macOS runners to the supervisor on #3419; blockers not on dev
+2026-10-20T08:49Z	heartbeat	builds still queued (2h30m); no supervisor reply on #3419 yet; blockers not on dev (dev head be364d1e)
