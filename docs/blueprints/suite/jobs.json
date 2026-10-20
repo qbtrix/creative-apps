@@ -879,6 +879,26 @@
     "waits_on": "EP-1",
     "added_by": "suiteui/adopt-kernel-eyedropper-photo"
   },
+  "RJ-X51": {
+    "id": "RJ-X51",
+    "app": "suite",
+    "weight": "high",
+    "job": "By commands alone, add a drop shadow to a layer, drag its distance in 120 steps, copy the style onto a second layer, undo once, and export a PNG.",
+    "outcome": "After one undo the second layer has no style and the first keeps the last distance; in the PNG the shadow's darkest pixel sits at the shape's edge offset by the distance along the angle (y down) within 1 px, and the shadow is not cut at the layer's bounds.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The 120 steps land as 120 undo steps, the shadow is clipped at the layer's edge, or the angle is read as radians or with y up",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PY-6",
+    "added_by": "suiteui/layer-styles"
+  },
   "RJ-X50": {
     "id": "RJ-X50",
     "app": "suite",
