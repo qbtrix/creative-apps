@@ -308,7 +308,7 @@ struct DesignViewMenu: View {
 /// View > Show History: shows or hides the focused window's History panel (DesignHistoryArea).
 /// With no Design window focused there is no panel to show, so it is off and says why.
 struct DesignShowHistoryItem: View {
-    let panel: DesignHistoryToggle?
+    let panel: DesignHistoryShown?
 
     var body: some View {
         Button(panel?.isShown == true ? "Hide History" : "Show History", systemImage: "clock.arrow.circlepath") {

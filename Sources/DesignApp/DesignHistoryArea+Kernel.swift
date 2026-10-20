@@ -16,21 +16,21 @@ import SuiteUI
 import SwiftUI
 
 /// Whether the focused window's History panel shows, and how to toggle it.
-struct DesignHistoryToggle {
+struct DesignHistoryShown {
     var isShown: Bool
     var toggle: @MainActor () -> Void
 }
 
 /// A plain key rather than `@Entry`, as DesignMenuKey is, so DesignApp builds without the macro plugin.
-private struct DesignHistoryToggleKey: FocusedValueKey {
-    typealias Value = DesignHistoryToggle
+private struct DesignHistoryShownKey: FocusedValueKey {
+    typealias Value = DesignHistoryShown
 }
 
 extension FocusedValues {
     /// The focused Design window's History panel; nil with no Design window focused.
-    var designHistoryPanel: DesignHistoryToggle? {
-        get { self[DesignHistoryToggleKey.self] }
-        set { self[DesignHistoryToggleKey.self] = newValue }
+    var designHistoryPanel: DesignHistoryShown? {
+        get { self[DesignHistoryShownKey.self] }
+        set { self[DesignHistoryShownKey.self] = newValue }
     }
 }
 
@@ -50,7 +50,7 @@ struct DesignHistoryArea: ViewModifier {
             .safeAreaInset(edge: .trailing, spacing: 0) {
                 if isShown { Self.panel(model.historyListing, onJump: jumped) }
             }
-            .focusedSceneValue(\.designHistoryPanel, DesignHistoryToggle(isShown: isShown) { isShown.toggle() })
+            .focusedSceneValue(\.designHistoryPanel, DesignHistoryShown(isShown: isShown) { isShown.toggle() })
             .autosaveRecovery(hooks, folder: nil, delay: 2, edits: model.documentSession.currentToken)
     }
 
