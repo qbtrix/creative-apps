@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-20T20:37Z	PD-a	review	#3454	supervisor: start PD-a now, PL-a stubs (#3578) count as available, seam for DS-a
 2026-10-20T20:37Z	PD-a	stage-start	design/pd-a-placed-image-stubs	builder on PD-1+PD-2, stacks on DG-a only if DesignNode shared
 2026-10-20T20:59Z	PD-a	pr-opened	#3759	head 4ade2ec, 397 lines/11 files own diff, stacked on #3687, touches Package.swift (CoreRaster) so supervisor merges, Mutate 14/14 DesignNode
+2026-10-20T21:00:34Z	poll	heartbeat	#3759	PD-a open, own diff 397/11 over DG-a stack; #3687 open
