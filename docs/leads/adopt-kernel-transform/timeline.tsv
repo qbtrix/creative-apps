@@ -115,3 +115,4 @@ utc	stage	event	ref	note
 2026-10-20T10:36:35Z	heartbeat	#3584 merged; #3392 merged; #3585 build green, awaiting lane; #3587/#3588 builds queued; AT-d1 started
 2026-10-20T10:54:40Z	slice-pr	AT-d1 #3593 opened head f297417d; AT-d2 builder started
 2026-10-20T10:57:32Z	heartbeat	10:56Z: #3585 needs-rebase merge resolved (C4 desc), gate running; #3587 clean; #3588 clean; #3593 AT-d1 opened; AT-d2 building; earlier scoped photo/suiteui/full runs cancelled
+2026-10-20T11:18:57Z	heartbeat	11:18Z: #3585 clean at a9eca0ed (needs-rebase to drop), #3587/#3588/#3593 clean awaiting lane; scoped runs on 575cc800 still queued; AT-d2 builder in mutate step
