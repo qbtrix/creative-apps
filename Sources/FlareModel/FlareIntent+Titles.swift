@@ -90,6 +90,7 @@ extension FlareIntent.Tools {
             case .pen: "Pen"
             case .rectangle: "Rectangle"
             case .ellipse: "Ellipse"
+            case .shape: "Shape"
             }
         case .finishPath: "Finish Path"
         }
