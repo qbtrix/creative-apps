@@ -105,3 +105,5 @@ fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T17:40Z: full CI 39464293440 at 39a1c97e cancelled (replaced while pending); new full CI 39467874733 at 59fe72db pending, contains every slice; no qualifying run completed yet
 
 - 2026-10-20T18:00Z: full CI 39467874733 at 59fe72db cancelled (replaced while pending); new full CI 39469318877 at d7f615dc pending, contains every slice; no qualifying run completed yet
+
+- 2026-10-20T18:19Z: full CI 39469318877 at d7f615dc still pending (queued since 17:48Z, contains every slice); Linux check 39469631014 at d7f615dc passed (does not count); no qualifying run completed yet
