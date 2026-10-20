@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-20T19:29Z	3	heartbeat	-	wave 2 building; waits unchanged (GF-2, GF-5, XP-3, XP-4, SM-w, PP-u, SF-8 #3529 open), poll 2 of 3
 2026-10-20T19:50Z	wait	poll-3 unchanged; rule 23 question	#3470#issuecomment-6300014840	XP-3, XP-4, AX-photo, SM-w not on dev; #3678 open; PX-3 building
 2026-10-20T20:08Z	PX-m	pr-opened	#3729	PX-3 head f1a3bbea, stacked on #3678, Mutate 4/4, CI PASS
+2026-10-20T20:13Z	PX-m	supervisor-answer	#3470	PX-4 parked; no XP-3/XP-4/AX-photo PRs; #3678 #3729 open
