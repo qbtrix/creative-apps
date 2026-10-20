@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-20T05:35:34Z	builder-start	FC-11	stacked on FC-5
 2026-10-20T05:36:00Z	pr-opened	FC-6	#3491 draft, stacked on #3466
 2026-10-20T05:36:00Z	builder-start	FC-13	stacked on FC-5
+2026-10-20T05:58:39Z	pr-opened	FC-11	#3515 draft, stacked on #3466; 3 test files +394
