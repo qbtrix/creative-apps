@@ -124,3 +124,15 @@ extension LibraryCatalog {
         return inLoupe && canStep ? nil : reason("loupe", limit)
     }
 }
+
+extension LibraryCatalog {
+    /// The sizes the grid's Size bar offers, in points, in `cellSizeStep` steps.
+    public static let cellSizeRange = 80...320
+
+    /// The Size bar: `size` snapped to the nearest step from 80, clamped to `cellSizeRange`.
+    public mutating func setCellSize(_ size: Int) {
+        let range = Self.cellSizeRange, clamped = min(max(size, range.lowerBound), range.upperBound)
+        let steps = (Double(clamped - range.lowerBound) / Double(Self.cellSizeStep)).rounded()
+        cellSize = range.lowerBound + Int(steps) * Self.cellSizeStep
+    }
+}

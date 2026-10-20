@@ -3,12 +3,12 @@
 // (the catalog file's problem, the last import's result with its failures
 // and close button, or a refused cull change with its close button:
 // `LibraryCatalog.notice`), then
-// the photo grid (LibraryGrid) under its toolbar row (LibraryGridToolbar),
-// the loupe (LibraryLoupe), or an empty state.
+// the photo grid (LibraryGrid), the loupe (LibraryLoupe), or an empty state.
 // Values in, closures out; LibraryCatalog holds the state. The progress row
 // is SuiteUI's BusyNote (`library.import.progress`, with the import's
 // fraction); the import notice is a plain SwiftUI placeholder until SuiteUI's
 // InlineNotice (#780) lands.
+// The grid has its toolbar row (LibraryGridToolbar) above it.
 import LibraryModel
 import SuiteUI
 import SwiftUI

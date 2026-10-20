@@ -48,9 +48,8 @@ public struct ThumbnailRequest: Hashable, Sendable {
 public struct LibraryCatalog: Sendable, Equatable {
     /// How many of the newest photos Recently Added shows.
     public static let recentLimit = 20
-    /// The thumbnail cell's width step, in points; it stays in `cellSizeRange`.
+    /// The thumbnail cell's width step, in points; it stays in 80...320.
     public static let cellSizeStep = 40
-    public static let cellSizeRange = 80...320
 
     /// The sidebar's built-in rows; your collections follow them.
     static let builtInCollections = [
@@ -183,13 +182,6 @@ public struct LibraryCatalog: Sendable, Equatable {
         let span = (320 - 80) / Self.cellSizeStep
         let clampedSteps = min(max(steps, -span), span)
         cellSize = min(max(cellSize + clampedSteps * Self.cellSizeStep, 80), 320)
-    }
-
-    /// The size slider: `size` snapped to the nearest step from 80, clamped to `cellSizeRange`.
-    public mutating func setCellSize(_ size: Int) {
-        let range = Self.cellSizeRange, clamped = min(max(size, range.lowerBound), range.upperBound)
-        let steps = (Double(clamped - range.lowerBound) / Double(Self.cellSizeStep)).rounded()
-        cellSize = range.lowerBound + Int(steps) * Self.cellSizeStep
     }
 
     /// Applies `edit` to every selected photo, then keeps the counts and the

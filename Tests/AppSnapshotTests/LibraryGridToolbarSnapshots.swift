@@ -5,6 +5,7 @@
 // and the row renders over the samples. CommandPathTests can't see a
 // ToolbarAction, so this is what proves the wiring. Writes
 // library-grid-toolbar-{light,dark}.png. macOS only.
+import Foundation
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -21,10 +22,22 @@ import Testing
         return catalog
     }
 
-    @Test func everyControlIsACatalogCommand() {
+    /// Each listed id is a catalog spec and the row names it; every control call in the file is built `(spec, on:)`.
+    @Test func everyControlIsACatalogCommand() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+                .deletingLastPathComponent().appending(path: "Sources/LibraryApp/LibraryGridToolbar.swift"),
+            encoding: .utf8)
         for id in LibraryGridToolbar.commandIDs {
-            #expect(LibraryGridToolbar.spec(id) != nil, "\(id) isn't in Library's catalog")
+            #expect(LibraryCatalog.catalog.spec(id) != nil, "\(id) isn't in Library's catalog")
+            #expect(source.contains("(\"\(id)\""), "the row doesn't build \(id)")
         }
+        let calls = source.split(separator: "\n").filter {
+            !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//")
+                && ($0.contains("ToolbarAction(") || $0.contains("MenuCommand(") || $0.contains("Button("))
+        }
+        #expect(!calls.isEmpty)
+        for call in calls { #expect(call.contains(", on: "), "built without a spec: \(call)") }
     }
 
     @Test func importAndExportFollowTheirSpecs() {

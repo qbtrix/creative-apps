@@ -45,8 +45,13 @@ struct LibraryGridToolbar: View {
         .accessibilityIdentifier(Self.identifier)
     }
 
-    /// The command spec `id` in Library's catalog.
-    nonisolated static func spec(_ id: String) -> CommandSpec<LibraryCatalog>? { LibraryCatalog.catalog.spec(id) }
+    /// The command spec `id` in Library's catalog, else one that refuses, saying Library has no such command.
+    nonisolated static func spec(_ id: String) -> CommandSpec<LibraryCatalog> {
+        LibraryCatalog.catalog.spec(id) ?? .typed(
+            id, title: id, summary: "Library has no \(id) command.", kind: .view, params: JSONValue.self,
+            example: .object([:]), availability: { _ in .unavailable("Library has no \(id) command.") }
+        ) { _, _ in JSONValue.object([:]) }
+    }
 
     /// view.thumbnail-size: the cell size in its steps, through the window's route.
     private var sizeBar: some View {
@@ -56,26 +61,24 @@ struct LibraryGridToolbar: View {
             step: Double(LibraryCatalog.cellSizeStep), unit: "pt"
         ) { size in menu.view.setCellSize?(Int(size)) }
             .frame(width: SuiteSize.inspectorWidth.ideal)
-            .help(Self.spec("view.thumbnail-size")?.summary ?? "Thumbnail Size")
+            .help(Self.spec("view.thumbnail-size").summary)
             .libraryControl(id: "library.grid.toolbar.size", enabled: true, help: nil)
     }
 
     /// view.sort: one item per order, the current one checked.
-    @ViewBuilder private var sortMenu: some View {
-        if let spec = Self.spec("view.sort") {
-            let why = spec.availability(model).why
-            EditorBarMenu(
-                "Sort: \(model.sort.rawValue)", systemImage: "arrow.up.arrow.down",
-                unavailableHelp: why.map { "\(spec.title): \($0)" }
-            ) {
-                ForEach(LibrarySort.allCases, id: \.self) { sort in
-                    MenuCommand(spec, on: model, title: sort.rawValue, systemImage: sort == model.sort ? "checkmark" : nil) {
-                        menu.view.setSort?(sort)
-                    }
+    private var sortMenu: some View {
+        let spec = Self.spec("view.sort"), why = spec.availability(model).why
+        return EditorBarMenu(
+            "Sort: \(model.sort.rawValue)", systemImage: "arrow.up.arrow.down",
+            unavailableHelp: why.map { "\(spec.title): \($0)" }
+        ) {
+            ForEach(LibrarySort.allCases, id: \.self) { sort in
+                MenuCommand(spec, on: model, title: sort.rawValue, systemImage: sort == model.sort ? "checkmark" : nil) {
+                    menu.view.setSort?(sort)
                 }
             }
-            .libraryControl(id: "library.grid.toolbar.sort", enabled: why == nil, help: why)
         }
+        .libraryControl(id: "library.grid.toolbar.sort", enabled: why == nil, help: why)
     }
 
     /// file.import, through the import area's open panel.
@@ -85,9 +88,6 @@ struct LibraryGridToolbar: View {
     var exportAction: ToolbarAction { action("file.export", "square.and.arrow.up", "library.grid.toolbar.export", menu.export.export) }
 
     private func action(_ id: String, _ symbol: String, _ identifier: String, _ route: LibraryMenu.Action?) -> ToolbarAction {
-        guard let spec = Self.spec(id) else {
-            return ToolbarAction(id, systemImage: symbol, unavailableHelp: "Library has no \(id) command.", identifier: identifier)
-        }
-        return ToolbarAction(spec, on: model, systemImage: symbol, identifier: identifier, perform: route ?? {})
+        ToolbarAction(Self.spec(id), on: model, systemImage: symbol, identifier: identifier, perform: route ?? {})
     }
 }
