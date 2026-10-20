@@ -66,3 +66,9 @@ fast-lane PR opened against `main` to `dev`).
 ## Decisions (run act-1a157b2050f-ovpu)
 - 2026-10-20: AS-design is met (#3385 merged). AL-design #3392 is open and owned by another lead (act-1a154b13dec-71tm); not built here (rule: never copy another lead's slice).
 - PRs target `dev` (CLAUDE.md, the lane).
+
+## 2026-10-20 ~10:45Z: AT-design unblocked, AT-d1 started
+
+- AL-design merged (#3392, dev 6ace17f2), so DesignNode.swift's hand-off is met; AS-design was met by #3385.
+- design-seams-2 (status planned) lists "the beta gap adopts (... transform ...) before S2-a" in its waits_on and owns no active slice on DesignCanvasEditing.swift, so AT-design goes first on that file.
+- AT-d1 builder started on lead/adopt-kernel-transform-AT-d1 (adapter test first, mutation plan DesignModel.KernelTransformAdapter with 2+ planted bugs).
