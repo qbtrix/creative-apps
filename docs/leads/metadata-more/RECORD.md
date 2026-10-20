@@ -1,15 +1,15 @@
 # metadata-more lead record
 
 Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
-Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
+Run: act-1a15ac11868-4kb6 (resumes act-1a15749e510-0ox5) · Session: line lead (library: #1555, #1563, #3478) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: #3465 (head 00f26ebb) and #3473 (head 7e6638e9, dev merged in) ready for the lane; when #3465 merges, merge dev into MD-5 #3492 and un-draft; when #3473 merges, the same for MD-9 #3533, MD-14 #3544, MD-19 #3545 (the second of #3465/#3473 to merge likely gets needs-rebase on the library-model-sources C4 part: keep both clauses); MD-6 #3547, MD-7 #3548, MD-8 #3550 drafts; MD-12 #3569 (draft on MD-9 #3533); MD-11 #3570 (draft on MD-9 #3533); MD-10 #3581 (draft on MD-9 #3533); MD-15 #3574 (draft on MD-14 #3544); MD-16 #3582 (draft on MD-15 #3574); MD-20 #3575 (draft on MD-19 #3545); MD-17 #3579 (draft on MD-15 #3574); MD-21 waits on filters-collections (packet)
+Next: Belt scopes this run to MD-a (MD-b..MD-e were done before it); MD-a is merged-done. Shepherd the open MD PRs: ready #3550 (MD-8), #3570 (MD-11), #3574 (MD-15), #3575 (MD-20) wait on the lane's macOS builds; drafts #3581 (MD-10, blocked on #3520), #3582 (MD-16), #3579 (MD-17) un-draft when their parents merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| MD-a | contract: keywords, title, caption, camera fields, sidecar fake, cameras fixture, slots | MD-1, MD-2, MD-3, MD-4 | MD-MJ1 | cull (built) | no | 0 | building | - | - |
+| MD-a | contract: keywords, title, caption, camera fields, sidecar fake, cameras fixture, slots | MD-1, MD-2, MD-3, MD-4 | MD-MJ1 | cull (built) | no | 0 | merged-done | https://github.com/qbtrix/creative-apps/actions/runs/39479914225 | - |
 | MD-b | Info tab camera details | MD-5, MD-6, MD-7, MD-8 | MD-J1 | MD-a; status-and-layout (built) | yes | 0 | planned | - | - |
 | MD-c | keyword/title/caption edits with undo, persisted | MD-9 .. MD-13 | MD-J2 | MD-a; MD-b; filters-collections (MD-13) | yes | 0 | planned | - | - |
 | MD-d | XMP sidecar writes, originals untouched | MD-14 .. MD-18 | MD-J3 | MD-a; MD-c; filters-collections (MD-18) | yes | 0 | planned | - | - |
@@ -53,6 +53,10 @@ Next: #3465 (head 00f26ebb) and #3473 (head 7e6638e9, dev merged in) ready for t
 - MD-19 (#3545, head 0221a66a): 4 test files, +343, all disabled (MD-20/MD-21/MD-22). Adds a no-op @_disfavoredOverload setSearch(_:) stand-in in LibrarySearchOrderTests that MD-21 must delete. Keyword edits in the order tests use internal recordEdit until MD-10.
 - MD-6 (#3547, head d98a6dcb): own diff 3 files +130/-26, Mutate 8/8 LibraryModel.PhotoDetails. CameraRow.rows(for:) returns no rows (not even Taken) when no photo has camera details, for MD-1's test and MD-J1 step 3. A range whose ends format alike shows one value; 1/n shutter skipped when n is not finite or > 1e6. GitHub shows a conflict with dev until #3492 merges; recheck then.
 - Disk hit 95%: build caches of finished builder worktrees deleted (branches all pushed).
+
+- 19:35Z (act-1a15ac11868-4kb6): MD-a merged-done. MD-4 #3473 merged as 92976e6ac; Linux check run 39479914225 on dev a48992b7c contains it. Posted Belt-Slice-Done on #1555 (comment 6299308121).
+- MD-8 #3550 stays open. #3680 (from #3637) builds only the Flag chips and says MD-8 is the Camera half, so they don't duplicate each other.
+- State at 19:35Z: merged MD-1..MD-7, MD-9, MD-12, MD-14, MD-19. Ready on the lane: MD-8 #3550, MD-11 #3570, MD-15 #3574, MD-20 #3575 (macOS builds queued). Drafts: MD-10 #3581, MD-16 #3582, MD-17 #3579.
 
 ## Open
 - S-L9 #3413 (InspectorTokenRow) and S-L10 #3414 (InspectorTextRow) are soft waits for MD-13. Until they land, those rows use plain SwiftUI placeholders.
