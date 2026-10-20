@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-20T04:16Z	3	gate	HG-6	scripts/ci --changed PASS on hg-6-work 1af5780; #3421 macOS build still queued
 2026-10-20T04:38Z	3	poll	#3421	GF-1 macOS build still queued; no GF-6 or AC-halo PR; HG-a and HG-6 held locally
 2026-10-20T05:01Z	3	poll	#3421	GF-1 macOS build still queued (dev 18464f2); no GF-6 or AC-halo PR; HG-a and HG-6 held locally
+2026-10-20T05:23Z	3	poll	#3421	GF-1 macOS build still queued (dev 6537a1a); no GF-6 or AC-halo PR; HG-a and HG-6 held locally
