@@ -55,11 +55,11 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
 
 @Test func aRunningRenderBlocksASecondButNotRenderFrame() throws {
     var project = try keyed()
-    project.openRenderSheet()
-    #expect(project.startRender(pngHalf) != nil)
+    project.beginRender(pngHalf)
+    #expect(project.startRender() != nil)
     #expect(project.unavailableHelp(for: .openRenderSheet) == "A render is already running.")
     #expect(project.unavailableHelp(for: .startRender(pngHalf)) == "A render is already running.")
-    #expect(project.startRender(pngHalf) == nil)
+    #expect(project.startRender() == nil)
     #expect(project.unavailableHelp(for: .renderFrame) == nil)
     #expect(project.unavailableHelp(for: .cancelRender) == nil)
     #expect(project.unavailableHelp(for: .closeRenderSheet) == "Cancel the render first.")
@@ -69,9 +69,9 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
 
 @Test func anEndedRenderLetsTheNextOneStart() throws {
     var project = try keyed()
-    project.openRenderSheet()
-    _ = project.startRender(pngHalf)
-    project.finishRender(.finished(frames: 48))
+    project.beginRender(pngHalf)
+    _ = project.startRender()
+    project.endRender(.finished(frames: 48))
     #expect(project.unavailableHelp(for: .openRenderSheet) == nil)
     #expect(project.unavailableHelp(for: .startRender(pngHalf)) == nil)
     #expect(project.unavailableHelp(for: .cancelRender) == "The render has already ended.")
@@ -82,7 +82,7 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
     var project = try keyed()
     #expect(project.unavailableHelp(for: .cancelRender) == "No render is open.")
     #expect(project.unavailableHelp(for: .closeRenderSheet) == "No render is open.")
-    project.openRenderSheet()
+    project.beginRender(pngHalf)
     #expect(project.unavailableHelp(for: .cancelRender) == nil)
     #expect(project.unavailableHelp(for: .closeRenderSheet) == nil)
 }
@@ -91,8 +91,8 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
     var services = HaloServices.fake
     services.compositionRendering = HelpCompositionRendering(help: "x")
     var project = try keyed(services)
-    project.openRenderSheet()
-    #expect(project.startRender(pngHalf) == nil)
+    project.beginRender(pngHalf)
+    #expect(project.startRender() == nil)
     #expect(project.renderJob?.outcome != nil)
     #expect(project.unavailableHelp(for: .cancelRender) == nil)
     project.cancelRender()
