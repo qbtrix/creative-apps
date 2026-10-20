@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-20T12:08Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
 2026-10-20T12:23Z	3	mac-build-red	#3531	run 39414594798: GalleryCanvasHost .merging Sendable error; fixer moves registration to SuiteGallery.areas
 2026-10-20T12:35Z	3	fix-pushed	#3531	head 362d749b, CI: PASS; awaiting lane macOS build
+2026-10-20T12:38Z	3	heartbeat	-	lead polling PRs 3531 3541 3597 
