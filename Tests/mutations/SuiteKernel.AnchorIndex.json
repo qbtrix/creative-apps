@@ -1,0 +1,30 @@
+[
+  {
+    "label": "negativeCells: a truncating Int(v / cell) puts -1 in cell 0 beside 1, so negative cells shift",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "return q.isFinite ? Int(q.rounded(.down)) : 0",
+    "replace": "return q.isFinite ? Int(q) : 0",
+    "tests": "AnchorIndexTests"
+  },
+  {
+    "label": "edgeAnchorFound: the last column and row of covered cells are not read",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "let xs = x0...x1, ys = y0...y1",
+    "replace": "let xs = x0..<x1, ys = y0..<y1",
+    "tests": "AnchorIndexTests"
+  },
+  {
+    "label": "handleBeatsAnchorUnderIt: a selected anchor's handle never hits, so the anchor under it wins",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "where: { selected.contains($0.ref) })",
+    "replace": "where: { selected.contains($0.ref) && false })",
+    "tests": "AnchorIndexTests"
+  },
+  {
+    "label": "unselectedHandlesDontHit: every handle hits, selected or not",
+    "file": "Sources/SuiteKernel/Paths/AnchorIndex.swift",
+    "find": "selected.contains($0.ref)",
+    "replace": "true || selected.contains($0.ref)",
+    "tests": "AnchorIndexTests"
+  }
+]

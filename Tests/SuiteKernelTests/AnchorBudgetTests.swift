@@ -6,13 +6,19 @@ import SuiteKernel
     static func ms(runs: Int = 5, _ body: () -> Void) -> Double {
         (0..<runs).map { _ in let d = ContinuousClock().measure(body); return Double(d.components.seconds) * 1e3 + Double(d.components.attoseconds) / 1e15 }.min() ?? .infinity
     }
+    /// The budgets are for a release build (`swift test -c release`); the debug gate runs unoptimized code, so it allows 5 times as long.
+    #if DEBUG
+    static let slack = 5.0
+    #else
+    static let slack = 1.0
+    #endif
     static let page = Rect(minX: 0, minY: 0, maxX: 1100, maxY: 800), tall = Rect(minX: 0, minY: 0, maxX: 1100, maxY: 1600)
     static func index(_ stars: Int = 500) -> AnchorIndex { AnchorIndex(AnchorStressFixture.path(stars: stars), toDocument: .identity) }
     @Test func marqueeMoveAndHoverInBudget() {
         let (index, all) = (Self.index(), Set(Self.index().inside(Self.page)))
-        #expect(all.count == 5_000 && Self.ms(runs: 25) { _ = index.inside(Self.page) } <= 4)
-        #expect(Self.ms(runs: 25) { _ = AnchorIndex(AnchorEdit.moved(AnchorStressFixture.stress, all, dx: 1, dy: 0), toDocument: .identity) } <= 4)
-        #expect(Self.ms(runs: 25) { _ = index.hit(Point(x: 500, y: 300), reach: 4, selected: Selection()) } <= 0.1)
+        #expect(all.count == 5_000 && Self.ms(runs: 25) { _ = index.inside(Self.page) } <= 4 * Self.slack)
+        #expect(Self.ms(runs: 25) { _ = AnchorIndex(AnchorEdit.moved(AnchorStressFixture.stress, all, dx: 1, dy: 0), toDocument: .identity) } <= 4 * Self.slack)
+        #expect(Self.ms(runs: 25) { _ = index.hit(Point(x: 500, y: 300), reach: 4, selected: Selection()) } <= 0.1 * Self.slack)
     }
     @Test func marqueeScales() {
         let (small, big) = (Self.index(), Self.index(1_000))
