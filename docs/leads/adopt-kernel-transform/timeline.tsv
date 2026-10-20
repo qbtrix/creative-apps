@@ -119,3 +119,4 @@ utc	stage	event	ref	note
 2026-10-20T11:27:49Z	stage	AT-d2 built on lead/adopt-kernel-transform-AT-d2 (070f878a), gate PASS, Mutate DesignNode 8/8, LiveTransforming 9/9, KernelTransformAdapter 5/5; PR waits for #3593 to merge
 2026-10-20T11:39:13Z	heartbeat	#3593 AT-d1 open, clean, waiting on lane macOS build; AT-d2 PR waits
 2026-10-20T11:59:38Z	heartbeat	no merges since 0e1199e9; #3585/#3587/#3593 open and clean, waiting on queued lane macOS builds; full CI 39416190119 still pending
+2026-10-20T12:21:43Z	heartbeat	dev still 0e1199e9; #3593 build 39412643506 and #3587 build 39407145335 green, awaiting lane sweep; #3585 macOS build 39413777039 queued; full CI 39416190119 pending
