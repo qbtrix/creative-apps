@@ -67,7 +67,7 @@ extension LibraryJourneyTests {
 
     // MARK: - Steps
 
-    /// Step 1: by name, IMG_0001 in the loupe, the Develop tab, R: the frame
+    /// Step 1: by name, IMG_0001 in the loupe, the Develop tab, the photo clicked, R: the frame
     /// reads the whole photo, the chips, Straighten at 0, Auto, Apply, Cancel,
     /// and Photo's item reads "Done Cropping".
     @MainActor private func cropOpen(_ arguments: [String], suffix: String) -> Journey {
@@ -81,7 +81,7 @@ extension LibraryJourneyTests {
             .matching(NSPredicate(format: "label == 'Develop'")).firstMatch
         XCTAssert(tab.waitForExistence(timeout: 5), "the inspector has no Develop tab")
         tab.click()
-        library.press(character: "r")
+        cropKeyR(library)
         let frame = library.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame (library.crop.frame)")
         library.shot("crop\(suffix)")
@@ -142,7 +142,7 @@ extension LibraryJourneyTests {
     @MainActor private func cropCancelDrag(_ library: Journey) {
         library.press(character: "z", .command)
         XCTAssert(cropWait(5) { abs(self.cropLoupeRatio(library) - 1.5) < 0.01 }, "Undo left \(cropLoupeValue(library))")
-        library.press(character: "r")
+        cropKeyR(library)
         let frame = library.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame")
         let corner = frame.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
@@ -155,7 +155,7 @@ extension LibraryJourneyTests {
 
     /// Step 6: the six chips are one width (±0.5 pt).
     @MainActor private func cropChipWidths(_ library: Journey) {
-        library.press(character: "r")
+        cropKeyR(library)
         XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
         let widths = Self.cropAspects.map { library.element("library.crop.aspect.\($0)").frame.width }
         let spread = (widths.max() ?? 0) - (widths.min() ?? 0)
@@ -165,7 +165,7 @@ extension LibraryJourneyTests {
 
     /// Step 7: on 1:1, Right three times nudges the frame 3 px, Shift-Right 10 more.
     @MainActor private func cropNudge(_ library: Journey) {
-        library.press(character: "r")
+        cropKeyR(library)
         let frame = library.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame")
         library.element("library.crop.aspect.1:1").click()
@@ -179,7 +179,7 @@ extension LibraryJourneyTests {
 
     /// Step 8: Auto turns Straighten to the fake's 2.5; `live` before CR-10, Auto is off with its reason.
     @MainActor private func cropAuto(_ library: Journey, live: Bool) {
-        library.press(character: "r")
+        cropKeyR(library)
         let auto = library.element("library.crop.auto")
         XCTAssert(auto.waitForExistence(timeout: 5), "no Auto (library.crop.auto)")
         if live {
@@ -198,7 +198,7 @@ extension LibraryJourneyTests {
         library.press(.escape)
         cropCell("IMG_0002", library).doubleClick()
         XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "IMG_0002 didn't open in the loupe")
-        library.press(character: "r")
+        cropKeyR(library)
         XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
         library.element("library.crop.aspect.1:1").click()
         library.element("library.loupe.photo").click()
@@ -230,7 +230,7 @@ extension LibraryJourneyTests {
         XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
         first.doubleClick()
         XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "IMG_0001 didn't open in the loupe")
-        library.press(character: "r")
+        cropKeyR(library)
         XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
         cropSquare(library)
         cropStraighten(library, suffix: "-live-again", width: Self.cropLiveWidth)
@@ -255,7 +255,7 @@ extension LibraryJourneyTests {
         cell.doubleClick()
         XCTAssert(again.element("library.loupe").waitForExistence(timeout: 10), "IMG_0001 didn't open in the loupe")
         XCTAssert(cropWait(10) { self.cropLoupeRatio(again) == 1 }, "relaunched, the loupe isn't square: \(cropLoupeValue(again))")
-        again.press(character: "r")
+        cropKeyR(again)
         let frame = again.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame after the relaunch")
         let measured = Self.cropFrameWidth(frame)
@@ -282,6 +282,18 @@ extension LibraryJourneyTests {
     }
 
     // MARK: - Helpers
+
+    /// R with the loupe photo focused: a click on an inspector tab or chip
+    /// takes the keys, and R goes only to the grid or the loupe.
+    @MainActor private func cropKeyR(_ library: Journey) {
+        let photo = library.element("library.loupe.photo")
+        if photo.waitForExistence(timeout: 3), photo.isHittable {
+            photo.click()
+        } else {
+            library.element("library.loupe").click()
+        }
+        library.press(character: "r")
+    }
 
     /// Polls `condition` every tenth of a second for up to `seconds` times `CropRun.slack`.
     @MainActor private func cropWait(_ seconds: TimeInterval, _ condition: () -> Bool) -> Bool {
