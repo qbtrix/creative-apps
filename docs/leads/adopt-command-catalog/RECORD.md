@@ -1,0 +1,71 @@
+# adopt-command-catalog lead record
+
+Issue: #2999 · Packet: docs/blueprints/suiteui/features/adopt-command-catalog.md
+Run: act-1a157b2050f-ovpu (resumed from act-1a1543c764c-0mz9) · Session: claude/feature-lead-suiteui-run-336pic · Started: 2026-10-20T05:08Z
+Stage: 3 wave 4 (AC-flare, AC-library, AC-z listed done by Belt; AC-photo, AC-design, AC-halo wait on CC-u for their menus-from-specs tasks AC-p3, AC-d3, AC-h3)
+Base: b3011ab9dc5579023722e79f83254e6e2520e612 (main); dev 18464f26
+Next: AC-p3, AC-d3, AC-h3 start once command-catalog CC-u (lead/command-catalog-CC-9, building now) merges on dev; recheck every heartbeat.
+
+## Slices
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| AC-photo | Photo actions as catalog commands, PhotoHeadless, menus from specs | AC-p1, AC-p2, AC-p3 | MJ-AC-photo | command-catalog:CC-run; CC-u, CC-lint (AC-p3) | true | 0 | building | – | – |
+| AC-design | Design commands, DesignHeadless, menus from specs | AC-d1, AC-d2, AC-d3 | MJ-AC-design | command-catalog:CC-run; CC-u, CC-lint (AC-d3) | true | 0 | building | – | – |
+| AC-flare | FlareCore's commands and Flare actions, FlareHeadless, menus | AC-f1, AC-f2, AC-f3, AC-f4 | MJ-AC-flare | command-catalog:CC-run; CC-u, CC-lint (AC-f4) | true | 0 | building | – | – |
+| AC-halo | HaloCommand cases, HaloHeadless, menus | AC-h1, AC-h2, AC-h3 | MJ-AC-halo | command-catalog:CC-run; CC-u, CC-lint (AC-h3) | true | 0 | building | – | – |
+| AC-library | Library actions into the Model, catalog, LibraryHeadless, menus | AC-l1, AC-l2, AC-l3, AC-l4 | MJ-AC-library | command-catalog:CC-run; CC-u, CC-lint (AC-l4) | true | 0 | building | – | – |
+| AC-z | all-apps goldens, conformance walk, status built | AC-z1, AC-z2 | MJ-AC-all | every slice above; command-catalog:CC-z (AC-z2) | false | 0 | blocked | – | – |
+
+## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| AC-p1 | AC-photo | 1 | Photo catalog | Sources/PhotoModel/PhotoCommandCatalog.swift | PhotoCommandCatalogTests | #3187 | merged c083b7ad |
+| AC-p2 | AC-photo | 2 | Photo headless | Sources/PhotoModel/PhotoHeadless.swift | PhotoHeadlessTests | #3225 | merged f3936261 |
+| AC-p3 | AC-photo | 2 | Photo menus from specs | Sources/PhotoApp/PhotoCommands*.swift | menu golden | – | blocked |
+| AC-d1 | AC-design | 1 | Design catalog | Sources/DesignModel/DesignCommandCatalog.swift | DesignCommandCatalogTests | #3188 | merged 25f6d337 |
+| AC-d2 | AC-design | 2 | Design headless | Sources/DesignModel/DesignHeadless.swift | DesignHeadlessTests | #3210 | pr a1a332dc |
+| AC-d3 | AC-design | 2 | Design menus from specs | Sources/DesignApp/DesignCommands.swift | menu golden | – | blocked |
+| AC-f1 | AC-flare | 1 | FlareCore commands | Sources/FlareModel/FlareCoreCommandCatalog.swift | FlareCoreCommandCatalogTests | #3189 | merged fbfde9a1 |
+| AC-f2 | AC-flare | 2 | Flare app actions | Sources/FlareModel/FlareCommandCatalog.swift | FlareCommandCatalogTests | – | building |
+| AC-f3 | AC-flare | 3 | Flare headless | Sources/FlareModel/FlareHeadless.swift | FlareHeadlessTests | – | blocked |
+| AC-f4 | AC-flare | 3 | Flare menus from specs | Sources/FlareApp/FlareCommands.swift | menu golden | – | blocked |
+| AC-h1 | AC-halo | 1 | Halo catalog | Sources/HaloModel/HaloCommandCatalog.swift | HaloCommandCatalogTests | #3191 | merged 80c205d5 |
+| AC-h2 | AC-halo | 2 | Halo headless | Sources/HaloModel/HaloHeadless.swift | HaloHeadlessTests | #3207 | pr 98b2db9f |
+| AC-h3 | AC-halo | 2 | Halo menus from specs | Sources/HaloApp/HaloCommands.swift | menu golden | – | blocked |
+| AC-l1 | AC-library | 1 | Library actions into the Model | Sources/LibraryModel/LibraryActions.swift | LibraryActionTests | #3190 | merged ec18f81b |
+| AC-l2 | AC-library | 2 | Library catalog | Sources/LibraryModel/LibraryCommandCatalog.swift | LibraryCommandCatalogTests | – | building |
+| AC-l3 | AC-library | 3 | Library headless | Sources/LibraryModel/LibraryHeadless.swift | LibraryHeadlessTests | – | blocked |
+| AC-l4 | AC-library | 3 | Library menus from specs | Sources/LibraryApp/LibraryMenus.swift | menu golden | – | blocked |
+| AC-z1 | AC-z | 4 | AllAppsCatalogTests | Tests/AfterGlowCLITests/AllAppsCatalogTests.swift | AllAppsCatalogTests | – | blocked |
+| AC-z2 | AC-z | 5 | shared prose, status built, feature-done | docs/blueprints/suiteui.md, adopt-command-catalog.wave.json | waves check | – | blocked |
+
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
+
+## Decisions
+- PRs target `dev` (CLAUDE.md, lead contract rule 4).
+- The whole feature waits on command-catalog's CC-run, which this same run builds; nothing starts before it merges.
+
+## Open
+- CC-run merged (CC-8 671c98e7, 06:31Z); wave 1 started.
+- AC-p2 (#3225): only batch-resize of the two real jobs; the watermark job waits on gap #3219 (place a pasted layer, set opacity; job script posted there). Core PNG/JPEG codecs are stubs at the pin, so CoreRasterImageCodec carries a spec-built PNG reader/writer on core's zlib (drop after the core bump with IC-4/IC-5); JPEG refuses. Also fixes PhotoDocumentFile reopen taking a layer's size as the canvas. batch-resize job ~27 s in debug.
+- AC-d2 (#3210): multi-file export writes out/{stem}/<frame>.svg, an invented rule the CLI real-jobs harness (CL-7/CL-9) must adopt or replace; tests carry a small SHA-256 (none on Linux Foundation); PNG export waits on a Linux PNG writer. AC-d3 can replace DesignCatalogDoc in DesignCommandCatalogTests with DesignHeadless. Same stub-test edits as #3207.
+- AC-h2 (#3207): CommandSpec.run is internal, so headless docs rewrap specs (HaloHeadless.lifted); a kernel CommandCatalog.lifted helper would remove it (gap candidate). PNG.write unsupported at pinned core until IC-5. RealJobs.check still the CL-9 stub. Stub tests CommandFakeTests/CLIStubTests now skip built apps. Halo window file commands (save, open, open-recent, start-render) still notBuilt: AC-h3.
+- The real jobs depend on afterglow-cli CL-jobs (#2998). Photo and Library Linux PNG depend on creative-core image-codecs #562.
+- AC-p1 (#3187): CommandSpec has one title (= undo name); menu labels live in PhotoWorkspace.menuTitle(_:). AC-p3 must use it, or a kernel display-title field gets filed for CC-u.
+- AC-d1 (#3188): AC-d3 hand-offs: alignHelps differs from help(.align) (catalog uses help); Rename Page has no menu item; page.rename now off during text edit; Copy/Cut/Paste/Move Layer are not DesignCommands, so not in the catalog.
+- AC-f1 (#3189): registry has 68 ids (not 63); FlareCore ids kebab-cased for the catalog (layer.setFlags -> layer.set-flags); 37 layer commands use a hand schema table (probe cannot see flattened owner); shapeKey.set/remove unavailable (unbuilt in core).
+- AC-l1 (#3190): LibraryCommands.swift still duplicates the disabled-item reasons; AC-l4 builds menus from help(_:) and drops the copy.
+- AC-h1 (#3191): conformance skips with reasons: playhead saved in the file (scrub/next-frame change bytes), step names follow the payload, no-op edits stay enabled, duplicate keeps the id counter, ~15 examples need a richer fixture; file commands and render.start wait on AC-h2.
+
+## Decisions (run act-1a1543c764c-0mz9)
+- 2026-10-19T13:01:46Z: Belt's brief lists AC-photo/design/flare/halo/library as done, but no slice has a Belt-Slice-Done line on #2999: AC-d2 #3210 and AC-h2 #3207 are open (macOS builds 39231785889, 39229979032 green), AC-f2/AC-l2 never opened a PR, and AC-*3/AC-*4 are unbuilt. Working the real state: AC-f2 and AC-l2 rebuilt now; no Belt-Slice-Done until a slice's tasks are merged and a run proves it.
+- 2026-10-19T13:01:46Z: lead branches rebased on main 6f9a2b88 (shallow clone unshallowed first).
+- 2026-10-19 AC-f2 #3255: Flare catalog with 99 ledger ids. Left out to stay under 400 lines: scenes.select, Finish Path, Export, Close, the per-file Open Recent items, View, Symbol, keyframe and timeline commands. These ride AC-f4 (menus), or become gap issues at AC-z. Core ids are ledgered, not conformance-checked, because no single fixture runs all 63.
+- 2026-10-19 AC-l2 #3248: Library catalog. Import Folder and Export are left out because Library has no Model runner for them yet. Develop and crop menu reasons stay as today's menu text; the more specific Model help strings are a later choice for AC-l4.
+- 2026-10-19 Builder PR bodies picked up a session footer, and a REST edit can't remove it because the server re-appends it. The lane strips it from the squash, and the commits are clean (author Prakash Dalai, no trailers).
+
+## Decisions (run act-1a157b2050f-ovpu)
+- 2026-10-20: command-catalog CC-u unchained from font-picker FP-a (see command-catalog RECORD), so AC-*3 now wait only on CC-u, which is building.
+- PRs target `dev` (CLAUDE.md, the lane).

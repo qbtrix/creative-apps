@@ -1,0 +1,92 @@
+utc	stage	event	ref	note
+2026-10-18T23:53Z	0	stage-start	#2999	line lead act-1a1516d2305-soy7; base dev b3283d3
+2026-10-18T23:53Z	2	blocked	#2999	waits on command-catalog:CC-run
+2026-10-19T00:27Z	3	heartbeat	db8f8f616470a325522b00fc66052c177414a702	recheck: still blocked (see Open)
+2026-10-19T00:44Z	3	heartbeat	#3056	still blocked (see Open)
+2026-10-19T00:57Z	heartbeat	check: all tasks still wait on command-catalog:CC-run
+2026-10-19T01:12Z	heartbeat	check: CC-1 merged; tasks still wait on command-catalog:CC-run
+2026-10-19T01:33Z	heartbeat	check: tasks still wait on command-catalog:CC-run
+2026-10-19T01:50:41Z	heartbeat	still blocked: CC-run (CC-6/7/8) in progress
+2026-10-19T02:11:05Z	heartbeat	still blocked: CC-run (CC-6/7/8) in progress
+2026-10-19T02:30:28Z	heartbeat	still blocked: CC-run (CC-6/7/8) in progress
+2026-10-19T02:52:47Z	heartbeat	all slices still blocked on command-catalog CC-run (CC-6\/7\/8); CC-6 built, waiting on #3074
+2026-10-19T03:15:31Z	heartbeat	still blocked on CC-run; CC-2 merged, CC-6 gating, CC-7\/CC-8 building
+2026-10-19T04:03Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev
+2026-10-19T04:34Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev (aed78668); CC-7 #3120 open
+2026-10-19T04:57Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev (bede8342)
+2026-10-19T05:20Z	heartbeat	still blocked; no FP-a, AS-design or AL-design on dev
+2026-10-19T06:05Z	heartbeat	CC-6 and CC-7 merged; CC-8 open as #3156; wave 1 starts once it merges
+2026-10-19T06:28Z	heartbeat	waits on CC-run: CC-8 #3156 in the lane's macOS build
+2026-10-19T06:55:48Z	wave	wave 1 started: AC-p1 AC-d1 AC-f1 AC-h1 AC-l1 (CC-run merged)
+2026-10-19T07:23:32Z	heartbeat	wave 1 building: AC-p1 AC-d1 AC-f1 AC-h1 AC-l1, no PRs yet
+2026-10-19T07:45:05Z	heartbeat	wave 1 builders still building/gating, no PRs yet
+2026-10-19T07:50:19Z	pr	AC-p1 #3187 opened (head 66763484, mutate 2/2)
+2026-10-19T07:51:15Z	pr	AC-d1 #3188 opened (head ff78578f, mutate 2/2)
+2026-10-19T07:52:17Z	pr	AC-f1 #3189 opened (head 69197cd4, mutate 4/4)
+2026-10-19T07:53:44Z	pr	AC-l1 #3190 opened (head 8dc01bc1, mutate 4/4)
+2026-10-19T07:55:58Z	pr	AC-h1 #3191 opened (head 140a63ee, mutate 2/2); wave 1 all PRs open
+2026-10-19T08:09:26Z	check	#3188 needs-rebase: merged dev, c4 part resolved, gate running; others open in lane
+2026-10-19T08:17:47Z	fix	#3188 needs-rebase resolved: merged dev at 0fa1f1e8, gate PASS, Head moved
+2026-10-19T08:31:12Z	check	wave-1 #3187-#3191 open in lane, no flags; #3188 needs-rebase cleared
+2026-10-19T08:53:29Z	check	AC-h1 #3191 merged 80c205d5; AC-h2 builder launched; AC-h3 waits on CC-u, CC-lint
+2026-10-19T09:15:16Z	check	AC-d1 #3188 merged 25f6d337; AC-d2 builder launched; AC-d3 waits on CC-u, CC-lint
+2026-10-19T09:19:17Z	pr	AC-h2 #3207 open, head 98b2db9f, mutate 4/4
+2026-10-19T09:36:38Z	check	#3187, #3189, #3190 wait on queued macOS builds (runner backlog); #3207 open; AC-d2 building
+2026-10-19T09:37:12Z	pr	AC-d2 #3210 open, head a1a332dc, mutate 3/3
+2026-10-19T09:59:20Z	check	AC-p1 #3187 merged c083b7ad; AC-p2 builder launched. #3189 #3190 #3207 #3210 open, macOS builds queued
+2026-10-19T10:20:29Z	heartbeat	#3189 #3190 #3207 #3210 wait on macOS builds; AC-p2 building; FP-a/AS-design/AL-design not on dev
+2026-10-19T10:34:16Z	pr	AC-p2 #3225 head 9febc742, mutate 3/3, 15 files +371/-19; watermark job deferred to gap #3219
+2026-10-19T10:42:02Z	heartbeat	#3189 #3190 #3207 #3210 #3225 wait on macOS builds; FP-a/AS-design/AL-design not on dev
+2026-10-19T11:04:22Z	heartbeat	#3189 #3190 #3207 #3210 #3225 wait on macOS builds (runner backlog); FP-a/AS-design/AL-design not on dev
+2026-10-19T11:27:01Z	heartbeat	5 PRs open on lane macOS builds (AC-l1 build 39220366051 green, awaiting sweep); FP-a/AS-design/AL-design not on dev
+2026-10-19T11:51:09Z	merged	AC-f1 #3189 fbfde9a1, AC-l1 #3190 ec18f81b, AC-p2 #3225 f3936261; wave-2 AC-f2, AC-l2 building
+2026-10-19T11:51:41Z	heartbeat	AC-f1/AC-l1/AC-p2 merged; AC-f2, AC-l2 builders running; #3207, #3210 on lane macOS builds; FP-a/AS-design/AL-design not on dev
+2026-10-19T13:01:46Z	stage-start	run act-1a1543c764c-0mz9 on main 6f9a2b88; AC-f2, AC-l2 builders launched; #3210, #3207 builds green
+2026-10-19T14:13:33Z	pr-opened	AC-f2 #3255 020e2d4a, AC-l2 #3248 45fba795 (lane macOS builds dispatched); FP-a/AS-design/AL-design not on dev (955f02d0)
+2026-10-19T14:14:26Z	wave-start	wave 3: AC-f3 stacked on #3255, AC-l3 stacked on #3248 (builders launched)
+2026-10-19T15:37:36Z	pr-opened	AC-f3 #3280 4eaf5309 (base #3255), AC-l3 #3275 (base #3248)
+2026-10-19T15:37:36Z	fix-round	round 1: #3210 AC-d2 export-frames-svg job refused; #3207 AC-h2 render-frame PNG.write unsupported on Linux; fixers launched
+2026-10-19T15:59:47Z	heartbeat	#3255 #3248 macOS builds green, waiting on lane batch; fix round 1 on #3210 #3207 and RealJobs check on #3280 #3275 still running
+2026-10-19T16:09:03Z	check	#3280 RealJobs 9/9 + CI PASS on dev merge (no change, 4eaf5309); #3275 macOS skip-reason prefix fixed, head c26b694f, RealJobs 9/9, mutants 5/5, CI PASS
+2026-10-19T16:11:40Z	fix-pushed	#3207 AC-h2 round 1: HaloFramePNG fallback writer while core PNG.write waits on IC-5 (same as Photo CoreRasterImageCodec), head f43ba7eb, 393 lines, mutants 4/4+3/3, CI PASS
+2026-10-19T16:21:41Z	heartbeat	#3255 #3248 #3207 builds green, lane runs queued (runner backlog); #3210 fixer still running; #3280 #3275 RealJobs green
+2026-10-19T16:43:28Z	heartbeat	lane run in progress, #3255 #3248 #3207 green and waiting on it; #3210 fixer still running
+2026-10-19T17:06:05Z	merged	AC-l2 #3248 merged to dev; merging dev into AC-l3 #3275 (C4 part conflict, kept the superset) and gating before retarget; #3210 fixer still running
+2026-10-19T17:12:37Z	retarget	AC-l3 #3275 retargeted to dev, head fd5e6238 (dev merged, CI PASS 650, RealJobs 9/9)
+2026-10-19T17:33:45Z	merged	AC-f2 #3255 and AC-h2 #3207 merged to dev; merging dev into AC-f3 #3280 and gating before retarget; #3275 on lane; #3210 fixer still running
+2026-10-19T17:39:58Z	retarget	AC-f3 #3280 retargeted to dev, head b9b6df38 (dev merged, CI PASS 953, RealJobs 9/9)
+2026-10-19T18:12:17Z	heartbeat	#3275 fd5e6238 and #3280 b9b6df38 on dev, waiting on lane macOS builds; #3210 AC-d2 fix round 1 still in progress (job fixture and test reworked, not pushed); AC-z1 after #3210 #3275 #3280 merge
+2026-10-19T18:35:07Z	check	AC-d2 fixer stalled since 15:54 waiting on a finished gate run; stopped it, lead finishes fix round 1 in its worktree. #3275/#3280 clean, waiting on the lane.
+2026-10-19T18:38:25Z	fix-pushed	#3210 AC-d2 fix round 1 at 7d08ae5a: export-frames-svg job gets a page.select step (the CLI refused a stepless job). RealJobs pass, CI PASS 1006 tests, mutate 3/3. Head moved.
+2026-10-19T18:56:34Z	merged	AC-l3 #3275 merged by the lane. #3210 needs-fix dropped on 7d08ae5a; #3280 waiting on the lane.
+19:18Z	check	#3280 macOS build green; #3210 build queued; FP-a, AS-design, AL-design still have no PR
+19:41Z	wave	#3280 AC-f3 merged 19:29Z; AC-z1 builder started on lead/adopt-command-catalog-AC-z1 stacked on AC-d2
+19:55Z	build	AC-z1 pushed cf823dd5, gate pass, mutate 4/4; PR held until #3210 merges (diff vs dev is 16 files with AC-d2)
+20:02Z	check	#3210 macOS build still queued (21 runs queued repo-wide, 2 running); AC-z1 PR held until #3210 merges
+2026-10-19T20:25:46Z	check	#3210 macOS build run 39304884033 succeeded; awaiting lane sweep merge. FP-a/AS-design/AL-design still absent on dev
+2026-10-19T20:38:58Z	check	#3210 build green, waiting on next lane sweep (last lane run 19:40Z). FP-a/AS-design/AL-design still absent on dev
+2026-10-19T20:56:52Z	check	#3210 still open (build green, clean, fast-lane; lane run 20:43Z skipped, next sweep pending). AC-z1 PR held. FP-a/AS-design/AL-design absent on dev
+2026-10-19T21:16:14Z	check	#3210 AC-d2 merged 21:11Z. AC-z1 merged with dev (clean), gate running. FP-a/AS-design/AL-design absent on dev
+2026-10-19T21:22:12Z	pr	AC-z1 opened as #3351 at 5b610287 (dev merged in, CI: PASS, RealJobsTests pass)
+2026-10-19T21:37:41Z	check	AC-z1 #3351 open, footer stripped from body, lane macOS build dispatched on 5b61028; AC-z2 still waits on AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z
+2026-10-19T21:59:32Z	check	AC-z1 #3351 open, lane macOS build 39327075170 queued; no PR yet for FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z
+2026-10-19T22:21:07Z	check	AC-z1 #3351 open, lane macOS build 39327075170 still queued (since 21:23Z); no PR yet for FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z
+2026-10-19T22:43:31Z	check	#3351 open, fast-lane; macOS build 39327075170 in_progress since 22:34Z; no blocker slice PRs on dev
+2026-10-19T23:05:08Z	check	#3351 macOS build 39327075170 success 22:43Z; awaiting lane sweep merge; no blocker slice PRs on dev
+2026-10-19T23:27:37Z	check	AC-z1 #3351 open, macOS build green, awaits lane merge sweep; FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z: no PRs on dev
+2026-10-19T23:48:46Z	check	AC-z1 #3351 merged into dev 23:30Z; blockers FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z: no PRs on dev
+2026-10-20T00:10:55Z	check	heartbeat: no PR on dev yet for FP-a, AS-design, AL-design, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 or CC-z; remaining slices stay blocked
+2026-10-20T00:32:40Z	check	heartbeat: still no PR on dev for any blocker slice; no new green main run since 2026-10-13
+2026-10-20T00:53:37Z	check	heartbeat: no blocker-slice PR on dev; no new green main run
+2026-10-20T01:15:07Z	check	AS-design PR #3385 open (not merged); no PR yet for FP-a/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml still 38363734665 (2026-10-13), no Belt-Slice-Done due
+2026-10-20T01:37:14Z	check	AS-design #3385 and AL-design #3392 open (not merged); no PR yet for FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml still 38363734665 (2026-10-13)
+2026-10-20T01:59:23Z	check	AS-design #3385 merged 01:39Z; AL-design #3392 open; no PR for FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml 38363734665 (2026-10-13); AT-design and AC-z2 still blocked
+2026-10-20T02:20:57Z	check	no change: AL-design #3392 open; AC-z2 deps and FP-a have no PR; latest green main ci.yml 38363734665 (2026-10-13)
+2026-10-20T02:42:33Z	check	no change: AL-design #3392 open (clean); AC-z2 deps and FP-a have no PR; latest green main ci.yml 38363734665 (2026-10-13)
+2026-10-20T03:04:47Z	check	AL-design #3392 open (clean); FP-a, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 and CC-z have no PR; latest green main ci.yml is from 10-13
+2026-10-20T03:26:43Z	check	AL-design #3392 open (clean); FP-a, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 and CC-z have no PR; latest green main ci.yml is from 10-13
+2026-10-20T03:48:07Z	check	AL-design #3392 (lead act-1a154b13dec-71tm) now needs-rebase: conflict in design-model-sources.json c4 part, its lead fixes it; FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z no PR; main green run still 38363734665
+2026-10-20T04:10:08Z	check	AL-design #3392 rebased by its lead (head aeec3b0, clean, needs-rebase dropped), not merged; other blockers no PR; main green run still 38363734665
+2026-10-20T04:32:26Z	check	AL-design #3392 needs-rebase again (04:30Z, head aeec3b0), its lead fixes it; other blockers no PR; main green run still 38363734665
+2026-10-20T04:53:33Z	check	AL-design #3392 rebased again by its lead (head ed7c3c6, clean), not merged; other blockers no PR; main green run still 38363734665
+2026-10-20T05:08:13Z	start	run act-1a157b2050f-ovpu; lead branch rebuilt on main b3011ab; AC-p3, AC-d3, AC-h3 start once command-catalog CC-u (lead/command-catalog-CC-9, building now) merges on dev; recheck every heartbeat.
