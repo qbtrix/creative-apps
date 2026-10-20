@@ -197,3 +197,4 @@ utc	stage	event	ref	note
 2026-10-20T09:30Z	heartbeat	#1705 verify: full 39395505274 (be364d1e) macOS still queued; also watching scoped halo 39399205335 (d9bc0337)
 2026-10-20T09:54Z	heartbeat	#1705: full 39395505274 cancelled; tracking scoped halo 39399205335 and full 39402653640 (queued, macOS backlog)
 2026-10-20T10:17Z	heartbeat	#1705: scoped halo 39399205335 and full 39402653640 still queued for macOS runners
+2026-10-20T10:38Z	heartbeat	#1705: scoped halo 39399205335 and full 39402653640 still queued; also tracking new full 39409307241 (a54a892a, contains e50f30b3)
