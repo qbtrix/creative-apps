@@ -17,6 +17,7 @@ struct DesignSampleLoupe: View {
     let store = DesignCanvasHover.current
     #if DEBUG
     /// How many times the overlay's body ran: once per pointer sample that moved the loupe.
+    // view-static: main-actor
     static var bodyRuns = 0
     #endif
 
@@ -41,7 +42,7 @@ struct DesignSampleLoupe: View {
     }
 
     /// Where the loupe draws on the artboard at `zoom`.
-    static func place(_ loupe: DesignLoupe, zoom: Double) -> CGPoint {
+    nonisolated static func place(_ loupe: DesignLoupe, zoom: Double) -> CGPoint {
         let scale = usable(zoom)
         return CGPoint(x: loupe.point.x * scale, y: loupe.point.y * scale)
     }
