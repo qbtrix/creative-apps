@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-20T13:00:54Z	3	poll	dev 897ccbb2: no prerequisites on dev yet
 2026-10-20T13:18:25Z	3	poll	dev f729e906: SM-a not on dev, XP-2 and XP-7 wait
 2026-10-20T13:29:45Z	3	poll	dev f729e906 unchanged: SM-a not on dev
+2026-10-20T13:41:11Z	3	poll	dev f729e906 unchanged: SM-a not on dev
