@@ -114,3 +114,4 @@ utc	stage	event	ref	note
 2026-10-20T11:09:53Z	stage	AC-d3 #3585 needs-rebase fixed: dev merged (C4 desc conflict kept both clauses), gate PASS, pushed a9eca0ed, Head moved; mergeable clean
 2026-10-20T11:18:50Z	heartbeat	11:18Z: #3585 clean at a9eca0ed (needs-rebase to drop), #3587/#3588/#3593 clean awaiting lane; scoped runs on 575cc800 still queued; AT-d2 builder in mutate step
 2026-10-20T11:39:05Z	heartbeat	#3585 and #3587 open, clean, macOS builds queued (39413777039 for #3585); AC-z2 waits
+2026-10-20T11:59:30Z	heartbeat	no merges since 0e1199e9; #3585/#3587/#3593 open and clean, waiting on queued lane macOS builds; full CI 39416190119 still pending
