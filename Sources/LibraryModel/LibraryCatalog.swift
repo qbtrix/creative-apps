@@ -2,7 +2,9 @@
 // with counts, the grid's sort, cell size and selection, and the browse mode.
 // Linux-safe; LibraryApp changes it only through the Model's methods. Invariants:
 // counts follow `items`; ids in `items` are unique; the selection holds only ids
-// the collection shows, and the loupe only a photo it shows.
+// the collection shows, and the loupe only a photo it shows. The selection is
+// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift).
+import SuiteKernel
 
 /// A sidebar collection: a fixed source of photos.
 public struct LibraryCollection: Identifiable, Sendable, Hashable {
@@ -58,7 +60,15 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var items: [PhotoItem] = []
     public internal(set) var sort = LibrarySort.captureDate
     public internal(set) var cellSize = 160
-    public internal(set) var selection: Set<String> = []
+    /// The grid's picks: the kernel's ordered selection with its anchor (LibrarySelectionAdapter).
+    public internal(set) var picks = Selection<String>() { didSet { pickedIDs = picks.set } }
+    private var pickedIDs: Set<String> = []  // the picks as a set, for O(1) lookups
+    /// The selected photos. Setting it picks the ids in display order (any not shown after, sorted)
+    /// and never ends the edit run; `select(_:)` is the setter that drops ids not shown.
+    public internal(set) var selection: Set<String> {
+        get { pickedIDs }
+        set { picks.replace(order.filter(newValue.contains) + newValue.subtracting(order).sorted()) }
+    }
     public internal(set) var mode = LibraryMode.grid
     public internal(set) var focusedItemID: String?  // the loupe's photo
 
