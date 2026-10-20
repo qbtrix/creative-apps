@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-20T20:19Z	poll	heartbeat	-	PD-a blocked 3 polls on PL-a/DG-a/DT-a/DS-a/DK-m; asked supervisor on #3454
 2026-10-20T20:37Z	PD-a	review	#3454	supervisor: start PD-a now, PL-a stubs (#3578) count as available, seam for DS-a
 2026-10-20T20:37Z	PD-a	stage-start	design/pd-a-placed-image-stubs	builder on PD-1+PD-2, stacks on DG-a only if DesignNode shared
+2026-10-20T20:59Z	PD-a	pr-opened	#3759	head 4ade2ec, 397 lines/11 files own diff, stacked on #3687, touches Package.swift (CoreRaster) so supervisor merges, Mutate 14/14 DesignNode
