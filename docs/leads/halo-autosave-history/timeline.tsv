@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-20T19:31Z	3	pr-opened	#3683	slice HA-a (HA-1 stubs, HA-2 history panel + History button), 348 lines 11 files
 2026-10-20T19:33Z	3	stage-start	wave 2	HA-5 (HA-m) stacked on lead/halo-autosave-history-HA-a; AH-m done
 2026-10-20T19:44Z	3	pr-open	#3701	HA-5 slice HA-m, stacked on #3683; Mutate 3/3; CI: PASS
+2026-10-20T19:56Z	3	heartbeat	#3683 #3701	added the missing Allow-Dup line to #3701 after the lane refused it; HG-m (for HA-6) not done; AC-halo #2999 open
