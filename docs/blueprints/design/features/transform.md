@@ -125,7 +125,7 @@ Longest chain: DT-1 → DT-2 → DT-3 → DT-4 → DT-7 → DT-8 (6). Chain of 6
 | DT-3 | `DesignTransformPaintTests`: a node turned 90° paints its corners where `TransformRules.corners` says; the handles turn with it | the canvas or handles stay upright | – (UI) |
 | DT-4 | `DesignTransformSnapshots`; `RenderBudgetDesignTransformTests.knobDragInThreeBodies` | budget over | – (UI) |
 | DT-5 | `DesignTransformTests`: a turn keeps the centre; a flip keeps the frame; several nodes turn about the union's centre in one step; a locked node refuses; a click inside a turned node's corner gap misses it | a point, a step or a hit is wrong | `DesignModel.DesignTransform+Kernel`: turn about the origin → `.turnAboutCentre`; one step per node → `.oneStepForSeveral`; `contains` uses the unturned frame → `.hitUsesTurn` |
-| DT-6 | `DesignSVGTests.turnedNode`; the six specs listed; RJ-D15 passes on Linux | the SVG drops the turn | `DesignModel.DesignSVG`: centre left out → `.rotateAboutCentre` |
+| DT-6 | `DesignSVGTests.turnedNode`; the six specs listed; RJ-D15 passes on Linux | the SVG drops the turn | `DesignModel.DesignSVG`: centre left out → `.rotateAboutCentre`; scale written for no flip → `.flipWritesScale` |
 | DT-7 | `testRotateAndFlip` steps 1 to 5 on live | a step fails | – |
 | DT-8 | `scripts/waves render --dry-run` | status not built | – |
 

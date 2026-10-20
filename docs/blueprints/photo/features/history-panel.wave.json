@@ -109,7 +109,7 @@
           "PH-5"
         ]
       },
-      "ui": false,
+      "ui": true,
       "owned": [
         "Sources/PhotoModel/PhotoHistory+Kernel.swift",
         "Tests/PhotoModelTests/PhotoHistoryJumpTests.swift",

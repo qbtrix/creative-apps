@@ -119,9 +119,9 @@ Longest chain: DK-1 → DK-2 → DK-3 → DK-4 → DK-8 → DK-9 (6). Chain of 6
 | DK-2 | `DesignInspectorSnapshots`: the Stroke section is the editor on the stubs, trim hidden | the editor is missing | – (UI) |
 | DK-3 | `DesignStrokePaintTests`: a dashed stroke paints gaps; a round cap rounds the ends | the canvas paints solid | – (UI) |
 | DK-4 | `DesignStrokeSnapshots`; `RenderBudgetDesignStrokeTests.widthScrubInThreeBodies` | budget over | – (UI) |
-| DK-5 | `DesignStrokeMigrationTests`: `old-strokes.design` decodes with its colours and widths as `VectorStroke`; a saved file round-trips join, cap and dash | an old file loses a stroke | `DesignModel.DesignNode`: old shape not read → `.oldStrokeDecodes` |
+| DK-5 | `DesignStrokeMigrationTests`: `old-strokes.design` decodes with its colours and widths as `VectorStroke`; a saved file round-trips join, cap and dash | an old file loses a stroke | `DesignModel.DesignNode`: old shape not read → `.oldStrokeDecodes`; a new stroke decoded as nil → `.newStrokeDecodes` |
 | DK-6 | `DesignStrokeTests`: each stroke command on three selected nodes is one step; a locked node is skipped with its help; width clamps; `stroke.trim` is unavailable with the trim help | a step, a clamp or a refusal is wrong | `DesignModel.DesignStroke+Kernel`: one step per node → `.oneStepForSeveral`; locked not skipped → `.lockedSkipped` |
-| DK-7 | `DesignSVGTests.dashedStroke`; RJ-D36 passes on Linux | the SVG drops the dash | `DesignModel.DesignSVG`: old writer kept → `.strokeWritesDash` |
+| DK-7 | `DesignSVGTests.dashedStroke`; RJ-D36 passes on Linux | the SVG drops the dash | `DesignModel.DesignSVG`: old writer kept → `.strokeWritesDash`; cap written as join → `.capAttribute` |
 | DK-8 | `testDashedBorder` steps 1 to 4 on live | a step fails | – |
 | DK-9 | `scripts/waves render --dry-run` | status not built | – |
 

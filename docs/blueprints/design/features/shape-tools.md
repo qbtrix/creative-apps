@@ -118,7 +118,7 @@ Longest chain: DS-1 → DS-2 → DS-3 → DS-4 → DS-7 → DS-8 (6). Chain of 6
 | DS-3 | `DesignShapePaintTests`: a star node paints its path, not its box; a resize redraws it | the canvas paints the box | – (UI) |
 | DS-4 | `DesignShapeSnapshots`; `RenderBudgetDesignShapeTests.starDragInThreeBodies` | budget over | – (UI) |
 | DS-5 | `DesignShapeTests`: a drag draws one node of kind `shape` as one step "Draw Star"; Rectangle and Ellipse still draw their kinds through `ShapeRules.dragged` with Shift; the spec round-trips through the file | a kind, a step or a spec is wrong | `DesignModel.DesignShape+Kernel`: spec dropped → `.specSaved`; two steps per draw → `.drawIsOneStep`; `DesignModel.DesignDrawing`: Shift ignored → `.shiftSquares` |
-| DS-6 | `DesignSVGTests.shapePath`; the two specs listed; RJ-D35 passes on Linux | the SVG writes a box | `DesignModel.DesignSVG`: frame written for a shape → `.shapeWritesPath` |
+| DS-6 | `DesignSVGTests.shapePath`; the two specs listed; RJ-D35 passes on Linux | the SVG writes a box | `DesignModel.DesignSVG`: frame written for a shape → `.shapeWritesPath`; open line closed with `Z` → `.lineIsOpen` |
 | DS-7 | `testDrawStarAndArrow` steps 1 to 5 on live | a step fails | – |
 | DS-8 | `scripts/waves render --dry-run` | status not built | – |
 

@@ -121,7 +121,7 @@ Longest chain: HK-1 → HK-2 → HK-3 → HK-4 → HK-7 → HK-8 (6). Chain of 6
 | HK-3 | `HaloStrokeInspectorTests`: the trim rows carry key diamonds; a diamond click emits one key toggle | a diamond is missing | – (UI) |
 | HK-4 | `HaloStrokeSnapshots`; `RenderBudgetHaloStrokeTests.trimScrubInThreeBodies` | budget over | – (UI) |
 | HK-5 | `HaloStrokeRenderTests`: an 8 pt stroke covers the outline band and not the centre; Trim End keyed 0 → 1 over 24 frames draws half the length at frame 12; dashes leave gaps | a band, a trim or a dash is wrong | `HaloModel.LiveFrameRendering`: stroke filled → `.strokeIsOutline`; `HaloModel.HaloOutlines`: trim sampled at frame 0 → `.trimAtFrame` |
-| HK-6 | `HaloStrokeTests`: each stroke command is one step; trim on an animated Trim End keys at the playhead; the nine specs listed; RJ-H30 passes on Linux | a step or a key is wrong | `HaloModel.HaloStroke+Kernel`: trim written as the base when animated → `.trimKeysWhenAnimated` |
+| HK-6 | `HaloStrokeTests`: each stroke command is one step; trim on an animated Trim End keys at the playhead; the nine specs listed; RJ-H30 passes on Linux | a step or a key is wrong | `HaloModel.HaloStroke+Kernel`: trim written as the base when animated → `.trimKeysWhenAnimated`; a static trim ignores the value → `.staticTrimSets` |
 | HK-7 | `testStrokeDrawOn` steps 1 to 4 on live | a step fails | – |
 | HK-8 | `scripts/waves render --dry-run` | status not built | – |
 

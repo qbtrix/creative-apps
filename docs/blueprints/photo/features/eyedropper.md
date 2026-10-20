@@ -126,7 +126,7 @@ Longest chain: PE-1 → PE-2 → PE-3 → PE-4 → PE-7 → PE-8 (6). Chain of 6
 | PE-2 | `PhotoInspectorSnapshots`: the Eyedropper's options show the chips on the stubs; I picks the tool and the tool is enabled | the options or the tool are missing | – (UI) |
 | PE-3 | `PhotoEyedropperOverlayTests`: the loupe tracks the pointer and shows nil past the edge; a click emits one `.pick(at:)` | a pick is doubled or the loupe stalls | – (UI) |
 | PE-4 | `PhotoEyedropperSnapshots`; `RenderBudgetPhotoEyedropperTests.loupeTrackInThreeBodies` | budget over | – (UI) |
-| PE-5 | `LiveSamplingTests`: the live `ColorSampling` returns the mean of the centred square; transparent pixels are skipped; nil outside | a mean is wrong | `PhotoModel.LiveSampling`: centre offset dropped → `.squareCentred` |
+| PE-5 | `LiveSamplingTests`: the live `ColorSampling` returns the mean of the centred square; transparent pixels are skipped; nil outside | a mean is wrong | `PhotoModel.LiveSampling`: centre offset dropped → `.squareCentred`; alpha-0 pixel counted → `.skipsTransparent` |
 | PE-6 | `PhotoSampleTests`: `sampledColor` reads the composite through an empty top layer; `pickBrushColor` sets the brush and records no step; RJ-P36 passes on Linux | the layer, the step or the mean is wrong | `PhotoModel.PhotoSample+Kernel`: active layer read → `.samplesComposite`; a step recorded → `.pickIsToolState` |
 | PE-7 | `testPickSkyColor` steps 1 to 5 on live | a step fails | – |
 | PE-8 | `scripts/waves render --dry-run` | status not built | – |

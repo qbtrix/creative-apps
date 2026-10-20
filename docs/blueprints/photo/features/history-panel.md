@@ -46,7 +46,7 @@ recovery).
 | PH-m | A jump lands on its step without recording one, and autosave writes, offers and restores through the shared schedule and folder with Photo's copy deleted. | PH-5, PH-6 | MJ-PH | PH-a; transform:PT-m (PH-5); AH-m, AH-z (cross-line) |
 | PH-z | The journeys jump back ten steps and restore after a quit on live services, and the feature is built. | PH-7, PH-8 | PJ-H1 | PH-u, PH-m |
 
-PH-u waits only on PH-a (rule 18); PH-m never waits on PH-u. MJ-PH is the
+PH-u waits only on PH-a (rule 18); PH-m never waits on PH-u. PH-m is `"ui": true` because PH-6 edits the window's file hooks. MJ-PH is the
 Model walk in `PhotoHistoryJumpTests` (Linux).
 
 ## Journey steps
@@ -149,6 +149,7 @@ Longest chain: PH-1 → PH-2 → PH-3 → PH-4 → PH-7 → PH-8 (6). Chain of 6
 |---|---|---|
 | render: arrow-key walk down 30 steps of the tab on a 12 MP image | ≤ 3 window bodies; p95 ≤ 16 ms | `RenderBudgetPhotoHistoryTests.arrowWalkInThreeBodies` |
 | One gesture, one step | a jump adds no step | `PhotoHistoryJumpTests.jumpRecordsNothing` |
+| render: 120-sample brush stroke while the autosave tick runs (PH-6 touches the window) | ≤ 3 window bodies; p95 ≤ 16 ms | `RenderBudgetPhotoHistoryTests.paintWhileAutosaving` |
 | Autosave stays off the main actor | the `.ora` encode runs detached | `PhotoRecoveryFolderTests.encodesOffMain` |
 | No dead controls; keyboard parity | every row identified, arrows and Return jump | `testJumpBackTenSteps` |
 | Audit | zero new over Photo's baseline | `audit-photo-*.json` |
