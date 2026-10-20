@@ -103,10 +103,12 @@
     },
     {
       "id": "LG-grid",
-      "behavior": "The grid scrolls 10,000 photos within budget, asking only for visible thumbnails plus two screens through the shared store, and the loupe steps within budget with its neighbours decoded (#3108, #3109).",
+      "behavior": "The grid scrolls 10,000 photos within budget through the shared thumbnail store and the loupe steps within budget (#3108, #3109), RJ-L07 and RJ-L56 pass, and the feature is built.",
       "tasks": [
         "LG-5",
-        "LG-6"
+        "LG-6",
+        "LG-7",
+        "LG-8"
       ],
       "journeys": [
         "LJ-LG",
@@ -119,46 +121,24 @@
         "UITests/LibraryJourneyTests+Large.swift",
         "Sources/LibraryModel/LoupeState.swift",
         "Sources/LibraryModel/RenderQueue.swift",
-        "Tests/mutations/LibraryModel.RenderQueue.json"
+        "Tests/mutations/LibraryModel.RenderQueue.json",
+        "Tests/RealJobs/library/large-catalog/large-catalog.jobs.json",
+        "Tests/perf-suites.txt",
+        "docs/blueprints/library/features/large-catalog.wave.json"
       ],
       "waits": {
         "LG-a": [
           "LG-5"
         ],
         "LG-model": [
-          "LG-5"
+          "LG-5",
+          "LG-7"
         ],
         "filters-collections:FC-c": [
           "LG-5"
         ]
       },
       "ui": true
-    },
-    {
-      "id": "LG-z",
-      "behavior": "The journey and RJ-L07 and RJ-L56 pass on the 10,000-photo fixture, the six findings are closed, and the feature is built.",
-      "tasks": [
-        "LG-7",
-        "LG-8"
-      ],
-      "journeys": [
-        "LJ-LG",
-        "MJ-LG"
-      ],
-      "owned": [
-        "Tests/RealJobs/library/large-catalog/large-catalog.jobs.json",
-        "Tests/perf-suites.txt",
-        "docs/blueprints/library/features/large-catalog.wave.json"
-      ],
-      "waits": {
-        "LG-model": [
-          "LG-7"
-        ],
-        "LG-grid": [
-          "LG-7"
-        ]
-      },
-      "ui": false
     }
   ]
 }

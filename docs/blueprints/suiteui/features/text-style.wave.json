@@ -174,14 +174,18 @@
     },
     {
       "id": "TS-halo",
-      "behavior": "Halo's text layers take a font, weight, italic, alignment, line height, letter spacing and several lines through the catalog, drawn the same in the viewer and the render.",
+      "behavior": "Halo's text layers take a font, weight, italic, alignment, line height, letter spacing and several lines through the catalog, drawn the same in the viewer and the render, and the feature is built.",
       "tasks": [
         "TS-9",
-        "TS-10"
+        "TS-10",
+        "TS-11",
+        "TS-12"
       ],
       "journeys": [
         "HJ-TS",
-        "MJ-TS-halo"
+        "MJ-TS-halo",
+        "MJ-TS",
+        "DJ-TS"
       ],
       "owned": [
         "Tests/HaloModelTests/HaloTextStyleTests.swift",
@@ -192,7 +196,9 @@
         "Tests/mutations/HaloModel.HaloText+Kernel.json",
         "Sources/HaloApp/HaloTextRasterizer.swift",
         "UITests/HaloJourneyTests+TextStyle.swift",
-        "Tests/RealJobs/halo/title-card/title-card.jobs.json"
+        "Tests/RealJobs/halo/title-card/title-card.jobs.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-text.json",
+        "docs/blueprints/suiteui/features/text-style.wave.json"
       ],
       "waits": {
         "TS-m": [
@@ -207,37 +213,14 @@
         "adjust-everywhere:AJ-halo": [
           "TS-9"
         ],
+        "TS-design": [
+          "TS-11"
+        ],
         "anchor-parenting:AN-halo": [
           "TS-9"
         ]
       },
       "ui": true
-    },
-    {
-      "id": "TS-z",
-      "behavior": "The kernel part names Design, Halo and Photo as adopters and the feature is built.",
-      "tasks": [
-        "TS-11",
-        "TS-12"
-      ],
-      "journeys": [
-        "MJ-TS",
-        "DJ-TS",
-        "HJ-TS"
-      ],
-      "owned": [
-        "docs/c4/parts/creative-apps/suite-kernel/kernel-text.json",
-        "docs/blueprints/suiteui/features/text-style.wave.json"
-      ],
-      "waits": {
-        "TS-design": [
-          "TS-11"
-        ],
-        "TS-halo": [
-          "TS-11"
-        ]
-      },
-      "ui": false
     }
   ]
 }
