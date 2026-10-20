@@ -9,3 +9,4 @@ time	kind	note
 2026-10-20T21:20Z	-	check	#3690	macOS build 39484764814 still queued (105m)
 2026-10-20T21:42Z	-	check	#3690	macOS build 39484764814 still queued (127m)
 2026-10-20T22:10Z	-	fix	#3690	needs-rebase (C4 part design-model-sources); merged dev, kept both clauses, gate PASS, head 5790b916, Head line moved
+2026-10-20T22:35Z	check	needs-rebase cleared	#3690 #3691	lane dropped label; macOS builds dispatched 22:21 on 5790b916 / 344cbd8f; lane asked to drop attribution footer: session proxy re-appends it on every PATCH (retried, re-added), lane strips it at squash
