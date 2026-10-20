@@ -99,6 +99,11 @@ let coreExamples: [CoreExample] = [
     CoreExample(AddSymbol(symbol: Symbol(id: "symbol-1", name: "Star"))),
     CoreExample(RenameSymbol(symbolID: "symbol-1", name: "Spark")),
     CoreExample(DuplicateLayer(owner: s1, layerID: "layer-1")), // before the instance, so symbol.remove finds none
+    CoreExample(AddLayerMask(owner: s1, layerID: "layer-1", mask: LayerMask(path: FlarePath(polyline: square, closed: true)))),
+    CoreExample(SetLayerMask(owner: s1, layerID: "layer-1", index: 0,
+                             mask: LayerMask(path: FlarePath(polyline: square, closed: true), mode: .subtract, feather: 2))),
+    CoreExample(MoveLayerMask(owner: s1, layerID: "layer-1", from: 0, to: 0)),
+    CoreExample(SetTrackMatte(owner: s1, layerID: "layer-1", matte: TrackMatte(sourceLayerID: "layer-1-copy", kind: .luma))),
     CoreExample(AddInstance(owner: s1, layerID: "layer-1", instance: Instance(symbolID: "symbol-1"))),
     CoreExample(SetInstanceTransform(owner: s1, layerID: "layer-1", index: 0, transform: Transform(x: 5, y: 5))),
     CoreExample(SetInstancePlayback(owner: s1, layerID: "layer-1", index: 0, firstFrame: 2, loop: .playOnce)),
@@ -123,6 +128,7 @@ let coreExamples: [CoreExample] = [
     CoreExample(RemoveMachineState(machineID: "machine-1", stateID: "idle")),
     CoreExample(RemoveStateMachine(machineID: "machine-1")),
     CoreExample(RemoveShape(owner: s1, layerID: "layer-1", index: 0)),
+    CoreExample(RemoveLayerMask(owner: s1, layerID: "layer-1", index: 0)),
     CoreExample(RemoveTextShape(owner: s1, layerID: "layer-1", index: 0)),
     CoreExample(RemoveInstance(owner: s1, layerID: "layer-1", index: 0)),
     CoreExample(RemoveSymbol(symbolID: "symbol-1")),
@@ -190,6 +196,9 @@ let coreSchemaOverrides: [String: ParamSchema] = {
         "shapeKey.set": layer(["shape": i, "frame": i, "path": probe(FlareCore.Path.self),
                                "easing": FlareCore.Easing.paramSchema]),
         "shapeKey.remove": layer(["shape": i, "frame": i]),
+        "mask.add": layer(["mask": probe(LayerMask.self), "index": .optional(i)]),
+        "mask.set": layer(["index": i, "mask": probe(LayerMask.self)]), "mask.remove": layer(["index": i]),
+        "mask.move": layer(["from": i, "to": i]), "mask.setMatte": layer(["matte": .optional(probe(TrackMatte.self))]),
     ]
 }()
 
