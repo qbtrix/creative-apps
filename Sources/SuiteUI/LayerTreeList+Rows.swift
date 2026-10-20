@@ -97,9 +97,13 @@ public struct LayerTreeOptions: Equatable, Sendable {
     /// Whether rows can hold children; a flat list (Photo) leaves out the
     /// indent and the empty disclosure column, so names start near the edge.
     public var nests: Bool
+    /// Whether rows show thumbnails: a row's leading well is a thumbnail's width, so a row with
+    /// only a symbol lines up with one whose thumbnail stands in for its symbol.
+    public var thumbnails: Bool
 
     public init(showsEye: Bool = true, showsLock: Bool = true, reorders: Bool = false, embedded: Bool = false,
-                nests: Bool = true) {
+                nests: Bool = true, thumbnails: Bool = false) {
+        self.thumbnails = thumbnails
         self.showsEye = showsEye
         self.showsLock = showsLock
         self.reorders = reorders
@@ -199,19 +203,22 @@ extension LayerTreeRow {
             .simultaneousGesture(TapGesture(count: 2).onEnded { openRename(on: .title) })
     }
 
-    /// The decoration's thumbnail and symbol, before the name.
+    /// The decoration's thumbnail, else its symbol, before the name. A thumbnail stands in for the
+    /// symbol, carrying its label and identifier; with no symbol it is hidden from accessibility.
     @ViewBuilder var leading: some View {
         if let thumbnail = decoration?.thumbnail {
             thumbnail
                 .resizable()
-                .scaledToFill()
-                .frame(width: SuiteSize.studioRow, height: SuiteSize.studioRow)
+                .scaledToFit()
+                .frame(width: SuiteSize.studioRow - SuiteSpacing.xs, height: SuiteSize.studioRow - SuiteSpacing.xs)
                 .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.field))
-                .accessibilityHidden(true)
-        }
-        if let symbol = decoration?.symbol {
+                .frame(width: SuiteSize.studioRow)
+                .accessibilityHidden(decoration?.symbol == nil)
+                .accessibilityLabel(decoration?.symbolLabel ?? row.name)
+                .accessibilityIdentifier(decoration?.symbolID ?? naming.control(row.id, "symbol"))
+        } else if let symbol = decoration?.symbol {
             Image(systemName: symbol)
-                .frame(width: SuiteSize.iconButtonHit)
+                .frame(width: options.thumbnails ? SuiteSize.studioRow : SuiteSize.iconButtonHit)
                 .foregroundStyle(SuiteColor.secondaryText)
                 .accessibilityLabel(decoration?.symbolLabel ?? row.name)
                 .accessibilityIdentifier(decoration?.symbolID ?? naming.control(row.id, "symbol"))
