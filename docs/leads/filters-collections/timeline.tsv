@@ -20,3 +20,6 @@ utc	stage	event	ref	note
 2026-10-20T04:45:20Z	pr-opened	FC-4 #3461 (draft, stacked on #3424)
 2026-10-20T04:45:20Z	stage-end	3 wave 2
 2026-10-20T04:45:20Z	stage-start	3 wave 3: FC-5 building
+2026-10-20T05:09:43Z	pr-opened	FC-5	#3466 draft, stacked on #3461; gate base caveat
+2026-10-20T05:09:43Z	builder-start	FC-6	stacked on FC-5
+2026-10-20T05:09:43Z	builder-start	FC-8	stacked on FC-5
