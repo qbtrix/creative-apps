@@ -6,3 +6,6 @@ utc	stage	event	ref	note
 2026-10-20T07:10Z	2	stage-start	-	waits read from source
 2026-10-20T07:12Z	2	stage-end	-	XP-1 built now (PR after #3543); XP-6 stacked on XP-1
 2026-10-20T07:12Z	3	stage-start	wave 1	XP-1, XP-6
+2026-10-20T07:45Z	3	task-built	XP-1	lead/export-pack-XP-1 04cd4c0, CI: PASS
+2026-10-20T07:45Z	3	task-built	XP-6	lead/export-pack-XP-6 de396d4, CI: PASS, Mutate 5/5
+2026-10-20T07:45Z	3	wait-met	AH-1	#3543 merged as 854a3b5
