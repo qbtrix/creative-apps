@@ -88,3 +88,4 @@ utc	stage	event	ref	note
 2026-10-20T00:20:21Z	heartbeat	check	-	no change: dev CI 39346519827 (c7306ee8) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
 2026-10-20T00:42:30Z	answer	supervisor	-	Supervisor answer 00:29Z on #1936: option 1. design-seams-2 DesignNode.swift hand-off released. AL-d1 and AL-d2 start now on top of #2880's LayerTree ordering; AL-d3 waits on layers-panel's Belt-Slice-Done. Record the swap in both .wave.json files in the first AL-d PR.
 2026-10-20T01:02:07Z	heartbeat	check	-	AL-d1+AL-d2 next after AS-design PR; full 39296061014 in progress
+2026-10-20T01:04:25Z	task-start	AL-design	-	AL-d1+AL-d2 builder started on slice/al-design from origin/dev (one PR; AL-d3 waits on layers-panel Belt-Slice-Done). DesignNode.swift swap recorded as waits_on text (waves cannot key across apps)

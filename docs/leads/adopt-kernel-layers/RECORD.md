@@ -87,3 +87,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T00:42:30Z Supervisor answer 00:29Z on #1936: option 1. design-seams-2 DesignNode.swift hand-off released. AL-d1 and AL-d2 start now on top of #2880's LayerTree ordering; AL-d3 waits on layers-panel's Belt-Slice-Done. Record the swap in both .wave.json files in the first AL-d PR.
 
 - 2026-10-20T01:02:07Z heartbeat: AL-d1 and AL-d2 are next, after the AS-design PR, since both touch Design. Full run 39296061014 is in progress.
+
+- 2026-10-20T01:04:25Z AL-design started: AL-d1 (adapter) and AL-d2 (delete) as one PR on slice/al-design, per the supervisor's answer on #1936. AL-d3 (panel) waits on layers-panel's Belt-Slice-Done. The DesignNode.swift swap with design-seams-2 goes in both .wave.json files as `waits_on` text, because scripts/waves resolves `waits` keys only within one app.
