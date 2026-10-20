@@ -17,7 +17,7 @@ Next: PF-1 builder (PhotoFileFlow+Kernel stubs) then PF-4 stacked on it; PF-2 wa
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PF-1 | PF-a | 1 | adapter stubs (SuiteDocumentHost, FileFlowTarget); PhotoFileFlowTests disabled | Sources/PhotoModel/PhotoFileFlow+Kernel.swift, Tests/PhotoModelTests/PhotoFileFlowTests.swift | compiles, suite disabled | – | building |
+| PF-1 | PF-a | 1 | adapter stubs (SuiteDocumentHost, FileFlowTarget); PhotoFileFlowTests disabled | Sources/PhotoModel/PhotoFileFlow+Kernel.swift, Tests/PhotoModelTests/PhotoFileFlowTests.swift | compiles, suite disabled | #3679 | open |
 | PF-2 | PF-a | – | .suiteApp scene, SuiteFileCommands with Open In, .suiteFileDrop | Sources/PhotoApp/PhotoApp.swift, Sources/PhotoApp/PhotoCommands+File.swift, Sources/PhotoApp/PhotoEditor.swift | snapshots (PF-5's) | – | waits place-image:PP-u |
 | PF-3 | PF-m | – | adapter bodies, FileFlowCommands specs, recents import, RJ-P42 | Sources/PhotoModel/PhotoFileFlow+Kernel.swift, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/PhotoModelTests/PhotoFileFlowTests.swift, Tests/mutations/PhotoModel.PhotoFileFlow+Kernel.json, Tests/RealJobs/photo/drop-layer/, Sources/PhotoModel/PhotoRecentMenu.swift | PhotoFileFlowTests | – | waits PT-m, PH-m, PE-m, PP-m |
 | PF-4 | PF-m | 1 (stacked on PF-1) | window notes opens and saves through the bridge | Sources/PhotoApp/PhotoWindow+File.swift, Tests/AppSnapshotTests/PhotoFileFlowLiveTests.swift | PhotoFileFlowLiveTests (macOS) | – | building |
