@@ -37,9 +37,9 @@ import SuiteKernel
         }
     }
 
-    /// The points a path visits: each move's and line's end.
-    static func vertices(_ path: Path) -> [Point] {
-        path.elements.compactMap { element in
+    /// The points the spec's path in `box` visits: each move's and line's end.
+    static func vertices(_ spec: ShapeSpec, in box: Rect) throws -> [Point] {
+        try ShapeRules.path(spec, in: box).elements.compactMap { element -> Point? in
             switch element {
             case .move(let to), .line(let to): to
             default: nil
@@ -48,16 +48,14 @@ import SuiteKernel
     }
 
     @Test(.disabled("waits on SH-5")) func starHasTenVerticesFromTheTop() throws {
-        let path = try ShapeRules.path(.defaults(.star), in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 100))
-        let points = Self.vertices(path)
+        let points = try Self.vertices(.defaults(.star), in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 100))
         #expect(points.count == 10)
         #expect(abs((points.first?.x ?? -1) - 50) < 1e-9 && abs(points.first?.y ?? -1) < 1e-9)
     }
 
     @Test(.disabled("waits on SH-5")) func hexagonLiesOnTheEllipse() throws {
         var spec = ShapeSpec.defaults(.polygon); spec.sides = 6
-        let path = try ShapeRules.path(spec, in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 60))
-        let points = Self.vertices(path)
+        let points = try Self.vertices(spec, in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 60))
         #expect(points.count == 6)
         for p in points {
             let u = (p.x - 50) / 50, v = (p.y - 30) / 30
@@ -68,14 +66,14 @@ import SuiteKernel
     @Test(.disabled("waits on SH-5")) func lineEndsAtTheBoxCorner() throws {
         var spec = ShapeSpec.defaults(.line)
         spec.start = Point(x: 0, y: 0); spec.end = Point(x: 1, y: 1)
-        let points = Self.vertices(try ShapeRules.path(spec, in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 50)))
+        let points = try Self.vertices(spec, in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 50))
         #expect(points.first == Point(x: 0, y: 0) && points.last == Point(x: 100, y: 50))
     }
 
     @Test(.disabled("waits on SH-5")) func headAtEnd() throws {
         var spec = ShapeSpec.defaults(.arrow)
         spec.start = Point(x: 0, y: 0.5); spec.end = Point(x: 1, y: 0.5)
-        let points = Self.vertices(try ShapeRules.path(spec, in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 40)))
+        let points = try Self.vertices(spec, in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 40))
         // The head's tip is the line's end, and nothing reaches past it.
         #expect(points.contains(Point(x: 100, y: 20)))
         #expect(points.allSatisfy { $0.x <= 100 + 1e-9 })
