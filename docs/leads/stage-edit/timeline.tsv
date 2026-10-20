@@ -171,3 +171,4 @@
 2026-10-20T05:02Z	resume	resume	#3312	run act-1a157ad4612-4xcw; #3309 merged; #3312 docs-only vs dev at a0054178, still no-fast-lane
 2026-10-20T05:09Z	5	gate	#3312	scripts/ci --changed PASS on a0054178; Head: and Belt-Lead: moved; no-fast-lane lifted
 2026-10-20T05:21Z	5	heartbeat	#3312	open, clean, fast-lane; waiting on the lane sweep
+2026-10-20T05:34Z	5	heartbeat	#3312	still open on fast-lane; lane busy with other PRs
