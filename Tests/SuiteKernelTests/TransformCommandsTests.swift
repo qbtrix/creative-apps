@@ -1,5 +1,5 @@
 // TransformCommandsTests.swift (transform-tools TT-1 shape, TT-6 body): the six transform.* commands
-// on a test target. The run tests wait on TT-6, which fills the bodies; the shape test runs now.
+// on a test target, run on TT-6's bodies.
 import Testing
 import SuiteKernel
 
@@ -46,7 +46,7 @@ struct TransformTestTarget: TransformTarget {
     }
 
     /// Each edit records one step named its title; read changes nothing.
-    @Test(.disabled("waits on TT-6")) func eachEditIsOneNamedStep() throws {
+    @Test func eachEditIsOneNamedStep() throws {
         let catalog = try TransformTestTarget.catalog()
         let runs: [(String, JSONValue, String)] = [
             ("transform.set", .object(["w": .number(240)]), "Transform"),
@@ -67,7 +67,7 @@ struct TransformTestTarget: TransformTarget {
     }
 
     /// 60 rotate samples under one drag token are one undo step, and rotate turns by its degrees, not to them.
-    @Test(.disabled("waits on TT-6")) func dragIsOneStep() throws {
+    @Test func dragIsOneStep() throws {
         let catalog = try TransformTestTarget.catalog()
         var doc = TransformTestTarget()
         for _ in 0..<60 { _ = try catalog.run("transform.rotate", params: .object(["degrees": .number(1.5), "drag": .string("k1")]), on: &doc) }
@@ -76,7 +76,7 @@ struct TransformTestTarget: TransformTarget {
     }
 
     /// Rotate is relative: two rotates by 100 land at -160, not at 100.
-    @Test(.disabled("waits on TT-6")) func rotateIsRelative() throws {
+    @Test func rotateIsRelative() throws {
         let catalog = try TransformTestTarget.catalog()
         var doc = TransformTestTarget()
         for _ in 0..<2 { _ = try catalog.run("transform.rotate", params: .object(["degrees": .number(100)]), on: &doc) }
@@ -84,7 +84,7 @@ struct TransformTestTarget: TransformTarget {
     }
 
     /// Flip says why not with the target's flipHelp, after transformHelp, and leaves the target as it was.
-    @Test(.disabled("waits on TT-6")) func flipHonoursHelp() throws {
+    @Test func flipHonoursHelp() throws {
         let catalog = try TransformTestTarget.catalog()
         var doc = TransformTestTarget()
         doc.flipBlock = "Text layers can't be mirrored."
@@ -99,7 +99,7 @@ struct TransformTestTarget: TransformTarget {
     }
 
     /// A set to width 0 throws its sentence; a scale by 0 throws; neither records a step.
-    @Test(.disabled("waits on TT-6")) func setRefusesTinyBox() throws {
+    @Test func setRefusesTinyBox() throws {
         let catalog = try TransformTestTarget.catalog()
         var doc = TransformTestTarget()
         #expect(throws: CatalogError.failed(id: "transform.set", message: "Width and height must be at least 1.")) {
@@ -109,8 +109,22 @@ struct TransformTestTarget: TransformTarget {
         #expect(doc.history.steps.isEmpty)
     }
 
+    /// Read reports the box, turn and mirrors; with nothing selected an edit fails and records nothing.
+    @Test func readsAndRefusesEmptySelection() throws {
+        let catalog = try TransformTestTarget.catalog()
+        var doc = TransformTestTarget()
+        let read = try catalog.run("transform.read", params: .object([:]), on: &doc).result
+        #expect(read == .object(["x": .number(100), "y": .number(80), "w": .number(200), "h": .number(120), "degrees": .number(0),
+                                 "flipX": .bool(false), "flipY": .bool(false)]))
+        doc.item = nil
+        #expect(throws: CatalogError.failed(id: "transform.rotate", message: "Select something to transform first.")) {
+            try catalog.run("transform.rotate", params: .object(["degrees": .number(15)]), on: &doc)
+        }
+        #expect(doc.history.steps.isEmpty)
+    }
+
     /// Each intent's command is a registered id whose params validate and run.
-    @Test(.disabled("waits on TT-6")) func intentRoundTrips() throws {
+    @Test func intentRoundTrips() throws {
         let catalog = try TransformTestTarget.catalog()
         let box = TransformBox(box: Rect(minX: 0, minY: 0, maxX: 40, maxY: 30), degrees: 10)
         let intents: [TransformIntent] = [.set(box, drag: "d"), .rotate(by: 15, drag: nil), .scale(sx: 2, sy: 3, anchor: .top, drag: nil),

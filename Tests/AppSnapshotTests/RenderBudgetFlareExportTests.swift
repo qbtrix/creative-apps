@@ -5,8 +5,11 @@
 // sequence chip, steps the To row (`flare.export.to`) 60 times the way
 // VoiceOver and XCUI adjust it (down and up in turn, so each step stays in the
 // scene's 48 frames and is an edit), then presses Cancel (`flare.export.cancel`).
-// The sheet is its own window attached to the hosted one, so its controls are
-// found from `attachedSheet`'s accessibility tree, not the host's. `bodies`
+// Export… is a toolbar item, and a borderless window shows no toolbar, so the
+// harness window gets `.titled` before the first measure (as
+// RenderBudgetAIAccessTests does for its title-bar chip). The sheet is its own
+// window attached to the hosted one, so its controls are found from
+// `attachedSheet`'s accessibility tree, not the host's. `bodies`
 // gates the window-body counts; `timing` (report-only, for
 // Tests/perf-suites.txt) judges the To steps. Nested in BodyCountSuites, as
 // every suite that reads a body counter is. macOS only.
@@ -42,6 +45,7 @@ extension BodyCountSuites {
             let model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "showcase"]))
             let w = RenderBudgetWindow(FlareWindow(model: model))
             defer { w.close() }
+            w.window.styleMask.insert(.titled)
             let bodies = { () -> Int? in
                 #if DEBUG
                 return FlareWindow.bodyRuns
@@ -54,8 +58,8 @@ extension BodyCountSuites {
             let open = try await w.measure("flare export sheet opens", bodies: bodies) {
                 try await w.ticks(1) { _ in pressed = Self.press("flare.export.showSheet", in: w.window) }
             }
+            try #require(pressed, "no Export… (flare.export.showSheet) to press in the window's toolbar")
             let sheet = try #require(await Self.sheet(of: w.window), "Export… opened no sheet: \(open)")
-            #expect(pressed, "no Export… (flare.export.showSheet) to press")
             #expect(Self.press("flare.export.format.pngSequence", in: sheet), "no PNG sequence chip")
             try await w.settle(untilStable: bodies)
             let row = try #require(Self.node("flare.export.to", in: sheet), "no To row (flare.export.to)")

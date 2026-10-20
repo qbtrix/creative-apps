@@ -1,5 +1,5 @@
 // TransformRulesTests.swift (transform-tools TT-1 shape, TT-5 body): the turn, flip and scale
-// rules on a TransformBox. The rule tests wait on TT-5, which fills them; the shape test runs now.
+// rules on a TransformBox, run on TT-5's bodies.
 import Testing
 import SuiteKernel
 
@@ -17,7 +17,7 @@ import SuiteKernel
     }
 
     /// A turn lands in (-180, 180]: 190 is -170, -180 is 180, a whole turn is 0.
-    @Test(.disabled("waits on TT-5")) func normalizesHalfTurn() {
+    @Test func normalizesHalfTurn() {
         #expect(Self.near(TransformRules.normalized(190), -170))
         #expect(Self.near(TransformRules.normalized(180), 180) && Self.near(TransformRules.normalized(-180), 180))
         #expect(Self.near(TransformRules.normalized(720), 0) && Self.near(TransformRules.normalized(-90), -90))
@@ -25,7 +25,7 @@ import SuiteKernel
     }
 
     /// A 100 × 50 box turned 90° clockwise about (50, 25): its corners, clockwise from the turned top-left.
-    @Test(.disabled("waits on TT-5")) func cornersTurn90() {
+    @Test func cornersTurn90() {
         let turned = TransformRules.rotated(Self.wide, by: 90)
         let expected = [Point(x: 75, y: -25), Point(x: 75, y: 75), Point(x: 25, y: 75), Point(x: 25, y: -25)]
         let corners = TransformRules.corners(of: turned)
@@ -35,7 +35,7 @@ import SuiteKernel
     }
 
     /// A square turned 45° has bounds √2 wider, about the same centre.
-    @Test(.disabled("waits on TT-5")) func boundsOfTurnedSquare() {
+    @Test func boundsOfTurnedSquare() {
         let square = TransformBox(box: Rect(minX: 0, minY: 0, maxX: 100, maxY: 100), degrees: 45)
         let b = TransformRules.bounds(of: square)
         #expect(Self.near(b.width, 100 * 2.0.squareRoot()) && Self.near(b.height, 100 * 2.0.squareRoot()))
@@ -43,7 +43,7 @@ import SuiteKernel
     }
 
     /// `local` undoes `matrix`: a point of the unturned box, sent to the document, comes back where it was.
-    @Test(.disabled("waits on TT-5")) func localInvertsMatrix() {
+    @Test func localInvertsMatrix() {
         let t = TransformBox(box: Rect(minX: 10, minY: 20, maxX: 110, maxY: 70), degrees: 30, flipX: true)
         for (u, v) in [(0.0, 0.0), (1.0, 0.0), (0.25, 0.75), (1.0, 1.0)] {
             let p = Point(x: 10 + u * 100, y: 20 + v * 50)
@@ -53,7 +53,7 @@ import SuiteKernel
     }
 
     /// A flip mirrors the box in place: the centre stays and the turn is negated; flipping twice is no change.
-    @Test(.disabled("waits on TT-5")) func flipKeepsCentre() {
+    @Test func flipKeepsCentre() {
         let t = TransformBox(box: Rect(minX: 0, minY: 0, maxX: 100, maxY: 50), degrees: 30)
         let flipped = TransformRules.flipped(t, .horizontal)
         #expect(flipped.flipX && !flipped.flipY && Self.near(flipped.degrees, -30) && flipped.box == t.box)
@@ -63,14 +63,29 @@ import SuiteKernel
     }
 
     /// Scale about an anchor keeps that anchor's point: 2 × about the bottom-right keeps (100, 50).
-    @Test(.disabled("waits on TT-5")) func scaleKeepsAnchor() {
+    @Test func scaleKeepsAnchor() {
         let s = TransformRules.scaled(Self.wide, sx: 2, sy: 2, about: .bottomRight)
         #expect(s.box == Rect(minX: -100, minY: -50, maxX: 100, maxY: 50))
         #expect(TransformRules.scaled(Self.wide, sx: 0.5, sy: 1, about: .center).box == Rect(minX: 25, minY: 0, maxX: 75, maxY: 50))
     }
 
+    /// On a turned box the anchor's document point stays put, and a factor that isn't above 0 changes nothing.
+    @Test func turnedScaleKeepsAnchorPoint() {
+        let t = TransformBox(box: Rect(minX: 0, minY: 0, maxX: 100, maxY: 50), degrees: 30, flipY: true)
+        let s = TransformRules.scaled(t, sx: 1.5, sy: 3, about: .topRight)
+        #expect(Self.near(s.box.width, 150) && Self.near(s.box.height, 150) && s.degrees == 30 && s.flipY)
+        let unit = Point(x: 1, y: 0)
+        #expect(Self.near(TransformRules.matrix(of: s).apply(unit), TransformRules.matrix(of: t).apply(unit)))
+        #expect(TransformRules.scaled(t, sx: 0, sy: 1, about: .center) == t && TransformRules.scaled(t, sx: -1, sy: 1, about: .top) == t)
+    }
+
+    /// A turn by a non-finite amount leaves the box as it was.
+    @Test func nonFiniteTurnIsNoChange() {
+        #expect(TransformRules.rotated(Self.wide, by: .nan) == Self.wide && TransformRules.rotated(Self.wide, by: .infinity) == Self.wide)
+    }
+
     /// Canvas Size: a 200 px border around 400 × 300 content puts it at (100, 100) about the centre.
-    @Test(.disabled("waits on TT-5")) func anchoredCentre() {
+    @Test func anchoredCentre() {
         let (old, new) = ((w: 400.0, h: 300.0), (w: 600.0, h: 500.0))
         #expect(Self.near(TransformRules.anchoredOrigin(old: old, new: new, .center), Point(x: 100, y: 100)))
         #expect(Self.near(TransformRules.anchoredOrigin(old: old, new: new, .topLeft), Point(x: 0, y: 0)))
