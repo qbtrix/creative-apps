@@ -3,6 +3,7 @@
 // catalog, and the row takes the sampled colour as one `Sample Colour` step that one undo puts back. A row
 // pick (the screen sampler or the hex field) is one `Colour` step however many changes it sends. The canvas
 // reads what it draws: the swatches over white paper, the black one at half opacity. macOS only (SuiteUI).
+import CoreGraphics
 import SuiteKernel
 @testable import SuiteUI
 import Testing
@@ -23,7 +24,10 @@ import Testing
         #expect(line.contains("\"size\":1") && line.contains("#00FF00"), "\(line)")
         #expect(board.color == HexColor(0, 255, 0))
         #expect(board.history.steps == ["Sample Colour"])
-        #expect(board.undo() && board.color == HexColor(0, 0, 255) && !board.undo())
+        let undone = board.undo()
+        #expect(undone && board.color == HexColor(0, 0, 255))
+        let undoneAgain = board.undo()
+        #expect(!undoneAgain)
     }
 
     /// The canvas reads what a person sees: red, the paper between swatches, half black over white.
@@ -39,7 +43,8 @@ import Testing
     /// 5 × 5 at green's left edge reads the mean of green and the paper beside it, not green.
     @Test func fiveByFiveAtTheEdgeReadsTheMean() {
         var board = GalleryEyedropperBoard()
-        #expect(board.choose(size: .fiveByFive) == "size 5 × 5")
+        let chosen = board.choose(size: .fiveByFive)
+        #expect(chosen == "size 5 × 5")
         guard let green = GalleryEyedropperBoard.swatches.first(where: { $0.id == "green" })?.rect else {
             Issue.record("no green swatch")
             return
@@ -61,12 +66,17 @@ import Testing
     /// A row pick is one step however many changes it sends; the tool's sample after it is a second.
     @Test func aRowPickIsOneStep() {
         var board = GalleryEyedropperBoard()
-        #expect(board.pick(HexColor(255, 0, 0)) == "change #FF0000")
-        #expect(board.pick(HexColor(250, 0, 0)) == "change #FA0000")
-        #expect(board.endPick() == "end")
+        let first = board.pick(HexColor(255, 0, 0))
+        #expect(first == "change #FF0000")
+        let second = board.pick(HexColor(250, 0, 0))
+        #expect(second == "change #FA0000")
+        let ended = board.endPick()
+        #expect(ended == "end")
         _ = board.sample(at: Self.centre("green"))
         #expect(board.history.steps == ["Colour", "Sample Colour"])
-        #expect(board.undo() && board.color == HexColor(250, 0, 0))
-        #expect(board.undo() && board.color == HexColor(0, 0, 255))
+        let firstUndo = board.undo()
+        #expect(firstUndo && board.color == HexColor(250, 0, 0))
+        let secondUndo = board.undo()
+        #expect(secondUndo && board.color == HexColor(0, 0, 255))
     }
 }
