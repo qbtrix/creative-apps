@@ -1,6 +1,6 @@
 # Feature packet: layer-styles (Photo)
 
-**Feature:** layer styles on Photo's image layers. Layer > Layer Style… (and
+**Feature:** layer styles on Photo's pixel and text layers (`photo/text-layers` adds `PhotoLayerKind.text`; the style is a `PhotoLayer` field, so a text layer takes it with no extra code, its glyph raster styled like any pixels). Layer > Layer Style… (and
 the Layers panel's `fx` button and row menu, once they land) opens SuiteUI's
 `LayerStylePanel` on the selected layer; drop shadow, inner shadow, glows,
 stroke, colour and gradient overlays and bevel and emboss draw live on the
@@ -49,7 +49,7 @@ Blueprint sections: photo.md 4 (Layers), 6 (inspector), 8.
 | PY-a | Image layers hold a `LayerStyle`, the `style.*` commands are in Photo's catalog on stubs, and Layer > Layer Style… opens the panel on the selected layer. | PY-1, PY-2 | MJ-PY | multi-layer-select; file-flow:PF-m (PY-1); suiteui layer-styles LS-a (cross-line) |
 | PY-u | The panel over the canvas has snapshots, a render budget and its journey written. | PY-3, PY-4 | PJ-Y1 | PY-a |
 | PY-m | Every style command sets each selected image layer's style as one undo step and refuses adjustment layers, the composite draws styles padded on the CPU, and the `.ora` keeps them. | PY-5, PY-6 | MJ-PY | PY-a; LS-m (cross-line) |
-| PY-z | The canvas draws styles live through the shared route, the journey passes on live, and photo.md lists the feature as built. | PY-7, PY-8 | PJ-Y1 | PY-u, PY-m; file-flow:PF-z (PY-8, the last earlier owner of `photo.md`); LS-gpu and IM-photo (PY-7, cross-line) |
+| PY-z | The canvas draws styles live through the shared route, the journey passes on live, and photo.md lists the feature as built. | PY-7, PY-8 | PJ-Y1 | PY-u, PY-m; text-layers:TX-z (PY-8, the last earlier owner of `photo.md`); LS-gpu and IM-photo (PY-7, cross-line) |
 
 PY-u waits only on PY-a (rule 18); PY-m never waits on PY-u. MJ-PY is
 `PhotoLayerStyleTests` and `PhotoStyleRenderTests` on Linux.
@@ -64,8 +64,8 @@ PY-u waits only on PY-a (rule 18); PY-m never waits on PY-u. MJ-PY is
 3. Turn Stroke on, Outside, 4 px, white; Done.
 4. Layer > Copy Layer Style, select "Background", Layer > Paste Layer Style:
    both rows' styles match.
-5. Select "Curves 1": Layer Style… is disabled with "Layer styles go on image
-   layers."
+5. Select "Curves 1": Layer Style… is disabled with "Layer styles go on pixel
+   and text layers."
 6. Save, close, reopen: the styles are there and still editable.
 
 ## Jobs
@@ -94,11 +94,11 @@ adjustment layer selected, the menu item's help).
 
 ```swift
 // Sources/PhotoModel/PhotoLayer.swift (PY-1)
-public internal(set) var style: LayerStyle = .none          // image layers only; adjustment layers keep .none
+public internal(set) var style: LayerStyle = .none          // pixel and text layers; adjustment layers keep .none
 // Sources/PhotoModel/PhotoStyle+Kernel.swift (PY-1 stubs, PY-5 bodies)
 extension PhotoWorkspace: LayerStyleTarget {
     public var styleSelection: LayerStyle? { get }           // the primary layer's, nil for none or an adjustment layer
-    public var styleHelp: String? { get }                    // StyleRules.noLayerHelp, or "Layer styles go on image layers."
+    public var styleHelp: String? { get }                    // StyleRules.noLayerHelp, or "Layer styles go on pixel and text layers."
     public var stylePanel: StyleKind? { get }
     public mutating func showStylePanel(_ kind: StyleKind?)  // state only, real from PY-1
     public mutating func setStyle(_ style: LayerStyle, name: String, drag: String?) throws   // NotBuilt until PY-5

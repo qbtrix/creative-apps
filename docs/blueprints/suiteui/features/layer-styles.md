@@ -26,8 +26,8 @@ lines: `photo/layer-styles`, `design/layer-styles` (RJ-D14),
 links DesignModel and HaloModel, widened in this PR) and **IM-m** (the route,
 for LS-9); gradient-fill's **GF-a** (`Fill`, `FillColor`,
 `GradientRules`, `GradientEditor`) and **GF-m** (`GradientSVG`, for LS-7);
-command-catalog (built: `CommandSpec`, `History`'s drag fold); pen-paths
-**PN-a**, the last owner of `SuiteGallery.swift` before this packet.
+command-catalog (built: `CommandSpec`, `History`'s drag fold); brush-keys
+**BK-u**, the last owner of `SuiteGallery.swift` before this packet.
 **creative-core:** `layer-style-engine` (core packet in this sprint): **LE-a**
 (the core types, through a `scripts/bump-core` PR) before LS-1, **LE-cpu**
 before LS-8, **LE-metal** before LS-9. Each reaches the apps only through a
@@ -92,7 +92,7 @@ Blueprint sections: suiteui.md 2.2 (components), 7.1 (budgets); suite.md 1.5
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| LS-a | SuiteImaging's `Style/` module declares the model, rules, presets, intents, the `style.*` command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a `layer-style` page, and every check is written, disabled. | LS-1, LS-2 | SJ0, MJ-LS | suite-imaging:IM-a; gradient-fill:GF-a; pen-paths:PN-a (LS-2); core LE-a through a bump (cross-line) |
+| LS-a | SuiteImaging's `Style/` module declares the model, rules, presets, intents, the `style.*` command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a `layer-style` page, and every check is written, disabled. | LS-1, LS-2 | SJ0, MJ-LS | suite-imaging:IM-a; gradient-fill:GF-a; brush-keys:BK-u (LS-2); core LE-a through a bump (cross-line) |
 | LS-u | On the gallery page the panel lists the eight styles with their switches, shows the selected style's rows (colour, blend, opacity, angle, distance, size, position, gradient, bevel), applies a preset, and is reachable from the Layers panel's `fx` button and row menu where that work has landed, within the render budget. | LS-3, LS-4 | LJ1 | LS-a |
 | LS-m | The rules clamp and default every parameter and keep one effect per kind, every `style.*` command records one undo step (a drag one), copy and paste round-trip as JSON, the SVG writer emits a filter for each style it can express and a warning for the rest, and `StyleProgram` maps a style to the core stack and back. | LS-5, LS-6, LS-7, LS-8 | MJ-LS | LS-a; gradient-fill:GF-m (LS-7); core LE-cpu through a bump (LS-8, cross-line) |
 | LS-gpu | The live route draws a styled layer on the GPU in one pass per step and matches the CPU within the core's parity tolerance, within 16 ms p95 for a 2,000 × 2,000 layer. | LS-9, LS-9b | MJ-LS-gpu | LS-m; suite-imaging:IM-m; core LE-metal through a bump (cross-line) |

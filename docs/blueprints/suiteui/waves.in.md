@@ -54,6 +54,36 @@ Its formats are the registry's camera RAW row; it adds no list of its own.
 Photo and the `afterglow` CLI adopt it in the packet itself; Library adopts
 it through `library/raw`, re-cut the same day to a thin adopter.
 
+The same wave carries the shared beta gaps (captain, 2026-10-21), cut from `paw-workspace/docs/design/drafts/2026-10-21-beta-gaps-combined.md`:
+`area-selection` (C1: area shapes, the wand, marching ants, group-aware
+clicks), `clipboard-interop` (C2: PNG and SVG on Copy, paste an image as a
+placed layer, one live coder and one shell bridge), `frame-rates` (C5: one
+rate list with the NTSC rates and drop-frame timecode), `anchor-parenting`
+(C6: Halo's anchor matrix lifted into a kernel `Placement`, Flare adopts),
+`orientation-crop` (C9: rotate, flip and a portrait-swappable crop on a new
+kernel `Crop` module, #3117) and `document-setup` (C4: one New Document sheet
+and Document Settings), plus `brush-keys` (C12). Each builds the shared part
+once and wires every app that needs it in its own adopt slice. Their app
+slices share each app's catalog, command-id list and CLI golden, so they
+chain in one order per app (frame-rates, area-selection, clipboard-interop,
+document-setup, orientation-crop, anchor-parenting, brush-keys), and their
+SuiteUI slices chain on `SuiteGallery.swift` after pen-paths PN-a. The
+baseline chain continues after suite-imaging's IM-z: area-selection AR-z,
+clipboard-interop CB-z, orientation-crop OC-z. Two need a creative-core bump
+that isn't filed yet: Flare's half of frame-rates (a rational scene rate) and
+of anchor-parenting (a transform anchor, a layer parent, Lottie `a` and
+`parent`).
+
+The same wave also carries the imaging, text and keys beta gaps:
+`adjust-everywhere` (C8: Black & White, Invert, filters and looks in
+SuiteImaging, the preset store in SuiteModel), `fill-heal` (C10: paint bucket,
+spot heal, heal and remove on core's engines), `text-style` (C11: the kernel's
+text style and SuiteUI's style row; Photo's half is `photo/text-layers`) and
+`timeline-keys` (C13: colour keys and span slide in the kernel's Keys). Their
+app slices on one app's files come after the packets above on the same
+files and then wait on each other in that order, so the adopts land one
+after another.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 **Wave 4 (beta-80 W1, 2026-10-18).** `font-picker` is SuiteUI's piece of

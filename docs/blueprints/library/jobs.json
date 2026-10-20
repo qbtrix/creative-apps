@@ -666,5 +666,25 @@
     ],
     "waits_on": "LF-3",
     "added_by": "library/file-flow"
+  },
+  "RJ-L70": {
+    "id": "RJ-L70",
+    "app": "library",
+    "weight": "high",
+    "job": "Stand up a sideways 4000x3000 scan with Rotate Right, crop it 4:5 portrait, and export JPEG.",
+    "outcome": "The JPEG is 3000x3750 and its top row matches the scan's left column within 2 levels.",
+    "needs": [
+      "suiteui/orientation-crop"
+    ],
+    "closes_with": "suiteui/orientation-crop",
+    "trap": "4:5 on the landscape original gives 5:4, or export ignores the turn",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "OC-8",
+    "added_by": "suiteui/orientation-crop"
   }
 }
