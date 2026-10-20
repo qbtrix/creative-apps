@@ -98,3 +98,4 @@ Next: #3465 (head 00f26ebb) and #3473 (head 7e6638e9, dev merged in) ready for t
 - 13:09Z MD-14 #3544 un-drafted, head dbe65695, 5 files +398 tests only, CI PASS. Next on MD-14 merge: MD-15 #3574.
 - 13:10Z MD-19 #3545 un-drafted, head 3675867a, 4 files +343 tests only, CI PASS. Next on MD-19 merge: MD-20 #3575. Ready, waiting on lane: MD-6 #3547, MD-9 #3533, MD-14 #3544, MD-19 #3545.
 - 13:12Z MD-6 #3547 merged (0b28402fd). Fixer started for MD-7 #3548 (conflicting; merge dev in, un-draft). Ready on lane: MD-9 #3533, MD-14 #3544, MD-19 #3545. No library-scoped CI run on dev yet since MD-4 (dev runs queued); MD-a Belt-Slice-Done waits. No new line:library findings.
+- 13:20Z MD-7 #3548 un-drafted, head 6234b33c, 2 files +18/-9, CI PASS (app code; macOS build is first compile). Next on MD-7 merge: MD-8 #3550.
