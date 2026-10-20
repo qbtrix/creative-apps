@@ -30,18 +30,18 @@ import Testing
                                                           height: content.pixels.height), transform: transform)
     }
 
-    @Test(.disabled("waits on PT-4")) func helpIsNil() {
+    @Test func helpIsNil() {
         #expect(live.unavailableHelp == nil)
     }
 
-    @Test(.disabled("waits on PT-4")) func theIdentityCommitGivesTheLayerBack() throws {
+    @Test func theIdentityCommitGivesTheLayerBack() throws {
         let content = try layer(5, 3, x: 7, y: -2)
         let out = try live.applied(draft(content), to: content)
         #expect(out == content)
         #expect(try out.pixels.flattened() == content.pixels.flattened())
     }
 
-    @Test(.disabled("waits on PT-4")) func turn90Size() throws {
+    @Test func turn90Size() throws {
         let content = try layer(4, 2)
         let out = try live.applied(draft(content, PhotoModel.LayerTransform(degrees: 90)), to: content)
         #expect(out.pixels.width == 2 && out.pixels.height == 4)
@@ -56,7 +56,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on PT-4")) func flipHorizontal() throws {
+    @Test func flipHorizontal() throws {
         let content = try layer(4, 3, x: 2, y: 5)
         let source = try content.pixels.flattened()
         let across = try live.flipped(content, .horizontal), down = try live.flipped(content, .vertical)
@@ -70,7 +70,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on PT-4")) func flippingTwiceGivesTheInput() throws {
+    @Test func flippingTwiceGivesTheInput() throws {
         let content = try layer(5, 4, x: 3, y: 1)
         for axis in FlipAxis.allCases {
             let twice = try live.flipped(live.flipped(content, axis), axis)

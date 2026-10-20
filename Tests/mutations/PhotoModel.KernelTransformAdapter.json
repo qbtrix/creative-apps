@@ -23,8 +23,8 @@
   {
     "label": "axesSwapped: a canvas point reaches the kernel with x and y swapped",
     "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
-    "find": "turned(Point(x: p.x, y: p.y), -1)",
-    "replace": "turned(Point(x: p.y, y: p.x), -1)",
+    "find": "TransformRules.local(Point(x: p.x, y: p.y), in: kernel)",
+    "replace": "TransformRules.local(Point(x: p.y, y: p.x), in: kernel)",
     "tests": "PhotoKernelTransformTests"
   },
   {
