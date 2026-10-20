@@ -15,9 +15,7 @@ enum GalleryCanvasHost {
     /// The status line under the log: the hovered mark and the backend in use.
     static let statusID = "suite.gallery.canvas-host.status"
 
-    /// This page, and the eyedropper's page over the same kind of canvas.
     @MainActor static let pages: GalleryPages = [name: { AnyView(CanvasHostPage()) }]
-        .merging(GalleryEyedropper.pages) { old, _ in old }
 }
 
 /// The page's document: twenty tiles in a 4 x 5 grid over 4096 x 2160, each a
