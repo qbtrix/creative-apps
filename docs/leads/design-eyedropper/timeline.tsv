@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-20T20:36Z	-	check	#3691	macOS build 39487327792 still queued (42m)
 2026-10-20T20:58Z	-	check	#3691	macOS build 39487327792 still queued; mac runners busy with older builds
 2026-10-20T21:20Z	-	check	#3691	macOS build 39487327792 still queued (87m)
+2026-10-20T21:42Z	-	check	#3691	macOS build 39487327792 still queued (109m)
