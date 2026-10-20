@@ -51,7 +51,7 @@ Blueprint sections: photo.md 4 (Edit and Image menus), 6 (canvas overlays).
 |---|---|---|---|---|
 | PT-a | The adapter is declared as stubs and Free Transform is reachable from the Edit menu with turned handles and the transform rows on them. | PT-1, PT-2 | MJ-PT | suiteui/transform-tools TT-a (cross-line) |
 | PT-u | Canvas Size's sheet works on the stubs and the transform overlay's snapshots and render budget hold. | PT-3, PT-7 | PJ-T1 | PT-a; TT-u (PT-7, cross-line) |
-| PT-m | The draft scales and turns as one step per gesture, commit resamples once, flips mirror the layer in place, and Canvas Size pads or crops about its anchor. | PT-4, PT-5, PT-6 | MJ-PT | PT-a; gradient-fill:PG-m (PT-5); TT-m (PT-5, cross-line) |
+| PT-m | The draft scales and turns as one step per gesture, commit resamples once, flips mirror the layer in place, and Canvas Size pads or crops about its anchor. | PT-4, PT-5, PT-6 | MJ-PT | PT-a; multi-layer-select:PM-m (the catalog, PT-5); gradient-fill:PG-m (PT-5); TT-m (PT-5, cross-line) |
 | PT-z | The journey turns, flips and adds a border on live services, and the feature is built. | PT-8, PT-9 | PJ-T1 | PT-u, PT-m |
 
 PT-u waits only on PT-a (rule 18); PT-m never waits on PT-u. MJ-PT is the
