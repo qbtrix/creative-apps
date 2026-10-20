@@ -49,6 +49,8 @@ import SuiteKernel
         let spec = ShapeSpec(kind: .arrow, start: Point(x: 0, y: 0.5), end: Point(x: 1, y: 0.5))
         let points = try Self.vertices(spec, in: Rect(minX: 0, minY: 0, maxX: 100, maxY: 40))
         #expect(points.contains(Point(x: 100, y: 20)) && points.allSatisfy { $0.x <= 100 + 1e-9 })
+        // The shaft runs from the start to the head's base; the head's tip, its first point, is the line's end.
+        #expect(points.first == Point(x: 0, y: 20) && points.dropFirst(2).first == Point(x: 100, y: 20))
     }
     @Test func shiftSquaresToLarger() {
         let drag = ShapeRules.dragged(.rectangle, from: Point(x: 10, y: 10), to: Point(x: 50, y: 40), modifiers: .shift)
