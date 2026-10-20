@@ -2,7 +2,7 @@
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
-Stage: 2 plan done
+Stage: 3 build W1
 Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
 Next: blocked: suiteui tone-controls TC-a has not started (its lead waits on GF-2, AH-a and PL-a); PT-1 starts once TC-a is slice-done
 
