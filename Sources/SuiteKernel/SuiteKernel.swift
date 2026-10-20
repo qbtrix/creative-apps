@@ -18,6 +18,12 @@
 //               and versioned JSON probing
 //   Stroke/     pressure samples, smoothing, dab spacing, brush settings and
 //               presets, the live copy a drag draws on
+//   Commands/   the command catalog (docs/blueprints/suiteui/features/
+//               command-catalog.md): `CommandSpec` (an id, typed params with a
+//               JSON schema, a kind, a description, an availability that says
+//               why not), `CommandCatalog` (list, describe, run, batch), and
+//               `HeadlessDocument`, the document the CLI, MCP and tests drive
+//               with no window. Menus, buttons, the CLI and MCP run one path
 //
 // Geometry.swift gives the kernel its geometry: FlareCore's `Point`, `Rect`
 // and `Matrix` under kernel names, the handle, pick, direction and modifier
