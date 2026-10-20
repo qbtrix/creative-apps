@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 #3547 (draft on MD-5 #3492); MD-7 building (on MD-6 #3547); MD-10 building (on MD-9 #3533)
+Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then #3492 after #3465, #3533, #3544 and #3545 after #3473; MD-6 #3547 (draft on MD-5 #3492); MD-7 #3548 (draft on MD-6 #3547); MD-8 building (on MD-7 #3548); MD-10 building (on MD-9 #3533)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -27,7 +27,8 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 | MD-14 | MD-d | 5 | XMP/sidecar checks, disabled | LibraryXMPTests, LibrarySidecarPlanTests, LibrarySidecarWriterTests, LibrarySidecarSnapshots, LibraryJourneyTests+Sidecars | compiles, disabled | #3544 | draft, stacked on #3473 |
 | MD-19 | MD-e | 4 | check-first for MD-e: search parsing, order, budget, MD-J4, all disabled | LibrarySearchTests, LibrarySearchOrderTests, LibrarySearchBudgetTests, LibraryJourneyTests+Search | compiles, disabled | #3545 | draft on #3473 + #3465 |
 | MD-6 | MD-b | 5 | CameraDetails(exif:tiff:), display texts, CameraRow.rows(for:) ranges and counts; enables LibraryCameraRowsTests | PhotoDetails.swift, LibraryCameraRowsTests, plan LibraryModel.PhotoDetails.json | LibraryCameraRowsTests | #3547 | draft on #3492 |
-| MD-7, MD-8, MD-10 .. MD-22 | MD-b..MD-e | 5+ | see packet Build waves | see packet | see packet | - | planned |
+| MD-7 | MD-b | 6 | ImageIODecoder reads Exif/TIFF into CameraDetails; LibraryCameraDecodeTests on | LA/Platform/ImageIODecoder.swift, AT/LibraryCameraDecodeTests.swift | LibraryCameraDecodeTests (macOS) | #3548 | draft, stacked on #3547 |
+| MD-8, MD-10 .. MD-22 | MD-b..MD-e | 5+ | see packet Build waves | see packet | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -62,3 +63,4 @@ Next: when #3460 merges, merge dev into #3465 and #3473 and un-draft them, then 
 
 - 07:07Z: #3460 lane macOS build 39377907664 succeeded; waiting on the lane merge.
 - 07:15Z check-in: #3423 and #3460 macOS builds green, not yet merged by the lane; #3424 build 39366318428 still queued (since 03:49Z). No new line:library findings in these features' files. Builders: MD-7, MD-10, FC-12; FC-10 blocked on S-L9 #3411.
+- MD-7 (#3548, head ad6ca8dc): 2 files +18/-9 over MD-6; tag reading stays in the Model (decoder hands bridged Exif/TIFF dictionaries to CameraDetails). Decode tests run on macOS only, so the Linux gate proved compile and lints. No mutation plan (App target, per packet).
