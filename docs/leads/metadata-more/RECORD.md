@@ -4,7 +4,7 @@ Issue: #1555 · Packet: docs/blueprints/library/features/metadata-more.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: #3465 (head 00f26ebb) and #3473 (head 1d8c098d) ready for the lane; when #3465 merges, merge dev into MD-5 #3492 and un-draft; when #3473 merges, the same for MD-9 #3533, MD-14 #3544, MD-19 #3545 (the second of #3465/#3473 to merge likely gets needs-rebase on the library-model-sources C4 part: keep both clauses); MD-6 #3547, MD-7 #3548, MD-8 #3550 drafts; MD-10, MD-11, MD-12 building (on MD-9 #3533)
+Next: #3465 (head 00f26ebb) and #3473 (head 1d8c098d) ready for the lane; when #3465 merges, merge dev into MD-5 #3492 and un-draft; when #3473 merges, the same for MD-9 #3533, MD-14 #3544, MD-19 #3545 (the second of #3465/#3473 to merge likely gets needs-rebase on the library-model-sources C4 part: keep both clauses); MD-6 #3547, MD-7 #3548, MD-8 #3550 drafts; MD-12 #3569 (draft on MD-9 #3533); MD-10, MD-11 building (on MD-9 #3533)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -70,3 +70,4 @@ Next: #3465 (head 00f26ebb) and #3473 (head 1d8c098d) ready for the lane; when #
 - MD-8 (#3550, head e57f5481): 3 files +59/-11 over MD-7. Taken date is formatted in the view with Date.FormatStyle (the Model helper is internal), so snapshot text follows the CI Mac locale; critics should check. Adds identifier library.metadata.camera.none. PNGs: library-camera{,-mixed,-none}-{light,dark}.png. MD-b slice code complete once the stack merges.
 - 07:59Z check-in: #3424 still open, mergeable clean; lane macOS build 39366318428 still queued (4h10m, runner backlog). No new line:library findings. Running: MD-10 (gate), MD-11 (building on MD-9), fixer for #3465/#3473. Drafts recorded: MD-8 #3550, FC-12 #3551.
 - 08:05Z: fixer merged dev into #3465 (CI: PASS on 2nd run) and #3473 (only LibraryCatalogBudgetTests/LibraryGridBudgetTests failed under load; both pass alone, so Fast-Check: pass kept, noted in the body); both un-drafted. Both edit the same C4 description in library-model-sources.json. MD-12 builder launched (feat/library-md12-metadata-persist on MD-9).
+- MD-12 (#3569, head 7875f7da): 3 files, +74/-5. Mutate 4/4 on LibraryModel.LiveCatalogCoding. Private optional-field Camera record in LiveCatalogCoding (CameraDetails stays non-Codable); nil keys omitted, golden catalog-v1 byte-equal. Gate PASS (grid budget flaked under load, passes alone).
