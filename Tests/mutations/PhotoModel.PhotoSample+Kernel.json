@@ -1,0 +1,4 @@
+[
+  {"label": "helpInverted: the eyedropper asks for an image while one is open", "file": "Sources/PhotoModel/PhotoSample+Kernel.swift", "find": "canvas == nil ? \"Open an image first.\" : nil", "replace": "canvas != nil ? \"Open an image first.\" : nil", "tests": "PhotoSampleTests"},
+  {"label": "sizeIgnored: picking a sample size leaves the square as it was", "file": "Sources/PhotoModel/PhotoSample+Kernel.swift", "find": "sampleSize = size", "replace": "_ = size", "tests": "PhotoSampleTests"}
+]
