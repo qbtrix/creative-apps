@@ -1,6 +1,8 @@
 // PhotoCommands+Edit.swift: Photo's Edit menu items: Undo and Redo named for
 // the edit; Cut, Copy, Paste and Select All in place of the system's
-// pasteboard group; then Delete Selection and Fill Selection. Every item
+// pasteboard group; then Delete Selection and Fill Selection; then Free
+// Transform (Command-T) and Transform > Flip Horizontal and Flip Vertical
+// (transform PT-2, PhotoTransformEditMenu). Every item
 // carries the system's SF Symbol for its action (PhotoEditItem), as the Layer
 // menu's do. Cut, Copy and Paste act on the image only when no text has focus
 // (photo-edit's decision): while the key window's first responder is a text
@@ -14,6 +16,7 @@
 // shortcut and runs the same text-first PhotoMenu.selectAll.
 import AppKit
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -27,6 +30,7 @@ extension PhotoCommands {
         }
         CommandGroup(after: .pasteboard) {
             PhotoSelectionEditMenu(menu: menu)
+            PhotoTransformEditMenu(menu: menu)
         }
     }
 }
@@ -120,6 +124,42 @@ struct PhotoSelectionEditMenu: View {
         }
         menu.item("edit.fill-selection", systemImage: PhotoEditItem.fillSelection.systemImage) {
             menu.perform(.fillSelection)
+        }
+    }
+}
+
+/// Free Transform and the Transform submenu's flips. Each reads its spec on
+/// the focused window's workspace, so it is off with no pixel layer and says
+/// why. Free Transform's spec is local until PT-5 registers `transform.begin`
+/// in Photo's catalog; the flips run SuiteKernel's `transform.flip`.
+struct PhotoTransformEditMenu: View {
+    let menu: PhotoMenu
+
+    /// Free Transform's spec: on while the workspace can transform its layer.
+    static let beginSpec = CommandSpec<PhotoWorkspace>.typed(
+        "transform.begin", title: "Free Transform", summary: "Puts a transform box with handles on the selected layer.",
+        kind: .edit, params: JSONValue.self, example: .object([:]),
+        availability: { $0.transformHelp.map(Availability.unavailable) ?? .available }
+    ) { _, _ in JSONValue.object([:]) }
+
+    /// SuiteKernel's flip spec for Photo; nil only if the kernel drops it.
+    static let flipSpec = TransformCommands.specs(PhotoWorkspace.self).first { $0.id == "transform.flip" }
+
+    var body: some View {
+        Divider()
+        MenuCommand(
+            Self.beginSpec, on: menu.workspace, systemImage: "arrow.up.left.and.arrow.down.right",
+            shortcut: KeyboardShortcut("t")
+        ) { menu.perform(.transform(.begin)) }
+        if let spec = Self.flipSpec {
+            Menu("Transform") {
+                MenuCommand(spec, on: menu.workspace, title: "Flip Horizontal", systemImage: "arrow.left.and.right") {
+                    menu.perform(.transform(.kernel(.flip(.horizontal))))
+                }
+                MenuCommand(spec, on: menu.workspace, title: "Flip Vertical", systemImage: "arrow.up.and.down") {
+                    menu.perform(.transform(.kernel(.flip(.vertical))))
+                }
+            }
         }
     }
 }

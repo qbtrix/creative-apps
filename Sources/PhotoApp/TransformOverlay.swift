@@ -1,19 +1,62 @@
-// TransformOverlay.swift: Free Transform's box over the canvas. Empty until
-// PV-7 draws the box and its handles: nothing while the workspace has no
-// transform draft, and with one only its element `photo.canvas.transform-box`,
-// "Transform box", at the box's frame before the transform.
+// TransformOverlay.swift: Free Transform's box over the canvas (transform
+// PT-2). Nothing while the workspace has no transform draft; with one, the
+// element `photo.canvas.transform-box`, "Transform box", at the draft's
+// unturned box, and SuiteUI's SelectionHandlesEditor on it, turned with the
+// draft. A handle drag asks for `.set` with the box it gives (keeping the
+// turn and flips); a knob drag asks for `.set` with the box turned from where
+// the drag began. Every sample of one drag carries one token, so the draft
+// records one step per gesture. Values in, intents out.
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 struct TransformOverlay: View {
     let model: PhotoWorkspace
     let zoom: Double
+    var perform: PhotoPerform = { _ in }
+    /// The running drag's token and the turn it began from; nil between drags.
+    @State private var gesture: (token: String, degrees: Double)?
 
     /// The transform box's element; nil without a transform draft.
-    var mark: PhotoCanvasMark? { model.transformDraft.map { PhotoCanvasMark.transformBox($0.box.cgRect) } }
+    var mark: PhotoCanvasMark? { box.map { PhotoCanvasMark.transformBox(Self.rect($0.box)) } }
+
+    /// The draft's box as the kernel sees it; nil without a draft.
+    private var box: TransformBox? { model.transformDraft == nil ? nil : model.transformSelection }
 
     var body: some View {
-        if let mark = mark { mark.probe(zoom: zoom) }
+        if let box, let mark {
+            ZStack(alignment: .topLeading) {
+                mark.probe(zoom: zoom)
+                SelectionHandlesEditor(rect: mark.rect, degrees: box.degrees, zoom: zoom, onResize: { resize(box, to: $0) },
+                                       onRotate: { turn(box, by: $0) }, onEnd: { gesture = nil })
+            }
+        }
     }
+
+    /// A handle drag: the box it gives, with the draft's turn and flips.
+    private func resize(_ current: TransformBox, to rect: CGRect) {
+        var next = current
+        next.box = Rect(minX: Double(rect.minX), minY: Double(rect.minY), maxX: Double(rect.maxX), maxY: Double(rect.maxY))
+        perform(.transform(.kernel(.set(next, drag: token(current)))))
+    }
+
+    /// A knob drag: `degrees` turned since the drag began.
+    private func turn(_ current: TransformBox, by degrees: Double) {
+        let token = token(current)
+        var start = current
+        start.degrees = gesture?.degrees ?? current.degrees
+        perform(.transform(.kernel(.set(TransformRules.rotated(start, by: degrees), drag: token))))
+    }
+
+    /// The running drag's token, starting one (from `current`'s turn) on its first sample.
+    private func token(_ current: TransformBox) -> String {
+        if let gesture { return gesture.token }
+        let token = UUID().uuidString
+        gesture = (token, current.degrees)
+        return token
+    }
+
+    /// A kernel box in document pixels as a CGRect.
+    private nonisolated static func rect(_ b: Rect) -> CGRect { CGRect(x: b.minX, y: b.minY, width: b.width, height: b.height) }
 }
