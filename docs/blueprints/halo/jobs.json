@@ -597,5 +597,26 @@
     "sources": [
       "https://lesterbanks.com/?p=68217"
     ]
+  },
+  "RJ-H32": {
+    "id": "RJ-H32",
+    "app": "halo",
+    "weight": "med",
+    "job": "Give a solid layer a radial gradient, white at the centre to black at the edge, and render frame 0.",
+    "outcome": "In the rendered PNG the layer's centre pixel is within 2/255 of white and its corner within 2/255 of black, and the viewer's frame has the same pixels.",
+    "needs": [
+      "S24",
+      "halo/gradient-fill"
+    ],
+    "closes_with": "halo/gradient-fill",
+    "trap": "The viewer draws the gradient but the render path still fills the layer's old solid colour",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HG-6",
+    "added_by": "halo/gradient-fill"
   }
 }

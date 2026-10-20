@@ -11,7 +11,7 @@ import SuiteUI
 import SwiftUI
 
 enum DesignIntent {
-    case newFile, open, save, saveAs
+    case newFile, open, save, saveAs, export
     case undo, redo
     case tool(DesignTool)
     case drag(CGPoint, CGPoint, DesignModifiers)

@@ -32,7 +32,7 @@ import Testing
         let store = SuiteControlStore()
         let view = DesignInspectorText(model: model, perform: { _ in })
         _ = try #require(render(view.environment(\.suiteControlStore, store), scheme: .light))
-        let width = store.inventory.document().controls.first { $0.id == DesignInspectorText.widthID }
+        let width = store.inventory.document().controls.first { $0.id == DesignControlID.inspectorTextWidth }
         #expect(width?.enabled == true)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(

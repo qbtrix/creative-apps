@@ -113,8 +113,20 @@ public enum DesignControlID {
     public static let inspectorTextSize = "design.inspector.text-size"
     public static let inspectorTextWeight = "design.inspector.text-weight"
     public static let inspectorTextAlignment = "design.inspector.text-alignment"
+    /// The Text section's Width row: Auto width or Fixed width.
+    public static let inspectorTextWidth = "design.inspector.text-width"
     public static let inspectorPageWidth = "design.inspector.page-width"
     public static let inspectorPageHeight = "design.inspector.page-height"
+    /// File > Export…'s sheet (design-export); Export, Cancel and Done are SuiteExportSheet's ids.
+    public static let exportSheet = "design.export.sheet"
+    public static let exportFormat = "design.export.format"
+    public static let exportScale = "design.export.scale"
+    public static let exportScope = "design.export.scope"
+    public static let exportItems = "design.export.items"
+    public static let exportRun = "design.export.start"
+    public static let exportCancel = "design.export.cancel"
+    public static let exportDone = "design.export.dismiss"
+    public static let exportResult = "design.export.result"
 
     /// A palette tool: "design.tool.rectangle".
     public static func tool(_ tool: DesignTool) -> String { "design.tool.\(tool.rawValue)" }
@@ -132,7 +144,9 @@ public enum DesignControlID {
         inspectorHeader, inspectorFill, inspectorCornerRadius, inspectorOpacity,
         inspectorStrokeColor, inspectorStrokeWidth, inspectorStrokeAdd, inspectorStrokeRemove,
         inspectorTextFamily, inspectorTextSize,
-        inspectorTextWeight, inspectorTextAlignment, inspectorPageWidth, inspectorPageHeight,
+        inspectorTextWeight, inspectorTextAlignment, inspectorTextWidth, inspectorPageWidth, inspectorPageHeight,
+        exportSheet, exportFormat, exportScale, exportScope, exportItems, exportRun,
+        exportCancel, exportDone, exportResult,
     ] + DesignToolbarItem.allCases.map(\.identifier) + DesignTool.allCases.map(tool)
         + DesignFrameField.allCases.map(frameField) + DesignAlignEdge.allCases.map(align)
         + DesignDistributeAxis.allCases.map(distribute)

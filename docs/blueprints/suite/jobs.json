@@ -531,5 +531,25 @@
     "sources": [
       "https://helpx.adobe.com/lightroom-classic/help/library-module-basic-workflow.html"
     ]
+  },
+  "RJ-X30": {
+    "id": "RJ-X30",
+    "app": "suite",
+    "weight": "high",
+    "job": "Give a shape a three-stop linear gradient at 45 degrees by commands alone, drag its middle stop with 120 moves, then undo once.",
+    "outcome": "The saved document holds stops at 0, 0.5 and 1 on a 45-degree line through the shape's centre, and after the drag and one undo the middle stop is back at 0.5.",
+    "needs": [
+      "S24"
+    ],
+    "closes_with": "S24",
+    "trap": "The 120 moves land as 120 undo steps, or the angle is saved in radians",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "GF-9",
+    "added_by": "suiteui/gradient-fill"
   }
 }
