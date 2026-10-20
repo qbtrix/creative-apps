@@ -49,6 +49,7 @@ flare FlareModelTests.hitWithinBudget
 flare FlareModelTests.machineEditsAndPreviewTicksStayWithinTheirModelBudgets
 flare FlareModelTests.nestedDrawListWithinBudget
 flare AppSnapshotTests.BodyCountSuites/RenderBudgetFlareTests/timing
+flare AppSnapshotTests.BodyCountSuites/RenderBudgetFlareExportTests/timing
 
 library LibraryModelTests.oneEditOnSixtyPhotosStaysInBudget
 library LibraryModelTests.orderRebuildWithinBudget
