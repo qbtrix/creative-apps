@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-20T21:39Z	3	heartbeat	-	wave 1 builders done; opening PRs
 2026-10-20T21:43Z	4	pr-opened	#3768	PF-a (PF-1, PF-2), fast-lane
 2026-10-20T22:14Z	4	heartbeat	#3768	lane dispatched macOS build run 39504439911 (queued)
+2026-10-20T22:44Z	4	heartbeat	#3768	macOS build still queued behind 5 macOS runs
