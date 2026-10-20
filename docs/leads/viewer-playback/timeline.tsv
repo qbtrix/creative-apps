@@ -204,3 +204,4 @@ utc	stage	event	ref	note
 2026-10-20T12:11Z	heartbeat	#1705: full 39409307241 (a54a892a) macOS journeys running since 11:52Z; scoped halo 39411345091 macOS running, journeys queued
 2026-10-20T12:28Z	heartbeat	#1705: journeys running in full 39409307241 and scoped halo 39411345091; scoped macOS (halo) red on HaloLayersSnapshots.layerList (LayerTreeOptions.nests) and HaloLayoutTests.transformBarsAlign, not viewer-playback code (layers #3217 owner); left to dev-red
 2026-10-20T12:45Z	heartbeat	#1705: journeys still running (full 39409307241 on Design journeys, scoped halo 39411345091); full 39416190119 cancelled
+2026-10-20T13:13Z	done	#1705 closed: testLayersDrawAtThePlayhead passed in scoped halo run 39411345091 (575cc800, contains e50f30b3); HaloEasing testEaseKeys and HaloRender testRenderPNGSequence failed there, outside viewer-playback
