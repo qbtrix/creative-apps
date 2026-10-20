@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-20T20:56Z	DT-a	pr-opened	#3751	head 4209ed6, 397 lines/14 files own diff, stacked on #3687, Mutate 14/14 DesignNode
 2026-10-20T21:00:34Z	DT-a	review	#3751	supervisor sentinel needs-split (645/17 incl. DG-a stack); own diff 397/14; replied, asked to hold until #3687
 2026-10-20T21:00:34Z	poll	heartbeat	-	#3687 open, #3698 open, #3684 open, #3686 open
+2026-10-20T21:21:54Z	poll	heartbeat	#3751	lane refused (645/17 stacked), needs-split; supervisor question open; #3687 still open
