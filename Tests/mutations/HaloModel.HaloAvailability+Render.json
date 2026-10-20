@@ -1,0 +1,4 @@
+[
+  {"label": "renderDisabledWhileRunning: Render… drops its help while a render runs", "file": "Sources/HaloModel/Availability/HaloAvailability+Render.swift", "find": "            if case .running = run { return \"A render is already running.\" }\n", "replace": "", "tests": "HaloRenderAvailabilityTests.renderDisabledWhileRunning"},
+  {"label": "renderEnabledAfterFinish: Render… treats a finished render as still running", "file": "Sources/HaloModel/Availability/HaloAvailability+Render.swift", "find": "            if case .running = run { return \"A render is already running.\" }\n", "replace": "            switch run { case .running, .finished: return \"A render is already running.\"; default: break }\n", "tests": "HaloRenderAvailabilityTests.renderEnabledAfterFinish"}
+]
