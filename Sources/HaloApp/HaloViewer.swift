@@ -1,6 +1,6 @@
 // HaloViewer.swift: Halo's main content: HaloViewerCanvas, the Model's
 // `viewerNotice` captioned under it while layers can't be drawn, a status bar
-// with HaloTransport, HaloTimelineView and a refusal's caption, or the empty
+// with HaloTransport and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
 // state. The status bar's tooltips (HaloStatusText) say what the timecode's
 // four parts count and that the pills are zoom and pixel size. A narrow
 // column drops the layer count, then the transport, then the timecode, so the
@@ -88,7 +88,10 @@ struct HaloViewer: View {
                     .help(comp.statusTimecodeHelp)
             }
             if layers { Text(comp.layerSummary).help("Layers in this composition.") }
-            if transport { HaloTransport(model: model, perform: perform) }
+            if transport {
+                HaloTransport(model: model, perform: perform)
+                HaloHistoryControl()
+            }
         }
         .help(HaloComposition.viewerPillsHelp)
     }
