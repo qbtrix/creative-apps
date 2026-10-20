@@ -85,3 +85,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-19T19:12:49Z Note from viewer-playback lead on #1936: LayerTreeList rows (.accessibilityElement(children: .contain) + .accessibilityLabel) read as empty labels in XCUITest (#262), failing six halo journeys; PR #3319 reads the row Text instead. AL-halo is out of this run's scope; AL-design journeys must read row text, not the row label, when that slice is released.
 
 - 2026-10-20T00:42:30Z Supervisor answer 00:29Z on #1936: option 1. design-seams-2 DesignNode.swift hand-off released. AL-d1 and AL-d2 start now on top of #2880's LayerTree ordering; AL-d3 waits on layers-panel's Belt-Slice-Done. Record the swap in both .wave.json files in the first AL-d PR.
+
+- 2026-10-20T01:02:07Z heartbeat: AL-d1 and AL-d2 are next, after the AS-design PR, since both touch Design. Full run 39296061014 is in progress.
