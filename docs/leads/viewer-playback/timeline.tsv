@@ -184,3 +184,4 @@ utc	stage	event	ref	note
 2026-10-20T04:46Z	heartbeat	#1705 verify: scoped halo run 39357615737 still queued (macOS backlog since 02:12Z)
 2026-10-20T05:09Z	heartbeat	#1705 verify: run 39357615737 still queued; macOS backlog 25 runs queued, 3 CI in progress since 02:26Z
 2026-10-20T05:31Z	heartbeat	#1705 verify: run 39357615737 still queued (macOS backlog)
+2026-10-20T05:53Z	heartbeat	#1705 verify: run 39357615737 still queued (macOS backlog, ~3h40m)
