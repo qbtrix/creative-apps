@@ -7,3 +7,5 @@ utc	stage	event	ref	note
 2026-10-20T19:50Z	3	heartbeat	-	PH-a builder still running
 2026-10-20T19:52Z	3	pr-opened	#3708	PH-a: 12 files +336/-27, Mutate 2/2, head 9d5d8f6; jump row is a stub until PH-5; one line added to command-path baseline (Window > History)
 2026-10-20T19:52Z	3	wave-start	-	wave 2 (history): PH-6 and PH-3 stacked on PH-a
+2026-10-20T20:10Z	3	branch-pushed	lead/history-panel-PH-3	PH-3 head 5272984, CI PASS (Linux; view+tests macOS-only), own diff 2 files +118/-4; PR waits for #3708
+2026-10-20T20:10Z	3	open-item	PH-5	canonical: PhotoWorkspace.jumpToHistoryStep already jumps via kernel; PH-5 body = that + endAdjust + range throw
