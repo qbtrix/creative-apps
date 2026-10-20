@@ -52,7 +52,7 @@ struct DesignCanvas: View {
     /// `page` of `shown`, the live copy while a drag or scrub lasts and `model` otherwise.
     private func canvas(_ page: DesignPage, shown: DesignWorkspace) -> some View {
         let painted = page.painted
-        let feedback = DesignCanvasFeedback(model: shown, zoom: zoom)
+        let feedback = DesignCanvasFeedback(model: shown, zoom: zoom, perform: perform)
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
