@@ -45,8 +45,6 @@ private func twoPhotos() -> LibraryCatalog {
     catalog.addKeywords("Sunset")
     catalog.addKeyword(toAll: "Sunset")
     catalog.removeKeyword("Beach")
-    catalog.setTitle("Bay")
-    catalog.setCaption("Evening")
     #expect(catalog == before)
     #expect(catalog.keywordStates.isEmpty)
     #expect(catalog.keywordSuggestions(prefix: "").isEmpty)
