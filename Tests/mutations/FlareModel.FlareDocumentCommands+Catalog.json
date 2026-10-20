@@ -2,8 +2,8 @@
   {
     "label": ".lockedLayerUnavailable: the dry run is skipped, so every command reads available",
     "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
-    "find": "        if let error = copy.layerError { return .unavailable(error.message) }\n",
-    "replace": "",
+    "find": "        return copy.layerError.map { .unavailable($0.message) } ?? .available\n",
+    "replace": "        return .available\n",
     "tests": "FlareCoreCommandCatalogTests"
   },
   {
@@ -30,8 +30,8 @@
   {
     "label": "notDrawnOnStage is ignored: mask and matte commands read available though the stage can't draw them",
     "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
-    "find": "        return notDrawnOnStage.contains(C.id) ? .unavailable(masksNotDrawn) : .available\n",
-    "replace": "        return .available\n",
+    "find": "        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }\n",
+    "replace": "",
     "tests": "FlareCoreCommandCatalogTests"
   }
 ]

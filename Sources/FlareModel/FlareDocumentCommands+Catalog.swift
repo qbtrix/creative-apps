@@ -29,13 +29,13 @@ extension FlareWorkspace {
     public static let masksNotDrawn = "Flare's stage and PNG frames don't draw masks or mattes yet, so this would "
         + "export a different picture from the one on the stage. Removing or reordering a mask still works."
 
-    /// The dry run: `example` on a copy of `workspace`; unavailable with the engine's message when it is refused,
-    /// or with `masksNotDrawn` for a `notDrawnOnStage` id the engine would take.
+    /// The dry run: `example` on a copy of `workspace`; unavailable with the engine's message when it is refused.
+    /// A `notDrawnOnStage` id is unavailable with `masksNotDrawn` whenever a document is open.
     static func dryRun<C: FlareCore.Command>(_ example: C, on workspace: FlareWorkspace) -> Availability {
+        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }
         var copy = workspace
         copy.apply(example)
-        if let error = copy.layerError { return .unavailable(error.message) }
-        return notDrawnOnStage.contains(C.id) ? .unavailable(masksNotDrawn) : .available
+        return copy.layerError.map { .unavailable($0.message) } ?? .available
     }
 }
 
