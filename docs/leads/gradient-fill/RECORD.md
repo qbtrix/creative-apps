@@ -2,9 +2,9 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
-Stage: 3 wave 2 (12:30Z: FG-1 #3526 merged as 11a545e7; FG-6 #3532 at e3e06e1f green and clean, waiting for the next lane batch)
+Stage: 3 wave 2 done (12:43Z: FG-1 #3526 merged as 11a545e7; FG-6 #3532 merged as a454b5c9); waiting on core slices for wave 3
 Base: 042279839a5e71c43540063bebded9d01cdc1c18
-Next: merge #3532 once its new build passes; FG-a slice done once FG-2 lands (needs GF-2); FG-3/4 wait on GF-3, FG-5 on GF-6 and AC-flare (fix oneStepForSeveral with Ball + Shadow)
+Next: FG-2 once GF-2 is on dev (then Belt-Slice-Done FG-a); FG-3/4 once GF-3 is; FG-5 once GF-6 and AC-flare are (enable FlareGradientCommandTests, fix oneStepForSeveral with Ball + Shadow; then Belt-Slice-Done FG-m); then FG-7, FG-8 (feature-done)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
