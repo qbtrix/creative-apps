@@ -28,8 +28,11 @@ struct FakeCanvasFileFlowTests {
         for id in ["file.recent", "file.open-recent", "file.clear-recent", "file.open-in", "file.drop"] {
             #expect(FakeCanvasDocument.catalog.spec(id) != nil, "\(id)")
         }
-        #expect(doc.recentFiles.isEmpty && doc.openInApps.isEmpty && doc.openInHelp != nil)
-        #expect(FakeCanvasDocument.catalog.availability("file.open-in", on: doc) == .unavailable(doc.openInHelp ?? ""))
+        #expect(doc.recentFiles.isEmpty && doc.openInApps == ["halo"] && doc.openInHelp == nil)
+        #expect(FakeCanvasDocument.catalog.availability("file.clear-recent", on: doc) == .unavailable("No Recent Files"))
+        var fixture = FakeCanvasDocument.fixture
+        _ = try FakeCanvasDocument.catalog.run(CommandEnvelope(id: "file.clear-recent", params: .object([:])), on: &fixture)
+        #expect(FakeCanvasDocument.fixture.recentFiles.count == 1 && fixture.recentFiles.isEmpty)
     }
 
     @Test func theOldCommandsAreUnchanged() {
