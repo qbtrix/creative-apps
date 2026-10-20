@@ -385,26 +385,31 @@
     },
     {
       "id": "S2",
-      "name": "Effects stack and layer styles, editable later",
+      "name": "Effects stack and layer styles, editable later (layer styles: captain 2026-10-21, beta, shared)",
       "layer": "kernel",
       "c4": [
-        "suite-kernel ✚`Effects`",
-        "suiteui effects panel"
+        "suite-imaging ✚`imaging-style` (LayerStyle, StyleRules, StyleCommands, LayerStyleSVG, StyleProgram, StyleRoute)",
+        "suiteui LayerStylePanel",
+        "coreraster + corerender `style` family (core layer-style-engine)"
       ],
       "adopters": [
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/layer-styles"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/layer-styles"
         },
         {
           "app": "library"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/layer-styles"
         }
-      ]
+      ],
+      "packet": "suiteui/layer-styles"
     },
     {
       "id": "S3",
@@ -438,7 +443,8 @@
           "app": "flare"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/masks-clipping"
         },
         {
           "app": "design"
@@ -524,7 +530,8 @@
           "app": "flare"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/masks-clipping"
         },
         {
           "app": "halo"
@@ -1906,6 +1913,15 @@
       "id": "photo/multi-layer-select",
       "name": "Photo selects several layers (Shift range, ⌘ toggle, All Layers) and moves, hides, deletes and fades them together (captain 2026-10-20, beta)",
       "packet": "photo/multi-layer-select",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/psd-effects",
+      "name": "Photo opens a layered PSD with its layer effects as editable layer styles, and Linear Dodge and Linear Burn as themselves (captain 2026-10-21, beta; findings #3496, #3497)",
+      "packet": "photo/psd-effects",
       "layer": "app",
       "app": "photo",
       "c4": [],
