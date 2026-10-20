@@ -2,7 +2,7 @@
 
 Issue: #1035 · Packet: docs/blueprints/halo/features/viewer-playback.md
 Run: act-1a1543fa006-c4p9 (resumed 2026-10-19T13:02Z; earlier act-1a14c24f6d2-lrkw, line lead for #1035, #1509, #1505, resumed 2026-10-17T23:16Z; earlier runs act-1a1429c87eb-3ecm, resumed 2026-10-16T02:50Z; first run act-1a13ed44a75-delk) · Session: session_015KXNRSDGxdpyRwt5HgCf3U · Started: 2026-10-15T09:05Z
-Stage: 3 fix wave 8 (#1705 reopened: run 39329203917 red on missing halo layer rows from #3217, fixed by #3291; scoped 39357615737, full 39387926961, scoped halo 39388363410, full 39389343595, full 39395505274 and full 39400946683 all cancelled before macOS ran (superseded by newer dev dispatches); verifying on scoped halo 39399205335 (d9bc0337) or full 39402653640 (36789542), both contain e50f30b3)
+Stage: 3 fix wave 8 (#1705 reopened: run 39329203917 red on missing halo layer rows from #3217, fixed by #3291; scoped 39357615737, full 39387926961, scoped halo 39388363410, full 39389343595, full 39395505274, full 39400946683, scoped halo 39399205335 and full 39402653640 all cancelled before macOS ran (superseded by newer dev dispatches); verifying on scoped halo 39411345091 or full 39411425197 (575cc800), or full 39409307241 (a54a892a), all contain e50f30b3)
 Base: 2b02948043fe554dde877f184894b7010998117e (origin/dev at 2026-10-19T13:40Z, has #2622)
 Next: #3245 merged 16:58Z; wait for a scoped halo run on dev that contains it: close #1699 #1701 #1703 #1705 if their journeys pass, else take them into a fix wave.
 
