@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-20T10:54Z	1	poll	HG-m	no PR yet for suiteui GF-2/GF-3/GF-6 or halo CL-probe; HG-m and HG-u stay blocked (open gradient-fill PR: flare FG-6 #3532)
 2026-10-20T11:17Z	1	poll	HG-m	still no PR for suiteui GF-2/GF-3/GF-6; halo core-loop active (#3590 open) but no CL-probe PR; HG-m and HG-u stay blocked
 2026-10-20T11:40Z	1	poll	HG-m	no GF-6/GF-2/GF-3 PR yet (only flare FG-6 #3532 open); no halo CL-probe PR; HG-m and HG-u still blocked
+2026-10-20T12:03Z	1	poll	HG-m	no GF-6/GF-2/GF-3 PR yet (only flare FG-6 #3532 open); no halo CL-probe PR; HG-m and HG-u still blocked
