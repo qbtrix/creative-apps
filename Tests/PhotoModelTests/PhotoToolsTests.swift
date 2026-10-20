@@ -15,7 +15,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
-import PhotoModel
+@testable import PhotoModel
 import SuiteKernel
 import Testing
 
@@ -105,6 +105,18 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     let ids = PhotoWorkspace.catalog.ids.filter { $0.hasPrefix("tool.") }
     #expect(Set(ids) == Set(PhotoTool.allCases.map { "tool.\($0.rawValue)" }))
     #expect(ids.filter { !ledger.contains($0) } == [], "every tool id is in the ledger")
+}
+
+/// The Gradient tool's `Fill` starts black to white, linear, and changes only
+/// through `setGradient`, which leaves the brush's settings alone.
+@Test func theGradientOptionChangesOnlyThroughItsSetter() {
+    var options = ToolOptions()
+    #expect(options.gradient == ToolOptions.defaultGradient)
+    options.setGradient(.radial(stops: ToolOptions.defaultGradient.stops, center: .init(x: 0.5, y: 0.5), radius: 0.5))
+    let radial = options.gradient
+    if case .radial(_, _, let radius) = radial { #expect(radius == 0.5) } else { Issue.record("setGradient didn't take the radial fill") }
+    #expect(radial.stops == ToolOptions.defaultGradient.stops)
+    #expect(options.settings == ToolOptions().settings && options.red == 0)
 }
 
 /// Move refuses an adjustment layer, which has no origin on the canvas, and

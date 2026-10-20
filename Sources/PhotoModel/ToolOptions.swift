@@ -39,8 +39,9 @@ public struct ToolOptions: Sendable, Equatable {
     public private(set) var blue: UInt8 = 0
     /// The Gradient tool's stops and type, the kernel's `Fill` (rule 20: no
     /// Photo gradient type); edited by `runGradientOption` (PG-4). Its points
-    /// are a unit box's; a drag gives the real line.
-    public internal(set) var gradient: Fill = ToolOptions.defaultGradient
+    /// are a unit box's; a drag gives the real line. Written only through
+    /// `setGradient`.
+    public private(set) var gradient: Fill = ToolOptions.defaultGradient
 
     /// Black to white, linear, left to right.
     public static let defaultGradient = Fill.linear(
@@ -53,6 +54,10 @@ public struct ToolOptions: Sendable, Equatable {
         if case .color(let r, let g, let b) = edit { (red, green, blue) = (r, g, b) }
         for brushEdit in Self.brushEdits(edit) { _ = settings.apply(brushEdit) }
     }
+
+    /// Replaces the Gradient tool's `Fill`: the one writer of `gradient`,
+    /// for `runGradientOption` once `GradientRules` has edited it (PG-4).
+    mutating func setGradient(_ fill: Fill) { gradient = fill }
 
     /// The paint color in linear light, as PixelBuffer stores color.
     var linearColor: (r: Float, g: Float, b: Float) {
