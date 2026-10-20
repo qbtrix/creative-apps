@@ -33,8 +33,9 @@ public struct GradientEditor: View {
     /// The bar's height, its handles' size, and the distance a click may miss a handle by.
     static let barHeight: CGFloat = 20, handleSize: CGFloat = 12
 
-    /// `showsAngle: false` for a tool whose drag sets the line (Photo's Gradient tool); `types` limits the switch.
-    public init(fill: Fill, box: Rect, showsAngle: Bool = true, types: [FillType] = FillType.allCases,
+    /// `showsAngle: false` for a tool whose drag sets the line (Photo's Gradient tool); `types` limits the switch (the
+    /// three paints by default).
+    public init(fill: Fill, box: Rect, showsAngle: Bool = true, types: [FillType] = [.solid, .linear, .radial],
                 onIntent: @escaping @MainActor (GradientIntent) -> Void) {
         self.fill = fill
         self.box = box

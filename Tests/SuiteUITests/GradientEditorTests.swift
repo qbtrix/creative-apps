@@ -19,8 +19,9 @@ import Testing
     @Test func clickAddsOneStopAtItsOffset() {
         var drag = GradientBarDrag(at: CGPoint(x: 50, y: 10), width: Self.width, fill: Self.three, token: "t")
         #expect(drag.stop == nil)
-        #expect(drag.changed(to: CGPoint(x: 51, y: 10), fill: Self.three) == nil)
-        #expect(drag.ended(at: CGPoint(x: 51, y: 10), fill: Self.three) == .add(offset: 0.25))
+        let moved = drag.changed(to: CGPoint(x: 51, y: 10), fill: Self.three)
+        let released = drag.ended(at: CGPoint(x: 51, y: 10), fill: Self.three)
+        #expect(moved == nil && released == .add(offset: 0.25))
     }
 
     @Test func dragMovesUnderOneToken() {
@@ -29,27 +30,31 @@ import Testing
         let intents = [120.0, 140, 160].compactMap { drag.changed(to: CGPoint(x: $0, y: 12), fill: Self.three) }
         #expect(intents == [.move(index: 1, offset: 0.6, drag: "t"), .move(index: 1, offset: 0.7, drag: "t"),
                             .move(index: 1, offset: 0.8, drag: "t")])
-        #expect(drag.ended(at: CGPoint(x: 160, y: 12), fill: Self.three) == nil)
+        let released = drag.ended(at: CGPoint(x: 160, y: 12), fill: Self.three)
+        #expect(released == nil)
     }
 
     @Test func dragPastTheEndsClamps() {
         var drag = GradientBarDrag(at: CGPoint(x: 100, y: 10), width: Self.width, fill: Self.three, token: "t")
-        #expect(drag.changed(to: CGPoint(x: 400, y: 10), fill: Self.three) == .move(index: 1, offset: 1, drag: "t"))
+        let moved = drag.changed(to: CGPoint(x: 400, y: 10), fill: Self.three)
+        #expect(moved == .move(index: 1, offset: 1, drag: "t"))
     }
 
     @Test func dragOffRemovesOnce() {
         var drag = GradientBarDrag(at: CGPoint(x: 100, y: 10), width: Self.width, fill: Self.three, token: "t")
-        #expect(drag.changed(to: CGPoint(x: 100, y: 55), fill: Self.three) == nil)
-        #expect(drag.ended(at: CGPoint(x: 100, y: 55), fill: Self.three) == .remove(index: 1))
+        let off = drag.changed(to: CGPoint(x: 100, y: 55), fill: Self.three)
+        let removed = drag.ended(at: CGPoint(x: 100, y: 55), fill: Self.three)
+        #expect(off == nil && removed == .remove(index: 1))
         var near = GradientBarDrag(at: CGPoint(x: 100, y: 10), width: Self.width, fill: Self.three, token: "t")
         _ = near.changed(to: CGPoint(x: 100, y: 45), fill: Self.three)
-        #expect(near.ended(at: CGPoint(x: 100, y: 45), fill: Self.three) == nil)
+        let kept = near.ended(at: CGPoint(x: 100, y: 45), fill: Self.three)
+        #expect(kept == nil)
     }
 
     @Test func twoStopsRefuseTheRemove() {
         var drag = GradientBarDrag(at: CGPoint(x: 0, y: 10), width: Self.width, fill: Self.two, token: "t")
-        #expect(drag.ended(at: CGPoint(x: 0, y: 60), fill: Self.two) == nil)
-        #expect(drag.refused)
+        let released = drag.ended(at: CGPoint(x: 0, y: 60), fill: Self.two)
+        #expect(released == nil && drag.refused)
     }
 
     @Test func angleRowOnlyForLinear() {
