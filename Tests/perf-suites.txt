@@ -58,6 +58,7 @@ library LibraryModelTests.finishImportWithinBudget
 library LibraryModelTests.planAgainstKnownWithinBudget
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 
+design DesignModelTests.DesignSnapBudgetTests
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
