@@ -15,3 +15,7 @@ utc	stage	event	ref	note
 2026-10-20T21:49Z	3	heartbeat	#3683 #3701	open, in the supervisor's local Mac gate queue; HA-u ready to rebase
 2026-10-20T22:12Z	3	heartbeat	#3683 #3701	open, in the local Mac gate queue; no change
 2026-10-20T22:34Z	3	heartbeat	#3683 #3701	open, in the local Mac gate queue; no change
+2026-10-20T23:54Z	3	merge	#3683	HA-a squash 66c13ce1c
+2026-10-20T23:54Z	3	slice-done	HA-a	Belt-Slice-Done and Mac-Finish-Wanted on #3442, run 39514893774
+2026-10-20T23:54Z	3	fix	#3701	needs-rebase: merged dev, kept HA-m's recovery files (dev's equal HA-a's), CI PASS, head fe1a0d9
+2026-10-20T23:54Z	3	rebase	HA-u	rebased onto dev, gating

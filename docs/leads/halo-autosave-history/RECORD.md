@@ -9,20 +9,20 @@ Next: watch #3683 (HA-a) and #3701 (HA-5, stacked on #3683, 370 lines/12 files v
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| HA-a | adapter stubs; History panel and autosave hooks on the window, reachable by a visible control | HA-1, HA-2 (+ HA-3's History button) | MJ-HA | – | yes | 0 | building (#3683 open) | – | – |
-| HA-u | panel follows undo and jumps; Edit > Show History; snapshots, budget | HA-3, HA-4 | J-HA | HA-a; menu item: adopt-command-catalog AC-halo | yes | 0 | waiting | – | – |
-| HA-m | jump lands without a step; recovery reopens dirty; catalog commands | HA-5, HA-6 | MJ-HA | HA-a; HA-6: gradient-fill:HG-m | no | 0 | building (#3701 open) | – | – |
+| HA-a | adapter stubs; History panel and autosave hooks on the window, reachable by a visible control | HA-1, HA-2 (+ HA-3's History button) | MJ-HA | – | yes | 0 | merged-done (#3683, 66c13ce1c) | https://github.com/qbtrix/creative-apps/actions/runs/39514893774 | wanted |
+| HA-u | panel follows undo and jumps; Edit > Show History; snapshots, budget | HA-3, HA-4 | J-HA | HA-a; menu item: adopt-command-catalog AC-halo | yes | 0 | building (rebased onto dev, gating) | – | – |
+| HA-m | jump lands without a step; recovery reopens dirty; catalog commands | HA-5, HA-6 | MJ-HA | HA-a; HA-6: gradient-fill:HG-m | no | 0 | building (#3701 open, dev merged in) | – | – |
 | HA-z | journey jumps and recovers on live; feature built | HA-7, HA-8 | J-HA | HA-u, HA-m, suiteui AH-z | yes | 0 | waiting | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| HA-1 | HA-a | 1 | adapter stubs; HaloRecoveryTests disabled | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift | compiles, disabled | #3683 | open |
-| HA-2 | HA-a | 1 | HaloHistoryArea + autosave hooks on the window, History button by the transport; journey skipped | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloWindow.swift, Sources/HaloApp/HaloControls.swift, UITests/HaloJourneyTests+History.swift | HaloWindowSnapshots panel | #3683 | open |
-| HA-5 | HA-m | 2 | adapter bodies: jump, recovery bytes, recovered project | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift, Tests/mutations/HaloModel.HaloRecovery+Kernel.json | HaloRecoveryTests; Mutate | – | PR #3701 open (head f7e6170, Mutate 3/3) |
+| HA-1 | HA-a | 1 | adapter stubs; HaloRecoveryTests disabled | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift | compiles, disabled | #3683 | merged (66c13ce1c) |
+| HA-2 | HA-a | 1 | HaloHistoryArea + autosave hooks on the window, History button by the transport; journey skipped | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloWindow.swift, Sources/HaloApp/HaloControls.swift, UITests/HaloJourneyTests+History.swift | HaloWindowSnapshots panel | #3683 | merged (66c13ce1c) |
+| HA-5 | HA-m | 2 | adapter bodies: jump, recovery bytes, recovered project | Sources/HaloModel/HaloRecovery+Kernel.swift, Tests/HaloModelTests/HaloRecoveryTests.swift, Tests/mutations/HaloModel.HaloRecovery+Kernel.json | HaloRecoveryTests; Mutate | #3701 | open: needs-rebase fixed by merging dev, head fe1a0d9 (Mutate 3/3) |
 | HA-6 | HA-m | 3 | two specs, id list, RJ-H33 | Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloHistoryCommandIDTests.swift, Tests/RealJobs/halo/history-jump/* | HaloHistoryCommandIDTests | – | waiting (HG-m) |
-| HA-3 | HA-u | 2 | panel follows undo and jumps; Edit > Show History once AC-halo is done | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloEditMenu.swift, Tests/AppSnapshotTests/HaloHistoryAreaTests.swift | HaloHistoryAreaTests | – | waiting |
-| HA-4 | HA-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloHistorySnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloHistoryTests.swift | arrowWalkInThreeBodies | – | waiting |
+| HA-3 | HA-u | 2 | panel follows undo and jumps; Edit > Show History once AC-halo is done | Sources/HaloApp/HaloHistoryArea.swift, Sources/HaloApp/HaloEditMenu.swift, Tests/AppSnapshotTests/HaloHistoryAreaTests.swift | HaloHistoryAreaTests | – | built on lead/halo-autosave-history-HA-u, rebased onto dev |
+| HA-4 | HA-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloHistorySnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloHistoryTests.swift | arrowWalkInThreeBodies | – | built on lead/halo-autosave-history-HA-u, rebased onto dev |
 | HA-7 | HA-z | 4 | journey on live | UITests/HaloJourneyTests+History.swift | testJumpAndRecover | – | waiting |
 | HA-8 | HA-z | 5 | status built, feature-done | docs/blueprints/halo/features/autosave-history.wave.json | waves render | – | waiting |
 
