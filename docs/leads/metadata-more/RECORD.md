@@ -88,3 +88,4 @@ Next: #3465 (head 00f26ebb) and #3473 (head 7e6638e9, dev merged in) ready for t
 - 10:13Z check-in: MD-4 #3473 and MD-5 #3492 still open, waiting on lane macOS builds. #3580 moved the library timed budget tests to the perf list, so the gate no longer runs them. No new line:library findings.
 - 10:36Z check-in: nothing merged; #3461/#3473/#3492 waiting on lane macOS builds (#3473 run 39405314225); no new findings.
 - 10:57Z check-in: nothing merged; #3461/#3473/#3492 still waiting on lane macOS builds; no new line:library findings.
+- 11:20Z check-in: nothing merged yet; #3473 macOS build green (run 39405314225, 11:03Z), awaiting lane sweep; #3461/#3492 still on their builds; no new findings.
