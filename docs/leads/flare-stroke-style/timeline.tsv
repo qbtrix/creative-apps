@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-20T13:53:25Z	heartbeat	FK-a waits: SS-2 #3601 open, FG-2 and GF-2 no PRs; only #3567 (shape-tools) merged since 13:39Z
 2026-10-20T14:10:11Z	heartbeat	FK-a still waits: SS-2 #3601 open, FG-2 and GF-2 have no PR
 2026-10-20T14:22:33Z	heartbeat	FK-a still blocked: SS-2 #3601 open, FG-2 and GF-2 have no PRs
+2026-10-20T14:34:49Z	heartbeat	FK-a blocked: SS-2 #3601 open; FG-2, GF-2 no PRs
