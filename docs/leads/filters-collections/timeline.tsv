@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-20T06:25:19Z	pr-opened	FC-7	#3534 draft, stacked on #3491; Mutate 17/17
 2026-10-20T06:25:19Z	builder-start	FC-15	stacked on FC-13 (#3521)
 2026-10-20T06:26:06Z	check-in	-	parents unmerged, lane macOS builds queued; no findings for this feature
+2026-10-20T06:33:23Z	pr-opened	FC-15	#3539 draft, stacked on #3521; own diff 2 files +52/-17
