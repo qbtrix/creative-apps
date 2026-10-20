@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-20T19:29Z	1	stage-end	#3436	v3 packet, 4 slices; DT-a waits on DG-a #3687
 2026-10-20T19:29Z	3	heartbeat	#3687	polling DG-a
 2026-10-20T19:30Z	3	heartbeat	#0	lead/transform is another line's lead branch; this record lives on lead/design-transform
+2026-10-20T19:45Z	3	heartbeat	-	poll: DG-a #3687 open; DT-a waits
