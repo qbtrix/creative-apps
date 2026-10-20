@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-20T20:50Z	3	staged	-	SF-10 branch pushed, waits on SF-8 and #3731
 2026-10-20T20:55Z	3	check	#3514	head 9c708ebd, mac build queued; sf4/sf8 rebuilt on it; #3731 clean, waiting for its batch
 2026-10-20T21:20Z	3	check	#3514	still head 9c708ebd, lane mac build 39494113551 queued; #3731 clean, waiting for its batch; sf4/sf8/sf10 staged
+2026-10-20T21:45Z	3	check	#3514	gate PASS on 9c708ebd, Head marker moved to it; lane mac build 39494113551 still queued; #3731 clean
