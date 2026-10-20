@@ -86,3 +86,4 @@ Next: FC-9 #3546 (draft on FC-8 #3490; FC-3 merged); FC-10 blocked on S-L9 #3411
 - 10:36Z check-in: nothing merged; #3461/#3473/#3492 waiting on lane macOS builds (#3473 run 39405314225); no new findings.
 - 10:57Z check-in: nothing merged; #3461/#3473/#3492 still waiting on lane macOS builds; no new line:library findings.
 - 11:20Z check-in: nothing merged yet; #3473 macOS build green (run 39405314225, 11:03Z), awaiting lane sweep; #3461/#3492 still on their builds; no new findings.
+- 11:38Z check-in: FC-4 #3461 not merged yet (waiting on lane macOS build); no new findings.
