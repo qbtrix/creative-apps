@@ -10,7 +10,11 @@
 # check, and its `Findings` step files or updates one `finding` issue (labels
 # `finding`, `line:<app>`) per failing journey, audit violations included,
 # keyed by test name, so the owning lead sees it without anyone waiting. It
-# never holds `promote`, `dev-red` or the fast lane.
+# never holds `promote`, `dev-red` or the fast lane. It runs only on `dev` (and
+# on the daily schedule, which runs on dev); a branch dispatch skips it unless
+# the `journeys` input is true, because each one holds a macOS runner for up to
+# 150 minutes and the org gets only 1-2 macOS jobs at once, so a burst of
+# branch dispatches would starve the gating macOS jobs.
 #
 # Branch model: crew PRs merge into dev through the fast lane on the worker's
 # Linux scripts/ci --changed marker (plus a build-only macOS compile for code
@@ -59,6 +63,14 @@ on:
         description: Only the Linux job (the fast lane's check on a PR head it integrated itself; no macOS job, so no findings get filed for a branch)
         type: boolean
         default: false
+      journeys:
+        description: Also run the report-only UI journeys (runs on dev always do)
+        type: boolean
+        default: false
+      promote:
+        description: A full dev run in its own concurrency group, so later dev dispatches don't replace it while it waits for a macOS runner
+        type: boolean
+        default: false
       app:
         description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run). With build_only: a comma list of flare, design, photo, library, halo'
         type: string
@@ -79,9 +91,13 @@ permissions:
 # gets its own group, so a Design run never displaces a pending Photo or full
 # run. A branch's build-only runs share one group whatever their `app`, so a
 # new head's build cancels the old head's (the lane reads the build by head,
-# and an old head's build is no longer the one it waits on).
+# and an old head's build is no longer the one it waits on). A `promote` run
+# (a full dev run the fast lane or the captain starts to move main) has its own
+# group: GitHub keeps one pending run per group, so without it every later dev
+# dispatch replaced the waiting full run and, with a long macOS queue, no full
+# dev run ever finished for Promote to fast-forward main.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ !inputs.build_only && inputs.app && format('-{0}', inputs.app) || '' }}
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ !inputs.build_only && inputs.app && format('-{0}', inputs.app) || '' }}${{ inputs.promote && '-promote' || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 jobs:
@@ -341,7 +357,7 @@ jobs:
   # job. Audit lower reads its `ui` output and `ui-screens`.
   journeys:
     name: ${{ inputs.app && format('macOS journeys ({0})', inputs.app) || 'macOS journeys' }}
-    if: ${{ !inputs.build_only && !inputs.linux_only }}
+    if: ${{ !inputs.build_only && !inputs.linux_only && (github.ref == 'refs/heads/dev' || inputs.journeys) }}
     runs-on: macos-26
     timeout-minutes: 150
     continue-on-error: true

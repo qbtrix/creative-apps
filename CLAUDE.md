@@ -374,7 +374,8 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   path, a looser app audit) loses the label with a comment saying why and
   waits for review.
 - Full CI (`Linux`; `macOS`, scripts/ci with the snapshots; and the
-  report-only `macOS journeys`) runs on `dev`
+  report-only `macOS journeys`, which a branch dispatch skips unless
+  `-f journeys=true`) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
   dispatches it, when the lane merges a PR labelled `feature-done` or one
   touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, after
@@ -394,7 +395,8 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   target, app bundle and journey bundle, then runs only that app's Model
   tests, snapshot tests and journeys (titled `scoped: <app>`, jobs `macOS
   (<app>)` and `macOS journeys (<app>)`; about 10 min for Design, longer for
-  apps with more journeys). It skips the Linux job and never promotes `main`,
+  apps with more journeys; on a branch, add `-f journeys=true`, since journeys
+  run only on `dev` unless asked). It skips the Linux job and never promotes `main`,
   opens `dev-red` or lowers the audit baseline. The supervisor's
   verify-dispatch.sh starts one per app after that app's merges.
 - A journey that keeps failing on `dev` for a known reason can be quarantined,
