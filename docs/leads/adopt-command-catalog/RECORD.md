@@ -70,3 +70,4 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-20: command-catalog CC-u unchained from font-picker FP-a (see command-catalog RECORD), so AC-*3 now wait only on CC-u, which is building.
 - PRs target `dev` (CLAUDE.md, the lane).
 - AC-p3/d3/h3 (built, branches lead/adopt-command-catalog-AC-{p3,d3,h3}): each app gets <App>MenuState in its Model. Baselines can't be emptied: Photo keeps Close, Clear Menu (no catalog spec) and sheet buttons; Design keeps Close, Export…, zoom items (no catalog commands) and "OK"; Halo keeps sheet/alert buttons outside the menu files. Enabled items' help is now the spec summary; Halo's Space hints are gone (gap candidate for kernel export/zoom specs).
+- 2026-10-20T09:43:56Z: AC-photo #3584 (head 22c6fa07), AC-design #3585 (569e890f), AC-halo #3587 (ad65da23) opened on dev with fast-lane; each passed scripts/ci --changed after merging dev (CC-u #3484). AC-z2 waits on these three.
