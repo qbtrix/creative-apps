@@ -11,7 +11,7 @@ Next: EY-7 (EY-z part 1) building on #3541; EY-m done on next green Linux run; E
 |---|---|---|---|---|---|---|---|---|---|
 | EY-a | The kernel's sample size, mean, target and color.sample spec are declared as stubs, the colour rows take the eyedropper ... | EY-1, EY-2 | SJ0 | gradient-fill:GF-a | true | 0 | pr-open | – | – |
 | EY-u | On the gallery page every colour row's eyedropper picks a colour from the screen as one gesture, the loupe follows the p... | EY-3, EY-4 | EJ1 | EY-a | true | 0 | pr-open | – | – |
-| EY-m | The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document po... | EY-5, EY-6 | KJ-sample | EY-a | false | 0 | merged | – | – |
+| EY-m | The mean averages the visible pixels of the square weighted by alpha, and color.sample reads the colour at a document po... | EY-5, EY-6 | KJ-sample | EY-a | false | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39413721862 | – |
 | EY-z | The gallery samples through color.sample on a live target, the fake app samples its topmost rect so RJ-X33 runs on the C... | EY-7, EY-8, EY-9 | EJ1, KJ-sample | EY-u, EY-m, transform-tools:TT-z | true | 0 | planned | – | – |
 
 ## Tasks
@@ -34,6 +34,7 @@ Next: EY-7 (EY-z part 1) building on #3541; EY-m done on next green Linux run; E
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-20T11:30Z EY-m done: Linux run 39413721862 holds 8d8919ca; Belt-Slice-Done posted on #3448 (not a UI slice, no Mac-Finish-Wanted).
 - 2026-10-20T11:21Z EY-7 builder started on lead/eyedropper-EY-7 from #3541 (EY-u) with dev merged in for EY-m; its PR diff shrinks to EY-7's files once #3541 sits on dev.
 - 2026-10-20T11:20Z #3531 needs-rebase fixed: dev merged at 5a8499cd (C4 description keeps the eyedropper and HistoryPanel clauses); #3541 restacked at e8e883c6 (397 lines); both CI: PASS.
 - 2026-10-20T11:02Z #3540 (EY-m) merged as 8d8919ca; EY-m done waits on a green dev Linux run; EY-7 starts once the #3541 restack lands.
