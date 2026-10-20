@@ -11,3 +11,5 @@ utc	stage	event	ref	note
 2026-10-20T20:10Z	3	branch-pushed	lead/eyedropper-PE-5	PE-5 head 9a125da, CI PASS, Mutate 2/2 PhotoModel.LiveSampling, own diff 9 files +115/-24; live eyedropper enabled (help nil); PR waits for #3706
 2026-10-20T20:10Z	3	open-item	PE-5	stale texts: PhotoEyedropper.swift header (NotBuilt sampler), PhotoWorkspace fallback help "Not built yet (PV-9)" - fix in PE-6
 2026-10-20T20:11Z	3	heartbeat	#3706	PR open, lane waiting on macOS batch gate; builders running
+2026-10-20T20:12Z	3	branch-pushed	lead/eyedropper-PE-3	PE-3 head 3fa40ea, CI PASS, Mutate 5/5 PhotoModel.PhotoSample+Kernel, own diff 8 files +208/-10; extra files PhotoWindow.swift (1 line), PhotoCanvasOverlay.swift; PR waits for #3706
+2026-10-20T20:12Z	3	open-item	PE-6	old Eyedropper drag->sampleDrag path now unreachable from the window; PE-6 decides remove or keep for agents
