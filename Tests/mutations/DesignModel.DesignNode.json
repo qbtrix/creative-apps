@@ -16,8 +16,8 @@
   {
     "label": "the text style is not decoded",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default)",
-    "replace": "textStyle: .default)",
+    "find": "textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,",
+    "replace": "textStyle: .default,",
     "tests": "DesignStyleSchemaTests.swift"
   },
   {
