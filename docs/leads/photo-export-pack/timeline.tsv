@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-20T18:49Z	3	stage-start	wf_2a07bee0-217	wave 1 builders launched
 2026-10-20T19:09Z	3	pr-opened	#3678	PX-1
 2026-10-20T19:09Z	3	heartbeat	-	waits unchanged (GF-2, GF-5, XP-3, SM-w, PP-u, SF-8); swift 6.3.3 installed
+2026-10-20T19:13Z	3	fix	#3678	fixer: enable stub tests (suite fully disabled)
