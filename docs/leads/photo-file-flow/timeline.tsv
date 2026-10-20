@@ -13,3 +13,5 @@ utc	stage	event	ref	note
 2026-10-20T19:43Z	3	pr-opened	#3700	PF-4, head 14fd57c1, 4 files +303 -7 with PF-1
 2026-10-20T19:50Z	wait	poll-3 unchanged; rule 23 question	#3471#issuecomment-6300015942	PP-u, PT-m, PH-m, PE-m, PP-m, SF-8 (#3529 open); #3679, #3700 open
 2026-10-20T20:13Z	PF-m	supervisor-answer	#3471	PF-3 builder stacked on PF-4; #3529 closed unmerged (SF-8)
+2026-10-20T20:22Z	wave	restart	PF-3	container restart stopped builder; resumed on PF-4
+2026-10-20T20:22Z	check	poll	#3679,#3700	open, no needs-fix
