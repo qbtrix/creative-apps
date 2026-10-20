@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-20T20:02Z	3	heartbeat	-	poll 20:01: no change (#3687, #3684, #3686, #3690 open; #3698 in lane)
 2026-10-20T20:19Z	poll	heartbeat	-	DF-1 #3698 in lane; DF-2 waits #3684/#3686/PD-u
 2026-10-20T20:37Z	poll	heartbeat	#3698	DF-1 still in lane (clean); DF-2 waits #3684/#3686/PD-u
+2026-10-20T21:00:34Z	poll	heartbeat	#3698	DF-1 open in lane; #3684 #3686 open
