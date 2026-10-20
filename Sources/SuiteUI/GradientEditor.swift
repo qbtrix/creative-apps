@@ -45,7 +45,7 @@ public struct GradientEditor: View {
     }
 
     /// Whether the angle row shows: a linear fill, in an editor that shows it.
-    static func showsAngleRow(_ fill: Fill, showsAngle: Bool) -> Bool { showsAngle && GradientRules.type(of: fill) == .linear }
+    nonisolated static func showsAngleRow(_ fill: Fill, showsAngle: Bool) -> Bool { showsAngle && GradientRules.type(of: fill) == .linear }
 
     private var type: FillType { GradientRules.type(of: fill) }
     /// The selected stop, kept inside the fill's stops (0 for a solid).
