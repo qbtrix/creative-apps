@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-7 building (stacked on FC-6 #3491); then FC-9, FC-15 (wave 5); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7
+Next: FC-7 building (stacked on FC-6 #3491); FC-9 building (on FC-8 #3490 + FC-3 #3423); then FC-15 (wave 5); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -29,7 +29,8 @@ Next: FC-7 building (stacked on FC-6 #3491); then FC-9, FC-15 (wave 5); when #34
 | FC-11 | FC-d | 4 | smart collection checks, disabled until FC-12 | LibrarySmartCollectionTests, LibrarySmartSnapshots, LibraryJourneyTests+Smart | compiles, disabled | #3515 | draft, stacked on #3466 |
 | FC-13 | FC-e | 4 | collections file checks, disabled until FC-14/FC-15 | LibraryCollectionsFileTests, LibraryCollectionsStoreTests, LibraryCollectionsNoticeSnapshots, LibraryJourneyTests+CollectionsFile | compiles, disabled | #3521 | draft, stacked on #3466 |
 | FC-7 | FC-b | 5 | filter methods (not smart); unavailable = nil; enables FC-6 checks | Sources/LibraryModel/LibraryFilter.swift, Tests/mutations/LibraryModel.LibraryFilter.json, FC-6 four files | LibraryFilterBarTests enabled | - | building (stacked on FC-6) |
-| FC-9, FC-10, FC-12, FC-14 .. FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
+| FC-9 | FC-c | 5 | new/add/remove/rename/delete, help; unavailable = nil; enables FC-8 checks but J14 step 7 | Sources/LibraryModel/LibraryCollections.swift, Tests/mutations/LibraryModel.LibraryCollections.json, FC-8 four files | LibraryCollectionsTests enabled | - | building (on FC-8 + FC-3) |
+| FC-10, FC-12, FC-14 .. FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |

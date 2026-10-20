@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-20T06:03:04Z	issue	-	#3520 perf-suites request
 2026-10-20T06:03:04Z	builder-start	FC-7	stacked on FC-6 (#3491)
 2026-10-20T06:03:17Z	pr-opened	FC-13	#3521 draft, stacked on #3466; 4 test files +399
+2026-10-20T06:03:47Z	builder-start	FC-9	branch from FC-8 (#3490), FC-3 (#3423) merged in
