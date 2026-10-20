@@ -1,0 +1,166 @@
+{
+  "title": "Text layers in Photo: type over a photo with the suite's text style, editable after reopen, drawn by the shared glyph rasterizer",
+  "wave": 5,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 cluster C11, Photo half (Photo audit row 16, under-specified 5); feature map E8 (Photo adopter); real job RJ-P02 (re-pointed)",
+  "waits_on": "suiteui/text-style TS-a (TextStyle, TextCommands, TextStyleRows) and TS-m (bodies), cross-line; suite/shell-text ST-z (the live glyph rasterizer), cross-line; gradient-fill PG-a and multi-layer-select PM-a (PhotoWorkspace.swift); Photo's catalog chain; multi-layer-select PM-g now waits on TX-m (PhotoLayer.swift, PhotoDocumentFile.swift), re-cut in this PR",
+  "depends": [
+    "photo-seams",
+    "photo-documents"
+  ],
+  "longest_chain": "6 (TX-1 → TX-2 → TX-3 → TX-4 → TX-7 → TX-8)",
+  "journeys": [
+    "PhotoTextJourneyTests.testTitleOverPhoto"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoLayer.swift",
+    "Sources/PhotoModel/PhotoTextLayer.swift",
+    "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "Tests/PhotoModelTests/PhotoTextLayerTests.swift",
+    "Tests/PhotoModelTests/PhotoTextORATests.swift",
+    "Sources/PhotoModel/PhotoText+Kernel.swift",
+    "UITests/PhotoJourneyTests+Text.swift",
+    "Sources/PhotoModel/PhotoWorkspace.swift",
+    "Sources/PhotoApp/PhotoPaletteTool.swift",
+    "Sources/PhotoApp/PhotoTextEditorOverlay.swift",
+    "Sources/PhotoApp/PhotoTextInspector.swift",
+    "Sources/PhotoApp/PhotoPanel.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoTextTests.swift",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/mutations/PhotoModel.PhotoText+Kernel.json",
+    "Sources/PhotoModel/PhotoTextLayer+ORA.swift",
+    "Tests/mutations/PhotoModel.PhotoTextLayer+ORA.json",
+    "Sources/PhotoApp/PhotoWindow+Text.swift",
+    "Tests/RealJobs/photo/sale-title/sale-title.jobs.json",
+    "docs/blueprints/photo/features/text-layers.wave.json",
+    "docs/blueprints/photo.md"
+  ],
+  "slices": [
+    {
+      "id": "TX-a",
+      "behavior": "Photo declares the text layer kind, its adapter onto the kernel's text style and the `text.add` and `text.set-words` commands as stubs, with the Model checks written and disabled.",
+      "tasks": [
+        "TX-1",
+        "TX-2"
+      ],
+      "journeys": [
+        "MJ-TX"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoLayer.swift",
+        "Sources/PhotoModel/PhotoTextLayer.swift",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Tests/PhotoModelTests/PhotoTextLayerTests.swift",
+        "Tests/PhotoModelTests/PhotoTextORATests.swift",
+        "Sources/PhotoModel/PhotoText+Kernel.swift",
+        "UITests/PhotoJourneyTests+Text.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "TX-u",
+      "behavior": "Photo's palette has the Type tool, a click places an editable text box on the canvas, and the inspector shows the shared style row for a text layer, on the stubs, every control identified and within the render budget.",
+      "tasks": [
+        "TX-3",
+        "TX-4"
+      ],
+      "journeys": [
+        "PJ-TX"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoWorkspace.swift",
+        "Sources/PhotoApp/PhotoPaletteTool.swift",
+        "Sources/PhotoApp/PhotoTextEditorOverlay.swift",
+        "Sources/PhotoApp/PhotoTextInspector.swift",
+        "Sources/PhotoApp/PhotoPanel.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoTextTests.swift"
+      ],
+      "waits": {
+        "TX-a": [
+          "TX-3"
+        ],
+        "gradient-fill:PG-a": [
+          "TX-3"
+        ],
+        "multi-layer-select:PM-a": [
+          "TX-3"
+        ],
+        "eyedropper:PE-a": [
+          "TX-3"
+        ],
+        "history-panel:PH-a": [
+          "TX-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "TX-m",
+      "behavior": "A text layer rasterizes through the shared layout and glyph rasterizer, re-rasterizes on every edit as one undo step, and saves into the `.ora` as pixels plus a text attribute that reopens editable.",
+      "tasks": [
+        "TX-5",
+        "TX-6"
+      ],
+      "journeys": [
+        "MJ-TX"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoText+Kernel.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/PhotoModelTests/PhotoTextLayerTests.swift",
+        "Tests/mutations/PhotoModel.PhotoText+Kernel.json",
+        "Sources/PhotoModel/PhotoTextLayer+ORA.swift",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Tests/PhotoModelTests/PhotoTextORATests.swift",
+        "Tests/mutations/PhotoModel.PhotoTextLayer+ORA.json"
+      ],
+      "waits": {
+        "TX-a": [
+          "TX-5",
+          "TX-6"
+        ],
+        "file-flow:PF-m": [
+          "TX-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "TX-z",
+      "behavior": "The Type tool and the inspector run live end to end, RJ-P02 passes on macOS, and the feature is built.",
+      "tasks": [
+        "TX-7",
+        "TX-8"
+      ],
+      "journeys": [
+        "PJ-TX",
+        "MJ-TX"
+      ],
+      "owned": [
+        "Sources/PhotoApp/PhotoWindow+Text.swift",
+        "UITests/PhotoJourneyTests+Text.swift",
+        "Tests/RealJobs/photo/sale-title/sale-title.jobs.json",
+        "docs/blueprints/photo/features/text-layers.wave.json",
+        "docs/blueprints/photo.md"
+      ],
+      "waits": {
+        "TX-u": [
+          "TX-7"
+        ],
+        "TX-m": [
+          "TX-7"
+        ],
+        "file-flow:PF-z": [
+          "TX-8"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

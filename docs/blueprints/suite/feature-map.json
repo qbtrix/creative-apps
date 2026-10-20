@@ -215,7 +215,8 @@
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "suiteui/fill-heal"
         }
       ]
     },
@@ -230,7 +231,8 @@
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "suiteui/fill-heal"
         }
       ]
     },
@@ -245,13 +247,16 @@
       ],
       "adopters": [
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "suiteui/text-style"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "suiteui/text-style"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/text-layers"
         },
         {
           "app": "flare"
@@ -350,7 +355,8 @@
       ],
       "adopters": [
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "suiteui/timeline-keys"
         }
       ]
     },
@@ -681,15 +687,19 @@
       ],
       "adopters": [
         {
-          "app": "library"
+          "app": "library",
+          "packet": "suiteui/adjust-everywhere"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "suiteui/adjust-everywhere"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "suiteui/adjust-everywhere"
         }
-      ]
+      ],
+      "packet": "suiteui/adjust-everywhere"
     },
     {
       "id": "S16",
@@ -2475,6 +2485,102 @@
         {
           "app": "flare",
           "packet": "suiteui/brush-keys"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adjust-everywhere",
+      "name": "Adjustments everywhere: Black & White, Invert, filters (blur, sharpen, noise) and looks (built-in and saved) in SuiteImaging, the preset store in SuiteModel; Photo, Library and Halo adopt",
+      "packet": "suiteui/adjust-everywhere",
+      "layer": "render",
+      "c4": [
+        "suite-imaging/imaging-adjust-kinds ✚",
+        "suite-model/suite-presets ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adjust-everywhere"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adjust-everywhere"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adjust-everywhere"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/fill-heal",
+      "name": "Paint bucket, spot heal, heal and remove object on creative-core's fill and heal engines, in SuiteImaging over the kernel's dab coverage; Photo adopts",
+      "packet": "suiteui/fill-heal",
+      "layer": "render",
+      "c4": [
+        "suite-imaging/imaging-retouch ✚",
+        "suite-kernel/kernel-stroke"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/fill-heal"
+        },
+        {
+          "app": "library"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/text-style",
+      "name": "One text style: font, weight, italic, size, alignment with justify, line height and letter spacing as kernel values and commands, one SuiteUI style row; Design and Halo adopt, Photo through photo/text-layers",
+      "packet": "suiteui/text-style",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-text ✚",
+        "suiteui/suiteui-sources TextStyleRows"
+      ],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/text-style"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/text-style"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/text-layers"
+        }
+      ]
+    },
+    {
+      "id": "photo/text-layers",
+      "name": "Photo's text layers: the Type tool, the suite's text style, editable after reopen",
+      "packet": "photo/text-layers",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/timeline-keys",
+      "name": "Timeline keys, one home: colour keys and span slide in SuiteKernel Keys; Flare keys fill and stroke, Halo slides and trims layer bars",
+      "packet": "suiteui/timeline-keys",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-keys",
+        "suiteui/suiteui-sources TimelineStrip"
+      ],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suiteui/timeline-keys"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/timeline-keys"
         }
       ]
     }
