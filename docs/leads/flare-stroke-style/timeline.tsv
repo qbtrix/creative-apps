@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-20T18:27:20Z	heartbeat	FK-a still waits on FG-2 and GF-2 (no PRs yet)
 2026-10-20T18:39:12Z	heartbeat	FK-a still waits on FG-2 and GF-2 (no PRs yet)
 2026-10-20T18:50:51Z	heartbeat	FK-a still waits on FG-2 and GF-2 (no PRs yet)
+2026-10-20T19:02:58Z	heartbeat	FK-a still blocked: FG-2 and GF-2 have no PRs yet
