@@ -1,3 +1,4 @@
 utc	stage	event	ref	note
 2026-10-20T21:05Z	0	stage-start	#3451	line lead act-1a15b1de023-4xx7; base dev 6c2c7b05; lead/flare-shape-tools created
 2026-10-20T21:05Z	2	stage-end	plan	wave 1 = FS-a (FS-1+FS-2), FS-5; FS-6 waits gradient-fill FG-m
+2026-10-20T21:39Z	3	heartbeat	-	wave 1 builders done; opening PRs
