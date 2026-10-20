@@ -9,8 +9,14 @@
 // Option press first, as a person does, then drag somewhere else. When a tool
 // needs more under the pointer to show its effect, grow the fixture, never
 // weaken the check. Runs on Linux and macOS.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import CoreRaster
 import PhotoModel
+import SuiteKernel
 import Testing
 
 /// Whether `tool` visibly changed from `a` to `b`: the pixels for the
@@ -18,7 +24,7 @@ import Testing
 /// layers' offsets for move and the brush color for the eyedropper.
 private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoWorkspace) -> Bool {
     switch tool {
-    case .brush, .eraser, .clone, .heal:
+    case .brush, .eraser, .clone, .heal, .gradient:
         a.pixels != b.pixels
     case .marquee:
         a.selection != b.selection || a.selectionMask != b.selectionMask
@@ -51,6 +57,8 @@ func photoToolActsOnFakeServices(_ tool: PhotoTool) throws {
     var before = try PhotoWorkspace.fixture(.sample)
     // The source is in the sky, the drag over the sun, so a stamp shows.
     ready(&before, tool, source: Mask.Point(x: 300, y: 100))
+    // A tool not built yet has its own help (not a service's) on every service: it is disabled, not dead.
+    if tool != .eyedropper, let help = tool.unavailableHelp { return #expect(before.toolHelp(tool) == help) }
     #expect(before.toolHelp(tool) == nil, "\(tool) has help on .fake, where every service works")
     var after = before
     stroke(&after, from: Mask.Point(x: 520, y: 180), to: Mask.Point(x: 600, y: 260))
@@ -71,6 +79,32 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     stroke(&after, from: Mask.Point(x: 30, y: 30), to: Mask.Point(x: 50, y: 50))
     let changed = shows(tool, changeFrom: before, to: after)
     #expect(changed || before.toolHelp(tool)?.isEmpty == false, "\(tool) is dead on .live with no help saying why")
+}
+
+/// The Gradient tool is in the palette, disabled with its help until PG-3
+/// draws, on both services, and a drag with it changes nothing yet.
+@Test func theGradientToolIsDisabledWithItsHelp() throws {
+    #expect(PhotoTool.allCases.contains(.gradient))
+    #expect(PhotoTool.gradient.unavailableHelp == "Not built yet (PG-3).")
+    #expect(!PhotoTool.gradient.isEnabled)
+    #expect(PhotoWorkspace().toolHelp(.gradient) == "Not built yet (PG-3).")
+    #expect(PhotoWorkspace(services: .fake).toolHelp(.gradient) == "Not built yet (PG-3).")
+    var workspace = try PhotoWorkspace.fixture(.sample)
+    let before = workspace
+    workspace.selectTool(.gradient)
+    stroke(&workspace, from: Mask.Point(x: 520, y: 180), to: Mask.Point(x: 600, y: 260))
+    #expect(workspace.pixels == before.pixels && !workspace.isDragging)
+    #expect(workspace.historySteps.count == before.historySteps.count)
+}
+
+/// The palette's tools are the catalog's `tool.` commands, each in the id
+/// ledger, and the gradient's is unavailable with the tool's help.
+@Test func theToolCommandIDsMatchTheCatalog() throws {
+    let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
+    let ledger = Set(try String(contentsOf: url, encoding: .utf8).split(separator: "\n").map(String.init))
+    let ids = PhotoWorkspace.catalog.ids.filter { $0.hasPrefix("tool.") }
+    #expect(Set(ids) == Set(PhotoTool.allCases.map { "tool.\($0.rawValue)" }))
+    #expect(ids.filter { !ledger.contains($0) } == [], "every tool id is in the ledger")
 }
 
 /// Move refuses an adjustment layer, which has no origin on the canvas, and
