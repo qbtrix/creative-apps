@@ -11,8 +11,10 @@ shared route), and Library's Develop moves off CPU CoreRaster onto the same
 route, with a slider-to-pixels latency budget test. Only SuiteImaging may link
 CoreRenderMetal or import Metal; a test holds that. It also owns the colour
 pipeline (`ImagingColor`, beta scope from 2026-10-21): pictures are decoded
-into one wide working space (linear Display P3, Float32, extended range, so
-nothing outside sRGB or above 1.0 is cut), every adjustment runs there, and
+into one working space wider than sRGB (extended-range linear sRGB,
+Float32, unclamped: a colour outside sRGB lives on as a negative or above-1
+component, CoreColor's own convention, so nothing outside sRGB or above 1.0
+is cut), every adjustment runs there, and
 the display and output transforms run last, built on creative-core's
 CoreColor profiles (#441, at the pin).
 **Line:** `line:suiteui` · **Wave:** XK3 (`waves.md`, the canonical burn-down) · **Lead branch:** `lead/suite-imaging`
@@ -77,14 +79,23 @@ RAW file's highlights can't come back. `ImagingColor` (IM-15) fixes the
 order: decode from the file's own ICC profile (core `ColorProfile(iccData:)`,
 `ProfileTransform`, both unclamped) into the working space; run
 `ImagingProgram` there; then one display step (`displaySteps(to:)`, a
-`channelMixer` from linear P3 to the display's linear space, appended last
-by the canvas and loupe routes, IM-8 and IM-11) or one output transform
-(`toOutput`, to the file's profile at 8 or 16 bits, the profile embedded by
-shared-codecs' encoder). shared-codecs' decoder and shared-raw's RAW decoder
-hand back working-space buffers; Photo and Library keep them as float
-(shared-raw SR-6, library/raw RW-3). Linear P3 keeps core's per-channel ops
-exact; luma-weighted ops (hue/saturation, contrast) read P3 values with
-Rec. 709 weights, a small shift the IM-15 tests pin (open question Q1).
+`channelMixer` from linear sRGB to a Display P3 screen's linear space, none
+for an sRGB screen, appended last by the canvas and loupe routes, IM-8 and
+IM-11) or one output transform (`toOutput`, to the file's profile at 8 or 16
+bits, the profile embedded by shared-codecs' encoder). shared-codecs'
+decoder and shared-raw's RAW decoder hand back working-space buffers; Photo
+and Library keep them as float (shared-raw SR-6, library/raw RW-3).
+
+**Why extended linear sRGB and not linear P3.** It is wider than sRGB in the
+only sense that matters here (no colour is clipped), and every existing
+consumer already assumes linear-sRGB primaries: Photo's export and `.ora`
+layers, the pasteboard, the eyedropper and hex, brush and fill colours,
+`ThumbnailWriter`, Library's histogram and thumbnails, and core's luma
+weights. A P3 working space would need a conversion at each of those
+boundaries; this one needs none, and the only new transforms are at the
+two ends (the file's profile in, the display or file profile out). Where an
+8-bit or sRGB consumer meets an out-of-sRGB value it clamps as it does
+today, so the wide values live from decode through develop to export.
 
 **Render path.** A slider step on the GPU route composites nothing and reads
 nothing back: the base stays resident and the step's program is folded into
@@ -273,7 +284,7 @@ dispatcher).
 | IM-3 | – | `AdjustSettings` bodies: clamping, the curve repair, decoding Photo's and Library's keys, encoding Library's; turns on `AdjustSettingsTests` | `Sources/SuiteImaging/Adjust/AdjustSettings.swift`, `Tests/SuiteImagingTests/AdjustSettingsTests.swift`, `Tests/mutations/SuiteImaging.AdjustSettings.json` | IM-2 | ~280, 3 |
 | IM-4 | – | `ImagingProgram` and `ImagingRoute` bodies: one private step list gives both `adjustments` and `program`; `choose`; turns on `ImagingProgramTests` | `Sources/SuiteImaging/Adjust/ImagingProgram.swift`, `Sources/SuiteImaging/Route/ImagingRoute.swift`, `Tests/SuiteImagingTests/ImagingProgramTests.swift`, `Tests/mutations/SuiteImaging.ImagingProgram.json` | IM-2 | ~300, 4 |
 | IM-5 | – | `LiveToneSurface` body, lifted from #3144's `PhotoLiveTone`: resident base per band, `draw` folds the program into the display encode and caches the unsharp pass over the base, `replaceBase` re-uploads damaged tiles only; macOS tests | `Sources/SuiteImaging/Route/LiveToneSurface.swift`, `Tests/SuiteImagingTests/LiveToneSurfaceTests.swift`, `Tests/mutations/SuiteImaging.LiveToneSurface.json` | IM-4 | ~350, 3 |
-| IM-15 | – | **The colour pipeline, test first.** `WideGamutTests` (Linux), then `ImagingColor`: `workingProfile` (linear Display P3 as a core `ColorProfile`), `toWorking(_:from:)` (a buffer in a file's profile into the working space), `displaySteps(to:)` (the linear-P3-to-display `channelMixer`, CPU and GPU forms), `toOutput(_:profile:bitDepth:)`; the C4 part names it | `Sources/SuiteImaging/Color/ImagingColor.swift`, `Tests/SuiteImagingTests/WideGamutTests.swift`, `Tests/mutations/SuiteImaging.ImagingColor.json`, `docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json` | IM-2 | ~320, 4 |
+| IM-15 | – | **The colour pipeline, test first.** `WideGamutTests` (Linux), then `ImagingColor`: `workingProfile` (core's `ColorProfile.linearSRGB`, read unclamped), `toWorking(_:from:)` (a buffer in a file's profile into the working space), `displaySteps(to:)` (none for sRGB, the linear-sRGB-to-P3 `channelMixer` for a P3 screen, CPU and GPU forms), `toOutput(_:profile:bitDepth:)`; the C4 part names it | `Sources/SuiteImaging/Color/ImagingColor.swift`, `Tests/SuiteImagingTests/WideGamutTests.swift`, `Tests/mutations/SuiteImaging.ImagingColor.json`, `docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json` | IM-2 | ~320, 4 |
 | IM-6 | – | **Photo, test first.** `PhotoImagingTests`, disabled (`waits on IM-7`): every `.ora` fixture opens with the same adjustment values and re-saves byte for byte; Photo's settings give `ImagingProgram`'s list; old files gain neutral output levels | `Tests/PhotoModelTests/PhotoImagingTests.swift`, `Tests/PhotoModelTests/Fixtures/adjust-legacy.ora` | IM-2 | ~200, 2 |
 | IM-7 | – | **Photo adapter.** `PhotoAdjust+Imaging.swift`; `AdjustmentSettings` stores `AdjustSettings` behind Photo's existing API; `PhotoRender.applied(to:)` runs `ImagingProgram.adjustments`; turns on `PhotoImagingTests` | `Sources/PhotoModel/PhotoAdjust+Imaging.swift`, `Sources/PhotoModel/AdjustmentSettings.swift`, `Sources/PhotoModel/PhotoRender.swift`, `Tests/PhotoModelTests/PhotoImagingTests.swift`, `Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json` | IM-6, IM-3, IM-4 | ~350, 5 |
 | IM-8 | – | **Photo canvas on the shared route.** `CanvasRenderer`, `PhotoRendering` and `TileCanvas` draw through `ImagingRoute` and `LiveToneSurface`, with `ImagingColor.displaySteps` last, and import no Metal or CoreRenderMetal; `PhotoLiveTone.swift` is no longer called and `PhotoRenderRoute`'s settings mapping is deleted; the three files leave `Tests/metal-boundary-baseline.txt`; `PhotoAdjustSliderLatencyTests` (#3144's) stays within budget | `Sources/PhotoApp/CanvasRenderer.swift`, `Sources/PhotoApp/PhotoRendering.swift`, `Sources/PhotoApp/TileCanvas.swift`, `Sources/PhotoModel/PhotoRenderRoute.swift`, `Tests/metal-boundary-baseline.txt` | IM-7, IM-5, #3144 | ~350, 6 |
@@ -312,7 +323,7 @@ Longest chain: IM-1 → IM-2 → IM-6 → IM-7 → IM-8 → IM-8d → IM-12 → 
 | IM-3 | `AdjustSettingsTests`: gamma 10 clamps to 9.99; Photo's `{"black": 10}` percent and Library's `{"black": 25.5}` both read 0.1; a 17-point curve keeps 16; points 1/512 apart merge; NaN refused; neutral encodes to `{}` | a unit is mixed up, a bad curve is refused instead of repaired, or a value escapes its range | `SuiteImaging.AdjustSettings`: percent divided by 255 → `.photoPercentKeys`; `minGap` compared with `<=` for `<` → `.nearPointsMerge`; gamma clamp to 10 → `.gammaCeiling` |
 | IM-4 | `ImagingProgramTests`: neutral gives `[]`; the order is tone, exposure, levels, curve, hue/saturation; `cpuEqualsGpu` (the CPU backend on both lists, within 1 level); a `.color` step on Metal-not-yet chooses `.cpu` | the two lists differ, the order changes, or an unsupported step goes to the GPU | `SuiteImaging.ImagingProgram`: gamma as `1/g` → `.gammaSameMeaning`; saturation dropped from the CPU list → `.cpuListEqualsGpuList`; curve before levels → `.order` |
 | IM-5 | `LiveToneSurfaceTests` (macOS): a step encodes one pass and reads back zero bytes (`stepIsOneWrite`); the drawn picture equals `ImagingProgram.adjustments` on the CPU within 2 levels; a damaged tile re-uploads that tile only | a step reads back or recomposites, or the GPU picture drifts from the CPU one | `SuiteImaging.LiveToneSurface`: base re-uploaded on every draw → `.stepIsOneWrite`; program applied before the base blend → `.matchesCpu`; sharpen cache kept after a base change → `.sharpenFollowsBase` |
-| IM-15 | `WideGamutTests`: Display P3 red (1, 0, 0) moves into the working space unchanged, survives Exposure +0.5 and back, and leaves `toOutput(profile: .displayP3, bitDepth: 16)` within 1/1000 of P3 red, while the same value in linear sRGB has a negative green (out of sRGB); a highlight at 1.8 stays 1.8 until `toOutput`; `displaySteps(to: .sRGB)` on the CPU equals core's `ProfileTransform` within 1/1000; an sRGB file round-trips through `toWorking` and `toOutput(.sRGB)` within 1 level | a value outside sRGB or above 1.0 is clipped before output, or the display step drifts from core's transform | `SuiteImaging.ImagingColor`: clamp to 0...1 in `toWorking` → `.keepsWideValues`; display matrix transposed → `.displayMatchesCore`; 16-bit output rounded to 8 → `.sixteenBits` |
+| IM-15 | `WideGamutTests`: Display P3 red (1, 0, 0) enters the working space as about (1.22, −0.04, −0.02) (outside sRGB, unclamped), survives Exposure +0.5 and back, and leaves `toOutput(profile: .displayP3, bitDepth: 16)` within 1/1000 of P3 red; a highlight at 1.8 stays 1.8 until `toOutput`; `displaySteps(to: .displayP3)` on the CPU equals core's `ProfileTransform` within 1/1000 and `displaySteps(to: .sRGB)` is empty; an sRGB file round-trips through `toWorking` and `toOutput(.sRGB)` within 1 level | a value outside sRGB or above 1.0 is clipped before output, or the display step drifts from core's transform | `SuiteImaging.ImagingColor`: clamp to 0...1 in `toWorking` → `.keepsWideValues`; display matrix transposed → `.displayMatchesCore`; 16-bit output rounded to 8 → `.sixteenBits` |
 | IM-6 | compiles, disabled by name | – | – (test only) |
 | IM-7 | `PhotoImagingTests` and Photo's existing Model tests unchanged; `scripts/mutate --plan PhotoModel.PhotoAdjust+Imaging` | an old document opens with different values, or an existing test needs editing | `PhotoModel.PhotoAdjust+Imaging`: output white not carried → `.outputLevelsRoundTrip`; hue and saturation swapped → `.hueSatFields` |
 | IM-8 | `ImagingBoundaryTests` with the shorter baseline; `PhotoAdjustSliderLatencyTests` release: adjustment step p95 ≤ 30 ms at 8K (target 16), Move ≤ 80 ms; `PJ-IM` | a Photo file still imports Metal, or a step goes over budget or reads back | – (route code moved; IM-5's plan covers it) |

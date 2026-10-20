@@ -7,8 +7,7 @@ the float route from the decoder to develop. Which files are RAW is
 shared-codecs' format registry: after its SC-16, Library's `PhotoFileKind`
 is the registry's `SuiteImageFormat`, so the scan already takes RAW files. The grid draws each file's embedded preview, so a RAW import is as
 fast as a JPEG one; the loupe and export decode every pixel into a Float32
-buffer in SuiteImaging's wide working space (linear Display P3, extended
-range), for every photo and not only RAW, so Develop's shared tone sliders
+buffer in SuiteImaging's working space (extended-range linear sRGB, unclamped), for every photo and not only RAW, so Develop's shared tone sliders
 (Exposure, White Balance, Highlights) work with a RAW file's headroom and a
 Display P3 phone photo keeps the colours sRGB can't hold. Export takes the
 same buffer to the file's profile at its depth (16-bit TIFF included). A file the system can't read
@@ -139,7 +138,7 @@ loupe and Develop views are unchanged.
 ```swift
 extension PhotoDecoding {
     /// The file's pixels at `quality` (SuiteImaging's `RawQuality`; non-RAW files read it as a size) in the
-    /// working space (linear Display P3, Float32, extended range), upright, nothing clipped. Nil when the
+    /// working space (extended-range linear sRGB, Float32, unclamped), upright, nothing clipped. Nil when the
     /// decoder has no float route (the default, so `FakeDecoder` and every test decoder compile unchanged);
     /// callers then take `decode`'s 8-bit route. Throws `LibraryError.renderFailed(refusal.message)`.
     func decodeLinear(path: String, quality: RawQuality) async throws -> PixelBuffer?
@@ -236,8 +235,9 @@ it keeps the import fast, and the loupe's value already says `preview` or
 ## Done check
 
 Per slice (lead.md rule 6): **RW-a** when RJ0 steps 1 and 2 pass on the
-Linux gate with every mutation caught; **RW-m** with RJ0 complete,
-`Mutate:` full on RW-3 and `LibraryRawDecodeTests` green on the macOS job;
+Linux gate with every mutation caught; **RW-m** with RJ0 complete (step 5: the P3 red reaches the writer as a
+16-bit P3 request), `Mutate:` full on RW-3 and `LibraryRawDecodeTests`
+green on the macOS job, `p3PhotoKeepsItsGamut` included;
 **RW-z** when a scoped run (`app=library`) runs RJ1 green. Then
 `Belt-Contact-Sheet: <run url>` on #1530.
 

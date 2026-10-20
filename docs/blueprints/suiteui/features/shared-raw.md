@@ -5,7 +5,7 @@ DNG, PEF, SRW, 3FR, IIQ, ERF, MOS, X3F) open once, the same way, in every app
 that opens images. One shared decode lives in SuiteImaging's `Raw/` module
 over Apple's Core Image RAW (`CIRAWFilter`), so we write no decoder and port
 nothing. It hands back a Float32 `PixelBuffer` in SuiteImaging's wide
-working space (linear Display P3, extended range: suite-imaging's
+working space (extended-range linear sRGB, unclamped: suite-imaging's
 `ImagingColor`, IM-15) with headroom: values above 1.0 and colours outside
 sRGB survive, so the shared tone sliders (Exposure, White Balance,
 Highlights) pull back detail a JPEG has already clipped. Thumbnails take the
@@ -223,7 +223,7 @@ public enum SuiteRaw {
     /// The decoder the apps use: `SystemRawDecoder` on macOS, nil on Linux (every call refuses `.unavailable`).
     public static var decoder: (any RawDecoding)? { get }
     public static func info(_ source: RawSource, decoder: (any RawDecoding)? = SuiteRaw.decoder) throws(RawRefusal) -> RawFileInfo
-    /// The working space (linear Display P3, extended), Float32, premultiplied, upright; values above 1 and
+    /// The working space (extended-range linear sRGB), Float32, premultiplied, upright; values above 1 and
     /// outside sRGB kept. The file's baseline exposure is applied
     /// here as one core `exposure(stops:)` step; an embedded preview comes back as decoded (no baseline).
     public static func decode(_ source: RawSource, quality: RawQuality,
@@ -276,8 +276,9 @@ extension PhotoImageCodec {
   `exposure = 0`, `isHighlightRecoveryEnabled = isHighlightRecoverySupported`,
   `scaleFactor = scale`, `isDraftModeEnabled = draft`, orientation applied;
   render with one shared `CIContext()` into `.RGBAf` in
-  `CGColorSpace(name: CGColorSpace.extendedLinearDisplayP3)`, the working
-  space, so nothing clips and no gamut is lost;
+  `CGColorSpace(name: CGColorSpace.extendedLinearSRGB)`, the working space,
+  so nothing clips and no gamut is lost (a colour outside sRGB comes out as
+  a negative or above-1 component);
   alpha 1, so premultiplied equals straight. Preview: `previewImage`,
   oriented, scaled to `longestSide`, never enlarged, rendered the same way.
 - **Photo open** (SR-6). `openImage(data, name)`: `decodeLinear` first; a

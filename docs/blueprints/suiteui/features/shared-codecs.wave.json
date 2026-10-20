@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "canonical duplicates audit 2026-10-20, top-15 #6 (image file codecs); feature map suiteui/shared-codecs; real job RJ-X46; the captain's TIFF question 2026-10-21 (one format registry, slice SC-f, first)",
-  "waits_on": "SC-f first: adopt-suiteui-chrome AC-export-sheet (the export sheets) before SC-15 and SC-16, and adopt-kernel-autosave AK-8 now waits on SC-f (PhotoWindow+File.swift); suite-imaging IM-a (Package.swift, project.yml); adopt-kernel-autosave AK-z (canonical-baseline.txt) before SC-11; no creative-core bump (dev's pin 2258b62, #3549, already has core PNGRead/PNGWrite, IC-4/IC-5); cross-line hand-offs: photo/export-pack PX-m, library spine, metadata-more, raw, export, export-pack; SC-f cross-line hand-offs: photo/export-pack PX-a and PX-m, library metadata-more MD-a, export and export-pack (JPEGWriter, ExportPresets); suite-imaging IM-m (ImagingColor, the wide working space) before SC-4",
+  "waits_on": "SC-f first and waits on nothing: adopt-suiteui-chrome AC-export-sheet (PhotoWindow+Export.swift; not in the beta) and adopt-kernel-autosave AK-8 (PhotoWindow+File.swift) now wait on SC-f; suite-imaging IM-a (Package.swift, project.yml); adopt-kernel-autosave AK-z (canonical-baseline.txt) before SC-11; no creative-core bump (dev's pin 2258b62, #3549, already has core PNGRead/PNGWrite, IC-4/IC-5); cross-line hand-offs: photo/export-pack PX-m, library spine, metadata-more, raw, export, export-pack; SC-f cross-line hand-offs: photo/export-pack PX-a and PX-m, library metadata-more MD-a, export and export-pack (JPEGWriter, ExportPresets); suite-imaging IM-m (ImagingColor, the wide working space) before SC-4",
   "depends": [
     "suite-harness",
     "editor-kernel",
@@ -116,12 +116,7 @@
         "Tests/LibraryModelTests/LibraryFormatsTests.swift",
         "Tests/mutations/LibraryModel.LibraryValues.json"
       ],
-      "waits": {
-        "adopt-suiteui-chrome:AC-export-sheet": [
-          "SC-15",
-          "SC-16"
-        ]
-      },
+      "waits": {},
       "ui": true
     },
     {

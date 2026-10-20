@@ -105,7 +105,7 @@ library.md (import, export); halo.md (render-out).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| SC-f | One registry in SuiteModel lists every image format the suite reads and the four it writes, the plists and the type registry are built from it, and Photo's and Library's panels, import kinds, export formats and the CLI's lists derive from it with the per-app lists deleted and their ratchet strict. | SC-13, SC-14, SC-15, SC-16 | MJ-SC-f, PJ-SC | adopt-suiteui-chrome:AC-export-sheet (SC-15, SC-16: the export sheets, A/C first) |
+| SC-f | One registry in SuiteModel lists every image format the suite reads and the four it writes, the plists and the type registry are built from it, and Photo's and Library's panels, import kinds, export formats and the CLI's lists derive from it with the per-app lists deleted and their ratchet strict. | SC-13, SC-14, SC-15, SC-16 | MJ-SC-f, PJ-SC | – (first; AC-export-sheet and AK-8 wait on it) |
 | SC-a | Core's PNG is proven to round-trip what both local writers write, the ImageIO import ratchet is live with today's files baselined, and `SuiteImageIO` is declared as stubs in SuiteShell, which links CoreRaster. | SC-1, SC-2 | MJ-SC | suite-imaging:IM-a (SC-2: `Package.swift`, `project.yml`, A/C first) |
 | SC-photo | Photo decodes and encodes PNG and JPEG through core and everything else through `SuiteImageIO`, its own ImageIO code and PNG fallback are gone, and the pasteboard uses the same adapter. | SC-3, SC-4 | MJ-SC-photo, PJ-SC | SC-a; photo/export-pack PX-m (SC-4, cross-line hand-off); suite-imaging:IM-m (SC-4, `ImagingColor`) |
 | SC-halo | Halo's rendered frames and PNG sequences are core's PNG bytes, so the headless render, the sequence sink and the viewer agree. | SC-5, SC-6 | MJ-SC-halo, HJ-SC | SC-a |
@@ -113,9 +113,13 @@ library.md (import, export); halo.md (render-out).
 | SC-raster | Design's and Flare's rasterizers hand their pixels to `SuiteImageIO` for PNG instead of their own `CGImageDestination` code. | SC-9, SC-10 | MJ-SC-raster | SC-a |
 | SC-z | `HaloFramePNG.swift` is deleted with the baseline shrunk, only `SuiteImageIO.swift` imports ImageIO, and the feature is built. | SC-11, SC-12 | MJ-SC, HJ-SC | SC-photo, SC-halo, SC-library, SC-raster; adopt-kernel-autosave:AK-z (SC-11, `canonical-baseline.txt`, A/C first) |
 
-SC-f runs first: it needs no adapter, so it waits on nothing in this
-packet, and SC-library's JPEGWriter edit and adopt-kernel-autosave's AK-8
-(`PhotoWindow+File.swift`) wait on it. No new screen (`"ui_slice": "none"`):
+SC-f runs first: it needs no adapter and waits on nothing. SC-library's
+JPEGWriter edit, adopt-kernel-autosave's AK-8 (`PhotoWindow+File.swift`)
+and adopt-suiteui-chrome's AC-export-sheet (`PhotoWindow+Export.swift`; not
+in the beta, so it must not hold the registry back) wait on it. Drop
+targets need no edit: SuiteShell's `suiteFileDrop` routes by
+`SuiteTypeRegistry`, which SC-14 builds from the registry, and Photo's
+canvas drop hands any file to the same open path SC-15 derives. No new screen (`"ui_slice": "none"`):
 the panels list more types, and the export sheets more formats, through
 controls that exist. `SuiteImageIO` builds only on macOS;
 its plan runs on the supervisor's Mac before `Belt-Slice-Done:` (suiteui
@@ -214,7 +218,7 @@ public enum SuiteImageIO {
     public static var writable: Set<SuiteImageFormat> { get }
     /// The file's facts without decoding pixels (size already oriented).
     public static func info(_ url: URL) throws -> Info
-        /// Pixels, oriented, in SuiteImaging's working space (linear Display P3, Float32, extended range) from the
+        /// Pixels, oriented, in SuiteImaging's working space (extended-range linear sRGB, Float32, unclamped) from the
     /// file's own ICC profile through `ImagingColor.toWorking`, as CoreRaster's premultiplied buffer. 16-bit and
     /// float sources keep their depth; PNG and JPEG are read by CoreRaster, everything else by ImageIO.
     /// `longestSide` shrinks while decoding.
@@ -344,7 +348,10 @@ Longest chain: SC-13 → SC-14 → SC-15 → SC-16 → SC-8 → SC-12 (6), tied 
 
 Per slice: SC-f with `FormatListRatchetTests` strict and `Mutate:` clean on
 Linux, Photo's and Library's journeys unchanged (the feel gate opens a TIFF
-in each); SC-a with `CorePNGParityTests` green at the pin; each app slice's
+in each); SC-photo only with `SuiteImageIOFormatsTests` green on the macOS
+job, including the wide-gamut round trip (a Display P3 16-bit PNG decodes,
+develops and writes a 16-bit TIFF with the P3 profile embedded, its
+out-of-sRGB red within 1/1000); SC-a with `CorePNGParityTests` green at the pin; each app slice's
 Model walk and existing journeys green, the feel gate's `Mac-Finish:` line;
 SC-z with the strict ratchet and RJ-X46 green on the macOS job. Then
 `Belt-Contact-Sheet:` with one opened file per app.
