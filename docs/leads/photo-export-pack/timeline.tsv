@@ -1,0 +1,5 @@
+utc	stage	event	ref	note
+2026-10-20T18:50Z	0	stage-start	-	base e382f9d7
+2026-10-20T18:55Z	0	stage-end	-	lead/photo-export-pack created; waits checked
+2026-10-20T18:58Z	2	stage-end	-	combined plan: wave 1 PG-1+PG-3, PX-1+PX-3, PF-1+PF-4 (stacked)
+2026-10-20T19:00Z	3	stage-start	-	wave 1
