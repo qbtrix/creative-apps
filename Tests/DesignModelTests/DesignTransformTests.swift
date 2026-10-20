@@ -75,6 +75,17 @@ private func sample() throws -> DesignWorkspace {
         #expect(workspace.turnHelp == "Select a layer first.")
     }
 
+    /// Object > Flip and Rotate 90° are off with the rows' reason until the catalog has the specs (DT-6).
+    @Test func objectItemsSayWhyTheyAreOff() throws {
+        let workspace = try sample()
+        let state = DesignMenuState(workspace: workspace, hasWindow: true)
+        for id in ["transform.flip", "transform.rotate"] {
+            #expect(DesignMenuState.spec(id).availability(state) == .unavailable(workspace.turnHelp ?? ""))
+        }
+        #expect(DesignMenuState.spec("object.nothing").availability(state) == .unavailable("Design has no object.nothing command."))
+        #expect(DesignControlID.all.contains(DesignControlID.inspectorFlip("horizontal")))
+    }
+
     @Test(.disabled("waits on DT-5"))
     func turnKeepsCentre() throws {
         var workspace = try sample()
