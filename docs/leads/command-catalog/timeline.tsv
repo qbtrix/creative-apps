@@ -99,3 +99,4 @@ utc	stage	event	ref	note
 2026-10-20T07:39:22Z	heartbeat	#3484 build 39374818329 and #3392 build 39379782419 still queued; macOS runner busy (full CI 39349878829 running since 00:49Z)
 2026-10-20T08:00:03Z	heartbeat	#3484 build 39374818329 and #3392 build 39379782419 still queued behind the macOS runner
 2026-10-20T08:21:26Z	heartbeat	#3484 build 39374818329 (queued since 05:25Z) and #3392 build 39379782419 still queued behind the macOS runner
+2026-10-20T08:42:34Z	heartbeat	#3484 build 39374818329 and #3392 build 39379782419 still queued; no full/suiteui run done on dev
