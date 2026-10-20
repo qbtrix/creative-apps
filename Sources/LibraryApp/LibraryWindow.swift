@@ -7,7 +7,7 @@
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
 // or the live services over the Platform adapters.
 //
-// The sidebar has two sections: Library (All Photos, Favorites, Recently
+// The sidebar has two sections: Library (All Photos, Picks, Recently
 // Added) and Collections (yours, with New Collection as its add button and a
 // double-click rename while those can act). LibraryFilterBar sits above
 // LibraryBrowser; the hidden `library.collections` element carries the
