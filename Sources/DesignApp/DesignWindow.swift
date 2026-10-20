@@ -25,6 +25,9 @@
 // unknown name leaves it empty and says so on the status line) and
 // `-DesignWindowSize WxH` (the first window's content size).
 //
+// File > Export… (⇧⌘E) bumps `exportRequest`; DesignExportArea opens its sheet
+// on each change and hands its notes to the status line.
+//
 // Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
 // them through DesignPasteboardBridge under the Model's `pasteboardType`; a
 // refusal (nothing selected, nothing of Design's to paste) goes to the status
@@ -63,6 +66,8 @@ struct DesignWindow: View {
     @State private var note: String?
     @State private var problem: DesignFileProblem?
     @State private var started = false
+    /// Bumped by File > Export…; DesignExportArea opens its sheet on each change.
+    @State private var exportRequest = 0
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
@@ -118,6 +123,7 @@ struct DesignWindow: View {
         }
         .task { start() }
         .modifier(DesignClosePrompt(model: model))
+        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
@@ -138,6 +144,7 @@ struct DesignWindow: View {
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
+        case .export: exportRequest += 1
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
