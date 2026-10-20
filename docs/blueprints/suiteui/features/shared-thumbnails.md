@@ -24,7 +24,7 @@ creative-core: none (`ThumbnailStore` is at `2258b62`).
 
 **Hand-offs** (cross-line):
 - **ST-m:** `LiveThumbnails.swift` is library/spine's (building) and raw
-  RW-c's. ST-6 adds a new adapter file and a two-line call in it; it starts
+  RW-3's. ST-6 adds a new adapter file and a two-line call in it; it starts
   after spine's feature-done.
 - **ST-u:** `HomeGrid.swift` is suite/home's (built).
 - **ST-z:** `PhotoWindow+File.swift` is photo/history-panel PH-m's and
