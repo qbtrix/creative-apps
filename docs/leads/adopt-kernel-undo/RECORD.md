@@ -112,3 +112,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T01:39:11Z AU-library PR #3384 merged as 7969bfba. Waiting on a green ci.yml run containing it. AU-design (90e7a0c) is waiting on a green run too: dev CI 39352633488 and scoped suiteui run 39352972722 on 53630c3b are pending.
 
 - 2026-10-20T01:44:31Z Heartbeat. dev CI 39352633488 and scoped suiteui 39352972722 on 53630c3b are still queued. AU-design and AU-library wait on a green run. AU-flare waits on stage-edit #1514.
+
+- 2026-10-20T02:06:30Z Heartbeat. dev CI 39352633488 was cancelled, superseded by 39356653273 on dev 15b4e591, which is pending. Scoped suiteui 39352972722 is still queued, behind a macOS runner backlog (10 queued). main is still b3011ab9. AU-design and AU-library wait on a green run. AU-flare waits on stage-edit #1514. There are no supervisor answers since 00:29Z.
