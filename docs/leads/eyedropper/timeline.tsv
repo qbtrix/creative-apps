@@ -59,3 +59,5 @@ utc	stage	event	ref	note
 2026-10-20T14:32:09Z	3	restack	#3597	EY-z head 43fef3f5 merges EY-u; own diff 238+/25- in 2 files; gate PASS
 2026-10-20T14:40Z	3	heartbeat	-	lead polling PRs 3541 3597 
 2026-10-20T15:11Z	3	heartbeat	-	lead polling PRs 3541 3597 
+2026-10-20T15:13:27Z	3	merged	#3541	EY-u merged 2d129d50efac05d5c222187f2404682fc99376d4
+2026-10-20T15:13:27Z	3	retarget	#3597	EY-z base -> dev
