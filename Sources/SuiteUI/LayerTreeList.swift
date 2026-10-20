@@ -22,6 +22,8 @@
 // identifiers and labels (`naming: .sidebar`) and a header with an action
 // (LayerTreeList+Rows.swift). Each defaults to off, so older callers are unchanged.
 // App panels (#3194) add ids, options and decorations; `reorder` is the flat drop's pure rule.
+// `contextActions` gives a row its context menu: the app's spec-built layer
+// commands for that row's id (LayerActionBar.swift), none when it returns none.
 // It shows no scroller (wheel, trackpad and keys still scroll), so the
 // audit finds no unnamed page-area button beside a long tree. While it
 // scrolls it reports a drawn frame on series `layers-scroll` (SP4) to the
@@ -69,6 +71,7 @@ public struct LayerTreeList: View {
     private let decorations: [String: LayerRowDecoration]
     private let onSelect: (@MainActor (String) -> Void)?
     private let onRename: (@MainActor (String, String) -> String?)?
+    private let contextActions: (@MainActor (String) -> [ToolbarAction])?
     /// The row that starts with its rename field in this state: a snapshot's refused rename.
     private let renaming: (id: String, field: SidebarRenameField)?
     @State private var target: String?
@@ -81,16 +84,18 @@ public struct LayerTreeList: View {
     /// accept it or the refusal shown under the field it keeps open. Nil
     /// turns that gesture off; `naming`, `header` and `options` are described
     /// on their types, and `decorations` holds each decorated row's by its id.
+    /// `contextActions` names a row's context menu items by its id.
     public init(
         rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selection: String? = nil,
         naming: LayerTreeNaming = .layers, header: LayerTreeHeader? = nil, options: LayerTreeOptions = .init(),
         decorations: [String: LayerRowDecoration] = [:],
         onSelect: (@MainActor (String) -> Void)? = nil, onRename: (@MainActor (String, String) -> String?)? = nil,
+        contextActions: (@MainActor (String) -> [ToolbarAction])? = nil,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
         self.init(rows: rows, childCount: childCount, selection: selection, naming: naming, header: header,
-                  options: options, decorations: decorations,
-                  onSelect: onSelect, onRename: onRename, renaming: nil, onAction: onAction)
+                  options: options, decorations: decorations, onSelect: onSelect, onRename: onRename,
+                  renaming: nil, contextActions: contextActions, onAction: onAction)
     }
 
     init(
@@ -98,6 +103,7 @@ public struct LayerTreeList: View {
         naming: LayerTreeNaming, header: LayerTreeHeader?, options: LayerTreeOptions = .init(),
         decorations: [String: LayerRowDecoration] = [:], onSelect: (@MainActor (String) -> Void)?,
         onRename: (@MainActor (String, String) -> String?)?, renaming: (id: String, field: SidebarRenameField)?,
+        contextActions: (@MainActor (String) -> [ToolbarAction])? = nil,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void
     ) {
         self.rows = rows
@@ -111,6 +117,7 @@ public struct LayerTreeList: View {
         self.onSelect = onSelect
         self.onRename = onRename
         self.renaming = renaming
+        self.contextActions = contextActions
     }
 
     /// Whether row `id` draws selected.
@@ -123,6 +130,11 @@ public struct LayerTreeList: View {
     func rename(_ id: String) -> (@MainActor (String) -> String?)? {
         guard let onRename else { return nil }
         return { onRename(id, $0) }
+    }
+
+    /// Row `id`'s context menu: nil when the app gives it no actions.
+    func contextMenu(for id: String) -> [SidebarMenuItem]? {
+        contextActions.flatMap { SidebarContextMenu.items(for: $0(id)) }
     }
 
     /// The move a drop of `id` onto `target` makes, or nil when the list
@@ -209,6 +221,10 @@ public struct LayerTreeList: View {
                 field: renaming?.id == row.id ? renaming?.field : nil,
                 onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
                 .equatable()
+                // Outside the equatable row, whose == leaves closures out, so the menu is never stale.
+                // ponytail: built per shown row on each list update (the modifier takes no lazy builder);
+                // fine at panel sizes, move to a menu built on open if a long list shows it in a trace.
+                .modifier(SidebarContextMenu(items: contextMenu(for: row.id)))
                 .draggable(row.id)
                 .dropDestination(for: String.self) { items, _ in
                     accept(items, onto: row.id)
