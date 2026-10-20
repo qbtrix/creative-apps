@@ -176,5 +176,5 @@ private func rescannedCounts(_ catalog: LibraryCatalog) -> [String: Int] {
     #expect(!catalog.history.open)
     catalog.recordEdit("Exposure", coalesceKey: "exposure", ids: ["P1"]) { $0.rating = 5 }
     #expect(catalog.history.undo.count == 2)
-    #expect(catalog.history.top?.payload.map(\.rating) == [4])
+    #expect(catalog.history.top?.photos.map(\.rating) == [4])
 }

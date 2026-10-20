@@ -1,0 +1,162 @@
+{
+  "title": "Place an image in Photo: File > Place… and a drop on an open document add a fitted pixel layer through the kernel's place command",
+  "wave": 4,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/place-image (adopter of S20); RJ-P37",
+  "waits_on": "suiteui placed-images' contract slice PL-a (cross-line); gradient-fill's PG-m and PG-z (shared files); adopt-command-catalog AC-photo and adopt-suiteui-chrome AC-tools (cross-line, PP-3)",
+  "depends": [
+    "photo-documents",
+    "photo-edit"
+  ],
+  "longest_chain": "5 (PP-1 → PP-3 → PP-4 → PP-7 → PP-8)",
+  "journeys": [
+    "PhotoPlaceJourneyTests.testPlaceLogo"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoPlace+Kernel.swift",
+    "Tests/PhotoModelTests/PhotoPlaceTests.swift",
+    "Tests/RealJobs/photo/place-logo/",
+    "Sources/PhotoApp/PhotoPlace.swift",
+    "Sources/PhotoApp/PhotoCommands+File.swift",
+    "Sources/PhotoApp/PhotoEditor.swift",
+    "Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoPlaceTests.swift",
+    "UITests/PhotoJourneyTests+Place.swift",
+    "Sources/PhotoModel/PhotoClipboard.swift",
+    "Tests/mutations/PhotoModel.PhotoPlace+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/place-image.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PP-a",
+      "behavior": "PhotoWorkspace's PlacedImageTarget conformance exists as stubs, and the checks and RJ-P37's job are written, disabled.",
+      "tasks": [
+        "PP-1",
+        "PP-2"
+      ],
+      "journeys": [
+        "MJ-PP"
+      ],
+      "waits": {},
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoPlace+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoPlaceTests.swift",
+        "Tests/RealJobs/photo/place-logo/"
+      ]
+    },
+    {
+      "id": "PP-u",
+      "behavior": "File > Place… and a drop on an open document run place.image on the stubs, a drop with no document still opens, with snapshots, the render budget and the journey written.",
+      "tasks": [
+        "PP-3",
+        "PP-4"
+      ],
+      "journeys": [
+        "PJ-P1"
+      ],
+      "waits": {
+        "PP-a": [
+          "PP-3"
+        ],
+        "photo-seams": [
+          "PP-3"
+        ],
+        "photo-render-adopt": [
+          "PP-3"
+        ],
+        "shell-parity": [
+          "PP-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoApp/PhotoPlace.swift",
+        "Sources/PhotoApp/PhotoCommands+File.swift",
+        "Sources/PhotoApp/PhotoEditor.swift",
+        "Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoPlaceTests.swift",
+        "UITests/PhotoJourneyTests+Place.swift"
+      ]
+    },
+    {
+      "id": "PP-m",
+      "behavior": "Placing a PNG or JPEG adds a pixel layer above the selection, fitted and centred or at the drop point, as one undo step, refuses SVG with the reason, and runs from the catalog.",
+      "tasks": [
+        "PP-5",
+        "PP-6"
+      ],
+      "journeys": [
+        "MJ-PP"
+      ],
+      "waits": {
+        "PP-a": [
+          "PP-5",
+          "PP-6"
+        ],
+        "gradient-fill:PG-m": [
+          "PP-6"
+        ],
+        "transform:PT-m": [
+          "PP-5",
+          "PP-6"
+        ],
+        "history-panel:PH-m": [
+          "PP-5",
+          "PP-6"
+        ],
+        "eyedropper:PE-m": [
+          "PP-5",
+          "PP-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoPlace+Kernel.swift",
+        "Sources/PhotoModel/PhotoClipboard.swift",
+        "Tests/PhotoModelTests/PhotoPlaceTests.swift",
+        "Tests/mutations/PhotoModel.PhotoPlace+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/RealJobs/photo/place-logo/"
+      ]
+    },
+    {
+      "id": "PP-z",
+      "behavior": "The window runs on live services, the journey passes on live, and the blueprint lists Place.",
+      "tasks": [
+        "PP-7",
+        "PP-8"
+      ],
+      "journeys": [
+        "PJ-P1"
+      ],
+      "waits": {
+        "PP-u": [
+          "PP-7"
+        ],
+        "PP-m": [
+          "PP-7"
+        ],
+        "gradient-fill:PG-z": [
+          "PP-8"
+        ],
+        "multi-layer-select:PM-z": [
+          "PP-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+Place.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/place-image.wave.json"
+      ]
+    }
+  ]
+}

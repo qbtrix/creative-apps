@@ -1,0 +1,163 @@
+{
+  "title": "Rotate and flip layers: a turn and mirrors on each node, turned handles, transform rows and the Object menu",
+  "wave": 3,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/transform (adopter of S7); RJ-D15",
+  "waits_on": "suiteui transform-tools' contract slice TT-a (cross-line); gradient-fill's DG-a, DG-u and DG-m and autosave-history's DA-m slices",
+  "depends": [
+    "design-window",
+    "style-rows",
+    "select-several",
+    "design-export",
+    "layers-panel",
+    "canvas-basics",
+    "snapping"
+  ],
+  "longest_chain": "6 (DT-1 → DT-2 → DT-3 → DT-4 → DT-7 → DT-8)",
+  "journeys": [
+    "DesignTransformJourneyTests.testRotateAndFlip"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignTransform+Kernel.swift",
+    "Tests/DesignModelTests/DesignTransformTests.swift",
+    "Sources/DesignApp/DesignInspectorTransform.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "Sources/DesignApp/DesignObjectMenu.swift",
+    "UITests/DesignJourneyTests+Transform.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignSelectionMarks.swift",
+    "Tests/AppSnapshotTests/DesignTransformPaintTests.swift",
+    "Tests/AppSnapshotTests/DesignTransformSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift",
+    "Tests/mutations/DesignModel.DesignTransform+Kernel.json",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Tests/DesignModelTests/DesignSVGTests.swift",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/RealJobs/design/rotate-15/rotate-15.jobs.json",
+    "Tests/RealJobs/design/rotate-15/input/one-rect.design",
+    "docs/blueprints/design/features/transform.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DT-a",
+      "behavior": "Nodes carry a turn and mirrors, the adapter is declared as stubs, and the transform rows and Object items show on them.",
+      "tasks": [
+        "DT-1",
+        "DT-2"
+      ],
+      "journeys": [
+        "MJ-DT"
+      ],
+      "waits": {
+        "gradient-fill:DG-a": [
+          "DT-1",
+          "DT-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignTransform+Kernel.swift",
+        "Tests/DesignModelTests/DesignTransformTests.swift",
+        "Sources/DesignApp/DesignInspectorTransform.swift",
+        "Sources/DesignApp/DesignInspector.swift",
+        "Sources/DesignApp/DesignObjectMenu.swift",
+        "UITests/DesignJourneyTests+Transform.swift"
+      ]
+    },
+    {
+      "id": "DT-u",
+      "behavior": "The canvas and the export paint turned and mirrored nodes, the handles turn with them, and the snapshots and render budget hold.",
+      "tasks": [
+        "DT-3",
+        "DT-4"
+      ],
+      "journeys": [
+        "J-DT"
+      ],
+      "waits": {
+        "DT-a": [
+          "DT-3",
+          "DT-4"
+        ],
+        "gradient-fill:DG-u": [
+          "DT-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignApp/DesignSelectionMarks.swift",
+        "Tests/AppSnapshotTests/DesignTransformPaintTests.swift",
+        "Tests/AppSnapshotTests/DesignTransformSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift"
+      ]
+    },
+    {
+      "id": "DT-m",
+      "behavior": "Turns and flips keep each node's centre as one step for the whole selection, a turned node is hit by its turned outline, and the SVG writes the turn.",
+      "tasks": [
+        "DT-5",
+        "DT-6"
+      ],
+      "journeys": [
+        "MJ-DT"
+      ],
+      "waits": {
+        "DT-a": [
+          "DT-5",
+          "DT-6"
+        ],
+        "gradient-fill:DG-m": [
+          "DT-6"
+        ],
+        "autosave-history:DA-m": [
+          "DT-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignTransform+Kernel.swift",
+        "Tests/DesignModelTests/DesignTransformTests.swift",
+        "Tests/mutations/DesignModel.DesignTransform+Kernel.json",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/DesignModelTests/DesignSVGTests.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/RealJobs/design/rotate-15/rotate-15.jobs.json",
+        "Tests/RealJobs/design/rotate-15/input/one-rect.design"
+      ]
+    },
+    {
+      "id": "DT-z",
+      "behavior": "The journey turns and flips on live services, and the feature is built.",
+      "tasks": [
+        "DT-7",
+        "DT-8"
+      ],
+      "journeys": [
+        "J-DT"
+      ],
+      "waits": {
+        "DT-u": [
+          "DT-7"
+        ],
+        "DT-m": [
+          "DT-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Transform.swift",
+        "docs/blueprints/design/features/transform.wave.json"
+      ]
+    }
+  ]
+}
