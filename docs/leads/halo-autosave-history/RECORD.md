@@ -11,7 +11,7 @@ Next: watch #3683 (HA-a) and #3701 (HA-5, stacked on #3683, 370 lines/12 files v
 |---|---|---|---|---|---|---|---|---|---|
 | HA-a | adapter stubs; History panel and autosave hooks on the window, reachable by a visible control | HA-1, HA-2 (+ HA-3's History button) | MJ-HA | – | yes | 0 | building (#3683 open) | – | – |
 | HA-u | panel follows undo and jumps; Edit > Show History; snapshots, budget | HA-3, HA-4 | J-HA | HA-a; menu item: adopt-command-catalog AC-halo | yes | 0 | waiting | – | – |
-| HA-m | jump lands without a step; recovery reopens dirty; catalog commands | HA-5, HA-6 | MJ-HA | HA-a; HA-6: gradient-fill:HG-m | no | 0 | waiting | – | – |
+| HA-m | jump lands without a step; recovery reopens dirty; catalog commands | HA-5, HA-6 | MJ-HA | HA-a; HA-6: gradient-fill:HG-m | no | 0 | building (#3701 open) | – | – |
 | HA-z | journey jumps and recovers on live; feature built | HA-7, HA-8 | J-HA | HA-u, HA-m, suiteui AH-z | yes | 0 | waiting | – | – |
 
 ## Tasks
