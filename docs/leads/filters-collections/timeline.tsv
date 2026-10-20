@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T20:50Z	check	footer stripped from #3696 #3699 and comments on #1563 #1555 #3478; FC-4 #3461 and MD-8 #3550 macOS builds green, awaiting lane batch; nothing merged yet
 2026-10-20T21:23Z	check	MD-8 #3550 and #3575 merged; #3570 #3574 queued; MD-10 #3581 draft on two timing tests, asked supervisor on #1555 to add them to perf-suites.txt; #3579 #3582 wait on #3574
 2026-10-20T21:58:10Z	check	check-in: MD-11 #3570 and MD-15 #3574 merged; MD-16 #3582 and MD-17 #3579 dev merged in (slice diffs only), gate running; MD-10 #3581 waits on perf list
+2026-10-20T22:32:56Z	check	check-in: MD-16 #3582 and MD-17 #3579 ready and clean; lane macOS build for #3579 queued (run 39507171819); MD-10 #3581 still waits on perf list
