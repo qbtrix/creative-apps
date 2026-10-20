@@ -4,7 +4,7 @@ Issue: #3469 · Packet: docs/blueprints/design/features/file-flow.md
 Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
 Stage: 3 wave 1
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: DF-1 is in the fast lane (#3698, head b4dce95); DF-2 joins the slice once design-export (#3684), DA-a (#3686) and PD-u merge.
+Next: DF-1 #3698 got needs-rebase (C4 part design-model-sources.json): fixer merging dev in. DF-2 waits on #3684 (open, clean), #3686 (open, clean) and PD-u.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
