@@ -184,10 +184,11 @@
     "job": "Copy a shape as SVG and paste it into a code editor.",
     "outcome": "Valid SVG with the same colours.",
     "needs": [
-      "A1"
+      "A1",
+      "suiteui/clipboard-interop"
     ],
     "needs_note": "A1 copy as SVG or CSS",
-    "closes_with": "A1",
+    "closes_with": "suiteui/clipboard-interop",
     "trap": "Pastes a PNG instead",
     "run": "C",
     "baseline": "fail",
@@ -263,7 +264,7 @@
     "app": "design",
     "weight": "med",
     "job": "Add a drop shadow to a card; change it later.",
-    "outcome": "Shadow exports in PNG and SVG.",
+    "outcome": "The SVG export holds the shadow as a filter with the edited values, referenced by the card; the PNG and PDF half is RJ-D43 (macOS).",
     "needs": [
       "S2"
     ],
@@ -275,7 +276,8 @@
     "since": "2026-10-19",
     "sources": [
       "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
-    ]
+    ],
+    "waits_on": "DL-6"
   },
   "RJ-D15": {
     "id": "RJ-D15",
@@ -737,5 +739,46 @@
     ],
     "waits_on": "DF-3",
     "added_by": "design/file-flow"
+  },
+  "RJ-D43": {
+    "id": "RJ-D43",
+    "app": "design",
+    "weight": "med",
+    "job": "Export a card with a drop shadow as a 2x PNG and as a PDF.",
+    "outcome": "The PNG has shadow pixels past the card's edge by the style's reach at 2x; the PDF holds the card as a vector path with the shadow as one image under it.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The shadow is cut at the card's bounds, or the PDF rasterizes the card itself",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
+    ],
+    "waits_on": "DL-7",
+    "added_by": "design/layer-styles"
+  },
+  "RJ-D50": {
+    "id": "RJ-D50",
+    "app": "design",
+    "weight": "med",
+    "job": "Set a three-line justified paragraph in Design with line height 1.5, letter spacing 20 and italic, then export a PNG.",
+    "outcome": "The first two lines' ink spans the box width within 2 px and the last line doesn't; the baseline gap is 1.5 times ascent plus descent within 1 px.",
+    "needs": [
+      "suiteui/text-style",
+      "E8"
+    ],
+    "closes_with": "suiteui/text-style",
+    "trap": "Line height or justify is set in the inspector but the export ignores it",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TS-8",
+    "added_by": "suiteui/text-style"
   }
 }
