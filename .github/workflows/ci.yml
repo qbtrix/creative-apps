@@ -10,7 +10,11 @@
 # check, and its `Findings` step files or updates one `finding` issue (labels
 # `finding`, `line:<app>`) per failing journey, audit violations included,
 # keyed by test name, so the owning lead sees it without anyone waiting. It
-# never holds `promote`, `dev-red` or the fast lane.
+# never holds `promote`, `dev-red` or the fast lane. It runs only on `dev` (and
+# on the daily schedule, which runs on dev); a branch dispatch skips it unless
+# the `journeys` input is true, because each one holds a macOS runner for up to
+# 150 minutes and the org gets only 1-2 macOS jobs at once, so a burst of
+# branch dispatches would starve the gating macOS jobs.
 #
 # Branch model: crew PRs merge into dev through the fast lane on the worker's
 # Linux scripts/ci --changed marker (plus a build-only macOS compile for code
@@ -57,6 +61,10 @@ on:
         default: false
       linux_only:
         description: Only the Linux job (the fast lane's check on a PR head it integrated itself; no macOS job, so no findings get filed for a branch)
+        type: boolean
+        default: false
+      journeys:
+        description: Also run the report-only UI journeys (runs on dev always do)
         type: boolean
         default: false
       app:
@@ -341,7 +349,7 @@ jobs:
   # job. Audit lower reads its `ui` output and `ui-screens`.
   journeys:
     name: ${{ inputs.app && format('macOS journeys ({0})', inputs.app) || 'macOS journeys' }}
-    if: ${{ !inputs.build_only && !inputs.linux_only }}
+    if: ${{ !inputs.build_only && !inputs.linux_only && (github.ref == 'refs/heads/dev' || inputs.journeys) }}
     runs-on: macos-26
     timeout-minutes: 150
     continue-on-error: true
