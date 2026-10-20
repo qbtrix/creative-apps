@@ -4,7 +4,7 @@ Issue: #3537 · Packet: docs/blueprints/suiteui/features/timeline-select-all.md
 Run: act-1a158c2e32e-bl3z · Session: claude/suiteui-feature-lead-i2krve · Started: 2026-10-20
 Stage: 3 (TSA-a PR open)
 Base: dev 11a545e7 (brief main b3011ab9dc5579023722e79f83254e6e2520e612 verified; PRs target dev)
-Next: #3591 (TSA-a, feature-done) waits on the lane's macOS build and merge; then a green Linux check containing it gives Belt-Slice-Done TSA-a, Mac-Finish-Wanted TSA-a, and Belt-Contact-Sheet on #3537.
+Next: #3591 merged 12:42Z as 3e63a8ee; wait for Linux check 39424989659 on dev 897ccbb2 (contains it) to go green, then Belt-Slice-Done TSA-a, Mac-Finish-Wanted TSA-a, Belt-Contact-Sheet on #3537; critic panel on scoped suiteui run 39424969406 once it shows the screens.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
