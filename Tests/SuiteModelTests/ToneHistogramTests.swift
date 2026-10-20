@@ -9,6 +9,11 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Musl)
+import Musl
+#endif
 
 @Test func channelsSumPerBinWithTheTallestAtOne() {
     let shape = ToneHistogram(channels: [[1, 0, 3], [1, 2, 3]], shadowClipped: 0, highlightClipped: 4)
