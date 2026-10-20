@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-19T23:54:14Z	question	39336158094 cancelled; tracking full 39342355180 (f564907d); rule-23 question on #1940 re AU-library wait
 2026-10-20T00:13:52Z	heartbeat	39342355180 superseded; tracking full 39345113796 (1299651e); no supervisor reply; 0 findings
 2026-10-20T00:33:23Z	heartbeat	supervisor answered rule-23 question: Linux job is proof; waiting on #3380 (quarantine renew) then a green Linux job; AU-library unblocked upstream
+2026-10-20T00:53:14Z	heartbeat	#3380 merged; tracking full 39349878829 (2019b521) Linux job; no AU-library PR yet
