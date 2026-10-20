@@ -7,13 +7,13 @@
 - Started: 2026-10-20
 - Stage: 3 polling (wave 1 blocked)
 - Base: dev 533daec
-- Next: HG-a #3516 waits on its lane macOS build (run 39378049451, queued since 06:01Z); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 (AC-halo's files are on dev); HG-u waits on CL-probe and GF-2/GF-3
+- Next: HG-a #3516 merged into dev 10:02Z (cf691cca); HG-m PR (HG-6 + HG-7) waits on suiteui GF-6 (AC-halo's files are on dev); HG-u waits on CL-probe and GF-2/GF-3
 
 ## Slices
 
 | Slice | Tasks | UI | Waits | State | PRs |
 |---|---|---|---|---|---|
-| HG-a | HG-1, HG-5 | no | suiteui GF-1 | PR open | #3516 |
+| HG-a | HG-1, HG-5 | no | suiteui GF-1 | merged | #3516 |
 | HG-u | HG-2, HG-3, HG-4 | yes | HG-a; halo core-loop CL-probe (HG-2); suiteui GF-2, GF-3 | blocked | – |
 | HG-m | HG-6, HG-7 | no | HG-a; suiteui GF-6 and adopt-command-catalog AC-halo (HG-7) | blocked | – |
 | HG-z | HG-8, HG-9 | yes | HG-u, HG-m; halo core-loop CL-z (HG-9) | blocked | – |
@@ -22,13 +22,13 @@
 
 | Task | Wave | State | PR | Note |
 |---|---|---|---|---|
-| HG-1 | W1 | PR open | #3516 | HaloLayer.gradient, HaloDrawItem.gradient, conformance stubs, HaloGradientTests (2 on, 3 waiting on HG-7); gate CI: PASS at 7d112c5 |
-| HG-5 | W2 | PR open | #3516 | HaloGradientRenderTests, 4 waiting on HG-6; in the HG-a PR (rule 22) |
+| HG-1 | W1 | merged | #3516 | HaloLayer.gradient, HaloDrawItem.gradient, conformance stubs, HaloGradientTests (2 on, 3 waiting on HG-7); gate CI: PASS at 7d112c5 |
+| HG-5 | W2 | merged | #3516 | HaloGradientRenderTests, 4 waiting on HG-6; in the HG-a PR (rule 22) |
 | HG-2 | W2 | blocked | – | CL-probe: core-loop is planned, no lead running |
 | HG-7 | W2 | blocked | – | GF-6 (suiteui W3); AC-halo's HaloCommandCatalog.swift, HaloHeadless.swift and Tests/command-ids/halo.txt are on dev (packet still status planned, no Belt-Slice-Done) |
 | HG-3 | W3 | blocked | – | GF-3 |
 | HG-4 | W3 | blocked | – | after HG-2 |
-| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); rebased onto 7d112c5, now at 610ad65 |
+| HG-6 | W3 | built locally | – | stacked on HG-a; Mutate 3/3 HaloModel.LiveFrameRendering; PR waits on GF-6 and AC-halo (packet Depends on); rebased onto dev 11a545e after #3516 merged, now at 0bc7526 |
 | HG-8 | W4 | blocked | – | after HG-4, HG-6, HG-7 |
 | HG-9 | W5 | blocked | – | CL-z |
 
