@@ -758,5 +758,27 @@
     ],
     "waits_on": "PF-3",
     "added_by": "photo/file-flow"
+  },
+  "RJ-P43": {
+    "id": "RJ-P43",
+    "app": "photo",
+    "weight": "high",
+    "job": "Select three layers, fade them to 50% opacity and nudge them 40 px right together.",
+    "outcome": "All three layers are at 50% and 40 px right in the export; the fourth layer is unchanged.",
+    "needs": [
+      "suiteui/adopt-kernel-selection",
+      "photo/multi-layer-select"
+    ],
+    "needs_note": "photo/multi-layer-select puts Photo's layer selection on the kernel Selection and applies layer actions to every selected layer",
+    "closes_with": "photo/multi-layer-select",
+    "trap": "Only the last-clicked layer changes",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PM-6",
+    "test": "Tests/RealJobs/photo/fade-layers/fade-layers.jobs.json"
   }
 }
