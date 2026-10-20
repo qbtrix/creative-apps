@@ -12,7 +12,11 @@
 // sets in the environment. `onVisibleChange` reports the cells on
 // screen so the app can load only those thumbnails. Images aspect-fit inside
 // the cell; a reject is dimmed with a badge and an unreadable file shows a
-// warning mark. Snapshots drop the ScrollView, which ImageRenderer does not draw.
+// warning mark. Columns hold at least `cellSize.width` plus padding, and the
+// cells stretch to fill the row with their images a fixed 8 pt
+// (`SuiteSpacing.s`) apart, keeping `cellSize`'s aspect; adjacent selection
+// fills touch; `showsCaptions: false` drops the file name under each
+// image (the cell still reads it). Snapshots drop the ScrollView, which ImageRenderer does not draw.
 // Its indicators are `.never`, as in Halo's and Photo's inspectors: a legacy
 // scroller is an unlabelled, unidentified button to the app audit (#1368).
 // The grid still scrolls by wheel, trackpad and arrow keys.
@@ -75,6 +79,7 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
     private let cellIdentifierPrefix: String?
     private let onVisibleChange: @MainActor ([ID]) -> Void
     private let selecting: any GridSelecting
+    private let showsCaptions: Bool
     @State private var anchor: ID?
     @State private var visible = Set<ID>()
     @State private var width: CGFloat = 0
@@ -88,14 +93,16 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
     /// `cellIdentifierPrefix` each cell's identifier is `<prefix><id>`.
     /// `onVisibleChange` gets the ids of the cells on screen, in display
     /// order, as cells appear and disappear. `selecting` is the selection
-    /// rule every click and arrow move goes through.
+    /// rule every click and arrow move goes through. `showsCaptions` false
+    /// hides the caption under each image.
     public init(
         _ items: [ThumbnailItem<ID>], cellSize: CGSize, selection: Set<ID>,
         onSelectionChange: @escaping @MainActor (Set<ID>) -> Void,
         onOpen: @escaping @MainActor (ID) -> Void = { _ in },
         cellIdentifierPrefix: String? = nil,
         onVisibleChange: @escaping @MainActor ([ID]) -> Void = { _ in },
-        selecting: any GridSelecting = SuiteGridSelecting()
+        selecting: any GridSelecting = SuiteGridSelecting(),
+        showsCaptions: Bool = true
     ) {
         self.items = items
         self.cellSize = cellSize
@@ -105,6 +112,7 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
         self.cellIdentifierPrefix = cellIdentifierPrefix
         self.onVisibleChange = onVisibleChange
         self.selecting = selecting
+        self.showsCaptions = showsCaptions
     }
 
     public var body: some View {
@@ -122,13 +130,16 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
         }
     }
 
-    /// The image plus the cell's padding on both sides.
+    /// The narrowest column: the image plus the cell's padding on both sides.
     private var columnWidth: CGFloat { cellSize.width + SuiteSpacing.xs * 2 }
+    /// Between cells, so two images sit `SuiteSpacing.s` apart once each cell's padding is added.
+    private static var spacing: CGFloat { SuiteSpacing.s - SuiteSpacing.xs * 2 }
 
     private var grid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: columnWidth), spacing: SuiteSpacing.m)], spacing: SuiteSpacing.m) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: columnWidth), spacing: Self.spacing)], spacing: Self.spacing) {
             ForEach(items) { item in
-                ThumbnailCell(item: item, size: cellSize, isSelected: selection.contains(item.id))
+                ThumbnailCell(
+                    item: item, aspect: cellSize, showsCaption: showsCaptions, isSelected: selection.contains(item.id))
                     .suiteControl(id: cellIdentifierPrefix.map { "\($0)\(item.id)" }, enabled: true, reason: nil)
                     .id(item.id)
                     .onAppear { setVisible(item.id, true) }
@@ -193,7 +204,7 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
 
     private func move(_ arrow: GridArrow) -> KeyPress.Result {
         let columns = selecting.columns(
-            width: Double(width - SuiteSpacing.m * 2), minimum: Double(columnWidth), spacing: Double(SuiteSpacing.m))
+            width: Double(width - SuiteSpacing.m * 2), minimum: Double(columnWidth), spacing: Double(Self.spacing))
         let current = GridPick(selection: selection, anchor: currentAnchor)
         apply(selecting.move(arrow, extend: false, current: current, order: order, columns: columns))
         return .handled
@@ -227,22 +238,24 @@ private struct GridProbeKey: EnvironmentKey {
     static let defaultValue: GridProbe? = nil
 }
 
-/// One thumbnail: the image (or a flat placeholder) with its badges clipped
-/// to it, and the caption under it. Selection is an accent ring and a light
+/// One thumbnail: the image (or a flat placeholder) at the column's width and
+/// `aspect`'s shape, with its badges clipped to it, and the caption under it
+/// unless `showsCaption` is false. Selection is an accent ring and a light
 /// accent fill, and a `stateSelected` hairline just outside the ring, so the
 /// selection still reads on a blue or teal photo where the ring blends in.
 /// Hover on an unselected cell takes the row-hover fill and a primary caption
 /// (two signals, so it never reads by fill alone).
 private struct ThumbnailCell<ID: Hashable>: View {
     let item: ThumbnailItem<ID>
-    let size: CGSize
+    let aspect: CGSize
+    let showsCaption: Bool
     let isSelected: Bool
     @State private var hovering = false
 
     var body: some View {
         VStack(spacing: SuiteSpacing.xs) {
             thumbnail
-                .frame(width: size.width, height: size.height)
+                .aspectRatio(aspect, contentMode: .fit)
                 // Badges go on before the clip, so a small cell trims them
                 // instead of letting them spill past its edge (issue #102).
                 .overlay(alignment: .bottomLeading) { badges }
@@ -251,12 +264,14 @@ private struct ThumbnailCell<ID: Hashable>: View {
                     RoundedRectangle(cornerRadius: SuiteRadius.small)
                         .strokeBorder(isSelected ? SuiteColor.accent : SuiteColor.separator, lineWidth: isSelected ? 2 : 1))
                 .overlay { if isSelected { selectionHairline } }
-            Text(item.caption)
-                .font(SuiteFont.caption)
-                .foregroundStyle(isSelected || hovering ? Color.primary : SuiteColor.secondaryText)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .frame(width: size.width)
+            if showsCaption {
+                Text(item.caption)
+                    .font(SuiteFont.caption)
+                    .foregroundStyle(isSelected || hovering ? Color.primary : SuiteColor.secondaryText)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding(SuiteSpacing.xs)
         .background(
@@ -265,6 +280,11 @@ private struct ThumbnailCell<ID: Hashable>: View {
         )
         .onHover { hovering = $0 }
         .accessibilityElement(children: .combine)
+        // No caption on screen: the cell still reads its file name first.
+        .accessibilityLabel { label in
+            if !showsCaption { Text(item.caption) }
+            label
+        }
         // After the combine, so a cell with badges reads its help once, not once per element.
         .help(item.help ?? item.caption)
         .accessibilityValue(Text(verbatim: item.accessibilityValue ?? ""))
