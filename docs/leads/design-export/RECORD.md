@@ -1,19 +1,19 @@
 # design-export lead record
 
 Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
-Run: act-1a156b3f640-ytq0 · Session: (cloud) · Started: 2026-10-20T00:20Z (prior runs act-1a14852c11d-65cg, act-1a14fd6514a-4hke)
-Stage: 3 wave 5 (DE-u building)
-Base: 0af12d157c251fbf473fd6dcd72af32fb6ebeee7 (origin/dev)
-Next: DE-u builder (DE-6 + DE-7) opens its PR, then DE-z (DE-10 + DE-11) stacked on it
+Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z (prior runs act-1a14852c11d-65cg, act-1a14fd6514a-4hke, act-1a156b3f640-ytq0)
+Stage: 3 wave 1 of this run (DE-z building)
+Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
+Next: DE-u slice-done once dev CI 39475897385 (875b44d2, carries #3389 and #3391) is green on Linux; DE-z builder (DE-10 + DE-11, one PR, feature-done) running
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DE-a | options, scope, run type, live and fake export slots plan like the fake, UniqueFileNames in SuiteModel | DE-1, DE-0, DE-2 | MJ13 | design-contracts (built); editor-kernel EK-a (DE-2) | no | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39018046761 | – |
-| DE-u | File > Export… ⇧⌘E opens SuiteUI ExportSheet on the fakes; Export runs the fake steps; Cancel/Escape close; a failed step names its file | DE-6, DE-7 | J19 | DE-a; design-window DW-c; files-history FH-b; snapping SN-c; canvas-basics CB-c; editor-kernel EK-chrome | yes | 0 | building | – | – |
-| DE-s | the plan picks layers per scope, unique names, sizes per scale, refusals; SVG equals the reference | DE-3, DE-5 | MJ13, MJ14 | DE-a | no | 0 | waiting | – | – |
-| DE-w | PNG at 1x/2x/3x and one-page PDF off the window from the canvas artwork | DE-8, DE-9 | DesignRasterizerTests | DE-a | yes | 0 | waiting | – | – |
-| DE-z | real files, never overwriting, progress, failures, journeys on live | DE-10, DE-11 | J17, J18 | DE-u, DE-s, DE-w; files-history FH-b; editor-kernel EK-run | yes | 0 | waiting | – | – |
+| DE-u | File > Export… ⇧⌘E opens SuiteUI ExportSheet on the fakes; Export runs the fake steps; Cancel/Escape close; a failed step names its file | DE-6, DE-7 | J19 | DE-a; design-window DW-c; files-history FH-b; snapping SN-c; canvas-basics CB-c; editor-kernel EK-chrome | yes | 0 | merged, waits CI | 39475897385 (pending) | wanted |
+| DE-s | the plan picks layers per scope, unique names, sizes per scale, refusals; SVG equals the reference | DE-3, DE-5 | MJ13, MJ14 | DE-a | no | 0 | done | – | – |
+| DE-w | PNG at 1x/2x/3x and one-page PDF off the window from the canvas artwork | DE-8, DE-9 | DesignRasterizerTests | DE-a | yes | 0 | done | – | – |
+| DE-z | real files, never overwriting, progress, failures, journeys on live | DE-10, DE-11 | J17, J18 | DE-u, DE-s, DE-w; files-history FH-b; editor-kernel EK-run | yes | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -26,16 +26,18 @@ Next: DE-u builder (DE-6 + DE-7) opens its PR, then DE-z (DE-10 + DE-11) stacked
 | DE-3 | DE-s | 3 | the plan: scopes, hidden dropped, UniqueFileNames against existing, pixel sizes, refusals; turns on the rules half and MJ13 | Sources/DesignModel/DesignExport+Kernel.swift, Tests/mutations/DesignModel.DesignExport+Kernel.json, Tests/DesignModelTests/{DesignExportPlanTests,DesignExportWalkTests}.swift | DesignExportPlanTests, MJ13 (7 mutations) | – | building |
 | DE-5 | DE-s | 3 | DesignSVG.document per the pseudocode (QD-V8); turns on DesignSVGTests, svgExport budget, MJ14 | Sources/DesignModel/Live/DesignSVG.swift, Tests/mutations/DesignModel.DesignSVG.json, Tests/DesignModelTests/{DesignSVGTests,DesignExportBudgetTests,DesignSVGWalkTests}.swift | DesignSVGTests, MJ14 (7 mutations) | – | building |
 | DE-9 | DE-w | 3 | DesignRasterizer.pdf, pdfOnePage test | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/DesignRasterizerTests.swift | pdfOnePage (macOS) | – | planned |
-| DE-6 | DE-u | 4 | File > Export… ⇧⌘E, DesignExportArea hosting SuiteUI ExportSheet on the fakes, ids, launch args, J19 skipped, snapshots, render budget test | per packet | DesignExportSnapshots, J19 | – | waits on DE-2b, editor-kernel EK-chrome, design-window DW-c, files-history FH-b, snapping SN-c, canvas-basics CB-c |
-| DE-7 | DE-u | 5 | the run on the fakes, Cancel/Escape/Return, -DesignExportFail, J19 on, J17/J18 skipped | per packet | J19 | – | waits on DE-6 |
-| DE-10 | DE-z | 6 | real files, never overwriting, progress, rememberExport, J17 on | per packet | J17 | – | waits on DE-7, DE-3, DE-5, DE-9, editor-kernel EK-run |
-| DE-11 | DE-z | 7 | failures, Cancel mid-run, blueprint rows, feature-done, Closes #418 | per packet | J18 | – | waits on DE-10, files-history FH-b |
+| DE-6 | DE-u | 4 | File > Export… ⇧⌘E, DesignExportArea hosting SuiteUI ExportSheet on the fakes, ids, launch args, J19 skipped, snapshots, render budget test | per packet | DesignExportSnapshots, J19 | #3389 | merged |
+| DE-7 | DE-u | 5 | the run on the fakes, Cancel/Escape/Return, -DesignExportFail, J19 on, J17/J18 skipped | per packet | J19 | #3391 | merged 18:30Z (ad0f902e) |
+| DE-10 | DE-z | 6 | real files, never overwriting, progress, rememberExport, J17 on | per packet | J17 | – | building (wave 1, with DE-11) |
+| DE-11 | DE-z | 7 | failures, Cancel mid-run, blueprint rows, feature-done, Closes #418 | per packet | J18 | – | building (wave 1, with DE-10) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- Run act-1a15a9a4e8b-kn6a (one line lead for design-export, gradient-fill (Design) and autosave-history (Design)): DE-a, DE-s, DE-w done before it; DE-u merged (#3389, #3391). DE-z ships as one PR (DE-10 + DE-11, ~390 lines; files-history FH-b and editor-kernel are built), carrying `feature-done`, `Closes #418` and `Fixes #3528` (Export writes no file).
+- PRs target dev, not main: main only takes dev SHAs that passed full CI (CLAUDE.md).
 - DE-2b (the `DesignExportRun` typealias) re-homed from DE-a to DE-u: only the App export area reads it, SuiteKernel is not on dev, and DE-a's behaviour (options, scope, slots, readouts, the name rule) is complete and green. Belt-Slice-Done: DE-a posted on run 39018046761 (full CI on 453198a, Linux green).
 - DE-1 dropped (10:45Z): after the session lost 06:55 to 10:40Z to a usage limit, a test-only wave ahead of DE-3 and DE-5 costs a serial lane round for nothing rule 13 needs; each Model task merges with its own tests, as DE-2 and DE-0 did. DE-3 owns DesignExportPlanTests and DesignExportWalkTests, DE-5 owns DesignSVGTests, DesignExportBudgetTests and DesignSVGWalkTests, so their files stay disjoint.
 - DE-2 as built: `exportPlan` throws `.nothingSelected` itself for an empty selection scope (the slot reads empty ids as every top-level frame); the `defaultsNotAStep` mutation appends to `history.undo` directly because `record` no-ops on an unchanged document; pixel sizes guard non-finite sides (`whole()`), so DE-3 keeps that helper.

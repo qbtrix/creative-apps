@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-19T23:53:40Z	heartbeat	DE-u still blocked: #1552 and #1500 open, no supervisor reply on #1970
 2026-10-20T00:14:12Z	heartbeat	canvas-basics #1500 closed; DE-u still blocked on snapping #1552 (SN-8) and editor-kernel EK-chrome; no supervisor reply on #1970
 2026-10-20T00:30:00Z	stage	wave 5 start: DE-u builder (DE-6 + DE-7) on origin/dev 0af12d15; supervisor go on #1970
+2026-10-20T18:42:31Z	stage	run act-1a15a9a4e8b-kn6a starts on dev 875b44d2; DE-u merged (#3389, #3391), DE-z builder next
