@@ -9,3 +9,5 @@ utc	stage	event	ref	note
 2026-10-20T07:45Z	3	task-built	XP-1	lead/export-pack-XP-1 04cd4c0, CI: PASS
 2026-10-20T07:45Z	3	task-built	XP-6	lead/export-pack-XP-6 de396d4, CI: PASS, Mutate 5/5
 2026-10-20T07:45Z	3	wait-met	AH-1	#3543 merged as 854a3b5
+2026-10-20T07:57Z	3	gate	XP-1	scripts/ci --changed CI: PASS on 55611e3 (dev af2977c merged)
+2026-10-20T07:57Z	3	pr-open	#3552	XP-1, Slice XP-a, fast-lane

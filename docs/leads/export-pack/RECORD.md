@@ -4,7 +4,7 @@ Issue: #3477 · Packet: docs/blueprints/suiteui/features/export-pack.md
 Run: act-1a15821c836-93pf · Session: claude/feature-lead-playbook-v981be · Started: 2026-10-20T07:09Z
 Stage: 3 wave 1
 Base: 5a17e0e54b9c356c371e90c7fc10f062bbb0dde1
-Next: AH-1 merged (#3543, 854a3b5); merge dev into lead/export-pack-XP-1, rerun scripts/ci --changed, open the XP-1 PR, then the XP-6 PR stacked on it
+Next: #3552 (XP-1) waits on the lane (macOS build); once it merges, merge dev into lead/export-pack-XP-6, rerun scripts/ci --changed, open the XP-6 PR (Slice: XP-m, Mutate 5/5)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,7 +17,7 @@ Next: AH-1 merged (#3543, 854a3b5); merge dev into lead/export-pack-XP-1, rerun 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| XP-1 | XP-a | 1 | ExportOptions.swift stubs, C4 part, suite written disabled | Sources/SuiteKernel/Export/ExportOptions.swift, Tests/SuiteKernelTests/ExportOptionsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json | ExportOptionsTests compiles disabled; KernelShapeTests over Export/ | – | built (lead/export-pack-XP-1 04cd4c0, 264 lines, CI: PASS) |
+| XP-1 | XP-a | 1 | ExportOptions.swift stubs, C4 part, suite written disabled | Sources/SuiteKernel/Export/ExportOptions.swift, Tests/SuiteKernelTests/ExportOptionsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json | ExportOptionsTests compiles disabled; KernelShapeTests over Export/ | #3552 | PR open (head 55611e3, CI: PASS) |
 | XP-2 | XP-a | – | MetadataCarrying, FakeMetadata, SuiteServices.metadata | Sources/SuiteModel/Contracts/MetadataCarrying.swift, Sources/SuiteModel/Fakes/FakeMetadata.swift, Sources/SuiteModel/SuiteServices.swift, Tests/SuiteModelTests/FakeMetadataTests.swift | FakeMetadataTests | – | waits SM-a |
 | XP-3 | XP-a | – | ExportPick.size/.metadata, placeholder rows, gallery page, journey skipped | Sources/SuiteUI/ExportSheet.swift, Sources/SuiteUI/Gallery/GalleryExportPack.swift, Sources/SuiteUI/SuiteGallery.swift, UITests/SuiteJourneyTests+Export.swift | SJ0 | – | waits TC-a, PL-a |
 | XP-4 | XP-u | – | Size and Metadata rows | Sources/SuiteUI/ExportSheet.swift, Tests/SuiteUITests/ExportPackRowsTests.swift | ExportPackRowsTests | – | waits XP-3 |
@@ -38,6 +38,7 @@ Next: AH-1 merged (#3543, 854a3b5); merge dev into lead/export-pack-XP-1, rerun 
 - XP-6 waits on XP-1 only (packet task table): it needs only ExportOptions.swift, so it is unchained from XP-2 and XP-3 (lead.md stage 2) and stacked on XP-1.
 - XP-a ships as more than one PR: its three tasks wait on three different features and together exceed 400 lines.
 - Task branches are lead/export-pack-XP-n (a hyphen): lead/export-pack is a branch, so lead/export-pack/XP-n can't exist.
+- XP-6's PR opens after #3552 merges, not stacked on dev now: with XP-1's commits it is 440 lines, over the 400 cap.
 - XP-1 and XP-6 run in one builder, one after another: XP-6 fills XP-1's stub bodies.
 
 ## Open
