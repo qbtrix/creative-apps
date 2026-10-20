@@ -208,6 +208,12 @@
         ],
         "design-export:DE-u": [
           "D2-4b"
+        ],
+        "file-flow:DF-a": [
+          "D2-3a",
+          "D2-3b",
+          "D2-4a",
+          "D2-4b"
         ]
       },
       "ui": true
