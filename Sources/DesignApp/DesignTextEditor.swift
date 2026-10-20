@@ -3,7 +3,9 @@
 // child of the canvas overlay. While the workspace is editing a text node it shows one
 // plain TextField over that node's frame; otherwise it draws nothing and takes no clicks.
 // The box has no fill, only an accent hairline: the text keeps the colour it will have on
-// the page (black text on a field well is unreadable in the shell's dark scheme).
+// the page (black text on a field well is unreadable in the shell's dark scheme). The field
+// takes the scheme that contrasts with its ink, not the shell's, so the selection highlight and
+// caret stay readable over the white page in Dark (DesignColor.isDark).
 //
 // The field sits over the node's frame at the canvas zoom (`box`), in the node's own font
 // (DesignTextFont, the one the canvas artwork draws with) at its size x
@@ -104,6 +106,7 @@ private struct DesignTextField: View {
             .font(DesignTextFont.font(style, scale: DesignWorkspace.textEditScale(zoom: zoom)))
             .multilineTextAlignment(DesignTextFont.textAlignment(style))
             .foregroundStyle(node.fill.color)
+            .environment(\.colorScheme, node.fill.isDark ? .light : .dark)
             .focused($focused)
             .task { await takeFocus() }
             .onSubmit { perform(.commitText) }

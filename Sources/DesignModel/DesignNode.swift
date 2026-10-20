@@ -10,7 +10,10 @@
 // Order: paint order is depth first (a node, then its children, siblings back to
 // front in array order); hit order is the reverse. Hit testing skips a node that
 // is hidden or locked together with its subtree. The Layers list runs front to
-// back: the frontmost sibling on top, each node's children under it.
+// back: the frontmost sibling on top, each node's children under it; the rows
+// come from SuiteKernel's LayerTree (DesignNode+Kernel).
+
+import SuiteKernel
 
 /// A point on a page, in points from its top-left corner.
 public struct DesignPoint: Sendable, Hashable, Codable {
@@ -137,6 +140,13 @@ public struct DesignColor: Sendable, Hashable, Codable {
     public static let black = DesignColor(0, 0, 0)
     /// Every other shape.
     public static let shape = DesignColor(217, 217, 217)
+
+    /// Whether the color reads dark: its weighted brightness (299 R + 587 G + 114 B, per mille)
+    /// is under the 0...255 midpoint. Integer math, no libm. The text editor picks the light
+    /// highlight behind dark ink and the dark one behind light ink by it.
+    public var isDark: Bool {
+        299 * Int(red) + 587 * Int(green) + 114 * Int(blue) < 128_000
+    }
 }
 
 public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
@@ -276,12 +286,24 @@ extension [DesignNode] {
     public var frontToBack: [DesignNode] { reversed() }
 
     /// Rows in display order: siblings frontmost first, each node's children under it, shown only
-    /// when its id is in `expanded`.
-    func rows(expanded: Set<String>, depth: Int = 0) -> [DesignRow] {
-        frontToBack.flatMap { node -> [DesignRow] in
-            let children = expanded.contains(node.id) ? node.children.rows(expanded: expanded, depth: depth + 1) : []
-            return [DesignRow(node: node, depth: depth)] + children
+    /// when its id is in `expanded`. The kernel's `LayerTree.rows` walks the tree; each row
+    /// carries the node with that id.
+    func rows(expanded: Set<String>) -> [DesignRow] {
+        let nodes = byID
+        return layerTree.rows(expanded: expanded).compactMap { row in
+            nodes[row.id].map { DesignRow(node: $0, depth: row.depth) }
         }
+    }
+
+    /// Every node in the tree by id.
+    private var byID: [String: DesignNode] {
+        var out: [String: DesignNode] = [:]
+        var stack = self
+        while let node = stack.popLast() {
+            out[node.id] = node
+            stack += node.children
+        }
+        return out
     }
 
     func node(_ id: String) -> DesignNode? {

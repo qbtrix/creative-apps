@@ -7,6 +7,14 @@ Paste, Duplicate, Delete, Select All and Deselect through the menus, the
 stage's context menu and the pasteboard; the full draw journey with Pen.
 **Line:** `line:flare` · **Wave:** 4 (`waves.md`) · **Lead branch:** `lead/stage-edit`
 
+**Status:** built (2026-10-19), feature issue #1514. SE-0 to SE-5 are on
+`dev`: selection, marquee and the transform box (SE-0, SE-1), zoom, pan,
+rulers and guides (SE-2a #2532, SE-2b #3309), edit and order commands
+(SE-3, SE-4), and J3 and the order journey live (SE-5a #2945). J14 reads
+the zoom from a hidden `flare.stage.zoom` element until #1452 lets the
+pill's text reach the tests. Onion skin and motion path stay disabled with
+a reason (#386). Gaps: keyboard guides #3310, dark view goldens #3311.
+
 **Covers:** F3b #204 (closes with SE-1; its drag-to-key half landed in
 `draw-key-save` DK-14), F3c #375, F18 #384, and the stage half of IN-1 #397
 (J3, J5 and J15 green live). #397 closes with whichever of this feature's

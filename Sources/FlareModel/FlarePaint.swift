@@ -3,16 +3,20 @@
 // differs across them reads nil (Mixed), and a shape with no stroke reads as a zero-width one. Each setter is one undo
 // step through `services.properties` ("Set Fill" / "Set Stroke"); a bad hex, a gradient fill or no shape refuses with
 // a reason in `paintError` and changes nothing, and a successful set clears it. Hex parsing is NewDocumentSpec's.
+// `gradient` (gradient-fill FG-1) is the first shape's gradient in its bounds when every edited shape has a gradient.
 import FlareCore
+import SuiteKernel
 
 /// The selection's fill and stroke as the inspector shows them. A nil value reads as Mixed.
 public struct PaintReadout: Sendable, Equatable {
     public var fillHex: String?, fillIsGradient: Bool
     public var strokeHex: String?, strokeWidth: Double?, cap: Stroke.Cap?, join: Stroke.Join?
+    /// The gradient the editor shows; nil for a solid or Mixed.
+    public var gradient: FillSelection?
 
     public init(fillHex: String?, fillIsGradient: Bool, strokeHex: String?, strokeWidth: Double?,
-                cap: Stroke.Cap?, join: Stroke.Join?) {
-        (self.fillHex, self.fillIsGradient) = (fillHex, fillIsGradient)
+                cap: Stroke.Cap?, join: Stroke.Join?, gradient: FillSelection? = nil) {
+        (self.fillHex, self.fillIsGradient, self.gradient) = (fillHex, fillIsGradient, gradient)
         (self.strokeHex, self.strokeWidth, self.cap, self.join) = (strokeHex, strokeWidth, cap, join)
     }
 }
@@ -33,7 +37,8 @@ extension FlareWorkspace {
             fillHex: solid.count == fills.count ? Self.same(solid) : nil,
             fillIsGradient: solid.count < fills.count,
             strokeHex: Self.same(strokes.map { Self.hexDigits($0.color) }), strokeWidth: Self.same(strokes.map(\.width)),
-            cap: Self.same(strokes.map(\.cap)), join: Self.same(strokes.map(\.join)))
+            cap: Self.same(strokes.map(\.cap)), join: Self.same(strokes.map(\.join)),
+            gradient: solid.isEmpty ? fillSelection : nil)
     }
 
     /// Sets the selection's solid fill; refuses a bad hex or a gradient with a reason.
@@ -67,7 +72,7 @@ extension FlareWorkspace {
     private static let noStroke = Stroke(width: 0)
 
     /// The shape addresses the inspector paints, each with its shape.
-    private var paintShapes: [(StageAddress, FlareShape)] {
+    var paintShapes: [(StageAddress, FlareShape)] {
         guard let document, let owner = propertyOwner else { return [] }
         let direct = tool == .directSelect && !selection.isEmpty
         let items = direct ? selection : propertyLayerIDs.flatMap { id in

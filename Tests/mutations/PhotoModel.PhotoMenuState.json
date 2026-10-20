@@ -1,0 +1,7 @@
+[
+  {"label": "textIgnored: Cut and Copy go dark while a sheet's field has focus and no image is open", "file": "Sources/PhotoModel/PhotoMenuState.swift", "find": "let textFirst = textFocused || isPresenting", "replace": "let textFirst = isPresenting", "tests": "PhotoMenuStateTests"},
+  {"label": "pasteNeedsNoImage: Paste turns on with any pasteboard in a window", "file": "Sources/PhotoModel/PhotoMenuState.swift", "find": "if textFirst || (hasWindow && pasteboardHasImage) { return .available }", "replace": "if textFirst || hasWindow { return .available }", "tests": "PhotoMenuStateTests"},
+  {"label": "selectAllUnderSheet: Edit > Select All selects the canvas behind a sheet", "file": "Sources/PhotoModel/PhotoMenuState.swift", "find": "return isPresenting && ws.canvas != nil ? .unavailable(\"Finish the open sheet first.\") : base", "replace": "return base", "tests": "PhotoMenuStateTests"},
+  {"label": "commandADropped: Select > All goes dark with no window, so a field loses Command-A", "file": "Sources/PhotoModel/PhotoMenuState.swift", "find": "return hasWindow ? base : .available", "replace": "return base", "tests": "PhotoMenuStateTests"},
+  {"label": "runSkipped: a menu item's run never reaches the catalog", "file": "Sources/PhotoModel/PhotoMenuState.swift", "find": "try PhotoWorkspace.catalog.run(spec.id, params: params, on: &state.workspace).result", "replace": "JSONValue.object([:])", "tests": "PhotoMenuStateTests"}
+]
