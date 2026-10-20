@@ -70,6 +70,7 @@ library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 
 design DesignModelTests.DesignSnapBudgetTests
 design DesignModelTests.DesignSelectBudgetTests
+design DesignModelTests.DesignBudgetTests
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
