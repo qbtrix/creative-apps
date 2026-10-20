@@ -15,3 +15,6 @@ utc	stage	event	ref	note
 2026-10-20T21:49Z	3	heartbeat	#3682 #3702	open, in the supervisor's local Mac gate queue; HT-u ready to rebase
 2026-10-20T22:12Z	3	heartbeat	#3682 #3702	open, in the local Mac gate queue; no change
 2026-10-20T22:34Z	3	heartbeat	#3682 #3702	open, in the local Mac gate queue; no change
+2026-10-20T23:54Z	3	merge	#3702 #3682	HT-m (HT-5) squash 2a21273a3 carried HT-a; #3682 closed as superseded
+2026-10-20T23:54Z	3	slice-done	HT-a	Belt-Slice-Done and Mac-Finish-Wanted on #3443, run 39514893774
+2026-10-20T23:54Z	3	rebase	HT-u	rebased onto dev (C4 description merged), gating
