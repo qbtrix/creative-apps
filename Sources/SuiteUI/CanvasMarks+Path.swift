@@ -10,6 +10,10 @@
 // pixels. Marks are hidden from accessibility and never take a click; the
 // canvas gesture does. The geometry is static, plain and nonisolated, so
 // tests read it off the main actor without tripping the View isolation check.
+// Built from the kernel's contours (pen-paths PN-3), selected anchors fill
+// with the accent and show their handles, and the hovered anchor or handle
+// gets an accent ring.
+import SuiteKernel
 import SwiftUI
 
 /// One anchor of a vector path, in document pixels.
@@ -55,6 +59,9 @@ public struct PathMarks: View {
     private let anchors: [PathAnchor]
     private let segments: [PathSegment]
     private let zoom: Double
+    /// Indices into `anchors` drawn selected; the hovered anchor or handle, in document pixels.
+    private var selected: Set<Int> = []
+    private var hovered: CGPoint?
 
     /// `anchors` in document pixels; `segments` index into them; `zoom` in points per pixel.
     public init(anchors: [PathAnchor], segments: [PathSegment], zoom: Double) {
@@ -65,14 +72,17 @@ public struct PathMarks: View {
 
     public var body: some View {
         let outline = Self.outline(anchors: anchors, segments: segments, zoom: zoom)
-        let handles = Self.handleLines(anchors: anchors, zoom: zoom)
-        let marks = Self.anchorMarks(anchors: anchors, zoom: zoom)
+        let handles = Self.handleLines(anchors: anchors, zoom: zoom, selected: selected)
+        let marks = Self.anchorMarks(anchors: anchors, zoom: zoom, selected: selected)
+        let chosen = Self.selectedMarks(anchors: anchors, selected: selected, zoom: zoom)
         ZStack {
             outline.stroke(SuiteColor.overlayInk, lineWidth: 2)
             outline.stroke(SuiteColor.overlayPaper, lineWidth: 1)
             handles.stroke(SuiteColor.overlayInk, lineWidth: 1)
             marks.fill(SuiteColor.overlayPaper)
             marks.stroke(SuiteColor.overlayInk, lineWidth: 1)
+            chosen.fill(SuiteColor.accent)
+            if let hovered { Self.ring(hovered, zoom: zoom).stroke(SuiteColor.accent, lineWidth: 1) }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -98,13 +108,14 @@ public struct PathMarks: View {
         }
     }
 
-    /// Every anchor's mark, plus a half-size dot on each smooth anchor's handles.
-    public nonisolated static func anchorMarks(anchors: [PathAnchor], zoom: Double) -> Path {
+    /// Every anchor's mark, plus a half-size dot on the handles of each smooth
+    /// anchor and each anchor whose index is in `selected`.
+    public nonisolated static func anchorMarks(anchors: [PathAnchor], zoom: Double, selected: Set<Int> = []) -> Path {
         var path = Path()
         let dot = SuiteSize.anchor / 2
-        for anchor in anchors {
+        for (i, anchor) in anchors.enumerated() {
             path.addPath(anchorShape(anchor, zoom: zoom))
-            guard anchor.kind == .smooth else { continue }
+            guard anchor.kind == .smooth || selected.contains(i) else { continue }
             for handle in [anchor.handleIn, anchor.handleOut].compactMap({ $0 }) {
                 let c = view(handle, zoom)
                 path.addEllipse(in: CGRect(x: c.x - dot / 2, y: c.y - dot / 2, width: dot, height: dot))
@@ -113,16 +124,29 @@ public struct PathMarks: View {
         return path
     }
 
-    /// The lines from each smooth anchor to its handles; corners draw none.
-    public nonisolated static func handleLines(anchors: [PathAnchor], zoom: Double) -> Path {
+    /// The lines from each smooth or selected anchor to its handles; other corners draw none.
+    public nonisolated static func handleLines(anchors: [PathAnchor], zoom: Double, selected: Set<Int> = []) -> Path {
         var path = Path()
-        for anchor in anchors where anchor.kind == .smooth {
+        for (i, anchor) in anchors.enumerated() where anchor.kind == .smooth || selected.contains(i) {
             for handle in [anchor.handleIn, anchor.handleOut].compactMap({ $0 }) {
                 path.move(to: view(anchor.point, zoom))
                 path.addLine(to: view(handle, zoom))
             }
         }
         return path
+    }
+
+    /// The selected anchors' marks, which fill with the accent.
+    public nonisolated static func selectedMarks(anchors: [PathAnchor], selected: Set<Int>, zoom: Double) -> Path {
+        var path = Path()
+        for i in selected.sorted() where anchors.indices.contains(i) { path.addPath(anchorShape(anchors[i], zoom: zoom)) }
+        return path
+    }
+
+    /// A `SuiteSize.pointMarkRing` circle around `point` (document pixels), in view points.
+    public nonisolated static func ring(_ point: CGPoint, zoom: Double) -> Path {
+        let side = SuiteSize.pointMarkRing, c = view(point, zoom)
+        return Path(ellipseIn: CGRect(x: c.x - side / 2, y: c.y - side / 2, width: side, height: side))
     }
 
     /// The segments in view points; one whose index is out of range draws nothing.
@@ -145,22 +169,41 @@ public struct PathMarks: View {
 }
 
 extension PathMarks {
-    /// Contours' marks (pen-paths PN-2 stub): maps onto `init(anchors:segments:zoom:)`.
-    /// PN-3 takes the kernel's contours with `toView`, the selected anchors and the hovered hit.
-    public init(contours: [PathContourStandIn], zoom: Double) {
-        let parts = Self.parts(contours)
+    /// The kernel's contours, mapped to document pixels by `toView` (a path's
+    /// `toDocument`, identity for a Pen draft): `selected` anchors fill with
+    /// the accent and show their handles; `hovered` names an anchor or handle to ring.
+    public init(contours: [VectorContour], toView: Matrix, selected: Set<AnchorRef>, hovered: PathHit?, zoom: Double) {
+        let parts = Self.parts(contours, toView: toView)
         self.init(anchors: parts.anchors, segments: parts.segments, zoom: zoom)
+        var offsets: [Int] = [], count = 0
+        for contour in contours { offsets.append(count); count += contour.anchors.count }
+        func flat(_ ref: AnchorRef) -> Int? {
+            guard offsets.indices.contains(ref.contour), contours[ref.contour].anchors.indices.contains(ref.index) else { return nil }
+            return offsets[ref.contour] + ref.index
+        }
+        self.selected = Set(selected.compactMap(flat))
+        switch hovered {
+        case .anchor(let ref): self.hovered = flat(ref).map { parts.anchors[$0].point }
+        case .handle(let ref, let end):
+            self.hovered = flat(ref).flatMap { end == .handleIn ? parts.anchors[$0].handleIn : parts.anchors[$0].handleOut }
+        case .segment, nil: self.hovered = nil
+        }
     }
 
-    /// Every contour's anchors in one list, and the segments joining each
-    /// contour's neighbours, plus last to first when it is closed. A contour
-    /// of fewer than two anchors adds its anchors and no segment.
-    public nonisolated static func parts(_ contours: [PathContourStandIn]) -> (anchors: [PathAnchor], segments: [PathSegment]) {
+    /// Every contour's anchors in one list, mapped by `toView`, and the
+    /// segments joining each contour's neighbours, plus last to first when it
+    /// is closed. A contour of fewer than two anchors adds its anchors and no
+    /// segment. A corner draws as a corner; smooth and symmetric as smooth.
+    public nonisolated static func parts(_ contours: [VectorContour], toView: Matrix) -> (anchors: [PathAnchor], segments: [PathSegment]) {
+        func cg(_ p: Point) -> CGPoint { let v = toView.apply(p); return CGPoint(x: v.x, y: v.y) }
         var anchors: [PathAnchor] = []
         var segments: [PathSegment] = []
         for contour in contours {
             let first = anchors.count
-            anchors += contour.anchors
+            anchors += contour.anchors.map {
+                PathAnchor(point: cg($0.point), kind: $0.kind == .corner ? .corner : .smooth,
+                           handleIn: $0.handleIn.map(cg), handleOut: $0.handleOut.map(cg))
+            }
             let last = anchors.count - 1
             guard last > first else { continue }
             segments += (first..<last).map { PathSegment(from: $0, to: $0 + 1) }
