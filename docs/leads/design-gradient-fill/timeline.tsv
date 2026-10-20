@@ -9,3 +9,5 @@ time	kind	note
 2026-10-20T21:11:10Z	check	heartbeat	#3687	DG-a macOS build green; waits for the lane's batch to merge it; DG-u/m/z still blocked on #3677
 2026-10-20T21:33:21Z	check	heartbeat	#3687	DG-a built green, still waiting for a lane batch; DG-u/m/z blocked on #3677
 2026-10-20T21:55:10Z	check	merged	#3687	DG-a merged into dev at b17264bf (lane batch 39499777633); merged-done waits on dev ci.yml Linux check 39502742421 (in progress)
+2026-10-20T22:43:51Z	slice	done	DG-a	Belt-Slice-Done posted; dev Linux 39502742421 green with b17264bf; critics wait on a scoped: design run
+2026-10-20T22:43:51Z	check	heartbeat	#3677	DG-u/DG-m/DG-z wait on SuiteUI GF-2..GF-7
