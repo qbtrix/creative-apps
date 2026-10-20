@@ -6,7 +6,7 @@
   "feature_issue": "#1530",
   "beta": true,
   "covers": "#427; feature map library/raw (new) and the library adopter of suiteui/shared-raw; RJ-L22",
-  "waits_on": "import, thumbnails (built); export-pack LX-a (LibraryContracts.swift) before RW-2 and LX-m (LiveExporter.swift) before RW-3; cross-line: suiteui shared-raw SR-a before RW-1 and SR-m before RW-4, shared-codecs SC-library before RW-4 (ImageIODecoder.swift), shared-thumbnails ST-m and suite-imaging IM-library before RW-3 (LiveThumbnails, LiveLoupeImaging); metadata-more MD-a and MD-b now wait on RW-a and RW-m (re-cut 2026-10-21)",
+  "waits_on": "import, thumbnails (built); export-pack LX-a (LibraryContracts.swift) before RW-2 and LX-m (LiveExporter.swift) before RW-3; cross-line: suiteui shared-codecs SC-f before RW-2 (the format registry: PhotoFileKind becomes SuiteImageFormat, with the camera RAW row), shared-raw SR-a before RW-1 and SR-m before RW-4, shared-codecs SC-library before RW-4 (ImageIODecoder.swift), shared-thumbnails ST-m and suite-imaging IM-library before RW-3 (LiveThumbnails, LiveLoupeImaging); metadata-more MD-3 and MD-7 now wait on RW-a and RW-m (re-cut 2026-10-21)",
   "issues": [
     427
   ],
@@ -27,11 +27,10 @@
     "Tests/LibraryModelTests/LibraryRawTests.swift",
     "Tests/AppSnapshotTests/LibraryRawDecodeTests.swift",
     "UITests/LibraryJourneyTests+Raw.swift",
-    "Sources/LibraryModel/Contracts/LibraryValues.swift",
     "Sources/LibraryModel/Contracts/LibraryContracts.swift",
     "Sources/LibraryModel/Fakes/FakePlatform.swift",
-    "Tests/mutations/LibraryModel.LibraryValues.json",
     "Tests/mutations/LibraryModel.LibraryContracts.json",
+    "Tests/mutations/LibraryModel.FakePlatform.json",
     "Sources/LibraryModel/Live/LiveThumbnails.swift",
     "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
     "Sources/LibraryModel/Live/LiveExporter.swift",
@@ -44,7 +43,7 @@
   "slices": [
     {
       "id": "RW-a",
-      "behavior": "A RAW file name is a `.raw` photo kind, `PhotoDecoding` offers a float decode with a default, and the fake decoder answers RAW files from the shared fake.",
+      "behavior": "`PhotoDecoding` offers a float decode with a default, the fake decoder answers RAW files from the shared fake, and a RAW file is the registry's camera RAW kind.",
       "tasks": [
         "RW-1",
         "RW-2"
@@ -56,11 +55,10 @@
         "Tests/LibraryModelTests/LibraryRawTests.swift",
         "Tests/AppSnapshotTests/LibraryRawDecodeTests.swift",
         "UITests/LibraryJourneyTests+Raw.swift",
-        "Sources/LibraryModel/Contracts/LibraryValues.swift",
         "Sources/LibraryModel/Contracts/LibraryContracts.swift",
         "Sources/LibraryModel/Fakes/FakePlatform.swift",
-        "Tests/mutations/LibraryModel.LibraryValues.json",
-        "Tests/mutations/LibraryModel.LibraryContracts.json"
+        "Tests/mutations/LibraryModel.LibraryContracts.json",
+        "Tests/mutations/LibraryModel.FakePlatform.json"
       ],
       "waits": {
         "export-pack:LX-a": [

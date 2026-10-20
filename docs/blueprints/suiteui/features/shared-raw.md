@@ -10,8 +10,12 @@ Highlights) pull back detail a JPEG has already clipped. Thumbnails take the
 camera's embedded preview; the full decode runs only for the loupe, Photo's
 canvas and export. A file the system can't read or develop is refused with a
 sentence that names the format or the camera. Photo opens a RAW file as a new
-document; `afterglow` opens, develops (`tone.set`) and exports one. Library's
-adoption is `library/raw` (re-cut in this PR to a thin adopter).
+document; `afterglow` opens, develops (`tone.set`) and exports one. Which
+files count as RAW is not a list of this packet's: shared-codecs' format
+registry (`SuiteImageFormats`, slice SC-f) has one camera RAW row, so
+Photo's open panel, Library's scan and the CLI already list RAW files; this
+packet extends that row with the decode. Library's adoption is `library/raw`
+(re-cut in this PR to a thin adopter).
 **Line:** `line:suiteui` · **Wave:** XK4 (`waves.md`) · **Lead branch:** `lead/shared-raw`
 **Beta:** captain, 2026-10-21 ("RAW in beta, and it should be shared"). Labels `beta` and `p1` when filed.
 
@@ -23,16 +27,17 @@ and RJ-L22 close through `library/raw`.
 SuiteImaging target, which PhotoModel, LibraryModel and AfterGlowCLICore
 already link), **IM-m** before SR-3 (`ImagingProgram`, so the headroom test
 runs the shared list). tone-controls **TC-a** and pen-paths **PN-a** before
-SR-9 (`Tests/canonical-concepts.txt`, A/C first). adopt-kernel-unsaved-prompt
-**UP-photo** before SR-7 (`PhotoWindow+File.swift`, the last XK3 owner).
+SR-8 (`Tests/canonical-concepts.txt`, A/C first). shared-codecs **SC-f**
+before SR-6 (the format registry; SC-15 also edits `PhotoImageFile.swift`).
 **No creative-core issue and no `Package.swift` edit:** Core Image is a
 system framework, linked by its `import`, and every target that needs RAW
-already links SuiteImaging after IM-1.
+already links SuiteImaging after IM-1, which also links SuiteModel into
+SuiteImaging so `RawFormat` reads the registry (amended in this PR).
 
 **Hand-offs** (cross-line; the lead checks each before the slice starts):
-- **SR-photo:** `PhotoHeadless.swift` is photo/export-pack PX-m's;
-  `PhotoWindow+File.swift` is also photo/history-panel PH-m's and
-  photo/file-flow PF-m's. SR-6 and SR-7 add a few lines each after those.
+- **SR-photo:** none left: the open panel and `PhotoHeadless`' lists come
+  from the registry (shared-codecs SC-15), so this packet edits neither
+  `PhotoWindow+File.swift` nor `PhotoHeadless.swift`.
 - **SR-z:** RJ-X50's `tone.set` in Photo is photo/tone-controls PT-4's; the
   job stays disabled until it merges.
 - **library/raw** waits on this packet's SR-a (contract) and SR-m (the
@@ -49,8 +54,9 @@ and Model come from `CIRAWFilter.properties` with the string keys `{TIFF}`,
 `Make`, `Model`) and no Metal (suite-imaging's `ImagingBoundaryTests`; a
 default `CIContext()`).
 
-**Rule 20.** One RAW decode (`SuiteRaw`), one list of RAW extensions
-(`RawFormat`), one set of refusal sentences (`RawRefusal`). One home for
+**Rule 20.** One RAW decode (`SuiteRaw`), one set of refusal sentences
+(`RawRefusal`), and no RAW extension list of its own: `RawFormat` reads the
+registry's camera RAW row. One home for
 exposure and white balance: the shared tone sliders. The decoder is told
 neither: it decodes at the camera's as-shot white balance with its tone
 curve off (`boostAmount = 0`) and its baseline exposure moved out
@@ -59,7 +65,7 @@ core `exposure(stops:)` step on the float buffer). So a RAW file has no
 second Exposure or Temperature control, and a slider step on it stays one
 GPU display write on the resident float base (`docs/render-contract.md`;
 CoreRender's tile textures are `rgba16Float`, so the headroom survives on
-the GPU). SR-9 adds the `Raw decode: Raw` line to
+the GPU). SR-8 adds the `Raw decode: Raw` line to
 `Tests/canonical-concepts.txt`, so an app-local `*Raw*` decoder fails
 `scripts/check-dup-logic`.
 
@@ -77,7 +83,7 @@ deletes library/raw's own planned decoder (`Platform/RawDecoding.swift`,
 it is written.
 
 **C4:** a new component part `suite-imaging/imaging-raw.json`
-(`Sources/SuiteImaging/Raw/`), added by SR-2; SR-9 names the adopters.
+(`Sources/SuiteImaging/Raw/`), added by SR-2; SR-8 names the adopters.
 
 **Clean-room.** Decoding is Apple's documented `CIRAWFilter`. The test DNGs
 are written by our own test code from Adobe's published DNG specification
@@ -89,7 +95,7 @@ where `isHighlightRecoverySupported`). No XMP sidecars: develop settings stay
 in Library's catalog and Photo's `.ora`, the slots that exist. No RAW+JPEG
 pairing and no grid RAW tag (library/raw's open questions). Photo doesn't
 re-develop a RAW after opening it; it opens at the as-shot white balance and
-the tone sliders work from there.
+the tone sliders work from there. No RAW writing.
 
 Blueprint sections: suite.md 2 (shared tiers); photo.md (Open, Export);
 library.md 1.3 (raw through the system decoder), 10.1 (D11).
@@ -100,12 +106,14 @@ library.md 1.3 (raw through the system decoder), 10.1 (D11).
 |---|---|---|---|---|
 | SR-a | The tiny test DNGs are written in-repo and checked byte for byte, and SuiteImaging's `Raw/` module declares the formats, the refusals, the decode plan and `SuiteRaw` as stubs over a fake decoder, with their tests written, disabled. | SR-1, SR-2 | MJ-SR | suite-imaging:IM-a (SR-2) |
 | SR-m | RAW extensions parse, the plan picks the embedded preview only where it covers the size, refusals read as sentences, and the system decoder returns an upright linear float buffer whose highlights survive Exposure −1 through the shared list. | SR-3, SR-4 | MJ-SR, MJ-SR-mac | SR-a; suite-imaging:IM-m (SR-3) |
-| SR-photo | Photo opens a RAW file as a new document whose layer keeps the decoder's float pixels, the CLI opens it headless, the open panel lists RAW types, and a refused file leaves the window as it was with the sentence. | SR-5, SR-6, SR-7 | MJ-SR-photo, PJ-SR | SR-a; adopt-kernel-unsaved-prompt:UP-photo (SR-7, `PhotoWindow+File.swift`, A/C first) |
-| SR-z | On live services Photo opens, develops and exports the test DNG at full size, RJ-X50 passes on the macOS job, the concept line guards against a second decoder, and the feature is built. | SR-8, SR-9 | PJ-SR, MJ-SR | SR-m, SR-photo; tone-controls:TC-a, pen-paths:PN-a (SR-9, `canonical-concepts.txt`, A/C first) |
+| SR-photo | Photo opens a RAW file as a new document whose layer keeps the decoder's float pixels, the CLI opens it headless, and a refused file leaves the document as it was with the sentence. | SR-5, SR-6 | MJ-SR-photo, PJ-SR | SR-a; shared-codecs:SC-f (SR-6, `PhotoImageFile.swift`, A/C first) |
+| SR-z | On live services Photo opens, develops and exports the test DNG at full size, RJ-X50 passes on the macOS job, the concept line guards against a second decoder, and the feature is built. | SR-7, SR-8 | PJ-SR, MJ-SR | SR-m, SR-photo; tone-controls:TC-a, pen-paths:PN-a (SR-8, `canonical-concepts.txt`, A/C first) |
 
-SR-photo waits only on SR-a (rule 18): its Model tests run on
-`FakeRawDecoder`, and its view change (the open panel and the refusal alert)
-needs no pixels. SR-m never waits on SR-photo. `SystemRawDecoder.swift` and
+There is no new screen and no app view change (`"ui_slice": "none"`): the
+open panel lists RAW through the registry (shared-codecs SC-15) and a
+refusal shows in Photo's existing open-failure alert; SR-z's live journey
+and `photo-open-raw*` shots still go through the feel gate. SR-photo's
+Model tests run on `FakeRawDecoder`; SR-m never waits on SR-photo. `SystemRawDecoder.swift` and
 its tests build only on macOS: SR-4's mutation plan runs on the supervisor's
 Mac before `Belt-Slice-Done:` (suiteui waves, Q10).
 
@@ -118,7 +126,7 @@ Mac before `Belt-Slice-Done:` (suiteui waves, Q10).
 - `MJ-SR-photo` (Linux): `PhotoRawOpenTests` in `PhotoModelTests`.
 - `PJ-SR` · `PhotoRawJourneyTests.testOpenRawDevelopExport`
   (`UITests/PhotoJourneyTests+Raw.swift`; written by SR-5 with
-  `XCTSkip("waits on SR-8")`, enabled by SR-8):
+  `XCTSkip("waits on SR-7")`, enabled by SR-7):
   1. Copy `tiny-bayer.dng` and `not-raw.nef` (by `#filePath`) into a temp
      folder. Launch Photo with `-PhotoOpenFile <folder>/not-raw.nef`. Expect
      the alert "macOS can't read this raw file (NEF)." and an empty window.
@@ -144,7 +152,7 @@ after Exposure −1. Assertion: the export is 48 × 64, matches the reference
 within 3 levels, and the two patches differ by more than 20 levels. Cm
 because the decode crosses Core Image; on Linux the CLI refuses the file with
 `RawRefusal.unavailable`'s sentence, which `PhotoRawOpenTests` checks. Written
-by SR-5 (`waits_on: SR-8`, which adds the reference PNG once SR-4's decoder
+by SR-5 (`waits_on: SR-7`, which adds the reference PNG once SR-4's decoder
 has produced it on the Mac). RJ-L22 (Library's embedded preview) closes with
 `library/raw`.
 
@@ -155,22 +163,19 @@ has produced it on the Mac). RJ-L22 (Library's embedded preview) closes with
 | Photo, open | the refusal sentence in the existing open-failure alert; the window keeps what it had | the existing open progress, unchanged |
 | Photo canvas | – | – |
 
-Snapshots (Light and Dark): `PhotoRawSnapshots.swift`
-`photo-open-raw-refused` (SR-7, on the fake), `photo-open-raw` (SR-8, live).
+Snapshots (Light and Dark): `PhotoRawSnapshots.swift` `photo-open-raw` and
+`photo-open-raw-refused` (SR-7, live).
 
 ## Contract slice
 
 ```swift
 // Sources/SuiteImaging/Raw/RawFormat.swift (SR-2 stubs, SR-3 bodies). Linux-safe.
-/// A camera RAW extension; the raw value is the extension in upper case.
-public enum RawFormat: String, CaseIterable, Sendable, Codable {
-    case cr2 = "CR2", cr3 = "CR3", nef = "NEF", nrw = "NRW", arw = "ARW", sr2 = "SR2", raf = "RAF"
-    case orf = "ORF", rw2 = "RW2", dng = "DNG", pef = "PEF", srw = "SRW", fff = "3FR", iiq = "IIQ"
-    case erf = "ERF", mos = "MOS", x3f = "X3F"
-    /// Matched on the extension, ignoring case; nil for anything else.
+/// A camera RAW file's extension, upper case as the refusals name it ("NEF"). Which extensions are RAW is
+/// the registry's: `SuiteImageFormat.cameraRaw.extensions` (shared-codecs SC-14).
+public struct RawFormat: Hashable, Sendable, Codable {
+    public let fileExtension: String
+    /// Non-nil when the registry's format for `fileName` is in the `.cameraRaw` family, any case.
     public init?(fileName: String)
-    /// Lower-case extensions, for open panels and `HeadlessDocument.openExtensions`.
-    public static var extensions: [String] { get }
 }
 /// Why a RAW file can't be read or developed; `message` is the sentence the apps show.
 public enum RawRefusal: Error, Equatable, Sendable {
@@ -270,7 +275,8 @@ extension PhotoImageCodec {
   untitled, so Save writes `.ora` and never touches the RAW file;
   `maxOpenPixels` still sets `longestSide`. A `RawRefusal` throws its
   `message` through the existing open-failure path and leaves the workspace
-  unchanged. `PhotoHeadless.openExtensions` gains `RawFormat.extensions`.
+  unchanged. `PhotoHeadless.openExtensions` already lists the RAW
+  extensions (the registry, SC-15), so the CLI needs no change here.
 - **Fixtures** (SR-1). `TinyDNG.write(_ spec)` builds a DNG 1.4 file from the
   published spec: IFD0 holds the 32 × 24 8-bit RGB preview
   (`NewSubFileType` 1) and a SubIFD the 64 × 48 16-bit uncompressed RGGB CFA
@@ -291,16 +297,15 @@ extension PhotoImageCodec {
 |---|---|---|---|---|---|
 | SR-1 | – | **Tests first, and the fixtures.** `TinyDNG.swift` (test support, Linux) and the three committed files; `TinyDNGTests` live (each file equals its writer byte for byte; the writer's IFDs parse back to the spec's sizes and tags); `RawFormatTests`, `RawDecodePlanTests` and `RawHeadroomTests` written, disabled by name (`waits on SR-3`) | `Tests/SuiteImagingTests/TinyDNG.swift`, `Tests/SuiteImagingTests/TinyDNGTests.swift`, `Tests/SuiteImagingTests/Fixtures/raw/`, `Tests/SuiteImagingTests/RawFormatTests.swift`, `Tests/SuiteImagingTests/RawDecodePlanTests.swift`, `Tests/SuiteImagingTests/RawHeadroomTests.swift` | – | ~380, 8 |
 | SR-2 | – | The `Raw/` module as stubs: `RawFormat`, `RawRefusal`, `RawSize`, `RawFileInfo`, `RawQuality`, `RawDecodePlan`, `RawSource`, `SuiteRaw` (every call throws `.unavailable`), `RawDecoding`, `FakeRawDecoder` (its table filled: the Photo and Library slices run on it), `SystemRawDecoder` behind `#if canImport(CoreImage)`; the C4 part | `Sources/SuiteImaging/Raw/RawFormat.swift`, `Sources/SuiteImaging/Raw/SuiteRaw.swift`, `Sources/SuiteImaging/Raw/RawDecoding.swift`, `Sources/SuiteImaging/Raw/FakeRawDecoder.swift`, `Sources/SuiteImaging/Raw/SystemRawDecoder.swift`, `docs/c4/parts/creative-apps/suite-imaging/imaging-raw.json` | SR-1 | ~300, 6 |
-| SR-3 | – | Bodies on Linux: `RawFormat(fileName:)` and `extensions`, the refusal sentences, `RawDecodePlan.plan`, `SuiteRaw.info` and `decode` with the baseline step; turns on the three suites | `Sources/SuiteImaging/Raw/RawFormat.swift`, `Sources/SuiteImaging/Raw/SuiteRaw.swift`, `Tests/SuiteImagingTests/RawFormatTests.swift`, `Tests/SuiteImagingTests/RawDecodePlanTests.swift`, `Tests/SuiteImagingTests/RawHeadroomTests.swift`, `Tests/mutations/SuiteImaging.RawFormat.json`, `Tests/mutations/SuiteImaging.SuiteRaw.json` | SR-2, suite-imaging IM-4 | ~320, 7 |
+| SR-3 | – | Bodies on Linux: `RawFormat(fileName:)` over the registry's camera RAW row, the refusal sentences, `RawDecodePlan.plan`, `SuiteRaw.info` and `decode` with the baseline step; turns on the three suites | `Sources/SuiteImaging/Raw/RawFormat.swift`, `Sources/SuiteImaging/Raw/SuiteRaw.swift`, `Tests/SuiteImagingTests/RawFormatTests.swift`, `Tests/SuiteImagingTests/RawDecodePlanTests.swift`, `Tests/SuiteImagingTests/RawHeadroomTests.swift`, `Tests/mutations/SuiteImaging.RawFormat.json`, `Tests/mutations/SuiteImaging.SuiteRaw.json` | SR-2, suite-imaging IM-4 | ~320, 7 |
 | SR-4 | – | **The system decoder, spike first.** `SystemRawDecoderTests` opens `tiny-bayer.dng` before anything else (if Core Image refuses it, switch the fixture to `tiny-linear.dng` and say so in the PR, R1); then `SystemRawDecoder`'s body as in Pseudocode; `SuiteRaw.decoder` returns it on macOS | `Sources/SuiteImaging/Raw/SystemRawDecoder.swift`, `Tests/SuiteImagingTests/SystemRawDecoderTests.swift`, `Tests/mutations/SuiteImaging.SystemRawDecoder.json` | SR-2 | ~350, 3 |
-| SR-5 | – | **Photo, test first.** `PhotoRawOpenTests` (Linux, `FakeRawDecoder` through a test codec), disabled (`waits on SR-6`); the journey written and skipped; RJ-X50's job folder, disabled (`waits_on: SR-8`) | `Tests/PhotoModelTests/PhotoRawOpenTests.swift`, `UITests/PhotoJourneyTests+Raw.swift`, `Tests/RealJobs/photo/raw-develop/raw-develop.jobs.json`, `Tests/RealJobs/photo/raw-develop/input/tiny-bayer.dng` | SR-2 | ~260, 4 |
-| SR-6 | – | **Photo's float route.** `PhotoImageCodec.decodeLinear` with its default; `openImage` puts the buffer in the layer and names an untitled document; refusals through the open-failure path; `PhotoHeadless.openExtensions` lists RAW; turns on `PhotoRawOpenTests` | `Sources/PhotoModel/PhotoImageFile.swift`, `Sources/PhotoModel/PhotoHeadless.swift`, `Tests/PhotoModelTests/PhotoRawOpenTests.swift`, `Tests/mutations/PhotoModel.PhotoImageFile.json`, `Tests/mutations/PhotoModel.PhotoHeadless.json` | SR-5 | ~240, 5 |
-| SR-7 | – | **Photo's window.** The open panel's types gain `UTType.rawImage`; the open-failure alert shows `RawRefusal.message` as its text; `photo-open-raw-refused` on the fake | `Sources/PhotoApp/PhotoWindow+File.swift`, `Tests/AppSnapshotTests/PhotoRawSnapshots.swift` | SR-5 | ~120, 2 |
-| SR-8 | – | **Live.** The journey turned on; `photo-open-raw` added; RJ-X50's reference PNG from the Mac decode, so the job (`waits_on: SR-8`) runs from this merge | `UITests/PhotoJourneyTests+Raw.swift`, `Tests/AppSnapshotTests/PhotoRawSnapshots.swift`, `Tests/RealJobs/photo/raw-develop/raw-develop.jobs.json`, `Tests/RealJobs/photo/raw-develop/expected/tiny-bayer-ev-1.png` | SR-4, SR-6, SR-7 | ~150, 4 |
-| SR-9 | – | The `Raw decode: Raw` concept line; the C4 part names Photo, Library and the CLI as adopters; `status: built`; `feature-done` | `Tests/canonical-concepts.txt`, `docs/c4/parts/creative-apps/suite-imaging/imaging-raw.json`, `docs/blueprints/suiteui/features/shared-raw.wave.json` | SR-8 | ~30, 3 |
+| SR-5 | – | **Photo, test first.** `PhotoRawOpenTests` (Linux, `FakeRawDecoder` through a test codec), disabled (`waits on SR-6`); the journey written and skipped; RJ-X50's job folder, disabled (`waits_on: SR-7`) | `Tests/PhotoModelTests/PhotoRawOpenTests.swift`, `UITests/PhotoJourneyTests+Raw.swift`, `Tests/RealJobs/photo/raw-develop/raw-develop.jobs.json`, `Tests/RealJobs/photo/raw-develop/input/tiny-bayer.dng` | SR-2 | ~260, 4 |
+| SR-6 | – | **Photo's float route.** `PhotoImageCodec.decodeLinear` with its default; `openImage` puts the buffer in the layer and names an untitled document; refusals through the open-failure path; turns on `PhotoRawOpenTests` | `Sources/PhotoModel/PhotoImageFile.swift`, `Tests/PhotoModelTests/PhotoRawOpenTests.swift`, `Tests/mutations/PhotoModel.PhotoImageFile.json` | SR-5, shared-codecs SC-15 | ~200, 3 |
+| SR-7 | – | **Live.** The journey turned on; `photo-open-raw` and `photo-open-raw-refused`; RJ-X50's reference PNG from the Mac decode, so the job (`waits_on: SR-7`) runs from this merge | `UITests/PhotoJourneyTests+Raw.swift`, `Tests/AppSnapshotTests/PhotoRawSnapshots.swift`, `Tests/RealJobs/photo/raw-develop/raw-develop.jobs.json`, `Tests/RealJobs/photo/raw-develop/expected/tiny-bayer-ev-1.png` | SR-4, SR-6 | ~180, 4 |
+| SR-8 | – | The `Raw decode: Raw` concept line; the C4 part names Photo, Library and the CLI as adopters; `status: built`; `feature-done` | `Tests/canonical-concepts.txt`, `docs/c4/parts/creative-apps/suite-imaging/imaging-raw.json`, `docs/blueprints/suiteui/features/shared-raw.wave.json` | SR-7 | ~30, 3 |
 
 SR-1's size is mostly the writer (about 200 lines) and its test; the three
-fixtures are a few kilobytes of binary. SR-9's concept line lands last, after
+fixtures are a few kilobytes of binary. SR-8's concept line lands last, after
 library/raw's files exist under their own names (none of them may be named
 `*Raw*` decoders; library/raw keeps its RAW logic in existing files), and the
 supervisor runs `scripts/check-dup-logic` on it.
@@ -310,11 +315,11 @@ supervisor runs `scripts/check-dup-logic` on it.
 - Wave 1: SR-1. Independent in this wave: SR-1 alone.
 - Wave 2: SR-2. Independent in this wave: SR-2 alone.
 - Wave 3: SR-3, SR-4, SR-5. Independent in this wave: all three.
-- Wave 4: SR-6, SR-7. Independent in this wave: both.
-- Wave 5: SR-8. Independent in this wave: SR-8 alone.
-- Wave 6: SR-9. Independent in this wave: SR-9 alone.
+- Wave 4: SR-6. Independent in this wave: SR-6 alone.
+- Wave 5: SR-7. Independent in this wave: SR-7 alone.
+- Wave 6: SR-8. Independent in this wave: SR-8 alone.
 
-Longest chain: SR-1 → SR-2 → SR-5 → SR-6 → SR-8 → SR-9 (6). Chain of 6: the
+Longest chain: SR-1 → SR-2 → SR-5 → SR-6 → SR-7 → SR-8 (6). Chain of 6: the
 fixtures before the module that reads them, the contract before Photo's
 test, the test before Photo's route, the route and the real decoder before
 the live journey and the job's reference, and the concept line last so it
@@ -326,13 +331,12 @@ runs over every adopter's final files.
 |---|---|---|---|
 | SR-1 | `TinyDNGTests`: each committed file equals `TinyDNG.write`'s bytes; IFD0 is the 32 × 24 preview, the SubIFD the 64 × 48 CFA, Orientation 6, `BaselineExposure` 1.0; the other suites compile, disabled by name | a fixture drifts from its writer, or a tag the decoder needs is missing | – (tests and fixtures) |
 | SR-2 | the module builds on Linux without `SystemRawDecoder`; `ImagingBoundaryTests` and `ImageIOImportRatchetTests` green (no Metal, no ImageIO); the fake's table matches the contract comment | a stub signature the adopters call is missing, or the module imports ImageIO or Metal | – (stubs) |
-| SR-3 | `RawFormatTests`: all 17 extensions in any case, `DSC_0001.jpg`, `NEF` with no dot and `.nef` alone don't parse; each refusal's sentence. `RawDecodePlanTests`: a 32-px preview covers `.thumbnail(32)` but not `.thumbnail(64)`; `.preview(32)` drafts at 0.5; `.full` is scale 1, not draft; undevelopable with a preview gives the preview for thumbnails and `.refuse` otherwise. `RawHeadroomTests`: the fake's decode carries 1.4 and 1.8 linear; `ImagingProgram.adjustments` with Exposure −1 gives them 0.7 and 0.9 (sRGB more than 20 levels apart), while the same buffer clamped to 8 bits first gives two equal values | a format is missed, the preview stands in where it's too small or for export, a refusal is generic, or anything on the path clamps | `SuiteImaging.RawFormat`: compare case-sensitively → `.anyCase`; `3FR` missing → `.everyFormat`. `SuiteImaging.SuiteRaw`: `>=` to `>` in the preview cover → `.previewCovers`; `draft` true for `.full` → `.fullIsNotDraft`; baseline step skipped → `.baselineApplied`; result clamped to 1 → `.keepsHeadroom` |
-| SR-4 | `SystemRawDecoderTests` (macOS): `tiny-bayer.dng` opens and is 48 × 64 upright; `info` names "AfterGlow Test", `previewSize` 24 × 32, baseline 1.0; `.thumbnail(32)` returns the marker colour, `.full` the RAW data's (each within 8/255); `.full` leaves both highlight patches above 1.0 after the baseline; `not-raw.nef` refuses `.unreadable(.nef)`; `.preview(32)` drafts | the decoder clips, ignores orientation, hands export the preview, or a bad file's refusal is generic | `SuiteImaging.SystemRawDecoder` (on the supervisor's Mac): `boostAmount` left at default → `.linearOutput`; render format `.RGBA8` → `.floatOutput`; orientation not applied → `.upright` |
+| SR-3 | `RawFormatTests`: every extension of the registry's camera RAW row parses in any case; `DSC_0001.jpg`, `a.tif`, `NEF` with no dot and `.nef` alone don't; each refusal's sentence. `RawDecodePlanTests`: a 32-px preview covers `.thumbnail(32)` but not `.thumbnail(64)`; `.preview(32)` drafts at 0.5; `.full` is scale 1, not draft; undevelopable with a preview gives the preview for thumbnails and `.refuse` otherwise. `RawHeadroomTests`: the fake's decode carries 1.4 and 1.8 linear; `ImagingProgram.adjustments` with Exposure −1 gives them 0.7 and 0.9 (sRGB more than 20 levels apart), while the same buffer clamped to 8 bits first gives two equal values | a format is missed, the preview stands in where it's too small or for export, a refusal is generic, or anything on the path clamps | `SuiteImaging.RawFormat`: compare case-sensitively → `.anyCase`; family check dropped (a TIFF passes) → `.cameraRawOnly`. `SuiteImaging.SuiteRaw`: `>=` to `>` in the preview cover → `.previewCovers`; `draft` true for `.full` → `.fullIsNotDraft`; baseline step skipped → `.baselineApplied`; result clamped to 1 → `.keepsHeadroom` |
+| SR-4 | `SystemRawDecoderTests` (macOS): `tiny-bayer.dng` opens and is 48 × 64 upright; `info` names "AfterGlow Test", `previewSize` 24 × 32, baseline 1.0; `.thumbnail(32)` returns the marker colour, `.full` the RAW data's (each within 8/255); `.full` leaves both highlight patches above 1.0 after the baseline; `not-raw.nef` refuses `.unreadable` with "macOS can't read this raw file (NEF)."; `.preview(32)` drafts | the decoder clips, ignores orientation, hands export the preview, or a bad file's refusal is generic | `SuiteImaging.SystemRawDecoder` (on the supervisor's Mac): `boostAmount` left at default → `.linearOutput`; render format `.RGBA8` → `.floatOutput`; orientation not applied → `.upright` |
 | SR-5 | compiles, disabled; `scripts/jobs check` | – | – (tests) |
-| SR-6 | `PhotoRawOpenTests`: opening `x.DNG` on the fake gives one "Background" layer of 64 × 48 whose highlight patch reads 1.4 (not 1.0); the document is "x", untitled, and Save As offers `x.ora`; opening `y.NEF` (unreadable) throws "macOS can't read this raw file (NEF)." and leaves the open document as it was; on Linux with no decoder the sentence is `.unavailable`'s; `PhotoHeadless.openExtensions` contains `dng` and `cr3`; a PNG still opens through `decode` | the RAW route goes through 8 bits, overwrites the RAW on save, or a refusal changes the workspace | `PhotoModel.PhotoImageFile`: the RAW buffer converted to `DecodedImage` first → `.keepsFloat`; refusal after clearing the layers → `.refusalLeavesWorkspace`. `PhotoModel.PhotoHeadless`: RAW extensions dropped → `.cliOpensRaw` |
-| SR-7 | `PhotoRawSnapshots.openRefused` (fake); the design lint | the panel can't pick a RAW file, or the alert's text is generic | – (UI) |
-| SR-8 | `PJ-SR` steps 1 to 4 on live; RJ-X50 on the macOS job; `scripts/jobs check` | the export is the preview's size, the patches merge, or the journey fails | – |
-| SR-9 | `scripts/check-dup-logic` green with the concept line; `scripts/waves render --dry-run` | an app-local RAW decoder exists, or status isn't built | – |
+| SR-6 | `PhotoRawOpenTests`: opening `x.DNG` on the fake gives one "Background" layer of 64 × 48 whose highlight patch reads 1.4 (not 1.0); the document is "x", untitled, and Save As offers `x.ora`; opening `y.NEF` (unreadable) throws "macOS can't read this raw file (NEF)." and leaves the open document as it was; on Linux with no decoder the sentence is `.unavailable`'s; `PhotoHeadless.openExtensions` contains `dng` and `cr3` (from the registry); a PNG still opens through `decode` | the RAW route goes through 8 bits, overwrites the RAW on save, or a refusal changes the workspace | `PhotoModel.PhotoImageFile`: the RAW buffer converted to `DecodedImage` first → `.keepsFloat`; refusal after clearing the layers → `.refusalLeavesWorkspace` |
+| SR-7 | `PJ-SR` steps 1 to 4 on live; RJ-X50 on the macOS job; `PhotoRawSnapshots`; `scripts/jobs check` | the export is the preview's size, the patches merge, the alert's text is generic, or the journey fails | – |
+| SR-8 | `scripts/check-dup-logic` green with the concept line; `scripts/waves render --dry-run` | an app-local RAW decoder exists, or status isn't built | – |
 
 ## Quality tests
 
@@ -343,15 +347,16 @@ runs over every adopter's final files.
 | decode time (report-only, perf list) | `tiny-bayer.dng` `.thumbnail(32)` under 5 ms and `.full` under 50 ms on the Mac; a 24 MP camera file is the open question R3 | `SystemRawDecoderTests.decodeTime` |
 | render: a tone step on a RAW base | p95 ≤ 30 ms at 8K, one display write, like any picture (the base is `rgba16Float`) | suite-imaging's `PhotoAdjustSliderLatencyTests`, unchanged |
 | no dead controls; clear refusals | every refusal is one of the four sentences | `RawFormatTests`, `PhotoRawOpenTests` |
-| one decoder | no `*Raw*` decoder outside `Sources/SuiteImaging/Raw/` | `scripts/check-dup-logic` (SR-9) |
+| one decoder | no `*Raw*` decoder outside `Sources/SuiteImaging/Raw/` | `scripts/check-dup-logic` (SR-8) |
+| one format list | no RAW extension list outside the registry | shared-codecs' `FormatListRatchetTests` |
 
 ## Done check
 
 Per slice: SR-a with `TinyDNGTests` green on Linux; SR-m with `Mutate:`
 clean on SR-3's plans on Linux and SR-4's on the supervisor's Mac, and
-`SystemRawDecoderTests` green on the macOS job; SR-photo through the feel
-gate (open a RAW from the panel, drag Exposure) with its `Mac-Finish:` line;
-SR-z with `PJ-SR` green on live and RJ-X50 green on the macOS job. Then
+`SystemRawDecoderTests` green on the macOS job; SR-photo with `Mutate:`
+clean on Linux; SR-z through the feel gate (open a RAW from the panel, drag
+Exposure) with its `Mac-Finish:` line, `PJ-SR` green on live and RJ-X50 green on the macOS job. Then
 `Belt-Contact-Sheet:` with `photo-open-raw*`, and library/raw's lead is told
 SR-m has landed.
 

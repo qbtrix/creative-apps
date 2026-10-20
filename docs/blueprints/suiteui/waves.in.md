@@ -35,7 +35,9 @@ Rows whose wave reads `XK3` are the canonical burn-down (captain,
 (`paw-workspace/docs/design/drafts/2026-10-20-canonical-duplicates-audit.md`):
 `adopt-kernel-autosave` (one recovery path and one support root),
 `suite-imaging` (the new SuiteImaging target: adjustment values and the live
-GPU route, the only target that links CoreRenderMetal), `shared-codecs`,
+GPU route, the only target that links CoreRenderMetal), `shared-codecs`
+(its first slice, SC-f, is the one image format registry every app's
+panels, import, export and the CLI derive from: captain, 2026-10-21),
 `shared-thumbnails`, `adopt-kernel-unsaved-prompt` and
 `adopt-kernel-eyedropper-photo`. Each deletes app-local copies and shrinks
 `Tests/canonical-baseline.txt` in the deleting PR. One delete task per
@@ -48,6 +50,7 @@ Rows whose wave reads `XK4` are shared capabilities built on that layer.
 `shared-raw` (captain, 2026-10-21: "RAW in beta, and it should be shared")
 decodes camera RAW files once, in SuiteImaging's `Raw/` module over Core
 Image, into a linear float buffer that the shared tone sliders develop.
+Its formats are the registry's camera RAW row; it adds no list of its own.
 Photo and the `afterglow` CLI adopt it in the packet itself; Library adopts
 it through `library/raw`, re-cut the same day to a thin adopter.
 

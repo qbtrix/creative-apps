@@ -2,9 +2,10 @@
 
 **Feature:** camera RAW files import, show and develop in Library through
 the suite's shared RAW decode (`suiteui/shared-raw`, SuiteImaging's `Raw/`
-module over Core Image). Library adds only what is Library's: the file kind,
-which quality each caller asks for, and the float route from the decoder to
-develop. The grid draws each file's embedded preview, so a RAW import is as
+module over Core Image). Library adds only what is Library's: which quality each caller asks for and
+the float route from the decoder to develop. Which files are RAW is
+shared-codecs' format registry: after its SC-16, Library's `PhotoFileKind`
+is the registry's `SuiteImageFormat`, so the scan already takes RAW files. The grid draws each file's embedded preview, so a RAW import is as
 fast as a JPEG one; the loupe and export decode every pixel into a linear
 float buffer, so Develop's shared tone sliders (Exposure, White Balance,
 Highlights) work with the RAW file's headroom. A file the system can't read
@@ -29,8 +30,9 @@ develop settings and no catalog keys. Pairing (RJ-L21) and the grid's RAW
 tag are post-beta (open questions R1, R2). `c4-planned.json` drops the
 planned `RawFileTypes.swift` in the same PR.
 
-**Depends on:** `import` and `thumbnails` (built). **Cross-line:**
-suiteui `shared-raw` **SR-a** before RW-1 (its contract and
+**Depends on:** `import` and `thumbnails` (built). **Cross-line:** suiteui `shared-codecs` **SC-f** before RW-2 (the
+registry's camera RAW kind; SC-16 also edits `LibraryValues.swift`, which
+this packet no longer touches); suiteui `shared-raw` **SR-a** before RW-1 (its contract and
 `FakeRawDecoder`) and **SR-m** before RW-4 (the system decoder);
 suiteui `shared-codecs` **SC-library** before RW-4 (`ImageIODecoder.swift`
 moves onto `SuiteImageIO`); suiteui `shared-thumbnails` **ST-m** and
@@ -38,9 +40,9 @@ moves onto `SuiteImageIO`); suiteui `shared-thumbnails` **ST-m** and
 `LiveLoupeImaging.swift`). **Same line:** export-pack **LX-a** before RW-2
 (`LibraryContracts.swift`) and **LX-m** before RW-3 (`LiveExporter.swift`);
 both come after `export`. metadata-more (not in the beta) now waits on this
-packet instead of the other way round: its MD-a waits on RW-a
-(`LibraryValues.swift`, `FakePlatform.swift`) and its MD-b on RW-m
-(`ImageIODecoder.swift`), re-cut in this PR. No creative-core issue, no
+packet instead of the other way round: its MD-3 waits on RW-a
+(`FakePlatform.swift`) and its MD-7 on RW-m (`ImageIODecoder.swift`),
+re-cut in this PR. No creative-core issue, no
 `needs-ui` issue.
 
 Blueprint sections: 1.3 (raw through the system decoder), 2.3
@@ -51,7 +53,7 @@ Blueprint sections: 1.3 (raw through the system decoder), 2.3
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| RW-a | A RAW file name is a `.raw` photo kind, `PhotoDecoding` offers a float decode with a default, and the fake decoder answers RAW files from the shared fake. | RW-1, RW-2 | RJ0 | export-pack:LX-a (RW-2); suiteui shared-raw SR-a (cross-line) |
+| RW-a | `PhotoDecoding` offers a float decode with a default, the fake decoder answers RAW files from the shared fake, and a RAW file is the registry's camera RAW kind. | RW-1, RW-2 | RJ0 | export-pack:LX-a (RW-2); suiteui shared-codecs SC-f (RW-2) and shared-raw SR-a (cross-line) |
 | RW-m | The grid asks for the embedded preview, the loupe for a draft then every pixel, export for every pixel, all as float, and the platform decoder scans, refuses and decodes RAW files through `SuiteRaw`. | RW-3, RW-4 | RJ0, RJ-mac | RW-a; export-pack:LX-m (RW-3); suiteui ST-m, IM-library (RW-3), SC-library and shared-raw SR-m (RW-4) (cross-line) |
 | RW-z | On live services a folder with a RAW file imports, shows its preview, develops in the loupe and exports at full size, and the feature is built. | RW-5, RW-6 | RJ1 | RW-m |
 
@@ -64,8 +66,10 @@ photo.
 ## Journey steps
 
 **RJ0 · `LibraryRawTests`** (Linux; RW-1, cases turned on by RW-2 and RW-3):
-1. `PhotoFileKind.kind(forFileName: "DSC_0001.NEF")` is `.raw`, and so for
-   every `RawFormat` extension in any case; `IMG.jpg` stays `.jpeg`.
+1. `PhotoFileKind.kind(forFileName: "DSC_0001.NEF")` is the registry's
+   `.cameraRaw`, and so for every extension in that row in any case;
+   `IMG.jpg` stays `.jpeg` (a guard on shared-codecs' SC-16, not a rule of
+   this packet's).
 2. A test decoder that implements only `scan` and `decode` answers
    `decodeLinear` with nil.
 3. On the fakes: a `.DNG` photo's thumbnail asks `.thumbnail`, the loupe's
@@ -75,7 +79,7 @@ photo.
    patches more than 20 levels apart (the float route reached develop).
 
 **RJ-mac · `LibraryRawDecodeTests`** (macOS, RW-4): shared-raw's
-`tiny-bayer.dng` scans as `.raw` with its size 48 × 64 and capture facts;
+`tiny-bayer.dng` scans as `.cameraRaw` with its size 48 × 64 and capture facts;
 `not-raw.nef` fails the scan with "macOS can't read this raw file (NEF).";
 the thumbnail is the preview's marker colour, the full decode the RAW data's.
 
@@ -120,9 +124,8 @@ loupe and Develop views are unchanged.
 
 ## Contract slice
 
-`Sources/LibraryModel/Contracts/LibraryValues.swift` (RW-2): `PhotoFileKind`
-gains `case raw`; `kind(forFileName:)` returns `.raw` when
-`RawFormat(fileName:)` (SuiteImaging) is non-nil.
+`PhotoFileKind` is shared-codecs' `SuiteImageFormat` (SC-16); its
+`.cameraRaw` row is the RAW kind, so `LibraryValues.swift` gets no edit here.
 
 `Sources/LibraryModel/Contracts/LibraryContracts.swift` (RW-2):
 
@@ -162,7 +165,7 @@ Every task is one PR to `dev` with the lead's lines (`Belt-Lead:`,
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | RW-1 | #427 (part) | **Tests first.** `LibraryRawTests` (RJ0, Linux), disabled by name (`waits on RW-2`, `waits on RW-3`); `LibraryRawDecodeTests` (macOS) and RJ1 written and skipped | `Tests/LibraryModelTests/LibraryRawTests.swift`, `Tests/AppSnapshotTests/LibraryRawDecodeTests.swift`, `UITests/LibraryJourneyTests+Raw.swift` | – | ~260, 3 |
-| RW-2 | #427 (part) | `PhotoFileKind.raw`; `decodeLinear` with its default; `FakeDecoder` over `FakeRawDecoder`; turns on RJ0 steps 1 and 2 | `Contracts/LibraryValues.swift`, `Contracts/LibraryContracts.swift`, `Fakes/FakePlatform.swift`, `Tests/LibraryModelTests/LibraryRawTests.swift`, `Tests/mutations/LibraryModel.LibraryValues.json`, `Tests/mutations/LibraryModel.LibraryContracts.json` | RW-1 | ~200, 6 |
+| RW-2 | #427 (part) | `decodeLinear` with its default; `FakeDecoder` over `FakeRawDecoder`; turns on RJ0 steps 1 and 2 | `Contracts/LibraryContracts.swift`, `Fakes/FakePlatform.swift`, `Tests/LibraryModelTests/LibraryRawTests.swift`, `Tests/mutations/LibraryModel.LibraryContracts.json`, `Tests/mutations/LibraryModel.FakePlatform.json` | RW-1, shared-codecs SC-16 | ~180, 5 |
 | RW-3 | #427 (part) | Thumbnails, loupe and export ask for the right quality and keep the float buffer; turns on RJ0 steps 3 and 4 | `Live/LiveThumbnails.swift`, `Live/LiveLoupeImaging.swift`, `Live/LiveExporter.swift`, `Tests/LibraryModelTests/LibraryRawTests.swift`, `Tests/mutations/LibraryModel.LiveThumbnails.json`, `Tests/mutations/LibraryModel.LiveLoupeImaging.json`, `Tests/mutations/LibraryModel.LiveExporter.json` | RW-2 | ~220, 7 |
 | RW-4 | #427 (part) | `ImageIODecoder` scans, refuses and decodes RAW files through `SuiteRaw`; turns on `LibraryRawDecodeTests` | `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Tests/AppSnapshotTests/LibraryRawDecodeTests.swift` | RW-2 | ~150, 2 |
 | RW-5 | – | RJ1 turned on live | `UITests/LibraryJourneyTests+Raw.swift` | RW-3, RW-4 | ~40, 1 |
@@ -188,7 +191,7 @@ callers and the decoder before the live journey, and the status last.
 | id | test | fails when | mutations |
 |---|---|---|---|
 | RW-1 | compiles, disabled or skipped by name | – | – (tests) |
-| RW-2 | RJ0 steps 1 and 2; every catalog fixture encodes byte for byte as before | an extension is missed, or a decoder without RAW support stops compiling | `LibraryModel.LibraryValues`: `.raw` dropped from `kind(forFileName:)` → `.rawKind`. `LibraryModel.LibraryContracts`: the default returns a buffer for a JPEG → `.defaultIsNil` |
+| RW-2 | RJ0 steps 1 and 2; every catalog fixture encodes byte for byte as before | an extension is missed, or a decoder without RAW support stops compiling | `LibraryModel.LibraryContracts`: the default returns a buffer for a JPEG → `.defaultIsNil`. `LibraryModel.FakePlatform`: a RAW name answered with nil → `.fakeDecodesRaw` |
 | RW-3 | RJ0 steps 3 and 4 (a recording decoder) | the grid decodes in full, export takes the preview, or the loupe converts to 8 bits | `LibraryModel.LiveThumbnails`: `.full` for a thumbnail → `.previewFirst`. `LibraryModel.LiveLoupeImaging`: the float buffer passed through `DisplayImage` → `.keepsHeadroom`. `LibraryModel.LiveExporter`: `.thumbnail` for export → `.exportFullSize` |
 | RW-4 | `LibraryRawDecodeTests` on the macOS job | the preview isn't used, the size is sideways, or a bad file's reason is generic | – (macOS only) |
 | RW-5 | RJ1 on a scoped run (`app=library`) | a step fails | – |

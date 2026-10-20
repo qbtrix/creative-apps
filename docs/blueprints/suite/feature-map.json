@@ -2200,11 +2200,12 @@
     },
     {
       "id": "suiteui/shared-codecs",
-      "name": "One ImageIO adapter in SuiteShell over CoreRaster's codecs; the hand-rolled PNG writers deleted",
+      "name": "One image format registry (read TIFF, WebP, GIF, BMP, OpenEXR, TGA, HEIC, JPEG, PNG, RAW; write TIFF, PNG, JPEG, HEIC) and one ImageIO adapter in SuiteShell over CoreRaster's codecs; the per-app format lists and hand-rolled PNG writers deleted",
       "packet": "suiteui/shared-codecs",
       "layer": "model",
       "c4": [
-        "suite-shell/shell-imageio ✚"
+        "suite-shell/shell-imageio ✚",
+        "suite-model/suite-identity"
       ],
       "adopters": [
         {

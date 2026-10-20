@@ -897,7 +897,7 @@
     "sources": [
       "captain"
     ],
-    "waits_on": "SR-8",
+    "waits_on": "SR-7",
     "added_by": "suiteui/shared-raw"
   }
 }
