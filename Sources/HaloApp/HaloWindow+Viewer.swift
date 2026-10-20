@@ -3,9 +3,12 @@
 // sheet; Duplicate, Delete, select and rename call the Model, which refuses
 // what it can't do. Composition > Delete while a text field has focus (renaming in
 // the sidebar) edits the text instead (HaloProject.compositionDeleteCommand).
-// `viewerScene(_:)` is a pass-through: HaloViewerCanvas reads the draw list
-// and the selection from the Model itself (#37), so this file keeps only routes.
+// `viewerScene(_:)` hands the viewer's handles `haloCommitTransform`: a
+// handle drag's release reaches `setTransform` as one step (transform HT-3).
+// HaloViewerCanvas reads the draw list and the selection from the Model
+// itself (#37).
 import HaloModel
+import SuiteKernel
 import SwiftUI
 
 extension HaloWindow {
@@ -26,5 +29,12 @@ extension HaloWindow {
         }
     }
 
-    func viewerScene(_ content: some View) -> some View { content }
+    func viewerScene(_ content: some View) -> some View {
+        content.environment(\.haloCommitTransform, commitTransform)
+    }
+
+    /// A handle drag's release, as one step; the Model refuses what it can't do.
+    func commitTransform(_ t: TransformBox, name: String) {
+        try? model.setTransform(t, name: name, drag: nil)
+    }
 }
