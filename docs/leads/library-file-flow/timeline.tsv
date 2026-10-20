@@ -26,3 +26,4 @@
 2026-10-20T21:50:11Z	heartbeat	waiting	LF-a #3624 macOS build 39500950721 green at 12d9b930a; waits for the lane sweep; SF-3 #3514, SF-4 open
 2026-10-20T22:13:12Z	heartbeat	waiting	LF-a #3624 macOS build 39500950721 green, awaits lane sweep; LF-5 blocked on SF-3 #3514 (supervisor-queued) and SF-4
 2026-10-20T22:35:23Z	heartbeat	waiting	LF-a #3624 still open, macOS green; lane active; LF-5 blocked on SF-3 #3514, SF-4
+2026-10-20T22:41:48Z	LF-a	done	#3624 merged (a830aaee8); Belt-Slice-Done posted, proof run 39507806909; LF-5 waits on SF-3 #3514 and SF-4
