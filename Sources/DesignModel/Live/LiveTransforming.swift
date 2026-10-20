@@ -101,32 +101,14 @@ public struct LiveTransforming: SelectionTransforming {
 
     /// `node` and its subtree with each frame keeping its place and share of `box` inside `new`:
     /// the kernel's `BoxMath.scaled`, at least 1 pt wide and high. The kernel only moves an axis
-    /// the box has no length on, so a box of no width or height keeps Design's `stretched`.
+    /// the box has no length on; Design maps that axis onto the new box's start and length.
     private func scaled(_ node: DesignNode, from box: DesignRect, to new: DesignRect) -> DesignNode {
-        guard box.width > 0, box.height > 0 else { return stretched(node, from: box, to: new) }
         var node = node
-        let frame = BoxMath.scaled(node.frame.kernelRect, from: box.kernelRect, to: new.kernelRect)
-        node.frame = DesignRect(x: frame.minX, y: frame.minY, width: Swift.max(frame.width, 1), height: Swift.max(frame.height, 1))
+        let frame = DesignRect(BoxMath.scaled(node.frame.kernelRect, from: box.kernelRect, to: new.kernelRect))
+        let (x, width) = box.width > 0 ? (frame.x, frame.width) : (new.x, new.width)
+        let (y, height) = box.height > 0 ? (frame.y, frame.height) : (new.y, new.height)
+        node.frame = DesignRect(x: x, y: y, width: Swift.max(width, 1), height: Swift.max(height, 1))
         node.children = node.children.map { scaled($0, from: box, to: new) }
-        return node
-    }
-
-    /// `scaled` by Design's own rule, for a box of no width or height: that axis maps onto the
-    /// new box's start and length.
-    private func stretched(_ node: DesignNode, from box: DesignRect, to new: DesignRect) -> DesignNode {
-        // One axis: a box of no length maps everything onto the new box's start and length.
-        func place(_ value: Double, _ start: Double, _ length: Double, _ newStart: Double, _ newLength: Double) -> Double {
-            length > 0 ? newStart + (value - start) * newLength / length : newStart
-        }
-        func size(_ value: Double, _ length: Double, _ newLength: Double) -> Double {
-            Swift.max(length > 0 ? value * newLength / length : newLength, 1)
-        }
-        var node = node
-        let frame = node.frame
-        node.frame = DesignRect(
-            x: place(frame.x, box.x, box.width, new.x, new.width), y: place(frame.y, box.y, box.height, new.y, new.height),
-            width: size(frame.width, box.width, new.width), height: size(frame.height, box.height, new.height))
-        node.children = node.children.map { stretched($0, from: box, to: new) }
         return node
     }
 }

@@ -79,7 +79,6 @@
                   "Sources/LibraryApp/LibraryGrid.swift",
                   "Sources/LibraryApp/DisplayImage+Image.swift",
                   "Sources/LibraryApp/LibraryLoupe.swift",
-                  "Sources/LibraryApp/LibraryLoupe+Metal.swift",
                   "Sources/LibraryApp/LibraryStatusBar.swift"
                 ],
                 "status": "existing",
@@ -297,7 +296,7 @@
                   "Sources/LibraryModel/LibraryDevelop.swift",
                   "Sources/LibraryModel/Live/LiveDevelop.swift",
                   "Sources/LibraryModel/LibraryTone+Kernel.swift",
-                  "Sources/LibraryModel/Live/LibraryLiveTone.swift"
+                  "Sources/LibraryModel/LibraryDevelop+Imaging.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -329,13 +328,12 @@
               {
                 "id": "library-later",
                 "name": "Later model",
-                "description": "Wave 5 (not v1): collections and filters (#31), keywords (#744), raw file rules (#427).",
+                "description": "Wave 5 (not v1): collections and filters (#31) and keywords (#744). RAW files (#427) decode in SuiteImaging (suiteui/shared-raw).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/LibraryCollections.swift",
                   "Sources/LibraryModel/LibraryFilter.swift",
-                  "Sources/LibraryModel/LibraryKeywords.swift",
-                  "Sources/LibraryModel/RawFileTypes.swift"
+                  "Sources/LibraryModel/LibraryKeywords.swift"
                 ],
                 "status": "planned",
                 "authored": true

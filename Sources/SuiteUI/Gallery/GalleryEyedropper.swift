@@ -1,5 +1,5 @@
 // GalleryEyedropper.swift (eyedropper EY-2 page, EY-7 live): the gallery's `eyedropper` page. A colour row (blue,
-// sampleable, its button hidden until EY-3) over a small canvas of a red, a green and a half-transparent black
+// sampleable, its hex field `suite.gallery.eyedropper.hex`) over a small canvas of a red, a green and a half-transparent black
 // swatch, the sample-size chips and the page's log, which shows each change and end the row reports and each size
 // picked. EY-7 adds the page's eyedropper tool, sampling the canvas through `color.sample`.
 import SuiteKernel
@@ -28,6 +28,7 @@ private struct EyedropperPage: View {
                 color = next
                 lines.append("change \(next.text)")
             }, onEnd: { lines.append("end") })
+            .hexIdentifier("suite.gallery.eyedropper.hex")
             HStack(spacing: SuiteSpacing.s) {
                 ForEach(GalleryEyedropper.swatches, id: \.id) { swatch in
                     Rectangle()
