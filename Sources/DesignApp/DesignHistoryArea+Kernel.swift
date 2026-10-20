@@ -57,24 +57,17 @@ struct DesignHistoryArea: ViewModifier {
     /// Puts a recovered copy's bytes in the window, named for the file it was.
     let restore: @MainActor (Data, String?) throws -> Void
     let onNote: @MainActor (String) -> Void
+    /// Whether the panel shows before its first toggle; the tests host it shown.
+    var shown = false
     /// The window's id, which names its recovery files.
     @State private var window = UUID().uuidString
-    @State private var isShown: Bool
+    /// Whether the panel was toggled an odd number of times since the window opened.
+    @State private var toggled = false
 
-    init(
-        model: DesignWorkspace, jump: @escaping @MainActor (Int) throws -> Void,
-        restore: @escaping @MainActor (Data, String?) throws -> Void, onNote: @escaping @MainActor (String) -> Void,
-        shown: Bool = false
-    ) {
-        self.model = model
-        self.jump = jump
-        self.restore = restore
-        self.onNote = onNote
-        _isShown = State(initialValue: shown)
-    }
+    private var isShown: Bool { shown != toggled }
 
     func body(content: Content) -> some View {
-        let shown = DesignHistoryShown(isShown: isShown) { isShown.toggle() }
+        let shown = DesignHistoryShown(isShown: isShown) { toggled.toggle() }
         return content
             .environment(\.designHistory, shown)
             .safeAreaInset(edge: .trailing, spacing: 0) {
