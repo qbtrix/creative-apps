@@ -205,3 +205,4 @@
 2026-10-20T12:03:41Z	heartbeat	12:03Z poll: full CI 39416190119 (0e1199e9) still pending, 39409307241 queued; no merges since 11:50Z. Next: green full CI with 424b4a60 -> contact sheet on #1514
 2026-10-20T12:20:51Z	heartbeat	12:20Z poll: full CI 39416190119 (0e1199e9) still pending since 11:36Z, 39409307241 queued; no merges since 12:03Z. Next: green full CI with 424b4a60 -> contact sheet on #1514
 2026-10-20T12:31:43Z	heartbeat	12:31Z poll: full CI 39409307241 (a54a892a) now in_progress; 39416190119 (0e1199e9) still pending. Next: green full CI with 424b4a60 -> contact sheet on #1514
+2026-10-20T12:44:07Z	heartbeat	CI 39409307241 on a54a892a in_progress since 12:31Z; 39416190119 cancelled; 39423713631 on 3ebb876f pending; all contain 424b4a60; contact sheet waits on a green run
