@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T19:50Z	3	wave-start	-	wave 2 (eyedropper): PE-5 and PE-3 stacked on PE-a
 2026-10-20T20:10Z	3	branch-pushed	lead/eyedropper-PE-5	PE-5 head 9a125da, CI PASS, Mutate 2/2 PhotoModel.LiveSampling, own diff 9 files +115/-24; live eyedropper enabled (help nil); PR waits for #3706
 2026-10-20T20:10Z	3	open-item	PE-5	stale texts: PhotoEyedropper.swift header (NotBuilt sampler), PhotoWorkspace fallback help "Not built yet (PV-9)" - fix in PE-6
+2026-10-20T20:11Z	3	heartbeat	#3706	PR open, lane waiting on macOS batch gate; builders running
