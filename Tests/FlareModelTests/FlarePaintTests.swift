@@ -1,6 +1,7 @@
 // FlarePaintTests.swift: inspector-timeline IT-2 on `.built`. A fill set on Ball is one "Undo Set Fill" over every
 // shape; a bad hex refuses with a reason and changes nothing; a width set, a cap and a join are one entry each, so one
-// undo restores only the last; a gradient fill reads as one and refuses a hex set; a successful set clears the error.
+// undo restores only the last; a gradient fill reads as one and a hex set turns it solid; a successful set clears the
+// error.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -85,7 +86,7 @@ private func shapes(_ layerID: String, in w: FlareWorkspace) -> [FlareShape] {
     #expect(w.undoActionName == "Undo Set Stroke")
 }
 
-@Test func aGradientFillReadsAsOneAndRefusesAHexSet() {
+@Test func aGradientFillReadsAsOneAndAHexSetTurnsItSolid() {
     var doc = FlareFixtures.bounce
     let gradient = Fill.linear(stops: [GradientStop(offset: 0, color: .black), GradientStop(offset: 1, color: .white)],
                                start: Point(x: 0, y: 0), end: Point(x: 1, y: 0))
@@ -95,8 +96,8 @@ private func shapes(_ layerID: String, in w: FlareWorkspace) -> [FlareShape] {
     var w = built("ball", in: doc)
     #expect(w.paint?.fillIsGradient == true && w.paint?.fillHex == nil)
     w.setFill(hex: "FF3B30")
-    #expect(w.paintError == "Gradients can't be edited yet.")
-    #expect(w.document == doc && !w.canUndo)
+    #expect(w.paintError == nil && w.paint?.fillHex == "FF3B30")
+    #expect(shapes("ball", in: w).allSatisfy { $0.fill == red })
 }
 
 @Test func mixedFillsReadNilAndASetPaintsBoth() {
