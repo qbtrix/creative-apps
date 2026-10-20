@@ -38,4 +38,4 @@ Next: the wave 2 builder (MD-2, stacked on MD-1) opens its PR; then MD-3 and MD-
 
 ## Open
 - S-L9 #3413 (InspectorTokenRow) and S-L10 #3414 (InspectorTextRow) are soft waits for MD-13. Until they land, those rows use plain SwiftUI placeholders.
-- Open line:library findings: 4, none in this feature's files.
+- Open line:library findings checked 2026-10-20T04:42:28Z: none in this feature's files. dev-red #3386 (macOS, range main..1b33afbb) predates these PRs; not ours.
