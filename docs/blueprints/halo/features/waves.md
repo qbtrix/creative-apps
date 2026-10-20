@@ -27,6 +27,7 @@ its tasks, owned files, acceptance tests, quality tests and done check.
 | W4 | Rotate and scale handles in the viewer, keyed at the playhead through the kernel's transform commands | `transform.md` | halo/transform (adopter of S7); RJ-H21, RJ-H34 | – | – | file when ready | planned |
 | W4 | Shape layers of every kind: a Shape button by the viewer, drawn by drag, rendered from the saved spec | `shape-tools.md` | halo/shape-tools (adopter of S19); RJ-H35 | – | – | file when ready | planned |
 | W4 | Strokes, dashes and keyed trim paths on shape layers, drawn as the painted path's outline | `stroke-style.md` | halo/stroke-style (adopter of S17); RJ-H30 | – | – | file when ready | planned |
+| W4 | Halo moves keys: picks across lanes, Select All Keys, a snapped group drag as one undo step, each a command | `key-editing.md` | halo/key-editing (adopter of suiteui/timeline TL-c, TL-d and suiteui/timeline-select-all); RJ-H13; #2763; the stress gate's Halo move-keys gap (PR #3499) | – | – | file when ready | planned |
 | W5 | Placed images in Halo: Place… and viewer drop, a PNG, JPEG or SVG picture in a solid layer, drawn by the viewer and the render | `placed-images.md` | halo/placed-images (adopter of S20 and E11); RJ-H02 (closes here), RJ-H36 (new) | – | – | file when ready | planned |
 
 No creative-core issue blocks any v1 feature. creative-core#182 (path

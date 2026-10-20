@@ -219,10 +219,12 @@
               {
                 "id": "halo-keying",
                 "name": "Keys and easing",
-                "description": "The inspector's property rows for the selected layer at the playhead; set value, stopwatch, key-here diamond and parent, each one named step (scrubs coalesce); selected keys on the timeline and setting their easing as one 'Keyframe Easing' step.",
+                "description": "The inspector's property rows for the selected layer at the playhead; set value, stopwatch, key-here diamond and parent, each one named step (scrubs coalesce); selected keys on the timeline (picked across lanes, Select All Keys) and setting their easing as one 'Keyframe Easing' step; a key drag moves every picked key as one 'Move Keyframes' step through KeyRules.moveKeys (HaloKeyPick+Kernel.swift, HaloKeyMove+Kernel.swift).",
                 "paths": [
                   "Sources/HaloModel/HaloKeying.swift",
-                  "Sources/HaloModel/HaloKeySelection.swift"
+                  "Sources/HaloModel/HaloKeySelection.swift",
+                  "Sources/HaloModel/HaloKeyPick+Kernel.swift",
+                  "Sources/HaloModel/HaloKeyMove+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true,

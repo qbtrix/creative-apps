@@ -17,7 +17,8 @@ text inspectors adopt this in W3).
 **Depends on:** suite `shell-text` (cross-line, soft: its ST-a slice
 declares `FontFamily` and `FontFace` in SuiteModel; FP-1 waits on that
 slice's merge); editor-kernel (slice EK-u owns `SuiteGallery.swift` before
-FP-1 adds the page; a slice wait, not a wave dependency).
+FP-1 adds the page; a slice wait, not a wave dependency); command-catalog
+(slice CC-u owns `SuiteGallery.swift` before FP-1, the same kind of wait).
 
 **Rule 20.** One picker. Search and nearest-face rules live in one file
 here (`FontPickerRules.swift`); no app filters fonts itself.
@@ -35,7 +36,7 @@ Blueprint sections: suiteui.md 2.2 (components), 7.1 (budgets), 7.5 (feel).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| FP-a | `FontPicker`'s inputs and outputs and `FontPickerRules` are declared as stubs returning the input order, the gallery's `font-picker` page is in the index on `FakeText`'s families, and the checks are written, disabled. | FP-1, FP-2 | SJ0 | editor-kernel:EK-u (FP-1) |
+| FP-a | `FontPicker`'s inputs and outputs and `FontPickerRules` are declared as stubs returning the input order, the gallery's `font-picker` page is in the index on `FakeText`'s families, and the checks are written, disabled. | FP-1, FP-2 | SJ0 | editor-kernel:EK-u, command-catalog:CC-u (FP-1) |
 | FP-u | On the gallery page, typing filters the list per keystroke, each family shows in its own face, the face menu and size row pick, every control is identified, within the render budget. | FP-3, FP-4 | `testFontPickerPicksAFace` | FP-a |
 | FP-m | Search matches prefix first then substring, ignoring case and diacritics; faces order by weight then italic; switching family keeps the nearest weight and italic. | FP-5, FP-8 | FJ-m | FP-a |
 | FP-z | The page runs on the live families when the gallery is launched with live services, the journey passes on live, and the feature is built. | FP-6, FP-7 | `testFontPickerPicksAFace` | FP-u, FP-m |
@@ -93,7 +94,7 @@ public struct FontPicker: View { public init(families: [FontFamily], pick: FontP
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| FP-1 | – | `FontPick`, the rules stubs, the placeholder view, the gallery page in `SuiteGallery.areas`, the journey written and skipped (`XCTSkip("waits on FP-4")`) | `Sources/SuiteUI/Contracts/FontPicking.swift`, `Sources/SuiteUI/FontPickerRules.swift`, `Sources/SuiteUI/FontPickerRules+Nearest.swift`, `Sources/SuiteUI/FontPicker.swift`, `Sources/SuiteUI/Gallery/GalleryFontPicker.swift`, `Sources/SuiteUI/SuiteGallery.swift`, `UITests/SuiteJourneyTests+FontPicker.swift` | editor-kernel:EK-u, shell-text:ST-a | ~240, 7 |
+| FP-1 | – | `FontPick`, the rules stubs, the placeholder view, the gallery page in `SuiteGallery.areas`, the journey written and skipped (`XCTSkip("waits on FP-4")`) | `Sources/SuiteUI/Contracts/FontPicking.swift`, `Sources/SuiteUI/FontPickerRules.swift`, `Sources/SuiteUI/FontPickerRules+Nearest.swift`, `Sources/SuiteUI/FontPicker.swift`, `Sources/SuiteUI/Gallery/GalleryFontPicker.swift`, `Sources/SuiteUI/SuiteGallery.swift`, `UITests/SuiteJourneyTests+FontPicker.swift` | editor-kernel:EK-u, shell-text:ST-a, command-catalog:CC-u | ~240, 7 |
 | FP-2 | – | Checks first: `FontPickerRulesTests` and `FontPickerNearestTests` disabled by name | `Tests/SuiteUITests/FontPickerRulesTests.swift`, `Tests/SuiteUITests/FontPickerNearestTests.swift` | FP-1 | ~160, 2 |
 | FP-3 | – | The view: list, search, face menu, size row, identifiers | `Sources/SuiteUI/FontPicker.swift`, `Tests/SuiteUITests/FontPickerTests.swift` | FP-1 | ~300, 2 |
 | FP-4 | – | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteFontPickerSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetFontPickerTests.swift`, `UITests/SuiteJourneyTests+FontPicker.swift` | FP-3 | ~200, 3 |
