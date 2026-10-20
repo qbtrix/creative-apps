@@ -113,3 +113,4 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - 2026-10-20T04:21:00Z Heartbeat. The lane dropped needs-rebase on AL-design #3392 (aeec3b00) and dispatched macOS build 39367190107. Full dev CI 39365038310 was cancelled. The current full run is 39368749437 on dev 53151b2b, pending. Scoped suiteui 39352972722 is still queued. main is still b3011ab9. No supervisor answers, and no new Belt-Slice-Done on #1514 or #1498. AL-d3 waits on layers-panel #1498.
 - 2026-10-20T04:44:02Z Heartbeat. #3392 AL-design needs-rebase (3rd, design-seams-2 waits_on) resolved: merged dev, CI: PASS, head ed7c3c69, Head line moved; awaits macOS build and lane.
 - 2026-10-20T05:06:18Z Heartbeat. #3392 AL-design head ed7c3c69, needs-rebase dropped, macOS build 39371121699 queued; main b3011ab9.
+- 2026-10-20T05:28:27Z Heartbeat. #3392 AL-design head ed7c3c69 still waits on macOS build 39371121699 (queued); main b3011ab9.
