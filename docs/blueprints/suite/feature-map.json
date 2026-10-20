@@ -472,15 +472,19 @@
         "suite-kernel `Transform`/`Box`, kernel-geometry `EditorHandle`",
         "suiteui CanvasMarks"
       ],
+      "packet": "suiteui/transform-tools",
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/transform"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/transform"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/transform"
         }
       ]
     },
@@ -581,15 +585,19 @@
         "suite-kernel `Session` + `History`",
         "suite-model/suite-store"
       ],
+      "packet": "suiteui/autosave-history",
       "adopters": [
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/autosave-history"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/autosave-history"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/history-panel"
         }
       ]
     },
@@ -598,15 +606,18 @@
       "name": "Eyedropper (re-cut: PV-9)",
       "layer": "ui",
       "c4": [
-        "suiteui ColorWell",
-        "corerender readback"
+        "suite-kernel/kernel-sample ✚",
+        "suiteui ColorWell + Eyedropper (NSColorSampler)"
       ],
+      "packet": "suiteui/eyedropper",
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/eyedropper"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/eyedropper"
         }
       ]
     },
@@ -670,17 +681,23 @@
       "name": "Strokes, dashes and trim paths (gradient fills are S24)",
       "layer": "core",
       "c4": [
-        "flarecore/geometry + document-commands (Fill, Stroke) + export"
+        "suite-kernel/kernel-fill (VectorStroke, StrokeRules, StrokeCommands)",
+        "flarecore/geometry path ops + Stroke dash and trim (core stroke-style, to file)",
+        "suiteui StrokeEditor"
       ],
+      "packet": "suiteui/stroke-style",
       "adopters": [
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/stroke-style"
         },
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/stroke-style"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/stroke-style"
         }
       ]
     },
@@ -707,18 +724,22 @@
       "name": "Shape tools: polygon, star, rounded rect, line, arrow",
       "layer": "core",
       "c4": [
-        "flarecore/geometry PathBuilders ⚠",
-        "suiteui tool rail"
+        "suite-kernel/kernel-shapes ✚ over flarecore PathBuilders",
+        "suiteui ShapeToolOptions"
       ],
+      "packet": "suiteui/shape-tools",
       "adopters": [
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "flare/shape-tools"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/shape-tools"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/shape-tools"
         }
       ]
     },
@@ -1058,6 +1079,24 @@
       "adopters": []
     },
     {
+      "id": "flare/shape-tools",
+      "name": "Flare's Shape tool: polygons, stars, lines and arrows on the stage",
+      "packet": "flare/shape-tools",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/stroke-style",
+      "name": "Flare's STROKE as the shared editor, with keyed trim paths for draw-ons",
+      "packet": "flare/stroke-style",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "design/design-contracts",
       "name": "The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures",
       "packet": "design/design-contracts",
@@ -1175,6 +1214,51 @@
       "adopters": []
     },
     {
+      "id": "design/autosave-history",
+      "name": "Autosave, crash recovery and the History panel in Design",
+      "packet": "design/autosave-history",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/transform",
+      "name": "Rotate and flip Design's layers with turned handles, transform rows and the Object menu",
+      "packet": "design/transform",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/eyedropper",
+      "name": "Design's Eyedropper tool: the selection's fill or stroke from the colour under the pointer",
+      "packet": "design/eyedropper",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/shape-tools",
+      "name": "Design's Shape tool: polygons, stars, lines and arrows as editable shape layers",
+      "packet": "design/shape-tools",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "design/stroke-style",
+      "name": "Design's strokes with joins, caps and dashes through the shared stroke editor",
+      "packet": "design/stroke-style",
+      "layer": "app",
+      "app": "design",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "photo/photo-seams",
       "name": "The seams: contracts, fakes, services, state, routing, file splits",
       "packet": "photo/photo-seams",
@@ -1241,6 +1325,33 @@
       "id": "photo/gradient-fill",
       "name": "Photo's Gradient tool: drag a linear or radial gradient into the layer or selection",
       "packet": "photo/gradient-fill",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/transform",
+      "name": "Free Transform, layer flips and Canvas Size on the shared transform commands and handles",
+      "packet": "photo/transform",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/history-panel",
+      "name": "Photo's History tab on the shared panel, and autosave on the shared schedule and recovery folder",
+      "packet": "photo/history-panel",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "photo/eyedropper",
+      "name": "Photo's Eyedropper tool: sample size, the loupe and the brush colour on the shared mean",
+      "packet": "photo/eyedropper",
       "layer": "app",
       "app": "photo",
       "c4": [],
@@ -1421,6 +1532,42 @@
       "id": "halo/gradient-fill",
       "name": "Gradient fills on Halo's solid and shape layers, drawn by the frame renderer",
       "packet": "halo/gradient-fill",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/autosave-history",
+      "name": "Autosave, crash recovery and the History panel in Halo",
+      "packet": "halo/autosave-history",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/transform",
+      "name": "Rotate and scale handles in Halo's viewer, keyed at the playhead",
+      "packet": "halo/transform",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/shape-tools",
+      "name": "Halo's shape layers of every kind, drawn by drag in the viewer",
+      "packet": "halo/shape-tools",
+      "layer": "app",
+      "app": "halo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "halo/stroke-style",
+      "name": "Strokes, dashes and keyed trim paths on Halo's shape layers",
+      "packet": "halo/stroke-style",
       "layer": "app",
       "app": "halo",
       "c4": [],

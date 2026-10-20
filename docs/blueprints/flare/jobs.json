@@ -27,10 +27,11 @@
     "job": "Draw a logo stroke on with trim paths (0→100% over 1.5 s) and export Lottie.",
     "outcome": "The Lottie carries a trim-path property animating 0 to 100% over 1.5 s, and a player draws the stroke on.",
     "needs": [
-      "S17"
+      "S17",
+      "flare/stroke-style"
     ],
-    "needs_note": "S17 trim paths",
-    "closes_with": "S17",
+    "needs_note": "S17 trim paths; flare/stroke-style keys them",
+    "closes_with": "flare/stroke-style",
     "trap": "Trim exported as a shape morph or dropped",
     "run": "C",
     "baseline": "fail",
@@ -39,7 +40,8 @@
       "https://www.udemy.com/course/after-effects-for-beginners-4-projects-to-get-you-started/",
       "https://blog.motionarray.com/learn/software/animatedshapes/",
       "https://docs.lottiefiles.com/en/integrations/after-effects/09_lottie-compatibility"
-    ]
+    ],
+    "waits_on": "FK-6"
   },
   "RJ-F03": {
     "id": "RJ-F03",
@@ -467,17 +469,18 @@
     "job": "Draw a five-point star with the star tool for a rating animation.",
     "outcome": "The star tool draws a five-point star that can be keyed like any shape.",
     "needs": [
-      "S19"
+      "S19",
+      "flare/shape-tools"
     ],
-    "needs_note": "S19 shape tools",
-    "closes_with": "S19",
+    "closes_with": "flare/shape-tools",
     "trap": "Only rectangle, ellipse and pen",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
-    ]
+    ],
+    "waits_on": "FS-6"
   },
   "RJ-F26": {
     "id": "RJ-F26",
