@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-7 building (stacked on FC-6 #3491); FC-9 building (on FC-8 #3490 + FC-3 #3423); then FC-15 (wave 5); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7
+Next: FC-9 building (on FC-8 #3490 + FC-3 #3423); FC-15 building (on FC-13 #3521); then FC-12 after FC-7 and FC-11; when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -28,9 +28,10 @@ Next: FC-7 building (stacked on FC-6 #3491); FC-9 building (on FC-8 #3490 + FC-3
 | FC-8 | FC-c | 4 | collections checks, disabled until FC-9 (J14 step 7: FC-10) | LibraryCollectionsTests, LibraryCollectionsBudgetTests, LibraryCollectionsSnapshots, LibraryJourneyTests+Collections | compiles, disabled | - | building (stacked on FC-5) |
 | FC-11 | FC-d | 4 | smart collection checks, disabled until FC-12 | LibrarySmartCollectionTests, LibrarySmartSnapshots, LibraryJourneyTests+Smart | compiles, disabled | #3515 | draft, stacked on #3466 |
 | FC-13 | FC-e | 4 | collections file checks, disabled until FC-14/FC-15 | LibraryCollectionsFileTests, LibraryCollectionsStoreTests, LibraryCollectionsNoticeSnapshots, LibraryJourneyTests+CollectionsFile | compiles, disabled | #3521 | draft, stacked on #3466 |
-| FC-7 | FC-b | 5 | filter methods (not smart); unavailable = nil; enables FC-6 checks | Sources/LibraryModel/LibraryFilter.swift, Tests/mutations/LibraryModel.LibraryFilter.json, FC-6 four files | LibraryFilterBarTests enabled | - | building (stacked on FC-6) |
+| FC-7 | FC-b | 5 | filter methods (not smart); unavailable = nil; enables FC-6 checks | Sources/LibraryModel/LibraryFilter.swift, Tests/mutations/LibraryModel.LibraryFilter.json, FC-6 four files | LibraryFilterBarTests enabled | #3534 | draft, stacked on #3491 |
 | FC-9 | FC-c | 5 | new/add/remove/rename/delete, help; unavailable = nil; enables FC-8 checks but J14 step 7 | Sources/LibraryModel/LibraryCollections.swift, Tests/mutations/LibraryModel.LibraryCollections.json, FC-8 four files | LibraryCollectionsTests enabled | - | building (on FC-8 + FC-3) |
-| FC-10, FC-12, FC-14 .. FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
+| FC-15 | FC-e | 5 | CollectionsStore: folder, atomic write, writeNow, set aside; enables its store test | Sources/LibraryApp/Platform/CollectionsStore.swift, Tests/AppSnapshotTests/LibraryCollectionsStoreTests.swift | LibraryCollectionsStoreTests | - | building (stacked on FC-13) |
+| FC-10, FC-12, FC-14, FC-16 | FC-b..FC-e | 5+ | see packet | see packet task table | see packet | - | planned |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -53,6 +54,7 @@ Next: FC-7 building (stacked on FC-6 #3491); FC-9 building (on FC-8 #3490 + FC-3
 - FC-8 (#3490): J14 step 1 doesn't check that All Photos is selected after undo, and step 6 doesn't check the All Photos selection. The Model tests cover both. Left out to stay under the line cap.
 - FC-6 (#3491): J13 skips as a whole test, following the PerfExport journey's pattern. The three snapshot states are one test, to stay under the line cap. The PR body asks for LibraryFilterBudgetTests to be added to Tests/perf-suites.txt (protected, the supervisor's) before FC-7 enables it.
 - FC-13 (#3521): golden JSON written from Linux JSONEncoder output for the planned records; FC-14 replaces it if real output differs. CollectionsStore.setAside() returns a path but tests pass the name collections.json.bad to failRestoreCollections(setAsideAs:); FC-14 and FC-15 must agree. Checks merged into fewer tests to stay at +399.
+- FC-7 (#3534): own diff 7 files +71/-30, Mutate 17/17 LibraryModel.LibraryFilter. Also edited LibraryCollectionsSeamTests (FC-2's stub check expected unavailable filter methods; enabled theBarHidesRejectsThroughItsToggle). The packet's refreshShown-without-loupe mutation already lives in LibraryCollections.json, so FC-7 mutates setFilter's loupe check instead. Smart 'Edit Rules' left to FC-12; C4 prose left to FC-16.
 
 ## Open
 - #3520 asks the supervisor to list LibraryFilterBudgetTests, LibraryCollectionsBudgetTests (and the keyword/search suites, plus the load-flaky Catalog/Grid budget suites) in Tests/perf-suites.txt. Open.
