@@ -4,7 +4,7 @@ Issue: #1940 · Packet: docs/blueprints/suiteui/features/adopt-kernel-session.md
 Run: act-1a1540ed5f3-c3x9 (slices AD-photo, AD-halo, AD-library; AD-flare, AD-design done in act-1a1509b245f-653k)
 Stage: 3 wave B
 Base: 6e70826b (origin/dev); lead branch on main 6f9a2b88
-Next: AD-p2 #3253 (8e5d40de) and AD-h2 #3252 (354e39a8) on dev. Supervisor (issuecomment-6280424029): proof is the first green **Linux job** on a dev run containing 8f405311 (lead.md rule 6). #3380 (quarantine renew) merged as 2019b521 at 00:40Z. Candidate: full 39349878829 (2019b521, pending, no jobs yet; contains 8f405311 and #3380). 39346519827 and 39345113796 cancelled before any job. Green Linux job → Belt-Slice-Done AD-photo, AD-halo. AD-library: waits on AU-library (no PR yet; supervisor released filters-collections); relaunch AD-l1 when it merges (checked 2026-10-20T00:53Z). Open findings: 0
+Next: AD-p2 #3253 (8e5d40de) and AD-h2 #3252 (354e39a8) on dev. Supervisor (issuecomment-6280424029): proof is the first green **Linux job** on a dev run containing 8f405311 (lead.md rule 6). #3380 (quarantine renew) merged as 2019b521 at 00:40Z. Candidate: full 39349878829 (2019b521, Linux job in progress since 01:02Z; contains 8f405311 and #3380). 39346519827 and 39345113796 cancelled before any job. Green Linux job → Belt-Slice-Done AD-photo, AD-halo. AD-library: waits on AU-library (PR #3384 open); relaunch AD-l1 when it merges (checked 2026-10-20T01:10Z). Open findings: 0
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
