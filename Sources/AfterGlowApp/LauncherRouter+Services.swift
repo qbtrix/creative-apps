@@ -1,5 +1,6 @@
 // LauncherRouter+Services.swift: the launcher's services (HM-2a): the live
-// services over SuiteLocations' support folder, seeded first with
+// services over the process's support folder (SuiteLocations.processSupportFolder,
+// read at each use, so a test process's registered folder applies), seeded first with
 // `-SuiteFixture <name>` (documents from `-SuiteFixtureDocuments <path>`), so
 // the home's first frame reads the fixture, with the launcher's updater.
 import Foundation
@@ -8,15 +9,15 @@ import SuiteShell
 
 enum LauncherServices {
     /// The support folder this process uses.
-    static let support = SuiteLocations.supportFolder(
-        arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory())
+    static var support: String { SuiteLocations.processSupportFolder }
 
     /// Built once, on first use: HomeWindow's model reads it before its first frame.
-    static let shared = make(arguments: ProcessInfo.processInfo.arguments)
+    static let shared = make(arguments: ProcessInfo.processInfo.arguments, support: support)
 
-    /// The live services for `arguments`, seeding a `-SuiteFixture` first.
-    static func make(arguments: [String], now: Date = Date()) -> SuiteServices {
-        let support = SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory())
+    /// The live services for `arguments` over `support` (default: the folder `arguments` name), seeding a
+    /// `-SuiteFixture` first.
+    static func make(arguments: [String], support: String? = nil, now: Date = Date()) -> SuiteServices {
+        let support = support ?? SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory())
         if let name = value(after: "-SuiteFixture", in: arguments) {
             // A fixture that can't be seeded leaves the store as it was; its journey fails on what shows.
             try? FixtureSeeder.seed(

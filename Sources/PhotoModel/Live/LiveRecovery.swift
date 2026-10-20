@@ -5,7 +5,11 @@
 // time too, but the entry is what leftBehind reads). Every write is atomic, so
 // a crash mid-write leaves the last good file. A file that doesn't open is
 // removed and skipped (review note 3). The window string is percent-encoded
-// into the file name, so no window escapes the folder. Linux-safe.
+// into the file name, so no window escapes the folder. A store built without
+// a folder reads `defaultDirectory` at each use: on macOS that is the
+// `PhotoRecoveryDir` default (the `-PhotoRecoveryDir` launch argument, or
+// the one the snapshot tests register) when set, else
+// ~/Library/Application Support/Photo/Recovery. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -16,13 +20,27 @@ struct LiveRecovery: RecoveryStoring {
     static let infoPath = "photo/recovery.json"
     static let fileExtension = "ora"
 
-    let directory: URL
+    /// The folder named at init; nil means `defaultDirectory`, read at each use.
+    private let named: URL?
+
+    var directory: URL { named ?? Self.defaultDirectory }
+
+    init(directory: URL) { named = directory }
+
+    /// The store on `defaultDirectory`.
+    init() { named = nil }
 
     var unavailableHelp: String? { nil }
 
+    /// The `PhotoRecoveryDir` default when set (macOS), else
     /// ~/Library/Application Support/Photo/Recovery, from FileManager's
     /// application-support folder when it has one, else the home folder's.
     static var defaultDirectory: URL {
+        #if !canImport(FoundationEssentials)
+        if let path = UserDefaults.standard.string(forKey: "PhotoRecoveryDir"), !path.isEmpty {
+            return URL(fileURLWithPath: path, isDirectory: true)
+        }
+        #endif
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.homeDirectoryForCurrentUser
                 .appendingPathComponent("Library", isDirectory: true)

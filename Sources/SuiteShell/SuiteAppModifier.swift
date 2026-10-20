@@ -16,7 +16,7 @@ extension Scene {
     public func suiteApp(_ app: SuiteApp, host: any SuiteDocumentHost, live: LiveCommandChannel? = nil) -> some Scene {
         try? live?.start()
         if let delegate = SuiteAppRegistry.delegate {
-            let support = SuiteLocations.supportFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory())
+            let support = SuiteLocations.processSupportFolder
             delegate.app = app
             delegate.host = host
             delegate.receiver = StoreHandOffs(store: FileStore(folder: support), from: app, deliver: HandOffTransport.deliver)
