@@ -169,3 +169,4 @@
 2026-10-20T03:23Z	SE-5b	heartbeat	#3312	#3312 open at a0054178; supervisor merges
 2026-10-20T03:42Z	SE-5b	heartbeat	#3312	#3312 open at a0054178 (needs captain review)
 2026-10-20T05:02Z	resume	resume	#3312	run act-1a157ad4612-4xcw; #3309 merged; #3312 docs-only vs dev at a0054178, still no-fast-lane
+2026-10-20T05:09Z	5	gate	#3312	scripts/ci --changed PASS on a0054178; Head: and Belt-Lead: moved; no-fast-lane lifted
