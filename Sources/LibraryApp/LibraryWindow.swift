@@ -164,7 +164,7 @@ struct LibraryWindow: View {
 
     static func symbol(for collectionID: String) -> String {
         switch collectionID {
-        case "favorites": "heart"
+        case "favorites": "flag"
         case "recent": "clock"
         default: "photo.on.rectangle.angled"
         }
