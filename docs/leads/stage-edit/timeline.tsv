@@ -196,3 +196,4 @@
 2026-10-20T10:12:08Z	heartbeat	full CI 39402653640 on 36789542 (has 424b4a60) still queued; waiting for green to post contact sheet
 2026-10-20T10:24:09Z	heartbeat	full CI 39402653640 on 36789542 (has 424b4a60) still queued; waiting for green to post contact sheet
 2026-10-20T10:35:52Z	heartbeat	full CI 39402653640 on 36789542 (has 424b4a60) still queued since 09:42Z; waiting for green to post contact sheet
+2026-10-20T10:47:40Z	heartbeat	poll: full CI 39402653640 (36789542) still queued; newer CI 39409307241 (a54a892a) pending; FK-a deps #3532/GF-a/SS-a not merged
