@@ -1,0 +1,127 @@
+utc	stage	event	ref	note
+2026-10-18T23:21Z	0	stage-start	#3000	setup, base e0a627c; waits on afterglow-cli:CL-a
+2026-10-19T01:39Z	3	heartbeat	#3037	CL-1 merged; CL-2 waits on CC-2 #3074
+2026-10-19T01:51Z	3	heartbeat	#3074	CC-2 still open; dev ed0fed9
+2026-10-19T02:02Z	3	heartbeat	#3074	CC-2 waits on lane macOS build run 39185685216; dev 17dc84c
+2026-10-19T02:16Z	3	heartbeat	#3074	CC-2 macOS build run 39185685216 green; waiting on lane sweep to merge
+2026-10-19T02:26Z	3	heartbeat	#3074	CC-2 build green, awaiting lane sweep; dev 17dc84c
+2026-10-19T02:38Z	3	heartbeat	#3074	lane batch-20261019021433 red (run 39189040322); bisecting, probe-1 (to #3066) red, probe-0 (dev) running 39190259772; CC-2 is last in batch
+2026-10-19T02:52Z	3	heartbeat	#3074	CC-2 still open, no needs-fix; dev now 036f8d0 (bisect resolved earlier PRs); awaiting next lane batch
+2026-10-19T03:06Z	3	dep-progress	#3074	CC-2 merged 02:53Z; CL-2 builder started
+2026-10-19T03:17Z	3	pr-open	#3100	CL-2 PR opened, head 01b5b24, scripts/ci PASS (3868 tests)
+2026-10-19T03:34Z	3	heartbeat	#3100	CL-2 macOS build run 39195008542 dispatched by lane; stripped tool-added attribution footer from PR body
+2026-10-19T03:52:08Z	poll	heartbeat	#3100	macOS build 39195008542 success; awaiting lane sweep merge
+2026-10-19T04:04:11Z	poll	heartbeat	#3100	build green 03:46Z, still open/clean; awaiting lane sweep
+2026-10-19T04:16:53Z	build	wave started	#3100 merged	MC-1 builder started
+2026-10-19T04:39:32Z	build	heartbeat	-	MC-1 builder still running
+2026-10-19T04:40:32Z	build	PR opened	#3125	MC-1 MC-a head e7a27b3, ci --changed PASS, 398 lines/10 files
+2026-10-19T05:01:02Z	build	heartbeat	-	#3125 MC-1 open in lane, not merged yet
+2026-10-19T05:23:10Z	build	heartbeat	-	#3125 MC-1 still open in lane
+2026-10-19T05:45:57Z	build	heartbeat	-	#3125 MC-1 macOS build still queued (run 39200599134)
+2026-10-19T06:10:35Z	heartbeat	check	#3125	MC-1 macOS build still queued since 04:39Z; no needs-fix/needs-rebase
+2026-10-19T06:31:59Z	heartbeat	check	#3125	MC-1 still in lane (macOS build queue); no needs-fix
+2026-10-19T06:55:56Z	heartbeat	check	#3125	MC-1 still in lane, macOS build queue
+2026-10-19T07:19:44Z	heartbeat	check	#3125	MC-1 still in lane
+2026-10-19T07:44Z	MC-a	dispatch	MC-2	stacked on MC-1, PR held
+2026-10-19T07:44Z	MC-live-wire	dispatch	MC-9	stacked on MC-1, PR held
+2026-10-19T08:04Z	MC-a	built-held	MC-2	63a43ed, PR after #3125
+2026-10-19T08:05Z	heartbeat	wait	#3125	macOS build queued since 04:39Z
+2026-10-19T08:15Z	MC-live-wire	built-held	MC-9	fffb92d, PR after #3125
+2026-10-19T08:27Z	MC-a	merged	#3125	69cf6f6d
+2026-10-19T08:27Z	MC-a	ship	MC-2,MC-9	shipper dispatched
+2026-10-19T08:27Z	MC-live-ui	dispatch	MC-12	builder
+2026-10-19T08:45Z	wave	pr-open	#3200	MC-2 59fa5ae
+2026-10-19T08:45Z	wave	pr-open	#3202	MC-9 e212468
+2026-10-19T08:46Z	wave	pr-open	#3203	MC-12 85376b8
+2026-10-19T08:46Z	wave	dispatch	MC-3,MC-5,MC-7	stacked on MC-2
+2026-10-19T08:48Z	heartbeat	check	-	#3200 MC-2, #3202 MC-9 and #3203 MC-12 are open in the lane and waiting for thei
+2026-10-19T08:57Z	wave	pushed	MC-3,MC-5,MC-7	held until #3200
+2026-10-19T09:11Z	heartbeat	check	-	#3200, #3202 and #3203 are clean, waiting for macOS builds. MC-3/5/7 are built a
+2026-10-19T09:13Z	wave	pushed	MC-4,MC-6	held
+2026-10-19T09:26Z	wave	pushed	MC-8	held
+2026-10-19T09:34Z	heartbeat	check	-	#3200, #3202 and #3203 are still waiting for macOS builds. MC-3, MC-4, MC-5, MC-
+2026-10-19T09:43Z	wave	pushed	MC-13	held
+2026-10-19T09:55Z	heartbeat	waiting	-	macOS queue 30
+2026-10-19T10:09Z	wave	pushed	MC-11	held until MC-8; 400/400 lines
+2026-10-19T10:10Z	wave	started	MC-10,MC-14	stacked builders
+2026-10-19T10:18Z	heartbeat	waiting	-	macOS queue 33
+2026-10-19T10:25Z	wave	pushed	MC-14	held until MC-8, CL-10
+2026-10-19T10:35Z	wave	pushed	MC-10	held until MC-9, MC-11; first macOS compile pending
+2026-10-19T10:35Z	wave	started	MC-15	docs builder, stacked
+2026-10-19T10:39Z	heartbeat	waiting	-	MC-12 build in progress
+2026-10-19T10:50Z	wave	pushed	MC-15	all MC built; held
+2026-10-19T11:01Z	fix	needs-rebase	#3203	C4 part conflict with MC-9
+2026-10-19T11:09:46Z	MC-live-ui	fix-pushed	#3203	merge 6c826012 resolves the C4 description conflict; gate PASS; Head moved
+2026-10-19T11:24:56Z	MC-proto/tools/call	ship	MC-3,MC-5,MC-7	#3200 merged; shipper opening the three PRs
+2026-10-19T13:01:07Z	lead	stage-start	-	run act-1a1543c761a-p4tj resumed; lead branch rebased on main 6f9a2b88
+2026-10-19T13:01:07Z	lead	heartbeat	-	polling lane for #3237 #3238 #3211 #3203
+2026-10-19T13:31:47Z	lead	heartbeat	-	lane congested (24/30 recent sweeps cancelled, sweep 39259516700 in progress since 13:21Z); #3237 #3238 #3211 #3203 clean with green mac builds, awaiting merge
+2026-10-19T13:50:18Z	lead	heartbeat	-	lane batch lane/batch-20261019133046 bisecting (probe -2 Linux check running); #3237 #3238 #3211 #3203 still open, clean
+2026-10-19T14:09:12Z	lead	check	#3211	batch 20261019133046 red on RealJobsTests halo/render-frame (PNG.write waits on IC-5), added by #3207 not CL-10 (CL-10 touches LiveIO only; test uses FakeIO); prefix through #3203 green; awaiting lane verdict and next batch
+2026-10-19T14:21:18Z	MC-live-ui	ship	#3272	MC-13 PR opened on dev after #3203 merged; gate PASS head 0b414652
+2026-10-19T14:39:47Z	lead	check	#3211	batch 20261019141529 (8 PRs, #3211 last) red on CommandPathTests library baseline (DevelopInspector.swift), not this lead; #3207 got needs-fix for the earlier red; MC-3 #3237 MC-5 #3238 MC-13 #3272 waiting for a batch
+2026-10-19T14:58:08Z	lead	heartbeat	#3211	batch 20261019141529 probe -2 (#3211, #3217) green; probe -3 running; CL-10 expected to merge with the green prefix
+2026-10-19T15:31Z	ship	MC-4 #3283 b8bc58ec; MC-6 #3284 c0cf1cfb
+2026-10-19T15:49Z	heartbeat	MC-13/MC-4/MC-6 waiting on macOS builds
+2026-10-19T16:07Z	heartbeat	lane runs queued; all PRs clean
+2026-10-19T16:26Z	heartbeat	lane busy; PRs clean
+2026-10-19T16:44Z	heartbeat	all four ready; lane sweep in progress
+2026-10-19T17:02Z	heartbeat	batch 170158 running
+2026-10-19T17:16Z	merged	MC-13 #3272 731916bf
+2026-10-19T17:35Z	merged	MC-4 #3283 f0520a67
+2026-10-19T17:40Z	integrate	MC-6 #3284 merged dev, gating
+2026-10-19T17:45Z	check	MC-6 needs-rebase was for c0cf1cfb; already integrated at 4ece4a78 (clean). Full run 39294573974 cancelled; 39296061014 (1b33afbb, has f0520a67+731916bf) pending. MC-8 integrated onto MC-6, gating
+2026-10-19T18:05Z	gate	MC-8 integrated on MC-6 4ece4a78, CI: PASS at d885c06708455d8767bb5daedda77c1382b505ea, pushed (held until #3284 merges)
+2026-10-19T18:00Z	heartbeat	MC-6 macOS build 39296255618 queued; dev runs 39296061014 pending, 39292755765 queued
+2026-10-19T18:25Z	integrate	MC-11, MC-10, MC-14 re-stacked on integrated MC-8 (deltas verified unchanged; suite-ai-access.json combined with MC-12 text); gating in turn. Runners congested (22 queued); MC-6 macOS build 39296255618 still queued
+2026-10-19T18:50Z	gate	CI: PASS and pushed: MC-11 19a71a09, MC-10 51705c34, MC-14 dd851d0a (held)
+2026-10-19T18:45Z	heartbeat	macOS runners busy (19 queued); MC-6 build 39296255618 and dev full run 39296061014 queued. Re-stacking MC-15 on MC-10+MC-14
+2026-10-19T18:55Z	gate	MC-15 re-stacked on MC-10+MC-14, CI: PASS, pushed b51cef15 (held; feature-done, last)
+2026-10-19T18:59Z	check	MC-6 #3284 macOS build 39296255618 in progress; full 39296061014 and scoped 39292755765 still queued
+2026-10-19T19:06Z	stage	MC-6 #3284 merged 1f4500f1; MC-8 #3320 opened at 61f5db65 (Slice MC-call, fast-lane)
+2026-10-19T19:25Z	check	MC-8 #3320 macOS build 39308275016 queued (tool footer re-added to PR body on every write; lane strips it); full 39296061014 and scoped 39292755765 still queued
+2026-10-19T19:44Z	check	no change: MC-8 #3320 build 39308275016, full 39296061014 and scoped 39292755765 all queued
+2026-10-19T20:03Z	check	no change: MC-8 #3320 build 39308275016, full 39296061014 and scoped 39292755765 all queued (runners congested)
+2026-10-19T20:21Z	check	no change: 3 runs in progress, 18 queued; MC-8 build 39308275016, full 39296061014, scoped 39292755765 all queued
+2026-10-19T20:40Z	check	no change: MC-8 build 39308275016, full 39296061014, scoped 39292755765 all queued
+2026-10-19T20:59Z	check	MC-8 #3320 macOS build 39308275016 in progress; full 39296061014 and scoped 39292755765 still queued
+2026-10-19T21:36Z	stage	MC-8 merged cd44f3ee; critics filed #3346-#3350; fix round 1: #3362 (#3327), copy and re-ask fixes gating; MC-11 and MC-14 held under the findings cap
+2026-10-19T21:45Z	stage	fix round 1 PRs open: #3362 (#3327), #3363 (#3346-#3349), #3364 (#3350)
+2026-10-19T21:56Z	check	lane dispatched macOS builds: #3362 39329303023, #3363 39329665117, #3364 39329692413; full 39296061014 still queued
+2026-10-19T21:58Z	check	#3363 macOS build 39329665117 success, waits on the lane sweep; #3362 and #3364 builds queued; full 39296061014 queued
+2026-10-19T22:20Z	check	#3363 merged (findings #3346-#3349 closed); 2 open (#3327, #3350), so MC-11 and MC-14 re-merged with dev and re-gating (first gate failed on a stale link after #3363 changed AIAccessRequest.init)
+2026-10-19T22:45Z	stage	MC-11 opened as #3368 (744ff087) and MC-14 as #3369 (010f2976), gate PASS on clean builds; findings open: #3327 (#3362), #3350 (#3364)
+2026-10-19T23:05Z	check	#3362 #3364 #3368 #3369 open, each waiting on its lane macOS build (runners queued); full 39296061014 still queued
+2026-10-19T23:25Z	check	no change: 5 runs still queued (21 queued repo-wide behind 4 supervisor macOS runs in progress since 17:50-18:50Z); #3362 #3364 #3368 #3369 open, no needs-fix
+2026-10-19T23:45Z	check	no change: 4 PRs open, 5 runs queued behind the busy macOS runners
+2026-10-20T00:05Z	check	no change: 4 PRs open, 5 runs queued behind the busy macOS runners
+2026-10-20T00:25Z	check	no change for this feature: 5 runs queued; the queue is draining (builds dispatched 21:30-22:10Z now running)
+2026-10-20T00:45Z	check	#3362 macOS build 39329303023 success, waits on the lane sweep; #3364 #3368 #3369 builds and full 39296061014 queued
+2026-10-20T00:27Z	check	#3369 (MC-14) macOS build 39335348190 success; #3368 build 39335320219 in progress; #3362 waits on the lane sweep (earlier check lines from 23:05Z on carry estimated times, ahead of the clock)
+2026-10-20T00:32Z	stage	#3362 MERGED (bb4695bc), #3327 closed; 1 finding open (#3350, fix #3364); lane merged dev into #3364 #3368 #3369 (heads a18fbd0e, 725e7840, b7b0499c)
+2026-10-20T00:35Z	check	#3368 (MC-11) macOS build 39335320219 success; #3368 and #3369 wait on the lane sweep; #3364 build 39329692413 and full 39296061014 queued (the heads did not move: the earlier a18fbd0e/725e7840/b7b0499c were GitHub test-merge SHAs)
+2026-10-20T00:40Z	stage	MC-14 #3369 MERGED (f9b8ea4f); #3368 (MC-11) waits on the lane sweep; #3364 build and full 39296061014 queued
+2026-10-20T00:53Z	check	#3364 macOS build 39329692413 success; #3364 and #3368 both green, waiting on the lane sweep; full 39296061014 queued
+2026-10-20T00:55Z	stage	MC-11 #3368 MERGED (e497d903); MC-10 re-merged with dev (SuiteAppModifier header comment conflict, both kept), gating
+2026-10-20T01:00Z	stage	MC-10 opened as #3383 (11212c74), gate PASS; #3364 green, waits on the lane sweep; full 39296061014 queued; MC-15 opens after #3383 merges
+2026-10-20T01:02Z	check	full 39296061014 (dev 1b33afbb, holds MC-4 f0520a67) red: journeys fail in every app (identifier audit + event posting) and macOS scripts/ci on expired quarantine entries; dev-red #3386, supervisor-owned, not this feature's. MC-proto not done yet. #3364 green waits on lane; #3383 waits on its lane macOS build
+2026-10-20T01:16Z	stage	#3364 merged (closes #3350; no open findings left). MC-10 #3383 conflicted with it on suite-ai-access.json: merged dev, combined descriptions, gate PASS, pushed 8c65d2cd, Head moved
+2026-10-20T01:35Z	check	MC-10 #3383 at 8c65d2cd: lane macOS build 39352591107 dispatched; needs-rebase cleared
+2026-10-20T01:52Z	check	MC-10 #3383 macOS build 39352591107 success; waits on a lane sweep
+2026-10-20T02:06Z	stage	MC-10 #3383 merged (15b4e591). MC-15 (MC-z, docs only) re-merged dev (took dev for SuiteAppModifier.swift and suite-ai-access.json, stale copies), gate PASS, opened #3395 (26171609) with feature-done; its merge dispatches full CI on dev for the Slice-Done runs
+2026-10-20T02:07Z	stage	MC-15 #3395 merged (13cf5dce): all slice PRs merged. Waiting on dev runs for Slice-Done: scoped suite 39354995505 (3712f0f1: MC-proto, MC-tools, #3364), full 39356653273 (15b4e591: + MC-10), and one containing 13cf5dce for MC-z
+2026-10-20T02:08Z	check	full 39356653273 (15b4e591) cancelled, superseded by full 39357273491 on 13cf5dce (contains every slice incl. MC-z); scoped suite 39354995505 still pending
+2026-10-20T02:22Z	check	container restarted; scoped suite 39354995505 queued, full 39357273491 (13cf5dce) pending; monitor restarted
+2026-10-20T02:34Z	check	full 39357273491 cancelled, superseded by full 39359599960 (25a8d9a2, contains 13cf5dce); scoped suite 39354995505 still queued
+2026-10-20T02:53Z	check	runs 39354995505 (suite, 3712f0f1) and 39359599960 (full, 25a8d9a2) still queued; waiting
+2026-10-20T03:12Z	check	suite 39354995505 queued, full 39359599960 pending (runner queue backed up); waiting
+2026-10-20T03:31Z	check	suite 39354995505 queued, full 39359599960 pending; macOS runner queue still backed up; waiting
+2026-10-20T03:35Z	check	full 39359599960 cancelled, superseded by full 39365038310 (533daec7, contains MC-z 13cf5dce); suite 39354995505 still queued
+2026-10-20T03:53Z	check	suite 39354995505 queued, full 39365038310 pending; waiting
+2026-10-20T04:12Z	check	suite 39354995505 queued, full 39365038310 pending (macOS queue); waiting
+2026-10-20T04:17Z	check	full 39365038310 cancelled (superseded), now watching full 39368749437 (53151b2b, descends 533daec7); suite 39354995505 still queued
+2026-10-20T04:36Z	check	suite 39354995505 queued, full 39368749437 pending (macOS queue); waiting
+2026-10-20T04:54Z	check	suite 39354995505 queued, full 39368749437 pending (macOS queue); waiting
+2026-10-20T05:20Z	0	stage-start	act-1a157b204fb-js9h	resume; lead branch rebuilt on main b3011ab9
+2026-10-20T05:20Z	3	slice-done	MC-a	run 39331727327 (scoped suite, holds #3200)
+2026-10-20T05:20Z	4	stage-end	#3000	contact sheet on run 39370860805
