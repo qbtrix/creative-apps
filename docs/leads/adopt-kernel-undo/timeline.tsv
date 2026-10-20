@@ -116,3 +116,4 @@ utc	stage	event	ref	note
 2026-10-20T18:24:22Z	slice-done	AU-design,AU-library,AU-halo	39469631014	Belt-Slice-Done posted (Linux check proof per supervisor 07:07Z)
 2026-10-20T18:24:22Z	start	AU-flare	-	stage-edit built, layers-files closed; AU-f1+AU-f2 building
 2026-10-20T18:28:57Z	AU-flare	test commit 9acf8763; HistoryReading conformance + KernelUndoAdapter plan in progress
+2026-10-20T18:46:11Z	AU-flare	PR #3674 opened, scripts/ci --changed PASS, head 7076cec9

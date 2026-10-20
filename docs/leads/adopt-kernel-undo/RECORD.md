@@ -4,7 +4,7 @@ Issue: #1934 · Packet: docs/blueprints/suiteui/features/adopt-kernel-undo.md
 Run: act-1a15a8a9680-umw7 (resume; earlier runs act-1a154b13dec-71tm, act-1a152763cf6-04ka, act-1a14dfbdefe-il38, act-1a14e01679a-5ey4, act-1a1483c075b-wqh5) · Session: claude/adopt-kernel-undo-1z23j3 · Resumed: 2026-10-20
 Stage: 3 wave 1 (AU-flare)
 Base: 6e70826 (brief main 6e70826be59e092e59269605cfdfbce93c4a2bbe verified; PRs target dev)
-Next: AU-flare (AU-f1 + AU-f2 in one slice PR); then Belt-Contact-Sheet once its run lands.
+Next: Belt-Slice-Done AU-flare once #3674 merges and a green dev Linux check contains it; then Belt-Contact-Sheet.
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-undo half. The brief's integration branch is `main` at
@@ -19,7 +19,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 | AU-photo | Photo undo on `History<PhotoEdit>` and `HistoryReading` behind its API; stack, id, base and jump code deleted | AU-p1, AU-p2 | MJ-AU-photo (`PhotoHistoryStepsTests`) | – | false | 0 | done | 39133431238 | – |
 | AU-library | Library undo on `History<[PhotoItem]>` and `HistoryReading` behind its API; `CatalogHistory.swift` deleted | AU-l1, AU-l2 | MJ-AU-library (`LibraryHistoryTests`) | filters-collections, spine | false | 0 | done | 39469631014 | – |
 | AU-halo | Halo `ProjectHistory` (live and fake) wraps `History<HaloDocumentState>`; `HaloHistoryRules.swift` and the stack code deleted | AU-h1, AU-h2 | MJ-AU-halo (`ProjectHistoryContractTests`) | #2747 (kernel payload read + Equatable) | false | 0 | done | 39469631014 | – |
-| AU-flare | `FlareWorkspace` conforms to `HistoryReading` over `CommandEngine`; the Flare-only undo/redo name spelling goes | AU-f1, AU-f2 | MJ-AU-flare (`SceneUndoSelectionTests`) | stage-edit | false | 0 | building: failing test committed, conformance written, gate pending
+| AU-flare | `FlareWorkspace` conforms to `HistoryReading` over `CommandEngine`; the Flare-only undo/redo name spelling goes | AU-f1, AU-f2 | MJ-AU-flare (`SceneUndoSelectionTests`) | stage-edit | false | 0 | PR #3674 open (fast-lane, feature-done), head 7076cec9; mutations 5/5
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
