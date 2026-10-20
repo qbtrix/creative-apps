@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15749e510-0ox5 · Session: line lead (library: #1555, #1563) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 3
 Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-9 #3546 (draft on FC-8 #3490 + FC-3 #3423); FC-10 next (on FC-9); FC-15 #3539 (draft on FC-13 #3521); then FC-12 after FC-7 and FC-11; when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
+Next: FC-9 #3546 (draft on FC-8 #3490 + FC-3 #3423); FC-10 blocked on S-L9 #3411 (open); FC-15 #3539 (draft on FC-13 #3521); FC-12 building (on FC-7 #3534 + FC-11 #3515); when #3424 merges un-draft #3461 (merge dev in first), then #3466 (after a plain scripts/ci --changed on its head), then the FC-6, FC-8, FC-11, FC-13 drafts, then FC-7 #3534, FC-9 #3546
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
