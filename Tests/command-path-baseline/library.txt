@@ -40,4 +40,5 @@ Sources/LibraryApp/LibraryExportSheet.swift: Button("Cancel") { actions.cancel?(
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Try Again") { actions.retry?() }.disabled(actions.retry == nil)
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Show in Finder") { actions.showInFinder?() }.disabled(actions.showInFinder == nil)
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)
+Sources/LibraryApp/LibraryWindow+Filters.swift: Button("Clear") { menu.clearFilter?() }
 Sources/LibraryApp/LibraryLoupe.swift: Button(action: onGrid) {
