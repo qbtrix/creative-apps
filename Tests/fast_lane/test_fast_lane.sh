@@ -1487,6 +1487,17 @@ gate "$TIP" failure success "macOS (photo)"; lane_sweep
 gate "$(probe_sha 1)" failure success "macOS (photo)"; lane_sweep
 gate "$(probe_sha 0)" failure failure "macOS (photo)"; lane_sweep
 expect "red base: red on every job the tip is red on lands on own proof, as before" "$(merges)" "pr merge 105,pr merge 106"
+# Never on own proof while the tip's macOS gate still runs: dev red on Linux
+# sets Linux aside, and the tip waits for macOS; green there, it lands.
+fresh; cpr 107 Sources/PhotoApp/A.swift; cpr 108 Sources/PhotoModel/B.swift
+lane_sweep; TIP=$(batch_tip)
+gate "$TIP" failure in_progress "macOS (photo)"; lane_sweep
+gate "$(probe_sha 1)" failure in_progress "macOS (photo)"; lane_sweep
+gate "$(probe_sha 0)" failure success "macOS (photo)"; lane_sweep
+expect "red base: a tip whose macOS gate still runs lands nothing" "$(merges),$(grep -c "own proof" "$sw/calls")" ",0"
+gate "$TIP" failure success "macOS (photo)"; lane_sweep
+expect "red base: once macOS passes, red only where dev is red, it lands on own proof" \
+  "$(merges),$(grep -c '^pr comment 108 .*so this batch landed on each PR.s own proof' "$sw/calls")" "pr merge 107,pr merge 108,1"
 LANE_MAC_PER_PR=1
 
 exit "$fail"
