@@ -18,7 +18,7 @@ public struct FakeDecoder: PhotoDecoding {
         try await FakeBehavior.perform(mode, failing: .unreadableFolder(folder))
         let candidates = photos.map {
             ImportCandidate(path: folder + "/" + $0.name + ".jpg", captureDate: $0.captureDate,
-                            pixelSize: $0.pixelSize, kind: .jpeg)
+                            pixelSize: $0.pixelSize, kind: .jpeg, camera: $0.camera)
         }
         return FolderScan(candidates: candidates, failures: [])
     }

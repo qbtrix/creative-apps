@@ -1,0 +1,141 @@
+{
+  "title": "Export a scene as MP4 or a looping GIF",
+  "wave": 6,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/export-pack (adopter of S11 and E9); RJ-F07, RJ-F08",
+  "waits_on": "suiteui export-pack's XP-a (cross-line; FV-3 needs XP-6, FV-5 XP-4); suite shell-media's SM-a and SM-w (cross-line: the movie and animated image writers); gradient-fill's FG-z for flare.md (slice wait)",
+  "longest_chain": "5 (FV-1 → FV-2 → FV-6 → FV-7 → FV-8)",
+  "journeys": [
+    "FlareExportPackJourneyTests.testExportLoopAsGIFAndMP4"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareExport.swift",
+    "Tests/FlareModelTests/FlareVideoExportTests.swift",
+    "Sources/FlareApp/FlareExportSheetAdapter.swift",
+    "Sources/FlareModel/FlareExport+Kernel.swift",
+    "Tests/mutations/FlareModel.FlareExport+Kernel.json",
+    "Tests/RealJobs/flare/slack-gif/",
+    "Tests/RealJobs/flare/social-mp4/",
+    "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "Sources/FlareModel/Fakes/FakeExport.swift",
+    "Tests/FlareModelTests/FlareVideoWriteTests.swift",
+    "Tests/mutations/FlareModel.LiveExportAdapter.json",
+    "Tests/AppSnapshotTests/FlareExportPackSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareExportPackTests.swift",
+    "UITests/FlareJourneyTests+ExportPack.swift",
+    "docs/blueprints/flare.md",
+    "docs/blueprints/flare/features/export-pack.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "FV-a",
+      "behavior": "Flare's export lists MP4 and GIF with frame rate and loop on stubs, and the sheet shows them with the shared Size row.",
+      "tasks": [
+        "FV-1",
+        "FV-2"
+      ],
+      "journeys": [
+        "MJ-FV"
+      ],
+      "waits": {
+        "flare-export": [
+          "FV-1",
+          "FV-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlareExport.swift",
+        "Tests/FlareModelTests/FlareVideoExportTests.swift",
+        "Sources/FlareApp/FlareExportSheetAdapter.swift"
+      ]
+    },
+    {
+      "id": "FV-u",
+      "behavior": "The sheet has snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "FV-5",
+        "FV-6"
+      ],
+      "journeys": [
+        "FJ-X1"
+      ],
+      "waits": {
+        "FV-a": [
+          "FV-5",
+          "FV-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/FlareExportPackSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareExportPackTests.swift",
+        "UITests/FlareJourneyTests+ExportPack.swift"
+      ]
+    },
+    {
+      "id": "FV-m",
+      "behavior": "The plan lists every frame with its time and size, GIF keeps transparency and loops, MP4 is even-sized and opaque, and the live adapter streams frames into the shared writers, deleting a cancelled file.",
+      "tasks": [
+        "FV-3",
+        "FV-4"
+      ],
+      "journeys": [
+        "MJ-FV"
+      ],
+      "waits": {
+        "FV-a": [
+          "FV-3",
+          "FV-4"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/FlareExport+Kernel.swift",
+        "Tests/FlareModelTests/FlareVideoExportTests.swift",
+        "Tests/mutations/FlareModel.FlareExport+Kernel.json",
+        "Tests/RealJobs/flare/slack-gif/",
+        "Tests/RealJobs/flare/social-mp4/",
+        "Sources/FlareModel/Live/LiveExportAdapter.swift",
+        "Sources/FlareModel/Fakes/FakeExport.swift",
+        "Tests/FlareModelTests/FlareVideoWriteTests.swift",
+        "Tests/mutations/FlareModel.LiveExportAdapter.json"
+      ]
+    },
+    {
+      "id": "FV-z",
+      "behavior": "MP4 and GIF write real files on live services, the journey passes, and the blueprint has them in.",
+      "tasks": [
+        "FV-7",
+        "FV-8"
+      ],
+      "journeys": [
+        "FJ-X1"
+      ],
+      "waits": {
+        "FV-u": [
+          "FV-7",
+          "FV-8"
+        ],
+        "FV-m": [
+          "FV-7"
+        ],
+        "gradient-fill:FG-z": [
+          "FV-8"
+        ],
+        "svg-place:PF-z": [
+          "FV-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+ExportPack.swift",
+        "docs/blueprints/flare.md",
+        "docs/blueprints/flare/features/export-pack.wave.json"
+      ]
+    }
+  ]
+}
