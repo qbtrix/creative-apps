@@ -44,4 +44,4 @@ Next: the wave 2 builder (FC-4, stacked on FC-2b) opens its PR; then wave 3: FC-
 
 ## Open
 - S-L9 #3411 (sidebar drop): FC-10 waits on it. S-L10 #3412 (isRenamable): nothing waits on it.
-- Open line:library findings: 4 (#3134, #3136, #3324, #3325), none in this feature's files.
+- Open line:library findings checked 2026-10-20T04:42:28Z: none in this feature's files. dev-red #3386 (macOS, range main..1b33afbb) predates these PRs; not ours.
