@@ -3,7 +3,7 @@
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
 Stage: 3 polling (wave 1 blocked)
-Base: 18464f26b93c6826d069e0107545d7aacfac033c
+Base: 6537a1a02f512db2df50d253384529f1b354b184
 Next: once #3421 (GF-1) merges, start FG-1 (stubs need only the kernel API); FG-2 waits GF-2 (SuiteUI GradientEditor)
 
 ## Slices
@@ -36,5 +36,5 @@ Next: once #3421 (GF-1) merges, start FG-1 (stubs need only the kernel API); FG-
 - #2315 is already closed, so FG-8 references it and does not use a closing keyword.
 
 ## Open
-- Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs are PR #3421 (open since 03:31Z, waiting on its lane macOS build run 39364860084), GF-2 blocked on command-catalog CC-u); Sources/SuiteKernel/Fill/ (Fill, FillSelection, GradientFillTarget, GradientIntent, GradientEditor) is not on dev. Every Flare task needs it.
+- Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs are PR #3421 (open since 03:31Z, waiting on its lane macOS build run 39364860084, queued since 03:32Z), GF-2 blocked on command-catalog CC-u); Sources/SuiteKernel/Fill/ (Fill, FillSelection, GradientFillTarget, GradientIntent, GradientEditor) is not on dev. Every Flare task needs it.
 - FG-5 also waits on GF-6 and adopt-command-catalog's AC-flare (Belt-Slice-Done on #2999's feature issue).
