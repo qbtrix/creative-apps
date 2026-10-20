@@ -104,6 +104,10 @@
         "HG-a": [
           "HG-6",
           "HG-7"
+        ],
+        "key-editing:KE-a": [
+          "HG-6",
+          "HG-7"
         ]
       },
       "ui": false,
@@ -140,6 +144,9 @@
           "HG-8"
         ],
         "core-loop:CL-z": [
+          "HG-9"
+        ],
+        "key-editing:KE-z": [
           "HG-9"
         ]
       },
