@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-20T21:05Z	1	stage-end	-	packets read; slices and tasks copied
 2026-10-20T21:08Z	2	stage-end	-	combined plan W1-W6 across place-image, tone-controls, multi-layer-select
 2026-10-20T21:06Z	3	wave-start	W1	builder for PM-1 launched (test-first, stacked on dev)
+2026-10-20T21:13Z	3	pr-open	#3761	PM-1 head 2fedd63; CI --changed PASS on Linux; SuiteUI unbuilt until the batch macOS gate

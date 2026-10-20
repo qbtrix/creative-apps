@@ -4,7 +4,7 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
 Stage: 3 build W1
 Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
-Next: PM-1 builder (wave 1); PM-2 once photo-gradient-fill PG-a is slice-done
+Next: #3761 (PM-1) in the lane; PM-2 once photo-gradient-fill PG-a is slice-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,7 +18,7 @@ Next: PM-1 builder (wave 1); PM-2 once photo-gradient-fill PG-a is slice-done
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| PM-1 | PM-a | 1 | LayerTreeList multi-select init and pick(shift:command:) | Sources/SuiteUI/LayerTreeList.swift, Sources/SuiteUI/LayerTreeList+Rows.swift, Tests/SuiteUITests/LayerTreeListTests.swift, Tests/mutations/SuiteUI.LayerTreeList.json | LayerTreeListTests; .pickModes .severalSelected | – | building |
+| PM-1 | PM-a | 1 | LayerTreeList multi-select init and pick(shift:command:) | Sources/SuiteUI/LayerTreeList.swift, Sources/SuiteUI/LayerTreeList+Rows.swift, Tests/SuiteUITests/LayerTreeListTests.swift, Tests/mutations/SuiteUI.LayerTreeList.json | LayerTreeListTests; .pickModes .severalSelected | #3761 | in lane |
 | PM-2 | PM-a | 2 | layerSelection behind selectedLayerID; API stubs; suites disabled | Sources/PhotoModel/PhotoWorkspace.swift, PhotoLayerSelection+Kernel.swift, PhotoSeveralLayers+Kernel.swift, two test suites | PhotoWorkspaceTests | – | waiting (PG-a) |
 | PM-3 | PM-a | 3 | Layers list on multi-select, Select > All Layers ⌥⌘A, intents | Sources/PhotoApp/PhotoLayerList.swift, PhotoIntent.swift, PhotoWindow.swift, PhotoCommands+Select.swift | PhotoLayerListSnapshots, PhotoEditMenuTests | – | waiting |
 | PM-4 | PM-m | 3 | selection bodies | PhotoLayerSelection+Kernel.swift + tests + mutations | PhotoLayerSelectionTests | – | waiting |
