@@ -1,0 +1,91 @@
+utc	stage	event	ref	note
+2026-10-18T23:53Z	0	stage-start	#2996	line lead for #2999 #2996 #1938 (act-1a1516d2305-soy7); base dev b3283d3; brief main 349578b verified
+2026-10-18T23:53Z	2	plan	#2996	wave 1 CC-1; CC-u waits EK-u and FP-a; CC-14 waits EK-z
+2026-10-18T23:53Z	3	wave-start	#2996	wave 1: CC-1
+2026-10-19T00:27Z	3	pr-opened	#3056	CC-1 contract stubs, Head 28581b4
+2026-10-19T00:27Z	3	heartbeat	db8f8f616470a325522b00fc66052c177414a702	EK-u, EK-z met (editor-kernel built); FP-a still planned
+2026-10-19T00:44Z	3	heartbeat	#3056	#3056 macOS build green, awaiting lane sweep
+2026-10-19T00:57Z	heartbeat	check: #3056 open, lane run 39182127069 in progress (macOS build green); wave 2 waits on merge
+2026-10-19T01:11Z	pr-merged	#3056 CC-1 merged as 252e0c53
+2026-10-19T01:12Z	wave-start	wave 2: CC-2, CC-3, CC-11 builders launched on origin/dev 124fe38c
+2026-10-19T01:27Z	pr-open	#3072 CC-3 head c2309458
+2026-10-19T01:29Z	pr-open	#3073 CC-11 head f662e493; Mutate 2/2
+2026-10-19T01:33Z	pr-open	#3074 CC-2 head b5d197e7
+2026-10-19T01:50:41Z	wave	wave 3 launched stacked: CC-4,CC-5 on CC-3; CC-6 on CC-2; CC-12 on CC-11; wave 2 macOS builds queued
+2026-10-19T02:11:05Z	check	CC-3 merged 17dc84c7; CC-2 build running, CC-11 queued; wave 3 builders running
+2026-10-19T02:16:48Z	builder	CC-12 pushed b39dac5b (3 files +40/-9, mutate 3/3, no stale lines); PR waits on #3073 CC-11 merge
+2026-10-19T02:30:28Z	check	CC-2, CC-11 builds green; CC-5 built, dev merged (30d09d71), gate rerun pending (timing flakes under load); CC-4, CC-6 running
+2026-10-19T02:33:01Z	builder	CC-6 pushed 6ebe5737 (4 test files, 392 lines, CI: PASS on 4th run); PR waits on #3074. Notes for CC-7/CC-8: CJ2 names Rect 1 locked but fixture locks Rect 2; edit.undo/redo are .view yet change bytes (CC-8 decides exemption); runOverheadWithinBudget left for perf-suites (supervisor); id rule silent on digits
+2026-10-19T02:34:13Z	builder	CC-4 pushed, dev merged (157e06f2, 4 files +157/-14, mutate 5/5; touched CommandShapeTests line 38 since the stub assertion no longer holds; fixed a CC-3 expectation to 'expected integer'). Lead gates CC-4 then CC-5 on the quiet box
+2026-10-19T02:52:47Z	pr	CC-4 #3092 open (gate PASS 157e06f2, mutate 5\/5); CC-5 #3093 open (gate PASS 30d09d71, mutate 3\/3)
+2026-10-19T02:53:51Z	wave	wave 4 started: CC-7 stacked on CC-6+CC-4 (70ad99e7), CC-8 stacked on CC-6; CC-6 notes passed to both
+2026-10-19T03:15:31Z	merge	CC-2 #3074 merged 20b1c143; CC-11 #3073 merged 1f116104; dev merged into CC-6 (clean) and CC-12 (add\/add, ours; dev's copies equal f662e493)
+2026-10-19T03:21:57Z	built	CC-7 2651c536 (152+/29-, 6 files incl. CommandShapeTests stub-line rewrite; mutate 6/6 SuiteKernel.CommandCatalog; builder gate PASS). New API: CatalogIDError, CommandCatalog.isValidID (a-z0-9.-, letter first, <=64). Fixture locks Rect 2, CJ2 test builds its own Rect 1. runOverheadWithinBudget not in tests. Watch CommandShapeTests overlap with CC-8.
+2026-10-19T03:36:58Z	pr	CC-6 #3101 open (gate PASS 01f4b152); CC-12 #3102 open (gate PASS d60cff1d, mutate 3\/3)
+2026-10-19T03:39:27Z	built	CC-8 4e824f7a (196+/20-, 6 files incl. one CommandShapeTests line; mutate 6/6 SuiteKernel.CatalogConformance; gate PASS). Ledger tests on; 8 conformance tests stay disabled (laws call CommandCatalog.run, CC-7) -- verified 14/14 + 6/6 in scratch with a run body. Decisions: undo/redo exempt from queryOrViewChangesNoBytes, checked by undo/redo byte laws; id rule = CC-7's (private helper); problems read '<id>: <CatalogLaw>: <what>'; ledger skips blank and # lines. CC-8 now opens after CC-7.
+2026-10-19T03:40:12Z	wave	wave 5 started: CC-13 stacked on 4b9ae6f5 (CC-7 + CC-8 + CC-5; CommandShapeTests conflict resolved: CC-4's .object line + CC-8's ledger line)
+2026-10-19T03:52:57Z	built	CC-13 e54c58d6 (CommandWalkTests +150, 7 cases, none disabled; gate PASS). Conformance tests pass 8/8 when enabled on the stacked base. Opens after CC-5, CC-7 and CC-8 merge.
+2026-10-19T04:03Z	heartbeat	CC-4 #3092 and CC-5 #3093 merged; #3101 and #3102 wait on lane macOS builds 39195635905 and 39195649963
+2026-10-19T04:34Z	pr	CC-6 #3101 merged 9f098e23; CC-12 #3102 merged 1422c727; CC-7 opened #3120 at 99cd3d32 (dev merged in, gate PASS)
+2026-10-19T04:57Z	heartbeat	CC-7 #3120 waits on lane macOS build 39200233448; full run 39199491251 at aed78668 (has CC-schema and CC-lint) pending; 39196649963 cancelled
+2026-10-19T05:20Z	heartbeat	CC-7 #3120 still open (lane macOS build 39200233448 queued behind a backlog); full runs 39199491251 (aed78668) and 39203617095 (b7e17ed6) both contain CC-schema and CC-lint, neither started
+2026-10-19T05:56Z	merge	CC-7 #3120 merged as 9b33f116; CC-8 merged dev in (4cb37d27), conformance tests enabled, mutate and gate running
+2026-10-19T06:04Z	done	Belt-Slice-Done posted for CC-a, CC-schema, CC-lint (run 39203617095 Linux green); CC-8 opened as #3156; Linux-only slices take no critic panel
+2026-10-19T06:28Z	heartbeat	CC-8 #3156 waits on the lane's macOS build (dispatched 06:08Z); CC-13 stacked
+2026-10-19T06:53Z	merge	CC-8 #3156 merged as 671c98e7; CC-13 merged dev in (47acaa53), gate running; full run 39211832383 pending
+2026-10-19T06:56:53Z	heartbeat	CC-13 gating 47acaa53; CC-run waits on dev run 39211832383 (pending); CC-9/CC-u wait on FP-a
+2026-10-19T07:00:18Z	pr	CC-13 #3182 opened (head 47acaa53, CI: PASS)
+2026-10-19T07:23:32Z	heartbeat	CC-13 #3182 in lane; CC-run waits on dev run 39215489121 (57d85dfd; 39211832383 cancelled); FP-a not on dev
+2026-10-19T07:45:05Z	heartbeat	#3182 awaiting lane macOS build; dev run 39215489121 still pending (CC-run done-line waits); FP-a not on dev
+2026-10-19T07:52:17Z	decision	kernel gaps from AC-f1 noted in Open
+2026-10-19T08:09:26Z	check	CC-13 #3182 merged a4814ea3; full dev run 39215489121 pending for CC-run
+2026-10-19T08:31:12Z	check	full dev runs 39215489121, 39221107993 cancelled; 39221576463 at 6f9a2b88 pending for CC-run
+2026-10-19T08:53:29Z	check	full dev runs keep cancelling (39225019255); 39225709204 at d40cdad1 pending for CC-run
+2026-10-19T09:15:16Z	check	full dev runs keep cancelling (39225709204); 39226253814 at 097b0d52 pending for CC-run
+2026-10-19T09:36:38Z	check	full dev run 39226253814 cancelled; 39230710902 at acbbef13 pending for CC-run
+2026-10-19T09:59:07Z	check	CC-run slice-done: run 39221576463 Linux green (6f9a2b88 contains 671c98e7); posted on #2996
+2026-10-19T10:20:29Z	heartbeat	#3189 #3190 #3207 #3210 wait on macOS builds; AC-p2 building; FP-a/AS-design/AL-design not on dev
+2026-10-19T10:42:02Z	heartbeat	#3189 #3190 #3207 #3210 #3225 wait on macOS builds; FP-a/AS-design/AL-design not on dev
+2026-10-19T11:04:22Z	heartbeat	#3189 #3190 #3207 #3210 #3225 wait on macOS builds (runner backlog); FP-a/AS-design/AL-design not on dev
+2026-10-19T11:27:01Z	heartbeat	5 PRs open on lane macOS builds (AC-l1 build 39220366051 green, awaiting sweep); FP-a/AS-design/AL-design not on dev
+2026-10-19T11:51:41Z	heartbeat	AC-f1/AC-l1/AC-p2 merged; AC-f2, AC-l2 builders running; #3207, #3210 on lane macOS builds; FP-a/AS-design/AL-design not on dev
+2026-10-19T13:01:46Z	stage-start	run act-1a1543c764c-0mz9; CC-u blocked on font-picker:FP-a
+2026-10-19T14:13:33Z	heartbeat	AC-f2 #3255, AC-l2 #3248 opened; #3210, #3207 waiting on the sweep; FP-a/AS-design/AL-design not on dev (955f02d0)
+2026-10-19T15:37:36Z	heartbeat	blocked unchanged (see Stage); checked dev and open PRs
+2026-10-19T15:59:47Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T16:21:41Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T16:43:28Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T17:06:05Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T17:33:45Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev, no open PR
+2026-10-19T18:12:17Z	heartbeat	blockers unchanged: FP-a / AS-design / AL-design not on dev (0), open PRs (0)
+2026-10-19T18:35:07Z	heartbeat	Blockers unchanged: FP-a, AS-design, AL-design not on dev, no open PRs.
+2026-10-19T18:56:34Z	heartbeat	Blockers unchanged: FP-a, AS-design, AL-design have no PRs on dev.
+19:18Z	check	still blocked: FP-a, AS-design, AL-design have no PR on dev
+19:41Z	check	still blocked: FP-a, AS-design, AL-design have no PR on dev
+20:02Z	check	still blocked: FP-a, AS-design, AL-design have no PR on dev
+2026-10-19T20:25:48Z	check	Blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T20:39:01Z	check	Blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T20:56:55Z	check	blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T21:16:16Z	check	blockers recheck: FP-a/AS-design/AL-design still absent on dev
+2026-10-19T21:37:44Z	check	CC-u waits on FP-a: no PR on dev yet
+2026-10-19T21:59:35Z	check	AC-z1 #3351 open, lane macOS build 39327075170 queued; no PR yet for FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z
+2026-10-19T22:21:10Z	check	AC-z1 #3351 open, lane macOS build 39327075170 still queued (since 21:23Z); no PR yet for FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z
+2026-10-19T22:43:34Z	check	#3351 open, fast-lane; macOS build 39327075170 in_progress since 22:34Z; no blocker slice PRs on dev
+2026-10-19T23:05:10Z	check	#3351 macOS build 39327075170 success 22:43Z; awaiting lane sweep merge; no blocker slice PRs on dev
+2026-10-19T23:27:40Z	check	AC-z1 #3351 open, macOS build green, awaits lane merge sweep; FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z: no PRs on dev
+2026-10-19T23:48:49Z	check	AC-z1 #3351 merged into dev 23:30Z; blockers FP-a/AS-design/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z: no PRs on dev
+2026-10-20T00:10:57Z	check	heartbeat: no PR on dev yet for FP-a, AS-design, AL-design, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 or CC-z; remaining slices stay blocked
+2026-10-20T00:32:43Z	check	heartbeat: still no PR on dev for any blocker slice; no new green main run since 2026-10-13
+2026-10-20T00:53:40Z	check	heartbeat: no blocker-slice PR on dev; no new green main run
+2026-10-20T01:15:13Z	check	AS-design PR #3385 open (not merged); no PR yet for FP-a/AL-design/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml still 38363734665 (2026-10-13), no Belt-Slice-Done due
+2026-10-20T01:37:17Z	check	AS-design #3385 and AL-design #3392 open (not merged); no PR yet for FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml still 38363734665 (2026-10-13)
+2026-10-20T01:59:25Z	check	AS-design #3385 merged 01:39Z; AL-design #3392 open; no PR for FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z; latest green main ci.yml 38363734665 (2026-10-13); AT-design and AC-z2 still blocked
+2026-10-20T02:21:04Z	check	no change: AL-design #3392 open; AC-z2 deps and FP-a have no PR; latest green main ci.yml 38363734665 (2026-10-13)
+2026-10-20T02:42:36Z	check	no change: AL-design #3392 open (clean); AC-z2 deps and FP-a have no PR; latest green main ci.yml 38363734665 (2026-10-13)
+2026-10-20T03:04:54Z	check	AL-design #3392 open (clean); FP-a, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 and CC-z have no PR; latest green main ci.yml is from 10-13
+2026-10-20T03:26:46Z	check	AL-design #3392 open (clean); FP-a, AC-p3, AC-d3, AC-f4, AC-h3, AC-l4 and CC-z have no PR; latest green main ci.yml is from 10-13
+2026-10-20T03:48:09Z	check	AL-design #3392 (lead act-1a154b13dec-71tm) now needs-rebase: conflict in design-model-sources.json c4 part, its lead fixes it; FP-a/AC-p3/AC-d3/AC-f4/AC-h3/AC-l4/CC-z no PR; main green run still 38363734665
+2026-10-20T04:10:10Z	check	AL-design #3392 rebased by its lead (head aeec3b0, clean, needs-rebase dropped), not merged; other blockers no PR; main green run still 38363734665
+2026-10-20T04:32:33Z	check	AL-design #3392 needs-rebase again (04:30Z, head aeec3b0), its lead fixes it; other blockers no PR; main green run still 38363734665
+2026-10-20T04:53:39Z	check	AL-design #3392 rebased again by its lead (head ed7c3c6, clean), not merged; other blockers no PR; main green run still 38363734665
+2026-10-20T05:08:13Z	start	run act-1a157b2050f-ovpu; lead branch rebuilt on main b3011ab; CC-u (CC-9, CC-10) in a builder (branch lead/command-catalog-CC-9, PR to dev); then CC-14 with the shared prose; Belt-Slice-Done for CC-u and CC-z on a ci.yml app=suiteui or full run that contains their merges.
