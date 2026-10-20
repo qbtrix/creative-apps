@@ -1,18 +1,43 @@
 // LibraryUndoAdapter.swift: undo and redo for the catalog on the kernel's History.
 // Each step is named ("Set Rating", "Exposure") and holds the photos it
 // changed as they were before it; undo puts them back by id and hands the
-// kernel the photos it replaced, which redo puts back. Edits sharing an open
+// kernel the photos it replaced, which redo puts back. A collections step
+// ("New Collection") holds your collections before and after it; undo puts
+// the before list back and redo the after list (FC-3). Edits sharing an open
 // coalesce key (one slider drag) stay one step. The 100-step limit is the
 // kernel's. Undo and redo never move the loupe (#426). Linux-safe.
 
 import SuiteKernel
 
+/// One step's payload: the photos to put back, and for a collections step
+/// your collections before and after it (nil on a photo step).
+public struct CatalogChange: Hashable, Sendable {
+    public internal(set) var photos: [PhotoItem]
+    public internal(set) var collectionsBefore: [UserCollection]?
+    public internal(set) var collectionsAfter: [UserCollection]?
+
+    init(photos: [PhotoItem], collectionsBefore: [UserCollection]? = nil, collectionsAfter: [UserCollection]? = nil) {
+        self.photos = photos
+        self.collectionsBefore = collectionsBefore
+        self.collectionsAfter = collectionsAfter
+    }
+}
+
+extension History<CatalogChange>.Step {
+    /// The photos the step puts back.
+    public var photos: [PhotoItem] { payload.photos }
+    /// Your collections before a collections step; nil on a photo step.
+    public var collectionsBefore: [UserCollection]? { payload.collectionsBefore }
+    /// Your collections after a collections step; nil on a photo step.
+    public var collectionsAfter: [UserCollection]? { payload.collectionsAfter }
+}
+
 /// The catalog's undo history: the kernel's steps of photos before an edit.
 public struct CatalogHistory: Hashable, Sendable {
-    public typealias Step = History<[PhotoItem]>.Step
+    public typealias Step = History<CatalogChange>.Step
 
-    /// The kernel's history; each payload is the photos to put back.
-    public internal(set) var kernel = History<[PhotoItem]>(limit: 100)
+    /// The kernel's history; each payload is the photos (and collections) to put back.
+    public internal(set) var kernel = History<CatalogChange>(limit: 100)
     /// True while the top step can still take a coalesced edit.
     public internal(set) var open = false
 
@@ -49,9 +74,21 @@ extension LibraryCatalog {
         let after = indices.map { items[$0] }
         guard before != after else { return }
         saveRevision += 1
-        history.kernel.record(name, before, key: coalesceKey)
+        history.kernel.record(name, CatalogChange(photos: before), key: coalesceKey)
         history.open = true
         refreshAfterHistoryChange(replacing: before, with: after)
+    }
+
+    /// Applies `edit` to `userCollections` and records it as the step `name`
+    /// with the list before and after it. An edit that changes nothing records
+    /// nothing. It never touches the photos or `saveRevision`.
+    mutating func recordCollectionsEdit(_ name: String, _ edit: (inout [UserCollection]) -> Void) {
+        var edited = userCollections
+        edit(&edited)
+        guard edited != userCollections else { return }
+        history.kernel.record(name, CatalogChange(photos: [], collectionsBefore: userCollections, collectionsAfter: edited))
+        history.open = false
+        applyCollections(edited)
     }
 
     /// The indices in `items` of the photos with `ids`. One id (a single
@@ -68,34 +105,54 @@ extension LibraryCatalog {
         history.open = false
     }
 
-    /// Puts the top step's photos back as they were; the loupe stays put.
+    /// Puts the top step's photos or collections back as they were; the loupe stays put.
     public mutating func undo() {
-        step { $0.undo($1) }
+        step(\.collectionsBefore) { $0.undo($1) }
     }
 
     /// Reapplies the last undone step; the loupe stays put.
     public mutating func redo() {
-        step { $0.redo($1) }
+        step(\.collectionsAfter) { $0.redo($1) }
     }
 
-    /// Moves the kernel one step with `move`, then restores the photos it
-    /// handed back. The kernel gets the photos they replace as the opposite
-    /// step; nothing changes when there is no step to move.
+    /// Moves the kernel one step with `move`, then restores the collections
+    /// list at `side` of a collections step and the photos it handed back.
+    /// The kernel gets the photos they replace as the opposite step, and the
+    /// collections snapshots unchanged; nothing changes when there is no step
+    /// to move. A collections-only step leaves `saveRevision` alone.
     private mutating func step(
-        _ move: (inout History<[PhotoItem]>, ([PhotoItem]) -> [PhotoItem]) -> Bool
+        _ side: KeyPath<CatalogChange, [UserCollection]?>,
+        _ move: (inout History<CatalogChange>, (CatalogChange) -> CatalogChange) -> Bool
     ) {
         var kernel = history.kernel
         let current = items
-        var applied: [PhotoItem]?
-        let moved = move(&kernel) { photos in
-            applied = photos
-            let ids = Set(photos.map(\.id))
-            return current.filter { ids.contains($0.id) }
+        var applied: CatalogChange?
+        let moved = move(&kernel) { change in
+            applied = change
+            let ids = Set(change.photos.map(\.id))
+            var swapped = change
+            swapped.photos = current.filter { ids.contains($0.id) }
+            return swapped
         }
         guard moved, let applied else { return }
         history.kernel = kernel
         history.open = false
-        restore(applied)
+        if let collections = applied[keyPath: side] { applyCollections(collections) }
+        if !applied.photos.isEmpty { restore(applied.photos) }
+    }
+
+    /// Puts `collections` in place as your collections and keeps what is shown
+    /// true to them: a selected collection that is gone falls back to All
+    /// Photos. The loupe stays put unless its photo is no longer shown (#156).
+    private mutating func applyCollections(_ collections: [UserCollection]) {
+        userCollections = collections
+        collectionsRevision += 1
+        let selected = selectedCollectionID
+        if UserCollection.isUserID(selected), !collections.contains(where: { $0.id == selected }) {
+            selectedCollectionID = "all"
+        }
+        recount()
+        refreshShown()
     }
 
     /// Replaces each photo by id with its copy in `photos`, then refreshes.
