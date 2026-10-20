@@ -46,3 +46,14 @@ private func twoSelected(titles: [String] = ["", ""]) -> LibraryCatalog {
     two.undo()
     #expect(two.items.map(\.title) == ["", ""])
 }
+
+@Test func inTheLoupeOnlyTheLoupePhotoGetsTheTitleAndNothingSelectedRecordsNothing() {
+    var two = twoSelected()
+    two.open("P2")
+    two.setTitle("\0Pier\t")
+    #expect(two.items.map(\.title) == ["", "Pier"] && two.history.undo.count == 1)
+    var none = twoSelected()
+    none.select([])
+    none.setCaption("Pier")
+    #expect(none.items.map(\.caption) == ["", ""] && none.history.undo.isEmpty)
+}
