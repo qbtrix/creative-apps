@@ -1,15 +1,18 @@
 // DesignRecovery+Kernel.swift: the workspace on SuiteKernel's history panel and SuiteModel's
 // autosave recovery (design/autosave-history). `historyListing` is DesignHistory's kernel
 // History as the panel lists it, its base "Open" for a file the window opened or saved and
-// "New Design" otherwise; `jumpHistory(to:)` will land on that step through
-// History.jumpEndingRun, recording nothing. `recoveryBytes()` will be the document as
-// DesignFile writes it, for SuiteUI's autosave to hand to a RecoveryFolder, and
-// `recovered(from:name:)` the workspace those bytes reopen as: dirty and never saved, so Save
-// asks for a name. `restoreRecovered(from:name:)` puts that workspace in this one, keeping its
-// services, since a view never assigns the workspace. DA-1 declares the adapter: every write and
-// both byte paths refuse with `.notBuilt("History")` until DA-5 writes their bodies
-// (DesignRecoveryTests). No history logic lives here: the steps and the jump are the kernel's.
-// Linux-safe.
+// "New Design" otherwise; `jumpHistory(to:)` lands on that step and records nothing: it ends
+// the open run, as History.jumpEndingRun does, then walks the kernel's undo and redo through
+// DesignHistory's own `undo()` / `redo()`, so a jump restores each step exactly as Edit > Undo
+// does (counters never go back, a New File swap brings its location back). Out of range, or
+// mid-drag and while editing text where Undo is ignored, it refuses with `.unchanged`.
+// `recoveryBytes()` is the document as DesignFile writes it, for SuiteUI's autosave to hand to a
+// RecoveryFolder, and `recovered(from:name:)` the workspace those bytes reopen as: no location
+// and a saved mark no step carries (the kernel's ids never go negative), so it is dirty and Save
+// asks for a name. The name is the window's to show; the Model keeps no title. Damaged bytes
+// throw DesignFile's error. `restoreRecovered(from:name:)` puts that workspace in this one,
+// keeping its services, since a view never assigns the workspace (DesignRecoveryTests). No
+// history logic lives here: the steps and their payloads are the kernel's. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -23,21 +26,35 @@ extension DesignWorkspace: HistoryJumping {
         history.kernel.listing(base: documentURL == nil ? "New Design" : "Open")
     }
 
-    /// Lands on step `index` of `historyListing` without recording one. A stub until DA-5.
+    /// Lands on step `index` of `historyListing` without recording one; refuses out of range and
+    /// while Undo is ignored (mid-drag, editing text).
     public mutating func jumpHistory(to index: Int) throws {
-        throw DesignRefusal.notBuilt("History")
+        let listing = historyListing
+        guard (0...listing.steps.count).contains(index), gesture == nil, editingTextID == nil else {
+            throw DesignRefusal.unchanged
+        }
+        endEditRun()
+        for _ in index..<max(index, listing.index) { undo() }
+        for _ in listing.index..<max(listing.index, index) { redo() }
     }
 }
 
 extension DesignWorkspace {
-    /// The open document as DesignFile writes it, for the autosave. A stub until DA-5.
+    /// A saved mark no kernel step carries: its ids start at 0 and only grow.
+    static let neverSavedStepID = Int.min
+
+    /// The open document as DesignFile writes it, for the autosave. Throws with nothing open.
     public func recoveryBytes() throws -> Data {
-        throw DesignRefusal.notBuilt("Recovery")
+        try fileData()
     }
 
-    /// The workspace autosaved `data` reopens as, named `name`: dirty and never saved. A stub until DA-5.
+    /// The workspace autosaved `data` reopens as, named `name` by the window: the same pages,
+    /// no location and dirty, so Save asks where. Damaged bytes throw.
     public static func recovered(from data: Data, name: String?) throws -> DesignWorkspace {
-        throw DesignRefusal.notBuilt("Recovery")
+        var workspace = DesignWorkspace()
+        try workspace.open(data)
+        workspace.history.kernel.savedStepID = neverSavedStepID
+        return workspace
     }
 
     /// Puts the workspace `data` recovers as in this one, keeping this one's services.
