@@ -7,3 +7,4 @@
 2026-10-20T15:16Z	1	heartbeat	LF-a	#3624 macOS build 39439515810 still queued; SF-3 #3514 open; SF-4 not started
 2026-10-20T15:38Z	1	heartbeat	LF-a	#3624 macOS build 39439515810 queued 70 min; SF-3 #3514 open; SF-4 not started
 2026-10-20T15:59Z	1	heartbeat	LF-a	#3624 macOS build 39439515810 still queued (~90 min); SF-3 #3514 open; SF-4 not started
+2026-10-20T16:22Z	heartbeat	no change: #3624 open, macOS build runs 39438676925/39439515810 still queued since 14:2xZ (runner backlog); blockers unchanged
