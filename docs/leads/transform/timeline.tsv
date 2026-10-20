@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-20T19:27Z	0	stage-start	#3436	setup: main b3011ab9 verified, base origin/dev a48992b7
+2026-10-20T19:29Z	1	stage-end	#3436	v3 packet, 4 slices; DT-a waits on DG-a #3687
+2026-10-20T19:29Z	3	heartbeat	#3687	polling DG-a
