@@ -48,7 +48,7 @@
 
 ## Open
 
-- GF-1 #3421: open, mergeable clean; its lane macOS build (run 39364860084) still queued at 04:16Z, no runner.
+- GF-1 #3421: open, mergeable clean; its lane macOS build (run 39364860084) still queued at 04:38Z (since 03:32Z), no runner; no GF-6 or AC-halo PR yet.
 - halo core-loop (CL-probe, CL-z) and suiteui adopt-command-catalog (AC-halo) are status planned with no lead branch: HG-2, HG-7 and HG-9 cannot start until those run.
 - Resolved: pinned core has `PixelBuffer.gradient(width:height:shape:from:to:stops:space:dither:)` (CoreRaster/Fill/RasterGradient.swift); no needs-core issue.
 - HALO-GRADIENT-FRAME costs about 1.5–1.7 s on a Linux debug build at 1080p (report only).

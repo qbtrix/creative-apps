@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-20T04:09:17Z	3	core-api	RasterGradient.swift	PixelBuffer.gradient present at pin; HG-6 drafted
 2026-10-20T04:12Z	3	built	HG-6	HG-6 on hg-6-work over HG-a; mutations 3/3; gate running; #3421 still open
 2026-10-20T04:16Z	3	gate	HG-6	scripts/ci --changed PASS on hg-6-work 1af5780; #3421 macOS build still queued
+2026-10-20T04:38Z	3	poll	#3421	GF-1 macOS build still queued; no GF-6 or AC-halo PR; HG-a and HG-6 held locally
