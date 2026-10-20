@@ -2,9 +2,9 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a1574f6742-pe5i · Session: claude/gradient-fill-lead-43ftwc · Started: 2026-10-20T03:17Z
-Stage: 3 polling (wave 1 blocked)
+Stage: 3 wave 1 (FG-1 building)
 Base: 042279839a5e71c43540063bebded9d01cdc1c18
-Next: once #3421 (GF-1) merges, start FG-1 (stubs need only the kernel API); FG-2 waits GF-2 (SuiteUI GradientEditor)
+Next: open the FG-1 PR (branch feat/flare-gradient-fg-a, slice FG-a) once scripts/ci --changed passes; then FG-6 stacked on it; FG-2 waits GF-2 (SuiteUI GradientEditor)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,9 +33,10 @@ Next: once #3421 (GF-1) merges, start FG-1 (stubs need only the kernel API); FG-
 ## Decisions
 - Base is origin/dev, not main: the brief names main (b3011ab, verified), but the packet only exists on dev (233aff5, #3410) and CLAUDE.md says PRs target dev. The lane retargets main PRs to dev anyway.
 - Slice PRs (rule 22): FG-1 and FG-2 ship as one FG-a PR, its first commit the disabled FlareGradientTests; FG-5 and FG-6 as one FG-m PR. Waves follow the packet with that grouping.
+- 2026-10-20T06:2xZ: FG-a ships as two PRs, FG-1 now and FG-2 once GF-2 lands. GF-2 waits command-catalog CC-u for an unknown time, and holding FG-1 would also hold FG-6 (FG-m). The FG-a Belt-Slice-Done waits for FG-2.
 - #2315 is already closed, so FG-8 references it and does not use a closing keyword.
 
 ## Open
-- Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs are PR #3421 (open since 03:31Z, waiting on its lane macOS build run 39364860084, queued since 03:32Z), GF-2 blocked on command-catalog CC-u); Sources/SuiteKernel/Fill/ (Fill, FillSelection, GradientFillTarget, GradientIntent, GradientEditor) is not on dev. Every Flare task needs it.
+- Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs are PR #3421 (open since 03:31Z, waiting on its lane macOS build run 39364860084, queued since 03:32Z), GF-2 blocked on command-catalog CC-u); #3421 merged 05:53Z (9a146777): the kernel Fill module is on dev, which unblocks FG-1 and FG-6. GradientEditor (GF-2) is still missing, blocking FG-2.
 - FG-5 also waits on GF-6 and adopt-command-catalog's AC-flare (Belt-Slice-Done on #2999's feature issue).
 - 2026-10-20T05:32Z: asked the supervisor on #3419 to re-dispatch #3421's queued macOS build or add a Mac-Check.
