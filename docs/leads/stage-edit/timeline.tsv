@@ -195,3 +195,4 @@
 2026-10-20T09:59:20Z	heartbeat	waiting on full CI 39402653640 (36789542, queued); 39395505274 cancelled
 2026-10-20T10:12:08Z	heartbeat	full CI 39402653640 on 36789542 (has 424b4a60) still queued; waiting for green to post contact sheet
 2026-10-20T10:24:09Z	heartbeat	full CI 39402653640 on 36789542 (has 424b4a60) still queued; waiting for green to post contact sheet
+2026-10-20T10:35:52Z	heartbeat	full CI 39402653640 on 36789542 (has 424b4a60) still queued since 09:42Z; waiting for green to post contact sheet
