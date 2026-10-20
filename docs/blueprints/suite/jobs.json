@@ -878,5 +878,26 @@
     ],
     "waits_on": "EP-1",
     "added_by": "suiteui/adopt-kernel-eyedropper-photo"
+  },
+  "RJ-X50": {
+    "id": "RJ-X50",
+    "app": "suite",
+    "weight": "high",
+    "job": "Open a camera RAW file with the afterglow CLI, pull its exposure down one stop, and export it as PNG at full size.",
+    "outcome": "The PNG is the RAW file's full 48 x 64 size, upright, within 3 levels of the reference, and its two highlight patches differ by more than 20 levels.",
+    "needs": [
+      "suiteui/shared-raw",
+      "S1"
+    ],
+    "closes_with": "suiteui/shared-raw",
+    "trap": "The export is the embedded preview's size, or the decode went through 8 bits so the clipped highlights come back flat",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "SR-8",
+    "added_by": "suiteui/shared-raw"
   }
 }

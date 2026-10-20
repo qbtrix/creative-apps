@@ -28,7 +28,7 @@ pixel for pixel. If that test fails at the pin, SC-a stops and files a
 **Hand-offs** (cross-line; the lead checks each before the slice starts):
 - **SC-photo:** `ImageIOCodec.swift` is photo/export-pack PX-m's.
 - **SC-library:** `ImageIODecoder.swift` is library/spine's (building),
-  metadata-more MD-b's and raw RW-b's; `JPEGWriter.swift` is library/export
+  metadata-more MD-b's and raw RW-4's; `JPEGWriter.swift` is library/export
   EX-b/EX-c's and export-pack LX-m's. SC-8 starts after spine's feature-done
   and rebases onto whichever of the others lands first.
 - **SC-raster:** `DesignRasterizer.swift` and `StageRasterizer.swift` are

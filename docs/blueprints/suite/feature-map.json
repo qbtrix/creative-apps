@@ -2249,6 +2249,34 @@
       ]
     },
     {
+      "id": "suiteui/shared-raw",
+      "name": "Camera RAW decoded once in SuiteImaging through Core Image: linear float with headroom, embedded previews for thumbnails, clear refusals",
+      "packet": "suiteui/shared-raw",
+      "layer": "model",
+      "c4": [
+        "suite-imaging/imaging-raw ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/shared-raw"
+        },
+        {
+          "app": "library",
+          "packet": "library/raw"
+        }
+      ]
+    },
+    {
+      "id": "library/raw",
+      "name": "Library imports, shows, develops and exports RAW files through the shared RAW decode",
+      "packet": "library/raw",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "suiteui/adopt-kernel-unsaved-prompt",
       "name": "One unsaved-changes guard and save status in every editor",
       "packet": "suiteui/adopt-kernel-unsaved-prompt",

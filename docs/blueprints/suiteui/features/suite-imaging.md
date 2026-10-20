@@ -35,7 +35,7 @@ lead checks each before the slice starts):
   IM-8d deletes it, and photo/tone-controls PT-3 now edits
   `PhotoAdjust+Imaging.swift` instead (re-cut in this PR).
 - **IM-library:** `LiveDevelop.swift`, `LiveLoupeImaging.swift` and
-  `DevelopValues.swift` are library/spine's (building), and raw RW-a/RW-c and
+  `DevelopValues.swift` are library/spine's (building), and raw RW-3 (`LiveLoupeImaging.swift` only) and
   tone-controls LT-a/LT-m also list them. IM-10 and IM-11 start after spine's
   feature-done. library/tone-controls LT-1 no longer edits `Package.swift` and
   LT-4 no longer adds `LibraryLoupe+Metal.swift`: its loupe step calls IM-11's

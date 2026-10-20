@@ -44,6 +44,13 @@ suite-imaging's IM-8d); nothing else in them waits on another packet's
 baseline edit. `suite-imaging` re-cut `tone-controls`: its `Tone/` module
 lives in SuiteImaging, so SuiteKernel stays Foundation and FlareCore only.
 
+Rows whose wave reads `XK4` are shared capabilities built on that layer.
+`shared-raw` (captain, 2026-10-21: "RAW in beta, and it should be shared")
+decodes camera RAW files once, in SuiteImaging's `Raw/` module over Core
+Image, into a linear float buffer that the shared tone sliders develop.
+Photo and the `afterglow` CLI adopt it in the packet itself; Library adopts
+it through `library/raw`, re-cut the same day to a thin adopter.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 **Wave 4 (beta-80 W1, 2026-10-18).** `font-picker` is SuiteUI's piece of
