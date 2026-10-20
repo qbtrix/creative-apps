@@ -111,7 +111,7 @@ y}, to: {x, y}}`; unavailable with `noImage` or `noLayer`.
 | PG-6 | – | The drag's line on the canvas overlay; the journey written and skipped (`XCTSkip("waits on PG-7")`) | `Sources/PhotoApp/PhotoCanvasOverlay.swift`, `UITests/PhotoJourneyTests+Gradient.swift` | PG-2 | ~140, 2 |
 | PG-7 | – | Live: the journey turned on, on live services | `UITests/PhotoJourneyTests+Gradient.swift` | PG-6, PG-3, PG-4 | ~40, 1 |
 | PG-8 | – | photo.md: the Gradient tool moves from v2 Out to the tools; `status: built`; `feature-done` | `docs/blueprints/photo.md`, `docs/blueprints/photo/features/gradient-fill.wave.json` | PG-7, PG-5 | ~30, 2 |
-| PG-9 | – | The Tool Options colour row switches to `InspectorColorWellRow`'s opacity init and `ToolOptions` keeps the colour's alpha, so the brush and the gradient tool paint at it (gap audit C3) | `Sources/PhotoApp/PhotoToolOptions.swift`, `Sources/PhotoModel/ToolOptions.swift`, `Tests/PhotoModelTests/PhotoToolColorAlphaTests.swift`, `Tests/mutations/PhotoModel.ToolOptions.json` | PG-2, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~150, 4 |
+| PG-9 | – | The Tool Options colour row switches to `InspectorColorWellRow`'s opacity init and `ToolOptions` keeps the colour's alpha, so the brush and the gradient tool paint at it; it also stores the kernel's `FillMemory` beside the fill and saves it, so linear → radial → linear keeps the angle (gap audit C3) | `Sources/PhotoApp/PhotoToolOptions.swift`, `Sources/PhotoModel/ToolOptions.swift`, `Tests/PhotoModelTests/PhotoToolColorAlphaTests.swift`, `Tests/mutations/PhotoModel.ToolOptions.json` | PG-2, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~150, 4 |
 
 ## Build waves
 
@@ -138,7 +138,7 @@ live, PG-8 is the prose task.
 | PG-6 | compiles, skipped | – | – |
 | PG-7 | `PhotoGradientJourneyTests.testSkyGradient` steps 1 to 5 | a step fails | – |
 | PG-8 | `scripts/waves render --dry-run` | status not built | – |
-| PG-9 | `PhotoToolColorAlphaTests`: a colour option at 50% stores alpha 0.5 and a later RGB-only change keeps it | the alpha resets to 1 | `PhotoModel.ToolOptions`: alpha dropped in the colour option → `.colorKeepsAlpha`; RGB change resets alpha → `.rgbKeepsAlpha` |
+| PG-9 | `PhotoToolColorAlphaTests`: a colour option at 50% stores alpha 0.5 and a later RGB-only change keeps it; a linear fill at 45° switched to radial and back reads 45° after a save and open | the alpha resets to 1 | `PhotoModel.ToolOptions`: alpha dropped in the colour option → `.colorKeepsAlpha`; RGB change resets alpha → `.rgbKeepsAlpha` |
 
 ## Quality tests
 

@@ -103,7 +103,7 @@ public var gradient: FillSelection?   // nil for solid or Mixed; replaces `fillI
 | FG-6 | – | `PaintReadout` reads Mixed for differing gradients; the solid setter turns a gradient solid instead of refusing; `gradientRefusal` deleted | `Sources/FlareModel/FlarePaint.swift`, `Tests/FlareModelTests/FlarePaintGradientTests.swift`, `Tests/mutations/FlareModel.FlarePaint.json` | FG-1 | ~140, 3 |
 | FG-7 | – | Live: the journey turned on, on live services | `UITests/FlareJourneyTests+Gradient.swift` | FG-4, FG-5 | ~40, 1 |
 | FG-8 | – | flare.md: gradient editing leaves the Later list; `status: built`; `feature-done`; `Fixes #2315` | `docs/blueprints/flare.md`, `docs/blueprints/flare/features/gradient-fill.wave.json` | FG-7, FG-6, FG-3 | ~30, 2 |
-| FG-9 | – | The FILL and STROKE colour rows switch to `InspectorColorWellRow(_:color:opacity:)` and the paint setters carry the opacity, so a picked alpha reaches the shape and a typed hex keeps it (gap audit C3) | `Sources/FlareApp/FlareInspectorFill.swift`, `Sources/FlareModel/FlarePaint.swift`, `Tests/FlareModelTests/FlarePaintAlphaTests.swift`, `Tests/mutations/FlareModel.FlarePaint.json` | FG-2, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~160, 4 |
+| FG-9 | – | The FILL and STROKE colour rows switch to `InspectorColorWellRow(_:color:opacity:)` and the paint setters carry the opacity, so a picked alpha reaches the shape and a typed hex keeps it; it also stores the kernel's `FillMemory` beside the fill and saves it, so linear → radial → linear keeps the angle (gap audit C3) | `Sources/FlareApp/FlareInspectorFill.swift`, `Sources/FlareModel/FlarePaint.swift`, `Tests/FlareModelTests/FlarePaintAlphaTests.swift`, `Tests/mutations/FlareModel.FlarePaint.json` | FG-2, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~160, 4 |
 
 ## Build waves
 
@@ -130,7 +130,7 @@ live, FG-8 is the prose task.
 | FG-6 | `FlarePaintGradientTests`: two different gradients read Mixed; the same gradient reads it; `setFill(hex:)` on a gradient makes it solid | a readout or the setter is wrong | `FlareModel.FlarePaint`: gradients compared by type only → `.differingGradientsAreMixed`; refusal kept → `.solidReplacesGradient` |
 | FG-7 | `FlareGradientJourneyTests.testEditImportedGradient` steps 1 to 5 | a step fails | – |
 | FG-8 | `scripts/waves render --dry-run` | status not built | – |
-| FG-9 | `FlarePaintAlphaTests`: a fill set at 50% stores alpha 0.5, a hex set after it keeps 0.5, a stroke colour keeps its alpha | the alpha resets to 1 | `FlareModel.FlarePaint`: alpha forced to 1 → `.fillKeepsAlpha`; hex setter drops alpha → `.hexKeepsAlpha` |
+| FG-9 | `FlarePaintAlphaTests`: a fill set at 50% stores alpha 0.5, a hex set after it keeps 0.5, a stroke colour keeps its alpha; a linear fill at 45° switched to radial and back reads 45° after a save and open | the alpha resets to 1 | `FlareModel.FlarePaint`: alpha forced to 1 → `.fillKeepsAlpha`; hex setter drops alpha → `.hexKeepsAlpha` |
 
 ## Quality tests
 

@@ -102,7 +102,7 @@ extension HaloProject: GradientFillTarget {
 | HG-7 | – | Conformance bodies (one "Change Fill" step through `edit`, the drag token as the coalesce key); the specs in the catalog and the id list; turns on `HaloGradientTests` | `Sources/HaloModel/HaloFill+Kernel.swift`, `Tests/HaloModelTests/HaloGradientTests.swift`, `Tests/mutations/HaloModel.HaloFill+Kernel.json`, `Sources/HaloModel/HaloCommandCatalog.swift`, `Tests/command-ids/halo.txt` | HG-1, GF-6, AC-halo | ~240, 5 |
 | HG-8 | – | Live: the journey turned on, on live services | `UITests/HaloJourneyTests+Gradient.swift` | HG-4, HG-7, HG-6 | ~40, 1 |
 | HG-9 | – | halo.md lists gradient fills on solid and shape layers; `status: built`; `feature-done` | `docs/blueprints/halo.md`, `docs/blueprints/halo/features/gradient-fill.wave.json` | HG-8, HG-3, core-loop:CL-z | ~30, 2 |
-| HG-10 | – | The layer colour row switches to `InspectorColorWellRow`'s opacity init and `HaloLayerColor` carries alpha (old projects open at 1), so a picked alpha reaches the layer (gap audit C3) | `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloModel/HaloLayer.swift`, `Tests/HaloModelTests/HaloLayerAlphaTests.swift`, `Tests/mutations/HaloModel.HaloLayer.json` | HG-1, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~160, 4 |
+| HG-10 | – | The layer colour row switches to `InspectorColorWellRow`'s opacity init and `HaloLayerColor` carries alpha (old projects open at 1), so a picked alpha reaches the layer; it also stores the kernel's `FillMemory` beside the fill and saves it, so linear → radial → linear keeps the angle (gap audit C3) | `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloModel/HaloLayer.swift`, `Tests/HaloModelTests/HaloLayerAlphaTests.swift`, `Tests/mutations/HaloModel.HaloLayer.json` | HG-1, suiteui gradient-fill C3 (the opacity colour row and the kernel's opt-in no fill, cross-line) | ~160, 4 |
 
 ## Build waves
 
@@ -130,7 +130,7 @@ on live, HG-9 is the prose task.
 | HG-7 | `HaloGradientTests`: `fill.type` radial on a solid stores a unit-box fill; a text layer is unavailable with its reason; a 120-move drag is one step | a fill, refusal or step count is wrong | `HaloModel.HaloFill+Kernel`: text layers allowed → `.textRefuses`; drag key dropped → `.dragIsOneStep` |
 | HG-8 | `HaloGradientJourneyTests.testRadialSolid` steps 1 to 5 | a step fails | – |
 | HG-9 | `scripts/waves render --dry-run` | status not built | – |
-| HG-10 | `HaloLayerAlphaTests`: a project without alpha opens at 1; a 50% layer colour saves and opens at 0.5 | the alpha is lost on save | `HaloModel.HaloLayer`: alpha not encoded → `.alphaRoundTrips`; alpha clamped to 1 on decode → `.oldProjectsOpaque` |
+| HG-10 | `HaloLayerAlphaTests`: a project without alpha opens at 1; a 50% layer colour saves and opens at 0.5; a linear fill at 45° switched to radial and back reads 45° after a save and open | the alpha is lost on save | `HaloModel.HaloLayer`: alpha not encoded → `.alphaRoundTrips`; alpha clamped to 1 on decode → `.oldProjectsOpaque` |
 
 ## Quality tests
 

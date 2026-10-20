@@ -63,7 +63,9 @@ feature: the kernel's opt-in no fill (`FillType.none`, `FillType.paints`, `FillS
 `GradientFillTarget.clearFill` with a refusing default, `fill.read` type "none", the stop and angle commands waiting
 with `GradientCommands.noneHelp`; `FillNoneTests`), and the opacity colour row (`InspectorColorWellRow(_:color:opacity:)`,
 whose typed hex and eyedropper picks keep the opacity; `GradientEditor`'s stop colour uses it; `ColorAlphaTests`).
-`fill.stop-color` also recolours a solid at index 0, alpha kept. Each adopt packet carries the app side as one task
+`fill.stop-color` also recolours a solid at index 0, alpha kept. A type switch keeps settings (supervisor, 2026-10-21): `FillMemory` holds the last linear angle and radial
+centre and radius, `GradientRules.converted(_:to:in:memory:)` restores them, and `fill.type` saves it through
+`setFill(_:memory:in:name:drag:)` (`FillMemoryTests`); journey step 5's "45° kept" holds once the gallery page keeps it. Each adopt packet carries the app side as one task
 (DG-9 and DG-10, FG-9, HG-10, PG-9): its colour rows switch to the opacity init, and Design's colour gains alpha and
 its fill can be none.
 
