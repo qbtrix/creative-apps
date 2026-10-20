@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-20T19:53:22Z	check	heartbeat	widwznsim	DA-a #3686 open, macOS build queued; wave 2 (DA-u, DA-m) building, no PRs yet
 2026-10-20T19:55:22Z	wave	widwznsim done	#3710	DA-m (DA-5) PR #3710 open, footer stripped; DA-u builder stopped before the gate, lead runs scripts/ci --changed and mutate on e8ed1a26
 2026-10-20T20:01:40Z	pr	DA-u	#3726	lead fixed the History help mismatch and added 2 plan entries; scripts/ci --changed PASS, mutate 8/8; opened stacked on #3686
+2026-10-20T20:15:53Z	check	heartbeat	#3686	DA-a macOS build 39483668298 still queued; #3710 and #3726 stacked, wait for #3686
