@@ -14,10 +14,10 @@
     "tests": "DesignGroupTests"
   },
   {
-    "label": "a layer missing from the page reaches the kernel",
+    "label": "the new group is not selected",
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
-    "find": "let present = ids.filter { page.nodes.node($0) != nil }",
-    "replace": "let present = ids",
+    "find": "selection: [made.id])",
+    "replace": "selection: [])",
     "tests": "DesignGroupTests"
   },
   {
