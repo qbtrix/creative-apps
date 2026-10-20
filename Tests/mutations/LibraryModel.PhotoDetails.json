@@ -1,0 +1,23 @@
+[
+  {
+    "label": "camera text keeps its NULs",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "let isPadding: (Character) -> Bool = { $0.isWhitespace || $0 == \"\\0\" }",
+    "replace": "let isPadding: (Character) -> Bool = { $0.isWhitespace }",
+    "tests": "LibraryPhotoDetailsTests.swift"
+  },
+  {
+    "label": "a zero exposure, aperture or focal length is kept",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "guard let value, value.isFinite, value > 0 else { return nil }",
+    "replace": "guard let value, value.isFinite, value >= 0 else { return nil }",
+    "tests": "LibraryPhotoDetailsTests.swift"
+  },
+  {
+    "label": "an ISO of 0 is kept",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "self.iso = iso.flatMap { $0 > 0 ? $0 : nil }",
+    "replace": "self.iso = iso.flatMap { $0 >= 0 ? $0 : nil }",
+    "tests": "LibraryPhotoDetailsTests.swift"
+  }
+]
