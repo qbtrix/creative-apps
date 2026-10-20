@@ -82,11 +82,14 @@ private struct FrameRow: Identifiable {
     }
 
     /// This row's scrub field over the selection (DesignFrameScrub): a drag previews on the live box
-    /// and lands as one step (#536). Disabled with `help` as its tooltip when it can't edit.
-    @MainActor func scrubField(_ model: DesignWorkspace, help: String?, perform: @escaping DesignPerform) -> some View {
+    /// and lands as one step (#536). Disabled with `help` as its tooltip when it can't edit. An open
+    /// text edit's box reads at its `draft` extent, as its commit will fit it (#3335).
+    @MainActor func scrubField(
+        _ model: DesignWorkspace, help: String?, draft: DesignTextExtent? = nil, perform: @escaping DesignPerform
+    ) -> some View {
         DesignFrameScrub(
-            model: model, name: name, field: field, range: range, read: { value(in: $0.frame) }, help: help,
-            perform: perform)
+            model: model, name: name, field: field, range: range,
+            read: { value(in: model.liveFrame(of: $0, draft: draft)) }, help: help, perform: perform)
     }
 }
 
@@ -107,8 +110,10 @@ private struct DesignNodeProperties: View {
     var body: some View {
         // Why the rows are off, named for the layer ("Unlock A to change it."), or nil.
         let hint = model.styleHelp(.opacity) == nil ? nil : model.styleHint(.opacity)
+        // An open text edit's draft, measured, so the header and W/H follow the typing (#3335).
+        let draft = DesignTextOverlay.draftExtent(model)
         VStack(alignment: .leading, spacing: 0) {
-            InspectorHeader(node.name, details: node.inspectorDetails)
+            InspectorHeader(node.name, details: model.inspectorDetails(of: node, draft: draft))
             DesignAlignBar(help: alignHelp, perform: perform)
             InspectorSection("Layer") {
                 InspectorRow("") {
@@ -128,7 +133,7 @@ private struct DesignNodeProperties: View {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     ForEach(FrameRow.all) { row in
                         InspectorRow(row.label) {
-                            row.scrubField(model, help: lockHelp, perform: perform)
+                            row.scrubField(model, help: lockHelp, draft: draft, perform: perform)
                                 .onGeometryChange(for: CGFloat.self) {
                                     $0.frame(in: .named(Self.hintSpace)).minX
                                 } action: { if row.field == .x { valueColumn = $0 } }
