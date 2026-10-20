@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-20T20:55Z	PF-3	built	photo-file-flow/PF-3@6451dc74	15 files +323/-73 vs PF-4 (at cap); Mutate 3/3 PhotoModel.PhotoFileFlow+Kernel; CI PASS; RJ-P42 drop-layer pending gap #3741; PR held until #3700 merges
 2026-10-20T20:56Z	PF-3	rework	photo-file-flow/PF-3	lead review: PF-2 blocked long (place-image planned), so PF-3 must keep writing old PhotoRecentFiles list; builder resumed
 2026-10-20T21:00Z	PF-3	built	photo-file-flow/PF-3@e40c105b	rework done: window unchanged vs PF-4 (old list kept), import moves to PF-2; 14 files +312/-68; Mutate 3/3; full CI PASS; PR held until #3700 merges
+2026-10-20T21:14Z	check	heartbeat	#3679,#3700	open; macOS builds still queued; PF-3 held at e40c105b
