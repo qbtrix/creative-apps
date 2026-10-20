@@ -856,7 +856,8 @@ dispatch_mac() {
 # mac_verdict <sha>: the macOS gate on <sha>, from the newest MAC_GATE_RE check
 # run and the LOCAL_MAC_CONTEXT commit status; a pass from either counts:
 #   none   running   green|<url>   red|<url>|<job>
-# An unreadable API answers running, so a blip never starts a second run.
+# Any other conclusion (cancelled, timed out) is red, as check_verdict reads
+# Linux. An unreadable API answers running, so a blip never starts a second run.
 mac_verdict() {
   local runs st
   runs=$(gh api "repos/$REPO/commits/$1/check-runs?per_page=100" --jq '.check_runs' 2>/dev/null) || { echo running; return; }
@@ -901,6 +902,13 @@ red_jobs() {
   [[ "$(check_verdict "$1")" != red* ]] || j="Linux"
   [[ -z "$BATCH_APPS" || "$(mac_verdict "$1")" != red* ]] || j="${j:+$j }macOS"
   echo "$j"
+}
+
+# settled <sha>: true when every job the batch runs (Linux, and its macOS gate
+# when it has one) has finished on <sha>, green or red.
+settled() {
+  [[ "$(check_verdict "$1")" =~ ^(green|red) ]] || return 1
+  [[ -z "$BATCH_APPS" ]] || [[ "$(mac_verdict "$1")" =~ ^(green|red) ]]
 }
 
 # batch_dispatch <ref> <sha> <key> [<mode>]: starts what the chain commit
@@ -1076,7 +1084,10 @@ batch_resume() {
         case "${verd[0]}" in
           red*)
             bj=$(red_jobs "${chain[0]%%|*}"); tj=$(red_jobs "${chain[k]%%|*}"); line="${verd[0]#red|}"; line="${line%%|*}"
-            if [[ -n "$tj" && -z "$(comm -23 <(tr ' ' '\n' <<<"$tj" | sort) <(tr ' ' '\n' <<<"$bj" | sort) | grep . || true)" ]]; then
+            # Own proof only once every job on the tip has finished: a macOS gate
+            # still running must not land code unproven. Until then the base's
+            # red jobs are set aside below, so the tip waits on the rest.
+            if settled "${chain[k]%%|*}" && [[ -n "$tj" && -z "$(comm -23 <(tr ' ' '\n' <<<"$tj" | sort) <(tr ' ' '\n' <<<"$bj" | sort) | grep . || true)" ]]; then
               log "batch $br: $BASE_BRANCH itself is red ($bj: $line); landing on the PRs' own proof"
               batch_land "$br" "$k" "$BASE_BRANCH was red on its own ($line), so this batch landed on each PR's own proof" "${chain[@]}"
               BATCH_STATE=done; return
