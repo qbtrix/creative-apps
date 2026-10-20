@@ -38,6 +38,7 @@ halo HaloModelTests.HaloKeysBudgetTests
 halo HaloModelTests.HaloLayerEditsBudgetTests
 halo HaloModelTests.HaloTimelineCostTests
 halo HaloModelTests.HaloViewerBudgetTests
+halo HaloModelTests.HaloEasingBudgetTests
 halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloTests/timing
 
 flare FlareModelTests.FlareEasingDragCostTests
@@ -69,10 +70,20 @@ library LibraryModelTests.LibraryCropBudgetTests
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 
 design DesignModelTests.DesignSnapBudgetTests
+design DesignModelTests.DesignSelectBudgetTests
+design DesignModelTests.DesignBudgetTests
+design DesignModelTests.DesignExportBudgetTests
+design DesignModelTests.DesignLayersBudgetTests/layerRows
+design DesignModelTests.DesignStyleBudgetTests
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
 suite SuiteModelTests.StoreBudgetTests
+suite SuiteModelTests.HandOffBudgetTests
+suite SuiteModelTests.HomeBudgetTests
 
 suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
+suiteui SuiteUITests.ListBudgetTests
+suiteui SuiteUITests.TimelineBudgetTests
+suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetEyedropperTests/loupeTrackTiming
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget

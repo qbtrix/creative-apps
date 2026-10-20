@@ -38,7 +38,7 @@ real file.
 
 | Area | What exists | Where | Proof |
 |---|---|---|---|
-| Window | `SuiteWindow` with the collections sidebar (All Photos, Favorites, Recently Added, with counts), content and inspector; `WindowGroup`, so each window has its own catalog | `Sources/LibraryApp/LibraryApp.swift` | `testLaunchShowsWindowShell` |
+| Window | `SuiteWindow` with the collections sidebar (All Photos, Picks, Recently Added, with counts), content and inspector; `WindowGroup`, so each window has its own catalog | `Sources/LibraryApp/LibraryApp.swift` | `testLaunchShowsWindowShell` |
 | Samples | 60 seeded sample photos (a flat sRGB color each, a date, rating, flag, label); File > Load Sample Photos and the empty state's button | `LibrarySample.swift`, `LibraryCommands.swift` | `testLoadSamplePhotos` |
 | Grid | `ThumbnailGrid` of one-pixel images stretched to the cell, sort by capture date, name or rating, Larger and Smaller Thumbnails (80 to 320 pt in 40 pt steps), selection | `LibraryCatalog.swift`, `LibraryApp.swift` (`LibraryBrowser`) | `LibraryGridTests`, `LibraryGridEdgeTests`, `LibraryCellSizeFuzzTests`; `library-grid-*.png` |
 | Empty states | No photos at all; an empty collection with a Show All Photos button | `LibraryEmptyCollection.swift` | `LibraryCollectionEmptinessTests`; `library-empty-*.png`, `library-empty-collection-*.png` |
@@ -595,7 +595,7 @@ F and L)
 2. Press 3. Shot `cull-rated`. Expect "2 of 24"; press Left: the photo's
    value ends `3 stars`; press Right.
 3. Press P on `IMG_0002`, then X on `IMG_0003`. Shot `cull-flagged`.
-   Expect "4 of 24"; Favorites count 1.
+   Expect "4 of 24"; Picks count 1.
 4. Open Edit: the Undo item reads "Undo Reject". Choose it. Shot
    `cull-undo`. Expect the loupe still on "4 of 24" (undo does not move,
    #426); Left: `IMG_0003`'s value no longer contains `Rejected`.
@@ -765,7 +765,7 @@ from `LibraryJourneyTests.swift`, the file it owns in wave 2)
 2. Wait for `library.catalog` = `saved`; terminate
    (`XCUIApplication.terminate()`) and relaunch with the same
    `-LibraryCatalogDir` and no import. Shot `relaunched`. Expect 6 cells,
-   the first `4 stars`, the second `Picked`, the third `Red`, Favorites 1.
+   the first `4 stars`, the second `Picked`, the third `Red`, Picks 1.
 3. Delete `day2/` from disk; relaunch. Shot `missing-files`. Expect those
    two cells' values start `unreadable` with help "The file is missing.";
    they can still be rated (press 1 on one: its value contains `1 star`).
@@ -2120,7 +2120,7 @@ SuiteUI does not have; section 6.4 lists them as issues to file.
 
 | Screen | Region | Contents | Components |
 |---|---|---|---|
-| Main window, grid | Sidebar | Library section: All Photos, Favorites, Recently Added with counts | `SuiteWindow`, `SidebarItem` / `SidebarRow` |
+| Main window, grid | Sidebar | Library section: All Photos, Picks, Recently Added with counts | `SuiteWindow`, `SidebarItem` / `SidebarRow` |
 | | Content | Notice (import result, catalog problem); import progress row; the grid; status pills under it | **needs-ui** `InlineNotice`; **needs-ui** `ProgressRow`; `ThumbnailGrid` (**needs-ui**: visible ids, per-cell loading state and identifier, reject and unreadable badges); `ViewerStatusBar(zoom:size:trailing:)` with its trailing pills ("3 selected"); **needs-ui** S-L7 to make the zoom and size pills optional, so the grid shows "24 photos" and the thumbnail size instead of a zoom percent |
 | | Inspector | Tabs Info and Develop; Info: `InspectorHeader` (name or "3 Photos", facts: date, size, file kind), Metadata section (existing) | `SegmentedTabs`, `InspectorHeader`, `InspectorSection`, `InspectorRow`, `InspectorPickerRow`; with nothing selected, the collection's `InspectorHeader` and "N photos" (replacing today's `SurfaceCard`, which design.md keeps out of inspectors) |
 | Main window, empty | Content | "No Photos", Import Folder… as the one prominent button; Load Sample Photos stays in File | `EmptyStateView` |
