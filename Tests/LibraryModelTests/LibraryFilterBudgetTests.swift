@@ -32,7 +32,7 @@ private let scale = 0.1
         return catalog
     }
 
-    @Test(.disabled("waits on FC-7")) func rebuildWithFilterWithinBudget() {
+    @Test func rebuildWithFilterWithinBudget() {
         var catalog = Self.largeCatalog()
         let filter = LibraryFilter(flags: [.pick, .none], rating: .atLeast(2), labels: [.red, .blue])
         catalog.setFilter(filter)
