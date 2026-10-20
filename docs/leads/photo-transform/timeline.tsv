@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-20T22:20Z	3	heartbeat	#3704,#3706,#3762	none merged; #3706 clean+mac green, queued for lane batch (lane busy bisecting batch-20261020214541); #3704 build still queued
 2026-10-20T22:44Z	3	waiting	#3704	PT-1 macOS build green; waiting for a lane batch
 2026-10-20T23:46Z	3	needs-rebase	#3704	c4 part conflict on photo-model-sources.json; fixer merging dev
+2026-10-20T23:57Z	3	fixed	#3704	merged dev, c4 description conflict resolved (both clauses), CI PASS, head b851c66
