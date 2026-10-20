@@ -1,10 +1,10 @@
 # switching lead record
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
-Run: act-1a152d6e775-atvh · Session: claude/switching-feature-lead-2qhod5 · Started: 2026-10-18 (earlier runs act-1a150baa312-n5va on claude/switching-feature-lead-kyvcdx, act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 4 round 1, blocked on CI #3176 (scoped `suite` runs skip AfterGlowJourneyTests+Switch until it merges, #2971; SW-4a #2989 merged as 531550f)
-Base: origin/dev d481419
-Next: wait for #3176 (ci/scope-macos-per-app) to merge into dev, then for the next scoped `suite` run on dev that contains it; download ui-screens, snapshots and audit-suite json, run Anatomy round 1 (critic panel, clarity lens), then Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
+Run: act-1a1598756a8-uyen · Session: claude/switching-feature-lead-jajuoj · Started: 2026-10-18 (earlier runs act-1a1552a8478-ned8, act-1a152d6e775-atvh, act-1a150baa312-n5va, act-1a146f2912a-581f)
+Stage: 4 round 2 (critic round 2 after fix rounds 1 #3359 and 2 #3367; the round cap allows no third fix round)
+Base: origin/dev f729e906
+Next: critic round 2 on full run 39349878829 (dev 2019b521, has #3367); then relabel the open findings `gap` (rule 11) and post Belt-Contact-Sheet on #1507
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
@@ -125,3 +125,11 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
   - #3357: an open search field (`isSearching`) reserves `searchFieldRoom` past the buttons, so the row narrows to fit instead of pushing the sidebar toggle into the overflow menu.
   - Tests: AppSwitcherTests `theRowStaysOutOfTheInspectorsColumn` and `anOpenSearchFieldNarrowsTheRow`. The journeys check the row's maxX against the inspector at 880 and 1000 pt, and check that the sidebar toggle stays hittable with search open.
 - Next: critic round 2 on the next scoped `suite` run that contains round 2.
+- Fix round 2 PR #3367 merged at 23:59Z (dev 1299651e), after macOS build 39333570669 passed. It waited about 100 min in the runner queue.
+- Critic round 2 waits on a scoped `suite` run on a dev head that contains 1299651e. Scoped run 39331727327 (bd10d93a, still queued) has #3359 but not #3367, so it can't serve round 2. I asked the supervisor on #1507 to dispatch `ci.yml app=suite` on dev.
+
+## Decisions (stage 4, run act-1a1598756a8-uyen)
+- Brief's base check: main HEAD b3011ab9 matched. Work stays on dev (f729e906). Status channel is this run's designated branch `claude/switching-feature-lead-jajuoj`, reset to origin/dev with this record copied from `claude/switching-feature-lead-a254h6`.
+- The supervisor's scoped run 39354995505 was cancelled, and every scoped `suite` run since has been cancelled too. Full run 39349878829 (dev 2019b521, contains #3367 1299651e) completed with ui-screens, snapshots and journeys: it is critic round 2's evidence.
+- Its switching journeys: testCrashIsolation skipped on adoption (#861, #862, #837, #836), so #3332's attach error is gone; testOpenRecentBringsAppForward failed "Unable to find hit point for ScrollView" (#3554); testSwitchKeepsEachAppAsLeft failed the disabled-dim audit on the home's own switcher item `suite.switcher.home` (#3555), then skipped on adoption.
+
