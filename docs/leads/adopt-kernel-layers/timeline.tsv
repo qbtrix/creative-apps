@@ -117,3 +117,4 @@ utc	stage	event	ref	note
 2026-10-20T13:43:16Z	3	heartbeat	#1498	AL-d3 still waits on LP-a Belt-Slice-Done
 2026-10-20T14:06:36Z	3	heartbeat	#1498	AL-d3 still waits on LP-a Belt-Slice-Done
 2026-10-20T14:27:48Z	3	heartbeat	#1498	AL-d3 still waits on LP-a Belt-Slice-Done
+2026-10-20T14:50:05Z	3	question	#1936	#1498 labelled needs-human 14:47Z, no LP-a Belt-Slice-Done; asked supervisor whether AL-d3 may start (issuecomment-6293704284)
