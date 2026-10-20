@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-19T21:18:26Z	heartbeat	crash-isolation fix: attach by bundle URL
 2026-10-19T22:10:37Z	stage	fix round 1 #3359 merged; fix round 2 (#3356 #3357) PR opened
 2026-10-19T23:59:52Z	stage	fix round 2 #3367 merged; critic round 2 waits on a scoped suite run with 1299651e
+2026-10-20T00:47:20Z	heartbeat	critic round 2 waits on dev CI 39346519827 (c7306ee8, has #3367): pending, no job started; no scoped suite run with 1299651e yet
