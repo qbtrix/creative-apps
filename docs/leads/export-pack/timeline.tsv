@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 09:28Z	3	merged	XP-1	#3552 squash-merged by the fast lane
 09:42Z	3	pr	XP-6	#3586 opened (dev merged in, add/add conflicts resolved to XP-6 side, CI: PASS, Mutate 5/5), fast-lane
 09:56Z	3	check	XP-6	#3586 lane macOS build 39403374325 dispatched 09:48Z
+10:08Z	3	check	XP-6	lane macOS build 39403374325 still queued (runner backlog)
