@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-20T19:51:38Z	3	branch pushed	DY-u	94eb67fa, PR after #3691 merges
 2026-10-20T20:15Z	3	check	#3691	macOS build 39487327792 queued on f84d4cc5; no needs-fix; DY-u waits
 2026-10-20T20:36Z	-	check	#3691	macOS build 39487327792 still queued (42m)
+2026-10-20T20:58Z	-	check	#3691	macOS build 39487327792 still queued; mac runners busy with older builds
