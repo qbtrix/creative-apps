@@ -40,7 +40,7 @@ private let item = TransformBox(box: Rect(minX: 100, minY: 80, maxX: 300, maxY: 
     var asked = [TransformIntent]()
     let actions = TransformRows.flips(selection: item, help: nil, flipHelp: nil) { asked.append($0) }
     #expect(actions.map(\.identifier) == ["suite.transform.flip-horizontal", "suite.transform.flip-vertical"])
-    #expect(actions.allSatisfy(\.isEnabled))
+    #expect(actions.allSatisfy { $0.isEnabled })
     actions.first?.perform()
     #expect(asked == [.flip(.horizontal)])
     actions.last?.perform()
