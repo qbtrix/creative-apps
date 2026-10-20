@@ -35,7 +35,13 @@ func theStageDrawsTheSampledShapeAtEveryFrame(_ frame: Int) throws {
     #expect(item.fill == want.fill && item.stroke == want.stroke && item.path == want.outline)
     // The SVG export writes the same fill and path at that frame.
     let svg = try SVGExporter.export(scene: try #require(document.scenes.first), frame: Double(frame))
-    if case .solid(let color)? = item.fill { #expect(svg.contains(try SVGExporter.fill(color))) }
+    if case .solid(let color)? = item.fill {
+        let hex = "#" + [color.r, color.g, color.b].map {
+            let byte = String(Int((min(max($0, 0), 1) * 255).rounded()), radix: 16)
+            return byte.count == 1 ? "0" + byte : byte
+        }.joined()
+        #expect(svg.contains("fill=\"\(hex)\""), "\(hex) at \(frame)")
+    }
     #expect(svg.contains("d=\"\(try SVGExporter.pathData(item.path))\""))
 }
 
