@@ -44,8 +44,8 @@
   {
     "label": "an unchanged photo is rewritten",
     "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
-    "find": "if let previous, previous.says(photo) { continue }",
-    "replace": "_ = previous",
+    "find": "previous.caption == photo.caption, previous.keywords == photo.keywords { continue }",
+    "replace": "previous.caption == photo.caption, previous.keywords == photo.keywords, previous.isEmpty && !previous.isEmpty { continue }",
     "tests": "LibrarySidecarPlanTests"
   },
   {
@@ -72,15 +72,15 @@
   {
     "label": "a stale sidecar says saved",
     "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
-    "find": "guard written[id]?.says(photo) == true else",
+    "find": "guard written[id] == SidecarFields(photo: photo) else",
     "replace": "guard written[id] != nil else",
     "tests": "LibrarySidecarPlanTests"
   },
   {
     "label": "a written reject compares as its stars",
     "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
-    "find": "rating == (photo.flag == .reject ? -1 : photo.rating)",
-    "replace": "rating == photo.rating",
+    "find": "previous.rating == (photo.flag == .reject ? -1 : photo.rating)",
+    "replace": "previous.rating == photo.rating",
     "tests": "LibrarySidecarPlanTests"
   }
 ]

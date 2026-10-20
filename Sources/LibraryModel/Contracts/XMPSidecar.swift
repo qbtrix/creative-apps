@@ -88,7 +88,11 @@ extension LibraryCatalog {
         for photo in items {
             guard let photoPath = photo.path else { continue }
             let previous = written[photo.id]
-            if let previous, previous.says(photo) { continue }
+            // `previous == SidecarFields(photo: photo)`, inline and without building one:
+            // this runs for every photo after each change (QB-LIB-M4).
+            if let previous, previous.rating == (photo.flag == .reject ? -1 : photo.rating),
+               previous.label == photo.label, previous.title == photo.title,
+               previous.caption == photo.caption, previous.keywords == photo.keywords { continue }
             let fields = SidecarFields(photo: photo)
             if previous == nil && fields.isEmpty { continue }
             plan.append(SidecarWrite(
@@ -107,7 +111,7 @@ extension LibraryCatalog {
         guard let photoPath = photo.path else { return "Samples have no file, so no sidecar." }
         if writing.contains(id) { return "Saving…" }
         if let failure = failures[id] { return failure }
-        guard written[id]?.says(photo) == true else { return "No sidecar yet" }
+        guard written[id] == SidecarFields(photo: photo) else { return "No sidecar yet" }
         let path = sidecarPath(for: photoPath)
         let name = path.lastIndex(of: "/").map { String(path[path.index(after: $0)...]) } ?? path
         return "Saved to \(name)"
@@ -122,14 +126,5 @@ extension LibraryCatalog {
             if let path = photo.path, path.hasPrefix(stem) { siblings.insert(path) }
         }
         return XMPSidecar.path(for: photoPath, siblings: siblings)
-    }
-}
-
-extension SidecarFields {
-    /// `self == SidecarFields(photo: photo)` without building one, for the
-    /// plan's pass over every photo (QB-LIB-M4); the rating as `init(photo:)` maps it.
-    func says(_ photo: PhotoItem) -> Bool {
-        rating == (photo.flag == .reject ? -1 : photo.rating) && label == photo.label
-            && title == photo.title && caption == photo.caption && keywords == photo.keywords
     }
 }
