@@ -35,6 +35,14 @@ import Testing
         #expect(rows(steps[11]).line == .finished("Exported editor-kernel.png"))
     }
 
+    /// A host with its own scale control drops the Size row, so the sheet never shows two scales.
+    @Test func aHostCanLeaveOutTheSizeRow() {
+        let jpeg = ExportPick(format: "jpeg", scale: 2, quality: 0.6)
+        let run = ExportRun<ExportPick>.editing(jpeg)
+        let rows = ExportSheetRows(run, formats: GalleryEditorKernelChrome.formats, showsSize: false) { $0 }
+        #expect(rows.rows == [.format("jpeg"), .quality(0.6)] && rows.editable)
+    }
+
     @Test func idsTakeTheHostPrefix() {
         let ids = ExportSheetIDs("flare.export")
         let formats = ["svgFrame", "lottie", "pngSequence"].map(ids.format)

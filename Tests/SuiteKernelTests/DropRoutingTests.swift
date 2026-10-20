@@ -21,31 +21,31 @@ import SuiteKernel
         DropPlan.plan(paths, into: app, hasDocument: hasDocument, places: places, readers: Self.readers)
     }
 
-    @Test(.disabled("waits on SF-5")) func anotherAppsDocumentIsHandedOff() {
+    @Test func anotherAppsDocumentIsHandedOff() {
         #expect(plan(["/w/Intro.halo"], into: "design", hasDocument: true) == [.handOff(path: "/w/Intro.halo", app: "halo")])
     }
 
-    @Test(.disabled("waits on SF-5")) func anImageIsPlacedIntoAnOpenDocumentAndOpenedWithoutOne() {
+    @Test func anImageIsPlacedIntoAnOpenDocumentAndOpenedWithoutOne() {
         #expect(plan(["/w/Sky.png"], into: "photo", hasDocument: true) == [.place(path: "/w/Sky.png")])
         #expect(plan(["/w/Sky.png"], into: "photo", hasDocument: false) == [.open(path: "/w/Sky.png")])
         #expect(plan(["/w/Sky.png"], into: "library", hasDocument: true) == [.place(path: "/w/Sky.png")])
     }
 
-    @Test(.disabled("waits on SF-5")) func ownTypeOpensEvenWithADocumentOpen() {
+    @Test func ownTypeOpensEvenWithADocumentOpen() {
         #expect(plan(["/w/Edit.photo"], into: "photo", hasDocument: true, places: ["png", "jpg", "photo"])
                 == [.open(path: "/w/Edit.photo")])
     }
 
-    @Test(.disabled("waits on SF-5")) func anUnknownTypeIsRefusedInWords() {
+    @Test func anUnknownTypeIsRefusedInWords() {
         #expect(plan(["/w/notes.xyz"], into: "design") == [.refuse(path: "/w/notes.xyz", reason: "AfterGlow can't open .xyz files.")])
     }
 
-    @Test(.disabled("waits on SF-5")) func extensionsRouteWhateverTheirCase() {
+    @Test func extensionsRouteWhateverTheirCase() {
         #expect(plan(["/w/Intro.HALO"], into: "design") == [.handOff(path: "/w/Intro.HALO", app: "halo")])
         #expect(plan(["/w/Sky.PNG"], into: "photo", hasDocument: true) == [.place(path: "/w/Sky.PNG")])
     }
 
-    @Test(.disabled("waits on SF-5")) func aFolderExpandsOneLevelInNameOrder() throws {
+    @Test func aFolderExpandsOneLevelInNameOrder() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("drop-\(UUID().uuidString)")
         let inner = folder.appendingPathComponent("inner")
         try FileManager.default.createDirectory(at: inner, withIntermediateDirectories: true)
@@ -56,7 +56,7 @@ import SuiteKernel
                                                        .open(path: folder.appendingPathComponent("b.png").path)])
     }
 
-    @Test(.disabled("waits on SF-5")) func eachPathGetsOneActionInOrder() {
+    @Test func eachPathGetsOneActionInOrder() {
         let actions = plan(["/w/Sky.png", "/w/notes.xyz", "/w/Intro.halo"], into: "photo", hasDocument: true)
         #expect(actions.map(\.path) == ["/w/Sky.png", "/w/notes.xyz", "/w/Intro.halo"])
     }

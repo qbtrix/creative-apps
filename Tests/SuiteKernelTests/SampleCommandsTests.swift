@@ -1,6 +1,5 @@
-// SampleCommandsTests.swift (eyedropper EY-1 written, EY-6 turns on): `color.sample` on a test target that paints
-// one colour per sample size over a 100 × 100 document. The spec shape check runs now; the runs are disabled by name
-// until EY-6 builds the body.
+// SampleCommandsTests.swift (eyedropper EY-1 written, EY-6 turned on): `color.sample` on a test target that paints
+// one colour per sample size over a 100 × 100 document: the spec's shape, the result, null, the size and the why-not.
 import Testing
 import SuiteKernel
 
@@ -29,7 +28,7 @@ struct SampleDoc: SampleTarget {
         #expect(catalog.availability("color.sample", on: SampleDoc()) == .available)
         #expect(catalog.availability("color.sample", on: SampleDoc(sampleHelp: "Open an image first.")) == .unavailable("Open an image first."))
     }
-    @Test(.disabled("waits on EY-6")) func readsHexAndChannels() throws {
+    @Test func readsHexAndChannels() throws {
         let catalog = try #require(Self.catalog)
         var doc = SampleDoc()
         let outcome = try catalog.run("color.sample", params: Self.at(10, 10), on: &doc)
@@ -37,12 +36,18 @@ struct SampleDoc: SampleTarget {
         #expect(outcome.result == .object(["color": color]))
         #expect(outcome.undoStep == nil)
     }
-    @Test(.disabled("waits on EY-6")) func emptySpaceIsNull() throws {
+    @Test func readsAlphaAsAChannel() throws {
+        let catalog = try #require(Self.catalog)
+        var doc = SampleDoc(colors: [.point: FillColor(r: 0, g: 0.5, b: 1, a: 0.5)])
+        let color: JSONValue = .object(["hex": .string("#0080FF"), "r": .number(0), "g": .number(128), "b": .number(255), "a": .number(128)])
+        #expect(try catalog.run("color.sample", params: Self.at(99, 0), on: &doc).result == .object(["color": color]))
+    }
+    @Test func emptySpaceIsNull() throws {
         let catalog = try #require(Self.catalog)
         var doc = SampleDoc()
         #expect(try catalog.run("color.sample", params: Self.at(500, 500), on: &doc).result == .object(["color": .null]))
     }
-    @Test(.disabled("waits on EY-6")) func passesSize() throws {
+    @Test func passesSize() throws {
         let catalog = try #require(Self.catalog)
         var doc = SampleDoc(colors: [.point: FillColor(r: 1, g: 0, b: 0), .fiveByFive: FillColor(r: 0, g: 0, b: 1)])
         let result = try catalog.run("color.sample", params: Self.at(10, 10, size: 5), on: &doc).result
@@ -51,7 +56,7 @@ struct SampleDoc: SampleTarget {
         }
         #expect(color["hex"] == .string("#0000FF"))
     }
-    @Test(.disabled("waits on EY-6")) func honoursSampleHelp() throws {
+    @Test func honoursSampleHelp() throws {
         let catalog = try #require(Self.catalog)
         var doc = SampleDoc(sampleHelp: "Open an image first.")
         #expect(throws: CatalogError.unavailable(id: "color.sample", why: "Open an image first.")) { try catalog.run("color.sample", params: Self.at(10, 10), on: &doc) }
