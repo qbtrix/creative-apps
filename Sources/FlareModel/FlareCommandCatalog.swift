@@ -40,7 +40,8 @@ extension FlareWorkspace {
         default: Self.menuLabels[id] ?? Self.catalog.spec(id)?.title ?? id
         }
     }
-    static let menuLabels = ["file.open": "Open…", "file.save-as": "Save As…", "edit.delete": "Delete", "animate.play": "Play/Pause"]
+    static let menuLabels = ["file.open": "Open…", "file.save-as": "Save As…", "edit.delete": "Delete", "animate.play": "Play/Pause",
+                             "layers.add": "New Layer"]
 
     public static func sampleHelp(_ name: String) -> String? { FlareFixtures.named(name) == nil ? "No sample called \(name)." : nil }
     public static func sampleTitle(_ name: String) -> String { name == "keyed" ? "Keyed Ball" : name.capitalized }
@@ -124,12 +125,12 @@ extension FlareWorkspace {
         act("edit.deselect", "Deselect", "Clears the stage and layer selection.", .view, { $0.editHelp(.deselect) }) { w in w.deselect() },
         act("object.bring-forward", "Bring Forward", "Moves the selected layer one place up.", .edit, { $0.orderHelp(forward: true) }) { w in w.bringForward() },
         act("object.send-backward", "Send Backward", "Moves the selected layer one place down.", .edit, { $0.orderHelp(forward: false) }) { w in w.sendBackward() },
-        act("layers.add", "New Layer", "Adds a layer above the selected one and selects it.", .edit, { $0.addLayerHelp }) { w in w.addLayer() },
+        act("layers.add", "Add Layer", "Adds a layer above the selected one and selects it.", .edit, { $0.addLayerHelp }) { w in w.addLayer() },
         act("layers.remove", "Delete Layer", "Deletes the selected layer.", .edit, noLayer) { w in w.removeLayer(w.selectedLayerID ?? "") },
-        act("layers.toggle-visible", "Hide Layer", "Hides or shows the selected layer.", .edit, noLayer) { w in
+        act("layers.toggle-visible", "Set Layer Flags", "Hides or shows the selected layer.", .edit, noLayer) { w in
             w.toggleLayerFlag(w.selectedLayerID ?? "", .visible)
         },
-        act("layers.toggle-locked", "Lock Layer", "Locks or unlocks the selected layer.", .edit, noLayer) { w in
+        act("layers.toggle-locked", "Set Layer Flags", "Locks or unlocks the selected layer.", .edit, noLayer) { w in
             w.toggleLayerFlag(w.selectedLayerID ?? "", .locked)
         },
     ] + FlareTool.allCases.map { tool in
