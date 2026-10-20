@@ -14,6 +14,8 @@ import Darwin
 public enum GradientRules {
     /// The most stops a gradient holds, and why a gradient can't drop below two.
     public static let maxStops = 64, stopHelp = "A gradient needs at least two stops."
+    /// Why `fill.type` none refuses on a target whose layers always have a fill.
+    public static let noFillHelp = "This layer always has a fill."
     /// What an app's `setFill` throws until its adopt builds it.
     public static let notBuilt = CatalogError.notBuilt(id: "fill", feature: "gradient-fill GF-6")
 
@@ -27,15 +29,16 @@ public enum GradientRules {
     }
 
     /// `fill` as `type` in `box`: solid to linear is the colour to white at 0°, to radial the same stops about the
-    /// centre out to half the diagonal; linear and radial keep their stops; to solid keeps the first colour.
+    /// centre out to half the diagonal; linear and radial keep their stops; to solid keeps the first colour. `none` isn't
+    /// a paint (a target clears its fill instead), so it returns `fill`.
     public static func converted(_ fill: Fill, to type: FillType, in box: Rect) -> Fill {
-        guard type != Self.type(of: fill) else { return fill }
+        guard type != Self.type(of: fill), type != .none else { return fill }
         let stops = if case .solid(let color) = fill {
             [GradientStop(offset: 0, color: color), GradientStop(offset: 1, color: .white)]
         } else { fill.stops }
         let center = center(of: box)
         switch type {
-        case .solid: return .solid(stops.first?.color ?? .black)
+        case .solid, .none: return .solid(stops.first?.color ?? .black)
         case .linear: return rotated(.linear(stops: stops, start: center, end: center), to: 0, in: box)
         case .radial:
             // ponytail: a box with no diagonal still gets a 1-unit radius, so the fill stays valid.
