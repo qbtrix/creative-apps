@@ -1,0 +1,4 @@
+[
+{"label":"the demo client never asks again","file":"Sources/SuiteModel/AIAccess/FakeAIAccess.swift","find":"        request(client: client)\n    }","replace":"    }","tests":"FakeAIAccessTests"},
+{"label":"the demo client asks after every Stop","file":"Sources/SuiteModel/AIAccess/FakeAIAccess.swift","find":"        retryClient = nil\n","replace":"","tests":"FakeAIAccessTests"}
+]
