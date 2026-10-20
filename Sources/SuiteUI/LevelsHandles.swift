@@ -4,9 +4,10 @@
 // output black and white handles. Values are the engine's: points in 0...1
 // (sRGB-encoded), gamma over 1 brightens; the midtone handle sits where the
 // curve gives half output (SuiteModel's LevelsMidtone), so it follows the
-// black and white points. Dragging a handle sends `onChange` with the value
-// under the pointer and one `onEnd` on release; the host clamps (a black point
-// can't pass the white). Each handle is one adjustable accessibility element
+// black and white points. Dragging a handle moves it from where it was by the
+// drag's distance (a press that doesn't move changes nothing) and sends
+// `onChange`, then one `onEnd` on release through the suite's EditRun, so a
+// click ends nothing; the host clamps (a black point can't pass the white). Each handle is one adjustable accessibility element
 // labelled with its field ("Black Point"), valued `reading` (points 0...255,
 // gamma to two places, "Mixed" while `mixed`), identified `id(handle)` and
 // listed in suite.controls; increment and decrement step one level (gamma
@@ -53,6 +54,9 @@ public struct LevelsHandles: View {
     private let onEnd: @MainActor () -> Void
     @State private var hovered: LevelsHandle?
     @State private var dragged: LevelsHandle?
+    /// The dragged handle's position (0...1) at the press.
+    @State private var dragStart: Double?
+    @State private var run = EditRun()
 
     /// `reason` is the tooltip and suite.controls reason while not `enabled`.
     public init(
@@ -95,7 +99,6 @@ public struct LevelsHandles: View {
                 }
             }
             .frame(maxHeight: .infinity)
-            .coordinateSpace(.named(Self.space))
         }
         .frame(height: SuiteSize.curveHandleHit)
     }
@@ -110,14 +113,20 @@ public struct LevelsHandles: View {
             .contentShape(.rect)
             .onHover { hovered = $0 ? handle : (hovered == handle ? nil : hovered) }
             .gesture(
-                DragGesture(minimumDistance: 0, coordinateSpace: .named(Self.space))
+                DragGesture(minimumDistance: 0)
                     .onChanged { drag in
                         dragged = handle
-                        onChange(handle, Self.value(handle, at: drag.location.x / max(width, 1), values, gammaRange: gammaRange))
+                        let start = dragStart ?? Self.position(handle, values)
+                        dragStart = start
+                        guard drag.translation.width != 0 else { return }
+                        _ = run.change()
+                        let fraction = start + drag.translation.width / max(width, 1)
+                        onChange(handle, Self.value(handle, at: fraction, values, gammaRange: gammaRange))
                     }
                     .onEnded { _ in
                         dragged = nil
-                        onEnd()
+                        dragStart = nil
+                        if run.end() { onEnd() }
                     })
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(handle.rawValue)
@@ -130,8 +139,6 @@ public struct LevelsHandles: View {
             }
             .suiteControl(id: id(handle), enabled: enabled, reason: enabled ? nil : reason)
     }
-
-    private static let space = "levels.track"
 
     /// Black and output black draw dark, white and output white light, midtones grey.
     nonisolated private static func fill(_ handle: LevelsHandle) -> Color {
