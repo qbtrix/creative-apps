@@ -63,6 +63,7 @@ struct RenderStep: CustomStringConvertible {
 
     init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820)) {
         _ = DragSessions.faked
+        _ = TestDefaults.registered
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
         // turned on before the window exists so every run builds it the same way.
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
