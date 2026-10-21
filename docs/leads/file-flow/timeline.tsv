@@ -25,3 +25,5 @@ utc	stage	event	ref	note
 2026-10-20T21:55Z	3	check	#3514	mac build 39494113551 still queued (38 runs queued, mac runners busy since 16:01Z); #3731 clean; waiting
 2026-10-20T22:17Z	3	check	#3514	mac build 39494113551 still queued; #3514 and #3731 open (dev moved, mergeability recomputing); waiting
 2026-10-20T22:44Z	3	question	#3480	mac build 39494113551 queued 2h; asked supervisor for a mac slot or Mac-Check for #3514 and #3731
+2026-10-21T00:10Z	3	merged	#3731	SF-9 (SF-z part 2) merged 23:01Z
+2026-10-21T00:10Z	3	staged	-	supervisor: #3514 lands via local Mac gate after #3743; dev merged into sf4 (04220b3b), sf8 (c070045f), sf10 (aa4923a7); gate PASS on sf8 and sf10
