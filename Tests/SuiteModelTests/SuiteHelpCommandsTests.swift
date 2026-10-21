@@ -52,6 +52,20 @@ import Testing
         #expect(!text.contains("URLSession") && !text.contains("NSWorkspace"), "the provider reaches the network")
     }
 
+    /// RP-5b: the sheet's report holds this Mac's crashes, read from CrashFolder's folder and files only.
+    @Test func providerReadsTheCrashFolder() throws {
+        let provider = try source("Sources/SuiteShell/ShellHelpProvider.swift")
+        #expect(provider.contains("crashes: CrashFolderReader.read("), "the report has no crashes")
+        #expect(!provider.contains("crashes: [],"))
+        let reader = try source("Sources/SuiteShell/CrashFolderReader.swift")
+        #expect(reader.contains("CrashFolder.path(arguments: arguments, home: home)"))
+        #expect(reader.contains("CrashFolder.toRead(entries, now: now)"), "the reader opens every file in the folder")
+        #expect(!reader.contains("URLSession") && !reader.contains("NSWorkspace"), "the reader reaches the network")
+        let journey = try source("UITests/AfterGlowJourneyTests+Help.swift")
+        #expect(!journey.contains("XCTSkip"), "the Help journey is still skipped")
+        #expect(journey.contains("\"-SuiteCrashDir\""))
+    }
+
     @Test func launcherAddsTheGroupInPlaceOfItsWelcomeGroup() throws {
         let app = try source("Sources/AfterGlowApp/AfterGlowApp.swift")
         #expect(app.components(separatedBy: "SuiteHelpCommands(app: .launcher)").count == 2)

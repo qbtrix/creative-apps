@@ -1,7 +1,7 @@
-// AfterGlowJourneyTests+Help.swift (report-problem RP-2, on in RP-5): XJ-RP, the suite Help menu in the
+// AfterGlowJourneyTests+Help.swift (report-problem RP-2, on in RP-5b): XJ-RP, the suite Help menu in the
 // launcher. Help lists Report a Problem…, Beta Notes and Welcome to AfterGlow; Welcome opens the tour; Report a
-// Problem… opens the sheet with a crash from the fixture folder; Beta Notes opens the known-issues window.
-// Skipped until RP-5 builds the sheet, the notes window and the crash reader. Every click is a mouse click on a
+// Problem… opens the sheet with a crash from a fixture folder (`-SuiteCrashDir`), the home path shown as `~`;
+// Beta Notes opens the known-issues window. Every click is a mouse click on a
 // menu item found by title. The bundle compiles only SuiteModel's Values, so the item ids are literals here:
 // `suite.<catalog id>`, and Welcome's `afterglow.onboarding.help`.
 import XCTest
@@ -11,10 +11,6 @@ final class AfterGlowHelpJourneyTests: XCTestCase {
         ("Report a Problem…", "suite.help.report-problem"), ("Beta Notes", "suite.help.beta-notes"),
         ("Welcome to AfterGlow", "afterglow.onboarding.help"),
     ]
-
-    override func setUpWithError() throws {
-        throw XCTSkip("waits on RP-5")
-    }
 
     /// Help lists the three items, each enabled, and Welcome opens the tour.
     @MainActor func testHelpMenuListsItsItems() {
@@ -32,13 +28,40 @@ final class AfterGlowHelpJourneyTests: XCTestCase {
         XCTAssert(welcome.waitForExistence(timeout: 10), "Help > Welcome to AfterGlow opened no window")
     }
 
-    /// Step 1: Report a Problem… shows the newest Photo crash with `~` for the home path; Copy holds note plus report.
-    @MainActor func testReportAProblem() {
-        let launcher = SuiteHarness(self).launch(fixture: "firstLaunch", arguments: [], skipOnboarding: true)
+    /// Step 1: Report a Problem… shows the fixture folder's Photo crash, not the other app's, with `~` for the home.
+    @MainActor func testReportAProblem() throws {
+        let crashes = try Self.crashFolder()
+        defer { try? FileManager.default.removeItem(at: crashes) }
+        let launcher = SuiteHarness(self).launch(fixture: "firstLaunch", arguments: ["-SuiteCrashDir", crashes.path])
         Self.openHelp(launcher).menuItems["Report a Problem…"].click()
         let sheet = launcher.app.sheets.firstMatch
         XCTAssert(sheet.waitForExistence(timeout: 10), "Help > Report a Problem… opened no sheet")
+        let report = sheet.descendants(matching: .any)["suite.help.report.report"]
+        XCTAssert(report.waitForExistence(timeout: 5), "the sheet has no report (suite.help.report.report)")
+        // A SwiftUI Text reaches XCUITest as its value, not its label, so both are matched.
+        func line(_ text: String) -> XCUIElement {
+            sheet.staticTexts.matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text)).firstMatch
+        }
+        XCTAssert(line("Photo-journey.ips").waitForExistence(timeout: 5), "the report doesn't show the Photo crash")
+        XCTAssert(line("~/Applications/Photo.app").exists, "the home path isn't shown as ~")
+        XCTAssertFalse(line(Self.home + "/").exists, "the home path leaks into the report")
+        XCTAssertFalse(line("Browser-journey.ips").exists, "another app's crash is in the report")
         launcher.shot("help-report")
+    }
+
+    /// The app's home: built from the user name, since a sandboxed runner's NSHomeDirectory() is its container.
+    static var home: String { "/Users/" + NSUserName() }
+
+    /// A fresh folder holding one Photo crash and one crash from an app outside the suite, both just written.
+    static func crashFolder() throws -> URL {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("suite-crashes-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for process in ["Photo", "Browser"] {
+            let ips = #"{"app_name":"\#(process)","name":"\#(process)"}"# + "\n"
+                + #"{"procPath":"\#(home)/Applications/\#(process).app","threads":[{"triggered":true,"frames":[]}]}"#
+            try Data(ips.utf8).write(to: folder.appendingPathComponent("\(process)-journey.ips"))
+        }
+        return folder
     }
 
     /// Step 2: Beta Notes opens the known-issues window; Close returns to the home.
