@@ -1,6 +1,7 @@
 // PhotoWorkspace.swift: the state behind Photo's window (raster editing): the
 // open image's size and name, its layer stack (top first) with each layer's
-// pixels, the selected layer, the active tool, the brush's and the eraser's
+// pixels, the picked layers (a kernel Selection whose primary is the selected
+// layer), the active tool, the brush's and the eraser's
 // options (each tool keeps its own), the image
 // adjustments, the marquee selection and a pending crop, the clone source, and
 // the undo history.
@@ -63,7 +64,17 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var layers: [PhotoLayer] = []
     /// Each layer's pixels, by layer id, in tiles (TiledPixels).
     public internal(set) var pixels: [PhotoLayer.ID: TiledPixels] = [:]
-    public internal(set) var selectedLayerID: PhotoLayer.ID?
+    /// The picked layers, primary last, on the kernel's Selection (PhotoLayerSelection+Kernel.swift).
+    var layerSelection = Selection<PhotoLayer.ID>()
+    /// The layer the inspector, the brush and the Move tool act on: the
+    /// selection's primary. Setting it makes that layer the whole selection;
+    /// nil clears it.
+    public internal(set) var selectedLayerID: PhotoLayer.ID? {
+        get { layerSelection.primary }
+        set {
+            if let newValue { layerSelection.replace([newValue]) } else { layerSelection.clear() }
+        }
+    }
     public private(set) var tool: PhotoTool = .move
     /// The brush's options; its color is also the marquee's Fill color.
     public private(set) var brushOptions = ToolOptions()
@@ -260,7 +271,7 @@ public struct PhotoWorkspace: Sendable {
         layers.remove(at: at)
         pixels[id] = nil
         layerGeometryChanged(id, .removed)
-        if selectedLayerID == id { selectedLayerID = layers[min(at, layers.count - 1)].id }
+        pruneLayerSelection(near: at)
         touch(.all)
         return true
     }
@@ -380,7 +391,7 @@ extension PhotoWorkspace: Equatable {
     /// `services` isn't compared: it isn't Equatable and isn't what shows.
     public static func == (lhs: PhotoWorkspace, rhs: PhotoWorkspace) -> Bool {
         lhs.revision == rhs.revision && lhs.canvas == rhs.canvas && lhs.documentName == rhs.documentName
-            && lhs.layers == rhs.layers && lhs.selectedLayerID == rhs.selectedLayerID && lhs.tool == rhs.tool
+            && lhs.layers == rhs.layers && lhs.layerSelection == rhs.layerSelection && lhs.tool == rhs.tool
             && lhs.brushOptions == rhs.brushOptions
             && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
