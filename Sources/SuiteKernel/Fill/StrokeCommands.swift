@@ -1,5 +1,5 @@
-// StrokeCommands.swift (stroke-style SS-1 specs with real ids, schemas and availability, runs throwing
-// `StrokeRules.notBuilt`; SS-6 bodies but dash and trim; SS-7 those two): the nine stroke commands every app registers
+// StrokeCommands.swift (stroke-style SS-1 specs with real ids, schemas and availability; SS-6 bodies but dash and
+// trim, whose runs throw `StrokeRules.notBuilt`; SS-7 those two): the nine stroke commands every app registers
 // with one line, `+ StrokeCommands.specs(<X>Workspace.self)`, and the stroke editor's gestures as those commands.
 
 /// A document the stroke commands run on: it reads the selection's stroke and sets it back as one undo step.
@@ -73,27 +73,35 @@ public enum StrokeCommands {
         [
             .typed("stroke.read", title: "Read Stroke", summary: "Reads the selection's stroke: colour, width, join, cap, dash and trim; null when it has none.",
                    kind: .query, params: Empty.self, schema: .none, result: read,
-                   example: .object([:]), availability: { ready($0) }) { _, _ in try stub() },
+                   example: .object([:]), availability: { ready($0) }) { t, _ in t.selectedStroke.map(reading) ?? .null },
             .typed("stroke.add", title: "Add Stroke", summary: "Gives the selection a 1 pt black stroke with a miter join and a butt cap.",
                    kind: .edit, params: Empty.self, schema: .none,
-                   example: .object([:]), availability: { unstroked($0) }) { _, _ in try stub() },
+                   example: .object([:]), availability: { unstroked($0) }) { t, _ in try add(&t) },
             .typed("stroke.remove", title: "Remove Stroke", summary: "Removes the selection's stroke.",
                    kind: .edit, params: Empty.self, schema: .none,
-                   example: .object([:]), availability: { stroked($0) }) { _, _ in try stub() },
+                   example: .object([:]), availability: { stroked($0) }) { t, _ in try remove(&t) },
             .typed("stroke.color", title: "Stroke Color", summary: "Sets the stroke's colour; changes under one drag token are one undo step.",
                    kind: .edit, params: ColorParams.self,
                    schema: .object(rgba.merging(["drag": drag]) { old, _ in old }, required: ["r", "g", "b", "a", "drag"]),
                    example: .object(["r": .number(1), "g": .number(0), "b": .number(0), "a": .number(1)]),
-                   availability: { stroked($0) }) { _, _ in try stub() },
+                   availability: { stroked($0) }) { t, p in
+                       try edit(&t, "stroke.color", "Stroke Color", drag: p.drag) { $0.color = FillColor(r: p.r, g: p.g, b: p.b, a: p.a) }
+                   },
             .typed("stroke.width", title: "Stroke Width", summary: "Sets the stroke's width in points, 0 to 1000; a scrub under one drag token is one undo step.",
                    kind: .edit, params: WidthParams.self, schema: .object(["width": width, "drag": drag], required: ["width", "drag"]),
-                   example: .object(["width": .number(4)]), availability: { stroked($0) }) { _, _ in try stub() },
+                   example: .object(["width": .number(4)]), availability: { stroked($0) }) { t, p in
+                       try edit(&t, "stroke.width", "Stroke Width", drag: p.drag) { $0.width = StrokeRules.clampedWidth(p.width) }
+                   },
             .typed("stroke.join", title: "Stroke Join", summary: "Sets how the stroke's corners meet: miter, round or bevel.",
                    kind: .edit, params: JoinParams.self, schema: .object(["join": join], required: ["join"]),
-                   example: .object(["join": .string("round")]), availability: { stroked($0) }) { _, _ in try stub() },
+                   example: .object(["join": .string("round")]), availability: { stroked($0) }) { t, p in
+                       try edit(&t, "stroke.join", "Stroke Join") { $0.join = p.join }
+                   },
             .typed("stroke.cap", title: "Stroke Cap", summary: "Sets how the stroke's open ends finish: butt, round or square.",
                    kind: .edit, params: CapParams.self, schema: .object(["cap": cap], required: ["cap"]),
-                   example: .object(["cap": .string("round")]), availability: { stroked($0) }) { _, _ in try stub() },
+                   example: .object(["cap": .string("round")]), availability: { stroked($0) }) { t, p in
+                       try edit(&t, "stroke.cap", "Stroke Cap") { $0.cap = p.cap }
+                   },
             .typed("stroke.dash", title: "Stroke Dash", summary: "Dashes the stroke with a preset scaled by its width, or a pattern and phase in points.",
                    kind: .edit, params: DashParams.self,
                    schema: .object(["preset": .optional(.string("The dash preset.", oneOf: DashPreset.allCases.map(\.rawValue))),
@@ -130,6 +138,38 @@ public enum StrokeCommands {
         guard stroked(target) == .available else { return stroked(target) }
         return .unavailable(StrokeRules.waitingCore)
     }
-    /// Every run until SS-6: refuses with `StrokeRules.notBuilt`.
+    /// `stroke.add`: a 1 pt black stroke with a miter join and a butt cap, one step named "Add Stroke".
+    static func add<T: StrokeTarget>(_ target: inout T) throws -> JSONValue {
+        let stroke = VectorStroke()
+        try target.setStroke(stroke, name: "Add Stroke", drag: nil)
+        return reading(stroke)
+    }
+    /// `stroke.remove`: clears the selection's stroke, one step named "Remove Stroke".
+    static func remove<T: StrokeTarget>(_ target: inout T) throws -> JSONValue {
+        guard target.selectedStroke != nil else { throw CatalogError.failed(id: "stroke.remove", message: noStrokeHelp) }
+        try target.setStroke(nil, name: "Remove Stroke", drag: nil)
+        return .null
+    }
+    /// Reads the selection's stroke, applies `change` and hands it back once as one undo step named `name`, `drag`
+    /// passed through so a scrub folds into one step; returns the new stroke as `stroke.read` reports it.
+    static func edit<T: StrokeTarget>(_ target: inout T, _ id: String, _ name: String, drag: String? = nil,
+                                      _ change: (inout VectorStroke) -> Void) throws -> JSONValue {
+        guard var stroke = target.selectedStroke else { throw CatalogError.failed(id: id, message: noStrokeHelp) }
+        change(&stroke)
+        try target.setStroke(stroke, name: name, drag: drag)
+        return reading(stroke)
+    }
+    /// `stroke` as `stroke.read` reports it: colour, width, join, cap, the dash and the trim (null when none).
+    static func reading(_ stroke: VectorStroke) -> JSONValue {
+        let (pattern, phase) = StrokeRules.dash(of: stroke)
+        let trim = StrokeRules.trim(of: stroke).map {
+            JSONValue.object(["start": .number($0.start), "end": .number($0.end), "offset": .number($0.offset)])
+        }
+        return .object(["r": .number(stroke.color.r), "g": .number(stroke.color.g), "b": .number(stroke.color.b),
+                        "a": .number(stroke.color.a), "width": .number(stroke.width), "join": .string(stroke.join.rawValue),
+                        "cap": .string(stroke.cap.rawValue), "dash": .array(pattern.map(JSONValue.number)),
+                        "dashPhase": .number(phase), "trim": trim ?? .null])
+    }
+    /// `stroke.dash` and `stroke.trim` until SS-7 (their availability already refuses with `waitingCore`).
     static func stub() throws -> JSONValue { throw StrokeRules.notBuilt }
 }

@@ -190,7 +190,8 @@ extension PhotoWorkspace {
             var (source, x, y) = (tile, at.x, at.y)
             // Out of range, CoreRaster throws for the opacity: send the whole tile so the error comes back.
             if inRange {
-                guard let painted = try PhotoLayerComposite.paintedRect(of: tile) else { continue }
+                let over = PixelRect(x: -at.x, y: -at.y, width: rect.width, height: rect.height)
+                guard let painted = try PhotoLayerComposite.paintedRect(of: tile, in: over) else { continue }
                 if painted.width != tile.width || painted.height != tile.height {
                     source = try tile.cropped(x: painted.x, y: painted.y, width: painted.width, height: painted.height)
                 }

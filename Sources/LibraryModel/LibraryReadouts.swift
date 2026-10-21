@@ -104,6 +104,12 @@ extension LibraryCatalog {
         Self.histogramValue(of: loupeRender?.histogram ?? .empty)
     }
 
+    /// What the histogram says while it has no bins: why, or that the loupe's render is on its way.
+    public var histogramEmptyMessage: String {
+        loupeItem == nil ? "Open a photo in the loupe to see its histogram."
+            : loupeError == nil ? "Rendering the photo…" : "The photo didn't render, so there's no histogram."
+    }
+
     /// `mean 0.4213`: the mean of the three channels' bin means over 0...255,
     /// divided by 255, to four decimals. An empty channel's mean is 0, never NaN.
     public static func histogramValue(of bins: HistogramBins) -> String {
@@ -179,7 +185,7 @@ extension LibraryCatalog {
         case .loading, .ready:
             return LibraryEmptyState(
                 title: "No Photos",
-                message: hint ?? "Photos you import appear here, sorted by the date they were taken.",
+                message: hint ?? "Import a folder or drop one here. Photos appear sorted by the date they were taken.",
                 offersImport: true)
         }
     }

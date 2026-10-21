@@ -1,25 +1,23 @@
-// HaloJourneyTests+Render.swift: H-J21, File > Render… (render-out RO-10,
-// #429; docs/blueprints/halo/features/render-out.md, Journey steps 2). On
-// `-HaloSample keyed -HaloRenderTo <tmp>` (Bounce on live services, 48
-// frames at 24 fps, 1920 × 1080) it opens File > Render…, picks PNG Sequence
-// and Half in the sheet's segmented `halo.render.format` and
-// `halo.render.size` pickers, reads the summary "48 PNG files, 960 × 540,
-// into a new folder "Bounce"", and presses Render (`halo.render.start`).
-// The progress row ("Frame n of 48" over `halo.render.progress`) is shot
-// when it is caught: 48 half-size frames can finish before XCUITest looks,
-// so then the success text stands in for it (QB-L9's UI half is
-// report-only until #330). Success reads "Rendered 48 frames." with
-// `halo.render.reveal`; the test then lists `<tmp>/Bounce/`: exactly
-// `Bounce_0001.png` … `Bounce_0048.png`, each decoded with ImageIO at
-// 960 × 540. Then ⌘Q and a relaunch on `-HaloSample reference` (300 frames
-// of 50 keyed layers, so the movie can't finish before the click lands):
-// Render…, Movie, Full, Render, and `halo.render.cancel` as soon as the
-// row reads "Frame n of 300"; the result reads "Cancelled. No movie was
-// written." and, once the run has stopped, `<tmp>` holds no `.mp4`. The
-// sheet's texts carry no identifier (HaloRenderSheet.swift), so they are
-// found by what a person reads, as H-J10 finds its alert's text. The Model
-// half of every step is HaloRenderJobTests. One shot per step,
-// `halo-render-<n>-<step>`.
+// HaloJourneyTests+Render.swift: H-J21, File > Render… on SuiteUI's export
+// sheet (core-loop CL-4, #1971; render-out RO-10, #429). On `-HaloSample
+// keyed -HaloRenderTo <tmp>` (Bounce on live services, 48 frames at 24 fps,
+// 1920 × 1080) it opens File > Render…, picks the PNG sequence format chip
+// (`halo.render.format.pngSequence`) and the Half chip in Halo's options rows
+// (`halo.render.size.half`), reads the summary "48 PNG files, 960 × 540, into
+// a new folder "Bounce"", and presses the sheet's start button
+// (`halo.render.start`, titled Export until #3402). The options rows' note
+// ("Frame n of 48") is shot when it is caught: 48 half-size frames can finish
+// before XCUITest looks, so then the finished line stands in for it. The
+// finished line reads "Exported Bounce" with `halo.render.reveal`; the test
+// then lists `<tmp>/Bounce/`: exactly `Bounce_0001.png` … `Bounce_0048.png`,
+// each decoded with ImageIO at 960 × 540. Then ⌘Q and a relaunch on
+// `-HaloSample reference` (300 frames of 50 keyed layers, so the movie can't
+// finish before the click lands): Render…, Movie, Full, start, and
+// `halo.render.cancel` as soon as the note reads "Frame n of 300"; a cancel
+// leaves the run idle, so the sheet closes, and once the run has stopped
+// `<tmp>` holds no `.mp4`. Texts are found by what a person reads, as H-J10
+// finds its alert's text. The Model half of every step is HaloRenderJobTests
+// and HaloRenderRunTests. One shot per step, `halo-render-<n>-<step>`.
 import ImageIO
 import XCTest
 
@@ -33,18 +31,18 @@ final class HaloRenderJourneyTests: XCTestCase {
         // 1. File > Render… on keyed; PNG Sequence, Half: the summary names 48 files at 960 × 540.
         var halo = launch(["-HaloSample", "keyed", "-HaloRenderTo", folder.path])
         openRenderSheet(halo)
-        pick("PNG Sequence", in: "halo.render.format", halo)
-        pick("Half", in: "halo.render.size", halo)
+        pick("halo.render.format.pngSequence", halo)
+        pick("halo.render.size.half", halo)
         expectText("48 PNG files, 960 × 540, into a new folder \"Bounce\"", halo)
         halo.shot("render-1-settings")
 
-        // 2. Render: the progress row if caught in time, then "Rendered 48 frames." with Reveal in Finder.
+        // 2. Start: the progress note if caught in time, then "Exported Bounce" with Reveal in Finder.
         clickStart(halo)
         let progress = progressText(of: 48, halo)
-        let done = text("Rendered 48 frames.", halo)
+        let done = text("Exported Bounce", halo)
         XCTAssert(waitFor(seconds: 10) { progress.exists || done.exists }, "Render showed neither progress nor a result")
         if progress.exists { halo.shot("render-2-progress") }
-        XCTAssert(done.waitForExistence(timeout: 60), "the render never read \"Rendered 48 frames.\"")
+        XCTAssert(done.waitForExistence(timeout: 60), "the render never read \"Exported Bounce\"")
         XCTAssert(halo.element("halo.render.reveal").waitForExistence(timeout: 5), "no Reveal in Finder (halo.render.reveal)")
         halo.shot("render-3-done")
 
@@ -59,24 +57,24 @@ final class HaloRenderJourneyTests: XCTestCase {
         }
         quit(halo)
 
-        // 4. Relaunch on reference; Render…, Movie, Full, Render, Cancel once frames come in.
+        // 4. Relaunch on reference; Render…, Movie, Full, start, Cancel once frames come in.
         halo = launch(["-HaloSample", "reference", "-HaloRenderTo", folder.path])
         openRenderSheet(halo)
-        pick("Movie", in: "halo.render.format", halo)
-        pick("Full", in: "halo.render.size", halo)
+        pick("halo.render.format.movie", halo)
+        pick("halo.render.size.full", halo)
         halo.shot("render-4-movie-settings")
         clickStart(halo)
         let running = progressText(of: 300, halo)
-        XCTAssert(running.waitForExistence(timeout: 10), "the movie's progress row never read \"Frame n of 300\"")
+        XCTAssert(running.waitForExistence(timeout: 10), "the movie's progress note never read \"Frame n of 300\"")
         XCTAssert(halo.element("halo.render.progress").exists, "no progress bar (halo.render.progress)")
         let cancel = halo.element("halo.render.cancel")
         XCTAssert(cancel.waitForExistence(timeout: 5), "no Cancel while rendering (halo.render.cancel)")
         halo.shot("render-5-movie-progress")
         cancel.click()
 
-        // 5. "Cancelled. No movie was written." and no .mp4 in <tmp> once the run has stopped.
-        expectText("Cancelled. No movie was written.", halo)
-        XCTAssert(halo.element("halo.render.close").waitForExistence(timeout: 5), "no Close after Cancel (halo.render.close)")
+        // 5. Cancel leaves the run idle: the sheet closes, and no .mp4 stays in <tmp> once the run has stopped.
+        let start = halo.element("halo.render.start")
+        XCTAssert(waitFor(seconds: 10) { !start.exists }, "the sheet stayed open after Cancel (halo.render.start)")
         halo.shot("render-6-movie-cancelled")
         func movies() -> [String] {
             ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []).filter { $0.hasSuffix(".mp4") }
@@ -111,26 +109,18 @@ final class HaloRenderJourneyTests: XCTestCase {
         XCTAssert(halo.element("halo.render.format").waitForExistence(timeout: 10), "no Render sheet (halo.render.format)")
     }
 
-    /// Clicks the segment titled `title` of the segmented picker `pickerID`.
-    /// The segments are looked up under the picker, then anywhere in the
-    /// window, since a segmented control's identifier may sit on its wrapper.
-    @MainActor private func pick(_ title: String, in pickerID: String, _ halo: Journey) {
-        let picker = halo.element(pickerID)
-        XCTAssert(picker.waitForExistence(timeout: 5), "no \(pickerID) picker")
-        let predicate = NSPredicate(format: "(label == %@ OR title == %@) AND elementType IN %@", title, title, [
-            XCUIElement.ElementType.radioButton.rawValue, XCUIElement.ElementType.button.rawValue,
-        ].map { NSNumber(value: $0) })
-        var segment = picker.descendants(matching: .any).matching(predicate).firstMatch
-        if !segment.exists { segment = halo.app.windows.firstMatch.descendants(matching: .any).matching(predicate).firstMatch }
-        XCTAssert(segment.waitForExistence(timeout: 5), "\(pickerID) has no \(title) segment")
-        segment.click()
+    /// Clicks the chip with identifier `id` (a format chip or a size chip).
+    @MainActor private func pick(_ id: String, _ halo: Journey) {
+        let chip = halo.element(id)
+        XCTAssert(chip.waitForExistence(timeout: 5), "no chip \(id)")
+        chip.click()
     }
 
-    /// Clicks Render (`halo.render.start`) once it is enabled.
+    /// Clicks the sheet's start button (`halo.render.start`, titled Export until #3402) once it is enabled.
     @MainActor private func clickStart(_ halo: Journey) {
         let start = halo.element("halo.render.start")
-        XCTAssert(start.waitForExistence(timeout: 5), "no Render button (halo.render.start)")
-        XCTAssert(waitFor { start.isEnabled }, "Render is disabled with -HaloRenderTo set")
+        XCTAssert(start.waitForExistence(timeout: 5), "no start button (halo.render.start)")
+        XCTAssert(waitFor { start.isEnabled }, "the start button is disabled with -HaloRenderTo set")
         start.click()
     }
 
@@ -147,7 +137,7 @@ final class HaloRenderJourneyTests: XCTestCase {
         return halo.app.descendants(matching: .any).matching(predicate).firstMatch
     }
 
-    /// The progress row's "Frame n of `total`", read from a static text's label or value.
+    /// The progress note's "Frame n of `total`", read from a static text's label or value.
     @MainActor private func progressText(of total: Int, _ halo: Journey) -> XCUIElement {
         let tail = " of \(total)"
         let predicate = NSPredicate(

@@ -61,15 +61,22 @@ struct PhotoCommandCatalogTests {
 
     @Test func conformance() throws {
         #expect(PhotoWorkspace.catalog.ids.count == PhotoWorkspace.commands.count)
-        #expect(CatalogConformance.check(PhotoLawsDocument.self, fixture: PhotoLawsDocument(ws: try Self.lawsFixture())) == Self.tolerated)
+        let fixture = PhotoLawsDocument(ws: try Self.lawsFixture())
+        // Only exampleRuns, and only for a command whose availability says why it is off on the fixture (tool.gradient
+        // until PG-3): its example refuses as unavailable, the filter Design's and Library's laws use. The file-flow
+        // examples need a recent file, a saved image or a readable file on disk: PhotoFileFlowTests runs them.
+        let needsFiles = Set(["file.clear-recent", "file.drop", "file.open-in", "file.open-recent"])
+        let problems = CatalogConformance.check(PhotoLawsDocument.self, fixture: fixture).filter { problem in
+            let id = String(problem.prefix { $0 != ":" })
+            guard problem.hasPrefix("\(id): exampleRuns") else { return true }
+            let off = PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil
+            return !(off || needsFiles.contains(id))
+        }
+        #expect(problems == Self.tolerated)
     }
-    /// Free Transform's commit and cancel need a draft the fixture has none of; the kernel's transform.flip is
-    /// titled "Flip" while its step names the axis ("Flip Horizontal"), as the transform packet asks.
-    static let tolerated = [
-        "transform.cancel: exampleRuns: the example refused on the fixture: transform.cancel is unavailable: Start Free Transform first.",
-        "transform.commit: exampleRuns: the example refused on the fixture: transform.commit is unavailable: Start Free Transform first.",
-        "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
-    ]
+    /// The kernel's transform.flip is titled "Flip" while its step names the axis ("Flip Horizontal"), as the
+    /// transform packet asks. (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
+    static let tolerated = ["transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""]
 
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
@@ -132,8 +139,13 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Every non-tool command but Free Transform's (transform PT-5, ahead of its menu items), in menu order (the catalog lists them as the menus do).
-    static let menuIDs = PhotoWorkspace.commands.map(\.id).filter { !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") }
+    /// Every non-tool command but the shared file-flow ones and Free Transform's (transform PT-5, ahead of its menu
+    /// items), in menu order (the catalog lists them as the menus do).
+    static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {
+        !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !fileFlowIDs.contains($0)
+    }
+    /// The shared file-flow commands (PF-3), which today's menus don't show yet.
+    static let fileFlowIDs = Set(FileFlowCommands.specs(PhotoWorkspace.self).map(\.id))
     static let helped: Set = ["edit.cut", "edit.copy", "edit.paste", "layer.duplicate", "layer.merge-down", "layer.flatten"]
     /// Today's Cut and Copy stay on with an image open (they also act on focused text); the catalog gives their reason.
     static let menuOwnsEnabled: Set = ["edit.cut", "edit.copy"]

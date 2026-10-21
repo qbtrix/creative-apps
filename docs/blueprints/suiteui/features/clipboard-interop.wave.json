@@ -1,0 +1,446 @@
+{
+  "title": "Clipboard interop: Copy in every app also writes PNG (and SVG for vectors) beside the app's own type, Paste of a plain image or SVG makes a placed image, on one live SuiteModel coder and one SuiteShell bridge",
+  "wave": "XK4",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 C2 (suite row 8, Design rows 5 and 6); feature map suiteui/clipboard-interop (new); real jobs RJ-X72, RJ-X73 (new), RJ-D10",
+  "waits_on": "placed-images PL-m (the kernel's place commands, for paste as a picture); shared-codecs SC-photo (edits PhotoPasteboard.swift first); area-selection AR-z (the canonical-baseline.txt chain, CB-15 only); the apps' placed-images packets and catalog chains (cross-line hand-offs in the packet)",
+  "depends": [
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "8 (CB-1 → CB-2 → CB-4b → CB-4c → CB-13 → CB-14 → CB-15 → CB-16)",
+  "journeys": [
+    "SuiteClipboardJourneyTests.testCopyAsMenuInGallery",
+    "PhotoEditJourneyTests.testPasteFromAnotherApp",
+    "DesignEditJourneyTests.testCopyOutPasteImageIn",
+    "FlareEditJourneys.testCopyOutPasteImageIn",
+    "HaloEditJourneyTests.testCopyFramePasteImage",
+    "LibraryJourneyTests.testCopyPhotoOut"
+  ],
+  "owned": [
+    "Sources/SuiteModel/Values/Clip.swift",
+    "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+    "Sources/SuiteModel/Pasteboard/PasteboardFolder.swift",
+    "Sources/SuiteShell/PasteboardBridge.swift",
+    "Sources/SuiteKernel/Commands/CopyAsCommands.swift",
+    "Tests/SuiteModelTests/SuitePasteboardCodingTests.swift",
+    "Tests/SuiteModelTests/PasteboardFolderTests.swift",
+    "Tests/mutations/SuiteModel.SuitePasteboardCoding.json",
+    "docs/c4/parts/creative-apps/suite-model/suite-pasteboard.json",
+    "Sources/SuiteShell/Live/PasteboardSlot.swift",
+    "Tests/mutations/SuiteModel.PasteboardFolder.json",
+    "Tests/SuiteUITests/PasteboardBridgeTests.swift",
+    "docs/c4/parts/creative-apps/suite-shell/shell-pasteboard.json",
+    "Sources/SuiteUI/CopyAsMenu.swift",
+    "Sources/SuiteUI/Gallery/GalleryMenus.swift",
+    "Tests/SuiteUITests/CopyAsMenuTests.swift",
+    "UITests/SuiteJourneyTests+Clipboard.swift",
+    "Tests/AppSnapshotTests/RenderBudgetCopyAsMenuTests.swift",
+    "Tests/DesignModelTests/DesignPasteboardAdapterTests.swift",
+    "UITests/DesignJourneyTests+Edit.swift",
+    "Tests/RealJobs/suite/copy-design-paste-photo/copy-design-paste-photo.jobs.json",
+    "Sources/DesignModel/DesignPasteboardAdapter.swift",
+    "Sources/DesignApp/DesignEditMenu.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Tests/mutations/DesignModel.DesignPasteboardAdapter.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json",
+    "Tests/FlareModelTests/FlarePasteboardAdapterTests.swift",
+    "UITests/FlareJourneyTests+Edit.swift",
+    "Sources/FlareModel/FlarePasteboardAdapter.swift",
+    "Sources/FlareApp/FlareWindow+Edit.swift",
+    "Sources/FlareApp/FlareStageContextMenu.swift",
+    "Tests/mutations/FlareModel.FlarePasteboardAdapter.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+    "Tests/HaloModelTests/HaloPasteboardAdapterTests.swift",
+    "UITests/HaloJourneyTests+Edit.swift",
+    "Tests/RealJobs/suite/paste-screenshot/paste-screenshot.jobs.json",
+    "Tests/RealJobs/suite/paste-screenshot/input/screenshot.png",
+    "Sources/HaloModel/HaloPasteboardAdapter.swift",
+    "Sources/HaloApp/HaloEditMenu.swift",
+    "Sources/HaloApp/HaloWindow+Edit.swift",
+    "Tests/mutations/HaloModel.HaloPasteboardAdapter.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json",
+    "Tests/LibraryModelTests/LibraryPasteboardAdapterTests.swift",
+    "UITests/LibraryJourneyTests+Copy.swift",
+    "Sources/LibraryModel/LibraryPasteboardAdapter.swift",
+    "Sources/LibraryApp/LibraryCommands.swift",
+    "Tests/mutations/LibraryModel.LibraryPasteboardAdapter.json",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/library.list-commands.json",
+    "Sources/PhotoModel/PhotoPasteboardAdapter.swift",
+    "Sources/PhotoApp/PhotoWindow+Edit.swift",
+    "Tests/PhotoModelTests/PhotoPasteboardAdapterTests.swift",
+    "Tests/mutations/PhotoModel.PhotoPasteboardAdapter.json",
+    "Sources/PhotoApp/PhotoCommands+Edit.swift",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json",
+    "Sources/DesignApp/DesignPasteboardBridge.swift",
+    "Sources/FlareApp/FlarePasteboard.swift",
+    "Sources/PhotoApp/PhotoPasteboard.swift",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/suiteui/features/clipboard-interop.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "CB-a",
+      "behavior": "SuiteClipItem gains the app's own layer bytes, the live coder and the shell bridge are declared as stubs, and their tests are written and disabled.",
+      "tasks": [
+        "CB-1",
+        "CB-2"
+      ],
+      "journeys": [
+        "MJ-CB"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Values/Clip.swift",
+        "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+        "Sources/SuiteModel/Pasteboard/PasteboardFolder.swift",
+        "Sources/SuiteShell/PasteboardBridge.swift",
+        "Sources/SuiteKernel/Commands/CopyAsCommands.swift",
+        "Tests/SuiteModelTests/SuitePasteboardCodingTests.swift",
+        "Tests/SuiteModelTests/PasteboardFolderTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "CB-m",
+      "behavior": "The coder orders representations richest first (own type, SVG, PNG, TIFF, text), picks the best item a target app can take and says why Paste is off, and the CLI's pasteboard folder round-trips every item.",
+      "tasks": [
+        "CB-3",
+        "CB-4"
+      ],
+      "journeys": [
+        "MJ-CB"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+        "Tests/SuiteModelTests/SuitePasteboardCodingTests.swift",
+        "Tests/mutations/SuiteModel.SuitePasteboardCoding.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-pasteboard.json",
+        "Sources/SuiteModel/Pasteboard/PasteboardFolder.swift",
+        "Sources/SuiteShell/Live/PasteboardSlot.swift",
+        "Tests/SuiteModelTests/PasteboardFolderTests.swift",
+        "Tests/mutations/SuiteModel.PasteboardFolder.json"
+      ],
+      "waits": {
+        "CB-a": [
+          "CB-3",
+          "CB-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CB-s",
+      "behavior": "One SuiteShell bridge writes and reads the coder's items on the system pasteboard with no source metadata and no polling timer.",
+      "tasks": [
+        "CB-4b",
+        "CB-4c"
+      ],
+      "journeys": [
+        "MJ-CB"
+      ],
+      "owned": [
+        "Tests/SuiteUITests/PasteboardBridgeTests.swift",
+        "Sources/SuiteShell/PasteboardBridge.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-pasteboard.json"
+      ],
+      "waits": {
+        "CB-a": [
+          "CB-4b",
+          "CB-4c"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CB-u",
+      "behavior": "SuiteUI has one Copy As submenu (PNG, SVG, the app's own type) and Paste as Image built from the catalog's specs, each item off with the coder's reason as its help, reachable from the gallery's menus page on the fakes.",
+      "tasks": [
+        "CB-u1",
+        "CB-u2"
+      ],
+      "journeys": [
+        "SJ-CB"
+      ],
+      "owned": [
+        "Sources/SuiteUI/CopyAsMenu.swift",
+        "Sources/SuiteUI/Gallery/GalleryMenus.swift",
+        "Tests/SuiteUITests/CopyAsMenuTests.swift",
+        "UITests/SuiteJourneyTests+Clipboard.swift",
+        "Tests/AppSnapshotTests/RenderBudgetCopyAsMenuTests.swift"
+      ],
+      "waits": {
+        "CB-a": [
+          "CB-u1"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-design",
+      "behavior": "Design's Copy writes its layers, a PNG of the selection at 2x and an SVG beside them, and Paste of a plain image or SVG places it as a picture at the view's centre.",
+      "tasks": [
+        "CB-5",
+        "CB-6"
+      ],
+      "journeys": [
+        "DJ-CB"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignPasteboardAdapterTests.swift",
+        "UITests/DesignJourneyTests+Edit.swift",
+        "Tests/RealJobs/suite/copy-design-paste-photo/copy-design-paste-photo.jobs.json",
+        "Sources/DesignModel/DesignPasteboardAdapter.swift",
+        "Sources/DesignApp/DesignEditMenu.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Tests/mutations/DesignModel.DesignPasteboardAdapter.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json"
+      ],
+      "waits": {
+        "CB-m": [
+          "CB-6"
+        ],
+        "CB-a": [
+          "CB-5"
+        ],
+        "placed-images:PL-m": [
+          "CB-6"
+        ],
+        "CB-s": [
+          "CB-6"
+        ],
+        "CB-u": [
+          "CB-6"
+        ],
+        "adopt-kernel-unsaved-prompt:UP-design": [
+          "CB-6"
+        ],
+        "area-selection:AR-design": [
+          "CB-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-flare",
+      "behavior": "Flare's Copy writes its layers, a PNG of the selection at the playhead and an SVG frame beside them, Paste of an image or SVG places it, and its 4 Hz pasteboard poll is gone.",
+      "tasks": [
+        "CB-7",
+        "CB-8"
+      ],
+      "journeys": [
+        "FJ-CB"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlarePasteboardAdapterTests.swift",
+        "UITests/FlareJourneyTests+Edit.swift",
+        "Sources/FlareModel/FlarePasteboardAdapter.swift",
+        "Sources/FlareApp/FlareWindow+Edit.swift",
+        "Sources/FlareApp/FlareStageContextMenu.swift",
+        "Tests/mutations/FlareModel.FlarePasteboardAdapter.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json"
+      ],
+      "waits": {
+        "CB-m": [
+          "CB-8"
+        ],
+        "CB-a": [
+          "CB-7"
+        ],
+        "placed-images:PL-m": [
+          "CB-8"
+        ],
+        "CB-s": [
+          "CB-8"
+        ],
+        "CB-u": [
+          "CB-8"
+        ],
+        "frame-rates:FR-flare": [
+          "CB-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-halo",
+      "behavior": "Halo's Edit > Copy Frame writes the viewer's frame as PNG, and Paste of an image or SVG adds a placed image layer at the playhead.",
+      "tasks": [
+        "CB-9",
+        "CB-10"
+      ],
+      "journeys": [
+        "HJ-CB"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloPasteboardAdapterTests.swift",
+        "UITests/HaloJourneyTests+Edit.swift",
+        "Tests/RealJobs/suite/paste-screenshot/paste-screenshot.jobs.json",
+        "Tests/RealJobs/suite/paste-screenshot/input/screenshot.png",
+        "Sources/HaloModel/HaloPasteboardAdapter.swift",
+        "Sources/HaloApp/HaloEditMenu.swift",
+        "Sources/HaloApp/HaloWindow+Edit.swift",
+        "Tests/mutations/HaloModel.HaloPasteboardAdapter.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json"
+      ],
+      "waits": {
+        "CB-m": [
+          "CB-10"
+        ],
+        "CB-a": [
+          "CB-9"
+        ],
+        "placed-images:PL-m": [
+          "CB-10"
+        ],
+        "CB-s": [
+          "CB-10"
+        ],
+        "CB-u": [
+          "CB-10"
+        ],
+        "frame-rates:FR-halo": [
+          "CB-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-library",
+      "behavior": "Library's Copy writes the selected photo as a full-size PNG with its develop settings applied and as a file URL, with no location data.",
+      "tasks": [
+        "CB-11",
+        "CB-12"
+      ],
+      "journeys": [
+        "LJ-CB"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryPasteboardAdapterTests.swift",
+        "UITests/LibraryJourneyTests+Copy.swift",
+        "Sources/LibraryModel/LibraryPasteboardAdapter.swift",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Tests/mutations/LibraryModel.LibraryPasteboardAdapter.json",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/library.list-commands.json"
+      ],
+      "waits": {
+        "CB-m": [
+          "CB-12"
+        ],
+        "CB-a": [
+          "CB-11"
+        ],
+        "CB-s": [
+          "CB-12"
+        ],
+        "shared-thumbnails:ST-m": [
+          "CB-12"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-photo",
+      "behavior": "Photo's Copy and Paste run through the shared bridge with the same bytes it writes today, and Paste of an SVG places it rasterized at the canvas centre.",
+      "tasks": [
+        "CB-13",
+        "CB-14"
+      ],
+      "journeys": [
+        "PJ-CB"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoPasteboardAdapter.swift",
+        "Sources/PhotoApp/PhotoWindow+Edit.swift",
+        "Tests/PhotoModelTests/PhotoPasteboardAdapterTests.swift",
+        "Tests/mutations/PhotoModel.PhotoPasteboardAdapter.json",
+        "Sources/PhotoApp/PhotoCommands+Edit.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json"
+      ],
+      "waits": {
+        "CB-m": [
+          "CB-13"
+        ],
+        "shared-codecs:SC-photo": [
+          "CB-13"
+        ],
+        "CB-s": [
+          "CB-13"
+        ],
+        "CB-u": [
+          "CB-14"
+        ],
+        "area-selection:AR-photo-m": [
+          "CB-14"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CB-z",
+      "behavior": "Design's, Flare's and Photo's own pasteboard files are deleted with the baseline shrunk by three lines, RJ-X72 and RJ-X73 pass, and the feature is built.",
+      "tasks": [
+        "CB-15",
+        "CB-16"
+      ],
+      "journeys": [
+        "MJ-CB",
+        "DJ-CB",
+        "FJ-CB",
+        "PJ-CB"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignPasteboardBridge.swift",
+        "Sources/FlareApp/FlarePasteboard.swift",
+        "Sources/PhotoApp/PhotoPasteboard.swift",
+        "Tests/canonical-baseline.txt",
+        "docs/blueprints/suiteui/features/clipboard-interop.wave.json"
+      ],
+      "waits": {
+        "CB-design": [
+          "CB-15"
+        ],
+        "CB-flare": [
+          "CB-15"
+        ],
+        "CB-photo": [
+          "CB-15"
+        ],
+        "CB-halo": [
+          "CB-16"
+        ],
+        "CB-library": [
+          "CB-16"
+        ],
+        "area-selection:AR-z": [
+          "CB-15"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

@@ -127,14 +127,26 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
             name: "photo-status-message-dark", scheme: .dark)
     }
 
-    /// The palette's Eyedropper carries the sampling service's help: disabled on
-    /// `.live`, enabled on `.fake`.
+    /// The palette's Eyedropper carries the sampling service's help: enabled
+    /// on `.live` once its sampler is built (eyedropper PE-5), and on `.fake`.
     @Test func paletteEyedropperHelp() {
         let live = PhotoWorkspace(services: .live)
         #expect(PhotoPaletteTool(.eyedropper, in: live).unavailableHelp == live.toolHelp(.eyedropper))
-        #expect(PhotoPaletteTool(.eyedropper, in: live).unavailableHelp == "Not built yet (PV-9).")
+        #expect(PhotoPaletteTool(.eyedropper, in: live).unavailableHelp == nil)
         #expect(PhotoPaletteTool(.eyedropper, in: PhotoWorkspace(services: .fake)).unavailableHelp == nil)
         #expect(PhotoPaletteTool.palette(live).map(\.tool) == PhotoTool.allCases)
+    }
+
+    /// The Gradient tool picked (gradient-fill PG-1): its palette button is
+    /// disabled with "Not built yet (PG-3).", and Tool Options shows its hint.
+    /// Writes photo-gradient-tool-light/dark.png.
+    @Test func gradientTool() throws {
+        var model = try opened()
+        model.selectTool(.gradient)
+        #expect(model.tool == .gradient)
+        #expect(PhotoPaletteTool(.gradient, in: model).unavailableHelp == "Not built yet (PG-3).")
+        #expect(ToolOptionsSection.gradientHint == "Drag across the image to draw a gradient from the press to the release.")
+        try shoot("gradient-tool", model)
     }
 
     @Test func exportSheet() throws {

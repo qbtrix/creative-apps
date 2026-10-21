@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "beta": true,
-  "covers": "feature map S1 (tone rows, shared half) and the sharpen half of S2's engine (effects-engine #433); real job RJ-X41; captain 2026-10-20: everyday tone tools in the beta, built once",
+  "covers": "feature map S1 (tone rows, shared half) and the sharpen half of S2's engine (effects-engine #433); real job RJ-X41; Brightness, finding #3527 (re-cut 2026-10-21); captain 2026-10-20: everyday tone tools in the beta, built once",
   "waits_on": "suite-imaging's contract slice IM-a (TC-1: the SuiteImaging target); gradient-fill's GF-a slice (canonical-concepts.txt, SuiteGallery.swift); editor-kernel, suite-harness (built). Re-cut 2026-10-20: the Tone module lives in SuiteImaging, so SuiteKernel takes no engine and TC-1 no longer waits on photo #3144",
   "longest_chain": "6 (TC-1 → TC-2 → TC-3 → TC-4 → TC-8 → TC-10)",
   "journeys": [

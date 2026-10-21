@@ -1,5 +1,6 @@
 // Budget+Home.swift: QB-SM2, HomeBuilding.home over 200 recents with a query
-// (blueprint 7.1): ≤ 2 ms on device, ≤ 20 ms in debug (the gate). The crowd
+// (blueprint 7.1): ≤ 2 ms on device, ≤ 20 ms in debug. The test is timed, so the suite is on
+// the perf list (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it. The crowd
 // fixture's 200 recents, spread half a day apart over 100 days, so the ages
 // take every path: Today, Yesterday, the weekday and the medium date.
 import Foundation
