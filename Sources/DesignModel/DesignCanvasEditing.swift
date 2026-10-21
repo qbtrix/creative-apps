@@ -54,7 +54,8 @@
 // a full-size frame finds its handle with the kernel's `HandleHit` (adopt-kernel-transform
 // AT-d1), in the node's own unturned frame (`TransformRules.local`), so each handle hits where the
 // turned node shows it. The rotate knob above the top (`BoxMath.handles`) turns one selected layer
-// about its centre through `runTransform` (DT-5), Shift snapping to the kernel's
+// about its centre through `runTransform` (DT-5); the knob above several layers' box turns each about
+// its own centre by the same angle (#4224), Shift snapping to the kernel's
 // `BoxMath.snappedDegrees`; every sample rewinds as a service step does, so the drag is one step
 // (transform DT-u). A handle of a turned or mirrored layer resizes it in its own axes, the opposite
 // edge kept where it shows (#4223); an upright one resizes, snaps and rounds as before. The angle comes from libm's atan2 (Glibc/Musl/Darwin). Linux-safe.
@@ -125,10 +126,10 @@ extension DesignWorkspace {
     }
 
     /// With several layers selected, the handle of their box (`selectionBounds`) under `point`, as
-    /// `handle(at:)` finds one on a single layer, but never the knob, which turns one layer; nil otherwise.
+    /// `handle(at:)` finds one on a single layer, the knob above the box included (#4224); nil otherwise.
     func boxHandle(at point: DesignPoint) -> DesignHandle? {
         guard hasMultipleSelection, let box = selectionBounds else { return nil }
-        return handle(on: box, at: point).flatMap { $0 == .rotate ? nil : $0 }
+        return handle(on: box, at: point)
     }
 
     /// A full-size frame asks the kernel's `HandleHit` (its inside is no Design handle), then the
@@ -294,7 +295,9 @@ extension DesignWorkspace {
                 guard turn.isFinite else { return }
                 turn -= 360 * (turn / 360).rounded()
                 let degrees = BoxMath.snappedDegrees(box.degrees + turn, modifiers: modifiers.editModifiers)
-                runTransform(.rotate(by: degrees - box.degrees, drag: "knob"))
+                if hasMultipleSelection { turnEach(by: degrees - box.degrees) } else {
+                    runTransform(.rotate(by: degrees - box.degrees, drag: "knob"))
+                }
             default:
                 break
             }
@@ -302,6 +305,15 @@ extension DesignWorkspace {
             return
         }
         current.guides = landedGuides(on: selectionBounds, modifiers: modifiers, current)
+    }
+
+    /// Turns every selected layer by `degrees` about its own centre as one "Rotate" step (#4224); a layer
+    /// inside another selected one goes with it. A selection `transformHelp` refuses changes nothing.
+    private mutating func turnEach(by degrees: Double) {
+        guard transformHelp == nil else { return }
+        let before = snapshot
+        for root in transformRoots { _ = pages.update(root.id) { $0.place(TransformRules.rotated(root.transformBox, by: degrees)) } }
+        record("Rotate", before: before)
     }
 
     /// `t`'s frame with `handle` dragged from `start` to `end` in the node's own axes (#4223): the sweep
@@ -464,6 +476,8 @@ extension DesignWorkspace {
                 route = .turn(node.transformBox)
             } else if let handle = handle(at: start), let node = selectedNode {
                 route = .resize(node.id, handle, node.frame)
+            } else if boxHandle(at: start) == .rotate, let bounds = selectionBounds {
+                route = .turn(TransformBox(box: bounds.kernelRect))
             } else if let handle = boxHandle(at: start) {
                 route = .resizeSeveral(ids, handle)
             } else if let id = hit, shift {
