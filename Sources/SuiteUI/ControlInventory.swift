@@ -7,7 +7,9 @@
 // view. SuiteControlStore holds a window's inventory for `.suiteControl` and
 // SuiteControlsElement publishes its JSON as the label of a hidden element,
 // placed by `.suiteProbes()` (SuiteEnvironment.swift). The rules are
-// Foundation only (ControlInventoryTests).
+// Foundation only (ControlInventoryTests). `.suiteControl(entry:identifies:)`
+// lists a whole entry, so the toggle-style controls (InspectorAction,
+// SegmentedTabs, KeyframeButton) report `selected` (ControlStateTests).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -52,6 +54,13 @@ public struct SuiteControlInventory: ControlInventorying {
         registrations[id] = list.isEmpty ? nil : list
     }
 
+    /// Moves `owner`'s control from `old` to `new`: drops `old` when `new` is nil or has another id,
+    /// then registers `new`. A view that places its entry, changes it and leaves calls this each time.
+    public mutating func place(_ new: ControlEntry?, replacing old: ControlEntry?, owner: UUID) {
+        if let old, old.id != new?.id { unregister(old.id, owner: owner) }
+        if let new { register(new, owner: owner) }
+    }
+
     public func violations() -> [String] {
         registrations.compactMap { id, list in
             let dead = list.contains { !$0.entry.enabled && ($0.entry.reason ?? "").isEmpty }
@@ -90,6 +99,37 @@ import SwiftUI
     func register(_ entry: ControlEntry, owner: UUID) { inventory.register(entry, owner: owner) }
 
     func unregister(_ id: String, owner: UUID) { inventory.unregister(id, owner: owner) }
+
+    func place(_ new: ControlEntry?, replacing old: ControlEntry?, owner: UUID) {
+        inventory.place(new, replacing: old, owner: owner)
+    }
+}
+
+extension View {
+    /// Lists `entry` in the window's `suite.controls` while on screen, its
+    /// `selected` state included, so a toggle-style SuiteUI control reports
+    /// whether it is on; nil lists nothing. With `identifies` the entry's id
+    /// is also the view's accessibility identifier.
+    func suiteControl(entry: ControlEntry?, identifies: Bool) -> some View {
+        modifier(SuiteControlEntryModifier(entry: entry, identifies: identifies))
+    }
+}
+
+/// Places one entry for the view's lifetime; each change replaces the last one placed.
+private struct SuiteControlEntryModifier: ViewModifier {
+    let entry: ControlEntry?
+    let identifies: Bool
+    @Environment(\.suiteControlStore) private var store
+    @State private var owner = UUID()
+
+    func body(content: Content) -> some View {
+        Group {
+            if identifies, let id = entry?.id { content.accessibilityIdentifier(id) } else { content }
+        }
+        .onAppear { store?.place(entry, replacing: nil, owner: owner) }
+        .onChange(of: entry) { old, new in store?.place(new, replacing: old, owner: owner) }
+        .onDisappear { store?.place(nil, replacing: entry, owner: owner) }
+    }
 }
 
 /// The hidden `suite.controls` element: no hits, its label the inventory's JSON.
