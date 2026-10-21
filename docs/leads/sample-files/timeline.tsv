@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-21T14:56Z	0	stage-start	#3775	lead set up, base 3f96cd10c
+2026-10-21T14:56Z	2	stage-end	#3775	wave plan: SS-a, SS-vector, SS-raster, SS-z
+2026-10-21T14:56Z	3	stage-start	wave 1	SS-a builder
