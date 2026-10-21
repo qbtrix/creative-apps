@@ -3,5 +3,5 @@
 {"label":"report drops the note","file":"Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift","find":"note: params.note ?? \"\")","replace":"note: \"\")","tests":"SuiteHelpCatalogTests"},
 {"label":"report's answer not kept for save","file":"Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift","find":"doc.answer = doc.provider.report(","replace":"_ = doc.provider.report(","tests":"SuiteHelpCatalogTests"},
 {"label":"beta notes answer with nothing","file":"Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift","find":"doc.answer = doc.provider.betaNotes()","replace":"doc.answer = .null","tests":"SuiteHelpCatalogTests"},
-{"label":"welcome available in every app","file":"Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift","find":"$0.app == \"launcher\" ? .available","replace":"true ? .available","tests":"SuiteHelpCatalogTests"}
+{"label":"welcome available in every app","file":"Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift","find":"$0.app == \"launcher\" ? .available","replace":"$0.app != \"\" ? .available","tests":"SuiteHelpCatalogTests"}
 ]
