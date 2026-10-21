@@ -77,7 +77,7 @@ struct HaloDocumentHostTests {
     }
 
     @Test func aRefusalSaysWhy() {
-        #expect(HaloDocumentHost.verbRefusal == .notAvailable("Halo only opens and creates compositions."))
+        #expect(HaloDocumentHost.verbRefusal == .notAvailable("Halo can't do that yet."))
         #expect(HaloDocumentHost.openNeedsProject == .notAvailable("Choose a Halo project to open."))
     }
 }
