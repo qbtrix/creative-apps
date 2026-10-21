@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-21T14:50Z	3 W4	build	PP-m	takeover; #4004 closed (dup of #4008); PP-5 builder started from dev; fixer merging dev into #4003
 2026-10-21T16:31Z	3	pr-opened	#4101	PP-5 (PP-m, PP-6 folded), Mutate 5/5; needs-rebase, fixer taking it
 2026-10-21T18:43Z	2026-10-21T18:43Z Belt nudge answered: PP-4 mac-built, waiting for the next batch
+2026-10-21T19:31Z	2026-10-21T19:33Z PP-4 batch Linux check green; macOS gate queued
