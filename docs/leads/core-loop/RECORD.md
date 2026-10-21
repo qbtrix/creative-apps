@@ -1,10 +1,10 @@
 # core-loop lead record
 
 Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
-Run: act-1a15a9f4e8d-hav0 (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/feature-lead-playbook-rmflin · Started: 2026-10-20T02:37Z
+Run: act-1a15d0eeefb-6z9l (from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 2
 Base: 6537a1a02f512db2df50d253384529f1b354b184
-Next: #3812 (CL-6, run1b, 754b5038 after needs-fix on the LibrarySidecarPlanTests timing flake, dev merged, CI PASS) and #3817 (CL-7, run2b, bcc243f0, stacked on run1b) are open in the lane. Retarget #3817 to dev once #3812 merges, then post Belt-Slice-Done CL-run on a green run. CL-8..10 wait on #3401, CL-12/13 on #865.
+Next: #3812 (CL-6) lane-eligible, waiting for a batch; retarget #3817 (CL-7) to dev once it merges. CL-8..10 wait on #3401 (open, re-checked 05:40Z), CL-12/13 on #865.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

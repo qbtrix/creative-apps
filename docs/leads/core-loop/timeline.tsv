@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-21T03:40Z	fix	CL-run	#3812	needs-fix from batch 20261021005140 on LibrarySidecarPlanTests/planWithinBudget (12.57ms/10ms, Library timing, not ours); merged dev, CI PASS, Head 754b5038; #3817 waits
 2026-10-21T04:07Z	check	heartbeat	#3812	needs-fix cleared on 754b5038; lane macOS build 39540077560 green; waiting on the lane merge; #3817 waits
 2026-10-21T04:35Z	check	heartbeat	#3812	still open, clean, macOS green, no needs-fix; waiting on the next lane batch; #3817 waits
+2026-10-21T05:45Z	check	heartbeat	#3812,#3817	new run act-1a15d0eeefb-6z9l; #3812 eligible in lane run 39550746014; #3401 and #865 still open
