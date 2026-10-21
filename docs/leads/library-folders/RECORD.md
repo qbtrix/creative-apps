@@ -60,3 +60,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T20:03Z: FO-m done: dev CI run 39664459063 (369ecc7, contains FO-5's e0e2732) Linux green. Belt-Slice-Done posted on #3787. FO-6 #4121 waits on its lane macOS build.
 
 - 2026-10-21T20:39Z: FO-6 #4121: its lane macOS build 39664988428 at 18efe8b is still queued (runner backlog). FO-7 follows once it merges.
+
+- 2026-10-21T20:55Z: FO-6 #4121: lane macOS build 39664988428 is queued null.
