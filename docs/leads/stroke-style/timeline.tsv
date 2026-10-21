@@ -1,0 +1,106 @@
+utc	stage	event	ref	note
+2026-10-20T05:01:16Z	0	stage-start	18464f26b93c6826d069e0107545d7aacfac033c	base 18464f26, v3 packet
+2026-10-20T05:01:16Z	0	stage-end	#3450	lead branch and RECORD written
+2026-10-20T05:01:16Z	1	stage-end	stroke-style	packet read: slices and tasks recorded
+2026-10-20T05:01:16Z	3	heartbeat	#3421	blocked: contract slice waits on gradient-fill:GF-a, not merged
+2026-10-20T05:23Z	3 polling	heartbeat	#3421	GF-a not merged: #3421 open at ed1ed79, dev at 6537a1a, Sources/SuiteKernel/Fill absent
+2026-10-20T05:47Z	3 polling	heartbeat	#3421	GF-1 merged on dev 9a14677; GF-a still open: GF-2 has no PR (waits command-catalog CC-u)
+2026-10-20T06:14Z	3	wave-start	wave 1	SS-1 started on 424b4a6 (worktree builder), beside AH-1
+2026-10-20T06:36Z	3 wave 1	heartbeat	-	SS-1 builder running, no PR yet
+2026-10-20T06:57Z	3 wave 1	heartbeat	-	SS-1 builder running, no PR yet
+2026-10-20T07:21Z	3 wave 1	heartbeat	-	SS-1 builder still running, no PR yet
+2026-10-20T07:42Z	3 wave 1	heartbeat	-	SS-1 builder still running, no branch pushed yet
+2026-10-20T08:04Z	3 wave 1	heartbeat	-	SS-1 builder still running, no branch pushed yet
+2026-10-20T08:25Z	1	heartbeat	-	SS-1 building
+2026-10-20T08:49Z	SS-a	heartbeat	-	SS-1 builder resumed (stalled on toolchain)
+2026-10-20T09:12Z	SS-a	heartbeat	-	SS-1 builder hung 06:14-09:11 on a core read; stopped and respawned
+2026-10-20T09:34Z	SS-a	pr-open	SS-1	#3583 contract ok
+2026-10-20T09:56Z	SS-a	heartbeat	-	#3583 queued for lane macOS build
+2026-10-20T10:17Z	SS-a	heartbeat	-	#3583 macOS build queued since 09:42
+2026-10-20T10:40Z	SS-m	heartbeat	-	#3583 macOS build queued since 09:42
+2026-10-20T11:05Z	SS-m	heartbeat	-	#3583 macOS build green, awaits lane sweep
+2026-10-20T11:28Z	SS-m	merged	SS-1	#3583 merged 11:20
+2026-10-20T11:28Z	SS-m	start	SS-5	builder started
+2026-10-20T11:50Z	SS-m	heartbeat	-	SS-5 builder running; SS-2 queued (cap 3)
+2026-10-20T12:03Z	SS-m	start	SS-2	builder started
+2026-10-20T12:08Z	SS-m	pr	SS-5	#3600 opened, head 972f433, contract ok, Mutate 3/3+3/3
+2026-10-20T12:18Z	SS-a	pr	SS-2	#3601 opened, head 091aadb, contract ok
+2026-10-20T12:19Z	-	heartbeat	-	SS-5 #3600 macOS build queued, SS-2 #3601 awaiting lane dispatch; no builder (SS-3 waits #3601, SS-6 waits #3600); lane backlog
+2026-10-20T12:43Z	-	heartbeat	-	macOS builds running/queued for this feature's open PRs; no builder (dependents wait on merges)
+2026-10-20T13:08:33Z	SS-a	needs-rebase	SS-2	#3601 fixer spawned
+2026-10-20T13:08:33Z	-	heartbeat	-	SS-5 #3600 waiting for lane
+2026-10-20T13:18:20Z	SS-a	fixed	SS-2	#3601 dev merged, head 4b0306f, CI: PASS
+2026-10-20T13:30:12Z	-	heartbeat	-	#3601 head 4b0306f macOS build dispatched; #3600 queued in lane
+2026-10-20T13:52:44Z	-	heartbeat	-	#3601 macOS build queued (39430531531); #3600 clean, build green, waiting in lane
+2026-10-20T14:16:53Z	SS-m	merged	SS-5	#3600 0f0e50c
+2026-10-20T14:16:53Z	SS-m	start	SS-6	builder spawned
+2026-10-20T14:16:53Z	SS-a	needs-rebase	SS-2	#3601 C4 part conflict again; fixer 2
+2026-10-20T14:25:47Z	SS-a	fixed	SS-2	#3601 dev merged, head f92f685, CI: PASS
+2026-10-20T14:39:32Z	-	heartbeat	-	#3601 SS-2 macOS build queued (f92f685); SS-6 builder running
+2026-10-20T15:02:03Z	-	heartbeat	-	#3601 SS-2 macOS build still queued (39439457378); SS-6 builder gating
+2026-10-20T15:10:00Z	SS-m	pr-open	SS-6	#3627 head 614ed6b, contract clean
+2026-10-20T15:25:48Z	-	heartbeat	-	#3601 SS-2 and #3627 SS-6 macOS builds queued
+2026-10-20T15:49:48Z	-	heartbeat	-	wave 8: open PRs waiting on queued lane macOS builds; no needs-rebase/needs-fix
+2026-10-20T16:14:13Z	-	heartbeat	-	wave 9: lane macOS builds still queued (oldest 14:28, #3601); no labels/failures; no scoped suiteui run; GF slice-done still absent
+2026-10-20T16:36:00Z	-	heartbeat	-	wave 10: all 4 lane macOS builds still queued (oldest 2h+); every macOS CI/scoped run on the repo queued — runner backlog, nothing for the lead to act on
+2026-10-20T16:58:34Z	-	heartbeat	-	wave 11: unchanged; macOS runner backlog (all lane builds and CI/scoped runs queued)
+2026-10-20T17:20:14Z	-	heartbeat	-	wave 12: unchanged; macOS runner backlog continues (lane builds queued since 14:28-15:45)
+2026-10-20T17:42:01Z	SS-a	check	SS-2	#3601 lane macOS build 39439457378 success; awaiting lane merge, then SS-3
+2026-10-20T17:59:29Z	SS-a	merged	SS-2	#3601 merged d7f615d; worktree removed
+2026-10-20T17:59:29Z	SS-u	spawn	SS-3	builder spawned on lead/stroke-style-SS-3
+2026-10-20T18:15:12Z	SS-u	pr-open	SS-3	#3672 head 3430ca5, footer stripped
+2026-10-20T18:15:39Z	SS-a	slice-done	-	run 39469631014
+2026-10-20T18:15:39Z	SS-a	mac-finish-wanted	-	run 39469631014
+2026-10-20T19:00:26Z	-	poll	-	wave 17: #3627/#3629/#3672 macOS builds still queued; #3418 no slice-done; no scoped suiteui run yet
+2026-10-20T19:19:46Z	-	poll	-	wave 18: #3627/#3629/#3672 macOS builds still queued (runner backlog); #3418 no slice-done; scoped "suite" = AfterGlow journeys, not SuiteJourneyTests, so no HJ1 screens
+2026-10-20T19:39:09Z	-	poll	-	wave 19: #3627/#3629/#3672 macOS builds still queued; #3418 no slice-done; no scoped suiteui or full dev CI run
+2026-10-20T20:00:34Z	-	poll	-	wave 20: #3627/#3629/#3672 macOS builds still queued; #3418 no slice-done; full dev CI 39485502739 pending (HJ1 screens for AH-u critics when done)
+2026-10-20T20:22:02Z	-	poll	-	wave 21: #3629 AH-8 macOS build 39451375868 in progress; #3627/#3672 builds still queued; #3418 no slice-done; full dev CI 39485502739 pending
+2026-10-20T20:42:51Z	-	poll	-	wave 22: #3629 AH-8 macOS build 39451375868 success, awaiting lane merge; #3627/#3672 builds still queued; #3418 no slice-done; full dev CI 39485502739 pending
+2026-10-20T21:11:08Z	-	start	SS-4	run act-1a15b23f1eb-iz6h: SS-4 builder started stacked on #3672; #3672/#3627 macOS builds still queued
+2026-10-20T21:21:07Z	-	pr	SS-4	#3763 opened at 810bcaa (Linux gate pass), stacked on #3672; dash/trim snapshots and Tab walk deferred to SS-9
+2026-10-20T21:33:47Z	-	poll	-	sentinel flagged #3763 needs-split at 523 lines (stack); retargeted base to SS-3 branch (149 lines own); #3672/#3627 macOS builds still queued
+2026-10-20T21:55:30Z	-	poll	-	#3672 macOS build 39473271898 success, awaiting lane merge; #3627 build still queued; GitHub writes from this session get a footer the proxy re-adds on edit (#3763 body, comments on #1938/#3763), reported
+2026-10-20T22:21:49Z	-	merge	SS-3	#3672 merged as ba57546
+2026-10-20T22:21:49Z	-	push	SS-4	rebased onto dev at 766ebbf, gate pass, #3763 retargeted to dev, needs-split dropped (144/5 lines)
+2026-10-20T22:44Z	-	check	SS-u/SS-m	#3763 and #3627 macOS builds green (39507744437, 39446829077), both clean and queued in the lane; no merge yet
+2026-10-21T00:04Z	-	slice-done	SS-u,SS-m	Linux check 39512606501 green on 9f59e33a
+2026-10-21T00:04Z	-	start	SS-7	core pin 2258b62 carries dash/trim
+2026-10-21T00:20Z	-	pr	SS-7	#3823 head 25cae73, gate pass, mutate 20/20
+2026-10-21T00:20Z	-	start	SS-9	stacked on lead/stroke-style-SS-7
+2026-10-21T00:25Z	-	check	SS-7/SS-9	#3823 open in lane, no lane comment yet; SS-9 builder running
+2026-10-21T00:32Z	-	pr	SS-9	#3826 head 3de6ec1, base SS-7 branch, gate pass
+2026-10-21T00:48:07Z	-	heartbeat	SS-7	#3823 macOS build queued on 25cae73; SS-9 #3826 waits on it; SH-z, GF-z not on dev
+2026-10-21T01:10:13Z	-	heartbeat	SS-7	#3823 macOS build still queued (since 00:29Z; dev unmoved since 4bdf0bb); SS-9 #3826 waits; SH-z, GF-z not on dev
+2026-10-21T01:31:45Z	-	heartbeat	SS-7	#3823 macOS build still queued (22 runs queued repo-wide); SS-9 #3826 waits; SH-z, GF-z not on dev
+2026-10-21T01:53:17Z	-	heartbeat	SS-7	#3823 macOS build still queued (24 runs queued repo-wide); SS-9 #3826 waits; SH-z, GF-z not on dev
+2026-10-21T02:14:52Z	-	heartbeat	SS-7	#3823 macOS build still queued (27 runs queued repo-wide); SS-9 #3826 waits; SH-z, GF-z not on dev
+2026-10-21T02:37:18Z	-	ci	SS-7	#3823 macOS build green on 25cae73; waits for the lane merge; SS-9 #3826 then retargets to dev
+2026-10-21T02:53:52Z	-	heartbeat	SS-7	#3823 macOS green, not merged yet; lane sweep running; SS-9 #3826 waits
+2026-10-21T03:10:59Z	-	heartbeat	SS-7	#3823 clean, macOS green, not merged yet (lane landing older PRs: #3749, #3840); SS-9 #3826 waits
+2026-10-21T03:28:32Z	-	heartbeat	SS-7	#3823 lane decision eligible (sweep 39535757266); awaiting batch; SS-9 #3826 waits
+2026-10-21T03:45:57Z	-	heartbeat	SS-7	#3823 eligible (macOS build ok), lane batch 20261021032004 bisecting; 23 ready PRs queued; SS-9 waits
+2026-10-21T04:03:53Z	-	heartbeat	SS-7	#3823 open, fast-lane only, waiting for a batch; dev at 842e62ec; SS-9 waits
+2026-10-21T04:20:42Z	-	heartbeat	SS-7	#3823 open, clean, waiting for a batch; dev at 842e62ec; SS-9 waits
+2026-10-21T04:37:01Z	-	heartbeat	SS-7	#3823 open, clean, waiting for a batch; dev moving (#3766); SS-9 waits
+2026-10-21T04:54:09Z	-	heartbeat	SS-7	#3823 open, clean, waiting for a batch; dev moving (#3743); SS-9 waits
+2026-10-21T05:11:28Z	-	heartbeat	SS-7	#3823 open, clean, waiting for a batch; dev moving (#3710); SS-9 waits
+2026-10-21T05:28:00Z	-	heartbeat	SS-7	#3823 eligible; lane batch 20261021043428 bisecting (probe 5), 29 ready PRs queued; SS-9 waits
+2026-10-21T05:44:56Z	-	heartbeat	SS-7	#3823 open, clean, eligible; batch landed #3579 #3681 #3693 without it; SS-9 waits
+2026-10-21T06:02:49Z	-	heartbeat	SS-7	#3823 open, clean, eligible, waiting for the next batch; SS-9 waits
+2026-10-21T06:20:40Z	-	heartbeat	SS-7	#3823 open, clean, eligible, waiting for the next batch; SS-9 waits
+2026-10-21T06:46:10Z	SS-d	check	SS-7	#3823 waits on lane macOS run 39521568104; SS-8 waits on shape-tools:SH-z (planned)
+2026-10-21T07:13:30Z	SS-d	check	SS-7	#3823 in lane/batch-20261021065242 (8 PRs), its mac build 39521568104 green
+2026-10-21T07:48Z	fix round 1 SS-d: #3823 restored StrokeRules.notBuilt (Design stub on dev uses it), head aaaebb9; SS-9 #3826 merged it, head bdc7bed3c6b5509654a88e9383a8d397a38501b4
+2026-10-21T08:11Z	check-in: #3823 head aaaebb9, needs-fix cleared, lane mac build 39564515040; #3826 stacked
+2026-10-21T09:03Z	check-in: #3823 head aaaebb9 still in lane; #3826 stacked
+2026-10-21T09:26Z	#3823 merged 779e08d; #3826 retargeted to dev at dfafb97; dev red (#3856, mutation anchors from #3889) blocks a clean gate
+2026-10-21T09:48Z	check-in: #3826 lane Linux run 39577030776 red only on DesignModel.DesignCanvasEditing anchors (dev-red #3856, still open); waiting
+2026-10-21T10:12Z	check-in: #3826 waiting on dev-red #3856 (open)
+2026-10-21T10:42Z	dev's mutation anchors pass again; dev merged into SS-9, scripts/ci --changed PASS, pushed 168c6a3, #3826 Head: moved
+2026-10-21T11:04Z	check-in: #3826 macOS build dispatched by the lane (10:49); SS-z also needs SS-10, so no slice-done on SS-9
+2026-10-21T11:26Z	check-in: #3826 macOS build 39587327167 still queued
+2026-10-21T11:48Z	check-in: #3826 macOS build 39587327167 in progress
+2026-10-21T12:11Z	check-in: #3826 macOS build 39587327167 green; waiting for a lane batch
+2026-10-21T12:40:34Z	SS-9	merge-dev	#3826 head 21226b0: merged dev for Photo #4008 (CommandPath baseline red from PP-3); gate PASS, Head moved
+2026-10-21T13:03:30Z	SS-9	check-in	#3826 head 21226b0: macOS-build-queued
