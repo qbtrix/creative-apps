@@ -24,7 +24,7 @@ for your PR alone, and you never start one yourself for routine work. So:
   feature CI as a "dev is red" issue whose culprit range names your PR.
 - The `macOS` job uploads the `snapshots` artifact (PNGs written by
   `Tests/AppSnapshotTests`), and the report-only `macOS journeys` job (its
-  own workflow, journeys.yml, started when a CI run on `dev` completes) clicks
+  own workflow, journeys.yml, which each CI run on `dev` dispatches) clicks
   through every app (`UITests/<X>JourneyTests.swift`), uploading
   whole-window screenshots as `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`
   (`--workflow journeys.yml` for the journeys), then `gh run download <id> -n snapshots`
@@ -399,10 +399,13 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - The report-only UI journeys run in their own workflow,
   `.github/workflows/journeys.yml` (job `macOS journeys`, `macOS journeys
   (<app>)` when scoped; artifact `ui-screens`; Findings and `Audit lower`),
-  started by every CI run that completes on `dev`: a full run's completion
-  runs every journey, a scoped run's that app's, a Linux check, build-only
-  run or macOS gate none. Its run is titled `after CI run <id>: <CI title>`
-  and checks out the commit that CI run tested. Its concurrency group is
+  dispatched by ci.yml's last job, `Journeys dispatch`, once a full or scoped
+  CI run on `dev` has finished its gate jobs (a full run: every journey; a
+  scoped run: that app's; a Linux check, build-only run or macOS gate: none).
+  It is a dispatch, not a workflow_run trigger, because CI runs the lane
+  starts with GITHUB_TOKEN fire no workflow_run. Its run is titled `after CI
+  run <id>: journeys <app|full> at <sha>` and checks out the commit that CI
+  run tested. Its concurrency group is
   `journeys-<branch>-<app|full>` with cancel-in-progress, so a journeys job
   waiting for a macOS runner never holds `ci-dev`, and only the newest run
   of each scope waits. On a branch, or to ask for one by hand: `gh workflow
@@ -412,7 +415,7 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   app=<flare|design|photo|library|halo|suite|suiteui>`. It still builds every
   target and app bundle, then runs only that app's Model
   tests and snapshot tests (titled `scoped: <app>`, job `macOS (<app>)`;
-  about 10 min for Design), and on `dev` its completion starts that app's
+  about 10 min for Design), and on `dev` its `Journeys dispatch` job starts that app's
   journeys (`macOS journeys (<app>)` in journeys.yml; on a branch, dispatch
   journeys.yml with `-f app=<app>` yourself). It skips the Linux job and never promotes `main`,
   opens `dev-red` or lowers the audit baseline. The supervisor's

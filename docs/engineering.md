@@ -174,8 +174,9 @@ every step.
 - **How they run.** `scripts/ui-test` builds the bundles, generates the
   project, runs the `Journeys` scheme and exports every screenshot to
   `.build/ui-screens/<app>-<step>.png`. The `macOS journeys` job runs it
-  in its own workflow, `.github/workflows/journeys.yml`, which every CI run
-  on `dev` starts when it completes (scoped to the CI run's app, if any), and
+  in its own workflow, `.github/workflows/journeys.yml`, which every full or
+  scoped CI run on `dev` dispatches from its last job (scoped to the CI run's
+  app, if any), and
   uploads the folder as the `ui-screens` artifact of that journeys run
   (`gh run list --workflow journeys.yml`, then `gh run download <id> -n
   ui-screens`). Its own concurrency group means a journeys job waiting for a

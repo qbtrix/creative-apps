@@ -5,10 +5,11 @@
 # (`app-builds`, a tarball so the executables keep their +x bit) and the size
 # report. Linux and macOS are the gate: both must pass for `promote`, and a
 # red one opens `dev-red`. The report-only UI journeys (`macOS journeys`,
-# `ui-screens`, Findings, Audit lower) are not here: journeys.yml runs them
-# after each CI run on dev completes, in its own concurrency group, so a
-# journeys job waiting hours for one of the org's 1-2 macOS runners never
-# holds this run's `ci-dev` group (and with it every later full dev run).
+# `ui-screens`, Findings, Audit lower) are not here: on dev, the last job,
+# `Journeys dispatch`, starts a journeys.yml run for this run's commit and
+# app, in its own concurrency group, so a journeys job waiting hours for one
+# of the org's 1-2 macOS runners never holds this run's `ci-dev` group (and
+# with it every later full dev run).
 # On a branch: `gh workflow run journeys.yml --ref <branch> [-f app=<app>]`.
 #
 # Branch model: crew PRs merge into dev through the fast lane on the worker's
@@ -31,23 +32,21 @@
 # Scoped run (workflow_dispatch with `app`: flare, design, photo, library,
 # halo, suite or suiteui): the macOS job builds every target but runs only
 # that app's Model and snapshot tests (suite: SuiteModel, SuiteKernel and the
-# CLI's tests). Its completion on dev starts journeys.yml scoped to that app
-# (it reads this run's title). The Linux job is skipped; a scoped run never
+# CLI's tests). On dev, `Journeys dispatch` then starts that app's journeys
+# in journeys.yml. The Linux job is skipped; a scoped run never
 # promotes, opens dev-red or lowers the audit baseline. verify-dispatch.sh
 # starts one per app after its merges.
 #
 # macOS gate run (workflow_dispatch with `mac_only`, the lane's batch check):
 # only the macOS job, scripts/ci in full, or with `app` (a comma list) the
 # scoped step over the union of those apps' tests. No Linux job (the lane
-# dispatches its own Linux-only run), no bundles or size report, and its
-# title tells journeys.yml to run no journeys;
+# dispatches its own Linux-only run), no bundles or size report, no journeys;
 # it never promotes, opens dev-red or lowers the audit baseline.
 #
 # The fast lane reads the job names "Linux", "macOS" (also "macOS (<apps>)")
 # and "macOS build" and the run titles "macOS build" and "macOS gate*", and
 # ignores "macOS journeys" (with or without " (<app>)", journeys.yml's job), so
-# keep them stable. journeys.yml reads the titles "scoped: <app>", "Linux
-# check", "macOS build" and "macOS gate*" too.
+# keep them stable.
 name: CI
 # A build-only run (the fast lane's compile check for code PRs), a Linux-only
 # run (the lane's check on a head it integrated or a batch), a macOS gate run
@@ -445,3 +444,29 @@ jobs:
           else
             gh issue create --title "dev is red" --label dev-red --body-file "$RUNNER_TEMP/body.md"
           fi
+
+  # Start the report-only journeys (journeys.yml) for this run's commit and
+  # app once the gate jobs are done, red or green. A dispatch, not a
+  # workflow_run trigger there, because CI runs the lane starts with
+  # GITHUB_TOKEN fire no workflow_run; a GITHUB_TOKEN dispatch does start a
+  # run. On dev only, never for a Linux check, build-only run or macOS gate.
+  # continue-on-error: a failed dispatch is its own red check, not a red run.
+  # Its name must not start with "macOS" (the sentinel counts those jobs).
+  journeys-dispatch:
+    name: Journeys dispatch
+    needs: [linux, macos]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/dev' && github.event_name != 'pull_request' && !inputs.build_only && !inputs.linux_only && !inputs.mac_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      actions: write  # dispatch journeys.yml
+    steps:
+      - name: Dispatch journeys.yml
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP: ${{ inputs.app }}
+        run: |
+          gh workflow run journeys.yml -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" \
+            -f sha="$GITHUB_SHA" -f ci_run="$GITHUB_RUN_ID" ${APP:+-f app="$APP"}
+          echo "Dispatched journeys.yml: ${APP:-every app} at $GITHUB_SHA (title \"after CI run $GITHUB_RUN_ID: ...\")." >>"$GITHUB_STEP_SUMMARY"
