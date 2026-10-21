@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-21T18:57:40Z	3 wave 3	check	PM-3,PM-4,PM-8 merged; PM-5,PM-6 needs-rebase	fixer sent; PM-7 #4138 open; PM-a awaits Linux run 39655526241
 2026-10-21T20:01:18Z	3 wave 3	slice-done	PM-a	Belt-Slice-Done + Mac-Finish-Wanted posted (run 39655526241); PM-7 merged; PM-5/PM-6 rebased
 2026-10-21T20:01:39Z	3 wave 3	slice-done	PM-u	Belt-Slice-Done + Mac-Finish-Wanted posted (run 39661533247)
+2026-10-21T20:01:54Z	3 wave 3	check	-	#4064 merged; #3499 open; 0 feature findings

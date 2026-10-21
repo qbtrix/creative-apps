@@ -4,7 +4,7 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a15e9d8b78-eu21 (resumed; earlier act-1a15b1de115-nxto) · Session: claude/multi-layer-select-lead-g8o0jx · Started: 2026-10-20T20:40Z
 Stage: 3 wave 3
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: PM-a slice-done (Linux 39655526241); critics for PM-a and PM-u when scoped photo run 39665905219 (dev 037c5c745) shows screens. PM-5 #4118 (f4243a36d) and PM-6 #4143 (d635b3a69) rebased, Fast-Check moved, lane macOS builds dispatched. PM-u slice-done (Linux 39661533247). PM-9 waits on #3499, PM-10 on #4064
+Next: PM-a slice-done (Linux 39655526241); critics for PM-a and PM-u when scoped photo run 39665905219 (dev 037c5c745) shows screens. PM-5 #4118 (f4243a36d) and PM-6 #4143 (d635b3a69) rebased, Fast-Check moved, lane macOS builds dispatched. PM-u slice-done (Linux 39661533247). PM-9 waits on #3499 (open) and PM-6; PM-10 waits on PM-9 (PG-z #4064 merged). Findings for this feature: 0 open
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
