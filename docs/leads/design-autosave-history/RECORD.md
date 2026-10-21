@@ -2,9 +2,9 @@
 
 Issue: #3434 · Packet: docs/blueprints/design/features/autosave-history.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z
-Stage: 3 wave 2 (DA-a done; DA-m #3710 and DA-u #3726 on dev, each in its lane macOS build)
+Stage: 3 wave 2 (DA-a done; DA-m #3710 merged 229c5eff3 at 05:07Z, awaiting dev Linux check; DA-u #3726 open, local Mac gate)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: Belt-Slice-Done DA-m and DA-u once merged-done; DA-a critics on the first scoped: design run with ui-screens; DA-6 waits DG-m (SuiteUI #3677); DA-z waits DA-6 (AH-8 #3629 merged 0506808e)
+Next: Belt-Slice-Done DA-m on the first green dev Linux check containing 229c5eff3; DA-u once merged-done; DA-a critics on journeys design 39545087913 ui-screens; DA-6 waits DG-m (SuiteUI #3677, GF-6 #3742); DA-z waits DA-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
