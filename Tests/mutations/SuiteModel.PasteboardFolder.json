@@ -1,0 +1,16 @@
+[
+ {
+  "label": ".writeReplaces: a write appends to what was there",
+  "file": "Sources/SuiteModel/Pasteboard/PasteboardFolder.swift",
+  "find": "var entries: [Entry] = []",
+  "replace": "var entries: [Entry] = old",
+  "tests": "PasteboardFolderTests"
+ },
+ {
+  "label": ".typeFromManifest: a type is read from the file's extension only",
+  "file": "Sources/SuiteModel/Pasteboard/PasteboardFolder.swift",
+  "find": "SuiteTypeID(rawValue: entry.type)",
+  "replace": "Self.extensions.first { entry.file.hasSuffix(\".\" + $0.value) }?.key ?? SuiteTypeID(rawValue: \"\")",
+  "tests": "PasteboardFolderTests"
+ }
+]
