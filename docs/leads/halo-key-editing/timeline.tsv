@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-21T19:24Z	poll	journeys 39651139451: no screens (Flare release build, dev-red #3856); panel moves to journeys after 39655512121
 2026-10-21T19:46Z	poll	blocked 1/3: macOS queue (25 queued); #4152 build 39655796643 queued, scoped halo 39655512121 queued, #3499 open, CL-z not built
 2026-10-21T20:10Z	poll	blocked 2/3: same waits; macOS queue 28; #4152 build 39655796643 and scoped halo 39655512121 still queued
+2026-10-21T20:37Z	needs-rebase	#4152 conflicted with #4155 in RenderBudgetHaloKeyEditingTests; took dev's file, pushed d84c1c6df, Head moved
