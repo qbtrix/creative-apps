@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-21T08:51Z	check	blocked	CL-probe	blocked note and supervisor question posted on #1971 (#3401, #865 open)
 2026-10-21T09:25Z	poll	check	-	still blocked: #3401 and #865 open, no PR
 2026-10-21T11:08Z	poll	check	-	removed lead/halo-core-loop per the supervisor (#1971); still blocked on #3401 and #865
+2026-10-21T11:21Z	check	decision	-	supervisor deleted lead/halo-core-loop (#1971); status goes to lead/core-loop only
