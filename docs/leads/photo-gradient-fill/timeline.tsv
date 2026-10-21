@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-21T06:34Z	heartbeat	lane	#3922,#3923,#3927	PG-3 macOS build green; PG-4 queued, PG-2 building
 2026-10-21T06:53Z	heartbeat	lane	#3922,#3923,#3927	PG-3, PG-2 macOS builds green; PG-4 build queued; batch 065242 running
 2026-10-21T07:16Z	heartbeat	lane	#3922,#3923,#3927	not yet in a batch; PG-4 macOS build queued
+2026-10-21T07:39Z	PG-3	needs-rebase	#3922	merged dev (PF-3's file-flow commands): catalog golden unioned, menuIDs filter takes both; gate running
