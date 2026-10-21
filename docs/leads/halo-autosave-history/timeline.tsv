@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T05:12:16Z	heartbeat	check: batch lane/batch-20261021043428 red, bisecting (probe 6, #3701 is 7th); #3810 waits; HG-m #3417 open
 2026-10-21T05:38:45Z	heartbeat	check: batch lane/batch-20261021043428 bisecting (first 4 PRs merged); #3701 HA-m and #3810 HA-u wait; HG-m #3417 open
 2026-10-21T06:00:33Z	heartbeat	check: #3701 HA-m and #3810 HA-u still open, no labels; HG-m #3417 open
+2026-10-21T06:27:04Z	heartbeat	HA-m #3701 merged a5c820215 (done waits on HA-6); HA-u #3810 needs-fix isa-swizzle lint, fixed 3b3c8b0 (keyCapable harness), Head moved
