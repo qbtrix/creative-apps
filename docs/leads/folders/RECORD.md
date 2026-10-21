@@ -51,4 +51,6 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T18:07Z: needs-rebase dropped on #4022; lane macOS build 39649207191 on 2ef801b dispatched. #4121 draft at ba7fb3c.
 - 2026-10-21T18:37Z: rule 23 re-read. #4022 macOS build 39649207191 queued; #4121 draft. dev-red #3856 open. Open findings: 0.
 
-- 2026-10-21T18:41Z: Belt watches lead/folders; run act-1a15f2277a5-6xyv kept its record on lead/library-folders (docs/leads/library-folders/). This file now mirrors that record and is pushed with it; the earlier run act-1a15d1c39b2-vvii record is in this file's git history.
+- 2026-10-21T18:42Z: lead/folders now mirrors this record. FO-5 #4022 at 2ef801b: lane macOS build 39649207191 still queued (runner backlog). FO-6 #4121 at ba7fb3c stays a draft until #4022 merges.
+
+- 2026-10-21T18:42Z: Mirror of lead/library-folders (docs/leads/library-folders/).
