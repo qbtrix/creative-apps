@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-21T05:25:09Z	2	wave-1 start	-	AC-zoom (slice/ac-zoom) and AC-guides (slice/ac-guides) building; AC-colour after AC-zoom; AC-tools after AC-colour; AC-export-sheet waits on shared-codecs:SC-f (not started, #3718) and AX-photo/AX-library
 2026-10-21T05:25:37Z	2	slice-done AC-guides	-	AC-zoom building (slice/ac-zoom); AC-colour after AC-zoom; AC-tools after AC-colour; AC-export-sheet waits on SC-f, AX-photo, AX-library
 2026-10-21T06:44:43Z	3	AC-zoom built, PR next	-	open AC-zoom PR with departures, then AC-colour stacked on it
+2026-10-21T06:48:20Z	3	AC-zoom PR #3941 open, AC-colour builder launched	-	AC-zoom gate result; AC-colour PR; then AC-tools
