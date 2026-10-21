@@ -8,7 +8,7 @@
 // is dirty, its `recoveryBytes()` and `restore` for a copy left behind. The modifier and the
 // adapter (DesignRecovery+Kernel.swift) are stubs until AH-8 and DA-5, so the panel lists the
 // steps but a jump says History isn't built yet, and nothing is written. `panel` is the panel
-// alone, which DesignEditorSnapshots renders. DA-3 adds the toolbar's History button: the
+// alone, under its "History" title and step count (#3945). DA-3 adds the toolbar's History button: the
 // modifier hands its panel state down as the environment value `designHistory`, and
 // DesignEditor draws `toolbarAction` from it, selected while the panel shows, off with the
 // Model's reason with no file and with `noPanel` outside a window that has the panel.
@@ -117,13 +117,44 @@ struct DesignHistoryArea: ViewModifier {
         ) { panel?.toggle() }
     }
 
-    /// The panel on `listing`, at the editor's panel width, inset from the window's edge.
+    /// The panel's accessibility identifier, and its title row's.
+    static let panelID = "design.history.panel"
+    static let headerID = "design.history.header"
+
+    /// The title row's count: "1 step", "3 steps", "0 steps" before the first edit.
+    nonisolated static func stepCount(_ listing: HistoryListing) -> String {
+        listing.steps.count == 1 ? "1 step" : "\(listing.steps.count) steps"
+    }
+
+    /// The panel on `listing` under its "History" title and step count, at the editor's panel
+    /// width, inset from the window's edge (#3945).
     @MainActor static func panel(_ listing: HistoryListing, onJump: @escaping @MainActor (Int) -> Void) -> some View {
         GlassPanel {
-            HistoryPanel(listing: listing, onJump: onJump)
-                .frame(maxHeight: .infinity, alignment: .top)
+            VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+                header(listing)
+                HistoryPanel(listing: listing, onJump: onJump)
+                    .frame(maxHeight: .infinity, alignment: .top)
+            }
         }
         .frame(width: SuiteSize.editorPanelWidth)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(panelID)
         .padding(SuiteSpacing.s)
+    }
+
+    /// "History" in the headline font, the step count after it in secondary text; one header
+    /// element reading "History", valued with the count.
+    @MainActor private static func header(_ listing: HistoryListing) -> some View {
+        let count = stepCount(listing)
+        return HStack(alignment: .firstTextBaseline, spacing: SuiteSpacing.s) {
+            Text("History").font(SuiteFont.headline).foregroundStyle(SuiteColor.textPrimary)
+            Spacer(minLength: 0)
+            Text(count).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary).monospacedDigit()
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("History")
+        .accessibilityValue(count)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityIdentifier(headerID)
     }
 }
