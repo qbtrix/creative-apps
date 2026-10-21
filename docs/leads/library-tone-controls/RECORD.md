@@ -35,4 +35,5 @@ Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRow
 ## Open
 - Blocked on suiteui tone-controls TC-a/TC-3/TC-5/TC-6, suite-imaging IM-library, library cull-finish DR-m (all planned).
 - #3476 (suiteui tone-controls) is labelled needs-human and waiting-on-prereq; no TC-a PR is open and SuiteKernel has no tone files on dev e2b8aa76.
-- Question for the supervisor: Library tone-controls (#3475) can't start until suiteui TC-a lands, and #3476 is needs-human. Should this lead keep polling, or park #3475 until #3476 moves? And do you still want lead/tone-controls rebased onto main, given it is the suiteui lead's live record branch with no merge base on main?
+- Question for the supervisor, posted on #3475 at 11:30Z (issuecomment-6314752314): keep polling or park #3475 until #3476 moves; is the lead/tone-controls rebase still wanted? Waiting on the answer.
+- Re-checked on dev ded2ca57 at 11:30Z: still no TC-a, and #3476 is waiting-on-prereq (needs-human is gone).
