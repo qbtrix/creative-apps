@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-21T22:39:45Z	-	watch	FO-z	heartbeat: FO-6 #4121 waits on its macOS build 39664988428; FO-7 after it merges.
 2026-10-21T22:55:11Z	-	watch	FO-z	FO-6 #4121 macOS build 39664988428 green; waits for its batch merge. FO-7 after it merges.
 1792623562	-	watch	FO-z	FO-6 #4121 still open, waiting for its batch; FO-7 after it merges.
+1792624224	-	watch	FO-z	Heartbeat: FO-6 #4121 still open, waiting for its batch (dev doesn't compile on macOS until #4215 lands).
