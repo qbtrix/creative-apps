@@ -25,6 +25,7 @@ Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (Command
 |---|---|---|---|---|---|
 
 ## Decisions
+- The record moved to lead/library-share-sheet at docs/leads/library-share-sheet/, where Belt reads it. lead/share-sheet is the old copy.
 - Base is dev, not main: PRs target dev (CLAUDE.md).
 - SH-a carries SH-2 (a SuiteUI file) because the packet's slice table puts it there.
 
@@ -33,6 +34,7 @@ Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (Command
 
 ## Open
 - SH-m blocked: file-flow LF-m and catalog-backup BK-m not on dev e2b8aa76 (LF-a, BK-a merged; BK-u #3967, BK-3 #3965 open).
-- #3814 Linux red: LibraryCommands.swift:266 builds MenuCommand( without a spec; fixer dispatched.
+- #3814 fixed at head b0d656d0: File > Share now uses the catalog spec, Belt-Lead is this run, and the macOS build is green. The lane is waiting to batch it. The server re-appends the attribution footer when the body is PATCHed; the lane strips it from the squash.
+- SH-m: LF-m is in flight (LF-3 #4024) and so is BK-m (BK-3 #3965, BK-u #3967). Neither is on dev ded2ca57.
 - dev-red #3856 is open (others' merges); not ours to fix.
 - ShareButton is two presses: Share prepares, then "Share N Photos" is the ShareLink (a ShareLink can't open itself after an await). SharePhase holds the logic so SuiteUITests check it.
