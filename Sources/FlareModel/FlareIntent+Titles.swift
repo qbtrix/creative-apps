@@ -137,6 +137,7 @@ extension FlareIntent.Inspector {
         case .easingPreset: "Easing"
         case .easingHandle: "Move Easing Handle"
         case .endEasingHandle: "End Easing Handle"
+        case .runFill: "Edit Fill"
         }
     }
 }

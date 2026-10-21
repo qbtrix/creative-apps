@@ -47,7 +47,6 @@ struct PhotoWindow: View {
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
     @State var problem: PhotoProblem?
-    @State var isExporting = false
     @State var exportFormat = ImageFormat.png
     @State var exportQuality = 0.9
     @State var isResizing = false
@@ -72,7 +71,7 @@ struct PhotoWindow: View {
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
-    var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
+    var isPresenting: Bool { model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming }
 
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
@@ -111,10 +110,10 @@ struct PhotoWindow: View {
                 takeStroke()
                 model.clearStatus()
             }
-            .sheet(isPresented: $isExporting) {
+            .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
                 ExportSheet(
                     format: exportFormat, quality: exportQuality, onFormat: { exportFormat = $0 },
-                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { isExporting = false })
+                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
@@ -207,6 +206,7 @@ struct PhotoWindow: View {
             pacer.stop()
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
+        case .gradientOption(let intent): model.runGradientOption(intent)
         case .adjust(let edit): model.adjust(edit)
         case .endAdjust: model.endAdjust()
         case .selectAll: model.selectAll()
@@ -227,8 +227,8 @@ struct PhotoWindow: View {
         case .sendBackward: model.sendSelectedLayerBackward()
         case .selectLayerAbove: model.selectLayerAbove()
         case .selectLayerBelow: model.selectLayerBelow()
-        case .zoomIn: setZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .zoomIn: setZoom(ZoomMath.zoomedIn(from: zoom))
+        case .zoomOut: setZoom(ZoomMath.zoomedOut(from: zoom))
         case .actualSize: setZoom(1)
         case .fit: fit()
         case .file(let intent): performFile(intent)
@@ -263,8 +263,9 @@ struct PhotoWindow: View {
         fit()
     }
 
+    /// Sets the zoom within ZoomMath's range (10% to 3200%).
     private func setZoom(_ scale: Double) {
-        zoom = min(max(scale.isFinite ? scale : 1, ViewerZoom.stops[0]), ViewerZoom.stops[ViewerZoom.stops.count - 1])
+        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
     }
 
     /// Fits the image in the canvas clear of the floating palette (every tool shows while an image is
@@ -272,9 +273,12 @@ struct PhotoWindow: View {
     private func fit() {
         guard let canvas = model.canvas, viewport.width > 0, viewport.height > 0 else { return }
         fitPending = false
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: PhotoTool.allCases.count)
-        let fitted = layout.fitScale(artboard: CGSize(width: canvas.width, height: canvas.height))
-        setZoom(fitted > 0 ? fitted : 1)
+        let toolCount = PhotoTool.allCases.count
+        // The fit EditorDetail hands Command-0, so a fitted image clears the floating palette.
+        let paletteFit: @Sendable (CGSize, CGSize) -> Double = { viewport, artboard in
+            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
+        }
+        setZoom(ZoomMath.fit(document: CGSize(width: canvas.width, height: canvas.height), in: viewport, using: paletteFit))
         fittedZoom = zoom
     }
 
