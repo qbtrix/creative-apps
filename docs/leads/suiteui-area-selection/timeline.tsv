@@ -1,3 +1,4 @@
 time	task	event	note
 2026-10-21T13:22:44Z	-	start	run act-1a15e9d8ac8-27wz, stage 1 packet read; AR-a startable
 2026-10-21T13:23:56Z	AR-a	builder	AR-1+AR-2 builder launched on lead/area-selection-AR-a
+2026-10-21T15:00Z	check	AR-a builder relaunched after the worker restart; records moved to suiteui-area-selection

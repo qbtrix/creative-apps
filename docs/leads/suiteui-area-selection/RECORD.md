@@ -37,3 +37,5 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 - AR-r waits on suite-imaging:IM-a; AR-u on pen-paths:PN-a. Neither slice has started on dev (2026-10-21T13:22:44Z).
 - 2026-10-21T13:23:56Z: pen-paths PN-a's tasks are on dev (PN-1 #3643, PN-2 #3553), so AR-u's PN-a wait is met; AR-7 starts once AR-a merges. suite-imaging IM-a has no merged task and dev has no SuiteImaging target, so AR-r (and AR-photo-m's AR-10) stays blocked.
 - Plan: wave 2 stacks AR-m (AR-3 + AR-4, ~370 lines) on lead/area-selection-AR-a; AR-u (AR-7), AR-9 and AR-13 follow once AR-a is on dev.
+
+- 2026-10-21T15:00Z: The lead dir moved to docs/leads/suiteui-area-selection on lead/suiteui-area-selection. The worker restarted, and the AR-a builder had pushed 2 commits to lead/area-selection-AR-a but opened no PR, so I relaunched it to gate, push and open the PR. AR-m stacks on it next. PN-a is merged, so AR-u (AR-7) and AR-13 follow AR-a. AR-r waits on IM-a.
