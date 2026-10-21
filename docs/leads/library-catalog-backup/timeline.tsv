@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-21T20:08:48Z	-	watch	BK-u	Watch: BK-u #3967 at 780c26c had needs-fix dropped and waits on the lane's macOS build.
 2026-10-21T20:39:41Z	-	watch	BK-u	BK-u #3967: its lane macOS build 39661645674 passed at 780c26c. Waiting for a lane batch; 63 fast-lane PRs are open on dev.
 2026-10-21T20:55:04Z	-	watch	BK-u	BK-u #3967: open merged=false [fast-lane]; still waiting for a lane batch.
+2026-10-21T21:10:24Z	-	watch	BK-u	BK-u #3967: no change; macOS build passed, still waiting for a lane batch.

@@ -54,3 +54,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T20:39Z: BK-u #3967: its lane macOS build 39661645674 passed at 780c26c. Waiting for a lane batch; 63 fast-lane PRs are open on dev.
 
 - 2026-10-21T20:55Z: BK-u #3967: open merged=false [fast-lane]; still waiting for a lane batch.
+
+- 2026-10-21T21:10Z: BK-u #3967: no change; macOS build passed, still waiting for a lane batch.
