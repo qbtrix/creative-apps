@@ -4,7 +4,7 @@ Issue: #3517 · Packet: docs/blueprints/design/features/pen-paths.md
 Run: act-1a15bc68263-njsv · Session: line lead (design) · Started: 2026-10-21T00:00Z
 Stage: 3 polling
 Base: 07f754f7 (origin/dev)
-Next: DP-a waits: DP-1 on placed-images:PD-a (#3759, supervisor lands it) and shape-tools:DS-a (DT-a merged 03:57Z; DS-a PR being built); DP-2 on stroke-style:DK-m (waiting) and adopt-kernel-session AD-design's Belt-Slice-Done (ready, not built); DP-3 on DS-m and PD-u. Blocked poll 3 of 3; supervisor answered (00:44Z): #3759 lands in the supervisor's local Mac queue; core issue filed (creative-core#787). Polling on (2026-10-21T07:08Z: unchanged; DT-a #3751 in the lane).
+Next: DP-a waits: DP-1 on placed-images:PD-a (#3759, supervisor lands it) and shape-tools:DS-a (DT-a merged 03:57Z; DS-a PR being built); DP-2 on stroke-style:DK-m (waiting) and adopt-kernel-session AD-design's Belt-Slice-Done (ready, not built); DP-3 on DS-m and PD-u. Blocked poll 3 of 3; supervisor answered (00:44Z): #3759 lands in the supervisor's local Mac queue; core issue filed (creative-core#787). Polling on (2026-10-21T07:29Z: unchanged; DT-a #3751 in the lane).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
