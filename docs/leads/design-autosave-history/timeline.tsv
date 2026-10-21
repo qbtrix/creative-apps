@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-21T00:36:54Z	3	slice-done	DA-a	run 39520241285; #3710 retargeted dev 4d5d8826
 2026-10-21T00:43Z	DA-u	retargeted	#3726 7a01cb92	dev merged in; needs-split answered
 2026-10-21T01:05Z	3	heartbeat	#3710 #3726	macOS builds running; #3629 merged
+2026-10-21T01:20Z	3	check	#3710	macOS build green; awaits batch
