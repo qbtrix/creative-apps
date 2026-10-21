@@ -39,3 +39,5 @@ time	kind	note
 2026-10-21T18:56Z	3	resume	DG-m	run act-1a15fcdd869-ck2o; rechecking GF-6 #3742, GF-7, DE-s, AC-design
 2026-10-21T20:03Z	3	heartbeat	#3742	GF-6/GF-7 merged; DG-m wait re-read
 2026-10-21T20:05Z	3	heartbeat	-	DG-m builder running
+2026-10-21T20:27Z	3	pr-opened	#4189	DG-4 + DG-5 in one PR, 186+/36-, 13 files; touched catalog tests, CLI golden, inspector snapshot
+2026-10-21T20:27Z	3	builder-started	DG-7	journey live, stacked on #4189
