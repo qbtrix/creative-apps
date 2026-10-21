@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-21T21:49Z	3	check	dev Linux 39678885281 red (has 4565e85)	same launcher baseline, dev-red #3856 open, not core-loop; halo scoped run still queued
 2026-10-21T22:16Z	3	question	supervisor: slice-done on unrelated red?	dev Linux 39682861406 red, same launcher baseline (#3856)
 2026-10-21T22:42Z	3	done	CL-measure, CL-z, contact sheet posted	run 39682861406 per supervisor ruling
+2026-10-21T23:14Z	3	check	#1971 closed by supervisor	scoped halo macOS failed on a Photo snapshot-test build error (not ours); waiting on journeys halo 39691305165 for critics
