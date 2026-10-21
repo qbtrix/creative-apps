@@ -44,3 +44,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T17:09Z: rule 23 re-read. #3967 open at cf07beb; lane macOS build 39632012767 queued. BK-5m blocked (LF-m, FO-m, AK). Open findings with Feature: catalog-backup: 0.
 - 2026-10-21T18:07Z: rule 23 re-read. BK-u #3967 open at cf07beb, clean, lane macOS build 39632012767 success (17:51Z); merge waits on a lane batch. Open findings: 0.
 - 2026-10-21T18:37Z: rule 23 re-read. #3967 green macOS build, waits on a lane batch. dev-red #3856 open. Open findings: 0.
+
+- 2026-10-21T18:42Z: lead/catalog-backup now mirrors this record. BK-u #3967 at cf07beb waits on a lane batch (macOS build 39632012767 succeeded).
