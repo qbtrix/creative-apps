@@ -98,3 +98,4 @@ utc	stage	event	ref	note
 2026-10-21T12:11Z	check-in: #3942 macOS build 39587386627 green; waiting for a lane batch
 2026-10-21T12:40:34Z	PL-4	merge-dev	#3942 head 227f061: merged dev for Photo #4008 (CommandPath baseline red from PP-3); gate PASS, Head moved
 2026-10-21T13:03:30Z	PL-4	check-in	#3942 head 227f061: macOS-build-green,awaiting-batch
+2026-10-21T13:22:56Z	PL-4	check-in	run act-1a15e9d8ac8-27wz start; #3942 macOS build green, awaiting lane

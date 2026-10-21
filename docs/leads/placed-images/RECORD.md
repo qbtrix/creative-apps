@@ -57,3 +57,6 @@ Relaunched 2026-10-20T21:07Z. No slice is buildable: PL-2 still waits on GF-2 an
 - 2026-10-21: PL-3 opened as #3940 (397 lines vs PL-2, 6 files: the gallery page is wired so Place… isn't dead; scripts/ci --changed PASS on 2e8f630). Stacked on lead/placed-images-PL-2 because PL-2 + PL-3 against dev is over the 400-line cap. Retarget to dev once #3931 merges.
 - 2026-10-21T06:46:10Z: the server re-appends a footer line to every PR body after the Head: line, even after a PATCH removes it; the lane strips it from the squash and still reads the marker (it dispatched the macOS build), so it is left as is.
 - 2026-10-21T06:54:17Z: PL-4 #3942 leaves out journey steps 4 and 5 (edge and focus drags need PL-8's live page), the p95 timing test (perf-suites.txt is supervisor-only) and resizeLargeInThreeBodies (not in PL-4's acceptance).
+
+## Run act-1a15e9d8ac8-27wz
+Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (record files only). PL-4 #3942 (head 227f061) has a green macOS build (39601667831) and waits for a lane batch. PL-8 starts once #3942 merges. PL-9 waits on GF-z.
