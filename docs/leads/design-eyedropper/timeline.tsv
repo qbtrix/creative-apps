@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-20T22:10Z	-	fix	#3691	needs-rebase (C4 part design-model-sources); merged dev, kept both clauses, gate PASS, head 344cbd8f, Head line moved
 2026-10-20T22:35Z	check	needs-rebase cleared	#3690 #3691	lane dropped label; macOS builds dispatched 22:21 on 5790b916 / 344cbd8f; lane asked to drop attribution footer: session proxy re-appends it on every PATCH (retried, re-added), lane strips it at squash
 2026-10-21T00:06Z	stage	DY-a merged; DY-u PR opened	#3691 #3816	#3691 merged 23:24Z (6f9c8928); DY-u merged dev, C4 part resolved, gate PASS, PR #3816 head 6ec9cf44
+2026-10-21T00:29Z	check	lane waits macOS build	#3816	head 6ec9cf44 clean; macOS build dispatched 00:22; no scoped design run with screens on dev yet (full runs cancelled; 39520919569 pending at 07f754f7); DY-m waits DT-m (transform DT-a #3751 open)
