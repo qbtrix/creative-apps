@@ -64,6 +64,9 @@
         ],
         "command-catalog:CC-u": [
           "GF-2"
+        ],
+        "font-picker:FP-a": [
+          "GF-2"
         ]
       },
       "ui": true,

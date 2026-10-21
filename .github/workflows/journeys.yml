@@ -1,0 +1,228 @@
+# Journeys: the report-only UI journeys (docs/engineering.md, Human-like UI
+# tests) with the app audit, in their own workflow so a journeys job waiting
+# hours for one of the org's 1-2 macOS runners never holds ci.yml's `ci-dev`
+# concurrency group (and with it every later full dev run and Promote).
+#
+# Trigger: workflow_dispatch only. ci.yml's last job (`Journeys dispatch`)
+# dispatches it on dev after every full or scoped CI run (not a Linux check,
+# build-only run or macOS gate), passing `app`, `sha` (the commit CI tested)
+# and `ci_run`. It is a dispatch and not workflow_run because CI runs the lane
+# starts with GITHUB_TOKEN fire no workflow_run (fast-lane.yml); a
+# GITHUB_TOKEN workflow_dispatch does start a run. By hand, on any branch:
+# `gh workflow run journeys.yml --ref <branch> [-f app=<app>]`.
+# The `macOS journeys` job (`macOS journeys (<app>)` when scoped; the fast lane
+# ignores both names) runs scripts/ui-test at `sha`, uploads `ui-screens`
+# (contact-sheet.html inside) and, on dev, files or updates one `finding` issue
+# per failing journey (scripts/ci-findings). After a green full run on dev,
+# `Audit lower` pushes one commit lowering the app audit's baseline.
+#
+# Gotcha: a dispatched run's github.sha and headSha are the ref's tip when it
+# was dispatched, not always the commit CI tested. Everything here uses
+# HEAD_SHA (the `sha` input) and BRANCH, passed to the scripts in the shell;
+# the run title names the CI run it follows ("after CI run <id>: ...").
+#
+# Concurrency is on the macOS job, keyed by branch and scope
+# (journeys-<branch>-<app|full>), never cancelling a running one: GitHub keeps
+# the running run plus the newest pending one and cancels a superseded pending
+# one, so a journeys run that started always finishes (Findings, Audit lower)
+# and only the newest waits for a runner. Its own group, so it never holds CI's
+# `ci-dev`.
+name: Journeys
+run-name: "${{ inputs.ci_run && format('after CI run {0}: ', inputs.ci_run) || '' }}journeys ${{ inputs.app || 'full' }} at ${{ inputs.sha || github.sha }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: every journey)'
+        type: string
+        default: ''
+      sha:
+        description: The commit to run the journeys at (empty, the ref's tip; ci.yml passes the commit it tested)
+        type: string
+        default: ''
+      ci_run:
+        description: The CI run this follows, for the title (ci.yml passes its run id)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  HEAD_SHA: ${{ inputs.sha || github.sha }}
+  BRANCH: ${{ github.ref_name }}
+
+jobs:
+  # Its own runner and timeout: the five apps' journeys take an hour or more.
+  # Audit lower reads its `ui` output and `ui-screens`.
+  journeys:
+    name: ${{ inputs.app && format('macOS journeys ({0})', inputs.app) || 'macOS journeys' }}
+    runs-on: macos-26
+    timeout-minutes: 150
+    continue-on-error: true
+    concurrency:
+      group: journeys-${{ github.ref_name }}-${{ inputs.app || 'full' }}
+      cancel-in-progress: false
+    outputs:
+      ui: ${{ steps.ui.outcome }}
+    # issues: write lets scripts/quarantine check each quarantined journey's
+    # owner issue and Findings file issues.
+    permissions:
+      contents: read
+      issues: write
+    env:
+      APP: ${{ inputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ env.HEAD_SHA }}" }
+      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      # A scoped run's journeys: APP's bundle (suite: the launcher's journeys).
+      - name: Pick the journeys
+        if: env.APP
+        id: scope
+        run: |
+          case "$APP" in
+            flare)   journeys=FlareJourneyTests ;;
+            design)  journeys=DesignJourneyTests ;;
+            photo)   journeys=PhotoJourneyTests ;;
+            library) journeys=LibraryJourneyTests ;;
+            halo)    journeys=HaloJourneyTests ;;
+            suite)   journeys=AfterGlowJourneyTests ;;
+            suiteui) journeys=SuiteJourneyTests ;;
+            *) echo "::error::app '$APP' is not one of flare, design, photo, library, halo, suite, suiteui"; exit 1 ;;
+          esac
+          echo "journeys=$journeys" >>"$GITHUB_OUTPUT"
+          echo "- UI journeys: \`scripts/ui-test -only-testing:$journeys\` (quarantine entries of scope all still skipped; scope full ones run)" >>"$GITHUB_STEP_SUMMARY"
+      # scripts/ui-test builds the app and journey bundles itself, clicks
+      # through each app (UITests/) and exports a whole-window PNG per step,
+      # uploaded as `ui-screens`. A failed journey fails this job (not the
+      # run), and the log goes to Findings.
+      # XcodeGen is a pinned release, checked against its sha256 (Homebrew
+      # can't pin a version). automationmodetool lets the test runner drive
+      # the UI without a password prompt.
+      - name: Install XcodeGen 2.46.0
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+      - run: sudo automationmodetool enable-automationmode-without-authentication
+      # A scoped run builds every journey bundle first, so a shared change
+      # that breaks another app's journeys still fails it, then runs only
+      # APP's bundle (suite has none yet). scripts/ui-test passes
+      # -only-testing to xcodebuild. APP (the job's env) tells it this is a
+      # scoped run: it still skips quarantined journeys of scope `all`, and
+      # runs the `full` ones, which only full runs skip.
+      - name: Build every journey bundle
+        if: env.APP
+        run: |
+          xcodegen generate --quiet
+          xcodebuild build-for-testing -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS
+      - name: Run scripts/ui-test  # the lane compares failed step names with dev's
+        id: ui
+        if: ${{ !env.APP || steps.scope.outputs.journeys != '' }}
+        env:
+          JOURNEYS: ${{ steps.scope.outputs.journeys }}
+        run: |
+          set -o pipefail
+          scripts/ui-test ${JOURNEYS:+"-only-testing:$JOURNEYS"} 2>&1 | tee "$RUNNER_TEMP/ui-test.log"
+      # One `finding` issue per failing journey (an audit violation fails its
+      # journey too), titled "CI finding: <Target/Class/test>", the form
+      # UITests/quarantine.json takes, labelled `finding` and `line:<app>`.
+      # An open one with that title gets its body updated instead (keeping the
+      # `Feature:`, `Slice:` and `Owner:` lines a triage added), so a test red
+      # across runs keeps one routed issue. A test that ran and passed closes
+      # its finding with "Passes on run <url>". scripts/ci-findings does the
+      # work. Only on dev: never for a branch run.
+      - name: Findings
+        if: always() && (steps.ui.outcome == 'failure' || steps.ui.outcome == 'success') && env.BRANCH == 'dev'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: GITHUB_REF_NAME="$BRANCH" GITHUB_SHA="$HEAD_SHA" scripts/ci-findings "$RUNNER_TEMP/ui-test.log"
+      # The page to review: every journey step with its audit, each app's
+      # audit counts against the baseline and the perf reports, written into
+      # ui-screens, plus a short table in the job summary. Runs when a journey
+      # failed too, since that's when the sheet matters most.
+      # A scoped run's sheet compares only APP against its baseline (the other
+      # apps didn't run), and its branch reads "dev (scoped: APP)" so the sheet
+      # doesn't promise an Audit lower that a scoped run skips.
+      - name: Contact sheet
+        if: always() && steps.ui.outcome != 'skipped'
+        run: |
+          export GITHUB_SHA="$HEAD_SHA" GITHUB_REF_NAME="$BRANCH"
+          if [[ -z "$APP" ]]; then scripts/contact-sheet; exit; fi
+          base="$RUNNER_TEMP/audit-baseline.json"
+          key=$APP; [[ "$APP" != suite ]] || key=afterglow  # the AfterGlow journeys' audit counts
+          jq --arg a "$key" 'with_entries(select(.key == $a))' UITests/audit-baseline.json >"$base"
+          GITHUB_REF_NAME="$BRANCH (scoped: $APP)" scripts/contact-sheet .build/ui-screens "$base"
+      - name: Upload UI screens
+        if: always() && steps.ui.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screens
+          path: .build/ui-screens
+          if-no-files-found: warn
+      # On a failed journey, the result bundle: the UI hierarchy and a screen
+      # recording at the failure (open in Xcode or `xcrun xcresulttool`).
+      - name: Upload UI test results
+        if: failure() && steps.ui.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-tests-xcresult
+          path: .build/ui-tests.xcresult
+          retention-days: 7
+
+  # The app audit's way down (docs/blueprints/app-audit.md, "The ratchet"): a
+  # count under its baseline doesn't fail the journeys, so on dev this writes
+  # the counts the run measured (audit-counts.json in ui-screens) into
+  # UITests/audit-baseline.json with scripts/audit-lower and pushes that one
+  # commit straight to dev, the way ci.yml's promote pushes main.
+  # scripts/audit-lower refuses any count over its baseline, so this can only
+  # tighten the audit. It runs only after a full run whose journeys passed (the
+  # journeys job's `ui` output; the job's own result can't say, since it has
+  # continue-on-error): a failed journey leaves its later screens unaudited, so
+  # its counts are too low. When dev moved during the run the push is refused;
+  # it fetches dev and lowers again on top, judging only checks still at the
+  # number they were measured against (the third argument), up to 3 retries.
+  # GITHUB_TOKEN pushes start no workflow.
+  audit-lower:
+    name: Audit lower
+    needs: [journeys]
+    if: github.ref_name == 'dev' && !inputs.app && needs.journeys.outputs.ui == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write  # push the lowered baseline to dev
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ env.HEAD_SHA }}" }
+      - uses: actions/download-artifact@v4
+        with: { name: ui-screens, path: ui-screens }
+      - name: Lower the baselines to the measured counts
+        run: |
+          title="test(audit): lower baselines to the measured counts"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          measured="$RUNNER_TEMP/measured-baseline.json"
+          cp UITests/audit-baseline.json "$measured"  # the checkout is $HEAD_SHA, what the journeys ran
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            rows=$(scripts/audit-lower UITests/audit-baseline.json ui-screens/audit-counts.json "$measured")
+            if [[ -z "$rows" ]]; then
+              echo "Audit: nothing to lower." >>"$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            table=$(printf '| app | check | old | new |\n|---|---|---:|---:|\n%s\n' "$rows")
+            git commit -q -m "$title" -m "Measured by the macOS journeys in $run_url at $HEAD_SHA." -m "$table" UITests/audit-baseline.json
+            if git push origin HEAD:refs/heads/dev; then
+              printf 'Audit: pushed %s to dev, lowering the baseline.\n\n%s\n' "$(git rev-parse --short HEAD)" "$table" >>"$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Push $attempt refused (dev moved); lowering again on top of the new dev."
+            git fetch -q origin dev
+            git checkout -q --detach FETCH_HEAD
+          done
+          echo "::error::Could not push the lowered baseline to dev after 3 retries."
+          exit 1

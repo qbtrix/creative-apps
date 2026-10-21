@@ -1,0 +1,226 @@
+{
+  "title": "One text style for the suite: font, weight, italic, size, alignment with justify, line height and letter spacing, as kernel values and commands over FlareCore's paragraph, and one SuiteUI style row; Design and Halo adopt (Photo in photo/text-layers)",
+  "wave": "XK4",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 cluster C11 (Design's line height, letter spacing, italic, justify; Halo's font, weight, tracking, two lines); feature map E8 (Design and Halo adopters); finding #3339 (a font change doesn't refit the box); real jobs RJ-H04 (re-pointed) and RJ-D50 (new)",
+  "waits_on": "font-picker FP-a and FP-u (the picker); suite/shell-text ST-z (live measurer, cross-line); adopt-kernel-easing AE-halo (HaloValues.swift); adjust-everywhere AJ-halo (Halo's catalog and ledger); design style-rows SR-t, design-window DW-a, pen-paths DP-a and stroke-style DK-m hand-offs",
+  "depends": [],
+  "longest_chain": "7 (TS-1 → TS-5 → TS-6 → TS-7 → TS-8 → TS-11 → TS-12)",
+  "journeys": [
+    "DesignTextStyleJourneyTests.testParagraphStyle",
+    "HaloTextStyleJourneyTests.testTitleCard"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Text/TextStyle.swift",
+    "Sources/SuiteKernel/Text/TextStyleRules.swift",
+    "Sources/SuiteKernel/Text/TextCommands.swift",
+    "Tests/SuiteKernelTests/TextStyleRulesTests.swift",
+    "Tests/SuiteKernelTests/TextStyleLayoutTests.swift",
+    "Tests/SuiteKernelTests/TextCommandsTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-text.json",
+    "Sources/SuiteUI/TextStyleRows.swift",
+    "Tests/SuiteUITests/TextStyleRowsTests.swift",
+    "Sources/DesignApp/DesignInspectorText.swift",
+    "UITests/DesignJourneyTests+TextStyle.swift",
+    "Sources/HaloApp/HaloTextInspector.swift",
+    "UITests/HaloJourneyTests+TextStyle.swift",
+    "Tests/AppSnapshotTests/RenderBudgetTextStyleTests.swift",
+    "Tests/mutations/SuiteKernel.TextStyleRules.json",
+    "Tests/mutations/SuiteKernel.TextCommands.json",
+    "Tests/DesignModelTests/DesignTextStyleTests.swift",
+    "Sources/DesignModel/DesignTextStyle+Kernel.swift",
+    "Sources/DesignModel/Contracts/StyleTypes.swift",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/mutations/DesignModel.DesignTextStyle+Kernel.json",
+    "Sources/DesignApp/DesignTextArtwork.swift",
+    "Sources/DesignApp/DesignTextFont.swift",
+    "Tests/RealJobs/design/paragraph-style/paragraph-style.jobs.json",
+    "Tests/HaloModelTests/HaloTextStyleTests.swift",
+    "Sources/HaloModel/HaloText+Kernel.swift",
+    "Sources/HaloModel/Contracts/HaloValues.swift",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/mutations/HaloModel.HaloText+Kernel.json",
+    "Sources/HaloApp/HaloTextRasterizer.swift",
+    "Tests/RealJobs/halo/title-card/title-card.jobs.json",
+    "docs/blueprints/suiteui/features/text-style.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "TS-a",
+      "behavior": "The kernel declares the text style, its rules, layout and commands, and SuiteUI the style row, as stubs, with the Model checks written and disabled.",
+      "tasks": [
+        "TS-1",
+        "TS-2"
+      ],
+      "journeys": [
+        "MJ-TS"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Text/TextStyle.swift",
+        "Sources/SuiteKernel/Text/TextStyleRules.swift",
+        "Sources/SuiteKernel/Text/TextCommands.swift",
+        "Tests/SuiteKernelTests/TextStyleRulesTests.swift",
+        "Tests/SuiteKernelTests/TextStyleLayoutTests.swift",
+        "Tests/SuiteKernelTests/TextCommandsTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-text.json",
+        "Sources/SuiteUI/TextStyleRows.swift",
+        "Tests/SuiteUITests/TextStyleRowsTests.swift"
+      ],
+      "waits": {
+        "font-picker:FP-a": [
+          "TS-2"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "TS-u",
+      "behavior": "Design's and Halo's text inspectors show the shared style row on the stubs, reachable by selecting a text layer, every control identified and within the render budget.",
+      "tasks": [
+        "TS-3",
+        "TS-4"
+      ],
+      "journeys": [
+        "DJ-TS",
+        "HJ-TS"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignInspectorText.swift",
+        "UITests/DesignJourneyTests+TextStyle.swift",
+        "Sources/HaloApp/HaloTextInspector.swift",
+        "UITests/HaloJourneyTests+TextStyle.swift",
+        "Tests/AppSnapshotTests/RenderBudgetTextStyleTests.swift"
+      ],
+      "waits": {
+        "TS-a": [
+          "TS-3"
+        ],
+        "font-picker:FP-u": [
+          "TS-3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "TS-m",
+      "behavior": "The style validates against FlareCore's ranges, the layout sets line height, letter spacing, italic and justify from measured advances, and every text command is one undo step.",
+      "tasks": [
+        "TS-5",
+        "TS-6"
+      ],
+      "journeys": [
+        "MJ-TS"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Text/TextStyle.swift",
+        "Sources/SuiteKernel/Text/TextStyleRules.swift",
+        "Tests/SuiteKernelTests/TextStyleRulesTests.swift",
+        "Tests/SuiteKernelTests/TextStyleLayoutTests.swift",
+        "Tests/mutations/SuiteKernel.TextStyleRules.json",
+        "Sources/SuiteKernel/Text/TextCommands.swift",
+        "Tests/SuiteKernelTests/TextCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.TextCommands.json"
+      ],
+      "waits": {
+        "TS-a": [
+          "TS-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "TS-design",
+      "behavior": "Design's text layers take italic, justify, line height and letter spacing through the catalog, old files open unchanged, and a font change refits the box (#3339).",
+      "tasks": [
+        "TS-7",
+        "TS-8"
+      ],
+      "journeys": [
+        "DJ-TS",
+        "MJ-TS-design"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignTextStyleTests.swift",
+        "Sources/DesignModel/DesignTextStyle+Kernel.swift",
+        "Sources/DesignModel/Contracts/StyleTypes.swift",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/mutations/DesignModel.DesignTextStyle+Kernel.json",
+        "Sources/DesignApp/DesignTextArtwork.swift",
+        "Sources/DesignApp/DesignTextFont.swift",
+        "UITests/DesignJourneyTests+TextStyle.swift",
+        "Tests/RealJobs/design/paragraph-style/paragraph-style.jobs.json"
+      ],
+      "waits": {
+        "TS-m": [
+          "TS-7"
+        ],
+        "TS-u": [
+          "TS-8"
+        ],
+        "adopt-command-catalog:AC-design": [
+          "TS-7"
+        ],
+        "brush-keys:BK-design": [
+          "TS-7"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "TS-halo",
+      "behavior": "Halo's text layers take a font, weight, italic, alignment, line height, letter spacing and several lines through the catalog, drawn the same in the viewer and the render, and the feature is built.",
+      "tasks": [
+        "TS-9",
+        "TS-10",
+        "TS-11",
+        "TS-12"
+      ],
+      "journeys": [
+        "HJ-TS",
+        "MJ-TS-halo",
+        "MJ-TS",
+        "DJ-TS"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloTextStyleTests.swift",
+        "Sources/HaloModel/HaloText+Kernel.swift",
+        "Sources/HaloModel/Contracts/HaloValues.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/mutations/HaloModel.HaloText+Kernel.json",
+        "Sources/HaloApp/HaloTextRasterizer.swift",
+        "UITests/HaloJourneyTests+TextStyle.swift",
+        "Tests/RealJobs/halo/title-card/title-card.jobs.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-text.json",
+        "docs/blueprints/suiteui/features/text-style.wave.json"
+      ],
+      "waits": {
+        "TS-m": [
+          "TS-9"
+        ],
+        "TS-u": [
+          "TS-10"
+        ],
+        "adopt-kernel-easing:AE-halo": [
+          "TS-9"
+        ],
+        "adjust-everywhere:AJ-halo": [
+          "TS-9"
+        ],
+        "TS-design": [
+          "TS-11"
+        ],
+        "anchor-parenting:AN-halo": [
+          "TS-9"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

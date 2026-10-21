@@ -1,0 +1,51 @@
+[
+  {
+    "label": "smoothKeepsPartner: the partner handle is left alone on a smooth handle drag",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "partner = Point(x: a.point.x + ux / length * keep, y: a.point.y + uy / length * keep)",
+    "replace": "partner = other",
+    "tests": "AnchorEditTests"
+  },
+  {
+    "label": "moveCarriesHandles: the in handle stays put when its anchor moves",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "a.handleIn = a.handleIn.map(shift)",
+    "replace": "a.handleIn = a.handleIn.map { $0 }",
+    "tests": "AnchorEditTests"
+  },
+  {
+    "label": "removeSeveralInOrder: removal goes low index to high, so later refs name the wrong anchors",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "anchors.sorted(by: >)",
+    "replace": "anchors.sorted(by: <)",
+    "tests": "AnchorEditTests"
+  },
+  {
+    "label": "symmetricMirrors: a symmetric partner keeps its own length",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "a.kind == .symmetric ? length :",
+    "replace": "a.kind == .smooth ? length :",
+    "tests": "AnchorEditTests"
+  },
+  {
+    "label": "insertKeepsOutline: the ref walk counts a contour's move as its first segment",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "case .move: (contour, index, closed) = (contour + 1, 0, false)",
+    "replace": "case .move: (contour, index, closed) = (contour + 1, 1, false)",
+    "tests": "AnchorEditTests"
+  },
+  {
+    "label": "nonFiniteEditIsANoOp: a non-finite dy reaches the moved anchors",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "guard dx.isFinite, dy.isFinite else { return path }",
+    "replace": "guard dx.isFinite else { return path }",
+    "tests": "AnchorEditTests"
+  },
+  {
+    "label": "nonFiniteEditIsANoOp: a handle target with a non-finite y is written to the anchor",
+    "file": "Sources/SuiteKernel/Paths/AnchorEdit.swift",
+    "find": "guard to.isFinite else { return path }",
+    "replace": "guard to.x.isFinite else { return path }",
+    "tests": "AnchorEditTests"
+  }
+]

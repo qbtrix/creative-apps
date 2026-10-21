@@ -54,7 +54,7 @@ extension LibraryJourneyTests {
         expectPersistCell(rated, contains: "4 stars", library)
         expectPersistCell(picked, contains: "Picked", library)
         expectPersistCell(labelled, contains: "Red", library)
-        expectPersistSidebarCount("Favorites", 1, library)
+        expectPersistSidebarCount("Picks", 1, library)
         library.app.terminate()
 
         // Step 3: day2/ is deleted; its two photos come back unreadable, and still rate.

@@ -1,0 +1,162 @@
+{
+  "title": "The welcome tour's sample files ship in the bundle: Cards.design, Bounce.flare, beach.ora, Sunset.png and Intro.halo, each made by an afterglow script so it can be rebuilt",
+  "wave": "BG1",
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 suite must-have 5 (suite audit row 9, under-specified 4); #836, #837, #838, #839 (the suite journey fixtures); real job RJ-X66 (new)",
+  "waits_on": "onboarding (built; SampleCatalog names the files); afterglow-cli (built; scripts run headless); each app's catalog commands the scripts call (built on dev)",
+  "depends": [
+    "onboarding",
+    "afterglow-cli"
+  ],
+  "longest_chain": "8 (SS-1 → SS-2 → SS-3 → SS-4 → SS-5 → SS-6 → SS-7 → SS-8)",
+  "ui_slice": "none",
+  "ui_slice_reason": "no new screen: the onboarding tour's tiles exist; this packet supplies the files they open, and SS-7's journey proves it",
+  "journeys": [
+    "AfterGlowOnboardingJourneyTests.testOpenEverySample"
+  ],
+  "owned": [
+    "Tests/AfterGlowCLITests/SampleFilesTests.swift",
+    "scripts/make-samples",
+    "Bundle/Samples/README.md",
+    "Bundle/Samples/make/Cards.design.json",
+    "Bundle/Samples/make/Logo.design.json",
+    "Bundle/Samples/Cards.design",
+    "UITests/Fixtures/suite/Cards.design",
+    "UITests/Fixtures/suite/Logo.design",
+    "Bundle/Samples/make/Bounce.flare.json",
+    "Bundle/Samples/make/Title.flare.json",
+    "Bundle/Samples/make/Logo.flare.json",
+    "Bundle/Samples/Bounce.flare",
+    "UITests/Fixtures/suite/Bounce.flare",
+    "UITests/Fixtures/suite/Title.flare",
+    "UITests/Fixtures/suite/Logo.flare",
+    "Bundle/Samples/make/beach.ora.json",
+    "Bundle/Samples/make/Sunset.png.json",
+    "Bundle/Samples/beach.ora",
+    "Bundle/Samples/Sunset.png",
+    "UITests/Fixtures/suite/beach.ora",
+    "UITests/Fixtures/suite/Sunset.png",
+    "Bundle/Samples/make/Intro.halo.json",
+    "Bundle/Samples/Intro.halo",
+    "UITests/Fixtures/suite/Intro.halo",
+    "UITests/AfterGlowJourneyTests+Onboarding.swift",
+    "Tests/RealJobs/suite/open-samples/open-samples.jobs.json",
+    "scripts/ci",
+    "docs/blueprints/suite/features/sample-files.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "SS-a",
+      "behavior": "A make script turns each sample's afterglow script into its file, and the check that every catalog sample exists and opens headless is written and disabled.",
+      "tasks": [
+        "SS-1",
+        "SS-2"
+      ],
+      "journeys": [
+        "MJ-SS"
+      ],
+      "owned": [
+        "Tests/AfterGlowCLITests/SampleFilesTests.swift",
+        "scripts/make-samples",
+        "Bundle/Samples/README.md"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "SS-vector",
+      "behavior": "Cards.design and Logo.design (#836) and Bounce.flare, Title.flare and Logo.flare (#837) are made by script, committed, and open in Design and Flare.",
+      "tasks": [
+        "SS-3",
+        "SS-4"
+      ],
+      "journeys": [
+        "MJ-SS"
+      ],
+      "owned": [
+        "Bundle/Samples/make/Cards.design.json",
+        "Bundle/Samples/make/Logo.design.json",
+        "Bundle/Samples/Cards.design",
+        "UITests/Fixtures/suite/Cards.design",
+        "UITests/Fixtures/suite/Logo.design",
+        "Tests/AfterGlowCLITests/SampleFilesTests.swift",
+        "Bundle/Samples/make/Bounce.flare.json",
+        "Bundle/Samples/make/Title.flare.json",
+        "Bundle/Samples/make/Logo.flare.json",
+        "Bundle/Samples/Bounce.flare",
+        "UITests/Fixtures/suite/Bounce.flare",
+        "UITests/Fixtures/suite/Title.flare",
+        "UITests/Fixtures/suite/Logo.flare"
+      ],
+      "waits": {
+        "SS-a": [
+          "SS-3",
+          "SS-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SS-raster",
+      "behavior": "beach.ora and Sunset.png (#838) and Intro.halo (#839) are made by script, committed, and open in Photo, Library and Halo.",
+      "tasks": [
+        "SS-5",
+        "SS-6"
+      ],
+      "journeys": [
+        "MJ-SS"
+      ],
+      "owned": [
+        "Bundle/Samples/make/beach.ora.json",
+        "Bundle/Samples/make/Sunset.png.json",
+        "Bundle/Samples/beach.ora",
+        "Bundle/Samples/Sunset.png",
+        "UITests/Fixtures/suite/beach.ora",
+        "UITests/Fixtures/suite/Sunset.png",
+        "Tests/AfterGlowCLITests/SampleFilesTests.swift",
+        "Bundle/Samples/make/Intro.halo.json",
+        "Bundle/Samples/Intro.halo",
+        "UITests/Fixtures/suite/Intro.halo"
+      ],
+      "waits": {
+        "SS-a": [
+          "SS-5"
+        ],
+        "SS-vector": [
+          "SS-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SS-z",
+      "behavior": "Every tour tile opens its sample on a first launch, RJ-X66 passes, and the feature is built.",
+      "tasks": [
+        "SS-7",
+        "SS-8"
+      ],
+      "journeys": [
+        "XJ-SS",
+        "MJ-SS"
+      ],
+      "owned": [
+        "UITests/AfterGlowJourneyTests+Onboarding.swift",
+        "Tests/RealJobs/suite/open-samples/open-samples.jobs.json",
+        "scripts/ci",
+        "docs/blueprints/suite/features/sample-files.wave.json"
+      ],
+      "waits": {
+        "SS-vector": [
+          "SS-7"
+        ],
+        "SS-raster": [
+          "SS-7"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

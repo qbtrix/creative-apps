@@ -16,7 +16,8 @@
 // row of damaged tiles as one region, the rows on their own tasks. With
 // resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
 // composites from them in one batch, so a frame uploads only the tiles that
-// changed, those across the cores. Export and `composite()` stay on
+// changed, those across the cores, and `composites` keeps the live route's
+// base composites (PhotoLiveTone.swift). Export and `composite()` stay on
 // `rendered(_:)` (CoreRaster directly), the reference both routes are held
 // to. Linux-safe: the Metal backend is the app's to make.
 import CoreColor
@@ -29,6 +30,8 @@ public struct PhotoRenderRoute: Sendable {
     public let preferred: (any RenderBackend)?
     /// Layer tiles kept on `preferred` between renders; nil uploads every tile a render composites.
     public let resident: ResidentSurfaces?
+    /// The live route's base composites, one per region, kept while their layers are unchanged.
+    public let composites = PhotoCompositeCache()
 
     public init(preferred: (any RenderBackend)? = nil, resident: ResidentSurfaces? = nil) {
         self.preferred = preferred
@@ -88,10 +91,9 @@ extension PhotoWorkspace {
             adjusted, x: inner.x - outer.x, y: inner.y - outer.y, width: inner.width, height: inner.height)
     }
 
-    /// The visible layers over transparency in `rect`, bottom first, from `resident`: each pixel layer's
-    /// tiles under `rect` synced there (an unchanged tile is not uploaded again, a clear one is skipped),
-    /// then one batched composite onto a blank surface, whole tiles, no CPU scan of their pixels. Nil when
-    /// a visible layer needs the other path: an adjustment layer, or an opacity CoreRaster rejects.
+    /// The visible layers over transparency in `rect`, bottom first, from `resident` (`residentComposited(_:layers:
+    /// on:resident:)`). Nil when a visible layer needs the other path: an adjustment layer, or an opacity
+    /// CoreRaster rejects.
     func residentComposited(_ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces) throws
         -> RenderSurface?
     {
@@ -102,24 +104,15 @@ extension PhotoWorkspace {
                 return (0...1).contains(Float(layer.opacity))
             })
         else { return nil }
-        var tiles: [(key: ResidentKey, pixels: PixelBuffer, at: PixelRect, layer: PhotoLayer)] = []
-        for layer in shown {
-            guard let tiled = pixels[layer.id] else { continue }
-            let region = PixelRect(x: rect.x - layer.offsetX, y: rect.y - layer.offsetY, width: rect.width, height: rect.height)
-            for i in tiled.tileIndices(in: region) where tiled.tiles.indices.contains(i) {
-                let at = tiled.tileRect(i).offsetBy(layer.offsetX - rect.x, layer.offsetY - rect.y)
-                tiles.append((ResidentKey(layer: layer.id, tile: i), tiled.tiles[i], at, layer))
-            }
-        }
-        // The changed tiles upload across the cores, as the CPU route renders its tiles; steps stay in order.
-        let surfaces = try PhotoLayerComposite.inParallel(tiles.count) { [tiles] i in
-            try resident.surface(tiles[i].key, pixels: tiles[i].pixels)
-        }
-        let steps = zip(tiles, surfaces).compactMap { tile, surface in
-            surface.map {
-                CompositeStep($0, x: tile.at.x, y: tile.at.y, mode: tile.layer.blendMode, opacity: Float(tile.layer.opacity))
-            }
-        }
+        return try residentComposited(rect, layers: shown, on: dispatcher, resident: resident)
+    }
+
+    /// The pixel layers `layers` (bottom first) over transparency in `rect`: their tiles under `rect` synced to
+    /// `resident` (`residentSteps`), then one batched composite onto a blank surface, whole tiles, no CPU scan
+    /// of their pixels.
+    func residentComposited(_ rect: PixelRect, layers: [PhotoLayer], on dispatcher: RenderDispatcher,
+                            resident: ResidentSurfaces) throws -> RenderSurface {
+        let steps = try residentSteps(layers, in: rect, resident: resident)
         var picture = try dispatcher.blank(width: rect.width, height: rect.height)
         do {
             try dispatcher.composite(steps, onto: &picture)
@@ -128,6 +121,29 @@ extension PhotoWorkspace {
             throw error
         }
         return picture
+    }
+
+    /// The pixel layers' tiles under `rect` (bottom first) as composite steps onto a surface of `rect`, each
+    /// synced to `resident` (an unchanged tile is not uploaded again, a clear one is skipped). The changed tiles
+    /// upload across the cores, as the CPU route renders its tiles; the steps stay in order.
+    func residentSteps(_ layers: [PhotoLayer], in rect: PixelRect, resident: ResidentSurfaces) throws -> [CompositeStep] {
+        var tiles: [(key: ResidentKey, pixels: PixelBuffer, at: PixelRect, layer: PhotoLayer)] = []
+        for layer in layers {
+            guard let tiled = pixels[layer.id] else { continue }
+            let region = PixelRect(x: rect.x - layer.offsetX, y: rect.y - layer.offsetY, width: rect.width, height: rect.height)
+            for i in tiled.tileIndices(in: region) where tiled.tiles.indices.contains(i) {
+                let at = tiled.tileRect(i).offsetBy(layer.offsetX - rect.x, layer.offsetY - rect.y)
+                tiles.append((ResidentKey(layer: layer.id, tile: i), tiled.tiles[i], at, layer))
+            }
+        }
+        let surfaces = try PhotoLayerComposite.inParallel(tiles.count) { [tiles] i in
+            try resident.surface(tiles[i].key, pixels: tiles[i].pixels)
+        }
+        return zip(tiles, surfaces).compactMap { tile, surface in
+            surface.map {
+                CompositeStep($0, x: tile.at.x, y: tile.at.y, mode: tile.layer.blendMode, opacity: Float(tile.layer.opacity))
+            }
+        }
     }
 
     /// The visible layers over transparency in `rect`, bottom first.
@@ -174,7 +190,8 @@ extension PhotoWorkspace {
             var (source, x, y) = (tile, at.x, at.y)
             // Out of range, CoreRaster throws for the opacity: send the whole tile so the error comes back.
             if inRange {
-                guard let painted = try PhotoLayerComposite.paintedRect(of: tile) else { continue }
+                let over = PixelRect(x: -at.x, y: -at.y, width: rect.width, height: rect.height)
+                guard let painted = try PhotoLayerComposite.paintedRect(of: tile, in: over) else { continue }
                 if painted.width != tile.width || painted.height != tile.height {
                     source = try tile.cropped(x: painted.x, y: painted.y, width: painted.width, height: painted.height)
                 }

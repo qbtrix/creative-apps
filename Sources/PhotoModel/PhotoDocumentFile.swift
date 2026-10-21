@@ -70,12 +70,14 @@ extension PhotoWorkspace {
     }
 
     /// Opens a flat file through `open(_:name:codec:longestSide:)` and sets
-    /// `fileKind` from its name, so a just-opened PNG saves in place.
+    /// `fileKind` from its name, so a just-opened PNG saves in place. A file
+    /// opened smaller (`longestSide`, past the pixel cap) is `.readOnly`:
+    /// Save asks where rather than replace the full-size original.
     public mutating func openImage(
         _ data: Data, name: String, codec: some PhotoImageCodec, longestSide: Int? = nil
     ) throws {
         try open(data, name: name, codec: codec, longestSide: longestSide)
-        fileKind = Self.fileKind(forName: name)
+        fileKind = longestSide == nil ? Self.fileKind(forName: name) : .readOnly
     }
 
     /// The name Save as Photo Document offers: the document's name with

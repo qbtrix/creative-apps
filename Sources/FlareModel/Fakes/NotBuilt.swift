@@ -59,7 +59,7 @@ extension NotBuilt: PropertyAnimating, KeyframeEditing, KeyframeEasing, OnionSki
     public func toggleAnimated(_: String, owner _: LayerOwner, layerID _: String, frame _: Int, lastFrame _: Int, in _: inout CommandEngine) throws { throw self }
     public func toggleKey(_: String, owner _: LayerOwner, layerID _: String, frame _: Int, in _: inout CommandEngine) throws { throw self }
     public func setFill(_: Fill, of _: [StageAddress], in _: inout CommandEngine) throws { throw self }
-    public func setStroke(_: Stroke?, of _: [StageAddress], in _: inout CommandEngine) throws { throw self }
+    public func setStroke(_: Stroke?, of _: [StageAddress], coalesceKey _: String?, in _: inout CommandEngine) throws { throw self }
     public func rows(_: Document, owner _: LayerOwner) -> [TimelineRow] { [] }
     public func labels(_: Document, sceneID _: String) -> [String: Int] { [:] }
     public func moveKeys(_: Set<KeyRef>, by _: Int, owner _: LayerOwner, coalesceKey _: String?, in _: inout CommandEngine) throws { throw self }
