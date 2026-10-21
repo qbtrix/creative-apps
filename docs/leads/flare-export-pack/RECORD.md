@@ -56,3 +56,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 17:11Z: heartbeat: waiting on SM-a #4034 #4035 (open in lane)
 - 17:31Z: heartbeat: waiting on SM-a #4034 #4035 (open in lane)
 - 17:51Z: Still waiting on SM-a #4034 #4035 (open in lane).
+- 18:12Z: Waiting on SM-a #4034 (now needs-rebase, owner's to fix) and #4035.
