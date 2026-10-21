@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-21T16:47Z	3	question	#3725	asked supervisor: keep waiting on #4034 or stack ST-a as draft
 2026-10-21T17:06Z	3	answer	#3725	supervisor: stack ST-a as draft on #4034
 2026-10-21T17:06Z	3	stage-start	wave A	ST-a builder on lead/shell-media-SM-1
+2026-10-21T17:22Z	3	pr-opened	#4135	ST-a text contract draft on #4034, mutate 4/4
