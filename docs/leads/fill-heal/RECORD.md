@@ -4,7 +4,7 @@ Issue: #3778 · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a15cb4e0f5-ipbr (took over from act-1a15c4e2e3b-zh3u, released 04:25Z) · Session: claude/lead-fill-heal-adjust-everywhere-4clx57 · Started: 2026-10-21T02:36Z, relaunched 2026-10-21T04:29Z
 Stage: 3 wave 1
 Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: wait on IM-a (#3715) per the supervisor's 04:24Z answer on #3778; poll every 20 min; if nothing lands by 06:30Z the run is released and relaunched once IM-a is on dev
+Next: wait on IM-a (#3715) and BK-m (#3758) per the supervisor's 04:24Z answer on #3778; poll every 20 min; if nothing lands by 06:30Z the run is released and relaunched once IM-a is on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
