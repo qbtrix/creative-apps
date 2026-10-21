@@ -56,6 +56,7 @@ private func picked(_ project: HaloProject, _ layerID: String) -> Set<Int> {
     pickAlso(&project, rig, 0)
     for _ in 0..<3 { project.moveKeys(by: 2, dragStart: 0) }
     project.endKeyDrag()
+    #expect(project.keyDragSerial == 1)
     project.moveKeys(by: 1, dragStart: 6)
     project.endKeyDrag()
     #expect(project.history.undo.count == 2)
