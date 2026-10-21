@@ -4,7 +4,7 @@ Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: dev anchors fixed by #3996 (#3980 closed as superseded), rerun scripts/ci --changed on #3961, swap no-fast-lane for fast-lane, set Fast-Check: pass and Head:; #3963 (stacked on #3961) follows once #3961 merges; re-read FC-d, LF-m, LC-m for FO-5 Blocked-wait polls with no change: 3 (09:20, 09:54, 10:30); Question for the supervisor posted 10:30, waiting on the answer.
+Next: FO-4 #3961 merged with dev; its gate failed only on tenThousandPaths (24 ms single run vs 20 ms under parallel load), now timed by Budget.measure median over 10 runs, re-gating; on PASS push, Fast-Check: pass, Head:, fast-lane. #3963 (FO-u, stacked) follows once #3961 merges. Re-read FC-d, LF-m, LC-m for FO-5. Blocked-wait polls with no change: 3 (09:20, 09:54, 10:16); Question for the supervisor posted 10:16, waiting on the answer.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
