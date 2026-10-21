@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-21T22:46Z	check	heartbeat: #4165 clean in lane; scoped photo run 39687866678 queued on d8b1b210 (contains f2953daf, PF-a) - waits for it
 2026-10-21T23:07Z	check	heartbeat: #4165 clean in lane; scoped photo run 39687866678 (PF-a) still queued
 2026-10-21T23:40Z	fix	#4165 macOS build red: RenderBudgetPhotoPlaceTests sends PhotoPlaceIntent.files, which #4164 (PF-2) replaced with .drop; dev is red on macOS for everyone (#3856). Porting fix #4215 into the PR; gate running
+2026-10-21T23:50Z	fix	#4165 pushed fef845ec (port of #4215, CI --changed PASS), Head moved; lane rebuilds on macOS. Cause was our #4164 (PF-2)
