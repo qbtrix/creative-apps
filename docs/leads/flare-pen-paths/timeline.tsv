@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T11:37:03Z	heartbeat	check	-	FP-e:waits on full CI 39592552743 (ded2ca57); #4027 #4029 open clean fast-lane
 2026-10-21T11:59:47Z	heartbeat	FP-e blocked poll 3/3 (run 39592552743 Linux red on Photo CommandPathTests, #3856); rule-23 question posted	#3519#issuecomment-6315361799	PRs 4025-4033 open, no needs-fix; #3770 open
 2026-10-21T12:24:23Z	FP-e	slice done	#3519#issuecomment-6315821062	run 39596004859, only the Library timing flake (supervisor answer)
+2026-10-21T12:47:23Z	heartbeat	#4027 #4029 held by Linux red on Photo CommandPathTests (heads predate #4008); merging dev in and re-gating	-	fix in flight
