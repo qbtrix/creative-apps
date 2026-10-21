@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-21T22:01Z	3	blocked	#4184	integrated 976774dd; gate fails only on dev-red #3856; commented on #3757
 2026-10-21T22:28Z	3	poll	#4184	dev now red on library baseline (#3967) instead of launcher; DS-m still blocked
 2026-10-21T22:42Z	3	poll	#4184	lane waiting, CI red (Linux) from dev-red #3856 (library baseline); blocked poll 1 of 3
+2026-10-21T22:57Z	3	poll	#4184	dev still red on library baseline (#3856); blocked poll 2 of 3
