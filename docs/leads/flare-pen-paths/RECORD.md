@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T22:49Z) #4204 macOS build 39679130271 failed on dev's own break (RenderBudgetPhotoPlaceTests: PhotoPlaceIntent.files removed by #4164 after #4003); line:photo's fix, noted on #4204 and dev-red #3856. #4204 waits for it; PN-3 #4203 open.
+Next: (2026-10-21T23:12Z) #4204 (FP-a fix 2) waits on dev's Photo build fix #4215 (open, in lane) and a lane rebuild; then post-round-2 critic panel. FP-u waits on PN-3 #4203 (open).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
