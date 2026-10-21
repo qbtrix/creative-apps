@@ -50,3 +50,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T19:06Z: BK-u #3967 got needs-fix: the batch's Linux check failed CommandPathTests (library). The five backup sites are now listed in the command-path baseline, as FC-5 and PT-3 did. dev merged in, gate PASS, pushed 780c26c, Head moved. Waiting on the lane's new macOS build and batch.
 
 - 2026-10-21T20:08Z: Watch: BK-u #3967 at 780c26c had needs-fix dropped and waits on the lane's macOS build.
+
+- 2026-10-21T20:39Z: BK-u #3967: its lane macOS build 39661645674 passed at 780c26c. Waiting for a lane batch; 63 fast-lane PRs are open on dev.

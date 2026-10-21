@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T18:42:52Z	-	wait	-	lead/catalog-backup now mirrors this record. BK-u #3967 at cf07beb waits on a lane batch (macOS build 39632012767 succeeded).
 2026-10-21T19:06:20Z	-	fix	BK-u	BK-u #3967 got needs-fix: the batch's Linux check failed CommandPathTests (library). The five backup sites are now listed in the command-path baseline, as FC-5 and PT-3 did. dev merged in, gate PASS, pushed 780c26c, Head moved. Waiting on the lane's new macOS build and batch.
 2026-10-21T20:08:48Z	-	watch	BK-u	Watch: BK-u #3967 at 780c26c had needs-fix dropped and waits on the lane's macOS build.
+2026-10-21T20:39:41Z	-	watch	BK-u	BK-u #3967: its lane macOS build 39661645674 passed at 780c26c. Waiting for a lane batch; 63 fast-lane PRs are open on dev.
