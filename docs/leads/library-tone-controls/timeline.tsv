@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-21T08:11Z	check	heartbeat	TC	still blocked: no ToneSettings/ToneRows on dev 5a911587; TC-a #3476 open, no PR
 2026-10-21T10:18Z	check	heartbeat	LT-a	run act-1a15df37b73-k199 took over; TC-a not on dev e2b8aa76, #3476 needs-human; rebase of lead/tone-controls skipped (see Decisions); question to supervisor
 2026-10-21T11:30Z	check	heartbeat	LT-a	still blocked on dev ded2ca57: no TC-a, #3476 waiting-on-prereq; Question for the supervisor posted on #3475 (rule 23)
+2026-10-21T11:45Z	stage	parked	LT-a	supervisor answer on #3475: park until TC-a (#3476) is on dev; no rebase; run released from tone-controls

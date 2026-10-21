@@ -25,6 +25,7 @@ Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRow
 |---|---|---|---|---|---|
 
 ## Decisions
+- Parked on the supervisor's answer, 2026-10-21T11:29Z. Resume at Stage 0 once #3475 loses waiting-on-prereq.
 - Record branch is lead/library-tone-controls, not lead/tone-controls: that branch holds the live suiteui tone-controls lead's record (#3476, run act-1a15821c836-93pf) and pushing there would clobber it.
 - Base is dev, not main: the packet exists only on dev, and PRs target dev.
 - Run act-1a15b98bc49-4lk9 keeps this record branch: Belt's nudge names lead/tone-controls, but that is the suiteui lead's live record (see above).
@@ -33,7 +34,5 @@ Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRow
 - Run act-1a15df37b73-k199: the brief says to rebase lead/tone-controls onto origin/main with --force-with-lease. Not done: that branch is the suiteui tone-controls lead's record (#3476), it shares no merge base with main and carries 1,739 non-record commits, so a rebase rewrites another lead's live history. This record stays on lead/library-tone-controls. Raised as a question below.
 
 ## Open
-- Blocked on suiteui tone-controls TC-a/TC-3/TC-5/TC-6, suite-imaging IM-library, library cull-finish DR-m (all planned).
-- #3476 (suiteui tone-controls) is labelled needs-human and waiting-on-prereq; no TC-a PR is open and SuiteKernel has no tone files on dev e2b8aa76.
-- Question for the supervisor, posted on #3475 at 11:30Z (issuecomment-6314752314): keep polling or park #3475 until #3476 moves; is the lead/tone-controls rebase still wanted? Waiting on the answer.
-- Re-checked on dev ded2ca57 at 11:30Z: still no TC-a, and #3476 is waiting-on-prereq (needs-human is gone).
+- Parked by the supervisor (#3475, 11:29Z): LT-a waits on suiteui TC-a (#3476), and TC-a waits on suite-imaging IM-a and autosave-history AH-a. #3475 is labelled waiting-on-prereq; the supervisor removes the label once TC-a is on dev. This run is released from tone-controls and polls it no more.
+- No rebase of lead/tone-controls. The supervisor confirmed it is the suiteui lead's record; this lead's record is on lead/library-tone-controls.
