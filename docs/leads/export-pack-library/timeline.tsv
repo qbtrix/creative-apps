@@ -11,3 +11,4 @@ time	event	task	note
 2026-10-20T22:32:56Z	check	check-in: LX-1 #3696 clean, awaiting lane; LX-3 waits on it; XP-2/3/7 not on dev
 2026-10-21T00:05:30Z	check	check-in: LX-1 #3696 merged (7f3959c); LX-a still needs LX-2 (waits XP-3); LX-3 #3699 rebuilt on dev (slice diff only), gate running. Belt's 'lead/export-pack' is the core lead's branch; this feature's record is lead/export-pack-library
 2026-10-21T00:16:12Z	stage	LX-3 #3699 rebuilt on dev (6 files +38/-8), CI: PASS, pushed 7909013, ready (draft off)
+2026-10-21T00:33:02Z	check	check-in: LX-3 #3699 ready on 7909013, awaiting lane batch; XP-2/3/7 not on dev (XP-1, XP-6 are)
