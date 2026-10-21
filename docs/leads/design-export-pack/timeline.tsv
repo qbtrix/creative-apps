@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-21T08:13Z	merged	DX-1+DX-3 in #3834 (c1d0a7be); #3833 closed superseded; DX-2 waits XP-3, DX-4 waits SM-w
 2026-10-21T08:35Z	waiting	unchanged: DX-2 waits XP-3, DX-4 waits SM-w (no shell-media lead)
 2026-10-21T08:58Z	waiting	unchanged: DX-2 waits XP-3 (waits TC-a, PL-a), DX-4 waits SM-w (no shell-media lead)
+2026-10-21T09:20Z	waiting	unchanged: DX-2 waits XP-3 (waits TC-a, PL-a), DX-4 waits SM-w (no shell-media lead)
