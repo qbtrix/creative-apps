@@ -3,9 +3,9 @@
 // then three added rectangles: the panel at the trailing edge lists "Open" with
 // the saved dot and the three steps, the last current, under its "History" title
 // and "3 steps" (#3945). The editor wears DesignHistoryArea itself, shown, so the
-// panel is the window's own trailing inset (#3949): a geometric test holds it
+// panel sits beside the editor as in the window (#3949): a geometric test holds it
 // inside the window, flush at the trailing edge, at the panel width, and clear of
-// the editor's columns. Writes design-history-panel-light.png and
+// the editor's columns, the inspector included. Writes design-history-panel-light.png and
 // design-history-panel-dark.png. macOS only.
 import AppKit
 import DesignModel
@@ -78,14 +78,17 @@ import Testing
         let panel = try #require(await w.element(DesignHistoryArea.panelID), "no History panel in the window")
         let bounds = CGRect(origin: .zero, size: size)
         #expect(bounds.insetBy(dx: -0.5, dy: -0.5).contains(panel), "the panel \(panel) leaves the window")
-        #expect(abs(panel.width - SuiteSize.editorPanelWidth) < 1, "the panel is \(panel.width) wide")
-        #expect(abs(panel.maxX - (size.width - SuiteSpacing.s)) < 1, "the panel ends at \(panel.maxX)")
+        // The element's frame is the GlassPanel's content box: the glass is `editorPanelWidth` wide,
+        // its content inset by GlassPanel's horizontal padding (SuiteSpacing.l) on each side.
+        let glass = panel.insetBy(dx: -SuiteSpacing.l, dy: 0)
+        #expect(abs(glass.width - SuiteSize.editorPanelWidth) < 1, "the panel is \(glass.width) wide")
+        #expect(abs(glass.maxX - (size.width - SuiteSpacing.s)) < 1, "the panel ends at \(glass.maxX)")
         #expect(panel.height > size.height / 2, "the panel is only \(panel.height) tall")
         let columns = await w.splitViews()
         #expect(!columns.isEmpty, "the editor has no split view")
         for split in columns {
             let frame = split.convert(split.bounds, to: nil)
-            #expect(frame.maxX <= panel.minX + 0.5, "an editor column \(frame) runs under the panel \(panel)")
+            #expect(frame.maxX <= glass.minX + 0.5, "an editor column \(frame) runs under the panel \(glass)")
         }
     }
 }
