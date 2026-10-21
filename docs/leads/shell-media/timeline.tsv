@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T15:16Z	2026-10-21T15:16:45Z	3	gate-restored	#4034	dev merged, scripts/ci --changed PASS (3rd run; Library timing test flaked twice under load), markers restored at 53f5d3e
 2026-10-21T15:39Z	2026-10-21T15:39:41Z	stage3	poll	lane	macOS builds pending on 4021/4034/4048; 4023 merged dev, awaiting lane
 2026-10-21T16:00Z	2026-10-21T16:00:52Z	stage3	poll	lane	#4048 macOS build green; #4034 building; #4021 #4023 queued; needs-rebase dropped on #4023
+2026-10-21T16:22Z	2026-10-21T16:23Z	wave2	building	SM-3..SM-7	finisher agent on prior worktree commits; parents #4034 #4035 in lane
