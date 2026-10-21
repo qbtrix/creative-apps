@@ -58,3 +58,5 @@
 - HG-7 names each fill step for its command title ("Fill Type", "Set Gradient", ...), not one "Change Fill": the kernel's catalog conformance (stepNamedTitle) requires a step named for its spec. HaloGradientTests reads "Undo Fill Type".
 - The fill.angle and fill.stop-* examples are exempt from exampleRuns in HaloCommandCatalogTests: the Ball fixture's fill is solid, and those commands need a gradient.
 - RJ-H32's pixel expectation is skipped until image codecs reach the apps (RealJobs.pixelsWait); the job still runs both steps and writes the PNG.
+- 2026-10-21: HG-m opened as #4216 (HG-6 render + HG-7 commands, 15 files, +200/-32; Mutate 5/5 HaloModel.LiveFrameRendering). The two fill mutations live in the LiveFrameRendering plan to keep the PR at 15 files. The gate also needed the catalog count in HaloShapeCommandIDTests and the halo list-commands golden to list the eight fill ids; the shading adapter is named `+Kernel` to pass check-dup-logic.
+- A REST PATCH of a PR body through `gh api --jq` piped into a file emptied #4216's body once; it was restored with the PR update tool, which does not append the footer.
