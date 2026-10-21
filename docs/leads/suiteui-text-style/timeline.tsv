@@ -1,0 +1,8 @@
+utc	stage	event	ref	note
+2026-10-21T01:21:08Z	0	stage-start	7277a83ac040f759d8bdefc150a72e7cdf2900d6	base 7277a83a, v3 packet
+2026-10-21T01:21:08Z	0	stage-end	#3779	lead branch and RECORD written
+2026-10-21T01:21:08Z	1	stage-end	text-style	packet read: slices and tasks recorded
+2026-10-21T01:21:08Z	3	stage-start	wave 1	TS-1 builder
+2026-10-21T02:19Z	3	heartbeat	-	wave 1 PR open; wave 2 starting
+2026-10-21T02:19Z	3	pr-opened	#3836	TS-1 text style contract
+2026-10-21T02:19Z	3	stage-start	wave 2	TS-m
