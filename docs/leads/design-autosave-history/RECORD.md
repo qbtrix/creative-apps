@@ -2,14 +2,14 @@
 
 Issue: #3434 · Packet: docs/blueprints/design/features/autosave-history.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z
-Stage: 3 wave 2 (DA-a #3686 fixed for CommandPathTests at 509907a6, macOS build green, waiting on its lane batch; DA-m #3710 and DA-u #3726 stacked on it)
+Stage: 3 wave 2 (DA-a #3686 merged 07f754f7; DA-m #3710 and DA-u #3726 merging dev and regating before retarget to dev)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: when #3686 merges, retarget #3710 and #3726 to dev and post Belt-Slice-Done DA-a; DA-6 waits DG-m; DA-z waits SuiteUI #3629
+Next: Belt-Slice-Done DA-a once Linux check 39520241285 (07f754f7) is green; push DA-m and DA-u merges, move Head, retarget to dev; DA-6 waits DG-m; DA-z waits SuiteUI #3629
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DA-a | adapter stubs; History panel and autosave hooks on the window; View > Show History | DA-1, DA-2 | MJ-DA | shell-parity (built) | yes | 0 | in lane #3686 | – | – |
+| DA-a | adapter stubs; History panel and autosave hooks on the window; View > Show History | DA-1, DA-2 | MJ-DA | shell-parity (built) | yes | 0 | merged 07f754f7 | – | – |
 | DA-u | toolbar History button; panel follows undo and jumps; snapshots and budget | DA-3, DA-4 | J-DA | DA-a | yes | 0 | #3726 open (head f2d0c703, base DA-a branch, Mutate 2/2) | – | – |
 | DA-m | jump records no step; recovery bytes reopen dirty; history commands in the catalog | DA-5, DA-6 | MJ-DA | DA-a; gradient-fill:DG-m (DA-6) | no | 0 | DA-5 #3710 open (head c2d68a99, base DA-a branch, Mutate 3/3); DA-6 waits DG-m | – | – |
 | DA-z | journey jumps and recovers on live; built | DA-7, DA-8 | J-DA | DA-u, DA-m; suiteui autosave-history AH-z (AH-8 #3629) | yes | 0 | planned | – | – |
@@ -40,3 +40,4 @@ Next: when #3686 merges, retarget #3710 and #3726 to dev and post Belt-Slice-Don
 - Wave 2 (wf widwznsim): DA-u (DA-3 + DA-4) and DA-5 open as PRs based on #3686's branch (lead/design-autosave-history-DA-a); the lane skips a non-dev base, and the lead retargets each to dev once #3686 merges. DA-m ships as two PRs (DA-5 now, DA-6 after gradient-fill DG-m), since DA-6 is blocked across features.
 - 2026-10-21T00:05:02Z: #3686 needs-fix (CommandPathTests: Show History Button not built from a spec) fixed by DesignMenuState.windowSpecs view.history and MenuCommand(spec, on:); mutate 7/7.
 - Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
+- 2026-10-21T00:27:40Z: DA-a merged as 07f754f7. DA-m and DA-u merge origin/dev (add/add conflicts on DA-a's files resolved to the branch side; dev's copies equal 509907a6), so their diffs against dev are their own slices only.
