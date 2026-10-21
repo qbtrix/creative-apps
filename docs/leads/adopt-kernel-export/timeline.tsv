@@ -97,3 +97,4 @@ utc	stage	event	ref	note
 2026-10-20T00:19Z	question	rule 23: 3+ identical blocked polls; posted Question for the supervisor (#1508 6280289229, #1939 6280289878); stopped CI polling; hourly check for replies only
 2026-10-21T05:25:06Z	2	wave-1 start	-	AX-photo (slice/ax-photo) and AX-library (slice/ax-library) building
 2026-10-21T06:44:30Z	3	wave1 PRs open #3890 #3893	-	lane merges #3890/#3893, then green ci.yml on main -> Belt-Slice-Done
+2026-10-21T06:48:26Z	3	heartbeat: AX PRs in lane	-	lane merges #3890 #3893; then Belt-Slice-Done
