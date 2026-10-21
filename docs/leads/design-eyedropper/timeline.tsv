@@ -39,3 +39,5 @@ utc	stage	event	ref	note
 2026-10-21T08:10Z	check	lane	#3887 #3889 #3891	DY-a fixes open in lane; scoped 39558386118 done (macOS red #3856, snapshots up); journeys 39564988409 queued, DY-u critics wait screens
 2026-10-21T08:32Z	check	lane	#3887 #3889 #3891	DY-a fixes still in lane; journeys 39564988409 still queued (runners busy), DY-u critics wait screens
 2026-10-21T09:00Z	merge	DY-a fixes	#3887 #3889 #3891	merged 08:48Z (658fce7f af8fdc3a 45e8bd4d); slice-done waits dev CI 39573184415 Linux
+2026-10-21T09:25Z	check	dev-ci	39573184415	Linux red: DY-a mutation anchors stale after DS-a #3857 reworded the case line; fix #3980 (placed-images lead) in lane; Slice-Done DY-a waits next green Linux
+2026-10-21T09:25Z	stage	critics	DY-u	critic-panel wf_3582a1a8-d8b on run 39558386118 + journeys 39564988409 (J-DY skips until DY-7)
