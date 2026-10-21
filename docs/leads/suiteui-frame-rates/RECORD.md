@@ -4,13 +4,13 @@ Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
 Stage: 3 wave 2
 Base: dev
-Next: FR-a #4063 waits on the lane's macOS build (run 39600275867, queued); FR-m gating
+Next: serial gates, then open wave-1 PRs and stacked PRs as parents merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FR-a | The kernel declares FrameRate, the common list, Timecode and the two time.* specs as stubs, with their tests written and disabled. | FR-1, FR-2 | MJ-FR | editor-kernel, command-catalog (built, `depends`) | no | 0 | pr-open | – | – |
-| FR-m | Rates are exact rationals, a duration in seconds becomes whole frames by one rounding rule, and timecode is drop-frame at 29.97 and 59.94 and round-trips at every rate. | FR-3, FR-4 | MJ-FR | FR-a | no | 0 | building | – | – |
+| FR-m | Rates are exact rationals, a duration in seconds becomes whole frames by one rounding rule, and timecode is drop-frame at 29.97 and 59.94 and round-trips at every rate. | FR-3, FR-4 | MJ-FR | FR-a | no | 0 | built at 6fe38e4f9, re-gating | – | – |
 | FR-u | SuiteUI's timeline readout shows timecode at the document's rate and its rate menu offers the one list, reachable from the gallery's timeline page on the fakes. | FR-5, FR-6 | SJ-FR | FR-a; shared files, after timeline-select-all:TSA-a (FR-5) | yes | 0 | planned | – | – |
 | FR-halo | A Halo composition can be 23.976, 29.97, 50 or 59.94 fps, its render times every frame by the exact rate, its readout shows drop-frame timecode, and every old file opens byte for byte. | FR-7, FR-8 | MJ-FR-halo, HJ-FR | FR-a (FR-7); FR-m and FR-u (FR-8); adopt-kernel-easing AE-halo and the Halo catalog chain (cross-line); shared files, after adopt-command-catalog:AC-z (FR-8), adopt-kernel-session:AD-halo (FR-8) | yes | 0 | planned | – | – |
 | FR-flare | A Flare scene can be 23.976, 29.97, 50 or 59.94 fps on the stage, in the inspector and in the Lottie it writes, and every old file opens unchanged. | FR-9, FR-10 | MJ-FR-flare, FJ-FR | FR-a (FR-9); FR-m and FR-u (FR-10); the creative-core rate bump, adopt-kernel-easing AE-flare and the Flare catalog chain (cross-line); shared files, after adopt-command-catalog:AC-z (FR-10) | yes | 0 | planned | – | – |
@@ -49,4 +49,5 @@ Next: FR-a #4063 waits on the lane's macOS build (run 39600275867, queued); FR-m
 - FR-halo on adopt-command-catalog:AC-z and adopt-kernel-session:AD-halo; FR-flare on AC-z and a creative-core rational-rate bump. Rechecked before each starts.
 - dev-red #3856 fixed on dev by #4008; wave-1 slices merged dev and re-gated.
 - timeline-select-all is built, so FR-u can start once a builder slot frees.
+- FR-m: dev #4050 moved both Library timing tests into perf-suites; merged dev and re-gating serially (serialgate.sh).
 
