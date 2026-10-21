@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: 3 wave 1 done (DK-a done: Belt-Slice-Done posted with run 39670298178, gaps #3865 #3871 #3873); blocked poll 3 at 22:21Z, asked the supervisor
+Stage: 3 wave 1 done (DK-a done: Belt-Slice-Done posted with run 39670298178, gaps #3865 #3871 #3873); supervisor 22:4xZ: keep going, DT-u and DT-m queued on the Mac gate behind #4215
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: DK-u waits shape-tools:DS-u (waits transform DT-u, building: DT-4 behind #4159); DK-m waits shape-tools:DS-m (waits DT-m: #4187 open, DT-6 after DG-m; and eyedropper DY-m). Re-read waits every poll
 
