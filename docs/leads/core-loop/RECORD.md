@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: wave 5 building CL-10 (stacked on lead/core-loop-probe, #4147) and CL-z CL-13+CL-14 (stacked on lead/core-loop-live, #4148); then check the lane and dev CI for #4147/#4148
+Next: wave 5 building CL-10 (stacked on lead/core-loop-probe, #4147) and CL-z CL-13+CL-14 (on dev; #4148 merged 5803475); then check the lane and dev CI for #4147/#4148
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,7 +13,7 @@ Next: wave 5 building CL-10 (stacked on lead/core-loop-probe, #4147) and CL-z CL
 | CL-ui | Render… opens SuiteUI ExportSheet on the kernel run; render budget on | CL-4, CL-5 | H-J21 | CL-a | true | 0 | done: #3590 ui1 + #3653 ui2 merged; Belt-Slice-Done + Mac-Finish-Wanted at run 39507877855 (23:50Z) | | |
 | CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
 | CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | PR #4147 open | | |
-| CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | CL-11 merged; #4148 (#865+CL-12) open; CL-10 building | | |
+| CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | CL-11 merged; #4148 (#865+CL-12) merged 5803475; CL-10 building | | |
 | CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | building (wave 5) | | |
 
 ## Tasks
@@ -30,8 +30,8 @@ Next: wave 5 building CL-10 (stacked on lead/core-loop-probe, #4147) and CL-z CL
 | CL-9 | CL-probe | – | RenderBudgetHaloProbeTests.bodies on | Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift | bodies | #4147 | open c6770b5e |
 | CL-10 | CL-measure | – | H-P1..H-P5 journeys on | UITests/HaloJourneyTests+Perf.swift | perf journeys | | building, stacked on #4147 |
 | CL-11 | CL-measure | 2 | L3..L5 and latency line on | Tests/AppSnapshotTests/HaloLayoutTests.swift, HaloViewerLatencyTests.swift | layout tests | | #3487 merged d9bc0337 |
-| CL-12 | CL-measure | – | -HaloFixture → -HaloSample in six journeys | UITests/HaloJourneyTests*.swift | journeys | #4148 | open 91746810 (with #865) |
-| CL-13 | CL-z | – | H-J12 live | UITests/HaloJourneyTests.swift | H-J12 | | building, stacked on #4148 |
+| CL-12 | CL-measure | – | -HaloFixture → -HaloSample in six journeys | UITests/HaloJourneyTests*.swift | journeys | #4148 | merged 5803475 (with #865) |
+| CL-13 | CL-z | – | H-J12 live | UITests/HaloJourneyTests.swift | H-J12 | | building on dev (after #4148 merged) |
 | CL-14 | CL-z | – | status built, waves.in.md, blueprint prose (feature-done) | core-loop.wave.json, waves.in.md, halo.md | scripts/ci | | building with CL-13 (feature-done) |
 
 ## Reviews
@@ -42,7 +42,7 @@ Next: wave 5 building CL-10 (stacked on lead/core-loop-probe, #4147) and CL-z CL
 - W1: CL-a1 = CL-1+CL-2 (~380 lines, 3 files), CL-a2 = CL-3 (~300, 5). Independent: both (disjoint files, CL-3's suites need no CL-2 code).
 - W2 (started at once, stacked): CL-run1 = CL-6 on CL-a1 (needs the stubs and the disabled tests); CL-ui = CL-4+CL-5 on CL-a1+CL-a2 (CL-4 needs the stubs, CL-5 the CL-3 suite); CL-11 on CL-a2 (enables CL-3's layout and latency tests).
 - W3: CL-run2 = CL-7 on CL-run1 (reads the kernel run CL-6 fills).
-- Open: #4147 (CL-8, CL-9), #4148 (#865, CL-12). Building: CL-10 on #4147; CL-13+CL-14 on #4148.
+- Open: #4147 (CL-8, CL-9). Merged: #4148 (#865, CL-12) 5803475. Building: CL-10 on #4147; CL-13+CL-14 on dev.
 
 ## Decisions
 - Run kvrn: #3401 closed (#3981) and KE-a is done, so CL-probe starts. Supervisor told the lead to take #865 (A-HA-1) on this line; it ships with CL-12 as one CL-measure PR (both edit HaloJourneyTests.swift). CL-10 is a second CL-measure PR stacked on CL-probe.
