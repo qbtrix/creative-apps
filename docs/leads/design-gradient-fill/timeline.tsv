@@ -15,3 +15,4 @@ time	kind	note
 2026-10-21T08:46:56Z	3	wave	DG-u	run act-1a15da1b26c-9qo6 resumes; GF-3 merged, DG-u starts
 2026-10-21T09:00:10Z	3	pr	DG-u	#3978 opened, head 3666d345, scripts/ci --changed PASS
 2026-10-21T09:28:12Z	3	heartbeat	DG-u	#3978 open, macOS build 39574568750 queued; dev Linux red on stale DY anchors (#3980 open); PR body footers removed; 0 open findings on gradient-fill
+2026-10-21T09:51Z	3	heartbeat	DG-u	check-in: #3978 mac build 39574568750 green, waits on batch; #3980 #3983 open; dev Linux 39579635083 red on #3857 anchors (#3980 fixes); scoped design 39578329384 queued for critics
