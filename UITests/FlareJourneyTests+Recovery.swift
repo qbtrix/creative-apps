@@ -8,13 +8,14 @@
 // shows it). Then Select drags Ball (at (80, 100) on frame 0) 100 scene
 // points right; the suite's `.autosaveRecovery` writes `flare.main.flare`
 // and then `flare.main.json` under `<support>/Flare/Recovery/` 30 s after
-// that last edit. `app.terminate()` stands in for a crash; a relaunch on the
-// same store with no document offers "Restore the autosaved changes to
-// “<name>”?" with "Autosaved <time>." and `suite.recovery.restore` and
-// `suite.recovery.discard`. Restore brings back
-// the document, edited and untitled, with Ball at the moved spot: a click
-// there selects Ball's track, a click where Ball was doesn't. One shot per
-// step, `flare-recovery-<step>`.
+// that last edit. A second drag moves Ball 100 points further, and ⌘Q
+// quits well inside the next 30 s, so only the quit's own write can keep it.
+// A relaunch on the same store with no document offers "Restore the
+// autosaved changes to “<name>”?" with "Autosaved <time>." and
+// `suite.recovery.restore` and `suite.recovery.discard`. Restore brings back
+// the document, edited and untitled, with Ball where the second drag left
+// it: a click there selects Ball's track, a click at the first drag's spot
+// doesn't. One shot per step, `flare-recovery-<step>`.
 import XCTest
 
 final class FlareRecoveryJourneys: XCTestCase {
@@ -71,8 +72,14 @@ final class FlareRecoveryJourneys: XCTestCase {
         XCTAssertGreaterThanOrEqual(waited, 25, "it autosaved \(waited) s after the drag; the delay is 30 s")
         flare.shot("recovery-2-autosaved")
 
-        // 3. A crash, then a launch with no document: the offer with its time, Restore and Discard.
-        flare.app.terminate()
+        // 3. A second drag, ⌘Q before its autosave is due, then a launch with no document: the offer with its
+        // time, Restore and Discard.
+        point(180, 100, on: canvas).press(forDuration: 0.1, thenDragTo: point(280, 100, on: canvas))
+        let movedAgain = Date()
+        flare.press(character: "q", .command)
+        XCTAssert(flare.app.wait(for: .notRunning, timeout: 15), "⌘Q didn't quit Flare")
+        let quitAfter = Date().timeIntervalSince(movedAgain)
+        XCTAssertLessThan(quitAfter, 25, "the quit came \(quitAfter) s after the second drag, near its autosave")
         flare = launch(recoveryFlag)
         let offer = flare.app.staticTexts.matching(NSPredicate(
             format: "label BEGINSWITH %@ OR value BEGINSWITH %@",
@@ -90,7 +97,7 @@ final class FlareRecoveryJourneys: XCTestCase {
         XCTAssert(flare.app.buttons["suite.recovery.discard"].exists, "the offer has no Discard (suite.recovery.discard)")
         flare.shot("recovery-3-offer")
 
-        // 4. Restore: edited and untitled, Ball where the drag left it.
+        // 4. Restore: edited and untitled, Ball where the second drag left it.
         restore.click()
         XCTAssert(offer.waitForNonExistence(timeout: 10), "the offer stayed up after Restore")
         let stage = flare.element("suite.canvas")
@@ -104,10 +111,10 @@ final class FlareRecoveryJourneys: XCTestCase {
         let ball = flare.element("flare.timeline").buttons.matching(
             NSPredicate(format: "label == 'Ball'")).firstMatch
         XCTAssert(ball.waitForExistence(timeout: 5), "no Ball track in the timeline")
-        point(80, 100, on: stage).click()
-        XCTAssert(waitFor { !ball.isSelected }, "a click where Ball was still hits Ball after Restore")
         point(180, 100, on: stage).click()
-        XCTAssert(waitFor { ball.isSelected }, "Restore lost the move: Ball isn't at the moved spot")
+        XCTAssert(waitFor { !ball.isSelected }, "Ball is at the first drag's spot: the quit didn't write the second")
+        point(280, 100, on: stage).click()
+        XCTAssert(waitFor { ball.isSelected }, "Restore lost the second drag: Ball isn't where it was left")
         flare.shot("recovery-4-restored")
     }
 

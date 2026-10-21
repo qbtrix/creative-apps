@@ -2,8 +2,9 @@
 // `.autosaveRecovery`. The window's id names its files in `AfterGlow/Flare/Recovery/`, the encoder copies the dirty
 // document and encodes it off main with the save path's encoder, and a restore opens the bytes as unsaved, untitled
 // work in one undo step (`RecoveryRestore`), so Undo goes back to the document the window held before. Bytes that
-// don't decode throw and change nothing. `recoveryFolder` is the folder the window hands the modifier, and
-// `moveLegacyRecovery` moves the one copy an earlier build kept (`legacyRecovery`) under the root once, never over a
+// don't decode throw and change nothing. `writeRecoveryOnQuit` is the quit's synchronous write of the same pair.
+// `recoveryFolder` is the folder the window hands the modifier, and `launchRecoveryFolder` runs
+// `moveLegacyRecovery`, which moves the one copy an earlier build kept (`legacyRecovery`) under the root once, never over a
 // newer copy. Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -24,6 +25,19 @@ extension FlareWorkspace {
     public func recoveryEncoder() -> (@Sendable () throws -> Data)? {
         guard isDirty, let document else { return nil }
         return { try FlareFormat.encode(document) }
+    }
+
+    /// The quit's last write: while dirty, the document goes to `folder` now, on the caller's thread, as the same
+    /// pair the suite's autosave writes, so the next launch offers it. False when clean or the write failed.
+    @discardableResult
+    public func writeRecoveryOnQuit(to folder: RecoveryFolder, at time: Double) -> Bool {
+        guard let encode = recoveryEncoder() else { return false }
+        do {
+            try folder.write(try encode(), window: recoveryWindow, name: fileName, at: time)
+            return true
+        } catch {
+            return false
+        }
     }
 
     /// Opens a recovered copy's bytes as unsaved, untitled work. Over an open document it is one undo step named
@@ -55,19 +69,28 @@ extension FlareWorkspace {
         return RecoveryFolder(store: store, ext: recoveryExtension)
     }
 
-    /// Moves an earlier build's `Recovery.flare` under the root once, as the main window's copy stamped with the old
+    /// This launch's folder (`recoveryFolder`), after an earlier build's copy moved into it; nil, with no move, while
+    /// recovery is off, so a launch that keeps no state never touches the person's old file.
+    public static func launchRecoveryFolder(arguments: [String], home: String, ignoresState: Bool) -> RecoveryFolder? {
+        guard let folder = recoveryFolder(arguments: arguments, home: home, ignoresState: ignoresState) else { return nil }
+        moveLegacyRecovery(into: folder, arguments: arguments, home: home)
+        return folder
+    }
+
+    /// Moves an earlier build's `Recovery.flare` into `folder` once, as the main window's copy stamped with the old
     /// file's time; the old file goes only once the copy is written. A copy already under the root wins and both
-    /// stay (`LegacySupport.plan`). Returns the step it planned; a move that fails leaves both and says so.
+    /// stay (`LegacySupport.plan`). Returns the step it took; a move that can't read, write or delete leaves both
+    /// and returns `.keepBoth`.
     @discardableResult
-    public static func moveLegacyRecovery(arguments: [String], home: String) -> LegacySupport.Step {
+    public static func moveLegacyRecovery(into folder: RecoveryFolder, arguments: [String], home: String)
+        -> LegacySupport.Step {
         let files = FileManager.default
         let old = SuiteLocations.legacyFolder(legacyRecovery, home: home)
         let new = SuiteLocations.appFolder("Flare", arguments: arguments, home: home)
             + "/Recovery/\(mainWindow).\(recoveryExtension)"
         let step = LegacySupport.plan(old: old, new: new) { files.fileExists(atPath: $0) }
-        guard case .move = step, let data = files.contents(atPath: old),
-              let folder = recoveryFolder(arguments: arguments, home: home, ignoresState: false)
-        else { return step }
+        guard case .move = step else { return step }
+        guard let data = files.contents(atPath: old) else { return .keepBoth(old: old) }
         let modified = (try? files.attributesOfItem(atPath: old))?[.modificationDate] as? Date
         do {
             try folder.write(data, window: mainWindow, name: nil, at: modified?.timeIntervalSinceReferenceDate ?? 0)

@@ -158,25 +158,70 @@ import Testing
 
     @Test func theLegacyMoveRunsOnceAndNeverOverANewerCopy() throws {
         let (home, arguments) = Self.home()
-        #expect(FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home) == .nothing)
+        let folder = Self.folder(arguments: arguments, home: home)
+        let move = { FlareWorkspace.moveLegacyRecovery(into: folder, arguments: arguments, home: home) }
+        #expect(move() == .nothing)
         let old = SuiteLocations.legacyFolder(FlareWorkspace.legacyRecovery, home: home)
         try FileManager.default.createDirectory(atPath: home + "/Library/Application Support/Flare",
                                                 withIntermediateDirectories: true)
         let bytes = try FlareFormat.encode(FlareFixtures.bounce)
         #expect(FileManager.default.createFile(atPath: old, contents: bytes))
-        let step = FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home)
+        let step = move()
         guard case .move = step else { Issue.record("expected a move, got \(step)"); return }
         #expect(!FileManager.default.fileExists(atPath: old))
-        let folder = Self.folder(arguments: arguments, home: home)
         let items = try folder.leftBehind()
         #expect(items.map(\.window) == [FlareWorkspace.mainWindow])
         #expect(items.map(\.data) == [bytes])
         #expect(items.allSatisfy { $0.savedAt > 0 })
-        #expect(FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home) == .nothing)
+        #expect(move() == .nothing)
 
         #expect(FileManager.default.createFile(atPath: old, contents: Data("older".utf8)))
-        #expect(FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home) == .keepBoth(old: old))
+        #expect(move() == .keepBoth(old: old))
         #expect(FileManager.default.fileExists(atPath: old))
         #expect(try folder.leftBehind().map(\.data) == [bytes])
+    }
+
+    @Test func anUnreadableOldCopyStaysAndIsNotAMove() throws {
+        let (home, arguments) = Self.home()
+        let old = SuiteLocations.legacyFolder(FlareWorkspace.legacyRecovery, home: home)
+        try FileManager.default.createDirectory(atPath: old, withIntermediateDirectories: true)
+        let folder = Self.folder(arguments: arguments, home: home)
+        #expect(FlareWorkspace.moveLegacyRecovery(into: folder, arguments: arguments, home: home)
+            == .keepBoth(old: old))
+        #expect(FileManager.default.fileExists(atPath: old))
+        #expect(try folder.leftBehind().isEmpty)
+    }
+
+    @Test func aLaunchWithRecoveryOffLeavesTheOldCopy() throws {
+        let (home, arguments) = Self.home()
+        let old = SuiteLocations.legacyFolder(FlareWorkspace.legacyRecovery, home: home)
+        try FileManager.default.createDirectory(atPath: home + "/Library/Application Support/Flare",
+                                                withIntermediateDirectories: true)
+        #expect(FileManager.default.createFile(atPath: old, contents: try FlareFormat.encode(FlareFixtures.bounce)))
+        #expect(FlareWorkspace.launchRecoveryFolder(arguments: [], home: home, ignoresState: true) == nil)
+        #expect(FileManager.default.fileExists(atPath: old))
+        #expect(FlareWorkspace.launchRecoveryFolder(arguments: arguments, home: home, ignoresState: true) != nil)
+        #expect(!FileManager.default.fileExists(atPath: old))
+    }
+
+    @Test func aDirtyQuitWritesTheDocumentAndACleanOneNothing() throws {
+        let (home, arguments) = Self.home()
+        let folder = Self.folder(arguments: arguments, home: home)
+        var clean = FlareWorkspace(services: .fake())
+        try clean.open(FlareFormat.encode(FlareFixtures.bounce), named: "Bounce.flare")
+        #expect(clean.writeRecoveryOnQuit(to: folder, at: 7) == false)
+        #expect(try folder.leftBehind().isEmpty)
+
+        let dirty = Self.edited()
+        #expect(dirty.writeRecoveryOnQuit(to: folder, at: 9))
+        #expect(FileManager.default.fileExists(atPath: home + "/support/Flare/Recovery/flare.main.flare"))
+        #expect(FileManager.default.fileExists(atPath: home + "/support/Flare/Recovery/flare.main.json"))
+        let items = try folder.leftBehind()
+        #expect(items.map(\.window) == [FlareWorkspace.mainWindow])
+        let item = try #require(items.first)
+        #expect(item.savedAt == 9)
+        var relaunched = FlareWorkspace(services: .fake())
+        try relaunched.restoreRecovery(item.data)
+        #expect(relaunched.document == dirty.document)
     }
 }
