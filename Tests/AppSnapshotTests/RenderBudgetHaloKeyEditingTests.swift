@@ -1,19 +1,20 @@
 // RenderBudgetHaloKeyEditingTests.swift (key-editing KE-6, Quality tests,
 // packet docs/blueprints/halo/features/key-editing.md): the timeline's key
 // editing on the real Halo window, through the harness
-// (RenderBudgetHarness.swift). On `parented` with Ball's and Rig's keys at
-// frame 0 picked (picked in the Model before the window opens: the harness's
-// presses carry no Shift) and the playhead scrubbed to 36 (at 0 its grab band
-// covers the key, so the press scrubbed instead: #4150), Ball's key is
-// dragged 120 samples right: at most 3
+// (RenderBudgetHarness.swift). On `parented` with the playhead parked at 30
+// (its band takes a press before a key under it, and the fixture opens on 0)
+// and Ball's and Rig's keys at frame 0 picked (picked in the Model before the
+// window opens: the harness's presses carry no Shift), Ball's key is dragged
+// 120 samples right, and the playhead must stay put and the key move: at most 3
 // window bodies (the lanes draw each step on their own layers, TL-22; the
 // release sends one move and its end). On `crowd` (300 lanes, 5,000 keys) a
-// press on Solid 300's bed gives the strip focus, then Select All Keys goes
-// down the responder chain as ⌘A's selectAll: does (the harness has no menu
-// bar to press ⌘A in), so the strip's onCommand runs `.selectAllKeys`: at
-// most 1 window body. The packet's p95s (drag ≤ 8 ms, ⌘A ≤ 16 ms) are
-// judged only by `timing`, which belongs in Tests/perf-suites.txt (only the
-// supervisor edits it); the body tests print them. Nested in
+// press on Solid 300's bed gives the strip focus, then selectAll: goes to the
+// first responder in the window's chain that takes it, as ⌘A's targetless
+// menu item does (the harness window is never key and has no menu bar), so
+// the strip's onCommand runs `.selectAllKeys`: at most 1 window body. The
+// packet's p95s (drag ≤ 8 ms, ⌘A ≤ 16 ms) are judged only by `timing`, which
+// Tests/perf-suites.txt lists, so it runs nightly and not in the gate; the
+// body tests print them. Nested in
 // BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -29,6 +30,8 @@ extension BodyCountSuites {
         static let ball = "comp-1-layer-2"
         static let rig = "comp-1-layer-3"
         static let solid300 = "comp-1-layer-300"
+        /// Where `keyDrag` parks the playhead: clear of the drag (frames 0 to about 9) and its snap.
+        static let playhead = 30
 
         @Test(.timeLimit(.minutes(2))) func keyDragInThreeBodies() async throws {
             let drag = try await Self.keyDrag()
@@ -56,10 +59,11 @@ extension BodyCountSuites {
         /// Picks Ball's and Rig's keys at 0 on `parented`, then drags Ball's key 120 samples right.
         static func keyDrag() async throws -> RenderStep {
             var project = HaloLaunch(arguments: ["Halo", "-HaloFixture", "parented"]).project()
+            // The playhead's band takes a press before a key under it (TimelineLaneLayers.route) and the
+            // fixture opens on Ball's key at 0, so park it off the drag's path: the press grabs the key.
+            project.scrub(to: playhead)
             project.pickLaneKeys(layerID: ball, frame: 0, mode: .replace)
             project.pickLaneKeys(layerID: rig, frame: 0, mode: .extend)
-            // Off every key: the playhead's grab band over Ball's key at 0 would take the press (#4150).
-            project.scrub(to: HaloKeyEditingSnapshots.playhead)
             #if DEBUG
             let picked = project.pickedKeyframes.count
             #endif
@@ -77,6 +81,11 @@ extension BodyCountSuites {
             #if DEBUG
             // KE-4 moves the keys and the pick follows them; either way the drag never drops the pick.
             #expect(HaloWindow.shownProject?.pickedKeyframes.count == picked, "the drag changed the pick: \(step)")
+            // A press that grabbed the playhead scrubs and moves no key, which the body count alone can't tell.
+            let shown = HaloWindow.shownProject
+            #expect(shown?.selectedComposition?.playheadFrame == playhead, "the drag scrubbed: \(step)")
+            #expect(shown.map { !$0.pickedFrames(of: ball).isEmpty && !$0.pickedFrames(of: ball).contains(0) } == true,
+                    "Ball's key didn't move off 0: \(step)")
             #endif
             return step
         }
@@ -94,10 +103,16 @@ extension BodyCountSuites {
             let lane = try #require(await w.element("halo.timeline.lane.\(solid300)"), "no lane for Solid 300")
             w.click(at: CGPoint(x: lane.minX + lane.width * 0.05, y: lane.midY))
             try await w.settle(untilStable: HaloWindowPlaybackTests.windowBodies)
+            let selectAll = #selector(NSResponder.selectAll(_:))
             var routed = false
             let step = try await w.measure("halo select all keys, crowd (5,000 keys)", bodies: HaloWindowPlaybackTests.windowBodies) {
                 try await w.ticks(1) { _ in
-                    routed = w.window.firstResponder?.tryToPerform(#selector(NSResponder.selectAll(_:)), with: nil) ?? false
+                    // ⌘A's menu item has no target: AppKit sends selectAll: to the first responder in the key
+                    // window's chain that takes it. The harness window is never key, so find that one here.
+                    // Not tryToPerform: SwiftUI's KeyViewProxy, the first responder, never passes it on.
+                    var target = w.window.firstResponder
+                    while let t = target, !t.responds(to: selectAll) { target = t.nextResponder }
+                    routed = target.map { NSApp.sendAction(selectAll, to: $0, from: nil) } ?? false
                 }
             }
             #expect(routed, "selectAll: found no responder: the strip didn't take focus from the bed press")

@@ -1,7 +1,8 @@
 // FlareWindow+Stage.swift: the router's stage area (FlareWindow+Router.swift). FlareStage's drags arrive here: a
 // pointer move is the Model's `dragChanged` (the live draft, marquee or move preview), mouse-up its `endDrag` (one
 // undo step, or a selection change), and Escape mid-drag its `cancelDrag`. FlarePathEditLayer (FP-2) draws Direct
-// Select's `pathInEdit` and the Pen's `penDraft` in PathEditOverlay; its intents (PN-3) go to `performPath`.
+// Select's `editablePath` (none on a locked layer; the status bar's pill says why) and the Pen's `penDraft` in
+// PathEditOverlay; its intents (PN-3) go to `performPath`.
 import FlareCore
 import FlareModel
 import SuiteKernel
@@ -40,7 +41,7 @@ struct FlarePathEditLayer: View {
 
     var body: some View {
         if let tool: PenTool = model.tool == .pen ? .pen : model.tool == .directSelect ? .directSelect : nil {
-            let edit = model.pathInEdit
+            let edit = model.editablePath
             PathEditOverlay(
                 draft: model.penDraft.map { Self.standIn($0.contour, through: .identity) },
                 path: edit.map { edit in edit.path.contours.map { Self.standIn($0, through: edit.toDocument) } } ?? [],

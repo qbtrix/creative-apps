@@ -1,0 +1,44 @@
+[
+  {
+    "label": "dragIsOneStep: the drag token not passed to setPath, so 120 handle moves are 120 undo steps",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "try t.setPath(path, name: title, drag: drag)",
+    "replace": "try t.setPath(path, name: title, drag: nil)",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "closeNeedsThree: close allowed with two anchors",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "distinct($0) < 3 ? closeHelp : nil",
+    "replace": "distinct($0) < 2 ? closeHelp : nil",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "oneStepPerRun: setPath called per anchor in anchor-move, so moving three points records three steps",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "{ t, p in try edit(&t, \"Move Points\", drag: p.drag) { AnchorEdit.moved($0.path, $1, dx: p.dx, dy: p.dy) } }",
+    "replace": "{ t, p in for ref in t.anchorSelection.ordered { _ = try edit(&t, \"Move Points\", drag: p.drag) { e, _ in AnchorEdit.moved(e.path, [ref], dx: p.dx, dy: p.dy) } }; return .object([:]) }",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "insertUnavailableOffThePath: the reach check dropped, so a click off the path adds a point",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "location.distance <= insertReach else",
+    "replace": "location.distance >= 0 else",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "everyWhyNot: a handle drag on a point with no handle there runs without breaking",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "guard breaking || (p.end == .handleIn ? a.handleIn : a.handleOut) != nil else",
+    "replace": "guard breaking || a.handleIn == nil || a.handleIn != nil else",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "drawRefusesFewerThanTwo: path.draw takes a single point",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "guard anchors.count >= 2 else",
+    "replace": "guard anchors.count >= 1 else",
+    "tests": "PathCommandsTests"
+  }
+]
