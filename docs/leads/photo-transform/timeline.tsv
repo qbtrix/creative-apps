@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-21T10:33Z	3	merged	PT-u	#3968 (PT-3m) merged as 79a4378; opener launched for PT-3 (lead/transform-PT-3: merge dev, C4 parts as dev, gate, PR)
 2026-10-21T10:33Z	3	heartbeat	W4g	dev green again (Linux check fe232dc success after #3996); #3969 (PT-5) clean, in lane; lane batch 20261021102756 forming; scoped photo run 39579629627 still queued
 2026-10-21T10:39Z	3	pr	PT-u	#4005 PT-3 Canvas Size sheet opened (head b0846a5, 6 files, 286 lines, CI PASS, fast-lane, footer 0); PT-7 waits for #4005 to merge
+2026-10-21T10:57Z	3	heartbeat	W4h	#4005 PT-3 open; fixer baselining CanvasSizeSheet buttons (CommandPathTests); dev red from #3976 PhotoPlace not ours; #3969 PT-5 open fast-lane; scoped photo run 39579629627 in progress
