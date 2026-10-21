@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-21T17:31:01Z	FP-a	answer	#4027	supervisor moved #4027 to the local Mac gate (merges on pass); head a74ae98e after a dev merge; PN-3 #3770 open; no FL-m PR
 2026-10-21T17:55:05Z	heartbeat	poll	#4027	still open on the local Mac gate (no status on a74ae98e yet); #4011/#4013 open; PN-3 #3770 open; no FL-m PR
 2026-10-21T18:19:15Z	heartbeat	poll	#4027	lane re-dispatched macOS build 39645360844 for head a74ae98e (queued); #4011/#4013 open; PN-3 #3770 head moved to 92162512, still open; no FL-m PR
+2026-10-21T18:42:09Z	FP-a	poll	#4027	macOS build 39645360844 green; lane merge pending

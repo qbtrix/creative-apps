@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: FP-a fix round 1 #4027 (Fixes #4011, #4013) at 0e22b950 after a dev merge; lane macOS build since 15:24Z. On merge: FP-a round-2 critics. FP-e done. FP-5 merged (#4029); FP-6 waits on file-flow FL-m (no PR yet). FP-u waits on PN-3 (#3770 open, lane says Linux red). #4012 waits on PenRules.mirror going public.
+Next: FP-a fix round 1 #4027 (Fixes #4011, #4013) at a74ae98e: lane macOS build 39645360844 green, the lane merges it on a sweep (supervisor also has it on the local Mac gate). On merge: verify #4011/#4013 closed, then FP-a round-2 critics. FP-e done. FP-5 merged (#4029); FP-6 waits on file-flow FL-m (no PR yet). FP-u waits on PN-3 (#3770 open at 92162512). #4012 waits on PenRules.mirror going public.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -50,6 +50,7 @@ Next: FP-a fix round 1 #4027 (Fixes #4011, #4013) at 0e22b950 after a dev merge;
 - GitHub MCP issue_write/update_pull_request write bodies without the server footer; use them instead of gh api for bodies from now on.
 
 ## Open
+- 2026-10-21T18:42:09Z: #4027 macOS build 39645360844 succeeded; waiting on the lane's merge sweep. Open findings for this feature: 3 (#4011-#4013), under the cap of 5. Belt stall nudge 18:41Z answered with this record push.
 - FP-e done: rule-23 question at 3/3 (issuecomment-6315361799); supervisor said #4008 fixed Photo and the tenThousandPaths flake doesn't count; Belt-Slice-Done posted (issuecomment-6315821062) on run 39596004859.
 - FP-a findings open: #4011, #4013 (fix round 1: PR #4027, head d36c6856, Mutate 6/6 FlareModel.FlareAnchors+Kernel, fast-lane, snapshot flare-select-direct-locked-light.png), #4012 (FP-5 #4029 carries Refs: PenRules.mirror is internal; needs-suite #4030 asks to make it public; Flare copy has a TODO). Count 3 of cap 5.
 - shape-tools FS-m: FS-5 merged #3850, FS-6 blocked on gradient-fill FG-m (FP-5 unchained, FP-6 unaffected).
