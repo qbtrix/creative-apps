@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-21T04:28:14Z	heartbeat	check: #3701 HA-m and #3810 HA-u eligible, queued (26 ready, batch in flight); HG-m #3417 open
 2026-10-21T04:50:46Z	heartbeat	check: #3701 HA-m in lane/batch-20261021043428 (Linux check running); #3810 HA-u eligible, next batch; HG-m #3417 open
 2026-10-21T05:12:16Z	heartbeat	check: batch lane/batch-20261021043428 red, bisecting (probe 6, #3701 is 7th); #3810 waits; HG-m #3417 open
+2026-10-21T05:38:45Z	heartbeat	check: batch lane/batch-20261021043428 bisecting (first 4 PRs merged); #3701 HA-m and #3810 HA-u wait; HG-m #3417 open
