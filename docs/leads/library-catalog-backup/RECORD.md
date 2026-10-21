@@ -74,3 +74,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T23:01Z: #4244 macOS build 39689010451 red, but not ours: dev doesn't compile on macOS (RenderBudgetPhotoPlaceTests uses PhotoPlaceIntent.files, which #4164 removed). The fix is #4215 (Photo line, not ported). Commented on #4244; I'll merge dev into the branch and move Head once #4215 lands.
 
 - 2026-10-21T23:10Z: Heartbeat: #4244 still open, waiting for #4215 (the macOS compile fix) to reach dev; dev at 8d08e08.
+
+- 2026-10-21T23:27Z: #4244 closed: #4250 (be9aa35) landed the same baseline fix on dev (library.txt at 48). Dev Linux at 8d08e08 was red only on the library CommandPath baseline. BK-u closes on the first green dev Linux run that includes be9aa35.
