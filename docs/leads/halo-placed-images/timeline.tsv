@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-21T01:44Z	0	heartbeat	#3676	HS-a in lane batch 20261021005140 macOS probe; #3536 open
 2026-10-21T02:06Z	0	heartbeat	#3676	HS-a in probes -3 (green) and -4; #3536 open
 2026-10-21T02:33Z	0	heartbeat	#3676	parked; bisect probe -4 running; #3536 open
+2026-10-21T02:55Z	0	heartbeat	#3676	parked; #3676 and #3536 open
