@@ -3,6 +3,7 @@
 // PM-6). An eye or slider on an unpicked row acts on that row alone; Delete
 // refuses to take every layer. Runs on Linux and macOS.
 import CoreRaster
+import Foundation
 import SuiteKernel
 import Testing
 @testable import PhotoModel
@@ -102,7 +103,7 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
         }
     }
 
-    @Test(.disabled("waits on PM-6")) func moveMovesEvery() throws {
+    @Test func moveMovesEvery() throws {
         var (workspace, one, two, three) = try onePlusThree()
         stroke(&workspace, .move, from: point(2, 2), to: point(5, 3))
         #expect(layer(workspace, one)?.offsetX == 3 && layer(workspace, one)?.offsetY == 1)
@@ -114,6 +115,82 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
         workspace.undo()
         workspace.undo()
         #expect(layer(workspace, one)?.offsetX == 0 && layer(workspace, three)?.offsetX == 0)
+    }
+
+    @Test func moveOneStep() throws {
+        var (workspace, one, _, three) = try onePlusThree()
+        let (before, undoName) = (workspace.layers, workspace.undoActionName)
+        workspace.selectTool(.move)
+        for x in [2.0, 3, 4, 6] { workspace.drag(from: point(2, 2), to: point(x, 2)) }
+        workspace.endDrag()
+        #expect(layer(workspace, one)?.offsetX == 4 && layer(workspace, three)?.offsetX == 4)
+        #expect(workspace.undoActionName == "Undo Move Layers")
+        workspace.undo()
+        #expect(workspace.layers == before)
+        #expect(workspace.undoActionName == undoName)
+    }
+
+    @Test func oneLayerMovesAsBefore() throws {
+        var (workspace, one, _, three) = try onePlusThree()
+        workspace.selectedLayerID = one
+        stroke(&workspace, .move, from: point(2, 2), to: point(4, 2))
+        #expect(layer(workspace, one)?.offsetX == 2 && layer(workspace, three)?.offsetX == 0)
+        #expect(workspace.undoActionName == "Undo Move Layer")
+    }
+
+    @Test func moveByCommandMovesEveryInOneStep() throws {
+        var (workspace, one, two, three) = try onePlusThree()
+        let before = workspace.layers
+        _ = try PhotoWorkspace.catalog.run(
+            "layer.move-by", params: .object(["dx": .number(40), "dy": .number(-3)]), on: &workspace)
+        #expect(layer(workspace, one)?.offsetX == 40 && layer(workspace, three)?.offsetY == -3)
+        #expect(layer(workspace, two)?.offsetX == 0)
+        #expect(workspace.undoActionName == "Undo Move Layers")
+        workspace.undo()
+        #expect(workspace.layers == before)
+    }
+
+    @Test func anAdjustmentLayerAmongThePickedStaysPut() throws {
+        var (workspace, one, _, three) = try onePlusThree()
+        workspace.addAdjustmentLayer(.exposure)
+        let adjustment = try #require(workspace.selectedLayerID)
+        workspace.layerSelection.replace([adjustment, three, one])
+        workspace.moveSelectedLayers(dx: 2, dy: 0)
+        #expect(layer(workspace, one)?.offsetX == 2 && layer(workspace, three)?.offsetX == 2)
+        #expect(layer(workspace, adjustment)?.offsetX == 0)
+    }
+
+    /// Packet budget row (stress gate): one Move step with 100 layers picked,
+    /// <= 8 ms on Linux. Kept out of the merge gate until the supervisor lists
+    /// it in Tests/perf-suites.txt.
+    @Test(.disabled("perf: waits on a Tests/perf-suites.txt line")) func moveHundredInBudget() throws {
+        var workspace = try whiteImage(8, 8)
+        for _ in 0..<99 { workspace.addLayer() }
+        workspace.selectAllLayers()
+        let clock = ContinuousClock(), started = clock.now
+        stroke(&workspace, .move, from: point(0, 0), to: point(5, 5))
+        #expect(clock.now - started <= .milliseconds(8))
+        #expect(workspace.layers.allSatisfy { $0.offsetX == 5 })
+    }
+
+    /// RJ-P43, run here on PhotoHeadless since the CLI's harness can't decode
+    /// its pixels yet. Its Shift-picks need PM-4's `pickLayer` (#4095).
+    @Test(.disabled("RJ-P43 waits on PM-4's Shift-click extend (#4095)")) func fadeLayersRealJob() throws {
+        struct Script: Decodable { var steps: [CommandEnvelope]; var atomic: Bool }
+        let folder = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("RealJobs/photo/fade-layers")
+        let file = { (path: String) in try Data(contentsOf: folder.appendingPathComponent(path)) }
+        let script = try JSONDecoder().decode(Script.self, from: file("fade-layers.jobs.json"))
+        var doc = try PhotoHeadless.open(file("input/four-layers.ora"), name: "four-layers.ora")
+        let report = PhotoHeadless.catalog.runBatch(script.steps, on: &doc, atomic: script.atomic)
+        #expect(report.stoppedAt == nil, "\(report.steps.compactMap(\.error))")
+        #expect(doc.workspace.undoActionName == "Undo Move Layers")
+        let exported = try #require(doc.export("png", options: .object([:])).first)
+        let got = try PhotoHeadless.codec.decode(exported.data, longestSide: nil)
+        let want = try PhotoHeadless.codec.decode(file("expected/four-layers-faded.png"), longestSide: nil)
+        #expect(got.width == want.width && got.height == want.height)
+        #expect(got.rgba8.count == want.rgba8.count
+            && zip(got.rgba8, want.rgba8).allSatisfy { abs(Int($0) - Int($1)) <= 2 }, "the export matches within 2")
     }
 
     @Test func moveSelectedLayersMovesThePrimaryInOneStep() throws {

@@ -28,6 +28,7 @@ layer.delete
 layer.duplicate
 layer.flatten
 layer.merge-down
+layer.move-by
 layer.new
 layer.new-adjustment
 layer.pick
