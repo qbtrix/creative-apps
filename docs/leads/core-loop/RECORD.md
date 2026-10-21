@@ -12,7 +12,7 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are
 | CL-a | the loop's checks and the HaloRenderJob+Kernel stubs exist before its code | CL-1, CL-2, CL-3 | MJ-CL1 | editor-kernel EK-a (merged, #1933) | false | 0 | merged (#3404, #3408) | | |
 | CL-ui | Render… opens SuiteUI ExportSheet on the kernel run; render budget on | CL-4, CL-5 | H-J21 | CL-a | true | 0 | done: #3590 ui1 + #3653 ui2 merged; Belt-Slice-Done + Mac-Finish-Wanted at run 39507877855 (23:50Z) | | |
 | CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
-| CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | PR #4147 open | | |
+| CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | #4147 merged a2d1a8d; waiting for a green dev Linux run at or past it | | |
 | CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | CL-11 merged; #4148 (#865+CL-12) merged 5803475; CL-10 building | | |
 | CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | PR #4167 open | | |
 
@@ -26,8 +26,8 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are
 | CL-5 | CL-ui | 3 | RenderBudgetHaloRenderTests.bodies on | Tests/AppSnapshotTests/RenderBudgetHaloRenderTests.swift | bodies | | pushed 0229c007 (with CL-4) |
 | CL-6 | CL-run | 2 | stored run state goes through ExportRun; old state machine deleted | Sources/HaloModel/HaloRenderJob*.swift | kernel-run tests (4 mutations) | | merged (#3641 run1a, #3812 run1b) |
 | CL-7 | CL-run | 3 | render availability reads the kernel run | Sources/HaloModel/Availability (render) | availability tests (2 mutations) | | merged (#3817, 9265b982) |
-| CL-8 | CL-probe | – | HaloProbe + input sites record | Sources/HaloApp/HaloProbe.swift + 5 views | CL-9/CL-10 oracles | #4147 | open c6770b5e |
-| CL-9 | CL-probe | – | RenderBudgetHaloProbeTests.bodies on | Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift | bodies | #4147 | open c6770b5e |
+| CL-8 | CL-probe | – | HaloProbe + input sites record | Sources/HaloApp/HaloProbe.swift + 5 views | CL-9/CL-10 oracles | #4147 | merged a2d1a8d |
+| CL-9 | CL-probe | – | RenderBudgetHaloProbeTests.bodies on | Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift | bodies | #4147 | merged a2d1a8d |
 | CL-10 | CL-measure | – | H-P1..H-P5 journeys on | UITests/HaloJourneyTests+Perf.swift | perf journeys | #4166 | open 9b77b2cd (stacked on #4147) |
 | CL-11 | CL-measure | 2 | L3..L5 and latency line on | Tests/AppSnapshotTests/HaloLayoutTests.swift, HaloViewerLatencyTests.swift | layout tests | | #3487 merged d9bc0337 |
 | CL-12 | CL-measure | – | -HaloFixture → -HaloSample in six journeys | UITests/HaloJourneyTests*.swift | journeys | #4148 | merged 5803475 (with #865) |
@@ -42,7 +42,7 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are
 - W1: CL-a1 = CL-1+CL-2 (~380 lines, 3 files), CL-a2 = CL-3 (~300, 5). Independent: both (disjoint files, CL-3's suites need no CL-2 code).
 - W2 (started at once, stacked): CL-run1 = CL-6 on CL-a1 (needs the stubs and the disabled tests); CL-ui = CL-4+CL-5 on CL-a1+CL-a2 (CL-4 needs the stubs, CL-5 the CL-3 suite); CL-11 on CL-a2 (enables CL-3's layout and latency tests).
 - W3: CL-run2 = CL-7 on CL-run1 (reads the kernel run CL-6 fills).
-- Open: #4147 (CL-8, CL-9). Merged: #4148 (#865, CL-12) 5803475. Open: #4166 (CL-10, after #4147). Open: #4167 (CL-13+CL-14, feature-done, after #4166).
+- Merged: #4147 (CL-8, CL-9) a2d1a8d; #4148 (#865, CL-12) 5803475. Open: #4166 (CL-10, after #4147). Open: #4167 (CL-13+CL-14, feature-done, after #4166).
 
 ## Decisions
 - The PR tool's server appends an attribution footer and puts it back after a body edit; the fast lane strips it from the squash commit (CLAUDE.md), so the lead leaves it.
