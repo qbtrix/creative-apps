@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-21T20:16Z	0	stopped	#4019	SC-13 macOS build running in lane; AC-export-sheet waits on SC-14..16
 2026-10-21T20:47Z	0	stopped	#4019	SC-13 macOS build green, awaiting lane merge; AC-export-sheet waits on SC-14..16
 2026-10-21T21:18Z	0	stopped	#4019	SC-13 eligible, not yet merged by lane; AC-export-sheet waits on SC-14..16
+2026-10-21T21:49Z	0	stopped	#4019	SC-13 still unmerged; AC-export-sheet waits on SC-14..16
