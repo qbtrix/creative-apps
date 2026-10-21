@@ -13,3 +13,4 @@ time	task	event	note
 2026-10-21T16:38Z	AR-u	fix	#4124 held for bodyRuns gate fold
 2026-10-21T16:41Z	AR-u	fixed	#4124 b45e6b4
 2026-10-21T16:58Z	AR-m/AR-u/AR-design	mac-build	queued for 4096 4120 4122
+2026-10-21T17:19Z	AR-design	mac-green	#4120 39636490860

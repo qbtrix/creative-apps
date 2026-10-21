@@ -54,3 +54,5 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 - 16:41Z: AR-8 #4124 fixed at b45e6b4 (page bodyRuns counter, draft lasso in GalleryAreaDraft read only by the ants layer, slow-leg journey lasso). Gate PASS (Linux; the view code compiles first in the batch macOS gate). Body set; no-fast-lane swapped for needs-split until #4122 merges.
 
 - 16:58Z: The lane is building #4096 (run 39634352484), #4120 (39636490860) and #4122 (39636526138) on macOS; all queued. The sentinel flagged #4124 as oversize (572 lines including stacked #4122; its own change is +182). I replied that it restacks after #4122 merges; it is not split. #4098 waits on #4096.
+
+- 17:19Z: #4120 AR-13's macOS build 39636490860 is green, so it lands on the lane's next sweep. #4096 (39634352484) and #4122 (39636526138) are still queued for macOS. #4098 and #4124 wait on their bases.
