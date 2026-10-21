@@ -505,6 +505,8 @@
                 "paths": [
                   "Sources/SuiteKernel/Keys/Keys.swift",
                   "Sources/SuiteKernel/Keys/KeyRules.swift",
+                  "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+                  "Sources/SuiteKernel/Keys/SpanRules.swift",
                   "Sources/SuiteKernel/Keys/FrameRate.swift",
                   "Sources/SuiteKernel/Keys/Timecode.swift",
                   "Sources/SuiteKernel/Keys/TimeCommands.swift"
@@ -617,6 +619,15 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Crop/"
+                ]
+              },
+              {
+                "id": "kernel-document",
+                "name": "Document Setup",
+                "description": "Document/: DocumentSetup, a document's size in a length unit (px, pt, in, cm, mm) at a resolution, its background and, for timed apps, frame rate and duration in seconds, with the rules that turn it into whole pixels, convert units, swap the sides and name each field's problem; and DocumentSetupCommands, document.read-settings and document.set-settings over a DocumentSetupTarget, placing old content by a BoxAnchor through TransformRules. document-setup DS-1 declares them as stubs; DS-3 and DS-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Document/"
                 ]
               },
               {
