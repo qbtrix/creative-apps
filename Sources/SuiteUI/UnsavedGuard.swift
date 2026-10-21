@@ -6,6 +6,8 @@
 // clean window closes at once, and a second close while the sheet is up adds no sheet. `proceed` asks the same
 // sheet before Open, New or Quit replaces the document. An NSAlert, since SwiftUI drops alert buttons' ids and
 // the journeys find them by `<prefix>.close.<answer>`. Design's and Photo's proven guard, now in one place.
+// `UnsavedHooks.ask` is the one seam between the decision and the sheet: the app never sets it (the real sheet);
+// a test sets a fake answerer, so the close and proceed rules run without a window server.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -20,6 +22,8 @@ public struct UnsavedHooks {
     public var isDirty: @MainActor () -> Bool
     /// Saves the document; true only when the save landed.
     public var save: @MainActor () async -> Bool
+    /// Puts the question to the user and returns the answer: the real sheet unless a test swaps it.
+    var ask: UnsavedGuard.Ask = UnsavedGuard.sheet
 
     /// Hooks for one document window.
     public init(
@@ -35,6 +39,9 @@ public struct UnsavedHooks {
 
 /// Asks Save, Don't Save or Cancel before a dirty document is closed, replaced or quit.
 public enum UnsavedGuard {
+    /// Asks about the document `name` on `window` (modally when nil) with button ids under `prefix`.
+    typealias Ask = @MainActor (_ name: String, _ prefix: String, _ window: NSWindow?) async -> UnsavedPrompt.Answer
+
     /// The windows with a sheet up: one sheet at a time per window.
     @MainActor private static var asking = Set<ObjectIdentifier>()
 
@@ -46,7 +53,7 @@ public enum UnsavedGuard {
         let key = window.map(ObjectIdentifier.init)
         if let key, !asking.insert(key).inserted { return false }
         defer { if let key { asking.remove(key) } }
-        switch await answer(alert(for: name, prefix: hooks.idPrefix), in: window) {
+        switch await hooks.ask(name, hooks.idPrefix, window) {
         case .save: return await hooks.save()
         case .dontSave: return true
         case .cancel: return false
@@ -66,7 +73,7 @@ public enum UnsavedGuard {
     }
 
     /// The warning alert in the kernel's words, its buttons in `UnsavedPrompt.answers` order.
-    @MainActor private static func alert(for name: String, prefix: String) -> NSAlert {
+    @MainActor static func alert(for name: String, prefix: String) -> NSAlert {
         let alert = NSAlert()
         alert.alertStyle = .warning
         alert.messageText = UnsavedPrompt.message(for: name)
@@ -88,8 +95,9 @@ public enum UnsavedGuard {
         return alert
     }
 
-    /// Runs `alert` as a sheet on `window`, or modally when there is none; the answer of the button pressed.
-    @MainActor private static func answer(_ alert: NSAlert, in window: NSWindow?) async -> UnsavedPrompt.Answer {
+    /// The real asker: the alert as a sheet on `window`, or modally when there is none; the button pressed.
+    @MainActor static func sheet(name: String, prefix: String, window: NSWindow?) async -> UnsavedPrompt.Answer {
+        let alert = alert(for: name, prefix: prefix)
         let response: NSApplication.ModalResponse
         if let window {
             window.makeKeyAndOrderFront(nil)
@@ -155,13 +163,12 @@ final class UnsavedGuardView: NSView {
     /// The original delegate; AppKit asks `responds(to:)` on the main thread.
     nonisolated(unsafe) weak var original: (any NSWindowDelegate)?
     var hooks: UnsavedHooks
-    /// A close is waiting on the sheet, or the sheet's answer is closing the window.
-    private var pending = false, closing = false
+    /// A close is waiting on the sheet.
+    private var pending = false
 
     init(hooks: UnsavedHooks) { self.hooks = hooks }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        if closing { return original?.windowShouldClose?(sender) ?? true }
         if pending || UnsavedGuard.isAsking(in: sender) { return false }
         guard hooks.isDirty(), hooks.documentName() != nil else {
             return original?.windowShouldClose?(sender) ?? true
@@ -171,10 +178,10 @@ final class UnsavedGuardView: NSView {
         Task {
             let closes = await UnsavedGuard.proceed(hooks, in: sender)
             pending = false
-            guard closes else { return }
-            closing = true
-            sender.performClose(nil)
-            closing = false
+            // The same should-close check performClose makes, without its close-button flash: the flash runs a
+            // nested event loop, which in a `swift test` host ends the host's main run loop and the test run.
+            guard closes, original?.windowShouldClose?(sender) ?? true else { return }
+            sender.close()
         }
         return false
     }
