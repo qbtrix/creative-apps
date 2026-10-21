@@ -4,7 +4,7 @@ Issue: #3418 · Packet: docs/blueprints/suiteui/features/gradient-fill.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T03:19Z (relaunched 2026-10-21)
 Stage: 3 wave 5
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: #3742 (GF-6+GF-7, head 573bf571, Fast-Check pass) waits on the lane's macOS build; GF-8 and GF-9 build stacked on feat/suiteui-gradient-gf-6
+Next: #3742 (GF-6+GF-7, head 573bf571) macOS build run 39650981019 dispatched 18:15Z; once merged open the GF-z PR from lead/suiteui-gradient-fill-GF-z (head b2667bac, feature-done) and the docs-only C4 PR from lead/suiteui-gradient-fill-GF-z-c4 (9976b617)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: #3742 (GF-6+GF-7, head 573bf571, Fast-Check pass) waits on the lane's macO
 | GF-a | kernel Fill/ module as stubs; gallery page; checks written, disabled | GF-1, GF-2 | SJ0 | command-catalog:CC-u (GF-2) | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39554157396 | wanted |
 | GF-u | the GradientEditor view, snapshots, budget, journey | GF-3, GF-4 | GJ1 | GF-a | true | 0 | done | https://github.com/qbtrix/creative-apps/actions/runs/39646407505 | wanted |
 | GF-m | rules, commands (one undo step per edit), SVG writer | GF-5, GF-6, GF-7 | KJ-fill | GF-a; command-catalog:CC-run (met) | false | 0 | building | – | – |
-| GF-z | gallery live on GradientCommands, fake app takes fills (RJ-X30), built | GF-8, GF-9, GF-10 | GJ1, KJ-fill | GF-u, GF-m; command-catalog:CC-a (met) | true | 0 | building (stacked on GF-m) | – | – |
+| GF-z | gallery live on GradientCommands, fake app takes fills (RJ-X30), built | GF-8, GF-9, GF-10 | GJ1, KJ-fill | GF-u, GF-m; command-catalog:CC-a (met) | true | 0 | built, PR waits #3742 (lead/suiteui-gradient-fill-GF-z b2667bac, Mutate 6/6, ci PASS) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -24,9 +24,9 @@ Next: #3742 (GF-6+GF-7, head 573bf571, Fast-Check pass) waits on the lane's macO
 | GF-5 | GF-m | 2 | GradientRules bodies | Sources/SuiteKernel/Fill/GradientRules.swift, Tests/SuiteKernelTests/GradientRulesTests.swift, Tests/mutations/SuiteKernel.GradientRules.json | GradientRulesTests | #3705 | merged |
 | GF-6 | GF-m | 3 | GradientCommands bodies, intent.command | Sources/SuiteKernel/Fill/GradientCommands.swift, Tests/SuiteKernelTests/GradientCommandsTests.swift, Tests/mutations/SuiteKernel.GradientCommands.json | GradientCommandsTests | #3742 | open, head 573bf571, Fast-Check pass |
 | GF-7 | GF-m | 3 | GradientSVG body | Sources/SuiteKernel/Fill/GradientSVG.swift, Tests/SuiteKernelTests/GradientSVGTests.swift, Tests/mutations/SuiteKernel.GradientSVG.json | GradientSVGTests | #3742 | open (folded into GF-6's PR) |
-| GF-8 | GF-z | 5 | gallery live through GradientCommands | Sources/SuiteUI/Gallery/GalleryGradientEditor.swift, Tests/SuiteUITests/GradientEditorLiveTests.swift | GradientEditorLiveTests | – | building, stacked on GF-6 |
-| GF-9 | GF-z | 5 | fake app takes fills; RJ-X30 | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasFillTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/gradient-fill/* | FakeCanvasFillTests, RJ-X30 | – | building, stacked on GF-6 |
-| GF-10 | GF-z | last | C4 part, status built, feature-done | kernel-fill.json, gradient-fill.wave.json | waves render --dry-run | – | waits GF-8, GF-9 |
+| GF-8 | GF-z | 5 | gallery live through GradientCommands | Sources/SuiteUI/Gallery/GalleryGradientEditor.swift, Tests/SuiteUITests/GradientEditorLiveTests.swift | GradientEditorLiveTests | – | built on lead/suiteui-gradient-fill-GF-z |
+| GF-9 | GF-z | 5 | fake app takes fills; RJ-X30 | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasFillTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/gradient-fill/* | FakeCanvasFillTests, RJ-X30 | – | built on lead/suiteui-gradient-fill-GF-z |
+| GF-10 | GF-z | last | C4 part, status built, feature-done | kernel-fill.json, gradient-fill.wave.json | waves render --dry-run | – | built (status built in GF-z branch; C4 text on -GF-z-c4) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
