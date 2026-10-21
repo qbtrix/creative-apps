@@ -1,7 +1,6 @@
 // LibraryCollectionsFileTests.swift: the collections file (filters-collections
-// FC-14 check row; slice FC-e). Written before its code (FC-13): FC-14 drops
-// the `.disabled` traits. FC-14's planned mutations and what catches them:
-// ids unsorted (golden, set order); `canSave` guard dropped (newer catalog);
+// FC-14 check row; slice FC-e). Written by FC-13, enabled by FC-14. FC-14's
+// planned mutations and what catches them: ids unsorted (golden, set order); `canSave` guard dropped (newer catalog);
 // `selected` not encoded (golden, decode back); `version > 1` accepted (newer).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -89,7 +88,7 @@ private let scale = 0.1
         return catalog
     }
 
-    @Test(.disabled("waits on FC-14")) func encodesToTheGoldenAndDecodesBackEqual() throws {
+    @Test func encodesToTheGoldenAndDecodesBackEqual() throws {
         let catalog = goldenCatalog()
         let request = try #require(catalog.collectionsSaveRequest())
         #expect(request.revision == catalog.collectionsRevision)
@@ -104,7 +103,7 @@ private let scale = 0.1
         #expect(back.collectionsSaveRequest() == nil)
     }
 
-    @Test(.disabled("waits on FC-14")) func equalStateEncodesEqualWhateverTheSetOrder() throws {
+    @Test func equalStateEncodesEqualWhateverTheSetOrder() throws {
         func encoded(_ photos: Set<String>, _ labels: Set<PhotoLabel>, _ flags: Set<PhotoFlag>) throws -> Data {
             var catalog = shoot()
             catalog.userCollections = [UserCollection(id: "user-1", name: "All", contents: .photos(photos))]
@@ -123,7 +122,7 @@ private let scale = 0.1
         #expect(first == second)
     }
 
-    @Test(.disabled("waits on FC-14")) func aDamagedOrNewerFileThrowsAndChangesNothing() throws {
+    @Test func aDamagedOrNewerFileThrowsAndChangesNothing() throws {
         var catalog = goldenCatalog()
         let before = catalog
         for text in ["not json", "{}"] {
@@ -139,7 +138,7 @@ private let scale = 0.1
         #expect(catalog == before)
     }
 
-    @Test(.disabled("waits on FC-14")) func saveRequestsFollowTheRevisionsAndCanSave() throws {
+    @Test func saveRequestsFollowTheRevisionsAndCanSave() throws {
         var catalog = shoot()
         #expect(catalog.collectionsSaveRequest() == nil)
         #expect(catalog.collectionsFileValue == "saved")
@@ -163,7 +162,7 @@ private let scale = 0.1
         #expect(newer.collectionsSaveRequest() != nil)
     }
 
-    @Test(.disabled("waits on FC-14")) func anUnknownSelectedIDSelectsAllPhotos() throws {
+    @Test func anUnknownSelectedIDSelectsAllPhotos() throws {
         let text = Self.golden.replacingOccurrences(of: "\"selected\" : \"user-1\"", with: "\"selected\" : \"user-9\"")
         var catalog = shoot()
         catalog.selectCollection("favorites")
@@ -173,7 +172,7 @@ private let scale = 0.1
         #expect(catalog.filter.hidesRejected)
     }
 
-    @Test(.disabled("waits on FC-14")) func aSetAsideFileSetsTheNotice() {
+    @Test func aSetAsideFileSetsTheNotice() {
         var catalog = shoot()
         catalog.failRestoreCollections(setAsideAs: "collections.json.bad")
         #expect(catalog.collectionsNotice
@@ -183,7 +182,7 @@ private let scale = 0.1
     }
 
     /// 20 collections over 10,000 ids encode and decode within 200 ms debug.
-    @Test(.disabled("waits on FC-14")) func twentyCollectionsOverTenThousandIDsWithinBudget() throws {
+    @Test(.disabled("waits on its Tests/perf-suites.txt line from the supervisor")) func twentyCollectionsOverTenThousandIDsWithinBudget() throws {
         var catalog = LibraryCatalog()
         catalog.load(LibraryFixtures.photos(named: "large"))
         let ids = catalog.items.map(\.id)
