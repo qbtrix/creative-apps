@@ -36,3 +36,6 @@ Last stage: FS-a merged-done: Belt-Slice-Done posted on #3451 for run 3953892128
 - Base and PR target are dev (CLAUDE.md; the lane retargets main to dev), though the brief names main.
 - SuiteKernel's ShapeSpec, ShapeRules.dragged/path and SuiteUI's ShapeToolOptions are on dev, so SH-a, SH-m and SH-u are met.
 - FS-5 starts in wave 1 beside FS-a: it touches only LiveShapes and its tests, none of FS-1's files (rule 18).
+
+## Open
+- 2026-10-21T13:09Z: resumed on Belt's 30-min nudge. FS-u #3984 (head e276a3b7) is lane-eligible (macOS build 39595470213 green, 5 checks green, no needs-fix/needs-rebase); waiting for the next batch while lane/batch-20261021122102 bisects. FS-m (FS-6) waits FG-m; FS-z waits FS-u and FS-m. Findings 0.
