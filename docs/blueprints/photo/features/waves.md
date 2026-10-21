@@ -22,7 +22,7 @@ file's waves, not this one's.
 | 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1075 | built |
 | 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1076 | built |
 | 2 | Adjustment layers | PV-6 | `photo-adjustment-layers.md` | #580 | p1 | photo-edit (hands over `PhotoCommands+Layer.swift`) | nothing (CR-5 optional) | #1501 | built |
-| 3 | The Gradient tool: drag a linear or radial gradient into the layer or selection, stops set with the shared editor | – | `gradient-fill.md` | photo/gradient-fill (adopter of S24 and of E6's raster gradient); RJ-P19 | – | – | – | file when ready | planned |
+| 3 | The Gradient tool: drag a linear or radial gradient into the layer or selection, stops set with the shared editor | – | `gradient-fill.md` | photo/gradient-fill (adopter of S24 and of E6's raster gradient); RJ-P19 | – | – | – | #3416 | built |
 | 3 | Tone and sharpen in Photo: White Balance, Tone, Presence and Sharpen rows on the image and on adjustment layers, live on the GPU | – | `tone-controls.md` | photo/tone-controls (adopter of S1); RJ-P12, RJ-P13, RJ-P14 | – | – | – | file when ready | planned |
 | 3 | Free Transform, layer flips and Canvas Size on the kernel's transform commands and SuiteUI's turned handles | – | `transform.md` | photo/transform (adopter of S7; PV-7's stubs); RJ-P17, RJ-P18 | – | – | – | file when ready | planned |
 | 3 | Export at a size from Photo, with HEIC and TIFF, on the suite's export sheet | – | `export-pack.md` | photo/export-pack (adopter of S11); RJ-P01 | – | – | – | file when ready | planned |

@@ -5,6 +5,7 @@
 // By default it is inset like the rows (SuiteSpacing.m); `column` instead
 // starts it at a value column, an x measured in a named coordinate space the
 // caller sets up (Design's style hint starts at the X field, #276).
+// Its accessibility label is its text, so a test or journey reads it by id.
 import SwiftUI
 
 public struct InspectorNote: View {
@@ -31,6 +32,8 @@ public struct InspectorNote: View {
 
     public var body: some View {
         content
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(text))
             .accessibilityIdentifier(identifier ?? "")
             .frame(maxWidth: .infinity, alignment: .leading)
             .fixedSize(horizontal: false, vertical: true)
