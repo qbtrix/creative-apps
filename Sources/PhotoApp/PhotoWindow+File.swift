@@ -318,10 +318,12 @@ extension PhotoWindow {
                 if saving {
                     didSave(url, kind: .image(format), opened: opened)
                 } else {
+                    model.endExport(.success([url.lastPathComponent]))
                     note = "Exported \(url.lastPathComponent)"
                 }
             } catch {
                 if saving { return didFailSave(error) }
+                model.endExport(.failure(error))
                 note = nil
                 problem = PhotoProblem("\(url.lastPathComponent) couldn't be written.", Self.reason(error))
             }
