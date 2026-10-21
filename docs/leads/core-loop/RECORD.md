@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: wave 5: CL-10 #4166 open (after #4147); CL-z CL-13+CL-14 (on dev; #4148 merged 5803475); then check the lane and dev CI for #4147/#4148
+Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are open, so: merge watch, Belt-Slice-Done per slice on a green dev Linux run, critics once the scoped halo run shows screens; then check the lane and dev CI for #4147/#4148
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -31,8 +31,8 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z CL-13+CL-14 (on dev; #4148 me
 | CL-10 | CL-measure | – | H-P1..H-P5 journeys on | UITests/HaloJourneyTests+Perf.swift | perf journeys | #4166 | open 9b77b2cd (stacked on #4147) |
 | CL-11 | CL-measure | 2 | L3..L5 and latency line on | Tests/AppSnapshotTests/HaloLayoutTests.swift, HaloViewerLatencyTests.swift | layout tests | | #3487 merged d9bc0337 |
 | CL-12 | CL-measure | – | -HaloFixture → -HaloSample in six journeys | UITests/HaloJourneyTests*.swift | journeys | #4148 | merged 5803475 (with #865) |
-| CL-13 | CL-z | – | H-J12 live | UITests/HaloJourneyTests.swift | H-J12 | | building on dev (after #4148 merged) |
-| CL-14 | CL-z | – | status built, waves.in.md, blueprint prose (feature-done) | core-loop.wave.json, waves.in.md, halo.md | scripts/ci | | building with CL-13 (feature-done) |
+| CL-13 | CL-z | – | H-J12 live | UITests/HaloJourneyTests.swift | H-J12 | #4167 | open 84e3f09c |
+| CL-14 | CL-z | – | status built, waves.in.md, blueprint prose (feature-done) | core-loop.wave.json, waves.in.md, halo.md | scripts/ci | #4167 | open 84e3f09c (feature-done) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -42,7 +42,7 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z CL-13+CL-14 (on dev; #4148 me
 - W1: CL-a1 = CL-1+CL-2 (~380 lines, 3 files), CL-a2 = CL-3 (~300, 5). Independent: both (disjoint files, CL-3's suites need no CL-2 code).
 - W2 (started at once, stacked): CL-run1 = CL-6 on CL-a1 (needs the stubs and the disabled tests); CL-ui = CL-4+CL-5 on CL-a1+CL-a2 (CL-4 needs the stubs, CL-5 the CL-3 suite); CL-11 on CL-a2 (enables CL-3's layout and latency tests).
 - W3: CL-run2 = CL-7 on CL-run1 (reads the kernel run CL-6 fills).
-- Open: #4147 (CL-8, CL-9). Merged: #4148 (#865, CL-12) 5803475. Open: #4166 (CL-10, after #4147). Building: CL-13+CL-14 on dev.
+- Open: #4147 (CL-8, CL-9). Merged: #4148 (#865, CL-12) 5803475. Open: #4166 (CL-10, after #4147). Open: #4167 (CL-13+CL-14, feature-done, after #4166).
 
 ## Decisions
 - The PR tool's server appends an attribution footer and puts it back after a body edit; the fast lane strips it from the squash commit (CLAUDE.md), so the lead leaves it.
