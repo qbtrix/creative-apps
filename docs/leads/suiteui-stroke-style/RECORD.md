@@ -82,3 +82,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 19:53Z: #3826 (SS-9) is open with fast-lane. SS-d and SS-z wait on their dependencies.
 - 20:09Z: #3826 (SS-9) is open with fast-lane, waiting on a batch. #3881 is tracked against SS-9.
 - 20:23Z: #3826 (SS-9) is open with fast-lane, waiting on a batch.
+- 20:43Z: #3826 (SS-9) was stalled: its head 21226b0 carries a red Linux check (a LibraryFoldersTests.tenThousandPaths timing budget this PR doesn't touch), so the lane can't merge it. I launched a fixer to merge dev into the branch, rerun scripts/ci --changed and push a new head; then the Head: line moves and the body's stray --- comes out.
