@@ -1,7 +1,7 @@
 // LibraryExportMetadataTests.swift: MX-LX, the metadata policy on Library's
 // export (packet docs/blueprints/library/features/export-pack.md). LX-1 adds
-// `ExportOptions.metadata` and the sidecar's signature; the policy's own
-// tests wait on LX-3 (lead.md, contract rule 13). The policy is SuiteKernel's
+// `ExportOptions.metadata` and the sidecar's signature; LX-3, which makes the
+// sidecar and the exporter follow the policy, enabled the rest. The policy is SuiteKernel's
 // `ExportMetadata`, and the dropped tags are `ExportRules.dropped` (rule 20).
 import CoreColor
 import Foundation
@@ -29,7 +29,7 @@ import Testing
     }
 }
 
-@Suite(.disabled("waits on LX-3")) struct LibraryExportMetadataTests {
+@Suite struct LibraryExportMetadataTests {
     /// IMG_0001: 3 stars, a pick, Red, exposure 0.5.
     func photo() throws -> PhotoItem {
         PhotoItem(id: "/shoot/IMG_0001.jpg", name: "IMG_0001", captureDate: try Date("2026-06-01T10:07:00Z", strategy: .iso8601),

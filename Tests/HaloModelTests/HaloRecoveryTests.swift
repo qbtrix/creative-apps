@@ -1,11 +1,10 @@
-// HaloRecoveryTests.swift (autosave-history HA-1, MJ-HA): the History panel's
-// listing and the recovery bytes, through HaloRecovery+Kernel.swift. On today's
-// stubs: a new project lists "New Project", an opened one "Open", each edit a
-// step and undo moves the index without dropping it; the saved mark follows a
-// save; the recovery bytes are the bytes Save writes. Disabled until HA-5
-// fills the adapter's bodies: a jump to 4 of 10 key edits restores those keys
-// and records nothing; recovery bytes reopen dirty and never saved; damaged
-// bytes throw. Linux and macOS.
+// HaloRecoveryTests.swift (autosave-history HA-1, HA-5, MJ-HA): the History
+// panel's listing and the recovery bytes, through HaloRecovery+Kernel.swift. A
+// new project lists "New Project", an opened one "Open", each edit a step and
+// undo moves the index without dropping it; the saved mark follows a save; the
+// recovery bytes are the bytes Save writes. HA-5's bodies: a jump to 4 of 10
+// key edits restores those keys and records nothing; recovery bytes reopen
+// dirty and never saved; damaged bytes throw. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -67,8 +66,7 @@ private func keyTen(_ project: inout HaloProject) {
     #expect(try project.recoveryBytes() == project.fileData())
 }
 
-@Test(.disabled("HA-5 bodies"))
-func jumpRecordsNothing() throws {
+@Test func jumpRecordsNothing() throws {
     var project = try ball()
     keyTen(&project)
     var four = try ball()
@@ -86,8 +84,7 @@ func jumpRecordsNothing() throws {
     #expect(project.historyListing.steps.count == 10)
 }
 
-@Test(.disabled("HA-5 bodies"))
-func recoveryBytesReopenDirtyAndNeverSaved() throws {
+@Test func recoveryBytesReopenDirtyAndNeverSaved() throws {
     var project = try ball()
     keyTen(&project)
     let reopened = try HaloProject.recovered(from: project.recoveryBytes(), name: "title")
@@ -98,8 +95,7 @@ func recoveryBytesReopenDirtyAndNeverSaved() throws {
     #expect(reopened.historyListing.steps.isEmpty)
 }
 
-@Test(.disabled("HA-5 bodies"))
-func damagedBytesThrow() throws {
+@Test func damagedBytesThrow() throws {
     #expect(throws: (any Error).self) { try HaloProject.recovered(from: Data("not a halo file".utf8), name: nil) }
     #expect(throws: (any Error).self) { try HaloProject.recovered(from: Data(), name: "title") }
 }

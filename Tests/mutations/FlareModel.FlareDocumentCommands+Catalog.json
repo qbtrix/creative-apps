@@ -26,5 +26,12 @@
     "find": "        (undoName, redoName) = (workspace.undoName, workspace.redoName)\n",
     "replace": "        (undoName, redoName) = (workspace.undoActionName, workspace.redoName)\n",
     "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "notDrawnOnStage is ignored: mask and matte commands read available though the stage can't draw them",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }\n",
+    "replace": "",
+    "tests": "FlareCoreCommandCatalogTests"
   }
 ]

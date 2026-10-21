@@ -9,8 +9,8 @@
 # Until beta only compile and Model tests block (captain, 2026-10-16). The
 # proof a head passed the gate is Linux-side: the worker's `Fast-Check: pass`
 # line followed by `Head: <full head sha>` in the body, or a passing CI
-# `Linux` check on the head. CI's `macOS` and `macOS journeys` jobs (each
-# also as `... (<app>)`) prove nothing for a PR, so the lane ignores them
+# `Linux` check on the head. CI's `macOS` job and journeys.yml's `macOS
+# journeys` job (each also as `... (<app>)`) prove nothing for a PR, so the lane ignores them
 # (REPORT_ONLY_RE): a red or running one never holds a PR. macOS is gated
 # per batch, not per PR (below): a batch whose PRs change code (BUILD_RE)
 # lands only once its macOS gate is green too. LANE_MAC_PER_PR=1 is the
@@ -147,7 +147,7 @@ FEATURE_LABEL="feature-done"  # merging one dispatches full CI on BASE_BRANCH
 CI_WORKFLOWS=("CI")
 # CI job names, so CI runs started by workflow_dispatch (no PR association) still count.
 CI_CHECKS=("Linux")
-# CI's report-only jobs (ci.yml): never red, pending or proof here.
+# Report-only jobs (ci.yml's macOS, journeys.yml's macOS journeys), matched by name: never red, pending or proof here.
 REPORT_ONLY_RE='^macOS( journeys)?( \(.*\))?$'
 CI_FILE="ci.yml"  # the CI workflow file, dispatched on BASE_BRANCH after merges
 SELF_WORKFLOW="Fast Lane"
