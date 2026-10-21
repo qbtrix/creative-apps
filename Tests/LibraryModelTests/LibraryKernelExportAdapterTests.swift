@@ -26,7 +26,7 @@ import Testing
         var catalog = Self.shoot(selecting: ["IMG_0001", "IMG_0002"])
         let options = ExportOptions(folder: "/out")
         #expect(catalog.exportRun == .idle)
-        #expect(catalog.beginExport(folder: "/out"))
+        #expect(catalog.beginExport(folder: "/out") == true)
         #expect(catalog.exportRun == .editing(options))
         #expect(catalog.exportPlan(existingNames: [])?.items.count == 2)
         #expect(catalog.exportRun == .running(options, done: 0, total: 2))
@@ -44,11 +44,12 @@ import Testing
 
     @Test func retryReopensAndStartsTheKernelRun() throws {
         var catalog = Self.shoot(selecting: ["IMG_0001", "IMG_0002"])
-        #expect(catalog.beginExport(folder: "/out"))
+        #expect(catalog.beginExport(folder: "/out") == true)
         _ = catalog.exportPlan(existingNames: [])
         catalog.finishExport(ExportSummary(total: 2, written: ["IMG_0001.jpg"], failedIDs: [Self.id("IMG_0002")]))
         let options = ExportOptions(longEdge: 512, folder: "/again")
-        let retry = try #require(catalog.retryExport(options: options, existingNames: []))
+        let retried = catalog.retryExport(options: options, existingNames: [])
+        let retry = try #require(retried)
         #expect(retry.items.map(\.photoID) == [Self.id("IMG_0002")])
         #expect(catalog.exportRun == .running(options, done: 0, total: 1))
     }
@@ -58,7 +59,7 @@ import Testing
         catalog.finishExport(ExportSummary(total: 1, written: ["IMG_0001.jpg"]))
         catalog.showExportProgress(done: 1, total: 1)
         #expect(catalog.exportRun == .idle && catalog.exportSummary == nil)
-        #expect(catalog.beginExport(folder: "/out"))
+        #expect(catalog.beginExport(folder: "/out") == true)
         _ = catalog.exportPlan(existingNames: [])
         catalog.closeExport()
         catalog.setExportOptions(ExportOptions(longEdge: 512, folder: "/out"))

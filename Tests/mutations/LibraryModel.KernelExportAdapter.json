@@ -1,0 +1,51 @@
+[
+  {
+    "label": "dropsEnd: finishExport never forwards the summary to the kernel's end, so the run started by Export never finishes",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "        exportRun.end(.success(summary.written))\n",
+    "replace": "        _ = summary\n",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "refusalIsSuccess: closeExport overrides the kernel's dismiss, so a running export closes as if the kernel had allowed it",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "        exportRun.dismiss()\n",
+    "replace": "        exportRun = .idle\n",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "retryRefusalIsSuccess: retryExport skips the kernel's reopen, so start is refused from finished and Try Again plans nothing",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "exportRun.begin(options), exportRun.start(",
+    "replace": "exportRun.start(",
+    "tests": "LibraryExportBatchTests"
+  },
+  {
+    "label": "optionsOutsideEditing: setExportOptions drops its editing check, so the kernel's begin opens a closed sheet",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "        guard case .editing = exportRun else { return }\n",
+    "replace": "",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "dropsProgress: showExportProgress never forwards to the kernel's progressed",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "        exportRun.progressed(done: done)\n",
+    "replace": "        _ = done\n",
+    "tests": "LibraryExportFlowTests"
+  },
+  {
+    "label": "finishWhenIdle: finishExport keeps a summary the kernel's end ignores, outside a run",
+    "file": "Sources/LibraryModel/LibraryExport.swift",
+    "find": "        guard case .running = exportRun else { return }\n        exportSummary = summary\n",
+    "replace": "        exportSummary = summary\n",
+    "tests": "LibraryKernelExportAdapterTests"
+  },
+  {
+    "label": "readoutDropsSummary: the readout shows only the kernel's written names, so the failures and Try Again's ids are lost",
+    "file": "Sources/LibraryModel/LibraryExportAdapter.swift",
+    "find": "self = .finished(summary ?? ExportSummary(total: files.count, written: files))",
+    "replace": "self = .finished(ExportSummary(total: files.count, written: files))",
+    "tests": "LibraryExportBatchTests"
+  }
+]
