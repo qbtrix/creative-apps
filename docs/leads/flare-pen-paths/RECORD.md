@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T21:43Z) #4204 (FP-a fix round 2) waits on the lane's macOS build 39679130271. Its body footer is re-added server-side on every edit; the lane strips it from the squash. PN-3a #3770 merged 21:01Z; PN-3 is #4203 (open); FP-u starts once it merges.
+Next: (2026-10-21T22:05Z) #4204 (FP-a fix round 2) waits on lane macOS build 39679130271 (still queued). PN-3 #4203 open; FP-u starts once it merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
