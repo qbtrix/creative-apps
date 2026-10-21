@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T10:06:57Z	heartbeat	heartbeat	-	AC-colour,AC-tools merge
 2026-10-21T10:27:41Z	merged	AC-colour merged, AC-tools p2 started	-	AC-colour green dev run; AC-tools p1 merge; AC-tools p2 PR
 2026-10-21T10:35:10Z	lane	AC-tools p2 #4002 opened	-	AC-colour green dev run; AC-tools #3952+#4002 merge
+2026-10-21T10:50:48Z	heartbeat	heartbeat	-	AC-colour green dev run (dev red #3856 from #3976, photo); AC-tools #3952+#4002 merge
