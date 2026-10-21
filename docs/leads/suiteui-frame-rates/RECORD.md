@@ -2,9 +2,9 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: wave1
+Stage: build
 Base: dev
-Next: FR-a #4063 macOS build 39626628147 in progress; FR-m and FR-u stacked locally
+Next: FR-m opens when #4063 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
