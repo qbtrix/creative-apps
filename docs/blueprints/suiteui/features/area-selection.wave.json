@@ -1,0 +1,318 @@
+{
+  "title": "Area selection: ellipse, lasso and polygon areas that add, subtract and intersect, invert, feather, expand and contract, a magic wand, marching ants, and group-aware clicks, on SuiteKernel and SuiteImaging; Photo and Design adopt",
+  "wave": "XK4",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 C1 (Photo row 1 and 2, Design row 1); feature map S5; real jobs RJ-X70, RJ-X71 (new)",
+  "waits_on": "suite-imaging IM-a (the SuiteImaging target, for AreaMask) and IM-z (the canonical-baseline.txt chain, AR-z only); photo/file-flow PF-m and design/pen-paths DP-m (the catalog and command-id ledger chains, cross-line hand-offs)",
+  "depends": [
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "9 (AR-1 → AR-2 → AR-5 → AR-6 → AR-10 → AR-11 → AR-12 → AR-15 → AR-16)",
+  "journeys": [
+    "SuiteAreaSelectJourneyTests.testAntsAndOptionsInGallery",
+    "PhotoSelectionJourneyTests.testShapesWandInvertFeather",
+    "DesignSelectJourneyTests.testClickGroupThenEnter"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Selection/AreaShape.swift",
+    "Sources/SuiteKernel/Selection/AreaSelectCommands.swift",
+    "Sources/SuiteKernel/Selection/GroupPick.swift",
+    "Tests/SuiteKernelTests/AreaShapeTests.swift",
+    "Tests/SuiteKernelTests/GroupPickTests.swift",
+    "Tests/mutations/SuiteKernel.AreaShape.json",
+    "Tests/mutations/SuiteKernel.GroupPick.json",
+    "Sources/SuiteImaging/Select/AreaMask.swift",
+    "Tests/SuiteImagingTests/AreaMaskTests.swift",
+    "Tests/mutations/SuiteImaging.AreaMask.json",
+    "docs/c4/parts/creative-apps/suite-imaging/imaging-select.json",
+    "Sources/SuiteUI/CanvasMarks+Area.swift",
+    "Sources/SuiteUI/AreaToolOptions.swift",
+    "Sources/SuiteUI/Gallery/GalleryAreaSelect.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Tests/SuiteUITests/AreaToolOptionsTests.swift",
+    "Tests/AppSnapshotTests/RenderBudgetAreaSelectTests.swift",
+    "UITests/SuiteJourneyTests+AreaSelect.swift",
+    "Tests/PhotoModelTests/PhotoAreaSelectionTests.swift",
+    "Tests/RealJobs/photo/select-shapes/select-shapes.jobs.json",
+    "Tests/RealJobs/photo/select-shapes/input/portrait.png",
+    "Sources/PhotoModel/PhotoArea+Kernel.swift",
+    "Sources/PhotoModel/PhotoSelectionMask.swift",
+    "Tests/mutations/PhotoModel.PhotoArea+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json",
+    "Sources/PhotoModel/PhotoToolbarItems.swift",
+    "Sources/PhotoApp/PhotoToolOptions.swift",
+    "Sources/PhotoApp/PhotoWindow+Select.swift",
+    "Sources/PhotoApp/PhotoCommands.swift",
+    "Tests/command-path-baseline/photo.txt",
+    "UITests/PhotoJourneyTests+Selection.swift",
+    "Tests/AppSnapshotTests/PhotoRenderBudgetTests.swift",
+    "Tests/DesignModelTests/DesignGroupPickTests.swift",
+    "UITests/DesignJourneyTests+Select.swift",
+    "Tests/RealJobs/design/group-click/group-click.jobs.json",
+    "Sources/DesignModel/DesignGroupPick+Kernel.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Sources/DesignApp/DesignEditMenu.swift",
+    "Tests/mutations/DesignModel.DesignGroupPick+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json",
+    "Sources/PhotoModel/Contracts/SelectionContracts.swift",
+    "Sources/PhotoModel/Contracts/LayerMaskContracts.swift",
+    "Sources/PhotoModel/Live/LiveSelection.swift",
+    "Sources/PhotoApp/SelectionOverlay.swift",
+    "Sources/PhotoModel/PhotoServices.swift",
+    "Tests/canonical-baseline.txt",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-selection.json",
+    "docs/blueprints/suiteui/features/area-selection.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "AR-a",
+      "behavior": "The kernel declares the area recipe, the group pick rule and their thirteen select.* command specs as stubs, with their tests written and disabled.",
+      "tasks": [
+        "AR-1",
+        "AR-2"
+      ],
+      "journeys": [
+        "MJ-AR"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Selection/AreaShape.swift",
+        "Sources/SuiteKernel/Selection/AreaSelectCommands.swift",
+        "Sources/SuiteKernel/Selection/GroupPick.swift",
+        "Tests/SuiteKernelTests/AreaShapeTests.swift",
+        "Tests/SuiteKernelTests/GroupPickTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "AR-m",
+      "behavior": "Shapes join the area by Shift, Option or both, a lasso closes and drops points closer than a pixel, the steps keep their order, and a click picks the outermost group in the entered scope.",
+      "tasks": [
+        "AR-3",
+        "AR-4"
+      ],
+      "journeys": [
+        "MJ-AR"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Selection/AreaShape.swift",
+        "Tests/SuiteKernelTests/AreaShapeTests.swift",
+        "Tests/mutations/SuiteKernel.AreaShape.json",
+        "Sources/SuiteKernel/Selection/GroupPick.swift",
+        "Tests/SuiteKernelTests/GroupPickTests.swift",
+        "Tests/mutations/SuiteKernel.GroupPick.json"
+      ],
+      "waits": {
+        "AR-a": [
+          "AR-3",
+          "AR-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AR-r",
+      "behavior": "A recipe becomes a CoreRaster mask in SuiteImaging: shapes joined in order, the wand by tolerance and contiguity over one layer or all, then invert, feather, expand and contract.",
+      "tasks": [
+        "AR-5",
+        "AR-6"
+      ],
+      "journeys": [
+        "MJ-AR-raster"
+      ],
+      "owned": [
+        "Sources/SuiteImaging/Select/AreaMask.swift",
+        "Tests/SuiteImagingTests/AreaMaskTests.swift",
+        "Tests/mutations/SuiteImaging.AreaMask.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-select.json"
+      ],
+      "waits": {
+        "suite-imaging:IM-a": [
+          "AR-5",
+          "AR-6"
+        ],
+        "AR-a": [
+          "AR-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AR-u",
+      "behavior": "SuiteUI draws marching ants from a mask outline and a lasso in progress, and shows the area tool options (shape, mode, feather, wand tolerance, contiguous, all layers) as command-backed controls, reachable from the gallery on the fakes.",
+      "tasks": [
+        "AR-7",
+        "AR-8"
+      ],
+      "journeys": [
+        "SJ-AR"
+      ],
+      "owned": [
+        "Sources/SuiteUI/CanvasMarks+Area.swift",
+        "Sources/SuiteUI/AreaToolOptions.swift",
+        "Sources/SuiteUI/Gallery/GalleryAreaSelect.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Tests/SuiteUITests/AreaToolOptionsTests.swift",
+        "Tests/AppSnapshotTests/RenderBudgetAreaSelectTests.swift",
+        "UITests/SuiteJourneyTests+AreaSelect.swift"
+      ],
+      "waits": {
+        "AR-a": [
+          "AR-7"
+        ],
+        "pen-paths:PN-a": [
+          "AR-7"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AR-photo-m",
+      "behavior": "Photo's selection runs on the kernel recipe and SuiteImaging's mask behind its existing API, every select.* command works by CLI, and delete, fill and paint keep weighting by coverage.",
+      "tasks": [
+        "AR-9",
+        "AR-10"
+      ],
+      "journeys": [
+        "MJ-AR-photo"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoAreaSelectionTests.swift",
+        "Tests/RealJobs/photo/select-shapes/select-shapes.jobs.json",
+        "Tests/RealJobs/photo/select-shapes/input/portrait.png",
+        "Sources/PhotoModel/PhotoArea+Kernel.swift",
+        "Sources/PhotoModel/PhotoSelectionMask.swift",
+        "Tests/mutations/PhotoModel.PhotoArea+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json"
+      ],
+      "waits": {
+        "AR-a": [
+          "AR-9"
+        ],
+        "AR-m": [
+          "AR-10"
+        ],
+        "AR-r": [
+          "AR-10"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AR-photo-u",
+      "behavior": "Photo's toolbar has Ellipse, Lasso, Polygon Lasso and Magic Wand beside the Marquee, the Select menu lists every area command, and the ants come from SuiteUI instead of Photo's overlay.",
+      "tasks": [
+        "AR-11",
+        "AR-12"
+      ],
+      "journeys": [
+        "PJ-AR"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoToolbarItems.swift",
+        "Sources/PhotoApp/PhotoToolOptions.swift",
+        "Sources/PhotoApp/PhotoWindow+Select.swift",
+        "Sources/PhotoApp/PhotoCommands.swift",
+        "Tests/command-path-baseline/photo.txt",
+        "UITests/PhotoJourneyTests+Selection.swift",
+        "Tests/AppSnapshotTests/PhotoRenderBudgetTests.swift"
+      ],
+      "waits": {
+        "AR-u": [
+          "AR-11"
+        ],
+        "AR-photo-m": [
+          "AR-11"
+        ],
+        "adopt-suiteui-chrome:AC-colour": [
+          "AR-11"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AR-design",
+      "behavior": "In Design a click on a grouped layer picks the group and drags it whole, a double-click or Return enters it, Escape steps out one level, and ⌘-click picks the deepest layer, all as commands.",
+      "tasks": [
+        "AR-13",
+        "AR-14"
+      ],
+      "journeys": [
+        "DJ-AR"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignGroupPickTests.swift",
+        "UITests/DesignJourneyTests+Select.swift",
+        "Tests/RealJobs/design/group-click/group-click.jobs.json",
+        "Sources/DesignModel/DesignGroupPick+Kernel.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Sources/DesignApp/DesignEditMenu.swift",
+        "Tests/mutations/DesignModel.DesignGroupPick+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json"
+      ],
+      "waits": {
+        "AR-a": [
+          "AR-13"
+        ],
+        "AR-m": [
+          "AR-14"
+        ],
+        "adopt-kernel-transform:AT-design": [
+          "AR-14"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AR-z",
+      "behavior": "Photo's selection contract copy, its NotBuilt live service and its own overlay are deleted with the baseline shrunk by three lines, the kernel's C4 part names the recipe, RJ-X70 and RJ-X71 pass, and the feature is built.",
+      "tasks": [
+        "AR-15",
+        "AR-16"
+      ],
+      "journeys": [
+        "MJ-AR",
+        "PJ-AR",
+        "DJ-AR"
+      ],
+      "owned": [
+        "Sources/PhotoModel/Contracts/SelectionContracts.swift",
+        "Sources/PhotoModel/Contracts/LayerMaskContracts.swift",
+        "Sources/PhotoModel/Live/LiveSelection.swift",
+        "Sources/PhotoApp/SelectionOverlay.swift",
+        "Sources/PhotoModel/PhotoServices.swift",
+        "Tests/canonical-baseline.txt",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-selection.json",
+        "docs/blueprints/suiteui/features/area-selection.wave.json"
+      ],
+      "waits": {
+        "AR-photo-m": [
+          "AR-15"
+        ],
+        "AR-photo-u": [
+          "AR-15"
+        ],
+        "AR-design": [
+          "AR-16"
+        ],
+        "suite-imaging:IM-z": [
+          "AR-15"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

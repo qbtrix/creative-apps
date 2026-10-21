@@ -42,9 +42,8 @@ public struct TransformDraft: Hashable, Sendable {
     }
 }
 
-public enum FlipAxis: Hashable, Sendable {
-    case horizontal, vertical
-}
+/// Which way a flip mirrors: SuiteKernel's `FlipDirection` (horizontal or vertical).
+public typealias FlipAxis = FlipDirection
 
 /// PV-7: free transform and flips.
 public protocol LayerTransforming: PhotoUseCase {

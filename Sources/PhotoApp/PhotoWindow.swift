@@ -66,6 +66,8 @@ struct PhotoWindow: View {
     @State var isTransforming = false
     /// The Export sheet's choices while it is open (PhotoWindow+Export.swift, PV-8).
     @State var exportDraft: ExportOptions?
+    /// The inspector's tab (PhotoWindow+History.swift, history-panel PH-2).
+    @State var inspectorTab = PhotoInspectorTab.adjust
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
@@ -152,7 +154,7 @@ struct PhotoWindow: View {
             .modifier(PhotoFileArea(model: model, files: files, perform: perform))
             .modifier(PhotoEditArea(model: model, perform: perform))
             .modifier(PhotoCropArea(model: model, perform: perform))
-            .modifier(PhotoHistoryArea(model: model, perform: perform))
+            .modifier(PhotoHistoryArea(model: model, perform: perform, tab: inspectorTab))
             .modifier(PhotoSelectArea(model: model, perform: perform))
             .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
             .modifier(PhotoTransformArea(model: model, perform: perform))
