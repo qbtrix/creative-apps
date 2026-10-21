@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T20:42Z	3	pr-opened	#4191	TK-u (TK-3, TK-4), base tk-a-timeline-keys-contract
 2026-10-21T20:54Z	3	poll	#4183	macOS build 39671398584 in progress; #4185 #4191 wait; no findings
 2026-10-21T21:12Z	3	lane-mac	#4183	macOS build 39671398584 success; merge on the next lane sweep; #4185 #4191 wait
+2026-10-21T21:25Z	3	poll	#4183	compiled; waiting on the lane sweep (run 39678641684 pending)
