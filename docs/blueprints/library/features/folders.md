@@ -32,6 +32,8 @@ views" components (this PR).
 
 Blueprint sections: library.md 3 (sidebar), 5 (filters).
 
+**Hand-off (beta gaps C1 to C12, suiteui line, cross-line):** the XK4 kernel-gap adopts (clipboard-interop CB-library, orientation-crop OC-library-m) also edit `LibraryCommandCatalog.swift` and `Tests/command-ids/library.txt`. The slices here that edit those files start after those adopts' slices on the same app have merged, or before them with their lead told; the checker can't see this across lines.
+
 ## Slices
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |

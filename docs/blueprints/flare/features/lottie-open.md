@@ -36,6 +36,8 @@ skipped note reuses export's `ExportScan` row view for its list.
 
 Blueprint sections: flare.md 4 (files), 6 (Lottie).
 
+**Hand-off (beta gaps C1 to C12, suiteui line, cross-line):** the XK4 kernel-gap adopts (clipboard-interop CB-flare, frame-rates FR-flare, anchor-parenting AN-flare-m, document-setup DS-flare, brush-keys BK-flare) also edit `FlareCommandCatalog.swift` and `Tests/command-ids/flare.txt`. The slices here that edit those files start after those adopts' slices on the same app have merged, or before them with their lead told; the checker can't see this across lines.
+
 ## Slices
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |

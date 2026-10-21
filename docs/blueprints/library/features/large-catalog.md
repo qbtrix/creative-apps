@@ -34,14 +34,15 @@ component (this PR).
 
 Blueprint sections: library.md 9 (budgets).
 
+**Hand-off (beta gaps C1 to C12, suiteui line, cross-line):** the XK4 kernel-gap adopts (orientation-crop OC-library-u) also edit `LibraryGrid.swift`. The slices here that edit those files start after those adopts' slices on the same app have merged, or before them with their lead told; the checker can't see this across lines.
+
 ## Slices
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | LG-a | A 10,000-photo fixture catalog exists and every finding has a budget test on it, written and disabled by the slice that fixes it. | LG-1, LG-2 | MJ-LG | metadata-more:MD-a (`LibraryLaunch.swift`) |
 | LG-model | The catalog loads off the main thread with an id index, selection is index-set arithmetic, and the export plan is one pass, each within its budget on 10,000 photos (#3110, #1650, #3213, #3214). | LG-3, LG-4 | MJ-LG | LG-a; filters-collections:FC-a, metadata-more:MD-e, cull-finish:DR-m (`LibraryCatalog.swift`) |
-| LG-grid | The grid scrolls 10,000 photos within budget, asking only for visible thumbnails plus two screens through the shared store, and the loupe steps within budget with its neighbours decoded (#3108, #3109). | LG-5, LG-6 | LJ-LG, MJ-LG | LG-a, LG-model; suiteui shared-thumbnails (cross-line); filters-collections:FC-c (`LibraryWindow.swift`) |
-| LG-z | The journey and RJ-L07 and RJ-L56 pass on the 10,000-photo fixture, the six findings are closed, and the feature is built. | LG-7, LG-8 | LJ-LG, MJ-LG | LG-model, LG-grid |
+| LG-grid | The grid scrolls 10,000 photos within budget through the shared thumbnail store and the loupe steps within budget (#3108, #3109), RJ-L07 and RJ-L56 pass, and the feature is built. | LG-5, LG-6, LG-7, LG-8 | LJ-LG, MJ-LG | LG-a, LG-model, LG-model; suiteui shared-thumbnails (cross-line); filters-collections:FC-c (`LibraryWindow.swift`) |
 
 **Measure first.** LG-a lands every budget test before any fix, each disabled
 by the slice that turns it on, so each fix PR shows its own before and after.
