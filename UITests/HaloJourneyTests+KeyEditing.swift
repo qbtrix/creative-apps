@@ -8,15 +8,14 @@
 // 0 alone onto 12 (refused, the status line says why), then ⌘A, ⌫ and ⌘Z.
 // A key is `halo.timeline.key.<layer id>.<frame>`, selected while picked
 // (TimelineLaneAccess). Halo has no eye yet, so step 5 hides Rig only when
-// its row shows one. One shot per step, `key-editing-<step>`. It skips until
-// KE-7, when the moves (KE-4) are on dev.
+// its row shows one. One shot per step, `key-editing-<step>`. It runs live:
+// KE-7 turned it on once the moves (KE-4) were on dev.
 import XCTest
 
 final class HaloKeyEditingJourneyTests: XCTestCase {
     private static let rig = "comp-1-layer-3", ball = "comp-1-layer-2"
 
     @MainActor func testSelectAllAndMoveKeys() throws {
-        try XCTSkipIf(true, "waits on KE-7")
         let halo = Journey("Halo", self, arguments: ["-HaloFixture", "parented", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
