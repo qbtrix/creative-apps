@@ -46,3 +46,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T18:37Z: rule 23 re-read. #3967 green macOS build, waits on a lane batch. dev-red #3856 open. Open findings: 0.
 
 - 2026-10-21T18:42Z: lead/catalog-backup now mirrors this record. BK-u #3967 at cf07beb waits on a lane batch (macOS build 39632012767 succeeded).
+
+- 2026-10-21T19:06Z: BK-u #3967 got needs-fix: the batch's Linux check failed CommandPathTests (library). The five backup sites are now listed in the command-path baseline, as FC-5 and PT-3 did. dev merged in, gate PASS, pushed 780c26c, Head moved. Waiting on the lane's new macOS build and batch.
