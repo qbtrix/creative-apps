@@ -4,14 +4,14 @@ Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: FO-4 #3961 merged with dev; its gate failed only on tenThousandPaths (24 ms single run vs 20 ms under parallel load), now timed by Budget.measure median over 10 runs, re-gating; on PASS push, Fast-Check: pass, Head:, fast-lane. #3963 (FO-u, stacked) follows once #3961 merges. Re-read FC-d, LF-m, LC-m for FO-5. Blocked-wait polls with no change: 3 (09:20, 09:54, 10:16); Question for the supervisor posted 10:16, waiting on the answer.
+Next: FO-4 #3961 on fast-lane at 27c6113 (gate PASS; tenThousandPaths now a Budget median, 10.2 ms vs 20). Once #3961 merges: merge dev into FO-u #3963, gate, fast-lane. FO-a Belt-Slice-Done once a qualifying run containing #3939 passes. Re-read FC-d, LF-m, LC-m for FO-5. Blocked-wait polls with no change: 3 (09:20, 09:54, 10:16); Question for the supervisor posted 10:16, waiting on the answer.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | merged #3939 (in Linux check 39571804700 d93267dab); Belt-Slice-Done waits on a qualifying run | – | – |
 | FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | PR #3963 open, stacked on #3961 (FO-4) | – | – |
-| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 #3961 open; FO-5 blocked | – | – |
+| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 #3961 fast-lane (27c6113); FO-5 blocked | – | – |
 | FO-z | live, RJ-L53, built | FO-6, FO-7 | LJ-FO, MJ-FO | FO-u, FO-m | yes | 0 | blocked | – | – |
 
 ## Tasks
