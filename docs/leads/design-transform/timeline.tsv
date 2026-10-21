@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-21T20:05Z	3	builder-started	DT-5	DT-m adapter bodies and turned-outline hit test
 2026-10-21T20:21Z	3	pr-opened	#4187	DT-5 adapter bodies, mutate 5/5
 2026-10-21T20:21Z	3	finding-filed	#4188	canvas has no rotate knob (DT-3 gap); fix round 1 started
+2026-10-21T20:27Z	3	builder-started	DT-6	commands + SVG, stacked on #4189 and #4187
