@@ -1,7 +1,10 @@
 // LibraryInspector.swift: the Library window's inspector: one InspectorHeader
 // (`library.inspector.header`, the catalog's inspectorHeader: the collection's
 // name and photo count with nothing selected, one photo's name, Captured, Size
-// and Kind, or several photos' count and capture span), then Info and Develop
+// and Kind, or several photos' count and capture span), then SuiteUI's
+// HistogramView of the loupe render (`library.develop.histogram`, valued with
+// the render's mean, and saying why while it has no bins), pinned above both
+// tabs, then Info and Develop
 // tabs on SegmentedTabs (`library.inspector.tabs`, its segments
 // `library.inspector.info` and `library.inspector.develop`, #291). Info shows the cull targets' MetadataInspector (the
 // loupe photo in the loupe, else the selected photos) or nothing. Develop
@@ -35,6 +38,11 @@ struct LibraryInspector: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
+            HistogramView(
+                model.toneHistogram, emptyMessage: model.histogramEmptyMessage, value: model.histogramValue,
+                id: DevelopInspector.histogramID)
+            .padding(.horizontal, SuiteSpacing.m)
+            .padding(.vertical, SuiteSpacing.s)
             // SegmentedTabs identifies the switch and each segment and lists them in suite.controls; an id
             // on this multi-element view would copy onto every element in it (swiftui-rules 7).
             SegmentedTabs("Inspector", tabs: Self.tabs, selection: tab, id: Self.tabsID, onChange: { tab = $0 })

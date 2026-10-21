@@ -9,6 +9,7 @@
 // PhotoTool's palette look (title, symbol, one-key shortcut) lives here too.
 import CoreRaster
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -24,6 +25,8 @@ enum PhotoIntent {
     case drag(CGPoint, CGPoint)
     case endDrag
     case toolOption(ToolOptionEdit)
+    /// One GradientEditor gesture on the Gradient tool's fill (PhotoFillToolOptions).
+    case gradientOption(GradientIntent)
     case adjust(AdjustmentEdit)
     /// A slider's or the curve's gesture ended: the next adjustment is a new undo step.
     case endAdjust
@@ -38,6 +41,7 @@ enum PhotoIntent {
     // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
+    case place(PhotoPlaceIntent)
     /// Return: commits a free transform, else applies a pending crop.
     case confirm
     /// Escape: cancels a free transform, else cancels a pending crop or deselects.
@@ -58,6 +62,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "Heal"
         case .crop: "Crop"
         case .eyedropper: "Eyedropper"
+        case .gradient: "Gradient"
         }
     }
 
@@ -71,6 +76,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "bandage"
         case .crop: "crop"
         case .eyedropper: "eyedropper"
+        case .gradient: "square.bottomhalf.filled"
         }
     }
 
@@ -84,6 +90,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "j"
         case .crop: "c"
         case .eyedropper: "i"
+        case .gradient: "g"
         }
     }
 

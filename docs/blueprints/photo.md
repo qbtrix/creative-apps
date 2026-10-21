@@ -207,17 +207,19 @@ or writing any closed layered format.
 | Files | A layered document format (section 9, question 1) that keeps layers, masks, adjustment layers, blend, opacity, offsets and the global adjustments; Open Recent; an unsaved dot and the close prompt; autosave to a recovery file and a restore offer after a crash | Reading and writing other apps' layered formats; version browser |
 | Edit | Cut, Copy, Paste (as a new layer, at its place or centered), Paste from another app's image on the pasteboard, Duplicate Layer, Merge Down, Flatten Image | Paste Into a selection, Copy Merged |
 | Crop | Typed X, Y, W, H for the pending crop; aspect Free, Original, 1:1, 3:2, 4:3, 16:9 with a portrait swap | Crop presets with resolution, perspective crop |
-| Layers | Adjustment layers (Exposure, Levels, Curves, Hue/Saturation) in the stack, each with visibility, opacity, blend mode, reorder and a mask | Blur as an adjustment layer (it's a filter), layer groups, clipping masks, layer styles |
+| Layers | Adjustment layers (Exposure, Levels, Curves, Hue/Saturation) in the stack, each with visibility, opacity, blend mode, reorder and a mask; clipping masks (`photo/masks-clipping`); layer styles, shared with Design and Halo (`photo/layer-styles` on `suiteui/layer-styles`; captain 2026-10-21, beta) | Blur as an adjustment layer (it's a filter), layer groups |
 | Select | Rectangle, Ellipse and Lasso (freehand, closed on release); Shift adds, Option subtracts; Select > Invert; Feather; brush, eraser, clone, heal, Fill and Delete act inside it | Magic wand, quick selection, refine edge, saved selections |
 | Masks | Add Mask from Selection, Delete Mask, Apply Mask, disable a mask; paint on the mask with brush and eraser | Vector masks, mask density and feather sliders on the layer |
 | Transform | Edit > Free Transform (Command-T): scale with the 8 handles, rotate outside them, Shift keeps ratio, typed W%, H%, angle; Edit > Transform > Flip Horizontal and Flip Vertical (the selected layer); Image > Flip Canvas Horizontal and Vertical | Skew, distort, perspective, warp |
 | History | The History tab: every named step, click to jump, later steps dimmed | Snapshots, history brush |
-| Paint | The brush cursor circle at the brush size; Eyedropper (I) picks a color from the image into the brush color, point or 3 × 3 or 5 × 5 average | Gradient, paint bucket, brush presets and textures |
+| Paint | The brush cursor circle at the brush size; Eyedropper (I) picks a color from the image into the brush color, point or 3 × 3 or 5 × 5 average; the Gradient tool (G) drags a linear or radial gradient into the layer or the selection as one step, its stops set in Tool Options with the shared gradient editor (`photo/gradient-fill`, beta) | Paint bucket, brush presets and textures |
 | Export | PNG, JPEG, TIFF and HEIC; a size as a percent or a longest side; quality for JPEG and HEIC | Export several sizes at once, web presets, metadata editing |
 | Fixes | #79, #252, #253, #289 (Photo's views), and #255, #586 tracked to SuiteUI | – |
 
-Tier 3 stays out of v2: text, paths and a pen, layer styles, print setup,
-specialist controls, gradients and fills.
+Tier 3 stays out of v2: text, paths and a pen, print setup, specialist
+controls and fills. The Gradient tool moved into the beta (`photo/gradient-fill`). Layer styles moved into the beta, built once
+and shared (captain, 2026-10-21; `suiteui/layer-styles`), with clipping masks
+and PSD layer effects (`photo/masks-clipping`, `photo/psd-effects`).
 
 ---
 
@@ -419,10 +421,11 @@ and the photo editing software survey
 
 ### Tier 3: specialist or occasional (not v2)
 
-Blend modes beyond today's 16 and layer styles; text; paths and a pen;
-print setup; specialist controls; gradients and fills; magic wand and refine
-edge; skew, distort, perspective and warp; layer groups and clipping masks;
-camera raw (Library); 16-bit layers (section 9, question 3).
+Blend modes beyond today's 16 (Linear Dodge and Linear Burn come with
+`photo/psd-effects`); text; paths and a pen; print setup; specialist
+controls; gradients and fills; magic wand and refine edge; skew, distort,
+perspective and warp; layer groups; camera raw (Library); 16-bit layers (section 9, question 3). Layer styles
+and clipping masks left this tier for the beta (captain, 2026-10-21).
 
 Later, from the suite blueprint (captain, 2026-10-15): drag out to export (20) and palette from a reference (22), in `docs/blueprints/suite.md` section 3a.
 

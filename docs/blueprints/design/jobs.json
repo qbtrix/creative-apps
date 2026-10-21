@@ -264,7 +264,7 @@
     "app": "design",
     "weight": "med",
     "job": "Add a drop shadow to a card; change it later.",
-    "outcome": "Shadow exports in PNG and SVG.",
+    "outcome": "The SVG export holds the shadow as a filter with the edited values, referenced by the card; the PNG and PDF half is RJ-D43 (macOS).",
     "needs": [
       "S2"
     ],
@@ -276,7 +276,8 @@
     "since": "2026-10-19",
     "sources": [
       "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
-    ]
+    ],
+    "waits_on": "DL-6"
   },
   "RJ-D15": {
     "id": "RJ-D15",
@@ -738,6 +739,26 @@
     ],
     "waits_on": "DF-3",
     "added_by": "design/file-flow"
+  },
+  "RJ-D43": {
+    "id": "RJ-D43",
+    "app": "design",
+    "weight": "med",
+    "job": "Export a card with a drop shadow as a 2x PNG and as a PDF.",
+    "outcome": "The PNG has shadow pixels past the card's edge by the style's reach at 2x; the PDF holds the card as a vector path with the shadow as one image under it.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The shadow is cut at the card's bounds, or the PDF rasterizes the card itself",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
+    ],
+    "waits_on": "DL-7",
+    "added_by": "design/layer-styles"
   },
   "RJ-D50": {
     "id": "RJ-D50",

@@ -61,13 +61,17 @@
     },
     {
       "id": "NP-flare",
-      "behavior": "Flare's beta.2 menu items and the empty Library tab are hidden, their commands stay in the catalog unavailable with a plain reason, and the baseline shrinks.",
+      "behavior": "Flare's beta.2 menu items and the empty Library tab are hidden with their commands kept and unavailable, only Settings is left in the baseline, RJ-X64 passes, and the feature is built.",
       "tasks": [
         "NP-3",
-        "NP-4"
+        "NP-4",
+        "NP-5",
+        "NP-6"
       ],
       "journeys": [
-        "FJ-NP"
+        "FJ-NP",
+        "XJ-NP",
+        "MJ-NP"
       ],
       "owned": [
         "Tests/FlareModelTests/FlareMenuVisibilityTests.swift",
@@ -77,43 +81,20 @@
         "Sources/FlareApp/FlareWindow+View.swift",
         "Sources/FlareApp/FlareLibraryPanel.swift",
         "Tests/placeholder-menu-baseline.txt",
-        "UITests/FlareJourneyTests+Menus.swift"
+        "UITests/FlareJourneyTests+Menus.swift",
+        "Tests/RealJobs/suite/no-placeholders/no-placeholders.jobs.json",
+        "docs/blueprints/suite/features/no-placeholders.wave.json"
       ],
       "waits": {
         "NP-a": [
-          "NP-3"
+          "NP-3",
+          "NP-5"
         ],
         "command-state:CS-flare": [
           "NP-3"
         ]
       },
       "ui": true
-    },
-    {
-      "id": "NP-z",
-      "behavior": "Only Settings is left in the baseline, RJ-X64 passes, and the feature is built.",
-      "tasks": [
-        "NP-5",
-        "NP-6"
-      ],
-      "journeys": [
-        "XJ-NP",
-        "FJ-NP",
-        "MJ-NP"
-      ],
-      "owned": [
-        "Tests/RealJobs/suite/no-placeholders/no-placeholders.jobs.json",
-        "docs/blueprints/suite/features/no-placeholders.wave.json"
-      ],
-      "waits": {
-        "NP-a": [
-          "NP-5"
-        ],
-        "NP-flare": [
-          "NP-5"
-        ]
-      },
-      "ui": false
     }
   ]
 }

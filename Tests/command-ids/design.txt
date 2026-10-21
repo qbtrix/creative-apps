@@ -9,6 +9,8 @@ file.new
 file.open
 file.save
 file.save-as
+history.jump
+history.read
 object.align-bottom
 object.align-center
 object.align-left
@@ -29,6 +31,7 @@ page.delete
 page.rename
 page.select
 tool.ellipse
+tool.eyedropper
 tool.frame
 tool.move
 tool.pen

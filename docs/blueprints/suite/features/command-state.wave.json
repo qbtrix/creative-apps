@@ -29,6 +29,8 @@
     "Tests/command-path-baseline/halo.txt",
     "Tests/command-path-baseline/library.txt",
     "Tests/command-path-baseline/photo.txt",
+    "Tests/command-path-baseline/shell.txt",
+    "Tests/command-path-baseline/launcher.txt",
     "Tests/mutations/SuiteKernelTests.CommandPathTests.json",
     "Tests/LibraryModelTests/LibraryCommandPathTests.swift",
     "Sources/LibraryModel/LibraryCommandCatalog.swift",
@@ -106,6 +108,8 @@
         "Tests/command-path-baseline/halo.txt",
         "Tests/command-path-baseline/library.txt",
         "Tests/command-path-baseline/photo.txt",
+        "Tests/command-path-baseline/shell.txt",
+        "Tests/command-path-baseline/launcher.txt",
         "Tests/mutations/SuiteKernelTests.CommandPathTests.json"
       ],
       "waits": {},

@@ -75,6 +75,10 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     #expect(catalog.loupeValue == "unreadable fit No stars")
 }
 
+@Test func anEmptyHistogramSaysWhy() {
+    #expect(LibraryCatalog().histogramEmptyMessage == "Open a photo in the loupe to see its histogram.")
+}
+
 @Test func histogramValueIsTheChannelMeanAndNeverNaN() {
     #expect(LibraryCatalog.histogramValue(of: .empty) == "mean 0.0000")
     #expect(LibraryCatalog().histogramValue == "mean 0.0000")

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the catalog reports no document",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "public var hasDocument: Bool { true }",
+    "replace": "public var hasDocument: Bool { false }",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "HEIC drops are not placed",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "[\"jpg\", \"jpeg\", \"png\", \"heic\", \"heif\"]",
+    "replace": "[\"jpg\", \"jpeg\", \"png\"]",
+    "tests": "LibraryFileFlowTests.swift"
+  }
+]

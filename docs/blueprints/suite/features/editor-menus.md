@@ -51,8 +51,7 @@ Blueprint sections: suite.md 2.6 (adoption), 6 (menus).
 | EM-a | SuiteShell declares `.suiteEditor` and the delegate's reopen rule, and the launcher-side journeys for an editor are written and skipped. | EM-1, EM-2 | XJ-EM | report-problem:RP-a |
 | EM-photo-design | Photo and Design show Switch To, AI Access and the Help group, answer live commands, reopen a window from the Dock, and the home's New Photo opens a photo (#3648). | EM-3, EM-4 | PJ-EM, DJ-EM | EM-a; photo and design file-flow (cross-line) |
 | EM-flare-halo | Flare and Halo show Switch To, AI Access and the Help group, answer live commands, and reopen a window from the Dock; Halo's empty Help item is gone (#1018, #1081). | EM-5, EM-6 | FJ-EM, HJ-EM | EM-a; flare and halo file-flow (cross-line) |
-| EM-library | Library shows Switch To, AI Access and the Help group, answers live commands on its catalog, and reopens its window from the Dock. | EM-7, EM-8 | LJ-EM | EM-a; library file-flow and spine (cross-line) |
-| EM-z | Every editor's suite-menus journey is green, RJ-X63 passes, and the feature is built. | EM-9, EM-10 | PJ-EM, DJ-EM, FJ-EM, HJ-EM, LJ-EM | every app slice |
+| EM-library | Library shows Switch To, AI Access and the Help group, answers live commands on its catalog and reopens its window from the Dock, RJ-X63 passes in all five editors, and the feature is built. | EM-7, EM-8, EM-9, EM-10 | LJ-EM, PJ-EM, DJ-EM, FJ-EM, HJ-EM | EM-a; library file-flow and spine (cross-line), every app slice |
 
 **Screen early.** EM-a is the `"ui": true` contract slice (the modifier is the
 screen piece); each app slice adopts it on the real menus. The app slices
@@ -169,5 +168,5 @@ Longest chain: EM-1 → EM-2 → EM-3 → EM-9 → EM-10 (5). Chain of 5: the mo
 Per slice (rules 6, 15, 17, 21, 22): EM-a green with `Mutate:` clean; each app
 slice merged-done with its journey green in a scoped run, verified after the
 feel gate (`mouse`: reach Home, AI Access and Help by mouse; reopen from the
-Dock) and its `Mac-Finish:` line; RJ-X63 green at EM-z. Then
+Dock) and its `Mac-Finish:` line; RJ-X63 green at EM-library. Then
 `Belt-Contact-Sheet:`.

@@ -82,6 +82,8 @@ struct PhotoStroke: Sendable, Equatable {
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
     /// Option subtracts, PV-5).
     var modifiers: DragModifiers = []
+    /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
+    var end: Mask.Point?
 }
 
 extension PhotoWorkspace {
@@ -165,6 +167,8 @@ extension PhotoWorkspace {
             moveSelectedLayer(current, to: end)
         case .eyedropper:
             break
+        case .gradient:
+            current.end = end
         }
         stroke = current
     }
@@ -189,6 +193,19 @@ extension PhotoWorkspace {
     public var dragPaintsOnly: Bool {
         transformDraft == nil && [.brush, .eraser, .clone, .heal].contains(tool)
     }
+
+    /// The Gradient tool's line while it drags, from the press to where the
+    /// pointer is now, in canvas pixels, for the canvas overlay; nil with no
+    /// gradient drag or one that hasn't moved.
+    public var gradientDrag: (from: Mask.Point, to: Mask.Point)? {
+        guard let stroke, stroke.tool == .gradient, let end = stroke.end, end != stroke.start else { return nil }
+        return (stroke.start, end)
+    }
+
+    /// Whether the drag under way only moves a line over the canvas until its
+    /// release draws (the Gradient tool's), so the window can keep its later
+    /// samples off the workspace the panels read.
+    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient }
 
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
@@ -218,6 +235,9 @@ extension PhotoWorkspace {
             record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
         case .marquee, .crop, .eyedropper:
             break
+        case .gradient:
+            guard let end = done.end else { return }
+            do { try drawGradient(from: done.start, to: end) } catch { statusMessage = "Couldn't draw the gradient." }
         case .move:
             if done.layersBefore != layers, !done.layersBefore.isEmpty {
                 record(.layers(done.layersBefore, selected: selectedLayerID), named: "Move Layer")

@@ -25,10 +25,11 @@ its tasks, owned files, acceptance tests, quality tests and done check.
 | W4 | Render ProRes 4444 with a transparent background | `export-pack.md` | halo/export-pack (adopter of S11 and E9); RJ-H41 (new) | – | – | file when ready | planned |
 | W4 | Halo's Open Recent from the suite list, file drops, and Flare scenes arriving by Open In | `file-flow.md` | halo/file-flow (adopter of suite/file-flow); #865 (adopt the suite: SuiteDocumentHost, .suiteApp); RJ-H42 | – | – | file when ready | planned |
 | W4 | Rotate and scale handles in the viewer, keyed at the playhead through the kernel's transform commands | `transform.md` | halo/transform (adopter of S7); RJ-H21, RJ-H34 | – | – | file when ready | planned |
-| W4 | Shape layers of every kind: a Shape button by the viewer, drawn by drag, rendered from the saved spec | `shape-tools.md` | halo/shape-tools (adopter of S19); RJ-H35 | – | – | file when ready | planned |
+| W4 | Shape layers of every kind: a Shape button by the viewer, drawn by drag, rendered from the saved spec | `shape-tools.md` | halo/shape-tools (adopter of S19); RJ-H35 | – | – | #3445 | built |
 | W4 | Strokes, dashes and keyed trim paths on shape layers, drawn as the painted path's outline | `stroke-style.md` | halo/stroke-style (adopter of S17); RJ-H30 | – | – | file when ready | planned |
 | W4 | Halo moves keys: picks across lanes, Select All Keys, a snapped group drag as one undo step, each a command | `key-editing.md` | halo/key-editing (adopter of suiteui/timeline TL-c, TL-d and suiteui/timeline-select-all); RJ-H13; #2763; the stress gate's Halo move-keys gap (PR #3499) | – | – | file when ready | planned |
 | W5 | Placed images in Halo: Place… and viewer drop, a PNG, JPEG or SVG picture in a solid layer, drawn by the viewer and the render | `placed-images.md` | halo/placed-images (adopter of S20 and E11); RJ-H02 (closes here), RJ-H36 (new) | – | – | file when ready | planned |
+| W5 | Layer styles on Halo's layers: the shared panel, drawn on every frame, with the drop shadow's and outer glow's numbers keyable | `layer-styles.md` | halo/layer-styles (adopter of S2); RJ-H43; captain 2026-10-21: layer styles in the beta, shared | placed-images; file-flow (HF-m, HF-z) | suiteui layer-styles LS-a, LS-m, LS-gpu; suite-imaging IM-a; core layer-style-engine through the shared packet | file when ready | planned |
 
 No creative-core issue blocks any v1 feature. creative-core#182 (path
 builders) closed on 2026-10-14 via creative-core#281, but `Path.ellipse(in:)`
