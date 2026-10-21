@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 20:23Z	heartbeat	#3826 (SS-9) is open with fast-lane, waiting on a batch.
 20:43Z	heartbeat	#3826 (SS-9) was stalled: its head 21226b0 carries a red Linux check (a LibraryFoldersTests.tenThousandPaths timing budget this PR doesn't touch), so the lane can't merge it. I launched a fixer to merge dev into the branch, rerun scripts/ci --changed and push a new head; then the Head: line moves and the body's stray --- comes out.
 20:49Z	fix	#3826 head ab264ad
+21:11Z	heartbeat	heartbeat: #3826 (SS-9) head ab264ad is clean with Fast-Check; its lane macOS build is queued.

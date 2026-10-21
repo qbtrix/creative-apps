@@ -84,3 +84,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 20:23Z: #3826 (SS-9) is open with fast-lane, waiting on a batch.
 - 20:43Z: #3826 (SS-9) was stalled: its head 21226b0 carries a red Linux check (a LibraryFoldersTests.tenThousandPaths timing budget this PR doesn't touch), so the lane can't merge it. I launched a fixer to merge dev into the branch, rerun scripts/ci --changed and push a new head; then the Head: line moves and the body's stray --- comes out.
 - 20:49Z: #3826 refreshed: dev merged in as ab264ad (no conflicts), scripts/ci --changed PASS, body moved to Head: ab264ad with Belt-Lead act-1a15e9d8ac8-27wz and the stray --- removed. It waits on the lane's macOS build and batch.
+- 21:11Z: heartbeat: #3826 (SS-9) head ab264ad is clean with Fast-Check; its lane macOS build is queued.
