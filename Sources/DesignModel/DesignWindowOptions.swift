@@ -108,6 +108,8 @@ public enum DesignControlID {
     public static let pageDelete = "design.page.delete"
     public static let inspectorHeader = "design.inspector.header"
     public static let inspectorFill = "design.inspector.fill"
+    /// The Fill section's type switch (Solid, Linear, Radial); each segment is `<id>.<type>`.
+    public static let inspectorFillType = "design.inspector.fill-type"
     public static let inspectorCornerRadius = "design.inspector.corner-radius"
     public static let inspectorOpacity = "design.inspector.opacity"
     public static let inspectorStrokeColor = "design.inspector.stroke-color"
@@ -122,6 +124,8 @@ public enum DesignControlID {
     public static let inspectorTextAlignment = "design.inspector.text-alignment"
     /// The Text section's Width row: Auto width or Fixed width.
     public static let inspectorTextWidth = "design.inspector.text-width"
+    /// The Transform section's Rotation bar (transform DT-2); also its scrub's drag token.
+    public static let inspectorRotation = "design.inspector.rotation"
     public static let inspectorPageWidth = "design.inspector.page-width"
     public static let inspectorPageHeight = "design.inspector.page-height"
     /// File > Export…'s sheet (design-export); Export, Cancel and Done are SuiteExportSheet's ids.
@@ -144,14 +148,18 @@ public enum DesignControlID {
     /// A Distribute button: "design.distribute.horizontal".
     public static func distribute(_ axis: DesignDistributeAxis) -> String { "design.distribute.\(axis.rawValue)" }
 
+    /// A Transform section flip button, by the kernel's FlipDirection raw value: "design.inspector.flip-horizontal".
+    public static func inspectorFlip(_ axis: String) -> String { "design.inspector.flip-\(axis)" }
+
     /// Every fixed id: the named ones, the toolbar's, and one per tool, frame field, edge and axis.
     public static let all: [String] = [
         canvas, canvasSelection, canvasHover, canvasBadge, canvasGuides, canvasMarquee,
         statusTool, statusSave, statusSelection, statusNote, pageAdd, pageDelete,
-        inspectorHeader, inspectorFill, inspectorCornerRadius, inspectorOpacity,
+        inspectorHeader, inspectorFill, inspectorFillType, inspectorCornerRadius, inspectorOpacity,
         inspectorStrokeColor, inspectorStrokeWidth, inspectorStrokeAdd, inspectorStrokeRemove,
         inspectorTextFamily, inspectorTextSize,
         inspectorTextWeight, inspectorTextAlignment, inspectorTextWidth, inspectorPageWidth, inspectorPageHeight,
+        inspectorRotation, inspectorFlip("horizontal"), inspectorFlip("vertical"),
         exportSheet, exportFormat, exportScale, exportScope, exportItems, exportRun,
         exportCancel, exportDone, exportResult,
     ] + DesignToolbarItem.allCases.map(\.identifier) + DesignTool.allCases.map(tool)
