@@ -43,3 +43,4 @@
 2026-10-21T11:17:20Z	3	pr	-	LF-3 #4024 opened on fast-lane (5/5 mutants)
 2026-10-21T11:25:30Z	3	check	-	11:25 poll: lane macOS builds pending for #3961/#3965/#3967; CI 39586209372+39585973891 in progress; #3997 merged, #3928 open
 2026-10-21T11:48:23Z	3	check	-	11:50 poll: dev-red #3856 (photo/flare) holds slice-done; #4024 needs-rebase being resolved
+2026-10-21T11:50:49Z	3	fixes	-	FO-4 #3961 merged; dev merged into FO-u/FO-5 (squash conflicts resolved), BK-u macOS type-check split, LF-3 rebase; 4 gates running
