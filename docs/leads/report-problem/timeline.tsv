@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 2026-10-21T18:39Z	2026-10-21T18:39Z	lane	ready	#4049 #4110	RP-2 head fd92d1da, RP-4 head d6321ab0 (4/4 ProblemReport); dev merged, gate pass
 2026-10-21T20:21Z	2026-10-21T20:21Z	heartbeat	resume	-	run act-1a1601c3538-r0c9 resumed; #4049 #4110 in lane
 2026-10-21T20:57Z	2026-10-21T20:57Z	lane	bring-up	#4103	RP-3 merged origin/dev after #4049; conflicts in SuiteHelpCommands kept RP-3's side; gate running
+2026-10-21T21:06Z	2026-10-21T21:06Z	fix	pr	#4201	dev Linux red: CS-2 command-path baseline still listed RP-2's deleted LauncherCommands+Onboarding; one-line baseline fix, gate pass
