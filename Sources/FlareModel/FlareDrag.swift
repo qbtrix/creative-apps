@@ -1,6 +1,7 @@
 // FlareDrag.swift: stage gestures (docs/blueprints/flare.md, section 2). A pointer move sets only `draft`, `marquee` or
 // `dragPreview`; `endDrag` commits once, through the contract's one named group. A pen draft lasts until its path
 // closes, and a click refused on a locked layer keeps it (#692). A move under `clickSlop` stage points is a click (#470).
+// The Shape tool's draft is the kernel's path for its picked options; its mouse-up adds nothing until shape-tools FS-6.
 import FlareCore
 
 /// The gesture under way: `base` is the pen draft it carries on from, `moving`
@@ -69,7 +70,10 @@ extension FlareWorkspace {
             var base = g.base ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []))
             base.stageScale = stageScale
             draft = shapes.draft(tool, from: start, to: end, modifiers: modifiers, previous: base)
-        case .shape: draft = nil  // draws from shape-tools FS-6
+        case .shape:
+            // The kernel's path for the tool's options (a star as a star); mouse-up draws from shape-tools FS-6.
+            draft = g.isClick ? nil : LiveShapes.shape(shapeTool, from: start, to: end, modifiers: modifiers)
+                .map { ShapeDraft(tool: .shape, shape: $0) }
         case .select, .directSelect:
             let drags = !g.isClick && start.isFinite && end.isFinite
             if let grip = g.grip {
