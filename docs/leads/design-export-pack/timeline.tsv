@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-21T00:08Z	3	heartbeat	#3467	polling waits, blocked 1 of 3
 2026-10-21T00:33Z	3	heartbeat	XP-a	blocked poll 2 of 3: XP-2, XP-3 not opened
 2026-10-21T00:39Z	3	question	#3467	supervisor: Belt watches the SuiteUI branch; poll-2 status and asks
+2026-10-21T00:54Z	3	wave-start	DX-1	supervisor approved; builder started
