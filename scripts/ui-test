@@ -19,8 +19,8 @@
 # Journeys in the quarantine (UITests/quarantine.json, scripts/quarantine) are
 # skipped with -skip-testing, and listed with their owner and expiry here and
 # in the job summary, so a skip is never silent. An entry with scope `full` is
-# skipped only in a full run: when APP is set (ci.yml's macOS job sets it from
-# its `app` input, so only in a scoped run) it isn't skipped, and is listed
+# skipped only in a full run: when APP is set (journeys.yml's macOS journeys
+# job sets it for a scoped run) it isn't skipped, and is listed
 # as such. An unreadable quarantine fails the run before anything builds.
 #
 #   .build/ui-tests.xcresult   the result bundle (open it in Xcode)

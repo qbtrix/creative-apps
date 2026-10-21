@@ -193,6 +193,7 @@ struct PhotoWindow: View {
             // The picture starts at once, not after SwiftUI's next pass reaches `.onChange`. A paint
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
+                if samplePress(moves) { return }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)

@@ -54,8 +54,9 @@ func flareToolIsEnabledOnlyWithAStagePath(_ tool: FlareTool) {
     )
 }
 
-/// Every palette tool is enabled on the built services' open stage: none says "isn't built yet".
-@Test(arguments: FlareTool.allCases)
+/// Every palette tool is enabled on the built services' open stage: none says "isn't built yet". Shape says why
+/// until its drag draws (shape-tools FS-6), which `flareToolActsOrIsDisabled` holds it to meanwhile.
+@Test(arguments: FlareTool.allCases.filter { $0 != .shape })
 func flareToolIsEnabledOnTheStage(_ tool: FlareTool) {
     #expect(tool.unavailableHelp == nil, "\(tool) still says \(tool.unavailableHelp ?? "")")
     var workspace = FlareWorkspace(services: .built)
