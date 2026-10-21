@@ -29,6 +29,9 @@ Next: mark CS-14/10/4 ready after #4144/#4140/#4134 merge; CS-8/12/5 drafts buil
 | CS-13 | CS-design | 2 | Design catalog | packet CS-13 | Mutate 6/6 | #4144 | ready; gate pass, Head 8e64342f |
 | CS-7 | CS-halo | 2 | Halo catalog | packet CS-7 | Mutate 8/8 HaloModel.HaloCommandCatalog | #4196 | ready; gate pass, Head 84921163 |
 | CS-11 | CS-flare | 2 | Flare catalog (+6 commands, file.new params) | packet CS-11 | Mutate 7/7 FlareModel.FlareCommandCatalog | #4205 | ready; gate pass, Head 88d0c661 |
+| CS-14 | CS-design | 3 | Design wiring | packet CS-14 | CommandPathTests | #4202 | draft, stacked on #4144; gate pass, Head d902b346 |
+| CS-10 | CS-photo | 3 | Photo wiring (+1 line PhotoWindow+Export) | packet CS-10 | CommandPathTests; photo export/straighten snapshots may show confirm disabled | #4206 | draft, stacked on #4140; gate pass, Head 2aaaa0db |
+| CS-4 | CS-library-1 | 3 | Library wiring, 25 menu items; baseline max 48 to 23 | packet CS-4 | CommandPathTests, CommandPathLimitTests | #4213 | draft, stacked on #4134; gate pass, Head b449feb8 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
