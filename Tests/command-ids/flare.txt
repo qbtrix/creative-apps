@@ -44,6 +44,7 @@ layer.remove
 layer.rename
 layer.reorder
 layer.set-flags
+layer.set-parent
 machine.add
 machine.add-input
 machine.add-state

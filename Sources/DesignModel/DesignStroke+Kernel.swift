@@ -10,12 +10,23 @@ import SuiteKernel
 extension DesignNode {
     /// This layer's stroke as the kernel's; nil when it has none.
     public var vectorStroke: VectorStroke? {
-        stroke.map { VectorStroke(color: Self.fillColor($0.color), width: $0.width) }
+        stroke.map { VectorStroke(color: $0.color.kernelColor, width: $0.width) }
+    }
+}
+
+/// Design's one adapter between its 0...255 colour and the kernel's 0...1 `FillColor`; the fill and the stroke
+/// both go through it.
+extension DesignColor {
+    /// The kernel's colour as Design's, its opacity dropped; each part is `SampleRules.byte`, so out-of-range
+    /// parts clamp and NaN is 0.
+    init(kernel color: FillColor) {
+        func byte(_ part: Double) -> UInt8 { UInt8(clamping: SampleRules.byte(part)) }
+        self.init(byte(color.r), byte(color.g), byte(color.b))
     }
 
-    /// An opaque 0...255 colour as the kernel's 0...1 one.
-    static func fillColor(_ color: DesignColor) -> FillColor {
-        FillColor(r: Double(color.red) / 255, g: Double(color.green) / 255, b: Double(color.blue) / 255)
+    /// This opaque colour as the kernel's.
+    var kernelColor: FillColor {
+        FillColor(r: Double(red) / 255, g: Double(green) / 255, b: Double(blue) / 255)
     }
 }
 
@@ -54,14 +65,8 @@ extension DesignWorkspace: StrokeTarget {
             return (.stroke(DesignStroke(color: current.color, width: StrokeRules.clampedWidth(width))), drag != nil)
         case .color(let color, let drag):
             guard let current else { return nil }
-            return (.stroke(DesignStroke(color: Self.designColor(color), width: current.width)), drag != nil)
+            return (.stroke(DesignStroke(color: DesignColor(kernel: color), width: current.width)), drag != nil)
         case .join, .cap, .dash, .trim: return nil
         }
-    }
-
-    /// A 0...1 kernel colour as Design's 0...255 one, its opacity dropped; out-of-range and NaN parts clamp.
-    static func designColor(_ color: FillColor) -> DesignColor {
-        func byte(_ part: Double) -> UInt8 { part.isNaN ? 0 : UInt8((min(max(part, 0), 1) * 255).rounded()) }
-        return DesignColor(byte(color.r), byte(color.g), byte(color.b))
     }
 }
