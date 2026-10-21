@@ -2,9 +2,9 @@
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: slice-done
+Stage: review
 Base: dev ac7f95c9
-Next: AC-colour critic panel (code-only, no artifact token); AC-tools needs #4002 merged + green run
+Next: fix round 1 for AC-colour (#4086, branch fix/ac-colour-bridges); AC-tools waits on #4002
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: AC-colour critic panel (code-only, no artifact token); AC-tools needs #400
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T13:31Z: AC-colour review (code-only, lenses design/first-use/mouse/taste/job/correctness) on 45c81070: 1 finding #4086 (bridges untested); fixer launched, round 1
 - 2026-10-21T13:30Z: AC-colour Belt-Slice-Done + Mac-Finish-Wanted on Linux check 39604117821 (5bec8089); critic panel started
 - 2026-10-21T13:08Z: #4002 Linux red is dev's #3976 failure only; no fix in our PR
 - 2026-10-21T12:43Z: -
