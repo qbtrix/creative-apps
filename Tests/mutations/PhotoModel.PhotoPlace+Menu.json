@@ -21,10 +21,17 @@
     "tests": "PhotoPlaceMenuTests"
   },
   {
-    "label": "noImageTurnsPlaceOff: the panel's reason comes before the command's, so no image reads as the panel",
+    "label": "theMenuIsBuiltFromPlaceImage: the menu takes another command's spec, so Place… reads place.read",
     "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
-    "find": "Self.placeCatalog.availability(\"place.image\", on: self).why ?? panelHelp",
-    "replace": "panelHelp ?? Self.placeCatalog.availability(\"place.image\", on: self).why",
+    "find": "catalog.spec(\"place.image\") ??",
+    "replace": "catalog.spec(\"place.read\") ??",
+    "tests": "PhotoPlaceMenuTests"
+  },
+  {
+    "label": "theMenuIsBuiltFromPlaceImage: the fallback takes the first place spec, place.read, not place.image",
+    "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
+    "find": "PlaceCommands.specs(PhotoWorkspace.self).first { $0.id == \"place.image\" }",
+    "replace": "PlaceCommands.specs(PhotoWorkspace.self).first",
     "tests": "PhotoPlaceMenuTests"
   }
 ]

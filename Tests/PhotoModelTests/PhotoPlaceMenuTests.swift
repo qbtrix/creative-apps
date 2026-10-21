@@ -1,5 +1,5 @@
 // PhotoPlaceMenuTests.swift (place-image PP-3): what File > Place… and the canvas drop read and run. The menu
-// item's reason is `place.image`'s, else the panel's; a drop's point comes in at the canvas zoom; a place that
+// item is built from `place.image`'s spec and takes its reason; a drop's point comes in at the canvas zoom; a place that
 // can't run leaves its reason in the status line and adds nothing. These hold on the PP-1 stubs and after PP-5.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -17,14 +17,22 @@ import Testing
         return workspace
     }
 
-    @Test func noImageTurnsPlaceOff() {
-        #expect(PhotoWorkspace().placeMenuHelp(panelHelp: nil) == "Open or make an image to place into.")
-        #expect(PhotoWorkspace().placeMenuHelp(panelHelp: "No panel.") == "Open or make an image to place into.")
+    @Test func theMenuIsBuiltFromPlaceImage() {
+        #expect(PhotoWorkspace.placeMenuSpec.id == "place.image")
+        #expect(PhotoWorkspace.placeMenuSpec(in: .empty(app: "photo")).id == "place.image")
     }
 
-    @Test func theCommandsReasonComesBeforeThePanels() throws {
+    @Test func noImageTurnsPlaceOff() {
+        let none = "Open or make an image to place into."
+        #expect(PhotoWorkspace.placeMenuSpec.availability(PhotoWorkspace()).why == none)
+        #expect(PhotoWorkspace.placeMenuSpec(in: .empty(app: "photo")).availability(PhotoWorkspace()).why == none)
+    }
+
+    /// With an image open the item follows `placeHelp`: off saying placing isn't built on the PP-1 stubs, on after PP-5.
+    @Test func anOpenImageTurnsPlaceOnOnceItIsBuilt() throws {
         let workspace = try opened()
-        #expect(workspace.placeMenuHelp(panelHelp: "No panel.") == workspace.placeHelp ?? "No panel.")
+        #expect(PhotoWorkspace.placeMenuSpec.availability(workspace).why == workspace.placeHelp)
+        #expect(PhotoWorkspace.placeMenuSpec.availability(workspace).why != "Open or make an image to place into.")
     }
 
     @Test func aDropPointIsInDocumentPixels() {
