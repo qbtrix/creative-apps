@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-21T18:42:09Z	LP-z	built	LP-6	branch lead/lottie-player-check-LP-6 at 5cec7e97; PR waits on #4132
 2026-10-21T19:05Z	heartbeat	#4132 waits on the supervisor's macOS run and hand merge; LP-6 is ready on its branch.
 2026-10-21T19:27Z	heartbeat	#4132 still waits on the supervisor's macOS run and hand merge; LP-6 ready on its branch.
+2026-10-21T19:48Z	heartbeat	#4132 still waits on the supervisor's macOS run and hand merge (answered 17:11Z); LP-6 ready on its branch.
