@@ -62,7 +62,8 @@ import Testing
         #expect(await w.element(DesignHistoryArea.headerID) != nil, "the History panel has no header")
         #expect(w.label(DesignHistoryArea.headerID) == "History")
         let header = BodyCountSuites.RenderBudgetHistoryPanelTests.node(DesignHistoryArea.headerID, in: w.host)
-        let value = (header?.accessibilityValue?() ?? nil) as? String
+        let raw: Any?? = header?.accessibilityValue?()
+        let value = (raw ?? nil) as? String
         #expect(value == "3 steps", "the header's value is \(String(describing: value))")
     }
 
