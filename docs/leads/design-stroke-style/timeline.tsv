@@ -34,3 +34,4 @@ time	kind	note
 2026-10-21T07:23Z	check	lane	#3882,#3883,#3884,#3886	clean, queued; dev still b64cbb8c; round 2 waits
 2026-10-21T07:45Z	check	lane	#3882,#3883,#3884,#3886	not yet merged, lane landing a batch; round 2 waits
 2026-10-21T08:10Z	check	lane	#3882 #3883 #3884 #3886	DK-a round-1 open in lane; round 2 (#3865 #3871 #3873) held
+2026-10-21T08:32Z	check	lane	#3882 #3883 #3884 #3886	DK-a round-1 Linux checks running in lane; round 2 held
