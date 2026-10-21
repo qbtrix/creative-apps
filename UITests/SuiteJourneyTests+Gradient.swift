@@ -3,14 +3,11 @@
 // `suiteui`. The editor's controls are GF-3's `suite.gradient.*`: `bar` (the stop bar), `stop.<n>` (each handle, from 0),
 // `color` (the selected stop's hex field), `angle`, `type.<solid|linear|radial>` and `help`; the preview is
 // `suite.gallery.gradient-editor.preview`, its value "<type>, <n> stops, <angle>°"; the page logs `<command id> <intent>`
-// to `suite.gallery.log`. It skips until GF-4 turns it on.
+// to `suite.gallery.log`. On since GF-4.
 import XCTest
 
 final class SuiteGradientJourneyTests: XCTestCase {
-    private static let editorWait = true
-
     @MainActor func testGradientEditorEditsAFill() throws {
-        if Self.editorWait { throw XCTSkip("waits on GF-4") }
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
         gallery.element("suite.gallery.index.gradient-editor").click() // 1. A two-stop linear fill, blue to white, 0°.
