@@ -1,0 +1,4 @@
+[
+  {"label": "squareCentred: the centre offset is dropped, so the square is anchored at the picture's corner", "file": "Sources/PhotoModel/Live/LiveSampling.swift", "find": "SampleRules.mean(x: center.x, y: center.y, size: size)", "replace": "SampleRules.mean(x: 0, y: 0, size: size)", "tests": "LiveSamplingTests"},
+  {"label": "skipsTransparent: the reader reports an alpha-0 pixel as faintly opaque, so it is counted", "file": "Sources/PhotoModel/Live/LiveSampling.swift", "find": "a: bytes[i + 3])", "replace": "a: max(bytes[i + 3], 1))", "tests": "LiveSamplingTests"}
+]
