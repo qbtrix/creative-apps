@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T16:44:59Z	merge	OC-m #4088 merged b48e63e3; dev Linux 39637279724 running
 2026-10-21T17:02:50Z	done	OC-m Belt-Slice-Done posted (comment 6321755384), Linux 39637279724
 2026-10-21T17:55:57Z	poll	DS-u, DS-photo, CB-library, IM-z, AR-photo-u, CB-z not on dev; blocked poll 1
+2026-10-21T18:18:01Z	poll	blockers unchanged; blocked poll 2
