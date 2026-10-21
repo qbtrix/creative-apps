@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-21T11:40:00Z	check	blocked	AX-photo merged #3890; PX-2/PX-5 still wait XP-3, XP-4 (no PRs, #3477 not launched); question to supervisor on #3470	-
 2026-10-21T11:50:00Z	check	blocked	PX-2/PX-5 still wait XP-3, XP-4; no answer yet on #3470	-
 2026-10-21T15:08Z	check	blocked	parked per supervisor on #3470 until #3477 lands XP-3, XP-4	-
+15:32Z	check	blocked	parked: waits on #3477 (XP-3, XP-4)	-
