@@ -1,6 +1,7 @@
 // StrokeEditorGeometryTests.swift (stroke-style DK-a, #3867): StrokeEditor in an inspector-width Stroke section, read
 // from a hosted window's accessibility tree. The Join, Cap and Dash chip groups share the Width row's leading and
-// trailing edges, and Remove Stroke starts on its leading edge: no extra inset inside the section. macOS only.
+// trailing edges, and Remove Stroke starts on its leading edge: no extra inset inside the section. It sets both AX
+// attributes and waits (spinUntil) for every row it reads, so it passes run alone. macOS only.
 import AppKit
 import SuiteKernel
 @testable import SuiteUI
@@ -33,7 +34,9 @@ import Testing
 }
 
 @MainActor private func strokeWindow() -> NSWindow {
-    NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: "AXManualAccessibility"))
+    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+        NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+    }
     let size = CGSize(width: SuiteSize.inspectorWidth.ideal, height: 640)
     let view = InspectorSection("Stroke") {
         StrokeEditor(stroke: VectorStroke(width: 2), help: nil, dashHelp: nil, showsTrim: false) { _ in }
@@ -42,7 +45,10 @@ import Testing
     let window = NSWindow(contentRect: CGRect(origin: .zero, size: size), styleMask: [.titled], backing: .buffered, defer: false)
     window.contentView = NSHostingView(rootView: view)
     window.orderFrontRegardless()
-    RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+    spinUntil {
+        let ids = strokeFrames(in: window).keys
+        return ["width", "join", "cap", "dash", "remove"].allSatisfy { ids.contains("suite.stroke.\($0)") }
+    }
     return window
 }
 

@@ -74,7 +74,7 @@ struct FlareNewAnimationSheet: View {
                     .accessibilityIdentifier("flare.new.duration")
             }
             .formStyle(.columns)
-            InspectorColorWellRow("Background", color: background) { setBackground($0) }
+            InspectorColorWellRow("Background", color: spec.background.hex) { setBackground($0) }
             if let problem = spec.problem {
                 Label(problem, systemImage: "exclamationmark.circle")
                     .font(SuiteFont.caption)
@@ -94,10 +94,6 @@ struct FlareNewAnimationSheet: View {
         }
         .padding(SuiteSpacing.xl)
         .frame(width: SuiteSize.contentMinimum.width)
-    }
-
-    private var background: HexColor {
-        HexColor(NewDocumentSpec.hex(spec.background)) ?? HexColor(255, 255, 255)
     }
 
     private func pick(_ name: String) {
@@ -121,7 +117,7 @@ struct FlareNewAnimationSheet: View {
     }
 
     private func setBackground(_ hex: HexColor) {
-        if let color = NewDocumentSpec.color(hex: hex.text) { spec.background = color }
+        if let color = FlareColor(hex: hex) { spec.background = color }
     }
 
     /// A typed number; text that isn't one in range is 0, which `problem` names.

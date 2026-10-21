@@ -21,7 +21,6 @@ Sources/DesignApp/DesignWindow.swift::DesignWindow.lastWorkspace
 Sources/DesignApp/DesignWindow.swift::DesignWindow.launchSaveURL
 Sources/DesignApp/DesignWindow.swift::DesignWindow.reason
 Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow.keyState
-Sources/FlareApp/FlareInspectorScene.swift::FlareInspectorScene.hex
 Sources/FlareApp/FlareInspectorScene.swift::FlareInspectorScene.rates
 Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.number
 Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.text
