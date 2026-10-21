@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-21T06:04Z	3	heartbeat	#3850	FS-5 still queued in the lane; FS-u re-opens after it merges
 2026-10-21T06:23Z	3	heartbeat	#3850	FS-5 still queued in the lane; scoped flare run 39554153274 queued at 0865916d
 2026-10-21T06:40Z	check	dev 0865916d; #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
+2026-10-21T06:57Z	check	dev b64cbb8c (core bump #3784); #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
