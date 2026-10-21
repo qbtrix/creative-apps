@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-21T07:40Z	PG-3	rebase	#3922	dev merged in locally; scripts/ci --changed running before push
 2026-10-21T07:42Z	PG-3	rebased	#3922	dev merged, CI: PASS, pushed 94d8793e7, Head moved
 2026-10-21T07:59Z	heartbeat	lane	#3922,#3923,#3927	all mergeable; needs-rebase cleared on #3922 (macOS build queued for 94d8793e7); PG-2/PG-4 waiting for batch
+2026-10-21T08:18Z	heartbeat	lane	#3922,#3923,#3927	no needs-fix/needs-rebase; a batch landed on dev (#3809..#3839) without ours; waiting for next batch
