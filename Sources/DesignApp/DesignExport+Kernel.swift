@@ -1,11 +1,19 @@
 // DesignExport+Kernel.swift: File > Export…'s sheet (design-export DE-6) on SuiteUI's
 // SuiteExportSheet. DesignExportArea keeps the run (DesignExportRun) as its own state, so editing
 // the sheet never runs the window's body; each change of `request` opens it on the Model's
-// `exportSheetDefaults`. Ids hang off `design.export`: Format (no Size row: Scale is the one
-// scale control), then DesignExportRows' Scale (`scale.<n>x`, off with `scaleHelp` for SVG and
-// PDF) and Scope (`scope.<scope>`) chips, the file list (`items`) and the plan's refusal (`result`).
-// Export (DE-7) runs the fake steps in a task, the summary on the sheet and the status line;
-// Cancel mid-run cancels it. `sheet` is the content alone, which DesignExportSnapshots renders.
+// `exportSheetDefaults`, after the last run's options (`rememberExport`). Ids hang off
+// `design.export`: Format (no Size row: Scale is the one scale control), then DesignExportRows'
+// Scale (`scale.<n>x`, off with `scaleHelp` for SVG and PDF) and Scope (`scope.<scope>`) chips, the
+// file list (`items`) and the plan's refusal (`result`). Export on the fakes (DE-7) runs fake steps
+// that write nothing. Export on the live services (DE-10) writes into `-DesignExportTo`, else the
+// folder an NSOpenPanel picks (its Cancel leaves the sheet editing): the plan is named against the
+// folder's listing, each item renders (SVG from `exportSVG`, PNG and PDF from DesignRasterizer) and
+// is written `.withoutOverwriting`, progress steps per file, and the sheet and the status line read
+// "Exported n file(s) to <folder>". A write that throws ends the run failed with the file's name and
+// the system's reason, keeping the files already written; Cancel or Escape mid-run stops after the
+// current file and reports what was written (DE-11). `sheet` is the content alone, which
+// DesignExportSnapshots renders.
+import AppKit
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -18,6 +26,16 @@ struct DesignExportArea: ViewModifier {
     let onNote: @MainActor (String) -> Void
     @State private var run: DesignExportRun = .idle
     @State private var task: Task<Void, Never>?
+    /// The last run's options, which the next sheet opens with.
+    @State private var remembered: DesignExportOptions?
+    /// The folder a finished live run wrote to, for its line; nil on the fakes.
+    @State private var folderName: String?
+
+    #if DEBUG
+    /// RenderBudgetDesignExportTests' folder, in place of the panel.
+    // view-static: main-actor
+    static var testFolder: URL?
+    #endif
 
     /// The format chips: one per DesignExportFormat, its id the raw value.
     nonisolated static let formats = DesignExportFormat.allCases.map {
@@ -26,20 +44,114 @@ struct DesignExportArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .onChange(of: request) { _ = run.begin(model.exportSheetDefaults) }
+            .onChange(of: request) { open() }
             .sheet(isPresented: Binding(get: { run != .idle }, set: { if !$0 { close() } })) {
-                Self.sheet(model: model, run: run, edit: { _ = run.begin($0) }, export: export, close: close)
+                Self.sheet(model: model, run: run, edit: { _ = run.begin($0) }, export: export, close: close, folder: folderName)
             }
     }
 
-    /// Cancel or Escape: stops a run under way (it ends idle), else closes the sheet.
+    /// Opens the sheet on the defaults, after the last run's options.
+    private func open() {
+        var seed = model
+        if let remembered { seed.rememberExport(remembered) }
+        folderName = nil
+        _ = run.begin(seed.exportSheetDefaults)
+    }
+
+    /// Cancel or Escape: stops a run under way after its current file, else closes the sheet.
     private func close() {
         if case .running = run { task?.cancel() } else { run.dismiss() }
     }
 
-    /// Export on the fakes (DE-7): one step per planned file, writing nothing; `-DesignExportFail` fails its file.
+    /// Export: the fake steps on the fakes, else the live run into a folder.
     private func export() {
         guard case .editing(let options) = run else { return }
+        if model.services == .fake {
+            exportFakes(options)
+        } else if let folder = Self.folder() {
+            exportLive(options, to: folder)
+        }
+    }
+
+    /// Where a live run writes: `-DesignExportTo`, else the folder the panel picks; nil on its Cancel.
+    // view-static: main-actor
+    private static func folder() -> URL? {
+        if let path = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments).exportFolder {
+            return URL(fileURLWithPath: path, isDirectory: true)
+        }
+        #if DEBUG
+        if let testFolder { return testFolder }
+        #endif
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+        panel.prompt = "Export"
+        return panel.runModal() == .OK ? panel.url : nil
+    }
+
+    /// The live run (DE-10, DE-11): names against the folder's listing, then one render and one
+    /// `.withoutOverwriting` write per file. A throw fails the run with the file's name and the
+    /// system's reason; a cancel stops after the current file and reports what was written.
+    private func exportLive(_ options: DesignExportOptions, to folder: URL) {
+        let existing = Set((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
+        let items: [DesignExportItem]
+        do { items = try model.exportPlan(options, existing: existing) } catch {
+            refuse(error.help)
+            return
+        }
+        guard run.start(total: items.count) else { return }
+        let model = model
+        task = Task {
+            var written: [String] = []
+            for item in items {
+                if Task.isCancelled { break }
+                do {
+                    try Self.render(item, options.format, model)
+                        .write(to: folder.appendingPathComponent(item.fileName), options: .withoutOverwriting)
+                } catch {
+                    let reason = (error as? DesignRefusal)?.help ?? error.localizedDescription
+                    let line = "\(item.fileName) couldn't be written. \(reason)"
+                    run.end(.failure(DesignExportFailure(line)))
+                    onNote(line)
+                    return
+                }
+                written.append(item.fileName)
+                run.progressed(done: written.count)
+                // Lets the sheet draw the step and a Cancel arrive before the next file.
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            remembered = options
+            guard !written.isEmpty else { return run.end(.failure(CancellationError())) }
+            folderName = folder.lastPathComponent
+            run.end(.success(written))
+            onNote("Exported \(Self.files(written.count)) to \(folder.lastPathComponent)")
+        }
+    }
+
+    /// One item's file: SVG text from the Model, PNG and PDF from DesignRasterizer.
+    // view-static: main-actor
+    private static func render(_ item: DesignExportItem, _ format: DesignExportFormat, _ model: DesignWorkspace) throws -> Data {
+        switch format {
+        case .svg: Data(try model.exportSVG(item).utf8)
+        case .png: try DesignRasterizer.png(try model.exportRaster(item))
+        case .pdf: try DesignRasterizer.pdf(try model.exportRaster(item))
+        }
+    }
+
+    /// A plan refused before any file: the failed line and the status line read `help`.
+    private func refuse(_ help: String) {
+        guard run.start(total: 0) else { return }
+        run.end(.failure(DesignExportFailure(help)))
+        onNote(help)
+    }
+
+    /// "1 file", "3 files".
+    nonisolated static func files(_ count: Int) -> String { "\(count) file\(count == 1 ? "" : "s")" }
+
+    /// Export on the fakes (DE-7): one step per planned file, writing nothing; `-DesignExportFail` fails its file.
+    private func exportFakes(_ options: DesignExportOptions) {
         let failing = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments).exportFail
         let files = model.exportFiles(options)
         guard run.start(total: (try? files.get())?.count ?? 0) else { return }
@@ -52,6 +164,7 @@ struct DesignExportArea: ViewModifier {
                     run.progressed(done: index + 1)
                 }
                 run.end(.success(names))
+                remembered = options
                 onNote(DesignWorkspace.exportSummary(names))
             } catch {
                 run.end(.failure(error))
@@ -61,13 +174,18 @@ struct DesignExportArea: ViewModifier {
     }
 
     /// The sheet's content on `run`; `edit` takes new options, `export` starts, `close` is Cancel or Done.
+    /// A finished run with a `folder` reads "Exported n file(s) to <folder>", else `summarized`.
     @MainActor static func sheet(
         model: DesignWorkspace, run: DesignExportRun, edit: @escaping @MainActor (DesignExportOptions) -> Void,
-        export: @escaping @MainActor () -> Void, close: @escaping @MainActor () -> Void
+        export: @escaping @MainActor () -> Void, close: @escaping @MainActor () -> Void, folder: String? = nil
     ) -> some View {
         let options = run.shownOptions ?? model.exportSheetDefaults
+        var shown = run.summarized
+        if case .finished(let finished, let names) = run, let folder {
+            shown = .finished(finished, ["\(files(names.count)) to \(folder)"])
+        }
         return SuiteExportSheet(
-            ExportSheetRows(run.summarized, formats: formats, showsSize: false) { ExportPick(format: $0.format.rawValue, scale: Double($0.scale)) },
+            ExportSheetRows(shown, formats: formats, showsSize: false) { ExportPick(format: $0.format.rawValue, scale: Double($0.scale)) },
             formats: formats,
             idPrefix: "design.export",
             onFormat: { id in
