@@ -60,14 +60,16 @@ enum DesignIntent {
 typealias DesignPerform = @MainActor (DesignIntent) -> Void
 
 extension DesignToolbarItem {
-    /// What the toolbar command asks the window to do.
-    var intent: DesignIntent {
+    /// What the toolbar command asks the window to do; nil for History, which toggles the
+    /// window's own panel (DesignHistoryArea) rather than asking the workspace.
+    var intent: DesignIntent? {
         switch self {
         case .newFile: .newFile
         case .open: .open
         case .save: .save
         case .undo: .undo
         case .redo: .redo
+        case .history: nil
         case .zoomOut: .zoomOut
         case .fit: .fit
         case .zoomIn: .zoomIn

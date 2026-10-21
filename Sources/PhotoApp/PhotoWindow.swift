@@ -207,6 +207,7 @@ struct PhotoWindow: View {
             pacer.stop()
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
+        case .gradientOption(let intent): model.runGradientOption(intent)
         case .adjust(let edit): model.adjust(edit)
         case .endAdjust: model.endAdjust()
         case .selectAll: model.selectAll()

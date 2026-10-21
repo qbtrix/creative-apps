@@ -139,7 +139,7 @@ struct PhotoCanvas: View {
                         }
                     }
                 } overlay: {
-                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover)
+                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform)
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {
