@@ -55,6 +55,8 @@ extension LibraryCatalog {
 
     /// Every Library menu action as a command spec, in menu order.
     public static let commands: [CommandSpec<LibraryCatalog>] = fileAndEditSpecs + viewSpecs + photoSpecs + metadataSpecs
+        + FileFlowCommands.specs(LibraryCatalog.self)
+        + folderSpecs
 
     /// The specs as a catalog whose history is the catalog's own.
     public static let catalog: CommandCatalog<LibraryCatalog> =

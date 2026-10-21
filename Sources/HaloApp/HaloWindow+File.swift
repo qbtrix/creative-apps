@@ -15,7 +15,8 @@
 // the Model's message in one system alert; the project stays as it was.
 // At launch the window restores Open Recent from the "HaloRecentFiles"
 // default (and writes it back on every change) and opens `-HaloOpenFile`
-// once. The hidden `halo.file` element's label and value are
+// once, and runs every suite hand-off HaloShell's inbox holds (New
+// Composition, or an open through Open Recent's path). The hidden `halo.file` element's label and value are
 // `model.saveStatus` (journeys read the label: XCUITest reads SwiftUI values
 // as empty, #262); the title is `model.windowTitle`, and the title bar's
 // subtitle (`.navigationSubtitle`) is `model.windowSubtitle`, "Edited" or
@@ -73,6 +74,7 @@ extension HaloWindow {
             .modifier(HaloFileAlert(message: model.file.error))
             .task { launchFiles() }
             .onChange(of: model.recent) { _, recent in Self.storeRecent(recent) }
+            .onChange(of: HaloShell.inbox.pending, initial: true) { for command in HaloShell.inbox.take() { perform(command) } }
     }
 
     /// The window's title.

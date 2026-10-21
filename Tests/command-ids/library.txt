@@ -26,3 +26,10 @@ view.sort
 view.zoom-in
 view.zoom-out
 view.zoom-to-fit
+file.clear-recent
+file.drop
+file.open-in
+file.open-recent
+file.recent
+folders.list
+view.show-folder
