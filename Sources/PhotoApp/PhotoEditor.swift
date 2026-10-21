@@ -131,6 +131,8 @@ struct PhotoCanvas: View {
     @Environment(\.photoRendering) private var rendering
     /// The window's live drag line (LiveDragLine.swift); only the overlay reads its line.
     @Environment(\.photoDragLine) private var dragLine
+    /// The window's live Free Transform copy (LiveDraftBox.swift); only the transform box reads it.
+    @Environment(\.photoDraftBox) private var draftBox
 
     var body: some View {
         Group {
@@ -148,7 +150,7 @@ struct PhotoCanvas: View {
                     }
                 } overlay: {
                     // The overlay spans the artboard at `zoom`, so a drop's point divides back to document pixels.
-                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform, liveLine: dragLine)
+                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform, liveLine: dragLine, liveBox: draftBox)
                         .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)

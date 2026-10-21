@@ -5,7 +5,9 @@
 // draft. A handle drag asks for `.set` with the box it gives (keeping the
 // turn and flips); a knob drag asks for `.set` with the box turned from where
 // the drag began. Every sample of one drag carries one token, so the draft
-// records one step per gesture. Values in, intents out.
+// records one step per gesture; the release asks for `.endEdit`. While a drag
+// lasts its box is the window's LiveDraftBox's (#4247), read here only, so its
+// samples re-run this body and not the editor's. Values in, intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -15,21 +17,26 @@ struct TransformOverlay: View {
     let model: PhotoWorkspace
     let zoom: Double
     var perform: PhotoPerform = { _ in }
+    /// The window's live Free Transform copy; its box wins while one is live.
+    var liveBox: LiveDraftBox?
     /// The running drag's token and the turn it began from; nil between drags.
     @State private var gesture: (token: String, degrees: Double)?
 
     /// The transform box's element; nil without a transform draft.
     var mark: PhotoCanvasMark? { box.map { PhotoCanvasMark.transformBox(Self.rect($0.box)) } }
 
-    /// The draft's box as the kernel sees it; nil without a draft.
-    private var box: TransformBox? { model.transformDraft == nil ? nil : model.transformSelection }
+    /// The draft's box as the kernel sees it (the live copy's while one is live); nil without a draft.
+    private var box: TransformBox? { model.transformDraft == nil ? nil : (liveBox?.selection ?? model.transformSelection) }
 
     var body: some View {
         if let box, let mark {
             ZStack(alignment: .topLeading) {
                 mark.probe(zoom: zoom)
                 SelectionHandlesEditor(rect: mark.rect, degrees: box.degrees, zoom: zoom, onResize: { resize(box, to: $0) },
-                                       onRotate: { turn(box, by: $0) }, onEnd: { gesture = nil })
+                                       onRotate: { turn(box, by: $0) }, onEnd: {
+                    gesture = nil
+                    perform(.transform(.endEdit))
+                })
             }
         }
     }

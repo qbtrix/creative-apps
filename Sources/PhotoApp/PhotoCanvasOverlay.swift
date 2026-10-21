@@ -27,12 +27,14 @@ struct PhotoCanvasOverlay: View {
     var perform: PhotoPerform = { _ in }
     /// The window's live drag line; read here only, so its samples re-run this body and not the editor's.
     var liveLine: LiveDragLine?
+    /// The window's live Free Transform copy; read only by TransformOverlay, as `liveLine` is here.
+    var liveBox: LiveDraftBox?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             SelectionOverlay(model: model, zoom: zoom)
             CropOverlay(model: model, zoom: zoom)
-            TransformOverlay(model: model, zoom: zoom, perform: perform)
+            TransformOverlay(model: model, zoom: zoom, perform: perform, liveBox: liveBox)
             if let diameter = model.brushCursorDiameter {
                 BrushCursorMark(point: hover, diameter: diameter, zoom: zoom)
                 if let mark = brushCursor { mark.probe(zoom: zoom) }
@@ -72,7 +74,7 @@ struct PhotoCanvasOverlay: View {
     var marks: [PhotoCanvasMark] {
         [
             SelectionOverlay(model: model, zoom: zoom).mark, CropOverlay(model: model, zoom: zoom).mark,
-            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine,
+            TransformOverlay(model: model, zoom: zoom, liveBox: liveBox).mark, brushCursor, gradientLine,
         ].compactMap { $0 }
     }
 }
