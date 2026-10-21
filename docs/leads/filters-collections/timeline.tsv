@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-21T04:29:21Z	check	FC-5 #3466 head 6686ed2 macOS build 39543117125 green; waits lane merge
 2026-10-21T04:51:43Z	check	FC-5 #3466 (6686ed2) first in batch-20261021043428; batch red on HaloShapeDraftTests (not ours), bisecting (probe -4 running)
 2026-10-21T05:13:47Z	check	FC-5 #3466 (6686ed2) in batch-20261021043428, bisect probes -4..-6 contain it (Halo red later); stacked FC drafts wait its merge
+2026-10-21T05:36:10Z	check	FC-5 #3466 merged (59242ec1e); FC-a done once dev Linux run 39550229338 is green; merging dev into stacked drafts fc6/7, fc8/9, fc11/12, fc13/15 (4 agents)
