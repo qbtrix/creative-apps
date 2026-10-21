@@ -8,6 +8,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteModel
 
 extension PhotoTextLayer {
     /// The stack.xml attribute that holds a text layer's words and style.
@@ -36,10 +37,7 @@ extension PhotoTextLayer {
     /// The unescaped value of ` name="…"` in `tag`; nil when the tag has none.
     private static func attribute(_ name: String, in tag: String) -> String? {
         guard let start = tag.firstRange(of: " \(name)=\"") else { return nil }
-        let value = tag[start.upperBound...].prefix { $0 != "\"" }
-        // The five predefined entities XMLText writes, &amp; last so "&amp;lt;" stays "&lt;".
-        return String(value).replacing("&quot;", with: "\"").replacing("&apos;", with: "'")
-            .replacing("&lt;", with: "<").replacing("&gt;", with: ">").replacing("&amp;", with: "&")
+        return XMLText.unescaped(tag[start.upperBound...].prefix { $0 != "\"" })
     }
 }
 
