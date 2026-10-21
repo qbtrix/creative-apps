@@ -9,7 +9,8 @@
 //
 // The sidebar has two sections: Library (All Photos, Picks, Recently
 // Added) and Collections (yours, with New Collection as its add button and a
-// double-click rename while those can act). LibraryFilterBar sits above
+// double-click rename while those can act), then FOLDERS when the catalog's photos sit in any
+// (LibraryFoldersSection.swift). LibraryFilterBar sits above
 // LibraryBrowser; the hidden `library.collections` element carries the
 // collections file's state for the journeys.
 //
@@ -64,8 +65,10 @@ struct LibraryWindow: View {
             title: "Library",
             sections: sidebarSections(filters),
             selection: model.selectedCollectionID,
-            onSelect: { model.selectCollection($0) },
-            onRename: filters.renameCollection
+            // A FOLDERS row's click runs view.show-folder once it can (FO-6); until then it selects nothing.
+            onSelect: { if !LibraryFolders.isRowID($0) { model.selectCollection($0) } },
+            onRename: filters.renameCollection,
+            contextActions: { LibraryFolders.isRowID($0) ? LibraryFoldersSection.actions(help: model.showFolderHelp) : [] }
         ) {
             VStack(spacing: 0) {
                 LibraryFilterBar(
@@ -124,7 +127,8 @@ struct LibraryWindow: View {
         photo.resetCrop = crop.resetCrop
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
-            view: viewMenu, photo: photo, export: exportMenu, reasons: model.services.unavailable)
+            view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
+            reasons: model.services.unavailable)
     }
 
     /// A single key to the area that owns it; ignored (so the grid or the
@@ -191,7 +195,7 @@ struct LibraryWindow: View {
             SidebarSection(
                 id: "collections", title: "Collections", items: rows.filter { UserCollection.isUserID($0.id) },
                 addAction: add),
-        ]
+        ] + [LibraryFoldersSection.section(LibraryFoldersSection.tree(model))].compactMap { $0 }
     }
 
     static func symbol(for collectionID: String) -> String {

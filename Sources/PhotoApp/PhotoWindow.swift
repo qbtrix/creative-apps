@@ -35,6 +35,7 @@ struct PhotoWindow: View {
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
     @State var liveStroke = LiveStroke()
+    @State var dragLine = LiveDragLine()
     @State var zoom = 1.0
     @State var viewport = CGSize.zero
     /// A new image waits to be fitted until the canvas has a size.
@@ -99,6 +100,7 @@ struct PhotoWindow: View {
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
             renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
             straighten: straightenDraft)
+            .environment(\.photoDragLine, dragLine)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onAppear { if let rendering { renderer.follow(rendering) { renderer.show(model) } } }
@@ -197,6 +199,8 @@ struct PhotoWindow: View {
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
                 if samplePress(moves) { return }
+                // A Gradient drag's later samples move only its line, on LiveDragLine's copy.
+                if dragLine.drags(moves, on: model, zoom: zoom) { return }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)
@@ -251,9 +255,10 @@ struct PhotoWindow: View {
         }
     }
 
-    /// A live paint stroke's copy back into the workspace: one SwiftUI pass for the stroke.
+    /// A live paint stroke's or drag line's copy back into the workspace: one SwiftUI pass for the stroke.
     private func takeStroke() {
         if let painted = liveStroke.take() { model.adoptLiveStroke(painted) }
+        if let lined = dragLine.take() { model.adoptLiveStroke(lined) }
     }
 
     // MARK: Zoom
