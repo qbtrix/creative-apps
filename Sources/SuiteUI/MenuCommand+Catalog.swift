@@ -11,11 +11,11 @@ import SwiftUI
 extension MenuCommand {
     public init<T>(
         _ spec: CommandSpec<T>, on target: T, title: String? = nil, systemImage: String? = nil,
-        shortcut: KeyboardShortcut? = nil, perform: @escaping @MainActor () -> Void
+        shortcut: KeyboardShortcut? = nil, role: ButtonRole? = nil, perform: @escaping @MainActor () -> Void
     ) {
         let name = title ?? spec.title
         let why = spec.availability(target).why
         self.init(name, systemImage: systemImage, shortcut: shortcut, help: why.map { "\(name): \($0)" } ?? spec.summary,
-                  isEnabled: why == nil, perform: perform)
+                  isEnabled: why == nil, role: role, perform: perform)
     }
 }
