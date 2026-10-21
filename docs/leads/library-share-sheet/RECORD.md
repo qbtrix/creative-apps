@@ -40,3 +40,4 @@ Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (Command
 - ShareButton is two presses: Share prepares, then "Share N Photos" is the ShareLink (a ShareLink can't open itself after an await). SharePhase holds the logic so SuiteUITests check it.
 
 - 13:05Z: Posted Belt-Slice-Done: SH-u on 39601343733 (737541328, contains 76d0c892; only red LibraryFoldersTests, #3961), plus Mac-Finish-Wanted for SH-u and the missed one for SH-a. SH-m still waits on #4024 and #3967, both open with fast-lane (poll 1 at this state).
+- 13:39Z: Poll 3, unchanged (#4024 a1574a64, #3967 d65a2827 open). Asked the supervisor (rule 23, #3789 issuecomment-6317522942): stack SH-m on both as a draft, or keep waiting.

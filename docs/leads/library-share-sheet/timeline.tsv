@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-21T13:05Z	done	slice	SH-u	Belt-Slice-Done + Mac-Finish-Wanted (SH-u, SH-a) on 39601343733
 2026-10-21T13:05Z	check	wait	SH-m	#4024 and #3967 open (fast-lane)
 2026-10-21T13:25Z	check	wait	SH-m	#4024 and #3967 open with fast-lane (poll 2)
+2026-10-21T13:39Z	check	blocked	SH-m	#4024 and #3967 open (poll 3); rule-23 question to supervisor, issuecomment-6317522942
