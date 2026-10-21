@@ -4,7 +4,7 @@ Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: read wave 1 results (FO-a PR); then wave 2 stacks FO-u and FO-4 on it
+Next: wave 2: FO-u and FO-4 stacked on #3939 (FO-a); strip #3939's attribution footer first
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,8 +17,8 @@ Next: read wave 1 results (FO-a PR); then wave 2 stacks FO-u and FO-4 on it
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FO-1 | FO-a | 1 | FolderNode, tree stub, command specs NotBuilt, tests disabled | LibraryFolders.swift, LibraryFolders+Kernel.swift, LibraryFoldersTests.swift | compiles, disabled | – | building |
-| FO-2 | FO-a | 1 | journey skipped, RJ-L53 disabled | UITests/LibraryJourneyTests+Folders.swift, Tests/RealJobs/library/browse-folders/ | scripts/jobs check | – | building (same PR) |
+| FO-1 | FO-a | 1 | FolderNode, tree stub, command specs NotBuilt, tests disabled | LibraryFolders.swift, LibraryFolders+Kernel.swift, LibraryFoldersTests.swift | compiles, disabled | #3939 | open, head 1d4518b |
+| FO-2 | FO-a | 1 | journey skipped, RJ-L53 disabled | UITests/LibraryJourneyTests+Folders.swift, Tests/RealJobs/library/browse-folders/ | scripts/jobs check | #3939 | open (same PR) |
 | FO-3 | FO-u | 2 | FOLDERS section | LibraryBrowser.swift, LibraryFoldersSection.swift | ids, menu toggles | – | planned |
 | FO-3b | FO-u | 2 | render budget | RenderBudgetLibraryFoldersTests.swift | expandFolderInTwoBodies | – | planned |
 | FO-4 | FO-m | 2 | tree body | LibraryFolders.swift, LibraryFoldersTests.swift, Tests/mutations/LibraryModel.LibraryFolders.json | LibraryFoldersTests | – | planned |
