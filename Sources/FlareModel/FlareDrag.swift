@@ -2,12 +2,15 @@
 // `dragPreview`; `endDrag` commits once, through the contract's one named group. A pen draft lasts until its path
 // closes, and a click refused on a locked layer keeps it (#692). A move under `clickSlop` stage points is a click (#470).
 import FlareCore
+import SuiteKernel
 
 /// The gesture under way: `base` is the pen draft it carries on from, `moving`
-/// what a selection-tool drag moves (empty for a marquee or a handle), `grip` the box handle a Select drag holds.
+/// what a selection-tool drag moves (empty for a marquee or a handle), `grip` the box handle a Select drag holds,
+/// `anchor` the anchor or handle of the path in edit a Direct Select drag holds, and `anchorMarquee` whether its
+/// marquee picks that path's anchors instead of items.
 struct StageGesture: Equatable, Sendable {
     var start: Point, end: Point, modifiers: DragModifiers, stageScale: Double, base: ShapeDraft?, moving: [StageAddress]
-    var grip: BoxGrip? = nil
+    var grip: BoxGrip? = nil, anchor: PathHit? = nil, anchorMarquee = false
 
     var isClick: Bool {
         let scale = FlareWorkspace.usable(stageScale)
@@ -49,11 +52,14 @@ extension FlareWorkspace {
     /// the stage's fit scale (stage points per scene point), so minimums apply on screen.
     public mutating func dragChanged(from start: Point, to end: Point, modifiers: DragModifiers = [], stageScale: Double = 1) {
         if gesture?.start != start {
-            // A handle of the selection box wins over the art under it (FlareBoxDrag.swift).
+            // A handle of the selection box wins over the art under it (FlareBoxDrag.swift), and so does an anchor or
+            // handle of the path in edit (FlareAnchors+Kernel.swift).
             let grip = grip(at: start, stageScale: stageScale)
+            let anchor = grip == nil ? anchorPress(at: start, modifiers: modifiers, stageScale: stageScale) : nil
+            let moving = grip == nil && anchor == nil ? grabbed(at: start, stageScale: stageScale) : []
             gesture = StageGesture(start: start, end: end, modifiers: modifiers, stageScale: stageScale,
-                                   base: gesture.map(\.base) ?? draft,
-                                   moving: grip == nil ? grabbed(at: start, stageScale: stageScale) : [], grip: grip)
+                                   base: gesture.map(\.base) ?? draft, moving: moving, grip: grip, anchor: anchor,
+                                   anchorMarquee: tool == .directSelect && pathInEdit != nil && anchor == nil && moving.isEmpty)
         }
         gesture?.end = end; gesture?.modifiers = modifiers; gesture?.stageScale = stageScale
         guard selectedScene != nil, let g = gesture else { return draft = nil }
@@ -78,6 +84,7 @@ extension FlareWorkspace {
                 dragPreview = drags ? boxPreview(asked, box: grip.box) : nil
                 return
             }
+            if g.anchor != nil { return (marquee, dragPreview) = (nil, drags ? anchorPreview(g) : nil) }
             marquee = drags && g.moving.isEmpty ? Rect(enclosing: [start, end]) : nil
             dragPreview = drags && !g.moving.isEmpty ? movePreview(g.moving, dx: end.x - start.x, dy: end.y - start.y) : nil
         }
@@ -96,7 +103,7 @@ extension FlareWorkspace {
         case .ellipse: commitEllipse(from: g.start, to: g.end, stageScale: g.stageScale)
         case .rectangle: if let pending { commit(pending) }
         case .pen: if let pending, pending.isClosed { commit(pending) } else { draft = pending }
-        case .select, .directSelect: endSelect(g)
+        case .select, .directSelect: if !endPathGesture(g) { endSelect(g) }
         case .shape: break
         }
     }
