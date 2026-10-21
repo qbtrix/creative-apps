@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 12:25Z	DA-a	heartbeat	39598650564	dev Linux containing #3973 running; awaiting Design screens
 12:30Z	DA-a	dev-linux-red	39598650564	Library timing budgets only; dev-red #3856; not Design
 12:45Z	DA-a	heartbeat	39600323802	full CI containing #3973 pending
+12:54Z	DA-a	dev-linux-red	39601343733	Library timing; Flare macOS break blocks journeys; #3856
