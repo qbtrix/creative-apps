@@ -4,7 +4,7 @@ Run: act-1a15e33396b-eo15 (resumes act-1a15b69feea-et92). Feature issue #3721. P
 Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev ac7f95c9f6b0516253108a270145e4280f243b69.
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: 3 identical blocked polls; Question for the supervisor posted on #3721 (comment 6323716714); polling stopped (rule 23) until answered or a dependency lands
+Next: RELEASED by the supervisor (#3721, 18:49 UTC): UP-design done (Mac-Finish-Wanted posted); issue labelled waiting-on-prereq, Belt relaunches once ST-z, SC-z land. Nothing further in this run.
 
 ## Plan
 
