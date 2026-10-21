@@ -5,14 +5,15 @@
 //
 // Foundation (#777): H-J0 checks the empty viewer and inspector; H-J1 fills
 // the New Composition sheet by its field labels (#286); H-J13 reads the
-// `halo.controls` JSON on the `keyed` fixture, clicks every enabled control
-// (then Escape and Command-Z) and checks it changed the window, and that every
-// disabled one says why (QB-F1). `halo.controls` travels by preference, which
+// `halo.controls` JSON on `-HaloSample keyed` (live services, CL-12), clicks
+// every enabled control (then Escape and Command-Z) and checks it changed the
+// window, and that every disabled one says why (QB-F1). `halo.controls` travels by preference, which
 // may not leave the inspector or toolbar, so H-J13 also launches with
 // `-SuitePerfProbe` and adds the `halo.*` entries of `suite.controls`, which
 // `.haloControl` registers too. testEveryMenuOpens checks the Composition,
-// Layer and Animation menus hold exactly their items and File and Edit hold
-// Halo's. testLayoutAtWidths relaunches at five window sizes with a layer
+// Layer and Animation menus hold exactly their items and File, Edit and
+// Window hold Halo's; testSwitchToMenu (A-HA-1, #865) reads Window > Switch
+// To. testLayoutAtWidths relaunches at five window sizes with a layer
 // selected from its timeline lane (blueprint 7.3): L1 is the audit on each
 // `halo-layout-<w>` shot, L2
 // takes the artboard as the drawn layers' frame (`halo.viewer.canvas`) and
@@ -167,9 +168,17 @@ final class HaloJourneyTests: XCTestCase {
             ["Linear", "Ease In", "Ease Out", "Ease In and Out", "Hold"])
     }
 
+    /// A-HA-1 (#865): Window > Switch To lists the suite's other apps, then Halo's own window.
+    @MainActor func testSwitchToMenu() {
+        let halo = launch()
+        XCTAssertEqual(
+            submenuTitles("Switch To", of: "Window", in: halo),
+            ["Home", "Flare", "Design", "Photo", "Library", "Show Halo Window"])
+    }
+
     /// H-J13 (QB-F1): every enabled control acts, every disabled one says why.
     @MainActor func testEveryControlActsOrSaysWhy() {
-        let halo = launch(["-HaloFixture", "keyed", "-HaloControlsProbe", "-SuitePerfProbe"])
+        let halo = launch(["-HaloSample", "keyed", "-HaloControlsProbe", "-SuitePerfProbe"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         halo.shot("controls")
         let listed = Self.decode(halo.element("halo.controls"))
@@ -220,7 +229,7 @@ final class HaloJourneyTests: XCTestCase {
         var viewerWidths: [Int: CGFloat] = [:]
         for size in sizes {
             let width = Int(size.width)
-            let halo = Journey("Halo", self, arguments: ["-HaloFixture", "keyed", "-HaloWindowSize", "\(width)x\(Int(size.height))"])
+            let halo = Journey("Halo", self, arguments: ["-HaloSample", "keyed", "-HaloWindowSize", "\(width)x\(Int(size.height))"])
             let window = halo.app.windows.firstMatch
             XCTAssert(window.waitForExistence(timeout: 30), "no window opened at \(width)")
             if size.width <= screen.width {
@@ -306,6 +315,7 @@ final class HaloJourneyTests: XCTestCase {
     private static let menusHolding: [(String, [String])] = [
         ("File", ["New Composition…", "Open…", "Open Recent", "Save", "Save As…", "Render…", "Render Frame"]),
         ("Edit", ["Undo", "Redo"]),
+        ("Window", ["Switch To", "AI Access…"]),
     ]
 
     /// The titles of `menu`'s top-level items, read with the menu open.
