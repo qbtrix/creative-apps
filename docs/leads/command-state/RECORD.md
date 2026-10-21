@@ -4,7 +4,7 @@ Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
 Stage: wave 2: CS-1b/3/7/9/11/13 ready, in lane; CS-14/10/4 drafts stacked
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: mark CS-14/10/4 ready after #4144/#4140/#4134 merge; CS-8/12/5 drafts building
+Next: parents in lane; drafts #4202 #4206 #4213 #4210 #4214 #4225 ready after parents; CS-6 building; then CS-15, CS-16 feature-done. needs-ui #4208 filed (spec-built alert button)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -32,6 +32,10 @@ Next: mark CS-14/10/4 ready after #4144/#4140/#4134 merge; CS-8/12/5 drafts buil
 | CS-14 | CS-design | 3 | Design wiring | packet CS-14 | CommandPathTests | #4202 | draft, stacked on #4144; gate pass, Head d902b346 |
 | CS-10 | CS-photo | 3 | Photo wiring (+1 line PhotoWindow+Export) | packet CS-10 | CommandPathTests; photo export/straighten snapshots may show confirm disabled | #4206 | draft, stacked on #4140; gate pass, Head 2aaaa0db |
 | CS-4 | CS-library-1 | 3 | Library wiring, 25 menu items; baseline max 48 to 23 | packet CS-4 | CommandPathTests, CommandPathLimitTests | #4213 | draft, stacked on #4134; gate pass, Head b449feb8 |
+| CS-8 | CS-halo | 3 | Halo wiring: transport, render Choose…, New Composition Create | packet CS-8 | CommandPathTests | #4210 | draft, stacked on #4196; gate pass, Head 8f46d805 |
+| CS-12 | CS-flare | 3 | Flare wiring; baseline 10 to 3 | packet CS-12 | CommandPathTests, CommandPathLimitTests | #4214 | draft, stacked on #4205; gate pass, Head dd40adc6 |
+| CS-5 | CS-library-2 | 3 | Library catalog part 2 (+20 ids, CLI list regenerated) | packet CS-5 | Mutate 9/9 LibraryModel.LibraryCommandCatalog | #4225 | draft, stacked on #4134; gate pass, Head 926fdd96 |
+| CS-6 | CS-library-2 | 4 | Library wiring part 2 | packet CS-6 | CommandPathTests, CommandPathLimitTests | | building, stacked on #4225 + #4213 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
