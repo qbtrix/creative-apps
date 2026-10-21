@@ -1,6 +1,6 @@
 // LibraryJourneyTests+Filters.swift: J13, filter by flag and rating (packet
 // docs/blueprints/library/features/filters-collections.md). Written before its
-// code (FC-6, contract rule 13): FC-7 drops the `XCTSkip` line. It walks the
+// code (FC-6, contract rule 13) and enabled by FC-7. It walks the
 // `shoot` fakes, then every step live on `LibraryFiles.writeShoot`'s JPEGs
 // (shots end `-live`); step 6 needs live Auto Advance, so it runs live only.
 import XCTest
@@ -8,7 +8,6 @@ import XCTest
 final class LibraryFiltersJourneyTests: XCTestCase {
     /// J13: the bar narrows the grid, says "N of M" and keeps its filter across collections.
     @MainActor func testFilterByFlagAndRating() throws {
-        throw XCTSkip("waits on FC-7")
         walk(Journey("Library", self, arguments: ["-LibraryFixture", "shoot"]), live: false)
 
         let folder = try LibraryFiles.freshPhotoFolder()

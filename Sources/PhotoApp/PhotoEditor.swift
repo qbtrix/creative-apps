@@ -109,7 +109,8 @@ struct PhotoEditor: View {
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
 /// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
-/// or deselect). Dropping an image file opens it. While the Straighten sheet is
+/// or deselect). A PNG or JPEG dropped on an open image places at the drop point (PhotoPlace.swift);
+/// any other file, or a drop with no image open, opens it. While the Straighten sheet is
 /// open the picture turns by its angle under StraightenMarks.
 struct PhotoCanvas: View {
     let model: PhotoWorkspace
@@ -141,7 +142,14 @@ struct PhotoCanvas: View {
                         }
                     }
                 } overlay: {
+                    // The overlay spans the artboard at `zoom`, so a drop's point divides back to document pixels.
                     PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform, liveLine: dragLine)
+                        .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
+                        .placeDropTarget(formats: model.placeFormats) { files, point in
+                            let at = PhotoWorkspace.placePoint(x: point.x, y: point.y, zoom: zoom)
+                            perform(.place(.files(files, at: at)))
+                            return true
+                        }
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {

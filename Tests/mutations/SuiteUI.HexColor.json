@@ -1,0 +1,44 @@
+[
+  {
+    "label": "droppedEndRun: a hex commit never ends its run, so one typed colour spans two gestures",
+    "file": "Sources/SuiteUI/ColorWell.swift",
+    "find": "return (next == old ? nil : next, run.end())",
+    "replace": "return (next == old ? nil : next, false)",
+    "tests": "HexColorParserTests"
+  },
+  {
+    "label": "refusalIsSuccess: text that isn't a hex colour commits as black instead of keeping the old colour",
+    "file": "Sources/SuiteUI/ColorWell.swift",
+    "find": "parse(text) ?? old",
+    "replace": "parse(text) ?? RGB8(0, 0, 0)",
+    "tests": "HexColorParserTests"
+  },
+  {
+    "label": "hashRequiredOff: a leading # is no longer stripped, so \"#RRGGBB\" reads as nothing",
+    "file": "Sources/SuiteUI/ColorWell.swift",
+    "find": "if digits.hasPrefix(\"#\") { digits.removeFirst() }",
+    "replace": "_ = digits.hasPrefix(\"#\")",
+    "tests": "HexColorParserTests"
+  },
+  {
+    "label": "noShorthand: three digits no longer double up, so \"#F80\" reads as nothing",
+    "file": "Sources/SuiteUI/ColorWell.swift",
+    "find": "if digits.count == 3 { digits = String(digits.flatMap { [$0, $0] }) }",
+    "replace": "_ = digits.count",
+    "tests": "HexColorParserTests"
+  },
+  {
+    "label": "signAccepted: the hex-digit check goes, so \"+12345\" reads as a colour",
+    "file": "Sources/SuiteUI/ColorWell.swift",
+    "find": "digits.allSatisfy(\\.isHexDigit), ",
+    "replace": "",
+    "tests": "HexColorParserTests"
+  },
+  {
+    "label": "spacesKept: surrounding spaces are no longer trimmed",
+    "file": "Sources/SuiteUI/ColorWell.swift",
+    "find": "var digits = text.trimmingCharacters(in: .whitespaces)",
+    "replace": "var digits = text",
+    "tests": "HexColorParserTests"
+  }
+]

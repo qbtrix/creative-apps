@@ -48,7 +48,6 @@ struct PhotoWindow: View {
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
     @State var problem: PhotoProblem?
-    @State var isExporting = false
     @State var exportFormat = ImageFormat.png
     @State var exportQuality = 0.9
     @State var isResizing = false
@@ -73,7 +72,7 @@ struct PhotoWindow: View {
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
-    var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
+    var isPresenting: Bool { model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming }
 
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
@@ -113,10 +112,10 @@ struct PhotoWindow: View {
                 takeStroke()
                 model.clearStatus()
             }
-            .sheet(isPresented: $isExporting) {
+            .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
                 ExportSheet(
                     format: exportFormat, quality: exportQuality, onFormat: { exportFormat = $0 },
-                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { isExporting = false })
+                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
@@ -245,6 +244,7 @@ struct PhotoWindow: View {
         case .transform(let intent): performTransform(intent)
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
+        case .place(let intent): performPlace(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }

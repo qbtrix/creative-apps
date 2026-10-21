@@ -41,6 +41,7 @@ enum PhotoIntent {
     // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
+    case place(PhotoPlaceIntent)
     /// Return: commits a free transform, else applies a pending crop.
     case confirm
     /// Escape: cancels a free transform, else cancels a pending crop or deselects.
