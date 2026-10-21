@@ -90,3 +90,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 22:17Z: heartbeat: #3826 (SS-9) head ab264ad is clean. Its lane macOS build (run 39674198800) has been queued since 20:53Z behind about 25 other macOS builds repo-wide; 3 macOS builds are running. This is runner capacity, not this PR.
 - 22:44Z: heartbeat: #3826 (SS-9) head ab264ad; its lane macOS build (run 39674198800) got a runner and is in progress.
 - 23:07Z: #3826 (SS-9) macOS build (run 39674198800) failed in Photo's RenderBudgetPhotoPlaceTests.swift:35 (PhotoPlaceIntent.files, removed by #4164). The break is on dev, not in this PR; open #4215 fixes it. A fixer is porting #4215 into #3826, then the gate, push and Head: update.
+- 23:14Z: #3826 (SS-9): ported #4215's PhotoPlace test fix at head ead55aa; scripts/ci --changed passed. Head: moved and one PR comment posted. Waiting for the lane's macOS build of the new head.
