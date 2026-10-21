@@ -3,7 +3,7 @@
 Issue: #3730 · Packet: docs/blueprints/suiteui/features/font-picker.md
 Run: act-1a15c07cabb-mtlw · Session: e6bf0eb1-e2b8-518f-a36a-05b7f66e9a98 · Started: 2026-10-21T01:21:08Z
 Stage: 3 polling
-Base: 7277a83ac040f759d8bdefc150a72e7cdf2900d6
+Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
 Next: poll for shell-text ST-a on dev (Sources/SuiteModel/Values/Text.swift, FontFamily/FontFace); FP-1 starts once it lands.
 
 ## Slices
