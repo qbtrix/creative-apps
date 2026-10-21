@@ -9,9 +9,8 @@
 // leaves the bottom half's pixels as they were; Command-Z puts the layer
 // back; Radial (`suite.gradient.type.radial`) and a drag from the centre
 // outwards draw a radial fill. Shots `gradient-options`, `gradient-done`,
-// `gradient-undone` and `gradient-radial`. Written now and skipped: the
-// pixels arrive in PG-3 and the options in PG-4, and PG-7 turns it on
-// (replacing the skip with a call to `skyGradient`). The canvas is the whole
+// `gradient-undone` and `gradient-radial`. Written in PG-6 and turned on in
+// PG-7, on the live drawing (PG-3) and options (PG-4). The canvas is the whole
 // viewport with the fitted image centred in it, so the image's top half sits
 // above the viewport's middle and the marquee from the top corner to the
 // middle is clipped to the image.
@@ -25,7 +24,7 @@ final class PhotoGradientJourneyTests: XCTestCase {
 
     /// PJ-G1: marquee the top half, G, blue stops, drag, undo, then Radial.
     @MainActor func testSkyGradient() throws {
-        throw XCTSkip("waits on PG-7")
+        try skyGradient()
     }
 
     @MainActor private func skyGradient() throws {
