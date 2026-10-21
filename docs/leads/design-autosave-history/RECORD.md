@@ -2,9 +2,9 @@
 
 Issue: #3434 · Packet: docs/blueprints/design/features/autosave-history.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z
-Stage: 3 wave 1 (DA-a building)
+Stage: 3 wave 2 (DA-a #3686 fixed for CommandPathTests at 509907a6, macOS build green, waiting on its lane batch; DA-m #3710 and DA-u #3726 stacked on it)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: DA-a #3686 (head 5a79039a) in the lane; wave 2 stacks on it: DA-m's DA-5 stacked on it, DA-u's DA-3 after DA-a
+Next: when #3686 merges, retarget #3710 and #3726 to dev and post Belt-Slice-Done DA-a; DA-6 waits DG-m; DA-z waits SuiteUI #3629
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -38,3 +38,5 @@ Next: DA-a #3686 (head 5a79039a) in the lane; wave 2 stacks on it: DA-m's DA-5 s
 ## Open
 - DA-6 waits on gradient-fill:DG-m, which waits on suiteui GF-6 (not on dev): both own DesignCommandCatalog.swift and Tests/command-ids/design.txt.
 - Wave 2 (wf widwznsim): DA-u (DA-3 + DA-4) and DA-5 open as PRs based on #3686's branch (lead/design-autosave-history-DA-a); the lane skips a non-dev base, and the lead retargets each to dev once #3686 merges. DA-m ships as two PRs (DA-5 now, DA-6 after gradient-fill DG-m), since DA-6 is blocked across features.
+- 2026-10-21T00:05:02Z: #3686 needs-fix (CommandPathTests: Show History Button not built from a spec) fixed by DesignMenuState.windowSpecs view.history and MenuCommand(spec, on:); mutate 7/7.
+- Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
