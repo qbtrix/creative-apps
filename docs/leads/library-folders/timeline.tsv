@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-21T12:21:35Z	3	poll	-	BK-3 merged; BK-u/LF-3/FO-u/FO-5 in lane; slice-done waits on run 39593465885
 2026-10-21T12:43:29Z	3	poll	-	no change; macOS runner backlog holds batch gate and scoped library run
 2026-10-21T13:17:51Z	3	poll	-	no change; macOS backlog; 4 PRs await batch gate
+2026-10-21T15:49:08Z	3	relaunch	-	run act-1a15f2277a5-6xyv resumed; slice-done lines posted on 39623471557; open PRs merging dev for the Photo baseline fix
