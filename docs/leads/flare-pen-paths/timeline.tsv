@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-21T15:23Z	fix	merge-dev	-	#4027 FP-a fix1: origin/dev merged, CI: PASS, Head moved to 0e22b950
 2026-10-21T15:39Z	heartbeat	check	-	#4027/#4033 in lane macOS build; FL-m no PR; #3770 open
 2026-10-21T16:09Z	heartbeat	check	-	#4027 macOS build 39625398668 still queued (runner wait)
+2026-10-21T16:31Z	heartbeat	poll	-	#4027 macOS build 39625398668 still queued; repo-wide backlog (28 queued runs, macOS runners busy since 15:21Z)
