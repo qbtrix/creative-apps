@@ -101,3 +101,4 @@ utc	stage	event	ref	note
 2026-10-21T13:22:56Z	PL-4	check-in	run act-1a15e9d8ac8-27wz start; #3942 macOS build green, awaiting lane
 2026-10-21T15:00Z	stage	PL-u merged-done (#3942 541cab6, run 39617481529)
 2026-10-21T15:25Z	check	PL-z still waiting on deps; no findings
+2026-10-21T15:44Z	check	PL-z waiting on deps; no findings
