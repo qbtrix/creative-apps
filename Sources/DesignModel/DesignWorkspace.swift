@@ -60,12 +60,14 @@ public enum DesignTool: String, CaseIterable, Sendable {
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
+    /// The palette shows it in place of "Title (Key)", so an icon-only tool's
+    /// reason names the tool and its key itself.
     public var unavailableHelp: String? {
         switch self {
         case .move, .frame, .rectangle, .ellipse, .text: nil
         case .shape: "Drawing shapes isn't built yet."
         case .pen: "Drawing paths isn't built yet."
-        case .eyedropper: "Picking a color from the canvas isn't built yet."
+        case .eyedropper: "Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet."
         }
     }
 
