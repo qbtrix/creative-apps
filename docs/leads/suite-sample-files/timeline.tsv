@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-21T18:45Z	3	poll	#4100	mac build green, clean, awaiting lane merge; stacked drafts wait
 2026-10-21T18:48Z	3	poll	#4100	unchanged, awaiting lane
 2026-10-21T19:05:15Z	heartbeat	#4034 #4100 still queued (lane batching, dev at 58034759f); drafts wait
+2026-10-21T19:22:03Z	heartbeat	#4100 in lane batch 20261021190945 (Linux + macOS gate running)
