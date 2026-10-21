@@ -41,7 +41,16 @@ struct LibraryBrowser: View {
     /// Why Import Folder… can't act when neither the menu nor the services say.
     static let importFallbackHelp = "Import isn't connected yet."
 
+    #if DEBUG
+    /// How many times the content's body ran; RenderBudgetLibraryFoldersTests checks a folder's
+    /// disclosure leaves it, and the grid under it, alone.
+    @MainActor static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         VStack(spacing: 0) {
             if case .running(let progress) = model.importState {
                 BusyNote(

@@ -21,7 +21,7 @@ import Testing
 
     @Test func onlyAFolderRowsIdReadsAsOne() {
         #expect(LibraryFolders.isRowID(LibraryFolders.rowID(for: "/p/family")))
-        for id in ["all", "favorites", "recent", "smart-1", "library.folder", "library.folders./p"] {
+        for id in ["all", "favorites", "recent", "smart-1", "library.folder", "library.folders./p", "library.folder./p/trips"] {
             #expect(!LibraryFolders.isRowID(id), "\(id) read as a folder row")
         }
     }
