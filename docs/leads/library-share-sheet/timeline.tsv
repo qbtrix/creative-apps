@@ -37,3 +37,5 @@ utc	stage	event	ref	note
 2026-10-21T11:30Z	check	heartbeat	SH-m	LF-m (#4024) and BK-m (#3965) still open on dev ded2ca57
 2026-10-21T11:45Z	check	heartbeat	SH-u	#3814 open, still waiting on the lane batch (macOS build green); dev ded2ca57
 2026-10-21T11:45Z	check	heartbeat	SH-m	LF-m #4024 needs-rebase, BK-m #3965/#3967 open; still blocked
+2026-10-21T12:12Z	check	heartbeat	SH-u	#3814 still waiting on the lane batch (macOS build green); dev c2aa3391
+2026-10-21T12:12Z	check	heartbeat	SH-m	BK-3 #3965 merged; LF-3 #4024 and BK-u #3967 open; still blocked
