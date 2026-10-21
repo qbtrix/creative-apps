@@ -1,7 +1,8 @@
-// GalleryPlaceImage.swift: the gallery's `place-image` page (placed-images PL-2; PL-4 turns its journey on). An
-// 800 × 600 canvas, drawn at half size, with Place… (disabled until PL-3 builds the panel) and two samples whose bytes
+// GalleryPlaceImage.swift: the gallery's `place-image` page (placed-images PL-2 and PL-3; PL-4 turns its journey on).
+// An 800 × 600 canvas, drawn at half size, that takes dropped files, with Place… (the panel) and two samples whose bytes
 // are made here: `Wide PNG`, a 1200 × 400 picture, and `Logo SVG`, 240 × 80 with a red and a blue part. A sample
-// places through `PlaceRules.fitted`, and each intent writes one line, `<command id> <intent>`, to `suite.gallery.log`.
+// places through `PlaceRules.fitted`; the page applies each intent to its one image (Replace… keeps the box, Reset Size
+// takes `resetBox`), and each intent writes one line, `<command id> <intent>`, to `suite.gallery.log`.
 // The canvas reads "Image, <name>, W by H pixels" to VoiceOver. The page is its own area in `SuiteGallery.areas`.
 import CoreGraphics
 import Foundation
@@ -74,18 +75,23 @@ struct GalleryPlaceImagePage: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             HStack(spacing: SuiteSpacing.s) {
-                Button("Place…") {}
+                Button("Place…", action: choose)
                     .disabled(PlacePanel.unbuiltHelp != nil)
                     .help(PlacePanel.unbuiltHelp ?? "Choose an image to place.")
-                    .accessibilityIdentifier("suite.place.choose")
+                    .suiteControl(id: "suite.place.choose", enabled: PlacePanel.unbuiltHelp == nil, reason: PlacePanel.unbuiltHelp)
                 ForEach(GalleryPlaceImage.samples, id: \.name) { sample in
                     Button(sample.label) { place(sample) }
-                        .accessibilityIdentifier("suite.place.sample.\(sample.format.rawValue)")
+                        .suiteControl(id: "suite.place.sample.\(sample.format.rawValue)", enabled: true, reason: nil)
                 }
             }
             GalleryPlaceCanvas(placed: placed)
+                .placeDropTarget(formats: Set(PlacedFormat.allCases)) { files, point in
+                    let scale = GalleryPlaceImage.scale
+                    for file in files { apply(.place(name: file.name, data: file.data, at: Point(x: point.x / scale, y: point.y / scale))) }
+                    return true
+                }
             if let placed {
-                PlacedImageRows(asset: placed.asset, formats: Set(PlacedFormat.allCases), onIntent: send)
+                PlacedImageRows(asset: placed.asset, formats: Set(PlacedFormat.allCases), onIntent: apply)
                     .frame(width: SuiteSize.inspectorWidth.ideal)
             }
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
@@ -100,6 +106,34 @@ struct GalleryPlaceImagePage: View {
     private func place(_ sample: GalleryPlaceImage.Sample) {
         placed = GalleryPlaceImage.placed(sample)
         send(.place(name: sample.name, data: sample.data, at: nil))
+    }
+
+    private func choose() {
+        Task { @MainActor in
+            for file in await PlacePanel.choose(formats: Set(PlacedFormat.allCases)) {
+                apply(.place(name: file.name, data: file.data, at: nil))
+            }
+        }
+    }
+
+    /// `intent` on the page's one image, then its log line.
+    private func apply(_ intent: PlaceIntent) {
+        let canvas = GalleryPlaceImage.canvas
+        switch intent {
+        case .place(let name, let data, let at):
+            guard let asset = PlacedRaster.asset(name: name, data: data) else { return }
+            placed = (asset, PlacedImage(assetID: asset.id, box: PlaceRules.fitted(natural: asset.natural, in: canvas, at: at)))
+        case .replace(let name, let data):
+            guard let old = placed?.image, let asset = PlacedRaster.asset(name: name, data: data) else { return }
+            placed = (asset, PlacedImage(assetID: asset.id, box: old.box, focus: old.focus))
+        case .resetSize:
+            guard var current = placed else { return }
+            current.image.box = PlaceRules.resetBox(current.image, natural: current.asset.natural)
+            placed = current
+        case .focus(let point, _):
+            placed?.image.focus = point
+        }
+        send(intent)
     }
 
     private func send(_ intent: PlaceIntent) {

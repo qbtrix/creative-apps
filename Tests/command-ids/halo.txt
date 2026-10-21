@@ -48,6 +48,7 @@ render.close-sheet
 render.frame
 render.open-sheet
 render.start
+shape.draw
 text.end-size-scrub
 text.set
 text.set-color
@@ -57,6 +58,7 @@ timeline.move-keys
 timeline.pick-keys
 timeline.scrub
 timeline.select-all-keys
+tool.shape
 viewer.drag-begin
 viewer.drag-cancel
 viewer.drag-end

@@ -1,6 +1,6 @@
 // StrokeCommandsTests.swift (stroke-style SS-1 written, SS-6 turned on): the nine stroke commands on a test target
 // with a kernel `History`. Each edit records one step named its title, a width scrub is one step, every why-not
-// reads, and dash and trim wait on creative-core's stroke fields.
+// reads, and dash and trim need a stroke (their bodies: StrokeDashTrimTests, SS-7).
 import Testing
 import SuiteKernel
 
@@ -72,11 +72,12 @@ struct StrokeDoc: StrokeTarget {
         #expect(catalog.availability("stroke.add", on: StrokeDoc(stroke: nil)) == .available)
         #expect(catalog.availability("stroke.width", on: StrokeDoc(stroke: nil)) != .available)
     }
-    @Test func dashAndTrimWaitOnCore() throws {
+    @Test func dashAndTrimNeedAStroke() throws {
         let catalog = try #require(Self.catalog)
-        let doc = StrokeDoc(stroke: VectorStroke())
-        #expect(catalog.availability("stroke.dash", on: doc) == .unavailable(StrokeRules.waitingCore))
-        #expect(catalog.availability("stroke.trim", on: doc) == .unavailable(StrokeRules.waitingCore))
+        for id in ["stroke.dash", "stroke.trim"] {
+            #expect(catalog.availability(id, on: StrokeDoc(stroke: VectorStroke())) == .available, "\(id)")
+            #expect(catalog.availability(id, on: StrokeDoc(stroke: nil)) == .unavailable("Add a stroke first."), "\(id)")
+        }
     }
     @Test func trimHonoursHelp() throws {
         let catalog = try #require(Self.catalog)
