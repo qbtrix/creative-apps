@@ -22,3 +22,5 @@ utc	stage	event	ref	note
 2026-10-21T05:14Z	check	heartbeat	SH-a	#3809 open clean; batch 20261021043428 bisecting (probes -4..-6) without it; dev 229c5eff3; SH-m still blocked (no LF-m/BK-m PRs)
 2026-10-21T05:37Z	check	heartbeat	SH-a	#3809 skipped by batches 043428/053311: conflicts in docs/c4/parts/creative-apps/suiteui/suiteui-sources.json (description line) with earlier batch PRs; will merge dev and resolve once batch 053311 lands
 2026-10-21T05:59Z	check	heartbeat	SH-a	#3809 open/clean, unbatched; batch 053311 still bisecting (probes -4..-6), dev 71ffa4d1c; no LF-m/BK-m PRs
+2026-10-21T06:27Z	check	rebase	SH-a	needs-rebase after batch 053311 landed; merged dev into sh-a, dropped C4 description edits (new dev gate refuses them), scripts/ci --changed PASS, Head b245b2a4d
+2026-10-21T06:27Z	check	rebase	SH-u	merged new sh-a into sh-u, dropped library-app C4 description edit, scripts/ci --changed PASS, Head 257c7a8d7; still based on sh-a
