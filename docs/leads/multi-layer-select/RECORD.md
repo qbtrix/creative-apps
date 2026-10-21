@@ -24,8 +24,8 @@ Next: PM-3 #4117, PM-4 #4095, PM-5 #4118 in the lane (macOS builds queued); PM-6
 | PM-4 | PM-m | 3 | selection bodies | PhotoLayerSelection+Kernel.swift + tests + mutations | PhotoLayerSelectionTests | #4095 | pr open |
 | PM-5 | PM-m | 4 | several-layer hide/opacity/delete; catalog | PhotoSeveralLayers+Kernel.swift, PhotoCommandCatalog.swift, command-ids | PhotoSeveralLayersTests | #4118 | pr open |
 | PM-6 | PM-m | 4 | Move moves every selected layer; RJ-P43 | PhotoStroke.swift, PhotoSeveralLayers+Kernel.swift, RealJobs/photo/fade-layers | moveMovesEvery | – | building |
-| PM-7 | PM-u | 4 | snapshots and render budget | Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift, RenderBudgetPhotoMultiLayerTests.swift | snapshots | – | waiting |
-| PM-8 | PM-u | 4 | journey written, skipped | UITests/PhotoJourneyTests+MultiSelect.swift | compiles | – | waiting |
+| PM-7 | PM-u | 4 | snapshots and render budget | Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift, RenderBudgetPhotoMultiLayerTests.swift | snapshots | – | building (stacked on PM-3) |
+| PM-8 | PM-u | 4 | journey written, skipped | UITests/PhotoJourneyTests+MultiSelect.swift | compiles | – | building (stacked on PM-3) |
 | PM-9 | PM-z | 5 | journey on live | UITests/PhotoJourneyTests+MultiSelect.swift, +StressPerf.swift | journey | – | waiting |
 | PM-10 | PM-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, multi-layer-select.wave.json | scripts/ci | – | waiting |
 
