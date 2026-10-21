@@ -24,9 +24,8 @@ public enum ExportSidecar {
 
     /// The XMP packet for `photo` as exported under `metadata`, UTF-8, attributes in a fixed order.
     public static func xmp(for photo: PhotoItem, metadata: ExportMetadata) -> Data? {
-        let head = "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"
-            + "<rdf:Description rdf:about=\"\" xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\" "
-            + "xmlns:library=\"https://github.com/qbtrix/creative-apps/ns/library/1.0/\""
+        let head = XMPSidecar.head + "<rdf:Description rdf:about=\"\" xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\" "
+            + "xmlns:library=\"\(XMPSidecar.libraryNamespace)\""
         let body = kept(attributes(for: photo), metadata: metadata).map { " \($0.name)=\"\(XMLText.escaped($0.value))\"" }.joined()
         return Data((head + body + "/></rdf:RDF></x:xmpmeta>").utf8)
     }
