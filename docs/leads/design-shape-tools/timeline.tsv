@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-21T06:39Z	check	lane	#3857	clean, queued; lane bisecting batch-20261021061843; DT-u/DT-m not opened
 2026-10-21T07:01Z	check	lane	#3857	clean, queued; DT-u/DT-m not opened
 2026-10-21T07:23Z	check	lane	#3857	clean, queued; DT-u/DT-m not opened
+2026-10-21T07:45Z	check	lane	#3857	not yet merged, lane landing a batch; DT-u/DT-m not opened
