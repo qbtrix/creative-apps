@@ -30,3 +30,5 @@
 2026-10-21T22:32Z	check	#4053 TX-u clean, macOS build 39677009049 still queued since 21:13Z; #4059 TX-m clean, mac build green, awaiting batch; TS-m #3844/#3847 unchanged
 2026-10-21T22:55Z	check	#4053 macOS build 39677009049 red, not ours: dev RenderBudgetPhotoPlaceTests sends removed .place(.files) (#4164 vs #4003); fix #4215 in lane; merge dev and push after it lands. #4059 waits for a batch. TS-m #3844/#3847 unchanged.
 2026-10-21T23:17Z	check	TX-u #4053 waits on #4215 (dev place-test fix, unmerged); TX-m #4059 awaits batch; TS-m #3844/#3847 unchanged
+2026-10-21T23:38Z	merged	TX-m #4059 merged as 8f583b30f; awaiting a green Linux run on dev containing it
+2026-10-21T23:38Z	check	TX-u #4053 waits on #4215 (Linux check running); TS-m #3844/#3847 unchanged
