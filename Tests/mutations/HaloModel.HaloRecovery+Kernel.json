@@ -1,0 +1,5 @@
+[
+  {"label": "jumpLandsOnIndex: the jump lands one step past its index", "file": "Sources/HaloModel/HaloRecovery+Kernel.swift", "find": "kernel.jumpEndingRun(to: index)", "replace": "kernel.jumpEndingRun(to: index + 1)", "tests": "HaloRecoveryTests"},
+  {"label": "recoveredIsDirty: the restored project is marked saved", "file": "Sources/HaloModel/HaloRecovery+Kernel.swift", "find": "project.file.unsaved = true", "replace": "project.file.unsaved = false", "tests": "HaloRecoveryTests"},
+  {"label": "jumpRestores: the jump keeps the document it left", "file": "Sources/HaloModel/HaloRecovery+Kernel.swift", "find": "restore(history.jump(to: index, from: document))", "replace": "_ = history.jump(to: index, from: document)", "tests": "HaloRecoveryTests"}
+]

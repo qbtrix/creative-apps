@@ -13,10 +13,9 @@ struct DesignInspectorFill: View {
     let model: DesignWorkspace
     let perform: DesignPerform
 
-    /// The switch's id in `suite.controls`; each segment is `<id>.<type>`.
-    nonisolated static let typeID = "design.inspector.fill-type"
     nonisolated static let options = FillType.allCases.map {
-        InspectorOption(id: $0, title: $0.rawValue.capitalized, identifier: "\(typeID).\($0.rawValue)")
+        InspectorOption(
+            id: $0, title: $0.rawValue.capitalized, identifier: "\(DesignControlID.inspectorFillType).\($0.rawValue)")
     }
 
     var body: some View {
@@ -26,7 +25,7 @@ struct DesignInspectorFill: View {
             ChoiceChips(options: Self.options, selected: type) { perform(.fill(.type($0))) }
                 .disabled(help != nil)
                 .help(help ?? "Fill type")
-                .suiteControl(id: Self.typeID, enabled: help == nil, reason: help, identifies: false)
+                .suiteControl(id: DesignControlID.inspectorFillType, enabled: help == nil, reason: help, identifies: false)
             if type != .solid {
                 // Placeholder until SuiteUI's GradientEditor lands (#3677): its stops and angle go here.
                 Text("Gradient stops and angle")

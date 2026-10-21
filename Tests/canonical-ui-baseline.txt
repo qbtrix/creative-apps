@@ -42,7 +42,6 @@ B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox accent-outlin
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover caps-header
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover easing
 B Sources/FlareApp/FlareInspector.swift::FlareInspector error-label
-B Sources/FlareApp/FlareInspectorFill.swift::FlareInspectorFill pending-commit
 B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow keyed-row
 B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow pending-commit
 B Sources/FlareApp/FlareInspectorScene.swift::FlareSceneNumberRow pending-commit
