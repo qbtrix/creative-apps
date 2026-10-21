@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-21T06:07:32Z	PG-4	pr	#3923	merged dev, CI: PASS, Mutate 4/4, fast-lane; PG-2 still waits #3695
 2026-10-21T06:15Z	PG-2	gate	-	dev merged in after #3695 (GF-2); scripts/ci --changed running
 2026-10-21T06:19Z	PG-2	pr	#3927	gate pass, head 70aa9c1f, fast-lane
+2026-10-21T06:34Z	heartbeat	lane	#3922,#3923,#3927	PG-3 macOS build green; PG-4 queued, PG-2 building
