@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T10:39:27Z	3	heartbeat	-	dev anchors clean; merged dev into KE-2/KE-4, scripts/ci --changed PASS; Fast-Check restored on #3954 f3b5aba91 and #3955 2610048f3
 2026-10-21T10:57:22Z	3	heartbeat	-	waiting: #3954 KE-2 (f3b5aba91) and #3955 KE-4 (2610048f3) in lane macOS build; Fast-Check pass
 2026-10-21T11:19:10Z	3	heartbeat	-	waiting: #3954 KE-2 macOS build green (run 39587418590), lane merges next sweep; #3955 KE-4 macOS build queued (run 39587441413)
+2026-10-21T11:36:40Z	3	heartbeat	-	KE-2 #3954 macOS build green, waiting lane sweep; KE-4 #3955 macOS build 39587441413 queued; wave 3 (KE-5/KE-6) after both merge
