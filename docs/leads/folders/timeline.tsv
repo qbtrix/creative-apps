@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-21T07:47:52Z	3	heartbeat	-	PRs #3960 BK-a, #3961 FO-4, #3963 FO-u opened; wave 2 BK starts
 2026-10-21T09:07:08Z	3	heartbeat	-	resumed after container restart; #3939 and #3938 merged; restacking stacked PRs
 2026-10-21T09:20:44Z	3	check	-	folders #3961/#3963 restacked on dev (needs-split cleared); gate blocked only by dev-red #3856 Design anchors (fix #3980); LF-u and FO-a merged; BK waits #3960
+2026-10-21T09:54:30Z	3	check	-	BK-a #3960 merged; #3965/#3967 merged with dev, needs-split cleared, gate blocked only by dev-red #3856 (fix #3980 open); no qualifying run yet (full 39573184415 queued); waits LF-3/FO-5/BK-5m/LF-4 unchanged (poll 2)
