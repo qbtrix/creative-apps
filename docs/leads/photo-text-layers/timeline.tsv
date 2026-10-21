@@ -12,3 +12,4 @@
 15:32Z	check	#4036 TX-1 head e68e6e99 waits on lane macOS build 39625524966 (queued); merged TX-1 into TX-3 and TX-6, gates running
 2026-10-21T15:46Z	check	TX-3 (#4053) at 0f6ce630 and TX-6 (#4059) at 617145db: TX-1 head merged in, scripts/ci --changed PASS on both, Head lines moved; #4036 waits on lane macOS build 39625524966
 2026-10-21T15:55Z	check	#4036 macOS build 39625524966 still queued; #4053/#4059 clean at new heads; TS-m #3844 (Head a880a6f9) and #3847 unchanged, TX-4/TX-5 blocked
+2026-10-21T16:18Z	check	#4036 macOS build 39625524966 still queued (53 min); TS-m #3844/#3847 unchanged; ask supervisor if still queued next check
