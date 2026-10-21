@@ -2,9 +2,9 @@
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: lane
+Stage: heartbeat
 Base: dev 79a43789
-Next: AC-colour green dev run; AC-tools #3952+#4002 merge
+Next: AC-colour green dev run (dev red #3856 from #3976, photo); AC-tools #3952+#4002 merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: AC-colour green dev run; AC-tools #3952+#4002 merge
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T10:50Z: -
 - 2026-10-21T10:35Z: AC-tools p2 PR #4002 head d2037179 (stacked on #3952); mutate unscored on Linux, macOS gate scores
 - 2026-10-21T10:27Z: AC-colour #3943 merged 45c81070; AC-tools p2 builder launched on slice/ac-tools-2
 - 2026-10-21T10:06Z: -
