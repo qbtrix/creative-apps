@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-21T04:15Z	check	heartbeat	SH-a	#3809 open, fast-lane, head b63c2756 not yet in lane/batch-20261021032004 (bisecting); dev 842e62ec1; SH-m still blocked (no LF-m/BK-m)
 2026-10-21T04:34Z	check	heartbeat	SH-a	#3809 open, clean vs dev da68f32f0; batch 20261021032004 resolved without it; no batch in flight, awaiting next sweep; SH-m still blocked (no LF-m/BK-m)
 2026-10-21T04:55Z	check	heartbeat	SH-a	#3809 open clean, macOS build green; batch 20261021043428 in flight without it; dev 0eca6ab52; SH-m still blocked (no LF-m/BK-m PRs)
+2026-10-21T05:14Z	check	heartbeat	SH-a	#3809 open clean; batch 20261021043428 bisecting (probes -4..-6) without it; dev 229c5eff3; SH-m still blocked (no LF-m/BK-m PRs)
