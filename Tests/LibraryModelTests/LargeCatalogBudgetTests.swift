@@ -115,11 +115,10 @@ import Testing
 }
 
 /// LG-1's wall-clock budget: the 10,000-photo fixture builds in under 5 s. A
-/// timing test never gates CI, so it stays disabled until the supervisor lists
-/// `library LibraryModelTests.LargeCatalogFixtureBudgetTests` in Tests/perf-suites.txt.
+/// timing test never gates CI: Tests/perf-suites.txt lists this suite, so it
+/// runs in perf-nightly and the gate skips it.
 @Suite struct LargeCatalogFixtureBudgetTests {
-    @Test(.disabled("timing budget: waits on a Tests/perf-suites.txt entry (supervisor)"))
-    func fixtureBuildsUnderFiveSeconds() throws {
+    @Test func fixtureBuildsUnderFiveSeconds() throws {
         let folder = LargeCatalogBudgetTests.folder("fixture-budget")
         defer { try? FileManager.default.removeItem(atPath: folder) }
         let start = ContinuousClock.now
