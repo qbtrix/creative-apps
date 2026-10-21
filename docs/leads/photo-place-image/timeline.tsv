@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-21T16:31Z	3	pr-opened	#4101	PP-5 (PP-m, PP-6 folded), Mutate 5/5; needs-rebase, fixer taking it
 2026-10-21T16:33Z	W4 fixer: #4101 rebase, #4003 head refresh
 2026-10-21T16:56Z	heartbeat: #4101 clean at 486222a, fixer still on #4003
+2026-10-21T17:00Z	fixer done: #4101 merged dev 486222a Mutate 5/5+5/5; #4003 merged dev 3d1f532 head synced; both ci --changed PASS
