@@ -4,7 +4,7 @@ Issue: #3775 · Packet: docs/blueprints/suite/features/sample-files.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave 4
 Base: 9951eea7355e5a768f0ce1e1bad25656cf05cd82
-Next: #4100 merged 9a4ac8828, #4112 merged 0c435e275, #4115 merged 4ada7f79a. #4129 restacked on dev (head 4c542f8ed, CI PASS), ready, waiting on the lane. Belt-Slice-Done SS-vector and SS-raster once a green dev Linux run contains their merges (dev-red #3856, the launcher baseline, is not ours); SS-z after #4129 merges; then Belt-Contact-Sheet.
+Next: #4100 merged 9a4ac8828, #4112 merged 0c435e275, #4115 merged 4ada7f79a. #4129 restacked on dev (head 4c542f8ed, CI PASS), ready; its lane macOS build failed on dev's RenderBudgetPhotoPlaceTests (#4003), fix #4215 open; merge dev once it lands. Belt-Slice-Done SS-vector and SS-raster once a green dev Linux run contains their merges (dev-red #3856, the launcher baseline, is not ours); SS-z after #4129 merges; then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
