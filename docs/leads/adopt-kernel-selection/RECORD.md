@@ -2,9 +2,9 @@
 
 Issue: #1935 · Packet: docs/blueprints/suiteui/features/adopt-kernel-selection.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: 2 build
-Base: dev 229c5eff
-Next: AS-flare building (slice/as-flare); contact sheet on #1935 after AS-flare done
+Stage: 3 wave 1
+Base: dev 0865916d
+Next: lane merges #3892, then green ci.yml on main -> Belt-Slice-Done
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-selection half. The brief's integration branch is `main` at
@@ -15,7 +15,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AS-flare | Flare selection on `Selection<StageAddress>`, `Pick`, `Nudge`, `Marquee` behind its API; set logic deleted | AS-f1, AS-f2 | MJ-AS-flare (`WorkspaceWiringTests`) | stage-edit | false | 0 | building | – | – |
+| AS-flare | Flare selection on `Selection<StageAddress>`, `Pick`, `Nudge`, `Marquee` behind its API; set logic deleted | AS-f1, AS-f2 | MJ-AS-flare (`WorkspaceWiringTests`) | stage-edit | false | 0 | in-lane #3892 | – | – |
 | AS-design | Design selection on `Selection<String>` with `canAdd`, `Nudge.delta`/`runKey`, `Marquee.rect`/`union` behind its API; set logic and `DesignDirection` deleted | AS-d1, AS-d2 | MJ-AS-design (`DesignMultiSelectTests`) | design-seams chain to design-seams-2 | false | 0 | done | – | – |
 | AS-halo | Halo `selectedKeys` on `Selection<HaloKeyRef>` as a set with `prune(alive:)` behind its API; set and prune code deleted | AS-h1, AS-h2 | MJ-AS-halo (`HaloKeySelectionTests`) | – | false | 0 | done | 39133431238 | – |
 | AS-library | Library `LibraryCatalog.selection` on `Selection<String>` with `anchor`, `pick(_:_:order:)`, `move(_:order:columns:)` behind its API; set code deleted | AS-l1, AS-l2 | MJ-AS-library (`LibraryGridTests`) | spine, export, adopt-kernel-undo:AU-library | false | 0 | done | – | – |
@@ -37,6 +37,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T06:44Z: Status mirrored to lead/suiteui-adopt-kernel-selection as Belt's nudge names it
 - 2026-10-21T05:25Z: AS-library done (Belt-Slice-Done, run 39401676163); gap #3880 for grid pick/move wiring (waits on LL-3). stage-edit #1514 done 04:33Z, so AS-flare's wait is cleared; wave 1 starts AS-flare.
 - 2026-10-17T06:04Z: no task can start. Every slice waits on editor-kernel:EK-sel (`Selection<ID>`, `Pick`, `Nudge`, `Marquee`). On origin/dev 4a86f5f no kernel type exists under Sources/, #1933 has no lead branch and no `Belt-Slice-Done:` comment. Recorded on #1935; stopped per lead.md stage 0 step 4.
 - The brief names `main` as the integration branch; PRs will target `dev` (CLAUDE.md: never target `main`; the lane retargets). The brief's main SHA fdaabbf is an ancestor of both.

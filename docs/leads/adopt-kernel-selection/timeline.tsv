@@ -143,3 +143,4 @@ utc	stage	event	ref	note
 2026-10-20T22:19:58Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open; its lead relaunched 21:03Z)
 2026-10-20T22:41:46Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open; its lead relaunched 21:03Z)
 2026-10-21T05:25:03Z	2	wave-1 start	-	AS-flare building (slice/as-flare); contact sheet on #1935 after AS-flare done
+2026-10-21T06:44:37Z	3	wave1 PR open #3892	-	lane merges #3892, then green ci.yml on main -> Belt-Slice-Done
