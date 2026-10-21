@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T10:47Z	waiting	unchanged: DX-2 waits XP-3 (waits TC-a, PL-a), DX-4 waits SM-w (no shell-media lead)
 2026-10-21T11:16Z	waiting	DX-2 waits XP-3 (waits TC-a, PL-a); DX-4 waits SM-w: shell-media lead act-1a15e10aa98-lun9 started 10:50Z, SM-a building, SM-w planned
 2026-10-21T11:38Z	waiting	poll: XP-3 waits TC-a/PL-a; SM-w planned (SM-a building)
+2026-10-21T12:00Z	waiting	poll: XP-3 waits TC-a/PL-a; SM-w planned (SM-a building)
