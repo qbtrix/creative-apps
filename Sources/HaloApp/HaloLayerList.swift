@@ -56,8 +56,7 @@ struct HaloLayerList: View {
                     .accessibilityIdentifier("halo.layer.empty")
             } else {
                 LayerTreeList(
-                    rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID,
-                    picked: model.pickedLayerIDs,
+                    rows: model.layerRows, childCount: { _ in 0 }, selected: model.pickedLayerIDs,
                     naming: Self.naming, options: Self.options, decorations: Self.decorations(layers),
                     onPick: { perform(.pickLayer($0, $1)) },
                     onRename: { id, name in
