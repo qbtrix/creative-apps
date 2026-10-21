@@ -55,3 +55,5 @@ utc	stage	event	ref	note
 2026-10-21T18:31:18Z	poll	#4141 open (macOS build green, awaiting lane sweep); journeys 39651139451 queued; #3499 open; fixer on #4150 running
 2026-10-21T18:46Z	pr-opened	#4152 F4150 round 1 head 2fc0925a8
 2026-10-21T18:46Z	merged	#4141 KE-9 1b3913c07; Linux check 39655526241 running
+2026-10-21T19:03Z	slice-done	KE-m Linux 39655526241 (dev 1b3913c07)
+2026-10-21T19:03Z	fix-round	KE-u round 2 (#4150 select-all)
