@@ -1,7 +1,8 @@
 // StrokeEditor.swift (stroke-style SS-3): the one stroke editor every app shows under its gradient editor in the
 // paint section (packet docs/blueprints/suiteui/features/stroke-style.md). It never edits a document: each gesture
 // sample is one kernel `StrokeIntent` sent through `onIntent`, which the app runs as its stroke command. The rows are
-// the colour row (InspectorColorWellRow), Width (StudioScrubRow, 0...1000 pt), Join and Cap (ChoiceChips), Dash
+// the colour row (InspectorColorWellRow), Width (InspectorSliderRow, 0...1000 pt, "4 pt" or "0.5 pt"), Join and Cap
+// (ChoiceChips on the rows' edges, each option explained in the row's tooltip), Dash
 // (ChoiceChips of the presets, and for Custom a Dash and a Gap row), Trim Start and End (0...100 %) and Offset
 // (−360...360 °), unless `showsTrim` is false, then Remove Stroke; with no stroke, Add Stroke alone. A scrub or a
 // run of colour picks shares one drag token until its end, so the host folds it into one undo step. A row that can't
@@ -32,8 +33,9 @@ public struct StrokeEditor: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             if rows.contains(.color) { colorRow }
             if rows.contains(.width) {
-                StudioScrubRow(label: "Width", value: rules.value(.width), range: StrokeRules.widths, step: 0.5,
-                               unit: "pt", onChange: { v in sample { rules.width(v, drag: $0) } }, onEnd: end)
+                InspectorSliderRow("Width", value: rules.value(.width), in: StrokeRules.widths, step: 0.5, unit: "pt",
+                                   decimals: StrokeEditorText.decimals(rules.value(.width)),
+                                   onChange: { v in sample { rules.width(v, drag: $0) } }, onEnd: end)
                     .strokeRow(.width, rules)
             }
             if rows.contains(.join) {
@@ -79,7 +81,7 @@ public struct StrokeEditor: View {
             .suiteControl(id: StrokeEditorRow.color.identifier, enabled: reason == nil, reason: reason, identifies: false)
     }
 
-    /// A labelled chip group in Design's style: the label above, the chips under it.
+    /// A labelled chip group in Design's style: the label above, the chips under it, on the other rows' edges.
     private func chips(_ row: StrokeEditorRow, options: [InspectorOption<String>], selected: String?,
                        onSelect: @escaping @MainActor (String) -> Void) -> some View {
         let reason = rules.reason(row)
@@ -87,12 +89,11 @@ public struct StrokeEditor: View {
             Text(StrokeEditorRules.label(row)).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
             ChoiceChips(options: options, selected: selected, onSelect: onSelect)
                 .disabled(reason != nil)
-                .help(reason ?? "")
+                .help(rules.chipsHelp(row))
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(StrokeEditorRules.label(row))
                 .suiteControl(id: row.identifier, enabled: reason == nil, reason: reason)
         }
-        .padding(.horizontal, SuiteSpacing.m)
     }
 
     private func option(_ raw: String, _ group: String) -> InspectorOption<String> {
@@ -102,7 +103,6 @@ public struct StrokeEditor: View {
     private func action(_ row: StrokeEditorRow, _ title: String, systemImage: String) -> some View {
         InspectorAction(ToolbarAction(title, systemImage: systemImage, unavailableHelp: rules.reason(row),
                                       identifier: row.identifier) { onIntent(row == .add ? .add : .remove) })
-            .padding(.horizontal, SuiteSpacing.m)
     }
 
     /// One gesture sample: the open token (opened on the first sample), then the one intent it asks for.
@@ -233,6 +233,36 @@ struct StrokeEditorRules: Sendable {
     /// The open gesture's token, or a new one for its first sample.
     nonisolated static func token(_ open: String?) -> String { open ?? UUID().uuidString }
 
+    /// A chip row's tooltip: why it can't act, or one line per option saying what it draws.
+    func chipsHelp(_ row: StrokeEditorRow) -> String {
+        if let reason = reason(row) { return reason }
+        switch row {
+        case .join: return StrokeJoin.allCases.map { Self.help(join: $0) }.joined(separator: "\n")
+        case .cap: return StrokeCap.allCases.map { Self.help(cap: $0) }.joined(separator: "\n")
+        default: return ""
+        }
+    }
+
+    /// What a join draws at a corner: its line in the Join tooltip.
+    nonisolated static func help(join: StrokeJoin) -> String {
+        switch join.rawValue {
+        case "miter": "Miter: sharp, pointed corners."
+        case "round": "Round: rounded corners."
+        case "bevel": "Bevel: corners cut off flat."
+        default: "\(join.rawValue.capitalized): a corner style."
+        }
+    }
+
+    /// What a cap draws at an open end: its line in the Cap tooltip.
+    nonisolated static func help(cap: StrokeCap) -> String {
+        switch cap.rawValue {
+        case "butt": "Butt: the line ends exactly at its endpoint."
+        case "round": "Round: a half circle past the endpoint."
+        case "square": "Square: a half-width square past the endpoint."
+        default: "\(cap.rawValue.capitalized): an end style."
+        }
+    }
+
     nonisolated static func label(_ row: StrokeEditorRow) -> String {
         switch row {
         case .dashLength: "Dash"
@@ -257,6 +287,9 @@ struct StrokeEditorRules: Sendable {
 enum StrokeEditorText {
     /// "2 pt", or "0.5 pt" for a width between whole points.
     static func points(_ width: Double) -> String {
-        NumericInput.text(width, decimals: width.rounded() == width ? 0 : 1, unit: "pt")
+        NumericInput.text(width, decimals: decimals(width), unit: "pt")
     }
+
+    /// The places a width shows, in this text and on the Width row: none for whole points, one between them.
+    static func decimals(_ width: Double) -> Int { width.rounded() == width ? 0 : 1 }
 }
