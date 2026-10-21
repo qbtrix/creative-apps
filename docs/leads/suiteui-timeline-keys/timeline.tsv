@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-21T22:16Z	3	merged	#4183	TK-a squash-merged; #4185 and #4191 retargeted to dev, dev merged in
 2026-10-21T22:28Z	3	gate	#4191	pass at 0ebd9101; Head: moved
 2026-10-21T22:28Z	3	blocked	#4185	gate red only on dev library command-path baseline (#3967), not ours; commented on #3780
+2026-10-21T22:42Z	3	poll	#4185 #4191	supervisor re-labelled both fast-lane; queued on the local Mac gate after #4215; dev still red on library baseline
