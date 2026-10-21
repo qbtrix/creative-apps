@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-21T18:19:15Z	heartbeat	poll	#4027	lane re-dispatched macOS build 39645360844 for head a74ae98e (queued); #4011/#4013 open; PN-3 #3770 head moved to 92162512, still open; no FL-m PR
 2026-10-21T18:42:09Z	FP-a	poll	#4027	macOS build 39645360844 green; lane merge pending
 2026-10-21T19:05Z	heartbeat	#4027 lane integrated dev (head e7994c85); its Linux run is in progress, then merges with the batch. #3770 (PN-3) still open.
+2026-10-21T19:27Z	heartbeat	#4027 Linux green on e7994c85; waits on its lane batch's macOS gate. #3770 (PN-3) still open at be778261.

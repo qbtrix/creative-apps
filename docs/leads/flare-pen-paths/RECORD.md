@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T19:05Z) #4027 lane integrated dev (head e7994c85); its Linux run is in progress, then merges with the batch. #3770 (PN-3) still open.
+Next: (2026-10-21T19:27Z) #4027 Linux green on e7994c85; waits on its lane batch's macOS gate. #3770 (PN-3) still open at be778261.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
