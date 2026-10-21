@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-21T10:38Z	3 build W2	pr	#4003	PP-4 #4003 opened (head 838c548), fast-lane; PP-3fix still building
 2026-10-21T10:38Z	3 build W2	pr	#4004	PP-3fix #4004 opened (head bd53e19, Mutate 5/5): Place… from place.image spec; note: tooltip now the shared spec summary, which mentions SVG though Photo takes PNG/JPEG only; revisit at PP-6
 2026-10-21T10:47Z	3 build W2	check	#4003 #4004	PP-4 #4003 and PP-3fix #4004 open in lane (no lane comments yet); gradient-fill run re-armed 10:44Z, PG-2 not yet open (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T11:10Z	3 build W2	check	#4003 #4004	#4003 and #4004 wait on per-PR macOS builds (runs 39587596123, 39587620209, queued since 10:51Z); #4008 (another session, fix/photo-place-command-spec) is a 1-file duplicate of the PP-3 fix; whichever lands first, the other gets resolved on needs-rebase; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
