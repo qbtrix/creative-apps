@@ -32,7 +32,7 @@ final class FlareGradientJourneyTests: XCTestCase {
         XCTAssert(stage.screenshot().pngRepresentation == before, "two undos left the circle changed")
         // 5. A solid rectangle takes Radial.
         flare.element("flare.timeline").buttons["Rectangle"].click()
-        flare.element("flare.inspector.fillType.radial").click()
+        flare.element("suite.gradient.type.radial").click()
         XCTAssert(flare.element("suite.gradient").waitForExistence(timeout: 5), "Radial showed no gradient editor")
         flare.shot("fg-5-radial")
     }
