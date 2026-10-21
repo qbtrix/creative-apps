@@ -11,7 +11,7 @@ final class DesignStrokeJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
     /// Desktop's row (collapsed when the file opens) and A's inside it (DesignFixtures.cards).
     static let desktopRow = "design.layer.node-1", rowA = "design.layer.node-2"
-    static let addStroke = "design.inspector.stroke-add"
+    static let addStroke = "suite.stroke.add"
 
     /// The packet's dashed border: add, width, cap, dash, three undos, then an old file's strokes.
     @MainActor func testDashedBorder() throws {

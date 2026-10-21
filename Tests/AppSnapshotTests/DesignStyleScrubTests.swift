@@ -1,6 +1,6 @@
 // DesignStyleScrubTests.swift: what an inspector scrub costs Design's real
-// window (style-rows SR-a). A 120-sample drag on the Opacity bar and one on the
-// X field, on `crowd` with its Rectangle 1 (node-2, at 12, 12, 16 × 16; crowd
+// window (style-rows SR-a). A 120-sample drag on the Opacity bar, one on the
+// X field and one on the stroke editor's Width row (a 4 pt stroke given first), on `crowd` with its Rectangle 1 (node-2, at 12, 12, 16 × 16; crowd
 // has no layer named A) selected: each value previews on the live box
 // (DesignLiveDrag), so the window body runs at most 3 times, and mouse-up lands
 // one undo step with the copy cleared. The body count is DesignWindow's
@@ -35,13 +35,25 @@ extension BodyCountSuites {
             #endif
         }
 
+        /// The stroke editor's Width scrub lands like the other rows: one step, the live copy cleared.
+        @Test(.timeLimit(.minutes(2))) func strokeWidthScrubLandsOneStep() async throws {
+            #if DEBUG
+            let after = try await Self.scrub("suite.stroke.width", name: "design scrub stroke width", stroke: true) { Double($0) }
+            #expect((after.selectedNode?.stroke?.width ?? 0) > 4, "the scrub never landed a wider stroke")
+            var undone = after
+            undone.undo()
+            #expect(undone.selectedNode?.stroke?.width == 4, "one undo left \(String(describing: undone.selectedNode?.stroke))")
+            #endif
+        }
+
         #if DEBUG
         /// Drags the control `id` from its middle by `dx(i)` over 120 samples, gates the window's body runs, and
-        /// returns the workspace after mouse-up.
-        static func scrub(_ id: String, name: String, dx: (Int) -> Double) async throws -> DesignWorkspace {
+        /// returns the workspace after mouse-up. `stroke` gives the layer a 4 pt stroke first, as its own step.
+        static func scrub(_ id: String, name: String, stroke: Bool = false, dx: (Int) -> Double) async throws -> DesignWorkspace {
             var seed = DesignFixtures.crowd
             seed.useServices(.live)
             seed.selectItem("node-2")
+            if stroke { try seed.setStyle(.stroke(DesignStroke(color: .black, width: 4))); seed.endEditRun() }
             let live = DesignLiveDrag()
             let w = RenderBudgetWindow(DesignWindow(seed: seed, live: live).allowsWindowActivationEvents())
             defer { w.close() }

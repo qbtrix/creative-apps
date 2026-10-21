@@ -1,9 +1,10 @@
 // DesignSampleLoupe.swift (eyedropper DY-3): the Eyedropper's overlay on the canvas. While the tool is active it
 // takes the canvas's clicks: a click sends one `.pick` onto the selection's fill, an Option-click one onto its
 // stroke, both asked of the Model's `loupe(at:modifiers:size:)` (DesignLoupe) so the view decides nothing. It
-// draws SuiteUI's SampleLoupe at the pointer and SuiteUI's SampleSizeChips at the artboard's top left. The loupe
-// and the sample size live in DesignCanvasHover, observed by this body alone, so the loupe follows the pointer
-// without re-running the canvas, the editor or the window. It reads the model and never writes it.
+// draws SuiteUI's SampleLoupe at the pointer and SuiteUI's SampleSizeChips, on a GlassPanel, at the artboard's
+// top left. The loupe and the sample size live in DesignCanvasHover, observed by this body alone, so the loupe
+// follows the pointer without re-running the canvas, the editor or the window. It reads the model and never
+// writes it.
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -33,12 +34,19 @@ struct DesignSampleLoupe: View {
                 if let loupe = store.loupe(for: model) {
                     SampleLoupe(color: loupe.color.map { HexColor($0.red, $0.green, $0.blue) }, at: Self.place(loupe, zoom: zoom))
                 }
-                SampleSizeChips(size: store.sampleSize) { store.setSampleSize($0, on: model) }
-                    .fixedSize()
+                Self.sizeChips(store.sampleSize) { store.setSampleSize($0, on: model) }
                     .padding(SuiteSpacing.s)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+    }
+
+    /// SuiteUI's sample-size chips at the narrowest inspector column's width, on a GlassPanel. They float over the
+    /// artwork: at their bare fitting width a 1x display rounds "Point" over into "Poi…", and with no backing the
+    /// chosen chip's light label vanishes on a white artboard in Dark.
+    static func sizeChips(_ size: SampleSize, onChange: @escaping @MainActor (SampleSize) -> Void) -> some View {
+        GlassPanel { SampleSizeChips(size: size, onChange: onChange).frame(width: SuiteSize.inspectorWidth.min) }
+            .fixedSize()
     }
 
     /// Where the loupe draws on the artboard at `zoom`.

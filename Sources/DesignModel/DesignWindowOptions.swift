@@ -113,11 +113,6 @@ public enum DesignControlID {
     public static let inspectorCornerRadius = "design.inspector.corner-radius"
     public static let inspectorOpacity = "design.inspector.opacity"
     public static let inspectorStrokeColor = "design.inspector.stroke-color"
-    public static let inspectorStrokeWidth = "design.inspector.stroke-width"
-    /// The Style section's Add Stroke button, shown while the selection has no stroke.
-    public static let inspectorStrokeAdd = "design.inspector.stroke-add"
-    /// The Style section's Remove Stroke button, shown while the selection has a stroke.
-    public static let inspectorStrokeRemove = "design.inspector.stroke-remove"
     public static let inspectorTextFamily = "design.inspector.text-family"
     public static let inspectorTextSize = "design.inspector.text-size"
     public static let inspectorTextWeight = "design.inspector.text-weight"
@@ -156,7 +151,7 @@ public enum DesignControlID {
         canvas, canvasSelection, canvasHover, canvasBadge, canvasGuides, canvasMarquee,
         statusTool, statusSave, statusSelection, statusNote, pageAdd, pageDelete,
         inspectorHeader, inspectorFill, inspectorFillType, inspectorCornerRadius, inspectorOpacity,
-        inspectorStrokeColor, inspectorStrokeWidth, inspectorStrokeAdd, inspectorStrokeRemove,
+        inspectorStrokeColor,
         inspectorTextFamily, inspectorTextSize,
         inspectorTextWeight, inspectorTextAlignment, inspectorTextWidth, inspectorPageWidth, inspectorPageHeight,
         inspectorRotation, inspectorFlip("horizontal"), inspectorFlip("vertical"),

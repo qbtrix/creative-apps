@@ -3,8 +3,8 @@
 // dot-separated, three parts or more), and the list holds the ids the window
 // and its views register: the canvas, its selection, every toolbar item (Undo
 // is `design.bar.undo`), every palette tool, the status line, and each Align
-// and Distribute button, and the Style section's Add and Remove Stroke
-// buttons. Linux.
+// and Distribute button; the stroke editor's Width, Add and Remove Stroke are
+// SuiteUI's `suite.stroke.*` ids, so none is listed. Linux.
 import DesignModel
 import Testing
 
@@ -47,8 +47,9 @@ import Testing
         #expect(all.contains(DesignControlID.statusTool))
         #expect(all.contains(DesignControlID.statusSelection))
         #expect(all.contains(DesignControlID.statusNote))
-        #expect(all.contains("design.inspector.stroke-add"), "Add Stroke is unlisted")
-        #expect(all.contains("design.inspector.stroke-remove"), "Remove Stroke is unlisted")
+        #expect(all.contains(DesignControlID.inspectorStrokeColor))
+        #expect(!all.contains { $0.hasPrefix("design.inspector.stroke-") && $0 != DesignControlID.inspectorStrokeColor },
+                "the stroke editor's Width, Add and Remove are suite.stroke ids, not Design's")
         for item in DesignToolbarItem.allCases {
             #expect(all.contains(item.identifier), "toolbar \(item) is unlisted")
         }

@@ -2,9 +2,8 @@
 // SR-a). Opacity (a bar in the Layer section), Corners (the Radius bar, off
 // with its reason on a kind with no corners), and Stroke (SuiteUI's
 // StrokeEditor on the Model's `selectedStroke`, no trim rows, each intent run
-// through `strokeChange`; under it the Width bar while the editor's rows are
-// read-outs, and Add or Remove Stroke; stroke-style DK-2), plus the
-// X, Y, W and H fields the Frame section shows. A scrub never writes the
+// through `strokeChange`, its scrubs ended through `send.end`; stroke-style
+// DK-2), plus the X, Y, W and H fields the Frame section shows. A scrub never writes the
 // workspace per value: each value previews on the window's live box
 // (DesignLiveDrag), which only these rows and the canvas read, and the end of
 // the drag, key or typed value lands the last one as one step (`.endEditRun`).
@@ -120,31 +119,10 @@ struct DesignInspectorStyle: View {
     }
 
     /// SuiteUI's stroke editor on the primary layer's stroke (no trim in Design), each intent sent through the
-    /// Model; under it the Width bar while the editor's rows are read-outs (SS-3), and Add or Remove Stroke.
-    @ViewBuilder
+    /// Model; the end of a scrub or a run of colour picks lands it as one step.
     private func strokeRows(_ shown: DesignWorkspace, send: DesignStyleSend) -> some View {
-        let help = model.strokeHelp
-        StrokeEditor(stroke: shown.selectedStroke, help: help, dashHelp: model.strokeDashHelp, showsTrim: false) {
-            stroke($0, send: send)
-        }
-        if let first = shown.selectedStroke {
-            // nil when the layers differ (a layer with no stroke differs from one with a stroke).
-            let width: Double? = shown.sharedValue { $0.vectorStroke?.width } ?? nil
-            InspectorSliderRow(
-                "Width", value: width ?? first.width, in: 0...1000, step: 1, unit: "pt", decimals: 1, mixed: width == nil,
-                onChange: { stroke(.width($0, drag: DesignControlID.inspectorStrokeWidth), send: send) }, onEnd: send.end
-            )
-            .disabled(help != nil)
-            .help(help ?? "")
-            .suiteControl(id: DesignControlID.inspectorStrokeWidth, enabled: help == nil, reason: help)
-            InspectorAction(ToolbarAction(
-                "Remove Stroke", systemImage: "minus", unavailableHelp: help, identifier: DesignControlID.inspectorStrokeRemove
-            ) { stroke(.remove, send: send) })
-        } else {
-            InspectorAction(ToolbarAction(
-                "Add Stroke", systemImage: "plus", unavailableHelp: help, identifier: DesignControlID.inspectorStrokeAdd
-            ) { stroke(.add, send: send) })
-        }
+        StrokeEditor(stroke: shown.selectedStroke, help: model.strokeHelp, dashHelp: model.strokeDashHelp, showsTrim: false,
+                     onEnd: send.end) { stroke($0, send: send) }
     }
 
     /// One editor intent as the Model's style change: a scrub's sample previews, a whole edit lands as one step.
