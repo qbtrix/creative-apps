@@ -4,7 +4,7 @@
 // walk the selection from "Open" to step 50 without a jump: at most 3 window bodies (target 0: only the panel and
 // the two rows whose selection changed redraw). The p95 (packet: ≤ 8 ms) is printed, not gated: a step-time
 // budget belongs in a Tests/perf-suites.txt test. Keys need a key window, which the harness's borderless window
-// can't be, so this test turns that one window key-capable, focuses the panel by a click on "Open" (which jumps
+// can't be, so this test asks the harness for a key-capable one, focuses the panel by a click on "Open" (which jumps
 // nowhere: "Open" is current), and sends the presses through the window as AppKit sends a hand's. Nested in
 // BodyCountSuites: it reads a global body counter. macOS only.
 #if canImport(AppKit)
@@ -20,9 +20,8 @@ extension BodyCountSuites {
         static let steps = 50
 
         @Test(.timeLimit(.minutes(2))) func arrowWalkInThreeBodies() async throws {
-            let w = RenderBudgetWindow(HistoryPanelBudgetWindow())
+            let w = RenderBudgetWindow(HistoryPanelBudgetWindow(), keyCapable: true)
             defer { w.close() }
-            object_setClass(w.window, KeyCapableWindow.self)
             w.window.makeKey()
             _ = w.window.makeFirstResponder(w.host)
             let bodies = { () -> Int? in
@@ -70,11 +69,6 @@ extension BodyCountSuites {
             return children.lazy.compactMap { Self.node(identifier, in: $0, depth: depth + 1) }.first
         }
     }
-}
-
-/// The harness's borderless window, allowed to be key so the panel's arrow keys reach it.
-private final class KeyCapableWindow: NSWindow {
-    override var canBecomeKey: Bool { true }
 }
 
 /// The counted window: a header over the page, which owns the listing.

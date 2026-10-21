@@ -61,11 +61,18 @@ struct PhotoCommandCatalogTests {
 
     @Test func conformance() throws {
         #expect(PhotoWorkspace.catalog.ids.count == PhotoWorkspace.commands.count)
-        let problems = CatalogConformance.check(PhotoLawsDocument.self, fixture: PhotoLawsDocument(ws: try Self.lawsFixture()))
-        // The file-flow examples need a recent file, a saved image or a readable file on disk: PhotoFileFlowTests runs them.
-        let needsFiles = Set(["file.clear-recent", "file.drop", "file.open-in", "file.open-recent"].map { "\($0): exampleRuns" })
-        let key = { (problem: String) in problem.split(separator: ":").prefix(2).joined(separator: ":") }
-        #expect(problems.filter { !needsFiles.contains(key($0)) } == [])
+        let fixture = PhotoLawsDocument(ws: try Self.lawsFixture())
+        // Only exampleRuns, and only for a command whose availability says why it is off on the fixture (tool.gradient
+        // until PG-3): its example refuses as unavailable, the filter Design's and Library's laws use. The file-flow
+        // examples need a recent file, a saved image or a readable file on disk: PhotoFileFlowTests runs them.
+        let needsFiles = Set(["file.clear-recent", "file.drop", "file.open-in", "file.open-recent"])
+        let problems = CatalogConformance.check(PhotoLawsDocument.self, fixture: fixture).filter { problem in
+            let id = String(problem.prefix { $0 != ":" })
+            guard problem.hasPrefix("\(id): exampleRuns") else { return true }
+            let off = PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil
+            return !(off || needsFiles.contains(id))
+        }
+        #expect(problems == [])
     }
 
     @Test func ledger() throws {

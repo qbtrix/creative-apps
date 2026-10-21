@@ -94,7 +94,8 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
         == "Samples have no file, so no sidecar.")
 }
 
-/// QB-LIB-M4: one changed photo of 10,000 plans in 10 ms debug, 1 ms release.
+/// QB-LIB-M4: one changed photo of 10,000 plans in 10 ms debug, 1 ms release. Timed, so on the perf list
+/// (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
 @Test func planWithinBudget() {
     var catalog = LibraryCatalog()
     catalog.load(LibraryFixtures.photos(named: "large").map {
