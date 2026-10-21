@@ -75,3 +75,4 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - 16:14Z: Opened #4116 fix(build): project.yml pins creative-core at Package.swift's revision (head 544938d0, BuildGraphTests match test proven to fail on the old pin, CI: PASS). Refs #3856. After it merges, FG-u needs a scoped flare run's journeys for ui-screens.
 - 16:28Z: #4116 in lane; lane dispatched its macOS build. #4055, #3742, #4047 open; 6 open findings. No new comments.
 - 16:48Z: #4116 macOS build in progress. #4055, #3742, #4047 open; 6 open findings. No new comments.
+- 17:11Z: heartbeat: #4116 lane macOS build green, Linux batch run in progress; #4055 #3742 #4047 open; 6 open findings (no FG-5); FG-u critics wait on #4116 merge + scoped flare run
