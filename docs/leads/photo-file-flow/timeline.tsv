@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-20T23:24Z	3	merged	#3679	PF-1 merged 23:24Z
 2026-10-20T23:24Z	3	merged	#3700	PF-4 merged 23:24Z; PF-3 opening
 2026-10-20T23:56Z	3	heartbeat	-	worker restart; Belt-named lead/file-flow is the Suite lead record, mine is lead/photo-file-flow
+2026-10-21T00:06Z	3	opened	#3815	PF-3 PR (PF-m), head 96f8ec7b, fast-lane
