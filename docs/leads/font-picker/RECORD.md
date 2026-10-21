@@ -2,9 +2,9 @@
 
 Issue: #3730 · Packet: docs/blueprints/suiteui/features/font-picker.md
 Run: act-1a15c07cabb-mtlw · Session: e6bf0eb1-e2b8-518f-a36a-05b7f66e9a98 · Started: 2026-10-21T01:21:08Z
-Stage: 3 polling
+Stage: parked (blocked on shell-text ST-a, #3725)
 Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: poll for shell-text ST-a on dev (Sources/SuiteModel/Values/Text.swift, FontFamily/FontFace); FP-1 starts once it lands.
+Next: none this run. The supervisor relaunches font-picker once shell-text ST-a is on dev; FP-1 starts then.
 
 ## Slices
 
@@ -39,6 +39,8 @@ Next: poll for shell-text ST-a on dev (Sources/SuiteModel/Values/Text.swift, Fon
 - 2026-10-21T01:21:08Z: FP-1 waits on shell-text ST-a: no lead/shell-text branch, no Sources/SuiteModel/Values/Text.swift, no FontFamily/FontFace in Sources. Nothing in this feature can start; recorded on #3730.
 
 - 2026-10-21T02:22Z: three identical blocked polls for shell-text ST-a; rule 23 question posted on #3730 (comment 6306414555) offering wait / local FontPick / park. Waiting (a) until answered.
+
+- 2026-10-21T02:44Z: supervisor answered (c) on #3730: park font-picker, no throwaway FontPick type; shell-text #3725 and shell-media SM-a go in the next shift. Parked. Read the reply's "release this run" as about font-picker; adopt-kernel-autosave and text-style continue (no `Belt released this run.` message).
 
 ## Open
 
