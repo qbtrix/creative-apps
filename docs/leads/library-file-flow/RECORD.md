@@ -40,3 +40,4 @@ Next: (11:50) LF-3 #4024 got needs-rebase (LibraryUndoAdapter.swift vs FC-9 #354
 ## Open
 - LF-4 blocked (builder, 07:10Z): ThumbnailGrid has no per-cell drag hook (needs-ui #3928); the PNG representation is SF-8's (not merged); no suite type for a catalog open. Reading chosen: note a photo when it opens in the loupe (png/jpeg/heic already list Library), decided when LF-4 restarts.
 - LF-3 waits on tone-controls:LT-m (LibraryCommandCatalog.swift, Tests/command-ids/library.txt) and cull-finish:DR-m; neither feature has a lead branch.
+- 12:21Z: LF-3 #4024 (a1574a6) gate passes, fast-lane, in the lane. LF-u Belt-Slice-Done waits on scoped library run 39593465885 (queued, contains fd7f493). #3928 still open: LF-4 keeps waiting.
