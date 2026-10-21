@@ -45,3 +45,11 @@ utc	stage	event	ref	note
 2026-10-21T12:50:55Z	3	heartbeat	-	stripped attribution footers from #3955 #4067 bodies; KE-4/KE-5/KE-6 in lane
 2026-10-21T13:21:08Z	4	KE-4	#3955	merged dev (takes #4008 PhotoPlace fix), head fb99be903, gate PASS
 2026-10-21T13:42:11Z	heartbeat	check-in: #3955 (KE-4, fb99be903), #4067 (KE-6, b504f56cb), #4070 (KE-5, 5650f771b) all wait on their queued macOS builds; no red check, no needs-fix/needs-rebase. Next: RJ-H13 + KE-m Slice-Done on #3955 merge; KE-u critics on #4067+#4070 merge.
+2026-10-21T17:29:14Z	3	slice-done	KE-a	run 39632745681 (Linux green, holds #3813 #3954); resumed run act-1a15f807d0b-78hh
+2026-10-21T17:29:14Z	3	stage-start	wave 4	KE-9 RJ-H13 job + journey on
+2026-10-21T17:38:49Z	3	pr-opened	#4141	KE-9 RJ-H13 move-keys job + journey on, head ddee6da1a
+2026-10-21T17:39:48Z	poll	#4141 open, no lane build yet; run 39635764704 queued; #3499 open
+2026-10-21T17:59:56Z	poll	#4141 macOS build 39647703725 queued; scoped halo 39635764704 queued; #3499 open; dev-red #3856 open
+2026-10-21T18:23:00Z	finding-filed	#4150 KE-u macOS tests (run 39635764704)
+2026-10-21T18:23:00Z	fix-round	KE-u round 1: #4150
+2026-10-21T18:31:18Z	poll	#4141 open (macOS build green, awaiting lane sweep); journeys 39651139451 queued; #3499 open; fixer on #4150 running
