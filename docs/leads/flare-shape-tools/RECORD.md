@@ -8,7 +8,7 @@ Next: FS-a slice PR (FS-1, FS-2) and FS-5 (FS-m's first task) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: #3767 FS-a waiting in lane bisect of batch-20261021005140 (probe -4 running; red was Library timing test, not ours)
+Last stage: #3767 FS-a waiting in lane bisect of batch-20261021005140 (probe -4 timing retry 3 of 3 running)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
