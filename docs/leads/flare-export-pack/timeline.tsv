@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-21T08:17Z	3	parked	-	Parked per supervisor 08:01Z on #3481: SM-a #3711 waits for a Belt slot; not building SM-a.
 2026-10-21T08:38Z	3	parked	-	Still parked: SM-a #3711 has no slice PR yet.
 2026-10-21T08:58Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+2026-10-21T09:18Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
