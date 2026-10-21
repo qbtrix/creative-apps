@@ -66,3 +66,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T22:10Z: #3967 (BK-4, BK-4b) merged into dev as 15806ab. BK-u closes on the first dev CI run containing it with a green Linux job; dev is red on Launcher's command-path baseline (#3856, not ours).
 
 - 22:39Z: dev Linux red from our BK-u merge racing CS-2 #4023 (run 39685422711: library baseline stale Cancel lines, 53 over max 48). Fix #4244 opened (head 6b0bec6): LibraryBackupMenuState specs, menu item and sheet Restore buttons built from specs, baseline back at 48; gate PASS, mutate 3/3. Filed #4245 (needs-ui: role on spec MenuCommand).
+
+- 22:55Z: fix #4244 (6b0bec6) waits on its lane-dispatched macOS build (apps: library), then a batch.

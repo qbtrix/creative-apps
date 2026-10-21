@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T21:56:56Z	-	watch	BK-u	heartbeat: #3967 still waiting on a lane batch at 780c26c; dev-red #3856 still open (Launcher baseline, not ours)
 2026-10-21T22:10:00Z	-	merged	BK-u	#3967 merged 15806ab
 2026-10-21T22:39:54Z	-	fix	BK-u	dev Linux red from our BK-u merge racing CS-2 #4023 (run 39685422711: library baseline stale Cancel lines, 53 over max 48). Fix #4244 opened (head 6b0bec6): LibraryBackupMenuState specs, menu item and sheet Restore buttons built from specs, baseline back at 48; gate PASS, mutate 3/3. Filed #4245 (needs-ui: role on spec MenuCommand).
+2026-10-21T22:55:11Z	-	watch	BK-u	fix #4244 (6b0bec6) waits on its lane-dispatched macOS build (apps: library), then a batch.
