@@ -194,6 +194,14 @@ extension PhotoWorkspace {
         transformDraft == nil && [.brush, .eraser, .clone, .heal].contains(tool)
     }
 
+    /// The Gradient tool's line while it drags, from the press to where the
+    /// pointer is now, in canvas pixels, for the canvas overlay; nil with no
+    /// gradient drag or one that hasn't moved.
+    public var gradientDrag: (from: Mask.Point, to: Mask.Point)? {
+        guard let stroke, stroke.tool == .gradient, let end = stroke.end, end != stroke.start else { return nil }
+        return (stroke.start, end)
+    }
+
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
     /// canvas or layer stack), so a stroke never overwrites a newer document.
