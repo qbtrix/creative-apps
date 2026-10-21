@@ -8,7 +8,10 @@
 // layer while key picking can't act), and the bed selects the layer
 // (onSelectTrack) and clears the pick. A key drag sends `.moveKeys` per step,
 // all under the dragStart taken when it began, then `.endKeyDrag`; ⌘A while
-// the strip has focus sends `.selectAllKeys`. A scrub or a name click gives
+// the strip has focus sends `.selectAllKeys`. A bar's body drag goes to
+// `slideLayer` and an end drag to `trimLayer` (timeline-keys TK-4, as
+// `layer.slide` and `layer.trim` params), only while those specs can act;
+// until TK-6 builds them they can't, and the tooltip says why. A scrub or a name click gives
 // the timeline focus so HaloViewer's keys reach it; a lane press leaves the
 // focus on the strip, which ⌘A needs.
 // The strip's context menu holds the five easing presets for the picked keys
@@ -37,6 +40,10 @@ import SwiftUI
 struct HaloTimelineView: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    /// Runs `layer.slide` for a bar's body drag (the window wires it, TK-9).
+    var slideLayer: @MainActor (HaloProject.SlideParams) -> Void = { _ in }
+    /// Runs `layer.trim` for a bar's end drag (the window wires it, TK-9).
+    var trimLayer: @MainActor (HaloProject.TrimParams) -> Void = { _ in }
     @FocusState private var hasFocus: Bool
     /// The strip's laid-out width, once measured.
     @State private var stripWidth: Double?
@@ -74,8 +81,11 @@ struct HaloTimelineView: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Timeline")
         .accessibilityIdentifier("halo.timeline")
-        .help(model.timelineHelp)
+        .help(spanHelp.map { "\(model.timelineHelp) \($0)" } ?? model.timelineHelp)
     }
+
+    /// Why a bar can't slide or trim now; nil while `layer.slide` and `layer.trim` can act.
+    private var spanHelp: String? { HaloProject.spanCommands.lazy.compactMap { $0.availability(model).why }.first }
 
     private func content(_ rows: [HaloTimelineRow]) -> some View {
         let tracks = rows.map { row in
@@ -109,6 +119,12 @@ struct HaloTimelineView: View {
                     onEndKeyDrag: {
                         dragStart = nil
                         perform(.endKeyDrag)
+                    },
+                    onTrim: { id, edge, frame in
+                        if spanHelp == nil { trimLayer(.init(layer: id, edge: edge.rawValue, frame: frame)) }
+                    },
+                    onSlide: { id, by in
+                        if spanHelp == nil { slideLayer(.init(layer: id, by: by)) }
                     },
                     onSelectAllKeys: { perform(.selectAllKeys) })
                     .accessibilityIdentifier("halo.timeline.track")
