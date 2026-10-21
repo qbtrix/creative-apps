@@ -1,0 +1,86 @@
+utc	stage	event	ref	note
+2026-10-17T03:09Z	0	stage-start	-	lead branch created from origin/dev 06371387
+2026-10-17T03:09Z	0	stage-end	-	no lead/filters-collections existed on the remote, so RECORD.md was written from the template
+2026-10-17T03:09Z	2	pr-opened	-	none; FC-1 committed as 711d58b4
+2026-10-17T03:09Z	2	stage-end	-	FC-1 tests pass on dev base; FC-2 next
+2026-10-17T03:40Z	3	heartbeat	-	stage 2 plan complete; pushed stage record; waiting on supervisor Q1-Q4 before FC-2
+2026-10-17T05:51Z	3	pr-opened	#1976	FC-1 filter rules, fast-lane, head 01ce599b
+2026-10-17T06:28Z	3	pr-merged	#1976	FC-1 filter rules merged to dev by the lane
+2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
+2026-10-20T03:16Z	2	stage-start	-	resume as run act-1a15749e510-0ox5; base origin/dev 233aff5c
+2026-10-20T03:16Z	2	finding-filed	#3411	S-L9 sidebar drop (needs-ui)
+2026-10-20T03:16Z	2	finding-filed	#3412	S-L10 isRenamable (needs-ui)
+2026-10-20T03:16Z	2	stage-end	-	plan: FC-2b and FC-3 in wave 1
+2026-10-20T03:16Z	3	stage-start	-	wave 1 builders FC-2b, FC-3
+2026-10-20T04:22Z	pr-opened	FC-2b #3424
+2026-10-20T04:22Z	pr-opened	FC-3 #3423
+2026-10-20T04:22Z	stage-end	3 wave 1
+2026-10-20T04:22Z	stage-start	3 wave 2
+2026-10-20T04:42:28Z	check	findings none in feature; dev-red #3386 not ours; FC-4 builder gate rerun on committed head
+2026-10-20T04:45:20Z	pr-opened	FC-4 #3461 (draft, stacked on #3424)
+2026-10-20T04:45:20Z	stage-end	3 wave 2
+2026-10-20T04:45:20Z	stage-start	3 wave 3: FC-5 building
+2026-10-20T05:09:43Z	pr-opened	FC-5	#3466 draft, stacked on #3461; gate base caveat
+2026-10-20T05:09:43Z	builder-start	FC-6	stacked on FC-5
+2026-10-20T05:09:43Z	builder-start	FC-8	stacked on FC-5
+2026-10-20T05:16:46Z	builder-restart	FC-6, FC-8	container restart stopped both; resumed from their worktrees (FC-8 had a commit, FC-6 partial files)
+2026-10-20T05:35:34Z	pr-opened	FC-8	#3490 draft, stacked on #3466
+2026-10-20T05:35:34Z	builder-start	FC-11	stacked on FC-5
+2026-10-20T05:36:00Z	pr-opened	FC-6	#3491 draft, stacked on #3466
+2026-10-20T05:36:00Z	builder-start	FC-13	stacked on FC-5
+2026-10-20T05:58:39Z	pr-opened	FC-11	#3515 draft, stacked on #3466; 3 test files +394
+2026-10-20T06:03:04Z	issue	-	#3520 perf-suites request
+2026-10-20T06:03:04Z	builder-start	FC-7	stacked on FC-6 (#3491)
+2026-10-20T06:03:17Z	pr-opened	FC-13	#3521 draft, stacked on #3466; 4 test files +399
+2026-10-20T06:03:47Z	builder-start	FC-9	branch from FC-8 (#3490), FC-3 (#3423) merged in
+2026-10-20T06:25:19Z	pr-opened	FC-7	#3534 draft, stacked on #3491; Mutate 17/17
+2026-10-20T06:25:19Z	builder-start	FC-15	stacked on FC-13 (#3521)
+2026-10-20T06:26:06Z	check-in	-	parents unmerged, lane macOS builds queued; no findings for this feature
+2026-10-20T06:33:23Z	pr-opened	FC-15	#3539 draft, stacked on #3521; own diff 2 files +52/-17
+2026-10-20T06:48:47Z	check-in	-	parents unmerged, lane macOS builds queued 3h; no new findings
+2026-10-20T06:57:12Z	lane-build-green	FC-3	#3423 macOS build 39366083753 success
+2026-10-20T19:35:00Z	resume	-	run act-1a15ac11868-4kb6
+2026-10-20T19:35:00Z	check-in	-	FC-4 #3461 macOS build 39437577080 queued since 14:15Z; no findings
+2026-10-20T19:48:12Z	check	-	lane backlog: 56 runs queued; FC-4 #3461 macOS run 39437577080 queued since 14:15Z; nothing merged (MD #3550 #3570 #3574 #3575, LX #3696 waiting)
+2026-10-20T20:14:59Z	check	-	nothing merged; 59 runs queued; dev took #3680 (no conflict with ours); #3582/#3579 still dirty drafts awaiting parents; no supervisor reply on #1563
+2026-10-20T20:50Z	check	footer stripped from #3696 #3699 and comments on #1563 #1555 #3478; FC-4 #3461 and MD-8 #3550 macOS builds green, awaiting lane batch; nothing merged yet
+2026-10-20T21:23Z	stage	FC-4 #3461 merged; FC-5 #3466 merged dev in (resolved LibraryBrowser, Filters, Catalog conflicts; Favorites comment -> Picks), CI: PASS, head 22c58cd, un-drafted; FC-6/8/11/13 drafts wait on FC-5
+2026-10-20T21:58:10Z	check	check-in: FC-5 #3466 clean and ready on 22c58cd6, awaiting lane batch; stacked FC drafts wait on it
+2026-10-20T22:32:56Z	check	check-in: FC-5 #3466 still awaiting lane batch; no supervisor reply on #1563
+2026-10-21T00:05:30Z	check	check-in: FC-4 #3461 merged; FC-5 #3466 needs-rebase on LibraryWindow.swift, resolved (both focusedSceneValue modifiers kept), gate queued
+2026-10-21T00:16:12Z	stage	FC-5 #3466 dev merged (LibraryWindow.swift, both modifiers kept), CI: PASS, pushed a035f3c; stacked FC drafts wait on it
+2026-10-21T00:33:02Z	check	check-in: FC-5 #3466 ready on a035f3c, needs-rebase cleared, awaiting lane batch; no supervisor reply on #1563
+2026-10-21T01:05:17Z	check	FC-5 #3466 ready in lane (fast-lane, Head a035f3c8); dev red from MD-16 timing test, not FC; stacked FC drafts wait on FC-5
+2026-10-21T01:27:31Z	check	FC-5 #3466 clean in lane; dev fix #3829 in, Linux run 39526337262 running
+2026-10-21T01:48:43Z	check	dev green (run 39526337262); FC-5 #3466 clean, awaiting lane batch
+2026-10-21T02:10:07Z	check	no change: FC-5 #3466 clean, awaiting lane batch
+2026-10-21T02:32:07Z	check	no change: FC-5 #3466 clean, not yet batched
+2026-10-21T02:53:55Z	check	no change: FC-5 #3466 clean, not yet batched
+2026-10-21T03:16:29Z	check	no change: FC-5 #3466 clean, in lane
+2026-10-21T03:39:04Z	check	FC-5 #3466 clean in lane, waits batch; stacked drafts wait FC-5; dev green 39537764239
+2026-10-21T04:06:35Z	check	batch-20261021032004 red on CommandPathTests (library): FC-5 adds 10 MenuCommand sites not in Tests/command-path-baseline/library.txt; fixing on FC-5 branch (baseline lines, as FC-4 did)
+2026-10-21T04:07:22Z	fix	FC-5 #3466 pushed 6686ed2 (10 library.txt baseline lines), gate PASS, CommandPathTests pass, Head moved. Stacked FC drafts will need the same when they merge dev.
+2026-10-21T04:29:21Z	check	FC-5 #3466 head 6686ed2 macOS build 39543117125 green; waits lane merge
+2026-10-21T04:51:43Z	check	FC-5 #3466 (6686ed2) first in batch-20261021043428; batch red on HaloShapeDraftTests (not ours), bisecting (probe -4 running)
+2026-10-21T05:13:47Z	check	FC-5 #3466 (6686ed2) in batch-20261021043428, bisect probes -4..-6 contain it (Halo red later); stacked FC drafts wait its merge
+2026-10-21T05:36:10Z	check	FC-5 #3466 merged (59242ec1e); FC-a done once dev Linux run 39550229338 is green; merging dev into stacked drafts fc6/7, fc8/9, fc11/12, fc13/15 (4 agents)
+2026-10-21T07:12:14Z	check	#3521 FC-13 in lane/batch-20261021065242 (red on DesignModel StrokeRules.notBuilt, not ours; bisecting, probe -2 running); #3490/#3491/#3515 ready clean, not yet batched; stacked drafts wait
+2026-10-21T07:34:29Z	check	#3521 FC-13 merged (6997cc329); FC-15 #3539 dev merge + gate in a worktree agent; #3490/#3491/#3515 in lane/batch-20261021073036 (Linux check running)
+2026-10-21T07:40:07Z	stage	FC-15 #3539 dev merged (9b64967f2), gate CI: PASS, un-drafted, Head moved
+2026-10-21T07:56:13Z	check	#3490 FC-8 (8639b29c5), #3491 FC-6 (19f5ed0ef), #3515 FC-11 (012ffd1db) merged via batch 073036; worktree agents merging dev into FC-7 #3534 and FC-9 #3546; FC-15 #3539 ready, not yet batched; FC-12 #3551 waits on #3534
+2026-10-21T08:06:10Z	stage	FC-7 #3534 dev merged (766b255dd), gate CI: PASS, un-drafted, Head moved
+2026-10-21T08:07:51Z	stage	FC-9 #3546 dev merged (48ddfc085), gate CI: PASS, mutate 11/11, un-drafted, Head moved
+2026-10-21T08:18:58Z	check	FC-7 #3534, FC-9 #3546, FC-15 #3539 clean; per-PR macOS builds 39567176986/39567243117/39564329849 queued; FC-12 #3551 waits on #3534
+2026-10-21T08:41:02Z	check	macOS build green for FC-15 #3539 and FC-7 #3534 (lane merges next sweep); FC-9 #3546 build queued; FC-12 #3551 waits on #3534
+2026-10-21T09:03:56Z	check	FC-15 #3539 first in batch 084621, red on Halo CommandPathTests (not ours), lane bisecting; FC-7 #3534 built green, awaiting batch; FC-9 #3546 macOS build queued
+2026-10-21T09:26:33Z	check	FC-7 #3534 and FC-15 #3539 merged 09:22; FC-9 #3546 needs-rebase (LibraryCollectionsSeamTests) and FC-12 #3551 dev merge: worktree agents running
+2026-10-21T09:48:22Z	check	FC-9 #3546 dev merged (d91818de3), gate red only on dev-red #3856 mutation anchors; Head held until #3980/#3996 land. FC-12 #3551 agent resumed after rate limit
+2026-10-21T09:50:43Z	check	FC-12 #3551 dev merged (c071bdbde, 7 files +47/-27, Mutate 21/21 LibraryModel.LibraryFilter); gate red only on dev-red #3856 anchors; stays draft, Head held until fix lands
+2026-10-21T10:13:23Z	check	-	dev anchors fixed (#3996 merged; mutate --validate OK on e2b8aa76b); agents merging dev into FC-9 #3546 and FC-12 #3551 and rerunning the gate; FC-10 waits on S-L9 #3411 (open)
+2026-10-21T10:25:37Z	stage	FC-9	#3546 dev merged (0c4ddd751, 10 files +166/-45), CI: PASS, Mutate 11/11; Head moved, stack text refreshed
+2026-10-21T10:26:41Z	stage	FC-12	#3551 dev merged (afda170fe, 7 files +47/-27), CI: PASS, Mutate 21/21; Head moved, un-drafted; hold-lifted comment on #1563
+2026-10-21T10:35:35Z	done	FC-b	Belt-Slice-Done: green dev Linux check 39582236683 on fe232dcda contains #3534; FC-9 #3546 and FC-12 #3551 queued in the lane
+2026-10-21T10:57:48Z	check	-	FC-9 #3546 and FC-12 #3551 in the lane's per-PR macOS build (10:35); FC-10 waits on S-L9 #3411
+2026-10-21T11:20:35Z	check	-	FC-9 #3546: macOS build and Linux green on 0c4ddd751, awaiting lane merge; FC-12 #3551 macOS build running (11:20); FC-10 waits on S-L9 #3411
+2026-10-21T11:50:25Z	check	-	run act-1a15e4969c2-pa6e resumed; FC-12 #3551 fixer (dev merge); FC-14 builder; FC-10 waits S-L9 #3411; 0 open findings
+2026-10-21T15:13:45Z	check	-	FC-14 #4056 perf-list fix + dev merge; FC-12 #3551 dev merge (timing test now on perf list); FC-10 waits S-L9 #3411; 0 findings
