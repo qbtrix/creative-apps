@@ -98,6 +98,21 @@ import Testing
         #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "Option-click leaves the fill")
     }
 
+    /// #3991: the sample size reaches the pick, not only the loupe. Just outside the red ellipse's right edge a
+    /// point reads the white frame, a 5 × 5 square reads some red too, and the pick applies what the loupe showed.
+    @Test(.disabled("waits on DY-5")) func sizeChangesThePick() throws {
+        var w = try Self.shapes()
+        w.selectTool(.eyedropper)
+        let edge = pt(401, 300)
+        let point = w.loupe(at: edge, modifiers: [])?.color
+        w.setSampleSize(.fiveByFive)
+        let square = w.loupe(at: edge, modifiers: [])?.color
+        #expect(square != nil)
+        #expect(square != point, "a 5 × 5 square across the edge reads another colour than the point")
+        try w.pick(at: edge, toStroke: false)
+        #expect(w.treeNode("node-2")?.fill == square, "the pick applies the square the loupe showed")
+    }
+
     @Test(.disabled("waits on DY-5")) func lockedSelectionRefuses() throws {
         var w = try Self.shapes()
         try w.toggleNodeFlag("node-2", .locked)
