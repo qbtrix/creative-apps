@@ -1,9 +1,7 @@
 {
   "version": 1,
   "app": "photo",
-  "why": "RJ-P37, pending PP-6 (photo/place-image): named .jobs.pending.json so the harness skips it, and renamed to place-logo.jobs.json once PP-5 builds PhotoPlace+Kernel's bodies and PP-6 registers the place commands in Photo's catalog. Places logo.png (200 x 100, red left half, blue right half; its bytes are the base64 below) centred on an 800 x 600 white image and checks the flattened PNG: 800 x 600, the logo at 300, 250 at 100%, white around it.",
-  "pending": "PP-6",
-  "waits_on": "PP-6",
+  "why": "RJ-P37 (photo/place-image): places logo.png (200 x 100, red left half, blue right half; its bytes are the base64 below) centred on an 800 x 600 white image and checks the flattened PNG: 800 x 600, the logo at 300, 250 at 100%, white around it. The trap: the place opens the logo as a new document or lands it at the top-left corner.",
   "inputs": ["input/*.png"],
   "steps": [
     {"id": "place.image", "params": {"name": "logo.png", "base64": "iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAIAAABM5OhcAAABJUlEQVR42u3SMQ0AAAzDsPInvVHovh2WgiByJlGZB4c8AAsssMACCyyBBRZYYIEFlsACCyywwAJLYIEFFlhggSWwwAILLLDAElhggQUWWGAJLLDAAgsssAQWWGCBBRZYAgsssMACCyyBBRZYYIEFlsACCyywwAJLYIEFFlhggSWwwAILLLDAElhggQUWWGDJA7DAAgsssMASWGCBBRZYYAkssMACCyywBBZYYIEFFlgCCyywwAILLIEFFlhggQWWwAILLLDAAktggQUWWGCBJbDAAgsssMASWGCBBRZYYAkssMACCyywBBZYYIEFFlgCCyywwAILLIEFFlhggQWWDAALLLDAAgssgQUWWGCBBZbAAgsssMACS2CBBRZYYIElsMAC63cL/ofWZIxYFTgAAAAASUVORK5CYII=", "x": null, "y": null, "fill": null}}
