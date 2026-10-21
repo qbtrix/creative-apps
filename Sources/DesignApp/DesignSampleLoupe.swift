@@ -32,7 +32,7 @@ struct DesignSampleLoupe: View {
                     .contentShape(.rect)
                     .gesture(SpatialTapGesture().onEnded { pick(at: $0.location, modifiers: .current) })
                 if let loupe = store.loupe(for: model) {
-                    SampleLoupe(color: loupe.color.map { HexColor($0.red, $0.green, $0.blue) }, at: Self.place(loupe, zoom: zoom))
+                    SampleLoupe(color: loupe.color.map(\.hex), at: Self.place(loupe, zoom: zoom))
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

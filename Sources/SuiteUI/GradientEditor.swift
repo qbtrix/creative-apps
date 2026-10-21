@@ -29,9 +29,26 @@ public struct GradientEditor: View {
     /// True after a remove the two-stop rule refused, until the next gesture.
     @State private var refused = false
     @FocusState private var barFocused: Bool
+    @Environment(\.isEnabled) private var isEnabled
 
     /// The bar's height, its handles' size, and the distance a click may miss a handle by.
     static let barHeight: CGFloat = 20, handleSize: CGFloat = 12
+    /// Half a handle: the gradient is inset this far each side, so the end stops' handles stay inside the column.
+    nonisolated static let trackInset: CGFloat = 6
+
+    /// Where the handle of a stop at `offset` is centred in a bar row `width` wide.
+    nonisolated static func handleX(_ offset: Double, width: CGFloat) -> CGFloat {
+        trackInset + CGFloat(offset) * trackWidth(width)
+    }
+
+    /// The gradient's own width in a bar row `width` wide.
+    nonisolated static func trackWidth(_ width: CGFloat) -> CGFloat { max(width - 2 * trackInset, 0) }
+
+    /// A point in the bar row as the drag reads it, with the gradient's left edge at 0.
+    nonisolated static func trackPoint(_ point: CGPoint) -> CGPoint { CGPoint(x: point.x - trackInset, y: point.y) }
+
+    /// The bar and its handles dim with the rest of the rows while the editor is off.
+    nonisolated static func barOpacity(enabled: Bool) -> Double { enabled ? 1 : SuiteColor.disabledOpacity }
 
     /// `showsAngle: false` for a tool whose drag sets the line (Photo's Gradient tool); `types` limits the switch (the
     /// three paints by default).
@@ -42,6 +59,13 @@ public struct GradientEditor: View {
         self.showsAngle = showsAngle
         self.types = types
         self.onIntent = onIntent
+    }
+
+    /// The editor with stop `selected` picked and, when `refused`, the two-stop help showing: the snapshots' states.
+    init(fill: Fill, box: Rect, selected: Int, refused: Bool, onIntent: @escaping @MainActor (GradientIntent) -> Void) {
+        self.init(fill: fill, box: box, onIntent: onIntent)
+        _selected = State(initialValue: selected)
+        _refused = State(initialValue: refused)
     }
 
     /// Whether the angle row shows: a linear fill, in an editor that shows it.
@@ -87,10 +111,10 @@ public struct GradientEditor: View {
     /// The stop bar: the stops left to right with a handle under each, one drag gesture over it all.
     private var bar: some View {
         GeometryReader { geometry in
-            let width = geometry.size.width
+            let width = geometry.size.width, track = Self.trackWidth(width)
             ZStack(alignment: .topLeading) {
                 Canvas { context, size in
-                    let rect = CGRect(x: 0, y: 0, width: size.width, height: Self.barHeight)
+                    let rect = CGRect(x: Self.trackInset, y: 0, width: Self.trackWidth(size.width), height: Self.barHeight)
                     let unit = Rect(minX: 0, minY: 0, maxX: 1, maxY: 1)
                     let flat = Fill.linear(stops: fill.stops, start: Point(x: 0, y: 0.5), end: Point(x: 1, y: 0.5))
                     context.fill(SwiftUI.Path(roundedRect: rect, cornerRadius: SuiteRadius.field), with: flat.shading(in: rect, box: unit))
@@ -100,11 +124,11 @@ public struct GradientEditor: View {
             }
             .contentShape(Rectangle())
             .gesture(DragGesture(minimumDistance: 0).onChanged { value in
-                if drag == nil { begin(at: value.startLocation, width: width) }
-                if let intent = drag?.changed(to: value.location, fill: fill) { send(intent, keepRefusal: true) }
+                if drag == nil { begin(at: Self.trackPoint(value.startLocation), width: track) }
+                if let intent = drag?.changed(to: Self.trackPoint(value.location), fill: fill) { send(intent, keepRefusal: true) }
             }.onEnded { value in
                 guard var current = drag else { return }
-                let intent = current.ended(at: value.location, fill: fill)
+                let intent = current.ended(at: Self.trackPoint(value.location), fill: fill)
                 refused = current.refused
                 drag = nil
                 if case .add(let offset) = intent, let added = GradientRules.addingStop(fill, at: offset) { selected = added.index }
@@ -113,6 +137,7 @@ public struct GradientEditor: View {
             })
         }
         .frame(height: Self.barHeight + Self.handleSize / 2 + SuiteSpacing.xs)
+        .opacity(Self.barOpacity(enabled: isEnabled))
         .focusable()
         .focused($barFocused)
         .onKeyPress(.leftArrow) { nudge(-0.01) }
@@ -133,7 +158,7 @@ public struct GradientEditor: View {
             .fill(fill.stops[stop].color.swiftUI)
             .overlay(Circle().strokeBorder(stop == index ? SuiteColor.accent : SuiteColor.outline, lineWidth: stop == index ? 2 : 1))
             .frame(width: Self.handleSize, height: Self.handleSize)
-            .position(x: CGFloat(offset) * width, y: Self.barHeight)
+            .position(x: Self.handleX(offset, width: width), y: Self.barHeight)
             .accessibilityElement()
             .accessibilityLabel(GradientEditorText.stop(stop, of: fill))
             .accessibilityAddTraits(stop == index ? .isSelected : [])

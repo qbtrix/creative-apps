@@ -132,8 +132,14 @@ extension DesignTool: PaletteTool {
 }
 
 extension DesignColor {
-    /// The color as SwiftUI draws it, through SuiteUI's hex bridge.
-    var color: Color { HexColor(red, green, blue).color }
+    /// Design's one bridge to SuiteUI's HexColor: the same 8-bit sRGB channels.
+    init(hex: HexColor) { self.init(hex.red, hex.green, hex.blue) }
+
+    /// The color as SuiteUI's color rows and parser speak it.
+    var hex: HexColor { HexColor(red, green, blue) }
+
+    /// The color as SwiftUI draws it, through the hex bridge.
+    var color: Color { hex.color }
 }
 
 extension DesignModifiers {
@@ -143,10 +149,12 @@ extension DesignModifiers {
     }
 
     /// Shift and Option as held; `.noSnap` when ⌘ is held or Snap to Layers is off in `defaults` (snapping SN-8).
+    /// The flags are read through SuiteUI's `KeyModifiers(flags:)` (AC-tools).
     static func make(flags: NSEvent.ModifierFlags, defaults: UserDefaults) -> DesignModifiers {
-        DesignModifiers(
-            shift: flags.contains(.shift), option: flags.contains(.option),
-            command: flags.contains(.command), snapToLayers: snapsToLayers(in: defaults))
+        let held = KeyModifiers(flags: flags)
+        return DesignModifiers(
+            shift: held.contains(.shift), option: held.contains(.option),
+            command: held.contains(.command), snapToLayers: snapsToLayers(in: defaults))
     }
 
     /// View > Snap to Layers as `defaults` holds it; a missing value reads as on.
