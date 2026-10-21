@@ -47,7 +47,7 @@ Until beta, CI blocks only on compile and Model tests (captain, 2026-10-16).
 3. **Status channel.** For each of its features, the lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to that feature's branch `lead/<feature>` after every stage (in v3, after every wave and every check between waves). Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
 4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, for a packet with slices `Slice: <slice>` (the slice ids the PR serves, comma separated), then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci --changed` passes (lints, every target built, the touched targets' tests; plain `scripts/ci` is the full gate). Point at the feature issue with `Refs`; the lane turns a closing keyword before a `feature-lead` issue into `Refs` anyway and never closes it. Findings and gaps a PR fixes take a closing keyword (`Fixes #n`) and close on merge. The lane merges them. Nobody merges into dev by hand or by an agent.
 5. **Review policy (decision for the captain).** `Belt-Lead:` PRs do not need the `belt/review` status. The lead's own critic panel is the review. Only `Belt-Run:` and `Belt-Test:` PRs keep it.
-6. **Done (v3), two levels.** Slices are the unit of done. Leads never wait on macOS runs. **Merged-done:** every task of the slice has merged, and the newest CI run on dev that contains the slice's last merged PR has a green `Linux` job (every Model built and its tests run; a scoped run has no Linux job, a full run does, and its Linux result shows long before its macOS job ends). Each code PR already passed the lane's batch macOS gate (scripts/ci on macOS, scoped to its batch's apps) before it merged, and carries its full `Mutate:` score (rule 14), so nothing else is waited on. The lead then comments on the feature issue, one comment per slice, with the line `Belt-Slice-Done: <slice> <run url>`. When every slice has its line (the last PR, labelled `feature-done`, is in the last slice), the lead comments `Belt-Contact-Sheet: <run url>`. **Verified:** the slice's journeys ran green in a scoped or full run (a quarantined journey is skipped, not green; one quarantined for full runs only still runs in a scoped run), no `finding` issue for it is open, and a slice marked `"ui": true` passed the feel gate (rule 15) and has its `Mac-Finish:` line (rule 17). That belongs to the beta-hardening lane, never blocks the lead or the slice line, and ends with the finisher's comment `Belt-Slice-Verified: <slice> <run url>`, or ` gaps: #<n> #<m>` at its end for a slice closed under the round cap (rule 11). Rule 21 adds each level's real jobs. A red journey reaches the lead as a `CI finding: <Target/Class/test>` issue labelled `finding` and `line:<app>`, which the report-only macOS job files itself; the lead takes the ones on its feature's files into its next wave like any finding (rule 10). The slice ids are the packet's Slices table, the same data as `slices` in the feature's `.wave.json`. A packet without slices keeps the v2 Done rule ("Packets without slices (v2)").
+6. **Done (v3), two levels.** Slices are the unit of done. Leads never wait on macOS runs. **Merged-done:** every task of the slice has merged, and the newest CI run on dev that contains the slice's last merged PR has a green `Linux` job (every Model built and its tests run; a scoped run has no Linux job, a full run does, and its Linux result shows long before its macOS job ends). Each code PR already passed the lane's batch macOS gate (scripts/ci on macOS, scoped to its batch's apps) before it merged, and carries its full `Mutate:` score (rule 14), so nothing else is waited on. The lead then comments on the feature issue, one comment per slice, with the line `Belt-Slice-Done: <slice> <run url>`. When every slice has its line (the last PR, labelled `feature-done`, is in the last slice), the lead comments `Belt-Contact-Sheet: <run url>`. **Verified:** the slice's journeys ran green in the journeys.yml run that follows a scoped or full CI run (titled `after CI run <id>:`) (a quarantined journey is skipped, not green; one quarantined for full runs only still runs in a scoped run), no `finding` issue for it is open, and a slice marked `"ui": true` passed the feel gate (rule 15) and has its `Mac-Finish:` line (rule 17). That belongs to the beta-hardening lane, never blocks the lead or the slice line, and ends with the finisher's comment `Belt-Slice-Verified: <slice> <run url>`, or ` gaps: #<n> #<m>` at its end for a slice closed under the round cap (rule 11). Rule 21 adds each level's real jobs. A red journey reaches the lead as a `CI finding: <Target/Class/test>` issue labelled `finding` and `line:<app>`, which the report-only journeys run (journeys.yml) files itself; the lead takes the ones on its feature's files into its next wave like any finding (rule 10). The slice ids are the packet's Slices table, the same data as `slices` in the feature's `.wave.json`. A packet without slices keeps the v2 Done rule ("Packets without slices (v2)").
 7. **Stall.** No commit on any of the run's `lead/<feature>` branches, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the run's issues `needs-human` and stop.
 8. **Timeouts.** Lead runs: 8 h wall clock, no 1 h no-PR rule. Task runs keep today's 4 h and 1 h.
 9. **Brief rules.** Step one checks out the integration branch and verifies the base SHA. Set the repo-local identity "Prakash Dalai" / `86671543+prakashUXtech@users.noreply.github.com`. No attribution line anywhere, comments included. Fixers run the full harness before handing back. In v3, once a slice's review is clean, add no new critics or lenses for it: its next review runs the same panel; v2 keeps its Anatomy round rule ("Packets without slices (v2)"). One critic lens is first-use clarity: "what does each number and label mean to someone new?". Agents never treat a chat message as a reason to stop or skip a merge, with one exception: a message that starts `Belt released this run.` means stop at once, end your turn, push nothing more and open no PRs. Questions go to the supervisor.
@@ -74,17 +74,18 @@ Until beta, CI blocks only on compile and Model tests (captain, 2026-10-16).
   batch of ready PRs, and the `macOS` CI job on `dev`.
 - **You can't dispatch CI** (the API answers 403). Two kinds of run come to
   you. A **scoped run** (`ci.yml` with `app=<app>`, titled `scoped: <app>`,
-  jobs `macOS (<app>)` for the Model tests and snapshots and the report-only
-  `macOS journeys (<app>)` for that app's journeys; about 10
+  job `macOS (<app>)` for the Model tests and snapshots; about 10
   minutes for Design) is started by the supervisor's verify-dispatch.sh after
-  merges to your app; its screens feed reviews and the Verified level. A **full run**
+  merges to your app. Its last job dispatches the report-only
+  `macOS journeys (<app>)` in journeys.yml (run titled `after CI run <id>:
+  journeys <app> at <sha>`), whose screens feed reviews and the Verified level. A **full run**
   is dispatched by the lane, at most once per lane run, after it merges a PR
   labelled `feature-done`, a PR touching `Sources/*App`, `Sources/SuiteUI`,
   `Tests/App*` or `UITests`, or the 10th merged PR since the last CI run. A
   full run covers every app, so it counts as a scoped run for yours, and its
   `Linux` job is the one merged-done reads (rule 6). A full run's `macOS`
-  job (scripts/ci) gates `main` with Linux; the journeys job is report-only
-  in both: a red journey files a finding and never turns the gate red.
+  job (scripts/ci) gates `main` with Linux; the journeys run that follows
+  is report-only in both: a red journey files a finding and never turns the gate red.
 - **Code must compile on macOS.** A PR changing any `.swift` file under
   `Sources/`, `Tests/` or `UITests/`, or `project.yml`, Models and shared
   shell files such as `SuiteWindow.swift` included,
@@ -96,8 +97,14 @@ Until beta, CI blocks only on compile and Model tests (captain, 2026-10-16).
   with it. Fix it first, push, and restack them.
 - **You can read runs.** `gh run list --workflow ci.yml --branch dev --json
   databaseId,headSha,status,conclusion,displayTitle,url` (a scoped run's
-  `displayTitle` is `scoped: <app>`), then `gh run download <id> -n ui-screens` (whole-window PNGs,
-  `contact-sheet.html`, `audit-*.json`) and `-n snapshots`; or the GitHub MCP
+  `displayTitle` is `scoped: <app>`), then `gh run download <id> -n snapshots`. The
+  journeys run in their own workflow, which each CI run on dev dispatches: find
+  the one that follows CI run `<id>` with `gh run list --workflow journeys.yml
+  --json databaseId,displayTitle,status,conclusion,url` (its `displayTitle`
+  starts `after CI run <id>:`; its own `headSha` is dev's tip when it was dispatched,
+  not the tested commit, so match by the title), then `gh run download <its
+  id> -n ui-screens` (whole-window PNGs, `contact-sheet.html`,
+  `audit-*.json`). "A run's `ui-screens`" below means that journeys run's. Or the GitHub MCP
   `actions_*` and `get_job_logs` tools. A run contains a PR when
   `git merge-base --is-ancestor <merge sha> <run head sha>` succeeds.
 - **You can read the findings queue.** Before you file the first finding

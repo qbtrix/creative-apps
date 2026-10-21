@@ -1,7 +1,8 @@
 // DesignSeveralInspectorSnapshots.swift: Design's inspector at the editor's
 // panel width with A and B of the `cards` fixture selected (D0-5c): "2 Layers",
 // the Align row with Distribute, X, Y and W reading "Mixed" (A is 100, 100,
-// 100 × 80 and B 300, 140, 200 × 80) and H reading 80. On `.fake` and on
+// 100 × 80 and B 300, 140, 200 × 80), H reading 80, and Transform's Rotation
+// and flips. On `.fake` and on
 // `.live`; then Title, a text layer, with its empty Text section after Fill.
 // Writes design-inspector-several-fake-, -several-live- and
 // -text-{light,dark}.png. Every control the inspector and its Align row show
@@ -12,6 +13,7 @@
 // hosting view's accessibility tree only for an assistive client, so the
 // inventory stands in for the tooltips. macOS only.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -49,6 +51,9 @@ import Testing
         helps += DesignDistributeAxis.allCases.map { (DesignControlID.distribute($0), model.help(.distribute($0))) }
         // Only H is shared; X, Y and W read "Mixed" and list nothing.
         helps.append((DesignControlID.frameField(.height), model.styleHelp(.frame)))
+        // Transform: Rotation and the two flips, all with the Model's turn help.
+        helps.append((DesignControlID.inspectorRotation, model.turnHelp))
+        helps += FlipDirection.allCases.map { (DesignControlID.inspectorFlip($0.rawValue), model.turnHelp) }
         // A shared fill is the color well, which carries the eyedropper with the row's help.
         if model.severalShowFill, model.sharedValue(\.fill) != nil {
             helps.append((DesignControlID.inspectorFill, model.styleHelp(.fill)))
