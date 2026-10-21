@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-21T10:55:47Z	3	building	wave 1	builders running; no PR yet
 2026-10-21T11:14:57Z	3	heartbeat	wave	builders and gates running; no new PR; dev at 11919406
 2026-10-21T11:19:59Z	3	pr	LP-1	#4025 open (no-fast-lane, protected scripts/); supervisor asked on #3792
+2026-10-21T11:23:29Z	3	pr	LP-2	#4026 open fast-lane; LP-m (LP-3, LP-5) builder started stacked on lead/lottie-player-check-LP-a

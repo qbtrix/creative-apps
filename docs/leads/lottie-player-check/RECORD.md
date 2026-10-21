@@ -9,17 +9,17 @@ Next: LP-2 (LP-a fast-lane PR) and LP-1 (scripts/, supervisor-merge PR) building
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| LP-a | oracle build script; parity suite (skips without the oracle) | LP-1, LP-2 | MJ-LP | – | no | 0 | building | – | – |
-| LP-m | FrameParity rules in FlareModel; colour-key and trim fixtures | LP-3, LP-5 | MJ-LP | LP-a | no | 0 | waiting | – | – |
+| LP-a | oracle build script; parity suite (skips without the oracle) | LP-1, LP-2 | MJ-LP | – | no | 0 | PRs open (#4025 supervisor, #4026 lane) | – | – |
+| LP-m | FrameParity rules in FlareModel; colour-key and trim fixtures | LP-3, LP-5 | MJ-LP | LP-a | no | 0 | building (stacked on #4026) | – | – |
 | LP-z | CI builds the oracle (supervisor merge); RJ-F11 on; built (feature-done) | LP-4, LP-6 | MJ-LP | LP-a, LP-m | no | 0 | waiting | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | LP-1 | LP-a | 1 | scripts/lottie-oracle build + render | scripts/lottie-oracle/{build,render.c,VERSION,README} | build on a Mac; one-rect render | #4025 (5131fb58) | open, no-fast-lane, supervisor merge asked |
-| LP-2 | LP-a | 1 | LottiePlayerParityTests + fixtures | Tests/AppSnapshotTests/LottiePlayerParityTests.swift, Tests/AppSnapshotTests/Fixtures/Lottie/* | skips without oracle | – | building |
-| LP-3 | LP-m | 2 | FrameParity pure rules | Sources/FlareModel/FrameParity.swift, Tests/FlareModelTests/FrameParityTests.swift, Tests/mutations/FlareModel.FrameParity.json | FrameParityTests | – | waiting |
-| LP-5 | LP-m | 2 | colour-key, trim fixtures skipped | Tests/AppSnapshotTests/Fixtures/Lottie/{colour-key,trim}.flare | rows skip by name | – | waiting |
+| LP-2 | LP-a | 1 | LottiePlayerParityTests + fixtures | Tests/AppSnapshotTests/LottiePlayerParityTests.swift, Tests/AppSnapshotTests/Fixtures/Lottie/* | skips without oracle | #4026 (a02110c4) | open, fast-lane |
+| LP-3 | LP-m | 2 | FrameParity pure rules | Sources/FlareModel/FrameParity.swift, Tests/FlareModelTests/FrameParityTests.swift, Tests/mutations/FlareModel.FrameParity.json | FrameParityTests | – | building |
+| LP-5 | LP-m | 2 | colour-key, trim fixtures skipped | Tests/AppSnapshotTests/Fixtures/Lottie/{colour-key,trim}.flare | rows skip by name | – | building |
 | LP-4 | LP-z | 3 | ci.yml oracle cache + RJ-F11 | .github/workflows/ci.yml, jobs.json | macOS job runs suite unskipped | – | waiting |
 | LP-6 | LP-z | 4 | status built (feature-done) | lottie-player-check.wave.json | waves render | – | waiting |
 
