@@ -1,0 +1,81 @@
+utc	stage	event	ref	note
+2026-10-20T02:37Z	0	stage-start	#1971	base 25a8d9a, lead/core-loop created
+2026-10-20T02:40Z	0	stage-end	#1971	waits: probe needs-ui unfiled, #865 open; CL-a free
+2026-10-20T02:40Z	1	stage-start	#1971	packet read
+2026-10-20T02:50Z	1	stage-end	#3401	filed #3401 #3402 #3403
+2026-10-20T02:51Z	2	stage-end	#1971	plan: W1 CL-a1 CL-a2; W2 stacked CL-6, CL-ui, CL-11; W3 CL-7
+2026-10-20T02:52Z	3	stage-start	wave1	CL-a1 CL-a2
+2026-10-20T02:40Z	3	wave1-launch	wf_017c691b-16c	CL-a1 CL-a2 building; blocks commented on #1971
+2026-10-20T03:37Z	3	pr-opened	#3408	CL-a1 (CL-1, CL-2) head c5045203
+2026-10-20T03:37Z	3	pr-opened	#3404	CL-a2 (CL-3) head 43b9a3ef
+2026-10-20T03:37Z	3	stage-start	wave2	CL-run1 CL-ui CL-11 stacked
+2026-10-20T03:38Z	3	wave2-launch	wf_10affc2f-8b8	CL-run1 (on a1), CL-ui (on a1+a2), CL-11 (on a2) building
+2026-10-20T04:40:45Z	3	wave2-result	wf_10affc2f-8b8	CL-ui 0229c007 + CL-11 781e71c5 pushed; CL-run1 base check failed, relaunching
+2026-10-20T04:41:00Z	3	CL-run1-relaunch	wf_40f8c99e-3fa	base 25a8d9a2 stacked on CL-a1
+2026-10-20T04:56:48Z	3	CL-run1-pushed	3d7f7ad3	mutate 4/4; PR after CL-ui merges (macOS dependency)
+2026-10-20T05:00:51Z	3	check	#3404 #3408	#3404 macOS build 39361166054 success, lane merges next sweep; #3408 build 39362401890 queued; findings: #3403 (filed by lead for line:suiteui, not a core-loop fix)
+2026-10-20T05:20:00Z	3	merged	#3404	CL-a2 merged 6537a1a0; CL-11 PR opening
+2026-10-20T05:28:50Z	3	pr-open	#3487	CL-11 (Slice CL-measure) head ceb44c54
+2026-10-20T05:40:05Z	3	check	#3408 #3487	#3408 macOS build 39362401890 still queued (2.5h, runner backlog); #3487 macOS build dispatched 05:30Z; nothing to open
+2026-10-20T05:59:55Z	3	check	#3408 #3487	both wait on macOS builds; 36 CI runs queued repo-wide (runner backlog)
+2026-10-20T06:20Z	3	check	#3408,#3487	lane macOS build 39362401890 still queued; both PRs wait
+2026-10-20T06:40Z	3	check	#3408,#3487	lane macOS builds still queued (40 runs queued repo-wide); both PRs wait
+2026-10-20T07:00Z	3	check	#3408,#3487	lane macOS builds still queued (37 queued; mac runner busy on a 06:00 build); both PRs wait
+2026-10-20T07:20Z	3	check	#3408,#3487	lane macOS builds still queued (39 queued repo-wide); both PRs wait
+2026-10-20T07:40Z	3	check	#3408,#3487	lane macOS builds still queued (35 queued repo-wide); both PRs wait
+2026-10-20T08:00Z	3	check	#3408,#3487	lane macOS builds still queued (37 queued); blockers #3401 #865 still open; no new findings
+2026-10-20T08:20Z	3	check	#3408,#3487	builds still queued; newer mac builds run first (starvation); told supervisor on #1971 (comment 6286642483)
+2026-10-20T08:40Z	3	check	#3408,#3487	both builds still queued; no supervisor reply yet
+2026-10-20T09:00Z	3	check	#3487	CL-11 macOS build 39375228561 succeeded; lane merges on next sweep. #3408 build 39362401890 still queued; no supervisor reply
+2026-10-20T09:20Z	3	merge	#3487	CL-11 merged as d9bc0337; #3408 build succeeded, waits on lane sweep
+2026-10-20T09:34Z	3	check	#3408	still open, clean; fast-lane run 39400477055 in progress (likely batch)
+2026-10-20T09:51Z	3	merge	#3408	CL-a1 merged as 97bd3f46 (batch run 39401454452); slice CL-a merged; CL-ui PR builder launched
+2026-10-20T10:05Z	3	pr	#3589	CL-ui PR 721 lines, over cap; fast-lane removed; split builder launched (CL-ui1 PR + CL-ui2 branch)
+2026-10-20T10:20Z	3	pr	#3590	CL-ui1 opened (359 lines); CL-ui2 pushed c3166049; #3589 closed
+2026-10-20T10:40Z	3	wave	W3	#3590 macOS build queued; CL-7 builder launched stacked on CL-run1
+2026-10-20T10:50Z	3	built	CL-7	lead/core-loop-CL-run2 11be6c50 pushed, mutate 2/2, CI PASS; PR after CL-run1
+2026-10-20T10:56Z	3	heartbeat	#3590	macOS build 39407177083 still queued; no new comments on #1971; no core-loop findings open
+2026-10-20T11:19Z	3	heartbeat	#3590	macOS build still queued (~1h); blockers #3401 #865 still open; nothing else buildable
+2026-10-20T11:42Z	3	build-red	#3590	macOS build 39407177083 failed: mutating call in #expect/#require (HaloRenderSheetSnapshots.swift:24,31); fix builder launched (fix round 1)
+2026-10-20T11:55Z	3	fix-pushed	#3590	ui1 114b6e2d, ui2 47d8aaa8; scripts/ci --changed PASS on both; awaiting lane macOS build
+2026-10-20T12:17Z	3	heartbeat	#3590	macOS build 39418622779 queued on fixed head; no #1971 replies; blockers open
+2026-10-20T12:39Z	3	heartbeat	#3590	macOS build 39418622779 still queued; no #1971 replies; blockers open
+2026-10-20T13:00Z	3	heartbeat	#3590	macOS build 39418622779 success; PR clean, waiting on lane merge; no #1971 replies; blockers open
+2026-10-20T13:21Z	3	heartbeat	#3590	build green 12:57Z; PR clean, lane sweep in progress; no #1971 replies; blockers open
+2026-10-20T13:38Z	3	heartbeat	#3590	ready; lane batch in flight (bisecting), #3590 queued for next sweep; no #1971 replies; blockers open
+2026-10-20T14:02Z	3	fix-round-2	#3590	needs-fix: CommandPathTests halo after #3587 on dev (Choose button lacks catalog spec); builder launched
+2026-10-20T14:17Z	3	fix-round-2-done	#3590	ui1 829a9d4e, ui2 cce8bd1d; CI: PASS both; lane macOS build dispatched
+2026-10-20T14:28Z	3	heartbeat	#3590	829a9d4e clean; macOS build 39437315085 queued; no #1971 replies; blockers open
+2026-10-20T14:51Z	3	heartbeat	#3590	build 39437315085 cancelled; lane re-dispatched 39441366970 (queued); no #1971 replies; blockers open
+2026-10-20T15:18Z	3	heartbeat	#3590	macOS build 39441366970 still queued (since 14:40Z); no #1971 replies; blockers open
+2026-10-20T15:44Z	3	heartbeat	#3590	build 39441366970 still queued 1h; CL-run1 524 lines > cap, builder splitting into run1a/run1b; no #1971 replies; blockers open
+2026-10-20T16:00Z	3	open	#3641	CL-run1a a4caa3fc, 286 lines, mutate 4/4; run1b 65ff5468 waits on ui2 (views still use old API)
+2026-10-20T16:05Z	3	heartbeat	#3590 #3641	both clean; macOS builds 39441366970 (since 14:40Z) and 39453771231 queued; no #1971 replies; blockers open
+2026-10-20T16:27Z	3	heartbeat	#3590 #3641	both clean; macOS builds still queued (44 runs queued, macOS held by 2 long CI runs since ~14:00Z); no #1971 replies; blockers open
+2026-10-20T16:48Z	3	heartbeat	#3590 #3641	both clean; macOS builds still queued (39441366970 since 14:40Z); no #1971 replies; blockers open
+2026-10-20T17:12Z	3	merged	#3590	CL-ui1 merged into dev; builder merging dev into CL-ui2; #3641 macOS build 39453771231 queued
+2026-10-20T17:20Z	CL-ui	opened #3653	bf66faf1	ui2 after dev merge, 366 lines, CI PASS
+2026-10-20T17:37Z	check	heartbeat	#3653,#3641	both wait on queued macOS builds (39465484543, 39453771231); #3401/#865 open; no new #1971 comments
+2026-10-20T18:03Z	check	heartbeat	#3653,#3641	macOS builds 39465484543, 39453771231 still queued (runner starvation); #3401/#865 open
+2026-10-20T18:25Z	check	heartbeat	#3653,#3641	macOS builds still queued; #3401/#865 open
+2026-10-20T18:46Z	check	takeover	#3653,#3641	run act-1a15a9f4e8d-hav0 takes over core-loop with halo shape-tools #3445 and stroke-style #3447; both PRs mergeable, Linux green, macOS builds still queued
+2026-10-20T19:11Z	check	heartbeat	#3653,#3641	macOS builds 39465484543, 39453771231 still queued; #3401/#865 open
+2026-10-20T19:33Z	check	heartbeat	#3653,#3641	macOS builds still queued (51 queued runs repo-wide); both clean on dev 2de3e92d
+2026-10-20T19:56Z	check	heartbeat	#3641 #3653	both clean, macOS builds 39453771231/39465484543 still queued (59 queued repo-wide); run1b/run2 wait on them
+2026-10-20T20:18Z	check	heartbeat	#3641 #3653	unchanged: clean, macOS builds still queued (56 queued repo-wide)
+2026-10-20T20:40Z	check	heartbeat	#3641 #3653	unchanged: macOS builds queued (54 repo-wide); #3401 #865 open
+2026-10-20T21:14Z	check	heartbeat	#3641 #3653	macOS builds still queued (since 16:01Z/17:22Z) while newer ones run; asked supervisor on #1971
+2026-10-20T21:45Z	check	heartbeat	#3653	macOS build 39465484543 success, lane merge pending; #3641 build still queued
+2026-10-20T22:09Z	check	heartbeat	#3653 #3641	#3653 in lane batch 20261020214541 (Linux check pending); #3641 macOS build 39453771231 success, next batch
+2026-10-20T22:31Z	check	heartbeat	#3653	#3653 merged 83f7dbdb at 22:16Z; Linux run 39507877855 holding it is in progress; #3641 clean, build green, waiting for the next lane batch
+2026-10-20T23:52Z	stage	slice-done	CL-ui	Belt-Slice-Done CL-ui at run 39507877855; #3641 merged; run1b merged with dev, gating
+2026-10-21T00:05Z	stage	pr-open	CL-run	#3812 open (CL-6, 94b09eed); #3817 CL-7 opened stacked on run1b at bcc243f0, CI PASS
+2026-10-21T00:51Z	check	heartbeat	#3812	macOS build 39519633495 success on 94b09eed; next lane sweep merges; #3817 stacked
+2026-10-21T01:14Z	check	heartbeat	#3812	not merged yet; lane batch 20261021005140 red on LibrarySidecarPlanTests.planWithinBudget (timing, dev-red #3386, not ours), bisecting
+2026-10-21T01:40Z	check	heartbeat	#3812	still open/clean, no needs-fix; lane batch 20261021005140 still bisecting (probe -3); #3817 waits
+2026-10-21T02:09Z	check	heartbeat	#3812	still open/clean, no needs-fix; lane batch 20261021005140 bisecting at probe -4; #3817 waits
+2026-10-21T02:36Z	check	heartbeat	#3812	still open/clean, no needs-fix; lane batch 20261021005140 bisecting at probe -5; dev-red #3386 green at 01:42Z; #3817 waits
+2026-10-21T03:04Z	check	heartbeat	#3812	batch order #3676,#3699,#3767,#3768,#3800,#3812; probes -3,-4 passed 2/3; probe -5 (through #3800) 1/2, third run going. If -5 passes, #3812 is named on a timing flake (LibrarySidecarPlanTests, not ours)
+2026-10-21T03:40Z	fix	CL-run	#3812	needs-fix from batch 20261021005140 on LibrarySidecarPlanTests/planWithinBudget (12.57ms/10ms, Library timing, not ours); merged dev, CI PASS, Head 754b5038; #3817 waits
+2026-10-21T04:07Z	check	heartbeat	#3812	needs-fix cleared on 754b5038; lane macOS build 39540077560 green; waiting on the lane merge; #3817 waits
+2026-10-21T04:35Z	check	heartbeat	#3812	still open, clean, macOS green, no needs-fix; waiting on the next lane batch; #3817 waits
