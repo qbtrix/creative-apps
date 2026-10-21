@@ -70,7 +70,7 @@ public struct SuiteGallery: View {
         GalleryCanvas.pages, GalleryTimeline.pages, GalleryGraph.pages, GalleryEditorWindow.pages,
         GalleryAppMarks.pages, GalleryCanvasHost.pages, GalleryRenderingPane.pages,
         GalleryFeedback.pages, GalleryEditorKernel.pages, GalleryCommandCatalog.pages, GalleryPenPaths.pages,
-        GalleryEyedropper.pages, GalleryGradientEditor.pages,
+        GalleryEyedropper.pages, GalleryGradientEditor.pages, GalleryPlaceImage.pages,
     ]
 
     /// All pages by name; `SuiteGalleryTests` checks no two areas declare one name.
