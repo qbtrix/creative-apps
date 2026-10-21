@@ -34,3 +34,5 @@ utc	stage	event	ref	note
 2026-10-21T02:21Z	3	heartbeat	W3k	no merges; dev Linux green 2ab0eb9; lane batch 20261021005140 (holds #3800) bisecting, probe -4 (before #3800) red on Library planWithinBudget timing, rerunning; not ours
 2026-10-21T02:42Z	3	heartbeat	W3l	no merges; lane probe 20261021005140-4 green on rerun, probe -5 (adds #3800) running; all five PRs clean fast-lane
 2026-10-21T03:03Z	3	heartbeat	W3m	no merges; probe 20261021005140-5 (adds #3800) red once on Library planWithinBudget 10.27/10 (batch predates #3829 perf-list move), rerunning; dev d945ca0 Linux running
+2026-10-21T03:26Z	3	merged	#3800	PE-5 merged as dccfa54; PE-m still needs PE-6, which waits on PH-5 (catalog/photo.txt order), which waits on PT-m (#3831, PT-5)
+2026-10-21T03:26Z	3	heartbeat	W3n	#3800 merged (dccfa54, Linux check running); new lane batch 20261021032004 holds #3808; #3818 #3830 #3831 open clean fast-lane
