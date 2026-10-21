@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T02:33Z	3	fix-pushed	#3811	macOS build 39519614459 red on b6cba72 (mutating call in #require); fixed in 6af524c, ci --changed PASS, Head moved
 2026-10-21T02:55Z	3	question	#3811	macOS build 39534515438 for 6af524c cancelled; lane won't redispatch same head; asked supervisor on #3443
 2026-10-21T03:17Z	3	heartbeat	#3811	no new macOS build for 6af524c; supervisor not yet answered on #3443
+2026-10-21T03:43Z	3	fix-pushed	#3811	needs-rebase (C4 part) resolved: merged dev as ad67a02, kept dev description; ci --changed PASS; Head moved; supervisor ask withdrawn
