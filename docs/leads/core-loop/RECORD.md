@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are open, so: merge watch, Belt-Slice-Done per slice on a green dev Linux run, critics once the scoped halo run shows screens; then check the lane and dev CI for #4147/#4148
+Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are open, so: merge watch, Belt-Slice-Done per slice on a green dev Linux run, critics once the scoped halo run shows screens
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -14,7 +14,7 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are
 | CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
 | CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | PR #4147 open | | |
 | CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | CL-11 merged; #4148 (#865+CL-12) merged 5803475; CL-10 building | | |
-| CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | building (wave 5) | | |
+| CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | PR #4167 open | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
