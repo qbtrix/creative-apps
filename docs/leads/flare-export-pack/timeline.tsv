@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T07:10Z	2	check	blocked	resumed as act-1a15d4ed024-1wsg; SM-a not on dev (poll 1)
 2026-10-21T07:37Z	2	check	blocked	SM-a not on dev, no PR (poll 2)
 2026-10-21T07:57Z	2	question	blocked	SM-a absent (poll 3); Question for the supervisor on #3481
+2026-10-21T08:17Z	3	parked	-	Parked per supervisor 08:01Z on #3481: SM-a #3711 waits for a Belt slot; not building SM-a.
