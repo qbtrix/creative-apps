@@ -69,3 +69,5 @@ utc	stage	event	ref	note
 2026-10-21T09:50:09Z	check	lane	#3975 PG-5, #3977 PG-6 open in lane, no needs-fix/needs-rebase; PG-7 waits on #3977	dev-red #3856 open
 2026-10-21T10:11:47Z	check	lane	#3975 PG-5, #3977 PG-6 still awaiting mac build; no needs-fix/needs-rebase; PG-7 waits on #3977	dev-red #3856 open
 2026-10-21T10:35:53Z	fix	PG-6	#3977 needs-rebase: merged dev (PhotoEditor overlay conflict with PP-3), gate CI: PASS, head 3192c0198	Head line moved
+2026-10-21T11:30:00Z	resume	lead	run act-1a15e2da54d-qlg1 resumed; PG-2/3/4/5 merged; #3977 PG-6 mac build green, lane next	dev-red #3856 (PhotoPlace command path, history a11y; not ours)
+2026-10-21T11:31:00Z	wave	PG-z	PG-7 + PG-8 folded on photo-gradient-fill/PG-7 (journey on, PG-5's held tests on, photo.md, status built); gate running	PR after #3977 merges
