@@ -1,10 +1,10 @@
 // DesignHistoryAreaTests.swift (design/autosave-history DA-3): the History panel's wiring on a
-// Design window. A row click goes out as exactly one jump intent, and the stub's refusal reaches
-// the status line as its reason; the toolbar's History button toggles the panel, shows it as
-// selected while it is shown, and is off with its reason with no file or no panel to show; the
-// panel shown by DesignHistoryArea is on screen and hidden is not; and the panel follows undo
-// and redo, its current row moving with the listing's index. A jump that lands needs DA-5's
-// adapter bodies, so that test stays disabled. macOS only.
+// Design window. A row click goes out as exactly one jump intent and lands on its step without
+// recording one, and a refused jump (out of range) reaches the status line as its reason without
+// moving the history; the toolbar's History button toggles the panel, shows it as selected while
+// it is shown, and is off with its reason with no file or no panel to show; the panel shown by
+// DesignHistoryArea is on screen and hidden is not; and the panel follows undo and redo, its
+// current row moving with the listing's index. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -54,16 +54,16 @@ import Testing
     @Test func refusedJumpShowsItsReason() throws {
         var model = try Self.edited(3)
         let sent = Sent()
-        DesignHistoryArea.jump(1, with: { try model.jumpHistory(to: $0) }, onNote: { sent.notes.append($0) })
-        #expect(sent.notes == [DesignRefusal.notBuilt("History").help])
+        DesignHistoryArea.jump(4, with: { try model.jumpHistory(to: $0) }, onNote: { sent.notes.append($0) })
+        #expect(sent.notes == [DesignRefusal.unchanged.help])
         #expect(model.historyListing.index == 3, "a refused jump moved the history")
     }
 
-    @Test(.disabled("DA-5 writes the adapter bodies")) func rowClickLandsOnTheStep() throws {
+    @Test func rowClickLandsOnTheStep() throws {
         var model = try Self.edited(3)
         try model.jumpHistory(to: 1)
         #expect(model.historyListing.index == 1)
-        #expect(model.historyListing.steps.count == 3, "the jump recorded a step")
+        #expect(model.historyListing.steps.count == 3, "the jump recorded or dropped a step")
     }
 
     @Test func toolbarButtonTogglesThePanel() throws {
