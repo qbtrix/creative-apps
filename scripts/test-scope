@@ -3,14 +3,15 @@
 # (scripts/ci and its --changed mode), CI's scoped runs and the nightly perf
 # run (perf-nightly) agree on every test. Stdlib Python 3 only.
 #
-#   scripts/test-scope app APP             APP's tests (flare, design, photo, library, halo, suite, suiteui)
+#   scripts/test-scope app APP[,APP...]    those apps' tests (flare, design, photo, library, halo, suite, suiteui)
 #   scripts/test-scope changed [--linux]   the tests for the changed paths on stdin
 #   scripts/test-scope build-apps          the apps a macOS build of the changed code paths on stdin needs
 #   scripts/test-scope perf [APP]          the perf and timing tests, all or APP's
 #   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
 #   scripts/test-scope heavy [FILTER]      the CPU-heavy correctness tests, all or those FILTER takes
 #
-# app and changed print two lines: the regex for the tests outside
+# app and changed print two lines (app with a comma list: the union, as the
+# lane's batch macOS gate asks for): the regex for the tests outside
 # AppSnapshotTests, then the one for AppSnapshotTests (they run one at a
 # time). An empty line means none. changed prints `all` instead when a path
 # can change any test (Package.swift, Package.resolved, a new Sources/ dir).
@@ -267,7 +268,7 @@ def perf_report(log):
 def main(argv):
     cmd, args = (argv[0], argv[1:]) if argv else ("", [])
     if cmd == "app" and len(args) == 1:
-        print(regexes(app_units(args[0])))
+        print(regexes([u for a in args[0].split(",") for u in app_units(a)]))
     elif cmd == "changed" and args in ([], ["--linux"]):
         units = [u for p in sys.stdin.read().splitlines() if p for u in path_units(p)]
         print(regexes(units, linux=bool(args)))
@@ -280,7 +281,7 @@ def main(argv):
     elif cmd == "perf-report" and len(args) == 1:
         perf_report(args[0])
     else:
-        sys.exit("usage: scripts/test-scope app APP | changed [--linux] | build-apps | perf [APP] | heavy [FILTER] | perf-report LOG")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | perf [APP] | heavy [FILTER] | perf-report LOG")
 
 
 if __name__ == "__main__":

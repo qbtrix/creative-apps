@@ -1,0 +1,30 @@
+[
+  {
+    "label": "neverUpscales: fitted's scale cap takes max for min, so a small image grows to fill the canvas",
+    "file": "Sources/SuiteKernel/Place/PlaceRules.swift",
+    "find": "let scale = min(1, canvas.width / natural.width, canvas.height / natural.height)",
+    "replace": "let scale = max(1, canvas.width / natural.width, canvas.height / natural.height)",
+    "tests": "PlaceRulesTests"
+  },
+  {
+    "label": "coverKeepsAspect: the cover scale takes min for max, so the picture leaves gaps in its box",
+    "file": "Sources/SuiteKernel/Place/PlaceRules.swift",
+    "find": "let scale = max(box.width / natural.width, box.height / natural.height)",
+    "replace": "let scale = min(box.width / natural.width, box.height / natural.height)",
+    "tests": "PlaceRulesTests"
+  },
+  {
+    "label": "focusEdgeCovers: drawnRect drops the clamp, so a focus past the edge uncovers the box",
+    "file": "Sources/SuiteKernel/Place/PlaceRules.swift",
+    "find": "let x = clamp(fx, box.maxX - width, box.minX), y = clamp(fy, box.maxY - height, box.minY)",
+    "replace": "let x = fx, y = fy",
+    "tests": "PlaceRulesTests"
+  },
+  {
+    "label": "svgWithBOM: the UTF-8 BOM is not skipped, so an SVG saved with one is refused",
+    "file": "Sources/SuiteKernel/Place/PlaceRules.swift",
+    "find": "if head.starts(with: [0xEF, 0xBB, 0xBF]) { head = head.dropFirst(3) }",
+    "replace": "if false { head = head.dropFirst(3) }",
+    "tests": "PlaceRulesTests"
+  }
+]

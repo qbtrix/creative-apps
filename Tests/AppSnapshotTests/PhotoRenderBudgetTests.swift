@@ -60,15 +60,20 @@ import Testing
 
     static func median(_ values: [Double]) -> Double { values.sorted()[values.count / 2] }
 
-    /// A canvas-sized rgba8 texture on `metal`'s device and a display target writing into it, as the
-    /// canvas host's presenter texture takes the resident path's picture.
+    /// A canvas-sized rgba8 texture on `metal`'s device and a display target writing into it (with a tone
+    /// program too), as the canvas host's presenter texture takes the resident path's picture.
     static func textureTarget(_ metal: MetalBackend, width: Int, height: Int) throws -> PhotoDisplayTarget {
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: width, height: height, mipmapped: false)
         descriptor.usage = [.shaderRead, .shaderWrite]
         let held = BudgetTexture(texture: try #require(metal.device.makeTexture(descriptor: descriptor)))
-        return PhotoDisplayTarget { surface, rect in
-            try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
-        }
+        return PhotoDisplayTarget(
+            write: { surface, rect in
+                try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
+            },
+            writeToned: { surface, rect, tone in
+                try metal.display(
+                    surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true, tone: tone)
+            })
     }
 
     @Test(.timeLimit(.minutes(15))) func eightKFullPictureAndBrushFrameOnEachBackend() async throws {

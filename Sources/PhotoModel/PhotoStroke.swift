@@ -82,6 +82,8 @@ struct PhotoStroke: Sendable, Equatable {
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
     /// Option subtracts, PV-5).
     var modifiers: DragModifiers = []
+    /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
+    var end: Mask.Point?
 }
 
 extension PhotoWorkspace {
@@ -165,6 +167,8 @@ extension PhotoWorkspace {
             moveSelectedLayer(current, to: end)
         case .eyedropper:
             break
+        case .gradient:
+            current.end = end
         }
         stroke = current
     }
@@ -218,6 +222,9 @@ extension PhotoWorkspace {
             record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
         case .marquee, .crop, .eyedropper:
             break
+        case .gradient:
+            guard let end = done.end else { return }
+            do { try drawGradient(from: done.start, to: end) } catch { statusMessage = "Couldn't draw the gradient." }
         case .move:
             if done.layersBefore != layers, !done.layersBefore.isEmpty {
                 record(.layers(done.layersBefore, selected: selectedLayerID), named: "Move Layer")

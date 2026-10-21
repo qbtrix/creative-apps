@@ -1,0 +1,144 @@
+{
+  "title": "Library stays fast at 10,000 photos: launch, grid scroll, selection, loupe step and export planning each measured on a 10,000-photo fixture and fixed to budget",
+  "wave": 7,
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 Library must-haves (audit row 12); #3108, #3109, #3110, #1650, #3213, #3214; real jobs RJ-L07 (re-pointed) and RJ-L56 (new)",
+  "waits_on": "suiteui shared-thumbnails (the disk tier, cross-line); spine (building); filters-collections FC-a and FC-c, metadata-more MD-e, cull-finish DR-m (LibraryCatalog.swift, LibraryWindow.swift, LibraryGrid.swift); export (LiveExporter.swift)",
+  "depends": [
+    "spine",
+    "thumbnails",
+    "loupe-viewport",
+    "export"
+  ],
+  "longest_chain": "6 (LG-1 → LG-3 → LG-5 → LG-6 → LG-7 → LG-8)",
+  "ui_slice": "none",
+  "ui_slice_reason": "no new screen or control: the same grid, selection and loupe within budget; LG-grid is a ui slice because it changes the grid view, with its render budget row",
+  "journeys": [
+    "LibraryLargeCatalogJourneyTests.testTenThousandPhotos"
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryLargeFixture.swift",
+    "Tests/LibraryModelTests/LargeCatalogBudgetTests.swift",
+    "UITests/LibraryJourneyTests+Large.swift",
+    "Sources/LibraryModel/LibraryLaunch.swift",
+    "Tests/RealJobs/library/large-catalog/large-catalog.jobs.json",
+    "Sources/LibraryModel/LibraryCatalog.swift",
+    "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "Tests/mutations/LibraryModel.LibrarySelectionAdapter.json",
+    "Sources/LibraryModel/Live/LiveExporter.swift",
+    "Sources/LibraryModel/LibraryExport.swift",
+    "Tests/mutations/LibraryModel.LiveExporter.json",
+    "Sources/LibraryApp/LibraryGrid.swift",
+    "Sources/LibraryModel/LibraryThumbnails.swift",
+    "Tests/mutations/LibraryModel.LibraryThumbnails.json",
+    "Sources/LibraryModel/LoupeState.swift",
+    "Sources/LibraryModel/RenderQueue.swift",
+    "Tests/mutations/LibraryModel.RenderQueue.json",
+    "Tests/perf-suites.txt",
+    "docs/blueprints/library/features/large-catalog.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "LG-a",
+      "behavior": "A 10,000-photo fixture catalog exists and every finding has a budget test on it, written and disabled by the slice that fixes it.",
+      "tasks": [
+        "LG-1",
+        "LG-2"
+      ],
+      "journeys": [
+        "MJ-LG"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryLargeFixture.swift",
+        "Tests/LibraryModelTests/LargeCatalogBudgetTests.swift",
+        "UITests/LibraryJourneyTests+Large.swift",
+        "Sources/LibraryModel/LibraryLaunch.swift",
+        "Tests/RealJobs/library/large-catalog/large-catalog.jobs.json"
+      ],
+      "waits": {
+        "metadata-more:MD-a": [
+          "LG-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "LG-model",
+      "behavior": "The catalog loads off the main thread with an id index, selection is index-set arithmetic, and the export plan is one pass, each within its budget on 10,000 photos (#3110, #1650, #3213, #3214).",
+      "tasks": [
+        "LG-3",
+        "LG-4"
+      ],
+      "journeys": [
+        "MJ-LG"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+        "Tests/LibraryModelTests/LargeCatalogBudgetTests.swift",
+        "Tests/mutations/LibraryModel.LibrarySelectionAdapter.json",
+        "Sources/LibraryModel/Live/LiveExporter.swift",
+        "Sources/LibraryModel/LibraryExport.swift",
+        "Tests/mutations/LibraryModel.LiveExporter.json"
+      ],
+      "waits": {
+        "LG-a": [
+          "LG-3",
+          "LG-4"
+        ],
+        "filters-collections:FC-a": [
+          "LG-3"
+        ],
+        "metadata-more:MD-e": [
+          "LG-3"
+        ],
+        "cull-finish:DR-m": [
+          "LG-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "LG-grid",
+      "behavior": "The grid scrolls 10,000 photos within budget through the shared thumbnail store and the loupe steps within budget (#3108, #3109), RJ-L07 and RJ-L56 pass, and the feature is built.",
+      "tasks": [
+        "LG-5",
+        "LG-6",
+        "LG-7",
+        "LG-8"
+      ],
+      "journeys": [
+        "LJ-LG",
+        "MJ-LG"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryGrid.swift",
+        "Sources/LibraryModel/LibraryThumbnails.swift",
+        "Tests/mutations/LibraryModel.LibraryThumbnails.json",
+        "UITests/LibraryJourneyTests+Large.swift",
+        "Sources/LibraryModel/LoupeState.swift",
+        "Sources/LibraryModel/RenderQueue.swift",
+        "Tests/mutations/LibraryModel.RenderQueue.json",
+        "Tests/RealJobs/library/large-catalog/large-catalog.jobs.json",
+        "Tests/perf-suites.txt",
+        "docs/blueprints/library/features/large-catalog.wave.json"
+      ],
+      "waits": {
+        "LG-a": [
+          "LG-5"
+        ],
+        "LG-model": [
+          "LG-5",
+          "LG-7"
+        ],
+        "filters-collections:FC-c": [
+          "LG-5"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

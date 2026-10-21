@@ -93,7 +93,8 @@ public struct PaintReadout: Sendable, Equatable {
 extension FlareWorkspace {
     public var paint: PaintReadout?
     public mutating func setFill(hex: String)          // refuses a bad hex with a reason
-    public mutating func setStrokeWidth(_ width: Double)   // called once, on the bar's release
+    public mutating func setStrokeWidth(_ width: Double)   // one undo step (CLI, MCP, a typed value)
+    public mutating func scrubStrokeWidth(_ width: Double) // each bar drag sample; one step until endPropertyScrub()
     public mutating func setStrokeCap(_ cap: Stroke.Cap)
     public mutating func setStrokeJoin(_ join: Stroke.Join)
     public mutating func setStrokeColor(hex: String)
@@ -101,8 +102,9 @@ extension FlareWorkspace {
 // Stored state goes in FlareWorkspace.swift (Swift has no stored properties in extensions), all in IT-2:
 //   paintError: String?, selectedKeys: [KeyRef], timelineError: String?, keyDragSerial: Int,
 //   each cleared in load(_:). IT-3 uses the timeline ones.
-// The width bar shows the dragged value while scrubbing and calls setStrokeWidth once from onEnd, so a
-// width drag is one entry: PropertyAnimating.setStroke takes no coalesce key, and Live/ is not ours.
+// The width bar sends scrubStrokeWidth on every drag sample, so the canvas shows the width live, and endScrub
+// on release. PropertyAnimating.setStroke takes a coalesce key ("stroke-width-<items>-<propertyScrubSerial>"),
+// so the whole drag is one "Set Stroke" entry, the same way a TRANSFORM scrub is one "Set Keyframe" entry.
 
 // Sources/FlareModel/FlareTimelineEdit.swift (IT-3)
 extension FlareWorkspace {

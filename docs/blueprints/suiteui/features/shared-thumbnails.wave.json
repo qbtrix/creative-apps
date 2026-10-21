@@ -1,0 +1,166 @@
+{
+  "title": "One thumbnail store: Library, Photo and the home read and write previews through CoreAsset's ThumbnailStore under the suite's support root",
+  "wave": "XK3",
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #12 (thumbnails and previews); feature map suiteui/shared-thumbnails; real job RJ-X47; the home's 'Not connected yet' thumbnails slot",
+  "waits_on": "shared-codecs SC-a (Package.swift, project.yml); adopt-kernel-autosave AK-a (SuiteLocations.appFolder) and AK-photo (PhotoWindow+File.swift) before ST-7; cross-line hand-offs: library spine and raw RW-3 (LiveThumbnails), suite home (HomeGrid), photo/history-panel and file-flow (PhotoWindow+File)",
+  "depends": [
+    "suite-harness",
+    "editor-kernel"
+  ],
+  "longest_chain": "5 (ST-1 → ST-2 → ST-5 → ST-7 → ST-8)",
+  "journeys": [
+    "HomePreviewsJourneyTests.testHomeShowsDocumentPreviews"
+  ],
+  "owned": [
+    "Tests/AppSnapshotTests/ThumbnailWriterTests.swift",
+    "Tests/LibraryModelTests/LibraryThumbnailDiskTests.swift",
+    "Tests/RealJobs/library/relaunch-grid/relaunch-grid.jobs.json",
+    "Package.swift",
+    "project.yml",
+    "Sources/SuiteModel/Contracts/ThumbnailPublishing.swift",
+    "Sources/SuiteModel/Fakes/FakeThumbnails.swift",
+    "Sources/SuiteShell/ThumbnailWriter.swift",
+    "Sources/LibraryModel/Live/LiveThumbnailStoreAdapter.swift",
+    "Sources/AfterGlowApp/HomeGrid.swift",
+    "Tests/AppSnapshotTests/HomeGridPreviewTests.swift",
+    "Tests/AppSnapshotTests/HomePreviewSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHomePreviewTests.swift",
+    "UITests/AfterGlowJourneyTests+Previews.swift",
+    "Tests/mutations/SuiteShell.ThumbnailWriter.json",
+    "Sources/LibraryModel/Live/LiveThumbnails.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.LiveThumbnailStoreAdapter.json",
+    "Sources/SuiteShell/Live/ThumbnailsSlot.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Sources/LibraryApp/LibraryWindow.swift",
+    "Tests/AppSnapshotTests/PhotoPublishesPreviewTests.swift",
+    "docs/c4/parts/creative-apps/suite-shell/shell-documents.json",
+    "docs/blueprints/suiteui/features/shared-thumbnails.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "ST-a",
+      "behavior": "SuiteShell and LibraryModel link CoreAsset, `ThumbnailPublishing` gains a read, `ThumbnailWriter` and Library's disk tier are declared as stubs, and their tests are written, disabled.",
+      "tasks": [
+        "ST-1",
+        "ST-2"
+      ],
+      "journeys": [
+        "MJ-ST"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/ThumbnailWriterTests.swift",
+        "Tests/LibraryModelTests/LibraryThumbnailDiskTests.swift",
+        "Tests/RealJobs/library/relaunch-grid/relaunch-grid.jobs.json",
+        "Package.swift",
+        "project.yml",
+        "Sources/SuiteModel/Contracts/ThumbnailPublishing.swift",
+        "Sources/SuiteModel/Fakes/FakeThumbnails.swift",
+        "Sources/SuiteShell/ThumbnailWriter.swift",
+        "Sources/LibraryModel/Live/LiveThumbnailStoreAdapter.swift"
+      ],
+      "waits": {
+        "shared-codecs:SC-a": [
+          "ST-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "ST-u",
+      "behavior": "The home's recent-document cards show each document's preview from the publishing contract on the fake, with a placeholder when there is none, within the render budget.",
+      "tasks": [
+        "ST-3",
+        "ST-4"
+      ],
+      "journeys": [
+        "HJ-ST"
+      ],
+      "owned": [
+        "Sources/AfterGlowApp/HomeGrid.swift",
+        "Tests/AppSnapshotTests/HomeGridPreviewTests.swift",
+        "Tests/AppSnapshotTests/HomePreviewSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHomePreviewTests.swift",
+        "UITests/AfterGlowJourneyTests+Previews.swift"
+      ],
+      "waits": {
+        "ST-a": [
+          "ST-3",
+          "ST-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "ST-m",
+      "behavior": "The writer stores and reads previews in `AfterGlow/Thumbnails/` within its byte budget, and Library's thumbnails read the disk store before decoding and write after, keyed so a changed file or develop setting never shows a stale picture.",
+      "tasks": [
+        "ST-5",
+        "ST-6"
+      ],
+      "journeys": [
+        "MJ-ST"
+      ],
+      "owned": [
+        "Sources/SuiteShell/ThumbnailWriter.swift",
+        "Tests/AppSnapshotTests/ThumbnailWriterTests.swift",
+        "Tests/mutations/SuiteShell.ThumbnailWriter.json",
+        "Sources/LibraryModel/Live/LiveThumbnailStoreAdapter.swift",
+        "Sources/LibraryModel/Live/LiveThumbnails.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/LibraryModelTests/LibraryThumbnailDiskTests.swift",
+        "Tests/mutations/LibraryModel.LiveThumbnailStoreAdapter.json"
+      ],
+      "waits": {
+        "ST-a": [
+          "ST-5",
+          "ST-6"
+        ],
+        "adopt-kernel-autosave:AK-a": [
+          "ST-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "ST-z",
+      "behavior": "The thumbnails slot is live, Photo publishes a preview on save, Library builds its thumbnails over the shared store, the home shows real previews, and the feature is built.",
+      "tasks": [
+        "ST-7",
+        "ST-8"
+      ],
+      "journeys": [
+        "HJ-ST",
+        "MJ-ST"
+      ],
+      "owned": [
+        "Sources/SuiteShell/Live/ThumbnailsSlot.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Tests/AppSnapshotTests/PhotoPublishesPreviewTests.swift",
+        "UITests/AfterGlowJourneyTests+Previews.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-documents.json",
+        "docs/blueprints/suiteui/features/shared-thumbnails.wave.json"
+      ],
+      "waits": {
+        "ST-u": [
+          "ST-8"
+        ],
+        "ST-m": [
+          "ST-7",
+          "ST-8"
+        ],
+        "adopt-kernel-autosave:AK-photo": [
+          "ST-7"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}
