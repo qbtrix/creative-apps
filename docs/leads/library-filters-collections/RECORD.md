@@ -4,7 +4,7 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15e4969c2-pa6e (resumes act-1a15ac11868-4kb6) · Session: line lead (library: #1563, #3478) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 6
 Base: origin/dev ded2ca5 (main verified at 0dd23d659f4dbd8a0120aa85a321259327518251)
-Next: FC-14 #4056 needs-fix (unlisted wall-clock test): test landed .disabled, dev merged, gate running, then push and move Head. FC-12 #3551 red Linux on tenThousandPaths (on dev's perf list, not this PR's): dev merged, gate running, then push. FC-10 waits on S-L9 #3411 (open). FC-16 after FC-12 and FC-14 merge. Record moved to lead/library-filters-collections per Belt.
+Next: FC-12 #3551 (head 4644431) and FC-14 #4056 (head 75cd865) pushed with Fast-Check; the lane batches them. Then Belt-Slice-Done FC-d on a green dev run containing FC-12; FC-16 after both merge. FC-10 waits on S-L9 #3411.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -113,3 +113,4 @@ Next: FC-14 #4056 needs-fix (unlisted wall-clock test): test landed .disabled, d
 - 2026-10-21T11:50:25Z (act-1a15e4969c2-pa6e): resumed. On dev: FC-1..FC-9, FC-11, FC-13, FC-15. FC-12 #3551 carries needs-rebase; a fixer is merging dev. FC-14 builder started. S-L9 #3411 is still open, so FC-10 waits. No open findings carry Feature: filters-collections.
 
 - 2026-10-21T15:13:45Z check: Belt nudge; record moved to lead/library-filters-collections. FC-14 #4056 needs-fix = perf-list lint (twentyCollectionsOverTenThousandIDsWithinBudget unlisted): landed .disabled, supervisor asked for its line. FC-12 #3551 Linux red on LibraryFoldersTests/tenThousandPaths, a timing test on dev's perf list: merged dev. Footer stripped from #4056 body; #3551 Belt-Lead moved to this run. S-L9 #3411 open. 0 open findings.
+- 2026-10-21T15:23:29Z stage: FC-12 #3551 dev merge pushed (4644431, scripts/ci --changed PASS); FC-14 #4056 perf fix + dev merge pushed (75cd865, PASS); Head lines moved. The session proxy appends an attribution footer to every PR body and comment write and can't be stripped from here; the lane strips it from the squash.

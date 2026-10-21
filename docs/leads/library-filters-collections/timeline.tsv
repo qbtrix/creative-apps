@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-21T11:20:35Z	check	-	FC-9 #3546: macOS build and Linux green on 0c4ddd751, awaiting lane merge; FC-12 #3551 macOS build running (11:20); FC-10 waits on S-L9 #3411
 2026-10-21T11:50:25Z	check	-	run act-1a15e4969c2-pa6e resumed; FC-12 #3551 fixer (dev merge); FC-14 builder; FC-10 waits S-L9 #3411; 0 open findings
 2026-10-21T15:13:45Z	check	-	FC-14 #4056 perf-list fix + dev merge; FC-12 #3551 dev merge (timing test now on perf list); FC-10 waits S-L9 #3411; 0 findings
+2026-10-21T15:23:29Z	stage	FC-d,FC-e	FC-12 4644431 and FC-14 75cd865 pushed, gate PASS, Head moved
