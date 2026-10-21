@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-21T02:32Z	3	waiting	#3827	supervisor: batch retrying on local Mac gate; SF-8 opens after
 2026-10-21T02:47Z	3	waiting	#3827	check-in: #3827 still open in the lane batch, no new labels; SF-8 waits
 2026-10-21T03:09Z	3	waiting	#3827	check-in: #3827 open, no new labels; lane still probing batch-20261021005140; SF-8 waits
+2026-10-21T03:30Z	3	waiting	#3827	check-in: #3827 open, no new labels or comments; SF-8 waits
