@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T10:57Z	stage	FS-u #3984 merged dev (anchor fix), scripts/ci --changed PASS, pushed 0ae6a4c2, Head moved
 2026-10-21T11:16Z	check	FS-u #3984 head 0ae6a4c2 macOS build dispatched; batch-20261021102756 probing
 2026-10-21T11:43Z	stage	FS-u needs-rebase (FlareStage.swift comment conflict with #3952) resolved; gate PASS; pushed e276a3b7, Head moved
+2026-10-21T12:13Z	check	FS-u #3984 head e276a3b7 waiting on its macOS gate (lane 11:54Z); no blocking labels
