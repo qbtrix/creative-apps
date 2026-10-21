@@ -1,11 +1,9 @@
 // FlareRecovery+Kernel.swift (adopt-kernel-autosave AK-3 stub, AK-4 body): Flare's hooks for the suite's
 // `.autosaveRecovery`. The window's id names its files in `AfterGlow/Flare/Recovery/`, the encoder copies the dirty
-// document and encodes it off main with the save path's encoder, and a restore opens the bytes as unsaved, untitled
-// work in one undo step (`RecoveryRestore`), so Undo goes back to the document the window held before. Bytes that
-// don't decode throw and change nothing. `writeRecoveryOnQuit` is the quit's synchronous write of the same pair.
-// `recoveryFolder` is the folder the window hands the modifier, and `launchRecoveryFolder` runs
-// `moveLegacyRecovery`, which moves the one copy an earlier build kept (`legacyRecovery`) under the root once, never over a
-// newer copy. Linux-safe: no UI imports.
+// document and encodes it off main, and a restore opens the bytes as untitled work in one undo step
+// (`RecoveryRestore`); damaged bytes throw and change nothing. `writeRecoveryOnQuit` is the quit's synchronous write of
+// the same pair. `launchRecoveryFolder` runs `moveLegacyRecovery`, which moves an earlier build's copy
+// (`legacyRecovery`) under the root once, never over a newer copy. Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
