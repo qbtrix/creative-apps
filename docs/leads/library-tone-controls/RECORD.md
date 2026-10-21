@@ -2,7 +2,7 @@
 
 Issue: #3475 · Packet: docs/blueprints/library/features/tone-controls.md
 Run: act-1a15b98bc49-4lk9 · Session: claude/task-k1zaw1 · Started: 2026-10-20T23:00Z (earlier run act-1a15b10caae-y18c on claude/lead-raw-tone-controls-ca9b2k)
-Stage: 0 setup (blocked at 0.4; re-checked at dev 07f754f7, 2026-10-20T23:48Z)
+Stage: 0 setup (blocked at 0.4; re-checked at dev 4987f926, 2026-10-21T00:33:59Z)
 Base: 9781100bc432e119320c1bbbff41849ff4aeebdb (origin/dev; brief named main b3011ab9, see Decisions)
 Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRows) to merge, then start LT-1/LT-2
 
