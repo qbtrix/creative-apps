@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T05:59Z	check	heartbeat	TC	still blocked: no ToneSettings/ToneRows on dev 71ffa4d1c; TC-a #3476 unmerged
 2026-10-21T06:27Z	check	heartbeat	TC	still blocked: no ToneSettings/ToneRows on dev 0865916d4; TC-a #3476 unmerged
 2026-10-21T06:49Z	check	heartbeat	TC	still blocked: no ToneSettings/ToneRows on dev 6d7fcf14; TC-a #3476 unmerged
+2026-10-21T07:12Z	check	heartbeat	TC	still blocked: no ToneSettings/ToneRows on dev b64cbb8c; TC-a #3476 open, no PR
