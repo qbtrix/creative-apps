@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-21T13:18Z	3	pr-opened	#4057	BK-a contract slice
 2026-10-21T13:18Z	3	pr-opened	#4058	BK-m stacked on BK-a, Mutate 5/5
 2026-10-21T13:18Z	3	pr-opened	#4060	C4 kernel-stroke docs-only
+2026-10-21T13:20:12Z	check	blockers posted on feature issue; lane PRs open, no needs-fix
