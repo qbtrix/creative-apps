@@ -1,7 +1,7 @@
 // LibrarySidecarWriterTests.swift: the app's sidecar writer on a real folder (metadata-more MD-17):
 // it writes only `.xmp` files, never touches the photo, leaves another app's sidecar alone, and
-// ImageIO reads back what it wrote (QB-LIB-V8). Written first (contract rule 13, MD-14): every test
-// waits on MD-17. macOS only.
+// ImageIO reads back what it wrote (QB-LIB-V8). Written first (contract rule 13, MD-14), turned on
+// by MD-17. macOS only.
 #if os(macOS)
 import CryptoKit
 import Foundation
@@ -12,8 +12,8 @@ import Testing
 @testable import LibraryApp
 
 @Suite struct LibrarySidecarWriterTests {
-    /// MD-17 swaps this for its writer; the tests speak only `SidecarWriting`.
-    private func writer() -> any SidecarWriting { UnconnectedSidecars() }
+    /// The app's writer (MD-17); the tests speak only `SidecarWriting`.
+    private func writer() -> any SidecarWriting { XMPSidecarWriter() }
 
     /// 3 stars, Red, Dusk and Pier, a title and a caption.
     private func packet(rating: Int = 3) throws -> Data {
@@ -45,7 +45,7 @@ import Testing
         try await writer().write(try packet(rating: rating), sidecar: root.appending(path: name).path)
     }
 
-    @Test(.disabled("waits on MD-17")) func writesTheSidecarAndNeverThePhoto() async throws {
+    @Test func writesTheSidecarAndNeverThePhoto() async throws {
         try await inFolder { root in
             let before = try fingerprint(root.appending(path: "IMG_1.jpg"))
             for rating in [1, 2, 3] { try await write("IMG_1.xmp", in: root, rating: rating) }
@@ -54,7 +54,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on MD-17")) func refusesAnythingButAnXMPFileOrAReadOnlyFolder() async throws {
+    @Test func refusesAnythingButAnXMPFileOrAReadOnlyFolder() async throws {
         try await inFolder { root in
             let before = try fingerprint(root.appending(path: "IMG_1.jpg"))
             await #expect(throws: LibraryError.self) { try await write("IMG_1.jpg", in: root) }
@@ -66,7 +66,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on MD-17")) func leavesAnotherAppsSidecarByteEqual() async throws {
+    @Test func leavesAnotherAppsSidecarByteEqual() async throws {
         try await inFolder { root in
             let theirs = Data("<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"/>".utf8)
             try theirs.write(to: root.appending(path: "IMG_2.xmp"))
@@ -77,7 +77,7 @@ import Testing
     }
 
     /// QB-LIB-V8: ImageIO's XMP parser finds every field Library wrote; alt-text reads x-default.
-    @Test(.disabled("waits on MD-17")) func imageIOReadsEveryField() async throws {
+    @Test func imageIOReadsEveryField() async throws {
         try await inFolder { root in
             try await write("IMG_1.xmp", in: root)
             let data = try Data(contentsOf: root.appending(path: "IMG_1.xmp"))
