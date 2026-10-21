@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 16:34Z	DA-z	check	39629540112	#4102 mac build green, awaiting batch
 16:47Z	DA-z	merged	-	#4102 merged e4f3f33f
 16:56Z	DA-z	check	39638803228	no Linux-job run contains e4f3f33f yet
+17:19Z	DA-z	check	39640348697	Linux check containing DA-z running
