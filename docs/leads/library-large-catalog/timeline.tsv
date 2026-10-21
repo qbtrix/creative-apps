@@ -12,3 +12,4 @@
 2026-10-21T13:25Z	fix	round1	LG-a	#4073 updated per supervisor 12:54Z: perf-suites line swap, un-disable, rebase
 2026-10-21T13:25Z	check	wait	LG-model	FC-a, MD-e, DR-m unset (poll 2)
 2026-10-21T13:32Z	ship	updated	LG-a	#4073 head 3b18f2a7: perf-suites line swapped, budget suite enabled, rebased; CI: PASS; supervisor merges by hand
+2026-10-21T13:39Z	check	blocked	LG-model	FC-a, MD-e, DR-m unset (poll 3); rule-23 question to supervisor, issuecomment-6317524570
