@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T17:06:25Z	LP-m	slice-done	39637279724	Belt-Slice-Done posted
 2026-10-21T17:31:01Z	LP-z	answer	#4132	supervisor approved #4132; merges by hand once its macOS run is green (queue backed up); LP-6 after
 2026-10-21T17:55:05Z	heartbeat	poll	#4132	still open, waiting on the supervisor's hand-merge after its macOS run
+2026-10-21T18:19:15Z	heartbeat	poll	#4132	Linux green on 82c169e1; waiting on the supervisor's hand-merge after its macOS run
