@@ -9,3 +9,4 @@ time	event	task	note
 2026-10-20T21:23Z	check	LX-1 #3696 still queued for the lane; LX-3 #3699 draft on it; XP-2, XP-3, XP-7 not on dev
 2026-10-20T21:58:10Z	check	check-in: LX-1 #3696 re-proofed after needs-rebase (head f02f9e9c, CI: PASS); LX-2/LX-4 still blocked on XP-2/3/7
 2026-10-20T22:32:56Z	check	check-in: LX-1 #3696 clean, awaiting lane; LX-3 waits on it; XP-2/3/7 not on dev
+2026-10-21T00:05:30Z	check	check-in: LX-1 #3696 merged (7f3959c); LX-a still needs LX-2 (waits XP-3); LX-3 #3699 rebuilt on dev (slice diff only), gate running. Belt's 'lead/export-pack' is the core lead's branch; this feature's record is lead/export-pack-library
