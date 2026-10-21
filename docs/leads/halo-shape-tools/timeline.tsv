@@ -36,3 +36,4 @@ time	kind	step	ref	note
 2026-10-21T10:36Z	merge	done	HS-m	#3934 merged 39d90e3f; HS-z merged dev in (08498c22, CI PASS), #3929 retargeted to dev
 2026-10-21T11:08Z	poll	check	HS-z	#3929 macOS build green (run 39585943710), lane Linux check running on 08498c22; HS-m waits on a ci.yml run on dev containing 39d90e3f
 2026-10-21T11:51Z	poll	check	HS-m	dev is red (#3856: Linux CommandPathTests photo baseline, PhotoPlace.swift:36, not halo); HS-m waits for the next green run; #3929 still in the lane
+2026-10-21T12:22Z	ship	waiting	HS-z	#3929 held by the lane: Linux red only on the dev-red photo CommandPathTests (#3856); fix is photo #4004, not ported (other line); said on #3929
