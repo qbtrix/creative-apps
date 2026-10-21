@@ -116,6 +116,7 @@ struct FlareStage: View {
         } overlay: {
             FlareStageOverlay(marks: live?.stageMarks ?? model.stageMarks, zoom: scale)
             FlareStageSelection(model: model, zoom: scale, perform: perform)
+            FlarePathEditLayer(model: live?.shown ?? model, zoom: scale)
             FlareStageGuides(
                 model: model, zoom: scale, showsGuides: showsGuides, showsRulers: showsRulers,
                 drag: liveGuide ?? guideDrag, perform: perform)

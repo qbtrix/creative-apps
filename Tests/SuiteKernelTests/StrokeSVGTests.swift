@@ -1,6 +1,6 @@
 // StrokeSVGTests.swift (stroke-style SS-1 written, SS-5 turns on): the SVG writer's stroke attributes, as FlareCore's
 // SVG export writes them: colour as hex, opacity only below 1, width, join and cap.
-// On since SS-5; the dash test waits on SS-7.
+// On since SS-5; the dash test since SS-7 (StrokeDashTrimTests has the dashed ones).
 import Testing
 import SuiteKernel
 
@@ -22,7 +22,7 @@ import SuiteKernel
         let attributes = Self.table(VectorStroke(join: .round, cap: .square))
         #expect(attributes["stroke-linejoin"] == "round" && attributes["stroke-linecap"] == "square")
     }
-    @Test(.disabled("waits on SS-7")) func plainStrokeHasNoDash() {
+    @Test func plainStrokeHasNoDash() {
         #expect(Self.table(VectorStroke())["stroke-dasharray"] == nil)
     }
 }
