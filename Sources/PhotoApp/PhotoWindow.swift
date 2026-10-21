@@ -228,8 +228,8 @@ struct PhotoWindow: View {
         case .sendBackward: model.sendSelectedLayerBackward()
         case .selectLayerAbove: model.selectLayerAbove()
         case .selectLayerBelow: model.selectLayerBelow()
-        case .zoomIn: setZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .zoomIn: setZoom(ZoomMath.zoomedIn(from: zoom))
+        case .zoomOut: setZoom(ZoomMath.zoomedOut(from: zoom))
         case .actualSize: setZoom(1)
         case .fit: fit()
         case .file(let intent): performFile(intent)
@@ -264,8 +264,9 @@ struct PhotoWindow: View {
         fit()
     }
 
+    /// Sets the zoom within ZoomMath's range (10% to 3200%).
     private func setZoom(_ scale: Double) {
-        zoom = min(max(scale.isFinite ? scale : 1, ViewerZoom.stops[0]), ViewerZoom.stops[ViewerZoom.stops.count - 1])
+        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
     }
 
     /// Fits the image in the canvas clear of the floating palette (every tool shows while an image is
@@ -273,9 +274,12 @@ struct PhotoWindow: View {
     private func fit() {
         guard let canvas = model.canvas, viewport.width > 0, viewport.height > 0 else { return }
         fitPending = false
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: PhotoTool.allCases.count)
-        let fitted = layout.fitScale(artboard: CGSize(width: canvas.width, height: canvas.height))
-        setZoom(fitted > 0 ? fitted : 1)
+        let toolCount = PhotoTool.allCases.count
+        // The fit EditorDetail hands Command-0, so a fitted image clears the floating palette.
+        let paletteFit: @Sendable (CGSize, CGSize) -> Double = { viewport, artboard in
+            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
+        }
+        setZoom(ZoomMath.fit(document: CGSize(width: canvas.width, height: canvas.height), in: viewport, using: paletteFit))
         fittedZoom = zoom
     }
 
