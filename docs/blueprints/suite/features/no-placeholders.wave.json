@@ -1,0 +1,100 @@
+{
+  "title": "No placeholder menu items in the beta: the launcher's Check for Updates and Assets items and Flare's beta.2 items are hidden, and a ratchet keeps new ones out (Settings stays for the captain's call)",
+  "wave": "BG1",
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 suite must-have 6 (suite audit row 4) and Flare's stub menu items (Flare audit B7); real job RJ-X64 (new)",
+  "waits_on": "report-problem RP-2 (AfterGlowApp.swift); flare file-flow, svg-place and key-select-all (FlareCommands.swift, cross-line hand-off); Settings waits on the captain",
+  "depends": [
+    "onboarding"
+  ],
+  "longest_chain": "5 (NP-1 → NP-3 → NP-4 → NP-5 → NP-6)",
+  "journeys": [
+    "AfterGlowMenusJourneyTests.testNoPlaceholderItems",
+    "FlareMenusJourneyTests.testNoBetaTwoItems"
+  ],
+  "owned": [
+    "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "Tests/SuiteKernelTests/Fixtures/Placeholder/Menus.swift.txt",
+    "Tests/placeholder-menu-baseline.txt",
+    "Tests/mutations/SuiteKernelTests.PlaceholderMenuTests.json",
+    "Sources/AfterGlowApp/AfterGlowApp.swift",
+    "UITests/AfterGlowJourneyTests+Menus.swift",
+    "Tests/FlareModelTests/FlareMenuVisibilityTests.swift",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Sources/FlareApp/FlareWindow+View.swift",
+    "Sources/FlareApp/FlareLibraryPanel.swift",
+    "UITests/FlareJourneyTests+Menus.swift",
+    "Tests/RealJobs/suite/no-placeholders/no-placeholders.jobs.json",
+    "docs/blueprints/suite/features/no-placeholders.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "NP-a",
+      "behavior": "A ratchet test finds every placeholder menu item in the apps and the launcher against a shrink-only baseline, and the launcher hides Check for Updates and the Assets items.",
+      "tasks": [
+        "NP-1",
+        "NP-2"
+      ],
+      "journeys": [
+        "MJ-NP",
+        "XJ-NP"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+        "Tests/SuiteKernelTests/Fixtures/Placeholder/Menus.swift.txt",
+        "Tests/placeholder-menu-baseline.txt",
+        "Tests/mutations/SuiteKernelTests.PlaceholderMenuTests.json",
+        "Sources/AfterGlowApp/AfterGlowApp.swift",
+        "UITests/AfterGlowJourneyTests+Menus.swift"
+      ],
+      "waits": {
+        "report-problem:RP-a": [
+          "NP-2"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "NP-flare",
+      "behavior": "Flare's beta.2 menu items and the empty Library tab are hidden with their commands kept and unavailable, only Settings is left in the baseline, RJ-X64 passes, and the feature is built.",
+      "tasks": [
+        "NP-3",
+        "NP-4",
+        "NP-5",
+        "NP-6"
+      ],
+      "journeys": [
+        "FJ-NP",
+        "XJ-NP",
+        "MJ-NP"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlareMenuVisibilityTests.swift",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Sources/FlareApp/FlareWindow+View.swift",
+        "Sources/FlareApp/FlareLibraryPanel.swift",
+        "Tests/placeholder-menu-baseline.txt",
+        "UITests/FlareJourneyTests+Menus.swift",
+        "Tests/RealJobs/suite/no-placeholders/no-placeholders.jobs.json",
+        "docs/blueprints/suite/features/no-placeholders.wave.json"
+      ],
+      "waits": {
+        "NP-a": [
+          "NP-3",
+          "NP-5"
+        ],
+        "command-state:CS-flare": [
+          "NP-3"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

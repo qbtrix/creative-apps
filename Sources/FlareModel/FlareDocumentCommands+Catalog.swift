@@ -144,8 +144,7 @@ public struct FlareCoreHistory: HistoryReading {
     public let canUndo: Bool, canRedo: Bool, undoName: String?, redoName: String?, isDirty: Bool
     public init(_ workspace: FlareWorkspace) {
         (canUndo, canRedo, isDirty) = (workspace.canUndo, workspace.canRedo, workspace.isDirty)
-        undoName = workspace.undoActionName.map { String($0.dropFirst("Undo ".count)) }
-        redoName = workspace.redoActionName.map { String($0.dropFirst("Redo ".count)) }
+        (undoName, redoName) = (workspace.undoName, workspace.redoName)
     }
 }
 

@@ -46,6 +46,19 @@ import Testing
         #expect(try openedImage("a.heic").fileKind == .readOnly)
     }
 
+    @Test func anImageOpenedSmallerThanItsFileNeverSavesOverIt() throws {
+        // Photo opens a file past its pixel cap at a smaller size; File > Save in place would replace the
+        // full-size original with that copy, so it asks where instead.
+        let white = DecodedImage(rgba8: [UInt8](repeating: 255, count: 8 * 6 * 4), width: 8, height: 6)
+        let file = try RawCodec().encode(white, as: .png, quality: 1)
+        var capped = PhotoWorkspace(services: .fake)
+        try capped.openImage(file, name: "big.png", codec: RawCodec(), longestSide: 4)
+        #expect(capped.saveAction == .saveAs)
+        var whole = PhotoWorkspace(services: .fake)
+        try whole.openImage(file, name: "big.png", codec: RawCodec(), longestSide: nil)
+        #expect(whole.saveAction == .writeImage(.png))
+    }
+
     @Test func saveRoutesByKindAndLayers() throws {
         var workspace = try openedImage()
         #expect(!workspace.needsDocument)
