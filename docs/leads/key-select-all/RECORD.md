@@ -33,5 +33,6 @@ Loop: v3 (the packet has a `## Slices` table).
 - One PR for KS-a (KS-1 + KS-2), its first commit the failing tests.
 
 ## Open
+- 2026-10-21T13:09Z: resumed on Belt's 30-min nudge (it named lead/flare-key-select-all; this feature's branch is lead/key-select-all). KS-a (#3921, 80ac6639) is not slice-done: every dev Linux check containing it is red on dev's own failures (photo CommandPathTests; library timing budgets LibraryFoldersTests.tenThousandPaths, LargeCatalogBudgetTests), latest 73754132 run 39601343733; 5bec8089 run 39604117821 running; full CI 39600323802 pending. Critics wait for a scoped flare or full run with screens. KS-z waits #3499 (open).
 - #3921 view code (⌘A routing in FlareCommands) is unverified until the lane's macOS build and the journey.
 - Comments posted from this session get a server-appended attribution footer that an edit can't remove.
