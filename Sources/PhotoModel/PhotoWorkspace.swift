@@ -30,12 +30,10 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
-    /// `toolHelp` asks its sampling service instead. The gradient draws
-    /// nothing until gradient-fill PG-3 (PhotoGradientTool+Kernel.swift).
+    /// `toolHelp` asks its sampling service instead.
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
-        case .gradient: "Not built yet (PG-3)."
         default: nil
         }
     }
