@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T21:48Z	3 build W1	check	-	still blocked: TC-a has no PR
 2026-10-20T22:10Z	3 build W1	check	-	still blocked: TC-a has no PR
 2026-10-20T22:29Z	3 build W1	check	-	still blocked: TC-a has no PR
+2026-10-21T00:04:22Z	check	heartbeat	-	after worker restart; #3761 macOS build green, awaiting sweep / tone still blocked on TC-a
