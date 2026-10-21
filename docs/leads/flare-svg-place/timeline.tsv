@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T02:18:46Z	record-moved	Belt watches lead/flare-svg-place; record continues here (was docs/leads/svg-place on lead/svg-place)
 2026-10-21T02:48:43Z	lane-bisect	#3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 passed 2 of 3; probe -5 running)
 2026-10-21T03:14:49Z	merged	#3768 PF-a merged into dev; waiting on a green dev ci.yml run containing it for Belt-Slice-Done PF-a. PF-u waits on key-select-all KS-a, PF-m on FG-m/FS-m/FK-m (no lead upstream)
+2026-10-21T03:25:24Z	heartbeat: waiting on full dev CI for PF-a

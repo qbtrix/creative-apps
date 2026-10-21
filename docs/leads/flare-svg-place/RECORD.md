@@ -8,7 +8,7 @@ Next: PF-a slice PR (PF-1, PF-2) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: #3768 PF-a merged into dev; waiting on a green dev ci.yml run containing it for Belt-Slice-Done PF-a. PF-u waits on key-select-all KS-a, PF-m on FG-m/FS-m/FK-m (no lead upstream)
+Last stage: PF-a merged (#3768); waiting on a full dev ci.yml run containing 3471e810f (queued CI 39534644387 is older); PF-u blocked on KS-a, PF-m on FG-m/FS-m/FK-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
