@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-21T13:44Z	DA-a	scoped-red	39604112617	panel over inspector; fix PR in progress
 2026-10-21T15:38Z	DA-z	pr-open	#4102	e16b62e7, --changed PASS, Mutate 7/7
 15:58Z	DA-z	heartbeat	39629540112	#4102 macOS build queued
+16:07Z	DA-z	check	39629540112	#4102 macOS build in progress
