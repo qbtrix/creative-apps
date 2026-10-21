@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15f807d0b-78hh (resumed from act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-o3yyj5 · Started: 2026-10-20T23:47Z
 Stage: 3 wave 4
 Base: 1a7e0d866 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: #4152 (F4150 round 1, head 2fc0925a8) waits on its lane macOS build. Round 2 (select-all half of #4150) ended with no PR: no cause provable from Linux (comment 6324296761 lists what was ruled out and two candidates). Rounds spent: once a scoped halo run holding #4152 has run, relabel #4150 finding -> gap with what is still red (rule 11). KE-a/KE-u critic panel on journeys run 39651139451 / scoped halo 39655512121 once ui-screens land. KE-7 waits on #3499; KE-8 on core-loop CL-z.
+Next: #4152 (F4150 round 1, head 2fc0925a8) waits on its lane macOS build. #4150 rounds spent: once a scoped halo run holding #4152 has run, relabel #4150 finding -> gap with what is still red (rule 11). KE-a/KE-u critic panel: journeys 39651139451 ran no journey (release build broke on FlareModel SetLayerParent, dev-red #3856, not this feature), so the screens come from the journeys after scoped halo 39655512121 (dev 1b3913c07, queued). KE-7 waits on #3499; KE-8 on core-loop CL-z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
