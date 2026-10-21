@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-21T02:53:55Z	check	no change: FC-5 #3466 clean, not yet batched
 2026-10-21T03:16:29Z	check	no change: FC-5 #3466 clean, in lane
 2026-10-21T03:39:04Z	check	FC-5 #3466 clean in lane, waits batch; stacked drafts wait FC-5; dev green 39537764239
+2026-10-21T04:06:35Z	check	batch-20261021032004 red on CommandPathTests (library): FC-5 adds 10 MenuCommand sites not in Tests/command-path-baseline/library.txt; fixing on FC-5 branch (baseline lines, as FC-4 did)
