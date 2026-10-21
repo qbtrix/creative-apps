@@ -2,7 +2,7 @@
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: slice-done
+Stage: heartbeat
 Base: dev a6f45c18
 Next: AC-colour,AC-tools merge
 
@@ -34,6 +34,7 @@ Next: AC-colour,AC-tools merge
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T09:45Z: #3943 #3952 clean, waiting for batch; dev Linux red on a6f45c18 (#3856)
 - 2026-10-21T09:25Z: Linux check 39571804700 green contains AC-zoom f886c912
 - 2026-10-21T09:04Z: wait, never block on CI
 - 2026-10-21T08:56Z: stopped #3952 at dev 896cafe3: dev 296186f4 fails mutate --validate (DesignCanvasEditing plan, #3889); reported on #3856
