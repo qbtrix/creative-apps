@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 suite must-have 3 (suite audit row 3); real job RJ-X65 (new); privacy job RJ-X01's rule (no network call)",
-  "waits_on": "onboarding (built; AfterGlowApp.swift); afterglow-cli (built; Arguments.swift); editor-menus wires the Help group into the five editors",
+  "waits_on": "onboarding (built; AfterGlowApp.swift); afterglow-cli (built; Apps.swift); editor-menus wires the Help group into the five editors",
   "depends": [
     "onboarding",
     "afterglow-cli"
@@ -18,10 +18,14 @@
   "owned": [
     "Sources/SuiteModel/Help/ProblemReport.swift",
     "Sources/SuiteModel/Help/BetaNotes.swift",
+    "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
     "Tests/SuiteModelTests/ProblemReportTests.swift",
     "Tests/SuiteModelTests/BetaNotesTests.swift",
+    "Tests/SuiteKernelTests/SuiteHelpCatalogTests.swift",
+    "Tests/command-ids/suite.txt",
     "docs/c4/parts/creative-apps/suite-model/suite-help.json",
     "Sources/SuiteShell/SuiteHelpCommands.swift",
+    "Sources/SuiteShell/ShellHelpProvider.swift",
     "Sources/AfterGlowApp/AfterGlowApp.swift",
     "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
     "UITests/AfterGlowJourneyTests+Help.swift",
@@ -30,11 +34,12 @@
     "Tests/AppSnapshotTests/RenderBudgetHelpTests.swift",
     "Sources/SuiteShell/ProblemReportActions.swift",
     "Tests/mutations/SuiteModel.ProblemReport.json",
-    "Sources/AfterGlowCLICore/Arguments.swift",
+    "Sources/AfterGlowCLICore/Apps.swift",
     "Sources/AfterGlowCLICore/HelpReports.swift",
     "Sources/SuiteShell/CrashFolderReader.swift",
     "Tests/AfterGlowCLITests/HelpReportsTests.swift",
     "Tests/RealJobs/suite/report-problem/report-problem.jobs.json",
+    "Tests/mutations/SuiteKernel.SuiteHelpCatalog.json",
     "docs/blueprints/suite/features/report-problem.wave.json"
   ],
   "slices": [
@@ -51,10 +56,14 @@
       "owned": [
         "Sources/SuiteModel/Help/ProblemReport.swift",
         "Sources/SuiteModel/Help/BetaNotes.swift",
+        "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
         "Tests/SuiteModelTests/ProblemReportTests.swift",
         "Tests/SuiteModelTests/BetaNotesTests.swift",
+        "Tests/SuiteKernelTests/SuiteHelpCatalogTests.swift",
+        "Tests/command-ids/suite.txt",
         "docs/c4/parts/creative-apps/suite-model/suite-help.json",
         "Sources/SuiteShell/SuiteHelpCommands.swift",
+        "Sources/SuiteShell/ShellHelpProvider.swift",
         "Sources/AfterGlowApp/AfterGlowApp.swift",
         "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
         "UITests/AfterGlowJourneyTests+Help.swift"
@@ -88,39 +97,10 @@
     },
     {
       "id": "RP-m",
-      "behavior": "The report reads the newest suite crash files, redacts the home path, user and host, and the CLI prints the same report and the beta notes.",
+      "behavior": "The report reads the newest suite crash files and redacts the home path, user and host, the suite Help catalog runs it and the beta notes in the CLI and the menus, and the feature is built.",
       "tasks": [
         "RP-4",
-        "RP-5"
-      ],
-      "journeys": [
-        "MJ-RP"
-      ],
-      "owned": [
-        "Sources/SuiteModel/Help/ProblemReport.swift",
-        "Sources/SuiteModel/Help/BetaNotes.swift",
-        "Tests/SuiteModelTests/ProblemReportTests.swift",
-        "Tests/SuiteModelTests/BetaNotesTests.swift",
-        "Tests/mutations/SuiteModel.ProblemReport.json",
-        "Sources/AfterGlowCLICore/Arguments.swift",
-        "Sources/AfterGlowCLICore/HelpReports.swift",
-        "Sources/SuiteShell/CrashFolderReader.swift",
-        "Tests/AfterGlowCLITests/HelpReportsTests.swift",
-        "UITests/AfterGlowJourneyTests+Help.swift",
-        "Tests/RealJobs/suite/report-problem/report-problem.jobs.json"
-      ],
-      "waits": {
-        "RP-a": [
-          "RP-4",
-          "RP-5"
-        ]
-      },
-      "ui": false
-    },
-    {
-      "id": "RP-z",
-      "behavior": "The help part names the CLI and the shell, and the feature is built.",
-      "tasks": [
+        "RP-5",
         "RP-6",
         "RP-7"
       ],
@@ -129,14 +109,29 @@
         "XJ-RP"
       ],
       "owned": [
+        "Sources/SuiteModel/Help/ProblemReport.swift",
+        "Sources/SuiteModel/Help/BetaNotes.swift",
+        "Tests/SuiteModelTests/ProblemReportTests.swift",
+        "Tests/SuiteModelTests/BetaNotesTests.swift",
+        "Tests/mutations/SuiteModel.ProblemReport.json",
+        "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
+        "Tests/SuiteKernelTests/SuiteHelpCatalogTests.swift",
+        "Sources/AfterGlowCLICore/Apps.swift",
+        "Sources/AfterGlowCLICore/HelpReports.swift",
+        "Sources/SuiteShell/CrashFolderReader.swift",
+        "Tests/AfterGlowCLITests/HelpReportsTests.swift",
+        "UITests/AfterGlowJourneyTests+Help.swift",
+        "Tests/RealJobs/suite/report-problem/report-problem.jobs.json",
+        "Tests/mutations/SuiteKernel.SuiteHelpCatalog.json",
         "docs/c4/parts/creative-apps/suite-model/suite-help.json",
         "docs/blueprints/suite/features/report-problem.wave.json"
       ],
       "waits": {
-        "RP-u": [
-          "RP-6"
+        "RP-a": [
+          "RP-4",
+          "RP-5"
         ],
-        "RP-m": [
+        "RP-u": [
           "RP-6"
         ]
       },

@@ -74,6 +74,9 @@ public struct HaloProject: Sendable, Equatable {
     /// The keys picked for easing, a SuiteKernel `Selection`; written by
     /// `HaloKeySelection.swift`.
     var keySelection = Selection<HaloKeyRef>()
+    /// The key drag's serial, part of its coalescing key; written by
+    /// `HaloKeyMove+Kernel.swift`.
+    public internal(set) var keyDragSerial = 0
     /// The picked keys as a set, read from `keySelection`.
     public var selectedKeys: Set<HaloKeyRef> { keySelection.set }
     /// The project file's name, path and status; written by `HaloFiles.swift`.
@@ -90,6 +93,8 @@ public struct HaloProject: Sendable, Equatable {
     public internal(set) var refusal: HaloRefusal?
     /// The last refused rename, so the window can show why; nil once handled.
     public internal(set) var refusedRename: RefusedRename?
+    /// The spec the shape tool's next drag draws; written by `HaloShape+Kernel.swift`.
+    public internal(set) var shapeTool = ShapeSpec.defaults(.rectangle)
 
     /// A project on the live services, as the app ships.
     public init() { self.init(services: .live) }
@@ -101,7 +106,7 @@ public struct HaloProject: Sendable, Equatable {
         a.document == b.document && a.history == b.history && a.playback == b.playback
             && a.viewerDrag == b.viewerDrag && a.selectedKeys == b.selectedKeys && a.file == b.file
             && a.renderedFrame == b.renderedFrame && a.renderJob == b.renderJob && a.refusal == b.refusal
-            && a.refusedRename == b.refusedRename
+            && a.refusedRename == b.refusedRename && a.shapeTool == b.shapeTool
     }
 
     /// The compositions, in sidebar order.

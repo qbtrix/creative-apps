@@ -39,13 +39,14 @@ their last task on them, or before with the owner told.
 
 Blueprint sections: suite.md 6 (menus), flare.md 3 (menus; beta.2 items).
 
+**Hand-off (beta gaps C1 to C12, suiteui line, cross-line):** the XK4 kernel-gap adopts (clipboard-interop CB-flare, frame-rates FR-flare, anchor-parenting AN-flare, document-setup DS-flare, brush-keys BK-flare) also edit `FlareCommandCatalog.swift` and `FlareCommands.swift`. The slices here that edit those files start after those adopts' slices on the same app have merged, or before them with their lead told; the checker can't see this across lines.
+
 ## Slices
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | NP-a | A ratchet test finds every placeholder menu item in the apps and the launcher against a shrink-only baseline, and the launcher hides Check for Updates and the Assets items. | NP-1, NP-2 | MJ-NP, XJ-NP | report-problem:RP-a (`AfterGlowApp.swift`) |
-| NP-flare | Flare's beta.2 menu items and the empty Library tab are hidden, their commands stay in the catalog unavailable with a plain reason, and the baseline shrinks. | NP-3, NP-4 | FJ-NP | NP-a; command-state:CS-flare (Flare's catalog and `FlareCommands.swift`); flare menu hand-offs (cross-line) |
-| NP-z | Only Settings is left in the baseline, RJ-X64 passes, and the feature is built. | NP-5, NP-6 | XJ-NP, FJ-NP, MJ-NP | NP-a, NP-flare |
+| NP-flare | Flare's beta.2 menu items and the empty Library tab are hidden with their commands kept and unavailable, only Settings is left in the baseline, RJ-X64 passes, and the feature is built. | NP-3, NP-4, NP-5, NP-6 | FJ-NP, XJ-NP, MJ-NP | NP-a, NP-a; command-state:CS-flare (Flare's catalog and `FlareCommands.swift`); flare menu hand-offs (cross-line) |
 
 **Screen early.** NP-a changes the launcher's menus directly (there is nothing
 to stub), so it is the `"ui": true` slice that waits only on report-problem's
@@ -142,5 +143,5 @@ Longest chain: NP-1 → NP-3 → NP-4 → NP-5 → NP-6 (5). Chain of 5: the rat
 
 Per slice (rules 6, 15, 17, 21, 22): NP-a and NP-flare merged-done with their
 journeys green in a scoped run and verified after the feel gate (`mouse`: walk
-the menus) with their `Mac-Finish:` lines; RJ-X64 green at NP-z. Settings
+the menus) with their `Mac-Finish:` lines; RJ-X64 green at NP-flare. Settings
 stays in the baseline until the captain decides.

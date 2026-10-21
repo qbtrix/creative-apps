@@ -3,7 +3,8 @@
 // Linux-safe; LibraryApp changes it only through the Model's methods. Invariants:
 // counts follow `items`; ids in `items` are unique; the selection holds only ids
 // the collection shows, and the loupe only a photo it shows. The selection is
-// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift).
+// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift), the export
+// sheet's run its `ExportRun<ExportOptions>` (LibraryExportAdapter.swift).
 import SuiteKernel
 
 /// A sidebar collection: a fixed source of photos.
@@ -23,14 +24,6 @@ public enum ImportState: Hashable, Sendable {
 public enum LoupeZoom: Hashable, Sendable {
     case fit, actual
     case scale(Double)
-}
-
-/// Where the export sheet is: closed, editing its options, writing, or done.
-public enum ExportState: Hashable, Sendable {
-    case idle
-    case editing(ExportOptions)
-    case running(done: Int, total: Int)
-    case finished(ExportSummary)
 }
 
 /// A thumbnail asked of the services; `token` lets a stale answer be dropped.
@@ -92,13 +85,16 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
-    public internal(set) var exportState = ExportState.idle
+    /// The export sheet's run: the kernel's; `exportState` reads it (LibraryExportAdapter.swift).
+    public internal(set) var exportRun = ExportRun<ExportOptions>.idle
+    public internal(set) var exportSummary: ExportSummary?  // the finished run's summary
     public internal(set) var catalogState = CatalogFileState.ready
     public internal(set) var saveRevision = 0
     public internal(set) var savedRevision = 0
     public internal(set) var saveError: String?
     public internal(set) var showsTestValues = false  // -LibraryTestValues
     public internal(set) var cullError: String?  // a refused cull change
+    public internal(set) var fileRequests: [LibraryFileRequest] = []  // file-flow work for the window
     /// The filter bar's rules outside a smart collection (LibraryFilter.swift).
     public internal(set) var filter = LibraryFilter.all
     /// The collections you made and the smart ones, in sidebar order.
@@ -121,7 +117,8 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
-            && lhs.cullError == rhs.cullError && lhs.exportState == rhs.exportState
+            && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
+            && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
             && lhs.loupeError == rhs.loupeError

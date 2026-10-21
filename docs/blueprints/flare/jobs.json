@@ -209,10 +209,11 @@
     "job": "Play the exported Lottie in a standard player.",
     "outcome": "Sampled frames match the stage within 2% pixel difference.",
     "needs": [
-      "flare/flare-export"
+      "flare/flare-export",
+      "flare/lottie-player-check"
     ],
     "needs_note": "flare-export + a player oracle (not in the beta-80 plan)",
-    "closes_with": "flare/flare-export",
+    "closes_with": "flare/lottie-player-check",
     "trap": "Unsupported features dropped silently; easing differs in the player",
     "run": "C",
     "baseline": "fail",
@@ -230,17 +231,19 @@
     "job": "Open a Lottie downloaded from a library site and recolour it.",
     "outcome": "It plays as before, with the new colour.",
     "needs": [
-      "A2"
+      "A2",
+      "flare/lottie-open"
     ],
     "needs_note": "A2 Lottie round trip",
-    "closes_with": "A2",
+    "closes_with": "flare/lottie-open",
     "trap": "Opens as a still or loses easing",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
-    ]
+    ],
+    "waits_on": "LO-5"
   },
   "RJ-F13": {
     "id": "RJ-F13",

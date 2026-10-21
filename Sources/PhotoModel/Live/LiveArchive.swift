@@ -159,6 +159,8 @@ struct LayerEntry: Codable {
         switch layer.kind {
         case .pixels: kind = .pixels
         case .adjustment(let settings): kind = .adjustment; adjustment = settings
+        // Unreached until TX-6: the workspace refuses to save a text layer, and TX-6 writes its attribute.
+        case .text: kind = .pixels
         }
     }
 

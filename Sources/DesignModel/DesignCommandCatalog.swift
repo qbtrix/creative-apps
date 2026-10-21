@@ -2,7 +2,8 @@
 // DesignWorkspace, so a menu, the afterglow CLI and an agent run one path. Each spec's availability is the help the
 // window shows today and its run is today's method: every DesignCommand through `help(_:)` and `run(_:)`, the palette
 // tools through `unavailableHelp` and `selectTool`, the pages through `addPageHelp`/`deletePageHelp`, and the file
-// actions through the toolbar's help. Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
+// actions through the toolbar's help. The History panel's history.read and history.jump are SuiteKernel's
+// HistoryCommands on the workspace's HistoryJumping adapter (autosave-history DA-6). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -23,8 +24,9 @@ extension DesignWorkspace {
     struct TextParams: Codable, Sendable { var text: String }
     struct PathParams: Codable, Sendable { var path: String? }
 
-    /// Every Design action as a command spec, in menu order.
-    public static let commands: [CommandSpec<DesignWorkspace>] = fileSpecs + editSpecs + objectSpecs + pageSpecs + toolSpecs
+    /// Every Design action as a command spec, in menu order, then the History panel's two.
+    public static let commands: [CommandSpec<DesignWorkspace>] =
+        fileSpecs + editSpecs + objectSpecs + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self)
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =
@@ -146,7 +148,8 @@ extension DesignWorkspace {
         return w.editingTextID == nil ? nil : "Finish editing the text first."
     }
 
-    static let toolSpecs:[CommandSpec<DesignWorkspace>] = DesignTool.allCases.map { tool in
+    // tool.shape comes from ShapeCommands (shape-tools DS-6).
+    static let toolSpecs:[CommandSpec<DesignWorkspace>] = DesignTool.allCases.filter { $0 != .shape }.map { tool in
         let title = tool.rawValue.prefix(1).uppercased() + tool.rawValue.dropFirst()
         return plain("tool." + tool.rawValue, title, "Picks the \(title) tool.", .view, { _ in reason(tool.unavailableHelp) }) { $0.selectTool(tool) }
     }
