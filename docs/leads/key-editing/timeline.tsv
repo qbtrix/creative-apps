@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-21T13:42:11Z	heartbeat	check-in: #3955 (KE-4, fb99be903), #4067 (KE-6, b504f56cb), #4070 (KE-5, 5650f771b) all wait on their queued macOS builds; no red check, no needs-fix/needs-rebase. Next: RJ-H13 + KE-m Slice-Done on #3955 merge; KE-u critics on #4067+#4070 merge.
 2026-10-21T17:29:14Z	3	slice-done	KE-a	run 39632745681 (Linux green, holds #3813 #3954); resumed run act-1a15f807d0b-78hh
 2026-10-21T17:29:14Z	3	stage-start	wave 4	KE-9 RJ-H13 job + journey on
+2026-10-21T17:38:49Z	3	pr-opened	#4141	KE-9 RJ-H13 move-keys job + journey on, head ddee6da1a

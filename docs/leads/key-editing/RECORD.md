@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15f807d0b-78hh (resumed from act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-o3yyj5 · Started: 2026-10-20T23:47Z
 Stage: 3 wave 4
 Base: 1a7e0d866 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: RJ-H13 job + journey-on PR (KE-9) through the lane; then KE-m Belt-Slice-Done on a green Linux run holding it. KE-7 stress half waits on PR #3499; KE-8 waits on core-loop CL-z.
+Next: #4141 (KE-9) through the lane; then KE-m Belt-Slice-Done on a green Linux run holding it; KE-a critic panel on scoped halo run 39635764704 once done. KE-7 waits on #3499; KE-8 on core-loop CL-z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
