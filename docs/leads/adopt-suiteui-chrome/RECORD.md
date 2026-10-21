@@ -1,19 +1,19 @@
 # adopt-suiteui-chrome lead record
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
-Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: fix-round
-Base: dev 835677ca
-Next: #4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges + green run; AC-tools waits on #4002
+Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
+Stage: 0 setup (blocked)
+Base: dev 9951eea7 (main 0dd23d65 verified)
+Next: re-read shared-codecs SC-f (SC-13 #4019 open; SC-14, SC-15, SC-16 to come); start AC-e1 once SC-16 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | done | – | – |
-| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 0 | fix-r1 | – | – |
-| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | lane | – | – |
+| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 1 | done | 39604117821 | wanted |
+| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | done (per Belt brief act-1a15ef870d6-3mm5) | – | – |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
-| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare | yes | 0 | blocked-SC-f | – | – |
+| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome (met), adopt-kernel-export:AX-photo, AX-library, AX-flare (met), shared-codecs:SC-f (open) | yes | 0 | blocked-SC-f | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -34,6 +34,8 @@ Next: #4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T15:00Z: run act-1a15ef870d6-3mm5 resumed for AC-export-sheet only. Waits re-read: EK-chrome met (Sources/SuiteUI/ExportSheet.swift on dev); AX-flare, AX-photo, AX-library done (lead/adopt-kernel-export RECORD). shared-codecs:SC-f not met: SC-13 #4019 open, SC-14..16 unstarted. The wait is real: SC-15 owns PhotoWindow+Export.swift and SC-16 replaces Library's ExportFormat the sheet lists, so AC-e1 does not start and nothing is built around it.
+- 2026-10-21T15:00Z: Belt brief names main as base; dev's CLAUDE.md makes dev the integration branch and the lane retargets fast-lane PRs from main to dev, so slice PRs go to dev.
 - 2026-10-21T13:39Z: AC-colour fix round 1 PR #4089 head c6707931 (tests + 4 mutation plans, App targets unscored on Linux)
 - 2026-10-21T13:31Z: AC-colour review (code-only, lenses design/first-use/mouse/taste/job/correctness) on 45c81070: 1 finding #4086 (bridges untested); fixer launched, round 1
 - 2026-10-21T13:30Z: AC-colour Belt-Slice-Done + Mac-Finish-Wanted on Linux check 39604117821 (5bec8089); critic panel started
@@ -67,4 +69,4 @@ Next: #4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges 
 - Even once resumed, only AC-guides can start after editor-kernel's EK-a: AC-zoom and AC-colour wait on adopt-kernel-brush AB-photo (itself waiting on EK-stroke and EK-chrome), AC-tools on AC-colour, and AC-export-sheet on adopt-kernel-export's three app slices (waiting on EK-run and other adopt features). None of those features has started.
 
 ## Open
-- Waits on the captain lifting the beta cut, then on editor-kernel EK-a (every slice) and the adopt-kernel-* slices named above.
+- AC-export-sheet waits on shared-codecs:SC-f (#3718; SC-13 #4019, then SC-14, SC-15, SC-16).
