@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-21T08:40Z	3	heartbeat	W4b	#3818 (PH-4) and #3932 (PE-4) merged. Opened #3968 (PT-3m) and #3969 (PT-5), fast-lane, CI: PASS. Dev Linux check on 733e8ef (has #3830/#3831) in progress; 260f7a8 green but predates our merges. PT-3 waits #3968, PH-5 waits #3969
 2026-10-21T09:02Z	3	slice-done	PT-a	Belt-Slice-Done PT-a on #3435 (dev Linux check 39569221486 green on 733e8ef, contains #3704 #3830)
 2026-10-21T09:02Z	3	heartbeat	W4c	#3968 (PT-3m) and #3969 (PT-5) open, clean, fast-lane; not in a batch yet
+2026-10-21T09:26Z	3	heartbeat	W4d	#3968 (PT-3m) and #3969 (PT-5) open with fast-lane, not yet batched; dev-red #3856 is Design mutation anchors (DesignCanvasEditing), not ours; lane batch 20261021084621 bisecting
