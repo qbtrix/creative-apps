@@ -10,9 +10,8 @@
 // preview, so the window's editor body (a debug-only counter) runs at most 3
 // times either way. The window needs `allowsWindowActivationEvents`: a test
 // process only sends activation clicks, and the handles are a SwiftUI gesture.
-// On PT-1's stubs every draft edit refuses (the window beeps, the draft stays
-// put), so each test checks the draft moved only once `setTransform` builds
-// (PT-5). The step p95 (budget 16 ms) is printed, never asserted, until the
+// Each test checks the draft moved: the drag grew its box, the scrub turned it
+// (`setTransform`, PT-5). The step p95 (budget 16 ms) is printed, never asserted, until the
 // supervisor lists these in Tests/perf-suites.txt. Nested in BodyCountSuites,
 // as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
@@ -45,12 +44,8 @@ extension BodyCountSuites {
             let after = try #require(edited.workspace)
             #expect(after.transformDraft != nil, "the corner drag ended Free Transform")
             let box = try #require(after.transformSelection?.box)
-            if draft.builds {
-                #expect(box.width > draft.before.box.width && box.height > draft.before.box.height,
-                        "the corner drag didn't grow the draft: \(draft.before.box) to \(box)")
-            } else {
-                #expect(box == draft.before.box, "a refused corner drag moved the draft: \(draft.before.box) to \(box)")
-            }
+            #expect(box.width > draft.before.box.width && box.height > draft.before.box.height,
+                    "the corner drag didn't grow the draft: \(draft.before.box) to \(box)")
             expectBodies(step, atMost: 3, target: 3)
         }
 
@@ -70,11 +65,7 @@ extension BodyCountSuites {
             let after = try #require(edited.workspace)
             #expect(after.transformDraft != nil, "the scrub ended Free Transform")
             let degrees = try #require(after.transformSelection?.degrees)
-            if draft.builds {
-                #expect(degrees != draft.before.degrees, "the scrub didn't turn the draft")
-            } else {
-                #expect(degrees == draft.before.degrees, "a refused scrub turned the draft to \(degrees)°")
-            }
+            #expect(degrees != draft.before.degrees, "the scrub didn't turn the draft from \(draft.before.degrees)°")
             expectBodies(step, atMost: 3, target: 3)
         }
 
@@ -82,8 +73,6 @@ extension BodyCountSuites {
             let model: PhotoWorkspace
             /// The draft's box as it began.
             let before: TransformBox
-            /// Whether the draft's edits are built (PT-5): a 1° turn on a copy of the workspace lands.
-            let builds: Bool
         }
 
         /// The window's editor body runs (debug only).
@@ -95,9 +84,7 @@ extension BodyCountSuites {
             model.selectTool(.move)
             try model.beginTransform()
             let before = try #require(model.transformSelection)
-            var probe = model
-            let builds = (try? probe.setTransform(TransformRules.rotated(before, by: 1), name: "Rotate", drag: nil)) != nil
-            return Draft(model: model, before: before, builds: builds)
+            return Draft(model: model, before: before)
         }
 
         /// Waits for the hosted window to settle; returns its edited view, the draft still up.

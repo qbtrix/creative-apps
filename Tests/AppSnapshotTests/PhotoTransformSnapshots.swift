@@ -5,10 +5,9 @@
 // and the Move tool, so the draft's box is the selection's part of Background.
 // `rows`: the draft just begun, its handles on the box and the inspector's
 // transform rows (X 200, Y 200, W 400, H 200, Rotation 0°) over Apply
-// Transform and Cancel; it holds on PT-1's stubs, where Begin works. `turned`:
-// the draft turned 15° through `setTransform`, the handles and the Rotation
-// row turned with it; it waits on PT-5, which builds the draft's edits (on the
-// stubs every edit refuses). Canvas Size's sheet has its own screens in
+// Transform and Cancel. `turned`: the draft turned 15° through
+// `setTransform` (PT-5), the handles and the Rotation row turned with it.
+// Canvas Size's sheet has its own screens in
 // PhotoCanvasSizeSheetTests (PT-3). Writes photo-free-transform-rows-light/
 // -dark.png and photo-free-transform-light/-dark.png. macOS only.
 import CoreRaster
@@ -53,7 +52,7 @@ import Testing
         try shoot("photo-free-transform-rows", model)
     }
 
-    @Test(.disabled("waits on PT-5")) func turned() throws {
+    @Test func turned() throws {
         var model = try transforming()
         let box = try #require(model.transformSelection)
         try model.setTransform(TransformRules.rotated(box, by: 15), name: "Rotate", drag: nil)
