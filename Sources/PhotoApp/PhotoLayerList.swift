@@ -3,7 +3,9 @@
 // line, blend summary), a drop reordering through `layerListMove`; under it a
 // SuiteUI SidebarActionRow of New Layer, Delete Layer and Rename Layer…
 // (`photo.layer.new`, `.delete`, `.rename`). Delete is disabled on the last
-// layer and says why. Values in, intents out.
+// layer and says why. Every picked layer draws selected, and a row click
+// leaves as `pickLayer` with its mode (multi-layer-select PM-3). Values in,
+// intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -17,9 +19,9 @@ struct PhotoLayerList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             LayerTreeList(
-                rows: model.layerRows, childCount: { _ in 0 }, selection: model.selectedLayerID,
+                rows: model.layerRows, childCount: { _ in 0 }, selected: Self.selected(model),
                 naming: PhotoLayerRow.naming, options: PhotoLayerRow.options,
-                decorations: Self.decorations(model), onSelect: { perform(.selectLayer($0)) }
+                decorations: Self.decorations(model), onPick: { perform(.pickLayer($0, $1)) }
             ) { action in
                 switch action {
                 case .toggleHidden(let id): perform(.toggleVisibility(id))
@@ -33,6 +35,11 @@ struct PhotoLayerList: View {
             SidebarActionRow(Self.commands(model, perform))
                 .padding(.horizontal, SuiteSpacing.xs)
         }
+    }
+
+    /// The rows drawn picked: every selected layer's id.
+    nonisolated static func selected(_ model: PhotoWorkspace) -> Set<String> {
+        Set(model.selectedLayerIDs)
     }
 
     /// Each layer's kind symbol and caption by id; help names blend and opacity.

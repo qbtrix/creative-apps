@@ -6,7 +6,8 @@
 // that same call. Cut copies, then
 // clears that area weighted by the selection's coverage, as one "Cut" step.
 // Paste puts an image in a new "Pasted Layer" above the selected layer, where
-// `services.clipboard.placement` says, and selects it: one "Paste" step. With
+// `services.clipboard.placement` says, and selects it: one "Paste" step, through
+// `insertPixelLayer`, the insert Place (PhotoPlace+Kernel) uses too. With
 // no image open it opens the pasted image instead, as a new clean "Untitled"
 // image. A pasted image over `maxOpenPixels` is scaled to fit (lanczos3),
 // each side rounded down, with "Pasted at <n>%." in the status line. The
@@ -105,16 +106,24 @@ extension PhotoWorkspace {
         let fitted = percent == nil ? image : ClipboardImage(
             image: DecodedImage(rgba8: [], width: tiles.width, height: tiles.height), source: nil)
         let rect = services.clipboard.placement(of: fitted, canvas: canvas, center: viewCenter)
-        record(.stack(stackState), named: "Paste")
+        insertPixelLayer(tiles, named: "Pasted Layer", x: rect.x, y: rect.y, step: "Paste")
+        statusMessage = note
+    }
+
+    /// The insert Paste and Place share: `tiles` as a pixel layer `named` above the selected layer, its top-left
+    /// at (`x`, `y`) in canvas pixels, selected, as one undo step titled `step`. Returns the new layer's id.
+    @discardableResult
+    mutating func insertPixelLayer(_ tiles: TiledPixels, named: String, x: Int, y: Int, step: String) -> String {
+        record(.stack(stackState), named: step)
         let above = selectedLayerID.flatMap(index(of:)) ?? 0
-        let id = insertLayer(named: "Pasted Layer", pixels: tiles, kind: .pixels, at: above)
+        let id = insertLayer(named: named, pixels: tiles, kind: .pixels, at: above)
         if let at = index(of: id) {
-            layers[at].offsetX = rect.x
-            layers[at].offsetY = rect.y
+            layers[at].offsetX = x
+            layers[at].offsetY = y
         }
         selectedLayerID = id
-        statusMessage = note
         touch(.all)
+        return id
     }
 
     /// Test hook: while set (`$pasteLimit.withValue`), the most pixels a
