@@ -19,3 +19,4 @@ time	kind	note
 2026-10-21T02:22Z	check	waiting screens	#3690	full dev CI 39524928486 at 4bdf0bbd still pending; no scoped design run
 2026-10-21T02:44Z	check	waiting screens	#3690	full dev CI 39524928486 cancelled; new full CI 39534644387 at 2ab0eb96 (has DY-a, DK-a) pending
 2026-10-21T03:06Z	check	waiting screens	#3690	full dev CI 39534644387 at 2ab0eb96 queued; no scoped design run
+2026-10-21T03:27Z	check	waiting screens	#3690	full dev CI 39534644387 at 2ab0eb96 still queued; no scoped design run
