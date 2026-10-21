@@ -26,7 +26,8 @@ extension DesignWorkspace {
 
     /// Every Design action as a command spec, in menu order, then the History panel's two.
     public static let commands: [CommandSpec<DesignWorkspace>] =
-        fileSpecs + editSpecs + objectSpecs + pageSpecs + toolSpecs + HistoryCommands.specs(DesignWorkspace.self)
+        fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs
+            + HistoryCommands.specs(DesignWorkspace.self)
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =
