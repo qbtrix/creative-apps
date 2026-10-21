@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-20T22:10Z	3 build W1	check	#3761	macOS build 39499722577 still queued (48 min); PM-2 waits PG-a (#3681 open; GF-2 #3695 rebase cleared, open)
 2026-10-20T22:29Z	3 build W1	check	#3761	macOS build 39499722577 still queued (68 min, lane macOS capacity); PM-2 waits PG-a (#3681, #3695 open)
 2026-10-21T00:04:22Z	check	heartbeat	-	after worker restart; #3761 macOS build green, awaiting sweep / tone still blocked on TC-a
+2026-10-21T00:45Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
