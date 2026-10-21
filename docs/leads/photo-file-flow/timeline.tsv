@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-21T05:56:36Z	PF-3	push	#3815	merged dev, CI: PASS, Head 679e9382 moved; waits lane to drop needs-rebase
 2026-10-21T06:15Z	heartbeat	wait	#3815	PF-3 lane macOS build on 679e9382
 2026-10-21T06:34Z	heartbeat	lane	#3815	PF-3 macOS build still queued
+2026-10-21T06:53Z	heartbeat	lane	#3815	PF-3 macOS build green; waits on a batch
