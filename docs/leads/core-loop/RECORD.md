@@ -61,4 +61,5 @@ Next: CL-probe and CL-measure wait on #3401 (needs-ui), CL-12 on #865; CL-z afte
 - Filed at stage 1: needs-ui #3401 (probe recorder), needs-ui #3402 (ExportSheet verb), finding #3403 (adopt-kernel-export has no Halo slice).
 - CL-8 (and so CL-9, CL-10, CL-13, CL-14) waits on the SuiteUI probe recorder needs-ui.
 - CL-12 (and so CL-13) waits on switching A-HA-1 #865 (open).
+- Blocked (rule 19, run act-1a15d0eeefb-6z9l): CL-probe and CL-measure wait on #3401, CL-z on #865; both open with no PR. Said on #1971 with a question for the supervisor: https://github.com/qbtrix/creative-apps/issues/1971#issuecomment-6311966922
 - CL-7 note: sheet close while editing uses dismissRender (CL-ui2 already routes act(.close) to cancelRender only while running); `renderRunning` was unused and is dropped in #3817.
