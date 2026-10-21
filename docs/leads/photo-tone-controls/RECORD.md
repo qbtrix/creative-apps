@@ -2,9 +2,9 @@
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 3 W1 blocked (run act-1a15eecbafe-u0f9)
+Stage: 3 blocked on TC-a (run act-1a15eecbafe-u0f9)
 Base: b70dcb71e33b073d8e17f60683fea8c36db02f65
-Next: blocked: suiteui tone-controls TC-a (#3476) has no Belt-Slice-Done and dev has no ToneTarget/ToneRows; PT-1 starts when it lands; checked 16:35Z
+Next: await supervisor answer on #3468 (comment 6321141841): wait, build TC-a contract, or release; recheck #3476 each heartbeat
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
