@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-21T08:05Z	retarget	done	CL-run	#3817 (CL-7) to dev after merging dev (conflict in HaloRenderAvailabilityTests kept CL-7 side), 026ee757, 3 files, CI PASS, mutate 4/4
 2026-10-21T08:15Z	relabel	done	CL-run	#3817 fast-lane re-added (lane had dropped it at 443 lines while the diff was inflated; now 3 files +153/-102). Body footer is re-appended server-side on every edit; lane strips it from the squash
 2026-10-21T07:22Z	poll	wait	-	#3817 (CL-7) in lane; #3401, #865 still open
+2026-10-21T07:53Z	poll	wait	-	#3817 macOS build green, waiting on lane sweep; #3401, #865 open
