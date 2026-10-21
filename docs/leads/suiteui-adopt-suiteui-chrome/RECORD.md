@@ -4,7 +4,7 @@ Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet; earlier run act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
 Stage: 0 setup (blocked on shared-codecs:SC-f)
 Base: dev b70dcb71 (main 0dd23d65 verified)
-Next: re-read shared-codecs:SC-f (SC-13 #4019 open+clean; SC-14 stacked; SC-15, SC-16 planned); start AC-e1 once SC-16 merges
+Next: re-read shared-codecs:SC-f (SC-13 #4019 Linux red on 85c365cf, lane waiting; SC-14..16 after it); start AC-e1 once SC-16 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f (SC-13 #4019 open+clean; SC-14 stacked; SC-15, 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T16:36Z: SC-f unchanged on dev b70dcb71. #4019 (SC-13) sits because its Linux check is red on 85c365cf (lane: waiting, CI is red, since 12:30Z); shared-codecs lead owns it, not fixed here. Asked the supervisor to hold or release this run
 - 2026-10-21T16:04Z: re-read SC-f on dev b70dcb71: unchanged (SC-13 #4019 open+clean, no SC-14..16 PR); AC-e1 still waits
 - 2026-10-21T15:32Z: run act-1a15ef870d6-3mm5 does AC-export-sheet only (brief: AC-zoom, AC-colour, AC-tools, AC-guides done). Waits re-read: EK-chrome met (Sources/SuiteUI/ExportSheet.swift on dev); AX-photo, AX-library, AX-flare done. shared-codecs:SC-f not met: SC-13 #4019 open, SC-14 stacked, SC-15 (PhotoWindow+Export.swift) and SC-16 (Library ExportFormat) planned. Real wait on the files AC-e1 adapts; nothing else in the brief can start. Blocked note on #1942 (issuecomment-6319193997). Slice PRs go to dev (CLAUDE.md; the lane retargets main).
 - 2026-10-21T13:39Z: AC-colour fix round 1 PR #4089 head c6707931 (tests + 4 mutation plans, App targets unscored on Linux)

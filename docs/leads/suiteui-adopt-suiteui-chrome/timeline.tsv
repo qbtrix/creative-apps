@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T13:39:22Z	fix-round	fix-round	-	#4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges + green run; AC-tools waits on #4002
 2026-10-21T15:32Z	0	stopped	#1942	AC-export-sheet blocked on shared-codecs:SC-f (SC-13 #4019 open); nothing else in this run's brief
 2026-10-21T16:04Z	0	stopped	#1942	SC-f re-read: SC-13 #4019 still open; AC-export-sheet still blocked
+2026-10-21T16:36Z	0	stopped	#1942	SC-13 #4019 Linux red, lane waiting; AC-export-sheet still blocked
