@@ -8,8 +8,8 @@
 // counter) runs at most 3 times (target 0: only the panel and the two rows
 // whose selection changed redraw). The p95 (packet: ≤ 16 ms) is printed, not
 // gated: a step-time budget belongs in a Tests/perf-suites.txt test, which
-// only the supervisor lists. Keys need a key window, so the harness's window
-// is made key-capable, the panel is focused by a click on "Open" (the current
+// only the supervisor lists. Keys need a key window, so the harness builds a
+// key-capable one (`keyCapable: true`, never a class swap), the panel is focused by a click on "Open" (the current
 // state, so it jumps nowhere), and the presses go through the window as
 // RenderBudgetHistoryPanelTests sends them. Nested in BodyCountSuites: it
 // reads a global body counter. macOS only.
@@ -29,9 +29,8 @@ extension BodyCountSuites {
         static let steps = 30
 
         @Test(.timeLimit(.minutes(2))) func arrowWalkInThreeBodies() async throws {
-            let w = RenderBudgetWindow(PhotoWindow(model: try Self.document()))
+            let w = RenderBudgetWindow(PhotoWindow(model: try Self.document()), keyCapable: true)
             defer { w.close() }
-            object_setClass(w.window, PhotoHistoryKeyWindow.self)
             w.window.makeKey()
             _ = w.window.makeFirstResponder(w.host)
             let bodies = { BodyCountSuites.PhotoWindowStrokeTests.editorBodies() }
@@ -77,8 +76,4 @@ extension BodyCountSuites {
     }
 }
 
-/// The harness's borderless window, allowed to be key so the tab's arrow keys reach it.
-private final class PhotoHistoryKeyWindow: NSWindow {
-    override var canBecomeKey: Bool { true }
-}
 #endif
