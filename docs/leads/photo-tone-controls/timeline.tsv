@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-21T14:50Z	3 W1	check	PT-a	takeover; TC-a still not slice-done on #3476, ToneTarget/ToneRows absent on dev; PT-1 blocked
 2026-10-21T16:31Z	3	heartbeat	#3476	TC-a still not slice-done; rechecked
 2026-10-21T16:34Z	rule 23: Question for the supervisor posted on #3468 after repeated identical TC-a blocked polls
+2026-10-21T16:56Z	released by supervisor answer (c) on #3468; TC-a is SuiteUI's canonical contract

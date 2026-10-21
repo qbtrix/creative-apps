@@ -2,9 +2,9 @@
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 3 blocked on TC-a (run act-1a15eecbafe-u0f9)
-Base: b70dcb71e33b073d8e17f60683fea8c36db02f65
-Next: await supervisor answer on #3468 (comment 6321141841): wait, build TC-a contract, or release; recheck #3476 each heartbeat
+Stage: released (supervisor answer (c) on #3468, 16:37Z)
+Base: 4d4ebb24788bbaf169ff2818f71f52df3753ac51
+Next: none in this run: #3468 waiting-on-prereq; Belt relaunches tone-controls once TC-a (#3476) lands
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
