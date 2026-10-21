@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T03:06Z	heartbeat	DP-a waits unchanged: PD-a #3759 now fast-lane but open, DT-a #3751 in the lane, DK-m/DS-m/PD-u waiting, AD-design not built; DP-7 waits creative-core#787
 2026-10-21T03:27Z	heartbeat	DP-a waits unchanged: PD-a #3759 open (fast-lane label gone again, captain merge), DT-a #3751 in the lane, DK-m/DS-m/PD-u waiting, AD-design not built; DP-7 waits creative-core#787
 2026-10-21T03:49Z	heartbeat	unchanged: DT-a #3751 in the lane (head 72307abf), PD-a #3759 waits captain merge
+2026-10-21T04:11Z	heartbeat	DT-a #3751 merged 03:57Z; DS-a can start on shape-tools; DP-1 still waits PD-a and DS-a
