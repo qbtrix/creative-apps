@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-21T08:26:14Z	check	#3850 #3921 lane-eligible queued; #3499 open; findings 0; dev 733e8ef2
 2026-10-21T09:19Z	stage	FS-5 #3850 merged 08:34Z; FS-u builder relaunched off dev
 2026-10-21T09:29Z	pr	FS-u #3984 opened (supersedes #3851)
+2026-10-21T09:42Z	check	#3921 head 95a94d14 open, #3984 head 0be812aa open; lane run pending (last success predates pushes); #3499 #3419 #3856 open; findings 0
