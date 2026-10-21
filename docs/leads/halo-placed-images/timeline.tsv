@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-20T22:12Z	0	heartbeat	–	still blocked: HS-a (#3445), HK-a (#3536) and PL-a have no Belt-Slice-Done
 2026-10-20T22:34Z	0	heartbeat	–	still blocked: HS-a (#3445), HK-a (#3536) and PL-a have no Belt-Slice-Done
 2026-10-20T23:54Z	0	heartbeat	–	still blocked: HS-a (#3445), HK-a (#3536) and PL-a have no Belt-Slice-Done
+2026-10-21T00:00Z	0	question	#3456	supervisor: park; HS-a is #3676; resume PH-a once HS-a, HK-a, PL-a are done

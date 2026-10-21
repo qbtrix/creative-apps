@@ -23,4 +23,5 @@ Next: re-read the waits of PH-a (shape-tools HS-a, key-editing HK-a, suiteui pla
 - Lead branch is lead/halo-placed-images: lead/placed-images belongs to the suiteui lead.
 
 ## Open
-- PH-a blocked: HS-a (shape-tools #3445, no lead yet), HK-a (key-editing #3536), PL-a (suiteui placed-images, waiting on PL-2).
+- Supervisor (2026-10-21): don't take HS-a; it is #3676 (lead/halo-shape-tools-HS-a), being rebased for the Mac gate. Park placed-images until #3676, HK-a (#3536) and PL-a show Belt-Slice-Done.
+- PH-a blocked: HS-a (shape-tools #3445, PR #3676), HK-a (key-editing #3536), PL-a (suiteui placed-images, waiting on PL-2).
