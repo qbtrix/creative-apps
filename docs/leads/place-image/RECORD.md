@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: W5 PP-7 PR open
+Stage: await green dev run (39665258026 full / 39665905219 photo, queued)
 Base: dev
-Next: PP-7 #4175: per-head macOS build dispatched by the lane; slice-done PP-u, PP-m once full CI 39665258026 (or scoped photo 39665905219) is green
+Next: critic panel + Belt-Slice-Done on green; PP-7 #4175 in lane
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
