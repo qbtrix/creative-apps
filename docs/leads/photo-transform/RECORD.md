@@ -1,10 +1,10 @@
 # transform lead record
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
-Run: act-1a15ac118a1-s70v · Session: claude/feature-lead-playbook-j1aygs · Started: 2026-10-20T19:30Z
-Stage: 3 wave 1
+Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
+Stage: 3 W4 (run act-1a15eecbafe-u0f9)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: read wave 1's PRs (PT-a) on the fast lane; then wave 2
+Next: fixer merges dev into #3969 PT-5 and #4005 PT-3; PT-6 stacks on PT-5 once that head is pushed; PT-7 after #4005; slice-done lines once a scoped photo run holds the last PR
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
@@ -53,6 +53,9 @@ Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transfor
 - Cross-line waits met on dev a48992b: SuiteKernel Transform/Sample/History rules and commands (TT-a #3485/#3486, #3524, #3573), SuiteUI SampleLoupe/SampleSizeChips (EY #3525/#3531/#3540/#3541), TransformRows and handles #3512, HistoryPanel #3568/#3596/#3607, RecoveryFolder #3572, AutosaveSchedule #3576. shell-parity (photo) and AC-photo are built.
 - The swift toolchain was missing on this machine; it was installed with scripts/cloud-setup.sh (6.3.3) so `scripts/ci --changed` runs here.
 - PT-4 runs in parallel with PT-2: it needs only PT-1's FlipAxis.
+- Run act-1a15eecbafe-u0f9 (2026-10-21T14:20Z) takes over this record. The brief asked for base main and status on lead/transform and lead/tone-controls. It uses base dev and these photo-prefixed status branches instead: the fast lane merges only into dev, and lead/transform and lead/tone-controls belong to the live Halo #3443 and SuiteUI #3476 leads. Force-pushing them would rewrite another lead's history.
+- Red Linux runs on #3969, #4005 and #4003 came from dev at the time, not from the PRs: the PhotoPlace CommandPath failure (fixed by #4008), stale Design mutation anchors (DY-a), and LargeCatalogBudget timing (moved to perf-suites in #4050/#4069). A fixer merges origin/dev into each branch so the lane re-runs Linux on a fresh head.
+- This run owns slices PT-m and PT-z only; PT-a and PT-u are counted as done per the brief.
 
 ## Open
 - PT-z waits on PT-u and PT-m.
