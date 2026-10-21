@@ -1,10 +1,10 @@
 # photo export-pack lead record
 
 Issue: #3470 · Packet: docs/blueprints/photo/features/export-pack.md
-Run: act-1a15a9f4eba-h30y · Session: claude/feature-lead-playbook-djd69t · Started: 2026-10-20T18:40Z
-Stage: 3 wave 1
+Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
+Stage: 3 blocked (cross-line waits)
 Base: e382f9d7fba02ffdefc8ba2f23c9461b4774fad6
-Next: PX-1 builder (PhotoExport+Kernel stubs) then PX-3 stacked on it; PX-2 waits suiteui XP-3 (Size row) and AX-photo; PX-4 waits SM-w
+Next: supervisor question 2026-10-21T11:40Z (#3470): XP-3/XP-4 have no PRs and the suiteui lead #3477 is not launched; AX-photo merged (#3890); PX-4 parked; PX-8 waits PT-z, PP-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

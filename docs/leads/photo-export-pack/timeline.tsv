@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-21T09:50:09Z	check	blocked	PX-2/PX-5 wait on XP-3, XP-4, AX-photo	-
 2026-10-21T10:11:47Z	check	blocked	PX-2/PX-5 wait on XP-3, XP-4, AX-photo	-
 2026-10-21T10:35:53Z	check	blocked	PX-2/PX-5 wait on XP-3, XP-4, AX-photo	-
+2026-10-21T11:40:00Z	check	blocked	AX-photo merged #3890; PX-2/PX-5 still wait XP-3, XP-4 (no PRs, #3477 not launched); question to supervisor on #3470	-
