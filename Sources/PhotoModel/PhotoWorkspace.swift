@@ -21,6 +21,7 @@
 // `drag(from:to:)`; a tool that does nothing there stays disabled with
 // `unavailableHelp` (PhotoToolsTests checks this).
 import CoreRaster
+import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
@@ -29,12 +30,10 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
-    /// `toolHelp` asks its sampling service instead. The gradient draws
-    /// nothing until gradient-fill PG-3 (PhotoGradientTool+Kernel.swift).
+    /// `toolHelp` asks its sampling service instead.
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
-        case .gradient: "Not built yet (PG-3)."
         default: nil
         }
     }
@@ -110,6 +109,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
     public internal(set) var exportOptions = ExportOptions()
+    /// The Export sheet and its write, on the kernel's run (PhotoExportRun+Kernel.swift).
+    public internal(set) var exportRun = ExportRun<ExportOptions>.idle
     /// What the open file is, for Save (PhotoDocumentFile.swift).
     public internal(set) var fileKind: PhotoFileKind?
     /// The history step last saved, opened or created (`currentStepID`), so a
@@ -120,6 +121,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var statusMessage: String?
     /// "Merging…" while Merge Down or Flatten Image works off the main actor (PhotoLayerOps.swift).
     public internal(set) var progress: String?
+    /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
+    public internal(set) var fileFlow = PhotoFileFlowState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
@@ -386,6 +389,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
+            && lhs.exportRun == rhs.exportRun
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
     }

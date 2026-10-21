@@ -31,7 +31,7 @@ extension HaloProject: HeadlessDocument {
 
     @Test func oneSpecPerCase() {
         let ids = HaloCommand.allCases.map(\.commandID)
-        #expect(ids.count == 58 && Set(ids).count == ids.count)
+        #expect(ids.count == 62 && Set(ids).count == ids.count)
         #expect(catalog.ids == ids.sorted() && HaloProject.commandSpecs.map(\.id) == ids)
     }
 
@@ -84,6 +84,25 @@ extension HaloProject: HeadlessDocument {
         #expect(Set(catalog.ids).subtracting(listed).isEmpty)
     }
 
+    /// Key editing's four ids (KE-1) join the catalog; the lane pick keeps its params.
+    @Test func keyEditingIdsJoinAndLanePickKeepsItsParams() throws {
+        let ids = ["timeline.pick-keys", "timeline.select-all-keys", "timeline.move-keys", "timeline.end-key-drag"]
+        #expect(ids.allSatisfy { catalog.spec($0) != nil })
+        #expect(catalog.spec("timeline.move-keys")?.kind == .edit)
+        let lane = try #require(catalog.spec("easing.select-lane-keys"))
+        #expect(lane.params == .object(["layerID": .string("A composition or layer id.", maxLength: 64),
+            "frame": .integer(minimum: 0), "extending": .boolean], required: ["extending", "frame", "layerID"]))
+        var project = Self.ballSelected()
+        let pick: JSONValue = .object(["layerID": .string("comp-1-layer-2"), "frame": .number(24), "mode": .string("extend")])
+        #expect(try catalog.run("timeline.pick-keys", params: pick, on: &project).undoStep == nil)
+        #expect(project.pickedFrames(of: "comp-1-layer-2") == [24])
+        let clear: JSONValue = .object(["layerID": .string("comp-1-layer-2"), "mode": .string("replace")])
+        _ = try catalog.run("timeline.pick-keys", params: clear, on: &project)
+        #expect(project.pickedFrames(of: "comp-1-layer-2").isEmpty)
+        #expect(try catalog.run("timeline.select-all-keys", params: .object([:]), on: &project).undoStep == nil)
+        #expect(project.pickedFrames(of: "comp-1-layer-2") == [0, 12, 24])
+    }
+
     /// Where Halo breaks a kernel law today: "<ids>: <law>", by reason. Each is a gap for a later slice.
     static let exempt: [String: [String]] = [
         "Halo saves the playhead in the file": ["animation.go-to-end animation.next-frame timeline.scrub: queryOrViewChangesNoBytes"],
@@ -93,6 +112,7 @@ extension HaloProject: HeadlessDocument {
         "undo of a duplicate keeps the bumped id counter": ["layer.duplicate: undoRestoresBytes"],
         "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-color text.set-size: exampleRuns"],
         "files and rendering run through HaloHeadless in AC-h2": ["file.open file.save file.save-as render.start: exampleRuns"],
+        "key editing's move is a stub until KE-4": ["timeline.move-keys: exampleRuns"],
     ]
 
     @Test func conformance() {
