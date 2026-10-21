@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-21T16:31Z	3	heartbeat	#3969	PT-5 merged c4f7d5b93; PT-6 building; #4005 in lane
 2026-10-21T16:33Z	W4 builders: PT-6 from dev, PT-7 stacked on #4005
 2026-10-21T16:47Z	PT-7 #4127 opened stacked on #4005 at f7e70c8d; sent back to merge dev (PT-5 live) and drop stub expectations
+2026-10-21T16:56Z	#4005 PT-3 merged; #4127 sentinel needs-split measured while stacked, now +163/2
