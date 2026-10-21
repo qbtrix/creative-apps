@@ -1,6 +1,6 @@
 // LibraryFoldersTests.swift (folders FO-1, written before the bodies): the FOLDERS tree and its two commands.
 // The stub checks run now: the specs' ids, kinds, schemas and reasons, and their runs refuse as not built.
-// FO-4 turns on the tree checks (three imports give three roots, a chain collapses into one row, own and total
+// FO-4 turned on the tree checks (three imports give three roots, a chain collapses into one row, own and total
 // counts, `/a/bc` never under `/a/b`, all-missing folders, 10,000 paths under 20 ms); FO-5 the filter checks
 // (subfolders off shows only a folder's own photos, on its descendants' too, `folders.list` matches the tree).
 // Fails when a count is off, a sibling counts as a child, or the filter leaks another folder's photos. Linux-safe.
@@ -76,12 +76,11 @@ import Testing
         #expect(throws: CatalogError.notBuilt(id: "view.show-folder", feature: "folders FO-5")) {
             try show.run(&full, .object(["path": .string("/p/trips")]))
         }
-        #expect(LibraryFolders.tree(Self.trips).isEmpty, "the stub tree is empty until FO-4")
     }
 
     // MARK: The tree (FO-4)
 
-    @Test(.disabled("waits on FO-4")) func threeImportsGiveThreeRoots() {
+    @Test func threeImportsGiveThreeRoots() {
         let photos = ["/Volumes/Card/DCIM/a.jpg", "/Users/me/family/b.jpg", "/Users/me/family/kids/c.jpg",
                       "/srv/pets/d.jpg"].map { Self.photo($0) }
         let roots = LibraryFolders.tree(photos)
@@ -89,7 +88,7 @@ import Testing
         #expect(roots.map(\.totalCount).reduce(0, +) == 4)
     }
 
-    @Test(.disabled("waits on FO-4")) func aChainWithPhotosOnlyAtTheEndIsOneRow() {
+    @Test func aChainWithPhotosOnlyAtTheEndIsOneRow() {
         let roots = LibraryFolders.tree([Self.photo("/a/b/c/one.png"), Self.photo("/a/b/c/two.png")])
         #expect(roots.count == 1)
         #expect(roots.first?.name == "a/b/c")
@@ -98,7 +97,7 @@ import Testing
         #expect(roots.first?.ownCount == 2)
     }
 
-    @Test(.disabled("waits on FO-4")) func countsWithAndWithoutDescendants() throws {
+    @Test func countsWithAndWithoutDescendants() throws {
         let roots = LibraryFolders.tree(Self.trips)
         let trips = try #require(Self.node("/p/trips", in: roots))
         #expect(trips.ownCount == 1)
@@ -109,7 +108,7 @@ import Testing
         #expect(Self.node("/p/trips/2026", in: roots)?.totalCount == 1)
     }
 
-    @Test(.disabled("waits on FO-4")) func aSiblingWhoseNameIsAPrefixIsNotAChild() throws {
+    @Test func aSiblingWhoseNameIsAPrefixIsNotAChild() throws {
         let roots = LibraryFolders.tree(["/a/b/x.png", "/a/bc/y.png"].map { Self.photo($0) })
         #expect(Self.node("/a/b", in: roots)?.children.isEmpty == true)
         #expect(Self.node("/a/b", in: roots)?.totalCount == 1)
@@ -118,7 +117,7 @@ import Testing
         #expect(trip.totalCount == 1, "trip/ never counts trips/' photos")
     }
 
-    @Test(.disabled("waits on FO-4")) func aFolderIsAllMissingOnlyWhenEveryPhotoUnderItIs() {
+    @Test func aFolderIsAllMissingOnlyWhenEveryPhotoUnderItIs() {
         let photos = [Self.photo("/m/gone/a.png", missing: true), Self.photo("/m/gone/sub/b.png", missing: true),
                       Self.photo("/m/half/c.png", missing: true), Self.photo("/m/half/d.png")]
         let roots = LibraryFolders.tree(photos)
@@ -126,7 +125,7 @@ import Testing
         #expect(Self.node("/m/half", in: roots)?.allMissing == false)
     }
 
-    @Test(.disabled("waits on FO-4")) func tenThousandPaths() {
+    @Test func tenThousandPaths() {
         let photos = (0..<10_000).map { Self.photo("/big/\($0 % 20)/\($0 % 7)/\($0).png") }
         let start = ContinuousClock.now
         let roots = LibraryFolders.tree(photos)
