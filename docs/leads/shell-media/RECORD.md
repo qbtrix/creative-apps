@@ -4,7 +4,7 @@ Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
 Stage: 3 build, wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: SM-1 #4034 gate on head 8ca7a2e, then SM-2 #4035 ready, then SM-3/4/5/7 drafts; SM-6/SM-8 builders after
+Next: #4034 SM-1 in lane (Linux check); SM-2 #4035 up after it merges; then SM-3, 4, 5, 7
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
