@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T03:30Z	3	waiting	#3827	check-in: #3827 open, no new labels or comments; SF-8 waits
 2026-10-21T03:52Z	3	waiting	#3827	check-in: #3827 open, no labels or comments; lane merging other batches (03:14Z); SF-8 waits
 2026-10-21T04:14Z	3	waiting	#3827	check-in: lane passes #3827 (318 lines, 5 files, paths ok); it is one of 27 ready PRs behind batch-20261021032004; SF-8 waits
+2026-10-21T04:36Z	3	waiting	#3827	check-in: lane still bisecting batch-20261021032004 (probe 0); #3827 one of 28 ready PRs; SF-8 waits
