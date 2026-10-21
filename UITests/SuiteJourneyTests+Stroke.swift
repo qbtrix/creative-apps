@@ -3,16 +3,14 @@
 // `suiteui`. The editor's rows are SS-3's `suite.stroke.*`: `color` (its hex field), `width`, `join.<join>`,
 // `cap.<cap>`, `dash.<preset>`, `dash-length` and `gap` (Custom), `trim-start`, `trim-end`, `trim-offset`, `add` and
 // `remove`; the preview is `suite.gallery.stroke-editor.preview`; the page logs `<command id> <intent>` to
-// `suite.gallery.log`. SS-2 writes it; it skips until SS-4 turns on steps 1 to 3 (and adds step 5's Tab walk once
-// SS-3's rows take focus), and SS-9 runs steps 4 and 5 on live.
+// `suite.gallery.log`. SS-2 wrote it; SS-4 turns on steps 1 to 3 on the page's own stroke (colour, width, join and cap
+// apply there); steps 4 and 5 skip with "waits on SS-9", which runs them on live with dash and trim enabled.
 import XCTest
 
 final class SuiteStrokeJourneyTests: XCTestCase {
-    private static let editorWait = true
     private static let liveWait = true
 
     @MainActor func testStrokeEditorDashAndTrim() throws {
-        if Self.editorWait { throw XCTSkip("waits on SS-4") }
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "index"])
         XCTAssert(gallery.element("suite.gallery.index").waitForExistence(timeout: 30), "no gallery index")
         gallery.element("suite.gallery.index.stroke-editor").click() // 1. A 2 pt black stroke and every row.
@@ -51,7 +49,7 @@ final class SuiteStrokeJourneyTests: XCTestCase {
         XCTAssert((preview.value as? String ?? "").hasSuffix("round round"), "the preview's join and cap didn't round")
         gallery.shot("stroke-editor-round")
 
-        if Self.liveWait { return } // SS-9 turns on steps 4 and 5 on live.
+        if Self.liveWait { throw XCTSkip("waits on SS-9") } // SS-9 turns on steps 4 and 5 on live.
         gallery.element("suite.stroke.dash.dashed").click() // 4. Dashed, then Custom 10 and 4.
         expectStrokeLog(gallery, "stroke.dash", "the Dashed chip logged no stroke.dash")
         gallery.shot("stroke-editor-dashed")
