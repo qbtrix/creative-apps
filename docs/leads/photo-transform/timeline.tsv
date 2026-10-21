@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-21T19:10Z	2026-10-21T19:11Z PT-6 #4131 (e73823a37), PT-7 #4127 (dc8f2de75), PT-8 #4133 (6d5f3a402) merged; supervisor: keep records on lead/photo-transform and lead/place-image
 2026-10-21T19:54Z	full CI 39665258026 queued at 369ecc7a2 (contains PT-8)
 2026-10-21T20:16Z	20:17Z full CI 39665258026: Linux green, macOS queued; #4175 in lane
+2026-10-21T20:39Z	20:40Z macOS queue still backed up; 39665258026 and scoped photo 39665905219 queued; #4175 mac build dispatched
