@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-21T02:36Z	0	stage-start	-	setup, base 2ab0eb963
+2026-10-21T02:36Z	3	stage-start	wave1	FH-2 / AJ-2s; IM-a and BK-m not merged
+2026-10-21T03:28Z	3	pr-opened	#3846	AJ-2s preset store stubs; IM-a still open (re-read 03:3xZ)

@@ -4,7 +4,7 @@ Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
 Run: act-1a15c4e2e3b-zh3u · Session: claude/fill-heal-adjust-everywhere-t5hvqe · Started: 2026-10-21T02:36Z
 Stage: 3 wave 1
 Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: read AJ-2s's PR; re-read suite-imaging #3715 (IM-a) for AJ-1 and AJ-2l
+Next: wait for the lane to merge #3846 (AJ-2s); re-read suite-imaging #3715 (IM-a) for AJ-1 and AJ-2l
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,7 +22,7 @@ Next: read AJ-2s's PR; re-read suite-imaging #3715 (IM-a) for AJ-1 and AJ-2l
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | AJ-1 | AJ-a | 2+ | kinds, filters, commands stubs + disabled checks | Sources/SuiteImaging/Adjust/{AdjustKinds,FilterRules,AdjustCommands}.swift, tests, C4 part | suites compile | – | blocked (IM-a) |
-| AJ-2s | AJ-a | 1 | PresetStoring, PresetRecord, PresetStore, FakePresetStore; PresetStoreTests disabled (waits on AJ-7); C4 part | Sources/SuiteModel/Presets/PresetStore.swift, Sources/SuiteModel/Fakes/FakePresetStore.swift, Tests/SuiteModelTests/PresetStoreTests.swift, docs/c4/parts/creative-apps/suite-model/suite-presets.json | compiles, disabled by name | – | building |
+| AJ-2s | AJ-a | 1 | PresetStoring, PresetRecord, PresetStore, FakePresetStore; PresetStoreTests disabled (waits on AJ-7); C4 part | Sources/SuiteModel/Presets/PresetStore.swift, Sources/SuiteModel/Fakes/FakePresetStore.swift, Tests/SuiteModelTests/PresetStoreTests.swift, docs/c4/parts/creative-apps/suite-model/suite-presets.json | compiles, disabled by name | #3846 | in lane (Fast-Check pass, clean) |
 | AJ-2l | AJ-a | 2+ | LookPreset, BuiltInLooks as data | Sources/SuiteImaging/Adjust/LookPresets.swift | built-in looks decode | – | blocked (IM-a: target, ToneSettings) |
 
 ## Reviews
@@ -31,6 +31,7 @@ Next: read AJ-2s's PR; re-read suite-imaging #3715 (IM-a) for AJ-1 and AJ-2l
 
 ## Decisions
 - Base dev, not main: CLAUDE.md and the lane retarget main to dev.
+- Status mirrored to lead/suiteui-adjust-everywhere (docs/leads/suiteui-adjust-everywhere/), the branch name Belt's nudge read; lead/adjust-everywhere kept, per the brief.
 - AJ-2 split: AJ-2s (SuiteModel store) has no wait and ships now; AJ-2l (LookPresets.swift) needs the SuiteImaging target and ToneSettings from IM-a, which aren't on dev.
 
 ## Open
