@@ -7,6 +7,9 @@
 // Rate row carries `flare.inspector.scene.fps` and "<n> fps" as its value; its
 // menu is found as a menu, pop-up or plain button with that id or the label
 // "Frame Rate". Shots: `flare-scene-<step>`.
+// FJ-FR (frame-rates FR-10b): `testSceneAt2398` picks 23.976 fps from the
+// same menu; the row reads "23.976 fps" and the status bar's fps pill
+// (`flare.status.fps`) holds 23.976 within 1%. Shots: `flare-scene-2398-<step>`.
 import XCTest
 
 final class FlareSceneInspectorJourneys: XCTestCase {
@@ -28,15 +31,7 @@ final class FlareSceneInspectorJourneys: XCTestCase {
         flare.shot("scene-1-open")
 
         // 2. Frame Rate → 30 fps: the row reads 30 and the total is no longer 02:00.
-        let picker = flare.element("suite.inspector").descendants(matching: .any).matching(
-            NSPredicate(format: "elementType IN %@ AND (identifier == 'flare.inspector.scene.fps' OR label == 'Frame Rate')",
-                        [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) })
-        ).firstMatch
-        XCTAssert(picker.waitForExistence(timeout: 5), "no Frame Rate menu (flare.inspector.scene.fps)")
-        picker.click()
-        let thirty = flare.app.menuItems.matching(NSPredicate(format: "title == '30 fps'")).firstMatch
-        XCTAssert(thirty.waitForExistence(timeout: 5), "the Frame Rate menu offers no 30 fps")
-        thirty.click()
+        pickRate("30 fps", flare)
         expectRate(30, flare)
         XCTAssert(waitFor { !timecode.label.hasSuffix("/ 02:00") },
                   "the timecode still totals 02:00 at 30 fps: \(timecode.label)")
@@ -49,8 +44,41 @@ final class FlareSceneInspectorJourneys: XCTestCase {
         flare.shot("scene-3-undo")
     }
 
+    /// FJ-FR: 23.976 fps lands in the row and the fps pill, exact to 1%, not rounded to 24.
+    @MainActor func testSceneAt2398() {
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "bounce"])
+        XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        XCTAssert(flare.element("flare.inspector.scene").waitForExistence(timeout: 10), "no SCENE section")
+        expectRate(24, flare)
+        flare.shot("scene-2398-1-open")
+
+        pickRate("23.976 fps", flare)
+        expectRate("23.976", flare)
+        let pill = flare.element("flare.status.fps")
+        XCTAssert(pill.waitForExistence(timeout: 5), "no fps pill (flare.status.fps)")
+        func reading() -> Double? {
+            pill.label.range(of: #"[0-9]+(\.[0-9]+)?"#, options: .regularExpression).flatMap { Double(pill.label[$0]) }
+        }
+        XCTAssert(waitFor { reading().map { abs($0 - 23.976) / 23.976 <= 0.01 && $0 != 24 } ?? false },
+                  "the fps pill reads \(pill.label), not 23.976 fps")
+        flare.shot("scene-2398-2-picked")
+    }
+
+    /// Opens the SCENE section's Frame Rate menu and picks the item titled `title`.
+    @MainActor private func pickRate(_ title: String, _ flare: Journey) {
+        let picker = flare.element("suite.inspector").descendants(matching: .any).matching(
+            NSPredicate(format: "elementType IN %@ AND (identifier == 'flare.inspector.scene.fps' OR label == 'Frame Rate')",
+                        [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) })
+        ).firstMatch
+        XCTAssert(picker.waitForExistence(timeout: 5), "no Frame Rate menu (flare.inspector.scene.fps)")
+        picker.click()
+        let item = flare.app.menuItems.matching(NSPredicate(format: "title == %@", title)).firstMatch
+        XCTAssert(item.waitForExistence(timeout: 5), "the Frame Rate menu offers no \(title)")
+        item.click()
+    }
+
     /// The Frame Rate row reads "`fps` fps" within five seconds.
-    @MainActor private func expectRate(_ fps: Int, _ flare: Journey) {
+    @MainActor private func expectRate(_ fps: some CustomStringConvertible, _ flare: Journey) {
         let row = flare.app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier == 'flare.inspector.scene.fps' AND value == %@", "\(fps) fps")).firstMatch
         XCTAssert(row.waitForExistence(timeout: 5),
