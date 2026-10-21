@@ -4,7 +4,7 @@ Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
 Stage: 3 build, wave 4
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4201, #4103 RP-3, #4110 RP-4 in lane; #4209 RP-3e draft (ready after #4103); RP-5 after RP-3 and RP-4
+Next: #4201, #4103 RP-3, #4110 RP-4 in lane; drafts #4209 (after #4103), #4218 RP-5 (after #4103 + #4110); RP-5b building; then RP-6, RP-7 feature-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,7 +17,12 @@ Next: #4201, #4103 RP-3, #4110 RP-4 in lane; #4209 RP-3e draft (ready after #410
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | RP-1 | RP-a | 1 | checks first + ProblemReport/BetaNotes stubs, SuiteHelpCatalog specs, C4 part | packet RP-1 (8 files) | tests compile, disabled waits on RP-4 | #4048 | merged 6afa46a |
-| RP-2 | RP-a | 1 | Help menu from SuiteHelpCatalog via MenuCommand(spec:); launcher Welcome; journey skipped until RP-5 | packet RP-2 (5 files) | journey written | #4049 | ready, in lane, head fd92d1da |
+| RP-2 | RP-a | 1 | Help menu from SuiteHelpCatalog via MenuCommand(spec:); launcher Welcome; journey skipped until RP-5 | packet RP-2 (5 files) | journey written | #4049 | merged dd92b60 |
+| RP-3 | RP-u | 2 | ProblemReportSheet and BetaNotesView on the stubs; Help items open their windows | packet RP-3 | SuiteHelpCommandsTests; carries #4201 baseline fix | #4103 | ready; gate pass, Head 94a89c8e |
+| RP-4 | RP-m | 2 | report bodies: redaction, suite filter, 7 days, newest 3 | packet RP-4 | ProblemReportTests | #4110 | ready; gate pass, Head d6321ab0 |
+| RP-3e | RP-u | 3 | Save… and Email… (ProblemReportOutput) | packet RP-3 (split) | Mutate 4/4 SuiteModel.ProblemReportOutput | #4209 | draft, stacked on #4103; Head cfd36f2d |
+| RP-5 | RP-m | 3 | help catalog bodies + CLI `suite help.*` (HelpReports); fixes escaped-slash home-path leak in RP-4's encoder | packet RP-5 (split) | HelpReportsTests, SuiteHelpCatalogTests; Mutate 5/5 SuiteKernel.SuiteHelpCatalog | #4218 | draft, stacked on #4103 + #4110; Head 3b80095f |
+| RP-5b | RP-m | 4 | crash folder reader, shell Help provider, Help journey on | packet RP-5 (split) | journey | | building |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |

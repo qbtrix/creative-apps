@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T21:18Z	2026-10-21T21:18Z	heartbeat	lane	-	macOS build queue deep; dev Linux red only on CommandPathTests launcher, fix #4201 in lane
 2026-10-21T21:25Z	2026-10-21T21:25Z	build	pr	#4209	RP-3e draft stacked on #4103, Head cfd36f2d, 7 files +179/-5, mutate 4/4; no beta address in repo, mail has no recipients
 2026-10-21T21:40Z	2026-10-21T21:40Z	check	lane-wait	#3856	lane batches red on dev launcher.txt:21 (run 39676795156); #4201 fixes it, flagged on dev-red; our PRs built, queued
+2026-10-21T21:55Z	2026-10-21T21:55Z	build	draft	#4218	RP-5 draft (split; RP-5b next), gate pass, mutate 5/5; fixes escaped-slash redaction leak
