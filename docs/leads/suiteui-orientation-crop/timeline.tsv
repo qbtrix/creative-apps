@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T16:23:20Z	poll	#4088 macOS build 39625776416 green at 0c98d00f; awaiting lane batch
 2026-10-21T16:44:59Z	merge	OC-m #4088 merged b48e63e3; dev Linux 39637279724 running
 2026-10-21T17:02:50Z	done	OC-m Belt-Slice-Done posted (comment 6321755384), Linux 39637279724
+2026-10-21T17:55:57Z	poll	DS-u, DS-photo, CB-library, IM-z, AR-photo-u, CB-z not on dev; blocked poll 1
