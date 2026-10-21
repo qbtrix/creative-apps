@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T01:39Z	heartbeat	#3833 and #3834 in the lane (macOS builds dispatched), no needs-fix; XP-3 not started, SM-w absent
 2026-10-21T02:00Z	heartbeat	#3833 and #3834 still in the lane (macOS builds), no needs-fix; XP-3 not started, SM-w absent
 2026-10-21T02:23Z	heartbeat	#3833 macOS build run 39526045534 and #3834 run 39528087557 still queued (lane macOS runners backed up; batch 20261021005140 bisecting); no needs-fix
+2026-10-21T02:44Z	heartbeat	#3834 macOS build run 39528087557 passed (it carries DX-1 too); #3833 run 39526045534 still queued; no needs-fix
