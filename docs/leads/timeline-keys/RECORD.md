@@ -35,6 +35,9 @@ Next: build TK-a (TK-1 + TK-2) as one slice PR, then stack TK-5 (TK-m kernel hal
 - TK-1 and TK-2 ship as one TK-a slice PR (rule 22).
 - TK-m is split: TK-5 (kernel bodies) ships now as its own PR stacked on TK-a, since TK-6 waits on AJ-halo, TS-halo and AN-halo, which are far off; TK-6 follows as the slice's second PR.
 
+- Hand-offs (packet): FG-a, FK-a (FlareInspectorFill), KE-a and CL-probe (HaloTimelineView) are in `planned` features. Open PRs #4055 (2 lines in FlareInspectorFill), #4147 and #4166 (8 lines in HaloTimelineView) touch the same files; their edits are small, so TK-u goes ahead and the lane integrates any conflict.
+- Builders build the stacked slices one after another in one worktree; the lead opens the PRs.
+
 ## Open
 - TK-6 waits on adjust-everywhere:AJ-halo, text-style:TS-halo, anchor-parenting:AN-halo (and adopt-kernel-easing:AE-halo, AE-h2 open #2842 in that RECORD).
-- TK-u waits on timeline-select-all (to check).
+- TK-u: timeline and timeline-select-all are built (#3537 closed); it starts once the TK-a branch is pushed.
