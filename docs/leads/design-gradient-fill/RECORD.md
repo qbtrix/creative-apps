@@ -2,14 +2,14 @@
 
 Issue: #3415 · Packet: docs/blueprints/design/features/gradient-fill.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z (prior run act-1a159c9b6b4-va3c)
-Stage: 3 wave 1 of this run (DG-a in the lane, #3687)
+Stage: 3 wave 1 done (DG-a #3687 merged b17264bf, Belt-Slice-Done posted); wave 2 blocked on SuiteUI #3677
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: DG-a #3687 (head 502830b8) merges via its batch; #3677 filed for GradientEditor (needs-ui). DG-u waits GF-2 (GradientShading), DG-m waits GF-6 and GF-7 (suiteui gradient-fill, not on dev)
+Next: DG-a critics on the first scoped: design run containing b17264bf; DG-u waits GF-2 (GradientShading), DG-m waits GF-6 and GF-7, DG-z after both (#3677)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DG-a | DesignNode.gradient, GradientFillTarget stubs, Fill section on them | DG-1, DG-2 | MJ-DG | GF-a | yes | 0 | in lane #3687 | – | – |
+| DG-a | DesignNode.gradient, GradientFillTarget stubs, Fill section on them | DG-1, DG-2 | MJ-DG | GF-a | yes | 0 | done | – | – |
 | DG-u | canvas, text, PNG and PDF paint the gradient; snapshots, budget | DG-3, DG-6 | DJ-G1 | DG-a; GF-3 (DG-6) | yes | 0 | waiting | – | – |
 | DG-m | fill commands as one step; SVG gradients | DG-4, DG-5 | MJ-DG | DG-a; GF-6, AC-design (DG-4); GF-7, DE-s (DG-5) | no | 0 | waiting | – | – |
 | DG-z | journey on live; first-cut line; built | DG-7, DG-8 | DJ-G1 | DG-u, DG-m; design-export | no | 0 | waiting | – | – |
@@ -34,3 +34,4 @@ Next: DG-a #3687 (head 502830b8) merges via its batch; #3677 filed for GradientE
 
 ## Open
 - none
+- Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
