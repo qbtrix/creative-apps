@@ -2,7 +2,7 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: DY-u round 2 #4081 build green (2026-10-21T23:18Z), merge on lane sweep; DY-m waits DT-m (DT-6 PR pending)
+Stage: DY-u round 2 #4081 build green, lane Linux red on dev's library baseline (2026-10-21T23:41Z); merge dev once dev is green; DY-m waits DT-m
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: #4081 (round 2, #4061; head 1a5a24be with #4215 ported for dev's Photo compile break, Fast-Check pass) merges -> Belt-Slice-Done DY-u gaps #3987 #3990 #3994 on the next green design run. DY-m waits transform:DT-m (#4187 open; DT-6 after DG-m)
 
