@@ -56,3 +56,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-21T21:33Z: check-in: #4028 still open on the supervisor's Mac gate. IM-2 gated.
 - 2026-10-21T21:56Z: #4028 (IM-1) still waiting for the supervisor merge (Package.swift). IM-2 is ready on lead/suite-imaging-IM-2 (775148e3).
 - 2026-10-21T22:18Z: #4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
+- 2026-10-21T22:48Z: #4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
