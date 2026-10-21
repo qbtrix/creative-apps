@@ -69,11 +69,11 @@ extension FlareWorkspace {
         return RecoveryFolder(store: store, ext: recoveryExtension)
     }
 
-    /// This launch's folder (`recoveryFolder`), after an earlier build's copy moved into it; nil, with no move, while
-    /// recovery is off, so a launch that keeps no state never touches the person's old file.
+    /// This launch's folder (`recoveryFolder`), after an earlier build's copy moved into it. A launch that ignores
+    /// state never moves it, own store or not, so a test launch never touches the person's old file.
     public static func launchRecoveryFolder(arguments: [String], home: String, ignoresState: Bool) -> RecoveryFolder? {
         guard let folder = recoveryFolder(arguments: arguments, home: home, ignoresState: ignoresState) else { return nil }
-        moveLegacyRecovery(into: folder, arguments: arguments, home: home)
+        if !ignoresState { moveLegacyRecovery(into: folder, arguments: arguments, home: home) }
         return folder
     }
 

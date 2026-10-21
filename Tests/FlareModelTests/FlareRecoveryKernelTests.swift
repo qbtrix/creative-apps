@@ -201,6 +201,8 @@ import Testing
         #expect(FlareWorkspace.launchRecoveryFolder(arguments: [], home: home, ignoresState: true) == nil)
         #expect(FileManager.default.fileExists(atPath: old))
         #expect(FlareWorkspace.launchRecoveryFolder(arguments: arguments, home: home, ignoresState: true) != nil)
+        #expect(try FileManager.default.fileExists(atPath: old) && Self.folder(arguments: arguments, home: home).leftBehind().isEmpty)
+        #expect(FlareWorkspace.launchRecoveryFolder(arguments: arguments, home: home, ignoresState: false) != nil)
         #expect(!FileManager.default.fileExists(atPath: old))
     }
 
