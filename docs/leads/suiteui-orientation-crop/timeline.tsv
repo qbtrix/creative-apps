@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-21T11:26Z	0	started	-	run act-1a15e33396b-eo15, base ded2ca57
+2026-10-21T11:26Z	3	wave-started	-	wave 1: contract slice PR
+2026-10-21T13:18Z	3	heartbeat	-	OC-a held by dev-red #3856 (fixed); rebasing and opening PR
