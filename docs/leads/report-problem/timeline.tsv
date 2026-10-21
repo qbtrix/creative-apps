@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T14:53Z	2026-10-21T14:53:16Z	wave2	resume	-	session limit stopped every wave-2 builder and the marker agent at about 14:30Z; resuming from the journals
 2026-10-21T15:00Z	2026-10-21T15:00:58Z	3	gate-restored	#4048	dev-red cleared; dev merged, scripts/ci --changed PASS, markers restored at f59844e
 2026-10-21T15:18Z	2026-10-21T15:18:12Z	stage3	wave2-resumed	wf_f471d5ad-82e	RP-4 (RP-m) and RP-3 (RP-u) builders restarted on dev 9951eea
+2026-10-21T15:39Z	2026-10-21T15:39:44Z	stage3	poll	lane	macOS builds pending on 4021/4034/4048; 4023 merged dev, awaiting lane
