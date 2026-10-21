@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T16:31Z	heartbeat	poll	-	#4033 macOS build green; still waits on lane sweep (lane busy with backlog)
 2026-10-21T17:06:25Z	LP-z	pr	#4132	LP-4 opened, no-fast-lane, supervisor merge asked
 2026-10-21T17:06:25Z	LP-m	slice-done	39637279724	Belt-Slice-Done posted
+2026-10-21T17:31:01Z	LP-z	answer	#4132	supervisor approved #4132; merges by hand once its macOS run is green (queue backed up); LP-6 after
