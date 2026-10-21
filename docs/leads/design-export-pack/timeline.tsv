@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-21T01:16Z	3	heartbeat	#3833	lane dispatched macOS build; DX-3 building; XP-3 still waits TC-a, PL-a
 2026-10-21T01:23Z	3	pr-open	#3834	DX-3 CI: PASS, mutations 18/18, stacked on #3833
 2026-10-21T01:39Z	heartbeat	#3833 and #3834 in the lane (macOS builds dispatched), no needs-fix; XP-3 not started, SM-w absent
+2026-10-21T02:00Z	heartbeat	#3833 and #3834 still in the lane (macOS builds), no needs-fix; XP-3 not started, SM-w absent
