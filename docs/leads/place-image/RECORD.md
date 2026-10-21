@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: fix PRs #4252 (PT-m, #4247) and #4253 (PP-m, #4248) open in lane, clean; full CI 39665258026 red with the same photo render-budget failures only (halo failures not ours)
+Stage: PP-7 #4175 merged; fix PRs #4252 #4253 waiting on lane per-head macOS builds (macOS queue backed up)
 Base: dev
-Next: lane batches #4252 #4253 #4175; then green photo run -> critics -> Belt-Slice-Done
+Next: fix PRs merge; then green photo run -> critics -> Belt-Slice-Done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
