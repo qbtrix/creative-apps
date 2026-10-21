@@ -1,0 +1,12 @@
+# Files under Sources/ that still import ImageIO (shared-codecs rule 20: one ImageIO adapter,
+# Sources/SuiteShell/SuiteImageIO.swift). ImageIOImportRatchetTests fails on any other file that imports it.
+# Shrink only: each adopting task deletes its line, and SC-12 deletes this file.
+Sources/DesignApp/DesignRasterizer.swift
+Sources/FlareApp/StageRasterizer.swift
+Sources/HaloApp/HaloPNGWriter.swift
+Sources/LibraryApp/Platform/ImageIODecoder.swift
+Sources/LibraryApp/Platform/JPEGWriter.swift
+Sources/PhotoApp/ImageIOCodec.swift
+Sources/PhotoApp/PhotoPasteboard.swift
+Sources/SuiteUI/Gallery/GalleryPlaceImage.swift
+Sources/SuiteUI/PlacedImageView.swift
