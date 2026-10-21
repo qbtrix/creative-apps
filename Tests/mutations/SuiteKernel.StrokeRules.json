@@ -19,5 +19,33 @@
     "find": "min(max(width, widths.lowerBound), widths.upperBound)",
     "replace": "max(width, widths.lowerBound)",
     "tests": "StrokeRulesTests"
+  },
+  {
+    "label": "trimThenDash: the path is dashed before it is trimmed, so a trim cuts the dashes' length instead of the outline's",
+    "file": "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "find": "            out = try out.trimmed(start: trim.start, end: trim.end, offset: trim.offset, mode: trim.mode, tolerance: tolerance)\n        }\n        if !stroke.dash.isEmpty { out = try out.dashed(stroke.dash, phase: stroke.dashPhase, tolerance: tolerance) }",
+    "replace": "            if !stroke.dash.isEmpty { out = try out.dashed(stroke.dash, phase: stroke.dashPhase, tolerance: tolerance) }\n            out = try out.trimmed(start: trim.start, end: trim.end, offset: trim.offset, mode: trim.mode, tolerance: tolerance)\n            return out\n        }\n        if !stroke.dash.isEmpty { out = try out.dashed(stroke.dash, phase: stroke.dashPhase, tolerance: tolerance) }",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "startEqualToEndPaintsNothing: a trim whose start equals its end paints the whole outline",
+    "file": "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "find": "guard trim.start != trim.end else { return Path(elements: []) }",
+    "replace": "guard trim.start != trim.end else { return path }",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "dashReadsThePhase: dash(of:) drops the stored phase, so a custom phase reads back as 0",
+    "file": "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "find": "(stroke.dash, stroke.dashPhase) }",
+    "replace": "(stroke.dash, 0) }",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "validPattern: an all-zero pattern passes, so stroke.dash saves a pattern FlareCore refuses to dash",
+    "file": "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "find": "&& sum > 0 && sum.isFinite)",
+    "replace": "&& sum >= 0 && sum.isFinite)",
+    "tests": "StrokeDashTrimTests"
   }
 ]

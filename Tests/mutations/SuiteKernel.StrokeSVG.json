@@ -19,5 +19,26 @@
     "find": "SampleRules.hex(stroke.color).lowercased()",
     "replace": "SampleRules.hex(stroke.color)",
     "tests": "StrokeSVGTests"
+  },
+  {
+    "label": "dashOffset: the phase is written as the dash array, so stroke-dashoffset reads \"16 8\"",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "(name: \"stroke-dashoffset\", value: number(stroke.dashPhase))",
+    "replace": "(name: \"stroke-dashoffset\", value: stroke.dash.map(number).joined(separator: \" \"))",
+    "tests": "StrokeDashTrimTests"
+  },
+  {
+    "label": "plainStrokeHasNoDash: a solid stroke writes an empty stroke-dasharray",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "if !stroke.dash.isEmpty {",
+    "replace": "if true {",
+    "tests": "StrokeSVGTests|StrokeDashTrimTests"
+  },
+  {
+    "label": "dashArraySeparator: the pattern is comma-joined, unlike FlareCore's SVG export",
+    "file": "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "find": "stroke.dash.map(number).joined(separator: \" \")",
+    "replace": "stroke.dash.map(number).joined(separator: \",\")",
+    "tests": "StrokeDashTrimTests"
   }
 ]
