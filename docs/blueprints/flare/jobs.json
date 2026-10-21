@@ -209,10 +209,11 @@
     "job": "Play the exported Lottie in a standard player.",
     "outcome": "Sampled frames match the stage within 2% pixel difference.",
     "needs": [
-      "flare/flare-export"
+      "flare/flare-export",
+      "flare/lottie-player-check"
     ],
     "needs_note": "flare-export + a player oracle (not in the beta-80 plan)",
-    "closes_with": "flare/flare-export",
+    "closes_with": "flare/lottie-player-check",
     "trap": "Unsupported features dropped silently; easing differs in the player",
     "run": "C",
     "baseline": "fail",
@@ -230,10 +231,11 @@
     "job": "Open a Lottie downloaded from a library site and recolour it.",
     "outcome": "It plays as before, with the new colour.",
     "needs": [
-      "A2"
+      "A2",
+      "flare/lottie-open"
     ],
     "needs_note": "A2 Lottie round trip",
-    "closes_with": "A2",
+    "closes_with": "flare/lottie-open",
     "trap": "Opens as a still or loses easing",
     "run": "C",
     "baseline": "fail",
@@ -249,10 +251,11 @@
     "job": "Animate a fill colour from blue to orange over 1 s.",
     "outcome": "The fill colour reads blue at 0 s and orange at 1 s, in the preview and in the export.",
     "needs": [
-      "E14"
+      "E14",
+      "suiteui/timeline-keys"
     ],
     "needs_note": "E14 colour keys",
-    "closes_with": "E14",
+    "closes_with": "suiteui/timeline-keys",
     "trap": "Only transform and opacity tracks exist",
     "run": "C",
     "baseline": "fail",
@@ -268,10 +271,11 @@
     "job": "Parent a hand to an arm so it follows the arm's rotation.",
     "outcome": "The hand keeps its on-screen position when parented and then follows the arm's rotation.",
     "needs": [
-      "S8"
+      "S8",
+      "suiteui/anchor-parenting"
     ],
     "needs_note": "S8 parenting",
-    "closes_with": "S8",
+    "closes_with": "suiteui/anchor-parenting",
     "trap": "Child jumps when parented",
     "run": "C",
     "baseline": "fail",

@@ -4,6 +4,7 @@
 // PhotoWorkspace.curvesHistogram, at the inspector's ideal width, in Light and
 // Dark. Writes photo-curves-light.png and photo-curves-dark.png. macOS only.
 import CoreRaster
+import SuiteModel
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -30,7 +31,7 @@ import Testing
         model.adjust(.curvePoints([(0, 0), (0.25, 0.15), (0.5, 0.5), (0.75, 0.85), (1, 1)].map { CurvePoint(x: $0.0, y: $0.1) }))
         #expect(model.adjustments.curvePoints.count == 5)
         let histogram = model.curvesHistogram()
-        #expect(histogram.max() == 1)
+        #expect(histogram.heights.max() == 1)
         for scheme in [ColorScheme.light, .dark] {
             let view = AdjustmentsInspector(settings: model.adjustments, histogram: histogram)
                 .padding(SuiteSpacing.m)

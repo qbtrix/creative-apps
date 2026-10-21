@@ -4,7 +4,8 @@
 // runs). An easing chip step, `setEasing(_:)` on two picked keys of the first
 // layer plus reading `keySegments`, stays under 1 ms on a device, ten times
 // that in debug CI. Presets alternate so every run records a real step. Runs
-// on Linux and macOS.
+// on Linux and macOS. The test is timed, so the suite is on the perf list
+// (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
 @testable import HaloModel
 import Testing
 

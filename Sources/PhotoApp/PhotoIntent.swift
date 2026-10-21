@@ -9,6 +9,7 @@
 // PhotoTool's palette look (title, symbol, one-key shortcut) lives here too.
 import CoreRaster
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -24,6 +25,8 @@ enum PhotoIntent {
     case drag(CGPoint, CGPoint)
     case endDrag
     case toolOption(ToolOptionEdit)
+    /// One GradientEditor gesture on the Gradient tool's fill (PhotoFillToolOptions).
+    case gradientOption(GradientIntent)
     case adjust(AdjustmentEdit)
     /// A slider's or the curve's gesture ended: the next adjustment is a new undo step.
     case endAdjust
@@ -58,6 +61,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "Heal"
         case .crop: "Crop"
         case .eyedropper: "Eyedropper"
+        case .gradient: "Gradient"
         }
     }
 
@@ -71,6 +75,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "bandage"
         case .crop: "crop"
         case .eyedropper: "eyedropper"
+        case .gradient: "square.bottomhalf.filled"
         }
     }
 
@@ -84,6 +89,7 @@ extension PhotoTool: PaletteTool {
         case .heal: "j"
         case .crop: "c"
         case .eyedropper: "i"
+        case .gradient: "g"
         }
     }
 

@@ -79,7 +79,9 @@ private func ball(_ w: FlareWorkspace) -> Layer? { w.document?.scenes.first?.lay
 
 @Test func toolHelpAsksTheServices() {
     #expect(FlareWorkspace().toolHelp(.rectangle) == "Not connected yet (IN-1)." && FlareWorkspace().toolHelp(.ellipse) == nil)
-    #expect(FlareTool.allCases.allSatisfy { FlareWorkspace(services: .fake()).toolHelp($0) == nil })
+    // Shape keeps its own reason until it draws (shape-tools FS-6).
+    #expect(FlareTool.allCases.filter { $0 != .shape }.allSatisfy { FlareWorkspace(services: .fake()).toolHelp($0) == nil })
+    #expect(FlareWorkspace(services: .fake()).toolHelp(.shape) == FlareTool.shapeHelp)
     var off = FlareServices.fake()
     off.shapes = FakeShapes(unavailable: "")
     // Every tool's own help is nil now (DK-8), so a service's reason still disables it.

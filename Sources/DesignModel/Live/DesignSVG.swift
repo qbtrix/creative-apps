@@ -41,7 +41,7 @@ enum DesignSVG {
         let (x, y) = (f.x - origin.x, f.y - origin.y)
         let box = "x=\"\(number(x))\" y=\"\(number(y))\" width=\"\(number(f.width))\" height=\"\(number(f.height))\""
         switch node.kind {
-        case .rectangle, .instance:
+        case .rectangle, .instance, .shape:  // a shape writes its box until DS-6 writes its path
             lines.append(pad + "<rect \(box)\(corner(node)) fill=\"\(hex(node.fill))\"\(paint(node))\(alpha(node))/>")
         case .ellipse:
             let (rx, ry) = (f.width / 2, f.height / 2)
