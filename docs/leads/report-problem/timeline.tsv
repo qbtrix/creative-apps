@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T14:27Z	3	poll	w1	builders running
 2026-10-21T14:45Z	3	poll	w1	builders running
 2026-10-21T14:53Z	2026-10-21T14:53:16Z	wave2	resume	-	session limit stopped every wave-2 builder and the marker agent at about 14:30Z; resuming from the journals
+2026-10-21T15:00Z	2026-10-21T15:00:58Z	3	gate-restored	#4048	dev-red cleared; dev merged, scripts/ci --changed PASS, markers restored at f59844e
