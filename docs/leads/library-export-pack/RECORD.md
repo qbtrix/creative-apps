@@ -45,3 +45,4 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-3 (ExportPick.metadata); LX-4 w
 
 - 2026-10-21T15:13:45Z check: Belt nudge; record moved to lead/library-export-pack. XP-2/3/7 still not on dev (no MetadataCarrying/StillMetadata/ExportPick.metadata); LX-2, LX-4 and dependents wait. 0 open findings.
 - 2026-10-21T15:36:27Z check: XP-2/3/7 still not on dev; LX-2, LX-4 and dependents wait. 0 open findings.
+- 2026-10-21T15:58:40Z check: XP-2/3/7 not on dev; LX-2, LX-4 wait. 0 open findings.
