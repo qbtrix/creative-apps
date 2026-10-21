@@ -56,3 +56,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 16:09Z: No svg-place PF PRs yet; FL-2 still blocked.
 - 16:28Z: No svg-place PF PRs yet; FL-2 still blocked.
 - 16:48Z: No svg-place PF PRs yet; FL-2 still blocked.
+- 17:11Z: heartbeat: FL-2 blocked, no svg-place PF PRs
