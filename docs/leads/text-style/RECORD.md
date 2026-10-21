@@ -69,6 +69,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 2026-10-21T07:53Z heartbeat: lane merged dev into #3836 TS-1 (new head 58daec0e); gating to move Head:.
 
+- 2026-10-21T08:06Z heartbeat: #3836 gated CI: PASS on lane head 58daec0e, Head: moved; waits for macOS build and a batch.
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
