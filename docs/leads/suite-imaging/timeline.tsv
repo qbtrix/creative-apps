@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-21T10:52Z	0	stage-start	#3715	base 1191940
+2026-10-21T10:52Z	2	stage-end	#3715	combined plan with shared-codecs; wave 1 IM-1
+2026-10-21T10:52Z	3	stage-start	wave1	IM-1 builder launched
