@@ -104,3 +104,5 @@ utc	stage	event	ref	note
 2026-10-21T18:06Z	3	push	#3770	dev merged in, head 92162512, Fast-Check pass
 2026-10-21T18:06Z	3	push	PN-3	PN-3a merged into lead/pen-paths-PN-3 and on into PN-4
 2026-10-21T18:06Z	3	wave-start	5	PN-7 on dev
+2026-10-21T18:45Z	3	pr	PN-7	#4153 opened (head 76b697d2, PathCommandsTests 10/10, Mutate 6/6, ci --changed PASS)
+2026-10-21T18:45Z	3	poll	#3770	macOS build 39651057624 dispatched 18:15Z
