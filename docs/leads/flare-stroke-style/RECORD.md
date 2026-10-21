@@ -4,7 +4,7 @@ Issue: #3452 · Packet: docs/blueprints/flare/features/stroke-style.md
 Run: act-1a15cf358c6-wj2q · Session: claude/feature-lead-playbook-lw6pjl · Resumed: 2026-10-21T05:39:14Z (line lead: stroke-style #3452, shape-tools #3451, key-select-all #3538)
 Stage: 3 (wave 1)
 Base: 71ffa4d1 (origin/dev); main 0dd23d65 verified
-Next: FK-1 (stubs) building on flare/fk-1-stroke-adapter; the FK-a PR opens once FG-a is on dev (FK-2 edits FlareInspectorFill.swift after FG-2)
+Next: FK-1 built and held (head d239cde7 on flare/fk-1-stroke-adapter, CI PASS, tests disabled until FK-5); the FK-a PR opens once FG-a is on dev (FK-2 edits FlareInspectorFill.swift after FG-2)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,7 +17,7 @@ Next: FK-1 (stubs) building on flare/fk-1-stroke-adapter; the FK-a PR opens once
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FK-1 | FK-a | 1 | adapter stubs; FlareStrokeTests disabled | Sources/FlareModel/FlareStroke+Kernel.swift, Tests/FlareModelTests/FlareStrokeTests.swift | suite compiles, disabled | – | building (wave 1, run act-1a15cf358c6-wj2q) |
+| FK-1 | FK-a | 1 | adapter stubs; FlareStrokeTests disabled | Sources/FlareModel/FlareStroke+Kernel.swift, Tests/FlareModelTests/FlareStrokeTests.swift | suite compiles, disabled | – | built, held: head d239cde7, CI PASS; PR with FK-2 |
 | FK-2 | FK-a | 1 | STROKE is StrokeEditor with trim key diamonds on the stubs; journey written, skipped | Sources/FlareApp/FlareInspectorFill.swift, UITests/FlareJourneyTests+Stroke.swift | FlareInspectorSnapshots | – | waiting FK-1 |
 | FK-3 | FK-u | 2 | stage and PNG stroke StrokeRules.paintedPath | Sources/FlareApp/StagePath.swift, Sources/FlareApp/StageRasterizer.swift, Tests/AppSnapshotTests/FlareStrokePaintTests.swift | FlareStrokePaintTests | – | waiting FK-a |
 | FK-4 | FK-u | 3 | snapshots and render budget | Tests/AppSnapshotTests/FlareStrokeSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareStrokeTests.swift | RenderBudgetFlareStrokeTests.trimScrubInThreeBodies | – | waiting FK-3 |
@@ -39,6 +39,7 @@ Next: FK-1 (stubs) building on flare/fk-1-stroke-adapter; the FK-a PR opens once
 - FK-a also waits on suiteui SS-a, not only FG-a: the contract conforms FlareWorkspace to StrokeTarget and returns VectorStroke, and FK-2 uses StrokeEditor. Neither is on dev (rule 20: no app-local copy).
 
 ## Open
+- FK-5 note from the FK-1 builder: stroke.dash and stroke.trim still throw notBuilt (StrokeRules.waitingCore); FK-5 also needs SS-7 and the core bump with trim tracks.
 - 2026-10-21T05:39Z: SS-a, SS-u and SS-m are done (suiteui RECORD); the core bump #3549 is on dev. SS-d still waits (SS-7 #3823, SS-9 #3826 open). FG-a: FG-1 merged, FG-2 waits on GF-2 #3695 (open, fast-lane); #3419 is parked needs-human. FK-1 has no wait, so it builds now; FK-2, FK-5 and FK-6 stay blocked.
 - Comments posted from this session get a server-appended attribution footer that an edit can't remove; Belt lines stay first, and comments are kept to the required ones.
 - Blocked: FG-a (lead/gradient-fill, #3419) waits on suiteui GF-a (#3421 GF-1 open). SS-a (lead/stroke-style, #3450) waits on GF-a too. No Flare stroke task can start.
