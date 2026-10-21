@@ -4,7 +4,7 @@ Issue: #3792 · Packet: docs/blueprints/flare/features/lottie-player-check.md
 Run: act-1a15e10a86f-7bk9 · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T10:50Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: LP-a and LP-m done (LP-m Belt-Slice-Done on run 39637279724, issuecomment-6321834017). LP-4 is #4132 (ci.yml: supervisor merge, question issuecomment-6321827355). LP-6 follows once #4132 merges and a macOS run shows LottiePlayerParityTests unskipped.
+Next: LP-a and LP-m done. LP-4 is #4132 (supervisor approved; hand-merge after its macOS run). LP-6 is built on lead/lottie-player-check-LP-6 (5cec7e97: status built, feature_issue #3792; scripts/waves render --dry-run OK); its PR opens with feature-done once #4132 merges and a macOS run shows LottiePlayerParityTests unskipped, then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -37,5 +37,6 @@ Next: LP-a and LP-m done (LP-m Belt-Slice-Done on run 39637279724, issuecomment-
 - FrameParity is new in FlareModel: the only pixel tolerance (GoldenTolerance/GoldenImage) is macOS-only in SuiteUI/AppSnapshotTests (rule 20 search).
 
 ## Open
+- 2026-10-21T18:42:09Z: LP-6 branch pushed (5cec7e97), PR held until #4132 merges. #4132 Linux green on 82c169e1.
 - #4025 (LP-1) merged 13:08Z. #4132 (LP-4) waits on a supervisor merge; question on #3792 (issuecomment-6321827355). Linux build and one-rect render verified; Mac build comes with LP-4.
 - LP-1 and LP-4 need a supervisor merge (protected paths).
