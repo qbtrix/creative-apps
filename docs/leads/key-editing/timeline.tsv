@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-21T22:20Z	panel	journeys 39671666519: menu journey stale (Animation lacks the 3 key items), key-editing step 1 not hittable (#4151, playhead on keys at 0): no key-editing-* screens
 2026-10-21T22:22Z	finding	#4232 (KE-a, cc99cdc1c) and #4233 (KE-m, 1b3913c07) filed; fix round 1
 2026-10-21T22:40Z	pr	#4235 opened (fast-lane), closes #4232 #4233, head 456cf87a3, scripts/ci --changed PASS
+2026-10-21T22:46Z	poll	changed (count reset): core-loop CL-z done 22:42Z (run 39682861406), KE-8 now waits only on KE-7; #4235 in lane macOS build (halo); no new halo journeys run; #3499 open, clean, unchanged since 08:54Z
