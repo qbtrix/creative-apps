@@ -134,3 +134,4 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 - 2026-10-21T21:35Z check: FC-16 #4176/#4177 ready, queued behind lane batch-20261021205717 (bisecting, probe 4); 12 ready PRs wait for next sweep. Dev Linux red at 6dc7778 too (dev-red #3856, unrelated). Open findings 0.
 - 2026-10-21T22:02Z check: FC-16 #4176 (feature-done) and #4177 (C4) still queued, fast-lane, mergeable, no needs-fix; dev Linux red on unrelated CommandPathTests (dev-red #3856); 0 open findings
 - 2026-10-21T22:28Z check: FC-16 #4176 and #4177 still open in the lane, no needs-fix/needs-rebase; dev Linux check still red (39685422711, unrelated, dev-red #3856); 0 open findings
+- 2026-10-21T22:55Z check: FC-16 #4176 and #4177 still open, not yet in a batch (lane batch-20261021221623 bisecting, probe 4); no needs-fix/needs-rebase; dev Linux check still red (unrelated, dev-red #3856); 0 open findings
