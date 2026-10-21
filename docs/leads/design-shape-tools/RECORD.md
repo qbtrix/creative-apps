@@ -4,7 +4,7 @@ Issue: #3440 · Packet: docs/blueprints/design/features/shape-tools.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:16:13Z
 Stage: 3 wave 1 (DS-a #3857 merged 08:34Z as 24202fb1; DT-a merged 03:57Z as e6430cfa, DY-a merged as 6f9c8928)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
-Next: critics on DS-a once a scoped design run at or after 24202fb1 shows screens; Belt-Slice-Done DS-a once dev CI 39573184415 Linux is green; then DS-u once transform DT-u merges, DS-m once DT-m and DY-m merge
+Next: Belt-Slice-Done DS-a + Mac-Finish-Wanted DS-a after the first dev CI past #3980 (DY-a anchor fix) with a green Linux job; critics on DS-a once a scoped design run at or after 24202fb1 shows screens; DS-u once transform DT-u merges, DS-m once DT-m and DY-m merge (transform lead active, DT-a done 08:47Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

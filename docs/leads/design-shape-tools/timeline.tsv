@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 2026-10-21T08:10Z	check	lane	#3857	DS-a open in lane; DT-u/DT-m not opened, DS-u/DS-m blocked
 2026-10-21T08:32Z	check	lane	#3857	DS-a Linux check queued; DT-u/DT-m not opened
 2026-10-21T09:00Z	merge	DS-a	#3857	merged 08:34Z as 24202fb1; critics wait scoped design screens
+2026-10-21T09:25Z	check	dev-ci	39573184415	Linux red on DY-a anchors (fix #3980); Slice-Done DS-a waits next green Linux; no scoped design run since 24202fb1; transform lead active (DT-a done 08:47Z), DT-u/DT-m not opened
