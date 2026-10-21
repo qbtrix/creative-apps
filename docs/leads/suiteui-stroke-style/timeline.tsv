@@ -108,3 +108,4 @@ utc	stage	event	ref	note
 2026-10-21T15:00Z	check	SS-9 #3826 macOS green, waiting for a batch; records moved to suiteui-stroke-style
 2026-10-21T15:25Z	check	#3826 blocked by unrelated Library timing failure; rerun 403; asked supervisor
 2026-10-21T15:44Z	check	#3826 still held by the unrelated Library timing red; waiting on supervisor re-run
+2026-10-21T16:20Z	check	#3826 (SS-9) still waits on the supervisor re-run past the Library timing red; no findings
