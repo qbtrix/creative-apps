@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-21T09:57Z	3	sf-10-open	#3997	#3966 merged 09:52Z (7f55e1ad3); SF-10 PR opened (fast-lane, feature-done) without Fast-Check: gate red only on dev-red #3856 mutation anchors (culprit #3889); SF-z Slice-Done waits for green dev Linux run
 2026-10-21T10:25Z	3	SF-z gate pass	#3997	dev anchors fixed by #3996; merged dev, CI: PASS, Fast-Check/Head d16c70ee5 added; waiting on green dev Linux run (fe232dcda in progress) for Belt-Slice-Done SF-z
 2026-10-21T10:48Z	3	SF-z slice done	#3997	Belt-Slice-Done + Mac-Finish-Wanted SF-z posted (run 39582236683, fe232dcda); #3997 open in lane, waiting to land for Belt-Contact-Sheet
+2026-10-21T11:12Z	3	SF-10 in lane	#3997	lane: eligible (Fast-Check marker, CLEAN); batch in flight, 8 ready PRs wait for next sweep
