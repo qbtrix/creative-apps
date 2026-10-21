@@ -271,7 +271,7 @@ public struct PhotoWorkspace: Sendable {
         layers.remove(at: at)
         pixels[id] = nil
         layerGeometryChanged(id, .removed)
-        if selectedLayerID == id { selectedLayerID = layers[min(at, layers.count - 1)].id }
+        pruneLayerSelection(near: at)
         touch(.all)
         return true
     }
