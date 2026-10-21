@@ -77,3 +77,17 @@ extension LiveArchive {
         }
     }
 }
+
+extension PhotoWorkspace {
+    /// The autosave's bytes: the .ora container of `recoveryEntry`
+    /// (history-panel PH-1 declares it; PH-6 writes the body). Throws until then.
+    public func recoveryBytes() throws -> Data {
+        throw ArchiveError.damaged("recoveryBytes waits on history-panel PH-6")
+    }
+
+    /// The workspace an autosave's `data` restores, named `name`
+    /// (history-panel PH-1 declares it; PH-6 writes the body). Throws until then.
+    public static func recovered(from data: Data, name: String?) async throws -> PhotoWorkspace {
+        throw ArchiveError.damaged("recovered(from:name:) waits on history-panel PH-6")
+    }
+}

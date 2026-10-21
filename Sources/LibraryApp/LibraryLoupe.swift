@@ -1,6 +1,9 @@
 // LibraryLoupe.swift: the loupe's photo on SuiteUI's CanvasViewport at the
 // photo's own pixel size (a portrait photo stands taller than wide), drawn
-// at `loupeZoom` against the fit the viewport measured. It shows the latest
+// at `loupeZoom` against the fit the viewport measured. It reads as a photo
+// viewer, not a design canvas: no rulers, and the whole loupe is in the dark
+// scheme in both appearances, so the surround is the dark canvasSurround
+// (docs/design.md allows a fixed dark surround for a media app). It shows the latest
 // render (the grid thumbnail as a preview, then the full render, swapped
 // with no animation), or a placeholder until one arrives: the photo's frame
 // in a card tone with its name and size. Its help says why the file can't be
@@ -40,7 +43,7 @@ struct LibraryLoupe: View {
         let fit = ZoomMath.fit(document: document, in: viewport)
         let zoom = model.loupeZoom.scale(fit: fit)
         CanvasViewport(
-            documentSize: document, zoom: zoom, checkerboard: false,
+            documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
             // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
             onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
@@ -69,9 +72,9 @@ struct LibraryLoupe: View {
             .accessibilityLabel("Grid")
             .libraryControl(id: "library.loupe.grid", enabled: true, help: nil)
             .padding(SuiteSpacing.l)
-            // Clear of the rulers.
-            .padding([.top, .leading], SuiteSize.ruler)
         }
+        // A photo viewer, not a design canvas: dark in both appearances, so the photo is the brightest thing.
+        .environment(\.colorScheme, .dark)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Loupe")
         .accessibilityIdentifier("library.loupe")

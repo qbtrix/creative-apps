@@ -1,0 +1,249 @@
+{
+  "title": "One frame-rate list with 23.976, 29.97, 50 and 59.94 and one timecode rule (drop-frame at 29.97 and 59.94) in SuiteKernel; Halo and Flare delete their own lists",
+  "wave": "XK4",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 C5 (Halo B2); feature map suiteui/frame-rates (new); real job RJ-X74 (new)",
+  "waits_on": "creative-core: FlareCore Scene.fps as a rational rate with Lottie fr written as a decimal (not filed; FR-flare only); adopt-kernel-easing AE-halo and AE-flare (the timeline and key files, FR-halo and FR-flare); the Halo and Flare catalog chains (cross-line)",
+  "depends": [
+    "editor-kernel",
+    "command-catalog",
+    "timeline"
+  ],
+  "longest_chain": "7 (FR-1 → FR-2 → FR-3 → FR-4 → FR-8 → FR-11 → FR-12)",
+  "journeys": [
+    "SuiteJourneyTests.testTimecodeAtNTSCRates",
+    "HaloTimelineJourneyTests.testCompositionAt2997",
+    "FlareSceneInspectorJourneys.testSceneAt2398"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Keys/FrameRate.swift",
+    "Sources/SuiteKernel/Keys/Timecode.swift",
+    "Sources/SuiteKernel/Keys/TimeCommands.swift",
+    "Tests/SuiteKernelTests/FrameRateTests.swift",
+    "Tests/SuiteKernelTests/TimecodeTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-keys.json",
+    "Tests/mutations/SuiteKernel.Timecode.json",
+    "Tests/mutations/SuiteKernel.FrameRate.json",
+    "Tests/SuiteKernelTests/Fixtures/timecode-golden.json",
+    "Sources/SuiteUI/FrameRateMenu.swift",
+    "Sources/SuiteUI/TimelineTime.swift",
+    "Sources/SuiteUI/Gallery/GalleryTimeline.swift",
+    "Tests/SuiteUITests/FrameRateMenuTests.swift",
+    "UITests/SuiteJourneyTests+Timeline.swift",
+    "Tests/AppSnapshotTests/RenderBudgetSuiteTimelineRateTests.swift",
+    "Tests/HaloModelTests/HaloFrameRateTests.swift",
+    "Tests/HaloModelTests/Fixtures/comp-30fps.halo",
+    "Tests/RealJobs/halo/ntsc-lower-third/ntsc-lower-third.jobs.json",
+    "Sources/HaloModel/HaloFrameRate+Kernel.swift",
+    "Sources/HaloModel/CompositionSettings.swift",
+    "Sources/HaloModel/Live/HaloFileValidation.swift",
+    "Sources/HaloModel/HaloPlayback.swift",
+    "Sources/HaloModel/HaloTimelineReadout.swift",
+    "Sources/HaloApp/NewCompositionSheet.swift",
+    "Tests/mutations/HaloModel.HaloFrameRate+Kernel.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json",
+    "Tests/FlareModelTests/FlareFrameRateTests.swift",
+    "Sources/FlareModel/FlareFrameRate+Kernel.swift",
+    "Sources/FlareModel/FlareNewDocument.swift",
+    "Sources/FlareApp/FlareInspectorScene.swift",
+    "Sources/FlareApp/FlareNewSheet.swift",
+    "Tests/mutations/FlareModel.FlareFrameRate+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+    "Tests/SuiteKernelTests/FrameRateHomeTests.swift",
+    "docs/blueprints/suiteui/features/frame-rates.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "FR-a",
+      "behavior": "The kernel declares FrameRate, the common list, Timecode and the two time.* specs as stubs, with their tests written and disabled.",
+      "tasks": [
+        "FR-1",
+        "FR-2"
+      ],
+      "journeys": [
+        "MJ-FR"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Keys/FrameRate.swift",
+        "Sources/SuiteKernel/Keys/Timecode.swift",
+        "Sources/SuiteKernel/Keys/TimeCommands.swift",
+        "Tests/SuiteKernelTests/FrameRateTests.swift",
+        "Tests/SuiteKernelTests/TimecodeTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-keys.json"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "FR-m",
+      "behavior": "Rates are exact rationals, a duration in seconds becomes whole frames by one rounding rule, and timecode is drop-frame at 29.97 and 59.94 and round-trips at every rate.",
+      "tasks": [
+        "FR-3",
+        "FR-4"
+      ],
+      "journeys": [
+        "MJ-FR"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Keys/FrameRate.swift",
+        "Sources/SuiteKernel/Keys/Timecode.swift",
+        "Sources/SuiteKernel/Keys/TimeCommands.swift",
+        "Tests/SuiteKernelTests/FrameRateTests.swift",
+        "Tests/SuiteKernelTests/TimecodeTests.swift",
+        "Tests/mutations/SuiteKernel.Timecode.json",
+        "Tests/mutations/SuiteKernel.FrameRate.json",
+        "Tests/SuiteKernelTests/Fixtures/timecode-golden.json"
+      ],
+      "waits": {
+        "FR-a": [
+          "FR-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "FR-u",
+      "behavior": "SuiteUI's timeline readout shows timecode at the document's rate and its rate menu offers the one list, reachable from the gallery's timeline page on the fakes.",
+      "tasks": [
+        "FR-5",
+        "FR-6"
+      ],
+      "journeys": [
+        "SJ-FR"
+      ],
+      "owned": [
+        "Sources/SuiteUI/FrameRateMenu.swift",
+        "Sources/SuiteUI/TimelineTime.swift",
+        "Sources/SuiteUI/Gallery/GalleryTimeline.swift",
+        "Tests/SuiteUITests/FrameRateMenuTests.swift",
+        "UITests/SuiteJourneyTests+Timeline.swift",
+        "Tests/AppSnapshotTests/RenderBudgetSuiteTimelineRateTests.swift"
+      ],
+      "waits": {
+        "FR-a": [
+          "FR-5"
+        ],
+        "timeline-select-all:TSA-a": [
+          "FR-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "FR-halo",
+      "behavior": "A Halo composition can be 23.976, 29.97, 50 or 59.94 fps, its render times every frame by the exact rate, its readout shows drop-frame timecode, and every old file opens byte for byte.",
+      "tasks": [
+        "FR-7",
+        "FR-8"
+      ],
+      "journeys": [
+        "MJ-FR-halo",
+        "HJ-FR"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloFrameRateTests.swift",
+        "Tests/HaloModelTests/Fixtures/comp-30fps.halo",
+        "Tests/RealJobs/halo/ntsc-lower-third/ntsc-lower-third.jobs.json",
+        "Sources/HaloModel/HaloFrameRate+Kernel.swift",
+        "Sources/HaloModel/CompositionSettings.swift",
+        "Sources/HaloModel/Live/HaloFileValidation.swift",
+        "Sources/HaloModel/HaloPlayback.swift",
+        "Sources/HaloModel/HaloTimelineReadout.swift",
+        "Sources/HaloApp/NewCompositionSheet.swift",
+        "Tests/mutations/HaloModel.HaloFrameRate+Kernel.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json"
+      ],
+      "waits": {
+        "FR-m": [
+          "FR-8"
+        ],
+        "FR-a": [
+          "FR-7"
+        ],
+        "FR-u": [
+          "FR-8"
+        ],
+        "adopt-command-catalog:AC-z": [
+          "FR-8"
+        ],
+        "adopt-kernel-session:AD-halo": [
+          "FR-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "FR-flare",
+      "behavior": "A Flare scene can be 23.976, 29.97, 50 or 59.94 fps on the stage, in the inspector and in the Lottie it writes, and every old file opens unchanged.",
+      "tasks": [
+        "FR-9",
+        "FR-10"
+      ],
+      "journeys": [
+        "MJ-FR-flare",
+        "FJ-FR"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlareFrameRateTests.swift",
+        "Sources/FlareModel/FlareFrameRate+Kernel.swift",
+        "Sources/FlareModel/FlareNewDocument.swift",
+        "Sources/FlareApp/FlareInspectorScene.swift",
+        "Sources/FlareApp/FlareNewSheet.swift",
+        "Tests/mutations/FlareModel.FlareFrameRate+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json"
+      ],
+      "waits": {
+        "FR-m": [
+          "FR-10"
+        ],
+        "FR-a": [
+          "FR-9"
+        ],
+        "FR-u": [
+          "FR-10"
+        ],
+        "adopt-command-catalog:AC-z": [
+          "FR-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "FR-z",
+      "behavior": "A test holds that no app keeps its own rate list, RJ-X74 passes, and the feature is built.",
+      "tasks": [
+        "FR-11",
+        "FR-12"
+      ],
+      "journeys": [
+        "MJ-FR",
+        "HJ-FR",
+        "FJ-FR"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/FrameRateHomeTests.swift",
+        "docs/blueprints/suiteui/features/frame-rates.wave.json"
+      ],
+      "waits": {
+        "FR-halo": [
+          "FR-11"
+        ],
+        "FR-flare": [
+          "FR-11"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

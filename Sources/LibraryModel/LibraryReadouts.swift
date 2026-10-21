@@ -179,7 +179,7 @@ extension LibraryCatalog {
         case .loading, .ready:
             return LibraryEmptyState(
                 title: "No Photos",
-                message: hint ?? "Photos you import appear here, sorted by the date they were taken.",
+                message: hint ?? "Import a folder or drop one here. Photos appear sorted by the date they were taken.",
                 offersImport: true)
         }
     }
