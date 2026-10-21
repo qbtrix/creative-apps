@@ -30,6 +30,7 @@ Next: TX-4 waits on suiteui TextStyleRows (TS-a/TS-u); TX-5 waits on TS-m and sh
 - Text layers are still left out of PhotoLayerComposite (composite and merged image); TX-5 adds them when it rasterizes.
 
 ## Open
+- #4036 (TX-a) Linux check red at 76f1e990: CommandPathTests appMatchesItsBaseline(photo) on Sources/PhotoApp/PhotoPlace.swift:36, not TX code; the branch predates #4008 (909d29b3f) which fixed it on dev. Merged origin/dev into TX-1, gate rerun, new head pushed for a fresh lane check.
 - TX-4 blocked: needs suiteui TextStyleRows (TS-a/TS-u) on dev.
 - TX-5 blocked: needs TS-m (text command bodies) and shell-text ST-z (GlyphRasterizing) on dev.
 - TS and ST slices belong to the text-style (#3779) and shell-text (#3725) leads; no needs-ui issue filed for TextStyleRows, it is TS-u's own deliverable.

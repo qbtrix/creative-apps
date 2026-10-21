@@ -7,3 +7,4 @@
 2026-10-21T12:42Z	heartbeat	#4036 gets line:photo; TX-a/u/m wait on the lane
 2026-10-21T12:59Z	heartbeat	#4036 open, clean, waiting on the lane; TS-m #3844 still open; export-pack parked per supervisor on #3470
 2026-10-21T13:24Z	heartbeat	#4036 TX-a, #4053 TX-3, #4059 TX-6 open in the lane; TS-m #3844/#3847 still open, TX-4/TX-5 wait.
+2026-10-21T15:08Z	heartbeat	#4036 Linux red was PhotoPlace.swift command-path site fixed on dev by #4008; merged dev into TX-1, rerunning gate; #4053/#4059 stacked; TS-m #3844/#3847 open
