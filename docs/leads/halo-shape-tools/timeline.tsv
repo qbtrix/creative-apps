@@ -1,0 +1,27 @@
+time	kind	step	ref	note
+2026-10-20T18:48Z	stage	start	#3445	lead started; HS-a building from dev e382f9d7
+2026-10-20T19:07Z	pr	open	#3676	HS-a 69f4b77e, CI PASS, fast-lane
+2026-10-20T19:11Z	check	heartbeat	#3676	HS-a waits on lane macOS build; HS-m, HS-u building
+2026-10-20T19:33Z	check	heartbeat	#3676	HS-a clean, macOS build queued; HS-m, HS-u building
+2026-10-20T19:36Z	pr	open	#3693	HS-u 3dabcf96, CI PASS, stacked on #3676
+2026-10-20T19:40Z	pr	open	#3694	HS-m a86c3f1b, CI PASS, stacked on #3676
+2026-10-20T19:42Z	pr	retarget	#3693 #3694	base lead/halo-shape-tools-HS-a until #3676 merges; needs-split removed
+2026-10-20T19:56Z	check	heartbeat	#3676	HS-a clean, macOS build queued; #3693 #3694 clean on HS-a base; perf-suites ask open
+2026-10-20T20:18Z	check	heartbeat	#3676	unchanged: HS-a macOS build queued; #3693 #3694 wait on it; perf-suites ask open
+2026-10-20T20:40Z	check	heartbeat	#3676	unchanged: HS-a macOS build queued; perf-suites ask open
+2026-10-20T21:14Z	check	heartbeat	#3676	macOS build 39480804892 queued since 19:07Z; flagged on #1971; perf-suites ask open
+2026-10-20T21:45Z	check	heartbeat	#3676	macOS build 39480804892 still queued; perf-suites ask open
+2026-10-20T22:09Z	check	heartbeat	#3676	macOS build 39480804892 still queued; perf-suites ask open
+2026-10-20T22:31Z	check	heartbeat	-	#3676 build 39480804892 still queued; #3693/#3694 wait on it
+2026-10-21T00:05Z	stage	rebase	HS-a	#3676 merged origin/dev (needs-rebase), CI PASS, Head da26317f
+2026-10-21T00:20Z	check	heartbeat	#3676 #3693	#3676 waits on lane macOS build; #3693 merged HS-a branch (C4 part conflicts), now c7608889, CI PASS
+2026-10-21T00:51Z	check	heartbeat	#3676	macOS build 39518310109 success on da26317f; next lane sweep merges
+2026-10-21T01:14Z	check	heartbeat	#3676	not merged yet; lane batch 20261021005140 red on LibrarySidecarPlanTests.planWithinBudget (timing, dev-red #3386, not ours), bisecting
+2026-10-21T01:40Z	check	heartbeat	#3676	still open/clean, no needs-fix; lane batch 20261021005140 still bisecting (probe -3); #3693/#3694 wait
+2026-10-21T02:09Z	check	heartbeat	#3676	still open/clean, no needs-fix; lane batch 20261021005140 bisecting at probe -4; #3693/#3694 wait
+2026-10-21T02:36Z	check	heartbeat	#3676	still open/clean, no needs-fix; lane batch 20261021005140 bisecting at probe -5; dev-red #3386 green at 01:42Z; #3693/#3694 wait
+2026-10-21T03:04Z	check	heartbeat	#3676	first in batch 20261021005140; prefix probes -3,-4 passed, so #3676 merges when the bisect ends; #3693/#3694 wait
+2026-10-21T03:40Z	merge	HS-a	#3676	merged 268098eab in batch 20261021005140; Belt-Slice-Done HS-a on run 39537764239; #3693 (49f64139) and #3694 (f6c7d851) retargeted to dev with dev merged, CI PASS
+2026-10-21T04:07Z	check	heartbeat	#3693,#3694	lane macOS builds green (39539773691, 39539806744), clean, no needs-fix; waiting on the lane merge
+2026-10-21T04:35Z	check	heartbeat	#3693,#3694	still open, clean, macOS green, no needs-fix; lane busy (batch 20261021032004 done 04:10Z); waiting on the next batch
+2026-10-21T05:05Z	check	heartbeat	#3693,#3694	in lane batch 20261021043428 (red tip run 39544788354): HaloShapeDraftTests/drawingRefusesThroughTheModelWhileTheToolIsAStub (HS-u) fails once HS-m makes addShape real. Probe -4 (through #3693) green; -6 running. Expect #3694 named; fix in #3694 after #3693 merges: the test expects one shape layer, refusal checked without a composition
