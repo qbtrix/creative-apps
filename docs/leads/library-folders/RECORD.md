@@ -58,3 +58,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T19:38Z: FO-5 #4022 merged into dev as e0e2732, in a batch of 8 whose Linux check passed. FO-6 #4121: dev merged in (FO-6 alone, 11 files), gate PASS, CommandPathTests pass, pushed 18efe8b, Head moved, marked ready. FO-m's Belt-Slice-Done waits on a dev CI run containing e0e2732 with a green Linux job.
 
 - 2026-10-21T20:03Z: FO-m done: dev CI run 39664459063 (369ecc7, contains FO-5's e0e2732) Linux green. Belt-Slice-Done posted on #3787. FO-6 #4121 waits on its lane macOS build.
+
+- 2026-10-21T20:39Z: FO-6 #4121: its lane macOS build 39664988428 at 18efe8b is still queued (runner backlog). FO-7 follows once it merges.
