@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-suite-imaging (the branch Belt reads) from now on
 2026-10-21T20:10Z	stage	IM-2 restacked on IM-1 5b40c257
 2026-10-21T20:26Z	gate	IM-2 775148e3 gated CI: PASS and pushed to lead/suite-imaging-IM-2; PR opens once #4028 merges
+2026-10-21T20:49Z	check-in	check-in: #4028 (IM-1, Package.swift) still on the supervisor's Mac gate. IM-2 gated on lead/suite-imaging-IM-2.

@@ -51,3 +51,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-21T19:24Z: #4028 approved by the supervisor, queued on the Mac gate (18:06Z); body moved to this run id.
 - 2026-10-21T20:10Z: IM-2 rebased onto IM-1 head 5b40c257, clean.
 - 2026-10-21T20:26Z: IM-2 775148e3 gated CI: PASS and pushed to lead/suite-imaging-IM-2; PR opens once #4028 merges.
+- 2026-10-21T20:49Z: check-in: #4028 (IM-1, Package.swift) still on the supervisor's Mac gate. IM-2 gated on lead/suite-imaging-IM-2.
