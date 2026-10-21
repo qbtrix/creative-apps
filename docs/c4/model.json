@@ -523,8 +523,10 @@
                 "description": "Transform/BoxMath.swift: LayerTransform (scale, degrees, move) and BoxMath (resize by an EditorHandle with Shift aspect and Option centre, at least 1 and never flipping; several items scaled as one box; 15 degree rotate snap; the handle rects). Transform/HandleHit.swift: HandleHit (the handle under a point, Chebyshev with corners winning ties; a screen tolerance divided by zoom). Stubs from EK-3; bodies EK-20. Transform/TransformRules.swift: FlipDirection, BoxAnchor (nine points), TransformBox (an unturned box, its clockwise turn and its mirrors) and TransformRules (normalize, rotate, flip, scale about an anchor, corners, bounds, local and the matrix, the Canvas Size anchored origin). Transform/TransformCommands.swift: the TransformTarget protocol, TransformIntent and TransformCommands' six transform.* specs (read, set, rotate, scale, flip, reset). Stubs from transform-tools TT-1; bodies TT-5 and TT-6.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
+                  "Sources/SuiteKernel/Transform/AnchorCommands.swift",
                   "Sources/SuiteKernel/Transform/BoxMath.swift",
                   "Sources/SuiteKernel/Transform/HandleHit.swift",
+                  "Sources/SuiteKernel/Transform/Placement.swift",
                   "Sources/SuiteKernel/Transform/TransformCommands.swift",
                   "Sources/SuiteKernel/Transform/TransformRules.swift"
                 ]
@@ -554,7 +556,7 @@
               {
                 "id": "kernel-stroke",
                 "name": "Stroke",
-                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies.",
+                "description": "Stroke/: StrokeSample (point, pressure, time) and the strokeSamples fixture (40 samples), StrokeSegment (a cubic with a pressure range), StrokeSmoother (samples to segments one late, flattening), DabSpacer (dab centres between two points), BrushSettings with BrushEdit (size, hardness, opacity, flow, spacing, clamped), BrushPreset, and LiveCopy, the working copy a drag draws on until take(). EK-29 declares them as stubs; EK-28 fills the bodies. BrushKeys holds the brush keys' rule ([ and ] step size in bands of 1, 5, 25 and 50; Shift-brackets move hardness by 25; digits set opacity in tens, or an exact percent through OpacityDigits' 0.6 s window), and BrushKeyCommands its six commands on a BrushKeyTarget: brush.size-up, brush.size-down, brush.hardness-up, brush.hardness-down, brush.set-opacity and layer.set-opacity.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Stroke/"
@@ -597,6 +599,15 @@
                 ]
               },
               {
+                "id": "kernel-crop",
+                "name": "Crop",
+                "description": "Crop/: Orientation (the eight EXIF orientations as a group: turn, flip, compose, the turned size and the unit-square matrix) and the OrientationTarget protocol; CropAspect (free, original, W:H, with Library's raw keys) and CropOrientation; CropFrame; CropRules (the largest frame of an aspect, a handle drag held to the aspect and the bounds, swap and nudge) and the CropTarget protocol; CropCommands (image.rotate-cw, -ccw, -180, image.flip and the five crop.* command specs). orientation-crop OC-1 declares them as stubs; OC-3 and OC-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Crop/"
+                ]
+              },
+              {
                 "id": "kernel-commands",
                 "name": "Commands",
                 "description": "Commands/: the one typed command catalog every app registers its model actions in, so menus, buttons, the CLI, the MCP server and tests drive one path. JSONValue (any JSON value, Codable), ParamSchema (JSON Schema 2020-12 builders, closed objects, validate) with SchemaIssue, SchemaProbe and CommandSchemaProviding, CommandKind, Availability, CommandSpec and CommandDescription, CommandCatalog with CommandEnvelope (FlareCore's envelope), CatalogError, CommandOutcome and BatchReport, the HeadlessDocument protocol with ExportedFile, CommandIDLedger and CatalogConformance. command-catalog CC-1 declares them (JSONValue and the ParamSchema builders real, the rest stubs); CC-4, CC-5, CC-7 and CC-8 fill the bodies. Reads the target's HistoryReading; never owns a history.",
@@ -612,6 +623,15 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Paths/"
+                ]
+              },
+              {
+                "id": "kernel-text",
+                "name": "Text",
+                "description": "Text/: the suite's one text style. TextStyle (family, weight, italic, size, rgba and a paragraph, with .standard) and ParagraphStyle, TextLayout and TextStyle.Alignment as FlareCore's ParagraphStyle, TextLayout and TextAlignment under kernel names; TextStyleField (size, line height, tracking) and TextStyleRules (each field's range, the clamping setter and the one layout over FlareCore's TextLayout.lay, tracking in thousandths of an em); the TextStyleTarget protocol an app's workspace conforms to, TextIntent (the text inspector's gestures as commands) and TextCommands (the seven text.* command specs every app registers). text-style TS-1 declares them as stubs (specs with real ids, schemas and availability); TS-5 and TS-6 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Text/"
                 ]
               }
             ]

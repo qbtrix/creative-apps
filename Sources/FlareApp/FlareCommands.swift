@@ -11,8 +11,11 @@
 // then Clear Menu. The focused window publishes a FlareMenu as a focused
 // scene value (FlareWindow.swift); with none focused every item disables. The
 // value carries the selection's Edit reasons too, so a new selection is a new
-// value and the items re-read their reasons.
+// value and the items re-read their reasons. ⌘A is Select All Keys while the
+// timeline strip has focus (its FocusedValues.timelineSelectAll, key-select-all
+// KS-2), else Edit > Select All on the stage's art.
 import FlareModel
+import SuiteUI
 import SwiftUI
 
 /// What the focused Flare window's menus can do now.
@@ -54,6 +57,8 @@ struct FlareCommands: Commands {
     @FocusedValue(\.flareMenu) private var focused
     /// Read so a pasteboard change re-runs the body and Paste's reason (FlarePasteboard.swift).
     @FocusedValue(\.flarePasteboardChange) private var pasteboardChange
+    /// The focused timeline strip's Select All Keys; nil unless the strip has focus.
+    @FocusedValue(\.timelineSelectAll) private var timelineSelectAll
 
     private var menu: FlareMenu {
         _ = pasteboardChange
@@ -95,7 +100,11 @@ struct FlareCommands: Commands {
             item(.edit(.paste), key: KeyboardShortcut("v"))
             item(.edit(.duplicate), key: KeyboardShortcut("d"))
             item(.edit(.delete), key: KeyboardShortcut(.delete, modifiers: []))
-            item(.edit(.selectAll), key: KeyboardShortcut("a"))
+            if let keys = timelineSelectAll, let spec = FlareWorkspace.menuSpec("timeline.select-all-keys") {
+                MenuCommand(spec, on: menu.help(.timeline(.selectAllKeys)), shortcut: KeyboardShortcut("a")) { keys.run() }
+            } else {
+                item(.edit(.selectAll), key: KeyboardShortcut("a"))
+            }
             item(.edit(.deselect), key: KeyboardShortcut("a", modifiers: [.command, .shift]))
         }
         CommandGroup(before: .toolbar) {

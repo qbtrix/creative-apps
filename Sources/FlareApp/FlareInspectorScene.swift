@@ -31,7 +31,7 @@ struct FlareInspectorScene: View {
                 FlareSceneNumberRow(title: "Height", id: "height", value: scene.height, range: sides, unit: "px", help: sizeHelp) {
                     perform(.inspector(.setSceneSize(width: scene.width, height: $0)))
                 }
-                InspectorColorWellRow("Background", color: Self.hex(scene.background)) {
+                InspectorColorWellRow("Background", color: scene.background.hex) {
                     perform(.inspector(.setSceneBackground(hex: $0.text)))
                 }
                 InspectorPickerRow("Frame Rate", options: Self.rates(including: scene.fps), selection: scene.fps) {
@@ -62,11 +62,6 @@ struct FlareInspectorScene: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("flare.inspector.scene")
         }
-    }
-
-    /// The scene's background as the color row's 8-bit color.
-    private static func hex(_ color: FlareColor) -> HexColor {
-        HexColor(NewDocumentSpec.hex(color)) ?? HexColor(255, 255, 255)
     }
 
     /// The New sheet's frame rates, with `fps` added in order when it isn't one of them.
@@ -101,4 +96,15 @@ struct FlareSceneNumberRow: View {
             .disabled(help != nil)
             .help(help ?? title)
     }
+}
+
+/// Flare's one bridge to SuiteUI's HexColor, over NewDocumentSpec's "#RRGGBB"
+/// rules: channels clamp to 0...1 and round to 8 bits; a hex color is opaque.
+extension FlareColor {
+    init?(hex: HexColor) {
+        guard let color = NewDocumentSpec.color(hex: hex.text) else { return nil }
+        self = color
+    }
+
+    var hex: HexColor { HexColor(NewDocumentSpec.hex(self)) ?? HexColor(255, 255, 255) }
 }

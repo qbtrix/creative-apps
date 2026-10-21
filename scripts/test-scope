@@ -9,6 +9,7 @@
 #   scripts/test-scope perf [APP]          the perf and timing tests, all or APP's
 #   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
 #   scripts/test-scope heavy [FILTER]      the CPU-heavy correctness tests, all or those FILTER takes
+#   scripts/test-scope timing              the tests that assert a wall-clock bound and aren't in the perf list
 #
 # app and changed print two lines (app with a comma list: the union, as the
 # lane's batch macOS gate asks for): the regex for the tests outside
@@ -31,6 +32,16 @@
 # perf-nightly runs exactly them, so each test runs in one place. perf-report prints
 # what they measured and flags (a ::warning:: on stderr) each failed bound a
 # test missed by more than FLAG times; it never fails on a number.
+#
+# timing prints one line per enabled test in Tests/ (TESTS_DIR) that asserts a
+# wall-clock bound but isn't in the perf list, so CI would gate a number a busy
+# runner can miss; Tests/test_scope fails unless it prints nothing. A test
+# asserts one when an #expect or #require line in its body has an upper bound
+# (a spaced `<` or `<=`) against a Duration literal (`.milliseconds(`, ...), or
+# one with a timing name before it (median, p95, elapsed, percentile, took...)
+# in a file that reads a clock (ContinuousClock, `measure(`). Line-based on
+# purpose: a lower bound, a count budget (bodies, copies) or a bound named any
+# other way passes. A `not-timing:` comment in the test's body exempts it.
 #
 # heavy prints one regex, empty when there is none. Tests/heavy-suites.txt
 # (same format as the perf list) lists correctness tests that cost seconds of
@@ -189,6 +200,81 @@ def heavy_regex(within=None):
     return "^(%s)(/|\\()" % "|".join(i.replace(".", r"\.") for i in ids) if ids else ""
 
 
+TESTS_DIR = os.environ.get("TESTS_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests")
+DECL = re.compile(r"\b(struct|enum|class|actor|extension)\s+(\w+)[^{]*\{")
+TEST_FUNC = re.compile(r"\bfunc\s+(\w+)")
+# timing's detector (header): an upper bound in an #expect or #require that is a Duration literal, or that
+# has a timing name before it in a file that reads a clock.
+UPPER = re.compile(r"#(expect|require)\(.*\s<=?\s")
+DURATION = re.compile(r"\s<=?\s*[^,]*\.(milli|micro|nano)?seconds\(")
+TIMED_NAME = re.compile(r"(?i)(elapsed|median|p50|p95|p99|percentile|latency|took)[^<]*\s<=?\s")
+CLOCK = re.compile(r"ContinuousClock|SuspendingClock|DispatchTime\.now|CFAbsoluteTimeGetCurrent|\bmeasure\(")
+
+
+def swift_code(line):
+    """A line with its string literals emptied and its // comment cut, for brace counting and matching."""
+    line = re.sub(r'#".*?"#', '""', line)  # a raw string, #"..."#
+    return re.sub(r'"(?:\\.|[^"\\])*"', '""', line).split("//", 1)[0]
+
+
+def swift_tests(path):
+    """(suite path, test name, disabled, body lines) for each @Test func in a Swift file. Tracks braces line
+    by line; a suite (struct, enum, extension) is disabled when its attributes are, and so is each test in it."""
+    with open(path, errors="replace") as f:
+        lines = f.read().splitlines()
+    # attrs: the code since the last line ending in { or } outside brackets, so a multi-line
+    # @Test(arguments: [...]) or @Suite(.disabled(...)) above a declaration counts as its attributes.
+    depth, suites, attrs, test, out = 0, [], [], None, []  # suites: (name, depth, disabled)
+    for raw in lines:
+        code = swift_code(raw)
+        if test is None:
+            head = "\n".join(attrs + [code])
+            disabled = any(d for _, _, d in suites) or ".disabled(" in head
+            name, decl = TEST_FUNC.search(code), DECL.search(code)
+            if name and "@Test" in head:
+                test = ([n for n, _, _ in suites], name.group(1), disabled, [], depth)
+            elif decl:
+                suites.append((decl.group(2), depth, disabled))
+        if test:
+            test[3].append(raw)
+        attrs = attrs + [code]
+        if code.rstrip().endswith(("{", "}")) and sum(map("".join(attrs).count, "([")) == sum(map("".join(attrs).count, ")]")):
+            attrs = []
+        depth += code.count("{") - code.count("}")
+        if test and depth <= test[4] and any("{" in swift_code(b) for b in test[3]):
+            out.append(test[:4])
+            test = None
+        while suites and depth <= suites[-1][1]:
+            suites.pop()
+    return out
+
+
+def timing_tests(root=TESTS_DIR):
+    """(id, where, bound) for each enabled test in Tests/<Target>/ that asserts a wall-clock bound, unless
+    a `not-timing:` comment in its body marks it a deliberate exception."""
+    found = []
+    for target in sorted(os.listdir(root)):
+        for dirpath, _, files in sorted(os.walk(os.path.join(root, target))):
+            for name in sorted(f for f in files if f.endswith(".swift")):
+                path = os.path.join(dirpath, name)
+                with open(path, errors="replace") as f:
+                    clock = bool(CLOCK.search(f.read()))
+                for suites, test, disabled, body in swift_tests(path):
+                    if disabled or any("not-timing:" in b for b in body):
+                        continue
+                    for line in body:
+                        code = swift_code(line)
+                        if UPPER.search(code) and (DURATION.search(code) or (clock and TIMED_NAME.search(code))):
+                            found.append((f"{target}.{'/'.join(suites + [test])}", name, line.strip()))
+                            break
+    return found
+
+
+def unlisted_timing(root=TESTS_DIR):
+    perf = perf_regex()
+    return [t for t in timing_tests(root) if not (perf and re.search(perf, t[0] + "("))]
+
+
 NUMBER = r"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)"
 VALUE = re.compile("\u2192 " + NUMBER + r"(?: seconds)?$")
 # How Swift Testing shows a failed `#expect(a <= b)`: older releases on the
@@ -280,8 +366,11 @@ def main(argv):
         print(heavy_regex(args[0] if args else None))
     elif cmd == "perf-report" and len(args) == 1:
         perf_report(args[0])
+    elif cmd == "timing" and not args:
+        for test, where, bound in unlisted_timing():
+            print(f"{test}  ({where}: {bound})")
     else:
-        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | perf [APP] | heavy [FILTER] | perf-report LOG")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | perf [APP] | heavy [FILTER] | perf-report LOG | timing")
 
 
 if __name__ == "__main__":
