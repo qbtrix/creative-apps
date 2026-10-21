@@ -4,14 +4,14 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a15e9d8b78-eu21 (resumed; earlier act-1a15b1de115-nxto) · Session: claude/multi-layer-select-lead-g8o0jx · Started: 2026-10-20T20:40Z
 Stage: 3 wave 3
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: PM-a slice-done (Linux 39655526241); critics for PM-a and PM-u when scoped photo run 39665905219 (dev 037c5c745) shows screens. PM-5 #4118 (f4243a36d) and PM-6 #4143 (d635b3a69) rebased, Fast-Check moved, lane macOS builds: PM-5 39662015535 queued, PM-6 39662134270 green. PM-u slice-done (Linux 39661533247). PM-9 waits on #3499 (open) and PM-6; PM-10 waits on PM-9 (PG-z #4064 merged). Findings for this feature: 0 open
+Next: PM-m all merged (PM-4 #4095, PM-5 via PM-6 squash, PM-6 #4143 1a1ac0af1); Belt-Slice-Done PM-m on the first green Linux run on dev containing 1a1ac0af1 (runs 39673232799, 39676099814 red only on launcher CommandPathTests baseline, dev-red #3856, not ours). Critics for PM-a, PM-u on scoped photo 39665905219 (queued). PM-9 waits on #3499 (open); PM-10 on PM-9
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PM-a | LayerTreeList picks several rows; Photo keeps a kernel Selection of layers; list, Select > All Layers and intents on stubs | PM-1, PM-2, PM-3 | MJ-PM | photo-gradient-fill:PG-a (PM-2); shell-parity (built) | yes | 0 | slice-done | 39655526241 | wanted |
 | PM-u | snapshots of four states, render budget, journey written | PM-7, PM-8 | PJ-M1 | PM-a | yes | 0 | slice-done | 39661533247 | wanted |
-| PM-m | selection bodies; hide, opacity, delete, move on every selected layer as one step; catalog; RJ-P43 | PM-4, PM-5, PM-6 | MJ-PM | PM-a; PG-m (PM-5, PM-6) | no | 0 | waiting | – | – |
+| PM-m | selection bodies; hide, opacity, delete, move on every selected layer as one step; catalog; RJ-P43 | PM-4, PM-5, PM-6 | MJ-PM | PM-a; PG-m (PM-5, PM-6) | no | 0 | merged, awaiting green Linux | – | – |
 | PM-z | journey on live, stress journey, photo.md, feature-done | PM-9, PM-10 | PJ-M1 | PM-u, PM-m; PG-z (PM-10); #3499 (PM-9) | yes | 0 | waiting | – | – |
 | PM-g | group layers | PM-11, PM-12, PM-13 | – | PM-m | yes | 0 | out of beta (captain 2026-10-20, v1) | – | – |
 
@@ -22,8 +22,8 @@ Next: PM-a slice-done (Linux 39655526241); critics for PM-a and PM-u when scoped
 | PM-2 | PM-a | 2 | layerSelection behind selectedLayerID; API stubs; suites disabled | Sources/PhotoModel/PhotoWorkspace.swift, PhotoLayerSelection+Kernel.swift, PhotoSeveralLayers+Kernel.swift, two test suites | PhotoWorkspaceTests | #4087 | merged |
 | PM-3 | PM-a | 3 | Layers list on multi-select, Select > All Layers ⌥⌘A, intents | Sources/PhotoApp/PhotoLayerList.swift, PhotoIntent.swift, PhotoWindow.swift, PhotoCommands+Select.swift | PhotoLayerListSnapshots, PhotoEditMenuTests | #4117 | merged 18:25Z |
 | PM-4 | PM-m | 3 | selection bodies | PhotoLayerSelection+Kernel.swift + tests + mutations | PhotoLayerSelectionTests | #4095 | merged 18:09Z |
-| PM-5 | PM-m | 4 | several-layer hide/opacity/delete; catalog | PhotoSeveralLayers+Kernel.swift, PhotoCommandCatalog.swift, command-ids | PhotoSeveralLayersTests | #4118 | pr open (dev merged in) |
-| PM-6 | PM-m | 4 | Move moves every selected layer; RJ-P43 | PhotoStroke.swift, PhotoSeveralLayers+Kernel.swift, RealJobs/photo/fade-layers | moveMovesEvery | #4143 | pr open (dev merged in) |
+| PM-5 | PM-m | 4 | several-layer hide/opacity/delete; catalog | PhotoSeveralLayers+Kernel.swift, PhotoCommandCatalog.swift, command-ids | PhotoSeveralLayersTests | #4118 | merged via #4143 squash; #4118 closed superseded |
+| PM-6 | PM-m | 4 | Move moves every selected layer; RJ-P43 | PhotoStroke.swift, PhotoSeveralLayers+Kernel.swift, RealJobs/photo/fade-layers | moveMovesEvery | #4143 | merged 20:44Z |
 | PM-7 | PM-u | 4 | snapshots and render budget | Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift, RenderBudgetPhotoMultiLayerTests.swift | snapshots | #4138 | merged |
 | PM-8 | PM-u | 4 | journey written, skipped | UITests/PhotoJourneyTests+MultiSelect.swift | compiles | #4137 | merged 18:25Z |
 | PM-9 | PM-z | 5 | journey on live | UITests/PhotoJourneyTests+MultiSelect.swift, +StressPerf.swift | journey | – | waiting |
@@ -57,3 +57,4 @@ Next: PM-a slice-done (Linux 39655526241); critics for PM-a and PM-u when scoped
 - Belt watches lead/photo-multi-layer-select (docs/leads/photo-multi-layer-select/): the record is mirrored there from 14:55Z; lead/multi-layer-select keeps the same files.
 - The PR tooling re-appends a footer line to PR bodies after an edit removes it; the fast lane strips it from the squash commit.
 - The comment tool re-appends the attribution footer to issue comments too; a PATCH cannot remove it. Recorded, not blocking.
+- A stacked PR squash carries its base: PM-6 #4143 landed PM-5 too; #4118 closed as superseded (dev differs only by PM-6 lines).
