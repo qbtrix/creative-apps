@@ -12,7 +12,7 @@ Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once a dev Linux 
 | FP-a | adapters as stubs, PathEditTarget conformance, Direct Select anchors via overlay | FP-1, FP-2 | MJ-FP | PN-a (done), shape-tools:FS-a (done) | yes | 0 | done (Belt-Slice-Done 08:56Z; Mac-Finish-Wanted) | #3838 | 08:08Z merged 5a911587 |
 | FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | waiting | – | – |
 | FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 PR open (#4029, head 5a8dee2f, Mutate 4/4); FP-6 waits on FL-m | #4029 | – |
-| FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | merged 09:41Z (FP-7; FP-8 waits on test/stress-perf-journeys); Linux run pending | #3958 | – |
+| FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | done: run 39596004859 (only the Library timing flake; supervisor answer 12:04Z); FP-8 waits on test/stress-perf-journeys | #3958 | – |
 | FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -50,7 +50,7 @@ Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once a dev Linux 
 - GitHub MCP issue_write/update_pull_request write bodies without the server footer; use them instead of gh api for bodies from now on.
 
 ## Open
-- FP-e blocked poll 2/3: dev Linux run 39590966622 (965a76be) red on the same Photo CommandPathTests baseline (PhotoPlace.swift:36, dev-red #3856); every Flare test passed. A third identical red gets the rule-23 supervisor question.
+- FP-e done: rule-23 question at 3/3 (issuecomment-6315361799); supervisor said #4008 fixed Photo and the tenThousandPaths flake doesn't count; Belt-Slice-Done posted (issuecomment-6315821062) on run 39596004859.
 - FP-a findings open: #4011, #4013 (fix round 1: PR #4027, head d36c6856, Mutate 6/6 FlareModel.FlareAnchors+Kernel, fast-lane, snapshot flare-select-direct-locked-light.png), #4012 (FP-5 #4029 carries Refs: PenRules.mirror is internal; needs-suite #4030 asks to make it public; Flare copy has a TODO). Count 3 of cap 5.
 - shape-tools FS-m: FS-5 merged #3850, FS-6 blocked on gradient-fill FG-m (FP-5 unchained, FP-6 unaffected).
 - file-flow FL-m far off (waits on FG-m, FS-m, FK-m, PF-m): FP-6 waits; rule 23 question after 3 identical polls.
