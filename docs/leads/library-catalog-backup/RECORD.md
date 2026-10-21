@@ -78,3 +78,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T23:27Z: #4244 closed: #4250 (be9aa35) landed the same baseline fix on dev (library.txt at 48). Dev Linux at 8d08e08 was red only on the library CommandPath baseline. BK-u closes on the first green dev Linux run that includes be9aa35.
 
 - 2026-10-21T23:42Z: Heartbeat: dev Linux check 39693644795 on be9aa35 (has #4250) running.
+
+- 2026-10-21T23:47Z: BK-u done: Belt-Slice-Done + Mac-Finish-Wanted posted on #3788 (comment 6329115323), qualifying run 39693644795 (Linux green at be9aa35, includes 15806ab and #4250). Next: BK-5m, BK-5.
