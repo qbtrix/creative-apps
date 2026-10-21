@@ -134,20 +134,12 @@ import Testing
         shoot.userCollections = [keepers([id(1)])]
         shoot.recount()
         let before = shoot
-        #expect(shoot.filterHelp == LibraryFilter.unavailable)
-        #expect(shoot.clearFilterHelp == LibraryFilter.unavailable)
         #expect(shoot.addToCollectionHelp("user-1") == UserCollection.unavailable)
         #expect(shoot.removeFromCollectionHelp == UserCollection.unavailable)
         #expect(shoot.deleteCollectionHelp == UserCollection.unavailable)
         #expect(shoot.newSmartCollectionHelp == UserCollection.smartUnavailable)
         #expect(shoot.collectionsSaveRequest() == nil)
         #expect(shoot.collectionsFileValue == "saved")
-        shoot.setFilter(LibraryFilter(hidesRejected: true))
-        shoot.toggleFilterFlag(.pick)
-        shoot.setRatingRule(.atLeast(3))
-        shoot.toggleFilterLabel(.red)
-        shoot.toggleHideRejected()
-        shoot.clearFilter()
         #expect(shoot.newCollection() == "")
         #expect(shoot.newSmartCollection() == nil)
         shoot.renameCollection("user-1", to: "Best")
@@ -161,7 +153,7 @@ import Testing
         #expect(shoot == before)
     }
 
-    @Test(.disabled("waits on FC-7")) func theBarHidesRejectsThroughItsToggle() {
+    @Test func theBarHidesRejectsThroughItsToggle() {
         var shoot = catalog("shoot")
         shoot.select([id(4)])
         shoot.setFlag(.reject)
