@@ -2,7 +2,7 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: waiting on macOS runners: full CI 39665258026 and scoped photo 39665905219 in progress; PP-7 #4175 per-head build 39671173165 queued
+Stage: macOS jobs running: full CI 39665258026 (Linux green), scoped photo 39665905219, PP-7 #4175 build 39671173165
 Base: dev
 Next: on green: critic panel, Belt-Slice-Done PT-m/PT-z/PP-u/PP-m; PP-z after #4175 merges
 

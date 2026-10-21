@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-21T21:24Z	21:24Z heartbeat: macOS queue backed up repo-wide; 39665258026 Linux green, macOS queued; #4175 build 39671173165 queued
 2026-10-21T21:46Z	21:46Z heartbeat: macOS runners held by scoped suite/suiteui + journeys runs; all three of ours still queued
 2026-10-21T22:09Z	22:10Z heartbeat: runs still in progress; #4175 open fast-lane, no needs-fix
+2026-10-21T22:31Z	22:32Z heartbeat: all three macOS jobs now in progress; #4175 fast-lane, no needs-fix
