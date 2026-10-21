@@ -3,10 +3,12 @@
 // opens with the Solid / Linear / Radial switch (`flare.inspector.fillType`)
 // over every fill; a pick sends `.runFill(.type(_))`. Under it a solid fill is
 // a color row (`flare.inspector.fill`) whose pick or typed hex sends
-// `.setFill`, a gradient (`paint.gradient`) is SuiteUI's GradientEditor, whose
-// gestures send `.runFill(_)`, and fills that differ read Mixed. The switch
-// and the editor are off, with the router's reason as their tooltip, while
-// the kernel's `fillHelp` says why. STROKE is the color row
+// `.setFill`, a gradient (`paint.gradient`) is SuiteUI's GradientEditor
+// without its own type switch (`editorTypes`), whose gestures send
+// `.runFill(_)`, and fills that differ read Mixed. The switch
+// and the editor are off, with the router's reason as their tooltip and as a
+// note under the switch (`flare.inspector.fillHelp`), while the kernel's
+// `fillHelp` says why. STROKE is the color row
 // (`flare.inspector.stroke`, `.setStrokeColor`), the Width bar
 // (`flare.inspector.strokeWidth`, in pt: each drag sample sends
 // `.scrubStrokeWidth`, so the canvas shows the width live, and the release
@@ -35,6 +37,12 @@ struct FlareInspectorFill: View {
         InspectorOption(id: $0, title: $0.rawValue.capitalized, identifier: "flare.inspector.fillType.\($0.rawValue)")
     }
 
+    /// The note under the switch that says why it is off.
+    static let fillHelpID = "flare.inspector.fillHelp"
+
+    /// The editor's own switch offers only `fill`'s type, so it hides: FILL's switch above is the one Type control.
+    nonisolated static func editorTypes(_ fill: Fill) -> [FillType] { [GradientRules.type(of: fill)] }
+
     var body: some View {
         InspectorSection("Fill") { fill }
         InspectorSection("Stroke") { stroke }
@@ -47,8 +55,11 @@ struct FlareInspectorFill: View {
             .disabled(help != nil)
             .help(help ?? "Fill type")
             .suiteControl(id: "flare.inspector.fillType", enabled: help == nil, reason: help, identifies: false)
+        if let help { InspectorNote(help, kind: .secondary, identifier: Self.fillHelpID) }
         if let gradient = paint.gradient {
-            GradientEditor(fill: gradient.fill, box: gradient.box) { send(.runFill($0)) }
+            GradientEditor(fill: gradient.fill, box: gradient.box, types: Self.editorTypes(gradient.fill)) {
+                send(.runFill($0))
+            }
                 .disabled(help != nil)
                 .help(help ?? "Edit Fill")
         } else {

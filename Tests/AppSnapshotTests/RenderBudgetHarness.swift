@@ -23,7 +23,11 @@
 // is a window-activation click, which a SwiftUI gesture ignores unless it opts
 // in (`allowsWindowActivationEvents`); SwiftUI's own canvases and AppKit
 // controls take them, inspector scrub rows and Halo's viewer don't yet. Keys
-// need a key window, which it can't have either. Nor can it run a system
+// need a key window, which it can't have either. A `keyCapable` window refuses
+// key while each scripted mouse event goes through, or AppKit would eat every
+// press as the click that makes it key, which it never becomes (so a click
+// could never focus a panel in another hosting view, such as an inspector's).
+// Nor can it run a system
 // drag: a real session waits for a window-server mouse-up forever (#2971), so
 // once a harness window opens, DragSessions hands every `.draggable` drag an
 // idle session that never starts. macOS only.
@@ -54,9 +58,12 @@ struct RenderStep: CustomStringConvertible {
     }
 }
 
-/// The harness's borderless window, allowed to be key so a test's key presses reach it.
+/// The harness's borderless window, allowed to be key so a test's key presses reach it. It refuses key while a
+/// scripted mouse event goes through, so AppKit delivers that event as it does to a plain window instead of
+/// eating it as an activation click for a window the inactive test process never makes key.
 private final class KeyCapableWindow: NSWindow {
-    override var canBecomeKey: Bool { true }
+    var sendingMouse = false
+    override var canBecomeKey: Bool { !sendingMouse }
 }
 
 /// An app's real window hosted off screen, driven by scripted events.
@@ -200,6 +207,9 @@ private final class KeyCapableWindow: NSWindow {
             with: kind, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
             windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
         else { Issue.record("no \(kind) event"); return }
+        let keyCapable = window as? KeyCapableWindow
+        keyCapable?.sendingMouse = true
+        defer { keyCapable?.sendingMouse = false }
         window.sendEvent(event)
     }
 
