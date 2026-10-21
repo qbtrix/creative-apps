@@ -2,6 +2,7 @@
 // local AreaSelectTarget fake: a drag runs the tool's `select.<shape>` in the shown mode, Feather `select.feather`, and
 // each command logs a line. `GalleryAreaSelectSheet` is the snapshot: the bar in each mode and the ants on a lasso.
 import AppKit
+import Observation
 import SuiteKernel
 import SwiftUI
 
@@ -56,13 +57,29 @@ struct GalleryAreaBoard: AreaSelectTarget {
     }
 }
 
+/// The drag in progress; read only by the ants layer, so a sample never runs the page's body.
+@MainActor @Observable final class GalleryAreaDraft {
+    private(set) var points: [Point] = []
+
+    func add(_ point: Point) { points.append(point) }
+    /// The drawn points, clearing the draft.
+    func take() -> [Point] { defer { points = [] }; return points }
+}
+
 struct GalleryAreaSelectPage: View {
+    #if DEBUG
+    // view-static: main-actor
+    static var bodyRuns = 0
+    #endif
     @State private var board = GalleryAreaBoard()
     @State private var options = AreaOptions()
-    @State private var draft: [Point] = []
+    @State private var draft = GalleryAreaDraft()
     @State private var log: [String] = []
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Area select").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)
             AreaToolOptions(options: options) { control, next in
@@ -71,16 +88,15 @@ struct GalleryAreaSelectPage: View {
                     : "\(control.command(next.tool)) \(control.rawValue)")
             }
             SuiteColor.artboard.frame(width: SuiteSize.contentMinimum.width, height: SuiteSize.contentMinimum.height)
-                .overlay(alignment: .topLeading) { AreaAnts(outline: board.outline, draft: draft, zoom: 1) }
+                .overlay(alignment: .topLeading) { GalleryAreaAntsLayer(outline: board.outline, draft: draft) }
                 .clipShape(.rect(cornerRadius: SuiteRadius.medium))
                 .contentShape(.rect)
                 .gesture(DragGesture(minimumDistance: 0)
-                    .onChanged { draft.append(Point(x: $0.location.x, y: $0.location.y)) }
+                    .onChanged { draft.add(Point(x: $0.location.x, y: $0.location.y)) }
                     .onEnded { _ in
                         let flags = NSEvent.modifierFlags
                         let held = EditModifiers(rawValue: (flags.contains(.shift) ? 1 : 0) | (flags.contains(.option) ? 2 : 0))
-                        log.append(board.select(draft, options, mode: AreaToolOptions.shownMode(options.mode, held: held)))
-                        draft = []
+                        log.append(board.select(draft.take(), options, mode: AreaToolOptions.shownMode(options.mode, held: held)))
                     })
                 .accessibilityElement().accessibilityLabel("Area canvas")
                 .accessibilityValue("\(board.outline.count) shapes").accessibilityIdentifier("suite.gallery.area-canvas")
@@ -90,6 +106,14 @@ struct GalleryAreaSelectPage: View {
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
+}
+
+/// The only view that reads the draft: the ants over the outline and the drag in progress.
+private struct GalleryAreaAntsLayer: View {
+    let outline: [[Point]]
+    let draft: GalleryAreaDraft
+
+    var body: some View { AreaAnts(outline: outline, draft: draft.points, zoom: 1) }
 }
 
 /// The snapshot: the bar in each mode (the wand's last, with its rows) and the ants on a lasso with a polygon drawn.
