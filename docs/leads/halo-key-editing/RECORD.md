@@ -4,13 +4,13 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15f807d0b-78hh (resumed from act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-o3yyj5 · Started: 2026-10-20T23:47Z
 Stage: 3 wave 4
 Base: 1a7e0d866 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: #4152 (F4150, only the time-pill snapshot now; dev merged in, head d84c1c6df, Closes #4150) back in the lane after needs-rebase. #4155 (merged 05995608c) fixed both render-budget tests incl. select-all, so #4150 closes with #4152: no gap. KE-a/KE-u critic panel on the journeys after scoped halo 39655512121 (running). KE-7 waits on #3499; KE-8 on core-loop CL-z.
+Next: KE-a/KE-u critic panel on journeys 39671666519 (after scoped halo 39655512121, queued). #4150 closed: fixed on dev by #4155 (render budget) and #4173 (snapshot); #4152 closed as #4173's duplicate. KE-7 waits on #3499; KE-8 on core-loop CL-z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | KE-a | four key commands, catalog ids, adapter stubs; timeline picks, drags, Select All Keys | KE-1, KE-2 | MJ-KE | AC-halo, TSA-a (met) | yes | 0 | done | 39632745681 | wanted |
-| KE-u | snapshots, journey (skipped), render budget | KE-5, KE-6, F4150 | HJ-K1 | KE-a | yes | 2 | done (per Belt brief); finding #4150 closes with #4152 | 39635764704 | wanted |
+| KE-u | snapshots, journey (skipped), render budget | KE-5, KE-6, F4150 | HJ-K1 | KE-a | yes | 2 | done (per Belt brief); finding #4150 closed (#4155, #4173) | 39635764704 | wanted |
 | KE-m | cross-layer picks, select all, move as one step or refuse whole | KE-3, KE-4, KE-9 | MJ-KE | KE-a | no | 0 | done | 39655526241 | - |
 | KE-z | journey live, stress perf; halo.md, built, feature-done | KE-9, KE-7, KE-8 | HJ-K1 | KE-u, KE-m; PR #3499 (KE-7); core-loop:CL-z (KE-8) | yes | 0 | building | - | - |
 
@@ -40,7 +40,7 @@ Next: #4152 (F4150, only the time-pill snapshot now; dev merged in, head d84c1c6
 - KE-m's Slice-Done waits for the RJ-H13 job on dev (packet Done check), though rule 21 alone wouldn't gate on a missing check.
 
 ## Open
-- Finding #4150: aKeyDragShowsTheTimePill red since #4070; RenderBudgetHaloKeyEditingTests drag 9 bodies and selectAll unrouted (scoped halo 39635764704). Fix round 1 started 18:30Z: PR #4152 (test-only, playhead to 36 before the drag); the real-user bug went to #4151 (needs-ui, TimelineStrip playhead band wins a key's press); select-all is not fixed yet.
+- Finding #4150: aKeyDragShowsTheTimePill red since #4070; RenderBudgetHaloKeyEditingTests drag 9 bodies and selectAll unrouted (scoped halo 39635764704). Fix round 1 started 18:30Z: PR #4152 (test-only, playhead to 36 before the drag); the real-user bug went to #4151 (needs-ui, TimelineStrip playhead band wins a key's press); select-all is not fixed yet. Closed 21:00Z: #4155 fixed both render-budget tests and #4173 the snapshot; #4152 closed as a duplicate.
 - HaloViewerSnapshots.shapeButton red on macOS too: not this feature's file.
 - PR #3499 (stress journeys) open: KE-7 waits on it.
 - core-loop #1971 CL-z not built: KE-8 waits on it.
