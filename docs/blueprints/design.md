@@ -346,9 +346,11 @@ from disk; frames in page points, children listed back to front):
 | P3 | `testLayerListScroll` (`+PerfLayers`, F4) | crowd | scroll Layers end to end, all frames expanded | QD-S10 | – |
 | P4 | `testOpenLargeFile` (`+PerfFiles`, F5) | crowd with `-DesignSaveTo <tmp>`, then `-DesignOpenFile <tmp>` | ⌘S; relaunch on the saved file | progress within QB-L9; no stall over QB-L12 | loading |
 
-Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`
-(`+Export`; from #418 (c), plus Cancel and a read-only folder),
-`testPenCornersAndCurves` (`+Pen`), `testComponentsCreateAndInsert`
+Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`,
+`testExportNeverOverwritesAndCancels` and `testExportSheetOnFakes`
+(`+Export`; from #418 (c): PNG 2x, SVG and PDF read back; a second export
+never overwrites; Escape, Cancel and a read-only folder; the sheet on the
+fakes), `testPenCornersAndCurves` (`+Pen`), `testComponentsCreateAndInsert`
 (`+Components`) and `testVariablesLightAndDark` (`+Variables`).
 
 ---
@@ -1661,7 +1663,7 @@ public struct FakeVariables: VariableEditing {
 | `StyleEditing` | J10, J11, P2 | F3 |
 | `LayerOrdering` | J12, P3 | F4 |
 | `DocumentFiling` | J3, J13, J14, J16, P4 | F5 |
-| `ExportPlanning` | `testExportPNGSVGPDF` | F6 |
+| `ExportPlanning` | `testExportPNGSVGPDF`, `testExportNeverOverwritesAndCancels` | F6 |
 | `PathDrawing` | `testPenCornersAndCurves` | F7 |
 | `ComponentLibrary` | `testComponentsCreateAndInsert` | F8 |
 | `VariableEditing` | `testVariablesLightAndDark` | F9 |
@@ -1803,7 +1805,7 @@ with the issue numbers, and the model half gates alone (section 9, Q3).
 | QD-S9 | Any command that changes the document (`apply` plus one history record) | ≤ 1 ms / ≤ 10 ms | – | `DesignBudgetTests.applyStep` |
 | QD-S10 | Layers list with every row expanded (2,000 rows) | row build ≤ 5 ms / ≤ 50 ms | scroll p95 frame interval ≤ 1.5 refreshes (QB-L10) | `DesignLayersBudgetTests.layerRows`; P3 |
 | QD-S11 | Open and save the `crowd` file | decode and encode ≤ 50 ms / ≤ 500 ms | progress within 100 ms (QB-L9); no main-thread stall over 2 refreshes (QB-L12) | `DesignBudgetTests.fileRoundTrip`; P4 |
-| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms (needs #330's progress mark); 2x PNG of 1440 × 1024 written ≤ 1 s (the journey's wall time) | `DesignExportBudgetTests.svgExport`; `testExportPNGSVGPDF` |
+| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms (needs #330's progress mark); 2x PNG of 1440 × 1024 written ≤ 1 s (the journey's wall time) | `DesignExportBudgetTests.svgExport`; `RenderBudgetDesignExportTests.liveRun` (at most 4 DesignEditor bodies for a 3-file run); `testExportPNGSVGPDF` |
 
 ### 7.2 App-audit checks that apply
 
@@ -1974,7 +1976,7 @@ Waits on: wave 2 merged.
 
 | Feature | Covers | Owned files | Engine work it waits on |
 |---|---|---|---|
-| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExportSheet.swift`, `DesignRasterizer.swift`; tests `DesignExportTests.swift`, `DesignSVGTests.swift`, `DesignExportBudgetTests.swift`; snapshots `DesignExportSnapshots.swift`; journey `+Export` | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
+| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExport+Kernel.swift` (DesignModel: the plan, SVG and remembered options), `DesignExportSheet+Kernel.swift`, `DesignRaster.swift`, `DesignApp/DesignExport+Kernel.swift` (the sheet and the live run: folder, `.withoutOverwriting` writes, failures, Cancel), `DesignRasterizer.swift`; tests `DesignExportPlanTests.swift`, `DesignExportSheetTests.swift`, `DesignExportWalkTests.swift`, `DesignRasterTests.swift`, `DesignSVGTests.swift`, `DesignSVGWalkTests.swift`, `DesignExportBudgetTests.swift`, `RenderBudgetDesignExportTests.swift`; snapshots `DesignExportSnapshots.swift`; journeys `+Export` (`testExportPNGSVGPDF`, `testExportNeverOverwritesAndCancels`, `testExportSheetOnFakes`) | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
 | F7 `pen` | Pen tool: corners, smooth points, close, Return and Escape finish; enable the tool | `Live/LivePen.swift`, `DesignPenMarks.swift`, `DesignCanvas.swift`, `DesignWorkspace.swift` (the tool's help); tests `DesignPenTests.swift`; snapshots `DesignPenSnapshots.swift`; journey `+Pen` | **Needs a new core issue:** "Shared path geometry: a Linux-safe path (move, line, cubic, close) with exact cubic bounds, a hit test within a tolerance and SVG path data, for Flare and Design." Also SuiteUI #706 (anchor mark) |
 | F8 `components` | #19: create from a frame, Assets section, insert, instances draw the component | `Live/LiveComponents.swift`, `DesignPanel.swift`, `DesignAssetsPanel.swift`; tests `DesignComponentsTests.swift`; snapshots `DesignComponentsSnapshots.swift`; journey `+Components` | none |
 | F9 `variables` | #20: Variables sheet, light and dark values, fills bound to a variable (drawn through D2-3's `displayFill`), preview mode | `Live/LiveVariables.swift`, `DesignVariablesSheet.swift`, `DesignInspector.swift`; tests `DesignVariablesTests.swift`; snapshots `DesignVariablesSnapshots.swift`; journey `+Variables` | none (CoreColor wide gamut is #21, not v1) |
