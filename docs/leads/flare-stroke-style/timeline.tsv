@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-21T06:23Z	3	heartbeat	FG-a	GF-2 #3695 merged 06:11Z; FG-2 (gradient-fill lead) not built yet, so FK-2 still waits; SS-d #3823/#3826 open
 2026-10-21T06:40Z	check	dev 0865916d; #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
 2026-10-21T06:57Z	check	dev b64cbb8c (core bump #3784); #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
+2026-10-21T07:15Z	check	dev b64cbb8c; #3850 #3921 open in lane; FG-2 not opened (3rd poll, asked supervisor on #3452); #3499 #3823 #3826 open; flare findings 0
