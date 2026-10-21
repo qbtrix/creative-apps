@@ -50,6 +50,9 @@ struct LibraryCommands: Commands {
         return member.flatMap { menu.help(for: $0) } ?? fallback
     }
 
+    /// Why File > Share… is off: no window, else the window's reason.
+    private var shareWhy: String { why(nil, menu.share.help ?? LibraryMenu.Share.menuNotBuilt) }
+
     /// `perform` applied to `value`, nil (disabled) while `perform` is nil.
     private func bind<Value>(_ perform: (@MainActor (Value) -> Void)?, _ value: Value) -> LibraryMenu.Action? {
         guard let perform else { return nil }
@@ -71,6 +74,9 @@ struct LibraryCommands: Commands {
                 title: "Export…", systemImage: "square.and.arrow.up", action: menu.export.export,
                 reason: menu.export.exportHelp ?? why("exporter", "Export isn't connected yet."),
                 shortcut: KeyboardShortcut("e", modifiers: [.command, .shift]))
+            MenuCommand(
+                LibraryCatalog.shareMenuSpec, on: LibraryShareMenu(help: menu.share.share == nil ? shareWhy : nil),
+                systemImage: "square.and.arrow.up") { menu.share.share?() }
         }
         CommandGroup(replacing: .undoRedo) {
             MenuCommand(
