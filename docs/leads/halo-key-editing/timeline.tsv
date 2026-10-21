@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-21T08:35:21Z	3	heartbeat	-	wave 2: #3951 #3954 #3955 macOS builds green, awaiting lane merge sweep
 2026-10-21T08:55:17Z	3	heartbeat	-	#3951 KE-3 merged 08:34Z; #3955 needs-rebase resolved at fcd624a2e (HaloModelTests 655 pass; gate red on dev's stale Design anchors from #3889, not fixed here, noted on #3536); #3954 awaiting lane
 2026-10-21T09:12:24Z	3	heartbeat	-	#3954 awaiting lane batch; #3955 lane Linux run red only on dev's stale Design anchors (dev-red #3856), fix in #3980; not fixed here per CLAUDE.md
+2026-10-21T09:29:42Z	3	heartbeat	-	wave 2: #3951 merged; #3954 mac green, awaiting lane batch; #3955 held on dev anchor red (#3856, fix PR #3980 open)
