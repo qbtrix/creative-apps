@@ -2,9 +2,9 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: FR-10b built
-Base: lead/frame-rates-FR-flare-10b@06fffdaae
-Next: FR-10 PR after #4172+#4212 merge; FR-10b PR after FR-10 merges
+Stage: waiting on macOS builds
+Base: #4172 #4211 #4212
+Next: FR-10 PR after #4172+#4212 merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
