@@ -32,7 +32,7 @@ import Testing
             #expect(HaloProject.catalog.ids.contains(id), "\(id)")
             #expect(HaloHeadless.catalog.ids.contains(id), "\(id)")
         }
-        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2)
+        #expect(HaloProject.catalog.ids.count == HaloCommand.allCases.count + 2 + HaloProject.windowSpecs.count)
     }
 
     @Test func runShapeKeepsThePickedTool() throws {

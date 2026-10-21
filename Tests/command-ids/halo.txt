@@ -23,6 +23,7 @@ easing.select-lane-keys
 easing.set-custom
 edit.redo
 edit.undo
+file.answer-unsaved
 file.open
 file.open-recent
 file.save
@@ -44,6 +45,7 @@ layer.rename-begin
 layer.select
 layer.send-backward
 render.cancel
+render.choose-folder
 render.close-sheet
 render.frame
 render.open-sheet
