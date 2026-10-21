@@ -15,3 +15,4 @@
 2026-10-21T16:18Z	check	#4036 macOS build 39625524966 still queued (53 min); TS-m #3844/#3847 unchanged; ask supervisor if still queued next check
 2026-10-21T16:40Z	check	#4036 lane macOS build 39625524966 green (16:39Z); waiting on lane merge; TS-m #3844/#3847 unchanged
 2026-10-21T17:03Z	check	#4036 in lane batch lane/batch-20261021165002 (Linux check 39638325928 running); TS-m #3844/#3847 unchanged
+17:28Z	check	#4036 (TX-1) merged 17:06Z; Belt-Slice-Done TX-a posted (Linux check 39638325928); #4053/#4059 did not retarget, merged origin/dev in (dev + own diff over e68e6e99), gate running before retarget to dev; TS-m #3844/#3847 unchanged
