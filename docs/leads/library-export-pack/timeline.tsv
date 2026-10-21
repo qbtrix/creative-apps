@@ -1,0 +1,40 @@
+time	event	task	note
+2026-10-20T19:35:00Z	start	-	run act-1a15ac11868-4kb6; LX-1 planned
+2026-10-20T19:25:32Z	builder-start	LX-1+LX-3	builder subagent (worktree): LX-1 PR, then LX-3 stacked draft
+2026-10-20T19:39:39Z	built	LX-1	PR #3696 head c6102dd, fast-lane, ci --changed PASS
+2026-10-20T19:39:39Z	built	LX-3	PR #3699 draft head f165c5c, mutate 7/7 + 6/6
+2026-10-20T19:48:12Z	check	-	lane backlog: 56 runs queued; FC-4 #3461 macOS run 39437577080 queued since 14:15Z; nothing merged (MD #3550 #3570 #3574 #3575, LX #3696 waiting)
+2026-10-20T20:14:59Z	check	-	nothing merged; 59 runs queued; dev took #3680 (no conflict with ours); #3582/#3579 still dirty drafts awaiting parents; no supervisor reply on #1563
+2026-10-20T20:50Z	check	footer stripped from #3696 #3699 and comments on #1563 #1555 #3478; FC-4 #3461 and MD-8 #3550 macOS builds green, awaiting lane batch; nothing merged yet
+2026-10-20T21:23Z	check	LX-1 #3696 still queued for the lane; LX-3 #3699 draft on it; XP-2, XP-3, XP-7 not on dev
+2026-10-20T21:58:10Z	check	check-in: LX-1 #3696 re-proofed after needs-rebase (head f02f9e9c, CI: PASS); LX-2/LX-4 still blocked on XP-2/3/7
+2026-10-20T22:32:56Z	check	check-in: LX-1 #3696 clean, awaiting lane; LX-3 waits on it; XP-2/3/7 not on dev
+2026-10-21T00:05:30Z	check	check-in: LX-1 #3696 merged (7f3959c); LX-a still needs LX-2 (waits XP-3); LX-3 #3699 rebuilt on dev (slice diff only), gate running. Belt's 'lead/export-pack' is the core lead's branch; this feature's record is lead/export-pack-library
+2026-10-21T00:16:12Z	stage	LX-3 #3699 rebuilt on dev (6 files +38/-8), CI: PASS, pushed 7909013, ready (draft off)
+2026-10-21T00:33:02Z	check	check-in: LX-3 #3699 ready on 7909013, awaiting lane batch; XP-2/3/7 not on dev (XP-1, XP-6 are)
+2026-10-21T01:05:17Z	check	LX-3 #3699 ready in lane (Head 79090133); LX-2 waits XP-3, LX-4 waits XP-2/XP-7
+2026-10-21T01:27:31Z	check	LX-3 #3699 clean in lane; LX-2/LX-4 wait on XP-3, XP-2, XP-7
+2026-10-21T01:48:43Z	check	dev green; LX-3 #3699 clean, awaiting lane batch
+2026-10-21T02:10:07Z	check	no change: LX-3 #3699 clean, awaiting lane batch
+2026-10-21T02:32:07Z	check	LX-3 #3699 is in lane batch-20261021005140, which is bisecting (probe -4 Linux run 39532217965 includes it)
+2026-10-21T02:53:55Z	check	LX-3 #3699 still in bisecting batch-20261021005140 (probes -4, -5 past it; no needs-fix)
+2026-10-21T03:16:29Z	stage	LX-3 #3699 merged into dev as f1e49054d (lane batch-20261021005140)
+2026-10-21T03:39:04Z	check	XP-2/3/7 not landed; LX-2, LX-4 wait
+2026-10-21T04:06:35Z	check	XP-2 waits SM-a, XP-3 waits TC-a/PL-a, XP-7 waits XP-2/SM-w; LX-2, LX-4 wait
+2026-10-21T04:29:21Z	check	XP-2/3/7 not landed; LX-2, LX-4 wait
+2026-10-21T04:51:43Z	check	XP-2/3/7 not landed; LX-2, LX-4 wait
+2026-10-21T05:13:47Z	check	XP-2/XP-3/XP-7 not on dev (wait SM-a, TC-a+PL-a, SM-w); LX-2/LX-4 still blocked
+2026-10-21T05:36:10Z	check	XP-2/XP-3/XP-7 not on dev; LX-2/LX-4 still blocked
+2026-10-21T07:12:14Z	check	XP-2/XP-3/XP-7 not on dev; LX-2/LX-4 still blocked; no supervisor replies
+2026-10-21T07:34:29Z	check	XP-2/XP-3/XP-7 not on dev; LX-2/LX-4 still blocked; no supervisor replies
+2026-10-21T07:56:13Z	check	XP-2/XP-3/XP-7 not on dev; LX-2/LX-4 still blocked; no supervisor replies
+2026-10-21T08:18:58Z	check	XP-2/3/7 not on dev; LX-2/LX-4 wait
+2026-10-21T08:41:02Z	check	XP-2/3/7 not on dev; LX-2/LX-4 wait
+2026-10-21T09:03:56Z	check	XP-2/3/7 not on dev; LX-2/LX-4 wait
+2026-10-21T09:26:33Z	check	XP-2/3/7 not on dev; LX-2/LX-4 wait
+2026-10-21T10:13:23Z	check	-	no XP-2/3/7 PR yet; LX-2/LX-4 wait
+2026-10-21T10:35:35Z	check	-	no XP-2/3/7 PR yet; LX-2/LX-4 wait
+2026-10-21T10:57:48Z	check	-	no XP-2/3/7 PR yet; LX-2/LX-4 wait
+2026-10-21T11:20:35Z	check	-	no XP-2/3/7 PR yet; LX-2/LX-4 wait
+2026-10-21T11:50:25Z	check	-	run act-1a15e4969c2-pa6e resumed; XP-2/3/7 not on dev; LX-2/LX-4 wait
+2026-10-21T15:13:45Z	check	-	record moved to lead/library-export-pack; XP-2/3/7 not on dev; LX-2/LX-4 wait
