@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-21T11:52Z	2026-10-21T11:52:10Z	3	wave2-start	wf_ba938c1a-b7d	RP-4 (RP-m) on RP-1, RP-3 (RP-u) on RP-2; markers being restored on #4048
 2026-10-21T12:04Z	2026-10-21T12:03:56Z	3	wave2-restart	wf_d120983e-f26	RP-4 RP-3 relaunched on merge-base 965a76b with a dev merge first
 2026-10-21T12:06Z	3	poll	w1	builders running
+2026-10-21T12:26Z	3	poll	w1	builders running
