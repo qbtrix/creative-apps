@@ -12,7 +12,10 @@
 // SuiteControlInventory while it is on screen; a nil id registers nothing.
 // With `identifies` false it only registers, for a view whose parts carry
 // their own identifiers: an identifier on a view of several elements lands on
-// every one of them (KeyframeButton, #1282). The publishing call also sets
+// every one of them (KeyframeButton, #1282). `.suiteControl(entry:identifies:)`
+// lists a whole entry, so the toggle-style controls (InspectorAction,
+// SegmentedTabs, KeyframeButton) report `selected` (ControlStateTests).
+// The publishing call also sets
 // `gridProbe`, `scrubProbe`, `chipProbe` and `curveProbe`, so grids, layer
 // lists, scrub fields, chips and curve editors record their frames, samples
 // and marks into the window's `suite.perf` (SP1, SP4, SP6, SP7, SJ20); only
@@ -127,6 +130,33 @@ private struct SuiteControlModifier: ViewModifier {
                 }
                 .onDisappear { entry.map { store?.unregister($0.id, owner: owner) } }
         }
+    }
+}
+
+extension View {
+    /// Lists `entry` in the window's `suite.controls` while on screen, its
+    /// `selected` state included, so a toggle-style SuiteUI control reports
+    /// whether it is on; nil lists nothing. With `identifies` the entry's id
+    /// is also the view's accessibility identifier.
+    func suiteControl(entry: ControlEntry?, identifies: Bool) -> some View {
+        modifier(SuiteControlEntryModifier(entry: entry, identifies: identifies))
+    }
+}
+
+/// Places one entry for the view's lifetime; each change replaces the last one placed.
+private struct SuiteControlEntryModifier: ViewModifier {
+    let entry: ControlEntry?
+    let identifies: Bool
+    @Environment(\.suiteControlStore) private var store
+    @State private var owner = UUID()
+
+    func body(content: Content) -> some View {
+        Group {
+            if identifies, let id = entry?.id { content.accessibilityIdentifier(id) } else { content }
+        }
+        .onAppear { store?.place(entry, replacing: nil, owner: owner) }
+        .onChange(of: entry) { old, new in store?.place(new, replacing: old, owner: owner) }
+        .onDisappear { store?.place(nil, replacing: entry, owner: owner) }
     }
 }
 

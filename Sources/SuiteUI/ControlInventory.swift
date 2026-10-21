@@ -7,9 +7,8 @@
 // view. SuiteControlStore holds a window's inventory for `.suiteControl` and
 // SuiteControlsElement publishes its JSON as the label of a hidden element,
 // placed by `.suiteProbes()` (SuiteEnvironment.swift). The rules are
-// Foundation only (ControlInventoryTests). `.suiteControl(entry:identifies:)`
-// lists a whole entry, so the toggle-style controls (InspectorAction,
-// SegmentedTabs, KeyframeButton) report `selected` (ControlStateTests).
+// Foundation only (ControlInventoryTests). project.yml also compiles this file
+// alone into SuiteJourneyTests, so it uses nothing from other SuiteUI files.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -102,33 +101,6 @@ import SwiftUI
 
     func place(_ new: ControlEntry?, replacing old: ControlEntry?, owner: UUID) {
         inventory.place(new, replacing: old, owner: owner)
-    }
-}
-
-extension View {
-    /// Lists `entry` in the window's `suite.controls` while on screen, its
-    /// `selected` state included, so a toggle-style SuiteUI control reports
-    /// whether it is on; nil lists nothing. With `identifies` the entry's id
-    /// is also the view's accessibility identifier.
-    func suiteControl(entry: ControlEntry?, identifies: Bool) -> some View {
-        modifier(SuiteControlEntryModifier(entry: entry, identifies: identifies))
-    }
-}
-
-/// Places one entry for the view's lifetime; each change replaces the last one placed.
-private struct SuiteControlEntryModifier: ViewModifier {
-    let entry: ControlEntry?
-    let identifies: Bool
-    @Environment(\.suiteControlStore) private var store
-    @State private var owner = UUID()
-
-    func body(content: Content) -> some View {
-        Group {
-            if identifies, let id = entry?.id { content.accessibilityIdentifier(id) } else { content }
-        }
-        .onAppear { store?.place(entry, replacing: nil, owner: owner) }
-        .onChange(of: entry) { old, new in store?.place(new, replacing: old, owner: owner) }
-        .onDisappear { store?.place(nil, replacing: entry, owner: owner) }
     }
 }
 
