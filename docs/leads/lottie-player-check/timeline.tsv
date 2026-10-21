@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-21T11:59:47Z	heartbeat	all PRs open and clean; no needs-fix/needs-rebase; FL-m not seen	-	waiting on lane
 2026-10-21T12:24:23Z	heartbeat	PRs open and clean, no needs-fix; FL-m not seen	-	waiting on lane
 2026-10-21T12:47:23Z	heartbeat	#4026 #4033 wait on the lane's macOS builds; no needs-fix	-	waiting on lane
+2026-10-21T13:16:12Z	heartbeat	#4025 (oracle script) merged 13:08Z; #4026/#4033 red on Photo CommandPathTests (old heads); dev merge in flight	#4025	fix in flight
