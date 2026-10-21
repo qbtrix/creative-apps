@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T00:37:33Z	check	heartbeat	#3681	PG-1 macOS build 39519366166 still queued (slots full); PG-2/3/4 held; #3695 GF-2 integrated by lane, Linux check running
 2026-10-21T01:03:11Z	check	heartbeat	#3681	PG-1 macOS build 39519366166 still queued; #3695 GF-2 Linux check on e3dbed2c; PG-2/3/4 held
 2026-10-21T01:22:45Z	check	heartbeat	#3681	PG-1 macOS build 39519366166 queued 75 min, oldest in a 13-run macOS queue (later runs served first); #3695 GF-2 macOS build dispatched 00:59Z; PG-2/3/4 held; supervisor question on queue still open
+2026-10-21T01:41:46Z	check	heartbeat	#3681	PG-1 macOS build 39519366166 still queued (95 min); #3695 GF-2 macOS build queued; PG-2/3/4 held; supervisor queue question still open
