@@ -4,12 +4,12 @@ Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: 3 wave 1
 Base: dev 6d7fcf14
-Next: AC-zoom gate result; AC-colour PR; then AC-tools
+Next: AC-colour PR; then AC-tools
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | in-lane #3941 | – | – |
+| AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | in-lane #3941 (gate PASS aca36269) | – | – |
 | AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 0 | building slice/ac-colour | – | – |
 | AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | queued | – | – |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
@@ -34,6 +34,7 @@ Next: AC-zoom gate result; AC-colour PR; then AC-tools
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T06:51Z: Fast-Check on #3941 verified
 - 2026-10-21T06:48Z: stack AC-colour on AC-zoom
 - 2026-10-21T06:44Z: AC-zoom ships with departures listed (packet names absent files; no Model code to mutate)
 - 2026-10-21T05:25Z: AC-guides done with no PR: #3309 (cf120143) had already shipped ViewportGuideMarks guides, the showsRulers flag and FlareGuideDrag with its plan. Belt-Slice-Done on run 39401676163 (#1942 6308762859), plus Mac-Finish-Wanted.
