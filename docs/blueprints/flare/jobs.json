@@ -242,7 +242,8 @@
     "since": "2026-10-19",
     "sources": [
       "https://help.lottiefiles.com/hc/en-us/articles/30718780265369-Lottie-Creator-Key-Features"
-    ]
+    ],
+    "waits_on": "LO-5"
   },
   "RJ-F13": {
     "id": "RJ-F13",
