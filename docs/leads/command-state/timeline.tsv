@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-21T10:52Z	3	wave-start	w1	builders launched
 2026-10-21T11:11Z	3	poll	w1	builders running
 2026-10-21T11:14Z	3	wave-end	w1	#4021 CS-1, #4023 CS-2 open; CS-1b follow-up planned
+2026-10-21T11:29Z	3	poll	w1	builders running
