@@ -59,3 +59,5 @@ utc	stage	event	ref	note
 2026-10-21T22:05Z	4	build	DT-7	journey on feat/design-transform-dt7-journey off dev; PR after #4188 fix merges
 2026-10-21T22:16Z	4	built	DT-7	feat/design-transform-dt7-journey c36b6b1a off dev; uncompiled (UITests macOS only); PR held for knob fix, DT-6, #4223 fix
 2026-10-21T22:38Z	3	heartbeat	-	no merges; lane macOS build run 39662239121 (#4159) still queued since 19:30, no macOS runner picks up lane builds
+2026-10-21T22:50Z	3	built	#4223	fix/design-turned-resize 9ab21935, ci --changed PASS, Mutate 33/33; PR held for #4188 fix
+2026-10-21T22:50Z	3	built	#4224	fix/design-knob-several 00e7a2ca, ci --changed PASS, Mutate 38/38 + 25/25; PR held for #4223 fix
