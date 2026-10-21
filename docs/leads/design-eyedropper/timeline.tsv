@@ -55,3 +55,5 @@ utc	stage	event	ref	note
 2026-10-21T21:05Z	start	run act-1a1605b0534-rn47	-	resumed DY; main verified 0dd23d65
 2026-10-21T21:20Z	fix	DY-u round 2 restack	#4081	merged origin/dev in; diff 1 file +18; #4062 half on dev via #4083
 2026-10-21T21:20Z	check	waits	-	DT-m not merged (#4187 open)
+2026-10-21T21:45Z	fix	DY-u round 2 pushed	#4081	4ecb757b gate PASS; needs-split dropped, fast-lane back
+2026-10-21T21:45Z	gap	DY-u rounds spent	-	#3987 #3990 #3994 -> gap p2
