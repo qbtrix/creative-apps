@@ -11,8 +11,11 @@
 // as it comes. A click focuses it, so Escape sends `cancelViewerDrag` and
 // drops the live preview. It is hidden from accessibility: the artboard
 // element (`halo.viewer`) around it names it. It reads its model and never
-// assigns it.
+// assigns it. With the shape tool on (`haloShapeDrawing`, HS-3) a press
+// draws through it instead.
+import AppKit
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -34,7 +37,10 @@ struct HaloViewerGestures: View {
     /// or after Escape.
     @State private var start: HaloPoint?
     @State private var last: HaloPoint?
+    /// Whether this press draws a shape (the tool was on when it began).
+    @State private var drawsShape = false
     @Environment(\.haloLiveEdit) private var live
+    @Environment(\.haloShapeDrawing) private var shapes
     @Environment(\.haloViewerTakesActivationClicks) private var takesActivationClicks
 
     var body: some View {
@@ -47,12 +53,14 @@ struct HaloViewerGestures: View {
             .contentShape(Rectangle())
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
             .gesture(drag)
+            .overlay { if let shapes { HaloShapeDraftView(drawing: shapes, artboard: artboard) } }
             .allowsWindowActivationEvents(takesActivationClicks)
             .aspectRatio(artboard, contentMode: .fit)
             .frame(maxWidth: artboard.width, maxHeight: artboard.height)
             .focusable()
             .focusEffectDisabled()
             .onExitCommand {
+                if let shapes, drawsShape || shapes.isOn { return shapes.escape() }
                 (start, last) = (nil, nil)
                 live?.project = nil
                 perform(.cancelViewerDrag)
@@ -66,8 +74,13 @@ struct HaloViewerGestures: View {
             .onChanged { value in
                 if !dragging {
                     dragging = true
+                    drawsShape = shapes?.isOn == true
                     start = point(value.startLocation)
-                    if let start { perform(.beginViewerDrag(x: start.x, y: start.y)) }
+                    if let start, !drawsShape { perform(.beginViewerDrag(x: start.x, y: start.y)) }
+                }
+                if drawsShape, let shapes {
+                    guard let start, let now = point(value.location) else { return }
+                    return shapes.drag(model.shapeTool, from: start, to: now, modifiers: held)
                 }
                 guard let start, let now = point(value.location) else { return }
                 guard let live else { return perform(.moveViewerDrag(x: now.x, y: now.y)) }
@@ -81,11 +94,21 @@ struct HaloViewerGestures: View {
                 }
             }
             .onEnded { _ in
+                if drawsShape {
+                    (dragging, drawsShape, start) = (false, false, nil)
+                    return shapes?.release() ?? ()
+                }
                 if let last { perform(.moveViewerDrag(x: last.x, y: last.y)) }
                 perform(.endViewerDrag)
                 (dragging, start, last) = (false, nil, nil)
                 live?.project = nil
             }
+    }
+
+    /// The modifiers held now: Shift squares a shape, Option grows it from the centre.
+    private var held: EditModifiers {
+        let flags = NSEvent.modifierFlags
+        return EditModifiers(rawValue: (flags.contains(.shift) ? 1 : 0) | (flags.contains(.option) ? 2 : 0))
     }
 
     /// `location` in the artboard's points as composition pixels; nil before
