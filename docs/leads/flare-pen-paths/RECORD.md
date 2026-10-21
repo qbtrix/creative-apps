@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T20:11Z) FP-a round-2 critic panel once a scoped: flare or full CI run on dev contains 79e32f25 (#4027) and its journeys run has ui-screens; none yet. #3770 (PN-3) still open.
+Next: (2026-10-21T20:33Z) FP-a round-2 panel waits on a scoped: flare or full run containing 79e32f25 (only full CI 39665258026 at 369ecc7a is queued, before the merge). #3770 (PN-3) still open.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

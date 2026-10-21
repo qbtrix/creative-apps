@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-21T19:27Z	heartbeat	#4027 Linux green on e7994c85; waits on its lane batch's macOS gate. #3770 (PN-3) still open at be778261.
 2026-10-21T19:48Z	heartbeat	#4027 Linux green on e7994c85; lane dispatched its macOS build at 19:27Z. #3770 (PN-3) still open.
 2026-10-21T20:11Z	fix-round	FP-a round 1 merged (#4027, 79e32f25); #4011 #4013 closed; round-2 review waits on a Flare screens run
+2026-10-21T20:33Z	heartbeat	FP-a round-2 panel waits on a scoped: flare or full run containing 79e32f25 (only full CI 39665258026 at 369ecc7a is queued, before the merge). #3770 (PN-3) still open.
