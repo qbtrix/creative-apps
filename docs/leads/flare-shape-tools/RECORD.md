@@ -3,7 +3,7 @@
 Issue: #3451 · Packet: docs/blueprints/flare/features/shape-tools.md
 Run: act-1a15cf358c6-wj2q · Resumed: 2026-10-21T05:39:14Z (line lead: stroke-style #3452, shape-tools #3451, key-select-all #3538)
 Stage: 3 (wave 2)
-Base: 71ffa4d1 (origin/dev); main 0dd23d65 verified
+Base: 0865916d (origin/dev); main 0dd23d65 verified
 Next: #3850 (FS-5) merges in the lane; then FS-u re-opens as its own PR off dev (#3851 was 426 lines with FS-5 inside: needs-split) and #3851 closes
 
 Loop: v3 (the packet has a `## Slices` table).
