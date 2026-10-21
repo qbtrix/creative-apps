@@ -1,0 +1,37 @@
+utc	stage	event	ref	note
+2026-10-20T05:12Z	0	stage-start	-	lead branch created from origin/dev 6537a1a0
+2026-10-20T05:12Z	0	stage-end	-	no lead/file-flow on the remote; RECORD.md from the template
+2026-10-20T05:12Z	1	stage-end	-	packet read; SF-9 waits on suiteui export-pack XP-z
+2026-10-20T05:12Z	2	stage-end	-	waves planned: SF-a, then SF-m and SF-u, then SF-z
+2026-10-20T05:12Z	3	stage-start	-	wave 1 SF-a
+2026-10-20T05:31Z	3	pr-open	#3488	SF-a part 1 (SF-1), Fast-Check pass at 1dc2fddf
+2026-10-20T05:31Z	3	pr-open	#3489	SF-a part 2 (SF-2) stacked, Fast-Check pass at 19ceb645
+2026-10-20T05:31Z	3	stage-start	-	wave 2 SF-m
+2026-10-20T05:40Z	3	pr-open	#3493	SF-m part 1 (SF-5 + SF-6) stacked on SF-1, Mutate 5/5 + 4/4, Fast-Check pass at 9eef4fe3
+2026-10-20T05:45Z	3	pr-open	#3507	SF-m part 2 (SF-7) stacked on SF-2, Fast-Check pass at 8c97ef8b
+2026-10-20T05:46Z	3	stage-start	-	wave 2 SF-u
+2026-10-20T05:56Z	3	pr-open	#3514	SF-u part 1 (SF-3) stacked on SF-7, Fast-Check pass at 902f34cc
+2026-10-20T05:56Z	3	stage-start	-	wave 2 SF-u part 2 (SF-4)
+2026-10-20T06:40Z	3	pr-open	#3522	SF-u part 2 (SF-4) stacked on SF-3, Fast-Check pass at ff339260
+2026-10-20T06:40Z	3	stage-start	-	wave 3 SF-z (SF-8)
+2026-10-20T06:11Z	3	pr-open	#3529	SF-z part 1 (SF-8) stacked on SF-4, Fast-Check pass at bdf58b6f
+2026-10-20T20:05Z	3	relaunch	-	run act-1a15adc3ee8-qw4q; #3514 Head moved to d2970e8a; SF-4/SF-8 rebuilt; #3522/#3529 closed
+2026-10-20T20:08Z	3	slice-done	-	SF-a, SF-m on run 39484284755; Mac-Finish-Wanted SF-a
+2026-10-20T20:40Z	3	pr-open	#3731	SF-z part 2 (SF-9) on dev, Fast-Check pass at 05ecce2c
+2026-10-20T20:50Z	3	staged	-	SF-10 branch pushed, waits on SF-8 and #3731
+2026-10-20T20:55Z	3	check	#3514	head 9c708ebd, mac build queued; sf4/sf8 rebuilt on it; #3731 clean, waiting for its batch
+2026-10-20T21:20Z	3	check	#3514	still head 9c708ebd, lane mac build 39494113551 queued; #3731 clean, waiting for its batch; sf4/sf8/sf10 staged
+2026-10-20T21:45Z	3	check	#3514	gate PASS on 9c708ebd, Head marker moved to it; lane mac build 39494113551 still queued; #3731 clean
+2026-10-20T21:55Z	3	check	#3514	mac build 39494113551 still queued (38 runs queued, mac runners busy since 16:01Z); #3731 clean; waiting
+2026-10-20T22:17Z	3	check	#3514	mac build 39494113551 still queued; #3514 and #3731 open (dev moved, mergeability recomputing); waiting
+2026-10-20T22:44Z	3	question	#3480	mac build 39494113551 queued 2h; asked supervisor for a mac slot or Mac-Check for #3514 and #3731
+2026-10-21T00:10Z	3	merged	#3731	SF-9 (SF-z part 2) merged 23:01Z
+2026-10-21T00:10Z	3	staged	-	supervisor: #3514 lands via local Mac gate after #3743; dev merged into sf4 (04220b3b), sf8 (c070045f), sf10 (aa4923a7); gate PASS on sf8 and sf10
+2026-10-21T00:33Z	3	merged	#3514	SF-3 (SF-u) merged 00:23Z
+2026-10-21T00:33Z	3	opened	#3827	SF-4 (SF-u) rebuilt on dev, gate PASS
+2026-10-21T00:33Z	3	staged	-	SF-8 rebuilt on #3827 head (d2559733), gate PASS
+2026-10-21T00:55Z	3	waiting	#3827	lane dispatched macOS build 39522612 (00:39Z); SF-8 staged on d2559733
+2026-10-21T01:16Z	3	waiting	#3827	macOS build 39522612112 succeeded; waiting for the lane's merge sweep
+2026-10-21T01:32Z	3	waiting	#3827	green macOS build, clean, fast-lane; lane sweep 39527761241 pending
+2026-10-21T01:54Z	3	waiting	#3827	still open, clean, green macOS build; no new lane comment
+2026-10-21T02:25Z	3	waiting	#3827	record moved to lead/suite-file-flow; #3827 open, clean, green macOS build
