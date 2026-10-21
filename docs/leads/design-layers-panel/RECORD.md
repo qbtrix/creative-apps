@@ -128,3 +128,5 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - LP-a is done: green ci.yml run 39652451586 (15f7bad1) contains #3595 (897ccbb2) and #3605 (6cb55370). Belt-Slice-Done: LP-a was posted on #1498.
 - LP-b is not done yet: P3 (testLayerListScroll) is still red, finding #3307 ("no Layers list (design.layers)"; run 39578070252). Root cause: the Layers List is SuiteWindow's sidebar root view, so the sidebar's outer `suite.sidebar` identifier replaces `design.layers`. Every other Design journey reaches the rows through `suite.sidebar`.
 - LP-b fix round 2 (round 1 was #3316): P3 finds the list as `suite.sidebar`. This is test-only, on branch fix/design-p3-sidebar-list. If P3 is still red after this, #3307 becomes a gap and LP-b closes with `gaps:`.
+
+- 2026-10-21T23:22Z: #4178 (LP-b fix round 2, Closes #3307) merged as 8c55f0bf9. Belt-Slice-Done for LP-b waits on a successful design or full ci.yml run that contains it. None is green yet: dev-red #3856.
