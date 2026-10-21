@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-21T08:02Z	3	building	SF-8	#3827 merged 07:45 (260f7a874); SF-8 rebuilt on dev as 5c0bfd78d, gating
 2026-10-21T08:12Z	3	waiting	#3966	SF-8 opened as #3966 (head c07a54986, C4 description edit dropped per new gate rule); Belt-Slice-Done SF-u + Mac-Finish-Wanted SF-u posted (run 39564222036)
 2026-10-21T08:28Z	3	waiting	#3966	SF-8 in lane, macOS build 39567919459 queued; no needs-fix. SF-10 held until #3966 merges. (Rows 08:02Z/08:12Z were really ~08:05Z.)
+2026-10-21T08:50Z	3	waiting	#3966	SF-8 still in lane, macOS build 39567919459 queued; no needs-fix. Mac-Finish SF-a posted 08:33Z with gap #3971 (p2, folder drop stalls main thread). SF-10 held.
