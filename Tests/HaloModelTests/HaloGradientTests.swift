@@ -54,7 +54,7 @@ import Testing
             Issue.record("no radial gradient stored"); return
         }
         #expect((0...1).contains(center.x) && (0...1).contains(center.y) && radius > 0 && radius <= 1)
-        #expect(project.history.undoTitle == "Undo Change Fill")
+        #expect(project.history.undoTitle == "Undo Fill Type")
         let selection = try #require(project.fillSelection)
         #expect(selection.box.maxX > 1)  // the layer's box in composition pixels, not the unit box
     }

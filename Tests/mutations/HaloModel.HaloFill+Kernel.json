@@ -1,0 +1,4 @@
+[
+{"label": "text layers allowed a gradient", "file": "Sources/HaloModel/HaloFill+Kernel.swift", "find": "        case .text: return Self.textFillHelp\n", "replace": "        case .text: return nil\n", "tests": "HaloGradientTests"},
+{"label": "drag key dropped: each move is its own step", "file": "Sources/HaloModel/HaloFill+Kernel.swift", "find": "coalesceKey: key)", "replace": "coalesceKey: nil)", "tests": "HaloGradientTests"}
+]
