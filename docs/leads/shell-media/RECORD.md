@@ -2,9 +2,9 @@
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
-Stage: 3 build, wave 1
+Stage: build: SM-1..SM-8 all open; SM-1 in lane
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4034 SM-1 in lane (Linux check); SM-2 #4035 up after it merges; then SM-3, 4, 5, 7
+Next: #4201 unblocks the lane; then SM-1 #4034, SM-2..SM-8 drafts come up in stack order; SM-9/SM-10 after
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,6 +20,12 @@ Next: #4034 SM-1 in lane (Linux check); SM-2 #4035 up after it merges; then SM-3
 |---|---|---|---|---|---|---|---|
 | SM-1 | SM-a | 1 | contract: values, MediaEncoding/Decoding, FakeMedia, media member, fake slot | packet SM-1 (9 files) | MediaContractTests; Mutate SuiteModel.MediaFrame | #4034 | ready; gate pass, Head 8ca7a2e |
 | SM-2 | SM-a | 1 | checks first: rules/clock (Linux) and write/read (macOS) suites disabled by name, fixtures | packet SM-2 | suites compile | #4035 (draft, stacked on #4034) | waits #4034 |
+| SM-3 | SM-m | 2 | codec rules | packet SM-3 | rules suite | #4119 (draft) | waits #4035 |
+| SM-4 | SM-m | 2 | FrameClock | packet SM-4 | clock suite | #4123 (draft) | waits #4119 |
+| SM-5 | SM-w | 3 | movie writer, four codecs, cancel deletes | packet SM-5 | write suite (macOS) | #4125 (draft) | waits parent |
+| SM-6 | SM-w | 3 | GIF/APNG + still encoders | packet SM-6 | ShellMediaImageWriteTests (macOS); Mutate: none, live-only | #4237 (draft, on #4123) | waits #4123 |
+| SM-7 | SM-r | 3 | still decoder, upright 8-bit sRGB | packet SM-7 | read suite (macOS) | #4128 (draft) | waits parent |
+| SM-8 | SM-r | 3 | FootageReader info + exact frame | packet SM-8 | ShellMediaFootageTests (macOS); Mutate: none, live-only | #4239 (draft, on #4125) | waits #4125 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
