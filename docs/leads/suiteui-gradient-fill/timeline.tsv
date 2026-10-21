@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-21T22:55Z	4	check	GF-z	#4179 and #4180 still open; lane sweep 39688218586 in progress since 22:40Z
 2026-10-21T23:12Z	4	check	GF-z	#4179 merged 23:02Z; dev Linux check 39691394890 on 8d08e083 in progress; #4180 open
 2026-10-21T23:35Z	4	check	GF-z	dev Linux 39691394890 red on Library command-path baseline (not GF-z); waiting
+2026-10-21T23:53Z	4	check	GF-z	#4180 merged 23:33Z; dev Linux 39693644795 green with #4179; waiting on 39695796699 (de0f324, has #4180)
