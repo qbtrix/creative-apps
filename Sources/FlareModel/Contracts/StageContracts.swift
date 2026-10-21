@@ -17,17 +17,19 @@ public struct StageAddress: Hashable, Sendable {
 
 /// One thing to draw, in scene space (y-down, like the exporters).
 /// Text items are listed (so counts and warnings see them) but carry an empty path in v1.
+/// `strokePath` is what the stroke paints, `path` trimmed and dashed; nil strokes `path` itself.
 public struct StageItem: Equatable, Sendable {
     public var address: StageAddress
     public var path: FlarePath          // curves kept; never flattened for drawing
     public var fill: Fill?, stroke: Stroke?
+    public var strokePath: FlarePath?
     public var transform: Matrix
     public var opacity: Double          // 0...1, already multiplied down the instance chain
     public var isText: Bool
     public init(address: StageAddress, path: FlarePath, fill: Fill?, stroke: Stroke?,
-                transform: Matrix, opacity: Double, isText: Bool = false) {
+                transform: Matrix, opacity: Double, isText: Bool = false, strokePath: FlarePath? = nil) {
         self.address = address; self.path = path; self.fill = fill; self.stroke = stroke
-        self.transform = transform; self.opacity = opacity; self.isText = isText
+        self.transform = transform; self.opacity = opacity; self.isText = isText; self.strokePath = strokePath
     }
 }
 

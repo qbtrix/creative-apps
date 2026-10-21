@@ -1,7 +1,8 @@
 // LiveStage.swift: the live `StageRendering` (docs/blueprints/flare.md, 6.2; live-stage task ST-1). The picture is
 // FlareCore's render list (`Scene.renderList(at:symbols:)`, or the edited symbol's own), mapped item for item to
 // `StageItem`s: visible layers in paint order, outlines as stored (cubics stay cubics), matrices and opacity already
-// multiplied down. Text is listed with an empty path and counted in `hiddenTextCount`. No scene with that id gives
+// multiplied down, each shape as the render list samples it at the frame. A stroke paints `RenderItem.strokePath`, the
+// outline trimmed and dashed as the SVG export draws it. Text is listed with an empty path and counted in `hiddenTextCount`. No scene with that id gives
 // a 0 × 0 list with no items.
 import FlareCore
 
@@ -38,7 +39,11 @@ public struct LiveStage: StageRendering {
         } else {
             address = StageAddress(owner: a.owner, layerID: a.layerID, item: .shape(a.shapeIndex ?? 0))
         }
+        // Only a trimmed or dashed stroke paints a cut path; one FlareCore can't cut (it throws on a degenerate
+        // outline) strokes the whole outline.
+        let cut = render.stroke.map { !$0.dash.isEmpty || !($0.trim?.isWhole ?? true) } ?? false
+        let painted = cut ? try? render.strokePath(tolerance: SVGExporter.strokeTolerance) : nil
         return StageItem(address: address, path: render.outline, fill: render.fill, stroke: render.stroke,
-                         transform: render.matrix, opacity: render.opacity, isText: render.isText)
+                         transform: render.matrix, opacity: render.opacity, isText: render.isText, strokePath: painted)
     }
 }
