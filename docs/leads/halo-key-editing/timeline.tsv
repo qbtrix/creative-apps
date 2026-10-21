@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-21T10:15:29Z	3	heartbeat	-	holding: #3954 a049df39d and #3955 3a67e2cfe lane Linux runs red only at dev mutation anchors (dev-red #3856); fix #3980 is needs-rebase
 2026-10-21T10:39:27Z	3	heartbeat	-	dev anchors clean; merged dev into KE-2/KE-4, scripts/ci --changed PASS; Fast-Check restored on #3954 f3b5aba91 and #3955 2610048f3
 2026-10-21T10:57:22Z	3	heartbeat	-	waiting: #3954 KE-2 (f3b5aba91) and #3955 KE-4 (2610048f3) in lane macOS build; Fast-Check pass
+2026-10-21T11:19:10Z	3	heartbeat	-	waiting: #3954 KE-2 macOS build green (run 39587418590), lane merges next sweep; #3955 KE-4 macOS build queued (run 39587441413)
