@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-21T05:16:18Z	3	heartbeat	-	KE-1 #3813 open+mergeable, not yet batched (lane busy with batch-20261021043428); KE-2..4 held
 2026-10-21T05:35:56Z	3	heartbeat	-	KE-1 #3813 in lane/batch-20261021053311 (macOS gate); KE-2..4 ready to open once it lands
 2026-10-21T05:55:06Z	3	heartbeat	-	KE-1 #3813 last in red batch-20261021053311; bisect blames #3808/#3810 (probe -4 green, -6 red), so KE-1 waits for next batch
+2026-10-21T06:20:44Z	3	heartbeat	-	KE-1 #3813 in batch-20261021061843 (Linux red on isa-swizzle lint from #3818, after KE-1); bisect should land KE-1; KE-2..4 ready to open after
