@@ -65,7 +65,7 @@ private func properties(_ data: Data) -> [CFString: Any] {
         NSPasteboard(name: NSPasteboard.Name("org.creativesuite.tests.pasteboard.\(UUID().uuidString)"))
     }
 
-    @Test(.disabled("waits on CB-4c")) func aWrittenPNGReadsBackAsTheSameImageWithNoGPSOrMakerNote() throws {
+    @Test func aWrittenPNGReadsBackAsTheSameImageWithNoGPSOrMakerNote() throws {
         let pasteboard = scratch()
         defer { pasteboard.releaseGlobally() }
         let png = try taggedPNG()
@@ -83,7 +83,7 @@ private func properties(_ data: Data) -> [CFString: Any] {
         #expect(pasteboard.data(forType: .tiff) != nil)
     }
 
-    @Test(.disabled("waits on CB-4c")) func svgOwnLayersAndAFileURLRoundTrip() {
+    @Test func svgOwnLayersAndAFileURLRoundTrip() {
         let pasteboard = scratch()
         defer { pasteboard.releaseGlobally() }
         let items = [
@@ -97,7 +97,7 @@ private func properties(_ data: Data) -> [CFString: Any] {
         for item in items { #expect(offered.contains(item)) }
     }
 
-    @Test(.disabled("waits on CB-4c")) func twoWritesInARowBumpTheChangeCount() {
+    @Test func twoWritesInARowBumpTheChangeCount() {
         let pasteboard = scratch()
         defer { pasteboard.releaseGlobally() }
         let bridge = PasteboardBridge(pasteboard)
@@ -110,7 +110,21 @@ private func properties(_ data: Data) -> [CFString: Any] {
         #expect(bridge.offered() == [TypedData(type: .plainText, data: Data("two".utf8))])
     }
 
-    @Test(.disabled("waits on CB-4c")) func nothingInSuiteShellPollsOnATimer() throws {
+    @Test func theWatchReadsTheCountOnWindowKeyNotOnATimer() {
+        let pasteboard = scratch()
+        defer { pasteboard.releaseGlobally() }
+        var heard = 0
+        let watch = PasteboardChangeWatch(PasteboardBridge(pasteboard)) { heard += 1 }
+        NotificationCenter.default.post(name: NSWindow.didBecomeKeyNotification, object: nil)
+        #expect(heard == 0)   // nothing changed yet
+        PasteboardBridge(pasteboard).write([TypedData(type: .plainText, data: Data("x".utf8))])
+        #expect(heard == 0)   // no timer: a write alone is not heard
+        NotificationCenter.default.post(name: NSMenu.didBeginTrackingNotification, object: nil)
+        #expect(heard == 1)
+        withExtendedLifetime(watch) {}
+    }
+
+    @Test func nothingInSuiteShellPollsOnATimer() throws {
         let shell = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().appending(path: "Sources/SuiteShell")
         let files = try #require(FileManager.default.enumerator(at: shell, includingPropertiesForKeys: nil))
