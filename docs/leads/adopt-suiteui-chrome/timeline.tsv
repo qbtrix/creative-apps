@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T13:08:25Z	heartbeat	heartbeat	-	AC-colour + AC-tools p1 green dev run; #4002 held by lane on inherited dev-red (photo CommandPath, #3856)
 2026-10-21T13:30:25Z	slice-done	slice-done	-	AC-colour critic panel (code-only, no artifact token); AC-tools needs #4002 merged + green run
 2026-10-21T13:31:49Z	review	review	-	fix round 1 for AC-colour (#4086, branch fix/ac-colour-bridges); AC-tools waits on #4002
+2026-10-21T13:39:22Z	fix-round	fix-round	-	#4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges + green run; AC-tools waits on #4002

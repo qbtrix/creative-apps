@@ -2,15 +2,15 @@
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: review
-Base: dev ac7f95c9
-Next: fix round 1 for AC-colour (#4086, branch fix/ac-colour-bridges); AC-tools waits on #4002
+Stage: fix-round
+Base: dev 835677ca
+Next: #4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges + green run; AC-tools waits on #4002
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | done | – | – |
-| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 0 | done | – | – |
+| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 0 | fix-r1 | – | – |
 | AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | lane | – | – |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
 | AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare | yes | 0 | blocked-SC-f | – | – |
@@ -34,6 +34,7 @@ Next: fix round 1 for AC-colour (#4086, branch fix/ac-colour-bridges); AC-tools 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T13:39Z: AC-colour fix round 1 PR #4089 head c6707931 (tests + 4 mutation plans, App targets unscored on Linux)
 - 2026-10-21T13:31Z: AC-colour review (code-only, lenses design/first-use/mouse/taste/job/correctness) on 45c81070: 1 finding #4086 (bridges untested); fixer launched, round 1
 - 2026-10-21T13:30Z: AC-colour Belt-Slice-Done + Mac-Finish-Wanted on Linux check 39604117821 (5bec8089); critic panel started
 - 2026-10-21T13:08Z: #4002 Linux red is dev's #3976 failure only; no fix in our PR
