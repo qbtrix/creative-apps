@@ -23,8 +23,8 @@
   {
     "label": "copyKeepsSourceID: a duplicate's payload id wins over the node's, so the copy repeats its source's id",
     "file": "Sources/PhotoModel/PhotoLayers+Kernel.swift",
-    "find": "$0.payload.relabeled($0.id, name: $0.name, isVisible: !$0.isHidden)",
-    "replace": "$0.payload.relabeled($0.payload.id, name: $0.name, isVisible: !$0.isHidden)",
+    "find": "$0.payload.relabeled($0.id, name: $0.name, isVisible: !$0.isHidden, isLocked: $0.isLocked)",
+    "replace": "$0.payload.relabeled($0.payload.id, name: $0.name, isVisible: !$0.isHidden, isLocked: $0.isLocked)",
     "tests": "PhotoKernelLayersTests"
   },
   {

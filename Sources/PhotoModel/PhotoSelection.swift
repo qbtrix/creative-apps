@@ -79,7 +79,7 @@ extension PhotoWorkspace {
     /// weighted by the selection's coverage there, as one undo step named
     /// `name` that keeps the tiles it changed.
     mutating func editSelection(named name: String, _ pixel: (RGBA) -> RGBA) {
-        guard let selection, let id = selectedLayerID, let at = index(of: id), let bounds = bounds(of: layers[at]),
+        guard !selectedLayerIsLocked(), let selection, let id = selectedLayerID, let at = index(of: id), let bounds = bounds(of: layers[at]),
             let area = selection.intersection(bounds), var tiled = pixels[id]
         else { return }
         let local = area.offsetBy(-layers[at].offsetX, -layers[at].offsetY)

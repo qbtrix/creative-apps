@@ -90,7 +90,7 @@ extension PhotoWorkspace {
     /// `statusMessage` "Select an image layer in the sidebar to paint on."
     /// set in this call.
     public mutating func paintTarget() -> PaintTarget? {
-        guard let layer = selectedLayer else { return nil }
+        guard let layer = selectedLayer, !selectedLayerIsLocked() else { return nil }
         if case .adjustment = layer.kind {
             statusMessage = "Select an image layer in the sidebar to paint on."
             return nil
@@ -234,7 +234,7 @@ extension PhotoWorkspace {
     }
 
     private mutating func moveSelectedLayer(_ current: PhotoStroke, to end: Mask.Point) {
-        guard let id = selectedLayerID, let at = index(of: id),
+        guard !selectedLayerIsLocked(), let id = selectedLayerID, let at = index(of: id),
             let before = current.layersBefore.first(where: { $0.id == id })
         else { return }
         if case .adjustment = layers[at].kind {

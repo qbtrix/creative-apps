@@ -30,6 +30,7 @@ extension PhotoWorkspace {
         case "edit.undo": undoActionName
         case "edit.redo": redoActionName
         case "layer.toggle-visibility": visibilityCommandTitle
+        case "layer.toggle-lock": selectedLayer?.isLocked == true ? "Unlock Layer" : "Lock Layer"
         default: Self.menuLabels[id] ?? Self.catalog.spec(id)?.title ?? id
         }
     }
@@ -133,7 +134,9 @@ extension PhotoWorkspace {
         act("select.all", "All", "Selects the whole image.", .view, gate { $0.canSelectAll ? nil : noImage }) { $0.selectAll() },
         act("select.deselect", "Deselect", "Drops the selection.", .view, menu { $0.canDeselect ? nil : "Nothing is selected." }) { $0.deselect() },
     ]
-    static let selectionHelp: @Sendable (PhotoWorkspace) -> String? = { $0.canEditSelection ? nil : "Select part of the selected layer first." }
+    static let selectionHelp: @Sendable (PhotoWorkspace) -> String? = {
+        $0.selectedLayer?.isLocked == true ? lockedRefusal : $0.canEditSelection ? nil : "Select part of the selected layer first."
+    }
 
     static let imageCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("image.resize", title: "Image Size", summary: "Resamples every layer to the given size.", kind: .edit, params: SizeParams.self,
@@ -169,6 +172,7 @@ extension PhotoWorkspace {
                schema: nameSchema, example: .object(["name": .string("Sky")]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
             w.renameLayer(try w.selectedID("layer.rename"), to: p.name); return JSONValue.object([:])
         },
+        act("layer.toggle-lock", "Lock Layer", "Locks or unlocks the selected layer.", .edit, menu { $0.canEditSelectedLayer ? nil : noLayer }) { w in w.toggleLock(try w.selectedID("layer.toggle-lock")) },
         act("layer.toggle-visibility", "Hide Layer", "Hides or shows the selected layer.", .edit, menu { $0.canEditSelectedLayer ? nil : noLayer }) { w in w.toggleVisibility(try w.selectedID("layer.toggle-visibility")) },
         act("layer.bring-forward", "Reorder Layers", "Moves the selected layer one place up.", .edit, menu(upHelp)) { $0.bringSelectedLayerForward() },
         act("layer.send-backward", "Reorder Layers", "Moves the selected layer one place down.", .edit, menu(downHelp)) { $0.sendSelectedLayerBackward() },
