@@ -58,3 +58,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 17:51Z: Still waiting on SM-a #4034 #4035 (open in lane).
 - 18:12Z: Waiting on SM-a #4034 (now needs-rebase, owner's to fix) and #4035.
 - 18:32Z: Waiting on SM-a #4034 #4035 (in lane; #4034 needs-rebase cleared).
+- 18:54Z: Waiting on SM-a #4034 and #4035 in the lane.
