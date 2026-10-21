@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T08:46:56Z	3	merge	DT-a	#3751 merged e6430cfa; run act-1a15da1b26c-9qo6 resumes
 2026-10-21T09:00:10Z	3	done	DT-a	Belt-Slice-Done run 39569221486; DT-u waits DG-u #3978
 2026-10-21T09:25:32Z	3	pr	DT-3	#3983 opened, head 1ba13ba8, stacked on DG-u #3978; Fast-Check pass
+2026-10-21T09:28:12Z	3	heartbeat	DT-u	#3983 open, stacked on #3978; DT-4 waits on TT-u #3513 (open); 0 open findings on transform
