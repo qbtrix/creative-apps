@@ -16,3 +16,4 @@ time	kind	step	ref	note
 2026-10-21T09:25Z	poll	check	-	still blocked: #3401 and #865 open, no PR
 2026-10-21T11:08Z	poll	check	HK-a	still blocked: #3401 open
 2026-10-21T11:52Z	poll	blocked	HK-a	still blocked: #3401 open
+2026-10-21T12:52Z	poll	waiting	HK-a	still blocked: #3401 open
