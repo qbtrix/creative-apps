@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-21T09:20:44Z	3	check	-	folders #3961/#3963 restacked on dev (needs-split cleared); gate blocked only by dev-red #3856 Design anchors (fix #3980); LF-u and FO-a merged; BK waits #3960
 2026-10-21T09:54:30Z	3	check	-	BK-a #3960 merged; #3965/#3967 merged with dev, needs-split cleared, gate blocked only by dev-red #3856 (fix #3980 open); no qualifying run yet (full 39573184415 queued); waits LF-3/FO-5/BK-5m/LF-4 unchanged (poll 2)
 2026-10-21T10:17:30Z	3	check	-	poll 10:30: #3996 fixed dev anchors (#3980 superseded); FO-4/BK-3/BK-u merged with dev cleanly, gate running; full CI 39582370849 pending at fe232dc (contains #3939/#3938/#3960); blocked poll 3: Question for the supervisor posted on #3479/#3787/#3788
+2026-10-21T10:32:26Z	3	wave	-	BK-3 #3965 and BK-u #3967 gate PASS on dev+#3996, now fast-lane; FO-4 #3961 timing test moved to Budget median, re-gating

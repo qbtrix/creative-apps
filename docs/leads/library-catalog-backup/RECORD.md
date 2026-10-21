@@ -4,14 +4,14 @@ Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: #3996 fixed the dev anchors (#3980 closed as superseded): rerun scripts/ci --changed on #3965 (BK-3, head dfb75bf) and #3967 (BK-u, head 89b3e3c), set Fast-Check: pass and Head:, swap no-fast-lane for fast-lane. BK-a is merged-done once a qualifying run (scoped library or full) contains #3960: post Belt-Slice-Done for BK-a then. Blocked-wait polls with no change: 3 (09:20, 09:54, 10:30); Question for the supervisor posted 10:30, waiting on the answer.
+Next: BK-3 #3965 (583be3e) and BK-u #3967 (ddb98be) passed scripts/ci --changed on dev with #3996 and are on fast-lane (10:32); BK-a is merged-done once a qualifying run (scoped library or full; 39582370849 pending at fe232dc contains #3960) passes: post Belt-Slice-Done then. Blocked-wait polls with no change: 3 (09:20, 09:54, 10:16); Question for the supervisor posted 10:16, waiting on the answer.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | BK-a | rotation and restore commands as stubs, checks disabled | BK-1, BK-2 | MJ-BK | – | no | 0 | merged #3960 (09:23); waits on a qualifying run for Belt-Slice-Done | – | – |
 | BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | PR #3967 merged with dev (89b3e3c, 7 files +338), needs-split cleared, no-fast-lane until #3980 | – | – |
-| BK-m | rotation limits, fallback, restore backs up current | BK-3, BK-5m | MJ-BK | BK-a; LF-m, FO-m, AK-library (not merged) | no | 0 | BK-3 #3965 merged with dev (dfb75bf, Mutate 5/5), no-fast-lane until #3980; BK-5m blocked | – | – |
+| BK-m | rotation limits, fallback, restore backs up current | BK-3, BK-5m | MJ-BK | BK-a; LF-m, FO-m, AK-library (not merged) | no | 0 | BK-3 #3965 fast-lane at 583be3e (Mutate 5/5); BK-5m blocked | – | – |
 | BK-z | live restore, RJ-L54, built | BK-5, BK-6 | LJ-BK, MJ-BK | BK-u, BK-m | yes | 0 | blocked | – | – |
 
 ## Tasks
