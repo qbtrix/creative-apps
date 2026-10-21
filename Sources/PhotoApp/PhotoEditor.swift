@@ -123,6 +123,8 @@ struct PhotoCanvas: View {
     @State private var hover: CGPoint?
     /// The app's View > Rendering; nil (the tile layers) in tests.
     @Environment(\.photoRendering) private var rendering
+    /// The window's live drag line (LiveDragLine.swift); only the overlay reads its line.
+    @Environment(\.photoDragLine) private var dragLine
 
     var body: some View {
         Group {
@@ -139,7 +141,7 @@ struct PhotoCanvas: View {
                         }
                     }
                 } overlay: {
-                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform)
+                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform, liveLine: dragLine)
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {

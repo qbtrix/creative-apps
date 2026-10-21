@@ -202,6 +202,11 @@ extension PhotoWorkspace {
         return (stroke.start, end)
     }
 
+    /// Whether the drag under way only moves a line over the canvas until its
+    /// release draws (the Gradient tool's), so the window can keep its later
+    /// samples off the workspace the panels read.
+    public var dragShowsLineOnly: Bool { stroke?.tool == .gradient }
+
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
     /// canvas or layer stack), so a stroke never overwrites a newer document.
