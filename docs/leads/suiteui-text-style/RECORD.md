@@ -63,6 +63,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 06:30Z heartbeat: #3836 green and clean on b51250b1. The lane landed batch 20261021053311 at 06:12Z; ours are next in line.
 
+- 2026-10-21T06:58Z heartbeat: #3836 TS-1 green, waiting for the next lane batch; #3844 #3847 stacked.
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
