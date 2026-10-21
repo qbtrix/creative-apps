@@ -1,0 +1,31 @@
+utc	stage	event	ref	note
+2026-10-21T02:26Z	0	stage-start	#3481	line lead act-1a15c47678d-i2ih
+2026-10-21T02:45Z	2	blocked	SM-a	shell-media not filed; FV-1 needs its contract
+2026-10-21T03:09Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T03:32Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T03:54Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T04:16Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T04:38Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T05:00Z	0	check	SM-a	SM-a and SF-8 not on dev; blocked; 0 findings
+2026-10-21T05:22Z	0	check	SM-a	not on dev, no PR; 0 findings
+2026-10-21T05:44Z	0	check	SM-a	not on dev, no PR; 0 findings
+2026-10-21T06:12Z	0	check	SM-a	not on dev, no PR; 0 findings
+2026-10-21T07:10Z	2	check	blocked	resumed as act-1a15d4ed024-1wsg; SM-a not on dev (poll 1)
+2026-10-21T07:37Z	2	check	blocked	SM-a not on dev, no PR (poll 2)
+2026-10-21T07:57Z	2	question	blocked	SM-a absent (poll 3); Question for the supervisor on #3481
+2026-10-21T08:17Z	3	parked	-	Parked per supervisor 08:01Z on #3481: SM-a #3711 waits for a Belt slot; not building SM-a.
+2026-10-21T08:38Z	3	parked	-	Still parked: SM-a #3711 has no slice PR yet.
+2026-10-21T08:58Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+2026-10-21T09:18Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+2026-10-21T09:39Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+2026-10-21T10:00Z	3	parked	-	Still parked: SM-a #3711 has no slice PR.
+10:20Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+10:40Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+11:00Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+11:19Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
+11:40Z	3	check	-	Parked: SM-a #3711 still has no slice PR.
+12:00Z	3	check	-	Parked: SM-a (shell-media #3711) still has no slice PR.
+12:26Z	3	check	-	Parked: SM-a (shell-media #3711) still has no slice PR.
+12:46Z	3	SM-a PRs now open: #4034 (SM-1 media contract), #4035 (SM-2). Export-pack waits until they merge.	-	
+13:08Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
+13:28Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
