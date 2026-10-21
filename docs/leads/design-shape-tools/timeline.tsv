@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-21T09:47Z	check	ci	39578329384	scoped design run at a6f45c18 queued (has DS-a) for DS-a critics; transform opened #3983 (DT-u); #3980 open
 2026-10-21T10:06Z	check	anchors fixed	#3996	merged at fe232dcd; DS-a Belt-Slice-Done waits on a green dev Linux run
 2026-10-21T10:09Z	check	dev Linux pending	39582236683	Linux check at fe232dcd (past #3996) in progress; slice-done on green. Scoped design 39578329384 still queued; #3983 DT-u open
+2026-10-21T10:30Z	slice-done	DS-a	https://github.com/qbtrix/creative-apps/actions/runs/39582236683	Belt-Slice-Done + Mac-Finish-Wanted posted on #3440 (Linux green at fe232dcd); critics wait on scoped run 39578329384 (queued)
