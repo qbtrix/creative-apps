@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-21T18:45Z	3	poll	#3742	macOS build 39650981019 dispatched 18:15Z
 2026-10-21T19:02Z	3	heartbeat	-	No merges: #3742 macOS build 39650981019 queued; GF-z PR waits on it
 2026-10-21T19:25Z	3	check	#3742	macOS build green 19:20Z; merges on a lane sweep, then GF-z PR
+2026-10-21T19:40Z	3	check	poll	#3742 open (mac green 39650981019, clean, awaits sweep); GF-z ready to open on merge
