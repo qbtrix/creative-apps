@@ -35,3 +35,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-21T08:58Z: Still parked: SM-a #3711 has no slice PR.
 - 2026-10-21T09:18Z: Still parked: SM-a #3711 has no slice PR.
 - 2026-10-21T09:39Z: Still parked: SM-a #3711 has no slice PR.
+- 2026-10-21T10:00Z: Still parked: SM-a #3711 has no slice PR.
