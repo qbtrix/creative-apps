@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-21T21:46Z	21:46Z heartbeat: macOS runners held by scoped suite/suiteui + journeys runs; all three of ours still queued
 2026-10-21T22:09Z	22:10Z heartbeat: runs still in progress; #4175 open fast-lane, no needs-fix
 2026-10-21T22:31Z	22:32Z heartbeat: all three macOS jobs now in progress; #4175 fast-lane, no needs-fix
+2026-10-21T22:55Z	23:05Z findings #4247 #4248 filed, fixers spawned
