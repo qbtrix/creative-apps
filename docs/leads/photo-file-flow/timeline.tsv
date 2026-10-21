@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-21T06:34Z	heartbeat	lane	#3815	PF-3 macOS build still queued
 2026-10-21T06:53Z	heartbeat	lane	#3815	PF-3 macOS build green; waits on a batch
 2026-10-21T07:16Z	heartbeat	lane	#3815	in batch 065242 (red: DesignStroke+Kernel StrokeRules.notBuilt, a Design PR); bisect probe -2 (#3521,#3815) running
+2026-10-21T07:39Z	PF-3	merged	#3815	landed 07:24Z in batch 065242 (before #3823 broke it); PF-2 next once PP-u exists
