@@ -45,7 +45,7 @@ public struct UserCollection: Identifiable, Hashable, Sendable {
 
     /// Set to nil by the task that builds each part (FC-9, FC-12, FC-14).
     public static let unavailable: String? = nil
-    public static let smartUnavailable: String? = "Smart collections aren't built yet (filters-collections)."
+    public static let smartUnavailable: String? = nil
     public static let fileUnavailable: String? = nil
 
     /// The set's photo ids; empty for a smart collection.
