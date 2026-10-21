@@ -68,3 +68,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 16:58Z: heartbeat. PL-z waits on upstream (SH-z, TT-z, EY-z, AH-z, SS-d, GF-z).
 
 - 17:19Z: heartbeat. No change; still waiting (see the previous note).
+- 2026-10-21T17:40Z: PL-8, PL-9 and PL-10 still wait on SH-z, TT-z, EY-z, AH-z and SS-d (PL-9 also on GF-z). No open findings.
