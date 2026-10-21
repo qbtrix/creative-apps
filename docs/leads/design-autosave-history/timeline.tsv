@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 13:11Z	DA-a	heartbeat	39604112617	scoped design containing #3973 queued
 2026-10-21T13:23Z	DA-a	linux-green	39604117821	round-1 fixes in green Linux; round 2 waits on scoped design
 2026-10-21T13:44Z	DA-a	scoped-red	39604112617	panel over inspector; fix PR in progress
+2026-10-21T15:38Z	DA-z	pr-open	#4102	e16b62e7, --changed PASS, Mutate 7/7
