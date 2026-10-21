@@ -4,7 +4,7 @@ Run: act-1a15e33396b-eo15 (resumes act-1a15b69feea-et92). Feature issue #3721. P
 Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev ac7f95c9f6b0516253108a270145e4280f243b69.
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: UP-design done (Belt-Slice-Done 6322530982, Mac-Finish-Wanted 6322531304, Linux 39643409752); UP-photo/flare/halo/z blocked (see #3721 comment 6317099013), recheck deps each poll
+Next: 3 identical blocked polls; Question for the supervisor posted on #3721 (comment 6323716714); polling stopped (rule 23) until answered or a dependency lands
 
 ## Plan
 
