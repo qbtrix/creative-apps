@@ -64,3 +64,5 @@ utc	stage	event	ref	note
 2026-10-21T23:12Z	3	merged	#4187	DT-5 on dev 8684d700f
 2026-10-21T23:12Z	3	build	#4188	dev merged into fix/design-rotate-knob 875e12aa; scripts/ci --changed running
 2026-10-21T23:12Z	4	build	DT-6	re-cut on origin/dev by cherry-pick (squash bases conflicted) 487ff70e; scripts/ci --changed running
+2026-10-21T23:22Z	3	pr-opened	#4254	#4188 knob fix (DT-u round 1), head 875e12aa, fast-lane, ci --changed PASS
+2026-10-21T23:22Z	4	pr-opened	#4255	DT-6 (DT-m), head 487ff70e, fast-lane, ci --changed PASS
