@@ -4,7 +4,7 @@ Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
 Stage: build
 Base: 4172
-Next: FR-m merged (fd24dbd80); Linux run 39661533247 in progress, post Belt-Slice-Done on green. FR-u reopened as #4172 (head 74c5ee2ae)
+Next: FR-u PR #4172 awaits lane macOS build 39665231140; then critic panel and feature-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
