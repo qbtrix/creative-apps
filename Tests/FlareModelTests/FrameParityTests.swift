@@ -48,7 +48,8 @@ import Testing
 
     @Test(arguments: [1, 2, 3])
     func everyChannelCounts(_ channel: Int) {
-        #expect(!FrameParity.matches(Self.frame(), Self.off(300, by: 20, channel: channel), width: Self.w, height: Self.h))
+        let b = Self.off(300, by: 20, channel: channel)
+        #expect(!FrameParity.matches(Self.frame(), b, width: Self.w, height: Self.h))
     }
 
     @Test func aLoopEndingOnFrameZeroFails() {
