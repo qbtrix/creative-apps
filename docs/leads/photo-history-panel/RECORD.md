@@ -6,7 +6,7 @@ Earlier run: act-1a15ac118a1-s70v (PH-a, PH-u done)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
 Next: #4160 (PH-6) in the lane's macOS gate; #4162 (PH-5) needs-rebase fixer; then PH-7, PH-8 (PH-z)
-Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (lead/history-panel holds the copy before 20:25Z)
+Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (lead/history-panel holds the copy before 20:05Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

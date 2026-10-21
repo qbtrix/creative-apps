@@ -58,4 +58,4 @@ utc	stage	event	ref	note
 2026-10-21T10:33Z	3	heartbeat	W4g	dev green again (Linux check fe232dc success after #3996); #3969 (PT-5) clean, in lane; lane batch 20261021102756 forming; scoped photo run 39579629627 still queued
 2026-10-21T10:57Z	3	heartbeat	W4h	#4005 PT-3 open; fixer baselining CanvasSizeSheet buttons (CommandPathTests); dev red from #3976 PhotoPlace not ours; #3969 PT-5 open fast-lane; scoped photo run 39579629627 in progress
 2026-10-21T18:48:43Z	3	stage	A	new run act-1a15fc7d29e-gz1t; PH-6 + PH-5 builders (PH-m)
-2026-10-21T20:25Z	wave A	#4160 PH-6 in lane, #4162 PH-5 needs-rebase; record moved to lead/photo-history-panel
+2026-10-21T20:05Z	wave A	#4160 PH-6 in lane, #4162 PH-5 needs-rebase; record moved to lead/photo-history-panel
