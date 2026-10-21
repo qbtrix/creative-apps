@@ -27,3 +27,6 @@ time	kind	step	ref	note
 2026-10-21T05:05Z	check	heartbeat	#3693,#3694	in lane batch 20261021043428 (red tip run 39544788354): HaloShapeDraftTests/drawingRefusesThroughTheModelWhileTheToolIsAStub (HS-u) fails once HS-m makes addShape real. Probe -4 (through #3693) green; -6 running. Expect #3694 named; fix in #3694 after #3693 merges: the test expects one shape layer, refusal checked without a composition
 2026-10-21T05:45Z	slice	done	HS-u	Belt-Slice-Done on Linux run 39550229338 (#3693 merged 71ffa4d1)
 2026-10-21T05:50Z	fix	start	#3694	needs-fix: stub test replaced by real-draw + no-composition tests
+2026-10-21T06:20Z	fix	done	#3694	gate PASS (2430d8e8); then needs-split from supervisor
+2026-10-21T07:10Z	split	done	HS-m	#3694 closed -> #3933 + #3934 (stacked), both CI PASS
+2026-10-21T07:12Z	slice	PR	HS-z	#3929 on #3934, feature-done
