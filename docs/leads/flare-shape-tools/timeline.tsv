@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-21T11:43Z	stage	FS-u needs-rebase (FlareStage.swift comment conflict with #3952) resolved; gate PASS; pushed e276a3b7, Head moved
 2026-10-21T12:13Z	check	FS-u #3984 head e276a3b7 waiting on its macOS gate (lane 11:54Z); no blocking labels
 2026-10-21T12:36:51Z	check	FS-u #3984 lane decision eligible (macOS build 39595470213 green); waiting for its batch
+2026-10-21T13:09:06Z	stage	resume after Belt nudge
