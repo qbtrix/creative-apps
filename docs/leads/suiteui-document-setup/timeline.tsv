@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-21T22:42Z	3	poll	#4184	lane waiting, CI red (Linux) from dev-red #3856 (library baseline); blocked poll 1 of 3
 2026-10-21T22:57Z	3	poll	#4184	dev still red on library baseline (#3856); blocked poll 2 of 3
 2026-10-21T23:13Z	3	question	#3757	blocked poll 3 of 3 on dev-red #3856 (library baseline; dev macOS compile break); asked the supervisor
+2026-10-21T23:30:51Z	3	poll	#3757	supervisor: hold, #4250 (library baseline) merged at be9aa35b, #4215 Mac fix next, #4184 queued on local Mac gate behind it; no rebase until the gate asks; DS-u waits on FR-u (not started)
