@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-21T18:46Z	merged	#4141 KE-9 1b3913c07; Linux check 39655526241 running
 2026-10-21T19:03Z	slice-done	KE-m Linux 39655526241 (dev 1b3913c07)
 2026-10-21T19:03Z	fix-round	KE-u round 2 (#4150 select-all)
+2026-10-21T19:10Z	fix-round-end	KE-u round 2: no PR, select-all needs a Mac (#4150 comment 6324296761)
