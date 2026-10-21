@@ -4,7 +4,7 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a15e9d8b78-eu21 (resumed; earlier act-1a15b1de115-nxto) · Session: claude/multi-layer-select-lead-g8o0jx · Started: 2026-10-20T20:40Z
 Stage: 3 wave 3
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: PM-3 and PM-4 builders stacked on PM-2 (#4087, lead/multi-layer-select-PM-2); then PM-5, PM-6
+Next: fixer merges dev into PM-4 #4095 (needs-rebase after PM-2 squash); fixer finishes PM-3 (committed, not pushed before restart) and opens its PR; then PM-5, PM-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,9 +19,9 @@ Next: PM-3 and PM-4 builders stacked on PM-2 (#4087, lead/multi-layer-select-PM-
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | PM-1 | PM-a | 1 | LayerTreeList multi-select init and pick(shift:command:) | Sources/SuiteUI/LayerTreeList.swift, Sources/SuiteUI/LayerTreeList+Rows.swift, Tests/SuiteUITests/LayerTreeListTests.swift, Tests/mutations/SuiteUI.LayerTreeList.json | LayerTreeListTests; .pickModes .severalSelected | #3761 | merged 00:24Z |
-| PM-2 | PM-a | 2 | layerSelection behind selectedLayerID; API stubs; suites disabled | Sources/PhotoModel/PhotoWorkspace.swift, PhotoLayerSelection+Kernel.swift, PhotoSeveralLayers+Kernel.swift, two test suites | PhotoWorkspaceTests | #4087 | pr open |
+| PM-2 | PM-a | 2 | layerSelection behind selectedLayerID; API stubs; suites disabled | Sources/PhotoModel/PhotoWorkspace.swift, PhotoLayerSelection+Kernel.swift, PhotoSeveralLayers+Kernel.swift, two test suites | PhotoWorkspaceTests | #4087 | merged |
 | PM-3 | PM-a | 3 | Layers list on multi-select, Select > All Layers ⌥⌘A, intents | Sources/PhotoApp/PhotoLayerList.swift, PhotoIntent.swift, PhotoWindow.swift, PhotoCommands+Select.swift | PhotoLayerListSnapshots, PhotoEditMenuTests | – | building |
-| PM-4 | PM-m | 3 | selection bodies | PhotoLayerSelection+Kernel.swift + tests + mutations | PhotoLayerSelectionTests | – | building |
+| PM-4 | PM-m | 3 | selection bodies | PhotoLayerSelection+Kernel.swift + tests + mutations | PhotoLayerSelectionTests | #4095 | needs-rebase |
 | PM-5 | PM-m | 4 | several-layer hide/opacity/delete; catalog | PhotoSeveralLayers+Kernel.swift, PhotoCommandCatalog.swift, command-ids | PhotoSeveralLayersTests | – | waiting |
 | PM-6 | PM-m | 4 | Move moves every selected layer; RJ-P43 | PhotoStroke.swift, PhotoSeveralLayers+Kernel.swift, RealJobs/photo/fade-layers | moveMovesEvery | – | waiting |
 | PM-7 | PM-u | 4 | snapshots and render budget | Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift, RenderBudgetPhotoMultiLayerTests.swift | snapshots | – | waiting |
