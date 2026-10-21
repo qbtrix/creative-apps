@@ -27,6 +27,8 @@ extension PhotoWorkspace {
     /// layer.pick's layer and click ("replace", "extend" or "toggle"); layer.set-opacity's percent.
     public struct PickParams: Codable, Sendable { public var id, mode: String }
     public struct OpacityParams: Codable, Sendable { public var percent: Double }
+    /// layer.move-by's offset, in canvas pixels.
+    public struct MoveParams: Codable, Sendable { public var dx, dy: Int }
 
     /// The reasons menu items give that the Model has no help property for.
     static let noImage = "Open an image first.", noLayer = "Select a layer first."
@@ -237,6 +239,12 @@ extension PhotoWorkspace {
                example: .object(["percent": .number(50)]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
             let id = try w.selectedID("layer.set-opacity")
             w.endAdjust(); w.setOpacity(id, percent: p.percent); w.endAdjust(); return JSONValue.object([:])
+        },
+        .typed("layer.move-by", title: "Move Layer", summary: "Moves the selected layers by dx, dy pixels.", kind: .edit,
+               params: MoveParams.self, schema: .object(["dx": .integer("Pixels right.", minimum: -10_000_000, maximum: 10_000_000),
+                                                         "dy": .integer("Pixels down.", minimum: -10_000_000, maximum: 10_000_000)], required: ["dx", "dy"]),
+               example: .object(["dx": .number(40), "dy": .number(0)]), availability: menu { $0.canEditSelectedLayer ? nil : noLayer }) { w, p in
+            w.moveSelectedLayers(dx: p.dx, dy: p.dy); return JSONValue.object([:])
         },
     ]
     static let pickModes: [(name: String, pick: Pick)] = [("replace", .replace), ("extend", .extend), ("toggle", .toggle)]

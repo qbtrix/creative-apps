@@ -1,8 +1,8 @@
 // PhotoSeveralLayers+Kernel.swift: Hide and Show, Opacity, Delete and Move on
 // every picked layer (multi-layer-select). A row that is picked acts for the
 // whole selection, one undo step per gesture; an unpicked row acts alone, as
-// before. PM-5 fills Hide, Opacity and Delete; Move acts on the primary alone
-// until PM-6. Linux-safe: no UI imports.
+// before. PM-5 fills Hide, Opacity and Delete; PM-6 Move, by the Move tool's drag
+// and by `layer.move-by`. Linux-safe: no UI imports.
 
 extension PhotoWorkspace {
     /// The layers a click on row `id` acts on: every picked layer, top first,
@@ -68,21 +68,32 @@ extension PhotoWorkspace {
         touch(.all)
     }
 
-    /// Moves the picked layers by (`dx`, `dy`) canvas pixels, one undo step.
-    /// An adjustment layer has no place on the canvas and refuses. Stub until
-    /// PM-6: moves the primary alone.
+    /// Where the picked layers that can move sit in `layers`, top first: an
+    /// adjustment layer has no place on the canvas and stays put. Empty with
+    /// no image layer picked.
+    var movableSelectedLayers: [Int] {
+        selectedLayerIDs.compactMap(index(of:)).filter {
+            if case .adjustment = layers[$0].kind { return false }
+            return true
+        }
+    }
+
+    /// Moves the picked layers by (`dx`, `dy`) canvas pixels as one "Move
+    /// Layers" step ("Move Layer" for one). Picked adjustment layers stay put;
+    /// with no image layer picked it refuses with `moveRefusal`.
     public mutating func moveSelectedLayers(dx: Int, dy: Int) {
         let reach = -10_000_000...10_000_000
-        guard dx != 0 || dy != 0, reach.contains(dx), reach.contains(dy),
-            let id = selectedLayerID, let at = index(of: id)
-        else { return }
-        if case .adjustment = layers[at].kind {
+        guard dx != 0 || dy != 0, reach.contains(dx), reach.contains(dy), selectedLayerID != nil else { return }
+        let targets = movableSelectedLayers
+        guard !targets.isEmpty else {
             statusMessage = Self.moveRefusal
             return
         }
-        recordLayers(named: "Move Layer")
-        layers[at].offsetX += dx
-        layers[at].offsetY += dy
+        recordLayers(named: targets.count > 1 ? "Move Layers" : "Move Layer")
+        for at in targets {
+            layers[at].offsetX += dx
+            layers[at].offsetY += dy
+        }
         touch(.all)
     }
 }
