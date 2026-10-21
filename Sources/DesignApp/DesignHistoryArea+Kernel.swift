@@ -8,7 +8,10 @@
 // is dirty, its `recoveryBytes()` and `restore` for a copy left behind. The modifier and the
 // adapter (DesignRecovery+Kernel.swift) are stubs until AH-8 and DA-5, so the panel lists the
 // steps but a jump says History isn't built yet, and nothing is written. `panel` is the panel
-// alone, which DesignEditorSnapshots renders.
+// alone, which DesignEditorSnapshots renders. DA-3 adds the toolbar's History button: the
+// modifier hands its panel state down as the environment value `designHistory`, and
+// DesignEditor draws `toolbarAction` from it, selected while the panel shows, off with the
+// Model's reason with no file and with `noPanel` outside a window that has the panel.
 import DesignModel
 import SuiteKernel
 import SuiteModel
@@ -26,6 +29,19 @@ private struct DesignHistoryShownKey: FocusedValueKey {
     typealias Value = DesignHistoryShown
 }
 
+/// A plain key, as DesignHistoryShownKey is: the panel of the window around a view.
+private struct DesignHistoryKey: EnvironmentKey {
+    static var defaultValue: DesignHistoryShown? { nil }
+}
+
+extension EnvironmentValues {
+    /// The History panel of the window this view is in; nil outside a DesignHistoryArea.
+    var designHistory: DesignHistoryShown? {
+        get { self[DesignHistoryKey.self] }
+        set { self[DesignHistoryKey.self] = newValue }
+    }
+}
+
 extension FocusedValues {
     /// The focused Design window's History panel; nil with no Design window focused.
     var designHistoryPanel: DesignHistoryShown? {
@@ -41,16 +57,23 @@ struct DesignHistoryArea: ViewModifier {
     /// Puts a recovered copy's bytes in the window, named for the file it was.
     let restore: @MainActor (Data, String?) throws -> Void
     let onNote: @MainActor (String) -> Void
+    /// Whether the panel shows before its first toggle; the tests host it shown.
+    var shown = false
     /// The window's id, which names its recovery files.
     @State private var window = UUID().uuidString
-    @State private var isShown = false
+    /// Whether the panel was toggled an odd number of times since the window opened.
+    @State private var toggled = false
+
+    private var isShown: Bool { shown != toggled }
 
     func body(content: Content) -> some View {
-        content
+        let shown = DesignHistoryShown(isShown: isShown) { toggled.toggle() }
+        return content
+            .environment(\.designHistory, shown)
             .safeAreaInset(edge: .trailing, spacing: 0) {
                 if isShown { Self.panel(model.historyListing, onJump: jumped) }
             }
-            .focusedSceneValue(\.designHistoryPanel, DesignHistoryShown(isShown: isShown) { isShown.toggle() })
+            .focusedSceneValue(\.designHistoryPanel, shown)
             .autosaveRecovery(hooks, folder: nil, delay: 2, edits: model.documentSession.currentToken)
     }
 
@@ -72,8 +95,26 @@ struct DesignHistoryArea: ViewModifier {
     }
 
     /// A row's jump; a refusal goes to the status line.
-    private func jumped(_ index: Int) {
+    private func jumped(_ index: Int) { Self.jump(index, with: jump, onNote: onNote) }
+
+    /// One jump to `index` through `jump`; a refusal's help goes to `onNote`.
+    @MainActor static func jump(
+        _ index: Int, with jump: @MainActor (Int) throws -> Void, onNote: @MainActor (String) -> Void
+    ) {
         do { try jump(index) } catch { onNote((error as? DesignRefusal)?.help ?? "\(error)") }
+    }
+
+    /// Why the History button is off where no window holds a History panel.
+    static let noPanel = "Open a Design window to see its history."
+
+    /// The toolbar's History button on `panel`: selected while it shows, a click toggles it.
+    @MainActor static func toolbarAction(_ model: DesignWorkspace, _ panel: DesignHistoryShown?) -> ToolbarAction {
+        let item = DesignToolbarItem.history
+        let help = item.unavailableHelp(in: model) ?? (panel == nil ? noPanel : nil)
+        return ToolbarAction(
+            item.title(in: model), systemImage: item.systemImage, isSelected: panel?.isShown == true,
+            unavailableHelp: help, identifier: item.identifier
+        ) { panel?.toggle() }
     }
 
     /// The panel on `listing`, at the editor's panel width, inset from the window's edge.
