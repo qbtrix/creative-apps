@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T17:55:57Z	poll	DS-u, DS-photo, CB-library, IM-z, AR-photo-u, CB-z not on dev; blocked poll 1
 2026-10-21T18:18:01Z	poll	blockers unchanged; blocked poll 2
 2026-10-21T18:40:41Z	question	blocked poll 3; Question for the supervisor 6323716332
+2026-10-21T18:41:35Z	nudge	Belt nudge read; state re-read from source: #4058 awaiting batch, no supervisor reply yet, no blocking slice on dev
