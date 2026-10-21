@@ -103,3 +103,4 @@ utc	stage	event	ref	note
 2026-10-21T07:59:21Z	3	heartbeat 07:59: queued behind older batches	-	lane merges #3890 #3893; then Belt-Slice-Done
 2026-10-21T08:21:52Z	3	heartbeat 08:21: no merges	-	lane merges #3890 #3893; then Belt-Slice-Done
 2026-10-21T08:43:51Z	build	08:44 #3890 merged	-	Belt-Slice-Done AX-photo once a green dev run contains 747d3317; #3893 waits on batch
+2026-10-21T09:04:36Z	build	09:05 #3893 merged	-	Belt-Slice-Done AX-photo + AX-library on first green dev run with 1e2c86b7 (CI 39573184415 queued)
