@@ -4,13 +4,13 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a15e9d8b78-eu21 (resumed; earlier act-1a15b1de115-nxto) · Session: claude/multi-layer-select-lead-g8o0jx · Started: 2026-10-20T20:40Z
 Stage: 3 wave 3
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: PM-a slice-done (Linux 39655526241); critics for PM-a and PM-u when scoped photo run 39665905219 (dev 037c5c745) shows screens. PM-5 #4118 (f4243a36d) and PM-6 #4143 (d635b3a69) rebased, Fast-Check moved, lane macOS builds dispatched. PM-7 #4138 merged; PM-u merged-done when Linux on dev passes with it. PM-9 waits on #3499, PM-10 on #4064
+Next: PM-a slice-done (Linux 39655526241); critics for PM-a and PM-u when scoped photo run 39665905219 (dev 037c5c745) shows screens. PM-5 #4118 (f4243a36d) and PM-6 #4143 (d635b3a69) rebased, Fast-Check moved, lane macOS builds dispatched. PM-u slice-done (Linux 39661533247). PM-9 waits on #3499, PM-10 on #4064
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PM-a | LayerTreeList picks several rows; Photo keeps a kernel Selection of layers; list, Select > All Layers and intents on stubs | PM-1, PM-2, PM-3 | MJ-PM | photo-gradient-fill:PG-a (PM-2); shell-parity (built) | yes | 0 | slice-done | 39655526241 | wanted |
-| PM-u | snapshots of four states, render budget, journey written | PM-7, PM-8 | PJ-M1 | PM-a | yes | 0 | waiting | – | – |
+| PM-u | snapshots of four states, render budget, journey written | PM-7, PM-8 | PJ-M1 | PM-a | yes | 0 | slice-done | 39661533247 | wanted |
 | PM-m | selection bodies; hide, opacity, delete, move on every selected layer as one step; catalog; RJ-P43 | PM-4, PM-5, PM-6 | MJ-PM | PM-a; PG-m (PM-5, PM-6) | no | 0 | waiting | – | – |
 | PM-z | journey on live, stress journey, photo.md, feature-done | PM-9, PM-10 | PJ-M1 | PM-u, PM-m; PG-z (PM-10); #3499 (PM-9) | yes | 0 | waiting | – | – |
 | PM-g | group layers | PM-11, PM-12, PM-13 | – | PM-m | yes | 0 | out of beta (captain 2026-10-20, v1) | – | – |
