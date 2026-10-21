@@ -4,24 +4,24 @@ Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: when #3939 merges, swap no-fast-lane for fast-lane on #3961 and #3963 (move Head: lines); re-read FC-d, LF-m, LC-m for FO-5
+Next: when #3980 (dev-red #3856 Design anchors) merges, rerun scripts/ci --changed on #3961, swap no-fast-lane for fast-lane, set Fast-Check: pass and Head:; #3963 (stacked on #3961) follows once #3961 merges; re-read FC-d, LF-m, LC-m for FO-5
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | PR #3939 open | – | – |
-| FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | PR #3963 open | – | – |
-| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 next wave; FO-5 blocked | – | – |
+| FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | merged #3939 (in Linux check 39571804700 d93267dab); Belt-Slice-Done waits on a qualifying run | – | – |
+| FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | PR #3963 open, stacked on #3961 (FO-4) | – | – |
+| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 #3961 open; FO-5 blocked | – | – |
 | FO-z | live, RJ-L53, built | FO-6, FO-7 | LJ-FO, MJ-FO | FO-u, FO-m | yes | 0 | blocked | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FO-1 | FO-a | 1 | FolderNode, tree stub, command specs NotBuilt, tests disabled | LibraryFolders.swift, LibraryFolders+Kernel.swift, LibraryFoldersTests.swift | compiles, disabled | #3939 | open, head 1d4518b |
-| FO-2 | FO-a | 1 | journey skipped, RJ-L53 disabled | UITests/LibraryJourneyTests+Folders.swift, Tests/RealJobs/library/browse-folders/ | scripts/jobs check | #3939 | open (same PR) |
-| FO-3 | FO-u | 2 | FOLDERS section | LibraryBrowser.swift, LibraryFoldersSection.swift | ids, menu toggles | #3963 | open, head 6214f5b, no-fast-lane until #3939 merges |
+| FO-1 | FO-a | 1 | FolderNode, tree stub, command specs NotBuilt, tests disabled | LibraryFolders.swift, LibraryFolders+Kernel.swift, LibraryFoldersTests.swift | compiles, disabled | #3939 | merged |
+| FO-2 | FO-a | 1 | journey skipped, RJ-L53 disabled | UITests/LibraryJourneyTests+Folders.swift, Tests/RealJobs/library/browse-folders/ | scripts/jobs check | #3939 | merged (same PR) |
+| FO-3 | FO-u | 2 | FOLDERS section | LibraryBrowser.swift, LibraryFoldersSection.swift | ids, menu toggles | #3963 | open, head c61d27f (dev and FO-4 merged in, 9 files +347/-16), Mutate 6/6, no-fast-lane until #3961 merges |
 | FO-3b | FO-u | 2 | render budget | RenderBudgetLibraryFoldersTests.swift | expandFolderInTwoBodies | #3963 | open (same PR) |
-| FO-4 | FO-m | 2 | tree body | LibraryFolders.swift, LibraryFoldersTests.swift, Tests/mutations/LibraryModel.LibraryFolders.json | LibraryFoldersTests | #3961 | open, head ed04c50, no-fast-lane until #3939 merges |
+| FO-4 | FO-m | 2 | tree body | LibraryFolders.swift, LibraryFoldersTests.swift, Tests/mutations/LibraryModel.LibraryFolders.json | LibraryFoldersTests | #3961 | open, head 8f00bb8 (dev merged in, 3 files +92/-12), Mutate 3/3, no-fast-lane until the gate passes (blocked only by dev-red #3856) |
 | FO-5 | FO-m | – | filter case, command bodies | LibraryFilter.swift, LibraryFolders+Kernel.swift, LibraryCommandCatalog.swift, ... | LibraryFoldersTests.filter | – | blocked: FC-d, LF-m, LC-m |
 | FO-6 | FO-z | – | live | ... | LJ-FO | – | blocked |
 | FO-7 | FO-z | – | feature-done | folders.wave.json | – | – | blocked |
@@ -37,4 +37,6 @@ Next: when #3939 merges, swap no-fast-lane for fast-lane on #3961 and #3963 (mov
 - FO-u's wait on filters-collections:FC-a is met (FC-2 #3424, FC-4 #3461, FC-5 #3466 merged).
 
 ## Open
+- Gate on #3961/#3963 stops only at mutation anchors: Tests/mutations/DesignModel.DesignCanvasEditing.json finds are stale on dev (dev-red #3856, fix #3980, Design line). All lints before it and LibraryModelTests pass. Not ours to fix.
+- FO-u stacked on FO-4: both edit LibraryFolders.swift and the same mutation plan; sentinel needs-split answered on both PRs.
 - FO-5 waits on filters-collections:FC-d, file-flow:LF-m (LF-3 blocked) and catalog-files:LC-m; none merged.
