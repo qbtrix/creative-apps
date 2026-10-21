@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-21T20:25Z	build	heartbeat	FR-u	FR-7 and FR-9 builders started
 2026-10-21T20:47Z	build	heartbeat	FR-u	FR-7/FR-9 pushed
 2026-10-21T21:11Z	wait-macos	heartbeat	FR-u	FR-7 and FR-9 gates CI: PASS; #4172 macOS build 39665231140 still queued since 19:51Z
+2026-10-21T21:34Z	build-FR-flare	pr-open	FR-halo,FR-flare	FR-7 PR #4211, FR-9 PR #4212 opened (wait only on FR-a); FR-10 building stacked; FR-8 waits on FR-u and adopt-kernel-session:AD-halo (not on dev)
