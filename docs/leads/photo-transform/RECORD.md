@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: scoped photo 39665905219 red: render budget (transform 121 bodies/3 -> finding #4247; place 4000x3000 time limit -> finding #4248); fixers spawned
+Stage: fix PRs #4252 (PT-m, #4247) and #4253 (PP-m, #4248) open in lane, clean; full CI 39665258026 red with the same photo render-budget failures only (halo failures not ours)
 Base: dev
-Next: fix PRs for #4247/#4248 through lane; #4175 PP-7 in lane; then green photo run -> critics -> Belt-Slice-Done
+Next: lane batches #4252 #4253 #4175; then green photo run -> critics -> Belt-Slice-Done
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
