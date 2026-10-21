@@ -10,14 +10,14 @@ Next: LF-4 blocked (needs-ui #3928 per-cell drag hook, suite SF-8 PNG, catalog-o
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LF-a | adapter stubs, .suiteApp, menu and drop on fakes | LF-1, LF-2 | MLF | – | yes | – | merged (#3624) | – | – |
-| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | LF-6 done in #3624; LF-5 #3938 open | – | – |
+| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | merged (LF-6 #3624, LF-5 #3938; in Linux check 39571804700 d93267dab); Belt-Slice-Done and Mac-Finish-Wanted wait on a qualifying run | – | – |
 | LF-m | drop imports as one step, hand-offs, recents, drag out | LF-3, LF-4 | MLF | LF-a, SF-5/6/7 (met); LT-m, DR-m (not merged) | yes | 0 | LF-4 blocked (#3928, SF-8); LF-3 blocked | – | – |
 | LF-z | live journey, feature built | LF-7, LF-8 | LFJ1 | LF-u, LF-m | yes | 0 | blocked | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| LF-5 | LF-u | 1 | snapshots and render budget | Tests/AppSnapshotTests/LibraryFileFlowSnapshots.swift, RenderBudgetLibraryFileDropTests.swift | LibraryFileFlowSnapshots; dragHoverInTwoBodies | #3938 | open, head 38b0444 |
+| LF-5 | LF-u | 1 | snapshots and render budget | Tests/AppSnapshotTests/LibraryFileFlowSnapshots.swift, RenderBudgetLibraryFileDropTests.swift | LibraryFileFlowSnapshots; dragHoverInTwoBodies | #3938 | merged |
 | LF-6 | LF-u | – | journey written, skipped | UITests/LibraryJourneyTests+FileFlow.swift | compiles, skipped | #3624 | merged (folded into LF-a) |
 | LF-4 | LF-m | 1 | catalog opens to bridge; thumbnails drag out | Sources/LibraryApp/LibraryWindow+Import.swift, Tests/AppSnapshotTests/LibraryFileFlowLiveTests.swift | LibraryFileFlowLiveTests | – | blocked: needs-ui #3928, SF-8, catalog-open type |
 | LF-3 | LF-m | – | adapter bodies, catalog, ids, RJ-L42 | LibraryFileFlow+Kernel.swift, LibraryCommandCatalog.swift, Tests/command-ids/library.txt, ... | LibraryFileFlowTests | – | blocked: LT-m, DR-m |
