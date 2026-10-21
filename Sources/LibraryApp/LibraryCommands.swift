@@ -60,6 +60,9 @@ struct LibraryCommands: Commands {
                 title: "Export…", systemImage: "square.and.arrow.up", action: menu.export.export,
                 reason: menu.export.exportHelp ?? why("exporter", "Export isn't connected yet."),
                 shortcut: KeyboardShortcut("e", modifiers: [.command, .shift]))
+            MenuCommand(
+                title: "Share…", systemImage: "square.and.arrow.up", action: menu.share.share,
+                reason: menu.share.help ?? LibraryMenu.Share.menuNotBuilt)
         }
         CommandGroup(replacing: .undoRedo) {
             MenuCommand(
