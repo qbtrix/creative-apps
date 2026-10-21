@@ -7,9 +7,9 @@
 // inspector included) narrow to make room, on the workspace's `historyListing`; a click or
 // Return hands the state to `jump`, and a refusal goes to the status line through `onNote`.
 // `.autosaveRecovery` reads the workspace through AutosaveHooks: the open file's name, whether it
-// is dirty, its `recoveryBytes()` and `restore` for a copy left behind. The modifier and the
-// adapter (DesignRecovery+Kernel.swift) are stubs until AH-8 and DA-5, so the panel lists the
-// steps but a jump says History isn't built yet, and nothing is written. `panel` is the panel
+// is dirty, its `recoveryBytes()` and `restore` for a copy left behind (DesignRecovery+Kernel.swift).
+// Copies go to DesignRecoveryStore's folder for this launch (DA-7): `<support>/Design/Recovery/`,
+// none for a journey launch without `-SuiteSupportDir`. `panel` is the panel
 // alone, under its "History" title and step count (#3945). DA-3 adds the toolbar's History button: the
 // modifier hands its panel state down as the environment value `designHistory`, and
 // DesignEditor draws `toolbarAction` from it, selected while the panel shows, off with the
@@ -77,8 +77,12 @@ struct DesignHistoryArea: ViewModifier {
             if isShown { Self.panel(model.historyListing, onJump: jumped) }
         }
         .focusedSceneValue(\.designHistoryPanel, shown)
-        .autosaveRecovery(hooks, folder: nil, delay: 2, edits: model.documentSession.currentToken)
+        .autosaveRecovery(hooks, folder: Self.folder, delay: 2, edits: model.documentSession.currentToken)
     }
+
+    /// Where this launch's windows keep their recovery copies; nil keeps none.
+    private static let folder = DesignRecoveryStore.folder(
+        arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory())
 
     private var hooks: AutosaveHooks {
         let model = self.model
