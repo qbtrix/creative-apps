@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-20T22:40Z	heartbeat	poll	#3416	no base merged, heads unchanged, all bases waiting on macOS builds; no supervisor answer to issuecomment-6303075999 yet
 2026-10-20T22:41Z	3	merged	#3729	PX-3 merged 22:41Z
 2026-10-20T23:56Z	3	heartbeat	-	worker restart; PX-2/PX-5 wait XP-3, XP-4, AX-photo; PX-4 parked
+2026-10-21T00:17Z	3	heartbeat	-	PX-2/PX-5 wait XP-3, XP-4, AX-photo; PX-4 parked; no supervisor reply
