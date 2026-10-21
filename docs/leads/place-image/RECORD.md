@@ -4,12 +4,12 @@ Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
 Stage: 3 build W1
 Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
-Next: PP-a slice-done once a dev ci.yml Linux job containing #3764 is green; PP-m (PP-5) check; PP-3 once placed-images PL-2 merges
+Next: PP-3 once placed-images PL-2 merges; PP-5 (PP-m) once photo-gradient-fill PG-m is done (W4)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PP-a | PlacedImageTarget conformance as stubs; checks and RJ-P37 job written, disabled | PP-1, PP-2 | MJ-PP | placed-images PL-1 (merged #3578) | no | 0 | merged, awaiting dev Linux | – | – |
+| PP-a | PlacedImageTarget conformance as stubs; checks and RJ-P37 job written, disabled | PP-1, PP-2 | MJ-PP | placed-images PL-1 (merged #3578) | no | 0 | done | 39514893774 | – |
 | PP-u | File > Place… and drop run place.image on stubs; snapshots, budget, journey written | PP-3, PP-4 | PJ-P1 | PP-a; placed-images PL-2 (PP-3) | yes | 0 | waiting | – | – |
 | PP-m | placing PNG/JPEG adds a fitted pixel layer above the selection as one step; SVG refused; catalog | PP-5, PP-6 | MJ-PP | PP-a; PG-m (PP-6) | no | 0 | waiting | – | – |
 | PP-z | live, journey on live, blueprint lists Place | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; PG-z, PM-z (PP-8) | yes | 0 | waiting | – | – |
