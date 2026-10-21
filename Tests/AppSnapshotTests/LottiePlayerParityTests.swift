@@ -2,8 +2,9 @@
 // player as the stage draws it. Each fixture under Fixtures/Lottie/ opens and exports to Lottie through
 // `FlareHeadless`; LP-1's oracle (ThorVG behind `.build/lottie-oracle/render <file.json> <frame> <w> <h>`, raw RGBA
 // over white on stdout) renders frames 0, the middle and the last, `StageRasterizer` renders the same frames, and the
-// two agree when at most 2% of pixels differ by more than 8 levels (`GoldenImage`'s compare; LP-3's `FrameParity`
-// replaces it). The loop rule: the oracle's last frame (`op - 1`) is not frame 0 again, so the loop doesn't stutter.
+// two agree when at most 2% of pixels differ by more than 8 levels (LP-3's `FrameParity`, tested on Linux). The loop
+// rule: the oracle's last frame (`op - 1`) is not frame 0 again, so the loop doesn't stutter. Colour-key and trim
+// (LP-5) are listed but skip by name until the stage-matches-export fix lands.
 // A bounce whose keys land one frame late must fail the compare. The whole suite skips, with that reason, until
 // `scripts/lottie-oracle/build` has made the oracle. Exports and frames land in .build/lottie-oracle/parity/.
 // macOS only.
@@ -30,8 +31,6 @@ enum LottieOracle {
 struct LottiePlayerParityTests {
     static let root = LottieOracle.root, oracle = LottieOracle.binary
     static let work = root.appending(path: ".build/lottie-oracle/parity")
-    /// At most 2% of pixels may differ by more than 8 levels.
-    static let tolerance = GoldenTolerance(channel: 8, maxShare: 0.02)
 
     enum OracleError: Error { case failed(status: Int32, bytes: Int) }
 
@@ -74,29 +73,47 @@ struct LottiePlayerParityTests {
         return try #require(RGBAImage(png: try StageRasterizer().png(list, scale: 1, transparent: false)))
     }
 
+    /// Whether `a` and `b` are the same frame by `FrameParity`'s rule.
+    static func matches(_ a: RGBAImage, _ b: RGBAImage) -> Bool {
+        a.width == b.width && a.height == b.height
+            && FrameParity.matches(a.bytes, b.bytes, width: a.width, height: a.height)
+    }
+
     /// Frames 0, the middle and the last of a scene `count` frames long.
     static func frames(_ count: Int) -> [Int] { [0, count / 2, max(count - 1, 0)] }
 
     @Test(arguments: ["bounce", "spinner", "stroke-on"])
-    func theReferencePlayerDrawsWhatTheStageDraws(_ name: String) throws {
+    func theReferencePlayerDrawsWhatTheStageDraws(_ name: String) throws { try Self.parity(name) }
+
+    @Test(.disabled("waits on the stage-matches-export fix"), arguments: ["colour-key", "trim"])
+    func theReferencePlayerDrawsWhatTheStageDrawsAfterTheStageFix(_ name: String) throws { try Self.parity(name) }
+
+    static func parity(_ name: String) throws {
         let doc = try Self.open(name), scene = try #require(doc.workspace.selectedScene)
         let json = try Self.exportLottie(doc, as: name)
         let (w, h) = (Int(scene.width), Int(scene.height))
         for frame in Self.frames(scene.durationFrames) {
             let player = try Self.oracleFrame(json, frame: frame, width: w, height: h)
-            let result = GoldenImage().compare(player, to: try Self.stageFrame(doc, frame: frame), tolerance: Self.tolerance)
-            #expect(result.passes, "\(name) frame \(frame): \(result.differing) pixels (\(result.share)) differ")
+            let stage = try Self.stageFrame(doc, frame: frame)
+            let share = FrameParity.mismatch(player.bytes, stage.bytes, width: w, height: h)
+            #expect(Self.matches(player, stage), "\(name) frame \(frame): \(share) of pixels differ")
         }
     }
 
     @Test(arguments: ["bounce", "spinner", "stroke-on"])
-    func theLoopDoesNotRepeatFrameZero(_ name: String) throws {
+    func theLoopDoesNotRepeatFrameZero(_ name: String) throws { try Self.loop(name) }
+
+    @Test(.disabled("waits on the stage-matches-export fix"), arguments: ["colour-key", "trim"])
+    func theLoopDoesNotRepeatFrameZeroAfterTheStageFix(_ name: String) throws { try Self.loop(name) }
+
+    static func loop(_ name: String) throws {
         let doc = try Self.open(name), scene = try #require(doc.workspace.selectedScene)
         let json = try Self.exportLottie(doc, as: name)
         let (w, h) = (Int(scene.width), Int(scene.height))
         let first = try Self.oracleFrame(json, frame: 0, width: w, height: h)
         let last = try Self.oracleFrame(json, frame: scene.durationFrames - 1, width: w, height: h)
-        #expect(!GoldenImage().compare(last, to: first, tolerance: Self.tolerance).passes, "\(name) ends on frame 0")
+        #expect(FrameParity.loopIsClean(first: first.bytes, last: last.bytes, width: w, height: h),
+                "\(name) ends on frame 0")
     }
 
     /// The trap the suite exists for: keys one frame late play differently, so the compare must catch them.
@@ -115,7 +132,7 @@ struct LottiePlayerParityTests {
         let json = try Self.exportLottie(late, as: "bounce-late")
         let scene = try #require(doc.workspace.selectedScene), middle = scene.durationFrames / 2
         let player = try Self.oracleFrame(json, frame: middle, width: Int(scene.width), height: Int(scene.height))
-        #expect(!GoldenImage().compare(player, to: try Self.stageFrame(doc, frame: middle), tolerance: Self.tolerance).passes)
+        #expect(!Self.matches(player, try Self.stageFrame(doc, frame: middle)))
     }
 }
 #endif
