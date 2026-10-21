@@ -14,7 +14,7 @@ Next: CL-measure (cbbb878) and CL-z (#4167 merged 4565e85) both wait for a green
 | CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
 | CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | done: Belt-Slice-Done + Mac-Finish-Wanted (run 39670298178) | | |
 | CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | all PRs merged (#3487, #4148 5803475, #4166 cbbb878); waiting for a green dev Linux run at or past cbbb878 | | |
-| CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | PR #4167 open | | |
+| CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | PR #4167 merged 4565e85; waiting for a green dev Linux run | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -31,8 +31,8 @@ Next: CL-measure (cbbb878) and CL-z (#4167 merged 4565e85) both wait for a green
 | CL-10 | CL-measure | – | H-P1..H-P5 journeys on | UITests/HaloJourneyTests+Perf.swift | perf journeys | #4166 | merged cbbb878 |
 | CL-11 | CL-measure | 2 | L3..L5 and latency line on | Tests/AppSnapshotTests/HaloLayoutTests.swift, HaloViewerLatencyTests.swift | layout tests | | #3487 merged d9bc0337 |
 | CL-12 | CL-measure | – | -HaloFixture → -HaloSample in six journeys | UITests/HaloJourneyTests*.swift | journeys | #4148 | merged 5803475 (with #865) |
-| CL-13 | CL-z | – | H-J12 live | UITests/HaloJourneyTests.swift | H-J12 | #4167 | open 84e3f09c |
-| CL-14 | CL-z | – | status built, waves.in.md, blueprint prose (feature-done) | core-loop.wave.json, waves.in.md, halo.md | scripts/ci | #4167 | open 84e3f09c (feature-done) |
+| CL-13 | CL-z | – | H-J12 live | UITests/HaloJourneyTests.swift | H-J12 | #4167 | merged 4565e85 |
+| CL-14 | CL-z | – | status built, waves.in.md, blueprint prose (feature-done) | core-loop.wave.json, waves.in.md, halo.md | scripts/ci | #4167 | merged 4565e85 (feature-done) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -42,7 +42,7 @@ Next: CL-measure (cbbb878) and CL-z (#4167 merged 4565e85) both wait for a green
 - W1: CL-a1 = CL-1+CL-2 (~380 lines, 3 files), CL-a2 = CL-3 (~300, 5). Independent: both (disjoint files, CL-3's suites need no CL-2 code).
 - W2 (started at once, stacked): CL-run1 = CL-6 on CL-a1 (needs the stubs and the disabled tests); CL-ui = CL-4+CL-5 on CL-a1+CL-a2 (CL-4 needs the stubs, CL-5 the CL-3 suite); CL-11 on CL-a2 (enables CL-3's layout and latency tests).
 - W3: CL-run2 = CL-7 on CL-run1 (reads the kernel run CL-6 fills).
-- Merged: #4147 (CL-8, CL-9) a2d1a8d; #4148 (#865, CL-12) 5803475. Merged: #4166 (CL-10) cbbb878. Open: #4167 (CL-13+CL-14, feature-done, after #4166).
+- Merged: #4147 (CL-8, CL-9) a2d1a8d; #4148 (#865, CL-12) 5803475. Merged: #4166 (CL-10) cbbb878. Merged: #4167 (CL-13+CL-14, feature-done) 4565e85.
 
 ## Decisions
 - The server also appends the footer to issue comments (Belt-Slice-Done on #1971) and puts it back after an edit; the trailer lines stay first and parse.
