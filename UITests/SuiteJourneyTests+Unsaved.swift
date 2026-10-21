@@ -34,14 +34,26 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
     /// SJ-UP: every editor asks the same question the same way before it closes or replaces a dirty document.
     @MainActor func testEveryEditorAsksBeforeClosing() throws {
         var waiting: [String] = []
-        let legs: [@MainActor () throws -> Void] = [designLeg, photoLeg, flareLeg, haloLeg]
-        for leg in legs {
-            do { try leg() } catch let skip as XCTSkip { waiting.append(skip.message ?? "a leg skipped") }
+        for leg in Leg.allCases {
+            do { try run(leg) } catch let skip as XCTSkip { waiting.append(skip.message ?? "a leg skipped") }
         }
         if !waiting.isEmpty { throw XCTSkip(waiting.joined(separator: "; ")) }
     }
 
     // MARK: - Legs
+
+    /// The legs in order, by case rather than as function values (a method reference held as a
+    /// `@MainActor` function is implicitly Sendable, and XCTestCase isn't).
+    private enum Leg: CaseIterable { case design, photo, flare, halo }
+
+    @MainActor private func run(_ leg: Leg) throws {
+        switch leg {
+        case .design: try designLeg()
+        case .photo: try photoLeg()
+        case .flare: try flareLeg()
+        case .halo: try haloLeg()
+        }
+    }
 
     @MainActor private func designLeg() throws {
         guard Self.live.contains("Design") else { throw XCTSkip("waits on UP-6") }
