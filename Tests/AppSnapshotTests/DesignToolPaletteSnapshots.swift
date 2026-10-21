@@ -50,7 +50,8 @@ import Testing
     @Test func theEyedropperShowsItsOptions() throws {
         var model = DesignWorkspace()
         model.useServices(.fake)
-        #expect(model.openFixture("cards"))
+        let opened = model.openFixture("cards")
+        #expect(opened)
         model.selectTool(.eyedropper)
         model.setSampleSize(.fiveByFive)
         model.setSampleTarget(toStroke: true)
