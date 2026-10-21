@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-21T00:05:02Z	3	check	DA-a	#3686 509907a6 macOS build success; waits lane batch
 2026-10-21T00:27:40Z	3	merged	DA-a	#3686 as 07f754f7; Linux check 39520241285 running; DA-m/DA-u merging dev
 2026-10-21T00:36:54Z	3	slice-done	DA-a	run 39520241285; #3710 retargeted dev 4d5d8826
+2026-10-21T00:43Z	DA-u	retargeted	#3726 7a01cb92	dev merged in; needs-split answered

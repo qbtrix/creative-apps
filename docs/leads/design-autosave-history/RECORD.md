@@ -42,3 +42,4 @@ Next: push DA-u (#3726) once scripts/ci --changed passes, move Head, retarget to
 - Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
 - 2026-10-21T00:27:40Z: DA-a merged as 07f754f7. DA-m and DA-u merge origin/dev (add/add conflicts on DA-a's files resolved to the branch side; dev's copies equal 509907a6), so their diffs against dev are their own slices only.
 - 2026-10-21T00:36:54Z: Belt-Slice-Done DA-a (6305025272, run 39520241285). #3710 retargeted to dev at 4d5d8826 (--changed PASS). Supervisor told on #3415 and #3434 that Belt watches other runs' branches.
+- 2026-10-21T00:43Z: DA-u #3726 retargeted to dev at 7a01cb92 (dev merged in, --changed PASS); answered the supervisor needs-split sentinel (count predates retarget; now 373+/20-, 9 files). DA-m #3710 in the lane at 4d5d8826.
