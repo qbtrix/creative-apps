@@ -77,3 +77,4 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - 16:48Z: #4116 macOS build in progress. #4055, #3742, #4047 open; 6 open findings. No new comments.
 - 17:11Z: heartbeat: #4116 lane macOS build green, Linux batch run in progress; #4055 #3742 #4047 open; 6 open findings (no FG-5); FG-u critics wait on #4116 merge + scoped flare run
 - 17:31Z: #4116 merged 17:12Z (project.yml core pin; Flare bundle/journeys build unblocked). Asked supervisor on #3419 for a scoped flare run on dev; FG-u critics run on its ui-screens. #4055 #3742 #4047 open; 6 open findings (no FG-5).
+- 17:51Z: Supervisor dispatched scoped flare run 39645308209 (pending, macOS queue); FG-u critics wait for its journeys ui-screens. #4055 still in lane (FG-a round 2 after merge). 6 open findings, #3742 open: no FG-5.
