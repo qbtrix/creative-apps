@@ -189,7 +189,7 @@ public struct DesignColor: Sendable, Hashable, Codable {
 }
 
 public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
-    case frame, group, rectangle, ellipse, text, instance
+    case frame, group, rectangle, ellipse, text, instance, shape
 
     /// The SF Symbol for this kind's sidebar row.
     public var systemImage: String {
@@ -200,6 +200,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         case .ellipse: "circle"
         case .text: "textformat"
         case .instance: "square.on.square"
+        case .shape: "star"
         }
     }
 
@@ -213,7 +214,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         switch self {
         case .frame: .white
         case .text: .black
-        case .group, .rectangle, .ellipse, .instance: .shape
+        case .group, .rectangle, .ellipse, .instance, .shape: .shape
         }
     }
 
@@ -251,6 +252,9 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var rotation: Double = 0
     /// Mirrored left to right and top to bottom about the frame's centre. Written only when set.
     public var flipX = false, flipY = false
+    /// A shape node's polygon, star, line or arrow, drawn in `frame` by ShapeRules; nil for every other
+    /// kind. Written only when set (shape-tools DS-1).
+    public var shape: ShapeSpec?
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
@@ -275,10 +279,11 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         gradient = node.gradient
         rotation = node.rotation
         (flipX, flipY) = (node.flipX, node.flipY)
+        shape = node.shape
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke, the default text style, no gradient, upright and unmirrored.
+    /// corners, fully opaque, no stroke, the default text style, no gradient, upright and unmirrored, no shape spec.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -295,15 +300,16 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
         flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
+        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
     }
 
     /// The file's keys, one per stored field.
     enum CodingKeys: String, CodingKey {
         case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
-        case gradient, rotation, flipX, flipY
+        case gradient, rotation, flipX, flipY, shape
     }
 
-    /// Encodes a node as before transforms, adding the turn and each mirror only when set, so a file of
+    /// Encodes a node as before transforms, adding the turn, each mirror and a shape's spec only when set, so a file of
     /// upright nodes is written byte for byte as an older build wrote it.
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -324,6 +330,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         if rotation != 0 { try container.encode(rotation, forKey: .rotation) }
         if flipX { try container.encode(flipX, forKey: .flipX) }
         if flipY { try container.encode(flipY, forKey: .flipY) }
+        try container.encodeIfPresent(shape, forKey: .shape)
     }
 
     /// Shifts this node and everything under it by `delta`.

@@ -17,6 +17,7 @@ extension DesignNodeKind {
         case .text: "Text has no corners to round."
         case .group: "A group has no corners to round."
         case .instance: "An instance has no corners to round."
+        case .shape: "A shape has no corners to round."
         }
     }
 }

@@ -30,6 +30,8 @@ enum DesignIntent {
     case fill(GradientIntent)
     /// A turn or flip from the inspector or the Object menu, run as its kernel command (`runTransform`).
     case transform(TransformIntent)
+    /// A change from the Shape tool's options in the inspector, applied to the tool's next spec (`runShape`).
+    case shape(ShapeIntent)
     case align(DesignAlignEdge)
     case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)
@@ -80,6 +82,7 @@ extension DesignTool: PaletteTool {
         case .frame: "Frame"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"
+        case .shape: "Shape"
         case .text: "Text"
         case .pen: "Pen"
         case .eyedropper: "Eyedropper"
@@ -92,6 +95,7 @@ extension DesignTool: PaletteTool {
         case .frame: "number"
         case .rectangle: "rectangle"
         case .ellipse: "circle"
+        case .shape: "star"
         case .text: "textformat"
         case .pen: "pencil.tip"
         case .eyedropper: "eyedropper"
@@ -104,6 +108,7 @@ extension DesignTool: PaletteTool {
         case .frame: "f"
         case .rectangle: "r"
         case .ellipse: "o"
+        case .shape: "u"
         case .text: "t"
         case .pen: "p"
         case .eyedropper: "i"
@@ -114,7 +119,7 @@ extension DesignTool: PaletteTool {
     var pointer: PointerStyle {
         switch self {
         case .move, .pen, .eyedropper: .default
-        case .frame, .rectangle, .ellipse: .rectSelection
+        case .frame, .rectangle, .ellipse, .shape: .rectSelection
         case .text: .horizontalText
         }
     }

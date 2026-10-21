@@ -15,8 +15,10 @@
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
 // refuses what it must. Opacity, Corners and Stroke, the hint and the frame
 // fields' live scrub are DesignInspectorStyle. The scroll view shows no
-// indicators, so no legacy scroller reads as an unlabelled button.
+// indicators, so no legacy scroller reads as an unlabelled button. While the Shape
+// tool is active its options (DesignShapeOptions, shape-tools DS-2) come first.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -27,6 +29,9 @@ struct DesignInspector: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
+                if model.tool == .shape {
+                    DesignShapeOptions(spec: model.shapeTool, help: ShapeRules.help(model.shapeTool)) { perform(.shape($0)) }
+                }
                 if model.hasMultipleSelection {
                     DesignSeveralProperties(model: model, perform: perform)
                 } else if let node = model.selectedNode {
@@ -227,5 +232,20 @@ private struct DesignSeveralProperties: View {
             .font(SuiteFont.inspectorValue)
             .foregroundStyle(SuiteColor.secondaryText)
             .help(help ?? "")
+    }
+}
+
+/// The Shape tool's options: SuiteUI's ShapeToolOptions over the Model's `shapeTool` (the kind chips and the
+/// kind's rows). It only reads the spec; each change goes out as `.shape`, which the window runs through the
+/// Model's `runShape`. `help` is ShapeRules' reason the spec can't be drawn.
+struct DesignShapeOptions: View {
+    let spec: ShapeSpec
+    let help: String?
+    let onIntent: @MainActor (ShapeIntent) -> Void
+
+    var body: some View {
+        InspectorSection("Shape") {
+            ShapeToolOptions(spec: spec, help: help) { onIntent($0) }
+        }
     }
 }

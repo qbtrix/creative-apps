@@ -64,7 +64,7 @@ func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     let scale = usable(scale)
     let box = node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
     switch node.kind {
-    case .frame, .rectangle, .instance:
+    case .frame, .rectangle, .instance, .shape:  // a shape draws its box until DS-3 draws its path
         return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale).path(in: box)
     case .ellipse:
         return Path(ellipseIn: box)

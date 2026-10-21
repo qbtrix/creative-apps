@@ -146,7 +146,8 @@ extension DesignWorkspace {
         return w.editingTextID == nil ? nil : "Finish editing the text first."
     }
 
-    static let toolSpecs:[CommandSpec<DesignWorkspace>] = DesignTool.allCases.map { tool in
+    // tool.shape comes from ShapeCommands (shape-tools DS-6).
+    static let toolSpecs:[CommandSpec<DesignWorkspace>] = DesignTool.allCases.filter { $0 != .shape }.map { tool in
         let title = tool.rawValue.prefix(1).uppercased() + tool.rawValue.dropFirst()
         return plain("tool." + tool.rawValue, title, "Picks the \(title) tool.", .view, { _ in reason(tool.unavailableHelp) }) { $0.selectTool(tool) }
     }

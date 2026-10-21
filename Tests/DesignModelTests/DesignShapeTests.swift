@@ -29,7 +29,7 @@ struct DesignShapeTests {
     @Test func aSpecIsWrittenOnlyWhenSetAndReadBack() throws {
         var node = DesignNode(id: "node-9", name: "Star", kind: .shape, frame: rc(0, 0, 100, 100))
         let plain = String(decoding: try JSONEncoder().encode(node), as: UTF8.self)
-        #expect(!plain.contains("\"shape\""))
+        #expect(!plain.contains("\"shape\":"), "no spec, no key")
         node.shape = ShapeIntent.points(7).applied(to: .defaults(.star))
         let back = try JSONDecoder().decode(DesignNode.self, from: try JSONEncoder().encode(node))
         #expect(back.kind == .shape && back.shape == node.shape)
