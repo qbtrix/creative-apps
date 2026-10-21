@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T05:30Z	heartbeat	check	-	beat: still parked on shell-text #3725.
 2026-10-21T06:03Z	heartbeat	check	-	beat: still parked on shell-text #3725.
 2026-10-21T06:30Z	heartbeat	check	-	beat: still parked on shell-text #3725.
+2026-10-21T06:58Z	heartbeat	check	-	parked on shell-text #3725, no change.
