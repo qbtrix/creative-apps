@@ -11,7 +11,7 @@ Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once a dev Linux 
 |---|---|---|---|---|---|---|---|---|---|
 | FP-a | adapters as stubs, PathEditTarget conformance, Direct Select anchors via overlay | FP-1, FP-2 | MJ-FP | PN-a (done), shape-tools:FS-a (done) | yes | 0 | done (Belt-Slice-Done 08:56Z; Mac-Finish-Wanted) | #3838 | 08:08Z merged 5a911587 |
 | FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | waiting | – | – |
-| FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 PR open (#4029, head 5a8dee2f, Mutate 4/4); FP-6 waits on FL-m | #4029 | – |
+| FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a (done), PN-5 (done), PN-7, shape-tools:FS-m (unchained for FP-5), file-flow:FL-m | no | 0 | FP-5 merged (#4029, 14:11Z); FP-6 waits on FL-m | #4029 | – |
 | FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | done: run 39596004859 (only the Library timing flake; supervisor answer 12:04Z); FP-8 waits on test/stress-perf-journeys | #3958 | – |
 | FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | waiting | – | – |
 
