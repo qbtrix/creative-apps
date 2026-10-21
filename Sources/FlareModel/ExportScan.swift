@@ -1,7 +1,8 @@
 // ExportScan.swift: the warnings every export carries, shared by the fake and live exporters (docs/blueprints/flare.md,
 // 6.2 and 6.3). v1's exporters can't write text, symbol animation (instances flatten to their first frame), state
-// machines or, in Lottie, the background color, so each one present gets a named warning: never a silent drop. Text
-// counts every layer holding it, hidden or not, in the scene or a symbol its instances reach.
+// machines or, in Lottie, the background color, so each one present gets a named warning: never a silent drop. PNG
+// frames are the stage's picture, which has no masks or mattes yet, so a PNG export names those layers too. Text and
+// masks count every layer holding one, hidden or not, in the scene or a symbol its instances reach.
 import FlareCore
 
 public enum ExportScan {
@@ -15,6 +16,10 @@ public enum ExportScan {
         if instances > 0 { warnings.append("Symbol animation exports as its first frame (\(count(instances, "instance"))).") }
         let machines = document.stateMachines.count
         if machines > 0 { warnings.append("Interactions aren't exported (\(count(machines, "machine"))).") }
+        let masked = maskedLayers(scene.layers, document.symbols)
+        if options.format == .pngSequence, masked > 0 {
+            warnings.append("Masks and mattes aren't drawn in PNG yet (\(count(masked, "layer"))).")
+        }
         if options.format == .lottie, !options.transparentBackground {
             warnings.append("Background color isn't part of Lottie.")
         }
@@ -30,14 +35,25 @@ public enum ExportScan {
         return clean
     }
 
-    /// Layers holding text among `layers` and the symbols their instances reach; `seen` stops a symbol cycle.
+    /// Layers with a mask or a track matte among `layers` and the symbols their instances reach: what the stage
+    /// and PNG frames can't draw yet.
+    public static func maskedLayers(_ layers: [Layer], _ symbols: [Symbol]) -> Int {
+        countLayers(layers, symbols, seen: []) { !$0.masks.isEmpty || $0.matte != nil }
+    }
+
     private static func textLayers(_ layers: [Layer], _ symbols: [Symbol], seen: Set<String>) -> Int {
-        var total = layers.filter { !$0.texts.isEmpty }.count
+        countLayers(layers, symbols, seen: seen) { !$0.texts.isEmpty }
+    }
+
+    /// Layers matching `holds` among `layers` and the symbols their instances reach; `seen` stops a symbol cycle.
+    private static func countLayers(_ layers: [Layer], _ symbols: [Symbol], seen: Set<String>,
+                                    _ holds: (Layer) -> Bool) -> Int {
+        var total = layers.filter(holds).count
         var reached = seen
         for id in layers.flatMap(\.instances).map(\.symbolID) where !reached.contains(id) {
             reached.insert(id)
             guard let symbol = symbols.first(where: { $0.id == id }) else { continue }
-            total += textLayers(symbol.layers, symbols, seen: reached)
+            total += countLayers(symbol.layers, symbols, seen: reached, holds)
         }
         return total
     }

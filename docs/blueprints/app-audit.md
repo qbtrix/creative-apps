@@ -105,8 +105,8 @@ frame. Then:
   audit at that screen fails, naming the check, its fault and the element.
 - **Down.** A count under its baseline doesn't fail. The class's last test
   (run order is by name) attaches the app's counts in its teardown, so that
-  test must launch a Journey. On dev, after a green macOS job, the `Audit
-  lower` job in `.github/workflows/ci.yml` runs `scripts/audit-lower`: when
+  test must launch a Journey. On dev, after a full journeys run passes, the `Audit
+  lower` job in `.github/workflows/journeys.yml` runs `scripts/audit-lower`: when
   some count is under its baseline and none is over, it writes the measured
   numbers into the baseline (a check at 0 leaves its app's line) and pushes
   that one commit, "test(audit): lower baselines to the measured counts" with
@@ -114,8 +114,8 @@ frame. Then:
   dev and lowers again on top, up to 3 retries, judging only the checks whose
   baseline is still the number the run measured against; one raised, lowered
   or added since is left for the next run. `scripts/audit-lower` refuses any
-  count over its baseline, so the job can only tighten the audit. A red macOS
-  job lowers nothing: a failed journey leaves its later screens unaudited, so
+  count over its baseline, so the job can only tighten the audit. A red journeys
+  run lowers nothing: a failed journey leaves its later screens unaudited, so
   its counts would be too low.
 - A check missing from a listed app has baseline 0. An app missing from the
   file is recorded, not judged, and never added.
