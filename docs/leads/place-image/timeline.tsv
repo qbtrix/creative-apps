@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-21T19:31Z	2026-10-21T19:33Z PP-4 batch Linux check green; macOS gate queued
 2026-10-21T19:54Z	PP-4 #4003 merged a47f41f75; PP-7 merged dev, now 1 file +44/-11
 2026-10-21T19:58Z	PP-7 #4175 opened at dee50125 (gate pass)
+2026-10-21T20:16Z	20:17Z full CI 39665258026: Linux green, macOS queued; #4175 in lane
