@@ -120,3 +120,4 @@ utc	stage	event	ref	note
 2026-10-21T21:29Z	3	check	PN-u	#4203 macOS build 39679097683 dispatched; PN-4 pushed ce7d5960 (CI PASS), PR after #4203
 2026-10-21T21:47Z	3	check	PN-3 #4203	macOS build 39679097683 queued; PN-4 waits on merge; #3477 still waiting-on-prereq
 2026-10-21T22:04Z	3	check	PN-3 #4203	macOS build 39679097683 still queued; PN-4 waits
+2026-10-21T22:21Z	3	check	PN-3 #4203	macOS build 39679097683 still queued; PN-4 waits
