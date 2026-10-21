@@ -2,15 +2,15 @@
 
 Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
-Stage: 3 wave 1
-Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: wave 2 running (workflow wf_9570e370-f68): FO-u and FO-4 stacked on lead/folders-FO-a (#3939), labelled no-fast-lane until #3939 merges; then swap to fast-lane
+Stage: 3 wave 2
+Base: 260f7a87410930bd740151baf80e350340d2a4f9
+Next: when #3939 merges, swap no-fast-lane for fast-lane on #3961 and #3963 (move Head: lines); re-read FC-d, LF-m, LC-m for FO-5
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | building | – | – |
-| FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | waits FO-a PR | – | – |
+| FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | PR #3939 open | – | – |
+| FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | PR #3963 open | – | – |
 | FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 next wave; FO-5 blocked | – | – |
 | FO-z | live, RJ-L53, built | FO-6, FO-7 | LJ-FO, MJ-FO | FO-u, FO-m | yes | 0 | blocked | – | – |
 
@@ -19,9 +19,9 @@ Next: wave 2 running (workflow wf_9570e370-f68): FO-u and FO-4 stacked on lead/f
 |---|---|---|---|---|---|---|---|
 | FO-1 | FO-a | 1 | FolderNode, tree stub, command specs NotBuilt, tests disabled | LibraryFolders.swift, LibraryFolders+Kernel.swift, LibraryFoldersTests.swift | compiles, disabled | #3939 | open, head 1d4518b |
 | FO-2 | FO-a | 1 | journey skipped, RJ-L53 disabled | UITests/LibraryJourneyTests+Folders.swift, Tests/RealJobs/library/browse-folders/ | scripts/jobs check | #3939 | open (same PR) |
-| FO-3 | FO-u | 2 | FOLDERS section | LibraryBrowser.swift, LibraryFoldersSection.swift | ids, menu toggles | – | planned |
-| FO-3b | FO-u | 2 | render budget | RenderBudgetLibraryFoldersTests.swift | expandFolderInTwoBodies | – | planned |
-| FO-4 | FO-m | 2 | tree body | LibraryFolders.swift, LibraryFoldersTests.swift, Tests/mutations/LibraryModel.LibraryFolders.json | LibraryFoldersTests | – | planned |
+| FO-3 | FO-u | 2 | FOLDERS section | LibraryBrowser.swift, LibraryFoldersSection.swift | ids, menu toggles | #3963 | open, head 6214f5b, no-fast-lane until #3939 merges |
+| FO-3b | FO-u | 2 | render budget | RenderBudgetLibraryFoldersTests.swift | expandFolderInTwoBodies | #3963 | open (same PR) |
+| FO-4 | FO-m | 2 | tree body | LibraryFolders.swift, LibraryFoldersTests.swift, Tests/mutations/LibraryModel.LibraryFolders.json | LibraryFoldersTests | #3961 | open, head ed04c50, no-fast-lane until #3939 merges |
 | FO-5 | FO-m | – | filter case, command bodies | LibraryFilter.swift, LibraryFolders+Kernel.swift, LibraryCommandCatalog.swift, ... | LibraryFoldersTests.filter | – | blocked: FC-d, LF-m, LC-m |
 | FO-6 | FO-z | – | live | ... | LJ-FO | – | blocked |
 | FO-7 | FO-z | – | feature-done | folders.wave.json | – | – | blocked |
