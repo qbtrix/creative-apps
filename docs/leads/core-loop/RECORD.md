@@ -12,7 +12,7 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are
 | CL-a | the loop's checks and the HaloRenderJob+Kernel stubs exist before its code | CL-1, CL-2, CL-3 | MJ-CL1 | editor-kernel EK-a (merged, #1933) | false | 0 | merged (#3404, #3408) | | |
 | CL-ui | Render… opens SuiteUI ExportSheet on the kernel run; render budget on | CL-4, CL-5 | H-J21 | CL-a | true | 0 | done: #3590 ui1 + #3653 ui2 merged; Belt-Slice-Done + Mac-Finish-Wanted at run 39507877855 (23:50Z) | | |
 | CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
-| CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | #4147 merged a2d1a8d; waiting for a green dev Linux run at or past it | | |
+| CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | done: Belt-Slice-Done + Mac-Finish-Wanted (run 39670298178) | | |
 | CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | all PRs merged (#3487, #4148 5803475, #4166 cbbb878); waiting for a green dev Linux run at or past cbbb878 | | |
 | CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | PR #4167 open | | |
 
@@ -45,6 +45,7 @@ Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are
 - Merged: #4147 (CL-8, CL-9) a2d1a8d; #4148 (#865, CL-12) 5803475. Merged: #4166 (CL-10) cbbb878. Open: #4167 (CL-13+CL-14, feature-done, after #4166).
 
 ## Decisions
+- The server also appends the footer to issue comments (Belt-Slice-Done on #1971) and puts it back after an edit; the trailer lines stay first and parse.
 - The PR tool's server appends an attribution footer and puts it back after a body edit; the fast lane strips it from the squash commit (CLAUDE.md), so the lead leaves it.
 - Run kvrn: #3401 closed (#3981) and KE-a is done, so CL-probe starts. Supervisor told the lead to take #865 (A-HA-1) on this line; it ships with CL-12 as one CL-measure PR (both edit HaloJourneyTests.swift). CL-10 is a second CL-measure PR stacked on CL-probe.
 - Wave 5: CL-10 stacks on CL-probe; CL-z stacks on lead/core-loop-live (CL-13 needs CL-12, same file). CL-z is opened after CL-10 so the lane's oldest-first order lands feature-done last. Record stays on lead/core-loop per the supervisor, though Belt's nudge names lead/halo-core-loop.
