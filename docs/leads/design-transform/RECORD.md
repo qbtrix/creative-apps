@@ -2,9 +2,9 @@
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DT-u waiting on #4159 merge; DT-m started: DT-5 building (feat/design-transform-dt5)
+Stage: 3 DT-u waiting on #4159; finding #4188 (no rotate knob) fixer running on fix/design-rotate-knob; DT-m: DT-5 PR #4187 open
 Base: 896cafe3 (origin/dev); main verified at 0dd23d65
-Next: #4159 merges -> Belt-Slice-Done + Mac-Finish-Wanted DT-u on a green design run; DT-5 PR; DT-6 after DG-m merges (shares DesignSVG and catalog) and DA-m re-read
+Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u on a green design run; DT-6 after DG-m merges (shares DesignSVG, catalog; must update turnHelp snapshots: DesignInspectorSnapshots.transformRows, objectItemsSayWhyTheyAreOff, DesignSeveralInspectorSnapshots) and DA-m re-read
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
