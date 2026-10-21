@@ -33,3 +33,4 @@
 2026-10-20T19:35:00Z	slice-done	MD-a	run 39479914225, #1555 comment 6299308121
 2026-10-20T19:48:12Z	check	-	lane backlog: 56 runs queued; FC-4 #3461 macOS run 39437577080 queued since 14:15Z; nothing merged (MD #3550 #3570 #3574 #3575, LX #3696 waiting)
 2026-10-20T20:14:59Z	check	-	nothing merged; 59 runs queued; dev took #3680 (no conflict with ours); #3582/#3579 still dirty drafts awaiting parents; no supervisor reply on #1563
+2026-10-21T00:05:30Z	check	-	check-in: MD-16 #3582 ready (c9e3a89); MD-17 #3579 needs-rebase on C4 part, dev merged and resolved, gate running; MD-10 #3581 waits on perf list
