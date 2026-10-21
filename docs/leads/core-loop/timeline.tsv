@@ -100,3 +100,4 @@ utc	stage	event	ref	note
 2026-10-21T19:03Z	3	pr-opened	#4148	CL-measure #865 A-HA-1 + CL-12
 2026-10-21T19:03Z	3	stage-start	wave 5	CL-10 on #4147; CL-z on #4148
 2026-10-21T19:05Z	3	merged	#4148	CL-measure CL-12 + #865 at 5803475
+2026-10-21T19:16Z	3	pr-opened	#4166	CL-measure CL-10 H-P1..H-P5, stacked on #4147
