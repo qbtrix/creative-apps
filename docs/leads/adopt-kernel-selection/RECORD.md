@@ -37,6 +37,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T07:59Z: lane batching older PRs first
 - 2026-10-21T07:37Z: wait on lane
 - 2026-10-21T07:14Z: wait on lane
 - 2026-10-21T06:48Z: AS-library merged by earlier run
