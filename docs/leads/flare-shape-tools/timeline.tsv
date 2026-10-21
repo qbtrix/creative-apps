@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-21T03:25:00Z	FS-u PR #3851 opened (no-fast-lane, stacked on #3850)
 2026-10-21T03:55:40Z	heartbeat: #3850 macOS build; full CI 39538921285 pending
 2026-10-21T04:25:52Z	heartbeat: #3850 macOS build green
+2026-10-21T04:56:04Z	heartbeat: lane sweeping #3850; full CI in progress

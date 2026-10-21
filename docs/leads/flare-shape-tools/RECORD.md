@@ -8,7 +8,7 @@ Next: FS-a slice PR (FS-1, FS-2) and FS-5 (FS-m's first task) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: #3850 (FS-5) macOS build 39538905662 green, waiting on the lane's merge; #3851 (FS-u) held with no-fast-lane; full dev CI 39538921285 (contains #3767) queued for FS-a slice-done
+Last stage: #3850 (FS-5) built on macOS, mergeable, lane sweep 39546368201 running; #3851 (FS-u) held with no-fast-lane; full dev CI 39538921285 (contains #3767) in progress for FS-a slice-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
