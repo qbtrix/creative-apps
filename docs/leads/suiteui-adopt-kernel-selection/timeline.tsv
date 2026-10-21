@@ -1,0 +1,146 @@
+utc	stage	event	ref	note
+2026-10-17T06:04Z	0	stage-start	#1935	setup: line lead for #1936 #1935 #1934; base origin/dev 4a86f5f; brief main fdaabbf verified as ancestor
+2026-10-17T06:10Z	0	stopped	#1935	blocked: every slice waits on editor-kernel:EK-sel (#1933 not started, no kernel types on dev)
+2026-10-17T06:38Z	0	heartbeat	#1935	still blocked: editor-kernel lead started wave 1 (EK-a, PR #1992); EK-sel waits on EK-a
+2026-10-17T10:44Z	0	heartbeat	#1935	still blocked: #1992 (EK-1) unmerged, editor-kernel wave 2 stacked on it; EK-sel still planned
+2026-10-18T07:56Z	0	heartbeat	#1935	relaunch act-1a14e01679a-5ey4: still blocked on editor-kernel:EK-sel (EK-9 #2647 open, EK-10 (Selection, Nudge, Marquee bodies) planned)
+2026-10-18T08:26Z	0 setup	heartbeat	Belt nudge; still blocked on EK-sel (EK-9 #2647 open, EK-10 planned)
+2026-10-18T08:57Z	0 setup	heartbeat	dev d6271ae; EK-sel still planned (EK-9 #2647 open, EK-10 planned); Selection still a stub
+2026-10-18T09:28Z	0 setup	heartbeat	dev ed52eaa; EK-sel still planned (EK-9 #2647 open, EK-10 planned), Selection a stub
+2026-10-18T09:59Z	0 setup	heartbeat	dev 02c20bf; EK-9 #2647 still unmerged, EK-10 planned, Selection a stub
+2026-10-18T10:30Z	0 setup	heartbeat	dev 68eaee6; EK-9 #2647 merged (44a44d9, tests disabled); EK-10 (Selection/Nudge/Marquee bodies) still planned, Selection a stub
+2026-10-18T11:05Z	0 setup	heartbeat	dev 7bd94d2; Selection still the EK-2 stub (EK-10 not merged)
+2026-10-18T11:55Z	1 packet	done	EK-10 merged (ea68d6a)
+2026-10-18T11:55Z	2 plan	done	plan unchanged
+2026-10-18T11:55Z	3 wave 1	start	base ea68d6a; AS-h1 building
+2026-10-18T12:02Z	3 wave 1	pr	AS-h1 #2762 open, Mutate 3/3
+2026-10-18T13:01Z	3 wave 1	merged	AS-h1 #2762 -> 8dd9bc4
+2026-10-18T13:01Z	3 wave 2	start	base 7ae985e; AS-h2 building
+2026-10-18T13:11Z	3 wave 2	pr	AS-h2 #2792 open, Mutate 4/4
+2026-10-18T13:38Z	3 wave 2	build	AS-h2 #2792 macOS build green; waiting for the lane sweep
+2026-10-18T14:10Z	3 wave 2	merged	AS-h2 #2792 -> 244f4cf
+2026-10-18T14:10Z	3 wave 2	slice-done	AS-halo, run 39133431238
+2026-10-18T14:42Z	3 wave 2	check	dev 80c14ee; all remaining slices blocked on hand-offs
+2026-10-18T14:57Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T15:19Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T15:41Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T16:03Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T16:25Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T16:47Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T17:09Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T17:30Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T17:52Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T18:13Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T18:34Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T18:56Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T19:18Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T19:40Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T20:02Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T20:23Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T20:45Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T21:07Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T21:29Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T21:51Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T22:13Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T22:35Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T22:57Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T23:18Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-18T23:40Z	check-in	blocked; #2747 open, packets unchanged
+2026-10-19T04:44Z	check	resume	-	run act-1a152763cf6-04ka on dev bede834
+2026-10-19T05:43Z	3	heartbeat	-	no startable task
+2026-10-19T06:01:13Z	heartbeat	check	#3138 #3139	both PRs wait on lane macOS build-only runs 39202285107/39203315397 (queued); hand-offs unchanged (design-seams-2, files-history, design-window, stage-edit, filters-collections open)
+2026-10-19T06:26:48Z	heartbeat	check	#3138 #3139	lane macOS build-only runs still queued (25 runs queued repo-wide, macOS runners busy); hand-offs unchanged
+2026-10-19T06:48:17Z	heartbeat	check	#3138 #3139	hand-offs unchanged (#1526 #1499 #1494 #1514 #1563 open)
+2026-10-19T07:09:14Z	wave	launch	#3138 #3139	hand-offs unchanged (#1526 #1499 #1494 #1514 #1563 open)
+2026-10-19T07:32:16Z	heartbeat	lane-check	-	hand-offs #1526 #1514 #1563 open; no task startable
+2026-10-19T07:54:13Z	heartbeat	lane-check	-	hand-offs #1526 #1514 #1563 open; no task startable
+2026-10-19T08:13:32Z	heartbeat	lane-check	-	hand-offs #1526 #1514 #1563 open; no task startable
+2026-10-19T08:34:55Z	heartbeat	check	-	#3184 open (macOS 39215372795 queued); #3198 open (lane macOS build pending); main b7e17ed; hand-offs #1526 #1499 #1494 #1514 #1563 open
+2026-10-19T08:57:29Z	heartbeat	check	-	main 6f9a2b8 (holds AU-h1); #3184 open (macOS 39215372795 queued); #3198 open (lane macOS build pending); hand-offs #1526 #1499 #1494 #1514 #1563 open
+2026-10-19T09:18:48Z	heartbeat	check	-	no change: main 6f9a2b8; #3184 and #3198 open, waiting on their macOS builds; hand-offs open
+2026-10-19T09:41:22Z	heartbeat	check	-	no change
+2026-10-19T10:03:13Z	heartbeat	check	-	hand-offs still open
+2026-10-19T10:24:31Z	heartbeat	check	-	hand-offs still open
+2026-10-19T10:47:31Z	heartbeat	check	-	hand-offs still open
+2026-10-19T11:16:12Z	heartbeat	check	-	hand-offs still open
+2026-10-19T11:44:04Z	heartbeat	blocked	-	hand-offs #1526 #1499 #1494 #1514 #1563 still open
+2026-10-19T15:09Z	lead	resume	act-1a154b13dec-71tm	base 6e70826; hand-offs checked
+2026-10-19T15:54:33Z	heartbeat	check	-	#3287 open in lane; no supervisor answer yet on #1934-#1936; hand-offs unchanged
+2026-10-19T16:17:18Z	heartbeat	check	-	#3287 open in lane (lane backlog: batch -6 queued); no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T16:39:19Z	heartbeat	check	-	#3287 still open in lane; main at 955f02d; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T17:00:47Z	heartbeat	check	#3287	lane sweep 39285705464 rates #3287 eligible (Fast-Check marker), waiting on a batch; main at b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T17:22:38Z	heartbeat	check	#3287	lane batch 20261019172050 Linux check 39293333091 in progress; #3287 open, no needs-fix; main at b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T17:44:08Z	heartbeat	check	-	#3287 merged 90e7a0c; full CI 39296061014 pending on dev 1b33afbb; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T18:06:17Z	heartbeat	check	-	full CI 39296061014 (dev 1b33afbb, holds AU-design 90e7a0c) still pending, macOS runners backlogged; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T18:28:58Z	heartbeat	check	-	full CI 39296061014 (dev 1b33afbb, holds AU-design 90e7a0c) still queued, newer full CI 39300369891 on c5ec57aa pending; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T18:50:32Z	heartbeat	check	-	full CI 39296061014 (1b33afbb, holds AU-design 90e7a0c) still queued, 39300369891 (c5ec57aa) pending; main b3011ab; no supervisor answer on #1934-#1936; hand-off owners unchanged
+2026-10-19T19:12:49Z	heartbeat	check	-	full CI 39296061014 (1b33afbb, holds AU-design 90e7a0c) still queued; 39300369891 and 39306309509 cancelled; 39308088122 (1f4500f1) pending; main b3011ab; no supervisor answer; hand-off owners unchanged
+2026-10-19T19:34:31Z	heartbeat	check	-	no supervisor answer; hand-offs still open; full runs 39296061014 queued, 39311818078 (dev dda01faa, contains 90e7a0c) pending; main b3011ab
+2026-10-19T19:56:06Z	heartbeat	check	-	no change: no supervisor answer; hand-offs open; runs 39296061014 queued, 39311818078 pending; main b3011ab
+2026-10-19T20:18:04Z	heartbeat	check	-	no change: no supervisor answer; hand-offs open; runs 39296061014 queued, 39311818078 pending; main b3011ab
+2026-10-19T20:40:13Z	heartbeat	check	-	runs 39311818078/39296061014 still queued; main b3011ab9; no supervisor answer; hand-off owners not done
+2026-10-19T21:02:05Z	heartbeat	check	-	runs 39311818078/39296061014 still queued (new scoped library 39323823976 queued); main b3011ab9; no supervisor answer; hand-off owners not done
+2026-10-19T21:24:15Z	heartbeat	check	-	39311818078 cancelled; now tracking 39326710851 (dev d735ced2, pending) and full 39296061014 (queued); main b3011ab9; no supervisor answer; hand-off owners not done
+2026-10-19T21:45:56Z	heartbeat	check	-	dev CI runs superseded in turn (39326710851 cancelled); latest 39329322245 (dev e50f30b3) pending; full 39296061014 queued; main b3011ab9; no supervisor answer; hand-off owners not done
+2026-10-19T22:08:43Z	heartbeat	check	-	no change: dev CI 39331917840 (bd10d93a) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
+2026-10-19T22:30:07Z	heartbeat	check	-	no change: dev CI 39333170092 (a7e93ca4) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
+2026-10-19T22:52:06Z	heartbeat	check	-	no change: dev CI 39336158094 (cf120143) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
+2026-10-19T23:14:07Z	heartbeat	check	-	no change: dev CI 39336158094 (cf120143) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
+2026-10-19T23:36:02Z	heartbeat	check	-	no change: dev CI 39342355180 (f564907d) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
+2026-10-19T23:58:01Z	heartbeat	check	-	no change: dev CI 39342355180 (f564907d) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
+2026-10-20T00:20:21Z	heartbeat	check	-	no change: dev CI 39346519827 (c7306ee8) pending, full 39296061014 queued, main b3011ab9; no supervisor answer; hand-offs open
+2026-10-20T00:42:30Z	answer	supervisor	-	Supervisor answer 00:29Z on #1935: option 1. design-seams-2 (#1526) parked; DesignCanvasEditing.swift hand-off released. AS-design starts now; record the swap in both .wave.json files in the first AS-design PR. AS-library follows AU-library.
+2026-10-20T01:02:07Z	heartbeat	check	-	AS-design builder still running (gate/mutation); AS-library waits on AU-library #3384
+2026-10-20T01:03:19Z	pr-opened	AS-design	#3385	AS-design PR #3385 (head b81a466b, 10 files +226/-69, Mutate KernelSelectionAdapter 8/8, CI: PASS). design-seams-2 wait recorded as waits_on text (waves cannot key across apps). DesignDirection kept: kernel Direction is not CaseIterable; follow-up needs Direction: CaseIterable in SuiteKernel
+2026-10-20T01:24:03Z	heartbeat	check	-	no change: #3384 and #3385 open (lane macOS builds 39351224956, 39351246989 queued); dev CI 39352633488 (53630c3b) pending, scoped suiteui 39352972722 queued; main b3011ab9 (dev-red #3386); no new supervisor answer; stage-edit #1514 and layers-panel #1498 have no Belt-Slice-Done; AL-design builder running
+2026-10-20T01:39:11Z	started	AS-library	-	AU-library merged (7969bfba); builder started on slice/as-library
+2026-10-20T01:44:31Z	merged	AS-design	#3385	merged on dev; done-run pending
+2026-10-20T01:58:31Z	pr-opened	AS-library	#3394	head 348cc581, 6 files +269/-8, Mutate KernelSelectionAdapter 7/7, CI PASS; grid wiring to pick/move waits on lists-and-layers LL-3
+2026-10-20T02:06:30Z	heartbeat	-	-	AS-design (#3385, merged) waits on a green run (dev CI 39356653273 is pending). AS-library #3394 waits on its lane macOS build 39356510878 (queued). AS-flare waits on stage-edit #1514.
+2026-10-20T02:28:27Z	heartbeat	-	-	Since 22:36Z, every full CI run on dev has been cancelled when the next merge superseded it (latest 39356653273; now 39357273491 on 13cf5dce, pending). The scoped suiteui run 39352972722 has been queued since 01:21Z, and the macOS runners are backlogged. main is still b3011ab9. No green done-run can land until a run finishes, and the lead does not dispatch runs. AS-design waits on it. AS-library #3394's macOS build 39356510878 passed, and the PR waits for the lane batch (lane/batch-20261020021849 is in progress). AS-flare waits on stage-edit #1514.
+2026-10-20T02:50:30Z	heartbeat	-	-	AS-library #3394 merged at 02:32Z as 25a8d9a2. Its done-run will be 39359599960 or a later run. Dev CI 39357273491 on 13cf5dce was cancelled. The current full run is 39359599960 on dev 25a8d9a2, pending. The scoped suiteui run 39352972722 is still queued. main is still b3011ab9. No green done-run has landed yet. AS-design waits on it too. AS-flare waits on stage-edit #1514.
+2026-10-20T03:12:40Z	heartbeat	-	-	AS-design and AS-library (merged, 25a8d9a2) wait on a green run. Nothing has moved since 02:50Z. Full dev CI 39359599960 on 25a8d9a2 is still pending, and scoped suiteui 39352972722 is still queued. The scoped flare and library runs and other runs are also queued, so the macOS runners are still backlogged. main is still b3011ab9. No supervisor answers. AS-flare waits on stage-edit #1514.
+2026-10-20T03:34:10Z	heartbeat	-	-	AS-design and AS-library wait on a green run. Still stalled. Full dev CI 39359599960 on 25a8d9a2 is pending, and scoped suiteui 39352972722 is queued. A Linux-only check on dev 233aff5c (39363625797) passed, but it is not a full or suiteui run, so it does not count as a done-run. main is still b3011ab9. No supervisor answers. AS-flare waits on stage-edit #1514.
+2026-10-20T04:05:00Z	heartbeat	-	-	Heartbeat. AS-design and AS-library wait on a green run. Full dev CI 39359599960 was cancelled. The current full run is 39365038310 on dev 533daec7, pending. Scoped suiteui 39352972722 is still queued. main is still b3011ab9. No supervisor answers on the feature issues. On #1514 at 03:53Z, the supervisor relaunched stage-edit SE-2b, but stage-edit has no Belt-Slice-Done yet. AS-flare waits on stage-edit #1514.
+2026-10-20T04:21:00Z	heartbeat	-	-	AS-design and AS-library wait on a green run. Full dev CI 39365038310 was cancelled. The current full run is 39368749437 on dev 53151b2b, pending. Scoped suiteui 39352972722 is still queued. main is still b3011ab9. No supervisor answers, and no new Belt-Slice-Done on #1514 or #1498. AS-flare waits on stage-edit #1514.
+2026-10-20T04:44:02Z	heartbeat	-	-	No green full or suiteui run yet: main b3011ab9, full CI 39368749437 pending, scoped suiteui 39352972722 queued; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T05:06:18Z	heartbeat	-	-	No green full or suiteui run yet: main b3011ab9, full CI 39368749437 pending, scoped suiteui 39352972722 queued; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T05:28:27Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39368749437 cancelled (superseded), 39373545059 on 6537a1a0 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T05:50:10Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39373545059 on 6537a1a0 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T06:19:39Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39373545059 cancelled (superseded), 39379088986 on 424b4a60 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T06:40:56Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39379088986 on 424b4a60 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T07:04:50Z	heartbeat	-	-	No green full or suiteui run yet: full CI 39379088986 pending, scoped suiteui 39352972722 queued; main b3011ab9; #1514 still lacks Belt-Slice-Done; no supervisor answers
+2026-10-20T10:05:17Z	resume	-	-	run act-1a158c2e32e-bl3z; Belt-Slice-Done AS-design on run 39401676163; AS-flare waits on stage-edit #1514
+2026-10-20T11:32:54Z	3	heartbeat	#1514	AS-flare still waits on stage-edit #1514 (open)
+2026-10-20T11:51:57Z	3	heartbeat	#1514	AS-flare still waits on stage-edit (no Belt-Slice-Done)
+2026-10-20T12:14:20Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T12:30:45Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T12:59:24Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T13:21:34Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T13:43:16Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T14:06:36Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T14:27:48Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T14:50:05Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T15:16:20Z	3	heartbeat	#1514	AS-flare still waits on stage-edit
+2026-10-20T15:42:00Z	3	heartbeat	-	AS-flare waits on stage-edit #1514
+2026-10-20T16:09:27Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, no change since 03:53Z)
+2026-10-20T16:31:17Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T16:53:22Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T17:14:36Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T17:35:50Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T17:57:00Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T18:19:02Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T18:41:10Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T19:03:12Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T19:24:43Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T19:46:33Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T20:09:37Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T20:30:57Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T20:52:44Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open, unchanged)
+2026-10-20T21:14:06Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open; its lead relaunched 21:03Z)
+2026-10-20T21:36:11Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open; its lead relaunched 21:03Z)
+2026-10-20T21:58:17Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open; its lead relaunched 21:03Z)
+2026-10-20T22:19:58Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open; its lead relaunched 21:03Z)
+2026-10-20T22:41:46Z	3	heartbeat	-	AS-flare waits on stage-edit #1514 (open; its lead relaunched 21:03Z)
+2026-10-21T05:25:03Z	2	wave-1 start	-	AS-flare building (slice/as-flare); contact sheet on #1935 after AS-flare done
+2026-10-21T06:44:37Z	3	wave1 PR open #3892	-	lane merges #3892, then green ci.yml on main -> Belt-Slice-Done
