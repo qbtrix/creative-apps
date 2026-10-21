@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-20T20:48Z	0	stage-start		run act-1a15b10caae-y18c, base dev 9781100b
 2026-10-20T20:48Z	0	stage-end	#3475	blocked at 0.4: suiteui tone-controls TC-a unmerged
 2026-10-20T23:48Z	0	check	#3475	run act-1a15b98bc49-4lk9: still blocked at 0.4, no ToneSettings on dev 2cc149f5
+2026-10-21T00:06Z	-	check	blocked	suiteui TC-a not on dev 07f754f7 (no ToneSettings)
