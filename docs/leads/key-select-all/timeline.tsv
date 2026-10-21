@@ -10,3 +10,4 @@ time	event
 2026-10-21T08:08Z	check	dev cfc1a3a0; #3850 and #3921 lane-eligible, queued behind batch-20261021075104 (#3809..#3838); #3499 open; flare findings 0
 2026-10-21T08:26:14Z	check	#3850 #3921 lane-eligible queued; #3499 open; findings 0; dev 733e8ef2
 2026-10-21T09:19Z	fix	#3921 fix round 1 started (CommandPathTests + conflict)
+2026-10-21T09:36Z	fix	#3921 fix round 1 pushed head 95a94d14
