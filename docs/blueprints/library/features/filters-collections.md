@@ -88,9 +88,9 @@ and tests only, except FC-10's drag and FC-15's file I/O.
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| FC-a | With no filter and no collection of yours Library behaves exactly as today, while the filter and collection state, the undo of a collection change, every catalog method, the filter bar, the sidebar's Collections section and every new menu item exist, each control disabled with "… isn't built yet (filters-collections)." | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | features cull, persist, thumbnails, import, status-and-layout, export |
+| FC-a | With no filter and no collection of yours Library behaves exactly as today, while the filter and collection state, the undo of a collection change, every catalog method, the filter bar, the sidebar's Collections section and every new menu item exist, each control disabled with "… isn't built yet (filters-collections)." | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | features cull, persist, thumbnails, import, status-and-layout, export; file-flow:LF-a (beta first) |
 | FC-b | The filter bar narrows any collection by flag, by rating at least or exactly N, and by hiding rejects, shows "N of M", and says so with Clear Filter when nothing matches. | FC-6, FC-7 | J13 | FC-a (FC-6, FC-7) |
-| FC-c | New Collection takes the selection, Photo > Add to Collection, Remove from Collection, rename and delete each record one undo step, and dragging the selection onto a sidebar row adds it. | FC-8, FC-9, FC-10 | J14 | FC-a (FC-8, FC-9, FC-10); S-L9 (FC-10) |
+| FC-c | New Collection takes the selection, Photo > Add to Collection, Remove from Collection, rename and delete each record one undo step, and dragging the selection onto a sidebar row adds it. | FC-8, FC-9, FC-10 | J14 | FC-a (FC-8, FC-9, FC-10); S-L9 (FC-10); file-flow:LF-a (FC-8, FC-9, FC-10) |
 | FC-d | New Smart Collection from Filter saves the filter as a collection whose count follows every rating, and while it is selected the filter bar edits its rules as one undo step each. | FC-11, FC-12 | J15 | FC-a (FC-11, FC-12); FC-b (FC-12) |
 | FC-e | Your collections, their rules, the filter and the selected collection survive a relaunch, and a damaged collections file is set aside with a notice, never overwritten. | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a (FC-13, FC-15); FC-c (FC-14, FC-16); FC-b, FC-d (FC-16) |
 
@@ -139,7 +139,7 @@ it; all steps F and L)
    1"). Press U. Shot `filter-empty`. Expect the grid with "No Matching
    Photos" and **Clear Filter**. Edit > Undo twice ("Undo Clear Flag"):
    two cells again.
-7. Click Favorites. Expect the filter still on: "Picked, Rejects hidden; 2
+7. Click Picks. Expect the filter still on: "Picked, Rejects hidden; 2
    of 2".
 8. View > Filter > Clear Filter; All Photos. Expect "All photos; 24 of 24".
    View > Filter > Hide Rejected. Expect "Rejects hidden; 23 of 24".
@@ -363,7 +363,7 @@ so the controls light up when a slice sets its `unavailable` to nil, with no
 further app edit. `Platform/CollectionsStore.swift` is a stub that throws
 "The collections file isn't built yet (filters-collections)." FC-5 mounts
 it all: `LibraryWindow.swift` switches to the `sections:` init (Library:
-All Photos, Favorites, Recently Added; Collections: yours, with New Collection
+All Photos, Picks, Recently Added; Collections: yours, with New Collection
 as the section's `addAction` and `onRename`), puts the bar above
 `LibraryBrowser`, publishes `\.libraryFilters`, the `library.collections`
 element and the hooks; `LibraryCommands.swift` adds the items below;
@@ -542,7 +542,7 @@ with the `swift test --filter` regex of its test.
 | id | test | fails when | mutations |
 |---|---|---|---|
 | FC-1 | `LibraryFilterTests`: `.all` matches every `shoot` photo and its summary is "All photos"; `atLeast(3)` admits 3, 4, 5 and not 2; `exactly(0)` admits only unrated; `[.pick]` keeps picks; `[.pick, .none]` reads "Picked or Unflagged"; `hidesRejected` drops rejects whatever `flags` says; labels `[.red, .blue]` keep only those and read "Red or Blue"; a three-part summary reads "Picked, At least 3 stars, Rejects hidden"; every `RatingRule.title` | a rule admits the wrong photo or a summary's words drift | `>=` → `>` in `atLeast`; `hidesRejected` term dropped; empty `labels` treated as "no label" |
-| FC-2 | `LibraryCollectionsSeamTests` (MJ1): with `.all` and none of yours, `order`, counts and `==` equal today's on `shoot` and `samples`; two catalogs differing only in `filter` or `userCollections` are not equal; a filter applies in All Photos, Favorites and Recently Added; under a filter (name sort) a reject leaves `order`; a `user-1` row appears with its count, shows its photos, and falls back to All Photos when removed; a filter that hides the loupe photo returns to the grid; every stub's help is its `unavailable` text | the bar's filter skips a collection, `order` goes stale under a filter, or counts include filtered-out photos | `editCanReorder` without the filter term; `recount` omits your collections; `==` without `filter` |
+| FC-2 | `LibraryCollectionsSeamTests` (MJ1): with `.all` and none of yours, `order`, counts and `==` equal today's on `shoot` and `samples`; two catalogs differing only in `filter` or `userCollections` are not equal; a filter applies in All Photos, Picks and Recently Added; under a filter (name sort) a reject leaves `order`; a `user-1` row appears with its count, shows its photos, and falls back to All Photos when removed; a filter that hides the loupe photo returns to the grid; every stub's help is its `unavailable` text | the bar's filter skips a collection, `order` goes stale under a filter, or counts include filtered-out photos | `editCanReorder` without the filter term; `recount` omits your collections; `==` without `filter` |
 | FC-3 | `LibraryCollectionsHistoryTests`: a collections edit is one named step and a no-op records none; undo puts the list back and redo the new one; undo of a New Collection that was selected falls back to All Photos; a photo step and a collections step undo in order; undo never moves the loupe; `saveRevision` is untouched by a collections-only step | a collection change can't be undone, or undo restores the wrong list | undo skips `collectionsBefore`; redo applies `before`; no-op guard dropped |
 | FC-4 | builds on the lane's macOS build-only run; every closure is built as `enabled(help == nil)`, so while FC-2's stubs answer their `unavailable` text every one is nil (J11 in FC-5 checks it on screen) | a control is enabled with nothing behind it | – (macOS, no Model code) |
 | FC-5 | J0, J10, J11 pass: every new menu item and bar control is listed in `library.controls`, disabled, with "… isn't built yet (filters-collections)."; the sidebar shows the Library and Collections sections; existing Library snapshots redrawn and listed | a new control is dead or unnamed, or an existing journey breaks | – (macOS, no Model code) |

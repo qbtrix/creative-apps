@@ -2,10 +2,10 @@
   "title": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings",
   "wave": 3,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1527",
   "covers": "#32, #423",
-  "waits_on": "spine, persist, thumbnails, loupe-viewport; the spine follow-up (inspector pass-through) for DV-9; a creative-core issue (vibrance, saturation) and its bump for DV-12; #782 for P3",
+  "waits_on": "spine, persist, thumbnails, loupe-viewport; the spine follow-up (inspector pass-through) for DV-9; creative-core vibrance and saturation and their bump for DV-12 (gap #3425); #782 for P3 (gap #3286)",
   "issues": [
     32,
     423
@@ -36,8 +36,8 @@
     "UITests/LibraryJourneyTests+PerfDevelop.swift",
     "docs/blueprints/library.md"
   ],
-  "core": "to file: CoreRaster PixelBuffer.saturation(_:) and vibrance(_:) (DV-12 waits on it and its bump; packet header has the spec). Only if QB-LIB-6's Model half misses: the fused develop pass, now over every slider, the curve and levels. Whites, Blacks, Curve and Levels use the existing levels(...) and curves(...)",
-  "suiteui": "to file: S-L1 HistogramView, S-L6 InspectorSliderRow row reset (interim: a text readout and a row context menu); reuses ToneCurveEditor; #782 for P3",
+  "core": "CoreRaster PixelBuffer.saturation(_:) and vibrance(_:), not yet in core; DV-12 waits on them and their bump (gap #3425), and until then Vibrance and Saturation are disabled with the reason. Only if QB-LIB-6's Model half misses: the fused develop pass, now over every slider, the curve and levels. Whites, Blacks, Curve and Levels use the existing levels(...) and curves(...)",
+  "suiteui": "S-L1 HistogramView (#2984) and S-L6 InspectorSliderRow row reset (#2985), both open (shipped interim: a text readout and a row context menu); reuses ToneCurveEditor; #782 for P3",
   "depends": [
     "spine",
     "persist",

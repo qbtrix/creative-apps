@@ -50,7 +50,9 @@
 // would be thrown away while its undo step stayed (#542).
 //
 // The nudge step and its run key are SuiteKernel's `Nudge`, and the marquee's box
-// and the selection it leaves are its `Marquee` (adopt-kernel-selection AS-design). Linux-safe.
+// and the selection it leaves are its `Marquee` (adopt-kernel-selection AS-design). A press on
+// a full-size frame finds its handle with the kernel's `HandleHit` (adopt-kernel-transform
+// AT-d1). Linux-safe.
 import SuiteKernel
 
 /// A pointer gesture in progress, from its first `drag` to `endDrag`.
@@ -113,12 +115,17 @@ extension DesignWorkspace {
         return handle(on: box, at: point)
     }
 
+    /// A full-size frame asks the kernel's `HandleHit` (its inside and rotate knob are no Design
+    /// handle); a compact one tries its corners where they show, outside it.
     private func handle(on frame: DesignRect, at point: DesignPoint) -> DesignHandle? {
+        guard frame.isCompact(handleSize: handleTolerance) else {
+            let hit = HandleHit.handle(at: Point(x: point.x, y: point.y), in: frame.kernelRect, tolerance: handleTolerance)
+            return hit.flatMap(DesignHandle.init)
+        }
         let inside = point.x > frame.x && point.x < frame.maxX && point.y > frame.y && point.y < frame.maxY
-        if inside, frame.isCompact(handleSize: handleTolerance) { return nil }
+        if inside { return nil }
         let shown = frame.handles(size: handleTolerance)
-        let order = DesignHandle.allCases.filter(\.isCorner) + DesignHandle.allCases.filter { !$0.isCorner }
-        let hits = order.compactMap { handle -> (handle: DesignHandle, distance: Double)? in
+        let hits = DesignHandle.allCases.compactMap { handle -> (handle: DesignHandle, distance: Double)? in
             guard let at = shown[handle] else { return nil }
             let distance = Swift.max((at.x - point.x).magnitude, (at.y - point.y).magnitude)
             return distance <= handleTolerance ? (handle, distance) : nil
@@ -425,7 +432,7 @@ extension DesignWorkspace {
             if let kind = tool.nodeKind { route = .draw(kind) }
         case .text:
             route = .text
-        case .pen:
+        case .pen, .eyedropper:
             break
         }
         var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)

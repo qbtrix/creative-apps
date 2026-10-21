@@ -104,7 +104,16 @@
         "Sources/LibraryApp/LibraryCommands.swift",
         "Sources/LibraryApp/LibraryBrowser.swift"
       ],
-      "ui": true
+      "ui": true,
+      "waits": {
+        "file-flow:LF-a": [
+          "FC-1",
+          "FC-2",
+          "FC-3",
+          "FC-4",
+          "FC-5"
+        ]
+      }
     },
     {
       "id": "FC-b",
@@ -154,6 +163,11 @@
       ],
       "waits": {
         "FC-a": [
+          "FC-8",
+          "FC-9",
+          "FC-10"
+        ],
+        "file-flow:LF-a": [
           "FC-8",
           "FC-9",
           "FC-10"

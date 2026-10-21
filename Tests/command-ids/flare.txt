@@ -57,6 +57,11 @@ machine.set-initial
 machine.update-input
 machine.update-state
 machine.update-transition
+mask.add
+mask.move
+mask.remove
+mask.set
+mask.set-matte
 object.bring-forward
 object.send-backward
 scene.add
