@@ -1,41 +1,64 @@
-// FlarePen+Kernel.swift (pen-paths FP-1): the Pen's ShapeDraft as SuiteKernel's PenDraft, read and written as the shape
-// LiveShapes draws, and `addPath` as one "Add Path" through the shapes service. FP-5 moves the Pen onto PenRules.
+// FlarePen+Kernel.swift (pen-paths FP-1, FP-5): the Pen on SuiteKernel's PenRules. A pen ShapeDraft stores a PenDraft
+// and draws it as the shape (with a trailing move for a lone anchor's out-handle); LiveShapes and FakeShapes both draft
+// and check a commit through here. Return finishes an open path (`finishPath`), and `addPath` adds one "Add Path".
 import FlareCore
 import SuiteKernel
 
 extension ShapeDraft {
-    /// The pen draft as one contour at the stage scale; nil for another tool. Setting nil leaves the draft alone.
+    /// The pen draft as one contour at the stage scale; nil for another tool. Setting it redraws the shape; setting nil
+    /// leaves the draft alone.
     public var pen: PenDraft? {
-        get {
-            guard tool == .pen else { return nil }
-            let contours = shape.path?.contours ?? []
-            var contour = contours.first ?? VectorContour(anchors: [], closed: isClosed)
-            if anchors.count == 1, contours.count == 2, let handle = contours.last?.anchors.first?.point,
-               contour.anchors.indices.contains(0) {
-                contour.anchors[0].handleOut = handle
-            }
-            for index in contour.anchors.indices where smoothAnchors.contains(index) {
-                let anchor = contour.anchors[index]
-                if anchor.handleOut == nil, let handle = anchor.handleIn {
-                    contour.anchors[index].handleOut = Point(x: 2 * anchor.point.x - handle.x, y: 2 * anchor.point.y - handle.y)
-                }
-            }
-            contour.closed = isClosed
-            return PenDraft(contour: contour, scale: stageScale)
-        }
+        get { tool == .pen ? penStore : nil }
         set {
             guard let newValue else { return }
-            let contour = newValue.contour
-            anchors = contour.anchors.map(\.point)
-            smoothAnchors = Set(contour.anchors.indices.filter {
-                contour.anchors[$0].handleOut != nil || contour.anchors[$0].handleIn != nil
-            })
-            isClosed = contour.closed
-            stageScale = newValue.scale
-            var path = VectorPath(contours: [contour])
-            if contour.anchors.count == 1, let handle = contour.anchors.first?.handleOut { path.elements.append(.move(to: handle)) }
+            penStore = newValue
+            var path = VectorPath(contours: [newValue.contour])
+            if newValue.contour.anchors.count == 1, let handle = newValue.contour.anchors.first?.handleOut {
+                path.elements.append(.move(to: handle))
+            }
             shape = Self.penShape(points: anchors, closed: isClosed, path: path)
         }
+    }
+
+    /// `previous` after a pen press at `start` dragged to `end`: it closes on the first anchor when PenRules says so,
+    /// else adds an anchor (smooth for a drag). A closed or non-pen `previous` starts a new draft at its stage scale.
+    static func penDraft(at start: Point, to end: Point, previous: ShapeDraft?) -> ShapeDraft {
+        let scale = previous?.stageScale ?? 1
+        var base = previous?.pen.flatMap { $0.contour.closed ? nil : $0 }
+        base?.scale = scale
+        var draft = ShapeDraft(tool: .pen, shape: FlareShape(points: []), stageScale: scale)
+        if let base, PenRules.closes(start, base) {
+            draft.pen = PenRules.closed(base)
+        } else {
+            draft.pen = PenRules.add(start, handleOut: end, to: base, scale: scale)
+        }
+        return draft
+    }
+
+    /// Throws `CommandError.invalidDocument(PenRules.degenerate)` for a pen draft PenRules can't make a path of.
+    func checkPenPath() throws {
+        guard let pen else { return }
+        do { _ = try PenRules.path(pen) } catch { throw CommandError.invalidDocument(PenRules.degenerate) }
+    }
+
+    /// The contour `init` stores: `shape`'s first contour when it runs through `anchors` (a lone anchor's trailing move
+    /// as its out-handle), else corner anchors. A smooth anchor with only an in-handle gets it mirrored out.
+    static func contour(of shape: FlareShape, anchors: [Point], smooth: Set<Int>, closed: Bool) -> VectorContour {
+        let contours = shape.path?.contours ?? []
+        var contour = contours.first.flatMap { $0.anchors.map(\.point) == anchors ? $0 : nil }
+            ?? VectorContour(anchors: anchors.map { VectorAnchor(point: $0) }, closed: closed)
+        if anchors.count == 1, contours.count == 2, let handle = contours.last?.anchors.first?.point {
+            contour.anchors[0].handleOut = handle
+        }
+        for index in contour.anchors.indices where smooth.contains(index) {
+            let anchor = contour.anchors[index]
+            if anchor.handleOut == nil, let handle = anchor.handleIn {
+                // TODO(#4012): call PenRules.mirror(_:through:) once SuiteKernel makes it public; it is internal today.
+                contour.anchors[index].handleOut = Point(x: 2 * anchor.point.x - handle.x, y: 2 * anchor.point.y - handle.y)
+            }
+        }
+        contour.closed = closed
+        return contour
     }
 
     /// A pen path's shape as LiveShapes draws it: clear fill, the default stroke.
@@ -45,6 +68,26 @@ extension ShapeDraft {
 }
 
 extension FlareWorkspace {
+    /// Anchors an open pen draft needs before Finish can end it.
+    public static let minimumFinishAnchors = 2
+
+    /// Why Finish Path can't run, or nil when an open pen draft has `minimumFinishAnchors` anchors.
+    public var finishPathHelp: String? {
+        guard let draft, draft.tool == .pen, !draft.isClosed else { return "Click with the Pen to start a path." }
+        guard draft.anchors.count >= Self.minimumFinishAnchors else { return "Click a second point to finish the path." }
+        return lockedHelp(.pen)
+    }
+
+    /// Commits the open pen draft as it stands, one "Add Path"; a refused commit keeps the draft.
+    public mutating func finishPath() {
+        guard let pending = draft, pending.tool == .pen, !pending.isClosed,
+              pending.anchors.count >= Self.minimumFinishAnchors else { return }
+        if let reason = lockedHelp(.pen) { return refuse(.refused(reason)) }
+        cancelDrag()
+        commit(pending)
+        if layerError != nil { draft = pending }
+    }
+
     /// `draft` when it is a pen draft. Setting nil drops a pen draft; a value starts or replaces one.
     public var penDraft: PenDraft? {
         get { draft?.pen }
