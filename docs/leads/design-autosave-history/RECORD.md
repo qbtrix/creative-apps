@@ -2,9 +2,9 @@
 
 Issue: #3434 · Packet: docs/blueprints/design/features/autosave-history.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z
-Stage: 5 done check (DA-a, DA-m, DA-u Slice-Done; DA-z #4102 merged as e4f3f33f at 16:44Z)
+Stage: done (Belt-Slice-Done DA-a, DA-m, DA-u, DA-z; Belt-Contact-Sheet posted on #3434)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: Belt-Slice-Done DA-z once a dev CI run containing e4f3f33f has a green Linux job; then Belt-Contact-Sheet on #3434 and stop
+Next: none. Lead stopped; journeys verification belongs to the beta-hardening lane
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: Belt-Slice-Done DA-z once a dev CI run containing e4f3f33f has a green Lin
 | DA-a | adapter stubs; History panel and autosave hooks on the window; View > Show History | DA-1, DA-2 | MJ-DA | shell-parity (built) | yes | 0 | done | 39520241285 | – |
 | DA-u | toolbar History button; panel follows undo and jumps; snapshots and budget | DA-3, DA-4 | J-DA | DA-a | yes | 0 | #3726 open (head f2d0c703, base DA-a branch, Mutate 2/2) | – | – |
 | DA-m | jump records no step; recovery bytes reopen dirty; history commands in the catalog | DA-5, DA-6 | MJ-DA | DA-a; gradient-fill:DG-m (DA-6) | no | 0 | DA-5 #3710 open (head c2d68a99, base DA-a branch, Mutate 3/3); DA-6 waits DG-m | – | – |
-| DA-z | journey jumps and recovers on live; built | DA-7, DA-8 | J-DA | DA-u, DA-m; suiteui autosave-history AH-z (AH-8 #3629) | yes | 0 | merged #4102 (e4f3f33f), Mutate 3/3 + 4/4; DA-6 folded in | – | – |
+| DA-z | journey jumps and recovers on live; built | DA-7, DA-8 | J-DA | DA-u, DA-m; suiteui autosave-history AH-z (AH-8 #3629) | yes | 0 | done (#4102 e4f3f33f, Mutate 3/3 + 4/4; DA-6 folded in) | 39640348697 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -88,3 +88,4 @@ Next: Belt-Slice-Done DA-z once a dev CI run containing e4f3f33f has a green Lin
 - 16:47Z: stage. #4102 merged (e4f3f33f, 16:44Z) with feature-done. Waiting for a dev CI run containing it.
 - 16:56Z: check. Only dev run containing e4f3f33f is scoped photo 39638803228 (no Linux job). Waiting for a Linux check or full run on dev.
 - 17:19Z: check. Linux check 39640348697 (4d4ebb24, contains e4f3f33f) in progress; full CI 39640252451 and scoped design 39640337585 queued.
+- 17:20Z: done. Linux check 39640348697 green on 4d4ebb24 (contains e4f3f33f). Posted Belt-Slice-Done: DA-z and Belt-Contact-Sheet on #3434. Lead stops.
