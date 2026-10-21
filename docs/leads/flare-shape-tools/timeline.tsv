@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-21T05:39:14Z	FS-a done: Belt-Slice-Done run 39538921285; #3850 in lane; FS-u to re-open after #3850 (needs-split)
 2026-10-21T06:04Z	3	heartbeat	#3850	FS-5 still queued in the lane; FS-u re-opens after it merges
 2026-10-21T06:23Z	3	heartbeat	#3850	FS-5 still queued in the lane; scoped flare run 39554153274 queued at 0865916d
+2026-10-21T06:40Z	check	dev 0865916d; #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
