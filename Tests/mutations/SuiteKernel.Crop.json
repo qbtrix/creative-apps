@@ -1,0 +1,30 @@
+[
+  {
+    "label": "orientationWins: the chosen orientation is ignored and the ratio follows the photo's shape",
+    "file": "Sources/SuiteKernel/Crop/Crop.swift",
+    "find": "let stands = orientation ?? (size.height > size.width ? CropOrientation.portrait : .landscape)",
+    "replace": "let stands = size.height > size.width ? CropOrientation.portrait : (orientation ?? .landscape)",
+    "tests": "CropRulesTests"
+  },
+  {
+    "label": "clampToEdge: a free handle drag runs past the bounds' edge",
+    "file": "Sources/SuiteKernel/Crop/Crop.swift",
+    "find": "w = max(min(w, roomX), least)",
+    "replace": "w = max(w, least)",
+    "tests": "CropRulesTests"
+  },
+  {
+    "label": "aspectHeldAtTheEdge: a held aspect is not shrunk to the room left below the frame",
+    "file": "Sources/SuiteKernel/Crop/Crop.swift",
+    "find": "if h > roomY { (w, h) = (roomY * k, roomY) }",
+    "replace": "if h > roomY { (w, h) = (w, roomY) }",
+    "tests": "CropRulesTests"
+  },
+  {
+    "label": "swapKeepsShare: swap fills the largest frame instead of the frame's share of the bounds",
+    "file": "Sources/SuiteKernel/Crop/Crop.swift",
+    "find": "scale: min(share, 1), about: centre",
+    "replace": "scale: 1, about: centre",
+    "tests": "CropRulesTests"
+  }
+]
