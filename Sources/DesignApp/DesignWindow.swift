@@ -177,6 +177,7 @@ struct DesignWindow: View {
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
         case .fill(let intent): model.runFill(intent)
+        case .transform(let intent): model.runTransform(intent)
         case .align(let edge): model.alignLayer(edge)
         case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
