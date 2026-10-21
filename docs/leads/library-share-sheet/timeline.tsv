@@ -35,3 +35,5 @@ utc	stage	event	ref	note
 2026-10-21T10:18Z	fix	dispatch	SH-u	fixer on #3814: File > Share via catalog spec, strip footer, Belt-Lead to act-1a15df37b73-k199
 2026-10-21T11:30Z	fix	done	SH-u	#3814 head b0d656d0, Fast-Check pass, macOS build green, waiting on the lane batch
 2026-10-21T11:30Z	check	heartbeat	SH-m	LF-m (#4024) and BK-m (#3965) still open on dev ded2ca57
+2026-10-21T11:45Z	check	heartbeat	SH-u	#3814 open, still waiting on the lane batch (macOS build green); dev ded2ca57
+2026-10-21T11:45Z	check	heartbeat	SH-m	LF-m #4024 needs-rebase, BK-m #3965/#3967 open; still blocked
