@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T07:23Z	check	lane	#3857	clean, queued; DT-u/DT-m not opened
 2026-10-21T07:45Z	check	lane	#3857	not yet merged, lane landing a batch; DT-u/DT-m not opened
 2026-10-21T08:10Z	check	lane	#3857	DS-a open in lane; DT-u/DT-m not opened, DS-u/DS-m blocked
+2026-10-21T08:32Z	check	lane	#3857	DS-a Linux check queued; DT-u/DT-m not opened
