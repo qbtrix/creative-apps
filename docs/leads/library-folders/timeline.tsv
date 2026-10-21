@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-21T07:24:21Z	3	heartbeat	-	resumed after restart; wave 1: LF-5 #3938, FO-a #3939 open; LF-4 blocked; BK-a finishing
 2026-10-21T07:26:41Z	3	wave2-launch	-	FO-u, FO-4 builders and BK-a finisher started
 2026-10-21T07:47:52Z	3	heartbeat	-	PRs #3960 BK-a, #3961 FO-4, #3963 FO-u opened; wave 2 BK starts
+2026-10-21T09:07:08Z	3	heartbeat	-	resumed after container restart; #3939 and #3938 merged; restacking stacked PRs
