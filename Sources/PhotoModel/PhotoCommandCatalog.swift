@@ -3,6 +3,7 @@
 // the Model's menu reasons); run is the method the app calls. An edit's title is its undo step ("Rotate"), `menuTitle(_:)`
 // the menu's label ("Rotate 90° Clockwise"). Zoom is window state, so the view.zoom commands are no-ops. Linux-safe.
 import CoreRaster
+import FlareCore
 import SuiteKernel
 
 extension PhotoWorkspace {
@@ -14,6 +15,14 @@ extension PhotoWorkspace {
     public struct ImageParams: Codable, Sendable { public var name: String?; public var width, height: Int; public var rgba8: [UInt8] }
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
     public struct ExportParams: Codable, Sendable { public var format: String }
+    /// A rectangle in canvas pixels (select.rect).
+    public struct RectParams: Codable, Sendable { public var x, y, width, height: Int }
+    /// image.gradient's: "linear" or "radial", stops as sRGB 0...1, and the two points in canvas pixels.
+    public struct GradientParams: Codable, Sendable {
+        public struct Stop: Codable, Sendable { public var offset, r, g, b, a: Double }
+        public struct XY: Codable, Sendable { public var x, y: Double }
+        public var type: String; public var stops: [Stop]; public var from, to: XY
+    }
     public struct AdjustmentParams: Codable, Sendable { public var kind: String }
 
     /// The reasons menu items give that the Model has no help property for.
@@ -132,6 +141,16 @@ extension PhotoWorkspace {
         act("edit.fill-selection", "Fill", "Fills the selected pixels with the brush color.", .edit, menu(selectionHelp)) { $0.fillSelection() },
         act("select.all", "All", "Selects the whole image.", .view, gate { $0.canSelectAll ? nil : noImage }) { $0.selectAll() },
         act("select.deselect", "Deselect", "Drops the selection.", .view, menu { $0.canDeselect ? nil : "Nothing is selected." }) { $0.deselect() },
+        .typed("select.rect", title: "Select Rectangle", summary: "Selects a rectangle of the image, clipped to it.", kind: .view,
+               params: RectParams.self, schema: .object(["x": .integer("Left, in pixels."), "y": .integer("Top, in pixels."),
+                                                         "width": .integer("Width in pixels.", minimum: 1), "height": .integer("Height in pixels.", minimum: 1)],
+                                                        required: ["x", "y", "width", "height"]),
+               example: .object(["x": .number(0), "y": .number(0), "width": .number(8), "height": .number(6)]), availability: menu()) { w, p in
+            guard let rect = w.canvas.flatMap({ PixelRect(x: p.x, y: p.y, width: p.width, height: p.height).intersection($0.rect) }) else {
+                throw CatalogError.failed(id: "select.rect", message: "The rectangle is outside the image.")
+            }
+            w.setSelection(rect); return JSONValue.object([:])
+        },
     ]
     static let selectionHelp: @Sendable (PhotoWorkspace) -> String? = { $0.canEditSelection ? nil : "Select part of the selected layer first." }
 
@@ -146,7 +165,33 @@ extension PhotoWorkspace {
                example: .object(["degrees": .number(3), "cropToFit": .bool(false)]), availability: menu()) { w, p in
             try w.straighten(degrees: p.degrees, cropToFit: p.cropToFit); return JSONValue.object([:])
         },
+        .typed("image.gradient", title: "Gradient", summary: "Draws a dithered gradient into the selected layer, inside the selection.",
+               kind: .edit, params: GradientParams.self, schema: gradientSchema, example: gradientExample,
+               availability: menu { $0.selectedLayer == nil ? noLayer : nil }) { w, p in
+            try w.drawGradient(gradientFill(p), from: Mask.Point(x: p.from.x, y: p.from.y), to: Mask.Point(x: p.to.x, y: p.to.y))
+            return JSONValue.object([:])
+        },
     ]
+    static let gradientSchema: ParamSchema = {
+        let unit = ParamSchema.number("0...1.", minimum: 0, maximum: 1)
+        let xy = ParamSchema.object(["x": .number("In pixels."), "y": .number("In pixels.")], required: ["x", "y"])
+        let stop = ParamSchema.object(["offset": unit, "r": unit, "g": unit, "b": unit, "a": unit], required: ["offset", "r", "g", "b", "a"],
+                                      description: "A stop: where it sits and its sRGB color.")
+        return .object(["type": .string("The shape.", oneOf: ["linear", "radial"]), "stops": .array(of: stop, minItems: 2),
+                        "from": xy, "to": xy], required: ["type", "stops", "from", "to"])
+    }()
+    static let gradientExample = JSONValue.object([
+        "type": .string("linear"), "from": .object(["x": .number(0), "y": .number(0)]), "to": .object(["x": .number(0), "y": .number(11)]),
+        "stops": .array([0.0, 1.0].map { v in
+            .object(["offset": .number(v), "r": .number(v), "g": .number(v), "b": .number(v), "a": .number(1)])
+        }),
+    ])
+    /// The kernel `Fill` image.gradient's params describe, its stops in offset order.
+    static func gradientFill(_ p: GradientParams) -> Fill {
+        let stops = p.stops.sorted { $0.offset < $1.offset }.map { GradientStop(offset: $0.offset, color: Color(r: $0.r, g: $0.g, b: $0.b, a: $0.a)) }
+        return p.type == "radial" ? .radial(stops: stops, center: Point(x: 0, y: 0), radius: 1)
+            : .linear(stops: stops, start: Point(x: 0, y: 0), end: Point(x: 1, y: 0))
+    }
 
     static let layerCommands: [CommandSpec<PhotoWorkspace>] = [
         act("layer.new", "New Layer", "Adds a transparent layer above the selected one.", .edit, menu()) { $0.addLayer() },

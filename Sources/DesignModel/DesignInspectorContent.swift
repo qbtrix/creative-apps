@@ -33,7 +33,7 @@ extension DesignNodeKind {
         switch self {
         case .group: nil
         case .text: "Text Color"
-        case .frame, .rectangle, .ellipse, .instance: "Fill"
+        case .frame, .rectangle, .ellipse, .instance, .shape: "Fill"
         }
     }
 }
