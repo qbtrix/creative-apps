@@ -7,7 +7,8 @@
 // (−360...360 °), unless `showsTrim` is false, then Remove Stroke; with no stroke, Add Stroke alone. A scrub or a
 // run of colour picks shares one drag token until its end, so the host folds it into one undo step. A row that can't
 // act is disabled with its reason as its help: `help` for every row, "No stroke." without one, and `dashHelp` for the
-// dash and trim rows (StrokeRules.waitingCore until SS-7), also shown as a note under them. Identifiers are
+// dash and trim rows (StrokeRules.waitingCore until SS-7), also shown as a note under them, and `styleHelp` for Join
+// and Cap (an app whose stroke can't hold them yet), its note under the chips. Identifiers are
 // `suite.stroke.<row>` (StrokeEditorRow), with `join.<join>`, `cap.<cap>` and `dash.<preset>` on the chips. The
 // decisions live in StrokeEditorRules, which StrokeEditorTests drive; the view only lays the rows out.
 import Foundation
@@ -21,10 +22,11 @@ public struct StrokeEditor: View {
     /// The open gesture's drag token; nil between gestures.
     @State private var drag: String?
 
-    /// `showsTrim: false` hides the trim rows (Design); `dashHelp` disables the dash and trim rows with it.
-    public init(stroke: VectorStroke?, help: String?, dashHelp: String?, showsTrim: Bool = true,
+    /// `showsTrim: false` hides the trim rows (Design); `dashHelp` disables the dash and trim rows with it, and
+    /// `styleHelp` the Join and Cap chips.
+    public init(stroke: VectorStroke?, help: String?, dashHelp: String?, styleHelp: String? = nil, showsTrim: Bool = true,
                 onIntent: @escaping @MainActor (StrokeIntent) -> Void) {
-        rules = StrokeEditorRules(stroke: stroke, help: help, dashHelp: dashHelp, showsTrim: showsTrim)
+        rules = StrokeEditorRules(stroke: stroke, help: help, dashHelp: dashHelp, showsTrim: showsTrim, styleHelp: styleHelp)
         self.onIntent = onIntent
     }
 
@@ -48,6 +50,7 @@ public struct StrokeEditor: View {
                     send(StrokeCap(rawValue: $0).flatMap(rules.cap))
                 }
             }
+            if rows.contains(.cap), let note = rules.styleNote { InspectorNote(note) }
             if rows.contains(.dash) {
                 chips(.dash, options: DashPreset.allCases.map { option($0.rawValue, "dash") }, selected: rules.preset?.rawValue) {
                     send(DashPreset(rawValue: $0).flatMap(rules.dash))
@@ -144,6 +147,8 @@ struct StrokeEditorRules: Sendable {
     let help: String?
     let dashHelp: String?
     let showsTrim: Bool
+    /// Why Join and Cap can't act, after `help` and "No stroke.".
+    var styleHelp: String? = nil
 
     nonisolated static let noStroke = "No stroke."
 
@@ -156,13 +161,18 @@ struct StrokeEditorRules: Sendable {
         return rows + [.remove]
     }
 
-    /// Why `row` can't act: `help`, then "No stroke.", then `dashHelp` for the dash and trim rows; nil when it can.
+    /// Why `row` can't act: `help`, then "No stroke.", then `dashHelp` for the dash and trim rows and `styleHelp` for
+    /// Join and Cap; nil when it can.
     func reason(_ row: StrokeEditorRow) -> String? {
         if let help { return help }
         if row == .add { return stroke == nil ? nil : "The layer already has a stroke." }
         if stroke == nil { return Self.noStroke }
+        if row == .join || row == .cap { return styleHelp }
         return row.isDashOrTrim ? dashHelp : nil
     }
+
+    /// The note under Join and Cap: `styleHelp` once the rows are up and `help` says nothing.
+    var styleNote: String? { stroke != nil && help == nil ? styleHelp : nil }
 
     var preset: DashPreset? { stroke.map(StrokeRules.preset(of:)) }
 

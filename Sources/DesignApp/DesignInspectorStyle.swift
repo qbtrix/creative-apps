@@ -3,7 +3,8 @@
 // with its reason on a kind with no corners), and Stroke (SuiteUI's
 // StrokeEditor alone on the Model's `selectedStroke`, no trim rows: its Add
 // Stroke, Width and Remove Stroke are the only ones, #3864; each intent runs
-// through `strokeChange`, a scrub's samples preview and its run lands as one
+// through `strokeChange`, Join and Cap off with `strokeStyleHelp` until it
+// takes them, #3865; a scrub's samples preview and its run lands as one
 // step at mouse-up, or once the keys rest when no button is down), plus the
 // X, Y, W and H fields the Frame section shows. A scrub never writes the
 // workspace per value: each value previews on the window's live box
@@ -130,7 +131,8 @@ struct DesignInspectorStyle: View {
     /// SuiteUI's stroke editor on the primary layer's stroke (no trim in Design), its rows the section's only
     /// controls (#3864), each intent sent through the Model.
     private func strokeRows(_ shown: DesignWorkspace, send: DesignStyleSend) -> some View {
-        StrokeEditor(stroke: shown.selectedStroke, help: model.strokeHelp, dashHelp: model.strokeDashHelp, showsTrim: false) {
+        StrokeEditor(stroke: shown.selectedStroke, help: model.strokeHelp, dashHelp: model.strokeDashHelp,
+                     styleHelp: model.strokeStyleHelp, showsTrim: false) {
             stroke($0, shown: shown, send: send)
         }
         .simultaneousGesture(
