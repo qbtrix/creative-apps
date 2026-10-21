@@ -12,3 +12,4 @@ time	kind	note
 2026-10-20T22:43:51Z	slice	done	DG-a	Belt-Slice-Done posted; dev Linux 39502742421 green with b17264bf; critics wait on a scoped: design run
 2026-10-20T22:43:51Z	check	heartbeat	#3677	DG-u/DG-m/DG-z wait on SuiteUI GF-2..GF-7
 2026-10-21T00:05:02Z	3	check	DG-a	done; critics wait on scoped design run; DG-u/m/z blocked on #3677
+2026-10-21T08:46:56Z	3	wave	DG-u	run act-1a15da1b26c-9qo6 resumes; GF-3 merged, DG-u starts
