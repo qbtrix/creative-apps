@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-21T13:21Z	PD-a	heartbeat	#3759	supervisor-queued
 2026-10-21T13:44Z	PD-a	wait	#3759	supervisor-queued (Package.swift)
 2026-10-21T14:48Z	PD-a	wait	#3759	still open, supervisor-queued (Package.swift)
+2026-10-21T15:11Z	PD-a	wait	#3759	still open, supervisor-queued
