@@ -2,7 +2,7 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:16:13Z
-Stage: 3 wave 2 (DY-a merged 23:24Z as 6f9c8928; DY-u PR #3816 at 6ec9cf44)
+Stage: 3 wave 2 (DY-a merged 23:24Z as 6f9c8928; DY-u PR #3816 at 560cc535)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
 Next: lane on #3816 (DY-u); critics on DY-a/DY-u once a scoped design run on dev shows screens (dev full runs cancelled since 21:10); DY-m waits transform:DT-m.
 
