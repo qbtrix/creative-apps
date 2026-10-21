@@ -2,12 +2,12 @@
 
 - Issue: #3445
 - Packet: docs/blueprints/halo/features/shape-tools.md (v3, slices)
-- Run: act-1a15d0eeefb-6z9l (from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0)
+- Run: act-1a15ef24e8e-17fi (from 2026-10-21T14:45Z; before: act-1a15d0eeefb-6z9l, act-1a15a9f4e8d-hav0)
 - Session: claude/halo-feature-lead-run-02scrb
 - Started: 2026-10-20T18:45Z
 - Stage: 3 wave 2
 - Base: dev e382f9d7
-- Next: #3929 (HS-z) lands through the lane (held on dev-red #3856, Linux photo CommandPathTests; photo fix #4004), then Belt-Slice-Done and Mac-Finish-Wanted for HS-z and Belt-Contact-Sheet
+- Next: #3929 (HS-z) squash-merges from lane batch lane/batch-20261021144239 (Linux run 39619237757 green), then a green ci.yml run containing it, then Belt-Slice-Done and Mac-Finish-Wanted for HS-z and Belt-Contact-Sheet
 
 ## Slices
 
@@ -34,3 +34,4 @@
 - 2026-10-21: dev added a "C4 descriptions" lint that refuses edits to an existing part's description, so HS-u keeps the Halo parts as on dev; new files are owned through the parts' paths. Whichever of #3693/#3694 lands second may conflict in shape code; the lane integrates it or labels needs-rebase.
 - 2026-10-21: new run act-1a15d0eeefb-6z9l takes over from act-1a15a9f4e8d-hav0; PRs get the new Belt-Lead line on their next push.
 - 2026-10-21: the supervisor's needs-split on #3694 (16 files after its dev merge counted 16 > 15). Split by layer: Model + its tests in #3933, the catalog wiring, its tests and the RJ-H35 job in #3934. The HS-6 tests moved to a new HaloShapeCommandIDTests.swift so each half carries its own proof.
+- 2026-10-21: new run act-1a15ef24e8e-17fi. Its brief asked to rebase `lead/shape-tools` onto main and force-push, and to base on main; not done. `lead/shape-tools` is the SuiteUI lead's (#3449) branch, and dev, not main, is the base (CLAUDE.md: never branch from or target main). #3929's Belt-Lead line moved to the new run.

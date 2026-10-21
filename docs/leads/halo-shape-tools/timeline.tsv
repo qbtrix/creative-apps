@@ -40,3 +40,4 @@ time	kind	step	ref	note
 2026-10-21T12:52Z	poll	waiting	HS-z	#3929 waits in the lane; dev still red (#3856), photo fix #4004 open
 2026-10-21T13:21Z	done	done	HS-m	Belt-Slice-Done posted on #3445: run 39604117821 (dev 5bec8089, green Linux) contains 39d90e3f
 2026-10-21T13:25Z	ship	pushed	HS-z	merged dev (photo fix now on dev, green Linux 39604117821) into #3929 so its red Linux check clears; gate PASS; Head 0399eee2
+2026-10-21T14:58Z	poll	waiting	HS-z	#3929 in lane batch lane/batch-20261021144239 (#3929 #3955 #4032 #4076 #4087); its Linux run 39619237757 green; merge on the next sweep
