@@ -2,7 +2,7 @@
 
 Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
-Stage: 3 wave 2
+Stage: 4 wave 3
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: wave 2 open (#3954 KE-2, #3951 KE-3, #3955 KE-4). On merge: RJ-H13 job (scratchpad) as a follow-up, then wave 3 KE-5/KE-6 (KE-u). On needs-fix/needs-rebase: fix that PR.
 
@@ -18,11 +18,11 @@ Next: wave 2 open (#3954 KE-2, #3951 KE-3, #3955 KE-4). On merge: RJ-H13 job (sc
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | KE-1 | KE-a | 1 | HaloCommand cases, catalog ids, adapter stubs, HaloKeyEditingTests disabled | Sources/HaloModel/HaloCommand.swift, Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Sources/HaloModel/HaloKeyPick+Kernel.swift, Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift | HaloCommandTests, HaloCommandCatalogTests | #3813 | in lane (213 lines, 11 files, ci --changed PASS) |
-| KE-2 | KE-a | 2 | timeline clicks, Animation menu items, window wiring | Sources/HaloApp/HaloTimelineView.swift, Sources/HaloApp/HaloAnimationMenu.swift, Sources/HaloApp/HaloWindow+Easing.swift | HaloTimelineClickTests | - | built e0d17da91, PR after #3813 |
+| KE-2 | KE-a | 2 | timeline clicks, Animation menu items, window wiring | Sources/HaloApp/HaloTimelineView.swift, Sources/HaloApp/HaloAnimationMenu.swift, Sources/HaloApp/HaloWindow+Easing.swift | HaloTimelineClickTests | - | merged #3954 (12:15Z) |
 | KE-3 | KE-m | 2 | pick and select-all bodies | Sources/HaloModel/HaloKeyPick+Kernel.swift, Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloKeySelectionTests.swift | HaloKeySelectionTests | - | built 9a254bd5c (mutate 10/10, 6/6), PR after #3813 |
-| KE-4 | KE-m | 2 | moveKeys and endKeyDrag bodies, RJ move-keys | Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift, Tests/RealJobs/halo/move-keys/ | HaloKeyEditingTests, moveFiveThousandKeys | - | built 9d3544ed8; RJ-H13 held until KE-3 lands; PR after #3813 |
-| KE-5 | KE-u | 3 | snapshots, journey skipped | see packet | snapshots | - | planned |
-| KE-6 | KE-u | 3 | render budget | see packet | RenderBudgetHaloKeyEditingTests | - | planned |
+| KE-4 | KE-m | 2 | moveKeys and endKeyDrag bodies, RJ move-keys | Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift, Tests/RealJobs/halo/move-keys/ | HaloKeyEditingTests, moveFiveThousandKeys | - | PR #3955 head 2610048f3, mac build green, lane sweep pending; RJ-H13 follow-up after it lands |
+| KE-5 | KE-u | 3 | snapshots, journey skipped | see packet | snapshots | - | building (wave 3, started 12:33Z) |
+| KE-6 | KE-u | 3 | render budget | see packet | RenderBudgetHaloKeyEditingTests | - | building (wave 3, started 12:33Z) |
 | KE-7 | KE-z | 4 | journey live, stress perf | see packet | journey | - | planned |
 | KE-8 | KE-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/key-editing.wave.json | waves render --dry-run | - | planned |
 
@@ -36,6 +36,7 @@ Next: wave 2 open (#3954 KE-2, #3951 KE-3, #3955 KE-4). On merge: RJ-H13 job (sc
 - KE-a ships as two PRs (KE-1 model, KE-2 view): together they are about 480 lines, over the 400 cap.
 - Belt reads lead/key-editing; that branch was free, so the record is mirrored there at docs/leads/key-editing/ (lead/halo-key-editing keeps the same file).
 - Stacked slices open PRs only once their parent is on dev: a stacked PR against dev would count the parent's lines and break the 400 cap.
+- Wave 3 starts once KE-a is on dev, not waiting on KE-m: the packet says KE-u waits only on KE-a (rule 18).
 
 ## Open
 - none

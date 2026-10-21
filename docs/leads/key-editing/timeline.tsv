@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-21T11:36:40Z	3	heartbeat	-	KE-2 #3954 macOS build green, waiting lane sweep; KE-4 #3955 macOS build 39587441413 queued; wave 3 (KE-5/KE-6) after both merge
 2026-10-21T11:54:28Z	3	heartbeat	-	KE-2 #3954 macOS green, lane sweep pending (runner queue 25 deep); KE-4 #3955 macOS build still queued; wave 3 after both merge
 2026-10-21T12:15:02Z	3	heartbeat	-	waiting: #3954 KE-2 mac build green, lane sweep pending (Actions queue); #3955 KE-4 mac build 39587441413 in progress; wave 3 after both merge
+2026-10-21T12:32:46Z	4	wave 3	KE-5,KE-6	KE-2 merged #3954; KE-u started (KE-5 snapshots+journey, KE-6 render budget); #3955 KE-4 mac green, lane pending
