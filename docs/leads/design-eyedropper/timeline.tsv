@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-21T09:25Z	check	dev-ci	39573184415	Linux red: DY-a mutation anchors stale after DS-a #3857 reworded the case line; fix #3980 (placed-images lead) in lane; Slice-Done DY-a waits next green Linux
 2026-10-21T09:25Z	stage	critics	DY-u	critic-panel wf_3582a1a8-d8b on run 39558386118 + journeys 39564988409 (J-DY skips until DY-7)
 2026-10-21T09:29Z	check	critics	DY-u	panel wf_3582a1a8-d8b: 14 confirmed, 1 refuted, filed #3985-#3994; fix-batch round 1 wf_549fb0f0-0d5 on a6f45c18; >5 open findings, no new eyedropper wave
+2026-10-21T09:47Z	check	lane	#3980	anchor fix still open; dev Linux checks red (a6f45c18); Slice-Done DY-a waits; fix-batch round 1 wf_549fb0f0-0d5 running
