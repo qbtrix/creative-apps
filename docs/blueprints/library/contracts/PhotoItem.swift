@@ -55,7 +55,7 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
         self.availability = availability
     }
 
-    /// A pick: Favorites shows these.
+    /// A pick: Picks shows these.
     public var isFlagged: Bool { flag == .pick }
 
     /// The color as one opaque RGBA8 pixel, the thumbnail the grid draws.

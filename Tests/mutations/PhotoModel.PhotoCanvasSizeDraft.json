@@ -1,0 +1,6 @@
+[
+  {"label": "relativeIgnored: relative fields are read as absolute, so +400 makes a 400 px canvas", "file": "Sources/PhotoModel/PhotoCanvasSizeDraft.swift", "find": "relative ? CanvasSize(width: old.width + width, height: old.height + height) : CanvasSize(width: width, height: height)", "replace": "CanvasSize(width: width, height: height)", "tests": "PhotoCanvasSizeDraftTests"},
+  {"label": "cropNeedsBothSides: the crop note shows only when both sides shrink", "file": "Sources/PhotoModel/PhotoCanvasSizeDraft.swift", "find": "return size.width < old.width || size.height < old.height", "replace": "return size.width < old.width && size.height < old.height", "tests": "PhotoCanvasSizeDraftTests"},
+  {"label": "modeSwitchResets: switching to relative keeps the absolute number, so the size jumps", "file": "Sources/PhotoModel/PhotoCanvasSizeDraft.swift", "find": "next.width = on ? size.width - old.width : size.width", "replace": "next.width = size.width", "tests": "PhotoCanvasSizeDraftTests"},
+  {"label": "heightClampDropped: the height field takes any value, so a side can reach 0 or pass maxSide", "file": "Sources/PhotoModel/PhotoCanvasSizeDraft.swift", "find": "next.height = min(max(value, heightRange.lowerBound), heightRange.upperBound)", "replace": "next.height = value", "tests": "PhotoCanvasSizeDraftTests"}
+]

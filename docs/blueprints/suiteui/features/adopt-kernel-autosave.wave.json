@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "canonical duplicates audit 2026-10-20, top-15 #1 (autosave, recovery and support-folder stores); feature map S12's Flare and Library adopters; real job RJ-X44; pulls autosave-history's 'Adopted later' Flare adopt into the beta",
-  "waits_on": "suiteui autosave-history AH-a (the C4 part) and AH-z (the finished .autosaveRecovery, AH-8); cross-line hand-offs: photo/history-panel PH-z before AK-7, library spine before AK-6, design/halo autosave-history DA-z and HA-z before AK-9's journey runs all four editors",
+  "waits_on": "suiteui autosave-history AH-a (the C4 part) and AH-z (the finished .autosaveRecovery, AH-8); cross-line hand-offs: photo/history-panel PH-z before AK-7, library spine before AK-6, design/halo autosave-history DA-z and HA-z before AK-9's journey runs all four editors; shared-codecs SC-f before AK-8 (PhotoWindow+File.swift: the format registry goes first, 2026-10-21)",
   "depends": [
     "command-catalog",
     "adopt-command-catalog",
@@ -155,6 +155,9 @@
       "waits": {
         "AK-a": [
           "AK-7",
+          "AK-8"
+        ],
+        "shared-codecs:SC-f": [
           "AK-8"
         ]
       },

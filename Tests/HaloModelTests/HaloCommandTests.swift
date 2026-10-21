@@ -4,6 +4,7 @@
 // test here pins an unbuilt command off, so a feature that turns its area on
 // never edits this file (its own test asserts its commands). Linux and macOS.
 @testable import HaloModel
+import SuiteKernel
 import Testing
 
 /// `name` loaded on `services`, the first composition selected, no layer.
@@ -18,6 +19,9 @@ let stubIssues: [HaloCommandArea: Set<String>] = [
     .playback: ["37"], .keys: ["38"], .layers: ["770"], .history: ["208"], .files: ["209"], .easing: ["428"],
     .render: ["451", "429"], .text: ["430"],
 ]
+
+/// The stubs a feature packet's contract slice ships, named by task (key-editing KE-1).
+let stubTasks: [HaloCommandArea: Set<String>] = [.easing: ["Not built yet (KE-4)."]]
 
 /// Commands that work today and answer from state only.
 let shippedCommands: [HaloCommand] = [
@@ -36,7 +40,7 @@ func everyCommandActsOrSaysWhy(services: HaloServices) {
         for command in HaloCommand.allCases {
             let help = state.unavailableHelp(for: command)
             #expect(help.map { !$0.isEmpty } ?? true, "\(command) is disabled with no help")
-            guard let help, help.hasPrefix("Not built yet") else { continue }
+            guard let help, help.hasPrefix("Not built yet"), stubTasks[command.area]?.contains(help) != true else { continue }
             let issue = help.dropFirst("Not built yet (#".count).dropLast(2)
             #expect(help == "Not built yet (#\(issue)).", "\(command): \(help)")
             #expect(stubIssues[command.area]?.contains(String(issue)) == true, "\(command) names #\(issue)")
@@ -46,7 +50,7 @@ func everyCommandActsOrSaysWhy(services: HaloServices) {
 
 @Test func allCasesListsEachCaseOnceInEveryArea() {
     #expect(Set(HaloCommand.allCases).count == HaloCommand.allCases.count)
-    #expect(HaloCommand.allCases.count == 58)
+    #expect(HaloCommand.allCases.count == 62)
     #expect(Set(HaloCommand.allCases.map(\.area)) == Set(HaloCommandArea.allCases))
     #expect(HaloCommand.allCases.allSatisfy { !$0.title.isEmpty })
 }
@@ -83,4 +87,30 @@ func everyCommandActsOrSaysWhy(services: HaloServices) {
     #expect(project.title(for: .undo) == "Undo New Layer")
     #expect(project.title(for: .newLayer(.text)) == "Text")
     #expect(project.title(for: .openRecent("/tmp/Bounce.halo")) == "Bounce.halo")
+}
+
+/// Key editing's contract (KE-1): the four cases sit in the easing area, a
+/// pick acts as a lane click does, Select All Keys acts (KE-3), a move waits on KE-4.
+@Test func keyEditingCasesAreInTheEasingArea() throws {
+    let ball = "comp-1-layer-2"
+    let cases: [HaloCommand] = [
+        .pickLaneKeys(layerID: ball, frame: 0, mode: .replace), .selectAllKeys, .moveKeys(by: 6, dragStart: 0), .endKeyDrag,
+    ]
+    #expect(cases.allSatisfy { HaloCommand.allCases.contains($0) && $0.area == .easing })
+    #expect(cases.map(\.title) == ["Select Keys", "Select All Keys", "Move Keyframes", "End Key Drag"])
+    var project = commandProject("keyed", .fake)
+    #expect(project.unavailableHelp(for: .pickLaneKeys(layerID: ball, frame: nil, mode: .toggle)) == nil)
+    #expect(project.unavailableHelp(for: .selectAllKeys) == nil)
+    #expect(project.unavailableHelp(for: .moveKeys(by: 6, dragStart: 0)) == "Not built yet (KE-4).")
+    #expect(project.selectAllKeysHelp == nil)
+    #expect(project.moveKeysHelp == "Not built yet (KE-4).")
+    project.pickLaneKeys(layerID: ball, frame: 0, mode: .replace)
+    #expect(project.selectedLayerID == ball)
+    #expect(project.pickedFrames(of: ball) == [0])
+    project.pickLaneKeys(layerID: ball, frame: 24, mode: .extend)
+    #expect(project.pickedFrames(of: ball) == [0, 24])
+    #expect(project.pickedFrames(of: "comp-1-layer-1").isEmpty)
+    project.pickLaneKeys(layerID: ball, frame: nil, mode: .replace)
+    #expect(project.pickedFrames(of: ball).isEmpty)
+    #expect(project.history.undo.isEmpty)
 }

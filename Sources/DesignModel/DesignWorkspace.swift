@@ -56,27 +56,31 @@ public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
 
 /// The tools on Design's tool palette.
 public enum DesignTool: String, CaseIterable, Sendable {
-    case move, frame, rectangle, ellipse, text, pen
+    case move, frame, rectangle, ellipse, shape, text, pen, eyedropper
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
+    /// The palette shows it in place of "Title (Key)", so an icon-only tool's
+    /// reason names the tool and its key itself.
     public var unavailableHelp: String? {
         switch self {
         case .move, .frame, .rectangle, .ellipse, .text: nil
+        case .shape: "Drawing shapes isn't built yet."
         case .pen: "Drawing paths isn't built yet."
+        case .eyedropper: "Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet."
         }
     }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 
-    /// The kind of node this tool draws; nil for Move and Pen.
+    /// The kind of node this tool draws; nil for Move, Pen and Eyedropper, and for Shape until DS-5.
     public var nodeKind: DesignNodeKind? {
         switch self {
         case .frame: .frame
         case .rectangle: .rectangle
         case .ellipse: .ellipse
         case .text: .text
-        case .move, .pen: nil
+        case .move, .shape, .pen, .eyedropper: nil
         }
     }
 }
@@ -99,6 +103,8 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
     public internal(set) var expandedNodeIDs: Set<String> = []
     public internal(set) var tool: DesignTool = .move
+    /// The Shape tool's options, the spec its next drag draws: view state, never an undo step (DesignShape+Kernel).
+    public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
     /// The text node being edited inline, and its live text (DesignText).
     public internal(set) var editingTextID: String?
     public internal(set) var textDraft = ""

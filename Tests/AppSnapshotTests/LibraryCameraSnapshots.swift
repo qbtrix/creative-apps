@@ -1,7 +1,7 @@
 // LibraryCameraSnapshots.swift: the Info tab's Camera section (metadata-more MD-8) on
 // the cameras fixture by name, at UTC: IMG_0001 (`library-camera`), IMG_0001…6
 // (`library-camera-mixed`) and IMG_0024 without Exif (`library-camera-none`).
-// Written before its view (contract rule 13, MD-5): every test waits on MD-8.
+// Written before its view (contract rule 13, MD-5); MD-8 turned them on.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -24,7 +24,7 @@ import Testing
         return catalog
     }
 
-    @Test(.disabled("waits on MD-8")) func onePhoto() throws {
+    @Test func onePhoto() throws {
         let catalog = try cameras(selecting: [1])
         let rows = catalog.selectedCameraRows
         #expect(rows.map(\.field) == CameraField.allCases)
@@ -32,14 +32,14 @@ import Testing
         try shoot(catalog, "library-camera")
     }
 
-    @Test(.disabled("waits on MD-8")) func severalPhotos() throws {
+    @Test func severalPhotos() throws {
         let catalog = try cameras(selecting: Array(1...6))
         let rows = catalog.selectedCameraRows
         #expect(rows.first?.value == .text("2 cameras") && rows.contains { $0.value == .text("ISO 100–3200") })
         try shoot(catalog, "library-camera-mixed")
     }
 
-    @Test(.disabled("waits on MD-8")) func noDetails() throws {
+    @Test func noDetails() throws {
         let catalog = try cameras(selecting: [24])
         #expect(catalog.selectedPhotos.map(\.camera) == [CameraDetails.none])
         try shoot(catalog, "library-camera-none")

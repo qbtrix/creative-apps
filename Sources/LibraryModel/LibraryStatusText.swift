@@ -11,8 +11,9 @@
 // from `row.trailing`. Reads `order`, never a sorted copy, so a frame never
 // sorts. `inspectorHeader` names the collection or the selection with its
 // facts (SL-5): one photo's Captured, Size and Kind, or several photos'
-// capture span. Dates are written by hand (days-from-civil, proleptic
-// Gregorian, no Calendar or formatted()) so Linux and macOS agree. Linux-safe.
+// active photo (the Sync source) and capture span. Dates are written by hand
+// (days-from-civil, proleptic Gregorian, no Calendar or formatted()) so Linux
+// and macOS agree. Linux-safe.
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -110,7 +111,8 @@ extension LibraryCatalog {
     /// The inspector's header. `utcOffset` is the local offset in seconds
     /// (the view passes TimeZone.current's); tests pass 0. Nothing selected:
     /// the collection's name and "Photos N"; one photo: its name, Captured,
-    /// Size and Kind; several: "N Photos" and the capture span.
+    /// Size and Kind; several: "N Photos", the active photo (the Sync
+    /// source) and the capture span.
     public func inspectorHeader(utcOffset: Int) -> LibraryInspectorHeader {
         let photos = items.filter { selection.contains($0.id) }
         guard let metadata = PhotoMetadata(photos), let first = photos.first else {
@@ -128,7 +130,9 @@ extension LibraryCatalog {
         let (low, high) = (dates.min() ?? first.captureDate, dates.max() ?? first.captureDate)
         let earliest = Self.dayText(low, utcOffset: utcOffset), latest = Self.dayText(high, utcOffset: utcOffset)
         let span = earliest == latest ? earliest : "\(earliest) – \(latest)"
-        return LibraryInspectorHeader(title: metadata.title, facts: [.init(label: "Captured", value: span)])
+        // The active photo, the one Sync copies from, so the grid's heavier ring has a name (#3636).
+        let active = syncSource.map { [LibraryInspectorHeader.Fact(label: "Active", value: $0.name)] } ?? []
+        return LibraryInspectorHeader(title: metadata.title, facts: active + [.init(label: "Captured", value: span)])
     }
 
     /// "YYYY-MM-DD HH:MM" at `utcOffset` seconds from UTC; "" for a date

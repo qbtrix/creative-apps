@@ -3,7 +3,8 @@
 // label placements for 4,096 pt of a 100,000-frame timeline cost at most
 // 0.2 ms, gated at 2 ms, because they're bounded by the visible width and
 // never by the duration. The best of several runs is gated, so a busy machine
-// doesn't fail it. No SwiftUI. macOS only.
+// doesn't fail it. No SwiftUI. macOS only. The test is timed, so the suite is on the perf
+// list (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
 import Foundation
 import SuiteUI
 import Testing
