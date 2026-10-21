@@ -42,3 +42,4 @@ Next: #4141 (KE-9) through the lane; then KE-m Belt-Slice-Done on a green Linux 
 ## Open
 - PR #3499 (stress journeys) open: KE-7 waits on it.
 - core-loop #1971 CL-z not built: KE-8 waits on it.
+- #4141 body: the session's GitHub proxy re-appends an attribution footer on every body write (tried to strip it 17:59Z; it came back). The lane strips it from the squash commit and holds nothing on it.

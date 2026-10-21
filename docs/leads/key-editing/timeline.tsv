@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-21T17:29:14Z	3	stage-start	wave 4	KE-9 RJ-H13 job + journey on
 2026-10-21T17:38:49Z	3	pr-opened	#4141	KE-9 RJ-H13 move-keys job + journey on, head ddee6da1a
 2026-10-21T17:39:48Z	poll	#4141 open, no lane build yet; run 39635764704 queued; #3499 open
+2026-10-21T17:59:56Z	poll	#4141 macOS build 39647703725 queued; scoped halo 39635764704 queued; #3499 open; dev-red #3856 open
