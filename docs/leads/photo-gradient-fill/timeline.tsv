@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-21T04:49Z	heartbeat	check	-	#3681 PG-1 mac green clean; batch-20261021043428 red, bisecting (probe -4); #3695 GF-2 waits; dev-red #3856 points at design snapshots, not ours
 2026-10-21T05:08Z	heartbeat	check	-	#3681 PG-1 open, no lane flag; batch-20261021043428 bisect at probe -6 (-4 green); #3695 GF-2 waits
 2026-10-21T05:27Z	heartbeat	check	-	#3681 PG-1 clean, no lane flag; batch-20261021043428 bisect done (-4 green, -5 red: culprit is not ours); waits next batch; #3695 GF-2 waits
+2026-10-21T05:47Z	heartbeat	check	-	#3681 PG-1 merged 05:28Z; starting PG-3/PG-4 dev merge + PRs
