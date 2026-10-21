@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T12:00:44Z	3	push	-	BK-u #3967 type-check fix pushed (d65a282); LF-3 #4024 rebase pushed (a1574a6); FO-5 #4022 (8437a51) and FO-u #3963 (c11098e) on dev, fast-lane on; all gates PASS
 2026-10-21T12:21:35Z	3	poll	-	BK-3 merged; BK-u/LF-3/FO-u/FO-5 in lane; slice-done waits on run 39593465885
 2026-10-21T12:43:29Z	3	poll	-	no change; macOS runner backlog holds batch gate and scoped library run
+2026-10-21T13:17:51Z	3	poll	-	no change; macOS backlog; 4 PRs await batch gate
