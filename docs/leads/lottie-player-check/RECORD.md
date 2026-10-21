@@ -4,13 +4,13 @@ Issue: #3792 · Packet: docs/blueprints/flare/features/lottie-player-check.md
 Run: act-1a15e10a86f-7bk9 · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T10:50Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: LP-a done (Belt-Slice-Done on run 39620526621, issuecomment-6319422476). LP-m #4033 got needs-rebase (conflict in LottiePlayerParityTests.swift): merging origin/dev in, then scripts/ci --changed, push, move Head. LP-z starts once #4033 merges.
+Next: LP-a done (Belt-Slice-Done on run 39620526621, issuecomment-6319422476). LP-m #4033: dev merged in (needs-rebase cleared), head 13adaba0 with CI: PASS and Head moved; the lane's macOS build runs (15:25Z). LP-z starts once #4033 merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LP-a | oracle build script; parity suite (skips without the oracle) | LP-1, LP-2 | MJ-LP | – | no | 0 | done: run 39620526621 (Linux green at 3f96cd10) | #4025, #4026 | merged |
-| LP-m | FrameParity rules in FlareModel; colour-key and trim fixtures | LP-3, LP-5 | MJ-LP | LP-a | no | 0 | PR open (532f86f6, Mutate 4/4), stacked on #4026; needs-rebase 14:39Z, merging dev in | #4033 | – |
+| LP-m | FrameParity rules in FlareModel; colour-key and trim fixtures | LP-3, LP-5 | MJ-LP | LP-a | no | 0 | PR open (13adaba0 after dev merge, Mutate 4/4); lane macOS build 15:25Z | #4033 | – |
 | LP-z | CI builds the oracle (supervisor merge); RJ-F11 on; built (feature-done) | LP-4, LP-6 | MJ-LP | LP-a, LP-m | no | 0 | waiting | – | – |
 
 ## Tasks

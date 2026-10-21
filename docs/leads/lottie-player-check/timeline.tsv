@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T13:43:24Z	heartbeat	#4026/#4033 waiting on macOS builds; LP-z still waits on LP-a/LP-m merges	-	waiting on lane
 2026-10-21T15:12Z	heartbeat	check	-	#4026 #4029 #4031 merged; LP-a and LO-a Belt-Slice-Done on 39620526621; #4033 needs-rebase and #4027 (stale Linux flake) getting origin/dev merged in; Belt nudge answered (branches are lead/pen-paths, lead/lottie-*)
 2026-10-21T15:23Z	fix	merge-dev	-	#4033 LP-m: origin/dev merged (kept branch's LottiePlayerParityTests), CI: PASS, Head moved to 13adaba0
+2026-10-21T15:39Z	heartbeat	check	-	#4027/#4033 in lane macOS build; FL-m no PR; #3770 open
