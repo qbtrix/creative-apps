@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T08:35Z	waiting	unchanged: PD-a #3759 queued; DS-a PR not open; DK-m, AD-design pending
 2026-10-21T08:58Z	waiting	DS-a merged (#3857, 08:34Z); DP-1 still waits PD-a #3759 (supervisor-queued); DK-m, AD-design pending
 2026-10-21T09:20Z	waiting	unchanged: DP-1 waits PD-a #3759 (open); DP-2 waits DK-m (waits DS-m); AD-design done per session record
+2026-10-21T09:42Z	waiting	unchanged: DP-1 waits PD-a #3759 (open); DP-2 waits DK-m (waits DS-m, which waits DT-m and DY-m)
