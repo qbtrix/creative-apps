@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-21T15:57Z	PD-a	wait	#3759	still open, supervisor-queued
 2026-10-21T16:18Z	PD-a	wait	#3759	still open, supervisor-queued
 2026-10-21T16:40Z	PD-a	wait	#3759	open; fast-lane label now on alongside supervisor-queued
+2026-10-21T17:02Z	PD-a	wait	#3759	open, supervisor-queued
