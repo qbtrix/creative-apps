@@ -17,6 +17,7 @@ file.open-recent
 file.recent
 file.save
 file.save-as
+image.canvas-size
 image.gradient
 image.resize
 image.rotate-180
@@ -35,6 +36,11 @@ layer.select-above
 layer.select-below
 layer.send-backward
 layer.toggle-visibility
+place.focus
+place.image
+place.read
+place.replace
+place.reset-size
 select.all
 select.deselect
 select.rect
@@ -47,6 +53,15 @@ tool.gradient
 tool.heal
 tool.marquee
 tool.move
+transform.begin
+transform.cancel
+transform.commit
+transform.flip
+transform.read
+transform.reset
+transform.rotate
+transform.scale
+transform.set
 view.actual-size
 view.fit
 view.zoom-in

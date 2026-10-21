@@ -1,7 +1,8 @@
 // GradientEditorTests.swift (gradient-fill GF-3): the gradient editor's stop bar as intents, through its pure
 // `GradientBarDrag`. A click on the bar is one `.add` at its offset, a drag on a stop is `.move`s under one token, a
 // drag 40 pt off the bar is one `.remove`, a two-stop remove is refused with the help; the angle row shows only for a
-// linear fill; a stop reads "Stop n of m, p percent, colour". No rendering here. macOS only.
+// linear fill; a stop reads "Stop n of m, p percent, colour"; the end stops' handles stay inside the bar's row, and a
+// press on a handle there still picks its stop; the bar dims while the editor is off. No rendering here. macOS only.
 import CoreGraphics
 import SuiteKernel
 @testable import SuiteUI
@@ -69,5 +70,22 @@ import Testing
         #expect(GradientEditorText.stop(1, of: Self.three) == "Stop 2 of 3, 50 percent, red")
         #expect(GradientEditorText.colorName(Self.blue) == "blue" && GradientEditorText.colorName(.white) == "white")
         #expect(GradientEditorText.colorName(FillColor(r: 0.5, g: 0.5, b: 0.5)) == "grey")
+    }
+
+    @Test func endHandlesStayInsideTheRow() {
+        let row: CGFloat = 192, half = GradientEditor.trackInset
+        #expect(GradientEditor.handleX(0, width: row) - half >= 0, "the first stop's handle hangs past the row's left edge")
+        #expect(GradientEditor.handleX(1, width: row) + half <= row, "the last stop's handle hangs past the row's right edge")
+        let track = GradientEditor.trackWidth(row)
+        for (offset, stop) in [(0.0, 0), (0.5, 1), (1.0, 2)] {
+            let press = GradientEditor.trackPoint(CGPoint(x: GradientEditor.handleX(offset, width: row), y: 20))
+            let drag = GradientBarDrag(at: press, width: track, fill: Self.three, token: "t")
+            #expect(drag.stop == stop, "a press on stop \(stop)'s handle picks \(String(describing: drag.stop))")
+        }
+    }
+
+    @Test func barDimsWhileOff() {
+        #expect(GradientEditor.barOpacity(enabled: true) == 1)
+        #expect(GradientEditor.barOpacity(enabled: false) == SuiteColor.disabledOpacity)
     }
 }
