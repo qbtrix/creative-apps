@@ -33,6 +33,17 @@ extension FlareWorkspace {
         }
     }
     static let menuLabels = ["file.open": "Open…", "file.save-as": "Save As…", "edit.delete": "Delete", "animate.play": "Play/Pause"]
+    /// `id`'s catalog spec over the reason the focused window gives for it (nil: it can run), for a menu item that
+    /// holds that reason rather than the workspace; nil when the catalog lacks `id`. The item acts through its
+    /// window, so a run of this spec only refuses.
+    public static func menuSpec(_ id: String) -> CommandSpec<String?>? {
+        guard let spec = catalog.spec(id) else { return nil }
+        return .typed(spec.id, title: spec.title, summary: spec.summary, kind: spec.kind, params: JSONValue.self, schema: spec.params,
+                      result: spec.result, example: spec.example, availability: { $0.map(Availability.unavailable) ?? .available }) {
+            (_: inout String?, _: JSONValue) throws -> JSONValue in
+            throw CatalogError.unavailable(id: spec.id, why: "Run \(spec.title) from its window.")
+        }
+    }
 
     public static func sampleHelp(_ name: String) -> String? { FlareFixtures.named(name) == nil ? "No sample called \(name)." : nil }
     public static func sampleTitle(_ name: String) -> String { name == "keyed" ? "Keyed Ball" : name.capitalized }

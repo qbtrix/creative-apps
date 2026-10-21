@@ -100,8 +100,8 @@ struct FlareCommands: Commands {
             item(.edit(.paste), key: KeyboardShortcut("v"))
             item(.edit(.duplicate), key: KeyboardShortcut("d"))
             item(.edit(.delete), key: KeyboardShortcut(.delete, modifiers: []))
-            if let keys = timelineSelectAll {
-                Button(FlareIntent.timeline(.selectAllKeys).title) { keys.run() }.keyboardShortcut("a")
+            if let keys = timelineSelectAll, let spec = FlareWorkspace.menuSpec("timeline.select-all-keys") {
+                MenuCommand(spec, on: menu.help(.timeline(.selectAllKeys)), shortcut: KeyboardShortcut("a")) { keys.run() }
             } else {
                 item(.edit(.selectAll), key: KeyboardShortcut("a"))
             }

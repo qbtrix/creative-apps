@@ -156,4 +156,13 @@ struct FlareCommandCatalogTests {
             #expect(new == old, "\(state)")
         }
     }
+
+    /// The ⌘A menu item's spec (key-select-all KS-a): the catalog's title and summary, off with the window's reason.
+    @Test func menuSpecTakesTheWindowsReason() throws {
+        let spec = try #require(FlareWorkspace.menuSpec("timeline.select-all-keys"))
+        #expect(spec.title == "Select All Keys" && spec.summary == FlareWorkspace.catalog.spec("timeline.select-all-keys")?.summary)
+        #expect(spec.availability(nil) == .available)
+        #expect(spec.availability(FlareWorkspace.noKeysToSelect) == .unavailable(FlareWorkspace.noKeysToSelect))
+        #expect(FlareWorkspace.menuSpec("timeline.no-such") == nil)
+    }
 }
