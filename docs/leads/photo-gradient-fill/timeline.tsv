@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-21T12:16:00Z	merge	PG-u	#3977 PG-6 merged by the lane (its Linux red on 3192c019 was CommandPathTests on dev's PhotoPlace.swift, fixed on dev by #4008)	PG-u waits a green run
 2026-10-21T12:23:00Z	wave	PG-z	PR #4064 opened (PG-7 + PG-8, feature-done), gate PASS head 6519ea37	lane merges; then Belt-Slice-Done PG-u/PG-z and Belt-Contact-Sheet
 2026-10-21T12:35:00Z	heartbeat	lead	dev Linux 39598650564 on 76d0c892 (#3977, PG-u) running; #4064 PG-z in lane	PG-u done on green
+2026-10-21T12:42Z	check	dev Linux 39598650564 at 76d0c892 red: LargeCatalogBudgetTests (Library timing budget), not PG; PG-u waits for a green run
