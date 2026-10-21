@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "editor-kernel design (2026-10-17), inventory row 'chrome'; captain's canonical-first call on #1552",
-  "waits_on": "editor-kernel:EK-a only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "waits_on": "editor-kernel:EK-a only (every slice); cross-line hand-offs in the packet's Hand-offs list; AC-export-sheet waits on shared-codecs SC-f (the format registry derives the export panels' formats first, 2026-10-21)",
   "ui_slice": "none",
   "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it (its UI slices swap an app view for the SuiteUI component the kernel's EK-chrome page already shows)",
   "owned": [
@@ -207,6 +207,10 @@
         ],
         "adopt-kernel-export:AX-flare": [
           "AC-e1"
+        ],
+        "shared-codecs:SC-f": [
+          "AC-e1",
+          "AC-e2"
         ]
       },
       "ui": true

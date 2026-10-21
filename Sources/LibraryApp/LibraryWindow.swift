@@ -7,14 +7,21 @@
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
 // or the live services over the Platform adapters.
 //
+// The sidebar has two sections: Library (All Photos, Picks, Recently
+// Added) and Collections (yours, with New Collection as its add button and a
+// double-click rename while those can act). LibraryFilterBar sits above
+// LibraryBrowser; the hidden `library.collections` element carries the
+// collections file's state for the journeys.
+//
 // The area hooks: each area (edit, import, thumbnails, cull, persist, loupe,
-// develop, crop, export) fills its own `LibraryWindow+<Area>.swift` with the
+// develop, crop, export, filters) fills its own `LibraryWindow+<Area>.swift` with the
 // LibraryMenu sub-struct it owns, its `<Area>AreaState` in `areas`, and the
 // lifecycle hooks this body calls. The window's single keys go to the area
 // that owns them through the menu; a nil action ignores the key.
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -29,6 +36,7 @@ final class LibraryAreas {
     let develop = DevelopAreaState()
     let crop = CropAreaState()
     let export = ExportAreaState()
+    let filters = FiltersAreaState()
 }
 
 struct LibraryWindow: View {
@@ -51,20 +59,22 @@ struct LibraryWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         #endif
+        let filters = filtersMenu
         SuiteWindow(
             title: "Library",
-            sidebarTitle: "Collections",
-            items: model.collections.map {
-                SidebarItem(id: $0.id, title: $0.name, systemImage: Self.symbol(for: $0.id), count: $0.count)
-            },
+            sections: sidebarSections(filters),
             selection: model.selectedCollectionID,
-            onSelect: { model.selectCollection($0) }
+            onSelect: { model.selectCollection($0) },
+            onRename: filters.renameCollection
         ) {
             VStack(spacing: 0) {
+                LibraryFilterBar(
+                    filter: model.activeFilter, value: model.filterValue, caption: model.filterCaption, menu: filters)
+                    .fixedSize(horizontal: false, vertical: true)
                 LibraryBrowser(
                     // The store goes down unread, so a thumbnail pass reruns the grid, not this body.
                     model: model, menu: menu, thumbnails: areas.thumbnails.store, onSelect: { model.select($0) }, onOpen: { model.open($0) },
-                    onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
+                    onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() }, filters: filters)
                     // On the content, so it hears keys only while the grid or the loupe has focus.
                     .onKeyPress(phases: .down) { press in route(press) }
                 if model.showsStatusBar {
@@ -79,21 +89,28 @@ struct LibraryWindow: View {
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        .focusedSceneValue(\.libraryFilters, filters)
+        .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
+                       places: model.placesExtensions, perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
+        .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
         .task {
             importAreaLaunch()
             persistAreaLaunch()
+            filtersAreaLaunch()
         }
         .onChange(of: model.saveRevision) { _, _ in persistAreaChanged() }
         .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged() }
         .onChange(of: model.mode) { _, _ in loupeAreaFocusChanged() }
         .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
+        .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
+            filtersAreaFlush(areas.filters)
         }
     }
 
@@ -162,10 +179,27 @@ struct LibraryWindow: View {
         allowed ? perform : nil
     }
 
+    /// Library: the built-in collections; Collections: yours, its add button
+    /// New Collection, left off while it can't act (the header has no disabled state).
+    func sidebarSections(_ filters: LibraryFiltersMenu) -> [SidebarSection] {
+        let rows = model.collections.map {
+            SidebarItem(id: $0.id, title: $0.name, systemImage: Self.symbol(for: $0.id), count: $0.count)
+        }
+        let add = filters.newCollection.map { ToolbarAction("New Collection", systemImage: "plus", perform: $0) }
+        return [
+            SidebarSection(id: "library", title: "Library", items: rows.filter { !UserCollection.isUserID($0.id) }),
+            SidebarSection(
+                id: "collections", title: "Collections", items: rows.filter { UserCollection.isUserID($0.id) },
+                addAction: add),
+        ]
+    }
+
     static func symbol(for collectionID: String) -> String {
         switch collectionID {
-        case "favorites": "heart"
+        case "favorites": "flag"
         case "recent": "clock"
+        case let id where id.hasPrefix("smart-"): "gearshape"
+        case let id where UserCollection.isUserID(id): "rectangle.stack"
         default: "photo.on.rectangle.angled"
         }
     }

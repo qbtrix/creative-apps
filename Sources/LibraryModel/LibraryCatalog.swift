@@ -3,7 +3,8 @@
 // Linux-safe; LibraryApp changes it only through the Model's methods. Invariants:
 // counts follow `items`; ids in `items` are unique; the selection holds only ids
 // the collection shows, and the loupe only a photo it shows. The selection is
-// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift).
+// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift), the export
+// sheet's run its `ExportRun<ExportOptions>` (LibraryExportAdapter.swift).
 import SuiteKernel
 
 /// A sidebar collection: a fixed source of photos.
@@ -23,14 +24,6 @@ public enum ImportState: Hashable, Sendable {
 public enum LoupeZoom: Hashable, Sendable {
     case fit, actual
     case scale(Double)
-}
-
-/// Where the export sheet is: closed, editing its options, writing, or done.
-public enum ExportState: Hashable, Sendable {
-    case idle
-    case editing(ExportOptions)
-    case running(done: Int, total: Int)
-    case finished(ExportSummary)
 }
 
 /// A thumbnail asked of the services; `token` lets a stale answer be dropped.
@@ -54,7 +47,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// The sidebar's built-in rows; your collections follow them.
     static let builtInCollections = [
         LibraryCollection(id: "all", name: "All Photos", count: 0),
-        LibraryCollection(id: "favorites", name: "Favorites", count: 0),
+        // Id "favorites" predates the name; picks are called Picks everywhere a person reads (#3639).
+        LibraryCollection(id: "favorites", name: "Picks", count: 0),
         LibraryCollection(id: "recent", name: "Recently Added", count: 0),
     ]
 
@@ -91,7 +85,9 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
-    public internal(set) var exportState = ExportState.idle
+    /// The export sheet's run: the kernel's; `exportState` reads it (LibraryExportAdapter.swift).
+    public internal(set) var exportRun = ExportRun<ExportOptions>.idle
+    public internal(set) var exportSummary: ExportSummary?  // the finished run's summary
     public internal(set) var catalogState = CatalogFileState.ready
     public internal(set) var saveRevision = 0
     public internal(set) var savedRevision = 0
@@ -120,7 +116,8 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
-            && lhs.cullError == rhs.cullError && lhs.exportState == rhs.exportState
+            && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
+            && lhs.exportState == rhs.exportState
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
             && lhs.loupeError == rhs.loupeError
@@ -185,7 +182,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     }
 
     /// Applies `edit` to every selected photo, then keeps the counts and the
-    /// selection true to the collection (unflagging in Favorites drops a photo).
+    /// selection true to the collection (unflagging in Picks drops a photo).
     mutating func editSelected(_ edit: (inout PhotoItem) -> Void) {
         guard !selection.isEmpty else { return }
         for index in items.indices where selection.contains(items[index].id) {
@@ -211,7 +208,7 @@ public struct LibraryCatalog: Sendable, Equatable {
 
     /// The counts after a metadata edit, undo or redo that replaced `before`
     /// with `after` in place: no photo was added or removed and no capture
-    /// date changed, so only Favorites moves, by the flags that changed.
+    /// date changed, so only Picks moves, by the flags that changed.
     /// A smart collection moves by the changed photos its rules admit.
     mutating func recount(replacing before: [PhotoItem], with after: [PhotoItem]) {
         let delta = after.count(where: \.isFlagged) - before.count(where: \.isFlagged)

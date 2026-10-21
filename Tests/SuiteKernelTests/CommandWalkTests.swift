@@ -7,19 +7,23 @@ import SuiteKernel
 
 @Suite struct CommandWalkTests {
     let catalog = FakeCanvasDocument.catalog
-    /// Every id in an order whose examples all run on one fixture: reads first, then an add (which selects the free
-    /// new rect), a move of it, undo and redo of that move, and last the remove.
-    static let walk = ["rect.list", "rect.select", "doc.export-json", "rect.add", "rect.move", "edit.undo", "edit.redo", "rect.remove"]
+    /// Every id in an order whose examples all run on one fixture: reads first, the file-flow commands, then an add (which selects the free
+    /// new rect), a move of it, undo and redo of that move, and last the remove. `file.drop` places a rect as a
+    /// step, which a file command may not do here, so FakeCanvasFileFlowTests walks it instead.
+    static let walk = ["rect.list", "rect.select", "doc.export-json", "file.recent", "file.open-recent", "file.open-in",
+                       "file.clear-recent", "rect.add", "rect.move", "edit.undo", "edit.redo", "rect.remove"]
 
     /// `doc` saved and opened again: a document at its saved state, with a clean history.
     static func reopened(_ doc: FakeCanvasDocument) throws -> FakeCanvasDocument {
         try FakeCanvasDocument.open(doc.save(), name: "canvas.fake")
     }
 
-    @Test func listNamesTheFakesEightIdsSorted() {
+    @Test func listNamesTheFakesThirteenIdsSorted() {
         #expect(catalog.app == "fake")
-        #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select"])
-        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk) && catalog.ids.count == Self.walk.count)
+        #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
+                              "file.open-recent", "file.recent", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select"])
+        #expect(catalog.ids == catalog.ids.sorted() && Set(catalog.ids) == Set(Self.walk + ["file.drop"])
+                && catalog.ids.count == Self.walk.count + 1)
         #expect(catalog.ids.allSatisfy(CommandCatalog<FakeCanvasDocument>.isValidID))
     }
 

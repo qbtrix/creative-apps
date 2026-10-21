@@ -1,0 +1,242 @@
+{
+  "title": "One layer style: SuiteImaging's style model, rules, presets, commands, SVG writer and GPU route, SuiteUI's style panel, and the kernel's clipping rule",
+  "wave": 5,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S2 (effects stack and layer styles, shared half) and S8's clipping rule; real job RJ-X51; captain 2026-10-21: layer styles in the beta, shared; adopters photo/layer-styles, design/layer-styles (RJ-D14), halo/layer-styles, photo/masks-clipping, photo/psd-effects (#3496, #3497)",
+  "waits_on": "suite-imaging's IM-a (the target) and IM-m (the route, LS-9); gradient-fill's GF-a and GF-m (LS-7); brush-keys' BK-u, the last earlier owner of SuiteGallery.swift; creative-core layer-style-engine LE-a, LE-cpu and LE-metal, each through a bump (cross-line); the Layers-panel actions' fx button and row menu bind style.panel, style.copy, style.paste and style.clear (hand-off)",
+  "longest_chain": "6 (LS-1 → LS-2 → LS-3 → LS-4 → LS-12 → LS-13)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteLayerStyleJourneyTests.testLayerStylePanelEditsAStyle"
+  ],
+  "owned": [
+    "Sources/SuiteImaging/Style/LayerStyle.swift",
+    "Sources/SuiteImaging/Style/LayerStyleRules.swift",
+    "Sources/SuiteImaging/Style/StyleCommands.swift",
+    "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+    "Sources/SuiteImaging/Style/StyleProgram.swift",
+    "Sources/SuiteImaging/Route/StyleRoute.swift",
+    "Tests/SuiteImagingTests/LayerStyleRulesTests.swift",
+    "Tests/SuiteImagingTests/StyleCommandsTests.swift",
+    "Tests/SuiteImagingTests/LayerStyleSVGTests.swift",
+    "Tests/SuiteImagingTests/StyleProgramTests.swift",
+    "docs/c4/parts/creative-apps/suite-imaging/imaging-style.json",
+    "Sources/SuiteUI/LayerStylePanel.swift",
+    "Sources/SuiteUI/LayerStyleRows.swift",
+    "Sources/SuiteUI/Gallery/GalleryLayerStyle.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "UITests/SuiteJourneyTests+LayerStyle.swift",
+    "Tests/SuiteUITests/LayerStylePanelTests.swift",
+    "Tests/AppSnapshotTests/SuiteLayerStyleSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLayerStyleTests.swift",
+    "Tests/mutations/SuiteImaging.LayerStyleRules.json",
+    "Tests/mutations/SuiteImaging.StyleCommands.json",
+    "Tests/mutations/SuiteImaging.LayerStyleSVG.json",
+    "Tests/mutations/SuiteImaging.StyleProgram.json",
+    "Tests/SuiteImagingTests/StyleRouteTests.swift",
+    "Tests/mutations/SuiteImaging.StyleRoute.json",
+    "Tests/AppSnapshotTests/StyleRouteLatencyTests.swift",
+    "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "Tests/SuiteKernelTests/ClipRulesTests.swift",
+    "Tests/mutations/SuiteKernel.ClipRules.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json",
+    "Sources/SuiteKernel/Layers/ClipCommands.swift",
+    "Tests/SuiteKernelTests/ClipCommandsTests.swift",
+    "Tests/mutations/SuiteKernel.ClipCommands.json",
+    "Tests/SuiteUITests/LayerStylePanelLiveTests.swift",
+    "docs/blueprints/suiteui/features/layer-styles.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "LS-a",
+      "behavior": "SuiteImaging's Style module declares the model, rules, presets, intents, the style command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a layer-style page, and every check is written, disabled.",
+      "tasks": [
+        "LS-1",
+        "LS-2"
+      ],
+      "journeys": [
+        "SJ0",
+        "MJ-LS"
+      ],
+      "waits": {
+        "suite-imaging:IM-a": [
+          "LS-1"
+        ],
+        "gradient-fill:GF-a": [
+          "LS-1"
+        ],
+        "brush-keys:BK-u": [
+          "LS-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteImaging/Style/LayerStyle.swift",
+        "Sources/SuiteImaging/Style/LayerStyleRules.swift",
+        "Sources/SuiteImaging/Style/StyleCommands.swift",
+        "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+        "Sources/SuiteImaging/Style/StyleProgram.swift",
+        "Sources/SuiteImaging/Route/StyleRoute.swift",
+        "Tests/SuiteImagingTests/LayerStyleRulesTests.swift",
+        "Tests/SuiteImagingTests/StyleCommandsTests.swift",
+        "Tests/SuiteImagingTests/LayerStyleSVGTests.swift",
+        "Tests/SuiteImagingTests/StyleProgramTests.swift",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-style.json",
+        "Sources/SuiteUI/LayerStylePanel.swift",
+        "Sources/SuiteUI/LayerStyleRows.swift",
+        "Sources/SuiteUI/Gallery/GalleryLayerStyle.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "UITests/SuiteJourneyTests+LayerStyle.swift"
+      ]
+    },
+    {
+      "id": "LS-u",
+      "behavior": "On the gallery page the panel lists the eight styles with their switches, shows the selected style's rows, applies a preset, and is reachable from the Layers panel's fx button and row menu where that work has landed, within the render budget.",
+      "tasks": [
+        "LS-3",
+        "LS-4"
+      ],
+      "journeys": [
+        "LJ1"
+      ],
+      "waits": {
+        "LS-a": [
+          "LS-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/LayerStylePanel.swift",
+        "Sources/SuiteUI/LayerStyleRows.swift",
+        "Tests/SuiteUITests/LayerStylePanelTests.swift",
+        "Tests/AppSnapshotTests/SuiteLayerStyleSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLayerStyleTests.swift",
+        "UITests/SuiteJourneyTests+LayerStyle.swift"
+      ]
+    },
+    {
+      "id": "LS-m",
+      "behavior": "The rules clamp and default every parameter and keep one effect per kind, every style command records one undo step (a drag one), copy and paste round-trip as JSON, the SVG writer emits a filter for each style it can express and a warning for the rest, and StyleProgram maps a style to the core stack and back.",
+      "tasks": [
+        "LS-5",
+        "LS-6",
+        "LS-7",
+        "LS-8"
+      ],
+      "journeys": [
+        "MJ-LS"
+      ],
+      "waits": {
+        "LS-a": [
+          "LS-5"
+        ],
+        "gradient-fill:GF-m": [
+          "LS-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteImaging/Style/LayerStyle.swift",
+        "Sources/SuiteImaging/Style/LayerStyleRules.swift",
+        "Tests/SuiteImagingTests/LayerStyleRulesTests.swift",
+        "Tests/mutations/SuiteImaging.LayerStyleRules.json",
+        "Sources/SuiteImaging/Style/StyleCommands.swift",
+        "Tests/SuiteImagingTests/StyleCommandsTests.swift",
+        "Tests/mutations/SuiteImaging.StyleCommands.json",
+        "Sources/SuiteImaging/Style/LayerStyleSVG.swift",
+        "Tests/SuiteImagingTests/LayerStyleSVGTests.swift",
+        "Tests/mutations/SuiteImaging.LayerStyleSVG.json",
+        "Sources/SuiteImaging/Style/StyleProgram.swift",
+        "Tests/SuiteImagingTests/StyleProgramTests.swift",
+        "Tests/mutations/SuiteImaging.StyleProgram.json"
+      ]
+    },
+    {
+      "id": "LS-gpu",
+      "behavior": "The live route draws a styled layer on the GPU in one pass per step and matches the CPU within the core's parity tolerance, within 16 ms p95 for a 2,000 x 2,000 layer.",
+      "tasks": [
+        "LS-9",
+        "LS-9b"
+      ],
+      "journeys": [
+        "MJ-LS-gpu"
+      ],
+      "waits": {
+        "LS-m": [
+          "LS-9"
+        ],
+        "suite-imaging:IM-m": [
+          "LS-9"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteImaging/Route/StyleRoute.swift",
+        "Tests/SuiteImagingTests/StyleRouteTests.swift",
+        "Tests/mutations/SuiteImaging.StyleRoute.json",
+        "Tests/AppSnapshotTests/StyleRouteLatencyTests.swift"
+      ]
+    },
+    {
+      "id": "LS-clip",
+      "behavior": "SuiteKernel finds a clipped layer's base, refuses a clip with no base, and layer.clip and layer.unclip record one step each.",
+      "tasks": [
+        "LS-10",
+        "LS-11"
+      ],
+      "journeys": [
+        "KJ-clip"
+      ],
+      "waits": {},
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Layers/ClipRules.swift",
+        "Tests/SuiteKernelTests/ClipRulesTests.swift",
+        "Tests/mutations/SuiteKernel.ClipRules.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json",
+        "Sources/SuiteKernel/Layers/ClipCommands.swift",
+        "Tests/SuiteKernelTests/ClipCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.ClipCommands.json"
+      ]
+    },
+    {
+      "id": "LS-z",
+      "behavior": "The gallery runs its intents through StyleCommands on a live target with a History, the panel draws its preview through the route, and the feature is built.",
+      "tasks": [
+        "LS-12",
+        "LS-13"
+      ],
+      "journeys": [
+        "LJ1",
+        "MJ-LS"
+      ],
+      "waits": {
+        "LS-u": [
+          "LS-12"
+        ],
+        "LS-m": [
+          "LS-12",
+          "LS-13"
+        ],
+        "LS-gpu": [
+          "LS-12",
+          "LS-13"
+        ],
+        "LS-clip": [
+          "LS-13"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryLayerStyle.swift",
+        "Tests/SuiteUITests/LayerStylePanelLiveTests.swift",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-style.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json",
+        "docs/blueprints/suiteui/features/layer-styles.wave.json"
+      ]
+    }
+  ]
+}

@@ -211,6 +211,9 @@
         ],
         "photo-render-adopt": [
           "PM-12"
+        ],
+        "text-layers:TX-m": [
+          "PM-11"
         ]
       },
       "ui": true,

@@ -7,6 +7,7 @@
 // types and SwiftUI's. The cases are the contract the view files build on.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -25,6 +26,12 @@ enum DesignIntent {
     case addPage, deletePage
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)
     case setFill(String, DesignColor)
+    /// A Fill section gesture (type switch, stop, angle), run as its kernel fill command (`runFill`).
+    case fill(GradientIntent)
+    /// A turn or flip from the inspector or the Object menu, run as its kernel command (`runTransform`).
+    case transform(TransformIntent)
+    /// A change from the Shape tool's options in the inspector, applied to the tool's next spec (`runShape`).
+    case shape(ShapeIntent)
     case align(DesignAlignEdge)
     case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)
@@ -47,20 +54,24 @@ enum DesignIntent {
     case renameLayer(String, String)
     /// The inspector's Width or Height committed: the selected page's size, one "Change Page Size" step.
     case setPageSize(width: Double, height: Double)
+    /// An Eyedropper click: the colour at the page point onto the selection's stroke (Option) or fill, one step.
+    case pick(DesignPoint, toStroke: Bool)
 }
 
 /// Where a view sends its intents.
 typealias DesignPerform = @MainActor (DesignIntent) -> Void
 
 extension DesignToolbarItem {
-    /// What the toolbar command asks the window to do.
-    var intent: DesignIntent {
+    /// What the toolbar command asks the window to do; nil for History, which toggles the
+    /// window's own panel (DesignHistoryArea) rather than asking the workspace.
+    var intent: DesignIntent? {
         switch self {
         case .newFile: .newFile
         case .open: .open
         case .save: .save
         case .undo: .undo
         case .redo: .redo
+        case .history: nil
         case .zoomOut: .zoomOut
         case .fit: .fit
         case .zoomIn: .zoomIn
@@ -75,8 +86,10 @@ extension DesignTool: PaletteTool {
         case .frame: "Frame"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"
+        case .shape: "Shape"
         case .text: "Text"
         case .pen: "Pen"
+        case .eyedropper: "Eyedropper"
         }
     }
 
@@ -86,8 +99,10 @@ extension DesignTool: PaletteTool {
         case .frame: "number"
         case .rectangle: "rectangle"
         case .ellipse: "circle"
+        case .shape: "star"
         case .text: "textformat"
         case .pen: "pencil.tip"
+        case .eyedropper: "eyedropper"
         }
     }
 
@@ -97,24 +112,32 @@ extension DesignTool: PaletteTool {
         case .frame: "f"
         case .rectangle: "r"
         case .ellipse: "o"
+        case .shape: "u"
         case .text: "t"
         case .pen: "p"
+        case .eyedropper: "i"
         }
     }
 
     /// The pointer over the canvas while this tool is active.
     var pointer: PointerStyle {
         switch self {
-        case .move, .pen: .default
-        case .frame, .rectangle, .ellipse: .rectSelection
+        case .move, .pen, .eyedropper: .default
+        case .frame, .rectangle, .ellipse, .shape: .rectSelection
         case .text: .horizontalText
         }
     }
 }
 
 extension DesignColor {
-    /// The color as SwiftUI draws it, through SuiteUI's hex bridge.
-    var color: Color { HexColor(red, green, blue).color }
+    /// Design's one bridge to SuiteUI's HexColor: the same 8-bit sRGB channels.
+    init(hex: HexColor) { self.init(hex.red, hex.green, hex.blue) }
+
+    /// The color as SuiteUI's color rows and parser speak it.
+    var hex: HexColor { HexColor(red, green, blue) }
+
+    /// The color as SwiftUI draws it, through the hex bridge.
+    var color: Color { hex.color }
 }
 
 extension DesignModifiers {

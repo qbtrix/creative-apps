@@ -8,27 +8,32 @@
 // selection and drag serial live here too (FlareEasing.swift uses them); a
 // change of layer selection drops the segment. Stored state is `internal(set)`
 // so each area's extension file (docs/blueprints/flare.md, section 2) can set it; that includes the paint and
-// timeline-edit state (inspector-timeline), cleared on load like the rest of the per-document state.
+// timeline-edit state (inspector-timeline), cleared on load like the rest of the per-document state. It reads as
+// SuiteKernel's HistoryReading over the engine (adopt-kernel-undo AU-f1), so the shared Edit menu reads one protocol.
 import FlareCore
+import SuiteKernel
 
 /// The drawing tools on Flare's tool palette.
 public enum FlareTool: String, CaseIterable, Sendable {
-    case select, directSelect, pen, rectangle, ellipse
+    case select, directSelect, pen, rectangle, ellipse, shape
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// stage sends it drags. `FlareWorkspace.toolHelp(_:)` falls back to it.
-    /// Nil for all five: FlareStage sends every tool's drag (DK-8), and each
+    /// Nil for all but Shape: FlareStage sends every tool's drag (DK-8), and each
     /// acts through `drag` here (FlareToolsTests).
     public var unavailableHelp: String? {
         switch self {
         case .select, .directSelect, .pen, .rectangle, .ellipse: nil
+        case .shape: Self.shapeHelp
         }
     }
+    /// The Shape tool's reason until its drag draws (shape-tools FS-6).
+    public static let shapeHelp = "Shape drawing arrives with the shape kernel."
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
 
-public struct FlareWorkspace: Sendable, Equatable {
+public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     var engine: CommandEngine?
     /// The use cases the workspace edits through; `.live` or `.fake()`.
     public internal(set) var services: FlareServices
@@ -37,8 +42,14 @@ public struct FlareWorkspace: Sendable, Equatable {
         didSet { if oldValue != selectedLayerID { easingSelection = nil; easingDragSerial &+= 1 } }
     }
     public internal(set) var tool: FlareTool = .select
-    /// The stage selection (FlareSelection.swift).
-    public internal(set) var selection: [StageAddress] = []
+    /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
+    public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
+    /// The stage selection (FlareSelection.swift); a change drops the picked anchors.
+    public internal(set) var selection: [StageAddress] = [] {
+        didSet { if oldValue != selection { anchorSelectionStore = Selection() } }
+    }
+    /// The picked anchors of the path in edit (FlareAnchors+Kernel.swift).
+    var anchorSelectionStore = Selection<AnchorRef>()
     /// The marquee under way, in scene points; nil when none is.
     public internal(set) var marquee: Rect?
     /// The shape the drag under way would add, for the live preview; nil
@@ -113,9 +124,12 @@ public struct FlareWorkspace: Sendable, Equatable {
 
     public var canUndo: Bool { engine?.canUndo ?? false }
     public var canRedo: Bool { engine?.canRedo ?? false }
-    /// "Undo Set Keyframe Easing", for the Edit menu; nil with nothing to undo.
-    public var undoActionName: String? { engine?.undoActionName }
-    public var redoActionName: String? { engine?.redoActionName }
+    /// The next undo step's name without the menu's prefix ("Set Keyframe Easing"); nil with nothing to undo.
+    public var undoName: String? { engine?.undoActionName.map { String($0.dropFirst("Undo ".count)) } }
+    public var redoName: String? { engine?.redoActionName.map { String($0.dropFirst("Redo ".count)) } }
+    /// "Undo Set Keyframe Easing", the Edit menu's title over `undoName`; nil with nothing to undo.
+    public var undoActionName: String? { undoName.map { "Undo \($0)" } }
+    public var redoActionName: String? { redoName.map { "Redo \($0)" } }
 
     /// Replaces the open document with a new one holding one default scene in
     /// a fresh engine (no undo history), and selects that scene.
@@ -258,6 +272,7 @@ public struct FlareWorkspace: Sendable, Equatable {
             && lhs.draft == rhs.draft
             && lhs.layerError == rhs.layerError && lhs.selectedEasingSegment == rhs.selectedEasingSegment && lhs.canUndo == rhs.canUndo && lhs.canRedo == rhs.canRedo
             && lhs.services.isPreview == rhs.services.isPreview && lhs.selection == rhs.selection
+            && lhs.anchorSelectionStore == rhs.anchorSelectionStore
             && lhs.marquee == rhs.marquee && lhs.dragPreview == rhs.dragPreview && lhs.gesture == rhs.gesture && lhs.currentFrame == rhs.currentFrame
         let animating = lhs.isPlaying == rhs.isPlaying && lhs.loops == rhs.loops && lhs.playClock == rhs.playClock
             && lhs.autoKey == rhs.autoKey && lhs.onion == rhs.onion && lhs.showsMotionPath == rhs.showsMotionPath

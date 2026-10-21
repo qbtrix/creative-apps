@@ -56,8 +56,10 @@ struct AllAppsCatalogTests {
         "Design's select example names node-1, which a real file need not hold": ["edit.select: exampleRuns"],
         "Halo saves the playhead and the selection in the file": [
             "animation.go-to-end: queryOrViewChangesNoBytes", "animation.next-frame: queryOrViewChangesNoBytes",
-            "easing.select-lane-keys: queryOrViewChangesNoBytes", "layer.select: queryOrViewChangesNoBytes",
+            "easing.select-lane-keys: queryOrViewChangesNoBytes", "timeline.pick-keys: queryOrViewChangesNoBytes",
+            "layer.select: queryOrViewChangesNoBytes",
             "timeline.scrub: queryOrViewChangesNoBytes", "viewer.drag-begin: queryOrViewChangesNoBytes"],
+        "The kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
     ]

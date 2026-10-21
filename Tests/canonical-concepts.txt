@@ -24,6 +24,7 @@ Parent: Parent Parenting
 Bones: Bone
 Gradient: Gradient
 Autosave: Autosave
+Pen: PenDraft PenRules PenTool
 Placed image: PlacedImage PlacedAsset ImageLayer PlaceImage
 Tone settings: AdjustmentSettings DevelopSettings DevelopValues DevelopLevels ToneCurve HueSaturation LiveTone LiveDevelop GammaTrack LevelsFormat
 Render route: RenderRoute Rasterizer Rasterizing TileUpdate CompositeCache
@@ -39,3 +40,4 @@ Pasteboard: Pasteboard
 Unsaved prompt: UnsavedPrompt ClosePrompt SaveStatus
 Launch flags: FlareLaunch HaloLaunch LibraryLaunch PhotoLaunch ProjectLaunch LaunchFlags LaunchArguments LaunchArgs
 File envelope: FileEnvelope FileFormat Filing
+Layer style: LayerStyle LayerEffect StyleEffect DropShadow InnerShadow OuterGlow InnerGlow Bevel Emboss ColorOverlay GradientOverlay EffectStack

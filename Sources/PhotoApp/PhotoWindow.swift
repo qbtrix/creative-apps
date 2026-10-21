@@ -47,7 +47,6 @@ struct PhotoWindow: View {
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
     @State var problem: PhotoProblem?
-    @State var isExporting = false
     @State var exportFormat = ImageFormat.png
     @State var exportQuality = 0.9
     @State var isResizing = false
@@ -68,11 +67,15 @@ struct PhotoWindow: View {
     @State var exportDraft: ExportOptions?
     /// The Canvas Size sheet's choices while it is open (PhotoWindow+Transform.swift, PT-3).
     @State var canvasSizeDraft: CanvasSizeDraft?
+    /// The inspector's tab (PhotoWindow+History.swift, history-panel PH-2).
+    @State var inspectorTab = PhotoInspectorTab.adjust
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
-    var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil }
+    var isPresenting: Bool {
+        model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
+    }
 
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
@@ -111,10 +114,10 @@ struct PhotoWindow: View {
                 takeStroke()
                 model.clearStatus()
             }
-            .sheet(isPresented: $isExporting) {
+            .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
                 ExportSheet(
                     format: exportFormat, quality: exportQuality, onFormat: { exportFormat = $0 },
-                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { isExporting = false })
+                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
@@ -154,7 +157,7 @@ struct PhotoWindow: View {
             .modifier(PhotoFileArea(model: model, files: files, perform: perform))
             .modifier(PhotoEditArea(model: model, perform: perform))
             .modifier(PhotoCropArea(model: model, perform: perform))
-            .modifier(PhotoHistoryArea(model: model, perform: perform))
+            .modifier(PhotoHistoryArea(model: model, perform: perform, tab: inspectorTab))
             .modifier(PhotoSelectArea(model: model, perform: perform))
             .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
             .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
@@ -193,6 +196,7 @@ struct PhotoWindow: View {
             // The picture starts at once, not after SwiftUI's next pass reaches `.onChange`. A paint
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
+                if samplePress(moves) { return }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)
@@ -206,6 +210,7 @@ struct PhotoWindow: View {
             pacer.stop()
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
+        case .gradientOption(let intent): model.runGradientOption(intent)
         case .adjust(let edit): model.adjust(edit)
         case .endAdjust: model.endAdjust()
         case .selectAll: model.selectAll()
@@ -226,8 +231,8 @@ struct PhotoWindow: View {
         case .sendBackward: model.sendSelectedLayerBackward()
         case .selectLayerAbove: model.selectLayerAbove()
         case .selectLayerBelow: model.selectLayerBelow()
-        case .zoomIn: setZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .zoomIn: setZoom(ZoomMath.zoomedIn(from: zoom))
+        case .zoomOut: setZoom(ZoomMath.zoomedOut(from: zoom))
         case .actualSize: setZoom(1)
         case .fit: fit()
         case .file(let intent): performFile(intent)
@@ -239,6 +244,7 @@ struct PhotoWindow: View {
         case .transform(let intent): performTransform(intent)
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
+        case .place(let intent): performPlace(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }
@@ -262,8 +268,9 @@ struct PhotoWindow: View {
         fit()
     }
 
+    /// Sets the zoom within ZoomMath's range (10% to 3200%).
     private func setZoom(_ scale: Double) {
-        zoom = min(max(scale.isFinite ? scale : 1, ViewerZoom.stops[0]), ViewerZoom.stops[ViewerZoom.stops.count - 1])
+        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
     }
 
     /// Fits the image in the canvas clear of the floating palette (every tool shows while an image is
@@ -271,9 +278,12 @@ struct PhotoWindow: View {
     private func fit() {
         guard let canvas = model.canvas, viewport.width > 0, viewport.height > 0 else { return }
         fitPending = false
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: PhotoTool.allCases.count)
-        let fitted = layout.fitScale(artboard: CGSize(width: canvas.width, height: canvas.height))
-        setZoom(fitted > 0 ? fitted : 1)
+        let toolCount = PhotoTool.allCases.count
+        // The fit EditorDetail hands Command-0, so a fitted image clears the floating palette.
+        let paletteFit: @Sendable (CGSize, CGSize) -> Double = { viewport, artboard in
+            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
+        }
+        setZoom(ZoomMath.fit(document: CGSize(width: canvas.width, height: canvas.height), in: viewport, using: paletteFit))
         fittedZoom = zoom
     }
 

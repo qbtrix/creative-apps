@@ -1,0 +1,141 @@
+{
+  "title": "Help > Report a Problem and Beta Notes: a plain report with the newest crash logs that the person reads and sends themselves, and the known issues, in the launcher and every app",
+  "wave": "BG1",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 suite must-have 3 (suite audit row 3); real job RJ-X65 (new); privacy job RJ-X01's rule (no network call)",
+  "waits_on": "onboarding (built; AfterGlowApp.swift); afterglow-cli (built; Apps.swift); editor-menus wires the Help group into the five editors",
+  "depends": [
+    "onboarding",
+    "afterglow-cli"
+  ],
+  "longest_chain": "6 (RP-1 → RP-2 → RP-3 → RP-5 → RP-6 → RP-7)",
+  "journeys": [
+    "AfterGlowHelpJourneyTests.testReportAProblem"
+  ],
+  "owned": [
+    "Sources/SuiteModel/Help/ProblemReport.swift",
+    "Sources/SuiteModel/Help/BetaNotes.swift",
+    "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
+    "Tests/SuiteModelTests/ProblemReportTests.swift",
+    "Tests/SuiteModelTests/BetaNotesTests.swift",
+    "Tests/SuiteKernelTests/SuiteHelpCatalogTests.swift",
+    "Tests/command-ids/suite.txt",
+    "docs/c4/parts/creative-apps/suite-model/suite-help.json",
+    "Sources/SuiteShell/SuiteHelpCommands.swift",
+    "Sources/SuiteShell/ShellHelpProvider.swift",
+    "Sources/AfterGlowApp/AfterGlowApp.swift",
+    "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
+    "UITests/AfterGlowJourneyTests+Help.swift",
+    "Sources/SuiteUI/ProblemReportSheet.swift",
+    "Sources/SuiteUI/BetaNotesView.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHelpTests.swift",
+    "Sources/SuiteShell/ProblemReportActions.swift",
+    "Tests/mutations/SuiteModel.ProblemReport.json",
+    "Sources/AfterGlowCLICore/Apps.swift",
+    "Sources/AfterGlowCLICore/HelpReports.swift",
+    "Sources/SuiteShell/CrashFolderReader.swift",
+    "Tests/AfterGlowCLITests/HelpReportsTests.swift",
+    "Tests/RealJobs/suite/report-problem/report-problem.jobs.json",
+    "Tests/mutations/SuiteKernel.SuiteHelpCatalog.json",
+    "docs/blueprints/suite/features/report-problem.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "RP-a",
+      "behavior": "SuiteModel declares the report builder and the beta notes and SuiteShell the Help group, as stubs, with the report's checks written and disabled.",
+      "tasks": [
+        "RP-1",
+        "RP-2"
+      ],
+      "journeys": [
+        "MJ-RP"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Help/ProblemReport.swift",
+        "Sources/SuiteModel/Help/BetaNotes.swift",
+        "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
+        "Tests/SuiteModelTests/ProblemReportTests.swift",
+        "Tests/SuiteModelTests/BetaNotesTests.swift",
+        "Tests/SuiteKernelTests/SuiteHelpCatalogTests.swift",
+        "Tests/command-ids/suite.txt",
+        "docs/c4/parts/creative-apps/suite-model/suite-help.json",
+        "Sources/SuiteShell/SuiteHelpCommands.swift",
+        "Sources/SuiteShell/ShellHelpProvider.swift",
+        "Sources/AfterGlowApp/AfterGlowApp.swift",
+        "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
+        "UITests/AfterGlowJourneyTests+Help.swift"
+      ],
+      "waits": {},
+      "ui": true
+    },
+    {
+      "id": "RP-u",
+      "behavior": "Report a Problem opens a sheet with a note field and the report, Copy, Save and Email work without the app sending anything, and Beta Notes opens a window with the known issues, within the render budget.",
+      "tasks": [
+        "RP-3",
+        "RP-3e"
+      ],
+      "journeys": [
+        "XJ-RP"
+      ],
+      "owned": [
+        "Sources/SuiteUI/ProblemReportSheet.swift",
+        "Sources/SuiteUI/BetaNotesView.swift",
+        "Sources/SuiteShell/SuiteHelpCommands.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHelpTests.swift",
+        "Sources/SuiteShell/ProblemReportActions.swift"
+      ],
+      "waits": {
+        "RP-a": [
+          "RP-3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "RP-m",
+      "behavior": "The report reads the newest suite crash files and redacts the home path, user and host, the suite Help catalog runs it and the beta notes in the CLI and the menus, and the feature is built.",
+      "tasks": [
+        "RP-4",
+        "RP-5",
+        "RP-6",
+        "RP-7"
+      ],
+      "journeys": [
+        "MJ-RP",
+        "XJ-RP"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Help/ProblemReport.swift",
+        "Sources/SuiteModel/Help/BetaNotes.swift",
+        "Tests/SuiteModelTests/ProblemReportTests.swift",
+        "Tests/SuiteModelTests/BetaNotesTests.swift",
+        "Tests/mutations/SuiteModel.ProblemReport.json",
+        "Sources/SuiteKernel/Commands/SuiteHelpCatalog.swift",
+        "Tests/SuiteKernelTests/SuiteHelpCatalogTests.swift",
+        "Sources/AfterGlowCLICore/Apps.swift",
+        "Sources/AfterGlowCLICore/HelpReports.swift",
+        "Sources/SuiteShell/CrashFolderReader.swift",
+        "Tests/AfterGlowCLITests/HelpReportsTests.swift",
+        "UITests/AfterGlowJourneyTests+Help.swift",
+        "Tests/RealJobs/suite/report-problem/report-problem.jobs.json",
+        "Tests/mutations/SuiteKernel.SuiteHelpCatalog.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-help.json",
+        "docs/blueprints/suite/features/report-problem.wave.json"
+      ],
+      "waits": {
+        "RP-a": [
+          "RP-4",
+          "RP-5"
+        ],
+        "RP-u": [
+          "RP-6"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}
