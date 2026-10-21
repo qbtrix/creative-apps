@@ -49,6 +49,7 @@ Sources/FlareModel/Live/LiveKeyframes+Edit.swift
 Sources/FlareModel/Live/LiveKeyframes+Frames.swift
 Sources/FlareModel/Live/LiveKeyframes.swift
 Sources/HaloApp/HaloEasingInspector.swift
+Sources/HaloApp/HaloHistoryArea.swift
 Sources/HaloApp/HaloLaunch.swift
 Sources/HaloApp/HaloPNGWriter.swift
 Sources/HaloApp/HaloPlaybackDriver.swift

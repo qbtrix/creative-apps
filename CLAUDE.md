@@ -23,10 +23,12 @@ for your PR alone, and you never start one yourself for routine work. So:
   `needs-fix` on your PR; one only the full run sees shows up in the next
   feature CI as a "dev is red" issue whose culprit range names your PR.
 - The `macOS` job uploads the `snapshots` artifact (PNGs written by
-  `Tests/AppSnapshotTests`), and the report-only `macOS journeys` job clicks
+  `Tests/AppSnapshotTests`), and the report-only `macOS journeys` job (its
+  own workflow, journeys.yml, which each CI run on `dev` dispatches) clicks
   through every app (`UITests/<X>JourneyTests.swift`), uploading
-  whole-window screenshots as `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`,
-  then `gh run download <id> -n snapshots` or `-n ui-screens`. A user-facing
+  whole-window screenshots as `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`
+  (`--workflow journeys.yml` for the journeys), then `gh run download <id> -n snapshots`
+  (`-n ui-screens` from a journeys run). A user-facing
   feature adds or extends its app's journey test (docs/engineering.md,
   Human-like UI tests).
 
@@ -163,11 +165,14 @@ something. One that can't act yet is disabled and says why:
   GRDB `/groue/grdb.swift` and Swift `/swiftlang/swift`).
 - **Every source file has a C4 owner.** `scripts/ci` fails when a file under
   `Sources/` is not in exactly one component's `paths` in `docs/c4/model.json`.
-  Each target's folder is a component, so a new file in a target is covered;
-  if it adds something that component's description doesn't mention, update
-  the description in the same PR. The model is assembled from one file per
-  component in `docs/c4/parts/` (`scripts/c4-assemble`): edit that part, or
-  add a part for a new component, never the generated model.json.
+  Each target's folder is a component, so a new file in a target is covered
+  and needs no C4 edit. Don't touch an existing part's `description`: it is
+  one string, and two PRs that append to it always conflict, so
+  `scripts/ci --changed` fails a PR that changes one unless the PR adds a
+  part or changes nothing outside `docs/c4/parts/` (a C4-only refresh). The
+  model is assembled from one file per component in `docs/c4/parts/`
+  (`scripts/c4-assemble`): edit that part's `paths`, or add a part with its
+  own description for a new component, never the generated model.json.
 - **Views are dumb.** Files under `Sources/*App/` read their Model and call its
   methods; they never assign its state, bind to it, or mutate its collections.
   `scripts/ci` fails on that (the app-state rule). Model state is
@@ -369,16 +374,14 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   its starting counts in existing apps, at any count, when the same PR adds
   its file and registry entry.
 - A count that falls doesn't fail the journeys, and you don't lower the
-  baseline by hand: after a green macOS run on `dev`, CI's `Audit lower` job
+  baseline by hand: after a full journeys run on `dev` passes, journeys.yml's `Audit lower` job
   commits the measured counts to `UITests/audit-baseline.json` ("test(audit):
   lower baselines to the measured counts") straight onto `dev`. It only ever
   lowers; a count over its baseline fails instead.
 - A PR that breaks a hard rule (author, size outside the docs tier, protected
   path, a looser app audit) loses the label with a comment saying why and
   waits for review.
-- Full CI (`Linux`; `macOS`, scripts/ci with the snapshots; and the
-  report-only `macOS journeys`, which a branch dispatch skips unless
-  `-f journeys=true`) runs on `dev`
+- Full CI (`Linux`; `macOS`, scripts/ci with the snapshots) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
   dispatches it, when the lane merges a PR labelled `feature-done` or one
   touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, after
@@ -393,13 +396,28 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   each get a Linux-only run (red-triage's confident guess first, at most 8
   runs per red), and the verdict lands as a comment on the `dev-red` issue
   and on the owning feature-lead issue (the PR body's `Feature:` line).
+- The report-only UI journeys run in their own workflow,
+  `.github/workflows/journeys.yml` (job `macOS journeys`, `macOS journeys
+  (<app>)` when scoped; artifact `ui-screens`; Findings and `Audit lower`),
+  dispatched by ci.yml's last job, `Journeys dispatch`, once a full or scoped
+  CI run on `dev` has finished its gate jobs (a full run: every journey; a
+  scoped run: that app's; a Linux check, build-only run or macOS gate: none).
+  It is a dispatch, not a workflow_run trigger, because CI runs the lane
+  starts with GITHUB_TOKEN fire no workflow_run. Its run is titled `after CI
+  run <id>: journeys <app|full> at <sha>` and checks out the commit that CI
+  run tested. Its concurrency group is
+  `journeys-<branch>-<app|full>`, so a journeys job waiting for a macOS
+  runner never holds `ci-dev`. A running journeys run is never cancelled;
+  only the newest pending run of each scope waits. On a branch, or to ask for one by hand: `gh workflow
+  run journeys.yml --ref <branch> [-f app=<app>]` (findings and the audit
+  baseline move only on `dev`).
 - A scoped run proves one app: `gh workflow run ci.yml --ref dev -f
   app=<flare|design|photo|library|halo|suite|suiteui>`. It still builds every
-  target, app bundle and journey bundle, then runs only that app's Model
-  tests, snapshot tests and journeys (titled `scoped: <app>`, jobs `macOS
-  (<app>)` and `macOS journeys (<app>)`; about 10 min for Design, longer for
-  apps with more journeys; on a branch, add `-f journeys=true`, since journeys
-  run only on `dev` unless asked). It skips the Linux job and never promotes `main`,
+  target and app bundle, then runs only that app's Model
+  tests and snapshot tests (titled `scoped: <app>`, job `macOS (<app>)`;
+  about 10 min for Design), and on `dev` its `Journeys dispatch` job starts that app's
+  journeys (`macOS journeys (<app>)` in journeys.yml; on a branch, dispatch
+  journeys.yml with `-f app=<app>` yourself). It skips the Linux job and never promotes `main`,
   opens `dev-red` or lowers the audit baseline. The supervisor's
   verify-dispatch.sh starts one per app after that app's merges.
 - A journey that keeps failing on `dev` for a known reason can be quarantined,
@@ -432,8 +450,9 @@ bash Tests/bump_core/test_bump_core.sh       # scripts/bump-core against a fake 
 scripts/install-merge-drivers                # once per clone: .gitattributes merge drivers (JSON by key) and rebase.updateRefs; cloud-setup.sh runs it
 bash Tests/merge_drivers/test_merge_drivers.sh # the merge drivers on scratch repos (needs git, jq)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
+gh run list --workflow journeys.yml          # the UI journeys runs that follow them
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
-gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys
+gh run download <run-id> -n ui-screens       # whole-window PNGs from a journeys.yml run
 scripts/ui-test                              # macOS + Xcode + xcodegen: run the UI journeys locally
 scripts/contact-sheet                        # after ui-test: .build/ui-screens/contact-sheet.html, the page to review per run
 scripts/bundle-apps                          # macOS: release builds as signed FlareApp.app ... HaloApp.app in .build/apps; CI uploads them as `app-builds` (app-builds.tar.gz)
