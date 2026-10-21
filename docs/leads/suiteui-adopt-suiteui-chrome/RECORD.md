@@ -1,17 +1,17 @@
 # adopt-suiteui-chrome lead record
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
-Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet; earlier run act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
-Stage: 0 setup (blocked on shared-codecs:SC-f)
-Base: dev e0fb9919 (main 0dd23d65 verified)
-Next: re-read shared-codecs:SC-f (SC-13 #4019 merged; SC-14 #4238 open; SC-15, SC-16 not yet opened); start AC-e1 once SC-16 merges
+Run: act-1a160ca3d68-sbnc (#1942 only; slices AC-tools, AC-export-sheet; earlier runs act-1a15ef870d6-3mm5, act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-fhl6sx · Resumed: 2026-10-21
+Stage: 3 build (AC-tools p2 #4002 in lane; AC-export-sheet blocked on shared-codecs:SC-f)
+Base: dev be9aa35b
+Next: #4002 (head cbada801) merges via the lane, then a green ci.yml run (app=suiteui or full) containing it gives AC-tools Belt-Slice-Done + Mac-Finish-Wanted; re-read shared-codecs:SC-f (SC-14 #4238 open; SC-15, SC-16 not yet opened) and start AC-e1 once SC-16 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | done | – | – |
 | AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 1 | done (per Belt brief act-1a15ef870d6-3mm5) | 39604117821 | wanted |
-| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | done (per Belt brief act-1a15ef870d6-3mm5) | – | – |
+| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | building: p1 #3952 merged, p2 #4002 (head cbada801) in lane | – | – |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
 | AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare (met), shared-codecs:SC-f (open) | yes | 0 | blocked-SC-f | – | – |
 
@@ -22,8 +22,8 @@ Next: re-read shared-codecs:SC-f (SC-13 #4019 merged; SC-14 #4238 open; SC-15, S
 | AC-z2 | AC-zoom | – | zoom delete | per packet | same + mutate --validate | – | parked |
 | AC-c1 | AC-colour | – | colour adapter | per packet | HexColorParserTests, DesignStyleTests, DesignInspectorSnapshots | – | parked |
 | AC-c2 | AC-colour | – | colour delete | per packet | same + mutate --validate | – | parked |
-| AC-t1 | AC-tools | – | tools adapter | per packet | FlareToolsKeyTests, DesignToolsKeyTests, PhotoToolsKeyTests | – | parked |
-| AC-t2 | AC-tools | – | tools delete | per packet | same + mutate --validate | – | parked |
+| AC-t1 | AC-tools | – | tools adapter | per packet | FlareToolsKeyTests, DesignToolsKeyTests, PhotoToolsKeyTests | #3952, #4002 | #3952 merged; #4002 in lane |
+| AC-t2 | AC-tools | – | tools delete | per packet | same + mutate --validate | #4002 | in lane |
 | AC-g1 | AC-guides | – | guides adapter | per packet | FlareStageGuideSnapshots, GuideLineMarkTests | – | parked |
 | AC-g2 | AC-guides | – | guides delete | per packet | same + mutate --validate | – | parked |
 | AC-e1 | AC-export-sheet | – | export sheet adapter | per packet | PhotoExportSheetSnapshots, LibraryExportSnapshots, FlareExportSnapshots | – | parked |
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f (SC-13 #4019 merged; SC-14 #4238 open; SC-15, S
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T00:00Z: run act-1a160ca3d68-sbnc resumed from this record (Belt: status lives on this branch). AC-tools corrected from "done" to building: #4002 (AC-t1 Design/Photo + AC-t2 deletes) never merged. Merged origin/dev be9aa35b into #4002 (brings #4250's fix for dev's #3856 baseline), scripts/ci --changed PASS, pushed cbada801, Head line moved; mergeable clean, fast-lane. SC-f re-read: #4238 (SC-14) open and clean, SC-15/16 not opened; AC-e1 still waits
 - 2026-10-21T22:51Z: SC-14 opened as #4238 (open); SC-15, SC-16 not yet opened; no supervisor reply; AC-e1 still waits
 - 2026-10-21T22:20Z: #4019 (SC-13) merged into dev 22:09Z (lane note: dev red on its own, run 39682547538); no SC-14..16 PR yet; no supervisor reply; AC-e1 still waits
 - 2026-10-21T21:49Z: #4019 (SC-13) still open, unchanged since 19:48Z (macOS build green); no SC-14..16 PR; no supervisor reply; AC-e1 still waits
