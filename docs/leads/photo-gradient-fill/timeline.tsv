@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-20T23:57Z	3	mac-red	#3681	macOS build 39484077277 failed: PhotoToolsTests:136 ambiguous == (array literal, Foundation import); fixing on PG-1
 2026-10-21T00:07Z	3	pushed	#3681	PG-1 mac fix ee6da4d4, CI: PASS, Head moved; waits a macOS build
 2026-10-21T00:07Z	3	pushed	PG-2,PG-3,PG-4	mac fix cherry-picked onto the held branches
+2026-10-21T00:17Z	3	heartbeat	-	#3681 macOS build dispatched 00:07Z on ee6da4d4; #3695 open; no supervisor reply
