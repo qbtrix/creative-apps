@@ -29,3 +29,5 @@ utc	stage	event	ref	note
 2026-10-21T16:23Z	2026-10-21T16:23Z	wave	lane	#4021 #4023	CS-1 CS-2 in lane; wave 2 after shell-media
 2026-10-21T17:50Z	2026-10-21T17:50Z	wave2	prs	#4130 #4134 #4140 #4144	CS-1b, CS-3 6/6, CS-9 4/4, CS-13 6/6 drafts; photo.txt max 9->10 for dev's CanvasSizeSheet
 2026-10-21T18:06Z	2026-10-21T18:06Z	lane	rebase-fixed	#4023	dev merged, photo.txt max 10, head 90a7a388
+2026-10-21T20:21Z	2026-10-21T20:21Z	heartbeat	resume	-	run act-1a1601c3538-r0c9 resumed; CS-1 #4021 and CS-2 #4023 merged
+2026-10-21T20:21Z	2026-10-21T20:21Z	wave2	stage-start	#4130 #4134 #4140 #4144	bringing up drafts on dev 0599560
