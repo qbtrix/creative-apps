@@ -11,8 +11,8 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 |---|---|---|---|---|---|---|---|---|---|
 | FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | done: Belt-Slice-Done posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
 | FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | done: merged #3963; Belt-Slice-Done + Mac-Finish-Wanted posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
-| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 merged #3961; FO-5 PR #4022 in the lane | – | – |
-| FO-z | live, RJ-L53, built | FO-6, FO-7 | LJ-FO, MJ-FO | FO-u, FO-m | yes | 0 | FO-6 draft PR #4121 (stacked on #4022) | – | – |
+| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | done: FO-4 #3961, FO-5 #4022 (e0e2732) merged; Belt-Slice-Done posted | https://github.com/qbtrix/creative-apps/actions/runs/39664459063 | – |
+| FO-z | live, RJ-L53, built | FO-6, FO-7 | LJ-FO, MJ-FO | FO-u, FO-m | yes | 0 | FO-6 PR #4121 ready, in the lane at 18efe8b | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -56,3 +56,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T19:07Z: Watch: FO-5 #4022 at 2ef801b is in the lane waiting on its macOS build (runner backlog). FO-6 #4121 stays a draft until it merges. No dev CI run contains FO-m yet.
 
 - 2026-10-21T19:38Z: FO-5 #4022 merged into dev as e0e2732, in a batch of 8 whose Linux check passed. FO-6 #4121: dev merged in (FO-6 alone, 11 files), gate PASS, CommandPathTests pass, pushed 18efe8b, Head moved, marked ready. FO-m's Belt-Slice-Done waits on a dev CI run containing e0e2732 with a green Linux job.
+
+- 2026-10-21T20:03Z: FO-m done: dev CI run 39664459063 (369ecc7, contains FO-5's e0e2732) Linux green. Belt-Slice-Done posted on #3787. FO-6 #4121 waits on its lane macOS build.
