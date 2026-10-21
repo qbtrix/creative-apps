@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: W6 all PT merged; waiting on a dev run
+Stage: await green dev run (39665258026 full / 39665905219 photo, queued)
 Base: dev
-Next: full CI 39665258026 or scoped photo 39665905219 green, then critic panel and Belt-Slice-Done PT-m, PT-z
+Next: critic panel + Belt-Slice-Done on green; PP-7 #4175 in lane
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 

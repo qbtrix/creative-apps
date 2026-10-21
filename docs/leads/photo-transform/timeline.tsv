@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-21T19:54Z	full CI 39665258026 queued at 369ecc7a2 (contains PT-8)
 2026-10-21T20:16Z	20:17Z full CI 39665258026: Linux green, macOS queued; #4175 in lane
 2026-10-21T20:39Z	20:40Z macOS queue still backed up; 39665258026 and scoped photo 39665905219 queued; #4175 mac build dispatched
+2026-10-21T21:01Z	21:01Z heartbeat: runs queued; #4175 awaiting per-head macOS build
