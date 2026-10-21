@@ -46,3 +46,4 @@ time	kind	note
 2026-10-21T21:11Z	3	heartbeat	-	no merges yet; #4159 #4187 #4189 #4197 #4178 open in fast lane, no needs-fix
 2026-10-21T21:33Z	3	heartbeat	-	no merges; lane macOS builds queued (e.g. run 39662239121 for #4159 queued since 19:30, no runner)
 2026-10-21T22:05Z	3	check	DG-8	design-export still status planned on dev; DG-8 waits
+2026-10-21T22:38Z	3	heartbeat	-	no merges; lane macOS build run 39662239121 (#4159) still queued since 19:30, no macOS runner picks up lane builds
