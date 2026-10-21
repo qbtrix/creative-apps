@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-21T02:19Z	3	heartbeat	-	poll 2: shell-text ST-a not on dev
 2026-10-21T02:22Z	3	question	#3730	poll 3: ST-a absent; Question for the supervisor posted
 2026-10-21T02:44Z	3	parked	#3730	supervisor answer (c): blocked on shell-text ST-a #3725
+2026-10-21T03:41Z	parked	check	#3725	shell-text still open; font-picker stays parked until ST-a lands
