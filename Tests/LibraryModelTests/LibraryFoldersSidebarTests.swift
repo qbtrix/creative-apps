@@ -32,7 +32,7 @@ import Testing
         #expect(empty.showFolderHelp == "Import a folder to see its folders.")
         let trips = LibraryFoldersTests.catalog(LibraryFoldersTests.trips)
         #expect(trips.folderTree == LibraryFolders.tree(trips.items))
-        // The stub: with photos, view.show-folder isn't built yet (FO-5 makes this nil).
-        #expect(trips.showFolderHelp == "Folders arrive with FO-4.")
+        // FO-5: with photos in a folder, view.show-folder is available, so there is no reason to show.
+        #expect(trips.showFolderHelp == nil)
     }
 }
