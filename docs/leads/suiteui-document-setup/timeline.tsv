@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-21T20:54Z	3	poll	#4182	macOS build 39671351382 queued; #4184 waits; no findings
 2026-10-21T21:12Z	3	poll	#4182	macOS build 39671351382 in progress; #4184 waits; no findings
 2026-10-21T21:25Z	3	poll	#4182	macOS build 39671351382 still in progress; no lane labels
+2026-10-21T21:38Z	3	lane-mac	#4182	macOS build 39671351382 success; waiting on the lane sweep (run 39679102627)
