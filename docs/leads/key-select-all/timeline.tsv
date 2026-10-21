@@ -3,3 +3,4 @@ time	event
 2026-10-21T06:04Z	3	pr-opened	#3921	KS-a slice PR (KS-1, KS-2), mutate 4/4
 2026-10-21T06:23Z	3	heartbeat	#3921	KS-a in the lane (macOS build dispatched); KS-z waits #3499 (open)
 2026-10-21T06:40Z	check	dev 0865916d; #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
+2026-10-21T06:57Z	check	dev b64cbb8c (core bump #3784); #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
