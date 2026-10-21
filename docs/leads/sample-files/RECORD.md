@@ -2,17 +2,17 @@
 
 Issue: #3775 · Packet: docs/blueprints/suite/features/sample-files.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
-Stage: 3 wave 3
+Stage: 3 wave 4
 Base: 9951eea7355e5a768f0ce1e1bad25656cf05cd82
-Next: wave 3 builders running: SS-raster (SS-5 + SS-6) and SS-vector-b (Title/Logo.flare fixtures), each a draft stacked on #4100; on their PRs, plan SS-z
+Next: wave 4 builder running: SS-z (SS-7 + SS-8, Bounce fixture copy), draft stacked on #4115; poll #4094 (macOS build-only run 39623825564 green), #4100, #4112, #4115
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SS-a | make step turns each sample script into its file; the per-file open check is written, disabled | SS-1, SS-2 | MJ-SS | – | no | 0 | pr-open #4094 | – | – |
 | SS-vector | Cards/Logo .design and Bounce/Title/Logo .flare made by script, committed, open | SS-3, SS-4 | MJ-SS | SS-a | no | 0 | pr-open #4100 (+ follow-up for fixtures) | – | – |
-| SS-raster | beach.ora, Sunset.png, Intro.halo made by script, committed, open | SS-5, SS-6 | MJ-SS | SS-a, SS-vector | no | 0 | building | – | – |
-| SS-z | every tour tile opens its sample; RJ-X66; feature built | SS-7, SS-8 | XJ-SS, MJ-SS | SS-vector, SS-raster | no | 0 | planned | – | – |
+| SS-raster | beach.ora, Sunset.png, Intro.halo made by script, committed, open | SS-5, SS-6 | MJ-SS | SS-a, SS-vector | no | 0 | pr-open #4115 (beach.ora held on #4113) | – | – |
+| SS-z | every tour tile opens its sample; RJ-X66; feature built | SS-7, SS-8 | XJ-SS, MJ-SS | SS-vector, SS-raster | no | 0 | building | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -20,11 +20,11 @@ Next: wave 3 builders running: SS-raster (SS-5 + SS-6) and SS-vector-b (Title/Lo
 | SS-1 | SS-a | 1 | SampleFilesTests (AfterGlowCLITests): each catalog sample is in Bundle/Samples, opens headless, has its content, re-saves; disabled per file | Tests/AfterGlowCLITests/SampleFilesTests.swift | itself (compiles, disabled by name) | #4094 | pr-open |
 | SS-2 | SS-a | 1 | make step: runs Bundle/Samples/make/*.jobs.json through AfterGlowCLICore into Bundle/Samples and UITests/Fixtures/suite; check mode fails on a stale sample (Swift test, not scripts/make-samples, see Decisions) | Tests/AfterGlowCLITests/SampleFilesTests.swift (or a sibling file), Bundle/Samples/README.md | make check on an empty make folder passes; a stale sample fails | #4094 | pr-open |
 | SS-3 | SS-vector | 2 | Design: Cards and Logo scripts and files; rows on | Bundle/Samples/make/Cards.design.jobs.json, Bundle/Samples/make/Logo.design.jobs.json, Bundle/Samples/Cards.design, UITests/Fixtures/suite/Cards.design, UITests/Fixtures/suite/Logo.design, Tests/AfterGlowCLITests/SampleFilesTests.swift | SampleFilesTests.testCards, .testLogoDesign | #4100 | pr-open |
-| SS-4 | SS-vector | 2 | Flare: Bounce (position and scale keys, 2 s loop), Title, Logo; rows on | Bundle/Samples/make/Bounce.flare.jobs.json, Bundle/Samples/make/Title.flare.jobs.json, Bundle/Samples/make/Logo.flare.jobs.json, Bundle/Samples/Bounce.flare, UITests/Fixtures/suite/Bounce.flare, UITests/Fixtures/suite/Title.flare, UITests/Fixtures/suite/Logo.flare | SampleFilesTests.testBounce, .testTitle, .testLogoFlare | #4100 (Bounce); Title/Logo fixtures in SS-vector-b; Bounce fixture copy in SS-z | pr-open |
-| SS-5 | SS-raster | 3 | Photo: beach.ora (gradient, second layer, adjustment) and Sunset.png (flattened export); rows on | Bundle/Samples/make/beach.ora.jobs.json, Bundle/Samples/make/Sunset.png.jobs.json, Bundle/Samples/beach.ora, Bundle/Samples/Sunset.png, UITests/Fixtures/suite/beach.ora, UITests/Fixtures/suite/Sunset.png, Tests/AfterGlowCLITests/SampleFilesTests.swift | SampleFilesTests.testBeach, .testSunset | – | building |
-| SS-6 | SS-raster | 3 | Halo: Intro (5 s comp, solid, title text with opacity fade, shape sliding in); row on | Bundle/Samples/make/Intro.halo.jobs.json, Bundle/Samples/Intro.halo, UITests/Fixtures/suite/Intro.halo | SampleFilesTests.testIntro | – | building |
-| SS-7 | SS-z | 4 | journey testOpenEverySample; RJ-X66 job folder | UITests/AfterGlowJourneyTests+Onboarding.swift, Tests/RealJobs/suite/open-samples/open-samples.jobs.json | XJ-SS; RJ-X66 on Linux | – | planned |
-| SS-8 | SS-z | 4 | status built; feature-done | docs/blueprints/suite/features/sample-files.wave.json | scripts/waves render --dry-run | – | planned |
+| SS-4 | SS-vector | 2 | Flare: Bounce (position and scale keys, 2 s loop), Title, Logo; rows on | Bundle/Samples/make/Bounce.flare.jobs.json, Bundle/Samples/make/Title.flare.jobs.json, Bundle/Samples/make/Logo.flare.jobs.json, Bundle/Samples/Bounce.flare, UITests/Fixtures/suite/Bounce.flare, UITests/Fixtures/suite/Title.flare, UITests/Fixtures/suite/Logo.flare | SampleFilesTests.testBounce, .testTitle, .testLogoFlare | #4100 (Bounce); Title/Logo fixtures in #4112 (SS-vector-b); Bounce fixture copy in SS-z | pr-open |
+| SS-5 | SS-raster | 3 | Photo: beach.ora (gradient, second layer, adjustment) and Sunset.png (flattened export); rows on | Bundle/Samples/make/beach.ora.jobs.json, Bundle/Samples/make/Sunset.png.jobs.json, Bundle/Samples/beach.ora, Bundle/Samples/Sunset.png, UITests/Fixtures/suite/beach.ora, UITests/Fixtures/suite/Sunset.png, Tests/AfterGlowCLITests/SampleFilesTests.swift | SampleFilesTests.testBeach, .testSunset | #4115 (Sunset; beach held on #4113) | pr-open |
+| SS-6 | SS-raster | 3 | Halo: Intro (5 s comp, solid, title text with opacity fade, shape sliding in); row on | Bundle/Samples/make/Intro.halo.jobs.json, Bundle/Samples/Intro.halo, UITests/Fixtures/suite/Intro.halo | SampleFilesTests.testIntro | #4115 | pr-open |
+| SS-7 | SS-z | 4 | journey testOpenEverySample; RJ-X66 job folder | UITests/AfterGlowJourneyTests+Onboarding.swift, Tests/RealJobs/suite/open-samples/open-samples.jobs.json | XJ-SS; RJ-X66 on Linux | – | building |
+| SS-8 | SS-z | 4 | status built; feature-done | docs/blueprints/suite/features/sample-files.wave.json | scripts/waves render --dry-run | – | building |
 
 Wave plan (one PR per slice, brief rule 10; each slice PR stacks on the one before as a draft until it merges):
 - Wave 1: SS-a (SS-1 + SS-2). Independent of shell-text.
@@ -48,6 +48,9 @@ Wave plan (one PR per slice, brief rule 10; each slice PR stacks on the one befo
 - Waves are 1 to 2 tasks with nothing alongside, so each runs as one worktree subagent (lead.md stage 3).
 
 ## Open
+- #4112 (SS-vector-b, draft on #4100): Title.flare and Logo.flare fixtures with their fixtures-only make files; 231 lines over #4100.
+- #4115 (SS-raster, draft on #4100): Sunset.png and Intro.halo with make files and fixtures; 66 lines over #4100. beach.ora held: #4113 gap (line:photo, p1) .ora save is not byte-stable (adjustment set in hash order); its make file is in scratchpad/beach.ora.jobs.json. testBeach and beachOra rows stay disabled, pointing at #4113.
+- #4114 gap (line:halo, p2): headless text.set-color refuses solid and shape layers; Intro's solid and shape keep default colors.
 - #4100 (SS-vector, draft on #4094): Cards.design, Logo.design fixture, Bounce.flare. Flare files are pretty JSON, the full slice was 808 lines, so Title/Logo.flare fixtures go in a follow-up PR (SS-vector-b, make files kept in scratchpad/deferred) and Bounce's UITests fixture copy rides with SS-z.
 - #4108 gap (line:flare): headless Flare commands only reach layer id layer-1; make files use layer-1/layer-2.
 - Belt reads lead/suite-<feature> with docs/leads/suite-<feature>/; every record push mirrors to both names.

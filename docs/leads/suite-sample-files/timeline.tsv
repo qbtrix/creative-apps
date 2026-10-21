@@ -8,3 +8,8 @@ utc	stage	event	ref	note
 2026-10-21T16:05Z	3	pr-opened	#4100	SS-vector (Cards, Logo.design fixture, Bounce) draft on #4094
 2026-10-21T16:05Z	3	finding-filed	#4108	gap line:flare headless layer id
 2026-10-21T16:05Z	3	stage-start	wave 3	SS-raster + SS-vector-b on #4100
+2026-10-21T16:46Z	3	pr-opened	#4112	SS-vector-b Title/Logo.flare fixtures draft on #4100
+2026-10-21T16:46Z	3	pr-opened	#4115	SS-raster Sunset.png, Intro.halo draft on #4100
+2026-10-21T16:46Z	3	finding-filed	#4113	gap line:photo .ora save not byte-stable
+2026-10-21T16:46Z	3	finding-filed	#4114	gap line:halo text.set-color on solid/shape
+2026-10-21T16:46Z	3	stage-start	wave 4	SS-z on #4115
