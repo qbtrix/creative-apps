@@ -173,9 +173,14 @@ every step.
   `scripts/bundle-apps` writes to `.build/apps`.
 - **How they run.** `scripts/ui-test` builds the bundles, generates the
   project, runs the `Journeys` scheme and exports every screenshot to
-  `.build/ui-screens/<app>-<step>.png`. The `macOS journeys` CI job runs it
-  on its own runner and uploads the folder as the `ui-screens` artifact
-  (`gh run download <id> -n ui-screens`). A failed step fails that job and
+  `.build/ui-screens/<app>-<step>.png`. The `macOS journeys` job runs it
+  in its own workflow, `.github/workflows/journeys.yml`, which every full or
+  scoped CI run on `dev` dispatches from its last job (scoped to the CI run's
+  app, if any), and
+  uploads the folder as the `ui-screens` artifact of that journeys run
+  (`gh run list --workflow journeys.yml`, then `gh run download <id> -n
+  ui-screens`). Its own concurrency group means a journeys job waiting for a
+  macOS runner never holds CI's. A failed step fails that job and
   files a `finding` issue on dev; the job is report-only, so it never holds
   `main` or a PR. Gate: none (report-only).
 - **Quarantine is owned and expires.** The supervisor can skip a journey that
@@ -203,7 +208,7 @@ every step.
   Step names are unique within an app, because they become the PNG names.
 - **Look at the shots.** Name the `<app>-*.png` files your change touches in
   the PR body. The reviewer opens them from the `ui-screens` artifact of the
-  next feature CI run on `dev`, the same way as snapshots. Review-only.
+  journeys.yml run that follows the next feature CI run on `dev`. Review-only.
 - **The app audit checks every shot.** Each window shot runs the audit's
   checks (disabled controls look dimmer, no overlapping controls, text
   contrast, identifiers, nothing off the window, every control named) and
