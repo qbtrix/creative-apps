@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-21T02:26Z	0	stage-start	#3482	line lead act-1a15c47678d-i2ih
 2026-10-21T02:45Z	2	stage-end	#3482	plan: FL-1 now; FL-2 waits PF-u
 2026-10-21T02:45Z	3	stage-start	wave 1	FL-1
+2026-10-21T02:47Z	3	pr-open	#3843	FL-1 adapter stubs, 172 lines, Slice FL-a

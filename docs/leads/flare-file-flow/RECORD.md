@@ -4,14 +4,14 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a15c47678d-i2ih · Session: session_01KmedgAV8daBEtcQfR1LURr · Started: 2026-10-21T02:26Z (line lead: stage-edit #1514, file-flow #3482, export-pack #3481)
 Stage: 3 wave 1
 Base: 2ab0eb96 (origin/dev)
-Next: FL-1 (adapter stubs and the disabled FlareFileFlowTests) building, then the FL-a slice PR. FL-2 starts once svg-place:PF-u has merged.
+Next: FL-1 is in the lane as #3843. FL-2 starts once svg-place:PF-u has merged, then FL-u (FL-5, FL-6) stacks on FL-a.
 
 Loop: v3 (the packet has a `## Slices` table).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FL-a | SuiteDocumentHost and FileFlowTarget on stubs; .suiteApp, Open Recent, Open In and the drop on the fakes | FL-1, FL-2 | MFL | SF-a (on dev); svg-place:PF-u (FL-2) | yes | 0 | building FL-1 | | |
+| FL-a | SuiteDocumentHost and FileFlowTarget on stubs; .suiteApp, Open Recent, Open In and the drop on the fakes | FL-1, FL-2 | MFL | SF-a (on dev); svg-place:PF-u (FL-2) | yes | 0 | FL-1 in lane (#3843) | | |
 | FL-u | menu and drop mark snapshots, render budget, journey written | FL-5, FL-6 | FLJ1 | FL-a | yes | 0 | waiting | | |
 | FL-m | hand-offs accepted, old recents imported once, suite list, opens and saves noted | FL-3, FL-4 | MFL | FL-a; SF-5, SF-6, SF-7 (on dev); gradient-fill:FG-m; shape-tools:FS-m, stroke-style:FK-m, svg-place:PF-m (FL-3) | yes | 0 | waiting | | |
 | FL-z | live drop, Open Recent, Open In; journey passes; built | FL-7, FL-8 | FLJ1 | FL-u, FL-m; SF-8; export-pack:FV-z; svg-place:PF-z | no | 0 | waiting | | |
@@ -19,7 +19,7 @@ Loop: v3 (the packet has a `## Slices` table).
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FL-1 | FL-a | 1 | adapter as stubs, tests disabled | Sources/FlareModel/FlareFileFlow+Kernel.swift, Tests/FlareModelTests/FlareFileFlowTests.swift | compiles; FlareFileFlowTests disabled | – | building |
+| FL-1 | FL-a | 1 | adapter as stubs, tests disabled | Sources/FlareModel/FlareFileFlow+Kernel.swift, Tests/FlareModelTests/FlareFileFlowTests.swift | compiles; FlareFileFlowTests disabled | – | #3843 3c7abf91, CI: PASS (--changed) |
 | FL-2 | FL-a | 2 | .suiteApp, SuiteFileCommands, .suiteFileDrop | FlareApp.swift, FlareCommands.swift, FlareStage.swift | FlareFileFlowSnapshots.menu | – | waits svg-place:PF-u |
 
 ## Decisions
