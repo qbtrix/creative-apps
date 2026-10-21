@@ -3,8 +3,8 @@
 // the status line as its reason; the toolbar's History button toggles the panel, shows it as
 // selected while it is shown, and is off with its reason with no file or no panel to show; the
 // panel shown by DesignHistoryArea is on screen and hidden is not; and the panel follows undo
-// and redo, its current row moving with the listing's index. A jump that lands needs DA-5's
-// adapter bodies, so that test stays disabled. macOS only.
+// and redo, its current row moving with the listing's index. A row click lands on its step
+// through DA-5's adapter, and a jump past the rows says why it did nothing. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -54,12 +54,12 @@ import Testing
     @Test func refusedJumpShowsItsReason() throws {
         var model = try Self.edited(3)
         let sent = Sent()
-        DesignHistoryArea.jump(1, with: { try model.jumpHistory(to: $0) }, onNote: { sent.notes.append($0) })
-        #expect(sent.notes == [DesignRefusal.notBuilt("History").help])
+        DesignHistoryArea.jump(9, with: { try model.jumpHistory(to: $0) }, onNote: { sent.notes.append($0) })
+        #expect(sent.notes == [DesignRefusal.unchanged.help])
         #expect(model.historyListing.index == 3, "a refused jump moved the history")
     }
 
-    @Test(.disabled("DA-5 writes the adapter bodies")) func rowClickLandsOnTheStep() throws {
+    @Test func rowClickLandsOnTheStep() throws {
         var model = try Self.edited(3)
         try model.jumpHistory(to: 1)
         #expect(model.historyListing.index == 1)
