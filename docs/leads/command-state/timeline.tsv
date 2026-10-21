@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T22:05Z	2026-10-21T22:05Z	build	drafts	#4210 #4214 #4225	CS-8/12/5 drafts, gate pass; needs-ui #4208 filed; CS-6 assigned
 2026-10-21T22:17Z	2026-10-21T22:17Z	build	draft	#4234	CS-6 draft, gate pass, library max 13; needs-ui #4227 filed
 2026-10-21T22:24Z	2026-10-21T22:24Z	check	heartbeat	#4201	lane still red on launcher.txt:21 until #4201; no merges; drafts wait on parents; bodies clean
+2026-10-21T22:46Z	2026-10-21T22:46Z	check	heartbeat	#4201	no merges; batch lane/batch-20261021221623-4 red again; #4201 eligible (clean, marker on head) and waiting on the lane
