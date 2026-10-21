@@ -107,7 +107,7 @@ struct PhotoEditor: View {
 
 /// The canvas: the rendered picture (CanvasTiles on SuiteUI's EmbeddedCanvasHost) on the checkerboard with PhotoCanvasOverlay's
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
+/// with the canvas focused, V M B E S J C I G T pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
 /// or deselect). A PNG or JPEG dropped on an open image places at the drop point (PhotoPlace.swift);
 /// any other file, or a drop with no image open, opens it. While the Straighten sheet is
@@ -153,6 +153,8 @@ struct PhotoCanvas: View {
                     {
                         StraightenMarks(frame: frame, cropToFit: straighten.cropToFit, zoom: zoom)
                     }
+                    PhotoTextBoxOverlay(model: model, zoom: zoom, perform: perform)
+                        .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                 }
             } else {
                 EmptyStateView(
