@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-21T16:33Z	W4 builders: PT-6 from dev, PT-7 stacked on #4005
 2026-10-21T16:47Z	PT-7 #4127 opened stacked on #4005 at f7e70c8d; sent back to merge dev (PT-5 live) and drop stub expectations
 2026-10-21T16:56Z	#4005 PT-3 merged; #4127 sentinel needs-split measured while stacked, now +163/2
+2026-10-21T16:57Z	PT-7 #4127 merged dev, turned on, real budget asserts, head 9794f98, ci --changed PASS
