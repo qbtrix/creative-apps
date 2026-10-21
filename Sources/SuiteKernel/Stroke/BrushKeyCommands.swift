@@ -37,23 +37,43 @@ public enum BrushKeyCommands {
     /// settings, not the document), then the selected layers' opacity, one undo step.
     public static func specs<T: BrushKeyTarget>(_ target: T.Type) -> [CommandSpec<T>] {
         [
-            step("brush.size-up", "Larger Brush", "Steps the brush size up: by 1 under 10, 5 under 100, 25 under 300, 50 above."),
-            step("brush.size-down", "Smaller Brush", "Steps the brush size down by the band below it: 10 goes to 9."),
-            step("brush.hardness-up", "Harder Brush", "Raises the brush's hardness by 25%, to at most 100%."),
-            step("brush.hardness-down", "Softer Brush", "Lowers the brush's hardness by 25%, to at least 0%."),
+            step("brush.size-up", "Larger Brush", "Steps the brush size up: by 1 under 10, 5 under 100, 25 under 300, 50 above.") {
+                .size(BrushKeys.step(size: $0.size, up: true))
+            },
+            step("brush.size-down", "Smaller Brush", "Steps the brush size down by the band below it: 10 goes to 9.") {
+                .size(BrushKeys.step(size: $0.size, up: false))
+            },
+            step("brush.hardness-up", "Harder Brush", "Raises the brush's hardness by 25%, to at most 100%.") {
+                .hardness(BrushKeys.hardnessStep($0.hardness, up: true))
+            },
+            step("brush.hardness-down", "Softer Brush", "Lowers the brush's hardness by 25%, to at least 0%.") {
+                .hardness(BrushKeys.hardnessStep($0.hardness, up: false))
+            },
             .typed("brush.set-opacity", title: "Brush Opacity", summary: "Sets the active brush's opacity, 0 to 100 percent.",
                    kind: .view, params: Percent.self, schema: percent, result: brush,
-                   example: .object(["percent": .number(50)]), availability: { brushReady($0) }) { _, _ in JSONValue.null },
+                   example: .object(["percent": .number(50)]), availability: { brushReady($0) }) { t, p in try edit(&t, "brush.set-opacity", .opacity(p.percent)) },
             .typed("layer.set-opacity", title: "Layer Opacity", summary: "Sets every selected layer's opacity, 0 to 100 percent, as one undo step.",
                    kind: .edit, params: Percent.self, schema: percent,
-                   example: .object(["percent": .number(50)]), availability: { layersReady($0) }) { _, _ in JSONValue.null },
+                   example: .object(["percent": .number(50)]), availability: { layersReady($0) }) { t, p in
+                       try t.setSelectedOpacity(Swift.min(100, Swift.max(0, p.percent))); return JSONValue.null
+                   },
         ]
     }
 
-    /// One of the four no-param brush steps.
-    static func step<T: BrushKeyTarget>(_ id: String, _ title: String, _ summary: String) -> CommandSpec<T> {
+    /// One of the four no-param brush steps: the edit `change` makes from the current settings.
+    static func step<T: BrushKeyTarget>(_ id: String, _ title: String, _ summary: String,
+                                        _ change: @escaping @Sendable (BrushSettings) -> BrushEdit) -> CommandSpec<T> {
         .typed(id, title: title, summary: summary, kind: .view, params: Empty.self, schema: .none, result: brush,
-               example: .object([:]), availability: { brushReady($0) }) { _, _ in JSONValue.null }
+               example: .object([:]), availability: { brushReady($0) }) { t, _ in
+                   try edit(&t, id, t.activeBrush.map(change) ?? .size(BrushSettings.ranges.size.lowerBound))
+               }
+    }
+    /// Applies `change` to the active brush, hands the settings back, and reports size, hardness and opacity.
+    static func edit<T: BrushKeyTarget>(_ target: inout T, _ id: String, _ change: BrushEdit) throws -> JSONValue {
+        guard var settings = target.activeBrush else { throw CatalogError.failed(id: id, message: noBrushHelp) }
+        _ = settings.apply(change)
+        try target.setActiveBrush(settings)
+        return .object(["size": .number(settings.size), "hardness": .number(settings.hardness), "opacity": .number(settings.opacity)])
     }
     /// Available with a brush tool active; else `noBrushHelp`.
     static func brushReady<T: BrushKeyTarget>(_ target: T) -> Availability {

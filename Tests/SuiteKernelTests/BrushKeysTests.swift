@@ -21,7 +21,7 @@ struct BrushKeysDoc: BrushKeyTarget {
         return BrushKeys.action(for: key, shift: shift, settings: settings, brushActive: brushActive, digits: &digits, now: 0)
     }
 
-    @Test(.disabled("waits on BK-3")) func sizeUpStepsByBand() {
+    @Test func sizeUpStepsByBand() {
         #expect(BrushKeys.step(size: 9, up: true) == 10)
         #expect(BrushKeys.step(size: 10, up: true) == 15)
         #expect(BrushKeys.step(size: 23, up: true) == 25)
@@ -30,7 +30,7 @@ struct BrushKeysDoc: BrushKeyTarget {
         #expect(BrushKeys.step(size: 300, up: true) == 350)
         #expect(BrushKeys.step(size: 500, up: true) == 500)
     }
-    @Test(.disabled("waits on BK-3")) func sizeDownUsesTheBandBelow() {
+    @Test func sizeDownUsesTheBandBelow() {
         #expect(BrushKeys.step(size: 1, up: false) == 1)
         #expect(BrushKeys.step(size: 10, up: false) == 9)
         #expect(BrushKeys.step(size: 23, up: false) == 20)
@@ -38,31 +38,32 @@ struct BrushKeysDoc: BrushKeyTarget {
         #expect(BrushKeys.step(size: 300, up: false) == 275)
         #expect(BrushKeys.step(size: 500, up: false) == 450)
     }
-    @Test(.disabled("waits on BK-3")) func hardnessMovesAQuarter() {
+    @Test func hardnessMovesAQuarter() {
         #expect(BrushKeys.hardnessStep(60, up: true) == 85)
         #expect(BrushKeys.hardnessStep(85, up: true) == 100)
         #expect(BrushKeys.hardnessStep(60, up: false) == 35)
         #expect(BrushKeys.hardnessStep(10, up: false) == 0)
     }
-    @Test(.disabled("waits on BK-3")) func bracketsActOnTheBrush() {
+    @Test func bracketsActOnTheBrush() {
         #expect(Self.action("]", settings: BrushSettings(size: 9)) == .brush(.size(10)))
         #expect(Self.action("[", settings: BrushSettings(size: 1)) == .brush(.size(1)))
         #expect(Self.action("]", shift: true, settings: BrushSettings(hardness: 60)) == .brush(.hardness(85)))
         #expect(Self.action("[", shift: true, settings: BrushSettings(hardness: 60)) == .brush(.hardness(35)))
         #expect(Self.action("]", brushActive: false) == nil && Self.action("a") == nil)
     }
-    @Test(.disabled("waits on BK-3")) func digitsSetTensAndQuickPairs() {
+    @Test func digitsSetTensAndQuickPairs() {
         var digits = OpacityDigits()
         #expect(OpacityDigits.window == 0.6)
         #expect(digits.type(1, at: 0) == 10)
         #expect(digits.type(4, at: 10) == 40 && digits.type(5, at: 10.5) == 45)
         #expect(digits.type(4, at: 20) == 40 && digits.type(5, at: 20.7) == 50)
-        #expect(digits.type(4, at: 30) == 40 && digits.type(5, at: 30.6) == 50)
+        var edge = OpacityDigits()  // 0.6 - 0 is exactly the window: the pair has closed
+        #expect(edge.type(4, at: 0) == 40 && edge.type(5, at: OpacityDigits.window) == 50)
         #expect(digits.type(0, at: 40) == 100)
         #expect(digits.type(0, at: 50) == 100 && digits.type(5, at: 50.2) == 5)
         #expect(digits.type(7, at: 60) == 70 && digits.type(2, at: 60.1) == 72 && digits.type(3, at: 60.2) == 30)
     }
-    @Test(.disabled("waits on BK-3")) func digitsGoToTheBrushOrTheLayers() {
+    @Test func digitsGoToTheBrushOrTheLayers() {
         var digits = OpacityDigits()
         let brush = BrushSettings()
         #expect(BrushKeys.action(for: "4", shift: false, settings: brush, brushActive: true, digits: &digits, now: 0) == .brush(.opacity(40)))
@@ -70,7 +71,7 @@ struct BrushKeysDoc: BrushKeyTarget {
         #expect(BrushKeys.action(for: "0", shift: false, settings: brush, brushActive: false, digits: &digits, now: 5) == .layerOpacity(100))
         #expect(BrushKeys.action(for: "5", shift: true, settings: brush, brushActive: true, digits: &digits, now: 9) == nil)
     }
-    @Test(.disabled("waits on BK-3")) func commandsEditTheBrushAndTheLayers() throws {
+    @Test func commandsEditTheBrushAndTheLayers() throws {
         let catalog = try #require(Self.catalog)
         var doc = BrushKeysDoc()
         _ = try catalog.run("brush.size-up", params: .object([:]), on: &doc)
