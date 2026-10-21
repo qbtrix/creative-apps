@@ -1,7 +1,7 @@
 {
   "id": "kernel-files",
   "name": "File flow rules",
-  "description": "Files/DropPlan.swift: DropAction (open, place, hand off, refuse) and DropPlan.plan, the one drop rule every app and the CLI share. Files/FileFlowCommands.swift: RecentFileEntry, the FileFlowTarget protocol an app adopts, and FileFlowCommands.specs: file.recent, file.open-recent, file.clear-recent, file.open-in and file.drop with their why-nots. The fake canvas adopts FileFlowTarget, so RJ-X43 drops files on it through the CLI.",
+  "description": "Files/DropPlan.swift: DropAction (open, place, hand off, refuse) and DropPlan.plan, the one drop rule every app and the CLI share. Files/FileFlowCommands.swift: RecentFileEntry, the FileFlowTarget protocol an app adopts, and FileFlowCommands.specs: file.recent, file.open-recent, file.clear-recent, file.open-in and file.drop with their why-nots. Stubs from file-flow SF-1; bodies SF-5 and SF-6.",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
     "Sources/SuiteKernel/Files/"

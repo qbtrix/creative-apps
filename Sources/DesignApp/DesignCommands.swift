@@ -4,7 +4,8 @@
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
 // Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Snap to
-// Layers (a checked preference in user defaults, DesignSnapToLayersItem), Zoom to Selection. Every top bar command is here too. Every item Design adds carries
+// Layers (a checked preference in user defaults, DesignSnapToLayersItem), Zoom to Selection, Show History
+// (the trailing History panel, DesignHistoryArea; Hide History while it shows). Every top bar command is here too. Every item Design adds carries
 // its SF Symbol, the toolbar's where the toolbar has the same command.
 //
 // The focused window publishes a DesignMenu (what can run now, and where to send
@@ -131,6 +132,7 @@ extension FocusedValues {
 
 struct DesignCommands: Commands {
     @FocusedValue(\.designMenu) private var focused
+    @FocusedValue(\.designHistoryPanel) private var historyPanel
     @Environment(\.openWindow) private var openWindow
 
     private var menu: DesignMenu {
@@ -153,6 +155,7 @@ struct DesignCommands: Commands {
         CommandMenu("Object") { DesignObjectMenu(menu: menu) }
         CommandGroup(after: .toolbar) {
             DesignViewMenu(menu: menu)
+            DesignShowHistoryItem(panel: historyPanel)
             Divider()
         }
     }
@@ -299,6 +302,17 @@ struct DesignViewMenu: View {
             .keyboardShortcut("2", modifiers: [.option, .command])
             .disabled(menu.zoomToSelectionHelp != nil)
             .help(menu.zoomToSelectionHelp ?? "")
+    }
+}
+
+/// View > Show History: shows or hides the focused window's History panel (DesignHistoryArea).
+/// With no Design window focused there is no panel to show, so it is off and says why.
+struct DesignShowHistoryItem: View {
+    let panel: DesignHistoryShown?
+
+    var body: some View {
+        MenuCommand(DesignMenuState.spec("view.history"), on: DesignMenuState(hasWindow: panel != nil),
+                    title: panel?.isShown == true ? "Hide History" : nil, systemImage: "clock.arrow.circlepath") { panel?.toggle() }
     }
 }
 

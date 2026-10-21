@@ -1,8 +1,8 @@
 // LibraryExport.swift (EX-3, EX-13): the catalog's export states (targets,
 // help, the sheet's options, preview, plan, progress, summary, cancel, retry of
 // the failed photos) and the runner that renders and writes a plan in order,
-// keeping each file's failure and stopping on Cancel. Exporting is never an undo step. Progress moves by SuiteKernel's
-// `ExportRun` rule; `ExportState` itself moves onto `ExportRun` in #3091.
+// keeping each file's failure and stopping on Cancel. Exporting is never an undo step. Each move is
+// one call on the kernel's `exportRun` (LibraryExportAdapter.swift); `exportState` reads it.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -31,14 +31,13 @@ extension LibraryCatalog {
         guard exportHelp == nil else { return false }
         var options = last ?? ExportOptions(folder: folder)
         options.folder = folder
-        exportState = .editing(options)
-        return true
+        return exportRun.begin(options)
     }
 
     /// Replaces the sheet's options; ignored unless editing.
     public mutating func setExportOptions(_ options: ExportOptions) {
-        guard case .editing = exportState else { return }
-        exportState = .editing(options)
+        guard case .editing = exportRun else { return }
+        _ = exportRun.begin(options)
     }
 
     /// The sheet's preview of the first target: "IMG_0001.jpg · 2048 × 1365",
@@ -62,23 +61,20 @@ extension LibraryCatalog {
         let targets = exportTargets
         guard !targets.isEmpty else { return nil }
         let plan = services.exporter.plan(targets, options: options, existingNames: existingNames)
-        guard !plan.items.isEmpty else { return nil }
-        exportState = .running(done: 0, total: plan.items.count)
+        guard !plan.items.isEmpty, exportRun.start(total: plan.items.count) else { return nil }
         return plan
     }
 
     /// Reports `done` photos while running: never backwards, never past the plan's total.
     public mutating func showExportProgress(done: Int, total: Int) {
-        guard case .running(let old, let planned) = exportState else { return }
-        var run = ExportRun<Int>.running(0, done: old, total: planned)
-        run.progressed(done: done)
-        if case .running(_, let now, _) = run { exportState = .running(done: now, total: planned) }
+        exportRun.progressed(done: done)
     }
 
     /// Ends a running export with its summary.
     public mutating func finishExport(_ summary: ExportSummary) {
-        guard case .running = exportState else { return }
-        exportState = .finished(summary)
+        guard case .running = exportRun else { return }
+        exportSummary = summary
+        exportRun.end(.success(summary.written))
     }
 
     /// True while running; the area then cancels its task, and the runner's
@@ -95,15 +91,13 @@ extension LibraryCatalog {
         let byID = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         let failed = summary.failedIDs.compactMap { byID[$0] }
         let plan = services.exporter.plan(failed, options: options, existingNames: existingNames)
-        guard !plan.items.isEmpty else { return nil }
-        exportState = .running(done: 0, total: plan.items.count)
+        guard !plan.items.isEmpty, exportRun.begin(options), exportRun.start(total: plan.items.count) else { return nil }
         return plan
     }
 
     /// Closes the sheet; refused while running.
     public mutating func closeExport() {
-        if case .running = exportState { return }
-        exportState = .idle
+        exportRun.dismiss()
     }
 }
 
@@ -131,7 +125,8 @@ public enum ExportRunner {
                 do {
                     let image = try await exporter.render(item, photo: photo)
                     guard !Task.isCancelled else { cancelled = true; break } // between render and write
-                    try await writer.write(image, quality: options.quality, folder: options.folder, fileName: item.fileName)
+                    try await writer.write(image, quality: options.quality, folder: options.folder, fileName: item.fileName,
+                                           metadataFrom: photo.path, dropping: item.dropping)
                     if options.sidecar, let xmp = ExportSidecar.xmp(for: photo, metadata: options.metadata) {
                         try await writeSidecar(xmp, options.folder, ExportSidecar.fileName(for: item.fileName))
                     }
