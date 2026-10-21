@@ -6,18 +6,47 @@ in `Sources/SuiteModel/Onboarding/SampleCatalog.swift` names them, and
 `scripts/bundle-apps` copies this folder into
 `AfterGlow.app/Contents/Resources/Samples`.
 
-Each file is a copy of an app line's suite fixture export in
-`UITests/Fixtures/suite/`. None has landed yet, so the folder ships without
-them; a missing file's tile reads "The <App> sample isn't in this build."
-
-| File | App | Filled by |
+| File | App | Made in |
 |---|---|---|
-| `Bounce.flare` | Flare | #837 (A-FL-0) |
-| `Cards.design` | Design | #836 (A-DE-0) |
-| `beach.ora` | Photo | #838 (A-PH-0) |
-| `Sunset.png` | Library (imported) | #838 (A-PH-0) |
-| `Intro.halo` | Halo | #839 (A-HA-0) |
+| `Bounce.flare` | Flare | SS-4 |
+| `Cards.design` | Design | SS-3 |
+| `beach.ora` | Photo | SS-5 |
+| `Sunset.png` | Library (imported) | SS-5 |
+| `Intro.halo` | Halo | SS-6 |
 
-When an export lands, copy it here unchanged and remove its row's
-`.disabled` in `Tests/SuiteModelTests/SampleFilesTests.swift`, which checks
-that each file is present, non-empty and has its type's extension.
+None has landed yet; a missing file's tile reads "The <App> sample isn't in
+this build." (sample-files packet, `docs/blueprints/suite/features/sample-files.md`)
+
+## How a sample is made
+
+Every sample is made, never hand-edited, by one make file in `make/`, named
+after the sample it makes: `make/Cards.design.jobs.json` makes `Cards.design`.
+A make file is the `afterglow run` script format
+(`Sources/AfterGlowCLICore/Script.swift`) with fixed values only (no clocks, no
+random seeds), so two runs give the same bytes, plus an optional `"new"`
+object: the options its app's headless `new` gets.
+
+The maker (`Tests/AfterGlowCLITests/SampleMaker.swift`; it lives in the tests
+because `scripts/` is protected) seeds `seed.<native ext>` with the app's
+`new`, runs the script over it headless, and takes the one file the run
+writes. So a make file's `"inputs"` is `["seed.<ext>"]` and its run writes
+exactly one output (the default `out/` folder and name are fine).
+
+The sample goes to `Bundle/Samples/<name>` and its copy to
+`UITests/Fixtures/suite/<name>`. A make file under `make/fixtures-only/` makes
+a journey fixture the tour doesn't ship (Logo.design, Title.flare,
+Logo.flare): it goes to `UITests/Fixtures/suite/<name>` only.
+
+To write the samples after changing a make file:
+
+```bash
+MAKE_SAMPLES=1 swift test --filter SampleMakerTests
+```
+
+The check runs in `scripts/ci` with the rest of `AfterGlowCLITests`:
+`SampleMakerTests.committedSamplesMatchTheirMakeFiles` rebuilds every sample
+and fails when a committed copy is missing or differs byte for byte (a fixture
+copy of a shipped sample is compared once it exists).
+`SampleOpenTests` (`Tests/AfterGlowCLITests/SampleFilesTests.swift`) opens
+each sample headless, checks its content and re-saves it; each row is turned
+on by the slice that makes its file.
