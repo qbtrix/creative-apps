@@ -35,4 +35,4 @@ Next: check whether gradient-fill:HG-a and placed-images:PH-a have merged; if so
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
-- HX-a blocked on gradient-fill:HG-a, placed-images:PH-a.
+- HX-a blocked (2026-10-21T00:13Z): gradient-fill:HG-a done (#3516); placed-images:PH-a waiting (stage 0, waits on HS-a #3676 and suiteui PL-a).
