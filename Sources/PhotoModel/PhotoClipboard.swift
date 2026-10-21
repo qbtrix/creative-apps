@@ -23,8 +23,8 @@ extension PhotoWorkspace {
         return services.clipboard.unavailableHelp
     }
 
-    /// Why Cut can't run, or nil; the same reasons as Copy.
-    public var cutHelp: String? { copyHelp }
+    /// Why Cut can't run, or nil; the same reasons as Copy, and a locked layer.
+    public var cutHelp: String? { copyHelp ?? (selectedLayer?.isLocked == true ? Self.lockedRefusal : nil) }
 
     /// Why Paste can't run, or nil. It works with no image open: it opens one.
     public func pasteHelp(_ pasteboardHasImage: Bool) -> String? {
@@ -63,7 +63,7 @@ extension PhotoWorkspace {
     /// by the selection's coverage: one "Cut" step. Nil, changing nothing but
     /// the status line, when Copy took nothing.
     public mutating func cutSelection() -> ClipboardImage? {
-        guard let image = copySelection(), let id = selectedLayerID, let at = index(of: id),
+        guard !selectedLayerIsLocked(), let image = copySelection(), let id = selectedLayerID, let at = index(of: id),
             let tiled = pixels[id]
         else { return nil }
         if selection != nil {

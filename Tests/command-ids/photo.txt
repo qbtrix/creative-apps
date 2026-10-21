@@ -28,6 +28,7 @@ layer.rename
 layer.select-above
 layer.select-below
 layer.send-backward
+layer.toggle-lock
 layer.toggle-visibility
 select.all
 select.deselect

@@ -3,9 +3,10 @@
 // adapter projects it into a single-level tree whose roots are the layers back
 // to front (bottom first), runs the kernel's move, arrange, duplicate or
 // update on it, and projects the result back. `PhotoLayer` is the payload; a
-// node's own id, name and hidden flag win over its payload's, so a duplicate
+// node's own id, name, hidden and locked flags win over its payload's, so a duplicate
 // keeps the id the kernel gave it. A refusal from the kernel changes nothing.
-// The Layers panel (AL-p3) reads `layerRows`, `layerCaption`, `layerListMove`.
+// The Layers panel (AL-p3) reads `layerRows`, `layerCaption`, `layerListMove`;
+// its lock (`toggleLock`, the kernel's own flag) refuses edits with `lockedRefusal`.
 // Linux-safe.
 import SuiteKernel
 
@@ -13,15 +14,16 @@ extension PhotoLayer: LayerPayload {
     /// Always false: a Photo layer is never a container another layer moves into.
     public var holdsChildren: Bool { false }
 
-    /// This layer under `id`, named `name` and shown when `isVisible`, every
+    /// This layer under `id`, named `name`, shown when `isVisible` and locked when `isLocked`, every
     /// other property kept.
-    func relabeled(_ id: String, name: String, isVisible: Bool) -> PhotoLayer {
+    func relabeled(_ id: String, name: String, isVisible: Bool, isLocked: Bool) -> PhotoLayer {
         var layer = PhotoLayer(id: id, name: name, isVisible: isVisible, opacity: opacity, blendMode: blendMode)
         layer.offsetX = offsetX
         layer.offsetY = offsetY
         layer.kind = kind
         layer.hasMask = hasMask
         layer.isMaskEnabled = isMaskEnabled
+        layer.isLocked = isLocked
         return layer
     }
 }
@@ -30,16 +32,34 @@ extension PhotoWorkspace {
     /// The layers as one kernel tree of roots, back to front (bottom first).
     public var layerTree: LayerTree<PhotoLayer> { Self.layerTree(layers) }
 
+    /// Locks or unlocks a layer: one step, "Lock Layer" or "Unlock Layer".
+    public mutating func toggleLock(_ id: PhotoLayer.ID) {
+        guard let at = index(of: id) else { return }
+        commitKernelLayers(
+            Self.kernelEdited(layers) { tree in _ = tree.update(id) { $0.isLocked.toggle() } },
+            named: layers[at].isLocked ? "Unlock Layer" : "Lock Layer")
+    }
+
+    /// Why a locked layer refuses an edit, on the status line and as the edits' help.
+    public static let lockedRefusal = "Unlock the layer to change it."
+
+    /// True when the selected layer is locked; sets the status line to the refusal when `refusing`.
+    mutating func selectedLayerIsLocked(refusing: Bool = true) -> Bool {
+        guard selectedLayer?.isLocked == true else { return false }
+        if refusing { statusMessage = Self.lockedRefusal }
+        return true
+    }
+
     /// The tree of `topFirst`, Photo's top-first layer list.
     static func layerTree(_ topFirst: [PhotoLayer]) -> LayerTree<PhotoLayer> {
         LayerTree(topFirst.reversed().map {
-            LayerNode(id: $0.id, name: $0.name, isHidden: !$0.isVisible, payload: $0)
+            LayerNode(id: $0.id, name: $0.name, isHidden: !$0.isVisible, isLocked: $0.isLocked, payload: $0)
         })
     }
 
     /// `tree`'s roots as Photo's top-first layer list.
     static func layers(of tree: LayerTree<PhotoLayer>) -> [PhotoLayer] {
-        tree.roots.reversed().map { $0.payload.relabeled($0.id, name: $0.name, isVisible: !$0.isHidden) }
+        tree.roots.reversed().map { $0.payload.relabeled($0.id, name: $0.name, isVisible: !$0.isHidden, isLocked: $0.isLocked) }
     }
 
     /// The layers after `edit` runs on their tree; nil when the kernel refuses it.

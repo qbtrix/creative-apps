@@ -5,7 +5,9 @@
 // it. The pixels themselves live in PhotoWorkspace.pixels under the layer's
 // id, so a layer stays a small Hashable value. A layer is pixels or an
 // adjustment applied to the layers below (`kind`, PV-6), and may have a mask
-// in PhotoWorkspace.masks (`hasMask`, PV-5). Linux-safe.
+// in PhotoWorkspace.masks (`hasMask`, PV-5). A locked layer (`isLocked`)
+// refuses paint, moves and selection edits (PhotoWorkspace.lockedRefusal).
+// Linux-safe.
 import CoreRaster
 
 public struct PhotoLayer: Identifiable, Sendable, Hashable {
@@ -24,6 +26,8 @@ public struct PhotoLayer: Identifiable, Sendable, Hashable {
     public internal(set) var hasMask = false
     /// A disabled mask is kept but not applied (Shift-click its badge).
     public internal(set) var isMaskEnabled = true
+    /// A locked layer's pixels and place can't change.
+    public internal(set) var isLocked = false
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
     public init(id: String, name: String, isVisible: Bool = true, opacity: Double = 1, blendMode: BlendMode = .normal) {

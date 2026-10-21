@@ -151,11 +151,14 @@ struct LayerEntry: Codable {
     var src: String?
     var mask: String?
     var maskEnabled: Bool
+    /// Absent in archives from before layer locks, and for an unlocked layer.
+    var locked: Bool?
 
     init(_ layer: PhotoLayer, src: String?, mask: String?) {
         id = layer.id; name = layer.name; visible = layer.isVisible; opacity = layer.opacity
         blend = layer.blendMode; offset = Offset(x: layer.offsetX, y: layer.offsetY)
         self.src = src; self.mask = mask; maskEnabled = layer.isMaskEnabled
+        locked = layer.isLocked ? true : nil
         switch layer.kind {
         case .pixels: kind = .pixels
         case .adjustment(let settings): kind = .adjustment; adjustment = settings
@@ -168,6 +171,7 @@ struct LayerEntry: Codable {
         if kind == .adjustment { layer.kind = .adjustment(adjustment ?? AdjustmentSettings()) }
         layer.hasMask = mask != nil
         layer.isMaskEnabled = maskEnabled
+        layer.isLocked = locked ?? false
         return layer
     }
 }
