@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T17:40Z	3	poll	#4034	still open (clean); #4135 draft
 2026-10-21T17:57Z	3	poll	#4034	labelled needs-rebase by the lane (shell-media lead owns it); #4135 waits
 2026-10-21T18:15Z	3	poll	#4034	shell-media pushed 34a1f20f0 (clean, needs-rebase pending lane drop); #4135 waits
+2026-10-21T18:31Z	3	poll	#4034	needs-rebase dropped, clean, awaiting lane; #4135 waits
