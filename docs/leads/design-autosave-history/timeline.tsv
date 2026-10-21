@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-21T06:40Z	3	fix	#3726	DA-u head 1c9eb1fc: dev merged, isa-swizzle lint fix (keyCapable), --changed PASS; DA-5 #3710 merged 05:07Z; DA-6 waits DG-m (#3742 open)
 2026-10-21T06:59Z	3	fix	#3726	macOS build 39556740686 red (mutating call in #expect); fixed d58dec2b, gate running; DA-a critics running
 2026-10-21T07:00Z	4	review	DA-a	critics: 6 findings #3945-#3950; fix round 1 (wf_bdbedf4e-253); DA-u at d58dec2b
+2026-10-21T07:16Z	4	fix	DA-a	round 1: #3956 (fixes #3946 #3948 #3950); #3953 closed (SuiteUI edit), needs-ui #3957 for #3947; #3945 #3949 deferred to #3726
