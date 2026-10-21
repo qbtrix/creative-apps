@@ -152,3 +152,4 @@ utc	stage	event	ref	note
 2026-10-21T02:55Z	wait	hb9: CI 39524928486 cancelled; new full CI 39534644387 queued on 2ab0eb96; scoped 39491489760 queued
 2026-10-21T03:17Z	wait	hb10: scoped suiteui 39491489760 in progress; full CI 39534644387 queued
 2026-10-21T03:39Z	wait	hb11: scoped suiteui 39491489760 red at e64cff6b (macOS (suiteui): SliderBarTests.theBarsSliderReadsTheRowsTextOnATrack; journeys report-only), not a qualifying run, not an AC slice; full CI 39534644387 still queued
+2026-10-21T04:01Z	wait	hb12: full CI 39534644387 in progress on 2ab0eb96

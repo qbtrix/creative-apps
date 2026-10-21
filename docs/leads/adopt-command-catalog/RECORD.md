@@ -138,3 +138,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-21T03:17Z: hb10: scoped suiteui 39491489760 in progress; full CI 39534644387 queued
 
 - 2026-10-21T03:39Z: hb11: scoped suiteui 39491489760 red at e64cff6b (macOS (suiteui): SliderBarTests.theBarsSliderReadsTheRowsTextOnATrack; journeys report-only), not a qualifying run, not an AC slice; full CI 39534644387 still queued
+
+- 2026-10-21T04:01Z: hb12: full CI 39534644387 in progress on 2ab0eb96
