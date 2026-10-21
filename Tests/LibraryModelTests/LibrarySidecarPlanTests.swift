@@ -1,6 +1,6 @@
 // LibrarySidecarPlanTests.swift: which sidecars the catalog writes after a change, the Info tab's
 // Sidecar row (metadata-more MD-16), and QB-LIB-M4's plan budget. Written before its code (contract
-// rule 13, MD-14): every test waits on MD-16. `shoot` stands in for `cameras` (not on this base):
+// rule 13, MD-14); MD-16 turned them on. `shoot` stands in for `cameras` (not on this base):
 // its photos have files, and each test sets what they say. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -34,7 +34,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     Dictionary(uniqueKeysWithValues: catalog.items.map { ($0.id, SidecarFields(photo: $0)) })
 }
 
-@Test(.disabled("waits on MD-16")) func onlyPhotosWithSomethingToSayArePlanned() throws {
+@Test func onlyPhotosWithSomethingToSayArePlanned() throws {
     let catalog = shoot()
     let plan = catalog.sidecarWrites(after: [:])
     #expect(plan.map(\.photoID).sorted() == [shot(1), shot(2), shot(3)])
@@ -43,7 +43,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     #expect(catalog.sidecarWrites(after: allWritten(catalog)).isEmpty)
 }
 
-@Test(.disabled("waits on MD-16")) func oneChangeIsOneWriteAndClearingWritesEmptyFields() throws {
+@Test func oneChangeIsOneWriteAndClearingWritesEmptyFields() throws {
     var catalog = shoot()
     let written = allWritten(catalog)
     catalog.select([shot(4)])
@@ -55,9 +55,21 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     catalog.select([shot(2)])
     catalog.setRating(0)
     #expect(catalog.sidecarWrites(after: written).first { $0.photoID == shot(2) }?.fields.isEmpty == true)
+    #expect(catalog.sidecarStatus(for: shot(2), written: written, failures: [:], writing: []) == "No sidecar yet")
 }
 
-@Test(.disabled("waits on MD-16")) func theSidecarRowSaysWhereTheSidecarIs() throws {
+@Test func aWrittenRejectIsNotRewritten() throws {
+    var catalog = shoot()
+    catalog.select([shot(2)])
+    catalog.setFlag(.reject)
+    let write = try #require(catalog.sidecarWrites(after: allWritten(shoot())).first)
+    #expect(write.photoID == shot(2) && write.fields.rating == -1)
+    let written = allWritten(catalog)
+    #expect(catalog.sidecarWrites(after: written).isEmpty)
+    #expect(catalog.sidecarStatus(for: shot(2), written: written, failures: [:], writing: []) == "Saved to IMG_0002.xmp")
+}
+
+@Test func theSidecarRowSaysWhereTheSidecarIs() throws {
     let catalog = shoot()
     let written = allWritten(catalog)
     func status(_ written: [String: SidecarFields], _ failure: String? = nil, writing: Bool = false) -> String? {
@@ -70,7 +82,7 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
     #expect(status([:], "Not saved: The folder is read-only.") == "Not saved: The folder is read-only.")
 }
 
-@Test(.disabled("waits on MD-16")) func aSampleIsNeverPlannedAndSaysSo() throws {
+@Test func aSampleIsNeverPlannedAndSaysSo() throws {
     var samples = LibraryCatalog()
     samples.loadSamples()
     samples.select(Set(samples.items.map(\.id)))
@@ -82,8 +94,9 @@ private func allWritten(_ catalog: LibraryCatalog) -> [String: SidecarFields] {
         == "Samples have no file, so no sidecar.")
 }
 
-/// QB-LIB-M4: one changed photo of 10,000 plans in 10 ms debug, 1 ms release.
-@Test(.disabled("waits on MD-16")) func planWithinBudget() {
+/// QB-LIB-M4: one changed photo of 10,000 plans in 10 ms debug, 1 ms release. Timed, so on the perf list
+/// (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
+@Test func planWithinBudget() {
     var catalog = LibraryCatalog()
     catalog.load(LibraryFixtures.photos(named: "large").map {
         PhotoItem(id: "/large/\($0.name).jpg", name: $0.name, captureDate: $0.captureDate, color: $0.color,

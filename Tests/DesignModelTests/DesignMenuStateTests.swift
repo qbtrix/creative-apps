@@ -60,6 +60,14 @@ struct DesignMenuStateTests {
         #expect(DesignMenuState.spec("edit.redo").availability(typing).why == "Nothing to redo.")
     }
 
+    /// View > Show History drives the window, not the file: on with a window, off with none and saying why.
+    @Test func historyNeedsAWindow() {
+        let spec = DesignMenuState.spec("view.history")
+        #expect(spec.title == "Show History" && DesignWorkspace.catalog.spec("view.history") == nil)
+        #expect(spec.availability(DesignMenuState(hasWindow: true)).why == nil)
+        #expect(spec.availability(DesignMenuState()).why == "Open a Design window to see its history.")
+    }
+
     @Test func runGoesThroughTheCatalog() throws {
         var state = DesignMenuState(workspace: DesignFixtures.cards, hasWindow: true)
         let pages = state.workspace.pages.count
