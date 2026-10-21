@@ -71,6 +71,7 @@ library LibraryModelTests.statusRowWithinBudget
 library LibraryModelTests.planWithinBudget
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 library LibraryModelTests.LibraryFoldersTests/tenThousandPaths
+library LibraryModelTests.LargeCatalogBudgetTests/fixtureBuildsTenThousandDeterministically
 
 design DesignModelTests.DesignSnapBudgetTests
 design DesignModelTests.DesignSelectBudgetTests
