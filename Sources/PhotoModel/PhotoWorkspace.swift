@@ -21,6 +21,7 @@
 // `drag(from:to:)`; a tool that does nothing there stays disabled with
 // `unavailableHelp` (PhotoToolsTests checks this).
 import CoreRaster
+import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
@@ -110,6 +111,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
     public internal(set) var exportOptions = ExportOptions()
+    /// The Export sheet and its write, on the kernel's run (PhotoExportRun+Kernel.swift).
+    public internal(set) var exportRun = ExportRun<ExportOptions>.idle
     /// What the open file is, for Save (PhotoDocumentFile.swift).
     public internal(set) var fileKind: PhotoFileKind?
     /// The history step last saved, opened or created (`currentStepID`), so a
@@ -388,6 +391,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
+            && lhs.exportRun == rhs.exportRun
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
     }
