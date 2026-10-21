@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-21T15:39Z	2026-10-21T15:39:41Z	stage3	poll	lane	macOS builds pending on 4021/4034/4048; 4023 merged dev, awaiting lane
 2026-10-21T16:00Z	2026-10-21T16:00:52Z	stage3	poll	lane	#4048 macOS build green; #4034 building; #4021 #4023 queued; needs-rebase dropped on #4023
 2026-10-21T16:22Z	2026-10-21T16:23Z	wave2	building	SM-3..SM-7	finisher agent on prior worktree commits; parents #4034 #4035 in lane
+2026-10-21T16:51Z	2026-10-21T16:51Z	wave2	prs	#4119 #4123 #4125 #4128	SM-3 3/3, SM-4 2/2, SM-5, SM-7 drafts stacked on #4035; gate pass
