@@ -4,7 +4,7 @@ Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
 Stage: 3 W5
 Base: dev
-Next: #4101 PP-5 (486222a) and #4003 PP-4 (3d1f532) in lane, no ejections; PP-7 journey builder gating (stacked); then PP-8 feature-done
+Next: #4101 PP-5 and #4003 PP-4 in lane; PP-7 branch c3a92cf pushed (CI PASS), PR opens once they merge; PP-8 feature-done builder
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,7 +22,7 @@ Next: #4101 PP-5 (486222a) and #4003 PP-4 (3d1f532) in lane, no ejections; PP-7 
 | PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceMenuTests (6), Mutate 4/4 | #3976 | merged 10:20Z; CommandPath fixed by #4008 |
 | PP-4 | PP-u | 3 | snapshots, budget, journey skipped | Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift, RenderBudgetPhotoPlaceTests.swift, UITests/PhotoJourneyTests+Place.swift | snapshots (refused now; logo after PP-5), budget placeLargeInThreeBodies, journey skipped | #4003 | in lane 3d1f532 |
 | PP-5 | PP-m | 4 | conformance bodies; insertPixelLayer from paste; tests on (PP-6 folded in) | PhotoPlace+Kernel.swift, PhotoClipboard.swift, tests, mutations, catalog, ids | PhotoPlaceTests; .centredOnCanvas .largeFitsCanvas .aboveSelection | #4101 | in lane 486222a |
-| PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | – | building |
+| PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | lead/place-image-PP-7 | pushed c3a92cf, PR after #4003/#4101 |
 | PP-8 | PP-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, place-image.wave.json | scripts/ci | – | waiting |
 
 ## Waves (combined plan, all three features)
