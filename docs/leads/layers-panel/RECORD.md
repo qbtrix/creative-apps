@@ -2,9 +2,9 @@
 
 Issue: #1498 · Packet: docs/blueprints/design/features/layers-panel.md
 Run: act-1a156589867-ptgh, LP-a only (before: act-1a152e441eb-msob, act-1a14feea7c0-wmv6, act-1a14d32dfd7-u3ff, act-1a149c0c306-8ckd, act-1a1487bf8e3-hwdj) · Session: claude/layers-panel-lead-eyprpb · Started: 2026-10-19T22:50Z
-Stage: 3 wave 6 (LP-a, L-5)
+Stage: 3 polling (LP-a done; LP-b fix round 2 #4178 open)
 Base: cf120143 (dev; main b3011ab9 verified)
-Next: wait for a completed successful full (CI) or scoped app=design ci.yml run on dev containing 94c8fd34 (#3370), then Belt-Slice-Done: LP-a and Belt-Contact-Sheet on #1498.
+Next: #4178 (P3 finds the list as suite.sidebar, Closes #3307) merges; then Belt-Slice-Done: LP-b on a green design run containing it (gaps: #3307 if P3 stays red), then Belt-Contact-Sheet on #1498
 
 Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-group.
 

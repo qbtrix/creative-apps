@@ -297,3 +297,5 @@ utc	stage	event	ref	note
 2026-10-20T14:39:06Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 still queued since 12:47Z; CI 39438701609 (9f880c85) queued; full runs keep being superseded
 2026-10-21T18:55Z	3	slice-done	LP-a	run 39652451586
 2026-10-21T18:55Z	3	fix	LP-b	round 2 for #3307 (P3 list id)
+2026-10-21T20:03Z	3	pr-opened	#4178	LP-b fix round 2: P3 reads suite.sidebar (Closes #3307)
+2026-10-21T20:03Z	3	heartbeat	-	resumed after container restart
