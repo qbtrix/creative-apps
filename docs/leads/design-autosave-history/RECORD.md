@@ -68,3 +68,4 @@ Next: Belt-Slice-Done DA-u once merged-done; DA-a critics on journeys design 395
 - 2026-10-21T10:13:59Z: heartbeat. #3973 build 39573116254 still queued (repo queue 14 runs, down from ~18). GF-6 #3742 and #3957 open.
 - 2026-10-21T10:36:09Z: heartbeat. #3973 build 39573116254 still queued (macOS backlog). GF-6 #3742 and #3957 open.
 - 2026-10-21T10:48:33Z: #3973's macOS build 39573116254 failed: DesignEditorSnapshots.swift:65 'ambiguous use of accessibilityValue()' (AppKit protocol overloads). Fix pushed as bf4e1d0f (typed `let raw: Any?? = header?.accessibilityValue?()`, the pattern RenderBudgetDesignSnapTests uses); --changed PASS; Head: line moved. The lane builds the new head next.
+- 2026-10-21T10:58:01Z: heartbeat. #3973 head bf4e1d0f: lane macOS build 39587493383 queued. GF-6 #3742 and #3957 open.
