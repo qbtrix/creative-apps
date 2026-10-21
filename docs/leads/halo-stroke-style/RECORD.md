@@ -2,12 +2,12 @@
 
 - Issue: #3447
 - Packet: docs/blueprints/halo/features/stroke-style.md (v3, slices)
-- Run: act-1a15a9f4e8d-hav0
-- Session: claude/feature-lead-playbook-rmflin
+- Run: act-1a15d0eeefb-6z9l (from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0)
+- Session: claude/halo-feature-lead-run-02scrb
 - Started: 2026-10-20T18:45Z
 - Stage: 3 wave 1 (blocked)
 - Base: dev e382f9d7
-- Next: HK-1 is built on `lead/halo-stroke-style-HK-1` (56ea568f, 164 lines/4 files over HS-a, CI PASS) and held without a PR; the HK-a PR opens once HK-2 can build, which waits on gradient-fill HG-u (blocked on core-loop CL-probe, needs-ui #3401)
+- Next: HK-1 held on lead/halo-stroke-style-HK-1; HK-2 waits on gradient-fill HG-u (blocked on CL-probe/#3401 and suiteui GF-2/GF-3, per lead/halo-gradient-fill RECORD); re-check each poll
 
 ## Slices
 
