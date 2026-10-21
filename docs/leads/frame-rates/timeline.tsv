@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T20:01Z	build	heartbeat	FR-u	FR-m Belt-Slice-Done posted; #4172 body re-set clean
 2026-10-21T20:25Z	build	heartbeat	FR-u	FR-7 and FR-9 builders started
 2026-10-21T20:47Z	build	heartbeat	FR-u	FR-7/FR-9 pushed
+2026-10-21T21:11Z	wait-macos	heartbeat	FR-u	FR-7 and FR-9 gates CI: PASS; #4172 macOS build 39665231140 still queued since 19:51Z
