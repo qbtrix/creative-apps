@@ -96,5 +96,33 @@
     "find": "(kind.holdsPicture ? placedAsset : nil, placedFocus ?? Self.centreFocus)",
     "replace": "(placedAsset, placedFocus ?? Self.centreFocus)",
     "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "the turn is not decoded",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0",
+    "replace": "rotation = 0",
+    "tests": "DesignTransformTests.swift"
+  },
+  {
+    "label": "a copy drops the mirrors",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "(flipX, flipY) = (node.flipX, node.flipY)",
+    "replace": "(flipX, flipY) = (false, false)",
+    "tests": "DesignTransformTests.swift"
+  },
+  {
+    "label": "an upright node writes its turn",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if rotation != 0 { try container.encode(rotation, forKey: .rotation) }",
+    "replace": "try container.encode(rotation, forKey: .rotation)",
+    "tests": "DesignTransformTests.swift"
+  },
+  {
+    "label": "flipY is saved under flipX",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if flipY { try container.encode(flipY, forKey: .flipY) }",
+    "replace": "if flipY { try container.encode(flipY, forKey: .flipX) }",
+    "tests": "DesignTransformTests.swift"
   }
 ]

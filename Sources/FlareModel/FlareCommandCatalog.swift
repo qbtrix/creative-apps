@@ -116,7 +116,7 @@ extension FlareWorkspace {
         act("edit.deselect", "Deselect", "Clears the stage and layer selection.", .view, { $0.editHelp(.deselect) }) { w in w.deselect() },
         act("object.bring-forward", "Bring Forward", "Moves the selected layer one place up.", .edit, { $0.orderHelp(forward: true) }) { w in w.bringForward() },
         act("object.send-backward", "Send Backward", "Moves the selected layer one place down.", .edit, { $0.orderHelp(forward: false) }) { w in w.sendBackward() },
-    ] + FlareTool.allCases.map { tool in
+    ] + FlareTool.allCases.filter { $0 != .shape }.map { tool in  // tool.shape comes from ShapeCommands (shape-tools FS-6)
         act(toolID(tool), FlareIntent.tools(.choose(tool)).title, "Picks the \(tool.rawValue) tool for stage drags.", .view,
             { $0.toolHelp(tool) }) { w in w.selectTool(tool) }
     } + [

@@ -3,6 +3,8 @@
 // envelope carries as "params"), its schema is SchemaProbe's unless `coreSchemaOverrides` has one, it is available
 // when its example runs on a copy of the workspace, and it runs through the workspace's CommandEngine as one undo step.
 // Catalog ids allow no capitals, so a FlareCore id keeps its words in kebab case: layer.setFlags is layer.set-flags.
+// The stage and PNG frames don't draw masks or mattes yet while SVG and Lottie write them, so the commands that make
+// or change one (`notDrawnOnStage`) are unavailable with `masksNotDrawn` rather than export a different picture.
 import FlareCore
 import SuiteKernel
 
@@ -21,8 +23,16 @@ extension FlareWorkspace {
         if let error = layerError { throw .failed(id: id, message: error.message) }
     }
 
+    /// FlareCore ids that make or change a mask or matte, which the stage and PNG frames can't draw yet.
+    public static let notDrawnOnStage: Set<String> = ["mask.add", "mask.set", "mask.setMatte"]
+    /// Why `notDrawnOnStage` commands are unavailable.
+    public static let masksNotDrawn = "Flare's stage and PNG frames don't draw masks or mattes yet, so this would "
+        + "export a different picture from the one on the stage. Removing or reordering a mask still works."
+
     /// The dry run: `example` on a copy of `workspace`; unavailable with the engine's message when it is refused.
-    static func dryRun(_ example: some FlareCore.Command, on workspace: FlareWorkspace) -> Availability {
+    /// A `notDrawnOnStage` id is unavailable with `masksNotDrawn` whenever a document is open.
+    static func dryRun<C: FlareCore.Command>(_ example: C, on workspace: FlareWorkspace) -> Availability {
+        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }
         var copy = workspace
         copy.apply(example)
         return copy.layerError.map { .unavailable($0.message) } ?? .available
@@ -104,6 +114,7 @@ let coreExamples: [CoreExample] = [
                              mask: LayerMask(path: FlarePath(polyline: square, closed: true), mode: .subtract, feather: 2))),
     CoreExample(MoveLayerMask(owner: s1, layerID: "layer-1", from: 0, to: 0)),
     CoreExample(SetTrackMatte(owner: s1, layerID: "layer-1", matte: TrackMatte(sourceLayerID: "layer-1-copy", kind: .luma))),
+    CoreExample(SetLayerParent(owner: s1, layerID: "layer-1", parentID: "layer-1-copy")),
     CoreExample(AddInstance(owner: s1, layerID: "layer-1", instance: Instance(symbolID: "symbol-1"))),
     CoreExample(SetInstanceTransform(owner: s1, layerID: "layer-1", index: 0, transform: Transform(x: 5, y: 5))),
     CoreExample(SetInstancePlayback(owner: s1, layerID: "layer-1", index: 0, firstFrame: 2, loop: .playOnce)),
@@ -166,6 +177,7 @@ let coreSchemaOverrides: [String: ParamSchema] = {
         "layer.remove": layer([:]), "layer.duplicate": layer([:]), "layer.rename": layer(["name": s]),
         "layer.setFlags": layer(["isVisible": .optional(.boolean), "isLocked": .optional(.boolean)]),
         "layer.reorder": layer(["toIndex": i]),
+        "layer.setParent": layer(["parentID": .optional(s)]),
         "keyframe.set": layer(["property": s, "keyframe": probe(FlareCore.Keyframe.self)]),
         "keyframe.move": layer(["property": s, "from": i, "to": i]),
         "keyframe.remove": layer(["property": s, "frame": i]),

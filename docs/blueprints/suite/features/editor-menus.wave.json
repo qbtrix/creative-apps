@@ -120,57 +120,39 @@
     },
     {
       "id": "EM-library",
-      "behavior": "Library shows Switch To, AI Access and the Help group, answers live commands on its catalog, and reopens its window from the Dock.",
+      "behavior": "Library shows Switch To, AI Access and the Help group, answers live commands on its catalog and reopens its window from the Dock, RJ-X63 passes in all five editors, and the feature is built.",
       "tasks": [
         "EM-7",
-        "EM-8"
-      ],
-      "journeys": [
-        "LJ-EM"
-      ],
-      "owned": [
-        "Sources/LibraryApp/LibraryApp.swift",
-        "UITests/LibraryJourneyTests+SuiteMenus.swift",
-        "Tests/RealJobs/suite/editor-menus/editor-menus.jobs.json"
-      ],
-      "waits": {
-        "EM-a": [
-          "EM-7"
-        ]
-      },
-      "ui": true
-    },
-    {
-      "id": "EM-z",
-      "behavior": "Every editor's suite-menus journey is green, RJ-X63 passes, and the feature is built.",
-      "tasks": [
+        "EM-8",
         "EM-9",
         "EM-10"
       ],
       "journeys": [
+        "LJ-EM",
         "PJ-EM",
         "DJ-EM",
         "FJ-EM",
-        "HJ-EM",
-        "LJ-EM"
+        "HJ-EM"
       ],
       "owned": [
+        "Sources/LibraryApp/LibraryApp.swift",
+        "UITests/LibraryJourneyTests+SuiteMenus.swift",
         "Tests/RealJobs/suite/editor-menus/editor-menus.jobs.json",
         "UITests/AfterGlowJourneyTests+EveryControl.swift",
         "docs/blueprints/suite/features/editor-menus.wave.json"
       ],
       "waits": {
+        "EM-a": [
+          "EM-7"
+        ],
         "EM-photo-design": [
           "EM-9"
         ],
         "EM-flare-halo": [
           "EM-9"
-        ],
-        "EM-library": [
-          "EM-9"
         ]
       },
-      "ui": false
+      "ui": true
     }
   ]
 }

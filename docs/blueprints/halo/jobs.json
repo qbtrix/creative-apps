@@ -758,6 +758,26 @@
     "waits_on": "HF-3",
     "added_by": "halo/file-flow"
   },
+  "RJ-H43": {
+    "id": "RJ-H43",
+    "app": "halo",
+    "weight": "med",
+    "job": "Give a title an outer glow whose size is keyed from 0 to 20 over one second, and render frames 0, 15 and 30.",
+    "outcome": "The glow reaches 0 px past the title at frame 0, 20 px at frame 30 and an eased value between at frame 15.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The glow is baked at one size for every frame, or the keys show in the viewer but not in the render",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HY-6",
+    "added_by": "halo/layer-styles"
+  },
   "RJ-H70": {
     "id": "RJ-H70",
     "app": "halo",

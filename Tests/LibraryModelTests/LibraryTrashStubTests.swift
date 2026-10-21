@@ -31,10 +31,9 @@ import Testing
     #expect(LibraryServices.fake().trash is FakeTrash)
 }
 
-@Test func labelKeysAreSixToNineAndNeverCullYet() {
+@Test func labelKeysAreSixToNine() {
     #expect(LibraryKey.labelKeys.map(\.label) == [.red, .yellow, .green, .blue])
     #expect(LibraryKey(character: "5") == .rating(5))
-    #expect(LibraryCatalog.cullChange(for: .label(.red)) == nil)  // DR-5 maps it
 }
 
 @Test func deleteRejectsIsOffWithAReasonUntilItsBody() {

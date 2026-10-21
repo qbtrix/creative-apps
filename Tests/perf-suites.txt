@@ -67,6 +67,8 @@ library LibraryModelTests.focusChangeWithinBudget
 library LibraryModelTests.LibraryCatalogBudgetTests
 library LibraryModelTests.LibraryGridBudgetTests
 library LibraryModelTests.LibraryCropBudgetTests
+library LibraryModelTests.statusRowWithinBudget
+library LibraryModelTests.planWithinBudget
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 
 design DesignModelTests.DesignSnapBudgetTests
@@ -76,11 +78,17 @@ design DesignModelTests.DesignExportBudgetTests
 design DesignModelTests.DesignLayersBudgetTests/layerRows
 design DesignModelTests.DesignStyleBudgetTests
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
+design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignRasterTests/writeTiming
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
 suite SuiteModelTests.StoreBudgetTests
+suite SuiteModelTests.HandOffBudgetTests
+suite SuiteModelTests.HomeBudgetTests
+suite SuiteModelTests.ValuesRecentsTests/noteIntoFullList
+suite AfterGlowCLITests.MCPCallTests/callOverhead
 
 suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
 suiteui SuiteUITests.ListBudgetTests
 suiteui SuiteUITests.TimelineBudgetTests
+suiteui AppSnapshotTests.BodyCountSuites/RenderBudgetEyedropperTests/loupeTrackTiming
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget

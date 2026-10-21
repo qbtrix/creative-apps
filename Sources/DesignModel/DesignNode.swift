@@ -189,7 +189,7 @@ public struct DesignColor: Sendable, Hashable, Codable {
 }
 
 public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
-    case frame, group, rectangle, ellipse, text, instance
+    case frame, group, rectangle, ellipse, text, instance, shape
 
     /// The SF Symbol for this kind's sidebar row.
     public var systemImage: String {
@@ -200,6 +200,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         case .ellipse: "circle"
         case .text: "textformat"
         case .instance: "square.on.square"
+        case .shape: "star"
         }
     }
 
@@ -216,7 +217,7 @@ public enum DesignNodeKind: String, CaseIterable, Sendable, Codable {
         switch self {
         case .frame: .white
         case .text: .black
-        case .group, .rectangle, .ellipse, .instance: .shape
+        case .group, .rectangle, .ellipse, .instance, .shape: .shape
         }
     }
 
@@ -254,6 +255,14 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var placedAsset: PlacedAsset?
     /// The point of the picture (unit, 0.5 centre) its cover crop keeps in view. Written only when not the centre.
     public var placedFocus: Point
+    /// The turn, clockwise degrees about the frame's centre, (-180, 180]; `frame` stays the unturned box,
+    /// so snapping, resize and the layer list never see it. Written only when not 0 (transform DT-1).
+    public var rotation: Double = 0
+    /// Mirrored left to right and top to bottom about the frame's centre. Written only when set.
+    public var flipX = false, flipY = false
+    /// A shape node's polygon, star, line or arrow, drawn in `frame` by ShapeRules; nil for every other
+    /// kind. Written only when set (shape-tools DS-1).
+    public var shape: ShapeSpec?
 
     /// The focus a new picture starts with, and the one a file without the key opens with.
     static let centreFocus = Point(x: 0.5, y: 0.5)
@@ -282,15 +291,18 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         gradient = node.gradient
         placedAsset = node.placedAsset
         placedFocus = node.placedFocus
+        rotation = node.rotation
+        (flipX, flipY) = (node.flipX, node.flipY)
+        shape = node.shape
     }
 
     enum CodingKeys: String, CodingKey {
         case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
-        case gradient, placedAsset, placedFocus
+        case gradient, placedAsset, placedFocus, rotation, flipX, flipY, shape
     }
 
     /// Writes a node; a field at its default that a file before it lacked (no stroke, no gradient, no
-    /// picture, a centred focus) is left out, so a file without them saves the same bytes it opened with.
+    /// picture, a centred focus, no turn, no mirror, no shape spec) is left out, so a file without them saves the same bytes it opened with.
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
@@ -309,10 +321,14 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         try container.encodeIfPresent(gradient, forKey: .gradient)
         try container.encodeIfPresent(placedAsset, forKey: .placedAsset)
         if placedFocus != Self.centreFocus { try container.encode(placedFocus, forKey: .placedFocus) }
+        if rotation != 0 { try container.encode(rotation, forKey: .rotation) }
+        if flipX { try container.encode(flipX, forKey: .flipX) }
+        if flipY { try container.encode(flipY, forKey: .flipY) }
+        try container.encodeIfPresent(shape, forKey: .shape)
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke, the default text style, no gradient and no picture.
+    /// corners, fully opaque, no stroke, the default text style, no gradient, no picture, upright and unmirrored, no shape spec.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -328,6 +344,10 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),
             placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),
             placedFocus: container.decodeIfPresent(Point.self, forKey: .placedFocus))
+        rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
+        flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
+        flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
+        shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape)
     }
 
     /// Shifts this node and everything under it by `delta`.
@@ -448,7 +468,7 @@ extension [DesignNode] {
     func hit(at point: DesignPoint) -> String? {
         for node in reversed() where !node.isHidden && !node.isLocked {
             if let inner = node.children.hit(at: point) { return inner }
-            if node.frame.contains(point) { return node.id }
+            if node.contains(point) { return node.id }
         }
         return nil
     }
