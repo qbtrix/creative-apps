@@ -1,4 +1,5 @@
-// Live/HaloGradientShading.swift (gradient-fill HG-6): a draw item's
+// Live/HaloGradientShading+Kernel.swift (gradient-fill HG-6): the adapter onto
+// SuiteKernel's Fill and GradientRules that gives a draw item's
 // gradient as the color under each output pixel. The pixel's center maps
 // back through the item's matrix into its bounds, then into the unit box the
 // gradient's points are in; its offset there is the projection onto a linear

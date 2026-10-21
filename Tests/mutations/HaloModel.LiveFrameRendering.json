@@ -1,5 +1,5 @@
 [
 {"label": "gradient branch skipped: every layer draws its solid color", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "let color = shading?.color(x: x, y: y) ?? solid\n", "replace": "let color = solid\n", "tests": "HaloGradientRenderTests"},
-{"label": "pixel centers skip the item's matrix", "file": "Sources/HaloModel/Live/HaloGradientShading.swift", "find": "let layer = inverse.apply(HaloPoint(", "replace": "let layer = (HaloPoint(", "tests": "HaloGradientRenderTests"},
+{"label": "pixel centers skip the item's matrix", "file": "Sources/HaloModel/Live/HaloGradientShading+Kernel.swift", "find": "let layer = inverse.apply(HaloPoint(", "replace": "let layer = (HaloPoint(", "tests": "HaloGradientRenderTests"},
 {"label": "coverage not applied: the gradient fills outside the outline", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "guard let c = try? mask.coverage(x: x, y: y), c > 0 else { continue }\n", "replace": "guard let c0 = try? mask.coverage(x: x, y: y) else { continue }\n                let c = c0 * 0 + 1\n", "tests": "HaloGradientRenderTests"}
 ]
