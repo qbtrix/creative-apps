@@ -4,7 +4,7 @@ Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
 Stage: 3 build, wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4049 RP-2 and #4110 RP-4 in lane; RP-3 #4103 up after #4049; then RP-3e, RP-5
+Next: #4049 RP-2 merged; RP-3 #4103 dev merged in (conflicts resolved to RP-3's side), gate running; #4110 RP-4 in lane; then RP-3e, RP-5
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
