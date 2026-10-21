@@ -30,6 +30,7 @@ enum PhotoIntent {
     case selectAll, deselect, deleteSelection, fillSelection, applyCrop, cancelCrop
     case selectLayer(PhotoLayer.ID)
     case toggleVisibility(PhotoLayer.ID)
+    case toggleLock(PhotoLayer.ID)
     case opacity(PhotoLayer.ID, Double)
     case blendMode(PhotoLayer.ID, CoreRaster.BlendMode)
     case moveLayers(IndexSet, Int)

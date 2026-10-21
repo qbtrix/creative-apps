@@ -2,12 +2,13 @@
 // the stack top first, each row with its eye, kind symbol and caption (info
 // line, blend summary), a drop reordering through `layerListMove`. Under it
 // SuiteUI's LayerActionBar: New Layer, Duplicate Layer, Delete Layer, fx
-// (waiting on layer styles), Show/Hide Layer and Rename Layer…
-// (`photo.layer.new`, `.duplicate`, `.delete`, `.fx`, `.visibility`,
-// `.rename`). A row's context menu holds Rename, Duplicate, Delete, Merge
-// Down, Flatten Image, Bring Forward, Send Backward and Show/Hide. Every item
-// is built from the Layer menu's catalog spec on the same state,
-// `ToolbarAction(spec, on:)` titled as the menu titles it, so its title,
+// (waiting on layer styles), Lock/Unlock, Show/Hide Layer and Rename Layer…
+// (`photo.layer.new`, `.duplicate`, `.delete`, `.fx`, `.lock`, `.visibility`,
+// `.rename`). Each row shows its eye and lock. A row's context menu holds
+// Rename, Duplicate, Delete, Merge Down, Flatten Image, Bring Forward, Send
+// Backward, Lock/Unlock and Show/Hide. Every item is built from the Layer
+// menu's catalog spec on the same state, `ToolbarAction(spec, on:)` titled as
+// the menu titles it, so its title,
 // enablement and reason are the menu's; a row's menu reads the workspace with
 // that row selected, and a pick selects the row, then runs. Values in, intents out.
 import PhotoModel
@@ -34,7 +35,8 @@ struct PhotoLayerList: View {
                     if let move = model.layerListMove(drop.id, parent: drop.parentID, index: drop.index) {
                         perform(.moveLayers(IndexSet(integer: move.offset), move.destination))
                     }
-                case .disclose, .toggleLocked: break
+                case .toggleLocked(let id): perform(.toggleLock(id))
+                case .disclose: break
                 }
             }
             LayerActionBar(Self.bar(menu))
@@ -61,7 +63,7 @@ struct PhotoLayerList: View {
     /// The bar's commands, then fx after the third.
     nonisolated static func barCommands(selected: PhotoLayer.ID?) -> [Command] {
         [("layer.new", "new", .addLayer), ("layer.duplicate", "duplicate", .edit(.duplicateLayer)),
-         ("layer.delete", "delete", .deleteLayer),
+         ("layer.delete", "delete", .deleteLayer), ("layer.toggle-lock", "lock", selected.map(PhotoIntent.toggleLock)),
          ("layer.toggle-visibility", "visibility", selected.map(PhotoIntent.toggleVisibility)),
          ("layer.rename", "rename", .renameLayer)]
     }
@@ -71,7 +73,7 @@ struct PhotoLayerList: View {
         [("layer.rename", "rename", .renameLayer), ("layer.duplicate", "duplicate", .edit(.duplicateLayer)),
          ("layer.delete", "delete", .deleteLayer), ("layer.merge-down", "merge-down", .edit(.mergeDown)),
          ("layer.flatten", "flatten", .edit(.flattenImage)), ("layer.bring-forward", "bring-forward", .bringForward),
-         ("layer.send-backward", "send-backward", .sendBackward),
+         ("layer.send-backward", "send-backward", .sendBackward), ("layer.toggle-lock", "lock", .toggleLock(row)),
          ("layer.toggle-visibility", "visibility", .toggleVisibility(row))]
     }
 
@@ -98,7 +100,7 @@ struct PhotoLayerList: View {
         let title = state.title(command.id)
         return ToolbarAction(
             PhotoMenuState.spec(command.id), on: state, title: title,
-            systemImage: PhotoLayerMenu.symbol(command.id, visibility: title), identifier: "photo.layer." + command.part
+            systemImage: PhotoLayerMenu.symbol(command.id, title: title), identifier: "photo.layer." + command.part
         ) {
             if let row { menu.perform(.selectLayer(row)) }
             if let intent = command.intent { menu.perform(intent) }
@@ -107,11 +109,11 @@ struct PhotoLayerList: View {
 }
 
 /// A Layers row's ids (`photo.layers`, `photo.layer.row.<id>`,
-/// `photo.layer.<id>.<part>`), eye, no lock, reordering, no nesting, and kind symbol.
+/// `photo.layer.<id>.<part>`), eye, lock, reordering, no nesting, and kind symbol.
 enum PhotoLayerRow {
     static let naming = LayerTreeNaming.app(
         LayerTreeIDs(container: "photo.layers", row: "photo.layer.row.", control: "photo.layer."))
-    static let options = LayerTreeOptions(showsEye: true, showsLock: false, reorders: true, nests: false)
+    static let options = LayerTreeOptions(showsEye: true, showsLock: true, reorders: true, nests: false)
 
     static func kindSymbol(_ kind: PhotoLayerKind) -> String {
         if case .adjustment = kind { return "slider.horizontal.3" }
