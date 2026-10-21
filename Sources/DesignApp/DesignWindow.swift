@@ -26,13 +26,19 @@
 // `-DesignWindowSize WxH` (the first window's content size).
 //
 // File > Export… (⇧⌘E) bumps `exportRequest`; DesignExportArea opens its sheet
-// on each change and hands its notes to the status line.
+// on each change and hands its notes to the status line. DesignHistoryArea holds the
+// History panel (View > Show History) and the autosave hooks; a jump and a restore come
+// back here as workspace methods.
 //
 // Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
 // them through DesignPasteboardBridge under the Model's `pasteboardType`; a
 // refusal (nothing selected, nothing of Design's to paste) goes to the status
-// line. DesignClosePrompt sits on the root, letting every close through until
-// files-history asks about unsaved changes.
+// line.
+//
+// Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with Design's hooks
+// (`unsavedHooks`, buttons `design.close.*`): a close of an edited window, and File > New File
+// over one, asks Save, Don't Save or Cancel first. Save runs File > Save and lands only when
+// the workspace then reads clean, so a cancelled Save panel keeps the document.
 //
 // Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
 // then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
@@ -44,6 +50,7 @@
 // lists every control the editor registers with its DesignControlID.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -125,8 +132,9 @@ struct DesignWindow: View {
             Text(shown.message)
         }
         .task { start() }
-        .modifier(DesignClosePrompt(model: model))
+        .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
+        .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
@@ -143,7 +151,7 @@ struct DesignWindow: View {
         default: commitText()
         }
         switch intent {
-        case .newFile: model.newFile()
+        case .newFile: newFile()
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
@@ -172,6 +180,9 @@ struct DesignWindow: View {
         case .setFrame(let id, let x, let y, let width, let height):
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
+        case .fill(let intent): model.runFill(intent)
+        case .transform(let intent): model.runTransform(intent)
+        case .shape(let intent): model.runShape(intent)
         case .align(let edge): model.alignLayer(edge)
         case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
@@ -181,8 +192,8 @@ struct DesignWindow: View {
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
-        case .zoomIn: userZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: userZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
+        case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
             fit()
@@ -210,6 +221,10 @@ struct DesignWindow: View {
             // The row ids come from the model's own rows; only the name can be refused.
             do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
         case .setPageSize(let width, let height): model.setPageSize(width: width, height: height)
+        case .pick(let point, let toStroke):
+            do { try model.pick(at: point, toStroke: toStroke) } catch { note = error.help }
+        case .sampleSize(let size): model.setSampleSize(size)
+        case .sampleTarget(let toStroke): model.setSampleTarget(toStroke: toStroke)
         }
     }
 
@@ -244,10 +259,9 @@ struct DesignWindow: View {
 
     // MARK: Zoom
 
-    /// Sets the zoom within the Zoom In and Zoom Out stops, and resizes the handle grab area to match.
+    /// Sets the zoom within ZoomMath's range (10% to 3200%), and resizes the handle grab area to match.
     private func setZoom(_ scale: Double) {
-        let (lowest, highest) = (ViewerZoom.stops.first ?? 1, ViewerZoom.stops.last ?? 1)
-        zoom = scale.isFinite ? Swift.min(Swift.max(scale, lowest), highest) : 1
+        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
         model.setHandleTolerance(Double(SuiteSpacing.s) / zoom)
     }
 
@@ -262,9 +276,16 @@ struct DesignWindow: View {
     private func fit() {
         guard let page = model.selectedPage, viewport != .zero else { return }
         let size = CGSize(width: page.frameWidth, height: page.frameHeight)
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: size)
-        setZoom(scale > 0 ? scale : 1)
+        setZoom(ZoomMath.fit(document: size, in: viewport, using: paletteFit))
+    }
+
+    /// The fit EditorDetail hands Command-0: clear of the floating palette, which shows every tool
+    /// while a page is open.
+    private var paletteFit: @Sendable (CGSize, CGSize) -> Double {
+        let toolCount = DesignTool.allCases.count
+        return { viewport, artboard in
+            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
+        }
     }
 
     /// Zooms to fit the selection clear of the palette and keeps its rect for the canvas to
@@ -274,9 +295,7 @@ struct DesignWindow: View {
             note = model.zoomToSelectionHelp
             return
         }
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: CGSize(width: rect.width, height: rect.height))
-        userZoom(scale > 0 ? scale : 1)
+        userZoom(ZoomMath.fit(document: CGSize(width: rect.width, height: rect.height), in: viewport, using: paletteFit))
         show = rect
     }
 
@@ -286,6 +305,33 @@ struct DesignWindow: View {
     }
 
     // MARK: Files
+
+    /// The unsaved guard's hooks for a window (`design.close.*`): the name is the open file's ("Untitled"
+    /// before its first save, nil with nothing open), the dirty state the workspace's DocumentSession, and
+    /// Save runs File > Save, landing only when the workspace then reads clean.
+    // view-static: main-actor
+    static func unsavedHooks(model: @escaping @MainActor () -> DesignWorkspace, perform: @escaping DesignPerform) -> UnsavedHooks {
+        UnsavedHooks(
+            idPrefix: "design",
+            documentName: {
+                let workspace = model()
+                return workspace.isOpen ? workspace.documentURL?.lastPathComponent ?? "Untitled" : nil
+            },
+            isDirty: { model().isDirty },
+            save: {
+                perform(.save)
+                return !model().isDirty
+            })
+    }
+
+    /// File > New File, after the unsaved guard's sheet on the key window lets it go on.
+    private func newFile() {
+        let hooks = Self.unsavedHooks(model: { model }, perform: perform)
+        guard hooks.isDirty() else { return model.newFile() }
+        Task { @MainActor in
+            if await UnsavedGuard.proceed(hooks, in: NSApp.keyWindow) { model.newFile() }
+        }
+    }
 
     /// A window opened by File > New File with no window focused starts with a new file, one
     /// opened for a file opens it, and the first window opens the launch file when there is one.

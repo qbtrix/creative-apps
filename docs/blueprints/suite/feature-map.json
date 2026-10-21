@@ -215,7 +215,8 @@
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "suiteui/fill-heal"
         }
       ]
     },
@@ -230,7 +231,8 @@
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "suiteui/fill-heal"
         }
       ]
     },
@@ -245,13 +247,16 @@
       ],
       "adopters": [
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "suiteui/text-style"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "suiteui/text-style"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/text-layers"
         },
         {
           "app": "flare"
@@ -350,7 +355,8 @@
       ],
       "adopters": [
         {
-          "app": "flare"
+          "app": "flare",
+          "packet": "suiteui/timeline-keys"
         }
       ]
     },
@@ -379,26 +385,31 @@
     },
     {
       "id": "S2",
-      "name": "Effects stack and layer styles, editable later",
+      "name": "Effects stack and layer styles, editable later (layer styles: captain 2026-10-21, beta, shared)",
       "layer": "kernel",
       "c4": [
-        "suite-kernel ✚`Effects`",
-        "suiteui effects panel"
+        "suite-imaging ✚`imaging-style` (LayerStyle, StyleRules, StyleCommands, LayerStyleSVG, StyleProgram, StyleRoute)",
+        "suiteui LayerStylePanel",
+        "coreraster + corerender `style` family (core layer-style-engine)"
       ],
       "adopters": [
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "halo/layer-styles"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/layer-styles"
         },
         {
           "app": "library"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "design/layer-styles"
         }
-      ]
+      ],
+      "packet": "suiteui/layer-styles"
     },
     {
       "id": "S3",
@@ -432,7 +443,8 @@
           "app": "flare"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/masks-clipping"
         },
         {
           "app": "design"
@@ -441,20 +453,30 @@
     },
     {
       "id": "S5",
-      "name": "Selection tools: ellipse, lasso, add/subtract/intersect, feather, deep select (re-cut: PV-5)",
+      "name": "Selection tools: ellipse, lasso, polygon, add/subtract/intersect, invert, feather, expand, magic wand, group-aware click (captain 2026-10-21, beta)",
       "layer": "kernel",
       "c4": [
-        "suite-kernel `Selection`",
-        "coreraster Mask"
+        "suite-kernel `Selection` (AreaShape, GroupPick)",
+        "suite-imaging ✚`imaging-select` (AreaMask over coreraster Mask)",
+        "suiteui CanvasMarks+Area, AreaToolOptions"
       ],
       "adopters": [
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "suiteui/area-selection"
         },
         {
-          "app": "design"
+          "app": "design",
+          "packet": "suiteui/area-selection"
+        },
+        {
+          "app": "halo"
+        },
+        {
+          "app": "flare"
         }
-      ]
+      ],
+      "packet": "suiteui/area-selection"
     },
     {
       "id": "S6",
@@ -508,7 +530,8 @@
           "app": "flare"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "photo/masks-clipping"
         },
         {
           "app": "halo"
@@ -671,15 +694,19 @@
       ],
       "adopters": [
         {
-          "app": "library"
+          "app": "library",
+          "packet": "suiteui/adjust-everywhere"
         },
         {
-          "app": "photo"
+          "app": "photo",
+          "packet": "suiteui/adjust-everywhere"
         },
         {
-          "app": "halo"
+          "app": "halo",
+          "packet": "suiteui/adjust-everywhere"
         }
-      ]
+      ],
+      "packet": "suiteui/adjust-everywhere"
     },
     {
       "id": "S16",
@@ -907,7 +934,8 @@
         "flare-model",
         "flarecore `import` + export"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "flare/lottie-open"
     },
     {
       "id": "A3",
@@ -952,7 +980,8 @@
         "corecatalog/catalog-store",
         "suiteui LayerTreeList"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "library/folders"
     },
     {
       "id": "A7",
@@ -963,7 +992,8 @@
         "library-model",
         "suite-kernel `Export` run pattern"
       ],
-      "adopters": []
+      "adopters": [],
+      "packet": "library/catalog-files"
     },
     {
       "id": "A8",
@@ -1889,6 +1919,15 @@
       "adopters": []
     },
     {
+      "id": "photo/psd-effects",
+      "name": "Photo opens a layered PSD with its layer effects as editable layer styles, and Linear Dodge and Linear Burn as themselves (captain 2026-10-21, beta; findings #3496, #3497)",
+      "packet": "photo/psd-effects",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "suiteui/adopt-kernel-layers",
       "name": "Every app's layer list or tree runs on SuiteKernel's LayerTree; the app tree helpers are deleted",
       "packet": "suiteui/adopt-kernel-layers",
@@ -2200,11 +2239,12 @@
     },
     {
       "id": "suiteui/shared-codecs",
-      "name": "One ImageIO adapter in SuiteShell over CoreRaster's codecs; the hand-rolled PNG writers deleted",
+      "name": "One image format registry (read TIFF, WebP, GIF, BMP, OpenEXR, TGA, HEIC, JPEG, PNG, RAW; write TIFF, PNG, JPEG, HEIC) and one ImageIO adapter in SuiteShell over CoreRaster's codecs; the per-app format lists and hand-rolled PNG writers deleted",
       "packet": "suiteui/shared-codecs",
       "layer": "model",
       "c4": [
-        "suite-shell/shell-imageio ✚"
+        "suite-shell/shell-imageio ✚",
+        "suite-model/suite-identity"
       ],
       "adopters": [
         {
@@ -2249,6 +2289,34 @@
       ]
     },
     {
+      "id": "suiteui/shared-raw",
+      "name": "Camera RAW decoded once in SuiteImaging through Core Image: linear float with headroom, embedded previews for thumbnails, clear refusals",
+      "packet": "suiteui/shared-raw",
+      "layer": "model",
+      "c4": [
+        "suite-imaging/imaging-raw ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/shared-raw"
+        },
+        {
+          "app": "library",
+          "packet": "library/raw"
+        }
+      ]
+    },
+    {
+      "id": "library/raw",
+      "name": "Library imports, shows, develops and exports RAW files through the shared RAW decode",
+      "packet": "library/raw",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
       "id": "suiteui/adopt-kernel-unsaved-prompt",
       "name": "One unsaved-changes guard and save status in every editor",
       "packet": "suiteui/adopt-kernel-unsaved-prompt",
@@ -2289,6 +2357,463 @@
           "packet": "suiteui/adopt-kernel-eyedropper-photo"
         }
       ]
+    },
+    {
+      "id": "suiteui/clipboard-interop",
+      "name": "Clipboard interop: Copy writes PNG and SVG beside each app's own type, Paste of an image or SVG places it; one live pasteboard coder and one SuiteShell bridge (captain 2026-10-21, beta)",
+      "layer": "model",
+      "c4": [
+        "suite-model/suite-pasteboard",
+        "suite-shell/shell-pasteboard",
+        "suite-kernel/kernel-place (paste as a placed image)"
+      ],
+      "packet": "suiteui/clipboard-interop",
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/clipboard-interop"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/clipboard-interop"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/clipboard-interop"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/clipboard-interop"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/clipboard-interop"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/document-setup",
+      "name": "New Document sheet (size, unit, resolution, background, presets, clipboard size, rate and length) and Document Settings later, on a kernel DocumentSetup (captain 2026-10-21, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel ✚`kernel-document`",
+        "suiteui NewDocumentSheet",
+        "suite-model/suite-home presets"
+      ],
+      "packet": "suiteui/document-setup",
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/document-setup"
+        },
+        {
+          "app": "design",
+          "packet": "suiteui/document-setup"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/document-setup"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/document-setup"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/frame-rates",
+      "name": "One frame-rate list with 23.976, 29.97, 50 and 59.94, and drop-frame timecode, in SuiteKernel Keys (captain 2026-10-21, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-keys FrameRate, Timecode",
+        "suiteui TimelineTime, FrameRateMenu",
+        "flarecore Scene rate (core bump)"
+      ],
+      "packet": "suiteui/frame-rates",
+      "adopters": [
+        {
+          "app": "halo",
+          "packet": "suiteui/frame-rates"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/frame-rates"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/anchor-parenting",
+      "name": "Anchor point and parenting: a kernel Placement lifted from Halo, set-anchor that keeps place, parent and null layers through LayerFollow, an anchor mark and rows in SuiteUI (captain 2026-10-21, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-transform Placement",
+        "suite-kernel/kernel-layers LayerFollow",
+        "suiteui CanvasMarks+Anchor, AnchorRows",
+        "flarecore Transform anchor + Layer parent (core bump)"
+      ],
+      "packet": "suiteui/anchor-parenting",
+      "adopters": [
+        {
+          "app": "halo",
+          "packet": "suiteui/anchor-parenting"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/anchor-parenting"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/orientation-crop",
+      "name": "Rotate 90, flip and a crop aspect that swaps to portrait, on one kernel Crop module (#3117); Photo's Flip Canvas restored (captain 2026-10-21, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel ✚`kernel-crop` (Crop, Orientation)",
+        "suiteui CropAspectPicker"
+      ],
+      "packet": "suiteui/orientation-crop",
+      "adopters": [
+        {
+          "app": "library",
+          "packet": "suiteui/orientation-crop"
+        },
+        {
+          "app": "photo",
+          "packet": "suiteui/orientation-crop"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/brush-keys",
+      "name": "Brush and opacity keys: [ ] size, Shift-[ ] hardness, number keys for brush or layer opacity, never while a field has focus (captain 2026-10-21, beta)",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-stroke BrushKeys",
+        "suiteui ToolKeys, BrushKeyReadout"
+      ],
+      "packet": "suiteui/brush-keys",
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/brush-keys"
+        },
+        {
+          "app": "design",
+          "packet": "suiteui/brush-keys"
+        },
+        {
+          "app": "flare",
+          "packet": "suiteui/brush-keys"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/adjust-everywhere",
+      "name": "Adjustments everywhere: Black & White, Invert, filters (blur, sharpen, noise) and looks (built-in and saved) in SuiteImaging, the preset store in SuiteModel; Photo, Library and Halo adopt",
+      "packet": "suiteui/adjust-everywhere",
+      "layer": "render",
+      "c4": [
+        "suite-imaging/imaging-adjust-kinds ✚",
+        "suite-model/suite-presets ✚"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/adjust-everywhere"
+        },
+        {
+          "app": "library",
+          "packet": "suiteui/adjust-everywhere"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/adjust-everywhere"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/fill-heal",
+      "name": "Paint bucket, spot heal, heal and remove object on creative-core's fill and heal engines, in SuiteImaging over the kernel's dab coverage; Photo adopts",
+      "packet": "suiteui/fill-heal",
+      "layer": "render",
+      "c4": [
+        "suite-imaging/imaging-retouch ✚",
+        "suite-kernel/kernel-stroke"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suiteui/fill-heal"
+        },
+        {
+          "app": "library"
+        }
+      ]
+    },
+    {
+      "id": "suiteui/text-style",
+      "name": "One text style: font, weight, italic, size, alignment with justify, line height and letter spacing as kernel values and commands, one SuiteUI style row; Design and Halo adopt, Photo through photo/text-layers",
+      "packet": "suiteui/text-style",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-text ✚",
+        "suiteui/suiteui-sources TextStyleRows"
+      ],
+      "adopters": [
+        {
+          "app": "design",
+          "packet": "suiteui/text-style"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/text-style"
+        },
+        {
+          "app": "photo",
+          "packet": "photo/text-layers"
+        }
+      ]
+    },
+    {
+      "id": "photo/text-layers",
+      "name": "Photo's text layers: the Type tool, the suite's text style, editable after reopen",
+      "packet": "photo/text-layers",
+      "layer": "app",
+      "app": "photo",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "suiteui/timeline-keys",
+      "name": "Timeline keys, one home: colour keys and span slide in SuiteKernel Keys; Flare keys fill and stroke, Halo slides and trims layer bars",
+      "packet": "suiteui/timeline-keys",
+      "layer": "kernel",
+      "c4": [
+        "suite-kernel/kernel-keys",
+        "suiteui/suiteui-sources TimelineStrip"
+      ],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suiteui/timeline-keys"
+        },
+        {
+          "app": "halo",
+          "packet": "suiteui/timeline-keys"
+        }
+      ]
+    },
+    {
+      "id": "suite/command-state",
+      "name": "Every action is a command and every toggle reports its state: suite.controls carries selected, Show Original is a command, the 89 bare controls leave the baseline under a ratchet",
+      "packet": "suite/command-state",
+      "layer": "model",
+      "c4": [
+        "suiteui/suiteui-sources ControlInventory"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "design",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/command-state"
+        },
+        {
+          "app": "library",
+          "packet": "suite/command-state"
+        }
+      ]
+    },
+    {
+      "id": "suite/report-problem",
+      "name": "Help > Report a Problem and Beta Notes: a redacted report with the newest crash logs that the person sends, and the known issues; the CLI prints the same",
+      "packet": "suite/report-problem",
+      "layer": "model",
+      "c4": [
+        "suite-model/suite-help ✚",
+        "suite-shell/shell-adoption"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "design",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "library",
+          "packet": "suite/editor-menus"
+        }
+      ]
+    },
+    {
+      "id": "suite/cli-bundle",
+      "name": "The afterglow CLI inside AfterGlow.app and Help > Connect an AI Assistant with an ask-first Install Command-Line Tool",
+      "packet": "suite/cli-bundle",
+      "layer": "model",
+      "c4": [
+        "afterglow-bundle",
+        "suite-model/suite-packaging"
+      ],
+      "adopters": []
+    },
+    {
+      "id": "suite/editor-menus",
+      "name": "Switch To, AI Access, the Help group and the live command channel in every editor, and a window after the last one closes",
+      "packet": "suite/editor-menus",
+      "layer": "model",
+      "c4": [
+        "suite-shell/shell-adoption"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "design",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/editor-menus"
+        },
+        {
+          "app": "library",
+          "packet": "suite/editor-menus"
+        }
+      ]
+    },
+    {
+      "id": "suite/sample-files",
+      "name": "The welcome tour's sample files, made by afterglow scripts and shipped in the bundle (#836 to #839)",
+      "packet": "suite/sample-files",
+      "layer": "model",
+      "c4": [
+        "afterglow-bundle"
+      ],
+      "adopters": [
+        {
+          "app": "photo",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "design",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "flare",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "halo",
+          "packet": "suite/sample-files"
+        },
+        {
+          "app": "library",
+          "packet": "suite/sample-files"
+        }
+      ]
+    },
+    {
+      "id": "suite/no-placeholders",
+      "name": "No placeholder menu items in the beta: launcher Check for Updates and Assets and Flare's beta.2 items hidden, a ratchet keeps new ones out",
+      "packet": "suite/no-placeholders",
+      "layer": "model",
+      "c4": [],
+      "adopters": [
+        {
+          "app": "flare",
+          "packet": "suite/no-placeholders"
+        }
+      ]
+    },
+    {
+      "id": "library/catalog-files",
+      "name": "Library manages its files: copy on import into dated folders, remove from the catalog keeping the files, relink missing photos",
+      "packet": "library/catalog-files",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/folders",
+      "name": "Folders in Library's sidebar, with counts and subfolders",
+      "packet": "library/folders",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/catalog-backup",
+      "name": "Rolling catalog backups in the suite store and Restore Catalog Backup",
+      "packet": "library/catalog-backup",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/share-sheet",
+      "name": "Share the selected photos (developed, location off) through the system share sheet",
+      "packet": "library/share-sheet",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "library/large-catalog",
+      "name": "Library within budget at 10,000 photos: launch, scroll, selection, loupe step, export plan",
+      "packet": "library/large-catalog",
+      "layer": "app",
+      "app": "library",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/lottie-open",
+      "name": "Open a Lottie JSON in Flare, every skipped item named, saved as .flare",
+      "packet": "flare/lottie-open",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
+    },
+    {
+      "id": "flare/lottie-player-check",
+      "name": "A CI check that Flare's Lottie plays the same in a pinned reference player",
+      "packet": "flare/lottie-player-check",
+      "layer": "app",
+      "app": "flare",
+      "c4": [],
+      "adopters": []
     }
   ]
 }

@@ -31,10 +31,12 @@
     "job": "Add a bold title (\"SUMMER SALE\", heavy weight, 120 pt, centred) over a photo and export.",
     "outcome": "Text is crisp, centred, and still editable after save and reopen.",
     "needs": [
-      "E8"
+      "E8",
+      "photo/text-layers",
+      "suiteui/text-style"
     ],
     "needs_note": "E8 text engine (Photo adopter)",
-    "closes_with": "E8",
+    "closes_with": "photo/text-layers",
     "trap": "Text rasterised on save, or the font silently swapped on reopen",
     "run": "Cm",
     "baseline": "fail",
@@ -72,10 +74,11 @@
     "job": "Remove 20 sensor dust spots from a sky, one click each.",
     "outcome": "No halo, no tone shift, no repeated texture.",
     "needs": [
-      "E7"
+      "E7",
+      "suiteui/fill-heal"
     ],
     "needs_note": "E7 retouch (spot heal)",
-    "closes_with": "E7",
+    "closes_with": "suiteui/fill-heal",
     "trap": "Today's Heal is a per-dab tone match: grain and gradient smear show at 100%",
     "run": "C",
     "baseline": "partial",
@@ -104,7 +107,8 @@
       "captain",
       "https://affinity.serif.com/en-gb/photo/full-feature-list/",
       "https://shotkit.com/pixelmator-pro-vs-photoshop/"
-    ]
+    ],
+    "waits_on": "PK-7"
   },
   "RJ-P06": {
     "id": "RJ-P06",
@@ -134,10 +138,12 @@
     "job": "Remove a passer-by from a beach photo (lasso, then Remove).",
     "outcome": "The fill matches sand and sea with no cloned copies.",
     "needs": [
-      "E7"
+      "E7",
+      "suiteui/fill-heal",
+      "S5"
     ],
     "needs_note": "E7 retouch (fill from surroundings)",
-    "closes_with": "E7",
+    "closes_with": "suiteui/fill-heal",
     "trap": "Repeated-pattern fill; works on a 50 px spot but not a person-sized area",
     "run": "C",
     "baseline": "fail",
@@ -780,5 +786,148 @@
     ],
     "waits_on": "PM-6",
     "test": "Tests/RealJobs/photo/fade-layers/fade-layers.jobs.json"
+  },
+  "RJ-P44": {
+    "id": "RJ-P44",
+    "app": "photo",
+    "weight": "high",
+    "job": "Outline a cut-out with a 4 px white stroke and a soft drop shadow, save, reopen and fade the shadow.",
+    "outcome": "After reopening, the layer's style still lists the stroke and the shadow; the exported PNG has a white ring 4 px outside the shape and the shadow at the new opacity, with the shape's own pixels unchanged.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The style is flattened into the pixels on save, or the stroke lands inside the shape",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PY-6",
+    "added_by": "photo/layer-styles"
+  },
+  "RJ-P45": {
+    "id": "RJ-P45",
+    "app": "photo",
+    "weight": "med",
+    "job": "Clip a texture layer to the shape below it, then try to clip the bottom layer.",
+    "outcome": "The texture shows only inside the shape's alpha; clipping the bottom layer is refused with a reason.",
+    "needs": [
+      "S8"
+    ],
+    "closes_with": "S8",
+    "trap": "The clip uses the base's bounding box instead of its alpha, or a clip with nothing below succeeds silently",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PK-7",
+    "added_by": "photo/masks-clipping"
+  },
+  "RJ-P46": {
+    "id": "RJ-P46",
+    "app": "photo",
+    "weight": "med",
+    "job": "Open a PSD whose badge has a drop shadow and a stroke effect, change the shadow's distance, and export a PNG.",
+    "outcome": "The badge opens with an editable style holding exactly the drop shadow and the stroke; after the edit the shadow sits at the new distance along the PSD's angle within 1 px.",
+    "needs": [
+      "E10",
+      "S2",
+      "photo/psd-effects"
+    ],
+    "closes_with": "photo/psd-effects",
+    "trap": "The effects open flattened into pixels, or vanish with no warning",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "https://github.com/qbtrix/creative-apps/issues/3496"
+    ],
+    "waits_on": "PS-3",
+    "added_by": "photo/psd-effects"
+  },
+  "RJ-P70": {
+    "id": "RJ-P70",
+    "app": "photo",
+    "weight": "med",
+    "job": "Flip a two-layer image horizontally with Flip Canvas and export PNG.",
+    "outcome": "The PNG equals the original mirrored, pixel for pixel.",
+    "needs": [
+      "suiteui/orientation-crop"
+    ],
+    "closes_with": "suiteui/orientation-crop",
+    "trap": "Only the selected layer flips, or the top layer keeps its old offset",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "OC-12",
+    "added_by": "suiteui/orientation-crop"
+  },
+  "RJ-P71": {
+    "id": "RJ-P71",
+    "app": "photo",
+    "weight": "high",
+    "job": "Make a new 4x6 in image at 300 ppi with a transparent background, draw a red square, and export PNG.",
+    "outcome": "The PNG is 1200x1800, its corner alpha is 0, and its pHYs says 300 ppi.",
+    "needs": [
+      "suiteui/document-setup"
+    ],
+    "closes_with": "suiteui/document-setup",
+    "trap": "The image comes out 1920x1080 white, or 4x6 px",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-8",
+    "added_by": "suiteui/document-setup"
+  },
+  "RJ-P50": {
+    "id": "RJ-P50",
+    "app": "photo",
+    "weight": "high",
+    "job": "Blur only the top half of a portrait: select it and run Gaussian Blur at radius 8.",
+    "outcome": "Every pixel of the bottom half equals the input byte for byte; the top half's local variance drops by more than half.",
+    "needs": [
+      "suiteui/adjust-everywhere"
+    ],
+    "closes_with": "suiteui/adjust-everywhere",
+    "trap": "The blur leaks past the selection edge or runs on the whole image",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AJ-8",
+    "added_by": "suiteui/adjust-everywhere"
+  },
+  "RJ-P51": {
+    "id": "RJ-P51",
+    "app": "photo",
+    "weight": "high",
+    "job": "Fill a logo's white background with red using the paint bucket (tolerance 32, contiguous) and export.",
+    "outcome": "Every background pixel is red; every logo pixel, edges included, is unchanged.",
+    "needs": [
+      "suiteui/fill-heal",
+      "E6"
+    ],
+    "closes_with": "suiteui/fill-heal",
+    "trap": "The fill bleeds into the anti-aliased logo edge or misses the corners",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "FH-6",
+    "added_by": "suiteui/fill-heal"
   }
 }

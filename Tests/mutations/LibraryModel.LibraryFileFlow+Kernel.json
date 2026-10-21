@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".oneImportStep: a drop records one undo step per file",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "history.kernel.record(\"Import\", CatalogChange(photos: [], removing: fresh))",
+    "replace": "for photo in fresh { history.kernel.record(\"Import\", CatalogChange(photos: [], removing: [photo])) }",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": ".othersHandOff: another app's document is imported instead of handed off",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "case .handOff(let path, let app): fileRequests.append(.handOff(path: path, app: app))",
+    "replace": "case .handOff(let path, _): importDropped([path])",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "a drop leaves its photos unselected",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "        select(Set(fresh.map(\\.id)))\n",
+    "replace": "",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "Open In hands over nothing",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "        }\n        fileRequests.append(.handOff(path: path, app: app))\n",
+    "replace": "        }\n",
+    "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "undoing an import leaves its photos",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "        if let removing = applied.removing { removePhotos(Set(removing.map(\\.id))) }\n",
+    "replace": "",
+    "tests": "LibraryFileFlowTests.swift"
+  }
+]

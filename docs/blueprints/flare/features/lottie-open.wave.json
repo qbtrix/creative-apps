@@ -1,0 +1,146 @@
+{
+  "title": "Open a Lottie file in Flare: File > Open and drop read a Lottie JSON through FlareCore's reader, name what was skipped, and save as .flare",
+  "wave": 8,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 Flare must-have (Flare audit B5); feature map A2 (the open half; dotLottie stays later); real job RJ-F12 (re-pointed)",
+  "waits_on": "file-flow FL-m (Flare's open and drop paths, FlareFiles.swift and the catalog); the stage-matches-export fix in flight (an opened file's colour and trim keys draw on the stage)",
+  "depends": [
+    "layers-files",
+    "flare-export"
+  ],
+  "longest_chain": "4 (LO-1 → LO-4 → LO-5 → LO-6)",
+  "journeys": [
+    "FlareLottieOpenJourneyTests.testOpenAndRecolour"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareLottieOpen.swift",
+    "Tests/FlareModelTests/FlareLottieOpenTests.swift",
+    "Tests/FlareModelTests/Fixtures/bounce.lottie.json",
+    "Tests/FlareModelTests/Fixtures/precomp.lottie.json",
+    "UITests/FlareJourneyTests+LottieOpen.swift",
+    "Tests/RealJobs/flare/open-recolour-lottie/open-recolour-lottie.jobs.json",
+    "Sources/FlareApp/FlareFilePanels.swift",
+    "Sources/FlareApp/FlareWindow+File.swift",
+    "Sources/FlareApp/FlareImportNote.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareLottieOpenTests.swift",
+    "Sources/FlareModel/FlareFiles.swift",
+    "Sources/FlareModel/FlareHeadless.swift",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/mutations/FlareModel.FlareLottieOpen.json",
+    "Tests/AfterGlowCLITests/FlareLottieOpenCLITests.swift",
+    "docs/blueprints/flare/features/lottie-open.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "LO-a",
+      "behavior": "Flare declares the Lottie open path and the import note as stubs, with the checks written and disabled.",
+      "tasks": [
+        "LO-1",
+        "LO-2"
+      ],
+      "journeys": [
+        "MJ-LO"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareLottieOpen.swift",
+        "Tests/FlareModelTests/FlareLottieOpenTests.swift",
+        "Tests/FlareModelTests/Fixtures/bounce.lottie.json",
+        "Tests/FlareModelTests/Fixtures/precomp.lottie.json",
+        "UITests/FlareJourneyTests+LottieOpen.swift",
+        "Tests/RealJobs/flare/open-recolour-lottie/open-recolour-lottie.jobs.json"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "LO-u",
+      "behavior": "File > Open and drop accept a Lottie JSON and the window shows the import note listing what was skipped, on the stubs, within the render budget.",
+      "tasks": [
+        "LO-4",
+        "LO-4b"
+      ],
+      "journeys": [
+        "FJ-LO"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareFilePanels.swift",
+        "Sources/FlareApp/FlareWindow+File.swift",
+        "Sources/FlareApp/FlareImportNote.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareLottieOpenTests.swift"
+      ],
+      "waits": {
+        "LO-a": [
+          "LO-4"
+        ],
+        "file-flow:FL-m": [
+          "LO-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "LO-m",
+      "behavior": "A Lottie opens as an untitled Flare document with its keys, masks and mattes, every skipped item named, and malformed or over-limit files refused with a reason, through the catalog.",
+      "tasks": [
+        "LO-3",
+        "LO-3h"
+      ],
+      "journeys": [
+        "MJ-LO"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareLottieOpen.swift",
+        "Sources/FlareModel/FlareFiles.swift",
+        "Sources/FlareModel/FlareHeadless.swift",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/FlareModelTests/FlareLottieOpenTests.swift",
+        "Tests/mutations/FlareModel.FlareLottieOpen.json",
+        "Tests/AfterGlowCLITests/FlareLottieOpenCLITests.swift"
+      ],
+      "waits": {
+        "LO-a": [
+          "LO-3"
+        ],
+        "file-flow:FL-m": [
+          "LO-3"
+        ],
+        "pen-paths:FP-m": [
+          "LO-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "LO-z",
+      "behavior": "Opening and recolouring a Lottie runs live end to end, RJ-F12 passes, and the feature is built.",
+      "tasks": [
+        "LO-5",
+        "LO-6"
+      ],
+      "journeys": [
+        "FJ-LO",
+        "MJ-LO"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareWindow+File.swift",
+        "UITests/FlareJourneyTests+LottieOpen.swift",
+        "Tests/RealJobs/flare/open-recolour-lottie/open-recolour-lottie.jobs.json",
+        "docs/blueprints/flare/features/lottie-open.wave.json"
+      ],
+      "waits": {
+        "LO-u": [
+          "LO-5"
+        ],
+        "LO-m": [
+          "LO-5"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

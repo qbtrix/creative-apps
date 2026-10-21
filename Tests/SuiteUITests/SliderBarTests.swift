@@ -136,10 +136,12 @@ private let gamma = ScrubTrack(
     let window = NSWindow(
         contentRect: CGRect(x: 0, y: 0, width: 320, height: 80), styleMask: [.titled], backing: .buffered, defer: false)
     defer { window.orderOut(nil) }
-    NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: "AXManualAccessibility"))
+    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+        NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+    }
     window.contentView = NSHostingView(rootView: row.frame(width: SuiteSize.editorPanelWidth))
     window.orderFrontRegardless()
-    RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+    spinUntil { firstSlider(under: window) != nil }
     let slider = try #require(firstSlider(under: window), "the bar is no slider")
     let reading = slider.value(forKey: "accessibilityValueDescription") as? String
     #expect(reading == NumericInput.spoken(1, decimals: 2))

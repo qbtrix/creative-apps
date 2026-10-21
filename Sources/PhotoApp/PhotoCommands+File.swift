@@ -1,5 +1,5 @@
 // PhotoCommands+File.swift: Photo's File menu items: New Image, Open…, Open
-// Recent ▸, Close, Save, Save As…, Export…. Save, Save As and Export are off
+// Recent ▸, Place… (PhotoPlace.swift), Close, Save, Save As…, Export…. Save, Save As and Export are off
 // with no image. Close (Command-W) is the system's, which replacing
 // `.saveItem` drops: it sends performClose: to the key window, so an unsaved
 // window asks first (PhotoWindowCloseGuard). Open Recent lists the focused window's recent files, newest first;
@@ -27,6 +27,7 @@ extension PhotoCommands {
                 if !recent.files.isEmpty { Divider() }
                 Button("Clear Menu") { clearRecent(recent.target) }.disabled(!recent.canClear)
             }
+            menu.placeItem
         }
         CommandGroup(replacing: .saveItem) {
             // `.saveItem` holds the system's Close, so replacing it brings Close back here.

@@ -1,0 +1,5 @@
+[
+{"label":"release keeps the gesture, so a second release draws the shape again","file":"Sources/HaloModel/HaloShapeDraft.swift","find":"        defer { self = HaloShapeGesture() }\n","replace":"","tests":"HaloShapeDraftTests"},
+{"label":"Escape with no drag says it dropped one, so the tool never turns off","file":"Sources/HaloModel/HaloShapeDraft.swift","find":"        guard isDragging, !cancelled else { return false }\n","replace":"        guard !cancelled else { return false }\n","tests":"HaloShapeDraftTests"},
+{"label":"a stubbed draw refuses without the reason","file":"Sources/HaloModel/HaloShapeDraft.swift","find":"            refusal = HaloRefusal(control: Self.shapeControl, message: help)\n","replace":"","tests":"HaloShapeDraftTests"}
+]

@@ -1,0 +1,158 @@
+{
+  "title": "Every editor takes part in the suite: Window > Switch To, AI Access, the Help group and the live command channel in Photo, Design, Flare, Halo and Library, and a window comes back after the last one closes",
+  "wave": "BG1",
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 suite must-have 4 (suite audit row 5, under-specified 1); #3648 (New Photo on the home does nothing); Halo #1081 (no window after closing the last) and #1018 (Help with no help); real job RJ-X63 (new)",
+  "waits_on": "report-problem RP-a (SuiteHelpCommands); each app's file-flow adopt slice that owns its <App>App.swift (photo PF, design DF, flare FL, halo HF, library LF; cross-line hand-offs); afterglow-mcp (built)",
+  "depends": [
+    "switching",
+    "afterglow-mcp"
+  ],
+  "longest_chain": "5 (EM-1 → EM-2 → EM-3 → EM-9 → EM-10)",
+  "journeys": [
+    "PhotoSuiteMenusJourneyTests.testSuiteMenus",
+    "DesignSuiteMenusJourneyTests.testSuiteMenus",
+    "FlareSuiteMenusJourneyTests.testSuiteMenus",
+    "HaloSuiteMenusJourneyTests.testSuiteMenus",
+    "LibrarySuiteMenusJourneyTests.testSuiteMenus"
+  ],
+  "owned": [
+    "Sources/SuiteShell/SuiteEditorScene.swift",
+    "Sources/SuiteModel/Switching/ReopenRule.swift",
+    "Tests/SuiteModelTests/SuiteEditorReopenTests.swift",
+    "docs/c4/parts/creative-apps/suite-shell/shell-adoption.json",
+    "Sources/SuiteShell/SuiteAppDelegate.swift",
+    "Tests/mutations/SuiteModel.ReopenRule.json",
+    "Sources/PhotoApp/PhotoApp.swift",
+    "UITests/PhotoJourneyTests+SuiteMenus.swift",
+    "Sources/DesignApp/DesignApp.swift",
+    "UITests/DesignJourneyTests+SuiteMenus.swift",
+    "Sources/FlareApp/FlareApp.swift",
+    "UITests/FlareJourneyTests+SuiteMenus.swift",
+    "Sources/HaloApp/HaloApp.swift",
+    "UITests/HaloJourneyTests+SuiteMenus.swift",
+    "Sources/HaloApp/HaloFileMenu.swift",
+    "Sources/LibraryApp/LibraryApp.swift",
+    "UITests/LibraryJourneyTests+SuiteMenus.swift",
+    "Tests/RealJobs/suite/editor-menus/editor-menus.jobs.json",
+    "UITests/AfterGlowJourneyTests+EveryControl.swift",
+    "docs/blueprints/suite/features/editor-menus.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "EM-a",
+      "behavior": "SuiteShell declares `.suiteEditor` and the delegate's reopen rule, and the launcher-side journeys for an editor are written and skipped.",
+      "tasks": [
+        "EM-1",
+        "EM-2"
+      ],
+      "journeys": [
+        "XJ-EM"
+      ],
+      "owned": [
+        "Sources/SuiteShell/SuiteEditorScene.swift",
+        "Sources/SuiteModel/Switching/ReopenRule.swift",
+        "Tests/SuiteModelTests/SuiteEditorReopenTests.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-adoption.json",
+        "Sources/SuiteShell/SuiteAppDelegate.swift",
+        "Tests/mutations/SuiteModel.ReopenRule.json"
+      ],
+      "waits": {
+        "report-problem:RP-a": [
+          "EM-1"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EM-photo-design",
+      "behavior": "Photo and Design show Switch To, AI Access and the Help group, answer live commands, reopen a window from the Dock, and the home's New Photo opens a photo (#3648).",
+      "tasks": [
+        "EM-3",
+        "EM-4"
+      ],
+      "journeys": [
+        "PJ-EM",
+        "DJ-EM"
+      ],
+      "owned": [
+        "Sources/PhotoApp/PhotoApp.swift",
+        "UITests/PhotoJourneyTests+SuiteMenus.swift",
+        "Sources/DesignApp/DesignApp.swift",
+        "UITests/DesignJourneyTests+SuiteMenus.swift"
+      ],
+      "waits": {
+        "EM-a": [
+          "EM-3",
+          "EM-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EM-flare-halo",
+      "behavior": "Flare and Halo show Switch To, AI Access and the Help group, answer live commands, and reopen a window from the Dock; Halo's empty Help item is gone (#1018, #1081).",
+      "tasks": [
+        "EM-5",
+        "EM-6"
+      ],
+      "journeys": [
+        "FJ-EM",
+        "HJ-EM"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareApp.swift",
+        "UITests/FlareJourneyTests+SuiteMenus.swift",
+        "Sources/HaloApp/HaloApp.swift",
+        "UITests/HaloJourneyTests+SuiteMenus.swift",
+        "Sources/HaloApp/HaloFileMenu.swift"
+      ],
+      "waits": {
+        "EM-a": [
+          "EM-5",
+          "EM-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EM-library",
+      "behavior": "Library shows Switch To, AI Access and the Help group, answers live commands on its catalog and reopens its window from the Dock, RJ-X63 passes in all five editors, and the feature is built.",
+      "tasks": [
+        "EM-7",
+        "EM-8",
+        "EM-9",
+        "EM-10"
+      ],
+      "journeys": [
+        "LJ-EM",
+        "PJ-EM",
+        "DJ-EM",
+        "FJ-EM",
+        "HJ-EM"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryApp.swift",
+        "UITests/LibraryJourneyTests+SuiteMenus.swift",
+        "Tests/RealJobs/suite/editor-menus/editor-menus.jobs.json",
+        "UITests/AfterGlowJourneyTests+EveryControl.swift",
+        "docs/blueprints/suite/features/editor-menus.wave.json"
+      ],
+      "waits": {
+        "EM-a": [
+          "EM-7"
+        ],
+        "EM-photo-design": [
+          "EM-9"
+        ],
+        "EM-flare-halo": [
+          "EM-9"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}
