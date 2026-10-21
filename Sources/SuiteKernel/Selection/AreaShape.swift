@@ -1,4 +1,4 @@
-// AreaShape.swift (area-selection AR-1 stubs, AR-3 bodies): a selection that is an area, not only a rectangle: the
+// AreaShape.swift (area-selection AR-1, AR-3 bodies): a selection that is an area, not only a rectangle: the
 // shapes in order, each joined to the area before it, then invert, feather and expand. SuiteImaging masks it (AR-6).
 
 /// One shape an area tool draws, in document space.
@@ -41,8 +41,49 @@ public struct AreaRecipe: Hashable, Sendable, Codable {
     public static let empty = AreaRecipe()
     /// True when the recipe selects nothing: it has no step.
     public var isEmpty: Bool { steps.isEmpty }
-    /// Adds `step` after the others; a replace shape clears the earlier steps. AR-1 stub: appends.
-    public mutating func apply(_ step: Step) { steps.append(step) }
-    /// The recipe with each lasso and polygon closed and each lasso's points under 1 px apart dropped. AR-1 stub: as is.
-    public func normalized() -> AreaRecipe { self }
+    /// Adds `step` after the others: a replace shape clears the earlier steps, and an invert right after an invert
+    /// takes it back, so invert twice is the recipe before.
+    public mutating func apply(_ step: Step) {
+        switch step {
+        case .shape(_, .replace): steps = [step]
+        case .invert where steps.last == .invert: steps.removeLast()
+        default: steps.append(step)
+        }
+    }
+    /// The recipe with each lasso and polygon closed and each lasso's points under 1 px apart dropped; a normalized
+    /// recipe normalizes to itself.
+    public func normalized() -> AreaRecipe {
+        var copy = self
+        copy.steps = steps.map { step in
+            switch step {
+            case .shape(.lasso(let points), let mode): return .shape(.lasso(Self.closed(Self.simplified(Self.open(points)))), mode)
+            case .shape(.polygon(let points), let mode): return .shape(.polygon(Self.closed(Self.open(points))), mode)
+            default: return step
+            }
+        }
+        return copy
+    }
+
+    /// `points` without a closing point that repeats the first.
+    static func open(_ points: [Point]) -> [Point] {
+        guard points.count > 1, let first = points.first, points.last == first else { return points }
+        return Array(points.dropLast())
+    }
+    /// `points` closed by repeating the first at the end; empty stays empty.
+    static func closed(_ points: [Point]) -> [Point] {
+        guard let first = points.first, points.count > 1 else { return points }
+        return points + [first]
+    }
+    /// `points` with each point under 1 px from the last one kept dropped; the first is always kept.
+    static func simplified(_ points: [Point]) -> [Point] {
+        var kept: [Point] = []
+        for point in points {
+            if let last = kept.last {
+                let dx = point.x - last.x, dy = point.y - last.y
+                if dx * dx + dy * dy < 1 { continue }
+            }
+            kept.append(point)
+        }
+        return kept
+    }
 }
