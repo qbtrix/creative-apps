@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-21T17:40:37Z	done	BK-a merged-done, Linux 39643409752
 2026-10-21T17:55:57Z	poll	BK-m in lane (macOS build); blockers unchanged
 2026-10-21T18:18:01Z	poll	BK-m macOS build 39645467820 in progress; blockers unchanged
+2026-10-21T18:40:41Z	poll	BK-m macOS build green, awaiting batch

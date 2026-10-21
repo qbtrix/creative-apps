@@ -4,7 +4,7 @@ Issue: #3758 · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3756) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: #4058 BK-m (17188b30) clean, needs-rebase dropped, lane macOS build dispatched 17:37; on merge + green dev Linux post Belt-Slice-Done BK-m. BK-u/photo/design/flare/z still blocked (AN-u, AN-flare-u, AR-photo-u, DS-design not on dev at 17:55)
+Next: #4058 BK-m (17188b30) macOS build 39645467820 green, waiting for its lane batch; on merge + green dev Linux post Belt-Slice-Done BK-m. BK-u/photo/design/flare/z blocked (AN-u, AN-flare-u, AR-photo-u, DS-design not on dev)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
