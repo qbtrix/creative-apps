@@ -105,6 +105,19 @@ import Testing
         #expect(eyedropper == ControlEntry(id: "suite.color.eyedropper", enabled: false, reason: help))
     }
 
+    /// One locked layer: its Fill row is off, and the eyedropper says so with the lock's reason.
+    @Test func lockedLayersEyedropperSaysWhy() throws {
+        var model = DesignWorkspace()
+        model.useServices(.fake)
+        let opened = model.openFixture("cards")
+        #expect(opened)
+        model.selectItem("node-2")
+        try model.setNodeLocked("node-2", true)
+        let help = try #require(model.lockHelp("node-2"))
+        let eyedropper = try registered(model).first { $0.id == "suite.color.eyedropper" }
+        #expect(eyedropper == ControlEntry(id: "suite.color.eyedropper", enabled: false, reason: help))
+    }
+
     /// Align is two rows of three icon buttons, and several layers add one row of two Distribute
     /// buttons: no title wraps or widens a row (#2421).
     @Test func alignIsCompactIconRows() {
