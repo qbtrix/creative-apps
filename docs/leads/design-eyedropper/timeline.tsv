@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-21T00:54Z	check	needs-rebase on #3816	#3816	C4 part conflict with DK-a squash; merged dev, resolved, gate PASS, pushed 560cc535, Head moved, clean. dev Linux red at 4987f926 (pre-DK-a, dev-red #3386), not ours
 2026-10-21T01:16Z	check	DY-u in lane	#3816	head 560cc535 clean; lane macOS build queued (01:01Z). Full dev CI 39524928486 at 4bdf0bbd (has DY-a, DK-a) pending; no screens yet
 2026-10-21T01:38Z	check	DY-u in lane	#3816	head 560cc535 clean, waiting the lane macOS build (queued 01:01Z). dev Linux green again at 7277a83a
+2026-10-21T02:00Z	check	DY-u waits macOS runner	#3816	head 560cc535 clean; lane macOS build 39524856380 still queued (27 runs queued repo-wide, one mac build running since 01:12Z; CI 39442633733, 39438701609, scoped library 39424958645 in_progress since 10-20)
