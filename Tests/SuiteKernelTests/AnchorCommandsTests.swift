@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // AnchorCommandsTests.swift (anchor-parenting AN-2, on since AN-4):
+=======
+// AnchorCommandsTests.swift (anchor-parenting AN-2, turned on by AN-4):
+>>>>>>> origin/dev
 // transform.set-anchor, layer.set-parent and layer.new-null on a small fake
 // document. Parenting and clearing keep every layer where it is on screen, a
 // cycle is refused, `{at: center}` lands on the box centre, and each command
@@ -70,7 +74,11 @@ private func armAndHand() -> FakeAnchorDoc {
                    ("hand", Placement(x: 200, y: 100, rotation: 30, anchorX: 10, anchorY: 40), square)])
 }
 
+<<<<<<< HEAD
 @Suite struct AnchorCommandsTests {
+=======
+@Suite(.disabled("waits on AN-4")) struct AnchorCommandsTests {
+>>>>>>> origin/dev
     /// Parenting a turned child to a scaled parent leaves its world corners unchanged; clearing it too.
     @Test func parentingAndClearingKeepPlace() throws {
         let doc = armAndHand(), before = doc.worldCorners("hand")
@@ -114,6 +122,7 @@ private func armAndHand() -> FakeAnchorDoc {
         #expect(doc.treeWrites == writes + 1)
     }
 
+<<<<<<< HEAD
     /// An unknown layer or parent, and an anchor with no point, are refused with a sentence and write nothing.
     @Test func refusesWhatItCannotDo() throws {
         let doc = armAndHand(), tree = doc.layerTree
@@ -141,6 +150,8 @@ private func armAndHand() -> FakeAnchorDoc {
         }
     }
 
+=======
+>>>>>>> origin/dev
     /// New Null adds one empty layer that can be parented to.
     @Test func newNullAddsALayer() throws {
         let doc = armAndHand()

@@ -56,6 +56,8 @@ enum DesignIntent {
     case setPageSize(width: Double, height: Double)
     /// An Eyedropper click: the colour at the page point onto the selection's stroke (Option) or fill, one step.
     case pick(DesignPoint, toStroke: Bool)
+    /// The inspector's Eyedropper options: the square it reads, and whether a plain click picks the stroke.
+    case sampleSize(SampleSize), sampleTarget(toStroke: Bool)
 }
 
 /// Where a view sends its intents.

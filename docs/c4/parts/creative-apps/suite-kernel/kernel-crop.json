@@ -1,0 +1,10 @@
+{
+  "id": "kernel-crop",
+  "name": "Crop",
+  "description": "Crop/: Orientation (the eight EXIF orientations as a group: turn, flip, compose, the turned size and the unit-square matrix) and the OrientationTarget protocol; CropAspect (free, original, W:H, with Library's raw keys) and CropOrientation; CropFrame; CropRules (the largest frame of an aspect, a handle drag held to the aspect and the bounds, swap and nudge) and the CropTarget protocol; CropCommands (image.rotate-cw, -ccw, -180, image.flip and the five crop.* command specs). orientation-crop OC-1 declares them as stubs; OC-3 and OC-4 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Crop/"
+  ],
+  "order": 106
+}
