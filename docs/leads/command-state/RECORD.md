@@ -2,9 +2,9 @@
 
 Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
-Stage: 3 build, wave 2
+Stage: wave 2: CS-1b/3/7/9/11/13 ready, in lane; CS-14/10/4 drafts stacked
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4130 #4134 #4140 #4144 #4196 #4205 in lane; CS-14, CS-10, CS-4 stacked drafts building; then CS-5, CS-6, CS-8, CS-12
+Next: mark CS-14/10/4 ready after #4144/#4140/#4134 merge; CS-8/12/5 drafts building
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
