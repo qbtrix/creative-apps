@@ -8,7 +8,7 @@
   "covers": "beta gaps 2026-10-21 cluster C10 (Photo audit rows 3 and 4); feature map E6 and E7 (their Photo adopter); real jobs RJ-P04, RJ-P07 (re-pointed) and RJ-P51 (new)",
   "waits_on": "suite-imaging IM-a (target); adopt-kernel-brush AB-photo (PhotoRetouch.swift, PhotoToolOptions.swift); adopt-kernel-layers AL-photo, adopt-kernel-export AX-photo, adopt-kernel-undo AU-photo (PhotoWorkspace.swift); adopt-suiteui-chrome AC-colour (PhotoToolOptions.swift); adjust-everywhere AJ-photo (Photo's catalog and ledger); photo/gradient-fill PG-a and photo/eyedropper PE-a hand-offs; RJ-P07 also needs the kernel selection packet's lasso (beta gaps C1)",
   "depends": [],
-  "longest_chain": "6 (FH-1 → FH-5 → FH-6 → FH-7 → FH-9 → FH-10)",
+  "longest_chain": "6 (FH-1 → FH-5b → FH-6 → FH-7 → FH-9 → FH-10)",
   "journeys": [
     "PhotoRetouchJourneyTests.testPaintBucket",
     "PhotoRetouchJourneyTests.testSpotHealAndRemove"
@@ -35,9 +35,9 @@
     "UITests/PhotoJourneyTests+Retouch.swift",
     "Sources/PhotoApp/PhotoCanvasOverlay.swift",
     "Tests/AppSnapshotTests/RenderBudgetRetouchTests.swift",
-    "Tests/mutations/SuiteKernel.DabCoverage.json",
     "Tests/mutations/SuiteImaging.BucketRules.json",
     "Tests/mutations/SuiteImaging.HealRules.json",
+    "Tests/mutations/SuiteKernel.DabCoverage.json",
     "Tests/mutations/SuiteImaging.RetouchCommands.json",
     "Tests/PhotoModelTests/PhotoRetouchKernelTests.swift",
     "Sources/PhotoModel/PhotoRetouch+Kernel.swift",
@@ -131,11 +131,36 @@
       "ui": true
     },
     {
-      "id": "FH-m",
-      "behavior": "The bucket fills exactly the seeded region inside the selection, spot heal, heal and remove fill from texture through creative-core, the dab coverage matches the brush, and every command is one undo step.",
+      "id": "FH-r",
+      "behavior": "The bucket fills exactly the seeded region inside the selection, and spot heal, heal and remove fill from texture through creative-core.",
+      "tasks": [
+        "FH-5b",
+        "FH-5h"
+      ],
+      "journeys": [
+        "MJ-FH"
+      ],
+      "owned": [
+        "Sources/SuiteImaging/Retouch/BucketRules.swift",
+        "Tests/SuiteImagingTests/BucketRulesTests.swift",
+        "Tests/mutations/SuiteImaging.BucketRules.json",
+        "Sources/SuiteImaging/Retouch/HealRules.swift",
+        "Tests/SuiteImagingTests/HealRulesTests.swift",
+        "Tests/mutations/SuiteImaging.HealRules.json"
+      ],
+      "waits": {
+        "FH-a": [
+          "FH-5b",
+          "FH-5h"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "FH-c",
+      "behavior": "The dab coverage matches the brush, and every fill and heal command is one undo step with its reason when it can't run.",
       "tasks": [
         "FH-5k",
-        "FH-5",
         "FH-6"
       ],
       "journeys": [
@@ -145,35 +170,34 @@
         "Sources/SuiteKernel/Stroke/DabCoverage.swift",
         "Tests/SuiteKernelTests/DabCoverageTests.swift",
         "Tests/mutations/SuiteKernel.DabCoverage.json",
-        "Sources/SuiteImaging/Retouch/BucketRules.swift",
-        "Sources/SuiteImaging/Retouch/HealRules.swift",
-        "Tests/SuiteImagingTests/BucketRulesTests.swift",
-        "Tests/SuiteImagingTests/HealRulesTests.swift",
-        "Tests/mutations/SuiteImaging.BucketRules.json",
-        "Tests/mutations/SuiteImaging.HealRules.json",
         "Sources/SuiteImaging/Retouch/RetouchCommands.swift",
         "Tests/SuiteImagingTests/RetouchCommandsTests.swift",
         "Tests/mutations/SuiteImaging.RetouchCommands.json"
       ],
       "waits": {
         "FH-a": [
-          "FH-5",
           "FH-5k"
+        ],
+        "FH-r": [
+          "FH-6"
         ]
       },
       "ui": false
     },
     {
       "id": "FH-photo",
-      "behavior": "In Photo the bucket, spot heal, heal and remove change the selected pixel layer through the catalog as one undo step each, the old tone-match heal is gone, and RJ-P04, RJ-P07 and RJ-P51 pass.",
+      "behavior": "In Photo the bucket, spot heal, heal and remove change the selected pixel layer through the catalog as one undo step each, the old tone-match heal is gone, RJ-P04, RJ-P07 and RJ-P51 pass, and the feature is built.",
       "tasks": [
         "FH-7",
-        "FH-8"
+        "FH-8",
+        "FH-9",
+        "FH-10"
       ],
       "journeys": [
         "PJ-FH1",
         "PJ-FH2",
-        "MJ-FH-photo"
+        "MJ-FH-photo",
+        "MJ-FH"
       ],
       "owned": [
         "Tests/PhotoModelTests/PhotoRetouchKernelTests.swift",
@@ -184,10 +208,12 @@
         "Tests/mutations/PhotoModel.PhotoRetouch+Kernel.json",
         "Tests/mutations/PhotoModel.PhotoRetouch.json",
         "Sources/PhotoApp/PhotoWindow+Retouch.swift",
-        "UITests/PhotoJourneyTests+Retouch.swift"
+        "UITests/PhotoJourneyTests+Retouch.swift",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-retouch.json",
+        "docs/blueprints/suiteui/features/fill-heal.wave.json"
       ],
       "waits": {
-        "FH-m": [
+        "FH-c": [
           "FH-7"
         ],
         "FH-u": [
@@ -201,28 +227,6 @@
         ]
       },
       "ui": true
-    },
-    {
-      "id": "FH-z",
-      "behavior": "The C4 parts name Photo as the adopter and the feature is built.",
-      "tasks": [
-        "FH-9",
-        "FH-10"
-      ],
-      "journeys": [
-        "MJ-FH",
-        "PJ-FH2"
-      ],
-      "owned": [
-        "docs/c4/parts/creative-apps/suite-imaging/imaging-retouch.json",
-        "docs/blueprints/suiteui/features/fill-heal.wave.json"
-      ],
-      "waits": {
-        "FH-photo": [
-          "FH-9"
-        ]
-      },
-      "ui": false
     }
   ]
 }

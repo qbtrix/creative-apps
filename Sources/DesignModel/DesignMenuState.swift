@@ -25,10 +25,17 @@ public struct DesignMenuState: Sendable {
     /// The id of an Arrange, Align or Distribute item: its menu title slugged under "object.".
     public static func objectID(_ title: String) -> String { "object." + DesignWorkspace.slug(title) }
 
-    /// The catalog's spec for `id` over the menu state; an id the catalog lacks is never available.
+    /// The catalog's spec for `id` over the menu state; an id the catalog lacks is never available. A `transform.*`
+    /// item (Object > Flip and Rotate 90°) waits on the catalog's transform specs (DT-6) and says `turnHelp` meanwhile.
     public static func spec(_ id: String) -> CommandSpec<DesignMenuState> {
-        specs[id] ?? .typed(id, title: id, summary: "Design has no \(id) command.", kind: .view, params: JSONValue.self,
-                            example: .object([:]), availability: { _ in .unavailable("Design has no \(id) command.") }) { _, _ in JSONValue.object([:]) }
+        specs[id] ?? windowSpecs[id] ?? .typed(id, title: id, summary: "Design has no \(id) command.", kind: .view, params: JSONValue.self,
+                            example: .object([:]), availability: { .unavailable(missingHelp(id, on: $0.workspace)) }) { _, _ in JSONValue.object([:]) }
+    }
+
+    /// Why the menu item for an id the catalog lacks can't run.
+    static func missingHelp(_ id: String, on workspace: DesignWorkspace) -> String {
+        let none = "Design has no \(id) command."
+        return id.hasPrefix("transform.") ? workspace.turnHelp ?? none : none
     }
 
     static let specs = Dictionary(uniqueKeysWithValues: DesignWorkspace.commands.map { spec in
@@ -38,6 +45,15 @@ public struct DesignMenuState: Sendable {
             try DesignWorkspace.catalog.run(spec.id, params: params, on: &state.workspace).result
         })
     })
+
+    /// Items that drive the window rather than the file, so the catalog has no command for them and the item's own
+    /// perform does the work: View > Show History shows the window's History panel, which needs a window.
+    static let windowSpecs: [String: CommandSpec<DesignMenuState>] = [
+        "view.history": .typed("view.history", title: "Show History", summary: "Shows or hides this window's steps.", kind: .view,
+                               params: JSONValue.self, example: .object([:]),
+                               availability: { $0.hasWindow ? .available : .unavailable("Open a Design window to see its history.") }
+        ) { _, _ in JSONValue.object([:]) },
+    ]
 
     /// Whether the menu item for `id` can run, and why not.
     public func availability(_ id: String) -> Availability {

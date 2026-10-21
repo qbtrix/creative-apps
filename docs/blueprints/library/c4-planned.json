@@ -44,7 +44,8 @@
                   "Sources/LibraryApp/LibraryWindow.swift",
                   "Sources/LibraryApp/LibraryCommands.swift",
                   "Sources/LibraryApp/LibraryMenus.swift",
-                  "Sources/LibraryApp/LibraryControls.swift"
+                  "Sources/LibraryApp/LibraryControls.swift",
+                  "Sources/LibraryApp/LibraryMenus+Share.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -64,7 +65,9 @@
                   "Sources/LibraryApp/LibraryWindow+Develop.swift",
                   "Sources/LibraryApp/LibraryWindow+Crop.swift",
                   "Sources/LibraryApp/LibraryWindow+Export.swift",
-                  "Sources/LibraryApp/LibraryWindow+Trash.swift"
+                  "Sources/LibraryApp/LibraryWindow+Trash.swift",
+                  "Sources/LibraryApp/LibraryWindow+Files.swift",
+                  "Sources/LibraryApp/LibraryWindow+Backup.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -79,7 +82,12 @@
                   "Sources/LibraryApp/LibraryGrid.swift",
                   "Sources/LibraryApp/DisplayImage+Image.swift",
                   "Sources/LibraryApp/LibraryLoupe.swift",
-                  "Sources/LibraryApp/LibraryStatusBar.swift"
+                  "Sources/LibraryApp/LibraryStatusBar.swift",
+                  "Sources/LibraryApp/LibraryImportOptions.swift",
+                  "Sources/LibraryApp/LibraryMissingBadge.swift",
+                  "Sources/LibraryApp/LibraryFoldersSection.swift",
+                  "Sources/LibraryApp/LibraryBackupSheet.swift",
+                  "Sources/LibraryApp/LibraryShareItems.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -166,7 +174,8 @@
                   "Sources/LibraryModel/LibraryOrder.swift",
                   "Sources/LibraryModel/LibraryEmptyCollection.swift",
                   "Sources/LibraryModel/LibraryUndoAdapter.swift",
-                  "Sources/LibraryModel/LibraryCommandCatalog.swift"
+                  "Sources/LibraryModel/LibraryCommandCatalog.swift",
+                  "Sources/LibraryModel/LibrarySelectionAdapter.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -203,7 +212,8 @@
                   "Sources/LibraryModel/LibrarySample.swift",
                   "Sources/LibraryModel/SampleImage.swift",
                   "Sources/LibraryModel/LibraryFixtures.swift",
-                  "Sources/LibraryModel/LibraryLaunch.swift"
+                  "Sources/LibraryModel/LibraryLaunch.swift",
+                  "Sources/LibraryModel/LibraryLargeFixture.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -227,7 +237,9 @@
                 "paths": [
                   "Sources/LibraryModel/LibraryImport.swift",
                   "Sources/LibraryModel/Live/LiveImporter.swift",
-                  "Sources/LibraryModel/LibraryFileFlow+Kernel.swift"
+                  "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+                  "Sources/LibraryModel/ImportCopyPlan.swift",
+                  "Sources/LibraryModel/LibraryCatalogFiles+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -267,7 +279,10 @@
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/LibraryPersistence.swift",
-                  "Sources/LibraryModel/Live/LiveCatalogCoding.swift"
+                  "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+                  "Sources/LibraryModel/CatalogFileRules.swift",
+                  "Sources/LibraryModel/LibraryBackup+Kernel.swift",
+                  "Sources/SuiteModel/Store/BackupRotation.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -333,7 +348,9 @@
                 "paths": [
                   "Sources/LibraryModel/LibraryCollections.swift",
                   "Sources/LibraryModel/LibraryFilter.swift",
-                  "Sources/LibraryModel/LibraryKeywords.swift"
+                  "Sources/LibraryModel/LibraryKeywords.swift",
+                  "Sources/LibraryModel/LibraryFolders.swift",
+                  "Sources/LibraryModel/LibraryFolders+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -345,7 +362,8 @@
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/LibraryExport.swift",
-                  "Sources/LibraryModel/Live/LiveExporter.swift"
+                  "Sources/LibraryModel/Live/LiveExporter.swift",
+                  "Sources/LibraryModel/LibraryShare+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true
