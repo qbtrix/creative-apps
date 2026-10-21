@@ -19,5 +19,12 @@
     "find": "? grip.box : BoxMath.resized(grip.box, grip.handle.editorHandle, by: delta, modifiers: keys)",
     "replace": "? grip.box : grip.box",
     "tests": "FlareSelectionReadTests"
+  },
+  {
+    "label": "Direct Select reads the Select tool's grips",
+    "file": "Sources/FlareModel/FlareSelectionRead.swift",
+    "find": "handles: tool == .select ? box.map",
+    "replace": "handles: true ? box.map",
+    "tests": "FlareSelectionReadTests"
   }
 ]

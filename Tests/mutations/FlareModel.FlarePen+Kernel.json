@@ -1,0 +1,16 @@
+[
+  {
+    "label": "a polyline pen draft reads no anchors",
+    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
+    "find": "?? VectorContour(anchors: anchors.map { PathAnchor(point: $0) }, closed: isClosed)",
+    "replace": "?? VectorContour(anchors: [], closed: isClosed)",
+    "tests": "FlarePenKernelTests"
+  },
+  {
+    "label": "writing a corner-only draft back gives it a path",
+    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
+    "find": "path: curved || shape.path != nil ? path : nil)",
+    "replace": "path: path)",
+    "tests": "FlarePenKernelTests"
+  }
+]
