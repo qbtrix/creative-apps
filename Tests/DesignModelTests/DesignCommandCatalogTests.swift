@@ -43,6 +43,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             ("two pages", DesignFixtures.twoPages), ("edited", nudged), ("undone", with(nudged) { $0.undo() }),
             ("mid-drag", with(one) { $0.drag(from: pt(150, 140), to: pt(170, 150)) }),
             ("editing text", with { try? $0.beginTextEdit("node-5") }),
+            ("gradient", with(one) { $0.runFill(.type(.linear)); $0.runFill(.add(offset: 0.5)) }),
         ]
     }
 
@@ -77,7 +78,8 @@ struct DesignCatalogDoc: HeadlessDocument {
     }
 
     @Test func availabilityMatchesHelp() {
-        for id in DesignWorkspace.catalog.ids {
+        // The fill commands had no help before the catalog: their rules are GradientCommands' (DesignGradientTests).
+        for id in DesignWorkspace.catalog.ids where !id.hasPrefix("fill.") {
             #expect(Self.oldHelp(id, DesignWorkspace()) != nil, "\(id) has no old help to match")
             for (state, w) in Self.states {
                 let old = Self.oldHelp(id, w) ?? nil
@@ -181,6 +183,11 @@ struct DesignCatalogDoc: HeadlessDocument {
         "object.distribute-horizontally | Distribute Horizontally | Select three or more layers to distribute.",
         "object.distribute-vertically | Distribute Vertically | Select three or more layers to distribute.",
         "object.nudge | Nudge | on",
+        "fill.read | Read Fill | on", "fill.type | Fill Type | on", "fill.gradient | Set Gradient | on",
+        "fill.stop-add | Add Gradient Stop | Switch the fill to a gradient first.",
+        "fill.stop-move | Move Gradient Stop | Switch the fill to a gradient first.",
+        "fill.stop-remove | Remove Gradient Stop | Switch the fill to a gradient first.",
+        "fill.stop-color | Gradient Stop Color | on", "fill.angle | Gradient Angle | Angle is for a linear gradient.",
         "page.add | Add Page | on", "page.rename | Rename Page | on",
         "page.delete | Delete Page | A file keeps at least one page.", "page.select | Select Page | on",
         "tool.move | Move | on", "tool.frame | Frame | on", "tool.rectangle | Rectangle | on",

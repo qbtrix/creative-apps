@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P43: on a 200 x 40 image of four 20 px squares, one per layer, pick the three upper layers (layer-2, then Shift-pick layer-3 and layer-4), fade the three picked layers to 50% and move them 40 px right together, and export the PNG; the Background square stays as it was.",
+  "inputs": ["input/*.ora"],
+  "steps": [
+    {"id": "layer.pick", "params": {"id": "layer-2", "mode": "replace"}},
+    {"id": "layer.pick", "params": {"id": "layer-3", "mode": "extend"}},
+    {"id": "layer.pick", "params": {"id": "layer-4", "mode": "extend"}},
+    {"id": "layer.set-opacity", "params": {"percent": 50}},
+    {"id": "layer.move-by", "params": {"dx": 40, "dy": 0}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "png", "options": {}},
+  "expect": {
+    "out/four-layers.png": {"pixels": {"tolerance": 2, "reference": "expected/four-layers-faded.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}
