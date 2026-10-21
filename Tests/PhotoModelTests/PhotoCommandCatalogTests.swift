@@ -131,7 +131,7 @@ struct PhotoCommandCatalogTests {
                 row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)),
                 row("Select All", ws.canSelectAll), row("Delete Selection", ws.canEditSelection), row("Fill Selection", ws.canEditSelection),
                 row("All", image), row("Deselect", ws.canDeselect)]
-            + ["Image Size…", "Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°", "Straighten…"].map { row($0, image) }
+            + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°", "Straighten…"].map { row($0, image) }
             + [row("New Layer", image),
                "New Adjustment Layer|\(!ws.adjustmentLayerKinds.isEmpty && adjust == nil)|\(adjust ?? "New Adjustment Layer")",
                row("Delete Layer", ws.canDeleteSelectedLayer), row("Duplicate Layer", ws.duplicateLayerHelp == nil, ws.duplicateLayerHelp),

@@ -129,14 +129,15 @@ import Testing
         #expect(smart.emptyActionTitle == "Show All Photos")
     }
 
-    /// Your collections' edits (FC-9) and the file (FC-14) are built; their
-    /// checks are LibraryCollectionsTests and LibraryCollectionsFileTests.
+    /// Your collections' edits (FC-9), smart collections (FC-12) and the file
+    /// (FC-14) are built; their checks are LibraryCollectionsTests,
+    /// LibrarySmartCollectionTests and LibraryCollectionsFileTests.
     @Test func everyStubAnswersItsUnavailableText() throws {
         var shoot = catalog("shoot")
         shoot.userCollections = [keepers([id(1)])]
         shoot.recount()
         let before = shoot
-        #expect(shoot.newSmartCollectionHelp == UserCollection.smartUnavailable)
+        #expect(shoot.newSmartCollectionHelp == "Set a filter first: a smart collection keeps the filter's rules.")
         #expect(shoot.collectionsSaveRequest() == nil)
         #expect(shoot.collectionsFileValue == "saved")
         #expect(shoot.newSmartCollection() == nil)

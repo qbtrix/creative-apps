@@ -4,6 +4,7 @@
 // rows read the same reason the menus do.
 import FlareCore
 import FlareModel
+import SuiteKernel
 
 extension FlareWindow {
     /// Acts on an inspector intent.
@@ -56,7 +57,8 @@ extension FlareWindow {
         case .easingPreset, .easingHandle:
             if let reason = model.easingUnavailableReason { return reason }
             return model.selectedEasingSegment == nil ? "Select a keyframe span to ease it." : nil
-        case .runFill: return model.fillEditHelp
+        case .runFill(let gesture):
+            return model.fillHelp ?? FlareWorkspace.catalog.availability(gesture.command.id, on: model).why
         }
     }
 }
