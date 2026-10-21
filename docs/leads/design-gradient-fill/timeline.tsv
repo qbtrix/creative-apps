@@ -22,3 +22,4 @@ time	kind	note
 2026-10-21T11:41Z	3	heartbeat	DG-u	dev Linux red on photo #3976 CommandPathTests (dev-red #3856), 39590966622 too; waiting on 39593470198 / CI 39592552743
 2026-10-21T12:03Z	3	heartbeat	DG-u	39593470198 (ded2ca57a) Linux red, same photo CommandPathTests (dev-red #3856); waiting on 39596004859 (c2aa33918)
 2026-10-21T12:26Z	3	heartbeat	-	dev Linux red (photo, #3856, not ours); TT-u #3513 open; journeys 39588223335 queued
+2026-10-21T12:50Z	3	review-blocked	-	journeys 39588223335 built nothing (FlareModel SetLayerParent compile error, noted on #3856); DG-a/DT-a panels wait for a scoped design run with screens; dev Linux still red (photo); TT-u #3513 open
