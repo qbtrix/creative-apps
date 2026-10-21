@@ -41,3 +41,4 @@ Next: (11:50: CI at 39d90e3 red on dev-red #3856, not ours; slice-done held; lan
 - FO-u stacked on FO-4: both edit LibraryFolders.swift and the same mutation plan; sentinel needs-split answered on both PRs.
 - FO-5 waits on filters-collections:FC-d, file-flow:LF-m (LF-3 blocked) and catalog-files:LC-m; none merged.
 - 12:21Z: FO-u #3963 (c11098e) and FO-5 #4022 (8437a51) gates pass, both fast-lane, in the lane. FO-a Belt-Slice-Done waits on scoped library run 39593465885 (queued, contains 7962bec).
+- 12:44Z: no change; all four PRs clean + fast-lane, waiting on the lane's macOS batch gate; scoped library run 39593465885 still queued (macOS runners backlogged since 11:08Z); dev Linux checks red (dev-red, not ours).
