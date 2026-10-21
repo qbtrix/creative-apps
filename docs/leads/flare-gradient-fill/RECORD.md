@@ -83,3 +83,4 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - 18:54Z: FG-a: #4055 conflicts with dev; its red Linux run failed only Library tenThousandPaths timing (not Flare). Fixer dispatched: merge dev, ci --changed, move Head, drop attribution footer. FG-u: scoped run 39645308209 still pending macOS. FG-5 blocked (6 findings open, #3742 in lane).
 - 19:03Z: FG-a: #4055 merged dev (only a header-comment conflict in FlareInspectorFill.swift), ci --changed PASS, new head f91904b8, Head line moved. Back in the lane.
 - 19:14Z: #4055 head f91904b8 waiting on lane macOS build (dispatched 19:05Z). FG-u scoped run 39645308209 still pending macOS; no flare journeys yet. FG-5 blocked (6 findings, #3742 in lane).
+- 19:36Z: No change: #4055 (f91904b8) and #3742 waiting on lane macOS builds; FG-u scoped run 39645308209 still pending macOS; 6 findings open, FG-5 blocked.
