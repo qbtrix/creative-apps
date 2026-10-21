@@ -6,3 +6,6 @@ utc	stage	event	ref	note
 2026-10-21T20:20Z	3	pr-opened	#4185	TK-5 rules, stacked on #4183
 2026-10-21T20:20Z	3	build	TK-u	builder started on tk-u-timeline-keys-ui
 2026-10-21T20:20Z	3	channel	lead/suiteui-timeline-keys	status moved to the branch Belt watches
+2026-10-21T20:38Z	3	footer	#4183 #4185	server footer removed from both bodies
+2026-10-21T20:38Z	3	lane-mac	#4183	macOS build https://github.com/qbtrix/creative-apps/actions/runs/39671398584
+2026-10-21T20:38Z	3	poll	-	no findings; TK-u builder running

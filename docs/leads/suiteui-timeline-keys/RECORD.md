@@ -4,7 +4,7 @@ Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: poll the lane for #4183 (TK-a) and #4185 (TK-5); retarget #4185 to dev once #4183 merges; open the TK-u PR when its builder hands back
+Next: poll the lane for #4183 (TK-a, macOS build 39671398584) and #4185 (TK-5); retarget #4185 to dev once #4183 merges; open the TK-u PR when its builder hands back
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
