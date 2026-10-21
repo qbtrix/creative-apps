@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-21T05:13:47Z	check	FC-5 #3466 (6686ed2) in batch-20261021043428, bisect probes -4..-6 contain it (Halo red later); stacked FC drafts wait its merge
 2026-10-21T05:36:10Z	check	FC-5 #3466 merged (59242ec1e); FC-a done once dev Linux run 39550229338 is green; merging dev into stacked drafts fc6/7, fc8/9, fc11/12, fc13/15 (4 agents)
 2026-10-21T07:12:14Z	check	#3521 FC-13 in lane/batch-20261021065242 (red on DesignModel StrokeRules.notBuilt, not ours; bisecting, probe -2 running); #3490/#3491/#3515 ready clean, not yet batched; stacked drafts wait
+2026-10-21T07:34:29Z	check	#3521 FC-13 merged (6997cc329); FC-15 #3539 dev merge + gate in a worktree agent; #3490/#3491/#3515 in lane/batch-20261021073036 (Linux check running)
