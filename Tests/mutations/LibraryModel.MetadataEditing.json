@@ -1,0 +1,37 @@
+[
+  {
+    "label": "a title is set as typed, without the trim",
+    "file": "Sources/LibraryModel/MetadataEditing.swift",
+    "find": "let title = CameraDetails.text(text) ?? \"\"",
+    "replace": "let title = text",
+    "tests": "LibraryCaptionTests"
+  },
+  {
+    "label": "a caption is set as typed, without the trim",
+    "file": "Sources/LibraryModel/MetadataEditing.swift",
+    "find": "let caption = CameraDetails.text(text) ?? \"\"",
+    "replace": "let caption = text",
+    "tests": "LibraryCaptionTests"
+  },
+  {
+    "label": "the unchanged guard is dropped, so the same title again records a step",
+    "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "find": "        guard before != after else { return }\n",
+    "replace": "",
+    "tests": "LibraryCaptionTests"
+  },
+  {
+    "label": "a caption is recorded under the title's step name",
+    "file": "Sources/LibraryModel/MetadataEditing.swift",
+    "find": "recordEdit(\"Set Caption\", ids: cullTargets)",
+    "replace": "recordEdit(\"Set Title\", ids: cullTargets)",
+    "tests": "LibraryCaptionTests"
+  },
+  {
+    "label": "a title goes to the whole selection in the loupe",
+    "file": "Sources/LibraryModel/MetadataEditing.swift",
+    "find": "recordEdit(\"Set Title\", ids: cullTargets)",
+    "replace": "recordEdit(\"Set Title\", ids: selection)",
+    "tests": "LibraryCaptionTests"
+  }
+]

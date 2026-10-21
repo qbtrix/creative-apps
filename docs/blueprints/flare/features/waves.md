@@ -29,6 +29,15 @@ lists its tasks, owned files and acceptance tests.
 | 6 | Select All Keys in Flare's timeline: ⌘A with the timeline focused or the context menu, on the kernel Selection | `key-select-all.md` | flare/key-select-all (adopter of suiteui/timeline-select-all); RJ-F43; the stress gate's Select All Keys gap (PR #3499) | suiteui/timeline-select-all's TSA-a (cross-line, KS-2); adopt-command-catalog AC-flare before KS-1 (hand-off); PR #3499 before KS-4 | file when ready | planned |
 | 7 | Place SVG art: File > Place… and a window drop add an SVG's groups as editable layers through the kernel's place command | `svg-place.md` | flare/svg-place (adopter of S20 and E11); RJ-F06 | suiteui placed-images' contract slice PL-a (cross-line); gradient-fill's FG-m and FG-z (shared files) | file when ready | planned |
 | 7 | The Pen on the shared kernel, behaviour unchanged, and Direct Select dragging anchors | `pen-paths.md` | flare/pen-paths (adopter of S25); RJ-F27; the 5,000-anchor stress gate on FlareFixtures.stress; captain 2026-10-20: the Pen shared from Flare | suiteui pen-paths' contract slice PN-a (cross-line), PN-3 (FP-3), PN-5 (FP-5, FP-7), PN-6 (FP-7), PN-7 (FP-6); branch test/stress-perf-journeys on dev (FP-8); the last owners of the shared Flare files: shape-tools FS-a, FS-m; stage-edit; file-flow FL-m, FL-z | file when ready | planned |
+| 8 | Open a Lottie file in Flare: File > Open and drop read a Lottie JSON through FlareCore's reader, name what was skipped, and save as .flare | `lottie-open.md` | beta gaps 2026-10-21 Flare must-have (Flare audit B5); feature map A2 (the open half; dotLottie stays later); real job RJ-F12 (re-pointed) | file-flow FL-m (Flare's open and drop paths, FlareFiles.swift and the catalog); the stage-matches-export fix in flight (an opened file's colour and trim keys draw on the stage) | file when ready | planned |
+| 8 | A CI check that Flare's Lottie plays the same in a reference player: sampled frames from a pinned open-source player compared with Flare's own stage raster | `lottie-player-check.md` | beta gaps 2026-10-21 Flare must-have (Flare audit B6); real jobs RJ-F11 (re-pointed from the built flare-export) and RJ-F01's loop trap | flare-export (built: the Lottie writer and StageRasterizer); the stage-matches-export fix in flight (colour and trim fixtures join once it merges); ci.yml is a supervisor merge | file when ready | planned |
+
+**Wave 8 (beta gaps, 2026-10-21).** Flare's must-haves from
+`paw-workspace/docs/design/drafts/2026-10-21-beta-gaps-combined.md`:
+`lottie-open` (open a Lottie JSON, every skipped item named) and
+`lottie-player-check` (a pinned reference player in CI compared with the
+stage). Keyed fill and stroke are the suiteui `timeline-keys` packet, and the
+stub menu items are suite `no-placeholders`.
 
 Longest chain per feature: mac-platform 3, live-stage 4, live-keys 4,
 live-scenes 3, draw-key-save 7 (the reason is in its Build waves), stage-edit

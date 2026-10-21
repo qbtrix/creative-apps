@@ -144,7 +144,33 @@ public struct PathMarks: View {
     }
 }
 
-/// A ruler guide: a vertical line at `x` or a horizontal line at `y`, in document pixels.
+extension PathMarks {
+    /// Contours' marks (pen-paths PN-2 stub): maps onto `init(anchors:segments:zoom:)`.
+    /// PN-3 takes the kernel's contours with `toView`, the selected anchors and the hovered hit.
+    public init(contours: [PathContourStandIn], zoom: Double) {
+        let parts = Self.parts(contours)
+        self.init(anchors: parts.anchors, segments: parts.segments, zoom: zoom)
+    }
+
+    /// Every contour's anchors in one list, and the segments joining each
+    /// contour's neighbours, plus last to first when it is closed. A contour
+    /// of fewer than two anchors adds its anchors and no segment.
+    public nonisolated static func parts(_ contours: [PathContourStandIn]) -> (anchors: [PathAnchor], segments: [PathSegment]) {
+        var anchors: [PathAnchor] = []
+        var segments: [PathSegment] = []
+        for contour in contours {
+            let first = anchors.count
+            anchors += contour.anchors
+            let last = anchors.count - 1
+            guard last > first else { continue }
+            segments += (first..<last).map { PathSegment(from: $0, to: $0 + 1) }
+            if contour.closed { segments.append(PathSegment(from: last, to: first)) }
+        }
+        return (anchors, segments)
+    }
+}
+
+/// A ruler guide:a vertical line at `x` or a horizontal line at `y`, in document pixels.
 public enum ViewportGuide: Equatable, Sendable {
     case vertical(x: Double)
     case horizontal(y: Double)

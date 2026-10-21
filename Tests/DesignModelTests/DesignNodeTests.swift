@@ -35,9 +35,13 @@ import Testing
     #expect(DesignTool.move.nodeKind == nil && DesignTool.pen.nodeKind == nil)
 }
 
-@Test func onlyThePenIsDisabledAndItSaysWhy() {
-    for tool in DesignTool.allCases where tool != .pen { #expect(tool.isEnabled && tool.unavailableHelp == nil) }
+@Test func onlyThePenAndTheEyedropperAreDisabledAndSayWhy() {
+    for tool in DesignTool.allCases where tool != .pen && tool != .eyedropper {
+        #expect(tool.isEnabled && tool.unavailableHelp == nil)
+    }
     #expect(!DesignTool.pen.isEnabled && DesignTool.pen.unavailableHelp == "Drawing paths isn't built yet.")
+    // Until DY-5 makes its drag act.
+    #expect(!DesignTool.eyedropper.isEnabled && DesignTool.eyedropper.unavailableHelp != nil)
 }
 
 @Test func pageSizeTextShowsWholePoints() throws {
