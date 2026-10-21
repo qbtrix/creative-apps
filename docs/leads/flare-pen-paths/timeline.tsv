@@ -27,3 +27,5 @@ utc	stage	event	ref	note
 2026-10-21T08:55:48Z	slice-done	FP-a Belt-Slice-Done (run 39568091135 Linux green); Mac-Finish-Wanted posted
 2026-10-21T09:17:02Z	wait	#3958 macOS build green, waiting for a batch; scoped flare still queued
 2026-10-21T09:38:57Z	wait	#3958 waiting for a batch; scoped flare run in progress
+2026-10-21T10:49:58Z	stage	takeover by act-1a15e10a86f-7bk9	-	FP-e #3958 merged 09:41Z; FP-5 unchained from FS-m; base dev 11919406
+2026-10-21T10:49:58Z	wave	wave 2 starts: FP-5	FP-m	FP-u waits PN-3; FP-6 waits PN-7, FL-m
