@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T07:35:08Z	heartbeat	HT-u #3811 head da8dfd4 eligible (macOS green), waiting for a lane batch
 2026-10-21T07:56:46Z	heartbeat	HT-u #3811 merged as db7607e70 (batch of 8); dev Linux run 39564222036 at 260f7a874 contains it, in progress
 2026-10-21T08:11Z	heartbeat	HT-u done (dev Linux 39564222036); Belt-Slice-Done posted; HT-6 waits on HG-m #3417
+2026-10-21T08:33Z	heartbeat	HT-u done; HT-6 waits on HG-m #3417 (open)
