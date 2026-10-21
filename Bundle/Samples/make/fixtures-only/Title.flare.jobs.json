@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "app": "flare",
+  "inputs": ["seed.flare"],
+  "steps": [
+    {"id": "scenes.rename", "params": {"name": "Title"}},
+    {"id": "layer.add", "params": {"sceneID": "scene-1", "layer": {"id": "layer-1", "name": "Title", "tracks": {}, "instances": [], "isVisible": true, "isLocked": false, "shapes": []}}},
+    {"id": "text.add", "params": {"sceneID": "scene-1", "layerID": "layer-1", "text": {"string": "Hello, Flare", "fontFamily": "Helvetica", "fontSize": 48, "position": {"x": 140, "y": 220}, "fill": {"r": 0.12, "g": 0.12, "b": 0.16, "a": 1}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "opacity", "keyframe": {"frame": 0, "value": 0, "easing": {"linear": {}}}}},
+    {"id": "keyframe.set", "params": {"sceneID": "scene-1", "layerID": "layer-1", "property": "opacity", "keyframe": {"frame": 12, "value": 1, "easing": {"linear": {}}}}}
+  ],
+  "atomic": true,
+  "why": "A title that fades in over the first half second (opacity keys at 0 and 12), on the Web preset."
+}
