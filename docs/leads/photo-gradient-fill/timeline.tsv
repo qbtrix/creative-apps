@@ -80,3 +80,5 @@ utc	stage	event	ref	note
 2026-10-21T12:59Z	check	dev Linux 39601343733 at 7375413 also red; no green run with PG-u yet. #4064 open, clean, waiting on the lane batch
 2026-10-21T13:24Z	check	Linux 39604117821 green at 5bec808 (contains 76d0c892): Belt-Slice-Done PG-u posted. #4064 PG-z waits on macOS build 39600302637.
 2026-10-21T15:08Z	check	PG-z #4064 merged bb2189abd; Belt-Slice-Done PG-z posted on run 39614555474; contact sheet waits on scoped photo 39616082524 (contains bb2189abd)
+15:32Z	check	scoped photo 39616082524 red on macOS: RenderBudgetPhotoHistoryTests.arrowWalkInThreeBodies (History tab, not PG)
+15:32Z	done	Belt-Contact-Sheet on #3416, run 39623471557 (Linux green, 9951eea)

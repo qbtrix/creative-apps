@@ -2,9 +2,9 @@
 
 Issue: #3416 · Packet: docs/blueprints/photo/features/gradient-fill.md
 Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
-Stage: 3 wave 4 (PG-z, PR #4064)
+Stage: done (Belt-Contact-Sheet posted)
 Base: 965a76be767734bcfbd1a2bf916a7b7802e728ef (origin/dev at resume)
-Next: #4064 PG-z merges (feature-done); Belt-Slice-Done PG-u and PG-z once a green dev run holds #3977 and #4064, then Belt-Contact-Sheet
+Next: none; Verified is the beta-hardening lane's (journeys PJ-G1, MJ-PG not yet run)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -38,7 +38,7 @@ Next: #4064 PG-z merges (feature-done); Belt-Slice-Done PG-u and PG-z once a gre
 - PG-3 needs only PG-1's merged code (packet task table), so it stacks on PG-1 in wave 1.
 
 ## Open
-- Contact sheet: Belt-Contact-Sheet waits on scoped photo run 39616082524 (at aab8fc46, contains bb2189abd), in progress at 15:08Z.
+- Contact sheet: posted 15:32Z on #3416 (comment 6319815180), run 39623471557 (Linux check green at 9951eea, contains bb2189abd). Scoped photo 39616082524 was red on macOS only at RenderBudgetPhotoHistoryTests.arrowWalkInThreeBodies (History tab, not gradient; no issue found for it).
 - Unverified report (PG-1 fixer, 19:3xZ): `scripts/ci --changed` printed CI: PASS while `listCommandsMatchesItsGolden(app: "photo")` printed a ✘. Builders now read AfterGlowCLITests output themselves; file an issue if it reproduces.
 - GF-2 (SuiteUI GradientEditor) is not on dev: blocks PG-2, so PG-a's Belt-Slice-Done waits on it. GF-5 (GradientRules bodies; GradientRules.swift is still stubs) blocks PG-4; GF-3 blocks PG-5.
 - PG-3 held (branch photo-gradient-fill/PG-3, head a8cc61cf): open its PR when #3681 merges. Snapshots: photo-gradient-tool-light/dark.png. It also adds `select.rect` (RJ-P19 needs it to select the top half), which is outside the owned list and in no menu. `expected/grey-256-sky.png` was generated from this implementation, so it guards against regressions only. `noBanding` skips pure black and white rows, because OKLab leaves about 100 rows at 0 next to the black stop. The builder also ran full `scripts/ci` and the AfterGlowCLITests: PASS, with no ✘ (the PG-1 false-pass did not reproduce).
