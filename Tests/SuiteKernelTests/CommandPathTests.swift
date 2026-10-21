@@ -9,7 +9,9 @@
 // new site in the same file. The baselines hold the sites that predate the
 // catalog; adopt-command-catalog removes them as each app moves onto specs.
 // A baseline line whose site is gone fails too (CC-12), so baselines only
-// shrink. A fixture tree (Fixtures/CommandPath/, .txt so it isn't compiled) proves
+// shrink. The suite shell (Sources/SuiteShell, shell.txt) and the launcher
+// (Sources/AfterGlowApp, launcher.txt) are scanned the same way, and a sheet's
+// Cancel, Close or Done that only dismisses is no site (CS-2). A fixture tree (Fixtures/CommandPath/, .txt so it isn't compiled) proves
 // both directions. Files are read by path from #filePath.
 import Foundation
 import Testing
@@ -55,7 +57,8 @@ enum CommandPathScan {
             for callee in callees {
                 for range in line.ranges(of: callee) where startsCall(line, at: range.lowerBound) {
                     let following = lines.dropFirst(row + 1).prefix(40).joined(separator: "\n")
-                    if !builtFromSpec(line[range.upperBound...] + "\n" + following) {
+                    let arguments = line[range.upperBound...] + "\n" + following
+                    if !builtFromSpec(arguments), !(callee == "Button(" && dismissesOnly(arguments)) {
                         found.append(CommandSite(file: file, line: row + 1, text: trimmed))
                     }
                 }
@@ -93,6 +96,71 @@ enum CommandPathScan {
             }
         }
         return false
+    }
+
+    /// The titles a sheet's dismiss button carries, and the names of what only dismisses it.
+    static let dismissTitles: Set<String> = ["Cancel", "Close", "Done"]
+    static let dismissNames: Set<String> = ["dismiss", "onDismiss", "onCancel", "onClose", "onDone", "close"]
+
+    /// CS-2, the dismiss rule: a `Button("Cancel")`, `"Close"` or `"Done"` whose action
+    /// (its `action:` argument or its trailing closure) only dismisses its sheet: an empty
+    /// closure, calls to a dismiss name, or flags set to false or nil. One that also edits
+    /// anything still counts as a bare control.
+    static func dismissesOnly(_ arguments: String) -> Bool {
+        let chars = Array(arguments)
+        guard chars.first == "\"", let titleEnd = chars.dropFirst().firstIndex(of: "\"") else { return false }
+        let title = String(chars[1..<titleEnd])
+        guard dismissTitles.contains(title) else { return false }
+        guard let close = matchingClose(chars, from: 0) else { return false }
+        let inside = String(chars[..<close])
+        if let label = inside.range(of: ", action:") {
+            return dismisses(String(inside[label.upperBound...]))
+        }
+        var open = close + 1
+        while open < chars.count, chars[open] == " " { open += 1 }
+        guard open < chars.count, chars[open] == "{", let end = matchingClose(chars, from: open + 1) else { return false }
+        return String(chars[(open + 1)..<end])
+            .split(whereSeparator: { $0 == ";" || $0 == "\n" })
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .allSatisfy(dismisses)
+    }
+
+    /// One statement or action that only dismisses: `dismiss()`, `onClose?()`,
+    /// `actions.close?()`, `onCancel` passed as the action, or `flag = false` / `= nil`.
+    static func dismisses(_ statement: String) -> Bool {
+        let text = statement.trimmingCharacters(in: .whitespaces)
+        let isPath = { (path: Substring) in
+            !path.isEmpty && path.allSatisfy { $0.isLetter || $0.isNumber || $0 == "_" || $0 == "." }
+        }
+        for value in [" = false", " = nil"] where text.hasSuffix(value) {
+            return isPath(text.dropLast(value.count))
+        }
+        var path = Substring(text)
+        if path.hasSuffix("()") { path = path.dropLast(2) }
+        if path.hasSuffix("?") { path = path.dropLast() }
+        guard isPath(path), let last = path.split(separator: ".").last else { return false }
+        return dismissNames.contains(String(last))
+    }
+
+    /// The index of the bracket that closes the one open just before `start`, skipping strings.
+    static func matchingClose(_ chars: [Character], from start: Int) -> Int? {
+        var depth = 1, inString = false, escaped = false, index = start
+        while index < chars.count {
+            let char = chars[index]
+            if inString {
+                if escaped { escaped = false } else if char == "\\" { escaped = true } else if char == "\"" { inString = false }
+            } else if char == "\"" {
+                inString = true
+            } else if "([{".contains(char) {
+                depth += 1
+            } else if ")]}".contains(char) {
+                depth -= 1
+                if depth == 0 { return index }
+            }
+            index += 1
+        }
+        return nil
     }
 
     /// The sites `baseline` doesn't list, each named by file and line, then the baseline lines

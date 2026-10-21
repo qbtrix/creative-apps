@@ -7,6 +7,25 @@
 import Foundation
 import Testing
 
+enum CommandPathLimit {
+    /// The baseline's `# max: N` header (its second line) against its entries
+    /// (the lines that are neither blank nor comments): the header is missing or
+    /// malformed, or the entries outnumber N.
+    static func problems(baseline: String, name: String) -> [String] {
+        let lines = baseline.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        let prefix = "# max: "
+        guard lines.count > 1, lines[1].hasPrefix(prefix), let max = Int(lines[1].dropFirst(prefix.count)) else {
+            return ["\(name): its second line must be `# max: N`"]
+        }
+        let entries = lines.filter { !$0.isEmpty && !$0.hasPrefix("#") }.count
+        if entries > max {
+            return ["\(name) holds \(entries) sites over its # max: \(max); move a control onto a command instead"]
+        }
+        return []
+    }
+}
+
 @Suite struct CommandPathLimitTests {
     static let baselines = ["design", "flare", "halo", "library", "photo", "shell", "launcher"]
 

@@ -1,14 +1,12 @@
 # PhotoApp's menu items and buttons built without a command spec (command-catalog CC-11).
-Sources/PhotoApp/ExportSheet.swift: Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
+# max: 10
 Sources/PhotoApp/ExportSheet.swift: Button("Export", action: onExport).keyboardShortcut(.defaultAction)
-Sources/PhotoApp/ImageSizeSheet.swift: Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
 Sources/PhotoApp/ImageSizeSheet.swift: Button("Resize", action: resize)
 Sources/PhotoApp/PhotoCommands+File.swift: Button(url.lastPathComponent) { openRecent(url, recent.target) }
 Sources/PhotoApp/PhotoCommands+File.swift: Button("Clear Menu") { clearRecent(recent.target) }.disabled(!recent.canClear)
 Sources/PhotoApp/PhotoCommands+File.swift: Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
 Sources/PhotoApp/PhotoCommands+View.swift: MenuCommand("History", help: historyHelp, isEnabled: menu.hasImage) {
 Sources/PhotoApp/PhotoWindow.swift: Button("Rename", action: commitRename)
-Sources/PhotoApp/PhotoWindow.swift: Button("Cancel", role: .cancel) {}
 Sources/PhotoApp/PhotoWindow.swift: Button("OK", role: .cancel) {}
-Sources/PhotoApp/StraightenSheet.swift: Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
 Sources/PhotoApp/StraightenSheet.swift: Button("Apply", action: onApply).keyboardShortcut(.defaultAction).disabled(frame == nil)
+Sources/PhotoApp/PhotoPlace.swift: return MenuCommand(
