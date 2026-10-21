@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-21T18:10Z	0	stopped	#1942	SC-13 #4019 unchanged (Linux red); escalated on #1942
 2026-10-21T18:43Z	0	stopped	#1942	SC-13 #4019 unchanged (Linux red); awaiting supervisor
 2026-10-21T19:14Z	0	stopped	#1942	SC-13 #4019 unchanged (Linux red); awaiting supervisor
+2026-10-21T19:45Z	0	stopped	#4019	SC-13 fixed (4e6f468b), in lane; AC-export-sheet waits on SC-14..16
