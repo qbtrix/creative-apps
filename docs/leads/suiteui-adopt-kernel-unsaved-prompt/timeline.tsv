@@ -36,3 +36,4 @@ ts	kind	note
 2026-10-21T13:18Z	3	pr-opened	#4037	UP-design
 2026-10-21T13:18Z	3	fix-push	#4037	macOS build fix ff5d6a50
 2026-10-21T13:20:12Z	check	blockers posted on feature issue; lane PRs open, no needs-fix
+2026-10-21T13:38:10Z	poll	#4037 macOS build 39607806758 queued at ff5d6a50; no needs-fix
