@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-21T15:39Z	2026-10-21T15:39:44Z	stage3	poll	lane	macOS builds pending on 4021/4034/4048; 4023 merged dev, awaiting lane
 2026-10-21T15:53Z	2026-10-21T15:53:32Z	stage3	wave2	#4103	RP-3 (RP-u) draft PR #4103 stacked on #4049; RP-4 built locally (mutate 4/4), finisher merging dev and opening its draft on #4048
 2026-10-21T16:00Z	2026-10-21T16:00:55Z	stage3	poll	lane	#4048 macOS build green; #4034 building; #4021 #4023 queued; needs-rebase dropped on #4023
+2026-10-21T16:06Z	2026-10-21T16:06:34Z	stage3	wave2	#4110	RP-4 (RP-m) draft #4110 on #4048, mutate 4/4, gate pass; fixer moving #4048 CommandShape pin for dev's CopyAsCommands
