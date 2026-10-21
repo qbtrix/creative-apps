@@ -91,7 +91,8 @@ extension PhotoWorkspace {
     /// composited, then exposure and levels), counted on display (sRGB-encoded)
     /// values like the curve's axis, in 256 bins scaled so the
     /// tallest is 1: the histogram the curve editor draws behind the curve.
-    /// Empty with no image open; all zeros when every pixel is transparent.
+    /// Empty with no image open, and when the task counting it is cancelled
+    /// (it stops before the next row); all zeros when every pixel is transparent.
     /// Cost: it reads at most 256 evenly spaced rows, so about 256 x width
     /// pixels composited, adjusted and counted, whatever the image's height.
     public func curvesHistogram() -> [Double] {
@@ -100,6 +101,7 @@ extension PhotoWorkspace {
         // ponytail: recounts every sampled row on each call; cache counts per
         // tile by damage(since:) if it shows up in a drag profile.
         for y in stride(from: 0, to: canvas.height, by: (canvas.height + 255) / 256) {
+            guard !Task.isCancelled else { return [] }
             let row = PixelRect(x: 0, y: y, width: canvas.width, height: 1)
             // Can't fail: the same pixels render on the canvas.
             guard let pixels = try? adjustments.appliedBeforeCurves(to: composited(row)),

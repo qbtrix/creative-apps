@@ -4,8 +4,9 @@
 // gradient fill reads "Gradient", read only, with the reason it can't be
 // edited; fills that differ read Mixed. STROKE is the color row
 // (`flare.inspector.stroke`, `.setStrokeColor`), the Width bar
-// (`flare.inspector.strokeWidth`, in pt: it shows the dragged value while
-// scrubbing and sends `.setStrokeWidth` once on release, one undo step), and
+// (`flare.inspector.strokeWidth`, in pt: each drag sample sends
+// `.scrubStrokeWidth`, so the canvas shows the width live, and the release
+// sends `.endScrub`, so the whole drag is one undo step), and
 // the Cap and Join menus (`flare.inspector.cap`, `.join`, each reading its
 // choice as its value). A nil field reads Mixed. A refusal (`paintError`)
 // shows above the header with the others (FlareInspector). Its intents go out
@@ -23,8 +24,6 @@ struct FlareInspectorFill: View {
     /// Why an intent can't act now; nil while it can (`FlareWindow.inspectorHelp`).
     let reasonFor: @MainActor (FlareIntent.Inspector) -> String?
     let perform: @MainActor (FlareIntent) -> Void
-    /// The width shown while the bar is dragged; nil between drags.
-    @State private var draftWidth: Double?
 
     /// Why a gradient fill reads only (FlarePaint's refusal for it).
     static let gradientReason = "Gradients can't be edited yet."
@@ -53,13 +52,10 @@ struct FlareInspectorFill: View {
         color("Stroke", hex: paint.strokeHex, id: "flare.inspector.stroke") { .setStrokeColor(hex: $0) }
         let widthHelp = reasonFor(.setStrokeWidth(0))
         InspectorSliderRow(
-            "Width", value: draftWidth ?? paint.strokeWidth ?? 0, in: 0...100, step: 0.5, unit: "pt", decimals: 1,
-            mixed: draftWidth == nil && paint.strokeWidth == nil,
-            onChange: { draftWidth = $0 },
-            onEnd: {
-                if let width = draftWidth { send(.setStrokeWidth(width)) }
-                draftWidth = nil
-            })
+            "Width", value: paint.strokeWidth ?? 0, in: 0...100, step: 0.5, unit: "pt", decimals: 1,
+            mixed: paint.strokeWidth == nil,
+            onChange: { send(.scrubStrokeWidth($0)) },
+            onEnd: { send(.endScrub) })
             .accessibilityIdentifier("flare.inspector.strokeWidth")
             .disabled(widthHelp != nil)
             .help(widthHelp ?? "Stroke Width")
