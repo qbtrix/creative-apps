@@ -4,7 +4,7 @@ Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:16:13Z
 Stage: 3 wave 2 (DY-a merged 23:24Z as 6f9c8928; DY-u merged 06:45Z as 6d7fcf14)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
-Next: dev CI 39573184415 (296186f4) Linux went red on the two DY-a mutation anchors (DS-a #3857 reworded the shared case line after #3889 anchored on it); #3980 from the placed-images lead repoints them. Belt-Slice-Done DY-a and Mac-Finish-Wanted DY-a follow the first dev CI after #3980 with a green Linux job. DY-u critics running (wf_3582a1a8-d8b); J-DY skips until DY-7.
+Next: dev CI 39573184415 (296186f4) Linux went red on the two DY-a mutation anchors (DS-a #3857 reworded the shared case line after #3889 anchored on it); #3980 from the placed-images lead repoints them. Belt-Slice-Done DY-a and Mac-Finish-Wanted DY-a follow the first dev CI after #3980 with a green Linux job. DY-u critics filed #3985-#3994 (10 open findings, so no new wave); fix-batch round 1 wf_549fb0f0-0d5 running on a6f45c18.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
