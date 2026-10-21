@@ -295,3 +295,5 @@ utc	stage	event	ref	note
 2026-10-20T13:52:44Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 queued, CI 39429064045 pending; no completed run yet
 2026-10-20T14:16:52Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 queued since 12:47Z; CI 39429064045 cancelled; CI 39436941980 (56e73319) pending
 2026-10-20T14:39:06Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 still queued since 12:47Z; CI 39438701609 (9f880c85) queued; full runs keep being superseded
+2026-10-21T18:55Z	3	slice-done	LP-a	run 39652451586
+2026-10-21T18:55Z	3	fix	LP-b	round 2 for #3307 (P3 list id)

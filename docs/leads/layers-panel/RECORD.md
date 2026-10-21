@@ -121,3 +121,10 @@ Line lead (rule 19) over #1498 layers-panel, #1497 style-rows and #1496 copy-gro
 - J12 failed at step 3 in scoped run 39395510111 after round 1 (#3510); finding #3556.
 - Round 2 is PR #3595 (head 3e7a21b0): the drop resolves its own line from `info.location.y`. J12 drags with `click(...withVelocity: 200, thenHoldForDuration: 0.5)`, because `press` with velocity drives only the Touch Bar on macOS.
 - This is the last round. If J12 is still red in the run that contains the merge, #3556 becomes a `gap` and LP-a closes with `gaps:`.
+
+## Run act-1a15fcdd869-ck2o (2026-10-21T18:55Z)
+
+- Relaunched lead. Every task in the packet's Slices table is on dev: LP-a (L-1 #2880, L-2 #3114, L-4 #3145, L-5 #3370, plus fixes #3510, #3595 and Mac finish #3605) and LP-b (L-3 #2055, L-6 #3195, L-7 #2047/#3181, fix #3316).
+- LP-a is done: green ci.yml run 39652451586 (15f7bad1) contains #3595 (897ccbb2) and #3605 (6cb55370). Belt-Slice-Done: LP-a was posted on #1498.
+- LP-b is not done yet: P3 (testLayerListScroll) is still red, finding #3307 ("no Layers list (design.layers)"; run 39578070252). Root cause: the Layers List is SuiteWindow's sidebar root view, so the sidebar's outer `suite.sidebar` identifier replaces `design.layers`. Every other Design journey reaches the rows through `suite.sidebar`.
+- LP-b fix round 2 (round 1 was #3316): P3 finds the list as `suite.sidebar`. This is test-only, on branch fix/design-p3-sidebar-list. If P3 is still red after this, #3307 becomes a gap and LP-b closes with `gaps:`.
