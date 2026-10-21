@@ -2,7 +2,7 @@
 
 Issue: #3415 · Packet: docs/blueprints/design/features/gradient-fill.md
 Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DG-m PR #4189 open (DG-4+DG-5, mutate 3/3 + 9/9); DG-z: DG-7 PR #4197 open (journey file alone off dev; #4192 closed, oversize when stacked)
+Stage: 3 DG-m #4189 merged (e0fb99190, 23:0xZ), waiting on a green design/full ci.yml run (dev red, #3856; Linux run 39689070230 failed with the dev-red set); DG-z: DG-7 PR #4197 open (journey file alone off dev; #4192 closed, oversize when stacked)
 Base: 896cafe3 (origin/dev); main verified at 0dd23d65
 Next: #4189 merges -> Belt-Slice-Done DG-m on a green design run; #4197 merges; DG-8 after DG-7 + design-export built (design-export still planned at 2026-10-21T22:05Z)
 
