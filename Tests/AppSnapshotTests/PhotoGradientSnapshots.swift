@@ -4,12 +4,12 @@
 // Options showing its hint over SuiteUI's GradientEditor on the default
 // black-to-white linear fill, with no angle row (the drag sets the line).
 // `radialOptions` writes photo-gradient-options-radial-light/dark.png, the
-// editor switched to Radial (on once PG-4 runs the editor's intents).
+// editor switched to Radial.
 // `drag` writes photo-gradient-drag-light/dark.png: the top half marqueed and
 // a gradient drag under way from its top to its bottom, the line on the
 // canvas (PG-6's overlay). `done` writes photo-gradient-done-light/dark.png:
 // the same drag released, the gradient drawn inside the selection as one
-// "Gradient" step (on once PG-3 draws it). macOS only.
+// "Gradient" step. macOS only.
 import CoreRaster
 import PhotoModel
 import SuiteKernel
@@ -74,7 +74,7 @@ import Testing
         try shoot("options", model)
     }
 
-    @Test(.disabled("PG-4: runGradientOption runs the editor's intents")) func radialOptions() throws {
+    @Test func radialOptions() throws {
         var model = try opened()
         model.runGradientOption(.type(.radial))
         guard case .radial = model.toolOptions.gradient else {
@@ -91,7 +91,7 @@ import Testing
         try shoot("drag", model)
     }
 
-    @Test(.disabled("PG-3: drawGradient draws the pixels")) func done() throws {
+    @Test func done() throws {
         let model = try dragged(release: true)
         #expect(!model.isDragging)
         #expect(model.undoActionName == "Undo Gradient", "the release left no Gradient step")

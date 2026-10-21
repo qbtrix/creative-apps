@@ -1,6 +1,5 @@
 # HaloApp's menu items and buttons built without a command spec (command-catalog CC-11).
-# max: 9
-Sources/HaloApp/HaloTimelineView.swift: Button(preset.title) { perform(.setEasing(preset)) }
+# max: 8
 Sources/HaloApp/HaloTransport.swift: Button(model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
 Sources/HaloApp/HaloWindow+File.swift: Button(alertSaveNeedsPanel ? "Save As…" : "Save") { goOn(saving: true) }
 Sources/HaloApp/HaloWindow+File.swift: Button("Don't Save", role: .destructive) { goOn(saving: false) }
