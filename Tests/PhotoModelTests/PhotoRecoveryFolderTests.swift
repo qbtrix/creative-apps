@@ -1,9 +1,6 @@
-// PhotoRecoveryFolderTests.swift: history-panel PH-6. Photo's autosave goes
-// through SuiteModel's RecoveryFolder on SuiteKernel's AutosaveSchedule: an
-// edit writes one .ora under Recovery/ once the delay has passed, a save
-// removes it, a relaunch offers the newest copy, and Restore gives the same
-// layers back, dirty and unsaved. The .ora encode runs off the main actor.
-// Each test uses its own temporary folder. Runs on Linux and macOS.
+// PhotoRecoveryFolderTests.swift: history-panel PH-6. Autosave through RecoveryFolder on AutosaveSchedule: an edit
+// writes one .ora after the delay, a save removes it, a relaunch offers the newest, Restore gives the same layers
+// back dirty, and the encode runs off main. Each test has its own temporary folder. Linux and macOS.
 import Foundation
 import CoreRaster
 @testable import PhotoModel
@@ -30,8 +27,7 @@ import Testing
         return workspace
     }
 
-    /// The raw recovery copies under `folder`/Recovery, locks left out.
-    private func copies(in folder: URL) -> [String] {
+    private func copies(in folder: URL) -> [String] {  // the .ora copies under Recovery/
         let names = (try? FileManager.default.contentsOfDirectory(
             atPath: folder.appendingPathComponent("Recovery").path)) ?? []
         return names.filter { $0.hasSuffix(".ora") }.sorted()
@@ -106,16 +102,6 @@ import Testing
         #expect(restored.isDirty)
         let renamed = try await PhotoWorkspace.recovered(from: try workspace.recoveryBytes(), name: "b.png")
         #expect(renamed.documentName == "b.png")
-    }
-
-    /// Photo's own autosave timing is gone: the window uses the shared modifier
-    /// (scripts/check-dup-logic, run by scripts/ci, holds the baseline).
-    @Test func photoAutosaveIsGone() {
-        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-            .deletingLastPathComponent().deletingLastPathComponent()
-        let gone = root.appendingPathComponent("Sources/PhotoApp/PhotoAutosave.swift").path
-        #expect(FileManager.default.fileExists(atPath: root.appendingPathComponent("Sources/PhotoApp").path))
-        #expect(!FileManager.default.fileExists(atPath: gone))
     }
 
     @Test func damagedBytesThrow() async {

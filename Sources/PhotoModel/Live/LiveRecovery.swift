@@ -1,14 +1,10 @@
 // Live/LiveRecovery.swift: the live recovery store (D-4b of photo-documents,
-// history-panel PH-6). It keeps its copies through SuiteModel's
-// RecoveryFolder, under "Recovery/" in its folder: per window the OpenRaster
-// file PhotoZip writes, `<window>.ora`, with `photo/recovery.json` added
-// inside it for the document's name and the time it was saved, and the
-// folder's own `<window>.json` beside it. Every write is atomic, so a crash
-// mid-write leaves the last good copy. A copy that doesn't open is removed and
-// skipped (review note 3). The window string is percent-encoded into the file
-// name, so no window escapes the folder. The folder's times count from the
-// reference date, the clock the window's autosave writes with; an entry's
-// count from 1970. Linux-safe.
+// review note 1; history-panel PH-6). Through SuiteModel's RecoveryFolder:
+// per window `Recovery/<window>.ora`, the OpenRaster file PhotoZip writes with
+// `photo/recovery.json` (name, time) inside, and the folder's `<window>.json`.
+// Writes are atomic; a copy that doesn't open is removed and skipped (review
+// note 3); the window is percent-encoded, so none escapes the folder. The
+// folder's times count from the reference date, an entry's from 1970. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

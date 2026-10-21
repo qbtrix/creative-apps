@@ -30,14 +30,11 @@ import Testing
         ])
     }
 
-    /// The names in `folder`, the store's locks left out.
-    private func files(in folder: URL) throws -> [String] {
+    private func files(in folder: URL) throws -> [String] {  // locks left out
         try FileManager.default.contentsOfDirectory(atPath: folder.path).filter { !$0.hasSuffix(".lock") }.sorted()
     }
 
-    private func copies(in folder: URL) throws -> [String] {
-        try files(in: folder.appendingPathComponent("Recovery"))
-    }
+    private func copies(in folder: URL) throws -> [String] { try files(in: folder.appendingPathComponent("Recovery")) }
 
     @Test func writeThenLeftBehindGivesTheEntry() throws {
         try inTemporaryFolder { folder in

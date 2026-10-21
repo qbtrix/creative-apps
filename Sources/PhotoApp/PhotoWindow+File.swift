@@ -28,15 +28,11 @@
 // subtitle and `photo.bar.saved`, keeps the window's edited dot (`isDocumentEdited`) on
 // `model.isDirty`, and shows "Saving…" (`photo.file.saving`) or "Opening…"
 // (`photo.file.opening`) over the window once `files.working` has run 100 ms.
-// Autosave is SuiteUI's `.autosaveRecovery` (history-panel PH-6) on
-// `model.services.recoveryFolder`: its hooks read the image's name and dirty
-// state, copy the workspace on main and encode its `.ora` off it, and
-// Restore decodes a copy off main (`PhotoWorkspace.recovered`) and installs
-// it as `.restoreRecovered`. The folder is `-PhotoRecoveryDir`'s when given,
-// none for a launch that ignores restored state (`-ApplePersistenceIgnoreState`),
-// else Application Support/Photo. A save, a clean close and Don't Save
-// remove the window's copy; Quit writes it once more while the image is
-// dirty. D-10: PhotoWindowEditedView is the window's hook for Quit and
+// It runs the window's PhotoAutosave (D-9): a tick every second, discarded on
+// a clean close; the first window offers what a crash left behind in an
+// NSAlert sheet (SwiftUI drops alert buttons' identifiers, and journeys find
+// `photo.recovery.restore` by its own), and Restore and Discard are
+// FileIntents. D-10: PhotoWindowEditedView is the window's hook for Quit and
 // Finder opens (PhotoApp.swift); its close guard
 // asks PhotoUnsavedPrompt's alert before a dirty window closes.
 import AppKit
@@ -57,8 +53,10 @@ enum FileIntent {
     case flatten(ImageFormat)
     /// Open Recent > Clear Menu.
     case clearRecent
-    /// Restore on the autosave's offer: the image `PhotoWorkspace.recovered` decoded.
-    case restoreRecovered(PhotoWorkspace)
+    /// The launch offer: Restore its image into the window.
+    case restore(RecoveryOffer)
+    /// The launch offer: Discard what the crash left behind.
+    case discardRecovery
 }
 
 /// Long file work running off the main actor, for the window's notes.
@@ -84,32 +82,26 @@ final class PhotoFileSession {
     var saves = 0
     /// Open Recent's files, newest first.
     private(set) var recentFiles: [URL] = PhotoFileSession.storedRecent()
-    /// This window's name in the recovery folder.
-    let window = UUID().uuidString
+    /// The window's autosave, made on its workspace's recovery store when the window appears.
+    private(set) var autosave: PhotoAutosave?
+    /// The launch's restore offer while it waits for Restore or Discard.
+    var recoveryOffer: RecoveryOffer?
+    /// Only the first window of a launch looks for what a crash left behind.
+    private static var recoveryChecked = false
 
-    /// The folder this window autosaves to on `services`: `-PhotoRecoveryDir`'s
-    /// when given (the services already keep it), none when the launch ignores
-    /// restored state, else the services' own.
-    nonisolated static func recoveryFolder(_ services: PhotoServices) -> RecoveryFolder? {
-        let defaults = UserDefaults.standard
-        guard defaults.string(forKey: "PhotoRecoveryDir") != nil || !defaults.bool(forKey: "ApplePersistenceIgnoreState")
-        else { return nil }
-        return services.recoveryFolder
+    /// The window's autosave, made on `store` the first time.
+    func startAutosave(_ store: any RecoveryStoring) -> PhotoAutosave {
+        if let autosave { return autosave }
+        let made = PhotoAutosave(window: UUID().uuidString, delay: PhotoWorkspace.autosaveDelay, store: store)
+        autosave = made
+        return made
     }
 
-    /// Removes this window's recovery copy: a save, a clean close or Don't Save.
-    func discardRecovery(_ services: PhotoServices) {
-        try? Self.recoveryFolder(services)?.discard(window: window)
-    }
-
-    /// Quit: writes this window's copy of `model` once more, off the main actor, while it is dirty.
-    func writeRecovery(_ model: PhotoWorkspace) async {
-        guard model.isDirty, model.canvas != nil, let folder = Self.recoveryFolder(model.services) else { return }
-        let (encode, window, name) = (model.recoveryEncoder(codec: ImageIOCodec()), window, model.documentName)
-        let now = Date.now.timeIntervalSinceReferenceDate
-        _ = try? await Task.detached(priority: .userInitiated) {
-            try folder.write(try encode(), window: window, name: name, at: now)
-        }.value
+    /// The first window's launch: offers the newest autosave a crash left behind.
+    func offerRecovery(_ model: PhotoWorkspace) async {
+        guard !Self.recoveryChecked else { return }
+        Self.recoveryChecked = true
+        recoveryOffer = await startAutosave(model.services.recovery).launch(model: model)
     }
 
     /// The bridge opens and saves are noted through; nil uses the process's (tests inject one).
@@ -179,9 +171,30 @@ extension PhotoWindow {
             guard let url = documentURL else { return saveAs() }
             write(to: url, as: format, quality: exportQuality, saving: true)
         case .clearRecent: files.clearRecent()
-        case .restoreRecovered(let restored):
-            model.restoreRecovered(restored)
-            documentURL = nil
+        case .restore(let offer):
+            files.recoveryOffer = nil
+            restore(offer)
+        case .discardRecovery:
+            files.recoveryOffer = nil
+            files.startAutosave(model.services.recovery).discardLeftBehind()
+        }
+    }
+
+    /// Restore: decodes the offer's PNGs off the main actor, then opens the
+    /// image; a failure keeps the window as it was and drops the bad file.
+    private func restore(_ offer: RecoveryOffer) {
+        let (autosave, archive) = (files.startAutosave(model.services.recovery), model.services.archive)
+        files.working = .opening
+        Task {
+            do {
+                let snapshot = try await PhotoAutosave.decode(offer, archive: archive, codec: ImageIOCodec())
+                try autosave.restore(offer, decoded: snapshot, into: &model)
+                documentURL = nil
+            } catch {
+                autosave.discardLeftBehind()  // it holds nothing to keep (packet note 3)
+                problem = PhotoProblem("The image can't be restored.", (error as? ArchiveError)?.message ?? Self.reason(error))
+            }
+            files.working = nil
         }
     }
 
@@ -322,7 +335,7 @@ extension PhotoWindow {
         if documentURL == opened {
             documentURL = url
             model.didSave(as: url.lastPathComponent, kind: kind)
-            if !model.isDirty { files.discardRecovery(model.services) }
+            files.autosave?.didSave(model: model)
             files.saves += 1
         }
         files.saveFailed = false
@@ -358,7 +371,8 @@ struct PhotoFileArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .environment(\.photoSaveStatus, model.saveStatus(autosaved: false, saveFailed: files.saveFailed))
+            .environment(\.photoSaveStatus, model.saveStatus(
+                autosaved: files.autosave?.autosaved ?? false, saveFailed: files.saveFailed))
             .background { PhotoWindowEdited(model: model, files: files, perform: perform) }
             .overlay {
                 // A quick save shows nothing: the note waits 100 ms.
@@ -382,25 +396,23 @@ struct PhotoFileArea: ViewModifier {
             .onChange(of: model.isDirty) {
                 if !model.isDirty { files.saveFailed = false }
             }
-            .autosaveRecovery(autosaveHooks, folder: PhotoFileSession.recoveryFolder(model.services),
-                              delay: PhotoWorkspace.autosaveDelay, edits: model.revision)
+            .onChange(of: model.revision) { files.autosave?.noteEdit(at: Date.now.timeIntervalSince1970) }
+            // Ticks every second with this revision's workspace; the next revision restarts it.
+            .task(id: model.revision) {
+                let autosave = files.startAutosave(model.services.recovery)
+                while !Task.isCancelled {
+                    do { try await Task.sleep(for: .seconds(1)) } catch { return }
+                    await autosave.tick(model: model, now: Date.now.timeIntervalSince1970, codec: ImageIOCodec())
+                }
+            }
+            .task {
+                await files.offerRecovery(model)
+                guard let offer = files.recoveryOffer, let hook = await PhotoWindowEditedView.hook(for: files) else { return }
+                if let choice = await hook.askToRestore(offer) { perform(.file(choice)) } else { files.recoveryOffer = nil }
+            }
             .task { if let url = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(.openFile(url)) } }
             // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
-            .onDisappear { if !model.isDirty { files.discardRecovery(model.services) } }
-    }
-
-    /// The autosave's hooks: this render's workspace, copied on main by
-    /// `encoder`; Restore decodes off main, then installs through `perform`.
-    private var autosaveHooks: AutosaveHooks {
-        let (model, perform) = (model, perform)
-        return AutosaveHooks(
-            window: files.window, documentName: { model.documentName }, isDirty: { model.isDirty },
-            encoder: { model.isDirty && model.canvas != nil ? model.recoveryEncoder(codec: ImageIOCodec()) : nil },
-            restore: { data in
-                let restored = try await PhotoWorkspace.recovered(
-                    from: data, name: nil, services: model.services, codec: ImageIOCodec())
-                perform(.file(.restoreRecovered(restored)))
-            })
+            .onDisappear { if !model.isDirty { files.autosave?.discard() } }
     }
 }
 
@@ -417,7 +429,7 @@ struct PhotoWindowEdited: NSViewRepresentable {
 
 /// An invisible view that keeps its window's edited dot on the image's dirty
 /// state, puts its close guard in front of the window's delegate, and answers
-/// the unsaved-changes prompt and "Keep layers?" for its window.
+/// the unsaved-changes prompt and the restore offer for its window.
 final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     /// The visible Photo windows' hooks, front to back.
     static var shown: [PhotoWindowEditedView] {
@@ -458,13 +470,42 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     }
 
     func prepareToQuit() async {
-        guard let workspace, let files else { return }
-        await files.writeRecovery(workspace)
+        guard let workspace, let autosave = files?.autosave else { return }
+        await autosave.willQuit(model: workspace, codec: ImageIOCodec())
+    }
+
+    /// The window's hook for `files`, once it is in a window; nil after 2 s without one.
+    static func hook(for files: PhotoFileSession) async -> PhotoWindowEditedView? {
+        for _ in 0..<40 {
+            if let hook = all.allObjects.first(where: { $0.files === files && $0.window != nil }) { return hook }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        return nil
+    }
+
+    /// The launch's restore offer as a sheet: Restore (Return), Discard, or nil
+    /// for Cancel (Escape), which leaves the autosave for the next launch. An
+    /// NSAlert, since SwiftUI drops the identifiers of an alert's buttons.
+    func askToRestore(_ offer: RecoveryOffer) async -> FileIntent? {
+        guard let window else { return nil }
+        let alert = NSAlert()
+        alert.messageText = offer.message
+        alert.informativeText = RecoveryOffer.informativeText
+        alert.addButton(withTitle: "Restore").setAccessibilityIdentifier("photo.recovery.restore")
+        let discard = alert.addButton(withTitle: "Discard")
+        discard.setAccessibilityIdentifier("photo.recovery.discard")
+        discard.hasDestructiveAction = true
+        alert.addButton(withTitle: "Cancel").setAccessibilityIdentifier("photo.recovery.cancel")
+        switch await alert.beginSheetModal(for: window) {
+        case .alertFirstButtonReturn: return .restore(offer)
+        case .alertSecondButtonReturn: return .discardRecovery
+        default: return nil
+        }
     }
 
     /// "Keep layers?" as a sheet: Save as Photo Document (Return), Flatten
-    /// into `format`, or nil for Cancel (Escape). An NSAlert, since SwiftUI drops
-    /// an alert's button identifiers, so each keeps its `photo.file.keep-layers.*`.
+    /// into `format`, or nil for Cancel (Escape). An NSAlert, as the restore
+    /// offer, so each button keeps its `photo.file.keep-layers.*` identifier.
     func askToKeepLayers(_ format: ImageFormat, message: String) async -> FileIntent? {
         guard let window else { return nil }
         let alert = NSAlert()
@@ -508,10 +549,7 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
         return files.saves != before
     }
 
-    func discardChanges() {
-        guard let files, let workspace else { return }
-        files.discardRecovery(workspace.services)
-    }
+    func discardChanges() { files?.autosave?.discard() }
 }
 
 /// The window's delegate in front of SwiftUI's: asks before a dirty window

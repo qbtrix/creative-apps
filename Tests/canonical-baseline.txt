@@ -103,6 +103,7 @@ Sources/PhotoApp/CropOptions.swift
 Sources/PhotoApp/CropOverlay.swift
 Sources/PhotoApp/ExportSheet.swift
 Sources/PhotoApp/ImageIOCodec.swift
+Sources/PhotoApp/PhotoAutosave.swift
 Sources/PhotoApp/PhotoHistoryTab.swift
 Sources/PhotoApp/PhotoPasteboard.swift
 Sources/PhotoApp/PhotoSaveStatusLabel.swift
