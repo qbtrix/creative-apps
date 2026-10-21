@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T21:20Z	2026-10-21T21:20Z	build	pr	#4196 #4205	CS-7 Halo (8/8) and CS-11 Flare (7/7) opened, gate pass
 2026-10-21T21:40Z	2026-10-21T21:40Z	check	lane-wait	#3856	lane batches red on dev launcher.txt:21 (run 39676795156); #4201 fixes it, flagged on dev-red; our PRs built, queued
 2026-10-21T21:41Z	2026-10-21T21:41Z	build	drafts	#4202 #4206 #4213	CS-14/10/4 drafts opened stacked, gate pass
+2026-10-21T22:02Z	2026-10-21T22:02Z	check	lane-wait	#4201	nothing of ours merged; lane still bisecting 20:57 batch (red on dev launcher.txt:21); dev merging other PRs
