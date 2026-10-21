@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-21T22:29:00Z	heartbeat	#4034 still open; ST-a stack waiting
 2026-10-21T22:46:38Z	heartbeat	#4034 still open; ST-a stack waiting
 2026-10-21T23:04:49Z	heartbeat	#4034 still open; ST-a stack waiting
+2026-10-21T23:26:41Z	check	ST-a	#4034 still open (clean); #4135 waits on it
