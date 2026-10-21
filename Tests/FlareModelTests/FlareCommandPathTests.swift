@@ -73,8 +73,8 @@ struct FlareCommandPathTests {
         let scene = try #require(ws.selectedScene)
         #expect((scene.width, scene.height, scene.fps, scene.durationFrames) == (640, 480, 12, 36))
         #expect(scene.background == FlareColor(r: 1, g: 0, b: 0) && !ws.isDirty)
-        let bad: JSONValue = .object(["width": .number(0)])
-        #expect(throws: CatalogError.failed(id: "file.new", message: "Width must be 1 to 16384 px.")) {
+        let bad: JSONValue = .object(["background": .string("#GG0000")])
+        #expect(throws: CatalogError.failed(id: "file.new", message: "Pick a valid background color.")) {
             _ = try FlareWorkspace.catalog.run("file.new", params: bad, on: &ws)
         }
 
