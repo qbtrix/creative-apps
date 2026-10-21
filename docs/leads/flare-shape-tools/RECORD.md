@@ -8,7 +8,7 @@ Next: FS-a slice PR (FS-1, FS-2) and FS-5 (FS-m's first task) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: #3767 FS-a merged into dev; FS-5 rebased onto dev (2 commits, 3 files +108/-13), gate running before its PR
+Last stage: FS-5 (slice FS-m) opened as #3850, head 5890f921, 3 files +108/-13, fast-lane. FS-u rebased onto it; its gate is running, then a stacked PR held with no-fast-lane until #3850 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
