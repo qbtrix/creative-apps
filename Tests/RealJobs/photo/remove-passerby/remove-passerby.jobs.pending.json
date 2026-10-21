@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P07, pending FH-6 (suiteui/fill-heal) and the lasso command (select.lasso, area-selection S5): named .jobs.pending.json so the harness skips it, since the catalog has neither retouch.remove nor select.lasso yet and the folder has no input yet (the harness needs one). It is renamed to remove-passerby.jobs.json once both land, with input/beach.png (320 x 200, sea above y 80 and textured sand below, a person in a red jacket standing at about 150 to 175, 70 to 170) and expected/beach-removed.png. The job: lasso round the person, Remove over the selection, export a PNG. The trap: remove smears the person's colour into the sand or repeats one patch. The assertion: no pixel inside the lasso is within 10 levels of the jacket's colour, and the patch's local variance is within 30% of the sand's.",
+  "pending": "FH-6",
+  "waits_on": "FH-6",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "select.lasso", "params": {"points": [
+      {"x": 146, "y": 66}, {"x": 168, "y": 62}, {"x": 182, "y": 80}, {"x": 184, "y": 124},
+      {"x": 180, "y": 174}, {"x": 160, "y": 178}, {"x": 142, "y": 172}, {"x": 140, "y": 120}
+    ]}},
+    {"id": "retouch.remove", "params": {"seed": 1}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-removed", "format": "png", "options": {}},
+  "expect": {
+    "out/beach-removed.png": {"pixels": {"tolerance": 8, "reference": "expected/beach-removed.png"}}
+  },
+  "platforms": []
+}

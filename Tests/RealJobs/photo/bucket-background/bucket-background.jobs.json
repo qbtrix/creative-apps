@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P51, pending FH-6 (suiteui/fill-heal): the catalog has no fill.bucket until FH-6 builds RetouchCommands, so platforms is [] and the harness skips the job on both. Opens logo.png (48 x 32, flat white, a navy disc of radius 10 at 24, 16 with a 4 x 4 supersampled anti-aliased edge), fills from (4, 4) at tolerance 32, contiguous, red, and exports a PNG. The trap: the fill bleeds into the anti-aliased edge or misses the corners. The assertion: every background pixel is red and every logo pixel, edges included, is unchanged; the turn-on adds expected/logo-filled.png, logo.png with only its white turned red, and sets platforms to linux and macos.",
+  "pending": "FH-6",
+  "waits_on": "FH-6",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "fill.bucket", "params": {"x": 4, "y": 4, "tolerance": 32, "contiguous": true, "allLayers": false, "color": "#FF0000"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-filled", "format": "png", "options": {}},
+  "expect": {
+    "out/logo-filled.png": {"pixels": {"tolerance": 0, "reference": "expected/logo-filled.png"}}
+  },
+  "platforms": []
+}
