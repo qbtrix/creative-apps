@@ -27,3 +27,6 @@ utc	stage	event	ref	note
 2026-10-20T22:44Z	3	question	#3480	mac build 39494113551 queued 2h; asked supervisor for a mac slot or Mac-Check for #3514 and #3731
 2026-10-21T00:10Z	3	merged	#3731	SF-9 (SF-z part 2) merged 23:01Z
 2026-10-21T00:10Z	3	staged	-	supervisor: #3514 lands via local Mac gate after #3743; dev merged into sf4 (04220b3b), sf8 (c070045f), sf10 (aa4923a7); gate PASS on sf8 and sf10
+2026-10-21T00:33Z	3	merged	#3514	SF-3 (SF-u) merged 00:23Z
+2026-10-21T00:33Z	3	opened	#3827	SF-4 (SF-u) rebuilt on dev, gate PASS
+2026-10-21T00:33Z	3	staged	-	SF-8 rebuilt on #3827 head (d2559733), gate PASS

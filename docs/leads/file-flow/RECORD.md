@@ -56,6 +56,7 @@ Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb
 - SF-9: file.drop places a step, so CommandWalkTests leaves it out of the walk (file kinds must not change bytes); FakeCanvasFileFlowTests walks it. The fixture carries one recent entry and Halo as Open In so every example runs on it.
 
 ## Open
+- 2026-10-21T00:33Z: #3514 (SF-3) merged 00:23Z as 9973f2af. SF-4 rebuilt on dev by cherry-pick (58e8e836, gate PASS), opened as #3827 (fast-lane, Slice SF-u). SF-8 rebuilt on it (d2559733, gate PASS), pushed; its PR opens once #3827 merges. Belt-Slice-Done SF-u waits for #3827 and a green dev Linux run containing it.
 - 00:10Z: supervisor replied (#3480): GitHub mac queue is hours deep; #3514 lands through the supervisor's local Mac gate right after #3743 (snapshot KVO fix). Dev merged into sf4 04220b3b, sf8 c070045f, sf10 aa4923a7; gate PASS on sf8 and sf10. SF-4 and SF-8 PRs open once #3514 merges; SF-10 after SF-8.
 - 22:44Z: asked the supervisor on #3480 (comment 6303419089) for a mac slot or Mac-Check: #3514 build 39494113551 queued since 20:41Z.
 - #3514 (SF-3) was rewritten onto newer dev with an OpenInMenu import fix (head 9c708ebd, gated, Head marker moved 21:45Z); the lane's macOS build 39494113551 is queued. SF-4 (af2287f7) and SF-8 (fa2d2c41) cherry-picked onto it again, gate PASS on both. Then: PR for claude/file-flow-lead-6ugb9w-sf4 (merge origin/dev in first), then -sf8.
