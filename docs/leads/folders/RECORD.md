@@ -4,7 +4,7 @@ Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: (10:58) Supervisor answered: FO-5 waits on FC-d and LC-m only for shared files (LibraryFilter.swift, catalog, ledger), so it takes its rows append-only. FO-5 builder started on lead/folders-FO-5, stacked on FO-4 #3961 (waiting on the lane's macOS build). FO-a Belt-Slice-Done waits on CI 39586209372 / 39585973891 at 39d90e3, which contains #3939.
+Next: (11:15) FO-5 opened as #4022 (lead/folders-FO-5, head eb50169, gate PASS, Mutate LibraryModel.LibraryFolders+Kernel 5/5), stacked on FO-4 #3961 with no-fast-lane; swap to fast-lane once #3961 merges. Watch: FO-4's tenThousandPaths 20 ms median measured 22 ms once under full parallel load. If the batch turns red on it, raise the budget or move the test to the perf list via the supervisor. FO-a Belt-Slice-Done waits on CI at 39d90e3.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
