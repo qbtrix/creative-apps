@@ -40,3 +40,4 @@
 2026-10-21T10:33:53Z	3	wave	-	FO-4 #3961 gate PASS (tree budget median 10.2 ms), fast-lane at 27c6113; BK-3/BK-u on fast-lane; supervisor questions open
 2026-10-21T10:58:39Z	3	check	-	supervisor answers acted on: LF-3 and FO-5 builders started (append-only rows); BK-5m keeps AK wait; FO-4/BK-3/BK-u awaiting lane macOS builds; CI at 39d90e3 queued
 2026-10-21T11:12:37Z	3	pr	-	FO-5 #4022 opened stacked on #3961 (5/5 mutants)
+2026-10-21T11:17:20Z	3	pr	-	LF-3 #4024 opened on fast-lane (5/5 mutants)
