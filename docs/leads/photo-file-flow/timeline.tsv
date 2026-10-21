@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-21T03:53Z	heartbeat	check	-	#3815 PF-3 clean, mac green, waits for next batch
 2026-10-21T04:11Z	heartbeat	check	-	#3815 PF-3 clean, mac green, waits for next batch
 2026-10-21T04:29Z	heartbeat	check	-	#3815 PF-3 clean, mac green, waits for next batch; dev-red #3856 noted
+2026-10-21T04:49Z	heartbeat	check	-	#3815 PF-3 mac green clean, in lane queue; batch-20261021043428 bisecting
