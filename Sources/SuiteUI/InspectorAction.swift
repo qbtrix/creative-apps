@@ -5,16 +5,20 @@
 // selected well, a filled symbol and the selected trait; an action that can't run is disabled at 40% and its tooltip says why, from the
 // ToolbarAction it is built from. An icon-only action shows just the symbol,
 // so several share a row (Align's icon rows); its title stays the accessibility
-// label and leads the tooltip while it can't run. Owns presentation state only: hover.
+// label and leads the tooltip while it can't run. Built with `isToggle`, its
+// `suite.controls` entry reports `selected`, on only while it can act (`entry`).
+// Owns presentation state only: hover.
 import SwiftUI
 
 public struct InspectorAction: View {
     private let action: ToolbarAction
     private let iconOnly: Bool
+    private let isToggle: Bool
 
-    public init(_ action: ToolbarAction, iconOnly: Bool = false) {
+    public init(_ action: ToolbarAction, iconOnly: Bool = false, isToggle: Bool = false) {
         self.action = action
         self.iconOnly = iconOnly
+        self.isToggle = isToggle
     }
 
     public var body: some View {
@@ -26,7 +30,13 @@ public struct InspectorAction: View {
         .accessibilityAddTraits(action.isSelected ? .isSelected : [])
         .disabled(!action.isEnabled)
         .help(Self.help(action, iconOnly: iconOnly))
-        .suiteControl(action)
+        .suiteControl(entry: Self.entry(action, isToggle: isToggle), identifies: true)
+    }
+
+    /// The `suite.controls` entry: the action's own, plus a toggle's on state, which is off
+    /// while it can't act since it draws off; nil without an identifier.
+    public nonisolated static func entry(_ action: ToolbarAction, isToggle: Bool) -> ControlEntry? {
+        action.controlEntry().map { $0.selecting(isToggle ? action.isEnabled && action.isSelected : nil) }
     }
 
     /// The tooltip: the action's own help, except that an icon-only action that can't run names
