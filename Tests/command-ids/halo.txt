@@ -53,7 +53,11 @@ text.end-size-scrub
 text.set
 text.set-color
 text.set-size
+timeline.end-key-drag
+timeline.move-keys
+timeline.pick-keys
 timeline.scrub
+timeline.select-all-keys
 tool.shape
 viewer.drag-begin
 viewer.drag-cancel
