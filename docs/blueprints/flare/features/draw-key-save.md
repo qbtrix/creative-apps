@@ -145,7 +145,8 @@ public enum FlareIntent: Sendable, Equatable {
          moveGuide(index: Int, to: Double, dragStart: Double), endGuideDrag, removeGuide(index: Int) }
     public enum Inspector: Sendable, Equatable { case showTab(String), scrub(property: String, value: Double,
          dragStart: Double), endScrub, toggleAnimated(String), toggleKey(String), setFill(hex: String),
-         setStrokeColor(hex: String), setStrokeWidth(Double), setStrokeCap(String), setStrokeJoin(String),
+         setStrokeColor(hex: String), setStrokeWidth(Double), scrubStrokeWidth(Double), setStrokeCap(String),
+         setStrokeJoin(String),
          setSceneSize(width: Double, height: Double), setSceneBackground(hex: String),
          setSceneTiming(fps: Int, durationFrames: Int), easingPreset(String), easingHandle(index: Int, x: Double,
          y: Double), endEasingHandle }

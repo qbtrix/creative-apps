@@ -1,0 +1,4 @@
+[
+  {"label": "savedIgnored: the listing's saved step is the kernel's default, which Photo never moves", "file": "Sources/PhotoModel/PhotoHistory+Kernel.swift", "find": "kernel.savedStepID = savedStepID ?? Self.neverSavedToken", "replace": "kernel.savedStepID = 0", "tests": "PhotoHistoryJumpTests"},
+  {"label": "neverSavedIsCurrent: a never-saved image lists its current step as saved", "file": "Sources/PhotoModel/PhotoHistory+Kernel.swift", "find": "savedStepID ?? Self.neverSavedToken", "replace": "savedStepID ?? currentStepID", "tests": "PhotoHistoryJumpTests"}
+]

@@ -2,8 +2,9 @@
 // CanvasViewport's overlay at the canvas zoom: the selection
 // (SelectionOverlay.swift), a pending crop (CropOverlay.swift), Free
 // Transform's box (TransformOverlay.swift) and the brush cursor at `hover`
-// (SuiteUI's BrushCursorMark, the brush's size; `photo.canvas.brush-cursor`),
-// in that order. SuiteUI's marks are hidden from
+// (SuiteUI's BrushCursorMark, the brush's size; `photo.canvas.brush-cursor`)
+// and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
+// that order. SuiteUI's marks are hidden from
 // accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
 // clear rectangle at the mark's frame that the journeys find by identifier,
 // an image and never a control, that never takes a click. `marks` lists the
@@ -30,6 +31,7 @@ struct PhotoCanvasOverlay: View {
                 BrushCursorMark(point: hover, diameter: diameter, zoom: zoom)
                 if let mark = brushCursor { mark.probe(zoom: zoom) }
             }
+            PhotoSampleLoupe(model: model, zoom: zoom, hover: hover)
         }
     }
 

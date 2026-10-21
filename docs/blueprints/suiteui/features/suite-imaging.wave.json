@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "canonical duplicates audit 2026-10-20, top-15 #2 (render route and live preview) and #3 (tone and adjustment settings); feature map suiteui/suite-imaging; real job RJ-X45; re-cuts tone-controls' Tone module into SuiteImaging",
-  "waits_on": "photo #3144 (PhotoLiveTone, open; IM-8 lifts its route); library spine (building: owns LiveDevelop, LiveLoupeImaging, DevelopValues); photo and library tone-controls hand-offs; shared-thumbnails ST-a (Package.swift) and adopt-kernel-eyedropper-photo EP-z (canonical-baseline.txt) before IM-8d, the small delete split out of the canvas swap",
+  "waits_on": "photo #3144 (PhotoLiveTone, open; IM-8 lifts its route); library spine (building: owns LiveDevelop, LiveLoupeImaging, DevelopValues); photo and library tone-controls hand-offs; shared-thumbnails ST-a (Package.swift) and adopt-kernel-eyedropper-photo EP-z (canonical-baseline.txt) before IM-8d, the small delete split out of the canvas swap; IM-15 (ImagingColor, the wide working space on core CoreColor profiles #441) added 2026-10-21 for the beta",
   "depends": [
     "suite-harness",
     "editor-kernel",
@@ -69,7 +69,10 @@
     "Sources/PhotoModel/PhotoLevelsFormat.swift",
     "Sources/PhotoModel/HueSaturation.swift",
     "Tests/mutations/LibraryModel.DevelopValues.json",
-    "docs/blueprints/suiteui/features/suite-imaging.wave.json"
+    "docs/blueprints/suiteui/features/suite-imaging.wave.json",
+    "Sources/SuiteImaging/Color/ImagingColor.swift",
+    "Tests/SuiteImagingTests/WideGamutTests.swift",
+    "Tests/mutations/SuiteImaging.ImagingColor.json"
   ],
   "slices": [
     {
@@ -103,11 +106,12 @@
     },
     {
       "id": "IM-m",
-      "behavior": "Adjustment values clamp and round-trip both apps' files, one ordered step list drives the CPU and GPU paths alike, and the live surface makes a slider step one display write with no readback.",
+      "behavior": "Adjustment values clamp and round-trip both apps' files, one ordered step list drives the CPU and GPU paths alike, pictures move into a wide working space and out to the display or a file only at the end, and the live surface makes a slider step one display write with no readback.",
       "tasks": [
         "IM-3",
         "IM-4",
-        "IM-5"
+        "IM-5",
+        "IM-15"
       ],
       "journeys": [
         "MJ-IM"
@@ -122,7 +126,11 @@
         "Tests/mutations/SuiteImaging.ImagingProgram.json",
         "Sources/SuiteImaging/Route/LiveToneSurface.swift",
         "Tests/SuiteImagingTests/LiveToneSurfaceTests.swift",
-        "Tests/mutations/SuiteImaging.LiveToneSurface.json"
+        "Tests/mutations/SuiteImaging.LiveToneSurface.json",
+        "Sources/SuiteImaging/Color/ImagingColor.swift",
+        "Tests/SuiteImagingTests/WideGamutTests.swift",
+        "Tests/mutations/SuiteImaging.ImagingColor.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json"
       ],
       "waits": {
         "IM-a": [

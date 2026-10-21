@@ -29,7 +29,7 @@ public struct LiveShapes: Sendable {
                       previous: ShapeDraft?) -> ShapeDraft? {
         guard start.isFinite, end.isFinite else { return nil }
         switch tool {
-        case .select, .directSelect: return nil
+        case .select, .directSelect, .shape: return nil
         case .pen: return pen(at: start, to: end, previous: previous)
         case .rectangle, .ellipse:
             var dx = end.x - start.x, dy = end.y - start.y
@@ -51,6 +51,7 @@ public struct LiveShapes: Sendable {
         let kind = switch draft.tool {
         case .rectangle: "Rectangle"; case .ellipse: "Ellipse"; case .pen: "Path"
         case .select, .directSelect: throw CommandError.invalidDocument("Select doesn't draw.")
+        case .shape: throw CommandError.invalidDocument(FlareTool.shapeHelp)
         }
         if draft.tool == .pen, !Self.spans(draft.anchors, Self.scaled(Self.anchorTolerance, draft.stageScale)) {
             throw CommandError.invalidDocument(Self.degeneratePath)
