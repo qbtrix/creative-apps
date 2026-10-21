@@ -51,7 +51,8 @@ import Testing
     @Test func aStrokedLayerShowsOneWidthAndOneRemove() throws {
         var model = DesignWorkspace()
         model.useServices(.fake)
-        #expect(model.openFixture("cards"))
+        let opened = model.openFixture("cards")
+        #expect(opened)
         model.selectItem("node-2")
         try model.setStyle(.stroke(.default))
         let store = SuiteControlStore()
