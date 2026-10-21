@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T07:01Z	merge	DY-u	#3816	merged 06:45Z as 6d7fcf14; scoped design run 39558386118 on b64cbb8c (queued) will show its screens for the critic panel; DY-a fixes #3887/#3889/#3891 clean, queued; DT-m not opened
 2026-10-21T07:23Z	check	critics	39558386118	scoped design run still queued (macOS runners busy), DY-u critics wait; #3887/#3889/#3891 clean, queued; DT-m not opened
 2026-10-21T07:45Z	check	critics	39558386118	scoped design run in progress, no screens yet; lane landing a batch now (dev at #3824 07:44Z); #3887/#3889/#3891 not yet merged; DT-m not opened
+2026-10-21T08:10Z	check	lane	#3887 #3889 #3891	DY-a fixes open in lane; scoped 39558386118 done (macOS red #3856, snapshots up); journeys 39564988409 queued, DY-u critics wait screens
