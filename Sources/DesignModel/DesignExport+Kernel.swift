@@ -4,8 +4,10 @@
 // export slot (LiveExport: the plan and the SVG text; `.fake` uses the same type,
 // since planning is pure), and the workspace readouts the sheet and the run read:
 // the ids a scope names, the plan, its help, the SVG of one item, and the
-// remembered options. The options hold a SuiteExportSize and list JPEG, which the plan
-// refuses until export-pack DX-3. Those options are not document state: remembering
+// remembered options. The options hold a SuiteExportSize; the plan sizes every still
+// file to its exact pixels through the kernel's ExportRules (vectors take a scale only),
+// and a format without alpha (JPEG) flattens onto the frame's fill, white with no frame.
+// Those options are not document state: remembering
 // them is never a history step and undo never touches them. Linux-safe.
 import SuiteKernel
 import SuiteModel
@@ -14,7 +16,7 @@ import SuiteModel
 public enum DesignExportScope: String, CaseIterable, Hashable, Sendable { case selection, frame, page }
 
 /// The run's payload: format, size (the suite's SuiteExportSize, `.scale(1)` by default) and scope.
-/// Until export-pack DX-3 the plan reads only a scale (1, 2, 3; PNG only): Pixels and Long edge plan at 1x.
+/// A scale is whole and clamped to 1...3 for PNG and JPEG; Pixels and Long edge are exact (`exportSized`).
 public struct DesignExportOptions: Hashable, Sendable {
     public var format: DesignExportFormat = .png
     public var size: SuiteExportSize = .scale(1)
@@ -40,9 +42,11 @@ public struct DesignExportOptions: Hashable, Sendable {
     }
 }
 
-/// Why JPEG can't export yet; nil for every other format.
-func exportJPEGRefusal(_ format: DesignExportFormat) -> DesignRefusal? {
-    format == .jpeg ? .notYet("JPEG lands with DX-3.") : nil
+extension DesignExportFormat {
+    /// The kernel's spec of this format: extension, alpha, still or vector.
+    var spec: ExportFormatSpec? { ExportFormats.spec(rawValue) }
+    /// The file extension the export writes: "jpg" for JPEG, else the raw value.
+    public var fileExtension: String { spec?.fileExtension ?? rawValue }
 }
 
 /// Design's export run is the kernel's; the sheet reads it, DesignExport+Kernel (App) drives it.
@@ -60,15 +64,14 @@ public struct LiveExport: ExportPlanning {
 
     /// The files for `ids` (every visible top-level frame when empty): hidden layers dropped,
     /// locked ones kept, names unique against `existing` and each other, pixels at whole points
-    /// times the scale (PNG: 1...3; SVG and PDF: 1). Nothing left: `.nothingToExport` for no
+    /// times the scale (PNG and JPEG: 1...3; SVG and PDF: 1). Nothing left: `.nothingToExport` for no
     /// ids, `.nothingSelected` for named ids that are all hidden or unknown.
     public func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
                      existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
-        if let refusal = exportJPEGRefusal(format) { throw refusal }
         let found = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : fakeFind(ids, page)
         let nodes = found.filter { !page.isHiddenInTree($0.id) }
         guard !nodes.isEmpty else { throw ids.isEmpty ? .nothingToExport : .nothingSelected }
-        let names = UniqueFileNames.names(nodes.map(\.name), extension: format.rawValue, among: existing)
+        let names = UniqueFileNames.names(nodes.map(\.name), extension: format.fileExtension, among: existing)
         return zip(nodes, names).map { node, name in
             exportItem(node.id, name, node.frame.width, node.frame.height, format, scale)
         }
@@ -80,19 +83,21 @@ public struct LiveExport: ExportPlanning {
     }
 }
 
-/// The pixel factor: the scale clamped to 1...3 for PNG, 1 for SVG and PDF (vector, in points).
+/// The pixel factor: the scale clamped to 1...3 for PNG and JPEG, 1 for SVG and PDF (vector, in points).
 func exportFactor(_ format: DesignExportFormat, _ scale: Int) -> Int {
-    format == .png ? Swift.min(Swift.max(scale, 1), 3) : 1
+    [.png, .jpeg].contains(format) ? Swift.min(Swift.max(scale, 1), 3) : 1
 }
+
+/// A side in whole points; a non-finite side counts as 0 rather than crash.
+func wholePixels(_ value: Double) -> Int { value.isFinite ? Int(Swift.max(Swift.min(value, 1e9), -1e9).rounded()) : 0 }
 
 /// One planned file: `fileName`, `width` × `height` points, and the pixels at whole points times
 /// the factor. A non-finite side counts as 0 pixels rather than crash.
 func exportItem(_ id: String, _ fileName: String, _ width: Double, _ height: Double,
                 _ format: DesignExportFormat, _ scale: Int) -> DesignExportItem {
     let k = exportFactor(format, scale)
-    func whole(_ value: Double) -> Int { value.isFinite ? Int(Swift.max(Swift.min(value, 1e9), -1e9).rounded()) : 0 }
     return DesignExportItem(nodeID: id, fileName: fileName, width: width, height: height,
-                            pixelWidth: whole(width) * k, pixelHeight: whole(height) * k)
+                            pixelWidth: wholePixels(width) * k, pixelHeight: wholePixels(height) * k)
 }
 
 extension DesignWorkspace {
@@ -119,20 +124,52 @@ extension DesignWorkspace {
         do { _ = try exportPlan(options, existing: []); return nil } catch { return error.help }
     }
 
-    /// The files one run writes, names unique against `existing` (the folder's listing). JPEG is
-    /// refused until DX-3. The page is one item the page's size; the other scopes go through the
+    /// The files one run writes, names unique against `existing` (the folder's listing), each sized
+    /// by `exportSized`. The page is one item the page's size; the other scopes go through the
     /// export slot's plan.
     public func exportPlan(_ options: DesignExportOptions, existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
         guard let page = selectedPage else { throw .nothingToExport }
-        if let refusal = exportJPEGRefusal(options.format) { throw refusal }
         if options.scope == .page {
-            let name = UniqueFileNames.name(page.name, extension: options.format.rawValue, among: existing)
-            return [exportItem(page.id, name, page.frameWidth, page.frameHeight, options.format, options.scale)]
+            let name = UniqueFileNames.name(page.name, extension: options.format.fileExtension, among: existing)
+            return [try exportSized(exportItem(page.id, name, page.frameWidth, page.frameHeight, options.format, options.scale), options, page)]
         }
         let ids = exportTargetIDs(options.scope)
         // An empty selection is its own refusal; the slot reads empty ids as "every top-level frame".
         if options.scope == .selection, ids.isEmpty { throw .nothingSelected }
-        return try services.export.plan(ids, on: page, format: options.format, scale: options.scale, existing: existing)
+        let plan = try services.export.plan(ids, on: page, format: options.format, scale: options.scale, existing: existing)
+        var sized: [DesignExportItem] = []
+        for item in plan { sized.append(try exportSized(item, options, page)) }
+        return sized
+    }
+
+    /// `item` at its exact pixels for `options.size`, through the kernel's ExportRules: a scale is
+    /// whole and clamped (`exportFactor`), Pixels and Long edge exact, never a scale on top. SVG and
+    /// PDF take a scale only (in points). A format without alpha flattens onto `exportBackground`.
+    func exportSized(_ item: DesignExportItem, _ options: DesignExportOptions,
+                     _ page: DesignPage) throws(DesignRefusal) -> DesignExportItem {
+        guard let spec = options.format.spec, spec.kind == .still else {
+            if case .scale = options.size { return item }
+            throw .cantExport("SVG and PDF are vectors, so they export at their size in points. Choose a scale.")
+        }
+        let size: SuiteExportSize
+        if case .scale = options.size { size = .scale(Double(exportFactor(options.format, options.scale))) } else { size = options.size }
+        let source = (width: wholePixels(item.width), height: wholePixels(item.height))
+        let kernel = SuiteExportOptions(format: spec.id, size: size, alpha: spec.keepsAlpha)
+        if let why = ExportRules.refusal(kernel, source: source, formats: ExportFormats.all) { throw .cantExport(why) }
+        guard let pixels = try? ExportRules.pixels(of: source, size, evenSize: spec.needsEvenSize) else { return item }
+        var sized = item
+        (sized.pixelWidth, sized.pixelHeight) = pixels
+        sized.background = spec.keepsAlpha ? nil : exportBackground(item.nodeID, page)
+        return sized
+    }
+
+    /// The color an item flattens onto: the fill of the frame it is or sits in (its outermost
+    /// ancestor), white when that is no frame, has a gradient, or the item is the page.
+    func exportBackground(_ id: String, _ page: DesignPage) -> DesignColor {
+        let top = page.nodes.ancestors(of: id)?.first ?? id
+        let frame = [id, top].lazy.compactMap { page.nodes.node($0) }.first { $0.kind == .frame }
+        guard let frame, frame.gradient == nil else { return .white }
+        return frame.fill
     }
 
     /// The SVG document of one planned item (a layer, or the page when `item.nodeID` is the page's id).
