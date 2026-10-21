@@ -177,7 +177,7 @@ struct FlareStage: View {
         return .handled
     }
 
-    /// The palette: V A R E P, each with its reason when it can't act, then Finish Path. Return finishes a pen
+    /// The palette: V A R E P U, each with its reason when it can't act, then Finish Path. Return finishes a pen
     /// path too, but a mouse-only user needs a control on screen (lead.md rule 8, 9).
     private var palette: [ToolbarAction] {
         let tools = FlareTool.allCases.map { tool in
