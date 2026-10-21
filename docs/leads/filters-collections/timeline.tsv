@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-21T04:41Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
 2026-10-21T05:00Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
 2026-10-21T05:20Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:40Z	3 build W1	check	#3681	PG-1 #3681 merged 05:28Z; PG-a still needs PG-2 (no PR yet), not slice-done; no PL-2 PR; no TC-a PR; no builders started
