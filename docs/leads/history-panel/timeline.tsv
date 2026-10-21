@@ -50,3 +50,5 @@ utc	stage	event	ref	note
 2026-10-21T07:56Z	3	heartbeat	W3z	Prior batch merged (dev 260f7a8, #3827); dev Linux check in progress. Batch 20261021075104 carries #3830 (PT-2) and #3831 (PT-4). #3818 and #3932 open, clean, wait next batch
 2026-10-21T08:18Z	3	heartbeat	W4a	#3830 (PT-2) and #3831 (PT-4) merged (dev 2fe9e74, cfc1a3a). Opening PT-5 and PT-3m via agents. #3818 (PH-4) in batch 20261021081552; #3932 (PE-4) waits. Dev Linux check on 260f7a8 in progress
 2026-10-21T08:40Z	3	heartbeat	W4b	#3818 (PH-4) and #3932 (PE-4) merged. Opened #3968 (PT-3m) and #3969 (PT-5), fast-lane, CI: PASS. Dev Linux check on 733e8ef (has #3830/#3831) in progress; 260f7a8 green but predates our merges. PT-3 waits #3968, PH-5 waits #3969
+2026-10-21T09:02Z	3	slice-done	PH-u	Belt-Slice-Done + Mac-Finish-Wanted PH-u on #3437 (dev Linux check 39571804700 green on d93267d, contains #3762 #3818)
+2026-10-21T09:02Z	3	heartbeat	W4c	#3968 (PT-3m) and #3969 (PT-5) open, clean, fast-lane; not in a batch yet
