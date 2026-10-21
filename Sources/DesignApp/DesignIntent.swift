@@ -130,8 +130,14 @@ extension DesignTool: PaletteTool {
 }
 
 extension DesignColor {
-    /// The color as SwiftUI draws it, through SuiteUI's hex bridge.
-    var color: Color { HexColor(red, green, blue).color }
+    /// Design's one bridge to SuiteUI's HexColor: the same 8-bit sRGB channels.
+    init(hex: HexColor) { self.init(hex.red, hex.green, hex.blue) }
+
+    /// The color as SuiteUI's color rows and parser speak it.
+    var hex: HexColor { HexColor(red, green, blue) }
+
+    /// The color as SwiftUI draws it, through the hex bridge.
+    var color: Color { hex.color }
 }
 
 extension DesignModifiers {

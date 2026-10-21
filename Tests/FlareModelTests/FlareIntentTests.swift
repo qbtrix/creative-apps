@@ -21,9 +21,9 @@ struct FlareIntentTests {
     }
 
     @Test func examplesListEveryCase() {
-        // The contract slices' case count: 9 file, 11 edit, 3 stage, 2 tools, 13 view, 17 inspector,
+        // The contract slices' case count: 9 file, 11 edit, 3 stage, 2 tools, 13 view, 18 inspector,
         // 18 timeline, 8 layers, 9 library, 1 interactions, 11 export (flare-export FX-1), 1 assist.
-        #expect(FlareIntent.examples.count == 103)
+        #expect(FlareIntent.examples.count == 104)
     }
 
     @Test func exportFormatChipsRegisterApart() {
