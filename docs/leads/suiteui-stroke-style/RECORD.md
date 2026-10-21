@@ -69,3 +69,5 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 2026-10-21T15:25Z: #3826 is held by a red Linux check on head 21226b0 (run 39614527290). The only failure is LibraryFoldersTests.tenThousandPaths, a timing budget (32.2 against 20) outside this PR. The rerun returned 403. I commented on the PR asking the supervisor for one re-run.
 
 - 16:38Z: heartbeat. Unchanged: waiting on upstream slices (see above); no open findings.
+
+- 16:58Z: heartbeat. #3826 (SS-9) is open with fast-lane and waits on the supervisor to re-run CI past the Library timing failure. SS-8 and SS-10 wait on SH-z, GF-z and AH-z.
