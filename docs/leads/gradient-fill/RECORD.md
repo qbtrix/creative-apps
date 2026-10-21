@@ -45,3 +45,4 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - FG-5 also waits on GF-6 and adopt-command-catalog's AC-flare (Belt-Slice-Done on #2999's feature issue).
 - 2026-10-20T05:32Z: asked the supervisor on #3419 to re-dispatch #3421's queued macOS build or add a Mac-Check.
 - 2026-10-21T08:17Z: #3959 (FG-a) at the lane's macOS gate; FG-3 waits on GF-3 #3760, FG-5 on GF-6 #3742, KS-a #3921, AC-flare.
+- 2026-10-21T08:38Z: GF-3 #3760 merged 08:33Z: builder launched for FG-u (FG-3 snapshots + stopDragInThreeBodies), stacked on #3959, checking switch/Type-row duplicate. #3959 still at macOS gate. FG-m waits on KS-a #3921, GF-6 #3742, AC-flare.
