@@ -19,7 +19,32 @@ private struct ShapeDoc: HeadlessDocument {
     func export(_ format: String, options: JSONValue) throws -> [ExportedFile] { [ExportedFile(suggestedName: "a.json", format: format, data: try save())] }
     func summary() -> JSONValue { .object(["value": .number(value)]) }
 }
+/// A document Copy As, Paste as Image and Copy Frame act on: a selection flag and the last pasted file's name.
+private struct ClipDoc: CopyAsTarget, CopyFrameTarget {
+    var selected = true, pasted: String?
+    var copyAsHelp: String? { selected ? nil : "Select something to copy." }
+    var pasteAsImageHelp: String? { nil }
+    var copyFrameHelp: String? { nil }
+    func copyAs(_ format: CopyAsFormat) throws -> CopiedBytes {
+        CopiedBytes(type: format == .png ? "public.png" : format == .svg ? "public.svg-image" : "app.layers", data: Data([1, 2]))
+    }
+    mutating func pasteAsImage(name: String, data: Data) throws { pasted = name }
+    func copyFrame() throws -> Data { Data([3]) }
+}
 @Suite struct CommandShapeTests {
+    /// clipboard-interop CB-1: Copy As (`{format: png | svg | own}`), Paste as Image and Copy Frame are specs with
+    /// closed schemas whose examples validate, the right kinds, and the target's help as their availability.
+    @Test func copyAsSpecsHaveSchemasAndKinds() throws {
+        let specs = CopyAsCommands.specs(ClipDoc.self), frame = CopyAsCommands.frameSpecs(ClipDoc.self)
+        #expect(specs.map(\.id) == ["edit.copy-as", "edit.paste-as-image"] && frame.map(\.id) == ["edit.copy-frame"])
+        #expect(specs.map(\.kind) == [.query, .edit] && frame.map(\.kind) == [.query])
+        for spec in specs + frame { #expect(spec.params.validate(spec.example).isEmpty, "\(spec.id)'s example doesn't validate") }
+        let copyAs = try #require(specs.first)
+        #expect(!copyAs.params.validate(.object(["format": .string("gif")])).isEmpty)
+        #expect(copyAs.availability(ClipDoc(selected: false)).why == "Select something to copy.")
+        #expect(CopyAsFormat.allCases.map(\.rawValue) == ["png", "svg", "own"])
+    }
+
     /// CJ0: every public type and method exists, and the stubs answer without trapping.
     @Test func everySignatureExists() throws {
         let catalog = ShapeDoc.catalog, spec = try #require(catalog.spec("value.bump")), described = try #require(catalog.describe("value.bump"))
@@ -66,7 +91,7 @@ private struct ShapeDoc: HeadlessDocument {
     @Test func publicTypesDocumented() throws {
         let root = KernelShapeTests.kernelSources, files = try KernelShapeTests.swiftFiles(under: root).filter { $0.hasPrefix("Commands/") }
         let typeLine = try Regex(#"^\s*public (struct|enum|protocol) "#)
-        #expect(files.count == 8)
+        #expect(files.count == 9)
         for file in files {
             let lines = try String(contentsOf: root.appendingPathComponent(file), encoding: .utf8).split(separator: "\n", omittingEmptySubsequences: false)
             for (i, line) in lines.enumerated() where line.contains(typeLine) && !(i > 0 && lines[i - 1].contains("///")) {
