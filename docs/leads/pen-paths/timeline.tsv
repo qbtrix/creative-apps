@@ -100,3 +100,7 @@ utc	stage	event	ref	note
 2026-10-20T22:21Z	poll	poll: #3738 PN-5 mac build 39494583818 queued; #3770 PN-3a mac build 39504469916 dispatched; no conflicts with dev ba57546c
 2026-10-20T22:33Z	poll	poll: mac builds still queued (#3738 39494583818 since 20:44Z, #3770 39504469916 since 21:57Z); no conflicts with dev 52606a3e; perf list lacks AnchorBudgetTests and RenderBudgetPenPathsTests (asked on #3518)
 2026-10-20T22:46Z	poll	poll: mac builds 39494583818 (#3738) and 39504469916 (#3770) still queued, no runner; asked the supervisor on #3518 (comment 6303447772) to check or re-dispatch
+2026-10-21T18:06Z	3	stage-start	-	relaunch run act-1a15f92d30e-mfnc from dev aaa43f91
+2026-10-21T18:06Z	3	push	#3770	dev merged in, head 92162512, Fast-Check pass
+2026-10-21T18:06Z	3	push	PN-3	PN-3a merged into lead/pen-paths-PN-3 and on into PN-4
+2026-10-21T18:06Z	3	wave-start	5	PN-7 on dev
