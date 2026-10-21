@@ -41,9 +41,8 @@ import Testing
         return model
     }
 
-    /// The stroke editor's rows (`suite.stroke.<row>`, no trim in Design) and the inspector's Remove Stroke.
-    static let strokeRows = ["color", "width", "join", "cap", "dash"].map { "suite.stroke.\($0)" }
-        + [DesignControlID.inspectorStrokeRemove]
+    /// The stroke editor's rows (`suite.stroke.<row>`, no trim in Design), Remove Stroke last.
+    static let strokeRows = ["color", "width", "join", "cap", "dash", "remove"].map { "suite.stroke.\($0)" }
 
     @Test func pageAndLayer() throws {
         var model = DesignWorkspace()
