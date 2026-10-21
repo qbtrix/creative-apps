@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the menu item opens with no window",
+    "file": "Sources/LibraryModel/LibraryBackupMenuState.swift",
+    "find": "hasWindow ? restoreWhy : \"Open the Library window first.\"",
+    "replace": "restoreWhy",
+    "tests": "LibraryBackupMenuStateTests"
+  },
+  {
+    "label": "restore runs with no backup chosen",
+    "file": "Sources/LibraryModel/LibraryBackupMenuState.swift",
+    "find": "return selected == nil ? \"Choose a backup to restore.\" : nil",
+    "replace": "return nil",
+    "tests": "LibraryBackupMenuStateTests"
+  },
+  {
+    "label": "restore ignores the command's reason",
+    "file": "Sources/LibraryModel/LibraryBackupMenuState.swift",
+    "find": "if let restoreWhy { return restoreWhy }",
+    "replace": "",
+    "tests": "LibraryBackupMenuStateTests"
+  }
+]
