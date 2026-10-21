@@ -4,7 +4,7 @@ Issue: #3789 · Packet: docs/blueprints/library/features/share-sheet.md
 Run: act-1a15b98bc49-4lk9 · Session: claude/task-k1zaw1 · Started: 2026-10-20T23:00Z
 Stage: 3 wave 2 (SH-a #3809 and SH-u #3814 shipped; #3814 stacked on share-sheet/sh-a, retarget to dev once #3809 merges)
 Base: 2cc149f57 (origin/dev)
-Next: watch #3809 merge, retarget #3814 to dev and move its Head:; SH-m waits on file-flow LF-m and catalog-backup BK-m; then SH-z
+Next: #3809 rebased onto dev at b63c2756 (2026-10-21T00:33:59Z), waiting on its lane batch; then retarget #3814 to dev and move its Head:; SH-m waits on file-flow LF-m and catalog-backup BK-m; then SH-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
