@@ -109,7 +109,7 @@ private struct ClipDoc: CopyAsTarget, CopyFrameTarget {
     @Test func publicTypesDocumented() throws {
         let root = KernelShapeTests.kernelSources, files = try KernelShapeTests.swiftFiles(under: root).filter { $0.hasPrefix("Commands/") }
         let typeLine = try Regex(#"^\s*public (struct|enum|protocol) "#)
-        #expect(files.count == 9)
+        #expect(files.count == 10)
         for file in files {
             let lines = try String(contentsOf: root.appendingPathComponent(file), encoding: .utf8).split(separator: "\n", omittingEmptySubsequences: false)
             for (i, line) in lines.enumerated() where line.contains(typeLine) && !(i > 0 && lines[i - 1].contains("///")) {

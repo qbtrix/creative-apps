@@ -74,6 +74,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "file.recent", "file.open-recent", "file.drop": .some(nil)
         case "file.clear-recent": .some("No Recent Files")
         case "file.open-in": .some(c.openInHelp)
+        case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
     }
@@ -182,5 +183,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "metadata.clear-flag | Clear Flag | on", "metadata.set-label | Set Label | on", "metadata.auto-advance | Auto Advance | on",
         "file.recent | Recent Files | on", "file.open-recent | Open Recent | on", "file.clear-recent | Clear Menu | No Recent Files",
         "file.open-in | Open In | Open a photo in the loupe first.", "file.drop | Drop Files | on",
+        "folders.list | List Folders | Import a folder to see its folders.",
+        "view.show-folder | Show Folder | Import a folder to see its folders.",
     ]
 }
