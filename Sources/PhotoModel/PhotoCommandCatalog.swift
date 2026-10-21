@@ -91,7 +91,8 @@ extension PhotoWorkspace {
 
     /// One command per menu item, toolbar item and palette tool, in menu order.
     public static let commands: [CommandSpec<PhotoWorkspace>] = fileCommands + editCommands + imageCommands + layerCommands
-        + FileFlowCommands.specs(PhotoWorkspace.self) + viewCommands + PhotoTool.allCases.map { tool in
+        + FileFlowCommands.specs(PhotoWorkspace.self) + PlaceCommands.specs(PhotoWorkspace.self) + viewCommands + transformCommands
+        + PhotoTool.allCases.map { tool in
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
@@ -222,6 +223,17 @@ extension PhotoWorkspace {
     ]
     static let upHelp: @Sendable (PhotoWorkspace) -> String? = { $0.selectedLayer == nil ? noLayer : $0.canBringSelectedLayerForward ? nil : atTop }
     static let downHelp: @Sendable (PhotoWorkspace) -> String? = { $0.selectedLayer == nil ? noLayer : $0.canSendSelectedLayerBackward ? nil : atBottom }
+
+    /// The kernel's six transform.* commands, then Free Transform's begin, commit and cancel (transform PT-5).
+    static let transformCommands: [CommandSpec<PhotoWorkspace>] = TransformCommands.specs(PhotoWorkspace.self) + [
+        act("transform.begin", "Free Transform", "Starts Free Transform on the selected pixel layer.", .view,
+            gate { $0.transformHelp }) { try $0.beginTransform() },
+        act("transform.commit", "Free Transform", "Resamples the layer into its transformed box as one step.", .edit,
+            gate(draftHelp)) { try $0.commitTransform() },
+        act("transform.cancel", "Cancel Free Transform", "Drops Free Transform's box, changing no pixels.", .view,
+            gate(draftHelp)) { $0.cancelTransform() },
+    ]
+    static let draftHelp: @Sendable (PhotoWorkspace) -> String? = { $0.transformDraft == nil ? "Start Free Transform first." : nil }
 
     /// Zoom lives in the window; headless, these check availability and change nothing.
     static let viewCommands: [CommandSpec<PhotoWorkspace>] = [
