@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-21T09:02Z	3	slice-done	PH-u	Belt-Slice-Done + Mac-Finish-Wanted PH-u on #3437 (dev Linux check 39571804700 green on d93267d, contains #3762 #3818)
 2026-10-21T09:02Z	3	heartbeat	W4c	#3968 (PT-3m) and #3969 (PT-5) open, clean, fast-lane; not in a batch yet
 2026-10-21T09:26Z	3	heartbeat	W4d	#3968 (PT-3m) and #3969 (PT-5) open with fast-lane, not yet batched; dev-red #3856 is Design mutation anchors (DesignCanvasEditing), not ours; lane batch 20261021084621 bisecting
+2026-10-21T09:48Z	3	heartbeat	W4e	#3969 (PT-5) needs-rebase (photo.list-commands.json, PhotoCommandCatalogTests): fixer launched; #3968 (PT-3m) clean, waiting on lane; scoped photo run 39579629627 queued on ce2467a (has #3818, #3932) for PH-u/PE-u critics; dev-red #3856 not ours
