@@ -51,3 +51,5 @@ Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs
 - 2026-10-21T18:42Z: Belt watched lead/file-flow, which holds #3480's record. Asked the supervisor on #3479 (comment 6323753120) which branch to watch. LF-4 still waits on #3928 (open).
 
 - 2026-10-21T19:07Z: Watch: LF-4 is still blocked on #3928 (ThumbnailGrid per-cell drag hook, open). Waiting on the supervisor's answer on #3479 about which branch Belt watches.
+
+- 2026-10-21T20:08Z: Watch: LF-4 still blocked on #3928 (open). No supervisor reply on #3479 yet.
