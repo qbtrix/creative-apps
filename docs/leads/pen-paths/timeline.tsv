@@ -106,3 +106,4 @@ utc	stage	event	ref	note
 2026-10-21T18:06Z	3	wave-start	5	PN-7 on dev
 2026-10-21T18:45Z	3	pr	PN-7	#4153 opened (head 76b697d2, PathCommandsTests 10/10, Mutate 6/6, ci --changed PASS)
 2026-10-21T18:45Z	3	poll	#3770	macOS build 39651057624 dispatched 18:15Z
+2026-10-21T19:02Z	3	heartbeat	-	No merges: #3770 macOS 39651057624 and #4153 macOS 39657806824 queued; PN-9 still blocked (#3477 waiting-on-prereq)
