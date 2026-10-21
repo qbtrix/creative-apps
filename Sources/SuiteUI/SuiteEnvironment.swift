@@ -86,11 +86,16 @@ extension View {
 
 extension ToolbarAction {
     /// The action's `suite.controls` entry: disabled with its tooltip as the
-    /// reason while unavailable; nil without an identifier.
+    /// reason while unavailable, a toggle's state as `selected`; nil without an identifier.
     public func controlEntry(role: String? = nil) -> ControlEntry? {
         guard let identifier else { return nil }
         return ControlEntry(id: identifier, enabled: isEnabled, reason: isEnabled ? nil : help, role: role)
+            .selecting(toggleState)
     }
+
+    /// A toggle's `selected`: on only while it is on and able to act (a disabled
+    /// toggle draws off); nil for a plain action.
+    var toggleState: Bool? { isToggle ? isSelected && isEnabled : nil }
 }
 
 private struct SuiteControlModifier: ViewModifier {
