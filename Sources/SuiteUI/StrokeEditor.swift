@@ -5,9 +5,10 @@
 // (ChoiceChips on the rows' edges, each option explained in the row's tooltip), Dash
 // (ChoiceChips of the presets, and for Custom a Dash and a Gap row), Trim Start and End (0...100 %) and Offset
 // (−360...360 °), unless `showsTrim` is false, then Remove Stroke; with no stroke, Add Stroke alone. A scrub or a
-// run of colour picks shares one drag token until its end, so the host folds it into one undo step. A row that can't
-// act is disabled with its reason as its help: `help` for every row, "No stroke." without one, and `dashHelp` for the
-// dash and trim rows (StrokeRules.waitingCore until SS-7), also shown as a note under them. Identifiers are
+// run of colour picks shares one drag token until its end, which `onEnd` reports, so the host folds it into one undo
+// step. A row that can't act is disabled with its reason as its help: `help` for every row, "No stroke." without
+// one, and `dashHelp` for the dash and trim rows (StrokeRules.waitingCore until SS-7), also shown as a note under
+// them. Identifiers are
 // `suite.stroke.<row>` (StrokeEditorRow), with `join.<join>`, `cap.<cap>` and `dash.<preset>` on the chips. The
 // decisions live in StrokeEditorRules, which StrokeEditorTests drive; the view only lays the rows out.
 import Foundation
@@ -18,14 +19,17 @@ public struct StrokeEditor: View {
     private let rules: StrokeEditorRules
     /// Called once per gesture sample with its intent.
     private let onIntent: @MainActor (StrokeIntent) -> Void
+    /// Called when a scrub or a run of colour picks ends, so the host lands it as one step.
+    private let onEnd: @MainActor () -> Void
     /// The open gesture's drag token; nil between gestures.
     @State private var drag: String?
 
     /// `showsTrim: false` hides the trim rows (Design); `dashHelp` disables the dash and trim rows with it.
     public init(stroke: VectorStroke?, help: String?, dashHelp: String?, showsTrim: Bool = true,
-                onIntent: @escaping @MainActor (StrokeIntent) -> Void) {
+                onEnd: @escaping @MainActor () -> Void = {}, onIntent: @escaping @MainActor (StrokeIntent) -> Void) {
         rules = StrokeEditorRules(stroke: stroke, help: help, dashHelp: dashHelp, showsTrim: showsTrim)
         self.onIntent = onIntent
+        self.onEnd = onEnd
     }
 
     public var body: some View {
@@ -114,7 +118,10 @@ public struct StrokeEditor: View {
 
     private func send(_ intent: StrokeIntent?) { if let intent { onIntent(intent) } }
 
-    private func end() { if drag != nil { drag = nil } }
+    private func end() {
+        if drag != nil { drag = nil }
+        onEnd()
+    }
 }
 
 private extension View {
