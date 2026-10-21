@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T18:15Z	3	poll	#4034	shell-media pushed 34a1f20f0 (clean, needs-rebase pending lane drop); #4135 waits
 2026-10-21T18:31Z	3	poll	#4034	needs-rebase dropped, clean, awaiting lane; #4135 waits
 2026-10-21T18:45Z	3	wave B	ST-m, ST-live(ST-4)	builders started, stacked on ST-a; #4034 still waits on lane
+2026-10-21T18:48Z	3	poll	#4034	unchanged; ST-m and ST-live builders running
