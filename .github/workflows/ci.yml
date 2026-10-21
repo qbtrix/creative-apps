@@ -208,6 +208,22 @@ jobs:
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
       - run: sudo xcode-select -s /Applications/Xcode_26.6.app
       - run: swift --version
+      # The reference Lottie player LottiePlayerParityTests compares against
+      # (scripts/lottie-oracle). The suite skips without it. build is a no-op
+      # while VERSION and render.c match its stamp, so a cache hit needs no
+      # meson or ninja.
+      - name: Cache the Lottie oracle
+        id: lottie-oracle
+        uses: actions/cache@v4
+        with:
+          path: .build/lottie-oracle
+          key: lottie-oracle-${{ runner.os }}-${{ hashFiles('scripts/lottie-oracle/VERSION', 'scripts/lottie-oracle/render.c') }}
+      - name: Build the Lottie oracle
+        run: |
+          if [ "${{ steps.lottie-oracle.outputs.cache-hit }}" != true ]; then
+            brew install meson ninja
+          fi
+          scripts/lottie-oracle/build
       # scripts/ci with a memory sample every 20 s into memory.log: the time,
       # vm_stat's page counts, the system-wide free percentage and the five
       # largest processes by resident memory. The Crash reports step prints
