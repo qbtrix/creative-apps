@@ -28,6 +28,8 @@ enum DesignIntent {
     case setFill(String, DesignColor)
     /// A Fill section gesture (type switch, stop, angle), run as its kernel fill command (`runFill`).
     case fill(GradientIntent)
+    /// A turn or flip from the inspector or the Object menu, run as its kernel command (`runTransform`).
+    case transform(TransformIntent)
     case align(DesignAlignEdge)
     case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)

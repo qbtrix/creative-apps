@@ -54,6 +54,11 @@ struct RenderStep: CustomStringConvertible {
     }
 }
 
+/// The harness's borderless window, allowed to be key so a test's key presses reach it.
+private final class KeyCapableWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+}
+
 /// An app's real window hosted off screen, driven by scripted events.
 @MainActor final class RenderBudgetWindow<Content: View> {
     let host: CountingHostingView<Content>
@@ -61,7 +66,10 @@ struct RenderStep: CustomStringConvertible {
     /// Wall milliseconds of each step in the interaction being measured.
     private var stepTimes: [Double] = []
 
-    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820)) {
+    /// `keyCapable` builds a window that may become key, for a test that sends keys. Never isa-swizzle the window
+    /// instead: it is KVO-observed from the start, and a swapped class makes its dealloc throw (NSRangeException
+    /// on "_windowLayerContext") in whichever test is running when it is freed.
+    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820), keyCapable: Bool = false) {
         _ = DragSessions.faked
         _ = TestDefaults.registered
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
@@ -72,7 +80,8 @@ struct RenderStep: CustomStringConvertible {
         host = CountingHostingView(rootView: view)
         let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
-        window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        let kind = keyCapable ? KeyCapableWindow.self : NSWindow.self
+        window = kind.init(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.contentView = host
         window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
