@@ -4,8 +4,8 @@
 // enablement and reason and runs its action, over every fake catalog id on an
 // empty document and the fixture, so the panel can't drift from the menu. The fx button waits
 // for shared layer styles, disabled with its reason. LayerTreeList gives each
-// row the context menu its app builds for that row's id, and none without
-// one. The bar draws. macOS only.
+// row the context menu its app builds for that row's id, single or
+// multi-select, and none without one. The bar draws. macOS only.
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
@@ -60,6 +60,11 @@ import Testing
         #expect(list.contextMenu(for: "nosuch") == nil)
         #expect(asked == [first.id, "nosuch"])
         #expect(LayerTreeList(rows: rows, childCount: { _ in 0 }, onAction: { _ in }).contextMenu(for: first.id) == nil)
+        // A multi-select list carries the same menu.
+        let picking = LayerTreeList(rows: rows, childCount: { _ in 0 }, selected: [first.id], onPick: { _, _ in },
+                                    contextActions: { _ in [ToolbarAction("Delete Layer", systemImage: "trash")] },
+                                    onAction: { _ in })
+        #expect(picking.contextMenu(for: first.id)?.map(\.title) == ["Delete Layer"])
     }
 
     @Test func barDraws() throws {
