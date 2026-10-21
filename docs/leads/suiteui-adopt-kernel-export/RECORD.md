@@ -3,21 +3,22 @@
 Issue: #1939 · Packet: docs/blueprints/suiteui/features/adopt-kernel-export.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: 3 wave 1
-Base: dev b64cbb8c
+Base: dev 733e8ef2
 Next: lane merges #3890 #3893; then Belt-Slice-Done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AX-flare | Flare export runs through the kernel's ExportRun; app-local copy deleted | AX-f1 (#2948), AX-f2 (dropped: nothing to delete) | Model tests | editor-kernel:EK-run | no | 0 | done | 39166290773 | – |
-| AX-photo | Photo export through ExportRun | AX-p1, AX-p2 | Model tests | editor-kernel:EK-run, adopt-kernel-layers:AL-photo | no | 0 | in-lane #3890 (mac green) | – | – |
-| AX-library | Library export through ExportRun | AX-l1, AX-l2 | Model tests | editor-kernel:EK-run, adopt-kernel-selection:AS-library | no | 0 | in-lane #3893 (mac green) | – | – |
+| AX-photo | Photo export through ExportRun | AX-p1, AX-p2 | Model tests | editor-kernel:EK-run, adopt-kernel-layers:AL-photo | no | 0 | in-lane #3890 | – | – |
+| AX-library | Library export through ExportRun | AX-l1, AX-l2 | Model tests | editor-kernel:EK-run, adopt-kernel-selection:AS-library | no | 0 | in-lane #3893 | – | – |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T08:21Z: wait on lane
 - 2026-10-21T07:59Z: lane batching older PRs first
 - 2026-10-21T07:37Z: wait on lane
 - 2026-10-21T07:14Z: wait on lane
