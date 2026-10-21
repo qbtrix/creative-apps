@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: wave-3 in lane
+Stage: wave-3 merged; awaiting scoped photo run
 Base: dev
-Next: PT-6 #4131, PT-7 #4127, PT-8 #4133 macOS builds green; wait for batch (lane/batch-20261021180708 bisecting); then scoped photo run, critics, Belt-Slice-Done PT-m/PT-z
+Next: wait for a scoped photo (or full) ci.yml run on dev containing 6d5f3a402 (macOS queue backed up; scoped photo 39649396336 at aaa43f918 still queued); then critics with clarity lens + Belt-Slice-Done PT-m, PT-z
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
@@ -24,9 +24,9 @@ Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transfor
 | PT-3 | PT-u | 2 | Image > Canvas Size… sheet | Sources/PhotoApp/CanvasSizeSheet.swift, Sources/PhotoApp/PhotoCommands+Image.swift, Sources/PhotoApp/PhotoWindow+Transform.swift, Tests/AppSnapshotTests/PhotoCanvasSizeSheetTests.swift | PhotoCanvasSizeSheetTests | #4005 | merged |
 | PT-4 | PT-m | 2 | applied/flipped on CoreRaster; TransformRules.local and matrix | Sources/PhotoModel/Live/LiveTransform+Kernel.swift, Tests/PhotoModelTests/LiveTransformTests.swift, Tests/mutations/PhotoModel.LiveTransform+Kernel.json | LiveTransformTests; .turn90Size .flipHorizontal | – | planned |
 | PT-5 | PT-m | 3 | adapter bodies, catalog specs, tests on, RJ-P17 | Sources/PhotoModel/PhotoTransform+Kernel.swift, Tests/PhotoModelTests/PhotoTransformTests.swift, Tests/mutations/PhotoModel.PhotoTransform+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/free-transform/ | PhotoTransformTests; .flipInPlace .identityCommitsNothing .lockedRefuses | #3969 | merged 15:52Z |
-| PT-6 | PT-m | 4 | resizeCanvas and image.canvas-size, RJ-P18 | Sources/PhotoModel/PhotoImageOps.swift, Tests/PhotoModelTests/PhotoCanvasSizeTests.swift, Tests/mutations/PhotoModel.PhotoImageOps.json, Tests/RealJobs/photo/canvas-border/ | PhotoCanvasSizeTests; .canvasSizeCentred .borderIsBackground | #4131 | lane |
-| PT-7 | PT-u | 3 | snapshots + render budget | Tests/AppSnapshotTests/PhotoTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoTransformTests.swift | snapshots | #4127 | lane |
-| PT-8 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Transform.swift | journey | #4133 | lane |
+| PT-6 | PT-m | 4 | resizeCanvas and image.canvas-size, RJ-P18 | Sources/PhotoModel/PhotoImageOps.swift, Tests/PhotoModelTests/PhotoCanvasSizeTests.swift, Tests/mutations/PhotoModel.PhotoImageOps.json, Tests/RealJobs/photo/canvas-border/ | PhotoCanvasSizeTests; .canvasSizeCentred .borderIsBackground | #4131 | merged |
+| PT-7 | PT-u | 3 | snapshots + render budget | Tests/AppSnapshotTests/PhotoTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoTransformTests.swift | snapshots | #4127 | merged |
+| PT-8 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Transform.swift | journey | #4133 | merged |
 | PT-9 | PT-z | 6 | status built, feature-done | docs/blueprints/photo/features/transform.wave.json | scripts/ci | #4136 | merged |
 
 ## Waves (combined plan, all three features)

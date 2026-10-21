@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-21T18:04Z	18:04Z	merged	#4136 PT-9 merged; needs-rebase dropped on #4131
 2026-10-21T18:26Z	18:26Z	lane	#4127 #4133 macOS build success; #4131 build queued
 2026-10-21T18:43Z	2026-10-21T18:43Z Belt nudge answered: all three PRs mac-built, waiting for the next batch
+2026-10-21T19:10Z	2026-10-21T19:11Z PT-6 #4131 (e73823a37), PT-7 #4127 (dc8f2de75), PT-8 #4133 (6d5f3a402) merged; supervisor: keep records on lead/photo-transform and lead/place-image
