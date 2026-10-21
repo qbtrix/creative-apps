@@ -10,7 +10,8 @@
 // them to the workspace as they come, at most twice a display frame, and each
 // apply starts the picture's render at once. A brush, eraser, clone or heal
 // stroke draws on LiveStroke's LiveCopy and comes back once, at its end or before
-// any other intent, so drawing never re-runs the panels. Its workspace runs on
+// any other intent, so drawing never re-runs the panels; a Free Transform
+// handle drag or row scrub runs on LiveTransformCopy the same way. Its workspace runs on
 // `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
@@ -36,6 +37,7 @@ struct PhotoWindow: View {
     @State var pacer = StrokePacer()
     @State var liveStroke = LiveStroke()
     @State var dragLine = LiveDragLine()
+    @State var liveTransform = LiveTransformCopy()
     @State var zoom = 1.0
     @State var viewport = CGSize.zero
     /// A new image waits to be fitted until the canvas has a size.
@@ -101,6 +103,7 @@ struct PhotoWindow: View {
             renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
             straighten: straightenDraft)
             .environment(\.photoDragLine, dragLine)
+            .environment(\.photoLiveTransform, liveTransform)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onAppear { if let rendering { renderer.follow(rendering) { renderer.show(model) } } }
@@ -171,7 +174,7 @@ struct PhotoWindow: View {
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
-            takeStroke()
+            takeStroke(keepingTransform: Self.isTransformSample(intent))
         }
         switch intent {
         case .newImage:
@@ -257,10 +260,12 @@ struct PhotoWindow: View {
         }
     }
 
-    /// A live paint stroke's or drag line's copy back into the workspace: one SwiftUI pass for the stroke.
-    private func takeStroke() {
+    /// A live paint stroke's, drag line's or transform's copy back into the workspace: one SwiftUI pass
+    /// for the gesture. A transform sample keeps the live transform going.
+    func takeStroke(keepingTransform: Bool = false) {
         if let painted = liveStroke.take() { model.adoptLiveStroke(painted) }
         if let lined = dragLine.take() { model.adoptLiveStroke(lined) }
+        if !keepingTransform, let moved = liveTransform.take() { model.adoptLiveStroke(moved) }
     }
 
     // MARK: Zoom
