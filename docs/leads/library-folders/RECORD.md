@@ -66,3 +66,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T21:10Z: FO-6 #4121: lane macOS build 39664988428 still queued.
 
 - 2026-10-21T21:26Z: heartbeat: #4121 in the lane at 18efe8b, macOS build 39664988428 queued; dev Linux check 39676099814 (6dc7778) red on Launcher's CommandPathTests baseline, dev-red #3856, not ours
+
+- 2026-10-21T21:41Z: heartbeat: #4121 at 18efe8b, macOS build 39664988428 still queued (macOS slots busy); dev Linux still red on Launcher's CommandPathTests baseline (dev-red #3856, not ours); lane bisecting batch 20261021205717
