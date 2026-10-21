@@ -42,3 +42,4 @@ time	kind	note
 2026-10-21T10:09Z	check	DK-a round 2 running	wf_c31c3a4f-5b2	waiting on fixer PR
 2026-10-21T10:17Z	fix	DK-a round 2 done	#4001	fixes #3865 (Join/Cap disabled with Model reason until DK-5); #3871 #3873 -> gap p2 (rounds spent; #3873 waits on #3999 needs-ui). DK-a done once #4001 merges + dev Linux green
 2026-10-21T10:30Z	check	lane	#4001	clean, waiting on a batch
+2026-10-21T11:00Z	check	line-fix	#4001	SuiteUI StrokeEditor edits removed (line rule); Model-only, head 1923f406, ci --changed PASS; StrokeEditor styleHelp filed as #4014 needs-ui; #3865 stays open
