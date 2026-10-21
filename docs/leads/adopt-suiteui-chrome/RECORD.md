@@ -3,8 +3,8 @@
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: heartbeat
-Base: dev ded2ca57
-Next: AC-colour + AC-tools p1 green dev run (dev red #3856, photo); #4002 merge
+Base: dev 5bec8089
+Next: AC-colour + AC-tools p1 green dev run; #4002 held by lane on inherited dev-red (photo CommandPath, #3856)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: AC-colour + AC-tools p1 green dev run (dev red #3856, photo); #4002 merge
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T13:08Z: #4002 Linux red is dev's #3976 failure only; no fix in our PR
 - 2026-10-21T12:43Z: -
 - 2026-10-21T12:23Z: -
 - 2026-10-21T11:59Z: -
