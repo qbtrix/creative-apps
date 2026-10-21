@@ -6,7 +6,9 @@
 // QD-S8, one hit test per pointer move, ≤ 0.5 ms / ≤ 5 ms; QD-S9, one document
 // edit (`apply` plus one history record), ≤ 1 ms / ≤ 10 ms; QD-S11, encode and
 // decode the crowd file, ≤ 50 ms / ≤ 500 ms. Each also checks the timed body did
-// its work, so a body that short-circuits can't pass.
+// its work, so a body that short-circuits can't pass. All three tests are timed,
+// so the suite is on the perf list (Tests/perf-suites.txt): the merge gate skips
+// it and perf-nightly runs it.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

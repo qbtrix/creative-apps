@@ -56,6 +56,36 @@ struct LibraryDevelopTests {
         #expect(catalog.developTargets == [shot(5)])
     }
 
+    /// The window's drag: each sample sets the value and asks for a preview,
+    /// each preview landing while the next is asked for. The loupe shows the
+    /// drag before the release, and the whole drag is one undo step.
+    @Test func aDragShowsLiveInTheLoupeAndIsOneStep() throws {
+        var catalog = shoot()
+        catalog.open(shot(1))
+        let openedAsked = catalog.loupeRequest(longSide: 64, quality: .full)
+        let opened = try #require(openedAsked)
+        let image = try #require(DisplayImage(size: PixelSize(width: 1, height: 1), rgba8: [0, 0, 0, 255]))
+        catalog.showLoupeRender(RenderedPhoto(image: image, histogram: .empty, quality: .full), token: opened.token)
+        let before = catalog.history.undo.count
+        var inFlight: LoupeRequest?
+        for i in 1...10 {
+            catalog.setDevelop(.exposure, to: Double(i) / 10, coalesceKey: "develop-exposure")
+            let request = catalog.loupeRequest(longSide: 64, quality: .preview)
+            let asked = try #require(request)
+            if let done = inFlight {
+                let value = UInt8(i)
+                let shown = try #require(DisplayImage(size: PixelSize(width: 1, height: 1), rgba8: [value, 0, 0, 255]))
+                let preview = RenderedPhoto(image: shown, histogram: .empty, quality: .preview)
+                catalog.showLoupeRender(preview, token: done.token)
+                #expect(catalog.loupeRender == preview)
+            }
+            inFlight = asked
+        }
+        #expect(develop(catalog, 1)?.exposure == 1)
+        catalog.endDevelopDrag()
+        #expect(catalog.history.undo.count == before + 1 && catalog.undoTitle == "Undo Exposure")
+    }
+
     @Test func aDragIsOneStepAndDropsThumbnailsOnRelease() throws {
         var catalog = shoot()
         catalog.select([shot(1)])
@@ -238,9 +268,12 @@ struct LibraryDevelopTests {
         red[255] = 4; green[255] = 2; blue[0] = 1
         try showHistogram(&catalog, HistogramBins(red: red, green: green, blue: blue,
                                                   shadowClipped: 0, highlightClipped: 6))
-        #expect(catalog.histogramClips == ["Highlights clipped"])
-        #expect(catalog.curveHistogram.count == HistogramBins.binCount)
-        #expect(catalog.curveHistogram.max() == 1 && catalog.curveHistogram.first == 1.0 / 6)
+        let tone = catalog.toneHistogram
+        #expect(tone.clipsHighlights && !tone.clipsShadows)
+        #expect(tone.heights.count == HistogramBins.binCount)
+        let first: Double = 1.0 / 6
+        #expect(tone.heights.max() == 1)
+        #expect(tone.heights.first == first)
         #expect(catalog.developError == nil)
     }
 

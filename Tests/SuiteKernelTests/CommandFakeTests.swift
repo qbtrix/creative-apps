@@ -5,14 +5,16 @@ import Testing
 import SuiteKernel
 
 @Suite struct CommandFakeTests {
-    /// The six commands plus undo and redo, sorted, each with its kind and an example on the fixture.
+    /// The six commands, undo and redo, and the five file-flow commands, sorted, each with its kind and an example on the fixture.
     @Test func fakeListsItsCommands() throws {
         let catalog = FakeCanvasDocument.catalog
         #expect(catalog.app == "fake")
-        #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select"])
+        #expect(catalog.ids == ["doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
+                              "file.open-recent", "file.recent", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select"])
         let kinds = Dictionary(uniqueKeysWithValues: catalog.describeAll().map { ($0.id, $0.kind) })
         #expect(kinds == ["rect.add": .edit, "rect.move": .edit, "rect.remove": .edit, "rect.select": .view, "rect.list": .query,
-                          "doc.export-json": .file, "edit.undo": .view, "edit.redo": .view])
+                          "doc.export-json": .file, "edit.undo": .view, "edit.redo": .view, "file.recent": .query,
+                          "file.open-recent": .file, "file.clear-recent": .view, "file.open-in": .file, "file.drop": .file])
         #expect(catalog.describe("rect.add")?.title == "Add Rectangle" && catalog.spec("rect.add")?.params == FakeCanvasDocument.AddRect.paramSchema)
         #expect(try catalog.describe("rect.add")?.example.decode(FakeCanvasDocument.AddRect.self).w == 30)
         #expect(CommandCatalog<FakeCanvasDocument>.empty(app: "x").ids.isEmpty)

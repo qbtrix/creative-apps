@@ -4,12 +4,15 @@
 // `render` is one pipeline: a full-size decode (a sample's `SampleImage`,
 // never decoded), develop through `DevelopRendering` (tone, then crop),
 // lanczos3 to the planned long side, sRGB bytes. Decode errors pass through.
+// Each item carries the properties the options' metadata policy drops, for
+// the writer (export-pack, LX-3).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import CoreRaster
+import SuiteKernel
 
 public struct LiveExporter: PhotoExporting {
     public static let unavailable: String? = nil
@@ -25,12 +28,13 @@ public struct LiveExporter: PhotoExporting {
         }
         let names = ExportNames.unique(stems: stems, format: options.format, sidecar: options.sidecar,
                                        existing: existingNames)
+        let dropping = ExportRules.dropped(options.metadata).properties
         var items: [ExportPlan.Item] = []
         items.reserveCapacity(photos.count)
         for (photo, name) in zip(photos, names) {
             let full = Self.croppedSize(photo)
             let size = options.longEdge.map { full.fitting(longSide: $0) } ?? full
-            items.append(ExportPlan.Item(photoID: photo.id, fileName: name, size: size))
+            items.append(ExportPlan.Item(photoID: photo.id, fileName: name, size: size, dropping: dropping))
         }
         return ExportPlan(items: items, options: options)
     }

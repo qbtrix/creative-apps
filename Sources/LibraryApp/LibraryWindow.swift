@@ -7,7 +7,7 @@
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
 // or the live services over the Platform adapters.
 //
-// The sidebar has two sections: Library (All Photos, Favorites, Recently
+// The sidebar has two sections: Library (All Photos, Picks, Recently
 // Added) and Collections (yours, with New Collection as its add button and a
 // double-click rename while those can act). LibraryFilterBar sits above
 // LibraryBrowser; the hidden `library.collections` element carries the
@@ -21,6 +21,7 @@
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -89,6 +90,8 @@ struct LibraryWindow: View {
         }
         .focusedSceneValue(\.libraryMenu, menu)
         .focusedSceneValue(\.libraryFilters, filters)
+        .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
+                       places: model.placesExtensions, perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
@@ -132,7 +135,7 @@ struct LibraryWindow: View {
         let current = self.menu
         let action: LibraryMenu.Action?
         switch key {
-        case .rating, .pick, .reject, .unflag:
+        case .rating, .pick, .reject, .unflag, .label:
             guard let cull = current.cull.key else { return .ignored }
             cull(key)
             return .handled
@@ -193,7 +196,7 @@ struct LibraryWindow: View {
 
     static func symbol(for collectionID: String) -> String {
         switch collectionID {
-        case "favorites": "heart"
+        case "favorites": "flag"
         case "recent": "clock"
         case let id where id.hasPrefix("smart-"): "gearshape"
         case let id where UserCollection.isUserID(id): "rectangle.stack"
