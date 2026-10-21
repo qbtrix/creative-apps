@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-21T11:26Z	3	wave-started	-	wave 1: contract slice PR
 2026-10-21T13:18Z	3	heartbeat	-	OC-a held by dev-red #3856 (fixed); rebasing and opening PR
 2026-10-21T13:20:12Z	check	blockers posted on feature issue; lane PRs open, no needs-fix
+2026-10-21T13:34:01Z	pr-opened	OC-a #4082 ea5ec5d7; OC-m #4088 b929af4a stacked (Mutate 7/7)
