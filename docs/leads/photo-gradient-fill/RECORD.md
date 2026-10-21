@@ -10,9 +10,9 @@ Next: #4064 PG-z merges (feature-done); Belt-Slice-Done PG-u and PG-z once a gre
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PG-a | PhotoTool.gradient in the palette with help, options hold a Fill, Tool Options shows the editor on stubs | PG-1, PG-2 | MJ-PG | – | yes | 0 | done: Belt-Slice-Done on run 39582236683 (Linux, fe232dcda) | 39582236683 | – |
-| PG-u | drag line on canvas, options snapshots and render budget, journey written | PG-5, PG-6 | PJ-G1 | – | yes | 0 | merged (#3975, #3977 at 12:16Z); waits a green run | – | – |
+| PG-u | drag line on canvas, options snapshots and render budget, journey written | PG-5, PG-6 | PJ-G1 | – | yes | 0 | done: Belt-Slice-Done on run 39604117821 (Linux, 5bec808) | 39604117821 | – |
 | PG-m | drag draws dithered gradient into the layer inside the selection as one step; options take each intent | PG-3, PG-4 | MJ-PG | – | no | 0 | done: Belt-Slice-Done on run 39582236683 (Linux, fe232dcda) | 39582236683 | – |
-| PG-z | live services, journey on live, blueprint, built | PG-7, PG-8 | PJ-G1 | PG-u | yes | 0 | PR #4064 (feature-done), gate PASS head 6519ea37 | – | – |
+| PG-z | live services, journey on live, blueprint, built | PG-7, PG-8 | PJ-G1 | PG-u | yes | 0 | done: #4064 merged bb2189abd; Belt-Slice-Done on run 39614555474 | 39614555474 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -38,6 +38,7 @@ Next: #4064 PG-z merges (feature-done); Belt-Slice-Done PG-u and PG-z once a gre
 - PG-3 needs only PG-1's merged code (packet task table), so it stacks on PG-1 in wave 1.
 
 ## Open
+- Contact sheet: Belt-Contact-Sheet waits on scoped photo run 39616082524 (at aab8fc46, contains bb2189abd), in progress at 15:08Z.
 - Unverified report (PG-1 fixer, 19:3xZ): `scripts/ci --changed` printed CI: PASS while `listCommandsMatchesItsGolden(app: "photo")` printed a ✘. Builders now read AfterGlowCLITests output themselves; file an issue if it reproduces.
 - GF-2 (SuiteUI GradientEditor) is not on dev: blocks PG-2, so PG-a's Belt-Slice-Done waits on it. GF-5 (GradientRules bodies; GradientRules.swift is still stubs) blocks PG-4; GF-3 blocks PG-5.
 - PG-3 held (branch photo-gradient-fill/PG-3, head a8cc61cf): open its PR when #3681 merges. Snapshots: photo-gradient-tool-light/dark.png. It also adds `select.rect` (RJ-P19 needs it to select the top half), which is outside the owned list and in no menu. `expected/grey-256-sky.png` was generated from this implementation, so it guards against regressions only. `noBanding` skips pure black and white rows, because OKLab leaves about 100 rows at 0 next to the black stop. The builder also ran full `scripts/ci` and the AfterGlowCLITests: PASS, with no ✘ (the PG-1 false-pass did not reproduce).
