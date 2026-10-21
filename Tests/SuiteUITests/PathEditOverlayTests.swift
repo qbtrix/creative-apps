@@ -114,3 +114,12 @@ private let a1 = AnchorRef(contour: 0, index: 1)
         + gesture.release(at: CGPoint(x: 40, y: 40), modifiers: [])
     #expect(click == [.select(anchors: [], rect: nil, extend: false)])
 }
+
+@Test func aStandInContourIsTheKernelContourItDescribes() {
+    let smooth = PathAnchor(point: CGPoint(x: 10, y: 20), kind: .smooth, handleIn: CGPoint(x: 5, y: 20), handleOut: CGPoint(x: 15, y: 20))
+    let standIn = PathContourStandIn(anchors: [PathAnchor(point: CGPoint(x: 0, y: 0), kind: .corner), smooth], closed: true)
+    #expect(standIn.contour == VectorContour(anchors: [
+        corner(0, 0),
+        VectorAnchor(point: Point(x: 10, y: 20), handleIn: Point(x: 5, y: 20), handleOut: Point(x: 15, y: 20), kind: .smooth),
+    ], closed: true))
+}
