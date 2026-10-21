@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-21T06:20:32Z	2	plan	-	wave 1 planned
 2026-10-21T06:21:16Z	3	wave 1 start	0865916	builders launched
 2026-10-21T07:24:21Z	3	heartbeat	-	resumed after restart; wave 1: LF-5 #3938, FO-a #3939 open; LF-4 blocked; BK-a finishing
+2026-10-21T07:26:41Z	3	wave2-launch	-	FO-u, FO-4 builders and BK-a finisher started
