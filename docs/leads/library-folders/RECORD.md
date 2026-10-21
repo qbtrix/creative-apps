@@ -76,3 +76,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 22:39Z: heartbeat: FO-6 #4121 waits on its macOS build 39664988428; FO-7 after it merges.
 
 - 22:55Z: FO-6 #4121 macOS build 39664988428 green; waits for its batch merge. FO-7 after it merges.
+
+- 2026-10-21T22:59Z: FO-6 #4121 still open, waiting for its batch; FO-7 after it merges.
