@@ -8,7 +8,7 @@ Next: FS-a slice PR (FS-1, FS-2) and FS-5 (FS-m's first task) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: FS-5 (slice FS-m) opened as #3850, head 5890f921, 3 files +108/-13, fast-lane. FS-u rebased onto it; its gate is running, then a stacked PR held with no-fast-lane until #3850 merges
+Last stage: FS-u opened as #3851 (stacked on #3850, held with no-fast-lane; head f46e85f3). Next: when #3850 merges, rebase FS-u onto dev, gate, swap to fast-lane, move Head; FS-a slice-done when a green dev ci.yml run contains #3767
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
