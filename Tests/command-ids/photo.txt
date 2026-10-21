@@ -48,6 +48,15 @@ tool.heal
 tool.marquee
 tool.move
 tool.text
+transform.begin
+transform.cancel
+transform.commit
+transform.flip
+transform.read
+transform.reset
+transform.rotate
+transform.scale
+transform.set
 view.actual-size
 view.fit
 view.zoom-in
