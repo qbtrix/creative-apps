@@ -47,3 +47,4 @@
 2026-10-21T04:06:35Z	check	-	MD-17 in batch-20261021032004 behind FC-5's red; MD-17 itself clean; perf-suites still lacks MD-10 tests
 2026-10-21T04:29:21Z	check	-	MD-17 #3579 clean, waits lane; MD-10 perf entries absent; dev green 39542598669
 2026-10-21T04:51:43Z	check	-	MD-17 #3579 second in batch-20261021043428, red on a Halo test, bisecting; MD-10 perf entries absent
+2026-10-21T05:13:47Z	check	-	MD-17 #3579 in batch-20261021043428, bisect probes -4..-6 all contain it (Halo red is later); MD-10 #3581 waits perf-suites entries
