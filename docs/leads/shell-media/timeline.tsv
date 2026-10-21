@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-21T11:39Z	3	wave-end	w1	#4034 SM-1, #4035 SM-2 draft; gate held for dev-red #3856
 2026-10-21T11:47Z	3	poll	w1	builders running
 2026-10-21T11:49Z	2026-10-21T11:49:19Z	3 wave1	bodies	#4034 #4035	bodies rewritten via MCP, no footer
+2026-10-21T11:52Z	2026-10-21T11:52:10Z	3	wave2-start	wf_3ce2ba26-b7e	SM-3 SM-4 (SM-m), SM-5 (SM-w), SM-7 (SM-r) stacked on SM-2; dev-red fixed by #4008; markers being restored on #4034
