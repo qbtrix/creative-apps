@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F06, pending PF-6 (flare/svg-place): named .jobs.pending.json so the harness skips it, and renamed to place-svg.jobs.json once PF-5 builds FlarePlace+Kernel's bodies and PF-6 registers the place commands; PF-6 also pins the layer ids and paths PF-5 writes. Places logo.svg (a red #E53935 square group and a blue #1E88E5 ring group whose inner square is a hole) into a blank 480 x 270 scene and saves the .flare file: two new layers named after the groups, fills within 1/255, and the blue ring keeps both contours.",
+  "pending": "PF-6",
+  "waits_on": "PF-6",
+  "inputs": ["input/*.flare"],
+  "steps": [
+    {"id": "place.image", "params": {"name": "logo.svg", "base64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjAwIDEwMCI+PGcgaWQ9InJlZCI+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9IiNFNTM5MzUiLz48L2c+PGcgaWQ9ImJsdWUiPjxwYXRoIGZpbGw9IiMxRTg4RTUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTExMCAxMCBIMTkwIFY5MCBIMTEwIFogTTEzMCAzMCBWNzAgSDE3MCBWMzAgWiIvPjwvZz48L3N2Zz4=", "x": null, "y": null}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-placed", "format": "flare"},
+  "expect": {
+    "out/blank-placed.flare": {"json": {"format": "flare", "version": 1, "document": {"symbols": [], "scenes": [{
+      "id": "scene-1", "name": "Scene 1", "width": 480, "height": 270, "fps": 24, "durationFrames": 24,
+      "background": {"r": 1, "g": 1, "b": 1, "a": 1}, "guides": [], "labels": {},
+      "layers": [
+        {"name": "red", "shapes": [{"fill": {"r": 0.8980392156862745, "g": 0.2235294117647059, "b": 0.20784313725490197, "a": 1}, "contours": 1}]},
+        {"name": "blue", "shapes": [{"fill": {"r": 0.11764705882352941, "g": 0.5333333333333333, "b": 0.8980392156862745, "a": 1}, "contours": 2}]}
+      ]
+    }]}}}
+  },
+  "platforms": ["linux", "macos"]
+}
