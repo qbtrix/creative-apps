@@ -64,3 +64,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-21T22:18Z: #4019 (SC-13) merged as d2c129e51 and #4020 (SC-1) as d8b1b2109. SC-14 has dev merged in (it conflicted only on its own two test files, so SC-14's versions were kept) and scripts/ci --changed is running; its PR (slice SC-f) opens on CI: PASS. SC-2 waits on IM-a.
 - 2026-10-21T22:26Z: SC-14 opened as PR #4238 (slice SC-f, fast-lane), head 5b6eba7365e00f49fcdb1b9effdd84f269ab64d1, scripts/ci --changed CI: PASS. SC-2 waits on IM-a (#4028 then IM-2).
 - 2026-10-21T22:48Z: #4238 (SC-14): mergeable, no needs-fix; waiting on the lane's macOS build (run 39688920608). Removed a server-added footer from the body so Head: is the last line again.
+- 2026-10-21T23:12Z: SC-14 #4238 (SC-f) waits on lane macOS build 39688920608 (queued since 22:46Z); no needs-fix, no refusal.
