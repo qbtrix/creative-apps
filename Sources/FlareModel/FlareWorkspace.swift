@@ -44,8 +44,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var tool: FlareTool = .select
     /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
     public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
-    /// The stage selection (FlareSelection.swift).
-    public internal(set) var selection: [StageAddress] = []
+    /// The stage selection: SuiteKernel's ordered selection, which `selection` reads (FlareSelectionAdapter.swift).
+    var picks = Selection<StageAddress>()
     /// The marquee under way, in scene points; nil when none is.
     public internal(set) var marquee: Rect?
     /// The shape the drag under way would add, for the live preview; nil
