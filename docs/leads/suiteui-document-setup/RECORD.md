@@ -4,7 +4,7 @@ Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: #4182 (DS-a) merged; #4184 (DS-m) retargeted to dev with origin/dev merged in, gate running, then push and move Head:; DS-u waits on frame-rates FR-u (held)
+Next: #4184 (DS-m) integrated at 976774dd; gate red only on dev-red #3856 (launcher command-path baseline, not ours): move Head: once dev is green and scripts/ci --changed passes; DS-u waits on frame-rates FR-u (held)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
