@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 12:46Z	3	SM-a PRs now open: #4034 (SM-1 media contract), #4035 (SM-2). Export-pack waits until they merge.	-	
 13:08Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
 13:28Z	3	heartbeat	-	SM-a #4034 #4035 still open on lane.
+14:45Z	3	stage	-	Records moved to lead/flare-export-pack. Still blocked on SM-a PRs #4034 and #4035; re-polled, both open.

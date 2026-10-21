@@ -46,3 +46,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 12:46Z: 
 - 13:08Z: SM-a #4034 #4035 still open on lane.
 - 13:28Z: SM-a #4034 #4035 still open on lane.
+- 14:45Z: Records moved to lead/flare-export-pack. Still blocked on SM-a PRs #4034 and #4035; re-polled, both open.
