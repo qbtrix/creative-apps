@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-21T18:26Z	18:26Z	lane	#4003 macOS build in progress
 2026-10-21T18:43Z	2026-10-21T18:43Z Belt nudge answered: PP-4 mac-built, waiting for the next batch
 2026-10-21T19:31Z	2026-10-21T19:33Z PP-4 batch Linux check green; macOS gate queued
+2026-10-21T19:54Z	PP-4 #4003 merged a47f41f75; PP-7 merged dev, now 1 file +44/-11
