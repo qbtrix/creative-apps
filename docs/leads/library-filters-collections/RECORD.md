@@ -125,3 +125,4 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 - 2026-10-21T18:43:05Z check: #4146 merged (363d3ea); FC-14's timing test runs on dev. FC-12 #3551's macOS build 39648900493 is in progress. FC-16 still waits for FC-12. Findings 0.
 - 2026-10-21T19:05:17Z check: FC-12 #3551's macOS build 39648900493 is green. It's mergeable and waits for a lane sweep. Findings 0.
 - 2026-10-21T19:27Z check: FC-12 #3551 still open at c931a176c (macOS build green, mergeable); lane sweeps queued and superseding each other; open findings 0.
+- 2026-10-21T19:49Z check: FC-12 #3551 merged 19:32Z (a4d1bb1, lane batch). Dev Linux check 39664459063 (369ecc7, contains FC-12) running; Belt-Slice-Done FC-d on its green. FC-16 (docs, shared prose, status built) started with a fixer. Open findings 0.

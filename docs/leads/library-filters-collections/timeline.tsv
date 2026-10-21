@@ -96,3 +96,4 @@ utc	stage	event	ref	note
 2026-10-21T18:43:05Z	check	-	#4146 merged; FC-12 mac build in progress
 2026-10-21T19:05:17Z	check	-	FC-12 built green, waits sweep
 2026-10-21T19:27Z	check	-	FC-12 #3551 still open at c931a176c (macOS build green, mergeable); lane sweeps queued and superseding each other; open findings 0.
+2026-10-21T19:49Z	check	-	FC-12 #3551 merged 19:32Z (a4d1bb1, lane batch). Dev Linux check 39664459063 (369ecc7, contains FC-12) running; Belt-Slice-Done FC-d on its green. FC-16 (docs, shared prose, status built) started with a fixer. Open findings 0.
