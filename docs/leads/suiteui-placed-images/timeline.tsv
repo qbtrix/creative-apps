@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 18:54Z	heartbeat	No change: PL-8/9/10 wait on SH-z, TT-z, EY-z, AH-z, SS-d (PL-9 also GF-z).
 19:13Z	heartbeat	No change: PL-8/9/10 wait on SH-z, TT-z, EY-z, AH-z, SS-d (PL-9 also GF-z).
 19:33Z	heartbeat	No change: PL-8/9/10 wait on SH-z, TT-z, EY-z, AH-z, SS-d (PL-9 also GF-z).
+19:53Z	heartbeat	PL-z waits on SH-z, TT-z, EY-z, AH-z, GF-z and SS-d.
