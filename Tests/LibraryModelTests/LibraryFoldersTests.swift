@@ -1,7 +1,7 @@
 // LibraryFoldersTests.swift (folders FO-1, written before the bodies): the FOLDERS tree and its two commands.
 // The stub checks run now: the specs' ids, kinds, schemas and reasons, and their runs refuse as not built.
 // FO-4 turned on the tree checks (three imports give three roots, a chain collapses into one row, own and total
-// counts, `/a/bc` never under `/a/b`, all-missing folders, 10,000 paths under 20 ms); FO-5 the filter checks
+// counts, `/a/bc` never under `/a/b`, all-missing folders, 10,000 paths under a 20 ms median); FO-5 the filter checks
 // (subfolders off shows only a folder's own photos, on its descendants' too, `folders.list` matches the tree).
 // Fails when a count is off, a sibling counts as a child, or the filter leaks another folder's photos. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -127,11 +127,10 @@ import Testing
 
     @Test func tenThousandPaths() {
         let photos = (0..<10_000).map { Self.photo("/big/\($0 % 20)/\($0 % 7)/\($0).png") }
-        let start = ContinuousClock.now
-        let roots = LibraryFolders.tree(photos)
-        let elapsed = ContinuousClock.now - start
+        var roots: [FolderNode] = []
+        let cost = Budget.measure("folders tree-of-10000-paths", runs: 10) { roots = LibraryFolders.tree(photos) }
         #expect(roots.map(\.totalCount).reduce(0, +) == 10_000)
-        #expect(elapsed < .milliseconds(20), "tree of 10,000 paths took \(elapsed)")
+        #expect(cost.median < 20, "tree of 10,000 paths took a median \(cost.median) ms")
     }
 
     // MARK: The filter and the commands (FO-5)
