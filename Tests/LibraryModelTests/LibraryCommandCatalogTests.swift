@@ -71,6 +71,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "photo.reset-develop": .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "photo.crop": .some(menu(c.cropHelp == nil, "crop", "Crop isn't connected yet."))
         case "photo.reset-crop": .some(menu(c.resetCropHelp == nil, "crop", "Crop isn't connected yet."))
+        case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
     }
@@ -175,5 +176,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "photo.reset-crop | Reset Crop | Crop isn't connected yet.",
         "metadata.set-rating | Set Rating | on", "metadata.pick | Pick | on", "metadata.reject | Reject | on",
         "metadata.clear-flag | Clear Flag | on", "metadata.set-label | Set Label | on", "metadata.auto-advance | Auto Advance | on",
+        "folders.list | List Folders | Import a folder to see its folders.",
+        "view.show-folder | Show Folder | Import a folder to see its folders.",
     ]
 }
