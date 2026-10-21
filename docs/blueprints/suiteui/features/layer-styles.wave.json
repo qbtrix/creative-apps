@@ -1,12 +1,12 @@
 {
   "title": "One layer style: SuiteImaging's style model, rules, presets, commands, SVG writer and GPU route, SuiteUI's style panel, and the kernel's clipping rule",
-  "wave": 5,
-  "order": 30,
+  "wave": 4,
+  "order": 25,
   "status": "planned",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "feature map S2 (effects stack and layer styles, shared half) and S8's clipping rule; real job RJ-X51; captain 2026-10-21: layer styles in the beta, shared; adopters photo/layer-styles, design/layer-styles (RJ-D14), halo/layer-styles, photo/masks-clipping, photo/psd-effects (#3496, #3497)",
-  "waits_on": "suite-imaging's IM-a (the target) and IM-m (the route, LS-9); gradient-fill's GF-a and GF-m (LS-7); brush-keys' BK-u, the last earlier owner of SuiteGallery.swift; creative-core layer-style-engine LE-a, LE-cpu and LE-metal, each through a bump (cross-line); the Layers-panel actions' fx button and row menu bind style.panel, style.copy, style.paste and style.clear (hand-off)",
+  "waits_on": "suite-imaging's IM-a (the target) and IM-m (the route, LS-9); gradient-fill's GF-a and GF-m (LS-7); brush-keys' BK-u, the last earlier owner of SuiteGallery.swift; creative-core layer-style-engine LE-a, LE-cpu and LE-metal, each through a bump (cross-line: LE-a's types, creative-core PR 780, reach the apps through bump PR 3825 to 7966e5a, open; LE-cpu needs a bump at or past bddb0961; LE-metal's last task, LE-9b, is creative-core PR 797, open); the Layers-panel actions' fx button and row menu bind style.panel, style.copy, style.paste and style.clear (hand-off)",
   "longest_chain": "6 (LS-1 → LS-2 → LS-3 → LS-4 → LS-12 → LS-13)",
   "journeys": [
     "SuiteJourneyTests.testGalleryOpensEveryPage",

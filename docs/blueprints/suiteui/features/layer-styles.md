@@ -13,7 +13,7 @@ gets one `LayerStylePanel`; the model, rules, presets, commands, the SVG
 writer and the one mapping to creative-core's pixels live in SuiteImaging.
 SuiteKernel also gets the clipping rule (which layer a clipped layer clips to),
 the kernel half of Photo's clipping groups.
-**Line:** `line:suiteui` · **Wave:** 5 (`waves.md`) · **Lead branch:** `lead/layer-styles`
+**Line:** `line:suiteui` · **Wave:** 4 (`waves.md`; ahead of its wave-4 adopters, which wait on LS-a) · **Lead branch:** `lead/layer-styles`
 **Beta:** captain, 2026-10-21 ("layer styles in beta, shared"). Labels `beta`
 and `p1` when filed.
 
@@ -31,7 +31,12 @@ command-catalog (built: `CommandSpec`, `History`'s drag fold); brush-keys
 **creative-core:** `layer-style-engine` (core packet in this sprint): **LE-a**
 (the core types, through a `scripts/bump-core` PR) before LS-1, **LE-cpu**
 before LS-8, **LE-metal** before LS-9. Each reaches the apps only through a
-bump PR the supervisor merges.
+bump PR the supervisor merges. Where they stand on 2026-10-21: the dev pin
+(2258b62) has none of them. LE-a's types (`LayerStyleStack`, `Codable`
+`StrokePosition`; creative-core #780) ride bump PR #3825 (to 7966e5a, open),
+which is all LS-1 needs; LS-1 starts once it merges. LE-cpu (`styled`,
+creative-core #789 and #791) needs a later bump at or past bddb0961. LE-metal's
+last task, LE-9b (Metal claims `style`), is creative-core #797, open.
 
 **Hand-offs** (files other work owns; cross-line, so not in `waits`):
 - **Layers panel actions.** A local crew is building the shared Layers-panel
@@ -92,7 +97,7 @@ Blueprint sections: suiteui.md 2.2 (components), 7.1 (budgets); suite.md 1.5
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| LS-a | SuiteImaging's `Style/` module declares the model, rules, presets, intents, the `style.*` command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a `layer-style` page, and every check is written, disabled. | LS-1, LS-2 | SJ0, MJ-LS | suite-imaging:IM-a; gradient-fill:GF-a; brush-keys:BK-u (LS-2); core LE-a through a bump (cross-line) |
+| LS-a | SuiteImaging's `Style/` module declares the model, rules, presets, intents, the `style.*` command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a `layer-style` page, and every check is written, disabled. | LS-1, LS-2 | SJ0, MJ-LS | suite-imaging:IM-a; gradient-fill:GF-a; brush-keys:BK-u (LS-2); core LE-a through bump #3825 (cross-line) |
 | LS-u | On the gallery page the panel lists the eight styles with their switches, shows the selected style's rows (colour, blend, opacity, angle, distance, size, position, gradient, bevel), applies a preset, and is reachable from the Layers panel's `fx` button and row menu where that work has landed, within the render budget. | LS-3, LS-4 | LJ1 | LS-a |
 | LS-m | The rules clamp and default every parameter and keep one effect per kind, every `style.*` command records one undo step (a drag one), copy and paste round-trip as JSON, the SVG writer emits a filter for each style it can express and a warning for the rest, and `StyleProgram` maps a style to the core stack and back. | LS-5, LS-6, LS-7, LS-8 | MJ-LS | LS-a; gradient-fill:GF-m (LS-7); core LE-cpu through a bump (LS-8, cross-line) |
 | LS-gpu | The live route draws a styled layer on the GPU in one pass per step and matches the CPU within the core's parity tolerance, within 16 ms p95 for a 2,000 × 2,000 layer. | LS-9, LS-9b | MJ-LS-gpu | LS-m; suite-imaging:IM-m; core LE-metal through a bump (cross-line) |
