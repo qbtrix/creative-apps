@@ -4,24 +4,24 @@ Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: when #3960 (BK-a) merges: merge dev into #3965 (BK-3) and #3967 (BK-u), rerun the gate (needs #3980 for dev-red #3856), swap labels, move Head:, answer the needs-split sentinel
+Next: when #3980 clears dev-red #3856: rerun scripts/ci --changed on #3965 (BK-3, head dfb75bf) and #3967 (BK-u, head 89b3e3c), set Fast-Check: pass and Head:, swap no-fast-lane for fast-lane. BK-a is merged-done once a qualifying run (scoped library or full) contains #3960: post Belt-Slice-Done for BK-a then. Blocked-wait polls with no change: 2 (09:20, 09:54); at 3 post Question for the supervisor.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| BK-a | rotation and restore commands as stubs, checks disabled | BK-1, BK-2 | MJ-BK | – | no | 0 | PR #3960 open | – | – |
-| BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | PR #3967 open, stacked on #3960, no-fast-lane, needs-split until #3960 merges | – | – |
-| BK-m | rotation limits, fallback, restore backs up current | BK-3, BK-5m | MJ-BK | BK-a; LF-m, FO-m, AK-library (not merged) | no | 0 | BK-3 #3965 open; BK-5m blocked | – | – |
+| BK-a | rotation and restore commands as stubs, checks disabled | BK-1, BK-2 | MJ-BK | – | no | 0 | merged #3960 (09:23); waits on a qualifying run for Belt-Slice-Done | – | – |
+| BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | PR #3967 merged with dev (89b3e3c, 7 files +338), needs-split cleared, no-fast-lane until #3980 | – | – |
+| BK-m | rotation limits, fallback, restore backs up current | BK-3, BK-5m | MJ-BK | BK-a; LF-m, FO-m, AK-library (not merged) | no | 0 | BK-3 #3965 merged with dev (dfb75bf, Mutate 5/5), no-fast-lane until #3980; BK-5m blocked | – | – |
 | BK-z | live restore, RJ-L54, built | BK-5, BK-6 | LJ-BK, MJ-BK | BK-u, BK-m | yes | 0 | blocked | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| BK-1 | BK-a | 1 | BackupRotation stubs over FileStore; tests disabled; store part names it | Sources/SuiteModel/Store/BackupRotation.swift, Tests/SuiteModelTests/BackupRotationTests.swift, docs/c4/parts/creative-apps/suite-model/suite-store.json | compiles, disabled | #3960 | open, head 963604c |
-| BK-2 | BK-a | 1 | catalog.backups / restore-backup specs NotBuilt; tests disabled; journey skipped | LibraryBackup+Kernel.swift, LibraryBackupTests.swift, UITests/LibraryJourneyTests+Backup.swift | compiles, disabled | #3960 | open (same PR) |
+| BK-1 | BK-a | 1 | BackupRotation stubs over FileStore; tests disabled; store part names it | Sources/SuiteModel/Store/BackupRotation.swift, Tests/SuiteModelTests/BackupRotationTests.swift, docs/c4/parts/creative-apps/suite-model/suite-store.json | compiles, disabled | #3960 | merged |
+| BK-2 | BK-a | 1 | catalog.backups / restore-backup specs NotBuilt; tests disabled; journey skipped | LibraryBackup+Kernel.swift, LibraryBackupTests.swift, UITests/LibraryJourneyTests+Backup.swift | compiles, disabled | #3960 | merged #3960 |
 | BK-4 | BK-u | 2 | restore sheet and menu item | LibraryBackupSheet.swift, LibraryWindow+Backup.swift | ids, confirm text | #3967 | open |
 | BK-4b | BK-u | 2 | render budget | RenderBudgetLibraryBackupTests.swift | openSheetInTwoBodies | #3967 | open (same PR) |
-| BK-3 | BK-m | 2 | rotation bodies | BackupRotation.swift, BackupRotationTests.swift, Tests/mutations/SuiteModel.BackupRotation.json | BackupRotationTests | #3965 | open, stacked on #3960 |
+| BK-3 | BK-m | 2 | rotation bodies | BackupRotation.swift, BackupRotationTests.swift, Tests/mutations/SuiteModel.BackupRotation.json | BackupRotationTests | #3965 | open, dev merged in, BackupRotation conflict taken from BK-3 |
 | BK-5m | BK-m | – | Library on the rotation | LibraryBackup+Kernel.swift, LibraryPersistence.swift, ... | LibraryBackupTests | – | blocked: LF-m, FO-m, AK-library |
 | BK-5 | BK-z | – | live sheet, journey, RJ-L54 | ... | LJ-BK | – | blocked |
 | BK-6 | BK-z | – | feature-done | catalog-backup.wave.json | – | – | blocked |
