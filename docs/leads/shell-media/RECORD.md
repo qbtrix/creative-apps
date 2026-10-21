@@ -26,6 +26,7 @@ Next: wave 1 builders running; then mark stacked drafts ready after their parent
 |---|---|---|---|---|---|
 
 ## Decisions
+- Baseline: `scripts/ci --changed` on dev 1191940 printed CI: PASS (Linux build 232 s, 4m13s total) before wave 1.
 - SM-a is two PRs: SM-1 (~360 lines, 9 files) plus SM-2 (~320 lines, 4 files + fixtures) exceed the 400/15 cap together. SM-2 stacks on SM-1 as a draft and is marked ready after SM-1 merges.
 - Base is origin/dev, not main: the brief names main (0dd23d6, verified) but CLAUDE.md and lead.md target dev, and report-problem and command-state packets exist only on dev. PRs go to base dev.
 - One line lead plan across shell-media, report-problem and command-state (rule 19).
