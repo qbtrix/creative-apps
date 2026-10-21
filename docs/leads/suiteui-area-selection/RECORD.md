@@ -63,3 +63,4 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 - 19:13Z: macOS builds green: #4098 (AR-4, run 39657301406) and #4124 (AR-8, run 39649626905). Both wait on a lane batch. AR-14 starts once #4098 merges.
 - 19:33Z: #4098 (AR-4) and #4124 (AR-8): macOS builds green, both wait on a lane batch (27 runs queued repo-wide). No needs-fix, no findings.
 - 19:53Z: #4124 (AR-8, AR-u) merged as 369ecc7; Linux check 39664459063 is running on it. #4098 (AR-4) waits on a lane batch with its macOS build green.
+- 20:09Z: AR-u done: Belt-Slice-Done and Mac-Finish-Wanted posted on #3752 (Linux 39664459063 green on 369ecc7). #4098 (AR-4) merged as f2e75f9; Linux check 39667367345 on 606e821, which contains it, is running, so AR-m's done signal waits for it. AT-design is merged (#3593, #3604), but AR-14 (AR-design) still waits on design/pen-paths DP-m (DP-6 and DP-7 not yet opened) for the shared DesignCommandCatalog chain.
