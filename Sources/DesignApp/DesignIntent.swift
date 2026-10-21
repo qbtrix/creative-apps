@@ -52,6 +52,8 @@ enum DesignIntent {
     case renameLayer(String, String)
     /// The inspector's Width or Height committed: the selected page's size, one "Change Page Size" step.
     case setPageSize(width: Double, height: Double)
+    /// An Eyedropper click: the colour at the page point onto the selection's stroke (Option) or fill, one step.
+    case pick(DesignPoint, toStroke: Bool)
 }
 
 /// Where a view sends its intents.
