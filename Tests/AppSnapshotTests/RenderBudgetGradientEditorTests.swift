@@ -27,7 +27,7 @@ extension BodyCountSuites {
         }
 
         @Test(.timeLimit(.minutes(2))) func stopDragInThreeBodies() async throws {
-            let w = RenderBudgetWindow(GradientEditorBudgetWindow())
+            let w = RenderBudgetWindow(GradientEditorBudgetWindow().allowsWindowActivationEvents())
             defer { w.close() }
             try await w.settle(untilStable: Self.bodies)
             let stop = try #require(await w.element("suite.gradient.stop.1"), "the editor shows no middle stop (suite.gradient.stop.1)")
