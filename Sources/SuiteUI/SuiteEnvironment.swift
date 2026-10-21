@@ -166,8 +166,9 @@ private struct SuiteProbesModifier: ViewModifier {
 }
 
 /// The window's frame probe behind `.suiteProbes()`, read by app views as
-/// `suiteProbeRecorder`. Each control probe is built once, so its environment
-/// value stays the same closure across passes.
+/// `suiteProbeRecorder`. Read it with `@Environment`, never `@ObservedObject`:
+/// observing it runs the reader's body on every sample. Each control probe is
+/// built once, so its environment value stays the same closure across passes.
 @MainActor public final class SuiteProbeRecorder: ObservableObject {
     @Published private(set) var probe = SuiteFrameProbe()
     private(set) var gridProbe = GridProbe { _, _ in }
