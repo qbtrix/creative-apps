@@ -1,7 +1,9 @@
 // PhotoPaletteTool.swift: the tool palette's tool. It carries `model.toolHelp(tool)`
 // as its `unavailableHelp`, so the palette shows a tool disabled with the reason
-// the workspace's services give (the Eyedropper is "Not built yet (PV-9)." on
-// `.live` and enabled on `.fake`), not the tool enum's fallback text.
+// the workspace's services give, not the tool enum's fallback text. The
+// Eyedropper (I) is enabled on `.fake`, where it picks through its size chips
+// and the SampleTarget adapter; on `.live` it stays "Not built yet (PV-9)."
+// until the live sampler lands (eyedropper PE-5).
 import PhotoModel
 import SuiteUI
 

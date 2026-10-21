@@ -1,0 +1,86 @@
+[
+  {
+    "label": "the & escape is dropped",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "return XMLText.escaped(String(kept))",
+    "replace": "return XMLText.escaped(String(kept)).split(separator: \"&amp;\", omittingEmptySubsequences: false).joined(separator: \"&\")",
+    "tests": "LibraryXMPTests"
+  },
+  {
+    "label": "xmp:Rating 0 is written",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "if fields.rating != 0 {",
+    "replace": "if fields.rating >= 0 || fields.rating < 0 {",
+    "tests": "LibraryXMPTests"
+  },
+  {
+    "label": "siblings are ignored",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "let clash = siblings.contains { $0 != photoPath && self.stem(of: $0) == stem }",
+    "replace": "let clash = siblings.isEmpty && !siblings.isEmpty",
+    "tests": "LibraryXMPTests"
+  },
+  {
+    "label": "the marker check skips lib:Writer",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "&& text.contains(marker)",
+    "replace": "&& !text.isEmpty",
+    "tests": "LibraryXMPTests"
+  },
+  {
+    "label": "control characters are kept",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "value.unicodeScalars.filter { $0.value >= 0x20 || $0 == \"\\t\" || $0 == \"\\n\" }",
+    "replace": "value.unicodeScalars",
+    "tests": "LibraryXMPTests"
+  },
+  {
+    "label": "a sibling in another folder counts",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "guard let dot = path[nameStart...].lastIndex(of: \".\"), dot != nameStart else { return path }\n        return String(path[..<dot])",
+    "replace": "guard let dot = path[nameStart...].lastIndex(of: \".\"), dot != nameStart else { return path }\n        return String(path[nameStart..<dot])",
+    "tests": "LibraryXMPTests"
+  },
+  {
+    "label": "an unchanged photo is rewritten",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "previous.caption == photo.caption, previous.keywords == photo.keywords { continue }",
+    "replace": "previous.caption == photo.caption, previous.keywords == photo.keywords, previous.isEmpty && !previous.isEmpty { continue }",
+    "tests": "LibrarySidecarPlanTests"
+  },
+  {
+    "label": "a photo with nothing to say and nothing written is planned",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "if previous == nil && fields.isEmpty { continue }",
+    "replace": "if previous == nil && fields.isEmpty && previous != nil { continue }",
+    "tests": "LibrarySidecarPlanTests"
+  },
+  {
+    "label": "a sample is planned",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "guard let photoPath = photo.path else { continue }",
+    "replace": "let photoPath = photo.path ?? photo.id",
+    "tests": "LibrarySidecarPlanTests"
+  },
+  {
+    "label": "the status ignores writing",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "if writing.contains(id) { return \"Saving…\" }",
+    "replace": "if writing.isEmpty && !writing.isEmpty { return \"Saving…\" }",
+    "tests": "LibrarySidecarPlanTests"
+  },
+  {
+    "label": "a stale sidecar says saved",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "guard written[id] == SidecarFields(photo: photo) else",
+    "replace": "guard written[id] != nil else",
+    "tests": "LibrarySidecarPlanTests"
+  },
+  {
+    "label": "a written reject compares as its stars",
+    "file": "Sources/LibraryModel/Contracts/XMPSidecar.swift",
+    "find": "previous.rating == (photo.flag == .reject ? -1 : photo.rating)",
+    "replace": "previous.rating == photo.rating",
+    "tests": "LibrarySidecarPlanTests"
+  }
+]

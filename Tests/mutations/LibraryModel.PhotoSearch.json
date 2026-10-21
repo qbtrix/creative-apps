@@ -1,0 +1,58 @@
+[
+  {
+    "label": "iso, f and mm read > as >=",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "case .above: value > bound",
+    "replace": "case .above: value >= bound",
+    "tests": "LibrarySearchTests"
+  },
+  {
+    "label": "any one token is enough (OR, not AND)",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "terms.allSatisfy { $0.matches(photo) }",
+    "replace": "terms.isEmpty || terms.contains { $0.matches(photo) }",
+    "tests": "LibrarySearchTests"
+  },
+  {
+    "label": "a field's text keeps its case, so keyword:BEACH misses Beach",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "self = .text(value.lowercased(), textField)",
+    "replace": "self = .text(value, textField)",
+    "tests": "LibrarySearchTests"
+  },
+  {
+    "label": "a quoted phrase splits on its spaces",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "} else if character.isWhitespace && !quoted {",
+    "replace": "} else if character.isWhitespace {",
+    "tests": "LibrarySearchTests"
+  },
+  {
+    "label": "a bad number is dropped instead of searched as plain text",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "let plain = field.map { $0 + \":\" + value } ?? value",
+    "replace": "let plain = field == nil ? value : \"\"",
+    "tests": "LibrarySearchTests"
+  },
+  {
+    "label": "plain text skips the camera",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "case nil: return [photo.name] + photo.keywords + [photo.title, photo.caption] + camera + lens",
+    "replace": "case nil: return [photo.name] + photo.keywords + [photo.title, photo.caption] + lens",
+    "tests": "LibrarySearchTests"
+  },
+  {
+    "label": "suggestions ignore the limit",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "if suggestions.count == limit { return suggestions }",
+    "replace": "",
+    "tests": "LibrarySearchTests"
+  },
+  {
+    "label": "suggestions leave a spaced value unquoted",
+    "file": "Sources/LibraryModel/Contracts/PhotoSearch.swift",
+    "find": "(value.contains(\" \") ? \"\\\"\" + value + \"\\\"\" : value)",
+    "replace": "value",
+    "tests": "LibrarySearchTests"
+  }
+]
