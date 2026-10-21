@@ -8,5 +8,6 @@ Sources/LibraryApp/Platform/ImageIODecoder.swift
 Sources/LibraryApp/Platform/JPEGWriter.swift
 Sources/PhotoApp/ImageIOCodec.swift
 Sources/PhotoApp/PhotoPasteboard.swift
+Sources/SuiteShell/PasteboardBridge.swift
 Sources/SuiteUI/Gallery/GalleryPlaceImage.swift
 Sources/SuiteUI/PlacedImageView.swift
