@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-21T20:54Z	3	check	GF-z	#4179/#4186 macOS builds queued; #4180 not yet swept
 2026-10-21T21:12Z	3	check	GF-z	#4179 #4186 macOS builds queued; #4180 clean, awaiting sweep
 2026-10-21T21:29Z	3	check	GF-z	#4179 build still queued (macOS queue), #4186 build running, #4180 clean awaiting sweep
+2026-10-21T21:47Z	3	check	GF-z #4179 #4180 #4186	#4186 build green, #4180 eligible, both queued behind lane batch; #4179 build 39671257594 queued
