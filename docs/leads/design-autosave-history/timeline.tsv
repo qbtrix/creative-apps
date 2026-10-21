@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T01:27Z	3	heartbeat	#3710 #3726	no change: #3710 awaits batch, #3726 build queued, #3677 open, scoped design pending
 2026-10-21T01:49Z	3	heartbeat	#3710 #3726	macOS queue backlog; no change
 2026-10-21T02:11Z	3	heartbeat	#3710 #3726	no change; macOS queue backlog; GF-6 #3742 open
+2026-10-21T02:33Z	3	question	#3434 6306556075	macOS queue stall reported to supervisor
