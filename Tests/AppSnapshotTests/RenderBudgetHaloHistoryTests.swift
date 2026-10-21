@@ -9,8 +9,8 @@
 // state, so only the panel and the two rows whose selection changed redraw).
 // The p95 (packet: ≤ 8 ms) is printed, not gated: a step-time budget belongs
 // in a Tests/perf-suites.txt test. Keys need a key window, so, as
-// RenderBudgetHistoryPanelTests does, this turns the harness's one window
-// key-capable, focuses the panel by a click on its current row (a jump to
+// RenderBudgetHistoryPanelTests does, this asks the harness for a key-capable
+// window, focuses the panel by a click on its current row (a jump to
 // where it already is) and sends the presses through the window. Nested in
 // BodyCountSuites: it reads global counters. macOS only.
 #if canImport(AppKit)
@@ -30,9 +30,9 @@ extension BodyCountSuites {
             for _ in 0..<Self.steps { project.undo() }
             #expect(project.historyListing.index == 0 && project.historyListing.steps.count == Self.steps)
             let w = RenderBudgetWindow(
-                HaloWindow(model: project).environment(\.haloHistoryShelf, HaloHistoryShelf(shown: true)))
+                HaloWindow(model: project).environment(\.haloHistoryShelf, HaloHistoryShelf(shown: true)),
+                keyCapable: true)
             defer { w.close() }
-            object_setClass(w.window, HaloHistoryKeyWindow.self)
             w.window.makeKey()
             _ = w.window.makeFirstResponder(w.host)
             try await w.settle(untilStable: HaloWindowPlaybackTests.windowBodies)
@@ -66,10 +66,5 @@ extension BodyCountSuites {
             #endif
         }
     }
-}
-
-/// The harness's borderless window, allowed to be key so the panel's arrow keys reach it.
-private final class HaloHistoryKeyWindow: NSWindow {
-    override var canBecomeKey: Bool { true }
 }
 #endif
