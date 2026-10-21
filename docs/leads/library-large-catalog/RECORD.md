@@ -2,9 +2,9 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 · Started: 2026-10-21T10:19Z
-Stage: 3 wave 1 (LG-a building)
+Stage: 3 wave 1 (LG-a merged, waiting on the dev Linux check)
 Base: e2b8aa76 (origin/dev)
-Next: LG-a PR (LG-1 fixture and disabled budgets, LG-2 journey, launch flag, RJ-L56 folder); LG-model waits on LG-a, FC-a, MD-e, DR-m; LG-grid on LG-model, FC-c, suiteui shared-thumbnails ST-m
+Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on LG-model, FC-c, suiteui shared-thumbnails ST-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
