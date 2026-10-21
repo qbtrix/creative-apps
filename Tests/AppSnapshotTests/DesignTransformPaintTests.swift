@@ -3,7 +3,8 @@
 // is red just inside each corner `TransformRules.corners` gives and above its unturned box, and not where only
 // the unturned box would be. A red-to-blue gradient mirrored across paints blue at its left edge. The
 // selection box of the same turned node draws a handle at the turned top-left corner and none at the
-// unturned one, and its rotate knob turned with it. macOS only.
+// unturned one, and its rotate knob turned with it. Two layers turned together from the knob above their box
+// (#4224), each outline turned about its own centre: design-transform-turned-several-{light,dark}.png. macOS only.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -94,5 +95,21 @@ import Testing
         }
         #expect(try accent(DesignSelectionBox(rect: node.frame, zoom: 1, degrees: 90, knob: true)) > 0)
         #expect(try accent(DesignSelectionBox(rect: node.frame, zoom: 1, degrees: 90)) == 0, "no knob without `knob`")
+    }
+
+    @Test func severalLayersTurnedFromTheirKnob() throws {
+        var model = DesignWorkspace()
+        model.newFile()
+        try model.addNode(.rectangle, frame: DesignRect(x: 200, y: 200, width: 300, height: 150), in: "node-1")
+        try model.addNode(.rectangle, frame: DesignRect(x: 600, y: 300, width: 150, height: 250), in: "node-1")
+        model.selectItem("node-2")
+        model.toggleSelection("node-3")
+        // The box runs from 200, 200 to 750, 550; its knob sits 12 above the top's middle, at 475, 188.
+        model.drag(from: DesignPoint(x: 475, y: 188), to: DesignPoint(x: 600, y: 200))
+        model.endDrag()
+        try #require(model.selectedNodeIDs == ["node-2", "node-3"])
+        #expect(model.selectedNodes.allSatisfy { $0.rotation > 0 })
+        #expect(model.undoActionName == "Undo Rotate")
+        try shootCanvas(model, "design-transform-turned-several")
     }
 }
