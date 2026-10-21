@@ -1,0 +1,30 @@
+[
+  {
+    "label": "hexInSwapsRedBlue: a picked hex color reaches the Flare scene with red and blue swapped",
+    "file": "Sources/FlareApp/FlareInspectorScene.swift",
+    "find": "        self = color\n",
+    "replace": "        self = FlareColor(r: color.b, g: color.g, b: color.r)\n",
+    "tests": "FlareHexColorBridgeTests"
+  },
+  {
+    "label": "hexInRefusesEveryColor: the bridge reads a valid hex color as none, so the pick is dropped",
+    "file": "Sources/FlareApp/FlareInspectorScene.swift",
+    "find": "NewDocumentSpec.color(hex: hex.text)",
+    "replace": "NewDocumentSpec.color(hex: String(hex.text.dropFirst(2)))",
+    "tests": "FlareHexColorBridgeTests"
+  },
+  {
+    "label": "hexOutSwapsRedBlue: a Flare color shows in the color row with red and blue swapped",
+    "file": "Sources/FlareApp/FlareInspectorScene.swift",
+    "find": "HexColor(NewDocumentSpec.hex(self))",
+    "replace": "HexColor(NewDocumentSpec.hex(FlareColor(r: b, g: g, b: r)))",
+    "tests": "FlareHexColorBridgeTests"
+  },
+  {
+    "label": "hexOutAlwaysFallsBack: the getter skips the clamped channels and reads every color as the white fallback",
+    "file": "Sources/FlareApp/FlareInspectorScene.swift",
+    "find": "HexColor(NewDocumentSpec.hex(self)) ?? HexColor(255, 255, 255)",
+    "replace": "HexColor(\"not a color\") ?? HexColor(255, 255, 255)",
+    "tests": "FlareHexColorBridgeTests"
+  }
+]
