@@ -1,4 +1,5 @@
-// FlareCommandCatalog.swift (AC-f2): Flare's menu, palette, transport and SCENES (`scenes.*`) actions as catalog commands,
+// FlareCommandCatalog.swift (AC-f2): Flare's menu, palette, transport, SCENES (`scenes.*`) and LAYERS panel (`layers.*`,
+// on the selected layer) actions as catalog commands,
 // each available exactly when the window's control is. An edit's title is its undo step.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -21,18 +22,26 @@ extension FlareWorkspace {
     public static let catalog = (try? CommandCatalog<FlareWorkspace>(app: "flare", commands, history: FlareCoreHistory.init)) ?? .empty(app: "flare")
     static let noFile: Help = { $0.document == nil ? "Open or create an animation first." : nil }
     static let noScene: Help = { $0.document == nil ? FlareLayerError.noDocument.message : nil }
+    static let noLayer: Help = { $0.selectedLayer == nil ? "Select a layer first." : nil }
     static let cannotPlay: Help = { $0.canPlay ? nil : "Open an animation to play it." }
     /// Any Flare data: the catalog's Paste carries its data in the params, so its reason assumes some is on hand.
     static let anyPasteboard = Data("[]".utf8)
-    /// The label the menu shows for `id`: Undo and Redo name the step.
+    /// Why New Layer can't run: no scene to add it to.
+    public var addLayerHelp: String? { selectedScene == nil ? "Select a scene to add a layer to." : nil }
+    /// The selected layer of the edited owner, if any.
+    public var selectedLayer: Layer? { layers.first { $0.id == selectedLayerID } }
+    /// The label the menu shows for `id`: Undo and Redo name the step, Hide and Lock the layer's state.
     public func menuTitle(_ id: String) -> String {
         switch id {
         case "edit.undo": undoActionName ?? "Undo"
         case "edit.redo": redoActionName ?? "Redo"
+        case "layers.toggle-visible": selectedLayer?.isVisible == false ? "Show Layer" : "Hide Layer"
+        case "layers.toggle-locked": selectedLayer?.isLocked == true ? "Unlock Layer" : "Lock Layer"
         default: Self.menuLabels[id] ?? Self.catalog.spec(id)?.title ?? id
         }
     }
-    static let menuLabels = ["file.open": "Open…", "file.save-as": "Save As…", "edit.delete": "Delete", "animate.play": "Play/Pause"]
+    static let menuLabels = ["file.open": "Open…", "file.save-as": "Save As…", "edit.delete": "Delete", "animate.play": "Play/Pause",
+                             "layers.add": "New Layer"]
 
     public static func sampleHelp(_ name: String) -> String? { FlareFixtures.named(name) == nil ? "No sample called \(name)." : nil }
     public static func sampleTitle(_ name: String) -> String { name == "keyed" ? "Keyed Ball" : name.capitalized }
@@ -116,6 +125,14 @@ extension FlareWorkspace {
         act("edit.deselect", "Deselect", "Clears the stage and layer selection.", .view, { $0.editHelp(.deselect) }) { w in w.deselect() },
         act("object.bring-forward", "Bring Forward", "Moves the selected layer one place up.", .edit, { $0.orderHelp(forward: true) }) { w in w.bringForward() },
         act("object.send-backward", "Send Backward", "Moves the selected layer one place down.", .edit, { $0.orderHelp(forward: false) }) { w in w.sendBackward() },
+        act("layers.add", "Add Layer", "Adds a layer above the selected one and selects it.", .edit, { $0.addLayerHelp }) { w in w.addLayer() },
+        act("layers.remove", "Delete Layer", "Deletes the selected layer.", .edit, noLayer) { w in w.removeLayer(w.selectedLayerID ?? "") },
+        act("layers.toggle-visible", "Set Layer Flags", "Hides or shows the selected layer.", .edit, noLayer) { w in
+            w.toggleLayerFlag(w.selectedLayerID ?? "", .visible)
+        },
+        act("layers.toggle-locked", "Set Layer Flags", "Locks or unlocks the selected layer.", .edit, noLayer) { w in
+            w.toggleLayerFlag(w.selectedLayerID ?? "", .locked)
+        },
     ] + FlareTool.allCases.map { tool in
         act(toolID(tool), FlareIntent.tools(.choose(tool)).title, "Picks the \(tool.rawValue) tool for stage drags.", .view,
             { $0.toolHelp(tool) }) { w in w.selectTool(tool) }

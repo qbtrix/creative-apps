@@ -103,3 +103,7 @@ tool.ellipse
 tool.pen
 tool.rectangle
 tool.select
+layers.add
+layers.remove
+layers.toggle-locked
+layers.toggle-visible

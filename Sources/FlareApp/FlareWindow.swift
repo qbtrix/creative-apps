@@ -72,7 +72,7 @@ struct FlareWindow: View {
                         if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
                     },
                     onRename: { perform(.layers(.rename(id: $0, name: $1))) })
-                FlareLayersList(model: model, perform: { perform(.layers($0)) })
+                FlareLayersList(model: model, perform: perform)
             }
         } content: {
             FlareCanvas(
