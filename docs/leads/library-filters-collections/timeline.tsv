@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-21T22:28Z	check	-	FC-16 #4176 and #4177 still open in the lane, no needs-fix/needs-rebase; dev Linux check still red (39685422711, unrelated, dev-red #3856); 0 open findings
 2026-10-21T22:55Z	check	-	FC-16 #4176 and #4177 still open, not yet in a batch (lane batch-20261021221623 bisecting, probe 4); no needs-fix/needs-rebase; dev Linux check still red (unrelated, dev-red #3856); 0 open findings
 2026-10-21T23:22Z	check	-	FC-16 #4176 and #4177 still open in the lane queue, no needs-fix/needs-rebase; dev Linux check still red (unrelated, dev-red #3856); 0 open findings
+2026-10-21T23:49Z	check	-	FC-16 merged: #4176 aab06ae and #4177 be84fe4 at 23:32Z (batch landed on own proof, dev red on its own). Waiting for a green dev ci.yml run containing both: Linux check 39695796699 (de0f324) in progress, scoped suite 39694726393 (e220f20) queued; 0 open findings
