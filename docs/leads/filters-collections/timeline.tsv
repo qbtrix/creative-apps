@@ -76,3 +76,4 @@ utc	stage	event	ref	note
 2026-10-21T09:26:33Z	check	FC-7 #3534 and FC-15 #3539 merged 09:22; FC-9 #3546 needs-rebase (LibraryCollectionsSeamTests) and FC-12 #3551 dev merge: worktree agents running
 2026-10-21T09:48:22Z	check	FC-9 #3546 dev merged (d91818de3), gate red only on dev-red #3856 mutation anchors; Head held until #3980/#3996 land. FC-12 #3551 agent resumed after rate limit
 2026-10-21T09:50:43Z	check	FC-12 #3551 dev merged (c071bdbde, 7 files +47/-27, Mutate 21/21 LibraryModel.LibraryFilter); gate red only on dev-red #3856 anchors; stays draft, Head held until fix lands
+2026-10-21T10:13:23Z	check	-	dev anchors fixed (#3996 merged; mutate --validate OK on e2b8aa76b); agents merging dev into FC-9 #3546 and FC-12 #3551 and rerunning the gate; FC-10 waits on S-L9 #3411 (open)
