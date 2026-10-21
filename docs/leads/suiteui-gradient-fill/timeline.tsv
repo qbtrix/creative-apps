@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-21T18:45Z	3	built	GF-z	GF-8..GF-10 on lead/suiteui-gradient-fill-GF-z b2667bac (15 files, +311/-38, Mutate 6/6 FakeCanvasDocument, ci PASS); C4 text on -GF-z-c4 9976b617
 2026-10-21T18:45Z	3	poll	#3742	macOS build 39650981019 dispatched 18:15Z
 2026-10-21T19:02Z	3	heartbeat	-	No merges: #3742 macOS build 39650981019 queued; GF-z PR waits on it
+2026-10-21T19:25Z	3	check	#3742	macOS build green 19:20Z; merges on a lane sweep, then GF-z PR
