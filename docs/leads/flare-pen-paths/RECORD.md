@@ -32,6 +32,7 @@ Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once Linux check 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
+| FP-a | 39567954958 | 5a911587 | clarity, design, oracle (code only) | running | 0 |
 
 ## Decisions
 - PRs target `dev`, not `main` as the brief says: CLAUDE.md and lead.md rule 4 say base dev, and the lane retargets fast-lane PRs from main anyway.
@@ -42,6 +43,7 @@ Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once Linux check 
 
 - Run act-1a15e10a86f-7bk9 took this record over at 10:40Z; lead/pen-paths was recreated from main (its old history did not share a root with main).
 - FP-5 unchained from shape-tools:FS-m (rule 12): FS-5 (#3850), the only FS task that touches LiveShapes.swift, has merged; FS-6 left in FS-m touches only the catalog, which FP-5 does not.
+- FP-a's critic panel runs code lenses only (clarity, design, oracle): the overlay has no snapshot until FP-u's FlareAnchorSnapshots, so mouse and taste judge it in FP-u's review.
 
 ## Open
 - shape-tools FS-m: FS-5 merged #3850, FS-6 blocked on gradient-fill FG-m (FP-5 unchained, FP-6 unaffected).
