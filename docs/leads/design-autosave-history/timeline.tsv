@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 15:58Z	DA-z	heartbeat	39629540112	#4102 macOS build queued
 16:07Z	DA-z	check	39629540112	#4102 macOS build in progress
 16:34Z	DA-z	check	39629540112	#4102 mac build green, awaiting batch
+16:47Z	DA-z	merged	-	#4102 merged e4f3f33f

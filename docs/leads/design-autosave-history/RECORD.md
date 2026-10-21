@@ -2,9 +2,9 @@
 
 Issue: #3434 · Packet: docs/blueprints/design/features/autosave-history.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z
-Stage: 3 wave 2 (DA-a, DA-m done; DA-u #3726 open at local Mac gate)
+Stage: 5 done check (DA-a, DA-m, DA-u Slice-Done; DA-z #4102 merged as e4f3f33f at 16:44Z)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: Belt-Slice-Done DA-u once merged-done; DA-a critics on journeys design 39545087913 ui-screens (scoped design 39548305565 also running); DA-6 waits DG-m (SuiteUI #3677, GF-6 #3742); DA-z waits DA-6
+Next: Belt-Slice-Done DA-z once a dev CI run containing e4f3f33f has a green Linux job; then Belt-Contact-Sheet on #3434 and stop
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: Belt-Slice-Done DA-u once merged-done; DA-a critics on journeys design 395
 | DA-a | adapter stubs; History panel and autosave hooks on the window; View > Show History | DA-1, DA-2 | MJ-DA | shell-parity (built) | yes | 0 | done | 39520241285 | – |
 | DA-u | toolbar History button; panel follows undo and jumps; snapshots and budget | DA-3, DA-4 | J-DA | DA-a | yes | 0 | #3726 open (head f2d0c703, base DA-a branch, Mutate 2/2) | – | – |
 | DA-m | jump records no step; recovery bytes reopen dirty; history commands in the catalog | DA-5, DA-6 | MJ-DA | DA-a; gradient-fill:DG-m (DA-6) | no | 0 | DA-5 #3710 open (head c2d68a99, base DA-a branch, Mutate 3/3); DA-6 waits DG-m | – | – |
-| DA-z | journey jumps and recovers on live; built | DA-7, DA-8 | J-DA | DA-u, DA-m; suiteui autosave-history AH-z (AH-8 #3629) | yes | 0 | planned | – | – |
+| DA-z | journey jumps and recovers on live; built | DA-7, DA-8 | J-DA | DA-u, DA-m; suiteui autosave-history AH-z (AH-8 #3629) | yes | 0 | merged #4102 (e4f3f33f), Mutate 3/3 + 4/4; DA-6 folded in | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -85,3 +85,4 @@ Next: Belt-Slice-Done DA-u once merged-done; DA-a critics on journeys design 395
 - 15:58Z: heartbeat. #4102 (e16b62e7) clean; the lane's macOS build 39629540112 (apps: design) is queued. Merge follows a green build.
 - 16:07Z: check. #4102 clean, unmerged; lane macOS build 39629540112 in progress. Lane's attribution notice: proxy-added footer, stripped from the squash (see above).
 - 16:34Z: check. #4102's macOS build 39629540112 green (16:12Z). Waits on the next lane batch; batch 20261021155943 (without #4102) is bisecting a red Linux run. Lane Linux check 39634756821 running on e16b62e7.
+- 16:47Z: stage. #4102 merged (e4f3f33f, 16:44Z) with feature-done. Waiting for a dev CI run containing it.
