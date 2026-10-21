@@ -29,7 +29,8 @@ import Testing
     static func edited() throws -> DesignWorkspace {
         var model = DesignWorkspace()
         model.useServices(.fake)
-        #expect(model.openFixture("cards"))
+        let opened = model.openFixture("cards")
+        #expect(opened)
         for index in 0..<4 {
             try model.addNode(.rectangle, frame: DesignRect(x: 80 + Double(index) * 120, y: 80, width: 96, height: 96), in: "node-1")
         }

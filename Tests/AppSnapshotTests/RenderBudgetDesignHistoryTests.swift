@@ -23,7 +23,8 @@ extension BodyCountSuites {
         @Test(.timeLimit(.minutes(2))) func arrowWalkInThreeBodies() async throws {
             var model = DesignWorkspace()
             model.useServices(.fake)
-            #expect(model.openFixture("cards"))
+            let opened = model.openFixture("cards")
+            #expect(opened)
             for index in 0..<Self.steps {
                 let frame = DesignRect(x: 40 + Double(index % 10) * 120, y: 80 + Double(index / 10) * 120, width: 96, height: 96)
                 try model.addNode(.rectangle, frame: frame, in: "node-1")
