@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-21T21:12Z	3	lane-mac	#4183	macOS build 39671398584 success; merge on the next lane sweep; #4185 #4191 wait
 2026-10-21T21:25Z	3	poll	#4183	compiled; waiting on the lane sweep (run 39678641684 pending)
 2026-10-21T21:38Z	3	poll	#4183	compiled; still waiting on the lane sweep (run 39679102627)
+2026-10-21T21:53Z	3	poll	#4183	TK-a compiled on macOS, unmerged, clean; lane sweep 39682222093 pending (blocked poll 2 of 3)
