@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T09:03Z	3 build W2	check	#3976	PP-3 #3976 in lane (clean, fast-lane, waiting on batch); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
 2026-10-21T09:23Z	3 build W2	check	#3976	PP-3 #3976 lane macOS build 39574519410 queued (per-PR build); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
 2026-10-21T09:43Z	3 build W2	check	#3976	PP-3 #3976 macOS build 39574519410 green, awaiting lane merge; no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:05Z	3 build W2	check	#3976	PP-3 #3976 macOS build green; lane Linux run 39580807833 in progress on its head; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
