@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T12:47:23Z	heartbeat	#4026 #4033 wait on the lane's macOS builds; no needs-fix	-	waiting on lane
 2026-10-21T13:16:12Z	heartbeat	#4025 (oracle script) merged 13:08Z; #4026/#4033 red on Photo CommandPathTests (old heads); dev merge in flight	#4025	fix in flight
 2026-10-21T13:26:54Z	fix	dev merged into #4026 (8192f1db), LP-a merged into #4033 (7bf8a4e8); scripts/ci --changed PASS; Head lines moved; #4026 footer removed	#4026 #4033	back in the lane
+2026-10-21T13:43:24Z	heartbeat	#4026/#4033 waiting on macOS builds; LP-z still waits on LP-a/LP-m merges	-	waiting on lane
