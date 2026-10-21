@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-21T12:26Z	3	heartbeat	-	dev Linux red (photo, #3856, not ours); TT-u #3513 open; journeys 39588223335 queued
 2026-10-21T12:50Z	3	review-blocked	-	journeys 39588223335 built nothing (FlareModel SetLayerParent compile error, noted on #3856); DG-a/DT-a panels wait for a scoped design run with screens; dev Linux still red (photo); TT-u #3513 open
 2026-10-21T13:21Z	3	heartbeat	-	dev Linux red, not ours (39601343733: Library tenThousandPaths timing); waiting on design journeys 39603336201 and scoped design 39604112617 for panels; TT-u #3513 open
+2026-10-21T13:44Z	3	wait	DT-4	TT-u #3513 not merged; panels wait for design ui-screens
