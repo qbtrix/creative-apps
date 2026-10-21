@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-21T13:16:12Z	heartbeat	#4027 in lane Linux check, #4029 waiting on macOS gate; #3770, #4011-#4013 open	-	waiting on lane
 2026-10-21T13:43:24Z	heartbeat	#4027 lane Linux red only on Library LargeCatalogBudgetTests timing (5.39s/5s); re-run 403, asked on PR	#4027#issuecomment-6317595826	#4029 macOS build green, waiting on batch; #3770 open
 2026-10-21T15:12Z	heartbeat	check	-	#4026 #4029 #4031 merged; LP-a and LO-a Belt-Slice-Done on 39620526621; #4033 needs-rebase and #4027 (stale Linux flake) getting origin/dev merged in; Belt nudge answered (branches are lead/pen-paths, lead/lottie-*)
+2026-10-21T15:23Z	fix	merge-dev	-	#4027 FP-a fix1: origin/dev merged, CI: PASS, Head moved to 0e22b950
