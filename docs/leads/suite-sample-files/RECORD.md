@@ -4,12 +4,12 @@ Issue: #3775 · Packet: docs/blueprints/suite/features/sample-files.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave 4
 Base: 9951eea7355e5a768f0ce1e1bad25656cf05cd82
-Next: every slice has a PR; wait for the lane to merge #4094 then the stack, post Belt-Slice-Done per slice on a green dev Linux run, then Belt-Contact-Sheet; poll #4094 (macOS build-only run 39623825564 green), #4100, #4112, #4115, #4129
+Next: #4094 merged; #4100 ready (dev merged in, head cfa47ab72); when it merges, merge dev into #4112/#4115 (then #4129), mark ready; post Belt-Slice-Done per slice on a green dev Linux run, then Belt-Contact-Sheet; poll #4094 (macOS build-only run 39623825564 green), #4100, #4112, #4115, #4129
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SS-a | make step turns each sample script into its file; the per-file open check is written, disabled | SS-1, SS-2 | MJ-SS | – | no | 0 | pr-open #4094 | – | – |
+| SS-a | make step turns each sample script into its file; the per-file open check is written, disabled | SS-1, SS-2 | MJ-SS | – | no | 0 | merged #4094 (e78df8233) | – | – |
 | SS-vector | Cards/Logo .design and Bounce/Title/Logo .flare made by script, committed, open | SS-3, SS-4 | MJ-SS | SS-a | no | 0 | pr-open #4100 (+ follow-up for fixtures) | – | – |
 | SS-raster | beach.ora, Sunset.png, Intro.halo made by script, committed, open | SS-5, SS-6 | MJ-SS | SS-a, SS-vector | no | 0 | pr-open #4115 (beach.ora held on #4113) | – | – |
 | SS-z | every tour tile opens its sample; RJ-X66; feature built | SS-7, SS-8 | XJ-SS, MJ-SS | SS-vector, SS-raster | no | 0 | pr-open #4129 (feature-done) | – | – |
@@ -37,6 +37,7 @@ Wave plan (one PR per slice, brief rule 10; each slice PR stacks on the one befo
 |---|---|---|---|---|---|
 
 ## Decisions
+- After a parent squash-merges, the child merges origin/dev (keeping its own side of the add/add conflicts in Bundle/Samples/README.md and SampleFilesTests.swift, which already carry the parent), reruns scripts/ci --changed, moves Head:, and leaves draft. No rebase, no force-push.
 - SS-vector split over the 400-line cap: the generated Flare files are large; the follow-up is the same slice (Slice: SS-vector).
 - Base is origin/dev (3f96cd10c74f0eb4da8641e8fe511a2e5e42a466), not main (0dd23d6, verified as the brief's step one): main is 248 commits behind dev, this packet exists only on dev, CLAUDE.md and lead.md target dev, and the lane retargets main PRs to dev.
 - The packet's scripts/make-samples is a protected path (fast lane refuses scripts/), so the make step and its --check mode are Swift code in AfterGlowCLITests: the check runs as a test inside scripts/ci, regeneration runs the same code with MAKE_SAMPLES=1. SS-7 then needs no scripts/ci edit.
@@ -55,6 +56,6 @@ Wave plan (one PR per slice, brief rule 10; each slice PR stacks on the one befo
 - #4100 (SS-vector, draft on #4094): Cards.design, Logo.design fixture, Bounce.flare. Flare files are pretty JSON, the full slice was 808 lines, so Title/Logo.flare fixtures go in a follow-up PR (SS-vector-b, make files kept in scratchpad/deferred) and Bounce's UITests fixture copy rides with SS-z.
 - #4108 gap (line:flare): headless Flare commands only reach layer id layer-1; make files use layer-1/layer-2.
 - Belt reads lead/suite-<feature> with docs/leads/suite-<feature>/; every record push mirrors to both names.
-- #4094 (SS-a): open, fast-lane, head cf37000, waiting on the lane's macOS build. Its disabled count asserts (Cards ≥6 layers, Bounce 2 s, beach 3 layers, Intro 5 s and 3 layers) are the builder's reading; later slices may adjust them. Fixture-only make files live in Bundle/Samples/make/fixtures-only/. scripts/bundle-apps copies all of Bundle/Samples (make/ and README ship in bundles): protected script, noted for the supervisor.
+- #4094 (SS-a): merged as e78df8233 at ~17:15Z. Its disabled count asserts (Cards ≥6 layers, Bounce 2 s, beach 3 layers, Intro 5 s and 3 layers) are the builder's reading; later slices may adjust them. Fixture-only make files live in Bundle/Samples/make/fixtures-only/. scripts/bundle-apps copies all of Bundle/Samples (make/ and README ship in bundles): protected script, noted for the supervisor.
 - #4092 gap (line:design): headless Design commands that add content; Cards.design stays minimal until it lands.
 - dev-red #3856 (Photo CommandPathTests, Flare SetLayerParent): not this feature's.

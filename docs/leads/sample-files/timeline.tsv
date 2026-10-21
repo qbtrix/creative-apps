@@ -15,3 +15,5 @@ utc	stage	event	ref	note
 2026-10-21T16:46Z	3	stage-start	wave 4	SS-z on #4115
 2026-10-21T17:00Z	3	pr-opened	#4129	SS-z journey, RJ-X66, Bounce fixture, built; feature-done
 2026-10-21T17:06Z	3	poll	#4094	lane macOS build green, awaiting batch; #4100 #4112 #4115 #4129 drafts
+2026-10-21T17:30Z	3	merged	#4094	SS-a e78df8233
+2026-10-21T17:30Z	3	ready	#4100	dev merged in, CI PASS, head cfa47ab72
