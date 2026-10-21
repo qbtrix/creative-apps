@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-21T07:08:24Z	3	AC-tools part 1 PR #3952 open	-	after #3941/#3943 merge: AC-tools part 2 (Design/Photo letters + DesignToolsKeyTests/PhotoToolsKeyTests)
 2026-10-21T07:14:42Z	3	heartbeat 07:14: no merges yet	-	after #3941/#3943 merge: AC-tools part 2
 2026-10-21T07:37:13Z	3	heartbeat 07:37: no merges; mac builds green/queued	-	after #3941/#3943 merge: AC-tools part 2
+2026-10-21T07:59:16Z	3	heartbeat 07:59: queued behind older batches	-	after #3941/#3943 merge: AC-tools part 2
