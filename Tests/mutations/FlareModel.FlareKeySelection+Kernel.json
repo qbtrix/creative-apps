@@ -1,0 +1,30 @@
+[
+  {
+    "label": "hidden layers skipped",
+    "file": "Sources/FlareModel/FlareKeySelection+Kernel.swift",
+    "find": "        return rows.flatMap { row in",
+    "replace": "        return rows.filter(\\.isVisible).flatMap { row in",
+    "tests": "FlareTimelineEditTests"
+  },
+  {
+    "label": "the scene's owner ignored",
+    "file": "Sources/FlareModel/FlareKeySelection+Kernel.swift",
+    "find": "        let rows = services.keyframes.rows(document, owner: owner)\n",
+    "replace": "        let rows = services.keyframes.rows(document, owner: selectedSceneID.map(LayerOwner.scene) ?? owner)\n",
+    "tests": "FlareTimelineEditTests"
+  },
+  {
+    "label": "the earlier pick kept beside the new one",
+    "file": "Sources/FlareModel/FlareKeySelection+Kernel.swift",
+    "find": "        selectedKeys = selection.ordered\n",
+    "replace": "        selectedKeys += selection.ordered\n",
+    "tests": "FlareTimelineEditTests"
+  },
+  {
+    "label": "a refusal gives no reason",
+    "file": "Sources/FlareModel/FlareKeySelection+Kernel.swift",
+    "find": "        if let help = selectAllKeysHelp { return timelineError = help }\n",
+    "replace": "        if selectAllKeysHelp != nil { return }\n",
+    "tests": "FlareTimelineEditTests"
+  }
+]

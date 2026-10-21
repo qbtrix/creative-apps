@@ -32,7 +32,8 @@ extension HaloProject: HeadlessDocument {
     @Test func oneSpecPerCase() {
         let ids = HaloCommand.allCases.map(\.commandID)
         #expect(ids.count == 62 && Set(ids).count == ids.count)
-        #expect(catalog.ids == ids.sorted() && HaloProject.commandSpecs.map(\.id) == ids)
+        let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
+        #expect(catalog.ids == (ids + shapes).sorted() && HaloProject.commandSpecs.map(\.id) == ids + shapes)
     }
 
     @Test func areaHelpMatches() {
@@ -109,6 +110,7 @@ extension HaloProject: HeadlessDocument {
         "the step names the property or direction": ["inspector.set-property inspector.set-property-text inspector.toggle-animation inspector.toggle-key layer.send-backward: stepNamedTitle"],
         "a no-op edit stays enabled (in point at frame 0, drag end with no drag)": ["animation.set-in-point viewer.drag-end: stepNamedTitle",
             "animation.set-in-point viewer.drag-end: editRecordsOneStep", "animation.set-in-point viewer.drag-end: undoRestoresBytes"],
+        "the kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "undo of a duplicate keeps the bumped id counter": ["layer.duplicate: undoRestoresBytes"],
         "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-color text.set-size: exampleRuns"],
         "files and rendering run through HaloHeadless in AC-h2": ["file.open file.save file.save-as render.start: exampleRuns"],
