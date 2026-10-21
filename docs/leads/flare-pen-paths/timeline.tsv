@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-21T16:31Z	heartbeat	poll	-	#4027 macOS build 39625398668 still queued; repo-wide backlog (28 queued runs, macOS runners busy since 15:21Z)
 2026-10-21T17:06:25Z	FP-a	question	#4027	rule 23: build 39625398668 queued 1h40m, supervisor asked on #3519
 2026-10-21T17:31:01Z	FP-a	answer	#4027	supervisor moved #4027 to the local Mac gate (merges on pass); head a74ae98e after a dev merge; PN-3 #3770 open; no FL-m PR
+2026-10-21T17:55:05Z	heartbeat	poll	#4027	still open on the local Mac gate (no status on a74ae98e yet); #4011/#4013 open; PN-3 #3770 open; no FL-m PR
