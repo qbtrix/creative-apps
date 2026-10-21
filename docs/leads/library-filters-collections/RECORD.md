@@ -13,7 +13,7 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 | FC-b | filter bar narrows by flag, rating, hide rejects; N of M; Clear Filter | FC-6, FC-7 | J13 | FC-a | no | 0 | done (run 39582236683) | - | - |
 | FC-c | New Collection, add/remove/rename/delete as undo steps; sidebar drop | FC-8, FC-9, FC-10 | J14 | FC-a; S-L9 #3411 (FC-10) | yes | 0 | done with gap #4126 (FC-10 waits S-L9 #3411) | 39614555474 | - |
 | FC-d | smart collection from filter; rules edited as undo steps | FC-11, FC-12 | J15 | FC-a; FC-b (FC-12) | no | 0 | FC-11 merged; FC-12 #3551 fixing (red Linux: dev perf list) | - | - |
-| FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | FC-13, FC-15 merged; FC-14 #4056 in the lane (test disabled until #4099 perf line, merged; follow-up drops .disabled); FC-16 planned | - | - |
+| FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | FC-13, FC-15 merged; FC-14 #4056 merged (6eaa805); enable-timing follow-up #4146; FC-16 planned | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -120,3 +120,4 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 - 2026-10-21T16:43:01Z stage: supervisor said close FC-c with FC-10 as a gap. Filed gap #4126 (waits on #3411). Posted Belt-Slice-Done FC-c on run 39614555474 (green Linux check containing FC-9 ded2ca5), gaps #4126.
 - 2026-10-21T17:06:01Z check: FC-12 #3551 macOS build 39626013628 cancelled in swift build (not a compile error), rerun 403, asked supervisor on #1563. FC-14 #4056 macOS build green 39625628817, clean, waiting lane sweep. Findings 0.
 - 2026-10-21T17:28:16Z check: supervisor re-queued FC-12's macOS build (they had cancelled it for a promote run). FC-14 #4056 goes with the next lane sweep. Neither merged yet. Findings 0.
+- 2026-10-21T17:59:22Z check: FC-14 #4056 merged 17:34Z (6eaa805). FC-12 #3551 got needs-rebase (conflicts with FC-14 in LibraryCollections.swift and the seam test); merged dev, both unavailable flags nil, CI: PASS, pushed c931a176c, Head moved. Opened #4146, which drops .disabled from the FC-14 timing test (perf line on dev). Findings 0. FC-16 waits for FC-12.
