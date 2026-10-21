@@ -17,8 +17,11 @@ public enum AreaShape: Hashable, Sendable, Codable {
 public enum AreaCombine: String, Hashable, Sendable, Codable, CaseIterable {
     /// The four modes.
     case replace, add, subtract, intersect
-    /// The mode the held keys ask for. AR-1 stub: always replace.
-    public init(_ modifiers: EditModifiers) { self = .replace }
+    /// The mode the held keys ask for: Shift adds, Option subtracts, both intersect; Command alone changes nothing.
+    public init(_ modifiers: EditModifiers) {
+        let shift = modifiers.contains(.shift), option = modifiers.contains(.option)
+        self = shift ? (option ? .intersect : .add) : (option ? .subtract : .replace)
+    }
 }
 
 /// The area as the ordered steps that make it.
