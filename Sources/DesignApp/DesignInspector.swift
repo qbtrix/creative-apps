@@ -146,8 +146,8 @@ private struct DesignNodeProperties: View {
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     DesignInspectorFill(model: model, perform: perform)
-                    InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
-                        perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
+                    InspectorColorWellRow(label, color: node.fill.hex) {
+                        perform(.setFill(node.id, DesignColor(hex: $0)))
                     }
                     .accessibilityIdentifier("design.fill")
                     .disabled(lockHelp != nil)
@@ -190,8 +190,8 @@ private struct DesignSeveralProperties: View {
                 let fillHelp = model.styleHelp(.fill)
                 InspectorSection("Fill") {
                     if let fill = model.sharedValue(\.fill) {
-                        InspectorColorWellRow("Fill", color: HexColor(fill.red, fill.green, fill.blue)) {
-                            perform(.setStyle(.fill(DesignColor($0.red, $0.green, $0.blue))))
+                        InspectorColorWellRow("Fill", color: fill.hex) {
+                            perform(.setStyle(.fill(DesignColor(hex: $0))))
                         }
                         .accessibilityIdentifier("design.fill")
                         .disabled(fillHelp != nil)

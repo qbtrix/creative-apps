@@ -10,7 +10,7 @@
 // its accessibility value) that drags over `sizeBarRange`, so the usual
 // sizes sit clear of its label, and types over `fontSizeRange` (#2180), and
 // sends .setFontSize per sample and .endTextSizeScrub at the end, one step;
-// an InspectorColorRow (`halo.inspector.text.color`, from
+// an InspectorColorWellRow (`halo.inspector.text.color`, from
 // `selectedLayerColor`) that sends .setLayerColor in 8-bit sRGB. A refusal
 // naming one of these controls shows once, right under that control
 // (`textRefusal(at:)`, #2181); `owns` keeps the layer inspector's catch-all
@@ -109,9 +109,8 @@ struct HaloTextInspector: View {
     /// The layer color as an 8-bit sRGB well and hex field.
     private func color(_ current: HaloLayerColor) -> some View {
         let help = model.unavailableHelp(for: .setLayerColor(current))
-        let b = current.bytes
-        return InspectorColorRow("Color", hex: HexColor(b.red, b.green, b.blue)) { hex in
-            perform(.setLayerColor(HaloLayerColor(bytes: hex.red, hex.green, hex.blue)))
+        return InspectorColorWellRow("Color", color: current.hex) {
+            perform(.setLayerColor(HaloLayerColor(hex: $0)))
         }
         .disabled(help != nil)
         .help(help ?? "Color")
@@ -130,5 +129,16 @@ struct HaloTextInspector: View {
     private func reset() {
         draft = nil
         editing = false
+    }
+}
+
+/// Halo's one bridge to SuiteUI's HexColor, over the layer color's 8-bit
+/// sRGB `bytes` (each channel clamped, times 255, rounded).
+extension HaloLayerColor {
+    init(hex: HexColor) { self.init(bytes: hex.red, hex.green, hex.blue) }
+
+    var hex: HexColor {
+        let b = bytes
+        return HexColor(b.red, b.green, b.blue)
     }
 }

@@ -82,9 +82,7 @@ struct ToolOptionsSection: View {
     }
 
     private func colorRow(_ options: ToolOptions) -> some View {
-        InspectorColorWellRow("Color", color: HexColor(options.red, options.green, options.blue)) {
-            perform(.toolOption(.color(red: $0.red, green: $0.green, blue: $0.blue)))
-        }
+        InspectorColorWellRow("Color", color: options.hex) { perform(.toolOption(.brushColor($0))) }
         .accessibilityIdentifier("photo.tool.color")
     }
 
@@ -108,4 +106,14 @@ func toolCommand(
 ) -> some View {
     InspectorAction(ToolbarAction(title, systemImage: symbol, unavailableHelp: help) { perform(intent) })
         .accessibilityIdentifier("photo.tool." + title.lowercased().replacingOccurrences(of: " ", with: "-"))
+}
+
+/// Photo's one bridge to SuiteUI's HexColor: the brush color's 8-bit sRGB channels.
+extension ToolOptions {
+    var hex: HexColor { HexColor(red, green, blue) }
+}
+
+extension ToolOptionEdit {
+    /// The brush color edit for `hex`.
+    static func brushColor(_ hex: HexColor) -> ToolOptionEdit { .color(red: hex.red, green: hex.green, blue: hex.blue) }
 }
