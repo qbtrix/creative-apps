@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-21T08:06:10Z	stage	FC-7 #3534 dev merged (766b255dd), gate CI: PASS, un-drafted, Head moved
 2026-10-21T08:07:51Z	stage	FC-9 #3546 dev merged (48ddfc085), gate CI: PASS, mutate 11/11, un-drafted, Head moved
 2026-10-21T08:18:58Z	check	FC-7 #3534, FC-9 #3546, FC-15 #3539 clean; per-PR macOS builds 39567176986/39567243117/39564329849 queued; FC-12 #3551 waits on #3534
+2026-10-21T08:41:02Z	check	macOS build green for FC-15 #3539 and FC-7 #3534 (lane merges next sweep); FC-9 #3546 build queued; FC-12 #3551 waits on #3534
