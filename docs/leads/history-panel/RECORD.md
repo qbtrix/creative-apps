@@ -5,7 +5,8 @@ Run: act-1a15fc7d29e-gz1t (line lead with #3471 file-flow) · Session: claude/hi
 Earlier run: act-1a15ac118a1-s70v (PH-a, PH-u done)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
-Next: PH-6 (revive lead/history-panel-PH-6) and PH-5 builders in parallel (PH-m); then PH-7, PH-8 (PH-z)
+Next: #4160 (PH-6) in the lane's macOS gate; #4162 (PH-5) needs-rebase fixer; then PH-7, PH-8 (PH-z)
+Record moved: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (Belt's name); lead/history-panel keeps the old copy
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,8 +21,8 @@ Next: PH-6 (revive lead/history-panel-PH-6) and PH-5 builders in parallel (PH-m)
 |---|---|---|---|---|
 | PH-1, PH-2 | PH-a | stubs, tab, menu | #3708 | merged |
 | PH-3, PH-4 | PH-u | listing, snapshots, budget | #3762, #3818 | merged (mac fixes #3979, #4111) |
-| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | – | building |
-| PH-6 | PH-m | autosave on RecoveryFolder (branch lead/history-panel-PH-6, 3 commits from 2026-10-20) | – | building (merge dev, regate) |
+| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | needs-rebase (golden photo.list-commands.json), fixer |
+| PH-6 | PH-m | autosave on RecoveryFolder | #4160 | in lane (macOS gate) |
 | PH-7 | PH-z | journeys on live | – | waits PH-m |
 | PH-8 | PH-z | status built, feature-done | – | waits PH-7 |
 
@@ -35,3 +36,4 @@ Next: PH-6 (revive lead/history-panel-PH-6) and PH-5 builders in parallel (PH-m)
 - transform:PT-m wait treated as met: transform is status built (#4136); PT-6 (#4131) still open, so PH-5's catalog and command-id edits stay additive (append only), as the supervisor allowed for PF-3.
 - autosave-history AH-m/AH-z treated as met (AH-8 #3629 merged; Design and Halo adopted).
 - PH-m ships as two PRs (PH-6, PH-5): combined they pass ~500 lines.
+- PR bodies: the session's GitHub proxy appends an attribution footer to PR bodies and comments; commits are clean and the lane strips it from squash commits. Asked the supervisor.
