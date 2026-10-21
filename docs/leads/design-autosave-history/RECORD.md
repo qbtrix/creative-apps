@@ -59,3 +59,4 @@ Next: Belt-Slice-Done DA-u once merged-done; DA-a critics on journeys design 395
 - 2026-10-21T08:01Z: heartbeat. #3956 macOS build 39562423160 green at 71892d02, waiting for a lane sweep (the old fast-lane check reads cancelled). GF-6 #3742 open. #3957 open.
 - 2026-10-21T08:23Z: heartbeat. #3956 still unmerged (build green; lane runs 39567378240 and 39567595356 cancelled, 39568550736 pending). GF-6 #3742 and #3957 open.
 - 2026-10-21T08:31Z: #3956 merged; it closed #3946, #3948 and #3950. Fix batch wf_37138a1c-95e for #3945 and #3949 on dev 237777e5 (still round 1 for them). Open DA-a findings: #3945, #3947 (waits on #3957), #3949.
+- 2026-10-21T08:45Z: heartbeat. Fixer r-b1 (wf_37138a1c-95e) working on #3945 and #3949 (DesignHistoryArea+Kernel.swift, DesignEditorSnapshots.swift). GF-6 #3742 and #3957 open.
