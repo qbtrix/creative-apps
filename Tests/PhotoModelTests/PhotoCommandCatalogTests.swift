@@ -62,9 +62,9 @@ struct PhotoCommandCatalogTests {
     @Test func conformance() throws {
         #expect(PhotoWorkspace.catalog.ids.count == PhotoWorkspace.commands.count)
         let fixture = PhotoLawsDocument(ws: try Self.lawsFixture())
-        // Only exampleRuns, and only for a command whose availability says why it is off on the fixture (tool.gradient
-        // until PG-3): its example refuses as unavailable, the filter Design's and Library's laws use. The file-flow
-        // examples need a recent file, a saved image or a readable file on disk: PhotoFileFlowTests runs them.
+        // Only exampleRuns, and only for a command whose availability says why it is off on the fixture: its example
+        // refuses as unavailable, the filter Design's and Library's laws use. The file-flow examples need a recent
+        // file, a saved image or a readable file on disk: PhotoFileFlowTests runs them.
         let needsFiles = Set(["file.clear-recent", "file.drop", "file.open-in", "file.open-recent"])
         let problems = CatalogConformance.check(PhotoLawsDocument.self, fixture: fixture).filter { problem in
             let id = String(problem.prefix { $0 != ":" })
@@ -139,10 +139,12 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Every non-tool command but the shared file-flow ones and Free Transform's (transform PT-5, ahead of its menu
-    /// items), in menu order (the catalog lists them as the menus do).
+    /// Commands with no menu item: the catalog's only (gradient-fill PG-3).
+    static let noMenu: Set = ["select.rect", "image.gradient"]
+    /// Every non-tool command but the menu-less ones, the shared file-flow ones and Free Transform's (transform PT-5,
+    /// ahead of its menu items), in menu order (the catalog lists them as the menus do).
     static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {
-        !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !fileFlowIDs.contains($0)
+        !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !noMenu.contains($0) && !fileFlowIDs.contains($0)
     }
     /// The shared file-flow commands (PF-3), which today's menus don't show yet.
     static let fileFlowIDs = Set(FileFlowCommands.specs(PhotoWorkspace.self).map(\.id))
