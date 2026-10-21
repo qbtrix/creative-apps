@@ -115,3 +115,4 @@ utc	stage	event	ref	note
 2026-10-21T20:23Z	3	check	PN-m	merged-done on Linux check 39667367345 (606e8212); Belt-Slice-Done posted. PN-3a #3770 macOS build 39662925615 still queued
 2026-10-21T20:40Z	3	check	PN-3a	#3770 macOS build 39662925615 green; waits on lane sweep
 2026-10-21T20:54Z	3	check	PN-3a	#3770 green build, not yet swept; PN-3/PN-4 wait
+2026-10-21T21:12Z	3	check	PN-3a	#3770 merged 21:01Z; PN-3 merged dev (test helper conflict kept PN-3 side), gate running
