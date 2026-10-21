@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-21T08:21:46Z	3	heartbeat 08:21: no merges	-	after #3941/#3943 merge: AC-tools part 2
 2026-10-21T08:43:46Z	build	08:44 #3941 merged; #3943 #3952 needs-rebase	-	Belt-Slice-Done AC-zoom when scoped run 39570518579 green; fixer merging dev into #3943/#3952
 2026-10-21T08:56:35Z	build	08:58 #3943 #3952 conflicts resolved	-	lane drops needs-rebase on new heads; Belt-Slice-Done AC-zoom when run 39570518579 green
+2026-10-21T09:04:29Z	build	09:05 needs-rebase dropped on #3943 #3952	-	Belt-Slice-Done AC-zoom when run 39570518579 green; lane batches #3943/#3952
