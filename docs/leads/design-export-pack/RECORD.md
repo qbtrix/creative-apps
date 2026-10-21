@@ -4,7 +4,7 @@ Issue: #3467 · Packet: docs/blueprints/design/features/export-pack.md
 Run: act-1a15bc68263-njsv · Session: line lead (design) · Started: 2026-10-21T00:00Z
 Stage: 3 wave 1
 Base: 07f754f7 (origin/dev)
-Next: DX-1 is PR #3833 (head cef9b256, 7 files +115/−12, CI: PASS), lane macOS build dispatched (01:16Z; 2026-10-21T03:06Z: #3834's macOS build passed with DX-1's commits in it; #3833's build was cancelled while still queued, never on a runner, and the supervisor is asked on #3833 to re-run it or add a Mac-Check line; blocked poll 3 at 2026-10-21T04:11Z, no reply, follow-up posted). DX-3 is PR #3834 (head 8f669ed3, stacked on #3833; combined 10 files +307/−35, CI: PASS, mutations 18/18). DX-2 waits XP-3; DX-4 waits SM-w (no shell-media packet or lead yet).
+Next: DX-1 and DX-3 merged together in #3834's squash (c1d0a7be, 08:08Z; DX-1's commits were ancestors of DX-3's head), #3833 closed as superseded. DX-a still needs DX-2 (waits XP-3); DX-m still needs DX-4 (waits SM-w, no shell-media packet or lead yet). Polling on (2026-10-21T08:13Z: unchanged;)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,9 +17,9 @@ Next: DX-1 is PR #3833 (head cef9b256, 7 files +115/−12, CI: PASS), lane macOS
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| DX-1 | DX-a | 1 | DesignExportOptions.size and .jpeg (refused until DX-3); DesignExportPackTests disabled | Sources/DesignModel/DesignExport+Kernel.swift, Tests/DesignModelTests/DesignExportPackTests.swift | existing export tests pass with size .scale; JPEG refused | #3833 | open (lane) |
+| DX-1 | DX-a | 1 | DesignExportOptions.size and .jpeg (refused until DX-3); DesignExportPackTests disabled | Sources/DesignModel/DesignExport+Kernel.swift, Tests/DesignModelTests/DesignExportPackTests.swift | existing export tests pass with size .scale; JPEG refused | #3833 → #3834 | merged (c1d0a7be, via #3834) |
 | DX-2 | DX-a | 1 | Size row and JPEG chip; Metadata hidden | Sources/DesignApp/DesignExport+Kernel.swift | DesignExportPackSnapshots.pixels | – | waiting |
-| DX-3 | DX-m | 2 | exact pixel sizes, JPEG refusals and flattening, RJ-D41 | Sources/DesignModel/DesignExport+Kernel.swift, Tests/DesignModelTests/DesignExportPackTests.swift, Tests/mutations/DesignModel.DesignExport+Kernel.json, Tests/RealJobs/design/exact-jpeg/ | DesignExportPackTests | #3834 | open (lane, stacked on #3833) |
+| DX-3 | DX-m | 2 | exact pixel sizes, JPEG refusals and flattening, RJ-D41 | Sources/DesignModel/DesignExport+Kernel.swift, Tests/DesignModelTests/DesignExportPackTests.swift, Tests/mutations/DesignModel.DesignExport+Kernel.json, Tests/RealJobs/design/exact-jpeg/ | DesignExportPackTests | #3834 | merged (c1d0a7be) |
 | DX-4 | DX-m | 2 | rasterizer at planned size onto the fill | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/DesignRasterizerSizeTests.swift | DesignRasterizerSizeTests | – | waiting |
 | DX-5 | DX-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignExportPackSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignExportPackTests.swift | typingWidthInTwoBodies | – | waiting |
 | DX-6 | DX-u | 2 | journey written, skipped | UITests/DesignJourneyTests+ExportPack.swift | compiles, skipped | – | waiting |
@@ -42,3 +42,4 @@ Next: DX-1 is PR #3833 (head cef9b256, 7 files +115/−12, CI: PASS), lane macOS
 - 2026-10-21T01:05Z DX-1 (#3833) touched StyleTypes.swift (.jpeg lives in DesignExportFormat), EditContracts.swift (DesignRefusal.notYet for the packet wording), the export sheet note, and its mutation plan; all DesignModel/DesignApp. The JPEG chip already shows (refused), so export-sheet snapshots likely change ahead of DX-2.
 - 2026-10-21T01:05Z DX-3 started stacked on DX-1: its task waits are DX-1 and XP-6 (merged); the slice's SM-w wait applies to DX-4.
 - 2026-10-21T01:23Z DX-3 (#3834): JPEG files carry the frame fill as background (white with no frame); RJ-D41 plan half runs on Linux, the job folder is pending DX-7 with platforms []; the render .jpeg case refuses until DX-4. Repointed one stale anchor in DesignModel.DesignExportSheet+Kernel.json.
+- 2026-10-21T08:13Z #3834 merged at 08:08Z (batch of 8, run 39564910498) carrying DX-1's commits; #3833 closed as superseded with one comment (6311297787), so the macOS re-run question is moot. Neither DX-a nor DX-m is whole yet (DX-2, DX-4 wait).
