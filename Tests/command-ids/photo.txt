@@ -35,6 +35,11 @@ layer.select-above
 layer.select-below
 layer.send-backward
 layer.toggle-visibility
+place.focus
+place.image
+place.read
+place.replace
+place.reset-size
 select.all
 select.deselect
 select.rect

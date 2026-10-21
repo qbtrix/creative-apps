@@ -4,7 +4,7 @@
   "why": "RJ-P37 (photo/place-image): places logo.png (200 x 100, red left half, blue right half; its bytes are the base64 below) centred on an 800 x 600 white image and checks the flattened PNG: 800 x 600, the logo at 300, 250 at 100%, white around it. The trap: the place opens the logo as a new document or lands it at the top-left corner.",
   "inputs": ["input/*.png"],
   "steps": [
-    {"id": "place.image", "params": {"name": "logo.png", "base64": "iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAIAAABM5OhcAAABJUlEQVR42u3SMQ0AAAzDsPInvVHovh2WgiByJlGZB4c8AAsssMACCyyBBRZYYIEFlsACCyywwAJLYIEFFlhggSWwwAILLLDAElhggQUWWGAJLLDAAgsssAQWWGCBBRZYAgsssMACCyyBBRZYYIEFlsACCyywwAJLYIEFFlhggSWwwAILLLDAElhggQUWWGDJA7DAAgsssMASWGCBBRZYYAkssMACCyywBBZYYIEFFlgCCyywwAILLIEFFlhggQWWwAILLLDAAktggQUWWGCBJbDAAgsssMASWGCBBRZYYAkssMACCyywBBZYYIEFFlgCCyywwAILLIEFFlhggQWWDAALLLDAAgssgQUWWGCBBZbAAgsssMACS2CBBRZYYIElsMAC63cL/ofWZIxYFTgAAAAASUVORK5CYII=", "x": null, "y": null, "fill": null}}
+    {"id": "place.image", "params": {"name": "logo.png", "base64": "iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAIAAABM5OhcAAABJUlEQVR42u3SMQ0AAAzDsPInvVHovh2WgiByJlGZB4c8AAsssMACCyyBBRZYYIEFlsACCyywwAJLYIEFFlhggSWwwAILLLDAElhggQUWWGAJLLDAAgsssAQWWGCBBRZYAgsssMACCyyBBRZYYIEFlsACCyywwAJLYIEFFlhggSWwwAILLLDAElhggQUWWGDJA7DAAgsssMASWGCBBRZYYAkssMACCyywBBZYYIEFFlgCCyywwAILLIEFFlhggQWWwAILLLDAAktggQUWWGCBJbDAAgsssMASWGCBBRZYYAkssMACCyywBBZYYIEFFlgCCyywwAILLIEFFlhggQWWDAALLLDAAgssgQUWWGCBBZbAAgsssMACS2CBBRZYYIElsMAC63cL/ofWZIxYFTgAAAAASUVORK5CYII="}}
   ],
   "atomic": true,
   "output": {"dir": "out", "name": "{stem}-placed", "format": "png", "options": {}},

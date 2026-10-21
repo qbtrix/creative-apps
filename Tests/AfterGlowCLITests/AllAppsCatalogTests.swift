@@ -59,6 +59,7 @@ struct AllAppsCatalogTests {
             "easing.select-lane-keys: queryOrViewChangesNoBytes", "timeline.pick-keys: queryOrViewChangesNoBytes",
             "layer.select: queryOrViewChangesNoBytes",
             "timeline.scrub: queryOrViewChangesNoBytes", "viewer.drag-begin: queryOrViewChangesNoBytes"],
+        "The kernel's place.image example is an SVG, which Photo doesn't place": ["place.image: exampleRuns"],
         "The kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
