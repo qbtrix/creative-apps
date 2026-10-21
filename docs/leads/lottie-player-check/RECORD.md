@@ -4,7 +4,7 @@ Issue: #3792 · Packet: docs/blueprints/flare/features/lottie-player-check.md
 Run: act-1a15e10a86f-7bk9 · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T10:50Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T22:49Z) LP-4 #4132 still open at 82c169e1; supervisor question already on #3792 (rule 23 met). dev macOS build is broken by a Photo test (see #3856), which also blocks LP-4's macOS run.
+Next: (2026-10-21T23:12Z) LP-4 #4132 still open (no-fast-lane, supervisor merge after macOS); LP-6 ready on lead/lottie-player-check-LP-6. dev macOS build red until #4215 lands.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
