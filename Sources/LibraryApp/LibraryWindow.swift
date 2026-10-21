@@ -124,7 +124,8 @@ struct LibraryWindow: View {
         photo.resetCrop = crop.resetCrop
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
-            view: viewMenu, photo: photo, export: exportMenu, reasons: model.services.unavailable)
+            view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
+            reasons: model.services.unavailable)
     }
 
     /// A single key to the area that owns it; ignored (so the grid or the
