@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T00:07Z	3	pushed	#3681	PG-1 mac fix ee6da4d4, CI: PASS, Head moved; waits a macOS build
 2026-10-21T00:07Z	3	pushed	PG-2,PG-3,PG-4	mac fix cherry-picked onto the held branches
 2026-10-21T00:17Z	3	heartbeat	-	#3681 macOS build dispatched 00:07Z on ee6da4d4; #3695 open; no supervisor reply
+2026-10-21T00:37:33Z	check	heartbeat	#3681	PG-1 macOS build 39519366166 still queued (slots full); PG-2/3/4 held; #3695 GF-2 integrated by lane, Linux check running
