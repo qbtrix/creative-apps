@@ -406,9 +406,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   starts with GITHUB_TOKEN fire no workflow_run. Its run is titled `after CI
   run <id>: journeys <app|full> at <sha>` and checks out the commit that CI
   run tested. Its concurrency group is
-  `journeys-<branch>-<app|full>` with cancel-in-progress, so a journeys job
-  waiting for a macOS runner never holds `ci-dev`, and only the newest run
-  of each scope waits. On a branch, or to ask for one by hand: `gh workflow
+  `journeys-<branch>-<app|full>`, so a journeys job waiting for a macOS
+  runner never holds `ci-dev`. A running journeys run is never cancelled;
+  only the newest pending run of each scope waits. On a branch, or to ask for one by hand: `gh workflow
   run journeys.yml --ref <branch> [-f app=<app>]` (findings and the audit
   baseline move only on `dev`).
 - A scoped run proves one app: `gh workflow run ci.yml --ref dev -f

@@ -22,9 +22,11 @@
 # the run title names the CI run it follows ("after CI run <id>: ...").
 #
 # Concurrency is on the macOS job, keyed by branch and scope
-# (journeys-<branch>-<app|full>), cancel-in-progress: a newer dispatch of the
-# same scope cancels the waiting or running one, so only the newest waits for
-# a runner. It is not workflow-level so a running Audit lower is never cancelled.
+# (journeys-<branch>-<app|full>), never cancelling a running one: GitHub keeps
+# the running run plus the newest pending one and cancels a superseded pending
+# one, so a journeys run that started always finishes (Findings, Audit lower)
+# and only the newest waits for a runner. Its own group, so it never holds CI's
+# `ci-dev`.
 name: Journeys
 run-name: "${{ inputs.ci_run && format('after CI run {0}: ', inputs.ci_run) || '' }}journeys ${{ inputs.app || 'full' }} at ${{ inputs.sha || github.sha }}"
 
@@ -61,7 +63,7 @@ jobs:
     continue-on-error: true
     concurrency:
       group: journeys-${{ github.ref_name }}-${{ inputs.app || 'full' }}
-      cancel-in-progress: true
+      cancel-in-progress: false
     outputs:
       ui: ${{ steps.ui.outcome }}
     # issues: write lets scripts/quarantine check each quarantined journey's
