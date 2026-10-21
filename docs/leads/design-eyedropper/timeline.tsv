@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-21T03:06Z	check	DY-u macOS build green	#3816	lane macOS build 39524856380 success for 560cc535; waiting the lane sweep to merge
 2026-10-21T03:27Z	check	DY-u ready, waits batch	#3816	560cc535 clean, mac build green; not yet batched/merged
 2026-10-21T03:50Z	check	DY-u in lane batch (bisect probe -2)	#3816	waits batch
+2026-10-21T04:13Z	check	DY-u in lane batch bisect (probe -0 running)	#3816	waits batch
