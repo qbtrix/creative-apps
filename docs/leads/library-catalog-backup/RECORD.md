@@ -39,3 +39,4 @@ Next: (11:50: CI at 39d90e3 red on dev-red #3856, not ours; slice-done held; lan
 - BK-5m waits on file-flow:LF-m, folders:FO-m and suiteui adopt-kernel-autosave AK-library; none merged.
 - 12:21Z: BK-3 #3965 merged (73c3deb). BK-u #3967 head d65a282 in the lane (fast-lane). BK-a Belt-Slice-Done waits on scoped library run 39593465885 (queued, contains dc7df9b).
 - 12:44Z: no change; all four PRs clean + fast-lane, waiting on the lane's macOS batch gate; scoped library run 39593465885 still queued (macOS runners backlogged since 11:08Z); dev Linux checks red (dev-red, not ours).
+- 13:17 poll: PRs open/clean (BK-u #3967, LF-3 #4024, FO-u #3963, FO-5 #4022) awaiting lane macOS batch; macOS runners still backlogged; scoped library run 39593465885 queued; #3928 open (LF-4 blocked).
