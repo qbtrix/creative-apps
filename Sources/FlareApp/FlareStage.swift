@@ -10,7 +10,7 @@
 // Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
 // ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
 // `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
-// while frames drop) and "Text not shown (n)". A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
+// while frames drop), "Text not shown (n)" and, under Direct Select, why no points can be edited (`pathHelp`). A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
 // `flare.stage.zoom` reads the zoom for journeys. It only reads `model`; every change goes through `perform`.
 import AppKit
 import FlareCore
@@ -95,6 +95,7 @@ struct FlareStage: View {
         if let warning = pills.maskWarning {
             Text(warning).accessibilityIdentifier("flare.status.masks").statusPill(.warning)
         }
+        if let help = pills.pathHelp { Text(help).accessibilityIdentifier("flare.status.pathHelp") }
     }
 
     /// The scene's size for the status bar in whole points ("550 × 400 pt"); a non-finite side reads 0.

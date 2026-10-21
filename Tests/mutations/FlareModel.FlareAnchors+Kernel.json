@@ -28,6 +28,13 @@
     "tests": "FlareAnchorEditTests"
   },
   {
+    "label": "the status bar never says why Direct Select can't edit points",
+    "file": "Sources/FlareModel/FlareStatusRead.swift",
+    "find": "        if tool == .directSelect { pills.pathHelp = pathHelp }\n",
+    "replace": "",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
     "label": ".anchorWinsOverItem: a press on an anchor of the picked item grabs the item instead",
     "file": "Sources/FlareModel/FlareDrag.swift",
     "find": "            let anchor = grip == nil ? anchorPress(",
