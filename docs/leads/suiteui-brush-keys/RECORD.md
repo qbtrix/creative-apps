@@ -4,7 +4,7 @@ Issue: #3758 · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3756) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: wait for the lane to merge #4057 (BK-a), #4058 (BK-m, stacked) and #4060 (C4 docs); then a CI run on dev whose Linux job contains them. BK-u/photo/design/flare wait on unstarted features (see Open)
+Next: #4057 Linux check 39616976550 red only on LibraryFoldersTests.tenThousandPaths (20.4 ms vs 20 ms, unrelated); rerun not permitted, so dev merged into BK-a (1e2278b8), gating, then push and move Head:. #4060 merged (fb6f4b83). Then retarget #4058 once #4057 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,7 @@ Next: wait for the lane to merge #4057 (BK-a), #4058 (BK-m, stacked) and #4060 (
 | BK-1 | BK-a | 1 | stubs + six CommandSpecs | Sources/SuiteKernel/Stroke/BrushKeys.swift, Sources/SuiteKernel/Stroke/BrushKeyCommands.swift | CommandShapeTests | #4057 66acfc5a | open |
 | BK-2 | BK-a | 1 | disabled BrushKeysTests | Tests/SuiteKernelTests/BrushKeysTests.swift | BrushKeysTests (disabled) | #4057 | open |
 | BK-3 | BK-m | 2 | bodies + plan SuiteKernel.BrushKeys | Sources/SuiteKernel/Stroke/BrushKeys.swift, Tests/SuiteKernelTests/BrushKeysTests.swift, Tests/mutations/SuiteKernel.BrushKeys.json | BrushKeysTests; mutate (5/5) | #4058 4987a228 | open |
-| BK-4 | BK-m | 2 | C4 part kernel-stroke | docs/c4/parts/creative-apps/suite-kernel/kernel-stroke.json | scripts/ci C4 | #4060 789a94cb (docs-only; existing part description can only change in a docs-only PR) | open |
+| BK-4 | BK-m | 2 | C4 part kernel-stroke | docs/c4/parts/creative-apps/suite-kernel/kernel-stroke.json | scripts/ci C4 | #4060 merged fb6f4b83 (docs-only; existing part description can only change in a docs-only PR) | open |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
