@@ -49,3 +49,4 @@ time	kind	note
 2026-10-21T21:05Z	start	run act-1a1605b0534-rn47	-	resumed DK; main verified 0dd23d65
 2026-10-21T21:05Z	done	DK-a	39670298178	Belt-Slice-Done gaps #3865 #3871 #3873; Mac-Finish-Wanted posted
 2026-10-21T21:20Z	check	waits	-	DS-u (DT-u building), DS-m (DT-m #4187, DY-m) not merged
+2026-10-21T22:05Z	check	waits (poll 2)	-	DT-u #4159, DT-m #4187, DG-m #4189 open; DS-u/DS-m waiting; #4081 mac build 39680406979 queued
