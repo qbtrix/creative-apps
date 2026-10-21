@@ -21,7 +21,7 @@ Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (le
 |---|---|---|---|---|
 | PH-1, PH-2 | PH-a | stubs, tab, menu | #3708 | merged |
 | PH-3, PH-4 | PH-u | listing, snapshots, budget | #3762, #3818 | merged (mac fixes #3979, #4111) |
-| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | conflicts again on the golden after a new dev change (20:48Z); fixer round 2 |
+| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | merge ready locally (fix-4162 7a991bd), held: dev red on CommandPathTests launcher baseline (#3856) |
 | PH-6 | PH-m | autosave on RecoveryFolder | #4160 | in lane (macOS gate) |
 | PH-7 | PH-z | journeys on live | – | waits PH-m |
 | PH-8 | PH-z | status built, feature-done | – | waits PH-7 |
@@ -37,3 +37,4 @@ Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (le
 - autosave-history AH-m/AH-z treated as met (AH-8 #3629 merged; Design and Halo adopted).
 - PH-m ships as two PRs (PH-6, PH-5): combined they pass ~500 lines.
 - PR bodies: the session's GitHub proxy appends an attribution footer to PR bodies and comments; commits are clean and the lane strips it from squash commits. Asked the supervisor.
+- #4162 held: dev is red on CommandPathTests.appMatchesItsBaseline(launcher), a stale launcher.txt line after #4049. Not fixed in our PR (CLAUDE.md); the merge 7a991bd is ready in scratchpad fix-4162 and gets pushed when dev is green.
