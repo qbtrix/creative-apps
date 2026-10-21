@@ -148,10 +148,12 @@ struct LibraryBrowser: View {
                 })
         } else if model.loupeItem != nil {
             LibraryLoupe(model: model, menu: menu, onStep: onStep, onGrid: onGrid)
+                .libraryShare(model)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
             LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .libraryShare(model)
         }
     }
 }
