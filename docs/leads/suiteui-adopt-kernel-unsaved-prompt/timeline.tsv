@@ -46,3 +46,4 @@ ts	kind	note
 2026-10-21T17:02:50Z	poll	#4037 in lane batch-20261021165002 (Linux 39638325928 running)
 2026-10-21T17:25:49Z	merge	UP-design #4037 merged 2f1cd8ec; waiting on dev Linux 39643409752
 2026-10-21T17:40:37Z	done	UP-design merged-done, Linux 39643409752, Mac-Finish-Wanted posted
+2026-10-21T17:55:57Z	poll	AK-flare merged (5ecec459) but UP-flare still waits on UP-photo (ST-z not on dev); UP-z waits SC-z; blocked poll 1
