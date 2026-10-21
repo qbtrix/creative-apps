@@ -27,3 +27,6 @@
 
 - 2026-10-20: status branch is `lead/halo-stroke-style`, not `lead/stroke-style`, which belongs to the SuiteUI stroke-style lead (#3450).
 - 2026-10-20: HK-1 conforms to SuiteKernel's `StrokeTarget` (Sources/SuiteKernel/Fill/StrokeCommands.swift) and `VectorStroke`, which is where dev has them, not SuiteUI/SuiteModel as the Contract says. `HaloLayer.stroke` saves only when set, so old projects open unchanged. HK-1 is held without a PR because it is one task of HK-a, under the 150-line floor once HK-2 is added, and HK-2 waits on HG-u. Notes for HK-6: replace the test helper `toggleKeyRaw` with `toggleKey(.trimEnd)` once HK-5 adds `HaloProperty.trimEnd`; it changes `strokeHelp` to "Strokes are for shape layers."
+
+## Open
+- Blocked (rule 19, run act-1a15d0eeefb-6z9l): HK-a builds on HG-u, which needs #3401 (SuiteUI probe recorder, open, no PR) and SuiteUI GF-2/GF-3. Said on #3447: https://github.com/qbtrix/creative-apps/issues/3447#issuecomment-6311967268
