@@ -2,7 +2,7 @@
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DT-u waiting on #4159; finding #4188 (no rotate knob) fixer running on fix/design-rotate-knob; DT-m: DT-5 PR #4187 open, DT-6 building stacked on #4189+#4187 (DA-m satisfied: autosave-history built)
+Stage: 3 DT-u waiting on #4159; finding #4188 fix pushed on fix/design-rotate-knob (c1dfd3d6, mutate 30/30), PR held until #4187 merges (421 lines vs dev when stacked); DT-m: DT-5 PR #4187 open, DT-6 building stacked on #4189+#4187 (DA-m satisfied: autosave-history built)
 Base: 896cafe3 (origin/dev); main verified at 0dd23d65
 Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u on a green design run; DT-6 after DG-m merges (shares DesignSVG, catalog; must update turnHelp snapshots: DesignInspectorSnapshots.transformRows, objectItemsSayWhyTheyAreOff, DesignSeveralInspectorSnapshots) and DA-m re-read
 

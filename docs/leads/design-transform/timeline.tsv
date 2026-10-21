@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-21T20:21Z	3	pr-opened	#4187	DT-5 adapter bodies, mutate 5/5
 2026-10-21T20:21Z	3	finding-filed	#4188	canvas has no rotate knob (DT-3 gap); fix round 1 started
 2026-10-21T20:27Z	3	builder-started	DT-6	commands + SVG, stacked on #4189 and #4187
+2026-10-21T20:53Z	3	fix-pushed	#4188	round 1 on fix/design-rotate-knob c1dfd3d6; PR held until #4187 merges (size cap); open gaps: multi-select knob, turned resize
