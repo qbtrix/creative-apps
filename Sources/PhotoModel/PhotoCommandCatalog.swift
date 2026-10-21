@@ -99,7 +99,8 @@ extension PhotoWorkspace {
 
     /// One command per menu item, toolbar item and palette tool, in menu order.
     public static let commands: [CommandSpec<PhotoWorkspace>] = fileCommands + editCommands + imageCommands + layerCommands
-        + FileFlowCommands.specs(PhotoWorkspace.self) + viewCommands + transformCommands + PhotoTool.allCases.map { tool in
+        + FileFlowCommands.specs(PhotoWorkspace.self) + PlaceCommands.specs(PhotoWorkspace.self) + viewCommands + transformCommands
+        + PhotoTool.allCases.map { tool in
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
