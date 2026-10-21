@@ -2,8 +2,10 @@
 // and Render… are off with no composition, on for `keyed` on `.fake` and
 // `.live`; while a render runs Render… (and Render) say so and Render Frame
 // stays on; with nothing in the way each command takes its service's own
-// help. Cancel and Close answer from the job. Linux and macOS.
+// help. Cancel and Close answer from the job, and the catalog's Render… and
+// Close Render move the kernel's run (core-loop CL-6). Linux and macOS.
 @testable import HaloModel
+import SuiteKernel
 import Testing
 
 private let pngHalf = HaloRenderSettings(format: .pngSequence, halfSize: true)
@@ -55,11 +57,11 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
 
 @Test func aRunningRenderBlocksASecondButNotRenderFrame() throws {
     var project = try keyed()
-    project.openRenderSheet()
-    #expect(project.startRender(pngHalf) != nil)
+    project.beginRender(pngHalf)
+    #expect(project.startRender() != nil)
     #expect(project.unavailableHelp(for: .openRenderSheet) == "A render is already running.")
     #expect(project.unavailableHelp(for: .startRender(pngHalf)) == "A render is already running.")
-    #expect(project.startRender(pngHalf) == nil)
+    #expect(project.startRender() == nil)
     #expect(project.unavailableHelp(for: .renderFrame) == nil)
     #expect(project.unavailableHelp(for: .cancelRender) == nil)
     #expect(project.unavailableHelp(for: .closeRenderSheet) == "Cancel the render first.")
@@ -67,11 +69,26 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
     #expect(project.renderedFrame != nil)
 }
 
+@Test func theCatalogsRenderSheetCommandsMoveTheKernelsRun() throws {
+    var project = try keyed()
+    _ = try HaloProject.catalog.run("render.open-sheet", params: .object([:]), on: &project)
+    #expect(project.renderRun == .editing(HaloRenderSettings(format: .pngSequence)))
+    _ = try HaloProject.catalog.run("render.close-sheet", params: .object([:]), on: &project)
+    #expect(project.renderRun == .idle)
+    project.beginRender(pngHalf)
+    _ = project.startRender()
+    project.endRender(.finished(frames: 48))
+    _ = try HaloProject.catalog.run("render.open-sheet", params: .object([:]), on: &project)
+    #expect(project.renderOutcomeText == "Rendered 48 frames.")
+    _ = try HaloProject.catalog.run("render.close-sheet", params: .object([:]), on: &project)
+    #expect(project.renderRun == .idle && project.renderJob == nil)
+}
+
 @Test func anEndedRenderLetsTheNextOneStart() throws {
     var project = try keyed()
-    project.openRenderSheet()
-    _ = project.startRender(pngHalf)
-    project.finishRender(.finished(frames: 48))
+    project.beginRender(pngHalf)
+    _ = project.startRender()
+    project.endRender(.finished(frames: 48))
     #expect(project.unavailableHelp(for: .openRenderSheet) == nil)
     #expect(project.unavailableHelp(for: .startRender(pngHalf)) == nil)
     #expect(project.unavailableHelp(for: .cancelRender) == "The render has already ended.")
@@ -82,7 +99,7 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
     var project = try keyed()
     #expect(project.unavailableHelp(for: .cancelRender) == "No render is open.")
     #expect(project.unavailableHelp(for: .closeRenderSheet) == "No render is open.")
-    project.openRenderSheet()
+    project.beginRender(pngHalf)
     #expect(project.unavailableHelp(for: .cancelRender) == nil)
     #expect(project.unavailableHelp(for: .closeRenderSheet) == nil)
 }
@@ -91,8 +108,8 @@ func renderFrameAndRenderSheetAreOnForAComposition(services: HaloServices) throw
     var services = HaloServices.fake
     services.compositionRendering = HelpCompositionRendering(help: "x")
     var project = try keyed(services)
-    project.openRenderSheet()
-    #expect(project.startRender(pngHalf) == nil)
+    project.beginRender(pngHalf)
+    #expect(project.startRender() == nil)
     #expect(project.renderJob?.outcome != nil)
     #expect(project.unavailableHelp(for: .cancelRender) == nil)
     project.cancelRender()

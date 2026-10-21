@@ -11,6 +11,7 @@
 // may finish. macOS only.
 #if canImport(AppKit)
 import PhotoModel
+import SuiteModel
 import Synchronization
 import SwiftUI
 import Testing
@@ -40,14 +41,14 @@ import Testing
         private let state = Mutex((started: 0, finished: 0, released: false))
         var finished: Int { state.withLock { $0.finished } }
 
-        var count: @Sendable (PhotoWorkspace) async -> [Double] {
+        var count: @Sendable (PhotoWorkspace) async -> ToneHistogram {
             { [self] _ in
                 state.withLock { $0.started += 1 }
                 while !state.withLock({ $0.released }) {
-                    do { try await Task.sleep(for: .milliseconds(20)) } catch { return [] }
+                    do { try await Task.sleep(for: .milliseconds(20)) } catch { return .empty }
                 }
                 if !Task.isCancelled { state.withLock { $0.finished += 1 } }
-                return []
+                return .empty
             }
         }
 
