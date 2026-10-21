@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T17:55:05Z	heartbeat	poll	#4132	still open, waiting on the supervisor's hand-merge after its macOS run
 2026-10-21T18:19:15Z	heartbeat	poll	#4132	Linux green on 82c169e1; waiting on the supervisor's hand-merge after its macOS run
 2026-10-21T18:42:09Z	LP-z	built	LP-6	branch lead/lottie-player-check-LP-6 at 5cec7e97; PR waits on #4132
+2026-10-21T19:05Z	heartbeat	#4132 waits on the supervisor's macOS run and hand merge; LP-6 is ready on its branch.

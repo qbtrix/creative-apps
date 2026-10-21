@@ -4,7 +4,7 @@ Issue: #3792 · Packet: docs/blueprints/flare/features/lottie-player-check.md
 Run: act-1a15e10a86f-7bk9 · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T10:50Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: LP-a and LP-m done. LP-4 is #4132 (supervisor approved; hand-merge after its macOS run). LP-6 is built on lead/lottie-player-check-LP-6 (5cec7e97: status built, feature_issue #3792; scripts/waves render --dry-run OK); its PR opens with feature-done once #4132 merges and a macOS run shows LottiePlayerParityTests unskipped, then Belt-Contact-Sheet.
+Next: (2026-10-21T19:05Z) #4132 waits on the supervisor's macOS run and hand merge; LP-6 is ready on its branch.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
