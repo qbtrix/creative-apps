@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-21T21:25Z	2	open	HG-u	PR #4207 halo-gradient-ui fd55072 (7 files, 387 lines, scripts/ci --changed PASS on Linux; footer stripped)
 2026-10-21T21:35Z	2	build	HG-m	HG-6+HG-7 committed on claude/gradient-fill-lead-25lt0t; gradient, render and catalog suites pass; RJ-H32 job added; mutation plans running
 2026-10-21T21:50Z	2	open	HG-m	PR #4216 claude/gradient-fill-lead-25lt0t d8a3e5d (15 files, +200/-32, scripts/ci --changed PASS; Mutate 5/5; footer checked)
+2026-10-21T22:27Z	2	poll	HG-u HG-m	#4207 and #4216 clean, macOS builds queued (39680681261, 39682487811); no gradient findings; HG-z waits on both merging
