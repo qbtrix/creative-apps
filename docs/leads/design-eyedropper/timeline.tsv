@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T02:00Z	check	DY-u waits macOS runner	#3816	head 560cc535 clean; lane macOS build 39524856380 still queued (27 runs queued repo-wide, one mac build running since 01:12Z; CI 39442633733, 39438701609, scoped library 39424958645 in_progress since 10-20)
 2026-10-21T02:22Z	check	DY-u waits macOS runner	#3816	head 560cc535 clean; lane macOS build 39524856380 still queued (80 min); dev Linux green at 2ab0eb96
 2026-10-21T02:44Z	check	DY-u macOS build running	#3816	lane macOS build 39524856380 in_progress for 560cc535 (clean)
+2026-10-21T03:06Z	check	DY-u macOS build green	#3816	lane macOS build 39524856380 success for 560cc535; waiting the lane sweep to merge
