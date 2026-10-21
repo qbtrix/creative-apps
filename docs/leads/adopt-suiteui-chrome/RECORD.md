@@ -2,18 +2,18 @@
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: 3 wave 1
-Base: dev b64cbb8c
-Next: after #3941/#3943 merge: AC-tools part 2
+Stage: build
+Base: dev 896cafe3
+Next: Belt-Slice-Done AC-zoom when scoped run 39570518579 green; fixer merging dev into #3943/#3952
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | in-lane #3941 | – | – |
-| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 0 | in-lane #3943 | – | – |
-| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | part 1 in-lane #3952, part 2 queued | – | – |
+| AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | merged #3941 (in run 39570518579, queued) | – | – |
+| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 0 | needs-rebase #3943, fixer on it | – | – |
+| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | needs-rebase #3952 stacked | – | – |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
-| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare | yes | 0 | blocked on SC-f #3718 + AX | – | – |
+| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare | yes | 0 | blocked SC-f,AX-photo,AX-library | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -34,6 +34,7 @@ Next: after #3941/#3943 merge: AC-tools part 2
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T08:43Z: fixer merges origin/dev, no rebase
 - 2026-10-21T08:21Z: wait on lane
 - 2026-10-21T07:59Z: lane batching older PRs first
 - 2026-10-21T07:37Z: wait on lane
