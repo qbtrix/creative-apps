@@ -4,7 +4,7 @@ Issue: #3467 · Packet: docs/blueprints/design/features/export-pack.md
 Run: act-1a15bc68263-njsv · Session: line lead (design) · Started: 2026-10-21T00:00Z
 Stage: 3 wave 1
 Base: 07f754f7 (origin/dev)
-Next: DX-1 is PR #3833 (head cef9b256, 7 files +115/−12, CI: PASS), lane macOS build dispatched (01:16Z; 2026-10-21T03:06Z: #3834's macOS build passed with DX-1's commits in it; #3833's build was cancelled while still queued, never on a runner, and the supervisor is asked on #3833 to re-run it or add a Mac-Check line). DX-3 is PR #3834 (head 8f669ed3, stacked on #3833; combined 10 files +307/−35, CI: PASS, mutations 18/18). DX-2 waits XP-3; DX-4 waits SM-w (no shell-media packet or lead yet).
+Next: DX-1 is PR #3833 (head cef9b256, 7 files +115/−12, CI: PASS), lane macOS build dispatched (01:16Z; 2026-10-21T03:06Z: #3834's macOS build passed with DX-1's commits in it; #3833's build was cancelled while still queued, never on a runner, and the supervisor is asked on #3833 to re-run it or add a Mac-Check line; blocked poll 2 at 2026-10-21T03:49Z, no reply). DX-3 is PR #3834 (head 8f669ed3, stacked on #3833; combined 10 files +307/−35, CI: PASS, mutations 18/18). DX-2 waits XP-3; DX-4 waits SM-w (no shell-media packet or lead yet).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

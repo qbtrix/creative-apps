@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T02:44Z	heartbeat	#3834 macOS build run 39528087557 passed (it carries DX-1 too); #3833 run 39526045534 still queued; no needs-fix
 2026-10-21T03:06Z	blocked	#3833 macOS build run 39526045534 cancelled at 02:52Z before getting a runner (no step ran); the lane asks for a new push. #3834 run 39528087557 passed with the same commits. Question for the supervisor on #3833 (comment 6307013398): re-run or Mac-Check.
 2026-10-21T03:27Z	heartbeat	blocked poll 1: #3833 still has no macOS build after the cancelled run; no supervisor reply yet. #3834 build green. Nothing else cleared.
+2026-10-21T03:49Z	blocked	poll 2: #3833 build still cancelled, no supervisor reply; #3834 open; no new waits cleared
