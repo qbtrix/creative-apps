@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T06:36:49Z	3	heartbeat	-	bisect: probe -2 (through KE-1 #3813) Linux green, -4 red (#3818 isa-swizzle); KE-1 waits on probe macOS gate
 2026-10-21T06:55:49Z	3	heartbeat	-	KE-1 #3813 merged 06:45Z (dbf599ff6); KE-2/3/4 merged dev, conflicts resolved (branch bodies over KE-1 stubs), scripts/ci --changed running before opening PRs
 2026-10-21T07:04:47Z	3	pr-open	KE-3	#3951 head b5c3d40c1 (Mutate HaloKeySelection 10/10, HaloKeyPick+Kernel 6/6); KE-2 adds mutation plan HaloTimelinePress, KE-4 C4 description reverted (lint), both re-gating
+2026-10-21T07:11:41Z	3	pr-open	-	wave 2 open: KE-2 #3954 (KE-a, Mutate HaloTimelinePress 5/5), KE-3 #3951, KE-4 #3955 (Mutate HaloKeyMove+Kernel 5/5); all Fast-Check pass
