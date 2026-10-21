@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "library/tone-controls (adopter of S1); RJ-L41 (new)",
-  "waits_on": "suiteui tone-controls's TC-a (cross-line; LT-3 and LT-4 need TC-5, LT-5 TC-6, LT-6 TC-3); develop (the feature: DevelopValues, LiveDevelop, DevelopInspector) and crop (built), slice waits; suiteui suite-imaging's IM-library before LT-4 (cross-line; re-cut 2026-10-20: the loupe's GPU route and the Package.swift links are suite-imaging's). raw's RW-a and RW-c now wait on LT-a",
+  "waits_on": "suiteui tone-controls's TC-a (cross-line; LT-3 and LT-4 need TC-5, LT-5 TC-6, LT-6 TC-3); develop (the feature: DevelopValues, LiveDevelop, DevelopInspector) and crop (built), slice waits; suiteui suite-imaging's IM-library before LT-4 (cross-line; re-cut 2026-10-20: the loupe's GPU route and the Package.swift links are suite-imaging's)",
   "longest_chain": "5 (LT-1 → LT-2 → LT-7 → LT-8 → LT-9)",
   "journeys": [
     "LibraryToneJourneyTests.testAutoAndSharpenInDevelop"
