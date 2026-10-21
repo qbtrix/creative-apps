@@ -15,17 +15,20 @@ import SuiteKernel
 
 /// The drawing tools on Flare's tool palette.
 public enum FlareTool: String, CaseIterable, Sendable {
-    case select, directSelect, pen, rectangle, ellipse
+    case select, directSelect, pen, rectangle, ellipse, shape
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// stage sends it drags. `FlareWorkspace.toolHelp(_:)` falls back to it.
-    /// Nil for all five: FlareStage sends every tool's drag (DK-8), and each
+    /// Nil for all but Shape: FlareStage sends every tool's drag (DK-8), and each
     /// acts through `drag` here (FlareToolsTests).
     public var unavailableHelp: String? {
         switch self {
         case .select, .directSelect, .pen, .rectangle, .ellipse: nil
+        case .shape: Self.shapeHelp
         }
     }
+    /// The Shape tool's reason until its drag draws (shape-tools FS-6).
+    public static let shapeHelp = "Shape drawing arrives with the shape kernel."
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
@@ -39,6 +42,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         didSet { if oldValue != selectedLayerID { easingSelection = nil; easingDragSerial &+= 1 } }
     }
     public internal(set) var tool: FlareTool = .select
+    /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
+    public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
     /// The stage selection (FlareSelection.swift).
     public internal(set) var selection: [StageAddress] = []
     /// The marquee under way, in scene points; nil when none is.
