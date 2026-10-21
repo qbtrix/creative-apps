@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-21T15:00Z	stage	PL-u merged-done (#3942 541cab6, run 39617481529)
 2026-10-21T15:25Z	check	PL-z still waiting on deps; no findings
 2026-10-21T15:44Z	check	PL-z waiting on deps; no findings
+2026-10-21T16:20Z	check	PL-z waits on SH-z, TT-z, EY-z, AH-z, SS-d and GF-z; no findings
