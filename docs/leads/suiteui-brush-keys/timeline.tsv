@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-21T18:40:41Z	poll	BK-m macOS build green, awaiting batch
 2026-10-21T18:41:35Z	nudge	Belt nudge read; state re-read from source: #4058 awaiting batch, no supervisor reply yet, no blocking slice on dev
 2026-10-21T19:02:29Z	poll	BK-m awaiting lane batch (no batch branch open)
+2026-10-21T19:24:17Z	BK-m	merged	#4058 -> 1fe5c4ea; blockers unchanged, release question to supervisor
