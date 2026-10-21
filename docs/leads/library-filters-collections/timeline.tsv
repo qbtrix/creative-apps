@@ -92,3 +92,4 @@ utc	stage	event	ref	note
 2026-10-21T17:06:01Z	check	-	FC-12 mac build cancelled, asked supervisor; FC-14 built, waits sweep
 2026-10-21T17:28:16Z	check	-	FC-12 mac build re-queued by supervisor; FC-14 waits sweep
 2026-10-21T17:59:22Z	check	-	FC-14 merged; FC-12 rebased c931a17; follow-up #4146
+2026-10-21T18:21:24Z	check	-	FC-12 mac build queued; #4146 built, waits sweep
