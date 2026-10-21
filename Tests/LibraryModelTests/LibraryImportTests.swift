@@ -1,6 +1,6 @@
 // LibraryImportTests.swift: the catalog's import state machine (import IM-1):
-// beginImport, progress, batches that skip known ids, finish, fail, dismiss
-// and the Import Folder… help. Runs on Linux and macOS.
+// beginImport, progress, batches that skip known ids, finish, fail, dismiss,
+// the Import Folder… help and the folder a drop imports. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -140,4 +140,17 @@ private func allCount(_ catalog: LibraryCatalog) -> Int? {
     #expect(library.importHelp == "An import is already running.")
     library.failImport(.noPhotos("Shots"), folder: "Shots")
     #expect(library.importHelp == LiveImporter.unavailable)
+}
+
+/// A drop on the empty catalog imports the first dropped folder (#3639); files and missing paths are skipped.
+@Test func droppedFolderIsTheFirstFolder() throws {
+    let root = FileManager.default.temporaryDirectory.appending(path: "library-drop-\(UUID().uuidString)")
+    let folder = root.appending(path: "Shoot")
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let file = root.appending(path: "a.jpg")
+    try Data([1]).write(to: file)
+    #expect(LibraryCatalog.droppedFolder([file.path, root.path + "/missing", folder.path]) == folder.path)
+    #expect(LibraryCatalog.droppedFolder([file.path]) == nil)
+    #expect(LibraryCatalog.droppedFolder([]) == nil)
 }

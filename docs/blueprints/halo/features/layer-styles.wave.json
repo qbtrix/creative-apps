@@ -1,0 +1,155 @@
+{
+  "title": "Layer styles on Halo's layers: the shared panel, drawn on every frame, with the drop shadow's and outer glow's numbers keyable",
+  "wave": "W5",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/layer-styles (adopter of S2); RJ-H43; captain 2026-10-21: layer styles in the beta, shared",
+  "waits_on": "suiteui layer-styles' contract slice LS-a (cross-line; tasks start once it merges), LS-m before HY-5 and HY-6, LS-gpu before HY-7; suite-imaging's IM-1 links SuiteImaging into HaloModel; placed-images (layer, inspector and frame-renderer files), file-flow's HF-m (catalog, ids) and HF-z (halo.md)",
+  "longest_chain": "6 (HY-1 → HY-2 → HY-3 → HY-4 → HY-7 → HY-8)",
+  "journeys": [
+    "HaloLayerStyleJourneyTests.testKeyedGlow"
+  ],
+  "cells": {
+    "waits on (features)": "placed-images; file-flow (HF-m, HF-z)",
+    "waits on (SuiteUI, creative-core)": "suiteui layer-styles LS-a, LS-m, LS-gpu; suite-imaging IM-a; core layer-style-engine through the shared packet"
+  },
+  "owned": [
+    "Sources/HaloModel/HaloLayer.swift",
+    "Sources/HaloModel/Contracts/HaloValues.swift",
+    "Sources/HaloModel/HaloStyle+Kernel.swift",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/HaloModelTests/HaloLayerStyleTests.swift",
+    "Sources/HaloApp/HaloCommands.swift",
+    "Sources/HaloApp/HaloWindow+Styling.swift",
+    "Sources/HaloApp/HaloWindow.swift",
+    "Sources/HaloApp/HaloLayerInspector.swift",
+    "Tests/AppSnapshotTests/HaloLayerStyleSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloLayerStyleTests.swift",
+    "UITests/HaloJourneyTests+LayerStyle.swift",
+    "Tests/mutations/HaloModel.HaloStyle+Kernel.json",
+    "Sources/HaloModel/Live/LiveFrameRendering.swift",
+    "Tests/HaloModelTests/HaloStyleRenderTests.swift",
+    "Tests/mutations/HaloModel.LiveFrameRendering.json",
+    "Tests/RealJobs/halo/keyed-glow/keyed-glow.jobs.json",
+    "Tests/RealJobs/halo/keyed-glow/input/title.halo",
+    "Sources/HaloApp/HaloViewerCanvas.swift",
+    "docs/blueprints/halo.md",
+    "docs/blueprints/halo/features/layer-styles.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HY-a",
+      "behavior": "Layers hold a LayerStyle, the five style properties exist, the style commands are in Halo's catalog on stubs, and Layer > Layer Style… opens the panel.",
+      "tasks": [
+        "HY-1",
+        "HY-2"
+      ],
+      "journeys": [
+        "MJ-HY"
+      ],
+      "waits": {
+        "placed-images": [
+          "HY-1",
+          "HY-2"
+        ],
+        "file-flow:HF-m": [
+          "HY-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloLayer.swift",
+        "Sources/HaloModel/Contracts/HaloValues.swift",
+        "Sources/HaloModel/HaloStyle+Kernel.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/HaloModelTests/HaloLayerStyleTests.swift",
+        "Sources/HaloApp/HaloCommands.swift",
+        "Sources/HaloApp/HaloWindow+Styling.swift",
+        "Sources/HaloApp/HaloWindow.swift"
+      ]
+    },
+    {
+      "id": "HY-u",
+      "behavior": "The inspector shows the style properties with stopwatches for a styled layer, with snapshots, a render budget and the journey written.",
+      "tasks": [
+        "HY-3",
+        "HY-4"
+      ],
+      "journeys": [
+        "HJ-Y1"
+      ],
+      "waits": {
+        "HY-a": [
+          "HY-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloLayerInspector.swift",
+        "Tests/AppSnapshotTests/HaloLayerStyleSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloLayerStyleTests.swift",
+        "UITests/HaloJourneyTests+LayerStyle.swift"
+      ]
+    },
+    {
+      "id": "HY-m",
+      "behavior": "Every style command is one undo step, the five properties key and ease, and the frame renderer draws styles with keyed values at each frame.",
+      "tasks": [
+        "HY-5",
+        "HY-6"
+      ],
+      "journeys": [
+        "MJ-HY"
+      ],
+      "waits": {
+        "HY-a": [
+          "HY-5"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/HaloStyle+Kernel.swift",
+        "Tests/HaloModelTests/HaloLayerStyleTests.swift",
+        "Tests/mutations/HaloModel.HaloStyle+Kernel.json",
+        "Sources/HaloModel/Live/LiveFrameRendering.swift",
+        "Tests/HaloModelTests/HaloStyleRenderTests.swift",
+        "Tests/mutations/HaloModel.LiveFrameRendering.json",
+        "Tests/RealJobs/halo/keyed-glow/keyed-glow.jobs.json",
+        "Tests/RealJobs/halo/keyed-glow/input/title.halo"
+      ]
+    },
+    {
+      "id": "HY-z",
+      "behavior": "The viewer draws styles through the live route, the journey passes on live, and halo.md lists the feature as built.",
+      "tasks": [
+        "HY-7",
+        "HY-8"
+      ],
+      "journeys": [
+        "HJ-Y1"
+      ],
+      "waits": {
+        "HY-u": [
+          "HY-7"
+        ],
+        "HY-m": [
+          "HY-7"
+        ],
+        "file-flow:HF-z": [
+          "HY-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloViewerCanvas.swift",
+        "UITests/HaloJourneyTests+LayerStyle.swift",
+        "docs/blueprints/halo.md",
+        "docs/blueprints/halo/features/layer-styles.wave.json"
+      ]
+    }
+  ]
+}
