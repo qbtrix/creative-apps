@@ -87,10 +87,13 @@ import Testing
         let before = workspace
         let catalog = try CommandCatalog<PhotoWorkspace>(app: "photo-history", HistoryCommands.specs(PhotoWorkspace.self),
                                                          history: { $0.history.kernel })
-        for index in [-1, 4] {
-            #expect(throws: CatalogError.failed(id: "history.jump", message: "There is no step \(index).")) {
+        // Below 0 the schema refuses the params; past the last step the jump says there is no such step.
+        let refusals = [-1: "history.jump params: /index expected at least 0", 4: "history.jump failed: There is no step 4."]
+        for (index, sentence) in refusals {
+            let error = #expect(throws: CatalogError.self) {
                 _ = try catalog.run("history.jump", params: .object(["index": .number(Double(index))]), on: &workspace)
             }
+            #expect(error?.description == sentence)
         }
         #expect(workspace == before)
     }
