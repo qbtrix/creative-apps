@@ -18,3 +18,4 @@ time	event	task	note
 2026-10-21T02:10:07Z	check	no change: LX-3 #3699 clean, awaiting lane batch
 2026-10-21T02:32:07Z	check	LX-3 #3699 is in lane batch-20261021005140, which is bisecting (probe -4 Linux run 39532217965 includes it)
 2026-10-21T02:53:55Z	check	LX-3 #3699 still in bisecting batch-20261021005140 (probes -4, -5 past it; no needs-fix)
+2026-10-21T03:16:29Z	stage	LX-3 #3699 merged into dev as f1e49054d (lane batch-20261021005140)

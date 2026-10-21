@@ -4,14 +4,14 @@ Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a15ac11868-4kb6 · Session: line lead (library: #1555, #1563, #3478) · Started: 2026-10-20T19:35Z
 Stage: 3 wave 1
 Base: a48992b7c (origin/dev; main verified at b3011ab9)
-Next: LX-1 #3696 and LX-3 #3699 (draft, stacked) are open; un-draft #3699 after #3696 merges (merge dev, ci --changed, move Head). LX-2 waits on XP-3 (ExportPick.metadata); LX-4 waits on XP-2 + XP-7.
+Next: LX-1 and LX-3 are merged. LX-2 waits on XP-3 (ExportPick.metadata); LX-4 waits on XP-2 + XP-7.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LX-a | options hold a metadata policy (default All but location); the sheet shows the shared Metadata row | LX-1, LX-2 | MX-LX | XP-a; export (built, #1554 closed) | no | 0 | LX-1 #3696 merged 7f3959c; LX-2 waits XP-3 | - | - |
 | LX-u | snapshots, render budget, journey written | LX-5, LX-6 | LJ-X1 | LX-a | yes | 0 | waiting | - | - |
-| LX-m | sidecar drops the policy's tags; writer carries metadata minus them | LX-3, LX-4 | MX-LX | LX-a; XP-6 (merged), XP-7 | yes | 0 | LX-3 #3699 rebuilt on dev, gate running | - | - |
+| LX-m | sidecar drops the policy's tags; writer carries metadata minus them | LX-3, LX-4 | MX-LX | LX-a; XP-6 (merged), XP-7 | yes | 0 | LX-3 merged f1e49054d; LX-4 waits XP-2 + XP-7 | - | - |
 | LX-z | live services, journey on, feature-done | LX-7, LX-8 | LJ-X1 | LX-u, LX-m | no | 0 | waiting | - | - |
 
 ## Tasks
@@ -19,7 +19,7 @@ Next: LX-1 #3696 and LX-3 #3699 (draft, stacked) are open; un-draft #3699 after 
 |---|---|---|---|---|---|---|---|
 | LX-1 | LX-a | 1 | ExportOptions.metadata (default noLocation, old files read it), sidecar xmp(for:metadata:) signature; LibraryExportMetadataTests written, disabled | LibraryContracts.swift, ExportSidecar.swift, LibraryExportMetadataTests.swift | old file reads noLocation | #3696 c6102dd | merged 7f3959c |
 | LX-2 | LX-a | - | sheet Metadata row via ExportPick.metadata | LibraryExportSheet.swift | LibraryExportPackSnapshots.metadata | - | waits XP-3 |
-| LX-3 | LX-m | 2 | sidecar policy; LiveExporter passes the policy; RJ-L16/RJ-X03 folder; tests on | ExportSidecar.swift, LiveExporter.swift, tests, mutation plans, Tests/RealJobs/library/no-location/ | LibraryExportMetadataTests; Mutate ExportSidecar 7/7, LiveExporter 6/6 | #3699 f165c5c | draft, stacked on #3696 |
+| LX-3 | LX-m | 2 | sidecar policy; LiveExporter passes the policy; RJ-L16/RJ-X03 folder; tests on | ExportSidecar.swift, LiveExporter.swift, tests, mutation plans, Tests/RealJobs/library/no-location/ | LibraryExportMetadataTests; Mutate ExportSidecar 7/7, LiveExporter 6/6 | #3699 f1e49054d | merged |
 | LX-4 | LX-m | - | JPEGWriter carries metadata via services.metadata | JPEGWriter.swift, LibraryExportMetadataWriteTests.swift | macOS | - | waits XP-2, XP-7 |
 | LX-5..LX-8 | | - | see packet | | | - | waiting |
 
