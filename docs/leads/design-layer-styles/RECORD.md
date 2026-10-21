@@ -32,3 +32,4 @@ DL-1 can't be written without LS-a's types (rule 20: no Design shadow type), so 
 
 - 2026-10-21T06:22:42Z: every slice is blocked on cross-line contracts that aren't filed or merged. The waits are recorded here and a supervisor question is on #3858.
 - 2026-10-21T06:59Z: #3937 (suiteui layer-styles) is filed, so LS-a has a lead. DL-1 starts once LS-a's PR merges to dev. Still no supervisor reply on #3858.
+- 2026-10-21T07:39Z: heartbeat. LS-a #3937 still open, no supervisor reply on #3858 (2 comments). DL-1 waits.
