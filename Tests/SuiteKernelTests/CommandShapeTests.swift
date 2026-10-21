@@ -75,3 +75,41 @@ private struct ShapeDoc: HeadlessDocument {
         }
     }
 }
+
+/// A photo for the crop and orientation commands (orientation-crop OC-1): its orientation, its crop
+/// frame in its bounds (the unit square), why each can't act, and one undo history for both.
+struct CropShapeTarget: OrientationTarget, CropTarget {
+    struct State: Hashable, Sendable { var orientation = Orientation.up, frame: CropFrame? }
+    var state = State(), orientationHelp: String?, cropHelp: String?, applied = 0, history = History<State>()
+    var orientation: Orientation { state.orientation }
+    var cropFrame: CropFrame? { state.frame }
+    var cropBounds: Rect { Rect(minX: 0, minY: 0, maxX: 1, maxY: 1) }
+    mutating func setOrientation(_ o: Orientation, name: String) throws { history.record(name, state); state.orientation = o }
+    mutating func setCropFrame(_ f: CropFrame?, name: String) throws { history.record(name, state); state.frame = f }
+    mutating func applyCrop() throws { history.record("Crop", state); applied += 1 }
+    static func catalog() throws -> CommandCatalog<CropShapeTarget> {
+        try CommandCatalog(app: "test", CropCommands.specs(CropShapeTarget.self)) { $0.history }
+    }
+}
+
+extension CommandShapeTests {
+    /// OC-1: the nine ids in one catalog, every one an undoable edit whose example passes its schema,
+    /// each blocked by its side's help, and a param outside its schema refused.
+    @Test func cropCommandsShape() throws {
+        let catalog = try CropShapeTarget.catalog()
+        #expect(catalog.ids == ["crop.apply", "crop.reset", "crop.set-aspect", "crop.set-frame", "crop.swap",
+                                "image.flip", "image.rotate-180", "image.rotate-ccw", "image.rotate-cw"])
+        for id in catalog.ids {
+            let spec = try #require(catalog.spec(id))
+            #expect(spec.undoable && !spec.title.isEmpty && !spec.summary.isEmpty && spec.params.validate(spec.example).isEmpty, "\(id)")
+        }
+        var blocked = CropShapeTarget(orientationHelp: "Open a photo first.", cropHelp: "Pick a photo to crop.")
+        #expect(catalog.availability("image.rotate-cw", on: blocked).why == "Open a photo first.")
+        #expect(catalog.availability("crop.swap", on: blocked).why == "Pick a photo to crop.")
+        #expect(throws: CatalogError.unavailable(id: "image.flip", why: "Open a photo first.")) {
+            try catalog.run("image.flip", params: .object(["axis": .string("vertical")]), on: &blocked)
+        }
+        let flip = try #require(catalog.spec("image.flip"))
+        #expect(!flip.params.validate(.object(["axis": .string("diagonal")])).isEmpty)
+    }
+}
