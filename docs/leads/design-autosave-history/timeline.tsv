@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 12:45Z	DA-a	heartbeat	39600323802	full CI containing #3973 pending
 12:54Z	DA-a	dev-linux-red	39601343733	Library timing; Flare macOS break blocks journeys; #3856
 13:11Z	DA-a	heartbeat	39604112617	scoped design containing #3973 queued
+2026-10-21T13:23Z	DA-a	linux-green	39604117821	round-1 fixes in green Linux; round 2 waits on scoped design
