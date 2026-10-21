@@ -1,9 +1,12 @@
 # LibraryApp's menu items and buttons built without a command spec (command-catalog CC-11).
+# max: 48
 Sources/LibraryApp/DevelopInspector.swift: Button("Reset \(slider.rawValue)") { resetSlider?(slider) }
+Sources/LibraryApp/LibraryBackupSheet.swift: Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
+Sources/LibraryApp/LibraryBackupSheet.swift: Button("Restore…") { confirming = true }.keyboardShortcut(.defaultAction)
+Sources/LibraryApp/LibraryBackupSheet.swift: Button("Restore", role: .destructive) { if let selected { actions.restore?(selected) } }
+Sources/LibraryApp/LibraryBackupSheet.swift: Button("Cancel", role: .cancel) {}
 Sources/LibraryApp/LibraryBrowser.swift: Button(action.title, action: action.perform)
-Sources/LibraryApp/LibraryBrowser.swift: Button("Close", systemImage: "xmark") { onClose() }
 Sources/LibraryApp/LibraryBrowser.swift: Button(expanded ? "Hide" : "Show") { expanded.toggle() }
-Sources/LibraryApp/LibraryBrowser.swift: Button("Close", systemImage: "xmark") { onClose?() }
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
@@ -42,13 +45,11 @@ Sources/LibraryApp/LibraryCommands.swift: MenuCommand(
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Choose…") { actions.chooseFolder?() }.disabled(actions.chooseFolder == nil)
 Sources/LibraryApp/LibraryExportSheet.swift: ForEach(presets) { (preset: ExportPreset) in Button(preset.name) { actions.applyPreset?(preset) } }
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Save as Preset…") { savingPreset = true }.disabled(actions.savePreset == nil)
-Sources/LibraryApp/LibraryExportSheet.swift: Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Export") { actions.export?() }.keyboardShortcut(.defaultAction)
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Save") { savePreset() }
-Sources/LibraryApp/LibraryExportSheet.swift: Button("Cancel", role: .cancel) {}
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Cancel") { actions.cancel?() }.keyboardShortcut(.cancelAction).disabled(actions.cancel == nil)
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Try Again") { actions.retry?() }.disabled(actions.retry == nil)
 Sources/LibraryApp/LibraryExportSheet.swift: Button("Show in Finder") { actions.showInFinder?() }.disabled(actions.showInFinder == nil)
-Sources/LibraryApp/LibraryExportSheet.swift: Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)
 Sources/LibraryApp/LibraryWindow+Filters.swift: Button("Clear") { menu.clearFilter?() }
 Sources/LibraryApp/LibraryLoupe.swift: Button(action: onGrid) {
+Sources/LibraryApp/LibraryWindow+Backup.swift: MenuCommand(
