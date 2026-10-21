@@ -26,3 +26,4 @@
 2026-10-21T21:04Z	check	#4053 needs-rebase again on photo golden; merged dev, re-added tool.text, gate PASS, pushed 839b1132, Head moved; #4059 macOS build still queued; TS-m unchanged
 2026-10-21T21:26Z	check	#4053 clean at 839b1132, needs-rebase dropped, awaiting macOS build/batch; #4059 macOS build 39666528558 queued since 20:00Z (runner backlog); TS-m unchanged
 2026-10-21T21:47Z	check	GitHub API 503; via git: #4053 (839b1132) and #4059 (8c0a4d82) not merged, both merge clean with dev 8c75b620; labels/CI unread
+2026-10-21T22:10Z	check	#4059 macOS build 39666528558 green 22:02Z, awaits batch; #4053 macOS build 39677009049 queued since 21:13Z; no needs-* labels; TS-m unchanged
