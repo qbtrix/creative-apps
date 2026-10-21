@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-21T06:10Z	3	check	W3u+	PT-4 refreshed to 0c3f1af (CI: PASS 849 tests); lane dispatched macOS build 39553601309 for it. Footers removed from #3808 #3818 #3830 #3831 bodies via MCP update.
 2026-10-21T06:24Z	3	heartbeat	W3v	#3808 PE-3 merged (0865916). Batch 20261021061843 (#3818, #3830 inside) red: isa-swizzle lint hits #3818 RenderBudgetPhotoHistoryTests object_setClass (ours; lint is new on dev) -> PH-4 fixer launched. PE-4 opener launched. #3831 PT-4 macOS build 39553601309 queued.
 2026-10-21T06:32Z	3	pr	PE-4	PE-4 opened as #3932 (head 2807c77, CI: PASS, fast-lane, no footer). Diff is the two test files only.
+2026-10-21T06:46Z	3	heartbeat	W3w	No merges since 0865916 (dev Linux green there). Per-PR macOS builds queued: #3831 39553601309, #3818 39556914129 (new head 48d6f2d; needs-fix from old head, lane drops it on new head), #3932 39557167572. #3830 waits for next batch. macOS slots saturated across leads.
