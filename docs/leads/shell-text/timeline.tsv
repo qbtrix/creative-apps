@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T19:05:10Z	heartbeat	#4034 #4100 still queued (lane batching, dev at 58034759f); drafts wait
 2026-10-21T19:06:04Z	st-live2-pr	ST-5 + ST-7 draft PR #4161 on #4156 (head 6b09a4de8)
 2026-10-21T19:22:16Z	heartbeat	#4034 integrated by lane (head 880c41ced, Linux check green), waits for next batch; drafts #4135 #4156 #4157 #4161 wait
+2026-10-21T20:09Z	heartbeat	#4034 #4135	#4034 new head 8ca7a2e7d, unmerged; ST-a and wave B+C drafts wait
