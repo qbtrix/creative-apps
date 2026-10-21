@@ -118,3 +118,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-20T20:57Z: still no qualifying run completed. Pending: full CI 39485502739 (8c90de14), scoped suiteui 39491489760 (e64cff6b, contains every slice merge), scoped design 39490030243, photo 39492942073, flare 39491495208, halo 39494391226 (all contain the slice merges)
 
 - 2026-10-20T22:26Z: still no qualifying run completed. Pending: full CI 39504488816 (a17f8650, contains every slice merge), scoped suiteui 39491489760 (e64cff6b), plus scoped design/photo/flare/halo/library runs; dev-red #3386 open
+
+- 2026-10-21T00:18Z: worker restarted; no qualifying run yet: full CI 39504488816 (a17f8650) cancelled, CI 39518541517 (0c2c10dd) pending, scoped suiteui 39491489760 still queued; only Linux check runs green (no full Linux job). Waiting for a green full or scoped-suiteui run
