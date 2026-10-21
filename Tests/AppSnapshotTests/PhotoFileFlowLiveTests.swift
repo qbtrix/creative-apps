@@ -2,7 +2,7 @@
 // hosted on the render budget harness, notes each open and each save in the suite's shared recents through
 // SuiteDocumentsBridge: opening beach.png and saving it reach the bridge once each, in that order, with the
 // file's path and Photo as the app. PF-3's half, Photo's old Open Recent list imported once and its key
-// removed, is written here and disabled until PF-3 lands. Each test gets its own temp folder and a bridge on
+// removed, is written here and disabled until PF-2 retires the key. Each test gets its own temp folder and a bridge on
 // fake services. Nests in BodyCountSuites: hosted windows run one at a time. macOS only.
 #if os(macOS)
 import AppKit
@@ -80,7 +80,7 @@ extension BodyCountSuites {
             #expect(bridge.recents(for: .photo).map(\.path) == [path])
         }
 
-        @Test(.disabled("waits on PF-3"), .timeLimit(.minutes(1)))
+        @Test(.disabled("waits on PF-2: the old key stays until the window switches over"), .timeLimit(.minutes(1)))
         func theOldListIsImportedOnceAndItsKeyRemoved() async throws {
             let old = try Self.beach().path(percentEncoded: false)
             UserDefaults.standard.set([old], forKey: "PhotoRecentFiles")

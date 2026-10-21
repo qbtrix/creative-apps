@@ -33,6 +33,8 @@ struct HaloWindow: View {
     @State var request: HaloWindowRequest?
     /// The drag in progress, which the viewer draws without re-running this body (HaloLiveEdit.swift).
     @State var live = HaloLiveEdit()
+    /// The viewer's shape tool: on, its drag's draft, and its draw (HaloShapeTool.swift).
+    @State var shapes = HaloShapeDrawing()
 
     #if DEBUG
     /// How many times a window's body ran; HaloWindowPlaybackTests counts playback's.
@@ -61,7 +63,10 @@ struct HaloWindow: View {
                 onRename: { perform(.renameComposition($0, $1)) },
                 actions: [newComposition]
             ) {
-                HaloViewer(model: model, perform: perform)
+                HaloViewer(model: model, perform: perform, onShapeIntent: { intent in
+                    shapes.isOn = true
+                    model.runShape(intent)
+                })
             } inspector: {
                 if model.selectedComposition != nil {
                     HaloCompositionInspector(model: model, perform: perform)

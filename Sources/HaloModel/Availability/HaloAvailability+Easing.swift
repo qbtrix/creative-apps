@@ -5,13 +5,22 @@
 // say why not, and then the commands that change easing need a picked key
 // (EZ-2's `pickedKeys`), named for the span its row shows (#1454). Picking
 // and clearing act whenever they can reach a layer. Delete Keyframes needs a
-// picked key and the keying service, not the easing one. Linux-safe.
+// picked key and the keying service, not the easing one. Key editing
+// (key-editing KE-1): a pick acts as a lane click does; Select All Keys and a
+// key move answer with their own help, and ending a key drag always acts.
+// Linux-safe.
 
 extension HaloProject {
     /// Nil when `command` can act now; otherwise why not.
     func easingHelp(_ command: HaloCommand) -> String? {
         guard selectedComposition != nil else { return HaloEditError.noComposition.message }
-        if case .selectLaneKeys = command { return services.easing.unavailableHelp }
+        switch command {
+        case .selectLaneKeys, .pickLaneKeys: return services.easing.unavailableHelp
+        case .selectAllKeys: return selectAllKeysHelp
+        case .moveKeys: return moveKeysHelp
+        case .endKeyDrag: return nil
+        default: break
+        }
         guard selectedLayer != nil else { return HaloEditError.noLayerSelected.message }
         if case .deleteKeys = command {
             return pickedKeyframes.isEmpty ? "Click a key on the timeline first." : services.keying.unavailableHelp
