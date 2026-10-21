@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-20T22:32:56Z	check	check-in: FC-5 #3466 still awaiting lane batch; no supervisor reply on #1563
 2026-10-21T00:05:30Z	check	check-in: FC-4 #3461 merged; FC-5 #3466 needs-rebase on LibraryWindow.swift, resolved (both focusedSceneValue modifiers kept), gate queued
 2026-10-21T00:16:12Z	stage	FC-5 #3466 dev merged (LibraryWindow.swift, both modifiers kept), CI: PASS, pushed a035f3c; stacked FC drafts wait on it
+2026-10-21T00:33:02Z	check	check-in: FC-5 #3466 ready on a035f3c, needs-rebase cleared, awaiting lane batch; no supervisor reply on #1563
