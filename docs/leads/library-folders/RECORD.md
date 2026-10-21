@@ -4,7 +4,7 @@ Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: when #3980 (dev-red #3856 Design anchors) merges, rerun scripts/ci --changed on #3961, swap no-fast-lane for fast-lane, set Fast-Check: pass and Head:; #3963 (stacked on #3961) follows once #3961 merges; re-read FC-d, LF-m, LC-m for FO-5
+Next: when #3980 (dev-red #3856 Design anchors) merges, rerun scripts/ci --changed on #3961, swap no-fast-lane for fast-lane, set Fast-Check: pass and Head:; #3963 (stacked on #3961) follows once #3961 merges; re-read FC-d, LF-m, LC-m for FO-5 Blocked-wait polls with no change: 2 (09:20, 09:54); at 3 post Question for the supervisor.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
