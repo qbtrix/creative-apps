@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-21T17:21Z	2026-10-21T17:21:34Z	W5	PP-7 branch pushed c3a92cf, own diff 1 file +43/-11; PR held (stacked diff 455 lines > cap)
 2026-10-21T17:28Z	2026-10-21T17:28:25Z	W5	PP-8 opened #4139 (cbbe1c3), photo.md Place row + PJ-PI1, wave built, feature-done
 2026-10-21T17:42Z	17:42Z	merged	#4101 PP-5 merged
+2026-10-21T18:04Z	18:04Z	merged	#4139 PP-8 merged
