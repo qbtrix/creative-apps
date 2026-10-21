@@ -60,4 +60,25 @@ import Testing
         var empty = PhotoWorkspace(services: .fake)
         #expect(throws: PhotoRefusal("Open an image first.")) { try empty.pickBrushColor(at: Point(x: 1, y: 1)) }
     }
+
+    @Test func aPressPicksWithTheEyedropperOrWithTheBrushAndOption() throws {
+        var model = try whiteUnderEmptyLayer()
+        model.selectTool(.eyedropper)
+        #expect(model.pressPicksColor(modifiers: []))
+        #expect(model.showsSampleLoupe)
+        model.selectTool(.brush)
+        #expect(!model.pressPicksColor(modifiers: []), "a plain brush press paints")
+        #expect(!model.pressPicksColor(modifiers: .shift))
+        #expect(model.pressPicksColor(modifiers: .option))
+        #expect(!model.showsSampleLoupe, "the loupe is the Eyedropper's")
+        model.selectTool(.eraser)
+        #expect(!model.pressPicksColor(modifiers: .option))
+    }
+
+    @Test func nothingPicksWithNoImage() {
+        var empty = PhotoWorkspace(services: .fake)
+        empty.selectTool(.eyedropper)
+        #expect(!empty.pressPicksColor(modifiers: []))
+        #expect(!empty.showsSampleLoupe)
+    }
 }
