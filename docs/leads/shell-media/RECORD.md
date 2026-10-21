@@ -2,9 +2,9 @@
 
 Issue: #3711 · Packet: docs/blueprints/suite/features/shell-media.md
 Run: act-1a15e10aa98-lun9 · Session: https://claude.ai/code/session_01TyRi6dgCqqVCYgH3sXdspa · Started: 2026-10-21T10:50Z
-Stage: 0 setup
+Stage: 3 build, wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: stage 1, read the packet and the code it touches, then plan wave 1 with the line's other features
+Next: wave 1 builders running; then mark stacked drafts ready after their parents merge, critics on merge
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,12 +18,15 @@ Next: stage 1, read the packet and the code it touches, then plan wave 1 with th
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
+| SM-1 | SM-a | 1 | contract: values, MediaEncoding/Decoding, FakeMedia, media member, fake slot | packet SM-1 (9 files) | MediaContractTests; Mutate SuiteModel.MediaFrame | – | building |
+| SM-2 | SM-a | 1 | checks first: rules/clock (Linux) and write/read (macOS) suites disabled by name, fixtures | packet SM-2 | suites compile | – | building (draft, stacked on SM-1) |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- SM-a is two PRs: SM-1 (~360 lines, 9 files) plus SM-2 (~320 lines, 4 files + fixtures) exceed the 400/15 cap together. SM-2 stacks on SM-1 as a draft and is marked ready after SM-1 merges.
 - Base is origin/dev, not main: the brief names main (0dd23d6, verified) but CLAUDE.md and lead.md target dev, and report-problem and command-state packets exist only on dev. PRs go to base dev.
 - One line lead plan across shell-media, report-problem and command-state (rule 19).
 - Every slice is ui:false (ui_slice none): no critic panel with screens; Model walks prove SM-a/SM-m on Linux.
