@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-20T21:56:21Z	PD-a	fix-round	#3759	dev merged (merge commit 7b88ec3), 397/11, mutate 14/14, CI PASS; needs-split removed; Package.swift line means supervisor merge
 2026-10-20T22:12:17Z	build	heartbeat	#3759	clean, awaiting supervisor merge
 2026-10-20T22:40:15Z	PD-a	heartbeat	#3759	poll 9: open, clean; lane says protected Package.swift, needs captain review (blocked poll 2 of 3). PD-u/PD-m also wait on DG-u/DG-m, DT-u/DT-m, DA-a/DA-m, DS-*, DK-*, DE-*.
+2026-10-21T08:46:56Z	3	check	PD-a	#3759 supervisor-queued; run act-1a15da1b26c-9qo6 resumes

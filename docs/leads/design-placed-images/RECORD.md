@@ -1,10 +1,10 @@
 # placed-images lead record
 
 Issue: #3454 · Packet: docs/blueprints/design/features/placed-images.md
-Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
-Stage: 3 polling
-Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: PD-a #3759 head 7b88ec3 clean, waits on a captain merge (Package.swift); blocked poll 2 of 3, question to supervisor at 3. PD-u and PD-m also wait on gradient-fill, transform, autosave, shape-tools, stroke-style and export slices.
+Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
+Stage: 3 PD-a #3759 open (supervisor-queued, Package.swift)
+Base: 896cafe3 (origin/dev); main verified at 0dd23d65
+Next: PD-a merge by supervisor; PD-u and PD-m build additively from dev after it (supervisor)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
