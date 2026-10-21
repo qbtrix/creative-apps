@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T04:31Z	3	heartbeat	W3q	batch 20261021032004 bisect: probe -0 green, -1 red (Library, not ours); our 4 PRs still open clean fast-lane, await next batch
 2026-10-21T04:53Z	3	heartbeat	W3r	new batch 20261021043428 (8 older PRs #3466..#3703, none ours) red on Halo HaloShapeDraftTests, bisecting; our 4 PRs open fast-lane, queued behind older PRs
 2026-10-21T05:14Z	3	heartbeat	W3s	batch 20261021043428 (not ours) still bisecting: -4 green, -6 red, -5 running; our 4 PRs open clean fast-lane, queued
+2026-10-21T05:37Z	3	heartbeat	W3t	batch 20261021043428 resolved (4 older PRs merged); #3808 now in batch 20261021053311, red on isa-swizzle lint from #3810 (Halo, after #3808), bisecting; #3818 #3830 #3831 still queued
