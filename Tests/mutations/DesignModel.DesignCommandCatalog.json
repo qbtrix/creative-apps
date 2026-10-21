@@ -12,5 +12,19 @@
     "find": "large: params.large ?? false",
     "replace": "large: false",
     "tests": "DesignCommandCatalogTests"
+  },
+  {
+    "label": "historySpecsListed",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "toolSpecs + HistoryCommands.specs(DesignWorkspace.self)",
+    "replace": "toolSpecs",
+    "tests": "DesignHistoryCommandTests"
+  },
+  {
+    "label": "historyJumpListed",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "+ HistoryCommands.specs(DesignWorkspace.self)",
+    "replace": "+ HistoryCommands.specs(DesignWorkspace.self).filter { $0.id != \"history.jump\" }",
+    "tests": "DesignHistoryCommandTests"
   }
 ]
