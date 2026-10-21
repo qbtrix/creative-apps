@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-21T17:25:49Z	merge	BK-a #4057 merged 8fd982a9; #4058 retargeted to dev, dev merged, gating
 2026-10-21T17:33:04Z	gate	BK-m 17188b30 CI: PASS, pushed, Head moved
 2026-10-21T17:40:37Z	done	BK-a merged-done, Linux 39643409752
+2026-10-21T17:55:57Z	poll	BK-m in lane (macOS build); blockers unchanged
