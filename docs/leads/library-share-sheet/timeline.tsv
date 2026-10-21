@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-21T12:45Z	check	ci	SH-u	Linux 39598650564 red only on two timing tests outside SH-u (LG-a fixture, LibraryFoldersTests); waiting on 39601343733
 2026-10-21T13:05Z	done	slice	SH-u	Belt-Slice-Done + Mac-Finish-Wanted (SH-u, SH-a) on 39601343733
 2026-10-21T13:05Z	check	wait	SH-m	#4024 and #3967 open (fast-lane)
+2026-10-21T13:25Z	check	wait	SH-m	#4024 and #3967 open with fast-lane (poll 2)
