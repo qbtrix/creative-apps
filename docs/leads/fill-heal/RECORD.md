@@ -4,7 +4,7 @@ Issue: #3778 · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a15c4e2e3b-zh3u · Session: claude/fill-heal-adjust-everywhere-t5hvqe · Started: 2026-10-21T02:36Z
 Stage: 3 wave 1
 Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: wait for the lane to merge #3845 (FH-2); re-read suite-imaging #3715 (IM-a) and brush-keys #3758 (BK-m) for FH-1
+Next: blocked poll 2/3 at 04:00Z (#3715 IM-a, #3758 BK-m open, no PRs, dev 842e62ec1); #3845 in lane; at 3/3 ask the supervisor on #3778
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
