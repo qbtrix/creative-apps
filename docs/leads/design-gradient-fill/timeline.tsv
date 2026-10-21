@@ -26,3 +26,4 @@ time	kind	note
 2026-10-21T13:21Z	3	heartbeat	-	dev Linux red, not ours (39601343733: Library tenThousandPaths timing); waiting on design journeys 39603336201 and scoped design 39604112617 for panels; TT-u #3513 open
 2026-10-21T13:44Z	3	slice-done	DG-u	Belt-Slice-Done at 39604117821; DG-m waits #3742, DE-s, AC-design
 2026-10-21T14:48Z	3	wait	panels	DG-a/DG-u panels wait: design journeys 39609598622 queued, 39603336201 had no ui-screens; DG-m waits #3742, DE-s, AC-design
+2026-10-21T15:11Z	3	wait	panels	design journeys 39609598622 still queued; full 39623147707 pending
