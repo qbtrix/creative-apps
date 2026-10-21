@@ -1,8 +1,8 @@
 # tone-controls (Library) lead record
 
 Issue: #3475 · Packet: docs/blueprints/library/features/tone-controls.md
-Run: act-1a15b98bc49-4lk9 · Session: claude/task-k1zaw1 · Started: 2026-10-20T23:00Z (earlier run act-1a15b10caae-y18c on claude/lead-raw-tone-controls-ca9b2k)
-Stage: 0 setup (blocked at 0.4; re-checked at dev 2ab0eb96, 2026-10-21T02:13:40Z)
+Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 (earlier act-1a15b98bc49-4lk9 on claude/task-k1zaw1) · Started: 2026-10-20T23:00Z (earlier run act-1a15b10caae-y18c on claude/lead-raw-tone-controls-ca9b2k)
+Stage: 0 setup (blocked at 0.4; re-checked at dev e2b8aa76, 2026-10-21T10:18Z)
 Base: 9781100bc432e119320c1bbbff41849ff4aeebdb (origin/dev; brief named main b3011ab9, see Decisions)
 Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRows) to merge, then start LT-1/LT-2
 
@@ -30,5 +30,9 @@ Next: wait for suiteui tone-controls TC-a (#3476; ToneSettings/ToneRules/ToneRow
 - Run act-1a15b98bc49-4lk9 keeps this record branch: Belt's nudge names lead/tone-controls, but that is the suiteui lead's live record (see above).
 - Stage 0.4: no task can start. LT-1 needs ToneSettings/ToneRules/ToneRows from suiteui TC-a, absent from Sources; per #3476's record TC-a itself waits on gradient-fill GF-2 (and AH-a, PL-a).
 
+- Run act-1a15df37b73-k199: the brief says to rebase lead/tone-controls onto origin/main with --force-with-lease. Not done: that branch is the suiteui tone-controls lead's record (#3476), it shares no merge base with main and carries 1,739 non-record commits, so a rebase rewrites another lead's live history. This record stays on lead/library-tone-controls. Raised as a question below.
+
 ## Open
 - Blocked on suiteui tone-controls TC-a/TC-3/TC-5/TC-6, suite-imaging IM-library, library cull-finish DR-m (all planned).
+- #3476 (suiteui tone-controls) is labelled needs-human and waiting-on-prereq; no TC-a PR is open and SuiteKernel has no tone files on dev e2b8aa76.
+- Question for the supervisor: Library tone-controls (#3475) can't start until suiteui TC-a lands, and #3476 is needs-human. Should this lead keep polling, or park #3475 until #3476 moves? And do you still want lead/tone-controls rebased onto main, given it is the suiteui lead's live record branch with no merge base on main?
