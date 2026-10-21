@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-21T08:11Z	heartbeat	HA-u #3810 merged as 2ccdd33, no green dev run contains it yet; HA-m waits on HA-6
 2026-10-21T08:33Z	heartbeat	HA-u done (dev Linux 39568091135, head 733e8ef29); Belt-Slice-Done posted on #3442; HA-6 waits on #3417
 2026-10-21T08:54Z	heartbeat	HA-6 waits on HG-m (#3417)
+2026-10-21T09:15Z	heartbeat	HA-6 waits on HG-m (#3417)
