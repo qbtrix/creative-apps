@@ -505,6 +505,8 @@
                 "paths": [
                   "Sources/SuiteKernel/Keys/Keys.swift",
                   "Sources/SuiteKernel/Keys/KeyRules.swift",
+                  "Sources/SuiteKernel/Keys/ColorKeyRules.swift",
+                  "Sources/SuiteKernel/Keys/SpanRules.swift",
                   "Sources/SuiteKernel/Keys/FrameRate.swift",
                   "Sources/SuiteKernel/Keys/Timecode.swift",
                   "Sources/SuiteKernel/Keys/TimeCommands.swift"
