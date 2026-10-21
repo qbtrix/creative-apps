@@ -3,7 +3,7 @@
 Issue: #3452 · Packet: docs/blueprints/flare/features/stroke-style.md
 Run: act-1a15cf358c6-wj2q · Session: claude/feature-lead-playbook-lw6pjl · Resumed: 2026-10-21T05:39:14Z (line lead: stroke-style #3452, shape-tools #3451, key-select-all #3538)
 Stage: 3 (wave 1)
-Base: 71ffa4d1 (origin/dev); main 0dd23d65 verified
+Base: 0865916d (origin/dev); main 0dd23d65 verified
 Next: FK-1 built and held (head d239cde7 on flare/fk-1-stroke-adapter, CI PASS, tests disabled until FK-5); the FK-a PR opens once FG-a is on dev (FK-2 edits FlareInspectorFill.swift after FG-2)
 
 ## Slices
