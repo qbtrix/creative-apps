@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T18:56:09Z	st-m-pr	ST-m draft PR #4157 opened on ST-a (head 53db6e113)
 2026-10-21T18:56:34Z	wave-c-start	builder starts ST-5 + ST-7 stacked on ST-4
 2026-10-21T19:05:10Z	heartbeat	#4034 #4100 still queued (lane batching, dev at 58034759f); drafts wait
+2026-10-21T19:06:04Z	st-live2-pr	ST-5 + ST-7 draft PR #4161 on #4156 (head 6b09a4de8)

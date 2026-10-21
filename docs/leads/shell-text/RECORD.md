@@ -4,14 +4,14 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave B (stacked)
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: wave C builder runs ST-5 + ST-7 on lead/shell-text-ST-live2 (stacked on ST-4 #4156); open as draft on lead/shell-text-ST-live when pushed. Wave B drafts #4156, #4157 wait on ST-a #4135, which waits on #4034. When #4034 lands: rebase ST-a onto dev, retarget, CI, ready; restack.
+Next: wave B+C drafts open: #4157 ST-m and #4156 ST-4 on ST-a #4135, #4161 ST-5+ST-7 on #4156. All wait on #4034 -> ST-a. When #4034 lands: rebase ST-a onto dev, retarget, CI, ready; then restack #4156, #4157, #4161 in order. Wave D (ST-z: ST-8, ST-9) builds after ST-m and ST-live merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | ST-a | the text service contract: values, protocols, FakeText, SuiteServices.text slot | ST-1, ST-2 | MJ-ST0 | shell-media:SM-a (ST-1) | no | 0 | pr-open #4135 (draft on #4034) | – | – |
 | ST-m | TextSpan/PlacedSpan validation, font fallback rules, FakeText measures by rule | ST-3, ST-6 | MJ-ST1 | ST-a | no | 0 | pr-open #4157 (draft on ST-a, Mutate 4/4 + 3/3) | – | – |
-| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | pr-open #4156 (ST-4, draft on ST-a) | – | – |
+| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | pr-open #4156 (ST-4, draft on ST-a) + #4161 (ST-5, ST-7, draft on #4156) | – | – |
 | ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | planned | – | – |
 
 ## Tasks
@@ -22,8 +22,8 @@ Next: wave C builder runs ST-5 + ST-7 on lead/shell-text-ST-live2 (stacked on ST
 | ST-3 | ST-m | B | TextRules.validated | packet's ST-3 files | mutations SuiteModel.TextRules | #4157 | pr-open (draft, head 53db6e113) |
 | ST-6 | ST-m | B | FakeText measure rules | packet's ST-6 files | mutations SuiteModel.FakeText | #4157 | pr-open (draft, head 53db6e113) |
 | ST-4 | ST-live | B | SuiteShell/Text Core Text measuring + C4 part shell-text.json | Sources/SuiteShell/Text/, docs/c4/parts/creative-apps/suite-shell/shell-text.json | packet's ST-4 test | #4156 | pr-open (draft, head 8cb75650e) |
-| ST-5 | ST-live | C | font list | packet's ST-5 files | packet's ST-5 test | – | planned |
-| ST-7 | ST-live | C | glyph rasterizer; Halo's HaloTextRasterizer moves | packet's ST-7 files | packet's ST-7 test | – | planned |
+| ST-5 | ST-live | C | font list | packet's ST-5 files | packet's ST-5 test | #4161 | pr-open (draft, head 6b09a4de8) |
+| ST-7 | ST-live | C | glyph rasterizer; Halo's HaloTextRasterizer moves | packet's ST-7 files | packet's ST-7 test | #4161 | pr-open (draft, head 6b09a4de8; Halo swap stays W3 per packet) |
 | ST-8 | ST-z | D | slot live and the walk | packet's ST-8 files | MJ-ST4 | – | planned |
 | ST-9 | ST-z | D | shared prose, status built, feature-done | packet's ST-9 files | scripts/waves render --dry-run | – | planned |
 
@@ -44,3 +44,4 @@ Wave plan (one PR per slice; slice PRs stack as drafts): A = ST-a once SM-1 merg
 ## Open
 - ST-a blocked on shell-media SM-1, PR #4034 (open, Linux check red).
 - dev-red #3856 (Photo CommandPathTests, Flare SetLayerParent): not this feature's.
+- 19:2xZ: ST-7 keeps Halo's HaloTextRasterizer call sites; the packet's "Adopted later" schedules that swap for W3, and it would edit Halo's line.
