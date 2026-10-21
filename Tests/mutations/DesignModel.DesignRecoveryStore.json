@@ -1,21 +1,21 @@
 [
   {
     "label": "supportDirWinsOverIgnoredState",
-    "file": "Sources/DesignModel/DesignRecoveryStore.swift",
+    "file": "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
     "find": "if !hasSupportDir(arguments), ignoresState(arguments) { return nil }",
     "replace": "if ignoresState(arguments) { return nil }",
     "tests": "DesignRecoveryStoreTests"
   },
   {
     "label": "ignoredStateAloneKeepsNoCopies",
-    "file": "Sources/DesignModel/DesignRecoveryStore.swift",
+    "file": "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
     "find": "return [\"yes\", \"true\", \"1\"].contains(flag.lowercased())",
     "replace": "return false",
     "tests": "DesignRecoveryStoreTests"
   },
   {
     "label": "emptySupportDirIsNone",
-    "file": "Sources/DesignModel/DesignRecoveryStore.swift",
+    "file": "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
     "find": ".map { !$0.isEmpty } ?? false",
     "replace": ".map { _ in true } ?? false",
     "tests": "DesignRecoveryStoreTests"

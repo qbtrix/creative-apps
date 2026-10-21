@@ -1,4 +1,4 @@
-// DesignRecoveryStore.swift (design/autosave-history DA-7): where a Design window's autosave writes
+// DesignRecoveryStore+Kernel.swift (design/autosave-history DA-7): where a Design window's autosave writes
 // its recovery copies. `-SuiteSupportDir <path>` puts them under `<path>/Design/Recovery/` (the
 // journeys pass a temp folder); a launch that ignores restored state (the journeys'
 // `-ApplePersistenceIgnoreState YES`) without one keeps none, so no journey leaves a copy for the
