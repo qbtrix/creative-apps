@@ -10,14 +10,15 @@ Next: lane merges #3890 #3893; then Belt-Slice-Done
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AX-flare | Flare export runs through the kernel's ExportRun; app-local copy deleted | AX-f1 (#2948), AX-f2 (dropped: nothing to delete) | Model tests | editor-kernel:EK-run | no | 0 | done | 39166290773 | – |
-| AX-photo | Photo export through ExportRun | AX-p1, AX-p2 | Model tests | editor-kernel:EK-run, adopt-kernel-layers:AL-photo | no | 0 | in-lane #3890 | – | – |
-| AX-library | Library export through ExportRun | AX-l1, AX-l2 | Model tests | editor-kernel:EK-run, adopt-kernel-selection:AS-library | no | 0 | in-lane #3893 | – | – |
+| AX-photo | Photo export through ExportRun | AX-p1, AX-p2 | Model tests | editor-kernel:EK-run, adopt-kernel-layers:AL-photo | no | 0 | in-lane #3890 (mac green) | – | – |
+| AX-library | Library export through ExportRun | AX-l1, AX-l2 | Model tests | editor-kernel:EK-run, adopt-kernel-selection:AS-library | no | 0 | in-lane #3893 (mac green) | – | – |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T07:37Z: wait on lane
 - 2026-10-21T07:14Z: wait on lane
 - 2026-10-21T06:48Z: footers removed from PR bodies
 - 2026-10-21T06:44Z: Status mirrored to lead/suiteui-adopt-kernel-export as Belt's nudge names it
