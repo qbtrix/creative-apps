@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-21T05:12:16Z	heartbeat	check: #3811 HT-u eligible, waits for a batch
 2026-10-21T05:38:45Z	heartbeat	fix: #3811 HT-u needs-rebase (HaloWindow+Viewer.swift vs #3693) resolved, both environments kept; da8dfd4 pushed, scripts/ci --changed PASS, Head moved
 2026-10-21T06:00:33Z	heartbeat	check: #3811 needs-rebase dropped; macOS build 39551030965 for da8dfd4 dispatched
+2026-10-21T06:27:04Z	heartbeat	HT-u #3811 head da8dfd4 open, fast-lane, macOS build 39551030965 queued
