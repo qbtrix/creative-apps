@@ -58,14 +58,29 @@ struct LibraryBackupArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .focusedSceneValue(\.libraryBackup, LibraryBackupMenu(open: restoreWhy == nil ? { open() } : nil, help: restoreWhy))
-            .sheet(isPresented: Binding(get: { state.showing }, set: { (shown: Bool) -> Void in state.showing = shown })) {
-                LibraryBackupSheet(
-                    rows: state.rows, restoreHelp: restoreWhy, message: state.message,
-                    actions: LibraryBackupSheet.Actions(
-                        restore: { (name: String) -> Void in perform(name) }, close: { () -> Void in state.showing = false }))
-            }
+            .focusedSceneValue(\.libraryBackup, menu)
+            .sheet(isPresented: showing) { sheet }
             .onAppear { hook() }
+    }
+
+    private var menu: LibraryBackupMenu {
+        var action: LibraryMenu.Action?
+        if restoreWhy == nil { action = { open() } }
+        return LibraryBackupMenu(open: action, help: restoreWhy)
+    }
+
+    private var showing: Binding<Bool> {
+        let shown = state
+        return Binding<Bool>(get: { shown.showing }, set: { (value: Bool) -> Void in shown.showing = value })
+    }
+
+    private var sheet: LibraryBackupSheet {
+        let shown = state
+        let restore: @MainActor (String) -> Void = { (name: String) -> Void in perform(name) }
+        let close: LibraryMenu.Action = { shown.showing = false }
+        return LibraryBackupSheet(
+            rows: state.rows, restoreHelp: restoreWhy, message: state.message,
+            actions: LibraryBackupSheet.Actions(restore: restore, close: close))
     }
 
     private func hook() {
