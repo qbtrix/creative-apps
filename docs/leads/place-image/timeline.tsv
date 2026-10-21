@@ -2,10 +2,37 @@ utc	stage	event	ref	note
 2026-10-20T20:40Z	0	stage-start	-	setup: brief main b3011ab verified; base origin/dev 6c2c7b0
 2026-10-20T21:00Z	0	stage-end	-	waits checked on photo-gradient-fill, photo-transform, history-panel, photo-eyedropper, placed-images, tone-controls
 2026-10-20T21:05Z	1	stage-end	-	packets read; slices and tasks copied
-2026-10-20T21:08Z	2	stage-end	-	combined plan W1-W6 across place-image, tone-controls, multi-layer-select
 2026-10-20T21:06Z	3	wave-start	W1	builder for PP-a launched (test-first, stacked on dev)
+2026-10-20T21:08Z	2	stage-end	-	combined plan W1-W6 across place-image, tone-controls, multi-layer-select
 2026-10-20T21:21Z	3	pr-open	#3764	PP-a head 4f70765; CI --changed PASS; 677 Photo tests pass, 6 checks disabled until PP-5
 2026-10-20T21:27Z	3	check	W1	#3764 in lane; no PL-2 PR yet (PP-3 waits)
+2026-10-20T21:48Z	3 build W1	check	#3764	lane macOS build 39501562901 queued; PP-3 waits PL-2 (no PR)
+2026-10-20T22:10Z	3 build W1	check	#3764	macOS build 39501562901 still queued (35 min); PP-3 waits PL-2 (no PR)
+2026-10-20T22:29Z	3 build W1	check	#3764	macOS build 39501562901 still queued (54 min); PP-3 waits PL-2 (no PR)
 2026-10-21T00:04:22Z	3	merged	#3764	PP-a (PP-1, PP-2) fast-lane merged 23:02Z
 2026-10-21T00:05:32Z	3	slice-done	PP-a	Belt-Slice-Done posted on #3455; Linux green in run 39514893774 at 137f72c
 2026-10-21T00:24:57Z	3 build W1	check	-	PP-3 waits PL-2 (no PR); PP-5 waits PG-m
+2026-10-21T00:45Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:05Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:24Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:44Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:03Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:23Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:43Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:03Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:23Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:42Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:02Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:22Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:41Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:00Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:20Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:40Z	3 build W1	check	#3681	PG-1 #3681 merged 05:28Z; PG-a still needs PG-2 (no PR yet), not slice-done; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T06:00Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T06:22Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T06:41Z	3 build W1	check	#3931	PL-2 PR #3931 open (not merged, PP-3 still blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:03Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:23Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:42Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:03Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:22Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
