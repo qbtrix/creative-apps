@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-21T10:26Z	3	integrate	DT-u	#3983 merged origin/dev after DG-u squash (one adjacency conflict in DesignCanvasMarks), CI PASS, head da1e48b6; TT-u #3513 open, DT-4 waits
 2026-10-21T10:50Z	3	heartbeat	DT-u	#3983 open at da1e48b6, fast-lane, in queue
 2026-10-21T11:19Z	3	merged	DT-u	DT-3 #3983 merged as 564e6562; DT-4 waits TT-u #3513; DT-a panel waits journeys 39588223335 (ui-screens) for a6f45c18
+2026-10-21T11:41Z	3	heartbeat	DT-u	DT-4 waits TT-u #3513 (open); DT-a panel waits journeys 39588223335 (queued)
