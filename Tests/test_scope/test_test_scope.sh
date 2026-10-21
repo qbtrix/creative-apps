@@ -126,7 +126,7 @@ done < <(cat "$root/Tests/perf-suites.txt" "$root/Tests/heavy-suites.txt")
 check "every Tests/perf-suites.txt and Tests/heavy-suites.txt entry names a test in Tests/" "" "$missing"
 
 # Every test that asserts a wall-clock bound is in the perf list.
-check "every wall-clock test in Tests/ is in Tests/perf-suites.txt (scripts/test-scope timing)" "" "$(python3 "$ts" timing)"
+check "every wall-clock test in Tests/ is in Tests/perf-suites.txt (land a new one .disabled and ask the supervisor for its line; // not-timing: only for a look-alike)" "" "$(python3 "$ts" timing)"
 
 # What timing takes: a fixture tree whose perf list holds one suite.
 mkdir -p "$tmp/tree/PhotoModelTests"
