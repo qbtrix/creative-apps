@@ -4,7 +4,7 @@ Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
 Stage: 3 build W2
 Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
-Next: PP-3 #3976 merged 10:20Z (its Linux run red on CommandPathTests photo, PhotoPlace.swift:36 bare MenuCommand; fix PP-3fix building); PP-4 #4003 in lane; PP-5 (PP-m) once photo-gradient-fill PG-m is done (W4)
+Next: PP-3 #3976 merged 10:20Z (its Linux run red on CommandPathTests photo, PhotoPlace.swift:36 bare MenuCommand; fix #4004 in lane); PP-4 #4003 in lane; PP-5 (PP-m) once photo-gradient-fill PG-m is done (W4)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,7 +19,7 @@ Next: PP-3 #3976 merged 10:20Z (its Linux run red on CommandPathTests photo, Pho
 |---|---|---|---|---|---|---|---|
 | PP-1 | PP-a | 1 | conformance as stubs; PhotoPlaceTests disabled | Sources/PhotoModel/PhotoPlace+Kernel.swift, Tests/PhotoModelTests/PhotoPlaceTests.swift | suite compiles, disabled | #3764 | merged 23:02Z |
 | PP-2 | PP-a | 1 | RJ-P37 job folder, waits_on PP-6 | Tests/RealJobs/photo/place-logo/ | job listed, skipped | #3764 | merged 23:02Z |
-| PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceMenuTests (6), Mutate 4/4 | #3976 | merged 10:20Z; CommandPath regression, fix PP-3fix building |
+| PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceMenuTests (6), Mutate 4/4 | #3976 | merged 10:20Z; CommandPath regression, fix #4004 in lane |
 | PP-4 | PP-u | 3 | snapshots, budget, journey skipped | Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift, RenderBudgetPhotoPlaceTests.swift, UITests/PhotoJourneyTests+Place.swift | snapshots (refused now; logo after PP-5), budget placeLargeInThreeBodies, journey skipped | #4003 | in lane |
 | PP-5 | PP-m | 4 | conformance bodies; insertPixelLayer from paste; tests on (PP-6 folded in) | PhotoPlace+Kernel.swift, PhotoClipboard.swift, tests, mutations, catalog, ids | PhotoPlaceTests; .centredOnCanvas .largeFitsCanvas .aboveSelection | – | waiting |
 | PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | – | waiting |
