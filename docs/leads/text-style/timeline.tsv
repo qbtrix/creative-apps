@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-21T05:04Z	heartbeat	check	-	beat: #3836 still green and clean. Lane batch 20261021043428 (PRs #3466..#3703, 
 2026-10-21T05:30Z	heartbeat	check	-	beat: #3836 unchanged, green and queued behind the lane backlog.
 2026-10-21T06:03Z	heartbeat	check	-	beat: #3836 green and clean on b51250b1. Lane batch 20261021053311 (up to #3813)
+2026-10-21T06:30Z	heartbeat	check	-	beat: #3836 green and clean on b51250b1. The lane landed batch 20261021053311 at
