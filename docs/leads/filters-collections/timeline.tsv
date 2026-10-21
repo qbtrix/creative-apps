@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-21T10:26:41Z	stage	FC-12	#3551 dev merged (afda170fe, 7 files +47/-27), CI: PASS, Mutate 21/21; Head moved, un-drafted; hold-lifted comment on #1563
 2026-10-21T10:35:35Z	done	FC-b	Belt-Slice-Done: green dev Linux check 39582236683 on fe232dcda contains #3534; FC-9 #3546 and FC-12 #3551 queued in the lane
 2026-10-21T10:57:48Z	check	-	FC-9 #3546 and FC-12 #3551 in the lane's per-PR macOS build (10:35); FC-10 waits on S-L9 #3411
+2026-10-21T11:20:35Z	check	-	FC-9 #3546: macOS build and Linux green on 0c4ddd751, awaiting lane merge; FC-12 #3551 macOS build running (11:20); FC-10 waits on S-L9 #3411
