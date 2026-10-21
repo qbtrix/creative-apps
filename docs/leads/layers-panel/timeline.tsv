@@ -1,0 +1,297 @@
+utc	stage	event	ref	note
+2026-10-17T06:08Z	0	stage-start	#1498	line lead over #1325 #1498 #1497; no lead branch existed
+2026-10-17T06:17Z	1	stage-end	#1498	packet read; gap #1986 filed (rename/reorder/nest/Arrange, p1 in-progress)
+2026-10-17T06:17Z	2	stage-end	#1498	waves: L-3+L-7 now; L-1 L-2 wait on EK-tree #1933; L-4 L-5 on DW-a/DW-b; L-6 on LL-9
+2026-10-17T06:20Z	3	stage-start	wave 1	L-3 L-7 base fe0f5f1
+2026-10-17T12:15Z	3	stage-start	wave 1 (resume)	L-3 L-7 rebuilt; base 0424231
+2026-10-17T13:14Z	3	pr-merged	#2047	L-7 layers budget
+2026-10-17T13:14Z	3	pr-merged	#2055	L-3 lock commits text edit, rename trim
+2026-10-17T13:14Z	3	ci-run	39033633296	scoped design green on 93c2103
+2026-10-17T13:14Z	3	heartbeat	polling	waits on EK-tree #1933, DW-a #1494, LL-9
+2026-10-17T13:30Z	3	heartbeat	cd0282c	EK-tree (#1933) and DW-a (#1494) not merged, LL-9 not merged; 0 open findings
+2026-10-17T13:45Z	3	heartbeat	d2c4fa21	DW-a/DW-b, EK-tree, LL-9: none merged or open; 0 open findings
+2026-10-17T14:04Z	layers-panel	check	dev@25b220e4	launch-infra CI findings classified, not ours
+2026-10-17T14:20Z	layers-panel	check	dev@8c05d002	blocked on DW-a/EK-tree/LL-9
+2026-10-17T14:36Z	layers-panel	check	dev@8c05d002	blocked on DW-a/EK-tree/LL-9
+2026-10-17T14:52Z	layers-panel	check	dev@2c5003b5	blocked on DW-a/EK-tree/LL-9
+2026-10-17T15:09Z	layers-panel	check	dev@6dcb79e5	blocked on DW-a/EK-tree/LL-9
+2026-10-17T15:26Z	layers-panel	check	dev@f50448c4	blocked on DW-a/EK-tree/LL-9
+2026-10-17T15:43Z	layers-panel	check	dev@dd7ec767	blocked on DW-a/EK-tree/LL-9
+2026-10-17T16:00Z	layers-panel	check	dev@d6187654	blocked on DW-a/EK-tree/LL-9
+2026-10-17T16:18Z	layers-panel	check	dev@0b50c70f	DW-a PRs #2168 #2163 open; EK-tree, LL-9 none
+2026-10-17T16:32Z	layers-panel	check	dev@4cc9e6f4	DW-a #2168 #2163 waiting on macOS build
+2026-10-17T16:46Z	layers-panel	check	dev@1a4e5e89	DW-a 2/5 tasks in open PRs; EK-tree, LL-9 none
+2026-10-17T17:07Z	layers-panel	check	dev@dd568918	dev dd568918; DW-a 3/5 tasks merged, #2168 #2163 open; no EK-tree/LL-9 PR; no new findings; dev red #2191 (Linux): DesignStyleBudgetTests/scrubStep 5.119ms vs 5ms gate, a style-rows ST-7 timing test under load, perf-suites listing asked of supervisor
+2026-10-17T17:25Z	layers-panel	check	dev@ec0e979b	dev ec0e979b; DW-a: #2168 and #2163 merged, still missing inspector/pasteboard/edit-menu files (DesignSeveralInspectorSnapshots, DesignPasteboardBridge, DesignClosePrompt, DesignEditMenu, DesignInspectorText/Page), no open DW-a PR, so DW-a-gated tasks wait (17:07 record's '3/5 merged' was wrong: 0 of 5 were in then); no EK-tree/LL-9 PR; no new findings; dev-red #2191 open, no supervisor reply; scoped flare/halo green, full CI on 4cc9e6f4 still running
+2026-10-17T17:41Z	layers-panel	check	dev@c3dbf73c	dev c3dbf73c (9 non-Design merges since ec0e979b); DW-a still misses inspector/pasteboard/close-prompt/edit-menu files, no open DW-a PR, so DW-a-gated tasks wait; no EK-tree/LL-9 PR; no new findings; dev-red #2191 open, no supervisor reply; full CI 39049627028 still running, 39050873494 cancelled
+2026-10-17T17:57Z	layers-panel	check	dev@57486e5e	dev 57486e5e (2 Flare merges); DW-a remainder now in open PRs #2217 (several inspector), #2214 (pasteboard, close prompt), #2213 (menu items), not merged, so DW-a-gated tasks still wait; no EK-tree/LL-9 PR; no new findings; dev-red #2191: lane bisect names #2150 (Flare) as first red commit, our timing-miss note stands, no supervisor reply; CI 39055838504/39055200176 queued
+2026-10-17T18:14Z	layers-panel	check	dev@e17b68f9	dev e17b68f9 (1 Halo merge); DW-a remainder PRs #2217 #2214 #2213 still open (fast-lane), DW-a-gated tasks wait; no EK-tree/LL-9 PR; no new findings; dev-red #2191 closed: green at b04e50c7 (run 39055200176), main promoted; DesignStyleBudgetTests not yet in perf-suites (supervisor's call), may flake again
+2026-10-17T18:31Z	layers-panel	check	dev@13911964	dev@13911964; DW-a #2217 and #2214 merged, only #2213 (DesignEditMenu) still open; no EK-tree/LL-9 PRs; no dev-red; no new line:design findings; SR-a/L-4/L-5 still wait on DW-a; next check ~18:50
+2026-10-17T19:03Z	layers-panel	check	dev@b2942150	dev@b2942150: DW-a complete; L-4/L-5 still wait on DW-b (#1494 open, no DW-b PR); L-1/L-2 wait on EK-tree (#1933, no PR); L-6 on LL-9 (no PR).
+2026-10-17T19:21Z	layers-panel	check	dev@19206653	dev@19206653: L-4/L-5 wait on DW-b (#1494, no PR); L-1/L-2 on EK-tree (#1933, no PR); L-6 on LL-9 (no PR).
+2026-10-17T19:38Z	layers-panel	check	dev@0c8e4a71	dev@0c8e4a71: DW-b PR #2282 open (L-4/L-5 start once it merges); EK-tree (#1933) and LL-9 have no PR.
+2026-10-17T19:56Z	layers-panel	check	dev@8f0fa099	dev@8f0fa099: DW-b merged (#2282), but L-4 also needs L-1/L-2, which wait on EK-tree (#1933), and LL-9 has no PR, so nothing starts yet.
+2026-10-17T20:19Z	layers-panel	check	dev@8f0fa099	dev@8f0fa099: EK-tree #1933 open, LL-9 no PR; L-1/L-2/L-4/L-6 still blocked.
+2026-10-17T20:36Z	layers-panel	check	dev@df60ad73	dev@df60ad73: EK-tree #1933 open, LL-9 no PR; blocked.
+2026-10-17T20:52Z	layers-panel	check	dev@056214c4	dev@056214c4: EK-tree #1933 open, LL-9 no PR; blocked.
+2026-10-17T21:13Z	layers-panel	check	dev@32c676c1	dev 32c676c1. Still blocked: L-1/L-2 on EK-tree #1933 (open), L-6 on LL-9 (no PR). No open layers-panel findings.
+2026-10-17T21:33Z	layers-panel	check	dev@c2a70dd8	dev c2a70dd8. Still blocked: L-1/L-2 on EK-tree #1933 (open), L-6 on LL-9 (no PR). No open layers-panel findings.
+2026-10-17T21:53Z	layers-panel	check	dev@bc252a71	dev bc252a71. Still blocked: L-1/L-2 on EK-tree #1933 (open), L-6 on LL-9 (no PR). No open layers-panel findings.
+2026-10-17T22:11:18Z	layers-panel	check	dev@2b08e8fd	check: still blocked, L-1/L-2 on EK-tree #1933 (open), L-6 on LL-9; no dev-red
+2026-10-17T22:28:23Z	layers-panel	check	dev@e3c5da79	check: still blocked, #1933 open, LL-9 pending
+2026-10-17T22:45:26Z	layers-panel	check	dev@1265b11a	check: still blocked, #1933 open, LL-9 pending
+2026-10-17T23:03:14Z	layers-panel	check	dev@59c435a6	check: still blocked, #1933 open, LL-9 pending
+2026-10-17T23:21:15Z	layers-panel	check	dev@e26c99f8	blocked: L-1/L-2 on #1933 (open), L-6 on LL-9. No change.
+2026-10-17T23:37:46Z	layers-panel	check	dev@56cd8160	blocked: L-1/L-2 on #1933 (open), L-6 on LL-9. No change.
+2026-10-17T23:53:53Z	layers-panel	check	dev@a6150139	blocked: L-1/L-2 on #1933 (open), L-6 on LL-9. No change.
+2026-10-18T00:10:48Z	layers-panel	check	dev@f335fde7	blocked: L-1/L-2 on #1933 (open), L-6 on LL-9. No change.
+2026-10-18T00:27:52Z	layers-panel	check	dev@d3cd7d9f	blocked: L-1/L-2 on #1933 (open), L-6 on LL-9. No change.
+2026-10-18T00:44:22Z	layers-panel	check	dev@d3cd7d9f	blocked: L-1/L-2 on #1933, L-6 on LL-9. No change.
+2026-10-18T01:00:55Z	layers-panel	check	dev@d3cd7d9f	blocked: L-1/L-2 on #1933, L-6 on LL-9. No change.
+2026-10-18T01:18:12Z	layers-panel	check	dev@d3cd7d9f	blocked: L-1/L-2 on #1933, L-6 on LL-9. No change.
+2026-10-18T01:35:25Z	layers-panel	check	dev@d3cd7d9f	blocked: L-1/L-2 on #1933, L-6 on LL-9. No change.
+2026-10-18T01:53:22Z	layers-panel	check	dev@d3cd7d9f	no change; L-1/L-2 wait on #1933, L-6 on LL-9
+2026-10-18T02:11:35Z	layers-panel	check	dev@d3cd7d9f	no change; L-1/L-2 wait on #1933, L-6 on LL-9
+2026-10-18T02:32:02Z	layers-panel	check	dev@948bcbf4	no change: L-1/L-2 wait on #1933, L-6 on LL-9.
+2026-10-18T02:49:19Z	layers-panel	check	dev@498c5b3c	no change: L-1/L-2 wait on #1933, L-6 on LL-9.
+2026-10-18T03:06:28Z	layers-panel	check	dev@10fb92ec	SuiteUI LL-1 (#2527) and LL-4 (#2528) merged; L-6 still waits on LL-9, L-1/L-2 on #1933.
+2026-10-18T03:23:09Z	layers-panel	check	dev@0965457c	no change: L-1/L-2 wait on #1933, L-6 on LL-9.
+2026-10-18T03:41:04Z	layers-panel	check	dev@f6de1a9b	no change; LP blocked on #1933 and LL-9 (#1510)
+2026-10-18T04:04:16Z	layers-panel	check	dev@6bb1f3f6	no change; blocked on #1933 and LL-9 (#1510)
+2026-10-18T04:13Z	3	blocked	#1498	L-1/L-2/L-4/L-5 wait on EK-tree #1933, L-6 on LL-9 #1510; note posted
+2026-10-18T04:22:11Z	layers-panel	check	dev@21066130	LP-a/LP-b blocked: #1933 editor-kernel and LL-9 #1510 open
+2026-10-18T04:25:29Z	3	check	#1933 #1510	still open; LP slices blocked
+2026-10-18T04:39:23Z	layers-panel	check	dev@e01529f4	LP-a/LP-b blocked: #1933 editor-kernel and LL-9 #1510 open
+2026-10-18T04:56:55Z	layers-panel	check	dev@308b58a9	LP-a/LP-b blocked: #1933 editor-kernel and LL-9 #1510 open
+2026-10-18T05:04:03Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T05:14:28Z	layers-panel	check	dev@e1754e0f	LP-a/LP-b blocked: #1933 editor-kernel and LL-9 #1510 open
+2026-10-18T05:30:38Z	layers-panel	check	dev@9f327089	LP-a/LP-b blocked: #1933 editor-kernel and LL-9 #1510 open
+2026-10-18T05:47:31Z	layers-panel	check	dev@3a8c658a	blocked: #1933 and LL-9 #1510 open; no dev-red
+2026-10-18T05:58:47Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T06:04:25Z	layers-panel	check	dev@5816bef3	blocked: #1933 and LL-9 #1510 open; no dev-red
+2026-10-18T06:21:35Z	layers-panel	check	dev@cd2700d1	blocked: #1933 and LL-9 #1510 open; no dev-red
+2026-10-18T06:39:08Z	layers-panel	check	dev@9e0ac922	blocked: #1933 and LL-9 #1510 open; dev-red #2667 not ours
+2026-10-18T06:40:20Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T06:57:00Z	layers-panel	check	dev@9e0ac922	blocked: #1933 #1510 open; dev-red #2667 not ours; 13 design findings open
+2026-10-18T07:14:11Z	layers-panel	check	dev@cd81c77b	blocked: #1933 #1510 open; dev-red #2667 not ours; 13 design findings open
+2026-10-18T07:19:30Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T07:31:07Z	layers-panel	check	dev@cd81c77b	blocked: #1933 #1510 open; dev-red #2667 not ours; 12 design findings open
+2026-10-18T07:43:19Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T07:48:58Z	layers-panel	check	dev@2202c7c3	blocked: #1933 #1510 open; dev-red #2667 not ours; 10 design findings open
+2026-10-18T08:04:09Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T08:06:07Z	layers-panel	check	dev@2202c7c3	blocked: #1933 #1510 open; dev-red #2667 not ours; 10 design findings open
+2026-10-18T08:23:35Z	layers-panel	check	dev@2202c7c3	blocked: #1933 #1510 open; dev-red #2667 not ours; 9 design findings open
+2026-10-18T08:25:05Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T08:40:24Z	layers-panel	check	dev@2202c7c3	blocked: #1933 #1510 open; dev-red #2667 not ours; 9 design findings open
+2026-10-18T08:45:55Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T08:56:44Z	layers-panel	check	dev@d6271ae4	blocked: #1933 #1510 open; dev-red #2667 not ours; 9 design findings open
+2026-10-18T09:06:46Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T09:12:42Z	layers-panel	check	dev@d6271ae4	blocked: #1933 #1510 open; dev-red #2667 closed, dev green; 9 design findings open
+2026-10-18T09:27:38Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T09:28:49Z	layers-panel	check	dev@ed52eaa8	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T09:45:01Z	layers-panel	check	dev@b1b56eba	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T09:48:35Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T10:02:17Z	layers-panel	check	dev@ca6c45b7	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T10:09:26Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T10:19:11Z	layers-panel	check	dev@a80ed944	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T10:30:18Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T10:36:10Z	layers-panel	check	dev@5e1844e6	blocked: #1933 #1510 open; no dev-red; 7 design findings open
+2026-10-18T10:51:11Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T10:53:52Z	layers-panel	check	dev@a8ba1d69	blocked: #1933 #1510 open; no dev-red; 7 design findings open
+2026-10-18T11:12:02Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T11:12:12Z	layers-panel	check	dev@7e3413dc	blocked: #1933 #1510 open; no dev-red; 7 design findings open
+2026-10-18T11:28:39Z	layers-panel	check	dev@e3a4582c	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T11:32:54Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T11:45:15Z	layers-panel	check	dev@ea68d6a6	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T11:52:10Z	3	check	-	check after container restart: #1933 and #1510 still open; blocked
+2026-10-18T12:02:39Z	layers-panel	check	dev@e12c2ad8	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T12:13:00Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T12:19:11Z	layers-panel	check	dev@b0c59a4f	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T12:33:49Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T12:36:20Z	layers-panel	check	dev@618256bc	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T12:52:55Z	layers-panel	check	dev@7ae985e3	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T12:54:39Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T13:10:30Z	layers-panel	check	dev@563d9fad	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T13:16:11Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T13:27:55Z	layers-panel	check	dev@4bf67be8	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T13:37:02Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T13:45:08Z	layers-panel	check	dev@e99d9ee5	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T13:57:55Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T14:02:28Z	layers-panel	check	dev@3f5ae7f3	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T14:18:47Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T14:19:02Z	layers-panel	check	dev@650d2985	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T14:36:25Z	layers-panel	check	dev@624c4291	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T14:39:37Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T14:53:10Z	layers-panel	check	dev@04170953	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T15:00:31Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T15:11:15Z	layers-panel	check	dev@5a8c6fa7	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T15:21:22Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T15:27:41Z	layers-panel	check	dev@15e42166	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T15:42:16Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T15:43:55Z	layers-panel	check	dev@6d589da5	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T16:00:48Z	layers-panel	check	dev@58e33b30	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T16:03:09Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T16:18:28Z	layers-panel	check	dev@00d78f21	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T16:24:08Z	3	check	-	check: #1933 and #1510 still open; blocked
+2026-10-18T16:35:46Z	layers-panel	check	dev@e3c46ea8	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T16:52:12Z	layers-panel	check	dev@e3c46ea8	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T16:57Z	3	wave-start	dev@aee9df9d	EK-tree done: L-1 unblocked; wave 2 = L-1 (LP-a)
+2026-10-18T17:09:38Z	layers-panel	check	dev@f8119b2f	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T17:26:18Z	layers-panel	check	dev@acb73b0c	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T17:43:22Z	layers-panel	check	dev@bea7db20	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T18:00:34Z	layers-panel	check	dev@ad5c9271	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T18:17:17Z	layers-panel	check	dev@c91b1468	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T18:34:15Z	layers-panel	check	dev@2e27b8db	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-18T18:51:41Z	layers-panel	check	dev@1fcbcd90	blocked: #1933 #1510 open; no dev-red; 9 design findings open (new #2900 perf scrub journey, not this feature)
+2026-10-18T19:08:33Z	layers-panel	check	dev@1fcbcd90	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T19:25:15Z	layers-panel	check	dev@7d942bad	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T19:42:42Z	layers-panel	check	dev@f7e03506	blocked: #1933 #1510 open; no dev-red; 9 design findings open
+2026-10-18T19:59:53Z	layers-panel	check	dev@0e4e913b	blocked: #1933 #1510 open; no dev-red; 18 design findings open
+2026-10-18T20:16:38Z	layers-panel	check	dev@b1526f3e	blocked: #1933 #1510 open; no dev-red; 18 design findings open
+2026-10-18T20:32:44Z	layers-panel	check	dev@21874cd9	blocked: #1933 #1510 open; no dev-red; 18 design findings open
+2026-10-18T20:49:23Z	layers-panel	check	dev@ae6e7c81	blocked: #1933 #1510 open; no dev-red; 15 design findings open
+2026-10-18T21:06:31Z	layers-panel	check	dev@203e7d91	blocked: #1933 #1510 open; no dev-red; 12 design findings open
+2026-10-18T21:25:01Z	layers-panel	check	dev@b40c77f6	blocked: #1933 #1510 open; no dev-red; 12 design findings open
+2026-10-18T21:42:19Z	layers-panel	check	dev@2aad2f98	blocked: #1933 #1510 open; no dev-red; 12 design findings open
+2026-10-18T21:59:09Z	layers-panel	check	dev@f221b370	blocked: #1933 #1510 open; no dev-red; 12 design findings open
+2026-10-18T22:16:15Z	layers-panel	check	dev@76789931	blocked: #1933 #1510 open; no dev-red; 11 design findings open
+2026-10-18T22:34:20Z	layers-panel	check	dev@349578b8	blocked: #1933 #1510 open; no dev-red; 11 design findings open
+2026-10-18T22:52:27Z	layers-panel	check	dev@3bf5bc5b	blocked: #1933 #1510 open; no dev-red; 11 design findings open
+2026-10-18T23:10:14Z	layers-panel	check	dev@afa91212	blocked: #1933 #1510 open; no dev-red; 11 design findings open
+2026-10-18T23:27:11Z	layers-panel	check	dev@db15b8a6	blocked: #1933 #1510 open; no dev-red; 11 design findings open
+2026-10-18T23:44:36Z	layers-panel	check	dev@9ece98c5	blocked: #1933 #1510 open; no dev-red; 11 design findings open
+2026-10-19T00:02:07Z	layers-panel	check	dev@d50e891e	blocked: #1933 #1510 open; no dev-red; 14 design findings open (new #3042-#3045 not ours)
+2026-10-19T00:19:53Z	layers-panel	check	dev@ef6f201f	blocked: #1933 #1510 open; no dev-red; 15 design findings open (new #3052 not ours)
+2026-10-19T00:37:35Z	layers-panel	check	dev@7ccb643d	blocked: #1933 #1510 open; no dev-red; 15 design findings open
+2026-10-19T00:54:48Z	layers-panel	check	dev@f191be21	blocked: #1933 #1510 open; no dev-red; 16 design findings open
+2026-10-19T01:11:56Z	layers-panel	check	dev@124fe38c	blocked: #1933 #1510 open; no dev-red; 16 design findings open
+2026-10-19T01:30:08Z	layers-panel	check	dev@12008867	blocked: #1933 #1510 open; no dev-red; 15 design findings open
+2026-10-19T01:46:56Z	layers-panel	check	dev@ed0fed9e	blocked: #1933 #1510 open; no dev-red; 10 design findings open
+2026-10-19T02:04:10Z	layers-panel	check	dev@17dc84c7	blocked: #1933 #1510 open; no dev-red; 13 design findings open (new #3078-#3081 not ours)
+2026-10-19T02:20:49Z	layers-panel	check	dev@17dc84c7	blocked: #1933 #1510 open; no dev-red; 13 design findings open, unchanged
+2026-10-19T02:37:56Z	layers-panel	check	dev@17dc84c7	blocked: #1933 #1510 open; no dev-red; 13 design findings open, unchanged
+2026-10-19T02:55:53Z	layers-panel	check	dev@7def6ae5	blocked: #1933 #1510 open; no dev-red; 13 design findings open, unchanged
+2026-10-19T03:13:55Z	layers-panel	check	dev@cc14022e	blocked: #1933 #1510 open; no dev-red; 12 design findings open
+2026-10-19T03:31:30Z	layers-panel	check	dev@918abfc6	blocked: #1933 #1510 open; no dev-red; 8 design findings open
+2026-10-19T03:48:17Z	layers-panel	check	dev@7acc00bf	blocked: #1933 #1510 open; no dev-red; 8 design findings open, unchanged
+2026-10-19T04:05:00Z	layers-panel	pr-merged	#2880	L-1 LiveOrdering over the kernel tree (743d3ff5)
+2026-10-19T04:05:30Z	layers-panel	wave-start	wave 3	L-2 layerDrop on dev@b48cf6c4
+2026-10-19T04:05:29Z	layers-panel	check	dev@b48cf6c4	blocked: #1933 #1510 open; no dev-red; 8 design findings open, unchanged
+2026-10-19T04:22:26Z	layers-panel	check	dev@9f098e23	blocked: #1933 #1510 open; no dev-red; 8 design findings open, unchanged
+2026-10-19T04:28:00Z	layers-panel	pr-opened	#3114	L-2 layerDrop, Mutate 5/5
+2026-10-19T04:29:00Z	layers-panel	builder-start	L-4	on L-2 branch; PR after #3114 merges
+2026-10-19T04:32:00Z	layers-panel	check	#3114	lane macOS build dispatched 04:27Z; 0 findings; no dev-red; L-4 building
+2026-10-19T04:39:43Z	layers-panel	check	dev@aed78668	blocked: #1933 #1510 open; no dev-red; 8 design findings open, unchanged
+2026-10-19T04:53:30Z	layers-panel	check	#3114	lane macOS build 39199533900 still queued; 0 findings; no dev-red; L-4 building
+2026-10-19T04:56:29Z	layers-panel	check	dev@bede8342	blocked: #1933 #1510 open; no dev-red; 8 design findings open, unchanged
+2026-10-19T05:13:45Z	layers-panel	check	dev@22026122	blocked: #1933 #1510 open; no dev-red; 7 design findings open
+2026-10-19T05:15:00Z	layers-panel	check	#3114	lane macOS build 39199533900 running since 05:03Z; 0 findings; no dev-red; L-4 built, waits on #3114
+2026-10-19T05:30:09Z	layers-panel	check	dev@047303c1	blocked: #1933 #1510 open; no dev-red; 7 design findings open, unchanged
+2026-10-19T05:16:39Z	layers-panel	pr-merged	#3114	L-2 layerDrop (047303c1)
+2026-10-19T05:28:00Z	layers-panel	pr-opened	#3145	L-4 Layers rows, Mutate 9/9
+2026-10-19T05:31:00Z	layers-panel	builder-start	L-5	J12 on L-4 branch; no feature-done (LL-9 merged; L-6 carries it)
+2026-10-19T05:37:30Z	layers-panel	check	#3145	L-4 lane macOS build dispatched 05:30Z; 0 findings; no dev-red; L-5 building
+2026-10-19T05:47Z	3	L-6 builder started on L-5 commit 07ebcd12	#2758	opens after L-5 merges; feature-done
+2026-10-19T06:01Z	3	L-6 built	cf4799ec	gate PASS, Mutate 3/3; waits for L-5 to merge
+2026-10-19T06:06Z	3	check	#3145	macOS build 39204920848 still queued (36 min); findings 0, dev-red 0
+2026-10-19T06:30Z	3	relaunch act-1a152e441eb-msob	LP-b	L-5/L-6 builds lost; #3145 open clean
+2026-10-19T06:31Z	3	builder-start	L-7b	P3 un-skip on dev 977df193
+2026-10-19T06:36Z	3	builder-start	L-6	on L-4 branch, pushes wave/layers-panel-L-6; closes #2758
+2026-10-19T06:55Z	3	pr-open	L-7b	#3181 head 74c8ec86
+2026-10-19T07:00Z	3	builder-done	L-6	8ff35476 gate PASS; held for macOS proof
+2026-10-19T07:12Z	3	poll	LP-b	#3145 #3181 macOS builds queued; dev 34b8df25
+2026-10-19T07:28Z	3	poll	LP-b	#3145 #3181 macOS builds still queued (26 runs queued repo-wide); no findings, no dev-red
+2026-10-19T07:50Z	3	poll	LP-b	#3145 macOS build green, awaiting lane sweep; #3181 build queued; no findings, no dev-red
+2026-10-19T08:03Z	3	poll	LP-b	#3145 ready (macOS build green), lane sweep in progress; #3181 build queued; no findings, no dev-red; dev 97cd9613
+2026-10-19T08:20Z	3	pr	L-6	#3195 opened, head 60d211b0, no-fast-lane, scoped design run asked; #3145 merged 08:02Z; #3181 build queued; no findings, no dev-red
+2026-10-19T08:38Z	3	poll	LP-b	#3181 build 39212686991 still queued (32 runs queued repo-wide); #3195 waits on supervisor scoped run, no reply yet; no findings, no dev-red
+2026-10-19T08:58Z	3	poll	LP-b	#3195 got fast-lane by hand 08:55Z (hold released), macOS build 39226409428 queued, no-fast-lane removed; #3181 build still queued; no findings, no dev-red
+2026-10-19T09:18Z	3	poll	LP-b	#3181 build 39212686991 and #3195 build 39226409428 both queued (26 runs queued repo-wide); no findings, no dev-red
+2026-10-19T09:38Z	3	poll	LP-b	#3195 macOS build 39226409428 in progress; #3181 build 39212686991 still queued; no findings, no dev-red
+2026-10-19T09:59Z	3	poll	LP-b	#3195 merged 09:43Z (68d4644e), #3181 merged 09:56Z (3dbba7d3), both lane macOS builds green; no layers-panel findings, no dev-red; dev CI 39232536792 on 68d4644e cancelled (superseded); waiting for a green design/full run containing 3dbba7d3
+2026-10-19T10:19Z	3	poll	LP-b	dev CI 39234246603 on 3dbba7d3 pending (macOS queue backed up); no layers-panel findings, no dev-red
+2026-10-19T10:38Z	3	poll	LP-b	dev CI on 3dbba7d3 cancelled (superseded); newer dev CI 39236881849 on 895fb2d0 (contains 3dbba7d3) pending; no layers-panel findings, no dev-red
+2026-10-19T10:58Z	3	poll	LP-b	dev CI 39236881849 on 895fb2d0 still pending; no scoped design run yet; no layers-panel findings, no dev-red
+2026-10-19T11:21Z	3	poll	LP-b	dev CI on 895fb2d0 cancelled (superseded, third time); newer dev CI 39243183625 on d80a1b26 pending; no scoped design run; no layers-panel findings, no dev-red
+2026-10-19T11:41Z	3	poll	LP-b	no green run with 3dbba7d3 yet; full CI 39243183625 (d80a1b26) cancelled as superseded, 39244857355 on c6ad68f7 pending; no scoped design run; no dev-red, no open findings
+2026-10-19T12:01Z	3	poll	LP-b	no green run with 3dbba7d3; every dev ci.yml run since 10:00Z is cancelled (full 39244857355, 39246909805 and the queued scoped runs too), none queued; no scoped design run; no dev-red, no open findings
+2026-10-19T13:03Z	3	poll	LP-b	worker restarted; no green run with 3dbba7d3; full runs to 69ee7d31 all cancelled, 39252895176 (6e70826b) pending since 12:32Z; no scoped design run; no dev-red, no open findings; blocker noted in RECORD
+2026-10-19T13:25Z	3	poll	LP-b	no green run with 3dbba7d3; 39252895176 (6e70826b) still pending since 12:32Z, not started; no scoped design run; no dev-red, no open findings
+2026-10-19T13:45Z	3	poll	LP-b	full CI 39252895176 on 6e70826b (contains 3dbba7d3, compare=ahead) started: Linux success, macOS in progress since 13:38Z; 39262177225 (2b029480) pending behind it; no dev-red, no open findings
+2026-10-19T14:09Z	3	poll	LP-b	full dev CI 39252895176 on 6e70826b (contains 3dbba7d3): Linux success, macOS in progress since 13:38Z; 39262177225 pending; no dev-red, no open layers-panel finding
+2026-10-19T14:28Z	3	poll	LP-b	full dev CI 39252895176 on 6e70826b (contains 3dbba7d3): Linux success, macOS still in progress since 13:38Z; 39262177225 cancelled, 39268739545 on 955f02d0 pending; no dev-red, no open layers-panel finding
+2026-10-19T14:48Z	3	poll	LP-b	full dev CI 39252895176 on 6e70826b (contains 3dbba7d3): Linux success, macOS still in progress since 13:38Z (70 min); 39268739545 on 955f02d0 pending; no dev-red, no open layers-panel finding
+2026-10-19T15:11Z	3	poll	LP-b	39252895176 macOS cancelled at 15:08Z after 90 min (no result); full dev CI 39268739545 on 955f02d0 (contains 3dbba7d3, compare=ahead) now running Linux+macOS since 15:08Z; no dev-red, no open layers-panel finding
+2026-10-19T15:31Z	3	poll	LP-b	full dev CI 39268739545 on 955f02d0 (contains 3dbba7d3): Linux success, macOS in progress since 15:08Z; 39276059443 and 39278490377 queued behind it; no dev-red, no open layers-panel finding
+2026-10-19T15:50Z	3	poll	LP-b	full dev CI 39268739545 on 955f02d0 (contains 3dbba7d3): Linux success, macOS in progress since 15:08Z; 39276059443 cancelled, 39278490377 pending; no dev-red, no open layers-panel finding
+2026-10-19T16:11Z	3	poll	LP-b	full dev CI 39268739545 (955f02d0, contains 3dbba7d3): Linux success, macOS still in progress since 15:08Z; no dev-red, no open layers-panel finding
+2026-10-19T16:30Z	3	poll	LP-b	full dev CI 39268739545 (955f02d0, contains 3dbba7d3): Linux success, macOS in progress since 15:08Z; 39278490377 (b3011ab9) pending; no dev-red, no open layers-panel finding
+2026-10-19T16:49Z	3	poll	LP-b	39268739545 cancelled: macOS hit 90 min inside scripts/ci (memory sampled), journeys never ran; 39278490377 (b3011ab9, contains 3dbba7d3) Linux success, macOS in progress since 16:39Z; no dev-red, no open layers-panel finding
+2026-10-19T17:10Z	3	poll	LP-b	39278490377 (b3011ab9, contains 3dbba7d3): Linux success, macOS in progress since 16:39Z; 39291873502 (98e8d9cf) pending; no dev-red, no open layers-panel finding
+2026-10-19T17:31Z	3	poll	LP-b	full run 39278490377 (b3011ab9, contains 3dbba7d3): Linux success, macOS in progress since 16:39Z; 39294573974 (8f405311) pending; no dev-red, no open finding
+2026-10-19T17:51Z	3	poll	LP-b	full run 39278490377 macOS still in scripts/ui-test (cap ~18:09Z); scoped app=design 39297097650 on 1b33afbb queued; no dev-red, no open finding
+2026-10-19T18:10Z	3	poll	LP-b	full run 39278490377 macOS still in scripts/ui-test at ~90 min; scoped app=design 39297097650 (1b33afbb, contains 3dbba7d3) jobs queued for a macOS runner; no dev-red, no open finding
+2026-10-19T18:39:47Z	3	fix-round	LP-b	fix round 1: PR #3316 (04aaa024) fixes #3300-#3304, group rows lost design.layer id (run 39292729592)
+2026-10-19T18:58:47Z	3	poll	LP-b	#3316 open, lane macOS build pending; no dev-red; design runs queued
+2026-10-19T19:18:08Z	3	poll	LP-b	#3316 open, lane macOS build 39305105669 still queued; no dev-red
+2026-10-19T19:38:06Z	3	poll	LP-b	#3316 open, lane macOS build 39305105669 still queued (macOS runners backed up); no dev-red
+2026-10-19T19:58:24Z	3	poll	LP-b	#3316 open, lane mac build 39305105669 still queued; dev CI 39311818078 pending; no dev-red
+2026-10-19T20:18:03Z	3	poll	LP-b	#3316 lane mac build 39305105669 success; awaiting lane merge; dev CI 39311818078 pending; no dev-red
+2026-10-19T20:38:40Z	3	poll	LP-b	#3316 open, mac build 39305105669 green, no needs-fix/rebase; last lane sweep 19:40Z, waiting on next; dev CI 39311818078 pending; no dev-red
+2026-10-19T20:57:47Z	3	poll	LP-b	#3316 still open (mac build green, no blocking labels); lane sweep 39323551637 in progress; dev CI 39311818078 pending; no dev-red
+2026-10-19T21:17:29Z	3	merge	LP-b	#3316 merged as e794d5fd (21:12Z); full CI 39326152106 on 605c19fc contains it, pending; no dev-red
+2026-10-19T21:37:05Z	3	poll	LP-b	full CI 39326152106 cancelled (superseded); newest full 39327922875 on 8257c513 (contains e794d5fd) pending; no dev-red, no new #1498 comments
+2026-10-19T21:56:31Z	3	poll	LP-b	full CI 39327922875 + 39329322245 cancelled (superseded); newest full 39330687224 on 23e682ad pending; no scoped design run yet; no dev-red, no new #1498 comments
+2026-10-19T22:16:19Z	3	poll	LP-b	full CI 39330687224 + 39331917840 cancelled (superseded, never ran); newest 39333170092 on a7e93ca4 pending; scoped runs queued since 17:47Z (runner backlog); no dev-red, no new #1498 comments
+2026-10-19T22:35:50Z	3	poll	LP-b	full CI 39333170092 cancelled (superseded); newest 39335865885 on 58a042c8 pending; scoped runs still queued (backlog); no dev-red, no new #1498 comments
+2026-10-19T22:50:00Z	3	stage-start	LP-a	run act-1a156589867-ptgh; LP-b done before; L-5 remains; no open layers-panel findings
+2026-10-19T23:00:00Z	3	pr-open	L-5	#3370 head 62d43b6e
+2026-10-19T23:30:00Z	3	heartbeat	L-5	#3370 macOS build 39338781158 queued; lane strips footer
+2026-10-20T00:00:00Z	3	merged	L-5	#3370 -> 94c8fd34
+2026-10-20T00:21:00Z	3	heartbeat	LP-a	waiting scoped design 39346088549 / CI 39346519827
+2026-10-20T00:41:13Z	3	heartbeat	LP-a	39346519827 CI pending;39346088549 scoped: design queued;39345113796 CI completed;
+2026-10-20T01:00:16Z	3	heartbeat	LP-a	39349878829 CI pending;39346519827 CI completed;39346088549 scoped: design queued;
+2026-10-20T01:19:19Z	3	heartbeat	LP-a	39352633488 CI pending;39351999741 CI completed;39351262172 CI completed;
+2026-10-20T01:38:22Z	3	heartbeat	LP-a	39352972722 scoped: suiteui queued;39352633488 CI pending;39351999741 CI completed;
+2026-10-20T02:10:08Z	3	heartbeat	LP-a	scoped design 39346088549 queued; no passing run with 94c8fd34 yet
+2026-10-20T02:29:53Z	3	heartbeat	LP-a	scoped design 39346088549 queued; no passing run with 94c8fd34 yet
+2026-10-20T02:49:39Z	3	heartbeat	LP-a	scoped design 39346088549 queued; no passing run with 94c8fd34 yet
+2026-10-20T03:09:24Z	3	heartbeat	LP-a	scoped design 39346088549 queued; no passing run with 94c8fd34 yet
+2026-10-20T03:29:07Z	3	heartbeat	LP-a	scoped design 39346088549 queued; no passing run with 94c8fd34 yet
+2026-10-20T03:38:34Z	3	heartbeat	LP-a	container restart; poll resumed. scoped design 39346088549 still queued (runner backlog: all scoped runs queued); dev CI 39365038310 pending
+2026-10-20T03:58:44Z	3	heartbeat	LP-a	scoped design 39346088549 in_progress; no passing run with 94c8fd34 yet
+2026-10-20T04:18:38Z	3	heartbeat	LP-a	scoped design 39346088549 completed; no passing run with 94c8fd34 yet
+2026-10-20T04:38:35Z	3	heartbeat	LP-a	scoped design 39346088549 completed; no passing run with 94c8fd34 yet
+2026-10-20T04:58:28Z	3	heartbeat	LP-a	scoped design 39346088549 completed; no passing run with 94c8fd34 yet
+2026-10-20T05:18:25Z	3	heartbeat	LP-a	scoped design 39346088549 completed; no passing run with 94c8fd34 yet
+2026-10-20T05:38:21Z	3	heartbeat	LP-a	scoped design 39346088549 completed; no passing run with 94c8fd34 yet
+2026-10-20T05:50:05Z	3	fix-round-1	LP-a	PR #3510 for finding #3427 (system drag for Layers rows)
+2026-10-20T06:10:18Z	3	heartbeat	LP-a	fix PR #3510 open merged fast-lane; no completed run containing it yet
+2026-10-20T06:30:14Z	3	heartbeat	LP-a	fix PR #3510 open merged fast-lane; no completed run containing it yet
+2026-10-20T06:50:11Z	3	heartbeat	LP-a	fix PR #3510 open merged fast-lane; no completed run containing it yet
+2026-10-20T07:10:09Z	3	heartbeat	LP-a	fix PR #3510 open merged fast-lane; no completed run containing it yet
+2026-10-20T07:30:06Z	3	heartbeat	LP-a	fix PR #3510 open merged fast-lane; no completed run containing it yet
+2026-10-20T07:50:02Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T07:50:55Z	3	merged	LP-a	#3510 merged as 858a4570; scoped design 39387228332 queued
+2026-10-20T08:10:48Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T08:30:32Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T08:50:19Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T09:10:01Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T09:29:44Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T09:49:29Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T09:50:53Z	3	heartbeat	LP-a	runs containing 858a4570 cancelled; waiting on CI 39402653640
+2026-10-20T10:10:45Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T10:30:29Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T10:50:14Z	3	heartbeat	LP-a	fix PR #3510 closed merged 858a45700e85aab69f1df58ee3002df07f885f21; no completed run containing it yet
+2026-10-20T11:08:03Z	4	fix2-pr	LP-a	#3595 opened (Closes #3556)
+2026-10-20T11:28:16Z	4	heartbeat	LP-a	fix PR #3595 open merged fast-lane; no completed run containing it yet
+2026-10-20T11:48:08Z	4	heartbeat	LP-a	fix PR #3595 open merged fast-lane; no completed run containing it yet
+2026-10-20T12:08:02Z	4	heartbeat	LP-a	fix PR #3595 open merged fast-lane; no completed run containing it yet
+2026-10-20T12:27:58Z	4	heartbeat	LP-a	fix PR #3595 open merged fast-lane; no completed run containing it yet
+2026-10-20T12:47:54Z	4	heartbeat	LP-a	fix PR #3595 closed merged 897ccbb27adc3f249393b38ab5c24015ba1a440d; no completed run containing it yet
+2026-10-20T13:07:53Z	4	heartbeat	LP-a	fix PR #3595 closed merged 897ccbb27adc3f249393b38ab5c24015ba1a440d; no completed run containing it yet
+2026-10-20T13:08:36Z	4	fix2-merged	LP-a	#3595 merged as 897ccbb2; scoped: design 39424963422 and CI 39426412729 queued on it
+2026-10-20T13:29:57Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 still queued, CI 39426412729 cancelled, CI 39429064045 (f729e906) pending
+2026-10-20T13:52:44Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 queued, CI 39429064045 pending; no completed run yet
+2026-10-20T14:16:52Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 queued since 12:47Z; CI 39429064045 cancelled; CI 39436941980 (56e73319) pending
+2026-10-20T14:39:06Z	4	heartbeat	LP-a	#3595 merged 897ccbb2; scoped: design 39424963422 still queued since 12:47Z; CI 39438701609 (9f880c85) queued; full runs keep being superseded
