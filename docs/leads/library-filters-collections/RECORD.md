@@ -4,14 +4,14 @@ Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a15e4969c2-pa6e (resumes act-1a15ac11868-4kb6) · Session: line lead (library: #1563, #3478) · Started: 2026-10-20T03:00Z
 Stage: 3 wave 6
 Base: origin/dev ded2ca5 (main verified at 0dd23d659f4dbd8a0120aa85a321259327518251)
-Next: FC-12 #3551 (head 4644431) and FC-14 #4056 (head 75cd865) pushed with Fast-Check; the lane batches them. Then Belt-Slice-Done FC-d on a green dev run containing FC-12; FC-16 after both merge. FC-10 waits on S-L9 #3411.
+Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progress). Then Belt-Slice-Done FC-d on a green dev run containing FC-12, the FC-14 .disabled-drop follow-up, and FC-16 after both merge. FC-c done with gap #4126.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FC-a | no-filter Library unchanged; contract, bar, sidebar section and menus exist disabled | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | cull, persist, thumbnails, import, status-and-layout, export (all on dev) | yes | 0 | done (run 39550229338) | - | - |
 | FC-b | filter bar narrows by flag, rating, hide rejects; N of M; Clear Filter | FC-6, FC-7 | J13 | FC-a | no | 0 | done (run 39582236683) | - | - |
-| FC-c | New Collection, add/remove/rename/delete as undo steps; sidebar drop | FC-8, FC-9, FC-10 | J14 | FC-a; S-L9 #3411 (FC-10) | yes | 0 | FC-8, FC-9 merged; FC-10 waits S-L9 #3411 | - | - |
+| FC-c | New Collection, add/remove/rename/delete as undo steps; sidebar drop | FC-8, FC-9, FC-10 | J14 | FC-a; S-L9 #3411 (FC-10) | yes | 0 | done with gap #4126 (FC-10 waits S-L9 #3411) | 39614555474 | - |
 | FC-d | smart collection from filter; rules edited as undo steps | FC-11, FC-12 | J15 | FC-a; FC-b (FC-12) | no | 0 | FC-11 merged; FC-12 #3551 fixing (red Linux: dev perf list) | - | - |
 | FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | FC-13, FC-15 merged; FC-14 #4056 fixing (needs-fix); FC-16 planned | - | - |
 
@@ -117,3 +117,4 @@ Next: FC-12 #3551 (head 4644431) and FC-14 #4056 (head 75cd865) pushed with Fast
 - 2026-10-21T15:36:27Z check: FC-12 #3551 (4644431) and FC-14 #4056 (75cd865) in the lane's macOS build. Supervisor: FC-14's perf line is in #4099; drop .disabled once it is on dev. S-L9 #3411 open (FC-10 blocked). 0 open findings.
 - 2026-10-21T15:58:40Z check: FC-12 #3551 and FC-14 #4056 macOS builds still queued in the lane. #4099 (FC-14 perf line) merged; the .disabled drop follows once FC-14 is on dev. S-L9 #3411 open. 0 open findings.
 - 2026-10-21T16:20:00Z check: FC-12/FC-14 macOS builds still queued (since ~15:28Z). S-L9 #3411 open; asked the supervisor on #1563 whether FC-10 becomes a gap. 0 findings.
+- 2026-10-21T16:43:01Z stage: supervisor said close FC-c with FC-10 as a gap. Filed gap #4126 (waits on #3411). Posted Belt-Slice-Done FC-c on run 39614555474 (green Linux check containing FC-9 ded2ca5), gaps #4126.
