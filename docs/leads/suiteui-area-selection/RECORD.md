@@ -62,3 +62,4 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 - 18:54Z: #4096 (AR-3) merged as e3b6fb8. #4098 (AR-4) restacked on dev (add/add on GroupPick taken ours, dev equal to b02c125), gate PASS, head 432656d, needs-split dropped, fast-lane on. #4124 (AR-8) macOS build 39649626905 still running. AR-14 starts once #4098 merges.
 - 19:13Z: macOS builds green: #4098 (AR-4, run 39657301406) and #4124 (AR-8, run 39649626905). Both wait on a lane batch. AR-14 starts once #4098 merges.
 - 19:33Z: #4098 (AR-4) and #4124 (AR-8): macOS builds green, both wait on a lane batch (27 runs queued repo-wide). No needs-fix, no findings.
+- 19:53Z: #4124 (AR-8, AR-u) merged as 369ecc7; Linux check 39664459063 is running on it. #4098 (AR-4) waits on a lane batch with its macOS build green.
