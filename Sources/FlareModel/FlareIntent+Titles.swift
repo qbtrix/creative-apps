@@ -163,6 +163,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "Insert Frame"
         case .removeFrames: "Remove Frame"
         case .setLabel: "Add Label"
+        case .selectAllKeys: "Select All Keys"
         }
     }
 }
