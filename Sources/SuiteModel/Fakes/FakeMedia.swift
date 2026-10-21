@@ -76,10 +76,7 @@ public final class FakeMedia: MediaCoding {
     }
 
     func record(_ path: String, frames: [MediaFrame], settings: MovieSettings?) {
-        log.withLock {
-            $0.movies[path] = frames
-            $0.settings[path] = settings
-        }
+        log.withLock { $0.movies[path] = frames; $0.settings[path] = settings }
     }
 
     func recordCancel(_ path: String) { log.withLock { $0.cancelled.append(path) } }

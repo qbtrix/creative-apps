@@ -7,8 +7,7 @@
 /// One picture: 8-bit sRGB, straight alpha, top row first, 4 bytes a pixel.
 /// The shape Photo's `DecodedImage` and Halo's rendered frames already use.
 public struct MediaFrame: Sendable, Equatable {
-    public let width: Int
-    public let height: Int
+    public let width: Int, height: Int
     public let rgba: [UInt8]
 
     /// Refuses a size below 1 x 1 or a byte count other than width x height x 4.
@@ -44,9 +43,7 @@ public enum StillFormat: String, Codable, Sendable, CaseIterable { case png, jpe
 /// What a movie is written as: its size, its whole-number rate, its codec and
 /// a quality from 0 to 1.
 public struct MovieSettings: Hashable, Codable, Sendable {
-    public var width: Int
-    public var height: Int
-    public var fps: Int
+    public var width: Int, height: Int, fps: Int
     public var codec: MovieCodec
     public var quality: Double
 
@@ -57,9 +54,7 @@ public struct MovieSettings: Hashable, Codable, Sendable {
 
 /// What a GIF or APNG is written as; a loop count of 0 loops forever.
 public struct AnimatedImageSettings: Hashable, Codable, Sendable {
-    public var width: Int
-    public var height: Int
-    public var fps: Int
+    public var width: Int, height: Int, fps: Int
     public var format: AnimatedImageFormat
     public var loopCount: Int
 
@@ -70,13 +65,10 @@ public struct AnimatedImageSettings: Hashable, Codable, Sendable {
 
 /// What a movie file holds, read from its video track.
 public struct MediaInfo: Hashable, Codable, Sendable {
-    public var width: Int
-    public var height: Int
-    public var seconds: Double
-    public var fps: Double
+    public var width: Int, height: Int
+    public var seconds: Double, fps: Double
     public var frameCount: Int
-    public var hasAlpha: Bool
-    public var hasAudio: Bool
+    public var hasAlpha: Bool, hasAudio: Bool
     /// The track's codec, as the system names it (for example "avc1").
     public var codec: String
 
