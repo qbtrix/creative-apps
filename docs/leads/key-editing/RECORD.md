@@ -34,7 +34,7 @@ Next: #4141 (KE-9) merges on the next sweep (macOS build 39647703725 green); the
 ## Decisions
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 - KE-a shipped as two PRs (KE-1 model, KE-2 view): together about 480 lines, over the 400 cap.
-- The record also lives on lead/halo-key-editing (docs/leads/halo-key-editing/); this branch is the one Belt reads.
+- The record lives on both lead/halo-key-editing (docs/leads/halo-key-editing/, the branch Belt watches) and lead/key-editing (docs/leads/key-editing/); every stage pushes both. The mirror here lapsed 13:42Z-18:31Z and was caught up from lead/key-editing.
 - KE-7 split: turning the journey on needs only KE-3/KE-4/KE-5 (merged), not #3499, so it ships now with the RJ-H13 job (KE-9); the stress gestures stay in KE-7, waiting on #3499.
 - KE-9 folds two sub-50-line changes into one PR (rule 22), Slice: KE-m, KE-z.
 - KE-m's Slice-Done waits for the RJ-H13 job on dev (packet Done check), though rule 21 alone wouldn't gate on a missing check.

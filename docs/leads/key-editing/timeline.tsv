@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-21T17:59:56Z	poll	#4141 macOS build 39647703725 queued; scoped halo 39635764704 queued; #3499 open; dev-red #3856 open
 2026-10-21T18:23:00Z	finding-filed	#4150 KE-u macOS tests (run 39635764704)
 2026-10-21T18:23:00Z	fix-round	KE-u round 1: #4150
+2026-10-21T18:31:18Z	poll	#4141 open (macOS build green, awaiting lane sweep); journeys 39651139451 queued; #3499 open; fixer on #4150 running
