@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-21T07:56:13Z	check	#3490 FC-8 (8639b29c5), #3491 FC-6 (19f5ed0ef), #3515 FC-11 (012ffd1db) merged via batch 073036; worktree agents merging dev into FC-7 #3534 and FC-9 #3546; FC-15 #3539 ready, not yet batched; FC-12 #3551 waits on #3534
 2026-10-21T08:06:10Z	stage	FC-7 #3534 dev merged (766b255dd), gate CI: PASS, un-drafted, Head moved
 2026-10-21T08:07:51Z	stage	FC-9 #3546 dev merged (48ddfc085), gate CI: PASS, mutate 11/11, un-drafted, Head moved
+2026-10-21T08:18:58Z	check	FC-7 #3534, FC-9 #3546, FC-15 #3539 clean; per-PR macOS builds 39567176986/39567243117/39564329849 queued; FC-12 #3551 waits on #3534
