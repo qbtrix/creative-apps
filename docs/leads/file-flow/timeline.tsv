@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T00:33Z	3	staged	-	SF-8 rebuilt on #3827 head (d2559733), gate PASS
 2026-10-21T00:55Z	3	waiting	#3827	lane dispatched macOS build 39522612 (00:39Z); SF-8 staged on d2559733
 2026-10-21T01:16Z	3	waiting	#3827	macOS build 39522612112 succeeded; waiting for the lane's merge sweep
+2026-10-21T01:32Z	3	waiting	#3827	green macOS build, clean, fast-lane; lane sweep 39527761241 pending
