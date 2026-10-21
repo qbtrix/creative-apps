@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-21T12:23Z	3 build W2	check	#4003 #4004	#4004 needs-rebase cleared at 360a99e, new mac build 39597665667; #4003 mac build 39587596123 still queued; PG-2/TC-a no PR, PM-2/PT-1 blocked
 2026-10-21T12:44Z	3 build W2	check	#4003 #4004	#4003 macOS build green (39587596123), clean, awaiting lane sweep; #4004 macOS build 39597665667 running, clean; PM-2 waits PG-a, PT-1 waits TC-a
 2026-10-21T13:25Z	3 wave 2	stage-start	-	resumed by act-1a15e9d8b78-eu21; PG-a, PG-m, AC-photo done: PM-2 builder started; PM-g out of beta
+2026-10-21T13:22Z	3 wave 2	heartbeat	PM-2	PM-2 builder launched (branch lead/multi-layer-select-PM-2)
