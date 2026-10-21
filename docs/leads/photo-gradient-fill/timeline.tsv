@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-21T07:59Z	heartbeat	lane	#3922,#3923,#3927	all mergeable; needs-rebase cleared on #3922 (macOS build queued for 94d8793e7); PG-2/PG-4 waiting for batch
 2026-10-21T08:18Z	heartbeat	lane	#3922,#3923,#3927	no needs-fix/needs-rebase; a batch landed on dev (#3809..#3839) without ours; waiting for next batch
 2026-10-21T08:37Z	PG-2	merged	#3927	squash on dev
+2026-10-21T08:37Z	PG-5,PG-6	build	-	wave PG-u started: GF-3 #3760 and PG-2 on dev; two worktree agents
