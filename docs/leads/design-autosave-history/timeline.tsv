@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-21T03:17Z	3	heartbeat	#3710 #3726	no change; #3726 lane waiting for macOS build (03:05Z); scoped: design 39490030243 queued; #3677 #3742 open; no supervisor reply
 2026-10-21T03:38Z	3	heartbeat	#3710 #3726	no change; queue 6 queued; scoped: design 39490030243 queued; #3677 #3742 open; no supervisor reply
 2026-10-21T04:00Z	3	heartbeat	#3710 #3726	no change; scoped: design 39490030243 cancelled 03:54Z, none re-dispatched; asked supervisor in an update to the #3434 comment 6306556075
+2026-10-21T04:22Z	3	heartbeat	#3710 #3726	no change; new scoped: design 39541665044 queued 04:00Z (critics wait on it); #3677 #3742 open
