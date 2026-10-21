@@ -4,13 +4,13 @@ Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3758) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: when dev Linux 39637279724 (a803ef01, contains b48e63e3) is green, post Belt-Slice-Done: OC-m on #3756; remaining slices blocked (see #3756 comment 6317098600)
+Next: OC-a and OC-m done; remaining slices blocked on other features (see #3756 comment 6317098600); recheck blockers each poll, Question for the supervisor after 3 identical blocked polls
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OC-a | contract: Orientation, CropAspect, CropRules stubs, CropCommands, C4 part; disabled tests | OC-1, OC-2 | – | – | false | 0 | done (#4082 → f080846e; Linux 39620526621; Belt-Slice-Done posted) | – | – |
-| OC-m | Orientation and CropRules bodies; two mutation plans | OC-3, OC-4 | – | OC-a | false | 0 | merged (#4088 → b48e63e3; dev Linux 39637279724 at a803ef01 running) | – | – |
+| OC-m | Orientation and CropRules bodies; two mutation plans | OC-3, OC-4 | – | OC-a | false | 0 | done (#4088 → b48e63e3; Linux 39637279724; Belt-Slice-Done posted) | – | – |
 | OC-u | CropAspectPicker, gallery, journey, render budget | OC-5, OC-6 | SJ-OC | OC-a; document-setup:DS-u (not started) | true | 0 | blocked | – | – |
 | OC-library-m | Library adopts orientation | OC-7, OC-8 | – | OC-m, suite-imaging:IM-z, clipboard-interop:CB-library (not started) (OC-8) | false | 0 | blocked | – | – |
 | OC-library-u | Library crop UI | OC-9, OC-10 | – | OC-u, OC-library-m | true | 0 | blocked | – | – |
