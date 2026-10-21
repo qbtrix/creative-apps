@@ -4,7 +4,7 @@ Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: (11:25) #3997 suite file-flow MERGED 11:15; LF-4 still waits on #3928 (open). LF-3 #4024 on fast-lane awaiting lane macOS build. LF-u Belt-Slice-Done waits on runs 39586209372/39585973891 (in progress).
+Next: (11:50) LF-3 #4024 got needs-rebase (LibraryUndoAdapter.swift vs FC-9 #3546 selectedBefore); merged dev, kept both fields, gate running. LF-u Belt-Slice-Done held: CI 39586209372 and scoped 39585973891 both red on dev-red #3856 (Photo command-path baseline, Flare SetLayerParent build), not ours. LF-4 waits on #3928 only (#3997 merged).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
