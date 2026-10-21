@@ -51,3 +51,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 15:26Z: #4034, #4035 still open in lane; waiting.
 - 15:46Z: #4034, #4035 still open in lane; waiting.
 - 16:09Z: #4034, #4035 still open in lane. Note: macOS Xcode builds on dev fail on a project.yml core-pin mismatch; gradient-fill lead has a fixer on it.
+- 16:28Z: #4034, #4035 still open in lane; waiting.
