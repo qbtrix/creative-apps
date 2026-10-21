@@ -18,3 +18,4 @@ time	event
 2026-10-21T11:16Z	stage	KS-a #3921 merged as 80ac6639; awaiting a green dev Linux run containing it
 2026-10-21T11:43Z	check	KS-a 80ac6639 merged; dev Linux checks 965a76be red (not ours); ded2ca57 Linux check running
 2026-10-21T12:13Z	check	dev Linux check ded2ca57 red on photo CommandPathTests (PhotoPlace.swift MenuCommand, not ours); c2aa3391 Linux check running
+2026-10-21T12:36:51Z	check	KS-a: no green dev Linux yet; 76d0c892 and c2aa3391 Linux checks red on library timing budgets (LibraryFoldersTests, LargeCatalogBudgetTests), not ours
