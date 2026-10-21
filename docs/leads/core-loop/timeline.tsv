@@ -110,3 +110,4 @@ utc	stage	event	ref	note
 2026-10-21T21:07Z	3	check	dev Linux 39673232799 red	CommandPathTests launcher baseline (AfterGlowApp), not core-loop; dev-red #3856; CL-measure waits
 2026-10-21T21:27Z	3	merge	#4167 CL-z merged 4565e85	CL-z waits for a green dev Linux run
 2026-10-21T21:27Z	3	check	dev Linux 39676099814 red	same launcher baseline (RP-2 x CS-2), dev-red #3856, not core-loop
+2026-10-21T21:49Z	3	check	dev Linux 39678885281 red (has 4565e85)	same launcher baseline, dev-red #3856 open, not core-loop; halo scoped run still queued
