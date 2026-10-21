@@ -2,7 +2,7 @@
 
 Issue: #3789 · Packet: docs/blueprints/library/features/share-sheet.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 (earlier act-1a15b98bc49-4lk9 on claude/task-k1zaw1) · Started: 2026-10-20T23:00Z
-Stage: 3 wave 2 (SH-a done; SH-u #3814 merged, waiting on the dev Linux check)
+Stage: 3 wave 2 done (SH-a, SH-u done); SH-m waits on LF-3 #4024 and BK-u #3967
 Base: e2b8aa76 (origin/dev)
 Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (CommandPathTests), gate, move Head:; SH-m waits on file-flow LF-m and catalog-backup BK-m (only LF-a #3624, BK-a #3960 on dev); then SH-z
 
@@ -38,3 +38,5 @@ Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (Command
 - SH-m: LF-m is in flight (LF-3 #4024, needs-rebase cleared). For BK-m, BK-3 #3965 merged as 73c3deb1 and BK-u #3967 is still open. LF-m and BK-m are not met on dev c2aa3391.
 - dev-red #3856 is open (others' merges); not ours to fix.
 - ShareButton is two presses: Share prepares, then "Share N Photos" is the ShareLink (a ShareLink can't open itself after an await). SharePhase holds the logic so SuiteUITests check it.
+
+- 13:05Z: Posted Belt-Slice-Done: SH-u on 39601343733 (737541328, contains 76d0c892; only red LibraryFoldersTests, #3961), plus Mac-Finish-Wanted for SH-u and the missed one for SH-a. SH-m still waits on #4024 and #3967, both open with fast-lane (poll 1 at this state).
