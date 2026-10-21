@@ -67,3 +67,5 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 2026-10-21T15:00Z: The lead dir moved to docs/leads/suiteui-stroke-style on lead/suiteui-stroke-style. SS-9 #3826 (head 21226b0) has a green macOS build (39601623669) and waits for a lane batch. SS-8 and SS-10 wait on SH-z, GF-z and AH-z. Finding #3881 (the stroke journey) is tracked against SS-9.
 
 - 2026-10-21T15:25Z: #3826 is held by a red Linux check on head 21226b0 (run 39614527290). The only failure is LibraryFoldersTests.tenThousandPaths, a timing budget (32.2 against 20) outside this PR. The rerun returned 403. I commented on the PR asking the supervisor for one re-run.
+
+- 16:38Z: heartbeat. Unchanged: waiting on upstream slices (see above); no open findings.
