@@ -69,3 +69,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 21:48Z: No change: #4034 and #4035 open.
 - 22:10Z: No change: #4034 and #4035 open.
 - 22:33Z: Heartbeat: #4034 and #4035 still open with fast-lane; nothing new.
+- 22:57Z: heartbeat: #4034 #4035 open with fast-lane, waiting on the lane.
