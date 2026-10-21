@@ -16,8 +16,9 @@ final class SuiteAreaSelectJourneyTests: XCTestCase {
 
         gallery.element("suite.area.tool-lasso").click() // 2. Drag a lasso.
         XCTAssert(gallery.element("suite.area.tool-lasso").isSelected, "the Lasso chip isn't selected")
-        canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.2))
-            .press(forDuration: 0.1, thenDragTo: canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.7)))
+        // One slow leg, so the drag sends many samples: the schema refuses a lasso under 3 points. The points are
+        // collinear; the kernel closes them into a flat outline, which still runs select.lasso and adds one shape.
+        gallery.velocityDrag(on: "suite.gallery.area-canvas", from: CGVector(dx: 0.2, dy: 0.2), to: CGVector(dx: 0.6, dy: 0.7))
         expectAreaLog(gallery, "select.lasso replace")
         expectShapes(canvas, 1)
         gallery.shot("area-select-lasso")
