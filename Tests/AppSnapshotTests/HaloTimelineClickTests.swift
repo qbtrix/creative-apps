@@ -4,12 +4,15 @@
 // screen, as PhotoWindowStrokeTests hosts PhotoWindow, records the commands
 // it sends to `perform`, and clicks with real mouse events where a person
 // would: on Floor's span bar away from any key, which selects Floor as a
-// click on its name does (B5 in the 2026-10-16 timeline review), and on
-// Ball's diamond at 24, which picks that lane's keys at 24. Points come from
+// click on its name does and clears the key pick (B5 in the 2026-10-16
+// timeline review), and on Ball's diamond at 24, which picks that lane's keys
+// at 24 through `.pickLaneKeys` (key-editing KE-2): replace for a plain
+// click, extend with Shift, toggle with Command. Points come from
 // HaloTimelineLayout and the Model's frame width, plus the strip's 8 pt inset
 // before frame 0 (SuiteSpacing.s). macOS only.
 import AppKit
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -47,22 +50,33 @@ import Testing
 
         try await click(point(frame: 30, row: floor), in: window, height: size.height)
         #expect(sent.commands.contains(.selectLayer(rows[floor].id)), "a click on Floor's bar sent \(sent.commands)")
-
-        sent.commands = []
-        try await click(point(frame: 24, row: ball), in: window, height: size.height)
         #expect(
-            sent.commands.contains(.selectLaneKeys(layerID: rows[ball].id, frame: 24, extending: false)),
-            "a click on Ball's diamond at 24 sent \(sent.commands)")
-        #expect(!sent.commands.contains(.selectLayer(rows[floor].id)), "a click on Ball's lane selected Floor")
+            sent.commands.contains(.pickLaneKeys(layerID: rows[floor].id, frame: nil, mode: .replace)),
+            "a click on Floor's bar didn't clear the pick: \(sent.commands)")
+
+        let presses: [(NSEvent.ModifierFlags, Pick)] = [([], .replace), (.shift, .extend), (.command, .toggle)]
+        for (flags, mode) in presses {
+            sent.commands = []
+            try await click(point(frame: 24, row: ball), in: window, height: size.height, flags: flags)
+            #expect(
+                sent.commands.contains(.pickLaneKeys(layerID: rows[ball].id, frame: 24, mode: mode)),
+                "a \(mode) click on Ball's diamond at 24 sent \(sent.commands)")
+            #expect(
+                !sent.commands.contains { if case .selectLaneKeys = $0 { true } else { false } },
+                "a click on Ball's diamond sent the old lane pick: \(sent.commands)")
+            #expect(!sent.commands.contains(.selectLayer(rows[floor].id)), "a click on Ball's lane selected Floor")
+        }
     }
 
-    /// A mouse-down and mouse-up at `point`, measured from the window's top-left.
-    private func click(_ point: CGPoint, in window: NSWindow, height: Double) async throws {
+    /// A mouse-down and mouse-up at `point`, measured from the window's top-left, with `flags` held.
+    private func click(
+        _ point: CGPoint, in window: NSWindow, height: Double, flags: NSEvent.ModifierFlags = []
+    ) async throws {
         let location = CGPoint(x: point.x, y: height - point.y)
         for kind in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
             let event = try #require(
                 NSEvent.mouseEvent(
-                    with: kind, location: location, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                    with: kind, location: location, modifierFlags: flags, timestamp: ProcessInfo.processInfo.systemUptime,
                     windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
             window.sendEvent(event)
             try await Task.sleep(for: .milliseconds(50))
