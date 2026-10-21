@@ -3,7 +3,7 @@
 Issue: #1939 · Packet: docs/blueprints/suiteui/features/adopt-kernel-export.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: heartbeat
-Base: dev 5bec8089
+Base: dev ac7f95c9
 Next: done
 
 ## Slices
@@ -18,6 +18,7 @@ Next: done
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T13:30Z: -
 - 2026-10-21T13:08Z: -
 - 2026-10-21T12:43Z: -
 - 2026-10-21T12:23Z: -
