@@ -43,11 +43,14 @@ Model walk in `DesignSampleTests` (Linux).
 
 ## Journey steps
 
-1. Select a white rectangle, press I (DY-2, `DesignEyedropperJourneyTests.testPickFillFromShape`):
-   the Eyedropper is active; the loupe follows the pointer.
+1. Select a white rectangle, click the palette's Eyedropper (`design.tool.eyedropper`; DY-2,
+   `DesignEyedropperJourneyTests.testPickFillFromShape`): it is selected, the status line reads
+   Eyedropper; the loupe follows the pointer.
 2. Click a red ellipse: the rectangle's fill turns red (one "Fill" step).
 3. Option-click a blue text: the rectangle's stroke turns blue.
-4. Press V: the Move tool is back, the rectangle still selected.
+4. Click the palette's Move (`design.tool.move`): it is selected, the status line reads Move, the
+   rectangle still selected.
+5. Keyboard parity: press I, the Eyedropper is selected; press V, Move is back.
 
 ## Jobs
 
@@ -111,7 +114,7 @@ Longest chain: DY-1 → DY-2 → DY-3 → DY-4 → DY-7 → DY-8 (6). Chain of 6
 | DY-4 | `DesignEyedropperSnapshots`; `RenderBudgetDesignEyedropperTests.loupeTrackInThreeBodies` | budget over | – (UI) |
 | DY-5 | `DesignSampleTests`: the topmost visible node wins; a hidden one is skipped; a gradient reads its colour at the point; empty canvas is nil; an apply is one step and a locked selection refuses | a layer, a colour or a step is wrong | `DesignModel.DesignSample+Kernel`: selection read → `.samplesTopmost`; hidden nodes counted → `.skipsHidden`; first stop used → `.gradientAtPoint` |
 | DY-6 | `color.sample` and `color.pick` listed and run; RJ-D34 passes on Linux | the id is missing | – (registration) |
-| DY-7 | `testPickFillFromShape` steps 1 to 4 on live | a step fails | – |
+| DY-7 | `testPickFillFromShape` steps 1 to 5 on live | a step fails | – |
 | DY-8 | `scripts/waves render --dry-run` | status not built | – |
 
 ## Quality tests
@@ -120,7 +123,7 @@ Longest chain: DY-1 → DY-2 → DY-3 → DY-4 → DY-7 → DY-8 (6). Chain of 6
 |---|---|---|
 | render: 120-sample loupe track over the canvas | ≤ 3 window bodies; p95 ≤ 8 ms | `RenderBudgetDesignEyedropperTests.loupeTrackInThreeBodies` |
 | One gesture, one step | a pick is one step | `DesignSampleTests.applyIsOneStep` |
-| No dead controls; keyboard parity | I picks the tool, V leaves it | `testPickFillFromShape` |
+| No dead controls; keyboard parity | a palette click picks the tool and Move leaves it (steps 1, 4); I and V do the same (step 5) | `testPickFillFromShape` |
 | Audit | zero new over Design's baseline | `audit-design-*.json` |
 
 ## Done check

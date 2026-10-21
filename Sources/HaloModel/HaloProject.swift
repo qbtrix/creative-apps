@@ -93,6 +93,8 @@ public struct HaloProject: Sendable, Equatable {
     public internal(set) var refusal: HaloRefusal?
     /// The last refused rename, so the window can show why; nil once handled.
     public internal(set) var refusedRename: RefusedRename?
+    /// The spec the shape tool's next drag draws; written by `HaloShape+Kernel.swift`.
+    public internal(set) var shapeTool = ShapeSpec.defaults(.rectangle)
 
     /// A project on the live services, as the app ships.
     public init() { self.init(services: .live) }
@@ -104,7 +106,7 @@ public struct HaloProject: Sendable, Equatable {
         a.document == b.document && a.history == b.history && a.playback == b.playback
             && a.viewerDrag == b.viewerDrag && a.selectedKeys == b.selectedKeys && a.file == b.file
             && a.renderedFrame == b.renderedFrame && a.renderJob == b.renderJob && a.refusal == b.refusal
-            && a.refusedRename == b.refusedRename
+            && a.refusedRename == b.refusedRename && a.shapeTool == b.shapeTool
     }
 
     /// The compositions, in sidebar order.

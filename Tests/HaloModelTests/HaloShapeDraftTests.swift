@@ -1,5 +1,5 @@
 // HaloShapeDraftTests.swift: shape-tools HS-3, the viewer drag's Model half:
-// the draft, one shape per release, Escape, and `drawShape`'s refusal.
+// the draft, one shape per release, Escape, and `drawShape` drawing or refusing.
 @testable import HaloModel
 import SuiteKernel
 import Testing
@@ -47,14 +47,23 @@ import Testing
         #expect(next != nil && idle == false)
     }
 
-    @Test func drawingRefusesThroughTheModelWhileTheToolIsAStub() throws {
+    @Test func aReleaseDrawsOneShapeLayerThroughTheModel() throws {
         var project = HaloProject(services: .fake)
         project.restore(try #require(HaloFixtures.project("three-layers")))
-        let before = project.document
+        let before = try #require(project.selectedComposition)
+        let drawn = try #require(HaloShapeDrawn(Self.star, from: Self.a, to: Self.b))
+        let drawnID = project.drawShape(drawn)
+        let id = try #require(drawnID)
+        let comp = try #require(project.selectedComposition)
+        #expect(comp.layers.count == before.layers.count + 1 && project.history.undo.count == 1)
+        #expect(project.selectedLayer?.id == id && project.selectedLayer?.shape == Self.star && project.refusal == nil)
+    }
+
+    @Test func drawingWithoutACompositionRefusesWithTheHelp() throws {
+        var project = HaloProject(services: .fake)
         let drawn = try #require(HaloShapeDrawn(Self.star, from: Self.a, to: Self.b))
         let id = project.drawShape(drawn)
-        #expect(id == nil)
-        #expect(project.document == before && project.history.undo.isEmpty)
-        #expect(project.refusal == HaloRefusal(control: "halo.viewer.shape", message: project.shapeHelp ?? ""))
+        #expect(id == nil && project.history.undo.isEmpty)
+        #expect(project.refusal == HaloRefusal(control: "halo.viewer.shape", message: "Make a composition first."))
     }
 }

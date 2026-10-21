@@ -15,7 +15,6 @@ extension PhotoWorkspace {
     public mutating func drawGradient(from a: Mask.Point, to b: Mask.Point) throws {}
 
     /// One editor gesture on the tool's gradient (`toolOptions.gradient`),
-    /// through `GradientRules`; not undoable, as every tool option. Stub:
-    /// changes nothing; PG-4 builds it.
-    public mutating func runGradientOption(_ intent: GradientIntent) {}
+    /// through `GradientRules`; not undoable, as every tool option.
+    public mutating func runGradientOption(_ intent: GradientIntent) { setToolOption(.gradient(intent)) }
 }

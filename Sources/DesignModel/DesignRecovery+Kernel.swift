@@ -1,7 +1,7 @@
 // DesignRecovery+Kernel.swift: the workspace on SuiteKernel's history panel and SuiteModel's
 // autosave recovery (design/autosave-history). `historyListing` is DesignHistory's kernel
 // History as the panel lists it, its base "Open" for a file the window opened or saved and
-// "New Design" otherwise; `jumpHistory(to:)` lands on that step and records nothing: it ends
+// "New Design" otherwise, which was never saved and so marks no saved step; `jumpHistory(to:)` lands on that step and records nothing: it ends
 // the open run, as History.jumpEndingRun does, then walks the kernel's undo and redo through
 // DesignHistory's own `undo()` / `redo()`, so a jump restores each step exactly as Edit > Undo
 // does (counters never go back, a New File swap brings its location back). Out of range, or
@@ -22,8 +22,14 @@ import SuiteKernel
 
 extension DesignWorkspace: HistoryJumping {
     /// The history as the panel lists it; the state before the first step is "Open" or "New Design".
+    /// A document with no location was never saved, so it lists no saved state.
     public var historyListing: HistoryListing {
-        history.kernel.listing(base: documentURL == nil ? "New Design" : "Open")
+        guard documentURL != nil else {
+            var listing = history.kernel.listing(base: "New Design")
+            listing.savedIndex = nil
+            return listing
+        }
+        return history.kernel.listing(base: "Open")
     }
 
     /// Lands on step `index` of `historyListing` without recording one; refuses out of range and
