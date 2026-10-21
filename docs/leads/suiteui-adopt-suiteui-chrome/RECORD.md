@@ -3,7 +3,7 @@
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet; earlier run act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
 Stage: 0 setup (blocked on shared-codecs:SC-f)
-Base: dev 0f44e804 (main 0dd23d65 verified)
+Base: dev af840a6d (main 0dd23d65 verified)
 Next: re-read shared-codecs:SC-f (SC-13 #4019 Linux red on 85c365cf, lane waiting; SC-14..16 after it); start AC-e1 once SC-16 merges
 
 ## Slices
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f (SC-13 #4019 Linux red on 85c365cf, lane waitin
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T17:38Z: SC-f unchanged on dev af840a6d: #4019 still Linux red on 85c365cf, no push since 12:30Z; no SC-14..16 PR. Supervisor hold/release call still open
 - 2026-10-21T17:07Z: SC-f unchanged on dev 0f44e804: #4019 still Linux red on 85c365cf, no push since 12:30Z; no SC-14..16 PR. Still waiting on the supervisor's hold/release call
 - 2026-10-21T16:36Z: SC-f unchanged on dev b70dcb71. #4019 (SC-13) sits because its Linux check is red on 85c365cf (lane: waiting, CI is red, since 12:30Z); shared-codecs lead owns it, not fixed here. Asked the supervisor to hold or release this run
 - 2026-10-21T16:04Z: re-read SC-f on dev b70dcb71: unchanged (SC-13 #4019 open+clean, no SC-14..16 PR); AC-e1 still waits
