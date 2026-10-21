@@ -10,7 +10,11 @@ import SwiftUI
 
 /// What the overlay edits: the draft and path (document space), the selected anchors, the tool and the zoom.
 struct PathContext: Sendable {
-    var draft: PenDraft?, path: PathInEdit?, selection: Selection<AnchorRef>, tool: PenTool, zoom: Double
+    var draft: PenDraft?
+    var path: PathInEdit?
+    var selection: Selection<AnchorRef>
+    var tool: PenTool
+    var zoom: Double
     var scale: Double { PathMarks.scale(zoom) }
     func document(_ view: CGPoint) -> Point { Point(x: view.x / scale, y: view.y / scale) }
 }
