@@ -129,24 +129,16 @@ import Testing
         #expect(smart.emptyActionTitle == "Show All Photos")
     }
 
+    /// Your collections' edits (FC-9, LibraryCollectionsTests) and smart collections (FC-12) are built.
     @Test func everyStubAnswersItsUnavailableText() throws {
         var shoot = catalog("shoot")
         shoot.userCollections = [keepers([id(1)])]
         shoot.recount()
         let before = shoot
-        #expect(shoot.addToCollectionHelp("user-1") == UserCollection.unavailable)
-        #expect(shoot.removeFromCollectionHelp == UserCollection.unavailable)
-        #expect(shoot.deleteCollectionHelp == UserCollection.unavailable)
         #expect(shoot.newSmartCollectionHelp == "Set a filter first: a smart collection keeps the filter's rules.")
         #expect(shoot.collectionsSaveRequest() == nil)
         #expect(shoot.collectionsFileValue == "saved")
-        #expect(shoot.newCollection() == "")
         #expect(shoot.newSmartCollection() == nil)
-        shoot.renameCollection("user-1", to: "Best")
-        shoot.add([id(2)], to: "user-1")
-        shoot.addToCollection("user-1")
-        shoot.removeFromCollection()
-        shoot.deleteCollection("user-1")
         shoot.didSaveCollections(revision: 1)
         shoot.failRestoreCollections(setAsideAs: "collections.json.bad")
         try shoot.restoreCollections(nil)

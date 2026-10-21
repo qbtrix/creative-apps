@@ -72,6 +72,8 @@ private let keepers = UserCollection(id: "user-1", name: "Keepers", contents: .p
     #expect(catalog.userCollections.isEmpty)
     #expect(catalog.selectedCollectionID == "all")
     #expect(catalog.order == ["P1", "P2", "P3"])
+    // The fallback keeps the selection; picking All Photos by hand would clear it.
+    #expect(catalog.selection == ["P2"])
 }
 
 @Test func photoAndCollectionStepsUndoInOrder() {
