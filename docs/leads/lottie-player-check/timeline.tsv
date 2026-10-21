@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T22:27Z	heartbeat	LP-4 #4132 still open at 82c169e1; supervisor question already on #3792 (17:05Z, rule 23 met); LP-6 waits on it.
 2026-10-21T22:49Z	heartbeat	LP-4 #4132 still open at 82c169e1; supervisor question already on #3792 (rule 23 met). dev macOS build is broken by a Photo test (see #3856), which also blocks LP-4's macOS run.
 2026-10-21T23:12Z	heartbeat	LP-4 #4132 still open (no-fast-lane, supervisor merge after macOS); LP-6 ready on lead/lottie-player-check-LP-6. dev macOS build red until #4215 lands.
+2026-10-21T23:34Z	heartbeat	LP-4 #4132 open (supervisor merge after macOS, blocked by dev Photo break until #4215); LP-6 ready.
