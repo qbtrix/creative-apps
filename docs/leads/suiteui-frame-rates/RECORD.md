@@ -2,9 +2,9 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: 3 wave 1
+Stage: 3 wave 2
 Base: dev
-Next: ship wave 1 when gates pass; build wave 2 stacked
+Next: ship FR-a when its gate passes; FR-u waits on TSA-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -43,6 +43,7 @@ Next: ship wave 1 when gates pass; build wave 2 stacked
 - Status channel is lead/suiteui-<feature> with docs/leads/suiteui-<feature>/ (the names Belt reads); the earlier lead/<feature> branches are superseded.
 - Slice branches are named lead/<feature>-<slice> because lead/<feature> blocks lead/<feature>/<slice>.
 - FR-a: TimeCommands.specs is a generic static func like the other kernel command sets, since CommandSpec is generic.
+- Wave 2 slices (FR-m) build stacked on their wave-1 slice branch and push without a PR; the lead opens each PR once its parent has merged, so the stacked PR never carries the parent's diff past the size cap.
 
 ## Open
 - FR-u waits on timeline-select-all:TSA-a; FR-halo on adopt-command-catalog:AC-z and adopt-kernel-session:AD-halo; FR-flare on AC-z and a creative-core rational-rate bump. Rechecked before each starts.

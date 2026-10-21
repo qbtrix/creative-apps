@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-21T11:27Z	3	wave-start	FR-a	wave 1 launched (FR-a contract slice)
 2026-10-21T12:15Z	3	resume	FR-a	resumed after restart; FR-a built on lead/frame-rates-FR-a, gate blocked by dev-red #3856, now fixed on dev
 2026-10-21T12:17Z	3	heartbeat	-	gates running on wave-1 slices after merging dev (#4008 fixed dev-red)
+2026-10-21T12:19Z	3	wave-start	wf_8d28fdb1-88d	FR-m building stacked on lead/frame-rates-FR-a
