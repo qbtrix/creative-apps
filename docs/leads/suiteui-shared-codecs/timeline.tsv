@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-21T19:37Z	heartbeat	SC-13 #4019 head 4e6f468 and SC-1 #4020 head bc99791 re-gated after dev merge (pasteboard files baselined, caps 25/10); bodies moved to the new heads
 2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-shared-codecs (the branch Belt reads) from now on
 2026-10-21T20:10Z	stage	SC-14 restacked on SC-13 4e6f468; gate running
+2026-10-21T20:26Z	gate	SC-14 ac167606 gated CI: PASS and pushed to lead/shared-codecs-SC-14; PR opens once #4019 merges
