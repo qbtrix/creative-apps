@@ -129,3 +129,4 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 - 2026-10-21T20:00Z check: FC-16 opened: #4176 (shared prose + status built, feature-done, head 259767c) and C4-only #4177 (LibraryModel description, head 6de85aa; split because check-c4-descriptions refuses mixed PRs). Both CI: PASS, fast-lane. Dev Linux check 39664459063 still running.
 - 2026-10-21T20:07Z check: Belt-Slice-Done FC-d posted (run 39664459063 green, contains FC-12). FC-16 #4176 and #4177 open, mergeable, waiting for the lane. Open findings 0.
 - 2026-10-21T20:29Z check: FC-16 #4176 and #4177 still open, mergeable, no lane comment or needs-fix yet. Open findings 0.
+- 2026-10-21T20:51Z check: FC-16 #4176/#4177 open, mergeable, proof lines match heads; lane saw them 20:32 (footer note only, proxy-added); lane sweep pending. Open findings 0.
