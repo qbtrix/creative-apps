@@ -4,7 +4,7 @@ Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
 Run: act-1a15f2277a5-6xyv · Session: relaunch of cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z (resumed 2026-10-21T15:49Z)
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: (2026-10-21T17:09Z) LF-3 #4024 at 6f892b2: lane macOS build 39630311636 green; waits for the lane's batch merge. LF-4 still waits on needs-ui #3928 (open). LF-m slice-done needs LF-3 and LF-4 merged.
+Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs-ui #3928 (open); LF-m slice-done needs LF-4 merged plus a green dev Linux run.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -45,3 +45,4 @@ Next: (2026-10-21T17:09Z) LF-3 #4024 at 6f892b2: lane macOS build 39630311636 gr
 - 13:17 poll: PRs open/clean (BK-u #3967, LF-3 #4024, FO-u #3963, FO-5 #4022) awaiting lane macOS batch; macOS runners still backlogged; scoped library run 39593465885 queued; #3928 open (LF-4 blocked).
 - 2026-10-21T15:49Z (run act-1a15f2277a5-6xyv): relaunched. Rule 23 re-read: #3928 open (LF-4 blocked); dev-red #3856 still open but dev Linux check 39623471557 at 9951eea is green and contains every merged slice PR. All three open PRs (#4024, #4022, #3967) went red on Linux on dev's Photo command-path baseline, fixed by #4008; dev merged into each, gates re-running. Swift was missing in the relaunched container; scripts/cloud-setup.sh installed 6.3.3. No open finding is on this feature's files.
 - 2026-10-21T17:09Z: rule 23 re-read. #4024 open at 6f892b2; lane macOS build 39630311636 success, merge pending in a lane sweep. #3928 open, LF-4 blocked. dev-red #3856 open. Open findings with Feature: file-flow: 0.
+- 2026-10-21T17:35Z: LF-3 #4024 merged by the lane (593cfe6). #3928 open, LF-4 blocked.
