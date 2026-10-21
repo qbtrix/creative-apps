@@ -60,7 +60,7 @@ import Testing
             #expect(newer.lowerBound < older.lowerBound, "newest first")
         } else { Issue.record("a Photo crash is missing") }
         let printed = io.stdout.joined()
-        for leak in ["tester", "/Users/", "Browser", "stale"] { #expect(!printed.contains(leak), "\(leak) leaks") }
+        for leak in ["tester", "Users", "Browser", "stale"] { #expect(!printed.contains(leak), "\(leak) leaks") }
         #expect(try JSONValue(json: try io.read("out.suitehelp")) == .object(["app": .string("photo"), "answer": .object(result)]))
     }
 
