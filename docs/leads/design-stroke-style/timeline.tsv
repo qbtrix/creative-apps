@@ -40,3 +40,4 @@ time	kind	note
 2026-10-21T09:47Z	check	lane	#3884	macOS build 39574365736 green; waits on a lane batch
 2026-10-21T10:06Z	fix	DK-a round 2 started	wf_c31c3a4f-5b2	#3884 merged (7b1207a8); findings #3865 #3871 #3873
 2026-10-21T10:09Z	check	DK-a round 2 running	wf_c31c3a4f-5b2	waiting on fixer PR
+2026-10-21T10:17Z	fix	DK-a round 2 done	#4001	fixes #3865 (Join/Cap disabled with Model reason until DK-5); #3871 #3873 -> gap p2 (rounds spent; #3873 waits on #3999 needs-ui). DK-a done once #4001 merges + dev Linux green
