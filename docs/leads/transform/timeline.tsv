@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-21T04:28:14Z	heartbeat	check: #3811 HT-u macOS build 39541214739 green on ad67a02; lane: eligible next sweep, 26 ready behind a batch
 2026-10-21T04:50:46Z	heartbeat	check: #3811 HT-u eligible (macOS green on ad67a02), waits for a batch
 2026-10-21T05:12:16Z	heartbeat	check: #3811 HT-u eligible, waits for a batch
+2026-10-21T05:38:45Z	heartbeat	fix: #3811 HT-u needs-rebase (HaloWindow+Viewer.swift vs #3693) resolved, both environments kept; da8dfd4 pushed, scripts/ci --changed PASS, Head moved
