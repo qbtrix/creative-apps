@@ -1,0 +1,4 @@
+[
+{"label":"Q10: Save ignores the result: a failed save closes the window","file":"Sources/SuiteUI/UnsavedGuard.swift","find":"        case .save: return await hooks.save()\n","replace":"        case .save: _ = await hooks.save(); return true\n","tests":"UnsavedGuardTests"},
+{"label":"Cancel goes on: the dirty window closes anyway","file":"Sources/SuiteUI/UnsavedGuard.swift","find":"        case .cancel: return false\n","replace":"        case .cancel: return true\n","tests":"UnsavedGuardTests"}
+]
