@@ -26,7 +26,8 @@ import Testing
         #expect(items.map(\.command.title) == ["PNG", "SVG", "Gallery Layers"])
         #expect(items.map(\.commandID) == ["edit.copy-as", "edit.copy-as", "edit.copy-as"])
         #expect(items.map(\.id) == ["edit.copy-as.png", "edit.copy-as.svg", "edit.copy-as.own"])
-        #expect(items.allSatisfy(\.command.isEnabled))
+        let allEnabled = items.allSatisfy { $0.command.isEnabled }
+        #expect(allEnabled)
         for item in items { item.command.perform() }
         #expect(ran == [.png, .svg, .own])
     }
