@@ -2,9 +2,9 @@
 
 Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z (prior runs act-1a14852c11d-65cg, act-1a14fd6514a-4hke, act-1a156b3f640-ytq0)
-Stage: 3 wave 1 of this run (DE-z in the lane, #3684)
+Stage: 4 (all slices merged-done; DE-z #3684 merged e5cf7c4e 23:01Z, Belt-Slice-Done on Linux run 39514893774)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: DE-u critics on the next scoped: design or full run on dev (none yet; macOS queue backed up); DE-z #3684 (head b4c35e57, feature-done) waits on its batch; its CI then the contact sheet
+Next: DE-u and DE-z critics on the first scoped: design run with ui-screens on dev (39490030243 still queued); then fix rounds and Belt-Contact-Sheet on #1970
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,7 +13,7 @@ Next: DE-u critics on the next scoped: design or full run on dev (none yet; macO
 | DE-u | File > Export… ⇧⌘E opens SuiteUI ExportSheet on the fakes; Export runs the fake steps; Cancel/Escape close; a failed step names its file | DE-6, DE-7 | J19 | DE-a; design-window DW-c; files-history FH-b; snapping SN-c; canvas-basics CB-c; editor-kernel EK-chrome | yes | 0 | merged-done (critics wait scoped run) | 39479914225 | wanted |
 | DE-s | the plan picks layers per scope, unique names, sizes per scale, refusals; SVG equals the reference | DE-3, DE-5 | MJ13, MJ14 | DE-a | no | 0 | done | – | – |
 | DE-w | PNG at 1x/2x/3x and one-page PDF off the window from the canvas artwork | DE-8, DE-9 | DesignRasterizerTests | DE-a | yes | 0 | done | – | – |
-| DE-z | real files, never overwriting, progress, failures, journeys on live | DE-10, DE-11 | J17, J18 | DE-u, DE-s, DE-w; files-history FH-b; editor-kernel EK-run | yes | 0 | in lane #3684 | – | – |
+| DE-z | real files, never overwriting, progress, failures, journeys on live | DE-10, DE-11 | J17, J18 | DE-u, DE-s, DE-w; files-history FH-b; editor-kernel EK-run | yes | 0 | done | 39514893774 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -125,3 +125,4 @@ Last check: 2026-10-20T00:14:12Z (#1500 closed; DE-u blocked on #1552, EK-chrome
 - Decision: DE-6 + DE-7 come to ~620 lines, over the 400 cap; DE-u ships as a DE-6 PR plus a stacked DE-7 PR when one PR would exceed the cap.
 - Findings queue for design-export: empty at 00:30Z.
 - DE-u merged-done: ci.yml on dev a48992b7 (run 39479914225, Linux green) contains #3389 and #3391; Belt-Slice-Done posted on #1970 (comment 6299503101). Run 39475897385 on 875b44d2 still pending, superseded.
+- 2026-10-21T00:05:02Z: Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
