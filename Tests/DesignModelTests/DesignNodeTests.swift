@@ -44,6 +44,15 @@ import Testing
     #expect(!DesignTool.eyedropper.isEnabled && DesignTool.eyedropper.unavailableHelp != nil)
 }
 
+// #3860: the palette shows a disabled tool's reason in place of "Title (Key)", so the
+// icon-only Eyedropper's reason names the tool, its I key and what it will do.
+@Test func theDisabledEyedropperTooltipNamesTheToolAndItsKey() {
+    let help = DesignTool.eyedropper.unavailableHelp ?? ""
+    #expect(help.hasPrefix("Eyedropper (I): "))
+    #expect(help.contains("color from the canvas"))
+    #expect(!help.contains("isn't built yet"))
+}
+
 @Test func pageSizeTextShowsWholePoints() throws {
     let workspace = openDesign()
     #expect(workspace.selectedPage?.sizeText == "1440 × 1024 pt")
