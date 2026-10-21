@@ -2,7 +2,7 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 · Started: 2026-10-21T10:19Z
-Stage: 3 wave 1 (LG-a fix round 1 of 2: fixture timing out of the gate, branch large-catalog/lg-a-fix)
+Stage: 3 wave 1 (LG-a fix round 1: #4073 open, fast-lane, gate pass; perf-suites ask on #3790)
 Base: e2b8aa76 (origin/dev)
 Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on LG-model, FC-c, suiteui shared-thumbnails ST-m
 
