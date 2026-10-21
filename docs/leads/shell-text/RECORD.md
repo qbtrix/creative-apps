@@ -2,16 +2,16 @@
 
 Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
-Stage: 3 wave A
+Stage: 3 wave B (stacked)
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: ST-a is draft #4135 stacked on #4034 (lead/shell-media-SM-1) per the supervisor's answer on #3725; when #4034 lands, rebase ST-a onto dev and mark it ready
+Next: builders run ST-m (ST-3, ST-6; branch lead/shell-text-ST-m) and ST-live's ST-4 (branch lead/shell-text-ST-live), both stacked on ST-a; open each as a draft PR based on lead/shell-text-ST-a when pushed. When #4034 lands, rebase ST-a onto dev and mark it ready, then restack the drafts
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | ST-a | the text service contract: values, protocols, FakeText, SuiteServices.text slot | ST-1, ST-2 | MJ-ST0 | shell-media:SM-a (ST-1) | no | 0 | pr-open #4135 (draft on #4034) | – | – |
-| ST-m | TextSpan/PlacedSpan validation, font fallback rules, FakeText measures by rule | ST-3, ST-6 | MJ-ST1 | ST-a | no | 0 | planned | – | – |
-| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | planned | – | – |
+| ST-m | TextSpan/PlacedSpan validation, font fallback rules, FakeText measures by rule | ST-3, ST-6 | MJ-ST1 | ST-a | no | 0 | building (stacked on ST-a) | – | – |
+| ST-live | Core Text measuring, font list, glyph rasterizer on the Mac; Halo's rasterizer moves | ST-4, ST-5, ST-7 | MJ-ST2, MJ-ST3 | ST-a (ST-4) | no | 0 | building ST-4 (stacked on ST-a) | – | – |
 | ST-z | slot live, walk on the Mac, shared prose, built | ST-8, ST-9 | MJ-ST4 | ST-m, ST-live | no | 0 | planned | – | – |
 
 ## Tasks
@@ -38,6 +38,8 @@ Wave plan (one PR per slice; slice PRs stack as drafts): A = ST-a once SM-1 merg
 - Supervisor (#3725, 16:50Z): stack ST-a as a draft on #4034 now; #4034 is on the local Mac gate; once it lands, rebase ST-a onto dev and mark ready.
 - Base is origin/dev (3f96cd10c74f0eb4da8641e8fe511a2e5e42a466), not main (0dd23d6, verified as the brief's step one): main is 248 commits behind dev, CLAUDE.md and lead.md target dev, and the lane retargets main PRs to dev.
 - ST-1 waits on shell-media SM-1 (#4034: MediaFrame and the SuiteServices files), open with a red Linux check; sample-files runs first meanwhile (contract rule 19).
+
+- 18:45Z: rather than wait on the lane for #4034, wave B starts as drafts stacked on ST-a (contract: next slice stacked as a draft). ST-live splits by the line cap: ST-4 first, ST-5 and ST-7 in a follow-up PR on the same slice.
 
 ## Open
 - ST-a blocked on shell-media SM-1, PR #4034 (open, Linux check red).
