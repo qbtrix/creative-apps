@@ -303,3 +303,4 @@ utc	stage	event	ref	note
 2026-10-21T21:11Z	3	heartbeat	#4178	LP-b round 2 open in fast lane, not merged yet
 2026-10-21T21:33Z	3	heartbeat	#4178	no merges; lane macOS builds queued (e.g. run 39662239121 for #4159 queued since 19:30, no runner)
 2026-10-21T22:05Z	3	heartbeat	#4178	LP-b round 2 still in lane (macOS build queue)
+2026-10-21T22:38Z	3	heartbeat	#4178	no merges; lane macOS build run 39662239121 (#4159) still queued since 19:30, no macOS runner picks up lane builds
