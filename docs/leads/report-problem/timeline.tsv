@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T16:23Z	2026-10-21T16:23Z	wave	lane	#4048	RP-1 in lane; #4049 #4103 #4110 stacked drafts
 2026-10-21T18:06Z	2026-10-21T18:06Z	lane	merged	#4048	RP-1 merged as 6afa46ab; bringing up #4049 RP-2 and #4110 RP-4
 2026-10-21T18:39Z	2026-10-21T18:39Z	lane	ready	#4049 #4110	RP-2 head fd92d1da, RP-4 head d6321ab0 (4/4 ProblemReport); dev merged, gate pass
+2026-10-21T20:21Z	2026-10-21T20:21Z	heartbeat	resume	-	run act-1a1601c3538-r0c9 resumed; #4049 #4110 in lane

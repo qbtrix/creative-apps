@@ -1,10 +1,10 @@
 # report-problem lead record
 
 Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
-Run: act-1a15e10aa98-lun9 · Session: https://claude.ai/code/session_01TyRi6dgCqqVCYgH3sXdspa · Started: 2026-10-21T10:50Z
-Stage: 3 build, wave 1
+Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
+Stage: 3 build, wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: wave 1 builders running; then mark stacked drafts ready after their parents merge, critics on merge
+Next: #4049 RP-2 and #4110 RP-4 in lane; RP-3 #4103 up after #4049; then RP-3e, RP-5
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -16,8 +16,8 @@ Next: wave 1 builders running; then mark stacked drafts ready after their parent
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| RP-1 | RP-a | 1 | checks first + ProblemReport/BetaNotes stubs, SuiteHelpCatalog specs, C4 part | packet RP-1 (8 files) | tests compile, disabled waits on RP-4 | #4048 bae0e1a | open; gate held for dev-red #3856 |
-| RP-2 | RP-a | 1 | Help menu from SuiteHelpCatalog via MenuCommand(spec:); launcher Welcome; journey skipped until RP-5 | packet RP-2 (5 files) | journey written | #4049 (draft, stacked on #4048) | open; gate held |
+| RP-1 | RP-a | 1 | checks first + ProblemReport/BetaNotes stubs, SuiteHelpCatalog specs, C4 part | packet RP-1 (8 files) | tests compile, disabled waits on RP-4 | #4048 | merged 6afa46a |
+| RP-2 | RP-a | 1 | Help menu from SuiteHelpCatalog via MenuCommand(spec:); launcher Welcome; journey skipped until RP-5 | packet RP-2 (5 files) | journey written | #4049 | ready, in lane, head fd92d1da |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
