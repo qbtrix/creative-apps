@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-21T17:22Z	3	pr-opened	#4135	ST-a text contract draft on #4034, mutate 4/4
 2026-10-21T17:27Z	3	poll	#4034	still open (clean, local Mac gate); #4135 draft
 2026-10-21T17:40Z	3	poll	#4034	still open (clean); #4135 draft
+2026-10-21T17:57Z	3	poll	#4034	labelled needs-rebase by the lane (shell-media lead owns it); #4135 waits
