@@ -3,3 +3,4 @@
 2026-10-21T11:30Z	ship	pr-opened	LG-a	#4006 head 95d4c1b8, Fast-Check pass, macOS build green, waiting on the lane batch
 2026-10-21T11:45Z	check	heartbeat	LG-a	#4006 open, still waiting on the lane batch (macOS build green); dev ded2ca57
 2026-10-21T12:12Z	ship	merged	LG-a	#4006 merged as c2aa3391; dev Linux check 39596004859 running
+2026-10-21T12:28Z	check	ci	LG-a	Linux 39596004859 red on LibraryFoldersTests.tenThousandPaths timing (not LG-a); next check 39598650564 on 76d0c892

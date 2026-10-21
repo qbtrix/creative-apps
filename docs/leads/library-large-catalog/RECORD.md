@@ -31,6 +31,6 @@ Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on L
 - LG-7 edits Tests/perf-suites.txt, a protected path: the supervisor makes that line; LG-7's PR carries only the jobs file.
 
 ## Open
-- LG-a #4006 merged at 11:52Z as c2aa3391. dev Linux check 39596004859 on c2aa3391 is running; Belt-Slice-Done is posted once its Linux job is green. dev-red #3856 is a PhotoApp CommandPath failure whose fix, #4008, is below c2aa3391.
+- LG-a #4006 merged at 11:52Z as c2aa3391. dev Linux check 39596004859 on c2aa3391 went red only on LibraryFoldersTests.tenThousandPaths (31.6 ms vs 20 ms; folder tree #3961, a timing budget, not LG-a). Waiting on 39598650564 (76d0c892); Belt-Slice-Done is posted once its Linux job is green. dev-red #3856 is a PhotoApp CommandPath failure whose fix, #4008, is below c2aa3391.
 - LG-model waits on FC-a, MD-e and DR-m; it is re-checked at each heartbeat.
 - dev-red #3856 open (others' merges).
