@@ -1,0 +1,7 @@
+[
+{"label":"a move reaches only the selected layer's keys","file":"Sources/HaloModel/HaloKeyMove+Kernel.swift","find":"guard let properties = byLayer[layer.id] else { continue }","replace":"guard layer.id == doc.selectedLayerID, let properties = byLayer[layer.id] else { continue }","tests":"HaloKeyEditingTests.swift"},
+{"label":"every step of a drag is its own undo step","file":"Sources/HaloModel/HaloKeyMove+Kernel.swift","find":"coalesceKey: \"keys-\\(dragStart)-\\(keyDragSerial)\")","replace":"coalesceKey: nil)","tests":"HaloKeyEditingTests.swift"},
+{"label":"a drag's end doesn't start a new step","file":"Sources/HaloModel/HaloKeyMove+Kernel.swift","find":"        keyDragSerial &+= 1\n","replace":"","tests":"HaloKeyEditingTests.swift"},
+{"label":"a collision moves the tracks that fit","file":"Sources/HaloModel/HaloKeyMove+Kernel.swift","find":"                        refused = (error, layer.name)\n                        throw error\n","replace":"                        refused = (error, layer.name)\n                        continue\n","tests":"HaloKeyEditingTests.swift"},
+{"label":"the pick stays behind on the old frames","file":"Sources/HaloModel/HaloKeyMove+Kernel.swift","find":"frame: $0.frame &+ frames) })","replace":"frame: $0.frame) })","tests":"HaloKeyEditingTests.swift"}
+]

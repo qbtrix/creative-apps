@@ -4,8 +4,10 @@
 // a progress bar while running, the finished or failed line after, and the
 // actions that state offers (ExportSheetAction). Every control's identifier
 // hangs off the host's prefix (ExportSheetIDs, "suite.export" by default) and
-// registers in `suite.controls`. It holds no state; every edit goes to the
-// host, which moves its run.
+// registers in `suite.controls`. When the progress row appears it marks
+// `progress-shown` on the prefix's series in the window's `suite.perf`
+// (HB-U5, QB-L9). It holds no state; every edit goes to the host, which
+// moves its run.
 import SuiteKernel
 import SwiftUI
 
@@ -85,6 +87,7 @@ public struct SuiteExportSheet<Options: View>: View {
     let onFormat: @MainActor (String) -> Void, onScale: @MainActor (Double) -> Void, onQuality: @MainActor (Double) -> Void
     let onExport: @MainActor () -> Void, onClose: @MainActor () -> Void
     let onTryAgain: (@MainActor () -> Void)?, onReveal: (@MainActor () -> Void)?
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     /// `options` are the host's rows, drawn under the sheet's own and disabled with them; Try Again and Reveal
     /// show only when the host handles them.
@@ -108,7 +111,10 @@ public struct SuiteExportSheet<Options: View>: View {
                 options
             }
             .disabled(!readout.editable)
-            if let p = readout.progress { BusyNote(p.text, identifier: ids.progress, fraction: (p.done, p.total)) }
+            if let p = readout.progress {
+                BusyNote(p.text, identifier: ids.progress, fraction: (p.done, p.total))
+                    .onAppear { recorder?.mark("progress-shown", series: ids.prefix) }
+            }
             switch readout.line {
             case .finished(let text): Label(text, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
             case .failed(let text): Label(text, systemImage: "exclamationmark.circle").foregroundStyle(SuiteColor.stateError)

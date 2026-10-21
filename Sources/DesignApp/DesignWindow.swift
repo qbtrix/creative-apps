@@ -223,6 +223,8 @@ struct DesignWindow: View {
         case .setPageSize(let width, let height): model.setPageSize(width: width, height: height)
         case .pick(let point, let toStroke):
             do { try model.pick(at: point, toStroke: toStroke) } catch { note = error.help }
+        case .sampleSize(let size): model.setSampleSize(size)
+        case .sampleTarget(let toStroke): model.setSampleTarget(toStroke: toStroke)
         }
     }
 
