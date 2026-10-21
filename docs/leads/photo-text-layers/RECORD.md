@@ -32,3 +32,4 @@ Next: TX-4 waits on suiteui TextStyleRows (TS-a/TS-u); TX-5 waits on TS-m and sh
 ## Open
 - TX-4 blocked: needs suiteui TextStyleRows (TS-a/TS-u) on dev.
 - TX-5 blocked: needs TS-m (text command bodies) and shell-text ST-z (GlyphRasterizing) on dev.
+- TS and ST slices belong to the text-style (#3779) and shell-text (#3725) leads; no needs-ui issue filed for TextStyleRows, it is TS-u's own deliverable.
