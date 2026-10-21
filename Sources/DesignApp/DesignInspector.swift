@@ -15,8 +15,10 @@
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
 // refuses what it must. Opacity, Corners and Stroke, the hint and the frame
 // fields' live scrub are DesignInspectorStyle. The scroll view shows no
-// indicators, so no legacy scroller reads as an unlabelled button.
+// indicators, so no legacy scroller reads as an unlabelled button. While the Shape
+// tool is active its Shape section (SuiteUI's ShapeToolOptions, shape-tools DS-2) comes first.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -27,6 +29,12 @@ struct DesignInspector: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
+                if model.tool == .shape {
+                    // The Shape tool's options over the Model's `shapeTool`; each change runs as `.shape`.
+                    InspectorSection("Shape") {
+                        ShapeToolOptions(spec: model.shapeTool, help: ShapeRules.help(model.shapeTool)) { perform(.shape($0)) }
+                    }
+                }
                 if model.hasMultipleSelection {
                     DesignSeveralProperties(model: model, perform: perform)
                 } else if let node = model.selectedNode {
@@ -146,7 +154,7 @@ private struct DesignNodeProperties: View {
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     DesignInspectorFill(model: model, perform: perform)
-                    InspectorColorWellRow(label, color: node.fill.hex) {
+                    InspectorColorWellRow(label, color: node.fill.hex, sampleHelp: lockHelp) {
                         perform(.setFill(node.id, DesignColor(hex: $0)))
                     }
                     .accessibilityIdentifier("design.fill")
@@ -159,6 +167,11 @@ private struct DesignNodeProperties: View {
         }
         .coordinateSpace(.named(Self.hintSpace))
     }
+}
+
+extension DesignWorkspace {
+    /// Whether the several-layer inspector shows Fill: a group has no fill, so only when every selected layer has one.
+    var severalShowFill: Bool { selectedNodes.allSatisfy { $0.kind.fillLabel != nil } }
 }
 
 /// Several selected layers: "<n> Layers", Align with Distribute, then Frame and Fill over them all.
@@ -185,12 +198,11 @@ private struct DesignSeveralProperties: View {
                 }
             }
             DesignInspectorTransform(model: model, perform: perform)
-            // A group has no fill, so the row shows only when every selected layer has one.
-            if model.selectedNodes.allSatisfy({ $0.kind.fillLabel != nil }) {
+            if model.severalShowFill {
                 let fillHelp = model.styleHelp(.fill)
                 InspectorSection("Fill") {
                     if let fill = model.sharedValue(\.fill) {
-                        InspectorColorWellRow("Fill", color: fill.hex) {
+                        InspectorColorWellRow("Fill", color: fill.hex, sampleHelp: fillHelp) {
                             perform(.setStyle(.fill(DesignColor(hex: $0))))
                         }
                         .accessibilityIdentifier("design.fill")

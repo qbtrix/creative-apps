@@ -47,7 +47,6 @@ struct PhotoWindow: View {
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
     @State var problem: PhotoProblem?
-    @State var isExporting = false
     @State var exportFormat = ImageFormat.png
     @State var exportQuality = 0.9
     @State var isResizing = false
@@ -72,7 +71,7 @@ struct PhotoWindow: View {
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
-    var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
+    var isPresenting: Bool { model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming }
 
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
@@ -111,10 +110,10 @@ struct PhotoWindow: View {
                 takeStroke()
                 model.clearStatus()
             }
-            .sheet(isPresented: $isExporting) {
+            .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
                 ExportSheet(
                     format: exportFormat, quality: exportQuality, onFormat: { exportFormat = $0 },
-                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { isExporting = false })
+                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
@@ -193,6 +192,7 @@ struct PhotoWindow: View {
             // The picture starts at once, not after SwiftUI's next pass reaches `.onChange`. A paint
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
+                if samplePress(moves) { return }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)
@@ -206,6 +206,7 @@ struct PhotoWindow: View {
             pacer.stop()
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
+        case .gradientOption(let intent): model.runGradientOption(intent)
         case .adjust(let edit): model.adjust(edit)
         case .endAdjust: model.endAdjust()
         case .selectAll: model.selectAll()

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "Pending FO-6 (folders): RJ-L53. A catalog of trips/ (with 2025/ and 2026/ inside), a trip/ folder whose name is a prefix of trips, and family/. folders.list, then view.show-folder on trips/2025, then on trips without its subfolders: the shown photos must be coast only, never tripod (the prefix trap) or the 2025 and 2026 photos. FO-6 writes the shown photos' names as the json output with options.contents shown.",
+  "pending": "FO-6",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "folders.list", "params": {}},
+    {"id": "view.show-folder", "params": {"path": "trips/2025"}},
+    {"id": "view.show-folder", "params": {"path": "trips", "subfolders": false}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-shown", "format": "json", "options": {"contents": "shown"}},
+  "expect": {
+    "out/trips-shown.json": {"json": {"folder": "trips", "subfolders": false, "shown": ["coast.png"]}}
+  },
+  "platforms": []
+}
