@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T11:12:37Z	3	pr	-	FO-5 #4022 opened stacked on #3961 (5/5 mutants)
 2026-10-21T11:17:20Z	3	pr	-	LF-3 #4024 opened on fast-lane (5/5 mutants)
 2026-10-21T11:25:30Z	3	check	-	11:25 poll: lane macOS builds pending for #3961/#3965/#3967; CI 39586209372+39585973891 in progress; #3997 merged, #3928 open
+2026-10-21T11:48:23Z	3	check	-	11:50 poll: dev-red #3856 (photo/flare) holds slice-done; #4024 needs-rebase being resolved

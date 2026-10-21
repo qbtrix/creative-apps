@@ -4,7 +4,7 @@ Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: (10:58) Supervisor answered: keep the AK-library wait; BK-5m becomes a gap if it is still blocked at run end; finish BK-3/BK-u/BK-a first. #3965 BK-3 and #3967 BK-u are on fast-lane, waiting on the lane's macOS builds. BK-a Belt-Slice-Done waits on CI 39586209372 / 39585973891 at 39d90e3, which contains #3960.
+Next: (11:50: CI at 39d90e3 red on dev-red #3856, not ours; slice-done held; lane macOS builds still pending) (10:58) Supervisor answered: keep the AK-library wait; BK-5m becomes a gap if it is still blocked at run end; finish BK-3/BK-u/BK-a first. #3965 BK-3 and #3967 BK-u are on fast-lane, waiting on the lane's macOS builds. BK-a Belt-Slice-Done waits on CI 39586209372 / 39585973891 at 39d90e3, which contains #3960.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
