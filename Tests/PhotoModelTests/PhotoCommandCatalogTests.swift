@@ -119,7 +119,9 @@ struct PhotoCommandCatalogTests {
                "New Adjustment Layer|\(!ws.adjustmentLayerKinds.isEmpty && adjust == nil)|\(adjust ?? "New Adjustment Layer")",
                row("Delete Layer", ws.canDeleteSelectedLayer), row("Duplicate Layer", ws.duplicateLayerHelp == nil, ws.duplicateLayerHelp),
                row("Merge Down", ws.mergeDownHelp == nil, ws.mergeDownHelp), row("Flatten Image", ws.flattenHelp == nil, ws.flattenHelp),
-               row("Rename Layer…", ws.canEditSelectedLayer), row(ws.visibilityCommandTitle, ws.canEditSelectedLayer),
+               row("Rename Layer…", ws.canEditSelectedLayer),
+               row(ws.selectedLayer?.isLocked == true ? "Unlock Layer" : "Lock Layer", ws.canEditSelectedLayer),
+               row(ws.visibilityCommandTitle, ws.canEditSelectedLayer),
                row("Bring Forward", ws.canBringSelectedLayerForward), row("Send Backward", ws.canSendSelectedLayerBackward),
                row("Select Layer Above", ws.canBringSelectedLayerForward), row("Select Layer Below", ws.canSendSelectedLayerBackward)]
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
