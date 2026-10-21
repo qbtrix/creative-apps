@@ -3,7 +3,7 @@
 Issue: #1939 · Packet: docs/blueprints/suiteui/features/adopt-kernel-export.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: 3 wave 1
-Base: dev 6d7fcf14
+Base: dev b64cbb8c
 Next: lane merges #3890 #3893; then Belt-Slice-Done
 
 ## Slices
@@ -18,6 +18,7 @@ Next: lane merges #3890 #3893; then Belt-Slice-Done
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T07:14Z: wait on lane
 - 2026-10-21T06:48Z: footers removed from PR bodies
 - 2026-10-21T06:44Z: Status mirrored to lead/suiteui-adopt-kernel-export as Belt's nudge names it
 - 2026-10-21T05:25Z: AL-photo and AS-library done, so AX-photo's and AX-library's waits are cleared; wave 1 starts both. AX-photo builder re-reads PhotoWorkspace's export state on dev first.
