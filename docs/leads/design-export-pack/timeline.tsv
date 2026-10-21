@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T07:29Z	blocked	unchanged: #3833 no reply, no new build; #3834 open
 2026-10-21T07:50Z	blocked	unchanged: #3833 no reply, no new build; #3834 open
 2026-10-21T08:13Z	merged	DX-1+DX-3 in #3834 (c1d0a7be); #3833 closed superseded; DX-2 waits XP-3, DX-4 waits SM-w
+2026-10-21T08:35Z	waiting	unchanged: DX-2 waits XP-3, DX-4 waits SM-w (no shell-media lead)

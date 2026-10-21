@@ -4,7 +4,7 @@ Issue: #3467 · Packet: docs/blueprints/design/features/export-pack.md
 Run: act-1a15bc68263-njsv · Session: line lead (design) · Started: 2026-10-21T00:00Z
 Stage: 3 wave 1
 Base: 07f754f7 (origin/dev)
-Next: DX-1 and DX-3 merged together in #3834's squash (c1d0a7be, 08:08Z; DX-1's commits were ancestors of DX-3's head), #3833 closed as superseded. DX-a still needs DX-2 (waits XP-3); DX-m still needs DX-4 (waits SM-w, no shell-media packet or lead yet). Polling on (2026-10-21T08:13Z: unchanged;)
+Next: DX-1 and DX-3 merged together in #3834's squash (c1d0a7be, 08:08Z; DX-1's commits were ancestors of DX-3's head), #3833 closed as superseded. DX-a still needs DX-2 (waits XP-3); DX-m still needs DX-4 (waits SM-w, no shell-media packet or lead yet). Polling on (2026-10-21T08:35Z: unchanged;)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
