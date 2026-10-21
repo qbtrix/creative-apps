@@ -8,7 +8,7 @@ Next: PF-a slice PR (PF-1, PF-2) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: 4 (in lane), 2026-10-21T01:04Z: #3768 macOS build green; in lane batch lane/batch-20261021005140 (#3676 #3699 #3767 #3768 #3800 #3812), waiting on its Linux check.
+Last stage: #3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 running; red was Library timing test, not ours)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
