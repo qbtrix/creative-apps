@@ -16,7 +16,7 @@ Next: LP-2 (LP-a fast-lane PR) and LP-1 (scripts/, supervisor-merge PR) building
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| LP-1 | LP-a | 1 | scripts/lottie-oracle build + render | scripts/lottie-oracle/{build,render.c,VERSION,README} | build on a Mac; one-rect render | – | building |
+| LP-1 | LP-a | 1 | scripts/lottie-oracle build + render | scripts/lottie-oracle/{build,render.c,VERSION,README} | build on a Mac; one-rect render | #4025 (5131fb58) | open, no-fast-lane, supervisor merge asked |
 | LP-2 | LP-a | 1 | LottiePlayerParityTests + fixtures | Tests/AppSnapshotTests/LottiePlayerParityTests.swift, Tests/AppSnapshotTests/Fixtures/Lottie/* | skips without oracle | – | building |
 | LP-3 | LP-m | 2 | FrameParity pure rules | Sources/FlareModel/FrameParity.swift, Tests/FlareModelTests/FrameParityTests.swift, Tests/mutations/FlareModel.FrameParity.json | FrameParityTests | – | waiting |
 | LP-5 | LP-m | 2 | colour-key, trim fixtures skipped | Tests/AppSnapshotTests/Fixtures/Lottie/{colour-key,trim}.flare | rows skip by name | – | waiting |
@@ -28,8 +28,11 @@ Next: LP-2 (LP-a fast-lane PR) and LP-1 (scripts/, supervisor-merge PR) building
 |---|---|---|---|---|---|
 
 ## Decisions
+- LP-1 pins ThorVG v1.1.2 (b004a778, MIT): v1.1.3 was under two weeks old.
+- The server re-appends a Claude Code footer to PR and issue bodies written from this session; removing it with PATCH doesn't stick. Recorded, not fought.
 - PRs target `dev` (CLAUDE.md, lead.md rule 4), not main.
 - LP-a ships as two PRs: LP-2 through the fast lane, and LP-1 (`scripts/`, protected; the packet names the path) as a `no-fast-lane` PR for the supervisor to merge, with a question on #3792. LP-2 skips by name until the oracle is built, so it doesn't wait on LP-1.
 
 ## Open
+- #4025 (LP-1) waits on a supervisor merge; question on #3792 (issuecomment-6314646002). Linux build and one-rect render verified; Mac build comes with LP-4.
 - LP-1 and LP-4 need a supervisor merge (protected paths).
