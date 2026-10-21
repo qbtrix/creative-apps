@@ -80,6 +80,7 @@ extension DesignTool: PaletteTool {
         case .ellipse: "Ellipse"
         case .text: "Text"
         case .pen: "Pen"
+        case .eyedropper: "Eyedropper"
         }
     }
 
@@ -91,6 +92,7 @@ extension DesignTool: PaletteTool {
         case .ellipse: "circle"
         case .text: "textformat"
         case .pen: "pencil.tip"
+        case .eyedropper: "eyedropper"
         }
     }
 
@@ -102,13 +104,14 @@ extension DesignTool: PaletteTool {
         case .ellipse: "o"
         case .text: "t"
         case .pen: "p"
+        case .eyedropper: "i"
         }
     }
 
     /// The pointer over the canvas while this tool is active.
     var pointer: PointerStyle {
         switch self {
-        case .move, .pen: .default
+        case .move, .pen, .eyedropper: .default
         case .frame, .rectangle, .ellipse: .rectSelection
         case .text: .horizontalText
         }
