@@ -26,6 +26,7 @@ A Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow Notice
 A Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow Notice
 A Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet Sheet
 A Sources/LibraryApp/LibraryStatusBar.swift::LibraryStatusBar StatusBar
+A Sources/PhotoApp/CanvasSizeSheet.swift::CanvasSizeSheet Sheet
 A Sources/PhotoApp/ExportSheet.swift::ExportSheet Sheet
 A Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet Sheet
 A Sources/PhotoApp/PhotoLayerList.swift::PhotoLayerList LayerList
@@ -64,6 +65,7 @@ B Sources/LibraryApp/LibraryBrowser.swift::LibraryImportNoticeRow error-label
 B Sources/LibraryApp/LibraryBrowser.swift::LibraryNoticeRow error-label
 B Sources/LibraryApp/LibraryControls.swift::* app-inventory
 B Sources/LibraryApp/LibraryExportSheet.swift::LibraryExportSheet sheet-buttons
+B Sources/PhotoApp/CanvasSizeSheet.swift::CanvasSizeSheet sheet-buttons
 B Sources/PhotoApp/ExportSheet.swift::ExportSheet sheet-buttons
 B Sources/PhotoApp/ImageSizeSheet.swift::ImageSizeSheet sheet-buttons
 B Sources/PhotoApp/PhotoStatusLine.swift::PhotoStatusLine error-label

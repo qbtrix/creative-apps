@@ -1,4 +1,6 @@
 # PhotoApp's menu items and buttons built without a command spec (command-catalog CC-11).
+Sources/PhotoApp/CanvasSizeSheet.swift: Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
+Sources/PhotoApp/CanvasSizeSheet.swift: Button("OK", action: resize).keyboardShortcut(.defaultAction)
 Sources/PhotoApp/ExportSheet.swift: Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
 Sources/PhotoApp/ExportSheet.swift: Button("Export", action: onExport).keyboardShortcut(.defaultAction)
 Sources/PhotoApp/ImageSizeSheet.swift: Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
