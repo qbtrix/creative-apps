@@ -42,3 +42,4 @@ Next: (11:50) LF-3 #4024 got needs-rebase (LibraryUndoAdapter.swift vs FC-9 #354
 - LF-3 waits on tone-controls:LT-m (LibraryCommandCatalog.swift, Tests/command-ids/library.txt) and cull-finish:DR-m; neither feature has a lead branch.
 - 12:21Z: LF-3 #4024 (a1574a6) gate passes, fast-lane, in the lane. LF-u Belt-Slice-Done waits on scoped library run 39593465885 (queued, contains fd7f493). #3928 still open: LF-4 keeps waiting.
 - 12:44Z: no change; all four PRs clean + fast-lane, waiting on the lane's macOS batch gate; scoped library run 39593465885 still queued (macOS runners backlogged since 11:08Z); dev Linux checks red (dev-red, not ours).
+- 13:17 poll: PRs open/clean (BK-u #3967, LF-3 #4024, FO-u #3963, FO-5 #4022) awaiting lane macOS batch; macOS runners still backlogged; scoped library run 39593465885 queued; #3928 open (LF-4 blocked).
