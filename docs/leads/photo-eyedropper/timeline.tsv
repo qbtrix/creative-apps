@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T00:30Z	3	waiting	#3800 #3808	macOS builds in progress / queued
 2026-10-21T00:52Z	3	check	#3800,#3808	W3g: PE-5 and PE-3 open, waiting on lane
 2026-10-21T01:14Z	3	check	#3800,#3808	W3h: dev Linux check 39524299532 on 4bdf0bb red only on Library timing test planWithinBudget (not this line; dev-red #3386 open), so no slice-done yet
+2026-10-21T01:37Z	3	heartbeat	W3i	dev Linux green at 7277a83 (contains PT-1); #3800 #3808 #3818 #3830 #3831 open clean fast-lane, waiting on lane batch
