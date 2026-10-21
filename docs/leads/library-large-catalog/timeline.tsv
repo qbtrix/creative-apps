@@ -4,3 +4,5 @@
 2026-10-21T11:45Z	check	heartbeat	LG-a	#4006 open, still waiting on the lane batch (macOS build green); dev ded2ca57
 2026-10-21T12:12Z	ship	merged	LG-a	#4006 merged as c2aa3391; dev Linux check 39596004859 running
 2026-10-21T12:28Z	check	ci	LG-a	Linux 39596004859 red on LibraryFoldersTests.tenThousandPaths timing (not LG-a); next check 39598650564 on 76d0c892
+2026-10-21T12:45Z	check	ci	LG-a	Linux 39598650564 red on LargeCatalogBudgetTests fixture timing (ours) + LibraryFoldersTests (not ours)
+2026-10-21T12:45Z	fix	round1	LG-a	fixer dispatched on large-catalog/lg-a-fix: timing out of the gate

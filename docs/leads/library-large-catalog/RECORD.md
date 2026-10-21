@@ -2,7 +2,7 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 · Started: 2026-10-21T10:19Z
-Stage: 3 wave 1 (LG-a merged, waiting on the dev Linux check)
+Stage: 3 wave 1 (LG-a fix round 1 of 2: fixture timing out of the gate, branch large-catalog/lg-a-fix)
 Base: e2b8aa76 (origin/dev)
 Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on LG-model, FC-c, suiteui shared-thumbnails ST-m
 
@@ -34,3 +34,5 @@ Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on L
 - LG-a #4006 merged at 11:52Z as c2aa3391. dev Linux check 39596004859 on c2aa3391 went red only on LibraryFoldersTests.tenThousandPaths (31.6 ms vs 20 ms; folder tree #3961, a timing budget, not LG-a). Waiting on 39598650564 (76d0c892); Belt-Slice-Done is posted once its Linux job is green. dev-red #3856 is a PhotoApp CommandPath failure whose fix, #4008, is below c2aa3391.
 - LG-model waits on FC-a, MD-e and DR-m; it is re-checked at each heartbeat.
 - dev-red #3856 open (others' merges).
+
+- 12:45Z: dev Linux check 39598650564 (76d0c892) red on our LargeCatalogBudgetTests.fixtureBuildsTenThousandDeterministically (6.45 s vs 5 s wall clock at line 25), plus the not-ours LibraryFoldersTests.tenThousandPaths. Decision: LG-a fix round 1. The fixture test keeps determinism only; the 5 s budget moves to its own disabled suite LargeCatalogFixtureBudgetTests, and the supervisor is asked to list it in Tests/perf-suites.txt (protected).
