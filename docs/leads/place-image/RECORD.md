@@ -4,7 +4,7 @@ Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
 Stage: W5 PP-7 PR open
 Base: dev
-Next: PP-7 #4175 through the lane; slice-done for PP-u, PP-m once full CI 39665258026 is green; PP-z after a run holds PP-7
+Next: PP-7 #4175 through the lane; slice-done PP-u, PP-m once full CI 39665258026 is green
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
