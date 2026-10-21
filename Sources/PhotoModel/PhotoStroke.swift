@@ -169,6 +169,8 @@ extension PhotoWorkspace {
             break
         case .gradient:
             current.end = end
+        case .text:
+            break
         }
         stroke = current
     }
@@ -225,6 +227,8 @@ extension PhotoWorkspace {
         case .gradient:
             guard let end = done.end else { return }
             do { try drawGradient(from: done.start, to: end) } catch { statusMessage = "Couldn't draw the gradient." }
+        case .text:
+            openTextBox(at: done.start)
         case .move:
             if done.layersBefore != layers, !done.layersBefore.isEmpty {
                 record(.layers(done.layersBefore, selected: selectedLayerID), named: "Move Layer")

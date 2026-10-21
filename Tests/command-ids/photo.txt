@@ -47,6 +47,7 @@ tool.gradient
 tool.heal
 tool.marquee
 tool.move
+tool.text
 view.actual-size
 view.fit
 view.zoom-in
