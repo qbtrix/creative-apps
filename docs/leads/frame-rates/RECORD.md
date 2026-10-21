@@ -2,9 +2,9 @@
 
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
-Stage: 0 setup
+Stage: 3 wave 1
 Base: ded2ca57af4a7c5496188e4dbf3c8857b8817bcd
-Next: Stage 1: read packet and code, then plan wave 1 (FR-a)
+Next: wave 1 building: FR-a slice PR; then stack next slices
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
