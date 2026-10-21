@@ -18,3 +18,4 @@
 17:28Z	check	#4036 (TX-1) merged 17:06Z; Belt-Slice-Done TX-a posted (Linux check 39638325928); #4053/#4059 did not retarget, merged origin/dev in (dev + own diff over e68e6e99), gate running before retarget to dev; TS-m #3844/#3847 unchanged
 2026-10-21T18:02Z	check	#4053 TX-u and #4059 TX-m clean on dev af840a6d, waiting for a lane batch. TS-m #3844/#3847 unchanged; TX-4/TX-5 still blocked.
 2026-10-21T18:23Z	check	#4053 and #4059 clean, still queued; lane active (dev at 15f7bad). TS-m #3844/#3847 unchanged.
+2026-10-21T18:46Z	check	#4053 TX-u and #4059 TX-m clean and queued; lane batch run 39653091139 in progress; dev at 1b3913c; TS-m #3844/#3847 unchanged
