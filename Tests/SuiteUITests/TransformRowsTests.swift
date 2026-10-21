@@ -4,7 +4,9 @@
 // keeps the rest of the box; a value that changes nothing or a size under 1
 // asks for none. Flip Horizontal and Flip Vertical each ask for one `.flip`,
 // and with `flipHelp` set both are disabled and say why; with no selection
-// every row is disabled and says why. No rendering. macOS only.
+// every row is disabled and says why; the flips draw the mirror symbols
+// (FlipDirection.systemImage). No rendering. macOS only.
+import AppKit
 import Foundation
 import SuiteKernel
 import Testing
@@ -64,4 +66,16 @@ private let item = TransformBox(box: Rect(minX: 100, minY: 80, maxX: 300, maxY: 
 @Test func theRowsReadTheBox() {
     #expect(TransformRow.allCases.map { TransformRows.value($0, of: item) } == [100, 80, 200, 120, 30])
     #expect(TransformRow.allCases.map(\.rawValue) == ["x", "y", "w", "h", "rotation"])
+}
+
+/// The flips draw Apple's mirror symbols, which exist on this system, not the two-way arrows a move or
+/// resize uses, so a first-time user reads them as mirroring (Design mac finish, transform DT-a).
+@Test @MainActor func theFlipsDrawTheMirrorSymbols() {
+    let actions = TransformRows.flips(selection: item, help: nil, flipHelp: nil) { _ in }
+    #expect(actions.map(\.title) == FlipDirection.allCases.map(\.title))
+    #expect(actions.map(\.systemImage) == [
+        "arrow.left.and.right.righttriangle.left.righttriangle.right",
+        "arrow.up.and.down.righttriangle.up.righttriangle.down",
+    ])
+    #expect(actions.allSatisfy { NSImage(systemSymbolName: $0.systemImage, accessibilityDescription: nil) != nil })
 }
