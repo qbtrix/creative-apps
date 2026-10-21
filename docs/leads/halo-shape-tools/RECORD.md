@@ -5,9 +5,9 @@
 - Run: act-1a15ef24e8e-17fi (from 2026-10-21T14:45Z; before: act-1a15d0eeefb-6z9l, act-1a15a9f4e8d-hav0)
 - Session: claude/halo-feature-lead-run-02scrb
 - Started: 2026-10-20T18:45Z
-- Stage: 3 wave 2
+- Stage: done
 - Base: dev e382f9d7
-- Next: a green ci.yml run on dev containing 5fc3dc1a (#3929), then Belt-Slice-Done and Mac-Finish-Wanted for HS-z and Belt-Contact-Sheet
+- Next: none for the lead; the beta-hardening lane verifies HS-u and HS-z (Mac-Finish-Wanted posted; journeys follow scoped halo 39623465135)
 
 ## Slices
 
@@ -16,7 +16,7 @@
 | HS-a | HS-1, HS-2 | yes | gradient-fill HG-a (done), transform HT-a (file order, see Decisions) | done | #3676 merged 2026-10-21T03:14Z as 268098eab; Belt-Slice-Done on Linux run 39537764239 |
 | HS-u | HS-3, HS-4 | yes | HS-a | done (#3693 merged 71ffa4d1; Belt-Slice-Done on Linux run 39550229338; Mac-Finish-Wanted, scoped halo 39550225476 queued) | #3693 retargeted to dev (49f64139 after merging dev; C4 descriptions kept as on dev, the gate refuses description edits; 10 files +386/-9, CI PASS, mutate 3/3 HaloModel.HaloShapeDraft) |
 | HS-m | HS-5, HS-6 | no | HS-a; transform HT-m (file order, see Decisions) | done | #3933 and #3934 merged (#3934 squash 39d90e3f); green run https://github.com/qbtrix/creative-apps/actions/runs/39604117821 (5bec8089); Belt-Slice-Done posted on #3445 |
-| HS-z | HS-7, HS-8 | yes | HS-u, HS-m | merged, waits on a green run | #3929 merged 2026-10-21T14:55Z as 5fc3dc1a (lane batch, Linux 39619237757 green); was 0399eee2, dev merged in again for the photo fix, 2 files +76/-8, CI PASS), fast-lane + feature-done |
+| HS-z | HS-7, HS-8 | yes | HS-u, HS-m | done (Belt-Slice-Done 39623471557) | #3929 merged 2026-10-21T14:55Z as 5fc3dc1a (lane batch, Linux 39619237757 green); was 0399eee2, dev merged in again for the photo fix, 2 files +76/-8, CI PASS), fast-lane + feature-done |
 
 ## Reviews
 
