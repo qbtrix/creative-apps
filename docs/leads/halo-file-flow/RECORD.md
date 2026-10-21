@@ -35,4 +35,4 @@ Next: check whether transform:HT-a, shape-tools:HS-a and placed-images:PH-u have
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
-- HF-a blocked on transform:HT-a, shape-tools:HS-a, placed-images:PH-u (rule 12: a wait is met once its tasks merged).
+- HF-a blocked (2026-10-21T00:13Z): transform:HT-a likely in (#3702 adapter bodies merged), shape-tools:HS-a in review (#3676), placed-images:PH-u not started (PH-a still waiting).
