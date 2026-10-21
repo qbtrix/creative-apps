@@ -105,3 +105,4 @@ utc	stage	event	ref	note
 2026-10-21T19:27Z	3	check	wave 5	#4147 #4166 #4167 open in lane; dev fd24dbd; Linux 5803475 green (has #4148); scoped halo queued; no slice merged-done
 2026-10-21T19:48Z	3	check	wave 5	lane per-PR macOS builds: #4147 in progress (run 39653570590), #4166 and #4167 queued; no merge; CL-ui Mac-Finish posted by supervisor (gaps #4051 #4052)
 2026-10-21T20:11Z	3	merged	#4147	CL-probe CL-8+CL-9 at a2d1a8d; #4166 macOS build running, #4167 queued
+2026-10-21T20:33Z	3	merged	#4166	CL-measure CL-10 at cbbb878; Linux run 39670298178 at 0599560 (has #4147) in progress; #4167 macOS build running
