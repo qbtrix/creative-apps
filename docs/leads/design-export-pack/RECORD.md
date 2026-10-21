@@ -4,7 +4,7 @@ Issue: #3467 · Packet: docs/blueprints/design/features/export-pack.md
 Run: act-1a15bc68263-njsv · Session: line lead (design) · Started: 2026-10-21T00:00Z
 Stage: 3 polling
 Base: 07f754f7 (origin/dev)
-Next: DX-a waits on suiteui export-pack XP-a (XP-1 merged; XP-2 waits shell-media:SM-a, XP-3 waits tone-controls:TC-a). design-export is merged-done (DE-z #3684). Blocked poll 1 of 3.
+Next: DX-a waits on suiteui export-pack XP-a (XP-1 merged; XP-2 waits shell-media:SM-a, XP-3 waits tone-controls:TC-a). design-export is merged-done (DE-z #3684). Blocked poll 2 of 3 (00:33Z: XP-2 waits SM-a, XP-3 waits TC-a and PL-a, no PRs).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

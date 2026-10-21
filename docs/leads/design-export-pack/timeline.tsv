@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-21T00:08Z	0	stage-start	#3467	setup: main b3011ab9 verified, base origin/dev 07f754f7
 2026-10-21T00:08Z	1	stage-end	#3467	v3 packet, 4 slices; DX-a waits XP-a (XP-2, XP-3 open); design-export done
 2026-10-21T00:08Z	3	heartbeat	#3467	polling waits, blocked 1 of 3
+2026-10-21T00:33Z	3	heartbeat	XP-a	blocked poll 2 of 3: XP-2, XP-3 not opened
