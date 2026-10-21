@@ -176,3 +176,15 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     let png = try await clock.measure { files = try await run(hd(48), options(.pngSequence, 0...47), using: straight).files.count }
     #expect(svg < .seconds(1) && lottie < .seconds(10) && png < .seconds(10) && files == 48)
 }
+
+/// The PNG frames draw the stage's picture, which has no masks or mattes yet; SVG and Lottie write them.
+@Test func aMaskOrMatteIsNamedForPNGOnly() {
+    var document = FlareFixtures.bounce
+    let square = [Point(x: 0, y: 0), Point(x: 10, y: 0), Point(x: 10, y: 10)]
+    document.scenes[0].layers[0].masks = [LayerMask(path: FlarePath(polyline: square, closed: true))]
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (1 layer)."])
+    #expect(ExportScan.warnings(document, options: options(.svgFrame)).isEmpty)
+    #expect(ExportScan.warnings(document, options: options(.lottie, transparent: true)).isEmpty)
+    document.scenes[0].layers.append(Layer(id: "m", name: "M", matte: TrackMatte(sourceLayerID: document.scenes[0].layers[0].id)))
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (2 layers)."])
+}

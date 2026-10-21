@@ -1,4 +1,5 @@
-// HaloViewer.swift: Halo's main content: HaloViewerCanvas, the Model's
+// HaloViewer.swift: Halo's main content: HaloViewerCanvas with the Shape
+// button (HaloShapeTool, shape-tools HS-2) at its top trailing corner, the Model's
 // `viewerNotice` captioned under it while layers can't be drawn, a status bar
 // with HaloTransport and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
 // state. The status bar's tooltips (HaloStatusText) say what the timecode's
@@ -9,12 +10,15 @@
 // delete command) sends the Model's `deleteCommand`: the picked keys while any
 // are picked, else the selected layer, as in the layer list. Views only read HaloProject; state lives in HaloModel.
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 struct HaloViewer: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    /// Where the Shape popover's options go (HaloShapeTool).
+    var onShapeIntent: @MainActor (ShapeIntent) -> Void = { _ in }
     /// The viewer's size, for the zoom CanvasSurface fits the artboard at.
     @State private var viewport = CGSize.zero
 
@@ -25,6 +29,10 @@ struct HaloViewer: View {
                 HaloViewerCanvas(model: model, perform: perform)
                     .overlay { HaloViewerHandles(model: model) }
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { viewport = $0 }
+                    // Top trailing, clear of the drag journey's top-leading surround.
+                    .overlay(alignment: .topTrailing) {
+                        HaloShapeTool(model: model, onIntent: onShapeIntent).padding(SuiteSpacing.s)
+                    }
                 // Under the artboard, not over it: the layout journey reads
                 // the artboard's frame from the viewer's pixels.
                 if let notice = model.viewerNotice {

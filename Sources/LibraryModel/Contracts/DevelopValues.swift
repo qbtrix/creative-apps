@@ -9,6 +9,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteModel
 
 /// One develop slider. The raw value is the row's label.
 public enum DevelopSlider: String, CaseIterable, Sendable, Codable {
@@ -357,11 +358,9 @@ public struct HistogramBins: Hashable, Sendable {
         self.red = red; self.green = green; self.blue = blue
         self.shadowClipped = shadowClipped; self.highlightClipped = highlightClipped
     }
-    /// Each channel scaled to 0...1 by the tallest bin of all three; all 0 (never NaN) when empty.
-    public var heights: (red: [Double], green: [Double], blue: [Double]) {
-        let tallest = Double(max(red.max() ?? 0, green.max() ?? 0, blue.max() ?? 0))
-        let scale: ([Int]) -> [Double] = { bins in bins.map { tallest > 0 ? Double($0) / tallest : 0 } }
-        return (scale(red), scale(green), scale(blue))
+    /// The suite's display shape: the three channels summed per bin, the tallest at 1, with the clip flags.
+    public var tone: ToneHistogram {
+        ToneHistogram(channels: [red, green, blue], shadowClipped: shadowClipped, highlightClipped: highlightClipped)
     }
 }
 
@@ -369,12 +368,16 @@ public struct HistogramBins: Hashable, Sendable {
 /// way; full is the screen-size render it settles to.
 public enum RenderQuality: String, Sendable, Hashable { case preview, full }
 
-/// The loupe's picture and its histogram.
+/// The loupe's picture and its histogram. `tone`, the histogram's display
+/// shape, is made where the render is (LiveLoupeImaging's actor, off the main
+/// thread), once per render, so the window only reads it.
 public struct RenderedPhoto: Hashable, Sendable {
     public var image: DisplayImage
-    public var histogram: HistogramBins
+    public var histogram: HistogramBins { didSet { tone = histogram.tone } }
+    public private(set) var tone: ToneHistogram
     public var quality: RenderQuality
     public init(image: DisplayImage, histogram: HistogramBins, quality: RenderQuality) {
         self.image = image; self.histogram = histogram; self.quality = quality
+        tone = histogram.tone
     }
 }

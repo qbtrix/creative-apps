@@ -1,10 +1,9 @@
 // DevelopInspector.swift: the inspector's Develop tab (develop DV-9). While a
 // crop draft is set it hosts CropInspector with the window's crop controls
 // (`\.libraryCrop`, crop CR-6). With no photo to develop it is an
-// EmptyStateView saying why (`developHelp`). Otherwise, top to bottom:
-// the histogram readout in a well (`library.develop.histogram`: the loupe
-// render's mean and its clip labels as text until S-L1, #2984, draws bars),
-// the render error under it (`library.develop.error`), the TONE and COLOR
+// EmptyStateView saying why (`developHelp`). Otherwise, top to bottom (the
+// histogram sits above both tabs, in LibraryInspector): the render error
+// (`library.develop.error`), the TONE and COLOR
 // sections with one bar row per slider ("Mixed" while the targets differ, a
 // Reset context menu per row, the section reset while any row is off 0),
 // CURVE (SuiteUI's ToneCurveEditor over the targets' curve, its engine
@@ -35,7 +34,6 @@ struct DevelopInspector: View {
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-                    histogram
                     if let error = model.developError {
                         InspectorNote(error, kind: .error, identifier: Self.errorID)
                     }
@@ -56,21 +54,6 @@ struct DevelopInspector: View {
     }
 
     private var develop: LibraryMenu.Develop { menu.photo.develop }
-
-    /// The readout: the mean, then any clip labels, as one element valued with the mean.
-    private var histogram: some View {
-        let text = ([model.histogramValue] + model.histogramClips).joined(separator: "  ·  ")
-        return Text(text)
-            .font(SuiteFont.inspectorMeta)
-            .foregroundStyle(SuiteColor.secondaryText)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(SuiteSpacing.s)
-            .background(SuiteColor.field, in: .rect(cornerRadius: SuiteRadius.row))
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Histogram")
-            .accessibilityValue(model.histogramValue)
-            .accessibilityIdentifier(Self.histogramID)
-    }
 
     /// The section's reset while one of its rows is off 0 (or mixed) and resets can run.
     private func sectionReset(_ group: DevelopGroup) -> (@MainActor () -> Void)? {
@@ -126,7 +109,7 @@ struct DevelopInspector: View {
         let enabled = setCurve != nil
         let entry = ControlEntry(id: Self.curveID, enabled: enabled, reason: enabled ? nil : Self.unavailable)
         return ToneCurveEditor(
-            points: points, samples: samples, histogram: model.curveHistogram, id: Self.curveID,
+            points: points, samples: samples, histogram: model.toneHistogram.heights, id: Self.curveID,
             onChange: onChange, onEnd: onEnd)
             .disabled(!enabled)
             .help(enabled ? "" : Self.unavailable)
@@ -179,6 +162,7 @@ struct DevelopInspector: View {
 
     /// Why a row is off when its closure is nil (outside a window).
     nonisolated static let unavailable = "Open a photo or select photos in the grid to develop them."
+    /// The histogram above the tabs (LibraryInspector) keeps the develop panel's id.
     nonisolated static let histogramID = "library.develop.histogram"
     nonisolated static let errorID = "library.develop.error"
     nonisolated static let curveID = "library.develop.curve"
