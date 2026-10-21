@@ -4,3 +4,4 @@ time	task	event	note
 2026-10-21T15:00Z	check	AR-a builder relaunched after the worker restart; records moved to suiteui-area-selection
 2026-10-21T15:10Z	stage	AR-a PR #4093 open; AR-m (AR-3, AR-4) building stacked
 2026-10-21T15:25Z	check	#4093 macOS build dispatched by lane; AR-m builder running; no findings
+2026-10-21T15:40Z	stage	AR-m PRs #4096 (AR-3) and #4098 (AR-4) open, stacked on #4093
