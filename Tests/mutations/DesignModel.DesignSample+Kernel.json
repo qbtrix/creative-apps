@@ -1,0 +1,4 @@
+[
+{"label":"the stub pick no longer refuses (eyedropper DY-a)","file":"Sources/DesignModel/DesignSample+Kernel.swift","find":"        throw DesignRefusal.notBuilt(\"Picking a color\")\n","replace":"\n","tests":"DesignSampleTests"},
+{"label":"the Option-click stub pick no longer refuses (eyedropper DY-a)","file":"Sources/DesignModel/DesignSample+Kernel.swift","find":"        throw DesignRefusal.notBuilt(\"Picking a color\")\n","replace":"        if !toStroke { throw DesignRefusal.notBuilt(\"Picking a color\") }\n","tests":"DesignSampleTests"}
+]

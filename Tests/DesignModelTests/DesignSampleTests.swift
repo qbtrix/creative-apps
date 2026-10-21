@@ -32,6 +32,42 @@ import Testing
         #expect(openDesign().sampleHelp == nil)
     }
 
+    /// Until DY-5 the pick refuses and changes nothing.
+    @Test func theStubPickRefusesAndChangesNothing() throws {
+        var w = try Self.shapes()
+        let before = w
+        #expect(throws: DesignRefusal.self) { try w.applySample(at: Point(x: 350, y: 350), toStroke: false) }
+        #expect(throws: DesignRefusal.self) { try w.applySample(at: Point(x: 350, y: 350), toStroke: true) }
+        #expect(w == before, "a refused pick changes nothing")
+    }
+
+    /// Journey steps 1 and 4: the Eyedropper keeps the selection, and back to Move keeps it too.
+    @Test func pickJourneyWalk() throws {
+        var w = try Self.shapes()
+        w.selectTool(.eyedropper)
+        #expect(w.tool == .eyedropper)
+        #expect(w.selectedNodeID == "node-2", "choosing the Eyedropper keeps the selection")
+        w.selectTool(.move)
+        #expect(w.tool == .move)
+        #expect(w.selectedNodeID == "node-2", "back to Move, the rectangle is still selected")
+    }
+
+    /// Journey steps 2 and 3 through the tool's click on the canvas, not applySample.
+    @Test(.disabled("waits on DY-5")) func pickJourneyWalkClicks() throws {
+        var w = try Self.shapes()
+        w.selectTool(.eyedropper)
+        w.drag(from: pt(350, 350), to: pt(350, 350))
+        w.endDrag()
+        #expect(w.treeNode("node-2")?.fill == DesignColor(255, 0, 0), "a click picks the ellipse's red as the fill")
+        w.undo()
+        #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "the pick is one step")
+        w.drag(from: pt(350, 350), to: pt(350, 350), modifiers: .option)
+        w.endDrag()
+        #expect(w.treeNode("node-2")?.stroke?.color == DesignColor(255, 0, 0), "Option-click sets the stroke")
+        #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "Option-click leaves the fill")
+        #expect(w.selectedNodeID == "node-2")
+    }
+
     @Test(.disabled("waits on DY-5")) func samplesTopmost() throws {
         let w = try Self.shapes()
         #expect(Self.hex(w.sampledColor(at: Point(x: 250, y: 250), size: .point)) == "#FF0000", "the ellipse on top, not the selection")
