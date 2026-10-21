@@ -58,7 +58,7 @@ public struct FakeShapes: ShapeBuilding {
                       previous: ShapeDraft?) -> ShapeDraft? {
         guard unavailable == nil, start.isFinite, end.isFinite else { return nil }
         switch tool {
-        case .select, .directSelect: return nil
+        case .select, .directSelect, .shape: return nil
         case .pen: return pen(at: start, dragged: start != end, previous: previous)
         case .rectangle, .ellipse:
             var dx = end.x - start.x, dy = end.y - start.y
@@ -96,6 +96,7 @@ public struct FakeShapes: ShapeBuilding {
         let kind = switch draft.tool {
         case .rectangle: "Rectangle"; case .ellipse: "Ellipse"; case .pen: "Path"
         case .select, .directSelect: throw CommandError.invalidDocument("Select doesn't draw.")
+        case .shape: throw CommandError.invalidDocument(FlareTool.shapeHelp)
         }
         let tolerance = Self.anchorTolerance(atStageScale: draft.stageScale)
         if draft.tool == .pen, !Self.spans(draft.anchors, tolerance) || !Self.spans(draft.shape.points, tolerance) {

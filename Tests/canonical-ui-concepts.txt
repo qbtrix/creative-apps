@@ -24,3 +24,6 @@ Ruler: Ruler
 Zoom: ZoomControl ZoomBar
 EmptyState: EmptyState Placeholder
 ToolPalette: ToolPalette ToolRail Palette
+Layer style panel: LayerStylePanel StylePanel EffectsPanel
+Histogram: Histogram
+Levels: Levels

@@ -25,6 +25,7 @@ extension FlareWorkspace {
     /// Why `tool` is disabled, as its tooltip; nil when its drag works. Asks the tool's service; Ellipse draws through
     /// the workspace (FlareDrawing.swift). A drawing tool with a locked layer selected says to unlock it (#676).
     public func toolHelp(_ tool: FlareTool) -> String? {
+        if tool == .shape { return tool.unavailableHelp }  // its drag draws from shape-tools FS-6
         if tool != .ellipse, let reason = services.shapes.unavailableHelp(for: tool) {
             return reason.isEmpty ? tool.unavailableHelp ?? reason : reason
         }
@@ -68,6 +69,7 @@ extension FlareWorkspace {
             var base = g.base ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []))
             base.stageScale = stageScale
             draft = shapes.draft(tool, from: start, to: end, modifiers: modifiers, previous: base)
+        case .shape: draft = nil  // draws from shape-tools FS-6
         case .select, .directSelect:
             let drags = !g.isClick && start.isFinite && end.isFinite
             if let grip = g.grip {
@@ -95,6 +97,7 @@ extension FlareWorkspace {
         case .rectangle: if let pending { commit(pending) }
         case .pen: if let pending, pending.isClosed { commit(pending) } else { draft = pending }
         case .select, .directSelect: endSelect(g)
+        case .shape: break
         }
     }
 

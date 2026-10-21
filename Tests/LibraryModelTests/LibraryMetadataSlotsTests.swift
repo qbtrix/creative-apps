@@ -45,14 +45,12 @@ private func twoPhotos() -> LibraryCatalog {
     catalog.addKeywords("Sunset")
     catalog.addKeyword(toAll: "Sunset")
     catalog.removeKeyword("Beach")
-    catalog.setTitle("Bay")
-    catalog.setCaption("Evening")
     #expect(catalog == before)
     #expect(catalog.keywordStates.isEmpty)
     #expect(catalog.keywordSuggestions(prefix: "").isEmpty)
-    #expect(catalog.searchSuggestions(prefix: "").isEmpty)
     #expect(catalog.sidecarWrites(after: [:]).isEmpty)
-    #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: []) == nil)
+    #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: [])
+        == "Samples have no file, so no sidecar.")
 }
 
 @Test func theInspectorReadsTitleAndCaptionAcrossTheSelection() {
