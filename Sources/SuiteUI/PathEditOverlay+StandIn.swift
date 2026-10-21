@@ -1,14 +1,9 @@
-// PathEditOverlay+StandIn.swift (pen-paths PN-3): the PN-2 overlay's
-// `PathContourStandIn` and its marks-only init, kept so a caller still on the
-// stand-in (FlareApp's stage) builds while its line moves to the kernel types
-// and `onIntent`. The init maps the stand-ins onto a `PenDraft` and a
-// `PathInEdit` in document space and turns the gesture off, as PN-2 drew.
-// Delete both once no caller uses them.
+// PathEditOverlay+StandIn.swift (pen-paths PN-3): PN-2's `PathContourStandIn` and marks-only init, kept for callers
+// still on them (FlareApp's stage) until they move to the kernel types and `onIntent`; then delete this file.
 import SuiteKernel
 import SwiftUI
 
-/// One contour as the PN-2 overlay took it: its anchors in order, in document
-/// pixels, and whether the last joins the first.
+/// One contour as PN-2 took it: its anchors in order, in document pixels, and whether the last joins the first.
 public struct PathContourStandIn: Equatable, Sendable {
     public let anchors: [PathAnchor]
     public let closed: Bool
@@ -31,8 +26,7 @@ public struct PathContourStandIn: Equatable, Sendable {
 }
 
 extension PathEditOverlay {
-    /// The PN-2 overlay: `draft` and `path` drawn as marks, nothing selected,
-    /// no gesture. Use `init(draft:path:selection:tool:zoom:onIntent:)` to edit.
+    /// PN-2's overlay: `draft` and `path` as marks, no selection, no gesture.
     public init(draft: PathContourStandIn?, path: [PathContourStandIn], tool: PenTool, zoom: Double) {
         self.init(draft: draft.map { PenDraft(contour: $0.contour, scale: PathMarks.scale(zoom)) },
                   path: path.isEmpty ? nil
