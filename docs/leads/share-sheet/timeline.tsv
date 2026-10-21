@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-21T00:05Z	3	pr	SH-u	#3814 head 7637bf75, base share-sheet/sh-a, scripts/ci --changed pass
 2026-10-21T00:33:59Z	3	check	SH-a,SH-u	#3809 needs-rebase (suiteui-sources.json C4 conflict): merged dev, ci --changed PASS, pushed b63c2756, Head moved; #3814 merged sh-a, PASS, pushed ec118b6d, Head moved; LF-m/BK-m still absent (dev 4987f926)
 2026-10-21T00:54:32Z	3	check	SH-a,SH-u	#3809 needs-rebase dropped, clean; macOS build 39522543439 queued; #3814 still on sh-a; LF-m/BK-m absent (dev 4bdf0bbd)
+2026-10-21T01:14:03Z	3	check	SH-a,SH-u	#3809 macOS build 39522543439 green, clean, awaiting lane batch; #3814 still on sh-a; LF-m/BK-m absent (dev 4bdf0bbd)
