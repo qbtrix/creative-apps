@@ -29,6 +29,7 @@ import Testing
         #expect(DragSessions.begun > begun, "the drag never asked for a drag session, so this proves nothing")
 
         // A leaked session waits for a mouse-up; the rescue posts one to this process five seconds on.
+        // not-timing: a hang guard, not a budget. A clean run returns at once; only a leak waits for the rescue.
         let rescue = Self.postMouseUp(after: 5, to: NSApplication.shared)
         let took = Self.turnTheRunLoop()
         rescue.cancel()
