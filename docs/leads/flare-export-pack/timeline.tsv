@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 11:00Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
 11:19Z	3	check	-	Heartbeat: still parked; SM-a (#3711) has no slice PR.
 11:40Z	3	check	-	Parked: SM-a #3711 still has no slice PR.
+12:00Z	3	check	-	Parked: SM-a (shell-media #3711) still has no slice PR.
