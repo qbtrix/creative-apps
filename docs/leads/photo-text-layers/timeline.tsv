@@ -23,3 +23,4 @@
 2026-10-21T19:52Z	check	#4059 lane Linux red on its own XMLTextTests.noAppModelKeepsItsOwnEscaper (inline unescaper): moved to SuiteModel XMLText.unescaped, pushed 8c0a4d82, Head moved; #4053 clean in lane at 9fff6a29; TS-m #3844 still open
 2026-10-21T20:14Z	check	#4053 macOS build green (39661828345), awaiting batch; #4059 macOS build 39666528558 queued on 8c0a4d82; TS-m #3844/#3847 unchanged
 2026-10-21T20:36Z	check	#4053 clean, macOS build green, awaits batch; #4059 clean, macOS build 39666528558 still queued; TS-m #3844/#3847 unchanged
+2026-10-21T21:04Z	check	#4053 needs-rebase again on photo golden; merged dev, re-added tool.text, gate PASS, pushed 839b1132, Head moved; #4059 macOS build still queued; TS-m unchanged
