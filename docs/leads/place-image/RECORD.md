@@ -2,9 +2,9 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 3 W5 (run act-1a15eecbafe-u0f9)
-Base: 4d4ebb24788bbaf169ff2818f71f52df3753ac51
-Next: #4101 PP-5 (486222a) and #4003 PP-4 (3d1f532) in lane; PP-7 journey builder stacked on both; then PP-8 feature-done
+Stage: 3 W5
+Base: dev
+Next: #4101 PP-5 (486222a) and #4003 PP-4 (3d1f532) in lane, no ejections; PP-7 journey builder gating (stacked); then PP-8 feature-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
