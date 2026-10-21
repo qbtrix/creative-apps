@@ -44,3 +44,4 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs are PR #3421 (open since 03:31Z, waiting on its lane macOS build run 39364860084, queued since 03:32Z), GF-2 blocked on command-catalog CC-u); #3421 merged 05:53Z (9a146777): the kernel Fill module is on dev, which unblocks FG-1 and FG-6. GradientEditor (GF-2) is still missing, blocking FG-2.
 - FG-5 also waits on GF-6 and adopt-command-catalog's AC-flare (Belt-Slice-Done on #2999's feature issue).
 - 2026-10-20T05:32Z: asked the supervisor on #3419 to re-dispatch #3421's queued macOS build or add a Mac-Check.
+- 2026-10-21T08:17Z: #3959 (FG-a) at the lane's macOS gate; FG-3 waits on GF-3 #3760, FG-5 on GF-6 #3742, KS-a #3921, AC-flare.

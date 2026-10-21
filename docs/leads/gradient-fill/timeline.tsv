@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-21T07:32Z	3	pr	FG-a	#3959 opened (FG-2+FG-4), head 9a054aab, ci --changed PASS
 2026-10-21T07:37Z	3	check	wave 3	#3959 in lane; GF-3 #3760, GF-6 #3742, KS-a #3921 open; dev 709f9283
 2026-10-21T07:57Z	3	check	wave 3	#3959 waiting on macOS gate (lane 07:50Z); deps unchanged; dev 260f7a87
+2026-10-21T08:17Z	3	poll	-	#3959 (FG-a) at the lane's macOS gate; FG-3 waits on GF-3 #3760, FG-5 on GF-6 #3742, KS-a #3921, AC-flare.
