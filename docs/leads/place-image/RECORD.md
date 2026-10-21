@@ -2,15 +2,15 @@
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
-Stage: 3 build W1
+Stage: 3 build W2
 Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
-Next: PP-3 once placed-images PL-2 merges; PP-5 (PP-m) once photo-gradient-fill PG-m is done (W4)
+Next: PP-3 builder running (PL-2 #3931 merged 08:30Z); then PP-4; PP-5 (PP-m) once photo-gradient-fill PG-m is done (W4)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PP-a | PlacedImageTarget conformance as stubs; checks and RJ-P37 job written, disabled | PP-1, PP-2 | MJ-PP | placed-images PL-1 (merged #3578) | no | 0 | done | 39514893774 | – |
-| PP-u | File > Place… and drop run place.image on stubs; snapshots, budget, journey written | PP-3, PP-4 | PJ-P1 | PP-a; placed-images PL-2 (PP-3) | yes | 0 | waiting | – | – |
+| PP-u | File > Place… and drop run place.image on stubs; snapshots, budget, journey written | PP-3, PP-4 | PJ-P1 | PP-a; placed-images PL-2 (PP-3, merged #3931) | yes | 0 | building | – | – |
 | PP-m | placing PNG/JPEG adds a fitted pixel layer above the selection as one step; SVG refused; catalog | PP-5, PP-6 | MJ-PP | PP-a; PG-m (PP-6) | no | 0 | waiting | – | – |
 | PP-z | live, journey on live, blueprint lists Place | PP-7, PP-8 | PJ-P1 | PP-u, PP-m; PG-z, PM-z (PP-8) | yes | 0 | waiting | – | – |
 
@@ -19,7 +19,7 @@ Next: PP-3 once placed-images PL-2 merges; PP-5 (PP-m) once photo-gradient-fill 
 |---|---|---|---|---|---|---|---|
 | PP-1 | PP-a | 1 | conformance as stubs; PhotoPlaceTests disabled | Sources/PhotoModel/PhotoPlace+Kernel.swift, Tests/PhotoModelTests/PhotoPlaceTests.swift | suite compiles, disabled | #3764 | merged 23:02Z |
 | PP-2 | PP-a | 1 | RJ-P37 job folder, waits_on PP-6 | Tests/RealJobs/photo/place-logo/ | job listed, skipped | #3764 | merged 23:02Z |
-| PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceSnapshots.logo | – | waiting (PL-2) |
+| PP-3 | PP-u | 2 | File > Place… ⇧⌘P and the drop | Sources/PhotoApp/PhotoPlace.swift, PhotoCommands+File.swift, PhotoEditor.swift | PhotoPlaceSnapshots.logo | – | building |
 | PP-4 | PP-u | 3 | snapshots, budget, journey skipped | Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift, RenderBudgetPhotoPlaceTests.swift, UITests/PhotoJourneyTests+Place.swift | snapshots | – | waiting |
 | PP-5 | PP-m | 4 | conformance bodies; insertPixelLayer from paste; tests on (PP-6 folded in) | PhotoPlace+Kernel.swift, PhotoClipboard.swift, tests, mutations, catalog, ids | PhotoPlaceTests; .centredOnCanvas .largeFitsCanvas .aboveSelection | – | waiting |
 | PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | – | waiting |
