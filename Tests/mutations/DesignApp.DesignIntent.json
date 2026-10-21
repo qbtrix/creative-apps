@@ -1,0 +1,16 @@
+[
+  {
+    "label": "hexInSwapsRedBlue: a picked hex color reaches the Design layer with red and blue swapped",
+    "file": "Sources/DesignApp/DesignIntent.swift",
+    "find": "init(hex: HexColor) { self.init(hex.red, hex.green, hex.blue) }",
+    "replace": "init(hex: HexColor) { self.init(hex.blue, hex.green, hex.red) }",
+    "tests": "DesignHexColorBridgeTests"
+  },
+  {
+    "label": "hexOutSwapsGreenBlue: a Design color shows in the color row with green and blue swapped",
+    "file": "Sources/DesignApp/DesignIntent.swift",
+    "find": "var hex: HexColor { HexColor(red, green, blue) }",
+    "replace": "var hex: HexColor { HexColor(red, blue, green) }",
+    "tests": "DesignHexColorBridgeTests"
+  }
+]
