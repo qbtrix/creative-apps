@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-21T05:08Z	heartbeat	check	-	#3815 PF-3 open, no lane flag; batch bisecting at probe -6
 2026-10-21T05:27Z	heartbeat	check	-	#3815 PF-3 clean, no lane flag; waits next batch
 2026-10-21T05:47Z	heartbeat	check	-	#3815 PF-3 needs-rebase (photo.list-commands.json, PhotoCommandCatalogTests); fixing
+2026-10-21T05:50:01Z	heartbeat	check	-	PF-3 #3815 merged with dev (needs-rebase); C4 part kept as dev; scripts/ci --changed running
