@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T11:54:28Z	3	heartbeat	-	blocked: HX-a waits placed-images PH-a (placed-images Stage 0)
 2026-10-21T12:15:02Z	3	heartbeat	-	blocked: HX-a waits placed-images PH-a (placed-images Stage 0)
 2026-10-21T12:32:54Z	3	heartbeat	-	blocked: HX-a waits placed-images PH-a (placed-images Stage 0)
+2026-10-21T12:50:55Z	3	heartbeat	-	blocked on placed-images PH-u/PH-a (Stage 0)
