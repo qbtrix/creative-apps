@@ -5,8 +5,9 @@
 // `.live`; then Title, a text layer, with its empty Text section after Fill.
 // Writes design-inspector-several-fake-, -several-live- and
 // -text-{light,dark}.png. Every control the inspector and its Align row show
-// lists itself in `suite.controls` with its DesignControlID, enabled exactly
-// when the Model's help for it is nil and with that help as its reason; a
+// (the Fill well's eyedropper too) lists itself in `suite.controls` with its
+// id, enabled exactly when the Model's help for it is nil and with that help
+// as its reason, a disabled Fill row's eyedropper included; a
 // "Mixed" row is text, not a control, so it lists nothing. SwiftUI builds a
 // hosting view's accessibility tree only for an assistive client, so the
 // inventory stands in for the tooltips. macOS only.
@@ -48,7 +49,11 @@ import Testing
         helps += DesignDistributeAxis.allCases.map { (DesignControlID.distribute($0), model.help(.distribute($0))) }
         // Only H is shared; X, Y and W read "Mixed" and list nothing.
         helps.append((DesignControlID.frameField(.height), model.styleHelp(.frame)))
-        if model.sharedValue(\.fill) != nil { helps.append((DesignControlID.inspectorFill, model.styleHelp(.fill))) }
+        // A shared fill is the color well, which carries the eyedropper with the row's help.
+        if model.severalShowFill, model.sharedValue(\.fill) != nil {
+            helps.append((DesignControlID.inspectorFill, model.styleHelp(.fill)))
+            helps.append(("suite.color.eyedropper", model.styleHelp(.fill)))
+        }
         return helps.map { ControlEntry(id: $0.id, enabled: $0.help == nil, reason: $0.help) }.sorted { $0.id < $1.id }
     }
 
@@ -85,6 +90,19 @@ import Testing
             #expect(control.reason?.isEmpty == false, "\(control.id) is disabled without saying why")
         }
         try shoot("several-live", model)
+    }
+
+    /// With style editing not built the Fill row is off, and its eyedropper says so with the row's reason rather
+    /// than listing as enabled.
+    @Test func offFillTurnsItsEyedropperOff() throws {
+        var services = DesignServices.fake
+        services.styling = NotBuilt("Style editing")
+        let model = try twoCards(services)
+        let help = try #require(model.styleHelp(.fill))
+        let controls = try registered(model)
+        #expect(controls == expectedControls(model))
+        let eyedropper = controls.first { $0.id == "suite.color.eyedropper" }
+        #expect(eyedropper == ControlEntry(id: "suite.color.eyedropper", enabled: false, reason: help))
     }
 
     /// Align is two rows of three icon buttons, and several layers add one row of two Distribute

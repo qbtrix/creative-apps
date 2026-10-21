@@ -145,7 +145,9 @@ private struct DesignNodeProperties: View {
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     DesignInspectorFill(model: model, perform: perform)
-                    InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
+                    InspectorColorWellRow(
+                        label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue), sampleHelp: lockHelp
+                    ) {
                         perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
                     }
                     .accessibilityIdentifier("design.fill")
@@ -158,6 +160,11 @@ private struct DesignNodeProperties: View {
         }
         .coordinateSpace(.named(Self.hintSpace))
     }
+}
+
+extension DesignWorkspace {
+    /// Whether the several-layer inspector shows Fill: a group has no fill, so only when every selected layer has one.
+    var severalShowFill: Bool { selectedNodes.allSatisfy { $0.kind.fillLabel != nil } }
 }
 
 /// Several selected layers: "<n> Layers", Align with Distribute, then Frame and Fill over them all.
@@ -183,12 +190,13 @@ private struct DesignSeveralProperties: View {
                     }
                 }
             }
-            // A group has no fill, so the row shows only when every selected layer has one.
-            if model.selectedNodes.allSatisfy({ $0.kind.fillLabel != nil }) {
+            if model.severalShowFill {
                 let fillHelp = model.styleHelp(.fill)
                 InspectorSection("Fill") {
                     if let fill = model.sharedValue(\.fill) {
-                        InspectorColorWellRow("Fill", color: HexColor(fill.red, fill.green, fill.blue)) {
+                        InspectorColorWellRow(
+                            "Fill", color: HexColor(fill.red, fill.green, fill.blue), sampleHelp: fillHelp
+                        ) {
                             perform(.setStyle(.fill(DesignColor($0.red, $0.green, $0.blue))))
                         }
                         .accessibilityIdentifier("design.fill")
