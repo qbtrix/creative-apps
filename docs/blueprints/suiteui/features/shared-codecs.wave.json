@@ -1,0 +1,302 @@
+{
+  "title": "One image format registry and one ImageIO adapter: every app reads TIFF, WebP, GIF, BMP, OpenEXR, TGA, HEIC, JPEG and PNG and writes TIFF, PNG, JPEG and HEIC from one list, decodes and encodes them the same way, and the two hand-rolled PNG writers are deleted",
+  "wave": "XK3",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #6 (image file codecs); feature map suiteui/shared-codecs; real job RJ-X46; the captain's TIFF question 2026-10-21 (one format registry, slice SC-f, first)",
+  "waits_on": "SC-f first and waits on nothing: adopt-suiteui-chrome AC-export-sheet (PhotoWindow+Export.swift; not in the beta) and adopt-kernel-autosave AK-8 (PhotoWindow+File.swift) now wait on SC-f; suite-imaging IM-a (Package.swift, project.yml); adopt-kernel-autosave AK-z (canonical-baseline.txt) before SC-11; no creative-core bump (dev's pin 2258b62, #3549, already has core PNGRead/PNGWrite, IC-4/IC-5); cross-line hand-offs: photo/export-pack PX-m, library spine, metadata-more, raw, export, export-pack; SC-f cross-line hand-offs: photo/export-pack PX-a and PX-m, library metadata-more MD-a, export and export-pack (JPEGWriter, ExportPresets); suite-imaging IM-m (ImagingColor, the wide working space) before SC-4",
+  "depends": [
+    "suite-harness",
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "6 (SC-13 → SC-14 → SC-15 → SC-16 → SC-8 → SC-12, tied with SC-1 → SC-2 → SC-3 → SC-4 → SC-8 → SC-12)",
+  "ui_slice": "none",
+  "ui_slice_reason": "no new screen or control: files open and save as before, the panels and export sheets list more formats through controls that exist, the same way in every app; the app slices are ui slices because they edit app files, with the windows' existing budget rows",
+  "journeys": [
+    "HaloRenderFrameJourneyTests.testRenderFrame",
+    "PhotoDocumentsJourneyTests.testSaveLayeredDocumentAndReopen"
+  ],
+  "owned": [
+    "Tests/PhotoModelTests/CorePNGParityTests.swift",
+    "Tests/SuiteModelTests/ImageIOImportRatchetTests.swift",
+    "Tests/imageio-baseline.txt",
+    "Tests/AppSnapshotTests/SuiteImageIOTests.swift",
+    "Tests/PhotoModelTests/Fixtures/png-parity/",
+    "Sources/SuiteShell/SuiteImageIO.swift",
+    "Package.swift",
+    "project.yml",
+    "docs/c4/parts/creative-apps/suite-shell/shell-imageio.json",
+    "Tests/PhotoModelTests/PhotoCodecRouteTests.swift",
+    "Tests/RealJobs/photo/rotated-photo/rotated-photo.jobs.json",
+    "Tests/RealJobs/photo/rotated-photo/input/rotated-6.jpg",
+    "Tests/RealJobs/photo/rotated-photo/input/rotated-6.heic",
+    "Sources/PhotoApp/ImageIOCodec.swift",
+    "Sources/PhotoModel/CoreRasterImageCodec.swift",
+    "Sources/PhotoApp/PhotoPasteboard.swift",
+    "Tests/mutations/PhotoModel.CoreRasterImageCodec.json",
+    "Tests/HaloModelTests/HaloFramePNGCoreTests.swift",
+    "Sources/HaloModel/HaloHeadless.swift",
+    "Sources/HaloApp/HaloPNGWriter.swift",
+    "Tests/mutations/HaloModel.HaloHeadless.json",
+    "Tests/AppSnapshotTests/LibraryImageIOTests.swift",
+    "Tests/AppSnapshotTests/Fixtures/library-imageio-expected.json",
+    "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+    "Sources/LibraryApp/Platform/JPEGWriter.swift",
+    "Tests/AppSnapshotTests/RasterizerPNGTests.swift",
+    "Sources/DesignApp/DesignRasterizer.swift",
+    "Sources/FlareApp/StageRasterizer.swift",
+    "Sources/HaloModel/HaloFramePNG.swift",
+    "Tests/mutations/HaloModel.HaloFramePNG.json",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/suiteui/features/shared-codecs.wave.json",
+    "Tests/SuiteModelTests/SuiteImageFormatsTests.swift",
+    "Tests/SuiteModelTests/FormatListRatchetTests.swift",
+    "Tests/format-lists-baseline.txt",
+    "Tests/AfterGlowCLITests/ImageFormatParityTests.swift",
+    "Sources/SuiteModel/Values/SuiteImageFormats.swift",
+    "Sources/SuiteModel/Values/SuiteTypes.swift",
+    "Bundle/Info/Photo.plist",
+    "Bundle/Info/Library.plist",
+    "Tests/SuiteModelTests/PlistShapeAppsTests.swift",
+    "Tests/mutations/SuiteModel.SuiteImageFormats.json",
+    "docs/c4/parts/creative-apps/suite-model/suite-identity.json",
+    "Sources/PhotoModel/PhotoImageFile.swift",
+    "Sources/PhotoModel/PhotoHeadless.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Sources/PhotoApp/PhotoWindow+Export.swift",
+    "Tests/PhotoModelTests/PhotoFormatsTests.swift",
+    "Tests/mutations/PhotoModel.PhotoHeadless.json",
+    "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "Sources/LibraryModel/Contracts/ExportFormats.swift",
+    "Sources/LibraryModel/Contracts/ExportPresets.swift",
+    "Tests/LibraryModelTests/LibraryFormatsTests.swift",
+    "Tests/mutations/LibraryModel.LibraryValues.json",
+    "Tests/AppSnapshotTests/SuiteImageIOFormatsTests.swift"
+  ],
+  "slices": [
+    {
+      "id": "SC-f",
+      "behavior": "One registry in SuiteModel lists every image format the suite reads and the four it writes, the plists and the type registry are built from it, and Photo's and Library's panels, import kinds, export formats and the CLI's lists derive from it with the per-app lists deleted and their ratchet strict.",
+      "tasks": [
+        "SC-13",
+        "SC-14",
+        "SC-15",
+        "SC-16"
+      ],
+      "journeys": [
+        "MJ-SC-f",
+        "PJ-SC"
+      ],
+      "owned": [
+        "Tests/SuiteModelTests/SuiteImageFormatsTests.swift",
+        "Tests/SuiteModelTests/FormatListRatchetTests.swift",
+        "Tests/format-lists-baseline.txt",
+        "Tests/AfterGlowCLITests/ImageFormatParityTests.swift",
+        "Sources/SuiteModel/Values/SuiteImageFormats.swift",
+        "Sources/SuiteModel/Values/SuiteTypes.swift",
+        "Bundle/Info/Photo.plist",
+        "Bundle/Info/Library.plist",
+        "Tests/SuiteModelTests/PlistShapeAppsTests.swift",
+        "Tests/mutations/SuiteModel.SuiteImageFormats.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-identity.json",
+        "Sources/PhotoModel/PhotoImageFile.swift",
+        "Sources/PhotoModel/PhotoHeadless.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift",
+        "Sources/PhotoApp/PhotoWindow+Export.swift",
+        "Tests/PhotoModelTests/PhotoFormatsTests.swift",
+        "Tests/mutations/PhotoModel.PhotoHeadless.json",
+        "Sources/LibraryModel/Contracts/LibraryValues.swift",
+        "Sources/LibraryModel/Contracts/ExportFormats.swift",
+        "Sources/LibraryModel/Contracts/ExportPresets.swift",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift",
+        "Tests/LibraryModelTests/LibraryFormatsTests.swift",
+        "Tests/mutations/LibraryModel.LibraryValues.json"
+      ],
+      "waits": {},
+      "ui": true
+    },
+    {
+      "id": "SC-a",
+      "behavior": "Core's PNG is proven to round-trip what both local writers write, the ImageIO import ratchet is live with today's files baselined, and `SuiteImageIO` is declared as stubs in SuiteShell, which links CoreRaster.",
+      "tasks": [
+        "SC-1",
+        "SC-2"
+      ],
+      "journeys": [
+        "MJ-SC"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/CorePNGParityTests.swift",
+        "Tests/SuiteModelTests/ImageIOImportRatchetTests.swift",
+        "Tests/imageio-baseline.txt",
+        "Tests/AppSnapshotTests/SuiteImageIOTests.swift",
+        "Tests/PhotoModelTests/Fixtures/png-parity/",
+        "Sources/SuiteShell/SuiteImageIO.swift",
+        "Package.swift",
+        "project.yml",
+        "docs/c4/parts/creative-apps/suite-shell/shell-imageio.json"
+      ],
+      "waits": {
+        "suite-imaging:IM-a": [
+          "SC-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SC-photo",
+      "behavior": "Photo decodes and encodes PNG and JPEG through core and everything else through `SuiteImageIO`, its own ImageIO code and PNG fallback are gone, and the pasteboard uses the same adapter.",
+      "tasks": [
+        "SC-3",
+        "SC-4"
+      ],
+      "journeys": [
+        "MJ-SC-photo",
+        "PJ-SC"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoCodecRouteTests.swift",
+        "Tests/RealJobs/photo/rotated-photo/rotated-photo.jobs.json",
+        "Tests/RealJobs/photo/rotated-photo/input/rotated-6.jpg",
+        "Tests/RealJobs/photo/rotated-photo/input/rotated-6.heic",
+        "Sources/SuiteShell/SuiteImageIO.swift",
+        "Sources/PhotoApp/ImageIOCodec.swift",
+        "Sources/PhotoModel/CoreRasterImageCodec.swift",
+        "Sources/PhotoApp/PhotoPasteboard.swift",
+        "Tests/AppSnapshotTests/SuiteImageIOTests.swift",
+        "Tests/mutations/PhotoModel.CoreRasterImageCodec.json",
+        "Tests/AppSnapshotTests/SuiteImageIOFormatsTests.swift"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-3",
+          "SC-4"
+        ],
+        "suite-imaging:IM-m": [
+          "SC-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-halo",
+      "behavior": "Halo's rendered frames and PNG sequences are core's PNG bytes, so the headless render, the sequence sink and the viewer agree.",
+      "tasks": [
+        "SC-5",
+        "SC-6"
+      ],
+      "journeys": [
+        "MJ-SC-halo",
+        "HJ-SC"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloFramePNGCoreTests.swift",
+        "Sources/HaloModel/HaloHeadless.swift",
+        "Sources/HaloApp/HaloPNGWriter.swift",
+        "Tests/mutations/HaloModel.HaloHeadless.json"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-5",
+          "SC-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-library",
+      "behavior": "Library scans, decodes, orients and writes through `SuiteImageIO` and core's JPEG, with the same pixel size, capture date and metadata as before.",
+      "tasks": [
+        "SC-7",
+        "SC-8"
+      ],
+      "journeys": [
+        "MJ-SC-library",
+        "LJ-SC"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/LibraryImageIOTests.swift",
+        "Tests/AppSnapshotTests/Fixtures/library-imageio-expected.json",
+        "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-7",
+          "SC-8"
+        ],
+        "SC-f": [
+          "SC-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-raster",
+      "behavior": "Design's and Flare's rasterizers hand their pixels to `SuiteImageIO` for PNG instead of their own `CGImageDestination` code.",
+      "tasks": [
+        "SC-9",
+        "SC-10"
+      ],
+      "journeys": [
+        "MJ-SC-raster"
+      ],
+      "owned": [
+        "Tests/AppSnapshotTests/RasterizerPNGTests.swift",
+        "Sources/DesignApp/DesignRasterizer.swift",
+        "Sources/FlareApp/StageRasterizer.swift"
+      ],
+      "waits": {
+        "SC-a": [
+          "SC-9",
+          "SC-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "SC-z",
+      "behavior": "`HaloFramePNG.swift` is deleted with the baseline shrunk, only `SuiteImageIO.swift` imports ImageIO, and the feature is built.",
+      "tasks": [
+        "SC-11",
+        "SC-12"
+      ],
+      "journeys": [
+        "MJ-SC",
+        "HJ-SC"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloFramePNG.swift",
+        "Tests/mutations/HaloModel.HaloFramePNG.json",
+        "Tests/PhotoModelTests/CorePNGParityTests.swift",
+        "Tests/canonical-baseline.txt",
+        "Tests/imageio-baseline.txt",
+        "Tests/SuiteModelTests/ImageIOImportRatchetTests.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-imageio.json",
+        "docs/blueprints/suiteui/features/shared-codecs.wave.json"
+      ],
+      "waits": {
+        "SC-photo": [
+          "SC-12"
+        ],
+        "SC-halo": [
+          "SC-11"
+        ],
+        "SC-library": [
+          "SC-12"
+        ],
+        "SC-raster": [
+          "SC-12"
+        ],
+        "adopt-kernel-autosave:AK-z": [
+          "SC-11"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

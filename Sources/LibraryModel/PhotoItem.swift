@@ -2,7 +2,8 @@
 // the browse mode. Linux-safe value types. The color stands in for pixels
 // until import reads real files (L2); it is sRGB from CoreColor. Rating, flag
 // and label change only through LibraryCatalog's metadata edits
-// (MetadataEditing.swift), which keep the rating in 0...5.
+// (MetadataEditing.swift), which keep the rating in 0...5. Keywords, title,
+// caption and camera details (metadata-more) ride along in every copy.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -33,6 +34,12 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     public internal(set) var develop: DevelopSettings
     /// Whether the file can be read now; set when a decode fails or succeeds.
     public internal(set) var availability: PhotoAvailability
+    /// Normalized, sorted without regard to case, unique (metadata-more).
+    public internal(set) var keywords: [String]
+    public internal(set) var title: String  // "" when none
+    public internal(set) var caption: String  // "" when none
+    /// Read from the file's Exif at import; `.none` for samples and files without Exif.
+    public let camera: CameraDetails
 
     /// `id` defaults to the name; two photos may share a name but not an id.
     /// `isFlagged` makes it a pick unless `flag` says otherwise.
@@ -40,7 +47,8 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
         id: String? = nil, name: String, captureDate: Date, color: Color3, rating: Int = 0,
         isFlagged: Bool = false, label: PhotoLabel? = nil, flag: PhotoFlag? = nil, path: String? = nil,
         pixelSize: PixelSize = PixelSize(width: 4032, height: 3024), develop: DevelopSettings = .neutral,
-        availability: PhotoAvailability = .available
+        availability: PhotoAvailability = .available, keywords: [String] = [], title: String = "",
+        caption: String = "", camera: CameraDetails = .none
     ) {
         self.id = id ?? name
         self.name = name
@@ -53,9 +61,13 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
         self.pixelSize = pixelSize
         self.develop = develop
         self.availability = availability
+        self.keywords = keywords
+        self.title = title
+        self.caption = caption
+        self.camera = camera
     }
 
-    /// A pick: Favorites shows these.
+    /// A pick: Picks shows these.
     public var isFlagged: Bool { flag == .pick }
 
     /// The color as one opaque RGBA8 pixel, the thumbnail the grid draws.
@@ -67,14 +79,16 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     func withSize(_ size: PixelSize) -> PhotoItem {
         PhotoItem(
             id: id, name: name, captureDate: captureDate, color: color, rating: rating, label: label, flag: flag,
-            path: path, pixelSize: size, develop: develop, availability: availability)
+            path: path, pixelSize: size, develop: develop, availability: availability,
+            keywords: keywords, title: title, caption: caption, camera: camera)
     }
 
     /// The same photo under another id.
     func withID(_ newID: String) -> PhotoItem {
         PhotoItem(
             id: newID, name: name, captureDate: captureDate, color: color, rating: rating, label: label, flag: flag,
-            path: path, pixelSize: pixelSize, develop: develop, availability: availability)
+            path: path, pixelSize: pixelSize, develop: develop, availability: availability,
+            keywords: keywords, title: title, caption: caption, camera: camera)
     }
 }
 

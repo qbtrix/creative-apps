@@ -4,7 +4,8 @@
 // side, else "550 × 400"), its rate ("24 fps"), and while playing the rate the screen actually shows: the display
 // link's ticks over the last second (`PlaybackDriver.measuredFPS`), capped at the document rate, since a 60 Hz link
 // still shows each of 24 frames once. Under the document rate it is dropping (QB-L4, report-only). A scene with text
-// the stage can't draw says so: "Text not shown (1)". Integer math on clamped values, so nothing here can trap.
+// the stage can't draw says so: "Text not shown (1)", and so does one with masks or mattes: "Masks not shown (1)".
+// Integer math on clamped values, so nothing here can trap.
 import FlareCore
 
 extension FlareWorkspace {
@@ -20,6 +21,8 @@ extension FlareWorkspace {
             pills.isDropping = shown < scene.fps
         }
         if let hidden = stageList?.hiddenTextCount, hidden > 0 { pills.textWarning = "Text not shown (\(hidden))" }
+        let masked = ExportScan.maskedLayers(scene.layers, document?.symbols ?? [])
+        if masked > 0 { pills.maskWarning = "Masks not shown (\(masked))" }
         return pills
     }
 
@@ -50,6 +53,7 @@ public struct StatusPills: Sendable, Equatable {
     public var aspect: String, size: String, fps: String    // "16:9", "1080p", "24 fps"
     public var actualFPS: String?, isDropping: Bool         // while playing
     public var textWarning: String?                         // "Text not shown (1)"
+    public var maskWarning: String?                         // "Masks not shown (1)"
 
     public init(
         aspect: String, size: String, fps: String, actualFPS: String? = nil, isDropping: Bool = false,

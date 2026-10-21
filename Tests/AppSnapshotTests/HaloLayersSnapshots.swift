@@ -69,11 +69,11 @@ import Testing
     @Test func layerList() throws {
         let (project, badge) = try threeLayers()
         #expect(project.selectedComposition?.layers.map(\.name) == ["Title", "Badge", "Background", "Rig"])
-        // LayerTreeList's rows: Halo's ids, no eye or lock, flat reorder in the inspector's scroll view.
+        // LayerTreeList's rows: Halo's ids, no eye or lock, flat reorder in the inspector's scroll view, no disclosure column.
         #expect(project.layerRows.map(\.id) == project.selectedComposition?.layers.map(\.id))
         #expect(HaloLayerList.naming.row(badge) == "halo.layer.row.\(badge)")
         #expect(HaloLayerList.naming.container == "halo.layer.list")
-        #expect(HaloLayerList.options == LayerTreeOptions(showsEye: false, showsLock: false, reorders: true, embedded: true))
+        #expect(HaloLayerList.options == LayerTreeOptions(showsEye: false, showsLock: false, reorders: true, embedded: true, nests: false))
         // Badge's row: the shape symbol, its tooltip and its VoiceOver value.
         let decoration = try #require(HaloLayerList.decorations(project.selectedComposition?.layers ?? [])[badge])
         #expect(decoration.symbol == HaloLayerKind.shape.systemImage)

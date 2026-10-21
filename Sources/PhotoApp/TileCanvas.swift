@@ -11,7 +11,8 @@
 // by the Straighten preview's angle. On the resident GPU path
 // (`residentTarget`) the renderer writes the picture into the view's Metal
 // presenter's texture instead, and an update brings no tiles, only the
-// present. Mouse input stays with CanvasViewport,
+// present; its target also runs a tone program in that write (Metal's
+// `display_tone`), the live route's one pass per slider step. Mouse input stays with CanvasViewport,
 // which owns focus and Space-pan: the embedded view never takes a click.
 // Presentation state only.
 import AppKit
@@ -86,9 +87,14 @@ import SwiftUI
         let id = ObjectIdentifier(texture)
         defer { targetTexture = id }
         let held = TextureBox(texture: texture)
-        let target = PhotoDisplayTarget { surface, rect in
-            try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
-        }
+        let target = PhotoDisplayTarget(
+            write: { surface, rect in
+                try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
+            },
+            writeToned: { surface, rect, tone in
+                try metal.display(
+                    surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true, tone: tone)
+            })
         return (target, targetTexture != id)
     }
 

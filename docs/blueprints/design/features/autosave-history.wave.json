@@ -1,0 +1,151 @@
+{
+  "title": "Autosave, crash recovery and the History panel in Design, on the shared schedule, folder and panel",
+  "wave": 3,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/autosave-history (adopter of S12); RJ-D20, RJ-D33",
+  "waits_on": "suiteui autosave-history's contract slice AH-a (cross-line); gradient-fill's DG-m before DA-6",
+  "depends": [
+    "design-window",
+    "files-history",
+    "design-export",
+    "layers-panel",
+    "canvas-basics",
+    "snapping"
+  ],
+  "longest_chain": "6 (DA-1 → DA-2 → DA-3 → DA-4 → DA-7 → DA-8)",
+  "journeys": [
+    "DesignHistoryJourneyTests.testJumpAndRecover"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignRecovery+Kernel.swift",
+    "Tests/DesignModelTests/DesignRecoveryTests.swift",
+    "Sources/DesignApp/DesignHistoryArea.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "UITests/DesignJourneyTests+History.swift",
+    "Sources/DesignModel/DesignToolbarItems.swift",
+    "Tests/AppSnapshotTests/DesignHistoryAreaTests.swift",
+    "Tests/AppSnapshotTests/DesignHistorySnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignHistoryTests.swift",
+    "Tests/mutations/DesignModel.DesignRecovery+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/DesignModelTests/DesignHistoryCommandTests.swift",
+    "Tests/RealJobs/design/history-jump/history-jump.jobs.json",
+    "Tests/RealJobs/design/history-jump/input/one-card.design",
+    "docs/blueprints/design/features/autosave-history.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DA-a",
+      "behavior": "The adapter is declared as stubs and the History panel and the autosave hooks are on the window, reachable from View > Show History.",
+      "tasks": [
+        "DA-1",
+        "DA-2"
+      ],
+      "journeys": [
+        "MJ-DA"
+      ],
+      "waits": {
+        "shell-parity": [
+          "DA-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignRecovery+Kernel.swift",
+        "Tests/DesignModelTests/DesignRecoveryTests.swift",
+        "Sources/DesignApp/DesignHistoryArea.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "UITests/DesignJourneyTests+History.swift"
+      ]
+    },
+    {
+      "id": "DA-u",
+      "behavior": "The toolbar button toggles the panel, the panel follows undo and jumps, and the snapshots and render budget hold.",
+      "tasks": [
+        "DA-3",
+        "DA-4"
+      ],
+      "journeys": [
+        "J-DA"
+      ],
+      "waits": {
+        "DA-a": [
+          "DA-3",
+          "DA-4"
+        ],
+        "shell-parity": [
+          "DA-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignHistoryArea.swift",
+        "Sources/DesignModel/DesignToolbarItems.swift",
+        "Tests/AppSnapshotTests/DesignHistoryAreaTests.swift",
+        "Tests/AppSnapshotTests/DesignHistorySnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignHistoryTests.swift"
+      ]
+    },
+    {
+      "id": "DA-m",
+      "behavior": "A jump lands on its step without recording one, recovery bytes reopen as a dirty never-saved document, and the history commands run from the catalog.",
+      "tasks": [
+        "DA-5",
+        "DA-6"
+      ],
+      "journeys": [
+        "MJ-DA"
+      ],
+      "waits": {
+        "DA-a": [
+          "DA-5",
+          "DA-6"
+        ],
+        "gradient-fill:DG-m": [
+          "DA-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignRecovery+Kernel.swift",
+        "Tests/DesignModelTests/DesignRecoveryTests.swift",
+        "Tests/mutations/DesignModel.DesignRecovery+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/DesignModelTests/DesignHistoryCommandTests.swift",
+        "Tests/RealJobs/design/history-jump/history-jump.jobs.json",
+        "Tests/RealJobs/design/history-jump/input/one-card.design"
+      ]
+    },
+    {
+      "id": "DA-z",
+      "behavior": "The journey jumps and recovers after a force-quit on live services, and the feature is built.",
+      "tasks": [
+        "DA-7",
+        "DA-8"
+      ],
+      "journeys": [
+        "J-DA"
+      ],
+      "waits": {
+        "DA-u": [
+          "DA-7"
+        ],
+        "DA-m": [
+          "DA-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+History.swift",
+        "docs/blueprints/design/features/autosave-history.wave.json"
+      ]
+    }
+  ]
+}

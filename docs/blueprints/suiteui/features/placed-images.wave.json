@@ -1,0 +1,221 @@
+{
+  "title": "Placed images: the kernel's placed asset, fit and cover rules and place commands, SuiteUI's Place… panel, drop target, image view and rows",
+  "wave": 5,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S20 (placed images, image fills, crop in frame; shared half) and E11's app adoption (shared half); real job RJ-X36; captain 2026-10-20: everyday tools in the beta, built once",
+  "waits_on": "gradient-fill's GF-a and GF-z slices (shared files) and command-catalog's CC-run (#2996); editor-kernel, suite-harness and editor-in-window (built)",
+  "longest_chain": "6 (PL-1 → PL-2 → PL-3 → PL-4 → PL-8 → PL-10)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuitePlaceJourneyTests.testPlaceImageOnGallery"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Place/Placed.swift",
+    "Sources/SuiteKernel/Place/PlaceRules.swift",
+    "Sources/SuiteKernel/Place/PlaceVector.swift",
+    "Sources/SuiteKernel/Place/PlaceCommands.swift",
+    "Tests/SuiteKernelTests/PlaceRulesTests.swift",
+    "Tests/SuiteKernelTests/PlaceVectorTests.swift",
+    "Tests/SuiteKernelTests/PlaceCommandsTests.swift",
+    "Tests/canonical-concepts.txt",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-place.json",
+    "Sources/SuiteUI/PlacePanel.swift",
+    "Sources/SuiteUI/PlaceDrop.swift",
+    "Sources/SuiteUI/PlacedImageView.swift",
+    "Sources/SuiteUI/PlacedImageRows.swift",
+    "Sources/SuiteUI/Gallery/GalleryPlaceImage.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "UITests/SuiteJourneyTests+Place.swift",
+    "Tests/SuiteUITests/PlaceDropTests.swift",
+    "Tests/AppSnapshotTests/SuitePlaceSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPlaceTests.swift",
+    "Tests/mutations/SuiteKernel.PlaceRules.json",
+    "Tests/mutations/SuiteKernel.PlaceVector.json",
+    "Tests/SuiteKernelTests/Fixtures/place/",
+    "Tests/mutations/SuiteKernel.PlaceCommands.json",
+    "Tests/SuiteUITests/PlaceLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeCanvasPlaceTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/place-image/",
+    "docs/blueprints/suiteui/features/placed-images.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PL-a",
+      "behavior": "The kernel's Place module declares every type, rule and command spec as stubs, SuiteUI's panel, drop target, view and rows exist as placeholders on the gallery's place-image page, and the checks are written, disabled.",
+      "tasks": [
+        "PL-1",
+        "PL-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "gradient-fill:GF-a": [
+          "PL-1",
+          "PL-2"
+        ],
+        "editor-kernel": [
+          "PL-1"
+        ],
+        "suite-harness": [
+          "PL-2"
+        ],
+        "editor-in-window": [
+          "PL-2"
+        ],
+        "autosave-history:AH-a": [
+          "PL-1",
+          "PL-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Place/Placed.swift",
+        "Sources/SuiteKernel/Place/PlaceRules.swift",
+        "Sources/SuiteKernel/Place/PlaceVector.swift",
+        "Sources/SuiteKernel/Place/PlaceCommands.swift",
+        "Tests/SuiteKernelTests/PlaceRulesTests.swift",
+        "Tests/SuiteKernelTests/PlaceVectorTests.swift",
+        "Tests/SuiteKernelTests/PlaceCommandsTests.swift",
+        "Tests/canonical-concepts.txt",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-place.json",
+        "Sources/SuiteUI/PlacePanel.swift",
+        "Sources/SuiteUI/PlaceDrop.swift",
+        "Sources/SuiteUI/PlacedImageView.swift",
+        "Sources/SuiteUI/PlacedImageRows.swift",
+        "Sources/SuiteUI/Gallery/GalleryPlaceImage.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "UITests/SuiteJourneyTests+Place.swift"
+      ]
+    },
+    {
+      "id": "PL-u",
+      "behavior": "On the gallery page a dropped, chosen or sample PNG, JPEG or SVG shows in its box at its own aspect, the drop highlights only for files it takes, and the rows show the file and size with Replace… and Reset Size, every control identified, within the render budget.",
+      "tasks": [
+        "PL-3",
+        "PL-4"
+      ],
+      "journeys": [
+        "PJ1"
+      ],
+      "waits": {
+        "PL-a": [
+          "PL-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/PlacePanel.swift",
+        "Sources/SuiteUI/PlaceDrop.swift",
+        "Sources/SuiteUI/PlacedImageView.swift",
+        "Sources/SuiteUI/PlacedImageRows.swift",
+        "Tests/SuiteUITests/PlaceDropTests.swift",
+        "Tests/AppSnapshotTests/SuitePlaceSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPlaceTests.swift",
+        "UITests/SuiteJourneyTests+Place.swift"
+      ]
+    },
+    {
+      "id": "PL-m",
+      "behavior": "The rules sniff the format, refuse what they can't take with a reason, fit a new image inside the canvas without upscaling, crop by cover around the focus so nothing stretches, flatten an SVG into paint, and every place command records exactly one undo step (a focus drag one).",
+      "tasks": [
+        "PL-5",
+        "PL-6",
+        "PL-7"
+      ],
+      "journeys": [
+        "KJ-place"
+      ],
+      "waits": {
+        "PL-a": [
+          "PL-5",
+          "PL-6",
+          "PL-7"
+        ],
+        "command-catalog:CC-run": [
+          "PL-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Place/PlaceRules.swift",
+        "Tests/SuiteKernelTests/PlaceRulesTests.swift",
+        "Tests/mutations/SuiteKernel.PlaceRules.json",
+        "Sources/SuiteKernel/Place/PlaceVector.swift",
+        "Tests/SuiteKernelTests/PlaceVectorTests.swift",
+        "Tests/mutations/SuiteKernel.PlaceVector.json",
+        "Tests/SuiteKernelTests/Fixtures/place/",
+        "Sources/SuiteKernel/Place/PlaceCommands.swift",
+        "Tests/SuiteKernelTests/PlaceCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.PlaceCommands.json"
+      ]
+    },
+    {
+      "id": "PL-z",
+      "behavior": "The gallery runs its intents through PlaceCommands on a live target, the fake app takes placed images so RJ-X36 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "PL-8",
+        "PL-9",
+        "PL-10"
+      ],
+      "journeys": [
+        "PJ1",
+        "KJ-place"
+      ],
+      "waits": {
+        "PL-u": [
+          "PL-8"
+        ],
+        "PL-m": [
+          "PL-8",
+          "PL-9"
+        ],
+        "gradient-fill:GF-z": [
+          "PL-9"
+        ],
+        "autosave-history:AH-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "transform-tools:TT-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "eyedropper:EY-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "shape-tools:SH-z": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ],
+        "stroke-style:SS-d": [
+          "PL-8",
+          "PL-9",
+          "PL-10"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryPlaceImage.swift",
+        "Sources/SuiteUI/PlacedImageView.swift",
+        "Tests/SuiteUITests/PlaceLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeCanvasPlaceTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/place-image/",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-place.json",
+        "docs/blueprints/suiteui/features/placed-images.wave.json"
+      ]
+    }
+  ]
+}

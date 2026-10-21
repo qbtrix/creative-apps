@@ -168,6 +168,10 @@
         "CL-a": [
           "CL-8",
           "CL-9"
+        ],
+        "key-editing:KE-a": [
+          "CL-8",
+          "CL-9"
         ]
       },
       "ui": true
