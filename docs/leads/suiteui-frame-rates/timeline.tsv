@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T13:16Z	build	check	39600275867	FR-a macOS build green; FR-m gate PASS on 6fe38e4f9 and pushed
 2026-10-21T13:24Z	build	builder-relaunched	FR-u	FR-u builder relaunched on FR-m 6fe38e4f9
 2026-10-21T13:43Z	build	check	#4063	Linux check red on Library timing tests (not ours; perf-listed on dev in #4069); merged dev into FR-a, re-gating
+2026-10-21T13:44Z	build	slice-built	FR-u	FR-u built at a1d3152b9, gate PASS twice, stacked on FR-m
