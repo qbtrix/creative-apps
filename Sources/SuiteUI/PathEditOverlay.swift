@@ -29,6 +29,8 @@ public enum PenTool: String, CaseIterable, Sendable {
 public struct PathEditOverlay: View {
     private let context: PathContext
     private let onIntent: (PathIntent) -> Void
+    /// False for the stand-in init in PathEditOverlay+StandIn.swift: marks only, no gesture.
+    var interactive = true
     @State private var tracker = PathGesture()
     @State private var pointer: CGPoint?
     @State private var hovered: PathHit?
@@ -59,6 +61,7 @@ public struct PathEditOverlay: View {
             guides(hint: hint)
         }
         .contentShape(.rect)
+        .allowsHitTesting(interactive)
         .onContinuousHover { phase in
             if case .active(let p) = phase { (pointer, hovered) = (p, hitTest(p)) } else { (pointer, hovered) = (nil, nil) }
         }
