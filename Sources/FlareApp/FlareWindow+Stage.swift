@@ -1,9 +1,7 @@
 // FlareWindow+Stage.swift: the router's stage area (FlareWindow+Router.swift). FlareStage's drags arrive here: a
 // pointer move is the Model's `dragChanged` (the live draft, marquee or move preview), mouse-up its `endDrag` (one
-// undo step, or a selection change), and Escape mid-drag its `cancelDrag`. FlarePathEditLayer puts SuiteUI's
-// PathEditOverlay over the stage (pen-paths FP-2): the picked shape's contours under Direct Select (`pathInEdit`, in
-// stage points through its layer's transform) and the open pen draft (`penDraft`). Its intents go to the Model's
-// `runPath` through `performPath`; the placeholder overlay draws the outline only until PN-3 adds its gesture.
+// undo step, or a selection change), and Escape mid-drag its `cancelDrag`. FlarePathEditLayer (FP-2) draws Direct
+// Select's `pathInEdit` and the Pen's `penDraft` in PathEditOverlay; its intents (PN-3) go to `performPath`.
 import FlareCore
 import FlareModel
 import SuiteKernel
@@ -41,21 +39,12 @@ struct FlarePathEditLayer: View {
     let zoom: Double
 
     var body: some View {
-        if let tool = Self.tool(model.tool) {
+        if let tool: PenTool = model.tool == .pen ? .pen : model.tool == .directSelect ? .directSelect : nil {
             let edit = model.pathInEdit
             PathEditOverlay(
                 draft: model.penDraft.map { Self.standIn($0.contour, through: .identity) },
                 path: edit.map { edit in edit.path.contours.map { Self.standIn($0, through: edit.toDocument) } } ?? [],
                 tool: tool, zoom: zoom)
-        }
-    }
-
-    /// The overlay's tool for a Flare tool; nil for a tool that edits no path.
-    nonisolated static func tool(_ tool: FlareTool) -> PenTool? {
-        switch tool {
-        case .pen: .pen
-        case .directSelect: .directSelect
-        default: nil
         }
     }
 

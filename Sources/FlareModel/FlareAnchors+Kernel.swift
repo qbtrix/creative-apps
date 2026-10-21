@@ -1,7 +1,5 @@
-// FlareAnchors+Kernel.swift (pen-paths FP-1): FlareWorkspace as SuiteKernel's PathEditTarget, so the shared point
-// editor and the path commands work on Flare. `pathInEdit` is the one shape item Direct Select picked, in its layer's
-// space at the playhead; `setPath` writes it back as one "Edit Path" through the shapes service. FP-7 adds anchor
-// editing on the stage; FP-6 puts the path commands in the catalog `runPath` runs them through.
+// FlareAnchors+Kernel.swift (pen-paths FP-1): FlareWorkspace as SuiteKernel's PathEditTarget on the one shape Direct
+// Select picked; `setPath` writes it as one "Edit Path". FP-7 edits anchors; FP-6 adds the commands `runPath` runs.
 import FlareCore
 import SuiteKernel
 

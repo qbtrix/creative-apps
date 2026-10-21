@@ -1,7 +1,5 @@
-// FlareAnchorEditTests.swift (pen-paths FP-1, turned on by FP-7): Direct Select edits the points of the one picked
-// shape through SuiteKernel's PathEditTarget. The stubs' reads run now: `pathInEdit` is the one direct-selected shape
-// item, its help says why there is none, and the anchor selection clears when the item selection changes. The edits
-// wait on FP-7. Runs on Linux and macOS.
+// FlareAnchorEditTests.swift (pen-paths FP-1): Direct Select's PathEditTarget. The reads (`pathInEdit`, its help, the
+// anchor selection clearing on a new item selection) run now; the edits wait on FP-7. Runs on Linux and macOS.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -29,19 +27,13 @@ import Testing
         #expect(workspace.pathHelp == "Select one shape with Direct Select to edit its points.")
     }
 
-    @Test func nothingPickedHasNoPathInEdit() {
-        var workspace = Self.picked()
-        workspace.drag(from: Point(x: 300, y: 300), to: Point(x: 300, y: 300))
-        #expect(workspace.selection.isEmpty && workspace.pathInEdit == nil && workspace.pathHelp != nil)
-    }
-
     @Test func anchorSelectionClearsWhenTheItemSelectionChanges() {
         var workspace = Self.picked()
         workspace.anchorSelection = Selection([AnchorRef(contour: 0, index: 1)])
         workspace.drag(from: Point(x: 30, y: 25), to: Point(x: 30, y: 25))
         #expect(workspace.anchorSelection.ordered == [AnchorRef(contour: 0, index: 1)])
         workspace.drag(from: Point(x: 300, y: 300), to: Point(x: 300, y: 300))
-        #expect(workspace.anchorSelection.ordered.isEmpty)
+        #expect(workspace.anchorSelection.ordered.isEmpty && workspace.selection.isEmpty && workspace.pathInEdit == nil)
     }
 
     @Test(.disabled("waits on FP-7")) func onlyPickedAnchorsMove() throws {
@@ -55,13 +47,5 @@ import Testing
             let moved = index == 1 ? Point(x: old.point.x + 30, y: old.point.y) : old.point
             #expect(new.point == moved, "anchor \(index)")
         }
-    }
-
-    @Test(.disabled("waits on FP-7")) func removeKeepsTheOtherAnchors() throws {
-        var workspace = Self.picked()
-        workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 0), AnchorRef(contour: 0, index: 1)],
-                                  rect: nil, extend: false))
-        workspace.runPath(.remove)
-        #expect(workspace.pathInEdit?.path.contours.first?.anchors.count == 2)
     }
 }

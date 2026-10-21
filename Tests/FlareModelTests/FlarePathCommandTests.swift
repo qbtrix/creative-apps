@@ -1,5 +1,4 @@
-// FlarePathCommandTests.swift (pen-paths FP-1, turned on by FP-6): SuiteKernel's twelve path commands run on Flare's
-// catalog, each edit one undo step with the kernel's title. Runs on Linux and macOS.
+// FlarePathCommandTests.swift (pen-paths FP-1, on in FP-6): the twelve path commands in Flare's catalog, one step each.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel

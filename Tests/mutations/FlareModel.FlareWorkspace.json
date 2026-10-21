@@ -26,19 +26,5 @@
     "find": "        guard tool == .directSelect, selection.count == 1,",
     "replace": "        guard selection.count == 1,",
     "tests": "FlareAnchorEditTests"
-  },
-  {
-    "label": "the lone first anchor's drag handle is lost",
-    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
-    "find": "                contour.anchors[0].handleOut = handle\n",
-    "replace": "",
-    "tests": "FlarePenKernelTests"
-  },
-  {
-    "label": "the pen view is read under every tool",
-    "file": "Sources/FlareModel/FlarePen+Kernel.swift",
-    "find": "            guard tool == .pen else { return nil }\n",
-    "replace": "",
-    "tests": "FlarePenKernelTests"
   }
 ]

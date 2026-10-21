@@ -1,7 +1,5 @@
-// FlarePen+Kernel.swift (pen-paths FP-1): the Pen's draft as SuiteKernel's PenDraft, over today's ShapeDraft. `pen`
-// reads the draft's path back as one contour (the lone smooth first anchor's trailing move is its out-handle, and a
-// smooth last anchor's out-handle mirrors its in-handle) and writes a contour as the shape LiveShapes draws.
-// `addPath` commits a path as one "Add Path" through the shapes service. FP-5 moves the Pen onto PenRules.
+// FlarePen+Kernel.swift (pen-paths FP-1): the Pen's ShapeDraft as SuiteKernel's PenDraft, read and written as the shape
+// LiveShapes draws, and `addPath` as one "Add Path" through the shapes service. FP-5 moves the Pen onto PenRules.
 import FlareCore
 import SuiteKernel
 
@@ -55,15 +53,13 @@ extension FlareWorkspace {
                 if draft?.tool == .pen { draft = nil }
                 return
             }
-            var pen = draft?.tool == .pen ? draft : nil
-            pen = pen ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []))
-            pen?.pen = newValue
+            var pen = draft.flatMap { $0.tool == .pen ? $0 : nil } ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []))
+            pen.pen = newValue
             draft = pen
         }
     }
 
-    /// Commits `path` as one "Add Path" through the shapes service and returns the new layer's id. `name` is the
-    /// kernel's step name, which the service already gives. Throws the refusal when nothing was added.
+    /// Commits `path` as one "Add Path" (the service's name) and returns the new layer's id; throws when none was added.
     public mutating func addPath(_ path: VectorPath, name: String) throws -> String {
         let points = path.contours.flatMap { $0.anchors.map(\.point) }
         let closed = path.contours.first?.closed ?? false
