@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T11:26:40Z	FP-m	pr	#4029	FP-5 pen on PenRules; head 5a8dee2f; Mutate 4/4; Refs #4012
 2026-10-21T11:26:40Z	FP-a	issue	#4030	needs-suite: PenRules.mirror public (for #4012)
 2026-10-21T11:35:58Z	FP-e	check	39590966622	red again on Photo CommandPathTests (dev-red #3856), not this line; blocked poll 2/3
+2026-10-21T11:37:03Z	heartbeat	check	-	FP-e:waits on full CI 39592552743 (ded2ca57); #4027 #4029 open clean fast-lane
