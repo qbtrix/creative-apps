@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-20T23:54Z	3	fix	#3701	needs-rebase: merged dev, kept HA-m's recovery files (dev's equal HA-a's), CI PASS, head fe1a0d9
 2026-10-20T23:54Z	3	rebase	HA-u	rebased onto dev, gating
 2026-10-21T00:00Z	3	pr	#3810	HA-u opened, fast-lane, head cb45e2f, CI PASS
+2026-10-21T00:16Z	3	heartbeat	#3701 #3810	both queued for lane macOS gate; HA-6 waits on HG-m (#3417 open)
