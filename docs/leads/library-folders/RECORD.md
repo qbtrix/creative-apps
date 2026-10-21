@@ -72,3 +72,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T21:56Z: heartbeat: #4121 macOS build 39664988428 still queued; dev-red #3856 still open (Launcher baseline, not ours)
 
 - 2026-10-21T22:13Z: heartbeat: #4121 at 18efe8b, macOS build 39664988428 still queued; dev-red #3856 open (Launcher, not ours)
+
+- 22:39Z: heartbeat: FO-6 #4121 waits on its macOS build 39664988428; FO-7 after it merges.
