@@ -33,3 +33,4 @@ time	kind	step	ref	note
 2026-10-21T09:25Z	poll	check	HS-m	#3934 (head d6446bbb) waits on the lane macOS build, queued (run 39571182620; 20 runs queued); #3929 (HS-z) stacked on it
 2026-10-21T09:55Z	poll	check	HS-m	#3934 macOS build now running (run 39571182620)
 2026-10-21T10:20Z	poll	check	HS-m	#3934 macOS build green; the lane has it ready and waits for the next batch (batch-20261021095715 was bisecting)
+2026-10-21T10:36Z	merge	done	HS-m	#3934 merged 39d90e3f; HS-z merged dev in (08498c22, CI PASS), #3929 retargeted to dev

@@ -7,7 +7,7 @@
 - Started: 2026-10-20T18:45Z
 - Stage: 3 wave 2
 - Base: dev e382f9d7
-- Next: watch #3933 (HS-m part 1, to dev) land, then retarget #3934 (part 2) to dev, then #3929 (HS-z, feature-done); Belt-Slice-Done for HS-m and HS-z on green runs containing them, then Belt-Contact-Sheet
+- Next: Belt-Slice-Done for HS-m once a green ci.yml run on dev contains 39d90e3f; #3929 (HS-z) lands through the lane, then Belt-Slice-Done for HS-z and Belt-Contact-Sheet
 
 ## Slices
 
@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|
 | HS-a | HS-1, HS-2 | yes | gradient-fill HG-a (done), transform HT-a (file order, see Decisions) | done | #3676 merged 2026-10-21T03:14Z as 268098eab; Belt-Slice-Done on Linux run 39537764239 |
 | HS-u | HS-3, HS-4 | yes | HS-a | done (#3693 merged 71ffa4d1; Belt-Slice-Done on Linux run 39550229338; Mac-Finish-Wanted, scoped halo 39550225476 queued) | #3693 retargeted to dev (49f64139 after merging dev; C4 descriptions kept as on dev, the gate refuses description edits; 10 files +386/-9, CI PASS, mutate 3/3 HaloModel.HaloShapeDraft) |
-| HS-m | HS-5, HS-6 | no | HS-a; transform HT-m (file order, see Decisions) | in review | #3694 closed by needs-split (16 files); split into #3933 (HS-5 Model+tests, 8 files, to dev, 718324d9) and #3934 (HS-6 catalog+RJ-H35, 9 files, on #3933, 67a04531); both CI PASS, mutate 5/5 |
-| HS-z | HS-7, HS-8 | yes | HS-u, HS-m | in review | #3929 on #3934 (38363991, 2 files +76/-8, CI PASS), fast-lane + feature-done |
+| HS-m | HS-5, HS-6 | no | HS-a; transform HT-m (file order, see Decisions) | merged, waits on a green run | #3933 and #3934 merged (#3934 squash 39d90e3f); waits on a ci.yml run on dev containing it |
+| HS-z | HS-7, HS-8 | yes | HS-u, HS-m | in review | #3929 to dev (08498c22, dev merged in, 2 files +76/-8, CI PASS), fast-lane + feature-done |
 
 ## Reviews
 
