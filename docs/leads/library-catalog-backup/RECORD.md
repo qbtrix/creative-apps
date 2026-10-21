@@ -60,3 +60,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T21:26Z: heartbeat: #3967 in the lane at 780c26c (macOS build passed), waiting for a batch; dev Linux check 39676099814 (6dc7778) red on Launcher's CommandPathTests baseline, dev-red #3856, not ours
 
 - 2026-10-21T21:41Z: heartbeat: #3967 clean at 780c26c, macOS build passed, waiting on the lane; dev Linux still red on Launcher's CommandPathTests baseline (dev-red #3856, not ours); lane bisecting batch 20261021205717
+
+- 2026-10-21T21:56Z: heartbeat: #3967 still waiting on a lane batch at 780c26c; dev-red #3856 still open (Launcher baseline, not ours)
