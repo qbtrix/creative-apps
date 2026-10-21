@@ -32,8 +32,8 @@ import SuiteModel
         #expect(Self.rows.count == SampleCatalog.samples.count)
     }
 
-    @Test(.disabled("waits on #837")) func bounceFlare() throws { try Self.check("Bounce.flare") }
-    @Test(.disabled("waits on #836")) func cardsDesign() throws { try Self.check("Cards.design") }
+    @Test func bounceFlare() throws { try Self.check("Bounce.flare") }
+    @Test func cardsDesign() throws { try Self.check("Cards.design") }
     @Test(.disabled("waits on #838")) func beachOra() throws { try Self.check("beach.ora") }
     @Test(.disabled("waits on #838")) func sunsetPng() throws { try Self.check("Sunset.png") }
     @Test(.disabled("waits on #839")) func introHalo() throws { try Self.check("Intro.halo") }
