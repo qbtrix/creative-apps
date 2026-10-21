@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-21T19:11Z	build	heartbeat	FR-m	macOS build green; awaiting lane
 2026-10-21T19:38Z	build	pr-open	FR-u	#4172 opened after FR-m merge
 2026-10-21T20:01Z	build	heartbeat	FR-u	FR-m Belt-Slice-Done posted; #4172 body re-set clean
+2026-10-21T20:25Z	build	heartbeat	FR-u	FR-7 and FR-9 builders started
