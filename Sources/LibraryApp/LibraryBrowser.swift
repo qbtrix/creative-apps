@@ -2,8 +2,8 @@
 // row while an import runs (shown 100 ms after it starts), the notice slot
 // (the catalog file's problem, the last import's result with its failures
 // and close button, or a refused cull change with its close button:
-// `LibraryCatalog.notice`), then
-// the photo grid (LibraryGrid), the loupe (LibraryLoupe), or an empty state.
+// `LibraryCatalog.notice`), the collections file's notice (set aside, a
+// warning), then the photo grid (LibraryGrid), the loupe (LibraryLoupe), or an empty state.
 // Values in, closures out; LibraryCatalog holds the state. The progress row
 // is SuiteUI's BusyNote (`library.import.progress`, with the import's
 // fraction); the import notice is a plain SwiftUI placeholder until SuiteUI's
@@ -16,7 +16,9 @@ import SwiftUI
 /// Import Folder… (disabled until import lands, its message then saying why and
 /// pointing to File > Load Sample Photos; none for a newer catalog), beside Try
 /// Sample Photos, and that takes a dropped folder as an import; an empty collection in a non-empty catalog gets an empty
-/// state that says how to fill it, with a button back to All Photos. In loupe
+/// state that says how to fill it, with a button back to All Photos; a filter
+/// that hides every photo of the collection gets No Matching Photos with Clear
+/// Filter (`library.filter.empty.clear`). In loupe
 /// mode it shows the loupe's photo (LibraryLoupe) instead of the grid.
 struct LibraryBrowser: View {
     let model: LibraryCatalog
@@ -29,6 +31,8 @@ struct LibraryBrowser: View {
     var onShowAll: @MainActor () -> Void = {}
     var onStep: @MainActor (Int) -> Void = { _ in }
     var onGrid: @MainActor () -> Void = {}
+    /// The window's filter and collection actions; Clear Filter in No Matching Photos.
+    var filters = LibraryFiltersMenu()
     /// How long an import runs before its progress row shows (zero in snapshots).
     var importProgressDelay: Duration = .milliseconds(100)
     /// Whether the import notice opens with its failures listed (snapshots).
@@ -37,7 +41,16 @@ struct LibraryBrowser: View {
     /// Why Import Folder… can't act when neither the menu nor the services say.
     static let importFallbackHelp = "Import isn't connected yet."
 
+    #if DEBUG
+    /// How many times the content's body ran; RenderBudgetLibraryFoldersTests checks a folder's
+    /// disclosure leaves it, and the grid under it, alone.
+    @MainActor static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         VStack(spacing: 0) {
             if case .running(let progress) = model.importState {
                 BusyNote(
@@ -54,6 +67,9 @@ struct LibraryBrowser: View {
                         notice: notice, action: noticeAction(notice),
                         onClose: notice.source == .cull ? menu.cull.dismissCullError : nil)
                 }
+            }
+            if let message = model.collectionsNotice {
+                LibraryNoticeRow(notice: LibraryNoticeContent(message: message, isError: false, action: nil, source: .catalog))
             }
             // Fills the space under the notice, so the empty state stays centred.
             content.frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -81,6 +97,14 @@ struct LibraryBrowser: View {
         return ToolbarAction(
             "Import Folder…", systemImage: "folder.badge.plus", unavailableHelp: action == nil ? reason : nil,
             identifier: "library.import", perform: action ?? {})
+    }
+
+    /// Clear Filter in No Matching Photos, disabled with its reason while it can't act.
+    var clearFilterAction: ToolbarAction {
+        let reason = filters.clearFilterHelp ?? filters.filterHelp ?? LibraryFilter.unavailable ?? "No filter is on."
+        return ToolbarAction(
+            "Clear Filter", systemImage: "xmark.circle", unavailableHelp: filters.clearFilter == nil ? reason : nil,
+            identifier: "library.filter.empty.clear", perform: filters.clearFilter ?? {})
     }
 
     /// Why Try Sample Photos can't act when the catalog doesn't say.
@@ -120,6 +144,11 @@ struct LibraryBrowser: View {
         } else if model.isEmpty {
             // The launch read is running: blank until the catalog appears, no "No Photos" flash.
             Color.clear
+        } else if model.isHiddenByFilter {
+            EmptyStateView(
+                "No Matching Photos", systemImage: "line.3.horizontal.decrease.circle",
+                message: model.filterEmptyMessage, action: clearFilterAction)
+                .libraryControl(clearFilterAction)
         } else if model.isSelectedCollectionEmpty, let collection = model.selectedCollection {
             EmptyStateView(
                 "No Photos in \(collection.name)", systemImage: "photo.stack", message: collection.emptyMessage,
@@ -128,10 +157,12 @@ struct LibraryBrowser: View {
                 })
         } else if model.loupeItem != nil {
             LibraryLoupe(model: model, menu: menu, onStep: onStep, onGrid: onGrid)
+                .libraryShare(model)
         } else {
             // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
             LibraryGrid(model: model, menu: menu, thumbnails: thumbnails, onSelect: onSelect, onOpen: onOpen)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .libraryShare(model)
         }
     }
 }

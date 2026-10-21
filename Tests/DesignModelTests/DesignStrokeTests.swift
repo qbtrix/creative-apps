@@ -58,7 +58,42 @@ import Testing
         #expect(scrub.change == .stroke(DesignStroke(color: DesignColor(255, 0, 0), width: 1000)) && scrub.scrub)
         let blue = w.strokeChange(.color(FillColor(r: 0, g: 0, b: 1), drag: nil))
         #expect(blue?.change == .stroke(DesignStroke(color: DesignColor(0, 0, 255), width: 2)) && blue?.scrub == false)
+        let green = try #require(w.strokeChange(.color(FillColor(r: 0, g: 1, b: 0), drag: "c1")))
+        #expect(green.change == .stroke(DesignStroke(color: DesignColor(0, 255, 0), width: 2)))
+        #expect(green.scrub, "a colour scrub's sample is previewed, not one undo step each")
         #expect(w.strokeChange(.cap(.round)) == nil, "caps wait on DK-5's stroke type")
+    }
+
+    /// No dead controls (#3865): on a stroked layer every Join and Cap chip either changes the stroke or is disabled
+    /// with the Model's reason; the reason goes once the bridge runs them.
+    @Test func everyEnabledEditorRowActs() throws {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        #expect(w.strokeStyleHelp == nil, "no stroke: the editor shows Add Stroke alone")
+        try w.setStyle(.stroke(DesignStroke(color: DesignColor(255, 0, 0), width: 2)))
+        let intents = StrokeJoin.allCases.map(StrokeIntent.join) + StrokeCap.allCases.map(StrokeIntent.cap)
+        for intent in intents {
+            #expect(w.strokeChange(intent) != nil || w.strokeStyleHelp != nil, "\(intent) is enabled and does nothing")
+        }
+        #expect(w.strokeStyleHelp == DesignWorkspace.joinCapHelp)
+        #expect(w.strokeChange(.dash(.dashed, pattern: nil)) != nil || w.strokeDashHelp != nil)
+    }
+
+    @Test func designColorClampsOutOfRangeAndNaN() {
+        #expect(DesignColor(kernel: FillColor(r: 1.5, g: -0.2, b: .nan)) == DesignColor(255, 0, 0))
+        for part in [Double.nan, -0.1, 1.2, 0.5, 0, 1] {
+            let byte = UInt8(SampleRules.byte(part))
+            #expect(DesignColor(kernel: FillColor(r: part, g: part, b: part)) == DesignColor(byte, byte, byte), "\(part)")
+        }
+    }
+
+    @Test func kernelColorRoundTrips() {
+        for color in [DesignColor(255, 0, 0), DesignColor(12, 128, 250), .shape, .black, .white] {
+            #expect(DesignColor(kernel: color.kernelColor) == color)
+        }
+        #expect(DesignColor(0, 0, 255).kernelColor == FillColor(r: 0, g: 0, b: 1))
+        let node = DesignNode(id: "n", name: "N", kind: .rectangle, frame: DesignRect(x: 0, y: 0, width: 10, height: 10))
+        #expect(node.fill(in: node.frame.kernelRect) == .solid(node.fill.kernelColor))
     }
 
     @Test(.disabled("waits on DK-6")) func eachCommandIsOneStepForTheSelection() throws {

@@ -15,17 +15,20 @@ import SuiteKernel
 
 /// The drawing tools on Flare's tool palette.
 public enum FlareTool: String, CaseIterable, Sendable {
-    case select, directSelect, pen, rectangle, ellipse
+    case select, directSelect, pen, rectangle, ellipse, shape
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// stage sends it drags. `FlareWorkspace.toolHelp(_:)` falls back to it.
-    /// Nil for all five: FlareStage sends every tool's drag (DK-8), and each
+    /// Nil for all but Shape: FlareStage sends every tool's drag (DK-8), and each
     /// acts through `drag` here (FlareToolsTests).
     public var unavailableHelp: String? {
         switch self {
         case .select, .directSelect, .pen, .rectangle, .ellipse: nil
+        case .shape: Self.shapeHelp
         }
     }
+    /// The Shape tool's reason until its drag draws (shape-tools FS-6).
+    public static let shapeHelp = "Shape drawing arrives with the shape kernel."
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
@@ -39,8 +42,15 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         didSet { if oldValue != selectedLayerID { easingSelection = nil; easingDragSerial &+= 1 } }
     }
     public internal(set) var tool: FlareTool = .select
-    /// The stage selection (FlareSelection.swift).
-    public internal(set) var selection: [StageAddress] = []
+    /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
+    public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
+    /// The stage selection: SuiteKernel's ordered selection, which `selection` reads (FlareSelectionAdapter.swift);
+    /// a change drops the picked anchors.
+    var picks = Selection<StageAddress>() {
+        didSet { if oldValue.ordered != picks.ordered { anchorSelectionStore = Selection() } }
+    }
+    /// The picked anchors of the path in edit (FlareAnchors+Kernel.swift).
+    var anchorSelectionStore = Selection<AnchorRef>()
     /// The marquee under way, in scene points; nil when none is.
     public internal(set) var marquee: Rect?
     /// The shape the drag under way would add, for the live preview; nil
@@ -263,6 +273,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.draft == rhs.draft
             && lhs.layerError == rhs.layerError && lhs.selectedEasingSegment == rhs.selectedEasingSegment && lhs.canUndo == rhs.canUndo && lhs.canRedo == rhs.canRedo
             && lhs.services.isPreview == rhs.services.isPreview && lhs.selection == rhs.selection
+            && lhs.anchorSelectionStore == rhs.anchorSelectionStore
             && lhs.marquee == rhs.marquee && lhs.dragPreview == rhs.dragPreview && lhs.gesture == rhs.gesture && lhs.currentFrame == rhs.currentFrame
         let animating = lhs.isPlaying == rhs.isPlaying && lhs.loops == rhs.loops && lhs.playClock == rhs.playClock
             && lhs.autoKey == rhs.autoKey && lhs.onion == rhs.onion && lhs.showsMotionPath == rhs.showsMotionPath

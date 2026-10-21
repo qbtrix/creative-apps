@@ -18,6 +18,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteKernel
 
 /// The save status the window shows (its subtitle and status slot).
 public enum PhotoSaveStatus: Hashable, Sendable, CaseIterable {
@@ -100,9 +101,11 @@ extension PhotoWorkspace {
     /// The open image as a document keeps it: every layer (top first), each
     /// pixel layer's and mask's pixels as 8-bit straight-alpha sRGB, the
     /// whole-image adjustments and the selected layer. Throws
-    /// `RasterError.invalid` with no image open.
+    /// `RasterError.invalid` with no image open, and `textNotBuilt` for a
+    /// text layer until TX-6 writes it into the file.
     public func snapshot() throws -> PhotoDocumentSnapshot {
         guard let canvas else { throw RasterError.invalid("no image is open") }
+        if layers.contains(where: { if case .text = $0.kind { true } else { false } }) { throw Self.textNotBuilt }
         func image(_ tiles: TiledPixels) throws -> DecodedImage {
             DecodedImage(rgba8: try tiles.rgba8(), width: tiles.width, height: tiles.height)
         }

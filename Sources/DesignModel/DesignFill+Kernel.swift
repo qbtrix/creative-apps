@@ -44,7 +44,6 @@ extension DesignNode {
     /// Stub: the gradient as stored; DG-4 maps it with `GradientRules.mapped`.
     public func fill(in frame: Rect) -> Fill {
         if let gradient { return gradient }
-        let scale = 1.0 / 255
-        return .solid(FillColor(r: Double(fill.red) * scale, g: Double(fill.green) * scale, b: Double(fill.blue) * scale))
+        return .solid(fill.kernelColor)
     }
 }

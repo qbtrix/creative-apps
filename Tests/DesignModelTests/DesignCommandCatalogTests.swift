@@ -68,6 +68,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "page.add", "page.select", "edit.select", "edit.select-all": .some(w.addPageHelp)
         case "page.delete": .some(w.deletePageHelp)
         case "page.rename": .some(noPage)
+        case "history.read": .some(nil)
+        case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
         default: nil
         }
     }
@@ -121,7 +123,9 @@ struct DesignCatalogDoc: HeadlessDocument {
                 let named = id == "edit.delete" && w.selectedNodeIDs.count == 1 && problem.contains("stepNamedTitle")
                 // A nudge right after a nudge joins its step, as the arrow keys do.
                 let joined = id == "object.nudge" && state == "edited"
-                return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined
+                // A jump moves the document to an earlier step, as undo does, so its bytes change.
+                let jumped = id == "history.jump" && problem.contains("queryOrViewChangesNoBytes")
+                return !(off && problem.contains("exampleRuns")) && !noChange && !named && !joined && !jumped
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             ran.formUnion(DesignCatalogDoc.catalog.ids.filter { DesignCatalogDoc.catalog.availability($0, on: doc).why == nil })
@@ -179,6 +183,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "page.delete | Delete Page | A file keeps at least one page.", "page.select | Select Page | on",
         "tool.move | Move | on", "tool.frame | Frame | on", "tool.rectangle | Rectangle | on",
         "tool.ellipse | Ellipse | on", "tool.text | Text | on", "tool.pen | Pen | Drawing paths isn't built yet.",
-        "tool.eyedropper | Eyedropper | Picking a color from the canvas isn't built yet.",
+        "tool.eyedropper | Eyedropper | Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet.",
+        "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
     ]
 }

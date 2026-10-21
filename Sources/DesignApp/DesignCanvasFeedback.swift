@@ -22,6 +22,7 @@
 // `snapGuides`. It reads the model and never writes it.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -30,6 +31,8 @@ struct DesignCanvasFeedback: View {
     let zoom: Double
     /// The store the canvas this feedback belongs to reads and writes.
     let store = DesignCanvasHover.current
+    /// Where the Eyedropper's picks go (DesignSampleLoupe).
+    var perform: DesignPerform = { _ in }
 
     /// The pointer over the canvas: the one the last hover answer names, or the tool's own.
     var pointer: PointerStyle {
@@ -61,6 +64,8 @@ struct DesignCanvasFeedback: View {
             }
         }
         DesignGuideOverlay(guides: DesignGuidePin.guides ?? model.snapGuides, zoom: zoom)
+        // The Eyedropper's loupe and clicks; only its own body reads the loupe as it follows the pointer.
+        DesignSampleLoupe(model: model, zoom: zoom, perform: perform)
     }
 }
 
@@ -82,6 +87,8 @@ struct DesignCanvasFeedback: View {
     private(set) var key: Key?
     @ObservationIgnored private(set) var point: DesignPoint?
     @ObservationIgnored private(set) var modifiers: DesignModifiers = []
+    /// The Eyedropper's loupe at the pointer (DesignSampleLoupe reads it); nil for any other tool.
+    private(set) var loupe: DesignLoupe?
     #if DEBUG
     /// How many times a canvas showing this store's page read its pointer: once per canvas body.
     @ObservationIgnored var canvasReads = 0
@@ -101,6 +108,15 @@ struct DesignCanvasFeedback: View {
         if key != place { key = place }
         if placement != asked.placement { placement = asked.placement }
         if answer != asked.steady { answer = asked.steady }
+        let shown = model.loupe(at: point, modifiers: modifiers)
+        if loupe != shown { loupe = shown }
+    }
+
+    /// The loupe for `model`'s page, asked again of `model` at the kept pointer so a change to the inspector's
+    /// sample size or Fill/Stroke choice shows at once; nil for another canvas.
+    func loupe(for model: DesignWorkspace) -> DesignLoupe? {
+        guard belongs(to: model), let seen = loupe else { return nil }
+        return model.loupe(at: seen.point, modifiers: modifiers)
     }
 
     func belongs(to model: DesignWorkspace) -> Bool { key == Key(model) }

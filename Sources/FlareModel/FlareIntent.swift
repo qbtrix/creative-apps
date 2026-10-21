@@ -2,8 +2,10 @@
 // value: a top-level area and a nested case with plain-value payloads. Each case has a stable `identifier`,
 // "flare.<area>.<case name>", that no payload changes, so a menu item, toolbar action or UI test can name it.
 // The cases are the packet's contract slice in full (docs/blueprints/flare/features/draw-key-save.md);
-// DK-2b adds the titles in FlareIntent+Titles.swift. Linux-safe.
+// DK-2b adds the titles in FlareIntent+Titles.swift. `.inspector(.runFill(_))` carries a gradient editor's gesture
+// (gradient-fill FG-2). Linux-safe.
 import FlareCore
+import SuiteKernel
 
 /// One thing a person can ask Flare's window to do.
 public enum FlareIntent: Sendable, Equatable {
@@ -48,14 +50,14 @@ public enum FlareIntent: Sendable, Equatable {
              setStrokeWidth(Double), scrubStrokeWidth(Double), setStrokeCap(String), setStrokeJoin(String),
              setSceneSize(width: Double, height: Double), setSceneBackground(hex: String),
              setSceneTiming(fps: Int, durationFrames: Int), easingPreset(String),
-             easingHandle(index: Int, x: Double, y: Double), endEasingHandle
+             easingHandle(index: Int, x: Double, y: Double), endEasingHandle, runFill(GradientIntent)
     }
 
     public enum Timeline: Sendable, Equatable {
         case scrub(frame: Int), goToStart, goToEnd, step(Int), nextKeyframe, previousKeyframe, togglePlay,
              setLoops(Bool), toggleAutoKey, selectKey(layerID: String, property: String?, frame: Int, extending: Bool),
              moveKeys(by: Int, dragStart: Int), endKeyDrag, removeKeys, addKey, removeKey,
-             insertFrames(Int), removeFrames(Int), setLabel(String?)
+             insertFrames(Int), removeFrames(Int), setLabel(String?), selectAllKeys
     }
 
     public enum Layers: Sendable, Equatable {
@@ -147,13 +149,13 @@ public enum FlareIntent: Sendable, Equatable {
         .inspector(.setStrokeJoin("")), .inspector(.setSceneSize(width: 1, height: 1)),
         .inspector(.setSceneBackground(hex: "")), .inspector(.setSceneTiming(fps: 24, durationFrames: 48)),
         .inspector(.easingPreset("")), .inspector(.easingHandle(index: 0, x: 0, y: 0)),
-        .inspector(.endEasingHandle),
+        .inspector(.endEasingHandle), .inspector(.runFill(.type(.solid))),
         .timeline(.scrub(frame: 0)), .timeline(.goToStart), .timeline(.goToEnd), .timeline(.step(1)),
         .timeline(.nextKeyframe), .timeline(.previousKeyframe), .timeline(.togglePlay), .timeline(.setLoops(true)),
         .timeline(.toggleAutoKey), .timeline(.selectKey(layerID: "", property: nil, frame: 0, extending: false)),
         .timeline(.moveKeys(by: 0, dragStart: 0)), .timeline(.endKeyDrag), .timeline(.removeKeys),
         .timeline(.addKey), .timeline(.removeKey), .timeline(.insertFrames(1)), .timeline(.removeFrames(1)),
-        .timeline(.setLabel(nil)),
+        .timeline(.setLabel(nil)), .timeline(.selectAllKeys),
         .layers(.select(id: "")), .layers(.toggle(id: "", flag: "")), .layers(.move(section: "", from: 0, to: 0)),
         .layers(.rename(id: "", name: "")), .layers(.addLayer), .layers(.addScene), .layers(.remove(id: "")),
         .layers(.duplicate(id: "")),
@@ -261,6 +263,7 @@ extension FlareIntent.Inspector {
         case .easingPreset: "easingPreset"
         case .easingHandle: "easingHandle"
         case .endEasingHandle: "endEasingHandle"
+        case .runFill: "runFill"
         }
     }
 }
@@ -286,6 +289,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "insertFrames"
         case .removeFrames: "removeFrames"
         case .setLabel: "setLabel"
+        case .selectAllKeys: "selectAllKeys"
         }
     }
 }
