@@ -233,3 +233,57 @@ final class HaloHistoryJourneyTests: XCTestCase {
         return condition()
     }
 }
+
+/// J-HA (autosave-history, HA-2 written, HA-7 turned on): the History panel
+/// from the transport's History button jumps back through key edits, and a
+/// force-quit's recovery copy comes back. Shots `halo-history-panel*`.
+extension HaloHistoryJourneyTests {
+    @MainActor func testJumpAndRecover() throws {
+        throw XCTSkip("waits on HA-7")
+    }
+
+    /// The journey's steps, run by `testJumpAndRecover` once HA-7 puts the
+    /// jump and the recovery on live services.
+    @MainActor private func jumpAndRecover() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: "halo-jump-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
+        let title = folder.appending(path: "title.halo").path
+
+        // 1. Open title.halo, make 10 key edits, click History: "Open" and 10 steps.
+        var halo = Journey("Halo", self, arguments: ["-HaloSample", "keyed", "-HaloSaveTo", title, "-HaloWindowSize", "1000x640"])
+        halo.press(character: "s", .command)
+        halo.app.terminate()
+        halo = Journey("Halo", self, arguments: ["-HaloOpenFile", title, "-HaloWindowSize", "1000x640"])
+        XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let x = halo.element("halo.inspector.row.x")
+        for frame in 0..<10 {
+            x.doubleClick()
+            halo.press(character: "a", .command)
+            x.typeText("\(100 + frame * 10)\r")
+            halo.element("halo.viewer.canvas").click()
+            halo.press(.rightArrow)
+        }
+        halo.element("halo.history.show").click()
+        XCTAssert(halo.element("suite.history").waitForExistence(timeout: 5), "the History button showed no panel")
+        XCTAssert(halo.element("suite.history.row.0").label.hasPrefix("Open"), "the panel's first row isn't Open")
+        XCTAssert(halo.element("suite.history.row.10").exists, "the panel lists fewer than 10 steps")
+        halo.shot("history-panel")
+
+        // 2. Click step 4: the project after four edits, nothing recorded.
+        halo.element("suite.history.row.4").click()
+        XCTAssert(waitFor { halo.element("suite.history.row.4").isSelected }, "step 4 isn't current after the jump")
+        expectUndo("Undo Change Position X", halo)
+        halo.shot("history-panel-jumped")
+
+        // 3. Force-quit unsaved, relaunch: the offer names title.halo; Restore shows 4 steps, edited.
+        halo.app.terminate()
+        halo = Journey("Halo", self, arguments: ["-HaloWindowSize", "1000x640"])
+        let offer = halo.app.sheets.firstMatch
+        XCTAssert(offer.waitForExistence(timeout: 30), "no recovery offer after the force-quit")
+        XCTAssert(text("title", in: offer).exists, "the recovery offer doesn't name title.halo")
+        halo.shot("recovery-offer")
+        offer.buttons["Restore"].click()
+        XCTAssert(subtitle("Edited", halo).waitForExistence(timeout: 5), "the restored project isn't marked edited")
+    }
+}
