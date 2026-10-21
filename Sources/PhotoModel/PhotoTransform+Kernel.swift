@@ -65,6 +65,19 @@ extension PhotoWorkspace: TransformTarget {
         touch(.all)
     }
 
+    /// Whether `edit`, run as its catalog command, changes only the draft's box
+    /// and turn, never pixels or layers: a set, turn or scale while a draft is
+    /// up (`transform.set` carries no flips). The window runs these on a live
+    /// copy and takes it back once, so a handle drag or a Rotation scrub never
+    /// re-runs the editor per step (#4247). A flip or Reset is not.
+    public func editsDraftOnly(_ edit: TransformIntent) -> Bool {
+        guard transformDraft != nil else { return false }
+        switch edit {
+        case .set, .rotate, .scale: return true
+        case .flip, .reset: return false
+        }
+    }
+
     /// Mirrors the selected layer's pixels across their own centre lines, the
     /// layer staying where it is: one step named `name`.
     private mutating func flipLayer(x: Bool, y: Bool, name: String) throws {
