@@ -4,23 +4,45 @@
 // export slot (LiveExport: the plan and the SVG text; `.fake` uses the same type,
 // since planning is pure), and the workspace readouts the sheet and the run read:
 // the ids a scope names, the plan, its help, the SVG of one item, and the
-// remembered options. Those options are not document state: remembering them
-// is never a history step and undo never touches them. Linux-safe.
+// remembered options. The options hold a SuiteExportSize and list JPEG, which the plan
+// refuses until export-pack DX-3. Those options are not document state: remembering
+// them is never a history step and undo never touches them. Linux-safe.
 import SuiteKernel
 import SuiteModel
 
 /// What one export writes: the selected layers, the frame around them, or the page.
 public enum DesignExportScope: String, CaseIterable, Hashable, Sendable { case selection, frame, page }
 
-/// The run's payload: format, scale (1, 2, 3; PNG only) and scope.
+/// The run's payload: format, size (the suite's SuiteExportSize, `.scale(1)` by default) and scope.
+/// Until export-pack DX-3 the plan reads only a scale (1, 2, 3; PNG only): Pixels and Long edge plan at 1x.
 public struct DesignExportOptions: Hashable, Sendable {
     public var format: DesignExportFormat = .png
-    public var scale: Int = 1
+    public var size: SuiteExportSize = .scale(1)
     public var scope: DesignExportScope = .frame
 
-    public init(format: DesignExportFormat = .png, scale: Int = 1, scope: DesignExportScope = .frame) {
-        (self.format, self.scale, self.scope) = (format, scale, scope)
+    public init(format: DesignExportFormat = .png, size: SuiteExportSize, scope: DesignExportScope = .frame) {
+        (self.format, self.size, self.scope) = (format, size, scope)
     }
+
+    /// The old whole-scale init: `size` is `.scale(Double(scale))`.
+    public init(format: DesignExportFormat = .png, scale: Int = 1, scope: DesignExportScope = .frame) {
+        self.init(format: format, size: .scale(Double(scale)), scope: scope)
+    }
+
+    /// The size as a whole scale: a `.scale` rounded (non-finite reads 1), 1 for Pixels and Long
+    /// edge. Setting it makes the size `.scale`.
+    public var scale: Int {
+        get {
+            guard case .scale(let value) = size, value.isFinite else { return 1 }
+            return Int(Swift.max(Swift.min(value, 1e6), -1e6).rounded())
+        }
+        set { size = .scale(Double(newValue)) }
+    }
+}
+
+/// Why JPEG can't export yet; nil for every other format.
+func exportJPEGRefusal(_ format: DesignExportFormat) -> DesignRefusal? {
+    format == .jpeg ? .notYet("JPEG lands with DX-3.") : nil
 }
 
 /// Design's export run is the kernel's; the sheet reads it, DesignExport+Kernel (App) drives it.
@@ -42,6 +64,7 @@ public struct LiveExport: ExportPlanning {
     /// ids, `.nothingSelected` for named ids that are all hidden or unknown.
     public func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
                      existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
+        if let refusal = exportJPEGRefusal(format) { throw refusal }
         let found = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : fakeFind(ids, page)
         let nodes = found.filter { !page.isHiddenInTree($0.id) }
         guard !nodes.isEmpty else { throw ids.isEmpty ? .nothingToExport : .nothingSelected }
@@ -96,10 +119,12 @@ extension DesignWorkspace {
         do { _ = try exportPlan(options, existing: []); return nil } catch { return error.help }
     }
 
-    /// The files one run writes, names unique against `existing` (the folder's listing). The page
-    /// is one item the page's size; the other scopes go through the export slot's plan.
+    /// The files one run writes, names unique against `existing` (the folder's listing). JPEG is
+    /// refused until DX-3. The page is one item the page's size; the other scopes go through the
+    /// export slot's plan.
     public func exportPlan(_ options: DesignExportOptions, existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
         guard let page = selectedPage else { throw .nothingToExport }
+        if let refusal = exportJPEGRefusal(options.format) { throw refusal }
         if options.scope == .page {
             let name = UniqueFileNames.name(page.name, extension: options.format.rawValue, among: existing)
             return [exportItem(page.id, name, page.frameWidth, page.frameHeight, options.format, options.scale)]

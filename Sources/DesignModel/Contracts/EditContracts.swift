@@ -62,6 +62,8 @@ public enum DesignRefusal: Error, Equatable, Sendable {
     case unchanged
     /// The use case has no live conformance yet (DesignServices.live before its feature lands).
     case notBuilt(String)
+    /// A choice a later task builds; `help` is the reason itself ("JPEG lands with DX-3.").
+    case notYet(String)
 
     public var help: String {
         switch self {
@@ -84,6 +86,7 @@ public enum DesignRefusal: Error, Equatable, Sendable {
         case .unreadable: "The pasteboard holds no Design layers."
         case .unchanged: "Nothing would change."
         case .notBuilt(let feature): "\(feature) isn't built yet."
+        case .notYet(let reason): reason
         }
     }
 }

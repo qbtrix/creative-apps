@@ -116,7 +116,8 @@ public struct DesignVariable: Sendable, Hashable, Codable, Identifiable {
     public func value(in mode: DesignMode) -> DesignVariableValue { mode == .light ? light : dark }
 }
 
-public enum DesignExportFormat: String, CaseIterable, Sendable { case png, svg, pdf }
+/// What an export writes. JPEG is listed and refused (`exportJPEGRefusal`) until export-pack DX-3 builds it.
+public enum DesignExportFormat: String, CaseIterable, Sendable { case png, jpeg, svg, pdf }
 
 /// One file an export writes.
 public struct DesignExportItem: Sendable, Equatable {

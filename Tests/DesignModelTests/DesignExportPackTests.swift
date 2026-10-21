@@ -40,6 +40,7 @@ import Testing
             try LiveExport().plan([], on: page, format: .jpeg, scale: 1, existing: [])
         }
         #expect(cards.exportHelp(DesignExportOptions(format: .png)) == nil)
+        #expect(DesignExportOptions(format: .jpeg).scaleHelp == nil)
     }
 }
 

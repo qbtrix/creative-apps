@@ -39,9 +39,9 @@ extension DesignExportOptions {
         return options
     }
 
-    /// Why the Scale chips are off: SVG and PDF are vectors, written at 1x whatever the scale.
+    /// Why the Scale chips are off: SVG and PDF are vectors, written at 1x whatever the scale (PNG and JPEG take one).
     public var scaleHelp: String? {
-        format == .png ? nil : "SVG and PDF are vectors, so they don't take a scale."
+        [.png, .jpeg].contains(format) ? nil : "SVG and PDF are vectors, so they don't take a scale."
     }
 }
 
