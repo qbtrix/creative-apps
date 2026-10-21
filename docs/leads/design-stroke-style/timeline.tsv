@@ -38,3 +38,4 @@ time	kind	note
 2026-10-21T09:00Z	merge	DK-a fixes	#3882 #3883 #3886	merged 08:48Z; #3884 mac build red, fixed 65cd7d9c, Head moved
 2026-10-21T09:25Z	check	lane	#3884	macOS build 39574365736 queued at 65cd7d9c; round 2 (#3865 #3871 #3873) waits on it
 2026-10-21T09:47Z	check	lane	#3884	macOS build 39574365736 green; waits on a lane batch
+2026-10-21T10:06Z	fix	DK-a round 2 started	wf_c31c3a4f-5b2	#3884 merged (7b1207a8); findings #3865 #3871 #3873
