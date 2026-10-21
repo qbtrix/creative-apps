@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T20:21Z	2026-10-21T20:21Z	heartbeat	resume	-	run act-1a1601c3538-r0c9 resumed; CS-1 #4021 and CS-2 #4023 merged
 2026-10-21T20:21Z	2026-10-21T20:21Z	wave2	stage-start	#4130 #4134 #4140 #4144	bringing up drafts on dev 0599560
 2026-10-21T20:57Z	2026-10-21T20:57Z	heartbeat	lane	#4130 #4134 #4140 #4144	four CS PRs in lane; builders running
+2026-10-21T21:18Z	2026-10-21T21:18Z	heartbeat	lane	-	macOS build queue deep; dev Linux red only on CommandPathTests launcher, fix #4201 in lane
