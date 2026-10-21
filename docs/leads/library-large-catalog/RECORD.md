@@ -2,7 +2,7 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 · Started: 2026-10-21T10:19Z
-Stage: 3 wave 1 done (LG-a done on 39601343733; #4073 hardening open); LG-model waits on FC-a, MD-e, DR-m
+Stage: 3 wave 1 done (LG-a done; #4073 at 3b18f2a7 waits on the supervisor's hand merge); LG-model waits on FC-a, MD-e, DR-m
 Base: e2b8aa76 (origin/dev)
 Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on LG-model, FC-c, suiteui shared-thumbnails ST-m
 
