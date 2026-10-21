@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-21T10:52Z	3	stage-start	wave1	IM-1 builder launched
 2026-10-21T19:24Z	3	heartbeat	wave1	#4028 IM-1 supervisor-approved, Mac gate queued
 2026-10-21T20:09Z	status-channel	RECORD also pushed to lead/suiteui-suite-imaging (the branch Belt reads) from now on
+2026-10-21T20:10Z	stage	IM-2 restacked on IM-1 5b40c257

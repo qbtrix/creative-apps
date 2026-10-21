@@ -4,7 +4,7 @@ Issue: #3715 · Packet: docs/blueprints/suiteui/features/suite-imaging.md
 Run: act-1a15fe5ef7c-rszn (resumes act-1a15e10a9c3-kwzx) · Started: 2026-10-21T10:20Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: IM-1 (#4028) is supervisor-approved and queued on the Mac gate; open IM-2's PR once IM-1 merges
+Next: IM-1 #4028 queued on the supervisor's Mac gate (approved 18:06Z). IM-2 restacked on IM-1 5b40c257 (775148e, 6 files, 360 lines); gate it, push, and open its PR once #4028 merges.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -49,3 +49,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 ## Open
 - IM-photo waits adopt-kernel-eyedropper-photo EP-z (blocked) and photo #3144; IM-library waits library spine feature-done; IM-13 waits shared-thumbnails ST-a.
 - 2026-10-21T19:24Z: #4028 approved by the supervisor, queued on the Mac gate (18:06Z); body moved to this run id.
+- 2026-10-21T20:10Z: IM-2 rebased onto IM-1 head 5b40c257, clean.
