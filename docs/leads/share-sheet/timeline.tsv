@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-20T23:50Z	3	wave-start	SH-a	base dev 2cc149f5
 2026-10-21T00:05Z	3	pr	SH-a	#3809 head fcca55bf, scripts/ci --changed pass
 2026-10-21T00:05Z	3	wave-start	SH-u	stacked on share-sheet/sh-a
+2026-10-21T00:05Z	3	pr	SH-u	#3814 head 7637bf75, base share-sheet/sh-a, scripts/ci --changed pass
