@@ -1,19 +1,19 @@
 # adopt-suiteui-chrome lead record
 
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
-Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: fix-round
-Base: dev 835677ca
-Next: #4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges + green run; AC-tools waits on #4002
+Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet; earlier run act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
+Stage: 0 setup (blocked on shared-codecs:SC-f)
+Base: dev ab86592b (main 0dd23d65 verified)
+Next: re-read shared-codecs:SC-f (SC-13 #4019 open+clean; SC-14 stacked; SC-15, SC-16 planned); start AC-e1 once SC-16 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AC-zoom | every app clamps through ZoomMath, fits through one fit, maps through CanvasLayout | AC-z1, AC-z2 | MJ-AC-zoom | editor-kernel:EK-a, adopt-kernel-brush:AB-photo | yes | 0 | done | – | – |
-| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 0 | fix-r1 | – | – |
-| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | lane | – | – |
+| AC-colour | parse, format and pick colour through HexColor and ColorWell | AC-c1, AC-c2 | MJ-AC-colour | editor-kernel:EK-a, adopt-kernel-brush:AB-photo, AC-zoom | yes | 1 | done (per Belt brief act-1a15ef870d6-3mm5) | 39604117821 | wanted |
+| AC-tools | tool letters and modifiers through ToolKeys | AC-t1, AC-t2 | MJ-AC-tools | editor-kernel:EK-chrome, AC-colour | yes | 0 | done (per Belt brief act-1a15ef870d6-3mm5) | – | – |
 | AC-guides | Flare's guides draw through CanvasMarks (GuideLineMark) | AC-g1, AC-g2 | MJ-AC-guides | editor-kernel:EK-a | yes | 0 | done | – | – |
-| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare | yes | 0 | blocked-SC-f | – | – |
+| AC-export-sheet | Photo, Library and Flare export sheets are SuiteUI's ExportSheet | AC-e1, AC-e2 | MJ-AC-export-sheet | editor-kernel:EK-chrome, adopt-kernel-export:AX-photo, AX-library, AX-flare (met), shared-codecs:SC-f (open) | yes | 0 | blocked-SC-f | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -34,6 +34,7 @@ Next: #4089 (AC-colour round 1, Fixes #4086) in lane; re-review after it merges 
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T15:32Z: run act-1a15ef870d6-3mm5 does AC-export-sheet only (brief: AC-zoom, AC-colour, AC-tools, AC-guides done). Waits re-read: EK-chrome met (Sources/SuiteUI/ExportSheet.swift on dev); AX-photo, AX-library, AX-flare done. shared-codecs:SC-f not met: SC-13 #4019 open, SC-14 stacked, SC-15 (PhotoWindow+Export.swift) and SC-16 (Library ExportFormat) planned. Real wait on the files AC-e1 adapts; nothing else in the brief can start. Blocked note on #1942 (issuecomment-6319193997). Slice PRs go to dev (CLAUDE.md; the lane retargets main).
 - 2026-10-21T13:39Z: AC-colour fix round 1 PR #4089 head c6707931 (tests + 4 mutation plans, App targets unscored on Linux)
 - 2026-10-21T13:31Z: AC-colour review (code-only, lenses design/first-use/mouse/taste/job/correctness) on 45c81070: 1 finding #4086 (bridges untested); fixer launched, round 1
 - 2026-10-21T13:30Z: AC-colour Belt-Slice-Done + Mac-Finish-Wanted on Linux check 39604117821 (5bec8089); critic panel started
