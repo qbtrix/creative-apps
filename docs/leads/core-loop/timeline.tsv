@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-21T08:08Z	merge	done	CL-run	#3817 (CL-7) merged 9265b982; CL-run done once a green ci.yml run contains it
 2026-10-21T09:10Z	done	done	CL-run	Belt-Slice-Done: CL-run https://github.com/qbtrix/creative-apps/actions/runs/39569221486 (Linux check at 733e8ef2 contains 9265b982, Linux green)
 2026-10-21T08:51Z	check	blocked	CL-probe	blocked note and supervisor question posted on #1971 (#3401, #865 open)
+2026-10-21T09:25Z	poll	check	-	still blocked: #3401 and #865 open, no PR
