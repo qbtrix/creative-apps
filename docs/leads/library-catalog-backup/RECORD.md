@@ -4,7 +4,7 @@ Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a15f2277a5-6xyv · Session: relaunch of cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z (resumed 2026-10-21T15:49Z)
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: (2026-10-21T15:49Z) Run act-1a15f2277a5-6xyv resumed. BK-a Belt-Slice-Done posted on run 39623471557. BK-u #3967 Linux red was dev's Photo command-path baseline (fixed by #4008): dev merged in, gate re-running, then push + Head move. BK-5m still waits on LF-m (LF-4 / #3928), FO-m (FO-5 #4022) and AK-library.
+Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 queued (runner backlog). On merge + green dev Linux: Belt-Slice-Done + Mac-Finish-Wanted for BK-u. BK-5m still waits on LF-m (LF-4 / #3928), FO-m (#4022) and AK-library.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -41,3 +41,4 @@ Next: (2026-10-21T15:49Z) Run act-1a15f2277a5-6xyv resumed. BK-a Belt-Slice-Done
 - 12:44Z: no change; all four PRs clean + fast-lane, waiting on the lane's macOS batch gate; scoped library run 39593465885 still queued (macOS runners backlogged since 11:08Z); dev Linux checks red (dev-red, not ours).
 - 13:17 poll: PRs open/clean (BK-u #3967, LF-3 #4024, FO-u #3963, FO-5 #4022) awaiting lane macOS batch; macOS runners still backlogged; scoped library run 39593465885 queued; #3928 open (LF-4 blocked).
 - 2026-10-21T15:49Z (run act-1a15f2277a5-6xyv): relaunched. Rule 23 re-read: #3928 open (LF-4 blocked); dev-red #3856 still open but dev Linux check 39623471557 at 9951eea is green and contains every merged slice PR. All three open PRs (#4024, #4022, #3967) went red on Linux on dev's Photo command-path baseline, fixed by #4008; dev merged into each, gates re-running. Swift was missing in the relaunched container; scripts/cloud-setup.sh installed 6.3.3. No open finding is on this feature's files.
+- 2026-10-21T17:09Z: rule 23 re-read. #3967 open at cf07beb; lane macOS build 39632012767 queued. BK-5m blocked (LF-m, FO-m, AK). Open findings with Feature: catalog-backup: 0.
