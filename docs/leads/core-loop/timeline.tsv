@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-21T11:52Z	poll	blocked	CL-probe	still blocked: #3401 and #865 open
 2026-10-21T12:52Z	poll	waiting	CL-probe	still blocked: #3401 and #865 open
 2026-10-21T18:05Z	3	stage-start	CL-probe	run kvrn: #3401 closed, KE-a done; wave 4 = CL-probe + (#865 + CL-12)
+2026-10-21T17:51Z	3	wave-start	CL-probe+CL-measure(#865,CL-12)	run kvrn: builders launched for lead/core-loop-probe and lead/core-loop-live
