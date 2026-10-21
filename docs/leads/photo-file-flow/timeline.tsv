@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-21T18:48:43Z	stage	PF-m	done on run 39566690076; Belt-Slice-Done posted	-
 2026-10-21T18:48:43Z	stage	waveA	new run act-1a15fc7d29e-gz1t; PF-2 + PF-u builders	-
 2026-10-21T20:05Z	wave A	#4164 PF-2 macOS build green, #4165 PF-u in lane
+2026-10-21T20:26Z	heartbeat	#4164 merged f2953daf; no scoped photo run contains it yet; #4165 needs-rebase, fixer started
