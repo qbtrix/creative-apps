@@ -43,3 +43,4 @@ ts	kind	note
 2026-10-21T16:01:00Z	poll	#4037 macOS build 39625557606 queued (macOS runners busy)
 2026-10-21T16:23:20Z	poll	#4037 macOS build 39625557606 running
 2026-10-21T16:44:59Z	poll	#4037 macOS build green at 4ecc2fd7; awaiting lane batch
+2026-10-21T17:02:50Z	poll	#4037 in lane batch-20261021165002 (Linux 39638325928 running)
