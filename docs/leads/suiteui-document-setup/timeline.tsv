@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-21T20:38Z	3	footer	#4182 #4184	server footer removed from both bodies
 2026-10-21T20:38Z	3	lane-mac	#4182	macOS build https://github.com/qbtrix/creative-apps/actions/runs/39671351382
 2026-10-21T20:38Z	3	poll	-	no findings; FR-u held on frame-rates; AR-u merged (#4124)
+2026-10-21T20:54Z	3	poll	#4182	macOS build 39671351382 queued; #4184 waits; no findings
