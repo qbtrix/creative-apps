@@ -2,7 +2,7 @@
 
 Issue: #3472 · Packet: docs/blueprints/halo/features/export-pack.md
 Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
-Stage: 3 polling (blocked; checked 2026-10-21T02:03Z: HS-a #3676 open, placed-images PH-a not started)
+Stage: 3 polling (blocked; 2026-10-21T03:29Z: HS-a merged, placed-images not started)
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: check whether gradient-fill:HG-a and placed-images:PH-a have merged; if so start HX-1 (codec and alpha settings, ProRes refused, HaloProResTests disabled)
 
