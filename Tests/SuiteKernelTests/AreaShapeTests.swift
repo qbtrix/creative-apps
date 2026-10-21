@@ -1,5 +1,5 @@
 // AreaShapeTests.swift (area-selection AR-2 written, AR-3 turns on): the area recipe's rules, written from the packet
-// before their bodies. The specs, the modifier mapping and the JSON round trip are AR-1's and run now.
+// before their bodies. The specs, the modifier mapping and the JSON round trip are AR-1's.
 import Testing
 import SuiteKernel
 
@@ -52,7 +52,8 @@ func expectSelectionSpecs<T>(_ specs: [CommandSpec<T>], _ ids: [String], _ kind:
         #expect(try JSONValue(encoding: GroupScope(path: ["card", "face"])).decode(GroupScope.self) == GroupScope(path: ["card", "face"]))
     }
 
-    @Test(.disabled("waits on AR-3")) func lassoAndPolygonClose() {
+    /// A lasso and a polygon of three points close back to their first point, once.
+    @Test func lassoAndPolygonClose() {
         let three = [Point(x: 0, y: 0), Point(x: 40, y: 0), Point(x: 20, y: 30)]
         var recipe = AreaRecipe.empty
         recipe.apply(.shape(.lasso(three), .replace))
@@ -61,7 +62,8 @@ func expectSelectionSpecs<T>(_ specs: [CommandSpec<T>], _ ids: [String], _ kind:
         #expect(recipe.normalized().normalized() == recipe.normalized())
     }
 
-    @Test(.disabled("waits on AR-3")) func lassoDropsPointsUnderAPixel() {
+    /// A thousand samples 0.2 px apart simplify to under 50; points a pixel apart all stay.
+    @Test func lassoDropsPointsUnderAPixel() {
         // A slow drag with a tremor, about 0.2 px a sample: 20 px right, then 20 px down.
         let tremor = { (i: Int) in Double(i % 2) * 0.2 }
         let dense = (0..<500).map { Point(x: Double($0) * 0.04, y: tremor($0)) } + (0..<500).map { Point(x: 20 + tremor($0), y: Double($0) * 0.04) }
@@ -76,7 +78,8 @@ func expectSelectionSpecs<T>(_ specs: [CommandSpec<T>], _ ids: [String], _ kind:
         #expect(kept.last?.count == square.count + 1)
     }
 
-    @Test(.disabled("waits on AR-3")) func replaceStartsOverAndStepsKeepOrder() {
+    /// Steps keep their order, a replace starts over, and invert twice is the recipe before.
+    @Test func replaceStartsOverAndStepsKeepOrder() {
         var recipe = AreaRecipe.empty
         let steps: [AreaRecipe.Step] = [.shape(.rect(Self.box), .replace), .feather(4), .shape(.ellipse(Self.box), .subtract), .expand(-2)]
         steps.forEach { recipe.apply($0) }
@@ -87,7 +90,8 @@ func expectSelectionSpecs<T>(_ specs: [CommandSpec<T>], _ ids: [String], _ kind:
         #expect(inverted(inverted(recipe)) == recipe)
     }
 
-    @Test(.disabled("waits on AR-3")) func commandsJoinAndReselectRestores() throws {
+    /// The commands join by mode, each one undo step, and Reselect restores the recipe a replace dropped.
+    @Test func commandsJoinAndReselectRestores() throws {
         var doc = AreaDoc()
         try AreaSelectCommands.run("select.ellipse", Self.rect(100), on: &doc)
         let triangle: JSONValue = .array([(40.0, 60.0), (60, 60), (50, 90)].map { .object(["x": .number($0.0), "y": .number($0.1)]) })
@@ -99,5 +103,17 @@ func expectSelectionSpecs<T>(_ specs: [CommandSpec<T>], _ ids: [String], _ kind:
         try AreaSelectCommands.run("select.rect", Self.rect(10), on: &doc)
         try AreaSelectCommands.run("select.reselect", .object([:]), on: &doc)
         #expect(doc.areaRecipe == made)
+    }
+
+    /// A polygon keeps corners under a pixel apart, a closed lasso is not closed twice, and a shape that joins keeps
+    /// the steps before it.
+    @Test func polygonKeepsCornersAndClosedStaysClosed() {
+        let tight = [Point(x: 0, y: 0), Point(x: 0.5, y: 0), Point(x: 0.5, y: 0.5), Point(x: 30, y: 30)]
+        let closed = [Point(x: 0, y: 0), Point(x: 40, y: 0), Point(x: 20, y: 30), Point(x: 0, y: 0)]
+        var recipe = AreaRecipe.empty
+        recipe.apply(.shape(.polygon(tight), .replace))
+        recipe.apply(.shape(.lasso(closed), .intersect))
+        recipe.apply(.invert)
+        #expect(recipe.normalized().steps == [.shape(.polygon(tight + tight.prefix(1)), .replace), .shape(.lasso(closed), .intersect), .invert])
     }
 }
