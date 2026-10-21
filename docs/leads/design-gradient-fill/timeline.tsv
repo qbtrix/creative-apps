@@ -41,3 +41,5 @@ time	kind	note
 2026-10-21T20:05Z	3	heartbeat	-	DG-m builder running
 2026-10-21T20:27Z	3	pr-opened	#4189	DG-4 + DG-5 in one PR, 186+/36-, 13 files; touched catalog tests, CLI golden, inspector snapshot
 2026-10-21T20:27Z	3	builder-started	DG-7	journey live, stacked on #4189
+2026-10-21T20:51Z	3	pr-closed	#4192	DG-7 stacked on #4189 = 429 lines, sentinel asked to split
+2026-10-21T20:51Z	3	pr-opened	#4197	DG-7 journey alone off dev, 207 lines 1 file
