@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-21T00:43Z	DA-u	retargeted	#3726 7a01cb92	dev merged in; needs-split answered
 2026-10-21T01:05Z	3	heartbeat	#3710 #3726	macOS builds running; #3629 merged
 2026-10-21T01:20Z	3	check	#3710	macOS build green; awaits batch
+2026-10-21T01:27Z	3	heartbeat	#3710 #3726	no change: #3710 awaits batch, #3726 build queued, #3677 open, scoped design pending
