@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T04:20:14Z	3	heartbeat	-	#3813 still open: lane batch lane/batch-20261021032004 bisecting (probe 0), 26 ready PRs queued; KE-2..4 held; placed-images PH-a waits on our contract slice
 2026-10-21T04:38:36Z	3	heartbeat	-	#3813 still open, mergeable; previous batch resolved (#3766 merged 04:21Z), new sweep in progress; KE-2..4 held
 2026-10-21T04:57:41Z	3	heartbeat	-	KE-1 #3813 open, green mac build, not in batch-20261021043428 (red, bisecting); waits next sweep; KE-2..4 held
+2026-10-21T05:16:18Z	3	heartbeat	-	KE-1 #3813 open+mergeable, not yet batched (lane busy with batch-20261021043428); KE-2..4 held
