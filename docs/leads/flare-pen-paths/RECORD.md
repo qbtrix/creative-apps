@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: FP-a fix round 1 #4027 (Fixes #4011, #4013) at a74ae98e: lane macOS build 39645360844 green, the lane merges it on a sweep (supervisor also has it on the local Mac gate). On merge: verify #4011/#4013 closed, then FP-a round-2 critics. FP-e done. FP-5 merged (#4029); FP-6 waits on file-flow FL-m (no PR yet). FP-u waits on PN-3 (#3770 open at 92162512). #4012 waits on PenRules.mirror going public.
+Next: (2026-10-21T19:05Z) #4027 lane integrated dev (head e7994c85); its Linux run is in progress, then merges with the batch. #3770 (PN-3) still open.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
