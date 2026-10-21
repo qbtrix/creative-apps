@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T20:56Z	heartbeat	#4132 still waits on the supervisor's macOS run and hand merge; LP-6 ready on its branch.
 2026-10-21T20:59Z	heartbeat	LP-4 #4132 still open at 82c169e1 (no-fast-lane, supervisor merges after its macOS run); LP-6 waits on it on lead/lottie-player-check-LP-6.
 2026-10-21T21:17Z	heartbeat	LP-4 #4132 still open at 82c169e1 (supervisor merges after its macOS run); LP-6 waits on it.
+2026-10-21T21:43Z	heartbeat	LP-4 #4132 still open at 82c169e1 (supervisor merges after its macOS run); LP-6 waits on it.
