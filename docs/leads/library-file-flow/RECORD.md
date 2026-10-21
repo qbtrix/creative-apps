@@ -65,3 +65,5 @@ Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs
 - 2026-10-21T21:41Z: heartbeat: LF-4 still waits on #3928 (open); dev Linux still red on Launcher's CommandPathTests baseline (dev-red #3856, not ours); lane bisecting batch 20261021205717
 
 - 2026-10-21T21:56Z: heartbeat: LF-4 still waits on #3928; dev-red #3856 still open (Launcher baseline, not ours)
+
+- 2026-10-21T22:13Z: heartbeat: LF-4 still waits on #3928; dev-red #3856 open (Launcher, not ours)
