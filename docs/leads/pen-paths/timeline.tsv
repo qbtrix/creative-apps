@@ -1,0 +1,102 @@
+utc	stage	event	ref	note
+2026-10-20T07:09Z	0	stage-start	-	lead set up on base 5a17e0e
+2026-10-20T07:09Z	0	stage-end	-	worktree lead/pen-paths
+2026-10-20T07:09Z	1	stage-start	-	packet read
+2026-10-20T07:09Z	1	stage-end	-	v3 packet with Slices table
+2026-10-20T07:10Z	2	stage-start	-	waits read from source
+2026-10-20T07:12Z	3	polling	-	PN-1 waits core bump >= e09c6c30
+2026-10-20T07:45Z	3	heartbeat	-	dev af2977c: core pin still 0de5687d, no bump to e09c6c30 open
+2026-10-20T07:46Z	3	stage-start	wave 1	PN-2 on stand-ins (supervisor answer 6285500994)
+2026-10-20T07:46Z	3	task-start	PN-2	builder, branch lead/pen-paths-PN-2
+2026-10-20T07:59Z	3	heartbeat	-	dev 8e06057: core pin 0de5687d, #3144 open, GF-2 and PL-a not on dev, AH-2 not started
+2026-10-20T08:00Z	3	task-built	PN-2	lead/pen-paths-PN-2 a3cb277, CI: PASS
+2026-10-20T08:02Z	3	pr-open	PN-2	#3553
+2026-10-20T08:12Z	3	heartbeat	-	dev 8375049: #3553 macOS build queued (run 39391184437); core pin 0de5687d, bump not on dev
+2026-10-20T08:24Z	3	heartbeat	-	dev 8375049: #3553 macOS build still queued (run 39391184437); core pin 0de5687d
+2026-10-20T08:37Z	3	heartbeat	-	dev be364d1: #3553 macOS build queued (same runner hold, asked on #3477 6286926687); core pin 0de5687d
+08:48Z	3	heartbeat	-	poll: lane macOS builds 39390799799/39391184437 still queued (runner held by 39362977551); no supervisor answer yet; dev be364d1 unchanged, core pin 0de5687d
+08:59Z	3	heartbeat	-	poll: runner free; XP-1 build 39390799799 in progress since 08:53Z, PN-2 build 39391184437 queued next; no supervisor answer needed now
+09:12Z	3	heartbeat	-	poll: PN-2 build 39391184437 still queued (XP-1 build finished 09:03Z); dev be364d1, core pin 0de5687d
+09:24Z	3	heartbeat	-	poll: #3552 build green, waiting for a lane sweep to merge it (lane runs are cycling); PN-2 build 39391184437 still queued
+09:43Z	3	heartbeat	-	poll: PN-2 #3553 build still queued; core pin unchanged, PN-1 blocked
+09:56Z	3	check	PN-2	#3553 labelled needs-rebase 09:32Z (conflicts SuiteGallery.swift, suiteui-sources.json); fixer sent to merge dev and resolve
+10:03Z	3	fix	PN-2	fixer merged dev, resolved SuiteGallery.swift and suiteui-sources.json (both sides kept), CI: PASS, head f7e3622; Head: line moved
+10:08Z	3	check	PN-2	lane macOS build 39405590060 dispatched 10:06Z on head f7e3622, queued; core pin still 0de5687d
+10:19Z	3	check	PN-2	build 39405590060 still queued; core pin 0de5687d
+10:31Z	3	poll	-	macOS builds for #3586 and #3553 still queued; dev a54a892a, core pin 0de5687d unchanged; no SM-a, GF-2, AH-2, PL-a or #3144 on dev
+10:44Z	3	poll	-	#3553 macOS build 39405590060 still queued; core pin 0de5687d unchanged
+10:51Z	3	pr	PN-2	C4 description conflict with dev resolved (both additions kept); CI: PASS; pushed 35ada4d, Head: line moved
+10:56Z	3	poll	-	#3553 lane build 39411316143 dispatched on 35ada4d; core pin 0de5687d unchanged
+11:15Z	3	poll	-	dev b538c92c; core pin 0de5687d unchanged; no GF-2, AH-2, PL-a, #3144 or SM-a on dev; #3553 build 39411316143 pending
+11:34Z	3	fix	PN-2	needs-rebase again (#3588, canonical-concepts.txt): dev merged, both lines kept, CI: PASS, head e65ce2e, Head: line moved
+11:47Z	3	poll	-	dev still 0e1199e9 (core pin 0de5687d); PN-2 head e65ce2e mergeable, waits on the lane build; no slice unblocked
+12:00Z	3	poll	PN-2	build 39411316143 on 35ada4d passed (superseded); build 39416057519 on e65ce2e queued since 11:35Z; mergeable
+12:18Z	3	poll	PN-2	build 39416057519 on e65ce2e still queued (macOS runner backlog, since 11:35Z); mergeable
+12:29Z	3	poll	PN-2	build 39416057519 on e65ce2e still queued since 11:35Z; mergeable with dev 3ebb876f
+12:41Z	3	poll	PN-2	build 39416057519 on e65ce2e still queued since 11:35Z (macOS runners busy); mergeable
+2026-10-20T13:00:54Z	3	poll	PN-2 conflicted with dev after #3509 (C4 description); merged dev, CI: PASS, head 7ab84c5, Head: moved
+2026-10-20T13:18:25Z	3	poll	#3553 head 7ab84c5 clean, needs-rebase dropped, lane macOS build pending; core pin still 0de5687d, PN-1 waits
+2026-10-20T13:29:45Z	3	poll	#3553 head 7ab84c5: lane macOS build 39427554593 queued; core pin still 0de5687d
+2026-10-20T13:41:11Z	3	poll	#3553 head 7ab84c5: lane macOS build 39427554593 still queued (runner backlog); core pin 0de5687d
+2026-10-20T13:54:40Z	3	poll	#3553 head 7ab84c5: lane macOS build 39427554593 started 13:52Z; still merges clean with dev 4f365bf8; core pin 0de5687d
+2026-10-20T14:16:52Z	3	poll	#3553 build 39427554593 green on 7ab84c5; dev 56e73319 (#3531) conflicted, merged, CI: PASS, head 63cd357, Head line moved
+2026-10-20T14:28:43Z	3	poll	#3553 head 63cd357 clean with dev 9f880c85, lane build 39437877890 queued; core pin unchanged, PN-1 waits
+2026-10-20T14:40:10Z	3	poll	#3553 head 63cd357 clean with dev d40cdad1, lane build 39437877890 still queued; core pin unchanged, PN-1 waits
+2026-10-20T14:53:00Z	3	poll	#3553 head 63cd357 clean with dev 0dd23d65 (#3620; the 14:40 row's dev was 9f880c85, d40cdad1 was the last Package.resolved change), lane build 39437877890 queued since 14:17Z; core pin unchanged, PN-1 waits
+2026-10-20T15:05:58Z	3	poll	#3553 head 63cd357 clean with dev 35b6f8a8 (#3512, #3605), lane build 39437877890 queued since 14:17Z; core pin unchanged, PN-1 waits
+2026-10-20T15:18:30Z	3	poll	#3553 head 63cd357 clean with dev 27b67332 (#3541, #3548, #3607), lane build 39437877890 queued since 14:17Z (mac runner backlog); core pin unchanged, PN-1 waits
+15:30Z	3	poll	#3553 head 63cd357 clean with dev 27b67332, lane build 39437877890 still queued (mac runner backlog); core pin unchanged, PN-1 waits
+15:42Z	3	poll	#3553 head 63cd357 clean with dev 761060e6 (#3122), lane build 39437877890 still queued (mac runner backlog); core pin unchanged, PN-1 waits
+15:55Z	3	poll	core bump #3549 (2258b62, contains e09c6c30) on dev 5eceabf7: PN-1 builder started; #3553 head 63cd357 clean, lane build 39437877890 still queued
+16:07Z	3	poll	dev 5eceabf7 unchanged; #3553 head 63cd357 clean, lane build 39437877890 still queued; PN-1 builder running
+16:18Z	3	poll	dev 7b45f176 (#3642): #3553 head 63cd357 still clean, lane build 39437877890 still queued; PN-1 builder running
+16:21Z	1	pr	PN-1 #3643 opened, head d923d8d, CI: PASS
+2026-10-20T16:22:40Z	3	wave	PN-5 and PN-6 builders started, stacked on lead/pen-paths-PN-1 (#3643)
+2026-10-20T16:30:21Z	3	poll	#3553 (PN-2) and #3643 (PN-1, build 39457287861) wait on lane macOS builds, clean vs dev 7b45f176; PN-5/PN-6 builders running
+2026-10-20T16:41:46Z	3	poll	#3553 (PN-2) and #3643 (PN-1) still wait on lane macOS builds, clean vs dev bc9bc10e; PN-5/PN-6 builders running
+2026-10-20T16:45:20Z	3	slice	PN-5 built: lead/pen-paths-PN-5 head 0594773b, 6 files +238/-37, CI: PASS, Mutate 4/4 PenRules 5/5 AnchorEdit; critic panel running; PR opens once #3643 merges (stacked diff vs dev would break the 400-line cap)
+2026-10-20T16:53:14Z	3	poll	#3553 (PN-2) and #3643 (PN-1) still wait on lane macOS builds, clean vs dev bc9bc10e; PN-5 built (critics running), PN-6 builder running
+2026-10-20T16:57:12Z	3	critic	PN-5 critics: 1 blocking (closes skips the near-last rule), 3 nits (non-finite moved/movingHandle/handleOut, scale-guard and curved insert tests); fix round 1 sent
+2026-10-20T17:05:06Z	3	poll	#3553 (PN-2) and #3643 (PN-1) macOS builds still queued, clean vs dev 0269b300; PN-5 fix round 1 and PN-6 builder running
+2026-10-20T17:16:05Z	3	fix	PN-5 fix round 1 pushed: head ec3f3a29, 6 files +331/-38 vs PN-1, CI: PASS, Mutate 7/7 PenRules 7/7 AnchorEdit; all 4 critic findings fixed with tests; PR opens once #3643 merges
+2026-10-20T17:16:28Z	3	poll	#3553 (PN-2) and #3643 (PN-1) macOS builds still queued, clean vs dev 39a1c97e; PN-5 fixed (ec3f3a29), waits on #3643; PN-6 builder running
+2026-10-20T17:27:50Z	3	poll	#3553 (PN-2) and #3643 (PN-1) macOS builds still queued, clean vs dev f30af1b5; PN-5 ready (ec3f3a29), waits on #3643; PN-6 builder running
+2026-10-20T17:30:27Z	3	built	PN-6 ff5a6fbd CI PASS mutate 4/4 5/5; critics sent
+2026-10-20T17:38:59Z	3	poll	#3643 PN-1 and #3553 PN-2 open, clean, mac builds queued; dev 59fe72db, no conflicts; PN-5 ec3f3a29 and PN-6 ff5a6fbd held for #3643; PN-6 critics running
+2026-10-20T17:50:52Z	3	poll	#3553 PN-2 conflicts with dev d7f615dc (SS-2 C4 description): dev merged in locally, both clauses kept, scripts/ci --changed running; #3643 PN-1 clean, mac build queued; PN-6 critics running
+2026-10-20T17:55:07Z	3	critics	PN-6 2 blocking 2 nits; fix round 1 sent
+2026-10-20T18:03:15Z	3	poll	#3643 PN-1 mac build still queued, no conflict (dev d7f615dc); PN-2 merge-with-dev gate rerunning after a clean build (stale core objects); PN-6 fix round 1 running
+2026-10-20T18:09:09Z	3	merge-dev	PN-2 #3553 head cf39f47b CI PASS
+2026-10-20T18:14:40Z	3	poll	#3553 PN-2 head cf39f47b mac build 39472401137 queued; #3643 PN-1 mac build 39457287861 queued; no conflicts (dev d7f615dc); PN-6 fix round 1 running
+2026-10-20T18:26:23Z	3	poll	#3553 PN-2 and #3643 PN-1 open, no conflicts with dev 9c9d41a7, mac builds pending; PN-6 fix round 1 running
+2026-10-20T18:37:58Z	3	poll	dev 875b44d2, no conflicts for PN-1/PN-2; #3643 and #3553 mac builds still queued; PN-6 fix round 1 building
+2026-10-20T18:49:35Z	3	poll	dev e382f9d7, no conflicts for PN-1/PN-2; #3643 and #3553 mac builds still queued; PN-6 fix round 1 waiting on its gate
+2026-10-20T18:50:04Z	3	fix	PN-6 fix round 1 head 7076fe13, CI PASS, 8/8 + 5/5; re-check critic sent
+2026-10-20T19:00:29Z	3	poll	dev a48992b7, no conflicts for PN-1/PN-2; #3643 and #3553 mac builds still queued; PN-6 re-check critic running
+2026-10-20T19:11:38Z	3	poll	dev a48992b7 unchanged, no conflicts; #3643 and #3553 mac builds still queued; PN-6 re-check critic running
+2026-10-20T19:17:16Z	3	critic	PN-6 re-check: 1 blocking (budget flake under load), 4 nits; fix round 2 sent
+2026-10-20T19:22:56Z	3	poll	dev a48992b7 unchanged, no conflicts; #3643 and #3553 mac builds still queued; PN-6 fix round 2 running
+2026-10-20T19:34:33Z	3	poll	dev 2de3e92d, no conflicts for PN-1/PN-2; #3643 and #3553 mac builds still queued; PN-6 fix round 2 running
+2026-10-20T19:35:42Z	3	fix	PN-6 fix round 2 head cbc0c7af, CI PASS, 9/9 + 5/5, loaded 10/10; verify critic sent
+2026-10-20T19:46:50Z	3	poll	dev 8c90de14; #3643 PN-1 and #3553 PN-2 mac builds still queued, no conflicts; PN-6 verify critic running
+2026-10-20T19:53:22Z	3	critic	PN-6 verify clean; leftovers gap #3709; PR waits for #3643
+2026-10-20T19:58:05Z	3	poll	dev 8981de7d; #3643 PN-1 and #3553 PN-2 mac builds still queued, no conflicts; PN-5/PN-6 ready, wait for #3643
+2026-10-20T20:10:58Z	3	merged	PN-1 #3643 merged 014da2f1; PN-5/PN-6 merge dev + gate
+2026-10-20T20:28:39Z	3	pr	PN-5 #3738 opened head 95aa38b2; PN-6 gate running
+2026-10-20T20:30:48Z	3	pr	PN-6 #3739 opened head b352e463
+2026-10-20T20:42:07Z	3	poll	dev 94870406; #3553 PN-2 build queued; #3738 PN-5 and #3739 PN-6 waiting on lane, no comments; no conflicts
+2026-10-20T20:54:00Z	3	poll	dev 6c2c7b05; #3553 PN-2 macOS build green 20:46Z (run 39472401137), lane merge next sweep; #3738 PN-5 build 39494583818, #3739 PN-6 build 39494606915 dispatched 20:44Z; no conflicts
+2026-10-20T21:07:59Z	3	poll	dev 6c2c7b05; #3553 PN-2 clean + macOS build green, waits for lane sweep; #3738/#3739 macOS builds queued; no conflicts
+2026-10-20T21:20:20Z	3	merge	PN-2 #3553 merged 4256c5b8; PN-3 builder dispatched
+2026-10-20T21:20:54Z	3	poll	dev aaf3ad97; PN-a tasks all merged (PN-1 014da2f1, PN-2 4256c5b8), waits for a dev CI run containing 4256c5b8 with green Linux for Belt-Slice-Done; PN-3 building; #3738/#3739 builds queued
+2026-10-20T21:33:09Z	3	poll	dev 1f7c8857; PN-a: dev Linux run 39500009414 on aaf3ad97 (contains PN-2) in progress; #3739 PN-6 macOS build green, waits on lane sweep; #3738 PN-5 build queued; no conflicts with dev; PN-3 building
+2026-10-20T21:42:49Z	4	build	PN-3 built e1f3f001, ci PASS, 584 lines > 400 cap; sent back to split into PN-3a + PN-3
+2026-10-20T21:45:04Z	3	check	PN-a merged-done, Belt-Slice-Done posted (run 39500009414); PN-6 merged 5684f9dd
+2026-10-20T21:51:54Z	4	pr	#3770 PN-3a opened (475fb9e7); PN-3 stacked at 9cf53b14 waits for it
+2026-10-20T21:52:20Z	4	build	PN-4 builder dispatched, stacked on PN-3
+2026-10-20T21:57Z	poll	poll: #3738 PN-5 macOS build 39494583818 still queued; #3770 PN-3a waiting on lane build; PN-4 builder running
+2026-10-20T22:00Z	build	PN-4 built caa97e12, waits on PN-3 PR
+2026-10-20T22:09Z	poll	poll: #3738 PN-5 mac build still queued; #3770 PN-3a mac build pending; PN-3/PN-4 held
+2026-10-20T22:21Z	poll	poll: #3738 PN-5 mac build 39494583818 queued; #3770 PN-3a mac build 39504469916 dispatched; no conflicts with dev ba57546c
+2026-10-20T22:33Z	poll	poll: mac builds still queued (#3738 39494583818 since 20:44Z, #3770 39504469916 since 21:57Z); no conflicts with dev 52606a3e; perf list lacks AnchorBudgetTests and RenderBudgetPenPathsTests (asked on #3518)
+2026-10-20T22:46Z	poll	poll: mac builds 39494583818 (#3738) and 39504469916 (#3770) still queued, no runner; asked the supervisor on #3518 (comment 6303447772) to check or re-dispatch

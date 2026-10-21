@@ -1,0 +1,29 @@
+utc	stage	event	ref	note
+2026-10-21T01:10Z	0	stage-start	#3519	base main b3011ab verified; dev 7277a83a
+2026-10-21T01:30Z	0	stage-end	#3519	waits checked; AU-flare done, FS-a #3767 open
+2026-10-21T01:31Z	3	stage-start	wave 1	FP-a builder
+2026-10-21T01:42:20Z	heartbeat	wave 1: FP-a builder running
+2026-10-21T01:52:39Z	pr-opened	FP-a #3838 head caab3a91, CI pass, Mutate 4/4, 393 lines 10 files
+2026-10-21T02:04:28Z	heartbeat	#3838 on lane macOS build; PN-3a #3770 rebased, open; FS-a #3767 open
+2026-10-21T02:25:53Z	heartbeat	#3838 lane macOS build run 39530339263 queued; PN-3a #3770, FS-a #3767 open
+2026-10-21T02:47:01Z	heartbeat	#3838 lane macOS run 39530339263 still queued (since 01:58Z); deps unchanged
+2026-10-21T03:09:49Z	blocked	#3838 macOS run 39530339263 cancelled at 02:52Z after 0 steps (never got a runner); re-run 403; PR comment 6307055064 asks supervisor
+2026-10-21T03:32:01Z	fix-start	#3838 needs-rebase after FS-a #3767 merged; merged origin/dev, both sides kept in FlareWorkspace.swift; gate running
+2026-10-21T03:37:44Z	pushed	#3838 head 7da868d9: merged origin/dev (FS-a), reverted the C4 description edit for the new description lint; gate PASS, mutate 4/4
+2026-10-21T03:53:52Z	heartbeat	#3838 needs-rebase dropped, lane macOS build dispatched 03:44Z; PN-3a #3770 still open
+2026-10-21T04:15:12Z	heartbeat	#3838 macOS build run 39540216771 in progress; PN-3a #3770 still open
+2026-10-21T04:37:07Z	heartbeat	#3838 macOS build run 39540216771 success 04:19Z, awaiting lane merge; PN-3a #3770 still open
+2026-10-21T04:59:10Z	heartbeat	#3838 ready, waiting on a lane batch; PN-3a #3770 still open (its macOS build was cancelled 02:53Z)
+2026-10-21T05:21:10Z	heartbeat	#3838 and #3770 ready, queued behind bisecting batch lane/batch-20261021043428 (29 ready PRs waiting)
+2026-10-21T05:45:01Z	heartbeat	#3838 eligible, queued behind batch bisect; #3770 build-gate (cancelled mac run), asked supervisor to re-dispatch
+2026-10-21T06:13:48Z	heartbeat	#3838 still eligible, queued behind batch 053311 bisect; #3770 no new build yet
+2026-10-21T06:34:55Z	heartbeat	#3838 still eligible and queued (dev last merge 06:12Z); #3770 no new build, no supervisor reply
+2026-10-21T06:57:34Z	fix-start	FP-e build started (FP-7 only), stacked on fp-a; marquee kept out of FlareSelection.swift (AS-flare hand-off)
+2026-10-21T07:19:36Z	pr-opened	#3958 FP-e (FP-7) head 695c20e6, ci --changed PASS, mutate 3/3; RealJobs anchor-drag job deferred to FP-6 (needs PN-7 catalog)
+2026-10-21T07:20:20Z	heartbeat	#3838 eligible at 07:14Z, still queued; #3958 not yet evaluated; #3770 unchanged
+2026-10-21T07:42:20Z	blocked	#3958 dropped from fast lane for size (stacked diff includes FP-a); re-add after #3838 merges
+2026-10-21T08:05:26Z	wait	#3838 in batch 075104; replied to needs-split on #3958 (stacked, about 260 lines after FP-a)
+2026-10-21T08:33:14Z	merge	#3838 FP-a merged 08:08Z; #3958 merged dev in, 260 lines, head fa8a6542, fast-lane on
+2026-10-21T08:55:48Z	slice-done	FP-a Belt-Slice-Done (run 39568091135 Linux green); Mac-Finish-Wanted posted
+2026-10-21T09:17:02Z	wait	#3958 macOS build green, waiting for a batch; scoped flare still queued
+2026-10-21T09:38:57Z	wait	#3958 waiting for a batch; scoped flare run in progress

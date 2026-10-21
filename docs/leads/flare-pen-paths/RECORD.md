@@ -1,0 +1,47 @@
+# pen-paths (Flare) lead record
+
+Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
+Run: act-1a15c07caa7-sppq · Session: claude/pen-paths-lead-yilb26 · Started: 2026-10-21T01:10Z
+Stage: 3 wave 1
+Base: 7277a83ac040f759d8bdefc150a72e7cdf2900d6
+Next: the lane on #3958 (FP-e, head fa8a6542, macOS build green, waiting for a batch at 09:38Z). The critic panel for FP-a runs once scoped flare run 39567954958 (in progress at 09:38Z) shows its screens. FP-u waits on PN-3a #3770 (build-gate, supervisor asked). FP-m waits on PN-7.
+
+## Slices
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| FP-a | adapters as stubs, PathEditTarget conformance, Direct Select anchors via overlay | FP-1, FP-2 | MJ-FP | PN-a (done), shape-tools:FS-a (done) | yes | 0 | done (Belt-Slice-Done 08:56Z; Mac-Finish-Wanted) | #3838 | 08:08Z merged 5a911587 |
+| FP-u | snapshots, render budget, journey (skipped) | FP-3, FP-4 | J-FP | FP-a, PN-3 | yes | 0 | waiting | – | – |
+| FP-m | Pen on PenRules; path specs in catalog | FP-5, FP-6 | MJ-FP | FP-a, PN-5, PN-7, shape-tools:FS-m, file-flow:FL-m | no | 0 | waiting | – | – |
+| FP-e | Direct Select anchor editing; stress budget | FP-7, FP-8 | MJ-FP, RJ-F27 | FP-a, PN-5 (done), PN-6 (done), stage-edit (closed); FlareSelection.swift avoided (AS-flare hand-off, planned) | no | 0 | pr-open (FP-7; FP-8 waits on test/stress-perf-journeys) | #3958 | – |
+| FP-z | journey on; status built | FP-9, FP-10 | J-FP | FP-u, FP-m, FP-e, file-flow:FL-z | yes | 0 | waiting | – | – |
+
+## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| FP-1 | FP-a | 1 | adapters as stubs forwarding to today's code; ShapeDraft.pen; anchor selection field; 3 suites written | Sources/FlareModel/FlarePen+Kernel.swift, Sources/FlareModel/FlareAnchors+Kernel.swift, Sources/FlareModel/FlareWorkspace.swift, Tests/mutations/FlareModel.FlareWorkspace.json, Tests/FlareModelTests/FlarePenKernelTests.swift, Tests/FlareModelTests/FlareAnchorEditTests.swift, Tests/FlareModelTests/FlarePathCommandTests.swift | oracle suites unedited | – | building |
+| FP-2 | FP-a | 1 | PathEditOverlay on the stage for Direct Select and Pen | Sources/FlareApp/FlareWindow+Stage.swift | FlareAnchorSnapshots.directPicked (FP-u) | – | building |
+| FP-3 | FP-u | 2 | snapshots + render budget | Tests/AppSnapshotTests/FlareAnchorSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift | – | – | waiting |
+| FP-4 | FP-u | 2 | journey written, skipped | UITests/FlareJourneyTests+Pen.swift | – | – | waiting |
+| FP-5 | FP-m | 2 | Pen on PenRules | Sources/FlareModel/FlarePen+Kernel.swift, Sources/FlareModel/Live/LiveShapes.swift, Sources/FlareModel/Fakes/FakeShapes.swift, Sources/FlareModel/Contracts/ShapeContracts.swift, Sources/FlareModel/FlarePenFinish.swift | FlarePenKernelTests | – | waiting |
+| FP-6 | FP-m | 2 | twelve path specs in catalog | Sources/FlareModel/FlareCommandCatalog.swift, Tests/command-ids/flare.txt | FlarePathCommandTests | – | waiting |
+| FP-7 | FP-e | 2 | Direct Select anchor editing | Sources/FlareModel/FlareAnchors+Kernel.swift, Sources/FlareModel/FlareDrag.swift, Sources/FlareModel/FlareSelection.swift | FlareAnchorEditTests | – | waiting |
+| FP-8 | FP-e | 3 | anchor stress budget | Tests/FlareModelTests/FlareAnchorBudgetTests.swift, UITests/FlareJourneyTests+RealPerfAnchors.swift | FlareAnchorBudgetTests | – | waiting |
+| FP-9 | FP-z | 4 | journey on | UITests/FlareJourneyTests+Pen.swift | J-FP | – | waiting |
+| FP-10 | FP-z | 5 | flare.md + wave.json built (feature-done) | docs/blueprints/flare.md, docs/blueprints/flare/features/pen-paths.wave.json | – | – | waiting |
+
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
+
+## Decisions
+- PRs target `dev`, not `main` as the brief says: CLAUDE.md and lead.md rule 4 say base dev, and the lane retargets fast-lane PRs from main anyway.
+- This record lives at docs/leads/flare-pen-paths/ on lead/pen-paths: docs/leads/pen-paths/ there belongs to the SuiteUI pen-paths lead (#3518), whose record must not be clobbered.
+- One PR per slice (brief rule 8) instead of one per task.
+- FP-a starts from dev without waiting for FS-a #3767: FP-1 needs none of FS-a's code, only shares FlareWorkspace.swift (one stored field), which the lane's merge integrates.
+- AU-flare done (#3674 merged), so the FlareWorkspace.swift hand-off for FP-1 is clear.
+
+## Open
+- shape-tools FS-a #3767 open (macOS build). FS-m not started: FP-5 waits.
+- file-flow FL-m not started: FP-6 waits.
+- AS-flare waits on stage-edit #1514: FP-7's FlareSelection.swift hand-off waits.
+- PN-5 #3738 and PN-6 merged; PN-3a #3770 open (needs-rebase); PN-7 waits.
