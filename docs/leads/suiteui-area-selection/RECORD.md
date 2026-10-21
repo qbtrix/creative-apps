@@ -9,19 +9,19 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AR-a | Kernel declares the area recipe, group pick rule and 13 select.* specs as stubs, tests written and disabled. | AR-1, AR-2 | MJ-AR | editor-kernel, command-catalog (built) | false | 0 | building | – | – |
+| AR-a | Kernel declares the area recipe, group pick rule and 13 select.* specs as stubs, tests written and disabled. | AR-1, AR-2 | MJ-AR | editor-kernel, command-catalog (built) | false | 0 | built (PR merged; awaiting green dev Linux run) | – | – |
 | AR-m | Shift/Option join modes, lasso close and simplify, step order, outermost-group pick. | AR-3, AR-4 | MJ-AR | AR-a | false | 0 | building | – | – |
 | AR-r | Recipe to CoreRaster mask in SuiteImaging. | AR-5, AR-6 | MJ-AR-raster | suite-imaging:IM-a (planned, not started); AR-a | false | 0 | waiting | – | – |
-| AR-u | SuiteUI marching ants and area tool options on the gallery. | AR-7, AR-8 | SJ-AR | AR-a; pen-paths:PN-a (planned, not started) | true | 0 | waiting | – | – |
+| AR-u | SuiteUI marching ants and area tool options on the gallery. | AR-7, AR-8 | SJ-AR | AR-a; pen-paths:PN-a (met) | true | 0 | building | – | – |
 | AR-photo-m | Photo's selection on the kernel recipe, select.* by CLI. | AR-9, AR-10 | MJ-AR-photo | AR-a, AR-m, AR-r; photo/file-flow PF-m | false | 0 | waiting | – | – |
 | AR-photo-u | Photo tools, Select menu, SuiteUI ants. | AR-11, AR-12 | PJ-AR | AR-u, AR-photo-m; adopt-suiteui-chrome:AC-colour | true | 0 | waiting | – | – |
-| AR-design | Design group click, enter, exit, deep pick. | AR-13, AR-14 | DJ-AR | AR-a, AR-m; design/pen-paths DP-m; adopt-kernel-transform:AT-design | true | 0 | waiting | – | – |
+| AR-design | Design group click, enter, exit, deep pick. | AR-13, AR-14 | DJ-AR | AR-a, AR-m; design/pen-paths DP-m; adopt-kernel-transform:AT-design | true | 0 | building (AR-13) | – | – |
 | AR-z | Photo copies deleted, kernel C4 names the recipe, RJ-X70/71, built. | AR-15, AR-16 | MJ-AR, PJ-AR, DJ-AR | AR-photo-m, AR-photo-u, AR-design; suite-imaging:IM-z | false | 0 | waiting | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| AR-1 | AR-a | 1 | contract stubs | Sources/SuiteKernel/Selection/{AreaShape,AreaSelectCommands,GroupPick}.swift | packet acceptance row | #4093 | open (head 772d765) |
+| AR-1 | AR-a | 1 | contract stubs | Sources/SuiteKernel/Selection/{AreaShape,AreaSelectCommands,GroupPick}.swift | packet acceptance row | #4093 | merged (b70dcb7) |
 | AR-2 | AR-a | 1 | disabled tests | Tests/SuiteKernelTests/{AreaShape,GroupPick}Tests.swift | packet acceptance row | #4093 | open (head 772d765) |
 
 ## Reviews
@@ -45,3 +45,4 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 - 2026-10-21T15:40Z: AR-3 is #4096 (own diff +132/-10, 3 files) and AR-4 is #4098 (+85/-13, 3 files), stacked on #4093. Both have scripts/ci --changed PASS. needs-split is on both because GitHub diffs them against dev, which includes #4093; they shrink as the stack merges. Locked groups refuse enter (an addition the packet does not state). An attribution footer was auto-appended to the PR bodies created via gh api; I removed it via the MCP tool from #4093, #4096 and #4098. Next: AR-u (AR-7) and AR-13 once #4093 is on dev.
 
 - 2026-10-21T15:44Z: The lane took fast-lane off #4096 and #4098 because their stacked diffs against dev are too big (522 and 594 lines). After #4093 merges, #4096 drops to about 122 lines: then remove needs-split and add fast-lane back. Do the same for #4098 after #4096 merges.
+- 2026-10-21T16:20Z: #4093 (AR-a) merged as b70dcb7. I merged dev into lead/area-selection-AR-3 (the add/add conflicts took the branch side; dev's copies equal AR-a's head). #4096 is now +132/-10 in 3 files against dev, head b02c125, scripts/ci --changed PASS. needs-split is dropped and fast-lane is back on. #4098 is next, once #4096 merges. Builders launched: AR-7 (AR-u, lead/area-selection-AR-7) and AR-13 (AR-design tests, lead/area-selection-AR-13), both from dev.
