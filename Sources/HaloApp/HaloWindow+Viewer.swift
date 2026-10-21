@@ -6,7 +6,10 @@
 // HaloViewerCanvas reads the draw list and the selection from the Model itself
 // (#37). `viewerScene(_:)` hands the viewer the window's shape tool and points
 // its draw at the Model's `drawShape` (shape-tools HS-3): one call per release.
+// It also hands the handles `haloCommitTransform`: a handle drag's release
+// reaches `setTransform` as one step (transform HT-3).
 import HaloModel
+import SuiteKernel
 import SwiftUI
 
 extension HaloWindow {
@@ -30,6 +33,12 @@ extension HaloWindow {
     func viewerScene(_ content: some View) -> some View {
         content
             .environment(\.haloShapeDrawing, shapes)
+            .environment(\.haloCommitTransform, commitTransform)
             .onAppear { shapes.draw = { _ = model.drawShape($0) } }
+    }
+
+    /// A handle drag's release, as one step; the Model refuses what it can't do.
+    func commitTransform(_ t: TransformBox, name: String) {
+        try? model.setTransform(t, name: name, drag: nil)
     }
 }
