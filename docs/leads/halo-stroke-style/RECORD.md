@@ -1,0 +1,29 @@
+# Lead record: Halo stroke-style
+
+- Issue: #3447
+- Packet: docs/blueprints/halo/features/stroke-style.md (v3, slices)
+- Run: act-1a15a9f4e8d-hav0
+- Session: claude/feature-lead-playbook-rmflin
+- Started: 2026-10-20T18:45Z
+- Stage: 3 wave 1 (blocked)
+- Base: dev e382f9d7
+- Next: HK-1 is built on `lead/halo-stroke-style-HK-1` (56ea568f, 164 lines/4 files over HS-a, CI PASS) and held without a PR; the HK-a PR opens once HK-2 can build, which waits on gradient-fill HG-u (blocked on core-loop CL-probe, needs-ui #3401)
+
+## Slices
+
+| Slice | Tasks | UI | Waits | State | PRs |
+|---|---|---|---|---|---|
+| HK-a | HK-1, HK-2 | yes | shape-tools HS-a; gradient-fill HG-u (HK-2) | HK-1 built, held; HK-2 blocked (HG-u) | – (branch lead/halo-stroke-style-HK-1) |
+| HK-u | HK-3, HK-4 | yes | HK-a | blocked | – |
+| HK-m | HK-5, HK-6 | no | HK-a; shape-tools HS-m; gradient-fill HG-m; suiteui stroke-style SS-d (core bump, core #430) | blocked | – |
+| HK-z | HK-7, HK-8 | yes | HK-u, HK-m | blocked | – |
+
+## Reviews
+
+| Slice | Round | Run | Findings | Verdict |
+|---|---|---|---|---|
+
+## Decisions
+
+- 2026-10-20: status branch is `lead/halo-stroke-style`, not `lead/stroke-style`, which belongs to the SuiteUI stroke-style lead (#3450).
+- 2026-10-20: HK-1 conforms to SuiteKernel's `StrokeTarget` (Sources/SuiteKernel/Fill/StrokeCommands.swift) and `VectorStroke`, which is where dev has them, not SuiteUI/SuiteModel as the Contract says. `HaloLayer.stroke` saves only when set, so old projects open unchanged. HK-1 is held without a PR because it is one task of HK-a, under the 150-line floor once HK-2 is added, and HK-2 waits on HG-u. Notes for HK-6: replace the test helper `toggleKeyRaw` with `toggleKey(.trimEnd)` once HK-5 adds `HaloProperty.trimEnd`; it changes `strokeHelp` to "Strokes are for shape layers."

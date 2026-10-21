@@ -1,0 +1,12 @@
+time	kind	step	ref	note
+2026-10-20T18:48Z	stage	start	#3447	lead started; every slice blocked (HG-u, HG-m, SS-d, HS-a)
+2026-10-20T19:11Z	check	heartbeat	#3447	still blocked (HS-a in review; HG-u, HG-m, SS-d)
+2026-10-20T19:33Z	check	heartbeat	#3447	still blocked
+2026-10-20T19:45Z	build	done	HK-1	56ea568f on lead/halo-stroke-style-HK-1, CI PASS, held for HK-2 (HG-u)
+2026-10-20T19:56Z	check	heartbeat	HK-a	HK-1 held; HK-2 waits on HG-u
+2026-10-20T20:18Z	check	heartbeat	HK-a	unchanged: HK-1 held; HK-2 waits on HG-u
+2026-10-20T20:40Z	check	heartbeat	HK-a	unchanged: HK-1 held; HK-2 waits on HG-u
+2026-10-20T21:14Z	check	heartbeat	HK-a	unchanged: HK-1 held; HK-2 waits on HG-u
+2026-10-20T21:45Z	check	heartbeat	HK-a	unchanged: HK-1 held; HK-2 waits on HG-u
+2026-10-20T22:09Z	check	heartbeat	HK-a	unchanged: HK-1 held; HK-2 waits on HG-u
+2026-10-20T22:31Z	check	heartbeat	-	HK-1 held; HK-2 blocked on HG-u
