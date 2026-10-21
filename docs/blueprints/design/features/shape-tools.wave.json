@@ -1,0 +1,175 @@
+{
+  "title": "A Shape tool for polygons, stars, lines and arrows, drawn as editable shape layers",
+  "wave": 3,
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/shape-tools (adopter of S19); RJ-D35",
+  "waits_on": "suiteui shape-tools' contract slice SH-a (cross-line); transform's DT-a, DT-u, DT-m and eyedropper's DY-a, DY-m slices",
+  "depends": [
+    "design-window",
+    "style-rows",
+    "select-several",
+    "design-export",
+    "layers-panel",
+    "canvas-basics",
+    "snapping"
+  ],
+  "longest_chain": "6 (DS-1 → DS-2 → DS-3 → DS-4 → DS-7 → DS-8)",
+  "journeys": [
+    "DesignShapeJourneyTests.testDrawStarAndArrow"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Sources/DesignModel/DesignShape+Kernel.swift",
+    "Tests/DesignModelTests/DesignShapeTests.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignShapeOptions.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "UITests/DesignJourneyTests+Shapes.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Tests/AppSnapshotTests/DesignShapePaintTests.swift",
+    "Tests/AppSnapshotTests/DesignShapeSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignShapeTests.swift",
+    "Sources/DesignModel/DesignDrawing.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/mutations/DesignModel.DesignShape+Kernel.json",
+    "Tests/mutations/DesignModel.DesignDrawing.json",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Tests/DesignModelTests/DesignSVGTests.swift",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/RealJobs/design/star-badge/star-badge.jobs.json",
+    "Tests/RealJobs/design/star-badge/input/blank.design",
+    "docs/blueprints/design/features/shape-tools.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DS-a",
+      "behavior": "Shape nodes and the Shape tool exist, the adapter is declared as stubs, and the tool's options show in the inspector.",
+      "tasks": [
+        "DS-1",
+        "DS-2"
+      ],
+      "journeys": [
+        "MJ-DS"
+      ],
+      "waits": {
+        "transform:DT-a": [
+          "DS-1",
+          "DS-2"
+        ],
+        "eyedropper:DY-a": [
+          "DS-1",
+          "DS-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Sources/DesignModel/DesignShape+Kernel.swift",
+        "Tests/DesignModelTests/DesignShapeTests.swift",
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignShapeOptions.swift",
+        "Sources/DesignApp/DesignInspector.swift",
+        "UITests/DesignJourneyTests+Shapes.swift"
+      ]
+    },
+    {
+      "id": "DS-u",
+      "behavior": "The canvas paints a shape node's path and redraws it on resize, and the snapshots and render budget hold.",
+      "tasks": [
+        "DS-3",
+        "DS-4"
+      ],
+      "journeys": [
+        "J-DS"
+      ],
+      "waits": {
+        "DS-a": [
+          "DS-3",
+          "DS-4"
+        ],
+        "transform:DT-u": [
+          "DS-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Tests/AppSnapshotTests/DesignShapePaintTests.swift",
+        "Tests/AppSnapshotTests/DesignShapeSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignShapeTests.swift"
+      ]
+    },
+    {
+      "id": "DS-m",
+      "behavior": "A drag draws one shape node as one step through the kernel's drag rule, the spec round-trips through the file, and the SVG writes its path.",
+      "tasks": [
+        "DS-5",
+        "DS-6"
+      ],
+      "journeys": [
+        "MJ-DS"
+      ],
+      "waits": {
+        "DS-a": [
+          "DS-5",
+          "DS-6"
+        ],
+        "transform:DT-m": [
+          "DS-5",
+          "DS-6"
+        ],
+        "eyedropper:DY-m": [
+          "DS-5",
+          "DS-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignShape+Kernel.swift",
+        "Sources/DesignModel/DesignDrawing.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Tests/DesignModelTests/DesignShapeTests.swift",
+        "Tests/mutations/DesignModel.DesignShape+Kernel.json",
+        "Tests/mutations/DesignModel.DesignDrawing.json",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/DesignModelTests/DesignSVGTests.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/RealJobs/design/star-badge/star-badge.jobs.json",
+        "Tests/RealJobs/design/star-badge/input/blank.design"
+      ]
+    },
+    {
+      "id": "DS-z",
+      "behavior": "The journey draws a star and an arrow on live services, and the feature is built.",
+      "tasks": [
+        "DS-7",
+        "DS-8"
+      ],
+      "journeys": [
+        "J-DS"
+      ],
+      "waits": {
+        "DS-u": [
+          "DS-7"
+        ],
+        "DS-m": [
+          "DS-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Shapes.swift",
+        "docs/blueprints/design/features/shape-tools.wave.json"
+      ]
+    }
+  ]
+}

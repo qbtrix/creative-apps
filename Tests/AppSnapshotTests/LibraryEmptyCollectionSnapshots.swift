@@ -1,5 +1,5 @@
-// LibraryEmptyCollectionSnapshots.swift: Library's browser on Favorites when the
-// catalog has photos but none is flagged: the empty state, not a blank grid.
+// LibraryEmptyCollectionSnapshots.swift: Library's browser on Picks when the
+// catalog has photos but none is picked: the empty state, not a blank grid.
 // Writes library-empty-collection-{light,dark}.png. macOS only.
 import LibraryModel
 import SwiftUI

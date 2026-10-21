@@ -89,9 +89,15 @@ extension BodyCountSuites {
                 #expect(Self.value(in: w.host) == DesignGuideOverlay.value(guides, last: nil),
                         "mid-\(gesture) the guides don't read the live copy's \(guides.summary)")
                 let window = try #require(DesignWindow.lastWorkspace, "the \(gesture) never reached the window")
-                // The press goes to the window (D0-8a): a draw's adds its layer there at no size.
+                // The press goes to the window (D0-8a): a draw's adds its layer there at no size. A
+                // screen point maps back to the page only to within a point (CI's runner landed the
+                // draw's press at y 1011 for 1010), so the press is replayed where the window put the
+                // layer it added; a sample that reached the window would still change that layer's size.
+                let seedIDs = Set(gesture.seed.selectedPage?.nodes.map(\.id) ?? [])
+                let added = window.selectedPage?.nodes.first { !seedIDs.contains($0.id) }
+                let press = added.map { DesignPoint(x: $0.frame.x, y: $0.frame.y) } ?? DesignPoint(gesture.from)
                 var pressed = gesture.seed
-                pressed.drag(from: DesignPoint(gesture.from), to: DesignPoint(gesture.from))
+                pressed.drag(from: press, to: press)
                 #expect(window.selectedPage == pressed.selectedPage, "a sample reached the window's page mid-\(gesture)")
                 try await w.ticks(60) { w.send(.leftMouseDragged, at: at(60 + $0)) }
                 w.timed { w.send(.leftMouseUp, at: at(120)) }
