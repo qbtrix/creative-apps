@@ -10,3 +10,5 @@ utc	stage	event	ref	note
 2026-10-21T07:22Z	poll	wait	-	#3933 (HS-m1) macOS build 39557192935 success, waiting on a lane sweep (14 macOS builds queued); #3934, #3929 stacked
 2026-10-21T07:53Z	poll	wait	-	#3933 macOS build green, waiting on lane sweep (queue busy)
 2026-10-21T08:23Z	poll	wait	-	#3933 clean, Linux check running on 718324d9; lane merges after it
+2026-10-21T08:45Z	merge	done	HS-m	#3933 (HS-m1) merged
+2026-10-21T08:50Z	retarget	done	HS-m	#3934 (HS-m2) to dev after merging dev (conflicts in command-ids/halo.txt, the halo.list-commands golden and HaloCommandCatalogTests: kept #3813 key commands and the shape commands, count 62 + shapes), d6446bbb, 9 files +96/-4, CI PASS
