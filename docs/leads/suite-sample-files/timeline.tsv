@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-21T18:48Z	3	poll	#4100	unchanged, awaiting lane
 2026-10-21T19:05:15Z	heartbeat	#4034 #4100 still queued (lane batching, dev at 58034759f); drafts wait
 2026-10-21T19:22:03Z	heartbeat	#4100 in lane batch 20261021190945 (Linux + macOS gate running)
+2026-10-21T19:45Z	stage	#4100 #4112 #4115	#4100 merged 9a4ac8828; #4112, #4115 restacked on dev (CI PASS), ready; #4129 waits on both
