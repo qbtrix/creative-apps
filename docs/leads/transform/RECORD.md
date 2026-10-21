@@ -10,7 +10,7 @@ Next: watch #3682 (HT-a) and #3702 (HT-5, stacked on #3682, 335 lines/7 files vs
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HT-a | adapter stubs; handles on the selected layer in the viewer | HT-1, HT-2 | MJ-HT | – | yes | 0 | merged-done (landed in #3702, 2a21273a3) | https://github.com/qbtrix/creative-apps/actions/runs/39514893774 | wanted |
-| HT-u | handle drags preview live and commit once; snapshots, budget | HT-3, HT-4 | J-HT | HT-a, transform-tools:TT-u (done) | yes | 0 | building (rebased onto dev, gating) | – | – |
+| HT-u | handle drags preview live and commit once; snapshots, budget | HT-3, HT-4 | J-HT | HT-a, transform-tools:TT-u (done) | yes | 0 | building (#3811 open, head b6cba72) | – | – |
 | HT-m | turn/scale keyed at the playhead as one step; catalog commands | HT-5, HT-6 | MJ-HT | HT-a, transform-tools:TT-m (done), HT-6: autosave-history:HA-m | no | 0 | HT-5 merged (#3702, 2a21273a3); HT-6 waiting | – | – |
 | HT-z | journey on live; feature built | HT-7, HT-8 | J-HT | HT-u, HT-m | yes | 0 | waiting | – | – |
 
@@ -21,8 +21,8 @@ Next: watch #3682 (HT-a) and #3702 (HT-5, stacked on #3682, 335 lines/7 files vs
 | HT-2 | HT-a | 1 | HaloViewerHandles on the stubs; journey skipped | Sources/HaloApp/HaloViewerHandles.swift, Sources/HaloApp/HaloViewer.swift, UITests/HaloJourneyTests+Transform.swift | HaloViewerSnapshots handles | #3702 | merged (2a21273a3) |
 | HT-5 | HT-m | 2 | adapter bodies, keyed when animated | Sources/HaloModel/HaloTransform+Kernel.swift, Tests/HaloModelTests/HaloTransformTests.swift, Tests/mutations/HaloModel.HaloTransform+Kernel.json | HaloTransformTests; Mutate | #3702 | merged 22:41Z (2a21273a3, Mutate 3/3) |
 | HT-6 | HT-m | 3 | six specs, id list, RJ-H34 | Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Tests/HaloModelTests/HaloTransformCommandIDTests.swift, Tests/RealJobs/halo/key-turn/* | HaloTransformCommandIDTests | – | waiting (HA-m, HG-m) |
-| HT-3 | HT-u | 2 | drags preview via HaloLiveEdit, commit once, Escape cancels | Sources/HaloApp/HaloViewerHandles.swift, Tests/AppSnapshotTests/HaloViewerHandlesTests.swift | HaloViewerHandlesTests | – | built on lead/transform-HT-u, rebased onto dev |
-| HT-4 | HT-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloTransformTests.swift | knobDragInThreeBodies | – | built on lead/transform-HT-u, rebased onto dev |
+| HT-3 | HT-u | 2 | drags preview via HaloLiveEdit, commit once, Escape cancels | Sources/HaloApp/HaloViewerHandles.swift, Tests/AppSnapshotTests/HaloViewerHandlesTests.swift | HaloViewerHandlesTests | #3811 | open |
+| HT-4 | HT-u | 3 | snapshots, render budget | Tests/AppSnapshotTests/HaloTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetHaloTransformTests.swift | knobDragInThreeBodies | #3811 | open |
 | HT-7 | HT-z | 4 | journey on live | UITests/HaloJourneyTests+Transform.swift | testRotateAndScaleInViewer | – | waiting |
 | HT-8 | HT-z | 5 | status built, feature-done | docs/blueprints/halo/features/transform.wave.json | waves render | – | waiting |
 

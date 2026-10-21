@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-20T23:54Z	3	merge	#3702 #3682	HT-m (HT-5) squash 2a21273a3 carried HT-a; #3682 closed as superseded
 2026-10-20T23:54Z	3	slice-done	HT-a	Belt-Slice-Done and Mac-Finish-Wanted on #3443, run 39514893774
 2026-10-20T23:54Z	3	rebase	HT-u	rebased onto dev (C4 description merged), gating
+2026-10-21T00:00Z	3	pr	#3811	HT-u opened, fast-lane, head b6cba72, CI PASS
