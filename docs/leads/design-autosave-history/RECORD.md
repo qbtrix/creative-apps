@@ -2,9 +2,9 @@
 
 Issue: #3434 · Packet: docs/blueprints/design/features/autosave-history.md
 Run: act-1a15a9a4e8b-kn6a · Session: claude/feature-lead-playbook-y5rnbx · Started: 2026-10-20T18:42:31Z
-Stage: 3 wave 2 (DA-a done; DA-m #3710 on dev at 4d5d8826, in the lane; DA-u #3726 regating after merging dev)
+Stage: 3 wave 2 (DA-a done; DA-m #3710 and DA-u #3726 on dev, each in its lane macOS build)
 Base: 875b44d22d79dcfb782d7276af76dfc72a23f11a (origin/dev); main verified at b3011ab9
-Next: push DA-u (#3726) once scripts/ci --changed passes, move Head, retarget to dev; DA-a critics on the first scoped: design run with ui-screens; DA-6 waits DG-m; DA-z waits SuiteUI #3629
+Next: Belt-Slice-Done DA-m and DA-u once merged-done; DA-a critics on the first scoped: design run with ui-screens; DA-6 waits DG-m (SuiteUI #3677); DA-z waits DA-6 (AH-8 #3629 merged 0506808e)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -43,3 +43,4 @@ Next: push DA-u (#3726) once scripts/ci --changed passes, move Head, retarget to
 - 2026-10-21T00:27:40Z: DA-a merged as 07f754f7. DA-m and DA-u merge origin/dev (add/add conflicts on DA-a's files resolved to the branch side; dev's copies equal 509907a6), so their diffs against dev are their own slices only.
 - 2026-10-21T00:36:54Z: Belt-Slice-Done DA-a (6305025272, run 39520241285). #3710 retargeted to dev at 4d5d8826 (--changed PASS). Supervisor told on #3415 and #3434 that Belt watches other runs' branches.
 - 2026-10-21T00:43Z: DA-u #3726 retargeted to dev at 7a01cb92 (dev merged in, --changed PASS); answered the supervisor needs-split sentinel (count predates retarget; now 373+/20-, 9 files). DA-m #3710 in the lane at 4d5d8826.
+- 2026-10-21T01:05Z: heartbeat. #3710 macOS build 39522457598 in progress, #3726 macOS build 39523611270 queued; needs-split on #3726 still set (answered). SuiteUI #3629 (AH-8) merged at 0506808e, so DA-z now waits only on DA-6. #3677 open. scoped: design 39490030243 still pending.
