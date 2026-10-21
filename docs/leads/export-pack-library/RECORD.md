@@ -1,9 +1,9 @@
 # export-pack (Library) lead record
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
-Run: act-1a15ac11868-4kb6 · Session: line lead (library: #1555, #1563, #3478) · Started: 2026-10-20T19:35Z
+Run: act-1a15e4969c2-pa6e (resumes act-1a15ac11868-4kb6) · Session: line lead (library: #1563, #3478) · Started: 2026-10-20T19:35Z
 Stage: 3 wave 1
-Base: a48992b7c (origin/dev; main verified at b3011ab9)
+Base: origin/dev ded2ca5 (main verified at 0dd23d659f4dbd8a0120aa85a321259327518251)
 Next: LX-1 and LX-3 are merged. LX-2 waits on XP-3 (ExportPick.metadata); LX-4 waits on XP-2 + XP-7.
 
 ## Slices
@@ -41,3 +41,4 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-3 (ExportPick.metadata); LX-4 w
 
 ## Open
 - XP-2 waits on shell-media SM-a; XP-3 waits on tone-controls TC-a and PL-a (SuiteUI lead's record).
+- 2026-10-21T11:50:25Z (act-1a15e4969c2-pa6e): re-read dev ded2ca5. No MetadataCarrying (XP-2), no ExportPick.metadata (XP-3), no StillMetadata (XP-7). SuiteUI lead's last poll says SM-a is not on dev. LX-2, LX-4, LX-5/6 and LX-7/8 cannot start. No open findings carry Feature: export-pack.
