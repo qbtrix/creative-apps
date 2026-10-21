@@ -106,3 +106,4 @@ utc	stage	event	ref	note
 2026-10-21T13:03:30Z	SS-9	check-in	#3826 head 21226b0: macOS-build-queued
 2026-10-21T13:22:56Z	SS-9	check-in	run act-1a15e9d8ac8-27wz start; #3826 macOS build 39601623669 queued
 2026-10-21T15:00Z	check	SS-9 #3826 macOS green, waiting for a batch; records moved to suiteui-stroke-style
+2026-10-21T15:25Z	check	#3826 blocked by unrelated Library timing failure; rerun 403; asked supervisor
