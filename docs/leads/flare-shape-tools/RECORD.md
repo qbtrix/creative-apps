@@ -8,7 +8,7 @@ Next: FS-a slice PR (FS-1, FS-2) and FS-5 (FS-m's first task) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: 4 (in lane), 2026-10-21T00:16Z: wave-1 PR's lane macOS build still queued (since 21:57); the stuck scoped:flare run ended, queue may move; next: rebase stacked slices onto dev after it merges, open their PRs.
+Last stage: 4 (in lane), 2026-10-21T00:45Z: #3767's lane macOS build 39504410818 passed; it merges on the lane's next sweep. Next: rebase FS-5 then FS-u onto dev, open their PRs.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
