@@ -47,6 +47,15 @@ tool.gradient
 tool.heal
 tool.marquee
 tool.move
+transform.begin
+transform.cancel
+transform.commit
+transform.flip
+transform.read
+transform.reset
+transform.rotate
+transform.scale
+transform.set
 view.actual-size
 view.fit
 view.zoom-in

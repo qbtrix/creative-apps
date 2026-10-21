@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F12, pending LO-5 (flare/lottie-open): named .jobs.pending.json so the harness skips it, and renamed to open-recolour-lottie.jobs.json once LO-3 opens .json through FlareLottieOpen and LO-5 turns the open on. Opens bounce.json (a ball shape layer with three position keys over a solid floor), sets the ball's fill to orange and exports Lottie. The input's bytes must be unchanged (Save never targets the JSON); LO-5 pins the exported file's keyframe count and fill colour.",
+  "pending": "LO-5",
+  "waits_on": "LO-5",
+  "inputs": ["input/*.json"],
+  "steps": [
+    {"id": "shape.set-fill", "params": {"sceneID": "scene-1", "layerID": "layer-2", "index": 0, "fill": {"r": 1, "g": 0.5, "b": 0, "a": 1}}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-recoloured", "format": "lottie"},
+  "expect": {
+    "input/bounce.json": {"sha256": "8868a87f2afa682228fe032bf22a0bbcce9d3e669aaccd53e2eab2873803d4a6"}
+  },
+  "platforms": ["linux", "macos"]
+}
