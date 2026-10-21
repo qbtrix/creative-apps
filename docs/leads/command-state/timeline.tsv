@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T14:55Z	2026-10-21T14:55:54Z	3	gate-restored	#4023	dev-red #3856 cleared; origin/dev merged, scripts/ci --changed PASS, Fast-Check/Head restored at 6cd0756
 2026-10-21T15:12Z	2026-10-21T15:12:50Z	3	fix	#4021	macOS build fix: suiteControl(entry:identifies:) modifier moved to SuiteEnvironment.swift so ControlInventory.swift compiles alone in SuiteJourneyTests; gate PASS, head 244389b
 2026-10-21T15:34Z	2026-10-21T15:34:18Z	stage3	fix	#4023	dev merged, halo baseline max 8, gate pass, head 156e492
+2026-10-21T15:39Z	2026-10-21T15:39:47Z	stage3	poll	lane	macOS builds pending on 4021/4034/4048; 4023 merged dev, awaiting lane
