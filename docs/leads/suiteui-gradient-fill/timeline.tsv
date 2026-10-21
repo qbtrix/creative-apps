@@ -2,3 +2,7 @@ utc	stage	event	ref	note
 2026-10-20T03:19Z	0	stage-start	-	lead branch from origin/dev 233aff5c
 2026-10-20T03:19Z	2	stage-end	-	plan: GF-1 wave 1; GF-5, GF-7 wave 2; GF-6 wave 3; GF-9 wave 4; GF-2 blocked on CC-u
 2026-10-20T03:19Z	3	stage-start	-	wave 1 GF-1
+2026-10-21T18:05Z	3	stage-start	-	relaunch run act-1a15f92d30e-mfnc from dev aaa43f91
+2026-10-21T18:05Z	3	slice-done	GF-u	Belt-Slice-Done GF-u run 39646407505; Mac-Finish-Wanted posted
+2026-10-21T18:05Z	3	push	#3742	dev merged in, head 573bf571, Fast-Check pass
+2026-10-21T18:05Z	3	wave-start	5	GF-8, GF-9 stacked on GF-6
