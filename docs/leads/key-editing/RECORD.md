@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
 Stage: 4 wave 3
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: wave 2 open (#3954 KE-2, #3951 KE-3, #3955 KE-4). On merge: RJ-H13 job (scratchpad) as a follow-up, then wave 3 KE-5/KE-6 (KE-u). On needs-fix/needs-rebase: fix that PR.
+Next: KE-4 #3955 lane sweep; KE-u PRs #4067 (KE-6), #4070 (KE-5) in lane. On merge: RJ-H13 follow-up, KE-m Slice-Done; KE-u critics on a scoped run, then Slice-Done. On needs-fix/needs-rebase: fix that PR.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -21,7 +21,7 @@ Next: wave 2 open (#3954 KE-2, #3951 KE-3, #3955 KE-4). On merge: RJ-H13 job (sc
 | KE-2 | KE-a | 2 | timeline clicks, Animation menu items, window wiring | Sources/HaloApp/HaloTimelineView.swift, Sources/HaloApp/HaloAnimationMenu.swift, Sources/HaloApp/HaloWindow+Easing.swift | HaloTimelineClickTests | - | merged #3954 (12:15Z) |
 | KE-3 | KE-m | 2 | pick and select-all bodies | Sources/HaloModel/HaloKeyPick+Kernel.swift, Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloKeySelectionTests.swift | HaloKeySelectionTests | - | built 9a254bd5c (mutate 10/10, 6/6), PR after #3813 |
 | KE-4 | KE-m | 2 | moveKeys and endKeyDrag bodies, RJ move-keys | Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift, Tests/RealJobs/halo/move-keys/ | HaloKeyEditingTests, moveFiveThousandKeys | - | PR #3955 head 2610048f3, mac build green, lane sweep pending; RJ-H13 follow-up after it lands |
-| KE-5 | KE-u | 3 | snapshots, journey skipped | see packet | snapshots | - | building (wave 3, started 12:33Z) |
+| KE-5 | KE-u | 3 | snapshots, journey skipped | see packet | snapshots | - | PR #4070 head 5650f771b (2 files, 256 lines; 8 PNGs halo-timeline-keys-picked-across, -all-picked, -key-drag, halo-animation-menu-select-all, light+dark) |
 | KE-6 | KE-u | 3 | render budget | see packet | RenderBudgetHaloKeyEditingTests | - | PR #4067 head b504f56cb (107 lines); asks supervisor to add RenderBudgetHaloKeyEditingTests/timing to perf-suites |
 | KE-7 | KE-z | 4 | journey live, stress perf | see packet | journey | - | planned |
 | KE-8 | KE-z | 5 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/key-editing.wave.json | waves render --dry-run | - | planned |
