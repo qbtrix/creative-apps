@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-21T09:12:32Z	check	lane	#3922 mac build green, Linux check running; #3975 #3977 mac builds dispatched	-
 2026-10-21T09:31:04Z	wave	PG-z	PG-3 #3922 merged (PG-m in); PG-7 branch pushed on PG-6, gate running; PR after #3977 merges	#3975 #3977 mac builds queued
 2026-10-21T09:31:51Z	check	PG-7	gate FAIL on dev's own mutation anchors (DesignModel.DesignCanvasEditing, Eyedropper/Pen; dev-red #3856, Linux job); origin/dev a6f45c180 fails the same	not ours; rerun gate when PG-6 merges
+2026-10-21T09:50:09Z	check	lane	#3975 PG-5, #3977 PG-6 open in lane, no needs-fix/needs-rebase; PG-7 waits on #3977	dev-red #3856 open
