@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-21T03:26Z	3	heartbeat	W3n	#3800 merged (dccfa54, Linux check running); new lane batch 20261021032004 holds #3808; #3818 #3830 #3831 open clean fast-lane
 2026-10-21T03:48Z	3	heartbeat	W3o	dev Linux green at dccfa54 (holds #3800); batch 20261021032004 (holds #3808, last) red on Library CommandPathTests in an earlier PR, bisecting; #3818 #3830 #3831 open clean fast-lane
 2026-10-21T04:10Z	3	heartbeat	W3p	batch 20261021032004 probe -1 red (Library, first PR, not ours); #3808 #3818 #3830 #3831 open clean fast-lane, waiting next batch
+2026-10-21T04:31Z	3	heartbeat	W3q	batch 20261021032004 bisect: probe -0 green, -1 red (Library, not ours); our 4 PRs still open clean fast-lane, await next batch
