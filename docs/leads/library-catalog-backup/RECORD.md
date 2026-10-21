@@ -4,7 +4,7 @@ Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: when #3980 clears dev-red #3856: rerun scripts/ci --changed on #3965 (BK-3, head dfb75bf) and #3967 (BK-u, head 89b3e3c), set Fast-Check: pass and Head:, swap no-fast-lane for fast-lane. BK-a is merged-done once a qualifying run (scoped library or full) contains #3960: post Belt-Slice-Done for BK-a then. Blocked-wait polls with no change: 2 (09:20, 09:54); at 3 post Question for the supervisor.
+Next: #3996 fixed the dev anchors (#3980 closed as superseded): rerun scripts/ci --changed on #3965 (BK-3, head dfb75bf) and #3967 (BK-u, head 89b3e3c), set Fast-Check: pass and Head:, swap no-fast-lane for fast-lane. BK-a is merged-done once a qualifying run (scoped library or full) contains #3960: post Belt-Slice-Done for BK-a then. Blocked-wait polls with no change: 3 (09:20, 09:54, 10:30); Question for the supervisor posted 10:30, waiting on the answer.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
