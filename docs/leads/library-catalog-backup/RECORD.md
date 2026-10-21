@@ -68,3 +68,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 22:39Z: dev Linux red from our BK-u merge racing CS-2 #4023 (run 39685422711: library baseline stale Cancel lines, 53 over max 48). Fix #4244 opened (head 6b0bec6): LibraryBackupMenuState specs, menu item and sheet Restore buttons built from specs, baseline back at 48; gate PASS, mutate 3/3. Filed #4245 (needs-ui: role on spec MenuCommand).
 
 - 22:55Z: fix #4244 (6b0bec6) waits on its lane-dispatched macOS build (apps: library), then a batch.
+
+- 2026-10-21T22:59Z: dev-ci 39689070230 at e0fb991: Linux red only on CommandPathTests/CommandPathLimitTests for library.txt (2 stale Cancel lines, 53 > 48), the BK-u/CS-2 race; #4244 removes exactly those lines. #4244 macOS build 39689010451 in progress.
