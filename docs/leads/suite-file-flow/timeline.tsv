@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-21T07:17Z	3	waiting	#3827	open, fast-lane only, no needs-fix/needs-rebase; dev head b64cbb8cf (#3784 core bump); lane queue busy
 2026-10-21T07:39Z	3	waiting	#3827	open, fast-lane only, no needs-fix/needs-rebase; dev head 709f92838 (#3815); lane bisecting lane/batch-20261021065242
 2026-10-21T08:02Z	3	building	SF-8	#3827 merged 07:45 (260f7a874); SF-8 rebuilt on dev as 5c0bfd78d, gating
+2026-10-21T08:12Z	3	waiting	#3966	SF-8 opened as #3966 (head c07a54986, C4 description edit dropped per new gate rule); Belt-Slice-Done SF-u + Mac-Finish-Wanted SF-u posted (run 39564222036)
