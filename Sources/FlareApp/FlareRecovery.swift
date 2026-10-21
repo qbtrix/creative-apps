@@ -3,7 +3,8 @@
 // offer are the suite's `.autosaveRecovery` with the hooks FlareWorkspace gives (FlareRecovery+Kernel.swift): the
 // window id, the file name, the unsaved mark, the dirty document's encoder and a restore that lands the bytes as one
 // undo step. Its folder is `Recovery/` in Flare's folder under the suite root (`-SuiteSupportDir` moves it), none
-// for a launch that ignores restored state (the journeys' `-ApplePersistenceIgnoreState`); the first build after an
+// for a launch that ignores restored state (the journeys' `-ApplePersistenceIgnoreState`) unless it names its own
+// store (the recovery journey's); the first build after an
 // earlier one moves that build's `Recovery.flare` there once. After a failed save the window's subtitle reads
 // `model.saveStatus`, and the same "Not saved" shows in the error color at the window's bottom trailing corner
 // (`flare.saveStatus`), its tooltip the failure.

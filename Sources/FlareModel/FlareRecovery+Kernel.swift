@@ -45,9 +45,12 @@ extension FlareWorkspace {
     public static let legacyRecovery = "Flare/Recovery.flare"
 
     /// Where the window's copies go: `Recovery/` in Flare's folder under the suite root. Nil while the launch asks
-    /// for no saved state (the journeys' `-ApplePersistenceIgnoreState`), which turns autosave off.
+    /// for no saved state (the journeys' `-ApplePersistenceIgnoreState`), which turns autosave off, unless it also
+    /// names its own store with `-SuiteSupportDir` (the recovery journey's), as the old `-FlareRecoveryFile` did.
     public static func recoveryFolder(arguments: [String], home: String, ignoresState: Bool) -> RecoveryFolder? {
-        guard !ignoresState else { return nil }
+        let ownStore = SuiteLocations.supportFolder(arguments: arguments, home: home)
+            != SuiteLocations.supportFolder(arguments: [], home: home)
+        guard !ignoresState || ownStore else { return nil }
         let store = FileStore(folder: SuiteLocations.appFolder("Flare", arguments: arguments, home: home))
         return RecoveryFolder(store: store, ext: recoveryExtension)
     }

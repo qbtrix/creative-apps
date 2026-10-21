@@ -30,8 +30,15 @@
   {
     "label": "the folder ignores -ApplePersistenceIgnoreState",
     "file": "Sources/FlareModel/FlareRecovery+Kernel.swift",
-    "find": "        guard !ignoresState else { return nil }\n",
+    "find": "        guard !ignoresState || ownStore else { return nil }\n",
     "replace": "",
+    "tests": "FlareRecoveryKernelTests"
+  },
+  {
+    "label": "a launch that names its own store still turns recovery off",
+    "file": "Sources/FlareModel/FlareRecovery+Kernel.swift",
+    "find": "        guard !ignoresState || ownStore else { return nil }\n",
+    "replace": "        guard !ignoresState else { return nil }\n",
     "tests": "FlareRecoveryKernelTests"
   }
 ]

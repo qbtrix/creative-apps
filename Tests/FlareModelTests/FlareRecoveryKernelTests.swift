@@ -145,7 +145,10 @@ import Testing
 
     @Test func theWindowsFolderIsUnderTheRootAndOffWhenStateIsIgnored() throws {
         let (home, arguments) = Self.home()
-        #expect(FlareWorkspace.recoveryFolder(arguments: arguments, home: home, ignoresState: true) == nil)
+        #expect(FlareWorkspace.recoveryFolder(arguments: [], home: home, ignoresState: true) == nil)
+        #expect(FlareWorkspace.recoveryFolder(arguments: [SuiteLocations.supportDirFlag, ""], home: home,
+                                              ignoresState: true) == nil)
+        #expect(FlareWorkspace.recoveryFolder(arguments: arguments, home: home, ignoresState: true) != nil)
         let made = FlareWorkspace.recoveryFolder(arguments: arguments, home: home, ignoresState: false)
         let folder = try #require(made)
         try folder.write(Data("bytes".utf8), window: FlareWorkspace.mainWindow, name: "Bounce.flare", at: 5)
