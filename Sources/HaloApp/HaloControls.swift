@@ -40,6 +40,32 @@ extension View {
     }
 }
 
+/// The History button by the transport (autosave-history HA-2): a
+/// button-style toggle that shows and hides the window's History panel
+/// (HaloHistoryArea.swift), `halo.history.show`. Outside a Halo window there
+/// is no shelf, so it is disabled and says why.
+struct HaloHistoryControl: View {
+    @Environment(\.haloHistoryShelf) private var shelf
+
+    var body: some View {
+        let help: String? = shelf == nil ? "History shows in a Halo window." : nil
+        let shown = shelf?.shown == true
+        Toggle(isOn: Binding(get: { shown }, set: { shelf?.shown = $0 })) {
+            Label("History", systemImage: "clock.arrow.circlepath")
+        }
+        .toggleStyle(.button)
+        .tint(SuiteColor.accent)
+        .labelStyle(.iconOnly)
+        .buttonStyle(.borderless)
+        .frame(minWidth: SuiteSize.pillHit, minHeight: SuiteSize.pillHit)
+        .contentShape(Rectangle())
+        .disabled(help != nil)
+        .foregroundStyle(help != nil ? SuiteColor.textTertiary : shown ? SuiteColor.accent : SuiteColor.textSecondary)
+        .help(help ?? (shown ? "Hide History" : "Show History"))
+        .haloControl(id: "halo.history.show", enabled: help == nil, help: help)
+    }
+}
+
 private struct HaloControlsProbe: ViewModifier {
     let requested: Bool
 

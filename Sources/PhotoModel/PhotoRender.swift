@@ -12,8 +12,9 @@
 // parallel, redrawing only the tiles that changed since the frame before
 // (PhotoWorkspace.damage(since:)) and timing itself for the status line. The
 // curve editor's line (`curveSamples`) runs the same CoreRaster curve over a
-// ramp, and its histogram (`curvesHistogram`) counts the display values of the
-// image as it enters Curves, so both show what the render does; `curvesHistogramKey` changes
+// ramp, and its histogram (`curvesHistogram`, the suite's ToneHistogram, which
+// Levels draws too) counts the display values of the image as it enters
+// Curves, so both show what the render does; `curvesHistogramKey` changes
 // exactly when that count can. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -21,6 +22,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteModel
 
 /// One rendered picture: display bytes for the canvas, the revision they show
 /// and how long the render took.
@@ -89,26 +91,31 @@ extension PhotoWorkspace {
 
     /// Rec. 709 luminance of the image as it enters Curves (the layers
     /// composited, then exposure and levels), counted on display (sRGB-encoded)
-    /// values like the curve's axis, in 256 bins scaled so the
-    /// tallest is 1: the histogram the curve editor draws behind the curve.
-    /// Empty with no image open; all zeros when every pixel is transparent.
+    /// values like the curve's axis, in 256 bins, with its clipping: the
+    /// histogram Levels shows and the curve editor draws behind the curve.
+    /// Empty with no image open, when every pixel is transparent, and when the
+    /// task counting it is cancelled (it stops before the next row).
     /// Cost: it reads at most 256 evenly spaced rows, so about 256 x width
     /// pixels composited, adjusted and counted, whatever the image's height.
-    public func curvesHistogram() -> [Double] {
-        guard let canvas else { return [] }
+    /// A cancelled task stops between rows and gets `empty`.
+    public func curvesHistogram() -> ToneHistogram {
+        guard let canvas else { return .empty }
         var counts = [Int](repeating: 0, count: 256)
+        var shadows = 0, highlights = 0
         // ponytail: recounts every sampled row on each call; cache counts per
         // tile by damage(since:) if it shows up in a drag profile.
         for y in stride(from: 0, to: canvas.height, by: (canvas.height + 255) / 256) {
+            guard !Task.isCancelled else { return .empty }
             let row = PixelRect(x: 0, y: y, width: canvas.width, height: 1)
             // Can't fail: the same pixels render on the canvas.
             guard let pixels = try? adjustments.appliedBeforeCurves(to: composited(row)),
                 let histogram = try? Histogram(of: pixels, bins: counts.count, encoding: .sRGB)
             else { continue }
             counts = zip(counts, histogram.luminance).map(+)
+            shadows += histogram.shadowClipped
+            highlights += histogram.highlightClipped
         }
-        let tallest = Double(counts.max() ?? 0)
-        return counts.map { tallest > 0 ? Double($0) / tallest : 0 }
+        return ToneHistogram(channels: [counts], shadowClipped: shadows, highlightClipped: highlights)
     }
 
     /// A value that changes exactly when `curvesHistogram()` can: with any

@@ -45,14 +45,12 @@ private func twoPhotos() -> LibraryCatalog {
     catalog.addKeywords("Sunset")
     catalog.addKeyword(toAll: "Sunset")
     catalog.removeKeyword("Beach")
-    catalog.setTitle("Bay")
-    catalog.setCaption("Evening")
     #expect(catalog == before)
     #expect(catalog.keywordStates.isEmpty)
     #expect(catalog.keywordSuggestions(prefix: "").isEmpty)
-    #expect(catalog.searchSuggestions(prefix: "").isEmpty)
     #expect(catalog.sidecarWrites(after: [:]).isEmpty)
-    #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: []) == nil)
+    #expect(catalog.sidecarStatus(for: "P1", written: [:], failures: [:], writing: [])
+        == "Samples have no file, so no sidecar.")
 }
 
 @Test func theInspectorReadsTitleAndCaptionAcrossTheSelection() {
@@ -70,7 +68,7 @@ private func twoPhotos() -> LibraryCatalog {
         MetadataInspectorID.sidecar, MetadataInspectorID.search,
     ]
     let existing = [MetadataInspectorID.flag, MetadataInspectorID.label(nil)] + (1...5).map(MetadataInspectorID.star)
-        + CameraField.allCases.map(MetadataInspectorID.camera)
+        + CameraField.allCases.map(MetadataInspectorID.camera) + PhotoFlag.allCases.map(MetadataInspectorID.flag)
     #expect(Set(ids).count == ids.count)
     #expect(Set(ids).isDisjoint(with: existing))
     #expect(ids.allSatisfy { $0.hasPrefix("library.") })

@@ -6,7 +6,7 @@
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "canonical duplicates audit 2026-10-20, top-15 #12 (thumbnails and previews); feature map suiteui/shared-thumbnails; real job RJ-X47; the home's 'Not connected yet' thumbnails slot",
-  "waits_on": "shared-codecs SC-a (Package.swift, project.yml); adopt-kernel-autosave AK-a (SuiteLocations.appFolder) and AK-photo (PhotoWindow+File.swift) before ST-7; cross-line hand-offs: library spine and raw RW-c (LiveThumbnails), suite home (HomeGrid), photo/history-panel and file-flow (PhotoWindow+File)",
+  "waits_on": "shared-codecs SC-a (Package.swift, project.yml); adopt-kernel-autosave AK-a (SuiteLocations.appFolder) and AK-photo (PhotoWindow+File.swift) before ST-7; cross-line hand-offs: library spine and raw RW-3 (LiveThumbnails), suite home (HomeGrid), photo/history-panel and file-flow (PhotoWindow+File)",
   "depends": [
     "suite-harness",
     "editor-kernel"
