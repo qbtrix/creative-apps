@@ -81,6 +81,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 2026-10-21T10:36Z heartbeat: #3844 merged dev at b14ab8cb; the anchors pass now. The gate fails only on CommandPathTests photo (PhotoPlace.swift:36, #3976), which fails the same way on dev alone (#3856). Head held at a880a6f9; noted on #3779 and #3856. TS-a still needs TS-2 (FP-a). #3847 stacked on TS-5.
 
+- 2026-10-21T11:03Z heartbeat: #3844 Head: held at a880a6f9, dev still red (#3856, CommandPathTests photo); #3847 stacked
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
