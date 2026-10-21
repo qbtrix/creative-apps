@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-21T02:36Z	3	stage-start	wave1	FH-2 / AJ-2s; IM-a and BK-m not merged
 2026-10-21T03:28Z	3	pr-opened	#3845	FH-2 real jobs disabled; IM-a, BK-m still open (re-read 03:3xZ)
 2026-10-21T04:01Z	3	blocked-poll-2	#3715,#3758	IM-a and BK-m not started; FH-2 #3845 in lane
+2026-10-21T04:20Z	3	supervisor-question	#3778	3 identical blocked polls on IM-a/BK-m
