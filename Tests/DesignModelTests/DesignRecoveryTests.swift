@@ -2,7 +2,6 @@
 // DesignRecovery+Kernel.swift puts the workspace on SuiteKernel's HistoryJumping: the listing
 // starts at "Open" or "New Design", a jump lands on its step and records nothing, recovery bytes
 // are the document as DesignFile writes it, and the recovered workspace is dirty and never saved.
-// DA-1 declares the adapter as stubs, so the suite is disabled until DA-5 writes the bodies.
 // Runs on Linux and macOS.
 import DesignModel
 import SuiteKernel
@@ -23,7 +22,7 @@ private func edited(_ count: Int) throws -> DesignWorkspace {
     return workspace
 }
 
-@Suite(.disabled("DA-5 writes the adapter bodies"))
+@Suite
 struct DesignRecoveryTests {
     @Test func aNewFileListsNewDesign() throws {
         let listing = try edited(2).historyListing
@@ -63,6 +62,16 @@ struct DesignRecoveryTests {
 
     @Test func damagedBytesThrow() {
         #expect(throws: (any Error).self) { try DesignWorkspace.recovered(from: Data([0, 1, 2]), name: nil) }
+    }
+
+    @Test func restoreRecoveredPutsItInPlace() throws {
+        let saved = try edited(2)
+        var window = DesignWorkspace()
+        try window.restoreRecovered(from: saved.recoveryBytes(), name: "card.design")
+        #expect(window.pages == saved.pages)
+        #expect(window.isDirty && window.documentURL == nil)
+        #expect(throws: (any Error).self) { try window.restoreRecovered(from: Data([0, 1, 2]), name: nil) }
+        #expect(window.pages == saved.pages)
     }
 
     @Test func nothingOpenHasNoBytes() {

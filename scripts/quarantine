@@ -5,7 +5,7 @@
 #   {"test": "Target/Class/testName", "owner": "#<open issue>",
 #    "reason": "why it fails", "expires": "YYYY-MM-DD", "scope": "all"|"full"}
 # scope is optional: `all` (the default) skips the journey in every run;
-# `full` skips it only in full runs, so a scoped run (ci.yml's `app` input)
+# `full` skips it only in full runs, so a scoped run (journeys.yml's `app`)
 # still runs it and its owner keeps the proof while main can promote. An
 # entry is live while TODAY is before its expires date; from that day on the
 # journey runs again and `check` fails until the entry is renewed or removed.
