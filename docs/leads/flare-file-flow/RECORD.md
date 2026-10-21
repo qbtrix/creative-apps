@@ -4,7 +4,7 @@ Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
 Run: act-1a15c47678d-i2ih · Session: session_01KmedgAV8daBEtcQfR1LURr · Started: 2026-10-21T02:26Z (line lead: stage-edit #1514, file-flow #3482, export-pack #3481)
 Stage: 3 wave 1
 Base: 2ab0eb96 (origin/dev)
-Next: FL-1 is in the lane as #3843. FL-2 starts once svg-place:PF-u has merged, then FL-u (FL-5, FL-6) stacks on FL-a.
+Next: FL-1 is in the lane as #3843 (macOS build green). svg-place PF-a merged (#3768); FL-2 starts once PF-u has merged (no PR yet, it waits on key-select-all KS-a), then FL-u (FL-5, FL-6) stacks on FL-a.
 
 Loop: v3 (the packet has a `## Slices` table).
 
