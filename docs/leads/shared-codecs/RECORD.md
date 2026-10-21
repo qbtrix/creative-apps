@@ -4,7 +4,7 @@ Issue: #3718 · Packet: docs/blueprints/suiteui/features/shared-codecs.md
 Run: act-1a15fe5ef7c-rszn (resumes act-1a15e10a9c3-kwzx) · Started: 2026-10-21T10:20Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: SC-13 (#4019) and SC-1 (#4020) merged origin/dev for #4008's PhotoPlace fix; gate, push, move Head; open SC-14's PR once SC-13 merges
+Next: #4019 and #4020 wait on their queued macOS builds (runs 39664805180, 39664833728). SC-14 restacked on SC-13 4e6f468 (ac16760), gating; push and open its PR once #4019 merges. SC-2 after SC-1 and IM-a.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -55,3 +55,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-21T19:24Z: #4019 and #4020 were held on red Linux by dev's CommandPathTests photo failure (PhotoPlace.swift:36), which #4008 fixed on dev; both branches merge origin/dev and re-gate.
 
 - 2026-10-21T19:37Z: #4019 and #4020 merged dev (#4008 fix), baselined the pasteboard files dev added, re-gated CI: PASS, moved Head: lines. Both await the lane.
+- 2026-10-21T20:10Z: #4019 and #4020 macOS build-only runs queued. SC-14 rebased onto SC-13 head 4e6f468, clean; scripts/ci --changed running.
