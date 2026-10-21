@@ -3,7 +3,8 @@
 // flag), a rating the `rating` rule admits, a label in `labels` (empty: any
 // label or none), and not rejected while `hidesRejected` is on. `summary`
 // is what the bar and VoiceOver read, for example "At least 3 stars, Rejects
-// hidden". Linux-safe.
+// hidden". A folder rule (`folder`, folders FO-5) shows one folder's photos,
+// with or without its subfolders'. Linux-safe.
 
 /// How many stars a photo needs: any, at least N, or exactly N. Exactly 0
 /// is unrated.
@@ -47,6 +48,8 @@ public struct LibraryFilter: Hashable, Sendable {
     public var rating = RatingRule.any
     public var labels: Set<PhotoLabel> = []
     public var hidesRejected = false
+    /// The folder whose photos show (FolderScope in LibraryFolders+Kernel.swift); nil: any folder.
+    public var folder: FolderScope?
 
     /// No rule on: every photo shows.
     public static let all = LibraryFilter()
@@ -62,6 +65,7 @@ public struct LibraryFilter: Hashable, Sendable {
             guard let label = photo.label, labels.contains(label) else { return false }
         }
         if hidesRejected, photo.flag == .reject { return false }
+        if let folder, !folder.admits(photo) { return false }
         return true
     }
 
@@ -79,6 +83,7 @@ public struct LibraryFilter: Hashable, Sendable {
         let labelList = PhotoLabel.allCases.filter(labels.contains).map(\.rawValue)
         if !labelList.isEmpty { parts.append(Self.orList(labelList)) }
         if hidesRejected { parts.append("Rejects hidden") }
+        if let folder { parts.append(folder.summaryPhrase) }
         return parts.joined(separator: ", ")
     }
 
