@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
 2026-10-21T07:22Z	poll	wait	-	#3933 (HS-m1) macOS build 39557192935 success, waiting on a lane sweep (14 macOS builds queued); #3934, #3929 stacked
 2026-10-21T07:53Z	poll	wait	-	#3933 macOS build green, waiting on lane sweep (queue busy)
+2026-10-21T08:23Z	poll	wait	-	#3933 clean, Linux check running on 718324d9; lane merges after it
