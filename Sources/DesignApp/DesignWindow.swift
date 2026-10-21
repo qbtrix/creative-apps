@@ -33,8 +33,12 @@
 // Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
 // them through DesignPasteboardBridge under the Model's `pasteboardType`; a
 // refusal (nothing selected, nothing of Design's to paste) goes to the status
-// line. DesignClosePrompt sits on the root, letting every close through until
-// files-history asks about unsaved changes.
+// line.
+//
+// Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with Design's hooks
+// (`unsavedHooks`, buttons `design.close.*`): a close of an edited window, and File > New File
+// over one, asks Save, Don't Save or Cancel first. Save runs File > Save and lands only when
+// the workspace then reads clean, so a cancelled Save panel keeps the document.
 //
 // Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
 // then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
@@ -128,7 +132,7 @@ struct DesignWindow: View {
             Text(shown.message)
         }
         .task { start() }
-        .modifier(DesignClosePrompt(model: model))
+        .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
@@ -147,7 +151,7 @@ struct DesignWindow: View {
         default: commitText()
         }
         switch intent {
-        case .newFile: model.newFile()
+        case .newFile: newFile()
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
@@ -299,6 +303,33 @@ struct DesignWindow: View {
     }
 
     // MARK: Files
+
+    /// The unsaved guard's hooks for a window (`design.close.*`): the name is the open file's ("Untitled"
+    /// before its first save, nil with nothing open), the dirty state the workspace's DocumentSession, and
+    /// Save runs File > Save, landing only when the workspace then reads clean.
+    // view-static: main-actor
+    static func unsavedHooks(model: @escaping @MainActor () -> DesignWorkspace, perform: @escaping DesignPerform) -> UnsavedHooks {
+        UnsavedHooks(
+            idPrefix: "design",
+            documentName: {
+                let workspace = model()
+                return workspace.isOpen ? workspace.documentURL?.lastPathComponent ?? "Untitled" : nil
+            },
+            isDirty: { model().isDirty },
+            save: {
+                perform(.save)
+                return !model().isDirty
+            })
+    }
+
+    /// File > New File, after the unsaved guard's sheet on the key window lets it go on.
+    private func newFile() {
+        let hooks = Self.unsavedHooks(model: { model }, perform: perform)
+        guard hooks.isDirty() else { return model.newFile() }
+        Task { @MainActor in
+            if await UnsavedGuard.proceed(hooks, in: NSApp.keyWindow) { model.newFile() }
+        }
+    }
 
     /// A window opened by File > New File with no window focused starts with a new file, one
     /// opened for a file opens it, and the first window opens the launch file when there is one.

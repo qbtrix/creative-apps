@@ -42,7 +42,7 @@ import Testing
 }
 
 @MainActor
-@Suite(.disabled("waits on UP-6")) struct DesignUnsavedGuardTests {
+@Suite struct DesignUnsavedGuardTests {
     @Test func buttonsAreDesignsCloseIDs() {
         let hooks = DesignBox().hooks
         #expect(hooks.idPrefix == "design")
