@@ -1,3 +1,29 @@
 utc	stage	event	ref	note
 2026-10-21T11:25Z	0	stage-start	0	lead started, waits checked
 2026-10-21T11:27Z	3	wave-start	FR-a	wave 1 launched (FR-a contract slice)
+2026-10-21T12:15Z	3	resume	FR-a	resumed after restart; FR-a built on lead/frame-rates-FR-a, gate blocked by dev-red #3856, now fixed on dev
+2026-10-21T12:17Z	3	heartbeat	-	gates running on wave-1 slices after merging dev (#4008 fixed dev-red)
+2026-10-21T12:19Z	3	wave-start	wf_8d28fdb1-88d	FR-m building stacked on lead/frame-rates-FR-a
+2026-10-21T12:22Z	3	pr-opened	#4063	FR-a PR opened at 52ecf12e6, fast-lane
+2026-10-21T12:37Z	3	heartbeat	4063	wave 2 builders running
+2026-10-21T12:57Z	3	heartbeat	4063	removed the attribution footer from #4063's body; FR-m at 5dfc7481b
+2026-10-21T13:04Z	3	wave	FR	wave 2 builders returned; dev's perf list now skips the Library timing tests; merged dev into the slice branches and re-gating one at a time
+2026-10-21T13:05Z	build	wave	wf_5261e84a-ce6	FR-u builder started, stacked on FR-m
+2026-10-21T13:16Z	build	check	39600275867	FR-a macOS build green; FR-m gate PASS on 6fe38e4f9 and pushed
+2026-10-21T13:24Z	build	builder-relaunched	FR-u	FR-u builder relaunched on FR-m 6fe38e4f9
+2026-10-21T13:43Z	build	check	#4063	Linux check red on Library timing tests (not ours; perf-listed on dev in #4069); merged dev into FR-a, re-gating
+2026-10-21T13:44Z	build	slice-built	FR-u	FR-u built at a1d3152b9, gate PASS twice, stacked on FR-m
+2026-10-21T15:29Z	wave-2	pr-update	#4063	FR-a re-gated after dev merge (Library timing flake fixed on dev); Head moved to e20f5bc8b
+2026-10-21T15:50Z	wave-1	check	#4063	#4063 awaiting lane macOS build run 39626628147
+2026-10-21T16:13Z	build	heartbeat	#4063	FR-m and FR-u stacked and ready locally
+2026-10-21T16:33Z	build	heartbeat	#4063	macOS runner queue backed up
+2026-10-21T16:53Z	wave1	heartbeat	#4063	macOS build started; FR-m opens on merge
+2026-10-21T17:14Z	build	heartbeat	#4063	FR-a still on lane macOS build
+2026-10-21T17:35Z	build	merge	#4063	FR-a merged 17:34Z
+2026-10-21T17:44Z	build	pr	#4142	FR-m opened
+2026-10-21T17:55Z	build	pr	#4145	FR-u opened, stacked on FR-m #4142
+2026-10-21T17:56Z	build	pr	#4145	FR-u PR closed by size sentinel (stacked); held
+2026-10-21T18:07Z	build	slice-done	FR-a	Belt-Slice-Done FR-a posted (run 39646407505); FR-m #4142 macOS build queued; FR-u held
+2026-10-21T18:29Z	build	heartbeat	FR-m	FR-m #4142 macOS build 39647732409 still queued; FR-u held
+2026-10-21T18:43Z	build	heartbeat	FR-m	FR-m #4142 waits on macOS build 39647732409; FR-u held until FR-m merges
+2026-10-21T18:43Z	build	heartbeat	FR-m	mirror to lead/frame-rates
