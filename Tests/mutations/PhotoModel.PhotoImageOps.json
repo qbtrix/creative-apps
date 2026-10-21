@@ -1,0 +1,5 @@
+[
+  {"label": "anchorIgnored: Canvas Size always grows from the top left, so a centred border lands only on the right and bottom", "file": "Sources/PhotoModel/PhotoImageOps.swift", "find": "new: (Double(width), Double(height)), anchor)", "replace": "new: (Double(width), Double(height)), .topLeft)", "tests": "PhotoCanvasSizeTests/canvasSizeCentred"},
+  {"label": "backgroundPaddedTransparent: the new border is left see-through instead of the background colour", "file": "Sources/PhotoModel/PhotoImageOps.swift", "find": "for (x, y, w, h) in strips where w > 0 && h > 0 {", "replace": "for (x, y, w, h) in strips where w < 0 {", "tests": "PhotoCanvasSizeTests/borderIsBackground"},
+  {"label": "stepMisnamed: Canvas Size records its undo step as Image Size", "file": "Sources/PhotoModel/PhotoImageOps.swift", "find": "record(.stack(stackState), named: \"Canvas Size\")", "replace": "record(.stack(stackState), named: \"Image Size\")", "tests": "PhotoCanvasSizeTests/oneUndoStep"}
+]

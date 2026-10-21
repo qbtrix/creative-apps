@@ -71,6 +71,10 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "photo.reset-develop": .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "photo.crop": .some(menu(c.cropHelp == nil, "crop", "Crop isn't connected yet."))
         case "photo.reset-crop": .some(menu(c.resetCropHelp == nil, "crop", "Crop isn't connected yet."))
+        case "file.recent", "file.open-recent", "file.drop": .some(nil)
+        case "file.clear-recent": .some("No Recent Files")
+        case "file.open-in": .some(c.openInHelp)
+        case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
     }
@@ -135,7 +139,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
                     && (try? ran.save()) == (try? doc.save())
                 let noOpEdit = unchanged && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes", "redoRestoresBytes"]
                     .contains { problem.contains(": \($0):") }
-                return !(off && problem.contains("exampleRuns")) && !noOpEdit
+                // Library has no recent files, so Open Recent's example names one it can't find.
+                let needsFile = id == "file.open-recent" && problem.contains("exampleRuns")
+                return !((off || needsFile) && problem.contains("exampleRuns")) && !noOpEdit
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             for spec in LibraryCatalog.commands where spec.kind == .edit && spec.availability(c).why == nil {
@@ -175,5 +181,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "photo.reset-crop | Reset Crop | Crop isn't connected yet.",
         "metadata.set-rating | Set Rating | on", "metadata.pick | Pick | on", "metadata.reject | Reject | on",
         "metadata.clear-flag | Clear Flag | on", "metadata.set-label | Set Label | on", "metadata.auto-advance | Auto Advance | on",
+        "file.recent | Recent Files | on", "file.open-recent | Open Recent | on", "file.clear-recent | Clear Menu | No Recent Files",
+        "file.open-in | Open In | Open a photo in the loupe first.", "file.drop | Drop Files | on",
+        "folders.list | List Folders | Import a folder to see its folders.",
+        "view.show-folder | Show Folder | Import a folder to see its folders.",
     ]
 }

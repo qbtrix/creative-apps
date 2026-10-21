@@ -45,6 +45,7 @@ halo HaloModelTests.HaloTimelineCostTests
 halo HaloModelTests.HaloViewerBudgetTests
 halo HaloModelTests.HaloEasingBudgetTests
 halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloTests/timing
+halo AppSnapshotTests.BodyCountSuites/RenderBudgetHaloKeyEditingTests/timing
 
 flare FlareModelTests.FlareEasingDragCostTests
 flare FlareModelTests.LiveKeysBudgetTests
@@ -81,6 +82,7 @@ library LibraryModelTests.statusRowWithinBudget
 library LibraryModelTests.planWithinBudget
 library AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/timing
 library LibraryModelTests.LibraryFoldersTests/tenThousandPaths
+library LibraryModelTests.LibraryCollectionsFileTests/twentyCollectionsOverTenThousandIDsWithinBudget
 library LibraryModelTests.LargeCatalogBudgetTests/fixtureBuildsTenThousandDeterministically
 
 design DesignModelTests.DesignSnapBudgetTests

@@ -1,5 +1,6 @@
 // FlareSelectSnapshots.swift: stage-edit SE-1, the selection box and its handles on `bounce`: Ball, a marquee over Ball
-// and Shadow, a scale before mouse-up, and the locked Background (no box). Goldens flare-select-*-light.png.
+// and Shadow, a scale before mouse-up, the locked Background (no box), and Direct Select on Ball once its layer is
+// locked (no edit marks, an "Unlock" pill). Goldens flare-select-*-light.png.
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -39,6 +40,18 @@ import Testing
         model.selectLayer("background")
         #expect(model.selectionReadout.box == nil, "a locked layer picked in the sidebar drew a box")
         check(model, name: "flare-select-locked")
+    }
+
+    /// Direct Select on Ball, then Ball's layer locked: no edit marks, and the status bar says to unlock it (#4011).
+    @Test func directLocked() throws {
+        var model = Self.selected([])
+        model.selectTool(.directSelect)
+        model.drag(from: Point(x: 80, y: 100), to: Point(x: 80, y: 100))
+        let layer = try #require(model.selection.first?.layerID)
+        model.toggleLayerFlag(layer, .locked)
+        #expect(model.pathInEdit != nil && model.editablePath == nil)
+        #expect(model.statusPills(measuredFPS: nil).pathHelp?.hasPrefix("Unlock ") == true)
+        check(model, name: "flare-select-direct-locked")
     }
 
     private static func selected(_ drag: [Point]) -> FlareWorkspace {

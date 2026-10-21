@@ -448,6 +448,15 @@
                 "paths": [
                   "Sources/SuiteModel/Presets/"
                 ]
+              },
+              {
+                "id": "suite-help",
+                "name": "Help reports",
+                "description": "What Help > Report a Problem… and Beta Notes show: ProblemReport (the app, its version and build, macOS, the Mac model and the newest three suite crashes at most 7 days old, each a CrashFile trimmed to its header and crashed thread, with the home path, user and host redacted; text puts the person's note on top) and BetaNotes.current, the build's known issues. Built from values the caller reads; nothing here reads a disk or opens a socket (report-problem RP-1 stubs, RP-4 bodies).",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Help/"
+                ]
               }
             ]
           },
@@ -495,7 +504,10 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Keys/Keys.swift",
-                  "Sources/SuiteKernel/Keys/KeyRules.swift"
+                  "Sources/SuiteKernel/Keys/KeyRules.swift",
+                  "Sources/SuiteKernel/Keys/FrameRate.swift",
+                  "Sources/SuiteKernel/Keys/Timecode.swift",
+                  "Sources/SuiteKernel/Keys/TimeCommands.swift"
                 ]
               },
               {
@@ -735,6 +747,16 @@
                 "technology": "Swift 6, Foundation and Darwin sockets, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/LiveCommandChannel.swift"
+                ]
+              },
+              {
+                "id": "shell-help",
+                "name": "Help menu",
+                "description": "SuiteHelpCommands, the suite's Help menu: it replaces the system's empty help item with the suite Help catalog's items (Report a Problem…, Beta Notes and, in the launcher, Welcome to AfterGlow, which opens the tour), each a MenuCommand over a SuiteHelpDocument and disabled with its reason until its run is built. ShellHelpProvider adapts SuiteModel's ProblemReport and BetaNotes to the kernel's HelpProviding with this Mac's version, build, macOS and model. Built by report-problem RP-2.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteHelpCommands.swift",
+                  "Sources/SuiteShell/ShellHelpProvider.swift"
                 ]
               }
             ]
