@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T19:22:03Z	heartbeat	#4100 in lane batch 20261021190945 (Linux + macOS gate running)
 2026-10-21T19:45Z	stage	#4100 #4112 #4115	#4100 merged 9a4ac8828; #4112, #4115 restacked on dev (CI PASS), ready; #4129 waits on both
 2026-10-21T20:09Z	heartbeat	#4112 #4115 #4129	#4112 clean, #4115 macOS build queued (run 39666656239); #4129 waits on both
+2026-10-21T20:25Z	heartbeat	#4112 #4115 #4129	no merges; #4115 macOS build still queued; macOS runners backed up
