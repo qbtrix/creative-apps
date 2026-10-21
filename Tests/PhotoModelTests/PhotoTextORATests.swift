@@ -1,8 +1,7 @@
 // PhotoTextORATests.swift (text-layers TX-1 written, TX-6 turns on): a text layer in the `.ora`. It saves
 // as its rasterized PNG in the stack plus an `afterglow:text` attribute holding the words and style, so it
-// reopens editable in Photo and as pixels in another editor. Until TX-6 the workspace refuses to save a
-// document with a text layer (NotBuilt), which runs now; the round trip is disabled by name. Through
-// LiveArchive and RawCodec, a lossless in-memory codec. Linux and macOS.
+// reopens editable in Photo and as pixels in another editor; a damaged attribute reads as pixels too, never
+// an error. Through LiveArchive and RawCodec, a lossless in-memory codec. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -55,16 +54,21 @@ import Testing
         return package
     }
 
-    // The stub contract: what TX-6 replaces.
+    // The workspace's save and open.
 
-    @Test func aTextLayerRefusesToSaveUntilBuilt() throws {
+    @Test func theWorkspaceSavesAndReopensATextLayer() throws {
         var workspace = PhotoWorkspace(services: .fake)
         try workspace.newCanvas(width: 6, height: 4)
         var title = PhotoLayer(id: "layer-9", name: "SALE")
         title.kind = .text(sale)
         workspace.layers.insert(title, at: 0)
-        #expect(throws: PhotoWorkspace.textNotBuilt) { try workspace.snapshot() }
-        #expect(throws: PhotoWorkspace.textNotBuilt) { try workspace.documentPackage(archive: archive, codec: RawCodec()) }
+        let words = image(4, 2, seed: 3)
+        workspace.pixels["layer-9"] = try TiledPixels(rgba8: words.rgba8, width: words.width, height: words.height)
+        let package = try workspace.documentPackage(archive: archive, codec: RawCodec())
+        var reopened = PhotoWorkspace(services: .fake)
+        try reopened.openDocument(package, name: "Sale.ora", archive: archive, codec: RawCodec())
+        #expect(reopened.layers.first?.kind == .text(sale))
+        #expect(try reopened.snapshot().pixels["layer-9"] == words)
     }
 
     @Test func aDocumentWithoutTextSavesAsBefore() throws {
@@ -77,7 +81,7 @@ import Testing
 
     // MJ-TX: the text layer in the file.
 
-    @Test(.disabled("waits on TX-6: builds PhotoTextLayer+ORA"))
+    @Test
     func reopensEditable() throws {
         let original = snapshot()
         let package = try archive.encode(original, codec: RawCodec())
@@ -89,7 +93,7 @@ import Testing
         #expect(text == sale)
     }
 
-    @Test(.disabled("waits on TX-6: builds PhotoTextLayer+ORA"))
+    @Test
     func theStackPNGIsTheRasterizedPixels() throws {
         let original = snapshot()
         let package = try archive.encode(original, codec: RawCodec())
@@ -99,7 +103,7 @@ import Testing
         #expect(png == original.pixels["layer-2"])
     }
 
-    @Test(.disabled("waits on TX-6: builds PhotoTextLayer+ORA"))
+    @Test
     func unknownKeyTolerated() throws {
         let package = try editing(try archive.encode(snapshot(), codec: RawCodec()), "afterglow:text") {
             $0.replacingOccurrences(of: "&quot;family&quot;", with: "&quot;glow&quot;:3,&quot;family&quot;")
@@ -109,7 +113,7 @@ import Testing
         #expect(text == sale)
     }
 
-    @Test(.disabled("waits on TX-6: builds PhotoTextLayer+ORA"))
+    @Test
     func withoutTheAttributeReadsAsPixels() throws {
         let original = snapshot()
         let package = try editing(try archive.encode(original, codec: RawCodec()), "afterglow:text") {
@@ -120,5 +124,27 @@ import Testing
         #expect(title.kind == .pixels)
         #expect(title.name == "SALE")
         #expect(reopened.pixels["layer-2"] == original.pixels["layer-2"])
+    }
+}
+
+extension PhotoTextORATests {
+    @Test func aDamagedAttributeReadsAsPixels() throws {
+        let package = try editing(try archive.encode(snapshot(), codec: RawCodec()), "afterglow:text") {
+            $0.replacingOccurrences(of: "&quot;words&quot;", with: "&quot;wor")
+        }
+        let reopened = try archive.decode(package, codec: RawCodec())
+        #expect(reopened.layers.first?.kind == .pixels)
+        #expect(reopened.layers.first?.name == "SALE")
+    }
+
+    @Test func aTitleWithMarkupSurvives() throws {
+        var original = snapshot()
+        var title = try #require(original.layers.first)
+        var tricky = sale
+        tricky.words = #"<b>"Fish & Chips"</b> it's 'on'"#
+        title.kind = .text(tricky)
+        original.layers[0] = title
+        let reopened = try archive.decode(try archive.encode(original, codec: RawCodec()), codec: RawCodec())
+        #expect(reopened.layers.first?.kind == .text(tricky))
     }
 }
