@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-21T21:57Z	FR-10b	supervisor approved FR-10b ownership (comment 6327351234)	FR-flare	FR-10b UI half building stacked on FR-10; extra owned files approved by supervisor
 2026-10-21T22:14Z	FR-10b	FR-10b builder done, CI PASS, mutate 6/6; gap #4228 filed	FR-flare	Extra ownership per supervisor: FlareIntent, FlareScenes, FlareWindow+File, FlarePlayback, FlareHeadless, FlareNewDocumentTests, FlareNewSheetSnapshots, FlareStatusRead; FlareWindow+Inspector edited but owned by TK-flare
 2026-10-21T22:18Z	waiting	heartbeat 22:18Z: macOS build queue still backed up; OC-u, AD-halo not on dev	FR-flare	no change
+2026-10-21T22:39Z	waiting	heartbeat 22:39Z: no merges; OC-u, AD-halo not on dev	FR-flare	no change
