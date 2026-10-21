@@ -8,7 +8,7 @@ Next: PF-a slice PR (PF-1, PF-2) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: 4 (in lane), 2026-10-20T23:46Z: wave-1 PR's lane macOS build queued since 21:57; macOS runners look stuck (scoped runs in progress since 12:47), reported on #3451; next: rebase stacked slices onto dev after it merges, open their PRs.
+Last stage: 4 (in lane), 2026-10-21T00:16Z: wave-1 PR's lane macOS build still queued (since 21:57); the stuck scoped:flare run ended, queue may move; next: rebase stacked slices onto dev after it merges, open their PRs.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

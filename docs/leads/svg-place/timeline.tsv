@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-20T22:14Z	4	heartbeat	#3768	lane dispatched macOS build run 39504439911 (queued)
 2026-10-20T22:44Z	4	heartbeat	#3768	macOS build still queued behind 5 macOS runs
 2026-10-20T23:46Z	4	heartbeat	-	macOS runners stuck; reported to supervisor on #3451
+2026-10-21T00:16Z	4	heartbeat	-	lane macOS build still queued
