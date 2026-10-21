@@ -127,7 +127,8 @@ enum CommandPathScan {
         .deletingLastPathComponent().deletingLastPathComponent()
     static let fixture = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
         .appendingPathComponent("Fixtures").appendingPathComponent("CommandPath")
-    static let apps = ["photo": "PhotoApp", "design": "DesignApp", "flare": "FlareApp", "halo": "HaloApp", "library": "LibraryApp"]
+    static let apps = ["photo": "PhotoApp", "design": "DesignApp", "flare": "FlareApp", "halo": "HaloApp", "library": "LibraryApp",
+                       "shell": "SuiteShell", "launcher": "AfterGlowApp"]
 
     static func fixtureSites() throws -> [CommandSite] {
         try CommandPathScan.sites(root: fixture, folder: "Sources/FixtureApp", suffix: ".swift.txt")
@@ -185,8 +186,38 @@ enum CommandPathScan {
         #expect(CommandPathScan.sites(in: #"MenuCommand("\(on): x", help: "") { go(on: 1) }"#, file: "a").count == 1)
     }
 
-    /// Today's apps pass against the baselines generated from them.
-    @Test(arguments: ["photo", "design", "flare", "halo", "library"])
+    /// CS-2, the dismiss rule: a Cancel, Close or Done whose action only dismisses its sheet
+    /// (an empty closure, a dismiss call, a flag set to false or nil) is not a bare control.
+    @Test func dismissOnlyDismisses() {
+        let dismissals = [
+            #"Button("Cancel", role: .cancel) { onCancel() }"#,
+            #"Button("Close", systemImage: "xmark") { onClose?() }"#,
+            #"Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)"#,
+            #"Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)"#,
+            #"Button("Cancel", role: .cancel) {}"#,
+            #"Button("Cancel", role: .cancel) { request = nil }"#,
+            "Button(\"Done\") {\n    showing = false\n    dismiss()\n}",
+        ]
+        for text in dismissals {
+            #expect(CommandPathScan.sites(in: text, file: "a").isEmpty, "\(text)")
+        }
+        let edits = [
+            #"Button("Cancel") { dismiss(); model.reset() }"#,
+            "Button(\"Done\") {\n    model.apply()\n    dismiss()\n}",
+            #"Button("Cancel", action: model.revert)"#,
+            #"Button("Cancel") { actions.cancel?() }"#,
+            #"Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }"#,
+            #"Button("Delete") { dismiss() }"#,
+            #"Button("Remove", action: onClose)"#,
+            #"Button(title) { dismiss() }"#,
+        ]
+        for text in edits {
+            #expect(CommandPathScan.sites(in: text, file: "a").count == 1, "\(text)")
+        }
+    }
+
+    /// Today's apps, the suite shell and the launcher pass against the baselines generated from them.
+    @Test(arguments: ["photo", "design", "flare", "halo", "library", "shell", "launcher"])
     func appMatchesItsBaseline(app: String) throws {
         let folder = try #require(Self.apps[app])
         let name = "Tests/command-path-baseline/\(app).txt"
