@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-21T22:14Z	FR-10b	FR-10b builder done, CI PASS, mutate 6/6; gap #4228 filed	FR-flare	Extra ownership per supervisor: FlareIntent, FlareScenes, FlareWindow+File, FlarePlayback, FlareHeadless, FlareNewDocumentTests, FlareNewSheetSnapshots, FlareStatusRead; FlareWindow+Inspector edited but owned by TK-flare
 2026-10-21T22:18Z	waiting	heartbeat 22:18Z: macOS build queue still backed up; OC-u, AD-halo not on dev	FR-flare	no change
 2026-10-21T22:39Z	waiting	heartbeat 22:39Z: no merges; OC-u, AD-halo not on dev	FR-flare	no change
+2026-10-21T23:03Z	fix	macos-build-red	c8a8231a9	FR-u: fixed shadowed @State in GalleryTimeline + ported #4215 (dev break #4195); FR-7/FR-9 red only on #4195, port gating
