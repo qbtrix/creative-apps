@@ -51,7 +51,7 @@ struct FlarePathEditLayer: View {
     }
 
     /// The overlay's tool for a Flare tool; nil for a tool that edits no path.
-    static func tool(_ tool: FlareTool) -> PenTool? {
+    nonisolated static func tool(_ tool: FlareTool) -> PenTool? {
         switch tool {
         case .pen: .pen
         case .directSelect: .directSelect
@@ -60,7 +60,7 @@ struct FlarePathEditLayer: View {
     }
 
     /// `contour` mapped through `matrix` into stage points, as the overlay's stand-in.
-    static func standIn(_ contour: VectorContour, through matrix: Matrix) -> PathContourStandIn {
+    nonisolated static func standIn(_ contour: VectorContour, through matrix: Matrix) -> PathContourStandIn {
         func point(_ p: Point) -> CGPoint {
             let mapped = matrix.apply(p)
             return CGPoint(x: mapped.x, y: mapped.y)
