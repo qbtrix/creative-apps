@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-21T12:24:23Z	FP-e	slice done	#3519#issuecomment-6315821062	run 39596004859, only the Library timing flake (supervisor answer)
 2026-10-21T12:47:23Z	heartbeat	#4027 #4029 held by Linux red on Photo CommandPathTests (heads predate #4008); merging dev in and re-gating	-	fix in flight
 2026-10-21T13:09:06Z	fix	dev merged into #4027 (55eea80c) and #4029 (95f759e4); scripts/ci --changed PASS; Head lines moved	#4027 #4029	back in the lane
+2026-10-21T13:16:12Z	heartbeat	#4027 in lane Linux check, #4029 waiting on macOS gate; #3770, #4011-#4013 open	-	waiting on lane
