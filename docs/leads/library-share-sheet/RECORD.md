@@ -2,7 +2,7 @@
 
 Issue: #3789 · Packet: docs/blueprints/library/features/share-sheet.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 (earlier act-1a15b98bc49-4lk9 on claude/task-k1zaw1) · Started: 2026-10-20T23:00Z
-Stage: 3 wave 2 (SH-a merged 482f03c6 and done; SH-u #3814 on dev, fixing its Linux gate)
+Stage: 3 wave 2 (SH-a done; SH-u #3814 merged, waiting on the dev Linux check)
 Base: e2b8aa76 (origin/dev)
 Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (CommandPathTests), gate, move Head:; SH-m waits on file-flow LF-m and catalog-backup BK-m (only LF-a #3624, BK-a #3960 on dev); then SH-z
 
@@ -10,7 +10,7 @@ Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (Command
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SH-a | sharing preset, share folder, ShareButton: the contract | SH-1, SH-2 | - | - | yes | 0 | done #3809 (482f03c6) | 39571804700 | - |
-| SH-u | Share in the toolbar and File menu, journey | SH-4, SH-4b | LibraryJourneyTests+Share | SH-a | yes | 1 | fixing #3814 | - | - |
+| SH-u | Share in the toolbar and File menu, journey | SH-4, SH-4b | LibraryJourneyTests+Share | SH-a | yes | 1 | merged #3814 | - | - |
 | SH-m | prepare writes the files, launch cleanup, command | SH-3, SH-3c | - | SH-a, file-flow:LF-m, catalog-backup:BK-m | no | 0 | blocked | - | - |
 | SH-z | finish | SH-5, SH-6 | - | SH-u, SH-m | yes | 0 | planned | - | - |
 
