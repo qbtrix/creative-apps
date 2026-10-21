@@ -99,9 +99,8 @@ extension HaloProject: HeadlessDocument {
         let clear: JSONValue = .object(["layerID": .string("comp-1-layer-2"), "mode": .string("replace")])
         _ = try catalog.run("timeline.pick-keys", params: clear, on: &project)
         #expect(project.pickedFrames(of: "comp-1-layer-2").isEmpty)
-        #expect(throws: CatalogError.unavailable(id: "timeline.select-all-keys", why: "Not built yet (KE-3).")) {
-            try catalog.run("timeline.select-all-keys", params: .object([:]), on: &project)
-        }
+        #expect(try catalog.run("timeline.select-all-keys", params: .object([:]), on: &project).undoStep == nil)
+        #expect(project.pickedFrames(of: "comp-1-layer-2") == [0, 12, 24])
     }
 
     /// Where Halo breaks a kernel law today: "<ids>: <law>", by reason. Each is a gap for a later slice.
@@ -113,7 +112,7 @@ extension HaloProject: HeadlessDocument {
         "undo of a duplicate keeps the bumped id counter": ["layer.duplicate: undoRestoresBytes"],
         "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-color text.set-size: exampleRuns"],
         "files and rendering run through HaloHeadless in AC-h2": ["file.open file.save file.save-as render.start: exampleRuns"],
-        "key editing's Select All Keys and move are stubs until KE-3 and KE-4": ["timeline.move-keys timeline.select-all-keys: exampleRuns"],
+        "key editing's move is a stub until KE-4": ["timeline.move-keys: exampleRuns"],
     ]
 
     @Test func conformance() {

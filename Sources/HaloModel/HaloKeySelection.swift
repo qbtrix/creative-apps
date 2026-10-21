@@ -8,7 +8,9 @@
 // and its `prune(alive:)` drops stale keys, not set algebra here (AS-h2).
 // A pick is never an edit: no history step, no dirty file. ⌫ from the viewer
 // or timeline deletes the picked keys as one "Delete Keyframes" step while
-// any are picked (`deleteCommand`), else the layer.
+// any are picked (`deleteCommand`), else the layer. Key editing (KE-3): the
+// timeline's picks span layers (HaloKeyPick+Kernel.swift), so ⌫ takes every
+// layer's picked keys; the EASING list still reads the selected layer's.
 // EZ-3: easing the picked keys. A preset is one "Keyframe Easing" step; a
 // handle drag is one step until `endCoalescing()` (coalesced per layer); the
 // curve and handles the inspector draws come from the first picked segment.
@@ -92,11 +94,11 @@ extension HaloProject {
 
     /// Narrows the pick to `pickedKeys` before a toggle: stale and
     /// other-layer keys drop out, and a picked last key of a track gives way
-    /// to the first key of the segment it ends.
+    /// to the first key of the segment it ends (read before the prune, #2763).
     private mutating func narrowToPickedKeys() {
         let alive = pickedKeys
         keySelection.prune { alive.contains($0) }
-        for segment in keySegments where segment.isPicked && !keySelection.contains(segment.key) {
+        for segment in keySegments where alive.contains(segment.key) && !keySelection.contains(segment.key) {
             keySelection.pick(segment.key, .extend)
         }
     }
@@ -133,8 +135,10 @@ extension HaloProject {
         return live
     }
 
-    /// The picked keys still on the selected layer's animated tracks: what ⌫ deletes.
-    public var pickedKeyframes: Set<HaloKeyRef> { liveKeySelection.set }
+    /// The picked keys still on an animated track of the selected
+    /// composition, on every layer (key-editing KE-3): what ⌫ deletes and
+    /// the lanes draw picked.
+    public var pickedKeyframes: Set<HaloKeyRef> { keySelection.set.intersection(compositionKeys) }
 
     /// What ⌫ sends from the viewer and timeline: Delete Keyframes while any
     /// key is picked, else Delete (the selected layer).
