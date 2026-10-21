@@ -4,13 +4,13 @@ Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3758) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: gate the dev-merged OC-m head (0c98d00f, #4088 retargeted to dev), push, move its Head: line; then a Linux-green dev run for OC-m. Later slices blocked (see issue comment)
+Next: #4088 dev merged in (0c98d00f), gate CI: PASS, pushed, Head: moved, fast-lane re-added (293 lines, 8 files); wait for its batch, then Belt-Slice-Done OC-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | OC-a | contract: Orientation, CropAspect, CropRules stubs, CropCommands, C4 part; disabled tests | OC-1, OC-2 | – | – | false | 0 | done (#4082 → f080846e; Linux 39620526621; Belt-Slice-Done posted) | – | – |
-| OC-m | Orientation and CropRules bodies; two mutation plans | OC-3, OC-4 | – | OC-a | false | 0 | in lane (#4088 retargeted to dev; dev merged in, gating) | – | – |
+| OC-m | Orientation and CropRules bodies; two mutation plans | OC-3, OC-4 | – | OC-a | false | 0 | in lane (#4088 on dev, 0c98d00f, fast-lane) | – | – |
 | OC-u | CropAspectPicker, gallery, journey, render budget | OC-5, OC-6 | SJ-OC | OC-a; document-setup:DS-u (not started) | true | 0 | blocked | – | – |
 | OC-library-m | Library adopts orientation | OC-7, OC-8 | – | OC-m, suite-imaging:IM-z, clipboard-interop:CB-library (not started) (OC-8) | false | 0 | blocked | – | – |
 | OC-library-u | Library crop UI | OC-9, OC-10 | – | OC-u, OC-library-m | true | 0 | blocked | – | – |
