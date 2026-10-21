@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-21T08:38Z	3	build	-	GF-3 #3760 merged 08:33Z: builder launched for FG-u (FG-3 snapshots + stopDragInThreeBodies), stacked on #3959, checking switch/Type-row duplicate. #3959 still at macOS gate. FG-m waits on KS-a #3921, GF-6 #3742, AC-flare.
 2026-10-21T08:47Z	3	pr	3	FG-u PR #3974 opened (FG-3 snapshots + stopDragInThreeBodies, stacked on #3959), head 5c0c39ce, CI: PASS Linux. Duplicate type switch removed: editor gets only the current type.
 2026-10-21T08:58Z	3	question	-	#3959 macOS build green 08:04Z, mergeable clean, unmerged 53 min, no Linux check: asked supervisor on #3419. #3974 (FG-u) macOS build queued (run 39573143406). FG-m still waits on KS-a #3921, GF-6 #3742, AC-flare.
+2026-10-21T09:18Z	3	poll	-	Supervisor 09:03Z: a 15-min sweep now starts Linux checks for PRs with a green macOS build. #3959 Linux check in progress. #3974 macOS build still queued (run 39573143406). FG-m waits on KS-a #3921, GF-6 #3742, AC-flare.
