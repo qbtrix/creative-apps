@@ -9,6 +9,8 @@ file.new
 file.open
 file.save
 file.save-as
+history.jump
+history.read
 object.align-bottom
 object.align-center
 object.align-left
