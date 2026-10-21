@@ -279,16 +279,28 @@ private struct ThumbnailCell<ID: Hashable>: View {
             in: RoundedRectangle(cornerRadius: SuiteRadius.medium)
         )
         .onHover { hovering = $0 }
-        .accessibilityElement(children: .combine)
-        // No caption on screen: the cell still reads its file name first.
+        // No caption on screen: `.combine` would find no text and drop the element, so the cell
+        // names itself, file name first, then what its badges say.
+        .accessibilityElement(children: showsCaption ? .combine : .ignore)
         .accessibilityLabel { label in
-            if !showsCaption { Text(item.caption) }
-            label
+            if showsCaption { label } else { Text(verbatim: spokenName) }
         }
         // After the combine, so a cell with badges reads its help once, not once per element.
         .help(item.help ?? item.caption)
         .accessibilityValue(Text(verbatim: item.accessibilityValue ?? ""))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    /// The captionless cell's label: the file name, then the badges' and the warning mark's words.
+    private var spokenName: String {
+        let marks = item.badges
+        var parts = [item.caption]
+        if item.isUnreadable { parts.append("Unreadable") }
+        if marks.rating > 0 { parts.append(marks.rating == 1 ? "1 star" : "\(marks.rating) stars") }
+        if marks.dimmed { parts.append("Rejected") }
+        if marks.isFlagged { parts.append("Flagged") }
+        if let label = marks.colorLabel { parts.append(label.name) }
+        return parts.joined(separator: ", ")
     }
 
     /// One focus-gap-wide line around the image's edge, outside the ring;
