@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-21T17:09Z	3 wave 3	check	PM-3,PM-4,PM-5,PM-6	PM-3 #4117, PM-4 #4095 (rebased), PM-5 #4118 open with Fast-Check; lane macOS builds queued; PM-6 builder started on PM-5
 2026-10-21T17:10:26Z	3 wave 3	builders	PM-7,PM-8	started stacked on PM-3 #4117 (not merged), same as PM-6 on PM-5
 2026-10-21T18:57:40Z	3 wave 3	check	PM-3,PM-4,PM-8 merged; PM-5,PM-6 needs-rebase	fixer sent; PM-7 #4138 open; PM-a awaits Linux run 39655526241
+2026-10-21T20:01:18Z	3 wave 3	slice-done	PM-a	Belt-Slice-Done + Mac-Finish-Wanted posted (run 39655526241); PM-7 merged; PM-5/PM-6 rebased
