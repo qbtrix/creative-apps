@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T18:31Z	3	poll	#4100	still unmerged, clean; lane sweeps pending/cancelled (busy)
 2026-10-21T18:45Z	3	poll	#4100	mac build green, clean, awaiting lane merge; stacked drafts wait
 2026-10-21T18:48Z	3	poll	#4100	unchanged, awaiting lane
+2026-10-21T19:05:15Z	heartbeat	#4034 #4100 still queued (lane batching, dev at 58034759f); drafts wait
