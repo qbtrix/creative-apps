@@ -44,3 +44,4 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-3 (ExportPick.metadata); LX-4 w
 - 2026-10-21T11:50:25Z (act-1a15e4969c2-pa6e): re-read dev ded2ca5. No MetadataCarrying (XP-2), no ExportPick.metadata (XP-3), no StillMetadata (XP-7). SuiteUI lead's last poll says SM-a is not on dev. LX-2, LX-4, LX-5/6 and LX-7/8 cannot start. No open findings carry Feature: export-pack.
 
 - 2026-10-21T15:13:45Z check: Belt nudge; record moved to lead/library-export-pack. XP-2/3/7 still not on dev (no MetadataCarrying/StillMetadata/ExportPick.metadata); LX-2, LX-4 and dependents wait. 0 open findings.
+- 2026-10-21T15:36:27Z check: XP-2/3/7 still not on dev; LX-2, LX-4 and dependents wait. 0 open findings.
