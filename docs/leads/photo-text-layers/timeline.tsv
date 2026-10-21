@@ -4,3 +4,4 @@
 2026-10-21T11:56:00Z	pr	TX-u	#4053 opened (TX-3, stacked on #4036), gate PASS on 871ec00a4, fast-lane	TX-4 inspector style row next
 2026-10-21T12:10:00Z	pr	TX-m	#4059 opened (TX-6 .ora text attribute, stacked on #4036), gate PASS on c5f798d06, mutate 4/4, fast-lane	TX-4/TX-5 blocked cross-line; watch merges
 2026-10-21T12:35:00Z	heartbeat	lead	#4036 waits on lane macOS build 39595916899; #4053, #4059 stacked; TX-4/TX-5 wait on #3779, #3725	watch merges
+2026-10-21T12:42Z	heartbeat	#4036 gets line:photo; TX-a/u/m wait on the lane
