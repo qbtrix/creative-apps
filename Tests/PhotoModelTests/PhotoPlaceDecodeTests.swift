@@ -72,6 +72,15 @@ private final class SizingCodec: PhotoImageCodec, @unchecked Sendable {
         #expect(workspace.statusMessage == nil)
     }
 
+    @Test func readImagesSetsTheCodec() throws {
+        let codec = SizingCodec(4000, 3000)
+        var workspace = PhotoWorkspace()
+        try workspace.newCanvas(width: 800, height: 600)
+        workspace.readImages(with: codec)
+        _ = try place(4000, 3000, on: &workspace)
+        #expect(codec.sides == [800])
+    }
+
     @Test func aCodecAPixelShortStillFillsTheBox() throws {
         let codec = SizingCodec(4000, 3000, short: 1)
         var workspace = try opened(codec)
