@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-21T04:06:35Z	check	batch-20261021032004 red on CommandPathTests (library): FC-5 adds 10 MenuCommand sites not in Tests/command-path-baseline/library.txt; fixing on FC-5 branch (baseline lines, as FC-4 did)
 2026-10-21T04:07:22Z	fix	FC-5 #3466 pushed 6686ed2 (10 library.txt baseline lines), gate PASS, CommandPathTests pass, Head moved. Stacked FC drafts will need the same when they merge dev.
 2026-10-21T04:29:21Z	check	FC-5 #3466 head 6686ed2 macOS build 39543117125 green; waits lane merge
+2026-10-21T04:51:43Z	check	FC-5 #3466 (6686ed2) first in batch-20261021043428; batch red on HaloShapeDraftTests (not ours), bisecting (probe -4 running)
