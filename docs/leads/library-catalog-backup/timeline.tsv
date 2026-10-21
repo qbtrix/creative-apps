@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T15:49:07Z	3	relaunch	-	run act-1a15f2277a5-6xyv resumed; slice-done lines posted on 39623471557; open PRs merging dev for the Photo baseline fix
 2026-10-21T17:09:03Z	3	poll	-	rule 23 re-read; PRs wait on lane macOS builds
 2026-10-21T18:07:04Z	3	wait	BK-u	#3967 macOS build green, batch merge pending
+2026-10-21T18:37:08Z	-	wait	BK-u	#3967 green macOS build, waits on a lane batch
