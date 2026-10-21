@@ -1,5 +1,7 @@
 [
 {"label": "gradient branch skipped: every layer draws its solid color", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "let color = shading?.color(x: x, y: y) ?? solid\n", "replace": "let color = solid\n", "tests": "HaloGradientRenderTests"},
 {"label": "pixel centers skip the item's matrix", "file": "Sources/HaloModel/Live/HaloGradientShading+Kernel.swift", "find": "let layer = inverse.apply(HaloPoint(", "replace": "let layer = (HaloPoint(", "tests": "HaloGradientRenderTests"},
-{"label": "coverage not applied: the gradient fills outside the outline", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "guard let c = try? mask.coverage(x: x, y: y), c > 0 else { continue }\n", "replace": "guard let c0 = try? mask.coverage(x: x, y: y) else { continue }\n                let c = c0 * 0 + 1\n", "tests": "HaloGradientRenderTests"}
+{"label": "coverage not applied: the gradient fills outside the outline", "file": "Sources/HaloModel/Live/LiveFrameRendering.swift", "find": "guard let c = try? mask.coverage(x: x, y: y), c > 0 else { continue }\n", "replace": "guard let c0 = try? mask.coverage(x: x, y: y) else { continue }\n                let c = c0 * 0 + 1\n", "tests": "HaloGradientRenderTests"},
+{"label": "text layers allowed a gradient", "file": "Sources/HaloModel/HaloFill+Kernel.swift", "find": "        case .text: return Self.textFillHelp\n", "replace": "        case .text: return nil\n", "tests": "HaloGradientTests"},
+{"label": "drag key dropped: each move is its own step", "file": "Sources/HaloModel/HaloFill+Kernel.swift", "find": "coalesceKey: key)", "replace": "coalesceKey: nil)", "tests": "HaloGradientTests"}
 ]
