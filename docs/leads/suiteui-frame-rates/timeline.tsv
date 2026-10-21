@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T13:44Z	build	slice-built	FR-u	FR-u built at a1d3152b9, gate PASS twice, stacked on FR-m
 2026-10-21T15:29Z	wave-2	pr-update	#4063	FR-a re-gated after dev merge (Library timing flake fixed on dev); Head moved to e20f5bc8b
 2026-10-21T15:50Z	wave-1	check	#4063	#4063 awaiting lane macOS build run 39626628147
+2026-10-21T16:13Z	build	heartbeat	#4063	FR-m and FR-u stacked and ready locally
