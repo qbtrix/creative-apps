@@ -38,26 +38,17 @@ struct HaloAnimationMenu: Commands {
                 }
             }
             Divider()
-            keyItem("Select All Keys", .selectAllKeys, help: "Picks every key in the timeline; ⌘A there does the same.") {
-                perform?(.selectAllKeys)
-            }
+            target.item(.selectAllKeys)
             nudge("Move Keyframes Left", by: -1)
             nudge("Move Keyframes Right", by: 1)
         }
     }
 
-    /// A one-frame move of the picked keys, its own undo step.
+    /// A one-frame move of the picked keys, its own undo step, on the Move Keyframes spec.
     private func nudge(_ title: String, by frames: Int) -> MenuCommand {
-        keyItem(title, .moveKeys(by: frames, dragStart: 0), help: "Moves the picked keys \(abs(frames)) frame.") {
+        let spec = HaloMenuState.spec(HaloCommand.moveKeys(by: frames, dragStart: 0).commandID)
+        return MenuCommand(spec, on: target.state, title: title) {
             for command in model?.nudgeKeysCommands(by: frames) ?? [] { perform?(command) }
         }
-    }
-
-    /// An item disabled with the Model's reason while `command` can't act, else `help`.
-    private func keyItem(
-        _ title: String, _ command: HaloCommand, help: String, action: @escaping @MainActor () -> Void
-    ) -> MenuCommand {
-        let reason = target.help(for: command)
-        return MenuCommand(title, help: reason ?? help, isEnabled: reason == nil, perform: action)
     }
 }

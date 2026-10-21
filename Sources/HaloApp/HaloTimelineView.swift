@@ -116,7 +116,7 @@ struct HaloTimelineView: View {
                     .contextMenu {
                         easingItems
                         Divider()
-                        menuItem(.selectAllKeys, title: "Select All Keys", help: "Pick every key in the timeline (⌘A)")
+                        menuTarget.item(.selectAllKeys)
                     }
                     .onGeometryChange(for: Double.self) { Double($0.size.width) } action: { stripWidth = $0 }
             }
@@ -136,16 +136,10 @@ struct HaloTimelineView: View {
     /// The five easing presets for the picked keys, each disabled with why.
     @ViewBuilder private var easingItems: some View {
         ForEach(HaloEasingPreset.allCases, id: \.self) { preset in
-            menuItem(.setEasing(preset), title: preset.title, help: preset.title)
+            menuTarget.item(.setEasing(preset))
         }
     }
 
-    /// A context-menu button that sends `command`, disabled with the Model's
-    /// unavailableHelp as its help while it can't act, else `help`.
-    private func menuItem(_ command: HaloCommand, title: String, help: String) -> some View {
-        let reason = model.unavailableHelp(for: command)
-        return Button(title) { perform(command) }
-            .disabled(reason != nil)
-            .help(reason ?? help)
-    }
+    /// Context-menu items built from their catalog specs, as the menu bar's are.
+    private var menuTarget: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
 }
