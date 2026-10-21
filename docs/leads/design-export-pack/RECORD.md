@@ -37,3 +37,4 @@ Next: DX-a waits on suiteui export-pack XP-a (XP-1 merged; XP-2 waits shell-medi
 
 ## Open
 - DX-a blocked: XP-a not merged (XP-2, XP-3 open).
+- 2026-10-21T00:39Z Belt nudged on lead/export-pack and lead/pen-paths, which belong to the SuiteUI run act-1a15821c836-93pf. Not written to. Supervisor asked to watch lead/design-export-pack (#3467 comment 6305070606).
