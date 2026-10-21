@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-21T05:02Z	check	critic panel DY-a: 4 confirmed, 2 refuted; filed #3860 #3861 #3862 #3863	wf_c028d542-080	fix round 1 started (fix-batch wf_4d365bd6-f9f) on base 0eca6ab5
 2026-10-21T05:25Z	check	DY-u #3816 still in lane (clean, no needs-fix)	#3816	DY-a fix round 1 running (wf_4d365bd6-f9f)
 2026-10-21T05:49Z	check	lane	#3816	DY-u clean, fast-lane, not merged yet; DY-a fix round 1 running (#3887 opened); DT-m not opened, so DY-m stays blocked
+2026-10-21T05:49Z	fix	round1	#3887,#3889	DY-a fix round 1 (wf_4d365bd6-f9f): #3887 fixes #3860 (tooltip names Eyedropper and I), #3889 fixes #3861+#3862 (journey walk, disabled-drag mutations 26/26, 2/2); #3863 r-b3 finished by lead, gate running
