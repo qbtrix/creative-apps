@@ -1,0 +1,23 @@
+[
+  {
+    "label": "clearKeepsPlace: keepPlace skipped on clear",
+    "file": "Sources/SuiteKernel/Transform/AnchorCommands.swift",
+    "find": "keepingPlace: { node, placed in target.keepPlace(&node, world: placed) })",
+    "replace": "keepingPlace: { node, placed in if p.parent != nil { target.keepPlace(&node, world: placed) } })",
+    "tests": "AnchorCommandsTests"
+  },
+  {
+    "label": "refusesCycle: the cycle refusal is not a sentence",
+    "file": "Sources/SuiteKernel/Transform/AnchorCommands.swift",
+    "find": "case .cycle: \"Layer \\(p.parent ?? p.id) already follows \\(p.id), so \\(p.id) can't follow it.\"",
+    "replace": "case .cycle: \"\\(refusal)\"",
+    "tests": "AnchorCommandsTests"
+  },
+  {
+    "label": "set-anchor ignores keepPlace false",
+    "file": "Sources/SuiteKernel/Transform/AnchorCommands.swift",
+    "find": "try target.setPlacement(p.keepPlace ?? true ? placement.movingAnchor(to: point) : loose, of: p.id)",
+    "replace": "try target.setPlacement(placement.movingAnchor(to: point), of: p.id)",
+    "tests": "AnchorCommandsTests"
+  }
+]
