@@ -1,0 +1,7 @@
+[
+{"label":"Shift-press replaces instead of extending","file":"Sources/HaloModel/HaloTimelinePress.swift","find":"case \"extend\": .extend","replace":"case \"extend\": .replace","tests":"HaloTimelinePressTests.swift"},
+{"label":"Command-press extends instead of toggling","file":"Sources/HaloModel/HaloTimelinePress.swift","find":"case \"toggle\": .toggle","replace":"case \"toggle\": .extend","tests":"HaloTimelinePressTests.swift"},
+{"label":"a key press sends nothing while picking can't act","file":"Sources/HaloModel/HaloTimelinePress.swift","find":"return frame == nil ? nil : .selectLayer(layerID)","replace":"return nil","tests":"HaloTimelinePressTests.swift"},
+{"label":"a drag with no pick folds under frame 1","file":"Sources/HaloModel/HaloTimelinePress.swift","find":".min() ?? 0","replace":".min() ?? 1","tests":"HaloTimelinePressTests.swift"},
+{"label":"a menu nudge never ends its drag","file":"Sources/HaloModel/HaloTimelinePress.swift","find":"[.moveKeys(by: frames, dragStart: keyDragStart), .endKeyDrag]","replace":"[.moveKeys(by: frames, dragStart: keyDragStart)]","tests":"HaloTimelinePressTests.swift"}
+]
