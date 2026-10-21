@@ -17,3 +17,4 @@ time	kind	note
 2026-10-21T09:28:12Z	3	heartbeat	DG-u	#3978 open, macOS build 39574568750 queued; dev Linux red on stale DY anchors (#3980 open); PR body footers removed; 0 open findings on gradient-fill
 2026-10-21T09:51Z	3	heartbeat	DG-u	check-in: #3978 mac build 39574568750 green, waits on batch; #3980 #3983 open; dev Linux 39579635083 red on #3857 anchors (#3980 fixes); scoped design 39578329384 queued for critics
 2026-10-21T10:26Z	3	merged	DG-u	#3978 merged as e2b8aa76; waiting for a dev Linux run that contains it; #3980 closed as superseded by #3996
+2026-10-21T10:50Z	3	heartbeat	DG-u	Linux check 39584735856 (79a437896) red on photo CommandPathTests (PhotoPlace.swift), not design; waiting on 39587217178 / CI 39586209372 Linux
