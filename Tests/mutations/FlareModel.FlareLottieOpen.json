@@ -1,0 +1,23 @@
+[
+  {
+    "label": ".stubRefusesByName: the stub throws a damaged-file refusal instead of the named not-yet one",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "        throw .notYet\n",
+    "replace": "        throw .damaged(\"\")\n",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".notLottieSentence: a file that isn't Lottie is called damaged",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "case .notLottie: \"This file isn't a Lottie file.\"",
+    "replace": "case .notLottie: \"This file is damaged.\"",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".damagedDetail: a damaged file's refusal drops the detail",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "FlareWorkspace.sentence(\"This file isn't a Lottie file Flare can read\", detail)",
+    "replace": "FlareWorkspace.sentence(\"This file isn't a Lottie file Flare can read\", \"\")",
+    "tests": "FlareLottieOpenTests"
+  }
+]

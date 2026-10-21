@@ -9,7 +9,8 @@
 //
 // The sidebar has two sections: Library (All Photos, Picks, Recently
 // Added) and Collections (yours, with New Collection as its add button and a
-// double-click rename while those can act). LibraryFilterBar sits above
+// double-click rename while those can act), then FOLDERS when the catalog's photos sit in any
+// (LibraryFoldersSection.swift). LibraryFilterBar sits above
 // LibraryBrowser; the hidden `library.collections` element carries the
 // collections file's state for the journeys.
 //
@@ -63,9 +64,16 @@ struct LibraryWindow: View {
         SuiteWindow(
             title: "Library",
             sections: sidebarSections(filters),
-            selection: model.selectedCollectionID,
-            onSelect: { model.selectCollection($0) },
-            onRename: filters.renameCollection
+            selection: model.sidebarSelection,
+            // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
+            onSelect: { model.selectSidebarRow($0) },
+            onRename: filters.renameCollection,
+            contextActions: { id in
+                guard LibraryFolders.isRowID(id) else { return [] }
+                return LibraryFoldersSection.actions(
+                    help: model.showFolderHelp, show: { model.selectSidebarRow(id) },
+                    toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
+            }
         ) {
             VStack(spacing: 0) {
                 LibraryFilterBar(
@@ -98,6 +106,7 @@ struct LibraryWindow: View {
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
+        .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()
@@ -124,7 +133,8 @@ struct LibraryWindow: View {
         photo.resetCrop = crop.resetCrop
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
-            view: viewMenu, photo: photo, export: exportMenu, reasons: model.services.unavailable)
+            view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
+            reasons: model.services.unavailable)
     }
 
     /// A single key to the area that owns it; ignored (so the grid or the
@@ -191,7 +201,7 @@ struct LibraryWindow: View {
             SidebarSection(
                 id: "collections", title: "Collections", items: rows.filter { UserCollection.isUserID($0.id) },
                 addAction: add),
-        ]
+        ] + [LibraryFoldersSection.section(LibraryFoldersSection.tree(model))].compactMap { $0 }
     }
 
     static func symbol(for collectionID: String) -> String {
