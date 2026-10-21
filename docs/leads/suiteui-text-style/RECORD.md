@@ -51,6 +51,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 2026-10-21T03:49Z: #3836 merged head b51250b1 printed CI: PASS. It's pushed and Head: is moved; the lane builds it on macOS again.
 
+- 04:08Z heartbeat: #3836 TS-1 macOS build 39541314123 queued on b51250b1. #3844 and #3847 stay stacked.
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
