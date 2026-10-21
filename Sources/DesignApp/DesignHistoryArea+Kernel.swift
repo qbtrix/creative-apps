@@ -1,8 +1,10 @@
 // DesignHistoryArea+Kernel.swift: the History panel and the autosave hooks on a Design window
 // (design/autosave-history DA-2). DesignHistoryArea keeps whether the panel shows as its own
-// state, so toggling it never runs the window's body, and publishes that to View > Show History
+// state, so the toggle itself never runs the window's body (the narrower canvas still reports
+// its new viewport), and publishes that to View > Show History
 // as the focused scene value `designHistoryPanel`. Shown, SuiteUI's HistoryPanel sits in a
-// GlassPanel inset at the window's trailing edge on the workspace's `historyListing`; a click or
+// GlassPanel beside the editor at the window's trailing edge, so the editor's columns (the
+// inspector included) narrow to make room, on the workspace's `historyListing`; a click or
 // Return hands the state to `jump`, and a refusal goes to the status line through `onNote`.
 // `.autosaveRecovery` reads the workspace through AutosaveHooks: the open file's name, whether it
 // is dirty, its `recoveryBytes()` and `restore` for a copy left behind. The modifier and the
@@ -68,13 +70,14 @@ struct DesignHistoryArea: ViewModifier {
 
     func body(content: Content) -> some View {
         let shown = DesignHistoryShown(isShown: isShown) { toggled.toggle() }
-        return content
-            .environment(\.designHistory, shown)
-            .safeAreaInset(edge: .trailing, spacing: 0) {
-                if isShown { Self.panel(model.historyListing, onJump: jumped) }
-            }
-            .focusedSceneValue(\.designHistoryPanel, shown)
-            .autosaveRecovery(hooks, folder: nil, delay: 2, edits: model.documentSession.currentToken)
+        // A sibling, not a trailing safeAreaInset: the editor's NavigationSplitView ignores the
+        // inset, so its inspector stayed full width under the panel (#4072).
+        return HStack(spacing: 0) {
+            content.environment(\.designHistory, shown)
+            if isShown { Self.panel(model.historyListing, onJump: jumped) }
+        }
+        .focusedSceneValue(\.designHistoryPanel, shown)
+        .autosaveRecovery(hooks, folder: nil, delay: 2, edits: model.documentSession.currentToken)
     }
 
     private var hooks: AutosaveHooks {
