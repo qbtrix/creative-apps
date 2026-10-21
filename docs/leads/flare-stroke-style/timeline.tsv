@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-20T20:26:12Z	heartbeat	FK-a blocked: GF-2 #3695 open, FG-2 has no PR
 2026-10-20T20:38:23Z	heartbeat	FK-a blocked: GF-2 #3695 open, FG-2 has no PR
 2026-10-20T20:50:36Z	heartbeat	FK-a blocked: GF-2 #3695 open, FG-2 has no PR
+2026-10-21T05:39:14Z	heartbeat	run act-1a15cf358c6-wj2q resumed; FK-1 building; FK-2/FK-5/FK-6 blocked on FG-a, FG-m, SS-d
