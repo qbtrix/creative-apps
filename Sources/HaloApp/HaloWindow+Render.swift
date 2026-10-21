@@ -6,7 +6,7 @@
 // while it isn't idle (HaloRenderSheetHost), with Halo's rows in the options
 // slot (HaloRenderOptionRows): the Size label over Full and Half chips (the
 // sheet's own 0.25x-4x Size row is off: Halo renders at those two only), the folder
-// (`-HaloRenderTo`, else Choose…), and one note: "Frame n of N" while
+// (`-HaloRenderTo`, else Choose…, its `render.choose-folder` spec's MenuCommand), and one note: "Frame n of N" while
 // running, else the summary, or, with no folder, why (the error color). A
 // format chip or the Size row calls `setRenderSettings`. The sheet's start
 // button (titled Export until #3402) asks for a folder when there is none
@@ -235,8 +235,7 @@ struct HaloRenderOptionRows: View {
                 HStack(spacing: SuiteSpacing.s) {
                     Text(destination?.lastPathComponent ?? "None")
                         .foregroundStyle(destination == nil ? SuiteColor.secondaryText : SuiteColor.textPrimary)
-                    Button("Choose…") { act(.choose) }
-                        .help(editing ? "Choose the folder to render into." : Self.busy)
+                    MenuCommand(HaloMenuState.spec("render.choose-folder"), on: HaloMenuState(project: model)) { act(.choose) }
                         .haloControl(id: "halo.render.destination", enabled: editing, help: editing ? nil : Self.busy)
                 }
             }

@@ -77,7 +77,7 @@ struct HaloWindow: View {
             }
             .sheet(isPresented: $showsNewComposition) {
                 NewCompositionSheet(
-                    settings: model.suggestedSettings,
+                    settings: model.suggestedSettings, state: HaloMenuState(project: model),
                     onCreate: { settings in if model.newComposition(settings) { showsNewComposition = false } },
                     onCancel: { showsNewComposition = false })
             }
