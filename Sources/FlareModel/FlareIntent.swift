@@ -45,7 +45,7 @@ public enum FlareIntent: Sendable, Equatable {
     public enum Inspector: Sendable, Equatable {
         case showTab(String), scrub(property: String, value: Double, dragStart: Double), endScrub,
              toggleAnimated(String), toggleKey(String), setFill(hex: String), setStrokeColor(hex: String),
-             setStrokeWidth(Double), setStrokeCap(String), setStrokeJoin(String),
+             setStrokeWidth(Double), scrubStrokeWidth(Double), setStrokeCap(String), setStrokeJoin(String),
              setSceneSize(width: Double, height: Double), setSceneBackground(hex: String),
              setSceneTiming(fps: Int, durationFrames: Int), easingPreset(String),
              easingHandle(index: Int, x: Double, y: Double), endEasingHandle
@@ -142,7 +142,8 @@ public enum FlareIntent: Sendable, Equatable {
         .view(.endGuideDrag), .view(.removeGuide(index: 0)),
         .inspector(.showTab("")), .inspector(.scrub(property: "", value: 0, dragStart: 0)), .inspector(.endScrub),
         .inspector(.toggleAnimated("")), .inspector(.toggleKey("")), .inspector(.setFill(hex: "")),
-        .inspector(.setStrokeColor(hex: "")), .inspector(.setStrokeWidth(1)), .inspector(.setStrokeCap("")),
+        .inspector(.setStrokeColor(hex: "")), .inspector(.setStrokeWidth(1)), .inspector(.scrubStrokeWidth(1)),
+        .inspector(.setStrokeCap("")),
         .inspector(.setStrokeJoin("")), .inspector(.setSceneSize(width: 1, height: 1)),
         .inspector(.setSceneBackground(hex: "")), .inspector(.setSceneTiming(fps: 24, durationFrames: 48)),
         .inspector(.easingPreset("")), .inspector(.easingHandle(index: 0, x: 0, y: 0)),
@@ -251,6 +252,7 @@ extension FlareIntent.Inspector {
         case .setFill: "setFill"
         case .setStrokeColor: "setStrokeColor"
         case .setStrokeWidth: "setStrokeWidth"
+        case .scrubStrokeWidth: "scrubStrokeWidth"
         case .setStrokeCap: "setStrokeCap"
         case .setStrokeJoin: "setStrokeJoin"
         case .setSceneSize: "setSceneSize"
