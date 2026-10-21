@@ -4,7 +4,7 @@ Issue: #3788 · Packet: docs/blueprints/library/features/catalog-backup.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: read wave 1 results (BK-a PR); then wave 2 stacks BK-u and BK-3 on it
+Next: finish BK-a from worktree wf_32b47868-6c0-4 (gate, commit, PR); then wave 2 stacks BK-u and BK-3 on it
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
