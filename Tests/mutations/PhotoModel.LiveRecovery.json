@@ -1,0 +1,4 @@
+[
+  {"label": "discard skipped on save: a save leaves the window's recovery copy in the folder", "file": "Sources/PhotoModel/Live/LiveRecovery.swift", "find": "        try folder.discard(window: Self.encoded(window))", "replace": "        _ = Self.encoded(window)", "tests": "PhotoRecoveryFolderTests/saveRemovesRecovery"},
+  {"label": "oldest offered: a relaunch lists the oldest copy first", "file": "Sources/PhotoModel/Live/LiveRecovery.swift", "find": "for item in try folder.leftBehind() {", "replace": "for item in try folder.leftBehind().reversed() {", "tests": "PhotoRecoveryFolderTests/newestOffered"}
+]

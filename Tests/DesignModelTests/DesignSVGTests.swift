@@ -2,9 +2,11 @@
 // The SVG of DesignFixtures.cards' Desktop frame equals the reference literal byte for byte;
 // one element per visible layer in paint order; a clipPath on every frame; escaped text;
 // opacity, stroke, stroke-width and rx only when not the SVG default; coordinates relative
-// to the box. Runs on Linux and macOS.
+// to the box. A gradient is a definition in frame space and a `fill="url(#g-…)"` (gradient-fill DG-5).
+// Runs on Linux and macOS.
 @testable import DesignModel
 import Foundation
+import SuiteKernel
 import Testing
 
 @Suite struct DesignSVGTests {
@@ -102,5 +104,30 @@ import Testing
         let noStroke = DesignNode(id: "n", name: "N", kind: .ellipse, frame: rect(0, 0, 10, 10),
                                   stroke: DesignStroke(color: .black, width: 0))
         #expect(!svg(noStroke).contains("stroke"))
+    }
+
+    /// Blue to white down the unit box: a 90° line, as `fill.angle` 90 stores it.
+    private let unitDown = Fill.linear(
+        stops: [GradientStop(offset: 0, color: FillColor(r: 0, g: 0, b: 1)), GradientStop(offset: 1, color: .white)],
+        start: Point(x: 0.5, y: 0), end: Point(x: 0.5, y: 1))
+
+    /// A 90° gradient writes its line in the layer's frame, relative to the box: vertical, top to bottom.
+    @Test func gradientInFrameSpace() {
+        let r = DesignNode(id: "r", name: "R", kind: .rectangle, frame: rect(10, 20, 200, 100), gradient: unitDown)
+        let text = DesignSVG.document([r], box: rect(0, 0, 300, 200), clip: false)
+        #expect(text.contains(#"<defs><linearGradient id="g-r" gradientUnits="userSpaceOnUse" x1="110" y1="20" x2="110" y2="120">"#
+            + ##"<stop offset="0" stop-color="#0000ff"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>"##))
+        #expect(text.contains(#"<rect x="10" y="20" width="200" height="100" fill="url(#g-r)"/>"#))
+        let e = DesignNode(id: "e", name: "E", kind: .ellipse, frame: rect(0, 0, 40, 40), gradient: unitDown)
+        #expect(svg(e).contains(#"fill="url(#g-e)""#))
+        #expect(svg(e).contains(#"x1="20" y1="0" x2="20" y2="40""#))
+    }
+
+    /// A text layer's gradient is defined too, and its letters fill with it.
+    @Test func textGradient() {
+        let t = DesignNode(id: "t", name: "T", kind: .text, frame: rect(0, 0, 100, 20), text: "Hi", gradient: unitDown)
+        let text = svg(t)
+        #expect(text.contains(#"<linearGradient id="g-t" gradientUnits="userSpaceOnUse" x1="50" y1="0" x2="50" y2="20">"#))
+        #expect(text.contains(#"fill="url(#g-t)">Hi</text>"#))
     }
 }

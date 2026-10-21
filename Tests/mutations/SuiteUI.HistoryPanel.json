@@ -1,0 +1,5 @@
+[
+{"label":"a pressed history row reads plain, so a press shows nothing","file":"Sources/SuiteUI/HistoryPanel.swift","find":"if pressed { return .pressed }","replace":"if pressed { return .plain }","tests":"HistoryPanelTests"},
+{"label":"an idle history row never shows hover","file":"Sources/SuiteUI/HistoryPanel.swift","find":"return hovering ? .hovered : .plain","replace":"return .plain","tests":"HistoryPanelTests"},
+{"label":"a press fills like hover, so it can't be told apart","file":"Sources/SuiteUI/HistoryPanel.swift","find":"case .pressed: SuiteColor.field","replace":"case .pressed: SuiteColor.rowHover","tests":"HistoryPanelTests"}
+]

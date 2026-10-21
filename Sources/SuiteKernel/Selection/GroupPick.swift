@@ -1,5 +1,5 @@
-// GroupPick.swift (area-selection AR-1 stubs, AR-4 bodies): the group-aware click every object editor shares: the outermost
-// group in the entered scope, Command the deepest layer; Return enters, Escape steps out. The commands run on the stubs.
+// GroupPick.swift (area-selection AR-1, AR-4 bodies): the group-aware click every object editor shares: the outermost
+// group in the entered scope, Command the deepest layer; Return enters, Escape steps out. The three commands run on them.
 
 /// The groups a click is inside: the path of group ids from the root down; empty is the root.
 public struct GroupScope: Hashable, Sendable, Codable {
@@ -35,12 +35,21 @@ public enum GroupPick {
     static let enterHelp = "Pick a group with layers in it first.", exitHelp = "No group is entered."
     /// The id a click picks: the ancestor of `hit` that is a direct child of the scope's innermost group, or `hit`
     /// itself when `deep` (Command) or when it already is one; nil when the hit is outside the scope or under a
-    /// locked group. AR-1 stub: `hit`.
-    public static func target<P>(hit: String, scope: GroupScope, deep: Bool, in tree: LayerTree<P>) -> String? { hit }
-    /// The scope inside `id` when it is a group with children; nil otherwise. AR-1 stub: nil.
-    public static func entering<P>(_ id: String, scope: GroupScope, in tree: LayerTree<P>) -> GroupScope? { nil }
-    /// The scope one level up; the root stays the root. AR-1 stub: the root.
-    public static func exiting(_ scope: GroupScope) -> GroupScope { .root }
+    /// locked group.
+    public static func target<P>(hit: String, scope: GroupScope, deep: Bool, in tree: LayerTree<P>) -> String? {
+        guard let ancestors = tree.ancestors(of: hit), !tree.isEffectivelyLocked(hit) else { return nil }
+        let chain = ancestors + [hit], depth = scope.path.count
+        guard chain.count > depth, Array(chain.prefix(depth)) == scope.path else { return nil }
+        return deep ? hit : chain.dropFirst(depth).first
+    }
+    /// The scope inside `id` when it is an unlocked group with children, directly inside `scope`; nil otherwise.
+    public static func entering<P>(_ id: String, scope: GroupScope, in tree: LayerTree<P>) -> GroupScope? {
+        guard let node = tree.node(id), !node.children.isEmpty, !tree.isEffectivelyLocked(id),
+              tree.ancestors(of: id) == scope.path else { return nil }
+        return GroupScope(path: scope.path + [id])
+    }
+    /// The scope one level up; the root stays the root.
+    public static func exiting(_ scope: GroupScope) -> GroupScope { GroupScope(path: Array(scope.path.dropLast())) }
     /// The three group commands on `target`: pick at a point, enter the picked group, exit one level; each a view
     /// change, not an undo step.
     public static func specs<T: GroupPickTarget>(_ target: T.Type) -> [CommandSpec<T>] {
