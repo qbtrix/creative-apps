@@ -2,7 +2,9 @@
 // SM-1): a frame of 8-bit sRGB bytes, the codecs and formats it writes, the
 // settings of a movie or an animated image, and what a movie file holds.
 // Settings rules (`validated()`) are SM-3's Media+Rules.swift; the frame
-// clock is SM-4's FrameClock.swift. Foundation free, Linux-safe, Sendable.
+// clock is SM-4's FrameClock.swift. `StillFormat` lives in SuiteTypes.swift
+// with the suite's other format list until SuiteImageFormats (shared-codecs
+// SC-14) names them all. Foundation free, Linux-safe, Sendable.
 
 /// One picture: 8-bit sRGB, straight alpha, top row first, 4 bytes a pixel.
 /// The shape Photo's `DecodedImage` and Halo's rendered frames already use.
@@ -36,9 +38,6 @@ public enum MovieCodec: String, Codable, Sendable, CaseIterable {
 
 /// The animated image formats the suite writes.
 public enum AnimatedImageFormat: String, Codable, Sendable, CaseIterable { case gif, apng }
-
-/// The still image formats the suite writes.
-public enum StillFormat: String, Codable, Sendable, CaseIterable { case png, jpeg, heic, tiff }
 
 /// What a movie is written as: its size, its whole-number rate, its codec and
 /// a quality from 0 to 1.
