@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T15:49:08Z	3	relaunch	-	run act-1a15f2277a5-6xyv resumed; slice-done lines posted on 39623471557; open PRs merging dev for the Photo baseline fix
 2026-10-21T16:26:40Z	3	build	FO-6	draft PR #4121 at 34c669c, gate PASS, mutate 5/5; waits on #4022 to go ready
 2026-10-21T17:09:03Z	3	poll	-	rule 23 re-read; PRs wait on lane macOS builds
+2026-10-21T17:36:52Z	5	wait	FO-m	#4022 dirty vs dev, lane integrates
