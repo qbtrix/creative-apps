@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-21T20:57Z	2026-10-21T20:57Z	heartbeat	lane	#4130 #4134 #4140 #4144	four CS PRs in lane; builders running
 2026-10-21T21:18Z	2026-10-21T21:18Z	heartbeat	lane	-	macOS build queue deep; dev Linux red only on CommandPathTests launcher, fix #4201 in lane
 2026-10-21T21:20Z	2026-10-21T21:20Z	build	pr	#4196 #4205	CS-7 Halo (8/8) and CS-11 Flare (7/7) opened, gate pass
+2026-10-21T21:40Z	2026-10-21T21:40Z	check	lane-wait	#3856	lane batches red on dev launcher.txt:21 (run 39676795156); #4201 fixes it, flagged on dev-red; our PRs built, queued
