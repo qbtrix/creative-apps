@@ -33,6 +33,12 @@ private func addSale(_ workspace: inout PhotoWorkspace) throws -> PhotoLayer.ID 
     return try #require(workspace.selectedLayerID)
 }
 
+/// The `required` keys of an object schema; nil when `schema` isn't one.
+private func required(_ schema: JSONValue) -> [String]? {
+    guard case .object(let fields) = schema, case .array(let keys)? = fields["required"] else { return nil }
+    return keys.compactMap { if case .string(let key) = $0 { key } else { nil } }
+}
+
 @Suite struct PhotoTextLayerTests {
     // The stub contract: what TX-5 keeps.
 
@@ -53,10 +59,10 @@ private func addSale(_ workspace: inout PhotoWorkspace) throws -> PhotoLayer.ID 
         let add = try #require(catalog.describe("text.add"))
         #expect(add.title == "Add Text")
         #expect(add.undoable)
-        #expect(add.params["required"] == .array(["words", "x", "y"].map(JSONValue.string)))
+        #expect(required(add.params) == ["words", "x", "y"])
         let words = try #require(catalog.describe("text.set-words"))
         #expect(words.title == "Edit Text")
-        #expect(words.params["required"] == .array([.string("words")]))
+        #expect(required(words.params) == ["words"])
     }
 
     @Test func noImageSaysWhy() throws {
