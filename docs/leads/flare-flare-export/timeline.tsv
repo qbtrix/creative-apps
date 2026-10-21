@@ -1,0 +1,167 @@
+utc	stage	event	ref	note
+2026-10-17T06:05Z	0	stage-start	#1973	line lead act-1a1487603d9-vrd4; base dev 4a86f5f; lead/flare-export created
+2026-10-17T06:20Z	2	stage-end	plan	wave 1 = FX-1 FX-6 FX-7; FX-2 FX-3 FX-4 wait on editor-kernel EK-a/EK-chrome/EK-run; FX-5 on inspector-timeline
+2026-10-17T06:20Z	3	stage-start	wave 1	build-wave FX-1 FX-6 FX-7 alongside draw-key-save round-2 panel
+2026-10-17T06:40Z	3	heartbeat	wf_b541828b-076	wave 1 running; filed #1989 #1990; commented #1939 #1973
+2026-10-17T07:06Z	3	pr-merged	#1995 #1996 #2004	wave 1: FX-1 FX-6 FX-7 merged; full CI 39018046761 at 453198ac Linux green
+2026-10-17T10:45Z	3	heartbeat	wave 2	container restarted 06:45-10:43; planning wave 2
+2026-10-17T10:55Z	3	stage-start	wave 2	build-wave FX-2a FX-8 (wf_25d336fa-c23) alongside draw-key-save round-2 panel on 39013292801
+2026-10-18T02:54Z	3	resume	wave 2	run act-1a14cda2f27-e9ty resumed; prior wave 2 opened no PRs; relaunch FX-2a FX-8
+2026-10-18T03:52Z	3	heartbeat	wave	container restarted; wave PRs #2532 #2533 #2534 open, FX-2a builder unfinished; relaunching FX-2a
+2026-10-18T03:24Z	2	merged	FX-8	#2533
+2026-10-18T03:59Z	2	slice-done	FX-live	https://github.com/qbtrix/creative-apps/actions/runs/39093972830
+2026-10-18T03:59Z	2	wave-start	FX-2a	relaunched (first builder made no PR)
+2026-10-18T04:01Z	2	heartbeat	findings	Flare CI findings read; none on flare-export files; findings 0
+2026-10-18T04:10Z	2	pr-opened	FX-2a	#2564 df8ad8ea
+2026-10-18T04:21Z	3	check	FX-2a	#2564 lane macOS build run 39096455633 pending; EK-a, EK-run, EK-chrome not merged; findings 0
+2026-10-18T04:42Z	3	merged	FX-2a	#2564 merged 04:35Z
+2026-10-18T05:05Z	3	check	FX-2a	no EK merges since 04:35Z; full CI 39098181461 contains FX-2a (FX-a still needs FX-2b); no new Flare findings
+2026-10-18T05:30Z	check	EK-2 #2577 merged, ExportRun not yet on dev; FX-2b waits; 0 findings
+2026-10-18T05:52Z	check	EK-3 #2620 merged (ExportRun stub on dev); FX-2b builder started (lead/flare-export-fx2b, slice FX-a)
+2026-10-18T06:04Z	wave	FX-2b PR #2649 opened (head 9cf4252c, fast-lane, full scripts/ci PASS); FX-4 tests need FX-11 setters, so FX-4 after FX-11 too
+2026-10-18T06:14Z	check	#2649 (FX-2b) not merged yet; EK-22 bodies not on dev; 0 findings
+06:37Z	check	#2649 (FX-2b) macOS build 39103240590 queued; EK-22 bodies not on dev; FX-11 waits on #2649 merge; 0 open flare-export findings
+06:58Z	check	#2649 macOS build 39103240590 success; waits on lane sweep; FX-11 starts on merge; EK-22 bodies still not on dev
+07:10Z	check	#2649 still open, lane sweep 39106241153 in progress; FX-11 waits on merge
+2026-10-18T07:27Z	check	#2649 still open (clean, mac build green); lane backlog 48 PRs, sweep 39107445380 in progress; FX-11 waits on merge; no EK-22 bodies on dev
+2026-10-18T07:48Z	check	lane reached #2638 (dev 2202c7c3); #2649 queued behind it; FX-11 waits on merge; no EK-22 bodies
+2026-10-18T08:19Z	check	#2649 still queued (lane held behind #2639 needs-fix; dev at 2202c7c3); no EK-22 bodies; no flare-export findings
+2026-10-18T08:42Z	check	#2649 (FX-2b) clean, queued in lane sweep 39111897240; no EK-22 bodies on dev; no flare-export findings
+2026-10-18T09:05Z	check	#2649 eligible in sweep 39111897240 but queued behind a batch in flight (30 ready PRs); no EK-22 bodies; no findings
+2026-10-18T09:27Z	check	#2649 (FX-2b) open, clean, eligible, queued in the lane. EK-22 ExportRun still stubbed. No flare-export findings.
+2026-10-18T09:49Z	check	#2649 merged (00684c2c). FX-11 blocked on EK-22 (ExportRun.begin stub); order after EK-22: FX-4 then FX-11. Full CI 39116548471 on b1b56eba (contains #2649) pending, for FX-a.
+2026-10-18T10:12Z	check	full run 39116548471 (b1b56eba, contains #2649) still pending; FX-a waits on it. No EK-22 PR yet; FX-4 then FX-11 after it
+2026-10-18T10:35Z	check	full run 39116548471 (b1b56eba, contains #2649) cancelled: FX-a not done, waits for next flare-scoped or full run containing 00684c2c; no EK-22 PR yet (FX-4, FX-11 wait)
+2026-10-18T10:57Z	check	FX-a waits on scoped flare run 39118732730 (a80ed944, in progress); EK-22 PR #2745 open
+2026-10-18T11:19Z	check	FX-a Belt-Slice-Done posted (run 39118732730 success); #2745 EK-22 still open, FX-4 waits
+2026-10-18T11:40Z	check	#2745 EK-22 still open; FX-4 waits
+2026-10-18T12:04Z	check	EK-22 #2745 merged 11:54Z; FX-4 builder started (slice FX-run); FX-11 follows FX-4
+2026-10-18T12:15Z	pr	FX-4 PR #2770 open (head 3c341a08, 5/5 mutations, CI PASS; 4 tests wait on FX-11); FX-11 builder started stacked on FX-4
+2026-10-18T12:27Z	check	#2770 (FX-4) body footer stripped; FX-11 builder running; wave: FX-6 (FX-live) and FX-7 (FX-u) builders started, no file overlap with FX-11
+2026-10-18T12:28Z	check	FX-7 already merged as #2004 (earlier run act-1a1487603d9-vrd4); no new PR. Carry to FX-3: name the sheet adapter in flare-app C4 part, commit the recorded golden flare-raster-bounce-0-light.png from a macOS dev snapshots artifact
+2026-10-18T12:33Z	pr	FX-11 PR #2773 head 3875fd53 (stacked on #2770), mutate 5/5 + 6/6, CI PASS --changed; footer stripped. FX-run done once a green flare/full run contains #2773
+2026-10-18T12:34Z	check	FX-6 already merged #1996, FX-8 #2533; FX-live Belt-Slice-Done already posted (run 39093972830). Stripped attribution footers from 4 comments on #1973 and fixer comments on #2768/#1789. Remaining: FX-run (#2770, #2773 in lane), FX-u (FX-3 waits on EK-chrome, FX-5 after), FX-z (FX-9 after FX-3)
+2026-10-18T12:36Z	check	#2770 macOS build green (run 39126602330), lane sweep in progress; #2773 stacked, clean; FX-u/FX-z wait #1989 (open)
+2026-10-18T12:49Z	check	#2770 build green, clean, awaiting lane sweep; #2773 macOS build dispatched (run 39128101587); no new flare run past 39126828688; #1989 open
+2026-10-18T13:12:19Z	check	#2770 merged 7ae985e3, scoped flare 39129659828 green; #2773 needs-rebase (3 test/mutation files), fixer started
+2026-10-18T13:19:11Z	fix	#2773 dev merged in, head d720c16e; ci --changed + full ci PASS, mutate 5/5 + 6/6; Head: line moved
+2026-10-18T13:33:51Z	check	#2773 at d720c16e awaiting lane macOS build 39131353563; #1989 open (FX-3 waits); #2622 open (#2768 waits)
+2026-10-18T13:55:21Z	merge	#2773 FX-11 merged aa8818ff (FX-run last PR); scoped flare 39133364526 + full 39133431238 queued on 3f5ae7f3
+2026-10-18T14:17:00Z	check	FX-run done: scoped flare 39133364526 green on 3f5ae7f3; Belt-Slice-Done posted on #1973. Left: FX-u, FX-z (both wait on #1989 for FX-3); #2768 waits on #2622
+2026-10-18T14:39:03Z	check	#1989 (FX-3) and #2622 (#2768) still open; dev 80c14eed
+2026-10-18T15:01:17Z	check	EK-30 SuiteExportSheet landed (#2744, 71e90e4b) without the host options slot or id prefix; FX-3 still waits on #1989. #2622 open
+2026-10-18T15:23:11Z	check	dev 15e42166 (suite onboarding, suiteui journeys): #1989 and #2622 not landed; FX-3 and #2768 wait
+2026-10-18T15:45:17Z	check	dev 6d589da5 (halo AE-h1, suiteui SJ17/perf): #1989 and #2622 not landed; FX-3 and #2768 wait
+2026-10-18T16:07:31Z	check	dev 9f396428 (suite onboarding, suiteui curve journeys, flare AE-f2): #1989 and #2622 not landed; FX-3 and #2768 wait
+2026-10-18T16:29:22Z	check	dev ae72cc6c (halo AE-h2, photo kernel/layers, lane label fix, suiteui): #1989 and #2622 not landed; FX-3 and #2768 wait
+2026-10-18T16:51:41Z	check	dev e3c46ea8 (halo kernel session #2827): #1989 and #2622 not landed; FX-3 and #2768 wait
+2026-10-18T17:12:35Z	check	dev e55c8d3c (suiteui focus/scroll/snap fixes, photo AL-p2): #1989 and #2622 not landed; FX-3 and #2768 wait
+2026-10-18T17:33:31Z	check	dev bea7db20 (design SVG/filing, suiteui labels, library/suite tests): #1989 and #2622 not landed; FX-3 and #2768 wait
+2026-10-18T17:55:14Z	check	dev ad5c9271: #2866 #2860, no blocker cleared (#995 #1989 #2622 open)
+2026-10-18T18:16:41Z	check	dev c91b1468: #2879 #2874 #2873 #2877 #2872 #2871 #2863, no blocker cleared (#995 #1989 #2622 open)
+2026-10-18T19:52:00Z	wave	wave 4 start: FX-3a (FX-3 split); dev f7e0350; #1989 open
+2026-10-18T21:09:29Z	3	pr-merged	#2944	FX-3a sheet on the fakes, J22 SVG+Lottie live, rest XCTSkip waits on #1989
+2026-10-18T21:27Z	3	pr-opened	#3006	FX-3c J0 Export… reason
+2026-10-18T21:27Z	3	heartbeat	-	dev b40c77f6; #1989 open; no open findings; flare scoped 39163996404 queued
+2026-10-18T21:49Z	3	heartbeat	#3006	macOS build red on PhotoZoomSweepTests (fixed on dev by #2990); merged dev, head 18ef76b9, Head line moved; #1989 open; 0 findings; scoped flare 39163996404 in progress
+2026-10-18T22:06Z	3	heartbeat	#3006	macOS build 39169546288 on 18ef76b9 running; #1989 open; 0 findings; scoped flare 39163996404 (abf7ca6a) in progress
+2026-10-18T22:23Z	3	heartbeat	#3006	merged 85f4a229 22:08Z (macOS build 39169546288 green); #1989 open; 0 findings; scoped flare 39163996404 green on abf7ca6a (before FX-3c); scoped flare 39171502038 queued on 76789931
+2026-10-18T22:40Z	3	heartbeat	-	dev 349578b8; #1989 open; 0 findings; scoped flare 39171502038 (76789931, contains FX-3c) and full CI 39171756438 queued
+2026-10-18T22:57Z	3	heartbeat	-	dev afa91212; #1989 open; 0 findings; scoped flare 39171502038 (76789931, contains FX-3c) in progress; full CI 39171756438 queued
+2026-10-18T23:14Z	3	heartbeat	-	dev e0a627c0; #1989 open; 0 findings; scoped flare 39171502038 (76789931, contains FX-3c) in progress; full CI 39171756438 queued
+2026-10-18T23:32Z	3	heartbeat	-	scoped flare 39171502038 green (FX-3c); findings #3036 #2484 identifier audit -> FX-3b; full CI 39171756438 running; dev d77c9e00; #995 #1989 #2622 open
+2026-10-18T23:49Z	3	heartbeat	-	dev 9ece98c5; full CI 39171756438 macOS running (Linux green); #995 #1989 #2622 open; findings #3036 #2484 open (FX-3b)
+2026-10-19T00:06Z	3	heartbeat	-	dev d50e891e; full CI 39171756438 macOS still running; #995 #1989 #2622 open; findings #3036 #2484 open (FX-3b)
+2026-10-19T00:22Z	3	heartbeat	-	dev db8f8f61; full CI 39171756438 macOS still running; #995 #1989 #2622 open; findings #3036 #2484 open (FX-3b)
+2026-10-19T00:39Z	3	heartbeat	-	dev 7ccb643d; full CI 39171756438 macOS still running; #995 #1989 #2622 open; findings #3036 #2484 open (FX-3b)
+2026-10-19T00:56Z	3	heartbeat	-	dev f191be21; full CI 39171756438 cancelled (superseded); watching full CI 39180214762 and scoped flare 39181656819 (queued); #995 #1989 #2622 open; findings #3036 #2484 open (FX-3b)
+2026-10-19T01:13Z	3	heartbeat	-	dev 124fe38c; #995 #1989 #2622 open; full CI 39180214762 and scoped flare 39181656819 queued; findings #3036 #2484 (2)
+2026-10-19T01:31Z	3	heartbeat	-	dev 12008867; #995 #1989 #2622 open; full CI 39180214762 queued, scoped flare 39181656819 running; findings #3036 #2484 (2)
+2026-10-19T01:48Z	3	heartbeat	-	dev ed0fed9e; #995 #1989 #2622 open; full CI 39180214762 and scoped flare 39181656819 running; findings #3036 #2484 (2)
+2026-10-19T02:05Z	3	heartbeat	-	dev 17dc84c7; #995 #1989 #2622 open; scoped flare 39181656819 (7ccb643d) success, full CI 39180214762 running; findings #3036 #2484 (2); no slice due (FX-u/FX-z wait on FX-3b)
+2026-10-19T02:22Z	3	heartbeat	-	dev 17dc84c7; #995 #1989 #2622 open; full CI 39180214762 running; findings #3036 #2484 (2)
+2026-10-19T02:39Z	3	heartbeat	-	dev 17dc84c7; #995 #1989 #2622 open; full CI 39180214762 running; findings #3036 #2484 (2)
+2026-10-19T02:56Z	3	heartbeat	-	dev 7def6ae5; #995 #1989 #2622 open; full CI 39180214762 running; findings #3036 #2484 (2)
+2026-10-19T03:13Z	3	heartbeat	-	dev cc14022e; #995 #1989 #2622 open, blocked; full CI 39180214762 cancelled, superseded by 39192572958 (queued); scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T03:29Z	3	heartbeat	-	dev 918abfc6; #995 #1989 #2622 open, blocked; full CI 39192572958 queued; scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T03:45Z	3	heartbeat	-	dev 7acc00bf; #995 #1989 #2622 open, blocked; full CI 39192572958 queued; scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T04:03Z	3	heartbeat	-	dev b48cf6c4; #995 #1989 #2622 open, blocked; full CI 39192572958 queued (1h); scoped flare 39193351004 queued; findings 3036 2484 (2)
+2026-10-19T04:20Z	3	heartbeat	-	dev 9f098e23; #995 #1989 #2622 open, blocked; full CI 39192572958 in progress; scoped flare 39193351004 in progress; findings 3036 2484 (2)
+2026-10-19T04:37Z	3	heartbeat	-	dev aed78668; #995 #1989 #2622 open, blocked; full CI 39192572958 in progress; scoped flare 39193351004 in progress; findings 3036 2484 (2)
+2026-10-19T04:54Z	3	heartbeat	-	dev bede8342; #995 #1989 #2622 open; full CI 39192572958 in progress (cc14022e); scoped flare 39193351004 success (cc14022e), no slice due (FX-u/FX-z blocked); findings #3036 #2484
+2026-10-19T05:12Z	3	heartbeat	-	dev aefebf4f; #995 #1989 #2622 open; full CI 39192572958 in progress (cc14022e); findings #3036 #2484
+2026-10-19T05:29Z	3	heartbeat	-	dev 047303c1; #995 #1989 #2622 open; full CI 39192572958 in progress (cc14022e); findings #3036 #2484
+2026-10-19T05:48Z	3	heartbeat	-	dev 9b33f116; #995 #1989 #2622 open; full CI 39192572958 cancelled (superseded), now tracking full CI 39203617095 (b7e17ed6, queued); findings #3036 #2484
+2026-10-19T06:09Z	3	heartbeat	-	dev 6dd055f6; #995 #1989 #2622 open; full CI 39203617095 queued (b7e17ed6); findings #3036 #2484
+2026-10-19T06:27Z	3	heartbeat	-	dev d4814191; #995 #1989 #2622 open; full CI 39203617095 queued (b7e17ed6); findings #3036 #2484
+2026-10-19T06:44Z	3	heartbeat	-	dev 977df193; #995 #1989 #2622 open; full CI 39203617095 queued; findings 3036,2484
+2026-10-19T07:02Z	3	heartbeat	-	dev d99751bc; #995 #1989 #2622 open; full CI 39203617095 queued; findings 3036,2484
+2026-10-19T07:22Z	3	heartbeat	-	dev 57d85dfd; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T07:39Z	3	heartbeat	-	dev 57d85dfd; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T07:56Z	3	heartbeat	-	dev 57d85dfd; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T08:13Z	3	heartbeat	-	dev 9cb4a95d; #995 #1989 #2622 open; full CI 39203617095 in progress; findings 3036,2484
+2026-10-19T08:30Z	3	heartbeat	-	dev 6f9a2b88; #995 #1989 #2622 open; full CI 39203617095 in_progress; findings 2 open (#3036 #2484)
+2026-10-19T08:47Z	3	check	39203617095	dev 0b9ec8ab; #995 #1989 #2622 open; full CI 39203617095 cancelled (macOS cancelled, Linux green), now watching full CI 39225019255 on 0b9ec8ab; findings 2 open (#3036 #2484)
+2026-10-19T09:04Z	3	heartbeat	-	dev 097b0d52; #995 #1989 #2622 open; full CI 39225019255 cancelled (superseded), latest full 39226253814 pending; findings 2 open (#3036 #2484)
+2026-10-19T09:20Z	3	heartbeat	-	dev 25f6d337; #995 #1989 #2622 open; latest full CI 39226253814 pending; findings 2 open (#3036 #2484)
+2026-10-19T09:37Z	3	heartbeat	-	dev b749dd94; #995 #1989 #2622 open; full CI 39226253814 cancelled (superseded), latest full 39230710902 pending; findings 2 open (#3036 #2484)
+2026-10-19T09:53Z	3	heartbeat	-	dev 68d4644e; #995 #1989 #2622 open; full CI 39230710902 cancelled (superseded), latest full 39232536792 pending; findings 2 open (#3036 #2484)
+2026-10-19T10:11Z	3	heartbeat	-	dev 3dbba7d3; #995 #1989 #2622 open; full CI 39232536792 and 39234075413 cancelled, 39234246603 pending; findings #3036 #2484
+2026-10-19T10:28Z	3	heartbeat	-	dev 895fb2d0; #995 #1989 #2622 open; full CI 39234246603 cancelled, 39236881849 pending; findings #3036 #2484
+2026-10-19T10:44Z	3	heartbeat	-	dev 895fb2d0; #995 #1989 #2622 open; full CI 39236881849 pending; findings #3036 #2484
+2026-10-19T11:03Z	3	heartbeat	-	dev d80a1b26; #995 #1989 #2622 open; full CI 39236881849 pending, scoped runs queued; findings #3036 #2484
+2026-10-19T11:23Z	3	heartbeat	-	dev c6ad68f7; #995 #1989 #2622 open; full CI 39236881849 cancelled, 39243183625 pending; findings #3036 #2484
+2026-10-19T11:39Z	3	heartbeat	-	dev fa8c815f; #995 #1989 #2622 open; full CI 39243183625 cancelled, 39244857355 pending; scoped flare 39246056734 queued; findings #3036 #2484
+2026-10-19T11:54Z	3	stage-start	-	resume act-1a15400ea40-y423; FX-4, FX-11 merged; inspector-timeline built: FX-5 can start
+2026-10-19T11:56Z	3	builder-started	FX-5+FX-9a	one builder, worktree
+2026-10-19T12:58Z	3	pushed	flare-export/fx5-fx9a	FX-9a commits pushed (test first); builder lost in worker restart, FX-5 relaunched
+2026-10-19T13:04Z	3	pr-opened	#3240	FX-5 + FX-9a, head 437bb504, 263 lines, Mutate 2/2, budget tests disabled until #1989
+2026-10-19T13:27Z	3	heartbeat	#3240	lane build in progress; dev run 39252895176 still pending
+2026-10-19T13:50Z	FX-5/FX-9a	heartbeat	#3240	lane macOS build success; dev run 39252895176 in progress
+2026-10-19T14:16Z	FX-5/FX-9a	heartbeat	#3240	dev run 39252895176 Linux green; no slice done (FX-u needs FX-3b/FX-5, FX-z needs FX-9b/FX-10)
+2026-10-19T14:36Z	FX-5/FX-9a	heartbeat	#3240	waits next lane batch
+2026-10-19T14:55Z	FX-5/FX-9a	heartbeat	#3240	still queued; no needs-fix
+2026-10-19T15:19Z	FX-5/FX-9a	heartbeat	#3240	eligible, queued behind in-flight batch
+2026-10-19T15:39Z	FX-5/FX-9a	heartbeat	#3240	merged ca41413; #1989 open; findings #3036 #2484
+2026-10-19T15:58Z	FX-5/FX-9a	heartbeat	#1989	#1989 open; findings #3036 #2484
+2026-10-19T16:18Z	FX-5/FX-9a	heartbeat	#1989	#1989 open; findings #3036 #2484
+2026-10-19T16:37Z	FX-5/FX-9a	heartbeat	#1989	#1989 open, PR #3242 fast-lane; findings #3036 #2484
+2026-10-19T16:58Z	FX-3b	heartbeat	#3242	#1989 closed; FX-3b builder launched (options rows, flare.export ids, problem line, J22 rest, J23, budget re-enabled)
+2026-10-19T17:13Z	FX-3b	heartbeat	#3296	FX-3b PR #3296 opened; #3297 needs-ui filed
+2026-10-19T17:17Z	FX-3b	heartbeat	#3298	FX-9b PR opened, stacked
+2026-10-19T17:19Z	FX-3b	heartbeat	#3296	#3296 in lane, no lane labels yet; findings #3036 #2484 open
+2026-10-19T17:37Z	FX-3b	heartbeat	#3296	lane dispatched macOS build-only run on 9b37e1a; #3290 not yet restored
+2026-10-19T17:57Z	FX-3b	heartbeat	#3296	macOS build 39293289259 queued on 9b37e1a; #3298 held
+2026-10-19T18:17Z	FX-3b	heartbeat	#3296	macOS build 39293289259 still queued (23 runs queued repo-wide); #3298 held
+2026-10-19T18:36Z	FX-3b	heartbeat	#3296	macOS build 39293289259 success 18:29Z; lane sweep in progress; #3298 held
+2026-10-19T19:01Z	FX-z:	heartbeat	#3298 e9f7822	#3296 merged 18:42Z; needs-rebase fixed (journey files took branch side), no-fast-lane removed, ci --changed PASS
+2026-10-19T19:18Z	FX-z:	heartbeat	#3298 run 39307401237	build queued (runner backlog)
+2026-10-19T19:38Z	FX-z:	heartbeat	#3298 run 39307401237	build still queued at 19:38Z
+2026-10-19T19:58Z	FX-z	heartbeat	#3298	19:58Z: build run 39307401237 still queued (macOS runner backlog)
+2026-10-19T20:18Z	FX-z	heartbeat	#3298	20:18Z: build run 39307401237 still queued (macOS runner backlog)
+2026-10-19T20:38Z	FX-z	heartbeat	#3298	20:38Z: build run 39307401237 success; lane merges on next sweep
+2026-10-19T20:54Z	FX-z	heartbeat	#3298	20:54Z: build green, no lane sweep since 19:40Z; waits for next sweep
+2026-10-19T21:11Z	FX-z	heartbeat	#3298	21:11Z: build green; lane sweeps at 21:09-21:10Z cancelled, one pending
+2026-10-19T21:35Z	FX-z:	pr	#3361	21:35Z: head 098dd7a1, scripts/ci --changed PASS, waves OK
+2026-10-19T21:53Z	FX-z:	heartbeat	#3361	21:53Z: all tasks merged; waiting on CI
+2026-10-19T22:12Z	all	heartbeat	#1973	22:12Z: full CI 39330687224 cancelled (superseded); 39333170092 on a7e93ca4 pending
+2026-10-19T22:31Z	all	heartbeat	#1973	22:31Z: scoped flare 39334167659 and full CI 39333170092 on a7e93ca4 (contains 39c9d46c) queued/pending
+2026-10-19T22:56Z	wait	heartbeat	scoped 39334167659 queued; full 39336158094 pending	no green run yet
+2026-10-19T23:15Z	wait	heartbeat	scoped 39334167659 queued; full 39336158094 pending	macOS runners backlogged; no green run yet
+2026-10-19T23:34Z	wait	heartbeat	scoped 39334167659 queued; full 39342355180 pending	full 39336158094 cancelled by a newer run
+2026-10-19T23:53Z	wait	heartbeat	scoped 39334167659 queued; full 39342355180 pending	runners backlogged; no green run yet
+2026-10-20T00:12Z	wait	heartbeat	scoped 39334167659 queued; full 39345113796 pending	full 39342355180 cancelled by a newer run
+2026-10-20T00:31Z	wait	heartbeat	scoped 39334167659; full 39346519827 pending	full 39345113796 cancelled by a newer run
+2026-10-20T00:50Z	wait	heartbeat	scoped 39334167659 queued; full 39349878829 pending	full 39346519827 cancelled by a newer run
+2026-10-20T01:09Z	wait	heartbeat	scoped 39334167659 queued; full 39349878829 queued, 39351262172 pending	runners backlogged; no green run yet
+2026-10-20T01:28Z	awaiting	heartbeat	39352633488	full CI 53630c3b pending, 2019b521 queued, scoped flare 39334167659 queued
+2026-10-20T01:47Z	awaiting	heartbeat	39352633488	full 53630c3b pending, 2019b521 queued, scoped flare 39334167659 queued
+2026-10-20T02:06Z	awaiting	heartbeat	39356653273	full 15b4e591 pending (53630c3b cancelled), 2019b521 queued, scoped flare 39334167659 queued
+2026-10-20T02:24Z	awaiting	heartbeat	39334167659	scoped flare 39334167659 now in_progress; full 13cf5dce pending (15b4e591 cancelled)
+2026-10-20T02:55Z	FX-u	heartbeat	#3407	scoped flare 39334167659 red on RenderBudgetFlareExportTests (borderless window hides toolbar Export…); fix PR #3407 opened
+2026-10-20T03:23Z	FX-u/FX-z	heartbeat	#3420	scoped flare 39334167659 journeys red; export journeys matched label only, fix PR #3420 (FX-z); #3407 (FX-u render budget) waiting on macOS build; scoped flare 39362173785 queued
+2026-10-20T03:42Z	FX-u/FX-z	heartbeat	#3420	macOS runners queued: #3407, #3420 builds and scoped flare 39362173785; full CI 39365038310 at 533daec7 pending
+2026-10-20T21:05Z	FX-u	slice-done	#3407	line lead act-1a15b1de023-4xx7; Linux green on https://github.com/qbtrix/creative-apps/actions/runs/39492947557 (holds 61601e8d); Mac-Finish-Wanted posted
+2026-10-20T21:05Z	FX-z	slice-done	#3420	Linux green on https://github.com/qbtrix/creative-apps/actions/runs/39492947557 (holds f010cf14)
+2026-10-20T21:05Z	4	contact-sheet	#1973	Belt-Contact-Sheet https://github.com/qbtrix/creative-apps/actions/runs/39492947557; stage done
+2026-10-21T02:18:46Z	record-moved	Belt watches lead/flare-flare-export; record continues here (was docs/leads/flare-export on lead/flare-export)
