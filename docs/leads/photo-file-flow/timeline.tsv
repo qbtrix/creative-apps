@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T02:00:54Z	check	heartbeat	#3815	PF-3 head 314bd40b clean, macOS build queued since 01:12Z
 2026-10-21T02:21:15Z	check	heartbeat	#3815	PF-3 head 314bd40b clean, macOS build queued since 01:12Z
 2026-10-21T02:38Z	heartbeat	check	-	#3815 PF-3 mac build 39525931453 in progress
+2026-10-21T02:57Z	heartbeat	check	-	#3815 PF-3 mac build 39525931453 success; waits for lane batch
