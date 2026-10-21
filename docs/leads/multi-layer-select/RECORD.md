@@ -64,3 +64,4 @@ Next: PM-z #4243 open (head 2e5a915, Fast-Check pass, fast-lane + feature-done),
 - The PR tooling re-appends a footer line to PR bodies after an edit removes it; the fast lane strips it from the squash commit.
 - The comment tool re-appends the attribution footer to issue comments too; a PATCH cannot remove it. Recorded, not blocking.
 - A stacked PR squash carries its base: PM-6 #4143 landed PM-5 too; #4118 closed as superseded (dev differs only by PM-6 lines).
+- dev's macOS build is broken outside this feature: #4164 replaced PhotoPlaceIntent.files, but RenderBudgetPhotoPlaceTests.swift still calls it. The fix is #4215 (open). #4243's lane build 39688975150 failed on it. Head 0972834 merges dev and ports #4215, with one comment on #4243. Slice-done for PM-m and PM-z waits on a green dev run, which needs #4215 or our port.

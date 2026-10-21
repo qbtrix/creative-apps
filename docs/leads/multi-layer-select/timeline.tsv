@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-21T21:17:52Z	3 wave 3	check	PM-5,PM-6	PM-6 merged incl PM-5; #4118 closed superseded; dev Linux red on launcher baseline (#3856), PM-m done waits for green
 2026-10-21T22:10:00Z	3 wave 3	resume	-	run act-1a160924292-21x8; main 0dd23d6 verified; PM-a, PM-u, PM-m done per Belt
 2026-10-21T22:40:00Z	3 wave 3	pr	PM-z	#4243 open (Delete on every picked layer, PJ-M1 on, PM-10 docs); ci --changed PASS; Mutate 6/6; #4242 filed for stress steps
+2026-10-21T23:25:00Z	3 wave 3	check	PM-z	#4243 lane mac build red on dev place-test break (#4164); ported #4215, head 0972834, ci --changed PASS; no green dev run yet; no findings
