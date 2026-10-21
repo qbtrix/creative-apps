@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 polling
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: at each check, read #4034 (shell-media SM-1); once it merges, build ST-a (ST-1 + ST-2) on the new origin/dev
+Next: poll #4034 (shell-media SM-1) every 10 min; build ST-a the moment it merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
