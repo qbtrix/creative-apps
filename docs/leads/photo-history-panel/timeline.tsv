@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-21T20:49Z	heartbeat	#4160 clean, waits macOS gate; #4162 golden conflict again, fixer round 2; no findings
 2026-10-21T20:55Z	wave A	#4162 merge ready (7a991bd), held on dev-red CommandPathTests launcher baseline
 2026-10-21T21:11Z	heartbeat	#4160 clean, waits macOS gate; #4162 held, dev Linux check red (run 39673232799); no findings
+2026-10-21T21:33Z	heartbeat	#4160 merged 8c75b620; #4162 held until #4201 (launcher baseline fix) lands; no findings

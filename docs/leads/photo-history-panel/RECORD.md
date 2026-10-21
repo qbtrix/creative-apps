@@ -5,7 +5,7 @@ Run: act-1a15fc7d29e-gz1t (line lead with #3471 file-flow) · Session: claude/hi
 Earlier run: act-1a15ac118a1-s70v (PH-a, PH-u done)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
-Next: #4160 (PH-6) in the lane's macOS gate; #4162 (PH-5) fixed, back in the lane; then PH-7, PH-8 (PH-z)
+Next: #4162 (PH-5) pushes once #4201 makes dev green (launcher baseline); then PH-m done on a scoped photo run; then PH-7, PH-8 (PH-z)
 Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (lead/history-panel holds the copy before 20:05Z)
 
 ## Slices
@@ -22,7 +22,7 @@ Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (le
 | PH-1, PH-2 | PH-a | stubs, tab, menu | #3708 | merged |
 | PH-3, PH-4 | PH-u | listing, snapshots, budget | #3762, #3818 | merged (mac fixes #3979, #4111) |
 | PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | merge ready locally (fix-4162 7a991bd), held: dev red on CommandPathTests launcher baseline (#3856) |
-| PH-6 | PH-m | autosave on RecoveryFolder | #4160 | in lane (macOS gate) |
+| PH-6 | PH-m | autosave on RecoveryFolder | #4160 | merged 8c75b620 |
 | PH-7 | PH-z | journeys on live | – | waits PH-m |
 | PH-8 | PH-z | status built, feature-done | – | waits PH-7 |
 
