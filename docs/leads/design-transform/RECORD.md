@@ -2,14 +2,14 @@
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DT-a merged (#3751, e6430cfa); Belt-Slice-Done waits on a green dev run with e6430cfa
+Stage: 3 DT-a done (#3751, e6430cfa; Linux green on run 39569221486); DT-u waits on DG-u (#3978 in lane)
 Base: 896cafe3 (origin/dev); main verified at 0dd23d65
-Next: DT-a slice-done line and critics on a scoped design run; DT-u after DG-u (building); DT-m waits DG-m, DA-m
+Next: DT-a critics on a scoped design run; DT-u once DG-u merges (both own DesignCanvasMarks.swift); DT-m waits DG-m, DA-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DT-a | rotation/flip fields on DesignNode, TransformTarget stubs, inspector rows and Object items on the stubs | DT-1, DT-2 | MJ-DT | TT-a (merged #3485/#3486); gradient-fill:DG-a (#3687 open) | yes | 0 | merged | – | – |
+| DT-a | rotation/flip fields on DesignNode, TransformTarget stubs, inspector rows and Object items on the stubs | DT-1, DT-2 | MJ-DT | TT-a (merged #3485/#3486); gradient-fill:DG-a (#3687 open) | yes | 0 | done | 39569221486 | wanted |
 | DT-u | canvas paints turned nodes, handles turn; snapshots and render budget | DT-3, DT-4 | DJ-T1 | DT-a; gradient-fill:DG-u | yes | 0 | waiting | – | – |
 | DT-m | adapter bodies, turned hit test, SVG turn, catalog specs, RJ-D15 | DT-5, DT-6 | MJ-DT | DT-a; gradient-fill:DG-m; autosave-history:DA-m | no | 0 | waiting | – | – |
 | DT-z | journey on live, status built, feature-done | DT-7, DT-8 | DJ-T1 | DT-u, DT-m | yes | 0 | waiting | – | – |
@@ -35,4 +35,4 @@ Next: DT-a slice-done line and critics on a scoped design run; DT-u after DG-u (
 - One combined wave plan across transform, placed-images, file-flow (rule 19); DT-a is the first wave for this feature and blocks PD-a.
 
 ## Open
-- DT-a waits on gradient-fill DG-a (#3687, open): it owns DesignNode.swift and DesignInspector.swift.
+- DT-a Belt-Slice-Done and Mac-Finish-Wanted posted on #3436 (run 39569221486).
