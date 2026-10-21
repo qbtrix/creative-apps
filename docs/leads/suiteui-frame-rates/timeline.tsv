@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-21T12:57Z	3	heartbeat	4063	removed the attribution footer from #4063's body; FR-m at 5dfc7481b
 2026-10-21T13:04Z	3	wave	FR	wave 2 builders returned; dev's perf list now skips the Library timing tests; merged dev into the slice branches and re-gating one at a time
 2026-10-21T13:05Z	build	wave	wf_5261e84a-ce6	FR-u builder started, stacked on FR-m
+2026-10-21T13:16Z	build	check	39600275867	FR-a macOS build green; FR-m gate PASS on 6fe38e4f9 and pushed
