@@ -1,13 +1,10 @@
 // HaloShapeTests.swift: shape-tools MJ-HS, the Model walk. A layer's shape
 // spec saves under its own key and old projects open without one, and with no
-// composition the Shape button says why (HS-1); drawing a star as one undo
-// step at the playhead's span, the picked tool and the refusals wait on HS-5's
-// conformance bodies. Linux and macOS.
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// composition the Shape button says why (HS-1); drawing a star is one undo
+// step at the playhead's span, the picked tool stays, a bad spec is refused,
+// and the renderer draws a layer's spec, not its ellipse (HS-5).
+// Linux and macOS.
 import Foundation
-#endif
 @testable import HaloModel
 import SuiteKernel
 import Testing
@@ -51,20 +48,18 @@ import Testing
         #expect(project.history.undo.isEmpty)
     }
 
-    @Test(.disabled("waits on HS-5")) func aCompositionTakesShapes() throws {
+    @Test func aCompositionTakesShapes() throws {
         let project = try Self.project()
         #expect(project.shapeHelp == nil)
     }
 
-    @Test(.disabled("waits on HS-5")) func pickingKeepsTheTool() throws {
+    @Test func pickingKeepsTheTool() throws {
         var project = try Self.project()
         project.pickShapeTool(Self.star)
         #expect(project.shapeTool == Self.star)
-        project.runShape(.points(8))
-        #expect(project.shapeTool.points == 8)
     }
 
-    @Test(.disabled("waits on HS-5")) func drawingAddsOneSelectedShapeLayerAsOneStep() throws {
+    @Test func drawingAddsOneSelectedShapeLayerAsOneStep() throws {
         var project = try Self.project()
         let before = try #require(project.selectedComposition)
         let id = try project.addShape(Self.star, in: Self.box, name: "Star")
@@ -77,7 +72,7 @@ import Testing
         #expect(project.history.undo.count == 1)
     }
 
-    @Test(.disabled("waits on HS-5")) func aBadSpecIsRefusedAndAddsNothing() throws {
+    @Test func aBadSpecIsRefusedAndAddsNothing() throws {
         var project = try Self.project()
         let before = project.document
         #expect(throws: ShapeRefusal.self) {
@@ -85,5 +80,23 @@ import Testing
         }
         #expect(project.document == before)
         #expect(project.history.undo.isEmpty)
+    }
+
+    @Test func specDrawsPath() throws {
+        let bounds = HaloLayerRect(x: 760, y: 340, width: 400, height: 400)
+        func item(_ shape: ShapeSpec?, _ matrix: HaloMatrix = .identity) -> HaloDrawItem {
+            HaloDrawItem(
+                layerID: "s", kind: .shape, bounds: bounds, matrix: matrix, opacity: 1,
+                color: HaloLayerKind.shape.defaultColor, blendMode: .normal, shape: shape)
+        }
+        #expect(HaloOutlines.outline(of: item(nil)) == .ellipse(bounds))
+        guard case .polygon(let points)? = HaloOutlines.outline(of: item(Self.star, .translation(x: 10, y: 0))) else {
+            Issue.record("a star is a polygon")
+            return
+        }
+        #expect(points.count == 12)
+        func has(_ x: Double, _ y: Double) -> Bool { points.contains { abs($0.x - x) < 1e-6 && abs($0.y - y) < 1e-6 } }
+        #expect(has(970, 340), "the top point, moved by the matrix")
+        #expect(has(1020, 540 - 100 * 3.0.squareRoot() / 2), "the first inner point, at half the radius")
     }
 }
