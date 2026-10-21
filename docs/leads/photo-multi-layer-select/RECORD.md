@@ -4,7 +4,7 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a15e9d8b78-eu21 (resumed; earlier act-1a15b1de115-nxto) · Session: claude/multi-layer-select-lead-g8o0jx · Started: 2026-10-20T20:40Z
 Stage: 3 wave 3
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: PM-3 #4117, PM-4 #4095, PM-5 #4118 in the lane (macOS builds queued); PM-6 builder running stacked on PM-5; then PM-7, PM-8 once PM-3 merges
+Next: PM-3 #4117, PM-4 #4095, PM-5 #4118 in the lane (macOS builds queued); PM-6 building stacked on PM-5; PM-7, PM-8 building stacked on PM-3; PM-9 waits on #3499, PM-10 on #4064
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

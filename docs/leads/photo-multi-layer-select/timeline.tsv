@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-21T15:58Z	3 wave 3	check	PM-2,PM-3,PM-4	PM-2 #4087 merged 14:56Z; PM-4 #4095 needs-rebase; PM-3 unpushed after worker restart; fixers started
 2026-10-21T15:59Z	3 wave 3	start	PM-5	PM-5 builder started from dev (PM-2 merged)
 2026-10-21T17:09Z	3 wave 3	check	PM-3,PM-4,PM-5,PM-6	PM-3 #4117, PM-4 #4095 (rebased), PM-5 #4118 open with Fast-Check; lane macOS builds queued; PM-6 builder started on PM-5
+2026-10-21T17:10:26Z	3 wave 3	builders	PM-7,PM-8	started stacked on PM-3 #4117 (not merged), same as PM-6 on PM-5
