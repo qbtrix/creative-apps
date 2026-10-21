@@ -4,7 +4,7 @@ Run: act-1a15e33396b-eo15 (resumes act-1a15b69feea-et92). Feature issue #3721. P
 Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev ac7f95c9f6b0516253108a270145e4280f243b69.
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: #4037 dev merged in (4ecc2fd7), gate CI: PASS, pushed and Head: moved; wait for the lane batch, then Belt-Slice-Done UP-design + Mac-Finish-Wanted
+Next: UP-design #4037 merged as 2f1cd8ec; Belt-Slice-Done UP-design + Mac-Finish-Wanted once dev Linux 39643409752 is green; UP-photo/flare/halo/z stay blocked (see #3721 comment 6317099013)
 
 ## Plan
 
