@@ -79,3 +79,4 @@ utc	stage	event	ref	note
 2026-10-21T17:42Z	17:42Z	needs-rebase	#4131 golden conflict; fixer resumed
 2026-10-21T17:50Z	17:50Z	fixed	#4131 merged dev, golden resolved, head 1f34046, CI PASS, mutate 3/3
 2026-10-21T18:04Z	18:04Z	merged	#4136 PT-9 merged; needs-rebase dropped on #4131
+2026-10-21T18:26Z	18:26Z	lane	#4127 #4133 macOS build success; #4131 build queued
