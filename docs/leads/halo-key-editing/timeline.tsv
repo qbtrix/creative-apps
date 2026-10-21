@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T09:12:24Z	3	heartbeat	-	#3954 awaiting lane batch; #3955 lane Linux run red only on dev's stale Design anchors (dev-red #3856), fix in #3980; not fixed here per CLAUDE.md
 2026-10-21T09:29:42Z	3	heartbeat	-	wave 2: #3951 merged; #3954 mac green, awaiting lane batch; #3955 held on dev anchor red (#3856, fix PR #3980 open)
 2026-10-21T09:56:56Z	3	heartbeat	-	KE-2 #3954 fixed CommandPathTests (a049df39d, spec-built menu items); KE-4 #3955 merged dev (3a67e2cfe); both held on dev-red anchors #3980
+2026-10-21T10:15:29Z	3	heartbeat	-	holding: #3954 a049df39d and #3955 3a67e2cfe lane Linux runs red only at dev mutation anchors (dev-red #3856); fix #3980 is needs-rebase
