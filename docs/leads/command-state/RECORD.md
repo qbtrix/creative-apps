@@ -4,7 +4,7 @@ Issue: #3771 · Packet: docs/blueprints/suite/features/command-state.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
 Stage: 3 build, wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: bring up drafts #4130 #4134 #4140 #4144 on dev 0599560 (gate, Head, ready); then CS-4/CS-10/CS-14/CS-7/CS-11 builders
+Next: #4130 #4134 #4140 #4144 in lane; CS-7, CS-11 building; CS-14, CS-10, CS-4 stacked drafts building
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
