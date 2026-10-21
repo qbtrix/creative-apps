@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T21:53Z	3	merged	#4182	DS-a squash-merged; #4184 retargeted to dev
 2026-10-21T21:53Z	3	poll	dev-red #3856	dev Linux red on launcher command-path baseline (not ours); AE-h2 #2842 closed
 2026-10-21T22:01Z	3	blocked	#4184	integrated 976774dd; gate fails only on dev-red #3856; commented on #3757
+2026-10-21T22:28Z	3	poll	#4184	dev now red on library baseline (#3967) instead of launcher; DS-m still blocked
