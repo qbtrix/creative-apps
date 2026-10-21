@@ -4,7 +4,7 @@ Run: act-1a15e33396b-eo15 (resumes act-1a15b69feea-et92). Feature issue #3721. P
 Integration branch: dev (main only takes dev SHAs that passed full CI). Base: origin/dev ac7f95c9f6b0516253108a270145e4280f243b69.
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: wait for the lane's macOS build of #4037 at ff5d6a50 and its merge; then a CI run on dev whose Linux job contains it, then Belt-Slice-Done and Mac-Finish-Wanted for UP-design. UP-photo/flare/halo/z wait on shared-thumbnails ST-z, adopt-kernel-autosave AK-flare and shared-codecs SC-z
+Next: #4037 macOS build at ff5d6a50 passed; its Linux check 39621963598 failed on the old-dev CommandPathTests photo (fixed on dev by #4008), so dev merged in (4ecc2fd7), gating, then push and move Head:
 
 ## Plan
 
