@@ -18,7 +18,6 @@ Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.showSid
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.showInspector) {}.keyboardShortcut("i", modifiers: [.option, .command])
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.larger) { model?.larger() }.keyboardShortcut("+")
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.smaller) { model?.smaller() }.keyboardShortcut("-")
-Sources/AfterGlowApp/LauncherCommands+Onboarding.swift: Button("Welcome to AfterGlow") { openWindow(id: "onboarding") }
 Sources/AfterGlowApp/LauncherCommands+Update.swift: Button("Check for Updates…") {}.disabled(true).help(SuiteIdentity.notConnected("updater"))
 Sources/AfterGlowApp/OnboardingStartPage.swift: Button("Open sample") { Task { await model.openSample(app, now: Date()) } }
 Sources/AfterGlowApp/OnboardingWindow.swift: Button("Skip") { Task { await model.skip() } }
