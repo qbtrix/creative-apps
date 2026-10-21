@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-21T22:55:11Z	-	watch	FO-z	FO-6 #4121 macOS build 39664988428 green; waits for its batch merge. FO-7 after it merges.
 1792623562	-	watch	FO-z	FO-6 #4121 still open, waiting for its batch; FO-7 after it merges.
 1792624224	-	watch	FO-z	Heartbeat: FO-6 #4121 still open, waiting for its batch (dev doesn't compile on macOS until #4215 lands).
+1792625247	-	watch	FO-z	FO-6 #4121 merged as c5a5c98; FO-7 #4256 opened (feature-done, head 58d92d1, docs only). Waiting for it to merge and for a green dev Linux run, then Belt-Slice-Done FO-z and the contact sheet.
