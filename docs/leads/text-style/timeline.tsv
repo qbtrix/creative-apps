@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-21T11:30Z	heartbeat		Heartbeat: dev still red (#3856, CommandPathTests photo; red-triage names #3976, photo line). #3844 Head: held at a880a6f9, #3847 stacked on it.
 2026-10-21T11:57Z	heartbeat		Heartbeat: dev still red (#3856); #3844 held at a880a6f9, #3847 stacked.
 2026-10-21T12:25Z	heartbeat		Heartbeat: dev still red (#3856); #3844 held at a880a6f9, #3847 stacked.
+2026-10-21T12:52Z	heartbeat	heartbeat: #3844 TS-5 held while dev red (#3856, photo line); #3847 stacked
