@@ -2,9 +2,9 @@
 
 Issue: #1935 · Packet: docs/blueprints/suiteui/features/adopt-kernel-selection.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
-Stage: heartbeat
-Base: dev 5bec8089
-Next: AS-flare green dev run, then contact sheet
+Stage: contact-sheet
+Base: dev ac7f95c9
+Next: done
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-selection half. The brief's integration branch is `main` at
@@ -15,7 +15,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AS-flare | Flare selection on `Selection<StageAddress>`, `Pick`, `Nudge`, `Marquee` behind its API; set logic deleted | AS-f1, AS-f2 | MJ-AS-flare (`WorkspaceWiringTests`) | stage-edit | false | 0 | lane | – | – |
+| AS-flare | Flare selection on `Selection<StageAddress>`, `Pick`, `Nudge`, `Marquee` behind its API; set logic deleted | AS-f1, AS-f2 | MJ-AS-flare (`WorkspaceWiringTests`) | stage-edit | false | 0 | done | – | – |
 | AS-design | Design selection on `Selection<String>` with `canAdd`, `Nudge.delta`/`runKey`, `Marquee.rect`/`union` behind its API; set logic and `DesignDirection` deleted | AS-d1, AS-d2 | MJ-AS-design (`DesignMultiSelectTests`) | design-seams chain to design-seams-2 | false | 0 | done | – | – |
 | AS-halo | Halo `selectedKeys` on `Selection<HaloKeyRef>` as a set with `prune(alive:)` behind its API; set and prune code deleted | AS-h1, AS-h2 | MJ-AS-halo (`HaloKeySelectionTests`) | – | false | 0 | done | 39133431238 | – |
 | AS-library | Library `LibraryCatalog.selection` on `Selection<String>` with `anchor`, `pick(_:_:order:)`, `move(_:order:columns:)` behind its API; set code deleted | AS-l1, AS-l2 | MJ-AS-library (`LibraryGridTests`) | spine, export, adopt-kernel-undo:AU-library | false | 0 | done | – | – |
@@ -37,6 +37,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T13:30Z: AS-flare Belt-Slice-Done + Belt-Contact-Sheet on Linux check 39604117821 (5bec8089)
 - 2026-10-21T13:08Z: -
 - 2026-10-21T12:43Z: -
 - 2026-10-21T12:23Z: -
