@@ -4,7 +4,7 @@
 // samples run on a FlareLiveDrag, a copy of the model in this view's own state, so only the stage redraws per sample
 // and the window's body doesn't (#1792); its art and marks come from that copy while it lasts. Mouse-up sends the
 // last sample as `.stage(.dragChanged)` (the gesture's start, Shift and Option and the zoom), then `.stage(.endDrag)`,
-// so the window changes once; Escape drops the copy before the window's `toolKey` cancels. A tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
+// so the window changes once; Escape drops the copy before the window's `toolKey` cancels. A tool letter (V A R E P U) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
 // glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
 // Path with `model.finishPathHelp`; it sits inside the vertical ruler. Under the stage the window's one
 // ViewerStatusBar shows the zoom percent, the scene size, on the fakes a "Preview data" warning pill, then
@@ -179,7 +179,7 @@ struct FlareStage: View {
         return .handled
     }
 
-    /// The palette: V A R E P, each with its reason when it can't act, then Finish Path. Return finishes a pen
+    /// The palette: V A R E P U, each with its reason when it can't act, then Finish Path. Return finishes a pen
     /// path too, but a mouse-only user needs a control on screen (lead.md rule 8, 9).
     private var palette: [ToolbarAction] {
         let tools = FlareTool.allCases.map { tool in
