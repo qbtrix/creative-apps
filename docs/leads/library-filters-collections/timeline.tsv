@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-21T18:21:24Z	check	-	FC-12 mac build queued; #4146 built, waits sweep
 2026-10-21T18:43:05Z	check	-	#4146 merged; FC-12 mac build in progress
 2026-10-21T19:05:17Z	check	-	FC-12 built green, waits sweep
+2026-10-21T19:27Z	check	-	FC-12 #3551 still open at c931a176c (macOS build green, mergeable); lane sweeps queued and superseding each other; open findings 0.
