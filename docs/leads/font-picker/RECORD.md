@@ -76,6 +76,8 @@ Next: none this run. The supervisor relaunches font-picker once shell-text ST-a 
 
 - 2026-10-21T11:57Z Heartbeat: still parked on #3725.
 
+- 2026-10-21T12:25Z Heartbeat: still parked on #3725.
+
 ## Open
 
 - shell-text ST-a not started (wave planned, no feature issue filed).
