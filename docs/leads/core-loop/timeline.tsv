@@ -87,3 +87,4 @@ utc	stage	event	ref	note
 2026-10-21T07:22Z	poll	wait	-	#3817 (CL-7) in lane; #3401, #865 still open
 2026-10-21T07:53Z	poll	wait	-	#3817 macOS build green, waiting on lane sweep; #3401, #865 open
 2026-10-21T08:08Z	merge	done	CL-run	#3817 (CL-7) merged 9265b982; CL-run done once a green ci.yml run contains it
+2026-10-21T09:10Z	done	done	CL-run	Belt-Slice-Done: CL-run https://github.com/qbtrix/creative-apps/actions/runs/39569221486 (Linux check at 733e8ef2 contains 9265b982, Linux green)

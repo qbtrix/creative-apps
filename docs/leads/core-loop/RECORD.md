@@ -4,14 +4,14 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15d0eeefb-6z9l (from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 2
 Base: 6537a1a02f512db2df50d253384529f1b354b184
-Next: #3817 (CL-7) lands, then Belt-Slice-Done CL-run on the first green ci.yml run containing it; CL-probe/CL-measure wait on #3401, CL-12 on #865
+Next: CL-probe and CL-measure wait on #3401 (needs-ui), CL-12 on #865; CL-z after them
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | CL-a | the loop's checks and the HaloRenderJob+Kernel stubs exist before its code | CL-1, CL-2, CL-3 | MJ-CL1 | editor-kernel EK-a (merged, #1933) | false | 0 | merged (#3404, #3408) | | |
 | CL-ui | Render… opens SuiteUI ExportSheet on the kernel run; render budget on | CL-4, CL-5 | H-J21 | CL-a | true | 0 | done: #3590 ui1 + #3653 ui2 merged; Belt-Slice-Done + Mac-Finish-Wanted at run 39507877855 (23:50Z) | | |
-| CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | in review (#3641 run1a merged 2026-10-20; #3812 run1b open, head 754b5038; #3817 run2b stacked) | | |
+| CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
 | CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder needs-ui #3401 | true | 0 | blocked | | |
 | CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | blocked (CL-11 merged; CL-10, CL-12 wait) | | |
 | CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | blocked | | |
@@ -24,8 +24,8 @@ Next: #3817 (CL-7) lands, then Belt-Slice-Done CL-run on the first green ci.yml 
 | CL-3 | CL-a | 1 | perf journeys (XCTSkip), L3..L5 layout tests, latency scaffold, two render budget suites (disabled) | UITests/HaloJourneyTests+Perf.swift, Tests/AppSnapshotTests/HaloLayoutTests.swift, HaloViewerLatencyTests.swift, RenderBudgetHaloRenderTests.swift, RenderBudgetHaloProbeTests.swift | – (checks) | #3404 | merged 6537a1a0 |
 | CL-4 | CL-ui | 2 | HaloRenderSheet presents SuiteExportSheet on renderRun | Sources/HaloApp/HaloRenderSheet.swift, HaloWindow+Render.swift | snapshots, H-J21 | | pushed 0229c007, PR waits on parents |
 | CL-5 | CL-ui | 3 | RenderBudgetHaloRenderTests.bodies on | Tests/AppSnapshotTests/RenderBudgetHaloRenderTests.swift | bodies | | pushed 0229c007 (with CL-4) |
-| CL-6 | CL-run | 2 | stored run state goes through ExportRun; old state machine deleted | Sources/HaloModel/HaloRenderJob*.swift | kernel-run tests (4 mutations) | | planned |
-| CL-7 | CL-run | 3 | render availability reads the kernel run | Sources/HaloModel/Availability (render) | availability tests (2 mutations) | | #3817 (lead/core-loop-CL-run2b, bcc243f0, cherry-picked onto run1b, 5 files +154/-110, mutate 4/4 Availability+Render, 4/4 RenderJob+Kernel, 4/4 CommandCatalog, CI PASS) |
+| CL-6 | CL-run | 2 | stored run state goes through ExportRun; old state machine deleted | Sources/HaloModel/HaloRenderJob*.swift | kernel-run tests (4 mutations) | | merged (#3641 run1a, #3812 run1b) |
+| CL-7 | CL-run | 3 | render availability reads the kernel run | Sources/HaloModel/Availability (render) | availability tests (2 mutations) | | merged (#3817, 9265b982) |
 | CL-8 | CL-probe | – | HaloProbe + input sites record | Sources/HaloApp/HaloProbe.swift + 5 views | CL-9/CL-10 oracles | | blocked (needs-ui) |
 | CL-9 | CL-probe | – | RenderBudgetHaloProbeTests.bodies on | Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift | bodies | | blocked |
 | CL-10 | CL-measure | – | H-P1..H-P5 journeys on | UITests/HaloJourneyTests+Perf.swift | perf journeys | | blocked |
