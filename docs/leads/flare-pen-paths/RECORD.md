@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once Linux check 39587217178 (dev 11919406, contains #3958) is green. FP-u waits on PN-3 (PN-3a #3770 open). FP-6 waits on PN-7 and file-flow FL-m.
+Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once a dev Linux run containing #3958 is green (39587217178 went red on Photo's CommandPathTests baseline, PhotoPlace.swift:36, not this line; dev-red #3856 open). FP-u waits on PN-3 (PN-3a #3770 open). FP-6 waits on PN-7 and file-flow FL-m.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
