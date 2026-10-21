@@ -24,3 +24,4 @@ time	kind	note
 2026-10-21T04:13Z	check	scoped design 39541665044 queued at 842e62ec	39541665044	waiting screens
 2026-10-21T04:35Z	check	scoped design 39541665044 in progress	39541665044	waiting screens
 2026-10-21T04:59Z	check	critic panel DK-a started on scoped run 39541665044 snapshots	39541665044	DK-u/DK-m still wait on DS-u/DS-m
+2026-10-21T05:03Z	check	critic panel DK-a: 22 confirmed, 2 refuted; filed #3864-#3874 (1 blocker, 4 major)	wf_65d869d1-502	11 open findings > 5: no new stroke wave; fix round 1 started on 0eca6ab5
