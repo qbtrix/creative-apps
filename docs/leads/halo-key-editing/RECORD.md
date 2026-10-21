@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
 Stage: 3 wave 2
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: KE-1 merged (#3813, dbf599ff6). Open KE-2 (KE-a), KE-3 (KE-m), KE-4 (KE-m) once their ci --changed passes.
+Next: KE-3 open as #3951. KE-2 (plan HaloTimelinePress) and KE-4 (mutate HaloKeyMove+Kernel) re-gating, then open their PRs. RJ-H13 into KE-4 after #3951 lands.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
