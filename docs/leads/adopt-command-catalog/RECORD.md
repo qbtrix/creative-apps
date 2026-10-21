@@ -2,19 +2,19 @@
 
 Issue: #2999 · Packet: docs/blueprints/suiteui/features/adopt-command-catalog.md
 Run: act-1a157b2050f-ovpu (resumed from act-1a1543c764c-0mz9) · Session: claude/feature-lead-suiteui-run-336pic · Started: 2026-10-20T05:08Z
-Stage: 3 wave 4 (AC-flare, AC-library, AC-z listed done by Belt; AC-photo, AC-design, AC-halo wait on CC-u for their menus-from-specs tasks AC-p3, AC-d3, AC-h3)
+Stage: 4 finish (every slice Belt-Slice-Done, contact sheet posted)
 Base: b3011ab9dc5579023722e79f83254e6e2520e612 (main); dev 18464f26
-Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#3484); PRs to dev once #3484 merges; then AC-z2 (feature-done).
+Next: beta-hardening lane verifies AC-photo, AC-design, AC-flare, AC-halo, AC-library (Mac-Finish-Wanted posted)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AC-photo | Photo actions as catalog commands, PhotoHeadless, menus from specs | AC-p1, AC-p2, AC-p3 | MJ-AC-photo | command-catalog:CC-run; CC-u, CC-lint (AC-p3) | true | 0 | building | – | – |
-| AC-design | Design commands, DesignHeadless, menus from specs | AC-d1, AC-d2, AC-d3 | MJ-AC-design | command-catalog:CC-run; CC-u, CC-lint (AC-d3) | true | 0 | building | – | – |
-| AC-flare | FlareCore's commands and Flare actions, FlareHeadless, menus | AC-f1, AC-f2, AC-f3, AC-f4 | MJ-AC-flare | command-catalog:CC-run; CC-u, CC-lint (AC-f4) | true | 0 | building | – | – |
-| AC-halo | HaloCommand cases, HaloHeadless, menus | AC-h1, AC-h2, AC-h3 | MJ-AC-halo | command-catalog:CC-run; CC-u, CC-lint (AC-h3) | true | 0 | building | – | – |
-| AC-library | Library actions into the Model, catalog, LibraryHeadless, menus | AC-l1, AC-l2, AC-l3, AC-l4 | MJ-AC-library | command-catalog:CC-run; CC-u, CC-lint (AC-l4) | true | 0 | building | – | – |
-| AC-z | all-apps goldens, conformance walk, status built | AC-z1, AC-z2 | MJ-AC-all | every slice above; command-catalog:CC-z (AC-z2) | false | 0 | blocked | – | – |
+| AC-photo | Photo actions as catalog commands, PhotoHeadless, menus from specs | AC-p1, AC-p2, AC-p3 | MJ-AC-photo | command-catalog:CC-run; CC-u, CC-lint (AC-p3) | true | 0 | done | 39534644387 | – |
+| AC-design | Design commands, DesignHeadless, menus from specs | AC-d1, AC-d2, AC-d3 | MJ-AC-design | command-catalog:CC-run; CC-u, CC-lint (AC-d3) | true | 0 | done | 39534644387 | – |
+| AC-flare | FlareCore's commands and Flare actions, FlareHeadless, menus | AC-f1, AC-f2, AC-f3, AC-f4 | MJ-AC-flare | command-catalog:CC-run; CC-u, CC-lint (AC-f4) | true | 0 | done | 39534644387 | – |
+| AC-halo | HaloCommand cases, HaloHeadless, menus | AC-h1, AC-h2, AC-h3 | MJ-AC-halo | command-catalog:CC-run; CC-u, CC-lint (AC-h3) | true | 0 | done | 39534644387 | – |
+| AC-library | Library actions into the Model, catalog, LibraryHeadless, menus | AC-l1, AC-l2, AC-l3, AC-l4 | MJ-AC-library | command-catalog:CC-run; CC-u, CC-lint (AC-l4) | true | 0 | done | 39534644387 | – |
+| AC-z | all-apps goldens, conformance walk, status built | AC-z1, AC-z2 | MJ-AC-all | every slice above; command-catalog:CC-z (AC-z2) | false | 0 | done | 39534644387 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -140,3 +140,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-21T03:39Z: hb11: scoped suiteui 39491489760 red at e64cff6b (macOS (suiteui): SliderBarTests.theBarsSliderReadsTheRowsTextOnATrack; journeys report-only), not a qualifying run, not an AC slice; full CI 39534644387 still queued
 
 - 2026-10-21T04:01Z: hb12: full CI 39534644387 in progress on 2ab0eb96
+
+- 2026-10-21T04:24Z: Belt-Slice-Done x5 on #2999 citing full CI 39534644387 (Linux green, contains AC-z2 59708c02; scoped suiteui 39540751500 green); Belt-Contact-Sheet and Mac-Finish-Wanted x5 posted.
