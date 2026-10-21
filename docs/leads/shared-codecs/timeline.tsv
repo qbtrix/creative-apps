@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-21T10:50Z	0	stage-start	#3718	base 1191940
+2026-10-21T10:50Z	2	stage-end	#3718	combined plan with suite-imaging; wave 1 SC-13, SC-1
+2026-10-21T10:50Z	3	stage-start	wave1	SC-13 SC-1 builders launched
