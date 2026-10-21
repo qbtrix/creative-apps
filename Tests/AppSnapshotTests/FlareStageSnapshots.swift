@@ -1,9 +1,10 @@
 // FlareStageSnapshots.swift: Flare's stage (FlareStage) at 2x through SnapshotHost, in Light, as goldens under
 // Golden/flare/: `bounce` at frames 0 and 30, `character` at 12 (its curves must stay curves), a rectangle draft, a
-// marquee beside Ball's selection outline, and the Rectangle tool over the locked Background layer, its palette
-// button disabled with "Unlock Background to draw on it.". Each also states what the Model hands the stage, so a
-// blank stage fails here and not only in the picture. Writes flare-stage-bounce-0@2x, flare-stage-bounce-30@2x,
-// flare-stage-character@2x, flare-stage-draft, flare-stage-marquee and flare-stage-locked (each -light.png).
+// pen draft, Direct Select on Ball with its path overlay, a marquee beside Ball's selection outline, and the Rectangle
+// tool over the locked Background layer, its palette button disabled with "Unlock Background to draw on it.". Each
+// also states what the Model hands the stage, so a blank stage fails here and not only in the picture. Writes
+// flare-stage-bounce-0@2x, flare-stage-bounce-30@2x, flare-stage-character@2x, flare-stage-draft, flare-stage-pen-draft,
+// flare-stage-direct, flare-stage-marquee and flare-stage-locked (each -light.png).
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -42,14 +43,24 @@ import Testing
         check(model, name: "flare-stage-draft")
     }
 
-    /// Two pen clicks leave an open path, so Finish Path in the palette is on, with no reason.
+    /// Two pen clicks leave an open path, outlined by the path overlay, so Finish Path in the palette is on, with no reason.
     @Test func penDraft() {
         var model = Self.open("bounce")
         model.selectTool(.pen)
         model.drag(from: Point(x: 300, y: 60), to: Point(x: 300, y: 60))
         model.drag(from: Point(x: 460, y: 180), to: Point(x: 460, y: 180))
         #expect(model.finishPathHelp == nil, "two pen clicks should leave a path Finish Path can commit")
+        #expect(model.penDraft?.contour.anchors.count == 2, "the path overlay outlines the pen draft's two clicks")
         check(model, name: "flare-stage-pen-draft")
+    }
+
+    /// A Direct Select click on Ball puts its path in edit, so the path overlay outlines it over the art.
+    @Test func directSelect() {
+        var model = Self.open("bounce")
+        model.selectTool(.directSelect)
+        model.drag(from: Point(x: 80, y: 100), to: Point(x: 80, y: 100))
+        #expect(model.pathInEdit != nil && model.pathHelp == nil, "a Direct Select click on Ball should put its path in edit")
+        check(model, name: "flare-stage-direct")
     }
 
     @Test func marquee() {

@@ -49,7 +49,8 @@ extension FlareWorkspace {
     public var selectionReadout: SelectionReadout { selectionReadout(stageScale: 1) }
 
     /// The selection readout, its rotate zone 2 × `handleSize` stage points above the box at `stageScale`. Select
-    /// counts layers, Direct Select items. A handle drag under way reads its preview: the resized box, `boxResult`.
+    /// counts layers, Direct Select items; only Select has handles, the tool whose grips act. A handle drag under way
+    /// reads its preview: the resized box, `boxResult`.
     public func selectionReadout(stageScale: Double) -> SelectionReadout {
         var box = selection.isEmpty ? nil : selectionBounds, changes: [String: [String: Double]] = [:]
         if let g = gesture, let grip = g.grip, !g.isClick, g.start.isFinite, g.end.isFinite, let sceneID = selectedSceneID,
@@ -71,7 +72,7 @@ extension FlareWorkspace {
         func shared(_ key: String) -> Double? { Self.shared(values.compactMap { $0[key] }) }
         return SelectionReadout(count: tool == .select ? selectedLayerIDs.count : selection.count, box: box,
                                 rotation: shared("rotation"), scaleX: shared("scaleX"), scaleY: shared("scaleY"),
-                                handles: box.map { handles(of: $0, rotation: 0, stageScale: stageScale) } ?? [])
+                                handles: tool == .select ? box.map { handles(of: $0, rotation: 0, stageScale: stageScale) } ?? [] : [])
     }
 
     /// The value every entry shares (within 1e-9), or nil when they differ or there are none.

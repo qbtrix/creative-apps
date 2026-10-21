@@ -114,3 +114,15 @@ func theHandlesAreEightAtTheCornersAndEdgeMiddlesWithTheRotateZone(_ name: Strin
                                           (-0.001, 2, "0.00"), (89.6, 0, "90"), (-90, 0, "-90"), (.nan, 2, "mixed")]
     for (value, places, want) in cases { #expect(SelectionReadout.fixed(value, places: places) == want, "\(value)") }
 }
+
+/// Grips only act under Select (`handle(at:)`), so Direct Select reads the box with no handles: inert squares would sit
+/// on the path's anchors.
+@Test(arguments: ["fake", "built"])
+func directSelectReadsTheBoxWithNoHandles(_ name: String) {
+    var workspace = bounce(name, clicking: [ballAt])
+    #expect(!workspace.selectionReadout.handles.isEmpty)
+    workspace.selectTool(.directSelect)
+    workspace.drag(from: ballAt, to: ballAt)
+    let readout = workspace.selectionReadout
+    #expect(readout.box != nil && readout.handles.isEmpty && readout.handleRects().isEmpty)
+}

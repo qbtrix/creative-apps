@@ -1,5 +1,6 @@
 // FlarePenKernelTests.swift (pen-paths FP-1): 200 seeded pen sequences on the built services, each hashed (FNV-1a) from
-// today's drafts and commits so FP-5's move onto PenRules draws exactly as before; `penDraft` reads them back.
+// today's drafts and commits so FP-5's move onto PenRules draws exactly as before; `penDraft` reads them back, and
+// the opened app's corner clicks (a polyline with no path) too.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -105,6 +106,20 @@ import Testing
         #expect(workspace.draft == before)
         workspace.penDraft = nil
         #expect(workspace.draft == nil && workspace.penDraft == nil)
+    }
+
+    /// On a document the app opens (FlareLaunch's services), corner clicks leave the draft's shape a polyline with no path; `penDraft`
+    /// still reads its anchors (the stage's path overlay outlined nothing until it did) and writes the same draft back.
+    @Test func cornerClicksReadAsAnchors() throws {
+        var workspace = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "bounce"]))
+        workspace.selectTool(.pen)
+        workspace.drag(from: Point(x: 300, y: 60), to: Point(x: 300, y: 60))
+        workspace.drag(from: Point(x: 460, y: 180), to: Point(x: 460, y: 180))
+        let before = try #require(workspace.draft)
+        let pen = try #require(workspace.penDraft)
+        #expect(pen.contour.anchors.map(\.point) == [Point(x: 300, y: 60), Point(x: 460, y: 180)] && !pen.contour.closed)
+        workspace.penDraft = pen
+        #expect(workspace.draft == before)
     }
 
     @Test func noPenDraftOutsideThePen() {

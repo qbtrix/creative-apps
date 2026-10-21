@@ -1,5 +1,6 @@
 // FlarePen+Kernel.swift (pen-paths FP-1): the Pen's ShapeDraft as SuiteKernel's PenDraft, read and written as the shape
-// LiveShapes draws, and `addPath` as one "Add Path" through the shapes service. FP-5 moves the Pen onto PenRules.
+// LiveShapes draws (a corner-only draft can be a polyline with no path, read from its anchors), and `addPath` as one
+// "Add Path" through the shapes service. FP-5 moves the Pen onto PenRules.
 import FlareCore
 import SuiteKernel
 
@@ -8,8 +9,9 @@ extension ShapeDraft {
     public var pen: PenDraft? {
         get {
             guard tool == .pen else { return nil }
+            // Corner clicks can leave the shape a polyline with no path: its anchors are then the clicks.
             let contours = shape.path?.contours ?? []
-            var contour = contours.first ?? VectorContour(anchors: [], closed: isClosed)
+            var contour = contours.first ?? VectorContour(anchors: anchors.map { PathAnchor(point: $0) }, closed: isClosed)
             if anchors.count == 1, contours.count == 2, let handle = contours.last?.anchors.first?.point,
                contour.anchors.indices.contains(0) {
                 contour.anchors[0].handleOut = handle
@@ -34,12 +36,13 @@ extension ShapeDraft {
             stageScale = newValue.scale
             var path = VectorPath(contours: [contour])
             if contour.anchors.count == 1, let handle = contour.anchors.first?.handleOut { path.elements.append(.move(to: handle)) }
-            shape = Self.penShape(points: anchors, closed: isClosed, path: path)
+            let curved = contour.anchors.contains { $0.handleIn != nil || $0.handleOut != nil }
+            shape = Self.penShape(points: anchors, closed: isClosed, path: curved || shape.path != nil ? path : nil)
         }
     }
 
     /// A pen path's shape as LiveShapes draws it: clear fill, the default stroke.
-    static func penShape(points: [Point], closed: Bool, path: VectorPath) -> FlareShape {
+    static func penShape(points: [Point], closed: Bool, path: VectorPath?) -> FlareShape {
         FlareShape(points: points, closed: closed, fill: .solid(FlareColor(r: 0, g: 0, b: 0, a: 0)), path: path, stroke: Stroke())
     }
 }
