@@ -84,3 +84,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T23:27Z: FO-6 #4121 merged as c5a5c98; FO-7 #4256 opened (feature-done, head 58d92d1, docs only). Waiting for it to merge and for a green dev Linux run, then Belt-Slice-Done FO-z and the contact sheet.
 
 - 2026-10-21T23:42Z: Heartbeat: #4256 waiting in the lane.
+
+- 2026-10-21T23:58Z: Heartbeat: #4256 still waiting in the lane.
