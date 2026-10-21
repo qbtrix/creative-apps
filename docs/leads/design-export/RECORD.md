@@ -126,3 +126,9 @@ Last check: 2026-10-20T00:14:12Z (#1500 closed; DE-u blocked on #1552, EK-chrome
 - Findings queue for design-export: empty at 00:30Z.
 - DE-u merged-done: ci.yml on dev a48992b7 (run 39479914225, Linux green) contains #3389 and #3391; Belt-Slice-Done posted on #1970 (comment 6299503101). Run 39475897385 on 875b44d2 still pending, superseded.
 - 2026-10-21T00:05:02Z: Belt's 00:0xZ nudge names lead/gradient-fill and lead/autosave-history; those hold other runs' records (flare pe5i, suiteui c6w5), left untouched. This run's records are lead/design-*.
+
+## Close-out (run act-1a15d1af4b1-45qq, 2026-10-21)
+
+- Belt-Contact-Sheet posted on #1970 for scoped design run 39548305565 (dev 229c5eff, contains DE-z e5cf7c4e).
+- That run's macOS (design) red is DesignSeveralInspectorSnapshots (transform/eyedropper controls), not export.
+- Critic findings open: DE-z #3894-#3905, DE-u #3906-#3920. They go to fix rounds (max 2), then become gaps.
