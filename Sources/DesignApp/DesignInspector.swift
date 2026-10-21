@@ -16,7 +16,8 @@
 // refuses what it must. Opacity, Corners and Stroke, the hint and the frame
 // fields' live scrub are DesignInspectorStyle. The scroll view shows no
 // indicators, so no legacy scroller reads as an unlabelled button. While the Shape
-// tool is active its Shape section (SuiteUI's ShapeToolOptions, shape-tools DS-2) comes first.
+// tool is active its Shape section (SuiteUI's ShapeToolOptions, shape-tools DS-2) comes first, and while
+// the Eyedropper is, its Eyedropper section (DesignSampleOptions: sample size, Fill or Stroke).
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -34,6 +35,10 @@ struct DesignInspector: View {
                     InspectorSection("Shape") {
                         ShapeToolOptions(spec: model.shapeTool, help: ShapeRules.help(model.shapeTool)) { perform(.shape($0)) }
                     }
+                }
+                if model.tool == .eyedropper {
+                    // The Eyedropper's options (DesignSampleOptions), in the inspector, never on the artboard.
+                    InspectorSection("Eyedropper") { DesignSampleOptions(model: model, perform: perform) }
                 }
                 if model.hasMultipleSelection {
                     DesignSeveralProperties(model: model, perform: perform)
@@ -154,10 +159,8 @@ private struct DesignNodeProperties: View {
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     DesignInspectorFill(model: model, perform: perform)
-                    InspectorColorWellRow(
-                        label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue), sampleHelp: lockHelp
-                    ) {
-                        perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
+                    InspectorColorWellRow(label, color: node.fill.hex, sampleHelp: lockHelp) {
+                        perform(.setFill(node.id, DesignColor(hex: $0)))
                     }
                     .accessibilityIdentifier("design.fill")
                     .disabled(lockHelp != nil)
@@ -204,10 +207,8 @@ private struct DesignSeveralProperties: View {
                 let fillHelp = model.styleHelp(.fill)
                 InspectorSection("Fill") {
                     if let fill = model.sharedValue(\.fill) {
-                        InspectorColorWellRow(
-                            "Fill", color: HexColor(fill.red, fill.green, fill.blue), sampleHelp: fillHelp
-                        ) {
-                            perform(.setStyle(.fill(DesignColor($0.red, $0.green, $0.blue))))
+                        InspectorColorWellRow("Fill", color: fill.hex, sampleHelp: fillHelp) {
+                            perform(.setStyle(.fill(DesignColor(hex: $0))))
                         }
                         .accessibilityIdentifier("design.fill")
                         .disabled(fillHelp != nil)

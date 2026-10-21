@@ -17,8 +17,10 @@
 // - Text nodes scale with the zoom, like the artwork they sit in; marks keep one
 //   line width on screen at any zoom. A document stroke is artwork: its width scales.
 // - A node draws at `DesignPainted.opacity`, its own opacity times its ancestors'.
+// - A turned or mirrored node draws its upright shape through artworkPlacement, the kernel's matrix.
 // - Colors come from SuiteColor, except the document's own fills (DesignColor).
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -73,6 +75,27 @@ func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     }
 }
 
+/// What `node` fills with at `scale` (view points): its gradient, its unit box drawn over its frame
+/// through the kernel's one mapping (SuiteUI's `Fill.shading`), or its solid colour (gradient-fill DG-3).
+func artworkShading(for node: DesignNode, scale: Double) -> GraphicsContext.Shading {
+    guard let gradient = node.gradient else { return .color(node.fill.color) }
+    let scale = usable(scale)
+    let box = node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
+    return gradient.shading(in: box, box: Rect(minX: 0, minY: 0, maxX: 1, maxY: 1))
+}
+
+/// Where a box drawn upright at `scale` lands once `t` turns and mirrors it, in view points: the kernel's
+/// `TransformRules.matrix` (unit box to document) after the upright box's own map to the unit box, so no
+/// turn is worked out here (transform DT-3). The identity for an upright, unmirrored or empty box.
+func artworkPlacement(_ t: TransformBox, scale: Double) -> CGAffineTransform {
+    let (w, h) = (t.box.width, t.box.height)
+    guard t.degrees != 0 || t.flipX || t.flipY, w > 0, h > 0, w.isFinite, h.isFinite else { return .identity }
+    let m = TransformRules.matrix(of: t), s = usable(scale)
+    let (a, b, c, d) = (m.a / w, m.b / w, m.c / h, m.d / h)
+    let tx = m.tx - a * t.box.minX - c * t.box.minY, ty = m.ty - b * t.box.minX - d * t.box.minY
+    return CGAffineTransform(a: a, b: b, c: c, d: d, tx: tx * s, ty: ty * s)
+}
+
 /// How `node`'s stroke draws at `scale`: its width times the scale, centered on the path's edge
 /// (half inside, half outside), or nil when it has none, or a width that draws nothing.
 func artworkStroke(for node: DesignNode, scale: Double) -> StrokeStyle? {
@@ -107,8 +130,9 @@ func paintArtwork(
         let node = item.node
         var faded = context
         faded.opacity = item.opacity * fade
+        faded.concatenate(artworkPlacement(node.transformBox, scale: scale))
         if let shape = artworkPath(for: node, scale: scale) {
-            faded.fill(shape, with: .color(node.fill.color))
+            faded.fill(shape, with: artworkShading(for: node, scale: scale))
             if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) {
                 faded.stroke(shape, with: .color(stroke.color.color), style: style)
             } else if node.kind == .frame {
