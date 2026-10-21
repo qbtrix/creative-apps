@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-21T02:54Z	3	heartbeat	waits	HS-a #3676 open; placed-images still stage 0; blocked
 2026-10-21T03:12Z	3	heartbeat	waits	HS-a #3676 open; placed-images still stage 0; blocked
 2026-10-21T03:29Z	3	heartbeat	waits	HS-a #3676 merged 03:14Z; placed-images still stage 0 (PH-a/PH-u not started); blocked
+2026-10-21T03:46Z	3	heartbeat	waits	placed-images still stage 0; blocked
