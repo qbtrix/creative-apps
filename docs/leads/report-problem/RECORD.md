@@ -4,7 +4,7 @@ Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
 Stage: 3 build, wave 4
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4201, #4103 RP-3, #4110 RP-4 in lane; drafts #4209 (after #4103), #4218 RP-5 (after #4103 + #4110); RP-5b building; then RP-6, RP-7 feature-done
+Next: #4201, #4103, #4110 in lane; drafts #4209, #4218, #4226 after parents; RP-6 (C4-only, from dev) after #4226 merges; RP-7 feature-done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -22,7 +22,7 @@ Next: #4201, #4103 RP-3, #4110 RP-4 in lane; drafts #4209 (after #4103), #4218 R
 | RP-4 | RP-m | 2 | report bodies: redaction, suite filter, 7 days, newest 3 | packet RP-4 | ProblemReportTests | #4110 | ready; gate pass, Head d6321ab0 |
 | RP-3e | RP-u | 3 | Save… and Email… (ProblemReportOutput) | packet RP-3 (split) | Mutate 4/4 SuiteModel.ProblemReportOutput | #4209 | draft, stacked on #4103; Head cfd36f2d |
 | RP-5 | RP-m | 3 | help catalog bodies + CLI `suite help.*` (HelpReports); fixes escaped-slash home-path leak in RP-4's encoder | packet RP-5 (split) | HelpReportsTests, SuiteHelpCatalogTests; Mutate 5/5 SuiteKernel.SuiteHelpCatalog | #4218 | draft, stacked on #4103 + #4110; Head 3b80095f |
-| RP-5b | RP-m | 4 | crash folder reader, shell Help provider, Help journey on | packet RP-5 (split) | journey | | building |
+| RP-5b | RP-m | 4 | CrashFolder (SuiteModel) + CrashFolderReader (SuiteShell), Help journey on with -SuiteCrashDir | packet RP-5 (split) | CrashFolderTests; Mutate 6/6 SuiteModel.CrashFolder; journey first runs in scoped suite run | #4226 | draft, stacked on #4218; gate pass, Head 4407777d |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -35,6 +35,8 @@ Next: #4201, #4103 RP-3, #4110 RP-4 in lane; drafts #4209 (after #4103), #4218 R
 - RP-a is two PRs: RP-1 (~230, 8 files) + RP-2 (~170, 5 files) sit at the 400-line cap together. RP-2 stacks on RP-1 as a draft.
 - Base is origin/dev, not main: this packet exists only on dev; PRs go to base dev.
 - The issue body names an RP-z slice; the packet and .wave.json have RP-a, RP-u, RP-m only (RP-7 feature-done sits in RP-m). Following the packet.
+
+- RP-6 must be a C4-only PR branched from dev after RP-5/RP-5b merge: scripts/check-c4-descriptions allows description rewrites only when every changed path is under docs/c4/parts/. It updates suite-help (callers: Help group, CLI) and shell-help (crash reader), and the afterglow onboarding part (still names the deleted LauncherCommands+Onboarding).
 
 ## Open
 - none

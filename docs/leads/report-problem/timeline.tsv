@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-21T21:40Z	2026-10-21T21:40Z	check	lane-wait	#3856	lane batches red on dev launcher.txt:21 (run 39676795156); #4201 fixes it, flagged on dev-red; our PRs built, queued
 2026-10-21T21:55Z	2026-10-21T21:55Z	build	draft	#4218	RP-5 draft (split; RP-5b next), gate pass, mutate 5/5; fixes escaped-slash redaction leak
 2026-10-21T22:02Z	2026-10-21T22:02Z	check	lane-wait	#4201	nothing of ours merged; lane still bisecting 20:57 batch (red on dev launcher.txt:21); dev merging other PRs
+2026-10-21T22:10Z	2026-10-21T22:10Z	build	draft	#4226	RP-5b draft, gate pass, mutate 6/6; RP-6 planned as C4-only PR from dev
