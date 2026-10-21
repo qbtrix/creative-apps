@@ -1,0 +1,10 @@
+{
+  "id": "shell-media",
+  "name": "Media",
+  "description": "Turns frames into movie, animated-image and still files, and files into frames, on AVFoundation and ImageIO.",
+  "technology": "Swift 6, AVFoundation and ImageIO, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/Media/"
+  ],
+  "order": 90
+}
