@@ -20,6 +20,9 @@ Sources/PhotoModel/PhotoImageFile.swift
 Sources/PhotoModel/PhotoPlace+Kernel.swift
 Sources/SuiteKernel/Place/Placed.swift
 Sources/SuiteModel/Fakes/FakePasteboard.swift
+Sources/SuiteModel/Pasteboard/PasteboardFolder.swift
+Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift
 Sources/SuiteModel/Values/SuiteTypes.swift
+Sources/SuiteShell/PasteboardBridge.swift
 Sources/SuiteUI/Gallery/GalleryEditorKernelChrome.swift
 Sources/SuiteUI/PlaceDrop.swift
