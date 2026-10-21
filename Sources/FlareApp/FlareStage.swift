@@ -222,8 +222,9 @@ private struct FlareStageArt: View, Equatable {
         context.opacity = item.opacity
         if let fill = item.fill { context.fill(path, with: shading(fill, matrix: matrix, stretch: stretch)) }
         if let stroke = item.stroke, stroke.width > 0 {
+            let painted = item.strokePath.map { SwiftUI.Path(StagePath.cgPath($0, transform: matrix)) } ?? path
             context.stroke(
-                path, with: .color(Self.paint(stroke.color)),
+                painted, with: .color(Self.paint(stroke.color)),
                 style: StrokeStyle(
                     lineWidth: stroke.width * stretch, lineCap: cap(stroke.cap), lineJoin: join(stroke.join)))
         }

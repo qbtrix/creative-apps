@@ -3,8 +3,8 @@
 // premultiplied sRGB bitmap context, flipped so the list's y-down scene space lands with its top row first, the CTM
 // scaled by `scale`, the canvas filled with the list's background unless `transparent`, then every non-text item in
 // paint order exactly as FlareStage draws it on screen: `StagePath.cgPath` with the item's matrix, the fill (solid or
-// gradient, clipped to the path) and the stroke at `width × stretch` with its cap and join, both at the item's
-// opacity. ImageIO encodes the CGImage as PNG. A zero or non-finite size, a context CoreGraphics won't make and a
+// gradient, clipped to the path) and the stroke (its trimmed, dashed `strokePath`) at `width × stretch` with its cap
+// and join, both at the item's opacity. ImageIO encodes the CGImage as PNG. A zero or non-finite size, a context CoreGraphics won't make and a
 // PNG it won't finalize each throw a RasterizerError; nothing here force-unwraps or crashes.
 import CoreGraphics
 import FlareCore
@@ -71,7 +71,7 @@ struct StageRasterizer: FrameRasterizing {
             context.setLineCap(cap(stroke.cap))
             context.setLineJoin(join(stroke.join))
             context.beginPath()
-            context.addPath(path)
+            context.addPath(item.strokePath.map { StagePath.cgPath($0, transform: item.transform) } ?? path)
             context.strokePath()
         }
         context.restoreGState()
