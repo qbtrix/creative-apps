@@ -34,7 +34,7 @@ Next: #3814 fixer: build File > Share from a LibraryCommandCatalog spec (Command
 
 ## Open
 - SH-m blocked: file-flow LF-m and catalog-backup BK-m not on dev e2b8aa76 (LF-a, BK-a merged; BK-u #3967, BK-3 #3965 open).
-- #3814 fixed at head b0d656d0: File > Share now uses the catalog spec, Belt-Lead is this run, and the macOS build is green. The lane is waiting to batch it. The server re-appends the attribution footer when the body is PATCHed; the lane strips it from the squash.
+- SH-u #3814 merged at 12:15Z. Waiting on a green dev Linux check that contains it: 39598650564 on 76d0c892 is running.
 - SH-m: LF-m is in flight (LF-3 #4024, needs-rebase cleared). For BK-m, BK-3 #3965 merged as 73c3deb1 and BK-u #3967 is still open. LF-m and BK-m are not met on dev c2aa3391.
 - dev-red #3856 is open (others' merges); not ours to fix.
 - ShareButton is two presses: Share prepares, then "Share N Photos" is the ShareLink (a ShareLink can't open itself after an await). SharePhase holds the logic so SuiteUITests check it.
