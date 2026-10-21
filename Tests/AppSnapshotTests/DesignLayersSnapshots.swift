@@ -12,9 +12,10 @@
 // through its "Rename" action in a hosted window, the way a double-click opens
 // it (nested in BodyCountSuites, see there); Title moved into Pair with both
 // expanded, whose eye and lock columns sit at one x at A's depth and Title's,
-// also with Pair hidden and locked; and a page with no layers, whose hint lines each fit the panel. Writes
+// also with Pair hidden and locked; a drag in flight, its line on C's top edge and its tint on
+// Pair; and a page with no layers, whose hint lines each fit the panel. Writes
 // design-layers-, -group-hidden-, -collapsed-, -chevrons-, -collapsed-selection-,
-// -one-page-, -no-file-, -renaming-, -nested- and -empty-{light,dark}.png.
+// -one-page-, -no-file-, -renaming-, -nested-, -drop-above-, -drop-into- and -empty-{light,dark}.png.
 // macOS only.
 import AppKit
 import DesignModel
@@ -171,6 +172,21 @@ extension BodyCountSuites {
             }
         }
 
+        /// A drag in flight on `cards`: the accent line on C's top edge (B dropped above C), and the
+        /// tint on Pair's row (Title dropped into Pair), the two drops J12 makes (#3556).
+        @Test func aDragShowsItsDropLine() throws {
+            let model = try cards()
+            let c = "node-4"
+            for (state, line) in [("above", DesignLayerDropLine(rowID: c, position: .above)),
+                                  ("into", DesignLayerDropLine(rowID: pair, position: .into))] {
+                for scheme in [ColorScheme.light, .dark] {
+                    try snapshot(
+                        PanelSample(model: model, dropLine: line),
+                        name: "design-layers-drop-\(state)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+                }
+            }
+        }
+
         @Test func aPageWithNoLayers() throws {
             var model = DesignWorkspace()
             model.newFile()
@@ -219,8 +235,9 @@ extension View {
 
 private struct PanelSample: View {
     let model: DesignWorkspace
+    var dropLine: DesignLayerDropLine?
     var body: some View {
-        DesignLayersPanel(model: model, perform: { _ in })
+        DesignLayersPanel(model: model, perform: { _ in }, seededLine: dropLine)
             .frame(width: SuiteSize.editorPanelWidth)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(SuiteSpacing.xxl)

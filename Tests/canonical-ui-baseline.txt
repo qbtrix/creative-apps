@@ -19,7 +19,6 @@ A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector Easing
 A Sources/HaloApp/HaloEasingInspector.swift::HaloEasingSegmentLabel Easing
 A Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView KeyedRow
 A Sources/HaloApp/HaloLayerList.swift::HaloLayerList LayerList
-A Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet Sheet
 A Sources/HaloApp/HaloRenderedFrameView.swift::HaloRenderedNote Notice
 A Sources/HaloApp/HaloTransport.swift::HaloTransport Transport
 A Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet Sheet
@@ -43,7 +42,6 @@ B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox accent-outlin
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover caps-header
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover easing
 B Sources/FlareApp/FlareInspector.swift::FlareInspector error-label
-B Sources/FlareApp/FlareInspectorFill.swift::FlareInspectorFill pending-commit
 B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow keyed-row
 B Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow pending-commit
 B Sources/FlareApp/FlareInspectorScene.swift::FlareSceneNumberRow pending-commit
@@ -58,8 +56,6 @@ B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector easing
 B Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector selected-fill
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView keyed-row
 B Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView pending-commit
-B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet error-label
-B Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet sheet-buttons
 B Sources/HaloApp/HaloTextInspector.swift::HaloTextInspector pending-commit
 B Sources/HaloApp/HaloTransport.swift::HaloTransport transport
 B Sources/HaloApp/NewCompositionSheet.swift::NewCompositionSheet error-label

@@ -7,11 +7,20 @@
 # so a failed journey fails the run; the screenshots are exported either way.
 # Extra arguments go to xcodebuild, so one app's journeys run with
 #   scripts/ui-test -only-testing:PhotoJourneyTests
+# The real-app perf journeys (<X>RealPerfJourneyTests, UITests/Journey+Health.swift:
+# an 8K document, ~3 s gestures, sample, idle CPU and hang checks) are heavy
+# and fail while the lag they catch is in the apps, so a plain run skips them and
+#   scripts/ui-test perf [xcodebuild args]
+# runs only them (perf-nightly.sh does, at night; Tests/render-budgets.md),
+# with scripts/realperf-watch beside xcodebuild: the runner is sandboxed, so
+# that samples the apps and reads their CPU for it (.build/realperf/). They
+# launch .build/realperf/AfterGlow.app, a copy of the bundle whose helpers'
+# ids end in .realperf, so an app the user has open never blocks them.
 # Journeys in the quarantine (UITests/quarantine.json, scripts/quarantine) are
 # skipped with -skip-testing, and listed with their owner and expiry here and
 # in the job summary, so a skip is never silent. An entry with scope `full` is
-# skipped only in a full run: when APP is set (ci.yml's macOS job sets it from
-# its `app` input, so only in a scoped run) it isn't skipped, and is listed
+# skipped only in a full run: when APP is set (journeys.yml's macOS journeys
+# job sets it for a scoped run) it isn't skipped, and is listed
 # as such. An unreadable quarantine fails the run before anything builds.
 #
 #   .build/ui-tests.xcresult   the result bundle (open it in Xcode)
@@ -44,12 +53,39 @@ while IFS=$'\t' read -r test owner expires scope reason; do
   fi
 done <<<"$live"
 [[ -n "$live" ]] || echo "ui-test: no journeys quarantined"
+realperf=(PhotoJourneyTests/PhotoRealPerfJourneyTests DesignJourneyTests/DesignRealPerfJourneyTests
+  FlareJourneyTests/FlareRealPerfJourneyTests)
+watcher=""
+if [[ "${1:-}" == perf ]]; then
+  shift
+  for test in "${realperf[@]}"; do set -- "$@" "-only-testing:$test"; done
+  # The runner is sandboxed: scripts/realperf-watch samples and times the apps for it, and writes the 8K photo.
+  rm -rf .build/realperf && mkdir -p .build/realperf || exit 1
+  python3 scripts/realperf-watch --photo .build/realperf/eight-k.png || { echo "ui-test: couldn't write the 8K photo"; exit 1; }
+  python3 scripts/realperf-watch .build/realperf --parent $$ &
+  watcher=$!
+else
+  for test in "${realperf[@]}"; do skips+=("-skip-testing:$test"); done
+fi
 cols=$'| test | owner | expires | skipped in | reason |\n|---|---|---|---|---|\n'
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   [[ -z "$skipped" ]] || printf '### Quarantined journeys (skipped)\n\n%s%s\n' "$cols" "$skipped" >>"$GITHUB_STEP_SUMMARY"
   [[ -z "$running" ]] || printf '### Quarantined in full runs only (not skipped in this scoped run)\n\n%s%s\n' "$cols" "$running" >>"$GITHUB_STEP_SUMMARY"
 fi
 scripts/bundle-apps || exit 1
+if [[ -n "$watcher" ]]; then
+  # The real-perf copy: the same bundle, each helper's id + ".realperf", so a copy of an app the
+  # user has open (XCUITest launches one instance per bundle id) never blocks the journeys.
+  copy=.build/realperf/AfterGlow.app
+  cp -R .build/apps/AfterGlow.app "$copy" || exit 1
+  for helper in "$copy"/Contents/Helpers/*.app; do
+    plist="$helper/Contents/Info.plist"
+    id=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist") || exit 1
+    /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $id.realperf" "$plist" || exit 1
+    codesign --force -s - "$helper" 2>/dev/null || { echo "ui-test: couldn't sign $helper"; exit 1; }
+  done
+  codesign --force -s - "$copy" 2>/dev/null || { echo "ui-test: couldn't sign $copy"; exit 1; }
+fi
 xcodegen generate --quiet || exit 1
 
 result=.build/ui-tests.xcresult
@@ -64,7 +100,7 @@ status=$?
 # the audit's JSON reports are kept: a failure also attaches a UI hierarchy and
 # a screen recording, which stay in the result bundle.
 raw=$(mktemp -d)
-trap 'rm -rf "$raw"' EXIT
+trap 'rm -rf "$raw"; [[ -z "$watcher" ]] || kill "$watcher" 2>/dev/null' EXIT
 mkdir -p "$screens"
 if [[ -d "$result" ]] && xcrun xcresulttool export attachments --path "$result" --output-path "$raw"; then
   jq -r '.[].attachments[]? | select(.suggestedHumanReadableName | test("\\.(png|json)$"))

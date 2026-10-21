@@ -1,0 +1,58 @@
+[
+  {
+    "label": "camera text keeps its NULs",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "let isPadding: (Character) -> Bool = { $0.isWhitespace || $0 == \"\\0\" }",
+    "replace": "let isPadding: (Character) -> Bool = { $0.isWhitespace }",
+    "tests": "LibraryPhotoDetailsTests.swift"
+  },
+  {
+    "label": "a zero exposure, aperture or focal length is kept",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "guard let value, value.isFinite, value > 0 else { return nil }",
+    "replace": "guard let value, value.isFinite, value >= 0 else { return nil }",
+    "tests": "LibraryPhotoDetailsTests.swift"
+  },
+  {
+    "label": "an ISO of 0 is kept",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "self.iso = iso.flatMap { $0 > 0 ? $0 : nil }",
+    "replace": "self.iso = iso.flatMap { $0 >= 0 ? $0 : nil }",
+    "tests": "LibraryPhotoDetailsTests.swift"
+  },
+  {
+    "label": "a shutter far from 1/n still reads as 1/n",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "abs(1 / n - seconds) / seconds < 0.05",
+    "replace": "abs(1 / n - seconds) / seconds <= 0.5",
+    "tests": "LibraryCameraRowsTests.swift"
+  },
+  {
+    "label": "the make is repeated before a model that starts with it",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "return model.lowercased().hasPrefix(make.lowercased()) ? model : make + \" \" + model",
+    "replace": "return make + \" \" + model",
+    "tests": "LibraryCameraRowsTests.swift"
+  },
+  {
+    "label": "a range ends at its lowest value",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "let low = values.min(), let high = values.max()",
+    "replace": "let low = values.min(), let high = values.min()",
+    "tests": "LibraryCameraRowsTests.swift"
+  },
+  {
+    "label": "an ISO list is not read",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "iso: (iso as? [Int])?.first ?? iso as? Int,",
+    "replace": "iso: iso as? Int,",
+    "tests": "LibraryCameraRowsTests.swift"
+  },
+  {
+    "label": "several names show the first instead of a count",
+    "file": "Sources/LibraryModel/Contracts/PhotoDetails.swift",
+    "find": "guard distinct > 1 else",
+    "replace": "guard distinct > 100 else",
+    "tests": "LibraryCameraRowsTests.swift"
+  }
+]

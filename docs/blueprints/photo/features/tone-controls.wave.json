@@ -1,0 +1,164 @@
+{
+  "title": "Tone and sharpen in Photo: White Balance, Tone, Presence and Sharpen rows on the image and on adjustment layers, live on the GPU",
+  "wave": 3,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/tone-controls (adopter of S1); RJ-P12, RJ-P13, RJ-P14",
+  "waits_on": "suiteui tone-controls's TC-a (cross-line; PT-3 needs TC-5, PT-4 TC-6, PT-5 TC-3); suiteui suite-imaging's IM-photo before PT-3 (cross-line; re-cut 2026-10-20: #3144's PhotoLiveTone became SuiteImaging's LiveToneSurface); gradient-fill's PG-m (the catalog files) and PG-z (photo.md), slice waits",
+  "depends": [
+    "photo-seams",
+    "photo-adjustment-layers"
+  ],
+  "longest_chain": "5 (PT-1 → PT-2 → PT-6 → PT-7 → PT-8)",
+  "journeys": [
+    "PhotoToneJourneyTests.testWarmShadowsAndSharpen"
+  ],
+  "owned": [
+    "Sources/PhotoModel/AdjustmentSettings.swift",
+    "Sources/PhotoModel/PhotoTone+Kernel.swift",
+    "Tests/PhotoModelTests/PhotoToneTests.swift",
+    "Sources/PhotoApp/AdjustmentsInspector.swift",
+    "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "Sources/PhotoModel/PhotoRender.swift",
+    "Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json",
+    "Tests/mutations/PhotoModel.PhotoRender.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/PhotoModelTests/PhotoToneCommandTests.swift",
+    "Tests/mutations/PhotoModel.PhotoTone+Kernel.json",
+    "Tests/RealJobs/photo/white-balance/",
+    "Tests/RealJobs/photo/backlit/",
+    "Tests/RealJobs/photo/sharpen-web/",
+    "Tests/AppSnapshotTests/PhotoToneSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoToneTests.swift",
+    "UITests/PhotoJourneyTests+Tone.swift",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/tone-controls.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PT-a",
+      "behavior": "`AdjustmentSettings` holds a `tone` section, the adapter conforms on stubs, and the Adjust panel shows the tone rows on them.",
+      "tasks": [
+        "PT-1",
+        "PT-2"
+      ],
+      "journeys": [
+        "MJ-PT"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/AdjustmentSettings.swift",
+        "Sources/PhotoModel/PhotoTone+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoToneTests.swift",
+        "Sources/PhotoApp/AdjustmentsInspector.swift"
+      ]
+    },
+    {
+      "id": "PT-u",
+      "behavior": "The rows have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "PT-5",
+        "PT-6"
+      ],
+      "journeys": [
+        "PJ-T1"
+      ],
+      "waits": {
+        "PT-a": [
+          "PT-5",
+          "PT-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoToneSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoToneTests.swift",
+        "UITests/PhotoJourneyTests+Tone.swift"
+      ]
+    },
+    {
+      "id": "PT-m",
+      "behavior": "Each tone step renders in the live display write and the same on export, Sharpen is one GPU pass, and every tone command is one undo step on the image or the selected adjustment layer.",
+      "tasks": [
+        "PT-3",
+        "PT-4"
+      ],
+      "journeys": [
+        "MJ-PT"
+      ],
+      "waits": {
+        "PT-a": [
+          "PT-3",
+          "PT-4"
+        ],
+        "gradient-fill:PG-m": [
+          "PT-4"
+        ],
+        "transform:PT-m": [
+          "PT-4"
+        ],
+        "history-panel:PH-m": [
+          "PT-4"
+        ],
+        "eyedropper:PE-m": [
+          "PT-4"
+        ],
+        "place-image:PP-m": [
+          "PT-4"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+        "Sources/PhotoModel/PhotoRender.swift",
+        "Tests/PhotoModelTests/PhotoToneTests.swift",
+        "Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json",
+        "Tests/mutations/PhotoModel.PhotoRender.json",
+        "Sources/PhotoModel/PhotoTone+Kernel.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/PhotoModelTests/PhotoToneCommandTests.swift",
+        "Tests/mutations/PhotoModel.PhotoTone+Kernel.json",
+        "Tests/RealJobs/photo/white-balance/",
+        "Tests/RealJobs/photo/backlit/",
+        "Tests/RealJobs/photo/sharpen-web/"
+      ]
+    },
+    {
+      "id": "PT-z",
+      "behavior": "The rows run on live services, the journey passes on live, and the blueprint has them in.",
+      "tasks": [
+        "PT-7",
+        "PT-8"
+      ],
+      "journeys": [
+        "PJ-T1"
+      ],
+      "waits": {
+        "PT-u": [
+          "PT-7",
+          "PT-8"
+        ],
+        "PT-m": [
+          "PT-7"
+        ],
+        "gradient-fill:PG-z": [
+          "PT-8"
+        ],
+        "place-image:PP-z": [
+          "PT-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+Tone.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/tone-controls.wave.json"
+      ]
+    }
+  ]
+}

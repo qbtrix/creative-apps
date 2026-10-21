@@ -91,7 +91,7 @@ def h: tostring | @html;
          + "</ul></details>" end)
     + "</figcaption></figure>";
   def group($title; $list): "<h3>\($title | h)</h3><div class=\"grid\">" + ($list | map(card(.)) | join("")) + "</div>";
-# On dev, counts only under the baseline: ci.yml's audit-lower job, after this one, lowers it.
+# On dev, counts only under the baseline: journeys.yml's audit-lower job, after this one, lowers it.
 ([$apps[] as $a | cells($a)[].class]) as $classes
 | (if $branch == "dev" and any($classes[]; . == "down") and all($classes[]; . != "up")
    then "↓ only: once this macOS job is green, the Audit lower job pushes the lower baseline to dev as “test(audit): lower baselines to the measured counts”; its commit is in that job's summary."

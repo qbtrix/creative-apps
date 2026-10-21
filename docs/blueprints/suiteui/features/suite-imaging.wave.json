@@ -1,0 +1,267 @@
+{
+  "title": "SuiteImaging: one shared target for adjustment values and the live render route; Photo moves onto it and Library develop moves off the CPU onto it",
+  "wave": "XK3",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #2 (render route and live preview) and #3 (tone and adjustment settings); feature map suiteui/suite-imaging; real job RJ-X45; re-cuts tone-controls' Tone module into SuiteImaging",
+  "waits_on": "photo #3144 (PhotoLiveTone, open; IM-8 lifts its route); library spine (building: owns LiveDevelop, LiveLoupeImaging, DevelopValues); photo and library tone-controls hand-offs; shared-thumbnails ST-a (Package.swift) and adopt-kernel-eyedropper-photo EP-z (canonical-baseline.txt) before IM-8d, the small delete split out of the canvas swap; IM-15 (ImagingColor, the wide working space on core CoreColor profiles #441) added 2026-10-21 for the beta",
+  "depends": [
+    "suite-harness",
+    "editor-kernel",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "8 (IM-1 → IM-2 → IM-6 → IM-7 → IM-8 → IM-8d → IM-12 → IM-14)",
+  "ui_slice": "none",
+  "ui_slice_reason": "no new screen or control: the same sliders draw the same picture faster; IM-photo and IM-library are ui slices (they change the apps' canvas code) with render budget rows",
+  "journeys": [
+    "LibraryDevelopJourneyTests.testDevelopSlidersAndHistogram",
+    "PhotoJourneyTests.testAdjustmentLayer"
+  ],
+  "owned": [
+    "Package.swift",
+    "project.yml",
+    "Sources/SuiteImaging/SuiteImaging.swift",
+    "Tests/SuiteImagingTests/ImagingBoundaryTests.swift",
+    "Tests/metal-boundary-baseline.txt",
+    "docs/c4/parts/creative-apps/suite-imaging/container.json",
+    "docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json",
+    "docs/c4/parts/creative-apps/suite-imaging/imaging-route.json",
+    "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+    "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
+    "Sources/SuiteImaging/Route/ImagingRoute.swift",
+    "Sources/SuiteImaging/Route/LiveToneSurface.swift",
+    "Tests/SuiteImagingTests/AdjustSettingsTests.swift",
+    "Tests/SuiteImagingTests/ImagingProgramTests.swift",
+    "Tests/mutations/SuiteImaging.AdjustSettings.json",
+    "Tests/mutations/SuiteImaging.ImagingProgram.json",
+    "Tests/SuiteImagingTests/LiveToneSurfaceTests.swift",
+    "Tests/mutations/SuiteImaging.LiveToneSurface.json",
+    "Tests/PhotoModelTests/PhotoImagingTests.swift",
+    "Tests/PhotoModelTests/Fixtures/adjust-legacy.ora",
+    "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "Sources/PhotoModel/AdjustmentSettings.swift",
+    "Sources/PhotoModel/PhotoRender.swift",
+    "Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json",
+    "Sources/PhotoApp/CanvasRenderer.swift",
+    "Sources/PhotoApp/PhotoRendering.swift",
+    "Sources/PhotoApp/TileCanvas.swift",
+    "Sources/PhotoModel/PhotoRenderRoute.swift",
+    "Sources/PhotoModel/PhotoLiveTone.swift",
+    "Tests/mutations/PhotoModel.PhotoLiveTone.json",
+    "Tests/PhotoModelTests/PhotoLiveToneTests.swift",
+    "Tests/canonical-baseline.txt",
+    "Tests/LibraryModelTests/LibraryImagingTests.swift",
+    "Tests/AppSnapshotTests/LibraryDevelopLatencyTests.swift",
+    "Tests/RealJobs/photo/same-edit-two-apps/same-edit-two-apps.jobs.json",
+    "Tests/RealJobs/photo/same-edit-two-apps/input/beach.png",
+    "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
+    "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "Tests/mutations/LibraryModel.LibraryDevelop+Imaging.json",
+    "Tests/mutations/LibraryModel.LiveDevelop.json",
+    "Sources/LibraryApp/LibraryLoupe.swift",
+    "Sources/LibraryApp/LibraryWindow+Loupe.swift",
+    "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "Tests/mutations/LibraryModel.LiveLoupeImaging.json",
+    "Sources/PhotoModel/GammaTrack.swift",
+    "Sources/PhotoModel/PhotoLevelsFormat.swift",
+    "Sources/PhotoModel/HueSaturation.swift",
+    "Tests/mutations/LibraryModel.DevelopValues.json",
+    "docs/blueprints/suiteui/features/suite-imaging.wave.json",
+    "Sources/SuiteImaging/Color/ImagingColor.swift",
+    "Tests/SuiteImagingTests/WideGamutTests.swift",
+    "Tests/mutations/SuiteImaging.ImagingColor.json"
+  ],
+  "slices": [
+    {
+      "id": "IM-a",
+      "behavior": "The SuiteImaging target links CoreRaster and CoreRender everywhere and CoreRenderMetal on macOS, the dependency rule is a live test with Photo's files baselined, and the adjustment values, program, route and live surface are declared as stubs with their tests written, disabled.",
+      "tasks": [
+        "IM-1",
+        "IM-2"
+      ],
+      "journeys": [
+        "MJ-IM"
+      ],
+      "owned": [
+        "Package.swift",
+        "project.yml",
+        "Sources/SuiteImaging/SuiteImaging.swift",
+        "Tests/SuiteImagingTests/ImagingBoundaryTests.swift",
+        "Tests/metal-boundary-baseline.txt",
+        "docs/c4/parts/creative-apps/suite-imaging/container.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-route.json",
+        "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+        "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
+        "Sources/SuiteImaging/Route/ImagingRoute.swift",
+        "Sources/SuiteImaging/Route/LiveToneSurface.swift",
+        "Tests/SuiteImagingTests/AdjustSettingsTests.swift",
+        "Tests/SuiteImagingTests/ImagingProgramTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "IM-m",
+      "behavior": "Adjustment values clamp and round-trip both apps' files, one ordered step list drives the CPU and GPU paths alike, pictures move into a wide working space and out to the display or a file only at the end, and the live surface makes a slider step one display write with no readback.",
+      "tasks": [
+        "IM-3",
+        "IM-4",
+        "IM-5",
+        "IM-15"
+      ],
+      "journeys": [
+        "MJ-IM"
+      ],
+      "owned": [
+        "Sources/SuiteImaging/Adjust/AdjustSettings.swift",
+        "Tests/SuiteImagingTests/AdjustSettingsTests.swift",
+        "Tests/mutations/SuiteImaging.AdjustSettings.json",
+        "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
+        "Sources/SuiteImaging/Route/ImagingRoute.swift",
+        "Tests/SuiteImagingTests/ImagingProgramTests.swift",
+        "Tests/mutations/SuiteImaging.ImagingProgram.json",
+        "Sources/SuiteImaging/Route/LiveToneSurface.swift",
+        "Tests/SuiteImagingTests/LiveToneSurfaceTests.swift",
+        "Tests/mutations/SuiteImaging.LiveToneSurface.json",
+        "Sources/SuiteImaging/Color/ImagingColor.swift",
+        "Tests/SuiteImagingTests/WideGamutTests.swift",
+        "Tests/mutations/SuiteImaging.ImagingColor.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json"
+      ],
+      "waits": {
+        "IM-a": [
+          "IM-3",
+          "IM-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "IM-photo",
+      "behavior": "Photo's adjustments are SuiteImaging values behind its existing API, its canvas draws through the shared live route with no Metal import of its own, `PhotoLiveTone.swift` and its baseline line are deleted, and its 8K slider latency stays within 30 ms p95.",
+      "tasks": [
+        "IM-6",
+        "IM-7",
+        "IM-8",
+        "IM-8d"
+      ],
+      "journeys": [
+        "MJ-IM-photo",
+        "PJ-IM"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoImagingTests.swift",
+        "Tests/PhotoModelTests/Fixtures/adjust-legacy.ora",
+        "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+        "Sources/PhotoModel/AdjustmentSettings.swift",
+        "Sources/PhotoModel/PhotoRender.swift",
+        "Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json",
+        "Sources/PhotoApp/CanvasRenderer.swift",
+        "Sources/PhotoApp/PhotoRendering.swift",
+        "Sources/PhotoApp/TileCanvas.swift",
+        "Sources/PhotoModel/PhotoRenderRoute.swift",
+        "Tests/metal-boundary-baseline.txt",
+        "Sources/PhotoModel/PhotoLiveTone.swift",
+        "Tests/mutations/PhotoModel.PhotoLiveTone.json",
+        "Tests/PhotoModelTests/PhotoLiveToneTests.swift",
+        "Tests/canonical-baseline.txt"
+      ],
+      "waits": {
+        "IM-a": [
+          "IM-6"
+        ],
+        "IM-m": [
+          "IM-7",
+          "IM-8"
+        ],
+        "adopt-kernel-eyedropper-photo:EP-z": [
+          "IM-8d"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "IM-library",
+      "behavior": "Library's develop values are SuiteImaging values with the catalog's keys unchanged, export and thumbnails run the shared CPU list, and the loupe draws each develop step on the GPU route within 30 ms p95 at 8K.",
+      "tasks": [
+        "IM-9",
+        "IM-10",
+        "IM-11"
+      ],
+      "journeys": [
+        "MJ-IM-library",
+        "LJ-IM"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryImagingTests.swift",
+        "Tests/AppSnapshotTests/LibraryDevelopLatencyTests.swift",
+        "Tests/RealJobs/photo/same-edit-two-apps/same-edit-two-apps.jobs.json",
+        "Tests/RealJobs/photo/same-edit-two-apps/input/beach.png",
+        "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
+        "Sources/LibraryModel/Contracts/DevelopValues.swift",
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Tests/mutations/LibraryModel.LibraryDevelop+Imaging.json",
+        "Tests/mutations/LibraryModel.LiveDevelop.json",
+        "Sources/LibraryApp/LibraryLoupe.swift",
+        "Sources/LibraryApp/LibraryWindow+Loupe.swift",
+        "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+        "Tests/mutations/LibraryModel.LiveLoupeImaging.json"
+      ],
+      "waits": {
+        "IM-a": [
+          "IM-9"
+        ],
+        "IM-m": [
+          "IM-10",
+          "IM-11"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "IM-z",
+      "behavior": "Photo's and Library's copies are deleted with the baseline shrunk, the dependency rule runs with no baseline and Photo's own CoreRenderMetal link removed, RJ-X45 passes, and the feature is built.",
+      "tasks": [
+        "IM-12",
+        "IM-13",
+        "IM-14"
+      ],
+      "journeys": [
+        "MJ-IM",
+        "PJ-IM",
+        "LJ-IM"
+      ],
+      "owned": [
+        "Sources/PhotoModel/GammaTrack.swift",
+        "Sources/PhotoModel/PhotoLevelsFormat.swift",
+        "Sources/PhotoModel/HueSaturation.swift",
+        "Tests/canonical-baseline.txt",
+        "Tests/mutations/PhotoModel.PhotoAdjust+Imaging.json",
+        "Sources/LibraryModel/Contracts/DevelopValues.swift",
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Package.swift",
+        "Tests/metal-boundary-baseline.txt",
+        "Tests/SuiteImagingTests/ImagingBoundaryTests.swift",
+        "Tests/mutations/LibraryModel.DevelopValues.json",
+        "docs/c4/parts/creative-apps/suite-imaging/imaging-route.json",
+        "docs/blueprints/suiteui/features/suite-imaging.wave.json"
+      ],
+      "waits": {
+        "IM-photo": [
+          "IM-12"
+        ],
+        "IM-library": [
+          "IM-13"
+        ],
+        "shared-thumbnails:ST-a": [
+          "IM-13"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "title": "The Pen and point editing: paths as Design layers on the shared pen, painted and exported",
+  "wave": 4,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/pen-paths (adopter of S25); RJ-D06; design.md's Pen rows (the disabled P, Tier 2 wave 3, the S5 gap) reversed (captain 2026-10-20)",
+  "waits_on": "suiteui pen-paths' contract slice PN-a (cross-line; tasks start once it merges), PN-3 (DP-4) and PN-7 (DP-6); a creative-core issue to file making SVGExporter.pathData public, then a bump (DP-7); the last owners of the shared Design files: placed-images PD-a, PD-u, PD-m; shape-tools DS-a, DS-m; stroke-style DK-m; design-export DE-a; file-flow DF-m, DF-z",
+  "depends": [
+    "design-contracts",
+    "design-window",
+    "style-rows",
+    "canvas-basics",
+    "files-history"
+  ],
+  "longest_chain": "6 (DP-1 → DP-3 → DP-4 → DP-5 → DP-8 → DP-9)",
+  "journeys": [
+    "DesignPenJourneyTests.testDrawLogoAndMovePoint"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Tests/mutations/DesignModel.DesignNode.json",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Tests/mutations/DesignModel.DesignWorkspace.json",
+    "Sources/DesignModel/DesignPen+Kernel.swift",
+    "Tests/DesignModelTests/DesignCommandCatalogTests.swift",
+    "Tests/DesignModelTests/DesignPenTests.swift",
+    "Tests/DesignModelTests/DesignSVGPathTests.swift",
+    "Sources/DesignModel/Contracts/StyleTypes.swift",
+    "Tests/mutations/DesignModel.StyleTypes.json",
+    "Sources/DesignModel/Contracts/UseCases.swift",
+    "Tests/mutations/DesignModel.UseCases.json",
+    "Sources/DesignModel/NotBuilt.swift",
+    "Tests/mutations/DesignModel.NotBuilt.json",
+    "Sources/DesignModel/DesignServices.swift",
+    "Tests/mutations/DesignModel.DesignServices.json",
+    "Tests/DesignModelTests/DesignDocumentTests.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignPathArtwork.swift",
+    "Tests/DesignModelTests/DesignPenRouteTests.swift",
+    "Tests/AppSnapshotTests/DesignPenPaintTests.swift",
+    "UITests/DesignJourneyTests+Pen.swift",
+    "Tests/AppSnapshotTests/DesignPenSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignPenTests.swift",
+    "Tests/mutations/DesignModel.DesignPen+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/mutations/DesignModel.DesignCommandCatalog.json",
+    "Tests/command-ids/design.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json",
+    "Tests/RealJobs/design/pen-logo/pen-logo.jobs.json",
+    "Tests/RealJobs/design/pen-logo/input/blank.design",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "docs/blueprints/design.md",
+    "docs/blueprints/design/features/pen-paths.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DP-a",
+      "behavior": "DesignNodeKind.path and DesignNode.path exist and save, DesignWorkspace conforms to PathEditTarget as stubs, the old path seam is gone, and P is enabled with the overlay drawing on the stubs.",
+      "tasks": [
+        "DP-1",
+        "DP-2",
+        "DP-3"
+      ],
+      "journeys": [
+        "MJ-DP"
+      ],
+      "waits": {
+        "placed-images:PD-a": [
+          "DP-1"
+        ],
+        "shape-tools:DS-a": [
+          "DP-1"
+        ],
+        "stroke-style:DK-m": [
+          "DP-2"
+        ],
+        "design-export:DE-a": [
+          "DP-2"
+        ],
+        "shape-tools:DS-m": [
+          "DP-3"
+        ],
+        "placed-images:PD-u": [
+          "DP-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Tests/mutations/DesignModel.DesignNode.json",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/mutations/DesignModel.DesignWorkspace.json",
+        "Sources/DesignModel/DesignPen+Kernel.swift",
+        "Tests/DesignModelTests/DesignCommandCatalogTests.swift",
+        "Tests/DesignModelTests/DesignPenTests.swift",
+        "Tests/DesignModelTests/DesignSVGPathTests.swift",
+        "Sources/DesignModel/Contracts/StyleTypes.swift",
+        "Tests/mutations/DesignModel.StyleTypes.json",
+        "Sources/DesignModel/Contracts/UseCases.swift",
+        "Tests/mutations/DesignModel.UseCases.json",
+        "Sources/DesignModel/NotBuilt.swift",
+        "Tests/mutations/DesignModel.NotBuilt.json",
+        "Sources/DesignModel/DesignServices.swift",
+        "Tests/mutations/DesignModel.DesignServices.json",
+        "Tests/DesignModelTests/DesignDocumentTests.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignApp/DesignPathArtwork.swift",
+        "Tests/DesignModelTests/DesignPenRouteTests.swift"
+      ]
+    },
+    {
+      "id": "DP-u",
+      "behavior": "The canvas, PNG and PDF paint path nodes, point editing shows on double-click, and the pen's snapshots and render budget hold.",
+      "tasks": [
+        "DP-4",
+        "DP-5"
+      ],
+      "journeys": [
+        "DJ-P1"
+      ],
+      "waits": {
+        "DP-a": [
+          "DP-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignPathArtwork.swift",
+        "Tests/AppSnapshotTests/DesignPenPaintTests.swift",
+        "UITests/DesignJourneyTests+Pen.swift",
+        "Tests/AppSnapshotTests/DesignPenSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignPenTests.swift"
+      ]
+    },
+    {
+      "id": "DP-m",
+      "behavior": "Every path command runs on Design's page as one undo step and the SVG export writes each path with the points the canvas draws.",
+      "tasks": [
+        "DP-6",
+        "DP-7"
+      ],
+      "journeys": [
+        "MJ-DP"
+      ],
+      "waits": {
+        "DP-a": [
+          "DP-6",
+          "DP-7"
+        ],
+        "file-flow:DF-m": [
+          "DP-6"
+        ],
+        "placed-images:PD-m": [
+          "DP-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignPen+Kernel.swift",
+        "Tests/DesignModelTests/DesignPenTests.swift",
+        "Tests/mutations/DesignModel.DesignPen+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/mutations/DesignModel.DesignCommandCatalog.json",
+        "Tests/command-ids/design.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json",
+        "Tests/RealJobs/design/pen-logo/pen-logo.jobs.json",
+        "Tests/RealJobs/design/pen-logo/input/blank.design",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/DesignModelTests/DesignSVGPathTests.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json"
+      ]
+    },
+    {
+      "id": "DP-z",
+      "behavior": "The journey passes on live services, and the blueprint says the Pen is in the first cut.",
+      "tasks": [
+        "DP-8",
+        "DP-9"
+      ],
+      "journeys": [
+        "DJ-P1"
+      ],
+      "waits": {
+        "DP-u": [
+          "DP-8"
+        ],
+        "DP-m": [
+          "DP-8",
+          "DP-9"
+        ],
+        "file-flow:DF-z": [
+          "DP-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Pen.swift",
+        "docs/blueprints/design.md",
+        "docs/blueprints/design/features/pen-paths.wave.json"
+      ]
+    }
+  ]
+}

@@ -54,7 +54,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// The sidebar's built-in rows; your collections follow them.
     static let builtInCollections = [
         LibraryCollection(id: "all", name: "All Photos", count: 0),
-        LibraryCollection(id: "favorites", name: "Favorites", count: 0),
+        // Id "favorites" predates the name; picks are called Picks everywhere a person reads (#3639).
+        LibraryCollection(id: "favorites", name: "Picks", count: 0),
         LibraryCollection(id: "recent", name: "Recently Added", count: 0),
     ]
 
@@ -86,6 +87,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeZoom = LoupeZoom.fit
     public internal(set) var loupeRender: RenderedPhoto?
     public internal(set) var loupeRenderToken = 0
+    /// The token the shown `loupeRender` landed under (the focus change's for the held thumbnail).
+    public internal(set) var loupeShownToken = 0
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
@@ -120,7 +123,8 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
             && lhs.cullError == rhs.cullError && lhs.exportState == rhs.exportState
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
-            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeError == rhs.loupeError
+            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
+            && lhs.loupeError == rhs.loupeError
             && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
@@ -182,7 +186,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     }
 
     /// Applies `edit` to every selected photo, then keeps the counts and the
-    /// selection true to the collection (unflagging in Favorites drops a photo).
+    /// selection true to the collection (unflagging in Picks drops a photo).
     mutating func editSelected(_ edit: (inout PhotoItem) -> Void) {
         guard !selection.isEmpty else { return }
         for index in items.indices where selection.contains(items[index].id) {
@@ -208,7 +212,7 @@ public struct LibraryCatalog: Sendable, Equatable {
 
     /// The counts after a metadata edit, undo or redo that replaced `before`
     /// with `after` in place: no photo was added or removed and no capture
-    /// date changed, so only Favorites moves, by the flags that changed.
+    /// date changed, so only Picks moves, by the flags that changed.
     /// A smart collection moves by the changed photos its rules admit.
     mutating func recount(replacing before: [PhotoItem], with after: [PhotoItem]) {
         let delta = after.count(where: \.isFlagged) - before.count(where: \.isFlagged)

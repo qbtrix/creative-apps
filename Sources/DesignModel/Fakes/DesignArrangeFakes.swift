@@ -3,12 +3,15 @@
 // style rows) and an in-memory file codec, so views, snapshots and fake-mode
 // journeys build before the live types. Each keeps its protocol's undo case and
 // the help law, acts anywhere in the tree and ignores locks and hidden layers.
+// Duplicate, group and ungroup run on SuiteKernel's LayerTree (DesignNode+Kernel);
+// move keeps its own remove and insert, since the kernel refuses a locked target.
 // Stand-ins, never shipped as `.live`. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 public struct FakeDuplicating: LayerDuplicating {
     public init() {}
@@ -16,20 +19,15 @@ public struct FakeDuplicating: LayerDuplicating {
     /// Each copy right above its original in the same parent, moved by `offset`, unlocked.
     public func duplicate(_ ids: [String], offset: DesignPoint, on page: DesignPage,
                           mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
-        let originals = fakeFind(ids, page)
-        guard !originals.isEmpty else { throw .nothingSelected }
-        var nodes = page.nodes
-        var copies: [String] = []
-        for original in originals {
-            var copy = copySubtree(original, mint: &mint)
-            copy.translate(by: offset)
-            copy.isLocked = false
-            let placed = copy
-            nodes = fakeSiblings(page.nodes.ancestors(of: original.id)?.last, nodes) { siblings in
-                let at = siblings.firstIndex { $0.id == original.id }.map { $0 + 1 } ?? siblings.count
-                siblings.insert(placed, at: at)
+        var tree = page.nodes.layerTree
+        let copies = tree.duplicate(ids, mint: { mint.nextNodeID() })
+        guard !copies.isEmpty else { throw .nothingSelected }
+        var nodes = tree.designNodes
+        for id in copies {
+            _ = nodes.update(id) { copy in
+                copy.translate(by: offset)
+                copy.isLocked = false
             }
-            copies.append(copy.id)
         }
         return DesignEdit(name: "Duplicate", nodes: nodes, selection: copies)
     }
@@ -51,15 +49,16 @@ public struct FakeGrouping: LayerGrouping {
     /// The group's frame is the union; it takes the topmost member's place; nothing moves.
     public func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
         guard let box = fakeUnion(fakeFind(ids, page).map(\.frame)) else { throw .nothingSelected }
-        let parent = try fakeSharedParent(ids, page)
-        var made = DesignNode(id: mint.nextNodeID(), name: "Group", kind: .group, frame: box)
-        let nodes = fakeSiblings(parent, page.nodes) { siblings in
-            made.children = siblings.filter { ids.contains($0.id) }
-            let top = siblings.lastIndex { ids.contains($0.id) } ?? siblings.count - 1
-            siblings.insert(made, at: top + 1)
-            siblings.removeAll { ids.contains($0.id) }
+        _ = try fakeSharedParent(ids, page)
+        let made = DesignNode(id: mint.nextNodeID(), name: "Group", kind: .group, frame: box)
+        var tree = page.nodes.layerTree
+        let present = ids.filter { page.nodes.node($0) != nil }
+        do throws(TreeRefusal) {
+            _ = try tree.group(present, name: made.name, payload: DesignNodePayload(node: made), mint: { made.id })
+        } catch {
+            throw .notSameParent
         }
-        return DesignEdit(name: "Group", nodes: nodes, selection: [made.id])
+        return DesignEdit(name: "Group", nodes: tree.designNodes, selection: [made.id])
     }
     public func ungroupHelp(_ ids: [String], on page: DesignPage) -> String? {
         fakeFind(ids, page).contains { $0.kind == .group } ? nil : DesignRefusal.notAGroup(ids.last ?? "The selection").help
@@ -67,14 +66,9 @@ public struct FakeGrouping: LayerGrouping {
     public func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         let groups = fakeFind(ids, page).filter { $0.kind == .group }
         guard !groups.isEmpty else { throw .notAGroup(ids.last ?? "The selection") }
-        var nodes = page.nodes
-        for group in groups {
-            nodes = fakeSiblings(page.nodes.ancestors(of: group.id)?.last, nodes) { siblings in
-                guard let at = siblings.firstIndex(where: { $0.id == group.id }) else { return }
-                siblings.replaceSubrange(at...at, with: group.children)
-            }
-        }
-        return DesignEdit(name: "Ungroup", nodes: nodes, selection: groups.flatMap { $0.children.map(\.id) })
+        var tree = page.nodes.layerTree
+        for group in groups { try? tree.ungroup(group.id) }
+        return DesignEdit(name: "Ungroup", nodes: tree.designNodes, selection: groups.flatMap { $0.children.map(\.id) })
     }
 }
 
