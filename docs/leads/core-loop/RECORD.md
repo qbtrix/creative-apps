@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: wave 5: CL-10 #4166 open (after #4147); CL-z #4167 open; all slice PRs are open, so: merge watch, Belt-Slice-Done per slice on a green dev Linux run, critics once the scoped halo run shows screens
+Next: CL-measure waits for a green dev Linux run at or past cbbb878 (run 39673232799 at 28e5f14 red on CommandPathTests launcher baseline, AfterGlowApp, not core-loop; dev-red #3856); CL-z #4167 open in the lane; critics once scoped halo run 39671767226 shows screens
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

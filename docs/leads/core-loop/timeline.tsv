@@ -107,3 +107,4 @@ utc	stage	event	ref	note
 2026-10-21T20:11Z	3	merged	#4147	CL-probe CL-8+CL-9 at a2d1a8d; #4166 macOS build running, #4167 queued
 2026-10-21T20:33Z	3	merged	#4166	CL-measure CL-10 at cbbb878; Linux run 39670298178 at 0599560 (has #4147) in progress; #4167 macOS build running
 2026-10-21T20:49Z	3	slice-done	CL-probe	Linux green run 39670298178 at 0599560; https://github.com/qbtrix/creative-apps/issues/1971#issuecomment-6326242256
+2026-10-21T21:07Z	3	check	dev Linux 39673232799 red	CommandPathTests launcher baseline (AfterGlowApp), not core-loop; dev-red #3856; CL-measure waits
