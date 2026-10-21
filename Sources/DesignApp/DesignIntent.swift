@@ -56,6 +56,8 @@ enum DesignIntent {
     case setPageSize(width: Double, height: Double)
     /// An Eyedropper click: the colour at the page point onto the selection's stroke (Option) or fill, one step.
     case pick(DesignPoint, toStroke: Bool)
+    /// The inspector's Eyedropper options: the square it reads, and whether a plain click picks the stroke.
+    case sampleSize(SampleSize), sampleTarget(toStroke: Bool)
 }
 
 /// Where a view sends its intents.
@@ -147,10 +149,12 @@ extension DesignModifiers {
     }
 
     /// Shift and Option as held; `.noSnap` when ⌘ is held or Snap to Layers is off in `defaults` (snapping SN-8).
+    /// The flags are read through SuiteUI's `KeyModifiers(flags:)` (AC-tools).
     static func make(flags: NSEvent.ModifierFlags, defaults: UserDefaults) -> DesignModifiers {
-        DesignModifiers(
-            shift: flags.contains(.shift), option: flags.contains(.option),
-            command: flags.contains(.command), snapToLayers: snapsToLayers(in: defaults))
+        let held = KeyModifiers(flags: flags)
+        return DesignModifiers(
+            shift: held.contains(.shift), option: held.contains(.option),
+            command: held.contains(.command), snapToLayers: snapsToLayers(in: defaults))
     }
 
     /// View > Snap to Layers as `defaults` holds it; a missing value reads as on.

@@ -1,7 +1,7 @@
 # FlareApp's menu items and buttons built without a command spec (command-catalog CC-11).
+# max: 10
 Sources/FlareApp/FlareCommands.swift: return Button(title ?? intent.title) { menu.perform(intent) }
 Sources/FlareApp/FlareFilePanels.swift: Button("OK", role: .cancel) {}
-Sources/FlareApp/FlareNewSheet.swift: Button("Cancel", role: .cancel) { onCancel() }
 Sources/FlareApp/FlareNewSheet.swift: Button("Create") { if spec.problem == nil { onCreate(spec) } }
 Sources/FlareApp/FlareRecovery.swift: Button("Restore") {
 Sources/FlareApp/FlareRecovery.swift: Button("Discard", role: .destructive) {
