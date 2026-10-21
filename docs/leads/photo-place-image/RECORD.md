@@ -5,7 +5,7 @@ Status: mirrored from lead/place-image (docs/leads/place-image), where earlier r
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
 Stage: 3 W5
 Base: dev
-Next: #4101 PP-5 and #4003 PP-4 in lane; PP-7 branch c3a92cf pushed (CI PASS), PR opens once they merge; PP-8 feature-done builder
+Next: #4003 PP-4, #4101 PP-5, #4139 PP-8 (feature-done) in lane; PP-7 PR opens once #4003/#4101 merge; then scoped photo run -> critics -> Belt-Slice-Done PP-m, PP-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,7 +24,7 @@ Next: #4101 PP-5 and #4003 PP-4 in lane; PP-7 branch c3a92cf pushed (CI PASS), P
 | PP-4 | PP-u | 3 | snapshots, budget, journey skipped | Tests/AppSnapshotTests/PhotoPlaceSnapshots.swift, RenderBudgetPhotoPlaceTests.swift, UITests/PhotoJourneyTests+Place.swift | snapshots (refused now; logo after PP-5), budget placeLargeInThreeBodies, journey skipped | #4003 | in lane 3d1f532 |
 | PP-5 | PP-m | 4 | conformance bodies; insertPixelLayer from paste; tests on (PP-6 folded in) | PhotoPlace+Kernel.swift, PhotoClipboard.swift, tests, mutations, catalog, ids | PhotoPlaceTests; .centredOnCanvas .largeFitsCanvas .aboveSelection | #4101 | in lane 486222a |
 | PP-7 | PP-z | 5 | journey on live | UITests/PhotoJourneyTests+Place.swift | journey | lead/place-image-PP-7 | pushed c3a92cf, PR after #4003/#4101 |
-| PP-8 | PP-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, place-image.wave.json | scripts/ci | – | waiting |
+| PP-8 | PP-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, place-image.wave.json | scripts/ci | #4139 | in lane (cbbe1c3) |
 
 ## Waves (combined plan, all three features)
 - W1: PM-1 (SuiteUI LayerTreeList multi-select, no waits) and PP-a (PP-1 and PP-2 in one PR; waits met by PL-1 #3578 and PL-m on dev). The files do not overlap.
