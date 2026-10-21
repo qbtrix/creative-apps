@@ -36,3 +36,4 @@ DL-1 can't be written without LS-a's types (rule 20: no Design shadow type), so 
 - 2026-10-21T08:01Z: heartbeat. LS-a #3937 open; no supervisor reply on #3858.
 - 2026-10-21T08:23Z: heartbeat. LS-a #3937 open; no supervisor reply on #3858.
 - 2026-10-21T08:45Z: heartbeat. LS-a #3937 open; no supervisor reply on #3858.
+- 2026-10-21T09:07:57Z: heartbeat. LS-a #3937 still open; DL-1 waits. No new supervisor reply on #3858 (2 comments).
