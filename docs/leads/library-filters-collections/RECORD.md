@@ -118,3 +118,4 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 - 2026-10-21T15:58:40Z check: FC-12 #3551 and FC-14 #4056 macOS builds still queued in the lane. #4099 (FC-14 perf line) merged; the .disabled drop follows once FC-14 is on dev. S-L9 #3411 open. 0 open findings.
 - 2026-10-21T16:20:00Z check: FC-12/FC-14 macOS builds still queued (since ~15:28Z). S-L9 #3411 open; asked the supervisor on #1563 whether FC-10 becomes a gap. 0 findings.
 - 2026-10-21T16:43:01Z stage: supervisor said close FC-c with FC-10 as a gap. Filed gap #4126 (waits on #3411). Posted Belt-Slice-Done FC-c on run 39614555474 (green Linux check containing FC-9 ded2ca5), gaps #4126.
+- 2026-10-21T17:06:01Z check: FC-12 #3551 macOS build 39626013628 cancelled in swift build (not a compile error), rerun 403, asked supervisor on #1563. FC-14 #4056 macOS build green 39625628817, clean, waiting lane sweep. Findings 0.
