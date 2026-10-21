@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T22:46:38Z	heartbeat	no change: #4129 macOS build still queued; no green dev Linux run since 0c435e275
 2026-10-21T23:04:49Z	heartbeat	dev Linux 39689070230 red on library CommandPath baseline (not ours); #4129 macOS build still queued
 2026-10-21T23:26:41Z	check	SS-z	#4129 lane macOS build red on dev file RenderBudgetPhotoPlaceTests (#4003); fix #4215 open, port would exceed 400-line cap; commented, waiting
+2026-10-21T23:52:45Z	check	SS-z	#4215 still open; #4129 waits; no green dev Linux run yet
