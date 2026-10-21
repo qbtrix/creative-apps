@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-20T23:47Z	3	stage-start	-	blocked: HF-a waits on HT-a, HS-a, PH-u
 2026-10-21T00:13Z	3	heartbeat	-	HF-a still blocked: HS-a in review #3676, PH-u not started
 2026-10-21T02:03Z	3	heartbeat	waits	HS-a #3676 open; placed-images PH-a still stage 0 waiting; blocked
+2026-10-21T02:21Z	3	heartbeat	waits	HS-a #3676 open; placed-images still stage 0; blocked
