@@ -87,4 +87,100 @@ public struct LibraryFilter: Hashable, Sendable {
         guard names.count > 1 else { return names.first ?? "" }
         return names.dropLast().joined(separator: ", ") + " or " + names[names.count - 1]
     }
+
+    /// Why the bar can't act yet; nil since FC-7 built it.
+    public static let unavailable: String? = nil
+}
+
+extension LibraryCatalog {
+    /// The selected smart collection's rules, else the bar's `filter`.
+    public var activeFilter: LibraryFilter {
+        if case .rules(let rules) = selectedUserCollection?.contents { return rules }
+        return filter
+    }
+
+    /// "<summary>; <shown> of <in the collection>".
+    public var filterValue: String {
+        activeFilter.summary + "; \(order.count) of \(collectionItems.count)"
+    }
+
+    /// "Rules of <name>" while a smart collection is selected.
+    public var filterCaption: String? {
+        guard let collection = selectedUserCollection, collection.isSmart else { return nil }
+        return "Rules of \(collection.name)"
+    }
+
+    /// A collection that isn't smart has photos, and the filter shows none.
+    public var isHiddenByFilter: Bool {
+        selectedUserCollection?.isSmart != true && order.isEmpty && !collectionItems.isEmpty
+    }
+
+    public var filterHelp: String? {
+        LibraryFilter.unavailable ?? (items.isEmpty ? "Import or load photos to filter them." : nil)
+    }
+
+    public var clearFilterHelp: String? {
+        filterHelp ?? (activeFilter.isActive ? nil : "No filter is on.")
+    }
+
+    public var newSmartCollectionHelp: String? { UserCollection.smartUnavailable }
+
+    /// Sets the bar's filter and refreshes what is shown: the selection
+    /// keeps the photos still shown, and a loupe on a hidden photo goes back
+    /// to the grid. View state like the sort: no undo step, but the
+    /// collections file is dirty. (A smart collection's rules: FC-12.)
+    public mutating func setFilter(_ filter: LibraryFilter) {
+        guard filterHelp == nil else { return }
+        self.filter = filter
+        collectionsRevision += 1
+        refreshShown()
+    }
+
+    /// Turns a flag chip on or off. Turning Rejected on turns Hide Rejected
+    /// off, so the filter can always match something.
+    public mutating func toggleFilterFlag(_ flag: PhotoFlag) {
+        var next = activeFilter
+        if next.flags.remove(flag) == nil {
+            next.flags.insert(flag)
+            if flag == .reject { next.hidesRejected = false }
+        }
+        setFilter(next)
+    }
+
+    /// Sets the rating rule; at least 0 stars is any rating.
+    public mutating func setRatingRule(_ rule: RatingRule) {
+        var next = activeFilter
+        if case .atLeast(let minimum) = rule, minimum <= 0 {
+            next.rating = .any
+        } else {
+            next.rating = rule
+        }
+        setFilter(next)
+    }
+
+    public mutating func toggleFilterLabel(_ label: PhotoLabel) {
+        var next = activeFilter
+        next.labels.formSymmetricDifference([label])
+        setFilter(next)
+    }
+
+    /// Turns Hide Rejected on or off. Turning it on drops the Rejected chip.
+    public mutating func toggleHideRejected() {
+        var next = activeFilter
+        next.hidesRejected.toggle()
+        if next.hidesRejected { next.flags.remove(.reject) }
+        setFilter(next)
+    }
+
+    public mutating func clearFilter() {
+        guard clearFilterHelp == nil else { return }
+        setFilter(.all)
+    }
+
+    /// Makes "New Smart Collection" from the bar's filter; returns its id,
+    /// or nil while smart collections are unavailable.
+    @discardableResult public mutating func newSmartCollection() -> String? {
+        guard newSmartCollectionHelp == nil else { return nil }
+        return nil
+    }
 }

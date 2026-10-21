@@ -1,0 +1,6 @@
+[
+{"label":"sorted oldest first","file":"Sources/SuiteModel/Store/RecoveryFolder.swift","find":"$0.savedAt > $1.savedAt","replace":"$0.savedAt < $1.savedAt","tests":"RecoveryFolderTests/newestFirst"},
+{"label":"damaged pair kept","file":"Sources/SuiteModel/Store/RecoveryFolder.swift","find":"                try discard(window: window)\n                continue","replace":"                continue","tests":"RecoveryFolderTests/damagedPairDropped"},
+{"label":"an item lost","file":"Sources/SuiteModel/Store/RecoveryFolder.swift","find":"            items.append(RecoveryItem(window: window, name: meta.name, savedAt: meta.savedAt, data: data))","replace":"","tests":"RecoveryFolderTests/writeThenLeftBehind"},
+{"label":"discard keeps the JSON","file":"Sources/SuiteModel/Store/RecoveryFolder.swift","find":"for name in [raw(window), json(window)] {","replace":"for name in [raw(window)] {","tests":"RecoveryFolderTests/discardRemovesBoth"}
+]

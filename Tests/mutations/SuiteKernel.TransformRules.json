@@ -1,0 +1,30 @@
+[
+  {
+    "label": "cornersTurn90: the turn reads its degrees as radians, so a quarter turn lands somewhere else (.cornersTurn90)",
+    "file": "Sources/SuiteKernel/Transform/TransformRules.swift",
+    "find": "private static func turn(_ degrees: Double) -> Matrix { Matrix.rotation(degrees: degrees) }",
+    "replace": "private static func turn(_ degrees: Double) -> Matrix { Matrix.rotation(degrees: degrees * 180 / .pi) }",
+    "tests": "SuiteKernelTests.TransformRulesTests"
+  },
+  {
+    "label": "normalizesHalfTurn: a half turn wraps to -180 instead of staying at 180 (.normalizesHalfTurn)",
+    "file": "Sources/SuiteKernel/Transform/TransformRules.swift",
+    "find": "if turn > 180 { return turn - 360 }",
+    "replace": "if turn >= 180 { return turn - 360 }",
+    "tests": "SuiteKernelTests.TransformRulesTests"
+  },
+  {
+    "label": "flipKeepsCentre: a flip mirrors the box about the document origin, so it moves (.flipKeepsCentre)",
+    "file": "Sources/SuiteKernel/Transform/TransformRules.swift",
+    "find": "return TransformBox(box: t.box, degrees: normalized(-t.degrees), flipX: flipX, flipY: flipY)",
+    "replace": "let b = t.box; let box = direction == .horizontal ? Rect(minX: -b.maxX, minY: b.minY, maxX: -b.minX, maxY: b.maxY) : Rect(minX: b.minX, minY: -b.maxY, maxX: b.maxX, maxY: -b.minY); return TransformBox(box: box, degrees: normalized(-t.degrees), flipX: flipX, flipY: flipY)",
+    "tests": "SuiteKernelTests.TransformRulesTests"
+  },
+  {
+    "label": "anchoredCentre: a middle anchor sits at 1 instead of 1/2, so Canvas Size about the centre lands at the far edge (.anchoredCentre)",
+    "file": "Sources/SuiteKernel/Transform/TransformRules.swift",
+    "find": "let middle = 0.5",
+    "replace": "let middle = 1.0",
+    "tests": "SuiteKernelTests.TransformRulesTests"
+  }
+]

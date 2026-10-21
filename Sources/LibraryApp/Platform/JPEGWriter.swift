@@ -1,9 +1,10 @@
 // Platform/JPEGWriter.swift: JPEGWriting on ImageIO and the file system
-// (export EX-5). `write` encodes the DisplayImage as an sRGB-tagged JPEG at
-// quality/100 into memory, then writes the bytes with `.withoutOverwriting`,
-// so a name that already exists throws `writeFailed` and its file is never
-// touched. `writeSidecar` writes the XMP bytes the same way. Only JPEG names
-// are written until EX-8 adds the other formats.
+// (export EX-5, EX-8). `write` encodes the DisplayImage, sRGB-tagged, in the
+// format its name's extension says (JPEG, PNG, TIFF or HEIC; JPEG and HEIC at
+// quality/100, PNG and TIFF lossless) into memory, then writes the bytes with
+// `.withoutOverwriting`, so a name that already exists throws `writeFailed`
+// and its file is never touched. `writeSidecar` writes the XMP bytes the same
+// way. `writableFormats` is the four formats ImageIO on this Mac can encode.
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -11,8 +12,23 @@ import LibraryModel
 import UniformTypeIdentifiers
 
 struct JPEGWriter: JPEGWriting {
-    /// The formats this writer can encode on this Mac (EX-8 widens it).
-    static func writableFormats() -> Set<ExportFormat> { [.jpeg] }
+    /// The export formats ImageIO on this Mac can encode, asked once (the sheet reads it per body).
+    static func writableFormats() -> Set<ExportFormat> { writable }
+
+    private static let writable: Set<ExportFormat> = {
+        let types = Set(CGImageDestinationCopyTypeIdentifiers() as? [String] ?? [])
+        return Set(ExportFormat.allCases.filter { types.contains(uniformType(for: $0).identifier) })
+    }()
+
+    /// The uniform type ImageIO encodes `format` as.
+    private static func uniformType(for format: ExportFormat) -> UTType {
+        switch format {
+        case .jpeg: .jpeg
+        case .png: .png
+        case .tiff: .tiff
+        case .heic: .heic
+        }
+    }
 
     func existingNames(in folder: String) async throws -> Set<String> {
         do {
@@ -25,11 +41,12 @@ struct JPEGWriter: JPEGWriting {
 
     func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String) async throws {
         let path = Self.path(folder, fileName)
-        guard ExportFormat.forFileName(fileName) == .jpeg else {
-            throw LibraryError.writeFailed(path: path, reason: "Library can only write JPEG files to \(fileName).")
+        guard let format = ExportFormat.forFileName(fileName) else {
+            throw LibraryError.writeFailed(
+                path: path, reason: "Library can only write JPEG, PNG, TIFF or HEIC files, not \(fileName).")
         }
-        guard let data = Self.jpeg(image, quality: quality) else {
-            throw LibraryError.writeFailed(path: path, reason: "Couldn't encode \(fileName) as JPEG.")
+        guard let data = Self.encode(image, as: format, quality: quality) else {
+            throw LibraryError.writeFailed(path: path, reason: "Couldn't encode \(fileName) as \(format.rawValue).")
         }
         try Self.writeNew(data, to: path, fileName: fileName)
     }
@@ -62,8 +79,9 @@ struct JPEGWriter: JPEGWriting {
         }
     }
 
-    /// `image` as JPEG bytes tagged sRGB, at `quality` (clamped to 0...100) / 100.
-    private static func jpeg(_ image: DisplayImage, quality: Int) -> Data? {
+    /// `image` as `format` bytes tagged sRGB; a lossy format at `quality`
+    /// (clamped to 0...100) / 100. Nil when this Mac can't encode `format`.
+    private static func encode(_ image: DisplayImage, as format: ExportFormat, quality: Int) -> Data? {
         let (width, height) = (image.size.width, image.size.height)
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
             let provider = CGDataProvider(data: Data(image.rgba8) as CFData),
@@ -74,11 +92,10 @@ struct JPEGWriter: JPEGWriting {
         else { return nil }
         let output = NSMutableData()
         guard let destination = CGImageDestinationCreateWithData(
-            output as CFMutableData, UTType.jpeg.identifier as CFString, 1, nil)
+            output as CFMutableData, Self.uniformType(for: format).identifier as CFString, 1, nil)
         else { return nil }
-        let options: [CFString: Any] = [
-            kCGImageDestinationLossyCompressionQuality: Double(min(max(quality, 0), 100)) / 100
-        ]
+        let options: [CFString: Any] = format.usesQuality
+            ? [kCGImageDestinationLossyCompressionQuality: Double(min(max(quality, 0), 100)) / 100] : [:]
         CGImageDestinationAddImage(destination, picture, options as CFDictionary)
         guard CGImageDestinationFinalize(destination) else { return nil }
         return output as Data

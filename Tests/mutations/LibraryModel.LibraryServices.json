@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".live skips the sidecars reason",
+    "file": "Sources/LibraryModel/LibraryServices.swift",
+    "find": "(\"sidecars\", sidecars is UnconnectedSidecars ? UnconnectedSidecars.unavailable : nil),",
+    "replace": "(\"sidecars\", nil),",
+    "tests": "LibrarySidecarContractTests.swift"
+  },
+  {
+    "label": ".live drops the writer it was given",
+    "file": "Sources/LibraryModel/LibraryServices.swift",
+    "find": "writer: writer, sidecars: sidecars, unavailable: unavailable, isPreview: false)",
+    "replace": "writer: writer, unavailable: unavailable, isPreview: false)",
+    "tests": "LibrarySidecarContractTests.swift"
+  }
+]

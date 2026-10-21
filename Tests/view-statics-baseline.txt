@@ -21,7 +21,6 @@ Sources/DesignApp/DesignWindow.swift::DesignWindow.lastWorkspace
 Sources/DesignApp/DesignWindow.swift::DesignWindow.launchSaveURL
 Sources/DesignApp/DesignWindow.swift::DesignWindow.reason
 Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow.keyState
-Sources/FlareApp/FlareInspectorScene.swift::FlareInspectorScene.hex
 Sources/FlareApp/FlareInspectorScene.swift::FlareInspectorScene.rates
 Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.number
 Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.text
@@ -44,8 +43,6 @@ Sources/HaloApp/HaloEasingInspector.swift::HaloEasingInspector.rowFill
 Sources/HaloApp/HaloLayerInspector.swift::HaloLayerGroup.owns
 Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView.bodyRuns
 Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView.keyState
-Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet.segmentID
-Sources/HaloApp/HaloRenderSheet.swift::HaloRenderSheet.title
 Sources/HaloApp/HaloTextInspector.swift::HaloTextInspector.owns
 Sources/HaloApp/HaloViewer.swift::HaloViewer.command
 Sources/HaloApp/HaloViewerCanvas.swift::HaloLiveLayers.bodyRuns

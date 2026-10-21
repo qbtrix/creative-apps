@@ -6,12 +6,13 @@
 // (2026-07-28) and `initialize` (handshake era) are each answered once in
 // the negotiated version; an unknown version gets the error listing the
 // supported ones. `handle` never prints: stdout carries only its replies.
+// `serve` reads its arguments strictly and answers stdin line by line.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import AfterGlowCLICore
+@testable import AfterGlowCLICore
 import Testing
 
 struct MCPProtocolTests {
@@ -37,7 +38,7 @@ struct MCPProtocolTests {
     /// The code `JSONRPC.parse` refuses `line` with; nil when it reads a request.
     static func parseCode(_ line: String) -> Int? { if case .failure(let error) = JSONRPC.parse(Data(line.utf8)) { error.code } else { nil } }
 
-    @Test(.disabled("waits on MC-4"))
+    @Test
     func parseReadsRequestsAndNotifications() throws {
         let request = try JSONRPC.parse(Data(#"{"jsonrpc":"2.0","id":"a-1","method":"tools/list","params":{"x":1}}"#.utf8)).get()
         #expect(request == RPCRequest(id: .string("a-1"), method: "tools/list", params: .object(["x": .number(1)])))
@@ -46,7 +47,7 @@ struct MCPProtocolTests {
         #expect(try JSONRPC.parse(Data(#"{"jsonrpc":"2.0","id":7,"method":"server/discover"}"#.utf8)).get().id == .number(7))
     }
 
-    @Test(.disabled("waits on MC-4"))
+    @Test
     func discoverAnswersTheVersionsCapabilitiesAndServerInfo() throws {
         let body = try #require(try Self.send(Self.server(), #"{"jsonrpc":"2.0","id":1,"method":"server/discover"}"#))
         #expect(body["id"] == .number(1))
@@ -57,7 +58,7 @@ struct MCPProtocolTests {
         #expect(Self.field(try client.discover().result, "supportedVersions") == Self.supported)
     }
 
-    @Test(.disabled("waits on MC-4"), arguments: ["2025-11-25", "2025-06-18"])
+    @Test(arguments: ["2025-11-25", "2025-06-18"])
     func initializeIsAnsweredInTheRequestedVersion(version: String) throws {
         var client = Client(Self.server(), era: .handshake(version))
         let reply = try client.initialize()
@@ -69,7 +70,7 @@ struct MCPProtocolTests {
         #expect(list.id == .number(2) && list.error == nil)
     }
 
-    @Test(.disabled("waits on MC-4"), arguments: MCPVersions.supported)
+    @Test(arguments: MCPVersions.supported)
     func eachSupportedVersionIsAnsweredOnceWithItsID(version: String) throws {
         let era: Client.Era = MCPVersions.handshakeEra.contains(version) ? .handshake(version) : .sessionless(version)
         var client = Client(Self.server(), era: era)
@@ -79,7 +80,7 @@ struct MCPProtocolTests {
         try client.notify("notifications/cancelled", params: ["requestId": .number(2)])
     }
 
-    @Test(.disabled("waits on MC-4"), arguments: [
+    @Test(arguments: [
         #"{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2024-01-01"}}}"#,
         #"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2025-03-26"}}}"#,
         #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-01-01","capabilities":{}}}"#,
@@ -91,20 +92,20 @@ struct MCPProtocolTests {
         #expect(Self.field(Self.field(body["error"], "data"), "supportedVersions") == Self.supported)
     }
 
-    @Test(.disabled("waits on MC-4"), arguments: ["{bad json", "[", #"{"jsonrpc":"2.0","id":1,"method":"#, "\u{1}", "nul"])
+    @Test(arguments: ["{bad json", "[", #"{"jsonrpc":"2.0","id":1,"method":"#, "\u{1}", "nul"])
     func parseErrorIs32700(line: String) throws {
         let body = try #require(try Self.send(Self.server(), line))
         #expect(body["id"] == .null && Self.code(body) == .number(-32700))
         #expect(Self.parseCode(line) == -32700)
     }
 
-    @Test(.disabled("waits on MC-4"))
+    @Test
     func invalidUTF8IsAParseError() throws {
         let body = try #require(try Self.send(Self.server(), Data([0x7B, 0xFF, 0xFE, 0x7D])))
         #expect(body["id"] == .null && Self.code(body) == .number(-32700))
     }
 
-    @Test(.disabled("waits on MC-4"), arguments: [
+    @Test(arguments: [
         "42", "[]", #"[{"jsonrpc":"2.0","id":1,"method":"server/discover"}]"#, #"{"id":1,"method":"server/discover"}"#,
         #"{"jsonrpc":"1.0","id":1,"method":"server/discover"}"#, #"{"jsonrpc":"2.0","id":1}"#,
         #"{"jsonrpc":"2.0","id":1,"method":7}"#, #"{"jsonrpc":"2.0","id":true,"method":"server/discover"}"#,
@@ -116,7 +117,7 @@ struct MCPProtocolTests {
         #expect(Self.parseCode(line) == -32600)
     }
 
-    @Test(.disabled("waits on MC-4"))
+    @Test
     func aLineOverTheCapIsAnInvalidRequestAndOneAtTheCapIsRead() throws {
         let request = Data(#"{"jsonrpc":"2.0","id":1,"method":"server/discover"}"#.utf8)
         let atCap = request + Data(repeating: UInt8(ascii: " "), count: JSONRPC.maxLineBytes - request.count)
@@ -127,14 +128,14 @@ struct MCPProtocolTests {
         #expect(over["id"] == .null && Self.code(over) == .number(-32600))
     }
 
-    @Test(.disabled("waits on MC-4"), arguments: ["resources/list", "prompts/get", "nope"])
+    @Test(arguments: ["resources/list", "prompts/get", "nope"])
     func methodNotFoundIs32601(method: String) throws {
         let line = #"{"jsonrpc":"2.0","id":4,"method":"\#(method)"}"#
         let body = try #require(try Self.send(Self.server(), line))
         #expect(body["id"] == .number(4) && Self.code(body) == .number(-32601))
     }
 
-    @Test(.disabled("waits on MC-4"), arguments: [
+    @Test(arguments: [
         #"{"jsonrpc":"2.0","method":"notifications/initialized"}"#,
         #"{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":3,"reason":"user"}}"#,
         #"{"jsonrpc":"2.0","method":"notifications/unknown"}"#, #"{"jsonrpc":"2.0","method":"tools/list"}"#,
@@ -147,7 +148,7 @@ struct MCPProtocolTests {
         #expect(io.stdout.isEmpty && io.files.isEmpty)
     }
 
-    @Test(.disabled("waits on MC-4"))
+    @Test
     func handleNeverPrintsSoStdoutCarriesOnlyReplies() throws {
         let io = FakeIO()
         let server = Self.server(io)
@@ -178,7 +179,7 @@ struct MCPProtocolTests {
         #"{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":3}}"#,
     ]
 
-    @Test(.disabled("waits on MC-4"), arguments: fuzzSeeds.indices)
+    @Test(arguments: fuzzSeeds.indices)
     func fuzzedRequestsNeverCrash(kind: Int) throws {
         let io = FakeIO()
         let server = Self.server(io)
@@ -201,5 +202,54 @@ struct MCPProtocolTests {
         }
         #expect(io.stdout.isEmpty)
         #expect(io.files.keys.allSatisfy { $0.hasPrefix(Self.root + "/") })
+    }
+
+    static let serveArguments = ["--app", "fake", "--root", root]
+
+    @Test func serveAnswersEachRequestLineAndExitsWhenStdinEnds() throws {
+        let lines = [#"{"jsonrpc":"2.0","id":1,"method":"server/discover"}"#, "", #"{"jsonrpc":"2.0","method":"notifications/initialized"}"#,
+                     "{bad json", #"{"jsonrpc":"2.0","id":2,"method":"ping"}"#]
+        let io = FakeIO(stdin: lines.map { Data($0.utf8) })
+        #expect(MCPServer.serve(Self.serveArguments, apps: [Apps.fake], io: io) == 0)
+        let replies = try io.stdout.map { try JSONValue(json: Data($0.utf8)) }
+        #expect(replies.map { Self.field($0, "id") } == [.number(1), .null, .number(2)])
+        #expect(Self.field(Self.field(replies.first, "result"), "supportedVersions") == Self.supported)
+        #expect(Self.field(replies.last, "result") == .object([:]) && io.stderr.isEmpty)
+    }
+
+    @Test(arguments: [[], ["--app", "fake"], ["--root"], ["--app", "nope", "--root", root], ["--app", "fake", "--app", "fake", "--root", root],
+                      ["--root", root, "--bogus"], ["--root", root, "extra"], ["--root", root, "--live", "--live"], ["--root", ""]])
+    func serveRefusesBadArgumentsAsUsage(arguments: [String]) {
+        let io = FakeIO(stdin: [Data(#"{"jsonrpc":"2.0","id":1,"method":"ping"}"#.utf8)])
+        #expect(MCPServer.serve(arguments, apps: [Apps.fake], io: io) == 64)
+        #expect(io.stderr.count == 1 && io.readLine() != nil, "a refused run reads no request")
+    }
+
+    @Test func serveLiveRunsOnlyOnMacOSAndAnAppFilterNarrowsTheApps() {
+        let io = FakeIO()
+        #if !os(macOS)
+        #expect(MCPServer.serve(Self.serveArguments + ["--live"], apps: [Apps.fake], io: io) == 69)
+        #expect(io.stderr == ["afterglow mcp --live runs only on macOS, where the apps listen"])
+        #endif
+        #expect(CLI.run(["mcp", "--root", Self.root], io: FakeIO()) == 0)
+        #expect(CLI.run(["mcp", "--app", "fake", "--root", Self.root], io: FakeIO()) == 0)
+    }
+
+    @Test func theRateWindowAdmitsTheLimitPerSecondAndRecordsNoRefusal() {
+        var window = RateWindow()
+        #expect([0, 0.5].map { window.admit(at: $0, limit: 2) } == [true, true])
+        #expect(!window.admit(at: 0.999, limit: 2) && window.times == [0, 0.5])
+        #expect(window.admit(at: 1, limit: 2) && window.times == [0.5, 1])
+        var closed = RateWindow()
+        #expect(!window.admit(at: 1.2, limit: 2) && !closed.admit(at: 0, limit: 0) && closed.times.isEmpty)
+    }
+
+    @Test func anUnknownToolAndArgumentsThatAreNotAnObjectAreInvalidParams() throws {
+        let unknown = try Self.send(Self.server(), #"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"nope.tool"}}"#)
+        #expect(Self.code(unknown) == .number(-32602) && Self.field(unknown?["error"], "message") == .string("Unknown tool: nope.tool"))
+        let bare = try Self.send(Self.server(), #"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"x","arguments":[]}}"#)
+        #expect(Self.code(bare) == .number(-32602))
+        let nameless = try Self.send(Self.server(), #"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{}}"#)
+        #expect(Self.code(nameless) == .number(-32602))
     }
 }

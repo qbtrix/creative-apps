@@ -30,17 +30,19 @@
     "outcome": "The logo layer scales with an overshoot and fades in over 5 s, in a 1080p H.264 movie.",
     "needs": [
       "S20",
-      "E11"
+      "E11",
+      "halo/placed-images"
     ],
-    "needs_note": "built keys/easing; S20 image or E11 SVG layer",
-    "closes_with": "S20",
+    "needs_note": "built keys/easing; S20 and E11 through halo/placed-images (a PNG or SVG picture in a solid)",
+    "closes_with": "halo/placed-images",
     "trap": "No image or SVG layer, so the logo can't come in",
     "run": "Cm",
     "baseline": "partial",
     "since": "2026-10-19",
     "sources": [
       "https://www.udemy.com/course/after-effects-for-beginners-4-projects-to-get-you-started/"
-    ]
+    ],
+    "waits_on": "PH-5"
   },
   "RJ-H03": {
     "id": "RJ-H03",
@@ -70,10 +72,11 @@
     "job": "Set a title card with a chosen font, weight, tracking and two lines.",
     "outcome": "The title shows two lines in the chosen font, weight and tracking, in the viewer and the render.",
     "needs": [
-      "E8"
+      "E8",
+      "suiteui/text-style"
     ],
     "needs_note": "E8 text engine",
-    "closes_with": "E8",
+    "closes_with": "suiteui/text-style",
     "trap": "One line, no font choice",
     "run": "Cm",
     "baseline": "partial",
@@ -242,17 +245,20 @@
     "outcome": "Every selected key moves by the same time offset, hidden layers' keys included.",
     "needs": [
       "S16",
-      "suiteui/timeline"
+      "suiteui/timeline",
+      "halo/key-editing"
     ],
-    "needs_note": "S16 (SuiteUI timeline built, Halo half unfiled)",
-    "closes_with": "S16",
+    "needs_note": "S16 (SuiteUI timeline built); halo/key-editing wires picking across lanes, Select All Keys and the key drag into Halo",
+    "closes_with": "halo/key-editing",
     "trap": "Keys of hidden layers stay behind",
-    "run": "J",
+    "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://support.apple.com/guide/motion/welcome/mac"
-    ]
+    ],
+    "waits_on": "KE-4",
+    "test": "Tests/RealJobs/halo/move-keys/move-keys.jobs.json"
   },
   "RJ-H14": {
     "id": "RJ-H14",
@@ -395,17 +401,18 @@
     "job": "Rotate and scale a layer with handles in the viewer.",
     "outcome": "Dragging the handles rotates and scales the layer, not only moves it.",
     "needs": [
-      "S7"
+      "S7",
+      "halo/transform"
     ],
-    "needs_note": "S7 transform handles",
-    "closes_with": "S7",
+    "closes_with": "halo/transform",
     "trap": "Drag moves position only",
     "run": "J",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://support.apple.com/guide/motion/welcome/mac"
-    ]
+    ],
+    "waits_on": "HT-7"
   },
   "RJ-H22": {
     "id": "RJ-H22",
@@ -434,10 +441,10 @@
     "job": "Force-quit after 30 minutes of work, relaunch.",
     "outcome": "Halo restores it.",
     "needs": [
-      "S12"
+      "S12",
+      "halo/autosave-history"
     ],
-    "needs_note": "S12 autosave and recovery",
-    "closes_with": "S12",
+    "closes_with": "halo/autosave-history",
     "trap": "Work lost since the last save",
     "run": "J",
     "baseline": "fail",
@@ -445,7 +452,8 @@
     "sources": [
       "https://community.adobe.com/t5/after-effects-discussions/recover-unsaved-after-effects-project/m-p/8492557",
       "https://community.adobe.com/questions-529/after-effects-crashed-corrupting-file-hoping-to-salvage-38628"
-    ]
+    ],
+    "waits_on": "HA-7"
   },
   "RJ-H24": {
     "id": "RJ-H24",
@@ -569,17 +577,22 @@
     "outcome": "A star shape with a gradient fill and a stroke, in the viewer and the render.",
     "needs": [
       "S19",
-      "S17"
+      "S17",
+      "S24",
+      "halo/shape-tools",
+      "halo/gradient-fill",
+      "halo/stroke-style"
     ],
-    "needs_note": "S19 shapes, S17 strokes and gradients",
-    "closes_with": "S19",
+    "needs_note": "S19 star, S24 gradient, S17 stroke; the stroke adopt lands last",
+    "closes_with": "halo/stroke-style",
     "trap": "Rectangles and ellipses only, layer colour only",
     "run": "C",
     "baseline": "partial",
     "since": "2026-10-19",
     "sources": [
       "https://www.canva.com/design-school/resources/how-to-create-your-first-scene-in-cavalry"
-    ]
+    ],
+    "waits_on": "HK-6"
   },
   "RJ-H31": {
     "id": "RJ-H31",
@@ -597,5 +610,232 @@
     "sources": [
       "https://lesterbanks.com/?p=68217"
     ]
+  },
+  "RJ-H32": {
+    "id": "RJ-H32",
+    "app": "halo",
+    "weight": "med",
+    "job": "Give a solid layer a radial gradient, white at the centre to black at the edge, and render frame 0.",
+    "outcome": "In the rendered PNG the layer's centre pixel is within 2/255 of white and its corner within 2/255 of black, and the viewer's frame has the same pixels.",
+    "needs": [
+      "S24",
+      "halo/gradient-fill"
+    ],
+    "closes_with": "halo/gradient-fill",
+    "trap": "The viewer draws the gradient but the render path still fills the layer's old solid colour",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HG-6",
+    "added_by": "halo/gradient-fill"
+  },
+  "RJ-H33": {
+    "id": "RJ-H33",
+    "app": "halo",
+    "weight": "high",
+    "job": "Make 10 position keys, jump back to the fourth in History, save and reopen.",
+    "outcome": "The reopened layer has the first four keys with their values and easings.",
+    "needs": [
+      "S12",
+      "halo/autosave-history"
+    ],
+    "closes_with": "halo/autosave-history",
+    "trap": "The jump records a step, or replays from the save and drops easings",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HA-6",
+    "added_by": "halo/autosave-history"
+  },
+  "RJ-H34": {
+    "id": "RJ-H34",
+    "app": "halo",
+    "weight": "med",
+    "job": "Key a 30 degree turn and a 2x scale at frame 12 by command on a layer with rotation animated.",
+    "outcome": "The rotation track has a key of 30 at frame 12 with its base kept, the scale keys 2 there, and the layer's centre is unchanged.",
+    "needs": [
+      "S7",
+      "halo/transform"
+    ],
+    "closes_with": "halo/transform",
+    "trap": "The turn overwrites the base value instead of keying, or the scale moves the layer",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HT-6",
+    "added_by": "halo/transform"
+  },
+  "RJ-H35": {
+    "id": "RJ-H35",
+    "app": "halo",
+    "weight": "med",
+    "job": "Draw a six-point star shape layer by command and render frame 0.",
+    "outcome": "The frame shows a star: the top point is the layer colour and the rim between two outer points is not.",
+    "needs": [
+      "S19",
+      "halo/shape-tools"
+    ],
+    "closes_with": "halo/shape-tools",
+    "trap": "The renderer ignores the spec and draws an ellipse",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HS-6",
+    "added_by": "halo/shape-tools"
+  },
+  "RJ-H36": {
+    "id": "RJ-H36",
+    "app": "halo",
+    "weight": "high",
+    "job": "Place a two-colour PNG logo into a composition by command and render frame 0.",
+    "outcome": "In the rendered PNG the logo's left half is red and its right half blue within 2/255, centred at its own 200 x 100 size, and the pixels just outside it are the background.",
+    "needs": [
+      "S20",
+      "halo/placed-images"
+    ],
+    "closes_with": "halo/placed-images",
+    "trap": "The viewer shows the logo but the render draws the solid's colour, or the logo is stretched to the composition",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "PH-5",
+    "added_by": "halo/placed-images"
+  },
+  "RJ-H41": {
+    "id": "RJ-H41",
+    "app": "halo",
+    "weight": "med",
+    "job": "Render a lower third as ProRes 4444 with a transparent background.",
+    "outcome": "The movie is ProRes 4444 with alpha: a background-only pixel has alpha 0, a bar pixel alpha 255.",
+    "needs": [
+      "S11",
+      "halo/export-pack"
+    ],
+    "closes_with": "halo/export-pack",
+    "trap": "Alpha renders black, or the file says ProRes but carries no alpha",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HX-3",
+    "added_by": "halo/export-pack"
+  },
+  "RJ-H42": {
+    "id": "RJ-H42",
+    "app": "halo",
+    "weight": "med",
+    "job": "Reopen a project from Open Recent and drop a .halo and a PNG on Halo.",
+    "outcome": "Open Recent equals the suite list filtered to Halo; the .halo opens and the PNG goes to Photo.",
+    "needs": [
+      "suite/file-flow",
+      "halo/file-flow"
+    ],
+    "closes_with": "halo/file-flow",
+    "trap": "Halo keeps its own list, or an image drop is silently ignored",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HF-3",
+    "added_by": "halo/file-flow"
+  },
+  "RJ-H43": {
+    "id": "RJ-H43",
+    "app": "halo",
+    "weight": "med",
+    "job": "Give a title an outer glow whose size is keyed from 0 to 20 over one second, and render frames 0, 15 and 30.",
+    "outcome": "The glow reaches 0 px past the title at frame 0, 20 px at frame 30 and an eased value between at frame 15.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The glow is baked at one size for every frame, or the keys show in the viewer but not in the render",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "HY-6",
+    "added_by": "halo/layer-styles"
+  },
+  "RJ-H70": {
+    "id": "RJ-H70",
+    "app": "halo",
+    "weight": "high",
+    "job": "Change a 10 s composition to 15 s with a navy background, then render frame 400.",
+    "outcome": "Frame 400 renders with a navy corner within 2 levels and the keys stay at frames 30 and 270.",
+    "needs": [
+      "suiteui/document-setup"
+    ],
+    "closes_with": "suiteui/document-setup",
+    "trap": "The comp can't be changed without rebuilding it, or the keys stretch to the new length",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-12",
+    "added_by": "suiteui/document-setup"
+  },
+  "RJ-H50": {
+    "id": "RJ-H50",
+    "app": "halo",
+    "weight": "med",
+    "job": "Blur a title layer by 6 px, then change the blur to 2 px later and render a frame.",
+    "outcome": "The frame equals a single radius-2 blur of the title within 1 level; the project holds one filter on the layer.",
+    "needs": [
+      "suiteui/adjust-everywhere"
+    ],
+    "closes_with": "suiteui/adjust-everywhere",
+    "trap": "The second edit adds a second blur instead of changing the first",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "AJ-12",
+    "added_by": "suiteui/adjust-everywhere"
+  },
+  "RJ-H51": {
+    "id": "RJ-H51",
+    "app": "halo",
+    "weight": "high",
+    "job": "Stagger three words by sliding the second layer 6 frames and the third 12 frames later, then trim the third's end by 12 frames.",
+    "outcome": "At frame 18 the second word's opacity equals the original's at frame 12 within 1%; the third word's out point is 12 frames earlier and its keys moved by 12.",
+    "needs": [
+      "suiteui/timeline-keys"
+    ],
+    "closes_with": "suiteui/timeline-keys",
+    "trap": "A slide moves the bar but leaves the keys behind, so the word pops in early",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TK-9",
+    "added_by": "suiteui/timeline-keys"
   }
 }

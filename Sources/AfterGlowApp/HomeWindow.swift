@@ -5,8 +5,11 @@
 // and the model published as the `homeModel` focused value for the menus,
 // with the page it shows as `homePage`, so Edit > Delete is titled for it.
 // HM-2b: the New row (HomeNewRow) and the inspector (HomeInspector).
+// File-flow SF-2: files dropped on the window go to the apps that read them
+// (DropPlan through the documents bridge); the launcher opens none itself.
 import AppKit
 import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -25,12 +28,14 @@ struct HomeWindow: View {
     @State private var model: HomeModel
     @State private var showsAssets = false
     @State private var images: [String: Image] = [:]
+    @State private var bridge: SuiteDocumentsBridge
     private let services: SuiteServices
     private let support: String
 
     init(services: SuiteServices = LauncherServices.shared, support: String = LauncherServices.support) {
         self.services = services; self.support = support
         _model = State(initialValue: HomeModel(services: services, fileExists: { FileManager.default.fileExists(atPath: $0) }))
+        _bridge = State(initialValue: SuiteDocumentsBridge(app: .launcher, services: services))
     }
 
     var body: some View {
@@ -43,6 +48,11 @@ struct HomeWindow: View {
         } inspector: {
             HomeInspector(model: model, services: services)
         }
+        .suiteSwitcher(current: .launcher)
+        .suiteFileDrop(.launcher, bridge: bridge, hasDocument: false, places: [], perform: { actions in
+            let bridge = self.bridge
+            Task { await bridge.handOff(actions) }
+        })
         .searchable(text: Binding(get: { model.query }, set: { model.search($0, now: Date()) }))
         .task { await model.reload(now: Date()); await model.observe(now: { Date() }) }
         .task(id: model.state.cards.compactMap(\.item.thumbnail)) {  // load each thumbnail once

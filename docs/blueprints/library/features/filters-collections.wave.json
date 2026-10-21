@@ -67,7 +67,7 @@
     "LibrarySmartJourneyTests.testSmartCollectionFromFilter",
     "LibraryCollectionsFileJourneyTests.testCollectionsSurviveRelaunch"
   ],
-  "notes": "Not v1. Takes spine files LibraryCatalog.swift, LibraryOrder.swift, CatalogHistory.swift, LibraryEmptyCollection.swift, LibraryWindow.swift and LibraryCommands.swift, import's LibraryBrowser.swift and thumbnails' LibraryGrid.swift (FC-10) for wave 5. Collections live in collections.json beside catalog.json, so persist's contract and golden are untouched.",
+  "notes": "Not v1. Takes spine files LibraryCatalog.swift, LibraryOrder.swift, CatalogHistory.swift, LibraryEmptyCollection.swift, LibraryWindow.swift and LibraryCommands.swift, import's LibraryBrowser.swift and thumbnails' LibraryGrid.swift (FC-10) for wave 5. Collections live in collections.json beside catalog.json, so persist's contract and golden are untouched. FC-3 waits on suiteui's adopt-kernel-undo AU-library, which replaces CatalogHistory.swift with LibraryUndoAdapter.swift on the kernel's History; FC-3 adds its collection steps there (supervisor, #1934, 2026-10-20; waves can't key a wait across apps).",
   "quality": "QB-LIB-3 and QB-LIB-4 model halves under a filter and with collections; relaunch codec budget; QB-F1, QB-F3, QB-F4; audit zero new",
   "library_title": "Filter by flag and rating, collections you make, smart rules (not v1)",
   "slices": [
@@ -104,7 +104,16 @@
         "Sources/LibraryApp/LibraryCommands.swift",
         "Sources/LibraryApp/LibraryBrowser.swift"
       ],
-      "ui": true
+      "ui": true,
+      "waits": {
+        "file-flow:LF-a": [
+          "FC-1",
+          "FC-2",
+          "FC-3",
+          "FC-4",
+          "FC-5"
+        ]
+      }
     },
     {
       "id": "FC-b",
@@ -154,6 +163,11 @@
       ],
       "waits": {
         "FC-a": [
+          "FC-8",
+          "FC-9",
+          "FC-10"
+        ],
+        "file-flow:LF-a": [
           "FC-8",
           "FC-9",
           "FC-10"

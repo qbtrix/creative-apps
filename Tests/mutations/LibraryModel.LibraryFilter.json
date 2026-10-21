@@ -9,5 +9,11 @@
 {"label":"the all filter reads as active by its flags only","file":"Sources/LibraryModel/LibraryFilter.swift","find":"public var isActive: Bool { self != .all }","replace":"public var isActive: Bool { !flags.isEmpty }","tests":"LibraryFilterTests"},
 {"label":"the summary drops the all-photos sentence","file":"Sources/LibraryModel/LibraryFilter.swift","find":"guard isActive else { return \"All photos\" }","replace":"","tests":"LibraryFilterTests"},
 {"label":"the summary names hidden rejects as hidden","file":"Sources/LibraryModel/LibraryFilter.swift","find":"if hidesRejected { parts.append(\"Rejects hidden\") }","replace":"if hidesRejected { parts.append(\"Hidden\") }","tests":"LibraryFilterTests"},
-{"label":"an or list joins its last two names with and","file":"Sources/LibraryModel/LibraryFilter.swift","find":"+ \" or \" +","replace":"+ \" and \" +","tests":"LibraryFilterTests"}
+{"label":"an or list joins its last two names with and","file":"Sources/LibraryModel/LibraryFilter.swift","find":"+ \" or \" +","replace":"+ \" and \" +","tests":"LibraryFilterTests"},
+{"label":"the Rejected chip leaves Hide Rejected on","file":"Sources/LibraryModel/LibraryFilter.swift","find":"            if flag == .reject { next.hidesRejected = false }\n","replace":"","tests":"LibraryFilterBarTests"},
+{"label":"a filter change refreshes without the loupe check","file":"Sources/LibraryModel/LibraryFilter.swift","find":"        collectionsRevision += 1\n        refreshShown()","replace":"        collectionsRevision += 1\n        rebuildOrder()\n        selection.formIntersection(order)","tests":"LibraryFilterBarTests"},
+{"label":"filterValue counts after the filter on both sides","file":"Sources/LibraryModel/LibraryFilter.swift","find":"of \\(collectionItems.count)","replace":"of \\(order.count)","tests":"LibraryFilterBarTests"},
+{"label":"Hide Rejected keeps the Rejected chip on","file":"Sources/LibraryModel/LibraryFilter.swift","find":"if next.hidesRejected { next.flags.remove(.reject) }","replace":"","tests":"LibraryFilterBarTests"},
+{"label":"at least 0 stars is stored as a rule","file":"Sources/LibraryModel/LibraryFilter.swift","find":"minimum <= 0","replace":"minimum < 0","tests":"LibraryFilterBarTests"},
+{"label":"a filter change leaves the collections file clean","file":"Sources/LibraryModel/LibraryFilter.swift","find":"        collectionsRevision += 1\n        refreshShown()","replace":"        refreshShown()","tests":"LibraryFilterBarTests"}
 ]

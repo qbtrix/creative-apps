@@ -1,0 +1,177 @@
+{
+  "title": "Suite file flow: drop files from Finder on any app, drag between apps, Open Recent and Open In in every app",
+  "wave": 5,
+  "order": 30,
+  "status": "built",
+  "feature_issue": "#3480",
+  "beta": true,
+  "covers": "feature map suite/file-flow (new: suite.md v1 rows 'Files and recents' and 'Copy, paste, drag', F6 and F7, moved into the beta); journeys SJ11 and SJ14; real job RJ-X43; captain 2026-10-20",
+  "waits_on": "suite-contracts, switching, home (built: RecentWork, DocumentRouting, PasteboardCoding, HandOffSending, SuiteDocumentHost, .suiteApp); suiteui export-pack's XP-z for FakeCanvasDocument.swift (cross-line, SF-9)",
+  "longest_chain": "6 (SF-1 → SF-2 → SF-3 → SF-4 → SF-8 → SF-10)",
+  "journeys": [
+    "SuiteFileFlowJourneyTests.testDropOnHomeAndOpenRecent",
+    "SuiteFileFlowJourneyTests.testOpenIn",
+    "SuiteFileFlowJourneyTests.testDragBetweenApps"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Files/DropPlan.swift",
+    "Sources/SuiteKernel/Files/FileFlowCommands.swift",
+    "Tests/SuiteKernelTests/DropRoutingTests.swift",
+    "Tests/SuiteKernelTests/FileFlowCommandsTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-files.json",
+    "Sources/SuiteShell/OpenInMenu.swift",
+    "Sources/SuiteShell/SuiteFileDrop.swift",
+    "Sources/SuiteShell/SuiteDragSource.swift",
+    "Sources/SuiteShell/SuiteDocumentsBridge.swift",
+    "Sources/AfterGlowApp/HomeWindow.swift",
+    "docs/c4/parts/creative-apps/suite-shell/shell-documents.json",
+    "UITests/SuiteJourneyTests+FileFlow.swift",
+    "Tests/AppSnapshotTests/SuiteFileFlowViewTests.swift",
+    "Tests/AppSnapshotTests/SuiteFileFlowSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFileDropTests.swift",
+    "Tests/mutations/SuiteKernel.DropPlan.json",
+    "Tests/mutations/SuiteKernel.FileFlowCommands.json",
+    "Tests/AppSnapshotTests/SuiteDocumentsBridgeTests.swift",
+    "Tests/AppSnapshotTests/SuiteFileDropLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeCanvasFileFlowTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/file-flow/",
+    "docs/blueprints/suite/features/file-flow.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "SF-a",
+      "behavior": "The kernel's drop rule and file commands exist as stubs, SuiteShell's menu group, drop modifier, drag source and documents bridge exist on the fakes, the home takes a drop and shows Open Recent, and the checks are written, disabled.",
+      "tasks": [
+        "SF-1",
+        "SF-2"
+      ],
+      "journeys": [
+        "SJ-F1"
+      ],
+      "waits": {
+        "targets": [
+          "SF-2"
+        ],
+        "home": [
+          "SF-2"
+        ],
+        "switching": [
+          "SF-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Files/DropPlan.swift",
+        "Sources/SuiteKernel/Files/FileFlowCommands.swift",
+        "Tests/SuiteKernelTests/DropRoutingTests.swift",
+        "Tests/SuiteKernelTests/FileFlowCommandsTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-files.json",
+        "Sources/SuiteShell/OpenInMenu.swift",
+        "Sources/SuiteShell/SuiteFileDrop.swift",
+        "Sources/SuiteShell/SuiteDragSource.swift",
+        "Sources/SuiteShell/SuiteDocumentsBridge.swift",
+        "Sources/AfterGlowApp/HomeWindow.swift",
+        "docs/c4/parts/creative-apps/suite-shell/shell-documents.json",
+        "UITests/SuiteJourneyTests+FileFlow.swift"
+      ]
+    },
+    {
+      "id": "SF-u",
+      "behavior": "Open Recent lists the app's files newest first with Clear Menu, Open In lists the readers or says why not, and a drag over a window shows what the drop will do, every control identified, within the render budget.",
+      "tasks": [
+        "SF-3",
+        "SF-4"
+      ],
+      "journeys": [
+        "SJ-F1"
+      ],
+      "waits": {
+        "SF-a": [
+          "SF-3",
+          "SF-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteShell/OpenInMenu.swift",
+        "Sources/SuiteShell/SuiteFileDrop.swift",
+        "Tests/AppSnapshotTests/SuiteFileFlowViewTests.swift",
+        "Tests/AppSnapshotTests/SuiteFileFlowSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFileDropTests.swift",
+        "UITests/SuiteJourneyTests+FileFlow.swift"
+      ]
+    },
+    {
+      "id": "SF-m",
+      "behavior": "The drop rule opens, places, hands off or refuses each file, the file commands run on a target with the right why-nots, and the bridge records every open and save in the one list and opens a document in another app.",
+      "tasks": [
+        "SF-5",
+        "SF-6",
+        "SF-7"
+      ],
+      "journeys": [
+        "KJ-files"
+      ],
+      "waits": {
+        "SF-a": [
+          "SF-5",
+          "SF-6",
+          "SF-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Files/DropPlan.swift",
+        "Tests/SuiteKernelTests/DropRoutingTests.swift",
+        "Tests/mutations/SuiteKernel.DropPlan.json",
+        "Sources/SuiteKernel/Files/FileFlowCommands.swift",
+        "Tests/SuiteKernelTests/FileFlowCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.FileFlowCommands.json",
+        "Sources/SuiteShell/SuiteDocumentsBridge.swift",
+        "Tests/AppSnapshotTests/SuiteDocumentsBridgeTests.swift"
+      ]
+    },
+    {
+      "id": "SF-z",
+      "behavior": "Drops, drags, Open Recent and Open In run on live services from the home, the fake app takes `file.drop` so RJ-X43 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "SF-8",
+        "SF-9",
+        "SF-10"
+      ],
+      "journeys": [
+        "SJ-F1",
+        "SJ11",
+        "SJ14",
+        "KJ-files"
+      ],
+      "waits": {
+        "SF-u": [
+          "SF-8"
+        ],
+        "SF-m": [
+          "SF-8",
+          "SF-9"
+        ],
+        "afterglow-cli": [
+          "SF-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteShell/SuiteFileDrop.swift",
+        "Sources/SuiteShell/SuiteDragSource.swift",
+        "Tests/AppSnapshotTests/SuiteFileDropLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeCanvasFileFlowTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/file-flow/",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-files.json",
+        "docs/c4/parts/creative-apps/suite-shell/shell-documents.json",
+        "docs/blueprints/suite/features/file-flow.wave.json"
+      ]
+    }
+  ]
+}

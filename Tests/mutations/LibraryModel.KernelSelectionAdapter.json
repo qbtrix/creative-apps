@@ -1,0 +1,51 @@
+[
+  {
+    "label": "droppedEndRun: a change to the selection keeps the edit run, so one drag spans two selections",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "        if changed { endCoalescing() }\n",
+    "replace": "        _ = changed\n",
+    "tests": "LibraryKernelSelectionAdapterTests"
+  },
+  {
+    "label": "refusalIsSuccess: a click the kernel refuses is adopted and reported as a change",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "guard next.pick(id, kind, order: order, canAdd: { $0 != id || shown }) else { return false }",
+    "replace": "_ = next.pick(id, kind, order: order, canAdd: { $0 != id || shown })",
+    "tests": "LibraryKernelSelectionAdapterTests"
+  },
+  {
+    "label": "endsRunAlways: a click that changes nothing ends the edit run",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "        let changed = next.set != selection\n",
+    "replace": "        let changed = true\n",
+    "tests": "LibraryKernelSelectionAdapterTests"
+  },
+  {
+    "label": "canAddIgnored: a click picks a photo the collection hides",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "canAdd: { $0 != id || shown }",
+    "replace": "canAdd: { _ in true }",
+    "tests": "LibraryKernelSelectionAdapterTests"
+  },
+  {
+    "label": "selectKeepsHidden: select(_:) keeps ids the collection doesn't show",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "next.replace(order.filter(ids.contains))",
+    "replace": "next.replace(Array(ids))",
+    "tests": "LibraryGridTests|LibraryGridEdgeTests"
+  },
+  {
+    "label": "noFirstPick: an arrow with nothing selected picks nothing",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "            next.replace([first])\n",
+    "replace": "            _ = first\n",
+    "tests": "LibraryKernelSelectionAdapterTests"
+  },
+  {
+    "label": "zeroColumnsKept: a zero column count reaches the kernel, so the arrow does nothing",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "columns: min(max(columns, 1), order.count)",
+    "replace": "columns: min(columns, order.count)",
+    "tests": "LibraryKernelSelectionAdapterTests"
+  }
+]

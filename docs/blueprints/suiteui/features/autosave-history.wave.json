@@ -1,0 +1,179 @@
+{
+  "title": "One autosave, crash recovery and History panel: the kernel's schedule and history commands, SuiteModel's recovery folder, SuiteUI's panel",
+  "wave": 4,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S12 (autosave, crash recovery, History panel; PV-4's History re-cut); real job RJ-X31; captain 2026-10-20: everyday tools in the beta, built once",
+  "waits_on": "gradient-fill's GF-a (canonical-concepts.txt) and GF-z (the fake document) slices; editor-kernel and the suite store (built)",
+  "depends": [
+    "lists-and-layers"
+  ],
+  "longest_chain": "6 (AH-1 → AH-2 → AH-3 → AH-4 → AH-8 → AH-10)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteHistoryJourneyTests.testHistoryPanelJumps"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+    "Sources/SuiteKernel/History/HistoryCommands.swift",
+    "Sources/SuiteModel/Store/RecoveryFolder.swift",
+    "Tests/SuiteKernelTests/AutosaveScheduleTests.swift",
+    "Tests/SuiteKernelTests/HistoryCommandsTests.swift",
+    "Tests/SuiteModelTests/RecoveryFolderTests.swift",
+    "Tests/canonical-concepts.txt",
+    "Tests/canonical-baseline.txt",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-history.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json",
+    "docs/c4/parts/creative-apps/suite-model/suite-store.json",
+    "Sources/SuiteUI/HistoryPanel.swift",
+    "Sources/SuiteUI/AutosaveRecovery.swift",
+    "Sources/SuiteUI/Gallery/GalleryHistoryPanel.swift",
+    "Sources/SuiteUI/Gallery/GalleryLists.swift",
+    "UITests/SuiteJourneyTests+History.swift",
+    "Tests/SuiteUITests/HistoryPanelTests.swift",
+    "Tests/AppSnapshotTests/SuiteHistoryPanelSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHistoryPanelTests.swift",
+    "Tests/mutations/SuiteKernel.AutosaveSchedule.json",
+    "Tests/mutations/SuiteKernel.HistoryCommands.json",
+    "Tests/mutations/SuiteModel.RecoveryFolder.json",
+    "Tests/SuiteUITests/AutosaveDriverTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeHistoryTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/history-jump/history-jump.jobs.json",
+    "Tests/RealJobs/fake/history-jump/input/one.fake",
+    "docs/blueprints/suiteui/features/autosave-history.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "AH-a",
+      "behavior": "The kernel's schedule and history commands and the recovery folder are declared as stubs, the gallery's history-panel page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "AH-1",
+        "AH-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "gradient-fill:GF-a": [
+          "AH-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+        "Sources/SuiteKernel/History/HistoryCommands.swift",
+        "Sources/SuiteModel/Store/RecoveryFolder.swift",
+        "Tests/SuiteKernelTests/AutosaveScheduleTests.swift",
+        "Tests/SuiteKernelTests/HistoryCommandsTests.swift",
+        "Tests/SuiteModelTests/RecoveryFolderTests.swift",
+        "Tests/canonical-concepts.txt",
+        "Tests/canonical-baseline.txt",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-history.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-store.json",
+        "Sources/SuiteUI/HistoryPanel.swift",
+        "Sources/SuiteUI/AutosaveRecovery.swift",
+        "Sources/SuiteUI/Gallery/GalleryHistoryPanel.swift",
+        "Sources/SuiteUI/Gallery/GalleryLists.swift",
+        "UITests/SuiteJourneyTests+History.swift"
+      ]
+    },
+    {
+      "id": "AH-u",
+      "behavior": "On the gallery page the panel lists the states, marks the current one, dims the undone ones and jumps on a click or arrows and Return, every row identified, within the render budget.",
+      "tasks": [
+        "AH-3",
+        "AH-4"
+      ],
+      "journeys": [
+        "HJ1"
+      ],
+      "waits": {
+        "AH-a": [
+          "AH-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/HistoryPanel.swift",
+        "Tests/SuiteUITests/HistoryPanelTests.swift",
+        "Tests/AppSnapshotTests/SuiteHistoryPanelSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHistoryPanelTests.swift",
+        "UITests/SuiteJourneyTests+History.swift"
+      ]
+    },
+    {
+      "id": "AH-m",
+      "behavior": "The schedule writes once per edit a delay after it and deletes a write a save overtook, a jump lands on its index without recording a step, and the folder keeps the newest recovery files and drops damaged ones.",
+      "tasks": [
+        "AH-5",
+        "AH-6",
+        "AH-7"
+      ],
+      "journeys": [
+        "KJ-history"
+      ],
+      "waits": {
+        "AH-a": [
+          "AH-5",
+          "AH-6",
+          "AH-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+        "Tests/SuiteKernelTests/AutosaveScheduleTests.swift",
+        "Tests/mutations/SuiteKernel.AutosaveSchedule.json",
+        "Sources/SuiteKernel/History/HistoryCommands.swift",
+        "Tests/SuiteKernelTests/HistoryCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.HistoryCommands.json",
+        "Sources/SuiteModel/Store/RecoveryFolder.swift",
+        "Tests/SuiteModelTests/RecoveryFolderTests.swift",
+        "Tests/mutations/SuiteModel.RecoveryFolder.json"
+      ]
+    },
+    {
+      "id": "AH-z",
+      "behavior": "The modifier autosaves and offers recovery on the live schedule and folder, the gallery jumps on a live history, the fake app jumps so RJ-X31 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "AH-8",
+        "AH-9",
+        "AH-10"
+      ],
+      "journeys": [
+        "HJ1",
+        "KJ-history"
+      ],
+      "waits": {
+        "AH-u": [
+          "AH-8"
+        ],
+        "AH-m": [
+          "AH-8",
+          "AH-9"
+        ],
+        "gradient-fill:GF-z": [
+          "AH-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/AutosaveRecovery.swift",
+        "Sources/SuiteUI/Gallery/GalleryHistoryPanel.swift",
+        "Tests/SuiteUITests/AutosaveDriverTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeHistoryTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/history-jump/history-jump.jobs.json",
+        "Tests/RealJobs/fake/history-jump/input/one.fake",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-history.json",
+        "docs/blueprints/suiteui/features/autosave-history.wave.json"
+      ]
+    }
+  ]
+}

@@ -1,8 +1,8 @@
-// LibraryExport.swift (EX-3; EX-13 fills cancel and retry): the catalog's export
-// states (targets, help, the sheet's options, preview, plan, progress, summary)
-// and the runner that renders and writes a plan in order, keeping each file's
-// failure. Exporting is never an undo step. Progress moves by SuiteKernel's
-// `ExportRun` rule; `ExportState` itself moves onto `ExportRun` in #3091.
+// LibraryExport.swift (EX-3, EX-13): the catalog's export states (targets,
+// help, the sheet's options, preview, plan, progress, summary, cancel, retry of
+// the failed photos) and the runner that renders and writes a plan in order,
+// keeping each file's failure and stopping on Cancel. Exporting is never an undo step. Each move is
+// one call on the kernel's `exportRun` (LibraryExportAdapter.swift); `exportState` reads it.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -31,14 +31,13 @@ extension LibraryCatalog {
         guard exportHelp == nil else { return false }
         var options = last ?? ExportOptions(folder: folder)
         options.folder = folder
-        exportState = .editing(options)
-        return true
+        return exportRun.begin(options)
     }
 
     /// Replaces the sheet's options; ignored unless editing.
     public mutating func setExportOptions(_ options: ExportOptions) {
-        guard case .editing = exportState else { return }
-        exportState = .editing(options)
+        guard case .editing = exportRun else { return }
+        _ = exportRun.begin(options)
     }
 
     /// The sheet's preview of the first target: "IMG_0001.jpg · 2048 × 1365",
@@ -62,34 +61,43 @@ extension LibraryCatalog {
         let targets = exportTargets
         guard !targets.isEmpty else { return nil }
         let plan = services.exporter.plan(targets, options: options, existingNames: existingNames)
-        guard !plan.items.isEmpty else { return nil }
-        exportState = .running(done: 0, total: plan.items.count)
+        guard !plan.items.isEmpty, exportRun.start(total: plan.items.count) else { return nil }
         return plan
     }
 
     /// Reports `done` photos while running: never backwards, never past the plan's total.
     public mutating func showExportProgress(done: Int, total: Int) {
-        guard case .running(let old, let planned) = exportState else { return }
-        var run = ExportRun<Int>.running(0, done: old, total: planned)
-        run.progressed(done: done)
-        if case .running(_, let now, _) = run { exportState = .running(done: now, total: planned) }
+        exportRun.progressed(done: done)
     }
 
     /// Ends a running export with its summary.
     public mutating func finishExport(_ summary: ExportSummary) {
-        guard case .running = exportState else { return }
-        exportState = .finished(summary)
+        guard case .running = exportRun else { return }
+        exportSummary = summary
+        exportRun.end(.success(summary.written))
     }
 
-    /// True while running; the area then cancels its task (EX-13).
-    public mutating func cancelExport() -> Bool { false }
-    /// From `.finished` with failures, the plan of only `failedIDs` under `options` (EX-13).
-    public mutating func retryExport(options: ExportOptions, existingNames: Set<String>) -> ExportPlan? { nil }
+    /// True while running; the area then cancels its task, and the runner's
+    /// summary (`cancelled`) ends the run through `finishExport`.
+    public mutating func cancelExport() -> Bool {
+        if case .running = exportState { return true }
+        return false
+    }
+
+    /// From `.finished` with failures: the plan of only `failedIDs` under
+    /// `options`, in that order, `.running(0, n)`; nil otherwise.
+    public mutating func retryExport(options: ExportOptions, existingNames: Set<String>) -> ExportPlan? {
+        guard case .finished(let summary) = exportState, !summary.failedIDs.isEmpty else { return nil }
+        let byID = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let failed = summary.failedIDs.compactMap { byID[$0] }
+        let plan = services.exporter.plan(failed, options: options, existingNames: existingNames)
+        guard !plan.items.isEmpty, exportRun.begin(options), exportRun.start(total: plan.items.count) else { return nil }
+        return plan
+    }
 
     /// Closes the sheet; refused while running.
     public mutating func closeExport() {
-        if case .running = exportState { return }
-        exportState = .idle
+        exportRun.dismiss()
     }
 }
 
@@ -98,28 +106,41 @@ public enum ExportRunner {
     /// Renders and writes each item in order; a file that fails is kept as a
     /// `FileFailure` with its photo id and the run goes on. Reports `progress`
     /// after every item. With `sidecar`, writes the photo's XMP beside it.
+    /// Checks for Cancel before each photo and between its render and write,
+    /// so nothing is written after Cancel; the summary then says `cancelled`.
     public static func run(_ plan: ExportPlan, photos: [String: PhotoItem],
                            exporter: any PhotoExporting, writer: any JPEGWriting,
                            writeSidecar: @escaping @Sendable (Data, _ folder: String, _ fileName: String) async throws -> Void,
                            progress: @escaping @Sendable (Int) -> Void) async -> ExportSummary {
         let options = plan.options
         var written: [String] = [], failures: [FileFailure] = [], failedIDs: [String] = []
+        var cancelled = false
         func fail(_ item: ExportPlan.Item, _ error: any Error) {
             failures.append(FileFailure(path: item.fileName, reason: (error as? LibraryError)?.message ?? "\(error)"))
             failedIDs.append(item.photoID)
         }
         for (index, item) in plan.items.enumerated() {
-            defer { progress(index + 1) }
-            guard let photo = photos[item.photoID] else { fail(item, LibraryError.missingFile(item.photoID)); continue }
-            do {
-                let image = try await exporter.render(item, photo: photo)
-                try await writer.write(image, quality: options.quality, folder: options.folder, fileName: item.fileName)
-                if options.sidecar, let xmp = ExportSidecar.xmp(for: photo) {
-                    try await writeSidecar(xmp, options.folder, ExportSidecar.fileName(for: item.fileName))
+            if Task.isCancelled { cancelled = true; break } // before each photo
+            if let photo = photos[item.photoID] {
+                do {
+                    let image = try await exporter.render(item, photo: photo)
+                    guard !Task.isCancelled else { cancelled = true; break } // between render and write
+                    try await writer.write(image, quality: options.quality, folder: options.folder, fileName: item.fileName,
+                                           metadataFrom: photo.path, dropping: item.dropping)
+                    if options.sidecar, let xmp = ExportSidecar.xmp(for: photo, metadata: options.metadata) {
+                        try await writeSidecar(xmp, options.folder, ExportSidecar.fileName(for: item.fileName))
+                    }
+                    written.append(item.fileName)
+                } catch {
+                    if Task.isCancelled { cancelled = true; break }
+                    fail(item, error)
                 }
-            } catch { fail(item, error); continue }
-            written.append(item.fileName)
+            } else {
+                fail(item, LibraryError.missingFile(item.photoID))
+            }
+            progress(index + 1)
         }
-        return ExportSummary(total: plan.items.count, written: written, failures: failures, failedIDs: failedIDs)
+        return ExportSummary(total: plan.items.count, written: written, failures: failures, failedIDs: failedIDs,
+                             cancelled: cancelled)
     }
 }

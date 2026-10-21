@@ -1,7 +1,8 @@
 // MCPShapeTests.swift: MJ0's shape checks (afterglow-mcp MC-1). Every
 // contract type exists; the versions are pinned newest first and
-// `negotiate` refuses an unknown one; every stub answers or errors naming
-// the task that builds it; `serve` still exits 69; the fake approval flow.
+// `negotiate` refuses an unknown one; the built parts answer (MC-4 built
+// the server, MCPProtocolTests covers it; MC-6 the tools, MCPToolsTests;
+// MC-8 the calls, MCPCallTests); the fake approval flow.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -42,30 +43,20 @@ struct MCPShapeTests {
                                    "error": .object(["code": .number(-32700), "message": .string("Parse error")])]))
     }
 
-    @Test func parseAndHandleAreStubsNamingMC4() throws {
-        let line = Data(#"{"jsonrpc":"2.0","id":3,"method":"server/discover"}"#.utf8)
-        #expect(JSONRPC.parse(line) == .failure(RPCError(code: -32603, message: "JSONRPC.parse is not built yet (afterglow-mcp MC-4)")))
+    @Test func serverOptionsHaveThePacketsLimits() {
         let server = MCPServer(Self.options, io: FakeIO(), clock: { 0 })
         #expect(server.options.maxOpen == 16 && server.options.idleSeconds == 3600 && server.options.maxCallsPerSecond == 50)
         #expect(!server.options.live && server.options.roots == ["/tmp/mcp"])
-        let reply = try JSONValue(json: try #require(server.handle(line)))
-        #expect(reply == .object(["jsonrpc": .string("2.0"), "id": .null, "error": .object([
-            "code": .number(-32603), "message": .string("MCPServer.handle is not built yet (afterglow-mcp MC-4)"),
-            "data": .object(["supportedVersions": .array(MCPVersions.supported.map(JSONValue.string))]),
-        ])]))
-        let io = FakeIO()
-        #expect(MCPServer.serve(["--app", "fake"], apps: [Apps.fake], io: io) == 69)
-        #expect(io.stderr == ["afterglow-mcp is not built yet"])
     }
 
-    @Test func toolsAndSessionsAreStubsNamingTheirTask() {
+    @Test func toolsRouteBackAndSessionsCall() {
         #expect(MCPTools.name(app: "photo", command: "layer.add") == "photo.layer.add")
-        #expect(MCPTools.list([Apps.fake]).isEmpty)
-        #expect(MCPTools.route("fake.rect.add", in: [Apps.fake]) == nil)
+        #expect(!MCPTools.list([Apps.fake]).isEmpty)
+        #expect(MCPTools.route("fake.rect.add", in: [Apps.fake]) == .command(app: "fake", id: "rect.add"))
         #expect(Set<MCPRoute>([.open(app: "f"), .new(app: "f"), .save, .export, .close, .command(app: "f", id: "a")]).count == 6)
         #expect(MCPTool(name: "fake.rect.list", title: "List", description: "d", inputSchema: .null).annotations == .object([:]))
         var sessions = MCPSessions(Self.options, io: FakeIO())
-        let text = "tools/call is not built yet (afterglow-mcp MC-8)"
+        let text = "there is no file at /tmp/mcp/a.fake"
         #expect(sessions.call(.open(app: "fake"), .object(["path": .string("a.fake")]), now: 0)
                     == MCPToolResult(structured: .object(["error": .string(text)]), text: text, isError: true))
     }

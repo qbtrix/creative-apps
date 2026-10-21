@@ -1,0 +1,205 @@
+{
+  "title": "The Pen on the shared kernel, behaviour unchanged, and Direct Select dragging anchors",
+  "wave": 7,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/pen-paths (adopter of S25); RJ-F27; the 5,000-anchor stress gate on FlareFixtures.stress; captain 2026-10-20: the Pen shared from Flare",
+  "waits_on": "suiteui pen-paths' contract slice PN-a (cross-line), PN-3 (FP-3), PN-5 (FP-5, FP-7), PN-6 (FP-7), PN-7 (FP-6); branch test/stress-perf-journeys on dev (FP-8); the last owners of the shared Flare files: shape-tools FS-a, FS-m; stage-edit; file-flow FL-m, FL-z",
+  "longest_chain": "5 (FP-1 → FP-2 → FP-4 → FP-9 → FP-10)",
+  "journeys": [
+    "FlarePenJourneyTests.testPenThenDragAnchor",
+    "FlareRealPerfJourneyTests.testStressAnchors"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlarePen+Kernel.swift",
+    "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "Sources/FlareModel/FlareWorkspace.swift",
+    "Tests/mutations/FlareModel.FlareWorkspace.json",
+    "Tests/FlareModelTests/FlarePenKernelTests.swift",
+    "Tests/FlareModelTests/FlareAnchorEditTests.swift",
+    "Tests/FlareModelTests/FlarePathCommandTests.swift",
+    "Sources/FlareApp/FlareWindow+Stage.swift",
+    "Tests/AppSnapshotTests/FlareAnchorSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift",
+    "UITests/FlareJourneyTests+Pen.swift",
+    "Sources/FlareModel/Live/LiveShapes.swift",
+    "Sources/FlareModel/Fakes/FakeShapes.swift",
+    "Sources/FlareModel/Contracts/ShapeContracts.swift",
+    "Sources/FlareModel/FlarePenFinish.swift",
+    "Tests/mutations/FlareModel.LiveShapes.json",
+    "Tests/mutations/FlareModel.FlarePenFinish.json",
+    "Tests/mutations/FlareModel.FlarePen+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+    "Tests/command-ids/flare.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+    "Sources/FlareModel/FlareDrag.swift",
+    "Sources/FlareModel/FlareSelection.swift",
+    "Tests/FlareModelTests/FlareAnchorBudgetTests.swift",
+    "Tests/mutations/FlareModel.FlareAnchors+Kernel.json",
+    "Tests/RealJobs/flare/anchor-drag/anchor-drag.jobs.json",
+    "Tests/RealJobs/flare/anchor-drag/input/four-points.flare",
+    "UITests/FlareJourneyTests+RealPerfAnchors.swift",
+    "docs/blueprints/flare.md",
+    "docs/blueprints/flare/features/pen-paths.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "FP-a",
+      "behavior": "The two adapters exist as stubs, FlareWorkspace conforms to PathEditTarget on them, and Direct Select shows the picked item's anchors through the overlay.",
+      "tasks": [
+        "FP-1",
+        "FP-2"
+      ],
+      "journeys": [
+        "MJ-FP"
+      ],
+      "waits": {
+        "shape-tools:FS-a": [
+          "FP-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlarePen+Kernel.swift",
+        "Sources/FlareModel/FlareAnchors+Kernel.swift",
+        "Sources/FlareModel/FlareWorkspace.swift",
+        "Tests/mutations/FlareModel.FlareWorkspace.json",
+        "Tests/FlareModelTests/FlarePenKernelTests.swift",
+        "Tests/FlareModelTests/FlareAnchorEditTests.swift",
+        "Tests/FlareModelTests/FlarePathCommandTests.swift",
+        "Sources/FlareApp/FlareWindow+Stage.swift"
+      ]
+    },
+    {
+      "id": "FP-u",
+      "behavior": "The anchor overlay's states have snapshots, an anchor drag stays in its render budget, and the journey is written.",
+      "tasks": [
+        "FP-3",
+        "FP-4"
+      ],
+      "journeys": [
+        "FJ-P1"
+      ],
+      "waits": {
+        "FP-a": [
+          "FP-3",
+          "FP-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/FlareAnchorSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareAnchorTests.swift",
+        "UITests/FlareJourneyTests+Pen.swift"
+      ]
+    },
+    {
+      "id": "FP-m",
+      "behavior": "The Pen runs on PenRules with every existing pen test unchanged, and the twelve path commands run on Flare's catalog.",
+      "tasks": [
+        "FP-5",
+        "FP-6"
+      ],
+      "journeys": [
+        "MJ-FP"
+      ],
+      "waits": {
+        "FP-a": [
+          "FP-5",
+          "FP-6"
+        ],
+        "shape-tools:FS-m": [
+          "FP-5"
+        ],
+        "file-flow:FL-m": [
+          "FP-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/FlarePen+Kernel.swift",
+        "Sources/FlareModel/Live/LiveShapes.swift",
+        "Sources/FlareModel/Fakes/FakeShapes.swift",
+        "Sources/FlareModel/Contracts/ShapeContracts.swift",
+        "Sources/FlareModel/FlarePenFinish.swift",
+        "Tests/FlareModelTests/FlarePenKernelTests.swift",
+        "Tests/mutations/FlareModel.LiveShapes.json",
+        "Tests/mutations/FlareModel.FlarePenFinish.json",
+        "Tests/mutations/FlareModel.FlarePen+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+        "Tests/command-ids/flare.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+        "Tests/FlareModelTests/FlarePathCommandTests.swift"
+      ]
+    },
+    {
+      "id": "FP-e",
+      "behavior": "Direct Select drags an anchor and only its handles move, as one Edit Path step, and selecting and dragging 5,000 anchors on the stress document stays in budget.",
+      "tasks": [
+        "FP-7",
+        "FP-8"
+      ],
+      "journeys": [
+        "MJ-FP",
+        "FJ-P2"
+      ],
+      "waits": {
+        "FP-a": [
+          "FP-7"
+        ],
+        "stage-edit": [
+          "FP-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/FlareModel/FlareAnchors+Kernel.swift",
+        "Sources/FlareModel/FlareDrag.swift",
+        "Sources/FlareModel/FlareSelection.swift",
+        "Tests/FlareModelTests/FlareAnchorEditTests.swift",
+        "Tests/FlareModelTests/FlareAnchorBudgetTests.swift",
+        "Tests/mutations/FlareModel.FlareAnchors+Kernel.json",
+        "Tests/RealJobs/flare/anchor-drag/anchor-drag.jobs.json",
+        "Tests/RealJobs/flare/anchor-drag/input/four-points.flare",
+        "UITests/FlareJourneyTests+RealPerfAnchors.swift"
+      ]
+    },
+    {
+      "id": "FP-z",
+      "behavior": "The journey passes on live services, and flare.md says Direct Select edits points.",
+      "tasks": [
+        "FP-9",
+        "FP-10"
+      ],
+      "journeys": [
+        "FJ-P1"
+      ],
+      "waits": {
+        "FP-u": [
+          "FP-9"
+        ],
+        "FP-m": [
+          "FP-9",
+          "FP-10"
+        ],
+        "FP-e": [
+          "FP-9",
+          "FP-10"
+        ],
+        "file-flow:FL-z": [
+          "FP-10"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+Pen.swift",
+        "docs/blueprints/flare.md",
+        "docs/blueprints/flare/features/pen-paths.wave.json"
+      ]
+    }
+  ]
+}

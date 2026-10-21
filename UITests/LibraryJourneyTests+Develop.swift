@@ -9,11 +9,13 @@
 // (`library.develop.exposure`), the histogram readout
 // `library.develop.histogram` with "mean 0.…" in its value.
 //
-// Written before its code (lead.md, contract rule 13, DV-7): each step starts
-// with `throw XCTSkip("waits on DV-n")`, and the task named there drops it.
-// DV-10 enables (F) steps 1 and 11, DV-13 (F) steps 2 to 10 and the (L)
-// pass. A skipped step is noted and the walk goes on, so steps 1 and 11 can
-// run while 2 to 10 still wait; the test then skips with every step's reason.
+// Written before its code (lead.md, contract rule 13, DV-7): each step started
+// with `throw XCTSkip("waits on DV-n")`, and the task named there dropped it.
+// DV-10 enabled (F) steps 1 and 11; DV-13 enabled (F) steps 2 to 9 and the (L)
+// pass with step 10. The window publishes no `library.catalog` readout, so step
+// 10 reads "saved" from disk, as J8 does: `catalog.json` holds the edit. A
+// skipped step is noted and the walk goes on; the test then skips with every
+// step's reason.
 import XCTest
 
 final class LibraryDevelopJourneyTests: XCTestCase {
@@ -52,7 +54,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 1: by name, IMG_0001 in the loupe, the Develop tab: every row at 0, the curve, the levels.
     @MainActor private func openDevelop(_ arguments: [String], suffix: String) throws {
-        throw XCTSkip("waits on DV-10")
         let library = Journey("Library", self, arguments: arguments)
         self.library = library
         sortByName(library)
@@ -60,10 +61,7 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
         first.doubleClick()
         XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "double-click didn't open the loupe")
-        let tab = library.element("suite.inspector").descendants(matching: .any)
-            .matching(NSPredicate(format: "label == 'Develop'")).firstMatch
-        XCTAssert(tab.waitForExistence(timeout: 5), "the inspector has no Develop tab")
-        tab.click()
+        developTab(library)
         let histogram = library.element("library.develop.histogram")
         XCTAssert(histogram.waitForExistence(timeout: 5), "no histogram (library.develop.histogram)")
         XCTAssert(wait(5) { Self.text(histogram).hasPrefix("mean 0.") }, "the histogram reads \(Self.text(histogram))")
@@ -75,6 +73,8 @@ final class LibraryDevelopJourneyTests: XCTestCase {
             XCTAssertEqual(Self.number(row), 0, "\(slider) isn't 0 on a new photo")
         }
         XCTAssert(library.element("library.develop.curve").exists, "no curve (library.develop.curve)")
+        XCTAssert(library.element("library.develop.curve.point2").exists, "the curve hasn't two points")
+        XCTAssertFalse(library.element("library.develop.curve.point3").exists, "a new photo's curve has a third point")
         for field in ["Black Point", "Midtones", "White Point", "Output Black", "Output White"] {
             XCTAssert(inspectorItem(field, library).exists, "no LEVELS row \(field)")
         }
@@ -83,7 +83,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 2: dragging Exposure right is one step "Exposure" that re-renders and lifts the histogram.
     @MainActor private func dragExposure(suffix: String) throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let exposure = row("Exposure", library)
         let mean = Self.mean(library.element("library.develop.histogram"))
@@ -101,10 +100,11 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 3: Right three times, then Shift-Right, on Contrast: 3, then 13.
     @MainActor private func stepContrast() throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let contrast = row("Contrast", library)
+        // A click opens the row's typing field; Return closes it and keeps the focus for the arrows.
         contrast.click()
+        library.press(.return)
         for _ in 0..<3 { library.press(.rightArrow) }
         XCTAssert(wait(3) { Self.number(contrast) == 3 }, "Contrast reads \(Self.text(contrast)), not 3")
         library.press(.rightArrow, .shift)
@@ -113,7 +113,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 4: "Undo Contrast" undoes one key step.
     @MainActor private func undoContrast() throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         expectUndo("Undo Contrast", library)
         library.press(character: "z", .command)
@@ -123,7 +122,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 5: Show Original draws step 1's picture without an undo step; again brings the edit back.
     @MainActor private func showOriginal(suffix: String) throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let developed = try checksum(library)
         let button = library.element("library.develop.original")
@@ -138,7 +136,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 6: a curve point dragged up 40 pt is "Undo Curve"; Midtones 1.20 is "Undo Levels".
     @MainActor private func editCurveAndLevels(suffix: String) throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let before = try checksum(library)
         let middle = library.element("library.develop.curve").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
@@ -155,7 +152,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 7: copy IMG_0001's settings, paste on IMG_0002 to IMG_0004 as one step, undo all three.
     @MainActor private func copyAndPaste(suffix: String) throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let exposure = Self.number(row("Exposure", library))
         library.element("library.loupe.photo").click()
@@ -176,7 +172,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 8: IMG_0001 to IMG_0006 selected, Sync from IMG_0001 is one step and leaves no row Mixed.
     @MainActor private func sync(suffix: String) throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         library.press(.escape)
         cell("IMG_0001", library).click()
@@ -192,7 +187,6 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 9: Reset Exposure from the row's menu, then TONE's Reset.
     @MainActor private func reset() throws {
-        throw XCTSkip("waits on DV-13")
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         cell("IMG_0001", library).doubleClick()
         row("Exposure", library).rightClick()
@@ -211,20 +205,24 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 10 (L): Exposure +1 survives a relaunch with the same picture, and the grid redraws the cell.
     @MainActor private func relaunch(_ arguments: [String], catalog: URL) throws {
-        throw XCTSkip("waits on DV-13")
         var library = try XCTUnwrap(self.library, "step 1 opened no window")
         let exposure = row("Exposure", library)
+        let before = try checksum(library)
         exposure.click()
         library.press(character: "a", .command)
         library.app.typeText("1")
         library.press(.return)
+        XCTAssert(wait(5) { Self.number(exposure) == 1 }, "Exposure reads \(Self.text(exposure)), not 1")
+        XCTAssert(wait(5) { (try? self.checksum(library)) != before && self.loupeQuality(library) == "full" },
+                  "Exposure +1 didn't re-render the loupe")
         let developed = try checksum(library)
-        XCTAssert(wait(10) { Self.text(library.element("library.catalog")) == "saved" }, "the catalog never read saved")
+        XCTAssert(wait(10) { Self.savedExposure(in: catalog, of: "IMG_0001") == 1 }, "catalog.json never held Exposure +1")
         library.app.terminate()
         library = Journey("Library", self, arguments: ["-LibraryCatalogDir", catalog.path, "-LibraryTestValues"])
         self.library = library
         sortByName(library)
         cell("IMG_0001", library).doubleClick()
+        developTab(library)
         XCTAssert(wait(5) { Self.number(self.row("Exposure", library)) == 1 }, "Exposure didn't survive the relaunch")
         XCTAssert(wait(5) { (try? self.checksum(library)) == developed }, "the picture changed across the relaunch")
         library.press(.escape)
@@ -235,12 +233,10 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 11 (F): a failed render says so under the histogram.
     @MainActor private func errorState() throws {
-        throw XCTSkip("waits on DV-10")
         let library = Journey("Library", self, arguments: Self.fake + ["-LibraryFakeMode", "fail"])
         sortByName(library)
         cell("IMG_0001", library).doubleClick()
-        library.element("suite.inspector").descendants(matching: .any)
-            .matching(NSPredicate(format: "label == 'Develop'")).firstMatch.click()
+        developTab(library)
         let error = library.element("library.develop.error")
         XCTAssert(error.waitForExistence(timeout: 5), "no render error (library.develop.error)")
         library.shot("develop-error")
@@ -250,11 +246,10 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// The (L) pass: steps 1 to 10 on real files imported on launch.
     @MainActor private func livePass() throws {
-        throw XCTSkip("waits on DV-13")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
-        try LibraryFiles.writeShoot(in: folder)
+        _ = try LibraryFiles.writeShoot(in: folder)
         let arguments = ["-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
                          "-LibraryImportOnLaunch", "-LibraryTestValues"]
         try openDevelop(arguments, suffix: "-live")
@@ -270,6 +265,31 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// Clicks the inspector's Develop tab (a new window opens on Info).
+    @MainActor private func developTab(_ library: Journey) {
+        let tab = library.element("suite.inspector").descendants(matching: .any)
+            .matching(NSPredicate(format: "label == 'Develop'")).firstMatch
+        XCTAssert(tab.waitForExistence(timeout: 5), "the inspector has no Develop tab")
+        tab.click()
+    }
+
+    /// The loupe render's quality, the first word of the loupe photo's value ("full", "preview").
+    @MainActor private func loupeQuality(_ library: Journey) -> String {
+        ((library.element("library.loupe.photo").value as? String) ?? "").split(separator: " ").first.map(String.init) ?? ""
+    }
+
+    /// The Exposure `catalog.json` in `catalog` holds for the photo named `name`; 0 when its develop is
+    /// left out (neutral), nil while the file or the photo is missing: the `library.catalog` stand-in.
+    private static func savedExposure(in catalog: URL, of name: String) -> Double? {
+        guard let data = try? Data(contentsOf: catalog.appending(path: "catalog.json")),
+            let top = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let photos = top["photos"] as? [[String: Any]],
+            let photo = photos.first(where: { $0["name"] as? String == name })
+        else { return nil }
+        guard let develop = photo["develop"] as? [String: Any] else { return 0 }
+        return (develop["exposure"] as? NSNumber)?.doubleValue
+    }
 
     /// Polls `condition` every tenth of a second for up to `seconds`.
     @MainActor private func wait(_ seconds: TimeInterval, _ condition: () -> Bool) -> Bool {

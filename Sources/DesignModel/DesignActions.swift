@@ -22,6 +22,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 /// A command on the selection that a menu item, a top bar item or a key runs.
 public enum DesignCommand: Hashable, Sendable {
@@ -120,17 +121,18 @@ extension DesignWorkspace {
     }
 
     /// Edit > Select All: every visible, unlocked layer at the primary selection's level (the page's
-    /// top level when nothing is selected), back to front. Not an edit; it ends the edit run.
+    /// top level when nothing is selected), back to front, through the kernel's `selectAll`. Not an
+    /// edit; it ends the edit run.
     public mutating func selectAll() {
         guard let page = selectedPage else { return }
         let parent = selectedNodeID.flatMap { page.nodes.ancestors(of: $0)?.last }
         let level = parent.flatMap { page.nodes.node($0)?.children } ?? page.nodes
-        let ids = level.map(\.id).filter { canAddToSelection($0) }
-        guard !ids.isEmpty else { return }
+        var next = selection
+        next.selectAll(level.map(\.id), canAdd: canAddToSelection)
+        guard !next.ordered.isEmpty else { return }
         commitTextEdit()
-        endEditRun()
-        selectedNodeIDs = ids
-        for id in ids { expandAncestors(of: id, in: page.nodes) }
+        adopt(next)
+        for id in next.ordered { expandAncestors(of: id, in: page.nodes) }
     }
 
     /// A mint over the file's ids, for a use case that adds nodes.

@@ -104,3 +104,39 @@ extension BodyCountSuites {
     }
 }
 #endif
+
+#if canImport(AppKit)
+/// What SwiftUI's resolved text measures `text` at in `style`, wrapped at `wrap` (nil: one line per
+/// paragraph): the size DesignTextArtwork draws it at, read from a Canvas rendered off screen.
+@MainActor func drawnTextSize(_ text: String, _ style: DesignTextStyle, wrap: Double?) -> CGSize {
+    final class Box { var size = CGSize.zero }
+    let box = Box()
+    let canvas = Canvas { context, _ in
+        let resolved = context.resolve(Text(text).font(DesignTextFont.font(style)))
+        box.size = resolved.measure(in: CGSize(width: wrap ?? .infinity, height: .infinity))
+    }.frame(width: 10, height: 10)
+    _ = ImageRenderer(content: canvas).nsImage
+    return box.size
+}
+
+@MainActor
+@Suite struct DesignTextMeasureTests {
+    /// The extent a box commits with holds every line the canvas draws: no wrapped line is cut off
+    /// or ends in an ellipsis because the measure and the drawing disagree on line height.
+    @Test(arguments: [10.0, 12, 13, 16, 18, 24, 32, 48, 72])
+    func measureHoldsTheDrawnText(size: Double) {
+        let text = DesignTextFitSnapshots.sentences
+        for weight in [400, 700] {
+            var style = DesignTextStyle.default
+            style.size = size
+            style.weight = weight
+            for wrap in [nil, 150.0, 400] {
+                let drawn = drawnTextSize(text, style, wrap: wrap)
+                let measured = DesignTextFont.measure(text, style, wrapWidth: wrap)
+                #expect(measured.height >= drawn.height, "size \(size) w\(weight) wrap \(String(describing: wrap)): measured \(measured.height), drawn \(drawn.height)")
+                #expect(measured.width >= drawn.width.rounded(.down), "size \(size) w\(weight) wrap \(String(describing: wrap)): measured \(measured.width), drawn \(drawn.width)")
+            }
+        }
+    }
+}
+#endif

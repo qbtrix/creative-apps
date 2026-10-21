@@ -3,14 +3,15 @@
 // tests) on the real window through the harness (RenderBudgetHarness.swift).
 // On `showcase` with the fakes it presses the toolbar's Export…, picks the PNG
 // sequence chip, steps the To row (`flare.export.to`) 60 times the way
-// VoiceOver and XCUI adjust it, then presses Cancel (`flare.export.cancel`).
+// VoiceOver and XCUI adjust it (down and up in turn, so each step stays in the
+// scene's 48 frames and is an edit), then presses Cancel (`flare.export.cancel`).
 // The sheet is its own window attached to the hosted one, so its controls are
-// found from `attachedSheet`'s accessibility tree, not the host's. `bodies`
+// found from `attachedSheet`'s accessibility tree, not the host's. Export… is
+// a toolbar item, so the harness window gets a title bar and an NSToolbar the
+// host bridges its toolbar into. `bodies`
 // gates the window-body counts; `timing` (report-only, for
-// Tests/perf-suites.txt) judges the To steps. Both wait on the sheet's options
-// slot and Flare's ids in it (#1989): until then the sheet has no To row and
-// its controls carry suite.export.* ids. Nested in BodyCountSuites, as every
-// suite that reads a body counter is. macOS only.
+// Tests/perf-suites.txt) judges the To steps. Nested in BodyCountSuites, as
+// every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import FlareModel
@@ -21,8 +22,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetFlareExportTests {
-        @Test(.disabled("waits on #1989: the sheet's options slot (the To row) and flare.export.* ids"),
-              .timeLimit(.minutes(2)))
+        @Test(.timeLimit(.minutes(2)))
         func bodies() async throws {
             let (open, to, close) = try await Self.run()
             // The sheet opening is the press and the run's begin: two bodies at most. Target: 2.
@@ -33,8 +33,7 @@ extension BodyCountSuites {
             expectBodies(close, atMost: 2, target: 2)
         }
 
-        @Test(.disabled("waits on #1989: the sheet's options slot (the To row) and flare.export.* ids"),
-              .timeLimit(.minutes(2)))
+        @Test(.timeLimit(.minutes(2)))
         func timing() async throws {
             let (_, to, _) = try await Self.run()
             // Target: a step fits one 120 Hz frame.
@@ -45,6 +44,13 @@ extension BodyCountSuites {
             let model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "showcase"]))
             let w = RenderBudgetWindow(FlareWindow(model: model))
             defer { w.close() }
+            // Export… is a toolbar item: the window gets a title bar and the host bridges its toolbar
+            // into it, which only happens as the host joins the window.
+            w.window.styleMask.insert(.titled)
+            w.window.contentView = nil
+            w.host.sceneBridgingOptions = [.toolbars]
+            w.window.toolbar = NSToolbar()
+            w.window.contentView = w.host
             let bodies = { () -> Int? in
                 #if DEBUG
                 return FlareWindow.bodyRuns
@@ -55,15 +61,22 @@ extension BodyCountSuites {
             try await w.settle(untilStable: bodies)
             var pressed = false
             let open = try await w.measure("flare export sheet opens", bodies: bodies) {
-                try await w.ticks(1) { _ in pressed = Self.press("flare.export.showSheet", in: w.window) }
+                // The toolbar item's viewer acts on the press but answers false: the sheet is the check.
+                try await w.ticks(1) { _ in
+                    let item = Self.node("flare.export.showSheet", in: w.window)
+                    pressed = item != nil
+                    _ = item?.accessibilityPerformPress?()
+                }
             }
-            let sheet = try #require(await Self.sheet(of: w.window), "Export… opened no sheet: \(open)")
             #expect(pressed, "no Export… (flare.export.showSheet) to press")
+            let sheet = try #require(await Self.sheet(of: w.window), "Export… opened no sheet: \(open)")
             #expect(Self.press("flare.export.format.pngSequence", in: sheet), "no PNG sequence chip")
             try await w.settle(untilStable: bodies)
             let row = try #require(Self.node("flare.export.to", in: sheet), "no To row (flare.export.to)")
             let to = try await w.measure("flare export To row, 60 steps", bodies: bodies) {
-                try await w.ticks(60) { _ in _ = row.accessibilityPerformIncrement?() }
+                try await w.ticks(60) { i in
+                    _ = i.isMultiple(of: 2) ? row.accessibilityPerformIncrement?() : row.accessibilityPerformDecrement?()
+                }
             }
             #expect((to.bodies ?? 1) >= 1, "the To row didn't step: \(to)")
             let close = try await w.measure("flare export sheet closes", bodies: bodies) {

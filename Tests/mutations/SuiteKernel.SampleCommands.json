@@ -1,0 +1,23 @@
+[
+  {
+    "label": "honoursSampleHelp: the target's sample help is not checked, so color.sample runs on a document that can't be sampled",
+    "file": "Sources/SuiteKernel/Sample/SampleCommands.swift",
+    "find": "availability: { $0.sampleHelp.map(Availability.unavailable) ?? .available })",
+    "replace": "availability: { _ in .available })",
+    "tests": "SampleCommandsTests"
+  },
+  {
+    "label": "passesSize: the size param is ignored, so every sample reads the point",
+    "file": "Sources/SuiteKernel/Sample/SampleCommands.swift",
+    "find": "size: params.size ?? .point)",
+    "replace": "size: .point)",
+    "tests": "SampleCommandsTests"
+  },
+  {
+    "label": "readsAlpha: the a channel reads the red channel",
+    "file": "Sources/SuiteKernel/Sample/SampleCommands.swift",
+    "find": "SampleRules.byte(color.a))",
+    "replace": "SampleRules.byte(color.r))",
+    "tests": "SampleCommandsTests"
+  }
+]

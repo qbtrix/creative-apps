@@ -3,7 +3,11 @@
 // which pointer the canvas shows there (a handle of the selection, move, copy with
 // Option, the Text tool's I-beam, or the tool's own), and the Text tool's box. The
 // selection badge is the "120 × 80" text under the selection, or "X 100, Y 40" while
-// a move runs. Nothing here writes the document. Linux-safe; no UI imports.
+// a move runs. While a text edit is open the badge, its anchor and the inspector
+// read the edited box as its commit will fit it to the draft's measured extent
+// (`liveFrame`, #3335), and `textLegibilityHint` asks for a zoom-in when the
+// typed text draws under 9 pt on screen (#3336). Nothing here writes the
+// document. Linux-safe; no UI imports.
 //
 // A press on a handle resizes the selected layer, so over a handle the hover names
 // that layer. Over a layer that is locked or hidden, or over a drawing tool's
@@ -65,12 +69,41 @@ extension DesignWorkspace {
 
     /// "120 × 80" for the selection (several: their bounds), "X 100, Y 40" while a move gesture
     /// runs; whole points; nil with nothing selected.
-    public var selectionBadge: String? {
-        guard let bounds = selectionBounds else { return nil }
+    public var selectionBadge: String? { selectionBadge(draft: nil) }
+
+    /// `selectionBadge` with an open text edit's box fitted to `extent`, the draft's measured size.
+    public func selectionBadge(draft extent: DesignTextExtent?) -> String? {
+        guard let bounds = liveSelectionBounds(extent) else { return nil }
         if case .move? = gesture?.route {
             return "X \(wholePoints(bounds.x)), Y \(wholePoints(bounds.y))"
         }
         return "\(wholePoints(bounds.width)) × \(wholePoints(bounds.height))"
+    }
+
+    /// `node`'s frame as the canvas shows it now: the box of the open text edit fitted to the
+    /// draft's measured `extent` the way its commit fits it (#3335), else the node's own frame.
+    public func liveFrame(of node: DesignNode, draft extent: DesignTextExtent?) -> DesignRect {
+        node.id == editingTextID ? Self.fitted(node.frame, node.textStyle, extent) : node.frame
+    }
+
+    /// The selection's bounds with the open edit's box fitted to `extent` (the edited node is then
+    /// the whole selection); `selectionBounds` otherwise.
+    private func liveSelectionBounds(_ extent: DesignTextExtent?) -> DesignRect? {
+        guard extent != nil, let id = editingTextID, selectedNodeIDs == [id], let node = findNode(id) else {
+            return selectionBounds
+        }
+        return liveFrame(of: node, draft: extent)
+    }
+
+    /// The smallest on-screen size, in points, typed text reads at.
+    public static let legibleTextSize = 9.0
+
+    /// "Zoom in to read text" while a text edit is open at a `zoom` where its text draws under
+    /// `legibleTextSize` on screen (#3336); nil otherwise.
+    public func textLegibilityHint(zoom: Double) -> String? {
+        guard let id = editingTextID, let node = findNode(id) else { return nil }
+        let onScreen = node.textStyle.size * Self.textEditScale(zoom: zoom)
+        return onScreen < Self.legibleTextSize ? "Zoom in to read text" : nil
     }
 }
 
@@ -92,8 +125,11 @@ extension DesignHover {
 
 extension DesignWorkspace {
     /// Where the size badge hangs: the middle of the selection's bottom edge (page points); nil with no badge.
-    public var selectionBadgeAnchor: DesignPoint? {
-        guard selectionBadge != nil, let bounds = selectionBounds else { return nil }
+    public var selectionBadgeAnchor: DesignPoint? { selectionBadgeAnchor(draft: nil) }
+
+    /// `selectionBadgeAnchor` with an open text edit's box fitted to `extent`.
+    public func selectionBadgeAnchor(draft extent: DesignTextExtent?) -> DesignPoint? {
+        guard let bounds = liveSelectionBounds(extent) else { return nil }
         return DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)
     }
 }

@@ -1,5 +1,7 @@
 # Feature packet: flare-export
 
+**Status:** built (2026-10-19), feature issue #1973. PRs: #1995 #1996 #2004 #2533 #2564 #2649 #2944 #3006 #3240 #3296 #3298 and this one (FX-10).
+
 **Feature:** export the open animation from the Export sheet as an SVG of one
 frame, a Lottie JSON of the scene, or a PNG sequence of a frame range, into a
 folder the person picks: the warnings the scan already names are shown
@@ -154,7 +156,9 @@ animated symbol instance and a machine):
 
 **J23 · `FlareExportErrorJourneys.testExportNeverOverwritesCancelAndFailure`**
 (`UITests/FlareJourneyTests+ExportErrors.swift`; FX-3) on `bounce` with the
-fakes (the 20 ms frame pause keeps Cancel reachable):
+fakes (the 20 ms frame pause keeps Cancel reachable). Steps 1 to 3 also run
+live on `-FlareSample bounce` as
+`FlareExportErrorJourneys.testExportNeverOverwritesAndFailsLive` (FX-9):
 
 | # | step (mouse) | expect |
 |---|---|---|

@@ -50,7 +50,8 @@ public struct LiveImporter: PhotoImporting {
         for candidate in fresh {
             let photo = PhotoItem(id: candidate.path, name: Self.fileStem(candidate.path),
                                   captureDate: candidate.captureDate, color: Self.neutralGrey,
-                                  path: candidate.path, pixelSize: candidate.pixelSize)
+                                  path: candidate.path, pixelSize: candidate.pixelSize,
+                                  camera: candidate.camera)
             all.append(photo); batch.append(photo)
             let time = now()
             if time - lastProgress >= Self.progressInterval {

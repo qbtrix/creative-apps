@@ -25,6 +25,11 @@
 // unknown name leaves it empty and says so on the status line) and
 // `-DesignWindowSize WxH` (the first window's content size).
 //
+// File > Export… (⇧⌘E) bumps `exportRequest`; DesignExportArea opens its sheet
+// on each change and hands its notes to the status line. DesignHistoryArea holds the
+// History panel (View > Show History) and the autosave hooks; a jump and a restore come
+// back here as workspace methods.
+//
 // Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
 // them through DesignPasteboardBridge under the Model's `pasteboardType`; a
 // refusal (nothing selected, nothing of Design's to paste) goes to the status
@@ -34,12 +39,14 @@
 // Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
 // then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
 // draws, so the window doesn't run per sample. Mouse-up, or the scrub's end
-// run, replays the last one into the workspace as one step (`live.end(into:)`).
+// run, replays the last one into the workspace as one step (`live.land(into:)`),
+// written before the copy is cleared.
 //
 // `.suiteProbes()` sits on the root (D0-7a), so the window's `suite.controls`
 // lists every control the editor registers with its DesignControlID.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -62,6 +69,8 @@ struct DesignWindow: View {
     @State private var note: String?
     @State private var problem: DesignFileProblem?
     @State private var started = false
+    /// Bumped by File > Export…; DesignExportArea opens its sheet on each change.
+    @State private var exportRequest = 0
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
@@ -82,6 +91,9 @@ struct DesignWindow: View {
     static var bodyRuns = 0
     /// The workspace after the last intent; DesignLiveDragTests reads it.
     static var lastWorkspace: DesignWorkspace?
+    /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
+    // view-static: main-actor
+    static var openExport: (@MainActor () -> Void)?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -117,6 +129,8 @@ struct DesignWindow: View {
         }
         .task { start() }
         .modifier(DesignClosePrompt(model: model))
+        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
+        .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
@@ -137,12 +151,13 @@ struct DesignWindow: View {
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
+        case .export: exportRequest += 1
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
         case .drag(let from, let to, let modifiers):
             let start = DesignPoint(from)
-            if live.workspace == nil {
+            if !live.isLive {
                 // The press goes to the workspace, so the selection shows at once.
                 model.drag(from: start, to: start, modifiers: modifiers)
                 live.begin(from: model)
@@ -161,6 +176,9 @@ struct DesignWindow: View {
         case .setFrame(let id, let x, let y, let width, let height):
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
+        case .fill(let intent): model.runFill(intent)
+        case .transform(let intent): model.runTransform(intent)
+        case .shape(let intent): model.runShape(intent)
         case .align(let edge): model.alignLayer(edge)
         case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
@@ -170,8 +188,8 @@ struct DesignWindow: View {
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
-        case .zoomIn: userZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: userZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
+        case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
             fit()
@@ -199,6 +217,8 @@ struct DesignWindow: View {
             // The row ids come from the model's own rows; only the name can be refused.
             do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
         case .setPageSize(let width, let height): model.setPageSize(width: width, height: height)
+        case .pick(let point, let toStroke):
+            do { try model.pick(at: point, toStroke: toStroke) } catch { note = error.help }
         }
     }
 
@@ -215,8 +235,10 @@ struct DesignWindow: View {
 
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
     private func endLive(otherwise: () -> Void) {
-        guard live.workspace != nil else { return otherwise() }
-        if let refusal = live.end(into: &model) { note = refusal.help }
+        guard live.isLive else { return otherwise() }
+        let refusal = live.land(into: &model)
+        live.clearAfterLanding()
+        if let refusal { note = refusal.help }
     }
 
     /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.
@@ -231,10 +253,9 @@ struct DesignWindow: View {
 
     // MARK: Zoom
 
-    /// Sets the zoom within the Zoom In and Zoom Out stops, and resizes the handle grab area to match.
+    /// Sets the zoom within ZoomMath's range (10% to 3200%), and resizes the handle grab area to match.
     private func setZoom(_ scale: Double) {
-        let (lowest, highest) = (ViewerZoom.stops.first ?? 1, ViewerZoom.stops.last ?? 1)
-        zoom = scale.isFinite ? Swift.min(Swift.max(scale, lowest), highest) : 1
+        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
         model.setHandleTolerance(Double(SuiteSpacing.s) / zoom)
     }
 
@@ -249,9 +270,16 @@ struct DesignWindow: View {
     private func fit() {
         guard let page = model.selectedPage, viewport != .zero else { return }
         let size = CGSize(width: page.frameWidth, height: page.frameHeight)
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: size)
-        setZoom(scale > 0 ? scale : 1)
+        setZoom(ZoomMath.fit(document: size, in: viewport, using: paletteFit))
+    }
+
+    /// The fit EditorDetail hands Command-0: clear of the floating palette, which shows every tool
+    /// while a page is open.
+    private var paletteFit: @Sendable (CGSize, CGSize) -> Double {
+        let toolCount = DesignTool.allCases.count
+        return { viewport, artboard in
+            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
+        }
     }
 
     /// Zooms to fit the selection clear of the palette and keeps its rect for the canvas to
@@ -261,9 +289,7 @@ struct DesignWindow: View {
             note = model.zoomToSelectionHelp
             return
         }
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: CGSize(width: rect.width, height: rect.height))
-        userZoom(scale > 0 ? scale : 1)
+        userZoom(ZoomMath.fit(document: CGSize(width: rect.width, height: rect.height), in: viewport, using: paletteFit))
         show = rect
     }
 
@@ -279,6 +305,9 @@ struct DesignWindow: View {
     private func start() {
         guard !started else { return }
         started = true
+        #if DEBUG
+        Self.openExport = { perform(.export) }
+        #endif
         if seeded {
             fitting = true
             return fit()

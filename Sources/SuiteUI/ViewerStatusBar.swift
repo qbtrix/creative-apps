@@ -7,7 +7,8 @@
 // one marked `.statusPill(.warning)` the warning tint and color with a
 // triangle, and one marked `.statusPill(.error)` (a failed save or render)
 // the error tint and color with an exclamation circle. Chrome, but flat: no glass and no band. The zoom text comes from
-// ViewerZoom, so every app formats it the same way.
+// ViewerZoom, so every app formats it the same way. StatusPillFace is one pill on its own, for
+// a hint over a canvas; its tint sits on the opaque panel color, so it reads off the bar too.
 import SwiftUI
 
 /// How a pill in a ViewerStatusBar draws.
@@ -107,17 +108,35 @@ public struct ViewerStatusBar<Trailing: View>: View {
     }
 
     private func pill(_ style: StatusPillStyle, @ViewBuilder _ content: () -> some View) -> some View {
+        StatusPillFace(style, content: content)
+            .frame(height: SuiteSize.pillHit)
+            .accessibilityAddTraits(style == .toggle(isOn: true) ? .isSelected : [])
+    }
+}
+
+/// One status pill as ViewerStatusBar draws it, for a pill shown on its own (a canvas hint):
+/// the style's symbol and colors, 20 pt tall. Its tint sits on the opaque panel color, so it
+/// reads the same over a canvas as on the bar's row.
+public struct StatusPillFace<Content: View>: View {
+    private let style: StatusPillStyle
+    private let content: Content
+
+    public init(_ style: StatusPillStyle, @ViewBuilder content: () -> Content) {
+        self.style = style
+        self.content = content()
+    }
+
+    public var body: some View {
         HStack(spacing: SuiteSpacing.xxs) {
             if let symbol = style.symbol { Image(systemName: symbol).imageScale(.small) }
-            content()
+            content
         }
         .font(SuiteFont.pill)
         .foregroundStyle(style.foreground)
         .padding(SuiteInset.pill)
         .frame(height: SuiteSize.pill)
         .background(style.fill, in: Capsule())
-        .frame(height: SuiteSize.pillHit)
-        .accessibilityAddTraits(style == .toggle(isOn: true) ? .isSelected : [])
+        .background(SuiteColor.panel, in: Capsule())
     }
 }
 

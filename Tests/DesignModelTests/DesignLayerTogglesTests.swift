@@ -65,3 +65,19 @@ func aToggleClickIsOneUndoStep(flag: DesignLayerFlag) throws {
     #expect(group.map(\.isOn) == [true, true])
     #expect(group.map(\.title) == ["Show Layer", "Unlock Layer"])
 }
+
+/// A flag's toggle reserves room for every symbol it can show, the same set in every state, so a
+/// row inside a hidden or locked group keeps its eye and lock at the same x as any other row.
+@Test(arguments: DesignLayerFlag.allCases)
+func aToggleReservesEverySymbolItCanShow(flag: DesignLayerFlag) throws {
+    for groupOn in [false, true] {
+        for ownOn in [false, true] {
+            var workspace = try sample()
+            if groupOn { try workspace.toggleNodeFlag("node-2", flag) }
+            if ownOn { try workspace.toggleNodeFlag("node-3", flag) }
+            let toggle = try #require(workspace.layerToggles("node-3").first { $0.flag == flag })
+            #expect(toggle.symbols == flag.symbols)
+            #expect(flag.symbols.contains(toggle.onSymbol) && flag.symbols.contains(toggle.offSymbol), "\(toggle)")
+        }
+    }
+}

@@ -1,0 +1,154 @@
+{
+  "title": "Gradient fills on shapes, text and frames: the shared editor in the inspector, painted and exported",
+  "wave": 3,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/gradient-fill (adopter of S24); RJ-D13; design.md's first-cut gradient line reversed (captain 2026-10-20)",
+  "waits_on": "suiteui gradient-fill's contract slice GF-a (cross-line; tasks start once it merges); design-export's DE-s slice before the SVG task",
+  "depends": [
+    "design-contracts",
+    "design-window",
+    "style-rows",
+    "canvas-basics",
+    "files-history"
+  ],
+  "longest_chain": "5 (DG-1 → DG-2 → DG-6 → DG-7 → DG-8)",
+  "journeys": [
+    "DesignGradientJourneyTests.testGradientFillAngle"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignFill+Kernel.swift",
+    "Tests/DesignModelTests/DesignGradientTests.swift",
+    "Sources/DesignApp/DesignInspectorFill.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignTextArtwork.swift",
+    "Tests/AppSnapshotTests/DesignGradientPaintTests.swift",
+    "UITests/DesignJourneyTests+Gradient.swift",
+    "Tests/AppSnapshotTests/DesignGradientSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift",
+    "Tests/mutations/DesignModel.DesignFill+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Tests/DesignModelTests/DesignSVGTests.swift",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "Tests/RealJobs/design/gradient-angle/gradient-angle.jobs.json",
+    "Tests/RealJobs/design/gradient-angle/input/background.design",
+    "docs/blueprints/design.md",
+    "docs/blueprints/design/features/gradient-fill.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DG-a",
+      "behavior": "DesignNode.gradient exists and saves, DesignWorkspace conforms to GradientFillTarget as stubs, and the inspector's Fill section shows the switch and the editor on them.",
+      "tasks": [
+        "DG-1",
+        "DG-2"
+      ],
+      "journeys": [
+        "MJ-DG"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignFill+Kernel.swift",
+        "Tests/DesignModelTests/DesignGradientTests.swift",
+        "Sources/DesignApp/DesignInspectorFill.swift",
+        "Sources/DesignApp/DesignInspector.swift"
+      ]
+    },
+    {
+      "id": "DG-u",
+      "behavior": "The canvas, text and the PNG and PDF exports paint a node's gradient, and the Fill section's snapshots and render budget hold.",
+      "tasks": [
+        "DG-3",
+        "DG-6"
+      ],
+      "journeys": [
+        "DJ-G1"
+      ],
+      "waits": {
+        "DG-a": [
+          "DG-3",
+          "DG-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignApp/DesignTextArtwork.swift",
+        "Tests/AppSnapshotTests/DesignGradientPaintTests.swift",
+        "UITests/DesignJourneyTests+Gradient.swift",
+        "Tests/AppSnapshotTests/DesignGradientSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignGradientTests.swift"
+      ]
+    },
+    {
+      "id": "DG-m",
+      "behavior": "Every fill command runs on Design's selection as one undo step, and the SVG export writes each gradient with the points the canvas draws.",
+      "tasks": [
+        "DG-4",
+        "DG-5"
+      ],
+      "journeys": [
+        "MJ-DG"
+      ],
+      "waits": {
+        "DG-a": [
+          "DG-4",
+          "DG-5"
+        ],
+        "design-export:DE-s": [
+          "DG-5"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/DesignModel/DesignFill+Kernel.swift",
+        "Tests/DesignModelTests/DesignGradientTests.swift",
+        "Tests/mutations/DesignModel.DesignFill+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/DesignModelTests/DesignSVGTests.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/RealJobs/design/gradient-angle/gradient-angle.jobs.json",
+        "Tests/RealJobs/design/gradient-angle/input/background.design"
+      ]
+    },
+    {
+      "id": "DG-z",
+      "behavior": "The journey passes on live services, and the blueprint says gradients are in the first cut.",
+      "tasks": [
+        "DG-7",
+        "DG-8"
+      ],
+      "journeys": [
+        "DJ-G1"
+      ],
+      "waits": {
+        "DG-u": [
+          "DG-7"
+        ],
+        "DG-m": [
+          "DG-7",
+          "DG-8"
+        ],
+        "design-export": [
+          "DG-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Gradient.swift",
+        "docs/blueprints/design.md",
+        "docs/blueprints/design/features/gradient-fill.wave.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "title": "The Eyedropper tool: sample size, the loupe and the brush colour, on the kernel's mean and color.sample",
+  "wave": 3,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/eyedropper (adopter of S13; PV-9's stubs); RJ-P22, RJ-P36",
+  "waits_on": "suiteui eyedropper's contract slice EY-a (cross-line); history-panel's PH-m before PE-6",
+  "depends": [
+    "photo-seams",
+    "photo-edit"
+  ],
+  "longest_chain": "6 (PE-1 → PE-2 → PE-3 → PE-4 → PE-7 → PE-8)",
+  "journeys": [
+    "PhotoEyedropperJourneyTests.testPickSkyColor"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoSample+Kernel.swift",
+    "Sources/PhotoModel/Contracts/OutputContracts.swift",
+    "Tests/PhotoModelTests/PhotoSampleTests.swift",
+    "Sources/PhotoApp/PhotoWindow+Sample.swift",
+    "Sources/PhotoApp/SampleOptions.swift",
+    "Sources/PhotoApp/PhotoPaletteTool.swift",
+    "UITests/PhotoJourneyTests+Eyedropper.swift",
+    "Sources/PhotoApp/LiveStroke.swift",
+    "Tests/AppSnapshotTests/PhotoEyedropperOverlayTests.swift",
+    "Tests/AppSnapshotTests/PhotoEyedropperSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoEyedropperTests.swift",
+    "Sources/PhotoModel/Live/LiveSampling.swift",
+    "Sources/PhotoModel/Live/NotBuilt.swift",
+    "Tests/PhotoModelTests/LiveSamplingTests.swift",
+    "Tests/mutations/PhotoModel.LiveSampling.json",
+    "Tests/mutations/PhotoModel.PhotoSample+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/RealJobs/photo/sample-mean/sample-mean.jobs.json",
+    "Tests/RealJobs/photo/sample-mean/input/checker-red-blue.png",
+    "docs/blueprints/photo/features/eyedropper.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PE-a",
+      "behavior": "The adapter is declared as stubs and the Eyedropper tool is enabled on the palette with its size chips.",
+      "tasks": [
+        "PE-1",
+        "PE-2"
+      ],
+      "journeys": [
+        "MJ-PE"
+      ],
+      "waits": {
+        "shell-parity": [
+          "PE-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoSample+Kernel.swift",
+        "Sources/PhotoModel/Contracts/OutputContracts.swift",
+        "Tests/PhotoModelTests/PhotoSampleTests.swift",
+        "Sources/PhotoApp/PhotoWindow+Sample.swift",
+        "Sources/PhotoApp/SampleOptions.swift",
+        "Sources/PhotoApp/PhotoPaletteTool.swift",
+        "UITests/PhotoJourneyTests+Eyedropper.swift"
+      ]
+    },
+    {
+      "id": "PE-u",
+      "behavior": "The loupe follows the pointer over the canvas, a click and an Option-click pick, and the snapshots and render budget hold.",
+      "tasks": [
+        "PE-3",
+        "PE-4"
+      ],
+      "journeys": [
+        "PJ-E1"
+      ],
+      "waits": {
+        "PE-a": [
+          "PE-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoApp/PhotoWindow+Sample.swift",
+        "Sources/PhotoApp/LiveStroke.swift",
+        "Tests/AppSnapshotTests/PhotoEyedropperOverlayTests.swift",
+        "Tests/AppSnapshotTests/PhotoEyedropperSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoEyedropperTests.swift"
+      ]
+    },
+    {
+      "id": "PE-m",
+      "behavior": "The live sampler averages the centred square of the composite, a pick sets the brush colour as tool state, and color.sample reads it for an agent.",
+      "tasks": [
+        "PE-5",
+        "PE-6"
+      ],
+      "journeys": [
+        "MJ-PE"
+      ],
+      "waits": {
+        "PE-a": [
+          "PE-5",
+          "PE-6"
+        ],
+        "history-panel:PH-m": [
+          "PE-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/Live/LiveSampling.swift",
+        "Sources/PhotoModel/Live/NotBuilt.swift",
+        "Tests/PhotoModelTests/LiveSamplingTests.swift",
+        "Tests/mutations/PhotoModel.LiveSampling.json",
+        "Sources/PhotoModel/PhotoSample+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoSampleTests.swift",
+        "Tests/mutations/PhotoModel.PhotoSample+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/RealJobs/photo/sample-mean/sample-mean.jobs.json",
+        "Tests/RealJobs/photo/sample-mean/input/checker-red-blue.png"
+      ]
+    },
+    {
+      "id": "PE-z",
+      "behavior": "The journey picks the sky's colour on live services, and the feature is built.",
+      "tasks": [
+        "PE-7",
+        "PE-8"
+      ],
+      "journeys": [
+        "PJ-E1"
+      ],
+      "waits": {
+        "PE-u": [
+          "PE-7"
+        ],
+        "PE-m": [
+          "PE-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+Eyedropper.swift",
+        "docs/blueprints/photo/features/eyedropper.wave.json"
+      ]
+    }
+  ]
+}

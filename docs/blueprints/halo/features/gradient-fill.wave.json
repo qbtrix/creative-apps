@@ -1,0 +1,161 @@
+{
+  "title": "Gradient fills on solid and shape layers: the shared editor in the inspector, drawn by the frame renderer",
+  "wave": "W4",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/gradient-fill (adopter of S24); RJ-H32",
+  "waits_on": "suiteui gradient-fill's contract slice GF-a (cross-line; tasks start once it merges); core-loop's CL-probe slice before the inspector task and CL-z before the blueprint task",
+  "depends": [
+    "foundation",
+    "viewer-playback",
+    "layer-keys",
+    "text-layers"
+  ],
+  "longest_chain": "5 (HG-1 → HG-2 → HG-4 → HG-8 → HG-9)",
+  "journeys": [
+    "HaloGradientJourneyTests.testRadialSolid"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloLayer.swift",
+    "Sources/HaloModel/Contracts/HaloDocumentValues.swift",
+    "Sources/HaloModel/HaloFill+Kernel.swift",
+    "Tests/HaloModelTests/HaloGradientTests.swift",
+    "Tests/HaloModelTests/HaloGradientRenderTests.swift",
+    "Sources/HaloApp/HaloFillInspector.swift",
+    "Sources/HaloApp/HaloLayerInspector.swift",
+    "Tests/AppSnapshotTests/HaloGradientSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloGradientTests.swift",
+    "UITests/HaloJourneyTests+Gradient.swift",
+    "Sources/HaloModel/Live/HaloDrawRules.swift",
+    "Sources/HaloModel/Live/LiveFrameRendering.swift",
+    "Tests/mutations/HaloModel.LiveFrameRendering.json",
+    "Tests/RealJobs/halo/gradient-frame/gradient-frame.jobs.json",
+    "Tests/RealJobs/halo/gradient-frame/input/one-solid.halo",
+    "Tests/mutations/HaloModel.HaloFill+Kernel.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "docs/blueprints/halo.md",
+    "docs/blueprints/halo/features/gradient-fill.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HG-a",
+      "behavior": "HaloLayer.gradient and the draw item's gradient exist and save, HaloProject conforms to GradientFillTarget as stubs, and the renderer's checks are written, disabled.",
+      "tasks": [
+        "HG-1",
+        "HG-5"
+      ],
+      "journeys": [
+        "MJ-HG"
+      ],
+      "waits": {},
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/HaloLayer.swift",
+        "Sources/HaloModel/Contracts/HaloDocumentValues.swift",
+        "Sources/HaloModel/HaloFill+Kernel.swift",
+        "Tests/HaloModelTests/HaloGradientTests.swift",
+        "Tests/HaloModelTests/HaloGradientRenderTests.swift"
+      ]
+    },
+    {
+      "id": "HG-u",
+      "behavior": "The layer inspector shows the switch and the editor for solid and shape layers on the stubs, with snapshots and the render budget, and the journey is written.",
+      "tasks": [
+        "HG-2",
+        "HG-3",
+        "HG-4"
+      ],
+      "journeys": [
+        "HJ-G1"
+      ],
+      "waits": {
+        "HG-a": [
+          "HG-2",
+          "HG-3",
+          "HG-4"
+        ],
+        "core-loop:CL-probe": [
+          "HG-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloFillInspector.swift",
+        "Sources/HaloApp/HaloLayerInspector.swift",
+        "Tests/AppSnapshotTests/HaloGradientSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloGradientTests.swift",
+        "UITests/HaloJourneyTests+Gradient.swift"
+      ]
+    },
+    {
+      "id": "HG-m",
+      "behavior": "The renderer draws a layer's gradient inside its outline at its matrix, and every fill command runs as one undo step.",
+      "tasks": [
+        "HG-6",
+        "HG-7"
+      ],
+      "journeys": [
+        "MJ-HG"
+      ],
+      "waits": {
+        "HG-a": [
+          "HG-6",
+          "HG-7"
+        ],
+        "key-editing:KE-a": [
+          "HG-6",
+          "HG-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/Live/HaloDrawRules.swift",
+        "Sources/HaloModel/Live/LiveFrameRendering.swift",
+        "Tests/HaloModelTests/HaloGradientRenderTests.swift",
+        "Tests/mutations/HaloModel.LiveFrameRendering.json",
+        "Tests/RealJobs/halo/gradient-frame/gradient-frame.jobs.json",
+        "Tests/RealJobs/halo/gradient-frame/input/one-solid.halo",
+        "Sources/HaloModel/HaloFill+Kernel.swift",
+        "Tests/HaloModelTests/HaloGradientTests.swift",
+        "Tests/mutations/HaloModel.HaloFill+Kernel.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt"
+      ]
+    },
+    {
+      "id": "HG-z",
+      "behavior": "The inspector runs on live services, the journey passes on live, and the blueprint lists gradient fills.",
+      "tasks": [
+        "HG-8",
+        "HG-9"
+      ],
+      "journeys": [
+        "HJ-G1"
+      ],
+      "waits": {
+        "HG-u": [
+          "HG-8",
+          "HG-9"
+        ],
+        "HG-m": [
+          "HG-8"
+        ],
+        "core-loop:CL-z": [
+          "HG-9"
+        ],
+        "key-editing:KE-z": [
+          "HG-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+Gradient.swift",
+        "docs/blueprints/halo.md",
+        "docs/blueprints/halo/features/gradient-fill.wave.json"
+      ]
+    }
+  ]
+}

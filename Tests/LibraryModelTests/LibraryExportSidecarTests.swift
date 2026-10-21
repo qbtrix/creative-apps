@@ -1,7 +1,7 @@
 // LibraryExportSidecarTests.swift: EX-16, the XMP sidecar beside an export
 // (packet docs/blueprints/library/features/export.md, slice EX-f). Written by
-// EX-15 before its code (lead.md, contract rule 13): every test is disabled
-// "waits on EX-16", and EX-16, which fills `ExportSidecar.xmp`, enables them.
+// EX-15 before its code (lead.md, contract rule 13); EX-16, which fills
+// `ExportSidecar.xmp`, enabled them and added the order and basics checks.
 import CoreColor
 import Foundation
 import Testing
@@ -18,11 +18,11 @@ import Testing
     }
 
     func packet(_ photo: PhotoItem) throws -> String {
-        let data = try #require(ExportSidecar.xmp(for: photo), "no packet: \(ExportSidecar.unavailable ?? "")")
+        let data = try #require(ExportSidecar.xmp(for: photo, metadata: .all), "no packet: \(ExportSidecar.unavailable ?? "")")
         return try #require(String(data: data, encoding: .utf8), "the packet isn't UTF-8")
     }
 
-    @Test(.disabled("waits on EX-16")) func packetHoldsEveryValueInAFixedOrder() throws {
+    @Test func packetHoldsEveryValueInAFixedOrder() throws {
         let expected = """
             <x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\
             <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/" \
@@ -34,19 +34,39 @@ import Testing
         #expect(ExportSidecar.unavailable == nil)
     }
 
-    @Test(.disabled("waits on EX-16")) func valuesAreXMLEscaped() throws {
+    @Test func valuesAreXMLEscaped() throws {
         let text = try packet(photo(name: "R&D \"final\" <1>"))
         #expect(text.contains("R&amp;D &quot;final&quot; &lt;1&gt;"))
         #expect(!text.contains("R&D"))
+        #expect(try packet(photo(name: "it's")).contains("library:Name=\"it&apos;s\""))
     }
 
-    @Test(.disabled("waits on EX-16")) func aRejectIsRatedMinusOne() throws {
+    @Test func anUnratedUnlabelledUnflaggedPhotoWritesOnlyItsBasics() throws {
+        let item = PhotoItem(id: "a", name: "a", captureDate: Date(timeIntervalSince1970: 0), color: Color3(0, 0, 0))
+        let text = try packet(item)
+        #expect(text.hasSuffix("""
+            xmp:Rating="0" xmp:CreateDate="1970-01-01T00:00:00Z" library:Name="a"/></rdf:RDF></x:xmpmeta>
+            """))
+    }
+
+    @Test func slidersFollowThePanelOrderAndCropComesLast() throws {
+        let crop = CropSettings(angle: -1.5, rect: UnitRect(x: 0, y: 0.25, width: 1, height: 0.5), aspect: .free)
+        let develop = DevelopSettings.neutral.setting(.saturation, to: 10).setting(.contrast, to: -20)
+            .setting(.exposure, to: 1).setting(crop: crop)
+        let text = try packet(photo(develop: develop))
+        #expect(text.contains("""
+            library:Flag="pick" library:Exposure="1" library:Contrast="-20" library:Saturation="10" \
+            library:CropAngle="-1.5" library:Crop="0 0.25 1 0.5"/>
+            """))
+    }
+
+    @Test func aRejectIsRatedMinusOne() throws {
         let text = try packet(photo(rating: 2, flag: .reject))
         #expect(text.contains("xmp:Rating=\"-1\""))
         #expect(text.contains("library:Flag=\"reject\""))
     }
 
-    @Test(.disabled("waits on EX-16")) func noCropWritesNoCrop() throws {
+    @Test func noCropWritesNoCrop() throws {
         #expect(!(try packet(photo())).contains("library:Crop"))
         let crop = CropSettings(angle: 2, rect: UnitRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8), aspect: .free)
         let cropped = try packet(photo(develop: DevelopSettings.neutral.setting(crop: crop)))
@@ -54,7 +74,7 @@ import Testing
         #expect(cropped.contains("library:Crop=\""))
     }
 
-    @Test(.disabled("waits on EX-16")) func runnerWritesTheSidecarBesideTheFileOnlyWhenOn() async throws {
+    @Test func runnerWritesTheSidecarBesideTheFileOnlyWhenOn() async throws {
         let item = try photo()
         for sidecar in [true, false] {
             let options = ExportOptions(longEdge: 1024, folder: "/out", sidecar: sidecar)

@@ -9,6 +9,7 @@
 // them; the three new items' shortcuts and symbols are tables the tests read.
 import AppKit
 import PhotoModel
+import SuiteUI
 import SwiftUI
 
 extension PhotoCommands {
@@ -24,36 +25,33 @@ struct PhotoLayerMenu: View {
     let menu: PhotoMenu
 
     var body: some View {
-        Button("New Layer", systemImage: "plus") { menu.perform(.addLayer) }
-            .keyboardShortcut("n", modifiers: [.command, .shift])
-            .disabled(!menu.hasImage)
+        menu.item("layer.new", systemImage: "plus", shortcut: KeyboardShortcut("n", modifiers: [.command, .shift])) {
+            menu.perform(.addLayer)
+        }
         adjustmentLayerMenu
-        Button("Delete Layer", systemImage: "trash") { menu.perform(.deleteLayer) }
-            .disabled(!menu.canDeleteLayer)
+        menu.item("layer.delete", systemImage: "trash") { menu.perform(.deleteLayer) }
         Divider()
-        item("Duplicate Layer", .duplicateLayer)
-        item("Merge Down", .mergeDown)
-        item("Flatten Image", .flattenImage)
+        item("layer.duplicate", .duplicateLayer)
+        item("layer.merge-down", .mergeDown)
+        item("layer.flatten", .flattenImage)
         Divider()
-        Button("Rename Layer…", systemImage: "pencil") { menu.perform(.renameLayer) }
-            .disabled(!menu.canEditLayer)
-        Button(menu.visibilityTitle, systemImage: menu.visibilityTitle == "Show Layer" ? "eye" : "eye.slash") {
+        menu.item("layer.rename", systemImage: "pencil") { menu.perform(.renameLayer) }
+        menu.item("layer.toggle-visibility", systemImage: menu.visibilityTitle == "Show Layer" ? "eye" : "eye.slash") {
             if let selected = menu.selectedLayer { menu.perform(.toggleVisibility(selected)) }
         }
-        .disabled(!menu.canEditLayer)
         Divider()
-        Button("Bring Forward", systemImage: "square.2.layers.3d.top.filled") { menu.perform(.bringForward) }
-            .keyboardShortcut("]")
-            .disabled(!menu.canBringForward)
-        Button("Send Backward", systemImage: "square.2.layers.3d.bottom.filled") { menu.perform(.sendBackward) }
-            .keyboardShortcut("[")
-            .disabled(!menu.canSendBackward)
-        Button("Select Layer Above", systemImage: "arrow.up") { menu.perform(.selectLayerAbove) }
-            .keyboardShortcut("]", modifiers: [.command, .option])
-            .disabled(!menu.canBringForward)
-        Button("Select Layer Below", systemImage: "arrow.down") { menu.perform(.selectLayerBelow) }
-            .keyboardShortcut("[", modifiers: [.command, .option])
-            .disabled(!menu.canSendBackward)
+        menu.item("layer.bring-forward", systemImage: "square.2.layers.3d.top.filled", shortcut: KeyboardShortcut("]")) {
+            menu.perform(.bringForward)
+        }
+        menu.item("layer.send-backward", systemImage: "square.2.layers.3d.bottom.filled", shortcut: KeyboardShortcut("[")) {
+            menu.perform(.sendBackward)
+        }
+        menu.item("layer.select-above", systemImage: "arrow.up", shortcut: KeyboardShortcut("]", modifiers: [.command, .option])) {
+            menu.perform(.selectLayerAbove)
+        }
+        menu.item("layer.select-below", systemImage: "arrow.down", shortcut: KeyboardShortcut("[", modifiers: [.command, .option])) {
+            menu.perform(.selectLayerBelow)
+        }
     }
 
     /// Command-J and Command-E; Flatten Image has none (QB-F4).
@@ -83,22 +81,16 @@ struct PhotoLayerMenu: View {
         let help = menu.addAdjustmentLayerHelp
         return Menu("New Adjustment Layer", systemImage: "slider.horizontal.3") {
             ForEach(menu.adjustmentLayerKinds, id: \.self) { kind in
-                Button(kind.title) { menu.perform(.adjustmentLayer(.add(kind))) }
-                    .disabled(help != nil)
-                    .help(help.map { "\(kind.title): \($0)" } ?? kind.title)
+                menu.item("layer.new-adjustment", title: kind.title) { menu.perform(.adjustmentLayer(.add(kind))) }
             }
         }
         .disabled(menu.adjustmentMenuDisabled)
         .help(help ?? "New Adjustment Layer")
     }
 
-    /// A layer command, disabled with its reason as its help when it can't run.
-    private func item(_ title: String, _ intent: EditIntent) -> some View {
-        let help = menu.editHelp(intent, pasteboard: PhotoPasteboardState())
-        return Button(title, systemImage: Self.systemImage(intent)) { menu.perform(.edit(intent)) }
-            .keyboardShortcut(Self.shortcut(intent))
-            .disabled(help != nil)
-            .help(help.map { "\(title): \($0)" } ?? title)
+    /// A layer command from its catalog spec, disabled with its reason as its help when it can't run.
+    private func item(_ id: String, _ intent: EditIntent) -> MenuCommand {
+        menu.item(id, systemImage: Self.systemImage(intent), shortcut: Self.shortcut(intent)) { menu.perform(.edit(intent)) }
     }
 }
 

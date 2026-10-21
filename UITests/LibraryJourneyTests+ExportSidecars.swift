@@ -7,9 +7,8 @@
 // (`library.export.preview`, `library.export.summary`); its buttons and the
 // Write Sidecar checkbox are found by title.
 //
-// Written before its code (lead.md, contract rule 13, EX-15): the walk starts
-// with `throw XCTSkip("waits on EX-16")`, and EX-16, which writes the XMP,
-// drops it.
+// Written before its code (lead.md, contract rule 13, EX-15); EX-16, which
+// writes the XMP, made it live.
 import Foundation
 import XCTest
 
@@ -17,7 +16,6 @@ final class LibraryExportSidecarsJourneyTests: XCTestCase {
     /// J7S: with Write Sidecar on, each exported JPEG gets an `.xmp` beside it
     /// holding its rating, and a second export replaces neither file.
     @MainActor func testExportWithSidecars() throws {
-        throw XCTSkip("waits on EX-16")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         let out = try LibraryFiles.freshPhotoFolder()

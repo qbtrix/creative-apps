@@ -7,9 +7,8 @@
 // (`library.export.quality`, `library.export.preview`, `library.export.summary`)
 // plus the format chips `library.export.format.<JPEG|PNG|TIFF|HEIC>`.
 //
-// Written before its code (lead.md, contract rule 13, EX-7): the walk starts
-// with `throw XCTSkip("waits on EX-8")`, and EX-8, which writes the formats,
-// drops it.
+// Written before its code (lead.md, contract rule 13, EX-7); EX-8, which
+// writes the formats, runs it.
 import AppKit
 import CoreGraphics
 import Foundation
@@ -20,7 +19,6 @@ final class LibraryExportFormatsJourneyTests: XCTestCase {
     /// J7F: PNG hides Quality and writes a PNG, TIFF writes a TIFF, and HEIC
     /// writes a HEIC or is disabled with "This Mac can't write HEIC files.".
     @MainActor func testExportOtherFormats() throws {
-        throw XCTSkip("waits on EX-8")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         let out = try LibraryFiles.freshPhotoFolder()

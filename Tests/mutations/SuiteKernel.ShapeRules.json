@@ -1,0 +1,30 @@
+[
+  {
+    "label": "polygonNeedsThree: help accepts a two-sided polygon (the count's low end moved down by one)",
+    "file": "Sources/SuiteKernel/Shapes/ShapeRules.swift",
+    "find": "count >= counts.lowerBound && count <= counts.upperBound",
+    "replace": "count >= counts.lowerBound - 1 && count <= counts.upperBound",
+    "tests": "ShapeRulesTests"
+  },
+  {
+    "label": "shiftSquaresToLarger: Shift squares the box to the smaller side",
+    "file": "Sources/SuiteKernel/Shapes/ShapeRules.swift",
+    "find": "let side = max(abs(dx), abs(dy))",
+    "replace": "let side = min(abs(dx), abs(dy))",
+    "tests": "ShapeRulesTests"
+  },
+  {
+    "label": "headAtEnd: the arrow's head sits at the line's start",
+    "file": "Sources/SuiteKernel/Shapes/ShapeRules.swift",
+    "find": "return arrow(from: a, to: b, head: spec.head)",
+    "replace": "return arrow(from: b, to: a, head: spec.head)",
+    "tests": "ShapeRulesTests"
+  },
+  {
+    "label": "optionFromCentre: Option is ignored, so the box grows from the press",
+    "file": "Sources/SuiteKernel/Shapes/ShapeRules.swift",
+    "find": "let centred = modifiers.contains(.option)",
+    "replace": "let centred = false",
+    "tests": "ShapeRulesTests"
+  }
+]

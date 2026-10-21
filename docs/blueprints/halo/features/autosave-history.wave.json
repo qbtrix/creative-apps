@@ -1,0 +1,144 @@
+{
+  "title": "Autosave, crash recovery and the History panel in Halo, on the shared schedule, folder and panel",
+  "wave": "W4",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/autosave-history (adopter of S12); RJ-H23, RJ-H33",
+  "waits_on": "suiteui autosave-history's contract slice AH-a (cross-line); gradient-fill's HG-m before HA-6",
+  "depends": [
+    "foundation",
+    "viewer-playback",
+    "layer-keys",
+    "text-layers",
+    "history-files",
+    "core-loop"
+  ],
+  "longest_chain": "6 (HA-1 → HA-2 → HA-3 → HA-4 → HA-7 → HA-8)",
+  "journeys": [
+    "HaloHistoryJourneyTests.testJumpAndRecover"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloRecovery+Kernel.swift",
+    "Tests/HaloModelTests/HaloRecoveryTests.swift",
+    "Sources/HaloApp/HaloHistoryArea.swift",
+    "Sources/HaloApp/HaloWindow.swift",
+    "Sources/HaloApp/HaloEditMenu.swift",
+    "UITests/HaloJourneyTests+History.swift",
+    "Sources/HaloApp/HaloControls.swift",
+    "Tests/AppSnapshotTests/HaloHistoryAreaTests.swift",
+    "Tests/AppSnapshotTests/HaloHistorySnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloHistoryTests.swift",
+    "Tests/mutations/HaloModel.HaloRecovery+Kernel.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/HaloModelTests/HaloHistoryCommandIDTests.swift",
+    "Tests/RealJobs/halo/history-jump/history-jump.jobs.json",
+    "Tests/RealJobs/halo/history-jump/input/one-solid.halo",
+    "docs/blueprints/halo/features/autosave-history.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HA-a",
+      "behavior": "The adapter is declared as stubs and the History panel and autosave hooks are on the window, reachable from Edit > Show History.",
+      "tasks": [
+        "HA-1",
+        "HA-2"
+      ],
+      "journeys": [
+        "MJ-HA"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloRecovery+Kernel.swift",
+        "Tests/HaloModelTests/HaloRecoveryTests.swift",
+        "Sources/HaloApp/HaloHistoryArea.swift",
+        "Sources/HaloApp/HaloWindow.swift",
+        "Sources/HaloApp/HaloEditMenu.swift",
+        "UITests/HaloJourneyTests+History.swift"
+      ]
+    },
+    {
+      "id": "HA-u",
+      "behavior": "The transport's History button toggles the panel, the panel follows undo and jumps, and the snapshots and render budget hold.",
+      "tasks": [
+        "HA-3",
+        "HA-4"
+      ],
+      "journeys": [
+        "J-HA"
+      ],
+      "waits": {
+        "HA-a": [
+          "HA-3",
+          "HA-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloHistoryArea.swift",
+        "Sources/HaloApp/HaloControls.swift",
+        "Tests/AppSnapshotTests/HaloHistoryAreaTests.swift",
+        "Tests/AppSnapshotTests/HaloHistorySnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloHistoryTests.swift"
+      ]
+    },
+    {
+      "id": "HA-m",
+      "behavior": "A jump lands on its step without recording one, recovery bytes reopen as a dirty never-saved project, and the history commands run from the catalog.",
+      "tasks": [
+        "HA-5",
+        "HA-6"
+      ],
+      "journeys": [
+        "MJ-HA"
+      ],
+      "waits": {
+        "HA-a": [
+          "HA-5",
+          "HA-6"
+        ],
+        "gradient-fill:HG-m": [
+          "HA-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/HaloRecovery+Kernel.swift",
+        "Tests/HaloModelTests/HaloRecoveryTests.swift",
+        "Tests/mutations/HaloModel.HaloRecovery+Kernel.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/HaloModelTests/HaloHistoryCommandIDTests.swift",
+        "Tests/RealJobs/halo/history-jump/history-jump.jobs.json",
+        "Tests/RealJobs/halo/history-jump/input/one-solid.halo"
+      ]
+    },
+    {
+      "id": "HA-z",
+      "behavior": "The journey jumps and recovers after a force-quit on live services, and the feature is built.",
+      "tasks": [
+        "HA-7",
+        "HA-8"
+      ],
+      "journeys": [
+        "J-HA"
+      ],
+      "waits": {
+        "HA-u": [
+          "HA-7"
+        ],
+        "HA-m": [
+          "HA-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+History.swift",
+        "docs/blueprints/halo/features/autosave-history.wave.json"
+      ]
+    }
+  ]
+}

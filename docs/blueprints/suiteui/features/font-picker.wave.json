@@ -45,6 +45,9 @@
       "waits": {
         "editor-kernel:EK-u": [
           "FP-1"
+        ],
+        "command-catalog:CC-u": [
+          "FP-1"
         ]
       },
       "ui": true,

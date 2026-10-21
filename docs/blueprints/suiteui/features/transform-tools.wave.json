@@ -1,0 +1,164 @@
+{
+  "title": "One rotate, scale and flip: the kernel's transform rules and commands, SuiteUI's turned handles and transform rows",
+  "wave": 4,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S7 (transform handles: rotate, scale, flip, canvas size; PV-7 re-cut); real job RJ-X32; captain 2026-10-20: everyday tools in the beta, built once",
+  "waits_on": "autosave-history's AH-z slice before the fake-app task; editor-kernel and canvas-marks (built); creative-core #434 (closed, on the pinned core)",
+  "depends": [
+    "suite-harness",
+    "canvas-marks"
+  ],
+  "longest_chain": "6 (TT-1 → TT-2 → TT-3 → TT-4 → TT-7 → TT-9)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteTransformJourneyTests.testTransformHandlesTurnAndFlip"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Transform/TransformRules.swift",
+    "Sources/SuiteKernel/Transform/TransformCommands.swift",
+    "Tests/SuiteKernelTests/TransformRulesTests.swift",
+    "Tests/SuiteKernelTests/TransformCommandsTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json",
+    "Sources/SuiteUI/TransformRows.swift",
+    "Sources/SuiteUI/CanvasMarks+Vector.swift",
+    "Sources/SuiteUI/Gallery/GalleryTransform.swift",
+    "Sources/SuiteUI/Gallery/GalleryCanvas.swift",
+    "UITests/SuiteJourneyTests+Transform.swift",
+    "Tests/SuiteUITests/TransformRowsTests.swift",
+    "Tests/SuiteUITests/SelectionHandleTurnTests.swift",
+    "Tests/AppSnapshotTests/SuiteTransformSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetTransformTests.swift",
+    "Tests/mutations/SuiteKernel.TransformRules.json",
+    "Tests/mutations/SuiteKernel.TransformCommands.json",
+    "Tests/SuiteUITests/TransformLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeTransformTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/turn-flip/turn-flip.jobs.json",
+    "Tests/RealJobs/fake/turn-flip/input/one.fake",
+    "docs/blueprints/suiteui/features/transform-tools.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "TT-a",
+      "behavior": "The kernel's transform rules, target, intents and six command specs are declared as stubs, the handles take a turn, the gallery's transform-handles page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "TT-1",
+        "TT-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "editor-kernel": [
+          "TT-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Transform/TransformRules.swift",
+        "Sources/SuiteKernel/Transform/TransformCommands.swift",
+        "Tests/SuiteKernelTests/TransformRulesTests.swift",
+        "Tests/SuiteKernelTests/TransformCommandsTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json",
+        "Sources/SuiteUI/TransformRows.swift",
+        "Sources/SuiteUI/CanvasMarks+Vector.swift",
+        "Sources/SuiteUI/Gallery/GalleryTransform.swift",
+        "Sources/SuiteUI/Gallery/GalleryCanvas.swift",
+        "UITests/SuiteJourneyTests+Transform.swift"
+      ]
+    },
+    {
+      "id": "TT-u",
+      "behavior": "On the gallery page the knob turns the box and its handles together, a side drag grows the turned box in its own frame, the rows type a turn and flip it, every control identified, within the render budget.",
+      "tasks": [
+        "TT-3",
+        "TT-4"
+      ],
+      "journeys": [
+        "TJ1"
+      ],
+      "waits": {
+        "TT-a": [
+          "TT-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/TransformRows.swift",
+        "Sources/SuiteUI/CanvasMarks+Vector.swift",
+        "Tests/SuiteUITests/TransformRowsTests.swift",
+        "Tests/SuiteUITests/SelectionHandleTurnTests.swift",
+        "Tests/AppSnapshotTests/SuiteTransformSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetTransformTests.swift",
+        "UITests/SuiteJourneyTests+Transform.swift"
+      ]
+    },
+    {
+      "id": "TT-m",
+      "behavior": "The rules turn, mirror and scale a box about its centre or an anchor and map points both ways, and every transform command records exactly one undo step (a drag one).",
+      "tasks": [
+        "TT-5",
+        "TT-6"
+      ],
+      "journeys": [
+        "KJ-transform"
+      ],
+      "waits": {
+        "TT-a": [
+          "TT-5",
+          "TT-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Transform/TransformRules.swift",
+        "Tests/SuiteKernelTests/TransformRulesTests.swift",
+        "Tests/mutations/SuiteKernel.TransformRules.json",
+        "Sources/SuiteKernel/Transform/TransformCommands.swift",
+        "Tests/SuiteKernelTests/TransformCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.TransformCommands.json"
+      ]
+    },
+    {
+      "id": "TT-z",
+      "behavior": "The gallery runs its intents through TransformCommands on a live target, the fake app turns and flips so RJ-X32 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "TT-7",
+        "TT-8",
+        "TT-9"
+      ],
+      "journeys": [
+        "TJ1",
+        "KJ-transform"
+      ],
+      "waits": {
+        "TT-u": [
+          "TT-7"
+        ],
+        "TT-m": [
+          "TT-7",
+          "TT-8"
+        ],
+        "autosave-history:AH-z": [
+          "TT-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryTransform.swift",
+        "Tests/SuiteUITests/TransformLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeTransformTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/turn-flip/turn-flip.jobs.json",
+        "Tests/RealJobs/fake/turn-flip/input/one.fake",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json",
+        "docs/blueprints/suiteui/features/transform-tools.wave.json"
+      ]
+    }
+  ]
+}

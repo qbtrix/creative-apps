@@ -1,6 +1,7 @@
-// LibraryHistoryTests.swift: CatalogHistory, the undo and redo stacks of named
-// before-and-after steps, coalescing a drag into one step, and the catalog's
-// recordEdit, undo and redo. Runs on Linux and macOS.
+// LibraryHistoryTests.swift: the catalog's recordEdit, undo and redo on the
+// kernel's History: named steps, coalescing a drag into one step, the step
+// limit and the open flag. The kernel's own tests cover History. Runs on
+// Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -9,87 +10,6 @@ import Foundation
 import CoreColor
 @testable import LibraryModel
 import Testing
-
-private func photo(_ name: String, rating: Int = 0) -> PhotoItem {
-    PhotoItem(name: name, captureDate: Date(timeIntervalSince1970: 0), color: Color3(0, 0, 0), rating: rating)
-}
-
-private func step(_ name: String, from: Int, to: Int, key: String? = nil) -> CatalogHistory.Step {
-    CatalogHistory.Step(
-        name: name, before: [photo("A", rating: from)], after: [photo("A", rating: to)], coalesceKey: key)
-}
-
-@Test func anEmptyHistoryHasNoTop() {
-    var history = CatalogHistory()
-    #expect(history.top == nil)
-    #expect(history.redoTop == nil)
-    #expect(history.undo.isEmpty && history.redo.isEmpty)
-    #expect(history.popUndo() == nil)
-    #expect(history.popRedo() == nil)
-    #expect(history == CatalogHistory())
-}
-
-@Test func popsGiveStepsBackInReverse() {
-    var history = CatalogHistory()
-    let first = step("Set Rating", from: 0, to: 1)
-    let second = step("Pick", from: 1, to: 2)
-    history.push(first)
-    history.push(second)
-    #expect(history.top == second)
-
-    #expect(history.popUndo() == second)
-    #expect(history.popUndo() == first)
-    #expect(history.popUndo() == nil)
-    #expect(history.redo == [second, first])
-
-    #expect(history.popRedo() == first)
-    #expect(history.popRedo() == second)
-    #expect(history.popRedo() == nil)
-    #expect(history.undo == [first, second])
-}
-
-@Test func aPushClearsRedo() {
-    var history = CatalogHistory()
-    history.push(step("Set Rating", from: 0, to: 1))
-    _ = history.popUndo()
-    #expect(history.redoTop?.name == "Set Rating")
-    history.push(step("Pick", from: 0, to: 2))
-    #expect(history.redo.isEmpty)
-    #expect(history.undo.map(\.name) == ["Pick"])
-}
-
-@Test func anOpenCoalesceKeyKeepsOneStep() {
-    var history = CatalogHistory()
-    history.push(step("Exposure", from: 0, to: 1, key: "exposure"))
-    history.push(step("Exposure", from: 1, to: 2, key: "exposure"))
-    #expect(history.undo.count == 1)
-    #expect(history.top?.before == [photo("A", rating: 0)])
-    #expect(history.top?.after == [photo("A", rating: 2)])
-    #expect(history.open)
-}
-
-@Test func coalescingStopsWhenClosedOrTheKeyDiffers() {
-    var history = CatalogHistory()
-    history.push(step("Exposure", from: 0, to: 1, key: "exposure"))
-    history.endCoalescing()
-    #expect(!history.open)
-    history.push(step("Exposure", from: 1, to: 2, key: "exposure"))
-    #expect(history.undo.count == 2)
-    history.push(step("Contrast", from: 2, to: 3, key: "contrast"))
-    #expect(history.undo.count == 3)
-    history.push(step("Set Rating", from: 3, to: 4))
-    history.push(step("Set Rating", from: 4, to: 5))
-    #expect(history.undo.count == 5)
-}
-
-@Test func undoClosesCoalescing() {
-    var history = CatalogHistory()
-    history.push(step("Exposure", from: 0, to: 1, key: "exposure"))
-    _ = history.popUndo()
-    _ = history.popRedo()
-    history.push(step("Exposure", from: 1, to: 2, key: "exposure"))
-    #expect(history.undo.count == 2)
-}
 
 /// Three photos rated 1, 2 and 3 stars; P2 is open in the loupe and selected.
 private func catalogWithLoupe() -> LibraryCatalog {
@@ -231,4 +151,30 @@ private func rescannedCounts(_ catalog: LibraryCatalog) -> [String: Int] {
     #expect(counts(catalog) == unflagged)
     #expect(counts(catalog) == rescannedCounts(catalog))
     #expect(catalog.items.filter(\.isFlagged).map(\.id) == ["P1", "P15", "P20", "P25"])
+}
+
+/// The kernel's 100-step limit: the 101st edit rolls the oldest into the base.
+@Test func theCatalogKeepsAtMostAHundredSteps() {
+    var catalog = catalogWithLoupe()
+    for step in 0..<101 {
+        catalog.recordEdit("Set Rating", ids: ["P1"]) { $0.rating = step % 2 == 0 ? 4 : 5 }
+    }
+    #expect(catalog.history.undo.count == 100)
+    for _ in 0..<101 { catalog.undo() }
+    #expect(catalog.undoTitle == nil)
+    #expect(catalog.items.map(\.rating) == [4, 2, 3])
+}
+
+/// Undo and redo close an open drag, so the next sample is a step of its own.
+@Test func undoAndRedoCloseTheOpenDrag() {
+    var catalog = catalogWithLoupe()
+    catalog.recordEdit("Exposure", coalesceKey: "exposure", ids: ["P1"]) { $0.rating = 4 }
+    #expect(catalog.history.open)
+    catalog.undo()
+    #expect(!catalog.history.open)
+    catalog.redo()
+    #expect(!catalog.history.open)
+    catalog.recordEdit("Exposure", coalesceKey: "exposure", ids: ["P1"]) { $0.rating = 5 }
+    #expect(catalog.history.undo.count == 2)
+    #expect(catalog.history.top?.photos.map(\.rating) == [4])
 }

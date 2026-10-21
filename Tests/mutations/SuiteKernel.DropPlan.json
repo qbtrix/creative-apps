@@ -1,0 +1,37 @@
+[
+  {
+    "label": "ownTypePlaced: a type only this app reads is placed into an open document instead of opening",
+    "file": "Sources/SuiteKernel/Files/DropPlan.swift",
+    "find": "if apps == [app] { return .open(path: path) }",
+    "replace": "if apps == [app] && !hasDocument { return .open(path: path) }",
+    "tests": "DropRoutingTests"
+  },
+  {
+    "label": "placeWithoutDocument: content is placed even when no document is open",
+    "file": "Sources/SuiteKernel/Files/DropPlan.swift",
+    "find": "if hasDocument && places.contains(ext) { return .place(path: path) }",
+    "replace": "if places.contains(ext) { return .place(path: path) }",
+    "tests": "DropRoutingTests"
+  },
+  {
+    "label": "caseSensitive: an upper-case extension is not lowercased and routes nowhere",
+    "file": "Sources/SuiteKernel/Files/DropPlan.swift",
+    "find": "return String(name[name.index(after: dot)...]).lowercased()",
+    "replace": "return String(name[name.index(after: dot)...])",
+    "tests": "DropRoutingTests"
+  },
+  {
+    "label": "subfoldersKept: a dropped folder's subfolders are planned like files",
+    "file": "Sources/SuiteKernel/Files/DropPlan.swift",
+    "find": ".filter { (try? files.contentsOfDirectory(atPath: $0)) == nil }",
+    "replace": ".filter { _ in true }",
+    "tests": "DropRoutingTests"
+  },
+  {
+    "label": "unsorted: a folder's files keep the order the file system lists them in",
+    "file": "Sources/SuiteKernel/Files/DropPlan.swift",
+    "find": "return names.filter { !$0.hasPrefix(\".\") }.sorted().map { base + $0 }",
+    "replace": "return names.filter { !$0.hasPrefix(\".\") }.sorted(by: >).map { base + $0 }",
+    "tests": "DropRoutingTests"
+  }
+]

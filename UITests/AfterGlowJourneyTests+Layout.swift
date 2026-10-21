@@ -67,6 +67,15 @@ final class AfterGlowLayoutJourneys: XCTestCase {
             minimums: Dictionary(uniqueKeysWithValues: names.map { ($0, (width: 1.0, height: 1.0)) }),
             apart: [], clear: clear)
         XCTAssert(found.isEmpty, "home geometry at \(size):\n" + found.joined(separator: "\n"))
+
+        // The switcher's row stays over the content column, clear of the inspector (#3356).
+        guard let inspector = home.regionFrame("suite.inspector") else { return }
+        for id in ["home"] + SuiteApp.apps.map(\.rawValue) {
+            let item = home.element("suite.switcher.\(id)")
+            guard item.exists else { continue }
+            XCTAssertLessThanOrEqual(
+                item.frame.maxX, inspector.minX + 1, "at \(size) suite.switcher.\(id) runs into the inspector")
+        }
     }
 
     /// Whether `window` reads `width` wide within a point inside five seconds

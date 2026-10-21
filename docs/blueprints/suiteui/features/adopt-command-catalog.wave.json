@@ -2,7 +2,7 @@
   "title": "Every app's actions are catalog commands, its document runs headless (Linux included) with its first real jobs, and its menus are built from the catalog",
   "wave": "XK2",
   "order": 5,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "#2999",
   "covers": "captain's AI-accessible-first call, per app; beta-80 plan W0 adopt slices (W2, p0); the real-jobs suites' first jobs per app",
   "waits_on": "command-catalog CC-run (every slice), CC-u and CC-lint (each menu task), CC-z (AC-z2); cross-line hand-offs in the packet: afterglow-cli CL-jobs, creative-core image-codecs IC-png (and IC-jpeg for JPEG jobs) through a bump, each app's menu-file owners",

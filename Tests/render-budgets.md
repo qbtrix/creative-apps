@@ -130,6 +130,59 @@ total:
 Before, each picture that landed spent its time in Core Animation's commit,
 colour-converting every sRGB tile image on the main thread.
 
+## Real-app perf journeys (`scripts/ui-test perf`)
+
+Everything above runs models and views inside a test process, so it never
+sees what the real app does to the machine. The `<X>RealPerfJourneyTests`
+journeys (`UITests/Journey+Health.swift`) launch the bundled app (a copy at
+`.build/realperf/AfterGlow.app` whose helpers' bundle ids end in
+`.realperf`, so an app the user has open never blocks the launch), drive real
+gestures for about 3 s each and judge every gesture from outside the
+process:
+
+| Check | How | Fails when |
+|---|---|---|
+| step p95 | the `suite.perf` samples the gesture added (event to the turn that showed it) | over 33 ms |
+| main thread | `/usr/bin/sample <pid> 3` during the gesture, `scripts/sample-surfaces` | over 20% of main-thread samples under `IOSurfaceCreate` / `SurfacePool::alloc` |
+| hang | an XCUITest window query right after | no answer within 2 s |
+| idle CPU | 3 s after, CPU over two 1 s windows (`ps -o time=`) | both over 10% |
+
+The UI test runner is sandboxed, so `scripts/realperf-watch` (started by
+`scripts/ui-test perf` beside xcodebuild) runs `sample` and `ps` for it and
+writes the 8K photo (7680 x 4320) Photo opens. Pan and zoom have no
+`suite.perf` series, so their round trips (which include XCUITest's own
+overhead) are recorded, not gated; neither are Design's and Flare's canvas
+drags, which publish no `canvas-drag` samples on dev, so those gate on the
+other three checks. Pinch isn't driven: XCUITest on macOS can't make a
+magnify gesture, so ⌘= / ⌘− stand in. Photo runs with Metal on and off
+(`-suite.rendering gpu|cpu`); Design and Flare have no switch. The journeys
+move the mouse, so they run only in perf-nightly.sh at 04:30, never in a
+daytime loop; a plain `scripts/ui-test` skips them.
+
+First run, dev `17dc84c7` (2026-10-19, M2 Pro, daytime load), step p95 / idle CPU (the two 1 s readings):
+
+| App | Gesture | Metal on | Metal off |
+|---|---|---|---|
+| Photo 8K | Levels (Black slider) | 225 ms / 0%, 133% | 171 ms / 1%, 175% |
+| Photo 8K | Hue/Saturation (Hue slider) | 333 ms / 0%, 107% | 499 ms / 165%, 121% |
+| Photo 8K | Move tool, 3 s drag | n/a / 102%, 213% | n/a / 169%, 108% |
+| Photo 8K | pan at 300% (round trip) | 535 ms / 0%, 1% | 1032 ms / 0%, 1% |
+| Photo 8K | ⌘= / ⌘− (round trip) | 243 ms / 0%, 0% | 914 ms / 1%, 0% |
+| Design `crowd` | Move a rectangle | n/a / 0%, 0% | |
+| Design `crowd` | Opacity bar | 284 ms / 0%, 0% | |
+| Design `crowd` | pan / zoom (round trip) | 1234 / 1093 ms | |
+| Flare `bounce` | Rotation bar | 487 ms / 0%, 0% | |
+| Flare `bounce` | pan / zoom (round trip) | 470 / 153 ms | |
+
+No gesture hung (every window query answered in under 0.1 s) and none spent
+over 0.1% of its main-thread samples in surface allocation on this build. The
+Move rows stay busy 3 to 5 s after the drag ends on both backends; what keeps
+them busy (the autosave of an 8K document is a candidate) isn't measured yet.
+In a second run Photo with Metal on crashed while opening the 8K photo
+(SIGABRT: `CanvasTilePresenter.present` asks MPS for a texture 30238 px
+high, over Metal's 16384 limit); direct launches hit it 5 times in 5. The
+journey's failure names those frames.
+
 ## What the harness can't drive
 
 The test process is never the active app. Every press it sends is a
@@ -144,3 +197,31 @@ NSSplitView tracks a divider drag in a modal loop that a test can't pace, so
 the divider moves through `setPosition(_:ofDividerAt:)`, which is what that
 loop calls. A wheel event made in a test carries no phase, so the grid scrolls
 its clip view directly.
+
+## Photo at 8K: one adjustment step, before and after the live route
+
+`PhotoAdjustSliderLatencyTests` (perf list) times one step on the 8K document,
+from the edit to the canvas texture holding the picture, through the canvas
+renderer's route. Release, M2 Pro, p50 / p95 per step, 30 steps:
+
+| Step | GPU before | GPU after | CPU (unchanged route) |
+|---|---|---|---|
+| Hue/Saturation, Saturation | 636 / 661 ms | 12.4 / 13.4 ms | 102 / 105 ms |
+| Levels, Gamma | 79 / 93 ms | 18.8 / 24.2 ms | 107 / 109 ms |
+| Curves, midpoint | 79 / 113 ms | 17.8 / 19.2 ms | 102 / 124 ms |
+| Levels adjustment layer, Gamma | 820 / 869 ms | 18.0 / 22.2 ms | 110 / 120 ms |
+| Hue/Saturation adjustment layer | 816 / 839 ms | 12.5 / 13.9 ms | 104 / 151 ms |
+| Move tool, top layer | 35 / 41 ms | 33 / 69 ms (busy machine) | 92 / 97 ms |
+
+Before, Hue/Saturation had no GPU op: each band of the picture was read back,
+run through Photo's per-pixel colour matrix on the CPU and uploaded again. Any
+visible adjustment layer sent every redraw, a Move or a brush frame included,
+down the same read-back path. The live route (PhotoLiveTone.swift) keeps each
+band's composite of the pixel layers on the GPU while they are unchanged. It
+runs adjustment layers as CoreRender tone-program passes and writes the picture
+through the image's adjustments in the same pass as the display encode. A
+slider step composites nothing and reads nothing back. The budget is 30 ms
+p95 for an adjustment step and 80 ms for a Move, and the target is 16 ms.
+Levels and Curves still build their tables on the CPU each step (about 2.5 ms),
+and a Move composites every layer again, so those rows sit over the target.
+Blur, a masked adjustment layer and the CPU route keep the old path.

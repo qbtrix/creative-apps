@@ -1,0 +1,7 @@
+[
+  {"label": "anyWindow: items turn on with no Halo window to send to", "file": "Sources/HaloModel/HaloMenuState.swift", "find": "guard let project else { return .unavailable(Self.noWindow) }", "replace": "guard let project else { return .available }", "tests": "HaloMenuStateTests"},
+  {"label": "allOn: every item is on whatever the project says", "file": "Sources/HaloModel/HaloMenuState.swift", "find": "return HaloProject.catalog.availability(id, on: project)", "replace": "_ = project; return .available", "tests": "HaloMenuStateTests"},
+  {"label": "plainTitles: Undo stops naming its step", "file": "Sources/HaloModel/HaloMenuState.swift", "find": "project?.title(for: command) ?? command.title", "replace": "command.title", "tests": "HaloMenuStateTests"},
+  {"label": "runDropped: a menu item's run never reaches the project", "file": "Sources/HaloModel/HaloMenuState.swift", "find": "            state.project = project\n", "replace": "", "tests": "HaloMenuStateTests"},
+  {"label": "unknownOn: an id the catalog lacks turns on", "file": "Sources/HaloModel/HaloMenuState.swift", "find": "availability: { _ in .unavailable(\"Halo has no \\(id) command.\") }", "replace": "availability: { _ in .available }", "tests": "HaloMenuStateTests"}
+]

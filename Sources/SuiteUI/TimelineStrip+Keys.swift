@@ -10,12 +10,17 @@
 // A press on a lane takes the strip's focus (TimelineFocusClaim, which the
 // lanes' input calls), as a canvas press does, so ⌘+ works right after a
 // click (#1813). Zoom keys (⌘+, ⌘−, ⌘0) are not here; TL-17 has its own handler.
+// While the strip has focus and its host passed onSelectAllKeys, ⌘A (the
+// responder chain's selectAll:) runs that closure, and the strip publishes it
+// as FocusedValues.timelineSelectAll for a host's menu (TSA-1).
+import AppKit
 import SwiftUI
 
 struct TimelineStripKeys<ID: Hashable & Sendable>: ViewModifier {
     let tracks: [TimelineTrack<ID>]
     let mapping: FrameMapping
     let onPickKeyframe: @MainActor (ID, Int?, PickMode) -> Void
+    let onSelectAllKeys: (@MainActor () -> Void)?
     @State private var picker = TimelineKeyPicker()
     @State private var focusClaim = TimelineFocusClaim()
     @FocusState private var isFocused: Bool
@@ -24,6 +29,7 @@ struct TimelineStripKeys<ID: Hashable & Sendable>: ViewModifier {
         picker.update(onPickKeyframe)
         let focus = $isFocused
         focusClaim.claim = { if !focus.wrappedValue { focus.wrappedValue = true } }
+        let selectAll = TimelineSelectAll.route(focused: isFocused, onSelectAllKeys: onSelectAllKeys)
         return content
             .focused($isFocused)
             .focusEffectDisabled()
@@ -46,9 +52,36 @@ struct TimelineStripKeys<ID: Hashable & Sendable>: ViewModifier {
                     return .handled
                 }
             }
+            .focusedValue(\.timelineSelectAll, selectAll)
+            .onCommand(#selector(NSResponder.selectAll(_:)), perform: selectAll.map { all in { all.run() } })
             .environment(\.timelineKeyPicker, picker)
             .environment(\.timelineFocusClaim, focusClaim)
             .environment(\.timelineLaneMapping, mapping)
+    }
+}
+
+/// The strip's Select All Keys request, published while it has focus (TSA-1).
+public struct TimelineSelectAll {
+    public let run: @MainActor () -> Void
+
+    public init(run: @escaping @MainActor () -> Void) { self.run = run }
+
+    /// Where ⌘A goes from a strip: the host's closure while the strip has focus, else nowhere.
+    static func route(focused: Bool, onSelectAllKeys: (@MainActor () -> Void)?) -> TimelineSelectAll? {
+        guard focused, let all = onSelectAllKeys else { return nil }
+        return TimelineSelectAll(run: { all() })
+    }
+}
+
+private struct TimelineSelectAllKey: FocusedValueKey {
+    typealias Value = TimelineSelectAll
+}
+
+extension FocusedValues {
+    /// The focused strip's Select All Keys request; nil when no strip with a closure has focus.
+    public var timelineSelectAll: TimelineSelectAll? {
+        get { self[TimelineSelectAllKey.self] }
+        set { self[TimelineSelectAllKey.self] = newValue }
     }
 }
 

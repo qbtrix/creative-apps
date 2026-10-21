@@ -25,6 +25,13 @@ public protocol CLIIO: Sendable {
     func out(_ line: String)
     /// Prints one line on stderr.
     func err(_ line: String)
+    /// The next line of stdin without its newline, nil once stdin ends (`afterglow mcp` reads its requests here).
+    func readLine() -> Data?
+}
+
+extension CLIIO {
+    /// No stdin: it has already ended.
+    public func readLine() -> Data? { nil }
 }
 
 /// Why a file operation refused.
@@ -38,11 +45,11 @@ public enum CLIIOError: Error, Hashable, Sendable {
 /// An in-memory file system with captured stdout and stderr: the tests' world.
 public final class FakeIO: CLIIO {
     /// The files by path, and the lines printed so far.
-    private struct State { var files: [String: Data]; var stdout: [String] = []; var stderr: [String] = [] }
+    private struct State { var files: [String: Data]; var stdin: [Data] = []; var stdout: [String] = []; var stderr: [String] = [] }
     private let state: Mutex<State>
 
-    /// A file system holding `files`, keyed by path.
-    public init(files: [String: Data] = [:]) { state = Mutex(State(files: files)) }
+    /// A file system holding `files`, keyed by path, whose stdin is the lines `stdin`.
+    public init(files: [String: Data] = [:], stdin: [Data] = []) { state = Mutex(State(files: files, stdin: stdin)) }
 
     /// Every file, keyed by path.
     public var files: [String: Data] { state.withLock { $0.files } }
@@ -80,6 +87,7 @@ public final class FakeIO: CLIIO {
 
     public func out(_ line: String) { state.withLock { $0.stdout.append(line) } }
     public func err(_ line: String) { state.withLock { $0.stderr.append(line) } }
+    public func readLine() -> Data? { state.withLock { $0.stdin.isEmpty ? nil : $0.stdin.removeFirst() } }
 
     /// Whether one path segment `name` matches `pattern`, where `*` is any run and `?` any one character.
     static func matches(_ pattern: [Character], _ name: [Character]) -> Bool {

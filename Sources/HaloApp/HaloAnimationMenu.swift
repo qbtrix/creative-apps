@@ -2,10 +2,10 @@
 // Frame, Previous Frame, Go to Start, Go to End, Set In Point, Set Out Point
 // and Keyframe Easing ▸ (Linear, Ease In, Ease Out, Ease In and Out, Hold).
 // Space, →, ←, Home, End, I and O do the same while the viewer or timeline
-// has focus; the items name those keys in their help rather than take them as
-// key equivalents, so typing in a field never plays or sets a point. Each item
-// is sent through the focused window and disabled with the Model's reason as
-// help (SuiteUI's MenuCommand).
+// has focus; the items don't take those keys as key equivalents, so typing in
+// a field never plays or sets a point. Each item is built from its catalog
+// spec (HaloMenuTarget.item), sent through the focused window and disabled
+// with the spec's reason as help.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -18,20 +18,20 @@ struct HaloAnimationMenu: Commands {
 
     var body: some Commands {
         CommandMenu("Animation") {
-            MenuCommand(command: .playPause, target: target, systemImage: "playpause", key: "Space")
-            MenuCommand(command: .toggleLoop, target: target, systemImage: "repeat")
+            target.item(.playPause, systemImage: "playpause")
+            target.item(.toggleLoop, systemImage: "repeat")
             Divider()
-            MenuCommand(command: .nextFrame, target: target, key: "→")
-            MenuCommand(command: .previousFrame, target: target, key: "←")
-            MenuCommand(command: .goToStart, target: target, key: "Home")
-            MenuCommand(command: .goToEnd, target: target, key: "End")
+            target.item(.nextFrame)
+            target.item(.previousFrame)
+            target.item(.goToStart)
+            target.item(.goToEnd)
             Divider()
-            MenuCommand(command: .setInPoint, target: target, key: "I")
-            MenuCommand(command: .setOutPoint, target: target, key: "O")
+            target.item(.setInPoint)
+            target.item(.setOutPoint)
             Divider()
             Menu("Keyframe Easing") {
                 ForEach(HaloEasingPreset.allCases, id: \.self) { preset in
-                    MenuCommand(command: .setEasing(preset), target: target)
+                    target.item(.setEasing(preset))
                 }
             }
         }

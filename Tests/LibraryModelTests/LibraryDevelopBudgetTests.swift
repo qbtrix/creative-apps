@@ -66,7 +66,7 @@ private let judgesRenders = true
             catalog.endCoalescing()
         }
         #expect(catalog.history.undo.count == 10)
-        #expect(catalog.history.top?.after.count == 1_000)
+        #expect(catalog.history.top?.photos.count == 1_000)
         #expect(catalog.undoTitle == "Undo Paste Settings")
         #expect(cost.median <= 50 * scale)
     }

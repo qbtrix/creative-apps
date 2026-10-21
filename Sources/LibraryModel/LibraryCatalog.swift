@@ -2,7 +2,10 @@
 // with counts, the grid's sort, cell size and selection, and the browse mode.
 // Linux-safe; LibraryApp changes it only through the Model's methods. Invariants:
 // counts follow `items`; ids in `items` are unique; the selection holds only ids
-// the collection shows, and the loupe only a photo it shows.
+// the collection shows, and the loupe only a photo it shows. The selection is
+// SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift), the export
+// sheet's run its `ExportRun<ExportOptions>` (LibraryExportAdapter.swift).
+import SuiteKernel
 
 /// A sidebar collection: a fixed source of photos.
 public struct LibraryCollection: Identifiable, Sendable, Hashable {
@@ -23,14 +26,6 @@ public enum LoupeZoom: Hashable, Sendable {
     case scale(Double)
 }
 
-/// Where the export sheet is: closed, editing its options, writing, or done.
-public enum ExportState: Hashable, Sendable {
-    case idle
-    case editing(ExportOptions)
-    case running(done: Int, total: Int)
-    case finished(ExportSummary)
-}
-
 /// A thumbnail asked of the services; `token` lets a stale answer be dropped.
 public struct ThumbnailRequest: Hashable, Sendable {
     public var id: String
@@ -49,16 +44,28 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// The thumbnail cell's width step, in points; it stays in 80...320.
     public static let cellSizeStep = 40
 
-    public internal(set) var collections: [LibraryCollection] = [
+    /// The sidebar's built-in rows; your collections follow them.
+    static let builtInCollections = [
         LibraryCollection(id: "all", name: "All Photos", count: 0),
-        LibraryCollection(id: "favorites", name: "Favorites", count: 0),
+        // Id "favorites" predates the name; picks are called Picks everywhere a person reads (#3639).
+        LibraryCollection(id: "favorites", name: "Picks", count: 0),
         LibraryCollection(id: "recent", name: "Recently Added", count: 0),
     ]
+
+    public internal(set) var collections = builtInCollections
     public internal(set) var selectedCollectionID = "all"
     public internal(set) var items: [PhotoItem] = []
     public internal(set) var sort = LibrarySort.captureDate
     public internal(set) var cellSize = 160
-    public internal(set) var selection: Set<String> = []
+    /// The grid's picks: the kernel's ordered selection with its anchor (LibrarySelectionAdapter).
+    public internal(set) var picks = Selection<String>() { didSet { pickedIDs = picks.set } }
+    private var pickedIDs: Set<String> = []  // the picks as a set, for O(1) lookups
+    /// The selected photos. Setting it picks the ids in display order (any not shown after, sorted)
+    /// and never ends the edit run; `select(_:)` is the setter that drops ids not shown.
+    public internal(set) var selection: Set<String> {
+        get { pickedIDs }
+        set { picks.replace(order.filter(newValue.contains) + newValue.subtracting(order).sorted()) }
+    }
     public internal(set) var mode = LibraryMode.grid
     public internal(set) var focusedItemID: String?  // the loupe's photo
 
@@ -73,10 +80,14 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeZoom = LoupeZoom.fit
     public internal(set) var loupeRender: RenderedPhoto?
     public internal(set) var loupeRenderToken = 0
+    /// The token the shown `loupeRender` landed under (the focus change's for the held thumbnail).
+    public internal(set) var loupeShownToken = 0
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
-    public internal(set) var exportState = ExportState.idle
+    /// The export sheet's run: the kernel's; `exportState` reads it (LibraryExportAdapter.swift).
+    public internal(set) var exportRun = ExportRun<ExportOptions>.idle
+    public internal(set) var exportSummary: ExportSummary?  // the finished run's summary
     public internal(set) var catalogState = CatalogFileState.ready
     public internal(set) var saveRevision = 0
     public internal(set) var savedRevision = 0
@@ -105,9 +116,11 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
-            && lhs.cullError == rhs.cullError && lhs.exportState == rhs.exportState
+            && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
+            && lhs.exportState == rhs.exportState
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
-            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeError == rhs.loupeError
+            && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
+            && lhs.loupeError == rhs.loupeError
             && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
@@ -137,11 +150,7 @@ public struct LibraryCatalog: Sendable, Equatable {
         guard collections.contains(where: { $0.id == id }) else { return }
         selectedCollectionID = id
         selection = []
-        rebuildOrder()
-        if mode == .loupe, !(focusedItemID.map(order.contains) ?? false) {
-            mode = .grid
-            focusedItemID = nil
-        }
+        refreshShown()
     }
 
     public mutating func loadSamples(seed: UInt64 = LibrarySample.defaultSeed) {
@@ -173,7 +182,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     }
 
     /// Applies `edit` to every selected photo, then keeps the counts and the
-    /// selection true to the collection (unflagging in Favorites drops a photo).
+    /// selection true to the collection (unflagging in Picks drops a photo).
     mutating func editSelected(_ edit: (inout PhotoItem) -> Void) {
         guard !selection.isEmpty else { return }
         for index in items.indices where selection.contains(items[index].id) {
@@ -184,23 +193,34 @@ public struct LibraryCatalog: Sendable, Equatable {
         select(selection)
     }
 
-    /// Every count from scratch: for a load or an import, which add photos.
-    /// Recently Added holds the newest `recentLimit`, so its count needs no sort.
+    /// Every row and count from scratch: the built-ins, then one row per
+    /// collection of yours, each counted before the bar's filter. A selected
+    /// collection that is gone falls back to All Photos. Recently Added holds
+    /// the newest `recentLimit`, so its count needs no sort.
     mutating func recount() {
         let favorites = items.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) }
         let counts = ["all": items.count, "favorites": favorites, "recent": min(items.count, Self.recentLimit)]
-        for index in collections.indices {
-            collections[index].count = counts[collections[index].id] ?? 0
-        }
+        var rows = Self.builtInCollections.map { LibraryCollection(id: $0.id, name: $0.name, count: counts[$0.id] ?? 0) }
+        rows += userCollections.map { LibraryCollection(id: $0.id, name: $0.name, count: photos(of: $0).count) }
+        collections = rows
+        if !collections.contains(where: { $0.id == selectedCollectionID }) { selectCollection("all") }
     }
 
     /// The counts after a metadata edit, undo or redo that replaced `before`
     /// with `after` in place: no photo was added or removed and no capture
-    /// date changed, so only Favorites moves, by the flags that changed.
+    /// date changed, so only Picks moves, by the flags that changed.
+    /// A smart collection moves by the changed photos its rules admit.
     mutating func recount(replacing before: [PhotoItem], with after: [PhotoItem]) {
-        let delta = after.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) } - before.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) }
-        guard delta != 0, let index = collections.firstIndex(where: { $0.id == "favorites" }) else { return }
-        collections[index].count += delta
+        let delta = after.count(where: \.isFlagged) - before.count(where: \.isFlagged)
+        if delta != 0, let index = collections.firstIndex(where: { $0.id == "favorites" }) {
+            collections[index].count += delta
+        }
+        for user in userCollections {
+            guard case .rules(let rules) = user.contents,
+                let index = collections.firstIndex(where: { $0.id == user.id })
+            else { continue }
+            collections[index].count += after.count(where: rules.matches) - before.count(where: rules.matches)
+        }
     }
 
     /// The photos with every id unique; the first photo with an id keeps it,
@@ -227,12 +247,34 @@ public struct LibraryCatalog: Sendable, Equatable {
         }
     }
 
-    /// The selected collection's photos, unsorted.
+    /// The selected collection's photos through `activeFilter`, unsorted.
     var shownItems: [PhotoItem] {
+        let base = collectionItems
+        let filter = activeFilter
+        return filter.isActive ? base.filter(filter.matches) : base
+    }
+
+    /// The selected collection's photos before the bar's filter: a set of
+    /// yours its photos, a smart one every photo (its rules are the filter).
+    var collectionItems: [PhotoItem] {
         switch selectedCollectionID {
         case "favorites": items.filter(\.isFlagged)
         case "recent": recentItems
-        default: items
+        default:
+            if case .photos(let ids) = selectedUserCollection?.contents {
+                items.filter { ids.contains($0.id) }
+            } else {
+                items
+            }
+        }
+    }
+
+    /// The photos a collection of yours holds before the bar's filter: its
+    /// set's photos, or the photos a smart one's rules admit.
+    func photos(of collection: UserCollection) -> [PhotoItem] {
+        switch collection.contents {
+        case .photos(let ids): items.filter { ids.contains($0.id) }
+        case .rules(let rules): items.filter(rules.matches)
         }
     }
 

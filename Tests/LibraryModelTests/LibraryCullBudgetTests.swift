@@ -6,7 +6,9 @@
 // sort it does, and the photo moves. Each prints a `LIBRARY-BUDGET cull …`
 // line. A recorded edit finds one photo by a plain scan and moves the counts
 // by the changed photo alone (#1587), so the gate is a plain #expect. Runs on
-// Linux and macOS.
+// Linux and macOS. The two timed tests are on the perf list
+// (Tests/perf-suites.txt), so the merge gate skips them and perf-nightly runs
+// them.
 @testable import LibraryModel
 import Testing
 

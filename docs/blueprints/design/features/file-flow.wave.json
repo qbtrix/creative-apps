@@ -1,0 +1,171 @@
+{
+  "title": "Open Recent, Open In and file drops in Design, and dragging a selection out to other apps",
+  "wave": 3,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/file-flow (adopter of suite/file-flow); #862 (adopt the suite: SuiteDocumentHost, .suiteApp); RJ-D42",
+  "waits_on": "suite file-flow's SF-a (cross-line; DF-3 needs SF-5 and SF-6, DF-4 SF-7, DF-7 SF-8); design-export (DesignCommands.swift, DesignWindow.swift), gradient-fill's DG-m (the catalog) and export-pack's DX-z (design.md), slice waits",
+  "longest_chain": "5 (DF-1 → DF-2 → DF-6 → DF-7 → DF-8)",
+  "journeys": [
+    "DesignFileFlowJourneyTests.testOpenRecentAndDrop"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignFileFlow+Kernel.swift",
+    "Tests/DesignModelTests/DesignFileFlowTests.swift",
+    "Sources/DesignApp/DesignApp.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/mutations/DesignModel.DesignFileFlow+Kernel.json",
+    "Tests/RealJobs/design/open-recent/",
+    "Sources/DesignApp/DesignWindow+Files.swift",
+    "Sources/DesignApp/DesignPasteboardBridge.swift",
+    "Tests/AppSnapshotTests/DesignFileFlowLiveTests.swift",
+    "Tests/AppSnapshotTests/DesignFileFlowSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignFileDropTests.swift",
+    "UITests/DesignJourneyTests+FileFlow.swift",
+    "docs/blueprints/design.md",
+    "docs/blueprints/design/features/file-flow.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DF-a",
+      "behavior": "Design conforms to `SuiteDocumentHost` and `FileFlowTarget` on stubs, its scene adopts `.suiteApp`, and its File menu and window use the suite's Open Recent, Open In and drop on the fakes.",
+      "tasks": [
+        "DF-1",
+        "DF-2"
+      ],
+      "journeys": [
+        "MDF"
+      ],
+      "waits": {
+        "design-export": [
+          "DF-1",
+          "DF-2"
+        ],
+        "autosave-history:DA-a": [
+          "DF-2"
+        ],
+        "placed-images:PD-u": [
+          "DF-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignFileFlow+Kernel.swift",
+        "Tests/DesignModelTests/DesignFileFlowTests.swift",
+        "Sources/DesignApp/DesignApp.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignWindow.swift"
+      ]
+    },
+    {
+      "id": "DF-u",
+      "behavior": "The menu and the drop mark have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "DF-5",
+        "DF-6"
+      ],
+      "journeys": [
+        "DFJ1"
+      ],
+      "waits": {
+        "DF-a": [
+          "DF-5",
+          "DF-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/DesignFileFlowSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignFileDropTests.swift",
+        "UITests/DesignJourneyTests+FileFlow.swift"
+      ]
+    },
+    {
+      "id": "DF-m",
+      "behavior": "Design accepts open and new hand-offs, lists its recents and refuses Open In with its reason, notes every open and save in the suite list, and drags a selection out with the pasteboard's representations.",
+      "tasks": [
+        "DF-3",
+        "DF-4"
+      ],
+      "journeys": [
+        "MDF"
+      ],
+      "waits": {
+        "DF-a": [
+          "DF-3",
+          "DF-4"
+        ],
+        "gradient-fill:DG-m": [
+          "DF-3"
+        ],
+        "autosave-history:DA-m": [
+          "DF-3"
+        ],
+        "transform:DT-m": [
+          "DF-3"
+        ],
+        "eyedropper:DY-m": [
+          "DF-3"
+        ],
+        "shape-tools:DS-m": [
+          "DF-3"
+        ],
+        "stroke-style:DK-m": [
+          "DF-3"
+        ],
+        "placed-images:PD-m": [
+          "DF-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignFileFlow+Kernel.swift",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/DesignModelTests/DesignFileFlowTests.swift",
+        "Tests/mutations/DesignModel.DesignFileFlow+Kernel.json",
+        "Tests/RealJobs/design/open-recent/",
+        "Sources/DesignApp/DesignWindow+Files.swift",
+        "Sources/DesignApp/DesignPasteboardBridge.swift",
+        "Tests/AppSnapshotTests/DesignFileFlowLiveTests.swift"
+      ]
+    },
+    {
+      "id": "DF-z",
+      "behavior": "Drop, Open Recent and Open In run on live services, the journey passes, and the feature is built.",
+      "tasks": [
+        "DF-7",
+        "DF-8"
+      ],
+      "journeys": [
+        "DFJ1"
+      ],
+      "waits": {
+        "DF-u": [
+          "DF-7",
+          "DF-8"
+        ],
+        "DF-m": [
+          "DF-7"
+        ],
+        "export-pack:DX-z": [
+          "DF-8"
+        ],
+        "placed-images:PD-z": [
+          "DF-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+FileFlow.swift",
+        "docs/blueprints/design.md",
+        "docs/blueprints/design/features/file-flow.wave.json"
+      ]
+    }
+  ]
+}

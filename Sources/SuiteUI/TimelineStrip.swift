@@ -20,7 +20,8 @@
 // data is in TimelineTrack.swift. The unit and fps reach the ruler and the
 // toolbar's unit chips; the work area reaches the toolbar's Work Area chip and
 // the bar on the ruler (TimelineWorkAreaBar, over the playhead), which call
-// onUnit and onWorkArea (TL-18). Each lane's input (TimelineLaneInput) calls
+// onUnit and onWorkArea (TL-18). ⌘A while the strip has focus calls
+// onSelectAllKeys when the host passes one (TSA-1, TimelineStrip+Keys). Each lane's input (TimelineLaneInput) calls
 // the move closures for a key drag and the trim closures for a clip end. The strip owns its zoom (TL-17), a factor over the
 // host's frameWidth kept in TimelineZoom's range (1 = fit): Command-plus,
 // Command-minus and Command-0 while it has focus (anchored on the playhead),
@@ -55,6 +56,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onEndTrim: @MainActor () -> Void
     private let onUnit: @MainActor (TimeUnit) -> Void
     private let onWorkArea: @MainActor (ClosedRange<Int>?) -> Void
+    private let onSelectAllKeys: (@MainActor () -> Void)?
     @Environment(\.suiteSnapshotRendering) private var snapshot
     /// The host's prefix for the name buttons' identifiers; nil puts none.
     @Environment(\.timelineIdentifierPrefix) private var idPrefix
@@ -99,7 +101,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         onTrim: @escaping @MainActor (ID, SpanEdge, Int) -> Void = { _, _, _ in },
         onEndTrim: @escaping @MainActor () -> Void = {},
         onUnit: @escaping @MainActor (TimeUnit) -> Void = { _ in },
-        onWorkArea: @escaping @MainActor (ClosedRange<Int>?) -> Void = { _ in }
+        onWorkArea: @escaping @MainActor (ClosedRange<Int>?) -> Void = { _ in },
+        onSelectAllKeys: (@MainActor () -> Void)? = nil
     ) {
         self.tracks = tracks
         self.fitMapping = FrameMapping(duration: duration, frameWidth: Double(frameWidth))
@@ -118,6 +121,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         self.onEndTrim = onEndTrim
         self.onUnit = onUnit
         self.onWorkArea = onWorkArea
+        self.onSelectAllKeys = onSelectAllKeys
     }
 
     public var body: some View {
@@ -196,7 +200,9 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             maxHeight: layout.idealHeight, alignment: .top
         )
         .focusable(!snapshot, interactions: .edit)
-        .modifier(TimelineStripKeys(tracks: tracks, mapping: mapping, onPickKeyframe: onPickKeyframe))
+        .modifier(
+            TimelineStripKeys(
+                tracks: tracks, mapping: mapping, onPickKeyframe: onPickKeyframe, onSelectAllKeys: onSelectAllKeys))
         .focused($focused)
         .background {
             if focused && !snapshot {

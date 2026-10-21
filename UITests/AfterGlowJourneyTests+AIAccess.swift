@@ -1,5 +1,5 @@
 // AfterGlowJourneyTests+AIAccess.swift (afterglow-mcp MC-12): the approval journey
-// (sheet, Allow Once, chip, Stop, an empty Window > AI Access…) on the fake request;
+// (sheet, Allow Once, chip, Stop and the re-ask, an empty Window > AI Access…) on the fake request;
 // turned on by MC-13. MC-10 swaps the fake for the live channel behind the same views.
 // The bundle compiles only SuiteModel's Values, so AIAccessPrompt's copy is literal.
 import XCTest
@@ -13,7 +13,9 @@ extension AfterGlowJourneyTests {
         // The sheet asks, naming the client and the app.
         let sheet = home.app.sheets.firstMatch
         XCTAssert(sheet.waitForExistence(timeout: 10), "no approval sheet for the demo request")
-        XCTAssert(sheet.staticTexts["Allow “Test Client” to control AfterGlow?"].exists, "the sheet doesn't name the client and app")
+        XCTAssert(sheet.staticTexts["Allow the AI assistant “Test Client” to work in AfterGlow?"].exists, "the sheet doesn't name the client and app")
+        let help = "Allow Once lasts until “Test Client” disconnects. Always Allow remembers “Test Client” for AfterGlow."
+        XCTAssert(sheet.staticTexts[help].exists, "the sheet doesn't tell the two allows apart")
         for title in ["Deny", "Always Allow"] { XCTAssert(sheet.buttons[title].exists, "the sheet has no \(title)") }
         home.shot("ai-access-sheet")
 
@@ -22,12 +24,20 @@ extension AfterGlowJourneyTests {
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "the sheet stayed after Allow Once")
         let chip = home.element("suite.aiaccess.chip")
         XCTAssert(chip.waitForExistence(timeout: 5), "no Controlled by chip after Allow Once")
-        XCTAssertEqual(chip.label, "Controlled by Test Client")
+        // Falls back to the value the way Home's journey does (#262).
+        XCTAssertEqual(chip.label.isEmpty ? (chip.value as? String) ?? "" : chip.label, "Controlled by Test Client")
         home.shot("ai-access-chip")
 
-        // Stop: the chip goes.
+        // Stop: the chip goes, and the client's next request asks again.
         home.element("suite.aiaccess.stop").click()
         XCTAssert(chip.waitForNonExistence(timeout: 5), "the chip stayed after Stop")
+        XCTAssert(sheet.waitForExistence(timeout: 5), "the next request didn't ask again after Stop")
+        home.shot("ai-access-reask")
+        home.click("Allow Once", in: .sheet)
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "the sheet stayed after the second Allow Once")
+        XCTAssert(chip.waitForExistence(timeout: 5), "no chip after the second Allow Once")
+        home.element("suite.aiaccess.stop").click()
+        XCTAssert(chip.waitForNonExistence(timeout: 5), "the chip stayed after the second Stop")
 
         // Window > AI Access… lists no grant: an allow-once isn't remembered.
         let window = home.app.menuBars.firstMatch.menuBarItems["Window"]

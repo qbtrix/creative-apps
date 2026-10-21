@@ -1,0 +1,92 @@
+{
+  "title": "Select All Keys in Flare's timeline: ⌘A with the timeline focused or the context menu, on the kernel Selection",
+  "wave": 6,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/key-select-all (adopter of suiteui/timeline-select-all); RJ-F43; the stress gate's Select All Keys gap (PR #3499)",
+  "waits_on": "suiteui/timeline-select-all's TSA-a (cross-line, KS-2); adopt-command-catalog AC-flare before KS-1 (hand-off); PR #3499 before KS-4",
+  "depends": [
+    "inspector-timeline",
+    "draw-key-save",
+    "flare-export"
+  ],
+  "longest_chain": "4 (KS-1 → KS-2 → KS-3 → KS-4)",
+  "journeys": [
+    "FlareKeySelectAllJourneys.testSelectAllKeys"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareKeySelection+Kernel.swift",
+    "Sources/FlareModel/FlareIntent.swift",
+    "Sources/FlareModel/FlareIntent+Titles.swift",
+    "Sources/FlareApp/FlareWindow+Timeline.swift",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/FlareModelTests/FlareTimelineEditTests.swift",
+    "Tests/mutations/FlareModel.FlareKeySelection+Kernel.json",
+    "Tests/RealJobs/flare/select-all-keys/select-all-keys.jobs.json",
+    "Tests/RealJobs/flare/select-all-keys/input/three-layers.flare",
+    "Sources/FlareApp/FlareTimelineEdit.swift",
+    "Sources/FlareApp/FlareCommands.swift",
+    "UITests/FlareJourneyTests+KeySelectAll.swift",
+    "Tests/AppSnapshotTests/FlareKeySelectAllSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareKeySelectAllTests.swift",
+    "UITests/FlareJourneyTests+StressPerf.swift",
+    "docs/blueprints/flare/features/key-select-all.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "KS-a",
+      "behavior": "timeline.select-all-keys picks every key of the scene on the kernel Selection, and ⌘A with the timeline focused, or the timeline's context menu, sends it while ⌘A on the stage still selects art.",
+      "tasks": [
+        "KS-1",
+        "KS-2"
+      ],
+      "journeys": [
+        "MJ-KS"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlareKeySelection+Kernel.swift",
+        "Sources/FlareModel/FlareIntent.swift",
+        "Sources/FlareModel/FlareIntent+Titles.swift",
+        "Sources/FlareApp/FlareWindow+Timeline.swift",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/FlareModelTests/FlareTimelineEditTests.swift",
+        "Tests/mutations/FlareModel.FlareKeySelection+Kernel.json",
+        "Tests/RealJobs/flare/select-all-keys/select-all-keys.jobs.json",
+        "Tests/RealJobs/flare/select-all-keys/input/three-layers.flare",
+        "Sources/FlareApp/FlareTimelineEdit.swift",
+        "Sources/FlareApp/FlareCommands.swift"
+      ]
+    },
+    {
+      "id": "KS-z",
+      "behavior": "The journey, snapshot and render budget pass, and the stress gate's Flare key move starts from ⌘A instead of Shift-clicking every lane.",
+      "tasks": [
+        "KS-3",
+        "KS-4"
+      ],
+      "journeys": [
+        "FJ-KS1"
+      ],
+      "waits": {
+        "KS-a": [
+          "KS-3",
+          "KS-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+KeySelectAll.swift",
+        "Tests/AppSnapshotTests/FlareKeySelectAllSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareKeySelectAllTests.swift",
+        "UITests/FlareJourneyTests+StressPerf.swift",
+        "docs/blueprints/flare/features/key-select-all.wave.json"
+      ]
+    }
+  ]
+}

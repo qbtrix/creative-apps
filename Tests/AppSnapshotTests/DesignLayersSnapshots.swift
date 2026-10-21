@@ -10,10 +10,12 @@
 // one-page file shows Delete Page disabled, saying why, and with no file open
 // both are disabled. On `cards` (layers-panel L-4): the A row in rename, opened
 // through its "Rename" action in a hosted window, the way a double-click opens
-// it; Title moved into Pair with both expanded, whose eye and lock columns sit
-// at one x at A's depth and Title's; and a page with no layers. Writes
+// it (nested in BodyCountSuites, see there); Title moved into Pair with both
+// expanded, whose eye and lock columns sit at one x at A's depth and Title's,
+// also with Pair hidden and locked; a drag in flight, its line on C's top edge and its tint on
+// Pair; and a page with no layers, whose hint lines each fit the panel. Writes
 // design-layers-, -group-hidden-, -collapsed-, -chevrons-, -collapsed-selection-,
-// -one-page-, -no-file-, -renaming-, -nested- and -empty-{light,dark}.png.
+// -one-page-, -no-file-, -renaming-, -nested-, -drop-above-, -drop-into- and -empty-{light,dark}.png.
 // macOS only.
 import AppKit
 import DesignModel
@@ -113,79 +115,118 @@ import Testing
     }
 }
 
-@MainActor
-@Suite struct DesignLayersRowSnapshots {
-    let desktop = "node-1", a = "node-2", title = "node-5", pair = "node-6"
+// Its hosted windows open a rename field, and every window's field shares the one field editor, so
+// it nests in BodyCountSuites and never runs beside another hosted test that edits text.
+extension BodyCountSuites {
+    @MainActor
+    @Suite struct DesignLayersRowSnapshots {
+        let desktop = "node-1", a = "node-2", title = "node-5", pair = "node-6"
 
-    /// `cards` with Desktop open: A, B, C, Title, Pair, Locked and Hidden under it.
-    private func cards() throws -> DesignWorkspace {
-        var model = DesignFixtures.cards
-        try model.setExpanded(desktop, true)
-        return model
-    }
-
-    @Test(.disabled("quarantine #3259 until 2026-10-22")) func aRowInRename() async throws {
-        for scheme in [ColorScheme.light, .dark] {
-            let w = RenderBudgetWindow(PanelSample(model: try cards()).hosted(scheme), size: Self.size)
-            defer { w.close() }
-            w.window.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
-            try await w.settle(300)
-            #expect(w.perform(SidebarRow.renameActionName, on: "design.layer.\(a)"), "A has no Rename action")
-            try await w.settle(300)
-            #expect(await w.element("suite.sidebar.\(a).rename") != nil, "A's rename field didn't open")
-            try Self.write(w, name: "design-layers-renaming-\(scheme == .dark ? "dark" : "light")")
+        /// `cards` with Desktop open: A, B, C, Title, Pair, Locked and Hidden under it.
+        private func cards() throws -> DesignWorkspace {
+            var model = DesignFixtures.cards
+            try model.setExpanded(desktop, true)
+            return model
         }
-    }
 
-    @Test(.disabled("quarantine #3260 until 2026-10-22")) func aLayerNestedInAGroup() async throws {
-        var model = try cards()
-        try model.moveLayer(title, into: pair, at: 0)
-        try model.setExpanded(pair, true)
-        model.deselect()
-        #expect(model.layerRows.contains { $0.id == title })
-        for scheme in [ColorScheme.light, .dark] {
-            try snapshot(PanelSample(model: model), name: "design-layers-nested-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        @Test func aRowInRename() async throws {
+            for scheme in [ColorScheme.light, .dark] {
+                let w = RenderBudgetWindow(PanelSample(model: try cards()).hosted(scheme), size: Self.size)
+                defer { w.close() }
+                w.window.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
+                try await w.settle(300)
+                let name = try #require(w.element(.staticText, in: "design.layer.\(a)"), "no title on A")
+                #expect(w.perform(SidebarRow.renameActionName, on: "design.layer.\(a)"), "A has no Rename action")
+                try await w.settle(300)
+                let field = await w.element("suite.sidebar.\(a).rename")
+                #expect(field != nil, "A's rename field didn't open")
+                // The field takes the title text's place (its own inset aside): the name doesn't jump left.
+                if let field { #expect(field.minX >= name.minX && field.minX - name.minX <= SuiteSpacing.s, "the field at \(field.minX), the title at \(name.minX)") }
+                try Self.write(w, name: "design-layers-renaming-\(scheme == .dark ? "dark" : "light")")
+            }
         }
-        // The eye and lock columns share one x at every depth (blueprint 7.3, item 4).
-        let w = RenderBudgetWindow(PanelSample(model: model).hosted(.light), size: Self.size)
-        defer { w.close() }
-        try await w.settle(300)
-        for flag in DesignLayerFlag.allCases {
-            let outer = try #require(await w.element("suite.sidebar.\(a).\(flag.rawValue)"), "no \(flag) on A")
-            let inner = try #require(await w.element("suite.sidebar.\(title).\(flag.rawValue)"), "no \(flag) on Title")
-            #expect(abs(outer.midX - inner.midX) < 0.5, "\(flag): A at \(outer.midX), Title at \(inner.midX)")
+
+        @Test func aLayerNestedInAGroup() async throws {
+            var model = try cards()
+            try model.moveLayer(title, into: pair, at: 0)
+            try model.setExpanded(pair, true)
+            model.deselect()
+            #expect(model.layerRows.contains { $0.id == title })
+            for scheme in [ColorScheme.light, .dark] {
+                try snapshot(PanelSample(model: model), name: "design-layers-nested-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+            }
+            // The eye and lock columns share one x at every depth (blueprint 7.3, item 4), and stay there
+            // when Title's toggles show its group hidden and locked.
+            var shut = model
+            try shut.toggleNodeFlag(pair, .hidden)
+            try shut.toggleNodeFlag(pair, .locked)
+            for sample in [model, shut] {
+                let w = RenderBudgetWindow(PanelSample(model: sample).hosted(.light), size: Self.size)
+                defer { w.close() }
+                try await w.settle(300)
+                for flag in DesignLayerFlag.allCases {
+                    let outer = try #require(await w.element("suite.sidebar.\(a).\(flag.rawValue)"), "no \(flag) on A")
+                    let inner = try #require(await w.element("suite.sidebar.\(title).\(flag.rawValue)"), "no \(flag) on Title")
+                    #expect(abs(outer.midX - inner.midX) < 0.5, "\(flag): A at \(outer.midX), Title at \(inner.midX)")
+                }
+            }
         }
-    }
 
-    @Test func aPageWithNoLayers() throws {
-        var model = DesignWorkspace()
-        model.newFile()
-        model.selectItem(desktop)
-        model.deleteSelection()
-        #expect(model.selectedPage?.nodes.isEmpty == true)
-        for scheme in [ColorScheme.light, .dark] {
-            try snapshot(PanelSample(model: model), name: "design-layers-empty-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        /// A drag in flight on `cards`: the accent line on C's top edge (B dropped above C), and the
+        /// tint on Pair's row (Title dropped into Pair), the two drops J12 makes (#3556).
+        @Test func aDragShowsItsDropLine() throws {
+            let model = try cards()
+            let c = "node-4"
+            for (state, line) in [("above", DesignLayerDropLine(rowID: c, position: .above)),
+                                  ("into", DesignLayerDropLine(rowID: pair, position: .into))] {
+                for scheme in [ColorScheme.light, .dark] {
+                    try snapshot(
+                        PanelSample(model: model, dropLine: line),
+                        name: "design-layers-drop-\(state)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+                }
+            }
         }
-    }
 
-    static let size = CGSize(width: 1440, height: 900)
+        @Test func aPageWithNoLayers() throws {
+            var model = DesignWorkspace()
+            model.newFile()
+            model.selectItem(desktop)
+            model.deleteSelection()
+            #expect(model.selectedPage?.nodes.isEmpty == true)
+            // A list row doesn't grow for a wrapped note, so each line of the hint fits the panel's text
+            // column on one line: the panel less a note's inset and the list's row inset on each side.
+            let column = SuiteSize.editorPanelWidth - 2 * (SuiteSpacing.m + SuiteSpacing.l)
+            for open in [true, false] {
+                for line in DesignLayersPanel.emptyNotes(isOpen: open) {
+                    let width = NSHostingView(rootView: Text(line).font(SuiteFont.inspectorMeta)).fittingSize.width
+                    #expect(width <= column, "\"\(line)\" is \(width) pt, the column \(column)")
+                }
+            }
+            for scheme in [ColorScheme.light, .dark] {
+                try snapshot(PanelSample(model: model), name: "design-layers-empty-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+            }
+        }
 
-    /// The hosted window's view as a 1440 × 900 PNG in .build/snapshots, as `snapshot` writes one.
-    static func write<V: View>(_ w: RenderBudgetWindow<V>, name: String) throws {
-        let host = w.host
-        guard let image = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { throw SnapshotError.render(name) }
-        host.cacheDisplay(in: host.bounds, to: image)
-        guard let png = image.representation(using: .png, properties: [:]) else { throw SnapshotError.encode(name) }
-        let folder = try packageRoot().appending(path: ".build/snapshots")
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        try png.write(to: folder.appending(path: "\(name).png"))
+        static let size = CGSize(width: 1440, height: 900)
+
+        /// The hosted window's view as a 1440 × 900 PNG in .build/snapshots, as `snapshot` writes one.
+        static func write<V: View>(_ w: RenderBudgetWindow<V>, name: String) throws {
+            let host = w.host
+            guard let image = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { throw SnapshotError.render(name) }
+            host.cacheDisplay(in: host.bounds, to: image)
+            guard let png = image.representation(using: .png, properties: [:]) else { throw SnapshotError.encode(name) }
+            let folder = try packageRoot().appending(path: ".build/snapshots")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try png.write(to: folder.appending(path: "\(name).png"))
+        }
     }
 }
 
 extension View {
     /// The snapshot look for a view hosted in a live window: window background, scheme, flat glass.
     fileprivate func hosted(_ scheme: ColorScheme) -> some View {
-        frame(width: DesignLayersRowSnapshots.size.width, height: DesignLayersRowSnapshots.size.height)
+        let size = BodyCountSuites.DesignLayersRowSnapshots.size
+        return frame(width: size.width, height: size.height)
             .background(SuiteColor.windowBackground)
             .environment(\.colorScheme, scheme)
             .environment(\.suiteSnapshotRendering, true)
@@ -194,8 +235,9 @@ extension View {
 
 private struct PanelSample: View {
     let model: DesignWorkspace
+    var dropLine: DesignLayerDropLine?
     var body: some View {
-        DesignLayersPanel(model: model, perform: { _ in })
+        DesignLayersPanel(model: model, perform: { _ in }, seededLine: dropLine)
             .frame(width: SuiteSize.editorPanelWidth)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(SuiteSpacing.xxl)

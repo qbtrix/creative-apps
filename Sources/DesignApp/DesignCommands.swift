@@ -1,14 +1,16 @@
-// DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…;
+// DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…,
+// Export… ⇧⌘E (the export sheet, DesignExportArea);
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
-// Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Zoom to
-// Selection. Every top bar command is here too. Every item Design adds carries
+// Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Snap to
+// Layers (a checked preference in user defaults, DesignSnapToLayersItem), Zoom to Selection, Show History
+// (the trailing History panel, DesignHistoryArea; Hide History while it shows). Every top bar command is here too. Every item Design adds carries
 // its SF Symbol, the toolbar's where the toolbar has the same command.
 //
 // The focused window publishes a DesignMenu (what can run now, and where to send
-// it) as a focused scene value. An item that can't run is disabled, never hidden,
-// and its tooltip is the Model's help for it.
+// it) as a focused scene value. Each item is built from its catalog spec over DesignMenuState
+// (`menu.item`, AC-d3): one that can't run is disabled, never hidden, and its tooltip says why.
 // With no Design window focused only New File acts: it opens a window that starts
 // with a new file. Edit > Undo and Redo replace the system pair. They go where the
 // Model's `undoTarget(textFieldFocused:)` says: while a text field has keyboard focus,
@@ -20,11 +22,14 @@
 // selected layers while the canvas or the Layers list has focus (`canDeleteLayer`).
 import AppKit
 import DesignModel
+import SuiteUI
 import SwiftUI
 
 /// What the focused Design window's menus and top bar can do now.
 struct DesignMenu {
     var perform: DesignPerform = { _ in }
+    /// The focused window's workspace, which the items' catalog specs read (DesignMenuState); a blank one with no window.
+    var workspace = DesignWorkspace()
     /// Whether a Design window is focused; Open needs one to open into.
     var hasWindow = false
     var isOpen = false
@@ -69,6 +74,7 @@ struct DesignMenu {
 
     init(model: DesignWorkspace, perform: @escaping DesignPerform) {
         self.perform = perform
+        workspace = model
         hasWindow = true
         isOpen = model.isOpen
         undoTitle = model.undoActionName
@@ -126,6 +132,7 @@ extension FocusedValues {
 
 struct DesignCommands: Commands {
     @FocusedValue(\.designMenu) private var focused
+    @FocusedValue(\.designHistoryPanel) private var historyPanel
     @Environment(\.openWindow) private var openWindow
 
     private var menu: DesignMenu {
@@ -148,30 +155,36 @@ struct DesignCommands: Commands {
         CommandMenu("Object") { DesignObjectMenu(menu: menu) }
         CommandGroup(after: .toolbar) {
             DesignViewMenu(menu: menu)
+            DesignShowHistoryItem(panel: historyPanel)
             Divider()
         }
     }
 }
 
-/// File: New File and Open…, then Close, Save and Save As….
+/// File: New File and Open…, then Close, Save, Save As… and Export….
 struct DesignFileMenu: View {
     let menu: DesignMenu
 
     var body: some View {
-        Button("New File", systemImage: DesignToolbarItem.newFile.systemImage) { menu.perform(.newFile) }
-            .keyboardShortcut("n")
-        Button("Open…", systemImage: DesignToolbarItem.open.systemImage) { menu.perform(.open) }
-            .keyboardShortcut("o")
-            .disabled(!menu.hasWindow)
+        menu.item("file.new", systemImage: DesignToolbarItem.newFile.systemImage, shortcut: KeyboardShortcut("n")) {
+            menu.perform(.newFile)
+        }
+        menu.item("file.open", systemImage: DesignToolbarItem.open.systemImage, shortcut: KeyboardShortcut("o")) {
+            menu.perform(.open)
+        }
         Divider()
         Button("Close", systemImage: "xmark") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
             .keyboardShortcut("w")
-        Button("Save", systemImage: DesignToolbarItem.save.systemImage) { menu.perform(.save) }
-            .keyboardShortcut("s")
+        menu.item("file.save", systemImage: DesignToolbarItem.save.systemImage, shortcut: KeyboardShortcut("s")) {
+            menu.perform(.save)
+        }
+        menu.item("file.save-as", systemImage: "square.and.arrow.down.on.square", shortcut: KeyboardShortcut("s", modifiers: [.command, .shift])) {
+            menu.perform(.saveAs)
+        }
+        Button("Export…", systemImage: "square.and.arrow.up") { menu.perform(.export) }
+            .keyboardShortcut("e", modifiers: [.command, .shift])
             .disabled(!menu.isOpen)
-        Button("Save As…", systemImage: "square.and.arrow.down.on.square") { menu.perform(.saveAs) }
-            .keyboardShortcut("s", modifiers: [.command, .shift])
-            .disabled(!menu.isOpen)
+            .help(menu.noFileHelp ?? "")
     }
 }
 
@@ -182,20 +195,24 @@ struct DesignHistoryMenu: View {
     var field = DesignFieldUndo.State()
 
     private var inField: Bool { menu.undoTarget(field.focused) == .field }
+    /// The items' state: the field's own undo while Undo and Redo go there, else the file's history.
+    private var state: DesignMenuState {
+        menu.state(field: inField ? DesignMenuState.FieldUndo(canUndo: field.canUndo, canRedo: field.canRedo) : nil)
+    }
 
     var body: some View {
-        Button(inField ? field.undoTitle : menu.undoTitle, systemImage: DesignToolbarItem.undo.systemImage) {
+        menu.item(
+            "edit.undo", title: inField ? field.undoTitle : menu.undoTitle, systemImage: DesignToolbarItem.undo.systemImage,
+            shortcut: KeyboardShortcut("z", modifiers: .command), in: state
+        ) {
             if inField { DesignFieldUndo.send("undo:") } else { menu.perform(.undo) }
         }
-        .disabled(inField ? !field.canUndo : !menu.canUndo)
-        .help((inField ? field.undoHelp : menu.undoHelp) ?? "")
-        .keyboardShortcut("z", modifiers: .command)
-        Button(inField ? field.redoTitle : menu.redoTitle, systemImage: DesignToolbarItem.redo.systemImage) {
+        menu.item(
+            "edit.redo", title: inField ? field.redoTitle : menu.redoTitle, systemImage: DesignToolbarItem.redo.systemImage,
+            shortcut: KeyboardShortcut("z", modifiers: [.shift, .command]), in: state
+        ) {
             if inField { DesignFieldUndo.send("redo:") } else { menu.perform(.redo) }
         }
-        .disabled(inField ? !field.canRedo : !menu.canRedo)
-        .help((inField ? field.redoHelp : menu.redoHelp) ?? "")
-        .keyboardShortcut("z", modifiers: [.shift, .command])
     }
 }
 
@@ -245,9 +262,7 @@ struct DesignDeleteLayerItem: View {
     let menu: DesignMenu
 
     var body: some View {
-        Button("Delete", systemImage: "trash") { menu.perform(.deleteSelection) }
-            .disabled(!menu.canDeleteLayer)
-            .help(menu.deleteLayerHelp ?? "")
+        menu.item("edit.delete", systemImage: "trash") { menu.perform(.deleteSelection) }
     }
 }
 
@@ -256,22 +271,18 @@ struct DesignPageMenu: View {
     let menu: DesignMenu
 
     var body: some View {
-        Button("Add Page", systemImage: "doc.badge.plus") { menu.perform(.addPage) }
-            .disabled(!menu.isOpen)
-            .help(menu.noFileHelp ?? "")
-        // No intent until the menu has a name field to send `.renamePage` from; always disabled.
-        Button("Rename Page…", systemImage: "pencil") {}
-            .disabled(true)
-            .help(menu.renamePageHelp)
-        Button("Delete Page", systemImage: "trash") { menu.perform(.deletePage) }
-            .disabled(!menu.canDeletePage)
-            .help(menu.deletePageHelp ?? "")
+        menu.item("page.add", systemImage: "doc.badge.plus") { menu.perform(.addPage) }
+        // No intent until the menu has a name field to send `.renamePage` from; its spec keeps it off (DesignMenuState).
+        menu.item("page.rename", title: "Rename Page…", systemImage: "pencil") {}
+        menu.item("page.delete", systemImage: "trash") { menu.perform(.deletePage) }
     }
 }
 
-/// View: Zoom In, Zoom Out, Fit Page and Zoom to Selection.
+/// View: Zoom In, Zoom Out, Fit Page, Snap to Layers and Zoom to Selection.
 struct DesignViewMenu: View {
     let menu: DesignMenu
+    /// Where Snap to Layers is stored; a test passes its own suite.
+    var snapStore: UserDefaults = .standard
 
     var body: some View {
         Button("Zoom In", systemImage: DesignToolbarItem.zoomIn.systemImage) { menu.perform(.zoomIn) }
@@ -286,9 +297,40 @@ struct DesignViewMenu: View {
             .keyboardShortcut("0")
             .disabled(!menu.isOpen)
             .help(menu.noFileHelp ?? "")
+        DesignSnapToLayersItem(store: snapStore)
         Button("Zoom to Selection", systemImage: "viewfinder") { menu.perform(.zoomToSelection) }
             .keyboardShortcut("2", modifiers: [.option, .command])
             .disabled(menu.zoomToSelectionHelp != nil)
             .help(menu.zoomToSelectionHelp ?? "")
     }
+}
+
+/// View > Show History: shows or hides the focused window's History panel (DesignHistoryArea).
+/// With no Design window focused there is no panel to show, so it is off and says why.
+struct DesignShowHistoryItem: View {
+    let panel: DesignHistoryShown?
+
+    var body: some View {
+        MenuCommand(DesignMenuState.spec("view.history"), on: DesignMenuState(hasWindow: panel != nil),
+                    title: panel?.isShown == true ? "Hide History" : nil, systemImage: "clock.arrow.circlepath") { panel?.toggle() }
+    }
+}
+
+/// View > Snap to Layers (snapping SN-8): a checked item, on by default, with no key equivalent,
+/// stored under `DesignSnapSettings.defaultsKey` so it holds across relaunches. A preference, so it
+/// acts with no file open; `DesignModifiers.current` reads it on every canvas step.
+struct DesignSnapToLayersItem: View {
+    @AppStorage private var snapsToLayers: Bool
+
+    init(store: UserDefaults = .standard) {
+        _snapsToLayers = AppStorage(wrappedValue: true, DesignSnapSettings.defaultsKey, store: store)
+    }
+
+    var body: some View {
+        Toggle("Snap to Layers", systemImage: "align.horizontal.left", isOn: $snapsToLayers)
+            .help("Line up a drag with the layers and the page. Hold Command to drag without snapping.")
+    }
+
+    /// Turns Snap to Layers on or off, as a click on the item does.
+    func set(_ on: Bool) { snapsToLayers = on }
 }

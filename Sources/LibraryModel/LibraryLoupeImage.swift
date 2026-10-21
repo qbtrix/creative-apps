@@ -1,9 +1,13 @@
 // LibraryLoupeImage.swift: the loupe's picture state in LibraryCatalog
 // (loupe-viewport LV-2). A focus change shows the held grid thumbnail as a
-// preview at once; each render the loupe asks for gets a new token, and only
-// the current token's render or failure lands (latest wins). A failure keeps
-// the last picture and says why. The loupe's neighbours are decoded ahead so
-// stepping is quick. Linux-safe.
+// preview at once; each render the loupe asks for gets a new token. A render
+// lands when its token is at least the shown picture's (newer wins), so a
+// develop drag's previews show while the drag goes on, even when the next
+// sample has already asked for another; a render asked for before the last
+// focus change never lands, and a preview never replaces a full of the same
+// token. A failure keeps the last picture and says why, for the current token
+// only. The loupe's neighbours are decoded ahead so stepping is quick.
+// Linux-safe.
 
 /// One render the loupe needs: which photo, with which settings, at what
 /// size and quality, under the token its result must match to be shown.
@@ -32,6 +36,7 @@ extension LibraryCatalog {
         let thumbnails = cache?.thumbnails ?? self.thumbnails
         let held = mode == .loupe ? focusedItemID.flatMap { thumbnails[$0] } : nil
         loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }
+        loupeShownToken = loupeRenderToken
     }
 
     /// The render the loupe needs now at `longSide`, under a new token; nil outside the loupe.
@@ -42,11 +47,13 @@ extension LibraryCatalog {
                             quality: quality, token: loupeRenderToken)
     }
 
-    /// Shown only for the current token (latest wins); a `.preview` never replaces a `.full` of the same token.
+    /// Shown when `token` is at least the shown picture's (newer wins, so a drag's
+    /// in-flight previews land); a `.preview` never replaces a `.full` of the same token.
     public mutating func showLoupeRender(_ render: RenderedPhoto, token: Int) {
-        guard token == loupeRenderToken else { return }
-        if loupeRender?.quality == .full && render.quality == .preview { return }
+        guard token >= loupeShownToken, token <= loupeRenderToken else { return }
+        if token == loupeShownToken && loupeRender?.quality == .full && render.quality == .preview { return }
         loupeRender = render
+        loupeShownToken = token
         loupeError = nil
     }
 

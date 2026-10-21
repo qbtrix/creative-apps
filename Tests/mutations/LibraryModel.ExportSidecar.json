@@ -1,0 +1,51 @@
+[
+  {
+    "label": "values are not XML-escaped",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "=\\\"\\(XMLText.escaped($0.value))\\\"",
+    "replace": "=\\\"\\($0.value)\\\"",
+    "tests": "LibraryExportSidecarTests"
+  },
+  {
+    "label": "a reject is written as its stars, not -1",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "photo.flag == .reject ? \"-1\" : String(photo.rating)",
+    "replace": "String(photo.rating)",
+    "tests": "LibraryExportSidecarTests"
+  },
+  {
+    "label": "the crop is dropped",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "if let crop = develop.crop {",
+    "replace": "if let crop = develop.crop, false {",
+    "tests": "LibraryExportSidecarTests"
+  },
+  {
+    "label": "sliders at zero are written too",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "where develop.value(slider) != 0",
+    "replace": "where true",
+    "tests": "LibraryExportSidecarTests"
+  },
+  {
+    "label": "the label is not written",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "if let label = photo.label { out.append((\"xmp:Label\", label.rawValue)) }",
+    "replace": "_ = photo.label",
+    "tests": "LibraryExportSidecarTests"
+  },
+  {
+    "label": "the policy drops nothing: GPS is written under All but location",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "|| !dropped.contains($0.name) }",
+    "replace": "|| true }",
+    "tests": "LibraryExportMetadataTests/sidecarDropsGPS"
+  },
+  {
+    "label": "None drops every attribute, the Library namespace too",
+    "file": "Sources/LibraryModel/Contracts/ExportSidecar.swift",
+    "find": "return attributes.filter {",
+    "replace": "return metadata == .none ? [] : attributes.filter {",
+    "tests": "LibraryExportMetadataTests/keepsLibraryFields"
+  }
+]

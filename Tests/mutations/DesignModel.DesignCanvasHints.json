@@ -79,15 +79,15 @@
   {
     "label": "the badge reads one layer, not the bounds of several",
     "file": "Sources/DesignModel/DesignCanvasHints.swift",
-    "find": "guard let bounds = selectionBounds else { return nil }",
-    "replace": "guard let bounds = selectedNodes.last?.frame else { return nil }",
+    "find": "return selectionBounds",
+    "replace": "return selectedNodes.last?.frame",
     "tests": "DesignCanvasHintsTests.swift"
   },
   {
     "label": "the badge shows a zero size with nothing selected",
     "file": "Sources/DesignModel/DesignCanvasHints.swift",
-    "find": "guard let bounds = selectionBounds else { return nil }",
-    "replace": "guard let bounds = Optional(selectionBounds ?? DesignRect(x: 0, y: 0, width: 0, height: 0)) else { return nil }",
+    "find": "return selectionBounds",
+    "replace": "return selectionBounds ?? DesignRect(x: 0, y: 0, width: 0, height: 0)",
     "tests": "DesignCanvasHintsTests.swift"
   },
   {
@@ -138,5 +138,26 @@
     "find": "DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)",
     "replace": "DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.y)",
     "tests": "DesignCanvasHintsTests.swift"
+  },
+  {
+    "label": "the live frame ignores the draft, so the badge stays at the placed size while typing (#3335)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "node.id == editingTextID ? Self.fitted(node.frame, node.textStyle, extent) : node.frame",
+    "replace": "node.frame",
+    "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "the badge reads the stored bounds during an edit (#3335)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "return liveFrame(of: node, draft: extent)",
+    "replace": "return selectionBounds",
+    "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "text at exactly the legible size still asks for a zoom-in (#3336)",
+    "file": "Sources/DesignModel/DesignCanvasHints.swift",
+    "find": "onScreen < Self.legibleTextSize",
+    "replace": "onScreen <= Self.legibleTextSize",
+    "tests": "DesignTextLiveFitTests"
   }
 ]

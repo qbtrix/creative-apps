@@ -1,0 +1,187 @@
+{
+  "title": "One gradient fill: the kernel's fill rules and commands, SuiteUI's gradient editor",
+  "wave": 4,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S24 (gradient fills, shared half; S17 keeps strokes, dashes and trim paths); real job RJ-X30; captain 2026-10-20: gradients in the beta, built once",
+  "waits_on": "command-catalog's CC-run, CC-u and CC-a slices (slice waits, filed #2996); editor-kernel, suite-harness and editor-in-window (built)",
+  "longest_chain": "6 (GF-1 → GF-2 → GF-3 → GF-4 → GF-8 → GF-10)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteGradientJourneyTests.testGradientEditorEditsAFill"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Fill/Fill.swift",
+    "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "Sources/SuiteKernel/Fill/GradientSVG.swift",
+    "Tests/SuiteKernelTests/GradientRulesTests.swift",
+    "Tests/SuiteKernelTests/GradientCommandsTests.swift",
+    "Tests/SuiteKernelTests/GradientSVGTests.swift",
+    "Tests/canonical-concepts.txt",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json",
+    "Sources/SuiteUI/GradientEditor.swift",
+    "Sources/SuiteUI/GradientShading.swift",
+    "Sources/SuiteUI/Gallery/GalleryGradientEditor.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "UITests/SuiteJourneyTests+Gradient.swift",
+    "Tests/SuiteUITests/GradientEditorTests.swift",
+    "Tests/AppSnapshotTests/SuiteGradientEditorSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetGradientEditorTests.swift",
+    "Tests/mutations/SuiteKernel.GradientRules.json",
+    "Tests/mutations/SuiteKernel.GradientCommands.json",
+    "Tests/mutations/SuiteKernel.GradientSVG.json",
+    "Tests/SuiteUITests/GradientEditorLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeCanvasFillTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/gradient-fill/gradient-fill.jobs.json",
+    "Tests/RealJobs/fake/gradient-fill/input/one.fake",
+    "docs/blueprints/suiteui/features/gradient-fill.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "GF-a",
+      "behavior": "The kernel's Fill module declares every type, rule, intent and command spec as stubs, the gallery's gradient-editor page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "GF-1",
+        "GF-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "editor-kernel:EK-u": [
+          "GF-2"
+        ],
+        "suite-harness": [
+          "GF-2"
+        ],
+        "editor-in-window": [
+          "GF-2"
+        ],
+        "command-catalog:CC-u": [
+          "GF-2"
+        ],
+        "font-picker:FP-a": [
+          "GF-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Fill/Fill.swift",
+        "Sources/SuiteKernel/Fill/GradientRules.swift",
+        "Sources/SuiteKernel/Fill/GradientCommands.swift",
+        "Sources/SuiteKernel/Fill/GradientSVG.swift",
+        "Tests/SuiteKernelTests/GradientRulesTests.swift",
+        "Tests/SuiteKernelTests/GradientCommandsTests.swift",
+        "Tests/SuiteKernelTests/GradientSVGTests.swift",
+        "Tests/canonical-concepts.txt",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json",
+        "Sources/SuiteUI/GradientEditor.swift",
+        "Sources/SuiteUI/GradientShading.swift",
+        "Sources/SuiteUI/Gallery/GalleryGradientEditor.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "UITests/SuiteJourneyTests+Gradient.swift"
+      ]
+    },
+    {
+      "id": "GF-u",
+      "behavior": "On the gallery page a click adds a stop, a drag moves it, dragging it off removes it, the colour row recolours the selected stop, the angle row turns a linear fill and the switch changes type, every control identified, within the render budget.",
+      "tasks": [
+        "GF-3",
+        "GF-4"
+      ],
+      "journeys": [
+        "GJ1"
+      ],
+      "waits": {
+        "GF-a": [
+          "GF-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/GradientEditor.swift",
+        "Sources/SuiteUI/GradientShading.swift",
+        "Tests/SuiteUITests/GradientEditorTests.swift",
+        "Tests/AppSnapshotTests/SuiteGradientEditorSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetGradientEditorTests.swift",
+        "UITests/SuiteJourneyTests+Gradient.swift"
+      ]
+    },
+    {
+      "id": "GF-m",
+      "behavior": "The rules keep stops sorted in 0...1 with at least two and turn the line about the box centre so the corners land on 0 and 1, every fill command records exactly one undo step (a drag one), and the SVG writer emits the same points.",
+      "tasks": [
+        "GF-5",
+        "GF-6",
+        "GF-7"
+      ],
+      "journeys": [
+        "KJ-fill"
+      ],
+      "waits": {
+        "GF-a": [
+          "GF-5",
+          "GF-6",
+          "GF-7"
+        ],
+        "command-catalog:CC-run": [
+          "GF-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Fill/GradientRules.swift",
+        "Tests/SuiteKernelTests/GradientRulesTests.swift",
+        "Tests/mutations/SuiteKernel.GradientRules.json",
+        "Sources/SuiteKernel/Fill/GradientCommands.swift",
+        "Tests/SuiteKernelTests/GradientCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.GradientCommands.json",
+        "Sources/SuiteKernel/Fill/GradientSVG.swift",
+        "Tests/SuiteKernelTests/GradientSVGTests.swift",
+        "Tests/mutations/SuiteKernel.GradientSVG.json"
+      ]
+    },
+    {
+      "id": "GF-z",
+      "behavior": "The gallery runs its intents through GradientCommands on a live target, the fake app takes fills so RJ-X30 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "GF-8",
+        "GF-9",
+        "GF-10"
+      ],
+      "journeys": [
+        "GJ1",
+        "KJ-fill"
+      ],
+      "waits": {
+        "GF-u": [
+          "GF-8"
+        ],
+        "GF-m": [
+          "GF-8",
+          "GF-9"
+        ],
+        "command-catalog:CC-a": [
+          "GF-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryGradientEditor.swift",
+        "Tests/SuiteUITests/GradientEditorLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeCanvasFillTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/gradient-fill/gradient-fill.jobs.json",
+        "Tests/RealJobs/fake/gradient-fill/input/one.fake",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json",
+        "docs/blueprints/suiteui/features/gradient-fill.wave.json"
+      ]
+    }
+  ]
+}

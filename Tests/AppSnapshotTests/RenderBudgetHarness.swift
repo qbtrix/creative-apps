@@ -5,7 +5,9 @@
 // off every screen: never shown, but it gets AppKit's display cycle and mouse
 // events. Accessibility is turned on first, so elements are found by
 // identifier and every run builds the same tree (the cost an accessibility
-// client adds is part of what it measures).
+// client adds is part of what it measures). The search walks each element's
+// accessibility children and then a view's subviews, since a List's rows
+// hide what they hold from a test process's accessibility walk.
 //
 // It drives scripted steps, each paced at 120 Hz and timed on its own clock as
 // the event's work plus the layout and display it forced: a mouse drag of N
@@ -52,6 +54,11 @@ struct RenderStep: CustomStringConvertible {
     }
 }
 
+/// The harness's borderless window, allowed to be key so a test's key presses reach it.
+private final class KeyCapableWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+}
+
 /// An app's real window hosted off screen, driven by scripted events.
 @MainActor final class RenderBudgetWindow<Content: View> {
     let host: CountingHostingView<Content>
@@ -59,8 +66,12 @@ struct RenderStep: CustomStringConvertible {
     /// Wall milliseconds of each step in the interaction being measured.
     private var stepTimes: [Double] = []
 
-    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820)) {
+    /// `keyCapable` builds a window that may become key, for a test that sends keys. Never isa-swizzle the window
+    /// instead: it is KVO-observed from the start, and a swapped class makes its dealloc throw (NSRangeException
+    /// on "_windowLayerContext") in whichever test is running when it is freed.
+    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820), keyCapable: Bool = false) {
         _ = DragSessions.faked
+        _ = TestDefaults.registered
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
         // turned on before the window exists so every run builds it the same way.
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
@@ -69,7 +80,8 @@ struct RenderStep: CustomStringConvertible {
         host = CountingHostingView(rootView: view)
         let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
-        window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        let kind = keyCapable ? KeyCapableWindow.self : NSWindow.self
+        window = kind.init(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.contentView = host
         window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
@@ -160,12 +172,11 @@ struct RenderStep: CustomStringConvertible {
         return (before, clip.bounds.origin.y)
     }
 
-    /// Runs the accessibility action called `name` on the element called `identifier` (a custom action
-    /// such as a grid cell's "Open"); false when there is no such element or action.
+    /// Runs the accessibility action called `name` on the element called `identifier`, or on the first
+    /// element inside it that has it (a custom action such as a grid cell's "Open"); false when there is
+    /// no such element or action.
     @discardableResult func perform(_ name: String, on identifier: String) -> Bool {
-        guard let node = Self.node(identifier, in: host),
-            let action = ((node.accessibilityCustomActions?() ?? nil) ?? []).first(where: { $0.name == name })
-        else { return false }
+        guard let node = Self.node(identifier, in: host), let action = Self.action(name, in: node) else { return false }
         if let handler = action.handler { return handler() }
         guard let target = action.target as? NSObject, let selector = action.selector else { return false }
         target.perform(selector, with: action)
@@ -219,6 +230,22 @@ struct RenderStep: CustomStringConvertible {
         return nil
     }
 
+    /// The window frame of the first element with `role` inside the element called `identifier` (a
+    /// row's title text, which has no identifier of its own); nil when there is none.
+    func element(_ role: NSAccessibility.Role, in identifier: String) -> CGRect? {
+        func find(_ element: Any, _ depth: Int) -> AnyObject? {
+            let node = element as AnyObject
+            if depth > 0, (node.accessibilityRole?() ?? nil) == role { return node }
+            guard depth < 8 else { return nil }
+            for child in Self.children(of: node) {
+                if let found = find(child, depth + 1) { return found }
+            }
+            return nil
+        }
+        guard let row = Self.node(identifier, in: host), let screen = find(row, 0)?.accessibilityFrame?() else { return nil }
+        return window.convertFromScreen(screen)
+    }
+
     /// The accessibility label of the element called `identifier`, the field a journey reads a probe by
     /// (XCUITest reads SwiftUI values as empty, #262); nil when there is no such element.
     func label(_ identifier: String) -> String? {
@@ -234,11 +261,13 @@ struct RenderStep: CustomStringConvertible {
     /// Every accessibility identifier in the window now, in tree order (for writing a scenario).
     func identifiers() -> [String] {
         var ids: [String] = []
+        var seen = Set<ObjectIdentifier>()
         func walk(_ element: Any, _ depth: Int) {
             let node = element as AnyObject
+            guard seen.insert(ObjectIdentifier(node)).inserted else { return }
             if let id = node.accessibilityIdentifier?() ?? nil, !id.isEmpty { ids.append(id) }
             guard depth < 60 else { return }
-            for child in (node.accessibilityChildren?() ?? nil) ?? [] { walk(child, depth + 1) }
+            for child in Self.children(of: node) { walk(child, depth + 1) }
         }
         walk(host, 0)
         return ids
@@ -258,14 +287,37 @@ struct RenderStep: CustomStringConvertible {
 
     /// The first node called `identifier` under `element` in the accessibility tree, in tree order.
     /// SwiftUI's nodes answer the NSAccessibility methods informally, so they are read as AnyObject.
-    private static func node(_ identifier: String, in element: Any, depth: Int = 0) -> AnyObject? {
-        let node = element as AnyObject
-        if (node.accessibilityIdentifier?() ?? nil) == identifier { return node }
-        guard depth < 60 else { return nil }
-        for child in (node.accessibilityChildren?() ?? nil) ?? [] {
-            if let found = Self.node(identifier, in: child, depth: depth + 1) { return found }
+    private static func node(_ identifier: String, in element: Any) -> AnyObject? {
+        var seen = Set<ObjectIdentifier>()
+        func find(_ element: Any, _ depth: Int) -> AnyObject? {
+            let node = element as AnyObject
+            guard seen.insert(ObjectIdentifier(node)).inserted else { return nil }
+            if (node.accessibilityIdentifier?() ?? nil) == identifier { return node }
+            guard depth < 60 else { return nil }
+            for child in children(of: node) {
+                if let found = find(child, depth + 1) { return found }
+            }
+            return nil
+        }
+        return find(element, 0)
+    }
+
+    /// The custom action called `name` on `node`, else on the first element inside it that has it: a
+    /// row made a container (`accessibilityElement(children: .contain)`) hands its actions to its children.
+    private static func action(_ name: String, in node: AnyObject, depth: Int = 0) -> NSAccessibilityCustomAction? {
+        if let own = ((node.accessibilityCustomActions?() ?? nil) ?? []).first(where: { $0.name == name }) { return own }
+        guard depth < 8 else { return nil }
+        for child in children(of: node) {
+            if let found = action(name, in: child as AnyObject, depth: depth + 1) { return found }
         }
         return nil
+    }
+
+    /// An element's accessibility children, then, for a view, its subviews. A List's outline rows
+    /// report no children to a test process (#3259, #3260), so what a row holds is reached through
+    /// the row's views instead; a node met both ways is walked once.
+    private static func children(of node: AnyObject) -> [Any] {
+        ((node.accessibilityChildren?() ?? nil) ?? []) + ((node as? NSView)?.subviews ?? [])
     }
 
     /// The split views SwiftUI's columns use, outermost first: the sidebar's, then the inspector's.

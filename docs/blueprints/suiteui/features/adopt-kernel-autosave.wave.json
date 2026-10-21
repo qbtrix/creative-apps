@@ -1,0 +1,214 @@
+{
+  "title": "Every app autosaves and recovers through the kernel's AutosaveSchedule, SuiteModel's RecoveryFolder and SuiteUI's .autosaveRecovery, under one SuiteLocations support root",
+  "wave": "XK3",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "canonical duplicates audit 2026-10-20, top-15 #1 (autosave, recovery and support-folder stores); feature map S12's Flare and Library adopters; real job RJ-X44; pulls autosave-history's 'Adopted later' Flare adopt into the beta",
+  "waits_on": "suiteui autosave-history AH-a (the C4 part) and AH-z (the finished .autosaveRecovery, AH-8); cross-line hand-offs: photo/history-panel PH-z before AK-7, library spine before AK-6, design/halo autosave-history DA-z and HA-z before AK-9's journey runs all four editors; shared-codecs SC-f before AK-8 (PhotoWindow+File.swift: the format registry goes first, 2026-10-21)",
+  "depends": [
+    "command-catalog",
+    "adopt-command-catalog",
+    "adopt-kernel-session"
+  ],
+  "longest_chain": "6 (AK-1 → AK-2 → AK-3 → AK-4 → AK-9 → AK-11)",
+  "ui_slice": "none",
+  "ui_slice_reason": "no new screen: the recovery offer is autosave-history's alert (AH-z built and snapshotted it), which Flare now shows instead of its own; the Flare, Library and Photo slices are ui slices with render budget rows because they edit app files",
+  "journeys": [
+    "SuiteRecoveryJourneyTests.testFourEditorsRecoverFromOneRoot",
+    "FlareRecoveryJourneys.testSaveFailureAndRecovery",
+    "PhotoRecoveryJourneyTests.testRestoreAfterCrash"
+  ],
+  "owned": [
+    "Sources/SuiteModel/Store/SuiteLocations.swift",
+    "Sources/SuiteModel/Store/LegacySupport.swift",
+    "Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift",
+    "Tests/SuiteModelTests/SupportFolderRatchetTests.swift",
+    "Tests/support-dir-baseline.txt",
+    "Tests/mutations/SuiteModel.SuiteLocations.json",
+    "docs/c4/parts/creative-apps/suite-model/suite-store.json",
+    "Sources/FlareModel/FlareRecovery+Kernel.swift",
+    "Tests/FlareModelTests/FlareRecoveryKernelTests.swift",
+    "Sources/FlareApp/FlareWindow.swift",
+    "Tests/mutations/FlareModel.FlareRecovery+Kernel.json",
+    "Sources/LibraryModel/LibrarySupport+Suite.swift",
+    "Tests/LibraryModelTests/LibraryCatalogLocationTests.swift",
+    "Sources/LibraryApp/Platform/CatalogStore.swift",
+    "Tests/mutations/LibraryModel.LibrarySupport+Suite.json",
+    "Tests/PhotoModelTests/PhotoRecoveryRootTests.swift",
+    "Sources/PhotoModel/Live/LiveRecovery.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "UITests/PhotoJourneyTests+Fixtures.swift",
+    "UITests/PhotoJourneyTests+Recovery.swift",
+    "Tests/mutations/PhotoModel.LiveRecovery.json",
+    "UITests/SuiteJourneyTests+Recovery.swift",
+    "Sources/FlareApp/FlareAutosave.swift",
+    "Sources/FlareApp/FlareRecovery.swift",
+    "Tests/AppSnapshotTests/AutosaveTests.swift",
+    "Tests/AppSnapshotTests/AutosaveRecoveryTests.swift",
+    "Tests/AppSnapshotTests/TestDefaults.swift",
+    "UITests/FlareJourneyTests+Recovery.swift",
+    "Tests/command-path-baseline/flare.txt",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/suiteui/features/adopt-kernel-autosave.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "AK-a",
+      "behavior": "SuiteLocations gives each app its folder under the one support root and moves an old folder's files once without overwriting, and a ratchet fails any new Application Support path outside SuiteLocations.",
+      "tasks": [
+        "AK-1",
+        "AK-2"
+      ],
+      "journeys": [
+        "MJ-AK-root"
+      ],
+      "owned": [
+        "Sources/SuiteModel/Store/SuiteLocations.swift",
+        "Sources/SuiteModel/Store/LegacySupport.swift",
+        "Tests/SuiteModelTests/SuiteLocationsAppFolderTests.swift",
+        "Tests/SuiteModelTests/SupportFolderRatchetTests.swift",
+        "Tests/support-dir-baseline.txt",
+        "Tests/mutations/SuiteModel.SuiteLocations.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-store.json"
+      ],
+      "waits": {
+        "autosave-history:AH-a": [
+          "AK-2"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AK-flare",
+      "behavior": "Flare's window autosaves and offers recovery through `.autosaveRecovery` with Flare's hooks into `AfterGlow/Flare/Recovery/`, and an old `Recovery.flare` is offered once.",
+      "tasks": [
+        "AK-3",
+        "AK-4"
+      ],
+      "journeys": [
+        "MJ-AK-flare",
+        "FJ-AK"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareRecovery+Kernel.swift",
+        "Tests/FlareModelTests/FlareRecoveryKernelTests.swift",
+        "Sources/FlareApp/FlareWindow.swift",
+        "Tests/mutations/FlareModel.FlareRecovery+Kernel.json"
+      ],
+      "waits": {
+        "AK-a": [
+          "AK-3",
+          "AK-4"
+        ],
+        "autosave-history:AH-z": [
+          "AK-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AK-library",
+      "behavior": "Library's catalog lives at `AfterGlow/Library/catalog.json`, `-SuiteSupportDir` reaches it, and a catalog at the old place moves there once and never over a newer one.",
+      "tasks": [
+        "AK-5",
+        "AK-6"
+      ],
+      "journeys": [
+        "MJ-AK-library",
+        "LJ-AK"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibrarySupport+Suite.swift",
+        "Tests/LibraryModelTests/LibraryCatalogLocationTests.swift",
+        "Sources/LibraryApp/Platform/CatalogStore.swift",
+        "Tests/mutations/LibraryModel.LibrarySupport+Suite.json"
+      ],
+      "waits": {
+        "AK-a": [
+          "AK-5",
+          "AK-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AK-photo",
+      "behavior": "Photo's recovery copies live in `AfterGlow/Photo/Recovery/`, `-SuiteSupportDir` replaces `-PhotoRecoveryDir`, and copies at the old place are offered once.",
+      "tasks": [
+        "AK-7",
+        "AK-8"
+      ],
+      "journeys": [
+        "MJ-AK-photo",
+        "PJ-AK"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoRecoveryRootTests.swift",
+        "Sources/PhotoModel/Live/LiveRecovery.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift",
+        "UITests/PhotoJourneyTests+Fixtures.swift",
+        "UITests/PhotoJourneyTests+Recovery.swift",
+        "Tests/mutations/PhotoModel.LiveRecovery.json"
+      ],
+      "waits": {
+        "AK-a": [
+          "AK-7",
+          "AK-8"
+        ],
+        "shared-codecs:SC-f": [
+          "AK-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AK-z",
+      "behavior": "Four editors killed mid-edit under one `-SuiteSupportDir` each offer their own edit back, Flare's copy is deleted with the baseline shrunk, the ratchet runs with no baseline, and the feature is built.",
+      "tasks": [
+        "AK-9",
+        "AK-10",
+        "AK-11"
+      ],
+      "journeys": [
+        "SJ-AK",
+        "FJ-AK",
+        "PJ-AK"
+      ],
+      "owned": [
+        "UITests/SuiteJourneyTests+Recovery.swift",
+        "Sources/FlareApp/FlareAutosave.swift",
+        "Sources/FlareApp/FlareRecovery.swift",
+        "Tests/AppSnapshotTests/AutosaveTests.swift",
+        "Tests/AppSnapshotTests/AutosaveRecoveryTests.swift",
+        "Tests/AppSnapshotTests/TestDefaults.swift",
+        "UITests/FlareJourneyTests+Recovery.swift",
+        "Tests/command-path-baseline/flare.txt",
+        "Tests/canonical-baseline.txt",
+        "Tests/support-dir-baseline.txt",
+        "Tests/SuiteModelTests/SupportFolderRatchetTests.swift",
+        "docs/c4/parts/creative-apps/suite-model/suite-store.json",
+        "docs/blueprints/suiteui/features/adopt-kernel-autosave.wave.json"
+      ],
+      "waits": {
+        "AK-flare": [
+          "AK-9",
+          "AK-10"
+        ],
+        "AK-library": [
+          "AK-9",
+          "AK-11"
+        ],
+        "AK-photo": [
+          "AK-9",
+          "AK-11"
+        ],
+        "autosave-history:AH-z": [
+          "AK-10"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

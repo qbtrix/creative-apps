@@ -1,6 +1,6 @@
 // ExportSheet.swift: SuiteExportSheet (EK-30), drawn over ExportSheetRows, a
-// readout of the kernel's ExportRun: Format chips, Size and (when the format
-// takes one) Quality rows, then the host's own options rows (the slot, #1989),
+// readout of the kernel's ExportRun: Format chips, Size (unless the host draws
+// its own scale) and (when the format takes one) Quality rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
 // actions that state offers (ExportSheetAction). Every control's identifier
 // hangs off the host's prefix (ExportSheetIDs, "suite.export" by default) and
@@ -43,11 +43,14 @@ public struct ExportSheetRows: Hashable, Sendable {
         return shown + [line == nil ? .cancel : .dismiss, .start]
     }
 
-    public init<Options: Hashable & Sendable>(_ run: ExportRun<Options>, formats: [FormatChoice], pick: (Options) -> ExportPick) {
+    /// `showsSize: false` leaves out the Size row, for a host that draws its own scale control.
+    public init<Options: Hashable & Sendable>(
+        _ run: ExportRun<Options>, formats: [FormatChoice], showsSize: Bool = true, pick: (Options) -> ExportPick
+    ) {
         func shown(_ options: Options) -> [Row] {
             let p = pick(options)
             let quality = formats.first { $0.id == p.format }?.hasQuality ?? false
-            return [.format(p.format), .size(p.scale)] + (quality ? [.quality(p.quality)] : [])
+            return [.format(p.format)] + (showsSize ? [.size(p.scale)] : []) + (quality ? [.quality(p.quality)] : [])
         }
         var progress: ExportProgress?, line: Line?, editable = false
         switch run {
@@ -100,7 +103,7 @@ public struct SuiteExportSheet<Options: View>: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
             Text("Export").font(SuiteFont.title)
-            VStack(spacing: SuiteSpacing.xs) {
+            VStack(spacing: SuiteSpacing.s) {
                 ForEach(Array(readout.rows.enumerated()), id: \.offset) { row($0.element) }
                 options
             }

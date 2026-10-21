@@ -139,6 +139,7 @@ private func launchCatalog(_ arguments: [String]) -> LibraryCatalog {
         "culling": LiveCulling.unavailable, "coding": LiveCatalogCoding.unavailable,
         "loupe": LiveLoupeImaging.unavailable, "develop": LiveDevelop.unavailable,
         "crop": LiveCrop.unavailable, "exporter": LiveExporter.unavailable,
+        "sidecars": UnconnectedSidecars.unavailable, "trash": LiveTrash.unavailable,
     ]
     #expect(catalog.services.unavailable == reasons.compactMapValues { $0 })
     // Every other stored value is a fresh catalog's.

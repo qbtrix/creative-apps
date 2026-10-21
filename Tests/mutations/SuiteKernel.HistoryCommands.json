@@ -1,0 +1,23 @@
+[
+  {
+    "label": "history.jump is an edit, so the jump records an undo step",
+    "file": "Sources/SuiteKernel/History/HistoryCommands.swift",
+    "find": "kind: .view, params: JumpParams.self",
+    "replace": "kind: .edit, params: JumpParams.self",
+    "tests": "SuiteKernelTests.HistoryCommandsTests/jumpRecordsNoStep"
+  },
+  {
+    "label": "the jump lands on index - 1, one step short",
+    "file": "Sources/SuiteKernel/History/HistoryCommands.swift",
+    "find": "try doc.jumpHistory(to: index)",
+    "replace": "try doc.jumpHistory(to: index - 1)",
+    "tests": "SuiteKernelTests.HistoryCommandsTests/jumpLandsOnIndex"
+  },
+  {
+    "label": "the jump leaves the run open, so the next edit folds into the step it landed on",
+    "file": "Sources/SuiteKernel/History/HistoryCommands.swift",
+    "find": "        endRun()\n        jump(to: index, apply)",
+    "replace": "        jump(to: index, apply)",
+    "tests": "SuiteKernelTests.HistoryCommandsTests/jumpEndsRun"
+  }
+]

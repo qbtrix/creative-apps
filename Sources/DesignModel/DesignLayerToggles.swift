@@ -1,7 +1,8 @@
 // DesignLayerToggles.swift: the eye and lock toggles on a Layers panel row.
 // Each toggle shows the node's own flag; when a group around the node is
 // hidden or locked the off symbol says so, so a child row shows its parent's
-// state. A click flips the node's own flag through setNodeHidden or
+// state. Each flag names every symbol it can show (`symbols`), and the panel
+// reserves room for all of them so the eye and lock columns never move. A click flips the node's own flag through setNodeHidden or
 // setNodeLocked, one undo step. A drag between rows maps through layerDrop to
 // the (parent, index) LayerOrdering.move takes: rows list front to back while
 // children are stored back to front, and the index counts the parent's children
@@ -10,6 +11,15 @@
 /// The two flags a Layers row toggles; the raw value is the toggle's id.
 public enum DesignLayerFlag: String, CaseIterable, Sendable {
     case hidden, locked
+
+    /// Every symbol this flag's toggle shows in any state: its own flag on, off, or off inside a
+    /// hidden or locked group.
+    public var symbols: [String] {
+        switch self {
+        case .hidden: ["eye.slash", "eye"]
+        case .locked: ["lock.fill", "lock.open", "lock"]
+        }
+    }
 }
 
 /// One row toggle as the panel draws it: `onSymbol` while the node's own flag is set, else `offSymbol`.
@@ -20,6 +30,9 @@ public struct DesignLayerToggle: Equatable, Sendable {
     public let onSymbol: String
     public let offSymbol: String
     public let isOn: Bool
+
+    /// Every symbol the toggle can show, whatever the state: the room the panel reserves for it.
+    public var symbols: [String] { flag.symbols }
 }
 
 /// Where a Layers drop lands relative to the row under it: in front of it, behind it, or inside it last.

@@ -21,10 +21,10 @@
     "tests": "DesignArrangeFakesTests"
   },
   {
-    "label": "group moves a leaf",
+    "label": "the group's frame is not the members' union",
     "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
-    "find": "made.children = siblings.filter { ids.contains($0.id) }",
-    "replace": "made.children = siblings.filter { ids.contains($0.id) }.map { var n = $0; n.translate(by: DesignPoint(x: 1, y: 0)); return n }",
+    "find": "name: \"Group\", kind: .group, frame: box)",
+    "replace": "name: \"Group\", kind: .group, frame: DesignRect(x: 0, y: 0, width: 1, height: 1))",
     "tests": "DesignArrangeFakesTests"
   },
   {

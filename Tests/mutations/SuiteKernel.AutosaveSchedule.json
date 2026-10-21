@@ -1,0 +1,23 @@
+[
+  {
+    "label": "dueExactlyAtDelay: a write is due only after the delay, not at it",
+    "file": "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+    "find": "now - edit >= delay",
+    "replace": "now - edit > delay",
+    "tests": "AutosaveScheduleTests"
+  },
+  {
+    "label": "saveDuringWriteDiscards: resets not compared, so a write a save overtook is kept",
+    "file": "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+    "find": "if ticket.resets != resets { return .discard }",
+    "replace": "if false { return .discard }",
+    "tests": "AutosaveScheduleTests"
+  },
+  {
+    "label": "failedWriteWaitsForEdit: writtenEdit cleared on failure, so a failing write retries every tick",
+    "file": "Sources/SuiteKernel/Session/AutosaveSchedule.swift",
+    "find": "guard wrote else { return .retryOnNextEdit }",
+    "replace": "guard wrote else { writtenEdit = nil; return .retryOnNextEdit }",
+    "tests": "AutosaveScheduleTests"
+  }
+]

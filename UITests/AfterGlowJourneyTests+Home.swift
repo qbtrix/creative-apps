@@ -26,6 +26,13 @@ extension AfterGlowJourneyTests {
                   "searching logo shows \(Self.cardNames(home))")
         XCTAssertEqual(Self.text(of: matching), "2 items matching \u{201C}logo\u{201D}")
         home.shot("home-sj1-search")
+        // The open field leaves the toolbar whole (#3357): nothing in the overflow, the sidebar
+        // toggle in reach and the switcher's Home item on screen.
+        let overflow = home.app.popUpButtons.matching(
+            NSPredicate(format: "label ==[c] 'more toolbar items' OR identifier ==[c] 'more toolbar items'"))
+        XCTAssertFalse(overflow.firstMatch.exists, "with the search open, toolbar items went into the overflow")
+        XCTAssert(home.element("suite.sidebarToggle").isHittable, "with the search open, the sidebar toggle is out of reach")
+        XCTAssert(home.element("suite.switcher.home").exists, "with the search open, the switcher's Home item is gone")
 
         // 2. The Design chip: 1 card.
         let chip = Self.designChip(home)

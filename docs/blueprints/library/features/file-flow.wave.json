@@ -1,0 +1,148 @@
+{
+  "title": "Drop photos and folders on Library to import them, drag thumbnails out to other apps, and Open In from Library",
+  "wave": 5,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "library/file-flow (adopter of suite/file-flow); #864 (adopt the suite: SuiteDocumentHost, .suiteApp); RJ-L42",
+  "waits_on": "suite file-flow's SF-a (cross-line; LF-3 needs SF-5 and SF-6, LF-4 SF-7, LF-7 SF-8); tone-controls's LT-m (the catalog files), slice wait",
+  "longest_chain": "5 (LF-1 → LF-2 → LF-6 → LF-7 → LF-8)",
+  "journeys": [
+    "LibraryFileFlowJourneyTests.testDropToImportAndDragOut"
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "Tests/LibraryModelTests/LibraryFileFlowTests.swift",
+    "Sources/LibraryApp/LibraryApp.swift",
+    "Sources/LibraryApp/LibraryCommands.swift",
+    "Sources/LibraryApp/LibraryGrid.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.LibraryFileFlow+Kernel.json",
+    "Tests/RealJobs/library/drop-import/",
+    "Sources/LibraryApp/LibraryWindow+Import.swift",
+    "Tests/AppSnapshotTests/LibraryFileFlowLiveTests.swift",
+    "Tests/AppSnapshotTests/LibraryFileFlowSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryFileDropTests.swift",
+    "UITests/LibraryJourneyTests+FileFlow.swift",
+    "docs/blueprints/library/features/file-flow.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "LF-a",
+      "behavior": "Library conforms to `SuiteDocumentHost` and `FileFlowTarget` on stubs, its scene adopts `.suiteApp`, and its File menu and window use the suite's Open Recent, Open In and drop on the fakes.",
+      "tasks": [
+        "LF-1",
+        "LF-2"
+      ],
+      "journeys": [
+        "MLF"
+      ],
+      "waits": {
+        "spine": [
+          "LF-1",
+          "LF-2"
+        ],
+        "import": [
+          "LF-1",
+          "LF-2"
+        ],
+        "thumbnails": [
+          "LF-1",
+          "LF-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+        "Tests/LibraryModelTests/LibraryFileFlowTests.swift",
+        "Sources/LibraryApp/LibraryApp.swift",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Sources/LibraryApp/LibraryGrid.swift"
+      ]
+    },
+    {
+      "id": "LF-u",
+      "behavior": "The menu and the drop mark have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "LF-5",
+        "LF-6"
+      ],
+      "journeys": [
+        "LFJ1"
+      ],
+      "waits": {
+        "LF-a": [
+          "LF-5",
+          "LF-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/LibraryFileFlowSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryFileDropTests.swift",
+        "UITests/LibraryJourneyTests+FileFlow.swift"
+      ]
+    },
+    {
+      "id": "LF-m",
+      "behavior": "Library imports dropped photos and folders as one step, accepts import and open hand-offs, notes its catalog opens in the suite list, and drags thumbnails out as the file and a PNG.",
+      "tasks": [
+        "LF-3",
+        "LF-4"
+      ],
+      "journeys": [
+        "MLF"
+      ],
+      "waits": {
+        "LF-a": [
+          "LF-3",
+          "LF-4"
+        ],
+        "tone-controls:LT-m": [
+          "LF-3"
+        ],
+        "cull-finish:DR-m": [
+          "LF-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/LibraryModelTests/LibraryFileFlowTests.swift",
+        "Tests/mutations/LibraryModel.LibraryFileFlow+Kernel.json",
+        "Tests/RealJobs/library/drop-import/",
+        "Sources/LibraryApp/LibraryWindow+Import.swift",
+        "Tests/AppSnapshotTests/LibraryFileFlowLiveTests.swift"
+      ]
+    },
+    {
+      "id": "LF-z",
+      "behavior": "Drop, Open Recent and Open In run on live services, the journey passes, and the feature is built.",
+      "tasks": [
+        "LF-7",
+        "LF-8"
+      ],
+      "journeys": [
+        "LFJ1"
+      ],
+      "waits": {
+        "LF-u": [
+          "LF-7",
+          "LF-8"
+        ],
+        "LF-m": [
+          "LF-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/LibraryJourneyTests+FileFlow.swift",
+        "docs/blueprints/library/features/file-flow.wave.json"
+      ]
+    }
+  ]
+}

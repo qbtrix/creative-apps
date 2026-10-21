@@ -1,0 +1,30 @@
+[
+  {
+    "label": "a solid fill reads as a gradient",
+    "file": "Sources/FlareModel/FlarePaint.swift",
+    "find": "            gradient: solid.isEmpty && Self.same(fills) != nil ? fillSelection : nil)",
+    "replace": "            gradient: fillSelection)",
+    "tests": "FlareGradientTests"
+  },
+  {
+    "label": "the readout drops the gradient",
+    "file": "Sources/FlareModel/FlarePaint.swift",
+    "find": "            gradient: solid.isEmpty && Self.same(fills) != nil ? fillSelection : nil)",
+    "replace": "            gradient: nil)",
+    "tests": "FlareGradientTests"
+  },
+  {
+    "label": "differingGradientsAreMixed: gradients compared by type only",
+    "file": "Sources/FlareModel/FlarePaint.swift",
+    "find": "            gradient: solid.isEmpty && Self.same(fills) != nil ? fillSelection : nil)",
+    "replace": "            gradient: solid.isEmpty ? fillSelection : nil)",
+    "tests": "FlarePaintGradientTests"
+  },
+  {
+    "label": "solidReplacesGradient: the gradient refusal kept",
+    "file": "Sources/FlareModel/FlarePaint.swift",
+    "find": "        paintStep(nil) { try properties.setFill(.solid(color), of: items, in: &$0) }",
+    "replace": "        if found.contains(where: { if case .solid = $0.1.fill { false } else { true } }) { return paintError = \"Gradients can't be edited yet.\" }; paintStep(nil) { try properties.setFill(.solid(color), of: items, in: &$0) }",
+    "tests": "FlarePaintGradientTests"
+  }
+]

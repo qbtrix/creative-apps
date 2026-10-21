@@ -1,7 +1,8 @@
 // CLIShapeTests.swift: LJ0's first half (afterglow-cli CL-1). `afterglow
 // --version` prints exactly one JSON object with sorted keys and exits 0;
 // since CL-4 the other single-shot forms answer (CLIArgsTests), since CL-7
-// `run` does too (BatchTests), and `mcp` is a stub that exits 69 naming its slice. Runs
+// `run` does too (BatchTests), and since afterglow-mcp MC-4 `mcp` serves
+// (MCPProtocolTests). Runs
 // through CLI.run, the same entry main.swift calls, so both targets build
 // on Linux and macOS.
 #if canImport(FoundationEssentials)
@@ -33,19 +34,6 @@ struct CLIShapeTests {
         #expect(run.err.isEmpty)
         #expect(Self.object(run.out.first ?? "")?["version"] == .string(CLI.version))
         #expect(!CLI.version.isEmpty)
-    }
-
-    @Test(arguments: [(["mcp"], "afterglow-mcp is not built yet")]) // `run` is real since CL-7
-    func everyOtherFormIsAStubThatNamesItsSlice(arguments: [String], slice: String) {
-        let run = Self.run(arguments)
-        #expect(run.code == 69)
-        #expect(run.out.count == 1)
-        let line = run.out.first ?? ""
-        #expect(line.hasPrefix(#"{"error":{"kind":"notBuilt","message":"#), "keys are not sorted: \(line)")
-        #expect(line.hasSuffix(#""ok":false}"#))
-        #expect(Self.object(line)?["ok"] == .bool(false))
-        #expect(run.err.count == 1)
-        #expect(run.err.first?.contains(slice) == true, "\(run.err)")
     }
 }
 

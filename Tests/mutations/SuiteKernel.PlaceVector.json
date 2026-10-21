@@ -1,0 +1,23 @@
+[
+  {
+    "label": "keepsColours: every fill mapped to black, so the groups lose their colours",
+    "file": "Sources/SuiteKernel/Place/PlaceVector.swift",
+    "find": "fill: paint(item.fill, item.matrix)",
+    "replace": "fill: .solid(FillColor(r: 0, g: 0, b: 0))",
+    "tests": "PlaceVectorTests"
+  },
+  {
+    "label": "ringKeepsHole: only the first contour kept, so the ring's hole fills",
+    "file": "Sources/SuiteKernel/Place/PlaceVector.swift",
+    "find": ".filter { $0.count > 1 }",
+    "replace": ".filter { $0.count > 1 }.prefix(1).map { $0 }",
+    "tests": "PlaceVectorTests"
+  },
+  {
+    "label": "reportsSkipped: the import's report dropped, so a filter goes unreported",
+    "file": "Sources/SuiteKernel/Place/PlaceVector.swift",
+    "find": "let skipped = report.skipped +",
+    "replace": "let skipped = [String]() +",
+    "tests": "PlaceVectorTests"
+  }
+]

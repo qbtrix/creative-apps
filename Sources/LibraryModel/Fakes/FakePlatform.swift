@@ -18,7 +18,7 @@ public struct FakeDecoder: PhotoDecoding {
         try await FakeBehavior.perform(mode, failing: .unreadableFolder(folder))
         let candidates = photos.map {
             ImportCandidate(path: folder + "/" + $0.name + ".jpg", captureDate: $0.captureDate,
-                            pixelSize: $0.pixelSize, kind: .jpeg)
+                            pixelSize: $0.pixelSize, kind: .jpeg, camera: $0.camera)
         }
         return FolderScan(candidates: candidates, failures: [])
     }
@@ -36,6 +36,9 @@ public actor FakeJPEGWriter: JPEGWriting {
     let mode: FakeMode
     /// Written files by "folder/name", for tests.
     public private(set) var files: [String: DisplayImage] = [:]
+    /// The dropped properties and the metadata source of each file written with them, by "folder/name".
+    public private(set) var dropped: [String: Set<String>] = [:]
+    public private(set) var sources: [String: String] = [:]
     public init(mode: FakeMode = .ok) { self.mode = mode }
 
     public func existingNames(in folder: String) async throws -> Set<String> {
@@ -47,6 +50,14 @@ public actor FakeJPEGWriter: JPEGWriting {
         try await FakeBehavior.perform(mode, failing: .writeFailed(path: key, reason: "The folder is read-only."))
         guard files[key] == nil else { throw LibraryError.writeFailed(path: key, reason: "The file already exists.") }
         files[key] = image
+    }
+
+    public func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String,
+                      metadataFrom source: String?, dropping: Set<String>) async throws {
+        try await write(image, quality: quality, folder: folder, fileName: fileName)
+        let key = folder + "/" + fileName
+        dropped[key] = dropping
+        sources[key] = source
     }
 }
 

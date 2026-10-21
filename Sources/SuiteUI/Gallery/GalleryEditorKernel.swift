@@ -25,7 +25,8 @@ import SwiftUI
 enum GalleryEditorKernel {
     static let name = "editor-kernel"
 
-    @MainActor static let pages: GalleryPages = [name: { AnyView(GalleryEditorKernelPage()) }]
+    @MainActor static let pages: GalleryPages = [name: { AnyView(GalleryEditorKernelPage()) },
+                                                 GalleryShapeTools.name: { AnyView(GalleryShapeToolsPage()) }]
 
     /// Every container id of `tree`, found by opening rows until no new one shows.
     static func allOpen<P: LayerPayload>(_ tree: LayerTree<P>) -> Set<String> {

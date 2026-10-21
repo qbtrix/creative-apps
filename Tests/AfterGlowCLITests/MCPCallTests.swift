@@ -1,5 +1,5 @@
 // MCPCallTests.swift: MJ3's call checks (afterglow-mcp MC-7, written first;
-// MC-8 builds `MCPSessions.call` and wires `tools/call`, then turns them on).
+// MC-8 built `MCPSessions.call` behind `tools/call` and turned them on).
 // `<app>.open` reads a file under the allowed roots into an expiring handle;
 // `<app>.<id> {doc, params}` runs one command through the catalog; why-nots,
 // schema issues, refused paths and dead handles are tool errors
@@ -55,7 +55,7 @@ struct MCPCallTests {
         return text
     }
 
-    @Test(.disabled("waits on MC-8"))
+    @Test
     func openReturnsAHandleAndTheSummaryAndCommandsRunOnIt() throws {
         var sessions = MCPSessions(Self.options(), io: Self.io())
         let opened = sessions.call(.open(app: "fake"), Self.path(Self.file), now: 0)
@@ -75,7 +75,7 @@ struct MCPCallTests {
         #expect(!made.isError && fresh != doc && freshCount == 0)
     }
 
-    @Test(.disabled("waits on MC-8"))
+    @Test
     func whyNotIsToolError() throws {
         var sessions = MCPSessions(Self.options(), io: Self.io())
         let doc = try Self.open(&sessions)
@@ -89,7 +89,7 @@ struct MCPCallTests {
         #expect(undo.isError && undo.text.contains("There is nothing to undo."))
     }
 
-    @Test(.disabled("waits on MC-8"))
+    @Test
     func schemaIssuesAreToolErrorsNamingEachPath() throws {
         var sessions = MCPSessions(Self.options(), io: Self.io())
         let doc = try Self.open(&sessions)
@@ -101,7 +101,7 @@ struct MCPCallTests {
         #expect(notObject.isError && rects == 2 && noDoc.isError)
     }
 
-    @Test(.disabled("waits on MC-4 and MC-8"))
+    @Test
     func throughTheServerAnUnknownToolIsInvalidParamsAndAWhyNotIsAResult() throws {
         let server = MCPServer(Self.options(), io: Self.io(), clock: { 0 })
         var client = MCPTestClient(server, era: .sessionless(MCPVersions.current))
@@ -116,7 +116,7 @@ struct MCPCallTests {
         #expect(Self.field(content.first, "type") == .string("text") && Self.text(undo.result).contains("nothing to undo"))
     }
 
-    @Test(.disabled("waits on MC-8"), arguments: ["/etc/passwd", "/tmp/mcp/../etc/passwd", "/tmp/mcp-evil/a.fake", "/tmp", "relative/../../x.fake"])
+    @Test(arguments: ["/etc/passwd", "/tmp/mcp/../etc/passwd", "/tmp/mcp-evil/a.fake", "/tmp", "relative/../../x.fake"])
     func pathsOutsideTheRootsAreRefused(path: String) {
         var files = ["/tmp/mcp-evil/a.fake": Self.locked]
         files[path] = Self.locked
@@ -138,7 +138,7 @@ struct MCPCallTests {
         return (base, root, outside)
     }
 
-    @Test(.disabled("waits on MC-8"))
+    @Test
     func symlinkEscapeRefused() throws {
         let tree = try Self.liveTree()
         defer { try? FileManager.default.removeItem(atPath: tree.base) }
@@ -153,7 +153,7 @@ struct MCPCallTests {
         #expect(out.isError && !FileManager.default.fileExists(atPath: tree.outside + "/written.fake"))
     }
 
-    @Test(.disabled("waits on MC-8"))
+    @Test
     func theOpenCapRefusesOneMoreUntilAHandleCloses() throws {
         var sessions = MCPSessions(Self.options(maxOpen: 2), io: Self.io())
         let first = try Self.open(&sessions)
@@ -167,7 +167,7 @@ struct MCPCallTests {
         _ = try Self.open(&sessions)
     }
 
-    @Test(.disabled("waits on MC-8"))
+    @Test
     func idleExpiryInclusive() throws {
         var sessions = MCPSessions(Self.options(idle: 10), io: Self.io())
         let doc = try Self.open(&sessions, now: 0)
@@ -184,7 +184,7 @@ struct MCPCallTests {
         #expect(unknown.isError && unknown.text.contains(Self.expired))
     }
 
-    @Test(.disabled("waits on MC-8"))
+    @Test
     func saveAndExportRefuseToOverwriteWithoutForce() throws {
         let io = Self.io()
         var sessions = MCPSessions(Self.options(), io: io)
@@ -220,7 +220,7 @@ struct MCPCallTests {
         func set(_ value: Double) { now.withLock { $0 = value } }
     }
 
-    @Test(.disabled("waits on MC-4 and MC-8"))
+    @Test
     func rateLimited() throws {
         var options = Self.options()
         options.maxCallsPerSecond = 3
@@ -243,8 +243,8 @@ struct MCPCallTests {
         #expect(rects.count == 2, "the refused call ran nothing")
     }
 
-    /// Timing (quality row "call overhead"): reported, not gated, so it waits on a `Tests/perf-suites.txt` entry too.
-    @Test(.disabled("waits on MC-8 and a perf-suites entry (timing)"))
+    /// Timing (quality row "call overhead"): p95 of the routing overhead, on the perf list (`Tests/perf-suites.txt`).
+    @Test
     func callOverhead() throws {
         var sessions = MCPSessions(Self.options(), io: Self.io())
         let doc = try Self.open(&sessions)

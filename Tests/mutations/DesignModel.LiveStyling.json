@@ -44,8 +44,22 @@
   {
     "label": "the layer's own flag is dropped, so the incoming style's fixedWidth wins",
     "file": "Sources/DesignModel/Live/LiveStyling.swift",
-    "find": "clamped.fixedWidth = node.textStyle.fixedWidth",
+    "find": "clamped.fixedWidth = Self.widthMode(style, over: node.textStyle)",
     "replace": "",
     "tests": "DesignTextFitTests"
+  },
+  {
+    "label": "a width-mode-only style keeps the layer's mode, so the Width chips do nothing (#3337)",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "return style.fixedWidth == true ? true : nil",
+    "replace": "return own.fixedWidth",
+    "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "auto width is stored as false, not nil, so it reads as a different style (#3337)",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "return style.fixedWidth == true ? true : nil",
+    "replace": "return style.fixedWidth",
+    "tests": "DesignTextLiveFitTests"
   }
 ]

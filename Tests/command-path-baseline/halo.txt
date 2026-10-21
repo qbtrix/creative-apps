@@ -1,36 +1,4 @@
 # HaloApp's menu items and buttons built without a command spec (command-catalog CC-11).
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .playPause, target: target, systemImage: "playpause", key: "Space")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .toggleLoop, target: target, systemImage: "repeat")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .nextFrame, target: target, key: "→")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .previousFrame, target: target, key: "←")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .goToStart, target: target, key: "Home")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .goToEnd, target: target, key: "End")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .setInPoint, target: target, key: "I")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .setOutPoint, target: target, key: "O")
-Sources/HaloApp/HaloAnimationMenu.swift: MenuCommand(command: .setEasing(preset), target: target)
-Sources/HaloApp/HaloCommands.swift: MenuCommand(command: .newLayer(kind), target: target, systemImage: kind.systemImage)
-Sources/HaloApp/HaloCommands.swift: MenuCommand(
-Sources/HaloApp/HaloCommands.swift: MenuCommand(command: .beginRenameLayer, target: target)
-Sources/HaloApp/HaloCommands.swift: MenuCommand(command: .deleteLayer, target: target, systemImage: "trash", key: "Delete")
-Sources/HaloApp/HaloCommands.swift: MenuCommand(command: .bringLayerForward, target: target, shortcut: KeyboardShortcut("]"))
-Sources/HaloApp/HaloCommands.swift: MenuCommand(command: .sendLayerBackward, target: target, shortcut: KeyboardShortcut("["))
-Sources/HaloApp/HaloCompositionCommands.swift: MenuCommand(
-Sources/HaloApp/HaloCompositionCommands.swift: MenuCommand(
-Sources/HaloApp/HaloCompositionCommands.swift: MenuCommand(
-Sources/HaloApp/HaloEditMenu.swift: MenuCommand(command: .undo, target: target, shortcut: KeyboardShortcut("z"))
-Sources/HaloApp/HaloEditMenu.swift: MenuCommand(command: .redo, target: target, shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
-Sources/HaloApp/HaloFileMenu.swift: MenuCommand(command: .newComposition, target: target, systemImage: "plus")
-Sources/HaloApp/HaloFileMenu.swift: MenuCommand(command: .open, target: target, systemImage: "folder", shortcut: KeyboardShortcut("o"))
-Sources/HaloApp/HaloFileMenu.swift: MenuCommand(
-Sources/HaloApp/HaloFileMenu.swift: MenuCommand(command: .saveAs, target: target, shortcut: KeyboardShortcut("s", modifiers: [.command, .shift]))
-Sources/HaloApp/HaloFileMenu.swift: MenuCommand(
-Sources/HaloApp/HaloFileMenu.swift: MenuCommand(command: .renderFrame, target: target, systemImage: "photo", shortcut: KeyboardShortcut("r"))
-Sources/HaloApp/HaloFileMenu.swift: Button("Open Recent") {}
-Sources/HaloApp/HaloFileMenu.swift: MenuCommand(command: .openRecent(file.path), target: target, title: file.name)
-Sources/HaloApp/HaloRenderSheet.swift: Button("Choose…") { chooseFolder() }
-Sources/HaloApp/HaloRenderSheet.swift: Button("Render") { startRender() }
-Sources/HaloApp/HaloRenderSheet.swift: Button("Reveal in Finder") {
-Sources/HaloApp/HaloRenderSheet.swift: return Button(title) { onCommand(command) }
 Sources/HaloApp/HaloTimelineView.swift: Button(preset.title) { perform(.setEasing(preset)) }
 Sources/HaloApp/HaloTransport.swift: Button(model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
 Sources/HaloApp/HaloWindow+File.swift: Button(alertSaveNeedsPanel ? "Save As…" : "Save") { goOn(saving: true) }
@@ -39,6 +7,7 @@ Sources/HaloApp/HaloWindow+File.swift: Button("Cancel", role: .cancel) { request
 Sources/HaloApp/HaloWindow+File.swift: Button("OK", role: .cancel) {}
 Sources/HaloApp/HaloWindow+Layers.swift: Button("Rename") { onRename(id, draft ?? name(id)) }
 Sources/HaloApp/HaloWindow+Layers.swift: Button("Cancel", role: .cancel) { onDismiss() }
+Sources/HaloApp/HaloWindow+Render.swift: Button("Choose…") { act(.choose) }
 Sources/HaloApp/NewCompositionSheet.swift: Button("Cancel", role: .cancel) { onCancel() }
 Sources/HaloApp/NewCompositionSheet.swift: Button("Create") { if draft.isValid { onCreate(draft.settings) } }
 Sources/HaloApp/RenameRefusalAlert.swift: Button("Rename") { onRename(refusal, draft ?? refusal.name) }

@@ -12,9 +12,12 @@
 // 1, text size 1...1000, weight 100...900; a non-finite value changes nothing.
 // Help law: nil exactly when the write succeeds or only reports `.unchanged`;
 // it depends on the selection, never on the value. A text style keeps each
-// layer's own `fixedWidth` and refits its box by the size's ratio in the same
-// step (canvas-basics CB-5): auto width both sides, fixed width the height,
-// rounded up, at least 1. Linux-safe.
+// layer's own `fixedWidth` unless the style differs from that layer's only in
+// it, which switches the layer's width mode (#3337; auto is stored as nil), and
+// refits its box by the size's ratio in the same step (canvas-basics CB-5):
+// auto width both sides, fixed width the height, rounded up, at least 1. A
+// switch to auto keeps the width until the next edit measures the text.
+// Linux-safe.
 
 public struct LiveStyling: StyleEditing {
     public init() {}
@@ -75,7 +78,7 @@ public struct LiveStyling: StyleEditing {
             var clamped = style
             clamped.size = Swift.max(1, Swift.min(style.size, 1000))
             clamped.weight = Swift.min(Swift.max(style.weight, 100), 900)
-            clamped.fixedWidth = node.textStyle.fixedWidth
+            clamped.fixedWidth = Self.widthMode(style, over: node.textStyle)
             let old = node.textStyle.size
             node.textStyle = clamped
             guard old.isFinite, old > 0, clamped.size != old else { return }
@@ -83,6 +86,16 @@ public struct LiveStyling: StyleEditing {
             if clamped.fixedWidth != true { node.frame.width = Self.scaled(node.frame.width, ratio) }
             node.frame.height = Self.scaled(node.frame.height, ratio)
         }
+    }
+
+    /// The width mode `style` leaves on a layer styled `own`: `style`'s when it differs from `own`
+    /// only in that mode (the inspector's Width choice, #3337), true for fixed and nil for auto;
+    /// else `own`'s, so a row that sets one layer's style on several keeps each one's mode.
+    private static func widthMode(_ style: DesignTextStyle, over own: DesignTextStyle) -> Bool? {
+        var same = style
+        same.fixedWidth = own.fixedWidth
+        guard same == own else { return own.fixedWidth }
+        return style.fixedWidth == true ? true : nil
     }
 
     /// `side` × `ratio`, rounded up to a whole point, at least 1.

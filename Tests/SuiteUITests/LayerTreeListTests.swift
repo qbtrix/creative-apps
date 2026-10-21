@@ -9,7 +9,9 @@
 // its toggles as SidebarRow does and runs its header action. For the app
 // panel swaps (#3194) it takes app ids, and a drop beside a flat row reorders
 // it among its siblings (before, after, first, last; refused on a locked
-// target or an unknown id), the root as parent at depth 0. macOS only.
+// target or an unknown id), the root as parent at depth 0. Multi-select
+// (multi-layer-select PM-1): Shift extends, Command toggles, a plain click
+// replaces, and every id in `selected` draws selected. macOS only.
 @testable import SuiteUI
 import SuiteKernel
 import SwiftUI
@@ -171,6 +173,78 @@ import Testing
         #expect(!flat.showsEye && !flat.showsLock && flat.reorders && flat.embedded)
         let kind = LayerRowDecoration(symbol: "photo", symbolID: "photo.layer.7.kind", caption: "Pixel · 100%")
         #expect(kind.caption == "Pixel · 100%" && kind.thumbnail == nil && kind.help == nil)
+    }
+
+    /// The click's mode (PM-1): Shift extends, Command toggles, a plain click
+    /// replaces; Shift wins when both are held.
+    @Test func pickModes() {
+        #expect(LayerTreeList.pick(shift: true, command: false) == .extend)
+        #expect(LayerTreeList.pick(shift: false, command: true) == .toggle)
+        #expect(LayerTreeList.pick(shift: false, command: false) == .replace)
+        #expect(LayerTreeList.pick(shift: true, command: true) == .extend)
+    }
+
+    /// With two ids picked both rows read selected and a click goes out
+    /// through `onPick`; the single `selection:` init still draws one row.
+    @Test func severalSelected() {
+        let rows = KernelFixtures.tree200.rows(expanded: [])
+        let calls = PanelCalls()
+        let list = LayerTreeList(
+            rows: rows, childCount: { _ in 0 }, selected: ["header", "footer"],
+            onPick: { id, _ in calls.picked.append(id) }, onAction: { _ in })
+        #expect(list.isSelected("header") && list.isSelected("footer"))
+        #expect(!list.isSelected("background") && !list.isSelected("nosuch"))
+        list.select("background")
+        #expect(calls.picked == ["background"])
+
+        let single = LayerTreeList(rows: rows, childCount: { _ in 0 }, selection: "header", onAction: { _ in })
+        #expect(single.isSelected("header") && !single.isSelected("footer"))
+        let none = LayerTreeList(rows: rows, childCount: { _ in 0 }, selected: [], onPick: { _, _ in }, onAction: { _ in })
+        #expect(!none.isSelected("header"))
+    }
+
+    /// A flat leaf row of `tree200`, named Sky.
+    private func flatRow() -> LayerRow {
+        var row = KernelFixtures.tree200.rows(expanded: [])[0]
+        row.id = "7"
+        row.name = "Sky"
+        row.depth = 0
+        row.holdsChildren = false
+        return row
+    }
+
+    /// `row` drawn alone with `options` and `decoration`, at its own size.
+    private func size(_ row: LayerRow, options: LayerTreeOptions = .init(),
+                      decoration: LayerRowDecoration? = nil) -> CGSize {
+        NSHostingView(rootView: LayerTreeRow(
+            row: row, lit: false, selected: false, naming: .layers, options: options, decoration: decoration,
+            field: nil, onAction: { _ in }, onSelect: nil, onRename: nil)).fittingSize
+    }
+
+    /// Every row is one pointer-sized height: a caption under the name doesn't
+    /// make its row jump taller than its neighbours (Photo's blend line).
+    @Test func rowsShareOneHeight() {
+        let plain = size(flatRow()).height
+        let captioned = size(flatRow(), decoration: LayerRowDecoration(symbol: "photo", caption: "Multiply 60%")).height
+        #expect(plain >= SuiteSize.studioRow, "plain row is \(plain) pt")
+        #expect(abs(captioned - plain) <= 4, "caption row \(captioned) pt against plain \(plain) pt")
+    }
+
+    /// A list that never nests (Photo) leaves out the empty disclosure column.
+    @Test func flatListHasNoDisclosureColumn() {
+        #expect(LayerTreeOptions().nests)
+        let nested = size(flatRow()).width
+        let flat = size(flatRow(), options: LayerTreeOptions(nests: false)).width
+        #expect(nested - flat >= SuiteSize.iconButtonHit, "flat \(flat) pt against nested \(nested) pt")
+    }
+
+    /// A row under the pointer shows it with fill and outline (fill alone is
+    /// too faint in Dark); selection and a drop target win over hover.
+    @Test func hoverLook() {
+        #expect(LayerRowLook.resolve(selected: false, lit: false, hovering: false) == .rest)
+        #expect(LayerRowLook.resolve(selected: false, lit: false, hovering: true) == .hover)
+        #expect(LayerRowLook.resolve(selected: true, lit: false, hovering: true) == .selected)
+        #expect(LayerRowLook.resolve(selected: true, lit: true, hovering: true) == .dropTarget)
     }
 
     /// A legacy scroller's page area is a `button ''` to the app audit, so the

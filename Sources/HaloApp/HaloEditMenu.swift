@@ -1,7 +1,7 @@
 // HaloEditMenu.swift: Halo's Undo ⌘Z and Redo ⇧⌘Z in place of the system
 // pair, titled for the step they act on by `HaloProject.title(for:)` ("Undo
 // New Layer"), sent through the focused window and disabled with the Model's
-// reason as help (SuiteUI's MenuCommand). The system's pasteboard items stay, so Cut,
+// reason as help (HaloMenuTarget.item, from the catalog spec). The system's pasteboard items stay, so Cut,
 // Copy, Paste and Select All still work in text fields.
 import HaloModel
 import SuiteUI
@@ -15,8 +15,8 @@ struct HaloEditMenu: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .undoRedo) {
-            MenuCommand(command: .undo, target: target, shortcut: KeyboardShortcut("z"))
-            MenuCommand(command: .redo, target: target, shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
+            target.item(.undo, shortcut: KeyboardShortcut("z"))
+            target.item(.redo, shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
         }
     }
 }

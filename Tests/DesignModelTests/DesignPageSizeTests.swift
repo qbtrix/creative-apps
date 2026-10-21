@@ -107,3 +107,21 @@ private func liftedCards(_ change: (inout [DesignNode]) -> Void) -> DesignPage {
     #expect(narrow.isPastEdge(desktop))
     #expect(!narrow.isPastEdge(a))
 }
+
+/// contentBounds is DesignRect.union of the visible frames (#3341): nested visible layers count,
+/// a hidden group's children don't, and the union takes the true min and max on each side.
+@Test func contentBoundsIsTheCanonicalUnion() {
+    let nested = DesignNode(
+        id: "node-1", name: "F", kind: .frame, frame: rc(10, 20, 100, 100),
+        children: [DesignNode(id: "node-2", name: "In", kind: .ellipse, frame: rc(-30, 50, 20, 200))])
+    let hidden = DesignNode(
+        id: "node-3", name: "G", kind: .group, frame: rc(500, 500, 10, 10),
+        children: [DesignNode(id: "node-4", name: "Far", kind: .rectangle, frame: rc(-900, -900, 5, 5))],
+        isHidden: true)
+    let tail = DesignNode(id: "node-5", name: "R", kind: .rectangle, frame: rc(200, -40, 60, 30))
+    let page = DesignPage(id: "page-9", name: "P", frameWidth: 100, frameHeight: 100, nodes: [nested, hidden, tail])
+    let visible = [rc(10, 20, 100, 100), rc(-30, 50, 20, 200), rc(200, -40, 60, 30)]
+    #expect(page.contentBounds == DesignRect.union(visible))
+    #expect(page.contentBounds == rc(-30, -40, 290, 290))
+    #expect(DesignRect.union([]) == nil)
+}

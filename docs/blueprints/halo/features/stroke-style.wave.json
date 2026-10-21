@@ -1,0 +1,163 @@
+{
+  "title": "Strokes, dashes and keyed trim paths on shape layers, drawn as the painted path's outline",
+  "wave": "W4",
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/stroke-style (adopter of S17); RJ-H30",
+  "waits_on": "suiteui stroke-style's contract slice SS-a and SS-d (cross-line); shape-tools' HS-a and HS-m and gradient-fill's HG-u and HG-m slices",
+  "depends": [
+    "foundation",
+    "viewer-playback",
+    "layer-keys",
+    "text-layers",
+    "history-files",
+    "core-loop"
+  ],
+  "longest_chain": "6 (HK-1 → HK-2 → HK-3 → HK-4 → HK-7 → HK-8)",
+  "journeys": [
+    "HaloStrokeJourneyTests.testStrokeDrawOn"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloLayer.swift",
+    "Sources/HaloModel/HaloStroke+Kernel.swift",
+    "Tests/HaloModelTests/HaloStrokeTests.swift",
+    "Sources/HaloApp/HaloStrokeInspector.swift",
+    "Sources/HaloApp/HaloLayerInspector.swift",
+    "UITests/HaloJourneyTests+Stroke.swift",
+    "Tests/AppSnapshotTests/HaloStrokeInspectorTests.swift",
+    "Tests/AppSnapshotTests/HaloStrokeSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloStrokeTests.swift",
+    "Sources/HaloModel/Live/HaloOutlines.swift",
+    "Sources/HaloModel/Live/LiveFrameRendering.swift",
+    "Sources/HaloModel/Contracts/HaloValues.swift",
+    "Tests/HaloModelTests/HaloStrokeRenderTests.swift",
+    "Tests/mutations/HaloModel.LiveFrameRendering.json",
+    "Tests/mutations/HaloModel.HaloOutlines.json",
+    "Tests/mutations/HaloModel.HaloStroke+Kernel.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/RealJobs/halo/star-stroke/star-stroke.jobs.json",
+    "Tests/RealJobs/halo/star-stroke/input/empty-1080p.halo",
+    "docs/blueprints/halo/features/stroke-style.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "HK-a",
+      "behavior": "Shape layers carry a stroke, the adapter is declared as stubs, and the shared stroke editor shows in the layer inspector.",
+      "tasks": [
+        "HK-1",
+        "HK-2"
+      ],
+      "journeys": [
+        "MJ-HK"
+      ],
+      "waits": {
+        "shape-tools:HS-a": [
+          "HK-1"
+        ],
+        "gradient-fill:HG-u": [
+          "HK-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloModel/HaloLayer.swift",
+        "Sources/HaloModel/HaloStroke+Kernel.swift",
+        "Tests/HaloModelTests/HaloStrokeTests.swift",
+        "Sources/HaloApp/HaloStrokeInspector.swift",
+        "Sources/HaloApp/HaloLayerInspector.swift",
+        "UITests/HaloJourneyTests+Stroke.swift"
+      ]
+    },
+    {
+      "id": "HK-u",
+      "behavior": "The trim rows carry key diamonds, and the snapshots and render budget hold.",
+      "tasks": [
+        "HK-3",
+        "HK-4"
+      ],
+      "journeys": [
+        "J-HK"
+      ],
+      "waits": {
+        "HK-a": [
+          "HK-3",
+          "HK-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloStrokeInspector.swift",
+        "Tests/AppSnapshotTests/HaloStrokeInspectorTests.swift",
+        "Tests/AppSnapshotTests/HaloStrokeSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloStrokeTests.swift"
+      ]
+    },
+    {
+      "id": "HK-m",
+      "behavior": "The renderer draws the trimmed, dashed stroke outline after the fill, trim keys at the playhead, and every stroke command is one step.",
+      "tasks": [
+        "HK-5",
+        "HK-6"
+      ],
+      "journeys": [
+        "MJ-HK"
+      ],
+      "waits": {
+        "HK-a": [
+          "HK-5",
+          "HK-6"
+        ],
+        "shape-tools:HS-m": [
+          "HK-5",
+          "HK-6"
+        ],
+        "gradient-fill:HG-m": [
+          "HK-5"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/Live/HaloOutlines.swift",
+        "Sources/HaloModel/Live/LiveFrameRendering.swift",
+        "Sources/HaloModel/Contracts/HaloValues.swift",
+        "Tests/HaloModelTests/HaloStrokeRenderTests.swift",
+        "Tests/mutations/HaloModel.LiveFrameRendering.json",
+        "Tests/mutations/HaloModel.HaloOutlines.json",
+        "Sources/HaloModel/HaloStroke+Kernel.swift",
+        "Tests/HaloModelTests/HaloStrokeTests.swift",
+        "Tests/mutations/HaloModel.HaloStroke+Kernel.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/RealJobs/halo/star-stroke/star-stroke.jobs.json",
+        "Tests/RealJobs/halo/star-stroke/input/empty-1080p.halo"
+      ]
+    },
+    {
+      "id": "HK-z",
+      "behavior": "The journey strokes a star and draws it on on live services, and the feature is built.",
+      "tasks": [
+        "HK-7",
+        "HK-8"
+      ],
+      "journeys": [
+        "J-HK"
+      ],
+      "waits": {
+        "HK-u": [
+          "HK-7"
+        ],
+        "HK-m": [
+          "HK-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+Stroke.swift",
+        "docs/blueprints/halo/features/stroke-style.wave.json"
+      ]
+    }
+  ]
+}

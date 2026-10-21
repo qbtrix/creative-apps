@@ -40,7 +40,7 @@ afterglow mcp [...]
 | `<app> <command> --in <file> …` | runs one command on the file and saves the result | `command`, `output`, `result`, `undoStep` |
 | `<app> export <file> --format <fmt> --out <path>` | exports in a format the app lists | `outputs` |
 | `run <script.jobs.json>` | runs a script over a set of inputs (Scripts below) | the run report |
-| `mcp` | the MCP server (`afterglow-mcp.md`); not built yet, exits 69 | – |
+| `mcp` | the MCP server: every app's catalog as tools over stdio (MCP server below) | one JSON-RPC reply line per request, until stdin ends |
 
 `<app>` is `photo`, `design`, `flare`, `halo` or `library`, plus `fake`,
 SuiteKernel's test document (`FakeCanvasDocument`: rectangles, saved as
@@ -95,7 +95,7 @@ Parsing is strict. Each form knows its own flags and nothing else:
 
 ## Output and exit codes
 
-Every invocation prints exactly one JSON object on one line of stdout, keys
+Every invocation but `mcp` prints exactly one JSON object on one line of stdout, keys
 sorted. Success is `{"ok":true,…}`. Failure is
 `{"ok":false,"error":{"kind","message","issues"?}}`, plus the message as one
 line on stderr. Exit codes follow BSD `sysexits`:
@@ -261,3 +261,273 @@ script without an `expect` block, fails with 70.
 3. Write `expect` from them: sha256 for byte-exact formats, json for JSON,
    pixels for images. Delete `out/`.
 4. `swift test --filter RealJobsTests` must pass or skip it with its reason.
+
+## MCP server: `afterglow mcp`
+
+`afterglow mcp` is a Model Context Protocol server over stdio. It publishes
+every app's command catalog as tools, so an MCP client edits documents
+through the same catalog as the menus and the commands above. It runs on
+Linux and macOS. The packet is
+`docs/blueprints/suite/features/afterglow-mcp.md`; the code is
+`Sources/AfterGlowCLICore/MCP/`.
+
+### Set-up for a client
+
+Build the binary once, then add one entry to your client's `.mcp.json`
+(or to its MCP settings, which take the same command and args):
+
+```bash
+swift build -c release --product afterglow    # .build/release/afterglow
+```
+
+```json
+{
+  "mcpServers": {
+    "afterglow": {
+      "command": "/absolute/path/to/creative-apps/.build/release/afterglow",
+      "args": ["mcp", "--root", "/Users/me/Art"]
+    }
+  }
+}
+```
+
+That is all a client needs. It starts the process, writes one JSON-RPC
+request per line to stdin and reads one reply per line from stdout. Use
+absolute paths: the client picks the working directory, and a relative
+`--root` is taken against it.
+
+| flag | meaning |
+|---|---|
+| `--root <dir>` | a folder the tools may read and write. Required; give it more than once for more folders. |
+| `--app <name>` | serve only this app's tools (`photo`, `design`, `flare`, `halo`, `library` or `fake`); repeat for more. Left out, every app. |
+| `--live` | also list the running apps' tools (Live mode below). macOS only. |
+
+Parsing is strict, as for the other forms, and a bad command line exits
+before serving, with the usual one JSON object:
+
+| when | message | exit |
+|---|---|---|
+| no `--root` | `afterglow mcp needs --root <dir>, the folder its tools may read and write` | 64 |
+| an unknown flag or app | `unknown flag --port`, `unknown app paint` | 64 |
+| `--app <name>` or `--live` given twice | `--app fake is given twice`, `--live is given twice` | 64 |
+| `--live` off macOS | `afterglow mcp --live runs only on macOS, where the apps listen` (kind `unavailable`) | 69 |
+
+Once serving, stdout carries nothing but replies. Blank lines and
+notifications get no reply, and the process exits 0 when stdin ends.
+
+**The five apps' catalogs are empty today** (see Forms): each app lists only
+its `open` and `new` tools until its `adopt-command-catalog` slice lands.
+The `fake` app has a full catalog, so try the server on it first
+(`--app fake`).
+
+### Protocol versions
+
+The server speaks three revisions of the specification, newest first:
+`2026-07-28`, `2025-11-25` and `2025-06-18` (`MCPVersions.swift`).
+
+- **2026-07-28** has no session: each request names its version in
+  `params._meta["io.modelcontextprotocol/protocolVersion"]`, and
+  `server/discover` returns the versions, the capabilities and the server's
+  name.
+- **2025-11-25 and 2025-06-18** start with `initialize`, which must carry a
+  `protocolVersion`. The reply is in that version, and it stays the version
+  of later requests that name none.
+- A request that names no version, before any `initialize`, is answered as
+  `2026-07-28`.
+
+The methods are `server/discover`, `initialize`, `ping`, `tools/list` and
+`tools/call`. The capabilities are `{"tools":{"listChanged":false}}`: no
+resources, no prompts, no change notifications.
+
+| error | code | when |
+|---|---|---|
+| Parse error | -32700 | the line isn't JSON (the reply's id is null) |
+| Invalid Request | -32600 | not one request object: a batch, `jsonrpc` other than `"2.0"`, an id that is neither an integer nor a string, `params` that aren't an object, a line over 16 MiB |
+| Method not found | -32601 | any other method |
+| Invalid params | -32602 | an unsupported version (`data` lists `supportedVersions` and the `requested` one); `initialize` without `protocolVersion`; an unknown tool; `arguments` that aren't an object |
+
+A handshake-era session with `--app fake` (real output):
+
+```
+> {"jsonrpc":"2.0","id":1,"method":"server/discover"}
+< {"id":1,"jsonrpc":"2.0","result":{"capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"afterglow","version":"0.1.0"},"supportedVersions":["2026-07-28","2025-11-25","2025-06-18"]}}
+> {"jsonrpc":"2.0","id":2,"method":"initialize","params":{"protocolVersion":"2025-06-18","clientInfo":{"name":"my-client","version":"1"},"capabilities":{}}}
+< {"id":2,"jsonrpc":"2.0","result":{"capabilities":{"tools":{"listChanged":false}},"protocolVersion":"2025-06-18","serverInfo":{"name":"afterglow","version":"0.1.0"}}}
+> {"jsonrpc":"2.0","method":"notifications/initialized"}
+> {"jsonrpc":"2.0","id":90,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2024-01-01"}}}
+< {"error":{"code":-32602,"data":{"requested":"2024-01-01","supportedVersions":["2026-07-28","2025-11-25","2025-06-18"]},"message":"Unsupported protocol version"},"id":90,"jsonrpc":"2.0"}
+> {bad json
+< {"error":{"code":-32700,"message":"Parse error: the line is not one JSON value"},"id":null,"jsonrpc":"2.0"}
+```
+
+### The tools
+
+`tools/list` returns the same list, in the same order, on every call:
+
+1. each served app's `<app>.open {path}` and `<app>.new {options?}`;
+2. `afterglow.save {doc, path?, force?}`, `afterglow.export {doc, format,
+   path, options?, force?}` and `afterglow.close {doc}`, for any app's
+   document;
+3. every command of every served app as `<app>.<id>`, by id, with input
+   `{doc, params}`: the command's own params schema sits under `params`.
+
+A command tool's title is the command's title. Its description is the
+command's summary, plus `Undoable: one step named '<title>'.` for an edit,
+and its output schema is `{result, undoStep?}`. The annotations follow the
+command's kind: a query is `readOnlyHint: true`; a view or an edit is
+`destructiveHint: false`; a file command is destructive only when it takes
+`force`. Save and export are `destructiveHint: true`, and every tool is
+`openWorldHint: false`. With `--app fake` the list is `fake.open`,
+`fake.new`, `afterglow.save`, `afterglow.export`, `afterglow.close`,
+`fake.doc.export-json`, `fake.edit.redo`, `fake.edit.undo`, `fake.rect.add`,
+`fake.rect.list`, `fake.rect.move`, `fake.rect.remove`, `fake.rect.select`.
+
+A `tools/call` reply has one text content (the result as JSON text, or the
+error), `structuredContent` and `isError`. Anything the model can act on is
+a tool error (`isError: true`), never a protocol error: the app's why-not,
+each schema issue as `/path: message`, a path outside the roots, a full
+handle table, a dead handle, a file that exists. Only an unknown tool and
+`arguments` that aren't an object are -32602.
+
+**Rate limit:** at most 50 calls a second. One more is the tool error
+`slow down: at most 50 calls a second`, and it runs nothing.
+
+### Handles
+
+`<app>.open` and `<app>.new` hold the document in the server and return
+`{doc, summary}`: `doc` is an opaque handle (a UUID), `summary` the app's
+own. Every other tool takes `doc`. A handle ends on `afterglow.close`, after
+1 hour without a call, or when the server exits; a dead one answers `this
+document handle expired; open it again`. At most 16 documents are open at
+once; the 17th is `at most 16 documents may be open; close one first`.
+Nothing reaches the disk until `afterglow.save`: closing drops unsaved
+edits.
+
+A session in the current revision (real output, run in a folder holding
+`root/a.fake`, an empty fake document). Every request carries
+`"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28"}` in its
+`params`. The lines are shortened to the tool's name and arguments and the
+reply's `isError` and `structuredContent`; `<doc>` is the handle and `…` a
+shortened path:
+
+```
+> fake.open {"path":"a.fake"}
+< false {"doc":"CD539B7F-33E6-4402-8664-A591B93B46ED","summary":{"rects":0,"selected":null}}
+> fake.rect.add {"doc":<doc>,"params":{"x":10,"y":10,"w":40,"h":30,"name":"Box"}}
+< false {"result":{"h":30,"id":1,"locked":false,"name":"Box","w":40,"x":10,"y":10},"undoStep":"Add Rectangle"}
+> fake.rect.add {"doc":<doc>,"params":{"x":10,"y":10}}
+< true {"error":"rect.add params: /w: missing required key; /h: missing required key"}
+> afterglow.save {"doc":<doc>}
+< true {"error":"…/root/a.fake already exists; pass force: true to replace it"}
+> afterglow.save {"doc":<doc>,"path":"b.fake"}
+< false {"path":"…/root/b.fake"}
+> afterglow.export {"doc":<doc>,"format":"json","path":"out/b.json"}
+< false {"path":"…/root/out/b.json"}
+> fake.open {"path":"/etc/passwd"}
+< true {"error":"/etc/passwd is outside the allowed roots (root)"}
+> afterglow.close {"doc":<doc>}
+< false {}
+> fake.rect.list {"doc":<doc>}
+< true {"error":"this document handle expired; open it again"}
+```
+
+and an unknown tool, in full:
+
+```
+< {"error":{"code":-32602,"message":"Unknown tool: fake.nope"},"id":12,"jsonrpc":"2.0"}
+```
+
+### Roots
+
+Every path a tool takes, to open, save or export, must lie inside a
+`--root`:
+
+- A relative path is placed against the **first** root, with `.` and `..`
+  folded; the paths in replies are absolute.
+- The check uses the real location, every symlink resolved (the roots' own
+  too), so a link inside a root that points out of it is refused.
+- A path must lie under a root, not be the root folder itself.
+- Outside, the call is the tool error `<path> is outside the allowed roots
+  (<the roots as given>)`.
+- No file is replaced without `"force": true`, not even the one the document
+  was opened from. Missing folders on the way are created, and writes are
+  atomic, as for `--out`.
+
+### Live mode (macOS)
+
+`afterglow mcp --live --root <dir>` also bridges the apps running on this
+Mac, so a client edits the document in an open window, each edit an
+ordinary undo step there. In `.mcp.json`, add `"--live"` to `args`. Off
+macOS it exits 69 (above).
+
+**No app turns its live channel on yet.** An app opts in by handing a
+`LiveCommandChannel` to `.suiteApp(_:host:live:)`, whose `live` defaults to
+nil, and none of the five passes one today. So `--live` lists no `live.`
+tools yet and the server behaves as it does without the flag. The rest of
+this section is what the code does once an app passes a channel.
+
+- **The wire.** A running app listens on a Unix socket,
+  `~/Library/Application Support/AfterGlow/live/<app>-<pid>.sock` (folder
+  0700, socket 0600), and opens no network port. It serves peers running as
+  the same user only, at most 8 connections at once, and removes its own
+  stale sockets when it starts.
+- **The tools.** Each `tools/list` asks every socket again, skips the ones
+  that don't answer, and adds `live.<app>.<id>` for each command of each
+  running app (apps by name, commands by id), such as
+  `live.photo.layer.add`. The input is `{params}` only: the document is the
+  window's, so there is no handle. The description starts `In the open
+  <Title> window: ` before the command's summary. Title, output schema and
+  annotations are the headless tool's. Live calls share the 50-a-second
+  limit.
+- **Calls.** A live call runs the command on the window's document on the
+  main thread, through the same catalog. When the app has quit, the call is
+  the tool error `Photo is not running; open it with a document, then list
+  the tools again`; with no document open, `Photo has no document open; open
+  one, then call again`.
+
+#### Approval
+
+A live command runs only for a client the user approved. The client is the
+`clientInfo.name` it sent with `initialize` (cut to 128 characters); a
+client that never sends `initialize`, as in the 2026-07-28 revision, is
+`MCP client`.
+
+1. A call from a client with no grant asks the user in the app:
+   "Allow “<client>” to control <app>?", with **Allow Once**, **Always
+   Allow** and **Deny**. The bridge waits up to 120 s for the app's reply.
+2. Allowed within 110 s, the call runs and returns its result.
+3. Denied, or answered after 110 s, the call is refused. The client sees the
+   tool error `Photo asked you to approve this client; answer it in Photo,
+   then call again`. After a late Always Allow, calling again runs.
+
+- **Allow Once** is never remembered. It lasts one connection, and a
+  reconnect asks again. The bridge opens a fresh connection to the app for
+  each list and each call, so today Allow Once covers the one call it
+  answered, and the next call asks again.
+- **Always Allow** and **Deny** are remembered per client per app, in the
+  suite preferences (`preferences.json`, the app's `aiAccess.<client>`
+  key). A remembered deny refuses at once with no prompt, and the client
+  sees the same "asked you to approve" text.
+- **A file command always asks**, whatever the grant, and Allow Once never
+  covers one.
+- **Stop.** The channel's `stop()` closes every client's connection and
+  removes the socket, so every client then finds the app not running.
+
+The approval sheet, the "Controlled by <client>" title-bar chip with its
+**Stop** button, and Window > AI Access… (the remembered grants, each with
+**Revoke**) are built, and today run on a demo request (the
+`-AIAccessDemoRequest <client>` launch argument), not on the channel. The
+app that wires its channel connects them: the sheet becomes the channel's
+`ask`, the chip reads its `connectedClient`, and Stop calls `stop()`.
+
+#### The audit log
+
+Every live command the app decides on leaves one line in
+`~/Library/Logs/AfterGlow/ai-access.log` (folder 0700, file 0600): one JSON
+object, keys sorted, with `client`, `app`, `id` (the command), `time`
+(ISO 8601, UTC) and `outcome` (`ran`, `refused` or `failed`). The params are
+never written. Nothing rotates or trims the log. A line has this shape:
+
+```json
+{"app":"photo","client":"my-client","id":"layer.add","outcome":"ran","time":"2026-10-19T09:30:00Z"}
+```

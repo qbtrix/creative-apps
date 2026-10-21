@@ -47,7 +47,13 @@
 //
 // While a gesture is live (`gesture != nil`) the canvas edits do nothing, as Undo and Redo
 // don't: each pointer move rewinds to the gesture's start, so an edit landing between two moves
-// would be thrown away while its undo step stayed (#542). Linux-safe.
+// would be thrown away while its undo step stayed (#542).
+//
+// The nudge step and its run key are SuiteKernel's `Nudge`, and the marquee's box
+// and the selection it leaves are its `Marquee` (adopt-kernel-selection AS-design). A press on
+// a full-size frame finds its handle with the kernel's `HandleHit` (adopt-kernel-transform
+// AT-d1). Linux-safe.
+import SuiteKernel
 
 /// A pointer gesture in progress, from its first `drag` to `endDrag`.
 struct DesignGesture: Sendable, Equatable {
@@ -109,12 +115,17 @@ extension DesignWorkspace {
         return handle(on: box, at: point)
     }
 
+    /// A full-size frame asks the kernel's `HandleHit` (its inside and rotate knob are no Design
+    /// handle); a compact one tries its corners where they show, outside it.
     private func handle(on frame: DesignRect, at point: DesignPoint) -> DesignHandle? {
+        guard frame.isCompact(handleSize: handleTolerance) else {
+            let hit = HandleHit.handle(at: Point(x: point.x, y: point.y), in: frame.kernelRect, tolerance: handleTolerance)
+            return hit.flatMap(DesignHandle.init)
+        }
         let inside = point.x > frame.x && point.x < frame.maxX && point.y > frame.y && point.y < frame.maxY
-        if inside, frame.isCompact(handleSize: handleTolerance) { return nil }
+        if inside { return nil }
         let shown = frame.handles(size: handleTolerance)
-        let order = DesignHandle.allCases.filter(\.isCorner) + DesignHandle.allCases.filter { !$0.isCorner }
-        let hits = order.compactMap { handle -> (handle: DesignHandle, distance: Double)? in
+        let hits = DesignHandle.allCases.compactMap { handle -> (handle: DesignHandle, distance: Double)? in
             guard let at = shown[handle] else { return nil }
             let distance = Swift.max((at.x - point.x).magnitude, (at.y - point.y).magnitude)
             return distance <= handleTolerance ? (handle, distance) : nil
@@ -130,23 +141,18 @@ extension DesignWorkspace {
         }
     }
 
-    /// Moves the selected node by 1 point (10 with Shift). A run of nudges to one node is one
-    /// step. Several selected layers move together through `run(.nudge)` (#2463). Does nothing
+    /// Moves the selected node by the kernel's `Nudge.delta`: 1 point, 10 with Shift. A run of
+    /// nudges to one node (`Nudge.runKey`) is one step. Several selected layers move together through `run(.nudge)` (#2463). Does nothing
     /// without an unlocked selection, for a layer hidden in the tree (#607), while editing text
     /// or mid-gesture (#542).
     public mutating func nudge(_ direction: DesignDirection, shift: Bool) {
         guard gesture == nil else { return }
         if hasMultipleSelection { try? run(.nudge(direction, large: shift)); return }
         guard editingTextID == nil, let id = selectedNodeID, !isHiddenInTree(id) else { return }
-        let step = shift ? 10.0 : 1.0
-        let delta = switch direction {
-        case .up: DesignPoint(x: 0, y: -step)
-        case .down: DesignPoint(x: 0, y: step)
-        case .left: DesignPoint(x: -step, y: 0)
-        case .right: DesignPoint(x: step, y: 0)
-        }
+        let step = Nudge.delta(direction.kernel, large: shift)
+        let delta = DesignPoint(x: step.x, y: step.y)
         // A locked node is refused and stays put; the selection's id always exists.
-        try? editNode(id, named: "Nudge", coalescing: "nudge-\(id)") { $0.translate(by: delta) }
+        try? editNode(id, named: "Nudge", coalescing: Nudge.runKey("nudge", [id])) { $0.translate(by: delta) }
     }
 
     /// Drags `handle` of a node's frame by `delta` (see DesignRect.resized). Children stay where
@@ -203,11 +209,11 @@ extension DesignWorkspace {
             current.guides = landedGuides(on: frame, modifiers: modifiers, current)
         case .marquee(let parent):
             guard current.moved, let page = selectedPage else { break }
-            let rect = DesignRect(
-                x: Swift.min(current.start.x, end.x), y: Swift.min(current.start.y, end.y),
-                width: (end.x - current.start.x).magnitude, height: (end.y - current.start.y).magnitude)
+            let box = Marquee.rect(enclosing: Point(x: current.start.x, y: current.start.y), Point(x: end.x, y: end.y))
+            let rect = DesignRect(x: box.minX, y: box.minY, width: box.maxX - box.minX, height: box.maxY - box.minY)
             marquee = rect
-            selectedNodeIDs = services.marquee.layers(touching: rect, in: parent, on: page)
+            let found = services.marquee.layers(touching: rect, in: parent, on: page)
+            selectedNodeIDs = Marquee.union(selectedNodeIDs, found, extending: false)
             for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) }
         case .moveSeveral, .resizeSeveral, .optionCopy:
             applyStep(&current, delta: delta, modifiers: modifiers)
@@ -426,11 +432,23 @@ extension DesignWorkspace {
             if let kind = tool.nodeKind { route = .draw(kind) }
         case .text:
             route = .text
-        case .pen:
+        case .shape, .pen, .eyedropper:  // Shape draws through ShapeRules.dragged from DS-5
             break
         }
         var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)
         buildSnap(&gesture)
         return gesture
+    }
+}
+
+extension DesignDirection {
+    /// The kernel's direction, for `Nudge.delta`.
+    var kernel: Direction {
+        switch self {
+        case .up: .up
+        case .down: .down
+        case .left: .left
+        case .right: .right
+        }
     }
 }

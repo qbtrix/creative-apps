@@ -1,5 +1,5 @@
 // PhotoCommands+File.swift: Photo's File menu items: New Image, Open…, Open
-// Recent ▸, Close, Save, Save As…, Export…. Save, Save As and Export are off
+// Recent ▸, Place… (PhotoPlace.swift), Close, Save, Save As…, Export…. Save, Save As and Export are off
 // with no image. Close (Command-W) is the system's, which replacing
 // `.saveItem` drops: it sends performClose: to the key window, so an unsaved
 // window asks first (PhotoWindowCloseGuard). Open Recent lists the focused window's recent files, newest first;
@@ -11,13 +11,14 @@
 // of its own.
 import AppKit
 import PhotoModel
+import SuiteUI
 import SwiftUI
 
 extension PhotoCommands {
     @CommandsBuilder var fileMenu: some Commands {
         CommandGroup(replacing: .newItem) {
-            Button("New Image") { menu.perform(.newImage) }.keyboardShortcut("n")
-            Button("Open…") { menu.perform(.open) }.keyboardShortcut("o")
+            menu.item("file.new", shortcut: KeyboardShortcut("n")) { menu.perform(.newImage) }
+            menu.item("file.open", shortcut: KeyboardShortcut("o")) { menu.perform(.open) }
             Menu("Open Recent") {
                 let recent = PhotoRecentMenu(focused: recentFiles, stored: PhotoSavedRecent.shared.files)
                 ForEach(recent.files, id: \.self) { url in
@@ -26,16 +27,17 @@ extension PhotoCommands {
                 if !recent.files.isEmpty { Divider() }
                 Button("Clear Menu") { clearRecent(recent.target) }.disabled(!recent.canClear)
             }
+            menu.placeItem
         }
         CommandGroup(replacing: .saveItem) {
             // `.saveItem` holds the system's Close, so replacing it brings Close back here.
             Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
                 .keyboardShortcut("w")
-            Button("Save") { menu.perform(.save) }.keyboardShortcut("s").disabled(!menu.hasImage)
-            Button("Save As…") { menu.perform(.saveAs) }.keyboardShortcut("s", modifiers: [.command, .shift])
-                .disabled(!menu.hasImage)
-            Button("Export…") { menu.perform(.export(.openSheet)) }.keyboardShortcut("e", modifiers: [.command, .shift])
-                .disabled(!menu.hasImage)
+            menu.item("file.save", shortcut: KeyboardShortcut("s")) { menu.perform(.save) }
+            menu.item("file.save-as", shortcut: KeyboardShortcut("s", modifiers: [.command, .shift])) { menu.perform(.saveAs) }
+            menu.item("file.export", shortcut: KeyboardShortcut("e", modifiers: [.command, .shift])) {
+                menu.perform(.export(.openSheet))
+            }
         }
     }
 

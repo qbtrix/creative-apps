@@ -19,5 +19,26 @@
     "find": "            buffer = try develop.render(buffer, settings: photo.develop)\n",
     "replace": "",
     "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the plan ignores the crop: photo.develop.crop is read as nil",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "guard let crop = photo.develop.crop,",
+    "replace": "guard let crop = CropSettings?.none,",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the cropped size takes the photo's aspect at the crop's long side",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "return PixelSize(width: frame.width, height: frame.height)",
+    "replace": "return photo.pixelSize.fitting(longSide: max(frame.width, frame.height))",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the policy is not passed: the writer drops nothing",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "size: size, dropping: dropping))",
+    "replace": "size: size))",
+    "tests": "LibraryExportMetadataTests/writerDrops"
   }
 ]

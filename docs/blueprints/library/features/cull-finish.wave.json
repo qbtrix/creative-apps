@@ -1,0 +1,190 @@
+{
+  "title": "Finish the cull: Delete Rejected Photos to the Trash with undo, and colour label keys 6 to 9",
+  "wave": 6,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map A5 (Delete Rejects, label keys; not full screen); RJ-L06; captain 2026-10-18 (Delete Rejects in the beta); filters stay #1563's FC-b",
+  "waits_on": "filters-collections FC-a and metadata-more MD-a, MD-c, MD-d and MD-e (shared files, slice waits); cull, import and persist (built)",
+  "longest_chain": "7 (DR-1 → DR-2 → DR-6 → DR-7 → DR-8 → DR-9 → DR-10)",
+  "journeys": [
+    "LibraryCullFinishJourneyTests.testDeleteRejects"
+  ],
+  "owned": [
+    "Sources/LibraryModel/Contracts/TrashContracts.swift",
+    "Sources/LibraryModel/LibraryServices.swift",
+    "Sources/LibraryModel/Fakes/FakeTrash.swift",
+    "Sources/LibraryModel/Live/LiveTrash.swift",
+    "Sources/LibraryModel/LibraryKeys.swift",
+    "Sources/LibraryModel/LibraryDeleteRejects.swift",
+    "Tests/LibraryModelTests/LibraryDeleteRejectsTests.swift",
+    "Tests/LibraryModelTests/LibraryLabelKeysTests.swift",
+    "Tests/LibraryModelTests/LibraryNeverDeletesTests.swift",
+    "Tests/RealJobs/library/delete-rejects/",
+    "Sources/LibraryApp/LibraryWindow+Trash.swift",
+    "Sources/LibraryApp/LibraryWindow.swift",
+    "Sources/LibraryApp/LibraryCommands.swift",
+    "Sources/LibraryApp/LibraryMenus.swift",
+    "Tests/AppSnapshotTests/LibraryCullFinishSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetLibraryDeleteRejectsTests.swift",
+    "UITests/LibraryJourneyTests+CullFinish.swift",
+    "Sources/LibraryModel/LibraryCulling.swift",
+    "Tests/mutations/LibraryModel.LibraryCulling.json",
+    "Sources/LibraryModel/LibraryUndoAdapter.swift",
+    "Sources/LibraryModel/LibraryCatalog.swift",
+    "Sources/LibraryModel/LibraryImport.swift",
+    "Tests/mutations/LibraryModel.LibraryDeleteRejects.json",
+    "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "Tests/mutations/LibraryModel.LiveCatalogCoding.json",
+    "Tests/LibraryModelTests/LibraryExcludedPathsCodingTests.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/LibraryModelTests/LiveTrashTests.swift",
+    "docs/blueprints/library.md",
+    "docs/c4/parts/creative-apps/library-model/library-model-sources.json",
+    "docs/blueprints/library/features/cull-finish.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DR-a",
+      "behavior": "The Trash service with its fake and a live stub, the label keys' cases, and the catalog's Delete Rejects title, help, targets and run exist as stubs, and the checks and RJ-L06's job are written, disabled.",
+      "tasks": [
+        "DR-1",
+        "DR-2"
+      ],
+      "journeys": [
+        "MJ-DR"
+      ],
+      "waits": {
+        "filters-collections:FC-a": [
+          "DR-1"
+        ],
+        "metadata-more:MD-a": [
+          "DR-1"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/LibraryModel/Contracts/TrashContracts.swift",
+        "Sources/LibraryModel/LibraryServices.swift",
+        "Sources/LibraryModel/Fakes/FakeTrash.swift",
+        "Sources/LibraryModel/Live/LiveTrash.swift",
+        "Sources/LibraryModel/LibraryKeys.swift",
+        "Sources/LibraryModel/LibraryDeleteRejects.swift",
+        "Tests/LibraryModelTests/LibraryDeleteRejectsTests.swift",
+        "Tests/LibraryModelTests/LibraryLabelKeysTests.swift",
+        "Tests/LibraryModelTests/LibraryNeverDeletesTests.swift",
+        "Tests/RealJobs/library/delete-rejects/"
+      ]
+    },
+    {
+      "id": "DR-u",
+      "behavior": "Photo > Delete Rejected Photos… asks once with the count and runs on the stubs, and Set Label's items name keys 6 to 9, with snapshots, the render budget and the journey written.",
+      "tasks": [
+        "DR-3",
+        "DR-4"
+      ],
+      "journeys": [
+        "J-DR1"
+      ],
+      "waits": {
+        "DR-a": [
+          "DR-3"
+        ],
+        "filters-collections:FC-a": [
+          "DR-3"
+        ],
+        "metadata-more:MD-d": [
+          "DR-3"
+        ],
+        "metadata-more:MD-e": [
+          "DR-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/LibraryApp/LibraryWindow+Trash.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Sources/LibraryApp/LibraryMenus.swift",
+        "Tests/AppSnapshotTests/LibraryCullFinishSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetLibraryDeleteRejectsTests.swift",
+        "UITests/LibraryJourneyTests+CullFinish.swift"
+      ]
+    },
+    {
+      "id": "DR-m",
+      "behavior": "Keys 6 to 9 set Red, Yellow, Green and Blue as one step each; Delete Rejects moves every reject of the collection to the Trash, removes them and remembers their paths in one step whose undo puts files and photos back; the catalog file keeps those paths and import skips them; it runs from the catalog.",
+      "tasks": [
+        "DR-5",
+        "DR-6",
+        "DR-7",
+        "DR-8"
+      ],
+      "journeys": [
+        "MJ-DR"
+      ],
+      "waits": {
+        "DR-a": [
+          "DR-5",
+          "DR-6",
+          "DR-8"
+        ],
+        "metadata-more:MD-e": [
+          "DR-6",
+          "DR-7"
+        ],
+        "metadata-more:MD-c": [
+          "DR-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/LibraryModel/LibraryCulling.swift",
+        "Tests/LibraryModelTests/LibraryLabelKeysTests.swift",
+        "Tests/mutations/LibraryModel.LibraryCulling.json",
+        "Sources/LibraryModel/LibraryDeleteRejects.swift",
+        "Sources/LibraryModel/LibraryUndoAdapter.swift",
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Sources/LibraryModel/LibraryImport.swift",
+        "Tests/LibraryModelTests/LibraryDeleteRejectsTests.swift",
+        "Tests/mutations/LibraryModel.LibraryDeleteRejects.json",
+        "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+        "Tests/mutations/LibraryModel.LiveCatalogCoding.json",
+        "Tests/LibraryModelTests/LibraryExcludedPathsCodingTests.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Sources/LibraryModel/Live/LiveTrash.swift",
+        "Tests/LibraryModelTests/LiveTrashTests.swift",
+        "Tests/RealJobs/library/delete-rejects/"
+      ]
+    },
+    {
+      "id": "DR-z",
+      "behavior": "The window runs on live services, the journey passes on live, and the blueprint says Library moves rejects to the Trash.",
+      "tasks": [
+        "DR-9",
+        "DR-10"
+      ],
+      "journeys": [
+        "J-DR1"
+      ],
+      "waits": {
+        "DR-u": [
+          "DR-9"
+        ],
+        "DR-m": [
+          "DR-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/LibraryJourneyTests+CullFinish.swift",
+        "docs/blueprints/library.md",
+        "docs/c4/parts/creative-apps/library-model/library-model-sources.json",
+        "docs/blueprints/library/features/cull-finish.wave.json"
+      ]
+    }
+  ]
+}

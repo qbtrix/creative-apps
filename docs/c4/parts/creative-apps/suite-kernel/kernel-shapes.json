@@ -1,0 +1,8 @@
+{
+  "id": "kernel-shapes",
+  "name": "Shapes",
+  "description": "The shape tools every app's shape layer shares: ShapeKind and ShapeSpec (a drawn shape's recipe, Codable, with each kind's defaults; line and arrow ends in the box's unit space); ShapeRules, a spec's path in a box through FlareCore's PathBuilders, the box a drag draws (Shift squares it or snaps a line to 45 degrees, Option grows it from the centre) and why a spec can't be drawn; ShapeTarget, the document an app adopts; ShapeIntent, one option change from the tool's panel; ShapeCommands, shape.draw (one undo step) and tool.shape (view state). SH-1 declares the rules and commands as stubs; SH-5 and SH-6 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": ["Sources/SuiteKernel/Shapes/"],
+  "order": 95
+}

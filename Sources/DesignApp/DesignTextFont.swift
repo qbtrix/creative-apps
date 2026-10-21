@@ -43,7 +43,7 @@ enum DesignTextFont {
         let string = NSAttributedString(string: text, attributes: [.font: nsFont(style)])
         let bounds = string.boundingRect(
             with: CGSize(width: wrap, height: .greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+            options: [.usesLineFragmentOrigin], context: nil)
         return DesignTextExtent(width: ceil(bounds.width), height: ceil(bounds.height))
     }
 

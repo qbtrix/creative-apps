@@ -1,0 +1,37 @@
+[
+  {
+    "label": "the top handle maps onto the kernel's bottom",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "case .top: .top",
+    "replace": "case .top: .bottom",
+    "tests": "DesignKernelTransformAdapterTests"
+  },
+  {
+    "label": "the kernel's rotate knob becomes a resize handle",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "case .inside, .rotate: return nil",
+    "replace": "case .inside: return nil\n        case .rotate: self = .bottomRight",
+    "tests": "DesignKernelTransformAdapterTests"
+  },
+  {
+    "label": "Option never reaches the kernel",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if contains(.option) { modifiers.insert(.option) }",
+    "replace": "",
+    "tests": "DesignKernelTransformAdapterTests"
+  },
+  {
+    "label": "the press ignores the workspace's handle tolerance",
+    "file": "Sources/DesignModel/DesignCanvasEditing.swift",
+    "find": "in: frame.kernelRect, tolerance: handleTolerance)",
+    "replace": "in: frame.kernelRect, tolerance: 6)",
+    "tests": "DesignKernelTransformAdapterTests"
+  },
+  {
+    "label": "several layers scale into the old box",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "from: box.kernelRect, to: new.kernelRect)",
+    "replace": "from: box.kernelRect, to: box.kernelRect)",
+    "tests": "DesignKernelTransformAdapterTests"
+  }
+]

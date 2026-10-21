@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "–",
-  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b) and SN-c (D2-4b)",
+  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b); snapping SN-b (D2-3b) and SN-c (D2-4b); suiteui's adopt-kernel-selection AS-design (D2-3b: AS-design takes DesignCanvasEditing.swift first; supervisor, #1935, 2026-10-20); the beta gap adopts (autosave-history, transform, eyedropper, shape-tools, stroke-style, pen-paths) before S2-a, which share DesignNode, DesignWorkspace, DesignCanvasMarks and the window",
   "depends": [
     "design-contracts"
   ],
@@ -102,6 +102,42 @@
         ],
         "design-export:DE-a": [
           "D2-2"
+        ],
+        "gradient-fill": [
+          "D2-1a"
+        ],
+        "autosave-history": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "transform": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "eyedropper": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "shape-tools": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "stroke-style": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
+        ],
+        "placed-images": [
+          "D2-1a"
+        ],
+        "pen-paths": [
+          "D2-1a",
+          "D2-1b",
+          "D2-2"
         ]
       }
     },
@@ -176,6 +212,18 @@
           "D2-4b"
         ],
         "design-export:DE-u": [
+          "D2-4b"
+        ],
+        "file-flow:DF-a": [
+          "D2-3a",
+          "D2-3b",
+          "D2-4a",
+          "D2-4b"
+        ],
+        "pen-paths": [
+          "D2-3a",
+          "D2-3b",
+          "D2-4a",
           "D2-4b"
         ]
       },

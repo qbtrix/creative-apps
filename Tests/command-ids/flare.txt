@@ -44,6 +44,7 @@ layer.remove
 layer.rename
 layer.reorder
 layer.set-flags
+layer.set-parent
 machine.add
 machine.add-input
 machine.add-state
@@ -57,6 +58,11 @@ machine.set-initial
 machine.update-input
 machine.update-state
 machine.update-transition
+mask.add
+mask.move
+mask.remove
+mask.set
+mask.set-matte
 object.bring-forward
 object.send-backward
 scene.add
@@ -93,6 +99,7 @@ text.set-font
 text.set-on-path
 text.set-paragraph
 text.set-string
+timeline.select-all-keys
 tool.direct-select
 tool.ellipse
 tool.pen

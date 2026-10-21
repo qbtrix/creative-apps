@@ -33,14 +33,14 @@ struct MCPToolsTests {
         }
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func theFakeListsItsSessionToolsThenOneToolPerCommandInIDOrder() {
         let names = MCPTools.list([Apps.fake]).map(\.name)
-        #expect(Self.fakeCommands.map(\.id) == Self.fakeCommands.map(\.id).sorted() && Self.fakeCommands.count == 8)
+        #expect(Self.fakeCommands.map(\.id) == Self.fakeCommands.map(\.id).sorted() && Self.fakeCommands.count == 13)
         #expect(names == ["fake.open", "fake.new"] + Self.session + Self.fakeCommands.map { "fake.\($0.id)" })
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func everyAppGetsItsSessionToolsFirstAndItsCommandsGroupedByID() {
         let apps = Apps.all + [Apps.fake]
         let tools = MCPTools.list(apps).map(\.name)
@@ -52,7 +52,7 @@ struct MCPToolsTests {
         for app in apps { #expect(app.describeAll().map(\.id) == app.describeAll().map(\.id).sorted(), "\(app.name)") }
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func namesAreValidAndUnique() {
         let names = MCPTools.list(Apps.all + [Apps.fake]).map(\.name)
         #expect(Set(names).count == names.count)
@@ -60,14 +60,14 @@ struct MCPToolsTests {
         #expect(!Self.isValidName("") && !Self.isValidName("a b") && !Self.isValidName(String(repeating: "a", count: 129)))
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func stableOrder() {
         let first = MCPTools.list(Apps.all + [Apps.fake])
         for _ in 0..<5 { #expect(MCPTools.list(Apps.all + [Apps.fake]) == first) }
         #expect(MCPTools.list([Apps.fake]) == MCPTools.list([Apps.fake]))
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func theAppFilterListsOnlyTheGivenApps() {
         let fakeOnly = MCPTools.list([Apps.fake]).map(\.name)
         #expect(fakeOnly.allSatisfy { $0.hasPrefix("fake.") || $0.hasPrefix("afterglow.") })
@@ -76,7 +76,7 @@ struct MCPToolsTests {
         #expect(MCPTools.list([]).map(\.name) == Self.session)
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func paramsNested() throws {
         let tools = MCPTools.list([Apps.fake])
         for command in Self.fakeCommands {
@@ -89,7 +89,7 @@ struct MCPToolsTests {
         }
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func sessionToolsTakeTheirDocumentedArguments() throws {
         let tools = MCPTools.list([Apps.fake])
         let expected: [String: (all: Set<String>, required: Set<String>)] = [
@@ -106,7 +106,7 @@ struct MCPToolsTests {
         }
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func titlesAndDescriptionsComeFromTheCommand() throws {
         let tools = MCPTools.list([Apps.fake])
         for command in Self.fakeCommands {
@@ -118,7 +118,7 @@ struct MCPToolsTests {
         #expect(try Self.tool("fake.open", in: tools).description.contains("handles expire after 1 hour idle; at most 16 open"))
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func everyToolHasAnObjectOutputSchema() throws {
         let tools = MCPTools.list([Apps.fake])
         for tool in tools { #expect(Self.field(tool.outputSchema, "type") == .string("object"), "\(tool.name)") }
@@ -127,7 +127,7 @@ struct MCPToolsTests {
         #expect(Self.field(Self.field(try Self.tool("fake.rect.add", in: tools).outputSchema, "properties"), "undoStep") != nil)
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func readOnlyFromKind() throws {
         let tools = MCPTools.list([Apps.fake])
         for command in Self.fakeCommands {
@@ -148,7 +148,7 @@ struct MCPToolsTests {
         for tool in tools { #expect(Self.field(tool.annotations, "openWorldHint") == .bool(false), "\(tool.name)") }
     }
 
-    @Test(.disabled("waits on MC-6"))
+    @Test
     func everyNameRoutesBackAndUnknownNamesDont() {
         let apps = Apps.all + [Apps.fake]
         for tool in MCPTools.list(apps) { #expect(MCPTools.route(tool.name, in: apps) != nil, "\(tool.name)") }
@@ -164,8 +164,7 @@ struct MCPToolsTests {
         #expect(MCPTools.route("fake.rect.add", in: Apps.all) == nil)
     }
 
-    @Test(.disabled("waits on MC-4 and MC-6"))
-    func toolsListThroughTheServerMatchesTheList() throws {
+    @Test func toolsListThroughTheServerMatchesTheList() throws {
         let server = MCPServer(MCPOptions(apps: [Apps.fake], roots: ["/tmp/mcp"]), io: FakeIO(), clock: { 0 })
         var client = MCPTestClient(server, era: .sessionless(MCPVersions.current))
         guard case .array(let tools)? = Self.field(try client.request("tools/list").result, "tools") else {

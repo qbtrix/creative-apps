@@ -42,10 +42,10 @@ extension LibraryCatalog {
         }
     }
 
-    /// What to write: nil when every change is saved or when
-    /// `catalogState.canSave` is false (loading, or a newer file).
+    /// What to write: nil when the session reads clean (every change is saved)
+    /// or when `catalogState.canSave` is false (loading, or a newer file).
     public func saveRequest() -> (revision: Int, photos: [PhotoItem])? {
-        guard catalogState.canSave, saveRevision != savedRevision else { return nil }
+        guard catalogState.canSave, catalogSession.isDirty else { return nil }
         return (saveRevision, items)
     }
 

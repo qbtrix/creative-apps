@@ -1,0 +1,10 @@
+{
+  "id": "kernel-sample",
+  "name": "Sample",
+  "description": "Sample/: the suite's one colour sampler. SampleSize (point, 3 × 3, 5 × 5) and SampleRGBA (one 8-bit straight-alpha pixel); SampleRules (mean, the alpha-weighted mean of a square over a reader closure that skips transparent pixels, and hex); the SampleTarget protocol an app's workspace conforms to and SampleCommands (the color.sample query every app registers). eyedropper EY-1 declares them as stubs (the spec with its real id, schema and availability); EY-5 and EY-6 fill the bodies.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Sample/"
+  ],
+  "order": 105
+}

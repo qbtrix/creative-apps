@@ -1,0 +1,196 @@
+{
+  "title": "One stroke: colour, width, join, cap, dashes and trim paths as the kernel's stroke commands, SuiteUI's stroke editor beside the gradient editor",
+  "wave": 4,
+  "order": 70,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S17 (strokes, dashes and trim paths); real job RJ-X35; captain 2026-10-20: everyday tools in the beta, built once, sharing the gradient editor's build",
+  "waits_on": "gradient-fill's GF-a (the Fill module) and GF-z (kernel-fill.json), shape-tools' SH-z (the fake document); creative-core path-geometry #430 and a core bump, and creative-core stroke-style (to file) before SS-7",
+  "depends": [
+    "inspector-controls"
+  ],
+  "longest_chain": "6 (SS-1 → SS-5 → SS-6 → SS-7 → SS-8 → SS-10)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteStrokeJourneyTests.testStrokeEditorDashAndTrim"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Fill/VectorStroke.swift",
+    "Sources/SuiteKernel/Fill/StrokeRules.swift",
+    "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+    "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+    "Tests/SuiteKernelTests/StrokeRulesTests.swift",
+    "Tests/SuiteKernelTests/StrokeCommandsTests.swift",
+    "Tests/SuiteKernelTests/StrokeSVGTests.swift",
+    "Sources/SuiteUI/StrokeEditor.swift",
+    "Sources/SuiteUI/Gallery/GalleryStrokeEditor.swift",
+    "Sources/SuiteUI/Gallery/GalleryInspector.swift",
+    "UITests/SuiteJourneyTests+Stroke.swift",
+    "Tests/SuiteUITests/StrokeEditorTests.swift",
+    "Tests/AppSnapshotTests/SuiteStrokeEditorSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetStrokeEditorTests.swift",
+    "Tests/mutations/SuiteKernel.StrokeRules.json",
+    "Tests/mutations/SuiteKernel.StrokeSVG.json",
+    "Tests/mutations/SuiteKernel.StrokeCommands.json",
+    "Tests/SuiteKernelTests/StrokeDashTrimTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeStrokeTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/dash-trim/dash-trim.jobs.json",
+    "Tests/RealJobs/fake/dash-trim/input/one.fake",
+    "Tests/SuiteUITests/StrokeEditorLiveTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json",
+    "docs/blueprints/suiteui/features/stroke-style.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "SS-a",
+      "behavior": "The kernel's stroke type, rules, target, intents, nine command specs and SVG writer are declared as stubs, the gallery's stroke-editor page is in the index, and the checks are written, disabled.",
+      "tasks": [
+        "SS-1",
+        "SS-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "gradient-fill:GF-a": [
+          "SS-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Fill/VectorStroke.swift",
+        "Sources/SuiteKernel/Fill/StrokeRules.swift",
+        "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+        "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+        "Tests/SuiteKernelTests/StrokeRulesTests.swift",
+        "Tests/SuiteKernelTests/StrokeCommandsTests.swift",
+        "Tests/SuiteKernelTests/StrokeSVGTests.swift",
+        "Sources/SuiteUI/StrokeEditor.swift",
+        "Sources/SuiteUI/Gallery/GalleryStrokeEditor.swift",
+        "Sources/SuiteUI/Gallery/GalleryInspector.swift",
+        "UITests/SuiteJourneyTests+Stroke.swift"
+      ]
+    },
+    {
+      "id": "SS-u",
+      "behavior": "On the gallery page the editor sets colour, width, join and cap, shows the dash presets and trim rows (disabled with their reason until SS-d), and hides trim where an app has none, every control identified, within the render budget.",
+      "tasks": [
+        "SS-3",
+        "SS-4"
+      ],
+      "journeys": [
+        "KS1"
+      ],
+      "waits": {
+        "SS-a": [
+          "SS-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/StrokeEditor.swift",
+        "Tests/SuiteUITests/StrokeEditorTests.swift",
+        "Tests/AppSnapshotTests/SuiteStrokeEditorSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetStrokeEditorTests.swift",
+        "UITests/SuiteJourneyTests+Stroke.swift"
+      ]
+    },
+    {
+      "id": "SS-m",
+      "behavior": "The rules clamp widths and scale the dash presets, the SVG writer writes colour, width, join and cap, and every stroke command but dash and trim records exactly one undo step (a scrub one).",
+      "tasks": [
+        "SS-5",
+        "SS-6"
+      ],
+      "journeys": [
+        "KJ-stroke"
+      ],
+      "waits": {
+        "SS-a": [
+          "SS-5",
+          "SS-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Fill/StrokeRules.swift",
+        "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+        "Tests/SuiteKernelTests/StrokeRulesTests.swift",
+        "Tests/SuiteKernelTests/StrokeSVGTests.swift",
+        "Tests/mutations/SuiteKernel.StrokeRules.json",
+        "Tests/mutations/SuiteKernel.StrokeSVG.json",
+        "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+        "Tests/SuiteKernelTests/StrokeCommandsTests.swift",
+        "Tests/mutations/SuiteKernel.StrokeCommands.json"
+      ]
+    },
+    {
+      "id": "SS-d",
+      "behavior": "On the bumped core, dashes and trims paint the trimmed then dashed path, the two commands save fractions and scaled patterns in one step, and the fake app keeps them so RJ-X35 runs on the CLI.",
+      "tasks": [
+        "SS-7",
+        "SS-8"
+      ],
+      "journeys": [
+        "KJ-stroke"
+      ],
+      "waits": {
+        "SS-m": [
+          "SS-7"
+        ],
+        "shape-tools:SH-z": [
+          "SS-8"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Fill/StrokeRules.swift",
+        "Sources/SuiteKernel/Fill/StrokeCommands.swift",
+        "Sources/SuiteKernel/Fill/StrokeSVG.swift",
+        "Tests/SuiteKernelTests/StrokeDashTrimTests.swift",
+        "Tests/mutations/SuiteKernel.StrokeRules.json",
+        "Tests/mutations/SuiteKernel.StrokeCommands.json",
+        "Tests/mutations/SuiteKernel.StrokeSVG.json",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeStrokeTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/dash-trim/dash-trim.jobs.json",
+        "Tests/RealJobs/fake/dash-trim/input/one.fake"
+      ]
+    },
+    {
+      "id": "SS-z",
+      "behavior": "The gallery runs its intents through StrokeCommands on a live target, the journey dashes and trims on live, and the feature is built.",
+      "tasks": [
+        "SS-9",
+        "SS-10"
+      ],
+      "journeys": [
+        "KS1"
+      ],
+      "waits": {
+        "SS-u": [
+          "SS-9"
+        ],
+        "SS-d": [
+          "SS-9",
+          "SS-10"
+        ],
+        "gradient-fill:GF-z": [
+          "SS-10"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryStrokeEditor.swift",
+        "Tests/SuiteUITests/StrokeEditorLiveTests.swift",
+        "UITests/SuiteJourneyTests+Stroke.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-fill.json",
+        "docs/blueprints/suiteui/features/stroke-style.wave.json"
+      ]
+    }
+  ]
+}

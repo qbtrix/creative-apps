@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "Selects three scattered layers, aligns their left edges, spaces them evenly top to bottom and checks the saved file as JSON.",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "edit.select-all", "params": {}},
+    {"id": "object.align-left", "params": {}},
+    {"id": "object.distribute-vertically", "params": {}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/three-cards.design": {"json": {"version": 1, "pages": [{"id": "page-1", "name": "Page 1", "frameWidth": 1440, "frameHeight": 1024,
+      "nodes": [
+        {"id": "node-2", "kind": "rectangle", "name": "Rectangle", "frame": {"x": 10, "y": 10, "width": 100, "height": 60},
+         "children": [], "cornerRadius": 0, "fill": {"red": 217, "green": 217, "blue": 217}, "isHidden": false, "isLocked": false,
+         "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400}},
+        {"id": "node-3", "kind": "rectangle", "name": "Rectangle", "frame": {"x": 10, "y": 165, "width": 80, "height": 40},
+         "children": [], "cornerRadius": 0, "fill": {"red": 217, "green": 217, "blue": 217}, "isHidden": false, "isLocked": false,
+         "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400}},
+        {"id": "node-4", "kind": "ellipse", "name": "Ellipse", "frame": {"x": 10, "y": 300, "width": 50, "height": 50},
+         "children": [], "cornerRadius": 0, "fill": {"red": 217, "green": 217, "blue": 217}, "isHidden": false, "isLocked": false,
+         "opacity": 1, "text": "", "textStyle": {"alignment": "leading", "family": "System", "size": 16, "weight": 400}}
+      ]}]}}
+  },
+  "platforms": ["linux", "macos"]
+}

@@ -1,0 +1,136 @@
+{
+  "title": "Export at a size from Photo, with HEIC and TIFF, on the suite's export sheet",
+  "wave": 3,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/export-pack (adopter of S11); RJ-P01",
+  "waits_on": "suiteui export-pack's XP-a (cross-line; PX-3 needs XP-6, PX-5 XP-4); suiteui adopt-kernel-export's AX-photo (cross-line: Photo's export on ExportRun); shell-media SM-w (cross-line); tone-controls's PT-z for photo.md (slice wait)",
+  "depends": [
+    "photo-seams"
+  ],
+  "longest_chain": "5 (PX-1 → PX-2 → PX-6 → PX-7 → PX-8)",
+  "journeys": [
+    "PhotoExportPackJourneyTests.testExportForInstagram"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoExport+Kernel.swift",
+    "Tests/PhotoModelTests/PhotoExportPackTests.swift",
+    "Sources/PhotoApp/PhotoWindow+Export.swift",
+    "Sources/PhotoApp/ExportSheet.swift",
+    "Sources/PhotoModel/PhotoHeadless.swift",
+    "Tests/mutations/PhotoModel.PhotoExport+Kernel.json",
+    "Tests/RealJobs/photo/instagram/",
+    "Sources/PhotoApp/ImageIOCodec.swift",
+    "Tests/AppSnapshotTests/PhotoExportFormatsTests.swift",
+    "Tests/AppSnapshotTests/PhotoExportPackSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoExportPackTests.swift",
+    "UITests/PhotoJourneyTests+ExportPack.swift",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/export-pack.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PX-a",
+      "behavior": "Photo's export reads `ExportOptions` on stubs, and Export… opens `SuiteExportSheet` with the Size row and four formats.",
+      "tasks": [
+        "PX-1",
+        "PX-2"
+      ],
+      "journeys": [
+        "MJ-PX"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoExport+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoExportPackTests.swift",
+        "Sources/PhotoApp/PhotoWindow+Export.swift",
+        "Sources/PhotoApp/ExportSheet.swift"
+      ]
+    },
+    {
+      "id": "PX-u",
+      "behavior": "The sheet has snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "PX-5",
+        "PX-6"
+      ],
+      "journeys": [
+        "PJ-X1"
+      ],
+      "waits": {
+        "PX-a": [
+          "PX-5",
+          "PX-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoExportPackSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoExportPackTests.swift",
+        "UITests/PhotoJourneyTests+ExportPack.swift"
+      ]
+    },
+    {
+      "id": "PX-m",
+      "behavior": "Export resamples the flattened image to the exact size and writes PNG, JPEG, HEIC or TIFF through the shared encoder, headless and in the app.",
+      "tasks": [
+        "PX-3",
+        "PX-4"
+      ],
+      "journeys": [
+        "MJ-PX"
+      ],
+      "waits": {
+        "PX-a": [
+          "PX-3",
+          "PX-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoExport+Kernel.swift",
+        "Sources/PhotoModel/PhotoHeadless.swift",
+        "Tests/PhotoModelTests/PhotoExportPackTests.swift",
+        "Tests/mutations/PhotoModel.PhotoExport+Kernel.json",
+        "Tests/RealJobs/photo/instagram/",
+        "Sources/PhotoApp/ImageIOCodec.swift",
+        "Tests/AppSnapshotTests/PhotoExportFormatsTests.swift"
+      ]
+    },
+    {
+      "id": "PX-z",
+      "behavior": "Export runs on live services, the journey passes, and the blueprint has it in.",
+      "tasks": [
+        "PX-7",
+        "PX-8"
+      ],
+      "journeys": [
+        "PJ-X1"
+      ],
+      "waits": {
+        "PX-u": [
+          "PX-7",
+          "PX-8"
+        ],
+        "PX-m": [
+          "PX-7"
+        ],
+        "tone-controls:PT-z": [
+          "PX-8"
+        ],
+        "place-image:PP-z": [
+          "PX-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+ExportPack.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/export-pack.wave.json"
+      ]
+    }
+  ]
+}

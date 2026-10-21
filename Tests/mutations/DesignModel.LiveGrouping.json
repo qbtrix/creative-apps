@@ -1,30 +1,30 @@
 [
   {
-    "label": "group moves a leaf",
+    "label": "the group's frame is not the members' union",
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
-    "find": "made.children = siblings.filter { wanted.contains($0.id) }",
-    "replace": "made.children = siblings.filter { wanted.contains($0.id) }.map { var leaf = $0; leaf.translate(by: DesignPoint(x: 1, y: 0)); return leaf }",
+    "find": "kind: .group, frame: box)",
+    "replace": "kind: .group, frame: DesignRect(x: 0, y: 0, width: 1, height: 1))",
     "tests": "DesignGroupTests"
   },
   {
-    "label": "group goes to the top instead of the topmost member's place",
+    "label": "ungroup selects nothing",
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
-    "find": "siblings.insert(made, at: at)",
-    "replace": "siblings.append(made)",
+    "find": "selection += children",
+    "replace": "selection += []",
     "tests": "DesignGroupTests"
   },
   {
-    "label": "ungroup reverses the children's order",
+    "label": "the new group is not selected",
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
-    "find": "siblings.replaceSubrange(at...at, with: current.children)",
-    "replace": "siblings.replaceSubrange(at...at, with: current.children.reversed())",
+    "find": "selection: [made.id])",
+    "replace": "selection: [])",
     "tests": "DesignGroupTests"
   },
   {
     "label": "a cross-parent group is made",
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
-    "find": "let parent = try fakeSharedParent(ids.filter { page.nodes.node($0) != nil }, page)",
-    "replace": "let parent = page.nodes.ancestors(of: ids.last ?? \"\")?.last",
+    "find": "_ = try fakeSharedParent(present, page)",
+    "replace": "",
     "tests": "DesignGroupTests"
   },
   {

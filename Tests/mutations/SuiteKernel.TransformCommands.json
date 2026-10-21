@@ -1,0 +1,23 @@
+[
+  {
+    "label": "dragIsOneStep: the drag token isn't passed to setTransform, so a 60-sample drag is 60 undo steps (.dragIsOneStep)",
+    "file": "Sources/SuiteKernel/Transform/TransformCommands.swift",
+    "find": "try target.setTransform(t, name: name, drag: drag)",
+    "replace": "try target.setTransform(t, name: name, drag: nil)",
+    "tests": "SuiteKernelTests.TransformCommandsTests"
+  },
+  {
+    "label": "flipHonoursHelp: flip's availability skips the target's flipHelp, so a layer that can't mirror flips anyway (.flipHonoursHelp)",
+    "file": "Sources/SuiteKernel/Transform/TransformCommands.swift",
+    "find": "(t.transformHelp ?? t.flipHelp).map(Availability.unavailable)",
+    "replace": "t.transformHelp.map(Availability.unavailable)",
+    "tests": "SuiteKernelTests.TransformCommandsTests"
+  },
+  {
+    "label": "rotateIsRelative: transform.rotate sets the turn to its degrees instead of adding them (.rotateIsRelative)",
+    "file": "Sources/SuiteKernel/Transform/TransformCommands.swift",
+    "find": "TransformRules.rotated(try selection(t, \"transform.rotate\"), by: p.degrees)",
+    "replace": "TransformBox(box: try selection(t, \"transform.rotate\").box, degrees: p.degrees)",
+    "tests": "SuiteKernelTests.TransformCommandsTests"
+  }
+]

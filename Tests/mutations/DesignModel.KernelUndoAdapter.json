@@ -1,0 +1,37 @@
+[
+  {
+    "label": "droppedEndRun: endEditRun no longer forwards to the kernel, so one run spans two gestures",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "history.kernel.endRun()",
+    "replace": "_ = history.kernel",
+    "tests": "DesignSelectionRunTests|DesignUndoTests|DesignGestureTests"
+  },
+  {
+    "label": "refusalIsSuccess: canUndo ignores the kernel, so Undo reads enabled with nothing to undo",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "historyIsLive && history.kernel.canUndo",
+    "replace": "historyIsLive",
+    "tests": "DesignGestureTests|DesignFileTests|DesignTextTests"
+  },
+  {
+    "label": "refusalIsSuccess: canRedo ignores the kernel, so Redo reads enabled with nothing to redo",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "historyIsLive && history.kernel.canRedo",
+    "replace": "historyIsLive",
+    "tests": "DesignUndoTests|DesignUndoSwapEdgeTests|DesignGestureTests"
+  },
+  {
+    "label": "droppedKey: record passes no coalescing key, so a nudge run is one step per press",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "key: coalescing)",
+    "replace": "key: nil)",
+    "tests": "DesignSelectionRunTests|DesignUndoTests|DesignGestureTests"
+  },
+  {
+    "label": "lostName: the menu title drops the kernel step's name and always reads Undo",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "history.kernel.undoName.map { \"Undo \\($0)\" } ?? \"Undo\"",
+    "replace": "\"Undo\"",
+    "tests": "DesignUndoTests|DesignUndoSwapEdgeTests|DesignGestureTests"
+  }
+]

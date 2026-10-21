@@ -2,7 +2,7 @@
   "title": "afterglow mcp: an MCP server that publishes every app's command catalog as tools, headless first (stdio, Linux and macOS), then a running app's live document over a local, user-approved channel (macOS)",
   "wave": "AI1",
   "order": 20,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "#3000",
   "covers": "captain's AI-accessible-first call (MCP half); beta-80 plan W0 (p0; live slices W2); suite.md 1.5; the AI-via-Paw-OS module's connection point",
   "waits_on": "afterglow-cli CL-a (slice waits; MC-15 on CL-z for docs/cli.md); suiteui command-catalog CC-a (cross-line); the live slices also wait on one adopt-command-catalog app slice merged-done (cross-line hand-off) and suite-contracts (built)",

@@ -154,6 +154,7 @@ func snapshot(_ view: some View, name: String, scheme: ColorScheme) throws {
 /// `view` drawn at 1440x900 points, one pixel per point, through AppKit.
 @MainActor
 func render(_ view: some View, scheme: ColorScheme) -> NSBitmapImageRep? {
+    _ = TestDefaults.registered
     let size = CGSize(width: 1440, height: 900)
     let host = NSHostingView(rootView: view
         .frame(width: size.width, height: size.height)

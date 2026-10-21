@@ -1,0 +1,23 @@
+[
+  {
+    "label": "readersIgnored: the fake's readers table ignored, so every dropped file is refused",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "public func readers(ofExtension ext: String) -> [String] { Self.readerTable[ext] ?? [] }",
+    "replace": "public func readers(ofExtension ext: String) -> [String] { [] }",
+    "tests": "FakeCanvasFileFlowTests"
+  },
+  {
+    "label": "placesNothing: the fake places no type, so a dropped PNG opens instead of landing as a rect",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "public var placesExtensions: Set<String> { [\"png\"] }",
+    "replace": "public var placesExtensions: Set<String> { [] }",
+    "tests": "FakeCanvasFileFlowTests"
+  },
+  {
+    "label": "placeNotAStep: the placed rects aren't recorded, so undo can't take the drop back",
+    "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "find": "history.record(\"Place\", rects)",
+    "replace": "_ = rects",
+    "tests": "FakeCanvasFileFlowTests"
+  }
+]

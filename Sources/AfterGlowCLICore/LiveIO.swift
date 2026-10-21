@@ -91,8 +91,11 @@ public struct LiveIO: CLIIO {
             .sorted()
     }
 
-    public func out(_ line: String) { print(line) }
+    /// Writes unbuffered, so a client on a pipe gets each `afterglow mcp` reply as it is written.
+    public func out(_ line: String) { FileHandle.standardOutput.write(Data((line + "\n").utf8)) }
     public func err(_ line: String) { FileHandle.standardError.write(Data((line + "\n").utf8)) }
+    /// Swift's `readLine`, which repairs invalid UTF-8 rather than passing it on.
+    public func readLine() -> Data? { Swift.readLine(strippingNewline: true).map { Data($0.utf8) } }
 
     /// The paths under `folder` whose name matches `segment` (`*`, `?`); a literal segment is taken as is.
     /// A name starting with "." matches only a segment that does.

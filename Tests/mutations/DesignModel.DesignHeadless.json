@@ -1,0 +1,23 @@
+[
+  {
+    "label": "exportSelectedPageOnly",
+    "file": "Sources/DesignModel/DesignHeadless.swift",
+    "find": "for page in workspace.pages {",
+    "replace": "for page in workspace.pages where page.id == workspace.selectedPageID {",
+    "tests": "DesignHeadlessTests/realJobPasses"
+  },
+  {
+    "label": "liftedAvailabilityKept",
+    "file": "Sources/DesignModel/DesignHeadless.swift",
+    "find": "availability: { spec.availability($0.workspace) }",
+    "replace": "availability: { _ in .available }",
+    "tests": "DesignHeadlessTests"
+  },
+  {
+    "label": "summaryCountsNestedLayers",
+    "file": "Sources/DesignModel/DesignHeadless.swift",
+    "find": "nodes.reduce(nodes.count)",
+    "replace": "nodes.reduce(0)",
+    "tests": "DesignHeadlessTests"
+  }
+]

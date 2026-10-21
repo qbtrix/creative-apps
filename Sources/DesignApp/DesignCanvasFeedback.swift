@@ -14,10 +14,15 @@
 // pointer (`placement`, observed by this body alone, so the canvas body never re-runs
 // as it follows the pointer). The size badge (`design.canvas.badge`) is the Model's
 // `selectionBadge` in a caption pill hung clear of the selection's bottom handle, one size
-// at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs. It
-// reads the model and never writes it.
+// at any zoom; `model` is the live copy mid-drag, so it reads the drag as it runs, and an
+// open text edit's box is read at its draft's measured size (#3335). Under it, while the
+// typed text draws too small to read, the Model's `textLegibilityHint` hangs in a second
+// pill (`design.canvas.textHint`, #3336), a warning status pill (SuiteUI's StatusPillFace). The
+// smart guides (DesignGuideOverlay, `design.canvas.guides`) draw the same copy's
+// `snapGuides`. It reads the model and never writes it.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -26,6 +31,8 @@ struct DesignCanvasFeedback: View {
     let zoom: Double
     /// The store the canvas this feedback belongs to reads and writes.
     let store = DesignCanvasHover.current
+    /// Where the Eyedropper's picks go (DesignSampleLoupe).
+    var perform: DesignPerform = { _ in }
 
     /// The pointer over the canvas: the one the last hover answer names, or the tool's own.
     var pointer: PointerStyle {
@@ -48,9 +55,17 @@ struct DesignCanvasFeedback: View {
         if store.shows(model), let rect = now.mark {
             DesignHoverMark(rect: rect, zoom: zoom, name: now.pointer.name, dashed: now.placement != nil)
         }
-        if let badge = model.selectionBadge, let anchor = model.selectionBadgeAnchor {
+        // An open text edit's box as its draft measures, so the badge grows with the typing (#3335).
+        let draft = DesignTextOverlay.draftExtent(model)
+        if let badge = model.selectionBadge(draft: draft), let anchor = model.selectionBadgeAnchor(draft: draft) {
             DesignSizeBadge(text: badge, anchor: anchor, zoom: zoom)
+            if let hint = model.textLegibilityHint(zoom: zoom) {
+                DesignSizeBadge(text: hint, anchor: anchor, zoom: zoom, hint: true)
+            }
         }
+        DesignGuideOverlay(guides: DesignGuidePin.guides ?? model.snapGuides, zoom: zoom)
+        // The Eyedropper's loupe and clicks; only its own body reads the loupe as it follows the pointer.
+        DesignSampleLoupe(model: model, zoom: zoom, perform: perform)
     }
 }
 
@@ -72,6 +87,10 @@ struct DesignCanvasFeedback: View {
     private(set) var key: Key?
     @ObservationIgnored private(set) var point: DesignPoint?
     @ObservationIgnored private(set) var modifiers: DesignModifiers = []
+    /// The Eyedropper's loupe at the pointer (DesignSampleLoupe reads it); nil for any other tool.
+    private(set) var loupe: DesignLoupe?
+    /// The square the Eyedropper reads, as the size chips set it.
+    private(set) var sampleSize: SampleSize = .point
     #if DEBUG
     /// How many times a canvas showing this store's page read its pointer: once per canvas body.
     @ObservationIgnored var canvasReads = 0
@@ -91,6 +110,21 @@ struct DesignCanvasFeedback: View {
         if key != place { key = place }
         if placement != asked.placement { placement = asked.placement }
         if answer != asked.steady { answer = asked.steady }
+        updateLoupe(on: model)
+    }
+
+    /// Reads a `size` square from now on, the loupe at the kept pointer asked again of `model`.
+    func setSampleSize(_ size: SampleSize, on model: DesignWorkspace) {
+        if sampleSize != size { sampleSize = size }
+        updateLoupe(on: model)
+    }
+
+    /// The loupe for `model`'s page; nil for another canvas.
+    func loupe(for model: DesignWorkspace) -> DesignLoupe? { belongs(to: model) ? loupe : nil }
+
+    private func updateLoupe(on model: DesignWorkspace) {
+        let shown = model.loupe(at: point, modifiers: modifiers, size: sampleSize)
+        if loupe != shown { loupe = shown }
     }
 
     func belongs(to model: DesignWorkspace) -> Bool { key == Key(model) }
@@ -188,26 +222,40 @@ private struct DesignHoverMark: View {
 
 /// The size badge: `text` in a caption pill, its top `SuiteSpacing.xs` under the bottom-middle
 /// handle below `anchor` (page points) at `zoom`, one size at any zoom, identified `design.canvas.badge` with `text` as its label.
+/// A `hint` (the text legibility hint, `design.canvas.textHint`) hangs one pill lower as a warning
+/// status pill, its tint, color and triangle (design.md State colors), so it never reads as a
+/// second selection fact in accent.
 private struct DesignSizeBadge: View {
     let text: String
     let anchor: DesignPoint
     let zoom: Double
+    var hint = false
 
     var body: some View {
         let scale = usable(zoom)
-        Text(verbatim: text)
-            .font(SuiteFont.caption.monospacedDigit())
-            .foregroundStyle(SuiteColor.overlayPaper)
-            .padding(SuiteInset.pill)
-            .frame(height: SuiteSize.pill)
-            .background(Capsule().fill(SuiteColor.accentFill))
+        let row: CGFloat = hint ? 1 : 0
+        pill
             .fixedSize()
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text(verbatim: text))
-            .accessibilityIdentifier(DesignControlID.canvasBadge)
+            .accessibilityIdentifier(hint ? "design.canvas.textHint" : DesignControlID.canvasBadge)
             .position(
                 x: CGFloat(anchor.x * scale),
-                y: CGFloat(anchor.y * scale) + SuiteSize.selectionHandle / 2 + SuiteSpacing.xs + SuiteSize.pill / 2)
+                y: CGFloat(anchor.y * scale) + SuiteSize.selectionHandle / 2 + SuiteSpacing.xs + SuiteSize.pill / 2
+                    + row * (SuiteSize.pill + SuiteSpacing.xs))
             .allowsHitTesting(false)
+    }
+
+    @ViewBuilder private var pill: some View {
+        if hint {
+            StatusPillFace(.warning) { Text(verbatim: text) }
+        } else {
+            Text(verbatim: text)
+                .font(SuiteFont.caption.monospacedDigit())
+                .foregroundStyle(SuiteColor.overlayPaper)
+                .padding(SuiteInset.pill)
+                .frame(height: SuiteSize.pill)
+                .background(Capsule().fill(SuiteColor.accentFill))
+        }
     }
 }

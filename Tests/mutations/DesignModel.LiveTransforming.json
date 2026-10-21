@@ -1,10 +1,17 @@
 [
   {
-    "label": "a box of no width divides by zero",
+    "label": "a box of no width keeps the kernel's move-only axis",
     "file": "Sources/DesignModel/Live/LiveTransforming.swift",
-    "find": "length > 0 ? newStart + (value - start) * newLength / length : newStart",
-    "replace": "newStart + (value - start) * newLength / length",
+    "find": "let (x, width) = box.width > 0 ? (frame.x, frame.width) : (new.x, new.width)",
+    "replace": "let (x, width) = (frame.x, frame.width)",
     "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "a scaled layer can shrink below 1 pt",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "width: Swift.max(width, 1), height: Swift.max(height, 1))",
+    "replace": "width: width, height: height)",
+    "tests": "DesignKernelTransformAdapterTests"
   },
   {
     "label": "a locked layer does not refuse",

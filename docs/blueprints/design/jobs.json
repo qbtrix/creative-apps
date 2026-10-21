@@ -102,20 +102,21 @@
     "app": "design",
     "weight": "med",
     "job": "Draw a logo with the pen (curves, close the path), then move one point.",
-    "outcome": "Path stays closed and smooth.",
+    "outcome": "The saved path has one closed contour of exactly four anchors; the moved anchor and its handles moved by the same offset and the others are unchanged.",
     "needs": [
-      "S18"
+      "S25"
     ],
-    "needs_note": "F7 pen + S18 point editing",
-    "closes_with": "S18",
+    "needs_note": "the Pen and point editing (S25)",
+    "closes_with": "S25",
     "trap": "Closing the path adds a duplicate point",
-    "run": "J",
+    "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://help.figma.com/hc/en-us/articles/360039957534-Boolean-operations",
       "https://affinity.serif.com/en-gb/designer/full-feature-list/"
-    ]
+    ],
+    "waits_on": "DP-6"
   },
   "RJ-D07": {
     "id": "RJ-D07",
@@ -183,10 +184,11 @@
     "job": "Copy a shape as SVG and paste it into a code editor.",
     "outcome": "Valid SVG with the same colours.",
     "needs": [
-      "A1"
+      "A1",
+      "suiteui/clipboard-interop"
     ],
     "needs_note": "A1 copy as SVG or CSS",
-    "closes_with": "A1",
+    "closes_with": "suiteui/clipboard-interop",
     "trap": "Pastes a PNG instead",
     "run": "C",
     "baseline": "fail",
@@ -222,17 +224,19 @@
     "job": "Place a photo inside a rounded frame and move it inside the crop.",
     "outcome": "The photo keeps its aspect.",
     "needs": [
-      "S20"
+      "S20",
+      "design/placed-images"
     ],
-    "needs_note": "S20 image fills, crop in frame",
-    "closes_with": "S20",
+    "needs_note": "S20 placed images; design/placed-images wires them into Design (pictures in frames by cover)",
+    "closes_with": "design/placed-images",
     "trap": "Image stretched to the frame",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
-    ]
+    ],
+    "waits_on": "PD-6"
   },
   "RJ-D13": {
     "id": "RJ-D13",
@@ -241,24 +245,26 @@
     "job": "Give a background a two-stop linear gradient and rotate its angle.",
     "outcome": "Smooth, matches the export.",
     "needs": [
-      "S17"
+      "S24",
+      "design/gradient-fill"
     ],
-    "needs_note": "S17 gradient editor",
-    "closes_with": "S17",
+    "needs_note": "S24 gradient fills; design/gradient-fill wires them into Design",
+    "closes_with": "design/gradient-fill",
     "trap": "Export ignores the gradient angle",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/designer/full-feature-list/"
-    ]
+    ],
+    "waits_on": "DG-5"
   },
   "RJ-D14": {
     "id": "RJ-D14",
     "app": "design",
     "weight": "med",
     "job": "Add a drop shadow to a card; change it later.",
-    "outcome": "Shadow exports in PNG and SVG.",
+    "outcome": "The SVG export holds the shadow as a filter with the edited values, referenced by the card; the PNG and PDF half is RJ-D43 (macOS).",
     "needs": [
       "S2"
     ],
@@ -270,7 +276,8 @@
     "since": "2026-10-19",
     "sources": [
       "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
-    ]
+    ],
+    "waits_on": "DL-6"
   },
   "RJ-D15": {
     "id": "RJ-D15",
@@ -279,17 +286,18 @@
     "job": "Rotate a layer 15° with the handles.",
     "outcome": "Bounds and the inspector agree.",
     "needs": [
-      "S7"
+      "S7",
+      "design/transform"
     ],
-    "needs_note": "S7 transform",
-    "closes_with": "S7",
+    "closes_with": "design/transform",
     "trap": "Inspector shows the unrotated box",
     "run": "C",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/designer/full-feature-list/"
-    ]
+    ],
+    "waits_on": "DT-6"
   },
   "RJ-D16": {
     "id": "RJ-D16",
@@ -369,17 +377,18 @@
     "job": "Force-quit with unsaved work, relaunch.",
     "outcome": "Design offers to restore it.",
     "needs": [
-      "S12"
+      "S12",
+      "design/autosave-history"
     ],
-    "needs_note": "S12 autosave and recovery",
-    "closes_with": "S12",
+    "closes_with": "design/autosave-history",
     "trap": "Work lost (only saved files survive today)",
     "run": "J",
     "baseline": "fail",
     "since": "2026-10-19",
     "sources": [
       "https://community.adobe.com/t5/after-effects-discussions/recover-unsaved-after-effects-project/m-p/8492557"
-    ]
+    ],
+    "waits_on": "DA-7"
   },
   "RJ-D21": {
     "id": "RJ-D21",
@@ -426,10 +435,12 @@
     "job": "Pick a colour from a placed photo with the eyedropper.",
     "outcome": "The picked swatch equals the document pixel under the cursor, not the screen-scaled colour.",
     "needs": [
-      "S13"
+      "S13",
+      "design/eyedropper",
+      "S20"
     ],
-    "needs_note": "S13 eyedropper",
-    "closes_with": "S13",
+    "needs_note": "S13 and design/eyedropper pick the colour; S20 adds the placed photo it is picked from",
+    "closes_with": "S20",
     "trap": "Picks the screen-scaled colour",
     "run": "J",
     "baseline": "fail",
@@ -583,5 +594,191 @@
     "sources": [
       "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
     ]
+  },
+  "RJ-D32": {
+    "id": "RJ-D32",
+    "app": "design",
+    "weight": "med",
+    "job": "Resize the page to a new device size, then find a layer that now sits off it.",
+    "outcome": "Width and Height each change in one undo step; layers off the page stay visible, dimmed.",
+    "needs": [
+      "design/canvas-basics"
+    ],
+    "needs_note": "canvas-basics CB-c (page size in the inspector, layers past the edge)",
+    "closes_with": "design/canvas-basics",
+    "trap": "Page size fixed at creation; off-page layers vanish",
+    "run": "J",
+    "baseline": "fail",
+    "since": "2026-10-19",
+    "sources": [
+      "captain"
+    ]
+  },
+  "RJ-D33": {
+    "id": "RJ-D33",
+    "app": "design",
+    "weight": "high",
+    "job": "Nudge a card 30 times, jump back 10 steps in History, save and reopen.",
+    "outcome": "The reopened card sits where the 20th nudge left it (20 points right).",
+    "needs": [
+      "S12",
+      "design/autosave-history"
+    ],
+    "closes_with": "design/autosave-history",
+    "trap": "The jump records a step, or the save writes the state before the jump",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DA-6",
+    "added_by": "design/autosave-history"
+  },
+  "RJ-D34": {
+    "id": "RJ-D34",
+    "app": "design",
+    "weight": "med",
+    "job": "Pick a red ellipse's colour with the eyedropper onto a white rectangle under it, and save.",
+    "outcome": "The point over both reads red, and the saved rectangle's fill is #FF0000.",
+    "needs": [
+      "S13",
+      "design/eyedropper"
+    ],
+    "closes_with": "design/eyedropper",
+    "trap": "The sample reads the selected rectangle instead of the ellipse on top",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DY-6",
+    "added_by": "design/eyedropper"
+  },
+  "RJ-D35": {
+    "id": "RJ-D35",
+    "app": "design",
+    "weight": "med",
+    "job": "Draw a five-point star badge with the Shape tool, save, reopen and export SVG.",
+    "outcome": "The reopened layer is still a star with its points and ratio, and the SVG path has ten vertices with the first at the top centre.",
+    "needs": [
+      "S19",
+      "design/shape-tools"
+    ],
+    "closes_with": "design/shape-tools",
+    "trap": "The star reopens as a rectangle, or the SVG writes its box",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DS-6",
+    "added_by": "design/shape-tools"
+  },
+  "RJ-D36": {
+    "id": "RJ-D36",
+    "app": "design",
+    "weight": "med",
+    "job": "Give a rectangle a 2 pt dashed border with round caps and export SVG.",
+    "outcome": "The SVG rect has stroke-dasharray \"8 4\" and stroke-linecap \"round\".",
+    "needs": [
+      "S17",
+      "design/stroke-style"
+    ],
+    "closes_with": "design/stroke-style",
+    "trap": "The SVG drops the dash or writes it unscaled",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DK-7",
+    "added_by": "design/stroke-style"
+  },
+  "RJ-D41": {
+    "id": "RJ-D41",
+    "app": "design",
+    "weight": "high",
+    "job": "Export a 540x675 pt frame as JPEG at exactly 1080x1350, and as PNG at a 512 px long edge.",
+    "outcome": "The JPEG is exactly 1080x1350 with its transparent corner on the frame's fill; the PNG is 410x512 with alpha.",
+    "needs": [
+      "S11",
+      "design/export-pack"
+    ],
+    "closes_with": "design/export-pack",
+    "trap": "2x applied on top (2160x2700), or the JPEG's transparent corner comes out black",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DX-3",
+    "added_by": "design/export-pack"
+  },
+  "RJ-D42": {
+    "id": "RJ-D42",
+    "app": "design",
+    "weight": "high",
+    "job": "Save two Design files, then reopen one from File > Open Recent; drop a Halo project on Design.",
+    "outcome": "Open Recent lists only the two Design files, newest first; the Halo project is handed to Halo and the Design document is unchanged.",
+    "needs": [
+      "suite/file-flow",
+      "design/file-flow"
+    ],
+    "closes_with": "design/file-flow",
+    "trap": "Design has no Open Recent, or it lists every app's files",
+    "run": "C",
+    "baseline": "fail",
+    "since": "2026-10-20",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "DF-3",
+    "added_by": "design/file-flow"
+  },
+  "RJ-D43": {
+    "id": "RJ-D43",
+    "app": "design",
+    "weight": "med",
+    "job": "Export a card with a drop shadow as a 2x PNG and as a PDF.",
+    "outcome": "The PNG has shadow pixels past the card's edge by the style's reach at 2x; the PDF holds the card as a vector path with the shadow as one image under it.",
+    "needs": [
+      "S2"
+    ],
+    "closes_with": "S2",
+    "trap": "The shadow is cut at the card's bounds, or the PDF rasterizes the card itself",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "https://forum.sketch.com/t/i-cannot-export-svg-with-blur/5474"
+    ],
+    "waits_on": "DL-7",
+    "added_by": "design/layer-styles"
+  },
+  "RJ-D50": {
+    "id": "RJ-D50",
+    "app": "design",
+    "weight": "med",
+    "job": "Set a three-line justified paragraph in Design with line height 1.5, letter spacing 20 and italic, then export a PNG.",
+    "outcome": "The first two lines' ink spans the box width within 2 px and the last line doesn't; the baseline gap is 1.5 times ascent plus descent within 1 px.",
+    "needs": [
+      "suiteui/text-style",
+      "E8"
+    ],
+    "closes_with": "suiteui/text-style",
+    "trap": "Line height or justify is set in the inspector but the export ignores it",
+    "run": "Cm",
+    "baseline": "fail",
+    "since": "2026-10-21",
+    "sources": [
+      "captain"
+    ],
+    "waits_on": "TS-8",
+    "added_by": "suiteui/text-style"
   }
 }

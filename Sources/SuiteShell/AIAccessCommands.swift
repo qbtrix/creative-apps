@@ -21,8 +21,9 @@ import SwiftUI
     /// Starts the flow for `app` once; a demo client in `arguments` asks as soon as a main window shows.
     public func start(app: SuiteApp, arguments: [String]) {
         guard access == nil else { return }
-        access = FakeAIAccess(app: app.displayName)
-        guard let client = AIAccessPrompt.demoClient(in: arguments) else { return }
+        let client = AIAccessPrompt.demoClient(in: arguments)
+        access = FakeAIAccess(app: app.displayName, demoClient: client)
+        guard let client else { return }
         Task { @MainActor in
             var tries = 0
             while NSApp.mainWindow == nil, tries < 100 { tries += 1; try? await Task.sleep(for: .milliseconds(100)) }
@@ -33,6 +34,11 @@ import SwiftUI
     /// A client asks to drive `window` (the main window when nil): connects it, or begins the approval sheet.
     public func request(client: String, command: String? = nil, in window: NSWindow? = nil) {
         access?.request(client: client, command: command)
+        present(in: window)
+    }
+
+    /// Begins the sheet for a pending request on `window` (the main window when nil), and shows or hides the chip.
+    private func present(in window: NSWindow?) {
         guard let window = window ?? NSApp.mainWindow ?? NSApp.windows.first(where: \.isVisible) else { return }
         host = window
         if let pending = access?.pending, sheet == nil {
@@ -52,8 +58,8 @@ import SwiftUI
         showChip()
     }
 
-    /// The chip's Stop, and Window > AI Access…'s Revoke.
-    public func stop() { access?.stop(); showChip() }
+    /// The chip's Stop (the demo client's request after it asks on the same window), and Window > AI Access…'s Revoke.
+    public func stop() { access?.stop(); present(in: host) }
     public func revoke(_ entry: AIAccessEntry) { access?.revoke(client: entry.client); showChip() }
 
     /// Opens, or brings forward, the window listing the remembered grants.

@@ -1,7 +1,7 @@
 // LibraryOrder.swift: the cached display order (SP-8). `order` holds the
 // selected collection's photo ids in the current sort; it is rebuilt once per
 // change that can reorder or hide a photo (load, sort, collection, and an
-// edit under the rating sort or in Favorites), so the grid, the selection and
+// edit under the rating sort or in Picks), so the grid, the selection and
 // the loupe read it in O(n) instead of sorting on every read. Linux-safe.
 
 extension LibraryCatalog {
@@ -18,11 +18,9 @@ extension LibraryCatalog {
     }
 
     /// True when an edit to a photo's metadata can move or hide it in `order`.
-    var editCanReorder: Bool { sort == .rating || selectedCollectionID == "favorites" }
-
-    /// Sets the grid selection; ids not shown in the selected collection are dropped.
-    public mutating func select(_ ids: Set<String>) {
-        selection = ids.intersection(order)
+    var editCanReorder: Bool {
+        sort == .rating || selectedCollectionID == "favorites" || activeFilter.isActive
+            || UserCollection.isUserID(selectedCollectionID)
     }
 
     /// Opens a shown photo in the loupe. An unknown id is ignored.

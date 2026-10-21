@@ -1,10 +1,10 @@
 # switching lead record
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
-Run: act-1a150baa312-n5va · Session: claude/switching-feature-lead-kyvcdx · Started: 2026-10-18 (earlier run act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
-Stage: 3 wave 5 (SW-4a #2989, feature-done, waiting on its macOS build)
-Base: origin/dev 507719b
-Next: SW-4a PR merges; green dev macOS run; review round; Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
+Run: act-1a152d6e775-atvh · Session: claude/switching-feature-lead-2qhod5 · Started: 2026-10-18 (earlier runs act-1a150baa312-n5va on claude/switching-feature-lead-kyvcdx, act-1a146f2912a-581f on claude/switching-feature-lead-jm0d5f)
+Stage: 4 round 1, blocked on CI #3176 (scoped `suite` runs skip AfterGlowJourneyTests+Switch until it merges, #2971; SW-4a #2989 merged as 531550f)
+Base: origin/dev d481419
+Next: wait for #3176 (ci/scope-macos-per-app) to merge into dev, then for the next scoped `suite` run on dev that contains it; download ui-screens, snapshots and audit-suite json, run Anatomy round 1 (critic panel, clarity lens), then Belt-Contact-Sheet on #1507. SW-4b (#858) and SW-4c (#859) stay follow-ups
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
@@ -21,7 +21,7 @@ This packet has no `## Slices` table: the v2 loop applies. The feature is one un
 | SW-3b | feature | 2 | HandOffTransport, SuiteAppDelegate, live hand-off slot, the launcher router | Sources/SuiteShell/{HandOffTransport,SuiteAppDelegate}.swift; Live/HandOffSlot.swift; Sources/AfterGlowApp/LauncherRouter.swift | SuiteShellHandOffTests (macOS) | #1883 (merged 7d068e10) | merged |
 | SW-3c | feature | 3 | SuiteCommands Switch To from SwitchMenu, .suiteApp(_:host:) | Sources/SuiteShell/{SuiteCommands,SuiteAppModifier}.swift; SuiteAppDelegate.swift (registry); AppLauncher.swift (static run state) | SuiteCommandsTests (Linux), LauncherMenuStubTests | #1943 (merged 98e5d50f) | merged |
 | SW-3d | feature | 4 | SwitcherEntries (model), SuiteSwitcherBridge (the switcher a window shows) | Sources/SuiteModel/Switching/SwitcherEntries.swift; Sources/SuiteShell/SuiteSwitcherBridge.swift; SuiteAppModifier.swift | SwitcherEntriesTests (Linux) | #1977 (merged) | merged |
-| SW-4a | feature | 5 | Journeys SJ3, testOpenRecentBringsAppForward, testCrashIsolation (feature-done) | UITests/AfterGlowJourneyTests+Switch.swift | dev macOS run | this PR | in review; adoption steps skip until #861, #862, #836, #837 |
+| SW-4a | feature | 5 | Journeys SJ3, testOpenRecentBringsAppForward, testCrashIsolation (feature-done) | UITests/AfterGlowJourneyTests+Switch.swift | dev macOS run | #2989 | merged 531550f; adoption steps skip until #861, #862, #836, #837 |
 | SW-4b | feature | 5 | Journey SJ2 (follow-up #858) | UITests/AfterGlowJourneyTests+New.swift | dev macOS run | – | follow-up, outside the done check |
 | SW-4c | feature | 5 | SP1, SP2 and budget constants (follow-up #859) | UITests/AfterGlowJourneyTests+PerfSwitch.swift, +BudgetsSwitch.swift | perf JSON | – | follow-up, waits on #782 |
 | A-FL-1 | #861 | line:flare | FlareModel SuiteDocumentHost, FlareApp adoption | Sources/FlareModel/FlareDocumentHost.swift and FlareApp | FlareDocumentHostTests | – | owned by flare line |
@@ -88,9 +88,40 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 - C4: the bridge is added to the shell-apps component.
 - Belt-Slice-Done lines don't apply: this packet is v2 (no slices table), so there's no slice to mark.
 
+## Decisions (stage 4, run act-1a152d6e775-atvh)
+- Supervisor (#1507, 06:25Z): a green scoped `suite` run on dev that contains 531550f is valid evidence for Anatomy round 1 and the contact sheet. Run 39209833935 (d481419) is that run.
+- Supervisor correction (#1507, 06:43Z): scoped `suite` runs skip AfterGlowJourneyTests+Switch (#2971), so 39209833935 carries no switching journeys. Evidence is the first scoped `suite` run on dev after #3176 merges.
+- Belt's 07:1xZ stall ping named `lead/switching`; this session may push only `claude/switching-feature-lead-2qhod5`, so RECORD.md and timeline.tsv stay there, as every earlier run of this lead did. Told the supervisor on #1507.
+- Status channel is this run's designated branch `claude/switching-feature-lead-2qhod5`, reset to origin/dev d481419 (a fast-forward from main b7e17ed) with this record copied from `claude/switching-feature-lead-kyvcdx`. Brief's base check: HEAD b7e17ed matched `origin/main`; work stays on dev.
+
 ## Decisions (wave 5, run act-1a150baa312-n5va)
 - The brief's base check (HEAD f7e0350) matched `origin/main`; the work is based on `origin/dev` 507719b, as the earlier run decided.
 - SW-4a ships now as the feature-done PR. The launcher-side steps run today: the home's Switch To items and its disabled own item, ⌃⌘1/⌃⌘2 launching Flare and Design as separate processes while the home keeps running, SIGKILL of Flare leaving Design and the home running, and ⌃⌘1 relaunching Flare cold. Steps that need Flare or Design to host suite documents (state kept across switches, the shared switcher, window titles, dirty dot, the strip listing apps) skip naming the adoption and fixture issues, following the home journeys' XCTSkip pattern. The macOS journeys never hold a lane PR (supervisor note), so the dev run is their proof.
 - Checked with the apple-docs MCP: `XCUIElement.hover()`, `NSRunningApplication.forceTerminate()`.
 - SW-4a is #2989. Its first macOS build (run 39164953207) failed on a dev break that isn't this PR's: #2942's zoom-sweep test still used `TileCanvasView`, which #2907 had removed. #2990 fixed it on dev at 21:35Z. The fix wasn't ported, because CLAUDE.md says not to fix another line's dev break in a PR. dev was merged into the branch once #2990 landed.
 - The GitHub proxy re-appends a "Generated by" footer to every PR body this session writes, even on a REST PATCH, so it can't be removed from here. The lane strips attribution from the squash commit.
+- SW-4a's macOS build of 8fe3116 passed (run 39170015887), and the lane squash-merged #2989 as 531550f at 22:43Z. The branch restarts from dev after the squash, so this record and the timeline continue on top of the merged history.
+- The first full CI run on dev that contains 531550f is 39173775025 (head 46f6ce21, created 22:47Z). At 23:14Z it was still pending with no job started, behind queued dev runs from 22:16Z on. The Anatomy round (lead.md stage 4) reads that run's `ui-screens`, `snapshots` and audit, so it starts when the run finishes. Nothing in switching's files waits on anything else.
+
+## Decisions (stage 4, run act-1a1552a8478-ned8)
+- Brief's base check: HEAD b3011ab9 matched `origin/main`. Work stays on dev. This run's status channel is `claude/switching-feature-lead-a254h6`, reset to origin/dev 8f405311, with this record copied from `claude/switching-feature-lead-2qhod5`.
+- #3176 merged at 17:16Z, so dev's `suite` scope now runs AfterGlowJourneyTests, the switching journeys among them. #2971 is closed.
+- Evidence for Anatomy round 1 and the contact sheet: scoped `suite` run 39292755765 on dev 8f405311, which contains #3176. It was queued at 17:16Z.
+- Next: when 39292755765 completes, read its ui-screens, snapshots and audit, run critic round 1 with the first-use clarity lens, then fix or post the contact sheet.
+- Run 39292755765 (dev 8f405311) finished at 21:09Z: `macOS (suite)` green, `macOS journeys (suite)` red (report-only). Switching's journeys: SJ3 `testSwitchKeepsEachAppAsLeft` ran its launcher steps (switch-sj3-menu, switch-sj3-home) and skipped the adoption steps; `testOpenRecentBringsAppForward` skipped at its fixture guard; `testCrashIsolation` failed at Switch.swift:98: `XCUIApplication(bundleIdentifier:)` raised "The app representing org.creativesuite.flare could not be found" right after ⌃⌘1, though Flare had started (teardown terminated it). Launch Services hadn't registered the id of an app the launcher had just started by path. The run has no `snapshots` artifact, only ui-screens, xcresult, app-builds and size-report. Audit (afterglow): contrast 0, disabled-dim 0, identifier 10, offscreen 0, overlap 0, unnamed 0. The 10 identifier hits are on the home's filter chips and search field (home's feature, not switching's).
+- Fix: the switch journeys wait for the started process and attach by its running bundle's URL (`switched(to:)`), the same `XCUIApplication(url:)` init the harness uses for the launcher. It ships as a fix PR from this branch. Critic round 1 runs on the next scoped `suite` run that contains it.
+- Critic round 1 (workflow wf_0001f667-4c1) started at 21:18Z on run 39292755765's screens, lenses clarity, journey, design, layout and controls.
+- Round 1 verdict: not clean. 11 confirmed findings, 2 refuted, filed as #3352 to #3358.
+- Round 1 fix PR, from this branch:
+  - #3352: the home sets its switcher through a new `.suiteSwitcher(current:)` view modifier in SuiteShell, applied in HomeWindow. AfterGlowApp.swift is frozen.
+  - #3354: SJ3 sends ⌃⌘0 to Design, and skips on adoption while Design has no Switch To menu.
+  - #3355: testCrashIsolation checks Design's window and the strip drop between the SIGKILL and the relaunch.
+  - The attach-by-URL fix for line 98.
+- #3353 is declined. Packet switching.md line 130 specifies the current app's item as "Show <App> Window", the launcher included, so the finding conflicts with the packet.
+- #3356 and #3357 change SuiteWindow and AppSwitcher (SuiteUI, MAC_GATED). #3358 is the home's New row, not switching. They are next, in fix round 2.
+- Round 1 fix PR #3359 merged at 22:10Z, after the lane's macOS build 39327605843 passed.
+- Fix round 2, from this branch, restarted on dev:
+  - #3356: `AppSwitcher.toolbarTrailing` reserves the inspector's column (`inspectorWidth`), so the row ends left of it. SuiteWindow passes the inspector's ideal width when it shows.
+  - #3357: an open search field (`isSearching`) reserves `searchFieldRoom` past the buttons, so the row narrows to fit instead of pushing the sidebar toggle into the overflow menu.
+  - Tests: AppSwitcherTests `theRowStaysOutOfTheInspectorsColumn` and `anOpenSearchFieldNarrowsTheRow`. The journeys check the row's maxX against the inspector at 880 and 1000 pt, and check that the sidebar toggle stays hittable with search open.
+- Next: critic round 2 on the next scoped `suite` run that contains round 2.

@@ -79,6 +79,10 @@ check "--linux drops what Linux doesn't build" \
 check "app photo" "^(PhotoModelTests)\\.;$photo_snaps" "$(python3 "$ts" app photo | paste -sd';' -)"
 check "app suite" '^(AfterGlowCLITests|SuiteKernelTests|SuiteModelTests)\.;' "$(python3 "$ts" app suite | paste -sd';' -)"
 check "app suiteui" "^(AppAuditTests|SuiteKernelTests|SuiteUITests)\\.;$suiteui_snaps" "$(python3 "$ts" app suiteui | paste -sd';' -)"
+check "app design,photo: the union, as a lane batch scopes its macOS gate" \
+  "^(DesignModelTests|PhotoModelTests)\\.;" "$(python3 "$ts" app design,photo | paste -sd';' - | cut -d';' -f1);"
+python3 "$ts" app photo,nope >/dev/null 2>&1
+check "an unknown app in a list is refused" 1 "$?"
 python3 "$ts" app nope >/dev/null 2>&1
 check "an unknown app is refused" 1 "$?"
 

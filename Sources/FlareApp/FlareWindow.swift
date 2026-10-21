@@ -28,6 +28,8 @@ struct FlareWindow: View {
     @State var model = FlareWorkspace(launch: FlareLaunch(arguments: ProcessInfo.processInfo.arguments))
     /// nil fits the stage; set once the user zooms.
     @State var zoom: Double? = nil
+    /// The stage's fit, which Zoom In and Zoom Out step from while `zoom` is nil.
+    @State var fitted = 1.0
     @State var showsRulers = true
     @State var showsGuides = true
     @State var inspectorTab: FlareInspectorTab = .properties
@@ -75,14 +77,16 @@ struct FlareWindow: View {
         } content: {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey)
+                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
+                onFit: { fitted = $0 })
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
                 easing: FlareTimingRow(
                     editor: model, onSelect: { model.selectEasingSegment($0) },
                     onPreset: { model.setEasingPreset($0) }, onMoveHandle: { model.moveEasingHandle($0, to: $1) },
-                    onEndDrag: { model.endEasingHandleDrag() }))
+                    onEndDrag: { model.endEasingHandleDrag() }),
+                shape: shapeOptions)
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
@@ -145,6 +149,7 @@ struct FlareCanvas: View {
     var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
+    var onFit: @MainActor (Double) -> Void = { _ in }
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
     @State private var driver: PlaybackDriver?
@@ -154,7 +159,7 @@ struct FlareCanvas: View {
             VStack(spacing: 0) {
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS)
+                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
                 FlareTimeline(model: model, perform: perform)
             }
             .overlay { FlareRecording(model: model) }

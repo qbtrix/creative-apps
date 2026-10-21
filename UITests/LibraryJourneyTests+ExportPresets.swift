@@ -7,9 +7,8 @@
 // catalog file) starts clean. The sheet's name field is `library.export.name`
 // and its preset menu `library.export.preset` (EX-11); the rest are EX-6's.
 //
-// Written before its code (lead.md, contract rule 13, EX-9): the walk starts
-// with `throw XCTSkip("waits on EX-11")`, and EX-11, which stores the presets
-// and the last options, drops it.
+// EX-11 stores the presets and the last options (Cancel keeps the edited
+// ones), so step 4's relaunch finds them.
 import AppKit
 import Foundation
 import XCTest
@@ -18,7 +17,6 @@ final class LibraryExportPresetsJourneyTests: XCTestCase {
     /// J7N: a preset sets every option, a name template names the files with
     /// a live preview, and the last settings and saved presets survive a relaunch.
     @MainActor func testExportPresetsAndNames() throws {
-        throw XCTSkip("waits on EX-11")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         let out = try LibraryFiles.freshPhotoFolder()
@@ -60,6 +58,8 @@ final class LibraryExportPresetsJourneyTests: XCTestCase {
         sheetButton("Save as Preset…", library).click()
         library.app.typeText("Web 1200\r")
         sheetButton("Cancel", library).click()
+        XCTAssert(Self.wait(10) { Self.text(library.element("library.catalog")) == "saved" },
+                  "the catalog never read saved")
         library.app.terminate()
 
         // Step 4: relaunch on the same catalog: the last settings and "Web 1200" come back.
@@ -140,6 +140,13 @@ final class LibraryExportPresetsJourneyTests: XCTestCase {
     @MainActor private func cell(_ name: String, _ library: Journey) -> XCUIElement {
         library.app.descendants(matching: .any).matching(NSPredicate(
             format: "identifier BEGINSWITH %@ AND identifier CONTAINS %@", "library.grid.cell.", name)).firstMatch
+    }
+
+    /// Polls `condition` every 0.1 s for up to `seconds`.
+    @MainActor private static func wait(_ seconds: TimeInterval, _ condition: () -> Bool) -> Bool {
+        let deadline = Date(timeIntervalSinceNow: seconds)
+        while Date() < deadline, !condition() { Thread.sleep(forTimeInterval: 0.1) }
+        return condition()
     }
 
     /// What an element reads: its value where macOS puts a field's text, else its label.

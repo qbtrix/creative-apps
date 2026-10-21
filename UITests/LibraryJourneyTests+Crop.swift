@@ -12,6 +12,13 @@
 // step 10. The frame's handles are `library.crop.handle.<name>`
 // (`library.crop.handle.topLeft`). Each step takes the window and a shot suffix so the (L) run can
 // walk the same steps on real files.
+//
+// The (L) run walks steps 1 to 5 and 9 on the 24 JPEGs `LibraryFiles.writeShoot`
+// writes, imported on launch, its shots ending `-live`; at 5° its 1:1 frame
+// is 3545 px. Step 10 then crops IMG_0001 again, waits until the catalog is
+// saved (`library.catalog` reads "saved", or `catalog.json` holds the crop),
+// and relaunches on the same `-LibraryCatalogDir`: the cell and the loupe are
+// still square and R shows the stored 3545 px frame at 5°.
 import XCTest
 
 extension LibraryJourneyTests {
@@ -32,11 +39,35 @@ extension LibraryJourneyTests {
         cropAuto(library, live: false)
         cropReset(library)
         library.app.terminate()
+        try cropLive()
     }
+
+    /// The (L) run: steps 1 to 5 and 9 on real files, then step 10.
+    @MainActor private func cropLive() throws {
+        let folder = try LibraryFiles.freshPhotoFolder()
+        let catalog = try LibraryFiles.freshCatalogDir()
+        addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
+        try LibraryFiles.writeShoot(in: folder)
+        let arguments = ["-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
+                         "-LibraryImportOnLaunch", "-LibraryTestValues"]
+        // A live render of a 6000 × 4000 photo takes seconds in a debug build: render waits stretch.
+        CropRun.slack = 6
+        defer { CropRun.slack = 1 }
+        let library = cropOpen(arguments, suffix: "-live")
+        cropSquare(library)
+        cropStraighten(library, suffix: "-live", width: Self.cropLiveWidth)
+        cropApply(library, suffix: "-live")
+        cropCancelDrag(library)
+        cropReset(library)
+        cropRelaunch(library, catalog: catalog)
+    }
+
+    /// The live 1:1 frame's side at 5° on a 6000 × 4000 photo (MJ6L).
+    private static let cropLiveWidth = 3545
 
     // MARK: - Steps
 
-    /// Step 1: by name, IMG_0001 in the loupe, the Develop tab, R: the frame
+    /// Step 1: by name, IMG_0001 in the loupe, the Develop tab, the photo clicked, R: the frame
     /// reads the whole photo, the chips, Straighten at 0, Auto, Apply, Cancel,
     /// and Photo's item reads "Done Cropping".
     @MainActor private func cropOpen(_ arguments: [String], suffix: String) -> Journey {
@@ -50,7 +81,7 @@ extension LibraryJourneyTests {
             .matching(NSPredicate(format: "label == 'Develop'")).firstMatch
         XCTAssert(tab.waitForExistence(timeout: 5), "the inspector has no Develop tab")
         tab.click()
-        library.press(character: "r")
+        cropKeyR(library)
         let frame = library.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame (library.crop.frame)")
         library.shot("crop\(suffix)")
@@ -111,7 +142,7 @@ extension LibraryJourneyTests {
     @MainActor private func cropCancelDrag(_ library: Journey) {
         library.press(character: "z", .command)
         XCTAssert(cropWait(5) { abs(self.cropLoupeRatio(library) - 1.5) < 0.01 }, "Undo left \(cropLoupeValue(library))")
-        library.press(character: "r")
+        cropKeyR(library)
         let frame = library.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame")
         let corner = frame.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
@@ -124,7 +155,7 @@ extension LibraryJourneyTests {
 
     /// Step 6: the six chips are one width (±0.5 pt).
     @MainActor private func cropChipWidths(_ library: Journey) {
-        library.press(character: "r")
+        cropKeyR(library)
         XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
         let widths = Self.cropAspects.map { library.element("library.crop.aspect.\($0)").frame.width }
         let spread = (widths.max() ?? 0) - (widths.min() ?? 0)
@@ -134,7 +165,7 @@ extension LibraryJourneyTests {
 
     /// Step 7: on 1:1, Right three times nudges the frame 3 px, Shift-Right 10 more.
     @MainActor private func cropNudge(_ library: Journey) {
-        library.press(character: "r")
+        cropKeyR(library)
         let frame = library.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame")
         library.element("library.crop.aspect.1:1").click()
@@ -148,7 +179,7 @@ extension LibraryJourneyTests {
 
     /// Step 8: Auto turns Straighten to the fake's 2.5; `live` before CR-10, Auto is off with its reason.
     @MainActor private func cropAuto(_ library: Journey, live: Bool) {
-        library.press(character: "r")
+        cropKeyR(library)
         let auto = library.element("library.crop.auto")
         XCTAssert(auto.waitForExistence(timeout: 5), "no Auto (library.crop.auto)")
         if live {
@@ -167,7 +198,7 @@ extension LibraryJourneyTests {
         library.press(.escape)
         cropCell("IMG_0002", library).doubleClick()
         XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "IMG_0002 didn't open in the loupe")
-        library.press(character: "r")
+        cropKeyR(library)
         XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
         library.element("library.crop.aspect.1:1").click()
         library.element("library.loupe.photo").click()
@@ -190,11 +221,83 @@ extension LibraryJourneyTests {
                   "library.controls doesn't say \"\(reason)\"")
     }
 
+    /// Step 10 (L): IMG_0001 cropped 1:1 at 5° and applied; once the catalog
+    /// is saved, a relaunch on the same catalog shows its cell and loupe
+    /// square, and R shows the stored 3545 px frame at 5°.
+    @MainActor private func cropRelaunch(_ library: Journey, catalog: URL) {
+        library.press(.escape)
+        let first = cropCell("IMG_0001", library)
+        XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
+        first.doubleClick()
+        XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "IMG_0001 didn't open in the loupe")
+        cropKeyR(library)
+        XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
+        cropSquare(library)
+        cropStraighten(library, suffix: "-live-again", width: Self.cropLiveWidth)
+        library.element("library.loupe.photo").click()
+        library.press(.return)
+        XCTAssert(library.element("library.crop.frame").waitForNonExistence(timeout: 3), "Return left the frame up")
+        XCTAssert(cropWait(10) { self.cropLoupeRatio(library) == 1 }, "the loupe isn't square: \(cropLoupeValue(library))")
+        let readout = library.element("library.catalog")
+        let saved = cropWait(15) {
+            if readout.exists { return Self.cropText(readout) == "saved" }
+            return Self.cropSaved(in: catalog)
+        }
+        XCTAssert(saved, "the catalog never read saved (library.catalog: \(Self.cropText(readout)))")
+        library.app.terminate()
+
+        let again = Journey("Library", self, arguments: ["-LibraryCatalogDir", catalog.path, "-LibraryTestValues"])
+        cropSortByName(again)
+        let cell = cropCell("IMG_0001", again)
+        XCTAssert(cell.waitForExistence(timeout: 10), "no grid cell for IMG_0001 after the relaunch")
+        XCTAssert(cropWait(10) { Self.cropRatio(Self.cropText(cell)) == 1 }, "relaunched, IMG_0001's cell reads \(Self.cropText(cell))")
+        again.shot("crop-relaunched-live")
+        cell.doubleClick()
+        XCTAssert(again.element("library.loupe").waitForExistence(timeout: 10), "IMG_0001 didn't open in the loupe")
+        XCTAssert(cropWait(10) { self.cropLoupeRatio(again) == 1 }, "relaunched, the loupe isn't square: \(cropLoupeValue(again))")
+        cropKeyR(again)
+        let frame = again.element("library.crop.frame")
+        XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame after the relaunch")
+        let measured = Self.cropFrameWidth(frame)
+        XCTAssertEqual(Double(measured), Double(Self.cropLiveWidth), accuracy: 1, "relaunched, the frame reads \(Self.cropText(frame))")
+        let straighten = again.element("library.crop.straighten")
+        XCTAssert(cropWait(3) { Self.cropNumber(straighten) == 5 }, "relaunched, Straighten reads \(Self.cropText(straighten))")
+        again.press(.escape)
+        again.app.terminate()
+    }
+
+    /// Whether `catalog.json` in `catalog` stores a crop on IMG_0001.
+    private static func cropSaved(in catalog: URL) -> Bool {
+        let file = catalog.appending(path: "catalog.json")
+        guard let data = try? Data(contentsOf: file),
+            let top = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let photos = top["photos"] as? [[String: Any]]
+        else { return false }
+        for photo in photos {
+            let id = photo["id"] as? String ?? ""
+            let develop = photo["develop"] as? [String: Any] ?? [:]
+            if id.contains("IMG_0001"), develop["crop"] != nil { return true }
+        }
+        return false
+    }
+
     // MARK: - Helpers
 
-    /// Polls `condition` every tenth of a second for up to `seconds`.
+    /// R with the loupe photo focused: a click on an inspector tab or chip
+    /// takes the keys, and R goes only to the grid or the loupe.
+    @MainActor private func cropKeyR(_ library: Journey) {
+        let photo = library.element("library.loupe.photo")
+        if photo.waitForExistence(timeout: 3), photo.isHittable {
+            photo.click()
+        } else {
+            library.element("library.loupe").click()
+        }
+        library.press(character: "r")
+    }
+
+    /// Polls `condition` every tenth of a second for up to `seconds` times `CropRun.slack`.
     @MainActor private func cropWait(_ seconds: TimeInterval, _ condition: () -> Bool) -> Bool {
-        let deadline = Date(timeIntervalSinceNow: seconds)
+        let deadline = Date(timeIntervalSinceNow: seconds * CropRun.slack)
         repeat {
             if condition() { return true }
             Thread.sleep(forTimeInterval: 0.1)
@@ -239,7 +342,12 @@ extension LibraryJourneyTests {
 
     /// Width over height of the loupe value's "W×H", to two places; NaN without one.
     @MainActor private func cropLoupeRatio(_ library: Journey) -> Double {
-        for word in cropLoupeValue(library).split(separator: " ") {
+        Self.cropRatio(cropLoupeValue(library))
+    }
+
+    /// Width over height of the first "W×H" in `text` ("ready 640×640 No stars"), to two places; NaN without one.
+    private static func cropRatio(_ text: String) -> Double {
+        for word in text.split(separator: " ") {
             let sides = word.split(separator: "×").compactMap { Double($0) }
             if sides.count == 2, sides[1] > 0 { return (sides[0] / sides[1] * 100).rounded() / 100 }
         }
@@ -262,4 +370,9 @@ extension LibraryJourneyTests {
         let words = cropText(element).split(whereSeparator: { !"+-.0123456789".contains($0) })
         return words.lazy.compactMap { Double($0) }.first ?? .nan
     }
+}
+
+/// How many times longer `cropWait` polls: 1 on the fakes, more on live renders.
+@MainActor private enum CropRun {
+    static var slack: TimeInterval = 1
 }

@@ -17,7 +17,7 @@ share a file chain in the order each slice's hand-off note gives.
 **Hand-offs** (files other packets own; cross-line, so not in `waits`, and
 the lead checks each before its slice starts):
 - **AS-flare:** `FlareSelection.swift` is owned by stage-edit; start after its `Belt-Slice-Done:` on the file.
-- **AS-design:** `DesignSelection.swift` is owned by design-contracts (built), design-window and select-several; `DesignCanvasEditing.swift` passes design-seams → canvas-basics → select-several → snapping → design-seams-2, so this slice takes the file after design-seams-2's D2-3b.
+- **AS-design:** `DesignSelection.swift` is owned by design-contracts (built), design-window and select-several; `DesignCanvasEditing.swift` passes design-seams → canvas-basics → select-several → snapping → design-seams-2, and the supervisor ordered this slice to take the file before design-seams-2's D2-3b, which waits on it (#1935, 2026-10-20).
 - **AS-halo:** `HaloKeySelection.swift` is owned by Halo's easing packet (built) and shared with adopt-kernel-easing's Halo slice: the two slices chain, this one first.
 - **AS-library:** `LibraryCatalog.swift` is owned by Library's spine and export packets; `LibraryCulling.swift` is shared with adopt-kernel-undo's Library slice (that one first). Library's `c4-planned.json` has `every_source_file_owned`.
 

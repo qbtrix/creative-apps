@@ -1,0 +1,190 @@
+{
+  "title": "Export pack: one export options model (exact pixel size, long edge, scale, metadata policy), the suite's format list, and the sheet's Size and Metadata rows",
+  "wave": 4,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "feature map S11 (shared half: at a size, formats, the metadata option); real job RJ-X42; captain 2026-10-20: everyday export tools in the beta, built once",
+  "waits_on": "suite shell-media's SM-a (cross-line: Media values, FrameClock, the Media folder; XP-7 also SM-w); tone-controls's TC-a and TC-z slices (slice waits: SuiteGallery.swift, FakeCanvasDocument.swift); editor-kernel EK-run and EK-chrome (built)",
+  "longest_chain": "6 (XP-1 → XP-3 → XP-4 → XP-5 → XP-8 → XP-10)",
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteExportJourneyTests.testExportSheetSizesAndMetadata"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "Tests/SuiteKernelTests/ExportOptionsTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json",
+    "Sources/SuiteModel/Contracts/MetadataCarrying.swift",
+    "Sources/SuiteModel/Fakes/FakeMetadata.swift",
+    "Sources/SuiteModel/SuiteServices.swift",
+    "Tests/SuiteModelTests/FakeMetadataTests.swift",
+    "Sources/SuiteUI/ExportSheet.swift",
+    "Sources/SuiteUI/Gallery/GalleryExportPack.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "UITests/SuiteJourneyTests+Export.swift",
+    "Tests/SuiteUITests/ExportPackRowsTests.swift",
+    "Tests/AppSnapshotTests/SuiteExportPackSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetExportPackTests.swift",
+    "Tests/mutations/SuiteKernel.ExportOptions.json",
+    "Sources/SuiteShell/Media/StillMetadata.swift",
+    "Tests/AppSnapshotTests/StillMetadataTests.swift",
+    "Tests/RealJobs/fixtures/gps-phone.jpg",
+    "Tests/SuiteUITests/ExportPackLiveTests.swift",
+    "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+    "Tests/SuiteKernelTests/FakeCanvasExportTests.swift",
+    "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+    "Tests/RealJobs/fake/export-pack/",
+    "docs/blueprints/suiteui/features/export-pack.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "XP-a",
+      "behavior": "The kernel's export options, rules and format list exist as stubs, the metadata contract and its fake exist, the sheet shows Size and Metadata rows on a gallery page, and the checks are written, disabled.",
+      "tasks": [
+        "XP-1",
+        "XP-2",
+        "XP-3"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "waits": {
+        "tone-controls:TC-a": [
+          "XP-3"
+        ],
+        "editor-kernel": [
+          "XP-3"
+        ],
+        "autosave-history:AH-a": [
+          "XP-1"
+        ],
+        "placed-images:PL-a": [
+          "XP-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteKernel/Export/ExportOptions.swift",
+        "Tests/SuiteKernelTests/ExportOptionsTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json",
+        "Sources/SuiteModel/Contracts/MetadataCarrying.swift",
+        "Sources/SuiteModel/Fakes/FakeMetadata.swift",
+        "Sources/SuiteModel/SuiteServices.swift",
+        "Tests/SuiteModelTests/FakeMetadataTests.swift",
+        "Sources/SuiteUI/ExportSheet.swift",
+        "Sources/SuiteUI/Gallery/GalleryExportPack.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "UITests/SuiteJourneyTests+Export.swift"
+      ]
+    },
+    {
+      "id": "XP-u",
+      "behavior": "On the gallery page the Size row switches between Scale, Pixels and Long edge with a ratio lock and shows the pixels it will write, the Metadata row picks a policy, and every control is identified, within the render budget.",
+      "tasks": [
+        "XP-4",
+        "XP-5"
+      ],
+      "journeys": [
+        "XJ1"
+      ],
+      "waits": {
+        "XP-a": [
+          "XP-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/ExportSheet.swift",
+        "Tests/SuiteUITests/ExportPackRowsTests.swift",
+        "Tests/AppSnapshotTests/SuiteExportPackSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetExportPackTests.swift",
+        "UITests/SuiteJourneyTests+Export.swift"
+      ]
+    },
+    {
+      "id": "XP-m",
+      "behavior": "A size gives exact pixels (even when a codec needs it, never zero, never past the limit), a policy gives the tags to drop, a bad option says why, and the live copy drops those tags from a real JPEG and HEIC.",
+      "tasks": [
+        "XP-6",
+        "XP-7"
+      ],
+      "journeys": [
+        "KJ-export"
+      ],
+      "waits": {
+        "XP-a": [
+          "XP-6",
+          "XP-7"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/SuiteKernel/Export/ExportOptions.swift",
+        "Tests/SuiteKernelTests/ExportOptionsTests.swift",
+        "Tests/mutations/SuiteKernel.ExportOptions.json",
+        "Sources/SuiteShell/Media/StillMetadata.swift",
+        "Tests/AppSnapshotTests/StillMetadataTests.swift",
+        "Tests/RealJobs/fixtures/gps-phone.jpg"
+      ]
+    },
+    {
+      "id": "XP-z",
+      "behavior": "The gallery sheet plans through the rules on a live target, the fake app exports at a size so RJ-X42 runs on the CLI, and the feature is built.",
+      "tasks": [
+        "XP-8",
+        "XP-9",
+        "XP-10"
+      ],
+      "journeys": [
+        "XJ1",
+        "KJ-export"
+      ],
+      "waits": {
+        "XP-u": [
+          "XP-8"
+        ],
+        "XP-m": [
+          "XP-8",
+          "XP-9"
+        ],
+        "tone-controls:TC-z": [
+          "XP-9"
+        ],
+        "autosave-history:AH-a": [
+          "XP-10"
+        ],
+        "autosave-history:AH-z": [
+          "XP-9"
+        ],
+        "transform-tools:TT-z": [
+          "XP-9"
+        ],
+        "eyedropper:EY-z": [
+          "XP-9"
+        ],
+        "shape-tools:SH-z": [
+          "XP-9"
+        ],
+        "stroke-style:SS-d": [
+          "XP-9"
+        ],
+        "placed-images:PL-z": [
+          "XP-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/Gallery/GalleryExportPack.swift",
+        "Tests/SuiteUITests/ExportPackLiveTests.swift",
+        "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
+        "Tests/SuiteKernelTests/FakeCanvasExportTests.swift",
+        "Tests/mutations/SuiteKernel.FakeCanvasDocument.json",
+        "Tests/RealJobs/fake/export-pack/",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json",
+        "docs/blueprints/suiteui/features/export-pack.wave.json"
+      ]
+    }
+  ]
+}

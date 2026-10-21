@@ -61,5 +61,19 @@
     "find": "return \"\\(size.width) × \\(size.height) px\"",
     "replace": "_ = size; return Self.photoCountText(items.count)",
     "tests": "LibraryStatusTests.swift"
+  },
+  {
+    "label": "catalogValueStuckSaved: the library.catalog value stops reading the kernel session, so a change still reads saved",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "catalogSession.isDirty ? \"dirty\" : \"saved\"",
+    "replace": "\"saved\"",
+    "tests": "LibraryReadoutsTests|LibraryPersistTests"
+  },
+  {
+    "label": "saveRequestIgnoresSession: saveRequest stops asking the session whether it is dirty, so a saved catalog is written again",
+    "file": "Sources/LibraryModel/LibraryPersistence.swift",
+    "find": "guard catalogState.canSave, catalogSession.isDirty else { return nil }",
+    "replace": "guard catalogState.canSave else { return nil }",
+    "tests": "LibraryPersistTests|LibrarySessionKernelTests"
   }
 ]

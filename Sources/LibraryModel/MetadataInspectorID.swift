@@ -3,8 +3,13 @@
 // whatever their state (#262). Each one is stable across ratings, flags and
 // labels, and no two controls share one.
 public enum MetadataInspectorID {
-    /// The Flag menu.
+    /// The Flag chips, as one group.
     public static let flag = "library.metadata.flag"
+
+    /// The chip that sets `flag`.
+    public static func flag(_ flag: PhotoFlag) -> String {
+        "library.metadata.flag.\(flag.rawValue.lowercased())"
+    }
 
     /// The star that rates a photo `star` (1 to 5).
     public static func star(_ star: Int) -> String {

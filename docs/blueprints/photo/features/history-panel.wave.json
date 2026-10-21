@@ -1,0 +1,153 @@
+{
+  "title": "The History tab on the shared panel, and autosave on the shared schedule and recovery folder",
+  "wave": 3,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/history-panel (adopter of S12; PV-4's stubs); RJ-P28; RJ-X24's Photo leg",
+  "waits_on": "suiteui autosave-history's contract slice AH-a (cross-line); transform's PT-m before PH-5",
+  "depends": [
+    "photo-seams",
+    "photo-documents"
+  ],
+  "longest_chain": "6 (PH-1 → PH-2 → PH-3 → PH-4 → PH-7 → PH-8)",
+  "journeys": [
+    "PhotoHistoryJourneyTests.testJumpBackTenSteps",
+    "PhotoHistoryJourneyTests.testRestoreAfterQuit"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoHistory+Kernel.swift",
+    "Sources/PhotoModel/PhotoRecovery+Kernel.swift",
+    "Tests/PhotoModelTests/PhotoHistoryJumpTests.swift",
+    "Sources/PhotoApp/PhotoHistoryTab.swift",
+    "Sources/PhotoApp/PhotoWindow+History.swift",
+    "Sources/PhotoApp/PhotoPanel.swift",
+    "Sources/PhotoApp/PhotoCommands+View.swift",
+    "UITests/PhotoJourneyTests+History.swift",
+    "Tests/AppSnapshotTests/PhotoHistoryTabTests.swift",
+    "Tests/AppSnapshotTests/PhotoHistorySnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoHistoryTests.swift",
+    "Tests/mutations/PhotoModel.PhotoHistory+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Sources/PhotoModel/Live/LiveRecovery.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Sources/PhotoApp/PhotoAutosave.swift",
+    "Tests/PhotoModelTests/PhotoRecoveryFolderTests.swift",
+    "Tests/mutations/PhotoModel.LiveRecovery.json",
+    "Tests/canonical-baseline.txt",
+    "docs/blueprints/photo/features/history-panel.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PH-a",
+      "behavior": "The adapters are declared as stubs and the History tab lists the steps on them, reachable from Window > History.",
+      "tasks": [
+        "PH-1",
+        "PH-2"
+      ],
+      "journeys": [
+        "MJ-PH"
+      ],
+      "waits": {
+        "shell-parity": [
+          "PH-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoHistory+Kernel.swift",
+        "Sources/PhotoModel/PhotoRecovery+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoHistoryJumpTests.swift",
+        "Sources/PhotoApp/PhotoHistoryTab.swift",
+        "Sources/PhotoApp/PhotoWindow+History.swift",
+        "Sources/PhotoApp/PhotoPanel.swift",
+        "Sources/PhotoApp/PhotoCommands+View.swift",
+        "UITests/PhotoJourneyTests+History.swift"
+      ]
+    },
+    {
+      "id": "PH-u",
+      "behavior": "The tab follows undo, redo and jumps, and its snapshots and render budget hold.",
+      "tasks": [
+        "PH-3",
+        "PH-4"
+      ],
+      "journeys": [
+        "PJ-H1"
+      ],
+      "waits": {
+        "PH-a": [
+          "PH-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoApp/PhotoHistoryTab.swift",
+        "Tests/AppSnapshotTests/PhotoHistoryTabTests.swift",
+        "Tests/AppSnapshotTests/PhotoHistorySnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoHistoryTests.swift"
+      ]
+    },
+    {
+      "id": "PH-m",
+      "behavior": "A jump lands on its step without recording one, and autosave writes, offers and restores through the shared schedule and folder with Photo's copy deleted.",
+      "tasks": [
+        "PH-5",
+        "PH-6"
+      ],
+      "journeys": [
+        "MJ-PH"
+      ],
+      "waits": {
+        "PH-a": [
+          "PH-5",
+          "PH-6"
+        ],
+        "transform:PT-m": [
+          "PH-5"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoHistory+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoHistoryJumpTests.swift",
+        "Tests/mutations/PhotoModel.PhotoHistory+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Sources/PhotoModel/PhotoRecovery+Kernel.swift",
+        "Sources/PhotoModel/Live/LiveRecovery.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift",
+        "Sources/PhotoApp/PhotoAutosave.swift",
+        "Tests/PhotoModelTests/PhotoRecoveryFolderTests.swift",
+        "Tests/mutations/PhotoModel.LiveRecovery.json",
+        "Tests/canonical-baseline.txt"
+      ]
+    },
+    {
+      "id": "PH-z",
+      "behavior": "The journeys jump back ten steps and restore after a quit on live services, and the feature is built.",
+      "tasks": [
+        "PH-7",
+        "PH-8"
+      ],
+      "journeys": [
+        "PJ-H1"
+      ],
+      "waits": {
+        "PH-u": [
+          "PH-7"
+        ],
+        "PH-m": [
+          "PH-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+History.swift",
+        "docs/blueprints/photo/features/history-panel.wave.json"
+      ]
+    }
+  ]
+}

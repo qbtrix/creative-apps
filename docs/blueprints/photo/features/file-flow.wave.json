@@ -1,0 +1,170 @@
+{
+  "title": "Photo's Open Recent from the suite list, Open In, and drops that open or place images",
+  "wave": 3,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/file-flow (adopter of suite/file-flow); #863 (adopt the suite: SuiteDocumentHost, .suiteApp); RJ-P42",
+  "waits_on": "suite file-flow's SF-a (cross-line; PF-3 needs SF-5 and SF-6, PF-4 SF-7, PF-7 SF-8); tone-controls's PT-m (the catalog files) and export-pack's PX-z (photo.md), slice waits",
+  "longest_chain": "5 (PF-1 → PF-2 → PF-6 → PF-7 → PF-8)",
+  "journeys": [
+    "PhotoFileFlowJourneyTests.testDropImageAsLayer"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoFileFlow+Kernel.swift",
+    "Tests/PhotoModelTests/PhotoFileFlowTests.swift",
+    "Sources/PhotoApp/PhotoApp.swift",
+    "Sources/PhotoApp/PhotoCommands+File.swift",
+    "Sources/PhotoApp/PhotoEditor.swift",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/mutations/PhotoModel.PhotoFileFlow+Kernel.json",
+    "Tests/RealJobs/photo/drop-layer/",
+    "Sources/PhotoModel/PhotoRecentMenu.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Tests/AppSnapshotTests/PhotoFileFlowLiveTests.swift",
+    "Tests/AppSnapshotTests/PhotoFileFlowSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoFileDropTests.swift",
+    "UITests/PhotoJourneyTests+FileFlow.swift",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/file-flow.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PF-a",
+      "behavior": "Photo conforms to `SuiteDocumentHost` and `FileFlowTarget` on stubs, its scene adopts `.suiteApp`, and its File menu and window use the suite's Open Recent, Open In and drop on the fakes.",
+      "tasks": [
+        "PF-1",
+        "PF-2"
+      ],
+      "journeys": [
+        "MPF"
+      ],
+      "waits": {
+        "photo-seams": [
+          "PF-2"
+        ],
+        "photo-documents": [
+          "PF-2"
+        ],
+        "photo-render-adopt": [
+          "PF-2"
+        ],
+        "shell-parity": [
+          "PF-2"
+        ],
+        "place-image:PP-u": [
+          "PF-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoFileFlow+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoFileFlowTests.swift",
+        "Sources/PhotoApp/PhotoApp.swift",
+        "Sources/PhotoApp/PhotoCommands+File.swift",
+        "Sources/PhotoApp/PhotoEditor.swift"
+      ]
+    },
+    {
+      "id": "PF-u",
+      "behavior": "The menu and the drop mark have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "PF-5",
+        "PF-6"
+      ],
+      "journeys": [
+        "PFJ1"
+      ],
+      "waits": {
+        "PF-a": [
+          "PF-5",
+          "PF-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoFileFlowSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoFileDropTests.swift",
+        "UITests/PhotoJourneyTests+FileFlow.swift"
+      ]
+    },
+    {
+      "id": "PF-m",
+      "behavior": "Photo accepts open, new and place hand-offs, imports its old recents once, lists the suite's, and notes every open and save there.",
+      "tasks": [
+        "PF-3",
+        "PF-4"
+      ],
+      "journeys": [
+        "MPF"
+      ],
+      "waits": {
+        "PF-a": [
+          "PF-3",
+          "PF-4"
+        ],
+        "tone-controls:PT-m": [
+          "PF-3"
+        ],
+        "transform:PT-m": [
+          "PF-3"
+        ],
+        "history-panel:PH-m": [
+          "PF-3"
+        ],
+        "eyedropper:PE-m": [
+          "PF-3"
+        ],
+        "place-image:PP-m": [
+          "PF-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoFileFlow+Kernel.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/PhotoModelTests/PhotoFileFlowTests.swift",
+        "Tests/mutations/PhotoModel.PhotoFileFlow+Kernel.json",
+        "Tests/RealJobs/photo/drop-layer/",
+        "Sources/PhotoModel/PhotoRecentMenu.swift",
+        "Sources/PhotoApp/PhotoWindow+File.swift",
+        "Tests/AppSnapshotTests/PhotoFileFlowLiveTests.swift"
+      ]
+    },
+    {
+      "id": "PF-z",
+      "behavior": "Drop, Open Recent and Open In run on live services, the journey passes, and the feature is built.",
+      "tasks": [
+        "PF-7",
+        "PF-8"
+      ],
+      "journeys": [
+        "PFJ1"
+      ],
+      "waits": {
+        "PF-u": [
+          "PF-7",
+          "PF-8"
+        ],
+        "PF-m": [
+          "PF-7"
+        ],
+        "export-pack:PX-z": [
+          "PF-8"
+        ],
+        "place-image:PP-z": [
+          "PF-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+FileFlow.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/file-flow.wave.json"
+      ]
+    }
+  ]
+}

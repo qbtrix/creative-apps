@@ -2,8 +2,8 @@
 // cancels and shows its progress (packet docs/blueprints/library/features/
 // export.md; slice EX-e). Steps 1-2 are live (L) on `LibraryFiles.writeShoot`'s
 // JPEGs; step 3 is fake (F) with `-LibraryFakeMode slow`. EX-6's sheet ids;
-// buttons and size chips by title. Written by EX-12 before its code: it
-// skips "waits on EX-13" until EX-13 makes Cancel and Try Again work.
+// buttons and size chips by title. Written by EX-12 before its code and
+// enabled by EX-13, which makes Cancel and Try Again work.
 import Foundation
 import XCTest
 
@@ -11,7 +11,6 @@ final class LibraryExportBatchJourneyTests: XCTestCase {
     /// J7B: a read-only folder lists each failure with Try Again; Cancel stops
     /// a 24-photo export part way; the progress row shows within 2 s.
     @MainActor func testExportFailsAndCancels() throws {
-        throw XCTSkip("waits on EX-13")
         let folder = try LibraryFiles.freshPhotoFolder()
         try LibraryFiles.writeShoot(in: folder)
         let readOnly = try LibraryFiles.readOnlyFolder()

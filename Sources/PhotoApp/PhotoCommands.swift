@@ -14,6 +14,7 @@
 // focused window with no image. Every window toolbar command is here too.
 import AppKit
 import PhotoModel
+import SuiteUI
 import SwiftUI
 
 /// What the focused Photo window's menus can do now.
@@ -50,6 +51,8 @@ struct PhotoMenu {
     /// The kinds New Adjustment Layer offers, and why they can't run, or nil.
     var adjustmentLayerKinds: [AdjustmentKind] = []
     var addAdjustmentLayerHelp: String? = "Open an image first."
+    /// The focused window's workspace, which the items' catalog specs read (a blank one with no window).
+    var workspace = PhotoWorkspace()
 
     /// Select > All acts on the canvas, so not while a sheet is up.
     var canSelectAll: Bool { hasImage && !isPresenting }
@@ -70,6 +73,7 @@ struct PhotoMenu {
         self.perform = perform
         self.isPresenting = isPresenting
         hasWindow = true
+        workspace = model
         copyHelp = model.copyHelp
         cutHelp = model.cutHelp
         pasteHelpWithImage = model.pasteHelp(true)
@@ -92,6 +96,25 @@ struct PhotoMenu {
         canBringForward = model.canBringSelectedLayerForward
         canSendBackward = model.canSendSelectedLayerBackward
         selectedLayer = model.selectedLayerID
+    }
+}
+
+extension PhotoMenu {
+    /// What the catalog specs read: the workspace plus this menu's window, sheet, text focus and pasteboard.
+    func state(textFocused: Bool = false, pasteboard: PhotoPasteboardState = PhotoPasteboardState()) -> PhotoMenuState {
+        PhotoMenuState(workspace: workspace, hasWindow: hasWindow, isPresenting: isPresenting, textFocused: textFocused,
+                       pasteboardHasImage: pasteboard.hasImage, pasteboardIsEmpty: pasteboard.isEmpty)
+    }
+
+    /// The menu item for catalog command `id` (AC-p3): its spec decides whether it is on and what its help says;
+    /// the title is the menu's label for it unless `title` names more.
+    func item(
+        _ id: String, title: String? = nil, systemImage: String? = nil, shortcut: KeyboardShortcut? = nil,
+        in state: PhotoMenuState? = nil, perform: @escaping @MainActor () -> Void
+    ) -> MenuCommand {
+        let state = state ?? self.state()
+        return MenuCommand(PhotoMenuState.spec(id), on: state, title: title ?? state.title(id), systemImage: systemImage,
+                           shortcut: shortcut, perform: perform)
     }
 }
 

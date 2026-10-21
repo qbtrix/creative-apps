@@ -1,0 +1,169 @@
+{
+  "title": "Free Transform, layer flips and Canvas Size on the kernel's transform commands and SuiteUI's turned handles",
+  "wave": 3,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/transform (adopter of S7; PV-7's stubs); RJ-P17, RJ-P18",
+  "waits_on": "suiteui transform-tools' contract slice TT-a (cross-line); gradient-fill's PG-m before PT-5; adopt-command-catalog's AC-photo before the menu items (cross-line)",
+  "depends": [
+    "photo-seams",
+    "photo-documents",
+    "photo-edit"
+  ],
+  "longest_chain": "6 (PT-1 → PT-2 → PT-3 → PT-7 → PT-8 → PT-9)",
+  "journeys": [
+    "PhotoTransformJourneyTests.testFreeTransformTurnFlip"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoTransform+Kernel.swift",
+    "Sources/PhotoModel/Contracts/LayerContracts.swift",
+    "Tests/PhotoModelTests/PhotoTransformTests.swift",
+    "Sources/PhotoApp/PhotoWindow+Transform.swift",
+    "Sources/PhotoApp/TransformOverlay.swift",
+    "Sources/PhotoApp/TransformOptions.swift",
+    "Sources/PhotoApp/PhotoCommands+Edit.swift",
+    "UITests/PhotoJourneyTests+Transform.swift",
+    "Sources/PhotoApp/CanvasSizeSheet.swift",
+    "Sources/PhotoApp/PhotoCommands+Image.swift",
+    "Tests/AppSnapshotTests/PhotoCanvasSizeSheetTests.swift",
+    "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "Tests/PhotoModelTests/LiveTransformTests.swift",
+    "Tests/mutations/PhotoModel.LiveTransform+Kernel.json",
+    "Tests/mutations/PhotoModel.PhotoTransform+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/RealJobs/photo/free-transform/free-transform.jobs.json",
+    "Tests/RealJobs/photo/free-transform/input/logo-on-photo.photo",
+    "Sources/PhotoModel/PhotoImageOps.swift",
+    "Tests/PhotoModelTests/PhotoCanvasSizeTests.swift",
+    "Tests/mutations/PhotoModel.PhotoImageOps.json",
+    "Tests/RealJobs/photo/canvas-border/canvas-border.jobs.json",
+    "Tests/RealJobs/photo/canvas-border/input/photo-2000x1400.png",
+    "Tests/AppSnapshotTests/PhotoTransformSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoTransformTests.swift",
+    "docs/blueprints/photo/features/transform.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PT-a",
+      "behavior": "The adapter is declared as stubs and Free Transform is reachable from the Edit menu with turned handles and the transform rows on them.",
+      "tasks": [
+        "PT-1",
+        "PT-2"
+      ],
+      "journeys": [
+        "MJ-PT"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoTransform+Kernel.swift",
+        "Sources/PhotoModel/Contracts/LayerContracts.swift",
+        "Tests/PhotoModelTests/PhotoTransformTests.swift",
+        "Sources/PhotoApp/PhotoWindow+Transform.swift",
+        "Sources/PhotoApp/TransformOverlay.swift",
+        "Sources/PhotoApp/TransformOptions.swift",
+        "Sources/PhotoApp/PhotoCommands+Edit.swift",
+        "UITests/PhotoJourneyTests+Transform.swift"
+      ]
+    },
+    {
+      "id": "PT-u",
+      "behavior": "Canvas Size's sheet works on the stubs and the transform overlay's snapshots and render budget hold.",
+      "tasks": [
+        "PT-3",
+        "PT-7"
+      ],
+      "journeys": [
+        "PJ-T1"
+      ],
+      "waits": {
+        "PT-a": [
+          "PT-3",
+          "PT-7"
+        ],
+        "shell-parity": [
+          "PT-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoApp/CanvasSizeSheet.swift",
+        "Sources/PhotoApp/PhotoCommands+Image.swift",
+        "Sources/PhotoApp/PhotoWindow+Transform.swift",
+        "Tests/AppSnapshotTests/PhotoCanvasSizeSheetTests.swift",
+        "Tests/AppSnapshotTests/PhotoTransformSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoTransformTests.swift"
+      ]
+    },
+    {
+      "id": "PT-m",
+      "behavior": "The draft scales and turns as one step per gesture, commit resamples once, flips mirror the layer in place, and Canvas Size pads or crops about its anchor.",
+      "tasks": [
+        "PT-4",
+        "PT-5",
+        "PT-6"
+      ],
+      "journeys": [
+        "MJ-PT"
+      ],
+      "waits": {
+        "PT-a": [
+          "PT-4",
+          "PT-5",
+          "PT-6"
+        ],
+        "gradient-fill:PG-m": [
+          "PT-5"
+        ],
+        "multi-layer-select:PM-m": [
+          "PT-5"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+        "Tests/PhotoModelTests/LiveTransformTests.swift",
+        "Tests/mutations/PhotoModel.LiveTransform+Kernel.json",
+        "Sources/PhotoModel/PhotoTransform+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoTransformTests.swift",
+        "Tests/mutations/PhotoModel.PhotoTransform+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/RealJobs/photo/free-transform/free-transform.jobs.json",
+        "Tests/RealJobs/photo/free-transform/input/logo-on-photo.photo",
+        "Sources/PhotoModel/PhotoImageOps.swift",
+        "Tests/PhotoModelTests/PhotoCanvasSizeTests.swift",
+        "Tests/mutations/PhotoModel.PhotoImageOps.json",
+        "Tests/RealJobs/photo/canvas-border/canvas-border.jobs.json",
+        "Tests/RealJobs/photo/canvas-border/input/photo-2000x1400.png"
+      ]
+    },
+    {
+      "id": "PT-z",
+      "behavior": "The journey turns, flips and adds a border on live services, and the feature is built.",
+      "tasks": [
+        "PT-8",
+        "PT-9"
+      ],
+      "journeys": [
+        "PJ-T1"
+      ],
+      "waits": {
+        "PT-u": [
+          "PT-8"
+        ],
+        "PT-m": [
+          "PT-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+Transform.swift",
+        "docs/blueprints/photo/features/transform.wave.json"
+      ]
+    }
+  ]
+}

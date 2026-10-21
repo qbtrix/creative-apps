@@ -1,0 +1,150 @@
+{
+  "title": "The Gradient tool: drag a linear or radial gradient into the layer or selection, stops set with the shared editor",
+  "wave": 3,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/gradient-fill (adopter of S24 and of E6's raster gradient); RJ-P19",
+  "waits_on": "suiteui gradient-fill's contract slice GF-a (cross-line; tasks start once it merges); adopt-command-catalog's AC-photo slice before PG-1 (cross-line)",
+  "depends": [
+    "photo-seams"
+  ],
+  "longest_chain": "5 (PG-1 → PG-2 → PG-6 → PG-7 → PG-8)",
+  "journeys": [
+    "PhotoGradientJourneyTests.testSkyGradient"
+  ],
+  "owned": [
+    "Sources/PhotoModel/PhotoWorkspace.swift",
+    "Sources/PhotoModel/PhotoStroke.swift",
+    "Sources/PhotoModel/ToolOptions.swift",
+    "Sources/PhotoModel/PhotoGradientTool+Kernel.swift",
+    "Sources/PhotoApp/PhotoIntent.swift",
+    "Sources/PhotoApp/PhotoToolOptions.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/PhotoModelTests/PhotoToolsTests.swift",
+    "Tests/PhotoModelTests/PhotoGradientToolTests.swift",
+    "Sources/PhotoApp/PhotoFillToolOptions.swift",
+    "Sources/PhotoModel/PhotoSelection.swift",
+    "Tests/mutations/PhotoModel.PhotoGradientTool+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/RealJobs/photo/sky-gradient/sky-gradient.jobs.json",
+    "Tests/RealJobs/photo/sky-gradient/input/grey-256.png",
+    "Tests/PhotoModelTests/PhotoGradientOptionsTests.swift",
+    "Tests/mutations/PhotoModel.ToolOptions.json",
+    "Tests/AppSnapshotTests/PhotoGradientSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoGradientTests.swift",
+    "Sources/PhotoApp/PhotoCanvasOverlay.swift",
+    "UITests/PhotoJourneyTests+Gradient.swift",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/gradient-fill.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PG-a",
+      "behavior": "PhotoTool.gradient is in the palette with its help and its options hold a Fill, and Tool Options shows the editor on the stubs.",
+      "tasks": [
+        "PG-1",
+        "PG-2"
+      ],
+      "journeys": [
+        "MJ-PG"
+      ],
+      "waits": {},
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoWorkspace.swift",
+        "Sources/PhotoModel/PhotoStroke.swift",
+        "Sources/PhotoModel/ToolOptions.swift",
+        "Sources/PhotoModel/PhotoGradientTool+Kernel.swift",
+        "Sources/PhotoApp/PhotoIntent.swift",
+        "Sources/PhotoApp/PhotoToolOptions.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/PhotoModelTests/PhotoToolsTests.swift",
+        "Tests/PhotoModelTests/PhotoGradientToolTests.swift",
+        "Sources/PhotoApp/PhotoFillToolOptions.swift"
+      ]
+    },
+    {
+      "id": "PG-u",
+      "behavior": "A drag shows its line on the canvas, the options have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "PG-5",
+        "PG-6"
+      ],
+      "journeys": [
+        "PJ-G1"
+      ],
+      "waits": {
+        "PG-a": [
+          "PG-5",
+          "PG-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoGradientSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoGradientTests.swift",
+        "Sources/PhotoApp/PhotoCanvasOverlay.swift",
+        "UITests/PhotoJourneyTests+Gradient.swift"
+      ]
+    },
+    {
+      "id": "PG-m",
+      "behavior": "A drag draws the dithered gradient into the selected layer inside the selection as one undo step, and the options take each editor intent.",
+      "tasks": [
+        "PG-3",
+        "PG-4"
+      ],
+      "journeys": [
+        "MJ-PG"
+      ],
+      "waits": {
+        "PG-a": [
+          "PG-3",
+          "PG-4"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoGradientTool+Kernel.swift",
+        "Sources/PhotoModel/PhotoSelection.swift",
+        "Tests/PhotoModelTests/PhotoGradientToolTests.swift",
+        "Tests/mutations/PhotoModel.PhotoGradientTool+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/RealJobs/photo/sky-gradient/sky-gradient.jobs.json",
+        "Tests/RealJobs/photo/sky-gradient/input/grey-256.png",
+        "Sources/PhotoModel/ToolOptions.swift",
+        "Tests/PhotoModelTests/PhotoGradientOptionsTests.swift",
+        "Tests/mutations/PhotoModel.ToolOptions.json"
+      ]
+    },
+    {
+      "id": "PG-z",
+      "behavior": "The tool runs on live services, the journey passes on live, and the blueprint has the tool in.",
+      "tasks": [
+        "PG-7",
+        "PG-8"
+      ],
+      "journeys": [
+        "PJ-G1"
+      ],
+      "waits": {
+        "PG-u": [
+          "PG-7",
+          "PG-8"
+        ],
+        "PG-m": [
+          "PG-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+Gradient.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/gradient-fill.wave.json"
+      ]
+    }
+  ]
+}

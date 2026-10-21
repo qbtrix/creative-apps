@@ -27,6 +27,7 @@ extension BodyCountSuites {
         static let page = CGSize(width: 1440, height: 1024)
 
         @Test(.timeLimit(.minutes(2))) func theBadgeReadsTheLiveBoxMidDrag() async throws {
+            #if DEBUG
             let live = DesignLiveDrag()
             let w = RenderBudgetWindow(DesignWindow(seed: Self.seed(), live: live))
             defer { w.close() }
@@ -52,6 +53,7 @@ extension BodyCountSuites {
             #expect(live.workspace == nil)
             #expect(Self.label(DesignControlID.canvasBadge, in: w.host) == after.selectionBadge)
             #expect(after.selectionBadge != "100 × 80")
+            #endif
         }
 
         @Test(.timeLimit(.minutes(2))) func aDragWithTheBadgeRunsTheEditorAtMostThreeTimes() async throws {

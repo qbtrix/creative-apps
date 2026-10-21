@@ -1,0 +1,30 @@
+[
+  {
+    "label": "meanWeightsAlpha: every counted pixel weighs the same, so a faint pixel pulls the mean as hard as an opaque one",
+    "file": "Sources/SuiteKernel/Sample/SampleRules.swift",
+    "find": "let a = Double(pixel.a)",
+    "replace": "let a = 255.0",
+    "tests": "SampleRulesTests"
+  },
+  {
+    "label": "meanSkipsTransparent: fully transparent pixels are counted, so they thin the mean's alpha",
+    "file": "Sources/SuiteKernel/Sample/SampleRules.swift",
+    "find": "guard let pixel = read(x + dx, y + dy), pixel.a > 0 else { continue }",
+    "replace": "guard let pixel = read(x + dx, y + dy) else { continue }",
+    "tests": "SampleRulesTests"
+  },
+  {
+    "label": "squareIsCentred: the square runs from n/2 instead of -(n/2), so it reads a pixel off the point",
+    "file": "Sources/SuiteKernel/Sample/SampleRules.swift",
+    "find": "offsets = -half...half",
+    "replace": "offsets = half...half",
+    "tests": "SampleRulesTests"
+  },
+  {
+    "label": "hexRounds: each channel is truncated instead of rounded",
+    "file": "Sources/SuiteKernel/Sample/SampleRules.swift",
+    "find": "Int((min(max(channel, 0), 1) * 255).rounded())",
+    "replace": "Int(min(max(channel, 0), 1) * 255)",
+    "tests": "SampleRulesTests"
+  }
+]

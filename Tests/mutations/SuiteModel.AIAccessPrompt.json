@@ -1,5 +1,8 @@
 [
 {"label":"a flag value starting with a dash counts as a client","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"client.allSatisfy(\\.isWhitespace) || client.hasPrefix(\"-\") ? nil : client","replace":"client.allSatisfy(\\.isWhitespace) ? nil : client","tests":"AIAccessPromptTests"},
 {"label":"the sheet drops the command the client sent","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"return base + \" It asked to run “\\(command)”.\"","replace":"return base","tests":"AIAccessPromptTests"},
-{"label":"a deny reads as allowed","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"case .deny: \"Denied\"","replace":"case .deny: \"Always allowed\"","tests":"AIAccessPromptTests"}
+{"label":"a deny reads as allowed","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"case .deny: \"Denied\"","replace":"case .deny: \"Always allowed\"","tests":"AIAccessPromptTests"},
+{"label":"an empty document name is quoted as the scope","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"request.document.flatMap { $0.isEmpty ? nil : $0 }","replace":"request.document","tests":"AIAccessPromptTests"},
+{"label":"the sheet drops the way back","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"until you click \\(stop) in the title bar. Change this later in Window > \\(windowTitle).","replace":"until you stop it.","tests":"AIAccessPromptTests"},
+{"label":"allow once claims to remember","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"\\(allowOnce) lasts until","replace":"\\(allowOnce) remembers until","tests":"AIAccessPromptTests"}
 ]

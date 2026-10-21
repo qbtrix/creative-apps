@@ -18,11 +18,29 @@ import Testing
 
     @Test func sheetNamesClientAppAndCommand() {
         let bare = AIAccessRequest(client: "Test Client", app: "AfterGlow")
-        #expect(AIAccessPrompt.title(bare) == "Allow “Test Client” to control AfterGlow?")
+        #expect(AIAccessPrompt.title(bare) == "Allow the AI assistant “Test Client” to work in AfterGlow?")
         #expect(!AIAccessPrompt.message(bare).contains("asked to run"))
         let asked = AIAccessRequest(client: "Test Client", app: "Photo", command: "photo.crop")
         #expect(AIAccessPrompt.message(asked).hasSuffix("It asked to run “photo.crop”."))
         #expect(!AIAccessPrompt.message(AIAccessRequest(client: "c", app: "a", command: "")).contains("asked to run"))
+    }
+
+    @Test func messageScopesToTheDocumentOrTheApp() {
+        let home = AIAccessPrompt.message(AIAccessRequest(client: "Test Client", app: "AfterGlow"))
+        #expect(!home.contains("the open document") && home.contains("your documents in AfterGlow"))
+        let named = AIAccessPrompt.message(AIAccessRequest(client: "Test Client", app: "Design", document: "Logo.design"))
+        #expect(named.contains("“Logo.design”") && !named.contains("your documents"))
+        #expect(AIAccessPrompt.message(AIAccessRequest(client: "c", app: "Photo", document: "")).contains("your documents in Photo"))
+    }
+
+    @Test func messageSaysHowToStop() {
+        let message = AIAccessPrompt.message(AIAccessRequest(client: "Test Client", app: "AfterGlow"))
+        #expect(message.contains("click \(AIAccessPrompt.stop)") && message.contains("Window > \(AIAccessPrompt.windowTitle)"))
+    }
+
+    @Test func choiceHelpSaysEachAllowsScope() {
+        let help = AIAccessPrompt.choiceHelp(AIAccessRequest(client: "Test Client", app: "AfterGlow"))
+        #expect(help == "Allow Once lasts until “Test Client” disconnects. Always Allow remembers “Test Client” for AfterGlow.")
     }
 
     @Test func chipAndStatusText() {

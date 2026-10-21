@@ -1,18 +1,20 @@
-// DesignSelection.swift: several layers selected at once (#413, slice 1). The
-// workspace keeps the selected layers as an ordered list on the selected page;
-// the last one in is the primary selection, which `selectedNodeID` and
-// `selectedNode` read, so single-selection callers keep working. A plain click
-// (selectItem) replaces the list, Shift-click (toggleSelection) adds a layer or
-// takes it out, and deselect (Escape, a click on empty canvas) clears it. Each
-// of them ends the edit run (DesignHistory), so nudging A, then selecting B and
-// nudging it, is two undo steps.
+// DesignSelection.swift: several layers selected at once (#413, slice 1), kept in
+// SuiteKernel's `Selection<String>` (adopt-kernel-selection AS-design). The
+// kernel holds the ordered list; the last one in is the primary selection,
+// which `selectedNodeID` and `selectedNodes` read, so single-selection callers
+// keep working. A plain click (selectItem) replaces the list, Shift-click
+// (toggleSelection) is the kernel's `.toggle` pick, and deselect (Escape, a
+// click on empty canvas) clears it. Every change goes through `adopt`, which
+// ends the edit run (DesignHistory), so nudging A, then selecting B and nudging
+// it, is two undo steps; a pick the kernel refuses changes nothing.
 //
 // A layer that is locked or hidden, itself or through a group around it, is
-// never added (the subtree checks in DesignLocking and DesignLayerToggles); one
-// already selected can always be taken out. With several layers selected, nudge
-// and delete act on all of them through `run` (DesignActions). While a marquee
-// drag is live, showsSelectionHandles is false: the canvas draws the marquee and
-// an outline on each layer it touches, never the box's handles. Linux-safe.
+// never added (`canAddToSelection`, the kernel's canAdd); one already selected
+// can always be taken out. With several layers selected, nudge and delete act
+// on all of them through `run` (DesignActions). While a marquee drag is live,
+// showsSelectionHandles is false: the canvas draws the marquee and an outline
+// on each layer it touches, never the box's handles. Linux-safe.
+import SuiteKernel
 
 extension DesignWorkspace {
     /// More than one layer is selected.
@@ -53,19 +55,22 @@ extension DesignWorkspace {
 
     /// Shift-click: takes a selected layer out (the one selected before it becomes primary),
     /// or adds one as the new primary and expands the rows around it. A layer that can't be
-    /// added (`canAddToSelection`) is ignored.
+    /// added (`canAddToSelection`) is refused by the kernel and changes nothing.
     public mutating func toggleSelection(_ id: String) {
         // Committing first: a blank placed text node goes away with its edit.
         commitTextEdit()
-        // Either change ends the edit run: a run never spans two selections.
-        if let index = selectedNodeIDs.firstIndex(of: id) {
-            endEditRun()
-            selectedNodeIDs.remove(at: index)
-            return
-        }
-        guard canAddToSelection(id), let page = selectedPage else { return }
+        var next = selection
+        guard next.pick(id, .toggle, canAdd: canAddToSelection) else { return }
+        adopt(next)
+        if next.contains(id), let page = selectedPage { expandAncestors(of: id, in: page.nodes) }
+    }
+
+    /// Makes `next` the selection and ends the edit run: a run never spans two selections.
+    /// The anchor follows the primary, so two workspaces with the same layers in the same
+    /// order are equal however they got there.
+    mutating func adopt(_ next: Selection<String>) {
+        selection = next
+        selection.anchor = selection.primary
         endEditRun()
-        selectedNodeIDs.append(id)
-        expandAncestors(of: id, in: page.nodes)
     }
 }

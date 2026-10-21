@@ -76,13 +76,18 @@ public struct SidebarToggle: Identifiable, Hashable, Sendable {
     public let onSymbol: String
     public let offSymbol: String
     public let isOn: Bool
+    /// Symbols the toggle can show in other states that its two don't cover
+    /// (one whose off symbol says a parent's state): the icon reserves room
+    /// for them too, so its width never changes.
+    public let reserved: [String]
 
-    public init(id: String, title: String, onSymbol: String, offSymbol: String, isOn: Bool) {
+    public init(id: String, title: String, onSymbol: String, offSymbol: String, isOn: Bool, reserving reserved: [String] = []) {
         self.id = id
         self.title = title
         self.onSymbol = onSymbol
         self.offSymbol = offSymbol
         self.isOn = isOn
+        self.reserved = reserved
     }
 
     /// The SF Symbol for the current state.
@@ -236,26 +241,29 @@ public struct SidebarRow: View {
         }
     }
 
-    /// The title label, or the rename field while renaming. The rename
+    /// The title label, or the rename field in the text's place while renaming. The rename
     /// double-click lives on the label alone, not on the row or the blank
     /// space after it, so a double-click on a toggle is two plain clicks that
     /// flip it twice, and one on blank space selects the row and nothing more.
     @ViewBuilder private var title: some View {
         if field.isOpen {
-            VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
-                TextField(item.title, text: Binding(get: { field.draft ?? item.title }, set: { field.type($0) }))
-                    .focused($editing)
-                    .onSubmit(commitRename)
-                    .onExitCommand { field.cancel() }
-                    .onChange(of: editing) { _, focused in if !focused { loseFocus() } }
-                    .accessibilityIdentifier("suite.sidebar.\(item.id).rename")
-                if let message = field.message {
-                    Label(message, systemImage: "exclamationmark.triangle.fill")
-                        .font(SuiteFont.caption)
-                        .foregroundStyle(SuiteColor.stateError)
-                        .accessibilityIdentifier("suite.sidebar.\(item.id).renameMessage")
+            // The field takes the title text's place; the icon stays, so the name doesn't jump.
+            Label {
+                VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
+                    TextField(item.title, text: Binding(get: { field.draft ?? item.title }, set: { field.type($0) }))
+                        .focused($editing)
+                        .onSubmit(commitRename)
+                        .onExitCommand { field.cancel() }
+                        .onChange(of: editing) { _, focused in if !focused { loseFocus() } }
+                        .accessibilityIdentifier("suite.sidebar.\(item.id).rename")
+                    if let message = field.message {
+                        Label(message, systemImage: "exclamationmark.triangle.fill")
+                            .font(SuiteFont.caption)
+                            .foregroundStyle(SuiteColor.stateError)
+                            .accessibilityIdentifier("suite.sidebar.\(item.id).renameMessage")
+                    }
                 }
-            }
+            } icon: { SidebarRowIcon(item: item) }
         } else {
             Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
                 .modifier(SidebarRowDimming(color: SidebarRowLook(item).title))
@@ -331,10 +339,10 @@ private struct SidebarRowIcon: View {
     }
 }
 
-/// A toggle's icon: its on and off symbols stacked, only the current one
-/// drawn. The unseen symbol still takes part in layout, so the icon is as
-/// wide as the wider of the two whatever the state, and a toggle with the
-/// same symbols sits at the same x in every row (#53). No hand-sized frame.
+/// A toggle's icon: its on and off symbols and any reserved ones stacked,
+/// only the current one drawn. The unseen symbols still take part in layout,
+/// so the icon is as wide as the widest whatever the state, and a toggle with
+/// the same symbols sits at the same x in every row (#53). No hand-sized frame.
 private struct SidebarToggleIcon: View {
     let toggle: SidebarToggle
 
@@ -342,6 +350,7 @@ private struct SidebarToggleIcon: View {
         ZStack {
             Image(systemName: toggle.onSymbol).opacity(toggle.isOn ? 1 : 0)
             Image(systemName: toggle.offSymbol).opacity(toggle.isOn ? 0 : 1)
+            ForEach(toggle.reserved, id: \.self) { Image(systemName: $0).hidden() }
         }
         .accessibilityHidden(true)
     }

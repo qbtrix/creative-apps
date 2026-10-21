@@ -1,7 +1,7 @@
 {
   "id": "shell-adoption",
   "name": "Adoption modifier",
-  "description": "The .suiteApp(_:host:) modifier each app adds to its scene, SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost), and the settings route to the launcher.",
+  "description": "The .suiteApp(_:host:live:) modifier each app adds to its scene (it starts the app's live command channel when given one), SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost), and the settings route to the launcher.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/SuiteShell/SuiteAppModifier.swift",

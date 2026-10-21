@@ -1,0 +1,330 @@
+{
+  "title": "Every action is a command and every toggle reports its state: suite.controls carries selected, Library's Show Original is a command, and the 89 bare controls leave the command-path baseline under a ratchet",
+  "wave": "BG1",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 suite must-have 1 (suite audit row 7, under-specified 4 and 6); finding #3652; the command-path baselines (89 controls on dev 8c90de14b); real job RJ-X61 (new)",
+  "waits_on": "command-catalog and adopt-command-catalog (built); each app line's packets that own the files a slice switches (hand-offs); suiteui adopt-kernel-autosave AK-z (flare.txt baseline)",
+  "depends": [
+    "afterglow-cli"
+  ],
+  "longest_chain": "6 (CS-2 → CS-3 → CS-5 → CS-6 → CS-15 → CS-16)",
+  "journeys": [
+    "AfterGlowControlStateJourneyTests.testTogglesReportState"
+  ],
+  "owned": [
+    "Sources/SuiteUI/Contracts/ControlInventorying.swift",
+    "Sources/SuiteUI/ControlInventory.swift",
+    "Sources/SuiteUI/InspectorAction.swift",
+    "Sources/SuiteUI/SegmentedTabs.swift",
+    "Sources/SuiteUI/KeyframeButton.swift",
+    "Tests/SuiteUITests/ControlStateTests.swift",
+    "UITests/AfterGlowJourneyTests+ControlState.swift",
+    "Tests/SuiteKernelTests/CommandPathLimitTests.swift",
+    "Tests/SuiteKernelTests/CommandPathTests.swift",
+    "Tests/command-path-baseline/design.txt",
+    "Tests/command-path-baseline/flare.txt",
+    "Tests/command-path-baseline/halo.txt",
+    "Tests/command-path-baseline/library.txt",
+    "Tests/command-path-baseline/photo.txt",
+    "Tests/command-path-baseline/shell.txt",
+    "Tests/command-path-baseline/launcher.txt",
+    "Tests/mutations/SuiteKernelTests.CommandPathTests.json",
+    "Tests/LibraryModelTests/LibraryCommandPathTests.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Tests/command-ids/library.txt",
+    "Tests/mutations/LibraryModel.LibraryCommandCatalog.json",
+    "Sources/LibraryApp/LibraryCommands.swift",
+    "Sources/LibraryApp/LibraryExportSheet.swift",
+    "Sources/LibraryApp/LibraryBrowser.swift",
+    "Sources/LibraryApp/DevelopInspector.swift",
+    "Sources/LibraryApp/LibraryLoupe.swift",
+    "Tests/HaloModelTests/HaloCommandPathTests.swift",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/mutations/HaloModel.HaloCommandCatalog.json",
+    "Sources/HaloApp/HaloRenderSheet.swift",
+    "Sources/HaloApp/HaloTimelineView.swift",
+    "Sources/HaloApp/HaloTransport.swift",
+    "Sources/HaloApp/HaloWindow+File.swift",
+    "Sources/HaloApp/HaloWindow+Layers.swift",
+    "Sources/HaloApp/HaloWindow+Render.swift",
+    "Sources/HaloApp/NewCompositionSheet.swift",
+    "Sources/HaloApp/RenameRefusalAlert.swift",
+    "Tests/PhotoModelTests/PhotoCommandPathTests.swift",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/mutations/PhotoModel.PhotoCommandCatalog.json",
+    "Sources/PhotoApp/ExportSheet.swift",
+    "Sources/PhotoApp/ImageSizeSheet.swift",
+    "Sources/PhotoApp/PhotoCommands+File.swift",
+    "Sources/PhotoApp/PhotoWindow.swift",
+    "Sources/PhotoApp/StraightenSheet.swift",
+    "Tests/FlareModelTests/FlareCommandPathTests.swift",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Sources/FlareApp/FlareFilePanels.swift",
+    "Sources/FlareApp/FlareNewSheet.swift",
+    "Sources/FlareApp/FlareRecovery.swift",
+    "Sources/FlareApp/FlareStageContextMenu.swift",
+    "Sources/FlareApp/FlareTimelineEdit.swift",
+    "Tests/DesignModelTests/DesignCommandPathTests.swift",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/mutations/DesignModel.DesignCommandCatalog.json",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Tests/RealJobs/library/show-original/show-original.jobs.json",
+    "docs/blueprints/suite/features/command-state.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "CS-a",
+      "behavior": "SuiteUI's control inventory reports selected for every toggle-style control, each baseline file has a max the ratchet test holds, and the lint names sheet dismiss buttons instead of baselining them.",
+      "tasks": [
+        "CS-1",
+        "CS-2"
+      ],
+      "journeys": [
+        "MJ-CS",
+        "XJ-CS"
+      ],
+      "owned": [
+        "Sources/SuiteUI/Contracts/ControlInventorying.swift",
+        "Sources/SuiteUI/ControlInventory.swift",
+        "Sources/SuiteUI/InspectorAction.swift",
+        "Sources/SuiteUI/SegmentedTabs.swift",
+        "Sources/SuiteUI/KeyframeButton.swift",
+        "Tests/SuiteUITests/ControlStateTests.swift",
+        "UITests/AfterGlowJourneyTests+ControlState.swift",
+        "Tests/SuiteKernelTests/CommandPathLimitTests.swift",
+        "Tests/SuiteKernelTests/CommandPathTests.swift",
+        "Tests/command-path-baseline/design.txt",
+        "Tests/command-path-baseline/flare.txt",
+        "Tests/command-path-baseline/halo.txt",
+        "Tests/command-path-baseline/library.txt",
+        "Tests/command-path-baseline/photo.txt",
+        "Tests/command-path-baseline/shell.txt",
+        "Tests/command-path-baseline/launcher.txt",
+        "Tests/mutations/SuiteKernelTests.CommandPathTests.json"
+      ],
+      "waits": {},
+      "ui": true
+    },
+    {
+      "id": "CS-library-1",
+      "behavior": "Library's 25 bare controls run catalog commands, its baseline file is empty of them and its limit drops to match, and its toggles report their state.",
+      "tasks": [
+        "CS-3",
+        "CS-4"
+      ],
+      "journeys": [
+        "LJ-CS1"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryCommandPathTests.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/mutations/LibraryModel.LibraryCommandCatalog.json",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Tests/command-path-baseline/library.txt"
+      ],
+      "waits": {
+        "CS-a": [
+          "CS-3"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CS-library-2",
+      "behavior": "Library's 17 bare controls run catalog commands, its baseline file is empty of them and its limit drops to match, and its toggles report their state.",
+      "tasks": [
+        "CS-5",
+        "CS-6"
+      ],
+      "journeys": [
+        "LJ-CS2"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryCommandPathTests.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Tests/command-ids/library.txt",
+        "Tests/mutations/LibraryModel.LibraryCommandCatalog.json",
+        "Sources/LibraryApp/LibraryExportSheet.swift",
+        "Sources/LibraryApp/LibraryBrowser.swift",
+        "Sources/LibraryApp/DevelopInspector.swift",
+        "Sources/LibraryApp/LibraryLoupe.swift",
+        "Tests/command-path-baseline/library.txt"
+      ],
+      "waits": {
+        "CS-a": [
+          "CS-5"
+        ],
+        "CS-library-1": [
+          "CS-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CS-halo",
+      "behavior": "Halo's 17 bare controls run catalog commands, its baseline file is empty of them and its limit drops to match, and its toggles report their state.",
+      "tasks": [
+        "CS-7",
+        "CS-8"
+      ],
+      "journeys": [
+        "HJ-CS"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloCommandPathTests.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/mutations/HaloModel.HaloCommandCatalog.json",
+        "Sources/HaloApp/HaloRenderSheet.swift",
+        "Sources/HaloApp/HaloTimelineView.swift",
+        "Sources/HaloApp/HaloTransport.swift",
+        "Sources/HaloApp/HaloWindow+File.swift",
+        "Sources/HaloApp/HaloWindow+Layers.swift",
+        "Sources/HaloApp/HaloWindow+Render.swift",
+        "Sources/HaloApp/NewCompositionSheet.swift",
+        "Sources/HaloApp/RenameRefusalAlert.swift",
+        "Tests/command-path-baseline/halo.txt"
+      ],
+      "waits": {
+        "CS-a": [
+          "CS-7"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CS-photo",
+      "behavior": "Photo's 13 bare controls run catalog commands, its baseline file is empty of them and its limit drops to match, and its toggles report their state.",
+      "tasks": [
+        "CS-9",
+        "CS-10"
+      ],
+      "journeys": [
+        "PJ-CS"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoCommandPathTests.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/mutations/PhotoModel.PhotoCommandCatalog.json",
+        "Sources/PhotoApp/ExportSheet.swift",
+        "Sources/PhotoApp/ImageSizeSheet.swift",
+        "Sources/PhotoApp/PhotoCommands+File.swift",
+        "Sources/PhotoApp/PhotoWindow.swift",
+        "Sources/PhotoApp/StraightenSheet.swift",
+        "Tests/command-path-baseline/photo.txt"
+      ],
+      "waits": {
+        "CS-a": [
+          "CS-9"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CS-flare",
+      "behavior": "Flare's 11 bare controls run catalog commands, its baseline file is empty of them and its limit drops to match, and its toggles report their state.",
+      "tasks": [
+        "CS-11",
+        "CS-12"
+      ],
+      "journeys": [
+        "FJ-CS"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlareCommandPathTests.swift",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/mutations/FlareModel.FlareCommandCatalog.json",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Sources/FlareApp/FlareFilePanels.swift",
+        "Sources/FlareApp/FlareNewSheet.swift",
+        "Sources/FlareApp/FlareRecovery.swift",
+        "Sources/FlareApp/FlareStageContextMenu.swift",
+        "Sources/FlareApp/FlareTimelineEdit.swift",
+        "Tests/command-path-baseline/flare.txt"
+      ],
+      "waits": {
+        "CS-a": [
+          "CS-11"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CS-design",
+      "behavior": "Design's 7 bare controls run catalog commands, its baseline file is empty of them and its limit drops to match, and its toggles report their state.",
+      "tasks": [
+        "CS-13",
+        "CS-14"
+      ],
+      "journeys": [
+        "DJ-CS"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignCommandPathTests.swift",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/mutations/DesignModel.DesignCommandCatalog.json",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Tests/command-path-baseline/design.txt"
+      ],
+      "waits": {
+        "CS-a": [
+          "CS-13"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CS-z",
+      "behavior": "Every baseline's max is 0 and the ratchet holds it, RJ-X61 runs Show Original by command, the control-state journey is on, and the feature is built.",
+      "tasks": [
+        "CS-15",
+        "CS-16"
+      ],
+      "journeys": [
+        "XJ-CS",
+        "MJ-CS"
+      ],
+      "owned": [
+        "Tests/RealJobs/library/show-original/show-original.jobs.json",
+        "UITests/AfterGlowJourneyTests+ControlState.swift",
+        "docs/blueprints/suite/features/command-state.wave.json"
+      ],
+      "waits": {
+        "CS-library-1": [
+          "CS-15"
+        ],
+        "CS-library-2": [
+          "CS-15"
+        ],
+        "CS-halo": [
+          "CS-15"
+        ],
+        "CS-photo": [
+          "CS-15"
+        ],
+        "CS-flare": [
+          "CS-15"
+        ],
+        "CS-design": [
+          "CS-15"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

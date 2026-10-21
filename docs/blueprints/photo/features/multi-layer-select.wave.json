@@ -1,0 +1,236 @@
+{
+  "title": "Photo selects several layers: Shift range, ⌘ toggle, All Layers, and move, hide, delete and opacity on every selected layer; group last",
+  "wave": 3,
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "photo/multi-layer-select (Photo adopts suiteui/adopt-kernel-selection); RJ-P43; the stress gate's one-layer-at-a-time gap (PR #3499)",
+  "waits_on": "gradient-fill's PG-a (PhotoWorkspace, PhotoIntent, PhotoStroke), PG-m (the catalog, PM-5) and PG-z (photo.md, PM-10); adopt-command-catalog AC-photo before PM-5 (hand-off); PR #3499 before PM-9",
+  "depends": [
+    "photo-seams",
+    "photo-documents",
+    "photo-edit",
+    "photo-adjustment-layers"
+  ],
+  "longest_chain": "5 (PM-2 → PM-5 → PM-6 → PM-11 → PM-12; PM-1 → PM-3 → PM-7 → PM-9 → PM-10)",
+  "journeys": [
+    "PhotoMultiLayerJourneyTests.testSelectSeveralLayers",
+    "PhotoMultiLayerJourneyTests.testGroupLayers"
+  ],
+  "owned": [
+    "Sources/SuiteUI/LayerTreeList.swift",
+    "Sources/SuiteUI/LayerTreeList+Rows.swift",
+    "Tests/SuiteUITests/LayerTreeListTests.swift",
+    "Tests/mutations/SuiteUI.LayerTreeList.json",
+    "Sources/PhotoModel/PhotoWorkspace.swift",
+    "Sources/PhotoModel/PhotoLayerSelection+Kernel.swift",
+    "Sources/PhotoModel/PhotoSeveralLayers+Kernel.swift",
+    "Tests/PhotoModelTests/PhotoLayerSelectionTests.swift",
+    "Tests/PhotoModelTests/PhotoSeveralLayersTests.swift",
+    "Sources/PhotoApp/PhotoLayerList.swift",
+    "Sources/PhotoApp/PhotoIntent.swift",
+    "Sources/PhotoApp/PhotoWindow.swift",
+    "Sources/PhotoApp/PhotoCommands+Select.swift",
+    "Tests/mutations/PhotoModel.PhotoLayerSelection+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/mutations/PhotoModel.PhotoSeveralLayers+Kernel.json",
+    "Tests/mutations/PhotoModel.PhotoCommandCatalog.json",
+    "Sources/PhotoModel/PhotoStroke.swift",
+    "Tests/RealJobs/photo/fade-layers/fade-layers.jobs.json",
+    "Tests/RealJobs/photo/fade-layers/input/four-layers.photo",
+    "Tests/RealJobs/photo/fade-layers/expected/four-layers-faded.png",
+    "Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetPhotoMultiLayerTests.swift",
+    "UITests/PhotoJourneyTests+MultiSelect.swift",
+    "UITests/PhotoJourneyTests+StressPerf.swift",
+    "docs/blueprints/photo.md",
+    "docs/blueprints/photo/features/multi-layer-select.wave.json",
+    "Sources/PhotoModel/PhotoLayer.swift",
+    "Sources/PhotoModel/PhotoLayers+Kernel.swift",
+    "Sources/PhotoModel/PhotoLayerGroup+Kernel.swift",
+    "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "Tests/PhotoModelTests/PhotoLayerGroupTests.swift",
+    "Tests/mutations/PhotoModel.PhotoLayerGroup+Kernel.json",
+    "Sources/PhotoModel/PhotoLayerComposite.swift",
+    "Sources/PhotoModel/PhotoRenderRoute.swift",
+    "Tests/PhotoModelTests/PhotoLayerGroupCompositeTests.swift",
+    "Sources/PhotoApp/PhotoCommands+Layer.swift",
+    "Tests/AppSnapshotTests/PhotoLayerGroupSnapshots.swift",
+    "UITests/PhotoJourneyTests+LayerGroup.swift"
+  ],
+  "slices": [
+    {
+      "id": "PM-a",
+      "behavior": "LayerTreeList draws and reports several picked rows with the click's mode, Photo keeps a kernel Selection of layers behind selectedLayerID, and the Layers list, Select > All Layers and the intents pick several layers on stubbed actions.",
+      "tasks": [
+        "PM-1",
+        "PM-2",
+        "PM-3"
+      ],
+      "journeys": [
+        "MJ-PM"
+      ],
+      "waits": {
+        "gradient-fill:PG-a": [
+          "PM-2"
+        ],
+        "shell-parity": [
+          "PM-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/SuiteUI/LayerTreeList.swift",
+        "Sources/SuiteUI/LayerTreeList+Rows.swift",
+        "Tests/SuiteUITests/LayerTreeListTests.swift",
+        "Tests/mutations/SuiteUI.LayerTreeList.json",
+        "Sources/PhotoModel/PhotoWorkspace.swift",
+        "Sources/PhotoModel/PhotoLayerSelection+Kernel.swift",
+        "Sources/PhotoModel/PhotoSeveralLayers+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoLayerSelectionTests.swift",
+        "Tests/PhotoModelTests/PhotoSeveralLayersTests.swift",
+        "Sources/PhotoApp/PhotoLayerList.swift",
+        "Sources/PhotoApp/PhotoIntent.swift",
+        "Sources/PhotoApp/PhotoWindow.swift",
+        "Sources/PhotoApp/PhotoCommands+Select.swift"
+      ]
+    },
+    {
+      "id": "PM-u",
+      "behavior": "Several picked rows, the menus and a range click look right and stay inside their render budget, with the journey written.",
+      "tasks": [
+        "PM-7",
+        "PM-8"
+      ],
+      "journeys": [
+        "PJ-M1"
+      ],
+      "waits": {
+        "PM-a": [
+          "PM-7",
+          "PM-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetPhotoMultiLayerTests.swift",
+        "UITests/PhotoJourneyTests+MultiSelect.swift"
+      ]
+    },
+    {
+      "id": "PM-m",
+      "behavior": "Picks follow the kernel rules, and Move, Hide and Show, Delete and Opacity act on every selected layer as one step each, by panel, menu, tool or command.",
+      "tasks": [
+        "PM-4",
+        "PM-5",
+        "PM-6"
+      ],
+      "journeys": [
+        "MJ-PM"
+      ],
+      "waits": {
+        "PM-a": [
+          "PM-4",
+          "PM-5",
+          "PM-6"
+        ],
+        "gradient-fill:PG-m": [
+          "PM-5",
+          "PM-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/PhotoModel/PhotoLayerSelection+Kernel.swift",
+        "Tests/PhotoModelTests/PhotoLayerSelectionTests.swift",
+        "Tests/mutations/PhotoModel.PhotoLayerSelection+Kernel.json",
+        "Sources/PhotoModel/PhotoSeveralLayers+Kernel.swift",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/PhotoModelTests/PhotoSeveralLayersTests.swift",
+        "Tests/mutations/PhotoModel.PhotoSeveralLayers+Kernel.json",
+        "Tests/mutations/PhotoModel.PhotoCommandCatalog.json",
+        "Sources/PhotoModel/PhotoStroke.swift",
+        "Tests/RealJobs/photo/fade-layers/fade-layers.jobs.json",
+        "Tests/RealJobs/photo/fade-layers/input/four-layers.photo",
+        "Tests/RealJobs/photo/fade-layers/expected/four-layers-faded.png"
+      ]
+    },
+    {
+      "id": "PM-z",
+      "behavior": "The journey and the stress gate's Photo layer gestures pass on live with several layers selected, and the blueprint says Photo selects several layers.",
+      "tasks": [
+        "PM-9",
+        "PM-10"
+      ],
+      "journeys": [
+        "PJ-M1"
+      ],
+      "waits": {
+        "PM-u": [
+          "PM-9"
+        ],
+        "PM-m": [
+          "PM-9",
+          "PM-10"
+        ],
+        "gradient-fill:PG-z": [
+          "PM-10"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/PhotoJourneyTests+MultiSelect.swift",
+        "UITests/PhotoJourneyTests+StressPerf.swift",
+        "docs/blueprints/photo.md",
+        "docs/blueprints/photo/features/multi-layer-select.wave.json"
+      ]
+    },
+    {
+      "id": "PM-g",
+      "behavior": "Group Layers (⌘G) puts the selected layers in one group layer the list nests, the render composites as one, and the file saves; Ungroup takes it apart; one step each.",
+      "tasks": [
+        "PM-11",
+        "PM-12",
+        "PM-13"
+      ],
+      "journeys": [
+        "PJ-M2"
+      ],
+      "waits": {
+        "PM-m": [
+          "PM-11",
+          "PM-12",
+          "PM-13"
+        ],
+        "PM-a": [
+          "PM-13"
+        ],
+        "photo-render-adopt": [
+          "PM-12"
+        ],
+        "text-layers:TX-m": [
+          "PM-11"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/PhotoModel/PhotoLayer.swift",
+        "Sources/PhotoModel/PhotoLayers+Kernel.swift",
+        "Sources/PhotoModel/PhotoLayerGroup+Kernel.swift",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Tests/PhotoModelTests/PhotoLayerGroupTests.swift",
+        "Tests/mutations/PhotoModel.PhotoLayerGroup+Kernel.json",
+        "Sources/PhotoModel/PhotoLayerComposite.swift",
+        "Sources/PhotoModel/PhotoRenderRoute.swift",
+        "Tests/PhotoModelTests/PhotoLayerGroupCompositeTests.swift",
+        "Sources/PhotoApp/PhotoCommands+Layer.swift",
+        "Tests/AppSnapshotTests/PhotoLayerGroupSnapshots.swift",
+        "UITests/PhotoJourneyTests+LayerGroup.swift"
+      ]
+    }
+  ]
+}

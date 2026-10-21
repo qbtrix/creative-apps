@@ -17,7 +17,8 @@
 // LayerList) over a small tree and a 300-node one, every container open,
 // logged in GalleryEditorKernel's words. `grid` (24 cells) and `grid-2000`
 // show ThumbnailGrid; a selection logs its sorted ids (`3,4,5,6`), a
-// double-click `open 3`. Cells register as `suite.grid.<id>`.
+// double-click `open 3`. Cells register as `suite.grid.<id>`. `history-panel`
+// (autosave-history AH-2) lives in GalleryHistoryPanel.swift and logs here too.
 //
 // -SuiteGalleryFakes swaps the contracts the pages call: the window reorders
 // through FakeListEditing and the grids select through FakeGridSelecting
@@ -35,6 +36,7 @@ enum GalleryLists {
         "layers-300": { AnyView(GalleryLayersPage(tree: large)) },
         "grid": { AnyView(GalleryGridPage(count: 24)) },
         "grid-2000": { AnyView(GalleryGridPage(count: 2000)) },
+        GalleryHistoryPanel.name: { AnyView(GalleryHistoryPanelPage()) },
     ]
 
     /// The refusal the window page shows under a rename to "Taken".
@@ -81,8 +83,8 @@ enum GalleryLists {
     static func target(from source: Int, offset: Int) -> Int { offset > source ? offset - 1 : offset }
 }
 
-/// The last log line on screen; the whole log in its accessibility value.
-private struct GalleryListLog: View {
+/// The last log line on screen; the whole log in its accessibility value. The history-panel page shares it.
+struct GalleryListLog: View {
     let lines: [String]
 
     var body: some View {

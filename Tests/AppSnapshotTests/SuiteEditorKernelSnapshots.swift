@@ -54,7 +54,7 @@ import Testing
     @Test func guideMarks() throws {
         let labels = SnapGuideMarks.labels(.fake, zoom: 2)
         #expect(labels.map(\.text) == ["100", "100"])
-        #expect(labels.first?.center == CGPoint(x: 500, y: 300))
+        #expect(labels.first?.at == CGPoint(x: 500, y: 300))
         #expect(SnapGuideMarks.accessibilityValue(.fake) == SnapGuides.fake.summary)
         #expect(SnapGuideMarks.accessibilityValue(.fake) == "x 300, gap x 100, spacing x 100")
         #expect(!SnapGuideMarks.lines(.fake, zoom: 2).isEmpty)

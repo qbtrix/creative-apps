@@ -1,25 +1,8 @@
 # DesignApp's menu items and buttons built without a command spec (command-catalog CC-11).
-Sources/DesignApp/DesignCommands.swift: Button("New File", systemImage: DesignToolbarItem.newFile.systemImage) { menu.perform(.newFile) }
-Sources/DesignApp/DesignCommands.swift: Button("Open…", systemImage: DesignToolbarItem.open.systemImage) { menu.perform(.open) }
 Sources/DesignApp/DesignCommands.swift: Button("Close", systemImage: "xmark") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
-Sources/DesignApp/DesignCommands.swift: Button("Save", systemImage: DesignToolbarItem.save.systemImage) { menu.perform(.save) }
-Sources/DesignApp/DesignCommands.swift: Button("Save As…", systemImage: "square.and.arrow.down.on.square") { menu.perform(.saveAs) }
-Sources/DesignApp/DesignCommands.swift: Button(inField ? field.undoTitle : menu.undoTitle, systemImage: DesignToolbarItem.undo.systemImage) {
-Sources/DesignApp/DesignCommands.swift: Button(inField ? field.redoTitle : menu.redoTitle, systemImage: DesignToolbarItem.redo.systemImage) {
-Sources/DesignApp/DesignCommands.swift: Button("Delete", systemImage: "trash") { menu.perform(.deleteSelection) }
-Sources/DesignApp/DesignCommands.swift: Button("Add Page", systemImage: "doc.badge.plus") { menu.perform(.addPage) }
-Sources/DesignApp/DesignCommands.swift: Button("Rename Page…", systemImage: "pencil") {}
-Sources/DesignApp/DesignCommands.swift: Button("Delete Page", systemImage: "trash") { menu.perform(.deletePage) }
+Sources/DesignApp/DesignCommands.swift: Button("Export…", systemImage: "square.and.arrow.up") { menu.perform(.export) }
 Sources/DesignApp/DesignCommands.swift: Button("Zoom In", systemImage: DesignToolbarItem.zoomIn.systemImage) { menu.perform(.zoomIn) }
 Sources/DesignApp/DesignCommands.swift: Button("Zoom Out", systemImage: DesignToolbarItem.zoomOut.systemImage) { menu.perform(.zoomOut) }
 Sources/DesignApp/DesignCommands.swift: Button("Fit Page", systemImage: DesignToolbarItem.fit.systemImage) { menu.perform(.fit) }
 Sources/DesignApp/DesignCommands.swift: Button("Zoom to Selection", systemImage: "viewfinder") { menu.perform(.zoomToSelection) }
-Sources/DesignApp/DesignEditMenu.swift: MenuCommand(
-Sources/DesignApp/DesignObjectMenu.swift: MenuCommand(
-Sources/DesignApp/DesignObjectMenu.swift: MenuCommand(
-Sources/DesignApp/DesignObjectMenu.swift: MenuCommand("Arrange", systemImage: "square.3.layers.3d", help: arrangeOff, isEnabled: false) {}
-Sources/DesignApp/DesignObjectMenu.swift: MenuCommand(
-Sources/DesignApp/DesignObjectMenu.swift: MenuCommand("Align", systemImage: "align.horizontal.center", help: alignOff, isEnabled: false) {}
-Sources/DesignApp/DesignObjectMenu.swift: Button(edge.title, systemImage: edge.systemImage) { menu.perform(.align(edge)) }
-Sources/DesignApp/DesignObjectMenu.swift: MenuCommand(menu: menu, title: axis.title, systemImage: axis.systemImage, command: .distribute(axis))
 Sources/DesignApp/DesignWindow.swift: Button("OK", role: .cancel) {}

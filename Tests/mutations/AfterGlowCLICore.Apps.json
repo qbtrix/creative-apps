@@ -1,0 +1,6 @@
+[
+  {"label": "an app dropped from the registry (.allFive)", "file": "Sources/AfterGlowCLICore/Apps.swift", "find": "HeadlessApp(HaloHeadless.self), HeadlessApp(LibraryHeadless.self),", "replace": "HeadlessApp(HaloHeadless.self),", "tests": "AllAppsCatalogTests"},
+  {"label": "an app's export formats lost (.exportFormats)", "file": "Sources/AfterGlowCLICore/Apps.swift", "find": "(D.app, D.openExtensions, D.exportFormats)", "replace": "(D.app, D.openExtensions, [])", "tests": "AllAppsCatalogTests"},
+  {"label": "a command left out of list-commands (.describeAll)", "file": "Sources/AfterGlowCLICore/Apps.swift", "find": "describe = { D.catalog.describeAll() }", "replace": "describe = { Array(D.catalog.describeAll().dropLast()) }", "tests": "AllAppsCatalogTests"},
+  {"label": "export options ignored (.exportOptions)", "file": "Sources/AfterGlowCLICore/Apps.swift", "find": "try document.export(format, options: options)", "replace": "try document.export(format, options: .object([:]))", "tests": "AllAppsCatalogTests"}
+]

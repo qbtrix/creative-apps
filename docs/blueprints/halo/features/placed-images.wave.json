@@ -1,0 +1,210 @@
+{
+  "title": "Placed images in Halo: Place… and viewer drop, a PNG, JPEG or SVG picture in a solid layer, drawn by the viewer and the render",
+  "wave": "W5",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "halo/placed-images (adopter of S20 and E11); RJ-H02 (closes here), RJ-H36 (new)",
+  "waits_on": "suiteui placed-images' contract slice PL-a (cross-line); gradient-fill's HG-a, HG-u, HG-m and HG-z and core-loop's CL-probe (shared files)",
+  "depends": [
+    "foundation",
+    "viewer-playback",
+    "render-out",
+    "text-layers"
+  ],
+  "longest_chain": "5 (PH-1 → PH-3 → PH-4 → PH-7 → PH-8)",
+  "journeys": [
+    "HaloPlaceJourneyTests.testPlaceLogo"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloLayer.swift",
+    "Sources/HaloModel/Contracts/HaloDocumentValues.swift",
+    "Sources/HaloModel/HaloPlace+Kernel.swift",
+    "Sources/HaloModel/Live/HaloPlacedDrawing.swift",
+    "Tests/HaloModelTests/HaloPlaceTests.swift",
+    "Tests/HaloModelTests/HaloPlaceRenderTests.swift",
+    "Tests/RealJobs/halo/place-logo/",
+    "Tests/RealJobs/halo/logo-reveal/",
+    "Sources/HaloApp/HaloPlace.swift",
+    "Sources/HaloApp/HaloFileMenu.swift",
+    "Sources/HaloApp/HaloViewer.swift",
+    "Sources/HaloApp/HaloViewerCanvas.swift",
+    "Sources/HaloApp/HaloPlaceInspector.swift",
+    "Sources/HaloApp/HaloLayerInspector.swift",
+    "Tests/AppSnapshotTests/HaloPlaceSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloPlaceTests.swift",
+    "UITests/HaloJourneyTests+Place.swift",
+    "Sources/HaloModel/Live/HaloDrawRules.swift",
+    "Sources/HaloModel/Live/LiveFrameRendering.swift",
+    "Tests/mutations/HaloModel.HaloPlacedDrawing.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/mutations/HaloModel.HaloPlace+Kernel.json",
+    "docs/blueprints/halo.md",
+    "docs/blueprints/halo/features/placed-images.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "PH-a",
+      "behavior": "A solid's picture fields, the draw item's copy and HaloProject's PlacedImageTarget conformance exist as stubs, and the checks and job folders are written, disabled.",
+      "tasks": [
+        "PH-1",
+        "PH-2"
+      ],
+      "journeys": [
+        "MJ-PH"
+      ],
+      "waits": {
+        "gradient-fill:HG-a": [
+          "PH-1"
+        ],
+        "shape-tools:HS-a": [
+          "PH-1",
+          "PH-2"
+        ],
+        "stroke-style:HK-a": [
+          "PH-1",
+          "PH-2"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/HaloLayer.swift",
+        "Sources/HaloModel/Contracts/HaloDocumentValues.swift",
+        "Sources/HaloModel/HaloPlace+Kernel.swift",
+        "Sources/HaloModel/Live/HaloPlacedDrawing.swift",
+        "Tests/HaloModelTests/HaloPlaceTests.swift",
+        "Tests/HaloModelTests/HaloPlaceRenderTests.swift",
+        "Tests/RealJobs/halo/place-logo/",
+        "Tests/RealJobs/halo/logo-reveal/"
+      ]
+    },
+    {
+      "id": "PH-u",
+      "behavior": "File > Place… and a viewer drop add a solid with the picture on the stubs, the viewer draws it by cover, and the inspector shows its rows, with snapshots, the render budget and the journey written.",
+      "tasks": [
+        "PH-3",
+        "PH-4"
+      ],
+      "journeys": [
+        "HJ-P1"
+      ],
+      "waits": {
+        "PH-a": [
+          "PH-3"
+        ],
+        "gradient-fill:HG-u": [
+          "PH-3"
+        ],
+        "core-loop:CL-probe": [
+          "PH-3"
+        ],
+        "transform:HT-a": [
+          "PH-3",
+          "PH-4"
+        ],
+        "shape-tools:HS-a": [
+          "PH-3",
+          "PH-4"
+        ],
+        "stroke-style:HK-a": [
+          "PH-3",
+          "PH-4"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/HaloApp/HaloPlace.swift",
+        "Sources/HaloApp/HaloFileMenu.swift",
+        "Sources/HaloApp/HaloViewer.swift",
+        "Sources/HaloApp/HaloViewerCanvas.swift",
+        "Sources/HaloApp/HaloPlaceInspector.swift",
+        "Sources/HaloApp/HaloLayerInspector.swift",
+        "Tests/AppSnapshotTests/HaloPlaceSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloPlaceTests.swift",
+        "UITests/HaloJourneyTests+Place.swift"
+      ]
+    },
+    {
+      "id": "PH-m",
+      "behavior": "The render draws a solid's PNG, JPEG or SVG picture at its matrix inside its outline, and every place command runs as one undo step.",
+      "tasks": [
+        "PH-5",
+        "PH-6"
+      ],
+      "journeys": [
+        "MJ-PH"
+      ],
+      "waits": {
+        "PH-a": [
+          "PH-5",
+          "PH-6"
+        ],
+        "gradient-fill:HG-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "autosave-history:HA-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "transform:HT-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "shape-tools:HS-m": [
+          "PH-5",
+          "PH-6"
+        ],
+        "stroke-style:HK-m": [
+          "PH-5",
+          "PH-6"
+        ]
+      },
+      "ui": false,
+      "owned": [
+        "Sources/HaloModel/Live/HaloDrawRules.swift",
+        "Sources/HaloModel/Live/HaloPlacedDrawing.swift",
+        "Sources/HaloModel/Live/LiveFrameRendering.swift",
+        "Tests/HaloModelTests/HaloPlaceRenderTests.swift",
+        "Tests/mutations/HaloModel.HaloPlacedDrawing.json",
+        "Tests/RealJobs/halo/place-logo/",
+        "Tests/RealJobs/halo/logo-reveal/",
+        "Sources/HaloModel/HaloPlace+Kernel.swift",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/HaloModelTests/HaloPlaceTests.swift",
+        "Tests/mutations/HaloModel.HaloPlace+Kernel.json"
+      ]
+    },
+    {
+      "id": "PH-z",
+      "behavior": "The window runs on live services, the journey passes on live, and the blueprint lists pictures in solids.",
+      "tasks": [
+        "PH-7",
+        "PH-8"
+      ],
+      "journeys": [
+        "HJ-P1"
+      ],
+      "waits": {
+        "PH-u": [
+          "PH-7"
+        ],
+        "PH-m": [
+          "PH-7"
+        ],
+        "gradient-fill:HG-z": [
+          "PH-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/HaloJourneyTests+Place.swift",
+        "docs/blueprints/halo.md",
+        "docs/blueprints/halo/features/placed-images.wave.json"
+      ]
+    }
+  ]
+}

@@ -13,7 +13,7 @@ extension LibraryExportBatchJourneyTests {
 
     /// P8: three exports of ten 6000 × 4000 JPEGs at 2048; report each run's mark and time.
     @MainActor func testExportThroughput() throws {
-        throw XCTSkip("waits on EX-13")
+        throw XCTSkip("waits on #782")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         let out = try LibraryFiles.freshPhotoFolder()

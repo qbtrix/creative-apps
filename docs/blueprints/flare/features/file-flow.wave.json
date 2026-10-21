@@ -1,0 +1,166 @@
+{
+  "title": "Flare's Open Recent from the suite list, Open In Halo, and file drops",
+  "wave": 6,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "flare/file-flow (adopter of suite/file-flow); #861 (adopt the suite: SuiteDocumentHost, .suiteApp); RJ-F42",
+  "waits_on": "suite file-flow's SF-a (cross-line; FL-3 needs SF-5 and SF-6, FL-4 SF-7, FL-7 SF-8); layers-files, mac-platform (built) and stage-edit (FlareStage.swift); gradient-fill's FG-m (the catalog files) and export-pack's FV-z (flare.md), slice waits",
+  "longest_chain": "5 (FL-1 → FL-2 → FL-6 → FL-7 → FL-8)",
+  "journeys": [
+    "FlareFileFlowJourneyTests.testOpenRecentAndOpenInHalo"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareFileFlow+Kernel.swift",
+    "Tests/FlareModelTests/FlareFileFlowTests.swift",
+    "Sources/FlareApp/FlareApp.swift",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Sources/FlareApp/FlareStage.swift",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/mutations/FlareModel.FlareFileFlow+Kernel.json",
+    "Tests/RealJobs/flare/open-recent/",
+    "Sources/FlareModel/FlareFiles.swift",
+    "Sources/FlareApp/FlareWindow+File.swift",
+    "Tests/AppSnapshotTests/FlareFileFlowLiveTests.swift",
+    "Tests/AppSnapshotTests/FlareFileFlowSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareFileDropTests.swift",
+    "UITests/FlareJourneyTests+FileFlow.swift",
+    "docs/blueprints/flare.md",
+    "docs/blueprints/flare/features/file-flow.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "FL-a",
+      "behavior": "Flare conforms to `SuiteDocumentHost` and `FileFlowTarget` on stubs, its scene adopts `.suiteApp`, and its File menu and window use the suite's Open Recent, Open In and drop on the fakes.",
+      "tasks": [
+        "FL-1",
+        "FL-2"
+      ],
+      "journeys": [
+        "MFL"
+      ],
+      "waits": {
+        "layers-files": [
+          "FL-1",
+          "FL-2"
+        ],
+        "mac-platform": [
+          "FL-1",
+          "FL-2"
+        ],
+        "stage-edit": [
+          "FL-2"
+        ],
+        "svg-place:PF-u": [
+          "FL-2"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlareFileFlow+Kernel.swift",
+        "Tests/FlareModelTests/FlareFileFlowTests.swift",
+        "Sources/FlareApp/FlareApp.swift",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Sources/FlareApp/FlareStage.swift"
+      ]
+    },
+    {
+      "id": "FL-u",
+      "behavior": "The menu and the drop mark have snapshots and a render budget, and the journey is written.",
+      "tasks": [
+        "FL-5",
+        "FL-6"
+      ],
+      "journeys": [
+        "FLJ1"
+      ],
+      "waits": {
+        "FL-a": [
+          "FL-5",
+          "FL-6"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Tests/AppSnapshotTests/FlareFileFlowSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareFileDropTests.swift",
+        "UITests/FlareJourneyTests+FileFlow.swift"
+      ]
+    },
+    {
+      "id": "FL-m",
+      "behavior": "Flare accepts open and new hand-offs, imports its old recents once, lists the suite's, and notes every open and save there.",
+      "tasks": [
+        "FL-3",
+        "FL-4"
+      ],
+      "journeys": [
+        "MFL"
+      ],
+      "waits": {
+        "FL-a": [
+          "FL-3",
+          "FL-4"
+        ],
+        "gradient-fill:FG-m": [
+          "FL-3"
+        ],
+        "shape-tools:FS-m": [
+          "FL-3"
+        ],
+        "stroke-style:FK-m": [
+          "FL-3"
+        ],
+        "svg-place:PF-m": [
+          "FL-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/FlareModel/FlareFileFlow+Kernel.swift",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/FlareModelTests/FlareFileFlowTests.swift",
+        "Tests/mutations/FlareModel.FlareFileFlow+Kernel.json",
+        "Tests/RealJobs/flare/open-recent/",
+        "Sources/FlareModel/FlareFiles.swift",
+        "Sources/FlareApp/FlareWindow+File.swift",
+        "Tests/AppSnapshotTests/FlareFileFlowLiveTests.swift"
+      ]
+    },
+    {
+      "id": "FL-z",
+      "behavior": "Drop, Open Recent and Open In run on live services, the journey passes, and the feature is built.",
+      "tasks": [
+        "FL-7",
+        "FL-8"
+      ],
+      "journeys": [
+        "FLJ1"
+      ],
+      "waits": {
+        "FL-u": [
+          "FL-7",
+          "FL-8"
+        ],
+        "FL-m": [
+          "FL-7"
+        ],
+        "export-pack:FV-z": [
+          "FL-8"
+        ],
+        "svg-place:PF-z": [
+          "FL-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/FlareJourneyTests+FileFlow.swift",
+        "docs/blueprints/flare.md",
+        "docs/blueprints/flare/features/file-flow.wave.json"
+      ]
+    }
+  ]
+}

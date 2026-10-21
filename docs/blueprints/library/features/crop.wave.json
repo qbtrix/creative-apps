@@ -2,7 +2,7 @@
   "title": "Crop and straighten in the loupe, applied in render, thumbnail and export",
   "wave": 4,
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "covers": "#425",
   "waits_on": "develop; slice CR-a first (contract); CR-5 and CR-6 wait on the spine follow-up (LibraryMenu.Photo.crop merged by the window) and develop's inspector follow-up; P5 (CR-8) waits on #782; CR-10 waits on a creative-core issue to file (horizon angle) and its bump",
