@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 1792625260	-	watch	BK-u	#4244 closed: #4250 (be9aa35) landed the same baseline fix on dev (library.txt at 48). Dev Linux at 8d08e08 was red only on the library CommandPath baseline. BK-u closes on the first green dev Linux run that includes be9aa35.
 1792626175	-	watch	BK-u	Heartbeat: dev Linux check 39693644795 on be9aa35 (has #4250) running.
 1792626451	-	slice-done	BK-u	run 39693644795
+1792627091	-	watch	BK-5m	Heartbeat: BK-5m blocked (LF-m waits on #3928).
