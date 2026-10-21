@@ -13,9 +13,9 @@ PRs target dev (CLAUDE.md), not main.
 | DL-m | DL-5, DL-6, DL-7 | waiting (DL-a, LS-m, DX-m) | – | – |
 | DL-z | DL-8, DL-9 | waiting (DL-u, DL-m, LS-gpu, DP-z) | – | – |
 
-## Waits (re-read 2026-10-21T06:22:42Z)
+## Waits (re-read 2026-10-21T06:59Z)
 
-- suiteui layer-styles LS-a: no feature issue filed; suiteui/features/layer-styles.wave.json status planned. No LayerStyle, LayerStyleTarget, StyleCommands or LayerStyleSVG on dev.
+- suiteui layer-styles LS-a: filed as feature-lead #3937 (06:35Z); #3935 moves it to wave 4. LS-1 needs core LE-a's types, which come with bump PR #3825. Nothing on dev yet: no LayerStyle, LayerStyleTarget, StyleCommands or LayerStyleSVG.
 - suite-imaging IM-a (IM-1 links SuiteImaging into DesignModel): #3715 open, not merged.
 - design-seams-2: planned, no feature issue (owns DesignNode, DesignCanvas, DesignObjectMenu, DesignWindow first).
 - pen-paths DP-m (#3517): open; it last owns DesignSVG, DesignCommandCatalog and the command ids.
@@ -31,3 +31,4 @@ DL-1 can't be written without LS-a's types (rule 20: no Design shadow type), so 
 ## Decisions
 
 - 2026-10-21T06:22:42Z: every slice is blocked on cross-line contracts that aren't filed or merged. The waits are recorded here and a supervisor question is on #3858.
+- 2026-10-21T06:59Z: #3937 (suiteui layer-styles) is filed, so LS-a has a lead. DL-1 starts once LS-a's PR merges to dev. Still no supervisor reply on #3858.
