@@ -2,7 +2,8 @@
 // `HistoryListing` (packet docs/blueprints/suiteui/features/autosave-history.md). One row per state, "Open" (the
 // listing's base) at 0, then each step, oldest first. The current state is selected (the selected tint, the
 // headline font); the undone steps after it are secondary text and read "…, not applied"; the saved state carries a
-// small dot. A click on a row jumps to it; Up and Down move the selection without jumping, stopping at "Open" and
+// small dot captioned "Saved". Each step row leads with its position in monospaced secondary text, so identical
+// step names stay apart on screen as they do in the VoiceOver label. A click on a row jumps to it; Up and Down move the selection without jumping, stopping at "Open" and
 // the last step, and Return jumps to the selected row. Every jump goes out once through `onJump`; the panel mutates
 // nothing, and its selection returns to the listing's index whenever the listing changes. The selection and key rule
 // is `HistoryPanelCursor`, a value tested without a window. Rows are `suite.history.row.<n>`, lazy in the panel's
@@ -76,6 +77,20 @@ public struct HistoryPanel: View {
         position > 0 && listing.steps.indices.contains(position - 1) ? listing.steps[position - 1] : listing.base
     }
 
+    /// The step position a row shows before its name: "2" for step 2, nil for the base.
+    nonisolated static func position(at position: Int, in listing: HistoryListing) -> String? {
+        position > 0 && listing.steps.indices.contains(position - 1) ? "\(position)" : nil
+    }
+
+    /// The caption beside the saved state's dot.
+    nonisolated static let savedCaption = "Saved"
+
+    /// The text row `position` draws, in order: its position (steps only), its name, then "Saved" on the saved state.
+    nonisolated static func visibleText(at position: Int, in listing: HistoryListing) -> [String] {
+        [Self.position(at: position, in: listing), name(at: position, in: listing),
+         listing.savedIndex == position ? savedCaption : nil].compactMap { $0 }
+    }
+
     /// What VoiceOver reads for row `position`: "Step 6 of 11, Move, applied", the base as "Open, applied", a saved
     /// state with ", saved" before whether it is applied, and every row past the index ending "not applied".
     nonisolated static func label(at position: Int, in listing: HistoryListing) -> String {
@@ -119,7 +134,7 @@ public struct HistoryPanel: View {
 
     private func row(_ position: Int) -> some View {
         HistoryPanelRow(
-            name: Self.name(at: position, in: listing), label: Self.label(at: position, in: listing),
+            position: Self.position(at: position, in: listing), name: Self.name(at: position, in: listing), label: Self.label(at: position, in: listing),
             isSelected: position == cursor.position, isCurrent: position == listing.index,
             isApplied: position <= listing.index, isSaved: listing.savedIndex == position)
             .equatable()
@@ -138,6 +153,7 @@ public struct HistoryPanel: View {
 /// One state's row: plain values in, so SwiftUI skips it when they compare equal. The selected tint wins over hover;
 /// hover is a `rowHover` fill with an `outline` edge, never fill alone (docs/design.md, Surfaces).
 private struct HistoryPanelRow: View, Equatable {
+    let position: String?
     let name: String
     let label: String
     let isSelected: Bool
@@ -148,7 +164,7 @@ private struct HistoryPanelRow: View, Equatable {
     @Environment(\.suiteReduceMotion) private var reduceMotion
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.name == rhs.name && lhs.label == rhs.label && lhs.isSelected == rhs.isSelected
+        lhs.position == rhs.position && lhs.name == rhs.name && lhs.label == rhs.label && lhs.isSelected == rhs.isSelected
             && lhs.isCurrent == rhs.isCurrent && lhs.isApplied == rhs.isApplied && lhs.isSaved == rhs.isSaved
     }
 
@@ -159,6 +175,12 @@ private struct HistoryPanelRow: View, Equatable {
 
     var body: some View {
         HStack(spacing: SuiteSpacing.xs) {
+            if let position {
+                Text(position)
+                    .font(SuiteFont.inspectorMeta)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .lineLimit(1)
+            }
             Text(name)
                 .font(isCurrent ? SuiteFont.headline : SuiteFont.body)
                 .foregroundStyle(isApplied ? SuiteColor.textPrimary : SuiteColor.secondaryText)
@@ -169,7 +191,10 @@ private struct HistoryPanelRow: View, Equatable {
                     .resizable()
                     .frame(width: SuiteSize.statusDot, height: SuiteSize.statusDot)
                     .foregroundStyle(SuiteColor.textSecondary)
-                    .help("Saved")
+                Text(HistoryPanel.savedCaption)
+                    .font(SuiteFont.caption)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .lineLimit(1)
             }
         }
         .frame(minHeight: SuiteSize.studioRow)

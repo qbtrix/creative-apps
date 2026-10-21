@@ -39,6 +39,18 @@ import Testing
         }
     }
 
+    /// Identical step names stay apart on screen: each step row shows its position, the base shows none, and the
+    /// saved state's dot carries a visible "Saved" caption (finding #3947).
+    @Test func stepRowsShowTheirPosition() {
+        var listing = HistoryListing(base: "Open", steps: Array(repeating: "Add Rectangle", count: 3), index: 3)
+        listing.savedIndex = 2
+        #expect(HistoryPanel.visibleText(at: 0, in: listing) == ["Open"])
+        #expect(HistoryPanel.visibleText(at: 1, in: listing) == ["1", "Add Rectangle"])
+        #expect(HistoryPanel.visibleText(at: 2, in: listing) == ["2", "Add Rectangle", "Saved"])
+        #expect(HistoryPanel.visibleText(at: 3, in: listing) == ["3", "Add Rectangle"])
+        #expect(HistoryPanel.position(at: 4, in: listing) == nil)
+    }
+
     @Test func emptyListsOpenAlone() throws {
         let listing = HistoryListing(base: "Open", steps: [], index: 0)
         #expect(HistoryPanel.label(at: 0, in: listing) == "Open, applied")
