@@ -33,6 +33,8 @@ enum PhotoEdit: Sendable, Equatable {
     /// Several edits put back as one step (Flatten Image: the stack and the
     /// adjustments); applied in order, their inverses in reverse.
     case group([PhotoEdit])
+    /// Free Transform's draft as it was (nil: none was up), for its own steps.
+    case draft(TransformDraft?)
 }
 
 /// The whole layer stack, for edits that add, remove or resize layers.
@@ -195,6 +197,11 @@ extension PhotoWorkspace {
             return inverse
         case .group(let edits):
             return .group(edits.map { apply($0) }.reversed())
+        case .draft(let draft):
+            let inverse = PhotoEdit.draft(transformDraft)
+            transformDraft = draft
+            touch(.all)
+            return inverse
         }
     }
 

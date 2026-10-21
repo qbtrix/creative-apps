@@ -2,7 +2,8 @@
 // from a paint readout: a solid FF3B30 fill, a 4 pt stroke with Round cap and
 // join, and the rows disabled with the window router's reason when nothing can
 // be painted. The rows send through the `perform` they are given, never a
-// focused scene value. A gradient fill is FlareGradientSnapshots'. Writes
+// focused scene value. A switch that can't act shows its reason as a note, not
+// only a tooltip. A gradient fill is FlareGradientSnapshots'. Writes
 // flare-fill-solid, flare-stroke and flare-fill-disabled PNGs.
 import FlareCore
 import FlareModel
@@ -41,6 +42,24 @@ import Testing
         #expect(sent == [.inspector(.setFill(hex: "00FF00"))], "Rows send through the window's perform")
         try snapshot(Self.sections(Self.solidPaint, reasonFor: { FlareWindow.inspectorHelp($0, in: model) }),
                      name: "flare-fill-disabled", scheme: .dark)
+    }
+
+    @Test(.timeLimit(.minutes(1))) func anOffSwitchShowsItsReasonAsANote() async throws {
+        var model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "bounce"]))
+        model.selectLayer("ball")
+        let paint = try #require(model.paint, "Ball should have a paint readout, so FILL shows")
+        let reason = try #require(FlareWindow.inspectorHelp(.runFill(.type(.solid)), in: model),
+                                  "Ball's fill type can't be edited yet, so the switch has a reason")
+        let w = RenderBudgetWindow(Self.sections(paint, reasonFor: { FlareWindow.inspectorHelp($0, in: model) }))
+        defer { w.close() }
+        try await w.settle(500)
+        #expect(await w.element(FlareInspectorFill.fillHelpID) != nil, "the off switch shows no note")
+        #expect(w.label(FlareInspectorFill.fillHelpID) == reason, "the note isn't the router's reason")
+
+        let open = RenderBudgetWindow(Self.sections(Self.solidPaint))
+        defer { open.close() }
+        try await open.settle(500)
+        #expect(!open.identifiers().contains(FlareInspectorFill.fillHelpID), "a switch that can act shows a note")
     }
 
     private static let solidPaint = PaintReadout(
