@@ -1,19 +1,19 @@
 # filters-collections lead record
 
 Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
-Run: act-1a15ac11868-4kb6 (resumes act-1a15749e510-0ox5) · Session: line lead (library: #1555, #1563, #3478) · Started: 2026-10-20T03:00Z
-Stage: 3 wave 3
-Base: 233aff5cae4aac6b2b273fc39c1ed3b06e967b3f
-Next: FC-4 #3461 (head b798d490) ready; its lane macOS build 39437577080 has been queued since 14:15Z. When it merges: merge dev into FC-5 #3466, run scripts/ci --changed, un-draft (FC-a then complete), then the FC-6/8/11/13 test drafts, then FC-7 #3534, FC-9 #3546, FC-12 #3551, FC-15 #3539 (dirty ones need a dev merge). FC-10 is blocked on S-L9 #3411. FC-14 and FC-16 are planned.
+Run: act-1a15e4969c2-pa6e (resumes act-1a15ac11868-4kb6) · Session: line lead (library: #1563, #3478) · Started: 2026-10-20T03:00Z
+Stage: 3 wave 6
+Base: origin/dev ded2ca5 (main verified at 0dd23d659f4dbd8a0120aa85a321259327518251)
+Next: FC-12 #3551 fixer is merging dev (needs-rebase: LibraryCollections.swift and the seam test). FC-14 builder is building the FC-e PR on dev. FC-10 waits on S-L9 #3411 (open). FC-16 starts after FC-12 and FC-14 merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FC-a | no-filter Library unchanged; contract, bar, sidebar section and menus exist disabled | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | cull, persist, thumbnails, import, status-and-layout, export (all on dev) | yes | 0 | building | - | - |
-| FC-b | filter bar narrows by flag, rating, hide rejects; N of M; Clear Filter | FC-6, FC-7 | J13 | FC-a | no | 0 | planned | - | - |
-| FC-c | New Collection, add/remove/rename/delete as undo steps; sidebar drop | FC-8, FC-9, FC-10 | J14 | FC-a; S-L9 #3411 (FC-10) | yes | 0 | planned | - | - |
-| FC-d | smart collection from filter; rules edited as undo steps | FC-11, FC-12 | J15 | FC-a; FC-b (FC-12) | no | 0 | planned | - | - |
-| FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | planned | - | - |
+| FC-a | no-filter Library unchanged; contract, bar, sidebar section and menus exist disabled | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | cull, persist, thumbnails, import, status-and-layout, export (all on dev) | yes | 0 | done (run 39550229338) | - | - |
+| FC-b | filter bar narrows by flag, rating, hide rejects; N of M; Clear Filter | FC-6, FC-7 | J13 | FC-a | no | 0 | done (run 39582236683) | - | - |
+| FC-c | New Collection, add/remove/rename/delete as undo steps; sidebar drop | FC-8, FC-9, FC-10 | J14 | FC-a; S-L9 #3411 (FC-10) | yes | 0 | FC-8, FC-9 merged; FC-10 waits S-L9 #3411 | - | - |
+| FC-d | smart collection from filter; rules edited as undo steps | FC-11, FC-12 | J15 | FC-a; FC-b (FC-12) | no | 0 | FC-11 merged; FC-12 #3551 fixing (needs-rebase) | - | - |
+| FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | FC-13, FC-15 merged; FC-14 building; FC-16 planned | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -110,3 +110,4 @@ Next: FC-4 #3461 (head b798d490) ready; its lane macOS build 39437577080 has bee
 - 18:26Z check-in: dev at 9c9d41a7b (#3654 library develop fix, #3626 suitekernel; neither ours). Six ready PRs unmerged, unlabelled; scoped 39424958645 still queued; #3520 perf lines absent, MD-10 stays draft. No findings, no fixers.
 - 18:48Z check-in: FC-4 #3461 still unmerged, unlabelled (lane batches macOS now, #3409). No findings, no FC fixers.
 - 19:13Z check-in: dev a48992b7c (only #3085, not ours). Ready on lane: MD-8 #3550, MD-11 #3570, MD-15 #3574, MD-20 #3575, FC-4 #3461; no needs-fix/needs-rebase. #3520 Library lines still absent; MD-10 stays draft. Scoped 39424958645 still queued. No findings for #1555/#1563.
+- 2026-10-21T11:50:25Z (act-1a15e4969c2-pa6e): resumed. On dev: FC-1..FC-9, FC-11, FC-13, FC-15. FC-12 #3551 carries needs-rebase; a fixer is merging dev. FC-14 builder started. S-L9 #3411 is still open, so FC-10 waits. No open findings carry Feature: filters-collections.
