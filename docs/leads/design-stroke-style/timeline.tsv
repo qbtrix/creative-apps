@@ -39,3 +39,4 @@ time	kind	note
 2026-10-21T09:25Z	check	lane	#3884	macOS build 39574365736 queued at 65cd7d9c; round 2 (#3865 #3871 #3873) waits on it
 2026-10-21T09:47Z	check	lane	#3884	macOS build 39574365736 green; waits on a lane batch
 2026-10-21T10:06Z	fix	DK-a round 2 started	wf_c31c3a4f-5b2	#3884 merged (7b1207a8); findings #3865 #3871 #3873
+2026-10-21T10:09Z	check	DK-a round 2 running	wf_c31c3a4f-5b2	waiting on fixer PR
