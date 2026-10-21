@@ -10,6 +10,7 @@
 // macOS only.
 import AppKit
 import PhotoModel
+import SwiftUI
 import Testing
 
 @testable import PhotoApp
@@ -118,5 +119,26 @@ private final class TextSpy: NSTextView {
         let menu = PhotoMenu(model: model, perform: { sent.append($0) })
         menu.edit(.copy, focusedText: nil)
         #expect(sent.count == 1 && editsImage(sent))
+    }
+
+    @Test func allLayersIsOptionCommandAAndCommandAStaysSelectAll() throws {
+        let model = try PhotoWorkspace.fixture(.layered)
+        var sent: [PhotoIntent] = []
+        let menu = PhotoMenu(model: model, perform: { sent.append($0) })
+        let allLayers = menu.allLayersItem
+        #expect(allLayers.title == "All Layers" && allLayers.isEnabled)
+        #expect(allLayers.shortcut == KeyboardShortcut("a", modifiers: [.command, .option]))
+        allLayers.perform()
+        #expect(sent.count == 1)
+        if case .selectAllLayers = sent.first {} else { Issue.record("All Layers sent \(sent)") }
+        let pixels = menu.selectAllItem
+        #expect(pixels.title == "All" && pixels.shortcut == KeyboardShortcut("a"))
+        #expect(pixels.shortcut != allLayers.shortcut)
+    }
+
+    @Test func allLayersIsOffWithItsReasonWithNoImage() {
+        for menu in [PhotoMenu(), PhotoMenu(model: PhotoWorkspace(), perform: { _ in })] {
+            #expect(!menu.allLayersItem.isEnabled && menu.allLayersItem.help == "Open an image first.")
+        }
     }
 }
