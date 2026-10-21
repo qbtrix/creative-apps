@@ -4,7 +4,7 @@ Issue: #3538 · Packet: docs/blueprints/flare/features/key-select-all.md
 Run: act-1a15cf358c6-wj2q · Session: claude/feature-lead-playbook-lw6pjl · Started: 2026-10-21T05:39:29Z (line lead: stroke-style #3452, shape-tools #3451, key-select-all #3538)
 Stage: 3 (wave 1)
 Base: 0865916d (origin/dev); main 0dd23d65 verified
-Next: #3921 (KS-a) merges in the lane; then wait for a CI run on dev whose Linux job contains it; KS-z waits on KS-a and #3499 (open)
+Next: #3921 fix round 1 (Linux red: CommandPathTests, FlareCommands.swift:104 Button without command spec; conflict with dev): merge dev, MenuCommand from catalog, re-gate, move Head; then a dev CI run whose Linux job contains it. Note: branch is lead/key-select-all, not lead/flare-key-select-all
 
 Loop: v3 (the packet has a `## Slices` table).
 
