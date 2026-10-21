@@ -1,9 +1,9 @@
 [
   {
-    "label": "orientationWins: the chosen orientation is ignored and the ratio follows the photo's shape",
+    "label": "orientationWins: on a landscape photo the chosen orientation is ignored and the ratio follows the photo",
     "file": "Sources/SuiteKernel/Crop/Crop.swift",
     "find": "let stands = orientation ?? (size.height > size.width ? CropOrientation.portrait : .landscape)",
-    "replace": "let stands = size.height > size.width ? CropOrientation.portrait : (orientation ?? .landscape)",
+    "replace": "let stands = size.height > size.width ? (orientation ?? CropOrientation.portrait) : .landscape",
     "tests": "CropRulesTests"
   },
   {
