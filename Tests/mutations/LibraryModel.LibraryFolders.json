@@ -1,0 +1,23 @@
+[
+  {
+    "label": ".siblingNotChild: the child test drops the trailing slash, so /a/bc sits under /a/b",
+    "file": "Sources/LibraryModel/LibraryFolders.swift",
+    "find": "!path.hasPrefix(top + \"/\")",
+    "replace": "!path.hasPrefix(top)",
+    "tests": "LibraryFoldersTests"
+  },
+  {
+    "label": ".ownCountExact: a folder's own count takes its descendants' photos too",
+    "file": "Sources/LibraryModel/LibraryFolders.swift",
+    "find": "open[open.count - 1].node.totalCount += last.node.totalCount",
+    "replace": "open[open.count - 1].node.totalCount += last.node.totalCount; open[open.count - 1].node.ownCount += last.node.totalCount",
+    "tests": "LibraryFoldersTests"
+  },
+  {
+    "label": ".allMissingUnder: allMissing compares against the folder's own photos, not every photo under it",
+    "file": "Sources/LibraryModel/LibraryFolders.swift",
+    "find": "last.missing == last.node.totalCount",
+    "replace": "last.missing == last.node.ownCount",
+    "tests": "LibraryFoldersTests"
+  }
+]
