@@ -3,16 +3,16 @@
 // PM-6). An eye or slider on an unpicked row acts on that row alone; Delete
 // refuses to take every layer. Runs on Linux and macOS.
 import CoreRaster
-import PhotoModel
 import SuiteKernel
 import Testing
+@testable import PhotoModel
 
-/// Four layers (fourLayers) with Layer 1 and Layer 3 picked, Layer 3 the primary.
+/// Four layers (fourLayers) with Layer 1 and Layer 3 picked, Layer 3 the
+/// primary. Picked on the kernel selection, so it holds before PM-4's Command-click.
 private func onePlusThree() throws -> (PhotoWorkspace, one: PhotoLayer.ID, two: PhotoLayer.ID, three: PhotoLayer.ID) {
     var workspace = try fourLayers()
     let (one, two, three) = (layerID(workspace, "Layer 1"), layerID(workspace, "Layer 2"), layerID(workspace, "Layer 3"))
-    workspace.pickLayer(one, .replace)
-    workspace.pickLayer(three, .toggle)
+    workspace.layerSelection.replace([one, three])
     return (workspace, one, two, three)
 }
 
@@ -21,7 +21,7 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
 }
 
 @Suite struct PhotoSeveralLayersTests {
-    @Test(.disabled("waits on PM-5")) func anEyeOnAPickedRowHidesEveryPickedLayer() throws {
+    @Test func anEyeOnAPickedRowHidesEveryPickedLayer() throws {
         var (workspace, one, two, three) = try onePlusThree()
         workspace.toggleVisibility(one)
         #expect(layer(workspace, one)?.isVisible == false && layer(workspace, three)?.isVisible == false)
@@ -37,7 +37,7 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
         #expect(workspace.undoActionName == "Undo Hide Layer")
     }
 
-    @Test(.disabled("waits on PM-5")) func opacityAppliesToEvery() throws {
+    @Test func opacityAppliesToEvery() throws {
         var (workspace, one, two, three) = try onePlusThree()
         let before = workspace.layers
         workspace.setOpacity(three, percent: 50)
@@ -59,10 +59,10 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
         #expect(workspace.layers == before)
     }
 
-    @Test(.disabled("waits on PM-5")) func threePickedDeleteInOneStepAndUndoKeepsTheOrder() throws {
-        var (workspace, _, two, _) = try onePlusThree()
+    @Test func threePickedDeleteInOneStepAndUndoKeepsTheOrder() throws {
+        var (workspace, one, two, three) = try onePlusThree()
         let before = workspace.layers.map(\.id)
-        workspace.pickLayer(two, .toggle)
+        workspace.layerSelection.replace([one, two, three])
         workspace.removeSelectedLayers()
         #expect(workspace.layers.map(\.name) == ["Background"])
         #expect(workspace.undoActionName == "Undo Delete Layers")
@@ -70,13 +70,36 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
         #expect(workspace.layers.map(\.id) == before)
     }
 
-    @Test(.disabled("waits on PM-5")) func oneStepForSeveral() throws {
+    @Test func oneStepForSeveral() throws {
         var (workspace, one, _, _) = try onePlusThree()
         let (before, undoName) = (workspace.layers, workspace.undoActionName)
         workspace.toggleVisibility(one)
         workspace.undo()
         #expect(workspace.layers == before)
         #expect(workspace.undoActionName == undoName)
+    }
+
+    @Test func anEyeOnAHiddenPickedRowShowsEveryPickedLayer() throws {
+        var (workspace, one, _, three) = try onePlusThree()
+        workspace.toggleVisibility(three)
+        workspace.toggleVisibility(three)
+        #expect(layer(workspace, one)?.isVisible == true && layer(workspace, three)?.isVisible == true)
+        #expect(workspace.undoActionName == "Undo Show Layers")
+    }
+
+    @Test func commandsPickAndSetOpacity() throws {
+        var (workspace, one, two, three) = try onePlusThree()
+        let catalog = PhotoWorkspace.catalog
+        _ = try catalog.run("layer.set-opacity", params: .object(["percent": .number(25)]), on: &workspace)
+        #expect(layer(workspace, one)?.opacity == 0.25 && layer(workspace, three)?.opacity == 0.25)
+        #expect(layer(workspace, two)?.opacity == 1)
+        _ = try catalog.run("layer.select-all", params: .object([:]), on: &workspace)
+        #expect(workspace.selectedLayerIDs.count == 4)
+        _ = try catalog.run("layer.pick", params: .object(["id": .string(two), "mode": .string("replace")]), on: &workspace)
+        #expect(workspace.selectedLayerIDs == [two])
+        #expect(throws: (any Error).self) {
+            try catalog.run("layer.pick", params: .object(["id": .string("layer-99"), "mode": .string("replace")]), on: &workspace)
+        }
     }
 
     @Test(.disabled("waits on PM-6")) func moveMovesEvery() throws {
