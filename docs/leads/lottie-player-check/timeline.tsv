@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-21T21:17Z	heartbeat	LP-4 #4132 still open at 82c169e1 (supervisor merges after its macOS run); LP-6 waits on it.
 2026-10-21T21:43Z	heartbeat	LP-4 #4132 still open at 82c169e1 (supervisor merges after its macOS run); LP-6 waits on it.
 2026-10-21T22:05Z	heartbeat	LP-4 #4132 still open at 82c169e1 (supervisor merges after its macOS run); LP-6 waits on it.
+2026-10-21T22:27Z	heartbeat	LP-4 #4132 still open at 82c169e1; supervisor question already on #3792 (17:05Z, rule 23 met); LP-6 waits on it.
