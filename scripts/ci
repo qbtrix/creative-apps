@@ -10,9 +10,10 @@
 # dies without its "Test run with" summary prints TEST PROCESS DIED and the
 # tests it left unfinished (scripts/test-died); one that prints nothing for
 # CI_TEST_STALL seconds (default 600) is stuck, so it is sampled (macOS),
-# killed and named the same way. CI runs plain scripts/ci on
-# Linux and macOS. On Linux, Package.swift declares only the Model targets, so
-# build and test cover those; on macOS they cover everything.
+# killed and named the same way. CI_LOCAL_SKIP='<regex>' (unset in CI) skips
+# the named tests in every pass, for a local gate whose toolchain renders
+# differently. CI runs plain scripts/ci on Linux and macOS. On Linux,
+# Package.swift declares only the Model targets, so build and test cover those; on macOS they cover everything.
 #
 # --changed is what builders run before a PR: every lint and the same build,
 # then only the tests of the targets the branch touched since its merge base
@@ -470,6 +471,12 @@ run_tests() {
 # The perf and timing tests run nightly (perf-nightly), never here. An empty
 # regex would skip every test, so the flag goes in only when there is one.
 perf=$(python3 scripts/test-scope perf) || fail "Tests/perf-suites.txt: fix the line above"
+# CI_LOCAL_SKIP: an opt-in swift-testing --skip regex for a local gate whose
+# toolchain differs from CI's. It rides with the perf regex into every pass.
+if [[ -n "${CI_LOCAL_SKIP:-}" ]]; then
+  echo "CI: skipping local-only tests: $CI_LOCAL_SKIP"
+  perf="$perf${perf:+|}$CI_LOCAL_SKIP"
+fi
 skip_perf=()
 [[ -z "$perf" ]] || skip_perf=(--skip "$perf")
 
