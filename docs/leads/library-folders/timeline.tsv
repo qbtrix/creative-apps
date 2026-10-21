@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T17:58:12Z	5	fix	FO-m	#4022 needs-rebase resolved 2ef801b; #4121 ba7fb3c
 2026-10-21T18:07:04Z	5	wait	FO-m	#4022 macOS build 39649207191
 2026-10-21T18:37:08Z	-	wait	FO-m	#4022 macOS build 39649207191 queued; #4121 draft
+2026-10-21T18:42:52Z	-	wait	-	lead/folders now mirrors this record. FO-5 #4022 at 2ef801b: lane macOS build 39649207191 still queued (runner backlog). FO-6 #4121 at ba7fb3c stays a draft until #4022 merges.
