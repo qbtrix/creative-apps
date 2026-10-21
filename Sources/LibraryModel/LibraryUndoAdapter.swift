@@ -3,11 +3,12 @@
 // changed as they were before it; undo puts them back by id and hands the
 // kernel the photos it replaced, which redo puts back. A collections step
 // ("New Collection") holds your collections before and after it; undo puts
-// the before list back and redo the after list (FC-3). A drop's "Import" step
-// (LF-3) takes its photos out on undo and adds them back, selected, on redo.
-// Edits sharing an open
-// coalesce key (one slider drag) stay one step. The 100-step limit is the
-// kernel's. Undo and redo never move the loupe (#426). Linux-safe.
+// the before list back and redo the after list (FC-3), and undoing a delete
+// selects the deleted collection again when it was selected (FC-9). A drop's
+// "Import" step (LF-3) takes its photos out on undo and adds them back,
+// selected, on redo. Edits sharing an open coalesce key (one slider drag) stay
+// one step. The 100-step limit is the kernel's. Undo and redo never move the
+// loupe (#426). Linux-safe.
 
 import SuiteKernel
 
@@ -18,14 +19,20 @@ public struct CatalogChange: Hashable, Sendable {
     public internal(set) var photos: [PhotoItem]
     public internal(set) var collectionsBefore: [UserCollection]?
     public internal(set) var collectionsAfter: [UserCollection]?
+    /// The collection selected before a collections step, which undo selects
+    /// again when the step removed it (Delete Collection); nil on a photo step.
+    public internal(set) var selectedBefore: String?
     public internal(set) var removing: [PhotoItem]?
     public internal(set) var adding: [PhotoItem]?
 
-    init(photos: [PhotoItem], collectionsBefore: [UserCollection]? = nil, collectionsAfter: [UserCollection]? = nil,
-         removing: [PhotoItem]? = nil, adding: [PhotoItem]? = nil) {
+    init(
+        photos: [PhotoItem], collectionsBefore: [UserCollection]? = nil, collectionsAfter: [UserCollection]? = nil,
+        selectedBefore: String? = nil, removing: [PhotoItem]? = nil, adding: [PhotoItem]? = nil
+    ) {
         self.photos = photos
         self.collectionsBefore = collectionsBefore
         self.collectionsAfter = collectionsAfter
+        self.selectedBefore = selectedBefore
         self.removing = removing
         self.adding = adding
     }
@@ -94,7 +101,8 @@ extension LibraryCatalog {
         var edited = userCollections
         edit(&edited)
         guard edited != userCollections else { return }
-        history.kernel.record(name, CatalogChange(photos: [], collectionsBefore: userCollections, collectionsAfter: edited))
+        history.kernel.record(name, CatalogChange(
+            photos: [], collectionsBefore: userCollections, collectionsAfter: edited, selectedBefore: selectedCollectionID))
         history.open = false
         applyCollections(edited)
     }
@@ -149,6 +157,7 @@ extension LibraryCatalog {
         history.kernel = kernel
         history.open = false
         if let collections = applied[keyPath: side] { applyCollections(collections) }
+        if side == \.collectionsBefore, let selected = applied.selectedBefore { reselect(selected, after: applied) }
         if !applied.photos.isEmpty { restore(applied.photos) }
         if let removing = applied.removing { removePhotos(Set(removing.map(\.id))) }
         if let adding = applied.adding {
@@ -178,6 +187,15 @@ extension LibraryCatalog {
             selectedCollectionID = "all"
         }
         recount()
+        refreshShown()
+    }
+
+    /// Selects `id` again when the step being undone removed it while it was
+    /// selected (Delete Collection), so undo shows what it showed before.
+    private mutating func reselect(_ id: String, after change: CatalogChange) {
+        let removed = !(change.collectionsAfter ?? []).contains { $0.id == id }
+        guard removed, id != selectedCollectionID, userCollections.contains(where: { $0.id == id }) else { return }
+        selectedCollectionID = id
         refreshShown()
     }
 

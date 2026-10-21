@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "Select All Keys picks every key of all three layers, the hidden Shadow layer's too, and Delete removes them as one step, so the saved file keeps no key.",
+  "inputs": [
+    "input/*.flare"
+  ],
+  "steps": [
+    {
+      "id": "timeline.select-all-keys",
+      "params": {}
+    },
+    {
+      "id": "edit.delete",
+      "params": {}
+    }
+  ],
+  "atomic": true,
+  "output": {
+    "dir": "out",
+    "name": "{stem}-cleared",
+    "format": "flare"
+  },
+  "expect": {
+    "out/three-layers-cleared.flare": {
+      "json": {
+        "format": "flare",
+        "version": 1,
+        "document": {
+          "symbols": [],
+          "scenes": [
+            {
+              "background": {
+                "a": 1,
+                "b": 1,
+                "g": 1,
+                "r": 1
+              },
+              "durationFrames": 24,
+              "fps": 24,
+              "guides": [],
+              "height": 100,
+              "id": "scene-1",
+              "labels": {},
+              "layers": [
+                {
+                  "id": "ball",
+                  "name": "Ball",
+                  "instances": [],
+                  "isLocked": false,
+                  "isVisible": true,
+                  "shapes": [
+                    {
+                      "closed": true,
+                      "fill": {
+                        "a": 1,
+                        "b": 0,
+                        "g": 0,
+                        "r": 0
+                      },
+                      "points": [
+                        {
+                          "x": 0,
+                          "y": 0
+                        },
+                        {
+                          "x": 20,
+                          "y": 0
+                        },
+                        {
+                          "x": 20,
+                          "y": 20
+                        },
+                        {
+                          "x": 0,
+                          "y": 20
+                        }
+                      ]
+                    }
+                  ],
+                  "tracks": {}
+                },
+                {
+                  "id": "shadow",
+                  "name": "Shadow",
+                  "instances": [],
+                  "isLocked": false,
+                  "isVisible": false,
+                  "shapes": [
+                    {
+                      "closed": true,
+                      "fill": {
+                        "a": 1,
+                        "b": 0,
+                        "g": 0,
+                        "r": 0
+                      },
+                      "points": [
+                        {
+                          "x": 0,
+                          "y": 0
+                        },
+                        {
+                          "x": 20,
+                          "y": 0
+                        },
+                        {
+                          "x": 20,
+                          "y": 20
+                        },
+                        {
+                          "x": 0,
+                          "y": 20
+                        }
+                      ]
+                    }
+                  ],
+                  "tracks": {}
+                },
+                {
+                  "id": "floor",
+                  "name": "Floor",
+                  "instances": [],
+                  "isLocked": false,
+                  "isVisible": true,
+                  "shapes": [
+                    {
+                      "closed": true,
+                      "fill": {
+                        "a": 1,
+                        "b": 0,
+                        "g": 0,
+                        "r": 0
+                      },
+                      "points": [
+                        {
+                          "x": 0,
+                          "y": 0
+                        },
+                        {
+                          "x": 20,
+                          "y": 0
+                        },
+                        {
+                          "x": 20,
+                          "y": 20
+                        },
+                        {
+                          "x": 0,
+                          "y": 20
+                        }
+                      ]
+                    }
+                  ],
+                  "tracks": {}
+                }
+              ],
+              "name": "Scene 1",
+              "width": 200
+            }
+          ]
+        }
+      }
+    }
+  },
+  "platforms": [
+    "linux",
+    "macos"
+  ]
+}
