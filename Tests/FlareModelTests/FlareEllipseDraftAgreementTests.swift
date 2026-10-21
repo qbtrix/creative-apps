@@ -61,7 +61,8 @@ func ellipseDraftMatchesCommitForOddBoxes(hasDocument: Bool) {
 }
 
 @Test func otherToolsNeverDraftWithOrWithoutADocument() {
-    for tool in FlareTool.allCases where tool != .ellipse {
+    // Shape drafts the kernel's path (shape-tools FS-3): FlareShapeToolDraftTests covers it.
+    for tool in FlareTool.allCases where tool != .ellipse && tool != .shape {
         var workspace = FlareWorkspace()
         workspace.selectTool(tool)
         workspace.dragChanged(from: Point(x: 0, y: 0), to: Point(x: 50, y: 50))
