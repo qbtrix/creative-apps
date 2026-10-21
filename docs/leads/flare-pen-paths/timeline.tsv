@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-21T15:39Z	heartbeat	check	-	#4027/#4033 in lane macOS build; FL-m no PR; #3770 open
 2026-10-21T16:09Z	heartbeat	check	-	#4027 macOS build 39625398668 still queued (runner wait)
 2026-10-21T16:31Z	heartbeat	poll	-	#4027 macOS build 39625398668 still queued; repo-wide backlog (28 queued runs, macOS runners busy since 15:21Z)
+2026-10-21T17:06:25Z	FP-a	question	#4027	rule 23: build 39625398668 queued 1h40m, supervisor asked on #3519
