@@ -70,3 +70,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 22:55Z: fix #4244 (6b0bec6) waits on its lane-dispatched macOS build (apps: library), then a batch.
 
 - 2026-10-21T22:59Z: dev-ci 39689070230 at e0fb991: Linux red only on CommandPathTests/CommandPathLimitTests for library.txt (2 stale Cancel lines, 53 > 48), the BK-u/CS-2 race; #4244 removes exactly those lines. #4244 macOS build 39689010451 in progress.
+
+- 2026-10-21T23:01Z: #4244 macOS build 39689010451 red, but not ours: dev doesn't compile on macOS (RenderBudgetPhotoPlaceTests uses PhotoPlaceIntent.files, which #4164 removed). The fix is #4215 (Photo line, not ported). Commented on #4244; I'll merge dev into the branch and move Head once #4215 lands.
