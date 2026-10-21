@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T21:47:55Z	heartbeat	dev Linux 39678885281 red on launcher CommandPath baseline (dev-red #3856, not ours); SS-vector done waits green run; #4115 awaiting lane
 2026-10-21T22:12:08Z	merge	#4115 merged 4ada7f79a
 2026-10-21T22:12:08Z	restack	#4129 merged dev in, CI PASS, head 4c542f8ed, ready
+2026-10-21T22:29:00Z	heartbeat	dev Linux 39685422711 red on library CommandPath baseline (not ours); #4129 macOS build queued
