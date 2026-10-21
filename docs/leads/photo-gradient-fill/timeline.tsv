@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-21T09:31:51Z	check	PG-7	gate FAIL on dev's own mutation anchors (DesignModel.DesignCanvasEditing, Eyedropper/Pen; dev-red #3856, Linux job); origin/dev a6f45c180 fails the same	not ours; rerun gate when PG-6 merges
 2026-10-21T09:50:09Z	check	lane	#3975 PG-5, #3977 PG-6 open in lane, no needs-fix/needs-rebase; PG-7 waits on #3977	dev-red #3856 open
 2026-10-21T10:11:47Z	check	lane	#3975 PG-5, #3977 PG-6 still awaiting mac build; no needs-fix/needs-rebase; PG-7 waits on #3977	dev-red #3856 open
+2026-10-21T10:35:53Z	fix	PG-6	#3977 needs-rebase: merged dev (PhotoEditor overlay conflict with PP-3), gate CI: PASS, head 3192c0198	Head line moved
