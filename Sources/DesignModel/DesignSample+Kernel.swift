@@ -17,9 +17,9 @@ extension DesignWorkspace: SampleTarget {
         nil
     }
 
-    /// Sets the selection's fill (or its stroke when `toStroke`) to the colour at `point`, one "Fill" or
-    /// "Stroke" step. DY-1 stub: refuses, changing nothing, until DY-5.
-    public mutating func applySample(at point: Point, toStroke: Bool) throws {
+    /// Sets the selection's fill (or its stroke when `toStroke`) to the colour in a `size` square at `point`
+    /// (`sampledColor(at:size:)`), one "Fill" or "Stroke" step. DY-1 stub: refuses, changing nothing, until DY-5.
+    public mutating func applySample(at point: Point, toStroke: Bool, size: SampleSize = .point) throws {
         throw DesignRefusal.notBuilt("Picking a color")
     }
 }
