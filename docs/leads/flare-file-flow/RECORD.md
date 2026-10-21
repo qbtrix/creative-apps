@@ -49,3 +49,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 12:46Z: No svg-place PF PRs yet; FL-2 still blocked.
 - 13:08Z: No svg-place PF PRs; FL-2 blocked.
 - 13:28Z: No svg-place PF PRs; FL-2 blocked.
+- 14:45Z: Records moved to lead/flare-file-flow. FL-2 still blocked: no svg-place PF PRs yet.
