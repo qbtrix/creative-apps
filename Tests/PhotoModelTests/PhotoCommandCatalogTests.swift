@@ -142,8 +142,9 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Commands with no menu item: the catalog's only (gradient-fill PG-3).
-    static let noMenu: Set = ["select.rect", "image.gradient"]
+    /// Commands with no menu item: the catalog's only (gradient-fill PG-3); the Layers list's pick, All Layers
+    /// (Select menu, PM-3) and opacity (multi-layer-select PM-5).
+    static let noMenu: Set = ["select.rect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
     /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5), in menu order (the catalog lists them as the menus do).
     static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {

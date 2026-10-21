@@ -83,12 +83,12 @@ import Testing
         }
     }
 
-    @Test(.disabled("SS-4: Title.flare lands in the SS-vector follow-up (line cap)")) func testTitle() throws {
+    @Test func testTitle() throws {
         let scenes = Self.items(try Self.open("Title.flare", in: Self.fixtures, app: "flare"), "scenes")
         #expect(scenes.reduce(0) { $0 + Self.number($1, "layers") } >= 1)
     }
 
-    @Test(.disabled("SS-4: Logo.flare lands in the SS-vector follow-up (line cap)")) func testLogoFlare() throws {
+    @Test func testLogoFlare() throws {
         let scenes = Self.items(try Self.open("Logo.flare", in: Self.fixtures, app: "flare"), "scenes")
         #expect(scenes.reduce(0) { $0 + Self.number($1, "layers") } >= 1)
     }
