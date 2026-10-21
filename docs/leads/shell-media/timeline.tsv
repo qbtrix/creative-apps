@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T16:51Z	2026-10-21T16:51Z	wave2	prs	#4119 #4123 #4125 #4128	SM-3 3/3, SM-4 2/2, SM-5, SM-7 drafts stacked on #4035; gate pass
 2026-10-21T18:06Z	2026-10-21T18:06Z	lane	rebase-fixed	#4034	dev merged, SuiteLiveServicesTests 7 pending, head 34a1f20f
 2026-10-21T20:21Z	2026-10-21T20:21Z	heartbeat	resume	-	run act-1a1601c3538-r0c9 resumed; #4034 head 8ca7a2e needs gate + marker
+2026-10-21T20:35Z	2026-10-21T20:35Z	lane	gate-pass	#4034	SM-1 scripts/ci --changed PASS on 8ca7a2e; Head marker moved

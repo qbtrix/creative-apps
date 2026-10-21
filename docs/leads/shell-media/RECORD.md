@@ -18,7 +18,7 @@ Next: SM-1 #4034 gate on head 8ca7a2e, then SM-2 #4035 ready, then SM-3/4/5/7 dr
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| SM-1 | SM-a | 1 | contract: values, MediaEncoding/Decoding, FakeMedia, media member, fake slot | packet SM-1 (9 files) | MediaContractTests; Mutate SuiteModel.MediaFrame | #4034 | ready; gate rerun on head 8ca7a2e |
+| SM-1 | SM-a | 1 | contract: values, MediaEncoding/Decoding, FakeMedia, media member, fake slot | packet SM-1 (9 files) | MediaContractTests; Mutate SuiteModel.MediaFrame | #4034 | ready; gate pass, Head 8ca7a2e |
 | SM-2 | SM-a | 1 | checks first: rules/clock (Linux) and write/read (macOS) suites disabled by name, fixtures | packet SM-2 | suites compile | #4035 (draft, stacked on #4034) | waits #4034 |
 
 ## Reviews
