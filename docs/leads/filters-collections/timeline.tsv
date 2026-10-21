@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-17T06:28Z	3	pr-merged	#1976	FC-1 filter rules merged to dev by the lane
 2026-10-17T06:33Z	3	pr-opened	-	FC-2 part 1 (state, UserCollection, refreshShown), head in PR body
 2026-10-21T07:22Z	poll	wait	-	still blocked: HK-2 needs HG-u, which needs #3401 (open)
+2026-10-21T07:53Z	poll	wait	-	still blocked on #3401 via HG-u
