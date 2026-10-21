@@ -109,7 +109,10 @@ struct RealJobsTests {
             #expect(code == 0, "\(job) exited \(code): \(RealJobsHarness.printed(io))")
             if case .string(let why)? = report["skipped"] {
                 #expect(!job.hasPrefix("Tests/RealJobs/fake/"), "\(job) runs everywhere but was skipped: \(why)")
-                #expect(why.hasPrefix("macOS-only: ") || why.contains("waits on image-codecs"), "\(job) skipped as \(why)")
+                // A job waiting on a slice names it in `pending` and its why (AllAppsCatalogTests checks the
+                // gap); `platforms: []` then skips it on both platforms, so either prefix is fine for it.
+                let pending = try AllAppsCatalogTests.pending(job).map(why.contains) == true
+                #expect(why.hasPrefix("macOS-only: ") || why.contains("waits on image-codecs") || pending, "\(job) skipped as \(why)")
             } else {
                 #expect(report["ok"] == .bool(true), "\(job): \(RealJobsHarness.printed(io))")
             }
