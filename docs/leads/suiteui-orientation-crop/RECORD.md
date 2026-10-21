@@ -4,7 +4,7 @@ Issue: #3756 · Packet: docs/blueprints/suiteui/features/orientation-crop.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3758) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: OC-a and OC-m done; remaining slices blocked on other features (see #3756 comment 6317098600); recheck blockers each poll, Question for the supervisor after 3 identical blocked polls
+Next: 3 identical blocked polls; Question for the supervisor posted on #3756 (comment 6323716332); polling stopped (rule 23) until answered or a dependency lands
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
