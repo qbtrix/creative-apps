@@ -81,6 +81,7 @@ design DesignModelTests.DesignLayersBudgetTests/layerRows
 design DesignModelTests.DesignStyleBudgetTests
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/timing
 design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignRasterTests/writeTiming
+design AppSnapshotTests.BodyCountSuites/RenderBudgetDesignEyedropperTests/loupeTrackTiming
 
 suite AppSnapshotTests.BodyCountSuites/RenderBudgetAfterGlowOnboardingTests/timing
 suite SuiteModelTests.StoreBudgetTests
