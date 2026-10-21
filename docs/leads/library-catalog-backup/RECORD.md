@@ -56,3 +56,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T20:55Z: BK-u #3967: open merged=false [fast-lane]; still waiting for a lane batch.
 
 - 2026-10-21T21:10Z: BK-u #3967: no change; macOS build passed, still waiting for a lane batch.
+
+- 2026-10-21T21:26Z: heartbeat: #3967 in the lane at 780c26c (macOS build passed), waiting for a batch; dev Linux check 39676099814 (6dc7778) red on Launcher's CommandPathTests baseline, dev-red #3856, not ours
