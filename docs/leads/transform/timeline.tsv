@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T06:00:33Z	heartbeat	check: #3811 needs-rebase dropped; macOS build 39551030965 for da8dfd4 dispatched
 2026-10-21T06:27:04Z	heartbeat	HT-u #3811 head da8dfd4 open, fast-lane, macOS build 39551030965 queued
 2026-10-21T06:49:41Z	heartbeat	HT-u #3811 head da8dfd4 open, macOS build 39551030965 in progress
+2026-10-21T07:13:19Z	heartbeat	HT-u #3811 head da8dfd4 macOS build 39551030965 green; eligible, waits for a lane batch
