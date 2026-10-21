@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T20:56Z) FP-a round-2 critic panel running (workflow wf_9a0199a8-12f, code lenses clarity/design/oracle at 606e8212, Linux check 39667367345). #3770 (PN-3) still open.
+Next: (2026-10-21T20:58Z) FP-a fix round 2 (last allowed): #4198 (Shift-extend oracle) and #4199 (locked-layer help text) on lead/pen-paths-FP-a-fix2. #4200 moves the stand-in converter into SuiteUI, which line:flare can't edit; it waits for the post-round-2 review and then becomes a gap for line:suiteui.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,7 +33,7 @@ Next: (2026-10-21T20:56Z) FP-a round-2 critic panel running (workflow wf_9a0199a
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 | FP-a | 39567954958 | 5a911587 | clarity, design, oracle (code only) | #4011 #4012 #4013 (clean: minor only) | 0 |
-| FP-a | 39667367345 | 606e8212 | clarity, design, oracle (code only) | running | 1 |
+| FP-a | 39667367345 | 606e8212 | clarity, design, oracle (code only) | #4198 #4199 #4200 (not clean: 3 confirmed, 2 refuted) | 1 |
 
 ## Decisions
 - FP-a round-2 review runs on code, like round 1, on the first green dev Linux check containing 79e32f25: the overlay has no snapshot before FP-u, so a Flare screens run adds nothing for these lenses, and waiting on one hit 3 identical polls (rule 23: work instead of idling).
