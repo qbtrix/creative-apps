@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-21T20:49Z	check-in	check-in: #4028 (IM-1, Package.swift) still on the supervisor's Mac gate. IM-2 gated on lead/suite-imaging-IM-2.
 2026-10-21T21:11Z	check-in	check-in: #4028 still open (supervisor merge; lane re-labels it each sweep). IM-2 gated.
 2026-10-21T21:33Z	check-in	check-in: #4028 still open on the supervisor's Mac gate. IM-2 gated.
+2026-10-21T21:56Z	check-in	#4028 (IM-1) still waiting for the supervisor merge (Package.swift). IM-2 is ready on lead/suite-imaging-IM-2 (775148e3).
