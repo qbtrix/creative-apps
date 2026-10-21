@@ -4,7 +4,7 @@ Issue: #3792 · Packet: docs/blueprints/flare/features/lottie-player-check.md
 Run: act-1a15e10a86f-7bk9 · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T10:50Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T20:56Z) #4132 still waits on the supervisor's macOS run and hand merge; LP-6 ready on its branch.
+Next: (2026-10-21T20:59Z) LP-4 #4132 still open at 82c169e1 (no-fast-lane, supervisor merges after its macOS run); LP-6 waits on it on lead/lottie-player-check-LP-6.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
