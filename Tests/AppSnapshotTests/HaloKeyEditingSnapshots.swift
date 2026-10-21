@@ -3,7 +3,9 @@
 // unkeyed, top first). HaloViewer with Ball's key at 0 picked and Rig's at 0
 // added with Shift, so keys on two lanes draw picked; HaloViewer after Select
 // All Keys, every key of every lane picked; HaloTimelineView hosted in a
-// 1440 x 900 window, with Ball's key at 0 pressed and dragged 6 frames right
+// 1440 x 900 window, the playhead scrubbed to 36 (at 0 its 16 pt grab band
+// covers the key and the strip gives the press to the scrub, TL-22: #4150),
+// with Ball's key at 0 pressed and dragged 6 frames right
 // by real mouse events and held there, so the strip draws the step and the
 // time pill over the grabbed key (the PNG is taken before the mouse-up; the
 // recorder doesn't apply the commands, so the Model keeps the keys at 0); and
@@ -61,6 +63,8 @@ import Testing
         let ball = try layer("Ball", in: project), rig = try layer("Rig", in: project)
         project.pickLaneKeys(layerID: ball, frame: 0, mode: .replace)
         project.pickLaneKeys(layerID: rig, frame: 0, mode: .extend)
+        // Off every key: the playhead's grab band over Ball's key at 0 would take the press (#4150).
+        project.scrub(to: Self.playhead)
         let row = try #require(project.timelineRows.firstIndex { $0.id == ball })
         let comp = try #require(project.selectedComposition)
         let layout = HaloTimelineView.layout
@@ -101,6 +105,8 @@ import Testing
     }
 
     static let size = CGSize(width: 1440, height: 900)
+    /// Where the key drag's playhead sits: on no key of `parented`, far from the drag's 0 to 6.
+    static let playhead = 36
 
     /// The hosted window's view as a 1440 × 900 PNG in .build/snapshots, as `snapshot` writes one.
     static func write<V: View>(_ w: RenderBudgetWindow<V>, name: String) throws {

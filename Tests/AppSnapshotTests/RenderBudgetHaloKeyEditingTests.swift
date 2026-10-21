@@ -3,7 +3,9 @@
 // editing on the real Halo window, through the harness
 // (RenderBudgetHarness.swift). On `parented` with Ball's and Rig's keys at
 // frame 0 picked (picked in the Model before the window opens: the harness's
-// presses carry no Shift), Ball's key is dragged 120 samples right: at most 3
+// presses carry no Shift) and the playhead scrubbed to 36 (at 0 its grab band
+// covers the key, so the press scrubbed instead: #4150), Ball's key is
+// dragged 120 samples right: at most 3
 // window bodies (the lanes draw each step on their own layers, TL-22; the
 // release sends one move and its end). On `crowd` (300 lanes, 5,000 keys) a
 // press on Solid 300's bed gives the strip focus, then Select All Keys goes
@@ -56,6 +58,8 @@ extension BodyCountSuites {
             var project = HaloLaunch(arguments: ["Halo", "-HaloFixture", "parented"]).project()
             project.pickLaneKeys(layerID: ball, frame: 0, mode: .replace)
             project.pickLaneKeys(layerID: rig, frame: 0, mode: .extend)
+            // Off every key: the playhead's grab band over Ball's key at 0 would take the press (#4150).
+            project.scrub(to: HaloKeyEditingSnapshots.playhead)
             #if DEBUG
             let picked = project.pickedKeyframes.count
             #endif
