@@ -1,0 +1,8 @@
+utc	stage	event	ref	note
+2026-10-21T19:12:04Z	0	setup	58034759	base verified; lead branch created
+2026-10-21T19:12:04Z	2	plan	-	wave 1 = TK-a
+2026-10-21T19:16Z	3	check	hand-offs	FG-a/FK-a/KE-a/CL-probe planned; #4055 #4147 #4166 small overlaps; TK-u proceeds
+2026-10-21T20:20Z	3	pr-opened	#4183	TK-a contract stubs
+2026-10-21T20:20Z	3	pr-opened	#4185	TK-5 rules, stacked on #4183
+2026-10-21T20:20Z	3	build	TK-u	builder started on tk-u-timeline-keys-ui
+2026-10-21T20:20Z	3	channel	lead/suiteui-timeline-keys	status moved to the branch Belt watches
