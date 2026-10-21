@@ -33,7 +33,8 @@ import Testing
     static func cards(edited: Bool) throws -> DesignBox {
         let box = DesignBox()
         box.model.useServices(.fake)
-        #expect(box.model.openFixture("cards"))
+        let opened = box.model.openFixture("cards")
+        #expect(opened)
         if edited {
             try box.model.addNode(.rectangle, frame: DesignRect(x: 40, y: 80, width: 96, height: 96), in: "node-1")
         }
