@@ -49,3 +49,6 @@ utc	stage	event	ref	note
 2026-10-21T10:30Z	slice-done	DY-a	https://github.com/qbtrix/creative-apps/actions/runs/39582236683	Belt-Slice-Done + Mac-Finish-Wanted posted on #3438 (Linux green at fe232dcd)
 2026-10-21T10:30Z	check	lane	#3998	clean, waiting on a batch
 2026-10-21T11:00Z	check	wait	#3998	clean, waiting for macOS batch
+2026-10-21T13:12Z	start	run act-1a15e909498-4bkk	-	resumed
+2026-10-21T13:12Z	fix	DY-u round 1 build fix	#3998	mutating openFixture in #expect moved out
+2026-10-21T13:12Z	check	findings	-	11 open; filed #4078 #4079 for #3994 #3990
