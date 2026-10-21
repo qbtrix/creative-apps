@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T04:06:23Z	heartbeat	check: #3811 HT-u head ad67a02 macOS build 39541214739 queued; no needs-fix/needs-rebase
 2026-10-21T04:28:14Z	heartbeat	check: #3811 HT-u macOS build 39541214739 green on ad67a02; lane: eligible next sweep, 26 ready behind a batch
 2026-10-21T04:50:46Z	heartbeat	check: #3811 HT-u eligible (macOS green on ad67a02), waits for a batch
+2026-10-21T05:12:16Z	heartbeat	check: #3811 HT-u eligible, waits for a batch
