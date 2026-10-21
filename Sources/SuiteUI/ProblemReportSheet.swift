@@ -47,7 +47,7 @@ public struct ProblemReportSheet: View {
             }
             ProblemReportNote(draft: draft).accessibilityIdentifier(Self.identifier("note"))
             ScrollView {
-                Text(shown).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                Text(shown).font(SuiteFont.timecode).textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(SuiteSpacing.s)
             }
             .frame(height: SuiteSize.contentMinimum.height / 2)
