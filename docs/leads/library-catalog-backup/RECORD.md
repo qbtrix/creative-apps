@@ -37,3 +37,4 @@ Next: (11:50: CI at 39d90e3 red on dev-red #3856, not ours; slice-done held; lan
 
 ## Open
 - BK-5m waits on file-flow:LF-m, folders:FO-m and suiteui adopt-kernel-autosave AK-library; none merged.
+- 12:21Z: BK-3 #3965 merged (73c3deb). BK-u #3967 head d65a282 in the lane (fast-lane). BK-a Belt-Slice-Done waits on scoped library run 39593465885 (queued, contains dc7df9b).
