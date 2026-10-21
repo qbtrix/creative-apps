@@ -38,6 +38,8 @@ Next: poll for shell-text ST-a on dev (Sources/SuiteModel/Values/Text.swift, Fon
 - 2026-10-21T01:21:08Z: integration base is dev (7277a83a), not main.
 - 2026-10-21T01:21:08Z: FP-1 waits on shell-text ST-a: no lead/shell-text branch, no Sources/SuiteModel/Values/Text.swift, no FontFamily/FontFace in Sources. Nothing in this feature can start; recorded on #3730.
 
+- 2026-10-21T02:22Z: three identical blocked polls for shell-text ST-a; rule 23 question posted on #3730 (comment 6306414555) offering wait / local FontPick / park. Waiting (a) until answered.
+
 ## Open
 
 - shell-text ST-a not started (wave planned, no feature issue filed).
