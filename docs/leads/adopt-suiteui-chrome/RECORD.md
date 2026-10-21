@@ -4,7 +4,7 @@ Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a160ca3d68-sbnc (#1942; slices AC-tools, AC-export-sheet) · Session: claude/adopt-suiteui-chrome-fhl6sx · Resumed: 2026-10-21T23:30Z
 Stage: 3 build (AC-tools in lane; AC-export-sheet blocked)
 Base: dev be9aa35b (main 0dd23d65 verified)
-Next: #4002 (AC-tools p2) merged with dev be9aa35b for the #4250 dev-red fix, gate rerun, then lane merge and a green scoped suiteui or full run; re-read shared-codecs SC-f (SC-13 #4019 merged, SC-14 #4238 open, SC-15 and SC-16 not opened); start AC-e1 once SC-16 merges
+Next: #4002 (AC-tools p2) head cbada801 in the lane (Fast-Check pass), then lane merge and a green scoped suiteui or full run; re-read shared-codecs SC-f (SC-13 #4019 merged, SC-14 #4238 open, SC-15 and SC-16 not opened); start AC-e1 once SC-16 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: #4002 (AC-tools p2) merged with dev be9aa35b for the #4250 dev-red fix, ga
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-22T00:10Z: #4002 head cbada801 (merge of dev be9aa35b) passed scripts/ci --changed; pushed, Head and Belt-Lead lines moved. The lane batches it with its macOS gate.
 - 2026-10-21T23:30Z: run act-1a160ca3d68-sbnc resumed for AC-tools and AC-export-sheet. AC-tools is not done: no Belt-Slice-Done line exists and #4002 is unmerged, so the earlier record's "done (per Belt brief)" is corrected to building. #4002 was held on a red Linux check that only failed dev's inherited CommandPath baseline (#3856); #4250 fixed that on dev be9aa35b, so origin/dev is merged into slice/ac-tools-2 (no rebase) and the gate rerun.
 - 2026-10-21T23:30Z: SC-f re-read: SC-13 #4019 merged, SC-14 #4238 open and clean, SC-15 and SC-16 not opened. AC-e1 stays unstarted.
 - 2026-10-21T15:00Z: run act-1a15ef870d6-3mm5 resumed for AC-export-sheet only. Waits re-read: EK-chrome met (Sources/SuiteUI/ExportSheet.swift on dev); AX-flare, AX-photo, AX-library done (lead/adopt-kernel-export RECORD). shared-codecs:SC-f not met: SC-13 #4019 open, SC-14..16 unstarted. The wait is real: SC-15 owns PhotoWindow+Export.swift and SC-16 replaces Library's ExportFormat the sheet lists, so AC-e1 does not start and nothing is built around it.
