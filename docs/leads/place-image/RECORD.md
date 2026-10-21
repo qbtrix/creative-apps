@@ -4,7 +4,7 @@ Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
 Stage: wave-3 in lane
 Base: dev
-Next: PP-4 #4003 macOS build green, waiting for batch; then open PP-7 (lead/place-image-PP-7 c3a92cf)
+Next: PP-4 #4003 in lane/batch-20261021190945 (Linux green, macOS gate pending); on merge open PP-7 (lead/place-image-PP-7 c3a92cf)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
