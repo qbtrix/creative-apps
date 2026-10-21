@@ -106,3 +106,4 @@ utc	stage	event	ref	note
 2026-10-21T22:02Z	check	-	FC-16 #4176 (feature-done) and #4177 (C4) still queued, fast-lane, mergeable, no needs-fix; dev Linux red on unrelated CommandPathTests (dev-red #3856); 0 open findings
 2026-10-21T22:28Z	check	-	FC-16 #4176 and #4177 still open in the lane, no needs-fix/needs-rebase; dev Linux check still red (39685422711, unrelated, dev-red #3856); 0 open findings
 2026-10-21T22:55Z	check	-	FC-16 #4176 and #4177 still open, not yet in a batch (lane batch-20261021221623 bisecting, probe 4); no needs-fix/needs-rebase; dev Linux check still red (unrelated, dev-red #3856); 0 open findings
+2026-10-21T23:22Z	check	-	FC-16 #4176 and #4177 still open in the lane queue, no needs-fix/needs-rebase; dev Linux check still red (unrelated, dev-red #3856); 0 open findings
