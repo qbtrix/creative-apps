@@ -8,7 +8,7 @@ Next: PF-a slice PR (PF-1, PF-2) building
 
 Loop: v3 (the packet has a `## Slices` table).
 
-Last stage: #3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 timing retry 3 of 3 running)
+Last stage: #3768 PF-a waiting in lane bisect of batch-20261021005140 (probe -4 passed 2 of 3; probe -5 running)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
