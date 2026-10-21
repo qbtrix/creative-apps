@@ -53,9 +53,12 @@ import Testing
     @Test func theKnobTurnsTheBoxByTheTurnSoFarFromThePress() throws {
         let (_, item) = try Self.ball()
         var drag = HaloHandleDrag()
-        let first = try #require(drag.turned(10, from: item))
+        // `turned` is mutating, so it runs outside the macro, which takes its receiver immutably.
+        let turnedOnce = drag.turned(10, from: item)
+        let first = try #require(turnedOnce)
         // The handles redraw on the preview's turned box; the turn stays relative to the press.
-        let second = try #require(drag.turned(30, from: first.box))
+        let turnedTwice = drag.turned(30, from: first.box)
+        let second = try #require(turnedTwice)
         #expect(second.name == "Rotate")
         #expect(second.box.degrees == TransformRules.normalized(item.degrees + 30))
         #expect(second.box.box == item.box, "the turn moved the box off its centre")
