@@ -4,8 +4,10 @@
 // rounds of 100 runs). HB-1: a viewer drag step (`moveViewerDrag(to:)`,
 // `viewerDrawList`) under 3 ms on a device; HB-3: `ViewerDragging.hit` under
 // 1 ms; HB-4: an inspector scrub step (`setProperty(_:to:)` with `edit`'s copy
-// and coalesced record, `propertyRows`) under 1 ms. Ten times each in debug
-// CI. Runs on Linux and macOS.
+// and coalesced record, `propertyRows`) under 1 ms. Key editing (KE-4) adds
+// `moveFiveThousandKeys` on `crowd` (5,000 keys): one `moveKeys(by:dragStart:)`
+// step of a drag over every key under 8 ms. Ten times each in debug CI. Runs
+// on Linux and macOS.
 @testable import HaloModel
 import Testing
 
@@ -88,5 +90,31 @@ struct HaloKeysBudgetTests {
         #expect(project.propertyRows.first { $0.property == .x }?.value == x)
         #expect(project.history.undo.count == 1)
         #expect(project.history.undoTitle == "Undo Change \(HaloProperty.x.title)")
+    }
+
+    @Test func moveFiveThousandKeys() throws {
+        var project = HaloProject(services: .fake)
+        project.restore(try #require(HaloFixtures.project("crowd")))
+        let comp = try #require(project.selectedComposition)
+        let every = comp.layers.flatMap { layer in
+            layer.tracks.flatMap { name, track in
+                track.compactMap { key in
+                    HaloProperty(rawValue: name).map { HaloKeyRef(layerID: layer.id, property: $0, frame: key.frame) }
+                }
+            }
+        }
+        #expect(every.count == 5_000)
+        project.keySelection.replace(every)
+        let budget = haloBudget(device: 8)
+        var step = -1
+        let cost = haloP95("moveFiveThousandKeys", budget: budget) {
+            step = -step
+            project.moveKeys(by: step, dragStart: 0)
+        }
+        #expect(cost <= budget)
+        #expect(project.refusal == nil)
+        #expect(project.selectedKeys.count == 5_000)
+        #expect(project.history.undo.count == 1)
+        #expect(project.history.undo.last?.name == "Move Keyframes")
     }
 }
