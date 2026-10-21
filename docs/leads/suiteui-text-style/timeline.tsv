@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-21T04:08Z	heartbeat	check	-	beat: #3836 TS-1 macOS build 39541314123 queued on b51250b1. #3844 and #3847 sta
 2026-10-21T04:36Z	heartbeat	check	-	beat: #3836 TS-1 macOS build 39541314123 green and clean; waits on the lane batc
 2026-10-21T05:04Z	heartbeat	check	-	beat: #3836 still green and clean. Lane batch 20261021043428 (PRs #3466..#3703, 
+2026-10-21T05:30Z	heartbeat	check	-	beat: #3836 unchanged, green and queued behind the lane backlog.
