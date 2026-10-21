@@ -113,3 +113,4 @@ utc	stage	event	ref	note
 2026-10-21T19:40Z	3	check	poll	#4153 open (mac green, awaits sweep); #3770 mac build 39662925615 on be778261 running; #3477 still waiting-on-prereq
 2026-10-21T19:59Z	3	check	merge	#4153 PN-7 merged 19:56Z (PN-m tasks all merged); merged-done waits on a dev Linux job containing it; #3770 mac build 39662925615 queued
 2026-10-21T20:23Z	3	check	PN-m	merged-done on Linux check 39667367345 (606e8212); Belt-Slice-Done posted. PN-3a #3770 macOS build 39662925615 still queued
+2026-10-21T20:40Z	3	check	PN-3a	#3770 macOS build 39662925615 green; waits on lane sweep
