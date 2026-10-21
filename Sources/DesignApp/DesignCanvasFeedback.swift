@@ -89,8 +89,6 @@ struct DesignCanvasFeedback: View {
     @ObservationIgnored private(set) var modifiers: DesignModifiers = []
     /// The Eyedropper's loupe at the pointer (DesignSampleLoupe reads it); nil for any other tool.
     private(set) var loupe: DesignLoupe?
-    /// The square the Eyedropper reads, as the size chips set it.
-    private(set) var sampleSize: SampleSize = .point
     #if DEBUG
     /// How many times a canvas showing this store's page read its pointer: once per canvas body.
     @ObservationIgnored var canvasReads = 0
@@ -110,21 +108,15 @@ struct DesignCanvasFeedback: View {
         if key != place { key = place }
         if placement != asked.placement { placement = asked.placement }
         if answer != asked.steady { answer = asked.steady }
-        updateLoupe(on: model)
-    }
-
-    /// Reads a `size` square from now on, the loupe at the kept pointer asked again of `model`.
-    func setSampleSize(_ size: SampleSize, on model: DesignWorkspace) {
-        if sampleSize != size { sampleSize = size }
-        updateLoupe(on: model)
-    }
-
-    /// The loupe for `model`'s page; nil for another canvas.
-    func loupe(for model: DesignWorkspace) -> DesignLoupe? { belongs(to: model) ? loupe : nil }
-
-    private func updateLoupe(on model: DesignWorkspace) {
-        let shown = model.loupe(at: point, modifiers: modifiers, size: sampleSize)
+        let shown = model.loupe(at: point, modifiers: modifiers)
         if loupe != shown { loupe = shown }
+    }
+
+    /// The loupe for `model`'s page, asked again of `model` at the kept pointer so a change to the inspector's
+    /// sample size or Fill/Stroke choice shows at once; nil for another canvas.
+    func loupe(for model: DesignWorkspace) -> DesignLoupe? {
+        guard belongs(to: model), let seen = loupe else { return nil }
+        return model.loupe(at: seen.point, modifiers: modifiers)
     }
 
     func belongs(to model: DesignWorkspace) -> Bool { key == Key(model) }

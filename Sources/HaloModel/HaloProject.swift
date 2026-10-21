@@ -74,6 +74,9 @@ public struct HaloProject: Sendable, Equatable {
     /// The keys picked for easing, a SuiteKernel `Selection`; written by
     /// `HaloKeySelection.swift`.
     var keySelection = Selection<HaloKeyRef>()
+    /// The key drag's serial, part of its coalescing key; written by
+    /// `HaloKeyMove+Kernel.swift`.
+    public internal(set) var keyDragSerial = 0
     /// The picked keys as a set, read from `keySelection`.
     public var selectedKeys: Set<HaloKeyRef> { keySelection.set }
     /// The project file's name, path and status; written by `HaloFiles.swift`.
