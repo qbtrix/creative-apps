@@ -19,6 +19,11 @@ import SuiteKernel
         .object(["start": .number(start), "end": .number(end)])
     }
 
+    @Test func notBuiltStaysForAppsNotYetOnTheCommands() {
+        guard case .notBuilt(let id, _) = StrokeRules.notBuilt else { Issue.record("not a notBuilt refusal"); return }
+        #expect(id == "stroke")
+    }
+
     @Test func dashedSavesTheScaledPatternInOneStep() throws {
         let catalog = try #require(Self.catalog)
         var doc = StrokeDoc(stroke: VectorStroke(width: 4))

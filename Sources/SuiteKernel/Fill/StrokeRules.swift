@@ -11,6 +11,8 @@ public enum StrokeRules {
     public static let waitingCore = "Dashes and trim need creative-core's stroke fields."
     /// How finely `paintedPath` flattens curves before it trims and dashes them, in points.
     public static let tolerance = 0.25
+    /// What an app's stroke set throws until it runs the stroke commands (Design's `setStroke` before DK-6).
+    public static let notBuilt = CatalogError.notBuilt(id: "stroke", feature: "an app's stroke commands")
 
     /// `width` clamped to `widths`; NaN reads as the narrowest.
     public static func clampedWidth(_ width: Double) -> Double {
