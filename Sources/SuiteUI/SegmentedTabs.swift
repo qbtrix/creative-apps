@@ -81,9 +81,9 @@ public struct SegmentedTabs<ID: Hashable & Sendable>: View {
         _ tabs: [InspectorOption<ID>], in id: String?, enabled: Bool, reason: String?, selection: ID? = nil
     ) -> [ControlEntry] {
         tabs.compactMap { option in
-            segmentID(option, in: id).map { segment in
-                ControlEntry(id: segment, enabled: enabled, reason: enabled ? nil : reason,
-                             selected: selection.map { picked in option.id == picked })
+            segmentID(option, in: id).map {
+                ControlEntry(id: $0, enabled: enabled, reason: enabled ? nil : reason)
+                    .selecting(selection.map { picked in option.id == picked })
             }
         }
     }
