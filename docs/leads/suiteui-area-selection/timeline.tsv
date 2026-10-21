@@ -12,3 +12,4 @@ time	task	event	note
 2026-10-21T16:38Z	AR-a	merged-done	Belt-Slice-Done run 39632745681
 2026-10-21T16:38Z	AR-u	fix	#4124 held for bodyRuns gate fold
 2026-10-21T16:41Z	AR-u	fixed	#4124 b45e6b4
+2026-10-21T16:58Z	AR-m/AR-u/AR-design	mac-build	queued for 4096 4120 4122
