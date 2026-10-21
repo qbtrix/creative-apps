@@ -4,7 +4,7 @@ Issue: #3418 · Packet: docs/blueprints/suiteui/features/gradient-fill.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T03:19Z (relaunched 2026-10-21)
 Stage: 3 wave 5
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: #3742 (GF-6+GF-7, head 573bf571) macOS build run 39650981019 dispatched 18:15Z; once merged open the GF-z PR from lead/suiteui-gradient-fill-GF-z (head b2667bac, feature-done) and the docs-only C4 PR from lead/suiteui-gradient-fill-GF-z-c4 (9976b617)
+Next: GF-z PRs #4179 (code) and #4180 (C4) wait on the lane; then Belt-Slice-Done GF-m once a dev Linux job with #3742 is green; then #4047.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

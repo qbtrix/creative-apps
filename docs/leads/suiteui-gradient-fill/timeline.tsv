@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T19:25Z	3	check	#3742	macOS build green 19:20Z; merges on a lane sweep, then GF-z PR
 2026-10-21T19:40Z	3	check	poll	#3742 open (mac green 39650981019, clean, awaits sweep); GF-z ready to open on merge
 2026-10-21T19:59Z	3	check	merge	#3742 GF-6/7 merged 19:55Z (GF-m tasks all merged); dev merged into GF-z cleanly, gate running; merged-done waits on dev Linux job
+2026-10-21T20:10Z	3	push	GF-z	PR #4179 opened (head 288b84e0, ci --changed PASS, feature-done) and C4 docs PR #4180 (head 9976b617)
