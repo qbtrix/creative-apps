@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-21T09:28:12Z	3	heartbeat	DT-u	#3983 open, stacked on #3978; DT-4 waits on TT-u #3513 (open); 0 open findings on transform
 2026-10-21T09:51Z	3	heartbeat	DT-u	check-in: #3978 mac build 39574568750 green, waits on batch; #3980 #3983 open; dev Linux 39579635083 red on #3857 anchors (#3980 fixes); scoped design 39578329384 queued for critics; TT-u #3513 open, DT-4 waits
 2026-10-21T10:26Z	3	integrate	DT-u	#3983 merged origin/dev after DG-u squash (one adjacency conflict in DesignCanvasMarks), CI PASS, head da1e48b6; TT-u #3513 open, DT-4 waits
+2026-10-21T10:50Z	3	heartbeat	DT-u	#3983 open at da1e48b6, fast-lane, in queue
