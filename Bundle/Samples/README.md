@@ -14,7 +14,10 @@ in `Sources/SuiteModel/Onboarding/SampleCatalog.swift` names them, and
 | `Sunset.png` | Library (imported) | SS-5 |
 | `Intro.halo` | Halo | SS-6 |
 
-None has landed yet; a missing file's tile reads "The <App> sample isn't in
+Bounce.flare and Cards.design have landed. Cards is three card pages, each
+holding its frame, with no shape or title until headless Design can add one
+(#4092). Bounce's fixture copy, Title.flare and Logo.flare come next. A
+missing file's tile reads "The <App> sample isn't in
 this build." (sample-files packet, `docs/blueprints/suite/features/sample-files.md`)
 
 ## How a sample is made
