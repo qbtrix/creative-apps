@@ -163,11 +163,14 @@ something. One that can't act yet is disabled and says why:
   GRDB `/groue/grdb.swift` and Swift `/swiftlang/swift`).
 - **Every source file has a C4 owner.** `scripts/ci` fails when a file under
   `Sources/` is not in exactly one component's `paths` in `docs/c4/model.json`.
-  Each target's folder is a component, so a new file in a target is covered;
-  if it adds something that component's description doesn't mention, update
-  the description in the same PR. The model is assembled from one file per
-  component in `docs/c4/parts/` (`scripts/c4-assemble`): edit that part, or
-  add a part for a new component, never the generated model.json.
+  Each target's folder is a component, so a new file in a target is covered
+  and needs no C4 edit. Don't touch an existing part's `description`: it is
+  one string, and two PRs that append to it always conflict, so
+  `scripts/ci --changed` fails a PR that changes one unless the PR adds a
+  part or changes nothing outside `docs/c4/parts/` (a C4-only refresh). The
+  model is assembled from one file per component in `docs/c4/parts/`
+  (`scripts/c4-assemble`): edit that part's `paths`, or add a part with its
+  own description for a new component, never the generated model.json.
 - **Views are dumb.** Files under `Sources/*App/` read their Model and call its
   methods; they never assign its state, bind to it, or mutate its collections.
   `scripts/ci` fails on that (the app-state rule). Model state is

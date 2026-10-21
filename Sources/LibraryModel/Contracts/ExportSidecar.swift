@@ -1,7 +1,9 @@
 // Contracts/ExportSidecar.swift (EX-1 slot, filled by EX-16): the XMP beside an export, Library-local (#3091).
 // The packet follows the XMP spec (ISO 16684-1): `xmp:Rating` with -1 for a
 // reject, `xmp:Label`, `xmp:CreateDate`; the pick and develop settings go in
-// a Library namespace. Values are escaped by SuiteModel's `XMLText`.
+// a Library namespace. Values are escaped by SuiteModel's `XMLText`. The
+// export's `ExportMetadata` leaves out what `ExportRules.dropped` names; the
+// Library namespace always stays.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -48,10 +50,12 @@ public enum ExportSidecar {
         return out
     }
 
-    /// The attributes `metadata` keeps. Stub until LX-3: every one.
+    /// The attributes `metadata` keeps: every one not in `ExportRules.dropped(metadata).xmp`,
+    /// and Library's own namespace always (export-pack, LX-3).
     static func kept(_ attributes: [(name: String, value: String)],
                      metadata: ExportMetadata) -> [(name: String, value: String)] {
-        attributes
+        let dropped = ExportRules.dropped(metadata).xmp
+        return attributes.filter { $0.name.hasPrefix("library:") || !dropped.contains($0.name) }
     }
 
     /// `2` for a whole value, else the shortest round-tripping decimal (`0.5`).
