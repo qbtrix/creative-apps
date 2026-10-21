@@ -39,3 +39,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 2026-10-21T09:18Z: FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
 - 2026-10-21T09:39Z: FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
 - 2026-10-21T10:00Z: FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+- 10:20Z: Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
