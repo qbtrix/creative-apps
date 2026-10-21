@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T11:15:24Z	heartbeat	#3952 merged	-	AC-colour + AC-tools p1 (#3952 a4703a60) green dev run; #4002 merge
 2026-10-21T11:38:56Z	heartbeat	heartbeat	-	AC-colour + AC-tools p1 green dev run (dev red: photo CommandPath, #3976); #4002 merge
 2026-10-21T11:59:16Z	heartbeat	heartbeat	-	AC-colour + AC-tools p1 green dev run (dev red #3856, photo); #4002 merge
+2026-10-21T12:23:35Z	heartbeat	heartbeat	-	AC-colour + AC-tools p1 green dev run (dev red #3856, photo); #4002 merge
