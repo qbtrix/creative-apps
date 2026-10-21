@@ -85,3 +85,4 @@ utc	stage	event	ref	note
 2026-10-21T07:15Z	check	dev b64cbb8c; #3850 #3921 open in lane; FG-2 not opened (3rd poll, asked supervisor on #3452); #3499 #3823 #3826 open; flare findings 0
 2026-10-21T07:32Z	park	supervisor #3452: FG-2 is #3419s; stroke-style parked until FG-2 lands
 2026-10-21T09:19Z	heartbeat	parked; waits FG-2 #3419 (open)
+2026-10-21T09:42Z	check	#3921 head 95a94d14 open, #3984 head 0be812aa open; lane run pending (last success predates pushes); #3499 #3419 #3856 open; findings 0
