@@ -3,7 +3,7 @@
 Issue: #1935 · Packet: docs/blueprints/suiteui/features/adopt-kernel-selection.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: heartbeat
-Base: dev a6f45c18
+Base: dev 79a43789
 Next: AS-flare merge
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
@@ -37,6 +37,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T10:27Z: -
 - 2026-10-21T10:07Z: -
 - 2026-10-21T09:45Z: #3892 clean, waiting for batch
 - 2026-10-21T09:25Z: #3892 clean, waiting for batch; dev Linux check 39574400709 red on 296186f4 (mutate validate, reported on #3856)
