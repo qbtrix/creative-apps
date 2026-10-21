@@ -41,9 +41,11 @@ Wave plan (one PR per slice, brief rule 10; each slice PR stacks on the one befo
 - The packet's scripts/make-samples is a protected path (fast lane refuses scripts/), so the make step and its --check mode are Swift code in AfterGlowCLITests: the check runs as a test inside scripts/ci, regeneration runs the same code with MAKE_SAMPLES=1. SS-7 then needs no scripts/ci edit.
 - afterglow run takes only a .jobs.json path (app and output live in the JSON) and every input must exist, so each make script seeds its input with the app's headless new; make files are named <sample>.jobs.json.
 - SampleCatalog names five files; Logo.design, Title.flare and Logo.flare are journey fixtures only (UITests/Fixtures/suite), not catalog samples.
-- Design's catalog has no command that adds a shape or text with geometry (tool.* only pick a tool), so Cards.design is limited to what headless Design can make; a gap issue on line:design asks for it.
+- Design's catalog has no command that adds a shape or text with geometry (tool.* only pick a tool), so Cards.design is limited to what headless Design can make; gap #4092 (line:design) asks for frame/shape/text commands.
 - Tests/SuiteModelTests/SampleFilesTests.swift already checks presence per file (disabled rows #836–#839); each sample slice turns its row on there too.
+- The proxy appends an attribution footer to every gh api body write; final PR/issue/comment bodies are set through the GitHub MCP update tools, which don't.
 - Waves are 1 to 2 tasks with nothing alongside, so each runs as one worktree subagent (lead.md stage 3).
 
 ## Open
+- #4092 gap (line:design): headless Design commands that add content; Cards.design stays minimal until it lands.
 - dev-red #3856 (Photo CommandPathTests, Flare SetLayerParent): not this feature's.
