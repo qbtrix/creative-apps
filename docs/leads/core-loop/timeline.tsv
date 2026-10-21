@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-21T19:05Z	3	merged	#4148	CL-measure CL-12 + #865 at 5803475
 2026-10-21T19:16Z	3	pr-opened	#4166	CL-measure CL-10 H-P1..H-P5, stacked on #4147
 2026-10-21T19:18Z	3	pr-opened	#4167	CL-z CL-13+CL-14 feature-done
+2026-10-21T19:27Z	3	check	wave 5	#4147 #4166 #4167 open in lane; dev fd24dbd; Linux 5803475 green (has #4148); scoped halo queued; no slice merged-done
