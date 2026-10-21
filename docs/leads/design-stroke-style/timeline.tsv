@@ -14,3 +14,4 @@ time	kind	note
 2026-10-21T00:29Z	check	lane waits macOS build	#3690	head badfdf22 clean; macOS build dispatched 00:07
 2026-10-21T00:54Z	stage	DK-a merged	#3690	lane batch 00:45Z, squash 3785460f; slice-done waits a scoped design run with screens
 2026-10-21T01:16Z	check	waiting screens	#3690	full dev CI 39524928486 at 4bdf0bbd pending; critic panel when it shows screens. dev Linux red at 4bdf0bbd too (dev-red #3386)
+2026-10-21T01:38Z	check	waiting screens	#3690	full dev CI 39524928486 at 4bdf0bbd still pending; no scoped design run; critic panel deferred
