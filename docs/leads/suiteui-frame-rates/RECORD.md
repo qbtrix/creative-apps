@@ -3,8 +3,8 @@
 Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
 Stage: 3 wave 1
-Base: cc99cdc1c6ea580caba6877fb6ad24556a781e97
-Next: finish FR-a: merge dev (dev-red fix #4008 landed), scripts/ci --changed, open the slice PR
+Base: dev
+Next: ship wave 1 when gates pass; build wave 2 stacked
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -42,6 +42,7 @@ Next: finish FR-a: merge dev (dev-red fix #4008 landed), scripts/ci --changed, o
 - Wave 1 is the three contract slices FR-a, AN-a, CB-a: kernel/model stubs plus disabled tests, disjoint files.
 - Status channel is lead/suiteui-<feature> with docs/leads/suiteui-<feature>/ (the names Belt reads); the earlier lead/<feature> branches are superseded.
 - Slice branches are named lead/<feature>-<slice> because lead/<feature> blocks lead/<feature>/<slice>.
+- FR-a: TimeCommands.specs is a generic static func like the other kernel command sets, since CommandSpec is generic.
 
 ## Open
 - FR-u waits on timeline-select-all:TSA-a; FR-halo on adopt-command-catalog:AC-z and adopt-kernel-session:AD-halo; FR-flare on AC-z and a creative-core rational-rate bump. Rechecked before each starts.
