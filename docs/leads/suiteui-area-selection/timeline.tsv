@@ -8,3 +8,4 @@ time	task	event	note
 2026-10-21T15:44Z	check	#4093 macOS build green, Linux running; #4096/#4098 lost fast-lane on stacked size (522/594), relabel as the stack merges
 2026-10-21T16:20Z	stage	#4093 AR-a merged; #4096 restacked on dev (b02c125) and back in fast-lane; AR-7 and AR-13 builders launched
 2026-10-21T16:30Z	stage	AR-13 PR #4120 open (fast-lane, e73836b)
+2026-10-21T16:35Z	stage	AR-7 PR #4122 open (fast-lane, 24bf6e5); AR-8 builder stacked on it
