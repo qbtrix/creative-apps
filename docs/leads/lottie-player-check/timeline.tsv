@@ -18,3 +18,5 @@ utc	stage	event	ref	note
 2026-10-21T15:39Z	heartbeat	check	-	#4027/#4033 in lane macOS build; FL-m no PR; #3770 open
 2026-10-21T16:09Z	heartbeat	check	-	#4033 macOS build 39625448823 green 15:50Z; waits on lane sweep to merge
 2026-10-21T16:31Z	heartbeat	poll	-	#4033 macOS build green; still waits on lane sweep (lane busy with backlog)
+2026-10-21T17:06:25Z	LP-z	pr	#4132	LP-4 opened, no-fast-lane, supervisor merge asked
+2026-10-21T17:06:25Z	LP-m	slice-done	39637279724	Belt-Slice-Done posted
