@@ -1,0 +1,99 @@
+utc	stage	event	ref	note
+2026-10-18T04:36Z	1	stage-start	#1939	run act-1a14d48ae2f-857a; every slice waits: editor-kernel:EK-run (planned), AL-photo, AS-library (blocked)
+2026-10-18T04:59Z	1	check	#1939	dev Sources/SuiteKernel still Geometry.swift, SuiteKernel.swift only; EK-run not built
+2026-10-18T05:30Z	1 plan (blocked)	poll	dev	Sources/SuiteKernel/Export/ExportRun.swift not on dev; EK-3 export stubs PR #2620 open
+2026-10-18T05:44Z	1 plan (blocked)	poll	#1933	EK-a done (Belt-Slice-Done 05:41Z); ExportRun.swift is a stub until EK-22; still waiting on Belt-Slice-Done: EK-run
+2026-10-18T06:08Z	blocked	check	#1933	only Belt-Slice-Done: EK-a; no EK-run yet
+2026-10-18T06:41Z	blocked	check	#1933	no Belt-Slice-Done: EK-run yet (EK-a only; EK-19 #2646 open)
+2026-10-18T06:57Z	blocked	check	#1933	still only Belt-Slice-Done: EK-a; EK-run not done
+2026-10-18T07:30:20Z	2 build	heartbeat	-	#1933 has Belt-Slice-Done EK-a only; EK-run not done; blocked
+2026-10-18T11:46Z	check	heartbeat	-	blocked: no Belt-Slice-Done: EK-run on #1933 yet
+2026-10-18T13:00Z	0 wait	check	#1933	no EK-run slice yet
+2026-10-18T14:19:36Z	blocked	#1933	Still only Belt-Slice-Done: EK-a; waiting on EK-run.	
+2026-10-18T14:40:32Z	blocked	#1933	Still only Belt-Slice-Done: EK-a.	
+2026-10-18T15:02:15Z	blocked	#1933	Still only Belt-Slice-Done: EK-a.	
+2026-10-18T15:24:08Z	blocked	#1933	Still only Belt-Slice-Done: EK-a.	
+2026-10-18T15:46:09Z	blocked	waiting	#1933	Still only Belt-Slice-Done: EK-a.
+2026-10-18T16:13:31Z	blocked	waiting	#1933	no Belt-Slice-Done: EK-run yet
+2026-10-18T16:15:40Z	blocked	waiting	#1933	no Belt-Slice-Done: EK-run at check-in
+2026-10-18T20:08Z	stage	build	#1939	EK-run done; AX-f1 builder launched
+2026-10-18T20:10Z	pr	AX-f1	#2948	plan only, Flare already on ExportRun; AX-f2 dropped
+2026-10-18T20:31Z	check	heartbeat	#1939	#2948 open in lane (macOS build); AL-photo and AS-library not slice-done; dev CI f836dc70 pending
+2026-10-18T20:55Z	check	heartbeat	#1939	#2948 merged (03537a3e); waiting for a successful dev ci.yml run containing it (39164756292 on ae6e7c81 pending); AL-photo, AS-library not done
+2026-10-18T21:17Z	check	heartbeat	#1939	run 39164756292 cancelled (superseded); waiting on 39166290773 (scoped suiteui, 203e7d91) and 39166900704 (CI, f33b5b88), both contain #2948; AL-photo, AS-library not done
+2026-10-18T21:39:31Z	check	39166900704 cancelled; AX-flare waits on 39166290773 (scoped suiteui) or 39167964719 (CI); photo/library still blocked
+2026-10-18T22:04:08Z	check	dev CI runs keep cancelling; AX-flare waits on 39166290773 or 39169434591; photo/library blocked
+2026-10-18T22:26:01Z	check	AX-flare waits on 39166290773 (scoped suiteui, in progress) or CI 39171756438; AL-photo, AS-library not done
+2026-10-18T22:55:00Z	heartbeat	AX-flare waiting: scoped suiteui 39166290773 in progress, CI 39171756438 queued. AX-photo and AX-library still blocked (#1936, #1935)
+2026-10-18T23:17:45Z	slice-done	AX-flare: Belt-Slice-Done posted on #1939 with run 39166290773 (scoped suiteui at 203e7d91, contains 21874cd9). AX-photo and AX-library still blocked (#1936, #1935)
+2026-10-18T23:39:11Z	heartbeat	AX-photo and AX-library still blocked (#1936, #1935 have no new slice-done)
+2026-10-19T00:01:37Z	heartbeat	#1936 is unblocked (relaunch pending) but has no AL-photo slice-done. #1935 has only AS-halo. AX-photo and AX-library still blocked
+2026-10-19T00:23:55Z	heartbeat	AX-photo/AX-library still blocked on #1936/#1935 slice-done
+2026-10-19T00:46:17Z	heartbeat	AX-photo/AX-library still blocked on #1936/#1935 slice-done
+2026-10-19T01:08:24Z	heartbeat	AX-photo/AX-library still blocked on #1936/#1935 slice-done
+2026-10-19T01:28:47Z	heartbeat	AX-photo/AX-library still blocked on #1936/#1935 slice-done
+2026-10-19T02:00:02Z	heartbeat	AX-photo/AX-library still wait on AL-photo (#1936) and AS-library (#1935) slice-done
+2026-10-19T02:20:11Z	heartbeat	AX-photo/AX-library blocked: no AL-photo on #1936, no AS-library on #1935
+2026-10-19T02:40:17Z	heartbeat	still blocked: no AL-photo on #1936, no AS-library on #1935
+2026-10-19T02:58:23Z	heartbeat	still blocked: no AL-photo on #1936, no AS-library on #1935
+2026-10-19T03:14:58Z	heartbeat	still blocked: no AL-photo on #1936, no AS-library on #1935
+2026-10-19T03:36:57Z	heartbeat	still blocked: no AL-photo on #1936, no AS-library on #1935
+2026-10-19T03:57:06Z	heartbeat	still blocked: no AL-photo on #1936, no AS-library on #1935
+2026-10-19T04:18:54Z	heartbeat	AX-photo/AX-library still blocked on AL-photo #1936 and AS-library #1935
+2026-10-19T04:49:10Z	heartbeat	AX-flare-done;waiting-AL-photo-AS-library
+2026-10-19T05:12:29Z	heartbeat	AX-flare-done;AL-photo/AS-library-not-done;blocked
+2026-10-19T05:15:50Z	heartbeat	AX-photo and AX-library still blocked on #1936 and #1935
+2026-10-19T05:35:04Z	heartbeat	AX-photo and AX-library still blocked on #1936 and #1935
+2026-10-19T06:00:25Z	heartbeat	AX-photo/AX-library still blocked on #1936 #1935
+2026-10-19T06:07:20Z	heartbeat	waiting on #1936 AL-photo and #1935 AS-library
+2026-10-19T06:28:10Z	heartbeat	AX-photo and AX-library still blocked on AL-photo and AS-library
+2026-10-19T06:53:31Z	heartbeat	AX-photo/AX-library still blocked on #1935/#1936
+2026-10-19T07:22:01Z	heartbeat	AX-photo/AX-library still blocked on #1935/#1936
+2026-10-19T07:44:23Z	heartbeat	AX-photo/AX-library still blocked on #1935/#1936
+2026-10-19T08:06:10Z	heartbeat	AX-photo/AX-library still blocked on #1935/#1936
+2026-10-19T08:28:21Z	heartbeat	waiting: 1935/1936 not slice-done (1936 waits on contract #3194)
+2026-10-19T08:50:08Z	heartbeat	waiting: 1935/1936 not slice-done (1936 waits on contract #3194)
+2026-10-19T09:12:14Z	heartbeat	waiting: 1935/1936 not slice-done (1936 waits on contract #3194)
+2026-10-19T09:33:59Z	heartbeat	waiting: 1935/1936 not slice-done (1936 waits on contract #3194)
+2026-10-19T09:56:13Z	heartbeat	waiting: 1935/1936 not slice-done (1936 waits on contract #3194)
+2026-10-19T10:18:46Z	heartbeat	contract #3194 closed; waiting on #1936 panel-swap wave before AX-photo/AX-library
+2026-10-19T10:40:15Z	heartbeat	waiting on #1936 panel-swap wave (contract #3194 closed) before AX-photo/AX-library
+2026-10-19T11:08:27Z	heartbeat	waiting on #1936 panel-swap wave (contract #3194 closed) before AX-photo/AX-library
+2026-10-19T11:30:34Z	heartbeat	AX-photo/AX-library still blocked on LayerTreeList (#1936)
+2026-10-19T11:53:49Z	heartbeat	AX-photo/AX-library still blocked on LayerTreeList (#1936)
+2026-10-19T12:04:00Z	heartbeat	relaunch act-1a15409e144-cyb5; AX-photo waits AL-photo (#1936), AX-library waits AS-library (#1935)
+2026-10-19T13:06Z	check	no Belt-Slice-Done AL-photo on #1936 or AS-library on #1935; AX-photo, AX-library still blocked
+2026-10-19T13:24Z	check	#1936 relaunched by supervisor 13:13 (LayerTreeList gaps on dev via #3198), AL-photo not done yet; #1935 no AS-library; AX-photo/AX-library still blocked
+2026-10-19T13:41Z	check	no Belt-Slice-Done AL-photo on #1936 or AS-library on #1935; AX-photo/AX-library still blocked
+2026-10-19T13:58Z	check	no Belt-Slice-Done AL-photo (#1936) or AS-library (#1935); still blocked
+2026-10-19T14:20Z	check	AX-photo/AX-library still blocked: no Belt-Slice-Done AL-photo on #1936 nor AS-library on #1935
+2026-10-19T14:38Z	check	AX-photo/AX-library still blocked: no Belt-Slice-Done AL-photo on #1936 nor AS-library on #1935
+2026-10-19T14:56Z	check	AX-photo/AX-library still blocked: no Belt-Slice-Done AL-photo on #1936 nor AS-library on #1935
+2026-10-19T15:15Z	check	AL-photo's #3218 merged to dev (8487b69); waiting on its Belt-Slice-Done on #1936 (run 39276059443 pending). AS-library still not done on #1935
+2026-10-19T15:32Z	check	No Belt-Slice-Done AL-photo on #1936 yet (run 39276059443 at 8487b69 pending); AS-library blocked on AU-library (parked owner, asked on #1934) per #1935 15:10
+2026-10-19T15:55Z	check	#1936 no AL-photo done (39276059443 cancelled; 39278490377 pending); #1935 AS-library still blocked
+2026-10-19T16:17Z	check	#1936 no AL-photo done; #1935 AS-library blocked; no change
+2026-10-19T16:39Z	check	no Belt-Slice-Done AL-photo on #1936 nor AS-library on #1935; AX-photo/AX-library still blocked
+2026-10-19T17:01Z	check	AX-photo waits on AL-photo (#1936), AX-library on AS-library (#1935); no new slice-done lines
+2026-10-19T17:22Z	check	still blocked: no AL-photo on #1936, no AS-library on #1935; supervisor questions from 15:10 unanswered
+2026-10-19T17:44Z	check	still blocked: no AL-photo on #1936, no AS-library on #1935
+2026-10-19T18:06Z	check	AL-photo (#1936) and AS-library (#1935) not slice-done; AX-photo/AX-library still blocked
+2026-10-19T18:28Z	check	#1936/#1935 unchanged since 15:10, no AL-photo/AS-library slice-done; AX-photo/AX-library blocked
+2026-10-19T18:50Z	check	AX-photo waits on #1936, AX-library on #1935: no slice-done since 15:10; scoped suiteui still queued
+2026-10-19T19:11Z	check	#1936 new comment 18:56 (AL-halo journey failures), no Belt-Slice-Done AL-photo; #1935 unchanged; AX-photo/AX-library still blocked
+2026-10-19T19:33Z	check	no Belt-Slice-Done on #1936 (7 comments) or #1935 (5); AX-photo/AX-library still blocked; suiteui run still queued
+2026-10-19T19:54Z	check	no change on #1936 (7) or #1935 (5); AX-photo/AX-library still blocked
+2026-10-19T20:17Z	check	no change: suiteui 39292745070 queued, full 39311818078 pending; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T20:38Z	check	no change: suiteui 39292745070 queued, full 39311818078 pending; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T21:01Z	check	scoped suiteui 39292745070 still queued since 17:16; full 39311818078 still pending; no new completed dev run; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T21:22Z	check	scoped suiteui 39292745070 still queued; full 39311818078 cancelled 21:16, superseded by full 39326710851 (d735ced, pending); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T21:45Z	check	scoped suiteui 39292745070 still queued; full 39327922875 cancelled 21:40 (superseded), full 39329322245 pending; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T22:07Z	check	scoped suiteui 39292745070 still queued (since 17:16); full 39329322245 and 39330687224 cancelled (superseded); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T22:28Z	check	scoped suiteui 39292745070 still queued (since 17:16); full 39331917840 cancelled 22:11 (superseded); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T22:50Z	check	scoped suiteui 39292745070 still queued (since 17:16); full 39333170092 and 39335865885 cancelled (superseded); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T23:13Z	check	scoped suiteui 39292745070 still queued (since 17:16); no completed full dev run after 39335865885; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T23:35Z	check	scoped suiteui 39292745070 still queued (since 17:16); full 39336158094 cancelled at 23:33 (superseded); #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-19T23:56Z	check	scoped suiteui 39292745070 still queued (since 17:16); no new completed full dev run after 39336158094; #1936/#1935 no Belt-Slice-Done; no supervisor reply on #1508
+2026-10-20T00:19Z	question	rule 23: 3+ identical blocked polls; posted Question for the supervisor (#1508 6280289229, #1939 6280289878); stopped CI polling; hourly check for replies only
+2026-10-21T05:25:06Z	2	wave-1 start	-	AX-photo (slice/ax-photo) and AX-library (slice/ax-library) building
+2026-10-21T06:44:30Z	3	wave1 PRs open #3890 #3893	-	lane merges #3890/#3893, then green ci.yml on main -> Belt-Slice-Done
