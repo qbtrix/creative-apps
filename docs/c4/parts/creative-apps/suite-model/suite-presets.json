@@ -1,0 +1,10 @@
+{
+  "id": "suite-presets",
+  "name": "Presets",
+  "description": "PresetStoring and PresetRecord, the saved presets every app shares, and PresetStore over FileStore's presets/looks.json, names unique ignoring case. Stubs that refuse until AJ-7.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Presets/"
+  ],
+  "order": 210
+}
