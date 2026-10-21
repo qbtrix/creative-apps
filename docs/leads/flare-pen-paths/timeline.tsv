@@ -34,3 +34,5 @@ utc	stage	event	ref	note
 2026-10-21T11:06:04Z	3	check	FP-e	Linux 39587217178 red on photo CommandPathTests (not ours, dev-red #3856); waiting for next green dev run
 2026-10-21T11:14:52Z	3	heartbeat	wave	builders and gates running; no new PR; dev at 11919406
 2026-10-21T11:25:14Z	FP-a	fix-pr	#4027	fix round 1 for #4011 #4013; head d36c6856; Mutate 6/6; fast-lane
+2026-10-21T11:26:40Z	FP-m	pr	#4029	FP-5 pen on PenRules; head 5a8dee2f; Mutate 4/4; Refs #4012
+2026-10-21T11:26:40Z	FP-a	issue	#4030	needs-suite: PenRules.mirror public (for #4012)
