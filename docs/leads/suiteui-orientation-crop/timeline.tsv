@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-21T13:18Z	3	heartbeat	-	OC-a held by dev-red #3856 (fixed); rebasing and opening PR
 2026-10-21T13:20:12Z	check	blockers posted on feature issue; lane PRs open, no needs-fix
 2026-10-21T13:34:01Z	pr-opened	OC-a #4082 ea5ec5d7; OC-m #4088 b929af4a stacked (Mutate 7/7)
+2026-10-21T13:38:10Z	poll	#4082 macOS build 39608833245 queued; #4088 stacked; no needs-fix
