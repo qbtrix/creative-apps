@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-21T03:53Z	heartbeat	check	-	#3681 PG-1 batch bisect: probe -4 red, probe -2 (the two Library PRs ahead of it) running; #3695 GF-2 mac build pending
 2026-10-21T04:11Z	heartbeat	check	-	#3681 PG-1 batch bisect: probes -2 and -1 red (culprit is the first Library PR #3466 or dev), probe -0 running; PG-1 should go to the next batch; #3695 GF-2 mac build pending
 2026-10-21T04:29Z	heartbeat	check	-	batch bisect named #3466 (Library) as culprit; #3681 PG-1 clean, mac green, waits for next batch; dev-red #3856 (macOS job, range main..2ab0eb96) opened 04:13Z, none of our open PRs in it; #3695 GF-2 mac build pending
+2026-10-21T04:49Z	heartbeat	check	-	#3681 PG-1 mac green clean; batch-20261021043428 red, bisecting (probe -4); #3695 GF-2 waits; dev-red #3856 points at design snapshots, not ours
