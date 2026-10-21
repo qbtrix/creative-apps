@@ -72,3 +72,8 @@ public struct SuiteTypeRegistry: Sendable {
         return t.owner ?? t.readers.first
     }
 }
+
+/// The still image formats the suite writes (shell-media SM-1's media
+/// service). Kept here, beside the document types, so the suite lists image
+/// formats in one baselined file until SuiteImageFormats (SC-14) owns them.
+public enum StillFormat: String, Codable, Sendable, CaseIterable { case png, jpeg, heic, tiff }
