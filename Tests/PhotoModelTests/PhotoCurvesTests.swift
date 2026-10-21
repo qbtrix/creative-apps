@@ -169,12 +169,12 @@ import Testing
     @Test func aCancelledCountStopsBeforeItsFirstRow() async throws {
         let workspace = try grey()
         // The inspector cancels a count its key has moved past; that one must stop, not run to its end.
-        let count = Task { () -> [Double] in
+        let count = Task { () -> ToneHistogram in
             try? await Task.sleep(for: .seconds(60))
             return workspace.curvesHistogram()
         }
         count.cancel()
-        #expect(await count.value.isEmpty)
+        #expect(await count.value == .empty)
     }
 
     @Test func histogramKeyMovesOnlyWithTheHistogramsInput() throws {
