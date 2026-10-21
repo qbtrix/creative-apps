@@ -265,7 +265,8 @@
                 "description": "SuiteLocations (the support folder, -SuiteSupportDir override) and FileStore: revisioned JSON files written by atomic replace under an exclusive lock file, merged with the caller's pure merge. RecoveryFolder and RecoveryItem: the autosave recovery files under Recovery/ (each window's raw bytes and a JSON of its name and time, read back newest first, a damaged pair dropped); stub from autosave-history AH-1, body AH-7.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
-                  "Sources/SuiteModel/Store/"
+                  "Sources/SuiteModel/Store/",
+                  "Sources/SuiteModel/Store/BackupRotation.swift"
                 ]
               },
               {
