@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-21T00:29Z	check	waiting DT-a	#3751	transform is led: DT-a open as #3751 (earlier note 'unled' was wrong); DS-a starts when it merges
 2026-10-21T00:54Z	check	waiting DT-a	#3751	DT-a #3751 open, needs-rebase; DS-a not started
 2026-10-21T01:16Z	check	waiting DT-a	#3751	DT-a #3751 still open with needs-rebase at aadb5807; DT-m not opened; DS-a and DY-m stay blocked
+2026-10-21T01:38Z	check	waiting DT-a	#3751	DT-a pushed 440bcfde, still needs-rebase; DT-m not opened
