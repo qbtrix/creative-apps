@@ -52,3 +52,6 @@ utc	stage	event	ref	note
 2026-10-21T13:12Z	start	run act-1a15e909498-4bkk	-	resumed
 2026-10-21T13:12Z	fix	DY-u round 1 build fix	#3998	mutating openFixture in #expect moved out
 2026-10-21T13:12Z	check	findings	-	11 open; filed #4078 #4079 for #3994 #3990
+2026-10-21T21:05Z	start	run act-1a1605b0534-rn47	-	resumed DY; main verified 0dd23d65
+2026-10-21T21:20Z	fix	DY-u round 2 restack	#4081	merged origin/dev in; diff 1 file +18; #4062 half on dev via #4083
+2026-10-21T21:20Z	check	waits	-	DT-m not merged (#4187 open)

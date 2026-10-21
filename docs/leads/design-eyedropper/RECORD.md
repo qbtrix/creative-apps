@@ -1,16 +1,16 @@
 # design-eyedropper lead record
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
-Run: act-1a15e909498-4bkk · Session: claude/feature-lead-stroke-eyedropper-il215c · Started: 2026-10-21T12:55Z (prior run act-1a15abb305f-lc8g)
-Stage: 3 wave 2 fixes (DY-a done 10:30Z; DY-u merged 6d7fcf14, round 1 #3998 in the lane)
+Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
+Stage: 3 wave 2 fixes (DY-a done; DY-u merged 6d7fcf14, round 1 #3998 merged 97713e0d, round 2 #4081)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: #3998 macOS build red (mutating openFixture inside #expect, DesignToolPaletteSnapshots.swift:53), fixed and back in the lane; DY-u round 2: #4062 split the timing test, #4061 Point truncation; #3990 #3994 wait on #4079 / #4078; #3987 rides DY-5. 11 open findings, so no new wave. DY-m waits transform:DT-m
+Next: #4081 (round 2, #4061 Point chip; the #4062 timing split already landed via #4083) merges -> #3990 #3994 become gap (wait #4079 / #4078), #3987 rides DY-5, Belt-Slice-Done DY-u on the next green design run. DY-m waits transform:DT-m (#4187 open; DT-6 after DG-m)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 1 | merged (6f9c8928); round-1 fixes merged 45e8bd4d | – | wanted |
-| DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 1 | merged 6d7fcf14 (#3816); round 1 #3998 | – | – |
+| DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 2 | merged 6d7fcf14 (#3816); round 1 #3998 merged 97713e0d; round 2 #4081 | – | – |
 | DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m; EY-m (done) | no | 0 | waiting | – | – |
 | DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m | yes | 0 | waiting | – | – |
 
@@ -39,3 +39,5 @@ Next: #3998 macOS build red (mutating openFixture inside #expect, DesignToolPale
 - The session proxy appends a Claude Code footer to PR bodies written via MCP or REST; it cannot be stripped from here. The fast lane strips attribution from the squash commit. Reported for the supervisor.
 - DY-m waits transform:DT-m (Design transform #3436 has no running lead).
 
+- Run act-1a1605b0534-rn47: the brief's "rebase lead/eyedropper onto origin/main" was not done: lead/eyedropper is the SuiteUI eyedropper lead's branch (#3448); this lead's status stays on lead/design-eyedropper.
+- #4081 was labelled needs-split at 16 files: its stack still carried #3998's commits. Merging origin/dev into it (no force push) left 1 file, +18 lines.
