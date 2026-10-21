@@ -29,6 +29,7 @@ Next: wave 1 builders running; then mark stacked drafts ready after their parent
 |---|---|---|---|---|---|
 
 ## Decisions
+- Baseline: `scripts/ci --changed` on dev 1191940 printed CI: PASS (Linux build 232 s, 4m13s total) before wave 1.
 - CS-a is two independent PRs, CS-1 and CS-2: together they touch 17 files (cap 15). CS-2's launcher.txt baseline is taken at today's counts; RP-2 (report-problem) adds launcher Help items built from specs, so whichever lands second rebaselines launcher.txt.
 - Base is origin/dev, not main: this packet exists only on dev; PRs go to base dev.
 
