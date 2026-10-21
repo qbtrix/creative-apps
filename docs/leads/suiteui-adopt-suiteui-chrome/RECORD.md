@@ -3,7 +3,7 @@
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet; earlier run act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
 Stage: 0 setup (blocked on shared-codecs:SC-f)
-Base: dev 15f7bad1 (main 0dd23d65 verified)
+Base: dev 363d3ea9 (main 0dd23d65 verified)
 Next: re-read shared-codecs:SC-f (SC-13 #4019 Linux red on 85c365cf, lane waiting; SC-14..16 after it); start AC-e1 once SC-16 merges
 
 ## Slices
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f (SC-13 #4019 Linux red on 85c365cf, lane waitin
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T18:43Z: SC-f unchanged on dev 363d3ea9: #4019 Linux red on 85c365cf since 12:30Z, no push; no SC-14..16 PR; no supervisor reply on #1942 yet
 - 2026-10-21T18:10Z: SC-f unchanged on dev 15f7bad1: #4019 Linux red on 85c365cf since 12:30Z, no push; no SC-14..16 PR. Escalated on #1942 for the supervisor
 - 2026-10-21T17:38Z: SC-f unchanged on dev af840a6d: #4019 still Linux red on 85c365cf, no push since 12:30Z; no SC-14..16 PR. Supervisor hold/release call still open
 - 2026-10-21T17:07Z: SC-f unchanged on dev 0f44e804: #4019 still Linux red on 85c365cf, no push since 12:30Z; no SC-14..16 PR. Still waiting on the supervisor's hold/release call
