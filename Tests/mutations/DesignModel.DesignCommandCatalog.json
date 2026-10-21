@@ -12,5 +12,19 @@
     "find": "large: params.large ?? false",
     "replace": "large: false",
     "tests": "DesignCommandCatalogTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Zoom In is always available",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "plain(\"view.zoom-in\", \"Zoom In\", \"Zooms the window in.\", .view, openHelp)",
+    "replace": "plain(\"view.zoom-in\", \"Zoom In\", \"Zooms the window in.\", .view, { _ in .available })",
+    "tests": "DesignCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: Export ignores its scale",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": "DesignExportOptions(format: format, scale: p.scale, scope: scope)",
+    "replace": "DesignExportOptions(format: format, scale: 1, scope: scope)",
+    "tests": "DesignCommandPathTests"
   }
 ]
