@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-21T19:03Z	fix-round	KE-u round 2 (#4150 select-all)
 2026-10-21T19:10Z	fix-round-end	KE-u round 2: no PR, select-all needs a Mac (#4150 comment 6324296761)
 2026-10-21T19:24Z	poll	journeys 39651139451: no screens (Flare release build, dev-red #3856); panel moves to journeys after 39655512121
+2026-10-21T19:46Z	poll	blocked 1/3: macOS queue (25 queued); #4152 build 39655796643 queued, scoped halo 39655512121 queued, #3499 open, CL-z not built
