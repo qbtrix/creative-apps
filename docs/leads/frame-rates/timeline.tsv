@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T22:18Z	waiting	heartbeat 22:18Z: macOS build queue still backed up; OC-u, AD-halo not on dev	FR-flare	no change
 2026-10-21T22:39Z	waiting	heartbeat 22:39Z: no merges; OC-u, AD-halo not on dev	FR-flare	no change
 2026-10-21T23:03Z	fix	macos-build-red	c8a8231a9	FR-u: fixed shadowed @State in GalleryTimeline + ported #4215 (dev break #4195); FR-7/FR-9 red only on #4195, port gating
+2026-10-21T23:06Z	FR-u/7/9	pushed	c52f71142	FR-halo 53a6be99d, FR-flare c52f71142 pushed with #4215 port; Head lines moved
