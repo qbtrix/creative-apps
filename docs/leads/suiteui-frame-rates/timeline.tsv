@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T18:43Z	build	heartbeat	FR-m	FR-m #4142 waits on macOS build 39647732409; FR-u held until FR-m merges
 2026-10-21T18:43Z	build	heartbeat	FR-m	mirror to lead/frame-rates
 2026-10-21T19:11Z	build	heartbeat	FR-m	macOS build green; awaiting lane
+2026-10-21T19:38Z	build	pr-open	FR-u	#4172 opened after FR-m merge
