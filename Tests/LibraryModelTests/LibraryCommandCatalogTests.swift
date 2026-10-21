@@ -71,6 +71,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "photo.reset-develop": .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "photo.crop": .some(menu(c.cropHelp == nil, "crop", "Crop isn't connected yet."))
         case "photo.reset-crop": .some(menu(c.resetCropHelp == nil, "crop", "Crop isn't connected yet."))
+        case "file.recent", "file.open-recent", "file.drop": .some(nil)
+        case "file.clear-recent": .some("No Recent Files")
+        case "file.open-in": .some(c.openInHelp)
         default: nil
         }
     }
