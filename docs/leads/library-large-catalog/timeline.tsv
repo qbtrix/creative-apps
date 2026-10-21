@@ -9,3 +9,5 @@
 2026-10-21T12:55Z	ship	opened	LG-a	fix round 1 PR #4073 head 3deedf28, CI: PASS; asked supervisor on #3790 to list LargeCatalogFixtureBudgetTests in perf-suites
 2026-10-21T13:05Z	done	slice	LG-a	Belt-Slice-Done on 39601343733; only red LibraryFoldersTests (#3961)
 2026-10-21T13:05Z	check	question	-	supervisor asked on #3790 to list LibraryFoldersTests/tenThousandPaths in perf-suites (3 reds)
+2026-10-21T13:25Z	fix	round1	LG-a	#4073 updated per supervisor 12:54Z: perf-suites line swap, un-disable, rebase
+2026-10-21T13:25Z	check	wait	LG-model	FC-a, MD-e, DR-m unset (poll 2)
