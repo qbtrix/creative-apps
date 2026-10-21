@@ -23,3 +23,4 @@ time	kind	note
 2026-10-21T03:50Z	check	waiting screens	39534644387	full dev CI still queued
 2026-10-21T04:13Z	check	scoped design 39541665044 queued at 842e62ec	39541665044	waiting screens
 2026-10-21T04:35Z	check	scoped design 39541665044 in progress	39541665044	waiting screens
+2026-10-21T04:59Z	check	critic panel DK-a started on scoped run 39541665044 snapshots	39541665044	DK-u/DK-m still wait on DS-u/DS-m
