@@ -109,3 +109,4 @@ utc	stage	event	ref	note
 2026-10-21T19:02Z	3	heartbeat	-	No merges: #3770 macOS 39651057624 and #4153 macOS 39657806824 queued; PN-9 still blocked (#3477 waiting-on-prereq)
 2026-10-21T19:25Z	3	check	#3770	macOS build 39651057624 FAILED (compile): fixer launched on lead/pen-paths-PN-3a
 2026-10-21T19:25Z	3	check	#4153	macOS build green 19:16Z; merges on a lane sweep
+2026-10-21T19:30Z	3	push	#3770	PathContext stored-property init fix, head be778261, ci --changed PASS; merged forward into PN-3 and PN-4
