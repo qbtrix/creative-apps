@@ -620,6 +620,15 @@
                 ]
               },
               {
+                "id": "kernel-document",
+                "name": "Document Setup",
+                "description": "Document/: DocumentSetup, a document's size in a length unit (px, pt, in, cm, mm) at a resolution, its background and, for timed apps, frame rate and duration in seconds, with the rules that turn it into whole pixels, convert units, swap the sides and name each field's problem; and DocumentSetupCommands, document.read-settings and document.set-settings over a DocumentSetupTarget, placing old content by a BoxAnchor through TransformRules. document-setup DS-1 declares them as stubs; DS-3 and DS-4 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Document/"
+                ]
+              },
+              {
                 "id": "kernel-commands",
                 "name": "Commands",
                 "description": "Commands/: the one typed command catalog every app registers its model actions in, so menus, buttons, the CLI, the MCP server and tests drive one path. JSONValue (any JSON value, Codable), ParamSchema (JSON Schema 2020-12 builders, closed objects, validate) with SchemaIssue, SchemaProbe and CommandSchemaProviding, CommandKind, Availability, CommandSpec and CommandDescription, CommandCatalog with CommandEnvelope (FlareCore's envelope), CatalogError, CommandOutcome and BatchReport, the HeadlessDocument protocol with ExportedFile, CommandIDLedger and CatalogConformance. command-catalog CC-1 declares them (JSONValue and the ParamSchema builders real, the rest stubs); CC-4, CC-5, CC-7 and CC-8 fill the bodies. Reads the target's HistoryReading; never owns a history.",
