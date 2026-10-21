@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave B (stacked)
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: wave B drafts open (#4156 ST-4, #4157 ST-m), both on ST-a #4135. When #4034 lands: rebase ST-a onto dev, retarget to dev, CI, mark ready; then restack #4156 and #4157. ST-5 + ST-7 follow-up PR after ST-4 merges.
+Next: wave C builder runs ST-5 + ST-7 on lead/shell-text-ST-live2 (stacked on ST-4 #4156); open as draft on lead/shell-text-ST-live when pushed. Wave B drafts #4156, #4157 wait on ST-a #4135, which waits on #4034. When #4034 lands: rebase ST-a onto dev, retarget, CI, ready; restack.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
