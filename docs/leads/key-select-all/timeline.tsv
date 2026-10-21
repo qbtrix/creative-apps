@@ -16,3 +16,4 @@ time	event
 2026-10-21T10:29Z	check	#3921 and #3984 ready in lane run 39582313181 (macOS builds green, CLEAN); waiting for next sweep behind bisecting batch-20261021095715; findings 0; #3856 open; stroke-style parked on #3419
 2026-10-21T10:53Z	check	KS-a #3921 in batch-20261021102756 (Linux running); FS-u #3984 Linux red on dev-red anchors, merging dev and re-gating
 2026-10-21T11:16Z	stage	KS-a #3921 merged as 80ac6639; awaiting a green dev Linux run containing it
+2026-10-21T11:43Z	check	KS-a 80ac6639 merged; dev Linux checks 965a76be red (not ours); ded2ca57 Linux check running
