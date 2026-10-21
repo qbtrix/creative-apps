@@ -35,7 +35,7 @@ public struct CopyAsMenu<Target: CopyAsTarget>: View {
         self.pasteAsImage = pasteAsImage
     }
 
-    private static var specs: [CommandSpec<Target>] { CopyAsCommands.specs(Target.self) }
+    private nonisolated static var specs: [CommandSpec<Target>] { CopyAsCommands.specs(Target.self) }
 
     /// The submenu's title for `format`.
     private func title(_ format: CopyAsFormat) -> String {
