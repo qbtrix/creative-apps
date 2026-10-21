@@ -61,3 +61,6 @@ utc	stage	event	ref	note
 2026-10-21T22:38Z	3	heartbeat	-	no merges; lane macOS build run 39662239121 (#4159) still queued since 19:30, no macOS runner picks up lane builds
 2026-10-21T22:50Z	3	built	#4223	fix/design-turned-resize 9ab21935, ci --changed PASS, Mutate 33/33; PR held for #4188 fix
 2026-10-21T22:50Z	3	built	#4224	fix/design-knob-several 00e7a2ca, ci --changed PASS, Mutate 38/38 + 25/25; PR held for #4223 fix
+2026-10-21T23:12Z	3	merged	#4187	DT-5 on dev 8684d700f
+2026-10-21T23:12Z	3	build	#4188	dev merged into fix/design-rotate-knob 875e12aa; scripts/ci --changed running
+2026-10-21T23:12Z	4	build	DT-6	re-cut on origin/dev by cherry-pick (squash bases conflicted) 487ff70e; scripts/ci --changed running
