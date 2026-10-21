@@ -182,7 +182,7 @@ private let scale = 0.1
     }
 
     /// 20 collections over 10,000 ids encode and decode within 200 ms debug.
-    @Test(.disabled("waits on its Tests/perf-suites.txt line from the supervisor")) func twentyCollectionsOverTenThousandIDsWithinBudget() throws {
+    @Test func twentyCollectionsOverTenThousandIDsWithinBudget() throws {
         var catalog = LibraryCatalog()
         catalog.load(LibraryFixtures.photos(named: "large"))
         let ids = catalog.items.map(\.id)
