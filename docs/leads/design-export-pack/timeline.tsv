@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-21T01:05Z	3	pr-open	#3833	DX-1 CI: PASS, fast-lane
 2026-10-21T01:05Z	3	task-start	DX-3	stacked on #3833
 2026-10-21T01:16Z	3	heartbeat	#3833	lane dispatched macOS build; DX-3 building; XP-3 still waits TC-a, PL-a
+2026-10-21T01:23Z	3	pr-open	#3834	DX-3 CI: PASS, mutations 18/18, stacked on #3833
