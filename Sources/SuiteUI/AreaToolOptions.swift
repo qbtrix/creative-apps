@@ -1,22 +1,14 @@
-// AreaToolOptions.swift (area-selection AR-7): the area tools' options bar.
-// Shape chips (Rectangle, Ellipse, Lasso, Polygon, Wand), mode chips
-// (Replace, Add, Subtract, Intersect), a Feather row (0...250 px) and, for
-// the wand, Tolerance (0...255), Contiguous and All Layers. Each control names
-// the `AreaSelectCommands` command it feeds (`AreaControl.command`): the shape
-// and mode set the tool's `select.<shape>` params, Feather `select.feather`,
-// the wand's options `select.wand`. While Shift or Option is held the mode
-// chip shows the mode the keys ask for (Shift adds, Option subtracts, both
-// intersect), as a drag would use it. The view keeps only the held keys; the
-// host owns the options and gets each change with the control that made it.
-// Identifiers: `suite.area.tool-<shape>`, `suite.area.mode-<mode>` and
-// `suite.area.<control>`.
+// AreaToolOptions.swift (area-selection AR-7): the area tools' options bar: shape and mode chips, Feather (0...250 px)
+// and, for the wand, Tolerance (0...255), Contiguous and All Layers. Each control names the `AreaSelectCommands`
+// command it feeds (`AreaControl.command`). While Shift or Option is held the mode chip shows the keys' mode, as a drag
+// uses it. The view keeps only the held keys; the host owns the options and gets each change with its control.
+// Identifiers: `suite.area.tool-<shape>`, `suite.area.mode-<mode>` and `suite.area.<control>`.
 import SuiteKernel
 import SwiftUI
 
 /// The five area selection tools, each run by its shape command.
 public enum AreaTool: String, CaseIterable, Hashable, Sendable {
     case rect, ellipse, lasso, polygon, wand
-
     /// The command a drag or click with the tool runs.
     public var command: String { "select.\(rawValue)" }
     public var title: String { self == .rect ? "Rectangle" : rawValue.capitalized }
@@ -26,19 +18,15 @@ public enum AreaTool: String, CaseIterable, Hashable, Sendable {
 public struct AreaOptions: Hashable, Sendable {
     public var tool: AreaTool, mode: AreaCombine, feather: Double, tolerance: Double, contiguous: Bool, allLayers: Bool
 
-    public init(
-        tool: AreaTool = .rect, mode: AreaCombine = .replace, feather: Double = 0, tolerance: Double = 32,
-        contiguous: Bool = true, allLayers: Bool = false
-    ) {
-        (self.tool, self.mode, self.feather, self.tolerance) = (tool, mode, feather, tolerance)
-        (self.contiguous, self.allLayers) = (contiguous, allLayers)
+    public init(tool: AreaTool = .rect, mode: AreaCombine = .replace, feather: Double = 0, tolerance: Double = 32,
+                contiguous: Bool = true, allLayers: Bool = false) {
+        (self.tool, self.mode, self.feather, self.tolerance, self.contiguous, self.allLayers) = (tool, mode, feather, tolerance, contiguous, allLayers)
     }
 }
 
 /// One control of the options bar and the command it feeds.
 public enum AreaControl: String, CaseIterable, Hashable, Sendable {
     case tool, mode, feather, tolerance, contiguous, allLayers = "all-layers"
-
     public var identifier: String { "suite.area.\(rawValue)" }
 
     /// The command the control's value goes to with `tool` chosen.
@@ -81,10 +69,7 @@ public struct AreaToolOptions: View {
 
     /// SwiftUI's held keys as the kernel's: Shift and Option.
     nonisolated static func modifiers(_ keys: EventModifiers) -> EditModifiers {
-        var held = EditModifiers()
-        if keys.contains(.shift) { held.insert(.shift) }
-        if keys.contains(.option) { held.insert(.option) }
-        return held
+        (keys.contains(.shift) ? EditModifiers.shift : []).union(keys.contains(.option) ? .option : [])
     }
 
     public var body: some View {
@@ -101,16 +86,18 @@ public struct AreaToolOptions: View {
                     send(.tolerance) { $0.tolerance = tolerance }
                 }
                 .accessibilityIdentifier(AreaControl.tolerance.identifier)
-                check("Contiguous", .contiguous, on: options.contiguous) { $0.contiguous = $1 }
-                check("All Layers", .allLayers, on: options.allLayers) { $0.allLayers = $1 }
+                check("Contiguous", .contiguous, on: options.contiguous)
+                check("All Layers", .allLayers, on: options.allLayers)
             }
         }
         .onModifierKeysChanged(mask: [.shift, .option]) { _, keys in held = Self.modifiers(keys) }
     }
 
-    private func check(_ title: String, _ control: AreaControl, on: Bool, set: @escaping (inout AreaOptions, Bool) -> Void) -> some View {
+    private func check(_ title: String, _ control: AreaControl, on: Bool) -> some View {
         InspectorRow("") {
-            Toggle(title, isOn: Binding(get: { on }, set: { value in send(control) { set(&$0, value) } }))
+            Toggle(title, isOn: Binding(get: { on }, set: { value in
+                send(control) { if control == .contiguous { $0.contiguous = value } else { $0.allLayers = value } }
+            }))
                 .toggleStyle(.checkbox)
                 .suiteControl(id: control.identifier, enabled: true, reason: nil)
         }

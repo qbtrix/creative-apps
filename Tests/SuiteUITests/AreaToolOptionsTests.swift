@@ -1,9 +1,6 @@
-// AreaToolOptionsTests.swift (area-selection AR-7): the area tool's options and
-// its marching ants. Every control names a command `AreaSelectCommands` has; the
-// mode chip shows the held keys' mode (Shift adds, Option subtracts, both
-// intersect) over the chosen one; the ants trace exactly the outline they were
-// given, step 4 times a second and stand still under Reduce Motion. macOS only
-// (SuiteUI).
+// AreaToolOptionsTests.swift (area-selection AR-7): every area control names an `AreaSelectCommands` command; the mode
+// chip shows the held keys' mode; the ants trace their outline, step 4 times a second and stand still under Reduce
+// Motion. macOS only (SuiteUI).
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI

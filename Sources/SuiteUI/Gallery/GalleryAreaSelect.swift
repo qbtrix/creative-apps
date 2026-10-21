@@ -1,8 +1,6 @@
-// GalleryAreaSelect.swift (area-selection AR-7): the gallery's `area-select` page. AreaToolOptions over an artboard
-// with AreaAnts, both on a local AreaSelectTarget fake with a History: a drag runs the tool's `select.<shape>` in the
-// shown mode (the held keys' or the chosen one), a Feather change `select.feather`, and the ants trace each shape's
-// box or points; the drag in progress draws as the rubber band. Each command logs a line. `GalleryAreaSelectSheet` is
-// the snapshot: the bar in each mode and the ants on a lasso, with a polygon in progress.
+// GalleryAreaSelect.swift (area-selection AR-7): the gallery's `area-select` page, AreaToolOptions over AreaAnts on a
+// local AreaSelectTarget fake: a drag runs the tool's `select.<shape>` in the shown mode, Feather `select.feather`, and
+// each command logs a line. `GalleryAreaSelectSheet` is the snapshot: the bar in each mode and the ants on a lasso.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -87,8 +85,7 @@ struct GalleryAreaSelectPage: View {
                 .accessibilityElement().accessibilityLabel("Area canvas")
                 .accessibilityValue("\(board.outline.count) shapes").accessibilityIdentifier("suite.gallery.area-canvas")
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
-                .accessibilityLabel(log.joined(separator: "\n")).accessibilityValue(log.joined(separator: "\n"))
-                .accessibilityIdentifier("suite.gallery.log")
+                .accessibilityValue(log.joined(separator: "\n")).accessibilityIdentifier("suite.gallery.log")
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

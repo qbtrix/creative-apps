@@ -1,6 +1,5 @@
-// SuiteAreaSelectSnapshots.swift (area-selection AR-7): the gallery's Area Select page in Light and Dark. Writes
-// suite-gallery-area-select-{light,dark}.png: the options bar in each of the four modes and the ants on a lasso, with
-// a polygon in progress. macOS only.
+// SuiteAreaSelectSnapshots.swift (area-selection AR-7): suite-gallery-area-select-{light,dark}.png, the options bar in
+// each of the four modes and the ants on a lasso with a polygon in progress. macOS only.
 import SwiftUI
 import Testing
 

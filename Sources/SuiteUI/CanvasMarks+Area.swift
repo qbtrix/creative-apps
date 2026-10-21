@@ -1,15 +1,8 @@
-// CanvasMarks+Area.swift (area-selection AR-7): an area selection's marching
-// ants, drawn in a CanvasViewport's overlay. `AreaAnts` strokes each closed
-// contour of the selection's outline (`AreaMask.outline`) as a dashed
-// `overlayInk` line over a solid `overlayPaper` one, so the ants read on any
-// pixels, plus a lasso or polygon in progress as a rubber band that closes
-// back to its first point once it has three. The dash marches one `xxs` step
-// 4 times a second (one dash cycle a second) and stands still under Reduce
-// Motion and in snapshot renders. Positions are document pixels at the canvas
-// zoom; a zoom that isn't a positive finite number counts as 1. Marks are
-// hidden from accessibility and never take a click. The geometry and the
-// phase are static, plain and nonisolated so tests read them without
-// rendering. Path strokes only: no immediate-mode drawing per tick.
+// CanvasMarks+Area.swift (area-selection AR-7): marching ants in a CanvasViewport's overlay. `AreaAnts` strokes each
+// closed contour of the outline as dashed `overlayInk` over solid `overlayPaper`, plus a lasso or polygon in progress
+// as a rubber band closed back to its first point once it has three. The dash steps `xxs` 4 times a second and stands
+// still under Reduce Motion and in snapshots. Document pixels at the canvas zoom (a bad zoom is 1); hidden from
+// accessibility, never hit. Geometry and phase are static and nonisolated for tests. Path strokes only.
 import SuiteKernel
 import SwiftUI
 
@@ -24,20 +17,14 @@ public struct AreaAnts: View {
     /// The dash: on and off the same length.
     nonisolated static let dash: [CGFloat] = [SuiteSpacing.xs, SuiteSpacing.xs]
 
-    /// `outline` is the selection's closed contours and `draft` the outline being drawn, both in document pixels;
-    /// `zoom` in points per pixel.
+    /// `outline`'s closed contours and the `draft` being drawn, in document pixels; `zoom` in points per pixel.
     public init(outline: [[Point]], draft: [Point] = [], zoom: Double) {
         (self.outline, self.draft, self.zoom) = (outline, draft, zoom)
     }
 
-    /// `zoom`, or 1 when it isn't a positive finite number.
-    public nonisolated static func scale(_ zoom: Double) -> Double {
-        zoom.isFinite && zoom > 0 ? zoom : 1
-    }
-
-    /// Each contour in view points at `zoom`, in order.
+    /// Each contour in view points at `zoom` (1 when it isn't a positive finite number), in order.
     public nonisolated static func lines(_ outline: [[Point]], zoom: Double) -> [[CGPoint]] {
-        let factor = scale(zoom)
+        let factor = zoom.isFinite && zoom > 0 ? zoom : 1
         return outline.map { $0.map { CGPoint(x: $0.x * factor, y: $0.y * factor) } }
     }
 
@@ -53,12 +40,10 @@ public struct AreaAnts: View {
         !reduceMotion && !snapshot
     }
 
-    /// The dash phase at `time` seconds: one `xxs` step per tick, back to 0 after a dash cycle; 0 under Reduce
-    /// Motion or when `time` isn't finite.
+    /// The dash phase at `time` seconds: one `xxs` step per tick, a dash cycle a second; 0 under Reduce Motion.
     public nonisolated static func phase(at time: TimeInterval, reduceMotion: Bool) -> CGFloat {
-        guard !reduceMotion, time.isFinite else { return 0 }
         let steps = Int((dash.reduce(0, +) / SuiteSpacing.xxs).rounded())
-        guard steps > 0 else { return 0 }
+        guard !reduceMotion, time.isFinite, steps > 0 else { return 0 }
         let tick = Int((time * stepsPerSecond).rounded(.down).truncatingRemainder(dividingBy: Double(steps)))
         return CGFloat((tick + steps) % steps) * SuiteSpacing.xxs
     }
