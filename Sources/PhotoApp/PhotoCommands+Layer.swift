@@ -4,7 +4,7 @@
 // disabled with that reason when no kind can be added), Delete; Duplicate Layer
 // (Command-J), Merge Down (Command-E) and Flatten Image (no shortcut), each
 // disabled with the workspace's reason as its help when it can't run;
-// Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer Above and
+// Rename…, Show/Hide, Lock/Unlock, Bring Forward, Send Backward, Select Layer Above and
 // Below. The items are a view, PhotoLayerMenu, so the snapshot tests can draw
 // them; shortcuts and symbols are tables the tests read, and `symbol(_:)` is
 // shared with the Layers panel's bar and row menus (PhotoLayerList).
@@ -37,8 +37,11 @@ struct PhotoLayerMenu: View {
         item("layer.flatten", .flattenImage)
         Divider()
         menu.item("layer.rename", systemImage: Self.symbol("layer.rename")) { menu.perform(.renameLayer) }
-        menu.item("layer.toggle-visibility", systemImage: Self.symbol("layer.toggle-visibility", visibility: menu.visibilityTitle)) {
+        menu.item("layer.toggle-visibility", systemImage: Self.symbol("layer.toggle-visibility", title: menu.visibilityTitle)) {
             if let selected = menu.selectedLayer { menu.perform(.toggleVisibility(selected)) }
+        }
+        menu.item("layer.toggle-lock", systemImage: Self.symbol("layer.toggle-lock", title: menu.workspace.menuTitle("layer.toggle-lock"))) {
+            if let selected = menu.selectedLayer { menu.perform(.toggleLock(selected)) }
         }
         Divider()
         menu.item("layer.bring-forward", systemImage: Self.symbol("layer.bring-forward"), shortcut: KeyboardShortcut("]")) {
@@ -78,13 +81,14 @@ struct PhotoLayerMenu: View {
     }
 
     /// A layer command's symbol by catalog id, for the Layer menu and the Layers panel alike;
-    /// Show/Hide follows the title the menu gives it (`visibility`).
-    nonisolated static func symbol(_ id: String, visibility: String = "Hide Layer") -> String {
+    /// Show/Hide and Lock/Unlock follow the title the menu gives them.
+    nonisolated static func symbol(_ id: String, title: String = "") -> String {
         switch id {
+        case "layer.toggle-lock": title == "Unlock Layer" ? "lock.open" : "lock"
         case "layer.new": "plus"
         case "layer.delete": "trash"
         case "layer.rename": "pencil"
-        case "layer.toggle-visibility": visibility == "Show Layer" ? "eye" : "eye.slash"
+        case "layer.toggle-visibility": title == "Show Layer" ? "eye" : "eye.slash"
         case "layer.bring-forward": "square.2.layers.3d.top.filled"
         case "layer.send-backward": "square.2.layers.3d.bottom.filled"
         case "layer.duplicate": systemImage(.duplicateLayer)

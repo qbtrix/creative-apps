@@ -1,7 +1,7 @@
 // PhotoLayerListSnapshots.swift: Photo's Layers panel on SuiteUI's
 // LayerTreeList (AL-p3), `layered` with Background hidden: the journeys' ids,
-// each row's kind symbol (no thumbnail, so names share a leading edge, #1633)
-// and caption, with no disclosure column (the layers never nest). Writes
+// each row's kind symbol, or its preview in the same well (#3288; the well
+// keeps names on one leading edge, #1633), and caption, with no disclosure column (the layers never nest). Writes
 // photo-layer-list-kernel-light/-dark.png. macOS only.
 import PhotoModel
 import SuiteKernel
@@ -35,7 +35,14 @@ import Testing
         }
         let curves = try #require(model.layers.first { $0.name == "Curves 1" })
         #expect(decorations[curves.id]?.symbolLabel == "Curves adjustment layer")
-        #expect(PhotoLayerRow.options.showsEye && !PhotoLayerRow.options.showsLock)
+        #expect(PhotoLayerRow.options.showsEye && PhotoLayerRow.options.showsLock && PhotoLayerRow.options.thumbnails)
+        // #3288: pixel layers get a preview that stands in for the kind symbol; Curves keeps its symbol.
+        let previews = PhotoLayerList.previews(model)
+        #expect(Set(previews.keys) == Set(model.layers.filter { $0.name != "Curves 1" }.map(\.id)))
+        let shown = PhotoLayerList.decorations(model, previews: previews)
+        #expect(shown[curves.id]?.thumbnail == nil && shown[curves.id]?.symbolID == "photo.layer.\(curves.id).kind")
+        let held = PhotoLayerList.previewKey(model)
+        #expect(held == model.revision)
         // Photo's layers never nest, so the list leaves out the empty disclosure column.
         #expect(!PhotoLayerRow.options.nests)
         let paint = try #require(model.layers.first { $0.name == "Paint" })

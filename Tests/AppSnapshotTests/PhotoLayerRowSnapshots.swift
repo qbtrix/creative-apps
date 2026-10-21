@@ -31,7 +31,7 @@ import Testing
         let model = try twoLayers()
         let identifiers = PhotoLayerList.bar(PhotoMenu(model: model, perform: { _ in })).map(\.identifier)
         #expect(identifiers == ["photo.layer.new", "photo.layer.duplicate", "photo.layer.delete", "photo.layer.fx",
-                                "photo.layer.visibility", "photo.layer.rename"])
+                                "photo.layer.lock", "photo.layer.visibility", "photo.layer.rename"])
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 PhotoLayerList(model: model, perform: { _ in })
@@ -69,7 +69,7 @@ import Testing
         let top = PhotoLayerList.rowMenu(menu, row: try #require(model.selectedLayerID))
         let bottom = PhotoLayerList.rowMenu(menu, row: background)
         #expect(bottom.map(\.title) == ["Rename Layer…", "Duplicate Layer", "Delete Layer", "Merge Down", "Flatten Image",
-                                         "Bring Forward", "Send Backward", "Show Layer"])
+                                         "Bring Forward", "Send Backward", "Lock Layer", "Show Layer"])
         let merge = { (menu: [ToolbarAction]) in menu.first { $0.identifier == "photo.layer.merge-down" } }
         #expect(merge(top)?.isEnabled == true && merge(bottom)?.isEnabled == false)
         #expect(bottom.first { $0.identifier == "photo.layer.send-backward" }?.isEnabled == false)
