@@ -4,14 +4,14 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15f807d0b-78hh (resumed from act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-o3yyj5 · Started: 2026-10-20T23:47Z
 Stage: 3 wave 4
 Base: 1a7e0d866 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: KE-m Belt-Slice-Done once Linux check 39655526241 (dev 1b3913c07, holds #4141's merge) is green. #4152 (F4150 round 1: playhead off the key, test-only) in lane at head 2fc0925a8; the select-all half of #4150 is round 2. KE-a/KE-u critic panel on journeys run 39651139451 (queued) once its ui-screens land. KE-7 waits on #3499; KE-8 on core-loop CL-z.
+Next: #4152 (F4150 round 1, head 2fc0925a8) waits on its lane macOS build; round 2 (select-all half of #4150, branch lead/halo-key-editing-F4150-2) started 19:05Z, the last round. KE-a/KE-u critic panel on journeys run 39651139451 (queued) once its ui-screens land; scoped halo 39655512121 (dev 1b3913c07) queued too. KE-7 waits on #3499; KE-8 on core-loop CL-z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | KE-a | four key commands, catalog ids, adapter stubs; timeline picks, drags, Select All Keys | KE-1, KE-2 | MJ-KE | AC-halo, TSA-a (met) | yes | 0 | done | 39632745681 | wanted |
-| KE-u | snapshots, journey (skipped), render budget | KE-5, KE-6, F4150 | HJ-K1 | KE-a | yes | 1 | done (per Belt brief); finding #4150 open | 39635764704 | wanted |
-| KE-m | cross-layer picks, select all, move as one step or refuse whole | KE-3, KE-4, KE-9 | MJ-KE | KE-a | no | 0 | merged (RJ-H13 job owed: KE-9) | - | - |
+| KE-u | snapshots, journey (skipped), render budget | KE-5, KE-6, F4150 | HJ-K1 | KE-a | yes | 2 | done (per Belt brief); finding #4150 open | 39635764704 | wanted |
+| KE-m | cross-layer picks, select all, move as one step or refuse whole | KE-3, KE-4, KE-9 | MJ-KE | KE-a | no | 0 | done | 39655526241 | - |
 | KE-z | journey live, stress perf; halo.md, built, feature-done | KE-9, KE-7, KE-8 | HJ-K1 | KE-u, KE-m; PR #3499 (KE-7); core-loop:CL-z (KE-8) | yes | 0 | building | - | - |
 
 ## Tasks
