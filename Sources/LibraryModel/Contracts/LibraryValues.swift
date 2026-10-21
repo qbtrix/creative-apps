@@ -96,8 +96,13 @@ public struct ImportCandidate: Hashable, Sendable {
     /// After the Exif orientation is applied.
     public var pixelSize: PixelSize
     public var kind: PhotoFileKind
-    public init(path: String, captureDate: Date, pixelSize: PixelSize, kind: PhotoFileKind) {
+    /// What the file's Exif says about the camera; `.none` when it has none.
+    public var camera: CameraDetails
+    public init(
+        path: String, captureDate: Date, pixelSize: PixelSize, kind: PhotoFileKind, camera: CameraDetails = .none
+    ) {
         self.path = path; self.captureDate = captureDate; self.pixelSize = pixelSize; self.kind = kind
+        self.camera = camera
     }
 }
 
