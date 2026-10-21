@@ -4,7 +4,7 @@ Issue: #3754 · Packet: docs/blueprints/suiteui/features/frame-rates.md
 Run: act-1a15e33399d-zgll · Session: session_01F3g9p2SjhinJcobKKf3Gn2 · Started: 2026-10-21T11:23Z
 Stage: build
 Base: 4142
-Next: FR-m-merge
+Next: FR-m #4142 merges after its macOS build (run 39647732409, queued); then reopen FR-u on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
