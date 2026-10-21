@@ -1,4 +1,4 @@
-// FlareRecoveryKernelTests.swift (adopt-kernel-autosave AK-3 written, AK-4 turns on; journey MJ-AK-flare): Flare's
+// FlareRecoveryKernelTests.swift (adopt-kernel-autosave AK-3 written, AK-4 turned on; journey MJ-AK-flare): Flare's
 // hooks on the suite's autosave. An edit, a schedule ticket, a write under `<support>/Flare/Recovery/` and a launch
 // that restores the same document; a clean workspace has no encoder; a restore is one undo step; an old
 // `Recovery.flare` moves under the root once and never over a newer copy. Runs on Linux and macOS.
@@ -35,7 +35,7 @@ import Testing
         return workspace
     }
 
-    @Test(.disabled("waits on AK-4")) func editTicketWriteThenLaunchRestores() throws {
+    @Test func editTicketWriteThenLaunchRestores() throws {
         let (home, arguments) = Self.home()
         let workspace = Self.edited()
         #expect(workspace.isDirty)
@@ -62,7 +62,7 @@ import Testing
         #expect(relaunched.fileName == nil)
     }
 
-    @Test(.disabled("waits on AK-4")) func cleanWritesNothing() throws {
+    @Test func cleanWritesNothing() throws {
         #expect(FlareWorkspace(services: .fake()).recoveryEncoder() == nil)
         var opened = FlareWorkspace(services: .fake())
         try opened.open(FlareFormat.encode(FlareFixtures.bounce), named: "Bounce.flare")
@@ -74,7 +74,7 @@ import Testing
         #expect(undone.recoveryEncoder() == nil)
     }
 
-    @Test(.disabled("waits on AK-4")) func theEncoderCopiesTheDocumentWhenMade() throws {
+    @Test func theEncoderCopiesTheDocumentWhenMade() throws {
         var workspace = Self.edited()
         let copied = workspace.document
         let made = workspace.recoveryEncoder()
@@ -83,36 +83,38 @@ import Testing
         #expect(try FlareFormat.decode(encode()) == copied)
     }
 
-    @Test(.disabled("waits on AK-4")) func restoreIsOneStep() throws {
+    @Test func restoreIsOneStep() throws {
         let made = Self.edited().recoveryEncoder()
         let encode = try #require(made)
         let data = try encode()
         var workspace = FlareWorkspace(services: .fake())
-        workspace.newDocument()
+        try workspace.open(FlareFormat.encode(FlareFixtures.bounce), named: "Bounce.flare")
         let before = workspace.document
         try workspace.restoreRecovery(data)
         #expect(try workspace.document == FlareFormat.decode(data))
+        #expect(workspace.isDirty && workspace.fileName == nil)
+        #expect(workspace.undoActionName == "Undo Restore Autosaved Copy")
         #expect(workspace.canUndo)
         workspace.undo()
         #expect(workspace.document == before)
         #expect(workspace.canUndo == false)
     }
 
-    @Test(.disabled("waits on AK-4")) func damagedBytesThrowAndLeaveTheDocument() {
+    @Test func damagedBytesThrowAndLeaveTheDocument() {
         var workspace = Self.edited()
         let before = workspace.document
         #expect(throws: (any Error).self) { try workspace.restoreRecovery(Data("not a flare file".utf8)) }
         #expect(workspace.document == before)
     }
 
-    @Test(.disabled("waits on AK-4")) func theWindowIdIsAFileName() {
+    @Test func theWindowIdIsAFileName() {
         let window = FlareWorkspace(services: .fake()).recoveryWindow
         #expect(!window.isEmpty)
         #expect(!window.contains("/") && !window.hasPrefix("."))
         #expect(Self.edited().recoveryWindow == window)
     }
 
-    @Test(.disabled("waits on AK-4")) func anOldRecoveryFlareIsOfferedOnce() throws {
+    @Test func anOldRecoveryFlareIsOfferedOnce() throws {
         let (home, arguments) = Self.home()
         let window = FlareWorkspace(services: .fake()).recoveryWindow
         let old = SuiteLocations.legacyFolder(FlareWorkspace.legacyRecovery, home: home)
@@ -139,5 +141,39 @@ import Testing
 
         #expect(FileManager.default.createFile(atPath: old, contents: Data("older".utf8)))
         #expect(LegacySupport.plan(old: old, new: new, exists: exists) == .keepBoth(old: old))
+    }
+
+    @Test func theWindowsFolderIsUnderTheRootAndOffWhenStateIsIgnored() throws {
+        let (home, arguments) = Self.home()
+        #expect(FlareWorkspace.recoveryFolder(arguments: arguments, home: home, ignoresState: true) == nil)
+        let made = FlareWorkspace.recoveryFolder(arguments: arguments, home: home, ignoresState: false)
+        let folder = try #require(made)
+        try folder.write(Data("bytes".utf8), window: FlareWorkspace.mainWindow, name: "Bounce.flare", at: 5)
+        #expect(FileManager.default.fileExists(atPath: home + "/support/Flare/Recovery/flare.main.flare"))
+        #expect(try Self.folder(arguments: arguments, home: home).leftBehind().map(\.name) == ["Bounce.flare"])
+    }
+
+    @Test func theLegacyMoveRunsOnceAndNeverOverANewerCopy() throws {
+        let (home, arguments) = Self.home()
+        #expect(FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home) == .nothing)
+        let old = SuiteLocations.legacyFolder(FlareWorkspace.legacyRecovery, home: home)
+        try FileManager.default.createDirectory(atPath: home + "/Library/Application Support/Flare",
+                                                withIntermediateDirectories: true)
+        let bytes = try FlareFormat.encode(FlareFixtures.bounce)
+        #expect(FileManager.default.createFile(atPath: old, contents: bytes))
+        let step = FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home)
+        guard case .move = step else { Issue.record("expected a move, got \(step)"); return }
+        #expect(!FileManager.default.fileExists(atPath: old))
+        let folder = Self.folder(arguments: arguments, home: home)
+        let items = try folder.leftBehind()
+        #expect(items.map(\.window) == [FlareWorkspace.mainWindow])
+        #expect(items.map(\.data) == [bytes])
+        #expect(items.allSatisfy { $0.savedAt > 0 })
+        #expect(FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home) == .nothing)
+
+        #expect(FileManager.default.createFile(atPath: old, contents: Data("older".utf8)))
+        #expect(FlareWorkspace.moveLegacyRecovery(arguments: arguments, home: home) == .keepBoth(old: old))
+        #expect(FileManager.default.fileExists(atPath: old))
+        #expect(try folder.leftBehind().map(\.data) == [bytes])
     }
 }

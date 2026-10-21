@@ -1,0 +1,37 @@
+[
+  {
+    "label": "cleanWritesNothing: the encoder is returned while the workspace is clean",
+    "file": "Sources/FlareModel/FlareRecovery+Kernel.swift",
+    "find": "        guard isDirty, let document else { return nil }\n",
+    "replace": "        guard let document else { return nil }\n",
+    "tests": "FlareRecoveryKernelTests"
+  },
+  {
+    "label": "restoreIsOneStep: a restore over an open document doesn't record history",
+    "file": "Sources/FlareModel/FlareRecovery+Kernel.swift",
+    "find": "        try next.perform(RecoveryRestore(recovered))\n        load(recovered)\n        engine = next\n",
+    "replace": "        load(recovered)\n",
+    "tests": "FlareRecoveryKernelTests"
+  },
+  {
+    "label": "a restore leaves the file's name, so it isn't untitled work",
+    "file": "Sources/FlareModel/FlareRecovery+Kernel.swift",
+    "find": "        (savedDocument, fileName) = (nil, nil)\n",
+    "replace": "",
+    "tests": "FlareRecoveryKernelTests"
+  },
+  {
+    "label": "the legacy move leaves the old file behind",
+    "file": "Sources/FlareModel/FlareRecovery+Kernel.swift",
+    "find": "            try files.removeItem(atPath: old)\n",
+    "replace": "",
+    "tests": "FlareRecoveryKernelTests"
+  },
+  {
+    "label": "the folder ignores -ApplePersistenceIgnoreState",
+    "file": "Sources/FlareModel/FlareRecovery+Kernel.swift",
+    "find": "        guard !ignoresState else { return nil }\n",
+    "replace": "",
+    "tests": "FlareRecoveryKernelTests"
+  }
+]

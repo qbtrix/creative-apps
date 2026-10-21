@@ -92,7 +92,7 @@ struct FlareWindow: View {
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
-        .modifier(FlareRecovery(model: model, restore: { model.restoreRecovery($0) }))
+        .modifier(FlareRecovery(model: model, restore: { try model.restoreRecovery($0) }))
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
