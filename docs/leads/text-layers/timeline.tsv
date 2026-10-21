@@ -1,0 +1,81 @@
+utc	stage	event	ref	note
+2026-10-17T00:05Z	0	stage-start	#1509	setup; blocked on viewer-playback and layer-keys
+2026-10-17T00:05Z	0	stage-end	#1509	no task can start; comment on the issue
+2026-10-17T00:30Z	2	stage-end	#1509	waits met; plan from packet, 7 tasks, 3 waves
+2026-10-17T01:00Z	2	heartbeat	#1509	wave 1 waits on a Swift toolchain (none on this box) or supervisor decision
+2026-10-17T01:31Z	2	heartbeat	#1509	still waiting: no toolchain on this box, no newer halo run; dev 28469c63
+2026-10-17T02:02Z	2	heartbeat	#1509	still waiting on toolchain; dev 1e42526b
+2026-10-17T02:35Z	2	heartbeat	#1509	still waiting on toolchain; dev bc04c7d4
+2026-10-17T03:12Z	2	heartbeat	#1509	still waiting on toolchain; dev 82ac5055, no new halo run
+2026-10-17T06:17Z	0	stage-start	#1509	line lead act-1a1487bf880-qmey resumed; lead/text-layers rebuilt on main; swift 6.3.3 installed
+2026-10-17T06:17Z	2	stage-end	#1509	combined plan with render-out: 7 tasks, 3 waves; base b8dfb4f0
+2026-10-17T06:17Z	3	stage-start	#1509	wave 1: TX-1 TX-2 TX-3 TX-4 beside RO-1 RO-2 RO-3
+2026-10-17T11:58Z	3	heartbeat	act-1a149b53ef6-67v7	line lead resumed: wave 1 of the previous run opened no PRs; restarting it on dev 0424231
+2026-10-17T11:56Z	3	stage-start	#1509	wave 1 relaunched on 0424231 (run act-1a149b53ef6-67v7)
+2026-10-17T13:53Z	3	pr-merged	#2060	TX-1
+2026-10-17T13:53Z	3	pr-merged	#2063	TX-2
+2026-10-17T13:53Z	3	pr-merged	#2065	TX-3
+2026-10-17T13:53Z	3	pr-merged	#2064	TX-4
+2026-10-17T13:53Z	3	stage-start	#1509	wave 2: TX-5 TX-6 beside RO-4 RO-5 on 8e86841
+2026-10-17T13:55Z	3	check	#2099	CI findings are a bundle launch crash outside the feature; filed #2099
+2026-10-17T14:13Z	3	pr-opened	#2107	TX-5 head 9a2c07d
+2026-10-17T14:14Z	3	pr-opened	#2109	TX-6 head 76c003c
+2026-10-17T14:18:46Z	3 wave 2	heartbeat	#2107	TX-5 lane macOS build run 39040027884 dispatched
+2026-10-17T14:18:46Z	3 wave 2	heartbeat	#2109	TX-6 lane macOS build run 39040054237 dispatched
+2026-10-17T14:40:18Z	3 wave 2	mac-build-green	#2107	run 39040027884 success; awaiting lane sweep
+2026-10-17T14:40:18Z	3 wave 2	mac-build-green	#2109	run 39040054237 success; awaiting lane sweep
+2026-10-17T14:57:33Z	3 wave 2	pr-merged	#2107	TX-5 squash c79dd97e
+2026-10-17T14:57:33Z	3 wave 2	pr-merged	#2109	TX-6 squash 2c5003b5
+2026-10-17T14:58:11Z	3 wave 3	wave-start	TX-7	builder started on base 2c5003b5
+2026-10-17T15:05:44Z	3 wave 3	pr-opened	#2132	TX-7 feature-done, CI: PASS, waves OK, head 9aba9554
+2026-10-17T15:16:01Z	3	heartbeat	lane	TX-7 #2132 waiting on its lane macOS build; #2131 (6dcb79e5) likely fixes #2099 (H-J22 launch crash)
+2026-10-17T15:37:19Z	3	heartbeat	#2132	TX-7 macOS build run 39043788656 dispatched 15:09; waiting on the lane
+2026-10-17T15:49:46Z	4	pr-merged	#2132	TX-7 feature-done merged dd7ec767; full CI 39045632781 + scoped halo 39045670179 dispatched
+2026-10-17T15:59:06Z	4	check	39045670179	scoped halo run on dd7ec767 still in progress
+2026-10-17T16:18Z	4	ci	scoped halo 39045670179	success at dd7ec767
+2026-10-17T16:18Z	4	spawned	critic panel round 1	clarity journey design layout controls audit
+2026-10-17T16:22Z	4	anatomy	round 1	not clean: #2175 #2176 major; #2177-#2181 minor
+2026-10-17T16:22Z	4	spawned	fix round 1	A halo/text-inspector-fixes; B halo/text-model-fixes
+2026-10-17T16:39Z	4	ci	full 39045632781	cancelled
+2026-10-17T16:39Z	4	pr	fix A #2188	in lane, head 9aea9534
+2026-10-17T16:40Z	4	pr	fix B #2189	in lane, head ba9db0e7
+2026-10-17T17:23Z	4 anatomy	build-green	#2188	macOS build 39050837099 success; waits for lane
+2026-10-17T17:23Z	4 anatomy	build-green	#2189	macOS build 39050851209 success; waits for lane
+2026-10-17T17:43Z	4 anatomy	merged	#2188	fix A squash-merged 17:36:04Z
+2026-10-17T17:43Z	4 anatomy	merged	#2189	fix B squash-merged 17:36:19Z
+2026-10-17T17:43Z	4 anatomy	ci	dev c3dbf73c	full CI 39054585645 pending; round 2 input
+18:04Z	4	ci	39056193379	round-2 input switched: 39054585645 cancelled; full CI on e17b68f9 pending
+18:30Z	4	ci	39056662077	full 39056193379 cancelled; round-2 input = scoped halo on e17b68f9
+19:01Z	4	anatomy	39056662077	round 2 started; macOS (halo) done 18:50Z, snapshots+build green, ui-test red
+2026-10-17T19:08Z	4	anatomy-r2	39056662077	#2177 reopened; 6/7 fixed; no new
+2026-10-17T19:08Z	5	fix-r2	#2177	fixer spawned (last round)
+2026-10-17T19:15Z	5	fix-r2-pr	#2269	f0e7a921; scripts\/ci --changed PASS; awaiting lane
+2026-10-17T19:29Z	5	heartbeat	39062516417	full dev CI pending on 0c8e4a71 (holds #2211); fixer PR awaiting lane macOS build
+2026-10-17T19:53Z	5	fix-r2-merged	#2269	1174ebda; full CI 39062516417 (0c8e4a71) lacks it
+2026-10-17T20:15Z	5	heartbeat	39064216590	full CI holding #2269 pending
+2026-10-17T20:38Z	5	heartbeat	39066129346	scoped halo holding #2269 running
+2026-10-17T21:02Z	5	verified	#2177	scoped halo 39066129346 green at df60ad73 (holds #2269)
+2026-10-17T21:02Z	6	waiting	full CI	39066112359 cancelled; need next green full run
+2026-10-17T21:02Z	-	blocked	#2303	dev-red: Linux DesignStyleBudgetTests/scrubStep (Design, bisected to #2268); full CI cannot go green until fixed; not Halo
+2026-10-17T21:24Z	6	waiting	39069913922	full CI on c55fad78 queued; #2369 reverted the dev-red culprit
+2026-10-17T21:46:47Z	done-check	poll	39069913922	full CI in progress
+2026-10-17T22:08:29Z	done-check	poll	39069913922	still in progress; 39072812111 pending
+2026-10-17T22:30Z	done-check	full CI 39072812111 cancelled; watching 39069913922 and 39074726717	39074726717	heartbeat
+2026-10-17T22:52Z	6	full-ci-check	39069913922	red outside Halo (Photo journey geometry); watching 39076534514 on 59c435a6
+2026-10-17T23:14Z	6	full-ci-check	39076534514	in progress; 39069913922 cancelled; 39077736900 queued
+2026-10-17T23:16Z	6	heartbeat	act-1a14c24f6d2-lrkw	resumed, rebased on main 59c435a6; 0 open findings; waiting on CI 39076534514
+2026-10-17T23:36Z	6	full-ci-check	39076534514	macOS red on Design snapshot tests only, not Halo; Halo render timing p95 74.6ms/60ms report-only
+2026-10-17T23:58Z	6	heartbeat	39076534514	still in progress (ui-test, no journey output yet); next full run 39080371690 on a6150139 pending
+2026-10-18T00:19Z	6	heartbeat	39076534514	still in progress (ui-test); 39080371690 on a6150139 still pending, no jobs
+2026-10-18T00:41Z	6	full-ci-check	39076534514	completed: macOS scripts/ci red (Design only), ui-test cancelled at 00:28Z; 39080371690 pending
+2026-10-18T01:04Z	6	full CI red: expired quarantine entries; supervisor asked	39082226458	#1505 comment 6244022808
+2026-10-18T01:26Z	6	duplicate run stood down; lead already stopped by act-1a14c24f6d2-lrkw	39076534514	contact sheet posted 00:36Z
+2026-10-18T02:27Z	6	heartbeat	act-1a14c24f6d2-lrkw	resumed on stall nudge; lead stopped, nothing to build; gaps #2510,#2512; waiting on the supervisor (#1505 6244022808) and SuiteUI (#1789)
+2026-10-18T02:59Z	6	heartbeat	act-1a14c24f6d2-lrkw	stall nudge; lead stopped, nothing to build. dev green again at 948bcbf4 (dev-red #2509 closed); #1505 and #1035 carry needs-human; open: #1789, gaps #2510 #2512
+2026-10-18T03:30Z	6	heartbeat	act-1a14c24f6d2-lrkw	stall nudge; lead stopped, nothing to build. No full dev CI green since 39076534514 (39092671040 cancelled, 39093416270 running); open: #1789, gaps #2510 #2512
+2026-10-18T04:01Z	6	heartbeat	act-1a14c24f6d2-lrkw	stall nudge; lead stopped, nothing to build. Full CI 39093416270 (0965457c): Linux and Promote green, macOS (report-only) running; open: #1789, gaps #2510 #2512
+2026-10-18T04:33Z	6	heartbeat	act-1a14c24f6d2-lrkw	Still stopped. Full CI 39093416270 (0965457c): Linux and Promote green, macOS (report-only) still running; 39096939772 (21066130) pending. No new comments on #1505 #1509 #1035 #1789 #2510 #2512.
+2026-10-18T05:04Z	6	heartbeat	act-1a14c24f6d2-lrkw	Still stopped. Full CI 39093416270 (0965457c) concluded success (Linux, Promote green), but its report-only macOS job failed. The Halo journeys match the 00:36Z sheet: 4 pass, 13 fail, 1 skip, and the same 35 halo audit violations. The failures are the known timeline-prefix lookups (#2512, waiting on #1789) and H-J22 Stale (#2510). Nothing new to build.
+2026-10-18T05:35Z	6	heartbeat	act-1a14c24f6d2-lrkw	Still stopped. Scoped halo run 39100960414 (f4b990ea) is queued. The only Halo/SuiteUI change on dev since 0965457c is BusyNote (#2576); nothing touches #2510 or #1789/#2512. No new comments or labels.
+2026-10-18T06:07Z	6	heartbeat	act-1a14c24f6d2-lrkw	Still stopped. Scoped halo run 39100960414 (f4b990ea) still queued; full CI 39102696294 (e3fccbbb) pending. New SuiteUI merges (#2547, #2617, #2614) don't touch #1789 or the timeline prefix. No new comments or labels.
+2026-10-18T06:39Z	6	heartbeat	act-1a14c24f6d2-lrkw	Still stopped. Scoped halo run 39100960414 (f4b990ea) now in progress; full CI 39102696294 (e3fccbbb) queued. New SuiteUI merges (#2551, #2609, #2610, #2628, #2633, #2626) are not #1789. No new comments or labels.
