@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-21T04:07:22Z	fix	FC-5 #3466 pushed 6686ed2 (10 library.txt baseline lines), gate PASS, CommandPathTests pass, Head moved. Stacked FC drafts will need the same when they merge dev.
 2026-10-21T04:29:21Z	check	FC-5 #3466 head 6686ed2 macOS build 39543117125 green; waits lane merge
 2026-10-21T04:51:43Z	check	FC-5 #3466 (6686ed2) first in batch-20261021043428; batch red on HaloShapeDraftTests (not ours), bisecting (probe -4 running)
+2026-10-21T05:13:47Z	check	FC-5 #3466 (6686ed2) in batch-20261021043428, bisect probes -4..-6 contain it (Halo red later); stacked FC drafts wait its merge
