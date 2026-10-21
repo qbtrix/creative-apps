@@ -118,3 +118,4 @@ utc	stage	event	ref	note
 2026-10-21T21:12Z	3	check	PN-3a	#3770 merged 21:01Z; PN-3 merged dev (test helper conflict kept PN-3 side), gate running
 2026-10-21T21:17Z	3	wave	PN-3	PR #4203 opened (head bbcd4a64, CI PASS); PN-4 merged PN-3+dev, gate running
 2026-10-21T21:29Z	3	check	PN-u	#4203 macOS build 39679097683 dispatched; PN-4 pushed ce7d5960 (CI PASS), PR after #4203
+2026-10-21T21:47Z	3	check	PN-3 #4203	macOS build 39679097683 queued; PN-4 waits on merge; #3477 still waiting-on-prereq
