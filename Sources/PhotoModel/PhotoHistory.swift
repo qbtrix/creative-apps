@@ -182,7 +182,7 @@ extension PhotoWorkspace {
             // pixels. Only pixel layers have pixels (an adjustment layer none).
             guard Set(list.filter { $0.kind == .pixels }.map(\.id)) == Set(pixels.keys) else { return edit }
             layers = list
-            selectedLayerID = selected
+            restoreLayerSelection(primary: selected)
             touch(.all)
             return inverse
         case .stack(let stack):
@@ -229,7 +229,7 @@ extension PhotoWorkspace {
         layers = stack.layers
         pixels = stack.pixels
         masks = stack.masks
-        selectedLayerID = stack.selectedLayerID
+        restoreLayerSelection(primary: stack.selectedLayerID)
         selection = stack.selection
         pendingCrop = nil
     }
