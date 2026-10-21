@@ -39,6 +39,8 @@ Next: build DS-a (DS-1 + DS-2) as one slice PR, then stack DS-m (DS-3 + DS-4) on
 - DS-3 and DS-4 ship as one DS-m PR stacked on DS-a.
 - DS-11 (test only) is held for the DS-halo slice PR rather than a test-only PR (rule 22).
 
+- Builders build the stacked slices one after another in one worktree; the lead opens the PRs.
+
 ## Open
 - DS-u waits on frame-rates:FR-u (held) and area-selection:AR-u (waiting).
 - Adopt slices wait on other features' app slices (FR-halo/flare, CB-photo/design/halo/flare, UP-halo).
