@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T22:18Z	check-in	#4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
 2026-10-21T22:48Z	check-in	#4028 (IM-1) still waiting for the supervisor merge. IM-2 is held.
 2026-10-21T23:12Z	check-in	IM-1 #4028 still waits on supervisor merge (Package.swift); IM-2 gated (head 775148e3), PR opens once IM-1 lands.
+2026-10-21T23:35Z	check-in	IM-1 #4028 still waits on supervisor merge; IM-2 ready (775148e3).
