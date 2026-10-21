@@ -1,7 +1,7 @@
 {
   "id": "suite-pasteboard",
   "name": "Pasteboard coding",
-  "description": "SuiteClipItem and its typed representations (suite asset envelope, an app's own layers, SVG, PNG, TIFF, colour, text); SuitePasteboardCoding, the live coder: the best item per target app (own layers first, Photo takes pixels) and the refusal sentence; PasteboardFolder, the CLI's pasteboard as one file per type listed in a manifest.",
+  "description": "SuiteClipItem and its typed representations (suite asset envelope, SVG, PNG, colour, text); best-item choice for a target app.",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
     "Sources/SuiteModel/Pasteboard/"
