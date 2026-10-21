@@ -4,7 +4,7 @@ Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
 Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
 Stage: 3 wave 5
 Base: 6d5f3a4025ffce3bb843003a158f64bf282020e6
-Next: CL-measure (cbbb878) and CL-z (#4167 merged 4565e85) both wait for a green dev Linux run; dev red on CommandPathTests launcher baseline (RP-2 #4049 x CS-2 #4023, suite line, dev-red #3856), not core-loop; then Belt-Slice-Done CL-measure, CL-z, Belt-Contact-Sheet; critics once scoped halo run 39671767226 (still queued) shows screens
+Next: all slices done; Belt-Slice-Done CL-measure + CL-z and Belt-Contact-Sheet posted on run 39682861406 (supervisor ruling: its only red is the unrelated launcher baseline, fixed by #4217). Remaining: critics once scoped halo run 39671767226 shows screens; findings get fixers (at most 2 rounds), the rest become gaps
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -13,8 +13,8 @@ Next: CL-measure (cbbb878) and CL-z (#4167 merged 4565e85) both wait for a green
 | CL-ui | Render… opens SuiteUI ExportSheet on the kernel run; render budget on | CL-4, CL-5 | H-J21 | CL-a | true | 0 | done: #3590 ui1 + #3653 ui2 merged; Belt-Slice-Done + Mac-Finish-Wanted at run 39507877855 (23:50Z) | | |
 | CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
 | CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | done: Belt-Slice-Done + Mac-Finish-Wanted (run 39670298178) | | |
-| CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | all PRs merged (#3487, #4148 5803475, #4166 cbbb878); waiting for a green dev Linux run at or past cbbb878 | | |
-| CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | PR #4167 merged 4565e85; waiting for a green dev Linux run | | |
+| CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | done: Belt-Slice-Done run 39682861406 (issuecomment-6328176308) | | |
+| CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | done: Belt-Slice-Done run 39682861406 (issuecomment-6328176568) | | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -67,3 +67,5 @@ Next: CL-measure (cbbb878) and CL-z (#4167 merged 4565e85) both wait for a green
 - CL-12 (and so CL-13) waits on switching A-HA-1 #865 (open).
 - Blocked (rule 19, run act-1a15d0eeefb-6z9l): CL-probe and CL-measure wait on #3401, CL-z on #865; both open with no PR. Said on #1971 with a question for the supervisor: https://github.com/qbtrix/creative-apps/issues/1971#issuecomment-6311966922
 - CL-7 note: sheet close while editing uses dismissRender (CL-ui2 already routes act(.close) to cancelRender only while running); `renderRunning` was unused and is dropped in #3817.
+
+- 22:43Z supervisor ruled (issuecomment on #1971, 22:20Z): post slice-done and contact sheet on run 39682861406, naming the unrelated launcher-baseline failure (#3856, fixed by #4217). Done; contact sheet issuecomment-6328176890.
