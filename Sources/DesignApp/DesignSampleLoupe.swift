@@ -44,7 +44,7 @@ struct DesignSampleLoupe: View {
     /// SuiteUI's sample-size chips at the narrowest inspector column's width, on a GlassPanel. They float over the
     /// artwork: at their bare fitting width a 1x display rounds "Point" over into "Poi…", and with no backing the
     /// chosen chip's light label vanishes on a white artboard in Dark.
-    static func sizeChips(_ size: SampleSize, onChange: @escaping @MainActor (SampleSize) -> Void) -> some View {
+    @MainActor static func sizeChips(_ size: SampleSize, onChange: @escaping @MainActor (SampleSize) -> Void) -> some View {
         GlassPanel { SampleSizeChips(size: size, onChange: onChange).frame(width: SuiteSize.inspectorWidth.min) }
             .fixedSize()
     }
