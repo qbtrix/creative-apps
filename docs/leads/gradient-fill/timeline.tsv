@@ -1,0 +1,56 @@
+utc	stage	event	ref	note
+2026-10-20T03:17Z	0	stage-start	#3419	setup on dev 233aff5; main b3011ab verified
+2026-10-20T03:17Z	0	stopped	#3418	no task can start: GF-a not merged
+2026-10-20T03:49Z	3	heartbeat	#3418	dev 533daec has no Sources/SuiteKernel/Fill; GF-1 building, GF-2 waits CC-u
+2026-10-20T04:05Z	3	heartbeat	#3418	dev 533daec still lacks Fill/; GF-1 pushed (ed1ed79, no merge yet); GF-2 waits CC-u
+2026-10-20T04:23Z	3	heartbeat	#3418	dev 53151b2 lacks Fill/; GF-1 ed1ed79 unmerged; GF-2 waits CC-u
+2026-10-20T04:39Z	3	heartbeat	#3421	dev 18464f2 lacks Fill/; GF-1 is PR #3421 (open, fast-lane); GF-2 waits CC-u
+2026-10-20T04:56Z	3	heartbeat	#3421	dev 18464f2 lacks Fill/; #3421 waits its macOS build (run 39364860084)
+2026-10-20T05:13Z	3	heartbeat	#3421	dev 6537a1a lacks Fill/; #3421 macOS build 39364860084 still queued since 03:32Z (runner queue)
+2026-10-20T05:32Z	3	asked	#3419	#3421 macOS build 39364860084 queued 2h; asked supervisor to re-dispatch or Mac-Check
+2026-10-20T05:53Z	3	unblocked	#3421	GF-1 merged as 9a146777; Sources/SuiteKernel/Fill on dev
+2026-10-20T06:25Z	3	building	FG-1	feat/flare-gradient-fg-a: stubs + FlareGradientTests pass locally; running scripts/ci --changed
+2026-10-20T06:09Z	3	pr	FG-1	#3526 open at 37c65fb2, fast-lane, scripts/ci --changed PASS
+2026-10-20T06:16Z	3	pr	FG-6	#3532 open at 8bbb9c89 stacked on #3526, fast-lane, scripts/ci --changed PASS
+2026-10-20T06:37Z	3	heartbeat	FG-1,FG-6	lane dispatched macOS builds (queued); no GF-2/GF-6/AC-flare on dev
+2026-10-20T06:58Z	3	heartbeat	FG-1,FG-6	macOS builds still queued; no GF-2/GF-3/GF-6/AC-flare on dev
+2026-10-20T07:20Z	3	heartbeat	FG-1,FG-6	macOS builds queued 1h (runner backlog); no GF-2/GF-3/GF-6/AC-flare on dev
+2026-10-20T07:42Z	heartbeat	builds 39379666154/39379693778 still queued; #3526 #3532 clean; blockers GF-2/GF-3/GF-6/AC-flare not on dev
+2026-10-20T08:05Z	heartbeat	builds 39379666154/39379693778 still queued (1h46m); #3526 #3532 clean, no new lane comments; blockers GF-2/GF-3/GF-6/AC-flare not on dev (dev head 83750492)
+2026-10-20T08:26Z	heartbeat	builds still queued (2h07m); flagged stalled macOS runners to the supervisor on #3419; blockers not on dev
+2026-10-20T08:49Z	heartbeat	builds still queued (2h30m); no supervisor reply on #3419 yet; blockers not on dev (dev head be364d1e)
+2026-10-20T09:12Z	heartbeat	builds still queued (2h53m); PRs clean; no supervisor reply on #3419; blockers not on dev (dev head be364d1e)
+2026-10-20T09:34Z	heartbeat	FG-1 build 39379666154 started (in_progress); FG-6 build still queued; blockers not on dev (dev head 36789542)
+2026-10-20T09:35Z	build	FG-1 #3526 macOS build 39379666154 success (09:25-09:34Z); awaiting lane merge
+2026-10-20T09:48Z	build	FG-6 #3532 macOS build 39379693778 success; both PRs await lane merge
+2026-10-20T09:55Z	heartbeat	both builds green; #3526 #3532 clean, awaiting lane sweep; blockers not on dev (dev head f8b6c4f7); no supervisor reply
+2026-10-20T10:03Z	merged	FG-1 #3526 merged as 11a545e7; #3532 awaiting lane
+2026-10-20T10:15Z	fix	#3532 needs-rebase: merged dev, resolved to FG-6, gate PASS, pushed e3e06e1f, Head moved
+2026-10-20T10:18Z	heartbeat	#3532 at e3e06e1f awaiting lane (needs-rebase not yet dropped); GF-2, GF-3, GF-6, AC-flare not on dev (head a6cb0127); no supervisor reply
+2026-10-20T10:38Z	heartbeat	#3532 build 39406950210 queued; GF-2, GF-3, GF-6, AC-flare not on dev (head a54a892a); no supervisor reply
+2026-10-20T10:59Z	heartbeat	#3532 build 39406950210 still queued (macOS backlog); blockers not on dev (head 575cc800); no supervisor reply
+2026-10-20T11:20Z	build	#3532 macOS build 39406950210 green; awaiting lane merge
+2026-10-20T11:21Z	heartbeat	#3532 build green, awaiting lane sweep; blockers not on dev (head 0e1199e9); no supervisor reply
+2026-10-20T11:43Z	heartbeat	#3532 green since 11:19Z, unmerged; lane run 39415962455 in progress; blockers not on dev (head 0e1199e9); no supervisor reply
+2026-10-20T12:07Z	heartbeat	#3532 green, unmerged: lane batch-20261020112639 red, bisecting (probe -0 running); blockers not on dev (head 0e1199e9); no supervisor reply
+2026-10-20T12:30Z	heartbeat	batch-20261020112639 settled: 4 PRs merged (dev 3ebb876f), #3532 not in it; #3532 green, clean, no needs-fix, lane run 39421163733 in progress; GF-2/GF-3/GF-6/AC-flare still not on dev
+2026-10-20T12:43Z	merged	FG-6 #3532 merged as a454b5c9 (12:42Z); FG-m waits on FG-5 (GF-6, AC-flare); GF-2/GF-3/GF-6/AC-flare not on dev (head 3e010e38)
+2026-10-20T12:51Z	heartbeat	dev 897ccbb2: no GF-2/GF-3/GF-6/AC-flare yet; wave 3 blocked on core slices
+2026-10-20T13:22Z	heartbeat	dev f729e906: no GF-2/GF-3/GF-6; SuiteUI lead #3418 silent since 03:21Z; asked the supervisor on #3419 (comment 6291793984)
+2026-10-20T13:41Z	heartbeat	dev f729e906 unchanged; no GF PR open; no supervisor reply; #3418 still silent since 03:21Z
+2026-10-20T14:05Z	heartbeat	dev df54ce81: no GF-2/GF-3/GF-6; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T14:26Z	heartbeat	dev 9f880c85: no GF-2/GF-3/GF-6; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T14:48Z	heartbeat	dev 9f880c85 unchanged; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T15:16Z	heartbeat	dev 27b67332: no GF-2/GF-3/GF-6; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T15:39Z	heartbeat	dev 27b67332 unchanged; GF-2/GF-3/GF-6 not on dev, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T16:00Z	heartbeat	dev 5eceabf7 (core bump, perf journeys, AL-d3 doc): no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T16:22Z	heartbeat	dev 7b45f176: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419 (asked 13:22Z); #3418 silent
+2026-10-20T16:43Z	heartbeat	dev bc9bc10e: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T17:04Z	heartbeat	dev 0269b300: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T17:26Z	heartbeat	dev f30af1b5: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T17:48Z	heartbeat	dev d7f615dc (SS-2 stroke placeholder, DR-1, lane batch gate): still no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T18:11Z	heartbeat	dev d7f615dc unchanged: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T18:33Z	heartbeat	dev 875b44d2 (render contract lint #3163, place commands #3626, design/library): still no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T18:55Z	heartbeat	dev e382f9d7 (library MD-12): still no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T19:17Z	heartbeat	dev a48992b7 (suite #3085): still no GF-2/GF-3/GF-6; only gradient PR is #3681 (Photo tool, not ours); no supervisor reply on #3419; #3418 silent
+2026-10-21T07:05Z	3	stage-start	wave 3	line lead act-1a15d4ed024-1wsg resumed; GF-2 on dev; FG-2 + FG-4 start
