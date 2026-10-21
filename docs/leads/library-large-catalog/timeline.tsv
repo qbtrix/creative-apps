@@ -7,3 +7,5 @@
 2026-10-21T12:45Z	check	ci	LG-a	Linux 39598650564 red on LargeCatalogBudgetTests fixture timing (ours) + LibraryFoldersTests (not ours)
 2026-10-21T12:45Z	fix	round1	LG-a	fixer dispatched on large-catalog/lg-a-fix: timing out of the gate
 2026-10-21T12:55Z	ship	opened	LG-a	fix round 1 PR #4073 head 3deedf28, CI: PASS; asked supervisor on #3790 to list LargeCatalogFixtureBudgetTests in perf-suites
+2026-10-21T13:05Z	done	slice	LG-a	Belt-Slice-Done on 39601343733; only red LibraryFoldersTests (#3961)
+2026-10-21T13:05Z	check	question	-	supervisor asked on #3790 to list LibraryFoldersTests/tenThousandPaths in perf-suites (3 reds)

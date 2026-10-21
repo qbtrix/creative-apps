@@ -2,7 +2,7 @@
 
 Issue: #3790 · Packet: docs/blueprints/library/features/large-catalog.md
 Run: act-1a15df37b73-k199 · Session: claude/library-line-lead-lqhhp8 · Started: 2026-10-21T10:19Z
-Stage: 3 wave 1 (LG-a fix round 1: #4073 open, fast-lane, gate pass; perf-suites ask on #3790)
+Stage: 3 wave 1 done (LG-a done on 39601343733; #4073 hardening open); LG-model waits on FC-a, MD-e, DR-m
 Base: e2b8aa76 (origin/dev)
 Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on LG-model, FC-c, suiteui shared-thumbnails ST-m
 
@@ -36,3 +36,5 @@ Next: Belt-Slice-Done for LG-a; LG-model waits on FC-a, MD-e, DR-m; LG-grid on L
 - dev-red #3856 open (others' merges).
 
 - 12:45Z: dev Linux check 39598650564 (76d0c892) red on our LargeCatalogBudgetTests.fixtureBuildsTenThousandDeterministically (6.45 s vs 5 s wall clock at line 25), plus the not-ours LibraryFoldersTests.tenThousandPaths. Decision: LG-a fix round 1. The fixture test keeps determinism only; the 5 s budget moves to its own disabled suite LargeCatalogFixtureBudgetTests, and the supervisor is asked to list it in Tests/perf-suites.txt (protected).
+
+- 13:05Z: Linux 39601343733 (737541328, contains c2aa3391) red only on LibraryFoldersTests.tenThousandPaths (28.4 ms, #3961, not ours); LG-a tests green. Posted Belt-Slice-Done: LG-a (LG-a is not a UI slice, so no Mac-Finish-Wanted). #4073 (fix round 1) stays open to take the timing assert out of the gate. Asked the supervisor on #3790 to list LibraryFoldersTests/tenThousandPaths in perf-suites, since it has been red in 3 checks in a row.
