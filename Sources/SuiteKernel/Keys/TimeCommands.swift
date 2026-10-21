@@ -10,7 +10,23 @@ public enum TimeCommands {
     /// `time.timecode`'s params: a frame to label or a label to read, at a rate.
     struct TimecodeParams: Codable, Sendable { var frame: Int?; var text: String?; var rate: Rate }
     /// `time.timecode`'s result: the frame and its label; the frame is null for a label drop-frame skips.
-    struct TimecodeResult: Codable, Sendable { var frame: Int?; var text: String }
+    struct TimecodeResult: Codable, Sendable {
+        var frame: Int?; var text: String
+        /// Writes `frame` as null rather than leaving it out, so both keys the schema requires are always there.
+        func encode(to encoder: Encoder) throws {
+            var keyed = encoder.container(keyedBy: CodingKeys.self)
+            try keyed.encode(frame, forKey: .frame)
+            try keyed.encode(text, forKey: .text)
+        }
+    }
+
+    /// `time.timecode`'s run: a frame becomes its label; else a label becomes its frame (null when skipped).
+    static func timecode(_ p: TimecodeParams) -> TimecodeResult {
+        let rate = FrameRate(numerator: p.rate.num, denominator: p.rate.den)
+        if let frame = p.frame { return TimecodeResult(frame: frame, text: Timecode.string(frame: frame, rate: rate)) }
+        let text = p.text ?? ""
+        return TimecodeResult(frame: Timecode.frame(text, rate: rate), text: text)
+    }
     /// `time.rates`' result entry.
     struct RateEntry: Codable, Sendable { var num, den: Int; var title: String; var dropFrame: Bool }
 
@@ -37,7 +53,7 @@ public enum TimeCommands {
                                    required: ["frame", "text", "rate"]),
                    result: .object(["frame": .optional(.integer(minimum: 0)), "text": .string()], required: ["frame", "text"]),
                    example: .object(["frame": .number(1800), "rate": .object(["num": .number(30000), "den": .number(1001)])])) { _, p in
-                       TimecodeResult(frame: p.frame, text: "")
+                       timecode(p)
                    },
         ]
     }

@@ -1,0 +1,23 @@
+[
+  {
+    "label": "fillSelectionIsTheFirstOfSeveralShapesInItsBounds: the last shape's box",
+    "file": "Sources/FlareModel/FlareFill+Kernel.swift",
+    "find": "        guard let shape = paintShapes.first?.1 else { return nil }",
+    "replace": "        guard let shape = paintShapes.last?.1 else { return nil }",
+    "tests": "FlareGradientTests"
+  },
+  {
+    "label": "runFillRefusesWithAReasonUntilTheCommandsAreBuilt: the refusal dropped",
+    "file": "Sources/FlareModel/FlareFill+Kernel.swift",
+    "find": "            paintError = error.description",
+    "replace": "            paintError = nil",
+    "tests": "FlareGradientTests"
+  },
+  {
+    "label": "aShapeSaysEditingIsNotBuiltUntilTheCommandsAre: no not-built reason",
+    "file": "Sources/FlareModel/FlareFill+Kernel.swift",
+    "find": "        return Self.catalog.spec(GradientIntent.type(.solid).command.id) == nil ? Self.fillNotBuilt : nil",
+    "replace": "        return nil",
+    "tests": "FlareFillHelpTests"
+  }
+]
