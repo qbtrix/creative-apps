@@ -47,3 +47,4 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - 2026-10-21T08:17Z: #3959 (FG-a) at the lane's macOS gate; FG-3 waits on GF-3 #3760, FG-5 on GF-6 #3742, KS-a #3921, AC-flare.
 - 2026-10-21T08:38Z: GF-3 #3760 merged 08:33Z: builder launched for FG-u (FG-3 snapshots + stopDragInThreeBodies), stacked on #3959, checking switch/Type-row duplicate. #3959 still at macOS gate. FG-m waits on KS-a #3921, GF-6 #3742, AC-flare.
 - 2026-10-21T08:47Z: FG-u #3974 open, stacked on #3959; FILL keeps its switch, GradientEditor shows its own only with >1 type (journey clicks flare.inspector.fillType.radial). Stop drag in the test moves via accessibility adjust, not a drag gesture.
+- 2026-10-21T08:58Z: #3959 macOS build green 08:04Z, mergeable clean, unmerged 53 min, no Linux check: asked supervisor on #3419. #3974 (FG-u) macOS build queued (run 39573143406). FG-m still waits on KS-a #3921, GF-6 #3742, AC-flare.
