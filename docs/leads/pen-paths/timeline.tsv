@@ -116,3 +116,4 @@ utc	stage	event	ref	note
 2026-10-21T20:40Z	3	check	PN-3a	#3770 macOS build 39662925615 green; waits on lane sweep
 2026-10-21T20:54Z	3	check	PN-3a	#3770 green build, not yet swept; PN-3/PN-4 wait
 2026-10-21T21:12Z	3	check	PN-3a	#3770 merged 21:01Z; PN-3 merged dev (test helper conflict kept PN-3 side), gate running
+2026-10-21T21:17Z	3	wave	PN-3	PR #4203 opened (head bbcd4a64, CI PASS); PN-4 merged PN-3+dev, gate running
