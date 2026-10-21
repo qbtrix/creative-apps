@@ -1,10 +1,10 @@
 # suite-imaging lead record
 
 Issue: #3715 · Packet: docs/blueprints/suiteui/features/suite-imaging.md
-Run: act-1a15e10a9c3-kwzx · Session: cse_0149ntRhzuHiphyYf6FNgYbC · Started: 2026-10-21T10:20Z
+Run: act-1a15fe5ef7c-rszn (resumes act-1a15e10a9c3-kwzx) · Started: 2026-10-21T10:20Z
 Stage: 3 wave 1
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: read IM-1's PR (supervisor merge); open IM-2's PR once IM-1 merges
+Next: IM-1 (#4028) is supervisor-approved and queued on the Mac gate; open IM-2's PR once IM-1 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,7 +18,7 @@ Next: read IM-1's PR (supervisor merge); open IM-2's PR once IM-1 merges
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| IM-1 | IM-a | 1 | SuiteImaging target + Metal boundary rule (supervisor merge) | Package.swift, project.yml, Sources/SuiteImaging/SuiteImaging.swift, Tests/SuiteImagingTests/ImagingBoundaryTests.swift, Tests/metal-boundary-baseline.txt, docs/c4/parts/creative-apps/suite-imaging/container.json, docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json, docs/c4/parts/creative-apps/suite-imaging/imaging-route.json, Tests/mutations/SuiteImaging.ImagingBoundary.json | ImagingBoundaryTests | – | building |
+| IM-1 | IM-a | 1 | SuiteImaging target + Metal boundary rule (supervisor merge) | Package.swift, project.yml, Sources/SuiteImaging/SuiteImaging.swift, Tests/SuiteImagingTests/ImagingBoundaryTests.swift, Tests/metal-boundary-baseline.txt, docs/c4/parts/creative-apps/suite-imaging/container.json, docs/c4/parts/creative-apps/suite-imaging/imaging-adjust.json, docs/c4/parts/creative-apps/suite-imaging/imaging-route.json, Tests/mutations/SuiteImaging.ImagingBoundary.json | ImagingBoundaryTests | #4028 | in review |
 | IM-2 | IM-a | 2 | stubs + disabled tests | Sources/SuiteImaging/Adjust/AdjustSettings.swift, Sources/SuiteImaging/Adjust/ImagingProgram.swift, Sources/SuiteImaging/Route/ImagingRoute.swift, Sources/SuiteImaging/Route/LiveToneSurface.swift, Tests/SuiteImagingTests/AdjustSettingsTests.swift, Tests/SuiteImagingTests/ImagingProgramTests.swift | AdjustSettingsTests, ImagingProgramTests (disabled) | – | building (stacked on IM-1) |
 | IM-3 | IM-m | 3 | AdjustSettings clamp + round-trip | Sources/SuiteImaging/Adjust/AdjustSettings.swift, Tests/SuiteImagingTests/AdjustSettingsTests.swift, Tests/mutations/SuiteImaging.AdjustSettings.json | AdjustSettingsTests | – | planned |
 | IM-4 | IM-m | 3 | ImagingProgram one step list | Sources/SuiteImaging/Adjust/ImagingProgram.swift, Sources/SuiteImaging/Route/ImagingRoute.swift, Tests/SuiteImagingTests/ImagingProgramTests.swift, Tests/mutations/SuiteImaging.ImagingProgram.json | ImagingProgramTests | – | planned |
@@ -48,3 +48,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 
 ## Open
 - IM-photo waits adopt-kernel-eyedropper-photo EP-z (blocked) and photo #3144; IM-library waits library spine feature-done; IM-13 waits shared-thumbnails ST-a.
+- 2026-10-21T19:24Z: #4028 approved by the supervisor, queued on the Mac gate (18:06Z); body moved to this run id.
