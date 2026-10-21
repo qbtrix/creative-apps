@@ -1,29 +1,29 @@
 # folders lead record
 
 Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
-Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
+Run: act-1a15f2277a5-6xyv · Session: relaunch of cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z (resumed 2026-10-21T15:49Z)
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: (11:50: CI at 39d90e3 red on dev-red #3856, not ours; slice-done held; lane macOS builds still pending) (11:15) FO-5 opened as #4022 (lead/folders-FO-5, head eb50169, gate PASS, Mutate LibraryModel.LibraryFolders+Kernel 5/5), stacked on FO-4 #3961 with no-fast-lane; swap to fast-lane once #3961 merges. Watch: FO-4's tenThousandPaths 20 ms median measured 22 ms once under full parallel load. If the batch turns red on it, raise the budget or move the test to the perf list via the supervisor. FO-a Belt-Slice-Done waits on CI at 39d90e3.
+Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 queued (runner backlog). FO-6 draft PR #4121 at 34c669c stacked on it (attribution footer removed from its body); mark ready once #4022 merges. Then FO-7 feature-done.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | merged #3939 (in Linux check 39571804700 d93267dab); Belt-Slice-Done waits on a qualifying run | – | – |
-| FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | PR #3963 open, stacked on #3961 (FO-4) | – | – |
-| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 #3961 fast-lane (27c6113); FO-5 blocked | – | – |
-| FO-z | live, RJ-L53, built | FO-6, FO-7 | LJ-FO, MJ-FO | FO-u, FO-m | yes | 0 | blocked | – | – |
+| FO-a | tree and filter as stubs, checks disabled | FO-1, FO-2 | MJ-FO | – | no | 0 | done: Belt-Slice-Done posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
+| FO-u | FOLDERS section on stubs, ids, render budget | FO-3, FO-3b | LJ-FO | FO-a; FC-a (merged) | yes | 0 | done: merged #3963; Belt-Slice-Done + Mac-Finish-Wanted posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
+| FO-m | tree from paths, folder filter, commands | FO-4, FO-5 | MJ-FO | FO-a; FC-d, LF-m, LC-m (not merged) | no | 0 | FO-4 merged #3961; FO-5 PR #4022 in the lane | – | – |
+| FO-z | live, RJ-L53, built | FO-6, FO-7 | LJ-FO, MJ-FO | FO-u, FO-m | yes | 0 | FO-6 draft PR #4121 (stacked on #4022) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | FO-1 | FO-a | 1 | FolderNode, tree stub, command specs NotBuilt, tests disabled | LibraryFolders.swift, LibraryFolders+Kernel.swift, LibraryFoldersTests.swift | compiles, disabled | #3939 | merged |
 | FO-2 | FO-a | 1 | journey skipped, RJ-L53 disabled | UITests/LibraryJourneyTests+Folders.swift, Tests/RealJobs/library/browse-folders/ | scripts/jobs check | #3939 | merged (same PR) |
-| FO-3 | FO-u | 2 | FOLDERS section | LibraryBrowser.swift, LibraryFoldersSection.swift | ids, menu toggles | #3963 | open, head c61d27f (dev and FO-4 merged in, 9 files +347/-16), Mutate 6/6, no-fast-lane until #3961 merges |
+| FO-3 | FO-u | 2 | FOLDERS section | LibraryBrowser.swift, LibraryFoldersSection.swift | ids, menu toggles | #3963 | merged (c9c6d8a); was head c61d27f (dev and FO-4 merged in, 9 files +347/-16), Mutate 6/6, no-fast-lane until #3961 merges |
 | FO-3b | FO-u | 2 | render budget | RenderBudgetLibraryFoldersTests.swift | expandFolderInTwoBodies | #3963 | open (same PR) |
-| FO-4 | FO-m | 2 | tree body | LibraryFolders.swift, LibraryFoldersTests.swift, Tests/mutations/LibraryModel.LibraryFolders.json | LibraryFoldersTests | #3961 | open, head 8f00bb8 (dev merged in, 3 files +92/-12), Mutate 3/3, no-fast-lane until the gate passes (blocked only by dev-red #3856) |
+| FO-4 | FO-m | 2 | tree body | LibraryFolders.swift, LibraryFoldersTests.swift, Tests/mutations/LibraryModel.LibraryFolders.json | LibraryFoldersTests | #3961 | merged (80a62bd); was head 8f00bb8 (dev merged in, 3 files +92/-12), Mutate 3/3, no-fast-lane until the gate passes (blocked only by dev-red #3856) |
 | FO-5 | FO-m | – | filter case, command bodies | LibraryFilter.swift, LibraryFolders+Kernel.swift, LibraryCommandCatalog.swift, ... | LibraryFoldersTests.filter | – | blocked: FC-d, LF-m, LC-m |
-| FO-6 | FO-z | – | live | ... | LJ-FO | – | blocked |
+| FO-6 | FO-z | – | live | ... | LJ-FO | – | draft PR #4121 (34c669c), ready once #4022 merges |
 | FO-7 | FO-z | – | feature-done | folders.wave.json | – | – | blocked |
 
 ## Reviews
@@ -43,3 +43,12 @@ Next: (11:50: CI at 39d90e3 red on dev-red #3856, not ours; slice-done held; lan
 - 12:21Z: FO-u #3963 (c11098e) and FO-5 #4022 (8437a51) gates pass, both fast-lane, in the lane. FO-a Belt-Slice-Done waits on scoped library run 39593465885 (queued, contains 7962bec).
 - 12:44Z: no change; all four PRs clean + fast-lane, waiting on the lane's macOS batch gate; scoped library run 39593465885 still queued (macOS runners backlogged since 11:08Z); dev Linux checks red (dev-red, not ours).
 - 13:17 poll: PRs open/clean (BK-u #3967, LF-3 #4024, FO-u #3963, FO-5 #4022) awaiting lane macOS batch; macOS runners still backlogged; scoped library run 39593465885 queued; #3928 open (LF-4 blocked).
+- 2026-10-21T15:49Z (run act-1a15f2277a5-6xyv): relaunched. Rule 23 re-read: #3928 open (LF-4 blocked); dev-red #3856 still open but dev Linux check 39623471557 at 9951eea is green and contains every merged slice PR. All three open PRs (#4024, #4022, #3967) went red on Linux on dev's Photo command-path baseline, fixed by #4008; dev merged into each, gates re-running. Swift was missing in the relaunched container; scripts/cloud-setup.sh installed 6.3.3. No open finding is on this feature's files.
+- 2026-10-21T16:26Z: FO-5 #4022 re-gated after dev merge; fixed the stale FO-4 stub expectation (7482cc7), Head moved. FO-6 built on lead/folders-FO-6 stacked on FO-5: Model selectSidebarRow/toggleFolderSubfolders, window wiring, RJ-L53 on (stored-zip fixture, absolute paths), LJ-FO journey on. Gate PASS, mutate 5/5. Opened as draft #4121 because the dev diff counts FO-5's files (20 > 15) until #4022 merges. Open findings with Feature: folders: 0.
+- 2026-10-21T17:09Z: rule 23 re-read. #4022 open at 7482cc7; lane macOS build 39632234354 queued. #4121 draft, lane added fast-lane (Belt-Lead sweep; drafts are skipped) and flagged an attribution footer in the body, now removed. Open findings with Feature: folders: 0.
+- 2026-10-21T17:36Z: rule 23 re-read. FO-5 #4022 open at 7482cc7, now conflicting with dev (dirty); left to the lane's integration (needs-rebase would come back here). FO-6 #4121 stays draft. dev-red #3856 open.
+- 2026-10-21T17:58Z: lane put needs-rebase on #4022 (LF-3's file.* commands in LibraryCommandCatalog.swift, its tests, command-ids/library.txt, CLI golden). Merged origin/dev: dev's rows kept in place, FO-5's two appended, golden regenerated with afterglow. scripts/ci --changed PASS; pushed 2ef801b, Head moved. FO-6 #4121 merged FO-5 (clean), gate PASS, pushed ba7fb3c, Head moved, still draft.
+- 2026-10-21T18:07Z: needs-rebase dropped on #4022; lane macOS build 39649207191 on 2ef801b dispatched. #4121 draft at ba7fb3c.
+- 2026-10-21T18:37Z: rule 23 re-read. #4022 macOS build 39649207191 queued; #4121 draft. dev-red #3856 open. Open findings: 0.
+
+- 2026-10-21T18:41Z: Belt watches lead/folders; run act-1a15f2277a5-6xyv kept its record on lead/library-folders (docs/leads/library-folders/). This file now mirrors that record and is pushed with it; the earlier run act-1a15d1c39b2-vvii record is in this file's git history.
