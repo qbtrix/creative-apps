@@ -12,7 +12,7 @@ struct EchoHelp: HelpProviding {
 }
 
 @Suite struct SuiteHelpCatalogTests {
-    static let catalog = SuiteHelpCatalog.catalog
+    let catalog = SuiteHelpCatalog.catalog
 
     @Test func idsKeepTheLedger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
