@@ -3,8 +3,8 @@
 // selection handles, eight and the knob, on Ball's box from the Model's
 // transformSelection (on the HT-1 stubs, so the box is unturned until HT-5
 // reads the turn). Shape-tools HS-2: on `three-layers`, the Shape button at the
-// viewer's top trailing corner, disabled with HaloProject's `shapeHelp` until
-// HS-5 builds the tool, and its options popover's content (HaloShapeOptions:
+// viewer's top trailing corner, enabled (HaloProject's `shapeHelp` is nil
+// once a composition is selected, HS-5), and its options popover's content (HaloShapeOptions:
 // SuiteUI's ShapeToolOptions on the Model's tool, its help under the rows).
 // Light and Dark. Writes halo-viewer-handles-*.png, halo-viewer-shape-*.png and
 // halo-viewer-shape-options-*.png. macOS only.
@@ -25,7 +25,7 @@ import Testing
     @Test func shapeButton() throws {
         let project = try threeLayers()
         #expect(project.selectedComposition != nil)
-        #expect(project.shapeHelp != nil, "the stubbed Shape button has no help to say why it is off")
+        #expect(project.shapeHelp == nil, "the Shape button is off on a selected composition: \(project.shapeHelp ?? "")")
         #expect(HaloShapeTool.action(project) { }.unavailableHelp == project.shapeHelp)
         try snapshot(HaloViewer(model: project), name: "halo-viewer-shape-light", scheme: .light)
         try snapshot(HaloViewer(model: project), name: "halo-viewer-shape-dark", scheme: .dark)
