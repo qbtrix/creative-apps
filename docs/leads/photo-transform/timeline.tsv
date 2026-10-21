@@ -72,3 +72,4 @@ utc	stage	event	ref	note
 2026-10-21T16:56Z	#4005 PT-3 merged; #4127 sentinel needs-split measured while stacked, now +163/2
 2026-10-21T16:57Z	PT-7 #4127 merged dev, turned on, real budget asserts, head 9794f98, ci --changed PASS
 2026-10-21T16:57Z	W5: PT-8 journey builder from dev
+2026-10-21T17:00Z	PT-6 #4131 opened at 5b54c8c, Mutate 3/3, ci PASS; sent back to merge dev for PT-3 menu
