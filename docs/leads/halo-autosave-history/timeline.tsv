@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T03:43Z	3	heartbeat	#3701 #3810	still open, queued; batch 20261021032004 bisecting; HG-m #3417 open
 2026-10-21T04:06:23Z	heartbeat	check: #3701 HA-m and #3810 HA-u eligible, queued for lane batch; HG-m #3417 open
 2026-10-21T04:28:14Z	heartbeat	check: #3701 HA-m and #3810 HA-u eligible, queued (26 ready, batch in flight); HG-m #3417 open
+2026-10-21T04:50:46Z	heartbeat	check: #3701 HA-m in lane/batch-20261021043428 (Linux check running); #3810 HA-u eligible, next batch; HG-m #3417 open
