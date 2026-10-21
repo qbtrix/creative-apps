@@ -2,9 +2,9 @@
 
 Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
-Stage: 3 wave 1
+Stage: 3 wave 2
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: check the KE-1 builder (branch lead/halo-key-editing-KE-1); once its PR is open, start KE-2, KE-3, KE-4 stacked on it
+Next: KE-1 is PR #3813 (in the lane); KE-2, KE-3, KE-4 builders are stacked on lead/halo-key-editing-KE-1. Open their PRs once #3813 is on dev (merge origin/dev first).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,10 +17,10 @@ Next: check the KE-1 builder (branch lead/halo-key-editing-KE-1); once its PR is
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| KE-1 | KE-a | 1 | HaloCommand cases, catalog ids, adapter stubs, HaloKeyEditingTests disabled | Sources/HaloModel/HaloCommand.swift, Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Sources/HaloModel/HaloKeyPick+Kernel.swift, Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift | HaloCommandTests, HaloCommandCatalogTests | - | building |
-| KE-2 | KE-a | 2 | timeline clicks, Animation menu items, window wiring | Sources/HaloApp/HaloTimelineView.swift, Sources/HaloApp/HaloAnimationMenu.swift, Sources/HaloApp/HaloWindow+Easing.swift | HaloTimelineClickTests | - | planned |
-| KE-3 | KE-m | 2 | pick and select-all bodies | Sources/HaloModel/HaloKeyPick+Kernel.swift, Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloKeySelectionTests.swift | HaloKeySelectionTests | - | planned |
-| KE-4 | KE-m | 2 | moveKeys and endKeyDrag bodies, RJ move-keys | Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift, Tests/RealJobs/halo/move-keys/ | HaloKeyEditingTests, moveFiveThousandKeys | - | planned |
+| KE-1 | KE-a | 1 | HaloCommand cases, catalog ids, adapter stubs, HaloKeyEditingTests disabled | Sources/HaloModel/HaloCommand.swift, Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Sources/HaloModel/HaloCommandCatalog.swift, Tests/command-ids/halo.txt, Sources/HaloModel/HaloKeyPick+Kernel.swift, Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift | HaloCommandTests, HaloCommandCatalogTests | #3813 | in lane (213 lines, 11 files, ci --changed PASS) |
+| KE-2 | KE-a | 2 | timeline clicks, Animation menu items, window wiring | Sources/HaloApp/HaloTimelineView.swift, Sources/HaloApp/HaloAnimationMenu.swift, Sources/HaloApp/HaloWindow+Easing.swift | HaloTimelineClickTests | - | building |
+| KE-3 | KE-m | 2 | pick and select-all bodies | Sources/HaloModel/HaloKeyPick+Kernel.swift, Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloKeySelectionTests.swift | HaloKeySelectionTests | - | building |
+| KE-4 | KE-m | 2 | moveKeys and endKeyDrag bodies, RJ move-keys | Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift, Tests/RealJobs/halo/move-keys/ | HaloKeyEditingTests, moveFiveThousandKeys | - | building |
 | KE-5 | KE-u | 3 | snapshots, journey skipped | see packet | snapshots | - | planned |
 | KE-6 | KE-u | 3 | render budget | see packet | RenderBudgetHaloKeyEditingTests | - | planned |
 | KE-7 | KE-z | 4 | journey live, stress perf | see packet | journey | - | planned |
@@ -34,6 +34,8 @@ Next: check the KE-1 builder (branch lead/halo-key-editing-KE-1); once its PR is
 - Record lives on lead/halo-key-editing at docs/leads/halo-key-editing/, matching the other Halo leads' lead/halo-<feature> naming (lead/file-flow and lead/export-pack belong to other leads).
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 - KE-a ships as two PRs (KE-1 model, KE-2 view): together they are about 480 lines, over the 400 cap.
+- Belt reads lead/key-editing; that branch was free, so the record is mirrored there at docs/leads/key-editing/ (lead/halo-key-editing keeps the same file).
+- Stacked slices open PRs only once their parent is on dev: a stacked PR against dev would count the parent's lines and break the 400 cap.
 
 ## Open
 - none

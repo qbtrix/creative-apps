@@ -1,0 +1,5 @@
+utc	stage	event	ref	note
+2026-10-20T23:47Z	0	stage-start	-	setup on 2cc149f57
+2026-10-20T23:47Z	3	stage-start	-	wave 1: KE-1 builder started
+2026-10-21T00:12Z	3	pr-opened	#3813	KE-1 contract, 213 lines
+2026-10-21T00:12Z	3	stage-start	-	wave 2: KE-2, KE-3, KE-4 builders stacked on KE-1
