@@ -150,3 +150,4 @@ utc	stage	event	ref	note
 2026-10-21T07:59:27Z	3	heartbeat 07:59: queued behind older batches	-	lane merges #3892; Slice-Done AS-flare
 2026-10-21T08:21:39Z	3	#3892 needs-rebase; fixer launched	-	fixer merges dev into slice/as-flare; lane merges #3892; Slice-Done AS-flare
 2026-10-21T08:29:28Z	3	#3892 conflict resolved, head d2384817	-	lane drops needs-rebase and merges #3892; Slice-Done AS-flare
+2026-10-21T08:43:57Z	build	08:44 #3892 clean, label dropped	-	#3892 waits on lane batch; macOS build 39570991403 queued
