@@ -2,9 +2,9 @@
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
 Run: act-1a15d4ed024-1wsg (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z
-Stage: 3 wave 3 (FG-2, FG-4 stacked)
+Stage: 3 wave 3 (FG-2 + FG-4 in #3959)
 Base: b64cbb8cf55ea16b62f0a293c83e1820b3e4b572 (origin/dev)
-Next: FG-2 PR (FG-a) and FG-4 stacked (FG-u) are building; FG-3 once GF-3 (#3760) merges; FG-5 once GF-6 (#3742), KS-a (#3921) and AC-flare merge
+Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flare run shows flare-fill-gradient, critic panel + Belt-Slice-Done FG-a and Mac-Finish-Wanted; FG-3 once GF-3 #3760 merges; FG-5 once GF-6 #3742, KS-a #3921, AC-flare
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -39,6 +39,7 @@ Next: FG-2 PR (FG-a) and FG-4 stacked (FG-u) are building; FG-3 once GF-3 (#3760
 - #2315 is already closed, so FG-8 references it and does not use a closing keyword.
 
 ## Open
+- #3959 head 9a054aab: FG-2 + FG-4 (39-line journey folded in), 208 lines, 10 files, ci --changed PASS (Linux only; view not compiled yet). Notes for FG-7: journey assumes a `gradient-circle` Flare sample and guesses `suite.gradient.*` ids GF-3 defines. Notes for FG-3/GF-3: the FILL switch and the editor's own Type row may duplicate once GF-3 lands. The proxy re-appends a tool footer to PR bodies; the lane strips it from the squash.
 - 2026-10-21T07Z: GF-2 (#3695) and GF-5 (#3705) are on dev; GF-3 is #3760 and GF-6 is #3742, both open. FG-m now also waits on key-select-all:KS-a (#3921, open). AC-flare has no Belt-Slice-Done on #2999.
 - Blocked: suiteui/gradient-fill GF-a (#3418) is building (lead/suiteui-gradient-fill at d9bf033: GF-1 stubs are PR #3421 (open since 03:31Z, waiting on its lane macOS build run 39364860084, queued since 03:32Z), GF-2 blocked on command-catalog CC-u); #3421 merged 05:53Z (9a146777): the kernel Fill module is on dev, which unblocks FG-1 and FG-6. GradientEditor (GF-2) is still missing, blocking FG-2.
 - FG-5 also waits on GF-6 and adopt-command-catalog's AC-flare (Belt-Slice-Done on #2999's feature issue).

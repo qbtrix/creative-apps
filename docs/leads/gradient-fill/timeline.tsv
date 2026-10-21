@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-20T18:55Z	heartbeat	dev e382f9d7 (library MD-12): still no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
 2026-10-20T19:17Z	heartbeat	dev a48992b7 (suite #3085): still no GF-2/GF-3/GF-6; only gradient PR is #3681 (Photo tool, not ours); no supervisor reply on #3419; #3418 silent
 2026-10-21T07:05Z	3	stage-start	wave 3	line lead act-1a15d4ed024-1wsg resumed; GF-2 on dev; FG-2 + FG-4 start
+2026-10-21T07:32Z	3	pr	FG-a	#3959 opened (FG-2+FG-4), head 9a054aab, ci --changed PASS
