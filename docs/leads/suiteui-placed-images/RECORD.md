@@ -62,3 +62,5 @@ Relaunched 2026-10-20T21:07Z. No slice is buildable: PL-2 still waits on GF-2 an
 Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (record files only). PL-4 #3942 (head 227f061) has a green macOS build (39601667831) and waits for a lane batch. PL-8 starts once #3942 merges. PL-9 waits on GF-z.
 
 - 2026-10-21T15:00Z: The lead dir moved to docs/leads/suiteui-placed-images on lead/suiteui-placed-images, the names Belt reads. #3942 merged as 541cab6, and Linux check https://github.com/qbtrix/creative-apps/actions/runs/39617481529 on dev 08b378bc8 is green, so PL-u is merged-done. Belt-Slice-Done and Mac-Finish-Wanted are posted on #3457. PL-8 still waits on the PL-z slice deps (SH-z, TT-z, EY-z, AH-z, SS-d), none done yet. PL-9 waits on GF-z. No open findings carry Feature: placed-images.
+
+- 16:38Z: heartbeat. Unchanged: waiting on upstream slices (see above); no open findings.
