@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T05:25Z	check	DS-a #3857 still in lane (clean, macOS build dispatched 04:54Z)	#3857	DT-u/DT-m still not opened
 2026-10-21T05:49Z	check	lane	#3857	DS-a clean, fast-lane, not merged; DT-u/DT-m not opened, so DS-u and DS-m stay blocked
 2026-10-21T06:16Z	check	lane	#3857	DS-a clean, queued in lane; DT-u/DT-m not opened, DS-u and DS-m blocked
+2026-10-21T06:39Z	check	lane	#3857	clean, queued; lane bisecting batch-20261021061843; DT-u/DT-m not opened
