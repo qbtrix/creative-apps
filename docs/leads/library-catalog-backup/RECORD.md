@@ -10,7 +10,7 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | BK-a | rotation and restore commands as stubs, checks disabled | BK-1, BK-2 | MJ-BK | – | no | 0 | done: Belt-Slice-Done posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
-| BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | PR #3967 merged with dev (89b3e3c, 7 files +338), needs-split cleared, no-fast-lane until #3980 | – | – |
+| BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | BK-4 #3967 merged (15806ab, 22:09Z); waiting for a green dev Linux run containing it (dev-red #3856 open, Launcher) | – | – |
 | BK-m | rotation limits, fallback, restore backs up current | BK-3, BK-5m | MJ-BK | BK-a; LF-m, FO-m, AK-library (not merged) | no | 0 | BK-3 #3965 fast-lane at 583be3e (Mutate 5/5); BK-5m blocked | – | – |
 | BK-z | live restore, RJ-L54, built | BK-5, BK-6 | LJ-BK, MJ-BK | BK-u, BK-m | yes | 0 | blocked | – | – |
 
@@ -62,3 +62,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T21:41Z: heartbeat: #3967 clean at 780c26c, macOS build passed, waiting on the lane; dev Linux still red on Launcher's CommandPathTests baseline (dev-red #3856, not ours); lane bisecting batch 20261021205717
 
 - 2026-10-21T21:56Z: heartbeat: #3967 still waiting on a lane batch at 780c26c; dev-red #3856 still open (Launcher baseline, not ours)
+
+- 2026-10-21T22:10Z: #3967 (BK-4, BK-4b) merged into dev as 15806ab. BK-u closes on the first dev CI run containing it with a green Linux job; dev is red on Launcher's command-path baseline (#3856, not ours).
