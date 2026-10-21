@@ -53,3 +53,4 @@ Waves: combined with shared-codecs (see its RECORD). Wave 1 = IM-1 beside SC-13 
 - 2026-10-21T20:26Z: IM-2 775148e3 gated CI: PASS and pushed to lead/suite-imaging-IM-2; PR opens once #4028 merges.
 - 2026-10-21T20:49Z: check-in: #4028 (IM-1, Package.swift) still on the supervisor's Mac gate. IM-2 gated on lead/suite-imaging-IM-2.
 - 2026-10-21T21:11Z: check-in: #4028 still open (supervisor merge; lane re-labels it each sweep). IM-2 gated.
+- 2026-10-21T21:33Z: check-in: #4028 still open on the supervisor's Mac gate. IM-2 gated.
