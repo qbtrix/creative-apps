@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-21T12:32:46Z	4	wave 3	KE-5,KE-6	KE-2 merged #3954; KE-u started (KE-5 snapshots+journey, KE-6 render budget); #3955 KE-4 mac green, lane pending
 2026-10-21T12:41:02Z	4	PR	KE-6	PR #4067 opened, head b504f56cb, CI --changed pass
 2026-10-21T12:45:19Z	3	KE-5	#4070	PR opened head 5650f771b
+2026-10-21T12:50:55Z	3	heartbeat	-	stripped attribution footers from #3955 #4067 bodies; KE-4/KE-5/KE-6 in lane
