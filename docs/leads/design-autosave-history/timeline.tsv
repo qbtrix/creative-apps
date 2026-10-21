@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-21T10:58:01Z	DA-a	heartbeat	#3973	build 39587493383 queued
 2026-10-21T11:22:08Z	DA-a	heartbeat	#3973	build queued
 2026-10-21T11:43:07Z	DA-a	build-green	#3973	macOS build 39587493383 success
+11:44Z	DA-a	heartbeat	#3973	clean, build green, lane sweep running
