@@ -4,15 +4,15 @@ Issue: #3775 · Packet: docs/blueprints/suite/features/sample-files.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave 4
 Base: 9951eea7355e5a768f0ce1e1bad25656cf05cd82
-Next: #4100 merged (9a4ac8828, batch 20261021190945). #4112 (head 9d44e115c) and #4115 (head 4b2f2212c) have dev merged in, CI PASS, are ready and target dev. #4129 holds the pre-restack heads of both, so it stays a draft until both merge; then merge dev in, keep ours, CI, move Head:, ready. Belt-Slice-Done SS-vector once a green dev Linux run contains #4112's merge, SS-raster for #4115's; then SS-z, then Belt-Contact-Sheet.
+Next: #4100 merged 9a4ac8828, #4112 merged 0c435e275, #4115 merged 4ada7f79a. #4129 restacked on dev (head 4c542f8ed, CI PASS), ready, waiting on the lane. Belt-Slice-Done SS-vector and SS-raster once a green dev Linux run contains their merges (dev-red #3856, the launcher baseline, is not ours); SS-z after #4129 merges; then Belt-Contact-Sheet.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | SS-a | make step turns each sample script into its file; the per-file open check is written, disabled | SS-1, SS-2 | MJ-SS | – | no | 0 | merged #4094 (e78df8233) | – | – |
 | SS-vector | Cards/Logo .design and Bounce/Title/Logo .flare made by script, committed, open | SS-3, SS-4 | MJ-SS | SS-a | no | 0 | #4100 merged 9a4ac8828; #4112 merged 0c435e275 | – | – |
-| SS-raster | beach.ora, Sunset.png, Intro.halo made by script, committed, open | SS-5, SS-6 | MJ-SS | SS-a, SS-vector | no | 0 | ready #4115 (beach.ora held on #4113) | – | – |
-| SS-z | every tour tile opens its sample; RJ-X66; feature built | SS-7, SS-8 | XJ-SS, MJ-SS | SS-vector, SS-raster | no | 0 | pr-open #4129 (feature-done) | – | – |
+| SS-raster | beach.ora, Sunset.png, Intro.halo made by script, committed, open | SS-5, SS-6 | MJ-SS | SS-a, SS-vector | no | 0 | merged #4115 4ada7f79a (beach.ora held on #4113) | – | – |
+| SS-z | every tour tile opens its sample; RJ-X66; feature built | SS-7, SS-8 | XJ-SS, MJ-SS | SS-vector, SS-raster | no | 0 | ready #4129 (feature-done, head 4c542f8ed) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
