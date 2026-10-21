@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-21T21:11Z	wait-macos	heartbeat	FR-u	FR-7 and FR-9 gates CI: PASS; #4172 macOS build 39665231140 still queued since 19:51Z
 2026-10-21T21:34Z	build-FR-flare	pr-open	FR-halo,FR-flare	FR-7 PR #4211, FR-9 PR #4212 opened (wait only on FR-a); FR-10 building stacked; FR-8 waits on FR-u and adopt-kernel-session:AD-halo (not on dev)
 2026-10-21T21:47Z	build-FR-flare	built	FR-flare	FR-10 model half pushed 00a3825 (gate PASS, mutate 2/2); UI half needs files outside owned list, question posted on #3754
+2026-10-21T21:57Z	FR-10b	supervisor approved FR-10b ownership (comment 6327351234)	FR-flare	FR-10b UI half building stacked on FR-10; extra owned files approved by supervisor
