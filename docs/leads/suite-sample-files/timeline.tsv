@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T17:27Z	3	poll	dev CI	Linux run 39643409752 (contains SS-a) in progress; #4100 clean, awaiting lane
 2026-10-21T17:40Z	3	poll	dev CI	run 39643409752 still in progress; #4100 clean awaiting batch mac gate (mac runs queued)
 2026-10-21T17:57Z	3	slice-done	SS-a	Belt-Slice-Done posted on #3775 (run 39643409752 green, contains e78df8233); #4100 clean awaiting lane
+2026-10-21T18:15Z	3	poll	#4100	macOS build 39643952191 green; awaiting lane merge sweep
