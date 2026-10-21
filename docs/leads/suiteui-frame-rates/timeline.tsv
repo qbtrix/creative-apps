@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-21T15:50Z	wave-1	check	#4063	#4063 awaiting lane macOS build run 39626628147
 2026-10-21T16:13Z	build	heartbeat	#4063	FR-m and FR-u stacked and ready locally
 2026-10-21T16:33Z	build	heartbeat	#4063	macOS runner queue backed up
+2026-10-21T16:53Z	wave1	heartbeat	#4063	macOS build started; FR-m opens on merge
