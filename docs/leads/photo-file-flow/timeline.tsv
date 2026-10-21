@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-21T04:49Z	heartbeat	check	-	#3815 PF-3 mac green clean, in lane queue; batch-20261021043428 bisecting
 2026-10-21T05:08Z	heartbeat	check	-	#3815 PF-3 open, no lane flag; batch bisecting at probe -6
 2026-10-21T05:27Z	heartbeat	check	-	#3815 PF-3 clean, no lane flag; waits next batch
+2026-10-21T05:47Z	heartbeat	check	-	#3815 PF-3 needs-rebase (photo.list-commands.json, PhotoCommandCatalogTests); fixing
