@@ -15,7 +15,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| AS-flare | Flare selection on `Selection<StageAddress>`, `Pick`, `Nudge`, `Marquee` behind its API; set logic deleted | AS-f1, AS-f2 | MJ-AS-flare (`WorkspaceWiringTests`) | stage-edit | false | 0 | in-lane #3892 (mac build 39553861350 green) | – | – |
+| AS-flare | Flare selection on `Selection<StageAddress>`, `Pick`, `Nudge`, `Marquee` behind its API; set logic deleted | AS-f1, AS-f2 | MJ-AS-flare (`WorkspaceWiringTests`) | stage-edit | false | 0 | in-lane #3892 (mac green) | – | – |
 | AS-design | Design selection on `Selection<String>` with `canAdd`, `Nudge.delta`/`runKey`, `Marquee.rect`/`union` behind its API; set logic and `DesignDirection` deleted | AS-d1, AS-d2 | MJ-AS-design (`DesignMultiSelectTests`) | design-seams chain to design-seams-2 | false | 0 | done | – | – |
 | AS-halo | Halo `selectedKeys` on `Selection<HaloKeyRef>` as a set with `prune(alive:)` behind its API; set and prune code deleted | AS-h1, AS-h2 | MJ-AS-halo (`HaloKeySelectionTests`) | – | false | 0 | done | 39133431238 | – |
 | AS-library | Library `LibraryCatalog.selection` on `Selection<String>` with `anchor`, `pick(_:_:order:)`, `move(_:order:columns:)` behind its API; set code deleted | AS-l1, AS-l2 | MJ-AS-library (`LibraryGridTests`) | spine, export, adopt-kernel-undo:AU-library | false | 0 | done | – | – |
@@ -37,6 +37,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T07:37Z: wait on lane
 - 2026-10-21T07:14Z: wait on lane
 - 2026-10-21T06:48Z: AS-library merged by earlier run
 - 2026-10-21T06:44Z: Status mirrored to lead/suiteui-adopt-kernel-selection as Belt's nudge names it
