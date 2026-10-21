@@ -12,3 +12,5 @@ utc	stage	event	ref	note
 2026-10-21T21:12Z	3	poll	#4182	macOS build 39671351382 in progress; #4184 waits; no findings
 2026-10-21T21:25Z	3	poll	#4182	macOS build 39671351382 still in progress; no lane labels
 2026-10-21T21:38Z	3	lane-mac	#4182	macOS build 39671351382 success; waiting on the lane sweep (run 39679102627)
+2026-10-21T21:53Z	3	merged	#4182	DS-a squash-merged; #4184 retargeted to dev
+2026-10-21T21:53Z	3	poll	dev-red #3856	dev Linux red on launcher command-path baseline (not ours); AE-h2 #2842 closed
