@@ -53,13 +53,14 @@ struct PhotoLayerList: View {
         }) { first, _ in first }
     }
 
-    /// New Layer, Delete Layer (disabled on the last layer) and Rename Layer….
+    /// New Layer, Delete Layer (every picked layer; disabled on the last
+    /// layer or when every layer is picked) and Rename Layer….
     static func commands(_ model: PhotoWorkspace, _ perform: @escaping PhotoPerform) -> [ToolbarAction] {
         [
             ToolbarAction("New Layer", systemImage: "plus", identifier: "photo.layer.new") { perform(.addLayer) },
             ToolbarAction(
                 "Delete Layer", systemImage: "trash",
-                unavailableHelp: model.canDeleteSelectedLayer ? nil : "The last layer can't be deleted.",
+                unavailableHelp: model.deleteLayersHelp,
                 identifier: "photo.layer.delete"
             ) { perform(.deleteLayer) },
             ToolbarAction("Rename Layer…", systemImage: "pencil", identifier: "photo.layer.rename") { perform(.renameLayer) },
