@@ -4,7 +4,7 @@ Issue: #3758 · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3756) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: #4057 Linux check 39616976550 red only on LibraryFoldersTests.tenThousandPaths (20.4 ms vs 20 ms, unrelated); rerun not permitted, so dev merged into BK-a (1e2278b8), gating, then push and move Head:. #4060 merged (fb6f4b83). Then retarget #4058 once #4057 merges
+Next: #4057 dev merged in (1e2278b8), gate CI: PASS, pushed and Head: moved; once #4057 merges, retarget #4058 to dev, merge dev, gate, push, move Head:
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
