@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-21T02:38Z	3	heartbeat	#3813	lane sweep 39532413280: eligible; batch-20261021005140 is bisecting a budget failure, 20 ready PRs wait for the next batch
 2026-10-21T02:54Z	3	heartbeat	#3813	still eligible and queued in the lane; KE-2..4 PRs wait for it on dev
 2026-10-21T03:12Z	3	heartbeat	#3813	eligible, queued; lane merged #3749 02:55Z and #3840 03:04Z; sweep 39537028690 running
+2026-10-21T03:29Z	3	heartbeat	#3813	still eligible and queued in the lane
