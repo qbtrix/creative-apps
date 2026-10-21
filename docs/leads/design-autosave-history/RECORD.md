@@ -86,3 +86,4 @@ Next: Belt-Slice-Done DA-z once a dev CI run containing e4f3f33f has a green Lin
 - 16:07Z: check. #4102 clean, unmerged; lane macOS build 39629540112 in progress. Lane's attribution notice: proxy-added footer, stripped from the squash (see above).
 - 16:34Z: check. #4102's macOS build 39629540112 green (16:12Z). Waits on the next lane batch; batch 20261021155943 (without #4102) is bisecting a red Linux run. Lane Linux check 39634756821 running on e16b62e7.
 - 16:47Z: stage. #4102 merged (e4f3f33f, 16:44Z) with feature-done. Waiting for a dev CI run containing it.
+- 16:56Z: check. Only dev run containing e4f3f33f is scoped photo 39638803228 (no Linux job). Waiting for a Linux check or full run on dev.
