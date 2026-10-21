@@ -4,7 +4,7 @@ Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: LF-4 blocked (needs-ui #3928 per-cell drag hook, suite SF-8 PNG, catalog-open suite type); re-read LF-3's waits (LT-m, DR-m) and #3928/SF-8 each poll Blocked-wait polls with no change: 2 (09:20, 09:54); at 3 post Question for the supervisor.
+Next: LF-4 blocked (needs-ui #3928 per-cell drag hook, suite SF-8 PNG, catalog-open suite type); re-read LF-3's waits (LT-m, DR-m) and #3928/SF-8 each poll Blocked-wait polls with no change: 3 (09:20, 09:54, 10:30); Question for the supervisor posted 10:30, waiting on the answer.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
