@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-21T01:27:31Z	check	FC-5 #3466 clean in lane; dev fix #3829 in, Linux run 39526337262 running
 2026-10-21T01:48:43Z	check	dev green (run 39526337262); FC-5 #3466 clean, awaiting lane batch
 2026-10-21T02:10:07Z	check	no change: FC-5 #3466 clean, awaiting lane batch
+2026-10-21T02:32:07Z	check	no change: FC-5 #3466 clean, not yet batched
