@@ -41,3 +41,4 @@ ts	kind	note
 2026-10-21T15:19:08Z	UP-design	pushed 4ecc2fd7 (dev merged, gate pass), #4037 Head: moved
 2026-10-21T15:38:58Z	poll	#4037 waiting on lane macOS build of 4ecc2fd7
 2026-10-21T16:01:00Z	poll	#4037 macOS build 39625557606 queued (macOS runners busy)
+2026-10-21T16:23:20Z	poll	#4037 macOS build 39625557606 running
