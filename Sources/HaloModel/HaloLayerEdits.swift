@@ -16,26 +16,29 @@ extension HaloProject {
     /// A layer row's identifier, where its rename refusal shows.
     static func layerRowControl(_ id: String) -> String { "halo.layer.row.\(id)" }
 
-    /// Deletes the selected layer and selects the one that took its place
-    /// (else the new bottom layer, else none). Its children stop following it
-    /// and keep their place on screen; on a keying that can't parent yet
+    /// Deletes the picked layers (`pickedLayerIDs`, the selected one alone
+    /// without other picks) and selects the one that took the topmost's place
+    /// (else the new bottom layer, else none). Their children stop following
+    /// them and keep their place on screen; on a keying that can't parent yet
     /// (`.notBuilt`) they just lose the parent. Any other keying error refuses
     /// the delete. One step, "Delete Layer".
     public mutating func deleteSelectedLayer() {
         let keying = services.keying  // read before `edit`: its closure can't touch `self`
+        let picked = pickedLayerIDs
         edit("Delete Layer", control: Self.layerListControl) { doc in
             let (c, l) = try doc.selectedLayerIndices()
             var comp = doc.compositions[c]
-            let id = comp.layers[l].id
-            for child in comp.layers where child.parentID == id {
+            let ids = picked.isEmpty ? [comp.layers[l].id] : Set(picked)
+            let top = comp.layers.firstIndex { ids.contains($0.id) } ?? l
+            for child in comp.layers where child.parentID.map(ids.contains) == true && !ids.contains(child.id) {
                 do {
                     try keying.setParent(nil, of: child.id, at: comp.playheadFrame, in: &comp)
                 } catch HaloEditError.notBuilt {
                     try comp.editLayerTree { tree in _ = tree.update(child.id) { $0.followsID = nil } }
                 }
             }
-            comp.layers.removeAll { $0.id == id }
-            doc.selectedLayerID = comp.layers.indices.contains(l) ? comp.layers[l].id : comp.layers.last?.id
+            comp.layers.removeAll { ids.contains($0.id) }
+            doc.selectedLayerID = comp.layers.indices.contains(top) ? comp.layers[top].id : comp.layers.last?.id
             doc.compositions[c] = comp
         }
     }

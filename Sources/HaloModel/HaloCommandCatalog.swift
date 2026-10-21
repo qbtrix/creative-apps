@@ -20,6 +20,7 @@ extension HaloProject {
         case .selectComposition: return .selectComposition(comp)
         case .renameComposition(_, let name): return .renameComposition(comp, name)
         case .selectLayer: return .selectLayer(layer)
+        case .pickLayer(_, let pick): return .pickLayer(layer, pick)
         case .renameLayer(_, let name): return .renameLayer(layer, name)
         case .moveLayer(_, let index): return .moveLayer(layer, to: index)
         default: return sample
@@ -54,6 +55,7 @@ extension HaloProject {
         case .sendLayerBackward: sendSelectedLayerBackward()
         case .moveLayer(let layer, let index): moveLayer(layer, to: index)
         case .selectLayer(let layer): if let layer { selectLayer(layer) }
+        case .pickLayer(let layer, let pick): pickLayer(layer, pick)
         case .playPause: togglePlay(at: 0)
         case .toggleLoop: setLoops(!playback.loops)
         case .nextFrame: stepFrame(by: 1)
@@ -116,6 +118,7 @@ extension HaloProject {
         case .sendLayerBackward: plain(c, "layer.send-backward", "Send Backward", .edit, "Moves the selected layer down one.")
         case .moveLayer: typed(c, "layer.move", "Move Layer", .edit, "Moves a layer to a place in the stack, 0 on top.", Param.Move.self, obj(["id": Param.id, "index": .integer(minimum: 0)]), ["id": .string("comp-1-layer-2"), "index": .number(1)]) { .moveLayer($0.id, to: $0.index) }
         case .selectLayer: typed(c, "layer.select", "Select Layer", .view, "Selects a layer.", Param.ID.self, obj(["id": Param.id]), ["id": .string("comp-1-layer-2")]) { .selectLayer($0.id) }
+        case .pickLayer: typed(c, "layer.pick", "Pick Layer", .view, "Picks a layer in the layer list: toggle adds or drops it, extend adds the run from the last pick, replace picks it alone.", Param.Picked.self, obj(["id": Param.id, "pick": .string(oneOf: ["replace", "toggle", "extend"])]), ["id": .string("comp-1-layer-2"), "pick": .string("replace")]) { try .pickLayer($0.id, $0.kernelPick()) }
         case .playPause: plain(c, "animation.play-pause", "Play/Pause", .view, "Starts or stops playback.")
         case .toggleLoop: plain(c, "animation.loop", "Loop", .view, "Turns looping playback on or off.")
         case .nextFrame: plain(c, "animation.next-frame", "Next Frame", .view, "Moves the playhead one frame on.")
@@ -212,7 +215,20 @@ private enum Param {
     static let point = HaloProject.obj(["x": .number(), "y": .number()])
 
     struct None: Decodable, Sendable {}; struct Kind: Decodable, Sendable { var kind: HaloLayerKind }
-    struct ID: Decodable, Sendable { var id: String }; struct Rename: Decodable, Sendable { var id, name: String }
+    struct ID: Decodable, Sendable { var id: String }
+    struct Picked: Decodable, Sendable {
+        var id, pick: String
+        /// The kernel pick `pick` names; any other word is refused.
+        func kernelPick() throws -> Pick {
+            switch pick {
+            case "replace": return .replace
+            case "toggle": return .toggle
+            case "extend": return .extend
+            default: throw CatalogError.failed(id: "layer.pick", message: "A pick is replace, toggle or extend, not \(pick).")
+            }
+        }
+    }
+    struct Rename: Decodable, Sendable { var id, name: String }
     struct Frame: Decodable, Sendable { var frame: Int }; struct Time: Decodable, Sendable { var now: Double }
     struct PropertyValue: Decodable, Sendable { var property: HaloProperty; var value: Double }; struct PropertyText: Decodable, Sendable { var property: HaloProperty; var text: String }
     struct PropertyOnly: Decodable, Sendable { var property: HaloProperty }; struct Move: Decodable, Sendable { var id: String; var index: Int }

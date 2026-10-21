@@ -76,6 +76,9 @@ public struct HaloProject: Sendable, Equatable {
     var keySelection = Selection<HaloKeyRef>()
     /// The picked keys as a set, read from `keySelection`.
     public var selectedKeys: Set<HaloKeyRef> { keySelection.set }
+    /// The layers picked in the LAYERS list, a SuiteKernel `Selection` whose
+    /// primary is the selected layer; written by `HaloLayerPicks+Kernel.swift`.
+    var layerSelection = Selection<String>()
     /// The project file's name, path and status; written by `HaloFiles.swift`.
     /// A clean file (saved or opened) marks the history's current step saved,
     /// so the kernel's `isDirty` is true exactly while the work isn't on disk.
@@ -277,7 +280,11 @@ public struct HaloProject: Sendable, Equatable {
     /// Selects a layer of the selected composition by id. An unknown id is
     /// ignored. Not an undo step.
     public mutating func selectLayer(_ id: String) {
-        if selectedComposition?.layers.contains(where: { $0.id == id }) == true { document.selectedLayerID = id }
+        guard selectedComposition?.layers.contains(where: { $0.id == id }) == true else { return }
+        document.selectedLayerID = id
+        // A plain select is the list's only pick and the anchor of the next Shift-click.
+        layerSelection = Selection([id])
+        layerSelection.anchor = id
     }
 
     /// Sets the selected layer's opacity in its one static home,

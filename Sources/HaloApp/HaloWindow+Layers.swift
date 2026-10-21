@@ -20,6 +20,7 @@ extension HaloWindow {
         switch command {
         case .newLayer(let kind): model.newLayer(kind)
         case .selectLayer(.some(let id)): model.selectLayer(id)
+        case .pickLayer(let id, let pick): model.pickLayer(id, pick)
         case .duplicateLayer: model.duplicateSelectedLayer()
         case .deleteLayer: model.deleteSelectedLayer()
         case .bringLayerForward: model.bringSelectedLayerForward()
