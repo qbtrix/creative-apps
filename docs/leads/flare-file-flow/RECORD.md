@@ -33,3 +33,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - FL-2 waits on svg-place:PF-u, which waits on key-select-all KS-a (planned).
 - FL-3 waits on gradient-fill:FG-m, shape-tools:FS-m, stroke-style:FK-m and svg-place:PF-m, all planned.
 - FL-8 waits on export-pack:FV-z, which is blocked on shell-media.
+- 2026-10-21T08:17Z: Supervisor running a Linux check for #3843. No FL task can start: FL-2 waits on svg-place PF-u (no PF PR open; PF-u waits on KS-a #3921); FL-m on FG-m and other m-slices.

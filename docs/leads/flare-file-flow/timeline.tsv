@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T07:10Z	3	check	wave 1	resumed as act-1a15d4ed024-1wsg; FL-1 #3843 in lane; KS-a #3921 open
 2026-10-21T07:37Z	3	check	wave 1	FL-1 #3843 in lane; KS-a #3921 open
 2026-10-21T07:57Z	3	question	wave 1	FL-1 #3843 unchanged (poll 3); Question for the supervisor on #3482
+2026-10-21T08:17Z	3	blocked	-	Supervisor running a Linux check for #3843. No FL task can start: FL-2 waits on svg-place PF-u (no PF PR open; PF-u waits on KS-a #3921); FL-m on FG-m and other m-slices.
