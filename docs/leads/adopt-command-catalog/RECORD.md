@@ -124,3 +124,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-21T00:41Z: no qualifying run yet: CI 39520919569 (07f754f7) cancelled, CI 39522625110 (ca5dbdd6) pending, scoped suiteui 39491489760 still queued
 
 - 2026-10-21T01:03Z: no qualifying run: CI ca5dbdd6 cancelled, CI 39524928486 (4bdf0bbd) pending, scoped suiteui 39491489760 still queued
+
+- 2026-10-21T01:24Z: no qualifying run: CI 39524928486 (4bdf0bbd) pending, scoped suiteui 39491489760 queued. Dev Linux check failed at 4987f926 and 4bdf0bbd (Run scripts/ci); dev-red #3386 open. Not ours to fix

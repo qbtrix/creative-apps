@@ -145,3 +145,4 @@ utc	stage	event	ref	note
 2026-10-21T00:18Z	poll	worker restarted; no qualifying run yet: full CI 39504488816 (a17f8650) cancelled, CI 39518541517 (0c2c10dd) pending, scoped suiteui 39491489760 still queued; only Linux check runs green (no full Linux job). Waiting for a green full or scoped-suiteui run
 2026-10-21T00:41Z	poll	no qualifying run yet: CI 39520919569 (07f754f7) cancelled, CI 39522625110 (ca5dbdd6) pending, scoped suiteui 39491489760 still queued
 2026-10-21T01:03Z	poll	no qualifying run: CI ca5dbdd6 cancelled, CI 39524928486 (4bdf0bbd) pending, scoped suiteui 39491489760 still queued
+2026-10-21T01:24Z	poll	no qualifying run: CI 39524928486 (4bdf0bbd) pending, scoped suiteui 39491489760 queued. Dev Linux check failed at 4987f926 and 4bdf0bbd (Run scripts/ci); dev-red #3386 open. Not ours to fix
