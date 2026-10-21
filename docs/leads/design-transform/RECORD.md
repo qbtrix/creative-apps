@@ -36,3 +36,7 @@ Next: DT-a critics on a scoped design run; DT-u once DG-u merges (both own Desig
 
 ## Open
 - DT-a Belt-Slice-Done and Mac-Finish-Wanted posted on #3436 (run 39569221486).
+
+## Run act-1a15fcdd869-ck2o (2026-10-21T18:55Z)
+
+- Relaunched. TT-u #3513 merged as 7347ed80, so DT-4 (the DT-u snapshots and render budget) is unblocked and is next. DT-m still waits on gradient-fill DG-m and autosave-history DA-m.
