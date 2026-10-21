@@ -31,3 +31,5 @@ utc	stage	event	ref	note
 2026-10-21T07:54Z	check	heartbeat	SH-a	#3809 clean + mac build green, awaiting lane sweep (run 39565108989 pending); #3814 stacked; no LF-m/BK-m PR
 2026-10-21T08:11Z	merge	merged	SH-a	#3809 merged as 482f03c6 after lane macOS gate; Belt-Slice-Done waits for a dev CI Linux job containing it
 2026-10-21T08:11Z	ship	retarget	SH-u	#3814 retargeted to dev; merged origin/dev clean; scripts/ci --changed PASS; head 016a5da3
+2026-10-21T10:18Z	check	slice-done	SH-a	Belt-Slice-Done posted on #3789 with run 39571804700
+2026-10-21T10:18Z	fix	dispatch	SH-u	fixer on #3814: File > Share via catalog spec, strip footer, Belt-Lead to act-1a15df37b73-k199
