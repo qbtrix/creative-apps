@@ -1,0 +1,5 @@
+[
+{"label":"appFolder returns the root with no app segment","file":"Sources/SuiteModel/Store/SuiteLocations.swift","find":"supportFolder(arguments: arguments, home: home) + \"/\" + app","replace":"supportFolder(arguments: arguments, home: home)","tests":"SuiteLocationsAppFolderTests/appFolderHasAppSegment"},
+{"label":"plan moves when both exist","file":"Sources/SuiteModel/Store/LegacySupport.swift","find":"        if exists(new) { return .keepBoth(old: old) }\n","replace":"","tests":"SuiteLocationsAppFolderTests/neverOverwrites"},
+{"label":"the flag ignored","file":"Sources/SuiteModel/Store/SuiteLocations.swift","find":"supportFolder(arguments: arguments, home: home) + \"/\" + app","replace":"supportFolder(arguments: [], home: home) + \"/\" + app","tests":"SuiteLocationsAppFolderTests/flagReachesApp"}
+]
