@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-21T18:45Z	3	wave B	ST-m, ST-live(ST-4)	builders started, stacked on ST-a; #4034 still waits on lane
 2026-10-21T18:48Z	3	poll	#4034	unchanged; ST-m and ST-live builders running
 2026-10-21T18:55:21Z	st-live-pr	ST-4 draft PR #4156 opened on ST-a (head 8cb75650e)
+2026-10-21T18:56:09Z	st-m-pr	ST-m draft PR #4157 opened on ST-a (head 53db6e113)
