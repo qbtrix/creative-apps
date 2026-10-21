@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-21T18:48:43Z	3	stage	A	new run act-1a15fc7d29e-gz1t; PH-6 + PH-5 builders (PH-m)
 2026-10-21T20:05Z	wave A	#4160 PH-6 in lane, #4162 PH-5 needs-rebase; record moved to lead/photo-history-panel
 2026-10-21T20:17Z	wave A	#4162 merged dev in, head 2056a19d, scripts/ci --changed PASS, mutate PhotoHistory+Kernel 5/5
+2026-10-21T20:26Z	heartbeat	#4160 clean in lane (macOS gate); #4162 clean at 2056a19d, lane to drop needs-rebase; no open findings
