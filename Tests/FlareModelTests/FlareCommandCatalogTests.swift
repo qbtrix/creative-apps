@@ -65,7 +65,16 @@ struct FlareCommandCatalogTests {
         #expect(FlareWorkspace.catalog.ids.count == FlareWorkspace.coreCommands.count + FlareWorkspace.appCommands.count)
         let appIDs = Set(FlareWorkspace.appCommands.map(\.id))
         let problems = CatalogConformance.check(FlareLawsDocument.self, fixture: FlareLawsDocument(ws: Self.lawsFixture()))
-        #expect(problems.filter { appIDs.contains(String($0.prefix { $0 != ":" })) } == [])
+        #expect(problems.filter { appIDs.contains(String($0.prefix { $0 != ":" })) && !Self.exempt($0) } == [])
+    }
+    /// CS-11's controls that can't act on the laws' fixture, as their window controls can't: Restore and Discard keep
+    /// its unsaved edits, Delete Keyframe has no key selected, and a frame inserted or removed at frame 5 moves no key
+    /// or label, so it changes nothing and records no step (FlareCommandPathTests runs each where it acts).
+    static func exempt(_ problem: String) -> Bool {
+        let id = String(problem.prefix { $0 != ":" })
+        if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
+        return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)
+            && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes"].contains { problem.contains($0) }
     }
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/flare.txt")

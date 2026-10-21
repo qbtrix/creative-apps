@@ -151,7 +151,7 @@ extension FlareWorkspace {
         act("animate.previous-frame", "Previous Frame", "Steps one frame back.", .view, { $0.transportHelp(back: true, step: true) }) { w in w.stepFrame(by: -1) },
         act("animate.go-to-start", "Go to Start", "Moves the playhead to the first frame.", .view, { $0.transportHelp(back: true, step: false) }) { w in w.goToStart() },
         act("animate.go-to-end", "Go to End", "Moves the playhead to the last frame.", .view, { $0.transportHelp(back: false, step: false) }) { w in w.goToEnd() },
-        take("frame.label", "Label Frame", "Names the label at the playhead; no name removes it.", .edit, LabelParams.self,
+        take("frame.label", "Set Frame Label", "Names the label at the playhead; no name removes it.", .edit, LabelParams.self,
             example: .object(["name": .string("Intro")]), { $0.timelineHelp("Open an animation to label its frames.") }) { w, p in try w.label(p.name) },
         take("timeline.delete-keys", "Delete Keyframe", "Deletes the selected keyframes as one step.", .edit, NoParams.self, example: .object([:]),
             { $0.timelineHelp() ?? ($0.selectedKeys.isEmpty ? selectKeyFirst : nil) }) { w, _ in try w.timelineEdit("timeline.delete-keys") { $0.removeSelectedKeys() } },
