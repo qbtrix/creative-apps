@@ -1,0 +1,33 @@
+utc	stage	event	ref	note
+2026-10-21T02:26Z	0	stage-start	#3482	line lead act-1a15c47678d-i2ih
+2026-10-21T02:45Z	2	stage-end	#3482	plan: FL-1 now; FL-2 waits PF-u
+2026-10-21T02:45Z	3	stage-start	wave 1	FL-1
+2026-10-21T02:47Z	3	pr-open	#3843	FL-1 adapter stubs, 172 lines, Slice FL-a
+2026-10-21T03:09Z	1	check	#3843	macOS build green, in lane; attribution footer removed from body; PF-u not on dev; 0 findings
+2026-10-21T03:32Z	1	check	#3768	svg-place PF-a merged; PF-u not started (waits KS-a); #3843 in lane; 0 findings
+2026-10-21T03:54Z	1	check	#3843	clean, macOS build green, awaiting lane batch; PF-u not started; 0 findings
+2026-10-21T04:16Z	1	check	#3843	lane: eligible, queued (27 ready behind a bisecting batch); PF-u not started; 0 findings
+2026-10-21T04:38Z	1	check	#3843	clean, still queued in lane; PF-u not started; 0 findings
+2026-10-21T05:00Z	1	check	#3843	clean, still queued in lane; PF-u not started; 0 findings
+2026-10-21T05:22Z	1	check	#3843	queued in lane, clean; PF-u/KS-a no PR; 0 findings
+2026-10-21T05:44Z	1	check	#3843	queued in lane, clean; PF-u/KS-a no PR; 0 findings
+2026-10-21T06:12Z	1	check	#3843	eligible, waits for next batch (bisect in flight); KS-a open as #3921, PF-u no PR; 0 findings
+2026-10-21T07:10Z	3	check	wave 1	resumed as act-1a15d4ed024-1wsg; FL-1 #3843 in lane; KS-a #3921 open
+2026-10-21T07:37Z	3	check	wave 1	FL-1 #3843 in lane; KS-a #3921 open
+2026-10-21T07:57Z	3	question	wave 1	FL-1 #3843 unchanged (poll 3); Question for the supervisor on #3482
+2026-10-21T08:17Z	3	blocked	-	Supervisor running a Linux check for #3843. No FL task can start: FL-2 waits on svg-place PF-u (no PF PR open; PF-u waits on KS-a #3921); FL-m on FG-m and other m-slices.
+2026-10-21T08:38Z	3	blocked	-	FL-1 #3843 merged 08:33Z. FL-2 (rest of FL-a) still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T08:58Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T09:18Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T09:39Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+2026-10-21T10:00Z	3	blocked	-	FL-2 still waits on svg-place PF-u (no PF PR open; KS-a #3921 open).
+10:20Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+10:40Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+11:00Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+11:19Z	3	check	-	Heartbeat: FL-2 still blocked on svg-place PF-u; no PF PRs open.
+11:40Z	3	check	-	FL-2 blocked on svg-place PF-u: no PF PRs open.
+12:00Z	3	check	-	FL-2 blocked on svg-place PF-u: no PF PRs open.
+12:26Z	3	check	-	FL-2 blocked on svg-place PF-u: no PF PRs open.
+12:46Z	3	heartbeat	-	No svg-place PF PRs yet; FL-2 still blocked.
+13:08Z	3	heartbeat	-	No svg-place PF PRs; FL-2 blocked.
+13:28Z	3	heartbeat	-	No svg-place PF PRs; FL-2 blocked.
