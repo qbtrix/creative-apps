@@ -1,4 +1,4 @@
-// AnchorCommandsTests.swift (anchor-parenting AN-2, turned on by AN-4):
+// AnchorCommandsTests.swift (anchor-parenting AN-2, on since AN-4):
 // transform.set-anchor, layer.set-parent and layer.new-null on a small fake
 // document. Parenting and clearing keep every layer where it is on screen, a
 // cycle is refused, `{at: center}` lands on the box centre, and each command
@@ -70,7 +70,7 @@ private func armAndHand() -> FakeAnchorDoc {
                    ("hand", Placement(x: 200, y: 100, rotation: 30, anchorX: 10, anchorY: 40), square)])
 }
 
-@Suite(.disabled("waits on AN-4")) struct AnchorCommandsTests {
+@Suite struct AnchorCommandsTests {
     /// Parenting a turned child to a scaled parent leaves its world corners unchanged; clearing it too.
     @Test func parentingAndClearingKeepPlace() throws {
         let doc = armAndHand(), before = doc.worldCorners("hand")
@@ -112,6 +112,33 @@ private func armAndHand() -> FakeAnchorDoc {
         let writes = doc.treeWrites
         try AnchorCommands.run("layer.set-parent", .object(["id": .string("hand"), "parent": .string("arm")]), anchor: doc, parent: doc)
         #expect(doc.treeWrites == writes + 1)
+    }
+
+    /// An unknown layer or parent, and an anchor with no point, are refused with a sentence and write nothing.
+    @Test func refusesWhatItCannotDo() throws {
+        let doc = armAndHand(), tree = doc.layerTree
+        let asks: [(String, JSONValue)] = [
+            ("layer.set-parent", .object(["id": .string("leg"), "parent": .string("arm")])),
+            ("layer.set-parent", .object(["id": .string("hand"), "parent": .string("leg")])),
+            ("layer.set-parent", .object(["id": .string("hand"), "parent": .string("hand")])),
+            ("transform.set-anchor", .object(["id": .string("leg"), "at": .string("center")])),
+            ("transform.set-anchor", .object(["id": .string("hand"), "x": .number(3)])),
+        ]
+        for (id, params) in asks {
+            let error = #expect(throws: CatalogError.self) { try AnchorCommands.run(id, params, anchor: doc, parent: doc) }
+            if case .failed(let failing, let message)? = error {
+                #expect(failing == id && message.hasSuffix(".") && !message.contains("("), "\(message)")
+            } else { Issue.record("\(id) \(params): not a sentence: \(String(describing: error))") }
+        }
+        #expect(doc.layerTree == tree && doc.placementWrites == 0)
+    }
+
+    /// With no app target the commands are unavailable, said in a sentence.
+    @Test func needsATarget() {
+        #expect(throws: CatalogError.self) { try AnchorCommands.run("layer.new-null", .object([:]), anchor: nil, parent: nil) }
+        #expect(throws: CatalogError.self) {
+            try AnchorCommands.run("transform.set-anchor", .object(["id": .string("a"), "at": .string("center")]), anchor: nil, parent: nil)
+        }
     }
 
     /// New Null adds one empty layer that can be parented to.

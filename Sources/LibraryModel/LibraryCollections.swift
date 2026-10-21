@@ -2,14 +2,17 @@
 // smart collections (ids "smart-<n>"), their names and contents, and the
 // refresh that keeps the selection and the loupe true to what is shown when
 // the photos a collection shows change. New, rename, add, remove and delete
-// are each one named undo step (FC-9). Until the file is built (FC-14), its
-// calls change nothing. Linux-safe.
+// are each one named undo step (FC-9). The collections file (FC-14) keeps
+// them, the filter and the selected collection beside catalog.json: one
+// object, sorted keys, pretty, sets sorted, so equal state encodes to equal
+// bytes. Linux-safe.
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 /// A collection you made from a set of photos, or a smart collection whose
 /// photos are the ones its rules admit.
@@ -43,7 +46,7 @@ public struct UserCollection: Identifiable, Hashable, Sendable {
     /// Set to nil by the task that builds each part (FC-9, FC-12, FC-14).
     public static let unavailable: String? = nil
     public static let smartUnavailable: String? = "Smart collections aren't built yet (filters-collections)."
-    public static let fileUnavailable: String? = "Saving collections isn't built yet (filters-collections)."
+    public static let fileUnavailable: String? = nil
 
     /// The set's photo ids; empty for a smart collection.
     var photoIDs: Set<String> {
@@ -167,29 +170,152 @@ extension LibraryCatalog {
         return "\(base) \(number)"
     }
 
-    /// The collections file to write, or nil when nothing needs saving.
+    /// The collections file to write, or nil when nothing needs saving: it is
+    /// up to date, or the catalog can't be saved over (loading, or newer).
     public func collectionsSaveRequest() -> (revision: Int, data: Data)? {
-        guard UserCollection.fileUnavailable == nil else { return nil }
-        return nil
+        guard UserCollection.fileUnavailable == nil, catalogState.canSave,
+              collectionsRevision != collectionsSavedRevision else { return nil }
+        let file = CollectionsFile(
+            version: CollectionsFile.current, collections: userCollections.map(CollectionsFile.Record.init),
+            filter: CollectionsFile.Rules(filter), selected: selectedCollectionID)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
+        guard let data = try? encoder.encode(file) else { return nil }
+        return (collectionsRevision, data + Data("\n".utf8))
     }
 
-    /// Records that the file for `revision` was written.
+    /// Records that the file for `revision` was written; an older write
+    /// leaves a newer change dirty.
     public mutating func didSaveCollections(revision: Int) {
-        guard UserCollection.fileUnavailable == nil else { return }
+        guard UserCollection.fileUnavailable == nil,
+              revision > collectionsSavedRevision, revision <= collectionsRevision else { return }
+        collectionsSavedRevision = revision
     }
 
-    /// Restores your collections from the file's `data` (nil: no file).
+    /// Restores your collections, the filter and the selected collection from
+    /// the file's `data` (nil: no file, nothing changes). A damaged file
+    /// throws `damagedCatalog`, a newer one `newerCatalog`, and neither
+    /// changes anything. An unknown selected id selects All Photos.
     public mutating func restoreCollections(_ data: Data?) throws {
-        guard UserCollection.fileUnavailable == nil else { return }
+        guard UserCollection.fileUnavailable == nil, let data else { return }
+        let restored = try CollectionsFile.decode(data)
+        userCollections = restored.collections
+        filter = restored.filter
+        collectionsSavedRevision = collectionsRevision
+        collectionsNotice = nil
+        recount()
+        let selected = collections.contains { $0.id == restored.selected } ? restored.selected : "all"
+        selectCollection(selected)
     }
 
-    /// A file that couldn't be read was set aside as `name`.
+    /// A file that couldn't be read was set aside as `name` (a file name or
+    /// its path): the catalog starts with none of yours and says so.
     public mutating func failRestoreCollections(setAsideAs name: String) {
         guard UserCollection.fileUnavailable == nil else { return }
+        let fileName = name.split(separator: "/").last.map(String.init) ?? name
+        collectionsNotice = "Library couldn't read your collections. The file was set aside as \(fileName)."
+        userCollections = []
+        filter = .all
+        recount()
+        refreshShown()
     }
 
     /// "saved" or "dirty", for the journeys.
     public var collectionsFileValue: String {
         collectionsRevision == collectionsSavedRevision ? "saved" : "dirty"
+    }
+}
+
+/// The collections file, version 1: private records over raw values, so the
+/// feature adds `Codable` to no Model type.
+private struct CollectionsFile: Codable {
+    static let current = 1
+    var version: Int
+    var collections: [Record]
+    var filter: Rules
+    var selected: String
+
+    struct Record: Codable {
+        var id: String
+        var name: String
+        var photos: [String]?
+        var rules: Rules?
+
+        init(_ collection: UserCollection) {
+            id = collection.id
+            name = collection.name
+            switch collection.contents {
+            case .photos(let ids): photos = ids.sorted()
+            case .rules(let filter): rules = Rules(filter)
+            }
+        }
+
+        func collection() throws(LibraryError) -> UserCollection {
+            guard UserCollection.isUserID(id) else { throw .damagedCatalog("") }
+            if let rules, photos == nil { return UserCollection(id: id, name: name, contents: .rules(try rules.filter())) }
+            guard let photos, rules == nil else { throw .damagedCatalog("") }
+            return UserCollection(id: id, name: name, contents: .photos(Set(photos)))
+        }
+    }
+
+    struct Rules: Codable {
+        var flags: [String]
+        var hidesRejected: Bool
+        var labels: [String]
+        var rating: String
+        var stars: Int
+
+        init(_ filter: LibraryFilter) {
+            flags = filter.flags.map(\.rawValue).sorted()
+            hidesRejected = filter.hidesRejected
+            labels = filter.labels.map(\.rawValue).sorted()
+            switch filter.rating {
+            case .any: (rating, stars) = ("any", 0)
+            case .atLeast(let count): (rating, stars) = ("atLeast", count)
+            case .exactly(let count): (rating, stars) = ("exactly", count)
+            }
+        }
+
+        func filter() throws(LibraryError) -> LibraryFilter {
+            var filter = LibraryFilter()
+            for raw in flags {
+                guard let flag = PhotoFlag(rawValue: raw) else { throw .damagedCatalog("") }
+                filter.flags.insert(flag)
+            }
+            for raw in labels {
+                guard let label = PhotoLabel(rawValue: raw) else { throw .damagedCatalog("") }
+                filter.labels.insert(label)
+            }
+            filter.hidesRejected = hidesRejected
+            switch (rating, stars) {
+            case ("any", 0): filter.rating = .any
+            case ("atLeast", 1...5): filter.rating = .atLeast(stars)
+            case ("exactly", 0...5): filter.rating = .exactly(stars)
+            default: throw .damagedCatalog("")
+            }
+            return filter
+        }
+    }
+
+    /// The file's collections, filter and selected id; a newer version throws
+    /// `newerCatalog`, anything else this build can't read `damagedCatalog`.
+    static func decode(_ data: Data) throws(LibraryError) -> (collections: [UserCollection], filter: LibraryFilter, selected: String) {
+        let version: Int
+        do throws(VersionError) {
+            version = try VersionedJSON.probe(data, supported: current)
+        } catch {
+            if case .newer(let found, _) = error { throw .newerCatalog(version: found) }
+            throw .damagedCatalog("")
+        }
+        guard version == current, let file = try? JSONDecoder().decode(CollectionsFile.self, from: data) else {
+            throw .damagedCatalog("")
+        }
+        var collections: [UserCollection] = []
+        var ids = Set<String>()
+        for record in file.collections {
+            guard ids.insert(record.id).inserted else { throw .damagedCatalog("") }
+            collections.append(try record.collection())
+        }
+        return (collections, try file.filter.filter(), file.selected)
     }
 }
