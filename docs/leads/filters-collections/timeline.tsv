@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 2026-10-21T06:00Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
 2026-10-21T06:22Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
 2026-10-21T06:41Z	3 build W1	check	#3931	PL-2 PR #3931 open (not merged, PP-3 still blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:03Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
