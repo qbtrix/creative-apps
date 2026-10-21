@@ -47,3 +47,5 @@ Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs
 - 2026-10-21T17:09Z: rule 23 re-read. #4024 open at 6f892b2; lane macOS build 39630311636 success, merge pending in a lane sweep. #3928 open, LF-4 blocked. dev-red #3856 open. Open findings with Feature: file-flow: 0.
 - 2026-10-21T17:35Z: LF-3 #4024 merged by the lane (593cfe6). #3928 open, LF-4 blocked.
 - 2026-10-21T18:37Z: rule 23 re-read. LF-4 blocked on #3928 (open). dev-red #3856 open. Open findings: 0.
+
+- 2026-10-21T18:42Z: Belt watched lead/file-flow, which holds #3480's record. Asked the supervisor on #3479 (comment 6323753120) which branch to watch. LF-4 still waits on #3928 (open).

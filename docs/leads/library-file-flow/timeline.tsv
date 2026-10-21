@@ -52,3 +52,4 @@
 2026-10-21T17:09:03Z	3	poll	-	rule 23 re-read; PRs wait on lane macOS builds
 2026-10-21T17:35:56Z	3	merge	LF-3	#4024 merged 593cfe6
 2026-10-21T18:37:08Z	-	wait	LF-m	LF-4 blocked on #3928 (open)
+2026-10-21T18:42:52Z	-	wait	-	Belt watched lead/file-flow, which holds #3480's record. Asked the supervisor on #3479 (comment 6323753120) which branch to watch. LF-4 still waits on #3928 (open).
