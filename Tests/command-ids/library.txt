@@ -28,3 +28,5 @@ file.drop
 file.open-in
 file.open-recent
 file.recent
+folders.list
+view.show-folder
