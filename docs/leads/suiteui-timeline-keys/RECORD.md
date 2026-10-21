@@ -4,12 +4,12 @@ Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: poll the lane for #4183 (TK-a), #4185 (TK-5) and #4191 (TK-u); retarget #4185 and #4191 to dev once #4183 merges; critic panel on TK-u once a scoped run shows its screens; then TK-6
+Next: #4183 (TK-a) merged; #4185 (TK-5) and #4191 (TK-u) retargeted to dev with origin/dev merged in, gates running (dev-red #3856 may block the Head: marker); critic panel on TK-u once a scoped run shows its screens; then TK-6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| TK-a | ColorKeyRules/SpanRules stubs, Halo span spec stubs, disabled suites | TK-1, TK-2 | – | frame-rates:FR-a (merged) | false | 0 | pr #4183 | – | – |
+| TK-a | ColorKeyRules/SpanRules stubs, Halo span spec stubs, disabled suites | TK-1, TK-2 | – | frame-rates:FR-a (merged) | false | 0 | merged #4183 | – | – |
 | TK-u | Flare key buttons; TimelineStrip onSlide; Halo timeline on stubs | TK-3, TK-4 | FlareJourneyTests+FillKeys, HaloJourneyTests+Span (skipped) | TK-a, timeline, timeline-select-all | true | 0 | pr #4191 | – | – |
 | TK-m | rule bodies; Halo span bodies | TK-5, TK-6 | – | TK-a; TK-6: AE-halo, AJ-halo, TS-halo, AN-halo | false | 0 | pr #4185 (TK-5) | – | – |
 | TK-flare | Flare colour keys on live | TK-7, TK-8 | FJ-TK | TK-m, AE-flare (merged), TK-u | true | 0 | blocked | – | – |
