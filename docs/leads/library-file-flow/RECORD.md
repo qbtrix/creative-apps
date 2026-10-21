@@ -1,37 +1,40 @@
-# Lead record: file-flow (Library), #3479
+# file-flow lead record
 
-Belt-Lead: act-1a15995d319-aamb
-Packet: docs/blueprints/library/features/file-flow.md (v3, slices)
-Status branch: lead/library-file-flow (lead/file-flow is the suite lead's)
-
-## Stage
-
-Build wave 1. Base origin/dev df54ce81.
+Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
+Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
+Stage: 3 wave 1
+Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
+Next: read wave 1 results (LF-u, LF-4 PRs); re-read LF-3's waits (tone-controls:LT-m, cull-finish:DR-m)
 
 ## Slices
-
-| Slice | Tasks | State |
-|---|---|---|
-| LF-a | LF-1, LF-2 (+LF-6 folded) | PR #3624 (fast-lane), CI: PASS on 6187015c, Mutate 3/3 LibraryModel.FileFlow |
-| LF-u | LF-5, LF-6 | LF-6 (journey, skipped, ~30 lines) folded into LF-a's PR; LF-5 waits on SF-3 (#3514, the drop mark) and SF-4 (the drag-hover budget pattern) |
-| LF-m | LF-3, LF-4 | waits on LF-a, SF-5..7, tone-controls LT-m, cull-finish DR-m |
-| LF-z | LF-7, LF-8 | waits on the rest |
+| slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
+|---|---|---|---|---|---|---|---|---|---|
+| LF-a | adapter stubs, .suiteApp, menu and drop on fakes | LF-1, LF-2 | MLF | – | yes | – | merged (#3624) | – | – |
+| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | LF-6 done in #3624; LF-5 building | – | – |
+| LF-m | drop imports as one step, hand-offs, recents, drag out | LF-3, LF-4 | MLF | LF-a, SF-5/6/7 (met); LT-m, DR-m (not merged) | yes | 0 | LF-4 building; LF-3 blocked | – | – |
+| LF-z | live journey, feature built | LF-7, LF-8 | LFJ1 | LF-u, LF-m | yes | 0 | blocked | – | – |
 
 ## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| LF-5 | LF-u | 1 | snapshots and render budget | Tests/AppSnapshotTests/LibraryFileFlowSnapshots.swift, RenderBudgetLibraryFileDropTests.swift | LibraryFileFlowSnapshots; dragHoverInTwoBodies | – | building |
+| LF-6 | LF-u | – | journey written, skipped | UITests/LibraryJourneyTests+FileFlow.swift | compiles, skipped | #3624 | merged (folded into LF-a) |
+| LF-4 | LF-m | 1 | catalog opens to bridge; thumbnails drag out | Sources/LibraryApp/LibraryWindow+Import.swift, Tests/AppSnapshotTests/LibraryFileFlowLiveTests.swift | LibraryFileFlowLiveTests | – | building |
+| LF-3 | LF-m | – | adapter bodies, catalog, ids, RJ-L42 | LibraryFileFlow+Kernel.swift, LibraryCommandCatalog.swift, Tests/command-ids/library.txt, ... | LibraryFileFlowTests | – | blocked: LT-m, DR-m |
+| LF-7 | LF-z | – | journey on live | UITests/LibraryJourneyTests+FileFlow.swift | testDropToImportAndDragOut | – | blocked |
+| LF-8 | LF-z | – | status built, feature-done | file-flow.wave.json | waves render --dry-run | – | blocked |
 
-| Task | Branch | PR | State |
-|---|---|---|---|
-| LF-1 | library-file-flow/LF-1 | #3624 | built |
-| LF-2 | library-file-flow/LF-1 | #3624 | built, folded into LF-a's PR (one PR per slice) |
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
 
 ## Decisions
+- Base and PR target are dev, not main: the packets and LF-a exist only on dev, and the fast lane merges into dev (main 0dd23d6 is an ancestor of dev).
+- Resumed from the earlier run act-1a15995d319-aamb (record below this line's history on this branch): LF-a merged as #3624 with LF-6 folded in; its decisions stand (placed types follow PhotoFileKind; drop on the whole window; LF-3 owns the async drop path).
+- LF-5 builds now: SF-3's drop mark merged (#3514). If the drag-hover budget needs SF-4's harness hook (#3827, open), its budget test ships disabled `waits on SF-4` and the snapshots ship now.
+- LF-4 ships ahead of LF-3 as its own PR (LF-m partial): it waits only on LF-a and SF-7, both merged; LF-3 waits on LT-m and DR-m, neither merged.
+- Status branch is `lead/library-file-flow` (`lead/file-flow` is the suite/Flare lead's), as the earlier run chose.
+- Line lead (rule 19): one build-wave call per wave carries file-flow, folders and catalog-backup tasks; the template takes feature/issue/packet per task.
 
-- placesExtensions follows what the import reads today (`PhotoFileKind`: jpg, jpeg, png, heic, heif), not the packet's wider list; tiff and raw types wait for the raw feature.
-- Library is one always-open catalog: hasDocument is true, recentFiles is empty, openRecent refuses.
-- LF-1's drop tests are disabled by name ("LF-3"): `perform` is synchronous while the import is async; LF-3 picks a pending-drop queue or a synchronous path like LibraryHeadless and adapts them.
-- Spine (#1044) is closed as completed with no open PRs; its wave.json still reads "building", which is stale. LF-a's wait on spine is met.
-- LF-2 puts the drop on the whole window (LibraryWindow), not only the grid as the packet names: an empty catalog shows no grid and must still take a drop.
-- LF-2's hand-off host is a snapshot catalog (`LibraryShell.host`); LF-3 swaps it for a host that reaches the window's live catalog.
-- LF-5 can't land on LF-a alone: the `library-drop-mark` snapshot needs SF-3's mark (#3514, open) and `dragHoverInTwoBodies` needs SF-4's way to hover a file drag in the harness (not started). Open Recent is a Commands menu, not a view, so "one Open Recent" is checked in LFJ1 (LF-6), which folds into LF-a's PR.
-
-- 2026-10-20T16:44Z: macOS build-only runs for this feature have been queued since ~14:25Z (runner backlog); lead keeps waiting, no action needed from the supervisor unless the queue is stuck.
+## Open
+- LF-3 waits on tone-controls:LT-m (LibraryCommandCatalog.swift, Tests/command-ids/library.txt) and cull-finish:DR-m; neither feature has a lead branch.
