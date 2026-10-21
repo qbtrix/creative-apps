@@ -39,6 +39,7 @@ Next: parked until FG-2 (#3419, flare/gradient-fill) lands; Belt relaunches stro
 - FK-a also waits on suiteui SS-a, not only FG-a: the contract conforms FlareWorkspace to StrokeTarget and returns VectorStroke, and FK-2 uses StrokeEditor. Neither is on dev (rule 20: no app-local copy).
 
 ## Open
+- 2026-10-21T13:09Z: resumed on Belt's 30-min nudge; still parked until FG-2 #3419 (open) lands, per the supervisor on #3452.
 - 2026-10-21T07:32Z: parked. Supervisor (#3452, 07:20Z): FG-2 belongs to #3419, re-armed and waiting for a Belt slot; don't build it here. No startable FK slice: FK-2 waits FG-2, FK-5 waits SS-d (SS-7 #3823 now needs-fix, SS-9 #3826 open). The run continues for shape-tools and key-select-all, which have PRs in the lane (#3850, #3921).
 - FK-5 note from the FK-1 builder: stroke.dash and stroke.trim still throw notBuilt (StrokeRules.waitingCore); FK-5 also needs SS-7 and the core bump with trim tracks.
 - 2026-10-21T05:39Z: SS-a, SS-u and SS-m are done (suiteui RECORD); the core bump #3549 is on dev. SS-d still waits (SS-7 #3823, SS-9 #3826 open). FG-a: FG-1 merged, FG-2 waits on GF-2 #3695 (open, fast-lane); #3419 is parked needs-human. FK-1 has no wait, so it builds now; FK-2, FK-5 and FK-6 stay blocked.
