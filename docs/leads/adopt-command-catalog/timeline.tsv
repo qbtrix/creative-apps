@@ -150,3 +150,4 @@ utc	stage	event	ref	note
 2026-10-21T02:09Z	wait	hb7: CI 39524928486 pending, scoped 39491489760 queued; no qualifying run
 2026-10-21T02:30Z	wait	hb8: CI 39524928486 pending, scoped 39491489760 queued; Linux checks green at 2ab0eb96 (linux_only, not a qualifying run)
 2026-10-21T02:55Z	wait	hb9: CI 39524928486 cancelled; new full CI 39534644387 queued on 2ab0eb96; scoped 39491489760 queued
+2026-10-21T03:17Z	wait	hb10: scoped suiteui 39491489760 in progress; full CI 39534644387 queued

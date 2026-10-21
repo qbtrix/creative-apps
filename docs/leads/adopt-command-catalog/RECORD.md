@@ -134,3 +134,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-21T02:30Z: hb8: CI 39524928486 pending, scoped 39491489760 queued; Linux checks green at 2ab0eb96 (linux_only, not a qualifying run)
 
 - 2026-10-21T02:55Z: hb9: CI 39524928486 cancelled; new full CI 39534644387 queued on 2ab0eb96; scoped 39491489760 queued
+
+- 2026-10-21T03:17Z: hb10: scoped suiteui 39491489760 in progress; full CI 39534644387 queued
