@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-21T05:50:01Z	heartbeat	check	-	PF-3 #3815 merged with dev (needs-rebase); C4 part kept as dev; scripts/ci --changed running
 2026-10-21T05:56:36Z	PF-3	push	#3815	merged dev, CI: PASS, Head 679e9382 moved; waits lane to drop needs-rebase
 2026-10-21T06:15Z	heartbeat	wait	#3815	PF-3 lane macOS build on 679e9382
+2026-10-21T06:34Z	heartbeat	lane	#3815	PF-3 macOS build still queued
