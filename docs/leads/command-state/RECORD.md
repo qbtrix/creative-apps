@@ -35,7 +35,7 @@ Next: parents in lane; drafts #4202 #4206 #4213 #4210 #4214 #4225 ready after pa
 | CS-8 | CS-halo | 3 | Halo wiring: transport, render Choose…, New Composition Create | packet CS-8 | CommandPathTests | #4210 | draft, stacked on #4196; gate pass, Head 8f46d805 |
 | CS-12 | CS-flare | 3 | Flare wiring; baseline 10 to 3 | packet CS-12 | CommandPathTests, CommandPathLimitTests | #4214 | draft, stacked on #4205; gate pass, Head dd40adc6 |
 | CS-5 | CS-library-2 | 3 | Library catalog part 2 (+20 ids, CLI list regenerated) | packet CS-5 | Mutate 9/9 LibraryModel.LibraryCommandCatalog | #4225 | draft, stacked on #4134; gate pass, Head 926fdd96 |
-| CS-6 | CS-library-2 | 4 | Library wiring part 2 | packet CS-6 | CommandPathTests, CommandPathLimitTests | | building, stacked on #4225 + #4213 |
+| CS-6 | CS-library-2 | 4 | Library wiring part 2; baseline max 23 to 13 (alert Save waits #4208, loupe Grid waits #4227) | packet CS-6 | CommandPathTests, CommandPathLimitTests | #4234 | draft, stacked on #4225 + #4213; gate pass, Head 4c1294b6 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
