@@ -30,3 +30,4 @@ time	kind	note
 2026-10-21T05:49Z	check	lane	#3882,#3883,#3884,#3886	DK-a round-1 fix PRs clean, fast-lane, not merged; round 2 (#3865,#3871,#3873) waits for them
 2026-10-21T06:16Z	check	lane	#3882,#3883,#3884,#3886	DK-a round-1 fix PRs clean, queued in lane; round 2 waits for their merge
 2026-10-21T06:39Z	check	lane	#3882,#3883,#3884,#3886	clean, queued; lane bisecting batch-20261021061843; round 2 waits
+2026-10-21T07:01Z	check	lane	#3882,#3883,#3884,#3886	clean, queued; dev at b64cbb8c (core bump #3784); round 2 waits
