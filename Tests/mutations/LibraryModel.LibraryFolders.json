@@ -19,5 +19,26 @@
     "find": "last.missing == last.node.totalCount",
     "replace": "last.missing == last.node.ownCount",
     "tests": "LibraryFoldersTests"
+  },
+  {
+    "label": "a row id hashes without the xor",
+    "file": "Sources/LibraryModel/LibraryFolders.swift",
+    "find": "hash ^= UInt64(byte)",
+    "replace": "hash |= UInt64(byte)",
+    "tests": "LibraryFoldersSidebarTests"
+  },
+  {
+    "label": "any library.folder. id reads as a row",
+    "file": "Sources/LibraryModel/LibraryFolders.swift",
+    "find": "id.hasPrefix(rowPrefix) && id.count == rowPrefix.count + 16",
+    "replace": "id.hasPrefix(rowPrefix)",
+    "tests": "LibraryFoldersSidebarTests"
+  },
+  {
+    "label": "the help says folders are always ready",
+    "file": "Sources/LibraryModel/LibraryFolders.swift",
+    "find": "public var showFolderHelp: String? { Self.folderHelp(self) }",
+    "replace": "public var showFolderHelp: String? { nil }",
+    "tests": "LibraryFoldersSidebarTests"
   }
 ]
