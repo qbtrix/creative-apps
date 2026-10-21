@@ -59,6 +59,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 05:30Z heartbeat: #3836 unchanged, green and queued behind the lane backlog.
 
+- 06:03Z heartbeat: #3836 green and clean on b51250b1. Lane batch 20261021053311 (up to #3813) is bisecting; ours are next in line.
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
