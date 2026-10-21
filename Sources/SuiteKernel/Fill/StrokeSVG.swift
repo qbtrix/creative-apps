@@ -1,10 +1,11 @@
-// StrokeSVG.swift (stroke-style SS-1 stub; SS-5 colour to cap, SS-7 dash): a stroke as SVG presentation attributes,
+// StrokeSVG.swift (stroke-style SS-1 stub; SS-5 colour to cap; SS-7 dash): a stroke as SVG presentation attributes,
 // as FlareCore's SVG export writes them (SVG 1.1 `stroke`, `stroke-opacity`, `stroke-width`, `stroke-linejoin`,
 // `stroke-linecap`, `stroke-dasharray`, `stroke-dashoffset`). Colour bytes come from `SampleRules.hex`.
 
 public enum StrokeSVG {
     /// `stroke`'s attributes in writing order, `stroke-opacity` only below 1: the colour as "#rrggbb", the width
-    /// clamped to `StrokeRules.widths`, then join and cap. The dash attributes come with SS-7.
+    /// clamped to `StrokeRules.widths`, then join and cap, then `stroke-dasharray` (the pattern, space-separated)
+    /// and `stroke-dashoffset` (the phase) when the stroke is dashed, as FlareCore's SVG export writes them.
     public static func attributes(_ stroke: VectorStroke) -> [(name: String, value: String)] {
         var out = [(name: "stroke", value: SampleRules.hex(stroke.color).lowercased())]
         let alpha = stroke.color.a.isNaN ? 0 : min(max(stroke.color.a, 0), 1)
@@ -12,6 +13,10 @@ public enum StrokeSVG {
         out.append((name: "stroke-width", value: number(StrokeRules.clampedWidth(stroke.width))))
         out.append((name: "stroke-linejoin", value: stroke.join.rawValue))
         out.append((name: "stroke-linecap", value: stroke.cap.rawValue))
+        if !stroke.dash.isEmpty {
+            out.append((name: "stroke-dasharray", value: stroke.dash.map(number).joined(separator: " ")))
+            out.append((name: "stroke-dashoffset", value: number(stroke.dashPhase)))
+        }
         return out
     }
 

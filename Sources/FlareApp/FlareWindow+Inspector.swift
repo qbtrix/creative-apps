@@ -31,6 +31,7 @@ extension FlareWindow {
         case let .easingHandle(index, x, y):
             if let handle = EasingHandle(rawValue: index) { model.moveEasingHandle(handle, to: Point(x: x, y: y)) }
         case .endEasingHandle: model.endEasingHandleDrag()
+        case .runFill(let gesture): model.runFill(gesture)
         }
     }
 
@@ -55,6 +56,7 @@ extension FlareWindow {
         case .easingPreset, .easingHandle:
             if let reason = model.easingUnavailableReason { return reason }
             return model.selectedEasingSegment == nil ? "Select a keyframe span to ease it." : nil
+        case .runFill: return model.fillEditHelp
         }
     }
 }
