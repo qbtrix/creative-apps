@@ -137,6 +137,7 @@ struct DesignExportArea: ViewModifier {
         case .svg: Data(try model.exportSVG(item).utf8)
         case .png: try DesignRasterizer.png(try model.exportRaster(item))
         case .pdf: try DesignRasterizer.pdf(try model.exportRaster(item))
+        case .jpeg: throw DesignRefusal.notYet("JPEG files are written once DX-4 rasterizes them; PNG keeps transparency.")
         }
     }
 

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "matrixInverted: commit resamples through the inverse of the box-to-box matrix, so a turn goes the wrong way and lands off the box",
+    "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "find": "forward.apply(back.apply(",
+    "replace": "back.apply(forward.apply(",
+    "tests": "LiveTransformTests/turn90Size"
+  },
+  {
+    "label": "flipAxisSwapped: Flip Horizontal mirrors top to bottom and Flip Vertical left to right",
+    "file": "Sources/PhotoModel/Live/LiveTransform+Kernel.swift",
+    "find": "axis == .horizontal ? .horizontal : .vertical",
+    "replace": "axis == .horizontal ? .vertical : .horizontal",
+    "tests": "LiveTransformTests/flipHorizontal"
+  }
+]

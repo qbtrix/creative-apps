@@ -44,8 +44,12 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var tool: FlareTool = .select
     /// The Shape tool's options (FlareShape+Kernel.swift): view state, never an undo step.
     public internal(set) var shapeTool: ShapeSpec = .defaults(.star)
-    /// The stage selection (FlareSelection.swift).
-    public internal(set) var selection: [StageAddress] = []
+    /// The stage selection (FlareSelection.swift); a change drops the picked anchors.
+    public internal(set) var selection: [StageAddress] = [] {
+        didSet { if oldValue != selection { anchorSelectionStore = Selection() } }
+    }
+    /// The picked anchors of the path in edit (FlareAnchors+Kernel.swift).
+    var anchorSelectionStore = Selection<AnchorRef>()
     /// The marquee under way, in scene points; nil when none is.
     public internal(set) var marquee: Rect?
     /// The shape the drag under way would add, for the live preview; nil
@@ -268,6 +272,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.draft == rhs.draft
             && lhs.layerError == rhs.layerError && lhs.selectedEasingSegment == rhs.selectedEasingSegment && lhs.canUndo == rhs.canUndo && lhs.canRedo == rhs.canRedo
             && lhs.services.isPreview == rhs.services.isPreview && lhs.selection == rhs.selection
+            && lhs.anchorSelectionStore == rhs.anchorSelectionStore
             && lhs.marquee == rhs.marquee && lhs.dragPreview == rhs.dragPreview && lhs.gesture == rhs.gesture && lhs.currentFrame == rhs.currentFrame
         let animating = lhs.isPlaying == rhs.isPlaying && lhs.loops == rhs.loops && lhs.playClock == rhs.playClock
             && lhs.autoKey == rhs.autoKey && lhs.onion == rhs.onion && lhs.showsMotionPath == rhs.showsMotionPath
