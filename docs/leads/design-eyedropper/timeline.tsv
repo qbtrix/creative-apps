@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-21T22:05Z	check	waits (poll 2)	-	DT-u #4159, DT-m #4187, DG-m #4189 open; DS-u/DS-m waiting; #4081 mac build 39680406979 queued
 2026-10-21T22:21Z	check	waits (poll 3)	-	unchanged; asked the supervisor (#4187 #4189 mac green but unmerged; dev Linux red on CommandPathTests launcher)
 2026-10-21T22:20Z	fix	DY-u round 2 mac build red	#4081	dev break RenderBudgetPhotoPlaceTests; ported #4215; head 1a5a24be gate PASS
+2026-10-21T22:52Z	check	waits	-	DT-5 #4187 and DG-m #4189 merged 22:42Z; DT-6 and DT-u #4159 pending; supervisor: keep going
