@@ -56,6 +56,7 @@ extension PhotoWorkspace {
         "file.new": "Opens a new white 1920 × 1080 image.", "file.open": "Opens an image file.",
         "file.save": "Saves the image to its file.", "file.save-as": "Saves the image to a new file.",
         "file.export": "Exports a flattened copy of the image.", "image.resize": "Changes the image's size.",
+        "image.canvas-size": "Grows or crops the canvas around an anchor without scaling the image.",
         "image.straighten": "Rotates the image to level it.",
         "layer.new-adjustment": "Adds an adjustment layer above the selected layer.",
     ]

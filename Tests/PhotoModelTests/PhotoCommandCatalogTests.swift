@@ -128,7 +128,7 @@ struct PhotoCommandCatalogTests {
                 row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)),
                 row("Select All", ws.canSelectAll), row("Delete Selection", ws.canEditSelection), row("Fill Selection", ws.canEditSelection),
                 row("All", image), row("Deselect", ws.canDeselect)]
-            + ["Image Size…", "Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°", "Straighten…"].map { row($0, image) }
+            + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°", "Straighten…"].map { row($0, image) }
             + [row("New Layer", image),
                "New Adjustment Layer|\(!ws.adjustmentLayerKinds.isEmpty && adjust == nil)|\(adjust ?? "New Adjustment Layer")",
                row("Delete Layer", ws.canDeleteSelectedLayer), row("Duplicate Layer", ws.duplicateLayerHelp == nil, ws.duplicateLayerHelp),
@@ -139,8 +139,8 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Commands with no menu item: the catalog's only (gradient-fill PG-3), and Canvas Size until its sheet (transform PT-3).
-    static let noMenu: Set = ["select.rect", "image.gradient", "image.canvas-size"]
+    /// Commands with no menu item: the catalog's only (gradient-fill PG-3).
+    static let noMenu: Set = ["select.rect", "image.gradient"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones and Free Transform's (transform PT-5,
     /// ahead of its menu items), in menu order (the catalog lists them as the menus do).
     static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {
