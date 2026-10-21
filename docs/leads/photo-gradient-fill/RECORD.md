@@ -2,17 +2,17 @@
 
 Issue: #3416 · Packet: docs/blueprints/photo/features/gradient-fill.md
 Run: act-1a15e2da54d-qlg1 (resumed; earlier act-1a15a9f4eba-h30y) · Session: claude/feature-lead-playbook-t69dpt · Started: 2026-10-20T18:40Z
-Stage: 3 wave 4 (PG-z)
+Stage: 3 wave 4 (PG-z, PR #4064)
 Base: 965a76be767734bcfbd1a2bf916a7b7802e728ef (origin/dev at resume)
-Next: #3977 PG-6 merges (mac build 39586117070 green); open PG-z PR (PG-7 + PG-8 folded, feature-done); Belt-Slice-Done PG-a/PG-m once a green run holds #3927/#3922 (dev-red #3856, not ours)
+Next: #4064 PG-z merges (feature-done); Belt-Slice-Done PG-u and PG-z once a green dev run holds #3977 and #4064, then Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PG-a | PhotoTool.gradient in the palette with help, options hold a Fill, Tool Options shows the editor on stubs | PG-1, PG-2 | MJ-PG | – | yes | 0 | merged (#3681, #3927); waits a green run | – | – |
-| PG-u | drag line on canvas, options snapshots and render budget, journey written | PG-5, PG-6 | PJ-G1 | – | yes | 0 | PG-5 merged #3975; PG-6 #3977 in lane (mac build green) | – | – |
-| PG-m | drag draws dithered gradient into the layer inside the selection as one step; options take each intent | PG-3, PG-4 | MJ-PG | – | no | 0 | merged (#3923 PG-4, #3922 PG-3 last); waits a green run | – | – |
-| PG-z | live services, journey on live, blueprint, built | PG-7, PG-8 | PJ-G1 | PG-u | yes | 0 | building: branch photo-gradient-fill/PG-7 (PG-7 journey on, PG-5 tests on, PG-8 docs folded in), gate running | – | – |
+| PG-a | PhotoTool.gradient in the palette with help, options hold a Fill, Tool Options shows the editor on stubs | PG-1, PG-2 | MJ-PG | – | yes | 0 | done: Belt-Slice-Done on run 39582236683 (Linux, fe232dcda) | 39582236683 | – |
+| PG-u | drag line on canvas, options snapshots and render budget, journey written | PG-5, PG-6 | PJ-G1 | – | yes | 0 | merged (#3975, #3977 at 12:16Z); waits a green run | – | – |
+| PG-m | drag draws dithered gradient into the layer inside the selection as one step; options take each intent | PG-3, PG-4 | MJ-PG | – | no | 0 | done: Belt-Slice-Done on run 39582236683 (Linux, fe232dcda) | 39582236683 | – |
+| PG-z | live services, journey on live, blueprint, built | PG-7, PG-8 | PJ-G1 | PG-u | yes | 0 | PR #4064 (feature-done), gate PASS head 6519ea37 | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -22,8 +22,8 @@ Next: #3977 PG-6 merges (mac build 39586117070 green); open PG-z PR (PG-7 + PG-8
 | PG-3 | PG-m | 1 (stacked on PG-1) | drawGradient bodies, dithered, through editSelection; image.gradient spec; RJ-P19 | Sources/PhotoModel/PhotoGradientTool+Kernel.swift, Sources/PhotoModel/PhotoSelection.swift, Tests/PhotoModelTests/PhotoGradientToolTests.swift, Tests/mutations/PhotoModel.PhotoGradientTool+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/sky-gradient/sky-gradient.jobs.json, Tests/RealJobs/photo/sky-gradient/input/grey-256.png | PhotoGradientToolTests | – | merged #3922 (7d2121302) |
 | PG-4 | PG-m | – | runGradientOption through GradientRules | Sources/PhotoModel/ToolOptions.swift, Tests/PhotoModelTests/PhotoGradientOptionsTests.swift, Tests/mutations/PhotoModel.ToolOptions.json | PhotoGradientOptionsTests | – | merged #3923 (896cafe3c) |
 | PG-5 | PG-u | – | snapshots, render budget | Tests/AppSnapshotTests/PhotoGradientSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoGradientTests.swift | RenderBudgetPhotoGradientTests.gradientDragInThreeBodies | – | merged #3975 (119194068) |
-| PG-6 | PG-u | – | drag line overlay; journey written, skipped | Sources/PhotoApp/PhotoCanvasOverlay.swift, UITests/PhotoJourneyTests+Gradient.swift | compiles, skipped | – | #3977 open, head 3192c019, mac build green, lane merges next sweep |
-| PG-7 | PG-z | – | journey on live | UITests/PhotoJourneyTests+Gradient.swift | PhotoGradientJourneyTests.testSkyGradient | – | branch photo-gradient-fill/PG-7; folded with PG-8 into one PG-z PR (PG-7 is 7 lines); also turns on PhotoGradientSnapshots.radialOptions/done and RenderBudgetPhotoGradientTests.gradientDragInThreeBodies |
+| PG-6 | PG-u | – | drag line overlay; journey written, skipped | Sources/PhotoApp/PhotoCanvasOverlay.swift, UITests/PhotoJourneyTests+Gradient.swift | compiles, skipped | – | merged #3977 (12:16Z, head 3192c019) |
+| PG-7 | PG-z | – | journey on live | UITests/PhotoJourneyTests+Gradient.swift | PhotoGradientJourneyTests.testSkyGradient | #4064 | PR #4064; folded with PG-8 into one PG-z PR (PG-7 is 7 lines); also turns on PhotoGradientSnapshots.radialOptions/done and RenderBudgetPhotoGradientTests.gradientDragInThreeBodies |
 | PG-8 | PG-z | – | photo.md, status built, feature-done | docs/blueprints/photo.md, docs/blueprints/photo/features/gradient-fill.wave.json | scripts/waves render --dry-run | – | folded into the PG-z PR, feature-done |
 
 ## Reviews

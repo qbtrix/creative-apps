@@ -72,3 +72,6 @@ utc	stage	event	ref	note
 2026-10-21T11:30:00Z	resume	lead	run act-1a15e2da54d-qlg1 resumed; PG-2/3/4/5 merged; #3977 PG-6 mac build green, lane next	dev-red #3856 (PhotoPlace command path, history a11y; not ours)
 2026-10-21T11:31:00Z	wave	PG-z	PG-7 + PG-8 folded on photo-gradient-fill/PG-7 (journey on, PG-5's held tests on, photo.md, status built); gate running	PR after #3977 merges
 2026-10-21T11:50:00Z	check	PG-z	gate CI: PASS on photo-gradient-fill/PG-7 head d1d61469c, pushed	PR opens when #3977 (PG-6) merges; #3977 clean, lane next
+2026-10-21T12:12:00Z	check	PG-a,PG-m	Linux run 39582236683 green on fe232dcda holds #3681 #3927 #3922 #3923	Belt-Slice-Done PG-a and PG-m posted on #3416
+2026-10-21T12:16:00Z	merge	PG-u	#3977 PG-6 merged by the lane (its Linux red on 3192c019 was CommandPathTests on dev's PhotoPlace.swift, fixed on dev by #4008)	PG-u waits a green run
+2026-10-21T12:23:00Z	wave	PG-z	PR #4064 opened (PG-7 + PG-8, feature-done), gate PASS head 6519ea37	lane merges; then Belt-Slice-Done PG-u/PG-z and Belt-Contact-Sheet
