@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-21T20:26Z	heartbeat	#4164 merged f2953daf; no scoped photo run contains it yet; #4165 needs-rebase, fixer started
 2026-10-21T20:31Z	wave A	#4165 merged dev in, head 96ffdbcd, diff vs dev 3 files +121/-2, scripts/ci --changed PASS
 2026-10-21T20:49Z	heartbeat	#4165 clean, needs-rebase dropped; PF-a waits a scoped photo run containing f2953daf (none yet)
+2026-10-21T21:11Z	heartbeat	#4165 macOS build dispatched; PF-a waits a scoped photo run containing f2953daf (none dispatched yet)

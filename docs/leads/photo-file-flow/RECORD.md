@@ -22,8 +22,8 @@ Next: PF-a done once a scoped photo run contains f2953daf; #4165 merged dev in (
 | PF-2 | PF-a | .suiteApp, SuiteFileCommands + Open In, .suiteFileDrop (reconcile with PP-3's canvas drop → place.image) | #4164 | merged f2953daf |
 | PF-3 | PF-m | adapter bodies, catalog specs, recents import | #3815 | merged 709f928 (RJ-P42 pending gap #3741) |
 | PF-4 | PF-m | window notes opens and saves | #3700 | merged 7ec53b5 |
-| PF-5 | PF-u | snapshots, RenderBudgetPhotoFileDropTests.dragHoverInTwoBodies ≤ 2 | #4165 | clean in lane (96ffdbc), needs-rebase dropped |
-| PF-6 | PF-u | UITests/PhotoJourneyTests+FileFlow.swift, XCTSkip("waits on PF-7") | #4165 | clean in lane (96ffdbc), needs-rebase dropped |
+| PF-5 | PF-u | snapshots, RenderBudgetPhotoFileDropTests.dragHoverInTwoBodies ≤ 2 | #4165 | in lane (96ffdbc), macOS build dispatched 20:48Z |
+| PF-6 | PF-u | UITests/PhotoJourneyTests+FileFlow.swift, XCTSkip("waits on PF-7") | #4165 | in lane (96ffdbc), macOS build dispatched 20:48Z |
 | PF-7 | PF-z | journey on live | – | waits PF-u |
 | PF-8 | PF-z | photo.md, status built, feature-done | – | waits PX-z |
 
