@@ -1,15 +1,15 @@
 # design-stroke-style lead record
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
-Run: act-1a15e909498-4bkk · Session: claude/feature-lead-stroke-eyedropper-il215c · Started: 2026-10-21T12:55Z (prior runs act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
-Stage: 3 wave 1 done (DK-a merged 3785460f; round 2 #4001 merged 12:26Z as 73754132)
+Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g, act-1a159c9b6b4-va3c)
+Stage: 3 wave 1 done (DK-a done: Belt-Slice-Done posted with run 39670298178, gaps #3865 #3871 #3873)
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
-Next: Belt-Slice-Done DK-a + Mac-Finish-Wanted on the first dev Linux green at or past 73754132 (39601343733 red on LibraryFoldersTests.tenThousandPaths timing, #3856, not this feature). DK-u waits shape-tools:DS-u (needs transform DT-u), DK-m waits shape-tools:DS-m (needs DT-m, DY-m)
+Next: DK-u waits shape-tools:DS-u (waits transform DT-u, building: DT-4 behind #4159); DK-m waits shape-tools:DS-m (waits DT-m: #4187 open, DT-6 after DG-m; and eyedropper DY-m). Re-read waits every poll
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor on them | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | merged (3785460f); rounds spent (#3884, #4001); #3865 #3871 #3873 are gap p2 | – | wanted |
+| DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor on them | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | merged (3785460f); rounds spent (#3884, #4001); #3865 #3871 #3873 are gap p2 | 39670298178 | wanted (posted) |
 | DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 0 | waiting | – | – |
 | DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d (DK-7) | no | 0 | waiting | – | – |
 | DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | waiting | – | – |
@@ -36,3 +36,4 @@ Next: Belt-Slice-Done DK-a + Mac-Finish-Wanted on the first dev Linux green at o
 
 ## Open
 
+- Run act-1a1605b0534-rn47: the brief's "rebase lead/eyedropper onto origin/main" was not done: lead/eyedropper is the SuiteUI eyedropper lead's branch (#3448); this lead's status stays on lead/design-*.

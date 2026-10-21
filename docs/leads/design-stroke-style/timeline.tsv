@@ -46,3 +46,6 @@ time	kind	note
 2026-10-21T13:12Z	start	run act-1a15e909498-4bkk	-	resumed DK and DY; status stays on lead/design-*
 2026-10-21T13:12Z	check	DK-a rounds spent	#4001	merged 73754132; #3865 -> gap p2 (waits #4014)
 2026-10-21T13:12Z	check	dev red	39601343733	LibraryFoldersTests.tenThousandPaths timing, not ours
+2026-10-21T21:05Z	start	run act-1a1605b0534-rn47	-	resumed DK; main verified 0dd23d65
+2026-10-21T21:05Z	done	DK-a	39670298178	Belt-Slice-Done gaps #3865 #3871 #3873; Mac-Finish-Wanted posted
+2026-10-21T21:20Z	check	waits	-	DS-u (DT-u building), DS-m (DT-m #4187, DY-m) not merged
