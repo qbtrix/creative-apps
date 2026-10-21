@@ -53,3 +53,7 @@ utc	stage	event	ref	note
 2026-10-21T20:55Z	3	built	DT-6	feat/design-transform-dt6 31b8bc73 (stacked on #4189+#4187), mutate 12/12 SVG 5/5 catalog, CI PASS; PR held until #4189 and #4187 merge (567 lines/20 files vs dev)
 2026-10-21T21:11Z	3	heartbeat	-	no merges yet; #4159 #4187 #4189 #4197 #4178 open in fast lane, no needs-fix
 2026-10-21T21:33Z	3	heartbeat	-	no merges; lane macOS builds queued (e.g. run 39662239121 for #4159 queued since 19:30, no runner)
+2026-10-21T22:05Z	3	finding	#4223	turned side-handle resize acts upright (major), DT-u round 2
+2026-10-21T22:05Z	3	finding	#4224	no rotate knob on several (minor), DT-u round 2
+2026-10-21T22:05Z	3	fixer	#4223,#4224	stacked on fix/design-rotate-knob, push only
+2026-10-21T22:05Z	4	build	DT-7	journey on feat/design-transform-dt7-journey off dev; PR after #4188 fix merges
