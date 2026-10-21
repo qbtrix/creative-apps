@@ -1,0 +1,81 @@
+utc	stage	event	ref	note
+2026-10-20T03:17Z	0	stage-start	#3419	setup on dev 233aff5; main b3011ab verified
+2026-10-20T03:17Z	0	stopped	#3418	no task can start: GF-a not merged
+2026-10-20T03:49Z	3	heartbeat	#3418	dev 533daec has no Sources/SuiteKernel/Fill; GF-1 building, GF-2 waits CC-u
+2026-10-20T04:05Z	3	heartbeat	#3418	dev 533daec still lacks Fill/; GF-1 pushed (ed1ed79, no merge yet); GF-2 waits CC-u
+2026-10-20T04:23Z	3	heartbeat	#3418	dev 53151b2 lacks Fill/; GF-1 ed1ed79 unmerged; GF-2 waits CC-u
+2026-10-20T04:39Z	3	heartbeat	#3421	dev 18464f2 lacks Fill/; GF-1 is PR #3421 (open, fast-lane); GF-2 waits CC-u
+2026-10-20T04:56Z	3	heartbeat	#3421	dev 18464f2 lacks Fill/; #3421 waits its macOS build (run 39364860084)
+2026-10-20T05:13Z	3	heartbeat	#3421	dev 6537a1a lacks Fill/; #3421 macOS build 39364860084 still queued since 03:32Z (runner queue)
+2026-10-20T05:32Z	3	asked	#3419	#3421 macOS build 39364860084 queued 2h; asked supervisor to re-dispatch or Mac-Check
+2026-10-20T05:53Z	3	unblocked	#3421	GF-1 merged as 9a146777; Sources/SuiteKernel/Fill on dev
+2026-10-20T06:25Z	3	building	FG-1	feat/flare-gradient-fg-a: stubs + FlareGradientTests pass locally; running scripts/ci --changed
+2026-10-20T06:09Z	3	pr	FG-1	#3526 open at 37c65fb2, fast-lane, scripts/ci --changed PASS
+2026-10-20T06:16Z	3	pr	FG-6	#3532 open at 8bbb9c89 stacked on #3526, fast-lane, scripts/ci --changed PASS
+2026-10-20T06:37Z	3	heartbeat	FG-1,FG-6	lane dispatched macOS builds (queued); no GF-2/GF-6/AC-flare on dev
+2026-10-20T06:58Z	3	heartbeat	FG-1,FG-6	macOS builds still queued; no GF-2/GF-3/GF-6/AC-flare on dev
+2026-10-20T07:20Z	3	heartbeat	FG-1,FG-6	macOS builds queued 1h (runner backlog); no GF-2/GF-3/GF-6/AC-flare on dev
+2026-10-20T07:42Z	heartbeat	builds 39379666154/39379693778 still queued; #3526 #3532 clean; blockers GF-2/GF-3/GF-6/AC-flare not on dev
+2026-10-20T08:05Z	heartbeat	builds 39379666154/39379693778 still queued (1h46m); #3526 #3532 clean, no new lane comments; blockers GF-2/GF-3/GF-6/AC-flare not on dev (dev head 83750492)
+2026-10-20T08:26Z	heartbeat	builds still queued (2h07m); flagged stalled macOS runners to the supervisor on #3419; blockers not on dev
+2026-10-20T08:49Z	heartbeat	builds still queued (2h30m); no supervisor reply on #3419 yet; blockers not on dev (dev head be364d1e)
+2026-10-20T09:12Z	heartbeat	builds still queued (2h53m); PRs clean; no supervisor reply on #3419; blockers not on dev (dev head be364d1e)
+2026-10-20T09:34Z	heartbeat	FG-1 build 39379666154 started (in_progress); FG-6 build still queued; blockers not on dev (dev head 36789542)
+2026-10-20T09:35Z	build	FG-1 #3526 macOS build 39379666154 success (09:25-09:34Z); awaiting lane merge
+2026-10-20T09:48Z	build	FG-6 #3532 macOS build 39379693778 success; both PRs await lane merge
+2026-10-20T09:55Z	heartbeat	both builds green; #3526 #3532 clean, awaiting lane sweep; blockers not on dev (dev head f8b6c4f7); no supervisor reply
+2026-10-20T10:03Z	merged	FG-1 #3526 merged as 11a545e7; #3532 awaiting lane
+2026-10-20T10:15Z	fix	#3532 needs-rebase: merged dev, resolved to FG-6, gate PASS, pushed e3e06e1f, Head moved
+2026-10-20T10:18Z	heartbeat	#3532 at e3e06e1f awaiting lane (needs-rebase not yet dropped); GF-2, GF-3, GF-6, AC-flare not on dev (head a6cb0127); no supervisor reply
+2026-10-20T10:38Z	heartbeat	#3532 build 39406950210 queued; GF-2, GF-3, GF-6, AC-flare not on dev (head a54a892a); no supervisor reply
+2026-10-20T10:59Z	heartbeat	#3532 build 39406950210 still queued (macOS backlog); blockers not on dev (head 575cc800); no supervisor reply
+2026-10-20T11:20Z	build	#3532 macOS build 39406950210 green; awaiting lane merge
+2026-10-20T11:21Z	heartbeat	#3532 build green, awaiting lane sweep; blockers not on dev (head 0e1199e9); no supervisor reply
+2026-10-20T11:43Z	heartbeat	#3532 green since 11:19Z, unmerged; lane run 39415962455 in progress; blockers not on dev (head 0e1199e9); no supervisor reply
+2026-10-20T12:07Z	heartbeat	#3532 green, unmerged: lane batch-20261020112639 red, bisecting (probe -0 running); blockers not on dev (head 0e1199e9); no supervisor reply
+2026-10-20T12:30Z	heartbeat	batch-20261020112639 settled: 4 PRs merged (dev 3ebb876f), #3532 not in it; #3532 green, clean, no needs-fix, lane run 39421163733 in progress; GF-2/GF-3/GF-6/AC-flare still not on dev
+2026-10-20T12:43Z	merged	FG-6 #3532 merged as a454b5c9 (12:42Z); FG-m waits on FG-5 (GF-6, AC-flare); GF-2/GF-3/GF-6/AC-flare not on dev (head 3e010e38)
+2026-10-20T12:51Z	heartbeat	dev 897ccbb2: no GF-2/GF-3/GF-6/AC-flare yet; wave 3 blocked on core slices
+2026-10-20T13:22Z	heartbeat	dev f729e906: no GF-2/GF-3/GF-6; SuiteUI lead #3418 silent since 03:21Z; asked the supervisor on #3419 (comment 6291793984)
+2026-10-20T13:41Z	heartbeat	dev f729e906 unchanged; no GF PR open; no supervisor reply; #3418 still silent since 03:21Z
+2026-10-20T14:05Z	heartbeat	dev df54ce81: no GF-2/GF-3/GF-6; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T14:26Z	heartbeat	dev 9f880c85: no GF-2/GF-3/GF-6; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T14:48Z	heartbeat	dev 9f880c85 unchanged; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T15:16Z	heartbeat	dev 27b67332: no GF-2/GF-3/GF-6; no GF PR open; no supervisor reply; #3418 silent since 03:21Z
+2026-10-20T15:39Z	heartbeat	dev 27b67332 unchanged; GF-2/GF-3/GF-6 not on dev, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T16:00Z	heartbeat	dev 5eceabf7 (core bump, perf journeys, AL-d3 doc): no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T16:22Z	heartbeat	dev 7b45f176: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419 (asked 13:22Z); #3418 silent
+2026-10-20T16:43Z	heartbeat	dev bc9bc10e: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T17:04Z	heartbeat	dev 0269b300: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T17:26Z	heartbeat	dev f30af1b5: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T17:48Z	heartbeat	dev d7f615dc (SS-2 stroke placeholder, DR-1, lane batch gate): still no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T18:11Z	heartbeat	dev d7f615dc unchanged: no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T18:33Z	heartbeat	dev 875b44d2 (render contract lint #3163, place commands #3626, design/library): still no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T18:55Z	heartbeat	dev e382f9d7 (library MD-12): still no GF-2/GF-3/GF-6, no GF PR; no supervisor reply on #3419; #3418 silent
+2026-10-20T19:17Z	heartbeat	dev a48992b7 (suite #3085): still no GF-2/GF-3/GF-6; only gradient PR is #3681 (Photo tool, not ours); no supervisor reply on #3419; #3418 silent
+2026-10-21T07:05Z	3	stage-start	wave 3	line lead act-1a15d4ed024-1wsg resumed; GF-2 on dev; FG-2 + FG-4 start
+2026-10-21T07:32Z	3	pr	FG-a	#3959 opened (FG-2+FG-4), head 9a054aab, ci --changed PASS
+2026-10-21T07:37Z	3	check	wave 3	#3959 in lane; GF-3 #3760, GF-6 #3742, KS-a #3921 open; dev 709f9283
+2026-10-21T07:57Z	3	check	wave 3	#3959 waiting on macOS gate (lane 07:50Z); deps unchanged; dev 260f7a87
+2026-10-21T08:17Z	3	poll	-	#3959 (FG-a) at the lane's macOS gate; FG-3 waits on GF-3 #3760, FG-5 on GF-6 #3742, KS-a #3921, AC-flare.
+2026-10-21T08:38Z	3	build	-	GF-3 #3760 merged 08:33Z: builder launched for FG-u (FG-3 snapshots + stopDragInThreeBodies), stacked on #3959, checking switch/Type-row duplicate. #3959 still at macOS gate. FG-m waits on KS-a #3921, GF-6 #3742, AC-flare.
+2026-10-21T08:47Z	3	pr	3	FG-u PR #3974 opened (FG-3 snapshots + stopDragInThreeBodies, stacked on #3959), head 5c0c39ce, CI: PASS Linux. Duplicate type switch removed: editor gets only the current type.
+2026-10-21T08:58Z	3	question	-	#3959 macOS build green 08:04Z, mergeable clean, unmerged 53 min, no Linux check: asked supervisor on #3419. #3974 (FG-u) macOS build queued (run 39573143406). FG-m still waits on KS-a #3921, GF-6 #3742, AC-flare.
+2026-10-21T09:18Z	3	poll	-	Supervisor 09:03Z: a 15-min sweep now starts Linux checks for PRs with a green macOS build. #3959 Linux check in progress. #3974 macOS build still queued (run 39573143406). FG-m waits on KS-a #3921, GF-6 #3742, AC-flare.
+2026-10-21T09:39Z	3	merged	-	FG-a #3959 merged 09:22Z as a3fe79df. Waiting for a scoped flare run (or the full CI 39576710709, pending at a6f45c18) to show its screens before the critic panel and Belt-Slice-Done. #3974 (FG-u) needs-rebase after the squash: fixer launched (merge dev, no rebase). Dev Linux red is Design's stale mutation anchors (dev-red #3856), not this feature.
+2026-10-21T10:00Z	3	poll	-	Scoped flare run 39580931972 queued at 7b1207a8 (contains FG-a a3fe79df): critics + Belt-Slice-Done FG-a once it shows screens. #3974 fixer hit a rate limit mid-merge, resumed (one conflict: FlareInspectorFill.swift). macOS runners backlogged (several runs queued >1h).
+10:03Z	3	fix	-	FG-u #3974 merged origin/dev at 61237407 (diff vs dev: the 3 FG-3 files only, mergeable clean). scripts/ci --changed fails only on dev's stale DesignModel.DesignCanvasEditing mutation anchors (dev-red #3856, not ours), so Head: stays on 5c0c39ce until dev is green; then rerun the gate and move the marker.
+10:20Z	3	check	-	Heartbeat: scoped flare run 39580931972 (FG-a screens) still queued; FG-a critics wait on it. #3974 needs-rebase dropped by the lane at 61237407; Head: waits on dev-red #3856. FG-m: AC-flare done (#2999 closed), still waits on KS-a #3921 and GF-6 #3742 (both open).
+10:40Z	3	question	-	Third identical blocked poll (scoped flare run 39580931972 still queued; #3974 Head: held by dev-red #3856; KS-a #3921, GF-6 #3742 open). Rule 23: asked the supervisor on #3419 (comment 6313957829). The agent proxy re-appends an attribution footer to issue comments even after a REST edit; recorded, not removable from here.
+11:00Z	3	answer	-	Supervisor answered (10:44Z): freed a macOS runner, so scoped flare run 39580931972 is now in progress and is FG-a's critic run; #3996 fixed dev's stale anchors, and #3974 is queued on the local Mac gate at 61237407, whose pass is its proof (merges on green). No Head: move needed. FG-m still waits on KS-a #3921 and GF-6 #3742.
+11:19Z	3	check	-	Scoped flare run 39580931972 finished: Model (924) and snapshot (88) tests passed and the snapshots uploaded. A later build step failed on dev's own break (FlareDocumentCommands+Catalog.swift:117, cannot find SetLayerParent; FG-a doesn't touch that file). flare-fill-gradient shows the doubled Solid/Linear/Radial switch that FG-u #3974 removes. Its journeys run 39590174344 is pending; the FG-a critic panel runs once it has screens. KS-a #3921 merged 11:14Z; FG-m now waits only on GF-6 #3742.
+11:40Z	3	critic	-	FG-a critic panel started (wf_b6fe900d-6d9) on run 39580931972 snapshots; journeys 39590174344 still pending, not waited on. FG-u #3974 open, dev merged in (head d4d45c6d), on the Mac gate. FG-m waits on GF-6 #3742 (open).
+11:45Z	3	review	-	FG-a panel wf_b6fe900d-6d9: 9 confirmed, 6 refuted, filed #4039-#4046
+11:45Z	3	fix-round	-	FG-a round 1 (wf_5ed13100-329): #4044 #4045 #4046; #4040 waits on #3974 (FlareInspectorFill busy); #4039 #4041 #4042 #4043 cross-line -> needs-ui #4047
+12:00Z	3	pr	#4054 #4055	FG-a round 1 PRs opened, gate green
+12:00Z	3	check	-	FG-u #3974 open (head 77e62c84, lane integrating). Round 1 PRs #4054 #4055 open in the lane. GF-6 #3742 open. dev Linux still red on Photo (#4004 fixes it); FG-a Belt-Slice-Done held for a green Linux job. Journeys 39590174344 still queued.
+12:26Z	3	fix-round	-	FG-u #3974 merged (78812f8e); with FG-4 already in #3959, every FG-u task has merged. FG-u review waits for a scoped flare run containing 78812f8e (not dispatched by the lead). FG-a round 1 continues: #4040 fixer started (wf_9f3a6e90-094), since FlareInspectorFill.swift is now free. #4054 #4055 are on the lane's macOS build. The lane's attribution-line comments on #4054/#4055 are the proxy footer, which can't be removed from this session. GF-6 #3742 still open. dev Linux still red (Photo, #4004 open).
+12:34Z	3	fix-pr	-	FG-a round 1: #4040 fixer opened #4065 (head 2dde065f, Fixes #4040, fast-lane); AppSnapshotTests test runs first in the lane macOS gate
+12:46Z	3	heartbeat	-	Fix PRs #4054 #4055 #4065 open on lane, no needs-fix. Full CI 39600323802 on dev 737541328 (contains 78812f8e) pending: FG-a/FG-u Slice-Done waits on its Linux job. No scoped flare run with 78812f8e yet. GF-6 #3742 open; 8 open findings: no FG-5.
+13:08Z	3	heartbeat	-	No change: #4054 #4055 #4065 #4004 open on lane; full CI 39600323802 still pending (dev Linux checks red on Photo); no scoped flare run with 78812f8e; #3742 open; 8 open findings. Stray remote branch 'heartbeat' (4e450c3d, 12:46Z slip) needs supervisor delete: proxy 403.
+13:28Z	3	slice-done	-	Belt-Slice-Done + Mac-Finish-Wanted posted on #3419 for FG-a and FG-u (run 39604117821, dev 5bec80894, Linux green). Scoped flare run 39607068579 at ac7f95c9f (contains 78812f8e) queued: FG-u critic panel once its journeys upload ui-screens. Fix PRs #4054 #4055 #4065 still on lane; #3742 open; 8 open findings.
