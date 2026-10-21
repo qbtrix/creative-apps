@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-21T08:50Z	3	waiting	#3966	SF-8 still in lane, macOS build 39567919459 queued; no needs-fix. Mac-Finish SF-a posted 08:33Z with gap #3971 (p2, folder drop stalls main thread). SF-10 held.
 2026-10-21T09:12Z	3	sf-z-wait	#3966	still open, fast-lane only; lane macOS build 39567919459 queued since 08:15Z; Mac-Finish SF-u received 09:03Z; SF-10 held
 2026-10-21T09:34Z	3	sf-z-wait	#3966	lane macOS build 39567919459 green; awaiting lane merge; SF-10 held
+2026-10-21T09:57Z	3	sf-10-open	#3997	#3966 merged 09:52Z (7f55e1ad3); SF-10 PR opened (fast-lane, feature-done) without Fast-Check: gate red only on dev-red #3856 mutation anchors (culprit #3889); SF-z Slice-Done waits for green dev Linux run
