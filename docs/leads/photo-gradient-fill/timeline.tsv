@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-21T08:53:30Z	wave	PG-u	pr-open #3975 PG-5	PG-4 #3923 merged; PG-6 building
 2026-10-21T08:59:40Z	wave	PG-u	pr-open #3977 PG-6	next: PG-7 after PG-3, PG-6 merge; then enable PG-5 budget test
 2026-10-21T09:12:32Z	check	lane	#3922 mac build green, Linux check running; #3975 #3977 mac builds dispatched	-
+2026-10-21T09:31:04Z	wave	PG-z	PG-3 #3922 merged (PG-m in); PG-7 branch pushed on PG-6, gate running; PR after #3977 merges	#3975 #3977 mac builds queued
