@@ -1,0 +1,5 @@
+[
+  {"label": "noBanding: the gradient is drawn undithered, so an 8-bit ramp repeats each level for rows", "file": "Sources/PhotoModel/PhotoGradientTool+Kernel.swift", "find": "stops: stops, dither: true)", "replace": "stops: stops, dither: false)", "tests": "PhotoGradientToolTests/noBanding"},
+  {"label": "staysInSelection: the selection is ignored, so the gradient covers the whole layer", "file": "Sources/PhotoModel/PhotoGradientTool+Kernel.swift", "find": "let selected: PixelRect? = selection", "replace": "let selected: PixelRect? = nil", "tests": "PhotoGradientToolTests/staysInSelection"},
+  {"label": "firstRowIsDeepBlue: the stops are not decoded from sRGB, so core reads them as linear light and the sky starts too bright", "file": "Sources/PhotoModel/PhotoGradientTool+Kernel.swift", "find": "let linear = (try? srgb.converted(from: .sRGB, to: .linearSRGB)) ?? srgb", "replace": "let linear = srgb", "tests": "PhotoGradientToolTests/firstRowIsDeepBlue"}
+]

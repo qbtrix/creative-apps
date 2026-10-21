@@ -1,10 +1,9 @@
 // FlareFillSnapshots.swift: the inspector's FILL and STROKE sections (IT-5)
-// from a paint readout: a solid FF3B30 fill, a gradient fill read only with
-// its reason, a 4 pt stroke with Round cap and join, and the rows disabled
-// with the window router's reason when nothing can be painted. The rows send
-// through the `perform` they are given, never a focused scene value. Writes
-// flare-fill-solid, flare-fill-gradient, flare-stroke and flare-fill-disabled
-// PNGs.
+// from a paint readout: a solid FF3B30 fill, a 4 pt stroke with Round cap and
+// join, and the rows disabled with the window router's reason when nothing can
+// be painted. The rows send through the `perform` they are given, never a
+// focused scene value. A gradient fill is FlareGradientSnapshots'. Writes
+// flare-fill-solid, flare-stroke and flare-fill-disabled PNGs.
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -22,13 +21,6 @@ import Testing
         let paint = PaintReadout(fillHex: "FF3B30", fillIsGradient: false, strokeHex: "000000", strokeWidth: 1,
                                  cap: .butt, join: .miter)
         try snapshot(Self.sections(paint), name: "flare-fill-solid", scheme: .light)
-    }
-
-    @Test func gradient() throws {
-        let paint = PaintReadout(fillHex: nil, fillIsGradient: true, strokeHex: nil, strokeWidth: nil, cap: nil,
-                                 join: nil)
-        #expect(FlareInspectorFill.gradientReason.isEmpty == false)
-        try snapshot(Self.sections(paint), name: "flare-fill-gradient", scheme: .light)
     }
 
     @Test func stroke() throws {
