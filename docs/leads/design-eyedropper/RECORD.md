@@ -2,7 +2,7 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a1605b0534-rn47 · Session: claude/feature-leads-stroke-eyedropper-e84htn · Started: 2026-10-21T21:05Z (prior runs act-1a15e909498-4bkk, act-1a15abb305f-lc8g)
-Stage: 3 wave 2 fixes (DY-a done; DY-u merged 6d7fcf14, round 1 #3998 merged 97713e0d, round 2 #4081)
+Stage: 3 wave 2 fixes (DY-a done; DY-u merged 6d7fcf14, round 1 #3998 merged 97713e0d, round 2 #4081); blocked poll 2 at 22:05Z
 Base: 5bec8089 (origin/dev); main verified at 0dd23d65
 Next: #4081 (round 2, #4061; head 4ecb757b, Fast-Check pass, fast-lane restored) merges -> Belt-Slice-Done DY-u gaps #3987 #3990 #3994 on the next green design run. DY-m waits transform:DT-m (#4187 open; DT-6 after DG-m)
 
