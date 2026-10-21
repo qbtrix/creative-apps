@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T09:43Z	3 build W2	check	#3976	PP-3 #3976 macOS build 39574519410 green, awaiting lane merge; no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
 2026-10-21T10:05Z	3 build W2	check	#3976	PP-3 #3976 macOS build green; lane Linux run 39580807833 in progress on its head; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
 2026-10-21T10:27Z	3 build W2	check	#3976	PP-3 #3976 merged 10:20Z; its Linux run red on CommandPathTests photo (PhotoPlace.swift:36 bare MenuCommand), fixer started; PP-4 started; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:47Z	3 build W2	check	#4003 #4004	PP-4 #4003 and PP-3fix #4004 open in lane (no lane comments yet); gradient-fill run re-armed 10:44Z, PG-2 not yet open (PM-2 blocked); no TC-a PR (PT-1 blocked)
