@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T00:17Z	3	heartbeat	-	#3815 PF-3 open in the lane (96f8ec7b); no supervisor reply
 2026-10-21T00:37:33Z	check	heartbeat	#3815	PF-3 macOS build 39520792576 queued; PF-2 still waits place-image:PP-u
 2026-10-21T01:03:11Z	fix	needs-rebase	#3815	merged dev into PF-3 (C4 part photo-model-sources: kept both sentences); CI: PASS; head 314bd40b; Head line moved
+2026-10-21T01:22:45Z	check	heartbeat	#3815	needs-rebase dropped; PF-3 head 314bd40b clean, macOS build dispatched 01:12Z
