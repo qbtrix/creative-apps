@@ -48,7 +48,7 @@ Next: FP-5 (FP-m part 1) building from dev 11919406. FP-e done once a dev Linux 
 - FP-a's critic panel runs code lenses only (clarity, design, oracle): the overlay has no snapshot until FP-u's FlareAnchorSnapshots, so mouse and taste judge it in FP-u's review.
 
 ## Open
-- FP-a findings open: #4011, #4013 (fixer), #4012 (in FP-5). Count 3 of cap 5.
+- FP-a findings open: #4011, #4013 (fix round 1: PR #4027, head d36c6856, Mutate 6/6 FlareModel.FlareAnchors+Kernel, fast-lane, snapshot flare-select-direct-locked-light.png), #4012 (in FP-5). Count 3 of cap 5.
 - shape-tools FS-m: FS-5 merged #3850, FS-6 blocked on gradient-fill FG-m (FP-5 unchained, FP-6 unaffected).
 - file-flow FL-m far off (waits on FG-m, FS-m, FK-m, PF-m): FP-6 waits; rule 23 question after 3 identical polls.
 - AS-flare waits on stage-edit #1514: FP-7's FlareSelection.swift hand-off waits.
