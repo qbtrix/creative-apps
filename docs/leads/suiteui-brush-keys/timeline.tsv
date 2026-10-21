@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-21T13:38:10Z	poll	#4057 macOS build 39598833420 queued (since 12:20); #4058 #4060 open; no needs-fix
 2026-10-21T15:12:24Z	fix	#4057 Linux red on unrelated timing test; rerun 403; dev merged into BK-a; #4060 merged
 2026-10-21T15:21:44Z	BK-a	pushed 1e2278b8 (dev merged, gate pass), #4057 Head: moved
+2026-10-21T15:38:58Z	poll	#4057 waiting on lane macOS build of 1e2278b8; #4058 stacked
