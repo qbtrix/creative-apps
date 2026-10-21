@@ -13,7 +13,6 @@ public struct PathContourStandIn: Equatable, Sendable {
         self.closed = closed
     }
 
-    /// The kernel contour these anchors describe.
     var contour: VectorContour {
         func point(_ p: CGPoint) -> Point { Point(x: p.x, y: p.y) }
         return VectorContour(
