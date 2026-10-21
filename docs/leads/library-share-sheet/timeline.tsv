@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-21T12:12Z	check	heartbeat	SH-m	BK-3 #3965 merged; LF-3 #4024 and BK-u #3967 open; still blocked
 2026-10-21T12:28Z	ship	merged	SH-u	#3814 merged 12:15Z; waiting on dev Linux check 39598650564 (76d0c892)
 2026-10-21T12:28Z	check	heartbeat	SH-m	LF-3 #4024 and BK-u #3967 still open
+2026-10-21T12:45Z	check	ci	SH-u	Linux 39598650564 red only on two timing tests outside SH-u (LG-a fixture, LibraryFoldersTests); waiting on 39601343733
