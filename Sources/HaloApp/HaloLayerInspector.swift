@@ -184,7 +184,7 @@ struct HaloPropertyRowView: View, Equatable {
         + SuiteSpacing.xs + 2 * SuiteSize.keyframeButton
 
     /// HaloModel's key state as SuiteUI's, one to one.
-    static func keyState(_ state: HaloKeyState) -> KeyState {
+    static func keyState(_ state: HaloKeyState) -> SuiteUI.KeyState {
         switch state {
         case .notAnimated: .idle
         case .animated: .animated
