@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-21T11:11Z	3	poll	w1	builders running
 2026-10-21T11:29Z	3	poll	w1	builders running
 2026-10-21T11:47Z	3	poll	w1	builders running
+2026-10-21T11:49Z	2026-10-21T11:49:19Z	3 wave1	opened	#4048 #4049	RP-1/RP-2 PRs, gate held for dev-red #3856
