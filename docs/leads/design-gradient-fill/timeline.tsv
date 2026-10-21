@@ -30,3 +30,4 @@ time	kind	note
 2026-10-21T15:33Z	3	wait	panels	journeys 39609598622 and 39623147707 still queued
 2026-10-21T15:57Z	3	wait	panels	journeys 39609598622 and 39623147707 cancelled; waiting on design journeys 39626816600 (97713e0df)
 2026-10-21T16:18Z	3	wait	panels	design journeys 39626816600 still queued
+2026-10-21T16:40Z	3	wait	panels	design journeys 39626816600 still queued
