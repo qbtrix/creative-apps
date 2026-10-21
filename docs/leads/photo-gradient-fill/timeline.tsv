@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T03:16Z	heartbeat	check	-	#3681 PG-1 clean, mac green, waits for lane batch (batch-…-5 still resolving); #3695 GF-2 new head 2d869675 got a fresh mac build
 2026-10-21T03:34Z	heartbeat	check	-	#3681 PG-1 is in lane batch-20261021032004; batch Linux red on a LibraryApp command-path baseline check (not ours), lane bisecting; #3695 GF-2 mac build pending
 2026-10-21T03:53Z	heartbeat	check	-	#3681 PG-1 batch bisect: probe -4 red, probe -2 (the two Library PRs ahead of it) running; #3695 GF-2 mac build pending
+2026-10-21T04:11Z	heartbeat	check	-	#3681 PG-1 batch bisect: probes -2 and -1 red (culprit is the first Library PR #3466 or dev), probe -0 running; PG-1 should go to the next batch; #3695 GF-2 mac build pending
