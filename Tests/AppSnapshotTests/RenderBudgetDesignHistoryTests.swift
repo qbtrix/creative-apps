@@ -6,7 +6,7 @@
 // current), then 30 Down presses at 120 Hz walk the selection to step 30 without a jump: the
 // window and the editor run their bodies at most 3 times (target 0: only the panel and the two
 // rows whose selection changed redraw). Keys need a key window, so the harness's window is made
-// key-capable, as RenderBudgetHistoryPanelTests does. Nested in BodyCountSuites: it reads global
+// key-capable (keyCapable), as RenderBudgetHistoryPanelTests does. Nested in BodyCountSuites: it reads global
 // body counters. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -30,9 +30,8 @@ extension BodyCountSuites {
             }
             for _ in 0..<Self.steps { model.undo() }
             #expect(model.historyListing.index == 0 && model.historyListing.steps.count == Self.steps)
-            let w = RenderBudgetWindow(DesignHistoryBudgetWindow(model: model))
+            let w = RenderBudgetWindow(DesignHistoryBudgetWindow(model: model), keyCapable: true)
             defer { w.close() }
-            object_setClass(w.window, DesignKeyCapableWindow.self)
             w.window.makeKey()
             _ = w.window.makeFirstResponder(w.host)
             let bodies = { () -> Int? in
@@ -60,11 +59,6 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 3, target: 0)
         }
     }
-}
-
-/// The harness's borderless window, allowed to be key so the panel's arrow keys reach it.
-private final class DesignKeyCapableWindow: NSWindow {
-    override var canBecomeKey: Bool { true }
 }
 
 /// The counted window: Design's editor with its History panel shown, counting the jumps it is sent.
