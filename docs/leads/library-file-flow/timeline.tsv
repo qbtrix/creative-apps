@@ -51,3 +51,4 @@
 2026-10-21T15:49:07Z	3	relaunch	-	run act-1a15f2277a5-6xyv resumed; slice-done lines posted on 39623471557; open PRs merging dev for the Photo baseline fix
 2026-10-21T17:09:03Z	3	poll	-	rule 23 re-read; PRs wait on lane macOS builds
 2026-10-21T17:35:56Z	3	merge	LF-3	#4024 merged 593cfe6
+2026-10-21T18:37:08Z	-	wait	LF-m	LF-4 blocked on #3928 (open)
