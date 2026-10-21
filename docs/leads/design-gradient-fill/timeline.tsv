@@ -48,3 +48,4 @@ time	kind	note
 2026-10-21T22:05Z	3	check	DG-8	design-export still status planned on dev; DG-8 waits
 2026-10-21T22:38Z	3	heartbeat	-	no merges; lane macOS build run 39662239121 (#4159) still queued since 19:30, no macOS runner picks up lane builds
 2026-10-21T23:12Z	3	merged	#4189	DG-m on dev e0fb99190; slice done waits on a green design/full ci.yml run (dev-red #3856 open)
+2026-10-21T23:22Z	4	heartbeat	#4197	DG-7 PR still open in the lane; DG-m done line waits on a green design/full run (dev-red #3856)
