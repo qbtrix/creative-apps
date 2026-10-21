@@ -21,3 +21,17 @@ public enum SuiteLocations {
         return base + "/Library/Application Support/AfterGlow"
     }
 }
+
+/// One folder per app under the suite root, and where earlier builds kept an
+/// app's files (adopt-kernel-autosave AK-1 stub, AK-2 body).
+extension SuiteLocations {
+    /// `<supportFolder>/<app>`: one folder per app under the suite root ("Photo", "Flare", "Library", ...).
+    public static func appFolder(_ app: String, arguments: [String], home: String) -> String {
+        ""
+    }
+
+    /// Where an earlier build kept this app's files: `<home>/Library/Application Support/<legacy>`.
+    public static func legacyFolder(_ legacy: String, home: String) -> String {
+        ""
+    }
+}
