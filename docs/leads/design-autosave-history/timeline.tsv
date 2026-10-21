@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-21T08:45Z	4	heartbeat	DA-a	fixer r-b1 on #3945 #3949
 2026-10-21T08:47Z	4	fix-round	DA-a	#3973 fixes #3945 #3949; needs-ui #3972 filed
 2026-10-21T09:07:57Z	DA-a	heartbeat	#3973	macOS build pending
+2026-10-21T09:29:39Z	DA-a	heartbeat	#3973	macOS build 39573116254 queued
