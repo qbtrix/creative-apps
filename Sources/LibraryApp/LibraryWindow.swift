@@ -21,6 +21,7 @@
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -89,6 +90,8 @@ struct LibraryWindow: View {
         }
         .focusedSceneValue(\.libraryMenu, menu)
         .focusedSceneValue(\.libraryFilters, filters)
+        .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
+                       places: model.placesExtensions, perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
