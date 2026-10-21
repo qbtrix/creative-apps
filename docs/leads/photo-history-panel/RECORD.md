@@ -21,7 +21,7 @@ Record: docs/leads/photo-history-panel/RECORD.md on lead/photo-history-panel (le
 |---|---|---|---|---|
 | PH-1, PH-2 | PH-a | stubs, tab, menu | #3708 | merged |
 | PH-3, PH-4 | PH-u | listing, snapshots, budget | #3762, #3818 | merged (mac fixes #3979, #4111) |
-| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | merged dev in (2056a19, golden regenerated, CI PASS, mutate 5/5), waits for the lane |
+| PH-5 | PH-m | jump body, catalog specs (additive), PhotoHistoryJumpTests on, plan PhotoModel.PhotoHistory+Kernel | #4162 | conflicts again on the golden after a new dev change (20:48Z); fixer round 2 |
 | PH-6 | PH-m | autosave on RecoveryFolder | #4160 | in lane (macOS gate) |
 | PH-7 | PH-z | journeys on live | – | waits PH-m |
 | PH-8 | PH-z | status built, feature-done | – | waits PH-7 |
