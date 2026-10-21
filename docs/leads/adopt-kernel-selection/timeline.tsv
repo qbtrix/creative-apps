@@ -157,3 +157,4 @@ utc	stage	event	ref	note
 2026-10-21T10:07:03Z	heartbeat	heartbeat	-	AS-flare merge
 2026-10-21T10:27:47Z	heartbeat	heartbeat	-	AS-flare merge
 2026-10-21T10:50:54Z	heartbeat	heartbeat	-	AS-flare #3892 merge
+2026-10-21T11:15:30Z	heartbeat	#3892 merged	-	AS-flare (#3892 9663c771) green dev run, then contact sheet

@@ -4,7 +4,7 @@ Issue: #1935 · Packet: docs/blueprints/suiteui/features/adopt-kernel-selection.
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: heartbeat
 Base: dev 79a43789
-Next: AS-flare #3892 merge
+Next: AS-flare (#3892 9663c771) green dev run, then contact sheet
 
 Line lead for #1936, #1935 and #1934 (contract rule 19); this record is the
 adopt-kernel-selection half. The brief's integration branch is `main` at
@@ -37,6 +37,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T11:15Z: -
 - 2026-10-21T10:50Z: -
 - 2026-10-21T10:27Z: -
 - 2026-10-21T10:07Z: -
