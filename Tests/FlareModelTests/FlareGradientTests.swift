@@ -10,11 +10,15 @@ import Testing
 private let threeStops = [GradientStop(offset: 0, color: .black), GradientStop(offset: 0.5, color: .white),
                           GradientStop(offset: 1, color: .black)]
 
-/// Bounce with every Ball shape's fill set to `fill`, Ball selected, on `.built`.
-private func ball(_ fill: FlareCore.Fill? = nil) -> FlareWorkspace {
+/// Bounce with every Ball shape's fill set to `fill`, Ball selected, on `.built`. `twoShapes` adds the Shadow's ellipse
+/// to Ball after its circle, so Ball holds two shapes with different bounds.
+private func ball(_ fill: FlareCore.Fill? = nil, twoShapes: Bool = false) -> FlareWorkspace {
     var doc = FlareFixtures.bounce
-    if let fill, let i = doc.scenes.first?.layers.firstIndex(where: { $0.id == "ball" }) {
-        for s in doc.scenes[0].layers[i].shapes.indices { doc.scenes[0].layers[i].shapes[s].fill = fill }
+    if let i = doc.scenes.first?.layers.firstIndex(where: { $0.id == "ball" }) {
+        if twoShapes, let shadow = doc.scenes[0].layers.first(where: { $0.id == "shadow" })?.shapes.first {
+            doc.scenes[0].layers[i].shapes.append(shadow)
+        }
+        if let fill { for s in doc.scenes[0].layers[i].shapes.indices { doc.scenes[0].layers[i].shapes[s].fill = fill } }
     }
     var w = FlareWorkspace(services: .built)
     w.load(doc)
@@ -39,7 +43,20 @@ private func across(_ box: FlareCore.Rect) -> FlareCore.Fill {
         let selection = try #require(w.fillSelection)
         #expect(selection.fill == shape.fill)
         #expect(selection.box == shape.bounds)
-        #expect(w.fillHelp == nil)
+        #expect(w.fillHelp == FlareWorkspace.fillNotBuilt, "FG-5 registers the fill commands and retires this reason")
+    }
+
+    @Test func fillSelectionIsTheFirstOfSeveralShapesInItsBounds() throws {
+        let box = try #require(ballShapes(ball()).first?.bounds)
+        let w = ball(across(box), twoShapes: true)
+        let shapes = ballShapes(w)
+        try #require(shapes.count == 2)
+        let first = try #require(shapes.first?.bounds), second = try #require(shapes.last?.bounds)
+        try #require(first != second)
+        let selection = try #require(w.fillSelection)
+        #expect(selection.box == first)
+        #expect(selection.box != second)
+        #expect(selection.fill == across(box))
     }
 
     @Test func nothingSelectedHasNoFillAndSaysWhy() {
@@ -89,7 +106,7 @@ struct FlareGradientCommandTests {
 
     @Test func oneStepForSeveral() throws {
         let box = try #require(ballShapes(ball()).first?.bounds)
-        var w = ball(across(box))
+        var w = ball(across(box), twoShapes: true)
         let before = w.document
         try #require(ballShapes(w).count > 1)
         w.runFill(.type(.radial))
