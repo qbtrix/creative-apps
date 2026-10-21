@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-20T22:40:15Z	DT-a	heartbeat	#3751	poll 9: open, clean, fast-lane; lane's macOS build on 18116b8 pending. DG-u not open; #3710 (DA-m dep) open.
 2026-10-21T08:46:56Z	3	merge	DT-a	#3751 merged e6430cfa; run act-1a15da1b26c-9qo6 resumes
 2026-10-21T09:00:10Z	3	done	DT-a	Belt-Slice-Done run 39569221486; DT-u waits DG-u #3978
+2026-10-21T09:25:32Z	3	pr	DT-3	#3983 opened, head 1ba13ba8, stacked on DG-u #3978; Fast-Check pass
