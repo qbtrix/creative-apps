@@ -118,6 +118,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var statusMessage: String?
     /// "Merging…" while Merge Down or Flatten Image works off the main actor (PhotoLayerOps.swift).
     public internal(set) var progress: String?
+    /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
+    public internal(set) var fileFlow = PhotoFileFlowState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
