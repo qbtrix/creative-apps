@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-21T14:56Z	0	stage-start	#3725	lead set up, base 3f96cd10c
 2026-10-21T14:56Z	0	stage-end	#3725	ST-a waits on shell-media SM-1 #4034
 2026-10-21T14:56Z	3	heartbeat	#4034	waiting on SM-1
+2026-10-21T15:26Z	3	heartbeat	#4034	SM-1 still open (head 53f5d3e); ST-a waits on it
