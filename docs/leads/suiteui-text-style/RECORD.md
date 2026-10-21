@@ -47,6 +47,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 - 2026-10-21T02:53Z: TS-6 adds "This family has no upright face." for italic off on an italic-only family. TextStyle keeps synthesized Codable.
 - 2026-10-21T02:53Z: supervisor sentinel put needs-split on #3844 for the stacked 421 lines; replied that its own change is +60/-18 and asked to drop it.
 
+- 2026-10-21T03:41Z: #3836's macOS build (39529243000) was cancelled, and the lane waits for a new head. Merged dev into it: that picks up #3837's C4 description check, which the first gate predates. Gating it, then pushing and moving Head:.
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
