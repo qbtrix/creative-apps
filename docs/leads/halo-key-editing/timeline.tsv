@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-21T20:37Z	needs-rebase	#4152 conflicted with #4155 in RenderBudgetHaloKeyEditingTests; took dev's file, pushed d84c1c6df, Head moved
 2026-10-21T21:00Z	finding-closed	#4150 fixed on dev by #4155 + #4173; #4152 closed as #4173 duplicate; scoped halo 39655512121 red only on pre-#4155 render budget; journeys 39671666519 queued
 2026-10-21T21:21Z	poll	blocked 1/3: journeys 39671666519 still queued (no ui-screens); #3499 open, unchanged; core-loop CL-probe done 20:49Z, CL-z not yet
+2026-10-21T21:43Z	poll	journeys 39671666519 now in_progress (was queued): poll changed, blocked count reset; #3499 open, unchanged; core-loop CL-z not yet
