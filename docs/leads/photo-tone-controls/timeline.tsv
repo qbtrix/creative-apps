@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-21T12:23Z	3 build W2	check	#4003 #4004	#4004 needs-rebase cleared at 360a99e, new mac build 39597665667; #4003 mac build 39587596123 still queued; PG-2/TC-a no PR, PM-2/PT-1 blocked
 2026-10-21T12:44Z	3 build W2	check	#4003 #4004	#4003 macOS build green (39587596123), clean, awaiting lane sweep; #4004 macOS build 39597665667 running, clean; PM-2 waits PG-a, PT-1 waits TC-a
 2026-10-21T14:50Z	3 W1	check	PT-a	takeover; TC-a still not slice-done on #3476, ToneTarget/ToneRows absent on dev; PT-1 blocked
+2026-10-21T16:31Z	3	heartbeat	#3476	TC-a still not slice-done; rechecked
