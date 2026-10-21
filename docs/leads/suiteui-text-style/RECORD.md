@@ -83,6 +83,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 2026-10-21T11:03Z heartbeat: #3844 Head: held at a880a6f9, dev still red (#3856, CommandPathTests photo); #3847 stacked
 
+- 2026-10-21T11:30Z Heartbeat: dev still red (#3856, CommandPathTests photo; red-triage names #3976, photo line). #3844 Head: held at a880a6f9, #3847 stacked on it.
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
