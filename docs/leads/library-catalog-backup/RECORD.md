@@ -10,7 +10,7 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | BK-a | rotation and restore commands as stubs, checks disabled | BK-1, BK-2 | MJ-BK | – | no | 0 | done: Belt-Slice-Done posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
-| BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | BK-4 #3967 merged (15806ab, 22:09Z); waiting for a green dev Linux run containing it (dev-red #3856 open, Launcher) | – | – |
+| BK-u | Restore Catalog Backup sheet on stubs | BK-4, BK-4b | LJ-BK | BK-a; spine | yes | 0 | BK-4 #3967 merged (15806ab); it raced CS-2 #4023 and turned dev Linux red (run 39685422711, library command-path baseline 53 over max 48); fix #4244 (6b0bec6) open, fast-lane; then a green dev Linux run | – | – |
 | BK-m | rotation limits, fallback, restore backs up current | BK-3, BK-5m | MJ-BK | BK-a; LF-m, FO-m, AK-library (not merged) | no | 0 | BK-3 #3965 fast-lane at 583be3e (Mutate 5/5); BK-5m blocked | – | – |
 | BK-z | live restore, RJ-L54, built | BK-5, BK-6 | LJ-BK, MJ-BK | BK-u, BK-m | yes | 0 | blocked | – | – |
 
@@ -64,3 +64,5 @@ Next: (2026-10-21T17:09Z) BK-u #3967 at cf07beb: lane macOS build 39632012767 qu
 - 2026-10-21T21:56Z: heartbeat: #3967 still waiting on a lane batch at 780c26c; dev-red #3856 still open (Launcher baseline, not ours)
 
 - 2026-10-21T22:10Z: #3967 (BK-4, BK-4b) merged into dev as 15806ab. BK-u closes on the first dev CI run containing it with a green Linux job; dev is red on Launcher's command-path baseline (#3856, not ours).
+
+- 22:39Z: dev Linux red from our BK-u merge racing CS-2 #4023 (run 39685422711: library baseline stale Cancel lines, 53 over max 48). Fix #4244 opened (head 6b0bec6): LibraryBackupMenuState specs, menu item and sheet Restore buttons built from specs, baseline back at 48; gate PASS, mutate 3/3. Filed #4245 (needs-ui: role on spec MenuCommand).
