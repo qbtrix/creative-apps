@@ -1,0 +1,10 @@
+utc	stage	event	ref	note
+2026-10-21T14:56Z	0	stage-start	#3775	lead set up, base 3f96cd10c
+2026-10-21T14:56Z	2	stage-end	#3775	wave plan: SS-a, SS-vector, SS-raster, SS-z
+2026-10-21T14:56Z	3	stage-start	wave 1	SS-a builder
+2026-10-21T14:57Z	3	finding-filed	#4092	gap line:design: headless Design shape/text commands
+2026-10-21T15:25Z	3	pr-opened	#4094	SS-a (SS-1 + SS-2) make step and disabled open checks
+2026-10-21T15:25Z	3	stage-start	wave 2	SS-vector builder stacked on #4094
+2026-10-21T16:05Z	3	pr-opened	#4100	SS-vector (Cards, Logo.design fixture, Bounce) draft on #4094
+2026-10-21T16:05Z	3	finding-filed	#4108	gap line:flare headless layer id
+2026-10-21T16:05Z	3	stage-start	wave 3	SS-raster + SS-vector-b on #4100
