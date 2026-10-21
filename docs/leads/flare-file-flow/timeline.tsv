@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-21T02:45Z	2	stage-end	#3482	plan: FL-1 now; FL-2 waits PF-u
 2026-10-21T02:45Z	3	stage-start	wave 1	FL-1
 2026-10-21T02:47Z	3	pr-open	#3843	FL-1 adapter stubs, 172 lines, Slice FL-a
+2026-10-21T03:09Z	1	check	#3843	macOS build green, in lane; attribution footer removed from body; PF-u not on dev; 0 findings
