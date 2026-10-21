@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-20T21:54:28Z	DT-a	fix-round	#3751	dev merged (merge commit 18116b8), 397/14, mutate 14/14, CI PASS; needs-split removed; back in lane
 2026-10-20T22:12:17Z	build	heartbeat	#3751	clean, in lane; DT-u blocked on DG-u
 2026-10-20T22:40:15Z	DT-a	heartbeat	#3751	poll 9: open, clean, fast-lane; lane's macOS build on 18116b8 pending. DG-u not open; #3710 (DA-m dep) open.
+2026-10-21T08:46:56Z	3	merge	DT-a	#3751 merged e6430cfa; run act-1a15da1b26c-9qo6 resumes

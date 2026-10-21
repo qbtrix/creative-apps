@@ -1,15 +1,15 @@
 # transform lead record
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
-Run: act-1a15ac70747-ky1f · Session: line lead (design) · Started: 2026-10-20T19:27Z
-Stage: 3 polling
-Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: DT-a #3751 head 18116b8 clean, in the lane awaiting its macOS build. DT-u waits on DG-u (not open); DT-m on DG-m, DA-m. Critic round on DT-a pending: +Kernel view has no maths, Rotate symbols, Select-a-layer wording.
+Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
+Stage: 3 DT-a merged (#3751, e6430cfa); Belt-Slice-Done waits on a green dev run with e6430cfa
+Base: 896cafe3 (origin/dev); main verified at 0dd23d65
+Next: DT-a slice-done line and critics on a scoped design run; DT-u after DG-u (building); DT-m waits DG-m, DA-m
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| DT-a | rotation/flip fields on DesignNode, TransformTarget stubs, inspector rows and Object items on the stubs | DT-1, DT-2 | MJ-DT | TT-a (merged #3485/#3486); gradient-fill:DG-a (#3687 open) | yes | 0 | waiting | – | – |
+| DT-a | rotation/flip fields on DesignNode, TransformTarget stubs, inspector rows and Object items on the stubs | DT-1, DT-2 | MJ-DT | TT-a (merged #3485/#3486); gradient-fill:DG-a (#3687 open) | yes | 0 | merged | – | – |
 | DT-u | canvas paints turned nodes, handles turn; snapshots and render budget | DT-3, DT-4 | DJ-T1 | DT-a; gradient-fill:DG-u | yes | 0 | waiting | – | – |
 | DT-m | adapter bodies, turned hit test, SVG turn, catalog specs, RJ-D15 | DT-5, DT-6 | MJ-DT | DT-a; gradient-fill:DG-m; autosave-history:DA-m | no | 0 | waiting | – | – |
 | DT-z | journey on live, status built, feature-done | DT-7, DT-8 | DJ-T1 | DT-u, DT-m | yes | 0 | waiting | – | – |
@@ -17,8 +17,8 @@ Next: DT-a #3751 head 18116b8 clean, in the lane awaiting its macOS build. DT-u 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| DT-1 | DT-a | 1 | node fields + adapter stubs, tests disabled | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift | DesignTransformTests (disabled), fixtures byte-equal | – | waiting |
-| DT-2 | DT-a | 1 | inspector transform rows, Object items, journey skipped | Sources/DesignApp/DesignInspectorTransform.swift, Sources/DesignApp/DesignInspector.swift, Sources/DesignApp/DesignObjectMenu.swift, UITests/DesignJourneyTests+Transform.swift | snapshot rows | – | waiting |
+| DT-1 | DT-a | 1 | node fields + adapter stubs, tests disabled | Sources/DesignModel/DesignNode.swift, Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift | DesignTransformTests (disabled), fixtures byte-equal | #3751 | merged (e6430cfa) |
+| DT-2 | DT-a | 1 | inspector transform rows, Object items, journey skipped | Sources/DesignApp/DesignInspectorTransform.swift, Sources/DesignApp/DesignInspector.swift, Sources/DesignApp/DesignObjectMenu.swift, UITests/DesignJourneyTests+Transform.swift | snapshot rows | #3751 | merged (e6430cfa) |
 | DT-3 | DT-u | 2 | canvas paints turned nodes | Sources/DesignApp/DesignCanvasMarks.swift, Sources/DesignApp/DesignSelectionMarks.swift, Tests/AppSnapshotTests/DesignTransformPaintTests.swift | DesignTransformPaintTests | – | waiting |
 | DT-4 | DT-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift | RenderBudgetDesignTransformTests | – | waiting |
 | DT-5 | DT-m | 2 | adapter bodies, contains | Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift, Tests/mutations/DesignModel.DesignTransform+Kernel.json | DesignTransformTests | – | waiting |
