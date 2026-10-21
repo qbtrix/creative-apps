@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-21T15:12:24Z	slice-done	OC-a merged f080846e; Linux 39620526621 green; Belt-Slice-Done posted; #4088 retargeted to dev, dev merged in
 2026-10-21T15:26:45Z	OC-m	pushed 0c98d00f (dev merged, gate pass), #4088 Head: moved, fast-lane re-added
 2026-10-21T15:38:58Z	poll	#4088 waiting on lane macOS build of 0c98d00f
+2026-10-21T16:01:00Z	poll	#4088 macOS build 39625776416 queued
