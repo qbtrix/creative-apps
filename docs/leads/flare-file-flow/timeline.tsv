@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-21T06:12Z	1	check	#3843	eligible, waits for next batch (bisect in flight); KS-a open as #3921, PF-u no PR; 0 findings
 2026-10-21T07:10Z	3	check	wave 1	resumed as act-1a15d4ed024-1wsg; FL-1 #3843 in lane; KS-a #3921 open
 2026-10-21T07:37Z	3	check	wave 1	FL-1 #3843 in lane; KS-a #3921 open
+2026-10-21T07:57Z	3	question	wave 1	FL-1 #3843 unchanged (poll 3); Question for the supervisor on #3482
