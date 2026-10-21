@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-21T00:54:32Z	3	check	SH-a,SH-u	#3809 needs-rebase dropped, clean; macOS build 39522543439 queued; #3814 still on sh-a; LF-m/BK-m absent (dev 4bdf0bbd)
 2026-10-21T01:14:03Z	3	check	SH-a,SH-u	#3809 macOS build 39522543439 green, clean, awaiting lane batch; #3814 still on sh-a; LF-m/BK-m absent (dev 4bdf0bbd)
 2026-10-21T01:33:53Z	3	check	SH-a,SH-u	#3809 green+clean, waits behind lane batch-20261021005140 (bisecting, without #3809); #3814 still on sh-a; LF-m/BK-m absent (dev 7277a83a)
+2026-10-21T01:54:08Z	3	check	SH-a,SH-u	#3809 green+clean, still behind lane batch-20261021005140 (probe -4 running); #3814 on sh-a; LF-m/BK-m absent (dev 7277a83a)
