@@ -42,3 +42,5 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 - Relaunched. TT-u #3513 merged as 7347ed80, so DT-4 (the DT-u snapshots and render budget) is unblocked and is next. DT-m still waits on gradient-fill DG-m and autosave-history DA-m.
 
 - 2026-10-21T23:22Z: opened #4254 (the #4188 knob fix, DT-u round 1, head 875e12aa) and #4255 (DT-6, DT-m, head 487ff70e). Both fast-lane, both passed the gate. The round-2 fixes for #4223 and #4224 follow once #4254 merges. DT-7 is held until #4254, #4255 and the #4223 fix merge. #4159 (DT-4) is still in the lane; its macOS gate is queued. There is no green design or full run yet: dev-red #3856 is open and its Linux runs are red from before #4187.
+
+- 2026-10-21T23:54Z: #4159 (DT-4) merged as 9829685ee. #4254 and #4255 still merge cleanly against dev and are waiting for a lane batch.
