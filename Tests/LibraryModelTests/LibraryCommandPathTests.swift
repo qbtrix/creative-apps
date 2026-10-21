@@ -28,7 +28,13 @@ import Testing
         ("Develop > Show Original", "view.show-original"),
     ]
 
-    static var states: [(String, LibraryCatalog)] { LibraryCommandCatalogTests.states }
+    /// The catalog tests' states, plus the loupe at actual size, where Zoom to Fit can act.
+    static var states: [(String, LibraryCatalog)] {
+        let shared = LibraryCommandCatalogTests.states
+        var zoomed = Dictionary(uniqueKeysWithValues: shared)["loupe"] ?? LibraryCatalog()
+        zoomed.zoomLoupe(.actual)
+        return shared + [("loupe at actual size", zoomed)]
+    }
     static func state(_ name: String) -> LibraryCatalog { Dictionary(uniqueKeysWithValues: states)[name] ?? LibraryCatalog() }
 
     @Test func everyControlIsListed() {
