@@ -65,3 +65,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 19:14Z: FL-2 blocked: no svg-place PF PRs.
 - 19:36Z: FL-2 blocked: no svg-place PF PRs.
 - 19:59Z: FL-2 blocked: no svg-place PF PRs open.
+- 20:21Z: No change: no svg-place PF PRs; FL-2 blocked.
