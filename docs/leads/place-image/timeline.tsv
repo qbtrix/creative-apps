@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-21T11:59Z	3 build W2	check	#4003 #4004	#4008 merged 11:48Z (dup PP-3 fix); merged dev into #4004 keeping model-side placeMenuSpec+tests, head 360a99e, ci --changed PASS; #4004 mac build 39587620209 green on old head; #4003 mac build still queued; PG-2/TC-a no PR
 2026-10-21T12:23Z	3 build W2	check	#4003 #4004	#4004 needs-rebase cleared at 360a99e, new mac build 39597665667; #4003 mac build 39587596123 still queued; PG-2/TC-a no PR, PM-2/PT-1 blocked
 2026-10-21T12:44Z	3 build W2	check	#4003 #4004	#4003 macOS build green (39587596123), clean, awaiting lane sweep; #4004 macOS build 39597665667 running, clean; PM-2 waits PG-a, PT-1 waits TC-a
+2026-10-21T14:50Z	3 W4	build	PP-m	takeover; #4004 closed (dup of #4008); PP-5 builder started from dev; fixer merging dev into #4003

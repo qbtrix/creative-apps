@@ -1,10 +1,10 @@
 # place-image lead record
 
 Issue: #3455 · Packet: docs/blueprints/photo/features/place-image.md
-Run: act-1a15b1de115-nxto · Session: claude/feature-lead-playbook-91s8do · Started: 2026-10-20T20:40Z
-Stage: 3 build W2
+Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
+Stage: 3 W4 (run act-1a15eecbafe-u0f9)
 Base: 6c2c7b052cd43c07f16a8138e1227bd9973f788d
-Next: PP-3 #3976 merged 10:20Z (its Linux run red on CommandPathTests photo, PhotoPlace.swift:36 bare MenuCommand; fix #4004 in lane); PP-4 #4003 in lane; PP-5 (PP-m) once photo-gradient-fill PG-m is done (W4)
+Next: PP-5 (PP-m, PP-6 folded) building on lead/place-image-PP-5; fixer merges dev into #4003 PP-4; then PP-7 and PP-8 (PP-z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -45,6 +45,11 @@ Next: PP-3 #3976 merged 10:20Z (its Linux run red on CommandPathTests photo, Pho
 - PP-1 starts on PL-1 (#3578, merged) rather than all of PL-a. PP-1 is Model-only and uses only the kernel `PlacedImageTarget` and Place types, which are on dev; PL-m (rule bodies) is done too. PL-2 is SuiteUI views, and only PP-3 needs it.
 - PP-6 (under 50 lines) is folded into PP-5's PR, as the packet says.
 - One PR per slice (rule 22), split per task when a slice is over the 400-line cap: PM-a (~600, so PM-1, PM-2 and PM-3 each get a PR).
+- Run act-1a15eecbafe-u0f9 (2026-10-21T14:20Z) takes over this record. The brief asked for base main and status on lead/transform and lead/tone-controls. It uses base dev and these photo-prefixed status branches instead: the fast lane merges only into dev, and lead/transform and lead/tone-controls belong to the live Halo #3443 and SuiteUI #3476 leads. Force-pushing them would rewrite another lead's history.
+- Red Linux runs on #3969, #4005 and #4003 came from dev at the time, not from the PRs: the PhotoPlace CommandPath failure (fixed by #4008), stale Design mutation anchors (DY-a), and LargeCatalogBudget timing (moved to perf-suites in #4050/#4069). A fixer merges origin/dev into each branch so the lane re-runs Linux on a fresh head.
+- #4004 closed as superseded by #4008.
+- PP-5 starts now: PG-m is met (gradient-fill is built, #4064). The waits on transform:PT-m, PH-m and PE-m only order edits to the shared PhotoCommandCatalog, and transform PT-5 already dropped the same kind of wait. A catalog conflict is resolved by the lane's merge or by a dev merge on needs-rebase.
+- This run owns slices PP-m and PP-z only; PP-a and PP-u are counted as done per the brief.
 
 ## Open
 - PP-2's job is skipped by its `.jobs.pending.json` name (the real-jobs harness ignores `waits_on`); PP-6 renames it to `place-logo.jobs.json` to turn it on. `rasterSize` throws in the stub; PP-5 reads the header.
