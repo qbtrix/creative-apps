@@ -32,6 +32,8 @@ enum PhotoIntent {
     case endAdjust
     case selectAll, deselect, deleteSelection, fillSelection, applyCrop, cancelCrop
     case selectLayer(PhotoLayer.ID)
+    /// A Layers row click with its mode (Shift extends, Command toggles); Select > All Layers picks every layer.
+    case pickLayer(PhotoLayer.ID, Pick), selectAllLayers
     case toggleVisibility(PhotoLayer.ID)
     case opacity(PhotoLayer.ID, Double)
     case blendMode(PhotoLayer.ID, CoreRaster.BlendMode)
