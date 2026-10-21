@@ -70,3 +70,4 @@ Next: Belt-Slice-Done DA-u once merged-done; DA-a critics on journeys design 395
 - 2026-10-21T10:48:33Z: #3973's macOS build 39573116254 failed: DesignEditorSnapshots.swift:65 'ambiguous use of accessibilityValue()' (AppKit protocol overloads). Fix pushed as bf4e1d0f (typed `let raw: Any?? = header?.accessibilityValue?()`, the pattern RenderBudgetDesignSnapTests uses); --changed PASS; Head: line moved. The lane builds the new head next.
 - 2026-10-21T10:58:01Z: heartbeat. #3973 head bf4e1d0f: lane macOS build 39587493383 queued. GF-6 #3742 and #3957 open.
 - 2026-10-21T11:22:08Z: heartbeat. #3973 (bf4e1d0f) build 39587493383 queued. GF-6 #3742 and #3957 open.
+- 2026-10-21T11:43:07Z: #3973's macOS build 39587493383 on bf4e1d0f succeeded; the lane merges it on its next sweep. Then: DA-a round-2 critic panel on a dev run containing it.
