@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T03:46Z	3	heartbeat	#3813	still eligible and queued in the lane
 2026-10-21T04:03Z	3	heartbeat	#3813	queued; merges cleanly onto current dev
 2026-10-21T04:20:14Z	3	heartbeat	-	#3813 still open: lane batch lane/batch-20261021032004 bisecting (probe 0), 26 ready PRs queued; KE-2..4 held; placed-images PH-a waits on our contract slice
+2026-10-21T04:38:36Z	3	heartbeat	-	#3813 still open, mergeable; previous batch resolved (#3766 merged 04:21Z), new sweep in progress; KE-2..4 held
