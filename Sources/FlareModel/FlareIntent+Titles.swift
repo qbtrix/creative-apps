@@ -137,6 +137,7 @@ extension FlareIntent.Inspector {
         case .easingPreset: "Easing"
         case .easingHandle: "Move Easing Handle"
         case .endEasingHandle: "End Easing Handle"
+        case .runFill: "Edit Fill"
         }
     }
 }
@@ -162,6 +163,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "Insert Frame"
         case .removeFrames: "Remove Frame"
         case .setLabel: "Add Label"
+        case .selectAllKeys: "Select All Keys"
         }
     }
 }

@@ -265,7 +265,8 @@
                 "description": "SuiteLocations (the support folder, -SuiteSupportDir override) and FileStore: revisioned JSON files written by atomic replace under an exclusive lock file, merged with the caller's pure merge. RecoveryFolder and RecoveryItem: the autosave recovery files under Recovery/ (each window's raw bytes and a JSON of its name and time, read back newest first, a damaged pair dropped); stub from autosave-history AH-1, body AH-7.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
-                  "Sources/SuiteModel/Store/"
+                  "Sources/SuiteModel/Store/",
+                  "Sources/SuiteModel/Store/BackupRotation.swift"
                 ]
               },
               {
@@ -611,6 +612,15 @@
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Paths/"
+                ]
+              },
+              {
+                "id": "kernel-text",
+                "name": "Text",
+                "description": "Text/: the suite's one text style. TextStyle (family, weight, italic, size, rgba and a paragraph, with .standard) and ParagraphStyle, TextLayout and TextStyle.Alignment as FlareCore's ParagraphStyle, TextLayout and TextAlignment under kernel names; TextStyleField (size, line height, tracking) and TextStyleRules (each field's range, the clamping setter and the one layout over FlareCore's TextLayout.lay, tracking in thousandths of an em); the TextStyleTarget protocol an app's workspace conforms to, TextIntent (the text inspector's gestures as commands) and TextCommands (the seven text.* command specs every app registers). text-style TS-1 declares them as stubs (specs with real ids, schemas and availability); TS-5 and TS-6 fill the bodies.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Text/"
                 ]
               }
             ]
