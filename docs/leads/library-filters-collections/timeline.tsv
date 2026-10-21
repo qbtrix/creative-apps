@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-21T17:59:22Z	check	-	FC-14 merged; FC-12 rebased c931a17; follow-up #4146
 2026-10-21T18:21:24Z	check	-	FC-12 mac build queued; #4146 built, waits sweep
 2026-10-21T18:43:05Z	check	-	#4146 merged; FC-12 mac build in progress
+2026-10-21T19:05:17Z	check	-	FC-12 built green, waits sweep
