@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-20T23:57Z	3	fixed	#3704	merged dev, c4 description conflict resolved (both clauses), CI PASS, head b851c66
 2026-10-21T00:08Z	3	waiting	#3704	new head b851c66 macOS build dispatched 23:58Z
 2026-10-21T00:30Z	3	waiting	#3704	macOS build 39518389605 green; waiting for lane batch
+2026-10-21T00:52Z	3	merged	#3704	PT-1 merged 00:46Z (4bdf0bb); shipping PT-2 and PT-4 (merge dev, gate, open)
