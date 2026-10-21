@@ -4,12 +4,12 @@ Issue: #3535 · Packet: docs/blueprints/photo/features/multi-layer-select.md
 Run: act-1a15e9d8b78-eu21 (resumed; earlier act-1a15b1de115-nxto) · Session: claude/multi-layer-select-lead-g8o0jx · Started: 2026-10-20T20:40Z
 Stage: 3 wave 3
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: PM-3 #4117, PM-4 #4095, PM-5 #4118 in the lane (macOS builds queued); PM-6 building stacked on PM-5; PM-7, PM-8 building stacked on PM-3; PM-9 waits on #3499, PM-10 on #4064
+Next: PM-a merged (PM-3 e727c46); Belt-Slice-Done once Linux run 39655526241 (dev 1b3913c07, contains it) is green; critics for PM-a on the next scoped photo run with PM-3. Fixer merging dev into PM-5 #4118 then PM-6 #4143 (needs-rebase: photo.list-commands.json, PhotoCommandCatalogTests). PM-7 #4138 in the lane. PM-9 waits on #3499, PM-10 on #4064
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PM-a | LayerTreeList picks several rows; Photo keeps a kernel Selection of layers; list, Select > All Layers and intents on stubs | PM-1, PM-2, PM-3 | MJ-PM | photo-gradient-fill:PG-a (PM-2); shell-parity (built) | yes | 0 | building | – | – |
+| PM-a | LayerTreeList picks several rows; Photo keeps a kernel Selection of layers; list, Select > All Layers and intents on stubs | PM-1, PM-2, PM-3 | MJ-PM | photo-gradient-fill:PG-a (PM-2); shell-parity (built) | yes | 0 | merged, Linux run pending | – | – |
 | PM-u | snapshots of four states, render budget, journey written | PM-7, PM-8 | PJ-M1 | PM-a | yes | 0 | waiting | – | – |
 | PM-m | selection bodies; hide, opacity, delete, move on every selected layer as one step; catalog; RJ-P43 | PM-4, PM-5, PM-6 | MJ-PM | PM-a; PG-m (PM-5, PM-6) | no | 0 | waiting | – | – |
 | PM-z | journey on live, stress journey, photo.md, feature-done | PM-9, PM-10 | PJ-M1 | PM-u, PM-m; PG-z (PM-10); #3499 (PM-9) | yes | 0 | waiting | – | – |
@@ -20,12 +20,12 @@ Next: PM-3 #4117, PM-4 #4095, PM-5 #4118 in the lane (macOS builds queued); PM-6
 |---|---|---|---|---|---|---|---|
 | PM-1 | PM-a | 1 | LayerTreeList multi-select init and pick(shift:command:) | Sources/SuiteUI/LayerTreeList.swift, Sources/SuiteUI/LayerTreeList+Rows.swift, Tests/SuiteUITests/LayerTreeListTests.swift, Tests/mutations/SuiteUI.LayerTreeList.json | LayerTreeListTests; .pickModes .severalSelected | #3761 | merged 00:24Z |
 | PM-2 | PM-a | 2 | layerSelection behind selectedLayerID; API stubs; suites disabled | Sources/PhotoModel/PhotoWorkspace.swift, PhotoLayerSelection+Kernel.swift, PhotoSeveralLayers+Kernel.swift, two test suites | PhotoWorkspaceTests | #4087 | merged |
-| PM-3 | PM-a | 3 | Layers list on multi-select, Select > All Layers ⌥⌘A, intents | Sources/PhotoApp/PhotoLayerList.swift, PhotoIntent.swift, PhotoWindow.swift, PhotoCommands+Select.swift | PhotoLayerListSnapshots, PhotoEditMenuTests | #4117 | pr open |
-| PM-4 | PM-m | 3 | selection bodies | PhotoLayerSelection+Kernel.swift + tests + mutations | PhotoLayerSelectionTests | #4095 | pr open |
-| PM-5 | PM-m | 4 | several-layer hide/opacity/delete; catalog | PhotoSeveralLayers+Kernel.swift, PhotoCommandCatalog.swift, command-ids | PhotoSeveralLayersTests | #4118 | pr open |
-| PM-6 | PM-m | 4 | Move moves every selected layer; RJ-P43 | PhotoStroke.swift, PhotoSeveralLayers+Kernel.swift, RealJobs/photo/fade-layers | moveMovesEvery | – | building |
-| PM-7 | PM-u | 4 | snapshots and render budget | Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift, RenderBudgetPhotoMultiLayerTests.swift | snapshots | – | building (stacked on PM-3) |
-| PM-8 | PM-u | 4 | journey written, skipped | UITests/PhotoJourneyTests+MultiSelect.swift | compiles | – | building (stacked on PM-3) |
+| PM-3 | PM-a | 3 | Layers list on multi-select, Select > All Layers ⌥⌘A, intents | Sources/PhotoApp/PhotoLayerList.swift, PhotoIntent.swift, PhotoWindow.swift, PhotoCommands+Select.swift | PhotoLayerListSnapshots, PhotoEditMenuTests | #4117 | merged 18:25Z |
+| PM-4 | PM-m | 3 | selection bodies | PhotoLayerSelection+Kernel.swift + tests + mutations | PhotoLayerSelectionTests | #4095 | merged 18:09Z |
+| PM-5 | PM-m | 4 | several-layer hide/opacity/delete; catalog | PhotoSeveralLayers+Kernel.swift, PhotoCommandCatalog.swift, command-ids | PhotoSeveralLayersTests | #4118 | needs-rebase, fixer |
+| PM-6 | PM-m | 4 | Move moves every selected layer; RJ-P43 | PhotoStroke.swift, PhotoSeveralLayers+Kernel.swift, RealJobs/photo/fade-layers | moveMovesEvery | #4143 | needs-rebase, fixer |
+| PM-7 | PM-u | 4 | snapshots and render budget | Tests/AppSnapshotTests/PhotoMultiLayerSnapshots.swift, RenderBudgetPhotoMultiLayerTests.swift | snapshots | #4138 | pr open |
+| PM-8 | PM-u | 4 | journey written, skipped | UITests/PhotoJourneyTests+MultiSelect.swift | compiles | #4137 | merged 18:25Z |
 | PM-9 | PM-z | 5 | journey on live | UITests/PhotoJourneyTests+MultiSelect.swift, +StressPerf.swift | journey | – | waiting |
 | PM-10 | PM-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, multi-layer-select.wave.json | scripts/ci | – | waiting |
 
