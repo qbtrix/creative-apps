@@ -52,7 +52,8 @@ Blueprint sections: design.md 1 (first cut), 5.4 (`StyleEditing`), 6
 | DG-a | `DesignNode.gradient` exists and saves, `DesignWorkspace` conforms to `GradientFillTarget` as stubs, and the inspector's Fill section shows the switch and the editor on them. | DG-1, DG-2 | MJ-DG | suiteui/gradient-fill GF-a (cross-line) |
 | DG-u | The canvas, text and the PNG and PDF exports paint a node's gradient, and the Fill section's snapshots and render budget hold. | DG-3, DG-6 | DJ-G1 | DG-a; GF-3 (DG-6, cross-line) |
 | DG-m | Every fill command runs on Design's selection as one undo step, and the SVG export writes each gradient with the points the canvas draws. | DG-4, DG-5 | MJ-DG | DG-a; GF-6 and AC-design (DG-4); GF-7 and design-export:DE-s (DG-5) |
-| DG-z | The journey passes on live services, and the blueprint says gradients are in the first cut. | DG-7, DG-8, DG-9, DG-10 | DJ-G1 | DG-u, DG-m; design-export (DG-8); DG-9, DG-10 also wait on design-export:DE-a, design-export:DE-s, pen-paths:DP-a, pen-paths:DP-m, placed-images:PD-m, placed-images:PD-u, shape-tools:DS-a, shape-tools:DS-m, shape-tools:DS-u, stroke-style:DK-a, stroke-style:DK-m, stroke-style:DK-u, transform:DT-a, transform:DT-m, transform:DT-u (shared files) |
+| DG-z | The journey passes on live services, and the blueprint says gradients are in the first cut. | DG-7, DG-8 | DJ-G1 | DG-u, DG-m; design-export (DG-8) |
+| DG-c | Design's colour carries alpha and a node's fill can be none, every colour row edits opacity, and the canvas, PNG and SVG keep both (gap audit C3). | DG-9, DG-10 | MJ-DG | DG-u, DG-m; design-export:DE-a, design-export:DE-s, pen-paths:DP-a, pen-paths:DP-m, placed-images:PD-m, placed-images:PD-u, shape-tools:DS-a, shape-tools:DS-m, shape-tools:DS-u, stroke-style:DK-a, stroke-style:DK-m, stroke-style:DK-u, transform:DT-a, transform:DT-m, transform:DT-u (shared files) |
 
 DG-a carries the first UI task (DG-2, the Fill section on the stubs), so the screen is reachable once the contract merges; DG-u waits only on DG-a (rule 18) and DG-m never waits on DG-u. MJ-DG is the
 Model walk in `DesignGradientTests` (Linux).
@@ -131,8 +132,7 @@ extension DesignNode { public func fill(in frame: Rect) -> Fill }   // solid or 
 - Wave 3: DG-6. Independent in this wave: DG-6 alone.
 - Wave 4: DG-7. Independent in this wave: DG-7 alone.
 - Wave 5: DG-8 (shared prose, `feature-done`, final). Independent in this wave: DG-8 alone.
-- With its slice (gap audit C3, added 2026-10-21): DG-9, after DG-1 and the suiteui C3 pull request.
-- With its slice (gap audit C3, added 2026-10-21): DG-10, after DG-9 and the suiteui C3 pull request.
+- DG-c (gap audit C3, added 2026-10-21): DG-9, then DG-10, once DG-u and DG-m have merged, along with the suiteui C3 pull request and the other features' slices that share their files. DG-z doesn't wait on DG-c.
 
 Longest chain: DG-1 → DG-2 → DG-6 → DG-7 → DG-8 (5). Chain of 5: the
 section needs the field, the budget times the section, the journey runs on

@@ -131,27 +131,48 @@
       "behavior": "The journey passes on live services, and the blueprint says gradients are in the first cut.",
       "tasks": [
         "DG-7",
-        "DG-8",
-        "DG-9",
-        "DG-10"
+        "DG-8"
       ],
       "journeys": [
         "DJ-G1"
       ],
       "waits": {
         "DG-u": [
+          "DG-7"
+        ],
+        "DG-m": [
           "DG-7",
+          "DG-8"
+        ],
+        "design-export": [
+          "DG-8"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "UITests/DesignJourneyTests+Gradient.swift",
+        "docs/blueprints/design.md",
+        "docs/blueprints/design/features/gradient-fill.wave.json"
+      ]
+    },
+    {
+      "id": "DG-c",
+      "behavior": "Design's colour carries alpha and a node's fill can be none, every colour row edits opacity, and the canvas, PNG and SVG keep both (gap audit C3).",
+      "tasks": [
+        "DG-9",
+        "DG-10"
+      ],
+      "journeys": [
+        "MJ-DG"
+      ],
+      "waits": {
+        "DG-u": [
           "DG-9",
           "DG-10"
         ],
         "DG-m": [
-          "DG-7",
-          "DG-8",
           "DG-9",
           "DG-10"
-        ],
-        "design-export": [
-          "DG-8"
         ],
         "transform:DT-a": [
           "DG-9",
@@ -203,9 +224,6 @@
       },
       "ui": true,
       "owned": [
-        "UITests/DesignJourneyTests+Gradient.swift",
-        "docs/blueprints/design.md",
-        "docs/blueprints/design/features/gradient-fill.wave.json",
         "Sources/DesignModel/DesignNode.swift",
         "Sources/DesignModel/DesignFill+Kernel.swift",
         "Tests/DesignModelTests/DesignFillAlphaTests.swift",
