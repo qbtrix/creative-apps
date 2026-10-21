@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-20T23:56Z	3	heartbeat	-	worker restart; Belt-named lead/file-flow is the Suite lead record, mine is lead/photo-file-flow
 2026-10-21T00:06Z	3	opened	#3815	PF-3 PR (PF-m), head 96f8ec7b, fast-lane
 2026-10-21T00:17Z	3	heartbeat	-	#3815 PF-3 open in the lane (96f8ec7b); no supervisor reply
+2026-10-21T00:37:33Z	check	heartbeat	#3815	PF-3 macOS build 39520792576 queued; PF-2 still waits place-image:PP-u
