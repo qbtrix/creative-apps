@@ -44,6 +44,13 @@ public struct GradientEditor: View {
         self.onIntent = onIntent
     }
 
+    /// The editor with stop `selected` picked and, when `refused`, the two-stop help showing: the snapshots' states.
+    init(fill: Fill, box: Rect, selected: Int, refused: Bool, onIntent: @escaping @MainActor (GradientIntent) -> Void) {
+        self.init(fill: fill, box: box, onIntent: onIntent)
+        _selected = State(initialValue: selected)
+        _refused = State(initialValue: refused)
+    }
+
     /// Whether the angle row shows: a linear fill, in an editor that shows it.
     nonisolated static func showsAngleRow(_ fill: Fill, showsAngle: Bool) -> Bool { showsAngle && GradientRules.type(of: fill) == .linear }
 

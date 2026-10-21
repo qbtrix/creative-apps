@@ -129,7 +129,8 @@ import Testing
         #expect(smart.emptyActionTitle == "Show All Photos")
     }
 
-    /// Your collections' edits are built (FC-9, LibraryCollectionsTests).
+    /// Your collections' edits (FC-9) and the file (FC-14) are built; their
+    /// checks are LibraryCollectionsTests and LibraryCollectionsFileTests.
     @Test func everyStubAnswersItsUnavailableText() throws {
         var shoot = catalog("shoot")
         shoot.userCollections = [keepers([id(1)])]
@@ -140,7 +141,6 @@ import Testing
         #expect(shoot.collectionsFileValue == "saved")
         #expect(shoot.newSmartCollection() == nil)
         shoot.didSaveCollections(revision: 1)
-        shoot.failRestoreCollections(setAsideAs: "collections.json.bad")
         try shoot.restoreCollections(nil)
         #expect(shoot == before)
     }
