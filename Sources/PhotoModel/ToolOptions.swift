@@ -1,11 +1,13 @@
 // ToolOptions.swift: the brush's or the eraser's settings in the inspector's
 // Tool options (PhotoWorkspace keeps one set per tool, two kernel
 // `BrushSettings` values): size in pixels, hardness and opacity as
-// percentages, and the paint color as 8-bit sRGB. Every change arrives as one
+// percentages, the paint color as 8-bit sRGB, and the Gradient tool's kernel
+// `Fill` (kept in the brush's set, which the panel shows for it). Every change arrives as one
 // ToolOptionEdit, goes to the settings as `BrushEdit`s (PhotoBrush+Kernel.swift)
 // and clamps to its range; NaN is ignored. Choosing options is not a document
 // edit, so it is not undoable. Linux-safe.
 import CoreColor
+import FlareCore
 import SuiteKernel
 
 /// One change the Tool options section can ask for.
@@ -35,6 +37,16 @@ public struct ToolOptions: Sendable, Equatable {
     public private(set) var red: UInt8 = 0
     public private(set) var green: UInt8 = 0
     public private(set) var blue: UInt8 = 0
+    /// The Gradient tool's stops and type, the kernel's `Fill` (rule 20: no
+    /// Photo gradient type); edited by `runGradientOption` (PG-4). Its points
+    /// are a unit box's; a drag gives the real line. Written only through
+    /// `setGradient`.
+    public private(set) var gradient: Fill = ToolOptions.defaultGradient
+
+    /// Black to white, linear, left to right.
+    public static let defaultGradient = Fill.linear(
+        stops: [GradientStop(offset: 0, color: .black), GradientStop(offset: 1, color: .white)],
+        start: Point(x: 0, y: 0), end: Point(x: 1, y: 0))
 
     public init() {}
 
@@ -42,6 +54,10 @@ public struct ToolOptions: Sendable, Equatable {
         if case .color(let r, let g, let b) = edit { (red, green, blue) = (r, g, b) }
         for brushEdit in Self.brushEdits(edit) { _ = settings.apply(brushEdit) }
     }
+
+    /// Replaces the Gradient tool's `Fill`: the one writer of `gradient`,
+    /// for `runGradientOption` once `GradientRules` has edited it (PG-4).
+    mutating func setGradient(_ fill: Fill) { gradient = fill }
 
     /// The paint color in linear light, as PixelBuffer stores color.
     var linearColor: (r: Float, g: Float, b: Float) {

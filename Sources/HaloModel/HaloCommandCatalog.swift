@@ -87,6 +87,10 @@ extension HaloProject {
         case .setCustomEasing(let easing): setCustomEasing(easing, coalesceKey: pickedSegment.map { "\($0.key.layerID).easing" })
         case .moveEasingHandle(let index, let x, let y): moveEasingHandle(index == 0 ? .first : .second, to: HaloPoint(x: x, y: y))
         case .endEasingDrag: endCoalescing()
+        case .pickLaneKeys(let layer, let frame, let mode): pickLaneKeys(layerID: layer, frame: frame, mode: mode)
+        case .selectAllKeys: selectAllKeys()
+        case .moveKeys(let frames, let dragStart): moveKeys(by: frames, dragStart: dragStart)
+        case .endKeyDrag: endKeyDrag()
         case .renderFrame: renderCurrentFrame()
         case .openRenderSheet: beginRender(HaloRenderSettings(format: .pngSequence))
         case .cancelRender: cancelRender()
@@ -151,6 +155,10 @@ extension HaloProject {
         case .setCustomEasing: typed(c, "easing.set-custom", "Custom Easing", .edit, "Sets the picked keys' easing to a cubic curve.", Param.Bezier.self, obj(["x1": Param.unit, "y1": .number(), "x2": Param.unit, "y2": .number()]), ["x1": .number(0.42), "y1": .number(0), "x2": .number(1), "y2": .number(1)]) { .setCustomEasing(.cubicBezier(x1: $0.x1, y1: $0.y1, x2: $0.x2, y2: $0.y2)) }
         case .moveEasingHandle: typed(c, "easing.move-handle", "Move Easing Handle", .edit, "Moves the first (0) or second (1) easing handle.", Param.Handle.self, obj(["index": .integer(minimum: 0, maximum: 1), "x": Param.unit, "y": .number()]), ["index": .number(0), "x": .number(0.3), "y": .number(0)]) { .moveEasingHandle(index: $0.index, x: $0.x, y: $0.y) }
         case .endEasingDrag: plain(c, "easing.end-drag", "End Easing Change", .view, "Ends an easing drag, so the next change is its own step.")
+        case .pickLaneKeys: typed(c, "timeline.pick-keys", "Select Keys", .view, "Picks a layer's keys at a frame: replace, extend (Shift) or toggle (Command); no frame clears the pick.", Param.PickKeys.self, obj(["layerID": Param.id, "frame": .optional(.integer(minimum: 0)), "mode": .string(oneOf: Param.modes.map(\.name))]), ["layerID": .string("comp-1-layer-2"), "frame": .number(0), "mode": .string("replace")]) { try .pickLaneKeys(layerID: $0.layerID, frame: $0.frame, mode: decoded(Param.pick($0.mode))) }
+        case .selectAllKeys: plain(c, "timeline.select-all-keys", "Select All Keys", .view, "Picks every key of the selected composition, hidden layers included.")
+        case .moveKeys: typed(c, "timeline.move-keys", "Move Keyframes", .edit, "Moves the picked keys by frames since the last move; moves of one drag share its dragStart and are one step.", Param.MoveKeys.self, obj(["by": .integer(), "dragStart": .integer(minimum: 0)]), ["by": .number(6), "dragStart": .number(0)]) { .moveKeys(by: $0.by, dragStart: $0.dragStart) }
+        case .endKeyDrag: plain(c, "timeline.end-key-drag", "End Key Drag", .view, "Ends a key drag, so the next move is its own step.")
         case .renderFrame: plain(c, "render.frame", "Render Frame", .view, "Renders the frame at the playhead for the viewer.")
         case .openRenderSheet: plain(c, "render.open-sheet", "Render…", .view, "Opens the render settings.")
         case .startRender: typed(c, "render.start", "Render", .file, "Renders the composition to files.", Param.Render.self, obj(["format": .string(oneOf: HaloRenderSettings.Format.allCases.map(\.rawValue)), "halfSize": .optional(.boolean)]), ["format": .string("pngSequence")]) { try .startRender(HaloRenderSettings(format: decoded(.init(rawValue: $0.format)), halfSize: $0.halfSize ?? false)) }
@@ -221,6 +229,10 @@ private enum Param {
     struct Preset: Decodable, Sendable { var preset: String }
     struct Key: Decodable, Sendable { var layerID: String; var property: HaloProperty; var frame: Int; var extending: Bool }
     struct Lane: Decodable, Sendable { var layerID: String; var frame: Int; var extending: Bool }
+    struct PickKeys: Decodable, Sendable { var layerID: String; var frame: Int?; var mode: String }
+    struct MoveKeys: Decodable, Sendable { var by, dragStart: Int }
+    static let modes: [(name: String, pick: Pick)] = [("replace", .replace), ("extend", .extend), ("toggle", .toggle)]
+    static func pick(_ name: String) -> Pick? { modes.first { $0.name == name }?.pick }
     struct Bezier: Decodable, Sendable { var x1, y1, x2, y2: Double }; struct Handle: Decodable, Sendable { var index: Int; var x, y: Double }
     struct Render: Decodable, Sendable { var format: String; var halfSize: Bool? }
     struct Text: Decodable, Sendable { var text: String }; struct Size: Decodable, Sendable { var size: Double }

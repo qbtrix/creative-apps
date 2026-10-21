@@ -22,10 +22,14 @@
 // identifiers and labels (`naming: .sidebar`) and a header with an action
 // (LayerTreeList+Rows.swift). Each defaults to off, so older callers are unchanged.
 // App panels (#3194) add ids, options and decorations; `reorder` is the flat drop's pure rule.
+// Multi-select (multi-layer-select PM-1): the `selected:` init draws every
+// picked id selected and sends a click out through `onPick` with its mode,
+// `pick(shift:command:)` of the modifiers read once when the click lands.
 // It shows no scroller (wheel, trackpad and keys still scroll), so the
 // audit finds no unnamed page-area button beside a long tree. While it
 // scrolls it reports a drawn frame on series `layers-scroll` (SP4) to the
 // environment's GridProbe, as ThumbnailGrid does.
+import AppKit
 import SuiteKernel
 import SwiftUI
 
@@ -63,6 +67,7 @@ public struct LayerTreeList: View {
     private let childCount: @MainActor (String) -> Int
     private let onAction: @MainActor (LayerTreeAction) -> Void
     private let selection: String?
+    private let selected: Set<String>
     let naming: LayerTreeNaming
     let header: LayerTreeHeader?
     let options: LayerTreeOptions
@@ -73,6 +78,25 @@ public struct LayerTreeList: View {
     private let renaming: (id: String, field: SidebarRenameField)?
     @State private var target: String?
     @Environment(\.gridProbe) private var probe
+
+    /// The list with several rows picked: every id in `selected` draws
+    /// selected, and a click on a row calls `onPick` with its id and the
+    /// click's mode (`pick(shift:command:)`). The rest is as the `selection:` init.
+    public init(
+        rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selected: Set<String>,
+        naming: LayerTreeNaming = .layers, header: LayerTreeHeader? = nil, options: LayerTreeOptions = .init(),
+        decorations: [String: LayerRowDecoration] = [:],
+        onPick: @escaping @MainActor (String, Pick) -> Void, onRename: (@MainActor (String, String) -> String?)? = nil,
+        onAction: @escaping @MainActor (LayerTreeAction) -> Void
+    ) {
+        self.init(rows: rows, childCount: childCount, selection: nil, selected: selected, naming: naming,
+                  header: header, options: options, decorations: decorations,
+                  onSelect: { id in
+                      let flags = NSEvent.modifierFlags
+                      onPick(id, Self.pick(shift: flags.contains(.shift), command: flags.contains(.command)))
+                  },
+                  onRename: onRename, renaming: nil, onAction: onAction)
+    }
 
     /// `rows` from `LayerTree.rows(expanded:)`; `childCount` names how many
     /// children a closed container holds, so a drop lands after the last one.
@@ -95,6 +119,7 @@ public struct LayerTreeList: View {
 
     init(
         rows: [LayerRow], childCount: @escaping @MainActor (String) -> Int, selection: String?,
+        selected: Set<String> = [],
         naming: LayerTreeNaming, header: LayerTreeHeader?, options: LayerTreeOptions = .init(),
         decorations: [String: LayerRowDecoration] = [:], onSelect: (@MainActor (String) -> Void)?,
         onRename: (@MainActor (String, String) -> String?)?, renaming: (id: String, field: SidebarRenameField)?,
@@ -104,6 +129,7 @@ public struct LayerTreeList: View {
         self.childCount = childCount
         self.onAction = onAction
         self.selection = selection
+        self.selected = selected
         self.naming = naming
         self.header = header
         self.options = options
@@ -113,8 +139,14 @@ public struct LayerTreeList: View {
         self.renaming = renaming
     }
 
-    /// Whether row `id` draws selected.
-    func isSelected(_ id: String) -> Bool { selection == id }
+    /// Whether row `id` draws selected: the single selection or any picked id.
+    func isSelected(_ id: String) -> Bool { selection == id || selected.contains(id) }
+
+    /// How a click with these modifiers changes the selection: Shift
+    /// extends, Command toggles, a plain click replaces (Shift wins over both).
+    nonisolated public static func pick(shift: Bool, command: Bool) -> Pick {
+        shift ? .extend : command ? .toggle : .replace
+    }
 
     /// A click on row `id`: tells the app, when it takes selection.
     func select(_ id: String) { onSelect?(id) }

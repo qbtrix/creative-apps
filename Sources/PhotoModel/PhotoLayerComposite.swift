@@ -22,7 +22,8 @@
 // composites give their answer without running (#1636, PB-13): an opaque
 // normal layer tile at opacity 1 covering a picture tile is that tile, and a
 // layer tile composites only over the rectangle it paints, since a clear
-// pixel leaves its backdrop alone. CoreRaster's composite is about 37 ns a
+// pixel leaves its backdrop alone (found by reading only the part of the tile
+// over the piece, so a one-row piece reads one row). CoreRaster's composite is about 37 ns a
 // pixel, so a 256 px tile under an opaque Background and a partly painted
 // layer drops from about 5 ms to about 3. An adjustment layer is per pixel,
 // so it costs the region it covers: the whole region at once, or tile by
@@ -128,7 +129,9 @@ public enum PhotoLayerComposite {
                     piece = tile
                     continue
                 }
-                guard let painted = try paintedRect(of: tile) else { continue }
+                // Only the part of the tile over this piece: a histogram row is one pixel high.
+                let over = PixelRect(x: -dx, y: -dy, width: piece.width, height: piece.height)
+                guard let painted = try paintedRect(of: tile, in: over) else { continue }
                 let source = painted.width == tile.width && painted.height == tile.height ? tile
                     : try tile.cropped(x: painted.x, y: painted.y, width: painted.width, height: painted.height)
                 piece = try CoreRaster.composite(
@@ -165,29 +168,36 @@ public enum PhotoLayerComposite {
     }
 
     /// The smallest rectangle of `tile` holding every pixel with alpha above
-    /// 0; nil when the whole tile is clear. A clear source pixel leaves its
+    /// 0 inside `window` (tile pixels, clipped to the tile; nil reads the
+    /// whole tile); nil when that part is clear. A clear source pixel leaves its
     /// backdrop pixel as it was in every blend mode (its straight color is
     /// clear, its weight 0 and the backdrop's 1), so only this rectangle needs
-    /// compositing: a layer that paints part of a tile costs that part. Rows
+    /// compositing: a layer that paints part of a tile costs that part, and a
+    /// piece that covers part of a tile reads only that part. Rows
     /// are read from each end until one is painted, then each painted row
     /// from both ends, so a tile painted to its edges costs a few reads.
-    static func paintedRect(of tile: PixelBuffer) throws -> PixelRect? {
+    static func paintedRect(of tile: PixelBuffer, in window: PixelRect? = nil) throws -> PixelRect? {
+        var area = PixelRect(x: 0, y: 0, width: tile.width, height: tile.height)
+        if let window {
+            guard let inside = window.intersection(area) else { return nil }
+            area = inside
+        }
         func clear(_ x: Int, _ y: Int) throws -> Bool { try tile.pixel(x: x, y: y).a == 0 }
         func clearRow(_ y: Int) throws -> Bool {
-            for x in 0..<tile.width where try !clear(x, y) { return false }
+            for x in area.x..<area.maxX where try !clear(x, y) { return false }
             return true
         }
-        var top = 0
-        while top < tile.height, try clearRow(top) { top += 1 }
-        guard top < tile.height else { return nil }
-        var bottom = tile.height - 1
+        var top = area.y
+        while top < area.maxY, try clearRow(top) { top += 1 }
+        guard top < area.maxY else { return nil }
+        var bottom = area.maxY - 1
         while bottom > top, try clearRow(bottom) { bottom -= 1 }
-        var left = tile.width, right = -1
+        var left = area.maxX, right = area.x - 1
         for y in top...bottom {
-            var x = 0
+            var x = area.x
             while x < left, try clear(x, y) { x += 1 }
             left = min(left, x)
-            var end = tile.width - 1
+            var end = area.maxX - 1
             while end > right, try clear(end, y) { end -= 1 }
             right = max(right, end)
         }

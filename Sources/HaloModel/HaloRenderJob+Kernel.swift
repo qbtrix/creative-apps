@@ -26,6 +26,12 @@ extension HaloProject {
         }
     }
 
+    /// Whether a render has started and not ended yet.
+    var renderRunning: Bool {
+        if case .running = renderRun { return true }
+        return false
+    }
+
     /// Opens the Render sheet on `settings` (idle → editing). False, and no
     /// change, with no composition or from any state but idle.
     @discardableResult
