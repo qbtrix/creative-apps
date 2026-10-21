@@ -1,4 +1,4 @@
-// UnsavedGuardTests.swift (adopt-kernel-unsaved-prompt UP-1, turned on by UP-3): the `.unsavedChangesGuard`
+// UnsavedGuardTests.swift (adopt-kernel-unsaved-prompt UP-1, on since UP-3): the `.unsavedChangesGuard`
 // modifier on an offscreen window with a fake document and a fake save. Cancel keeps the window; Don't Save closes
 // it; Save closes it only when the save lands; a clean window closes with no sheet; a second close while asking
 // adds no sheet; Return saves, Escape cancels and Command-D is Don't Save. The sheet's buttons are found by their
@@ -65,7 +65,7 @@ private func button(_ answer: String, in window: NSWindow) -> NSButton? {
 @MainActor
 @Suite("UnsavedGuard")
 struct UnsavedGuardTests {
-    @Test("Cancel keeps the window, still dirty", .disabled("waits on UP-3"))
+    @Test("Cancel keeps the window, still dirty")
     func cancelKeepsWindow() async {
         let document = FakeDocument()
         let window = document.window()
@@ -77,7 +77,7 @@ struct UnsavedGuardTests {
         #expect(document.dirty && document.saves == 0)
     }
 
-    @Test("Don't Save closes the window without saving", .disabled("waits on UP-3"))
+    @Test("Don't Save closes the window without saving")
     func dontSaveCloses() async {
         let document = FakeDocument()
         let window = document.window()
@@ -88,7 +88,7 @@ struct UnsavedGuardTests {
         #expect(document.saves == 0)
     }
 
-    @Test("Save closes the window once the save lands", .disabled("waits on UP-3"))
+    @Test("Save closes the window once the save lands")
     func saveCloses() async {
         let document = FakeDocument()
         let window = document.window()
@@ -99,7 +99,7 @@ struct UnsavedGuardTests {
         #expect(document.saves == 1)
     }
 
-    @Test("A failed save keeps the window", .disabled("waits on UP-3"))
+    @Test("A failed save keeps the window")
     func failedSaveKeepsWindow() async {
         let document = FakeDocument()
         document.saveLands = false
@@ -113,7 +113,7 @@ struct UnsavedGuardTests {
         #expect(document.dirty)
     }
 
-    @Test("A clean window closes with no sheet", .disabled("waits on UP-3"))
+    @Test("A clean window closes with no sheet")
     func cleanWindowCloses() async {
         let document = FakeDocument()
         document.dirty = false
@@ -123,7 +123,7 @@ struct UnsavedGuardTests {
         #expect(window.sheets.isEmpty, "a clean window asked before closing")
     }
 
-    @Test("A second close while asking adds no sheet", .disabled("waits on UP-3"))
+    @Test("A second close while asking adds no sheet")
     func secondCloseAddsNoSheet() async {
         let document = FakeDocument()
         let window = document.window()
@@ -135,7 +135,7 @@ struct UnsavedGuardTests {
         button("cancel", in: window)?.performClick(nil)
     }
 
-    @Test("Return saves, Escape cancels, Command-D is Don't Save", .disabled("waits on UP-3"))
+    @Test("Return saves, Escape cancels, Command-D is Don't Save")
     func keys() async {
         let document = FakeDocument()
         let window = document.window()
