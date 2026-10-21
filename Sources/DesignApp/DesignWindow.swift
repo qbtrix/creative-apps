@@ -177,6 +177,8 @@ struct DesignWindow: View {
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
         case .fill(let intent): model.runFill(intent)
+        case .transform(let intent): model.runTransform(intent)
+        case .shape(let intent): model.runShape(intent)
         case .align(let edge): model.alignLayer(edge)
         case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
@@ -186,8 +188,8 @@ struct DesignWindow: View {
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
-        case .zoomIn: userZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: userZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
+        case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
             fit()
@@ -215,6 +217,8 @@ struct DesignWindow: View {
             // The row ids come from the model's own rows; only the name can be refused.
             do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
         case .setPageSize(let width, let height): model.setPageSize(width: width, height: height)
+        case .pick(let point, let toStroke):
+            do { try model.pick(at: point, toStroke: toStroke) } catch { note = error.help }
         }
     }
 
@@ -249,10 +253,9 @@ struct DesignWindow: View {
 
     // MARK: Zoom
 
-    /// Sets the zoom within the Zoom In and Zoom Out stops, and resizes the handle grab area to match.
+    /// Sets the zoom within ZoomMath's range (10% to 3200%), and resizes the handle grab area to match.
     private func setZoom(_ scale: Double) {
-        let (lowest, highest) = (ViewerZoom.stops.first ?? 1, ViewerZoom.stops.last ?? 1)
-        zoom = scale.isFinite ? Swift.min(Swift.max(scale, lowest), highest) : 1
+        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
         model.setHandleTolerance(Double(SuiteSpacing.s) / zoom)
     }
 
@@ -267,9 +270,16 @@ struct DesignWindow: View {
     private func fit() {
         guard let page = model.selectedPage, viewport != .zero else { return }
         let size = CGSize(width: page.frameWidth, height: page.frameHeight)
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: size)
-        setZoom(scale > 0 ? scale : 1)
+        setZoom(ZoomMath.fit(document: size, in: viewport, using: paletteFit))
+    }
+
+    /// The fit EditorDetail hands Command-0: clear of the floating palette, which shows every tool
+    /// while a page is open.
+    private var paletteFit: @Sendable (CGSize, CGSize) -> Double {
+        let toolCount = DesignTool.allCases.count
+        return { viewport, artboard in
+            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
+        }
     }
 
     /// Zooms to fit the selection clear of the palette and keeps its rect for the canvas to
@@ -279,9 +289,7 @@ struct DesignWindow: View {
             note = model.zoomToSelectionHelp
             return
         }
-        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
-        let scale = layout.fitScale(artboard: CGSize(width: rect.width, height: rect.height))
-        userZoom(scale > 0 ? scale : 1)
+        userZoom(ZoomMath.fit(document: CGSize(width: rect.width, height: rect.height), in: viewport, using: paletteFit))
         show = rect
     }
 

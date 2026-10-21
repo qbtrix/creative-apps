@@ -90,6 +90,7 @@ extension FlareIntent.Tools {
             case .pen: "Pen"
             case .rectangle: "Rectangle"
             case .ellipse: "Ellipse"
+            case .shape: "Shape"
             }
         case .finishPath: "Finish Path"
         }
@@ -136,6 +137,7 @@ extension FlareIntent.Inspector {
         case .easingPreset: "Easing"
         case .easingHandle: "Move Easing Handle"
         case .endEasingHandle: "End Easing Handle"
+        case .runFill: "Edit Fill"
         }
     }
 }
