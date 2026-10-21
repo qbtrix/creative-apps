@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-21T22:55:11Z	-	watch	BK-u	fix #4244 (6b0bec6) waits on its lane-dispatched macOS build (apps: library), then a batch.
 1792623562	-	watch	BK-u	dev-ci 39689070230 at e0fb991: Linux red only on CommandPathTests/CommandPathLimitTests for library.txt (2 stale Cancel lines, 53 > 48), the BK-u/CS-2 race; #4244 removes exactly those lines. #4244 macOS build 39689010451 in progress.
 1792623672	-	watch	BK-u	#4244 macOS build 39689010451 red, but not ours: dev doesn't compile on macOS (RenderBudgetPhotoPlaceTests uses PhotoPlaceIntent.files, which #4164 removed). The fix is #4215 (Photo line, not ported). Commented on #4244; I'll merge dev into the branch and move Head once #4215 lands.
+1792624224	-	watch	BK-u	Heartbeat: #4244 still open, waiting for #4215 (the macOS compile fix) to reach dev; dev at 8d08e08.
