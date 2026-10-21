@@ -26,7 +26,7 @@ Next: parents in lane; drafts #4202 #4206 #4213 #4210 #4214 #4225 ready after pa
 | CS-1b | CS-a | 2 | toolbar toggles report selected (ToolbarGroup.swift, SuiteEnvironment.swift), left out of #4021 | follow-up, stacked on CS-1 | ControlStateTests (toolbar case) | #4130 | ready; gate pass, Head 3d8c6c72; macOS build queued |
 | CS-3 | CS-library-1 | 2 | Library catalog part 1 | packet CS-3 | Mutate 6/6 | #4134 | ready; gate pass, Head 776c0ec5 |
 | CS-9 | CS-photo | 2 | Photo catalog | packet CS-9 | Mutate 4/4 | #4140 | ready; gate pass, Head 0b6012c3 |
-| CS-13 | CS-design | 2 | Design catalog | packet CS-13 | Mutate 6/6 | #4144 | ready; gate pass, Head 8e64342f |
+| CS-13 | CS-design | 2 | Design catalog | packet CS-13 | Mutate 6/6 | #4144 | ready; merged dev after #4189, Head 45124d6 |
 | CS-7 | CS-halo | 2 | Halo catalog | packet CS-7 | Mutate 8/8 HaloModel.HaloCommandCatalog | #4196 | ready; gate pass, Head 84921163 |
 | CS-11 | CS-flare | 2 | Flare catalog (+6 commands, file.new params) | packet CS-11 | Mutate 7/7 FlareModel.FlareCommandCatalog | #4205 | ready; gate pass, Head 88d0c661 |
 | CS-14 | CS-design | 3 | Design wiring | packet CS-14 | CommandPathTests | #4202 | draft, stacked on #4144; gate pass, Head d902b346 |
