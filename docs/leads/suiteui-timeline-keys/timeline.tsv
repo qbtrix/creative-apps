@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-21T22:42Z	3	poll	#4185 #4191	supervisor re-labelled both fast-lane; queued on the local Mac gate after #4215; dev still red on library baseline
 2026-10-21T22:57Z	3	poll	#4191 #4185	TK-u macOS build dispatched by the lane; TK-5 Linux check (red while dev-red holds)
 2026-10-21T23:13Z	3	blocked	#4185 #4191	dev-red #3856: library baseline (TK-5) and dev macOS compile break in RenderBudgetPhotoPlaceTests (TK-u build); question on #3757
+2026-10-21T23:30:51Z	3	poll	#3757	supervisor: hold, #4250 merged, #4215 next, #4185 queued on local Mac gate; #4191 clean, waits on the lane; TK-6 waits on AJ-halo, TS-halo, AN-halo (none started)

@@ -4,7 +4,7 @@ Issue: #3780 · Packet: docs/blueprints/suiteui/features/timeline-keys.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: #4191 (TK-u) on dev at 0ebd9101, gate pass, Head: moved, waits on the lane; #4185 (TK-5) integrated at 873729d4, gate red only on dev-red (library baseline after #3967): move Head: once dev is green; critic panel on TK-u once a scoped run shows its screens; TK-6 waits on AJ-halo, TS-halo, AN-halo (AE-h2 #2842 closed)
+Next: #4185 (TK-5) queued by the supervisor on the local Mac gate behind #4215, hold; #4191 (TK-u) clean, waits on the lane; critic panel on TK-u once a scoped run shows its screens; TK-6 waits on AJ-halo, TS-halo, AN-halo
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
