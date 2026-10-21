@@ -38,3 +38,4 @@
 2026-10-21T00:33:02Z	check	-	check-in: MD-16 on dev (4ca5ce1); MD-17 #3579 ready on ddf03fd, needs-rebase cleared, awaiting lane batch; MD-10 #3581 still waits on perf list
 2026-10-21T01:05:17Z	check	-	dev red (#3386, Linux run 39522274346 at 4987f9260): MD-16 planWithinBudget median 11.08 ms vs 10 ms budget on runner, 4.21 ms locally; escalating perf-list entry to supervisor, MD-17 #3579 waits in lane
 2026-10-21T01:27:31Z	check	-	supervisor moved planWithinBudget to perf list (#3829, 7277a83ac); Linux run 39526337262 running on it. MD-17 #3579 clean in lane. MD-10 tests not yet listed, #3581 stays draft
+2026-10-21T01:48:43Z	check	-	dev green again (Linux run 39526337262 at 7277a83ac). MD-17 #3579 clean, awaiting lane batch; MD-10 perf entries not listed yet
