@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-21T05:20Z	3	waiting	#3827	check-in: lane still bisecting batch-20261021043428 (after 5 PRs); #3827 one of 29 ready; SF-8 waits
 2026-10-21T05:41Z	3	waiting	#3827	check-in: #3827 open, no labels or comments; lane sweeps still cycling; SF-8 waits
 2026-10-21T06:05Z	3	waiting	#3827	check-in: lane landed a batch at 05:28Z without #3827; #3827 open, no labels or comments; SF-8 waits
+2026-10-21T06:27Z	3	waiting	#3827	#3827 still open, fast-lane only, no new comments; SF-8 waits
