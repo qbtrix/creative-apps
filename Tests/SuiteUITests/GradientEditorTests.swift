@@ -2,7 +2,8 @@
 // `GradientBarDrag`. A click on the bar is one `.add` at its offset, a drag on a stop is `.move`s under one token, a
 // drag 40 pt off the bar is one `.remove`, a two-stop remove is refused with the help; the angle row shows only for a
 // linear fill; a stop reads "Stop n of m, p percent, colour"; the end stops' handles stay inside the bar's row, and a
-// press on a handle there still picks its stop; the bar dims while the editor is off. No rendering here. macOS only.
+// press on a handle there still picks its stop; the bar dims while the editor is off; a stop's rim turns accent under the
+// pointer, thinner than the selected stop's. No rendering here. macOS only.
 import CoreGraphics
 import SuiteKernel
 @testable import SuiteUI
@@ -87,5 +88,15 @@ import Testing
     @Test func barDimsWhileOff() {
         #expect(GradientEditor.barOpacity(enabled: true) == 1)
         #expect(GradientEditor.barOpacity(enabled: false) == SuiteColor.disabledOpacity)
+    }
+
+    @Test func handlesShowHoverBeforeThePress() {
+        let rest = GradientEditor.handleRim(selected: false, hovered: false)
+        let hover = GradientEditor.handleRim(selected: false, hovered: true)
+        let selected = GradientEditor.handleRim(selected: true, hovered: false)
+        #expect(rest == .init(color: SuiteColor.outline, width: 1))
+        #expect(hover.color == SuiteColor.accent, "a stop under the pointer shows no hover rim")
+        #expect(hover.width < selected.width, "hover reads apart from selected")
+        #expect(GradientEditor.handleRim(selected: true, hovered: true) == selected)
     }
 }

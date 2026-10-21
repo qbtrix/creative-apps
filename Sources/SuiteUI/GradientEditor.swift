@@ -7,7 +7,8 @@
 // (`suite.gradient.angle`). The bar's gesture math is `GradientBarDrag`: a click adds a stop, a drag moves one under
 // one drag token, a drag 40 pt off removes it; arrows nudge the selected stop 1% and Delete removes it. A colour-panel
 // session and an angle scrub each carry one token too, so the app folds each gesture into one undo step. Where a stop
-// lands after an add or a move comes from `GradientRules`, so the selection follows it.
+// lands after an add or a move comes from `GradientRules`, so the selection follows it. A stop handle's rim turns
+// accent under the pointer and the pointer is a grab hand (`handleRim`), as on CurveEditor's handles.
 import Foundation
 import SuiteKernel
 import SwiftUI
@@ -28,6 +29,8 @@ public struct GradientEditor: View {
     @State private var angleToken: String?
     /// True after a remove the two-stop rule refused, until the next gesture.
     @State private var refused = false
+    /// The stop under the pointer.
+    @State private var hovered: Int?
     @FocusState private var barFocused: Bool
     @Environment(\.isEnabled) private var isEnabled
 
@@ -49,6 +52,18 @@ public struct GradientEditor: View {
 
     /// The bar and its handles dim with the rest of the rows while the editor is off.
     nonisolated static func barOpacity(enabled: Bool) -> Double { enabled ? 1 : SuiteColor.disabledOpacity }
+
+    /// A stop handle's rim: accent and 2 pt while selected, accent under the pointer so it reads as grabbable before
+    /// the press (CurveEditor's handles do the same), the outline at rest.
+    struct HandleRim: Equatable {
+        let color: Color
+        let width: CGFloat
+    }
+
+    nonisolated static func handleRim(selected: Bool, hovered: Bool) -> HandleRim {
+        selected ? HandleRim(color: SuiteColor.accent, width: 2)
+            : HandleRim(color: hovered ? SuiteColor.accent : SuiteColor.outline, width: hovered ? 1.5 : 1)
+    }
 
     /// `showsAngle: false` for a tool whose drag sets the line (Photo's Gradient tool); `types` limits the switch (the
     /// three paints by default).
@@ -154,10 +169,14 @@ public struct GradientEditor: View {
     /// One stop's handle: its colour in a ring, under the bar at its offset, raised while selected.
     private func handle(_ stop: Int, width: CGFloat) -> some View {
         let offset = fill.stops[stop].offset
+        let rim = Self.handleRim(selected: stop == index, hovered: hovered == stop && isEnabled)
         return Circle()
             .fill(fill.stops[stop].color.swiftUI)
-            .overlay(Circle().strokeBorder(stop == index ? SuiteColor.accent : SuiteColor.outline, lineWidth: stop == index ? 2 : 1))
+            .overlay(Circle().strokeBorder(rim.color, lineWidth: rim.width))
             .frame(width: Self.handleSize, height: Self.handleSize)
+            .contentShape(Circle())
+            .onHover { hovered = $0 ? stop : (hovered == stop ? nil : hovered) }
+            .pointerStyle(drag?.stop == stop ? .grabActive : .grabIdle)
             .position(x: Self.handleX(offset, width: width), y: Self.barHeight)
             .accessibilityElement()
             .accessibilityLabel(GradientEditorText.stop(stop, of: fill))
