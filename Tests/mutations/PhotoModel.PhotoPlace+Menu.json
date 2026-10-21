@@ -1,0 +1,30 @@
+[
+  {
+    "label": "aDropPointIsInDocumentPixels: the drop point skips the zoom, so a zoomed drop lands off the pointer",
+    "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
+    "find": "return Point(x: x / scale, y: y / scale)",
+    "replace": "return Point(x: x, y: y)",
+    "tests": "PhotoPlaceMenuTests"
+  },
+  {
+    "label": "aDropPointIsInDocumentPixels: a zero zoom is taken as is, dividing by zero",
+    "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
+    "find": "let scale = zoom.isFinite && zoom > 0 ? zoom : 1",
+    "replace": "let scale = zoom",
+    "tests": "PhotoPlaceMenuTests"
+  },
+  {
+    "label": "noImageRefusesWithItsReason: a refusal shows the command's id and wording, not the reason alone",
+    "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
+    "find": "case .unavailable(_, let why): why",
+    "replace": "case .unavailable: error.description",
+    "tests": "PhotoPlaceMenuTests"
+  },
+  {
+    "label": "noImageTurnsPlaceOff: the panel's reason comes before the command's, so no image reads as the panel",
+    "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
+    "find": "Self.placeCatalog.availability(\"place.image\", on: self).why ?? panelHelp",
+    "replace": "panelHelp ?? Self.placeCatalog.availability(\"place.image\", on: self).why",
+    "tests": "PhotoPlaceMenuTests"
+  }
+]
