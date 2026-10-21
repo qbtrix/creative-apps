@@ -244,6 +244,7 @@ struct PhotoWindow: View {
         case .transform(let intent): performTransform(intent)
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
+        case .place(let intent): performPlace(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }
