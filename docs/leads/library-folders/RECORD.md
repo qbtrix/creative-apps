@@ -4,7 +4,7 @@ Issue: #3787 · Packet: docs/blueprints/library/features/folders.md
 Run: act-1a15f2277a5-6xyv · Session: relaunch of cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z (resumed 2026-10-21T15:49Z)
 Stage: 3 wave 2
 Base: 260f7a87410930bd740151baf80e350340d2a4f9
-Next: (2026-10-21T16:26Z) FO-5 #4022 in the lane at 7482cc7 (fix for the stale FO-4 stub expectation). FO-6 built stacked on it: draft PR #4121 at 34c669c, gate PASS, Mutate 5/5; mark ready once #4022 merges. Then FO-7 feature-done.
+Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 queued (runner backlog). FO-6 draft PR #4121 at 34c669c stacked on it (attribution footer removed from its body); mark ready once #4022 merges. Then FO-7 feature-done.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -45,3 +45,4 @@ Next: (2026-10-21T16:26Z) FO-5 #4022 in the lane at 7482cc7 (fix for the stale F
 - 13:17 poll: PRs open/clean (BK-u #3967, LF-3 #4024, FO-u #3963, FO-5 #4022) awaiting lane macOS batch; macOS runners still backlogged; scoped library run 39593465885 queued; #3928 open (LF-4 blocked).
 - 2026-10-21T15:49Z (run act-1a15f2277a5-6xyv): relaunched. Rule 23 re-read: #3928 open (LF-4 blocked); dev-red #3856 still open but dev Linux check 39623471557 at 9951eea is green and contains every merged slice PR. All three open PRs (#4024, #4022, #3967) went red on Linux on dev's Photo command-path baseline, fixed by #4008; dev merged into each, gates re-running. Swift was missing in the relaunched container; scripts/cloud-setup.sh installed 6.3.3. No open finding is on this feature's files.
 - 2026-10-21T16:26Z: FO-5 #4022 re-gated after dev merge; fixed the stale FO-4 stub expectation (7482cc7), Head moved. FO-6 built on lead/folders-FO-6 stacked on FO-5: Model selectSidebarRow/toggleFolderSubfolders, window wiring, RJ-L53 on (stored-zip fixture, absolute paths), LJ-FO journey on. Gate PASS, mutate 5/5. Opened as draft #4121 because the dev diff counts FO-5's files (20 > 15) until #4022 merges. Open findings with Feature: folders: 0.
+- 2026-10-21T17:09Z: rule 23 re-read. #4022 open at 7482cc7; lane macOS build 39632234354 queued. #4121 draft, lane added fast-lane (Belt-Lead sweep; drafts are skipped) and flagged an attribution footer in the body, now removed. Open findings with Feature: folders: 0.
