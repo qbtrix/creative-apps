@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-21T04:35Z	check	DY-u not in culprit; new batch 20261021043428	#3816	waits batch
 2026-10-21T04:59Z	check	DY-u #3816 in lane (clean, batch 043428 bisecting, probe -4 green)	#3816	scoped design 39541665044 red on DesignSeveralInspectorSnapshots: eyedropper row fix is #3839 (needs-rebase, not ours), rotation/flip rows from DT-a; noted on dev-red #3856. Critic panel DY-a started on its snapshots
 2026-10-21T05:02Z	check	critic panel DY-a: 4 confirmed, 2 refuted; filed #3860 #3861 #3862 #3863	wf_c028d542-080	fix round 1 started (fix-batch wf_4d365bd6-f9f) on base 0eca6ab5
+2026-10-21T05:25Z	check	DY-u #3816 still in lane (clean, no needs-fix)	#3816	DY-a fix round 1 running (wf_4d365bd6-f9f)
