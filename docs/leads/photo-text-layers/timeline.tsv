@@ -2,3 +2,4 @@
 2026-10-21T12:10:00Z	wave	TX-a	TX-1 + TX-2 on photo-text-layers/TX-1 (388 lines, 8 files); gate running	PR on CI: PASS
 2026-10-21T11:39:24Z	pr	TX-a	#4036 opened, gate PASS on 76f1e990b, fast-lane	TX-u on photo-text-layers/TX-3
 2026-10-21T11:56:00Z	pr	TX-u	#4053 opened (TX-3, stacked on #4036), gate PASS on 871ec00a4, fast-lane	TX-4 inspector style row next
+2026-10-21T12:10:00Z	pr	TX-m	#4059 opened (TX-6 .ora text attribute, stacked on #4036), gate PASS on c5f798d06, mutate 4/4, fast-lane	TX-4/TX-5 blocked cross-line; watch merges
