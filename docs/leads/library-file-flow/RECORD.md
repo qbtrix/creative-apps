@@ -4,22 +4,22 @@ Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: read wave 1 results (LF-u, LF-4 PRs); re-read LF-3's waits (tone-controls:LT-m, cull-finish:DR-m)
+Next: LF-4 blocked (needs-ui #3928 per-cell drag hook, suite SF-8 PNG, catalog-open suite type); re-read LF-3's waits (LT-m, DR-m) and #3928/SF-8 each poll
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LF-a | adapter stubs, .suiteApp, menu and drop on fakes | LF-1, LF-2 | MLF | – | yes | – | merged (#3624) | – | – |
-| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | LF-6 done in #3624; LF-5 building | – | – |
-| LF-m | drop imports as one step, hand-offs, recents, drag out | LF-3, LF-4 | MLF | LF-a, SF-5/6/7 (met); LT-m, DR-m (not merged) | yes | 0 | LF-4 building; LF-3 blocked | – | – |
+| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | LF-6 done in #3624; LF-5 #3938 open | – | – |
+| LF-m | drop imports as one step, hand-offs, recents, drag out | LF-3, LF-4 | MLF | LF-a, SF-5/6/7 (met); LT-m, DR-m (not merged) | yes | 0 | LF-4 blocked (#3928, SF-8); LF-3 blocked | – | – |
 | LF-z | live journey, feature built | LF-7, LF-8 | LFJ1 | LF-u, LF-m | yes | 0 | blocked | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| LF-5 | LF-u | 1 | snapshots and render budget | Tests/AppSnapshotTests/LibraryFileFlowSnapshots.swift, RenderBudgetLibraryFileDropTests.swift | LibraryFileFlowSnapshots; dragHoverInTwoBodies | – | building |
+| LF-5 | LF-u | 1 | snapshots and render budget | Tests/AppSnapshotTests/LibraryFileFlowSnapshots.swift, RenderBudgetLibraryFileDropTests.swift | LibraryFileFlowSnapshots; dragHoverInTwoBodies | #3938 | open, head 38b0444 |
 | LF-6 | LF-u | – | journey written, skipped | UITests/LibraryJourneyTests+FileFlow.swift | compiles, skipped | #3624 | merged (folded into LF-a) |
-| LF-4 | LF-m | 1 | catalog opens to bridge; thumbnails drag out | Sources/LibraryApp/LibraryWindow+Import.swift, Tests/AppSnapshotTests/LibraryFileFlowLiveTests.swift | LibraryFileFlowLiveTests | – | building |
+| LF-4 | LF-m | 1 | catalog opens to bridge; thumbnails drag out | Sources/LibraryApp/LibraryWindow+Import.swift, Tests/AppSnapshotTests/LibraryFileFlowLiveTests.swift | LibraryFileFlowLiveTests | – | blocked: needs-ui #3928, SF-8, catalog-open type |
 | LF-3 | LF-m | – | adapter bodies, catalog, ids, RJ-L42 | LibraryFileFlow+Kernel.swift, LibraryCommandCatalog.swift, Tests/command-ids/library.txt, ... | LibraryFileFlowTests | – | blocked: LT-m, DR-m |
 | LF-7 | LF-z | – | journey on live | UITests/LibraryJourneyTests+FileFlow.swift | testDropToImportAndDragOut | – | blocked |
 | LF-8 | LF-z | – | status built, feature-done | file-flow.wave.json | waves render --dry-run | – | blocked |
@@ -37,4 +37,5 @@ Next: read wave 1 results (LF-u, LF-4 PRs); re-read LF-3's waits (tone-controls:
 - Line lead (rule 19): one build-wave call per wave carries file-flow, folders and catalog-backup tasks; the template takes feature/issue/packet per task.
 
 ## Open
+- LF-4 blocked (builder, 07:10Z): ThumbnailGrid has no per-cell drag hook (needs-ui #3928); the PNG representation is SF-8's (not merged); no suite type for a catalog open. Reading chosen: note a photo when it opens in the loupe (png/jpeg/heic already list Library), decided when LF-4 restarts.
 - LF-3 waits on tone-controls:LT-m (LibraryCommandCatalog.swift, Tests/command-ids/library.txt) and cull-finish:DR-m; neither feature has a lead branch.
