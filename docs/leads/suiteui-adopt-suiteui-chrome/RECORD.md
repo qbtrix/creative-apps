@@ -3,7 +3,7 @@
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet; earlier run act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
 Stage: 0 setup (blocked on shared-codecs:SC-f)
-Base: dev 369ecc7a (main 0dd23d65 verified)
+Base: dev f2953daf (main 0dd23d65 verified)
 Next: re-read shared-codecs:SC-f (SC-13 #4019 fixed at 4e6f468b, Fast-Check pass, awaiting lane macOS build + merge; then SC-14, SC-15, SC-16); start AC-e1 once SC-16 merges
 
 ## Slices
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f (SC-13 #4019 fixed at 4e6f468b, Fast-Check pass
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T20:16Z: #4019 (SC-13) macOS build dispatched by the lane at 19:48Z on 4e6f468b, not merged yet; no SC-14..16 PR; AC-e1 still waits
 - 2026-10-21T19:45Z: #4019 (SC-13) pushed 4e6f468b at 19:36Z with Fast-Check pass for that head, clean, fast-lane; lane's macOS build and merge to follow. SC-14..16 still to come, so AC-e1 still waits
 - 2026-10-21T19:14Z: SC-f unchanged on dev ef3edb2b: #4019 Linux red on 85c365cf since 12:30Z, no push; no SC-14..16 PR; no supervisor reply on #1942
 - 2026-10-21T18:43Z: SC-f unchanged on dev 363d3ea9: #4019 Linux red on 85c365cf since 12:30Z, no push; no SC-14..16 PR; no supervisor reply on #1942 yet
