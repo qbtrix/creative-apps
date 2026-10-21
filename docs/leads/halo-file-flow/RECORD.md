@@ -2,7 +2,7 @@
 
 Issue: #3474 · Packet: docs/blueprints/halo/features/file-flow.md
 Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
-Stage: 3 polling (blocked: wave 1 waits on other Halo features)
+Stage: 3 polling (blocked; checked 2026-10-21T02:03Z: HS-a #3676 open, placed-images PH-a not started)
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: check whether transform:HT-a, shape-tools:HS-a and placed-images:PH-u have merged; if so start HF-1 (stub adapter, HaloFileFlowTests disabled)
 
