@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-21T06:20:32Z	0	setup	0865916	fresh start, no lead branch
+2026-10-21T06:20:32Z	2	plan	-	wave 1 planned
+2026-10-21T06:21:13Z	3	wave 1 start	0865916	builders launched
