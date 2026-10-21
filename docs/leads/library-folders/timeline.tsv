@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-21T11:25:30Z	3	check	-	11:25 poll: lane macOS builds pending for #3961/#3965/#3967; CI 39586209372+39585973891 in progress; #3997 merged, #3928 open
 2026-10-21T11:48:23Z	3	check	-	11:50 poll: dev-red #3856 (photo/flare) holds slice-done; #4024 needs-rebase being resolved
 2026-10-21T11:50:49Z	3	fixes	-	FO-4 #3961 merged; dev merged into FO-u/FO-5 (squash conflicts resolved), BK-u macOS type-check split, LF-3 rebase; 4 gates running
+2026-10-21T12:00:44Z	3	push	-	BK-u #3967 type-check fix pushed (d65a282); LF-3 #4024 rebase pushed (a1574a6); FO-5 #4022 (8437a51) and FO-u #3963 (c11098e) on dev, fast-lane on; all gates PASS
