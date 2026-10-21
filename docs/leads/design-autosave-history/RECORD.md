@@ -74,3 +74,4 @@ Next: Belt-Slice-Done DA-u once merged-done; DA-a critics on journeys design 395
 - 11:44Z: heartbeat. #3973 clean with green macOS build 39587493383; a lane sweep is running. Blocked: DA-6 (GF-6 #3742 open), #3947 (needs-ui #3957).
 - 12:05Z: heartbeat. #3973 clean, macOS build green; a Linux check is now running on its head, and the lane merges once it passes. DA-6 still waits on GF-6 #3742.
 - 12:08Z: stage. #3973 (DA-a round-1 fixes, Fixes #3945 #3949) merged to dev as b6043094 at 12:08Z. Next: DA-a round-2 critic panel once a dev run containing b6043094 shows Design's screens.
+- 12:25Z: heartbeat. Dev runs containing b6043094: Linux check 39598650564 (76d0c892) running, scoped: suite 39597318610 queued. Round 2 waits on a run showing Design's screens (scoped design or full CI). DA-6 waits on GF-6 #3742.
