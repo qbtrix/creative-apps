@@ -141,7 +141,7 @@ extension PhotoTextORATests {
         var original = snapshot()
         var title = try #require(original.layers.first)
         var tricky = sale
-        tricky.words = #"<b>"Fish & Chips"</b> it's 'on'"#
+        tricky.words = #"<b>"Fish & Chips"</b> it's 'on', &amp; &lt;3"#
         title.kind = .text(tricky)
         original.layers[0] = title
         let reopened = try archive.decode(try archive.encode(original, codec: RawCodec()), codec: RawCodec())

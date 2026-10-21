@@ -1,0 +1,6 @@
+[
+  {"label": "attributeDropped: stack.xml never gets afterglow:text, so a text layer reopens as pixels", "file": "Sources/PhotoModel/Live/PhotoStackXML.swift", "find": "            if let text = texts[src] { xml += ", "replace": "            if false, let text = texts[src] { xml += ", "tests": "PhotoTextORATests"},
+  {"label": "textNoSrc: a text layer's pixels never reach the stack", "file": "Sources/PhotoModel/Live/LiveArchive.swift", "find": "if layer.kind == .pixels || text != nil {", "replace": "if layer.kind == .pixels {", "tests": "PhotoTextORATests"},
+  {"label": "ampersandFirst: &amp; unescapes before the others, so an escaped entity in the words decodes twice", "file": "Sources/PhotoModel/PhotoTextLayer+ORA.swift", "find": "return String(value).replacing(\"&quot;\", with: \"\\\"\")", "replace": "return String(value).replacing(\"&amp;\", with: \"&\").replacing(\"&quot;\", with: \"\\\"\")", "tests": "PhotoTextORATests"},
+  {"label": "textPixelsDropped: opening a document leaves a text layer without its pixels", "file": "Sources/PhotoModel/PhotoDocumentFile.swift", "find": "if layer.kind == .pixels || layer.kind.textLayer != nil {", "replace": "if layer.kind == .pixels {", "tests": "PhotoTextORATests"}
+]
