@@ -7,3 +7,5 @@ utc	stage	event	ref	note
 2026-10-21T02:19Z	3	pr-opened	#3836	TS-1 text style contract
 2026-10-21T02:19Z	3	stage-start	wave 2	TS-m
 2026-10-21T02:44Z	3	heartbeat	-	#3836 open clean; TS-m building
+2026-10-21T02:53Z	3	pr-opened	#3844	TS-5 rules and layout bodies
+2026-10-21T02:53Z	3	pr-opened	#3847	TS-6 command bodies

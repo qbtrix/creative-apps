@@ -22,8 +22,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 |---|---|---|---|---|---|---|---|
 | TS-1 | TS-a | 1 | contract types, specs that throw NotBuilt, disabled suites | Sources/SuiteKernel/Text/TextStyle.swift, Sources/SuiteKernel/Text/TextStyleRules.swift, Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, docs/c4/parts/creative-apps/suite-kernel/kernel-text.json | suites compile disabled; KernelShapeTests unchanged | #3836 | open |
 | TS-2 | TS-a | – | TextStyleRows | Sources/SuiteUI/TextStyleRows.swift | see packet | – | blocked (FP-a) |
-| TS-5 | TS-m | 2 | rule and layout bodies | Sources/SuiteKernel/Text/TextStyleRules.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/mutations/SuiteKernel.TextStyleRules.json | .trackingIsEmRelative .lineHeightClamps .lastLineNotJustified | – | building |
-| TS-6 | TS-m | 2 | command bodies | Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, Tests/mutations/SuiteKernel.TextCommands.json | .scrubIsOneStep .familyKeepsWeight | – | building |
+| TS-5 | TS-m | 2 | rule and layout bodies | Sources/SuiteKernel/Text/TextStyleRules.swift, Tests/SuiteKernelTests/TextStyleRulesTests.swift, Tests/SuiteKernelTests/TextStyleLayoutTests.swift, Tests/mutations/SuiteKernel.TextStyleRules.json | .trackingIsEmRelative .lineHeightClamps .lastLineNotJustified | #3844 | open (Mutate 3/3; base feat/ts-1-text-contract) |
+| TS-6 | TS-m | 2 | command bodies | Sources/SuiteKernel/Text/TextCommands.swift, Tests/SuiteKernelTests/TextCommandsTests.swift, Tests/mutations/SuiteKernel.TextCommands.json | .scrubIsOneStep .familyKeepsWeight | #3847 | open (Mutate 2/2; base feat/ts-5-text-rules) |
 | TS-3 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-4 | TS-u | – | see packet | see packet | see packet | – | blocked |
 | TS-7..TS-12 | TS-design, TS-halo | – | see packet | see packet | see packet | – | blocked |
@@ -41,6 +41,11 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 2026-10-21T02:19Z: TS-5 and TS-6 run in one builder on one branch (slice TS-m, one PR), split in two only if over 400 lines.
 - 2026-10-21T02:19Z: TS-1 renamed TextField to TextStyleField and nested TextAlignment as TextStyle.Alignment (SwiftUI name clashes); packet's later tasks use the new names.
+
+- 2026-10-21T02:53Z: TS-m split into #3844 (TS-5) and #3847 (TS-6, stacked on #3844): stacked on #3836, one PR measured 483 lines against dev. Both bases point at their parent branch so the lane waits; each retargets to dev when its parent merges.
+- 2026-10-21T02:53Z: .lastLineNotJustified can't be planted in our file (FlareCore owns the last-line rule); the mutant drops the box width justify needs and justifySpansTheBoxButNotTheLastLine catches it.
+- 2026-10-21T02:53Z: TS-6 adds "This family has no upright face." for italic off on an italic-only family. TextStyle keeps synthesized Codable.
+- 2026-10-21T02:53Z: supervisor sentinel put needs-split on #3844 for the stacked 421 lines; replied that its own change is +60/-18 and asked to drop it.
 
 ## Open
 
