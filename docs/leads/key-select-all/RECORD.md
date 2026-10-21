@@ -3,7 +3,7 @@
 Issue: #3538 · Packet: docs/blueprints/flare/features/key-select-all.md
 Run: act-1a15cf358c6-wj2q · Session: claude/feature-lead-playbook-lw6pjl · Started: 2026-10-21T05:39:29Z (line lead: stroke-style #3452, shape-tools #3451, key-select-all #3538)
 Stage: 3 (wave 1)
-Base: 71ffa4d1 (origin/dev); main 0dd23d65 verified
+Base: 0865916d (origin/dev); main 0dd23d65 verified
 Next: #3921 (KS-a) merges in the lane; then wait for a CI run on dev whose Linux job contains it; KS-z waits on KS-a and #3499 (open)
 
 Loop: v3 (the packet has a `## Slices` table).

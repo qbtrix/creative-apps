@@ -1,3 +1,4 @@
 time	event
 2026-10-21T05:39:29Z	started run act-1a15cf358c6-wj2q; KS-a building (waits met)
 2026-10-21T06:04Z	3	pr-opened	#3921	KS-a slice PR (KS-1, KS-2), mutate 4/4
+2026-10-21T06:23Z	3	heartbeat	#3921	KS-a in the lane (macOS build dispatched); KS-z waits #3499 (open)
