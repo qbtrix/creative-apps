@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-21T00:00Z	3	pr	#3811	HT-u opened, fast-lane, head b6cba72, CI PASS
 2026-10-21T00:16Z	3	heartbeat	#3811	queued for lane macOS gate; HT-m waits on HT-6 (HG-m #3417 open)
 2026-10-21T00:37Z	3	heartbeat	#3811	still queued for lane macOS gate, no labels
+2026-10-21T01:00Z	3	heartbeat	#3811	queued for lane macOS gate; dev-red #3386 is Library planWithinBudget timing, not Halo
