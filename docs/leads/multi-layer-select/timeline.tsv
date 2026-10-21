@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-21T13:22Z	3 wave 2	heartbeat	PM-2	PM-2 builder launched (branch lead/multi-layer-select-PM-2)
 2026-10-21T14:54Z	3 wave 3	stage-start	PM-3,PM-4	PM-2 PR #4087 open (Fast-Check on c7971f0); worker restarted; PM-3 and PM-4 builders started stacked on it
 2026-10-21T15:58Z	3 wave 3	check	PM-2,PM-3,PM-4	PM-2 #4087 merged 14:56Z; PM-4 #4095 needs-rebase; PM-3 unpushed after worker restart; fixers started
+2026-10-21T15:59Z	3 wave 3	start	PM-5	PM-5 builder started from dev (PM-2 merged)
