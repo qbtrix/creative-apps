@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-21T20:56Z	review	FP-a round-2 critic panel started (wf_9a0199a8-12f) on 606e8212
 2026-10-21T20:58Z	finding-filed	FP-a round-2 review: #4198 #4199 #4200; open findings 4 (#4012 #4198 #4199 #4200)
 2026-10-21T20:58Z	fix-round	FP-a round 2 started: #4198 #4199
+2026-10-21T21:17Z	heartbeat	FP-a fix round 2 (last allowed) is PR #4204 (fast-lane, head 772079a2, mutate 8/8, CI: PASS) fixing #4198 #4199. Once it merges and a green dev Linux check contains it, run the post-round-2 review; findings still open after it (incl. #4200, a SuiteUI move) become gap.

@@ -4,7 +4,7 @@ Issue: #3519 · Packet: docs/blueprints/flare/features/pen-paths.md
 Run: act-1a15e10a86f-7bk9 (took over from act-1a15c07caa7-sppq) · Session: claude/feature-lead-playbook-yf71p7 · Started: 2026-10-21T01:10Z (this run 10:40Z)
 Stage: 3 wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: (2026-10-21T20:58Z) FP-a fix round 2 (last allowed): #4198 (Shift-extend oracle) and #4199 (locked-layer help text) on lead/pen-paths-FP-a-fix2. #4200 moves the stand-in converter into SuiteUI, which line:flare can't edit; it waits for the post-round-2 review and then becomes a gap for line:suiteui.
+Next: (2026-10-21T21:17Z) FP-a fix round 2 (last allowed) is PR #4204 (fast-lane, head 772079a2, mutate 8/8, CI: PASS) fixing #4198 #4199. Once it merges and a green dev Linux check contains it, run the post-round-2 review; findings still open after it (incl. #4200, a SuiteUI move) become gap.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
