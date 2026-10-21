@@ -35,7 +35,8 @@ private func ballAt12() -> FlareWorkspace {
 
 @Test func paintSettersEditTheFakesWithoutATimelineError() {
     let setters: [(inout FlareWorkspace) -> Void] = [
-        { $0.setFill(hex: "FF3B30") }, { $0.setStrokeWidth(4) }, { $0.setStrokeCap(.round) },
+        { $0.setFill(hex: "FF3B30") }, { $0.setStrokeWidth(4) }, { $0.scrubStrokeWidth(4) },
+        { $0.setStrokeCap(.round) },
         { $0.setStrokeJoin(.bevel) }, { $0.setStrokeColor(hex: "00FF00") },
     ]
     for set in setters {

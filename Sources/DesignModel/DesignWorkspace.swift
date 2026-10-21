@@ -56,7 +56,7 @@ public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
 
 /// The tools on Design's tool palette.
 public enum DesignTool: String, CaseIterable, Sendable {
-    case move, frame, rectangle, ellipse, text, pen
+    case move, frame, rectangle, ellipse, text, pen, eyedropper
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
@@ -64,19 +64,20 @@ public enum DesignTool: String, CaseIterable, Sendable {
         switch self {
         case .move, .frame, .rectangle, .ellipse, .text: nil
         case .pen: "Drawing paths isn't built yet."
+        case .eyedropper: "Picking a color from the canvas isn't built yet."
         }
     }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 
-    /// The kind of node this tool draws; nil for Move and Pen.
+    /// The kind of node this tool draws; nil for Move, Pen and Eyedropper.
     public var nodeKind: DesignNodeKind? {
         switch self {
         case .frame: .frame
         case .rectangle: .rectangle
         case .ellipse: .ellipse
         case .text: .text
-        case .move, .pen: nil
+        case .move, .pen, .eyedropper: nil
         }
     }
 }
