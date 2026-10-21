@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-20T21:27Z	3	check	W1	#3764 in lane; no PL-2 PR yet (PP-3 waits)
 2026-10-21T00:04:22Z	3	merged	#3764	PP-a (PP-1, PP-2) fast-lane merged 23:02Z
 2026-10-21T00:05:32Z	3	slice-done	PP-a	Belt-Slice-Done posted on #3455; Linux green in run 39514893774 at 137f72c
+2026-10-21T00:24:57Z	3 build W1	check	-	PP-3 waits PL-2 (no PR); PP-5 waits PG-m
