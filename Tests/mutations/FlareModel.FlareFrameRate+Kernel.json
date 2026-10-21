@@ -1,0 +1,16 @@
+[
+  {
+    "label": "lottieExactFr: the adapter rounds the rate to whole frames, so a 23.976 scene exports fr 24",
+    "file": "Sources/FlareModel/FlareFrameRate+Kernel.swift",
+    "find": "SceneRate(numerator: numerator, denominator: denominator)",
+    "replace": "SceneRate(whole: nominal)",
+    "tests": "FlareFrameRateTests"
+  },
+  {
+    "label": "durationRounds: a length in seconds truncates to whole frames instead of rounding to the nearest",
+    "file": "Sources/FlareModel/FlareFrameRate+Kernel.swift",
+    "find": "rate.frames(forDuration: $0)",
+    "replace": "Int($0 * Double(rate.numerator) / Double(rate.denominator))",
+    "tests": "FlareFrameRateTests"
+  }
+]
