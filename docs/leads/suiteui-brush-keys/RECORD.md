@@ -4,7 +4,7 @@ Issue: #3758 · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3756) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: BK-a merged as 8fd982a9; #4058 retargeted to dev, dev merged in (add/add resolved to ours, dev == BK-a), gate running; then push, move Head:, Belt-Slice-Done BK-a once dev Linux 39643409752 is green
+Next: #4058 BK-m dev merged (17188b30), gate CI: PASS, pushed, Head: moved, now clean (lane drops needs-rebase on the new head); Belt-Slice-Done BK-a once dev Linux 39643409752 is green; then wait for the BK-m batch
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
