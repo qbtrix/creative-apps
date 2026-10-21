@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-21T11:43:07Z	DA-a	build-green	#3973	macOS build 39587493383 success
 11:44Z	DA-a	heartbeat	#3973	clean, build green, lane sweep running
 12:05Z	DA-a	heartbeat	#3973	Linux check running on head; lane merges after
+12:08Z	DA-a	merged	#3973	b6043094; awaiting a dev run containing it for round 2
