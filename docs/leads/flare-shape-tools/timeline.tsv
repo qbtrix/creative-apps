@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T03:19:05Z	pr-opened	FS-5 (slice FS-m) opened as #3850, head 5890f921, 3 files +108/-13, fast-lane. FS-u rebased onto it; its gate is running, then a stacked PR held with no-fast-lane until #3850 merges
 2026-10-21T03:25:00Z	FS-u PR #3851 opened (no-fast-lane, stacked on #3850)
 2026-10-21T03:55:40Z	heartbeat: #3850 macOS build; full CI 39538921285 pending
+2026-10-21T04:25:52Z	heartbeat: #3850 macOS build green
