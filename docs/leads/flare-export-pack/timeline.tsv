@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-21T05:22Z	0	check	SM-a	not on dev, no PR; 0 findings
 2026-10-21T05:44Z	0	check	SM-a	not on dev, no PR; 0 findings
 2026-10-21T06:12Z	0	check	SM-a	not on dev, no PR; 0 findings
+2026-10-21T07:10Z	2	check	blocked	resumed as act-1a15d4ed024-1wsg; SM-a not on dev (poll 1)

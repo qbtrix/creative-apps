@@ -1,9 +1,9 @@
 # export-pack (Flare) lead record
 
 Issue: #3481 · Packet: docs/blueprints/flare/features/export-pack.md
-Run: act-1a15c47678d-i2ih · Session: session_01KmedgAV8daBEtcQfR1LURr · Started: 2026-10-21T02:26Z (line lead: stage-edit #1514, file-flow #3482, export-pack #3481)
+Run: act-1a15d4ed024-1wsg · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih)
 Stage: 2 plan (blocked)
-Base: 2ab0eb96 (origin/dev)
+Base: b64cbb8c (origin/dev)
 Next: check whether shell-media SM-a (MovieSettings, AnimatedImageSettings, FrameClock) is on dev. When it is, build FV-1, then FV-2 for the FV-a slice PR.
 
 Loop: v3 (the packet has a `## Slices` table).
@@ -22,6 +22,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | FV-1 | FV-a | 1 | .mp4 and .gif with fps and loop, refused until FV-3 | Sources/FlareModel/FlareExport.swift, Tests/FlareModelTests/FlareVideoExportTests.swift | export tests pass; MP4 refused | – | blocked (SM-a) |
 
 ## Decisions
+- 2026-10-21T07Z (act-1a15d4ed024-1wsg): resumed. SM-a still not on dev and not filed as a PR; the 02:32Z question on #3481 stands, so no second question until three identical polls.
 - Belt watches lead/export-pack, which the suiteui export-pack lead (#3477) also uses for docs/leads/export-pack. This record lives at docs/leads/flare-export-pack/ so neither lead overwrites the other.
 - PRs target dev (CLAUDE.md), as for file-flow.
 - Rule 20: no Flare encoder and no local copy of MovieSettings or FrameClock, so FV-1 does not start until SM-a is on dev.
