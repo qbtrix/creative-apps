@@ -60,3 +60,5 @@ utc	stage	event	ref	note
 2026-10-21T09:48Z	3	heartbeat	W4e	#3969 (PT-5) needs-rebase (photo.list-commands.json, PhotoCommandCatalogTests): fixer launched; #3968 (PT-3m) clean, waiting on lane; scoped photo run 39579629627 queued on ce2467a (has #3818, #3932) for PH-u/PE-u critics; dev-red #3856 not ours
 2026-10-21T09:57Z	3	fix	PT-5	#3969 merged dev at 9e452e8 (goldens regenerated, catalog test kept both sides); gate PASS except dev-red #3856 anchor step (not ours); Head line moved, footer clear; waiting on lane to drop needs-rebase
 2026-10-21T10:11Z	3	heartbeat	W4f	#3969 (PT-5) at 9e452e8, needs-rebase dropped; #3968 (PT-3m) and #3969 waiting on lane; #3996 repointed Design anchors (dev-red #3856 fix), Linux check on fe232dc running; scoped photo run 39579629627 still queued
+2026-10-21T10:33Z	3	merged	PT-u	#3968 (PT-3m) merged as 79a4378; opener launched for PT-3 (lead/transform-PT-3: merge dev, C4 parts as dev, gate, PR)
+2026-10-21T10:33Z	3	heartbeat	W4g	dev green again (Linux check fe232dc success after #3996); #3969 (PT-5) clean, in lane; lane batch 20261021102756 forming; scoped photo run 39579629627 still queued
