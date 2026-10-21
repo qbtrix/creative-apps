@@ -107,3 +107,5 @@ utc	stage	event	ref	note
 2026-10-21T18:45Z	3	pr	PN-7	#4153 opened (head 76b697d2, PathCommandsTests 10/10, Mutate 6/6, ci --changed PASS)
 2026-10-21T18:45Z	3	poll	#3770	macOS build 39651057624 dispatched 18:15Z
 2026-10-21T19:02Z	3	heartbeat	-	No merges: #3770 macOS 39651057624 and #4153 macOS 39657806824 queued; PN-9 still blocked (#3477 waiting-on-prereq)
+2026-10-21T19:25Z	3	check	#3770	macOS build 39651057624 FAILED (compile): fixer launched on lead/pen-paths-PN-3a
+2026-10-21T19:25Z	3	check	#4153	macOS build green 19:16Z; merges on a lane sweep

@@ -4,7 +4,7 @@ Issue: #3518 · Packet: docs/blueprints/suiteui/features/pen-paths.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T07:09Z (relaunched 2026-10-21)
 Stage: 3 wave 5
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: #3770 (PN-3a) macOS build run 39651057624 dispatched 18:15Z; once merged open PN-3 then PN-4. PN-7 is #4153 (head 76b697d2, Fast-Check pass) on the lane. PN-8 waits PN-u + PN-m; PN-9 waits export-pack:XP-z (#3477).
+Next: #3770 (PN-3a) macOS build 39651057624 failed to compile; fixer running; once merged open PN-3 then PN-4. PN-7 is #4153 (head 76b697d2, Fast-Check pass) on the lane. PN-8 waits PN-u + PN-m; PN-9 waits export-pack:XP-z (#3477).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
