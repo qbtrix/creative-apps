@@ -18,6 +18,7 @@ Next: done
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T10:07Z: -
 - 2026-10-21T09:45Z: feature complete, contact sheet posted
 - 2026-10-21T09:25Z: Linux check 39571804700 green on d93267da (AX-library merge) covers AX-photo and AX-library
 - 2026-10-21T09:04Z: all slices merged; awaiting green run then contact sheet
