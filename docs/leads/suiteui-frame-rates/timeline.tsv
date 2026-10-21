@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T17:35Z	build	merge	#4063	FR-a merged 17:34Z
 2026-10-21T17:44Z	build	pr	#4142	FR-m opened
 2026-10-21T17:55Z	build	pr	#4145	FR-u opened, stacked on FR-m #4142
+2026-10-21T17:56Z	build	pr	#4145	FR-u PR closed by size sentinel (stacked); held
