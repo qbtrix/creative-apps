@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-21T03:27Z	check	waiting DT-a	#3751	DT-a 440bcfde in lane, not merged; DT-m not opened
 2026-10-21T03:50Z	check	waiting DT-a	#3751	head 72307abf, not merged
 2026-10-21T04:13Z	wave	DS-a build started	wf_1ada19ee-afa	base 842e62ec; DT-a merged e6430cfa
+2026-10-21T04:35Z	wave	DS-a PR opened	#3857	head d77f2077; plan drift accepted
