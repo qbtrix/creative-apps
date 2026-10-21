@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-21T16:00Z	2026-10-21T16:00:57Z	stage3	poll	lane	#4048 macOS build green; #4034 building; #4021 #4023 queued; needs-rebase dropped on #4023
 2026-10-21T16:23Z	2026-10-21T16:23Z	wave	lane	#4021 #4023	CS-1 CS-2 in lane; wave 2 after shell-media
 2026-10-21T17:50Z	2026-10-21T17:50Z	wave2	prs	#4130 #4134 #4140 #4144	CS-1b, CS-3 6/6, CS-9 4/4, CS-13 6/6 drafts; photo.txt max 9->10 for dev's CanvasSizeSheet
+2026-10-21T18:06Z	2026-10-21T18:06Z	lane	rebase-fixed	#4023	dev merged, photo.txt max 10, head 90a7a388
