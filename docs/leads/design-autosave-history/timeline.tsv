@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-21T09:07:57Z	DA-a	heartbeat	#3973	macOS build pending
 2026-10-21T09:29:39Z	DA-a	heartbeat	#3973	macOS build 39573116254 queued
 2026-10-21T09:51:32Z	DA-a	heartbeat	#3973	macOS build queued
+2026-10-21T10:01:11Z	DA-a	wait	#3973	macOS runner backlog, build 39573116254 queued since 08:56Z
