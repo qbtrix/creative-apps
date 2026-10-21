@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-20T23:56Z	3	pr-opened	#3800	PE-5 (Slice PE-m) head b8e4029, 139 lines, CI PASS
 2026-10-20T23:56Z	3	pr-opened	#3808	PE-3 (Slice PE-u) head a269cec, 218 lines, CI PASS; PE-4 follows
 2026-10-21T00:08Z	3	waiting	#3800 #3808	macOS builds dispatched 23:59Z
+2026-10-21T00:30Z	3	waiting	#3800 #3808	macOS builds in progress / queued
