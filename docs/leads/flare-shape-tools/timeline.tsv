@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-21T09:42Z	check	#3921 head 95a94d14 open, #3984 head 0be812aa open; lane run pending (last success predates pushes); #3499 #3419 #3856 open; findings 0
 2026-10-21T10:07Z	check	#3921 KS-a macOS build 39579845156 green on 95a94d14, awaiting lane sweep; #3984 FS-u macOS build 39580065338 queued; findings 0; #3856 dev-red open; stroke-style parked on #3419
 2026-10-21T10:29Z	check	#3921 and #3984 ready in lane run 39582313181 (macOS builds green, CLEAN); waiting for next sweep behind bisecting batch-20261021095715; findings 0; #3856 open; stroke-style parked on #3419
+2026-10-21T10:53Z	check	KS-a #3921 in batch-20261021102756 (Linux running); FS-u #3984 Linux red on dev-red anchors, merging dev and re-gating
