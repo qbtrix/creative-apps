@@ -12,7 +12,7 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 | FC-a | no-filter Library unchanged; contract, bar, sidebar section and menus exist disabled | FC-1, FC-2, FC-3, FC-4, FC-5 | MJ1 | cull, persist, thumbnails, import, status-and-layout, export (all on dev) | yes | 0 | done (run 39550229338) | - | - |
 | FC-b | filter bar narrows by flag, rating, hide rejects; N of M; Clear Filter | FC-6, FC-7 | J13 | FC-a | no | 0 | done (run 39582236683) | - | - |
 | FC-c | New Collection, add/remove/rename/delete as undo steps; sidebar drop | FC-8, FC-9, FC-10 | J14 | FC-a; S-L9 #3411 (FC-10) | yes | 0 | done with gap #4126 (FC-10 waits S-L9 #3411) | 39614555474 | - |
-| FC-d | smart collection from filter; rules edited as undo steps | FC-11, FC-12 | J15 | FC-a; FC-b (FC-12) | no | 0 | FC-11 merged; FC-12 #3551 fixing (red Linux: dev perf list) | - | - |
+| FC-d | smart collection from filter; rules edited as undo steps | FC-11, FC-12 | J15 | FC-a; FC-b (FC-12) | no | 0 | done: FC-11, FC-12 #3551 (a4d1bb1) merged | 39664459063 | - |
 | FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | FC-13, FC-15 merged; FC-14 #4056 merged (6eaa805); enable-timing follow-up #4146 merged (363d3ea); FC-16 planned | - | - |
 
 ## Tasks
@@ -127,3 +127,4 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 - 2026-10-21T19:27Z check: FC-12 #3551 still open at c931a176c (macOS build green, mergeable); lane sweeps queued and superseding each other; open findings 0.
 - 2026-10-21T19:49Z check: FC-12 #3551 merged 19:32Z (a4d1bb1, lane batch). Dev Linux check 39664459063 (369ecc7, contains FC-12) running; Belt-Slice-Done FC-d on its green. FC-16 (docs, shared prose, status built) started with a fixer. Open findings 0.
 - 2026-10-21T20:00Z check: FC-16 opened: #4176 (shared prose + status built, feature-done, head 259767c) and C4-only #4177 (LibraryModel description, head 6de85aa; split because check-c4-descriptions refuses mixed PRs). Both CI: PASS, fast-lane. Dev Linux check 39664459063 still running.
+- 2026-10-21T20:07Z check: Belt-Slice-Done FC-d posted (run 39664459063 green, contains FC-12). FC-16 #4176 and #4177 open, mergeable, waiting for the lane. Open findings 0.
