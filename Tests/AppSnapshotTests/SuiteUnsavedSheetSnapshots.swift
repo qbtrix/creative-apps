@@ -3,7 +3,9 @@
 // puts the guard's sheet up (the kernel's words, Save, Don't Save and Cancel), and the PNG is the window's content
 // with the sheet drawn over its top centre, where AppKit attaches it. Cancel takes the sheet down again, so the
 // window is left open and dirty. UnsavedSheetFixture is shared with RenderBudgetUnsavedGuardTests; nested in
-// BodyCountSuites, since its document counts the bodies that test reads. macOS only.
+// BodyCountSuites, since its document counts the bodies that test reads. The close waits for the guard to hold the
+// window's delegate (a run-loop turn after the window shows), and the close and Cancel go through the fixture's
+// `close` and `press`, never performClose or performClick, whose nested event loops end the test run. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteKernel
@@ -19,7 +21,9 @@ extension BodyCountSuites {
                 let fixture = UnsavedSheetFixture()
                 let window = fixture.window(scheme: scheme)
                 defer { window.close() }
-                window.performClose(nil)
+                let guarded = await UnsavedSheetFixture.eventually { window.delegate is UnsavedGuardDelegate }
+                try #require(guarded, "the guard never took the window's delegate")
+                UnsavedSheetFixture.close(window)
                 let up = await UnsavedSheetFixture.eventually { window.attachedSheet != nil }
                 try #require(up, "a close of the dirty fake document put no sheet up")
                 let sheet = try #require(window.attachedSheet)
@@ -30,7 +34,7 @@ extension BodyCountSuites {
                 sheet.appearance = window.appearance
                 let image = try #require(Self.composite(window, sheet: sheet), "the sheet didn't draw")
                 try Self.write(image, name: "suiteui-unsaved-sheet-\(scheme.name)")
-                UnsavedSheetFixture.button(.cancel, in: window)?.performClick(nil)
+                UnsavedSheetFixture.press(.cancel, in: window)
                 _ = await UnsavedSheetFixture.eventually { window.attachedSheet == nil }
                 #expect(window.isVisible, "Cancel closed the window")
             }
@@ -118,6 +122,19 @@ extension BodyCountSuites {
             views.append(contentsOf: view.subviews)
         }
         return nil
+    }
+
+    /// What a click on `window`'s close button does, without the button's flash. `performClose` and
+    /// `performClick` flash in a nested event loop, after which a window-server event ends the `swift test` host's
+    /// main run loop, and the run exits early with status 0.
+    static func close(_ window: NSWindow) {
+        if window.delegate?.windowShouldClose?(window) ?? true { window.close() }
+    }
+
+    /// Presses the sheet's `answer` button through its action, without the flash (`close(_:)`).
+    static func press(_ answer: UnsavedPrompt.Answer, in window: NSWindow) {
+        guard let button = button(answer, in: window) else { return }
+        button.sendAction(button.action, to: button.target)
     }
 
     /// Turns the run loop until `condition` holds, at most `seconds`; whether it held.

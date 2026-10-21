@@ -124,6 +124,8 @@ struct PhotoCanvas: View {
     @State private var hover: CGPoint?
     /// The app's View > Rendering; nil (the tile layers) in tests.
     @Environment(\.photoRendering) private var rendering
+    /// The window's live drag line (LiveDragLine.swift); only the overlay reads its line.
+    @Environment(\.photoDragLine) private var dragLine
 
     var body: some View {
         Group {
@@ -141,7 +143,7 @@ struct PhotoCanvas: View {
                     }
                 } overlay: {
                     // The overlay spans the artboard at `zoom`, so a drop's point divides back to document pixels.
-                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform)
+                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform, liveLine: dragLine)
                         .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                         .placeDropTarget(formats: model.placeFormats) { files, point in
                             let at = PhotoWorkspace.placePoint(x: point.x, y: point.y, zoom: zoom)
