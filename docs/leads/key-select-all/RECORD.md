@@ -4,21 +4,21 @@ Issue: #3538 · Packet: docs/blueprints/flare/features/key-select-all.md
 Run: act-1a15cf358c6-wj2q · Session: claude/feature-lead-playbook-lw6pjl · Started: 2026-10-21T05:39:29Z (line lead: stroke-style #3452, shape-tools #3451, key-select-all #3538)
 Stage: 3 (wave 1)
 Base: 0865916d (origin/dev); main 0dd23d65 verified
-Next: #3921 (KS-a) fix round 1 pushed (head 95a94d14: dev merged, ⌘A item now MenuCommand from FlareWorkspace.menuSpec; CommandPathTests 6/6, mutate 4/4, 15 files +341/-8; gate PASS except dev-red #3856 Design anchors); merges in the lane; then a dev CI run whose Linux job contains it -> Belt-Slice-Done KS-a, critics. Branch is lead/key-select-all, not lead/flare-key-select-all
+Next: KS-a merged 11:14Z as 80ac6639 (#3921, batch landed on own proof while dev red). Waiting for a dev CI run whose Linux job contains 80ac6639 and is green (dev Linux red on photo CommandPathTests, #3976), then Belt-Slice-Done KS-a on #3538 and critics once a scoped flare run shows its screens. KS-z waits on #3499. Branch is lead/key-select-all, not lead/flare-key-select-all
 
 Loop: v3 (the packet has a `## Slices` table).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| KS-a | Select All Keys selects every key of the edited owner's layers, from the timeline menu and from ⌘A while the timeline has focus | KS-1, KS-2 | MJ-KS | AC-flare (met: Belt-Slice-Done on #2999, 04:24Z); suiteui TSA-a (met: built, TimelineStrip+Keys on dev) | yes | 0 | PR #3921 in the lane | | |
+| KS-a | Select All Keys selects every key of the edited owner's layers, from the timeline menu and from ⌘A while the timeline has focus | KS-1, KS-2 | MJ-KS | AC-flare (met: Belt-Slice-Done on #2999, 04:24Z); suiteui TSA-a (met: built, TimelineStrip+Keys on dev) | yes | 0 | merged 80ac6639 (#3921), awaiting green dev Linux | | |
 | KS-z | journey, snapshots, render budget; built | KS-3, KS-4 | J-KS | KS-a; PR #3499 (KS-4) | yes | 0 | waiting | | |
 
 ## Tasks
 | id | slice | wave | PR | state |
 |---|---|---|---|---|
-| KS-1 | KS-a | 1 | #3921 | PR open, head 5990eb78, CI PASS, Mutate 4/4 |
-| KS-2 | KS-a | 1 | #3921 | PR open (same PR) |
+| KS-1 | KS-a | 1 | #3921 | merged #3921 (80ac6639), Mutate 4/4 |
+| KS-2 | KS-a | 1 | #3921 | merged #3921 |
 | KS-3 | KS-z | 2 | | waits KS-a |
 | KS-4 | KS-z | 3 | | waits KS-3, #3499 (open, no lane label) |
 
