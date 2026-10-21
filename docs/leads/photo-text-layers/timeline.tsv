@@ -6,3 +6,4 @@
 2026-10-21T12:35:00Z	heartbeat	lead	#4036 waits on lane macOS build 39595916899; #4053, #4059 stacked; TX-4/TX-5 wait on #3779, #3725	watch merges
 2026-10-21T12:42Z	heartbeat	#4036 gets line:photo; TX-a/u/m wait on the lane
 2026-10-21T12:59Z	heartbeat	#4036 open, clean, waiting on the lane; TS-m #3844 still open; export-pack parked per supervisor on #3470
+2026-10-21T13:24Z	heartbeat	#4036 TX-a, #4053 TX-3, #4059 TX-6 open in the lane; TS-m #3844/#3847 still open, TX-4/TX-5 wait.
