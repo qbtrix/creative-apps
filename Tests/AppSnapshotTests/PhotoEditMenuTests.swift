@@ -138,7 +138,7 @@ private final class TextSpy: NSTextView {
 
     @Test func allLayersIsOffWithItsReasonWithNoImage() {
         for menu in [PhotoMenu(), PhotoMenu(model: PhotoWorkspace(), perform: { _ in })] {
-            #expect(!menu.allLayersItem.isEnabled && menu.allLayersItem.help == "Open an image first.")
+            #expect(!menu.allLayersItem.isEnabled && menu.allLayersItem.help == "All Layers: Open an image first.")
         }
     }
 }

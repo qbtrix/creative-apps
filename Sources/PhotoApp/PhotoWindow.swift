@@ -220,6 +220,8 @@ struct PhotoWindow: View {
         case .applyCrop: model.applyCrop()
         case .cancelCrop: model.cancelCrop()
         case .selectLayer(let id): model.selectLayer(id)
+        case .pickLayer(let id, let pick): model.pickLayer(id, pick)
+        case .selectAllLayers: model.selectAllLayers()
         case .toggleVisibility(let id): model.toggleVisibility(id)
         case .opacity(let id, let percent): model.setOpacity(id, percent: percent)
         case .blendMode(let id, let mode): model.setBlendMode(id, mode)
