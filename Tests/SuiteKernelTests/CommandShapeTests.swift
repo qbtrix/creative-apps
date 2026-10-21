@@ -62,6 +62,24 @@ private struct ShapeDoc: HeadlessDocument {
         #expect(try JSONValue(encoding: ShapeDoc.Bump(by: 2)) == .object(["by": .number(2)]) && JSONValue.number(2).decode(Double.self) == 2)
     }
 
+    /// brush-keys BK-1: the six brush and opacity specs, each with its kind, a closed params schema its example
+    /// validates against, and a description that round trips.
+    @Test func brushKeySpecsHaveSchemas() throws {
+        let catalog = try CommandCatalog(app: "test", BrushKeyCommands.specs(BrushKeysDoc.self), history: { $0.history })
+        let kinds: [String: CommandKind] = ["brush.size-up": .view, "brush.size-down": .view, "brush.hardness-up": .view,
+                                            "brush.hardness-down": .view, "brush.set-opacity": .view, "layer.set-opacity": .edit]
+        #expect(catalog.ids == kinds.keys.sorted())
+        for (id, kind) in kinds {
+            let spec = try #require(catalog.spec(id)), described = try #require(catalog.describe(id))
+            #expect(spec.kind == kind && !spec.title.isEmpty && !spec.summary.isEmpty, "\(id)")
+            #expect(spec.params.validate(spec.example).isEmpty && !spec.params.validate(.object(["x": .number(1)])).isEmpty, "\(id)")
+            #expect(try JSONValue(encoding: described).decode(CommandDescription.self) == described, "\(id)")
+        }
+        for id in ["brush.set-opacity", "layer.set-opacity"] {
+            #expect(try #require(catalog.spec(id)).params.validate(.object(["percent": .number(101)])).count == 1, "\(id)")
+        }
+    }
+
     /// Every public type in Commands/ has a `///` line above it.
     @Test func publicTypesDocumented() throws {
         let root = KernelShapeTests.kernelSources, files = try KernelShapeTests.swiftFiles(under: root).filter { $0.hasPrefix("Commands/") }
