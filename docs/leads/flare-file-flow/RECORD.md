@@ -1,9 +1,9 @@
 # file-flow (Flare) lead record
 
 Issue: #3482 · Packet: docs/blueprints/flare/features/file-flow.md
-Run: act-1a15c47678d-i2ih · Session: session_01KmedgAV8daBEtcQfR1LURr · Started: 2026-10-21T02:26Z (line lead: stage-edit #1514, file-flow #3482, export-pack #3481)
+Run: act-1a15d4ed024-1wsg · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-21T02:26Z (line lead: gradient-fill #3419, file-flow #3482, export-pack #3481; resumed from act-1a15c47678d-i2ih)
 Stage: 3 wave 1
-Base: 2ab0eb96 (origin/dev)
+Base: b64cbb8c (origin/dev)
 Next: FL-1 is in the lane as #3843 (eligible, macOS build green). KS-a is open as #3921; FL-2 starts once svg-place PF-u (waits on KS-a) has merged, then FL-u (FL-5, FL-6) stacks on FL-a.
 
 Loop: v3 (the packet has a `## Slices` table).
@@ -23,6 +23,7 @@ Loop: v3 (the packet has a `## Slices` table).
 | FL-2 | FL-a | 2 | .suiteApp, SuiteFileCommands, .suiteFileDrop | FlareApp.swift, FlareCommands.swift, FlareStage.swift | FlareFileFlowSnapshots.menu | – | waits svg-place:PF-u |
 
 ## Decisions
+- 2026-10-21T07Z (act-1a15d4ed024-1wsg): resumed. FL-1 #3843 still open in the lane (head 3c7abf91); KS-a #3921 open.
 - Belt watches lead/file-flow, which the suite file-flow lead (#3480) also uses for docs/leads/file-flow and docs/leads/suite-file-flow. This record lives at docs/leads/flare-file-flow/ on that branch so neither lead overwrites the other.
 - PRs target dev (CLAUDE.md; the lane retargets main to dev), though the brief names main as the integration branch. Slice done is judged on a green run whose SHA is on main.
 - The SF-a, SF-5, SF-6 and SF-7 types are on dev (DropPlan, FileFlowCommands, SuiteFileDrop, SuiteDocumentsBridge, SuiteAppModifier). PhotoFileFlow+Kernel.swift is the shape to copy (rule 20).
