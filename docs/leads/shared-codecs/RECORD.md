@@ -58,3 +58,4 @@ Waves (combined plan, rule 19): 1 = SC-13, SC-1, suite-imaging:IM-1 (independent
 - 2026-10-21T20:10Z: #4019 and #4020 macOS build-only runs queued. SC-14 rebased onto SC-13 head 4e6f468, clean; scripts/ci --changed running.
 - 2026-10-21T20:26Z: SC-14 ac167606 gated CI: PASS and pushed to lead/shared-codecs-SC-14; PR opens once #4019 merges.
 - 2026-10-21T20:49Z: check-in: #4019 and #4020 macOS builds green, Fast-Check current; waiting on the lane sweep (run 39671360946 in progress). SC-14 gated, PR opens once #4019 merges.
+- 2026-10-21T21:11Z: check-in: #4019 and #4020 still open, green macOS builds, no lane refusal; lane sweeps are being cancelled by newer ones. SC-14 still gated on #4019.
