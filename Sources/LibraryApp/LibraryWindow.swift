@@ -101,6 +101,7 @@ struct LibraryWindow: View {
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
+        .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()
