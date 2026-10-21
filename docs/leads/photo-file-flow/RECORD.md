@@ -5,13 +5,13 @@ Run: act-1a15fc7d29e-gz1t (line lead with #3437 history-panel) · Session: claud
 Earlier run: act-1a15a9f4eba-h30y (PF-1, PF-3, PF-4 merged)
 Stage: 3 wave A
 Base: origin/dev 1b3913c
-Next: PF-2 builder (PF-a), PF-u (PF-5 + PF-6) stacked on it; then PF-7; PF-8 waits export-pack:PX-z
+Next: #4164 (PF-2) and #4165 (PF-u, stacked) in the lane; then PF-7; PF-8 waits export-pack:PX-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| PF-a | .suiteApp scene, suite Open Recent / Open In, drop | PF-1, PF-2 | MPF | place-image:PP-u (built, #4139) | yes | 0 | building (PF-2) | – | – |
-| PF-u | menu and drop mark snapshots, render budget, journey written | PF-5, PF-6 | PFJ1 | PF-a | yes | 0 | building (stacked on PF-2) | – | – |
+| PF-a | .suiteApp scene, suite Open Recent / Open In, drop | PF-1, PF-2 | MPF | place-image:PP-u (built, #4139) | yes | 0 | in lane (#4164) | – | – |
+| PF-u | menu and drop mark snapshots, render budget, journey written | PF-5, PF-6 | PFJ1 | PF-a | yes | 0 | in lane (#4165, stacked on #4164) | – | – |
 | PF-m | open/new/place hand-offs, recents import, opens and saves noted | PF-3, PF-4 | MPF | – | yes | 0 | done | [39566690076](https://github.com/qbtrix/creative-apps/actions/runs/39566690076) | wanted |
 | PF-z | live drop, Open Recent, Open In; journey; built | PF-7, PF-8 | PFJ1 | PF-u, PF-m; export-pack:PX-z (PF-8, planned) | yes | 0 | waiting | – | – |
 
@@ -19,11 +19,11 @@ Next: PF-2 builder (PF-a), PF-u (PF-5 + PF-6) stacked on it; then PF-7; PF-8 wai
 | id | slice | behavior | PR | state |
 |---|---|---|---|---|
 | PF-1 | PF-a | adapter stubs | #3679 | merged |
-| PF-2 | PF-a | .suiteApp, SuiteFileCommands + Open In, .suiteFileDrop (reconcile with PP-3's canvas drop → place.image) | – | building |
+| PF-2 | PF-a | .suiteApp, SuiteFileCommands + Open In, .suiteFileDrop (reconcile with PP-3's canvas drop → place.image) | #4164 | in lane (macOS build passed) |
 | PF-3 | PF-m | adapter bodies, catalog specs, recents import | #3815 | merged 709f928 (RJ-P42 pending gap #3741) |
 | PF-4 | PF-m | window notes opens and saves | #3700 | merged 7ec53b5 |
-| PF-5 | PF-u | snapshots, RenderBudgetPhotoFileDropTests.dragHoverInTwoBodies ≤ 2 | – | building |
-| PF-6 | PF-u | UITests/PhotoJourneyTests+FileFlow.swift, XCTSkip("waits on PF-7") | – | building |
+| PF-5 | PF-u | snapshots, RenderBudgetPhotoFileDropTests.dragHoverInTwoBodies ≤ 2 | #4165 | in lane |
+| PF-6 | PF-u | UITests/PhotoJourneyTests+FileFlow.swift, XCTSkip("waits on PF-7") | #4165 | in lane |
 | PF-7 | PF-z | journey on live | – | waits PF-u |
 | PF-8 | PF-z | photo.md, status built, feature-done | – | waits PX-z |
 
@@ -37,3 +37,4 @@ Next: PF-2 builder (PF-a), PF-u (PF-5 + PF-6) stacked on it; then PF-7; PF-8 wai
 - Base and PR target are origin/dev (packets live on dev; the lane retargets main PRs). Brief's main HEAD 0dd23d6 verified.
 - PF-m marked done on run 39566690076 (scoped photo, success, head 260f7a8, contains #3815 and #3700). Posted Belt-Slice-Done and Mac-Finish-Wanted.
 - PF-2's place-image:PP-u wait is met (place-image status built, #4139).
+- PR bodies: the session's GitHub proxy appends an attribution footer to PR bodies and comments; commits are clean and the lane strips it from squash commits. Asked the supervisor.
