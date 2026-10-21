@@ -3,8 +3,8 @@
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
 Stage: 3 W4 (run act-1a15eecbafe-u0f9)
-Base: a48992b7c85ded3959e12683f50bd5fe7531b011
-Next: fixer merges dev into #3969 PT-5 and #4005 PT-3; PT-6 stacks on PT-5 once that head is pushed; PT-7 after #4005; slice-done lines once a scoped photo run holds the last PR
+Base: b70dcb71e33b073d8e17f60683fea8c36db02f65
+Next: PT-6 builder (resizeCanvas, image.canvas-size, RJ-P18) from dev, PT-5 #3969 merged; #4005 PT-3 in lane; PT-7 stacks on #4005; slice-done once a scoped photo run holds the last PR
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
@@ -21,10 +21,10 @@ Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transfor
 |---|---|---|---|---|---|---|---|
 | PT-1 | PT-a | 1 | adapter + four methods as stubs, FlipAxis = FlipDirection, tests disabled | Sources/PhotoModel/PhotoTransform+Kernel.swift, Sources/PhotoModel/Contracts/LayerContracts.swift, Tests/PhotoModelTests/PhotoTransformTests.swift | PhotoTransformTests (disabled) | – | building |
 | PT-2 | PT-a | 1 | Free Transform on stubs: intent, overlay, TransformRows, Edit menu; journey skipped | Sources/PhotoApp/PhotoWindow+Transform.swift, Sources/PhotoApp/TransformOverlay.swift, Sources/PhotoApp/TransformOptions.swift, Sources/PhotoApp/PhotoCommands+Edit.swift, UITests/PhotoJourneyTests+Transform.swift | macOS build | – | building |
-| PT-3 | PT-u | 2 | Image > Canvas Size… sheet | Sources/PhotoApp/CanvasSizeSheet.swift, Sources/PhotoApp/PhotoCommands+Image.swift, Sources/PhotoApp/PhotoWindow+Transform.swift, Tests/AppSnapshotTests/PhotoCanvasSizeSheetTests.swift | PhotoCanvasSizeSheetTests | – | planned |
+| PT-3 | PT-u | 2 | Image > Canvas Size… sheet | Sources/PhotoApp/CanvasSizeSheet.swift, Sources/PhotoApp/PhotoCommands+Image.swift, Sources/PhotoApp/PhotoWindow+Transform.swift, Tests/AppSnapshotTests/PhotoCanvasSizeSheetTests.swift | PhotoCanvasSizeSheetTests | #4005 | in lane |
 | PT-4 | PT-m | 2 | applied/flipped on CoreRaster; TransformRules.local and matrix | Sources/PhotoModel/Live/LiveTransform+Kernel.swift, Tests/PhotoModelTests/LiveTransformTests.swift, Tests/mutations/PhotoModel.LiveTransform+Kernel.json | LiveTransformTests; .turn90Size .flipHorizontal | – | planned |
-| PT-5 | PT-m | 3 | adapter bodies, catalog specs, tests on, RJ-P17 | Sources/PhotoModel/PhotoTransform+Kernel.swift, Tests/PhotoModelTests/PhotoTransformTests.swift, Tests/mutations/PhotoModel.PhotoTransform+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/free-transform/ | PhotoTransformTests; .flipInPlace .identityCommitsNothing .lockedRefuses | – | planned |
-| PT-6 | PT-m | 4 | resizeCanvas and image.canvas-size, RJ-P18 | Sources/PhotoModel/PhotoImageOps.swift, Tests/PhotoModelTests/PhotoCanvasSizeTests.swift, Tests/mutations/PhotoModel.PhotoImageOps.json, Tests/RealJobs/photo/canvas-border/ | PhotoCanvasSizeTests; .canvasSizeCentred .borderIsBackground | – | planned |
+| PT-5 | PT-m | 3 | adapter bodies, catalog specs, tests on, RJ-P17 | Sources/PhotoModel/PhotoTransform+Kernel.swift, Tests/PhotoModelTests/PhotoTransformTests.swift, Tests/mutations/PhotoModel.PhotoTransform+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/free-transform/ | PhotoTransformTests; .flipInPlace .identityCommitsNothing .lockedRefuses | #3969 | merged 15:52Z |
+| PT-6 | PT-m | 4 | resizeCanvas and image.canvas-size, RJ-P18 | Sources/PhotoModel/PhotoImageOps.swift, Tests/PhotoModelTests/PhotoCanvasSizeTests.swift, Tests/mutations/PhotoModel.PhotoImageOps.json, Tests/RealJobs/photo/canvas-border/ | PhotoCanvasSizeTests; .canvasSizeCentred .borderIsBackground | – | building |
 | PT-7 | PT-u | 3 | snapshots + render budget | Tests/AppSnapshotTests/PhotoTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoTransformTests.swift | snapshots | – | planned |
 | PT-8 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Transform.swift | journey | – | planned |
 | PT-9 | PT-z | 6 | status built, feature-done | docs/blueprints/photo/features/transform.wave.json | scripts/ci | – | planned |

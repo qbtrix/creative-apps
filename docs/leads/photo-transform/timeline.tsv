@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-21T10:57Z	3	heartbeat	W4h	#4005 PT-3 open; fixer baselining CanvasSizeSheet buttons (CommandPathTests); dev red from #3976 PhotoPlace not ours; #3969 PT-5 open fast-lane; scoped photo run 39579629627 in progress
 2026-10-21T10:58Z	3	fix	PT-u	#4005 CanvasSizeSheet buttons baselined; head 7bb9093; gate PASS; footer 0; fast-lane kept
 2026-10-21T14:50Z	3 W4	takeover	PT-m PT-z	run act-1a15eecbafe-u0f9 takes over; #3969 #4005 red Linux runs are dev's (CommandPath #4008, DY-a anchors, LargeCatalog timing), fixer merging dev
+2026-10-21T16:31Z	3	heartbeat	#3969	PT-5 merged c4f7d5b93; PT-6 building; #4005 in lane
