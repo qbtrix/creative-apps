@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-21T11:21Z	check	decision	-	supervisor deleted lead/halo-core-loop (#1971); status goes to lead/core-loop only
 2026-10-21T11:52Z	poll	blocked	CL-probe	still blocked: #3401 and #865 open
 2026-10-21T12:52Z	poll	waiting	CL-probe	still blocked: #3401 and #865 open
+2026-10-21T18:05Z	3	stage-start	CL-probe	run kvrn: #3401 closed, KE-a done; wave 4 = CL-probe + (#865 + CL-12)

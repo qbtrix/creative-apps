@@ -1,10 +1,10 @@
 # core-loop lead record
 
 Issue: #1971 · Packet: docs/blueprints/halo/features/core-loop.md
-Run: act-1a15d0eeefb-6z9l (from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
-Stage: 3 wave 2
-Base: 6537a1a02f512db2df50d253384529f1b354b184
-Next: CL-probe and CL-measure wait on #3401 (needs-ui), CL-12 on #865; CL-z after them
+Run: act-1a15f92d2f2-kvrn (from 2026-10-21T18:00Z; before: act-1a15d0eeefb-6z9l from 2026-10-21T05:40Z; before: act-1a15a9f4e8d-hav0) (from 2026-10-20T18:45Z; before: act-1a15728f2a2-zb1o) · Session: claude/halo-feature-lead-run-02scrb · Started: 2026-10-20T02:37Z
+Stage: 3 wave 4
+Base: e80f6aca314733d176a569109be9c56b24d1794c
+Next: wave 4 building CL-probe (CL-8+CL-9) and A-HA-1 #865 + CL-12 in parallel; then CL-10 stacked on CL-probe, then CL-z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: CL-probe and CL-measure wait on #3401 (needs-ui), CL-12 on #865; CL-z afte
 | CL-a | the loop's checks and the HaloRenderJob+Kernel stubs exist before its code | CL-1, CL-2, CL-3 | MJ-CL1 | editor-kernel EK-a (merged, #1933) | false | 0 | merged (#3404, #3408) | | |
 | CL-ui | Render… opens SuiteUI ExportSheet on the kernel run; render budget on | CL-4, CL-5 | H-J21 | CL-a | true | 0 | done: #3590 ui1 + #3653 ui2 merged; Belt-Slice-Done + Mac-Finish-Wanted at run 39507877855 (23:50Z) | | |
 | CL-run | the render run is ExportRun<HaloRenderSettings>; availability from it | CL-6, CL-7 | – | CL-a | false | 0 | done: #3641, #3812, #3817 merged; Belt-Slice-Done https://github.com/qbtrix/creative-apps/actions/runs/39569221486 | | |
-| CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder needs-ui #3401 | true | 0 | blocked | | |
+| CL-probe | under -SuitePerfProbe Halo's input sites record series into the window probe | CL-8, CL-9 | H-P1, H-P4 | CL-a; SuiteUI probe recorder #3401 (closed, #3981); key-editing:KE-a (done) | true | 0 | building (wave 4) | | |
 | CL-measure | H-P1..H-P5 attach series, L3..L5 hold, latency line, journeys live | CL-10, CL-11, CL-12 | H-P1..H-P5 | CL-a; CL-probe (CL-10); switching A-HA-1 #865 (CL-12, open) | false | 0 | blocked (CL-11 merged; CL-10, CL-12 wait) | | |
 | CL-z | H-J12 live; shared prose; feature-done | CL-13, CL-14 | H-J12 | CL-ui, CL-run, CL-probe, CL-measure | false | 0 | blocked | | |
 
@@ -45,6 +45,7 @@ Next: CL-probe and CL-measure wait on #3401 (needs-ui), CL-12 on #865; CL-z afte
 - Blocked: CL-8, CL-9, CL-10 on needs-ui #3401; CL-12, CL-13 on #865; CL-14 last.
 
 ## Decisions
+- Run kvrn: #3401 closed (#3981) and KE-a is done, so CL-probe starts. Supervisor told the lead to take #865 (A-HA-1) on this line; it ships with CL-12 as one CL-measure PR (both edit HaloJourneyTests.swift). CL-10 is a second CL-measure PR stacked on CL-probe.
 - CL-run1 stacks on CL-ui as well as CL-a1: on its own it would break the macOS build (HaloWindow+Render, HaloRenderSheet, HaloRenderSheetSnapshots still call the deleted methods until CL-ui lands). Its PR opens after CL-ui merges.
 - Stacked tasks check ancestry against their parent's base, not the wave base (CL-run1 stopped: 533daec not in CL-a1); relaunched on 25a8d9a2.
 - CL-ui merged with dev came to 721 lines (HaloRenderSheet.swift deletion 205): split into CL-ui1 (HaloWindow+Render, snapshots; old sheet kept unused) and CL-ui2 (budget, journey, deletion, baselines), stacked.
