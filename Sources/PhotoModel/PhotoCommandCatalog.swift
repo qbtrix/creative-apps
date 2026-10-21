@@ -11,6 +11,8 @@ extension PhotoWorkspace {
     /// straight-alpha RGBA bytes, row by row (file.open, edit.paste); straighten's angle; export's format; an adjustment.
     public struct NoParams: Codable, Sendable {}
     public struct SizeParams: Codable, Sendable { public var width, height: Int }
+    /// image.canvas-size's: the new size in pixels and the anchor the image keeps its place by.
+    public struct CanvasSizeParams: Codable, Sendable { public var width, height: Int; public var anchor: BoxAnchor }
     public struct NameParams: Codable, Sendable { public var name: String }
     public struct ImageParams: Codable, Sendable { public var name: String?; public var width, height: Int; public var rgba8: [UInt8] }
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
@@ -44,7 +46,7 @@ extension PhotoWorkspace {
     }
     static let menuLabels = [
         "file.open": "Open…", "file.save-as": "Save As…", "file.export": "Export…", "edit.delete-selection": "Delete Selection",
-        "edit.fill-selection": "Fill Selection", "image.resize": "Image Size…", "image.rotate-cw": "Rotate 90° Clockwise",
+        "edit.fill-selection": "Fill Selection", "image.resize": "Image Size…", "image.canvas-size": "Canvas Size…", "image.rotate-cw": "Rotate 90° Clockwise",
         "image.rotate-ccw": "Rotate 90° Counterclockwise", "image.rotate-180": "Rotate 180°", "image.straighten": "Straighten…",
         "layer.rename": "Rename Layer…", "layer.bring-forward": "Bring Forward", "layer.send-backward": "Send Backward",
     ]
@@ -88,6 +90,11 @@ extension PhotoWorkspace {
         ["name": .optional(.string("The file's name.", maxLength: 255)), "width": .integer(minimum: 1), "height": .integer(minimum: 1),
          "rgba8": .array(of: .integer(minimum: 0, maximum: 255))], required: ["name", "width", "height", "rgba8"])
     static let sizeExample = JSONValue.object(["width": .number(24), "height": .number(18)])
+    static let canvasSizeSchema = ParamSchema.object(
+        ["width": .integer("Width in pixels.", minimum: 1), "height": .integer("Height in pixels.", minimum: 1),
+         "anchor": .string("The point the image keeps its place by.", oneOf: BoxAnchor.allCases.map(\.rawValue))],
+        required: ["width", "height", "anchor"])
+    static let canvasSizeExample = JSONValue.object(["width": .number(24), "height": .number(18), "anchor": .string("center")])
 
     /// One command per menu item, toolbar item and palette tool, in menu order.
     public static let commands: [CommandSpec<PhotoWorkspace>] = fileCommands + editCommands + imageCommands + layerCommands
@@ -157,6 +164,11 @@ extension PhotoWorkspace {
     static let imageCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("image.resize", title: "Image Size", summary: "Resamples every layer to the given size.", kind: .edit, params: SizeParams.self,
                schema: sizeSchema, example: sizeExample, availability: menu()) { w, p in try w.resizeImage(width: p.width, height: p.height); return JSONValue.object([:]) },
+        .typed("image.canvas-size", title: "Canvas Size", summary: "Pads or crops the canvas to the given size about the anchor.",
+               kind: .edit, params: CanvasSizeParams.self, schema: canvasSizeSchema, example: canvasSizeExample,
+               availability: menu { $0.flipHelp }) { w, p in
+            try w.resizeCanvas(width: p.width, height: p.height, anchor: p.anchor); return JSONValue.object([:])
+        },
         act("image.rotate-cw", "Rotate", "Rotates the image 90° clockwise.", .edit, menu()) { $0.rotateImage(.degrees90) },
         act("image.rotate-ccw", "Rotate", "Rotates the image 90° counterclockwise.", .edit, menu()) { $0.rotateImage(.degrees270) },
         act("image.rotate-180", "Rotate", "Rotates the image 180°.", .edit, menu()) { $0.rotateImage(.degrees180) },

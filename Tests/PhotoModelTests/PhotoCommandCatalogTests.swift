@@ -139,8 +139,8 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Commands with no menu item: the catalog's only (gradient-fill PG-3).
-    static let noMenu: Set = ["select.rect", "image.gradient"]
+    /// Commands with no menu item: the catalog's only (gradient-fill PG-3), and Canvas Size until its sheet (transform PT-3).
+    static let noMenu: Set = ["select.rect", "image.gradient", "image.canvas-size"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones and Free Transform's (transform PT-5,
     /// ahead of its menu items), in menu order (the catalog lists them as the menus do).
     static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {
