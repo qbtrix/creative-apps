@@ -4,7 +4,7 @@ Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
 Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: LF-4 blocked (needs-ui #3928 per-cell drag hook, suite SF-8 PNG, catalog-open suite type); re-read LF-3's waits (LT-m, DR-m) and #3928/SF-8 each poll Blocked-wait polls with no change: 3 (09:20, 09:54, 10:16); Question for the supervisor posted 10:16, waiting on the answer.
+Next: (10:58) Supervisor answered (a): LF-3 proceeds, owning only its own rows in LibraryCommandCatalog.swift and Tests/command-ids/library.txt, append-only. LF-3 builder started on lead/file-flow-LF-3 (SF-m #3493 merged, so SF-5/SF-6 are met). LF-4 keeps its waits (#3928, #3997/SF-8); it becomes a gap if they are still open at run end. LF-u Belt-Slice-Done waits on CI 39586209372 / scoped library 39585973891 at 39d90e3, which contains #3938.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
