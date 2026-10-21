@@ -245,3 +245,5 @@
 2026-10-20T20:26:12Z	heartbeat	waiting on full CI 39485502739 (8c90de14, contains 424b4a60): still pending
 2026-10-20T20:38:23Z	heartbeat	waiting on full CI 39485502739 (8c90de14, contains 424b4a60): still pending
 2026-10-20T20:50:36Z	heartbeat	waiting on full CI 39485502739 (8c90de14, contains 424b4a60): still pending
+2026-10-21T02:40Z	5	ci-run	39442633733	dev 0dd23d65 contains 424b4a60; Linux, macOS green; promoted main
+2026-10-21T02:40Z	done	stage-end	#1514	Belt-Contact-Sheet posted

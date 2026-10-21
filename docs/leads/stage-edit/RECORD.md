@@ -2,9 +2,9 @@
 
 Issue: #1514 · Packet: docs/blueprints/flare/features/stage-edit.md
 Run: act-1a157ad4612-4xcw · Session: claude/feature-lead-playbook-dp4pbl · Started: 2026-10-16T18:20Z (resumed 2026-10-19T12:00Z; resumed 2026-10-20 under act-1a157ad4612-4xcw, line lead: stage-edit #1514, stroke-style #3452)
-Stage: SE-5b merged (#3312 → 424b4a60); waiting on dev full CI
-Base: 18464f26 (origin/dev)
-Next: wait for the newest pending full CI on dev that contains 424b4a60 (now 39395505274 on be364d1e, queued); when green, post Belt-Contact-Sheet on #1514 and mark the stage done
+Stage: done
+Base: 0dd23d65 (origin/main)
+Next: nothing. Belt-Contact-Sheet posted on #1514 for run 39442633733 (dev 0dd23d65, Linux and macOS green, promoted main)
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
@@ -19,7 +19,7 @@ No `## Slices` table: v2 packet, v2 loop applies.
 | SE-2b | – | guides view, ruler toggle, J14, snapshots | FlareStageGuides.swift, FlareStage.swift, FlareWindow+View.swift, FlareViewSnapshots, UITests +View | SE-2a, #995 | #3309 (35a92cb) | merged |
 | SE-3 | 2 | Edit actions via pasteboard, stage context menu, J15 | packet | SE-4 | #2565 | merged |
 | SE-5a | 4 | J3 extended on -FlareSample empty, FlareEditOrderJourneys.testSelectAllOrderAndEscape; Fixes #2485 | UITests/FlareJourneyTests+Draw.swift, UITests/FlareJourneyTests+EditOrder.swift | SE-1, SE-3 | #2945 | merged a46ef519 21:16Z |
-| SE-5b | – | status line built; feature-done | docs/blueprints/flare/features/stage-edit.md, stage-edit.wave.json | SE-2b, SE-5a | #3312 (a0054178) | open, fast-lane, gated a0054178 |
+| SE-5b | – | status line built; feature-done | docs/blueprints/flare/features/stage-edit.md, stage-edit.wave.json | SE-2b, SE-5a | #3312 (a0054178) | merged 424b4a60 |
 
 ## Reviews
 None.
@@ -33,6 +33,7 @@ None.
 - SE-2 split: SE-2a (Model: zoom steps, readouts) now; SE-2b (views) when #273 and #995 close.
 
 ## Open
+- 2026-10-21T02:40Z (act-1a15c47678d-i2ih): run 39442633733 on 0dd23d65 contains 424b4a60. Linux and macOS are green and Promote succeeded. Contact sheet: https://github.com/qbtrix/creative-apps/issues/1514#issuecomment-6306539001. The journeys job (report-only) was still running. lead/stage-edit was rebased onto origin/main.
 - 2026-10-20 resume (act-1a157ad4612-4xcw): #3309 merged. The quarantine.json commit b364e971 on #3312 is already on dev; the PR's diff against dev is only stage-edit.md and stage-edit.wave.json (docs tier, no size cap). The lane's "too big" comment was about the earlier diff. lead/stage-edit was rebuilt as origin/dev plus this record (dev, not main, per CLAUDE.md).
 - 2026-10-18T19:52Z: #995 open (SE-2b waits); #2768 (J15 identifier audit) waits on #2622 (halo, makes timelineIdentifierPrefix public), fix round 1 spent. Fixes #2639, #2733 merged (#2618, #2730 closed). Gap #2775 filed; #2741 SuiteKernel turn helper.
 - #273 (S12 SelectionHandles, guide marks) open; #995 (ruler toggle, drag-out guides) open; editor-kernel EK-box not merged.
