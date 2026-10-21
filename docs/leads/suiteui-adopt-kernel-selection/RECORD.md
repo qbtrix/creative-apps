@@ -37,6 +37,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T09:45Z: #3892 clean, waiting for batch
 - 2026-10-21T09:25Z: #3892 clean, waiting for batch; dev Linux check 39574400709 red on 296186f4 (mutate validate, reported on #3856)
 - 2026-10-21T09:04Z: wait for lane
 - 2026-10-21T08:43Z: wait for lane
