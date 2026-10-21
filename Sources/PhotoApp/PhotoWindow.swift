@@ -27,6 +27,7 @@
 import AppKit
 import CoreRaster
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -118,18 +119,18 @@ struct PhotoWindow: View {
             }
             .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
                 ExportSheet(
-                    format: exportFormat, quality: exportQuality, onFormat: { exportFormat = $0 },
+                    format: exportFormat, quality: exportQuality, workspace: model, onFormat: { exportFormat = $0 },
                     onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
-                    ImageSizeSheet(size: canvas, onResize: resize, onCancel: { isResizing = false })
+                    ImageSizeSheet(size: canvas, workspace: model, onResize: resize, onCancel: { isResizing = false })
                 }
             }
             .sheet(isPresented: Binding(get: { straightenDraft != nil }, set: { if !$0 { straightenDraft = nil } })) {
                 if let draft = straightenDraft {
                     StraightenSheet(
-                        draft: draft, frame: model.straightenFrame(degrees: draft.degrees, cropToFit: draft.cropToFit),
+                        draft: draft, frame: model.straightenFrame(degrees: draft.degrees, cropToFit: draft.cropToFit), workspace: model,
                         onDraft: { straightenDraft = $0 },
                         onApply: { perform(.applyStraighten(degrees: draft.degrees, cropToFit: draft.cropToFit)) },
                         onCancel: { straightenDraft = nil })
@@ -137,7 +138,9 @@ struct PhotoWindow: View {
             }
             .alert("Rename Layer", isPresented: $isRenaming) {
                 TextField("Name", text: $renameText).accessibilityIdentifier("photo.layer.name")
-                Button("Rename", action: commitRename)
+                if let spec = PhotoWorkspace.catalog.spec("layer.rename") {
+                    MenuCommand(spec, on: model, title: "Rename", perform: commitRename)
+                }
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Enter a new name for the layer.")
@@ -307,10 +310,19 @@ struct PhotoWindow: View {
 
     private func resize(width: Int, height: Int) {
         isResizing = false
+        run("image.resize", ["width": .number(Double(width)), "height": .number(Double(height))],
+            failing: "The image can't be resized to \(width) × \(height).")
+    }
+
+    /// Runs catalog command `id` with a sheet's values (command-state CS-10); a refusal opens the alert under `title`.
+    @discardableResult
+    func run(_ id: String, _ params: [String: JSONValue], failing title: String) -> Bool {
         do {
-            try model.resizeImage(width: width, height: height)
+            _ = try PhotoWorkspace.catalog.run(id, params: .object(params), on: &model)
+            return true
         } catch {
-            problem = PhotoProblem("The image can't be resized to \(width) × \(height).", Self.reason(error))
+            problem = PhotoProblem(title, error.description)
+            return false
         }
     }
 
@@ -345,8 +357,7 @@ struct PhotoWindow: View {
     }
 
     private func commitRename() {
-        guard let id = model.selectedLayerID else { return }
-        model.renameLayer(id, to: renameText)
+        run("layer.rename", ["name": .string(renameText)], failing: "The layer can't be renamed.")
     }
 }
 
