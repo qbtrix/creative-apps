@@ -16,8 +16,8 @@
   {
     "label": "a new item selection keeps the old picked anchors",
     "file": "Sources/FlareModel/FlareWorkspace.swift",
-    "find": "        didSet { if oldValue != selection { anchorSelectionStore = Selection() } }\n",
-    "replace": "",
+    "find": "        didSet { if oldValue != selection { anchorSelectionStore = Selection() } }",
+    "replace": "        didSet {}",
     "tests": "FlareAnchorEditTests"
   },
   {
