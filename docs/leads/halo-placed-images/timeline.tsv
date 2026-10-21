@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T03:17Z	0	heartbeat	#3676	HS-a #3676 merged; still parked on HK-a #3536 and PL-a
 2026-10-21T03:43Z	0	heartbeat	-	parked on HK-a #3536 and PL-a
 2026-10-21T04:06:23Z	heartbeat	check: parked; HK-a #3536 open, PL-a pending
+2026-10-21T04:28:14Z	heartbeat	check: parked; HK-a #3536 open, PL-a pending
