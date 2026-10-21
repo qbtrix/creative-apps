@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-21T15:26Z	3	heartbeat	#4034	SM-1 still open (head 53f5d3e); ST-a waits on it
 2026-10-21T16:06Z	3	heartbeat	#4034	SM-1 still open (head 53f5d3e, fast-lane); ST-a waits on it
 2026-10-21T16:46Z	3	poll	#4034	SM-1 still open (fast-lane, head 53f5d3e); ST-a waits
+2026-10-21T16:47Z	3	question	#3725	asked supervisor: keep waiting on #4034 or stack ST-a as draft
