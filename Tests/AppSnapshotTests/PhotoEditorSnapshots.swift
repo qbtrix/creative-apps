@@ -137,6 +137,18 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         #expect(PhotoPaletteTool.palette(live).map(\.tool) == PhotoTool.allCases)
     }
 
+    /// The Gradient tool picked (gradient-fill PG-1): its palette button is
+    /// disabled with "Not built yet (PG-3).", and Tool Options shows its hint.
+    /// Writes photo-gradient-tool-light/dark.png.
+    @Test func gradientTool() throws {
+        var model = try opened()
+        model.selectTool(.gradient)
+        #expect(model.tool == .gradient)
+        #expect(PhotoPaletteTool(.gradient, in: model).unavailableHelp == "Not built yet (PG-3).")
+        #expect(ToolOptionsSection.gradientHint == "Drag across the image to draw a gradient from the press to the release.")
+        try shoot("gradient-tool", model)
+    }
+
     @Test func exportSheet() throws {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(

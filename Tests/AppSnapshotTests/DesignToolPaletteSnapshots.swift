@@ -26,5 +26,23 @@ import Testing
                 name: "design-tool-palette-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
+
+    /// shape-tools DS-2: with the Shape tool (U) picked, the inspector leads with its Shape options.
+    /// Writes design-shape-options-light.png and design-shape-options-dark.png.
+    @Test func theShapeToolShowsItsOptions() throws {
+        #expect(DesignTool.shape.title == "Shape" && DesignTool.shape.shortcut == "u")
+        #expect(DesignTool.shape.unavailableHelp?.isEmpty == false, "a disabled tool says why")
+        var model = DesignWorkspace()
+        model.useServices(.fake)
+        let opened = model.openFixture("cards")
+        #expect(opened)
+        model.selectTool(.shape)
+        #expect(model.tool == .shape)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                DesignEditor(model: model, zoom: 0.5),
+                name: "design-shape-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
 }
 #endif

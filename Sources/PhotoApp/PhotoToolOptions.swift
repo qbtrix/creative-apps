@@ -17,6 +17,8 @@ struct ToolOptionsSection: View {
 
     /// The Eyedropper's one-line hint, like each other tool's.
     static let eyedropperHint = "Click the image to pick a color for the brush."
+    /// The Gradient tool's one-line hint.
+    static let gradientHint = "Drag across the image to draw a gradient from the press to the release."
 
     var body: some View {
         let options = model.toolOptions
@@ -63,6 +65,9 @@ struct ToolOptionsSection: View {
             case .eyedropper:
                 hint(Self.eyedropperHint)
                 SampleOptions(model: model, perform: perform)
+            case .gradient:
+                hint(Self.gradientHint)
+                PhotoFillToolOptions(model: model, perform: perform)
             }
         }
     }
