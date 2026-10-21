@@ -4,25 +4,30 @@
 // cut before the resample, and RJ-P01's plan half (Tests/RealJobs/photo/
 // instagram: its image.crop step waits on #3692, so the crop runs through the
 // workspace here). Written by PX-1, turned on by PX-3. Linux-safe.
+//
+// The export resamples with Lanczos in a debug build, which costs seconds per
+// megapixel, so every fixture here is small: the rules are the same at any
+// size. Only RJ-P01's check exports at the job's real 1080 × 1350, and it is
+// listed in Tests/heavy-suites.txt so it runs outside the parallel pass.
 import Foundation
 import PhotoModel
 import SuiteKernel
 import Testing
 
 @Suite struct PhotoExportPackTests {
-    /// A 3:2 image cut to 4:5 in the middle: 1200 × 800 to 640 × 800.
+    /// A 3:2 image cut to 4:5 in the middle: 120 × 80 to 64 × 80.
     private func croppedToFourByFive() throws -> PhotoWorkspace {
-        var workspace = try whiteImage(1200, 800)
-        stroke(&workspace, .crop, from: point(280, 0), to: point(920, 800))
+        var workspace = try whiteImage(120, 80)
+        stroke(&workspace, .crop, from: point(28, 0), to: point(92, 80))
         workspace.applyCrop()
         return workspace
     }
 
     @Test func aFourByFiveCropAtPixelsWritesExactlyThatSize() throws {
         let workspace = try croppedToFourByFive()
-        let options = SuiteExportOptions(format: "jpeg", size: .pixels(width: 1080, height: 1350), quality: 0.85)
+        let options = SuiteExportOptions(format: "jpeg", size: .pixels(width: 108, height: 135), quality: 0.85)
         let image = try workspace.exportPixels(options)
-        #expect((image.width, image.height) == (1080, 1350))
+        #expect((image.width, image.height) == (108, 135))
     }
 
     @Test func aThreeByTwoImageAtFourByFivePixelsIsRefused() throws {
@@ -32,19 +37,19 @@ import Testing
     }
 
     @Test func theLongEdgeKeepsTheShape() throws {
-        let workspace = try whiteImage(6000, 4000)
-        let image = try workspace.exportPixels(SuiteExportOptions(format: "heic", size: .longEdge(2048)))
-        #expect((image.width, image.height) == (2048, 1365))
+        let workspace = try whiteImage(300, 200)
+        let image = try workspace.exportPixels(SuiteExportOptions(format: "heic", size: .longEdge(128)))
+        #expect((image.width, image.height) == (128, 85))
     }
 
     @Test func theAgentsJSONOptionsGiveTheSheetsPixels() throws {
         let workspace = try croppedToFourByFive()
         let json = JSONValue.object([
-            "format": .string("jpeg"), "size": .object(["pixels": .array([.number(1080), .number(1350)])]),
+            "format": .string("jpeg"), "size": .object(["pixels": .array([.number(108), .number(135)])]),
             "quality": .number(0.85),
         ])
         let fromJSON = try SuiteExportOptions(json: json, defaults: workspace.exportOptionsDefault())
-        let fromSheet = SuiteExportOptions(format: "jpeg", size: .pixels(width: 1080, height: 1350), quality: 0.85)
+        let fromSheet = SuiteExportOptions(format: "jpeg", size: .pixels(width: 108, height: 135), quality: 0.85)
         #expect(fromJSON == fromSheet)
         #expect(try workspace.exportPixels(fromJSON) == workspace.exportPixels(fromSheet))
         let headless = try #require(PhotoHeadless(workspace: workspace).export("png", options: json).first)
@@ -89,10 +94,10 @@ import Testing
     @Test func aFramedCropIsCutBeforeTheResample() throws {
         var workspace = try Job.landscape()
         stroke(&workspace, .crop, from: point(20, 0), to: point(180, 200))
-        let image = try workspace.exportPixels(SuiteExportOptions(format: "png", size: .pixels(width: 1080, height: 1350)))
-        #expect((image.width, image.height) == (1080, 1350))
+        let image = try workspace.exportPixels(SuiteExportOptions(format: "png", size: .pixels(width: 216, height: 270)))
+        #expect((image.width, image.height) == (216, 270))
         let centre = redCentre(image)
-        #expect(abs(centre.x - 540) <= 2 && abs(centre.y - 675) <= 2, "the marker is at \(centre)")
+        #expect(abs(centre.x - 108) <= 1 && abs(centre.y - 135) <= 1, "the marker is at \(centre)")
     }
 
     @Test func rjP01sPlanHalfCropsToFourByFiveAndKeepsTheSubjectFramed() throws {
