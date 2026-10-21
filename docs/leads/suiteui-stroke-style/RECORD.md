@@ -79,3 +79,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 18:54Z: No change: #3826 (SS-9) open with fast-lane; SS-8/SS-10 wait on SH-z, GF-z, AH-z.
 - 19:13Z: No change: #3826 (SS-9) open with fast-lane; SS-8/SS-10 wait on SH-z, GF-z, AH-z.
 - 19:33Z: No change: #3826 (SS-9) open with fast-lane; SS-8/SS-10 wait on SH-z, GF-z, AH-z.
+- 19:53Z: #3826 (SS-9) is open with fast-lane. SS-d and SS-z wait on their dependencies.
