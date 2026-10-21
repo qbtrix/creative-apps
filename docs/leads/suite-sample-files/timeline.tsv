@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-21T22:12:08Z	restack	#4129 merged dev in, CI PASS, head 4c542f8ed, ready
 2026-10-21T22:29:00Z	heartbeat	dev Linux 39685422711 red on library CommandPath baseline (not ours); #4129 macOS build queued
 2026-10-21T22:46:38Z	heartbeat	no change: #4129 macOS build still queued; no green dev Linux run since 0c435e275
+2026-10-21T23:04:49Z	heartbeat	dev Linux 39689070230 red on library CommandPath baseline (not ours); #4129 macOS build still queued
