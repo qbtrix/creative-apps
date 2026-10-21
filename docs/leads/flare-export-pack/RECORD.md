@@ -62,3 +62,4 @@ Loop: v3 (the packet has a `## Slices` table).
 - 19:14Z: Waiting on SM-a #4034 and #4035 (open, fast-lane).
 - 19:36Z: SM-a #4034 head 880c41ce sent to lane macOS build 19:27Z; #4035 open.
 - 19:59Z: Waiting on SM-a #4034 (lane macOS build of 880c41ce) and #4035, both open.
+- 20:21Z: No change: SM-a #4034 and #4035 open in the lane.
