@@ -2,9 +2,9 @@
 
 Issue: #3415 · Packet: docs/blueprints/design/features/gradient-fill.md
 Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DG-u merged-done (#3978 e2b8aa76, Belt-Slice-Done at run 39604117821); DG-m waits on #3742, DE-s, AC-design; DG-a and DG-u panels wait for design ui-screens
+Stage: 3 DG-m starting: #3742 (GF-6, GF-7) merged 2026-10-21T19:55Z
 Base: 896cafe3 (origin/dev); main verified at 0dd23d65
-Next: DG-u merge, then its slice-done line on a green dev Linux run; DG-m waits GF-6 (#3742), GF-7, DE-s, AC-design; DG-z after both
+Next: re-read DE-s and AC-design waits, then build DG-4/DG-5 as one DG-m slice PR; DG-z after
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
