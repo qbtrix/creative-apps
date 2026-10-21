@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-21T22:21Z	4	check	GF-z	#4186 merged 22:07Z; #4179 build 39671257594 in progress; #4180 open, waiting on batch
 2026-10-21T22:38Z	4	check	GF-z	#4179 macOS build green 22:30Z; #4179 and #4180 wait on the lane batch in flight (sweep 39684009982)
 2026-10-21T22:55Z	4	check	GF-z	#4179 and #4180 still open; lane sweep 39688218586 in progress since 22:40Z
+2026-10-21T23:12Z	4	check	GF-z	#4179 merged 23:02Z; dev Linux check 39691394890 on 8d08e083 in progress; #4180 open
