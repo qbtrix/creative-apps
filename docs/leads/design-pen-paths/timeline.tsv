@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-21T02:00Z	heartbeat	DP-a waits unchanged: PD-a #3759 open, DT-a #3751 in the lane (head 440bcfde), DK-m/DS-m/PD-u waiting, AD-design not built; DP-7 waits creative-core#787
 2026-10-21T02:23Z	heartbeat	DP-a waits unchanged: PD-a #3759 open, DT-a #3751 macOS build queued, DK-m/DS-m/PD-u waiting, AD-design not built; DP-7 waits creative-core#787
 2026-10-21T02:44Z	heartbeat	DP-a waits unchanged: PD-a #3759 open, DT-a #3751 in the lane, DK-m/DS-m/PD-u waiting, AD-design not built; DP-7 waits creative-core#787
+2026-10-21T03:06Z	heartbeat	DP-a waits unchanged: PD-a #3759 now fast-lane but open, DT-a #3751 in the lane, DK-m/DS-m/PD-u waiting, AD-design not built; DP-7 waits creative-core#787
