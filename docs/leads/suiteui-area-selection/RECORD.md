@@ -56,3 +56,4 @@ Next: AR-a (AR-1 + AR-2, one PR, tests disabled first commit).
 - 16:58Z: The lane is building #4096 (run 39634352484), #4120 (39636490860) and #4122 (39636526138) on macOS; all queued. The sentinel flagged #4124 as oversize (572 lines including stacked #4122; its own change is +182). I replied that it restacks after #4122 merges; it is not split. #4098 waits on #4096.
 
 - 17:19Z: #4120 AR-13's macOS build 39636490860 is green, so it lands on the lane's next sweep. #4096 (39634352484) and #4122 (39636526138) are still queued for macOS. #4098 and #4124 wait on their bases.
+- 2026-10-21T17:40Z: #4120 (AR-13) merged as af840a6 in a batch of 5 (Linux run 39642386919). #4122 (AR-7) macOS build 39636526138 is green and waits on the next batch; #4096 (AR-3) build 39634352484 is still queued. #4098 and #4124 stay stacked (needs-split) until their bases merge. AR-14 waits on AR-m (#4096, #4098).

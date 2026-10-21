@@ -14,3 +14,4 @@ time	task	event	note
 2026-10-21T16:41Z	AR-u	fixed	#4124 b45e6b4
 2026-10-21T16:58Z	AR-m/AR-u/AR-design	mac-build	queued for 4096 4120 4122
 2026-10-21T17:19Z	AR-design	mac-green	#4120 39636490860
+2026-10-21T17:40Z	heartbeat	#4120 (AR-13) merged as af840a6 in a batch of 5 (Linux run 39642386919). #4122 (AR-7) macOS build 39636526138 is green and waits on the next batch; #4096 (AR-3) build 39634352484 is still queued. #4098 and #4124 stay stacked (needs-split) until their bases merge. AR-14 waits on AR-m (#4096, #4098).
