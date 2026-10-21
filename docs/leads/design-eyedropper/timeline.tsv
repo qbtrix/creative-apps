@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T05:49Z	fix	round1	#3887,#3889	DY-a fix round 1 (wf_4d365bd6-f9f): #3887 fixes #3860 (tooltip names Eyedropper and I), #3889 fixes #3861+#3862 (journey walk, disabled-drag mutations 26/26, 2/2); #3863 r-b3 finished by lead, gate running
 2026-10-21T05:52Z	fix	round1	#3891	r-b3 for #3863 (palette clicks in the journey) gated CI: PASS by the lead and opened as #3891, head 2b1167b2; DY-a round 1 now has all 4 findings in PRs
 2026-10-21T06:16Z	check	lane	#3816,#3887,#3889,#3891	all clean with fast-lane, not merged; lane is landing older PRs (dev at #3808, 06:12Z); DT-m still not opened, DY-m blocked
+2026-10-21T06:39Z	check	lane	#3816,#3887,#3889,#3891	all clean, not merged; DY-u macOS build 39524856380 green; lane is bisecting batch-20261021061843 (probe -3), dev unchanged since 06:12Z; DT-m not opened
