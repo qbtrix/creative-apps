@@ -39,3 +39,4 @@ ts	kind	note
 2026-10-21T13:38:10Z	poll	#4037 macOS build 39607806758 queued at ff5d6a50; no needs-fix
 2026-10-21T15:12:24Z	fix	#4037 macOS green; Linux red on old-dev CommandPathTests; dev merged in
 2026-10-21T15:19:08Z	UP-design	pushed 4ecc2fd7 (dev merged, gate pass), #4037 Head: moved
+2026-10-21T15:38:58Z	poll	#4037 waiting on lane macOS build of 4ecc2fd7
