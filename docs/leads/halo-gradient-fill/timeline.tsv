@@ -50,3 +50,5 @@ utc	stage	event	ref	note
 2026-10-20T18:48Z	1	poll	HG-m	no suiteui GF-6/GF-2/GF-3 PR or dev commit; no halo CL-probe PR; HG-m and HG-u still blocked
 2026-10-20T19:10Z	1	poll	HG-m	no suiteui GF-6/GF-2/GF-3 PR or dev commit; no halo CL-probe PR; HG-m and HG-u still blocked
 2026-10-20T19:32Z	1	poll	HG-m	new sibling PRs #3681 (photo PG) and #3687 (design DG-a), not suiteui; no GF-6/GF-2/GF-3 PR or dev commit; no halo CL-probe PR; HG-m and HG-u still blocked
+2026-10-21T21:25Z	2	open	HG-u	PR #4207 halo-gradient-ui fd55072 (7 files, 387 lines, scripts/ci --changed PASS on Linux; footer stripped)
+2026-10-21T21:35Z	2	build	HG-m	HG-6+HG-7 committed on claude/gradient-fill-lead-25lt0t; gradient, render and catalog suites pass; RJ-H32 job added; mutation plans running

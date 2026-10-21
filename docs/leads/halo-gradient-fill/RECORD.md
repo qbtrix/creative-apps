@@ -54,3 +54,7 @@
 - HALO-GRADIENT-FRAME costs about 1.5–1.7 s on a Linux debug build at 1080p (report only).
 - The contract's `extension HaloDrawItem { var gradient }` is a stored field with an init default (extensions can't store).
 - The PR tool appends an attribution footer to bodies it creates; #3516's was removed by an edit at 06:20Z. Every later PR body and comment gets the same check after posting.
+- 2026-10-21: HG-u opened as #4207 (inspector FILL section, snapshots, budget test, journey skipped until HG-8).
+- HG-7 names each fill step for its command title ("Fill Type", "Set Gradient", ...), not one "Change Fill": the kernel's catalog conformance (stepNamedTitle) requires a step named for its spec. HaloGradientTests reads "Undo Fill Type".
+- The fill.angle and fill.stop-* examples are exempt from exampleRuns in HaloCommandCatalogTests: the Ball fixture's fill is solid, and those commands need a gradient.
+- RJ-H32's pixel expectation is skipped until image codecs reach the apps (RealJobs.pixelsWait); the job still runs both steps and writes the PNG.
