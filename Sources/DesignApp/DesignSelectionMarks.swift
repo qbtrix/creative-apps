@@ -7,11 +7,12 @@
 // hidden layer in the selection leaves none. While a marquee is live only each hit
 // layer's outline draws: no box, no handles until the drag ends. Dashes are the live marquee's alone
 // (DesignMarqueeMark), so a committed selection never reads as one in progress.
-// The text node being edited shows its editor's box instead. The box carries the
+// A turned layer's outline and handles turn with it. The text node being edited shows its editor's box instead. The box carries the
 // one accessibility element, `design.canvas.selection` ("Selection"): a clear
 // rectangle at the box's frame, an image, never a control. Takes no clicks; the
 // canvas gesture does, with the same handles these marks draw.
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -38,7 +39,8 @@ struct DesignSelectionMarks: View {
             }
         } else if let selected = painted.first(where: { $0.node.id == model.selectedNodeID })?.node,
                   selected.id != model.editingTextID {
-            DesignSelectionBox(rect: selected.frame, zoom: zoom, handles: model.showsSelectionHandles)
+            DesignSelectionBox(
+                rect: selected.frame, zoom: zoom, handles: model.showsSelectionHandles, degrees: selected.rotation)
             ProbeElement(
                 Self.selectionID, label: "Selection", rect: selected.frame.cgRect, zoom: usable(zoom), traits: .isImage)
         }
@@ -47,12 +49,13 @@ struct DesignSelectionMarks: View {
 
 /// One selected layer, or the box around several: an accent outline around `rect`, and with
 /// `handles` its resize handles, white squares with an
-/// accent edge. Shapes, not a Canvas, so marks past the page's edge still draw: CanvasViewport
+/// accent edge, all turned `degrees` about the box's centre the way the artwork turns. Shapes, not a Canvas, so marks past the page's edge still draw: CanvasViewport
 /// doesn't clip its overlay. Frames and handles stay one size at any zoom.
 struct DesignSelectionBox: View {
     let rect: DesignRect
     let zoom: Double
     var handles = true
+    var degrees: Double = 0
 
     var body: some View {
         let scale = usable(zoom)
@@ -64,11 +67,13 @@ struct DesignSelectionBox: View {
                 path.addRect(CGRect(x: at.x * scale - side / 2, y: at.y * scale - side / 2, width: side, height: side))
             }
         }
+        let turn = TransformBox(box: Rect(minX: rect.x, minY: rect.y, maxX: rect.maxX, maxY: rect.maxY), degrees: degrees)
         ZStack(alignment: .topLeading) {
             Path(box).stroke(SuiteColor.accent, lineWidth: 1)
             squares.fill(SuiteColor.overlayPaper)
             squares.stroke(SuiteColor.accent, lineWidth: 1)
         }
+        .transformEffect(artworkPlacement(turn, scale: scale))
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

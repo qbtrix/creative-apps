@@ -99,6 +99,7 @@ text.set-font
 text.set-on-path
 text.set-paragraph
 text.set-string
+timeline.select-all-keys
 tool.direct-select
 tool.ellipse
 tool.pen
