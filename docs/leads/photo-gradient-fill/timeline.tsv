@@ -47,3 +47,5 @@ utc	stage	event	ref	note
 2026-10-21T05:27Z	heartbeat	check	-	#3681 PG-1 clean, no lane flag; batch-20261021043428 bisect done (-4 green, -5 red: culprit is not ours); waits next batch; #3695 GF-2 waits
 2026-10-21T05:47Z	heartbeat	check	-	#3681 PG-1 merged 05:28Z; starting PG-3/PG-4 dev merge + PRs
 2026-10-21T05:50:01Z	heartbeat	check	-	PG-3 and PG-4 merged with dev (PG-1 squash ee6da4d41 folded in); scripts/ci --changed running
+2026-10-21T06:07:32Z	PG-3	pr	#3922	merged dev (PG-1 squash), CI: PASS, Mutate 3/3, fast-lane
+2026-10-21T06:07:32Z	PG-4	pr	#3923	merged dev, CI: PASS, Mutate 4/4, fast-lane; PG-2 still waits #3695
