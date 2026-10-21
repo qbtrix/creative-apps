@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T02:33Z	0	heartbeat	#3676	parked; bisect probe -4 running; #3536 open
 2026-10-21T02:55Z	0	heartbeat	#3676	parked; #3676 and #3536 open
 2026-10-21T03:17Z	0	heartbeat	#3676	HS-a #3676 merged; still parked on HK-a #3536 and PL-a
+2026-10-21T03:43Z	0	heartbeat	-	parked on HK-a #3536 and PL-a
