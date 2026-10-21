@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the
-# app-state rule, the design lint, the C4 ownership check, the duplicate-code
+# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the isa-swizzle lint, the
+# app-state rule, the design lint, the C4 ownership and descriptions checks, the duplicate-code
 # check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the journey quarantine check, the
 # real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
 # test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
@@ -58,6 +58,12 @@
 # docs/c4/model.json is generated on dev), so it fails first when the parts
 # don't assemble. It needs jq and python3 and runs a self-test on a scratch
 # tree first.
+#
+# The C4 descriptions check runs Tests/c4_descriptions, then, with --changed
+# only (plain mode has no base), scripts/check-c4-descriptions on the merge
+# base: a PR may not rewrite an existing part's top-level description unless it
+# adds a part or changes nothing outside docs/c4/parts/. Each description is
+# one JSON string, so two PRs appending to it always conflicted.
 #
 # The waves check runs scripts/waves: every app's feature data
 # (docs/blueprints/*/features/*.wave.json) passes its checks and prints its
@@ -146,6 +152,15 @@ echo "== no-crash lint (Sources/)"
 pattern='try!|as!|fatalError\(|preconditionFailure\(|precondition\(|unowned |\.first!|\.last!'
 if grep -rnE "$pattern" Sources/; then
   fail "no-crash lint: replace the lines above with throwing code"
+fi
+echo "ok"
+
+# Swapping a live object's class breaks KVO on it: an NSWindow is KVO-observed from birth, and a swapped one throws
+# NSRangeException ("_windowLayerContext") when freed, killing the test process mid-run. Subclass instead
+# (RenderBudgetWindow's keyCapable). A use that must stay carries `isa-swizzle-ok` on its line.
+echo "== isa-swizzle lint (Sources/, Tests/, UITests/)"
+if grep -rnE 'object_setClass\(|class_setSuperclass\(' Sources/ Tests/ UITests/ | grep -v 'isa-swizzle-ok'; then
+  fail "isa-swizzle lint: create the object as the subclass you need instead of swapping its class"
 fi
 echo "ok"
 
@@ -320,6 +335,16 @@ if [[ -n "$found" ]]; then
   fail "C4 ownership: give each file above exactly one owner in docs/c4/parts/ (add it to a component part's paths, or add a component part)"
 fi
 echo "ok"
+
+echo "== C4 descriptions (docs/c4/parts/)"
+bash Tests/c4_descriptions/test_c4_descriptions.sh >/dev/null || fail "C4 descriptions: scripts/check-c4-descriptions broke its fixture test"
+if (( changed_mode )); then
+  python3 scripts/check-c4-descriptions "$fork" \
+    || fail "C4 descriptions: drop the description edits above; a new file is already owned through the part's paths (CLAUDE.md, Every source file has a C4 owner)"
+  echo "ok"
+else
+  echo "skipped (no base; scripts/ci --changed runs it)"
+fi
 
 echo "== waves (docs/blueprints/*/features/*.wave.json)"
 # --dry-run prints nothing to disk: the generated waves.md files are written only on dev.

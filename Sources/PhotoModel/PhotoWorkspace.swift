@@ -24,13 +24,20 @@ import CoreRaster
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
-    /// `toolHelp` asks its sampling service instead.
-    public var unavailableHelp: String? { self == .eyedropper ? "Not built yet (PV-9)." : nil }
+    /// `toolHelp` asks its sampling service instead. The gradient draws
+    /// nothing until gradient-fill PG-3 (PhotoGradientTool+Kernel.swift).
+    public var unavailableHelp: String? {
+        switch self {
+        case .eyedropper: "Not built yet (PV-9)."
+        case .gradient: "Not built yet (PG-3)."
+        default: nil
+        }
+    }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
@@ -113,6 +120,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var statusMessage: String?
     /// "Merging…" while Merge Down or Flatten Image works off the main actor (PhotoLayerOps.swift).
     public internal(set) var progress: String?
+    /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
+    public internal(set) var fileFlow = PhotoFileFlowState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0

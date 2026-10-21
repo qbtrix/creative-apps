@@ -1,4 +1,6 @@
 [
   {"label": "areaHelpMatches: Play/Pause reads Undo's help", "file": "Sources/HaloModel/HaloCommandCatalog.swift", "find": "case .playPause: plain(c, \"animation.play-pause\"", "replace": "case .playPause: plain(.undo, \"animation.play-pause\"", "tests": "HaloCommandCatalogTests"},
-  {"label": "scrubIsView: a scrub records an edit", "file": "Sources/HaloModel/HaloCommandCatalog.swift", "find": "\"timeline.scrub\", \"Move Playhead\", .view", "replace": "\"timeline.scrub\", \"Move Playhead\", .edit", "tests": "HaloCommandCatalogTests"}
+  {"label": "scrubIsView: a scrub records an edit", "file": "Sources/HaloModel/HaloCommandCatalog.swift", "find": "\"timeline.scrub\", \"Move Playhead\", .view", "replace": "\"timeline.scrub\", \"Move Playhead\", .edit", "tests": "HaloCommandCatalogTests"},
+  {"label": "openSheetMovesTheRun: the catalog's Render... no longer begins the kernel run", "file": "Sources/HaloModel/HaloCommandCatalog.swift", "find": "case .openRenderSheet: beginRender(HaloRenderSettings(format: .pngSequence))", "replace": "case .openRenderSheet: break", "tests": "theCatalogsRenderSheetCommandsMoveTheKernelsRun"},
+  {"label": "closeSheetMovesTheRun: the catalog's Close Render no longer dismisses the kernel run", "file": "Sources/HaloModel/HaloCommandCatalog.swift", "find": "case .closeRenderSheet: dismissRender()", "replace": "case .closeRenderSheet: break", "tests": "theCatalogsRenderSheetCommandsMoveTheKernelsRun"}
 ]
