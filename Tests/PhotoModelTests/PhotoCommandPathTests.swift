@@ -89,9 +89,11 @@ struct PhotoCommandPathTests {
     /// Without an image the sheets' commands say so; with no recent files Clear Menu says so.
     @Test func reasonWhenUnavailable() throws {
         let none = PhotoWorkspace(services: .fake)
-        for id in ["file.export", "image.resize", "image.straighten", "layer.rename"] {
+        for id in ["image.resize", "image.straighten", "layer.rename"] {
             #expect(PhotoWorkspace.catalog.availability(id, on: none).why == "Open an image first.", "\(id)")
         }
+        // Export shares the toolbar's Export button reason.
+        #expect(PhotoWorkspace.catalog.availability("file.export", on: none).why == "Open or create an image first.")
         #expect(PhotoWorkspace.catalog.availability("file.clear-recent", on: none).why == "No Recent Files")
         let ws = try Self.fixture()
         for control in Self.controls {
