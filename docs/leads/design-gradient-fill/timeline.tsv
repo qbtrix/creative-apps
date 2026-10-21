@@ -35,3 +35,4 @@ time	kind	note
 2026-10-21T17:24Z	3	wait	panels	design journeys 39638826181 release build failed, no ui-screens; 39626816600 queued
 2026-10-21T17:48Z	3	wait	panels	full journeys 39645095817 (3f96cd10, has 5bec80894) and design 39626816600 queued
 2026-10-21T18:10Z	3	wait	panels	full journeys 39645095817/39647568644 (3f96cd10) and design 39626816600 still queued
+2026-10-21T18:32Z	3	wait	panels	full journeys 39645095817 failed in build (dev-red #3856), no ui-screens; 39647568644 and 39626816600 pending
