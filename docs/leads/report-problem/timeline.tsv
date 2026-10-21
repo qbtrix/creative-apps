@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-21T12:04Z	2026-10-21T12:03:56Z	3	wave2-restart	wf_d120983e-f26	RP-4 RP-3 relaunched on merge-base 965a76b with a dev merge first
 2026-10-21T12:06Z	3	poll	w1	builders running
 2026-10-21T12:26Z	3	poll	w1	builders running
+2026-10-21T12:45Z	3	poll	w1	builders running
