@@ -72,7 +72,7 @@ private let item = TransformBox(box: Rect(minX: 100, minY: 80, maxX: 300, maxY: 
 /// resize uses, so a first-time user reads them as mirroring (Design mac finish, transform DT-a).
 @Test @MainActor func theFlipsDrawTheMirrorSymbols() {
     let actions = TransformRows.flips(selection: item, help: nil, flipHelp: nil) { _ in }
-    #expect(actions.map(\.title) == FlipDirection.allCases.map(\.title))
+    #expect(actions.map(\.title) == ["Flip Horizontal", "Flip Vertical"])
     #expect(actions.map(\.systemImage) == [
         "arrow.left.and.right.righttriangle.left.righttriangle.right",
         "arrow.up.and.down.righttriangle.up.righttriangle.down",
