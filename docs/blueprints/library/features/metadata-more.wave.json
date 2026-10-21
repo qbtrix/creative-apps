@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#744",
-  "waits_on": "import; takes over files from cull, persist, status-and-layout, and the window shell crop and export edit in wave 4; its window and search slices wait on filters-collections (same wave)",
+  "waits_on": "import; takes over files from cull, persist, status-and-layout, and the window shell crop and export edit in wave 4; its window and search slices wait on filters-collections (same wave); MD-3 waits on raw:RW-a and MD-7 on raw:RW-m (FakePlatform.swift, ImageIODecoder.swift; raw is in the beta and this feature isn't, re-cut 2026-10-21)",
   "issues": [
     744
   ],
@@ -133,6 +133,9 @@
       "waits": {
         "cull": [
           "MD-4"
+        ],
+        "raw:RW-a": [
+          "MD-3"
         ]
       }
     },
@@ -164,6 +167,9 @@
         ],
         "status-and-layout": [
           "MD-8"
+        ],
+        "raw:RW-m": [
+          "MD-7"
         ]
       },
       "ui": true

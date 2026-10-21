@@ -1,7 +1,8 @@
 // HaloRenderJobTests.swift: the render job behind File > Render… (RO-3, #429)
 // on the `keyed` fixture ("Bounce", 1920 × 1080, 24 fps, 48 frames) with the
-// fake services: the sheet, the output name and summary, progress, Cancel and
-// every outcome's text. Runs on Linux and macOS.
+// fake services: the sheet, the output name and summary, progress and the
+// outcomes' text. Cancel is the kernel's since core-loop CL-6 (#1971):
+// HaloRenderRunTests. Runs on Linux and macOS.
 import HaloModel
 import Testing
 
@@ -84,37 +85,6 @@ private struct RefusingRendering: CompositionRendering {
     #expect(project.renderOutcomeText == "Rendered 48 frames.")
     project.closeRenderSheet()
     #expect(project.renderJob == nil)
-}
-
-@Test func cancelStopsAtTheFramesWrittenAndTakesTheExactCount() throws {
-    var project = try running()
-    project.renderProgress(frame: 12)
-    project.cancelRender()
-    #expect(project.renderOutcomeText == "Cancelled after 12 frames.")
-    #expect(project.renderProgressText == nil)
-    project.renderProgress(frame: 13)
-    #expect(project.renderJob?.progress == 12)
-    #expect(project.renderOutcomeText == "Cancelled after 12 frames.")
-    project.finishRender(.finished(frames: 48))
-    #expect(project.renderOutcomeText == "Cancelled after 12 frames.")
-    project.finishRender(.cancelled(frames: 13))
-    #expect(project.renderOutcomeText == "Cancelled after 13 frames.")
-}
-
-@Test func aFailureAfterCancelReplacesIt() throws {
-    var project = try running()
-    project.cancelRender()
-    project.finishRender(.failed(frame: 2, message: "Disk full"))
-    #expect(project.renderOutcomeText == "Render stopped at frame 2: Disk full.")
-}
-
-@Test func cancelledMovieSaysNoMovieWasWritten() throws {
-    var project = try keyed()
-    project.openRenderSheet()
-    _ = project.startRender(movieFull)
-    project.renderProgress(frame: 7)
-    project.cancelRender()
-    #expect(project.renderOutcomeText == "Cancelled. No movie was written.")
 }
 
 @Test func failureNamesTheFrame() throws {

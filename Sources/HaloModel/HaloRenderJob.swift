@@ -1,10 +1,12 @@
 // HaloRenderJob.swift: the render job behind File > Render… (#429). Opens and
 // closes the sheet, names what a render writes, starts a render from the
-// services' plan, and records its progress and how it ended. The only file
-// that writes `renderJob`. The frames themselves are rendered off the main
-// actor by the app through `services.compositionRendering.run`; this file
-// only keeps the state the sheet shows. A job is running once it has a plan
-// and no outcome. Linux-safe: no UI imports.
+// services' plan, and records its progress and how it ended: the old moves
+// the kernel adapter replaces (core-loop CL-6 removes them; #1971). Cancel
+// and the progress and outcome text read the kernel's run in
+// HaloRenderJob+Kernel.swift. The frames are rendered off the main actor by
+// the app through `services.compositionRendering.run`; this file only keeps
+// the state the sheet shows. A job is running once it has a plan and no
+// outcome. Linux-safe: no UI imports.
 import SuiteModel
 
 extension HaloProject {
@@ -83,15 +85,6 @@ extension HaloProject {
         renderJob = job
     }
 
-    /// Cancel: a running render ends as cancelled after the frames written so
-    /// far; a sheet whose render hasn't started closes.
-    public mutating func cancelRender() {
-        guard let job = renderJob else { return }
-        if job.plan == nil { return closeRenderSheet() }
-        guard job.outcome == nil else { return }
-        renderJob?.outcome = .cancelled(frames: job.progress)
-    }
-
     /// How the app's run ended. A running render takes any outcome; after
     /// Cancel only the run's own cancelled count or a failure replaces the
     /// guess. A finished job never changes.
@@ -100,27 +93,6 @@ extension HaloProject {
         switch (job.outcome, outcome) {
         case (nil, _), (.cancelled, .cancelled), (.cancelled, .failed): renderJob?.outcome = outcome
         default: return
-        }
-    }
-
-    /// "Frame 12 of 48" while a render runs; nil otherwise.
-    public var renderProgressText: String? {
-        guard renderRunning, let job = renderJob, let plan = job.plan else { return nil }
-        return "Frame \(job.progress) of \(plan.frames.count)"
-    }
-
-    /// How the render ended, as the sheet shows it; nil until it has.
-    public var renderOutcomeText: String? {
-        guard let job = renderJob, let outcome = job.outcome else { return nil }
-        switch outcome {
-        case .finished(let n):
-            return n == 1 ? "Rendered 1 frame." : "Rendered \(n) frames."
-        case .cancelled(let n):
-            if job.settings.format == .movie { return "Cancelled. No movie was written." }
-            return n == 1 ? "Cancelled after 1 frame." : "Cancelled after \(n) frames."
-        case .failed(let frame, let message):
-            let reason = message.hasSuffix(".") ? String(message.dropLast()) : message
-            return job.plan == nil ? "\(reason)." : "Render stopped at frame \(frame): \(reason)."
         }
     }
 }

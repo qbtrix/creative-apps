@@ -12,6 +12,18 @@ acceptance tests.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
+**Wave BG1 (beta gaps, 2026-10-21).** The suite must-haves from
+`paw-workspace/docs/design/drafts/2026-10-21-beta-gaps-combined.md`:
+`command-state` (every action a command, toggles report state, the bare
+controls burned down under a ratchet), `report-problem` (Help > Report a
+Problem and Beta Notes, nothing sent by the app), `cli-bundle` (the `afterglow`
+CLI in the bundle, Help > Connect an AI Assistant), `editor-menus` (Switch To,
+AI Access, Help and the live channel in every editor, a window after the last
+one closes), `sample-files` (#836 to #839) and `no-placeholders` (Settings
+left for the captain). `report-problem`'s Help group comes first: the other
+Help items and the editors' menus build on it. The label sorts after the
+numbered waves and AI1, which every one of them depends on.
+
 **Wave AI1 (beta-80 W0, `p0`, 2026-10-19): AI-accessible first.** Every
 action is a command; the UI, the `afterglow` CLI and MCP drive one command
 catalog, and crews and CI test through it (suite.md 1.5). The catalog
