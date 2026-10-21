@@ -432,7 +432,7 @@ extension DesignWorkspace {
             if let kind = tool.nodeKind { route = .draw(kind) }
         case .text:
             route = .text
-        case .pen:
+        case .pen, .eyedropper:
             break
         }
         var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)

@@ -29,6 +29,7 @@ page.delete
 page.rename
 page.select
 tool.ellipse
+tool.eyedropper
 tool.frame
 tool.move
 tool.pen

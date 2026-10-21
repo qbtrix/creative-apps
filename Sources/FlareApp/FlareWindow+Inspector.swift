@@ -17,6 +17,7 @@ extension FlareWindow {
         case .setFill(let hex): model.setFill(hex: hex)
         case .setStrokeColor(let hex): model.setStrokeColor(hex: hex)
         case .setStrokeWidth(let width): model.setStrokeWidth(width)
+        case .scrubStrokeWidth(let width): model.scrubStrokeWidth(width)
         case .setStrokeCap(let raw): if let cap = Stroke.Cap(rawValue: raw) { model.setStrokeCap(cap) }
         case .setStrokeJoin(let raw): if let join = Stroke.Join(rawValue: raw) { model.setStrokeJoin(join) }
         case let .setSceneSize(width, height):
@@ -44,7 +45,7 @@ extension FlareWindow {
         case .showTab, .endScrub, .endEasingHandle, .setSceneSize, .setSceneTiming: return nil
         case .scrub: return model.propertyLayerIDs.isEmpty ? "Select a layer first." : nil
         case .toggleAnimated, .toggleKey: return model.propertyLayerIDs.count == 1 ? nil : "Select one layer to key it."
-        case .setFill, .setStrokeColor, .setStrokeWidth: return model.paint == nil ? "Select a layer to paint it." : nil
+        case .setFill, .setStrokeColor, .setStrokeWidth, .scrubStrokeWidth: return model.paint == nil ? "Select a layer to paint it." : nil
         case .setStrokeCap(let raw):
             return model.paint == nil ? "Select a layer to paint it." : Stroke.Cap(rawValue: raw) == nil ? "No cap named \(raw)." : nil
         case .setStrokeJoin(let raw):

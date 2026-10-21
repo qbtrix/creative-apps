@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "RJ-X43 (file-flow): drops a Halo document, a PNG and a type nobody reads on a one-rect canvas; only the PNG lands, as one placed rect, and the recent list reads back.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "file.drop", "params": {"paths": ["input/Intro.halo", "input/Sunset.png", "input/notes.xyz"]}},
+    {"id": "file.recent", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-dropped", "format": "json", "options": {}},
+  "expect": {
+    "out/one-dropped.json": {"json": [
+      {"h": 60, "id": 1, "locked": false, "name": "Rect 1", "w": 100, "x": 10, "y": 10},
+      {"h": 100, "id": 2, "locked": false, "name": "Sunset.png", "w": 100, "x": 0, "y": 0}
+    ]}
+  },
+  "platforms": ["linux", "macos"]
+}
