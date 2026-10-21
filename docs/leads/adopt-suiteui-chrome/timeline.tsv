@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-21T09:25:38Z	slice-done	Belt-Slice-Done + Mac-Finish-Wanted AC-zoom on #1942	-	AC-colour,AC-tools merge
 2026-10-21T09:45:15Z	heartbeat	heartbeat	-	AC-colour,AC-tools merge
 2026-10-21T10:06:57Z	heartbeat	heartbeat	-	AC-colour,AC-tools merge
+2026-10-21T10:27:41Z	merged	AC-colour merged, AC-tools p2 started	-	AC-colour green dev run; AC-tools p1 merge; AC-tools p2 PR
