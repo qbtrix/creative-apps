@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T05:55:06Z	3	heartbeat	-	KE-1 #3813 last in red batch-20261021053311; bisect blames #3808/#3810 (probe -4 green, -6 red), so KE-1 waits for next batch
 2026-10-21T06:20:44Z	3	heartbeat	-	KE-1 #3813 in batch-20261021061843 (Linux red on isa-swizzle lint from #3818, after KE-1); bisect should land KE-1; KE-2..4 ready to open after
 2026-10-21T06:36:49Z	3	heartbeat	-	bisect: probe -2 (through KE-1 #3813) Linux green, -4 red (#3818 isa-swizzle); KE-1 waits on probe macOS gate
+2026-10-21T06:55:49Z	3	heartbeat	-	KE-1 #3813 merged 06:45Z (dbf599ff6); KE-2/3/4 merged dev, conflicts resolved (branch bodies over KE-1 stubs), scripts/ci --changed running before opening PRs

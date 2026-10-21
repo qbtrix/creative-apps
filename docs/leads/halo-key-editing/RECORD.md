@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15b98bcea-wygm · Session: claude/task-xjfhws · Started: 2026-10-20T23:47Z
 Stage: 3 wave 2
 Base: 2cc149f57 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: #3813 (KE-1) macOS build green, waiting for its lane batch. KE-2 (e0d17da91), KE-3 (9a254bd5c), KE-4 (9d3544ed8) built and pushed on lead/halo-key-editing-KE-*; once #3813 is on dev merge origin/dev into each, rerun ci --changed, open the PRs. Then add RJ-H13 (scratchpad/RJ-H13) to KE-4 after KE-3 lands.
+Next: KE-1 merged (#3813, dbf599ff6). Open KE-2 (KE-a), KE-3 (KE-m), KE-4 (KE-m) once their ci --changed passes.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
