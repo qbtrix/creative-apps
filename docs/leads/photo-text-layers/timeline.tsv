@@ -20,3 +20,4 @@
 2026-10-21T18:23Z	check	#4053 and #4059 clean, still queued; lane active (dev at 15f7bad). TS-m #3844/#3847 unchanged.
 2026-10-21T18:46Z	check	#4053 TX-u and #4059 TX-m clean and queued; lane batch run 39653091139 in progress; dev at 1b3913c; TS-m #3844/#3847 unchanged
 2026-10-21T19:15Z	check	#4053 TX-u got needs-rebase (photo golden); merged dev 58034759, re-added tool.text, ci --changed PASS, Head 9fff6a29; #4059 TX-m clean and queued; TS-m #3844/#3847 unchanged
+2026-10-21T19:52Z	check	#4059 lane Linux red on its own XMLTextTests.noAppModelKeepsItsOwnEscaper (inline unescaper): moved to SuiteModel XMLText.unescaped, pushed 8c0a4d82, Head moved; #4053 clean in lane at 9fff6a29; TS-m #3844 still open
