@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T16:53Z	wave1	heartbeat	#4063	macOS build started; FR-m opens on merge
 2026-10-21T17:14Z	build	heartbeat	#4063	FR-a still on lane macOS build
 2026-10-21T17:35Z	build	merge	#4063	FR-a merged 17:34Z
+2026-10-21T17:44Z	build	pr	#4142	FR-m opened
