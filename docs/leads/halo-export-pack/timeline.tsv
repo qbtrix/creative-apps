@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-21T12:32:54Z	3	heartbeat	-	blocked: HX-a waits placed-images PH-a (placed-images Stage 0)
 2026-10-21T12:50:55Z	3	heartbeat	-	blocked on placed-images PH-u/PH-a (Stage 0)
 2026-10-21T13:21:08Z	3	heartbeat	-	blocked: halo placed-images still Stage 0 (PH-a/PH-u)
+2026-10-21T13:42:11Z	heartbeat	check-in: still blocked; placed-images is at Stage 0, PH-a waits on HS-a (#3676), HK-a (key-editing) and PL-a.
