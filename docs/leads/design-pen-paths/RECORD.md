@@ -39,3 +39,4 @@ Next: DP-a waits: DP-1 on placed-images:PD-a (#3759, captain merge) and shape-to
 ## Open
 - DP-a blocked: PD-a (#3759), DS-a, DK-m, AD-design not merged.
 - Core issue for public SVGExporter.pathData not filed (scope).
+- 2026-10-21T00:39Z Belt nudged on lead/export-pack and lead/pen-paths, which belong to the SuiteUI run act-1a15821c836-93pf. Not written to. Supervisor asked to watch lead/design-pen-paths (#3517 comment 6305071320).

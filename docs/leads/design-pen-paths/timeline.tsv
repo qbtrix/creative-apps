@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-21T00:08Z	1	stage-end	#3517	v3 packet, 4 slices; DP-a waits PD-a, DS-a, DK-m, AD-design, DS-m, PD-u
 2026-10-21T00:08Z	3	heartbeat	#3517	polling waits, blocked 1 of 3
 2026-10-21T00:33Z	3	heartbeat	DP-a	blocked poll 2 of 3: PD-a #3759 open; DS-a, DK-m, AD-design not merged
+2026-10-21T00:39Z	3	question	#3517	supervisor: Belt watches the SuiteUI branch; poll-2 status and asks
