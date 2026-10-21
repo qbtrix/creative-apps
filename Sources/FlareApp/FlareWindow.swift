@@ -85,7 +85,8 @@ struct FlareWindow: View {
                 easing: FlareTimingRow(
                     editor: model, onSelect: { model.selectEasingSegment($0) },
                     onPreset: { model.setEasingPreset($0) }, onMoveHandle: { model.moveEasingHandle($0, to: $1) },
-                    onEndDrag: { model.endEasingHandleDrag() }))
+                    onEndDrag: { model.endEasingHandleDrag() }),
+                shape: shapeOptions)
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
         .modifier(FlareNewSheet(presented: $presented, perform: perform))
