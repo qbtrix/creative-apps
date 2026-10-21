@@ -58,3 +58,5 @@ utc	stage	event	ref	note
 2026-10-21T21:45Z	fix	DY-u round 2 pushed	#4081	4ecb757b gate PASS; needs-split dropped, fast-lane back
 2026-10-21T21:45Z	gap	DY-u rounds spent	-	#3987 #3990 #3994 -> gap p2
 2026-10-21T22:05Z	check	waits (poll 2)	-	DT-u #4159, DT-m #4187, DG-m #4189 open; DS-u/DS-m waiting; #4081 mac build 39680406979 queued
+2026-10-21T22:21Z	check	waits (poll 3)	-	unchanged; asked the supervisor (#4187 #4189 mac green but unmerged; dev Linux red on CommandPathTests launcher)
+2026-10-21T22:20Z	fix	DY-u round 2 mac build red	#4081	dev break RenderBudgetPhotoPlaceTests; ported #4215; head 1a5a24be gate PASS
