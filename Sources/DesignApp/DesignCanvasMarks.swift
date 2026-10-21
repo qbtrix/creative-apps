@@ -19,6 +19,7 @@
 // - A node draws at `DesignPainted.opacity`, its own opacity times its ancestors'.
 // - Colors come from SuiteColor, except the document's own fills (DesignColor).
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -64,13 +65,22 @@ func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     let scale = usable(scale)
     let box = node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
     switch node.kind {
-    case .frame, .rectangle, .instance:
+    case .frame, .rectangle, .instance, .shape:  // a shape draws its box until DS-3 draws its path
         return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale).path(in: box)
     case .ellipse:
         return Path(ellipseIn: box)
     case .text, .group:
         return nil
     }
+}
+
+/// What `node` fills with at `scale` (view points): its gradient, its unit box drawn over its frame
+/// through the kernel's one mapping (SuiteUI's `Fill.shading`), or its solid colour (gradient-fill DG-3).
+func artworkShading(for node: DesignNode, scale: Double) -> GraphicsContext.Shading {
+    guard let gradient = node.gradient else { return .color(node.fill.color) }
+    let scale = usable(scale)
+    let box = node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
+    return gradient.shading(in: box, box: Rect(minX: 0, minY: 0, maxX: 1, maxY: 1))
 }
 
 /// How `node`'s stroke draws at `scale`: its width times the scale, centered on the path's edge
@@ -108,7 +118,7 @@ func paintArtwork(
         var faded = context
         faded.opacity = item.opacity * fade
         if let shape = artworkPath(for: node, scale: scale) {
-            faded.fill(shape, with: .color(node.fill.color))
+            faded.fill(shape, with: artworkShading(for: node, scale: scale))
             if let stroke = node.stroke, let style = artworkStroke(for: node, scale: scale) {
                 faded.stroke(shape, with: .color(stroke.color.color), style: style)
             } else if node.kind == .frame {

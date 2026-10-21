@@ -21,7 +21,7 @@ let stubIssues: [HaloCommandArea: Set<String>] = [
 ]
 
 /// The stubs a feature packet's contract slice ships, named by task (key-editing KE-1).
-let stubTasks: [HaloCommandArea: Set<String>] = [.easing: ["Not built yet (KE-3).", "Not built yet (KE-4)."]]
+let stubTasks: [HaloCommandArea: Set<String>] = [.easing: ["Not built yet (KE-4)."]]
 
 /// Commands that work today and answer from state only.
 let shippedCommands: [HaloCommand] = [
@@ -90,7 +90,7 @@ func everyCommandActsOrSaysWhy(services: HaloServices) {
 }
 
 /// Key editing's contract (KE-1): the four cases sit in the easing area, a
-/// pick acts on today's lane pick, Select All Keys and a move wait on KE-3 and KE-4.
+/// pick acts as a lane click does, Select All Keys acts (KE-3), a move waits on KE-4.
 @Test func keyEditingCasesAreInTheEasingArea() throws {
     let ball = "comp-1-layer-2"
     let cases: [HaloCommand] = [
@@ -100,9 +100,9 @@ func everyCommandActsOrSaysWhy(services: HaloServices) {
     #expect(cases.map(\.title) == ["Select Keys", "Select All Keys", "Move Keyframes", "End Key Drag"])
     var project = commandProject("keyed", .fake)
     #expect(project.unavailableHelp(for: .pickLaneKeys(layerID: ball, frame: nil, mode: .toggle)) == nil)
-    #expect(project.unavailableHelp(for: .selectAllKeys) == "Not built yet (KE-3).")
+    #expect(project.unavailableHelp(for: .selectAllKeys) == nil)
     #expect(project.unavailableHelp(for: .moveKeys(by: 6, dragStart: 0)) == "Not built yet (KE-4).")
-    #expect(project.selectAllKeysHelp == "Not built yet (KE-3).")
+    #expect(project.selectAllKeysHelp == nil)
     #expect(project.moveKeysHelp == "Not built yet (KE-4).")
     project.pickLaneKeys(layerID: ball, frame: 0, mode: .replace)
     #expect(project.selectedLayerID == ball)
