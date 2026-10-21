@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-21T05:10Z	3	merged	#3710	DA-m merged 229c5eff3; waiting for dev Linux check on it; journeys design 39545087913 queued; #3726 at Mac gate (373+/20-, 9 files)
 2026-10-21T05:32Z	3	slice-done	DA-m	Belt-Slice-Done DA-m on #3434 (6308828505), Linux check 39548309612 green on 229c5eff3; journeys 39545087913 running; #3726, #3677, #3742 open
 2026-10-21T06:40Z	3	fix	#3726	DA-u head 1c9eb1fc: dev merged, isa-swizzle lint fix (keyCapable), --changed PASS; DA-5 #3710 merged 05:07Z; DA-6 waits DG-m (#3742 open)
+2026-10-21T06:59Z	3	fix	#3726	macOS build 39556740686 red (mutating call in #expect); fixed d58dec2b, gate running; DA-a critics running
