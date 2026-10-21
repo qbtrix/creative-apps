@@ -3,8 +3,8 @@
 Issue: #1942 · Packet: docs/blueprints/suiteui/features/adopt-suiteui-chrome.md
 Run: act-1a15ef870d6-3mm5 (#1942 only; slice AC-export-sheet; earlier run act-1a15ce4fb40-9k5r) · Session: claude/adopt-suiteui-chrome-w955g1 · Resumed: 2026-10-21
 Stage: 0 setup (blocked on shared-codecs:SC-f)
-Base: dev d8b1b210 (main 0dd23d65 verified)
-Next: re-read shared-codecs:SC-f (SC-13 #4019 merged 22:09Z; SC-14, SC-15, SC-16 not yet opened); start AC-e1 once SC-16 merges
+Base: dev e0fb9919 (main 0dd23d65 verified)
+Next: re-read shared-codecs:SC-f (SC-13 #4019 merged; SC-14 #4238 open; SC-15, SC-16 not yet opened); start AC-e1 once SC-16 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -34,6 +34,7 @@ Next: re-read shared-codecs:SC-f (SC-13 #4019 merged 22:09Z; SC-14, SC-15, SC-16
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T22:51Z: SC-14 opened as #4238 (open); SC-15, SC-16 not yet opened; no supervisor reply; AC-e1 still waits
 - 2026-10-21T22:20Z: #4019 (SC-13) merged into dev 22:09Z (lane note: dev red on its own, run 39682547538); no SC-14..16 PR yet; no supervisor reply; AC-e1 still waits
 - 2026-10-21T21:49Z: #4019 (SC-13) still open, unchanged since 19:48Z (macOS build green); no SC-14..16 PR; no supervisor reply; AC-e1 still waits
 - 2026-10-21T21:18Z: #4019 (SC-13) still open on 4e6f468b (macOS build green, Fast-Check pass, no red check) while the lane merged #3770, #4073, #4167; lane run 39677404511 in progress; no SC-14..16 PR; no supervisor reply; AC-e1 still waits

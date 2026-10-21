@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-21T21:18Z	0	stopped	#4019	SC-13 eligible, not yet merged by lane; AC-export-sheet waits on SC-14..16
 2026-10-21T21:49Z	0	stopped	#4019	SC-13 still unmerged; AC-export-sheet waits on SC-14..16
 2026-10-21T22:20Z	0	stopped	#4019	SC-13 merged; AC-export-sheet waits on SC-14..16
+2026-10-21T22:51Z	0	stopped	#4238	SC-14 open; AC-export-sheet waits on SC-14..16
