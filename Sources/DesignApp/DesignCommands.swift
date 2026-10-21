@@ -18,7 +18,7 @@
 // Typing" from its undo manager; DesignFieldUndo watches the key window's focus),
 // else to the model's history (#275). Close (Command-W) replaces the system's in
 // `.saveItem`; it sends performClose: to the key window, so an edited window asks
-// first (DesignClosePrompt). The stock pasteboard group stays, so Select All still works there. Its Delete removes the
+// first (SuiteUI's unsaved guard). The stock pasteboard group stays, so Select All still works there. Its Delete removes the
 // selected layers while the canvas or the Layers list has focus (`canDeleteLayer`).
 import AppKit
 import DesignModel
