@@ -1,0 +1,55 @@
+utc	stage	event	ref	note
+2026-10-20T20:40Z	0	stage-start	-	setup: brief main b3011ab verified; base origin/dev 6c2c7b0
+2026-10-20T21:00Z	0	stage-end	-	waits checked on photo-gradient-fill, photo-transform, history-panel, photo-eyedropper, placed-images, tone-controls
+2026-10-20T21:05Z	1	stage-end	-	packets read; slices and tasks copied
+2026-10-20T21:06Z	3	wave-start	W1	builder for PP-a launched (test-first, stacked on dev)
+2026-10-20T21:08Z	2	stage-end	-	combined plan W1-W6 across place-image, tone-controls, multi-layer-select
+2026-10-20T21:21Z	3	pr-open	#3764	PP-a head 4f70765; CI --changed PASS; 677 Photo tests pass, 6 checks disabled until PP-5
+2026-10-20T21:27Z	3	check	W1	#3764 in lane; no PL-2 PR yet (PP-3 waits)
+2026-10-20T21:48Z	3 build W1	check	#3764	lane macOS build 39501562901 queued; PP-3 waits PL-2 (no PR)
+2026-10-20T22:10Z	3 build W1	check	#3764	macOS build 39501562901 still queued (35 min); PP-3 waits PL-2 (no PR)
+2026-10-20T22:29Z	3 build W1	check	#3764	macOS build 39501562901 still queued (54 min); PP-3 waits PL-2 (no PR)
+2026-10-21T00:04:22Z	3	merged	#3764	PP-a (PP-1, PP-2) fast-lane merged 23:02Z
+2026-10-21T00:05:32Z	3	slice-done	PP-a	Belt-Slice-Done posted on #3455; Linux green in run 39514893774 at 137f72c
+2026-10-21T00:24:57Z	3 build W1	check	-	PP-3 waits PL-2 (no PR); PP-5 waits PG-m
+2026-10-21T00:45Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:05Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:24Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:44Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:03Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:23Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:43Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:03Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:23Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:42Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:02Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:22Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:41Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:00Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:20Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:40Z	3 build W1	check	#3681	PG-1 #3681 merged 05:28Z; PG-a still needs PG-2 (no PR yet), not slice-done; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T06:00Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T06:22Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T06:41Z	3 build W1	check	#3931	PL-2 PR #3931 open (not merged, PP-3 still blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:03Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:23Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:42Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:03Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:22Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:43Z	3 build W2	builder-start	PP-3	PL-2 #3931 merged 08:30Z; PP-3 builder started on lead/place-image-PP-3; PM-2 and PT-1 still blocked
+2026-10-21T08:54Z	3 build W2	pr-open	#3976	PP-3 head 09e345a; CI --changed PASS; 6 PhotoPlaceMenuTests; Mutate 4/4; 8 files +198/-2
+2026-10-21T09:03Z	3 build W2	check	#3976	PP-3 #3976 in lane (clean, fast-lane, waiting on batch); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T09:23Z	3 build W2	check	#3976	PP-3 #3976 lane macOS build 39574519410 queued (per-PR build); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T09:43Z	3 build W2	check	#3976	PP-3 #3976 macOS build 39574519410 green, awaiting lane merge; no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:05Z	3 build W2	check	#3976	PP-3 #3976 macOS build green; lane Linux run 39580807833 in progress on its head; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:27Z	3 build W2	check	#3976	PP-3 #3976 merged 10:20Z; its Linux run red on CommandPathTests photo (PhotoPlace.swift:36 bare MenuCommand), fixer started; PP-4 started; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:38Z	3 build W2	pr	#4003	PP-4 #4003 opened (head 838c548), fast-lane; PP-3fix still building
+2026-10-21T10:38Z	3 build W2	pr	#4004	PP-3fix #4004 opened (head bd53e19, Mutate 5/5): Place… from place.image spec; note: tooltip now the shared spec summary, which mentions SVG though Photo takes PNG/JPEG only; revisit at PP-6
+2026-10-21T10:47Z	3 build W2	check	#4003 #4004	PP-4 #4003 and PP-3fix #4004 open in lane (no lane comments yet); gradient-fill run re-armed 10:44Z, PG-2 not yet open (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T11:10Z	3 build W2	check	#4003 #4004	#4003 and #4004 wait on per-PR macOS builds (runs 39587596123, 39587620209, queued since 10:51Z); #4008 (another session, fix/photo-place-command-spec) is a 1-file duplicate of the PP-3 fix; whichever lands first, the other gets resolved on needs-rebase; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T11:30Z	3 build W2	check	#4003 #4004	macOS builds 39587596123/39587620209 still queued (slots busy); #4008 duplicate in Linux check 39591166431; PG-2 and TC-a still no PR, PM-2/PT-1 blocked
+2026-10-21T11:59Z	3 build W2	check	#4003 #4004	#4008 merged 11:48Z (dup PP-3 fix); merged dev into #4004 keeping model-side placeMenuSpec+tests, head 360a99e, ci --changed PASS; #4004 mac build 39587620209 green on old head; #4003 mac build still queued; PG-2/TC-a no PR
+2026-10-21T12:23Z	3 build W2	check	#4003 #4004	#4004 needs-rebase cleared at 360a99e, new mac build 39597665667; #4003 mac build 39587596123 still queued; PG-2/TC-a no PR, PM-2/PT-1 blocked
+2026-10-21T12:44Z	3 build W2	check	#4003 #4004	#4003 macOS build green (39587596123), clean, awaiting lane sweep; #4004 macOS build 39597665667 running, clean; PM-2 waits PG-a, PT-1 waits TC-a
+2026-10-21T14:50Z	3 W4	build	PP-m	takeover; #4004 closed (dup of #4008); PP-5 builder started from dev; fixer merging dev into #4003
+2026-10-21T16:31Z	3	pr-opened	#4101	PP-5 (PP-m, PP-6 folded), Mutate 5/5; needs-rebase, fixer taking it
