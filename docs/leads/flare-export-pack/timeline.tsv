@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 19:36Z	3	heartbeat	-	SM-a #4034 head 880c41ce sent to lane macOS build 19:27Z; #4035 open.
 19:59Z	3	heartbeat	-	Waiting on SM-a #4034 (lane macOS build of 880c41ce) and #4035, both open.
 20:21Z	3	heartbeat	-	No change: SM-a #4034 and #4035 open in the lane.
+20:43Z	3	heartbeat	-	#4034 new head 8ca7a2e7: lane macOS build (every app) dispatched 20:26Z. #4035 open.
