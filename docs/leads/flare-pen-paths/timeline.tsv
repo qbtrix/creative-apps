@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T11:25:14Z	FP-a	fix-pr	#4027	fix round 1 for #4011 #4013; head d36c6856; Mutate 6/6; fast-lane
 2026-10-21T11:26:40Z	FP-m	pr	#4029	FP-5 pen on PenRules; head 5a8dee2f; Mutate 4/4; Refs #4012
 2026-10-21T11:26:40Z	FP-a	issue	#4030	needs-suite: PenRules.mirror public (for #4012)
+2026-10-21T11:35:58Z	FP-e	check	39590966622	red again on Photo CommandPathTests (dev-red #3856), not this line; blocked poll 2/3
