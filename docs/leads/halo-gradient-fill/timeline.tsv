@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 2026-10-21T21:50Z	2	open	HG-m	PR #4216 claude/gradient-fill-lead-25lt0t d8a3e5d (15 files, +200/-32, scripts/ci --changed PASS; Mutate 5/5; footer checked)
 2026-10-21T22:27Z	2	poll	HG-u HG-m	#4207 and #4216 clean, macOS builds queued (39680681261, 39682487811); no gradient findings; HG-z waits on both merging
 2026-10-21T22:27Z	3	prep	HG-z	HG-8 journey turned on, on halo-gradient-live 7829797 (stacked on HG-u); PR once #4207 and #4216 merge
+2026-10-21T22:31Z	3	poll	HG-u HG-m	#4207 and #4216 clean, macOS builds still queued; KE-z planned; HG-z waits
