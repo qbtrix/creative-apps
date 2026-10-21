@@ -4,7 +4,7 @@ Issue: #3725 · Packet: docs/blueprints/suite/features/shell-text.md
 Run: act-1a15ef24f0e-t1j1 · Session: cse_01Mv9wxYxE6yTZhCjfP2rdUH · Started: 2026-10-21T14:56Z
 Stage: 3 wave B (stacked)
 Base: 3f96cd10c74f0eb4da8641e8fe511a2e5e42a466
-Next: wave B+C drafts open: #4157 ST-m and #4156 ST-4 on ST-a #4135, #4161 ST-5+ST-7 on #4156. All wait on #4034 -> ST-a. When #4034 lands: rebase ST-a onto dev, retarget, CI, ready; then restack #4156, #4157, #4161 in order. Wave D (ST-z: ST-8, ST-9) builds after ST-m and ST-live merge.
+Next: #4034 merged 3364dd9dc. ST-a #4135 restacked on dev (head 1d8d84fdd), still draft: the gate fails only on dev's FormatListRatchet (Media.swift from #4034), not ours; when dev is green there, rerun the gate, add Fast-Check/Head, mark ready. Then restack #4157 ST-m and #4156 ST-4 on ST-a, #4161 on #4156. Wave D (ST-z) after ST-m and ST-live merge.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

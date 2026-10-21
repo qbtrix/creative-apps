@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-21T22:46:38Z	heartbeat	#4034 still open; ST-a stack waiting
 2026-10-21T23:04:49Z	heartbeat	#4034 still open; ST-a stack waiting
 2026-10-21T23:26:41Z	check	ST-a	#4034 still open (clean); #4135 waits on it
+2026-10-21T23:52:36Z	stage	ST-a	#4034 merged 3364dd9dc; #4135 restacked on dev, head 1d8d84fdd; gate red on dev ratchet (Media.swift from #4034 vs FormatListRatchet #4019), not ours; draft until dev green
