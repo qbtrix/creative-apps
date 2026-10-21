@@ -122,3 +122,5 @@ Next: AC-p3, AC-d3, AC-h3 built and pushed (CI: PASS each), stacked on CC-u (#34
 - 2026-10-21T00:18Z: worker restarted; no qualifying run yet: full CI 39504488816 (a17f8650) cancelled, CI 39518541517 (0c2c10dd) pending, scoped suiteui 39491489760 still queued; only Linux check runs green (no full Linux job). Waiting for a green full or scoped-suiteui run
 
 - 2026-10-21T00:41Z: no qualifying run yet: CI 39520919569 (07f754f7) cancelled, CI 39522625110 (ca5dbdd6) pending, scoped suiteui 39491489760 still queued
+
+- 2026-10-21T01:03Z: no qualifying run: CI ca5dbdd6 cancelled, CI 39524928486 (4bdf0bbd) pending, scoped suiteui 39491489760 still queued
