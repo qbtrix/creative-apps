@@ -2,7 +2,7 @@
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DT-u waiting on #4159 (lane macOS build queued, no runner); #4188 fix on fix/design-rotate-knob (c1dfd3d6) held for #4187; round 2: findings #4223 (turned resize) + #4224 (several, no knob) filed, fixer building fix/design-turned-resize + fix/design-knob-several; DT-m: #4187 open, DT-6 on feat/design-transform-dt6 (31b8bc73) held for #4189+#4187; DT-z: DT-7 journey building on feat/design-transform-dt7-journey (off dev, PR after knob merges)
+Stage: 3 DT-u waiting on #4159 (lane macOS build queued, no runner); #4188 fix on fix/design-rotate-knob (c1dfd3d6) held for #4187; round 2: findings #4223 (turned resize) + #4224 (several, no knob) filed, fixer building fix/design-turned-resize + fix/design-knob-several; DT-m: #4187 open, DT-6 on feat/design-transform-dt6 (31b8bc73) held for #4189+#4187; DT-z: DT-7 journey pushed on feat/design-transform-dt7-journey (c36b6b1a, off dev, +162/−6, 1 file; PR after #4188 fix, DT-6 and #4223 fix merge)
 Base: 896cafe3 (origin/dev); main verified at 0dd23d65
 Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u on a green design run; DT-6 after DG-m merges (shares DesignSVG, catalog; must update turnHelp snapshots: DesignInspectorSnapshots.transformRows, objectItemsSayWhyTheyAreOff, DesignSeveralInspectorSnapshots) and DA-m re-read
 
@@ -23,7 +23,7 @@ Next: #4159, #4187, #4188-fix merge -> Belt-Slice-Done + Mac-Finish-Wanted DT-u 
 | DT-4 | DT-u | 2 | snapshots, render budget | Tests/AppSnapshotTests/DesignTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetDesignTransformTests.swift | RenderBudgetDesignTransformTests | – | waiting |
 | DT-5 | DT-m | 2 | adapter bodies, contains | Sources/DesignModel/DesignTransform+Kernel.swift, Tests/DesignModelTests/DesignTransformTests.swift, Tests/mutations/DesignModel.DesignTransform+Kernel.json | DesignTransformTests | – | waiting |
 | DT-6 | DT-m | 3 | SVG turn, specs, RJ-D15 | Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt, Tests/RealJobs/design/rotate-15/ | DesignSVGTests.turnedNode, RJ-D15 | – | waiting |
-| DT-7 | DT-z | 4 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | – | building |
+| DT-7 | DT-z | 4 | journey on live | UITests/DesignJourneyTests+Transform.swift | DesignTransformJourneyTests | – | pushed, PR held |
 | DT-8 | DT-z | 5 | design.md, status built | docs/blueprints/design.md, docs/blueprints/design/features/transform.wave.json | scripts/waves render --dry-run | – | waiting |
 
 ## Reviews
