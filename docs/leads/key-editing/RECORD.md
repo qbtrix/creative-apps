@@ -4,7 +4,7 @@ Issue: #3536 · Packet: docs/blueprints/halo/features/key-editing.md
 Run: act-1a15f807d0b-78hh (resumed from act-1a15b98bcea-wygm) · Session: claude/key-editing-lead-o3yyj5 · Started: 2026-10-20T23:47Z
 Stage: 3 wave 4
 Base: 1a7e0d866 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
-Next: #4141 (KE-9) merges on the next sweep (macOS build 39647703725 green); then KE-m Belt-Slice-Done on a green Linux run holding it. Finding #4150 (KE-u macOS tests red) in fix round 1 (branch lead/halo-key-editing-F4150). KE-a/KE-u critic panel on journeys run 39651139451 (after scoped halo 39635764704) once its ui-screens land. KE-7 waits on #3499; KE-8 on core-loop CL-z.
+Next: KE-m Belt-Slice-Done once Linux check 39655526241 (dev 1b3913c07, holds #4141's merge) is green. #4152 (F4150 round 1: playhead off the key, test-only) in lane at head 2fc0925a8; the select-all half of #4150 is round 2. KE-a/KE-u critic panel on journeys run 39651139451 (queued) once its ui-screens land. KE-7 waits on #3499; KE-8 on core-loop CL-z.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -23,7 +23,7 @@ Next: #4141 (KE-9) merges on the next sweep (macOS build 39647703725 green); the
 | KE-4 | KE-m | 2 | move bodies, one step per drag | Sources/HaloModel/HaloKeyMove+Kernel.swift, Tests/HaloModelTests/HaloKeyEditingTests.swift | HaloKeyEditingTests | #3955 | merged |
 | KE-5 | KE-u | 3 | snapshots, journey skipped | Tests/AppSnapshotTests/HaloKeyEditingSnapshots.swift, UITests/HaloJourneyTests+KeyEditing.swift | snapshots | #4070 | merged |
 | KE-6 | KE-u | 3 | render budget | Tests/AppSnapshotTests/RenderBudgetHaloKeyEditingTests.swift | RenderBudgetHaloKeyEditingTests | #4067 | merged |
-| KE-9 | KE-m, KE-z | 4 | RJ-H13 move-keys real job; journey turned on (KE-7's first half) | Tests/RealJobs/halo/move-keys/move-keys.jobs.json, Tests/RealJobs/halo/move-keys/input/bounce.halo, UITests/HaloJourneyTests+KeyEditing.swift | RealJobsTests, HaloKeyEditingJourneyTests | #4141 | in lane (head ddee6da1a) |
+| KE-9 | KE-m, KE-z | 4 | RJ-H13 move-keys real job; journey turned on (KE-7's first half) | Tests/RealJobs/halo/move-keys/move-keys.jobs.json, Tests/RealJobs/halo/move-keys/input/bounce.halo, UITests/HaloJourneyTests+KeyEditing.swift | RealJobsTests, HaloKeyEditingJourneyTests | #4141 | merged 1b3913c07 |
 | KE-7 | KE-z | 5 | stress journey gains ⌘A and move-keys | UITests/HaloJourneyTests+StressPerf.swift | HaloStressPerfJourneyTests | - | waits #3499 |
 | KE-8 | KE-z | 6 | halo.md, built, feature-done | docs/blueprints/halo.md, docs/blueprints/halo/features/key-editing.wave.json | waves render --dry-run | - | waits CL-z |
 
@@ -40,7 +40,7 @@ Next: #4141 (KE-9) merges on the next sweep (macOS build 39647703725 green); the
 - KE-m's Slice-Done waits for the RJ-H13 job on dev (packet Done check), though rule 21 alone wouldn't gate on a missing check.
 
 ## Open
-- Finding #4150: aKeyDragShowsTheTimePill red since #4070; RenderBudgetHaloKeyEditingTests drag 9 bodies and selectAll unrouted (scoped halo 39635764704). Fix round 1 started 18:30Z.
+- Finding #4150: aKeyDragShowsTheTimePill red since #4070; RenderBudgetHaloKeyEditingTests drag 9 bodies and selectAll unrouted (scoped halo 39635764704). Fix round 1 started 18:30Z: PR #4152 (test-only, playhead to 36 before the drag); the real-user bug went to #4151 (needs-ui, TimelineStrip playhead band wins a key's press); select-all is not fixed yet.
 - HaloViewerSnapshots.shapeButton red on macOS too: not this feature's file.
 - PR #3499 (stress journeys) open: KE-7 waits on it.
 - core-loop #1971 CL-z not built: KE-8 waits on it.
