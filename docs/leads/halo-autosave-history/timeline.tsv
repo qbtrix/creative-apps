@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-21T06:49:41Z	heartbeat	HA-u #3810 head 3b3c8b0 open, needs-fix dropped, lane macOS build dispatched 06:27Z
 2026-10-21T07:13:19Z	heartbeat	HA-u #3810 head 3b3c8b0 open, macOS build 39555549040 queued
 2026-10-21T07:35:08Z	heartbeat	HA-u #3810 head 3b3c8b0 macOS build 39555549040 green; eligible, waiting for a lane batch
+2026-10-21T07:56:46Z	heartbeat	HA-u #3810 head 3b3c8b0 eligible, waiting for a lane batch
