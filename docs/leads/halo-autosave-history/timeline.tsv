@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-21T01:44Z	3	heartbeat	#3701 #3810	not in batch 20261021005140; waiting next batch; HG-m #3417 open
 2026-10-21T02:06Z	3	heartbeat	#3701 #3810	batch bisect at probe -4; ours outside; HG-m #3417 open
 2026-10-21T02:33Z	3	heartbeat	#3701 #3810	lane: both eligible (macOS builds green), queued behind batch 20261021005140 bisect; HG-m #3417 open
+2026-10-21T02:55Z	3	heartbeat	#3701 #3810	still open, queued; batch bisect at probe -5 (39535228356 running); HG-m #3417 open
