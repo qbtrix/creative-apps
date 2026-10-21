@@ -31,4 +31,4 @@ utc	stage	event	ref	note
 2026-10-21T04:47Z	3	heartbeat	#3710 #3726	supervisor 6308194266: PRs on local Mac gate; #3710 dev merged in (2ce01865), Fast Lane 39545279929 running. scoped: design 39541665044 red on DesignSeveralInspectorSnapshots (DT-a #3751 + EY-u #3541, not ours; noted on #3856 6308255592). journeys design 39545087913 queued: critics wait on its ui-screens
 2026-10-21T05:10Z	3	merged	#3710	DA-m merged 229c5eff3; waiting for dev Linux check on it; journeys design 39545087913 queued; #3726 at Mac gate (373+/20-, 9 files)
 2026-10-21T05:32Z	3	slice-done	DA-m	Belt-Slice-Done DA-m on #3434 (6308828505), Linux check 39548309612 green on 229c5eff3; journeys 39545087913 running; #3726, #3677, #3742 open
-2026-10-21T06:40Z	act-1a15d1af4b1-45qq	DA-5 merged; DA-u lint fix + dev merge; DA-6 waits DG-m
+2026-10-21T06:40Z	3	fix	#3726	DA-u head 1c9eb1fc: dev merged, isa-swizzle lint fix (keyCapable), --changed PASS; DA-5 #3710 merged 05:07Z; DA-6 waits DG-m (#3742 open)
