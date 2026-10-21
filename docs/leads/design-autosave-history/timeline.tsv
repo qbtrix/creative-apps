@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 12:05Z	DA-a	heartbeat	#3973	Linux check running on head; lane merges after
 12:08Z	DA-a	merged	#3973	b6043094; awaiting a dev run containing it for round 2
 12:25Z	DA-a	heartbeat	39598650564	dev Linux containing #3973 running; awaiting Design screens
+12:30Z	DA-a	dev-linux-red	39598650564	Library timing budgets only; dev-red #3856; not Design
