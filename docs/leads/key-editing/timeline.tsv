@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-21T00:12Z	3	stage-start	-	wave 2: KE-2, KE-3, KE-4 builders stacked on KE-1
 2026-10-21T02:03Z	3	built	KE-2,KE-3,KE-4	branches pushed; PRs wait for #3813 on dev
 2026-10-21T02:03Z	3	heartbeat	#3813	macOS build green, awaiting lane batch
+2026-10-21T02:21Z	3	heartbeat	#3813	still open with a green macOS build (run 39519655359) since 00:10Z; lane merged #3837 at 02:02Z without it; asked supervisor
