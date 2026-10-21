@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-21T03:50Z	check	DY-u in lane batch (bisect probe -2)	#3816	waits batch
 2026-10-21T04:13Z	check	DY-u in lane batch bisect (probe -0 running)	#3816	waits batch
 2026-10-21T04:35Z	check	DY-u not in culprit; new batch 20261021043428	#3816	waits batch
+2026-10-21T04:59Z	check	DY-u #3816 in lane (clean, batch 043428 bisecting, probe -4 green)	#3816	scoped design 39541665044 red on DesignSeveralInspectorSnapshots: eyedropper row fix is #3839 (needs-rebase, not ours), rotation/flip rows from DT-a; noted on dev-red #3856. Critic panel DY-a started on its snapshots
