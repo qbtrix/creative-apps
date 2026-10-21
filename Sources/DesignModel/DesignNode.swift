@@ -246,6 +246,11 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     /// The kernel's gradient fill, its points in the node's unit box (0...1 across its frame), so a
     /// resize never touches it; nil paints `fill` (solid). Written only when set (gradient-fill DG-1).
     public var gradient: Fill?
+    /// The turn, clockwise degrees about the frame's centre, (-180, 180]; `frame` stays the unturned box,
+    /// so snapping, resize and the layer list never see it. Written only when not 0 (transform DT-1).
+    public var rotation: Double = 0
+    /// Mirrored left to right and top to bottom about the frame's centre. Written only when set.
+    public var flipX = false, flipY = false
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
@@ -268,10 +273,12 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text,
             cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)
         gradient = node.gradient
+        rotation = node.rotation
+        (flipX, flipY) = (node.flipX, node.flipY)
     }
 
     /// Decodes a node; a field a file written before it existed lacks takes its default: square
-    /// corners, fully opaque, no stroke, the default text style and no gradient.
+    /// corners, fully opaque, no stroke, the default text style, no gradient, upright and unmirrored.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -285,6 +292,38 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
             textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
             gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))
+        rotation = try container.decodeIfPresent(Double.self, forKey: .rotation) ?? 0
+        flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
+        flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
+    }
+
+    /// The file's keys, one per stored field.
+    enum CodingKeys: String, CodingKey {
+        case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
+        case gradient, rotation, flipX, flipY
+    }
+
+    /// Encodes a node as before transforms, adding the turn and each mirror only when set, so a file of
+    /// upright nodes is written byte for byte as an older build wrote it.
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(frame, forKey: .frame)
+        try container.encode(children, forKey: .children)
+        try container.encode(isHidden, forKey: .isHidden)
+        try container.encode(isLocked, forKey: .isLocked)
+        try container.encode(fill, forKey: .fill)
+        try container.encode(text, forKey: .text)
+        try container.encode(cornerRadius, forKey: .cornerRadius)
+        try container.encode(opacity, forKey: .opacity)
+        try container.encodeIfPresent(stroke, forKey: .stroke)
+        try container.encode(textStyle, forKey: .textStyle)
+        try container.encodeIfPresent(gradient, forKey: .gradient)
+        if rotation != 0 { try container.encode(rotation, forKey: .rotation) }
+        if flipX { try container.encode(flipX, forKey: .flipX) }
+        if flipY { try container.encode(flipY, forKey: .flipY) }
     }
 
     /// Shifts this node and everything under it by `delta`.
@@ -405,7 +444,7 @@ extension [DesignNode] {
     func hit(at point: DesignPoint) -> String? {
         for node in reversed() where !node.isHidden && !node.isLocked {
             if let inner = node.children.hit(at: point) { return inner }
-            if node.frame.contains(point) { return node.id }
+            if node.contains(point) { return node.id }
         }
         return nil
     }

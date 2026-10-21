@@ -4,9 +4,9 @@
 // disabled, with the hint saying why in the value column, whose x is checked
 // against the X field's on the hosted view), a rectangle inside a locked group
 // (disabled the same way), and A on `cards` styled: radius 12, opacity 50% and
-// a 4 pt stroke, and A's Fill section with its type switch. Writes
-// design-inspector-page-, -node-, -locked-, -locked-group-, -style- and
-// -fill-{light,dark}.png. macOS only.
+// a 4 pt stroke, A's Fill section with its type switch, and A's Transform
+// section. Writes design-inspector-page-, -node-, -locked-, -locked-group-,
+// -style-, -fill- and -transform-{light,dark}.png. macOS only.
 import AppKit
 import DesignModel
 import SuiteKernel
@@ -73,6 +73,17 @@ import Testing
         #expect(GradientRules.type(of: selection.fill) == .solid)
         #expect(model.fillHelp != nil)
         try shoot("fill", model)
+    }
+
+    /// The Transform section's Rotation bar and Flip buttons over A, off with the Model's reason until
+    /// turning is built (transform DT-5).
+    @Test func transformRows() throws {
+        var model = DesignFixtures.cards
+        model.useServices(.live)
+        model.selectItem("node-2")
+        #expect(model.transformSelection?.degrees == 0)
+        #expect(model.turnHelp != nil)
+        try shoot("transform", model)
     }
 
     /// The hint starts where the X field does, not at the gutter (#276).
