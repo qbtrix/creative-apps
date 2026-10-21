@@ -5,7 +5,8 @@
 // catalog's help, so it lights up when a slice sets its `unavailable` to nil
 // with no app edit. `LibraryFilterBar` draws the bar: Picked, Unflagged and
 // Rejected chips, the rating and label menus, Hide Rejected, the summary
-// and Clear; a control that can't act is disabled with its reason as help.
+// and Clear; a control that can't act is disabled with its reason as help,
+// and each is listed in `library.controls`.
 // The hooks read `collections.json` at launch, write it 500 ms after each
 // change, and flush it on quit; every state change is a LibraryCatalog
 // method. FC-5 mounts the bar, publishes `\.libraryFilters` and calls the
@@ -37,6 +38,8 @@ struct LibraryFiltersMenu {
     }
 
     // The filter bar.
+    /// The rules in force, for View > Filter's checkmarks.
+    var activeFilter = LibraryFilter.all
     var toggleFlag: (@MainActor (PhotoFlag) -> Void)?
     var setRating: (@MainActor (RatingRule) -> Void)?
     var toggleLabel: (@MainActor (PhotoLabel) -> Void)?
@@ -52,6 +55,8 @@ struct LibraryFiltersMenu {
     var addItems: [AddItem] = []
     var removeFromCollection: Action?
     var deleteCollection: (@MainActor (_ id: String) -> Void)?
+    /// The selected collection of yours, which File > Delete Collection deletes.
+    var selectedCollectionID: String?
     var collectionsHelp: String?
     var removeFromCollectionHelp: String?
     var deleteCollectionHelp: String?
@@ -76,6 +81,7 @@ extension LibraryWindow {
                 action: enabled(help == nil) { model.addToCollection(collection.id) }, help: help)
         }
         return LibraryFiltersMenu(
+            activeFilter: model.activeFilter,
             toggleFlag: enabled(filterOK) { (flag: PhotoFlag) in model.toggleFilterFlag(flag) },
             setRating: enabled(filterOK) { (rule: RatingRule) in model.setRatingRule(rule) },
             toggleLabel: enabled(filterOK) { (label: PhotoLabel) in model.toggleFilterLabel(label) },
@@ -89,6 +95,7 @@ extension LibraryWindow {
             addItems: addItems,
             removeFromCollection: enabled(model.removeFromCollectionHelp == nil) { model.removeFromCollection() },
             deleteCollection: enabled(model.deleteCollectionHelp == nil) { (id: String) in model.deleteCollection(id) },
+            selectedCollectionID: model.selectedUserCollection?.id,
             collectionsHelp: UserCollection.unavailable,
             removeFromCollectionHelp: model.removeFromCollectionHelp,
             deleteCollectionHelp: model.deleteCollectionHelp,
@@ -182,6 +189,7 @@ struct LibraryFilterBar: View {
     }
 
     private var filterHelp: String { menu.filterHelp ?? "Show only the photos that pass these rules." }
+    private var clearHelp: String { menu.clearFilterHelp ?? "Show every photo in the collection." }
 
     var body: some View {
         HStack(spacing: SuiteSpacing.s) {
@@ -195,7 +203,9 @@ struct LibraryFilterBar: View {
                 }
                 .disabled(menu.toggleFlag == nil)
                 .help(filterHelp)
-                .accessibilityIdentifier("library.filter.flag.\(flag.rawValue.lowercased())")
+                .libraryControl(
+                    id: "library.filter.flag.\(flag.rawValue.lowercased())", enabled: menu.toggleFlag != nil,
+                    help: filterHelp)
             }
             Menu(filter.rating.title) {
                 ForEach(Self.ratings, id: \.self) { rule in
@@ -205,12 +215,13 @@ struct LibraryFilterBar: View {
             .fixedSize()
             .disabled(menu.setRating == nil)
             .help(filterHelp)
-            .accessibilityIdentifier("library.filter.rating")
+            .libraryControl(id: "library.filter.rating", enabled: menu.setRating != nil, help: filterHelp)
             Toggle("Hide Rejected", isOn: Binding(get: { filter.hidesRejected }, set: { _ in menu.toggleHideRejected?() }))
                 .toggleStyle(.checkbox)
                 .disabled(menu.toggleHideRejected == nil)
                 .help(filterHelp)
-                .accessibilityIdentifier("library.filter.hideRejected")
+                .libraryControl(
+                    id: "library.filter.hideRejected", enabled: menu.toggleHideRejected != nil, help: filterHelp)
             Menu(filter.labels.isEmpty ? "Any Label" : "Labels (\(filter.labels.count))") {
                 ForEach(PhotoLabel.allCases, id: \.self) { label in
                     Toggle(label.rawValue, isOn: Binding(
@@ -220,13 +231,13 @@ struct LibraryFilterBar: View {
             .fixedSize()
             .disabled(menu.toggleLabel == nil)
             .help(filterHelp)
-            .accessibilityIdentifier("library.filter.label")
+            .libraryControl(id: "library.filter.label", enabled: menu.toggleLabel != nil, help: filterHelp)
             Spacer(minLength: SuiteSpacing.s)
             Text(value).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
             Button("Clear") { menu.clearFilter?() }
                 .disabled(menu.clearFilter == nil)
-                .help(menu.clearFilterHelp ?? "Show every photo in the collection.")
-                .accessibilityIdentifier("library.filter.clear")
+                .help(clearHelp)
+                .libraryControl(id: "library.filter.clear", enabled: menu.clearFilter != nil, help: clearHelp)
         }
         .padding(.horizontal, SuiteSpacing.m)
         .padding(.vertical, SuiteSpacing.xs)

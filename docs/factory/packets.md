@@ -20,7 +20,8 @@ chain or conflict through them:
   `scripts/c4-assemble` from one file per component in `docs/c4/parts/`
   (`<system>/<container>/<component>.json`, with the container's own
   `container.json`). A task that changes what a component covers edits only
-  that component's part; **a new component is a new part file in the same
+  that component's part, and only its `paths`, never an existing
+  `description` (rule (a)); **a new component is a new part file in the same
   task that adds its code**, with an `order` that places it among its
   siblings.
 - **Waves.** Each app's `features/waves.md` is printed by `scripts/waves`
@@ -222,7 +223,9 @@ app's `waves.in.md` all go in the feature's last task, the one that carries
 pass 400 lines or 15 files). No build task owns shared prose, so no two
 build tasks chain through it. A C4 part and the feature's `.wave.json` are
 fragments, not shared docs: the task that adds a component adds its part,
-a task that changes what its component covers edits that part, and the
+a task that changes what its component covers edits only that part's
+`paths` (never an existing `description`: it is one string, so two tasks
+appending to it conflict, and `scripts/ci --changed` fails it), and the
 `feature-done` task sets the feature's `status` to `built`. Two tasks that
 edit the same part are owned-file overlap (rule (c)), so give a new area its
 own component part rather than chain. A new file inside a target's folder

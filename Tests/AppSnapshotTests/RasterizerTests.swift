@@ -2,7 +2,8 @@
 // `bounce` frame 0 is the scene's size at 1x and twice that at 2x; with the full-canvas Background left out, a
 // transparent export leaves a corner at alpha 0 and an opaque one at alpha 255; the ball's center carries its
 // fill; and the 1x frame is checked against Golden/flare/flare-raster-bounce-0-light.png within QB-V2's
-// tolerance (recorded by the macOS job on its first run, as Golden/README.md says). macOS only.
+// tolerance (recorded by the macOS job on its first run, as Golden/README.md says); a trimmed stroke paints only its
+// kept part. macOS only.
 #if canImport(CoreGraphics)
 import CoreGraphics
 import FlareCore
@@ -82,6 +83,23 @@ import Testing
         let image = try #require(RGBAImage(png: try StageRasterizer().png(Self.bounce, scale: 1, transparent: false)))
         #expect(image.width == 550 && image.height == 400)
         assertGolden(image, name: "flare-raster-bounce-0", area: "flare", appearance: "light")
+    }
+
+    /// A stroke trimmed to the first half of a square's outline paints the top and right sides only, as the SVG
+    /// export draws it: the PNG strokes the live stage's `strokePath`, not the whole outline.
+    @Test func aTrimmedStrokePaintsOnlyItsHalf() throws {
+        let square = FlarePath(polyline: [Point(x: 10, y: 10), Point(x: 90, y: 10), Point(x: 90, y: 90),
+                                          Point(x: 10, y: 90)], closed: true)
+        var stroke = Stroke(color: FlareColor(r: 1, g: 0, b: 0), width: 6)
+        stroke.trim = StrokeTrim(start: 0, end: 0.5)
+        let shape = FlareShape(points: [], fill: .solid(FlareColor(r: 0, g: 0, b: 0, a: 0)), path: square, stroke: stroke)
+        let scene = FlareScene(id: "s", name: "S", width: 100, height: 100, layers: [Layer(id: "l", name: "L", shapes: [shape])])
+        let list = LiveStage().drawList(Document(scenes: [scene]), sceneID: "s", frame: 0, editing: nil)
+        let image = try #require(RGBAImage(png: try StageRasterizer().png(list, scale: 1, transparent: false)))
+        #expect(pixel(image, x: 50, y: 10) == [255, 0, 0, 255], "top side, kept")
+        #expect(pixel(image, x: 90, y: 50) == [255, 0, 0, 255], "right side, kept")
+        #expect(pixel(image, x: 50, y: 90) == [255, 255, 255, 255], "bottom side, trimmed off")
+        #expect(pixel(image, x: 10, y: 50) == [255, 255, 255, 255], "left side, trimmed off")
     }
 }
 #endif

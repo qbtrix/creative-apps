@@ -1,0 +1,7 @@
+[
+  {"label": "helpInverted: the eyedropper asks for an image while one is open", "file": "Sources/PhotoModel/PhotoSample+Kernel.swift", "find": "canvas == nil ? \"Open an image first.\" : nil", "replace": "canvas != nil ? \"Open an image first.\" : nil", "tests": "PhotoSampleTests"},
+  {"label": "sizeIgnored: picking a sample size leaves the square as it was", "file": "Sources/PhotoModel/PhotoSample+Kernel.swift", "find": "sampleSize = size", "replace": "_ = size", "tests": "PhotoSampleTests"},
+  {"label": "optionIgnored: a Brush press picks without Option held", "file": "Sources/PhotoModel/PhotoSample+Kernel.swift", "find": "(tool == .brush && modifiers.contains(.option))", "replace": "(tool == .brush)", "tests": "PhotoSampleTests"},
+  {"label": "eyedropperDraws: an Eyedropper press doesn't pick", "file": "Sources/PhotoModel/PhotoSample+Kernel.swift", "find": "return tool == .eyedropper || (", "replace": "return false || (", "tests": "PhotoSampleTests"},
+  {"label": "loupeAnyTool: the loupe shows with every tool", "file": "Sources/PhotoModel/PhotoSample+Kernel.swift", "find": "canvas != nil && tool == .eyedropper", "replace": "canvas != nil", "tests": "PhotoSampleTests"}
+]
