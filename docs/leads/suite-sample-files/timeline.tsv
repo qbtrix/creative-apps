@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-21T20:58Z	stage	#4112	merged 0c435e275; Linux check 39673232799 (28e5f149c, contains it) running -> Belt-Slice-Done SS-vector when green; #4115 macOS build queued
 2026-10-21T21:14Z	check	#4112	Linux check 39673232799 red on CommandPathTests launcher baseline (LauncherCommands+Onboarding, not this feature); Belt-Slice-Done SS-vector waits on next green run containing 0c435e275; #4115 macOS build in progress
 2026-10-21T21:31:00Z	heartbeat	#4115 macOS build green, awaiting lane merge; dev Linux 39676099814 red (not ours), 39678885281 running with 0c435e275
+2026-10-21T21:47:55Z	heartbeat	dev Linux 39678885281 red on launcher CommandPath baseline (dev-red #3856, not ours); SS-vector done waits green run; #4115 awaiting lane
