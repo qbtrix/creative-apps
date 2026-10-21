@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-21T02:53Z	check	heartbeat	SH-a	#3809 open, clean, fast-lane; lane at bisect probe batch-20261021005140-5 (no #3809); dev 2ab0eb963; no LF-m/BK-m PR
 2026-10-21T03:14Z	check	heartbeat	SH-a	#3809 open, fast-lane, no needs-fix; lane still on batch-20261021005140 probes (-3..-5), none contain b63c2756; dev 80d986b52; no LF-m/BK-m PRs, SH-m still blocked
 2026-10-21T03:34Z	check	heartbeat	SH-a	#3809 open, clean, macOS build green; old batch resolved, new lane/batch-20261021032004 (8 PRs, #3466..#3808) excludes it, #3809 next by age; dev dccfa541a; no LF-m/BK-m PRs
+2026-10-21T03:54Z	check	heartbeat	SH-a	#3809 open, clean; lane bisecting batch-20261021032004 (probes -2,-4), not containing b63c2756; dev c786c8518; no LF-m/BK-m PRs
