@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-21T22:30Z	fix	#4162 merged dev d8b1b210 into PH-5, scripts/ci --changed PASS, pushed fd295c72, Head line moved
 2026-10-21T22:46Z	check	heartbeat: #4162 clean in lane (needs-rebase dropped); scoped photo run 39687866678 queued on d8b1b210; dev red now on library baseline (#3856), not ours
 2026-10-21T23:07Z	check	heartbeat: #4162 clean in lane, unmerged; no findings
+2026-10-21T23:40Z	fix	#4162 macOS build red: RenderBudgetPhotoPlaceTests sends PhotoPlaceIntent.files, which #4164 (PF-2) replaced with .drop; dev is red on macOS for everyone (#3856). Porting fix #4215 into the PR; gate running
