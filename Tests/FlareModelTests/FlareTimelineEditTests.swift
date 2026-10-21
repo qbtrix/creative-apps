@@ -143,15 +143,16 @@ struct FlareTimelineEditTests {
         w.timelineRows.flatMap { row in row.keyFrames.map { KeyRef(layerID: row.layerID, property: nil, frame: $0) } }
     }
 
+    /// Bounce with Shadow and the keyed Ball both hidden: the hidden Ball's keys are still picked.
     @Test func selectAllTakesHiddenLayers() {
         var w = bounce()
         w.toggleLayerFlag("shadow", .visible)
-        #expect(w.timelineRows.first { $0.layerID == "shadow" }?.isVisible == false)
+        w.toggleLayerFlag("ball", .visible)
+        #expect(w.timelineRows.filter { !$0.isVisible }.map(\.layerID).sorted() == ["ball", "shadow"])
         #expect(w.selectAllKeysHelp == nil)
         w.selectKey(ballKey(12), extending: false)
         w.selectAllKeys()
         #expect(w.selectedKeys == shownKeys(w) && w.timelineError == nil)
-        #expect(w.selectedKeys.contains { $0.layerID == "shadow" })
         #expect(Set(w.selectedKeys.map(\.layerID)) == Set(w.timelineRows.filter { !$0.keyFrames.isEmpty }.map(\.layerID)))
         #expect(w.selectedKeys.filter { $0.layerID == "ball" }.map(\.frame) == [0, 12, 24, 36, 47])
     }
@@ -173,9 +174,9 @@ struct FlareTimelineEditTests {
         w.editSymbol("wave")
         w.selectAllKeys()
         #expect(w.selectedKeys == [0, 12, 23].map { KeyRef(layerID: "hand", property: nil, frame: $0) })
+        // Back in the scene, whose own layers have no keys: the symbol's keys are not the scene's.
         w.exitSymbol()
-        w.selectAllKeys()
-        #expect(!w.selectedKeys.contains { $0.layerID == "hand" } && w.selectedKeys == shownKeys(w))
+        #expect(w.selectAllKeysHelp == FlareWorkspace.noKeysToSelect)
     }
 
     @Test func selectAllWithNoKeysRefusesWithItsHelp() {

@@ -113,6 +113,8 @@ extension FlareWorkspace {
         act("edit.delete", "Delete", "Deletes the selected keyframes, else the selected items or layers.", .edit,
             { $0.deleteHelp == nil ? nil : $0.editHelp(.delete) }) { w in w.deleteHelp == nil ? w.deleteSelection() : w.delete() },
         act("edit.select-all", "Select All", "Selects every item on the stage.", .view, { $0.editHelp(.selectAll) }) { w in w.selectAll() },
+        act("timeline.select-all-keys", "Select All Keys", "Picks every key on every layer of the edited scene or symbol, hidden ones too.", .view,
+            { $0.selectAllKeysHelp }) { w in w.selectAllKeys() },
         act("edit.deselect", "Deselect", "Clears the stage and layer selection.", .view, { $0.editHelp(.deselect) }) { w in w.deselect() },
         act("object.bring-forward", "Bring Forward", "Moves the selected layer one place up.", .edit, { $0.orderHelp(forward: true) }) { w in w.bringForward() },
         act("object.send-backward", "Send Backward", "Moves the selected layer one place down.", .edit, { $0.orderHelp(forward: false) }) { w in w.sendBackward() },

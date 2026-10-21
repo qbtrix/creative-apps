@@ -33,6 +33,8 @@ struct FlareCommandCatalogTests {
         ws.newDocument()
         for id in ["layer-a", "layer-b", "layer-c"] { ws.apply(AddLayer(owner: .scene("scene-1"), layer: Layer(id: id, name: id))) }
         ws.apply(AddScene(scene: Scene(id: "scene-2", name: "Scene 2")))
+        // A key, so Select All Keys (key-select-all KS-1) has one to pick.
+        ws.apply(SetKeyframe(owner: .scene("scene-1"), layerID: "layer-c", property: "x", keyframe: Keyframe(frame: 0, value: 0)))
         ws.selectLayer("layer-b")
         ws.selectTool(.rectangle)
         ws.drag(from: FlareCore.Point(x: 2, y: 2), to: FlareCore.Point(x: 30, y: 20))

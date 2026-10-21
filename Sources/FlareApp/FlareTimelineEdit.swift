@@ -3,6 +3,8 @@
 // one merged "Move Keyframe", then `.endKeyDrag`; a refused step moves nothing and sets `timelineError`. Delete and
 // the context menu (a right press selects the key) delete keys, insert or remove a frame and add or remove the label
 // at the playhead, disabled by `FlareWindow.timelineHelp`. Labels draw in a row on the ruler, only when one exists.
+// key-select-all KS-2: Select All Keys leads the context menu, and ⌘A with the strip focused sends the same intent
+// (the strip's onSelectAllKeys, which FlareCommands' ⌘A item reads as FocusedValues.timelineSelectAll).
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -51,7 +53,8 @@ struct FlareTimelineEdit: View {
             onEndKeyDrag: {
                 dragStart = nil
                 perform(.timeline(.endKeyDrag))
-            })
+            },
+            onSelectAllKeys: { perform(.timeline(.selectAllKeys)) })
             .accessibilityIdentifier("flare.timeline.track")
             .onKeyPress(keys: [.delete, .deleteForward]) { _ in
                 guard FlareWindow.timelineHelp(.removeKeys, in: model) == nil else { return .ignored }
@@ -70,6 +73,8 @@ struct FlareTimelineEdit: View {
     }
 
     @ViewBuilder private var menuItems: some View {
+        item("Select All Keys", .selectAllKeys)
+        Divider()
         item("Delete Keyframe", .removeKeys)
         Divider()
         item("Insert Frame", .insertFrames(1))
