@@ -62,12 +62,12 @@ Blueprint sections: photo.md 4 (tools), suiteui.md 2 (kernel tiers).
 |---|---|---|---|---|
 | FH-a | SuiteImaging declares the bucket, heal and remove rules and commands, and SuiteKernel the dab coverage, as stubs, with every Model check written and disabled. | FH-1, FH-2 | MJ-FH | suite-imaging:IM-a; brush-keys:BK-m (shared app file) |
 | FH-u | Photo's palette shows Paint Bucket, Spot Heal and Remove with their options on the stubs, each tool reachable by click and key, every control identified, within the render budget. | FH-3, FH-4 | PJ-FH1 | FH-a; adopt-kernel-brush:AB-photo, adopt-kernel-layers:AL-photo, adopt-kernel-export:AX-photo, adopt-kernel-undo:AU-photo, adopt-suiteui-chrome:AC-colour (`PhotoWorkspace.swift`, `PhotoToolOptions.swift`); brush-keys:BK-photo (shared app file) |
-| FH-m | The bucket fills exactly the seeded region inside the selection, spot heal, heal and remove fill from texture through creative-core, the dab coverage matches the brush, and every command is one undo step. | FH-5k, FH-5, FH-6 | MJ-FH | FH-a |
-| FH-photo | In Photo the bucket, spot heal, heal and remove change the selected pixel layer through the catalog as one undo step each, the old tone-match heal is gone, and RJ-P04, RJ-P07 and RJ-P51 pass. | FH-7, FH-8 | PJ-FH1, PJ-FH2, MJ-FH-photo | FH-m, FH-u; adjust-everywhere:AJ-photo (Photo's catalog and ledger); brush-keys:BK-photo (shared app file) |
-| FH-z | The C4 parts name Photo as the adopter and the feature is built. | FH-9, FH-10 | MJ-FH, PJ-FH2 | FH-photo |
+| FH-r | The bucket fills exactly the seeded region inside the selection, and spot heal, heal and remove fill from texture through creative-core. | FH-5b, FH-5h | MJ-FH | FH-a |
+| FH-c | The dab coverage matches the brush, and every fill and heal command is one undo step with its reason when it can't run. | FH-5k, FH-6 | MJ-FH | FH-a, FH-r |
+| FH-photo | In Photo the bucket, spot heal, heal and remove change the selected pixel layer through the catalog as one undo step each, the old tone-match heal is gone, RJ-P04, RJ-P07 and RJ-P51 pass, and the feature is built. | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u; adjust-everywhere:AJ-photo (Photo's catalog and ledger); brush-keys:BK-photo (shared app file) |
 
 **Screen early.** FH-u builds Photo's real palette entries and options on
-FH-a's stubs and waits on no slice of this feature but FH-a, beside FH-m.
+FH-a's stubs and waits on no slice of this feature but FH-a, beside FH-r and FH-c.
 FH-photo swaps the stubs for live.
 
 **Shared files.** `PhotoWorkspace.swift` (the `PhotoTool` cases) follows the
@@ -187,9 +187,10 @@ public enum RetouchCommands { public static func specs<T: RetouchTarget>(_ t: T.
 | FH-2 | – | RJ-P51's job folder and RJ-P04's and RJ-P07's re-pointed checks, disabled (`waits_on` FH-6) | `Tests/RealJobs/photo/bucket-background/bucket-background.jobs.json`, `Tests/RealJobs/photo/bucket-background/input/logo.png`, `Tests/RealJobs/photo/dust-spots/dust-spots.jobs.json`, `Tests/RealJobs/photo/remove-passerby/remove-passerby.jobs.json` | – | ~100, 4 |
 | FH-3 | – | **Reachable first.** `PhotoTool` gains `bucket`, `spotHeal` and `remove`; the palette shows them (G, J, Shift-J cycles Spot Heal, Heal, Remove); the options bar: Tolerance, Contiguous, All Layers for the bucket, Size and Hardness for the heal tools; each click calls its command (unavailable on the stubs with "Fill and heal arrive with FH-5."); `PhotoRetouchJourneyTests` written, skipped until FH-6 | `Sources/PhotoModel/PhotoWorkspace.swift`, `Sources/PhotoApp/PhotoPaletteTool.swift`, `Sources/PhotoApp/PhotoToolOptions.swift`, `Sources/PhotoApp/PhotoRetouchOptions.swift`, `UITests/PhotoJourneyTests+Retouch.swift` | FH-1 | ~220, 5 |
 | FH-4 | – | The Remove tool's stroke outline (SuiteUI `CanvasMarks` path mark, the painted area tinted) and the spot heal's ring cursor; render budget test | `Sources/PhotoApp/PhotoCanvasOverlay.swift`, `Tests/AppSnapshotTests/RenderBudgetRetouchTests.swift` | FH-3 | ~150, 2 |
+| FH-5b | – | `BucketRules` body over core: `floodMask` (sampling the layer or the merged picture) intersected with the selection's coverage, filled with the colour, the one-pixel anti-aliased edge; turns on `BucketRulesTests` | `Sources/SuiteImaging/Retouch/BucketRules.swift`, `Tests/SuiteImagingTests/BucketRulesTests.swift`, `Tests/mutations/SuiteImaging.BucketRules.json` | FH-1 | ~120, 3 |
+| FH-5h | – | `HealRules` body over core: spot heal via `PatchSearch` then `healed`; heal from a source offset; remove via `filledFromSurroundings` with a seed; `mask(_:)` from a coverage grid; turns on `HealRulesTests` | `Sources/SuiteImaging/Retouch/HealRules.swift`, `Tests/SuiteImagingTests/HealRulesTests.swift`, `Tests/mutations/SuiteImaging.HealRules.json` | FH-1 | ~150, 3 |
 | FH-5k | – | `DabCoverage` body: the dabs `DabSpacer` lays along the points, each a disc of the brush's size and hardness, max-combined into a coverage grid over the stroke's bounds; turns on `DabCoverageTests` | `Sources/SuiteKernel/Stroke/DabCoverage.swift`, `Tests/SuiteKernelTests/DabCoverageTests.swift`, `Tests/mutations/SuiteKernel.DabCoverage.json` | FH-1 | ~120, 3 |
-| FH-5 | – | `BucketRules` and `HealRules` bodies over core: `floodMask` (sampling the layer or the merged picture) intersected with the selection's coverage, filled with the colour; spot heal via `PatchSearch` then `healed`; heal from a source offset; remove via `filledFromSurroundings` with a seed; turns on both suites | `Sources/SuiteImaging/Retouch/BucketRules.swift`, `Sources/SuiteImaging/Retouch/HealRules.swift`, `Tests/SuiteImagingTests/BucketRulesTests.swift`, `Tests/SuiteImagingTests/HealRulesTests.swift`, `Tests/mutations/SuiteImaging.BucketRules.json`, `Tests/mutations/SuiteImaging.HealRules.json` | FH-1 | ~260, 6 |
-| FH-6 | – | `RetouchCommands` bodies over `RetouchTarget`: `fill.bucket`, `retouch.spot-heal`, `retouch.heal`, `retouch.remove` (points, or the selection when none); each one undo step named for its tool; turns on `RetouchCommandsTests` | `Sources/SuiteImaging/Retouch/RetouchCommands.swift`, `Tests/SuiteImagingTests/RetouchCommandsTests.swift`, `Tests/mutations/SuiteImaging.RetouchCommands.json` | FH-5, FH-5k | ~180, 3 |
+| FH-6 | – | `RetouchCommands` bodies over `RetouchTarget`: `fill.bucket`, `retouch.spot-heal`, `retouch.heal`, `retouch.remove` (points, or the selection when none); each one undo step named for its tool; turns on `RetouchCommandsTests` | `Sources/SuiteImaging/Retouch/RetouchCommands.swift`, `Tests/SuiteImagingTests/RetouchCommandsTests.swift`, `Tests/mutations/SuiteImaging.RetouchCommands.json` | FH-5b, FH-5h, FH-5k | ~180, 3 |
 | FH-7 | – | **Test first.** `PhotoRetouchKernelTests`; `PhotoRetouch+Kernel.swift` conforms `PhotoWorkspace` to `RetouchTarget` (the paint target, the selection's coverage, the layer's tiles for undo); the Heal tool calls `retouch.heal`; `toneShift` and its plan entries deleted from `PhotoRetouch.swift`; the catalog appends the specs; ids in the ledger; the three jobs enabled | `Tests/PhotoModelTests/PhotoRetouchKernelTests.swift`, `Sources/PhotoModel/PhotoRetouch+Kernel.swift`, `Sources/PhotoModel/PhotoRetouch.swift`, `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/mutations/PhotoModel.PhotoRetouch+Kernel.json`, `Tests/mutations/PhotoModel.PhotoRetouch.json` | FH-6, FH-3 | ~300, 7 |
 | FH-8 | – | The window on live: a click or a stroke ends in one command; `PhotoRetouchJourneyTests` turned on | `Sources/PhotoApp/PhotoWindow+Retouch.swift`, `UITests/PhotoJourneyTests+Retouch.swift` | FH-7, FH-4 | ~130, 2 |
 | FH-9 | – | The retouch part names Photo; Library's dust-spot adopt is written down as the next adopter in the part's description | `docs/c4/parts/creative-apps/suite-imaging/imaging-retouch.json` | FH-7 | ~20, 1 |
@@ -198,13 +199,13 @@ public enum RetouchCommands { public static func specs<T: RetouchTarget>(_ t: T.
 ## Build waves
 
 - Wave 1: FH-1, FH-2. Independent in this wave: both.
-- Wave 2: FH-3, FH-5k, FH-5. Independent in this wave: all.
+- Wave 2: FH-3, FH-5b, FH-5h, FH-5k. Independent in this wave: all.
 - Wave 3: FH-4, FH-6. Independent in this wave: both.
 - Wave 4: FH-7. Independent in this wave: FH-7 alone.
 - Wave 5: FH-8, FH-9. Independent in this wave: both.
 - Wave 6: FH-10. Independent in this wave: FH-10 alone.
 
-Longest chain: FH-1 → FH-5 → FH-6 → FH-7 → FH-9 → FH-10 (6). Chain of 6: the stubs before the bodies, the rules before the commands that call them, the commands before Photo's adapter, and the adapter before the window and the done task.
+Longest chain: FH-1 → FH-5b → FH-6 → FH-7 → FH-9 → FH-10 (6). Chain of 6: the stubs before the bodies, the rules before the commands that call them, the commands before Photo's adapter, and the adapter before the window and the done task.
 
 ## Acceptance test per task
 
@@ -214,8 +215,9 @@ Longest chain: FH-1 → FH-5 → FH-6 → FH-7 → FH-9 → FH-10 (6). Chain of 
 | FH-2 | `scripts/jobs check` | a job names a command the catalog lacks | – (jobs) |
 | FH-3 | the palette and options exist with their ids; G selects the bucket; `PJ-FH1` skipped by name | a tool has no key or an option no id | – (view; render budget row) |
 | FH-4 | `RenderBudgetRetouchTests.removeStrokeInThreeBodies` | the stroke re-renders the window per sample | – (view; render budget row) |
+| FH-5b | `BucketRulesTests`: tolerance 0 fills one colour's region exactly; contiguous off fills every match; nothing outside the selection changes; All Layers samples the merged picture but writes the target layer | a fill leaks or ignores the selection | `SuiteImaging.BucketRules`: selection intersection skipped → `.insideSelectionOnly`; contiguous flag ignored → `.contiguousStopsAtEdges` |
+| FH-5h | `HealRulesTests`: a dot on flat sky heals to within 3 levels of the sky; remove of a square on a texture leaves no pixel of the square's colour; the same seed gives the same pixels | heal leaves the spot, or remove isn't repeatable | `SuiteImaging.HealRules`: seed not passed → `.removeIsRepeatable`; source offset sign flipped → `.healCopiesFromSource` |
 | FH-5k | `DabCoverageTests`: one dab of size 10, hardness 1 covers a disc of radius 5 exactly; two overlapping dabs keep the max, not the sum; the grid's bounds hold every dab | coverage adds up past 1, or a dab is cut at the bounds | `SuiteKernel.DabCoverage`: max replaced by sum → `.overlapKeepsMax`; bounds not padded by the radius → `.boundsHoldDabs` |
-| FH-5 | `BucketRulesTests`: tolerance 0 fills one colour's region exactly; contiguous off fills every match; nothing outside the selection changes; All Layers samples the merged picture but writes the target layer. `HealRulesTests`: a dot on flat sky heals to within 3 levels of the sky; remove of a square on a texture leaves no pixel of the square's colour; the same seed gives the same pixels | a fill leaks, ignores the selection, or heal leaves the spot | `SuiteImaging.BucketRules`: selection intersection skipped → `.insideSelectionOnly`; contiguous flag ignored → `.contiguousStopsAtEdges`. `SuiteImaging.HealRules`: seed not passed → `.removeIsRepeatable`; source offset sign flipped → `.healCopiesFromSource` |
 | FH-6 | `RetouchCommandsTests` on a test target: one step each; undo restores the layer byte for byte; `retouch.remove` with no points and no selection is unavailable with the reason; a locked layer refuses | a command is two steps, undo is inexact, or remove runs on nothing | `SuiteImaging.RetouchCommands`: undo snapshot taken after the edit → `.undoRestoresBytes`; selection fallback missing → `.removeUsesSelection` |
 | FH-7 | `PhotoRetouchKernelTests`; Photo's existing clone tests unchanged; RJ-P04, RJ-P07, RJ-P51 on Linux | a tool edits another layer, heal still tone-matches per dab, or clone changes | `PhotoModel.PhotoRetouch+Kernel`: target taken from the composite → `.editsSelectedLayer`; coverage of a hidden selection used → `.selectionCoverageOnly` |
 | FH-8 | `PJ-FH1`, `PJ-FH2` | a click doesn't fill, or a stroke makes several undo steps | – (window wiring) |
@@ -235,7 +237,7 @@ Longest chain: FH-1 → FH-5 → FH-6 → FH-7 → FH-9 → FH-10 (6). Chain of 
 
 ## Done check
 
-Per slice (rules 6, 15, 17, 21, 22): FH-a and FH-m green on Linux with
+Per slice (rules 6, 15, 17, 21, 22): FH-a, FH-r and FH-c green on Linux with
 `Mutate:` scores clean; FH-u and FH-photo through the feel gate (`mouse`,
 `taste`, `perf`: a bucket click and a Remove stroke on an 8K photo) with their
 `Mac-Finish:` lines; RJ-P04, RJ-P07 (once the lasso exists) and RJ-P51 green

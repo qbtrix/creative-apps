@@ -56,6 +56,8 @@ No task reads another product's code.
 
 Blueprint sections: photo.md 4 (tools, layers), suite.md 2.
 
+**Hand-off (beta gaps C1 to C12, suiteui line, cross-line):** the XK4 kernel-gap adopts (area-selection AR-photo-m, clipboard-interop CB-photo, orientation-crop OC-photo-m, document-setup DS-photo, brush-keys BK-photo) also edit `PhotoCommandCatalog.swift` and `Tests/command-ids/photo.txt`. The slices here that edit those files start after those adopts' slices on the same app have merged, or before them with their lead told; the checker can't see this across lines.
+
 ## Slices
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |

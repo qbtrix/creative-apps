@@ -6,7 +6,11 @@
 // no menu bar), picks a format, a scale and a scope chip 3 times each, then
 // presses Cancel (`design.export.cancel`). The sheet's run is the export area's
 // own state, so the window body runs only for the request: at most 2 bodies over
-// the whole walk. `liveRun` times a real run's write and waits on DE-10. The
+// the whole walk. `liveRun` (DE-10): on the live services, Desktop, A and B
+// selected, Scope Selection at PNG 1x into a temp folder (DesignExportArea's
+// DEBUG `testFolder`, standing in for the folder panel), Export writes three
+// files: at most 4 DesignEditor bodies (one per progress step plus the finish;
+// the run is the area's state, the canvas never redraws). The
 // sheet is its own window attached to the hosted one, so its controls are found
 // from `attachedSheet`'s accessibility tree. Nested in BodyCountSuites, as every
 // suite that reads a body counter is. macOS only.
@@ -59,8 +63,44 @@ extension BodyCountSuites {
             expectBodies(walk, atMost: 2, target: 1)
         }
 
-        @Test(.disabled("waits on DE-10"), .timeLimit(.minutes(2)))
-        func liveRun() async throws {}
+        @Test(.timeLimit(.minutes(2)))
+        func liveRun() async throws {
+            var model = DesignFixtures.cards
+            for id in ["node-1", "node-2", "node-3"] { model.toggleSelection(id) }
+            let folder = FileManager.default.temporaryDirectory.appendingPathComponent("design-live-run-\(UUID().uuidString)")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: folder) }
+            #if DEBUG
+            DesignExportArea.testFolder = folder
+            defer { DesignExportArea.testFolder = nil }
+            #endif
+            let w = RenderBudgetWindow(DesignWindow(seed: model))
+            defer { w.close() }
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return DesignEditor.bodyRuns
+                #else
+                return nil
+                #endif
+            }
+            try await w.settle(untilStable: bodies)
+            #if DEBUG
+            DesignWindow.openExport?()
+            #endif
+            guard let sheet = await Self.sheet(of: w.window) else { return #expect(Bool(false), "no export sheet") }
+            #expect(Self.press("design.export.scope.selection", in: sheet), "no Selection chip")
+            try await w.settle(200)
+            let listing = { (try? FileManager.default.contentsOfDirectory(atPath: folder.path))?.sorted() ?? [] }
+            let run = try await w.measure("design export live run: 3 PNG files", bodies: bodies) {
+                #expect(Self.press("design.export.start", in: sheet), "no Export button")
+                for _ in 0..<200 where listing().count < 3 { try await Task.sleep(for: .milliseconds(20)) }
+                try await w.settle(200)
+            }
+            #expect(listing() == ["A.png", "B.png", "Desktop.png"], "the folder holds \(listing())")
+            // One body per progress step plus the finish; the target is the finish alone.
+            expectBodies(run, atMost: 4, target: 1)
+            _ = Self.press("design.export.dismiss", in: sheet)
+        }
 
         /// The sheet attached to `window`, waiting up to two seconds for SwiftUI to present it.
         static func sheet(of window: NSWindow) async -> NSWindow? {
