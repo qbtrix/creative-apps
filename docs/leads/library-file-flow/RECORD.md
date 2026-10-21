@@ -53,3 +53,5 @@ Next: (2026-10-21T17:35Z) LF-3 merged #4024 (593cfe6). LF-4 still waits on needs
 - 2026-10-21T19:07Z: Watch: LF-4 is still blocked on #3928 (ThumbnailGrid per-cell drag hook, open). Waiting on the supervisor's answer on #3479 about which branch Belt watches.
 
 - 2026-10-21T20:08Z: Watch: LF-4 still blocked on #3928 (open). No supervisor reply on #3479 yet.
+
+- 2026-10-21T20:39Z: Belt's nudge now names lead/library-file-flow, which answers the branch question on #3479; this record is the live one. LF-4 is still blocked on #3928 (open).
