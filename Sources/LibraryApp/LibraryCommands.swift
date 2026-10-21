@@ -12,6 +12,13 @@
 // once the cull area routes them) act only while the grid or loupe has focus,
 // so their items take no key equivalent and name the key in their help
 // instead ("Pick (P)"); a key with no route yet goes unnamed.
+// Filters and collections (FC-5), fed by the focused window's
+// LibraryFiltersMenu: File: New Collection ⌘N, New Smart Collection from
+// Filter ⌥⌘N, Delete Collection. Photo: Add to Collection ▸ (one item per
+// collection you made, not smart), Remove from Collection ⌘⌫. View: Filter ▸
+// Picked, Unflagged and Rejected (checkmarks), Rating ▸, Label ▸, Hide
+// Rejected, Clear Filter. Each is disabled with its Model help until its
+// slice lights it up.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -31,8 +38,10 @@ extension MenuCommand {
 
 struct LibraryCommands: Commands {
     @FocusedValue(\.libraryMenu) private var focused
+    @FocusedValue(\.libraryFilters) private var focusedFilters
 
     private var menu: LibraryMenu { focused ?? .disabled }
+    private var filters: LibraryFiltersMenu { focusedFilters ?? LibraryFiltersMenu() }
     private static let noWindow = "Open the Library window first."
 
     /// The services' reason for `member`, else `fallback`; no window says so.
@@ -49,6 +58,8 @@ struct LibraryCommands: Commands {
 
     var body: some Commands {
         CommandGroup(after: .newItem) {
+            collectionFileItems
+            Divider()
             MenuCommand(
                 title: "Import Folder…", systemImage: "folder.badge.plus", action: menu.file.importFolder,
                 reason: menu.file.importHelp ?? why("importer", "Import isn't available right now."),
@@ -77,7 +88,11 @@ struct LibraryCommands: Commands {
                 title: "Deselect", action: menu.edit.deselect, reason: why(nil, "No photos are selected."),
                 shortcut: KeyboardShortcut("a", modifiers: [.command, .shift]))
         }
-        CommandGroup(before: .toolbar) { viewItems }
+        CommandGroup(before: .toolbar) {
+            viewItems
+            filterMenu
+            Divider()
+        }
         CommandMenu("Photo") { photoItems }
         CommandMenu("Metadata") { metadataItems }
     }
@@ -123,7 +138,6 @@ struct LibraryCommands: Commands {
         }
         .disabled(view.setSort == nil)
         .help(view.setSort == nil ? "Sort By: \(noSort)" : "Sort By")
-        Divider()
     }
 
     @ViewBuilder private var photoItems: some View {
@@ -140,6 +154,8 @@ struct LibraryCommands: Commands {
         Divider()
         MenuCommand(title: photo.cropTitle, systemImage: "crop", action: photo.toggleCrop, reason: crop, key: "R")
         MenuCommand(title: "Reset Crop", action: photo.resetCrop, reason: crop)
+        Divider()
+        collectionPhotoItems
     }
 
     @ViewBuilder private var metadataItems: some View {
@@ -174,6 +190,81 @@ struct LibraryCommands: Commands {
         )
         .disabled(cull.toggleAutoAdvance == nil)
         .help(Self.autoAdvanceHelp(disabled: cull.toggleAutoAdvance == nil ? advance : nil))
+    }
+
+    /// A collections item's reason: no window, else `help`, the collections'
+    /// reason, `fallback`, or that a collection of yours must be selected.
+    private func collectionsWhy(_ help: String?, _ fallback: String? = UserCollection.unavailable) -> String {
+        guard focusedFilters != nil else { return Self.noWindow }
+        return help ?? filters.collectionsHelp ?? fallback ?? "Select a collection of yours first."
+    }
+
+    @ViewBuilder private var collectionFileItems: some View {
+        MenuCommand(
+            title: "New Collection", systemImage: "rectangle.stack.badge.plus", action: filters.newCollection,
+            reason: collectionsWhy(nil), shortcut: KeyboardShortcut("n"))
+        MenuCommand(
+            title: "New Smart Collection from Filter", systemImage: "gearshape", action: filters.newSmartCollection,
+            reason: collectionsWhy(filters.newSmartCollectionHelp, UserCollection.smartUnavailable),
+            shortcut: KeyboardShortcut("n", modifiers: [.command, .option]))
+        let delete = filters.selectedCollectionID.flatMap { bind(filters.deleteCollection, $0) }
+        MenuCommand(
+            "Delete Collection", systemImage: "trash",
+            help: "Delete Collection: "
+                + (delete == nil
+                    ? collectionsWhy(filters.deleteCollectionHelp) : "Deleting a collection never removes its photos."),
+            isEnabled: delete != nil) { delete?() }
+    }
+
+    @ViewBuilder private var collectionPhotoItems: some View {
+        let addWhy = collectionsWhy(nil, "Make a collection first: File > New Collection.")
+        let canAdd = filters.addItems.contains { $0.action != nil }
+        Menu("Add to Collection") {
+            ForEach(filters.addItems) { item in
+                MenuCommand(title: item.title, action: item.action, reason: item.help ?? addWhy)
+            }
+        }
+        .disabled(!canAdd)
+        .help(canAdd ? "Add to Collection" : "Add to Collection: \(addWhy)")
+        MenuCommand(
+            title: "Remove from Collection", action: filters.removeFromCollection,
+            reason: collectionsWhy(filters.removeFromCollectionHelp), shortcut: KeyboardShortcut(.delete))
+    }
+
+    @ViewBuilder private var filterMenu: some View {
+        let rules = filters.activeFilter
+        let reason = focusedFilters == nil ? Self.noWindow : (filters.filterHelp ?? LibraryFilter.unavailable ?? "")
+        let canFilter = filters.toggleFlag != nil || filters.clearFilter != nil
+        Menu("Filter") {
+            ForEach(LibraryFilterBar.flags, id: \.self) { flag in
+                MenuCommand(
+                    title: LibraryFilterBar.title(flag), systemImage: rules.flags.contains(flag) ? "checkmark" : nil,
+                    action: bind(filters.toggleFlag, flag), reason: reason)
+            }
+            Divider()
+            Menu("Rating") {
+                ForEach(LibraryFilterBar.ratings, id: \.self) { rule in
+                    MenuCommand(
+                        title: rule.title, systemImage: rules.rating == rule ? "checkmark" : nil,
+                        action: bind(filters.setRating, rule), reason: reason)
+                }
+            }
+            Menu("Label") {
+                ForEach(PhotoLabel.allCases, id: \.self) { label in
+                    MenuCommand(
+                        title: label.rawValue, systemImage: rules.labels.contains(label) ? "checkmark" : nil,
+                        action: bind(filters.toggleLabel, label), reason: reason)
+                }
+            }
+            MenuCommand(
+                title: "Hide Rejected", systemImage: rules.hidesRejected ? "checkmark" : nil,
+                action: filters.toggleHideRejected, reason: reason)
+            Divider()
+            MenuCommand(
+                title: "Clear Filter", action: filters.clearFilter, reason: filters.clearFilterHelp ?? reason)
+        }
+        .disabled(!canFilter)
+        .help(canFilter ? "Filter" : "Filter: \(reason)")
     }
 
     /// Auto Advance's help: what it does while enabled (a label never moves

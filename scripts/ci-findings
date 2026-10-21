@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/ci-findings <ui-test-log>: the macOS job's Findings step. One open
+# scripts/ci-findings <ui-test-log>: journeys.yml's Findings step. One open
 # issue per failing journey, filed as "CI finding: <Target/Class/test>" (the
 # form UITests/quarantine.json takes), labelled `finding` and `line:<app>`,
 # with a `Test: \`<name>\`` body line. A lead may relabel one `gap` and retitle

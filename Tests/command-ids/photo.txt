@@ -36,6 +36,7 @@ tool.clone
 tool.crop
 tool.eraser
 tool.eyedropper
+tool.gradient
 tool.heal
 tool.marquee
 tool.move
