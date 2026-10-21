@@ -3,8 +3,6 @@
 Sources/PhotoApp/CanvasSizeSheet.swift: Button("OK", action: resize).keyboardShortcut(.defaultAction)
 Sources/PhotoApp/ExportSheet.swift: Button("Export", action: onExport).keyboardShortcut(.defaultAction)
 Sources/PhotoApp/ImageSizeSheet.swift: Button("Resize", action: resize)
-Sources/PhotoApp/PhotoCommands+File.swift: Button(url.lastPathComponent) { openRecent(url, recent.target) }
-Sources/PhotoApp/PhotoCommands+File.swift: Button("Clear Menu") { clearRecent(recent.target) }.disabled(!recent.canClear)
 Sources/PhotoApp/PhotoCommands+File.swift: Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
 Sources/PhotoApp/PhotoCommands+View.swift: MenuCommand("History", help: historyHelp, isEnabled: menu.hasImage) {
 Sources/PhotoApp/PhotoWindow.swift: Button("Rename", action: commitRename)
