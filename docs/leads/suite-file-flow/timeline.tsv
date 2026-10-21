@@ -50,3 +50,4 @@ utc	stage	event	ref	note
 2026-10-21T06:50Z	3	waiting	#3827	batch landed 06:45Z (#3816, #3813) without #3827; lane log 06:41Z still lists #3827 ready, 24 ready PRs wait; no labels or comments; SF-8 waits
 2026-10-21T07:17Z	3	waiting	#3827	open, fast-lane only, no needs-fix/needs-rebase; dev head b64cbb8cf (#3784 core bump); lane queue busy
 2026-10-21T07:39Z	3	waiting	#3827	open, fast-lane only, no needs-fix/needs-rebase; dev head 709f92838 (#3815); lane bisecting lane/batch-20261021065242
+2026-10-21T08:02Z	3	building	SF-8	#3827 merged 07:45 (260f7a874); SF-8 rebuilt on dev as 5c0bfd78d, gating
