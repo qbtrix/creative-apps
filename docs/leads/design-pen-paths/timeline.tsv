@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-21T00:39Z	3	question	#3517	supervisor: Belt watches the SuiteUI branch; poll-2 status and asks
 2026-10-21T00:54Z	3	heartbeat	DP-a	blocked poll 3 of 3; supervisor answered; core#787 filed
 2026-10-21T01:16Z	3	heartbeat	DP-a	PD-a #3759 open; DS-a, DK-m, DS-m, PD-u waiting; AD-design ready
+2026-10-21T01:39Z	heartbeat	DP-a waits unchanged: PD-a #3759 open, DS-a waits DT-a #3751 (lane), DK-m waits DS-m, AD-design not built; DP-7 waits creative-core#787
