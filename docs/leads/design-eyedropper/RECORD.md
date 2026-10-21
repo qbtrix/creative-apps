@@ -2,15 +2,15 @@
 
 Issue: #3438 · Packet: docs/blueprints/design/features/eyedropper.md
 Run: act-1a15abb305f-lc8g · Session: claude/design-feature-lead-run-0oib91 · Started: 2026-10-20T19:16:13Z
-Stage: 3 wave 2 (DY-a merged 23:24Z as 6f9c8928; DY-u PR #3816 at 560cc535)
+Stage: 3 wave 2 (DY-a merged 23:24Z as 6f9c8928; DY-u merged 06:45Z as 6d7fcf14)
 Base: a48992b7c85ded3959e12683f50bd5fe7531b011 (origin/dev); main verified at b3011ab9
-Next: lane on #3816 (DY-u); critics on DY-a/DY-u once a scoped design run on dev shows screens (dev full runs cancelled since 21:10); DY-m waits transform:DT-m.
+Next: DY-a fixes #3887, #3889, #3891 in the lane; critics on DY-u once scoped design run 39558386118 shows screens; DY-m waits transform:DT-m.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DY-a | Eyedropper tool on the palette; SampleTarget stubs | DY-1, DY-2 | MJ-DY | EY-a (done) | yes | 0 | merged (6f9c8928) | – | wanted |
-| DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 0 | PR #3816 | – | – |
+| DY-u | loupe follows the pointer, click and Option-click picks; snapshots, budget | DY-3, DY-4 | J-DY | DY-a; EY-u (done) | yes | 0 | merged 6d7fcf14 (#3816) | – | – |
 | DY-m | topmost visible colour; apply as one step; color.sample, color.pick, RJ-D34 | DY-5, DY-6 | MJ-DY | DY-a, transform:DT-m; EY-m (done) | no | 0 | waiting | – | – |
 | DY-z | journey on live; built | DY-7, DY-8 | J-DY | DY-u, DY-m | yes | 0 | waiting | – | – |
 
