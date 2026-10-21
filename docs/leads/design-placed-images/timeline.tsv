@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-21T09:17:08Z	PD-a	fix-round	#3759	merged origin/dev (edd2404f: DesignNode with rotation/flips/shape, mutation plan union, C4 description kept as dev per check-c4-descriptions); ported #3980 stale DY anchors fix (b97947e2); scripts/ci --changed PASS; Head moved
 2026-10-21T09:28:12Z	PD-a	heartbeat	#3759	supervisor-queued, clean at b97947e2; #3980 (anchors) open; PD-u/PD-m wait on PD-a
 2026-10-21T09:51Z	PD-a	heartbeat	#3759	check-in: #3759 supervisor-queued, clean; #3980 anchors fix open
+2026-10-21T10:26Z	PD-a	integrate	#3759	merged origin/dev (mutation plan conflict, took dev #3996), CI PASS, head f8a29454; supervisor-queued
