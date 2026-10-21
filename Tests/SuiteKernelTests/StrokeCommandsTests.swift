@@ -1,7 +1,6 @@
-// StrokeCommandsTests.swift (stroke-style SS-1 written, SS-6 turns on): the nine stroke commands on a test target
+// StrokeCommandsTests.swift (stroke-style SS-1 written, SS-6 turned on): the nine stroke commands on a test target
 // with a kernel `History`. Each edit records one step named its title, a width scrub is one step, every why-not
-// reads, and dash and trim wait on creative-core's stroke fields. The spec shape check runs now; the rest are
-// disabled by name until SS-6 builds the bodies.
+// reads, and dash and trim wait on creative-core's stroke fields.
 import Testing
 import SuiteKernel
 
@@ -39,7 +38,7 @@ struct StrokeDoc: StrokeTarget {
             if id != "stroke.read" { #expect(spec.title == title, "\(id)") }
         }
     }
-    @Test(.disabled("waits on SS-6")) func oneStepPerRun() throws {
+    @Test func oneStepPerRun() throws {
         let catalog = try #require(Self.catalog)
         var doc = StrokeDoc(stroke: nil)
         let runs: [(String, JSONValue)] = [
@@ -56,7 +55,7 @@ struct StrokeDoc: StrokeTarget {
         }
         #expect(doc.stroke == nil)
     }
-    @Test(.disabled("waits on SS-6")) func widthDragIsOneStep() throws {
+    @Test func widthDragIsOneStep() throws {
         let catalog = try #require(Self.catalog)
         var doc = StrokeDoc(stroke: VectorStroke(width: 2))
         for sample in 0..<120 {
@@ -66,25 +65,25 @@ struct StrokeDoc: StrokeTarget {
         #expect(doc.history.steps == ["Stroke Width"])
         #expect(doc.undo() && doc.stroke?.width == 2)
     }
-    @Test(.disabled("waits on SS-6")) func addNeedsNoStroke() throws {
+    @Test func addNeedsNoStroke() throws {
         let catalog = try #require(Self.catalog)
         #expect(catalog.availability("stroke.add", on: StrokeDoc(stroke: VectorStroke()))
             == .unavailable("The layer already has a stroke."))
         #expect(catalog.availability("stroke.add", on: StrokeDoc(stroke: nil)) == .available)
         #expect(catalog.availability("stroke.width", on: StrokeDoc(stroke: nil)) != .available)
     }
-    @Test(.disabled("waits on SS-6")) func dashAndTrimWaitOnCore() throws {
+    @Test func dashAndTrimWaitOnCore() throws {
         let catalog = try #require(Self.catalog)
         let doc = StrokeDoc(stroke: VectorStroke())
         #expect(catalog.availability("stroke.dash", on: doc) == .unavailable(StrokeRules.waitingCore))
         #expect(catalog.availability("stroke.trim", on: doc) == .unavailable(StrokeRules.waitingCore))
     }
-    @Test(.disabled("waits on SS-6")) func trimHonoursHelp() throws {
+    @Test func trimHonoursHelp() throws {
         let catalog = try #require(Self.catalog)
         let why = "Trim paths are for animation, in Flare and Halo."
         #expect(catalog.availability("stroke.trim", on: StrokeDoc(stroke: VectorStroke(), trimHelp: why)) == .unavailable(why))
     }
-    @Test(.disabled("waits on SS-6")) func intentCommandRoundTrips() throws {
+    @Test func intentCommandRoundTrips() throws {
         let catalog = try #require(Self.catalog)
         let intents: [StrokeIntent] = [.add, .remove, .color(FillColor(r: 1, g: 0, b: 0), drag: "d"), .width(6, drag: nil),
                                        .join(.round), .cap(.square), .dash(.dashed, pattern: nil), .dash(.custom, pattern: [10, 4]),

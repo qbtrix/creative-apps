@@ -26,7 +26,9 @@
 // `-DesignWindowSize WxH` (the first window's content size).
 //
 // File > Export… (⇧⌘E) bumps `exportRequest`; DesignExportArea opens its sheet
-// on each change and hands its notes to the status line.
+// on each change and hands its notes to the status line. DesignHistoryArea holds the
+// History panel (View > Show History) and the autosave hooks; a jump and a restore come
+// back here as workspace methods.
 //
 // Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
 // them through DesignPasteboardBridge under the Model's `pasteboardType`; a
@@ -44,6 +46,7 @@
 // lists every control the editor registers with its DesignControlID.
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -127,6 +130,7 @@ struct DesignWindow: View {
         .task { start() }
         .modifier(DesignClosePrompt(model: model))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
+        .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
@@ -172,6 +176,8 @@ struct DesignWindow: View {
         case .setFrame(let id, let x, let y, let width, let height):
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
+        case .fill(let intent): model.runFill(intent)
+        case .transform(let intent): model.runTransform(intent)
         case .align(let edge): model.alignLayer(edge)
         case .endEditRun: endLive { model.endEditRun() }
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
@@ -210,6 +216,8 @@ struct DesignWindow: View {
             // The row ids come from the model's own rows; only the name can be refused.
             do { try model.renameNode(id, to: name) } catch { if error == .emptyName { note = DesignRefusal.emptyName.help } }
         case .setPageSize(let width, let height): model.setPageSize(width: width, height: height)
+        case .pick(let point, let toStroke):
+            do { try model.pick(at: point, toStroke: toStroke) } catch { note = error.help }
         }
     }
 

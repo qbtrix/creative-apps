@@ -63,14 +63,15 @@
               {
                 "id": "halo-layers",
                 "name": "Layers",
-                "description": "HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values. A solid or shape layer's gradient fill (the kernel's Fill in the layer's unit box) and its GradientFillTarget conformance (HaloFill+Kernel). A shape layer's ShapeSpec and stroke and their kernel adapters (HaloShape+Kernel, HaloStroke+Kernel). A solid's placed picture (the kernel's PlacedAsset and focus) and its PlacedImageTarget conformance (HaloPlace+Kernel).",
+                "description": "HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values. A solid or shape layer's gradient fill (the kernel's Fill in the layer's unit box) and its GradientFillTarget conformance (HaloFill+Kernel). A shape layer's ShapeSpec and stroke and their kernel adapters (HaloShape+Kernel, HaloStroke+Kernel). A solid's placed picture (the kernel's PlacedAsset and focus) and its PlacedImageTarget conformance (HaloPlace+Kernel). A layer's style (SuiteImaging's LayerStyle) and its LayerStyleTarget conformance (HaloStyle+Kernel).",
                 "paths": [
                   "Sources/HaloModel/HaloLayer.swift",
                   "Sources/HaloModel/HaloLayerDefaults.swift",
                   "Sources/HaloModel/HaloFill+Kernel.swift",
                   "Sources/HaloModel/HaloPlace+Kernel.swift",
                   "Sources/HaloModel/HaloShape+Kernel.swift",
-                  "Sources/HaloModel/HaloStroke+Kernel.swift"
+                  "Sources/HaloModel/HaloStroke+Kernel.swift",
+                  "Sources/HaloModel/HaloStyle+Kernel.swift"
                 ],
                 "status": "existing",
                 "authored": true,
@@ -389,7 +390,7 @@
               {
                 "id": "halo-window",
                 "name": "Window and command router",
-                "description": "HaloWindow (today inside HaloApp.swift; W0 moves it to its own file): the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey. The History panel and the autosave modifier on the window (HaloHistoryArea).",
+                "description": "HaloWindow (today inside HaloApp.swift; W0 moves it to its own file): the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text, +Styling: the layer style sheet). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey. The History panel and the autosave modifier on the window (HaloHistoryArea).",
                 "paths": [
                   "Sources/HaloApp/HaloWindow.swift",
                   "Sources/HaloApp/HaloControls.swift",
@@ -402,6 +403,7 @@
                   "Sources/HaloApp/HaloWindow+Easing.swift",
                   "Sources/HaloApp/HaloWindow+Render.swift",
                   "Sources/HaloApp/HaloWindow+Text.swift",
+                  "Sources/HaloApp/HaloWindow+Styling.swift",
                   "Sources/HaloApp/HaloHistoryArea.swift"
                 ],
                 "status": "planned",

@@ -1,0 +1,348 @@
+{
+  "title": "One New Document sheet (size, unit, resolution, background, presets, clipboard size, and rate and length for timed apps) and Document Settings to change them later, on a kernel DocumentSetup; Photo, Design, Halo and Flare adopt",
+  "wave": "XK4",
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "beta gaps 2026-10-21 C4 (Photo row 6, Halo B1 and the preset row); feature map suiteui/document-setup (new); real jobs RJ-P71, RJ-H70 (new)",
+  "waits_on": "frame-rates FR-a (the rate type) and FR-halo, FR-flare (CompositionSettings.swift, NewCompositionSheet.swift, FlareNewDocument.swift, FlareNewSheet.swift); clipboard-interop CB-s (the clipboard size, DS-photo); the apps' catalog chains (cross-line)",
+  "depends": [
+    "editor-kernel",
+    "command-catalog",
+    "adopt-command-catalog"
+  ],
+  "longest_chain": "7 (DS-1 → DS-2 → DS-5 → DS-6 → DS-12 → DS-15 → DS-16)",
+  "journeys": [
+    "SuiteDocumentSetupJourneyTests.testNewSheetPresetsAndUnits",
+    "PhotoDocumentsJourneyTests.testNewImageFromSheet",
+    "DesignPageJourneyTests.testNewDocumentFromPreset",
+    "HaloSettingsJourneyTests.testCompositionSettingsLater",
+    "FlareNewSheetJourneys.testDocumentSettingsLater"
+  ],
+  "owned": [
+    "Sources/SuiteKernel/Document/DocumentSetup.swift",
+    "Sources/SuiteKernel/Document/DocumentSetupCommands.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-document.json",
+    "Tests/SuiteKernelTests/DocumentSetupTests.swift",
+    "Tests/mutations/SuiteKernel.DocumentSetup.json",
+    "Tests/mutations/SuiteKernel.DocumentSetupCommands.json",
+    "Sources/SuiteUI/NewDocumentSheet.swift",
+    "Sources/SuiteUI/Gallery/GalleryNewDocument.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Tests/SuiteUITests/NewDocumentSheetTests.swift",
+    "UITests/SuiteJourneyTests+DocumentSetup.swift",
+    "Tests/AppSnapshotTests/RenderBudgetNewDocumentTests.swift",
+    "Tests/PhotoModelTests/PhotoNewImageTests.swift",
+    "UITests/PhotoJourneyTests+Documents.swift",
+    "Tests/RealJobs/photo/new-print-size/new-print-size.jobs.json",
+    "Sources/PhotoModel/PhotoNewImage+Kernel.swift",
+    "Sources/PhotoApp/PhotoWindow.swift",
+    "Tests/mutations/PhotoModel.PhotoNewImage+Kernel.json",
+    "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "Tests/command-ids/photo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json",
+    "Tests/DesignModelTests/DesignNewDocumentTests.swift",
+    "UITests/DesignJourneyTests+Page.swift",
+    "Sources/DesignModel/DesignNewDocument+Kernel.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Tests/mutations/DesignModel.DesignNewDocument+Kernel.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json",
+    "Tests/HaloModelTests/HaloCompositionSettingsTests.swift",
+    "UITests/HaloJourneyTests+Settings.swift",
+    "Tests/RealJobs/halo/longer-navy-comp/longer-navy-comp.jobs.json",
+    "Sources/HaloModel/HaloDocumentSetup+Kernel.swift",
+    "Sources/HaloModel/CompositionSettings.swift",
+    "Sources/HaloApp/HaloWindow+File.swift",
+    "Tests/mutations/HaloModel.HaloDocumentSetup+Kernel.json",
+    "Sources/HaloModel/HaloCommandCatalog.swift",
+    "Tests/command-ids/halo.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json",
+    "Tests/FlareModelTests/FlareDocumentSetupTests.swift",
+    "UITests/FlareJourneyTests+NewSheet.swift",
+    "Sources/FlareModel/FlareDocumentSetup+Kernel.swift",
+    "Sources/FlareModel/FlareNewDocument.swift",
+    "Sources/FlareApp/FlareCommands.swift",
+    "Tests/mutations/FlareModel.FlareDocumentSetup+Kernel.json",
+    "Sources/FlareModel/FlareCommandCatalog.swift",
+    "Tests/command-ids/flare.txt",
+    "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json",
+    "Sources/HaloApp/NewCompositionSheet.swift",
+    "Sources/FlareApp/FlareNewSheet.swift",
+    "Tests/canonical-ui-baseline.txt",
+    "docs/blueprints/suiteui/features/document-setup.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DS-a",
+      "behavior": "The kernel declares DocumentSetup with units, resolution, background, rate and length, its per-field problems and the two document.* specs as stubs, with their tests written and disabled.",
+      "tasks": [
+        "DS-1",
+        "DS-2"
+      ],
+      "journeys": [
+        "MJ-DS"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Document/DocumentSetup.swift",
+        "Sources/SuiteKernel/Document/DocumentSetupCommands.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-document.json",
+        "Tests/SuiteKernelTests/DocumentSetupTests.swift"
+      ],
+      "waits": {
+        "frame-rates:FR-a": [
+          "DS-1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "DS-m",
+      "behavior": "Sizes convert between units at the document's resolution to whole pixels, each field gets its own problem sentence against the app's limits, orientation swaps width and height, and a settings change plans the canvas offset for its anchor.",
+      "tasks": [
+        "DS-3",
+        "DS-4"
+      ],
+      "journeys": [
+        "MJ-DS"
+      ],
+      "owned": [
+        "Sources/SuiteKernel/Document/DocumentSetup.swift",
+        "Tests/SuiteKernelTests/DocumentSetupTests.swift",
+        "Tests/mutations/SuiteKernel.DocumentSetup.json",
+        "Sources/SuiteKernel/Document/DocumentSetupCommands.swift",
+        "Tests/mutations/SuiteKernel.DocumentSetupCommands.json"
+      ],
+      "waits": {
+        "DS-a": [
+          "DS-3",
+          "DS-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "DS-u",
+      "behavior": "SuiteUI has one New Document sheet with presets, units, resolution, orientation, background, clipboard size and, for timed apps, rate and duration, and the same sheet edits settings later, reachable from the gallery on the fakes.",
+      "tasks": [
+        "DS-5",
+        "DS-6"
+      ],
+      "journeys": [
+        "SJ-DS"
+      ],
+      "owned": [
+        "Sources/SuiteUI/NewDocumentSheet.swift",
+        "Sources/SuiteUI/Gallery/GalleryNewDocument.swift",
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Tests/SuiteUITests/NewDocumentSheetTests.swift",
+        "UITests/SuiteJourneyTests+DocumentSetup.swift",
+        "Tests/AppSnapshotTests/RenderBudgetNewDocumentTests.swift"
+      ],
+      "waits": {
+        "DS-a": [
+          "DS-5"
+        ],
+        "frame-rates:FR-u": [
+          "DS-5"
+        ],
+        "area-selection:AR-u": [
+          "DS-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "DS-photo",
+      "behavior": "Photo's File > New opens the shared sheet with its presets and the clipboard size, and makes the image at that size, resolution and background.",
+      "tasks": [
+        "DS-7",
+        "DS-8"
+      ],
+      "journeys": [
+        "PJ-DS"
+      ],
+      "owned": [
+        "Tests/PhotoModelTests/PhotoNewImageTests.swift",
+        "UITests/PhotoJourneyTests+Documents.swift",
+        "Tests/RealJobs/photo/new-print-size/new-print-size.jobs.json",
+        "Sources/PhotoModel/PhotoNewImage+Kernel.swift",
+        "Sources/PhotoApp/PhotoWindow.swift",
+        "Tests/mutations/PhotoModel.PhotoNewImage+Kernel.json",
+        "Sources/PhotoModel/PhotoCommandCatalog.swift",
+        "Tests/command-ids/photo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json"
+      ],
+      "waits": {
+        "DS-u": [
+          "DS-8"
+        ],
+        "DS-m": [
+          "DS-8"
+        ],
+        "clipboard-interop:CB-s": [
+          "DS-8"
+        ],
+        "adopt-suiteui-chrome:AC-zoom": [
+          "DS-8"
+        ],
+        "clipboard-interop:CB-photo": [
+          "DS-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "DS-design",
+      "behavior": "Design's File > New opens the shared sheet with its frame presets and makes the first page at that size and background.",
+      "tasks": [
+        "DS-9",
+        "DS-10"
+      ],
+      "journeys": [
+        "DJ-DS"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignNewDocumentTests.swift",
+        "UITests/DesignJourneyTests+Page.swift",
+        "Sources/DesignModel/DesignNewDocument+Kernel.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Tests/mutations/DesignModel.DesignNewDocument+Kernel.json",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/design.list-commands.json"
+      ],
+      "waits": {
+        "DS-u": [
+          "DS-10"
+        ],
+        "DS-m": [
+          "DS-10"
+        ],
+        "clipboard-interop:CB-design": [
+          "DS-10"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "DS-halo",
+      "behavior": "Halo makes compositions from the shared sheet and changes size, rate, duration and background colour later from Composition Settings, each change one undo step that keeps keys at their times.",
+      "tasks": [
+        "DS-11",
+        "DS-12"
+      ],
+      "journeys": [
+        "MJ-DS-halo",
+        "HJ-DS"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloCompositionSettingsTests.swift",
+        "UITests/HaloJourneyTests+Settings.swift",
+        "Tests/RealJobs/halo/longer-navy-comp/longer-navy-comp.jobs.json",
+        "Sources/HaloModel/HaloDocumentSetup+Kernel.swift",
+        "Sources/HaloModel/CompositionSettings.swift",
+        "Sources/HaloApp/HaloWindow+File.swift",
+        "Tests/mutations/HaloModel.HaloDocumentSetup+Kernel.json",
+        "Sources/HaloModel/HaloCommandCatalog.swift",
+        "Tests/command-ids/halo.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/halo.list-commands.json"
+      ],
+      "waits": {
+        "DS-u": [
+          "DS-12"
+        ],
+        "DS-m": [
+          "DS-12"
+        ],
+        "DS-a": [
+          "DS-11"
+        ],
+        "frame-rates:FR-halo": [
+          "DS-12"
+        ],
+        "adopt-kernel-unsaved-prompt:UP-halo": [
+          "DS-12"
+        ],
+        "clipboard-interop:CB-halo": [
+          "DS-12"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "DS-flare",
+      "behavior": "Flare makes animations from the shared sheet and edits size, rate, duration and background later from File > Document Settings, the same values its scene inspector shows.",
+      "tasks": [
+        "DS-13",
+        "DS-14"
+      ],
+      "journeys": [
+        "FJ-DS"
+      ],
+      "owned": [
+        "Tests/FlareModelTests/FlareDocumentSetupTests.swift",
+        "UITests/FlareJourneyTests+NewSheet.swift",
+        "Sources/FlareModel/FlareDocumentSetup+Kernel.swift",
+        "Sources/FlareModel/FlareNewDocument.swift",
+        "Sources/FlareApp/FlareCommands.swift",
+        "Tests/mutations/FlareModel.FlareDocumentSetup+Kernel.json",
+        "Sources/FlareModel/FlareCommandCatalog.swift",
+        "Tests/command-ids/flare.txt",
+        "Tests/AfterGlowCLITests/Golden/apps/flare.list-commands.json"
+      ],
+      "waits": {
+        "DS-u": [
+          "DS-14"
+        ],
+        "DS-m": [
+          "DS-14"
+        ],
+        "frame-rates:FR-flare": [
+          "DS-14"
+        ],
+        "clipboard-interop:CB-flare": [
+          "DS-14"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "DS-z",
+      "behavior": "Halo's and Flare's own New sheets are deleted with the UI baseline shrunk, RJ-P71 and RJ-H70 pass, and the feature is built.",
+      "tasks": [
+        "DS-15",
+        "DS-16"
+      ],
+      "journeys": [
+        "MJ-DS",
+        "PJ-DS",
+        "HJ-DS",
+        "FJ-DS"
+      ],
+      "owned": [
+        "Sources/HaloApp/NewCompositionSheet.swift",
+        "Sources/FlareApp/FlareNewSheet.swift",
+        "Tests/canonical-ui-baseline.txt",
+        "docs/blueprints/suiteui/features/document-setup.wave.json"
+      ],
+      "waits": {
+        "DS-halo": [
+          "DS-15"
+        ],
+        "DS-flare": [
+          "DS-15"
+        ],
+        "DS-photo": [
+          "DS-16"
+        ],
+        "DS-design": [
+          "DS-16"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

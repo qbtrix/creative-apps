@@ -1,0 +1,165 @@
+{
+  "title": "Layer styles on Design's shapes, text and frames: the shared panel, drawn live, exported to SVG, PNG and PDF",
+  "wave": 4,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "design/layer-styles (adopter of S2); RJ-D14 (closes, SVG on Linux); RJ-D43 (PNG and PDF on macOS); captain 2026-10-21: layer styles in the beta, shared",
+  "waits_on": "suiteui layer-styles' contract slice LS-a (cross-line; tasks start once it merges), LS-m before DL-5 to DL-7, LS-gpu before DL-8; suite-imaging's IM-1 links SuiteImaging into DesignModel; design-seams-2 (node, canvas, menu and window files), pen-paths' DP-m (catalog, ids, SVG) and DP-z (design.md), export-pack's DX-m (the rasterizer)",
+  "longest_chain": "6 (DL-1 → DL-2 → DL-3 → DL-4 → DL-8 → DL-9)",
+  "journeys": [
+    "DesignLayerStyleJourneyTests.testCardShadow"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignStyle+Kernel.swift",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/DesignModelTests/DesignLayerStyleTests.swift",
+    "Sources/DesignApp/DesignObjectMenu.swift",
+    "Sources/DesignApp/DesignWindow+Styling.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignCanvas+Styles.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Tests/AppSnapshotTests/DesignLayerStyleSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignLayerStyleTests.swift",
+    "UITests/DesignJourneyTests+LayerStyle.swift",
+    "Tests/mutations/DesignModel.DesignStyle+Kernel.json",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Tests/DesignModelTests/DesignStyleExportTests.swift",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "Tests/RealJobs/design/card-shadow/card-shadow.jobs.json",
+    "Tests/RealJobs/design/card-shadow/input/card.design",
+    "Sources/DesignApp/DesignRasterizer.swift",
+    "Tests/AppSnapshotTests/DesignStyleRasterTests.swift",
+    "Tests/RealJobs/design/card-shadow-raster/card-shadow-raster.jobs.json",
+    "Tests/RealJobs/design/card-shadow-raster/input/card.design",
+    "docs/blueprints/design.md",
+    "docs/blueprints/design/features/layer-styles.wave.json"
+  ],
+  "slices": [
+    {
+      "id": "DL-a",
+      "behavior": "Shapes, text and frames hold a LayerStyle, the style commands are in Design's catalog on stubs, and Object > Layer Style… opens the panel on the selection.",
+      "tasks": [
+        "DL-1",
+        "DL-2"
+      ],
+      "journeys": [
+        "MJ-DL"
+      ],
+      "waits": {
+        "design-seams-2": [
+          "DL-1",
+          "DL-2"
+        ],
+        "pen-paths:DP-m": [
+          "DL-1"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignStyle+Kernel.swift",
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/DesignModelTests/DesignLayerStyleTests.swift",
+        "Sources/DesignApp/DesignObjectMenu.swift",
+        "Sources/DesignApp/DesignWindow+Styling.swift",
+        "Sources/DesignApp/DesignWindow.swift"
+      ]
+    },
+    {
+      "id": "DL-u",
+      "behavior": "The canvas draws a styled node's effects from the stub program, and the panel and canvas have snapshots, a render budget and the journey written.",
+      "tasks": [
+        "DL-3",
+        "DL-4"
+      ],
+      "journeys": [
+        "DJ-L1"
+      ],
+      "waits": {
+        "DL-a": [
+          "DL-3"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignCanvas+Styles.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Tests/AppSnapshotTests/DesignLayerStyleSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignLayerStyleTests.swift",
+        "UITests/DesignJourneyTests+LayerStyle.swift"
+      ]
+    },
+    {
+      "id": "DL-m",
+      "behavior": "Every style command sets each selected node's style as one undo step, SVG export writes the style as a filter with its warnings, and PNG and PDF export draw it padded.",
+      "tasks": [
+        "DL-5",
+        "DL-6",
+        "DL-7"
+      ],
+      "journeys": [
+        "MJ-DL"
+      ],
+      "waits": {
+        "DL-a": [
+          "DL-5",
+          "DL-6",
+          "DL-7"
+        ],
+        "export-pack:DX-m": [
+          "DL-7"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignStyle+Kernel.swift",
+        "Tests/DesignModelTests/DesignLayerStyleTests.swift",
+        "Tests/mutations/DesignModel.DesignStyle+Kernel.json",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/DesignModelTests/DesignStyleExportTests.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/RealJobs/design/card-shadow/card-shadow.jobs.json",
+        "Tests/RealJobs/design/card-shadow/input/card.design",
+        "Sources/DesignApp/DesignRasterizer.swift",
+        "Tests/AppSnapshotTests/DesignStyleRasterTests.swift",
+        "Tests/RealJobs/design/card-shadow-raster/card-shadow-raster.jobs.json",
+        "Tests/RealJobs/design/card-shadow-raster/input/card.design"
+      ]
+    },
+    {
+      "id": "DL-z",
+      "behavior": "The canvas draws through the live route, the journey passes on live, and design.md lists the feature as built.",
+      "tasks": [
+        "DL-8",
+        "DL-9"
+      ],
+      "journeys": [
+        "DJ-L1"
+      ],
+      "waits": {
+        "DL-u": [
+          "DL-8"
+        ],
+        "DL-m": [
+          "DL-8",
+          "DL-9"
+        ],
+        "pen-paths:DP-z": [
+          "DL-9"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignApp/DesignCanvas+Styles.swift",
+        "UITests/DesignJourneyTests+LayerStyle.swift",
+        "docs/blueprints/design.md",
+        "docs/blueprints/design/features/layer-styles.wave.json"
+      ]
+    }
+  ]
+}

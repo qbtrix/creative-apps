@@ -131,8 +131,9 @@ public enum ExportRunner {
                 do {
                     let image = try await exporter.render(item, photo: photo)
                     guard !Task.isCancelled else { cancelled = true; break } // between render and write
-                    try await writer.write(image, quality: options.quality, folder: options.folder, fileName: item.fileName)
-                    if options.sidecar, let xmp = ExportSidecar.xmp(for: photo) {
+                    try await writer.write(image, quality: options.quality, folder: options.folder, fileName: item.fileName,
+                                           metadataFrom: photo.path, dropping: item.dropping)
+                    if options.sidecar, let xmp = ExportSidecar.xmp(for: photo, metadata: options.metadata) {
                         try await writeSidecar(xmp, options.folder, ExportSidecar.fileName(for: item.fileName))
                     }
                     written.append(item.fileName)
