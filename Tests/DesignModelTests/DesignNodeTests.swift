@@ -45,12 +45,11 @@ import Testing
 }
 
 // #3860: the palette shows a disabled tool's reason in place of "Title (Key)", so the
-// icon-only Eyedropper's reason names the tool, its I key and what it will do.
+// icon-only Eyedropper's reason names the tool, its I key and what it will do, in user terms.
 @Test func theDisabledEyedropperTooltipNamesTheToolAndItsKey() {
     let help = DesignTool.eyedropper.unavailableHelp ?? ""
     #expect(help.hasPrefix("Eyedropper (I): "))
-    #expect(help.contains("color from the canvas"))
-    #expect(!help.contains("isn't built yet"))
+    #expect(help.contains("fill or stroke color from the canvas"))
 }
 
 @Test func pageSizeTextShowsWholePoints() throws {

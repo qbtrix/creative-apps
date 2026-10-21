@@ -66,7 +66,7 @@ public enum DesignTool: String, CaseIterable, Sendable {
         switch self {
         case .move, .frame, .rectangle, .ellipse, .text: nil
         case .pen: "Drawing paths isn't built yet."
-        case .eyedropper: "Eyedropper (I): picking a fill or stroke color from the canvas is coming soon."
+        case .eyedropper: "Eyedropper (I): picking a fill or stroke color from the canvas isn't built yet."
         }
     }
 
