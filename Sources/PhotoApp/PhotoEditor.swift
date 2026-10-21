@@ -13,8 +13,12 @@
 // disabled with a tooltip saying why, and a disabled tool's shortcut key does
 // nothing. The canvas shows no scrollers: AppKit's scroller parts are unnamed
 // buttons (the app audit's unnamed check), and a zoomed image still pans by
-// scrolling.
+// scrolling. A file dropped anywhere on the window follows the suite's drop
+// rule (file-flow PF-2, `suiteFileDrop`): an image on an open one places as a
+// layer in one Place step, centred; with none open it opens; another app's
+// file goes to that app; the mark at the bottom says which before the drop.
 import PhotoModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -84,6 +88,8 @@ struct PhotoEditor: View {
         } inspector: {
             PhotoPanel(model: model, perform: perform)
         }
+        .suiteFileDrop(.photo, bridge: PhotoShell.bridge, hasDocument: model.hasDocument,
+                       places: model.placesExtensions, documentName: model.documentName) { perform(.place(.drop($0))) }
     }
 
     /// One toolbar command: the Model's title, symbol, reason and identifier, sending its intent.
@@ -109,9 +115,8 @@ struct PhotoEditor: View {
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
 /// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
-/// or deselect). A PNG or JPEG dropped on an open image places at the drop point (PhotoPlace.swift);
-/// any other file, or a drop with no image open, opens it. While the Straighten sheet is
-/// open the picture turns by its angle under StraightenMarks.
+/// or deselect). Drops land on the whole editor (PhotoEditor's `suiteFileDrop`), not here. While the
+/// Straighten sheet is open the picture turns by its angle under StraightenMarks.
 struct PhotoCanvas: View {
     let model: PhotoWorkspace
     let tiles: CanvasTiles?
@@ -124,6 +129,8 @@ struct PhotoCanvas: View {
     @State private var hover: CGPoint?
     /// The app's View > Rendering; nil (the tile layers) in tests.
     @Environment(\.photoRendering) private var rendering
+    /// The window's live drag line (LiveDragLine.swift); only the overlay reads its line.
+    @Environment(\.photoDragLine) private var dragLine
 
     var body: some View {
         Group {
@@ -141,13 +148,8 @@ struct PhotoCanvas: View {
                     }
                 } overlay: {
                     // The overlay spans the artboard at `zoom`, so a drop's point divides back to document pixels.
-                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform)
+                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover, perform: perform, liveLine: dragLine)
                         .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
-                        .placeDropTarget(formats: model.placeFormats) { files, point in
-                            let at = PhotoWorkspace.placePoint(x: point.x, y: point.y, zoom: zoom)
-                            perform(.place(.files(files, at: at)))
-                            return true
-                        }
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {
@@ -160,11 +162,6 @@ struct PhotoCanvas: View {
                     message: "Open a photo, drop one here, or make a new image with File > New Image.",
                     action: ToolbarAction("Open…", systemImage: "folder") { perform(.open) })
             }
-        }
-        .dropDestination(for: URL.self) { urls, _ in
-            guard let url = urls.first else { return false }
-            perform(.openFile(url))
-            return true
         }
     }
 

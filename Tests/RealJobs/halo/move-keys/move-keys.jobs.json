@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H13: selects every key of a three-layer bounce, Shadow hidden (out of its range at the playhead), moves them 6 frames in one drag and checks the saved project: every layer's keys, the hidden one's included, read 6, 18 and 30.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "timeline.select-all-keys", "params": {}},
+    {"id": "timeline.move-keys", "params": {"by": 6, "dragStart": 0}},
+    {"id": "timeline.end-key-drag", "params": {}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/bounce.halo": {"json": {"format": "halo", "version": 1, "project": {
+      "compositions": [{"id": "comp-1", "name": "Bounce", "width": 320, "height": 180, "framesPerSecond": 24, "durationFrames": 48, "playheadFrame": 0,
+        "layers": [
+          {"id": "comp-1-layer-3", "name": "Shadow", "kind": "shape", "inFrame": 36, "outFrame": 48, "opacity": 0.5, "blendMode": "normal",
+           "color": {"red": 0.2, "green": 0.2, "blue": 0.2}, "rect": {"x": 20, "y": 160, "width": 40, "height": 10},
+           "tracks": {"x": [
+             {"frame": 6, "value": 20, "easing": {"linear": {}}},
+             {"frame": 18, "value": 140, "easing": {"linear": {}}},
+             {"frame": 30, "value": 260, "easing": {"linear": {}}}]}},
+          {"id": "comp-1-layer-2", "name": "Ball", "kind": "shape", "inFrame": 0, "outFrame": 48, "opacity": 1, "blendMode": "normal",
+           "color": {"red": 0.9, "green": 0.4, "blue": 0.2}, "rect": {"x": 20, "y": 40, "width": 40, "height": 40},
+           "tracks": {"y": [
+             {"frame": 6, "value": 40, "easing": {"linear": {}}},
+             {"frame": 18, "value": 120, "easing": {"linear": {}}},
+             {"frame": 30, "value": 40, "easing": {"linear": {}}}]}},
+          {"id": "comp-1-layer-1", "name": "Floor", "kind": "solid", "inFrame": 0, "outFrame": 48, "opacity": 1, "blendMode": "normal",
+           "color": {"red": 0.25, "green": 0.55, "blue": 0.9}, "rect": {"x": 0, "y": 160, "width": 320, "height": 20},
+           "tracks": {"opacity": [
+             {"frame": 6, "value": 1, "easing": {"linear": {}}},
+             {"frame": 18, "value": 0.5, "easing": {"linear": {}}},
+             {"frame": 30, "value": 1, "easing": {"linear": {}}}]}}
+        ]}],
+      "selectedCompositionID": "comp-1", "selectedLayerID": "comp-1-layer-2",
+      "nextCompositionNumber": 2, "nextLayerNumber": 4
+    }}}
+  },
+  "platforms": ["linux", "macos"]
+}
