@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-21T18:41:35Z	nudge	Belt nudge read; state re-read from source: #4058 awaiting batch, no supervisor reply yet, no blocking slice on dev
 2026-10-21T19:02:29Z	poll	BK-m awaiting lane batch (no batch branch open)
 2026-10-21T19:24:17Z	BK-m	merged	#4058 -> 1fe5c4ea; blockers unchanged, release question to supervisor
+2026-10-21T19:45:38Z	BK-m	done	Belt-Slice-Done run 39661533247; brush-keys RELEASED by supervisor

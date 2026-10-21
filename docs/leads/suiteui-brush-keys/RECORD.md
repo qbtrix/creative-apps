@@ -4,7 +4,7 @@ Issue: #3758 · Packet: docs/blueprints/suiteui/features/brush-keys.md
 Run: act-1a15e33396b-eo15 · Session: cloud line lead (line:suiteui, with #3721 and #3756) · Started: 2026-10-21T11:26Z
 Stage: 3 wave 1
 Base: ac7f95c9f6b0516253108a270145e4280f243b69
-Next: BK-m #4058 merged 19:20 UTC (1fe5c4ea); post Belt-Slice-Done BK-m on the first green dev Linux run containing it. BK-u/photo/design/flare/z still blocked (AN-u, AN-flare-u, AR-photo-u, DS-design not on dev); asked the supervisor whether to release brush-keys.
+Next: RELEASED by the supervisor (#3758, 19:25 UTC) after BK-a and BK-m landed (Belt-Slice-Done both). Waiting-on-prereq: Belt relaunches when AN-u, AN-flare-u, AR-photo-u or DS-design land; BK-u/photo/design/flare/z remain.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
