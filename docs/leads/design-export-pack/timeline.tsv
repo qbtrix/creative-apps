@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-21T03:49Z	blocked	poll 2: #3833 build still cancelled, no supervisor reply; #3834 open; no new waits cleared
 2026-10-21T04:11Z	blocked	poll 3: no reply; follow-up posted on #3833 (comment 6307842201)
 2026-10-21T04:33Z	blocked	post-follow-up poll: #3833 no reply, no new build; #3834 open
+2026-10-21T04:54Z	blocked	unchanged: #3833 no reply, no new build; #3834 open
