@@ -3,7 +3,7 @@
 Issue: #1939 · Packet: docs/blueprints/suiteui/features/adopt-kernel-export.md
 Run: act-1a15ce4fb40-9k5r (line lead for #1942, #1939, #1935) · Session: claude/feature-lead-playbook-0t4ks3 · Resumed: 2026-10-21
 Stage: heartbeat
-Base: dev a6f45c18
+Base: dev 79a43789
 Next: done
 
 ## Slices
@@ -18,6 +18,7 @@ Next: done
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-21T10:27Z: -
 - 2026-10-21T10:07Z: -
 - 2026-10-21T09:45Z: feature complete, contact sheet posted
 - 2026-10-21T09:25Z: Linux check 39571804700 green on d93267da (AX-library merge) covers AX-photo and AX-library
