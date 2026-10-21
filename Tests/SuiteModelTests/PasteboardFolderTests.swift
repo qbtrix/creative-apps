@@ -23,7 +23,7 @@ import Testing
     }
 
     /// Each item kind's representations come back with the same types and bytes, in order.
-    @Test(.disabled("waits on CB-4"))
+    @Test
     func everyItemKindRoundTrips() throws {
         let folder = PasteboardFolder(try scratch())
         for item in everyKind {
@@ -34,7 +34,7 @@ import Testing
     }
 
     /// Mutation `.writeReplaces`: a second write leaves only its own items.
-    @Test(.disabled("waits on CB-4"))
+    @Test
     func aWriteReplacesWhatWasThere() throws {
         let folder = PasteboardFolder(try scratch())
         try folder.write([TypedData(type: .png, data: Data([1])), TypedData(type: .svg, data: Data("<svg/>".utf8))])
@@ -44,7 +44,7 @@ import Testing
     }
 
     /// Mutation `.typeFromManifest`: an own type with no file extension of its own keeps its full type id.
-    @Test(.disabled("waits on CB-4"))
+    @Test
     func anOwnTypeKeepsItsIDNotItsExtension() throws {
         let folder = PasteboardFolder(try scratch())
         let own = [TypedData(type: .flareLayers, data: Data([7])), TypedData(type: .designLayers, data: Data([8]))]
@@ -53,7 +53,7 @@ import Testing
     }
 
     /// A file someone dropped into the folder by hand is not on the pasteboard; an empty folder reads as nothing.
-    @Test(.disabled("waits on CB-4"))
+    @Test
     func anUnknownFileIsIgnored() throws {
         let url = try scratch()
         let folder = PasteboardFolder(url)
