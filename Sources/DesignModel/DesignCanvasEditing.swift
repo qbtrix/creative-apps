@@ -56,7 +56,8 @@
 // turned node shows it. The rotate knob above the top (`BoxMath.handles`) turns one selected layer
 // about its centre through `runTransform` (DT-5), Shift snapping to the kernel's
 // `BoxMath.snappedDegrees`; every sample rewinds as a service step does, so the drag is one step
-// (transform DT-u). The angle comes from libm's atan2 (Glibc/Musl/Darwin). Linux-safe.
+// (transform DT-u). A handle of a turned or mirrored layer resizes it in its own axes, the opposite
+// edge kept where it shows (#4223); an upright one resizes, snaps and rounds as before. The angle comes from libm's atan2 (Glibc/Musl/Darwin). Linux-safe.
 #if canImport(Glibc)
 import Glibc
 #elseif canImport(Musl)
@@ -219,6 +220,11 @@ extension DesignWorkspace {
             current.guides = landedGuides(frame, by: moveBy, modifiers: modifiers, current)
         case .resize(let id, let handle, let original):
             restorePages(current.before)
+            current.guides = .empty
+            if let t = selectedPage?.nodes.node(id)?.transformBox, t.degrees != 0 || t.flipX || t.flipY {
+                _ = pages.update(id) { $0.frame = Self.resized(t, handle, from: current.start, to: end, modifiers: modifiers) }
+                break
+            }
             let snapped = snapResize(delta, box: original, handle: handle, modifiers: modifiers, current)
             let raw = original.resized(
                 handle, by: snapped, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
@@ -296,6 +302,26 @@ extension DesignWorkspace {
             return
         }
         current.guides = landedGuides(on: selectionBounds, modifiers: modifiers, current)
+    }
+
+    /// `t`'s frame with `handle` dragged from `start` to `end` in the node's own axes (#4223): the sweep
+    /// taken into its unturned, unmirrored frame (`TransformRules.local`), the handle's edge moved there
+    /// (Shift keeps the aspect, Option works from the centre), and the new centre put back on the page
+    /// through the turn and mirrors about the old one, so the opposite edge stays where it shows. No
+    /// snap and no whole points: the page's lines and grid don't run along a turned edge.
+    static func resized(_ t: TransformBox, _ handle: DesignHandle, from start: DesignPoint, to end: DesignPoint,
+                        modifiers: DesignModifiers) -> DesignRect {
+        let (a, b) = (TransformRules.local(Point(x: start.x, y: start.y), in: t), TransformRules.local(Point(x: end.x, y: end.y), in: t))
+        let local = DesignRect(t.box).resized(handle, by: DesignPoint(x: b.x - a.x, y: b.y - a.y),
+                                              keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
+        // A unit box about the old centre with the node's turn and mirrors: its matrix takes an offset
+        // from the centre in the node's own axes to the page.
+        let c = Point(x: (t.box.minX + t.box.maxX) / 2, y: (t.box.minY + t.box.maxY) / 2)
+        let unit = TransformBox(box: Rect(minX: c.x - 0.5, minY: c.y - 0.5, maxX: c.x + 0.5, maxY: c.y + 0.5),
+                                degrees: t.degrees, flipX: t.flipX, flipY: t.flipY)
+        let centre = TransformRules.matrix(of: unit).apply(
+            Point(x: local.x + local.width / 2 - c.x + 0.5, y: local.y + local.height / 2 - c.y + 0.5))
+        return DesignRect(x: centre.x - local.width / 2, y: centre.y - local.height / 2, width: local.width, height: local.height)
     }
 
     /// `delta` snapped so `box` moved by it lines up; as is under `.noSnap` or without an engine.
