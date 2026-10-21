@@ -6,3 +6,4 @@ time	event
 2026-10-21T06:57Z	check	dev b64cbb8c (core bump #3784); #3850 #3921 open in lane; FG-2 not opened; #3499 #3823 #3826 open; flare findings 0
 2026-10-21T07:15Z	check	dev b64cbb8c; #3850 #3921 open in lane; FG-2 not opened (3rd poll, asked supervisor on #3452); #3499 #3823 #3826 open; flare findings 0
 2026-10-21T07:32Z	check	dev 709f9283; #3850 #3921 open in lane; #3499 open; flare findings 0
+2026-10-21T07:51Z	check	dev 260f7a87; #3850 eligible, waiting for a batch (lane bisecting batch-20261021065242); #3921 macOS build green, next sweep; #3499 open; flare findings 0
