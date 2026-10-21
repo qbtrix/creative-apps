@@ -1,7 +1,7 @@
 // HaloGradientTests.swift: gradient-fill MJ-HG, the Model walk. A layer's
 // gradient saves under its own key and old projects open without one (HG-1);
 // the fill commands on a solid, a refused text layer and a drag that is one
-// undo step wait on HG-7's conformance bodies. Linux and macOS.
+// undo step run on HG-7's conformance bodies. Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -45,7 +45,7 @@ import Testing
         #expect(decoded.withID("t").gradient == Self.radial)
     }
 
-    @Test(.disabled("waits on HG-7")) func radialOnASolidStoresAUnitBoxFill() throws {
+    @Test func radialOnASolidStoresAUnitBoxFill() throws {
         var project = try Self.project(select: "Background")
         #expect(project.fillHelp == nil)
         project.runFill(.type(.radial))
@@ -59,7 +59,7 @@ import Testing
         #expect(selection.box.maxX > 1)  // the layer's box in composition pixels, not the unit box
     }
 
-    @Test(.disabled("waits on HG-7")) func textRefuses() throws {
+    @Test func textRefuses() throws {
         var project = try Self.project(select: "Title")
         #expect(project.fillSelection == nil)
         #expect(project.fillHelp?.isEmpty == false)
@@ -69,7 +69,7 @@ import Testing
         #expect(project.history.undo.isEmpty)
     }
 
-    @Test(.disabled("waits on HG-7")) func dragIsOneStep() throws {
+    @Test func dragIsOneStep() throws {
         var project = try Self.project(select: "Badge")
         project.runFill(.type(.linear))
         let steps = project.history.undo.count
