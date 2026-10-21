@@ -40,3 +40,4 @@ Next: KE-4 #3955 lane sweep; KE-u PRs #4067 (KE-6), #4070 (KE-5) in lane. On mer
 
 ## Open
 - none
+- 2026-10-21T13:42:11Z check-in: #3955 (KE-4, fb99be903), #4067 (KE-6, b504f56cb), #4070 (KE-5, 5650f771b) all wait on their queued macOS builds; no red check, no needs-fix/needs-rebase. Next: RJ-H13 + KE-m Slice-Done on #3955 merge; KE-u critics on #4067+#4070 merge.
