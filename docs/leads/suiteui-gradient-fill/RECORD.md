@@ -4,7 +4,7 @@ Issue: #3418 · Packet: docs/blueprints/suiteui/features/gradient-fill.md
 Run: act-1a15f92d30e-mfnc · Session: claude/feature-lead-suiteui-srh349 · Started: 2026-10-20T03:19Z (relaunched 2026-10-21)
 Stage: 3 wave 5
 Base: aaa43f918e028249e0525eb468f37795638932d7
-Next: GF-z PRs #4179 (code) and #4180 (C4) wait on the lane; then Belt-Slice-Done GF-m once a dev Linux job with #3742 is green; then #4047.
+Next: #4179 (GF-z), #4180 (C4), #4186 (#4047 editor fixes) wait on the lane; Belt-Slice-Done GF-m once a dev Linux job with #3742 is green.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
