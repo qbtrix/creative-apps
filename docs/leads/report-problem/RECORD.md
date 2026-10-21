@@ -4,7 +4,7 @@ Issue: #3772 · Packet: docs/blueprints/suite/features/report-problem.md
 Run: act-1a1601c3538-r0c9 · Session: https://claude.ai/code/session_011jo1mtCQ8wVpaGZxRnV16N · Started: 2026-10-21T10:50Z · Resumed: 2026-10-21T20:17Z
 Stage: 3 build, wave 2
 Base: 11919406886e89e9e02adea13b113b66e852334d
-Next: #4201 baseline fix in lane (dev Linux red from RP-2 x CS-2); RP-3 #4103 regating with it; #4110 RP-4 in lane; then RP-3e, RP-5
+Next: #4201 baseline fix, #4103 RP-3 (Head 94a89c8e), #4110 RP-4 in lane; then RP-3e stacked on RP-3, RP-5 after RP-3 and RP-4
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
