@@ -9,7 +9,7 @@ import Foundation
 import SuiteKernel
 
 extension LibraryHeadless {
-    struct ExportContents: Decodable { var contents: String? }
+    struct ShownRequest: Decodable { var contents: String? }
     struct Shown: Encodable {
         var folder: String?
         var subfolders: Bool?
@@ -18,7 +18,7 @@ extension LibraryHeadless {
 
     /// Whether `options` asks the "json" export for the shown photos instead of the catalog file.
     static func wantsShown(_ options: JSONValue) -> Bool {
-        (try? options.decode(ExportContents.self).contents) == "shown"
+        (try? options.decode(ShownRequest.self).contents) == "shown"
     }
 
     /// The folder rule and the shown photos' file names, as JSON.
