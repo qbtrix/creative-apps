@@ -212,12 +212,12 @@ or writing any closed layered format.
 | Masks | Add Mask from Selection, Delete Mask, Apply Mask, disable a mask; paint on the mask with brush and eraser | Vector masks, mask density and feather sliders on the layer |
 | Transform | Edit > Free Transform (Command-T): scale with the 8 handles, rotate outside them, Shift keeps ratio, typed W%, H%, angle; Edit > Transform > Flip Horizontal and Flip Vertical (the selected layer); Image > Flip Canvas Horizontal and Vertical | Skew, distort, perspective, warp |
 | History | The History tab: every named step, click to jump, later steps dimmed | Snapshots, history brush |
-| Paint | The brush cursor circle at the brush size; Eyedropper (I) picks a color from the image into the brush color, point or 3 × 3 or 5 × 5 average | Gradient, paint bucket, brush presets and textures |
+| Paint | The brush cursor circle at the brush size; Eyedropper (I) picks a color from the image into the brush color, point or 3 × 3 or 5 × 5 average; the Gradient tool (G) drags a linear or radial gradient into the layer or the selection as one step, its stops set in Tool Options with the shared gradient editor (`photo/gradient-fill`, beta) | Paint bucket, brush presets and textures |
 | Export | PNG, JPEG, TIFF and HEIC; a size as a percent or a longest side; quality for JPEG and HEIC | Export several sizes at once, web presets, metadata editing |
 | Fixes | #79, #252, #253, #289 (Photo's views), and #255, #586 tracked to SuiteUI | – |
 
 Tier 3 stays out of v2: text, paths and a pen, print setup, specialist
-controls, gradients and fills. Layer styles moved into the beta, built once
+controls and fills. The Gradient tool moved into the beta (`photo/gradient-fill`). Layer styles moved into the beta, built once
 and shared (captain, 2026-10-21; `suiteui/layer-styles`), with clipping masks
 and PSD layer effects (`photo/masks-clipping`, `photo/psd-effects`).
 

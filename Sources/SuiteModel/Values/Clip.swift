@@ -36,10 +36,13 @@ public enum SuiteClipItem: Equatable, Sendable {
     case color(SuiteColorValue)
     case text(String)
     case files([SuiteDocumentRef])
+    /// An app's own layer bytes under its type (`.designLayers`, `.flareLayers`); only that app's model reads them.
+    case appLayers(SuiteTypeID, Data)
 
     /// The plural the "can't paste" sentence names.
     public var kindName: String {
         switch self {
+        case .appLayers: "layers"
         case .envelope(let e): e.kind == .image ? "images" : e.kind == .color ? "colours" : "vector art"
         case .vector: "vector art"
         case .image: "images"
