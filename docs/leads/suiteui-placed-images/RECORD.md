@@ -76,3 +76,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 19:33Z: No change: PL-8/9/10 wait on SH-z, TT-z, EY-z, AH-z, SS-d (PL-9 also GF-z).
 - 19:53Z: PL-z waits on SH-z, TT-z, EY-z, AH-z, GF-z and SS-d.
 - 20:09Z: PL-z still waits on its dependencies.
+- 20:23Z: PL-z still waits on its dependencies.
