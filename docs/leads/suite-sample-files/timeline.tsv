@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-21T16:46Z	3	finding-filed	#4113	gap line:photo .ora save not byte-stable
 2026-10-21T16:46Z	3	finding-filed	#4114	gap line:halo text.set-color on solid/shape
 2026-10-21T16:46Z	3	stage-start	wave 4	SS-z on #4115
+2026-10-21T17:00Z	3	pr-opened	#4129	SS-z journey, RJ-X66, Bounce fixture, built; feature-done
