@@ -213,11 +213,11 @@ struct GalleryTimelinePage: View {
             onTrim: { trim($0, $1, $2) },
             onEndTrim: { write("trim end") },
             onUnit: { new in
-                unit = new
+                self.unit = new
                 write("unit \(new.rawValue)")
             },
             onWorkArea: { range in
-                workArea = range
+                self.workArea = range
                 write(range.map { "work \($0.lowerBound)…\($0.upperBound)" } ?? "work off")
             },
             onSelectAllKeys: { selectAll() })
