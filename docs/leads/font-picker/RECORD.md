@@ -42,6 +42,8 @@ Next: none this run. The supervisor relaunches font-picker once shell-text ST-a 
 
 - 2026-10-21T02:44Z: supervisor answered (c) on #3730: park font-picker, no throwaway FontPick type; shell-text #3725 and shell-media SM-a go in the next shift. Parked. Read the reply's "release this run" as about font-picker; adopt-kernel-autosave and text-style continue (no `Belt released this run.` message).
 
+- 04:08Z heartbeat: still parked on shell-text #3725 (open).
+
 ## Open
 
 - shell-text ST-a not started (wave planned, no feature issue filed).
