@@ -2,9 +2,9 @@
 
 Issue: #3435 · Packet: docs/blueprints/photo/features/transform.md
 Run: act-1a15eecbafe-u0f9 · Session: claude/photo-feature-lead-batch-gdxv4u · Started: 2026-10-21T14:20Z (takes over from the earlier runs below)
-Stage: 3 W4 (run act-1a15eecbafe-u0f9)
+Stage: 3 W5 (run act-1a15eecbafe-u0f9)
 Base: 4d4ebb24788bbaf169ff2818f71f52df3753ac51
-Next: #4127 PT-7 at 9794f98 waits on supervisor dropping stale needs-split (now +163/2, comment posted); PT-6 builder running; then PT-8 journey on live, PT-9 feature-done
+Next: PT-8 builder (lead/transform-PT-8 from dev); #4127 waits on stale needs-split; PT-6 builder running; then PT-9 feature-done
 
 Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transform: one combined wave plan, so the other two records show the same waves.
 
@@ -26,7 +26,7 @@ Line lead (rule 19) for #3439 eyedropper, #3437 history-panel and #3435 transfor
 | PT-5 | PT-m | 3 | adapter bodies, catalog specs, tests on, RJ-P17 | Sources/PhotoModel/PhotoTransform+Kernel.swift, Tests/PhotoModelTests/PhotoTransformTests.swift, Tests/mutations/PhotoModel.PhotoTransform+Kernel.json, Sources/PhotoModel/PhotoCommandCatalog.swift, Tests/command-ids/photo.txt, Tests/RealJobs/photo/free-transform/ | PhotoTransformTests; .flipInPlace .identityCommitsNothing .lockedRefuses | #3969 | merged 15:52Z |
 | PT-6 | PT-m | 4 | resizeCanvas and image.canvas-size, RJ-P18 | Sources/PhotoModel/PhotoImageOps.swift, Tests/PhotoModelTests/PhotoCanvasSizeTests.swift, Tests/mutations/PhotoModel.PhotoImageOps.json, Tests/RealJobs/photo/canvas-border/ | PhotoCanvasSizeTests; .canvasSizeCentred .borderIsBackground | – | building |
 | PT-7 | PT-u | 3 | snapshots + render budget | Tests/AppSnapshotTests/PhotoTransformSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetPhotoTransformTests.swift | snapshots | #4127 | open 9794f98, needs-split stale |
-| PT-8 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Transform.swift | journey | – | planned |
+| PT-8 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Transform.swift | journey | – | building |
 | PT-9 | PT-z | 6 | status built, feature-done | docs/blueprints/photo/features/transform.wave.json | scripts/ci | – | planned |
 
 ## Waves (combined plan, all three features)
