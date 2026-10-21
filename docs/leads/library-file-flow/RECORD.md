@@ -1,16 +1,16 @@
 # file-flow lead record
 
 Issue: #3479 · Packet: docs/blueprints/library/features/file-flow.md
-Run: act-1a15d1c39b2-vvii · Session: cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z
+Run: act-1a15f2277a5-6xyv · Session: relaunch of cse_01Frm5sedPTzoQ8Smui9DRCb · Started: 2026-10-21T06:20:32Z (resumed 2026-10-21T15:49Z)
 Stage: 3 wave 1
 Base: 0865916d47ed5b21be2f827768d2aa92b7d200bb
-Next: (11:50) LF-3 #4024 got needs-rebase (LibraryUndoAdapter.swift vs FC-9 #3546 selectedBefore); merged dev, kept both fields, gate running. LF-u Belt-Slice-Done held: CI 39586209372 and scoped 39585973891 both red on dev-red #3856 (Photo command-path baseline, Flare SetLayerParent build), not ours. LF-4 waits on #3928 only (#3997 merged).
+Next: (2026-10-21T15:49Z) Run act-1a15f2277a5-6xyv resumed. LF-u Belt-Slice-Done + Mac-Finish-Wanted posted on run 39623471557 (dev Linux green at 9951eea). LF-3 #4024 Linux red was dev's Photo command-path baseline (fixed by #4008): dev merged in, gate re-running, then push + Head move. LF-4 still waits on needs-ui #3928 (open).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | LF-a | adapter stubs, .suiteApp, menu and drop on fakes | LF-1, LF-2 | MLF | – | yes | – | merged (#3624) | – | – |
-| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | merged (LF-6 #3624, LF-5 #3938; in Linux check 39571804700 d93267dab); Belt-Slice-Done and Mac-Finish-Wanted wait on a qualifying run | – | – |
+| LF-u | menu and drop-mark snapshots, render budget, journey written | LF-5, LF-6 | LFJ1 | LF-a (met); SF-3 merged (#3514); SF-4 open (#3827) | yes | 0 | done: Belt-Slice-Done + Mac-Finish-Wanted posted | https://github.com/qbtrix/creative-apps/actions/runs/39623471557 | – |
 | LF-m | drop imports as one step, hand-offs, recents, drag out | LF-3, LF-4 | MLF | LF-a, SF-5/6/7 (met); LT-m, DR-m (not merged) | yes | 0 | LF-4 blocked (#3928, SF-8); LF-3 blocked | – | – |
 | LF-z | live journey, feature built | LF-7, LF-8 | LFJ1 | LF-u, LF-m | yes | 0 | blocked | – | – |
 
@@ -43,3 +43,4 @@ Next: (11:50) LF-3 #4024 got needs-rebase (LibraryUndoAdapter.swift vs FC-9 #354
 - 12:21Z: LF-3 #4024 (a1574a6) gate passes, fast-lane, in the lane. LF-u Belt-Slice-Done waits on scoped library run 39593465885 (queued, contains fd7f493). #3928 still open: LF-4 keeps waiting.
 - 12:44Z: no change; all four PRs clean + fast-lane, waiting on the lane's macOS batch gate; scoped library run 39593465885 still queued (macOS runners backlogged since 11:08Z); dev Linux checks red (dev-red, not ours).
 - 13:17 poll: PRs open/clean (BK-u #3967, LF-3 #4024, FO-u #3963, FO-5 #4022) awaiting lane macOS batch; macOS runners still backlogged; scoped library run 39593465885 queued; #3928 open (LF-4 blocked).
+- 2026-10-21T15:49Z (run act-1a15f2277a5-6xyv): relaunched. Rule 23 re-read: #3928 open (LF-4 blocked); dev-red #3856 still open but dev Linux check 39623471557 at 9951eea is green and contains every merged slice PR. All three open PRs (#4024, #4022, #3967) went red on Linux on dev's Photo command-path baseline, fixed by #4008; dev merged into each, gates re-running. Swift was missing in the relaunched container; scripts/cloud-setup.sh installed 6.3.3. No open finding is on this feature's files.
