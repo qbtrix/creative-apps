@@ -4,7 +4,7 @@ Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
 Run: act-1a15c4e2e3b-zh3u · Session: claude/fill-heal-adjust-everywhere-t5hvqe · Started: 2026-10-21T02:36Z
 Stage: 3 wave 1
 Base: 2ab0eb96320db973b5aad0644449ee5ed3980ab9
-Next: wait for the lane to merge #3846 (AJ-2s); re-read suite-imaging #3715 (IM-a) for AJ-1 and AJ-2l
+Next: blocked poll 2/3 at 04:00Z (#3715 IM-a open, no PRs, dev 842e62ec1); #3846 in lane; at 3/3 ask the supervisor on #3777
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
