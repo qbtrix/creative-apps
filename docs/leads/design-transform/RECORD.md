@@ -2,9 +2,9 @@
 
 Issue: #3436 · Packet: docs/blueprints/design/features/transform.md
 Run: act-1a15da1b26c-9qo6 · Session: claude/design-feature-lead-run-1k035k · Started: 2026-10-21T08:46:56Z (prior run act-1a15ac70747-ky1f)
-Stage: 3 DT-a done (#3751, e6430cfa; Linux green on run 39569221486); DT-u building: DT-3 merged (#3983, 564e6562); DT-4 waits TT-u #3513
+Stage: 3 DT-u building: DT-3 merged (#3983); DT-4 PR #4159 open (macOS build dispatched)
 Base: 896cafe3 (origin/dev); main verified at 0dd23d65
-Next: DT-a critics on a scoped design run; DT-u once DG-u merges (both own DesignCanvasMarks.swift); DT-m waits DG-m, DA-m
+Next: #4159 merges; then Belt-Slice-Done + Mac-Finish-Wanted DT-u on a green design run; DT-m (DT-5, DT-6) now that DG-m starts (#3742 merged); DA-m wait re-read each poll
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

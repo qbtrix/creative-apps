@@ -43,3 +43,5 @@ utc	stage	event	ref	note
 2026-10-21T18:10Z	3	wait	DT-4	TT-u #3513 still open
 2026-10-21T18:32Z	3	wait	DT-4	TT-u #3513 still open
 2026-10-21T18:55Z	3	resume	DT-4	run act-1a15fcdd869-ck2o; TT-u merged (7347ed80), DT-4 unblocked
+2026-10-21T20:03Z	3	pr-opened	#4159	DT-4 transform snapshots and knob-drag render budget
+2026-10-21T20:03Z	3	heartbeat	-	resumed after container restart
