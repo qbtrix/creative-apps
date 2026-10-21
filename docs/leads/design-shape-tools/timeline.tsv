@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-21T10:06Z	check	anchors fixed	#3996	merged at fe232dcd; DS-a Belt-Slice-Done waits on a green dev Linux run
 2026-10-21T10:09Z	check	dev Linux pending	39582236683	Linux check at fe232dcd (past #3996) in progress; slice-done on green. Scoped design 39578329384 still queued; #3983 DT-u open
 2026-10-21T10:30Z	slice-done	DS-a	https://github.com/qbtrix/creative-apps/actions/runs/39582236683	Belt-Slice-Done + Mac-Finish-Wanted posted on #3440 (Linux green at fe232dcd); critics wait on scoped run 39578329384 (queued)
+2026-10-21T11:00Z	check	scoped-run	39578329384	macOS (design) red on DesignHistoryAreaTests.refusedJumpShowsItsReason (not a DS/DK/DY file); snapshots uploaded; journeys 39588223335 pending, DS-a critics wait on ui-screens
