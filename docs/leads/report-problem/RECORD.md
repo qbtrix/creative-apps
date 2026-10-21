@@ -24,6 +24,7 @@ Next: wave 1 builders running; then mark stacked drafts ready after their parent
 |---|---|---|---|---|---|
 
 ## Decisions
+- Baseline: `scripts/ci --changed` on dev 1191940 printed CI: PASS (Linux build 232 s, 4m13s total) before wave 1.
 - RP-a is two PRs: RP-1 (~230, 8 files) + RP-2 (~170, 5 files) sit at the 400-line cap together. RP-2 stacks on RP-1 as a draft.
 - Base is origin/dev, not main: this packet exists only on dev; PRs go to base dev.
 - The issue body names an RP-z slice; the packet and .wave.json have RP-a, RP-u, RP-m only (RP-7 feature-done sits in RP-m). Following the packet.
