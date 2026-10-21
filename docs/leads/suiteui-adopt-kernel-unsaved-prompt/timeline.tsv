@@ -47,3 +47,4 @@ ts	kind	note
 2026-10-21T17:25:49Z	merge	UP-design #4037 merged 2f1cd8ec; waiting on dev Linux 39643409752
 2026-10-21T17:40:37Z	done	UP-design merged-done, Linux 39643409752, Mac-Finish-Wanted posted
 2026-10-21T17:55:57Z	poll	AK-flare merged (5ecec459) but UP-flare still waits on UP-photo (ST-z not on dev); UP-z waits SC-z; blocked poll 1
+2026-10-21T18:18:01Z	poll	blockers unchanged (ST-z, SC-z, UP-photo not on dev); blocked poll 2
