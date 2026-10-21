@@ -52,3 +52,5 @@ Next: (2026-10-21T17:09Z) FO-5 #4022 at 7482cc7: lane macOS build 39632234354 qu
 - 2026-10-21T18:37Z: rule 23 re-read. #4022 macOS build 39649207191 queued; #4121 draft. dev-red #3856 open. Open findings: 0.
 
 - 2026-10-21T18:42Z: lead/folders now mirrors this record. FO-5 #4022 at 2ef801b: lane macOS build 39649207191 still queued (runner backlog). FO-6 #4121 at ba7fb3c stays a draft until #4022 merges.
+
+- 2026-10-21T19:07Z: Watch: FO-5 #4022 at 2ef801b is in the lane waiting on its macOS build (runner backlog). FO-6 #4121 stays a draft until it merges. No dev CI run contains FO-m yet.
