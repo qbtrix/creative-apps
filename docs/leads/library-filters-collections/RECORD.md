@@ -13,7 +13,7 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 | FC-b | filter bar narrows by flag, rating, hide rejects; N of M; Clear Filter | FC-6, FC-7 | J13 | FC-a | no | 0 | done (run 39582236683) | - | - |
 | FC-c | New Collection, add/remove/rename/delete as undo steps; sidebar drop | FC-8, FC-9, FC-10 | J14 | FC-a; S-L9 #3411 (FC-10) | yes | 0 | done with gap #4126 (FC-10 waits S-L9 #3411) | 39614555474 | - |
 | FC-d | smart collection from filter; rules edited as undo steps | FC-11, FC-12 | J15 | FC-a; FC-b (FC-12) | no | 0 | FC-11 merged; FC-12 #3551 fixing (red Linux: dev perf list) | - | - |
-| FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | FC-13, FC-15 merged; FC-14 #4056 merged (6eaa805); enable-timing follow-up #4146; FC-16 planned | - | - |
+| FC-e | collections, rules, filter and selection survive relaunch; damaged file set aside | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a; FC-c; FC-b, FC-d (FC-16) | yes | 0 | FC-13, FC-15 merged; FC-14 #4056 merged (6eaa805); enable-timing follow-up #4146 merged (363d3ea); FC-16 planned | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -122,3 +122,4 @@ Next: FC-12 #3551 and FC-14 #4056 wait in the lane's macOS build (#4056 in progr
 - 2026-10-21T17:28:16Z check: supervisor re-queued FC-12's macOS build (they had cancelled it for a promote run). FC-14 #4056 goes with the next lane sweep. Neither merged yet. Findings 0.
 - 2026-10-21T17:59:22Z check: FC-14 #4056 merged 17:34Z (6eaa805). FC-12 #3551 got needs-rebase (conflicts with FC-14 in LibraryCollections.swift and the seam test); merged dev, both unavailable flags nil, CI: PASS, pushed c931a176c, Head moved. Opened #4146, which drops .disabled from the FC-14 timing test (perf line on dev). Findings 0. FC-16 waits for FC-12.
 - 2026-10-21T18:21:24Z check: FC-12 #3551 macOS build 39648900493 for c931a176c is still queued. #4146's macOS build 39649786970 is green and the PR waits for a sweep. The lane flagged the proxy footer on #4146: it strips it from the squash, and the proxy re-adds it on every write. Findings 0.
+- 2026-10-21T18:43:05Z check: #4146 merged (363d3ea); FC-14's timing test runs on dev. FC-12 #3551's macOS build 39648900493 is in progress. FC-16 still waits for FC-12. Findings 0.
