@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-21T20:01:18Z	3 wave 3	slice-done	PM-a	Belt-Slice-Done + Mac-Finish-Wanted posted (run 39655526241); PM-7 merged; PM-5/PM-6 rebased
 2026-10-21T20:01:39Z	3 wave 3	slice-done	PM-u	Belt-Slice-Done + Mac-Finish-Wanted posted (run 39661533247)
 2026-10-21T20:01:54Z	3 wave 3	check	-	#4064 merged; #3499 open; 0 feature findings
+2026-10-21T20:33:03Z	3 wave 3	check	PM-5,PM-6	PM-5 macOS build 39662015535 queued; PM-6 build 39662134270 green; awaiting lane batch. #3499 open. Linux 39667367345 green. Scoped photo 39665905219 still queued
