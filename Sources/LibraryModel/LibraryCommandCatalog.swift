@@ -124,3 +124,18 @@ extension LibraryCatalog {
         plain("metadata.auto-advance", "Auto Advance", "Turns moving the loupe on after a rating or a flag on or off.", .view, .toggleAutoAdvance),
     ]
 }
+
+/// File > Share… as its menu item reads it: why it can't act now, nil when it can.
+public struct LibraryShareMenu: Sendable, Equatable {
+    public var help: String?
+    public init(help: String?) { self.help = help }
+}
+
+extension LibraryCatalog {
+    /// File > Share… (`file.share`): the window opens the system's share menu for the selection, so the spec stays
+    /// out of `commands` (and the ledger) like Import Folder… and Export…; it is available while the menu's help is nil.
+    public static let shareMenuSpec: CommandSpec<LibraryShareMenu> =
+        .typed("file.share", title: "Share…", summary: "Shares the selected photos, location off.", kind: .file,
+               params: NoParams.self, schema: ParamSchema.none, example: .object([:]), availability: { available($0.help) }
+        ) { _, _ -> JSONValue in throw CatalogError.notBuilt(id: "file.share", feature: "SH-5") }
+}
