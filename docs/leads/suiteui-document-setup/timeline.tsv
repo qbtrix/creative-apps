@@ -5,3 +5,6 @@ utc	stage	event	ref	note
 2026-10-21T20:20Z	3	pr-opened	#4182	DS-a contract stubs
 2026-10-21T20:20Z	3	pr-opened	#4184	DS-m rules, stacked on #4182
 2026-10-21T20:20Z	3	channel	lead/suiteui-document-setup	status moved to the branch Belt watches
+2026-10-21T20:38Z	3	footer	#4182 #4184	server footer removed from both bodies
+2026-10-21T20:38Z	3	lane-mac	#4182	macOS build https://github.com/qbtrix/creative-apps/actions/runs/39671351382
+2026-10-21T20:38Z	3	poll	-	no findings; FR-u held on frame-rates; AR-u merged (#4124)

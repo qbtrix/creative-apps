@@ -4,7 +4,7 @@ Issue: #3757 · Packet: docs/blueprints/suiteui/features/document-setup.md
 Run: act-1a15fddd101-68r5 · Session: session_01BsyWa1bPrB44D73KoNLtrU · Started: 2026-10-21T19:15Z
 Stage: 3 wave 1
 Base: 58034759f2cdc515d7a44a9ec164509be2b6508b
-Next: poll the lane for #4182 (DS-a) and #4184 (DS-m); retarget #4184 to dev once #4182 merges; re-read FR-u and AR-u for DS-u
+Next: poll the lane for #4182 (DS-a, macOS build 39671351382) and #4184 (DS-m); retarget #4184 to dev once #4182 merges; DS-u waits on frame-rates FR-u (held)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
