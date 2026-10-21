@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-21T21:18Z	2026-10-21T21:18Z	heartbeat	lane	-	macOS build queue deep; dev Linux red only on CommandPathTests launcher, fix #4201 in lane
 2026-10-21T21:40Z	2026-10-21T21:40Z	check	lane-wait	#3856	lane batches red on dev launcher.txt:21 (run 39676795156); #4201 fixes it, flagged on dev-red; our PRs built, queued
 2026-10-21T22:02Z	2026-10-21T22:02Z	check	lane-wait	#4201	nothing of ours merged; lane still bisecting 20:57 batch (red on dev launcher.txt:21); dev merging other PRs
+2026-10-21T22:24Z	2026-10-21T22:24Z	check	heartbeat	#4201	lane still red on launcher.txt:21 until #4201; no merges; drafts wait on parents; bodies clean
