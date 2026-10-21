@@ -88,3 +88,4 @@ Relaunched 2026-10-21T13:22:56Z. The lead branch was rebuilt on main 0dd23d6 (re
 - 21:33Z: heartbeat: #3826 (SS-9) head ab264ad is clean; its lane macOS build (run 39674198800) has been queued since 20:53Z, waiting for a runner.
 - 21:54Z: heartbeat: #3826 (SS-9) head ab264ad; its lane macOS build (run 39674198800) is still queued for a runner, about 1 h since 20:53Z. No red check and no needs-fix.
 - 22:17Z: heartbeat: #3826 (SS-9) head ab264ad is clean. Its lane macOS build (run 39674198800) has been queued since 20:53Z behind about 25 other macOS builds repo-wide; 3 macOS builds are running. This is runner capacity, not this PR.
+- 22:44Z: heartbeat: #3826 (SS-9) head ab264ad; its lane macOS build (run 39674198800) got a runner and is in progress.
