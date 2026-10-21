@@ -14,3 +14,4 @@ time	kind	note
 2026-10-21T00:05:02Z	3	check	DG-a	done; critics wait on scoped design run; DG-u/m/z blocked on #3677
 2026-10-21T08:46:56Z	3	wave	DG-u	run act-1a15da1b26c-9qo6 resumes; GF-3 merged, DG-u starts
 2026-10-21T09:00:10Z	3	pr	DG-u	#3978 opened, head 3666d345, scripts/ci --changed PASS
+2026-10-21T09:28:12Z	3	heartbeat	DG-u	#3978 open, macOS build 39574568750 queued; dev Linux red on stale DY anchors (#3980 open); PR body footers removed; 0 open findings on gradient-fill
