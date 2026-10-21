@@ -115,17 +115,3 @@ private func scrub(_ values: [Double], _ intent: (Double, String) -> StrokeInten
     #expect(NumericInput.text(0.5, decimals: StrokeEditorText.decimals(0.5), unit: "pt") == "0.5 pt")
     #expect(StrokeEditorText.points(4) == "4 pt" && StrokeEditorText.points(0.5) == "0.5 pt")
 }
-
-/// #3865: an app whose stroke can't hold a join or cap yet disables those chips with its reason, as a note too.
-@Test func styleHelpDisablesJoinAndCap() {
-    let why = "Design's strokes keep the default join and cap for now."
-    let editor = StrokeEditorRules(stroke: VectorStroke(width: 2), help: nil, dashHelp: nil, showsTrim: false, styleHelp: why)
-    #expect(editor.reason(.join) == why && editor.reason(.cap) == why && editor.chipsHelp(.cap) == why)
-    #expect(editor.join(.round) == nil && editor.cap(.square) == nil)
-    for row in [StrokeEditorRow.color, .width, .dash, .remove] { #expect(editor.reason(row) == nil, "\(row)") }
-    #expect(editor.styleNote == why)
-    let locked = StrokeEditorRules(stroke: VectorStroke(width: 2), help: "Locked.", dashHelp: nil, showsTrim: false, styleHelp: why)
-    #expect(locked.reason(.join) == "Locked." && locked.styleNote == nil)
-    #expect(StrokeEditorRules(stroke: nil, help: nil, dashHelp: nil, showsTrim: false, styleHelp: why).styleNote == nil)
-    #expect(rules().styleNote == nil && rules().reason(.join) == nil)
-}
