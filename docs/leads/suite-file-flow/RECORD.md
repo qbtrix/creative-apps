@@ -2,17 +2,17 @@
 
 Issue: #3480 · Packet: docs/blueprints/suite/features/file-flow.md
 Run: act-1a15adc3ee8-qw4q · Session: claude/file-flow-lead-6ugb9w · Started: 2026-10-20T05:12Z (relaunched 2026-10-20T19:30Z; first run act-1a157b72668-0qpi)
-Stage: 3 wave 3
+Stage: done
 Base: 6537a1a02f512db2df50d253384529f1b354b184
-Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb9w branches once #3514 is on dev
+Next: none. All four slices done; Belt-Contact-Sheet posted on #3480 (comment 6314886340, run 39592552743). Verification belongs to beta hardening.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
-| SF-a | kernel drop rule and file commands as stubs; SuiteShell menu group, drop modifier, drag source, bridge on the fakes; home takes a drop; checks written, disabled | SF-1, SF-2 | – | targets, home, switching (all built) | yes | 0 | done (#3488, #3489) | [39484284755](https://github.com/qbtrix/creative-apps/actions/runs/39484284755) | wanted |
-| SF-u | drop highlight, Open Recent, Open In, drag source views within the render budget; journeys on | SF-3, SF-4 | SJ11, SJ14 | SF-a | yes | 0 | #3514 (SF-3) open; SF-4 rebuilt on claude/file-flow-lead-6ugb9w-sf4 | – | – |
+| SF-a | kernel drop rule and file commands as stubs; SuiteShell menu group, drop modifier, drag source, bridge on the fakes; home takes a drop; checks written, disabled | SF-1, SF-2 | – | targets, home, switching (all built) | yes | 0 | done (#3488, #3489); gap #3971 | [39484284755](https://github.com/qbtrix/creative-apps/actions/runs/39484284755) | wanted |
+| SF-u | drop highlight, Open Recent, Open In, drag source views within the render budget; journeys on | SF-3, SF-4 | SJ11, SJ14 | SF-a | yes | 0 | done (#3514, #3827) | [39564222036](https://github.com/qbtrix/creative-apps/actions/runs/39564222036) | received |
 | SF-m | DropPlan routing, file commands bodies, bridge live | SF-5, SF-6, SF-7 | KJ (DropRoutingTests, FileFlowCommandsTests) | SF-a | no | 0 | done (#3493, #3507) | [39484284755](https://github.com/qbtrix/creative-apps/actions/runs/39484284755) | – |
-| SF-z | live drop and drag, fake conforms (RJ-X43), feature built | SF-8, SF-9, SF-10 | SJ11, SJ14, RJ-X43 | SF-u, SF-m; suiteui export-pack XP-z (SF-9); afterglow-cli (built) | yes | 0 | waiting | – | – |
+| SF-z | live drop and drag, fake conforms (RJ-X43), feature built | SF-8, SF-9, SF-10 | SJ11, SJ14, RJ-X43 | SF-u, SF-m; suiteui export-pack XP-z (SF-9); afterglow-cli (built) | yes | 0 | done (#3966, #3731, #3997) | [39582236683](https://github.com/qbtrix/creative-apps/actions/runs/39582236683) | wanted |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -22,11 +22,11 @@ Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb
 | SF-5 | SF-m | 2 | DropPlan body | Sources/SuiteKernel/Files/DropPlan.swift, Tests/SuiteKernelTests/DropRoutingTests.swift, Tests/mutations/SuiteKernel.DropPlan.json | DropRoutingTests | #3493 | merged, Mutate 5/5 |
 | SF-6 | SF-m | 2 | file commands bodies | Sources/SuiteKernel/Files/FileFlowCommands.swift, Tests/SuiteKernelTests/FileFlowCommandsTests.swift, Tests/mutations/SuiteKernel.FileFlowCommands.json | FileFlowCommandsTests | #3493 | merged, Mutate 4/4 |
 | SF-7 | SF-m | 2 | bridge live | Sources/SuiteShell/SuiteDocumentsBridge.swift, Tests/AppSnapshotTests/SuiteDocumentsBridgeTests.swift | SuiteDocumentsBridgeTests (macOS) | #3507 | merged |
-| SF-3 | SF-u | 2 | views | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileFlowViewTests.swift | SuiteFileFlowViewTests | #3514 | PR open, Fast-Check pass at d2970e8a |
-| SF-4 | SF-u | 2 | snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFileDropTests.swift, UITests/AfterGlowJourneyTests+FileFlow.swift | RenderBudgetFileDropTests, SuiteFileFlowSnapshots, journey | #3522 closed (needs-split) | rebuilt at 812acde1, gate pass, PR after #3514 |
-| SF-8 | SF-z | 3 | live drop and drag | Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileDropLiveTests.swift | SuiteFileDropLiveTests | #3529 closed (needs-split) | rebuilt at 3db84201, gate pass, PR after SF-4 |
-| SF-9 | SF-z | 3 | fake conforms to FileFlowTarget | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasFileFlowTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/file-flow/ | FakeCanvasFileFlowTests, RJ-X43 | – | blocked (XP-z) |
-| SF-10 | SF-z | 3 | C4 parts, wave.json built, feature-done | docs/c4/parts/creative-apps/suite-kernel/kernel-files.json, docs/blueprints/suite/features/file-flow.wave.json | scripts/ci | – | waiting |
+| SF-3 | SF-u | 2 | views | Sources/SuiteShell/OpenInMenu.swift, Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileFlowViewTests.swift | SuiteFileFlowViewTests | #3514 | merged 9973f2af |
+| SF-4 | SF-u | 2 | snapshots, render budget, journey on | Tests/AppSnapshotTests/SuiteFileFlowSnapshots.swift, Tests/AppSnapshotTests/RenderBudgetFileDropTests.swift, UITests/AfterGlowJourneyTests+FileFlow.swift | RenderBudgetFileDropTests, SuiteFileFlowSnapshots, journey | #3827 | merged |
+| SF-8 | SF-z | 3 | live drop and drag | Sources/SuiteShell/SuiteFileDrop.swift, Sources/SuiteShell/SuiteDragSource.swift, Tests/AppSnapshotTests/SuiteFileDropLiveTests.swift | SuiteFileDropLiveTests | #3966 | merged |
+| SF-9 | SF-z | 3 | fake conforms to FileFlowTarget | Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift, Tests/SuiteKernelTests/FakeCanvasFileFlowTests.swift, Tests/mutations/SuiteKernel.FakeCanvasDocument.json, Tests/RealJobs/fake/file-flow/ | FakeCanvasFileFlowTests, RJ-X43 | #3731 | merged |
+| SF-10 | SF-z | 3 | C4 parts, wave.json built, feature-done | docs/c4/parts/creative-apps/suite-kernel/kernel-files.json, docs/blueprints/suite/features/file-flow.wave.json | scripts/ci | #3997 | merged 965a76be7 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
@@ -56,6 +56,7 @@ Next: SF-9 (fake conforms, RJ-X43); open SF-4 and SF-8 PRs from the rebuilt 6ugb
 - SF-9: file.drop places a step, so CommandWalkTests leaves it out of the walk (file kinds must not change bytes); FakeCanvasFileFlowTests walks it. The fixture carries one recent entry and Halo as Open In so every example runs on it.
 
 ## Open
+- 2026-10-21T11:40Z: SF-10 (#3997) merged 11:15Z as 965a76be7. Belt-Slice-Done SF-z posted (6314047843), Belt-Contact-Sheet posted (6314886340, run 39592552743). Lead done.
 - 2026-10-21T02:32Z: supervisor (#3480, 6306538067): #3827 is fine; the batches failed on Mac only because of planWithinBudget, now off the gate; the batch is retrying on the local gate. SF-8 can't open as a PR to dev yet: stacked on #3827 it would be about 420 lines (over the 400 cap). It opens once #3827 merges.
 - 2026-10-21T02:25Z: Belt watches lead/suite-file-flow; the record moved here from lead/file-flow (docs/leads/file-flow, same history). #3827 (SF-4, Slice SF-u) is open, clean, fast-lane, macOS build 39522612112 green since ~01:00Z, no lane comment since 00:39Z. SF-8 staged on claude/file-flow-lead-6ugb9w-sf8 @ d2559733 (gate PASS); its PR opens once #3827 merges. Then SF-10 (feature-done), then Belt-Slice-Done SF-u/SF-z and the contact sheet.
 - 2026-10-21T00:33Z: #3514 (SF-3) merged 00:23Z as 9973f2af. SF-4 rebuilt on dev by cherry-pick (58e8e836, gate PASS), opened as #3827 (fast-lane, Slice SF-u). SF-8 rebuilt on it (d2559733, gate PASS), pushed; its PR opens once #3827 merges. Belt-Slice-Done SF-u waits for #3827 and a green dev Linux run containing it.
