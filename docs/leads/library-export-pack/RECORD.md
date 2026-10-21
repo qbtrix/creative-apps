@@ -2,9 +2,9 @@
 
 Issue: #3478 · Packet: docs/blueprints/library/features/export-pack.md
 Run: act-1a15e4969c2-pa6e (resumes act-1a15ac11868-4kb6) · Session: line lead (library: #1563, #3478) · Started: 2026-10-20T19:35Z
-Stage: 3 wave 1
+Stage: parked (waiting-on-prereq; relaunches when XP-3 is on dev)
 Base: origin/dev ded2ca5 (main verified at 0dd23d659f4dbd8a0120aa85a321259327518251)
-Next: LX-1 and LX-3 are merged. LX-2 waits on XP-3 (ExportPick.metadata); LX-4 waits on XP-2 + XP-7. Record moved to lead/library-export-pack per Belt.
+Next: parked by the supervisor (#3478, 16:20Z). XP-2, XP-3 and XP-7 belong to SuiteUI export-pack #3477. Run released; it relaunches when XP-3 is on dev. LX slices stay open (beta must-have, no gaps).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -47,3 +47,4 @@ Next: LX-1 and LX-3 are merged. LX-2 waits on XP-3 (ExportPick.metadata); LX-4 w
 - 2026-10-21T15:36:27Z check: XP-2/3/7 still not on dev; LX-2, LX-4 and dependents wait. 0 open findings.
 - 2026-10-21T15:58:40Z check: XP-2/3/7 not on dev; LX-2, LX-4 wait. 0 open findings.
 - 2026-10-21T16:20:00Z check: XP-2/3/7 not on dev; asked the supervisor on #3478 for an ETA or a gap call. 0 findings.
+- 2026-10-21T16:43:01Z stage: supervisor parked export-pack (waiting-on-prereq), released this run, and said no gaps for the LX slices. LX-1 and LX-3 are on dev; LX-2, LX-4..LX-8 wait on XP-3/XP-7.
