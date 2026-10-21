@@ -75,6 +75,8 @@ Next: wave 2 builder TS-m (TS-5 then TS-6) stacks on feat/ts-1-text-contract (#3
 
 - 2026-10-21T09:01Z heartbeat: #3836 TS-1 waits lane batch; #3844/#3847 stay stacked.
 
+- 2026-10-21T09:29Z heartbeat: dev red #3856 (Design anchors, not ours). #3836 TS-1 macOS green, waits lane batch; #3844/#3847 stay stacked.
+
 ## Open
 
 - TS-2 and everything UI wait on font-picker FP-a, itself blocked on shell-text ST-a.
