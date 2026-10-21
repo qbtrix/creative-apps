@@ -57,7 +57,7 @@ public enum FlareIntent: Sendable, Equatable {
         case scrub(frame: Int), goToStart, goToEnd, step(Int), nextKeyframe, previousKeyframe, togglePlay,
              setLoops(Bool), toggleAutoKey, selectKey(layerID: String, property: String?, frame: Int, extending: Bool),
              moveKeys(by: Int, dragStart: Int), endKeyDrag, removeKeys, addKey, removeKey,
-             insertFrames(Int), removeFrames(Int), setLabel(String?)
+             insertFrames(Int), removeFrames(Int), setLabel(String?), selectAllKeys
     }
 
     public enum Layers: Sendable, Equatable {
@@ -155,7 +155,7 @@ public enum FlareIntent: Sendable, Equatable {
         .timeline(.toggleAutoKey), .timeline(.selectKey(layerID: "", property: nil, frame: 0, extending: false)),
         .timeline(.moveKeys(by: 0, dragStart: 0)), .timeline(.endKeyDrag), .timeline(.removeKeys),
         .timeline(.addKey), .timeline(.removeKey), .timeline(.insertFrames(1)), .timeline(.removeFrames(1)),
-        .timeline(.setLabel(nil)),
+        .timeline(.setLabel(nil)), .timeline(.selectAllKeys),
         .layers(.select(id: "")), .layers(.toggle(id: "", flag: "")), .layers(.move(section: "", from: 0, to: 0)),
         .layers(.rename(id: "", name: "")), .layers(.addLayer), .layers(.addScene), .layers(.remove(id: "")),
         .layers(.duplicate(id: "")),
@@ -289,6 +289,7 @@ extension FlareIntent.Timeline {
         case .insertFrames: "insertFrames"
         case .removeFrames: "removeFrames"
         case .setLabel: "setLabel"
+        case .selectAllKeys: "selectAllKeys"
         }
     }
 }
