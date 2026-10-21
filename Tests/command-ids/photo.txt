@@ -7,9 +7,14 @@ edit.paste
 edit.redo
 edit.select-all
 edit.undo
+file.clear-recent
+file.drop
 file.export
 file.new
 file.open
+file.open-in
+file.open-recent
+file.recent
 file.save
 file.save-as
 image.resize
