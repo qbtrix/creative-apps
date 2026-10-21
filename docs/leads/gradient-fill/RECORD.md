@@ -1,10 +1,10 @@
 # gradient-fill lead record
 
 Issue: #3419 · Packet: docs/blueprints/flare/features/gradient-fill.md
-Run: act-1a15d4ed024-1wsg (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z
-Stage: 3 wave 3 (FG-2 + FG-4 in #3959)
-Base: b64cbb8cf55ea16b62f0a293c83e1820b3e4b572 (origin/dev)
-Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flare run shows flare-fill-gradient, critic panel + Belt-Slice-Done FG-a and Mac-Finish-Wanted; FG-3 once GF-3 #3760 merges; FG-5 once GF-6 #3742, KS-a #3921, AC-flare
+Run: act-1a160bffba1-bvv3 (line lead: gradient-fill #3419, export-pack #3481, file-flow #3482; resumed from act-1a1574f6742-pe5i) · Session: claude/feature-lead-playbook-ahxuto · Started: 2026-10-20T03:17Z · resumed from act-1a15d4ed024-1wsg at 23:2xZ
+Stage: 3 wave 4 (FG-z)
+Base: 8c55f0bf9 (origin/dev)
+Next: FG-m #4181 and FG-a round 2 #4236 in the lane; FG-z builder (FG-7 gradient-circle fixture + journey live, FG-8 docs/status built) stacked on #4181; then Belt-Slice-Done FG-m/FG-z on a green dev Linux run and the FG-u critic panel on scoped flare run 39690220595's ui-screens
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -67,3 +67,4 @@ Next: #3959 (FG-a, FG-4 folded in) in the lane; after it lands and a scoped flar
 - 12:46Z: Fix PRs #4054 #4055 #4065 open on lane, no needs-fix. Full CI 39600323802 on dev 737541328 (contains 78812f8e) pending: FG-a/FG-u Slice-Done waits on its Linux job. No scoped flare run with 78812f8e yet. GF-6 #3742 open; 8 open findings: no FG-5.
 - 13:08Z: No change: #4054 #4055 #4065 #4004 open on lane; full CI 39600323802 still pending (dev Linux checks red on Photo); no scoped flare run with 78812f8e; #3742 open; 8 open findings. Stray remote branch 'heartbeat' (4e450c3d, 12:46Z slip) needs supervisor delete: proxy 403.
 - 13:28Z: Belt-Slice-Done + Mac-Finish-Wanted posted on #3419 for FG-a and FG-u (run 39604117821, dev 5bec80894, Linux green). Scoped flare run 39607068579 at ac7f95c9f (contains 78812f8e) queued: FG-u critic panel once its journeys upload ui-screens. Fix PRs #4054 #4055 #4065 still on lane; #3742 open; 8 open findings.
+- 23:30Z: Resumed as act-1a160bffba1-bvv3. Since 13:28Z: round 1 #4054 #4055 #4065 merged; FG-5 is #4181 (FG-m, Mutate 6/6, macOS build 39671303530 green, waiting a lane sweep); round 2 (last) is #4236 (Fixes #4039 #4041 using needs-ui #4047, macOS build 39686705313 running); Mac-Finish FG-a gaps #4097. Mac-finish PR #4163 (FG-u, not ours) is needs-rebase. Both PR bodies moved to this run id, footer stripped via MCP. Open gradient-fill findings: 2 (#4039 #4041, both in #4236). dev Linux red on Photo (dev-red #3856), not ours. FG-z builder started, stacked on #4181 (gradient-circle sample fixture missing from FlareFixtures, so FG-7 adds it).
