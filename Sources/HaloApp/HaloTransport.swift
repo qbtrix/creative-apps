@@ -8,7 +8,8 @@
 // whether looping is on. It owns the HaloPlaybackDriver: running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
 // the screen, on the `haloRefreshLink` the environment gives; each refresh
-// sends `.tick(now)` through `perform`. Each
+// sends `.tick(now)` through `perform`, and a playhead that moved while
+// playing is a `playback` frame in the probe (HaloProbe). Each
 // control takes at least a SuiteSize.pillHit square (24 pt) to click, not
 // just its 10 pt glyph, the squares edge to edge so the row stays narrow
 // enough for the status bar, until TransportCapsule (#340) replaces it.
@@ -22,6 +23,7 @@ struct HaloTransport: View {
 
     @State private var driver: HaloPlaybackDriver?
     @Environment(\.haloRefreshLink) private var makeLink
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     /// One transport button: its command, SF Symbol and control id.
     private struct Item: Identifiable, Sendable {
@@ -61,6 +63,9 @@ struct HaloTransport: View {
             }
         }
         .onChange(of: model.playback.playing, initial: true) { _, playing in follow(playing: playing) }
+        .onChange(of: model.selectedComposition?.playheadFrame) {
+            if model.playback.playing { driver?.frameShown() }
+        }
         .onDisappear { driver?.stop() }
     }
 
@@ -106,6 +111,7 @@ struct HaloTransport: View {
         }
         let perform = perform
         let running = driver ?? HaloPlaybackDriver(onTick: { now in perform(.tick(now)) }, makeLink: makeLink)
+        running.probe = HaloProbe(recorder)
         driver = running
         running.start()
     }

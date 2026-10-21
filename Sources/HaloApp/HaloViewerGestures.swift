@@ -12,7 +12,8 @@
 // drops the live preview. It is hidden from accessibility: the artboard
 // element (`halo.viewer`) around it names it. It reads its model and never
 // assigns it. With the shape tool on (`haloShapeDrawing`, HS-3) a press
-// draws through it instead.
+// draws through it instead. Under `-SuitePerfProbe` each move records a
+// `viewer-drag` sample (HaloProbe), the first with `preview-before-mouse-up`.
 import AppKit
 import HaloModel
 import SuiteKernel
@@ -42,6 +43,7 @@ struct HaloViewerGestures: View {
     @Environment(\.haloLiveEdit) private var live
     @Environment(\.haloShapeDrawing) private var shapes
     @Environment(\.haloViewerTakesActivationClicks) private var takesActivationClicks
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     var body: some View {
         let comp = model.selectedComposition
@@ -83,7 +85,12 @@ struct HaloViewerGestures: View {
                     return shapes.drag(model.shapeTool, from: start, to: now, modifiers: held)
                 }
                 guard let start, let now = point(value.location) else { return }
-                guard let live else { return perform(.moveViewerDrag(x: now.x, y: now.y)) }
+                let probe = HaloProbe(recorder)
+                guard let live else {
+                    perform(.moveViewerDrag(x: now.x, y: now.y))
+                    return probe.sample(HaloProbe.viewerDrag)
+                }
+                let first = last == nil
                 last = now
                 // A press over empty space started no drag; there is nothing to preview.
                 guard model.viewerDrag != nil || live.project == nil else { return }
@@ -92,6 +99,8 @@ struct HaloViewerGestures: View {
                     if shown.viewerDrag == nil { shown.beginViewerDrag(at: start) }
                     shown.moveViewerDrag(to: now)
                 }
+                probe.sample(HaloProbe.viewerDrag)
+                if first { probe.mark(HaloProbe.previewBeforeMouseUp, series: HaloProbe.viewerDrag) }
             }
             .onEnded { _ in
                 if drawsShape {
