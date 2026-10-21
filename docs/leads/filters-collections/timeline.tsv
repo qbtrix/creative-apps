@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-21T08:18:58Z	check	FC-7 #3534, FC-9 #3546, FC-15 #3539 clean; per-PR macOS builds 39567176986/39567243117/39564329849 queued; FC-12 #3551 waits on #3534
 2026-10-21T08:41:02Z	check	macOS build green for FC-15 #3539 and FC-7 #3534 (lane merges next sweep); FC-9 #3546 build queued; FC-12 #3551 waits on #3534
 2026-10-21T09:03:56Z	check	FC-15 #3539 first in batch 084621, red on Halo CommandPathTests (not ours), lane bisecting; FC-7 #3534 built green, awaiting batch; FC-9 #3546 macOS build queued
+2026-10-21T09:26:33Z	check	FC-7 #3534 and FC-15 #3539 merged 09:22; FC-9 #3546 needs-rebase (LibraryCollectionsSeamTests) and FC-12 #3551 dev merge: worktree agents running
