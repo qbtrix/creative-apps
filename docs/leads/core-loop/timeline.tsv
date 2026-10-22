@@ -196,3 +196,4 @@ utc	stage	event	ref	note
 2026-10-22T20:42Z	3	merge	#4554	fixes core-loop finding
 2026-10-22T20:42Z	3	check-in	panel	no journeys run with fixes yet; wait 847f5072
 2026-10-22T21:34Z	3	check-in	panel	no completed journeys run with fixes; 39856259756 pending
+2026-10-22T22:26Z	3	merge	#4596	fixes #4586
